@@ -15,7 +15,7 @@ import type { KaiNavItem } from '../ui/nav';
 import type { KaiCommandItem } from './command';
 import { toast, configureToasts } from '../primitives/toast-store';
 
-// Labs/Apps: the full MULTI-AGENT WORKSPACE. A desktop shell with a LEFT
+// Labs/Apps: AMUX — a full multi-agent workspace. A desktop shell with a LEFT
 // workspace rail (kai-nav) and a TOP-LEVEL view toggle — AGENTS or BROWSER — that
 // fills the rest of the screen. AGENTS is the view-mode area the operator switches
 // between three tiers; BROWSER is a FULL-SCREEN kai-artifact (address bar /
@@ -175,7 +175,7 @@ const AGENTS: Agent[] = [
   {
     id: 'cleo', name: 'Cleo', role: 'Docs', glyph: BookText,
     dir: 'docs', branch: 'feat/checkout-guide', runtime: { kind: 'local' },
-    status: { tone: 'blocked', label: 'Needs input' },
+    status: { tone: 'blocked', label: 'Waiting for input' },
     needsAttention: true,
     lastLine: 'Which provider should the guide target?',
     body: 'The checkout guide needs a provider example before I can finish.\n\n> Which provider should the auth section target — Stripe or the in-house gateway?\n\nWaiting on your call.',
@@ -204,7 +204,7 @@ const AGENTS: Agent[] = [
   {
     id: 'nova', name: 'Nova', role: 'Data', glyph: Database,
     dir: 'infra', branch: 'feat/prod-backfill', runtime: { kind: 'remote', host: 'sandbox-2' },
-    status: { tone: 'blocked', label: 'Awaiting approval' },
+    status: { tone: 'blocked', label: 'Awaiting your review' },
     needsAttention: true,
     lastLine: 'Approve the production backfill?',
     body: 'The production backfill is staged and ready.\n\n> Approve running the backfill against prod? It rewrites ~120k rows.\n\nAwaiting approval.',
@@ -273,7 +273,7 @@ const TONE_TEXT: Record<AgentStatusTone, string> = {
   idle: 'text-muted-foreground',
   done: 'text-tool-green',
   error: 'text-tool-red',
-  blocked: 'text-tool-amber',
+  blocked: 'text-violet-400',
 };
 
 // ── Browser previews (the full-screen Browser view) ─────────────────────────
@@ -361,7 +361,7 @@ const INITIAL_BROWSER_TABS: BrowserTab[] = [
 ];
 
 export const SplitWorkspace: Story = {
-  name: 'Multi-Agent Workspace',
+  name: 'AMUX',
   render: () => {
     const [workspace, setWorkspace] = createSignal('acme');
     // focusedId tracks the focused agent for the workspace columns.
@@ -944,9 +944,12 @@ export const SplitWorkspace: Story = {
       // "An agent needs you": one PERSISTENT, actionable toast per waiting agent,
       // raised ONCE. Stable ids upsert, so HMR/re-render never stacks duplicates.
       for (const a of live().filter((x) => x.needsAttention)) {
-        toast(`${a.name} needs your input`, {
+        toast(`${a.name} is waiting for your input`, {
           id: `needs-${a.id}`,
           duration: 0,
+          appearance: 'card',
+          inverse: true,
+          description: [a.dir, a.branch].filter(Boolean).join(' · ') || undefined,
           action: { label: 'Respond', onAction: () => focusAgent(a.id) },
         });
       }
@@ -1010,6 +1013,9 @@ export const SplitWorkspace: Story = {
       const done = live().find((a) => a.status.tone === 'working') ?? live()[0];
       if (!done) return;
       toast.success(`${done.name} finished its ${done.role.toLowerCase()} task`, {
+        appearance: 'card',
+        inverse: true,
+        description: [done.dir, done.branch].filter(Boolean).join(' · ') || undefined,
         action: { label: 'Open', onAction: () => focusAgent(done.id) },
       });
     };
@@ -1100,13 +1106,6 @@ export const SplitWorkspace: Story = {
           placeholder={`Message ${props.agent.name}...`}
         ></kai-prompt-input>
       </div>
-    );
-
-    // The "needs you" pill shown in the header of an attention pane.
-    const NeedsYouBadge = () => (
-      <span class="inline-flex items-center gap-1 rounded-full bg-tool-amber/15 px-2 py-0.5 text-[11px] font-medium text-tool-amber">
-        <Bell class="size-3" /> Needs you
-      </span>
     );
 
     const RestoreAll = () => (
@@ -1259,8 +1258,8 @@ export const SplitWorkspace: Story = {
           <div
             class={cn(
               'flex min-h-0 flex-1 flex-col overflow-hidden border-2',
-              isFocused() ? 'border-ring' : 'border-border',
-              activeAgent()?.needsAttention && 'border-tool-amber',
+              isFocused() ? 'border-muted-foreground/50' : 'border-border',
+              activeAgent()?.needsAttention && 'border-violet-400/50',
             )}
           >
             {/* gutter doubles as the header: scrollable tab strip + a pinned right
@@ -1295,9 +1294,6 @@ export const SplitWorkspace: Story = {
                 </button>
               </div>
               <div class="flex shrink-0 items-center gap-1 px-1.5">
-                <Show when={activeAgent()?.needsAttention}>
-                  <NeedsYouBadge />
-                </Show>
                 <button
                   type="button"
                   aria-label={isZoomed() ? 'Restore section' : 'Maximize section'}
@@ -1539,7 +1535,7 @@ export const SplitWorkspace: Story = {
         <header class="relative flex shrink-0 items-center justify-between gap-3 border-b border-border px-4 py-2">
           <div class="flex items-center gap-2">
             <Boxes class="size-5 text-primary" />
-            <span class="text-sm font-semibold tracking-tight">Multi-Agent Workspace</span>
+            <span class="text-sm font-semibold tracking-tight">AMUX</span>
           </div>
           {/* TOP-LEVEL view toggle: AGENTS or the full-screen BROWSER, centered in the
               bar. Distinct from the within-Agents tier switcher. The Browser side
@@ -1594,12 +1590,12 @@ export const SplitWorkspace: Story = {
                 type="button"
                 aria-haspopup="menu"
                 aria-expanded={attnOpen()}
-                aria-label={`${attentionCount()} agents need you`}
+                aria-label={`${attentionCount()} agents waiting on you`}
                 onClick={(e) => { e.stopPropagation(); const r = e.currentTarget.getBoundingClientRect(); setAttnPos({ x: r.right, y: r.bottom }); setAttnOpen((o) => !o); }}
                 class="inline-flex items-center gap-1 rounded-md px-2 py-1.5 text-muted-foreground transition-colors hover:bg-hover hover:text-foreground"
               >
                 <Bell class="size-5" aria-hidden="true" />
-                <span class="text-xs font-semibold tabular-nums text-tool-amber">{attentionCount()}</span>
+                <span class="text-xs font-semibold tabular-nums text-violet-400">{attentionCount()}</span>
               </button>
               <Show when={attnOpen() && attnPos()} keyed>
                 {(pos) => (
@@ -1678,7 +1674,7 @@ export const SplitWorkspace: Story = {
                               'text-muted-foreground hover:bg-hover hover:text-foreground': workspace() !== w.id,
                             }}
                           >
-                            <span class={cn('size-1.5 shrink-0 rounded-full', w.status ? 'bg-tool-amber' : 'bg-muted-foreground/40')} aria-hidden="true" />
+                            <span class={cn('size-1.5 shrink-0 rounded-full', w.status ? 'bg-violet-400' : 'bg-muted-foreground/40')} aria-hidden="true" />
                             <span class="min-w-0 flex-1 truncate">{w.label}</span>
                             <span class="shrink-0 text-xs text-muted-foreground tabular-nums">{w.meta}</span>
                             <button
@@ -1694,7 +1690,7 @@ export const SplitWorkspace: Story = {
                       </For>
                     </div>
                     <div class="mx-3 my-1 h-px shrink-0 bg-border" aria-hidden="true"></div>
-                    <div class="shrink-0 px-3 pt-2 pb-1 text-[0.6875rem] font-semibold uppercase tracking-wider text-muted-foreground">Open panes</div>
+                    <div class="shrink-0 px-3 pt-2 pb-1 text-[0.6875rem] font-semibold uppercase tracking-wider text-muted-foreground">Agents</div>
                     <div class="min-h-0 flex-1 space-y-0.5 overflow-y-auto px-2 pb-2">
                       <For each={live()}>
                         {(a) => (
@@ -1743,7 +1739,7 @@ export const SplitWorkspace: Story = {
                 <div class="flex shrink-0 items-center gap-1 border-t border-border px-2 py-1.5">
                   <button
                     type="button"
-                    aria-label="Workspaces & panes"
+                    aria-label="Workspaces & agents"
                     onClick={() => setRailTab('agents')}
                     class={cn('flex size-8 items-center justify-center rounded-md transition-colors', railTab() === 'agents' ? 'bg-accent text-foreground' : 'text-muted-foreground hover:bg-hover hover:text-foreground')}
                   >
@@ -1871,8 +1867,8 @@ export const SplitWorkspace: Story = {
           </button>
           <span class="flex shrink-0 items-center gap-3">
             <Show when={live().filter((a) => a.needsAttention).length > 0}>
-              <span class="font-medium text-tool-amber">
-                {live().filter((a) => a.needsAttention).length} need you
+              <span class="font-medium text-violet-400">
+                {live().filter((a) => a.needsAttention).length} waiting on you
               </span>
             </Show>
             <span>{live().length} {live().length === 1 ? 'agent' : 'agents'}</span>
@@ -2025,100 +2021,99 @@ export const SplitWorkspace: Story = {
     docs: {
       source: {
         language: 'tsx',
-        // A representative skeleton (not the full interactive render). The shell is a
-        // two-region kai-resizable (rail | center) under a TOP-LEVEL Agents / Browser
-        // toggle. AGENTS is a `Segmented` view switcher whose default WORKSPACE tier
-        // is a 2-level editor-group (window tiling) — a row of resizable COLUMNS, each
-        // a vertical stack of resizable GROUPS (rows); every group = a
-        // numbered-status-badge tab strip + the active agent's `Pane`. BROWSER is a
-        // full-screen kai-artifact + a hand-rolled preview tab strip. A kai-command
-        // palette + ⌥-number keys are the keyboard backbone; notifications use toast().
-        code: `// status vocabulary shared by Pane + AgentCard
-const AGENTS = [ /* atlas, otto, ivy, cleo (needsAttention), … nova */ ];
+        // A representative COMPOSITION skeleton (not the full interactive render). An
+        // IDE-style shell: a header (centered Agents/Browser toggle + ⌘K search + needs-you
+        // bell) over a kai-resizable [ activity-bar rail | center ]. The center tiles editor
+        // GROUPS — a tab gutter that doubles as the header, the active agent's body, a
+        // composer, and a context bar; Browser is a full-screen kai-artifact. The 2-level
+        // tiling, drag-to-split, tab reorder + rename are the app's own logic. kai-command
+        // (⌘K), kai-dialog (modals), kai-file-tree (explorer) + toast() round it out.
+        code: `// AMUX — an IDE-style shell COMPOSED from kit elements.
+// The kit provides the building blocks; the 2-level tiling, drag-to-split, tab
+// reorder + rename are your app's own logic (abbreviated here as <Group>/<Tab>/…).
+import '@kitn.ai/ui/elements';                 // registers the kai-* elements
+import { toast } from '@kitn.ai/ui/elements';  // imperative notifications
 
-// 2-LEVEL EDITOR-GROUP model (window tiling, not a kanban):
-//   Column = a vertical stack of Groups (rows); Group = an ordered set of agent tabs.
-type Group = { id: string; agentIds: string[]; activeId: string };
-type Column = { id: string; groups: Group[] };
-const [columns, setColumns] = createSignal<Column[]>(distribute(AGENTS)); // mixed cols
-const [colSizes, setColSizes] = createSignal(columns().map(() => 1));        // column widths
-const [rowSizes, setRowSizes] = createSignal(rowWeights(columns()));         // row heights
-const [focusedGroupId, setFocusedGroupId] = createSignal(columns()[0].groups[0].id);
-const [zoomedId, setZoomedId] = createSignal<string | null>(null);
-const [view, setView] = createSignal<'workspace' | 'focus' | 'list'>('workspace');
+// Agents carry their own working context; the UI just reflects it.
+type Agent = {
+  id: string; name: string;
+  status: { tone: 'working'|'idle'|'done'|'error'|'blocked'; label?: string };
+  dir?: string; branch?: string; runtime?: { kind: 'local'|'remote'; host?: string };
+};
 
-// TOP-LEVEL view: AGENTS or the FULL-SCREEN BROWSER (never tiled). Different agents
-// open their own preview tabs; the Browser top-level tab badges the open count.
-const [topView, setTopView] = createSignal<'agents' | 'browser'>('agents');
-type BrowserTab = { id: string; title: string; url: string; agentId: string; src: string };
-const [browserTabs, setBrowserTabs] = createSignal<BrowserTab[]>(seedPreviews()); // dark data: pages
-const [activeBrowserTab, setActiveBrowserTab] = createSignal(browserTabs()[0].id);
+<div class="flex h-screen flex-col">
+  {/* HEADER: brand · centered Agents⇄Browser toggle · needs-you bell · ⌘K search · broadcast */}
+  <header class="relative flex items-center justify-between">
+    <Brand />
+    <ViewToggle value={topView()} onChange={setTopView} />            {/* absolutely centered */}
+    <div class="flex items-center gap-2">
+      <NeedsYouBell count={needsYou().length} onPick={jumpToAgent} /> {/* dropdown to pick one */}
+      <SearchButton onClick={() => setCmdOpen(true)} />               {/* opens kai-command */}
+      <kai-button icon="megaphone" onkai-click={() => setBroadcastOpen(true)} />
+    </div>
+  </header>
 
-// BROWSER-SAFE keyboard (no Cmd/Ctrl+number — browsers reserve it):
-document.addEventListener('keydown', (e) => {
-  if ((e.metaKey || e.ctrlKey) && e.code === 'KeyK') { open palette }       // ⌘K
-  if (e.altKey && /^Digit[1-8]$/.test(e.code)) jumpToAgent(/* code → N */); // ⌥1–8
-  if (e.altKey && e.code === 'KeyZ') toggleZoom(focusedPaneId());           // ⌥Z
-  if (e.altKey && e.code === 'KeyB') setTopView(v => v === 'browser' ? 'agents' : 'browser'); // ⌥B
-  if (e.key === 'Escape') setZoomedId(null);
-});
+  {/* BODY: resizable [ activity-bar rail | center ] */}
+  <kai-resizable orientation="horizontal" class="flex-1">
+    <kai-resizable-item size="280px" min="180px">
+      <Show when={railTab() === 'agents'}>
+        <WorkspaceList />    {/* name · status dot · count · hover-× → close-confirm kai-dialog */}
+        <OpenPanesList />    {/* dot · key# · name · local/remote · click jumps, × closes */}
+      </Show>
+      <Show when={railTab() === 'files'}>
+        <kai-file-tree files={files} onkai-select={(e) => openFile(e.detail.path)} />
+      </Show>
+      <RailTabs value={railTab()} onChange={setRailTab} />            {/* bottom icon strip: Layers | Files */}
+    </kai-resizable-item>
 
-// TOP-LEVEL toggle (header): AGENTS | Browser (count badge). The within-Agents
-// Workspace/Focus/List Segmented is a SEPARATE, lower switcher.
-<TopToggle value={topView()} onChange={setTopView} browserCount={browserTabs().length} />
+    <kai-resizable-item min="460px">
+      <Switch>
+        {/* AGENTS — resizable COLUMNS, each a stack of editor GROUPS (your tiling logic) */}
+        <Match when={topView() === 'agents'}>
+          <For each={columns()}>{(col) =>
+            <Column>
+              <For each={col.groups}>{(group) =>
+                <Group focused={group.id === focusedGroupId()}>
+                  {/* the tab gutter IS the header */}
+                  <Gutter>
+                    <For each={group.agentIds}>{(id) =>
+                      <Tab agent={byId(id)} onContextMenu={openTabMenu} />  {/* rename·split·move·close */}
+                    }</For>
+                    <button onClick={() => spawnAgent(group.id)}>＋</button>  {/* new agent */}
+                    <button onClick={() => toggleZoom(group.id)}>⤢</button>   {/* maximize group */}
+                  </Gutter>
+                  <AgentBody agent={active(group)} />
+                  <kai-prompt-input />                                  {/* the composer */}
+                  <ContextBar agent={active(group)} />                  {/* status · dir · branch · runtime */}
+                </Group>
+              }</For>
+            </Column>
+          }</For>
+        </Match>
 
-<Switch>
-{/* AGENTS — the view switcher + the active tier (full-width) */}
-<Match when={topView() === 'agents'}>
-<Segmented options={[{ value: 'workspace', label: 'Workspace', icon: <Columns3/> }, /* … */]}
-           value={view()} onChange={setView} />
+        {/* BROWSER — full-screen kai-artifact + your own preview tab strip */}
+        <Match when={topView() === 'browser'}>
+          <PreviewTabs tabs={browserTabs()} />
+          <kai-artifact src={activeTab().src} displayUrl={activeTab().url} noTabs />
+        </Match>
+      </Switch>
+    </kai-resizable-item>
+  </kai-resizable>
 
-<Switch>
-  {/* WORKSPACE — resizable COLUMNS; inside each, resizable GROUPS (rows) */}
-  <Match when={view() === 'workspace'}>
-    <For each={columns()}>{(col, i) => <>
-      {i() > 0 && <ColDivider onPointerDown={startDrag(i() - 1)} />}          {/* resize cols */}
-      <Column>                                                                {/* + close-column "x" */}
-        <For each={col.groups}>{(g, gi) => <>
-          {gi() > 0 && <RowDivider onPointerDown={startRowDrag(col.id, gi() - 1)} />} {/* resize rows */}
-          <Group>
-            {/* NUMBERED-STATUS-BADGE tabs: [tone badge + ⌥number] name [status] … × */}
-            <For each={colAgents(g)}>{(a) => <Tab group={g} colId={col.id} agent={a} />}</For>
-            <Pane focused={g.id === focusedGroupId()} maximized={zoomedId() === active(g).id}
-                  onClose={() => closeTab(active(g).id)} footer={<Composer agent={active(g)} />}>
-              <AgentBody agent={active(g)} />
-            </Pane>
-          </Group>
-        </>}</For>
-      </Column>
-    </>}</For>
-    <NewColumnButton onClick={addColumn} />   {/* trailing "+ New column" affordance */}
-  </Match>
-  {/* FOCUS — one big Pane + a rail of AgentCards; LIST — a scannable column */}
-</Switch>
-</Match>
+  {/* STATUS BAR — "Keyboard shortcuts" opens a kai-dialog; live counts */}
+  <StatusBar onShortcuts={() => setShortcutsOpen(true)} agents={live().length} needsYou={needsYou().length} />
+</div>
 
-{/* BROWSER — a FULL-SCREEN kai-artifact (address bar / back-forward / reload) with
-    a hand-rolled preview TAB STRIP above it (composition, not a monolith) */}
-<Match when={topView() === 'browser'}>
-  <div role="tablist">
-    <For each={browserTabs()}>{(t) => <PreviewTab tab={t}            // title + close ×
-      active={t.id === activeBrowserTab()} onClose={() => closeBrowserTab(t.id)} />}</For>
-    <button onClick={() => openPreview(focusedPaneId())}>＋</button>   {/* open a preview */}
-  </div>
-  <kai-artifact src={activeTab().src} displayUrl={activeTab().url} noTabs />  {/* dark page */}
-</Match>
-</Switch>
+{/* Every modal is a kai-dialog: broadcast composer · shortcuts reference · close-workspace confirm */}
+<kai-dialog open={broadcastOpen()}> … </kai-dialog>
 
-// COMMAND PALETTE (kai-command) — both nav levels + pane + view ops:
-//   Go to <agent> · Switch <workspace> · split right/down · move next/prev column · new column · zoom
-//   · View agents · Open browser · Open preview of <agent>
-<kai-command items={commandItems()} onkai-select={(e) => onCommandSelect(e.detail.id)} />
+{/* ⌘K palette covers every nav + pane op (go to agent, switch workspace, split/move, zoom, …) */}
+<kai-command items={commandItems()} onkai-select={(e) => run(e.detail.id)} />
 
-// SPLIT / MOVE via the tab "…" menu (no drag yet): split right (new column) ·
-// split down (new row) · move next/prev column · move group above/below · close.
-// A column "×" closes the WHOLE column; survivors REFLOW to fill the freed width.
-// NOTIFICATIONS: dogfood the kit's imperative toast() store (needs-you + finished).`,
+// Browser-safe keyboard (browsers reserve Cmd/Ctrl+number):
+//   ⌘K palette · ⌥1–9 jump · ⌥Z maximize group · ⌥B browser
+//   ⌥⇧←→ move pane across columns (split at edge) · ⌥⇧↑↓ across rows · Esc restore/close
+// Notifications via the imperative toast() store.`,
       },
     },
   },
