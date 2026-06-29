@@ -1,7 +1,7 @@
 import { type JSX, For, Show, createSignal } from 'solid-js';
 import { cn } from '../utils/cn';
 import { Textarea } from '../ui/textarea';
-import { Input } from '../ui/input';
+import { Input, FIELD_BASE as inputBase } from '../ui/input';
 import { Star } from 'lucide-solid';
 import type { FormField } from './form';
 
@@ -19,9 +19,6 @@ export interface WidgetProps {
   onInput: (value: unknown) => void;
   onBlur: () => void;
 }
-
-const inputBase =
-  'w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50 disabled:pointer-events-none';
 
 function ariaProps(p: WidgetProps) {
   return {

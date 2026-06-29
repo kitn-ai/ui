@@ -25,7 +25,7 @@ export interface InputProps extends Omit<JSX.InputHTMLAttributes<HTMLInputElemen
 // The single source of the field shell styling — lifted verbatim from the
 // `inputBase` constant that used to live in `src/components/form-widgets.tsx`.
 // `Input` now owns it; the form widgets render `Input` rather than re-pasting it.
-const FIELD_BASE =
+export const FIELD_BASE =
   'w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50 disabled:pointer-events-none';
 
 // When a leading/trailing affix is present the border + padding wrap the whole
