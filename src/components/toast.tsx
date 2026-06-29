@@ -220,7 +220,7 @@ export function Toast(props: ToastProps) {
           'animate-in fade-in-0 slide-in-from-top-4',
           'data-[closed]:animate-out data-[closed]:fade-out-0 data-[closed]:slide-out-to-top-2',
           appearance() === 'card'
-            ? 'flex items-start gap-3 rounded-xl p-4 shadow-xl'
+            ? 'flex min-w-[20rem] items-start gap-3 rounded-xl p-4 shadow-xl'
             : 'flex items-center gap-3 rounded-full px-4 py-2.5',
         )}
       >
