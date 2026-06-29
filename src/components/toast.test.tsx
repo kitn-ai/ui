@@ -50,6 +50,60 @@ describe('Toast — rendering', () => {
   });
 });
 
+describe('Toast — appearance + inverse', () => {
+  const statusEl = (c: HTMLElement) => c.querySelector('[role="status"]') as HTMLElement;
+
+  it('defaults to the pill appearance and ignores description', () => {
+    const { container, queryByText } = render(() => (
+      <Toast item={base({ duration: 0, description: 'should be hidden' })} onDismiss={() => {}} />
+    ));
+    expect(statusEl(container).dataset.appearance).toBe('pill');
+    // the pill is single-line: the message stays, the description never renders
+    expect(queryByText('should be hidden')).toBeNull();
+  });
+
+  it('renders the card appearance with a title + description line', () => {
+    const { container, getByText } = render(() => (
+      <Toast
+        item={base({ duration: 0, appearance: 'card', message: 'Deployed', description: 'Live in 30s' })}
+        onDismiss={() => {}}
+      />
+    ));
+    const el = statusEl(container);
+    expect(el.dataset.appearance).toBe('card');
+    expect(el).toHaveClass('rounded-xl');
+    expect(getByText('Deployed')).toBeInTheDocument();
+    expect(getByText('Live in 30s')).toBeInTheDocument();
+  });
+
+  it('inverse swaps to the high-contrast surface (bg-foreground / text-background)', () => {
+    const { container } = render(() => (
+      <Toast item={base({ duration: 0, inverse: true })} onDismiss={() => {}} />
+    ));
+    const el = statusEl(container);
+    expect(el.dataset.inverse).toBe('');
+    expect(el).toHaveClass('bg-foreground', 'text-background');
+    expect(el).not.toHaveClass('bg-popover');
+  });
+
+  it('a per-toast appearance wins over the region-level default', () => {
+    // region default pill, item asks for card → card
+    const { container } = render(() => (
+      <Toast item={base({ duration: 0, appearance: 'card' })} appearance="pill" onDismiss={() => {}} />
+    ));
+    expect(statusEl(container).dataset.appearance).toBe('card');
+  });
+
+  it('falls back to the region-level appearance / inverse when the item omits them', () => {
+    const { container } = render(() => (
+      <Toast item={base({ duration: 0 })} appearance="card" inverse onDismiss={() => {}} />
+    ));
+    const el = statusEl(container);
+    expect(el.dataset.appearance).toBe('card');
+    expect(el.dataset.inverse).toBe('');
+  });
+});
+
 describe('Toast — auto-dismiss', () => {
   beforeEach(() => vi.useFakeTimers());
   afterEach(() => vi.useRealTimers());
@@ -191,6 +245,15 @@ describe('ToastRegion — stacking + queue + a11y', () => {
     ));
     fireEvent.click(getByLabelText('Dismiss'));
     await waitFor(() => expect(onDismiss).toHaveBeenCalledWith('x', 'close'));
+  });
+
+  it('applies the region-level appearance / inverse defaults to its toasts', () => {
+    const { container } = render(() => (
+      <ToastRegion toasts={[base({ id: 'x', message: 'X', duration: 0 })]} appearance="card" inverse />
+    ));
+    const el = container.querySelector('[role="status"]') as HTMLElement;
+    expect(el.dataset.appearance).toBe('card');
+    expect(el.dataset.inverse).toBe('');
   });
 });
 

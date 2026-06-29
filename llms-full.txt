@@ -1829,10 +1829,12 @@ _No events._
 
 | Property | Attribute | Type | Description |
 |---|---|---|---|
-| `toasts` | — | `{ id: string; message: string; variant?: undefined \| "error" \| "info" \| "success" \| "warning" \| "neutral"; action?: undefined \| { label: string; onAction: () => void \| false }; duration?: undefined \| number; dismissible?: undefined \| false \| true; target?: undefined \| HTMLElement }[]` | The toasts to render. Newest is shown on top. Set as a JS property (array); pass a new array reference to update. |
+| `toasts` | — | `{ id: string; message: string; variant?: undefined \| "error" \| "info" \| "success" \| "warning" \| "neutral"; appearance?: undefined \| "pill" \| "card"; inverse?: undefined \| false \| true; description?: undefined \| string; action?: undefined \| { label: string; onAction: () => void \| false }; duration?: undefined \| number; dismissible?: undefined \| false \| true; target?: undefined \| HTMLElement }[]` | The toasts to render. Newest is shown on top. Set as a JS property (array); pass a new array reference to update. |
 | `position` | `position` | `undefined \| "top-center" \| "top-right" \| "top-left" \| "bottom-center" \| "bottom-right" \| "bottom-left"` | Stack anchor: `'top-center'` (default), `'top-right'`, `'bottom-center'`, … |
 | `max` | `max` | `undefined \| number` | Max simultaneously-visible toasts; the rest queue. Defaults to `3`. |
 | `stack` | `stack` | `undefined \| "expanded" \| "collapsed"` | Stacking: 'expanded' (default, full column) \| 'collapsed' (Sonner-style pile that expands on hover/focus). Attribute: stack. |
+| `appearance` | `appearance` | `undefined \| "pill" \| "card"` | Default appearance for this region's toasts: `'pill'` (default, compact) \| `'card'` (richer, with a description line). A per-toast `appearance` wins. Attribute: `appearance`. |
+| `inverse` | `inverse` | `undefined \| false \| true` | Default high-contrast inverse treatment for this region's toasts. A per-toast `inverse` wins. Off by default. Attribute: `inverse`. |
 | `target` | — | `undefined \| HTMLElement` | Container element to anchor this region to (JS property). Set by the store for a scoped region; unset = the global viewport region. |
 
 **Events** (non-bubbling `CustomEvent`s — listen directly on the element):

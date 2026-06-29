@@ -70,6 +70,33 @@ describe('toast() — basics', () => {
   });
 });
 
+describe('toast() — appearance / inverse / description', () => {
+  it('defaults to the pill appearance and non-inverse', () => {
+    const h = toast('Saved');
+    expect(find(h.id)?.appearance).toBe('pill');
+    expect(find(h.id)?.inverse).toBe(false);
+  });
+
+  it('carries through appearance / inverse / description from options', () => {
+    const h = toast('Deployed', { appearance: 'card', inverse: true, description: 'Live in 30s' });
+    expect(find(h.id)?.appearance).toBe('card');
+    expect(find(h.id)?.inverse).toBe(true);
+    expect(find(h.id)?.description).toBe('Live in 30s');
+  });
+
+  it('inherits the configured appearance / inverse defaults, with per-toast override', () => {
+    configureToasts({ appearance: 'card', inverse: true });
+    const inherited = toast('A');
+    expect(find(inherited.id)?.appearance).toBe('card');
+    expect(find(inherited.id)?.inverse).toBe(true);
+    // per-toast wins over the config default
+    const overridden = toast('B', { appearance: 'pill', inverse: false });
+    expect(find(overridden.id)?.appearance).toBe('pill');
+    expect(find(overridden.id)?.inverse).toBe(false);
+    configureToasts({ appearance: 'pill', inverse: false }); // reset
+  });
+});
+
 describe('resolveDuration — action floor', () => {
   it('defaults to DEFAULT_TOAST_DURATION', () => {
     expect(resolveDuration({})).toBe(DEFAULT_TOAST_DURATION);
@@ -135,5 +162,17 @@ describe('configureToasts — singleton region config', () => {
     expect(region.getAttribute('stack')).not.toBe('collapsed');
     configureToasts({ stack: 'collapsed' });
     expect(region.getAttribute('stack')).toBe('collapsed');
+  });
+
+  it('reflects appearance / inverse defaults onto the region element', () => {
+    configureToasts({ appearance: 'card', inverse: true });
+    toast('hi');
+    const region = document.querySelector('kai-toast-region')!;
+    expect(region.getAttribute('appearance')).toBe('card');
+    expect(region.hasAttribute('inverse')).toBe(true);
+    // turning inverse back off removes the attribute
+    configureToasts({ inverse: false });
+    expect(region.hasAttribute('inverse')).toBe(false);
+    configureToasts({ appearance: 'pill' }); // reset
   });
 });

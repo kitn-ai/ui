@@ -1582,13 +1582,17 @@ export const ThinkingBar = createWebComponent<ThinkingBarProps>(
 
 export interface ToastRegionProps extends WebComponentProps {
   /** The toasts to render. Newest is shown on top. Set as a JS property (array); pass a new array reference to update. */
-  toasts: { id: string; message: string; variant?: undefined | "error" | "info" | "success" | "warning" | "neutral"; action?: undefined | { label: string; onAction: () => void | false }; duration?: undefined | number; dismissible?: undefined | boolean; target?: undefined | HTMLElement }[];
+  toasts: { id: string; message: string; variant?: undefined | "error" | "info" | "success" | "warning" | "neutral"; appearance?: undefined | "pill" | "card"; inverse?: undefined | boolean; description?: undefined | string; action?: undefined | { label: string; onAction: () => void | false }; duration?: undefined | number; dismissible?: undefined | boolean; target?: undefined | HTMLElement }[];
   /** Stack anchor: `'top-center'` (default), `'top-right'`, `'bottom-center'`, … */
   position?: "top-center" | "top-right" | "top-left" | "bottom-center" | "bottom-right" | "bottom-left";
   /** Max simultaneously-visible toasts; the rest queue. Defaults to `3`. */
   max?: number;
   /** Stacking: 'expanded' (default, full column) | 'collapsed' (Sonner-style pile that expands on hover/focus). Attribute: stack. */
   stack?: "expanded" | "collapsed";
+  /** Default appearance for this region's toasts: `'pill'` (default, compact) | `'card'` (richer, with a description line). A per-toast `appearance` wins. Attribute: `appearance`. */
+  appearance?: "pill" | "card";
+  /** Default high-contrast inverse treatment for this region's toasts. A per-toast `inverse` wins. Off by default. Attribute: `inverse`. */
+  inverse?: boolean;
   /** Container element to anchor this region to (JS property). Set by the store for a scoped region; unset = the global viewport region. */
   target?: HTMLElement;
   /** A toast's action button was pressed. */
@@ -1599,7 +1603,7 @@ export interface ToastRegionProps extends WebComponentProps {
 
 export const ToastRegion = createWebComponent<ToastRegionProps>(
   'kai-toast-region',
-  ["theme","toasts","position","max","stack","target"],
+  ["theme","toasts","position","max","stack","appearance","inverse","target"],
   { onAction: 'kai-action', onDismiss: 'kai-dismiss' },
   () => import('@kitn.ai/ui/elements/toast-region'),
 );

@@ -6282,15 +6282,15 @@
     "props": [
       {
         "name": "toasts",
-        "type": "{ id: string; message: string; variant?: undefined | \"error\" | \"info\" | \"success\" | \"warning\" | \"neutral\"; action?: undefined | { label: string; onAction: () => void | false }; duration?: undefined | number; dismissible?: undefined | false | true; target?: undefined | HTMLElement }[]",
+        "type": "{ id: string; message: string; variant?: undefined | \"error\" | \"info\" | \"success\" | \"warning\" | \"neutral\"; appearance?: undefined | \"pill\" | \"card\"; inverse?: undefined | false | true; description?: undefined | string; action?: undefined | { label: string; onAction: () => void | false }; duration?: undefined | number; dismissible?: undefined | false | true; target?: undefined | HTMLElement }[]",
         "optional": false,
         "scalar": false,
         "description": "The toasts to render. Newest is shown on top. Set as a JS property (array); pass a new array reference to update.",
         "typeName": "ToastItem[]",
-        "typeShape": "{ id: string; message: string; variant?: undefined | \"error\" | \"info\" | \"success\" | \"warning\" | \"neutral\"; action?: undefined | { label: string; onAction: () => void | false }; duration?: undefined | number; dismissible?: undefined | false | true; target?: undefined | HTMLElement }[]",
+        "typeShape": "{ id: string; message: string; variant?: undefined | \"error\" | \"info\" | \"success\" | \"warning\" | \"neutral\"; appearance?: undefined | \"pill\" | \"card\"; inverse?: undefined | false | true; description?: undefined | string; action?: undefined | { label: string; onAction: () => void | false }; duration?: undefined | number; dismissible?: undefined | false | true; target?: undefined | HTMLElement }[]",
         "default": "[]",
         "typeImport": "ToastItem",
-        "displayType": "{ id: string; message: string; variant?: undefined | \"error\" | \"info\" | \"success\" | \"warning\" | \"neutral\"; action?: undefined | { label: string; onAction: () => void | false }; duration?: undefined | number; dismissible?: undefined | false | true; target?: undefined | HTMLElement }[]"
+        "displayType": "{ id: string; message: string; variant?: undefined | \"error\" | \"info\" | \"success\" | \"warning\" | \"neutral\"; appearance?: undefined | \"pill\" | \"card\"; inverse?: undefined | false | true; description?: undefined | string; action?: undefined | { label: string; onAction: () => void | false }; duration?: undefined | number; dismissible?: undefined | false | true; target?: undefined | HTMLElement }[]"
       },
       {
         "name": "position",
@@ -6318,6 +6318,24 @@
         "description": "Stacking: 'expanded' (default, full column) | 'collapsed' (Sonner-style pile that expands on hover/focus). Attribute: stack.",
         "default": "'expanded'",
         "displayType": "undefined | \"expanded\" | \"collapsed\""
+      },
+      {
+        "name": "appearance",
+        "type": "undefined | \"pill\" | \"card\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Default appearance for this region's toasts: `'pill'` (default, compact) | `'card'` (richer, with a description line). A per-toast `appearance` wins. Attribute: `appearance`.",
+        "default": "'pill'",
+        "displayType": "undefined | \"pill\" | \"card\""
+      },
+      {
+        "name": "inverse",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Default high-contrast inverse treatment for this region's toasts. A per-toast `inverse` wins. Off by default. Attribute: `inverse`.",
+        "default": "false",
+        "displayType": "undefined | false | true"
       },
       {
         "name": "target",
