@@ -13,9 +13,17 @@
 // Registration is async (a microtask after this module loads). Consumers that
 // need the upgraded element (e.g. the React runtime) guard with
 // customElements.whenDefined(), which resolves once the impl chunk has run.
-if (typeof window !== 'undefined' && typeof customElements !== 'undefined') {
-  void import('./register-impl');
-}
+/** Resolves once the kai-* elements are registered (browser); inert on the server.
+ *  Await this instead of customElements.whenDefined for a single ready signal.
+ *
+ *  NOTE: this MUST stay an exported binding. A bare `void import('./register-impl')`
+ *  is a result-unused dynamic import that the single-entry register-all build
+ *  (vite.config.ts → dist/kai.es.js) tree-shakes away as dead code, leaving the
+ *  bundle with NOTHING registered. Exporting the promise keeps the import live. */
+export const elementsReady: Promise<unknown> =
+  typeof window !== 'undefined' && typeof customElements !== 'undefined'
+    ? import('./register-impl')
+    : Promise.resolve();
 
 export type { ChatMessage, ChatMessageAction } from './chat-types';
 export { configureCodeHighlighting, isCodeHighlightingEnabled } from '../primitives/highlighter';
