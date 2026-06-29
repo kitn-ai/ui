@@ -273,7 +273,7 @@ const TONE_TEXT: Record<AgentStatusTone, string> = {
   idle: 'text-muted-foreground',
   done: 'text-tool-green',
   error: 'text-tool-red',
-  blocked: 'text-violet-400',
+  blocked: 'text-ring',
 };
 
 // ── Browser previews (the full-screen Browser view) ─────────────────────────
@@ -948,7 +948,6 @@ export const SplitWorkspace: Story = {
           id: `needs-${a.id}`,
           duration: 0,
           appearance: 'card',
-          inverse: true,
           description: [a.dir, a.branch].filter(Boolean).join(' · ') || undefined,
           action: { label: 'Respond', onAction: () => focusAgent(a.id) },
         });
@@ -1014,7 +1013,6 @@ export const SplitWorkspace: Story = {
       if (!done) return;
       toast.success(`${done.name} finished its ${done.role.toLowerCase()} task`, {
         appearance: 'card',
-        inverse: true,
         description: [done.dir, done.branch].filter(Boolean).join(' · ') || undefined,
         action: { label: 'Open', onAction: () => focusAgent(done.id) },
       });
@@ -1259,7 +1257,7 @@ export const SplitWorkspace: Story = {
             class={cn(
               'flex min-h-0 flex-1 flex-col overflow-hidden border-2',
               isFocused() ? 'border-muted-foreground/50' : 'border-border',
-              activeAgent()?.needsAttention && 'border-violet-400/50',
+              activeAgent()?.needsAttention && 'border-ring/50',
             )}
           >
             {/* gutter doubles as the header: scrollable tab strip + a pinned right
@@ -1595,7 +1593,7 @@ export const SplitWorkspace: Story = {
                 class="inline-flex items-center gap-1 rounded-md px-2 py-1.5 text-muted-foreground transition-colors hover:bg-hover hover:text-foreground"
               >
                 <Bell class="size-5" aria-hidden="true" />
-                <span class="text-xs font-semibold tabular-nums text-violet-400">{attentionCount()}</span>
+                <span class="text-xs font-semibold tabular-nums text-ring">{attentionCount()}</span>
               </button>
               <Show when={attnOpen() && attnPos()} keyed>
                 {(pos) => (
@@ -1674,7 +1672,7 @@ export const SplitWorkspace: Story = {
                               'text-muted-foreground hover:bg-hover hover:text-foreground': workspace() !== w.id,
                             }}
                           >
-                            <span class={cn('size-1.5 shrink-0 rounded-full', w.status ? 'bg-violet-400' : 'bg-muted-foreground/40')} aria-hidden="true" />
+                            <span class={cn('size-1.5 shrink-0 rounded-full', w.status ? 'bg-ring' : 'bg-muted-foreground/40')} aria-hidden="true" />
                             <span class="min-w-0 flex-1 truncate">{w.label}</span>
                             <span class="shrink-0 text-xs text-muted-foreground tabular-nums">{w.meta}</span>
                             <button
@@ -1867,7 +1865,7 @@ export const SplitWorkspace: Story = {
           </button>
           <span class="flex shrink-0 items-center gap-3">
             <Show when={live().filter((a) => a.needsAttention).length > 0}>
-              <span class="font-medium text-violet-400">
+              <span class="font-medium text-ring">
                 {live().filter((a) => a.needsAttention).length} waiting on you
               </span>
             </Show>
