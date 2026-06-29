@@ -3,7 +3,7 @@ import { EditableLabel } from './editable-label';
 import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
-  title: 'Components/Primitives/EditableLabel',
+  title: 'Components/Elements/EditableLabel',
   component: EditableLabel,
   tags: ['autodocs'],
   parameters: {

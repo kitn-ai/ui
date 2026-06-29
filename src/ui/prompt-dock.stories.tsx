@@ -28,7 +28,7 @@ const Pill = (props: { children: JSX.Element }) => (
 );
 
 const meta = {
-  title: 'Components/Primitives/Prompt Dock',
+  title: 'Components/Elements/Prompt Dock',
   component: PromptDock,
   tags: ['autodocs'],
   parameters: {

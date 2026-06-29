@@ -13,7 +13,7 @@ const ITEMS: KaiNavItem[] = [
 ];
 
 const meta = {
-  title: 'Components/Primitives/Nav',
+  title: 'Components/Elements/Nav',
   component: Nav,
   tags: ['autodocs'],
   parameters: {

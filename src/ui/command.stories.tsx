@@ -24,7 +24,7 @@ const SAMPLE_GROUPS: CommandGroup[] = [
 ];
 
 const meta = {
-  title: 'Components/Primitives/Command',
+  title: 'Components/Elements/Command',
   component: CommandList,
   tags: ['autodocs'],
   parameters: {

@@ -3,7 +3,7 @@ import { AgentCard } from './agent-card';
 import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
-  title: 'Components/Primitives/Agent Card',
+  title: 'Components/Elements/Agent Card',
   component: AgentCard,
   tags: ['autodocs'],
   parameters: {

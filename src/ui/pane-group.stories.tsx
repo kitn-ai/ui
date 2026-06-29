@@ -39,7 +39,7 @@ const BODIES: Record<string, JSX.Element> = {
 };
 
 const meta = {
-  title: 'Components/Primitives/Pane Group',
+  title: 'Components/Elements/Pane Group',
   component: PaneGroup,
   tags: ['autodocs'],
   parameters: {

@@ -40,7 +40,7 @@ const Composer = () => (
 );
 
 const meta = {
-  title: 'Components/Primitives/Pane',
+  title: 'Components/Elements/Pane',
   component: Pane,
   tags: ['autodocs'],
   parameters: {
