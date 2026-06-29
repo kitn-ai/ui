@@ -37,7 +37,10 @@ export interface CodeHighlightingOptions {
 // Runtime values live in the compiled \`default\` (dist/kai.es.js); we only
 // DECLARE their signatures here so the .d.ts pulls no source.
 export declare function configureCodeHighlighting(options: CodeHighlightingOptions): void;
-export declare function isCodeHighlightingEnabled(): boolean;`;
+export declare function isCodeHighlightingEnabled(): boolean;
+
+/** Resolves once the kai-* elements are registered (browser); inert on the server. */
+export declare const elementsReady: Promise<unknown>;`;
 
 const clean = (type, optional) => {
   let t = type
@@ -99,6 +102,9 @@ export type { ChatMessage, ChatMessageAction } from './chat-types';
 export type { CodeHighlightingOptions } from '../primitives/highlighter';
 export declare function configureCodeHighlighting(options: CodeHighlightingOptions): void;
 export declare function isCodeHighlightingEnabled(): boolean;
+
+/** Resolves once the kai-* elements are registered (browser); inert on the server. */
+export declare const elementsReady: Promise<unknown>;
 
 ${interfaces}
 
