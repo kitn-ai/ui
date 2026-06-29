@@ -39,6 +39,14 @@ const ROW_INPUT =
 const SIZE_SM = 'px-2.5 py-1';
 const INVALID = 'border-destructive dark:border-red-400/70';
 
+// Suppress the native search affordances Chrome/WebKit render for `type="search"`.
+// Without this the browser's `::-webkit-search-cancel-button` (×) stacks on top of
+// a custom clear control (e.g. kai-search's `part="clear"`) — a double ×. Applied
+// to the inner `<input>` in BOTH layouts (the field can be `type="search"` either
+// way; kai-search uses the affix layout for its leading icon).
+const SEARCH_RESET =
+  '[&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none [&::-webkit-search-cancel-button]:hidden';
+
 /**
  * `Input`: the token-themed single-line text field shell. A label/hint/error
  * stack around a field row that holds an optional `leading` affix, the
@@ -69,7 +77,7 @@ export function Input(props: InputProps): JSX.Element {
       disabled={local.disabled}
       aria-invalid={isInvalid() ? 'true' : undefined}
       aria-describedby={hasHint() ? hintId : undefined}
-      class={cls}
+      class={cn(SEARCH_RESET, cls)}
       onInput={(e) => local.onValueInput?.(e.currentTarget.value)}
       onBlur={(e) => {
         const handler = local.onBlur;
