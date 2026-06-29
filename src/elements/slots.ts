@@ -368,6 +368,11 @@ export const NAV_PARTS: PartDef[] = [
     doc: 'The right-aligned muted trailing text on a row (e.g. a relative time). Shown only when an item carries `meta`; restyle from outside.',
     recipe: 'kai-nav::part(meta) { color: var(--color-foreground); font-variant-numeric: tabular-nums }',
   },
+  {
+    name: 'item-action',
+    doc: 'The trailing per-item action / close button, a sibling of the item button. Shown only when an item carries `action` or `closable`; reveal it on hover or pin it visible from outside.',
+    recipe: 'kai-nav::part(item-action) { opacity: 1 }',
+  },
 ];
 
 /** Slots of `<kai-coachmark>` (the anchor/trigger is the default slot). */
@@ -525,6 +530,12 @@ export const SEARCH_PARTS: PartDef[] = [
   { name: 'clear', doc: 'The trailing clear ("x") button, shown when the field is non-empty.', recipe: 'kai-search::part(clear) { opacity: 1 }' },
 ];
 
+/** Styleable `::part`s of `<kai-editable-label>` (inline rename; the edit field is the kai-input field). */
+export const EDITABLE_LABEL_PARTS: PartDef[] = [
+  { name: 'text', doc: 'The read-mode label text. Restyle its typography; it swaps to the input on edit.', recipe: 'kai-editable-label::part(text) { font-weight: 600 }' },
+  { name: 'input', doc: 'The edit-mode input (the composed kai-input field).', recipe: 'kai-editable-label::part(input) { font: inherit }' },
+];
+
 /** Styleable `::part`s of `<kai-kbd>` (the keyboard-shortcut display). */
 export const KBD_PARTS: PartDef[] = [
   { name: 'key', doc: 'Each key cap. Restyle its surface, border, radius, or font.', recipe: 'kai-kbd::part(key) { border-radius: 0.375rem }' },
@@ -567,6 +578,7 @@ export const ELEMENT_COMPOSITION: Record<string, ElementComposition> = {
   'kai-input': { slots: INPUT_SLOTS, parts: INPUT_PARTS },
   'kai-search': { parts: SEARCH_PARTS },
   'kai-kbd': { parts: KBD_PARTS },
+  'kai-editable-label': { parts: EDITABLE_LABEL_PARTS },
 };
 
 /**

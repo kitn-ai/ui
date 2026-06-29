@@ -154,7 +154,7 @@ describe('FILE_TREE_PARTS registry', () => {
 describe('NAV_PARTS registry', () => {
   it('declares nav / item plus the nested-group + status parts, with unique names', () => {
     const names = NAV_PARTS.map((p) => p.name);
-    expect(names).toEqual(['nav', 'item', 'group', 'chevron', 'status', 'meta']);
+    expect(names).toEqual(['nav', 'item', 'group', 'chevron', 'status', 'meta', 'item-action']);
     expect(new Set(names).size).toBe(names.length);
   });
 
@@ -222,6 +222,7 @@ describe('ELEMENT_COMPOSITION registry (single source of truth the build extract
       'kai-coachmark',
       'kai-conversations',
       'kai-dialog',
+      'kai-editable-label',
       'kai-file-tree',
       'kai-hover-card',
       'kai-icon',

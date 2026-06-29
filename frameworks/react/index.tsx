@@ -598,6 +598,28 @@ export const Dialog = createWebComponent<DialogProps>(
   () => import('@kitn.ai/ui/elements/dialog'),
 );
 
+export interface EditableLabelProps extends WebComponentProps {
+  /** The label text — settable and reflected to the `value` attribute. Read `el.value` for live state. */
+  value?: string;
+  /** Controlled edit state. `el.editing = true` opens the field; reflected to the `editing` attribute. */
+  editing?: boolean;
+  /** Placeholder shown while editing / when the value is empty. */
+  placeholder?: string;
+  /** Disable entering edit mode. */
+  disabled?: boolean;
+  /** Edit was cancelled (Esc); the text is restored. */
+  onCancel?: (event: CustomEvent<Record<string, never>>) => void;
+  /** Committed a changed value (Enter / blur). */
+  onRename?: (event: CustomEvent<{ value: string }>) => void;
+}
+
+export const EditableLabel = createWebComponent<EditableLabelProps>(
+  'kai-editable-label',
+  ["theme","value","editing","placeholder","disabled"],
+  { onCancel: 'kai-cancel', onRename: 'kai-rename' },
+  () => import('@kitn.ai/ui/elements/editable-label'),
+);
+
 export interface EmbedProps extends WebComponentProps {
   /** Stable card id correlating every emitted event. Set as an attribute or property. */
   cardId?: string;
@@ -803,6 +825,10 @@ export interface InputProps extends WebComponentProps {
   invalid?: boolean;
   /** Form-control name. */
   name?: string;
+  /** Autofill hint forwarded to the inner input (e.g. `email`, `current-password`). */
+  autocomplete?: string;
+  /** Virtual-keyboard hint forwarded to the inner input (e.g. `numeric`, `email`). */
+  inputmode?: string;
   /** The value was committed (blur). */
   onChange?: (event: CustomEvent<{ value: string }>) => void;
   /** The value changed per keystroke. */
@@ -811,7 +837,7 @@ export interface InputProps extends WebComponentProps {
 
 export const Input = createWebComponent<InputProps>(
   'kai-input',
-  ["theme","type","value","placeholder","label","hint","error","size","disabled","readonly","required","invalid","name"],
+  ["theme","type","value","placeholder","label","hint","error","size","disabled","readonly","required","invalid","name","autocomplete","inputmode"],
   { onChange: 'kai-change', onInput: 'kai-input' },
   () => import('@kitn.ai/ui/elements/input'),
 );
@@ -972,13 +998,17 @@ export const ModelSwitcher = createWebComponent<ModelSwitcherProps>(
 
 export interface NavProps extends WebComponentProps {
   /** The nav items. Set as a JS property (array, not an attribute). Each item may carry `children` (a collapsible group), a `status` dot, and trailing `meta` text. */
-  items?: { id: string; label?: string; icon?: string; badge?: string; trailing?: string; disabled?: boolean; children?: Record<string, unknown>[]; status?: { tone: "error" | "primary" | "info" | "success" | "warning" | "neutral"; label?: string; pulse?: boolean }; meta?: string }[];
+  items?: { id: string; label?: string; icon?: string; badge?: string; trailing?: string; disabled?: boolean; children?: Record<string, unknown>[]; status?: { tone: "error" | "primary" | "info" | "success" | "warning" | "neutral"; label?: string; pulse?: boolean }; meta?: string; action?: { icon: string; label: string }; closable?: boolean }[];
   /** Active item id (controlled). */
   value?: string;
   /** Initial active id when uncontrolled. */
   defaultValue?: string;
   /** Ids of group items collapsed on first render (groups default to expanded). Set as a JS property (array). */
   defaultCollapsed?: string[];
+  /** A row's trailing `action` button was activated (not a select). `value` is the item id; `action` echoes the item's `{ icon, label }`. */
+  onNavItemAction?: (event: CustomEvent<{ value: string; action?: undefined | { icon: string; label: string } }>) => void;
+  /** A `closable` row's trailing close button was activated (not a select). `value` is the item id. */
+  onNavItemClose?: (event: CustomEvent<{ value: string }>) => void;
   /** A nav item was activated. */
   onNavSelect?: (event: CustomEvent<{ id: string }>) => void;
 }
@@ -986,7 +1016,7 @@ export interface NavProps extends WebComponentProps {
 export const Nav = createWebComponent<NavProps>(
   'kai-nav',
   ["theme","items","value","defaultValue","defaultCollapsed"],
-  { onNavSelect: 'kai-nav-select' },
+  { onNavItemAction: 'kai-nav-item-action', onNavItemClose: 'kai-nav-item-close', onNavSelect: 'kai-nav-select' },
   () => import('@kitn.ai/ui/elements/nav'),
 );
 

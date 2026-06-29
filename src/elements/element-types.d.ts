@@ -400,6 +400,19 @@ export interface KaiDialogElement extends HTMLElement {
   defaultOpen?: boolean;
 }
 
+export interface KaiEditableLabelElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: 'light' | 'dark' | 'auto';
+  /** The label text — settable and reflected to the `value` attribute. Read `el.value` for live state. */
+  value?: string;
+  /** Controlled edit state. `el.editing = true` opens the field; reflected to the `editing` attribute. */
+  editing?: boolean;
+  /** Placeholder shown while editing / when the value is empty. */
+  placeholder?: string;
+  /** Disable entering edit mode. */
+  disabled?: boolean;
+}
+
 export interface KaiEmbedElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
@@ -548,6 +561,10 @@ export interface KaiInputElement extends HTMLElement {
   invalid?: boolean;
   /** Form-control name. */
   name?: string;
+  /** Autofill hint forwarded to the inner input (e.g. `email`, `current-password`). */
+  autocomplete?: string;
+  /** Virtual-keyboard hint forwarded to the inner input (e.g. `numeric`, `email`). */
+  inputmode?: string;
 }
 
 export interface KaiKbdElement extends HTMLElement {
@@ -663,7 +680,7 @@ export interface KaiNavElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
   /** The nav items. Set as a JS property (array, not an attribute). Each item may carry `children` (a collapsible group), a `status` dot, and trailing `meta` text. */
-  items?: { id: string; label?: string; icon?: string; badge?: string; trailing?: string; disabled?: boolean; children?: Record<string, unknown>[]; status?: { tone: "error" | "primary" | "info" | "success" | "warning" | "neutral"; label?: string; pulse?: boolean }; meta?: string }[];
+  items?: { id: string; label?: string; icon?: string; badge?: string; trailing?: string; disabled?: boolean; children?: Record<string, unknown>[]; status?: { tone: "error" | "primary" | "info" | "success" | "warning" | "neutral"; label?: string; pulse?: boolean }; meta?: string; action?: { icon: string; label: string }; closable?: boolean }[];
   /** Active item id (controlled). */
   value?: string;
   /** Initial active id when uncontrolled. */
@@ -1260,6 +1277,7 @@ declare global {
     'kai-context': KaiContextElement;
     'kai-conversations': KaiConversationsElement;
     'kai-dialog': KaiDialogElement;
+    'kai-editable-label': KaiEditableLabelElement;
     'kai-embed': KaiEmbedElement;
     'kai-empty': KaiEmptyElement;
     'kai-feedback-bar': KaiFeedbackBarElement;

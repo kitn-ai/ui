@@ -2588,6 +2588,89 @@
     ]
   },
   {
+    "tag": "kai-editable-label",
+    "className": "KaiEditableLabelElement",
+    "displayName": "EditableLabel",
+    "props": [
+      {
+        "name": "value",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "The label text — settable and reflected to the `value` attribute. Read `el.value` for live state.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "editing",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Controlled edit state. `el.editing = true` opens the field; reflected to the `editing` attribute.",
+        "default": "false",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "placeholder",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Placeholder shown while editing / when the value is empty.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "disabled",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Disable entering edit mode.",
+        "default": "false",
+        "displayType": "undefined | false | true"
+      }
+    ],
+    "events": [
+      {
+        "name": "kai-cancel",
+        "detail": "Record<string, never>",
+        "description": "Edit was cancelled (Esc); the text is restored.",
+        "displayDetail": "Record<string, never>"
+      },
+      {
+        "name": "kai-rename",
+        "detail": "{ value: string }",
+        "description": "Committed a changed value (Enter / blur).",
+        "displayDetail": "{ value: string }"
+      }
+    ],
+    "methods": [
+      {
+        "name": "edit",
+        "params": "",
+        "returns": "void",
+        "description": ""
+      }
+    ],
+    "composedFrom": [
+      {
+        "name": "EditableLabel",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-editablelabel--docs"
+      }
+    ],
+    "tokens": [],
+    "parts": [
+      {
+        "name": "text",
+        "doc": "The read-mode label text. Restyle its typography; it swaps to the input on edit.",
+        "recipe": "kai-editable-label::part(text) { font-weight: 600 }"
+      },
+      {
+        "name": "input",
+        "doc": "The edit-mode input (the composed kai-input field).",
+        "recipe": "kai-editable-label::part(input) { font: inherit }"
+      }
+    ]
+  },
+  {
     "tag": "kai-embed",
     "className": "KaiEmbedElement",
     "displayName": "Embed",
@@ -3334,6 +3417,22 @@
         "scalar": true,
         "description": "Form-control name.",
         "displayType": "undefined | string"
+      },
+      {
+        "name": "autocomplete",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Autofill hint forwarded to the inner input (e.g. `email`, `current-password`).",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "inputmode",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Virtual-keyboard hint forwarded to the inner input (e.g. `numeric`, `email`).",
+        "displayType": "undefined | string"
       }
     ],
     "events": [
@@ -4053,11 +4152,11 @@
     "props": [
       {
         "name": "items",
-        "type": "undefined | { id: string; label?: undefined | string; icon?: undefined | string; badge?: undefined | string; trailing?: undefined | string; disabled?: undefined | false | true; children?: undefined | Record<string, unknown>[]; status?: undefined | { tone: \"error\" | \"primary\" | \"info\" | \"success\" | \"warning\" | \"neutral\"; label?: undefined | string; pulse?: undefined | false | true }; meta?: undefined | string }[]",
+        "type": "undefined | { id: string; label?: undefined | string; icon?: undefined | string; badge?: undefined | string; trailing?: undefined | string; disabled?: undefined | false | true; children?: undefined | Record<string, unknown>[]; status?: undefined | { tone: \"error\" | \"primary\" | \"info\" | \"success\" | \"warning\" | \"neutral\"; label?: undefined | string; pulse?: undefined | false | true }; meta?: undefined | string; action?: undefined | { icon: string; label: string }; closable?: undefined | false | true }[]",
         "optional": true,
         "scalar": false,
         "description": "The nav items. Set as a JS property (array, not an attribute). Each item may carry `children` (a collapsible group), a `status` dot, and trailing `meta` text.",
-        "displayType": "undefined | { id: string; label?: undefined | string; icon?: undefined | string; badge?: undefined | string; trailing?: undefined | string; disabled?: undefined | false | true; children?: undefined | Record<string, unknown>[]; status?: undefined | { tone: \"error\" | \"primary\" | \"info\" | \"success\" | \"warning\" | \"neutral\"; label?: undefined | string; pulse?: undefined | false | true }; meta?: undefined | string }[]"
+        "displayType": "undefined | { id: string; label?: undefined | string; icon?: undefined | string; badge?: undefined | string; trailing?: undefined | string; disabled?: undefined | false | true; children?: undefined | Record<string, unknown>[]; status?: undefined | { tone: \"error\" | \"primary\" | \"info\" | \"success\" | \"warning\" | \"neutral\"; label?: undefined | string; pulse?: undefined | false | true }; meta?: undefined | string; action?: undefined | { icon: string; label: string }; closable?: undefined | false | true }[]"
       },
       {
         "name": "value",
@@ -4085,6 +4184,18 @@
       }
     ],
     "events": [
+      {
+        "name": "kai-nav-item-action",
+        "detail": "{ value: string; action?: undefined | { icon: string; label: string } }",
+        "description": "A row's trailing `action` button was activated (not a select). `value` is the item id; `action` echoes the item's `{ icon, label }`.",
+        "displayDetail": "{ value: string; action?: undefined | { icon: string; label: string } }"
+      },
+      {
+        "name": "kai-nav-item-close",
+        "detail": "{ value: string }",
+        "description": "A `closable` row's trailing close button was activated (not a select). `value` is the item id.",
+        "displayDetail": "{ value: string }"
+      },
       {
         "name": "kai-nav-select",
         "detail": "{ id: string }",
@@ -4138,6 +4249,11 @@
         "name": "meta",
         "doc": "The right-aligned muted trailing text on a row (e.g. a relative time). Shown only when an item carries `meta`; restyle from outside.",
         "recipe": "kai-nav::part(meta) { color: var(--color-foreground); font-variant-numeric: tabular-nums }"
+      },
+      {
+        "name": "item-action",
+        "doc": "The trailing per-item action / close button, a sibling of the item button. Shown only when an item carries `action` or `closable`; reveal it on hover or pin it visible from outside.",
+        "recipe": "kai-nav::part(item-action) { opacity: 1 }"
       }
     ]
   },

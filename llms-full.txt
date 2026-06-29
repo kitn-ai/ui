@@ -3,7 +3,7 @@
 
 # @kitn.ai/ui
 
-> Framework-agnostic, Shadow-DOM web components for building AI chat interfaces — works in React, Vue, Angular, Svelte, or plain HTML. 77 custom elements, every one prefixed `kai-` (e.g. `<kai-chat>`, `<kai-artifact>`): streaming responses, markdown + code rendering, reasoning/tool panels, attachments, conversation sidebar, voice input. Zero framework dependency for consumers; the SolidJS runtime it is authored in is bundled in, so the host needs nothing.
+> Framework-agnostic, Shadow-DOM web components for building AI chat interfaces — works in React, Vue, Angular, Svelte, or plain HTML. 78 custom elements, every one prefixed `kai-` (e.g. `<kai-chat>`, `<kai-artifact>`): streaming responses, markdown + code rendering, reasoning/tool panels, attachments, conversation sidebar, voice input. Zero framework dependency for consumers; the SolidJS runtime it is authored in is bundled in, so the host needs nothing.
 
 ## Install
 
@@ -37,7 +37,7 @@ Drop an element into any framework (React, Vue, plain HTML). Data in via JS prop
 - `<kai-prompt-input>` — standalone composer with send button.
 
 **Layer 2 — composable primitives** (`import { … } from '@kitn.ai/ui'`):
-All 77 elements are also exported individually. Use them for custom layouts or features `<kai-chat>` does not expose (ChainOfThought, FeedbackBar, ThinkingBar, VoiceInput, …). Your bundler tree-shakes the rest.
+All 78 elements are also exported individually. Use them for custom layouts or features `<kai-chat>` does not expose (ChainOfThought, FeedbackBar, ThinkingBar, VoiceInput, …). Your bundler tree-shakes the rest.
 
 ## Key rules for the web components
 
@@ -99,7 +99,7 @@ For Tailwind builds: `@import "@kitn.ai/ui/theme.css"` in your CSS.
 
 ## Docs
 
-- Full element reference (all 77 elements, every prop/event): ./llms-full.txt — https://kitn.dev/llms-full.txt
+- Full element reference (all 78 elements, every prop/event): ./llms-full.txt — https://kitn.dev/llms-full.txt
 - Machine-readable Custom Elements Manifest: https://unpkg.com/@kitn.ai/ui/dist/custom-elements.json
 - Working examples: https://github.com/kitn-ai/ui/tree/main/examples
 - Storybook: https://storybook.kitn.dev
@@ -173,7 +173,7 @@ The same rule applies to every array/object property (`models`, `context`, `sugg
 
 ---
 
-## Element reference (77 elements, generated from custom-elements.json)
+## Element reference (78 elements, generated from custom-elements.json)
 
 Every element also accepts the `theme` attribute. Array/object properties are marked with a `—` attribute: they must be set as JS properties.
 
@@ -768,6 +768,33 @@ _No events._
 
 ---
 
+### `kai-editable-label` / `EditableLabel`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `value` | `value` | `undefined \| string` | The label text — settable and reflected to the `value` attribute. Read `el.value` for live state. |
+| `editing` | `editing` | `undefined \| false \| true` | Controlled edit state. `el.editing = true` opens the field; reflected to the `editing` attribute. |
+| `placeholder` | `placeholder` | `undefined \| string` | Placeholder shown while editing / when the value is empty. |
+| `disabled` | `disabled` | `undefined \| false \| true` | Disable entering edit mode. |
+
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `kai-cancel` | `CustomEvent<Record<string, never>>` | Edit was cancelled (Esc); the text is restored. |
+| `kai-rename` | `CustomEvent<{ value: string }>` | Committed a changed value (Enter / blur). |
+
+**Styleable parts** (restyle from outside via `kai-editable-label::part(name)`):
+
+| Part | Description |
+|---|---|
+| `::part(text)` | The read-mode label text. Restyle its typography; it swaps to the input on edit. — `kai-editable-label::part(text) { font-weight: 600 }` |
+| `::part(input)` | The edit-mode input (the composed kai-input field). — `kai-editable-label::part(input) { font: inherit }` |
+
+---
+
 ### `kai-embed` / `Embed`
 
 **Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
@@ -966,6 +993,8 @@ _No events._
 | `required` | `required` | `undefined \| false \| true` | Mark the input required. |
 | `invalid` | `invalid` | `undefined \| false \| true` | Force the invalid state without an `error` string. |
 | `name` | `name` | `undefined \| string` | Form-control name. |
+| `autocomplete` | `autocomplete` | `undefined \| string` | Autofill hint forwarded to the inner input (e.g. `email`, `current-password`). |
+| `inputmode` | `inputmode` | `undefined \| string` | Virtual-keyboard hint forwarded to the inner input (e.g. `numeric`, `email`). |
 
 **Events** (non-bubbling `CustomEvent`s — listen directly on the element):
 
@@ -1157,7 +1186,7 @@ _No events._
 
 | Property | Attribute | Type | Description |
 |---|---|---|---|
-| `items` | — | `undefined \| { id: string; label?: undefined \| string; icon?: undefined \| string; badge?: undefined \| string; trailing?: undefined \| string; disabled?: undefined \| false \| true; children?: undefined \| Record<string, unknown>[]; status?: undefined \| { tone: "error" \| "primary" \| "info" \| "success" \| "warning" \| "neutral"; label?: undefined \| string; pulse?: undefined \| false \| true }; meta?: undefined \| string }[]` | The nav items. Set as a JS property (array, not an attribute). Each item may carry `children` (a collapsible group), a `status` dot, and trailing `meta` text. |
+| `items` | — | `undefined \| { id: string; label?: undefined \| string; icon?: undefined \| string; badge?: undefined \| string; trailing?: undefined \| string; disabled?: undefined \| false \| true; children?: undefined \| Record<string, unknown>[]; status?: undefined \| { tone: "error" \| "primary" \| "info" \| "success" \| "warning" \| "neutral"; label?: undefined \| string; pulse?: undefined \| false \| true }; meta?: undefined \| string; action?: undefined \| { icon: string; label: string }; closable?: undefined \| false \| true }[]` | The nav items. Set as a JS property (array, not an attribute). Each item may carry `children` (a collapsible group), a `status` dot, and trailing `meta` text. |
 | `value` | `value` | `undefined \| string` | Active item id (controlled). |
 | `defaultValue` | `default-value` | `undefined \| string` | Initial active id when uncontrolled. |
 | `defaultCollapsed` | — | `undefined \| string[]` | Ids of group items collapsed on first render (groups default to expanded). Set as a JS property (array). |
@@ -1166,6 +1195,8 @@ _No events._
 
 | Event | `detail` type | Description |
 |---|---|---|
+| `kai-nav-item-action` | `CustomEvent<{ value: string; action?: undefined \| { icon: string; label: string } }>` | A row's trailing `action` button was activated (not a select). `value` is the item id; `action` echoes the item's `{ icon, label }`. |
+| `kai-nav-item-close` | `CustomEvent<{ value: string }>` | A `closable` row's trailing close button was activated (not a select). `value` is the item id. |
 | `kai-nav-select` | `CustomEvent<{ id: string }>` | A nav item was activated. |
 
 **Styleable parts** (restyle from outside via `kai-nav::part(name)`):
@@ -1178,6 +1209,7 @@ _No events._
 | `::part(chevron)` | The disclosure chevron on a group row (rotates when expanded). Recolor or resize it from outside. — `kai-nav::part(chevron) { opacity: 1; color: var(--color-primary) }` |
 | `::part(status)` | The per-item status cluster (a colored dot in the tone hue + an optional label). Shown only when an item carries a `status`; the `pulse` flag animates the dot. Restyle from outside. — `kai-nav::part(status) { gap: 0.5rem }` |
 | `::part(meta)` | The right-aligned muted trailing text on a row (e.g. a relative time). Shown only when an item carries `meta`; restyle from outside. — `kai-nav::part(meta) { color: var(--color-foreground); font-variant-numeric: tabular-nums }` |
+| `::part(item-action)` | The trailing per-item action / close button, a sibling of the item button. Shown only when an item carries `action` or `closable`; reveal it on hover or pin it visible from outside. — `kai-nav::part(item-action) { opacity: 1 }` |
 
 ---
 

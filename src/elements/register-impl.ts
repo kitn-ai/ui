@@ -90,3 +90,4 @@ import './dialog';
 import './input';
 import './search';
 import './kbd';
+import './editable-label';
