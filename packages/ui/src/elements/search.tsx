@@ -157,7 +157,7 @@ defineWebComponent<Props, Events>('kai-search', {
         </button>
       </Show>
       <Show when={!value() && props.shortcut}>
-        <Kbd keys={props.shortcut as string} size="sm" class="opacity-80" />
+        <Kbd keys={props.shortcut as string} size="sm" />
       </Show>
     </>
   );
