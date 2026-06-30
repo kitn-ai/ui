@@ -21,31 +21,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-          cache-dependency-path: |
-            package-lock.json
-            docs-site/package-lock.json
+          cache: pnpm
 
-      # The docs site syncs its element bundle + generated metas from the LIVE
-      # kit build (scripts/sync-kit.mjs, run on prebuild) — so build the kit first.
-      - name: Install kit dependencies
-        run: npm ci
-      - name: Build kit (element bundle + element-meta/theme/schemas)
-        run: npm run build
-
-      - name: Install docs-site dependencies
-        run: npm ci
-        working-directory: docs-site
-      - name: Build docs site (base /chat, prebuild syncs the fresh kit)
-        run: npm run build
-        working-directory: docs-site
+      - run: pnpm install --frozen-lockfile
+      - run: nx build docs        # builds @kitn.ai/ui first (dependsOn ^build), then astro
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: docs-site/dist
+          path: apps/docs/dist
 
   deploy:
     needs: build

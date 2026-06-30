@@ -25,20 +25,18 @@ jobs:
       - uses: actions/checkout@v4
         if: ${{ steps.release.outputs.release_created }}
 
+      - uses: pnpm/action-setup@v4
+        if: ${{ steps.release.outputs.release_created }}
       - uses: actions/setup-node@v4
         if: ${{ steps.release.outputs.release_created }}
         with:
           node-version: 22 # trusted publishing needs Node >= 22.14
           registry-url: https://registry.npmjs.org
 
-      # Node 22 ships an older npm; trusted publishing needs npm >= 11.5.1.
-      - if: ${{ steps.release.outputs.release_created }}
-        run: npm install -g npm@latest
-
-      - run: npm ci
+      - run: pnpm install --frozen-lockfile
         if: ${{ steps.release.outputs.release_created }}
 
       # Trusted publishing (OIDC): no NODE_AUTH_TOKEN, provenance is automatic.
-      # prepublishOnly runs `npm run build`, so dist/ is built fresh before publish.
-      - run: npm publish --access public
+      # prepublishOnly runs `npm run build` via pnpm lifecycle.
+      - run: pnpm --filter @kitn.ai/ui publish --access public --no-git-checks
         if: ${{ steps.release.outputs.release_created }}
