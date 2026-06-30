@@ -64,6 +64,10 @@ jobs:
   storybook:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
     steps:
       - uses: actions/checkout@v4
 
@@ -82,5 +86,7 @@ jobs:
       - name: Build (element bundle + provider subpath)
         run: pnpm exec nx build ui
 
-      - name: Storybook tests (a11y + interaction)
+      - name: Storybook tests (a11y + interaction) -- shard ${{ matrix.shard }}/4
+        env:
+          STORYBOOK_SHARD: ${{ matrix.shard }}/4
         run: pnpm --filter @kitn.ai/ui test:storybook:ci

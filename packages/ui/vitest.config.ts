@@ -119,7 +119,7 @@ export default defineConfig({
                 '--disable-backgrounding-occluded-windows',
                 '--disable-renderer-backgrounding',
                 '--disable-features=CalculateNativeWinOcclusion,BackForwardCache',
-                '--js-flags=--max-old-space-size=4096', // give V8 a bigger heap before it OOMs the renderer
+                '--js-flags=--max-old-space-size=2048', // each shard is ~28 files; lower cap forces earlier GC
               ],
             },
           }]

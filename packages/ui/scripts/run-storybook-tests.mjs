@@ -21,6 +21,13 @@ const MAX_ATTEMPTS = Number(process.env.STORYBOOK_TEST_ATTEMPTS ?? 3);
 const cmd = 'npx';
 const args = ['vitest', 'run', '--project=storybook'];
 
+// Shard support: when STORYBOOK_SHARD is set (e.g. "1/4") each invocation
+// runs only that slice of story files in a fresh browser process. Keeps each
+// shard to ~28 files so the single chromium session never accumulates enough
+// memory to OOM the runner. When unset the full suite runs as before.
+const shard = process.env.STORYBOOK_SHARD;
+if (shard) args.push(`--shard=${shard}`);
+
 let lastCode = 1;
 for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
   console.log(`\n> storybook browser tests - attempt ${attempt}/${MAX_ATTEMPTS}\n`);
