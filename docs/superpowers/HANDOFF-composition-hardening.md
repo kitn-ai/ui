@@ -6,7 +6,19 @@
 
 ---
 
-## 0.0 ★CURRENT — SESSIONS 4–5 (2026-06-28/29): new-components epic continuation + AMUX. ✅ MERGED to main via PR #114. ★Read memory `labs-apps-dogfood` (SESSION-5) + `footprint-reduction-research` + `supervisor-operating-mode`.
+## 0.00 ★★CURRENT — SESSION 6 (2026-06-29): input/search field family + consumer packaging hardening. ✅ SHIPPED to npm 0.18.0.
+
+**★Read these memories FIRST (they're authoritative; this doc is a pointer):** `consumer-packaging-hardening`, `input-search-field-family`, `monorepo-migration-plan`, `primitive-vs-element-taxonomy`, `defer-ivp-to-end`.
+
+**SHIPPED this session:**
+1. **Input/search field family — PR #115 (merge `132f072`).** +4 elements: `kai-input` · `kai-search` · `kai-kbd` · `kai-editable-label`; `kai-nav` per-item action/close; `kai-command`+`kai-menu` shortcut (kai-kbd caps); `kai-form` on a shared `Input` primitive. Dogfooded into perplexity-pro/proof-data-table/proof-auth/AMUX. 8 stories reclassified Components/Primitives→Elements (see `primitive-vs-element-taxonomy`).
+2. **Consumer packaging hardening — PRs #116 + #117 → npm 0.18.0.** Two critical bugs (`import '@kitn.ai/ui/elements'` registered NOTHING — void-import tree-shaken; the `@kitn.ai/ui/react` wrappers didn't resolve in any bundler — wrong per-element specifiers) → fixed + TWO build guards (`scripts/verify-elements-bundle.mjs`, `verify-react-wrappers.mjs`, wired into `npm run build`) + Next.js & TanStack Start examples + a verified compatibility FAQ (`docs/framework-compatibility-faq.md`). Verified across React/Next App-Router/TanStack/vanilla+autoloader/Vue/Svelte. **ui.kitn.ai is fixed live** (auto-redeploy on the #116 merge). Full detail: memory `consumer-packaging-hardening`.
+
+**★PROCESS LESSONS (reuse):** SSR-safe `void import()` registration is dead-code-elimination-fragile (bit us twice — storybook-static + the elements bundle) → guard built artifacts. **storybook-static can't register web components** → IVP must use `npm run dev` (see `defer-ivp-to-end`). **Serialize `build:api`/generated-file regen + git commits through the orchestrator** — parallel workers raced the react/types generated files and the branch index (recovered, no loss). Run the visual IVP only at the END (Rob's call). Real consumer apps catch packaging bugs the 1269-test unit suite + Vite-tolerant docs all miss.
+
+**NEXT (resume here):** (1) **Monorepo migration** (NX + pnpm workspaces) — Rob is READY; memory `monorepo-migration-plan` has the full plan/structure/decisions. It would kill the docs-site `sync-kit` fragility class. Do via brainstorm→writing-plans→staged. (2) **Examples refresh** (task: stale react/vue/angular/solid examples pin 0.2/0.4 + pre-rename API) — fold INTO the monorepo migration (`workspace:*`); showcase strategy in `monorepo-migration-plan`. (3) Smaller follow-ups: Angular example (no scaffold support, hand-write); document autoloader static-only contract on the export. (4) On `main`, clean except Rob's uncommitted `docs/notes.md`/`docs/notes-native.md` (HIS — committed once on local main `57694ae`, unpushed; leave them).
+
+## 0.0 (SESSIONS 4–5 — superseded by §0.00) — new-components epic continuation + AMUX. ✅ MERGED to main via PR #114. ★Read memory `labs-apps-dogfood` (SESSION-5) + `footprint-reduction-research` + `supervisor-operating-mode`.
 
 **WHERE WE ARE:** sessions 4–5 are DONE and **MERGED to `main`** (PR #114, merge commit `4dbacf1`, 37 commits, merge-method=merge to preserve conventional history for release-please). On `main` now; `feat/new-components-epic` is merged/stale → **branch fresh off `main`** for any new work. Gate at merge: typecheck 4/4 · unit **1225** · build clean · 74 elements.
 
