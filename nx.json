@@ -1,0 +1,17 @@
+{
+  "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "namedInputs": {
+    "default": ["{projectRoot}/**/*", "sharedGlobals"],
+    "sharedGlobals": []
+  },
+  "targetDefaults": {
+    "build": {
+      "dependsOn": ["^build"],
+      "cache": true,
+      "outputs": ["{projectRoot}/dist", "{projectRoot}/storybook-static"]
+    },
+    "typecheck": { "cache": true },
+    "test": { "cache": true },
+    "dev": { "dependsOn": ["^build"], "cache": false }
+  }
+}

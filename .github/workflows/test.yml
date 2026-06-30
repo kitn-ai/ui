@@ -18,36 +18,37 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: npm
+          node-version: 22
+          cache: pnpm
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Build (element bundle + provider subpath)
-        run: npm run build
+        run: pnpm exec nx build ui
 
       - name: Typecheck
-        run: npm run typecheck
+        run: pnpm exec nx typecheck ui
 
-      # Run ONLY the jsdom unit project. `npm test` (= `vitest run`) would also
+      # Run ONLY the jsdom unit project. pnpm test (= vitest run) would also
       # spin up the storybook BROWSER project; that runs in its own job now.
       - name: Unit tests (jsdom)
-        run: npm test -- --project=unit
+        run: pnpm --filter @kitn.ai/ui exec vitest run --project=unit
 
       - name: React adapter tests
-        run: npm run test:react
+        run: pnpm --filter @kitn.ai/ui test:react
 
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
 
       # Small, focused, retried-internally cross-origin postMessage SECURITY
-      # matrix (remote-element.spec.ts) — proves the host↔provider handshake
+      # matrix (remote-element.spec.ts) -- proves the host<>provider handshake
       # across two real origins, which jsdom and same-origin storybook can't.
       - name: Cross-origin e2e matrix
-        run: npm run test:e2e
+        run: pnpm --filter @kitn.ai/ui test:e2e
 
   # NON-REQUIRED check. The storybook browser project runs ~118 *.stories.tsx as
   # Playwright/chromium browser tests (smoke render + play functions + axe a11y).
@@ -66,19 +67,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: npm
+          node-version: 22
+          cache: pnpm
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
 
       - name: Build (element bundle + provider subpath)
-        run: npm run build
+        run: pnpm exec nx build ui
 
       - name: Storybook tests (a11y + interaction)
-        run: npm run test:storybook:ci
+        run: pnpm --filter @kitn.ai/ui test:storybook:ci

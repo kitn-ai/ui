@@ -1,0 +1,4 @@
+packages:
+  - 'packages/*'
+  - 'apps/*'
+# examples/* are added during the examples-refresh PRs (PR 2+)

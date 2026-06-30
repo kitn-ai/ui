@@ -1,0 +1,27 @@
+# build output
+dist/
+# generated types
+.astro/
+
+# raw kit assets copied by scripts/copy-kit-assets.mjs (autoloader, theme tokens,
+# llms.txt): regenerated on prebuild, never committed
+public/kitn/
+public/llms.txt
+public/llms-full.txt
+
+# dependencies
+node_modules/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+
+# environment variables
+.env
+.env.production
+
+# macOS-specific files
+.DS_Store
