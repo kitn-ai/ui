@@ -79,12 +79,15 @@ interface Events {
 /**
  * `<kai-menu>` — a cascading action menu driven by a JSON items-tree.
  *
- * Set the `items` property in JavaScript (array, not attribute). The trigger
- * is slotted — put your icon/button content in `slot="trigger"`:
+ * Set the `items` property in JavaScript (array, not attribute). The menu
+ * provides its own trigger button (accessible + keyboard-wired); slot only the
+ * VISUAL content into `slot="trigger"` (an icon, text, an `<svg>`) — never your
+ * own `<button>`/`<a>`, which would nest interactive elements. Set the
+ * accessible name with the `label` attribute (for an icon-only trigger):
  *
  * ```html
- * <kai-menu>
- *   <button slot="trigger" aria-label="Open menu">+</button>
+ * <kai-menu label="Open menu">
+ *   <span slot="trigger">+</span>
  * </kai-menu>
  * <script type="module">
  *   import '@kitn.ai/ui/elements';
