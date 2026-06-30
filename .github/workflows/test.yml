@@ -51,25 +51,25 @@ jobs:
       - name: Cross-origin e2e matrix
         run: pnpm --filter @kitn.ai/ui test:e2e
 
-  # The storybook browser project runs ~112 *.stories.tsx as Playwright/chromium
-  # browser tests (smoke render + play functions + axe a11y), sharded 8 ways at
-  # ~14 files/shard to keep each chromium process under the memory ceiling.
-  # Under CI load a renderer page occasionally dies mid-run and aborts the whole
-  # vitest runner ("Browser connection was closed" / "[birpc] rpc is closed") —
-  # a process-level crash, not a per-test failure, so vitest's own `retry` can't
-  # recover it. It's environmental flake on standard GitHub runners (a clean run
-  # passes every test). `test:storybook:ci` retries the whole slice up to 3x as a
-  # fresh process to absorb that random chromium crash, and the stable
-  # `storybook-gate` job (below) aggregates all shards into the single required
-  # status context. A real, repeatable regression still fails every retry and
-  # shows red here.
+  # The storybook browser project runs ~112 *.stories.tsx as chromium browser
+  # tests (smoke render + play functions + axe a11y), split across 4 matrix jobs.
+  # vitest runs each invocation through ONE long-lived chromium process, which
+  # accumulates ~20MB of never-reclaimed memory per story file and crashes around
+  # ~45 files locally (fewer on the smaller CI runners) with "Browser connection
+  # was closed" / "[birpc] rpc is closed" — a process-level crash, not a per-test
+  # failure, so vitest's own `retry` can't recover it. The real fix is capping
+  # files-per-process: each job's `test:storybook:ci` wrapper splits its slice
+  # into ~20-total fresh-chromium sub-shards of ~5-6 files each (and retries each
+  # sub-shard to absorb a rare crash). The stable `storybook-gate` job (below)
+  # aggregates all shards into the single required status context. A real,
+  # repeatable regression still fails every retry and shows red here.
   storybook:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2, 3, 4, 5, 6, 7, 8]
+        shard: [1, 2, 3, 4]
     steps:
       - uses: actions/checkout@v4
 
@@ -88,9 +88,10 @@ jobs:
       - name: Build (element bundle + provider subpath)
         run: pnpm exec nx build ui
 
-      - name: Storybook tests (a11y + interaction) -- shard ${{ matrix.shard }}/8
+      - name: Storybook tests (a11y + interaction) -- shard ${{ matrix.shard }}/4
         env:
-          STORYBOOK_SHARD: ${{ matrix.shard }}/8
+          STORYBOOK_SHARD: ${{ matrix.shard }}/4
+          STORYBOOK_SUBSHARD_TOTAL: '20'
         run: pnpm --filter @kitn.ai/ui test:storybook:ci
 
   # Stable aggregation gate: the SINGLE required status context for the storybook
