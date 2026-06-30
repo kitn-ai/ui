@@ -49,7 +49,7 @@ function UserMenu(props: { open?: boolean }) {
   return (
     <div style={{ width: '260px', padding: '1rem' }}>
       <kai-menu ref={(e) => (el = e as MenuEl)}>
-        <button
+        <span
           slot="trigger"
           style={{
             display: 'flex',
@@ -58,9 +58,6 @@ function UserMenu(props: { open?: boolean }) {
             width: '100%',
             padding: '0.375rem 0.5rem',
             'border-radius': '0.5rem',
-            border: 'none',
-            background: 'transparent',
-            cursor: 'pointer',
           }}
         >
           <span style={{ position: 'relative', display: 'inline-flex' }}>
@@ -70,7 +67,7 @@ function UserMenu(props: { open?: boolean }) {
           <span style={{ 'font-weight': '500', 'font-size': '0.875rem', color: 'var(--color-foreground)' }}>John</span>
           <span style={{ 'font-size': '0.8125rem', color: 'var(--color-muted-foreground)' }}>Max</span>
           <ChevronDown size={16} style={{ 'margin-left': 'auto', color: 'var(--color-muted-foreground)' }} />
-        </button>
+        </span>
       </kai-menu>
     </div>
   );
@@ -84,13 +81,13 @@ export const AccountMenu: Story = {
       source: {
         language: 'html',
         code: `<kai-menu>
-  <button slot="trigger" class="user-menu-trigger">
+  <span slot="trigger" class="user-menu-trigger">
     <span style="position:relative">
       <kai-avatar fallback="JD" size="sm"></kai-avatar>
       <kai-status status="new" pulse style="position:absolute;right:-2px;bottom:-2px"></kai-status>
     </span>
     <span>John</span><span class="muted">Max</span>
-  </button>
+  </span>
 </kai-menu>
 <script type="module">
   const menu = document.querySelector('kai-menu');

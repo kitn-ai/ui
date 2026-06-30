@@ -43,9 +43,6 @@ export const Home: Story = {
       sugg.layout = 'list';
       notice.severity = 'neutral';
       input.placeholder = 'How can I help you today?';
-      card.heading = 'Upgrade to Pro';
-      card.description = 'Unlock higher limits and Fable 5.';
-      card.clickable = true;
     });
     return (
       <div style={{ height: '680px', width: '100%' }}>
@@ -53,7 +50,10 @@ export const Home: Story = {
           <div slot="sidebar-header" style={{ padding: '0.75rem 0.5rem 0.25rem' }}>
             <kai-nav ref={nav}></kai-nav>
           </div>
-          <kai-card slot="sidebar-footer" ref={card} style={{ display: 'block', margin: '0.75rem' }}></kai-card>
+          <kai-card slot="sidebar-footer" ref={card} clickable style={{ display: 'block', margin: '0.75rem' }}>
+            <h3 slot="header">Upgrade to Pro</h3>
+            Unlock higher limits and Fable 5.
+          </kai-card>
           <div
             slot="main"
             style={{
@@ -88,7 +88,10 @@ export const Home: Story = {
   </div>
 
   <!-- sidebar-footer: an upgrade card -->
-  <kai-card slot="sidebar-footer" clickable></kai-card>
+  <kai-card slot="sidebar-footer" clickable>
+    <h3 slot="header">Upgrade to Pro</h3>
+    Unlock higher limits and Fable 5.
+  </kai-card>
 
   <!-- main: replaces the built-in chat thread with a Home screen -->
   <div slot="main">
@@ -111,9 +114,7 @@ export const Home: Story = {
   sugg.suggestions = [/* { label, icon, value }[] */];
   sugg.layout = 'list';
 
-  const card = document.querySelector('kai-card');
-  card.heading = 'Upgrade to Pro';
-  card.description = 'Unlock higher limits and Fable 5.';
+  // kai-card content is slotted, not set via JS properties.
 </script>`,
       },
     },

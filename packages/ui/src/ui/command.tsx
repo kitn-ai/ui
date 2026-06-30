@@ -41,7 +41,11 @@ export function CommandList(props: CommandListProps): JSX.Element {
   const hasItems = () => props.groups.some((g) => g.items.length > 0);
 
   return (
-    <div role="listbox" aria-label={props.ariaLabel ?? 'Command palette'} id={props.id}>
+    <div
+      role={hasItems() ? 'listbox' : undefined}
+      aria-label={hasItems() ? (props.ariaLabel ?? 'Command palette') : undefined}
+      id={props.id}
+    >
       <Show
         when={hasItems()}
         fallback={
