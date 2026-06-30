@@ -10,8 +10,9 @@ jobs:
   # The REQUIRED check. Everything here is deterministic: build, typecheck, the
   # jsdom unit project, the React adapter tests, and the cross-origin e2e
   # security matrix. The flaky storybook BROWSER project lives in its own
-  # `storybook` job below (non-required), so environmental chromium crashes no
-  # longer block merges.
+  # `storybook` job below (gated/required via the `storybook-gate` aggregation
+  # job), so environmental chromium crashes are retried away rather than
+  # blocking merges.
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -50,24 +51,25 @@ jobs:
       - name: Cross-origin e2e matrix
         run: pnpm --filter @kitn.ai/ui test:e2e
 
-  # NON-REQUIRED check. The storybook browser project runs ~118 *.stories.tsx as
-  # Playwright/chromium browser tests (smoke render + play functions + axe a11y).
+  # The storybook browser project runs ~112 *.stories.tsx as Playwright/chromium
+  # browser tests (smoke render + play functions + axe a11y), sharded 8 ways at
+  # ~14 files/shard to keep each chromium process under the memory ceiling.
   # Under CI load a renderer page occasionally dies mid-run and aborts the whole
   # vitest runner ("Browser connection was closed" / "[birpc] rpc is closed") —
   # a process-level crash, not a per-test failure, so vitest's own `retry` can't
   # recover it. It's environmental flake on standard GitHub runners (a clean run
-  # passes every test). `test:storybook:ci` already retries the whole suite as a
-  # fresh process; isolating this in its own job (and NOT adding it to branch
-  # protection's required checks) keeps the a11y/render coverage visible without
-  # blocking merges on infra flake. A real, repeatable regression still fails
-  # every retry and shows red here.
+  # passes every test). `test:storybook:ci` retries the whole slice up to 3x as a
+  # fresh process to absorb that random chromium crash, and the stable
+  # `storybook-gate` job (below) aggregates all shards into the single required
+  # status context. A real, repeatable regression still fails every retry and
+  # shows red here.
   storybook:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2, 3, 4]
+        shard: [1, 2, 3, 4, 5, 6, 7, 8]
     steps:
       - uses: actions/checkout@v4
 
@@ -86,7 +88,26 @@ jobs:
       - name: Build (element bundle + provider subpath)
         run: pnpm exec nx build ui
 
-      - name: Storybook tests (a11y + interaction) -- shard ${{ matrix.shard }}/4
+      - name: Storybook tests (a11y + interaction) -- shard ${{ matrix.shard }}/8
         env:
-          STORYBOOK_SHARD: ${{ matrix.shard }}/4
+          STORYBOOK_SHARD: ${{ matrix.shard }}/8
         run: pnpm --filter @kitn.ai/ui test:storybook:ci
+
+  # Stable aggregation gate: the SINGLE required status context for the storybook
+  # browser suite. `needs: [storybook]` makes `needs.storybook.result` 'success'
+  # only when EVERY matrix shard succeeded; `if: always()` ensures this job still
+  # runs (and can fail) when a shard fails, instead of being skipped. Branch
+  # protection requires THIS context, not the per-shard `storybook (N)` contexts,
+  # so changing the shard count never breaks the required-checks config.
+  storybook-gate:
+    needs: [storybook]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require all storybook shards to pass
+        run: |
+          if [ "${{ needs.storybook.result }}" != "success" ]; then
+            echo "storybook shards did not all succeed (result: ${{ needs.storybook.result }})"
+            exit 1
+          fi
+          echo "all storybook shards passed"
