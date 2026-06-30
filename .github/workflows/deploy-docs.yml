@@ -29,7 +29,7 @@ jobs:
           cache: pnpm
 
       - run: pnpm install --frozen-lockfile
-      - run: nx build docs        # builds @kitn.ai/ui first (dependsOn ^build), then astro
+      - run: pnpm exec nx build docs   # builds @kitn.ai/ui first (dependsOn ^build), then astro
 
       - uses: actions/upload-pages-artifact@v3
         with:
