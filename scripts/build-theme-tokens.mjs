@@ -27,12 +27,34 @@ function matchBraces(text, openIdx) {
   throw new Error('unbalanced braces');
 }
 
+/** Strip Tailwind `@utility name { … }` blocks. They're Tailwind v4 SOURCE
+ *  directives (not valid CSS a browser/lightningcss understands), so in this
+ *  plain-CSS token sheet they're inert leftovers — they apply nothing yet emit
+ *  "Unknown at rule: @utility" warnings in every consumer build. The classes
+ *  they declare (bg-surface, …) are compiled into the elements' shadow CSS
+ *  (compiled.css), where they're actually used; this <link>/CDN sheet ships
+ *  tokens only, so dropping them changes no rendering. */
+function stripUtilities(css) {
+  let out = '';
+  let i = 0;
+  while (i < css.length) {
+    const at = css.indexOf('@utility', i);
+    if (at === -1) { out += css.slice(i); break; }
+    out += css.slice(i, at);
+    const { end } = matchBraces(css, css.indexOf('{', at));
+    i = end + 1;
+  }
+  return out.replace(/\n{3,}/g, '\n\n'); // collapse blank lines left where blocks were removed
+}
+
 // --- locate the @theme block ---
 const themeAt = src.indexOf('@theme');
 if (themeAt === -1) throw new Error('no @theme block in theme.css');
 const themeOpen = src.indexOf('{', themeAt);
 const { body: themeBody, end: themeEnd } = matchBraces(src, themeOpen);
-const afterTheme = src.slice(themeEnd + 1); // .dark / .chat-markdown / .scrollbar-thin — already plain CSS
+// .dark / .chat-markdown / .scrollbar-thin / .kai-elevation — already plain CSS;
+// drop the trailing `@utility` blocks (Tailwind-source directives, inert here).
+const afterTheme = stripUtilities(src.slice(themeEnd + 1));
 
 // --- split @theme body into token declarations vs hoisted @keyframes ---
 const keyframes = [];

@@ -59,7 +59,7 @@ export function writeReact(root, elements, IMPORTS) {
 ${[...propLines, ...eventLines].join('\n')}
 }
 
-export const ${name} = createWebComponent<${propsName}>(
+export const ${name} = /*#__PURE__*/ createWebComponent<${propsName}>(
   '${el.tag}',
   ${propNames},
   ${eventMap},
