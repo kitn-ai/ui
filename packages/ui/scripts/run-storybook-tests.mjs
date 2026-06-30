@@ -1,49 +1,74 @@
 #!/usr/bin/env node
-// Process-level retry wrapper for the storybook browser test project.
+// Sub-batching + retry wrapper for the storybook browser test project.
 //
-// Why this exists: the storybook project runs ~118 *.stories.tsx as Playwright/
-// chromium browser tests through a SINGLE long-lived chromium session. Under CI
-// load that session occasionally has a renderer page die mid-run — the whole
-// vitest runner then aborts with "Browser connection was closed" /
-// "[birpc] rpc is closed", which is NOT a per-test assertion failure, so
-// vitest's own `retry` can't recover it. The crash is non-deterministic (it
-// lands on a different story each run; a clean run passes every test, e.g.
-// "177 passed (177)") — it's resource/concurrency flake, not a real bug.
+// Why this exists: the storybook project runs ~112 *.stories.tsx as chromium
+// browser tests (render + play + axe). vitest runs them through a SINGLE
+// long-lived chromium process per invocation, which accumulates ~20MB of
+// never-reclaimed memory PER story file (a vitest-browser/chromium harness cost,
+// not our component code — proven: the ~45-file local crash ceiling is unchanged
+// whether the theme MutationObserver or the heaviest app stories are removed). On
+// the smaller CI runners that ceiling is lower, so even a 14-file shard sometimes
+// dies mid-run ("Browser connection was closed" / "[birpc] rpc is closed") — a
+// process-level crash that vitest's own per-test `retry` cannot recover.
 //
-// The only thing that recovers a runner-level crash is re-running the suite as
-// a fresh process. The suite is short (~70s), so we retry the whole thing a few
-// times and exit 0 on the first clean pass; only a persistent failure across
-// every attempt fails the step (so a genuine, deterministic test regression
-// still goes red).
+// The only reliable lever is files-per-process. This wrapper splits the work into
+// small SUB-SHARDS and runs EACH in a FRESH vitest process (= fresh chromium), so
+// no single browser ever sees enough files to crash. Each sub-shard is retried a
+// few times to absorb a rare crash; a real, deterministic regression still fails
+// every attempt and goes red.
 import { spawnSync } from 'node:child_process';
 
 const MAX_ATTEMPTS = Number(process.env.STORYBOOK_TEST_ATTEMPTS ?? 3);
-const cmd = 'npx';
-const args = ['vitest', 'run', '--project=storybook'];
 
-// Shard support: when STORYBOOK_SHARD is set (e.g. "1/4") each invocation
-// runs only that slice of story files in a fresh browser process. Keeps each
-// shard to ~28 files so the single chromium session never accumulates enough
-// memory to OOM the runner. When unset the full suite runs as before.
-const shard = process.env.STORYBOOK_SHARD;
-if (shard) args.push(`--shard=${shard}`);
+// Target number of sub-shards across ALL CI matrix shards combined. ~112 files /
+// 20 ≈ 5-6 files per fresh chromium process — a comfortable margin under the
+// crash ceiling. Raise it (env only, no workflow edit) if a runner ever still
+// crashes; it just makes each batch smaller.
+const SUBSHARD_TARGET = Number(process.env.STORYBOOK_SUBSHARD_TOTAL ?? 20);
 
-let lastCode = 1;
-for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-  console.log(`\n> storybook browser tests - attempt ${attempt}/${MAX_ATTEMPTS}\n`);
-  const res = spawnSync(cmd, args, { stdio: 'inherit', shell: process.platform === 'win32' });
-  lastCode = res.status ?? 1;
-  if (lastCode === 0) {
-    if (attempt > 1) console.log(`\nstorybook browser tests passed on attempt ${attempt}\n`);
-    process.exit(0);
-  }
-  if (attempt < MAX_ATTEMPTS) {
-    console.warn(
-      `\nstorybook browser tests exited ${lastCode} on attempt ${attempt} - ` +
-        `retrying (likely a chromium runner crash, not a test failure).\n`,
-    );
-  }
+// STORYBOOK_SHARD = "i/N" from the CI matrix (1-based i, N total jobs). Absent =>
+// local full run (treated as shard 1/1, i.e. the whole suite, still sub-batched).
+let i = 1, N = 1;
+const shardEnv = process.env.STORYBOOK_SHARD;
+if (shardEnv) {
+  const [a, b] = shardEnv.split('/').map(Number);
+  if (Number.isInteger(a) && Number.isInteger(b) && a >= 1 && b >= 1 && a <= b) { i = a; N = b; }
 }
 
-console.error(`\nstorybook browser tests failed all ${MAX_ATTEMPTS} attempts (exit ${lastCode}).\n`);
-process.exit(lastCode);
+// Round the target up to a whole multiple of N so each CI shard owns an equal,
+// integer number of sub-shards.
+const M = Math.max(N, Math.ceil(SUBSHARD_TARGET / N) * N);
+const per = M / N;
+const start = (i - 1) * per + 1;
+const subshards = Array.from({ length: per }, (_, j) => start + j);
+
+console.log(`storybook tests — CI shard ${i}/${N}; sub-shards ${subshards.join(', ')} of ${M}, ${MAX_ATTEMPTS} attempts each\n`);
+
+let failed = null;
+for (const k of subshards) {
+  const arg = `${k}/${M}`;
+  let passed = false;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    console.log(`\n> sub-shard ${arg} — attempt ${attempt}/${MAX_ATTEMPTS}\n`);
+    const code = spawnSync('npx', ['vitest', 'run', '--project=storybook', `--shard=${arg}`], {
+      stdio: 'inherit',
+      shell: process.platform === 'win32',
+    }).status ?? 1;
+    if (code === 0) {
+      if (attempt > 1) console.log(`\nsub-shard ${arg} passed on attempt ${attempt}\n`);
+      passed = true;
+      break;
+    }
+    if (attempt < MAX_ATTEMPTS) {
+      console.warn(`\nsub-shard ${arg} exited ${code} on attempt ${attempt} — retrying (likely a chromium crash, not a test failure).\n`);
+    }
+  }
+  if (!passed) { failed = arg; break; }
+}
+
+if (failed) {
+  console.error(`\nsub-shard ${failed} failed all ${MAX_ATTEMPTS} attempts — failing CI shard ${i}/${N}.\n`);
+  process.exit(1);
+}
+console.log(`\nall ${per} sub-shard(s) passed for CI shard ${i}/${N}.\n`);
+process.exit(0);
