@@ -54,5 +54,19 @@ jobs:
       # is automatic with OIDC for a public package.
       - name: Publish to npm (OIDC trusted publishing)
         working-directory: packages/ui
-        run: npm publish --access public
+        # Idempotent publish. release-please re-emits releases_created for the LAST
+        # release on a plain push to main (the first non-release push after a
+        # release), which would otherwise hard-fail this step with "cannot publish
+        # over <version>". Skip when this exact name@version is already on the
+        # registry so the run stays green; a genuinely new version (real release or
+        # workflow_dispatch) is not yet on npm, so it still publishes. Also absorbs
+        # the benign E403-after-success republish retry.
+        run: |
+          NAME=$(node -p "require('./package.json').name")
+          VERSION=$(node -p "require('./package.json').version")
+          if npm view "$NAME@$VERSION" version > /dev/null 2>&1; then
+            echo "$NAME@$VERSION is already published — skipping publish."
+            exit 0
+          fi
+          npm publish --access public
         if: ${{ steps.release.outputs.release_created || steps.release.outputs.releases_created || github.event_name == 'workflow_dispatch' }}
