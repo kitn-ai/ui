@@ -6,6 +6,7 @@ name: Release
 on:
   push:
     branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -21,22 +22,29 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      # Everything below only runs on the commit that merged the release PR.
+      # Everything below runs when a release PR is merged (auto) OR when this
+      # workflow is dispatched manually (workflow_dispatch). Use the manual
+      # trigger to publish the current main version if the auto-gate ever
+      # misses -- for example, after the release-please config path moved from
+      # "." to "packages/ui", which caused release_created to evaluate false
+      # even though the tag and GitHub release were created. Release PRs should
+      # be merge-committed (not squashed) so release-please can read its own
+      # commit back and set the output correctly.
       - uses: actions/checkout@v4
-        if: ${{ steps.release.outputs.release_created }}
+        if: ${{ steps.release.outputs.release_created || steps.release.outputs.releases_created || github.event_name == 'workflow_dispatch' }}
 
       - uses: pnpm/action-setup@v4
-        if: ${{ steps.release.outputs.release_created }}
+        if: ${{ steps.release.outputs.release_created || steps.release.outputs.releases_created || github.event_name == 'workflow_dispatch' }}
       - uses: actions/setup-node@v4
-        if: ${{ steps.release.outputs.release_created }}
+        if: ${{ steps.release.outputs.release_created || steps.release.outputs.releases_created || github.event_name == 'workflow_dispatch' }}
         with:
           node-version: 22 # trusted publishing needs Node >= 22.14
           registry-url: https://registry.npmjs.org
 
       - run: pnpm install --frozen-lockfile
-        if: ${{ steps.release.outputs.release_created }}
+        if: ${{ steps.release.outputs.release_created || steps.release.outputs.releases_created || github.event_name == 'workflow_dispatch' }}
 
       # Trusted publishing (OIDC): no NODE_AUTH_TOKEN, provenance is automatic.
       # prepublishOnly runs `npm run build` via pnpm lifecycle.
       - run: pnpm --filter @kitn.ai/ui publish --access public --no-git-checks
-        if: ${{ steps.release.outputs.release_created }}
+        if: ${{ steps.release.outputs.release_created || steps.release.outputs.releases_created || github.event_name == 'workflow_dispatch' }}
