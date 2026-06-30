@@ -3,7 +3,7 @@
 // `inject` = additive (the built-in region still renders); `replace` = your
 // markup stands in for that region. The default (unnamed) slot — the element's
 // primary content — is covered in each page's Usage, not here.
-import meta from '../data/element-meta.json';
+import meta from '@kitn.ai/ui/element-meta.json';
 interface Props { tag: string }
 const { tag } = Astro.props;
 const el = (meta as any[]).find((e) => e.tag === tag);

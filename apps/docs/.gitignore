@@ -3,12 +3,11 @@ dist/
 # generated types
 .astro/
 
-# synced from the live kit build by scripts/sync-kit.mjs — never committed
+# raw kit assets copied by scripts/copy-kit-assets.mjs (autoloader, theme tokens,
+# llms.txt): regenerated on prebuild, never committed
 public/kitn/
 public/llms.txt
 public/llms-full.txt
-# synced generator metas (element-meta.json, framework-usage.json)
-src/data/*.json
 
 # dependencies
 node_modules/

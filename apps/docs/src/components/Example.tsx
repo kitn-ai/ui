@@ -7,7 +7,7 @@ import { onMount } from 'solid-js';
 import { loadKit } from './example/kit';
 import { Resizer } from './example/Resizer';
 import { CodePanel } from './example/CodePanel';
-import meta from '../data/element-meta.json';
+import meta from '@kitn.ai/ui/element-meta.json';
 import { generateSnippets, type ElementMeta, type State } from '../lib/codegen';
 import { sampleFor } from '../lib/sample-data';
 

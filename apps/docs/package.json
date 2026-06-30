@@ -1,14 +1,13 @@
 {
-  "name": "kitn-chat-docs",
+  "name": "@kitn.ai/docs",
   "type": "module",
   "version": "0.0.1",
   "private": true,
+  "nx": { "name": "docs" },
   "scripts": {
-    "sync:kit": "node scripts/sync-kit.mjs",
-    "predev": "npm run sync:kit",
     "dev": "astro dev",
     "start": "astro dev",
-    "prebuild": "npm run sync:kit",
+    "prebuild": "node scripts/copy-kit-assets.mjs",
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro"
@@ -18,6 +17,7 @@
     "@astrojs/starlight": "^0.40.0",
     "@astrojs/starlight-tailwind": "^5.0.0",
     "@iconify-json/lucide": "^1.2.113",
+    "@kitn.ai/ui": "workspace:*",
     "@tailwindcss/vite": "^4.3.1",
     "astro": "^6.4.5",
     "astro-icon": "^1.1.5",

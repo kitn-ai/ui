@@ -64,6 +64,9 @@
     },
     "./theme.css": "./theme.css",
     "./theme.tokens.css": "./dist/theme.tokens.css",
+    "./element-meta.json": "./src/elements/element-meta.json",
+    "./icon-names.json": "./src/elements/icon-names.json",
+    "./package.json": "./package.json",
     "./react": {
       "types": "./dist/react/index.d.ts",
       "default": "./dist/react.js"
