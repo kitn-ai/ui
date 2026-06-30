@@ -2,6 +2,15 @@ import type { Preview, Decorator } from 'storybook-solidjs-vite';
 import { createComponent, onCleanup, type JSX } from 'solid-js';
 import { themes } from 'storybook/theming';
 import { toast } from '../src/primitives/toast-store';
+// Register the kai-* elements via the BUILT bundle (`dist/kai.es.js`), not the
+// src entry: the src registration is a result-unused, SSR-gated dynamic import
+// that the PRODUCTION storybook build (Rollup) tree-shakes away entirely, so a
+// deployed static Storybook would ship every kai-* element unregistered/inert.
+// The dist bundle is listed in package.json `sideEffects`, so it's never shaken,
+// and it self-registers (browser-gated + SSR-safe). `elementsReady` resolves
+// once registration completes. (Requires the kit to be built — `nx build ui` —
+// before `storybook build`; wired into the dev/build scripts + deploy workflow.)
+import { elementsReady } from '../dist/kai.es.js';
 import './styles.css';
 
 // ── AI/UI brand for the manager (top-left) ──────────────────────────────────
@@ -95,7 +104,7 @@ const preview: Preview = {
   // axe checks it, failing `scrollable-region-focusable`.
   async beforeEach() {
     if (typeof window === 'undefined') return;
-    await import('../src/elements/register-impl');
+    await elementsReady;
   },
   // Outermost decorator: clear any imperatively-raised toasts when a story
   // unmounts so sticky toasts don't leak across story navigation (see

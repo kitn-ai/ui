@@ -1,0 +1,50 @@
+name: Deploy Storybook to Cloudflare Pages
+
+# Builds the static Storybook (packages/ui/storybook-static) and direct-uploads it
+# to a Cloudflare Pages project via Wrangler. Separate from the docs site (which
+# deploys to GitHub Pages via deploy-docs.yml). Needs two repo secrets:
+# CLOUDFLARE_API_TOKEN (Pages:Edit) and CLOUDFLARE_ACCOUNT_ID.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/ui/**'
+      - '.github/workflows/deploy-storybook.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One Storybook deploy at a time; never cancel an in-flight upload.
+concurrency:
+  group: storybook-pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # `nx build-storybook ui` builds the kit (dist/) FIRST via the dependsOn,
+      # then the static Storybook — preview.ts registers the kai-* elements from
+      # the built, sideEffects-protected dist bundle (the src registration is
+      # tree-shaken out of the production build), so the deployed site upgrades
+      # them instead of shipping inert elements.
+      - name: Build Storybook (static, kit built first)
+        run: pnpm exec nx build-storybook ui
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy packages/ui/storybook-static --project-name=kitn-ui-storybook --branch=main
