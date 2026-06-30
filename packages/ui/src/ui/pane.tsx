@@ -179,7 +179,7 @@ export function Pane(props: PaneProps) {
         </div>
       </div>
 
-      <div part="body" class="min-h-0 flex-1 overflow-y-auto">
+      <div part="body" class="min-h-0 flex-1 overflow-y-auto" tabindex={0}>
         {props.children}
       </div>
 

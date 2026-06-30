@@ -254,7 +254,7 @@ function HelmApp(props: { narrow: boolean }) {
             <Search class="size-4 shrink-0" />
             <span class="truncate">Search</span>
           </div>
-          <button class="grid size-8 place-items-center rounded-lg text-muted-foreground hover:bg-muted">
+          <button aria-label="Notifications" class="grid size-8 place-items-center rounded-lg text-muted-foreground hover:bg-muted">
             <Bell class="size-4" />
           </button>
           <div class="grid size-8 place-items-center rounded-full bg-muted text-xs font-semibold">RT</div>
