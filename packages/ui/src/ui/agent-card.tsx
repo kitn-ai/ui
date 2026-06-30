@@ -115,27 +115,15 @@ export function AgentCard(props: AgentCardProps) {
   };
 
   return (
-    // role="button" rather than a real <button> so the trailing kebab <button>
-    // is a valid (non-nested) interactive element.
+    // A plain container (no interactive role): the agent name below is the real
+    // <button> activator, and the kebab is a separate sibling <button>, so neither
+    // interactive control is nested inside the other.
     <div
-      role="button"
-      tabindex="0"
-      onClick={activate}
-      onKeyDown={(e) => {
-        // Only activate from the card itself, never from the nested kebab.
-        if (e.currentTarget !== e.target) return;
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          activate();
-        }
-      }}
-      aria-current={local.active ? 'true' : undefined}
       data-active={local.active ? '' : undefined}
       data-needs-attention={local.needsAttention ? '' : undefined}
       class={cn(
-        'group flex w-full cursor-pointer items-center gap-3 rounded-lg border px-3 py-2.5 text-left',
-        'outline-none transition-[background-color,border-color,box-shadow]',
-        'focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring',
+        'group relative flex w-full cursor-pointer items-center gap-3 rounded-lg border px-3 py-2.5 text-left',
+        'transition-[background-color,border-color,box-shadow]',
         local.active
           ? 'border-primary bg-accent'
           : 'border-border bg-surface hover:bg-accent',
@@ -174,9 +162,26 @@ export function AgentCard(props: AgentCardProps) {
         </Show>
       </span>
 
-      <span class="truncate text-sm font-medium leading-tight text-foreground min-w-0 flex-1">
-        {local.name}
-      </span>
+      {/* The agent name is the card's primary action: a real <button> whose inset
+          ::before overlay stretches the click target over the whole card, so a click
+          anywhere promotes the agent. Being a real button it is natively focusable and
+          activates on Enter / Space, so no manual key handling is needed. The overlay
+          also carries the card's focus ring (rounded to match), keeping the focused
+          card visually identical to before. */}
+      <button
+        type="button"
+        onClick={activate}
+        aria-current={local.active ? 'true' : undefined}
+        class={cn(
+          'min-w-0 flex-1 text-left outline-none',
+          "before:absolute before:inset-0 before:rounded-lg before:content-['']",
+          'focus-visible:before:ring-2 focus-visible:before:ring-inset focus-visible:before:ring-ring',
+        )}
+      >
+        <span class="block truncate text-sm font-medium leading-tight text-foreground">
+          {local.name}
+        </span>
+      </button>
 
       <span class="flex shrink-0 items-center gap-2">
         <Show when={local.needsAttention}>
@@ -192,12 +197,13 @@ export function AgentCard(props: AgentCardProps) {
             part="menu"
             aria-label="More"
             onClick={(e) => {
-              // Don't let the menu click also activate the card.
+              // The kebab sits above the name button's stretch overlay (relative z-10),
+              // so it opens its menu without activating the card; stop propagation too.
               e.stopPropagation();
               local.onMenu?.(e);
             }}
             class={cn(
-              'inline-flex size-7 shrink-0 items-center justify-center rounded-md',
+              'relative z-10 inline-flex size-7 shrink-0 items-center justify-center rounded-md',
               'text-muted-foreground outline-none transition-colors',
               'hover:bg-surface-sunken hover:text-foreground',
               'focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring',

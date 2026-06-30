@@ -137,13 +137,27 @@ export function defineWebComponent<P extends Record<string, unknown>, E = Record
     }
   }
 
+  // Props that NAME a reflected global IDL accessor (today: only `role`, from
+  // ARIAMixin's Element.prototype.role). Unlike RESERVED (which throws), these are
+  // allowed as plain styling props, but they must NEVER reach the host as an
+  // attribute: kai-message uses role='user'|'assistant' to pick its layout, and
+  // those are not valid ARIA roles, so a reflected role="user" / role="assistant"
+  // fails axe's aria-roles rule. The native IDL setter reflects to an attribute
+  // whenever the property is set BEFORE connectedCallback (e.g. in a framework
+  // `ref`: `el.role = 'user'`), which is the window before component-register
+  // installs its own (non-reflecting) per-instance accessor in initializeProps. We
+  // shadow the native accessor on the element prototype with a plain non-reflecting
+  // one, so setting the property only STORES the value (component-register still
+  // reads it back for styling) and never touches a host attribute.
+  const NON_REFLECTING = ['role'];
+
   // Every element gets a `theme` property/attribute: 'light' | 'dark' | 'auto'
   // (default 'auto' = follow the OS `prefers-color-scheme`). It drives a `.dark`
   // class on an inner wrapper, which the injected kit CSS already styles — so dark
   // mode works in standalone Shadow-DOM usage with no token duplication.
   const defaults = { theme: 'auto', ...propDefaults };
 
-  customElement(tag, defaults, (props: typeof defaults, options: { element: object }) => {
+  const Ctor = customElement(tag, defaults, (props: typeof defaults, options: { element: object }) => {
     const element = options.element as HTMLElement;
     let portalNode!: HTMLDivElement;
 
@@ -215,4 +229,29 @@ export function defineWebComponent<P extends Record<string, unknown>, E = Record
       </>
     );
   });
+
+  // Shadow any reflected native IDL accessor this element re-uses as a prop (see
+  // NON_REFLECTING) with a plain, non-reflecting store on the element prototype.
+  // This must live on the prototype (not the instance) so it is already in place
+  // when the value is set before connectedCallback, the window in which the native
+  // setter would otherwise reflect it to a host attribute. component-register reads
+  // the property back during initializeProps to seed the styling prop, and later
+  // shadows this with its own (also non-reflecting) per-instance accessor.
+  const proto = (Ctor as unknown as { prototype?: object } | undefined)?.prototype;
+  if (proto) {
+    for (const key of NON_REFLECTING) {
+      if (!(key in defaults)) continue;
+      const store = Symbol(`kai-prop:${key}`);
+      Object.defineProperty(proto, key, {
+        get(this: Record<symbol, unknown>) {
+          return this[store];
+        },
+        set(this: Record<symbol, unknown>, value: unknown) {
+          this[store] = value;
+        },
+        enumerable: true,
+        configurable: true,
+      });
+    }
+  }
 }

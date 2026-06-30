@@ -652,7 +652,6 @@ function ProgressChecklist(props: {
       <ul
         aria-labelledby={props.heading ? props.headingId : undefined}
         aria-label={props.heading ? undefined : 'Checklist'}
-        aria-readonly={props.readonly ? 'true' : undefined}
         class="flex flex-col gap-1"
       >
         <For each={props.tasks}>

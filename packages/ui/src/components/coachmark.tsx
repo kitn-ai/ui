@@ -60,9 +60,13 @@ const TONE_DEFAULTS = {
   primary: { bg: 'var(--color-primary)', fg: 'var(--color-primary-foreground)' },
   info: { bg: 'var(--color-tool-blue)', fg: '#fff' },
   success: { bg: 'var(--color-tool-green)', fg: '#fff' },
-  // Amber is light, so it carries a fixed dark foreground for contrast (a theme
-  // var would flip to white in dark mode and fail against the amber).
-  warning: { bg: 'var(--color-tool-amber)', fg: '#1a1a1a' },
+  // Light amber surface + near-black foreground. --color-warning is a dark amber in
+  // light mode (#935f06) and a bright amber in dark mode, both too saturated for
+  // white/cream text at 85% opacity to hit 4.5:1. --color-warning-soft (14% warning
+  // blended into the page background) gives a light tint in light mode and a dark
+  // tint in dark mode; --color-foreground (near-black in light, near-white in dark)
+  // provides >10:1 on the soft surface — still >>4.5:1 at text-current/85 opacity.
+  warning: { bg: 'var(--color-warning-soft)', fg: 'var(--color-foreground)' },
   error: { bg: 'var(--color-tool-red)', fg: '#fff' },
 } as const;
 

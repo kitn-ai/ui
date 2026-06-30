@@ -281,7 +281,7 @@ const TONE_TEXT: Record<AgentStatusTone, string> = {
   idle: 'text-muted-foreground',
   done: 'text-tool-green',
   error: 'text-tool-red',
-  blocked: 'text-ring',
+  blocked: 'text-tool-blue',
 };
 
 // ── Browser previews (the full-screen Browser view) ─────────────────────────
@@ -1144,68 +1144,59 @@ export const SplitWorkspace: Story = {
       const grpIdx = () => col()?.groups.findIndex((g) => g.id === props.group.id) ?? -1;
       const groupCount = () => col()?.groups.length ?? 0;
       return (
-        <div
-          ref={(el) => tabRefs.set(`${props.group.id}:${props.agent.id}`, el)}
-          role="tab"
-          aria-selected={isActive()}
-          onPointerDown={startTabDrag(props.agent.id)}
-          onClick={() => { if (dragMoved) { dragMoved = false; return; } selectTab(props.group.id, props.agent.id); }}
-          onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); setMenuPos({ x: e.clientX, y: e.clientY }); setMenuFor(props.agent.id); }}
-          class={cn(
-            'group/tab relative flex shrink-0 cursor-pointer items-center gap-1.5 rounded-none py-2 pl-1.5 pr-1 text-xs transition-colors',
-            isActive()
-              ? 'bg-surface text-foreground'
-              : 'text-muted-foreground hover:bg-surface/40 hover:text-foreground',
-            drag()?.agentId === props.agent.id && 'opacity-40',
-          )}
-        >
-          <span class={cn('size-1.5 shrink-0 rounded-full bg-current', TONE_TEXT[props.agent.status.tone])} aria-hidden="true" />
-          <span class="shrink-0 text-[11px] font-bold leading-none tabular-nums text-muted-foreground" aria-hidden="true">{num}</span>
-          <span class="h-3.5 w-px shrink-0 bg-border" aria-hidden="true" />
-          <Show
-            when={renamingId() === props.agent.id}
-            fallback={
-              <span class="max-w-[8rem] truncate font-medium">{agentName(props.agent.id)}</span>
-            }
-          >
-            <kai-editable-label
-              ref={(el) => {
-                (el as El).value = agentName(props.agent.id);
-                el.addEventListener('kai-rename', (e) =>
-                  commitRename(props.agent.id, (e as CustomEvent<{ value: string }>).detail.value),
-                );
-                el.addEventListener('kai-cancel', () => setRenamingId(null));
-                // kai-editable-label stays silent on an unchanged commit, so clear
-                // the controlled renaming state whenever the field loses focus too.
-                el.addEventListener('focusout', () => setRenamingId(null));
-                queueMicrotask(() => (el as unknown as { edit?: () => void }).edit?.());
-              }}
-              onClick={(e) => e.stopPropagation()}
-              onPointerDown={(e) => e.stopPropagation()}
-              class="min-w-0 max-w-[10rem] text-xs font-medium"
-            ></kai-editable-label>
-          </Show>
-          <Show when={props.agent.runtime} keyed>
-            {(rt) => (
-              <Show when={rt.kind === 'remote'} fallback={<Laptop class="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />}>
-                <Cloud class="size-4 shrink-0 text-tool-blue" aria-hidden="true" />
-              </Show>
+        // role="presentation" wrapper lets the close button sit as a sibling of
+        // role="tab" so no focusable element is nested inside the tab (nested-
+        // interactive a11y fix). group/tab lives here so hover shows the close button.
+        <div role="presentation" class="group/tab relative flex shrink-0 items-stretch">
+          <div
+            ref={(el) => tabRefs.set(`${props.group.id}:${props.agent.id}`, el)}
+            role="tab"
+            aria-selected={isActive()}
+            onPointerDown={startTabDrag(props.agent.id)}
+            onClick={() => { if (dragMoved) { dragMoved = false; return; } selectTab(props.group.id, props.agent.id); }}
+            onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); setMenuPos({ x: e.clientX, y: e.clientY }); setMenuFor(props.agent.id); }}
+            class={cn(
+              'relative flex shrink-0 cursor-pointer items-center gap-1.5 rounded-none py-2 pl-1.5 pr-1 text-xs transition-colors',
+              isActive()
+                ? 'bg-surface text-foreground'
+                : 'text-muted-foreground hover:bg-surface/40 hover:text-foreground',
+              drag()?.agentId === props.agent.id && 'opacity-40',
             )}
-          </Show>
-          <span class="ml-0.5 flex shrink-0 items-center">
-            <button
-              type="button"
-              aria-label={`Close ${props.agent.name}`}
-              onClick={(e) => { e.stopPropagation(); closeTab(props.agent.id); }}
-              class={cn(
-                'flex size-5 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-surface-sunken hover:text-foreground',
-                isActive() ? 'opacity-100' : 'opacity-0 group-hover/tab:opacity-100',
-              )}
+          >
+            <span class={cn('size-1.5 shrink-0 rounded-full bg-current', TONE_TEXT[props.agent.status.tone])} aria-hidden="true" />
+            <span class="shrink-0 text-[11px] font-bold leading-none tabular-nums text-muted-foreground" aria-hidden="true">{num}</span>
+            <span class="h-3.5 w-px shrink-0 bg-border" aria-hidden="true" />
+            <Show
+              when={renamingId() === props.agent.id}
+              fallback={
+                <span class="max-w-[8rem] truncate font-medium">{agentName(props.agent.id)}</span>
+              }
             >
-              <X class="size-4" aria-hidden="true" />
-            </button>
-          </span>
-          <Show when={menuFor() === props.agent.id && menuPos()} keyed>
+              <kai-editable-label
+                ref={(el) => {
+                  (el as El).value = agentName(props.agent.id);
+                  el.addEventListener('kai-rename', (e) =>
+                    commitRename(props.agent.id, (e as CustomEvent<{ value: string }>).detail.value),
+                  );
+                  el.addEventListener('kai-cancel', () => setRenamingId(null));
+                  // kai-editable-label stays silent on an unchanged commit, so clear
+                  // the controlled renaming state whenever the field loses focus too.
+                  el.addEventListener('focusout', () => setRenamingId(null));
+                  queueMicrotask(() => (el as unknown as { edit?: () => void }).edit?.());
+                }}
+                onClick={(e) => e.stopPropagation()}
+                onPointerDown={(e) => e.stopPropagation()}
+                class="min-w-0 max-w-[10rem] text-xs font-medium"
+              ></kai-editable-label>
+            </Show>
+            <Show when={props.agent.runtime} keyed>
+              {(rt) => (
+                <Show when={rt.kind === 'remote'} fallback={<Laptop class="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />}>
+                  <Cloud class="size-4 shrink-0 text-tool-blue" aria-hidden="true" />
+                </Show>
+              )}
+            </Show>
+            <Show when={menuFor() === props.agent.id && menuPos()} keyed>
             {(pos) => (
               <Portal>
                 <div
@@ -1230,6 +1221,19 @@ export const SplitWorkspace: Story = {
               </Portal>
             )}
           </Show>
+          </div>
+          {/* close button is a sibling of role="tab", not a descendant */}
+          <button
+            type="button"
+            aria-label={`Close ${props.agent.name}`}
+            onClick={(e) => { e.stopPropagation(); closeTab(props.agent.id); }}
+            class={cn(
+              'flex size-5 shrink-0 items-center justify-center self-center rounded text-muted-foreground transition-colors hover:bg-surface-sunken hover:text-foreground',
+              isActive() ? 'opacity-100' : 'opacity-0 group-hover/tab:opacity-100',
+            )}
+          >
+            <X class="size-4" aria-hidden="true" />
+          </button>
         </div>
       );
     };
@@ -1287,17 +1291,18 @@ export const SplitWorkspace: Story = {
                 <Show when={tabsZone() && tabsZone()!.beforeId === null}>
                   <div class="h-5 w-0.5 shrink-0 self-center rounded-full bg-primary" aria-hidden="true" />
                 </Show>
+              </div>
+              {/* "New agent" button is outside role="tablist" so the tablist owns only role="tab" children */}
+              <div class="flex shrink-0 items-center gap-1 px-1.5">
                 <button
                   type="button"
                   aria-label="New agent"
                   title="New agent"
                   onClick={(e) => { e.stopPropagation(); newAgent(props.group.id); }}
-                  class="flex size-7 shrink-0 items-center justify-center self-center rounded text-muted-foreground transition-colors hover:bg-hover hover:text-foreground"
+                  class="flex size-7 shrink-0 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-hover hover:text-foreground"
                 >
                   <Plus class="size-5" aria-hidden="true" />
                 </button>
-              </div>
-              <div class="flex shrink-0 items-center gap-1 px-1.5">
                 <button
                   type="button"
                   aria-label={isZoomed() ? 'Restore section' : 'Maximize section'}
@@ -1596,7 +1601,7 @@ export const SplitWorkspace: Story = {
                 class="inline-flex items-center gap-1 rounded-md px-2 py-1.5 text-muted-foreground transition-colors hover:bg-hover hover:text-foreground"
               >
                 <Bell class="size-5" aria-hidden="true" />
-                <span class="text-xs font-semibold tabular-nums text-ring">{attentionCount()}</span>
+                <span class="text-xs font-semibold tabular-nums text-tool-blue">{attentionCount()}</span>
               </button>
               <Show when={attnOpen() && attnPos()} keyed>
                 {(pos) => (
@@ -1665,24 +1670,31 @@ export const SplitWorkspace: Story = {
                     <div class="max-h-[45%] shrink-0 overflow-y-auto px-2 py-1">
                       <For each={workspaces()}>
                         {(w) => (
+                          // Outer div carries hover group + visual state; the selectable
+                          // area is a plain button so the close button can be a sibling
+                          // without triggering nested-interactive a11y violations.
                           <div
-                            role="button"
-                            tabindex="0"
-                            onClick={() => setWorkspace(w.id)}
-                            class="group/ws flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors"
+                            class="group/ws flex items-center rounded-md text-sm transition-colors"
                             classList={{
                               'bg-accent text-foreground': workspace() === w.id,
                               'text-muted-foreground hover:bg-hover hover:text-foreground': workspace() !== w.id,
                             }}
                           >
-                            <span class={cn('size-1.5 shrink-0 rounded-full', w.status ? 'bg-ring' : 'bg-muted-foreground/40')} aria-hidden="true" />
-                            <span class="min-w-0 flex-1 truncate">{w.label}</span>
-                            <span class="shrink-0 text-xs text-muted-foreground tabular-nums">{w.meta}</span>
+                            <button
+                              type="button"
+                              aria-label={`Select ${w.label}`}
+                              onClick={() => setWorkspace(w.id)}
+                              class="flex min-w-0 flex-1 cursor-pointer items-center gap-2 bg-transparent px-2 py-1.5 text-left text-inherit"
+                            >
+                              <span class={cn('size-1.5 shrink-0 rounded-full', w.status ? 'bg-ring' : 'bg-muted-foreground/40')} aria-hidden="true" />
+                              <span class="min-w-0 flex-1 truncate">{w.label}</span>
+                              <span class="shrink-0 text-xs text-muted-foreground tabular-nums">{w.meta}</span>
+                            </button>
                             <button
                               type="button"
                               aria-label={`Close ${w.label}`}
                               onClick={(e) => { e.stopPropagation(); setConfirmCloseWs(w.id); }}
-                              class="flex size-5 shrink-0 items-center justify-center rounded text-muted-foreground opacity-0 transition-colors hover:bg-hover hover:text-foreground group-hover/ws:opacity-100"
+                              class="mr-1 flex size-5 shrink-0 items-center justify-center rounded text-muted-foreground opacity-0 transition-colors hover:bg-hover hover:text-foreground group-hover/ws:opacity-100"
                             >
                               <X class="size-3.5" aria-hidden="true" />
                             </button>
@@ -1695,31 +1707,38 @@ export const SplitWorkspace: Story = {
                     <div class="min-h-0 flex-1 space-y-0.5 overflow-y-auto px-2 pb-2">
                       <For each={live()}>
                         {(a) => (
+                          // Outer div carries hover group + visual state; the selectable
+                          // area is a plain button so the close button can be a sibling
+                          // without triggering nested-interactive a11y violations.
                           <div
-                            role="button"
-                            tabindex="0"
-                            onClick={() => jumpToAgent(a.id)}
-                            class="group/pane flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm transition-colors"
+                            class="group/pane flex w-full items-center rounded-md text-sm transition-colors"
                             classList={{
                               'bg-accent text-foreground': focusedPaneId() === a.id,
                               'text-muted-foreground hover:bg-hover hover:text-foreground': focusedPaneId() !== a.id,
                             }}
                           >
-                            <span class={cn('size-1.5 shrink-0 rounded-full bg-current', TONE_TEXT[a.status.tone])} aria-hidden="true" />
-                            <span class="w-4 shrink-0 text-center text-[11px] font-bold leading-none tabular-nums text-muted-foreground">{agentNumber(a.id)}</span>
-                            <span class="min-w-0 flex-1 truncate">{agentName(a.id)}</span>
-                            <Show when={a.runtime} keyed>
-                              {(rt) => (
-                                <Show when={rt.kind === 'remote'} fallback={<Laptop class="size-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />}>
-                                  <Cloud class="size-3.5 shrink-0 text-tool-blue" aria-hidden="true" />
-                                </Show>
-                              )}
-                            </Show>
+                            <button
+                              type="button"
+                              aria-label={`Focus ${agentName(a.id)}`}
+                              onClick={() => jumpToAgent(a.id)}
+                              class="flex min-w-0 flex-1 cursor-pointer items-center gap-2 bg-transparent px-2 py-1.5 text-left text-inherit"
+                            >
+                              <span class={cn('size-1.5 shrink-0 rounded-full bg-current', TONE_TEXT[a.status.tone])} aria-hidden="true" />
+                              <span class="w-4 shrink-0 text-center text-[11px] font-bold leading-none tabular-nums text-muted-foreground">{agentNumber(a.id)}</span>
+                              <span class="min-w-0 flex-1 truncate">{agentName(a.id)}</span>
+                              <Show when={a.runtime} keyed>
+                                {(rt) => (
+                                  <Show when={rt.kind === 'remote'} fallback={<Laptop class="size-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />}>
+                                    <Cloud class="size-3.5 shrink-0 text-tool-blue" aria-hidden="true" />
+                                  </Show>
+                                )}
+                              </Show>
+                            </button>
                             <button
                               type="button"
                               aria-label={`Close ${agentName(a.id)}`}
                               onClick={(e) => { e.stopPropagation(); closeTab(a.id); }}
-                              class="flex size-5 shrink-0 items-center justify-center rounded text-muted-foreground opacity-0 transition-colors hover:bg-hover hover:text-foreground group-hover/pane:opacity-100"
+                              class="mr-1 flex size-5 shrink-0 items-center justify-center rounded text-muted-foreground opacity-0 transition-colors hover:bg-hover hover:text-foreground group-hover/pane:opacity-100"
                             >
                               <X class="size-3.5" aria-hidden="true" />
                             </button>
@@ -1786,28 +1805,37 @@ export const SplitWorkspace: Story = {
                     apps are themselves DARK, carried in isolated `data:` iframes. */}
                 <Match when={topView() === 'browser'}>
                   <div class="flex h-full min-h-0 flex-col">
-                    <div role="tablist" class="flex shrink-0 items-center gap-1 overflow-x-auto border-b border-border bg-surface px-2 py-1.5">
+                    {/* Outer strip: tablist + "Open preview" button as siblings so the
+                        tablist owns only role="tab" children (aria-required-children fix).
+                        overflow-x-auto scopes to just the tablist so the add button stays pinned. */}
+                    <div class="flex shrink-0 items-center gap-1 border-b border-border bg-surface px-2 py-1.5">
+                    <div role="tablist" class="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto">
                       <For each={browserTabs()}>
                         {(tab) => (
-                          <div
-                            role="tab"
-                            aria-selected={tab.id === activeBrowserTab()}
-                            onClick={() => setActiveBrowserTab(tab.id)}
-                            class={cn(
-                              'group/btab flex shrink-0 cursor-pointer items-center gap-1.5 rounded-md py-1 pl-2 pr-1 text-xs transition-colors',
-                              tab.id === activeBrowserTab()
-                                ? 'bg-background text-foreground shadow-sm ring-1 ring-border'
-                                : 'text-muted-foreground hover:bg-hover hover:text-foreground',
-                            )}
-                          >
-                            <Globe class="size-3.5 shrink-0 opacity-70" aria-hidden="true" />
-                            <span class="max-w-[12rem] truncate font-medium">{tab.title}</span>
+                          // role="presentation" wrapper keeps close button as a sibling of
+                          // role="tab" -- avoids nested-interactive a11y violation
+                          <div role="presentation" class="group/btab flex shrink-0 items-stretch">
+                            <div
+                              role="tab"
+                              aria-selected={tab.id === activeBrowserTab()}
+                              onClick={() => setActiveBrowserTab(tab.id)}
+                              class={cn(
+                                'flex shrink-0 cursor-pointer items-center gap-1.5 rounded-md py-1 pl-2 pr-1 text-xs transition-colors',
+                                tab.id === activeBrowserTab()
+                                  ? 'bg-background text-foreground shadow-sm ring-1 ring-border'
+                                  : 'text-muted-foreground hover:bg-hover hover:text-foreground',
+                              )}
+                            >
+                              <Globe class="size-3.5 shrink-0 opacity-70" aria-hidden="true" />
+                              <span class="max-w-[12rem] truncate font-medium">{tab.title}</span>
+                            </div>
+                            {/* close button is a sibling of role="tab", not a descendant */}
                             <button
                               type="button"
                               aria-label={`Close ${tab.title}`}
                               onClick={(e) => { e.stopPropagation(); closeBrowserTab(tab.id); }}
                               class={cn(
-                                'ml-0.5 flex size-5 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-surface-sunken hover:text-foreground',
+                                'ml-0.5 flex size-5 shrink-0 items-center justify-center self-center rounded text-muted-foreground transition-colors hover:bg-surface-sunken hover:text-foreground',
                                 tab.id === activeBrowserTab() ? 'opacity-100' : 'opacity-0 group-hover/btab:opacity-100',
                               )}
                             >
@@ -1816,16 +1844,18 @@ export const SplitWorkspace: Story = {
                           </div>
                         )}
                       </For>
-                      <kai-tooltip content="Open a preview for the focused agent">
-                        <button
-                          type="button"
-                          aria-label="Open preview"
-                          onClick={() => openPreview()}
-                          class="ml-0.5 flex size-7 shrink-0 items-center justify-center rounded-md border border-dashed border-border text-muted-foreground transition-colors hover:border-ring hover:bg-hover hover:text-foreground"
-                        >
-                          <Plus class="size-4" aria-hidden="true" />
-                        </button>
-                      </kai-tooltip>
+                    </div>
+                    {/* "Open preview" button is outside role="tablist" so only role="tab" children remain */}
+                    <kai-tooltip content="Open a preview for the focused agent">
+                      <button
+                        type="button"
+                        aria-label="Open preview"
+                        onClick={() => openPreview()}
+                        class="ml-0.5 flex size-7 shrink-0 items-center justify-center rounded-md border border-dashed border-border text-muted-foreground transition-colors hover:border-ring hover:bg-hover hover:text-foreground"
+                      >
+                        <Plus class="size-4" aria-hidden="true" />
+                      </button>
+                    </kai-tooltip>
                     </div>
                     <div class="min-h-0 flex-1">
                       <Show
@@ -1868,7 +1898,7 @@ export const SplitWorkspace: Story = {
           </button>
           <span class="flex shrink-0 items-center gap-3">
             <Show when={live().filter((a) => a.needsAttention).length > 0}>
-              <span class="font-medium text-ring">
+              <span class="font-medium text-tool-blue">
                 {live().filter((a) => a.needsAttention).length} waiting on you
               </span>
             </Show>

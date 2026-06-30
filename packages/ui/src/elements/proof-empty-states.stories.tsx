@@ -84,7 +84,7 @@ function EmptyStatePanel(props: { pattern: Pattern }) {
       <div class={`flex size-14 items-center justify-center rounded-full ${p.badge}`}>
         <Dynamic component={p.icon} class="size-7" />
       </div>
-      <h3 class="mt-5 text-base font-semibold tracking-tight text-foreground">{p.title}</h3>
+      <p class="mt-5 text-base font-semibold tracking-tight text-foreground">{p.title}</p>
       <p class="mt-1.5 max-w-xs text-sm leading-relaxed text-muted-foreground">{p.body}</p>
       <div class="mt-6 flex items-center gap-2">
         <button type="button" class={p.cta.variant === 'primary' ? PRIMARY_BTN : OUTLINE_BTN}>
@@ -136,7 +136,7 @@ export const EmptyStates: Story = {
   <div class="flex size-14 items-center justify-center rounded-full bg-destructive/10 text-destructive">
     <svg class="size-7"><!-- lucide glyph (TriangleAlert) --></svg>
   </div>
-  <h3 class="mt-5 text-base font-semibold text-foreground">Something went wrong</h3>
+  <p class="mt-5 text-base font-semibold text-foreground">Something went wrong</p>
   <p class="mt-1.5 max-w-xs text-sm text-muted-foreground">
     We hit an error loading your conversations. This is usually temporary.
   </p>

@@ -166,57 +166,64 @@ export function PaneGroup(props: PaneGroupProps) {
     // The status word shows on the active tab, on hover, and always when the tab
     // needs attention or has errored.
     const alwaysWord = () => isActive() || !!tab().needsAttention || tone() === 'error';
+    // Outer wrapper is a plain div (no ARIA role) so the role="tab" activator and
+    // the menu/close buttons are siblings -- no nested-interactive violation.
     return (
       <div
-        ref={(el) => { tabEls[tab().id] = el; }}
-        part="tab"
-        role="tab"
-        tabindex={tab().id === rovingId() ? 0 : -1}
-        aria-selected={isActive() ? 'true' : 'false'}
-        data-active={isActive() ? '' : undefined}
-        data-needs-attention={tab().needsAttention ? '' : undefined}
-        onClick={() => select(tab().id)}
-        onKeyDown={(e) => onKeyDown(e, tab())}
         class={cn(
-          'group/tab relative flex shrink-0 cursor-pointer items-center gap-1.5 rounded-md py-1 pl-1.5 pr-1 text-xs',
-          'outline-none transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring',
+          'group/tab relative flex shrink-0 items-center rounded-md text-xs',
           isActive()
             ? 'bg-background text-foreground shadow-sm ring-1 ring-border'
             : 'text-muted-foreground hover:bg-hover hover:text-foreground',
           tab().needsAttention && !isActive() && 'ring-1 ring-tool-amber/50',
         )}
+        data-active={isActive() ? '' : undefined}
+        data-needs-attention={tab().needsAttention ? '' : undefined}
       >
-        {/* Numbered status badge: color = status, digit = the ⌥-jump number. */}
-        <span class="relative flex size-[18px] shrink-0" aria-hidden="true">
-          <Show when={tab().status?.pulse}>
-            <span class={cn('absolute inset-0 animate-ping rounded opacity-60 motion-reduce:hidden', TONE_BG[tone()])} />
+        {/* role="tab" is the activator only; no focusable descendants inside it. */}
+        <div
+          ref={(el) => { tabEls[tab().id] = el; }}
+          part="tab"
+          role="tab"
+          tabindex={tab().id === rovingId() ? 0 : -1}
+          aria-selected={isActive() ? 'true' : 'false'}
+          onClick={() => select(tab().id)}
+          onKeyDown={(e) => onKeyDown(e, tab())}
+          class="flex cursor-pointer items-center gap-1.5 py-1 pl-1.5 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+        >
+          {/* Numbered status badge: color = status, digit = the ⌥-jump number. */}
+          <span class="relative flex size-[18px] shrink-0" aria-hidden="true">
+            <Show when={tab().status?.pulse}>
+              <span class={cn('absolute inset-0 animate-ping rounded opacity-60 motion-reduce:hidden', TONE_BG[tone()])} />
+            </Show>
+            <span
+              class={cn(
+                'relative flex size-[18px] items-center justify-center rounded text-[11px] font-bold leading-none tabular-nums',
+                TONE_BG[tone()],
+                TONE_BADGE_FG[tone()],
+              )}
+            >
+              {num()}
+            </span>
+          </span>
+
+          <span class="max-w-[8rem] truncate font-medium">{tab().name}</span>
+
+          <Show when={tab().status?.label}>
+            <span
+              class={cn(
+                'truncate text-[10px] font-medium',
+                TONE_TEXT[tone()],
+                alwaysWord() ? 'inline' : 'hidden group-hover/tab:inline',
+              )}
+            >
+              {tab().status!.label}
+            </span>
           </Show>
-          <span
-            class={cn(
-              'relative flex size-[18px] items-center justify-center rounded text-[11px] font-bold leading-none tabular-nums',
-              TONE_BG[tone()],
-              TONE_BADGE_FG[tone()],
-            )}
-          >
-            {num()}
-          </span>
-        </span>
+        </div>
 
-        <span class="max-w-[8rem] truncate font-medium">{tab().name}</span>
-
-        <Show when={tab().status?.label}>
-          <span
-            class={cn(
-              'truncate text-[10px] font-medium',
-              TONE_TEXT[tone()],
-              alwaysWord() ? 'inline' : 'hidden group-hover/tab:inline',
-            )}
-          >
-            {tab().status!.label}
-          </span>
-        </Show>
-
-        <span class="ml-0.5 flex shrink-0 items-center">
+        {/* menu/close are siblings to role="tab", not descendants -- fixes nested-interactive. */}
+        <span class="ml-0.5 flex shrink-0 items-center pr-1">
           <Show when={props.onTabMenu}>
             <button
               type="button"

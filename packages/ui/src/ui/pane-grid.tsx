@@ -108,6 +108,7 @@ export function PaneGrid(props: PaneGridProps) {
       // min-w-0 / min-h-0 let the grid shrink inside a flex/grid parent so its own
       // overflow:auto (not the parent) takes over once panes hit their minimums.
       class={cn('grid h-full w-full min-h-0 min-w-0 overflow-auto', props.class)}
+      tabindex={0}
       style={gridStyle()}
     >
       <For each={shown()}>{(pane) => pane}</For>
