@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.1](https://github.com/kitn-ai/ui/compare/@kitn.ai/ui-v0.18.0...@kitn.ai/ui-v0.18.1) (2026-06-30)
+
+
+### Bug Fixes
+
+* **a11y:** resolve all 18 storybook axe violations ([5188a0f](https://github.com/kitn-ai/ui/commit/5188a0f5ff9a26abedf4c2c701d91d095a131cb8)), closes [#119](https://github.com/kitn-ai/ui/issues/119)
+
 ## [0.18.0](https://github.com/kitn-ai/ui/compare/@kitn.ai/ui-v0.17.0...@kitn.ai/ui-v0.18.0) (2026-06-30)
 
 
