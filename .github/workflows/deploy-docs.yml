@@ -31,6 +31,18 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec nx build docs   # builds @kitn.ai/ui first (dependsOn ^build), then astro
 
+      # Also publish Storybook under /storybook of the docs site, so it serves at
+      # ui.kitn.ai/storybook from this same GitHub Pages deploy. `nx build-storybook
+      # ui` builds the kit dist first (its dependsOn) so the static build registers
+      # the kai-* elements; Storybook's relative asset paths work unchanged under
+      # the subpath. Copy it in as a /storybook subdir (additive — never touches the
+      # docs at /).
+      - name: Build Storybook into the docs /storybook subpath
+        run: |
+          pnpm exec nx build-storybook ui
+          rm -rf apps/docs/dist/storybook
+          cp -R packages/ui/storybook-static apps/docs/dist/storybook
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: apps/docs/dist
