@@ -44,7 +44,15 @@ jobs:
       - run: pnpm install --frozen-lockfile
         if: ${{ steps.release.outputs.release_created || steps.release.outputs.releases_created || github.event_name == 'workflow_dispatch' }}
 
-      # Trusted publishing (OIDC): no NODE_AUTH_TOKEN, provenance is automatic.
-      # prepublishOnly runs `npm run build` via pnpm lifecycle.
-      - run: pnpm --filter @kitn.ai/ui publish --access public --no-git-checks
+      # OIDC trusted publishing needs npm >= 11.5.1 (Node 22 ships an older npm).
+      - run: npm install -g npm@latest
+        if: ${{ steps.release.outputs.release_created || steps.release.outputs.releases_created || github.event_name == 'workflow_dispatch' }}
+
+      # Publish with the npm CLI (NOT pnpm publish -- pnpm does not do npm's OIDC
+      # token exchange, so it publishes unauthenticated and gets E404). Run from the
+      # package dir; prepublishOnly runs the build. No NODE_AUTH_TOKEN; provenance
+      # is automatic with OIDC for a public package.
+      - name: Publish to npm (OIDC trusted publishing)
+        working-directory: packages/ui
+        run: npm publish --access public
         if: ${{ steps.release.outputs.release_created || steps.release.outputs.releases_created || github.event_name == 'workflow_dispatch' }}
