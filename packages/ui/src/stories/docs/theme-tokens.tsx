@@ -191,7 +191,7 @@ export function TokenTable() {
         </a>.
       </p>
 
-      <h3 style={sectionHead}>Colors</h3>
+      <h2 style={sectionHead}>Colors</h2>
       <table style={{ width: '100%', 'border-collapse': 'collapse' }}>
         <thead>
           <tr><th style={cellHead}>Token</th><th style={cellHead}>Purpose</th><th style={cellHead}>Light</th><th style={cellHead}>Dark</th></tr>
@@ -210,7 +210,7 @@ export function TokenTable() {
         </tbody>
       </table>
 
-      <h3 style={sectionHead}>Typography</h3>
+      <h2 style={sectionHead}>Typography</h2>
       <table style={{ width: '100%', 'border-collapse': 'collapse' }}>
         <thead>
           <tr><th style={cellHead}>Token</th><th style={cellHead}>Purpose</th><th style={cellHead}>Size</th><th style={cellHead}>Line height</th></tr>
@@ -229,7 +229,7 @@ export function TokenTable() {
         </tbody>
       </table>
 
-      <h3 style={sectionHead}>Radius</h3>
+      <h2 style={sectionHead}>Radius</h2>
       <table style={{ width: '100%', 'border-collapse': 'collapse' }}>
         <thead>
           <tr><th style={cellHead}>Token</th><th style={cellHead}>Purpose</th><th style={cellHead}>Value</th></tr>
