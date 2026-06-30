@@ -237,7 +237,7 @@ Expected: `nx build ui` PASSES (both verify guards print OK); `theme.tokens.css`
 ```bash
 cd /Users/home/Projects/kitn-ai/kitn-chat
 nx typecheck ui                                   # = tsc x4
-pnpm --filter @kitn.ai/ui test -- --project=unit  # jsdom unit (~1225)
+pnpm --filter @kitn.ai/ui exec vitest run --project=unit  # jsdom unit (~1225)
 pnpm --filter @kitn.ai/ui test:react              # react adapter
 npx playwright install --with-deps chromium
 pnpm --filter @kitn.ai/ui test:e2e                # cross-origin matrix — proves remote-* path fixes
@@ -443,7 +443,7 @@ Replace the `test` job steps after checkout with:
       - run: pnpm install --frozen-lockfile
       - run: nx build ui
       - run: nx typecheck ui
-      - run: pnpm --filter @kitn.ai/ui test -- --project=unit
+      - run: pnpm --filter @kitn.ai/ui exec vitest run --project=unit
       - run: pnpm --filter @kitn.ai/ui test:react
       - run: npx playwright install --with-deps chromium
       - run: pnpm --filter @kitn.ai/ui test:e2e
@@ -492,7 +492,7 @@ cd /Users/home/Projects/kitn-ai/kitn-chat
 for f in .github/workflows/*.yml; do node -e "require('js-yaml')" 2>/dev/null && npx --yes js-yaml "$f" >/dev/null && echo "OK $f"; done
 nx run-many -t build          # ui + docs both build, ui first
 nx typecheck ui
-pnpm --filter @kitn.ai/ui test -- --project=unit
+pnpm --filter @kitn.ai/ui exec vitest run --project=unit
 ```
 Expected: each workflow parses; `nx run-many -t build` builds `ui` then `docs`; typecheck + unit green.
 
