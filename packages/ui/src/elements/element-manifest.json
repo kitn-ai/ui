@@ -72,7 +72,11 @@
     "kai-pane": "pane",
     "kai-pane-group": "pane-group",
     "kai-agent-card": "agent-card",
-    "kai-dialog": "dialog"
+    "kai-dialog": "dialog",
+    "kai-input": "input",
+    "kai-search": "search",
+    "kai-kbd": "kbd",
+    "kai-editable-label": "editable-label"
   },
   "files": {
     "conversation-list": [
@@ -289,6 +293,18 @@
     ],
     "dialog": [
       "kai-dialog"
+    ],
+    "input": [
+      "kai-input"
+    ],
+    "search": [
+      "kai-search"
+    ],
+    "kbd": [
+      "kai-kbd"
+    ],
+    "editable-label": [
+      "kai-editable-label"
     ]
   }
 }

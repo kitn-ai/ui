@@ -140,7 +140,7 @@ function tablesFor(el) {
 }
 
 export function writeWebComponentsMd(root, elements) {
-  const path = resolve(root, 'docs/web-components.md');
+  const path = resolve(root, '..', '..', 'docs/web-components.md');
   let md = readFileSync(path, 'utf8');
 
   for (const el of elements) {
