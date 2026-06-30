@@ -29,7 +29,7 @@ const CATEGORIES: KaiNavItem[] = [
  *  visual prototype a token-styled select is plenty and stays light. */
 function LanguageSelect() {
   return (
-    <select class="rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+    <select aria-label="Language" class="rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
       <option>Auto Detect</option>
       <option>English</option>
       <option>Español</option>
@@ -192,7 +192,7 @@ function SettingsContent() {
               label="Language"
               description="The interface language."
               control={
-                <select class="rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground">
+                <select aria-label="Language" class="rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground">
                   <option>Auto Detect</option>
                   <option>English</option>
                   <option>Español</option>
