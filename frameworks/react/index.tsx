@@ -28,7 +28,7 @@ export interface AgentCardProps extends WebComponentProps {
   onMenu?: (event: CustomEvent) => void;
 }
 
-export const AgentCard = createWebComponent<AgentCardProps>(
+export const AgentCard = /*#__PURE__*/ createWebComponent<AgentCardProps>(
   'kai-agent-card',
   ["theme","name","active","needsAttention","status"],
   { onActivate: 'kai-activate', onMenu: 'kai-menu' },
@@ -82,7 +82,7 @@ export interface ArtifactProps extends WebComponentProps {
   onTabChange?: (event: CustomEvent<{ tab: "preview" | "code" }>) => void;
 }
 
-export const Artifact = createWebComponent<ArtifactProps>(
+export const Artifact = /*#__PURE__*/ createWebComponent<ArtifactProps>(
   'kai-artifact',
   ["theme","src","files","tab","defaultTab","activeFile","sandbox","iframeTitle","maximized","expandable","openInTab","noNav","noReload","noHome","noPathField","noTabs","standalone","readonlyPath","displayUrl"],
   { onFileSelect: 'kai-file-select', onMaximizeChange: 'kai-maximize-change', onNavigate: 'kai-navigate', onTabChange: 'kai-tab-change' },
@@ -106,7 +106,7 @@ export interface AttachmentsProps extends WebComponentProps {
   onRemove?: (event: CustomEvent<{ id: string }>) => void;
 }
 
-export const Attachments = createWebComponent<AttachmentsProps>(
+export const Attachments = /*#__PURE__*/ createWebComponent<AttachmentsProps>(
   'kai-attachments',
   ["theme","items","variant","hoverCard","removable","showMediaType","emptyText"],
   { onRemove: 'kai-remove' },
@@ -124,7 +124,7 @@ export interface AvatarProps extends WebComponentProps {
   size?: "sm" | "md" | "lg";
 }
 
-export const Avatar = createWebComponent<AvatarProps>(
+export const Avatar = /*#__PURE__*/ createWebComponent<AvatarProps>(
   'kai-avatar',
   ["theme","src","alt","fallback","size"],
   {  },
@@ -136,7 +136,7 @@ export interface BadgeProps extends WebComponentProps {
   variant?: "default" | "count" | "citation";
 }
 
-export const Badge = createWebComponent<BadgeProps>(
+export const Badge = /*#__PURE__*/ createWebComponent<BadgeProps>(
   'kai-badge',
   ["theme","variant"],
   {  },
@@ -166,7 +166,7 @@ export interface ButtonProps extends WebComponentProps {
   onClick?: (event: CustomEvent) => void;
 }
 
-export const Button = createWebComponent<ButtonProps>(
+export const Button = /*#__PURE__*/ createWebComponent<ButtonProps>(
   'kai-button',
   ["theme","variant","size","icon","iconTrailing","label","disabled","full","align","type"],
   { onClick: 'kai-click' },
@@ -198,7 +198,7 @@ export interface CardProps extends WebComponentProps {
   onDismiss?: (event: CustomEvent) => void;
 }
 
-export const Card = createWebComponent<CardProps>(
+export const Card = /*#__PURE__*/ createWebComponent<CardProps>(
   'kai-card',
   ["theme","appearance","orientation","collapse","dense","dismissible","href","target","rel","clickable"],
   { onCardClick: 'kai-card-click', onDismiss: 'kai-dismiss' },
@@ -216,7 +216,7 @@ export interface CardsProps extends WebComponentProps {
   onCardResolved?: (event: CustomEvent<{ cardId: string; resolution: { kind: "action"; action: string; payload?: unknown; at?: undefined | string } | { kind: "submit"; data: unknown; at?: undefined | string } | { kind: "dismissed"; at?: undefined | string } | { kind: "expired"; reason?: undefined | string; at?: undefined | string } }>) => void;
 }
 
-export const Cards = createWebComponent<CardsProps>(
+export const Cards = /*#__PURE__*/ createWebComponent<CardsProps>(
   'kai-cards',
   ["theme","cards","types","policy"],
   { onCardResolved: 'kai-card-resolved' },
@@ -236,7 +236,7 @@ export interface ChainOfThoughtProps extends WebComponentProps {
   onValueChange?: (event: CustomEvent<{ value: string | string[] }>) => void;
 }
 
-export const ChainOfThought = createWebComponent<ChainOfThoughtProps>(
+export const ChainOfThought = /*#__PURE__*/ createWebComponent<ChainOfThoughtProps>(
   'kai-chain-of-thought',
   ["theme","steps","type","value","defaultValue"],
   { onValueChange: 'kai-value-change' },
@@ -318,7 +318,7 @@ export interface ChatProps extends WebComponentProps {
   onVoice?: (event: CustomEvent<Record<string, never>>) => void;
 }
 
-export const Chat = createWebComponent<ChatProps>(
+export const Chat = /*#__PURE__*/ createWebComponent<ChatProps>(
   'kai-chat',
   ["theme","messages","value","placeholder","loading","suggestions","suggestionMode","persistSuggestions","proseSize","codeTheme","codeHighlight","chatTitle","models","currentModel","context","scrollButton","headerStart","headerEnd","headerFull","sidebar","empty","composer","composerActions","footer","search","voice","triggers","kindIcons","actionsReveal"],
   { onAttachmentsChange: 'kai-attachments-change', onMessageAction: 'kai-message-action', onModelChange: 'kai-model-change', onSearch: 'kai-search', onSubmit: 'kai-submit', onSuggestionClick: 'kai-suggestion-click', onValueChange: 'kai-value-change', onVoice: 'kai-voice' },
@@ -338,7 +338,7 @@ export interface CheckpointProps extends WebComponentProps {
   onSelect?: (event: CustomEvent) => void;
 }
 
-export const Checkpoint = createWebComponent<CheckpointProps>(
+export const Checkpoint = /*#__PURE__*/ createWebComponent<CheckpointProps>(
   'kai-checkpoint',
   ["theme","label","tooltip","variant","size"],
   { onSelect: 'kai-select' },
@@ -364,7 +364,7 @@ export interface ChoiceProps extends WebComponentProps {
   onValueChange?: (event: CustomEvent<{ value: string }>) => void;
 }
 
-export const Choice = createWebComponent<ChoiceProps>(
+export const Choice = /*#__PURE__*/ createWebComponent<ChoiceProps>(
   'kai-choice',
   ["theme","data","cardId","heading","resolution","value","defaultValue","disabled"],
   { onValueChange: 'kai-value-change' },
@@ -392,7 +392,7 @@ export interface CoachmarkProps extends WebComponentProps {
   onOpenChange?: (event: CustomEvent<{ open: boolean }>) => void;
 }
 
-export const Coachmark = createWebComponent<CoachmarkProps>(
+export const Coachmark = /*#__PURE__*/ createWebComponent<CoachmarkProps>(
   'kai-coachmark',
   ["theme","open","defaultOpen","headline","badge","placement","tone","arrow"],
   { onDismiss: 'kai-dismiss', onOpenChange: 'kai-open-change' },
@@ -412,7 +412,7 @@ export interface CodeBlockProps extends WebComponentProps {
   proseSize?: "sm" | "lg" | "xs" | "base";
 }
 
-export const CodeBlock = createWebComponent<CodeBlockProps>(
+export const CodeBlock = /*#__PURE__*/ createWebComponent<CodeBlockProps>(
   'kai-code-block',
   ["theme","code","language","codeTheme","codeHighlight","proseSize"],
   {  },
@@ -434,7 +434,7 @@ export interface CommandProps extends WebComponentProps {
   onSelect?: (event: CustomEvent<{ id: string }>) => void;
 }
 
-export const Command = createWebComponent<CommandProps>(
+export const Command = /*#__PURE__*/ createWebComponent<CommandProps>(
   'kai-command',
   ["theme","items","placeholder","emptyLabel"],
   { onActiveChange: 'kai-active-change', onQueryChange: 'kai-query-change', onSelect: 'kai-select' },
@@ -464,7 +464,7 @@ export interface CompareProps extends WebComponentProps {
   onReady?: (event: CustomEvent<{ compareId: string }>) => void;
 }
 
-export const Compare = createWebComponent<CompareProps>(
+export const Compare = /*#__PURE__*/ createWebComponent<CompareProps>(
   'kai-compare',
   ["theme","data","compareId","selection","layout","proseSize","codeTheme","codeHighlight"],
   { onCompareSelect: 'kai-compare-select', onError: 'kai-error', onReady: 'kai-ready' },
@@ -508,7 +508,7 @@ export interface ComposerProps extends WebComponentProps {
   onValueChange?: (event: CustomEvent<{ doc: ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]; text: string; entities: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }>) => void;
 }
 
-export const Composer = createWebComponent<ComposerProps>(
+export const Composer = /*#__PURE__*/ createWebComponent<ComposerProps>(
   'kai-composer',
   ["theme","value","placeholder","disabled","loading","maxHeight","submitOnEnter","triggers","highlights","kindIcons"],
   { onBlur: 'kai-blur', onEntityAdd: 'kai-entity-add', onEntityRemove: 'kai-entity-remove', onFocus: 'kai-focus', onSubmit: 'kai-submit', onTrigger: 'kai-trigger', onTriggerClose: 'kai-trigger-close', onValueChange: 'kai-value-change' },
@@ -528,7 +528,7 @@ export interface ConfirmProps extends WebComponentProps {
   resolution?: Record<string, unknown>;
 }
 
-export const Confirm = createWebComponent<ConfirmProps>(
+export const Confirm = /*#__PURE__*/ createWebComponent<ConfirmProps>(
   'kai-confirm',
   ["theme","data","cardId","heading","autofocus","resolution"],
   {  },
@@ -546,7 +546,7 @@ export interface ContextProps extends WebComponentProps {
   onThresholdChange?: (event: CustomEvent<{ level: "ok" | "warn" | "danger" }>) => void;
 }
 
-export const Context = createWebComponent<ContextProps>(
+export const Context = /*#__PURE__*/ createWebComponent<ContextProps>(
   'kai-context',
   ["theme","context","warnThreshold","dangerThreshold"],
   { onThresholdChange: 'kai-threshold-change' },
@@ -576,7 +576,7 @@ export interface ConversationsProps extends WebComponentProps {
   onToggleSidebar?: (event: CustomEvent<Record<string, never>>) => void;
 }
 
-export const Conversations = createWebComponent<ConversationsProps>(
+export const Conversations = /*#__PURE__*/ createWebComponent<ConversationsProps>(
   'kai-conversations',
   ["theme","groups","conversations","activeId","collapsed","defaultCollapsed"],
   { onCollapseToggle: 'kai-collapse-toggle', onConversationSelect: 'kai-conversation-select', onNewChat: 'kai-new-chat', onSearch: 'kai-search', onToggleSidebar: 'kai-toggle-sidebar' },
@@ -592,7 +592,7 @@ export interface DialogProps extends WebComponentProps {
   onOpenChange?: (event: CustomEvent<{ open: boolean }>) => void;
 }
 
-export const Dialog = createWebComponent<DialogProps>(
+export const Dialog = /*#__PURE__*/ createWebComponent<DialogProps>(
   'kai-dialog',
   ["theme","open","defaultOpen"],
   { onOpenChange: 'kai-open-change' },
@@ -614,7 +614,7 @@ export interface EditableLabelProps extends WebComponentProps {
   onRename?: (event: CustomEvent<{ value: string }>) => void;
 }
 
-export const EditableLabel = createWebComponent<EditableLabelProps>(
+export const EditableLabel = /*#__PURE__*/ createWebComponent<EditableLabelProps>(
   'kai-editable-label',
   ["theme","value","editing","placeholder","disabled"],
   { onCancel: 'kai-cancel', onRename: 'kai-rename' },
@@ -628,7 +628,7 @@ export interface EmbedProps extends WebComponentProps {
   data?: { provider: "youtube" | "vimeo" | "generic"; id?: string; url?: string; title?: string; poster?: string; start?: number; aspectRatio?: "16:9" | "4:3" | "1:1" | "9:16" };
 }
 
-export const Embed = createWebComponent<EmbedProps>(
+export const Embed = /*#__PURE__*/ createWebComponent<EmbedProps>(
   'kai-embed',
   ["theme","cardId","data"],
   {  },
@@ -642,7 +642,7 @@ export interface EmptyProps extends WebComponentProps {
   description?: string;
 }
 
-export const Empty = createWebComponent<EmptyProps>(
+export const Empty = /*#__PURE__*/ createWebComponent<EmptyProps>(
   'kai-empty',
   ["theme","emptyTitle","description"],
   {  },
@@ -672,7 +672,7 @@ export interface FeedbackBarProps extends WebComponentProps {
   onFeedbackDetail?: (event: CustomEvent<{ value: "helpful" | "not-helpful"; category?: undefined | string; comment?: undefined | string }>) => void;
 }
 
-export const FeedbackBar = createWebComponent<FeedbackBarProps>(
+export const FeedbackBar = /*#__PURE__*/ createWebComponent<FeedbackBarProps>(
   'kai-feedback-bar',
   ["theme","barTitle","collectDetail","categories","detailTitle","detailPlaceholder","submitLabel","thanksMessage"],
   { onClose: 'kai-close', onFeedback: 'kai-feedback', onFeedbackDetail: 'kai-feedback-detail' },
@@ -692,7 +692,7 @@ export interface FileTreeProps extends WebComponentProps {
   onSelect?: (event: CustomEvent<{ path: string }>) => void;
 }
 
-export const FileTree = createWebComponent<FileTreeProps>(
+export const FileTree = /*#__PURE__*/ createWebComponent<FileTreeProps>(
   'kai-file-tree',
   ["theme","files","activeFile","defaultExpanded","summary"],
   { onSelect: 'kai-select' },
@@ -712,7 +712,7 @@ export interface FileUploadProps extends WebComponentProps {
   onFilesAdded?: (event: CustomEvent<{ files: File[] }>) => void;
 }
 
-export const FileUpload = createWebComponent<FileUploadProps>(
+export const FileUpload = /*#__PURE__*/ createWebComponent<FileUploadProps>(
   'kai-file-upload',
   ["theme","multiple","accept","disabled","label"],
   { onFilesAdded: 'kai-files-added' },
@@ -738,7 +738,7 @@ export interface FormProps extends WebComponentProps {
   onValuesChange?: (event: CustomEvent<{ values: Record<string, unknown>; valid: boolean }>) => void;
 }
 
-export const Form = createWebComponent<FormProps>(
+export const Form = /*#__PURE__*/ createWebComponent<FormProps>(
   'kai-form',
   ["theme","data","cardId","heading","resolution","values","defaultValues","disabled"],
   { onValuesChange: 'kai-values-change' },
@@ -762,7 +762,7 @@ export interface HoverCardProps extends WebComponentProps {
   onOpenChange?: (event: CustomEvent<{ open: boolean }>) => void;
 }
 
-export const HoverCard = createWebComponent<HoverCardProps>(
+export const HoverCard = /*#__PURE__*/ createWebComponent<HoverCardProps>(
   'kai-hover-card',
   ["theme","openDelay","closeDelay","placement","open","defaultOpen","disabled"],
   { onOpenChange: 'kai-open-change' },
@@ -776,7 +776,7 @@ export interface IconProps extends WebComponentProps {
   size?: "sm" | "md" | "lg";
 }
 
-export const Icon = createWebComponent<IconProps>(
+export const Icon = /*#__PURE__*/ createWebComponent<IconProps>(
   'kai-icon',
   ["theme","name","size"],
   {  },
@@ -794,7 +794,7 @@ export interface ImageProps extends WebComponentProps {
   mediaType?: string;
 }
 
-export const Image = createWebComponent<ImageProps>(
+export const Image = /*#__PURE__*/ createWebComponent<ImageProps>(
   'kai-image',
   ["theme","base64","bytes","alt","mediaType"],
   {  },
@@ -836,7 +836,7 @@ export interface InputProps extends WebComponentProps {
   onInput?: (event: CustomEvent<{ value: string }>) => void;
 }
 
-export const Input = createWebComponent<InputProps>(
+export const Input = /*#__PURE__*/ createWebComponent<InputProps>(
   'kai-input',
   ["theme","type","value","placeholder","label","hint","error","size","disabled","readonly","required","invalid","name","autocomplete","inputmode"],
   { onChange: 'kai-change', onInput: 'kai-input' },
@@ -852,7 +852,7 @@ export interface KbdProps extends WebComponentProps {
   size?: "sm" | "md";
 }
 
-export const Kbd = createWebComponent<KbdProps>(
+export const Kbd = /*#__PURE__*/ createWebComponent<KbdProps>(
   'kai-kbd',
   ["theme","keys","platform","size"],
   {  },
@@ -866,7 +866,7 @@ export interface LinkPreviewProps extends WebComponentProps {
   data?: { url: string; title?: string; description?: string; image?: string; imageAlt?: string; favicon?: string; domain?: string; siteName?: string };
 }
 
-export const LinkPreview = createWebComponent<LinkPreviewProps>(
+export const LinkPreview = /*#__PURE__*/ createWebComponent<LinkPreviewProps>(
   'kai-link-preview',
   ["theme","cardId","data"],
   {  },
@@ -882,7 +882,7 @@ export interface LoaderProps extends WebComponentProps {
   text?: string;
 }
 
-export const Loader = createWebComponent<LoaderProps>(
+export const Loader = /*#__PURE__*/ createWebComponent<LoaderProps>(
   'kai-loader',
   ["theme","variant","size","text"],
   {  },
@@ -900,7 +900,7 @@ export interface MarkdownProps extends WebComponentProps {
   codeHighlight?: boolean;
 }
 
-export const Markdown = createWebComponent<MarkdownProps>(
+export const Markdown = /*#__PURE__*/ createWebComponent<MarkdownProps>(
   'kai-markdown',
   ["theme","content","proseSize","codeTheme","codeHighlight"],
   {  },
@@ -932,7 +932,7 @@ export interface MenuProps extends WebComponentProps {
   onSelect?: (event: CustomEvent<{ id: string; checked?: undefined | boolean; radioGroup?: undefined | string }>) => void;
 }
 
-export const Menu = createWebComponent<MenuProps>(
+export const Menu = /*#__PURE__*/ createWebComponent<MenuProps>(
   'kai-menu',
   ["theme","items","placement","triggerIcon","triggerLabel","triggerIconTrailing","label","open","defaultOpen","disabled"],
   { onOpenChange: 'kai-open-change', onSelect: 'kai-select' },
@@ -966,7 +966,7 @@ export interface MessageProps extends WebComponentProps {
   onMessageAction?: (event: CustomEvent<{ messageId: string; action: string; state?: undefined | "on" | "off" }>) => void;
 }
 
-export const Message = createWebComponent<MessageProps>(
+export const Message = /*#__PURE__*/ createWebComponent<MessageProps>(
   'kai-message',
   ["theme","message","role","content","markdown","proseSize","codeTheme","codeHighlight","actionsReveal","avatarSrc","avatarFallback","avatar"],
   { onMessageAction: 'kai-message-action' },
@@ -990,7 +990,7 @@ export interface ModelSwitcherProps extends WebComponentProps {
   onOpenChange?: (event: CustomEvent<{ open: boolean }>) => void;
 }
 
-export const ModelSwitcher = createWebComponent<ModelSwitcherProps>(
+export const ModelSwitcher = /*#__PURE__*/ createWebComponent<ModelSwitcherProps>(
   'kai-model-switcher',
   ["theme","models","currentModel","open","defaultOpen","disabled"],
   { onModelChange: 'kai-model-change', onOpenChange: 'kai-open-change' },
@@ -1014,7 +1014,7 @@ export interface NavProps extends WebComponentProps {
   onNavSelect?: (event: CustomEvent<{ id: string }>) => void;
 }
 
-export const Nav = createWebComponent<NavProps>(
+export const Nav = /*#__PURE__*/ createWebComponent<NavProps>(
   'kai-nav',
   ["theme","items","value","defaultValue","defaultCollapsed"],
   { onNavItemAction: 'kai-nav-item-action', onNavItemClose: 'kai-nav-item-close', onNavSelect: 'kai-nav-select' },
@@ -1032,7 +1032,7 @@ export interface NoticeProps extends WebComponentProps {
   onDismiss?: (event: CustomEvent) => void;
 }
 
-export const Notice = createWebComponent<NoticeProps>(
+export const Notice = /*#__PURE__*/ createWebComponent<NoticeProps>(
   'kai-notice',
   ["theme","severity","icon","dismissible"],
   { onDismiss: 'kai-dismiss' },
@@ -1064,7 +1064,7 @@ export interface PaneProps extends WebComponentProps {
   onSplit?: (event: CustomEvent) => void;
 }
 
-export const Pane = createWebComponent<PaneProps>(
+export const Pane = /*#__PURE__*/ createWebComponent<PaneProps>(
   'kai-pane',
   ["theme","headline","subtitle","maximized","focused","showSplit","showDock","status"],
   { onClose: 'kai-close', onDock: 'kai-dock', onMaximize: 'kai-maximize', onSplit: 'kai-split' },
@@ -1086,7 +1086,7 @@ export interface PaneGroupProps extends WebComponentProps {
   onTabMenu?: (event: CustomEvent<{ id: string }>) => void;
 }
 
-export const PaneGroup = createWebComponent<PaneGroupProps>(
+export const PaneGroup = /*#__PURE__*/ createWebComponent<PaneGroupProps>(
   'kai-pane-group',
   ["theme","tabs","active","focused"],
   { onTabChange: 'kai-tab-change', onTabClose: 'kai-tab-close', onTabMenu: 'kai-tab-menu' },
@@ -1108,7 +1108,7 @@ export interface PopoverProps extends WebComponentProps {
   onOpenChange?: (event: CustomEvent<{ open: boolean }>) => void;
 }
 
-export const Popover = createWebComponent<PopoverProps>(
+export const Popover = /*#__PURE__*/ createWebComponent<PopoverProps>(
   'kai-popover',
   ["theme","placement","gutter","open","defaultOpen","disabled"],
   { onOpenChange: 'kai-open-change' },
@@ -1126,7 +1126,7 @@ export interface ProgressBarProps extends WebComponentProps {
   tone?: string;
 }
 
-export const ProgressBar = createWebComponent<ProgressBarProps>(
+export const ProgressBar = /*#__PURE__*/ createWebComponent<ProgressBarProps>(
   'kai-progress-bar',
   ["theme","value","max","label","tone"],
   {  },
@@ -1140,7 +1140,7 @@ export interface PromptDockProps extends WebComponentProps {
   appearance?: "outlined" | "filled" | "plain" | "soft";
 }
 
-export const PromptDock = createWebComponent<PromptDockProps>(
+export const PromptDock = /*#__PURE__*/ createWebComponent<PromptDockProps>(
   'kai-prompt-dock',
   ["theme","frame","appearance"],
   {  },
@@ -1194,7 +1194,7 @@ export interface PromptInputProps extends WebComponentProps {
   onVoice?: (event: CustomEvent<Record<string, never>>) => void;
 }
 
-export const PromptInput = createWebComponent<PromptInputProps>(
+export const PromptInput = /*#__PURE__*/ createWebComponent<PromptInputProps>(
   'kai-prompt-input',
   ["theme","value","placeholder","disabled","loading","suggestions","suggestionMode","search","voice","stoppable","submit","attach","attachments","triggers","kindIcons"],
   { onAttachmentsChange: 'kai-attachments-change', onSearch: 'kai-search', onStop: 'kai-stop', onSubmit: 'kai-submit', onSuggestionClick: 'kai-suggestion-click', onToolbarAction: 'kai-toolbar-action', onValueChange: 'kai-value-change', onVoice: 'kai-voice' },
@@ -1220,7 +1220,7 @@ export interface ReasoningProps extends WebComponentProps {
   onOpenChange?: (event: CustomEvent<{ open: boolean }>) => void;
 }
 
-export const Reasoning = createWebComponent<ReasoningProps>(
+export const Reasoning = /*#__PURE__*/ createWebComponent<ReasoningProps>(
   'kai-reasoning',
   ["theme","text","label","open","defaultOpen","streaming","markdown","disabled"],
   { onOpenChange: 'kai-open-change' },
@@ -1238,7 +1238,7 @@ export interface RemoteProps extends WebComponentProps {
   policy?: Record<string, unknown>;
 }
 
-export const Remote = createWebComponent<RemoteProps>(
+export const Remote = /*#__PURE__*/ createWebComponent<RemoteProps>(
   'kai-remote',
   ["theme","src","providerOrigin","envelope","policy"],
   {  },
@@ -1256,7 +1256,7 @@ export interface ResizableProps extends WebComponentProps {
   onMaximizeChange?: (event: CustomEvent<{ maximized: boolean; index: null | number }>) => void;
 }
 
-export const Resizable = createWebComponent<ResizableProps>(
+export const Resizable = /*#__PURE__*/ createWebComponent<ResizableProps>(
   'kai-resizable',
   ["theme","orientation","maximizedIndex"],
   { onChange: 'kai-change', onMaximizeChange: 'kai-maximize-change' },
@@ -1280,7 +1280,7 @@ export interface ResizableItemProps extends WebComponentProps {
   onMaximizeChange?: (event: CustomEvent<unknown>) => void;
 }
 
-export const ResizableItem = createWebComponent<ResizableItemProps>(
+export const ResizableItem = /*#__PURE__*/ createWebComponent<ResizableItemProps>(
   'kai-resizable-item',
   ["theme","size","min","max","locked","hidden","collapsed"],
   { onChange: 'kai-change', onMaximizeChange: 'kai-maximize-change' },
@@ -1300,7 +1300,7 @@ export interface ResponseStreamProps extends WebComponentProps {
   onComplete?: (event: CustomEvent) => void;
 }
 
-export const ResponseStream = createWebComponent<ResponseStreamProps>(
+export const ResponseStream = /*#__PURE__*/ createWebComponent<ResponseStreamProps>(
   'kai-response-stream',
   ["theme","text","mode","speed","as"],
   { onComplete: 'kai-complete' },
@@ -1326,7 +1326,7 @@ export interface ScopePickerProps extends WebComponentProps {
   onScopeChange?: (event: CustomEvent<{ filters: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | "transcript" | "markdown"; dateRange?: undefined | { from: string; to: string } } }>) => void;
 }
 
-export const ScopePicker = createWebComponent<ScopePickerProps>(
+export const ScopePicker = /*#__PURE__*/ createWebComponent<ScopePickerProps>(
   'kai-scope-picker',
   ["theme","availableAuthors","availableTags","currentLabel","open","defaultOpen","disabled"],
   { onOpenChange: 'kai-open-change', onScopeChange: 'kai-scope-change' },
@@ -1350,7 +1350,7 @@ export interface ScreenProps extends WebComponentProps {
   onOpenChange?: (event: CustomEvent<{ open: boolean }>) => void;
 }
 
-export const Screen = createWebComponent<ScreenProps>(
+export const Screen = /*#__PURE__*/ createWebComponent<ScreenProps>(
   'kai-screen',
   ["theme","open","defaultOpen","headline","back","noInert"],
   { onBack: 'kai-back', onOpenChange: 'kai-open-change' },
@@ -1362,7 +1362,7 @@ export interface ScrollAreaProps extends WebComponentProps {
   orientation?: "vertical" | "horizontal" | "both";
 }
 
-export const ScrollArea = createWebComponent<ScrollAreaProps>(
+export const ScrollArea = /*#__PURE__*/ createWebComponent<ScrollAreaProps>(
   'kai-scroll-area',
   ["theme","orientation"],
   {  },
@@ -1380,7 +1380,7 @@ export interface ScrollButtonProps extends WebComponentProps {
   onScroll?: (event: CustomEvent) => void;
 }
 
-export const ScrollButton = createWebComponent<ScrollButtonProps>(
+export const ScrollButton = /*#__PURE__*/ createWebComponent<ScrollButtonProps>(
   'kai-scroll-button',
   ["theme","for","variant","size"],
   { onScroll: 'kai-scroll' },
@@ -1408,7 +1408,7 @@ export interface SearchProps extends WebComponentProps {
   onSubmit?: (event: CustomEvent<{ value: string }>) => void;
 }
 
-export const Search = createWebComponent<SearchProps>(
+export const Search = /*#__PURE__*/ createWebComponent<SearchProps>(
   'kai-search',
   ["theme","value","placeholder","icon","debounce","loading","shortcut"],
   { onChange: 'kai-change', onSearch: 'kai-search', onSubmit: 'kai-submit' },
@@ -1426,7 +1426,7 @@ export interface SegmentedProps extends WebComponentProps {
   onChange?: (event: CustomEvent<{ value: string }>) => void;
 }
 
-export const Segmented = createWebComponent<SegmentedProps>(
+export const Segmented = /*#__PURE__*/ createWebComponent<SegmentedProps>(
   'kai-segmented',
   ["theme","options","value","size"],
   { onChange: 'kai-change' },
@@ -1438,7 +1438,7 @@ export interface SeparatorProps extends WebComponentProps {
   orientation?: "vertical" | "horizontal";
 }
 
-export const Separator = createWebComponent<SeparatorProps>(
+export const Separator = /*#__PURE__*/ createWebComponent<SeparatorProps>(
   'kai-separator',
   ["theme","orientation"],
   {  },
@@ -1452,7 +1452,7 @@ export interface SettingItemProps extends WebComponentProps {
   description?: string;
 }
 
-export const SettingItem = createWebComponent<SettingItemProps>(
+export const SettingItem = /*#__PURE__*/ createWebComponent<SettingItemProps>(
   'kai-setting-item',
   ["theme","label","description"],
   {  },
@@ -1466,7 +1466,7 @@ export interface SettingsGroupProps extends WebComponentProps {
   description?: string;
 }
 
-export const SettingsGroup = createWebComponent<SettingsGroupProps>(
+export const SettingsGroup = /*#__PURE__*/ createWebComponent<SettingsGroupProps>(
   'kai-settings-group',
   ["theme","heading","description"],
   {  },
@@ -1484,7 +1484,7 @@ export interface SkeletonProps extends WebComponentProps {
   lines?: number;
 }
 
-export const Skeleton = createWebComponent<SkeletonProps>(
+export const Skeleton = /*#__PURE__*/ createWebComponent<SkeletonProps>(
   'kai-skeleton',
   ["theme","variant","width","height","lines"],
   {  },
@@ -1496,7 +1496,7 @@ export interface SkillsProps extends WebComponentProps {
   skills: { id: string; name: string }[];
 }
 
-export const Skills = createWebComponent<SkillsProps>(
+export const Skills = /*#__PURE__*/ createWebComponent<SkillsProps>(
   'kai-skills',
   ["theme","skills"],
   {  },
@@ -1516,7 +1516,7 @@ export interface SourceProps extends WebComponentProps {
   showFavicon?: boolean;
 }
 
-export const Source = createWebComponent<SourceProps>(
+export const Source = /*#__PURE__*/ createWebComponent<SourceProps>(
   'kai-source',
   ["theme","href","label","headline","description","showFavicon"],
   {  },
@@ -1532,7 +1532,7 @@ export interface SourcesProps extends WebComponentProps {
   numbered?: boolean;
 }
 
-export const Sources = createWebComponent<SourcesProps>(
+export const Sources = /*#__PURE__*/ createWebComponent<SourcesProps>(
   'kai-sources',
   ["theme","sources","showFavicon","numbered"],
   {  },
@@ -1550,7 +1550,7 @@ export interface StatusProps extends WebComponentProps {
   size?: "sm" | "md";
 }
 
-export const Status = createWebComponent<StatusProps>(
+export const Status = /*#__PURE__*/ createWebComponent<StatusProps>(
   'kai-status',
   ["theme","status","pulse","label","size"],
   {  },
@@ -1574,7 +1574,7 @@ export interface SuggestionsProps extends WebComponentProps {
   onSelect?: (event: CustomEvent<{ value: string }>) => void;
 }
 
-export const Suggestions = createWebComponent<SuggestionsProps>(
+export const Suggestions = /*#__PURE__*/ createWebComponent<SuggestionsProps>(
   'kai-suggestions',
   ["theme","suggestions","variant","size","layout","block","highlight"],
   { onSelect: 'kai-select' },
@@ -1598,7 +1598,7 @@ export interface SwitchProps extends WebComponentProps {
   onChange?: (event: CustomEvent<{ checked: boolean }>) => void;
 }
 
-export const Switch = createWebComponent<SwitchProps>(
+export const Switch = /*#__PURE__*/ createWebComponent<SwitchProps>(
   'kai-switch',
   ["theme","checked","defaultChecked","disabled","label","name","value"],
   { onChange: 'kai-change' },
@@ -1622,7 +1622,7 @@ export interface TabsProps extends WebComponentProps {
   onTabChange?: (event: CustomEvent<{ value: string }>) => void;
 }
 
-export const Tabs = createWebComponent<TabsProps>(
+export const Tabs = /*#__PURE__*/ createWebComponent<TabsProps>(
   'kai-tabs',
   ["theme","items","value","defaultValue","variant","block","disabled"],
   { onTabChange: 'kai-tab-change' },
@@ -1650,7 +1650,7 @@ export interface TasksProps extends WebComponentProps {
   onValueChange?: (event: CustomEvent<{ value: string[] }>) => void;
 }
 
-export const Tasks = createWebComponent<TasksProps>(
+export const Tasks = /*#__PURE__*/ createWebComponent<TasksProps>(
   'kai-tasks',
   ["theme","data","cardId","heading","resolution","value","defaultValue","disabled","readonly"],
   { onValueChange: 'kai-value-change' },
@@ -1668,7 +1668,7 @@ export interface TextShimmerProps extends WebComponentProps {
   spread?: number;
 }
 
-export const TextShimmer = createWebComponent<TextShimmerProps>(
+export const TextShimmer = /*#__PURE__*/ createWebComponent<TextShimmerProps>(
   'kai-text-shimmer',
   ["theme","text","as","duration","spread"],
   {  },
@@ -1686,7 +1686,7 @@ export interface ThinkingBarProps extends WebComponentProps {
   onStop?: (event: CustomEvent) => void;
 }
 
-export const ThinkingBar = createWebComponent<ThinkingBarProps>(
+export const ThinkingBar = /*#__PURE__*/ createWebComponent<ThinkingBarProps>(
   'kai-thinking-bar',
   ["theme","text","stoppable","stopLabel"],
   { onStop: 'kai-stop' },
@@ -1714,7 +1714,7 @@ export interface ToastRegionProps extends WebComponentProps {
   onDismiss?: (event: CustomEvent<{ id: string; reason: "action" | "timeout" | "close" }>) => void;
 }
 
-export const ToastRegion = createWebComponent<ToastRegionProps>(
+export const ToastRegion = /*#__PURE__*/ createWebComponent<ToastRegionProps>(
   'kai-toast-region',
   ["theme","toasts","position","max","stack","appearance","inverse","target"],
   { onAction: 'kai-action', onDismiss: 'kai-dismiss' },
@@ -1734,7 +1734,7 @@ export interface ToolProps extends WebComponentProps {
   onOpenChange?: (event: CustomEvent<{ open: boolean }>) => void;
 }
 
-export const Tool = createWebComponent<ToolProps>(
+export const Tool = /*#__PURE__*/ createWebComponent<ToolProps>(
   'kai-tool',
   ["theme","tool","open","defaultOpen","disabled"],
   { onOpenChange: 'kai-open-change' },
@@ -1760,7 +1760,7 @@ export interface TooltipProps extends WebComponentProps {
   onOpenChange?: (event: CustomEvent<{ open: boolean }>) => void;
 }
 
-export const Tooltip = createWebComponent<TooltipProps>(
+export const Tooltip = /*#__PURE__*/ createWebComponent<TooltipProps>(
   'kai-tooltip',
   ["theme","content","openDelay","closeDelay","placement","open","defaultOpen","disabled"],
   { onOpenChange: 'kai-open-change' },
@@ -1786,7 +1786,7 @@ export interface VoiceInputProps extends WebComponentProps {
   onTranscription?: (event: CustomEvent<{ text: string }>) => void;
 }
 
-export const VoiceInput = createWebComponent<VoiceInputProps>(
+export const VoiceInput = /*#__PURE__*/ createWebComponent<VoiceInputProps>(
   'kai-voice-input',
   ["theme","transcribe","disabled","recognitionLang","interim"],
   { onAudioCaptured: 'kai-audio-captured', onRecordingChange: 'kai-recording-change', onTranscriptInterim: 'kai-transcript-interim', onTranscription: 'kai-transcription' },
@@ -1808,7 +1808,7 @@ export interface VoiceOutputProps extends WebComponentProps {
   onSynthesized?: (event: CustomEvent<{ blob: Blob }>) => void;
 }
 
-export const VoiceOutput = createWebComponent<VoiceOutputProps>(
+export const VoiceOutput = /*#__PURE__*/ createWebComponent<VoiceOutputProps>(
   'kai-voice-output',
   ["theme","text","autoplay","synthesize","disabled"],
   { onSpeakingChange: 'kai-speaking-change', onSynthesized: 'kai-synthesized' },
@@ -1881,7 +1881,7 @@ export interface WorkspaceProps extends WebComponentProps {
   onVoice?: (event: CustomEvent<Record<string, never>>) => void;
 }
 
-export const Workspace = createWebComponent<WorkspaceProps>(
+export const Workspace = /*#__PURE__*/ createWebComponent<WorkspaceProps>(
   'kai-workspace',
   ["theme","groups","conversations","activeId","messages","value","placeholder","loading","suggestions","suggestionMode","proseSize","codeTheme","codeHighlight","chatTitle","models","currentModel","context","scrollButton","search","voice","triggers","kindIcons","sidebarWidth","sidebarMinWidth","sidebarMaxWidth","sidebarCollapsed","defaultSidebarCollapsed","collapseBelow","compact","noConversations"],
   { onConversationSelect: 'kai-conversation-select', onMessageAction: 'kai-message-action', onModelChange: 'kai-model-change', onNewChat: 'kai-new-chat', onSearch: 'kai-search', onSidebarToggle: 'kai-sidebar-toggle', onSubmit: 'kai-submit', onSuggestionClick: 'kai-suggestion-click', onValueChange: 'kai-value-change', onVoice: 'kai-voice' },
