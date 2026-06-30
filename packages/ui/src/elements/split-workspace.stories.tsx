@@ -1144,14 +1144,15 @@ export const SplitWorkspace: Story = {
       const grpIdx = () => col()?.groups.findIndex((g) => g.id === props.group.id) ?? -1;
       const groupCount = () => col()?.groups.length ?? 0;
       return (
-        // role="presentation" wrapper lets the close button sit as a sibling of
-        // role="tab" so no focusable element is nested inside the tab (nested-
-        // interactive a11y fix). group/tab lives here so hover shows the close button.
-        <div role="presentation" class="group/tab relative flex shrink-0 items-stretch">
-          <div
+        // Button-group, not a tablist: the activator and the close button are
+        // sibling <button>s so the strip never owns a non-tab interactive child
+        // (aria-required-children fix). group/tab lives here so hover shows the
+        // close button.
+        <div class="group/tab relative flex shrink-0 items-stretch">
+          <button
+            type="button"
             ref={(el) => tabRefs.set(`${props.group.id}:${props.agent.id}`, el)}
-            role="tab"
-            aria-selected={isActive()}
+            aria-current={isActive() ? "true" : undefined}
             onPointerDown={startTabDrag(props.agent.id)}
             onClick={() => { if (dragMoved) { dragMoved = false; return; } selectTab(props.group.id, props.agent.id); }}
             onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); setMenuPos({ x: e.clientX, y: e.clientY }); setMenuFor(props.agent.id); }}
@@ -1221,8 +1222,8 @@ export const SplitWorkspace: Story = {
               </Portal>
             )}
           </Show>
-          </div>
-          {/* close button is a sibling of role="tab", not a descendant */}
+          </button>
+          {/* close button is a sibling of the tab activator, not a descendant */}
           <button
             type="button"
             aria-label={`Close ${props.agent.name}`}
@@ -1275,7 +1276,8 @@ export const SplitWorkspace: Story = {
             <div class="flex shrink-0 items-stretch bg-surface-strong">
               <div
                 ref={(el) => tabStripRefs.set(props.group.id, el)}
-                role="tablist"
+                role="group"
+                aria-label="Editor tabs"
                 class="flex min-w-0 flex-1 items-stretch gap-1 overflow-x-auto px-1.5"
               >
                 <For each={colAgents(props.group)}>
@@ -1292,7 +1294,7 @@ export const SplitWorkspace: Story = {
                   <div class="h-5 w-0.5 shrink-0 self-center rounded-full bg-primary" aria-hidden="true" />
                 </Show>
               </div>
-              {/* "New agent" button is outside role="tablist" so the tablist owns only role="tab" children */}
+              {/* "New agent" button sits outside the tab group, beside it */}
               <div class="flex shrink-0 items-center gap-1 px-1.5">
                 <button
                   type="button"
@@ -1805,19 +1807,19 @@ export const SplitWorkspace: Story = {
                     apps are themselves DARK, carried in isolated `data:` iframes. */}
                 <Match when={topView() === 'browser'}>
                   <div class="flex h-full min-h-0 flex-col">
-                    {/* Outer strip: tablist + "Open preview" button as siblings so the
-                        tablist owns only role="tab" children (aria-required-children fix).
-                        overflow-x-auto scopes to just the tablist so the add button stays pinned. */}
+                    {/* Outer strip: a tab group + "Open preview" button as siblings so the
+                        group never owns a non-tab interactive child (aria-required-children
+                        fix). overflow-x-auto scopes to just the group so the add button stays pinned. */}
                     <div class="flex shrink-0 items-center gap-1 border-b border-border bg-surface px-2 py-1.5">
-                    <div role="tablist" class="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto">
+                    <div role="group" aria-label="Browser tabs" class="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto">
                       <For each={browserTabs()}>
                         {(tab) => (
-                          // role="presentation" wrapper keeps close button as a sibling of
-                          // role="tab" -- avoids nested-interactive a11y violation
-                          <div role="presentation" class="group/btab flex shrink-0 items-stretch">
-                            <div
-                              role="tab"
-                              aria-selected={tab.id === activeBrowserTab()}
+                          // Button-group: the activator and the close button are sibling
+                          // <button>s, so the strip never owns a non-tab interactive child.
+                          <div class="group/btab flex shrink-0 items-stretch">
+                            <button
+                              type="button"
+                              aria-current={tab.id === activeBrowserTab() ? "true" : undefined}
                               onClick={() => setActiveBrowserTab(tab.id)}
                               class={cn(
                                 'flex shrink-0 cursor-pointer items-center gap-1.5 rounded-md py-1 pl-2 pr-1 text-xs transition-colors',
@@ -1828,8 +1830,8 @@ export const SplitWorkspace: Story = {
                             >
                               <Globe class="size-3.5 shrink-0 opacity-70" aria-hidden="true" />
                               <span class="max-w-[12rem] truncate font-medium">{tab.title}</span>
-                            </div>
-                            {/* close button is a sibling of role="tab", not a descendant */}
+                            </button>
+                            {/* close button is a sibling of the tab activator, not a descendant */}
                             <button
                               type="button"
                               aria-label={`Close ${tab.title}`}
@@ -1845,7 +1847,7 @@ export const SplitWorkspace: Story = {
                         )}
                       </For>
                     </div>
-                    {/* "Open preview" button is outside role="tablist" so only role="tab" children remain */}
+                    {/* "Open preview" button sits outside the tab group, beside it */}
                     <kai-tooltip content="Open a preview for the focused agent">
                       <button
                         type="button"
@@ -2049,6 +2051,25 @@ export const SplitWorkspace: Story = {
         </Show>
       </div>
     );
+  },
+  play: async () => {
+    // Let the onMount toasts' fade-in (animate-in fade-in-0) settle before the
+    // a11y/axe pass; otherwise axe samples them mid-fade and reads the near-black
+    // toast text as a low-contrast ~#a8a8a9 (black composited at partial opacity).
+    const settled = () => {
+      const region = document.querySelector('kai-toast-region');
+      const toastEls = region?.shadowRoot?.querySelectorAll('[role="status"]') ?? [];
+      if (!toastEls.length) return false;
+      return Array.from(toastEls).every(
+        (el) => Number(getComputedStyle(el as HTMLElement).opacity) > 0.99,
+      );
+    };
+    const start = Date.now();
+    while (!settled() && Date.now() - start < 2000) {
+      await new Promise((r) => setTimeout(r, 50));
+    }
+    // Safety margin in case the region/shadow isn't queryable in the test env.
+    await new Promise((r) => setTimeout(r, 150));
   },
   parameters: {
     docs: {

@@ -99,8 +99,10 @@ const TONE_TEXT: Record<PaneStatusTone, string> = {
  * renders `children` as the active pane's body and swaps it in response to
  * `onTabChange`. Selection-only — it never routes content itself.
  *
- * Accessibility: `role="tablist"` strip, `role="tab"` tabs with roving tabindex
- * and Arrow/Home/End navigation, the body as `role="tabpanel"`. Colors are all
+ * Accessibility: a `role="group"` ("Open panes") strip of real `<button>` tab
+ * activators (NOT `role="tab"`, so the strip can legally own the per-tab menu/close
+ * buttons) with roving tabindex + Arrow/Home/End navigation; the active activator is
+ * marked `aria-current="true"`, and the body is the `role="tabpanel"`. Colors are all
  * token-backed (surface / border / ring / tool-*), so it reads in light and dark.
  * The strip, each tab, and the body are exposed via `::part(tabs|tab|body)` for
  * the `kai-pane-group` facade. Give the group a bounded height for the body scroll.
@@ -166,7 +168,7 @@ export function PaneGroup(props: PaneGroupProps) {
     // The status word shows on the active tab, on hover, and always when the tab
     // needs attention or has errored.
     const alwaysWord = () => isActive() || !!tab().needsAttention || tone() === 'error';
-    // Outer wrapper is a plain div (no ARIA role) so the role="tab" activator and
+    // Outer wrapper is a plain div (no ARIA role) so the activator button and
     // the menu/close buttons are siblings -- no nested-interactive violation.
     return (
       <div
@@ -180,13 +182,14 @@ export function PaneGroup(props: PaneGroupProps) {
         data-active={isActive() ? '' : undefined}
         data-needs-attention={tab().needsAttention ? '' : undefined}
       >
-        {/* role="tab" is the activator only; no focusable descendants inside it. */}
-        <div
+        {/* Button-group activator (NOT role="tab") so the strip can legally own the
+            sibling menu/close buttons. aria-current marks the active pane. */}
+        <button
           ref={(el) => { tabEls[tab().id] = el; }}
+          type="button"
           part="tab"
-          role="tab"
           tabindex={tab().id === rovingId() ? 0 : -1}
-          aria-selected={isActive() ? 'true' : 'false'}
+          aria-current={isActive() ? 'true' : undefined}
           onClick={() => select(tab().id)}
           onKeyDown={(e) => onKeyDown(e, tab())}
           class="flex cursor-pointer items-center gap-1.5 py-1 pl-1.5 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
@@ -220,9 +223,9 @@ export function PaneGroup(props: PaneGroupProps) {
               {tab().status!.label}
             </span>
           </Show>
-        </div>
+        </button>
 
-        {/* menu/close are siblings to role="tab", not descendants -- fixes nested-interactive. */}
+        {/* menu/close are siblings to the activator, not descendants -- no nested-interactive. */}
         <span class="ml-0.5 flex shrink-0 items-center pr-1">
           <Show when={props.onTabMenu}>
             <button
@@ -273,7 +276,8 @@ export function PaneGroup(props: PaneGroupProps) {
     >
       <div
         part="tabs"
-        role="tablist"
+        role="group"
+        aria-label="Open panes"
         class="flex shrink-0 items-center gap-1 overflow-x-auto border-b border-border px-1.5 py-1"
       >
         <For each={tabs()}>{(tab, i) => <TabItem tab={tab} index={i()} />}</For>
