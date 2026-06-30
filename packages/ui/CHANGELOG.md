@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.2](https://github.com/kitn-ai/ui/compare/@kitn.ai/ui-v0.18.1...@kitn.ai/ui-v0.18.2) (2026-06-30)
+
+
+### Bug Fixes
+
+* **a11y:** clear the 4 storybook failures the OOM crash was masking ([#124](https://github.com/kitn-ai/ui/issues/124)) ([4e1e423](https://github.com/kitn-ai/ui/commit/4e1e4237b0c2a7d9f3d20838f244a18ae0e045c4))
+
 ## [0.18.1](https://github.com/kitn-ai/ui/compare/@kitn.ai/ui-v0.18.0...@kitn.ai/ui-v0.18.1) (2026-06-30)
 
 
