@@ -824,7 +824,8 @@ export const SplitWorkspace: Story = {
     // test on pointermove. pointerup commits; Esc / drop-outside cancels.
     const startTabDrag = (agentId: string) => (e: PointerEvent) => {
       if (e.button !== 0) return;
-      if ((e.target as HTMLElement | null)?.closest('button')) return;
+      const closestBtn = (e.target as HTMLElement | null)?.closest('button');
+      if (closestBtn && closestBtn !== e.currentTarget) return;
       const startX = e.clientX, startY = e.clientY;
       const tabEl = e.currentTarget as HTMLElement;
       const pointerId = e.pointerId;
