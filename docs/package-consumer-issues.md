@@ -131,7 +131,7 @@ namespaced `--kai-color-*`) avoids all of it.
   `.scrollbar-thin` utility to a `kai-*` prefix so they can't clash by name. The `--color-*` token names stay
   generic by design (the shadcn-compat surface) but already alias through `--kai-color-*` for the no-collision path.
 
-**Affected:** `theme.css` (keyframe + `.scrollbar-thin` rename), `docs-site/src/content/docs/guides/theming.mdx`, `docs-site/src/content/docs/guides/installation.mdx`.
+**Affected:** `theme.css` (keyframe + `.scrollbar-thin` rename), `apps/docs/src/content/docs/guides/theming.mdx`, `apps/docs/src/content/docs/guides/installation.mdx`.
 
 ---
 

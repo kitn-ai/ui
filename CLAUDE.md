@@ -4,13 +4,13 @@ Guidance for working **in this repo** with Claude Code. Consumer-facing usage li
 
 ## What this is
 
-`@kitn.ai/ui` — framework-agnostic, Shadow-DOM **web components** for building AI chat UIs (message threads, prompt input, streaming, markdown/code, reasoning + tool panels, attachments, generative-UI cards, artifacts). **Authored in SolidJS**, consumed from React / Vue / Svelte / Angular / plain HTML. Published to npm. The repo also ships the **`kai` MCP** (`src/agent-tooling/`) — a dev-time scaffolder that makes AI coding harnesses fluent at building with the library (`npx @kitn.ai/ui mcp`; tools: `scaffold` · `component_reference` · `theme` · `debug`).
+`@kitn.ai/ui` — framework-agnostic, Shadow-DOM **web components** for building AI chat UIs (message threads, prompt input, streaming, markdown/code, reasoning + tool panels, attachments, generative-UI cards, artifacts). **Authored in SolidJS**, consumed from React / Vue / Svelte / Angular / plain HTML. Published to npm. The repo also ships the **`kai` MCP** (`packages/ui/src/agent-tooling/`) — a dev-time scaffolder that makes AI coding harnesses fluent at building with the library (`npx @kitn.ai/ui mcp`; tools: `scaffold` · `component_reference` · `theme` · `debug`).
 
 ## Architecture — two layers, Solid is the source of truth
 
-- `src/primitives/` headless logic hooks + `ChatConfig` + on-demand highlighter · `src/ui/` in-house accessible UI primitives (no third-party UI deps) · `src/components/` the SolidJS AI feature components.
-- `src/elements/` wraps coarse **`kai-*` web-component facades** over those via `defineWebComponent`; the elements bundle registers them (client-only — `register.ts` → `register-impl.ts`). `frameworks/react/` holds generated typed React wrappers (`@kitn.ai/ui/react`, exports `Chat`, `Message`, …).
-- `src/agent-tooling/` the `kai` MCP server + the integration/archetype catalogs — independent of the components.
+- `packages/ui/src/primitives/` headless logic hooks + `ChatConfig` + on-demand highlighter · `packages/ui/src/ui/` in-house accessible UI primitives (no third-party UI deps) · `packages/ui/src/components/` the SolidJS AI feature components.
+- `packages/ui/src/elements/` wraps coarse **`kai-*` web-component facades** over those via `defineWebComponent`; the elements bundle registers them (client-only — `register.ts` → `register-impl.ts`). `packages/ui/frameworks/react/` holds generated typed React wrappers (`@kitn.ai/ui/react`, exports `Chat`, `Message`, …).
+- `packages/ui/src/agent-tooling/` the `kai` MCP server + the integration/archetype catalogs — independent of the components.
 
 ## The `kai-` contract — do NOT get this wrong (it's what consumers hit)
 
@@ -21,28 +21,30 @@ Guidance for working **in this repo** with Claude Code. Consumer-facing usage li
 
 ## Build / test / dev
 
+Run all commands from the **repo root** (pnpm + NX workspace):
+
 ```bash
-npm install
-npm run dev          # Storybook playground (port 6006) — the primary dev loop
-npm test             # ~1190 Vitest unit + browser tests (the kit's INTERNALS)
-npm run typecheck    # 4 tsc passes: Solid src + react wrappers + react tests + the Node MCP
-npm run build        # vite lib builds → dist/ (main + provider + react + barrel + mcp bin) + element-meta + react wrappers + schemas
+pnpm install
+pnpm dev             # Storybook (6006) + docs site (4321) together via nx run-many -t dev
+nx build ui          # vite lib builds into packages/ui/dist/ (or pnpm build for all)
+nx typecheck ui      # 4 tsc passes: Solid src + react wrappers + react tests + the Node MCP
+pnpm --filter @kitn.ai/ui exec vitest run --project=unit  # jsdom unit suite; bare pnpm test / nx test ui also runs the flaky storybook browser project
 ```
 
-- **Gotcha:** after `npm run build` / `build:api`, run `git checkout -- src/components/component-meta.json` — it churns with TS-type-expansion noise and is NOT used at runtime.
-- `dist/` is a gitignored build artifact; `prepublishOnly` rebuilds it. The package ships **compiled** entry points (`.`, `./react`, `./elements`) — don't reintroduce raw-source exports.
+- **Gotcha:** after `nx build ui` / `build:api`, run `git checkout -- packages/ui/src/components/component-meta.json` — it churns with TS-type-expansion noise and is NOT used at runtime.
+- `packages/ui/dist/` is a gitignored build artifact; `prepublishOnly` rebuilds it. The package ships **compiled** entry points (`.`, `./react`, `./elements`) — don't reintroduce raw-source exports.
 
 ## Testing the CONSUMER experience (not just internals)
 
-`npm test` is internal. To test what a consumer of the **published package** hits — packaging, exports, SSR, scaffold output, across every framework/integration — use the project skill **`/consumer-regression`** (`smoke` = one parallel pass + report; `regression` = the full build → triage → fix → re-verify loop). Unit tests catch none of those. See [`.claude/README.md`](.claude/README.md).
+`pnpm --filter @kitn.ai/ui exec vitest run --project=unit` is internal. To test what a consumer of the **published package** hits — packaging, exports, SSR, scaffold output, across every framework/integration — use the project skill **`/consumer-regression`** (`smoke` = one parallel pass + report; `regression` = the full build → triage → fix → re-verify loop). Unit tests catch none of those. See [`.claude/README.md`](.claude/README.md).
 
 ## Conventions
 
-- **Copy/voice:** sound like a sharp human engineer, not AI-generated — follow `docs-site/STYLE.md`. Web-components-FIRST framing; no emoji.
+- **Copy/voice:** sound like a sharp human engineer, not AI-generated — follow `apps/docs/STYLE.md`. Web-components-FIRST framing; no emoji.
 - **Versioning:** conventional commits drive **release-please** — never hand-edit the `package.json` version. Pre-1.0, so `feat!`/breaking = a minor bump.
 - **Behaviors are prop/JSON-driven**, never CSS-manipulated or shadow-pierced.
 - Known consumer-packaging issues + their fixes: [`docs/package-consumer-issues.md`](docs/package-consumer-issues.md).
 
 ## Map
 
-`src/` (`primitives` · `ui` · `components` · `elements` · `agent-tooling`) · `frameworks/react/` (wrappers) · `docs-site/` (public Astro Starlight docs → ui.kitn.ai) · `theme.css` / `theme.tokens.css` (design tokens) · `examples/` · `bin/` (the MCP bin) · `dist/` (built, gitignored).
+pnpm + NX workspace. `packages/ui/` (the kit: `src/` — `primitives` · `ui` · `components` · `elements` · `agent-tooling` — plus `frameworks/react/` wrappers, Storybook, `theme.css` / `theme.tokens.css`, the `kai` MCP) · `apps/docs/` (public Astro Starlight docs → ui.kitn.ai) · `examples/*` (at repo root, deferred) · `packages/ui/dist/` (built, gitignored).

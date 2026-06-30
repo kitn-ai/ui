@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
+    "predev": "node scripts/copy-kit-assets.mjs",
     "prebuild": "node scripts/copy-kit-assets.mjs",
     "build": "astro build",
     "preview": "astro preview",

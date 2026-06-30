@@ -9,7 +9,7 @@ import type { Tool } from './types';
  * self-correct without a human in the loop.
  *
  * Rule set sourced from:
- *  - docs-site/src/content/docs/guides/for-ai-agents.mdx §"What agents most commonly get wrong"
+ *  - apps/docs/src/content/docs/guides/for-ai-agents.mdx §"What agents most commonly get wrong"
  *  - context7.json `rules` array (5 contract rules)
  */
 

@@ -11,7 +11,7 @@
 //
 // lib/sample-data.ts auto-aggregates every src/data/samples/*.ts via glob.
 
-// A local sample image (served from docs-site/public). Doubles as the video poster.
+// A local sample image (served from apps/docs/public). Doubles as the video poster.
 const MEDIA_IMG = '/card-media.jpg';
 
 // Lucide "sparkles" as inline SVG (currentColor) — a kit-style icon for the promo

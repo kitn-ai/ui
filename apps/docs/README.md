@@ -25,7 +25,7 @@ repo root), so a fresh clone's `npm run dev` just works.
 
 ## Commands
 
-Run from this directory (`docs-site/`):
+Run from this directory (`apps/docs/`):
 
 | Command           | Action                                                          |
 | :---------------- | :------------------------------------------------------------- |
@@ -38,9 +38,9 @@ Run from this directory (`docs-site/`):
 ## Structure
 
 ```
-docs-site/
+apps/docs/
 ├── public/                 # static assets (kitn-logo, favicon); public/kitn/ is synced
-├── scripts/sync-kit.mjs    # syncs the site to the live kit build
+├── scripts/copy-kit-assets.mjs  # copies kit assets from packages/ui/dist/ into public/kitn/
 ├── src/
 │   ├── components/         # doc widgets (Solid islands + Astro)
 │   │   ├── example/        # reusable: kit loader, Resizer, CodePanel
