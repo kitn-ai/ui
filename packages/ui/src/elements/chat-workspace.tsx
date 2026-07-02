@@ -266,7 +266,7 @@ defineWebComponent<Props, Events>('kai-workspace', {
               </Show>
             </div>
           </ResizablePanel>
-          <ResizableHandle withHandle />
+          <ResizableHandle />
           <ResizablePanel>{mainRegion}</ResizablePanel>
         </ResizablePanelGroup>
       </Show>

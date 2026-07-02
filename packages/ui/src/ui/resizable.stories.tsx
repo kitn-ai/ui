@@ -12,7 +12,7 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'A draggable split layout: `ResizablePanelGroup` lays out `ResizablePanel` children along `orientation`, divided by a `ResizableHandle` (add `withHandle` for a visible grip).',
+        'A draggable split layout: `ResizablePanelGroup` lays out `ResizablePanel` children along `orientation`, divided by a `ResizableHandle`. Pick its affordance with `handle`: `line` (default hairline), `grip` (dotted), or `none`.',
         'Give panels a `defaultSize` (percent) plus optional `minSize`/`maxSize`. The group needs a sized container.',
       ]),
     },
@@ -46,7 +46,7 @@ const meta = {
             <span class="text-sm text-muted-foreground">Sidebar</span>
           </div>
         </ResizablePanel>
-        <ResizableHandle withHandle />
+        <ResizableHandle handle="grip" />
         <ResizablePanel>
           <div class="flex h-full items-center justify-center p-4">
             <span class="text-sm text-muted-foreground">Content</span>
@@ -71,7 +71,7 @@ export const Playground: Story = {
   <ResizablePanel defaultSize={30} data-min-size="100" data-max-size="400">
     Sidebar
   </ResizablePanel>
-  <ResizableHandle withHandle />
+  <ResizableHandle handle="grip" />
   <ResizablePanel>Content</ResizablePanel>
 </ResizablePanelGroup>`),
 };
@@ -82,7 +82,7 @@ export const Horizontal: Story = {
   <ResizablePanel defaultSize={30} data-min-size="100" data-max-size="400">
     Sidebar
   </ResizablePanel>
-  <ResizableHandle withHandle />
+  <ResizableHandle handle="grip" />
   <ResizablePanel>Content</ResizablePanel>
 </ResizablePanelGroup>`),
 };
@@ -97,7 +97,7 @@ export const Vertical: Story = {
             <span class="text-sm text-muted-foreground">Top</span>
           </div>
         </ResizablePanel>
-        <ResizableHandle withHandle />
+        <ResizableHandle handle="grip" />
         <ResizablePanel>
           <div class="flex h-full items-center justify-center p-4">
             <span class="text-sm text-muted-foreground">Bottom</span>
@@ -110,7 +110,7 @@ export const Vertical: Story = {
   <ResizablePanel defaultSize={40} data-min-size="60" data-max-size="300">
     Top
   </ResizablePanel>
-  <ResizableHandle withHandle />
+  <ResizableHandle handle="grip" />
   <ResizablePanel>Bottom</ResizablePanel>
 </ResizablePanelGroup>`),
 };
@@ -150,7 +150,7 @@ export const ThreePanels: Story = {
 </ResizablePanelGroup>`),
 };
 
-/** Handle without a visible grip; reports drag deltas via `onPanelResize` (showcase). */
+/** `handle="none"` — an invisible divider (8px hit-area only) that still reports drag deltas via `onPanelResize` (showcase). */
 export const NoHandle: Story = {
   name: 'Without Handle',
   render: () => (
@@ -161,7 +161,7 @@ export const NoHandle: Story = {
             <span class="text-sm text-muted-foreground">Panel A</span>
           </div>
         </ResizablePanel>
-        <ResizableHandle onPanelResize={fn()} />
+        <ResizableHandle handle="none" onPanelResize={fn()} />
         <ResizablePanel>
           <div class="flex h-full items-center justify-center p-4">
             <span class="text-sm text-muted-foreground">Panel B</span>
@@ -172,8 +172,54 @@ export const NoHandle: Story = {
   ),
   ...src(`<ResizablePanelGroup orientation="horizontal">
   <ResizablePanel defaultSize={40}>Panel A</ResizablePanel>
-  <ResizableHandle onPanelResize={(delta) => console.log(delta)} />
+  <ResizableHandle handle="none" onPanelResize={(delta) => console.log(delta)} />
   <ResizablePanel>Panel B</ResizablePanel>
+</ResizablePanelGroup>`),
+};
+
+/**
+ * The three `handle` affordances side by side. `line` (the default) is a 1px
+ * hairline that stays transparent at rest and tints on hover/drag; `grip` is the
+ * dotted handle; `none` is an invisible 8px hit-area. Drag or hover each divider.
+ */
+export const HandleStyles: Story = {
+  name: 'Handle Styles',
+  render: () => {
+    const row = (label: string, handle: 'line' | 'grip' | 'none') => (
+      <div>
+        <p class="mb-1 text-xs font-medium text-muted-foreground">
+          handle="{handle}"{handle === 'line' ? ' (default)' : ''}
+        </p>
+        <div class="h-24 w-full max-w-2xl rounded-lg border border-border overflow-hidden">
+          <ResizablePanelGroup orientation="horizontal">
+            <ResizablePanel defaultSize={40} data-min-size="100" data-max-size="400">
+              <div class="flex h-full items-center justify-center bg-muted/30 p-4">
+                <span class="text-sm text-muted-foreground">{label}</span>
+              </div>
+            </ResizablePanel>
+            <ResizableHandle handle={handle} />
+            <ResizablePanel>
+              <div class="flex h-full items-center justify-center p-4">
+                <span class="text-sm text-muted-foreground">Content</span>
+              </div>
+            </ResizablePanel>
+          </ResizablePanelGroup>
+        </div>
+      </div>
+    );
+    return (
+      <div class="flex flex-col gap-4">
+        {row('Line', 'line')}
+        {row('Grip', 'grip')}
+        {row('None', 'none')}
+      </div>
+    );
+  },
+  ...src(`{/* line is the default; pass handle to opt into grip/none */}
+<ResizablePanelGroup orientation="horizontal">
+  <ResizablePanel defaultSize={40} data-min-size="100" data-max-size="400">Sidebar</ResizablePanel>
+  <ResizableHandle handle="line" />
+  <ResizablePanel>Content</ResizablePanel>
 </ResizablePanelGroup>`),
 };
 
@@ -187,7 +233,7 @@ export const ConvenienceGroup: Story = {
   name: 'Resizable (convenience)',
   render: () => (
     <div class="h-48 w-full max-w-2xl rounded-lg border border-border overflow-hidden">
-      <Resizable orientation="horizontal" withHandle onChange={fn()}>
+      <Resizable orientation="horizontal" handle="grip" onChange={fn()}>
         <ResizablePanel defaultSize="240px" locked>
           <div class="flex h-full items-center justify-center bg-muted/30 p-4">
             <span class="text-sm text-muted-foreground">Locked sidebar (240px)</span>
@@ -206,7 +252,7 @@ export const ConvenienceGroup: Story = {
       </Resizable>
     </div>
   ),
-  ...src(`<Resizable orientation="horizontal" withHandle onChange={(sizes) => console.log(sizes)}>
+  ...src(`<Resizable orientation="horizontal" handle="grip" onChange={(sizes) => console.log(sizes)}>
   <ResizablePanel defaultSize="240px" locked>Locked sidebar</ResizablePanel>
   <ResizablePanel>Chat</ResizablePanel>
   <ResizablePanel defaultSize="30%" minSize="160px">Preview</ResizablePanel>
@@ -227,7 +273,7 @@ export const MinMaxKeyboard: Story = {
             <span class="text-sm text-muted-foreground">min 120px · max 50%</span>
           </div>
         </ResizablePanel>
-        <ResizableHandle withHandle />
+        <ResizableHandle handle="grip" />
         <ResizablePanel minSize="160px">
           <div class="flex h-full items-center justify-center p-4">
             <span class="text-sm text-muted-foreground">Content (min 160px)</span>
@@ -238,7 +284,7 @@ export const MinMaxKeyboard: Story = {
   ),
   ...src(`<ResizablePanelGroup orientation="horizontal">
   <ResizablePanel defaultSize="30%" minSize="120px" maxSize="50%">Sidebar</ResizablePanel>
-  <ResizableHandle withHandle />
+  <ResizableHandle handle="grip" />
   <ResizablePanel minSize="160px">Content</ResizablePanel>
 </ResizablePanelGroup>`),
 };

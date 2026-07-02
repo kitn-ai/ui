@@ -55,6 +55,14 @@ interface GroupProps extends Record<string, unknown> {
   orientation?: Orientation;
   /** Which item index is maximized (null = none). Declarative source of truth. */
   maximizedIndex?: number | null;
+  /**
+   * Divider affordance drawn inside each draggable handle's 8px grab zone:
+   * - `line` (default) — a 1px hairline, transparent at rest, tinting on hover/drag.
+   * - `grip` — a dotted grip handle.
+   * - `none` — no visible divider, just the invisible hit-area.
+   * The full grab zone and keyboard/ARIA behavior are identical for all three.
+   */
+  handle?: 'line' | 'grip' | 'none';
 }
 
 interface GroupEvents extends Record<string, unknown> {
@@ -75,6 +83,7 @@ interface GroupEvents extends Record<string, unknown> {
 defineWebComponent<GroupProps, GroupEvents>('kai-resizable', {
   orientation: 'horizontal',
   maximizedIndex: null,
+  handle: 'line',
 }, (props, { element, dispatch }) => {
   const [items, setItems] = createSignal<ItemInfo[]>([]);
   const orientation = (): Orientation => (props.orientation === 'vertical' ? 'vertical' : 'horizontal');
@@ -452,7 +461,7 @@ defineWebComponent<GroupProps, GroupEvents>('kai-resizable', {
             <>
               <Show when={i() > 0}>
                 <ResizableHandle
-                  withHandle
+                  handle={props.handle ?? 'line'}
                   orientation={orientation()}
                   static={isStatic()}
                   onPanelResize={() => {
@@ -516,6 +525,68 @@ defineWebComponent<GroupProps, GroupEvents>('kai-resizable', {
   );
 });
 
+/**
+ * Reflect a `<kai-resizable-item>`'s reactive CONFIG props to the ATTRIBUTES the
+ * parent `<kai-resizable>` reads (`readItems()` + its `size`/`min`/`max`/`locked`
+ * MutationObserver). Framework runtimes (React et al.) assign these as DOM
+ * *properties* — `el.size = "280px"` — but component-register only mirrors
+ * attribute→property, never the reverse, so a property-set size never becomes an
+ * attribute and the parent silently falls back to a flexible split. This is the
+ * exact class of bug the `collapsed` reflection already fixed; extended here to
+ * `size`/`min`/`max` (strings) and `locked` (boolean). `hidden` is deliberately
+ * NOT reflected — native `el.hidden` reflects to the attribute on its own and the
+ * parent honours the `hidden` property directly (and maximize drives `hidden`).
+ *
+ * Durability (don't fight drags): the parent WRITES `size` back to the live percent
+ * during a drag (`persistSizes` → `setAttribute('size', …)`), and that attribute
+ * write back-propagates into this prop's signal (component-register's
+ * attributeChangedCallback → property → the solid-element prop signal). A naive
+ * "reflect on every signal change" effect would therefore re-stomp the dragged size
+ * the next time a framework re-render re-asserts the ORIGINAL declared `size`
+ * (e.g. React re-runs `el.size = "280px"` on every render). So each string reflect
+ * only writes when the value the CONSUMER declared actually changes: a signal value
+ * that already equals the current attribute came FROM an attribute write (a drag),
+ * not the consumer, so it is left untouched and is not adopted as the new baseline.
+ * Net effect: a dragged size survives re-renders, while an explicit `size` change
+ * still applies. `size` prop signals use Solid's DEFAULT (same-value-skipping)
+ * equality — this guard is needed on top of that only because of the drag-write
+ * back-propagation, which same-value-skip alone can't see.
+ *
+ * Exported for unit testing (the live Shadow-DOM element is not jsdom-friendly).
+ */
+export function reflectItemConfig(
+  element: HTMLElement,
+  props: { readonly size?: string; readonly min?: string; readonly max?: string },
+  flag: (name: string) => boolean,
+) {
+  const norm = (v: unknown): string | null => (v == null || v === '' ? null : String(v));
+  const reflectString = (name: 'size' | 'min' | 'max') => {
+    // Last value the CONSUMER declared (distinct from a value the parent wrote to
+    // the attribute mid-drag). Starts `undefined`, which `norm` never returns, so
+    // the first genuine value always reflects.
+    let lastConsumer: string | null | undefined;
+    createEffect(() => {
+      const desired = norm(props[name]); // reactive read
+      if (desired === lastConsumer) return; // consumer intent unchanged → leave the attr (the drag owns it)
+      const current = element.getAttribute(name);
+      // Already matches — either untouched or the parent wrote it (drag). Don't
+      // adopt it as the consumer baseline and don't fight it.
+      if (desired === current) return;
+      lastConsumer = desired;
+      if (desired === null) element.removeAttribute(name);
+      else element.setAttribute(name, desired);
+    });
+  };
+  reflectString('size');
+  reflectString('min');
+  reflectString('max');
+  // Boolean: mirror the `collapsed`/`loading` precedent — a bare `locked` attribute
+  // and the IDL property are both honoured via `flag`. The parent also writes
+  // `locked` during maximize/restore; because `flag` re-derives from that same
+  // attribute state, the reflection stays self-consistent (no fight).
+  createEffect(() => { element.toggleAttribute('locked', flag('locked')); });
+}
+
 interface ItemProps extends Record<string, unknown> {
   /** Initial main-axis size: `"280px"` (fixed) or `"25%"`/`25` (percent). Omitted → flexible. */
   size?: string;
@@ -551,7 +622,7 @@ defineWebComponent<ItemProps>('kai-resizable-item', {
   locked: false,
   hidden: false,
   collapsed: false,
-}, (_props, { element, flag }) => {
+}, (props, { element, flag }) => {
   // Reflect the reactive `collapsed` prop to the `collapsed` ATTRIBUTE the parent
   // <kai-resizable> reads (and observes). This is what makes a bare JSX boolean
   // collapse the panel at INITIAL render from any framework: component-register
@@ -563,6 +634,11 @@ defineWebComponent<ItemProps>('kai-resizable-item', {
   // `hidden`, so the back-compat hidden path and maximize (which drive `hidden`)
   // are untouched.
   createEffect(() => { element.toggleAttribute('collapsed', flag('collapsed')); });
+  // Reflect the other config props (`size`/`min`/`max`/`locked`) property→attribute
+  // for the SAME reason — a framework that sets them as DOM properties (React et al.)
+  // would otherwise be invisible to the parent. See reflectItemConfig for the
+  // drag-durability guard on `size`.
+  reflectItemConfig(element, props, flag);
   return (
   <>
     {/* The item host fills the panel's single grid cell (the panel stretches it on
