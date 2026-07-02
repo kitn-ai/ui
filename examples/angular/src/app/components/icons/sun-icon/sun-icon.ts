@@ -7,7 +7,7 @@ import { Component } from '@angular/core';
 @Component({
   selector: 'app-sun-icon',
   standalone: true,
-  templateUrl: './sun-icon.component.html',
-  styleUrl: './sun-icon.component.css',
+  templateUrl: './sun-icon.html',
+  styleUrl: './sun-icon.css',
 })
-export class SunIconComponent {}
+export class SunIcon {}

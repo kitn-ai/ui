@@ -1,6 +1,6 @@
 import { CUSTOM_ELEMENTS_SCHEMA, Component, input, output } from '@angular/core';
-import type { Theme } from '../types';
-import type { Conversation } from '../../chat-data';
+import type { Theme } from '../../types';
+import type { Conversation } from '../../../chat-data';
 
 /**
  * The conversation rail — a thin wrapper over `<kai-conversations>`. The `.sidebar`
@@ -21,10 +21,10 @@ import type { Conversation } from '../../chat-data';
   selector: 'app-sidebar',
   standalone: true,
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
-  templateUrl: './sidebar.component.html',
-  styleUrl: './sidebar.component.css',
+  templateUrl: './sidebar.html',
+  styleUrl: './sidebar.css',
 })
-export class SidebarComponent {
+export class Sidebar {
   theme = input.required<Theme>();
   conversations = input.required<Conversation[]>();
   activeId = input.required<string>();

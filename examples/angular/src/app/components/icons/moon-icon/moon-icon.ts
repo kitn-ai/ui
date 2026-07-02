@@ -9,7 +9,7 @@ import { Component } from '@angular/core';
 @Component({
   selector: 'app-moon-icon',
   standalone: true,
-  templateUrl: './moon-icon.component.html',
-  styleUrl: './moon-icon.component.css',
+  templateUrl: './moon-icon.html',
+  styleUrl: './moon-icon.css',
 })
-export class MoonIconComponent {}
+export class MoonIcon {}

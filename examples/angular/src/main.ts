@@ -1,6 +1,6 @@
 import '@kitn.ai/ui/elements'; // registers the kai-* custom elements (async)
 import { bootstrapApplication } from '@angular/platform-browser';
-import { AppComponent } from './app/app.component';
+import { App } from './app/app';
 import { appConfig } from './app/app.config';
 
 // The kai-* elements register ASYNCHRONOUSLY. Angular sets array/object DOM
@@ -12,5 +12,5 @@ import { appConfig } from './app/app.config';
 // then binds against UPGRADED elements. Attributes survive upgrade; properties do not.
 const TAGS = ['kai-resizable', 'kai-resizable-item', 'kai-conversations', 'kai-thread', 'kai-prompt-input', 'kai-button'];
 Promise.all(TAGS.map((t) => customElements.whenDefined(t)))
-  .then(() => bootstrapApplication(AppComponent, appConfig))
+  .then(() => bootstrapApplication(App, appConfig))
   .catch((err) => console.error(err));

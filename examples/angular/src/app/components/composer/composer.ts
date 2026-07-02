@@ -1,6 +1,6 @@
 import { CUSTOM_ELEMENTS_SCHEMA, Component, ElementRef, ViewChild, input, output } from '@angular/core';
-import type { Theme } from '../types';
-import { useVoiceInput } from '../state/voice-input';
+import type { Theme } from '../../types';
+import { useVoiceInput } from '../../state/voice-input';
 
 /** The imperative surface of <kai-prompt-input> this composer drives. */
 type PromptInputEl = HTMLElement & { value?: unknown; clear?: () => void };
@@ -24,10 +24,10 @@ type PromptInputEl = HTMLElement & { value?: unknown; clear?: () => void };
   selector: 'app-composer',
   standalone: true,
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
-  templateUrl: './composer.component.html',
-  styleUrl: './composer.component.css',
+  templateUrl: './composer.html',
+  styleUrl: './composer.css',
 })
-export class ComposerComponent {
+export class Composer {
   theme = input.required<Theme>();
   loading = input.required<boolean>();
   suggestions = input.required<string[]>();

@@ -1,7 +1,7 @@
 import { CUSTOM_ELEMENTS_SCHEMA, Component, input, output } from '@angular/core';
-import type { Theme } from '../types';
-import { MoonIconComponent } from '../icons/moon-icon/moon-icon.component';
-import { SunIconComponent } from '../icons/sun-icon/sun-icon.component';
+import type { Theme } from '../../types';
+import { MoonIcon } from '../icons/moon-icon/moon-icon';
+import { SunIcon } from '../icons/sun-icon/sun-icon';
 
 /**
  * Light/dark switch for the top bar. Shows the moon in light mode (tap -> dark) and
@@ -12,11 +12,11 @@ import { SunIconComponent } from '../icons/sun-icon/sun-icon.component';
 @Component({
   selector: 'app-theme-toggle',
   standalone: true,
-  imports: [MoonIconComponent, SunIconComponent],
+  imports: [MoonIcon, SunIcon],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
-  templateUrl: './theme-toggle.component.html',
+  templateUrl: './theme-toggle.html',
 })
-export class ThemeToggleComponent {
+export class ThemeToggle {
   theme = input.required<Theme>();
   toggle = output<void>();
 }

@@ -3,10 +3,10 @@ import { CONVERSATIONS, THREADS, SUGGESTIONS, TRIGGERS, newId, streamFakeReply }
 import type { Theme } from './types';
 import { createChat } from './state/chat.store';
 import { createConversations } from './state/conversations.store';
-import { SidebarComponent } from './sidebar/sidebar.component';
-import { ThreadViewComponent } from './thread-view/thread-view.component';
-import { ComposerComponent } from './composer/composer.component';
-import { ThemeToggleComponent } from './theme-toggle/theme-toggle.component';
+import { Sidebar } from './components/sidebar/sidebar';
+import { ThreadView } from './components/thread-view/thread-view';
+import { Composer } from './components/composer/composer';
+import { ThemeToggle } from './components/theme-toggle/theme-toggle';
 
 /**
  * A mini chat workspace COMPOSED BY HAND from @kitn.ai/ui's individual elements —
@@ -31,12 +31,12 @@ import { ThemeToggleComponent } from './theme-toggle/theme-toggle.component';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [SidebarComponent, ThreadViewComponent, ComposerComponent, ThemeToggleComponent],
+  imports: [Sidebar, ThreadView, Composer, ThemeToggle],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
-  templateUrl: './app.component.html',
-  styleUrl: './app.component.css',
+  templateUrl: './app.html',
+  styleUrl: './app.css',
 })
-export class AppComponent {
+export class App {
   readonly theme = signal<Theme>('light');
   readonly collapsed = signal(false);
 
