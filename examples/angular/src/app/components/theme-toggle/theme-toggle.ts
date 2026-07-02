@@ -11,7 +11,6 @@ import { SunIcon } from '../icons/sun-icon/sun-icon';
  */
 @Component({
   selector: 'app-theme-toggle',
-  standalone: true,
   imports: [MoonIcon, SunIcon],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './theme-toggle.html',

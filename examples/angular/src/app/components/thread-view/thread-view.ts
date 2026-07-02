@@ -15,7 +15,6 @@ import type { Theme } from '../../types';
  */
 @Component({
   selector: 'app-thread-view',
-  standalone: true,
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './thread-view.html',
   styleUrl: './thread-view.css',

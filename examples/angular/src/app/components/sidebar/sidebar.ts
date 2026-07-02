@@ -19,7 +19,6 @@ import type { Conversation } from '../../../chat-data';
  */
 @Component({
   selector: 'app-sidebar',
-  standalone: true,
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.css',

@@ -63,11 +63,17 @@ like a published consumer — no aliases).
 
 ## Build tooling
 
-This example uses the **standard Angular CLI application builder**
-(`@angular-devkit/build-angular:application`, esbuild under the hood) rather than a
-custom Vite setup — it's the least-surprising, best-supported way to build an Angular
-SPA, and it consumes the compiled `@kitn.ai/ui` package the same way a real Angular
-app would.
+This example targets the latest Angular (v22) on the modern **`@angular/build:application`**
+builder (esbuild under the hood) rather than a custom Vite setup — it's the
+least-surprising, best-supported way to build an Angular SPA, and it consumes the
+compiled `@kitn.ai/ui` package the same way a real Angular app would.
+
+It's also **zoneless**: Angular 22 drops `zone.js` by default, so there's no polyfill
+and `app.config.ts` provides `provideZonelessChangeDetection()`. The app is fully
+signal-based (`createChat`/`createConversations` hold state in signals, streaming
+assigns a fresh `messages` array per chunk) and the `(kai-*)` event bindings schedule
+change detection, so streaming, theming, conversation switching, and sidebar collapse
+all update without Zone.
 
 ## Run it
 
@@ -81,6 +87,9 @@ pnpm --filter @kitn.ai/ui-example-angular dev
 ```
 
 Open the URL the Angular CLI prints (default <http://localhost:4200>).
+
+The Angular 22 CLI requires **Node >= 22.22.3** (or >= 24.15). If `pnpm example:angular`
+fails with a Node-version error, upgrade Node; the other examples run on any Node 22.
 
 ## Build
 

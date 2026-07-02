@@ -22,7 +22,6 @@ type PromptInputEl = HTMLElement & { value?: unknown; clear?: () => void };
  */
 @Component({
   selector: 'app-composer',
-  standalone: true,
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './composer.html',
   styleUrl: './composer.css',

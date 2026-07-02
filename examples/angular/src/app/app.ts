@@ -30,7 +30,6 @@ import { ThemeToggle } from './components/theme-toggle/theme-toggle';
  */
 @Component({
   selector: 'app-root',
-  standalone: true,
   imports: [Sidebar, ThreadView, Composer, ThemeToggle],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './app.html',
