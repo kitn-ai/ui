@@ -1,55 +1,106 @@
 # Examples
 
-These are **ES-module** web-component demos. They must be **served over HTTP** —
-opening them as `file://` pages fails (browsers block ES-module loading from
-`file://` with a CORS error, so no components register and you get empty boxes).
+Runnable starters that consume `@kitn.ai/ui` the way a real app does. The five in
+the starter set are the canonical reference; a few older demos live below them.
 
-## Run
+## Starter set: hand-composed chat workspaces
 
-The `composable` and `vanilla`/`widget` examples load the **local build**
-(`../../dist/kai.es.js`), so serve from the **repository root**:
+Five parallel examples, one per framework, each building the **same** small chat
+workspace by composing the kit's individual `kai-*` elements by hand: a
+resizable sidebar split, a `kai-conversations` rail, a streaming `kai-thread`, a
+`kai-prompt-input` composer, a light/dark toggle, and voice input. The point is
+to show how the pieces fit together, not to drop in one batteries-included
+`<kai-chat>` tag.
+
+They run with no backend. Replies stream from a local fake responder
+(`src/chat-data.ts`), so there's no API key and nothing to host. Swap
+`streamFakeReply` for a real model call and you have a real app.
+
+| Directory | Framework | Kit API used |
+|---|---|---|
+| `react/` | React 19 | Generated React wrappers from `@kitn.ai/ui/react` (`<Conversations>`, `<Message>`, `<PromptInput>`) |
+| `vue/` | Vue 3 | Raw `kai-*` web components via `:prop.prop` bindings + `@kai-*` handlers |
+| `svelte/` | Svelte 5 (runes) | Raw `kai-*` web components via `bind:this` + `$effect` + `onkai-*` handlers |
+| `vanilla/` | Plain TypeScript (Vite) | Raw `kai-*` web components, composed imperatively; no framework |
+| `angular/` | Angular 18 (standalone) | Raw `kai-*` web components via `[prop]` / `(kai-*)` + `CUSTOM_ELEMENTS_SCHEMA` |
+
+All five are pnpm-workspace members that depend on the kit with
+`"@kitn.ai/ui": "workspace:*"`, so they build against the local source through
+the package `exports` map, exactly like a published consumer. No aliases, no
+pointing at a raw bundle.
+
+### Run
+
+From the repo root:
 
 ```bash
-npm run build      # once — produces dist/
-npm run examples   # serves the repo root on http://localhost:8000
+pnpm install                                   # once
+pnpm exec nx build ui                          # build the kit into packages/ui/dist/
+pnpm --filter @kitn.ai/ui-example-react dev    # start any example (see names below)
 ```
 
-Then open:
+`nx build ui` produces `packages/ui/dist/`, a gitignored artifact the examples
+import. Build it once before starting a dev server, and rebuild after you change
+the kit. Then open the URL the dev server prints (Vite defaults to
+<http://localhost:5173>; the Angular example defaults to <http://localhost:4200>).
 
-- **Composable showcase** — http://localhost:8000/examples/composable/index.html
-  (the full roster of individual elements + the batteries-included `<kai-chat>`)
-- Vanilla CDN showcase — http://localhost:8000/examples/vanilla/index.html
-- Floating widget — http://localhost:8000/examples/widget/index.html
+The `--filter` name is `@kitn.ai/ui-example-<dir>`:
 
-> Any static server works (`npx serve`, `python3 -m http.server`, …) — the only
-> requirements are **HTTP (not `file://`)** and serving from the **repo root** so
-> `../../dist/` resolves.
+- `@kitn.ai/ui-example-react`
+- `@kitn.ai/ui-example-vue`
+- `@kitn.ai/ui-example-svelte`
+- `@kitn.ai/ui-example-vanilla`
+- `@kitn.ai/ui-example-angular`
 
-## Framework examples (their own dev servers)
+Or skip the filter and run it in place: `cd examples/react && pnpm dev`.
 
-- **`react/`**, **`solid/`**, **`angular/`**, and **`vue/`** are Vite apps. `cd` in, `npm install`, `npm run dev`.
-  They alias `@kitn.ai/ui/elements` to the local `dist/kai.es.js`, so run
-  `npm run build` at the repo root first, then start any example's dev server.
+Each example's own `README.md` documents the per-framework web-component rules
+(registering `kai-*` before mount, setting array/object data as DOM properties,
+listening for non-bubbling `kai-*` events, keeping the composer uncontrolled).
+`react/` is the reference the others mirror.
 
-  | Directory | Framework | Kit API used |
-  |---|---|---|
-  | `react/` | React 19 | Generated wrappers from `@kitn.ai/ui/react` |
-  | `solid/` | SolidJS | Raw SolidJS component API |
-  | `angular/` | Angular 19 | Web components via `[prop]`/`(event)` + `CUSTOM_ELEMENTS_SCHEMA` |
-  | `vue/` | Vue 3 | Web components via `:prop.prop` modifier + `@event` bindings; `isCustomElement` in vite.config |
+## Other examples
 
-- **`nextjs/`** and **`tanstack-start/`** are SSR meta-framework apps that consume
-  the kit the way a real consumer does — installed from the local repo via
-  `file:../..` (not aliased). `cd` in, `npm install`, then `npm run build`. Build
-  the kit at the repo root first.
+These predate the starter-set refresh and consume the kit their own way.
 
-  | Directory | Framework | Kit API used |
-  |---|---|---|
-  | `nextjs/` | Next.js 15 App Router | Generated React wrappers (`@kitn.ai/ui/react`); SSR + RSC `'use client'` |
-  | `tanstack-start/` | TanStack Start | Generated React wrappers (`@kitn.ai/ui/react`); SSR + hydration |
+### Static ES-module demos
 
-## Why a server?
+- **`composable/`**: the full roster of individual elements plus the
+  batteries-included `<kai-chat>`, as a plain HTML page.
+- **`widget/`**: a floating chat widget.
 
-`<script type="module">` is fetched with CORS semantics; a `file://` origin is
-`null`, which browsers refuse. This is a browser rule, not a kit limitation — the
-same applies to any ES-module page.
+Both are ES-module web-component pages: they must be **served over HTTP** (opening
+them as a `file://` page fails, because browsers block ES-module loading from a
+`null` origin, so nothing registers and you get empty boxes). Serve the **repo
+root** with any static server:
+
+```bash
+npx serve .        # serve the repo root over HTTP (or: python3 -m http.server 8000)
+```
+
+Then open `http://localhost:3000/examples/composable/index.html` or
+`.../examples/widget/index.html` (adjust the port to whatever your server prints).
+
+Caveat: these older demos load a repo-root `dist/kai.es.js` bundle. The current
+kit build writes to `packages/ui/dist/`, not the repo root, so you may need to
+produce that repo-root bundle manually before they render.
+
+### Framework and meta-framework apps
+
+- **`solid/`**: SolidJS Vite app that uses the raw SolidJS component API (the
+  `.` entry). Not a workspace member: `cd examples/solid && npm install && npm run dev`.
+- **`nextjs/`**: Next.js 15 App Router, SSR + RSC `'use client'`, on the
+  generated React wrappers (`@kitn.ai/ui/react`).
+- **`tanstack-start/`**: TanStack Start, SSR + hydration, also on the generated
+  React wrappers.
+
+`nextjs/` and `tanstack-start/` install the kit from the local repo via
+`file:../..` (not aliased), the way a real consumer would. Build the kit at the
+repo root first, then `cd` in, `npm install`, and `npm run build`.
+
+### Support fixtures
+
+`remote-host/`, `remote-provider/`, `shared/`, and `artifact-fixtures/` are not
+standalone demos. They hold shared sample data and assets, the remote
+generative-UI host/provider harness, and artifact render fixtures used by the
+other examples.
