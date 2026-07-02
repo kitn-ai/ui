@@ -2,7 +2,13 @@
   "name": "@kitn.ai/ui",
   "version": "0.18.2",
   "nx": {
-    "name": "ui"
+    "name": "ui",
+    "targets": {
+      "build-storybook": { "dependsOn": ["build"] },
+      "dev": { "dependsOn": ["build"] },
+      "test:storybook": { "dependsOn": ["build"] },
+      "test:storybook:ci": { "dependsOn": ["build"] }
+    }
   },
   "type": "module",
   "sideEffects": [
@@ -125,14 +131,6 @@
     "test:slots-ivp": "playwright test --config playwright.slots.config.ts",
     "test:menu-ivp": "playwright test --config playwright.menu.config.ts",
     "test:command-ivp": "playwright test --config playwright.command.config.ts"
-  },
-  "nx": {
-    "targets": {
-      "build-storybook": { "dependsOn": ["build"] },
-      "dev": { "dependsOn": ["build"] },
-      "test:storybook": { "dependsOn": ["build"] },
-      "test:storybook:ci": { "dependsOn": ["build"] }
-    }
   },
   "dependencies": {
     "@floating-ui/dom": "^1.7.6",
