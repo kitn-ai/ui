@@ -9,4 +9,6 @@ import { defineConfig } from 'vite';
 // compiler to learn about the tags. This is the "pure web components, zero
 // framework" showcase.
 // https://vite.dev/config/
-export default defineConfig({});
+export default defineConfig({
+  server: { port: 5176 },
+});

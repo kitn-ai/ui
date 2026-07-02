@@ -31,28 +31,30 @@ pointing at a raw bundle.
 
 ### Run
 
-From the repo root:
+Build the kit once first, then start any example with its shortcut script:
 
 ```bash
-pnpm install                                   # once
-pnpm exec nx build ui                          # build the kit into packages/ui/dist/
-pnpm --filter @kitn.ai/ui-example-react dev    # start any example (see names below)
+pnpm install       # once
+pnpm build:ui      # build the kit into packages/ui/dist/ (or: pnpm exec nx build ui)
+pnpm example:react # start the React example on http://localhost:5173
 ```
 
-`nx build ui` produces `packages/ui/dist/`, a gitignored artifact the examples
+`build:ui` produces `packages/ui/dist/`, a gitignored artifact the examples
 import. Build it once before starting a dev server, and rebuild after you change
-the kit. Then open the URL the dev server prints (Vite defaults to
-<http://localhost:5173>; the Angular example defaults to <http://localhost:4200>).
+the kit.
 
-The `--filter` name is `@kitn.ai/ui-example-<dir>`:
+Each example has a shortcut script and a fixed dev port:
 
-- `@kitn.ai/ui-example-react`
-- `@kitn.ai/ui-example-vue`
-- `@kitn.ai/ui-example-svelte`
-- `@kitn.ai/ui-example-vanilla`
-- `@kitn.ai/ui-example-angular`
+| Script | URL |
+|---|---|
+| `pnpm example:react` | <http://localhost:5173> |
+| `pnpm example:vue` | <http://localhost:5174> |
+| `pnpm example:svelte` | <http://localhost:5175> |
+| `pnpm example:vanilla` | <http://localhost:5176> |
+| `pnpm example:angular` | <http://localhost:4200> |
 
-Or skip the filter and run it in place: `cd examples/react && pnpm dev`.
+Longhand still works: `pnpm --filter @kitn.ai/ui-example-<dir> dev`, or run it in
+place with `cd examples/<dir> && pnpm dev`.
 
 Each example's own `README.md` documents the per-framework web-component rules
 (registering `kai-*` before mount, setting array/object data as DOM properties,
