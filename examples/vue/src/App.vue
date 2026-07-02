@@ -1,481 +1,98 @@
-<!--
-  kai-chat Vue 3 example — using web components natively.
-
-  Vue can bind to custom-element DOM properties with the `.prop` modifier:
-    :prop.prop="value"  — sets the DOM *property* (not a stringified attribute);
-                          essential for passing arrays/objects into Shadow-DOM
-                          web components.
-
-  CustomEvents are listened to with @event="handler":
-    @kai-submit="onSubmit"  — `$event` is the raw CustomEvent; `.detail` carries the
-                          payload.
-
-  vite.config.ts declares `isCustomElement: (tag) => tag.startsWith('kai-')`
-  so Vue treats kai-* tags as native custom elements rather than Vue components
-  (no "Unknown custom element" warnings).
-
-  `@kitn.ai/ui/elements` is imported once (main.ts side-effect) to register
-  the custom elements globally — BEFORE this component mounts.
--->
-
 <script setup lang="ts">
-import { ref, computed, reactive } from 'vue';
-
-// Shared sample data (also used by React / Angular examples).
-import {
-  SAMPLE_GROUPS,
-  SAMPLE_CONVERSATIONS,
-  SAMPLE_MESSAGES,
-  SAMPLE_MODELS,
-  SAMPLE_CONTEXT,
-  SAMPLE_SUGGESTIONS,
-  SAMPLE_TRIGGERS,
-  type SampleMessage,
-  type SampleConversation,
-} from '../../shared/sample-data';
-
-// ── Types ──────────────────────────────────────────────────────────────────────
-
-type Theme = 'light' | 'dark' | 'auto';
-type ChatMessage = SampleMessage;
-
-// ── Helpers ────────────────────────────────────────────────────────────────────
-
-function generateId(): string {
-  return Math.random().toString(36).slice(2, 9);
-}
-
-function buildReply(text: string): string {
-  return `Thanks for your message!\n\n> ${text}\n\nThis canned reply was appended to the \`messages\` property via Vue refs — proving array round-tripping through the web component binding.`;
-}
-
-/** "Streams" a reply word-by-word, calling onChunk on each tick. */
-function streamReply(
-  fullText: string,
-  onChunk: (partial: string, done: boolean) => void,
-): () => void {
-  const words = fullText.split(' ');
-  let i = 0;
-  const timer = setInterval(() => {
-    i += 1;
-    const partial = words.slice(0, i).join(' ');
-    const done = i >= words.length;
-    onChunk(partial, done);
-    if (done) clearInterval(timer);
-  }, 40);
-  return () => clearInterval(timer);
-}
-
-const SUN_SVG =
-  '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>';
-const MOON_SVG =
-  '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>';
-
-// ── Reactive state ─────────────────────────────────────────────────────────────
-
-const theme = ref<Theme>('auto');
-const conversations = ref<SampleConversation[]>(SAMPLE_CONVERSATIONS);
-const activeId = ref<string>('c-1');
-const allMessages = reactive<Record<string, ChatMessage[]>>(
-  // Deep clone so mutations don't affect the imported constant
-  Object.fromEntries(
-    Object.entries(SAMPLE_MESSAGES).map(([k, v]) => [k, [...v]]),
-  ),
-);
-const currentModel = ref<string>('sonnet');
-const loading = ref<boolean>(false);
-const toast = ref<string | null>(null);
-const draftSubmissions = ref<string[]>([]);
-
-// ── Derived ────────────────────────────────────────────────────────────────────
-
-/** Messages for the active conversation. */
-const messages = computed(() => allMessages[activeId.value] ?? []);
-
-/** Is the effective theme dark right now? */
-const isDark = computed(() => {
-  const t = theme.value;
-  const systemDark =
-    typeof window !== 'undefined' &&
-    window.matchMedia('(prefers-color-scheme: dark)').matches;
-  return t === 'dark' || (t === 'auto' && systemDark);
-});
-
-const borderColor = computed(() =>
-  isDark.value ? '#27272a' : '#e5e5e5',
-);
-const appBackground = computed(() =>
-  isDark.value ? '#0a0a0b' : '#ffffff',
-);
-const appColor = computed(() =>
-  isDark.value ? '#fafafa' : '#18181b',
-);
-const themeIconHtml = computed(() =>
-  isDark.value ? MOON_SVG : SUN_SVG,
-);
-
-// ── Static data passed as .prop bindings to the web components ─────────────────
-
-const groups = SAMPLE_GROUPS;
-const models = SAMPLE_MODELS;
-const context = SAMPLE_CONTEXT;
-const suggestions = SAMPLE_SUGGESTIONS;
-const triggers = SAMPLE_TRIGGERS;
-
-// ── Helpers ────────────────────────────────────────────────────────────────────
-
-function showToast(msg: string): void {
-  toast.value = msg;
-  setTimeout(() => { toast.value = null; }, 1600);
-}
-
-function toggleTheme(): void {
-  const wasDark = isDark.value;
-  theme.value = wasDark ? 'light' : 'dark';
-}
-
-// ── kai-workspace event handlers ─────────────────────────────────────────
+import { computed, ref } from 'vue';
+import { CONVERSATIONS, THREADS, SUGGESTIONS, TRIGGERS, newId, streamFakeReply } from './chat-data';
+import type { Theme } from './types';
+import { useChat, useConversations } from './composables';
+import Sidebar from './components/Sidebar.vue';
+import ThreadView from './components/ThreadView.vue';
+import Composer from './components/Composer.vue';
+import ThemeToggle from './components/ThemeToggle.vue';
 
 /**
- * @kai-submit — fired when the user sends a message.
- * Vue listens to CustomEvents with @event="handler".
- * `$event` is the raw Event; cast to CustomEvent to access `.detail`.
+ * A mini chat workspace COMPOSED BY HAND from @kitn.ai/ui's individual elements —
+ * the Vue mirror of `examples/react`. It shows how the raw `kai-*` web components
+ * fit together (vs. dropping in one batteries-included `<kai-chat>`/`<kai-workspace>`):
+ *
+ *   <kai-resizable>/<kai-resizable-item>  — the draggable sidebar | main split (the
+ *                                           divider is the kit's default `line` hairline)
+ *   <kai-conversations>  — the sidebar list (fed `conversations`, emits select/new)
+ *   <kai-thread>         — the scrolling message list (stick-to-bottom built in)
+ *   <kai-prompt-input>   — the composer at the bottom
+ *
+ * The pieces are split into `components/` (the UI subcomponents + the example's own
+ * moon/sun icons) and `composables/` (`useChat` owns the message array + streaming,
+ * `useConversations` the conversation stash, `useVoiceInput` the mic). Everything
+ * else is plain Vue refs. Swap `streamFakeReply` for a real model call to ship.
  */
-function onSubmit(event: Event): void {
-  const { value, attachments } = ((event as CustomEvent).detail ?? {}) as {
-    value?: string;
-    attachments?: unknown[];
-  };
-  const text = (value ?? '').trim();
-  if (!text && !(attachments ?? []).length) return;
+const theme = ref<Theme>('light');
+const collapsed = ref(false);
+const chat = useChat(THREADS[CONVERSATIONS[0].id] ?? []);
+const { messages, loading } = chat;
+const { conversations, activeId, selectConversation, newChat } = useConversations(chat, CONVERSATIONS);
 
-  const userMsg: ChatMessage = { id: 'u' + generateId(), role: 'user', content: text };
-  const replyId = 'a' + generateId();
-  const id = activeId.value;
+const suggestions = computed(() => (messages.value.length <= 1 ? SUGGESTIONS : []));
 
-  // Append user message + empty assistant placeholder.
-  if (!allMessages[id]) allMessages[id] = [];
-  allMessages[id] = [
-    ...allMessages[id],
-    userMsg,
-    { id: replyId, role: 'assistant', content: '' },
-  ];
-  loading.value = true;
-
-  streamReply(buildReply(text || 'your attachment'), (partial, done) => {
-    allMessages[id] = (allMessages[id] ?? []).map((m) =>
-      m.id === replyId
-        ? {
-            ...m,
-            content: partial,
-            actions: done
-              ? (['copy', 'like', 'dislike', 'regenerate'] as ChatMessage['actions'])
-              : undefined,
-          }
-        : m,
-    );
-    if (done) loading.value = false;
-  });
-}
-
-/**
- * @kai-message-action — copy, like, dislike, regenerate actions on messages.
- */
-async function onMessageAction(event: Event): Promise<void> {
-  const { messageId, action } = ((event as CustomEvent).detail ?? {}) as {
-    messageId: string;
-    action: string;
-  };
-  const id = activeId.value;
-  const msgs = allMessages[id] ?? [];
-  const msg = msgs.find((m) => m.id === messageId);
-  if (!msg) return;
-
-  if (action === 'copy') {
-    try {
-      await navigator.clipboard.writeText(msg.content);
-      showToast('Copied to clipboard');
-    } catch {
-      showToast('Copy failed');
-    }
-  } else if (action === 'like') {
-    showToast('Glad it helped!');
-  } else if (action === 'dislike') {
-    showToast('Thanks — noted.');
-  } else if (action === 'regenerate') {
-    const idx = msgs.findIndex((m) => m.id === messageId);
-    const replyId = 'a' + generateId();
-    allMessages[id] = [
-      ...msgs.slice(0, idx),
-      { id: replyId, role: 'assistant' as const, content: '' },
-    ];
-    loading.value = true;
-    streamReply(buildReply('regenerated answer'), (partial, done) => {
-      allMessages[id] = (allMessages[id] ?? []).map((m) =>
-        m.id === replyId
-          ? {
-              ...m,
-              content: partial,
-              actions: done
-                ? (['copy', 'like', 'dislike', 'regenerate'] as ChatMessage['actions'])
-                : undefined,
-            }
-          : m,
-      );
-      if (done) loading.value = false;
-    });
-  }
-}
-
-/**
- * @kai-model-change — user switched the active model.
- */
-function onModelChange(event: Event): void {
-  const { modelId } = ((event as CustomEvent).detail ?? {}) as { modelId: string };
-  currentModel.value = modelId;
-  showToast(
-    `Model → ${SAMPLE_MODELS.find((m) => m.id === modelId)?.name ?? modelId}`,
-  );
-}
-
-/**
- * @kai-conversation-select — user clicked a conversation in the sidebar.
- */
-function onConversationSelect(event: Event): void {
-  const { id } = ((event as CustomEvent).detail ?? {}) as { id: string };
-  activeId.value = id;
-  document.body.classList.remove('sidebar-open');
-}
-
-/**
- * @kai-new-chat — user clicked "New chat" in the sidebar.
- */
-function onNewChat(): void {
-  const id = 'c-' + generateId();
-  conversations.value = [
-    {
-      id,
-      title: 'New chat',
-      groupId: 'g-work',
-      scope: { type: 'collection' as const },
-      messageCount: 0,
-      lastMessageAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    },
-    ...conversations.value,
-  ];
-  allMessages[id] = [];
-  activeId.value = id;
-  document.body.classList.remove('sidebar-open');
-}
-
-/**
- * @kai-sidebar-toggle — hamburger / toggle from within the workspace.
- */
-function onSidebarToggle(): void {
-  document.body.classList.toggle('sidebar-open');
-}
-
-// ── Standalone kai-prompt-input handler ───────────────────────────────────────
-
-function onStandaloneSubmit(event: Event): void {
-  const { value } = ((event as CustomEvent).detail ?? {}) as { value?: string };
-  const text = (value ?? '').trim();
+async function send(raw: string) {
+  const text = raw.trim();
   if (!text) return;
-  draftSubmissions.value = [text, ...draftSubmissions.value].slice(0, 5);
+  // The Composer already cleared its own input; here we just append the user
+  // message and stream the (fake) assistant reply.
+  chat.append({ id: newId(), role: 'user', content: text });
+  const stream = chat.streamAssistant();
+  await streamFakeReply(text, (delta) => stream.appendText(delta));
+  stream.done();
 }
 </script>
 
 <template>
-  <!--
-    kai-chat Vue 3 example template.
+  <div class="app" :class="{ dark: theme === 'dark' }">
+    <!-- <kai-resizable> owns the sidebar width + the divider. The handle defaults to
+         the `line` hairline (transparent at rest, tinting on hover/drag); collapsing
+         the sidebar maps to <kai-resizable-item :collapsed>. Pass `theme` to the group
+         AND every item so slotted chrome inherits the right light/dark tokens. -->
+    <kai-resizable :theme="theme" orientation="horizontal">
+      <kai-resizable-item :theme="theme" size="280px" min="220px" max="420px" :collapsed.prop="collapsed">
+        <Sidebar
+          :theme="theme"
+          :conversations="conversations"
+          :active-id="activeId"
+          :collapsed="collapsed"
+          @select="selectConversation"
+          @new-chat="newChat"
+          @toggle="collapsed = !collapsed"
+        />
+      </kai-resizable-item>
 
-    Key Vue web-component patterns:
-      :prop.prop="value"   — the `.prop` modifier sets the DOM *property*
-                             (not a stringified attribute); required for passing
-                             arrays / objects into Shadow-DOM custom elements.
-      @event="handler"     — listens for CustomEvents by lowercase event name;
-                             `$event` is the raw Event, cast inside the handler.
-  -->
-  <div
-    class="app-shell"
-    :style="{ background: appBackground, color: appColor }"
-  >
-    <!-- Top bar -->
-    <header class="topbar" :style="{ borderBottom: '1px solid ' + borderColor }">
-      <span class="topbar-brand">
-        <img src="../../shared/logo.svg" alt="" width="20" height="20" />
-        kai-chat &middot; Vue example (web components)
-      </span>
+      <kai-resizable-item :theme="theme">
+        <main class="main">
+          <header class="bar">
+            <div class="bar-left">
+              <kai-button
+                v-if="collapsed"
+                :theme="theme"
+                variant="ghost"
+                size="icon"
+                icon="panel-left"
+                label="Show sidebar"
+                @click="collapsed = false"
+              ></kai-button>
+              <span class="brand">@kitn.ai/ui · composed chat</span>
+            </div>
+            <ThemeToggle :theme="theme" @toggle="theme = theme === 'light' ? 'dark' : 'light'" />
+          </header>
 
-      <button
-        @click="toggleTheme"
-        aria-label="Toggle light/dark"
-        class="theme-btn"
-        :style="{
-          border: '1px solid ' + (isDark ? '#3f3f46' : '#d4d4d8'),
-          background: isDark ? '#18181b' : '#fff',
-          color: isDark ? '#fafafa' : '#18181b',
-        }"
-        v-html="themeIconHtml"
-      ></button>
-    </header>
+          <ThreadView :theme="theme" :messages="messages" />
 
-    <!-- Main area: the flagship <kai-workspace> element.
-         :prop.prop sets DOM properties; @event listens for CustomEvents.
-         The `.prop` modifier is critical — without it Vue would stringify
-         arrays/objects as attributes and the elements would receive "[object Object]". -->
-    <div class="main-area">
-      <!--
-        <kai-workspace> is the batteries-included shell: sidebar +
-        conversation list + chat panel + resize handle, all in one element.
-
-        Property bindings (:prop.prop):
-          - :groups.prop          SampleGroup[]        — sidebar group headers
-          - :conversations.prop   SampleConversation[] — sidebar conversation list
-          - :activeId.prop        string               — highlighted conversation
-          - :messages.prop        SampleMessage[]      — chat message thread
-          - :models.prop          SampleModel[]        — model picker options
-          - :currentModel.prop    string               — selected model id
-          - :context.prop         object               — token-usage context meter
-          - :suggestions.prop     string[]             — prompt suggestions
-          - :triggers.prop        object[]             — entity-pill trigger groups
-          - :loading.prop         boolean              — streaming / loading state
-          - :theme.prop           'light'|'dark'|'auto'
-
-        Event bindings (@event):
-          - @kai-submit               — user sends a message
-          - @kai-message-action        — copy / like / dislike / regenerate
-          - @kai-model-change          — model picker changed
-          - @kai-conversation-select   — sidebar item clicked
-          - @kai-new-chat              — "New chat" button clicked
-          - @kai-sidebar-toggle        — hamburger / sidebar toggle
-      -->
-      <kai-workspace
-        :groups.prop="groups"
-        :conversations.prop="conversations"
-        :activeId.prop="activeId"
-        :messages.prop="messages"
-        :models.prop="models"
-        :currentModel.prop="currentModel"
-        :context.prop="context"
-        :suggestions.prop="suggestions"
-        :triggers.prop="triggers"
-        :loading.prop="loading"
-        :theme.prop="theme"
-        @kai-submit="onSubmit"
-        @kai-message-action="onMessageAction"
-        @kai-model-change="onModelChange"
-        @kai-conversation-select="onConversationSelect"
-        @kai-new-chat="onNewChat"
-        @kai-sidebar-toggle="onSidebarToggle"
-        style="flex: 1; min-height: 0;"
-      ></kai-workspace>
-    </div>
-
-    <!-- Standalone <kai-prompt-input> — proves a leaf element works on its own. -->
-    <div class="standalone-section" :style="{ borderTop: '1px solid ' + borderColor }">
-      <div class="standalone-label">
-        Standalone &lt;kai-prompt-input&gt; (try typing <code>/</code> or <code>@</code> for entity pills):
-      </div>
-      <kai-prompt-input
-        placeholder="Standalone prompt input…"
-        :triggers.prop="triggers"
-        :theme.prop="theme"
-        @kai-submit="onStandaloneSubmit"
-      ></kai-prompt-input>
-      <ul v-if="draftSubmissions.length > 0" class="draft-list">
-        <li v-for="d in draftSubmissions" :key="d">submitted: {{ d }}</li>
-      </ul>
-    </div>
-
-    <!-- Toast notification -->
-    <div v-if="toast" class="toast">{{ toast }}</div>
+          <Composer
+            :theme="theme"
+            :loading="loading"
+            :suggestions="suggestions"
+            :triggers="TRIGGERS"
+            @submit="send"
+            @suggestion="send"
+          />
+        </main>
+      </kai-resizable-item>
+    </kai-resizable>
   </div>
 </template>
-
-<style>
-/* ── App shell ───────────────────────────────────────────────────────────── */
-
-.app-shell {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  font-family: system-ui, sans-serif;
-}
-
-/* ── Top bar ─────────────────────────────────────────────────────────────── */
-
-.topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 48px;
-  padding: 0 14px;
-  flex-shrink: 0;
-}
-
-.topbar-brand {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 700;
-  font-size: 14px;
-}
-
-/* ── Theme toggle button ─────────────────────────────────────────────────── */
-
-.theme-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 9px;
-  cursor: pointer;
-}
-
-/* ── Main area ───────────────────────────────────────────────────────────── */
-
-.main-area {
-  display: flex;
-  flex: 1;
-  min-height: 0;
-}
-
-/* ── Standalone prompt input section ─────────────────────────────────────── */
-
-.standalone-section {
-  padding: 10px 14px;
-  flex-shrink: 0;
-}
-
-.standalone-label {
-  font-size: 12px;
-  opacity: 0.7;
-  margin-bottom: 6px;
-}
-
-.draft-list {
-  font-size: 12px;
-  opacity: 0.7;
-  margin: 8px 0 0;
-  padding-left: 18px;
-}
-
-/* ── Toast notification ──────────────────────────────────────────────────── */
-
-.toast {
-  position: fixed;
-  bottom: 18px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #18181b;
-  color: #fafafa;
-  font: 500 13px system-ui, sans-serif;
-  padding: 8px 14px;
-  border-radius: 8px;
-  z-index: 50;
-  pointer-events: none;
-}
-</style>
