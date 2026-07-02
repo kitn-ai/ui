@@ -51,7 +51,7 @@ export function createStore(): Store {
     messages: [...(THREADS[CONVERSATIONS[0].id] ?? [])],
     conversations: [...CONVERSATIONS],
     activeId: CONVERSATIONS[0].id,
-    theme: 'light',
+    theme: 'dark',
     collapsed: false,
     loading: false,
   };

@@ -36,7 +36,7 @@ import { ThemeToggle } from './components/theme-toggle/theme-toggle';
   styleUrl: './app.css',
 })
 export class App {
-  readonly theme = signal<Theme>('light');
+  readonly theme = signal<Theme>('dark');
   readonly collapsed = signal(false);
 
   readonly chat = createChat(THREADS[CONVERSATIONS[0].id] ?? []);

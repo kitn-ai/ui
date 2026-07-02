@@ -27,7 +27,7 @@
    * Everything else is plain Svelte runes. Swap `streamFakeReply` for a real model
    * call to ship.
    */
-  let theme: Theme = $state('light');
+  let theme: Theme = $state('dark');
   let collapsed = $state(false);
   const chat = createChat(THREADS[CONVERSATIONS[0].id] ?? []);
   const conversations = createConversations(chat, CONVERSATIONS);

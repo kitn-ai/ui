@@ -24,7 +24,7 @@ import ThemeToggle from './components/ThemeToggle.vue';
  * `useConversations` the conversation stash, `useVoiceInput` the mic). Everything
  * else is plain Vue refs. Swap `streamFakeReply` for a real model call to ship.
  */
-const theme = ref<Theme>('light');
+const theme = ref<Theme>('dark');
 const collapsed = ref(false);
 const chat = useChat(THREADS[CONVERSATIONS[0].id] ?? []);
 const { messages, loading } = chat;
