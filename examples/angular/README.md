@@ -1,63 +1,89 @@
-# kai-chat — Angular example
+# Angular example — chat workspace, composed by hand
 
-A minimal, runnable Angular 19 standalone app demonstrating how to use the
-`@kitn.ai/ui` web components natively — **no wrappers needed**.
+A small chat **workspace assembled from `@kitn.ai/ui`'s individual elements** — a
+`<kai-conversations>` sidebar, a `<kai-thread>` of messages, and a
+`<kai-prompt-input>` composer — wired together with plain Angular signals. Non-React
+frameworks consume the **raw `kai-*` web components directly** (no wrappers), so this
+is the reference for how that composition looks in Angular. It mirrors
+`examples/react` and `examples/vue` feature-for-feature.
 
-Angular binds to custom-element DOM properties with `[prop]="value"` and
-listens for CustomEvents with `(eventname)="handler($event)"`.  Adding
-`CUSTOM_ELEMENTS_SCHEMA` to the component is all that's needed to allow the
-`kai-*` tags.
+It runs with **no backend**: replies stream in from a local fake responder
+(`src/chat-data.ts`), so there's no API key and nothing to host. Swap
+`streamFakeReply` for a real model call (Anthropic, OpenAI, your own endpoint) and
+you have a real app.
 
-## Prerequisites
+## The Angular web-component rules
 
-Build the kit first so the local bundle (`dist/kai.es.js`) exists:
+Consuming Shadow-DOM custom elements from Angular comes down to five things:
 
-```bash
-# From the repo root
-npm run build
-```
-
-## Run (dev server)
-
-```bash
-cd examples/angular
-npm install
-npm run dev
-```
-
-Then open **http://localhost:5173** (or whatever port Vite picks).
-
-## Build (production)
-
-```bash
-npm run build
-```
-
-## Typecheck
-
-```bash
-npm run typecheck
-```
+- **Allow the tags with `CUSTOM_ELEMENTS_SCHEMA`.** Every standalone component that
+  uses `kai-*` tags adds `schemas: [CUSTOM_ELEMENTS_SCHEMA]`, so Angular passes
+  property/event bindings straight to the DOM instead of erroring on unknown
+  elements.
+- **Register before bootstrap.** `src/main.ts` does `import '@kitn.ai/ui/elements'`
+  and then gates `bootstrapApplication` on `customElements.whenDefined(...)` for
+  every tag used. The elements register **asynchronously**, and Angular sets
+  array/object DOM properties the moment it stamps a tag — a write before upgrade is
+  clobbered by the element's empty defaults on upgrade. The theme tokens
+  (`@kitn.ai/ui/theme.tokens.css`) load as a global stylesheet via `angular.json`
+  (Angular loads global CSS from the build config, not a TS import).
+- **Array/object props are DOM properties.** Angular property binding (`[messages]`,
+  `[conversations]`, `[groups]`, `[triggers]`, `[suggestions]`) sets the DOM property
+  on a custom element. Scalars the element reads as attributes bind with
+  `[attr.active-id]`; the rest (`[theme]`, `[loading]`, `[collapsed]`) bind as
+  properties, and fixed strings like `size="280px"` are plain attributes. Streaming
+  needs a **new array reference per chunk** — `createChat` keeps `messages` in a
+  signal and assigns a fresh array on every update.
+- **Boolean flags are truthy properties.** `[voice]="true"`, not a bare `voice`
+  attribute (which the facade's `flag()` reads as false).
+- **Events are non-bubbling `kai-*` CustomEvents.** Bind on the element with
+  `(kai-submit)`, `(kai-message-action)`, `(kai-conversation-select)`, … and read
+  `($event as CustomEvent).detail`.
 
 ## How it works
 
-| Concern | Angular pattern |
-|---|---|
-| Register elements | `import '@kitn.ai/ui/elements'` (side-effect, in `ngOnInit`) |
-| Pass arrays/objects | `[groups]="groups"` — sets the DOM *property*, not an attribute string |
-| Listen for events | `(kai-conversation-select)="onSelect($event)"` — `($event as CustomEvent).detail` has the payload |
-| Allow unknown tags | `schemas: [CUSTOM_ELEMENTS_SCHEMA]` on the standalone component |
-| Theme | `[theme]="theme()"` — passes `'light' \| 'dark' \| 'auto'` |
+- `src/app/app.component.ts` composes the elements by hand: `<kai-resizable>` for the
+  split, `<kai-conversations>` (via `sidebar.component.ts`), `<kai-thread>` (via
+  `thread-view.component.ts`), and `<kai-prompt-input>` (via `composer.component.ts`).
+- `src/app/state/chat.store.ts` owns the message array + streaming (`append`,
+  `setMessages`, `streamAssistant`, `loading`). It's a thin Angular port of the kit's
+  React `useKaiChat`, built on the **same** framework-neutral state core
+  (`@kitn.ai/ui/state`).
+- `conversations.store.ts` owns the active conversation + the in-memory thread stash;
+  `state/voice-input.ts` is a framework-neutral port of the kit's mic hook.
+- The composer stays **uncontrolled** so the `/` (skills) and `@` (agents) trigger
+  menus keep a live caret — clear-on-submit calls the element's `clear()` method and
+  voice seeds a `ComposerDoc` rather than assigning a plain string `value`.
+- A light/dark toggle (top-right) drives each element's `theme` prop and a `.dark`
+  class on the shell, so the kit's `--color-*` tokens flip for your own chrome too.
 
-The Vite config aliases `@kitn.ai/ui/elements` to the local `../../dist/kai.es.js`
-so the example exercises the in-repo build without needing a published package.
+The example consumes the kit from this monorepo via `workspace:*`, so it always
+builds against the local `@kitn.ai/ui` (through the package `exports` map, exactly
+like a published consumer — no aliases).
 
-## Key files
+## Build tooling
 
-- `src/app/app.component.ts` — standalone component with `CUSTOM_ELEMENTS_SCHEMA`,
-  Angular Signals state, and all event handlers
-- `src/app/app.component.html` — template with `[prop]` / `(event)` bindings on
-  `<kai-workspace>` and `<kai-prompt-input>`
-- `vite.config.ts` — local-build aliases
-- `src/stubs/` — minimal `.d.ts` stubs that redirect `@kitn.ai/ui/elements`
-  type resolution away from the kit's SolidJS source (runtime uses the real bundle)
+This example uses the **standard Angular CLI application builder**
+(`@angular-devkit/build-angular:application`, esbuild under the hood) rather than a
+custom Vite setup — it's the least-surprising, best-supported way to build an Angular
+SPA, and it consumes the compiled `@kitn.ai/ui` package the same way a real Angular
+app would.
+
+## Run it
+
+From the repo root, build the kit once so its `dist/` exists (the example imports the
+compiled `@kitn.ai/ui/elements` + `@kitn.ai/ui/theme.tokens.css`), then start the
+example:
+
+```bash
+pnpm exec nx build ui
+pnpm --filter @kitn.ai/ui-example-angular dev
+```
+
+Open the URL the Angular CLI prints (default <http://localhost:4200>).
+
+## Build
+
+```bash
+pnpm --filter @kitn.ai/ui-example-angular build
+```
