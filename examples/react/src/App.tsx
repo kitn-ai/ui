@@ -28,7 +28,7 @@ export type Theme = 'light' | 'dark';
  * `streamFakeReply` for a real model call to ship a real app.
  */
 export default function App() {
-  const [theme, setTheme] = useState<Theme>('light');
+  const [theme, setTheme] = useState<Theme>('dark');
   const [collapsed, setCollapsed] = useState(false);
   const chat = useKaiChat({ initialMessages: THREADS[CONVERSATIONS[0].id] ?? [] });
   const { conversations, activeId, selectConversation, newChat } = useConversations(chat, CONVERSATIONS);

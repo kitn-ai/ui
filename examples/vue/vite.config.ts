@@ -1,32 +1,24 @@
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
-import { resolve } from 'node:path';
 
-// Resolve `@kitn.ai/ui/*` against the LOCAL source/build of this repo so the
-// example exercises the elements we're developing (no publish needed):
-//   - `@kitn.ai/ui/elements`  → the built bundle that registers the elements
-//   - `@kitn.ai/ui/theme.css` → the kit's theme stylesheet
-const repoRoot = resolve(__dirname, '..', '..');
-
+// `@kitn.ai/ui` is linked into this example via `workspace:*`, so it resolves
+// through node_modules + the package's `exports` map exactly like a published
+// consumer would — no aliases, no source stubs. Build the kit first (`nx build ui`).
+//
+// The one Vue-specific bit: tell the template compiler that every `kai-*` tag is a
+// native custom element. Without this Vue tries to resolve them as Vue components
+// (warning "unknown custom element"); with it, Vue leaves them alone and passes
+// props/events straight through to the DOM.
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
     vue({
       template: {
         compilerOptions: {
-          // Tell Vue's compiler that kai-* tags are native custom elements,
-          // not Vue components — prevents "Unknown custom element" warnings
-          // and ensures Vue sets DOM *properties* (not attributes) via .prop.
           isCustomElement: (tag) => tag.startsWith('kai-'),
         },
       },
     }),
   ],
-  resolve: {
-    alias: {
-      '@kitn.ai/ui/elements': resolve(repoRoot, 'dist/kai.es.js'),
-      '@kitn.ai/ui/theme.css': resolve(repoRoot, 'theme.css'),
-    },
-    mainFields: ['module'],
-  },
+  server: { port: 5174 },
 });

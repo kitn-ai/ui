@@ -2,27 +2,29 @@
   "name": "@kitn.ai/ui-example-angular",
   "private": true,
   "version": "0.0.0",
-  "type": "module",
+  "engines": {
+    "node": ">=22.22.3"
+  },
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -p tsconfig.app.json --noEmit && vite build",
-    "preview": "vite preview",
-    "typecheck": "tsc -p tsconfig.app.json --noEmit"
+    "ng": "ng",
+    "dev": "ng serve",
+    "start": "ng serve",
+    "build": "ng build",
+    "watch": "ng build --watch --configuration development"
   },
   "dependencies": {
-    "@angular/common": "^19.0.0",
-    "@angular/compiler": "^19.0.0",
-    "@angular/core": "^19.0.0",
-    "@angular/platform-browser": "^19.0.0",
-    "@kitn.ai/ui": "^0.4.0",
-    "zone.js": "^0.15.0"
+    "@angular/common": "^22.0.0",
+    "@angular/compiler": "^22.0.0",
+    "@angular/core": "^22.0.0",
+    "@angular/platform-browser": "^22.0.0",
+    "@kitn.ai/ui": "workspace:*",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0"
   },
   "devDependencies": {
-    "@analogjs/vite-plugin-angular": "^2.6.1",
-    "@angular-devkit/build-angular": "^19.0.0",
-    "@angular/build": "^19.0.0",
-    "@types/node": "^22.0.0",
-    "typescript": "~5.7.2",
-    "vite": "^6.0.0"
+    "@angular/build": "^22.0.0",
+    "@angular/cli": "^22.0.0",
+    "@angular/compiler-cli": "^22.0.0",
+    "typescript": "~6.0.0"
   }
 }

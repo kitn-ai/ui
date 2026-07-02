@@ -1,78 +1,74 @@
-# kai-chat — Vue 3 example
+# Vue example — chat workspace, composed by hand
 
-A minimal, runnable **Vue 3 + Vite** app that uses the kit's web components directly (no wrappers).
+A small chat **workspace assembled from `@kitn.ai/ui`'s individual elements** — a
+`<kai-conversations>` sidebar, a `<kai-thread>` of messages, and a
+`<kai-prompt-input>` composer — wired together with plain Vue refs. Non-React
+frameworks consume the **raw `kai-*` web components directly** (no wrappers), so
+this is the reference for how that composition looks in Vue. It mirrors
+`examples/react` feature-for-feature.
 
-## What this demonstrates
+It runs with **no backend**: replies stream in from a local fake responder
+(`src/chat-data.ts`), so there's no API key and nothing to host. Swap
+`streamFakeReply` for a real model call (Anthropic, OpenAI, your own endpoint)
+and you have a real app.
 
-- A **static** `import '@kitn.ai/ui/elements'` in `src/main.ts` **before** `createApp(App).mount(...)` — the elements must be registered/upgraded before Vue stamps the tags.
-- The **`.prop` modifier** (`:groups.prop`, `:conversations.prop`, `:messages.prop`, etc.) so Vue sets DOM *properties* rather than stringified attributes — required when passing arrays/objects to Shadow-DOM custom elements.
-- `@event` listeners that read `(e as CustomEvent).detail` for `@kai-conversation-select`, `@kai-submit`, `@kai-model-change`, `@kai-sidebar-toggle`, `@kai-new-chat`, and `@kai-message-action`.
-- `vite.config.ts` with `isCustomElement: (tag) => tag.startsWith('kai-')` so Vue treats `kai-*` tags as native custom elements, not Vue components.
-- The flagship `<kai-workspace>` (sidebar + chat + resize shell) plus a standalone `<kai-prompt-input>`.
+## The Vue web-component rules
 
-## Prerequisites
+Consuming Shadow-DOM custom elements from Vue comes down to four things:
 
-Build the kit bundle first (the example uses the local build via a Vite alias):
+- **Tell Vue the tags are custom elements.** `vite.config.ts` sets
+  `isCustomElement: (tag) => tag.startsWith('kai-')` so Vue passes props/events
+  straight to the DOM instead of trying to resolve `kai-*` as Vue components.
+- **Register before mount.** `src/main.ts` does `import '@kitn.ai/ui/elements'`
+  (registers the elements) and `import '@kitn.ai/ui/theme.tokens.css'` (the plain
+  `--color-*` tokens the shell uses) **before** `createApp(App).mount(...)`.
+- **Array/object props are DOM properties, not attributes.** Use the `.prop`
+  modifier for rich values: `:messages.prop`, `:conversations.prop`,
+  `:groups.prop`, `:triggers.prop`, `:suggestions.prop`. Scalars (`theme`,
+  `placeholder`, `size`, `activeId`) bind normally. Streaming needs a **new array
+  reference per chunk** — `useChat` keeps `messages` in a `shallowRef` and assigns
+  a fresh array on every update.
+- **Events are non-bubbling `kai-*` CustomEvents.** Listen on the element with
+  `@kai-submit`, `@kai-message-action`, `@kai-conversation-select`, … and read
+  `(e as CustomEvent).detail`.
+
+## How it works
+
+- `src/App.vue` composes the elements by hand: `<kai-resizable>` for the split,
+  `<kai-conversations>` (via `Sidebar.vue`), `<kai-thread>` (via `ThreadView.vue`),
+  and `<kai-prompt-input>` (via `Composer.vue`).
+- `src/composables/useChat.ts` owns the message array + streaming (`append`,
+  `setMessages`, `streamAssistant`, `loading`). It's a thin Vue port of the kit's
+  React `useKaiChat`, built on the **same** framework-neutral state core
+  (`@kitn.ai/ui/state`).
+- `useConversations` owns the active conversation + the in-memory thread stash;
+  `useVoiceInput` is a Vue port of the kit's mic hook.
+- The composer stays **uncontrolled** so the `/` (skills) and `@` (agents) trigger
+  menus keep a live caret — clear-on-submit calls the element's `clear()` method
+  and voice seeds a `ComposerDoc` rather than assigning a plain string `value`.
+- A light/dark toggle (top-right) drives each element's `theme` prop and a `.dark`
+  class on the shell, so the kit's `--color-*` tokens flip for your own chrome too.
+
+The example consumes the kit from this monorepo via `workspace:*`, so it always
+builds against the local `@kitn.ai/ui` (through the package `exports` map, exactly
+like a published consumer — no aliases).
+
+## Run it
+
+From the repo root, build the kit once so its `dist/` exists (the example imports
+the compiled `@kitn.ai/ui/elements` + `@kitn.ai/ui/theme.tokens.css`), then start
+the example:
 
 ```bash
-# From the repo root
-npm run build
+pnpm exec nx build ui
+pnpm --filter @kitn.ai/ui-example-vue dev
 ```
 
-## Run
+Open the URL Vite prints (default <http://localhost:5173>).
+
+## Build / typecheck
 
 ```bash
-cd examples/vue
-npm install
-npm run dev
-```
-
-Open http://localhost:5173
-
-## Build
-
-```bash
-npm run build
-npm run preview
-```
-
-## Key patterns
-
-### Import ordering (CRITICAL)
-
-```ts
-// src/main.ts
-import '@kitn.ai/ui/elements'; // MUST come before createApp
-import '@kitn.ai/ui/theme.css';
-import { createApp } from 'vue';
-import App from './App.vue';
-createApp(App).mount('#app');
-```
-
-If the elements import is late (e.g. inside a component's `onMounted`), Vue sets `[messages]`/`[conversations]` on a not-yet-upgraded element. The element's empty defaults then clobber the data on upgrade → the sidebar/chat render **blank**.
-
-### Property bindings (`.prop` modifier)
-
-```vue
-<kai-workspace
-  :conversations.prop="conversations"
-  :messages.prop="messages"
-  :groups.prop="groups"
-  :models.prop="models"
-  :activeId.prop="activeId"
-  :currentModel.prop="currentModel"
-  :loading.prop="loading"
-  :theme.prop="theme"
-  @kai-submit="onSubmit"
-  @kai-conversation-select="onConversationSelect"
-></kai-workspace>
-```
-
-### Event handling
-
-```ts
-function onSubmit(event: Event): void {
-  const { value } = (event as CustomEvent).detail as { value: string };
-  // ...
-}
+pnpm --filter @kitn.ai/ui-example-vue typecheck
+pnpm --filter @kitn.ai/ui-example-vue build
 ```
