@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kitn.ai/ui": "^0.2.0",
+    "@kitn.ai/ui": "workspace:*",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
