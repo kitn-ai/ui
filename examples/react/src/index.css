@@ -20,16 +20,19 @@ body {
 }
 
 /* The sidebar is its own surface: `--color-muted` sits a step off `--color-background`
-   in both themes (near-white grey in light, a shade lighter than the base in dark), so
-   the panel reads as distinct and the sidebar | main boundary is a visible color step at
-   rest. No border needed. <kai-resizable>'s `line` handle stays the hover/drag affordance
-   in the 8px gutter (transparent at rest, tints on hover/drag). A border set directly on a
-   kai-* element wouldn't track the shell's light/dark tokens anyway, since each element
-   re-scopes --color-border on its own :host. Collapse is handled by the parent
-   <ResizableItem collapsed> (the panel + its divider drop out), so the old
-   `.sidebar.collapsed` rule is gone. */
+   in both themes (near-white grey in light, a shade lighter than the base in dark). That
+   #f4f4f5-on-white step is subtle, so a 1px right border marks the at-rest sidebar | main
+   division: <kai-resizable>'s `line` handle is transparent at rest and only tints on
+   hover/drag, so the boundary has to come from the panel itself. The border uses
+   `var(--color-border)`, which now tracks the shell's light/dark tokens because the parent
+   <ResizableItem theme={theme}> forwards the theme (a light hairline in light mode, dark in
+   dark). `box-sizing: border-box` keeps the 1px inside the 280px item so it doesn't shift
+   the content width. Collapse is handled by the parent <ResizableItem collapsed> (the panel
+   + its divider drop out), so the old `.sidebar.collapsed` rule is gone. */
 .sidebar {
   background: var(--color-muted);
+  border-right: 1px solid var(--color-border);
+  box-sizing: border-box;
   height: 100%;
   min-height: 0;
   overflow: hidden;
@@ -68,25 +71,11 @@ body {
   color: var(--color-muted-foreground);
 }
 
-/* Scroll container. Centers a fixed-width message column (ChatGPT-style) so lines
-   stay readable instead of spanning the full width. */
+/* <kai-thread> scrolls internally and centers its own fixed-width column, so the
+   host just needs to fill the remaining height of the main flex column. */
 .thread {
   flex: 1;
   min-height: 0;
-  overflow-y: auto;
-  padding: 1.25rem 1rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.thread-inner {
-  width: 100%;
-  max-width: 48rem;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
 }
 
 /* No top divider above the input — the composer floats against the thread. Extra

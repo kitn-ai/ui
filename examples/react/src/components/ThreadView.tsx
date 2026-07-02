@@ -1,7 +1,6 @@
-import { Message } from '@kitn.ai/ui/react';
+import { Thread } from '@kitn.ai/ui/react';
 import type { ChatMessage } from '@kitn.ai/ui/react';
 import type { Theme } from '../App';
-import { useThreadAutoScroll } from '../hooks';
 
 interface ThreadViewProps {
   theme: Theme;
@@ -9,39 +8,32 @@ interface ThreadViewProps {
 }
 
 /**
- * The scrolling message list: one `<Message>` element per item, mapped from state,
- * inside a centered fixed-width column. `useThreadAutoScroll` keeps the newest
- * message in view as it streams.
+ * The scrolling message list. `<kai-thread>` (React `<Thread>`) owns the message
+ * rendering, the centered fixed-width column, and stick-to-bottom scroll, so this
+ * component just bakes the per-message actions onto the assistant turns and wires
+ * the custom `speak` action to the browser's speech synthesis. `copy` (and the
+ * feedback votes) are handled inside the element.
  */
 export function ThreadView({ theme, messages }: ThreadViewProps) {
-  const threadRef = useThreadAutoScroll(messages);
+  // <Thread> reads `actions` off each message; only assistant replies get them.
+  const withActions: ChatMessage[] = messages.map((m) =>
+    m.role === 'assistant'
+      ? { ...m, actions: ['copy', { id: 'speak', label: 'Read aloud', icon: 'volume-2' }] }
+      : m,
+  );
   return (
-    <div className="thread" ref={threadRef}>
-      <div className="thread-inner">
-        {messages.map((m) => (
-          <Message
-            key={m.id}
-            theme={theme}
-            markdown
-            // Actions live on the `message` object (the standalone <Message> reads
-            // `message.actions`). Only assistant replies get them; user messages
-            // render plain. `copy` is a built-in (copies to clipboard); `speak` is a
-            // custom action wired to the browser's speech synthesis below.
-            message={
-              m.role === 'assistant'
-                ? { id: m.id, role: m.role, content: m.content, actions: ['copy', { id: 'speak', label: 'Read aloud', icon: 'volume-2' }] }
-                : { id: m.id, role: m.role, content: m.content }
-            }
-            onMessageAction={(e) => {
-              if (e.detail.action === 'speak') {
-                window.speechSynthesis.cancel();
-                window.speechSynthesis.speak(new SpeechSynthesisUtterance(m.content));
-              }
-              // 'copy' is handled internally by the element (copies to clipboard).
-            }}
-          />
-        ))}
-      </div>
-    </div>
+    <Thread
+      className="thread"
+      theme={theme}
+      messages={withActions}
+      onMessageAction={(e) => {
+        if (e.detail.action === 'speak') {
+          const m = messages.find((x) => x.id === e.detail.messageId);
+          if (!m) return;
+          window.speechSynthesis.cancel();
+          window.speechSynthesis.speak(new SpeechSynthesisUtterance(m.content));
+        }
+      }}
+    />
   );
 }
