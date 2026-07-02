@@ -237,7 +237,13 @@ function ResizablePanel(props: ResizablePanelProps) {
 // --- ResizableHandle ---
 
 export interface ResizableHandleProps extends JSX.HTMLAttributes<HTMLDivElement> {
-  withHandle?: boolean;
+  /**
+   * Divider affordance drawn inside the 8px grab zone:
+   * - `line` (default) — a 1px hairline, transparent at rest, tinting on hover/drag.
+   * - `grip` — a dotted grip handle.
+   * - `none` — no visible divider (invisible hit-area only).
+   */
+  handle?: 'line' | 'grip' | 'none';
   onPanelResize?: (delta: number) => void;
   /** Keyboard nudge step in pixels (default 16). Home/End jump to min/max. */
   keyboardStep?: number;
@@ -265,12 +271,15 @@ function readBound(el: HTMLElement, kind: 'min' | 'max', containerPx: number, fa
 
 function ResizableHandle(props: ResizableHandleProps) {
   const [local, rest] = splitProps(props, [
-    'withHandle', 'onPanelResize', 'class', 'keyboardStep', 'static', 'orientation',
+    'handle', 'onPanelResize', 'class', 'keyboardStep', 'static', 'orientation',
   ]);
   const ctx = useContext(ResizableContext);
   const orientation = () => local.orientation ?? ctx?.orientation ?? 'horizontal';
   const [isDragging, setIsDragging] = createSignal(false);
+  const [hovering, setHovering] = createSignal(false);
   const isStatic = () => !!local.static;
+  // Divider affordance; `line` (hairline) is the default.
+  const mode = () => local.handle ?? 'line';
 
   let startPos = 0;
   let prevEl: HTMLElement | null = null;
@@ -481,18 +490,33 @@ function ResizableHandle(props: ResizableHandleProps) {
     nextEl = null;
   };
 
+  // The full-strip drag highlight is only for `grip`/`none`; `line` shows its tint
+  // on the hairline alone (below), so the whole 8px zone must stay transparent.
+  const showStripHighlight = () => isDragging() && mode() !== 'line';
+  // Hairline tint (priority: dragging > hovering > rest). Inline CSS-var values
+  // with literal-hex fallbacks — this renders in a shadow root AND in light-DOM
+  // stories, where Tailwind arbitrary-value classes aren't reliably present.
+  const lineColor = () =>
+    isDragging()
+      ? 'var(--color-muted, #f4f4f5)'
+      : hovering()
+        ? 'var(--color-border, #e4e4e7)'
+        : 'transparent';
+
   return (
     <div
       class={cn('relative flex items-center justify-center', local.class)}
       style={{
         cursor: isStatic() ? 'default' : isHoriz() ? 'col-resize' : 'row-resize',
         [isHoriz() ? 'width' : 'height']: '8px',
-        'background': isDragging() ? 'var(--color-muted-foreground, #98989f)' : 'transparent',
-        'opacity': isDragging() ? '0.3' : '1',
+        'background': showStripHighlight() ? 'var(--color-muted-foreground, #98989f)' : 'transparent',
+        'opacity': showStripHighlight() ? '0.3' : '1',
       }}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
+      onPointerEnter={() => setHovering(true)}
+      onPointerLeave={() => setHovering(false)}
       onDblClick={handleDblClick}
       onKeyDown={handleKeyDown}
       role="separator"
@@ -505,7 +529,7 @@ function ResizableHandle(props: ResizableHandleProps) {
       aria-valuenow={valueNow()}
       {...rest}
     >
-      <Show when={local.withHandle}>
+      <Show when={mode() === 'grip'}>
         <div
           class={cn(
             'z-10 flex items-center justify-center',
@@ -529,6 +553,20 @@ function ResizableHandle(props: ResizableHandleProps) {
           </svg>
         </div>
       </Show>
+      <Show when={mode() === 'line'}>
+        {/* 1px hairline centered in the 8px grab zone; never eats the drag. */}
+        <div
+          class="pointer-events-none"
+          data-handle-line
+          style={{
+            position: 'absolute',
+            background: lineColor(),
+            ...(isHoriz()
+              ? { top: '0', bottom: '0', left: '50%', width: '1px', transform: 'translateX(-0.5px)' }
+              : { left: '0', right: '0', top: '50%', height: '1px', transform: 'translateY(-0.5px)' }),
+          }}
+        />
+      </Show>
     </div>
   );
 }
@@ -539,8 +577,8 @@ export interface ResizableProps {
   orientation?: Orientation;
   /** Fired on drag-end / keyboard resize / visibility change with the current panel sizes (percent). */
   onChange?: (sizes: number[]) => void;
-  /** Show a visible grip on each interactive handle. */
-  withHandle?: boolean;
+  /** Divider affordance on each interactive handle: `line` (default), `grip`, or `none`. */
+  handle?: 'line' | 'grip' | 'none';
   class?: string;
   /** Which panel index is maximized (null = none). Hides the others. */
   maximizedIndex?: number | null;
@@ -559,7 +597,7 @@ export interface ResizableProps {
  */
 function Resizable(props: ResizableProps) {
   const [local] = splitProps(props, [
-    'orientation', 'onChange', 'withHandle', 'class', 'children', 'maximizedIndex', 'onMaximizeChange',
+    'orientation', 'onChange', 'handle', 'class', 'children', 'maximizedIndex', 'onMaximizeChange',
   ]);
   const orientation = () => local.orientation ?? 'horizontal';
 
@@ -627,7 +665,7 @@ function Resizable(props: ResizableProps) {
             <>
               <Show when={i() > 0}>
                 <ResizableHandle
-                  withHandle={local.withHandle}
+                  handle={local.handle ?? 'line'}
                   static={panel.locked || renderPanels()[i() - 1]?.locked}
                   onPanelResize={() => emitChange()}
                 />

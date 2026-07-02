@@ -1,7 +1,7 @@
 import type { Component } from 'solid-js';
 import {
   Copy, ThumbsUp, ThumbsDown, RefreshCw, Pencil,
-  Share, Bookmark, Download, Link, Trash2, Check, X, Star, Flag, Reply, MoreHorizontal,
+  Share, Bookmark, Download, Link, Trash2, Check, X, Star, Flag, Reply, MoreHorizontal, Volume2,
 } from 'lucide-solid';
 import type { ChatMessageAction } from '../elements/chat-types';
 
@@ -33,6 +33,7 @@ const ICONS: Record<string, IconComponent> = {
   flag: Flag,
   reply: Reply,
   more: MoreHorizontal,
+  'volume-2': Volume2,
 };
 
 /** Resolve a curated icon name to its component, or `undefined` when unknown

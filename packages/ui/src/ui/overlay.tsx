@@ -206,7 +206,14 @@ export function usePosition(
     // on unmount via onCleanup.
     const cleanup = autoUpdate(ref, float, update);
     let ro: ResizeObserver | undefined;
-    if (typeof ResizeObserver === 'function') {
+    // Only a REAL element can be observed. The composer's trigger menu anchors to a
+    // VIRTUAL reference (a caret-rect object exposing just getBoundingClientRect, no
+    // DOM node); ResizeObserver.observe() throws "parameter 1 is not of type 'Element'"
+    // on it, and that uncaught throw aborts this effect before onCleanup registers,
+    // which corrupted the menu's reactive scope so it never re-opened after the first
+    // time. autoUpdate already tracks the virtual anchor; this ResizeObserver is a
+    // real-element-only add-on for ancestor/element resizes.
+    if (typeof ResizeObserver === 'function' && ref instanceof Element) {
       ro = new ResizeObserver(update);
       ro.observe(ref);
       for (const ancestor of getOverflowAncestors(ref)) {

@@ -1,0 +1,122 @@
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* Full-height workspace shell. Colors come from the kit's --color-* tokens, which
+   flip to dark under the `.dark` class we toggle on `.app`. <kai-resizable> fills
+   this box (its `:host` is `height:100%`) and owns the sidebar | main split, the
+   panel widths, and the draggable divider. */
+.app {
+  height: 100dvh;
+  background: var(--color-background);
+  color: var(--color-foreground);
+}
+
+/* The sidebar is its own surface: `--color-muted` sits a step off `--color-background`
+   in both themes (near-white grey in light, a shade lighter than the base in dark), so
+   the panel reads as distinct and the sidebar | main boundary is a visible color step at
+   rest. No border needed. <kai-resizable>'s `line` handle stays the hover/drag affordance
+   in the 8px gutter (transparent at rest, tints on hover/drag). A border set directly on a
+   kai-* element wouldn't track the shell's light/dark tokens anyway, since each element
+   re-scopes --color-border on its own :host. Collapse is handled by the parent
+   <ResizableItem collapsed> (the panel + its divider drop out), so the old
+   `.sidebar.collapsed` rule is gone. */
+.sidebar {
+  background: var(--color-muted);
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.sidebar > * {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100%;
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.bar-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.brand {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-muted-foreground);
+}
+
+/* Scroll container. Centers a fixed-width message column (ChatGPT-style) so lines
+   stay readable instead of spanning the full width. */
+.thread {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 1.25rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.thread-inner {
+  width: 100%;
+  max-width: 48rem;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* No top divider above the input — the composer floats against the thread. Extra
+   bottom padding lifts the input + hint off the viewport edge. */
+.composer {
+  padding: 0.75rem 1rem 1.5rem;
+}
+
+/* Match the composer to the centered message column above it. */
+.composer > * {
+  display: block;
+  width: 100%;
+  max-width: 48rem;
+  margin: 0 auto;
+}
+
+/* Muted, centered helper line under the input pointing out the / and @ triggers. */
+.composer-hint {
+  margin: 0.5rem auto 0;
+  font-size: 0.75rem;
+  text-align: center;
+  color: var(--color-muted-foreground);
+}
+
+.composer-hint kbd {
+  font-family: inherit;
+  font-size: 0.6875rem;
+  padding: 0.05rem 0.3rem;
+  border-radius: 0.25rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-muted);
+  color: var(--color-foreground);
+}

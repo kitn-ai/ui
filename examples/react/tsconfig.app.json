@@ -14,14 +14,6 @@
     "moduleDetection": "force",
     "noEmit": true,
 
-    /* Resolve @kitn.ai/ui/* against the local repo (matches vite.config alias)
-       so the example typechecks/builds the wrappers we're developing without a
-       published package. */
-    "baseUrl": ".",
-    "paths": {
-      "@kitn.ai/ui/react": ["../../frameworks/react/index.tsx"]
-    },
-
     /* React JSX */
     "jsx": "react-jsx",
 

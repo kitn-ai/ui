@@ -923,6 +923,8 @@ export interface KaiResizableElement extends HTMLElement {
   orientation?: "vertical" | "horizontal";
   /** Which item index is maximized (null = none). Declarative source of truth. */
   maximizedIndex?: null | number;
+  /** Divider affordance drawn inside each draggable handle's 8px grab zone: - `line` (default) — a 1px hairline, transparent at rest, tinting on hover/drag. - `grip` — a dotted grip handle. - `none` — no visible divider, just the invisible hit-area. The full grab zone and keyboard/ARIA behavior are identical for all three. */
+  handle?: "none" | "line" | "grip";
 }
 
 export interface KaiResizableItemElement extends HTMLElement {

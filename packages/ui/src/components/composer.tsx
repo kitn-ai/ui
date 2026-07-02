@@ -855,6 +855,10 @@ export function Composer(props: ComposerProps): JSX.Element {
         .kai-composer-pill-glyph svg { width: 1em; height: 1em; display: block; }
         /* The editable is the containing block for the placeholder pseudo-element. */
         [data-kai-composer-editable] { position: relative; }
+        /* While a pill is arrow-selected the pill IS the selection, so hide the text
+           caret so a blinking cursor doesn't sit beside the highlight box. Returns
+           the moment the pill selection clears (arrow off, type, click, backspace). */
+        [data-kai-composer-editable][data-pill-selected] { caret-color: transparent; }
         /* Placeholder via pseudo-element — exempt from axe color-contrast like a
            native <textarea> placeholder. position:absolute (with auto offsets =
            its static text-origin spot) takes it OUT of flow, so the caret sits at
@@ -874,6 +878,7 @@ export function Composer(props: ComposerProps): JSX.Element {
         <div
           ref={(el) => { editable = el; props.editableRef?.(el); }}
           data-kai-composer-editable
+          data-pill-selected={selectedPill() ? '' : undefined}
           data-placeholder={props.placeholder ?? ''}
           contentEditable={props.disabled ? false : ('plaintext-only' as unknown as boolean)}
           role="textbox"

@@ -1,4 +1,5 @@
 packages:
   - 'packages/*'
   - 'apps/*'
-# examples/* are added during the examples-refresh PRs (PR 2+)
+  - 'examples/react'
+# the remaining examples/* are added during the examples-refresh PRs (PR 2+)

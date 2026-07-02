@@ -216,7 +216,7 @@ export const FullExtensionLayout: Story = {
                 </div>
               </div>
             </ResizablePanel>
-            <ResizableHandle withHandle />
+            <ResizableHandle handle="grip" />
             <ResizablePanel class="overflow-hidden" defaultSize={35}>
               <div class="h-full flex flex-col overflow-hidden">
                 <div class="flex flex-col h-full min-w-0 overflow-hidden bg-card">
@@ -250,7 +250,7 @@ export const FullExtensionLayout: Story = {
   ),
   ...src(`<ResizablePanelGroup orientation="horizontal" class="flex-1 min-w-0 overflow-hidden">
   <ResizablePanel class="min-w-0 overflow-hidden">{/* article */}</ResizablePanel>
-  <ResizableHandle withHandle />
+  <ResizableHandle handle="grip" />
   <ResizablePanel defaultSize={35}>
     <ChatContainer class="flex-1 min-w-0 px-3 py-3">
       <Message>
@@ -273,7 +273,7 @@ export const InsideResizablePanel: Story = {
               <p class="text-foreground text-sm">Main content area, this simulates the article/transcript view</p>
             </div>
           </ResizablePanel>
-          <ResizableHandle withHandle />
+          <ResizableHandle handle="grip" />
           <ResizablePanel class="overflow-hidden" defaultSize={40}>
             <div class="h-full flex flex-col overflow-hidden">
               <div class="flex flex-col h-full min-w-0 overflow-hidden bg-card">
@@ -314,7 +314,7 @@ export const InsideResizablePanel: Story = {
   ),
   ...src(`<ResizablePanelGroup orientation="horizontal" class="flex-1 min-w-0 overflow-hidden">
   <ResizablePanel class="min-w-0 overflow-hidden">{/* main content */}</ResizablePanel>
-  <ResizableHandle withHandle />
+  <ResizableHandle handle="grip" />
   <ResizablePanel defaultSize={40}>
     <ChatContainer class="flex-1 min-w-0 px-3 py-3">
       <Message>

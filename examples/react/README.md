@@ -1,69 +1,54 @@
-# kai-chat — React example
+# React example — chat workspace, composed by hand
 
-This example shows how to use the `@kitn.ai/ui` web components inside a
-**React + Vite + TypeScript** application.
+A small chat **workspace assembled from `@kitn.ai/ui`'s individual elements** —
+a `<Conversations>` sidebar, a thread of `<Message>` elements, and a
+`<PromptInput>` composer — wired together with plain React state. The point is to
+show **how the pieces fit together**, not to drop in one batteries-included
+`<kai-chat>`/`<kai-workspace>` tag. This is the reference every other framework
+example copies.
 
-## What it demonstrates
+It runs with **no backend**: replies stream in from a local fake responder
+(`src/chat-data.ts`), so there's no API key and nothing to host. Swap
+`streamFakeReply` for a real model call (Anthropic, OpenAI, your own endpoint)
+and you have a real app.
 
-- **Registering custom elements** — a single side-effect import
-  (`import '@kitn.ai/ui/elements'`) registers `<kai-chat>`,
-  `<kai-conversations>`, and `<kai-prompt-input>` globally.
+## How it works
 
-- **Setting properties via `ref` + `useEffect`** — React only sets *attributes*
-  on custom elements. Objects like `messages` and `conversations` must be
-  assigned as DOM *properties*. The pattern is:
+- `src/main.tsx` registers the `kai-*` custom elements
+  (`import '@kitn.ai/ui/elements'`) and loads the plain `--color-*` tokens
+  (`import '@kitn.ai/ui/theme.tokens.css'`) used by the surrounding shell.
+- `src/App.tsx` composes three elements by hand:
+  - `<Conversations>` — the sidebar list, fed a `conversations` array; emits
+    `onConversationSelect` / `onNewChat`.
+  - `<Message>` × N — the thread, one element per message, mapped from state.
+  - `<PromptInput>` — the composer at the bottom; `onSubmit` appends the user's
+    message and streams the reply.
+- `useKaiChat` owns the message array + streaming (`append`, `setMessages`,
+  `streamAssistant`, `loading`); everything else (active conversation, theme) is
+  plain React `useState`.
+- A light/dark toggle (top-right) drives each element's `theme` prop and a
+  `.dark` class on the shell, so the kit's `--color-*` tokens flip for your own
+  chrome too.
 
-  ```tsx
-  const chatRef = useRef<HTMLElement>(null);
+The example consumes the kit from this monorepo via `workspace:*`, so it always
+builds against the local `@kitn.ai/ui` source.
 
-  useEffect(() => {
-    const el = chatRef.current;
-    if (!el) return;
-    (el as any).messages = messages;
-    (el as any).loading = loading;
-  }, [messages, loading]);
+## Run it
 
-  // In JSX:
-  <kai-chat ref={chatRef} />
-  ```
-
-- **Listening for custom events** — `submit`, `messageaction`, `select`,
-  `newchat`, and `togglesidebar` are native `CustomEvent`s dispatched on the
-  element. Wire them with `addEventListener` inside a `useEffect`, and clean up
-  with the returned function:
-
-  ```tsx
-  useEffect(() => {
-    const el = chatRef.current;
-    if (!el) return;
-    const onSubmit = (e: Event) => { /* handle (e as CustomEvent).detail */ };
-    el.addEventListener('kai-submit', onSubmit);
-    return () => el.removeEventListener('kai-submit', onSubmit);
-  }, [activeId, allMessages]);
-  ```
-
-- **JSX type declarations** — `src/global.d.ts` extends
-  `React.JSX.IntrinsicElements` so TypeScript accepts the custom-element tags
-  without errors.
-
-- **Simulated streaming** — the `submit` handler streams a canned reply
-  word-by-word to show how progressive content updates would feel in a real app.
-
-- **Theme toggle** — a button cycles between `light` and `dark`, passed to both
-  elements as the `theme` property.
-
-## Getting started
+From the repo root, build the kit once so its `dist/` exists (the example imports
+the compiled `@kitn.ai/ui/elements` + `@kitn.ai/ui/theme.tokens.css`), then start
+the example:
 
 ```bash
-npm install
-npm run dev
+pnpm exec nx build ui
+pnpm --filter @kitn.ai/ui-example-react dev
 ```
 
-Open <http://localhost:5173> in your browser.
+Open the URL Vite prints (default <http://localhost:5173>).
 
-## Build
+## Build / typecheck
 
 ```bash
-npm run build      # tsc + vite build
-npm run typecheck  # tsc --noEmit (type-check only)
+pnpm --filter @kitn.ai/ui-example-react typecheck
+pnpm --filter @kitn.ai/ui-example-react build
 ```
