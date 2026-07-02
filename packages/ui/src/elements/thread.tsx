@@ -1,0 +1,119 @@
+import { createSignal, onMount, onCleanup } from 'solid-js';
+import { defineWebComponent } from './define';
+import { readSlots, type SlotDef } from './slots';
+import { Thread, type ThreadController } from '../components/thread';
+import type { ChatMessage } from './chat-types';
+import type { ProseSize } from '../primitives/chat-config';
+
+/**
+ * Composition slots of `<kai-thread>`. Kept as a LOCAL registry for phase 1 (not
+ * yet wired into the shared `ELEMENT_COMPOSITION` in `slots.ts`) so the message-
+ * list decomposition lands additively; registering it there for docs / the `kai`
+ * MCP is a follow-up.
+ */
+const THREAD_SLOTS: SlotDef[] = [
+  {
+    name: 'empty',
+    mode: 'replace',
+    doc: 'Custom zero-state rendered in the message area while the thread is empty; replaces the built-in default.',
+  },
+];
+
+interface Props extends Record<string, unknown> {
+  /** The full message thread to render, newest last. Each entry carries its role,
+   *  content, and optional reasoning/tools/attachments/actions/avatar. Set as a JS
+   *  property (`el.messages = [...]`); a NEW array reference per streaming chunk
+   *  re-renders (mutating in place does not). */
+  messages?: ChatMessage[];
+  /** Show a typing indicator on the pending assistant turn — set while awaiting
+   *  the assistant's reply. */
+  loading?: boolean;
+  /** Body/prose font scale for rendered markdown (`'xs' | 'sm' | 'base' | 'lg'`).
+   *  Defaults to `'sm'`. */
+  proseSize?: ProseSize;
+  /** Shiki theme name for syntax-highlighted code blocks (e.g.
+   *  `'github-dark-dimmed'`). */
+  codeTheme?: string;
+  /** Enable Shiki syntax highlighting in code blocks. Turn off to render plain
+   *  `<pre>` blocks (lighter, no highlighter load). Default true. */
+  codeHighlight?: boolean;
+  /** Whether each message's action bar is always visible (`'always'`, default) or
+   *  only revealed on hover of that message row (`'hover'`). */
+  actionsReveal?: 'always' | 'hover';
+  /** Show the scroll-to-bottom button inside the scroll area. Default true. */
+  scrollButton?: boolean;
+  /** Extra classes applied to the thread's inner root. */
+  class?: string;
+}
+
+/** Events fired by `<kai-thread>`. */
+interface Events extends Record<string, unknown> {
+  /** A message's action button was clicked. `action` is the built-in name (`copy`
+   *  / `like` / `dislike` / `regenerate` / `edit`) or a custom id. `state` is
+   *  present only for the toggleable feedback votes: `'on'` when a like/dislike is
+   *  set, `'off'` when re-tapped to clear. */
+  'kai-message-action': { messageId: string; action: string; state?: 'on' | 'off' };
+}
+
+/**
+ * `<kai-thread>` — the scrolling message list of a chat, as a standalone
+ * composable element: one message row per `messages` entry with markdown / code
+ * highlight / reasoning + tool panels / avatars / action row, stick-to-bottom
+ * scroll with a scroll-to-bottom button, an optional typing indicator, and an
+ * `empty` slot. It fills the height its parent gives it and scrolls internally
+ * (`:host { display:block; height:100% }`). No composer, header, suggestions, or
+ * sidebar — pair it with `<kai-prompt-input>` and your own layout, or reach for
+ * the batteries-included `<kai-chat>`. Emits `kai-message-action`; exposes
+ * `scrollToBottom()`.
+ */
+defineWebComponent<Props, Events>('kai-thread', {
+  messages: undefined,
+  loading: false,
+  proseSize: 'sm',
+  codeTheme: 'github-dark-dimmed',
+  codeHighlight: true,
+  actionsReveal: 'always',
+  scrollButton: true,
+  class: undefined,
+}, (props, { element, dispatch, flag, expose }) => {
+  let controller: ThreadController | undefined;
+
+  // Detect whether the consumer projected `slot="empty"` content, so the built-in
+  // default only renders when they did NOT.
+  const [slots, setSlots] = createSignal<Record<string, boolean>>({});
+  onMount(() => {
+    const read = () => setSlots(readSlots(element, THREAD_SLOTS));
+    read();
+    const observer = new MutationObserver(read);
+    observer.observe(element, { childList: true });
+    onCleanup(() => observer.disconnect());
+  });
+
+  // Imperative method API — forward the thread's scroll control onto the host.
+  expose({
+    /** Scroll the message list to the bottom (default `'smooth'`). */
+    scrollToBottom: (behavior?: ScrollBehavior) => controller?.scrollToBottom(behavior),
+  });
+
+  return (
+    <>
+      {/* Fill the height the parent gives us and scroll internally, like
+          <kai-resizable>. Consumers only need to give a parent (or the element) a
+          height. */}
+      <style>{':host{display:block;height:100%}'}</style>
+      <Thread
+        class={props.class as string | undefined}
+        messages={(props.messages as ChatMessage[] | undefined) ?? []}
+        loading={flag('loading')}
+        proseSize={props.proseSize as ProseSize}
+        codeTheme={props.codeTheme as string}
+        codeHighlight={flag('codeHighlight')}
+        actionsReveal={props.actionsReveal as 'always' | 'hover'}
+        scrollButton={props.scrollButton !== false}
+        empty={slots()['empty'] ? <slot name="empty" /> : undefined}
+        onMessageAction={(detail) => dispatch('kai-message-action', detail)}
+        controllerRef={(c) => (controller = c)}
+      />
+    </>
+  );
+});

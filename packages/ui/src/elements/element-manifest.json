@@ -4,6 +4,7 @@
     "kai-prompt-input": "prompt-input",
     "kai-chat": "chat",
     "kai-workspace": "chat-workspace",
+    "kai-thread": "thread",
     "kai-thinking-bar": "thinking-bar",
     "kai-model-switcher": "model-switcher",
     "kai-attachments": "attachments",
@@ -90,6 +91,9 @@
     ],
     "chat-workspace": [
       "kai-workspace"
+    ],
+    "thread": [
+      "kai-thread"
     ],
     "thinking-bar": [
       "kai-thinking-bar"
