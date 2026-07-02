@@ -8,6 +8,7 @@ import {
   House, Clock, Lock, Box, Briefcase, PanelLeft, Circle, SlidersHorizontal, Workflow, SquarePen,
   Archive, ArrowUp, Bookmark, Copy, Ellipsis, ExternalLink, Flag,
   GitBranch, GitPullRequest, ListFilter, RotateCw,
+  Moon, Sun,
 } from 'lucide-solid';
 
 type IconComponent = Component<{ class?: string }>;
@@ -64,6 +65,9 @@ const NAMED_ICONS: Record<string, IconComponent> = {
   'git-pull-request': GitPullRequest,
   'list-filter': ListFilter,
   'rotate-cw': RotateCw,
+  // Theme / appearance glyphs.
+  moon: Moon,
+  sun: Sun,
 };
 
 /** Render an item icon.

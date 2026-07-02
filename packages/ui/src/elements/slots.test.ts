@@ -248,6 +248,7 @@ describe('ELEMENT_COMPOSITION registry (single source of truth the build extract
       'kai-skeleton',
       'kai-status',
       'kai-tabs',
+      'kai-thread',
       'kai-voice-output',
       'kai-workspace',
     ]);

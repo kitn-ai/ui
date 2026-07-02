@@ -6778,6 +6778,114 @@
     "tokens": []
   },
   {
+    "tag": "kai-thread",
+    "className": "KaiThreadElement",
+    "displayName": "Thread",
+    "props": [
+      {
+        "name": "messages",
+        "type": "undefined | { id: string; role: \"user\" | \"assistant\"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | (\"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string }; feedback?: undefined | \"like\" | \"dislike\" }[]",
+        "optional": true,
+        "scalar": false,
+        "description": "The full message thread to render, newest last. Each entry carries its role, content, and optional reasoning/tools/attachments/actions/avatar. Set as a JS property (`el.messages = [...]`); a NEW array reference per streaming chunk re-renders (mutating in place does not).",
+        "displayType": "undefined | { id: string; role: \"user\" | \"assistant\"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | (\"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string }; feedback?: undefined | \"like\" | \"dislike\" }[]"
+      },
+      {
+        "name": "loading",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Show a typing indicator on the pending assistant turn — set while awaiting the assistant's reply.",
+        "default": "false",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "proseSize",
+        "type": "undefined | \"sm\" | \"lg\" | \"xs\" | \"base\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Body/prose font scale for rendered markdown (`'xs' | 'sm' | 'base' | 'lg'`). Defaults to `'sm'`.",
+        "default": "'sm'",
+        "displayType": "undefined | \"sm\" | \"lg\" | \"xs\" | \"base\""
+      },
+      {
+        "name": "codeTheme",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Shiki theme name for syntax-highlighted code blocks (e.g. `'github-dark-dimmed'`).",
+        "default": "'github-dark-dimmed'",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "codeHighlight",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Enable Shiki syntax highlighting in code blocks. Turn off to render plain `<pre>` blocks (lighter, no highlighter load). Default true.",
+        "default": "true",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "actionsReveal",
+        "type": "undefined | \"always\" | \"hover\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Whether each message's action bar is always visible (`'always'`, default) or only revealed on hover of that message row (`'hover'`).",
+        "default": "'always'",
+        "displayType": "undefined | \"always\" | \"hover\""
+      },
+      {
+        "name": "scrollButton",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Show the scroll-to-bottom button inside the scroll area. Default true.",
+        "default": "true",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "class",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Extra classes applied to the thread's inner root.",
+        "displayType": "undefined | string"
+      }
+    ],
+    "events": [
+      {
+        "name": "kai-message-action",
+        "detail": "{ messageId: string; action: string; state?: undefined | \"on\" | \"off\" }",
+        "description": "A message's action button was clicked. `action` is the built-in name (`copy` / `like` / `dislike` / `regenerate` / `edit`) or a custom id. `state` is present only for the toggleable feedback votes: `'on'` when a like/dislike is set, `'off'` when re-tapped to clear.",
+        "displayDetail": "{ messageId: string; action: string; state?: undefined | \"on\" | \"off\" }"
+      }
+    ],
+    "methods": [
+      {
+        "name": "scrollToBottom",
+        "params": "behavior?: ScrollBehavior",
+        "returns": "void",
+        "description": "Scroll the message list to the bottom (default `'smooth'`)."
+      }
+    ],
+    "composedFrom": [
+      {
+        "name": "Thread",
+        "group": "Components",
+        "storyId": "solid-advanced-elements-thread--docs"
+      }
+    ],
+    "tokens": [],
+    "slots": [
+      {
+        "name": "empty",
+        "mode": "replace",
+        "doc": "Custom zero-state rendered in the message area while the thread is empty; replaces the built-in default."
+      }
+    ]
+  },
+  {
     "tag": "kai-toast-region",
     "className": "KaiToastRegionElement",
     "displayName": "ToastRegion",

@@ -11,6 +11,7 @@ import { createWebComponent, registerAll, type WebComponentProps } from './runti
 export { registerAll };
 export { useKaiChat } from './use-kai-chat';
 export type { UseKaiChatOptions, KaiChatController, ChatMessage } from './use-kai-chat';
+export { useVoiceInput } from './use-voice-input';
 
 
 export interface AgentCardProps extends WebComponentProps {
@@ -1693,6 +1694,34 @@ export const ThinkingBar = /*#__PURE__*/ createWebComponent<ThinkingBarProps>(
   ["theme","text","stoppable","stopLabel"],
   { onStop: 'kai-stop' },
   () => import('@kitn.ai/ui/elements/thinking-bar'),
+);
+
+export interface ThreadProps extends WebComponentProps {
+  /** The full message thread to render, newest last. Each entry carries its role, content, and optional reasoning/tools/attachments/actions/avatar. Set as a JS property (`el.messages = [...]`); a NEW array reference per streaming chunk re-renders (mutating in place does not). */
+  messages?: { id: string; role: "user" | "assistant"; content: string; reasoning?: { text: string; label?: string }; tools?: { type: string; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: Record<string, unknown>; output?: Record<string, unknown>; toolCallId?: string; errorText?: string }[]; attachments?: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }[]; actions?: ("copy" | "like" | "dislike" | "regenerate" | "edit" | { id: string; label: string; icon?: string; tooltip?: string })[]; avatar?: { src?: string; fallback?: string; alt?: string }; feedback?: "like" | "dislike" }[];
+  /** Show a typing indicator on the pending assistant turn — set while awaiting the assistant's reply. */
+  loading?: boolean;
+  /** Body/prose font scale for rendered markdown (`'xs' | 'sm' | 'base' | 'lg'`). Defaults to `'sm'`. */
+  proseSize?: "sm" | "lg" | "xs" | "base";
+  /** Shiki theme name for syntax-highlighted code blocks (e.g. `'github-dark-dimmed'`). */
+  codeTheme?: string;
+  /** Enable Shiki syntax highlighting in code blocks. Turn off to render plain `<pre>` blocks (lighter, no highlighter load). Default true. */
+  codeHighlight?: boolean;
+  /** Whether each message's action bar is always visible (`'always'`, default) or only revealed on hover of that message row (`'hover'`). */
+  actionsReveal?: "always" | "hover";
+  /** Show the scroll-to-bottom button inside the scroll area. Default true. */
+  scrollButton?: boolean;
+  /** Extra classes applied to the thread's inner root. */
+  class?: string;
+  /** A message's action button was clicked. `action` is the built-in name (`copy` / `like` / `dislike` / `regenerate` / `edit`) or a custom id. `state` is present only for the toggleable feedback votes: `'on'` when a like/dislike is set, `'off'` when re-tapped to clear. */
+  onMessageAction?: (event: CustomEvent<{ messageId: string; action: string; state?: undefined | "on" | "off" }>) => void;
+}
+
+export const Thread = /*#__PURE__*/ createWebComponent<ThreadProps>(
+  'kai-thread',
+  ["theme","messages","loading","proseSize","codeTheme","codeHighlight","actionsReveal","scrollButton","class"],
+  { onMessageAction: 'kai-message-action' },
+  () => import('@kitn.ai/ui/elements/thread'),
 );
 
 export interface ToastRegionProps extends WebComponentProps {

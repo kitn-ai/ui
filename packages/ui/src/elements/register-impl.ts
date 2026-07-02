@@ -7,6 +7,8 @@ import './conversation-list';
 import './prompt-input';
 import './chat';
 import './chat-workspace';
+// Message-list composable (the scrolling thread slice, sans composer/header)
+import './thread';
 // Composable leaf elements (spike — see docs/handoff + examples/composable)
 import './thinking-bar';
 import './model-switcher';

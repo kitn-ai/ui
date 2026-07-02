@@ -2,7 +2,7 @@ import { useCallback, useRef } from 'react';
 import { PromptInput } from '@kitn.ai/ui/react';
 import type { PromptInputProps } from '@kitn.ai/ui/react';
 import type { Theme } from '../App';
-import { useVoiceInput } from '../hooks';
+import { useVoiceInput } from '@kitn.ai/ui/react';
 
 interface ComposerProps {
   theme: Theme;

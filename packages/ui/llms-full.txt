@@ -3,7 +3,7 @@
 
 # @kitn.ai/ui
 
-> Framework-agnostic, Shadow-DOM web components for building AI chat interfaces — works in React, Vue, Angular, Svelte, or plain HTML. 78 custom elements, every one prefixed `kai-` (e.g. `<kai-chat>`, `<kai-artifact>`): streaming responses, markdown + code rendering, reasoning/tool panels, attachments, conversation sidebar, voice input. Zero framework dependency for consumers; the SolidJS runtime it is authored in is bundled in, so the host needs nothing.
+> Framework-agnostic, Shadow-DOM web components for building AI chat interfaces — works in React, Vue, Angular, Svelte, or plain HTML. 79 custom elements, every one prefixed `kai-` (e.g. `<kai-chat>`, `<kai-artifact>`): streaming responses, markdown + code rendering, reasoning/tool panels, attachments, conversation sidebar, voice input. Zero framework dependency for consumers; the SolidJS runtime it is authored in is bundled in, so the host needs nothing.
 
 ## Install
 
@@ -37,7 +37,7 @@ Drop an element into any framework (React, Vue, plain HTML). Data in via JS prop
 - `<kai-prompt-input>` — standalone composer with send button.
 
 **Layer 2 — composable primitives** (`import { … } from '@kitn.ai/ui'`):
-All 78 elements are also exported individually. Use them for custom layouts or features `<kai-chat>` does not expose (ChainOfThought, FeedbackBar, ThinkingBar, VoiceInput, …). Your bundler tree-shakes the rest.
+All 79 elements are also exported individually. Use them for custom layouts or features `<kai-chat>` does not expose (ChainOfThought, FeedbackBar, ThinkingBar, VoiceInput, …). Your bundler tree-shakes the rest.
 
 ## Key rules for the web components
 
@@ -99,7 +99,7 @@ For Tailwind builds: `@import "@kitn.ai/ui/theme.css"` in your CSS.
 
 ## Docs
 
-- Full element reference (all 78 elements, every prop/event): ./llms-full.txt — https://kitn.dev/llms-full.txt
+- Full element reference (all 79 elements, every prop/event): ./llms-full.txt — https://kitn.dev/llms-full.txt
 - Machine-readable Custom Elements Manifest: https://unpkg.com/@kitn.ai/ui/dist/custom-elements.json
 - Working examples: https://github.com/kitn-ai/ui/tree/main/examples
 - Storybook: https://storybook.kitn.dev
@@ -173,7 +173,7 @@ The same rule applies to every array/object property (`models`, `context`, `sugg
 
 ---
 
-## Element reference (78 elements, generated from custom-elements.json)
+## Element reference (79 elements, generated from custom-elements.json)
 
 Every element also accepts the `theme` attribute. Array/object properties are marked with a `—` attribute: they must be set as JS properties.
 
@@ -1961,6 +1961,35 @@ _No events._
 | Event | `detail` type | Description |
 |---|---|---|
 | `kai-stop` | `CustomEvent` | The "stop / answer now" affordance was clicked. |
+
+---
+
+### `kai-thread` / `Thread`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `messages` | — | `undefined \| { id: string; role: "user" \| "assistant"; content: string; reasoning?: undefined \| { text: string; label?: undefined \| string }; tools?: undefined \| { type: string; state: "input-streaming" \| "input-available" \| "output-available" \| "output-error"; input?: undefined \| Record<string, unknown>; output?: undefined \| Record<string, unknown>; toolCallId?: undefined \| string; errorText?: undefined \| string }[]; attachments?: undefined \| { id: string; type: "file" \| "source-document"; filename?: undefined \| string; mediaType?: undefined \| string; url?: undefined \| string; title?: undefined \| string }[]; actions?: undefined \| ("copy" \| "like" \| "dislike" \| "regenerate" \| "edit" \| { id: string; label: string; icon?: undefined \| string; tooltip?: undefined \| string })[]; avatar?: undefined \| { src?: undefined \| string; fallback?: undefined \| string; alt?: undefined \| string }; feedback?: undefined \| "like" \| "dislike" }[]` | The full message thread to render, newest last. Each entry carries its role, content, and optional reasoning/tools/attachments/actions/avatar. Set as a JS property (`el.messages = [...]`); a NEW array reference per streaming chunk re-renders (mutating in place does not). |
+| `loading` | `loading` | `undefined \| false \| true` | Show a typing indicator on the pending assistant turn — set while awaiting the assistant's reply. |
+| `proseSize` | `prose-size` | `undefined \| "sm" \| "lg" \| "xs" \| "base"` | Body/prose font scale for rendered markdown (`'xs' \| 'sm' \| 'base' \| 'lg'`). Defaults to `'sm'`. |
+| `codeTheme` | `code-theme` | `undefined \| string` | Shiki theme name for syntax-highlighted code blocks (e.g. `'github-dark-dimmed'`). |
+| `codeHighlight` | `code-highlight` | `undefined \| false \| true` | Enable Shiki syntax highlighting in code blocks. Turn off to render plain `<pre>` blocks (lighter, no highlighter load). Default true. |
+| `actionsReveal` | `actions-reveal` | `undefined \| "always" \| "hover"` | Whether each message's action bar is always visible (`'always'`, default) or only revealed on hover of that message row (`'hover'`). |
+| `scrollButton` | `scroll-button` | `undefined \| false \| true` | Show the scroll-to-bottom button inside the scroll area. Default true. |
+| `class` | `class` | `undefined \| string` | Extra classes applied to the thread's inner root. |
+
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `kai-message-action` | `CustomEvent<{ messageId: string; action: string; state?: undefined \| "on" \| "off" }>` | A message's action button was clicked. `action` is the built-in name (`copy` / `like` / `dislike` / `regenerate` / `edit`) or a custom id. `state` is present only for the toggleable feedback votes: `'on'` when a like/dislike is set, `'off'` when re-tapped to clear. |
+
+**Slots** (project your own markup via `slot="name"` on a light-DOM child):
+
+| Slot | Mode | Description |
+|---|---|---|
+| `empty` | replace | Custom zero-state rendered in the message area while the thread is empty; replaces the built-in default. |
 
 ---
 

@@ -80,6 +80,7 @@ import { createWebComponent, registerAll, type WebComponentProps } from './runti
 export { registerAll };
 export { useKaiChat } from './use-kai-chat';
 export type { UseKaiChatOptions, KaiChatController, ChatMessage } from './use-kai-chat';
+export { useVoiceInput } from './use-voice-input';
 ${importLines}
 
 ${blocks}

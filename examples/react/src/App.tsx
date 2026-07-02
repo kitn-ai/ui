@@ -17,12 +17,13 @@ export type Theme = 'light' | 'dark';
  *   <Resizable>/<ResizableItem>  — the draggable sidebar | main split (the divider
  *                                  is the kit's default `line` hairline)
  *   <Conversations>  — the sidebar list (fed `conversations`, emits select/new)
- *   <Message> x N    — the thread: one element per message, mapped from state
+ *   <Thread>         — the scrolling message list (kai-thread; stick-to-bottom built in)
  *   <PromptInput>    — the composer at the bottom
  *
  * The pieces are split into `components/` (the UI subcomponents + the example's own
- * moon/sun icons) and `hooks/` (the imperative bits: voice input, auto-scroll, the
- * conversation stash), so the structure reads top-down. `useKaiChat` owns the
+ * moon/sun icons) and `hooks/` (the
+ * conversation stash; voice input + the thread scroll now come from the kit), so the
+ * structure reads top-down. `useKaiChat` owns the
  * message array + streaming; everything else is plain React state. Swap
  * `streamFakeReply` for a real model call to ship a real app.
  */
@@ -52,18 +53,19 @@ export default function App() {
           to the new `line` hairline (transparent at rest, tinting on hover/drag);
           collapsing the sidebar maps to <ResizableItem collapsed>. */}
       <Resizable theme={theme} orientation="horizontal">
-        <ResizableItem size="280px" min="220px" max="420px" collapsed={collapsed}>
+        <ResizableItem theme={theme} size="280px" min="220px" max="420px" collapsed={collapsed}>
           <Sidebar
             theme={theme}
             conversations={conversations}
             activeId={activeId}
+            collapsed={collapsed}
             onSelect={selectConversation}
             onNewChat={newChat}
             onToggle={() => setCollapsed((c) => !c)}
           />
         </ResizableItem>
 
-        <ResizableItem>
+        <ResizableItem theme={theme}>
           <main className="main">
             <header className="bar">
               <div className="bar-left">
