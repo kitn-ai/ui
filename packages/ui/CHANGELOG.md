@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.19.0](https://github.com/kitn-ai/ui/compare/@kitn.ai/ui-v0.18.2...@kitn.ai/ui-v0.19.0) (2026-07-02)
+
+
+### Features
+
+* **composables:** kai-thread element, useVoiceInput hook, moon/sun icons ([#136](https://github.com/kitn-ai/ui/issues/136)) ([7ea6f9e](https://github.com/kitn-ai/ui/commit/7ea6f9e7031d1ea695668f2b8629b0fdbe7853b1))
+* **resizable:** handle style (line default) + React starter example ([#134](https://github.com/kitn-ai/ui/issues/134)) ([a786fa4](https://github.com/kitn-ai/ui/commit/a786fa4dceec75479254225172c497e6aaa6f52f))
+
 ## [0.18.2](https://github.com/kitn-ai/ui/compare/@kitn.ai/ui-v0.18.1...@kitn.ai/ui-v0.18.2) (2026-06-30)
 
 
