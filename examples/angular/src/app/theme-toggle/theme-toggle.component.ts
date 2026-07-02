@@ -1,7 +1,7 @@
 import { CUSTOM_ELEMENTS_SCHEMA, Component, input, output } from '@angular/core';
-import type { Theme } from './types';
-import { MoonIconComponent } from './icons/moon-icon.component';
-import { SunIconComponent } from './icons/sun-icon.component';
+import type { Theme } from '../types';
+import { MoonIconComponent } from '../icons/moon-icon/moon-icon.component';
+import { SunIconComponent } from '../icons/sun-icon/sun-icon.component';
 
 /**
  * Light/dark switch for the top bar. Shows the moon in light mode (tap -> dark) and
@@ -14,21 +14,7 @@ import { SunIconComponent } from './icons/sun-icon.component';
   standalone: true,
   imports: [MoonIconComponent, SunIconComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
-  template: `
-    <kai-button
-      [theme]="theme()"
-      variant="ghost"
-      size="icon"
-      label="Toggle light/dark theme"
-      (click)="toggle.emit()"
-    >
-      @if (theme() === 'light') {
-        <app-moon-icon slot="icon" aria-hidden="true"></app-moon-icon>
-      } @else {
-        <app-sun-icon slot="icon" aria-hidden="true"></app-sun-icon>
-      }
-    </kai-button>
-  `,
+  templateUrl: './theme-toggle.component.html',
 })
 export class ThemeToggleComponent {
   theme = input.required<Theme>();

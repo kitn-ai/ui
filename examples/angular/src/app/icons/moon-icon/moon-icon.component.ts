@@ -9,20 +9,7 @@ import { Component } from '@angular/core';
 @Component({
   selector: 'app-moon-icon',
   standalone: true,
-  template: `
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    >
-      <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
-    </svg>
-  `,
-  styles: [':host { display: inline-flex; }'],
+  templateUrl: './moon-icon.component.html',
+  styleUrl: './moon-icon.component.css',
 })
 export class MoonIconComponent {}

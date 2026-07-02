@@ -3,10 +3,10 @@ import { CONVERSATIONS, THREADS, SUGGESTIONS, TRIGGERS, newId, streamFakeReply }
 import type { Theme } from './types';
 import { createChat } from './state/chat.store';
 import { createConversations } from './state/conversations.store';
-import { SidebarComponent } from './sidebar.component';
-import { ThreadViewComponent } from './thread-view.component';
-import { ComposerComponent } from './composer.component';
-import { ThemeToggleComponent } from './theme-toggle.component';
+import { SidebarComponent } from './sidebar/sidebar.component';
+import { ThreadViewComponent } from './thread-view/thread-view.component';
+import { ComposerComponent } from './composer/composer.component';
+import { ThemeToggleComponent } from './theme-toggle/theme-toggle.component';
 
 /**
  * A mini chat workspace COMPOSED BY HAND from @kitn.ai/ui's individual elements —
@@ -33,59 +33,8 @@ import { ThemeToggleComponent } from './theme-toggle.component';
   standalone: true,
   imports: [SidebarComponent, ThreadViewComponent, ComposerComponent, ThemeToggleComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
-  template: `
-    <div class="app" [class.dark]="theme() === 'dark'">
-      <!-- <kai-resizable> owns the sidebar width + the divider. The handle defaults to
-           the \`line\` hairline (transparent at rest, tinting on hover/drag); collapsing
-           the sidebar maps to <kai-resizable-item [collapsed]>. Pass \`theme\` to the group
-           AND every item so slotted chrome inherits the right light/dark tokens. -->
-      <kai-resizable [theme]="theme()" orientation="horizontal">
-        <kai-resizable-item [theme]="theme()" size="280px" min="220px" max="420px" [collapsed]="collapsed()">
-          <app-sidebar
-            [theme]="theme()"
-            [conversations]="conversations()"
-            [activeId]="activeId()"
-            [collapsed]="collapsed()"
-            (select)="selectConversation($event)"
-            (newChat)="newChat()"
-            (toggle)="collapsed.set(!collapsed())"
-          ></app-sidebar>
-        </kai-resizable-item>
-
-        <kai-resizable-item [theme]="theme()">
-          <main class="main">
-            <header class="bar">
-              <div class="bar-left">
-                @if (collapsed()) {
-                  <kai-button
-                    [theme]="theme()"
-                    variant="ghost"
-                    size="icon"
-                    icon="panel-left"
-                    label="Show sidebar"
-                    (click)="collapsed.set(false)"
-                  ></kai-button>
-                }
-                <span class="brand">&#64;kitn.ai/ui · composed chat</span>
-              </div>
-              <app-theme-toggle [theme]="theme()" (toggle)="toggleTheme()"></app-theme-toggle>
-            </header>
-
-            <app-thread-view [theme]="theme()" [messages]="chat.messages()"></app-thread-view>
-
-            <app-composer
-              [theme]="theme()"
-              [loading]="chat.loading()"
-              [suggestions]="suggestions()"
-              [triggers]="triggers"
-              (submit)="send($event)"
-              (suggestion)="send($event)"
-            ></app-composer>
-          </main>
-        </kai-resizable-item>
-      </kai-resizable>
-    </div>
-  `,
+  templateUrl: './app.component.html',
+  styleUrl: './app.component.css',
 })
 export class AppComponent {
   readonly theme = signal<Theme>('light');

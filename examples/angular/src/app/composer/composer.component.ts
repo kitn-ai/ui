@@ -1,6 +1,6 @@
 import { CUSTOM_ELEMENTS_SCHEMA, Component, ElementRef, ViewChild, input, output } from '@angular/core';
-import type { Theme } from './types';
-import { useVoiceInput } from './state/voice-input';
+import type { Theme } from '../types';
+import { useVoiceInput } from '../state/voice-input';
 
 /** The imperative surface of <kai-prompt-input> this composer drives. */
 type PromptInputEl = HTMLElement & { value?: unknown; clear?: () => void };
@@ -24,26 +24,8 @@ type PromptInputEl = HTMLElement & { value?: unknown; clear?: () => void };
   selector: 'app-composer',
   standalone: true,
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
-  template: `
-    <div class="composer">
-      <kai-prompt-input
-        #prompt
-        [theme]="theme()"
-        placeholder="Message the demo…"
-        [loading]="loading()"
-        [suggestions]="suggestions()"
-        [triggers]="triggers()"
-        [voice]="true"
-        (kai-voice)="handleVoice()"
-        (kai-value-change)="onValueChange($event)"
-        (kai-submit)="onSubmit($event)"
-        (kai-suggestion-click)="onSuggestionClick($event)"
-      ></kai-prompt-input>
-      <p class="composer-hint">
-        Type <kbd>/</kbd> for skills · <kbd>&#64;</kbd> for agents
-      </p>
-    </div>
-  `,
+  templateUrl: './composer.component.html',
+  styleUrl: './composer.component.css',
 })
 export class ComposerComponent {
   theme = input.required<Theme>();

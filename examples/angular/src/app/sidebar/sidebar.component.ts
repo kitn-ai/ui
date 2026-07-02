@@ -1,6 +1,6 @@
 import { CUSTOM_ELEMENTS_SCHEMA, Component, input, output } from '@angular/core';
-import type { Theme } from './types';
-import type { Conversation } from '../chat-data';
+import type { Theme } from '../types';
+import type { Conversation } from '../../chat-data';
 
 /**
  * The conversation rail — a thin wrapper over `<kai-conversations>`. The `.sidebar`
@@ -21,20 +21,8 @@ import type { Conversation } from '../chat-data';
   selector: 'app-sidebar',
   standalone: true,
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
-  template: `
-    <aside class="sidebar">
-      <kai-conversations
-        [theme]="theme()"
-        [groups]="emptyGroups"
-        [conversations]="conversations()"
-        [attr.active-id]="activeId()"
-        [collapsed]="collapsed()"
-        (kai-conversation-select)="onSelect($event)"
-        (kai-new-chat)="newChat.emit()"
-        (kai-toggle-sidebar)="toggle.emit()"
-      ></kai-conversations>
-    </aside>
-  `,
+  templateUrl: './sidebar.component.html',
+  styleUrl: './sidebar.component.css',
 })
 export class SidebarComponent {
   theme = input.required<Theme>();

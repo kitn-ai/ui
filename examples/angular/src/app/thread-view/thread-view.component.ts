@@ -1,6 +1,6 @@
 import { CUSTOM_ELEMENTS_SCHEMA, Component, computed, input } from '@angular/core';
 import type { ChatMessage } from '@kitn.ai/ui';
-import type { Theme } from './types';
+import type { Theme } from '../types';
 
 /**
  * The scrolling message list. `<kai-thread>` owns the message rendering, the
@@ -17,14 +17,8 @@ import type { Theme } from './types';
   selector: 'app-thread-view',
   standalone: true,
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
-  template: `
-    <kai-thread
-      class="thread"
-      [theme]="theme()"
-      [messages]="withActions()"
-      (kai-message-action)="onMessageAction($event)"
-    ></kai-thread>
-  `,
+  templateUrl: './thread-view.component.html',
+  styleUrl: './thread-view.component.css',
 })
 export class ThreadViewComponent {
   theme = input.required<Theme>();
