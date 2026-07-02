@@ -1985,6 +1985,12 @@ _No events._
 |---|---|---|
 | `kai-message-action` | `CustomEvent<{ messageId: string; action: string; state?: undefined \| "on" \| "off" }>` | A message's action button was clicked. `action` is the built-in name (`copy` / `like` / `dislike` / `regenerate` / `edit`) or a custom id. `state` is present only for the toggleable feedback votes: `'on'` when a like/dislike is set, `'off'` when re-tapped to clear. |
 
+**Slots** (project your own markup via `slot="name"` on a light-DOM child):
+
+| Slot | Mode | Description |
+|---|---|---|
+| `empty` | replace | Custom zero-state rendered in the message area while the thread is empty; replaces the built-in default. |
+
 ---
 
 ### `kai-toast-region` / `ToastRegion`

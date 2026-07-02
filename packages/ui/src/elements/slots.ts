@@ -552,11 +552,18 @@ export const MENU_PARTS: PartDef[] = [
   { name: 'shortcut', doc: 'The right-aligned per-item keyboard shortcut, rendered as kai-kbd key caps. Shown only when an item carries a `shortcut`.', recipe: 'kai-menu::part(shortcut) { opacity: 0.8 }' },
 ];
 
+/** Slots of `<kai-thread>` (the standalone scrolling message list; messages come
+ *  from the `messages` prop). */
+export const THREAD_SLOTS: SlotDef[] = [
+  { name: 'empty', mode: 'replace', doc: 'Custom zero-state rendered in the message area while the thread is empty; replaces the built-in default.' },
+];
+
 export const ELEMENT_COMPOSITION: Record<string, ElementComposition> = {
   'kai-chat': { slots: CHAT_SLOTS, parts: CHAT_PARTS },
   'kai-command': { parts: COMMAND_PARTS },
   'kai-conversations': { slots: CONVERSATIONS_SLOTS, parts: CONVERSATIONS_PARTS },
   'kai-message': { slots: MESSAGE_SLOTS, parts: MESSAGE_PARTS },
+  'kai-thread': { slots: THREAD_SLOTS },
   'kai-prompt-input': { slots: PROMPT_INPUT_SLOTS, parts: PROMPT_INPUT_PARTS },
   'kai-button': { slots: BUTTON_SLOTS, parts: BUTTON_PARTS },
   'kai-badge': { parts: BADGE_PARTS },

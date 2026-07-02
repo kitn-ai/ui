@@ -6876,7 +6876,14 @@
         "storyId": "solid-advanced-elements-thread--docs"
       }
     ],
-    "tokens": []
+    "tokens": [],
+    "slots": [
+      {
+        "name": "empty",
+        "mode": "replace",
+        "doc": "Custom zero-state rendered in the message area while the thread is empty; replaces the built-in default."
+      }
+    ]
   },
   {
     "tag": "kai-toast-region",

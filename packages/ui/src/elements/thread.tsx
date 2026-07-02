@@ -1,23 +1,9 @@
 import { createSignal, onMount, onCleanup } from 'solid-js';
 import { defineWebComponent } from './define';
-import { readSlots, type SlotDef } from './slots';
+import { readSlots, THREAD_SLOTS } from './slots';
 import { Thread, type ThreadController } from '../components/thread';
 import type { ChatMessage } from './chat-types';
 import type { ProseSize } from '../primitives/chat-config';
-
-/**
- * Composition slots of `<kai-thread>`. Kept as a LOCAL registry for phase 1 (not
- * yet wired into the shared `ELEMENT_COMPOSITION` in `slots.ts`) so the message-
- * list decomposition lands additively; registering it there for docs / the `kai`
- * MCP is a follow-up.
- */
-const THREAD_SLOTS: SlotDef[] = [
-  {
-    name: 'empty',
-    mode: 'replace',
-    doc: 'Custom zero-state rendered in the message area while the thread is empty; replaces the built-in default.',
-  },
-];
 
 interface Props extends Record<string, unknown> {
   /** The full message thread to render, newest last. Each entry carries its role,
