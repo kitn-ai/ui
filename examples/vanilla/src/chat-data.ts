@@ -34,7 +34,7 @@ export const THREADS: Record<string, Msg[]> = {
   ],
   c2: [
     { id: 'c2u', role: 'user', content: 'How do I build my own chat instead of dropping in `<kai-chat>`?' },
-    { id: 'c2a', role: 'assistant', content: "Feed your `messages` to a `<kai-thread>`, put a `<kai-prompt-input>` below, and wire `kai-submit` to append + stream. That's exactly what this example does. Read `App.vue`." },
+    { id: 'c2a', role: 'assistant', content: "Feed your `messages` to a `<kai-thread>`, put a `<kai-prompt-input>` below, and wire `kai-submit` to append + stream. That's exactly what this example does. Read `main.ts`." },
   ],
   c3: [
     { id: 'c3u', role: 'user', content: 'How does dark mode work?' },
