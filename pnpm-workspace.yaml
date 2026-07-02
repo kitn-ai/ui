@@ -3,4 +3,5 @@ packages:
   - 'apps/*'
   - 'examples/react'
   - 'examples/vue'
+  - 'examples/vanilla'
 # the remaining examples/* are added during the examples-refresh PRs (PR 2+)
