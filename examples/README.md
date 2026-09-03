@@ -130,6 +130,16 @@ home yet: the no-build CDN path, `configureCodeHighlighting()` loading a Shiki
 grammar on demand, attachments folded onto the user turn, and canned reasoning +
 tool parts.
 
+### A plain website
+
+- **`demos/vesper/`**: the AW26 editorial landing page for "Vesper", extracted out
+  of the **Labs/Apps → v0** story (`packages/ui/src/elements/v0.stories.tsx`),
+  which builds it inline as the page it frames in `<kai-artifact>`. Real files
+  now: one stylesheet, one script, self-hosted fonts, six photographs. It uses
+  **none of the kit** and needs no build — serve the directory and it runs. Its
+  `tools/extract-from-story.mjs` re-derives it from the story, which stays the
+  source. See its own `README.md`.
+
 ### Framework and meta-framework apps
 
 - **`starters/solid/`**: SolidJS Vite app that uses the raw SolidJS component API
