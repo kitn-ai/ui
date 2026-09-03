@@ -22,11 +22,14 @@ export default function LookGrid(props: Props) {
   let root!: HTMLDivElement;
   const list = createMemo(() => props.looks);
 
-  createEffect((previous: DOMRect[] | undefined) => {
-    // Read both so the effect re-runs on a density change AND a filter change.
-    const density = props.density;
-    void list();
-    if (isServer || !root) return undefined;
+  let previous: DOMRect[] | undefined;
+
+  createEffect(
+    // The compute declares what a retile depends on: the density AND the
+    // filtered list. Reading both is what makes the effect re-run for either.
+    () => [props.density, list()] as const,
+    () => {
+    if (isServer || !root) return;
 
     const cards = [...root.querySelectorAll<HTMLElement>('.look-card')];
     const now = cards.map((c) => c.getBoundingClientRect());
@@ -55,9 +58,9 @@ export default function LookGrid(props: Props) {
       });
     }
 
-    void density;
-    return now;
-  });
+    previous = now;
+    },
+  );
 
   return (
     <div ref={root} class="look-grid" data-density={props.density}>

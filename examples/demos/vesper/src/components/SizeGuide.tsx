@@ -13,15 +13,18 @@ const ROWS = [
 export default function SizeGuide(props: { open: boolean; onClose: () => void }) {
   let closeButton!: HTMLButtonElement;
 
-  createEffect(() => {
-    if (!props.open) return;
-    queueMicrotask(() => closeButton?.focus());
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') { e.preventDefault(); props.onClose(); }
-    };
-    document.addEventListener('keydown', onKey);
-    onCleanup(() => document.removeEventListener('keydown', onKey));
-  });
+  createEffect(
+    () => props.open,
+    (open) => {
+      if (!open) return;
+      queueMicrotask(() => closeButton?.focus());
+      const onKey = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') { e.preventDefault(); props.onClose(); }
+      };
+      document.addEventListener('keydown', onKey);
+      onCleanup(() => document.removeEventListener('keydown', onKey));
+    },
+  );
 
   return (
     <Show when={props.open}>

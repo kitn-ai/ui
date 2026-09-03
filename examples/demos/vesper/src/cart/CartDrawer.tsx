@@ -24,8 +24,10 @@ export default function CartDrawer() {
     Math.min(100, Math.round((cart.subtotal() / FREE_SHIPPING) * 100)),
   );
 
-  createEffect(() => {
-    if (!cart.open()) return;
+  createEffect(
+    () => cart.open(),
+    (open) => {
+    if (!open) return;
     opener = document.activeElement as HTMLElement | null;
     document.body.style.overflow = 'hidden';
     // Focus the panel, not the first control: the reader should hear the
@@ -60,7 +62,8 @@ export default function CartDrawer() {
       document.body.style.overflow = '';
       opener?.focus();
     });
-  });
+    },
+  );
 
   return (
     <Show when={cart.open()}>

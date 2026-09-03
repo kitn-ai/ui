@@ -14,11 +14,11 @@ export default function Accordion(props: {
         {(item) => {
           const isOpen = () => open() === item.id;
           return (
-            <div class="acc-item" classList={{ open: isOpen() }}>
+            <div class={['acc-item', { open: isOpen() }]}>
               <h3>
                 <button
                   class="acc-trigger"
-                  aria-expanded={isOpen()}
+                  aria-expanded={String(isOpen())}
                   aria-controls={`acc-${item.id}`}
                   onClick={() => setOpen(isOpen() ? null : item.id)}
                 >

@@ -12,25 +12,29 @@ export default function SiteHeader() {
   const [scrolled, setScrolled] = createSignal(false);
   let sentinel!: HTMLDivElement;
 
-  // createEffect, not onMount: Solid 2 has no onMount. But note the isServer
-  // guard -- unlike Solid 1, effects DO run during the server render, so
-  // anything touching a browser API needs saying so explicitly.
-  createEffect(() => {
-    if (isServer) return;
-    // A sentinel rather than a scroll listener: no work on the main thread
-    // for every frame of every scroll.
-    const io = new IntersectionObserver(
-      ([entry]) => setScrolled(!entry!.isIntersecting),
-      { rootMargin: '0px' },
-    );
-    io.observe(sentinel);
-    onCleanup(() => io.disconnect());
-  });
+  // Solid 2's createEffect takes TWO functions: a compute that declares what
+  // is tracked, and an effect that receives its value. A one-argument
+  // createEffect is an error, not a shorthand. There is also no onMount, and
+  // effects DO run during the server render -- hence isServer.
+  createEffect(
+    () => sentinel,
+    (el) => {
+      if (isServer || !el) return;
+      // A sentinel rather than a scroll listener: no work on the main thread
+      // for every frame of every scroll.
+      const io = new IntersectionObserver(
+        ([entry]) => setScrolled(!entry!.isIntersecting),
+        { rootMargin: '0px' },
+      );
+      io.observe(el);
+      onCleanup(() => io.disconnect());
+    },
+  );
 
   return (
     <>
       <div ref={sentinel} class="header-sentinel" aria-hidden="true" />
-      <header class="site-header" classList={{ scrolled: scrolled() }}>
+      <header class={['site-header', { scrolled: scrolled() }]}>
         <div class="site-header-inner">
           <nav class="site-links" aria-label="Collections">
             <a href="/lookbook">Lookbook</a>

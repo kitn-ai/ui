@@ -8,20 +8,21 @@ export default function CartButton() {
   const [bumping, setBumping] = createSignal(false);
   let previous = 0;
 
-  createEffect(() => {
-    const n = cart.count();
-    if (n > previous) {
-      setBumping(true);
-      setTimeout(() => setBumping(false), 420);
-    }
-    previous = n;
-  });
+  createEffect(
+    () => cart.count(),
+    (n) => {
+      if (n > previous) {
+        setBumping(true);
+        setTimeout(() => setBumping(false), 420);
+      }
+      previous = n;
+    },
+  );
 
   return (
     <button
       ref={(el) => cart.setBagEl(el)}
-      class="bag glass-sm"
-      classList={{ bumping: bumping() }}
+      class={['bag glass-sm', { bumping: bumping() }]}
       onClick={() => cart.setOpen(true)}
       aria-label={`Bag, ${cart.count()} ${cart.count() === 1 ? 'piece' : 'pieces'}`}
       aria-haspopup="dialog"

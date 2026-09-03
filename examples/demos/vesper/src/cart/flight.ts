@@ -6,6 +6,8 @@
  * when it does nothing -- under reduced motion, with no bag on screen, or in
  * a browser without the Web Animations API.
  */
+const DURATION = 620;
+
 export function flyToCart(from: HTMLElement, to: HTMLElement): Promise<void> {
   if (
     typeof window === 'undefined' ||
@@ -58,12 +60,21 @@ export function flyToCart(from: HTMLElement, to: HTMLElement): Promise<void> {
         offset: 1,
       },
     ],
-    { duration: 620, easing: 'cubic-bezier(0.22, 0.61, 0.36, 1)', fill: 'forwards' },
+    { duration: DURATION, easing: 'cubic-bezier(0.22, 0.61, 0.36, 1)', fill: 'forwards' },
   );
 
-  return animation.finished
-    .catch(() => undefined)
-    .then(() => {
-      clone.remove();
-    });
+  // Race the animation against a hard cap. `animation.finished` is NOT
+  // guaranteed to settle: Chrome pauses animations in a tab that is not
+  // visible, so a background tab leaves the promise pending forever. Anything
+  // awaiting the flight -- opening the bag, for one -- would hang with it.
+  // A decoration must never be able to strand its caller.
+  const settled = Promise.race([
+    animation.finished.catch(() => undefined),
+    new Promise((resolve) => setTimeout(resolve, DURATION + 120)),
+  ]);
+
+  return settled.then(() => {
+    animation.cancel();
+    clone.remove();
+  });
 }

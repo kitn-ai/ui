@@ -1,4 +1,4 @@
-import { For, Show, createSignal } from 'solid-js';
+import { For, Show, createSignal, flush } from 'solid-js';
 import type { Look } from '../data/types';
 import { pieceById, colorwayImage } from '../data/catalog';
 import { useCart } from '../cart/CartProvider';
@@ -32,13 +32,12 @@ export default function Hotspots(props: { look: Look }) {
 
           return (
             <div
-              class="pin-wrap"
-              classList={{ 'pin-right': hotspot.x > 62 }}
+              class={['pin-wrap', { 'pin-right': hotspot.x > 62 }]}
               style={{ left: `${hotspot.x}%`, top: `${hotspot.y}%` }}
             >
               <button
                 class="pin glass-sm"
-                aria-expanded={isOpen()}
+                aria-expanded={String(isOpen())}
                 aria-label={`${piece.name}, ${money(piece.price)}`}
                 onClick={() => setOpen(isOpen() ? null : id)}
               >
@@ -66,9 +65,17 @@ export default function Hotspots(props: { look: Look }) {
                         const colorway = piece.colorways[0]!.name;
                         cart.add(piece, colorway, piece.sizes[Math.min(2, piece.sizes.length - 1)]!);
                         void colorwayImage(piece, colorway);
-                        const bag = cart.bagEl();
-                        if (bag && thumb) await flyToCart(thumb, bag);
-                        setOpen(null);
+                        try {
+                          const bag = cart.bagEl();
+                          if (bag && thumb) await flyToCart(thumb, bag);
+                        } finally {
+                          // Decoration never gates the outcome. flush()
+                          // because these writes land after an await, where
+                          // Solid 2 has nothing scheduling the update.
+                          setOpen(null);
+                          cart.setOpen(true);
+                          flush();
+                        }
                       }}
                     >
                       Add to bag

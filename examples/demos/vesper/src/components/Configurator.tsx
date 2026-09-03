@@ -1,4 +1,4 @@
-import { For, createMemo, createSignal } from 'solid-js';
+import { For, createMemo, createSignal, flush } from 'solid-js';
 import type { Piece } from '../data/types';
 import { colorwayImage } from '../data/catalog';
 import { useCart } from '../cart/CartProvider';
@@ -40,12 +40,26 @@ export default function Configurator(props: Props) {
     cart.add(props.piece, colorway(), size());
     setAdded(true);
     setTimeout(() => setAdded(false), 1400);
-    const bag = cart.bagEl();
-    if (bag && photo) await flyToCart(photo, bag);
+    // The photograph lands in the bag first, then the bag opens -- opening
+    // straight away would cover the flight with the drawer it is flying to.
+    // The flight is decoration, so it is fenced: whatever it does, the bag
+    // still opens. A dropped promise here would silently cost the user the
+    // only confirmation that the add worked.
+    try {
+      const bag = cart.bagEl();
+      if (bag && photo) await flyToCart(photo, bag);
+    } finally {
+      cart.setOpen(true);
+      // Solid 2 defers writes to the next flush. Inside an event handler the
+      // framework flushes for you, but this write happens AFTER an await --
+      // the synchronous handler has already returned, so nothing schedules
+      // it and the bag silently never opens. Flush explicitly.
+      flush();
+    }
   };
 
   return (
-    <div class="config" classList={{ 'config-page': props.size === 'page' }}>
+    <div class={['config', { 'config-page': props.size === 'page' }]}>
       <figure class="config-photo photo">
         <div class="ph">
           {/* Keyed on the source so a colorway change cross-fades rather than
@@ -78,7 +92,7 @@ export default function Configurator(props: Props) {
               <button
                 class="clay swatch"
                 role="radio"
-                aria-checked={c.name === colorway()}
+                aria-checked={String(c.name === colorway())}
                 aria-label={c.name}
                 onClick={() => setColorway(c.name)}
               >
@@ -98,7 +112,7 @@ export default function Configurator(props: Props) {
               <button
                 class="clay size"
                 role="radio"
-                aria-checked={s === size()}
+                aria-checked={String(s === size())}
                 onClick={() => setSize(s)}
               >
                 {s}

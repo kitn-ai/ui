@@ -77,7 +77,7 @@ export default function DensityControl(props: {
             class="density-opt"
             data-density-opt={option.id}
             role="radio"
-            aria-checked={props.value === option.id}
+            aria-checked={String(props.value === option.id)}
             tabindex={props.value === option.id ? 0 : -1}
             onClick={() => props.onChange(option.id)}
           >

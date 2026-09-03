@@ -41,9 +41,20 @@ export function CartProvider(props: ParentProps) {
 
   const [hydrated, setHydrated] = createSignal(false);
 
-  if (!isServer) {
-    // Read once, after mount.
-    createEffect(() => {
+  // NOTE: these effects are created UNCONDITIONALLY, and guard on isServer
+  // inside. Wrapping the createEffect calls in `if (!isServer)` instead
+  // creates two fewer reactive nodes on the server than on the client, which
+  // shifts the hydration id namespace for everything after them -- the whole
+  // page then fails to hydrate with "Hydration key miss", and nothing on it
+  // is interactive. Server and client must create the same nodes in the same
+  // order; only what those nodes DO may differ.
+
+  // Read storage once, after mount. The compute tracks nothing, so the effect
+  // runs a single time -- Solid 2 wants the two-function form regardless.
+  createEffect(
+    () => undefined,
+    () => {
+      if (isServer) return;
       let snapshot: CartSnapshot | null = null;
       try {
         const raw = localStorage.getItem(KEY);
@@ -54,21 +65,23 @@ export function CartProvider(props: ParentProps) {
       }
       cart.hydrateFromStorage(snapshot);
       setHydrated(true);
-    });
+    },
+  );
 
-    // Write on every change -- but not before the read above has landed, or
-    // the first pass would persist the empty server-rendered cart over a real
-    // saved one.
-    createEffect(() => {
-      const snapshot = cart.serialize();
-      if (!hydrated()) return;
+  // Write on every change -- but not before the read above has landed, or the
+  // first pass would persist the empty server-rendered cart over a real saved
+  // one.
+  createEffect(
+    () => (hydrated() ? cart.serialize() : null),
+    (snapshot) => {
+      if (isServer || !snapshot) return;
       try {
         localStorage.setItem(KEY, JSON.stringify(snapshot));
       } catch {
         // Over quota or storage disabled. The bag still works this session.
       }
-    });
-  }
+    },
+  );
 
   const api: CartApi = { ...cart, open, setOpen, bagEl, setBagEl };
   // The context object doubles as its own provider component in Solid 2;
