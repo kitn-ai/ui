@@ -1,0 +1,73 @@
+.header-sentinel {
+  position: absolute;
+  top: 0;
+  height: 1px;
+  width: 1px;
+}
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  background: transparent;
+  border-bottom: 1px solid transparent;
+  transition: background var(--t-mid) var(--ease),
+    box-shadow var(--t-mid) var(--ease), border-color var(--t-mid) var(--ease);
+}
+.site-header.scrolled {
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.4);
+  backdrop-filter: blur(var(--glass-blur)) saturate(1.4);
+  border-bottom-color: var(--glass-hair);
+  box-shadow: 0 10px 30px rgba(20, 24, 40, 0.07);
+}
+
+.site-header-inner {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  max-width: var(--wrap);
+  margin: 0 auto;
+  padding: 18px 30px;
+  transition: padding var(--t-mid) var(--ease);
+}
+.site-header.scrolled .site-header-inner { padding: 12px 30px }
+
+.site-links {
+  display: flex;
+  gap: 22px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink2);
+}
+.site-links a { text-decoration: none }
+.site-links a:hover { color: var(--ink) }
+
+/* The wordmark tightens as the page moves -- a small, deliberate tell that
+   the header has changed state, without moving anything else. */
+.wordmark {
+  font-family: var(--display-font);
+  font-size: 23px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  font-weight: 500;
+  text-indent: 0.3em;
+  justify-self: center;
+  text-decoration: none;
+  color: var(--ink);
+  transition: letter-spacing var(--t-slow) var(--ease),
+    font-size var(--t-mid) var(--ease);
+}
+.site-header.scrolled .wordmark {
+  letter-spacing: 0.24em;
+  font-size: 20px;
+}
+
+.site-header-end { justify-self: end }
+
+@media (max-width: 720px) {
+  .site-header-inner { grid-template-columns: auto 1fr; padding: 14px 20px }
+  .site-links { display: none }
+  .wordmark { justify-self: start }
+}

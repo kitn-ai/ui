@@ -22,5 +22,8 @@ export default defineConfig({
     // Keep photography as asset files rather than inlining it into the bundle.
     assetsInlineLimit: 0,
   },
-  test: { environment: 'node', include: ['src/**/*.test.ts'] },
+  // jsdom, not node: an `environment: 'node'` project gets the framework's
+  // SERVER build, where stores are read-only by design (the server renders an
+  // empty cart and never mutates it). Testing the cart there tests a stub.
+  test: { environment: 'jsdom', include: ['src/**/*.test.ts'] },
 });
