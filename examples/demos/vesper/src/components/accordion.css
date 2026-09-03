@@ -1,0 +1,40 @@
+.accordion { border-top: 1px solid var(--line); margin-top: 30px }
+.acc-item { border-bottom: 1px solid var(--line) }
+.acc-item h3 { margin: 0; font-weight: inherit; font-size: inherit }
+.acc-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  padding: 16px 2px;
+  font-family: var(--body-font);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink2);
+  text-align: left;
+}
+.acc-trigger:hover { color: var(--ink) }
+.acc-item.open .acc-trigger { color: var(--ink) }
+.acc-chev { transition: transform var(--t-mid) var(--ease); flex: none }
+.acc-item.open .acc-chev { transform: rotate(180deg) }
+
+.acc-panel[hidden] { display: none }
+.acc-panel-inner {
+  padding: 16px 18px;
+  margin-bottom: 16px;
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: var(--ink2);
+  border-radius: 14px;
+  animation: acc-in var(--t-mid) var(--ease-out) both;
+}
+@keyframes acc-in {
+  from { opacity: 0; transform: translateY(-4px) }
+  to { opacity: 1; transform: none }
+}

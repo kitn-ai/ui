@@ -1,0 +1,44 @@
+.material {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 18px;
+  padding: 16px;
+  border: 0;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--body-font);
+  color: inherit;
+  overflow: hidden;
+}
+.material-crop {
+  display: block;
+  position: relative;
+  border-radius: 13px;
+  overflow: hidden;
+  aspect-ratio: 1;
+  box-shadow: var(--inset-sm);
+}
+.material-crop img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(1) contrast(1.04);
+  transform: scale(1.1);
+  transition: transform var(--t-slow) var(--ease-out), filter var(--t-slow) var(--ease);
+}
+.material.open .material-crop img { transform: scale(1); filter: grayscale(1) contrast(1.12) }
+
+.material-body { display: grid; gap: 8px; padding: 0 4px 6px }
+.material-name { font-size: 26px; line-height: 1 }
+.material-copy {
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: var(--ink2);
+  /* Two lines at rest, all of it once the well is open. */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  transition: -webkit-line-clamp var(--t-mid) var(--ease);
+}
+.material.open .material-copy { -webkit-line-clamp: 12 }

@@ -1,0 +1,60 @@
+.look-detail { padding-top: 24px }
+.look-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 26px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--line);
+}
+.look-back,
+.look-pager a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink2);
+  text-decoration: none;
+}
+.look-back:hover,
+.look-pager a:hover { color: var(--ink) }
+.look-pager { display: inline-flex; align-items: center; gap: 14px }
+.look-pager i {
+  width: 4px; height: 4px; border-radius: 50%; background: var(--muted);
+}
+
+.look-body {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 52px;
+  align-items: center;
+}
+.look-title {
+  font-weight: 500;
+  font-size: clamp(34px, 5vw, 58px);
+  line-height: 1;
+  margin: 12px 0 20px;
+}
+.look-note {
+  font-size: 16px;
+  color: var(--ink2);
+  line-height: 1.7;
+  max-width: 32ch;
+  margin-bottom: 26px;
+}
+.look-hint {
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 26px;
+}
+.look-missing { padding: 80px 30px; text-align: center }
+.look-missing h1 { font-size: 32px; margin-bottom: 22px }
+
+@media (max-width: 900px) {
+  .look-body { grid-template-columns: 1fr; gap: 30px }
+}

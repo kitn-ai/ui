@@ -1,0 +1,67 @@
+.timeline { list-style: none; margin: 0; padding: 0; position: relative }
+/* The rule the nodes sit on. */
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 92px;
+  top: 14px;
+  bottom: 14px;
+  width: 1px;
+  background: var(--line);
+}
+.tl-item { position: relative }
+.tl-trigger {
+  display: grid;
+  grid-template-columns: 74px 36px 1fr;
+  align-items: center;
+  width: 100%;
+  gap: 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  padding: 14px 0;
+  text-align: left;
+  font-family: var(--body-font);
+}
+.tl-year { font-size: 19px; color: var(--muted); transition: color var(--t-fast) var(--ease) }
+.tl-node {
+  justify-self: center;
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: var(--bg);
+  box-shadow: var(--raise-sm);
+  transition: box-shadow var(--t-fast) var(--ease), transform var(--t-fast) var(--ease);
+}
+.tl-title {
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink2);
+}
+.tl-item.open .tl-year { color: var(--ink) }
+.tl-item.open .tl-node { box-shadow: var(--inset-sm); transform: scale(1.2) }
+.tl-item.open .tl-title { color: var(--ink) }
+.tl-trigger:hover .tl-title { color: var(--ink) }
+
+.tl-body[hidden] { display: none }
+.tl-body p {
+  margin-left: 110px;
+  padding: 0 0 18px;
+  max-width: 46ch;
+  font-size: 14px;
+  line-height: 1.75;
+  color: var(--ink2);
+  animation: tl-in var(--t-mid) var(--ease-out) both;
+}
+@keyframes tl-in {
+  from { opacity: 0; transform: translateY(-4px) }
+  to { opacity: 1; transform: none }
+}
+
+@media (max-width: 640px) {
+  .timeline::before { left: 62px }
+  .tl-trigger { grid-template-columns: 50px 24px 1fr }
+  .tl-year { font-size: 16px }
+  .tl-body p { margin-left: 74px }
+}

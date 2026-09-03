@@ -1,0 +1,105 @@
+.config {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: stretch;
+  background: var(--bg);
+  border-radius: 22px;
+  box-shadow: var(--raise);
+  overflow: hidden;
+}
+.config-photo {
+  border-radius: 0;
+  box-shadow: none;
+  aspect-ratio: 4 / 5;
+}
+.config-photo .ph {
+  inset: 0;
+  border-radius: 0;
+}
+.config-photo .ph img {
+  transition: opacity var(--t-mid) var(--ease);
+}
+.config-photo .ph::after {
+  box-shadow: inset -7px 0 16px rgba(20, 24, 40, 0.06);
+}
+
+.config-detail { padding: 40px 42px }
+.config-name {
+  font-weight: 500;
+  font-size: clamp(28px, 3.4vw, 40px);
+  line-height: 1.05;
+  margin: 10px 0 6px;
+}
+.config-price { font-size: 23px; margin-bottom: 16px }
+.config-desc {
+  font-size: 14.5px;
+  color: var(--ink2);
+  line-height: 1.65;
+  max-width: 34ch;
+  margin-bottom: 26px;
+}
+
+.opt-label {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+.opt-label b { color: var(--ink); font-weight: 600 }
+.opt-dot {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  box-shadow: inset 0 -2px 5px rgba(0, 0, 0, 0.3);
+  margin-left: auto;
+}
+
+.swatches { display: flex; gap: 13px; margin-bottom: 26px }
+.swatch {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  padding: 0;
+}
+.swatch i {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  box-shadow: inset 0 -2px 5px rgba(0, 0, 0, 0.25);
+  transition: transform var(--t-fast) var(--ease);
+}
+.swatch[aria-checked='true'] i { transform: scale(0.86) }
+
+.sizes { display: flex; gap: 10px; margin-bottom: 30px; flex-wrap: wrap }
+.size {
+  min-width: 50px;
+  padding: 12px 14px;
+  text-align: center;
+  font-size: 13px;
+  font-family: var(--body-font);
+  color: var(--ink2);
+  border-radius: 14px;
+}
+.size[aria-checked='true'] { color: var(--ink); font-weight: 600 }
+
+.config-add { width: fit-content }
+.config-add svg { transition: transform var(--t-fast) var(--ease) }
+.config-ship {
+  font-size: 11.5px;
+  color: var(--muted);
+  margin-top: 14px;
+}
+
+.config-page { grid-template-columns: 1.05fr 1fr }
+.config-page .config-detail { padding: 48px 52px }
+
+@media (max-width: 900px) {
+  .config, .config-page { grid-template-columns: 1fr }
+  .config-detail, .config-page .config-detail { padding: 30px 26px 34px }
+}

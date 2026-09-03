@@ -1,0 +1,92 @@
+.look-figure { aspect-ratio: 4 / 5; width: 100% }
+
+.pin-wrap { position: absolute; z-index: 3; transform: translate(-50%, -50%) }
+
+.pin {
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  padding: 0;
+  transition: transform var(--t-fast) var(--ease);
+}
+.pin:hover { transform: scale(1.14) }
+.pin-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--ink);
+}
+/* A slow pulse so the pins are findable without a legend. */
+.pin::after {
+  content: '';
+  position: absolute;
+  inset: -5px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  animation: pin-pulse 2.8s var(--ease) infinite;
+}
+@keyframes pin-pulse {
+  0% { transform: scale(0.86); opacity: 0.9 }
+  70% { transform: scale(1.3); opacity: 0 }
+  100% { opacity: 0 }
+}
+.pin[aria-expanded='true']::after { animation: none; opacity: 0 }
+
+.pin-card {
+  position: absolute;
+  left: 42px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 244px;
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 16px;
+  animation: pin-in var(--t-mid) var(--ease-out) both;
+}
+/* Flip to the other side near the right edge, so a card never leaves frame. */
+.pin-right .pin-card { left: auto; right: 42px }
+@keyframes pin-in {
+  from { opacity: 0; transform: translateY(-50%) scale(0.96) }
+  to { opacity: 1; transform: translateY(-50%) scale(1) }
+}
+.pin-thumb {
+  width: 56px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 8px;
+  filter: grayscale(1);
+}
+.pin-body { min-width: 0 }
+.pin-name {
+  font-size: 15px;
+  text-decoration: none;
+  color: var(--ink);
+  display: block;
+  line-height: 1.2;
+}
+.pin-name:hover { text-decoration: underline }
+.pin-price { font-size: 12px; color: var(--muted); margin: 3px 0 9px }
+.pin-add {
+  font-size: 9.5px;
+  padding: 8px 13px;
+  letter-spacing: 0.12em;
+}
+.pin-close {
+  background: none;
+  border: 0;
+  color: var(--muted);
+  cursor: pointer;
+  align-self: start;
+  padding: 2px;
+}
+.pin-close:hover { color: var(--ink) }
+
+@media (max-width: 560px) {
+  .pin-card { width: 208px; left: 36px }
+  .pin-right .pin-card { right: 36px }
+}

@@ -39,9 +39,39 @@ declare module "virtual:file-routes" {
       $$route?: undefined;
     },
     {
+      path: "/atelier";
+      page: true;
+      $component: FileRouteLazyRef<typeof import("./src/routes/atelier")>;
+      $$route?: undefined;
+    },
+    {
       path: "/";
       page: true;
       $component: FileRouteLazyRef<typeof import("./src/routes/index")>;
+      $$route?: undefined;
+    },
+    {
+      path: "/lookbook/:look";
+      page: true;
+      $component: FileRouteLazyRef<typeof import("./src/routes/lookbook/[look]")>;
+      $$route?: undefined;
+    },
+    {
+      path: "/lookbook/";
+      page: true;
+      $component: FileRouteLazyRef<typeof import("./src/routes/lookbook/index")>;
+      $$route?: undefined;
+    },
+    {
+      path: "/shop/:piece";
+      page: true;
+      $component: FileRouteLazyRef<typeof import("./src/routes/shop/[piece]")>;
+      $$route?: undefined;
+    },
+    {
+      path: "/shop/";
+      page: true;
+      $component: FileRouteLazyRef<typeof import("./src/routes/shop/index")>;
       $$route?: undefined;
     }
   ];
@@ -62,6 +92,46 @@ declare module "virtual:file-routes" {
       id: "/*404";
       page: true;
       $component: FileRouteLazyRef<typeof import("./src/routes/[...404]")>;
+      $$route?: undefined;
+      children?: undefined;
+    },
+    {
+      path: "/shop/";
+      id: "/shop/";
+      page: true;
+      $component: FileRouteLazyRef<typeof import("./src/routes/shop/index")>;
+      $$route?: undefined;
+      children?: undefined;
+    },
+    {
+      path: "/atelier";
+      id: "/atelier";
+      page: true;
+      $component: FileRouteLazyRef<typeof import("./src/routes/atelier")>;
+      $$route?: undefined;
+      children?: undefined;
+    },
+    {
+      path: "/lookbook/";
+      id: "/lookbook/";
+      page: true;
+      $component: FileRouteLazyRef<typeof import("./src/routes/lookbook/index")>;
+      $$route?: undefined;
+      children?: undefined;
+    },
+    {
+      path: "/shop/:piece";
+      id: "/shop/:piece";
+      page: true;
+      $component: FileRouteLazyRef<typeof import("./src/routes/shop/[piece]")>;
+      $$route?: undefined;
+      children?: undefined;
+    },
+    {
+      path: "/lookbook/:look";
+      id: "/lookbook/:look";
+      page: true;
+      $component: FileRouteLazyRef<typeof import("./src/routes/lookbook/[look]")>;
       $$route?: undefined;
       children?: undefined;
     }
