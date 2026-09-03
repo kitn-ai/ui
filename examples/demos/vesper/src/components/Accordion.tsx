@@ -18,7 +18,7 @@ export default function Accordion(props: {
               <h3>
                 <button
                   class="acc-trigger"
-                  aria-expanded={String(isOpen())}
+                  aria-expanded={isOpen() ? 'true' : 'false'}
                   aria-controls={`acc-${item.id}`}
                   onClick={() => setOpen(isOpen() ? null : item.id)}
                 >

@@ -34,14 +34,15 @@ export default function LookGrid(props: Props) {
     const cards = [...root.querySelectorAll<HTMLElement>('.look-card')];
     const now = cards.map((c) => c.getBoundingClientRect());
 
+    const before = previous;
     if (
-      previous &&
-      previous.length === now.length &&
+      before &&
+      before.length === now.length &&
       typeof root.animate === 'function' &&
       !window.matchMedia('(prefers-reduced-motion: reduce)').matches
     ) {
       cards.forEach((card, i) => {
-        const from = previous[i]!;
+        const from = before[i]!;
         const to = now[i]!;
         const dx = from.left - to.left;
         const dy = from.top - to.top;

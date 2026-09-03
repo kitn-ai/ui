@@ -28,9 +28,10 @@
 
 .look-body {
   display: grid;
-  grid-template-columns: 1.15fr 1fr;
-  gap: 52px;
+  grid-template-columns: 1.35fr 1fr;
+  gap: 56px;
   align-items: center;
+  padding-bottom: 30px;
 }
 .look-title {
   font-weight: 500;
@@ -50,7 +51,32 @@
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--muted);
-  margin-bottom: 26px;
+  margin-bottom: 22px;
+}
+
+.look-pieces {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--line);
+  max-width: 32ch;
+}
+.look-pieces li { border-bottom: 1px solid var(--line) }
+.look-pieces a {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 2px;
+  text-decoration: none;
+  color: var(--ink);
+}
+.look-pieces .serif { font-size: 17px }
+.look-pieces a:hover .serif { text-decoration: underline }
+.look-piece-price {
+  font-size: 12px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
 }
 .look-missing { padding: 80px 30px; text-align: center }
 .look-missing h1 { font-size: 32px; margin-bottom: 22px }

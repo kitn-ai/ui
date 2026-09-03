@@ -16,7 +16,7 @@ export default function MaterialWell(props: { material: Material }) {
   return (
     <button
       class={['material neu-well', { open: open() }]}
-      aria-expanded={String(open())}
+      aria-expanded={open() ? 'true' : 'false'}
       onClick={() => setOpen(!open())}
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}

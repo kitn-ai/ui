@@ -1,8 +1,10 @@
-import { Show } from 'solid-js';
+import { For, Show } from 'solid-js';
 import { Title, Meta } from '@solidjs/meta';
 import { type RouteProps } from '@solidjs/router';
 import Hotspots from '../../components/Hotspots';
 import { lookBySlug, adjacentLooks } from '../../data/looks';
+import { pieceById } from '../../data/catalog';
+import { money } from '../../lib/format';
 import './look.css';
 
 export default function LookDetail(props: RouteProps<'/lookbook/:look'>) {
@@ -53,12 +55,28 @@ export default function LookDetail(props: RouteProps<'/lookbook/:look'>) {
                   <p class="look-hint">
                     The marks on the photograph open each piece.
                   </p>
-                  <a class="link-cta" href="/shop">
-                    Shop the collection
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                      <path d="M5 12h13" /><path d="M12 6l6 6-6 6" />
-                    </svg>
-                  </a>
+                  {/* The pins are the primary way in, but they are marks on
+                      a photograph. This list is the same information as plain
+                      text -- findable, linkable, and readable aloud. */}
+                  <ul class="look-pieces">
+                    <For each={current().hotspots}>
+                      {(hotspot) => {
+                        const piece = pieceById(hotspot.pieceId);
+                        return (
+                          <Show when={piece}>
+                            {(p) => (
+                              <li>
+                                <a href={`/shop/${p().slug}`}>
+                                  <span class="serif">{p().name}</span>
+                                  <span class="look-piece-price">{money(p().price)}</span>
+                                </a>
+                              </li>
+                            )}
+                          </Show>
+                        );
+                      }}
+                    </For>
+                  </ul>
                 </div>
               </div>
             </div>

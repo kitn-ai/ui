@@ -1,4 +1,5 @@
 import { For, createMemo, createSignal, flush } from 'solid-js';
+import type { JSX } from '@solidjs/web';
 import type { Piece } from '../data/types';
 import { colorwayImage } from '../data/catalog';
 import { useCart } from '../cart/CartProvider';
@@ -10,7 +11,7 @@ interface Props {
   piece: Piece;
   /** The product page gives it more room and a larger type scale. */
   size?: 'panel' | 'page';
-  children?: unknown;
+  children?: JSX.Element;
 }
 
 /**
@@ -92,7 +93,7 @@ export default function Configurator(props: Props) {
               <button
                 class="clay swatch"
                 role="radio"
-                aria-checked={String(c.name === colorway())}
+                aria-checked={c.name === colorway() ? 'true' : 'false'}
                 aria-label={c.name}
                 onClick={() => setColorway(c.name)}
               >
@@ -112,7 +113,7 @@ export default function Configurator(props: Props) {
               <button
                 class="clay size"
                 role="radio"
-                aria-checked={String(s === size())}
+                aria-checked={s === size() ? 'true' : 'false'}
                 onClick={() => setSize(s)}
               >
                 {s}

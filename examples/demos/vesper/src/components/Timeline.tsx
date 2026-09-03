@@ -14,7 +14,7 @@ export default function Timeline(props: { entries: TimelineEntry[] }) {
             <li class={['tl-item', { open: isOpen() }]}>
               <button
                 class="tl-trigger"
-                aria-expanded={String(isOpen())}
+                aria-expanded={isOpen() ? 'true' : 'false'}
                 onClick={() => setOpen(isOpen() ? null : entry.year)}
               >
                 <span class="tl-year serif">{entry.year}</span>

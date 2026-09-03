@@ -1,8 +1,9 @@
 import { For } from 'solid-js';
+import type { JSX } from '@solidjs/web';
 import type { Density } from './LookGrid';
 import './density-control.css';
 
-const OPTIONS: { id: Density; label: string; icon: () => unknown }[] = [
+const OPTIONS: { id: Density; label: string; icon: () => JSX.Element }[] = [
   {
     id: 'editorial',
     label: 'Editorial',
@@ -77,7 +78,7 @@ export default function DensityControl(props: {
             class="density-opt"
             data-density-opt={option.id}
             role="radio"
-            aria-checked={String(props.value === option.id)}
+            aria-checked={props.value === option.id ? 'true' : 'false'}
             tabindex={props.value === option.id ? 0 : -1}
             onClick={() => props.onChange(option.id)}
           >

@@ -7,10 +7,17 @@
   box-shadow: var(--raise);
   overflow: hidden;
 }
+/* min-width: 0 on both tracks -- without it a grid item's automatic minimum
+   size is its content, and the photograph pushes past its column. */
+.config > * { min-width: 0 }
 .config-photo {
   border-radius: 0;
   box-shadow: none;
-  aspect-ratio: 4 / 5;
+  /* Height comes from the row, not from an aspect ratio. An aspect-ratio here
+     resolves WIDTH from the stretched height, which overflows the column and
+     lands the photograph on top of the copy. */
+  width: 100%;
+  min-height: 460px;
 }
 .config-photo .ph {
   inset: 0;

@@ -16,7 +16,7 @@ export default function FilterChips<T extends string>(props: {
     <div class="chips" role="group" aria-label={props.label}>
       <button
         class="chip glass-sm"
-        aria-pressed={String(props.value === null)}
+        aria-pressed={props.value === null ? 'true' : 'false'}
         onClick={() => props.onChange(null)}
       >
         {props.allLabel ?? 'All'}
@@ -25,7 +25,7 @@ export default function FilterChips<T extends string>(props: {
         {(option) => (
           <button
             class="chip glass-sm"
-            aria-pressed={String(props.value === option)}
+            aria-pressed={props.value === option ? 'true' : 'false'}
             onClick={() => props.onChange(props.value === option ? null : option)}
           >
             {option}

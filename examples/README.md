@@ -130,15 +130,27 @@ home yet: the no-build CDN path, `configureCodeHighlighting()` loading a Shiki
 grammar on demand, attachments folded onto the user turn, and canned reasoning +
 tool parts.
 
-### A plain website
+### A SolidJS 2 website
 
-- **`demos/vesper/`**: the AW26 editorial landing page for "Vesper", extracted out
-  of the **Labs/Apps → v0** story (`packages/ui/src/elements/v0.stories.tsx`),
-  which builds it inline as the page it frames in `<kai-artifact>`. Real files
-  now: one stylesheet, one script, self-hosted fonts, six photographs. It uses
-  **none of the kit** and needs no build — serve the directory and it runs. Its
-  `tools/extract-from-story.mjs` re-derives it from the story, which stays the
-  source. See its own `README.md`.
+- **`demos/vesper/`**: the AW26 collection site for "Vesper", a fictional fashion
+  label — a server-rendered **SolidJS 2** app with six routes, an interaction in
+  every section, and a persistent cart. It uses **none of the kit**; it is here
+  because it began as the page the **Labs/Apps → v0** story
+  (`packages/ui/src/elements/v0.stories.tsx`) builds inline and frames in
+  `<kai-artifact>`, and because it is a useful place to keep a real Solid 2 app.
+
+  Worth reading its `README.md` before starting any Solid 2 work: Start is now a
+  mode of `@solidjs/vite-plugin` (the `@solidjs/start` package on npm is the
+  Solid *1* line), and it lists the Solid 1 habits that are wrong in 2 —
+  `createEffect` takes two functions, store writes are deferred until a flush,
+  `classList` is gone, and creating reactive nodes conditionally breaks
+  hydration for the whole page.
+
+  ```bash
+  cd examples/demos/vesper && pnpm install && pnpm dev   # http://localhost:4330
+  ```
+
+  Not a pnpm workspace member: it installs on its own and stays out of repo CI.
 
 ### Framework and meta-framework apps
 

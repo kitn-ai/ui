@@ -37,7 +37,7 @@ export default function Hotspots(props: { look: Look }) {
             >
               <button
                 class="pin glass-sm"
-                aria-expanded={String(isOpen())}
+                aria-expanded={isOpen() ? 'true' : 'false'}
                 aria-label={`${piece.name}, ${money(piece.price)}`}
                 onClick={() => setOpen(isOpen() ? null : id)}
               >

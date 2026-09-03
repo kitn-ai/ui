@@ -24,7 +24,8 @@ export const lineKey = (pieceId: string, colorway: string, size: string) =>
   `${pieceId}:${colorway}:${size}`;
 
 export interface Cart {
-  items: CartLine[];
+  /** Readonly by construction: every change goes through the setters below. */
+  items: readonly CartLine[];
   add(piece: Piece, colorway: string, size: string, qty?: number): void;
   setQty(key: string, qty: number): void;
   remove(key: string): void;
@@ -86,7 +87,7 @@ export function createCart(): Cart {
     add,
     setQty,
     remove,
-    clear: () => setItems(() => []),
+    clear: () => setItems((lines) => { lines.length = 0; }),
     count,
     subtotal,
     shippingRemainder,
