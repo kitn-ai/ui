@@ -1,0 +1,280 @@
+/* Reset, page ground, type scale, and the handful of primitives every route
+ * uses. Component-specific rules live next to their components. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--body-font);
+  color: var(--ink);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  background: radial-gradient(
+    120% 80% at 50% -12%,
+    #f2f4f8 0%,
+    var(--bg) 58%,
+    #e1e4ec 100%
+  );
+  background-attachment: fixed;
+  min-height: 100dvh;
+}
+
+a {
+  color: inherit;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+.wrap {
+  max-width: var(--wrap);
+  margin: 0 auto;
+  padding: 0 30px;
+}
+
+section {
+  padding: 60px 0;
+}
+
+.serif {
+  font-family: var(--display-font);
+}
+
+.kicker {
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* Section heads: kicker, display heading, and an optional link on the right. */
+.sec-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+.sec-head h2 {
+  font-family: var(--display-font);
+  font-weight: 500;
+  font-size: clamp(30px, 4vw, 46px);
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+.sec-head .kicker {
+  margin-bottom: 11px;
+}
+.sec-head a {
+  font-size: 11.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink2);
+  text-decoration: none;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 3px;
+}
+.sec-head a:hover {
+  color: var(--ink);
+  border-color: var(--ink);
+}
+
+/* Buttons. The primary is the one ink-dark surface in the whole palette,
+   which is what makes it read as the action on any page it appears on. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-family: var(--body-font);
+  border: 0;
+  cursor: pointer;
+  border-radius: 999px;
+  padding: 15px 28px;
+  text-decoration: none;
+  transition: transform var(--t-fast) var(--ease),
+    box-shadow var(--t-fast) var(--ease);
+}
+.btn-primary {
+  color: var(--cta-ink);
+  background: linear-gradient(180deg, #2b2f38, var(--cta2));
+  box-shadow: 7px 7px 18px var(--sh-d), -7px -7px 18px var(--sh-l);
+}
+.btn-primary:hover {
+  transform: translateY(-1px);
+}
+.btn-primary:active {
+  transform: translateY(1px);
+  box-shadow: inset 3px 3px 9px rgba(0, 0, 0, 0.5);
+}
+.btn-primary[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+.btn-quiet {
+  background: var(--bg);
+  color: var(--ink);
+  box-shadow: var(--raise-sm);
+}
+.btn-quiet:active {
+  box-shadow: var(--inset-sm);
+}
+
+.link-cta {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--ink);
+  padding-bottom: 4px;
+}
+.link-cta svg {
+  transition: transform var(--t-fast) var(--ease);
+}
+.link-cta:hover svg {
+  transform: translateX(3px);
+}
+
+/* The photo slot: a neumorphic frame around an inset well holding a
+   grayscale photograph, with frosted-glass labels floating on top of it.
+   This is where neu and glass meet, and the pairing is the house signature. */
+.photo {
+  position: relative;
+  border-radius: 18px;
+  background: var(--bg);
+  box-shadow: var(--raise);
+  overflow: hidden;
+}
+.photo .ph {
+  position: absolute;
+  inset: 9px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: linear-gradient(150deg, #e7eaf0, #d6dae2);
+}
+.photo .ph img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+  filter: grayscale(1);
+}
+.photo .ph::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: var(--inset-sm);
+  pointer-events: none;
+}
+.photo figcaption,
+.photo .tag {
+  position: absolute;
+  z-index: 2;
+  background: var(--glass-bg-strong);
+  -webkit-backdrop-filter: blur(14px) saturate(1.3);
+  backdrop-filter: blur(14px) saturate(1.3);
+  border: 1px solid var(--glass-hair);
+  box-shadow: var(--glass-shadow-sm);
+  color: var(--ink);
+}
+.photo figcaption {
+  left: 18px;
+  bottom: 16px;
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 8px 14px;
+  border-radius: 999px;
+}
+.photo .tag {
+  top: 16px;
+  right: 16px;
+  font-family: var(--display-font);
+  font-size: 13px;
+  padding: 6px 13px;
+  border-radius: 999px;
+}
+
+/* Screen-reader-only, for labels the design carries visually another way. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Route transition: an 8px rise and a dissolve. Paired with the View
+   Transitions API where the browser has it (see App.tsx). */
+@keyframes route-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.route-body {
+  animation: route-in var(--t-mid) var(--ease-out) both;
+}
+
+/* Motion is decoration here; none of it carries meaning that the reduced
+   setting would lose. So it all goes. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
+@media (max-width: 840px) {
+  .wrap {
+    padding: 0 20px;
+  }
+  section {
+    padding: 44px 0;
+  }
+}
