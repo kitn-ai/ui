@@ -1,4 +1,4 @@
-import { createEffect, createSignal, onCleanup } from 'solid-js';
+import { createEffect, createSignal } from 'solid-js';
 import { isServer } from '@solidjs/web';
 import CartButton from '../cart/CartButton';
 import './site-header.css';
@@ -27,7 +27,8 @@ export default function SiteHeader() {
         { rootMargin: '0px' },
       );
       io.observe(el);
-      onCleanup(() => io.disconnect());
+      // Returned, not onCleanup: that is what an effect's teardown is here.
+      return () => io.disconnect();
     },
   );
 

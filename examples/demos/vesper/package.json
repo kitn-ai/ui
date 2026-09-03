@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit",
     "verify:photos": "node tools/verify-photos.mjs",
     "verify:ssr": "node tools/verify-ssr.mjs",
-    "check": "pnpm typecheck && pnpm test && pnpm verify:photos"
+    "check": "pnpm typecheck && pnpm test && pnpm verify:photos",
+    "verify:interactions": "node tools/verify-interactions.mjs"
   },
   "dependencies": {
     "@solidjs/meta": "1.0.0-next.2",
@@ -24,6 +25,7 @@
     "@testing-library/jest-dom": "6.6.3",
     "filesystem-routing": "0.2.1",
     "jsdom": "25.0.1",
+    "playwright": "^1.62.1",
     "typescript": "5.9.2",
     "vite": "8.2.2",
     "vitest": "4.1.11"

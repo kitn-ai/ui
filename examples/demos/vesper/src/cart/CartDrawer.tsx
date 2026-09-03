@@ -1,4 +1,4 @@
-import { For, Show, createEffect, createMemo, onCleanup } from 'solid-js';
+import { For, Show, createEffect, createMemo } from 'solid-js';
 import { useCart } from './CartProvider';
 import { FREE_SHIPPING } from './store';
 import { pieceById, colorwayImage } from '../data/catalog';
@@ -24,44 +24,50 @@ export default function CartDrawer() {
     Math.min(100, Math.round((cart.subtotal() / FREE_SHIPPING) * 100)),
   );
 
+  // An effect's cleanup in Solid 2 is the function the effect RETURNS.
+  // onCleanup() inside here would bind to the component's owner instead, and
+  // CartDrawer never unmounts -- so the scroll lock would be taken on open
+  // and never released. That is a page you cannot scroll.
   createEffect(
     () => cart.open(),
     (open) => {
-    if (!open) return;
-    opener = document.activeElement as HTMLElement | null;
-    document.body.style.overflow = 'hidden';
-    // Focus the panel, not the first control: the reader should hear the
-    // dialog's name before its buttons.
-    queueMicrotask(() => closeButton?.focus());
+      if (!open) return;
 
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        cart.setOpen(false);
-        return;
-      }
-      if (e.key !== 'Tab') return;
-      const focusable = panel.querySelectorAll<HTMLElement>(
-        'button:not([disabled]), a[href], input, [tabindex]:not([tabindex="-1"])',
-      );
-      if (!focusable.length) return;
-      const first = focusable[0]!;
-      const last = focusable[focusable.length - 1]!;
-      if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault();
-        last.focus();
-      } else if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault();
-        first.focus();
-      }
-    };
-    document.addEventListener('keydown', onKey);
+      opener = document.activeElement as HTMLElement | null;
+      const previousOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      queueMicrotask(() => closeButton?.focus());
 
-    onCleanup(() => {
-      document.removeEventListener('keydown', onKey);
-      document.body.style.overflow = '';
-      opener?.focus();
-    });
+      const onKey = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          cart.setOpen(false);
+          return;
+        }
+        if (e.key !== 'Tab') return;
+        const focusable = panel.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), a[href], input, [tabindex]:not([tabindex="-1"])',
+        );
+        if (!focusable.length) return;
+        const first = focusable[0]!;
+        const last = focusable[focusable.length - 1]!;
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      };
+      document.addEventListener('keydown', onKey);
+
+      return () => {
+        document.removeEventListener('keydown', onKey);
+        // Restore what was there rather than assuming '': something else may
+        // legitimately own the lock.
+        document.body.style.overflow = previousOverflow;
+        opener?.focus();
+      };
     },
   );
 

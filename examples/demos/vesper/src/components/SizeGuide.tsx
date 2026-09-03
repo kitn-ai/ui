@@ -1,4 +1,4 @@
-import { For, Show, createEffect, onCleanup } from 'solid-js';
+import { For, Show, createEffect } from 'solid-js';
 import './size-guide.css';
 
 const ROWS = [
@@ -13,6 +13,8 @@ const ROWS = [
 export default function SizeGuide(props: { open: boolean; onClose: () => void }) {
   let closeButton!: HTMLButtonElement;
 
+  // Cleanup is the RETURNED function -- onCleanup here would bind to the
+  // component owner, which outlives every open/close cycle.
   createEffect(
     () => props.open,
     (open) => {
@@ -22,7 +24,7 @@ export default function SizeGuide(props: { open: boolean; onClose: () => void })
         if (e.key === 'Escape') { e.preventDefault(); props.onClose(); }
       };
       document.addEventListener('keydown', onKey);
-      onCleanup(() => document.removeEventListener('keydown', onKey));
+      return () => document.removeEventListener('keydown', onKey);
     },
   );
 
