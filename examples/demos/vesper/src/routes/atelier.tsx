@@ -31,8 +31,8 @@ export default function Atelier() {
         <div class="wrap">
           <div class="sec-head">
             <div>
-              <p class="kicker">What it is made of</p>
-              <h2>The cloth</h2>
+              <p class="kicker">How it is made</p>
+              <h2>Three rooms</h2>
             </div>
           </div>
           <div class="materials">

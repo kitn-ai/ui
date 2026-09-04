@@ -31,9 +31,22 @@ describe('catalog', () => {
   });
 
   it('looks pieces up both ways', () => {
-    expect(pieceBySlug('wool-coat')?.name).toBe('The Wool Coat');
-    expect(pieceById('p1')?.slug).toBe('wool-coat');
+    const first = catalog[0]!;
+    expect(pieceBySlug(first.slug)?.id).toBe(first.id);
+    expect(pieceById(first.id)?.slug).toBe(first.slug);
     expect(pieceBySlug('nope')).toBeUndefined();
+  });
+
+  // The mismatch this collection was rewritten to fix: a colorway called
+  // "Camel" over a photograph of a black coat. A photograph's filename is
+  // written from its subject, so the colorway must appear in its own path.
+  it('names every colorway photograph after the colorway', () => {
+    for (const p of catalog)
+      for (const c of p.colorways) {
+        if (!c.image) continue;
+        const slug = c.name.toLowerCase().split(' ')[0]!;
+        expect(c.image, `${p.name} / ${c.name}`).toContain(slug);
+      }
   });
 });
 

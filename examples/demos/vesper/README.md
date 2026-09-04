@@ -62,7 +62,23 @@ Every one of these cost real debugging time, and each is commented at its site:
   Solid 1's `setItems(i, 'qty', n)` path form is gone.
 - **Writes are deferred until a flush.** Reading a signal on the line after
   writing it still sees the old value. Inside an event handler the framework
-  flushes for you; after an `await` it does not, so call `flush()`.
+  flushes for you; **anywhere else it does not** -- after an `await`, or in an
+  IntersectionObserver / timer / any browser callback -- so call `flush()`.
+  Unflushed, the signal changes and the DOM never does.
+- **An effect's cleanup is the function it RETURNS.** `onCleanup()` inside an
+  effect binds to the component's owner, so in a component that never
+  unmounts it never runs. That is how the bag's scroll lock got taken and
+  never released.
+- **A plain `let` ref is not reactive.** An effect whose compute reads one
+  runs once, while the ref is still undefined, and never again. Use a signal:
+  `const [el, setEl] = createSignal<HTMLElement>()` with `ref={setEl}`.
+- **`class` did not apply the object form** of `ClassValue` in this build --
+  `class={['a', { b: cond() }]}` rendered only `a`. Build the string:
+  `class={cond() ? 'a b' : 'a'}`.
+- **Props change before effects run.** Deriving state with an effect leaves
+  one render where the old value is looked up against the new props. Validate
+  the selection on read instead (see `Configurator`), or a stale colorway
+  throws mid-navigation and the click appears to do nothing.
 - **`classList` is gone** -- `class` takes a clsx-style value:
   `class={['card', { open: open() }]}`.
 - **`createContext` returns its own provider component**: `<Ctx value={api}>`,
@@ -106,7 +122,7 @@ flat ground is just a grey box with an expensive filter. Tokens are in
 | `/shop/:piece` | Accordions and a glass size-guide modal. |
 | `/atelier` | **Material wells** that reveal their crop and copy, and a timeline that expands. |
 | everywhere | **The cart** -- the photograph flies into the bag, the badge ticks, a glass drawer opens with steppers, a running subtotal and a free-shipping track. |
-| everywhere | **Sticky nav** that gains blur on scroll while the wordmark's letter-spacing tightens. |
+| everywhere | **Sticky nav.** At rest the links are bare text on the page ground. On scroll the header floats over photographs, so the links gather into a glass capsule -- the bag's material and radius -- with a lozenge sliding behind the current route, and the wordmark's letter-spacing tightens. |
 
 Every motion path is gated on `prefers-reduced-motion`.
 
@@ -128,10 +144,24 @@ must never be able to strand its caller.
 ```bash
 pnpm check                       # typecheck + unit tests + photograph check
 pnpm verify:ssr                  # 13 routes server-render their own content (dev)
+pnpm verify:interactions         # 16 checks in a real browser (needs a server up)
 
 pnpm build && pnpm start
-node tools/verify-ssr.mjs http://localhost:3000   # ...and in the built server
+node tools/verify-ssr.mjs http://localhost:3000            # ...and in the built
+node tools/verify-interactions.mjs http://localhost:3000   #    server too
 ```
+
+`verify-interactions.mjs` exists because unit tests cannot see any of the bugs
+that actually shipped here: a scroll lock never released, a header that never
+gained its scrolled state, and a product card that led to a different
+photograph than it showed. It drives a real browser and asserts what a reader
+would notice -- including following **every** product card, family card and
+lookbook card and checking the page you land on shows the photograph the card
+advertised.
+
+Its scroll checks use a real **wheel**, not `window.scrollTo`: `scrollTo` is
+not blocked by `body { overflow: hidden }`, so a `scrollTo`-based assertion
+passed against the broken code and proved nothing.
 
 Run the SSR check against **both**: dev SSR and the built handler are different
 pipelines, so a green dev run is not evidence for the build.

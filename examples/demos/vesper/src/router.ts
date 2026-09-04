@@ -7,5 +7,5 @@ import { fileRoutes } from '@solidjs/router/fs';
 
 export const Router = createRouter({ routes: fileRoutes(pageRoutes) });
 
-// Typed path proxy: paths.shop.piece('wool-coat') rather than a string literal.
+// Typed path proxy: paths.shop.piece('the-coat') rather than a string literal.
 export const { paths } = Router;

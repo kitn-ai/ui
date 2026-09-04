@@ -11,18 +11,18 @@ const origin = process.argv[2] ?? 'http://localhost:4330';
 // string like "8 of 8": Solid separates adjacent JSX expressions with
 // hydration comment markers, so that text is never contiguous in the HTML.
 const CASES = [
-  ['/', { has: ['Studies in', 'Monochrome', 'The Wool Coat', 'wipe-range', 'marquee-item'] }],
+  ['/', { has: ['Studies in', 'Monochrome', 'The Coat', 'wipe-range', 'marquee-item'] }],
   ['/lookbook', { has: ['The Lookbook', 'density-opt'], count: ['data-look=', 12] }],
-  ['/lookbook?category=Knitwear', { count: ['data-look=', 2] }],
-  ['/lookbook?category=Eveningwear', { count: ['data-look=', 3] }],
+  ['/lookbook?category=Outerwear', { count: ['data-look=', 4] }],
+  ['/lookbook?category=Eveningwear', { count: ['data-look=', 4] }],
   ['/lookbook/the-opening-look', { has: ['The Opening Look', 'pin-wrap', 'Previous'] }],
-  ['/lookbook/bias', { has: ['Bias', 'The Silk Slip'] }],
-  ['/shop', { has: ['The Collection', 'The Leather Blouson', 'price-track'], count: ['class="shop-card"', 8] }],
-  ['/shop?category=Knitwear', { has: ['The Draped Knit'], count: ['class="shop-card"', 1] }],
-  ['/shop?low=600', { count: ['class="shop-card"', 2] }],
-  ['/shop/wool-coat', { has: ['The Wool Coat', 'Charcoal', 'swatch', 'Biella', 'piece-crumbs'] }],
-  ['/shop/silk-slip', { has: ['The Silk Slip', 'Pearl', 'Como'] }],
-  ['/atelier', { has: ['Eleven people', 'Vegetable-tanned', 'timeline', '2019'] }],
+  ['/lookbook/ivory', { has: ['The Ivory Suit'] }],
+  ['/shop', { has: ['The Collection', 'The Sculpted Jacket', 'price-track'], count: ['class="shop-card"', 8] }],
+  ['/shop?category=Eveningwear', { has: ['The Slip'], count: ['class="shop-card"', 3] }],
+  ['/shop?low=600', { count: ['class="shop-card"', 3] }],
+  ['/shop/the-coat', { has: ['The Coat', 'Charcoal', 'swatch', 'Biella', 'piece-crumbs'] }],
+  ['/shop/lace-bustier', { has: ['The Lace Bustier', 'Calais'] }],
+  ['/atelier', { has: ['Eleven people', 'The Fitting Room', 'timeline', '2019'] }],
   ['/nowhere', { has: ['Not found'] }],
 ];
 

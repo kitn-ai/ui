@@ -1,25 +1,31 @@
 import type { Material, TimelineEntry } from './types';
 
+/**
+ * Three stages, not three cloths. The photographs are a dress form, a
+ * hand-finished collar and a rail of past seasons -- so the copy is about
+ * where a piece is made, which is what those frames actually show. Naming
+ * them "wool / silk / leather" over pictures of mannequins was the mismatch.
+ */
 export const materials: Material[] = [
   {
-    id: 'wool',
-    name: 'Wool',
-    origin: 'Biella, Italy',
-    copy: 'Double-faced, which means two cloths woven as one and joined by hand along every edge. It is why the coat has no lining and no visible seam allowance, and why it takes four times as long to make.',
+    id: 'fitting',
+    name: 'The Fitting Room',
+    origin: 'Stage one',
+    copy: 'Every pattern is cut on a form before it is cut on a person. A coat sits on the stand for a week while the shoulder is moved a few millimetres at a time. Most of the work you are paying for happens here, and none of it is visible in the finished piece.',
     image: '/img/atelier/wool.jpg',
   },
   {
-    id: 'silk',
-    name: 'Silk',
-    origin: 'Como, Italy',
-    copy: 'Sandwashed after weaving so the surface goes matte and the drape goes heavy. Untreated silk is brighter and cheaper and reads, immediately, as the wrong thing.',
+    id: 'finish',
+    name: 'The Finish',
+    origin: 'Stage two',
+    copy: 'Collars, facings and every edge that will be seen are finished by hand. It is slower by a day per garment and it is the difference between cloth that holds a shape and cloth that merely covers.',
     image: '/img/atelier/silk.jpg',
   },
   {
-    id: 'leather',
-    name: 'Leather',
-    origin: 'Tuscany, Italy',
-    copy: 'Vegetable-tanned over six weeks in oak and chestnut rather than six hours in chrome. It arrives pale and stiff, and it is supposed to. The jacket you own in a year is the one you made.',
+    id: 'archive',
+    name: 'The Archive',
+    origin: 'Stage three',
+    copy: 'One of everything we have made stays on a rail in the back room. New patterns are cut against old ones, which is why the shoulder line has not changed since 2021 and why it will not change next season either.',
     image: '/img/atelier/leather.jpg',
   },
 ];
@@ -43,7 +49,7 @@ export const timeline: TimelineEntry[] = [
   {
     year: '2025',
     title: 'The atelier',
-    body: 'Eleven people in one room in northern Italy. Every coat is made start to finish by one of them, and their initials are inside the pocket bag.',
+    body: 'Eleven people in one room in northern Italy. Every piece is made start to finish by one of them, and their initials are inside the pocket bag.',
   },
   {
     year: '2026',

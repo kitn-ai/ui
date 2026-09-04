@@ -32,7 +32,7 @@ export default function Hotspots(props: { look: Look }) {
 
           return (
             <div
-              class={['pin-wrap', { 'pin-right': hotspot.x > 62 }]}
+              class={hotspot.x > 62 ? 'pin-wrap pin-right' : 'pin-wrap'}
               style={{ left: `${hotspot.x}%`, top: `${hotspot.y}%` }}
             >
               <button

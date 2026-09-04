@@ -11,7 +11,7 @@ export default function Timeline(props: { entries: TimelineEntry[] }) {
         {(entry) => {
           const isOpen = () => open() === entry.year;
           return (
-            <li class={['tl-item', { open: isOpen() }]}>
+            <li class={isOpen() ? 'tl-item open' : 'tl-item'}>
               <button
                 class="tl-trigger"
                 aria-expanded={isOpen() ? 'true' : 'false'}

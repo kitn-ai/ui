@@ -25,17 +25,38 @@ interface Props {
  */
 export default function Configurator(props: Props) {
   const cart = useCart();
-  const [colorway, setColorway] = createSignal(props.piece.colorways[0]!.name);
-  const [size, setSize] = createSignal(
-    props.piece.sizes[Math.min(2, props.piece.sizes.length - 1)]!,
-  );
   const [added, setAdded] = createSignal(false);
   let photo!: HTMLImageElement;
 
-  const image = createMemo(() => colorwayImage(props.piece, colorway()));
+  // What the reader picked -- which may be a selection made on a DIFFERENT
+  // piece, because navigating between two product pages keeps this component
+  // mounted and only swaps props.piece.
+  const [pickedColorway, setPickedColorway] = createSignal<string | null>(null);
+  const [pickedSize, setPickedSize] = createSignal<string | null>(null);
+
+  // The selection is VALIDATED against the current piece on every read rather
+  // than reset by an effect. props.piece changes during the render pass and
+  // effects only run after it, so an effect leaves one render where the old
+  // colorway is looked up in the new piece's list -- `.find()` returns
+  // undefined, reading `.hex` off it throws, and the throw aborts the render
+  // mid-navigation. The click then appears to do nothing at all.
   const swatch = createMemo(
-    () => props.piece.colorways.find((c) => c.name === colorway())!,
+    () =>
+      props.piece.colorways.find((c) => c.name === pickedColorway()) ??
+      props.piece.colorways[0]!,
   );
+  const colorway = () => swatch().name;
+
+  const size = createMemo(() => {
+    const picked = pickedSize();
+    if (picked && props.piece.sizes.includes(picked)) return picked;
+    return props.piece.sizes[Math.min(2, props.piece.sizes.length - 1)]!;
+  });
+
+  const setColorway = (name: string) => setPickedColorway(name);
+  const setSize = (value: string) => setPickedSize(value);
+
+  const image = createMemo(() => colorwayImage(props.piece, colorway()));
 
   const addToBag = async () => {
     cart.add(props.piece, colorway(), size());
@@ -60,7 +81,7 @@ export default function Configurator(props: Props) {
   };
 
   return (
-    <div class={['config', { 'config-page': props.size === 'page' }]}>
+    <div class={props.size === 'page' ? 'config config-page' : 'config'}>
       <figure class="config-photo photo">
         <div class="ph">
           {/* Keyed on the source so a colorway change cross-fades rather than

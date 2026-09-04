@@ -29,7 +29,7 @@ export default function IndexMarquee() {
               </Show>
               <li>
                 <a
-                  class={['marquee-item', { on: category === active() }]}
+                  class={category === active() ? 'marquee-item on' : 'marquee-item'}
                   href={`/shop?category=${encodeURIComponent(category)}`}
                   onMouseEnter={() => setActive(category)}
                   onFocus={() => setActive(category)}

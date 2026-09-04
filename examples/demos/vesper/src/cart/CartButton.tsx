@@ -22,7 +22,7 @@ export default function CartButton() {
   return (
     <button
       ref={(el) => cart.setBagEl(el)}
-      class={['bag glass-sm', { bumping: bumping() }]}
+      class={bumping() ? 'bag glass-sm bumping' : 'bag glass-sm'}
       onClick={() => cart.setOpen(true)}
       aria-label={`Bag, ${cart.count()} ${cart.count() === 1 ? 'piece' : 'pieces'}`}
       aria-haspopup="dialog"

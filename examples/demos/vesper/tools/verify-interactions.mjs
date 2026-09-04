@@ -26,9 +26,18 @@ await page.goto(`${origin}/`, { waitUntil: 'networkidle' });
 
 // --- hydration actually happened ---
 await page.locator('.swatch').nth(1).click();
+// Read the expectation off the page rather than naming a colorway here:
+// colorway names are written to match their photographs and change with them.
+// The swatch's own aria-label says which colour it is, and the photograph it
+// selects must be the file named after that colour -- which is also the
+// mismatch ("Camel" over a black coat) this collection was rewritten to fix.
+const swatchName = (await page.locator('.swatch').nth(1).getAttribute('aria-label')) ?? '';
+const swatchSlug = swatchName.toLowerCase().split(' ')[0];
+const shownPhoto = (await page.locator('.config-photo img').getAttribute('src')) ?? '';
 check(
-  'swatch swaps the photograph (page is hydrated)',
-  (await page.locator('.config-photo img').getAttribute('src'))?.includes('camel') ?? false,
+  'swatch swaps to the photograph named after that colour',
+  shownPhoto.includes(swatchSlug) && swatchSlug.length > 0,
+  `swatch "${swatchName}" showed ${shownPhoto}`,
 );
 
 // --- add to bag opens the drawer ---
@@ -71,13 +80,102 @@ const scrolledAgain = await wheelScroll();
 check('the page scrolls after closing via the scrim', scrolledAgain > 100, `scrollY ${scrolledAgain}`);
 
 // --- the size guide takes no lock it fails to release ---
-await page.goto(`${origin}/shop/wool-coat`, { waitUntil: 'networkidle' });
+await page.goto(`${origin}/shop/the-coat`, { waitUntil: 'networkidle' });
 await page.locator('.piece-guide-link').click();
 await page.waitForSelector('.guide');
 await page.keyboard.press('Escape');
 await page.waitForSelector('.guide', { state: 'detached' });
 const afterGuide = await wheelScroll();
 check('the page scrolls after closing the size guide', afterGuide > 100, `scrollY ${afterGuide}`);
+
+// --- every card leads to what it advertised ---
+// A product card promises a garment with a photograph. Landing on a different
+// photograph reads as a broken link even though the href was right. This broke
+// once because the configurator kept the previous piece's colorway across a
+// param change, and both pieces happened to have a "Black".
+await page.goto(`${origin}/shop`, { waitUntil: 'networkidle' });
+const shopCards = await page.locator('.shop-card').evaluateAll((as) =>
+  as.map((a) => ({ href: a.getAttribute('href'), img: a.querySelector('img')?.getAttribute('src') })),
+);
+check('the shop lists every piece with a photograph', shopCards.every((c) => c.href && c.img), '');
+
+let inconsistent = [];
+for (const card of shopCards) {
+  await page.goto(origin + card.href, { waitUntil: 'networkidle' });
+  const landed = await page.locator('.config-photo img').getAttribute('src');
+  if (landed !== card.img) inconsistent.push(`${card.href}: card ${card.img} -> page ${landed}`);
+
+  // and every "also in this family" card, followed for real
+  const family = await page.locator('.piece-strip-card[href^="/shop/"]').evaluateAll((as) =>
+    as.map((a) => ({ href: a.getAttribute('href'), img: a.querySelector('img')?.getAttribute('src') })),
+  );
+  for (const f of family) {
+    await page.locator(`.piece-strip-card[href="${f.href}"]`).first().scrollIntoViewIfNeeded();
+    await page.locator(`.piece-strip-card[href="${f.href}"]`).first().click();
+    // Poll the path, not waitForURL: client-side routing fires no load event,
+    // so waitForURL's default 'load' wait never resolves.
+    await page.waitForFunction((p) => location.pathname === p, f.href, { timeout: 5000 });
+    await page.waitForTimeout(300);
+    const shown = await page.locator('.config-photo img').getAttribute('src');
+    if (shown !== f.img) inconsistent.push(`${card.href} -> ${f.href}: card ${f.img} -> page ${shown}`);
+    await page.goBack({ waitUntil: 'networkidle' });
+  }
+}
+check(
+  'every product card leads to the photograph it showed',
+  inconsistent.length === 0,
+  inconsistent.slice(0, 3).join(' | '),
+);
+
+// --- lookbook cards lead to the look they showed ---
+await page.goto(`${origin}/lookbook`, { waitUntil: 'networkidle' });
+const lookCards = await page.locator('.look-card').evaluateAll((as) =>
+  as.map((a) => ({ href: a.getAttribute('href'), img: a.querySelector('img')?.getAttribute('src') })),
+);
+let lookMismatch = [];
+for (const l of lookCards) {
+  await page.goto(origin + l.href, { waitUntil: 'networkidle' });
+  const shown = await page.locator('.look-figure img').getAttribute('src');
+  if (shown !== l.img) lookMismatch.push(`${l.href}: card ${l.img} -> page ${shown}`);
+}
+check(
+  'every lookbook card leads to the photograph it showed',
+  lookMismatch.length === 0,
+  lookMismatch.slice(0, 3).join(' | '),
+);
+
+// --- the header must actually gain its scrolled state ---
+// This failed silently three ways: a `let` ref made the observer's effect
+// never run, an unflushed signal write left the DOM unchanged, and the
+// ClassValue object form never applied the conditional class. Each left the
+// nav as bare text lying on top of photographs.
+await page.goto(`${origin}/shop`, { waitUntil: 'networkidle' });
+await page.waitForTimeout(400);
+const headerAtRest = await page.locator('.site-header').getAttribute('class');
+check('the header is bare at the top of the page', !headerAtRest.includes('scrolled'), headerAtRest);
+
+await page.mouse.move(640, 450);
+await page.mouse.wheel(0, 800);
+await page.waitForTimeout(900);
+
+const headerScrolled = await page.locator('.site-header').getAttribute('class');
+check('the header gains its scrolled state', headerScrolled.includes('scrolled'), headerScrolled);
+
+const backdrop = await page.locator('.site-header').evaluate((e) => getComputedStyle(e).backdropFilter);
+check('the scrolled header is glass, so the nav is readable over photographs',
+  backdrop !== 'none' && backdrop !== '', backdrop);
+
+const capsule = await page.locator('.site-links').evaluate((e) => {
+  const cs = getComputedStyle(e);
+  return { bg: cs.backgroundColor, alpha: Number((cs.backgroundColor.match(/[\d.]+\)$/) || ['1)'])[0].slice(0, -1)) };
+});
+check('the nav links gather into a capsule', capsule.alpha > 0.1, JSON.stringify(capsule));
+
+const lozenge = await page.locator('.site-links-pill').evaluate((e) => ({
+  opacity: Number(getComputedStyle(e).opacity),
+  width: parseFloat(getComputedStyle(e).width),
+}));
+check('a lozenge marks the current route', lozenge.opacity > 0.5 && lozenge.width > 20, JSON.stringify(lozenge));
 
 check('no page errors or hydration misses', errors.length === 0, errors.slice(0, 3).join(' | '));
 

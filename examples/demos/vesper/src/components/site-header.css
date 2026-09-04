@@ -33,16 +33,65 @@
 }
 .site-header.scrolled .site-header-inner { padding: 12px 30px }
 
+/* At rest: bare text on the page ground. */
 .site-links {
+  position: relative;
   display: flex;
+  align-items: center;
   gap: 22px;
+  width: fit-content;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  transition: gap var(--t-mid) var(--ease), padding var(--t-mid) var(--ease),
+    background var(--t-mid) var(--ease), border-color var(--t-mid) var(--ease),
+    box-shadow var(--t-mid) var(--ease);
+}
+.site-links a {
+  position: relative;
+  z-index: 1;
   font-size: 12px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--ink2);
+  text-decoration: none;
+  padding: 4px 0;
+  border-radius: 999px;
+  transition: color var(--t-mid) var(--ease), padding var(--t-mid) var(--ease);
 }
-.site-links a { text-decoration: none }
 .site-links a:hover { color: var(--ink) }
+.site-links a[aria-current='page'] { color: var(--ink) }
+
+/* On scroll the header floats, so the links gather onto something: the same
+   glass capsule and radius as the bag on the other side of the wordmark. */
+.site-header.scrolled .site-links {
+  gap: 4px;
+  padding: 5px 6px;
+  background: var(--glass-bg-strong);
+  -webkit-backdrop-filter: blur(14px) saturate(1.3);
+  backdrop-filter: blur(14px) saturate(1.3);
+  border-color: var(--glass-hair);
+  box-shadow: var(--glass-shadow-sm);
+}
+.site-header.scrolled .site-links a { padding: 8px 14px }
+
+/* The lozenge behind the current route. It only exists inside the capsule --
+   at rest there is no surface for it to sit on. */
+.site-links-pill {
+  position: absolute;
+  left: 0;
+  top: 5px;
+  bottom: 5px;
+  border-radius: 999px;
+  background: var(--bg);
+  box-shadow: var(--raise-sm);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform var(--t-slow) var(--ease-out),
+    width var(--t-slow) var(--ease-out), opacity var(--t-mid) var(--ease);
+}
+.site-links:not(.site-header.scrolled *) .site-links-pill { opacity: 0 }
+.site-header:not(.scrolled) .site-links-pill { opacity: 0 !important }
 
 /* The wordmark tightens as the page moves -- a small, deliberate tell that
    the header has changed state, without moving anything else. */

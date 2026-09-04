@@ -28,7 +28,7 @@ const BY = {
   '1601597565151-70c4020dc0e1': 'ben_scott_photography',
   '1606143412458-acc5f86de897': 'ali_nejatian',
   '1607207496684-3e09f039cfe6': 'khashi_photo',
-  '1612928414075-bc722ade44f1': 'project290',
+  '1603189343302-e603f7add05a': 'themalicki',
   '1613915617430-8ab0fd7c6baf': 'chyntiajuls',
   '1633381521050-26bb467d9d5a': 'ttrapani',
   '1637536701306-3214e9cec64a': 'maierfoto',
@@ -51,7 +51,7 @@ const MANIFEST = {
   'looks/look-02.jpg': ['1606143412458-acc5f86de897', 800, 1000],
   'looks/look-03.jpg': ['1533392151650-269f96231f65', 800, 1000],
   'looks/look-04.jpg': ['1638337935003-e17cf483ca8d', 800, 1000],
-  'looks/look-05.jpg': ['1612928414075-bc722ade44f1', 800, 1000],
+  'looks/look-05.jpg': ['1603189343302-e603f7add05a', 800, 1000],
   'looks/look-06.jpg': ['1637536701306-3214e9cec64a', 800, 1000],
   'looks/look-07.jpg': ['1592833578500-1082e18665a3', 800, 1000],
   'looks/look-08.jpg': ['1666586950819-67950d40bb0a', 800, 1000],
@@ -60,16 +60,16 @@ const MANIFEST = {
   'looks/look-11.jpg': ['1601597565151-70c4020dc0e1', 800, 1000],
   'looks/look-12.jpg': ['1678923917496-fe3fa70673ac', 800, 1000],
 
-  'pieces/wool-coat-camel.jpg': ['1587115924362-622c3fa065bd', 560, 700],
-  'pieces/wool-coat-ivory.jpg': ['1607207496684-3e09f039cfe6', 560, 700],
-  'pieces/wool-coat-black.jpg': ['1678923917496-fe3fa70673ac', 560, 700],
-  'pieces/draped-knit-ash.jpg': ['1536180931879-fd2d652efddc', 560, 700],
-  'pieces/silk-slip-pearl.jpg': ['1659522761084-79196b64abe4', 560, 700],
-  'pieces/wide-trouser-charcoal.jpg': ['1592833578500-1082e18665a3', 560, 700],
-  'pieces/leather-blouson-black.jpg': ['1612928414075-bc722ade44f1', 560, 700],
-  'pieces/column-dress-black.jpg': ['1784549758722-8a734d1eadd0', 560, 700],
-  'pieces/overshirt-ash.jpg': ['1666586950819-67950d40bb0a', 560, 700],
-  'pieces/cashmere-scarf-ivory.jpg': ['1752134052911-f7c26fca227d', 560, 700],
+  'pieces/coat-charcoal.jpg': ['1587115924362-622c3fa065bd', 560, 700],
+  'pieces/coat-ivory.jpg': ['1607207496684-3e09f039cfe6', 560, 700],
+  'pieces/coat-black.jpg': ['1678923917496-fe3fa70673ac', 560, 700],
+  'pieces/slip-black.jpg': ['1536180931879-fd2d652efddc', 560, 700],
+  'pieces/suit-ivory.jpg': ['1659522761084-79196b64abe4', 560, 700],
+  'pieces/wide-trouser-black.jpg': ['1592833578500-1082e18665a3', 560, 700],
+  'pieces/sculpted-jacket-black.jpg': ['1603189343302-e603f7add05a', 560, 700],
+  'pieces/belted-dress-ivory.jpg': ['1784549758722-8a734d1eadd0', 560, 700],
+  'pieces/sculpted-shirt-ivory.jpg': ['1666586950819-67950d40bb0a', 560, 700],
+  'pieces/lace-bustier-black.jpg': ['1752134052911-f7c26fca227d', 560, 700],
 
   // The hero's second frame, for the tonal wipe.
   'hero-b.jpg': ['1495914510314-ba3164b1321f', 560, 700],
@@ -83,7 +83,7 @@ const MANIFEST = {
 const INHERITED = {
   'hero-a.jpg': 'the opening look',
   'campaign.jpg': 'the AW26 campaign',
-  'pieces/wool-coat-charcoal.jpg': 'the wool coat',
+  'pieces/coat-grey.jpg': 'the wool coat',
 };
 
 for (const d of ['looks', 'pieces', 'atelier']) mkdirSync(join(OUT, d), { recursive: true });

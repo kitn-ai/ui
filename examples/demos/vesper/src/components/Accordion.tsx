@@ -14,7 +14,7 @@ export default function Accordion(props: {
         {(item) => {
           const isOpen = () => open() === item.id;
           return (
-            <div class={['acc-item', { open: isOpen() }]}>
+            <div class={isOpen() ? 'acc-item open' : 'acc-item'}>
               <h3>
                 <button
                   class="acc-trigger"

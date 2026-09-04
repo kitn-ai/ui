@@ -3,9 +3,15 @@ import { createRoot, flush } from 'solid-js';
 import { createCart, lineKey, FREE_SHIPPING } from './store';
 import { catalog, pieceBySlug } from '../data/catalog';
 
-const coat = pieceBySlug('wool-coat')!;
-const knit = pieceBySlug('draped-knit')!;
-const scarf = pieceBySlug('cashmere-scarf')!;
+// Derived from the catalog, not hardcoded copy: names and colorways are
+// written to match their photographs and change when a photograph does. A
+// test that hardcodes them fails on a copy edit and says nothing useful.
+const coat = pieceBySlug('the-coat')!;          // the one piece with 4 colorways
+const knit = pieceBySlug('the-slip')!;
+const scarf = catalog.reduce((a, b) => (a.price <= b.price ? a : b)); // cheapest
+const [CW1, CW2] = [coat.colorways[0]!.name, coat.colorways[1]!.name];
+const KNIT_CW = knit.colorways[0]!.name;
+const SCARF_CW = scarf.colorways[0]!.name;
 
 /**
  * Every case runs inside a root so the memos have an owner to dispose.
@@ -36,17 +42,17 @@ describe('cart', () => {
 
   it('adds a line', () =>
     withCart((c) => {
-      act(() => c.add(coat, 'Charcoal', 'M'));
+      act(() => c.add(coat, CW1, 'M'));
       expect(c.items.length).toBe(1);
       expect(c.count()).toBe(1);
       expect(c.subtotal()).toBe(coat.price);
-      expect(c.items[0]!.key).toBe(lineKey(coat.id, 'Charcoal', 'M'));
+      expect(c.items[0]!.key).toBe(lineKey(coat.id, CW1, 'M'));
     }));
 
   it('increments rather than duplicating an identical configuration', () =>
     withCart((c) => {
-      act(() => c.add(coat, 'Charcoal', 'M'));
-      act(() => c.add(coat, 'Charcoal', 'M', 2));
+      act(() => c.add(coat, CW1, 'M'));
+      act(() => c.add(coat, CW1, 'M', 2));
       expect(c.items.length).toBe(1);
       expect(c.count()).toBe(3);
       expect(c.subtotal()).toBe(coat.price * 3);
@@ -54,16 +60,16 @@ describe('cart', () => {
 
   it('keeps different colorways and sizes apart', () =>
     withCart((c) => {
-      act(() => c.add(coat, 'Charcoal', 'M'));
-      act(() => c.add(coat, 'Camel', 'M'));
-      act(() => c.add(coat, 'Charcoal', 'L'));
+      act(() => c.add(coat, CW1, 'M'));
+      act(() => c.add(coat, CW2, 'M'));
+      act(() => c.add(coat, CW1, 'L'));
       expect(c.items.length).toBe(3);
       expect(c.count()).toBe(3);
     }));
 
   it('changes quantity and removes at zero', () =>
     withCart((c) => {
-      act(() => c.add(knit, 'Ivory', 'S'));
+      act(() => c.add(knit, KNIT_CW, 'S'));
       const key = c.items[0]!.key;
       act(() => c.setQty(key, 4));
       expect(c.count()).toBe(4);
@@ -74,8 +80,8 @@ describe('cart', () => {
 
   it('removes one line without touching the others', () =>
     withCart((c) => {
-      act(() => c.add(coat, 'Charcoal', 'M'));
-      act(() => c.add(knit, 'Ivory', 'S'));
+      act(() => c.add(coat, CW1, 'M'));
+      act(() => c.add(knit, KNIT_CW, 'S'));
       act(() => c.remove(c.items[0]!.key));
       expect(c.items.length).toBe(1);
       expect(c.items[0]!.pieceId).toBe(knit.id);
@@ -83,16 +89,16 @@ describe('cart', () => {
 
   it('reports the free-shipping remainder, and zero once past it', () =>
     withCart((c) => {
-      act(() => c.add(scarf, 'Ivory', 'One size'));
+      act(() => c.add(scarf, SCARF_CW, scarf.sizes[0]!));
       expect(c.shippingRemainder()).toBe(FREE_SHIPPING - scarf.price);
-      act(() => c.add(coat, 'Charcoal', 'M'));
+      act(() => c.add(coat, CW1, 'M'));
       expect(c.subtotal()).toBeGreaterThan(FREE_SHIPPING);
       expect(c.shippingRemainder()).toBe(0);
     }));
 
   it('clears', () =>
     withCart((c) => {
-      act(() => c.add(coat, 'Charcoal', 'M'));
+      act(() => c.add(coat, CW1, 'M'));
       act(() => c.clear());
       expect(c.items.length).toBe(0);
     }));
@@ -100,16 +106,16 @@ describe('cart', () => {
   it('round-trips through a snapshot', () =>
     createRoot((dispose) => {
       const a = createCart();
-      act(() => a.add(coat, 'Camel', 'L', 2));
-      act(() => a.add(knit, 'Ash', 'S'));
+      act(() => a.add(coat, CW2, 'L', 2));
+      act(() => a.add(knit, KNIT_CW, 'S'));
       const snapshot = a.serialize();
 
       const b = createCart();
       act(() => b.hydrateFromStorage(snapshot));
       expect(b.count()).toBe(3);
       expect(b.subtotal()).toBe(a.subtotal());
-      expect(b.items[0]!.colorway).toBe('Camel');
-      expect(b.items[0]!.key).toBe(lineKey(coat.id, 'Camel', 'L'));
+      expect(b.items[0]!.colorway).toBe(CW2);
+      expect(b.items[0]!.key).toBe(lineKey(coat.id, CW2, 'L'));
       dispose();
     }));
 
@@ -123,8 +129,8 @@ describe('cart', () => {
       c.hydrateFromStorage({
         v: 1,
         lines: [
-          { pieceId: 'gone', colorway: 'Charcoal', size: 'M', qty: 1 },
-          { pieceId: coat.id, colorway: 'Charcoal', size: 'M', qty: 1 },
+          { pieceId: 'gone', colorway: CW1, size: 'M', qty: 1 },
+          { pieceId: coat.id, colorway: CW1, size: 'M', qty: 1 },
         ],
       });
       expect(c.items.length).toBe(1);

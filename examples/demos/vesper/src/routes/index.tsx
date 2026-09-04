@@ -3,7 +3,7 @@ import { Title, Meta } from '@solidjs/meta';
 import TonalWipe from '../components/TonalWipe';
 import IndexMarquee from '../components/IndexMarquee';
 import Configurator from '../components/Configurator';
-import { pieceBySlug } from '../data/catalog';
+import { catalog, pieceBySlug } from '../data/catalog';
 import { looks } from '../data/looks';
 import './home.css';
 
@@ -15,7 +15,10 @@ const Arrow = () => (
 );
 
 export default function Home() {
-  const featured = pieceBySlug('wool-coat')!;
+  // Falls back to the first piece rather than asserting a slug: a renamed
+  // slug should not be able to 500 the home page, and `!` on a lookup is
+  // exactly how that happened once already.
+  const featured = pieceBySlug('the-coat') ?? catalog[0]!;
   const teaser = looks.slice(0, 3);
 
   return (
