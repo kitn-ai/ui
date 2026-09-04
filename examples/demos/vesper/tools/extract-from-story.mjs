@@ -13,7 +13,10 @@ import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const OUT = resolve(HERE, '..');
+// Writes into static-original/, NOT the project root. A start-mode Solid app
+// must have no index.html at its root -- the plugin generates the entries --
+// and leaving one there is both confusing to read and a real footgun.
+const OUT = resolve(HERE, '../static-original');
 const STORY = resolve(HERE, '../../../../packages/ui/src/elements/v0.stories.tsx');
 
 // The generated-page section of the story: everything from the "framed for real"
@@ -44,7 +47,7 @@ try {
   rmSync(tmp, { force: true });
 }
 
-for (const d of ['css', 'js', 'img', 'fonts']) mkdirSync(join(OUT, d), { recursive: true });
+for (const d of ['', 'css', 'js', 'img', 'fonts']) mkdirSync(join(OUT, d), { recursive: true });
 
 // ── fonts ── pull each data:font/woff2 out of the @font-face block ──
 const faces = [...m.FONT_FACE.matchAll(
