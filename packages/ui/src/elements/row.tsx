@@ -39,6 +39,15 @@ defineWebComponent<Props, Events>('kai-row', {
   href: undefined,
   chevron: undefined,
 }, (props, { element, flag, dispatch }) => {
+  // Marks the host as a LIST ROW, which is what `RowGroup`'s `::slotted()` rules
+  // match on: the geometry cannot be scoped by tag name (a hand-typed roster a
+  // third row-shaped element would miss) or by `*` (the sheet is shared, so it
+  // would reach every element's slotted children). Set here, in the facade body,
+  // rather than in `onMount`, so the marker is on the host before the first paint
+  // and a row in a group never flashes without its hairline. Full reasoning:
+  // kit-base.css's row-list block.
+  element.setAttribute('data-kai-row', '');
+
   // Which named regions the consumer has filled; drives the conditional
   // wrappers so an empty region leaves no stray box behind.
   const [slots, setSlots] = createSignal<Record<string, boolean>>({});
@@ -51,15 +60,22 @@ defineWebComponent<Props, Events>('kai-row', {
   });
 
   return (
-    <Row
-      href={props.href as string | undefined}
-      chevron={flag('chevron')}
-      onActivate={flag('interactive') ? () => dispatch('kai-click') : undefined}
-      leading={slots().leading ? <slot name="leading" /> : undefined}
-      subtitle={slots().subtitle ? <slot name="subtitle" /> : undefined}
-      trailing={slots().trailing ? <slot name="trailing" /> : undefined}
-    >
-      <slot />
-    </Row>
+    <>
+      {/* Same reason as `<kai-view>`: the base sheet's `:host{display:block}` is an
+          author rule, so it outranks the UA's `[hidden]{display:none}` and a hidden
+          row still laid out. Live in `support-widget.html`, which drives its
+          recent-conversation row with `:hidden`. */}
+      <style>{':host([hidden]){display:none}'}</style>
+      <Row
+        href={props.href as string | undefined}
+        chevron={flag('chevron')}
+        onActivate={flag('interactive') ? () => dispatch('kai-click') : undefined}
+        leading={slots().leading ? <slot name="leading" /> : undefined}
+        subtitle={slots().subtitle ? <slot name="subtitle" /> : undefined}
+        trailing={slots().trailing ? <slot name="trailing" /> : undefined}
+      >
+        <slot />
+      </Row>
+    </>
   );
 });

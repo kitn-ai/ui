@@ -3,14 +3,14 @@
 ## Overview
 
 <!-- spec:overview -->
-`@kitn.ai/ui` ships 96 framework-agnostic custom elements built on the SolidJS kit.
+`@kitn.ai/ui` ships 97 framework-agnostic custom elements built on the SolidJS kit.
 
 | Tag | Purpose |
 |-----|---------|
 | `<kai-chat>` | Full chat UI — message list plus prompt input |
 | `<kai-conversations>` | Sidebar conversation browser with group support |
 | `<kai-prompt-input>` | Standalone text-input area with send button |
-| + 93 composable primitives | See the full roster below |
+| + 94 composable primitives | See the full roster below |
 <!-- /spec:overview -->
 
 Each element renders into its own **Shadow DOM** so the host page's CSS cannot leak in, and the kit's Tailwind classes cannot leak out. SolidJS and all kit dependencies are bundled inside the element bundle — the host does not need SolidJS.
@@ -669,6 +669,14 @@ Restyle from outside the Shadow DOM via `kai-code-block::part(name)`.
 #### Composed from
 
 `Components/CodeBlock`, `Components/CodeBlockCode`
+
+#### CSS custom properties
+
+Set these on the element to change how it looks.
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--kai-code-radius` | `0.75rem` | Corner radius of the code block. Set it to `0` to embed it flush under something that already provides the rounding (framework tabs, a docs panel). <br>`kai-code-block { --kai-code-radius: 0 }` |
 
 #### Theming
 

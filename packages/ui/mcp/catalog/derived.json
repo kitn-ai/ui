@@ -4002,6 +4002,26 @@
       "tokens": []
     },
     {
+      "tag": "kai-row-group",
+      "props": [
+        {
+          "name": "theme",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        }
+      ],
+      "events": [],
+      "methods": [],
+      "parts": [
+        "group"
+      ],
+      "composedFrom": [
+        "RowGroup"
+      ],
+      "tokens": []
+    },
+    {
       "tag": "kai-scope-picker",
       "props": [
         {

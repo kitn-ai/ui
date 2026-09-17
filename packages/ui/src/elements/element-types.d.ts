@@ -1446,6 +1446,11 @@ export interface KaiRowElement extends HTMLElement {
   chevron?: boolean;
 }
 
+export interface KaiRowGroupElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: "light" | "dark" | "auto";
+}
+
 export interface KaiScopePickerElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
@@ -2076,6 +2081,7 @@ declare global {
     'kai-resizable-item': KaiResizableItemElement;
     'kai-response-stream': KaiResponseStreamElement;
     'kai-row': KaiRowElement;
+    'kai-row-group': KaiRowGroupElement;
     'kai-scope-picker': KaiScopePickerElement;
     'kai-screen': KaiScreenElement;
     'kai-scroll-area': KaiScrollAreaElement;
@@ -2190,6 +2196,7 @@ declare module 'react' {
       'kai-resizable-item': KaiElementJsxProps;
       'kai-response-stream': KaiElementJsxProps;
       'kai-row': KaiElementJsxProps;
+      'kai-row-group': KaiElementJsxProps;
       'kai-scope-picker': KaiElementJsxProps;
       'kai-screen': KaiElementJsxProps;
       'kai-scroll-area': KaiElementJsxProps;
@@ -3336,6 +3343,11 @@ export interface KaiRowElementProps {
   chevron?: boolean;
 }
 
+export interface KaiRowGroupElementProps {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: "light" | "dark" | "auto";
+}
+
 export interface KaiScopePickerElementProps {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
@@ -4222,6 +4234,10 @@ export interface KaiRowElementEvents {
   onKaiClick?: (event: CustomEvent) => void;
 }
 
+export interface KaiRowGroupElementEvents {
+
+}
+
 export interface KaiScopePickerElementEvents {
   /** The scope dropdown opened or closed (by click, keyboard, Escape, outside-click, or a method). */
   onKaiOpenChange?: (event: CustomEvent<{ open: boolean }>) => void;
@@ -4544,6 +4560,8 @@ declare module 'vue' {
     KaiResponseStream: KaiVueElement<KaiResponseStreamElementProps, KaiResponseStreamElementEvents>;
     'kai-row': KaiVueElement<KaiRowElementProps, KaiRowElementEvents>;
     KaiRow: KaiVueElement<KaiRowElementProps, KaiRowElementEvents>;
+    'kai-row-group': KaiVueElement<KaiRowGroupElementProps, KaiRowGroupElementEvents>;
+    KaiRowGroup: KaiVueElement<KaiRowGroupElementProps, KaiRowGroupElementEvents>;
     'kai-scope-picker': KaiVueElement<KaiScopePickerElementProps, KaiScopePickerElementEvents>;
     KaiScopePicker: KaiVueElement<KaiScopePickerElementProps, KaiScopePickerElementEvents>;
     'kai-screen': KaiVueElement<KaiScreenElementProps, KaiScreenElementEvents>;

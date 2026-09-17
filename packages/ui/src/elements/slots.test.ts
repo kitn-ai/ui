@@ -854,6 +854,7 @@ describe('ELEMENT_COMPOSITION registry (single source of truth the build extract
       'kai-resizable',
       'kai-resizable-item',
       'kai-row',
+      'kai-row-group',
       'kai-screen',
       'kai-scroll-area',
       'kai-search',
@@ -886,5 +887,37 @@ describe('ELEMENT_COMPOSITION registry (single source of truth the build extract
         expect(part.doc.trim().length).toBeGreaterThan(0);
       }
     }
+  });
+
+  it('every registered CSS custom property exists in the shipped source', () => {
+    // The registry is hand-maintained and reaches consumers ONLY through generated
+    // artifacts (CEM `cssProperties` → the kai MCP's component reference,
+    // element-meta.json, llms-full.txt, docs/web-components.md). Rename or drop a
+    // var in a component and the doc keeps describing it: a knob that does nothing,
+    // advertised to every consumer and every agent. This asserts the registry
+    // against the SOURCE, which is the direction nothing else checks.
+    const source: string[] = [];
+    const walk = (dir: string): void => {
+      for (const entry of readdirSync(dir, { withFileTypes: true })) {
+        const path = resolve(dir, entry.name);
+        if (entry.isDirectory()) { walk(path); continue; }
+        if (!/\.(tsx?|css)$/.test(entry.name)) continue;
+        if (/\.(test|stories)\.tsx?$/.test(entry.name)) continue;
+        if (path.endsWith('slots.ts')) continue;
+        source.push(readFileSync(path, 'utf8'));
+      }
+    };
+    walk(resolve(HERE, '..'));
+    const haystack = source.join('\n');
+
+    const vars = Object.entries(ELEMENT_COMPOSITION).flatMap(([tag, def]) =>
+      (def.vars ?? []).map((v) => ({ tag, ...v })),
+    );
+    expect(vars.length, 'no element documents a custom property — the scan is looking at nothing').toBeGreaterThan(0);
+
+    const fictional = vars.filter((v) => !haystack.includes(v.name)).map((v) => `${v.tag}: ${v.name}`);
+    expect(fictional).toEqual([]);
+
+    expect(vars.filter((v) => !v.doc.trim()).map((v) => v.name)).toEqual([]);
   });
 });

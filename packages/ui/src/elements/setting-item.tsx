@@ -27,6 +27,11 @@ defineWebComponent<Props>('kai-setting-item', {
   label: '',
   description: undefined,
 }, (props, { element }) => {
+  // Marks the host as a LIST ROW so `RowGroup`'s `::slotted()` rules reach it —
+  // the same marker `kai-row` sets, and the reason the rules match a marker rather
+  // than a tag name. See kit-base.css's row-list block.
+  element.setAttribute('data-kai-row', '');
+
   // The control region only renders when `slot="control"` is actually filled, so
   // a plain label row has no stray right-side wrapper. An empty `<slot>` is always
   // a truthy node, so we track occupancy and gate on it (the kai-card approach).

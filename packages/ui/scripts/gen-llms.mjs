@@ -317,6 +317,21 @@ function renderElement(el) {
     );
   }
 
+  if (el.vars?.length) {
+    out.push('');
+    out.push(
+      [
+        '**CSS custom properties** (set them on the element to change how it looks):',
+        '',
+        '| Property | Default | Description |',
+        '|---|---|---|',
+        el.vars
+          .map((v) => `| \`${v.name}\` | ${v.default ? `\`${v.default}\`` : '—'} | ${escapeCell(v.doc)}${v.recipe ? ` — \`${escapeCell(v.recipe)}\`` : ''} |`)
+          .join('\n'),
+      ].join('\n'),
+    );
+  }
+
   out.push('');
   out.push('---');
   return out.join('\n');
@@ -529,6 +544,7 @@ function fromElements(elements) {
     })),
     slots: el.slots,
     parts: el.parts,
+    vars: el.vars,
     declarativeChildren: el.declarativeChildren,
   }));
 }
@@ -569,6 +585,14 @@ function fromManifest(cem) {
         })),
       slots: (d.slots || []).map((s) => ({ name: s.name, doc: s.description ?? '' })),
       parts: (d.cssParts || []).map((p) => ({ name: p.name, doc: p.description ?? '', recipe: p.recipe })),
+      // Consumer-settable custom properties. Tokens land in the same CEM array as
+      // `{ name }` with no description (they are palette entries, not knobs), so a
+      // DESCRIPTION is what marks a var. Keep this filter in step with
+      // gen-element-api's emission or this path silently drops the vars — the
+      // failure mode the note above describes, on the field added for them.
+      vars: (d.cssProperties || [])
+        .filter((p) => p.description)
+        .map((p) => ({ name: p.name, doc: p.description, default: p.default, recipe: p.recipe })),
       declarativeChildren: (d.declarativeChildren || []).map((c) => ({
         tag: c.tagName,
         attributes: (c.attributes || []).map((a) => a.name),

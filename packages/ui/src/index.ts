@@ -356,6 +356,8 @@ export type { ConversationItemProps } from './components/conversation-item';
 export type { ConversationRowDensity } from './components/conversation-item';
 export { Row } from './components/row';
 export type { RowProps } from './components/row';
+export { RowGroup } from './ui/row-group';
+export type { RowGroupProps } from './ui/row-group';
 export { ModelSwitcher } from './components/model-switcher';
 export type { ModelSwitcherProps } from './components/model-switcher';
 export { ChatScopePicker } from './components/chat-scope-picker';

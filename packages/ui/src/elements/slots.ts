@@ -149,6 +149,31 @@ export interface PartDef {
   recipe?: string;
 }
 
+/**
+ * A CSS custom property a CONSUMER sets to change how the element looks. The
+ * distinction from `COMPONENT_TOKENS` (the `--color-*` names a few elements read
+ * on top of the global token sheet) is the audience: a token is part of the
+ * design system's palette, a var is this element's own knob.
+ *
+ * WHY A REGISTRY ENTRY AND NOT JUST A COMMENT. These reach consumers through
+ * GENERATED artifacts only: the Custom Elements Manifest's `cssProperties` (what
+ * the `kai` MCP's component reference prints, with `description` and `default`),
+ * `element-meta.json`, `llms-full.txt` and `docs/web-components.md`. Measured
+ * before this existed: zero mentions of `--kai-row-radius` or `--kai-code-radius`
+ * in any of them, so the knob was real, documented in a source comment, and
+ * undiscoverable to every consumer and every coding agent.
+ */
+export interface VarDef {
+  /** The custom property, `--`-prefixed. */
+  name: string;
+  /** One-line contract: what setting it changes. Feeds the docs. */
+  doc: string;
+  /** Its default as CSS text, often a `var()` reference to a token. */
+  default?: string;
+  /** A copy-pasteable example for docs / the MCP reference. */
+  recipe?: string;
+}
+
 /** Styleable `::part`s of `<kai-chat>` (beyond the slot-backed `header`/`sidebar`/
  *  `footer` parts). */
 export const CHAT_PARTS: PartDef[] = [
@@ -520,6 +545,13 @@ export interface ElementComposition {
   slots?: SlotDef[];
   parts?: PartDef[];
   /**
+   * CSS custom properties a consumer can set on this element. Same contract as
+   * `slots`/`parts`: hand-maintained here because it is the ONE source every
+   * generator reads, and guarded against rot by `slots.test.ts` (a var that no
+   * longer appears in the shipped source is a fictional doc).
+   */
+  vars?: VarDef[];
+  /**
    * What the element's DEFAULT (unnamed) `<slot>` projects — i.e. what a consumer
    * puts between the tags. Kept OUT of `slots` on purpose: those arrays are also
    * read at runtime by `readSlots()`, which would query a meaningless `[slot=""]`.
@@ -824,8 +856,40 @@ export const ROW_PARTS: PartDef[] = [
   },
 ];
 
-export const ELEMENT_COMPOSITION: Record<string, ElementComposition> = {
-  'kai-chat': { slots: CHAT_SLOTS, parts: CHAT_PARTS },
+/** Styleable `::part`s of `<kai-row-group>`. There is one: the frame. The rows
+ *  keep their own parts, because the group adds no wrapper around them. */
+export const ROW_GROUP_PARTS: PartDef[] = [
+  {
+    name: 'group',
+    doc: 'The frame: the bordered, rounded, clipping card the rows sit in.',
+    recipe: 'kai-row-group::part(group) { border-radius: 0 }',
+  },
+];
+
+/** CSS custom properties of `<kai-row-group>`. One knob: the list's corner
+ *  radius, which the frame applies per ROW POSITION (first rounds at the top,
+ *  last at the bottom, every row between them square), so this is the radius
+ *  every one of those corners uses. */
+export const ROW_GROUP_VARS: VarDef[] = [
+  {
+    name: '--kai-row-radius',
+    doc: 'Corner radius for the rows in this list. Set it to `0` for a group that sits flush inside a panel that is already rounded.',
+    default: 'var(--radius-lg)',
+    recipe: 'kai-row-group { --kai-row-radius: 0 }',
+  },
+];
+
+/** CSS custom properties of `<kai-code-block>`. */
+export const CODE_BLOCK_VARS: VarDef[] = [
+  {
+    name: '--kai-code-radius',
+    doc: 'Corner radius of the code block. Set it to `0` to embed it flush under something that already provides the rounding (framework tabs, a docs panel).',
+    default: '0.75rem',
+    recipe: 'kai-code-block { --kai-code-radius: 0 }',
+  },
+];
+
+export const ELEMENT_COMPOSITION: Record<string, ElementComposition> = {  'kai-chat': { slots: CHAT_SLOTS, parts: CHAT_PARTS },
   'kai-command': { parts: COMMAND_PARTS },
   'kai-conversations': { slots: CONVERSATIONS_SLOTS, parts: CONVERSATIONS_PARTS, children: 'Your own `<kai-conversation-item>` rows (item mode: the consumer-owned loop). Data rows do not render while any are present.' },
   'kai-conversation-item': { slots: CONVERSATION_ITEM_SLOTS, parts: CONVERSATION_ITEM_PARTS, children: 'The row title. `leading`, `meta` and `menu` are the named regions around it.' },
@@ -873,7 +937,7 @@ export const ELEMENT_COMPOSITION: Record<string, ElementComposition> = {
   'kai-resizable': { children: 'The `<kai-resizable-item>` panels, in order. Dividers are inserted between them.' },
   'kai-resizable-item': { children: 'This panel\'s content.' },
   'kai-tooltip': { children: 'The TRIGGER the tooltip describes. The tip text is the `text` prop.' },
-  'kai-code-block': { parts: CODE_BLOCK_PARTS },
+  'kai-code-block': { parts: CODE_BLOCK_PARTS, vars: CODE_BLOCK_VARS },
   'kai-audio-visualizer': { parts: AUDIO_VISUALIZER_PARTS },
   'kai-panel': { slots: PANEL_SLOTS, parts: PANEL_PARTS, children: 'The view content that fills the body region (a `<kai-thread>`, a `<kai-view-stack>`, a home screen). Stretched to fill the remaining height between the `header` and `footer` slots.' },
   'kai-panel-header': { slots: PANEL_HEADER_SLOTS, parts: PANEL_HEADER_PARTS, children: 'The title text. `start` and `end` are the clusters around it: back arrows and close buttons are slotted content, never props.' },
@@ -882,6 +946,7 @@ export const ELEMENT_COMPOSITION: Record<string, ElementComposition> = {
   'kai-view-stack': { children: 'The named `<kai-view>` children: tab roots (`tab-root`) side by side behind a tab bar, the rest drill views reached by `push()`.' },
   'kai-view': { children: 'This view\'s content. It stays mounted while hidden, so switching views resets nothing.' },
   'kai-row': { slots: ROW_SLOTS, parts: ROW_PARTS, children: 'The row title. `leading`, `subtitle` and `trailing` are the named regions around it.' },
+  'kai-row-group': { parts: ROW_GROUP_PARTS, vars: ROW_GROUP_VARS, children: 'The `<kai-row>` rows, as DIRECT children: a wrapper element per row collects the divider on its own box instead. Rows are added and removed rather than hidden. A hidden row stays in the sibling chain, so the row after it paints a hairline under the frame\'s top border.' },
 };
 
 /**

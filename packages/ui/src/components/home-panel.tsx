@@ -4,6 +4,7 @@ import { Button } from '../ui/button';
 import { renderIcon } from '../ui/icon';
 import { relativeTimeShort, isConversationUnread } from './conversation-item';
 import { Row } from './row';
+import { RowGroup } from '../ui/row-group';
 import type { ConversationSummary, HomeLinkEntry } from '../types';
 
 export interface HomePanelProps {
@@ -38,6 +39,12 @@ export interface HomePanelProps {
  * a plain, non-interactive row — label visible, no anchor, no button, no
  * click handler — rather than silently promoting it into an event-emitter.
  * (The CTA stays a `Button`: it is a primary action, not a list row.)
+ *
+ * The recent-conversation card and the link list are both `RowGroup`s of one and
+ * of N rows, which is all the frame needs to know: a one-row group is a framed
+ * card, an N-row group draws the hairlines between them. Before `RowGroup` the
+ * link list faked its dividers with `rounded-none border-b last:border-b-0` on
+ * each row, because a row's own radius is a standalone row's radius.
  */
 export function HomePanel(props: HomePanelProps) {
   const title = () => props.greeting?.title ?? 'Hi there 👋';
@@ -59,24 +66,26 @@ export function HomePanel(props: HomePanelProps) {
           const time = () => relativeTimeShort(recent().updatedAt ?? recent().lastMessageAt);
           const unread = () => isConversationUnread(recent());
           return (
-            <Row
-              data-kai-home-recent
-              class="rounded-xl border border-border p-4"
-              subtitle={recent().trailing}
-              trailing={
-                <>
-                  <Show when={unread()}>
-                    <span aria-hidden="true" class="size-1.5 shrink-0 rounded-full bg-unread" />
-                  </Show>
-                  <Show when={time()}>
-                    <span class="shrink-0">{time()}</span>
-                  </Show>
-                </>
-              }
-              onActivate={() => props.onSelectRecent?.(recent().id)}
-            >
-              {recent().title}
-            </Row>
+            <RowGroup>
+              <Row
+                data-kai-home-recent
+                class="p-4"
+                subtitle={recent().trailing}
+                trailing={
+                  <>
+                    <Show when={unread()}>
+                      <span aria-hidden="true" class="size-1.5 shrink-0 rounded-full bg-unread" />
+                    </Show>
+                    <Show when={time()}>
+                      <span class="shrink-0">{time()}</span>
+                    </Show>
+                  </>
+                }
+                onActivate={() => props.onSelectRecent?.(recent().id)}
+              >
+                {recent().title}
+              </Row>
+            </RowGroup>
           );
         }}
       </Show>
@@ -96,12 +105,11 @@ export function HomePanel(props: HomePanelProps) {
       </Show>
 
       <Show when={props.links && props.links.length > 0}>
-        <div class="flex flex-col overflow-hidden rounded-xl border border-border">
+        <RowGroup>
           <For each={props.links}>
             {(entry) => (
               <Row
                 data-kai-home-link
-                class="rounded-none border-b border-border last:border-b-0"
                 leading={entry.icon ? renderIcon(entry.icon, { class: 'size-4 shrink-0' }) : undefined}
                 subtitle={entry.description}
                 chevron
@@ -112,7 +120,7 @@ export function HomePanel(props: HomePanelProps) {
               </Row>
             )}
           </For>
-        </div>
+        </RowGroup>
       </Show>
     </div>
   );

@@ -94,7 +94,8 @@
     "kai-tab-bar-item": "tab-bar-item",
     "kai-view-stack": "view-stack",
     "kai-view": "view",
-    "kai-row": "row"
+    "kai-row": "row",
+    "kai-row-group": "row-group"
   },
   "files": {
     "conversation-list": [
@@ -375,6 +376,9 @@
     ],
     "row": [
       "kai-row"
+    ],
+    "row-group": [
+      "kai-row-group"
     ]
   }
 }

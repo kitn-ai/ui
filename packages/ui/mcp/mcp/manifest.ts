@@ -76,6 +76,9 @@ export interface CemCssProperty {
   name: string;
   description?: string;
   default?: string;
+  /** Our extension: a copy-paste example, emitted for a consumer-settable knob (a
+   *  registry `VarDef`). A theme token carries none. */
+  recipe?: string;
 }
 
 export interface CemSlot {

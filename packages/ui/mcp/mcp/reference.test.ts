@@ -250,6 +250,18 @@ describe('component_reference — composition seams (slots + ::part)', () => {
     expect(text).toMatch(/### Styleable parts/);
     expect(text).toMatch(/::part\(button\)/);
   });
+
+  it('documents a consumer-settable CSS custom property, with its default and recipe', async () => {
+    // The knob has to reach the AGENT, not just the docs site: a harness told to
+    // build a settings screen needs to know how to make the list flush, and the
+    // generated artifacts are the only channel it reads. Comes from the
+    // `cssProperties` the registry emits into dist/custom-elements.json.
+    const text = await textFor('kai-row-group');
+    expect(text).toMatch(/### CSS custom properties/);
+    expect(text).toMatch(/--kai-row-radius/);
+    expect(text).toMatch(/var\(--radius-lg\)/); // the default, not just the name
+    expect(text).toMatch(/--kai-row-radius: 0/); // the copy-pasteable recipe
+  });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────

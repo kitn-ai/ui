@@ -750,6 +750,12 @@ for (const el of elements) {
       const parts = [...(comp.parts ?? []), ...slotParts];
       if (slots.length) el.slots = slots;
       if (parts.length) el.parts = parts;
+      // Consumer-settable custom properties, documented in the registry because
+      // they reach consumers ONLY through generated artifacts. Kept separate from
+      // `tokens` (the `--color-*` names a few elements read beside the global
+      // sheet): one is the design system's palette, the other is this element's
+      // own knob. Both are CEM `cssProperties`.
+      if (comp.vars?.length) el.vars = comp.vars;
     }
   } else {
     console.warn('⚠ slots.ts not found in program — slots/parts not emitted');
@@ -800,7 +806,18 @@ const cem = {
         type: { text: e.detail ? `CustomEvent<${e.detail}>` : 'CustomEvent' },
         description: e.description,
       })),
-      cssProperties: el.tokens.map((name) => ({ name })),
+      cssProperties: [
+        ...el.tokens.map((name) => ({ name })),
+        // `description`/`default` are CEM-standard on cssProperties and are what
+        // the kai MCP's component reference prints, so a var documented in
+        // src/elements/slots.ts reaches a coding agent with its contract intact.
+        ...(el.vars ?? []).map((v) => ({
+          name: v.name,
+          description: v.doc,
+          ...(v.default ? { default: v.default } : {}),
+          ...(v.recipe ? { recipe: v.recipe } : {}),
+        })),
+      ],
       // Our extension: the "Route 2" light-DOM child elements this one parses.
       // Not a CEM-standard key (the manifest has no vocabulary for a child-element
       // API), but it rides in the same file the kai MCP serves.

@@ -72,6 +72,7 @@ import type {
   KaiResizableItemElement,
   KaiResponseStreamElement,
   KaiRowElement,
+  KaiRowGroupElement,
   KaiScopePickerElement,
   KaiScreenElement,
   KaiScrollAreaElement,
@@ -1742,6 +1743,17 @@ export const Row = /*#__PURE__*/ createWebComponent<RowProps, KaiRowElement>(
   ["theme","interactive","href","chevron"],
   { onClick: 'kai-click' },
   () => import('@kitn.ai/ui/elements/row'),
+);
+
+export interface RowGroupProps extends WebComponentProps {
+
+}
+
+export const RowGroup = /*#__PURE__*/ createWebComponent<RowGroupProps, KaiRowGroupElement>(
+  'kai-row-group',
+  ["theme"],
+  {  },
+  () => import('@kitn.ai/ui/elements/row-group'),
 );
 
 export interface ScopePickerProps extends WebComponentProps {

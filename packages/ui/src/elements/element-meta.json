@@ -2566,6 +2566,14 @@
         "doc": "The copy-to-clipboard button in the header row. Hide it with `copy=\"false\"` rather than CSS.",
         "recipe": "kai-code-block::part(copy) { color: var(--color-primary) }"
       }
+    ],
+    "vars": [
+      {
+        "name": "--kai-code-radius",
+        "doc": "Corner radius of the code block. Set it to `0` to embed it flush under something that already provides the rounding (framework tabs, a docs panel).",
+        "default": "0.75rem",
+        "recipe": "kai-code-block { --kai-code-radius: 0 }"
+      }
     ]
   },
   {
@@ -7850,6 +7858,55 @@
       {
         "name": "trailing",
         "doc": "Right-aligned trailing region (a timestamp, value, or badge)."
+      }
+    ]
+  },
+  {
+    "tag": "kai-row-group",
+    "className": "KaiRowGroupElement",
+    "displayName": "RowGroup",
+    "props": [
+      {
+        "name": "theme",
+        "type": "\"light\" | \"dark\" | \"auto\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "default": "'auto'",
+        "universal": true,
+        "displayType": "\"light\" | \"dark\" | \"auto\""
+      }
+    ],
+    "events": [],
+    "methods": [],
+    "composedFrom": [
+      {
+        "name": "RowGroup",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-rowgroup--docs"
+      }
+    ],
+    "tokens": [],
+    "slots": [
+      {
+        "name": "",
+        "mode": "inject",
+        "doc": "The `<kai-row>` rows, as DIRECT children: a wrapper element per row collects the divider on its own box instead. Rows are added and removed rather than hidden. A hidden row stays in the sibling chain, so the row after it paints a hairline under the frame's top border."
+      }
+    ],
+    "parts": [
+      {
+        "name": "group",
+        "doc": "The frame: the bordered, rounded, clipping card the rows sit in.",
+        "recipe": "kai-row-group::part(group) { border-radius: 0 }"
+      }
+    ],
+    "vars": [
+      {
+        "name": "--kai-row-radius",
+        "doc": "Corner radius for the rows in this list. Set it to `0` for a group that sits flush inside a panel that is already rounded.",
+        "default": "var(--radius-lg)",
+        "recipe": "kai-row-group { --kai-row-radius: 0 }"
       }
     ]
   },

@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { fn } from 'storybook/test';
 import { Row } from './row';
+import { RowGroup } from '../ui/row-group';
 import { renderIcon } from '../ui/icon';
 import { componentDescription } from '../stories/docs/element-controls';
 
@@ -9,6 +10,12 @@ import { componentDescription } from '../stories/docs/element-controls';
  * subtitle, trailing region, optional chevron, pressable when interactive.
  * Stub-data story-first artifact for the blocks-and-parts round: the three
  * widget home-tab row shapes plus a settings-style row, light and dark.
+ *
+ * `RowGroup` is the frame around a list of them, and it is where the geometry
+ * comes from: a hairline between adjacent rows, the first rounded at the top
+ * only, the last at the bottom only. One row in a group is a framed card. The
+ * frame has its own page (`Components/Primitives/RowGroup`) — the stories here use
+ * it, and show the row shapes it frames.
  */
 const meta = {
   title: 'Components/Primitives/Row',
@@ -19,6 +26,7 @@ const meta = {
     docs: {
       description: componentDescription([
         'A generic list row: leading region, title with optional subtitle, trailing region, optional chevron affordance. Pressable with real button semantics via `onActivate`, or a real anchor via a safe `href`; with neither it is a plain display row. Covers the widget home-tab shapes (recent conversation, CTA with trailing arrow, help link) and general settings screens alike.',
+        'These stories frame the rows in `RowGroup` (its own page: `Components/Primitives/RowGroup`), which is what decides the divider and the per-position corners. The two ways of using it are visible across the stories below: a settings screen is ONE group with N rows, a home tab is ONE GROUP PER ROW with space between them, where rounding every corner is correct.',
       ]),
       controls: { exclude: ['use:eventListener'] },
     },
@@ -34,26 +42,29 @@ const meta = {
     onActivate: fn(),
   },
   render: (args) => (
-    <div class="w-80 rounded-lg border border-border">
+    <RowGroup class="w-80">
       <Row {...args}>Account</Row>
-    </div>
+    </RowGroup>
   ),
 } satisfies Meta<typeof Row>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const IMPORT = `import { Row } from '@kitn.ai/ui';`;
+const IMPORT = `import { Row, RowGroup } from '@kitn.ai/ui';`;
 const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/** Interactive playground: a single pressable row. */
+/** Interactive playground: a single pressable row inside its frame. A one-row
+ *  group is both first and last, so it rounds on all four corners. */
 export const Playground: Story = {
   args: { subtitle: 'Profile, security, preferences', chevron: true },
-  ...src(`<Row subtitle="Profile, security, preferences" chevron onActivate={() => openAccount()}>
-  Account
-</Row>`),
+  ...src(`<RowGroup>
+  <Row subtitle="Profile, security, preferences" chevron onActivate={() => openAccount()}>
+    Account
+  </Row>
+</RowGroup>`),
 };
 
 /**
@@ -63,12 +74,19 @@ export const Playground: Story = {
  *    preview subtitle;
  * 2. full-width CTA, trailing arrow;
  * 3. help link, leading icon + chevron.
+ *
+ * Each framed shape is a ONE-ROW group, which is why no shape carries a wrapper
+ * div any more: the frame's border and radius come from the group. The CTA is not
+ * a group at all — it is a filled row, so it takes the same radius its framed
+ * neighbours get (`rounded-xl`) and no border. (In the real widget the CTA is a
+ * `Button`: a primary action, not a list row. It stays a `Row` here to show the
+ * anatomy.)
  */
 function HomeTabRows(props: { onActivate: () => void }) {
   return (
     <div class="flex w-80 flex-col gap-4">
-      {/* 1 · Recent conversation: card-framed row, dot + time trailing. */}
-      <div class="overflow-hidden rounded-xl border border-border">
+      {/* 1 · Recent conversation: one-row group, dot + time trailing. */}
+      <RowGroup>
         <Row
           onActivate={props.onActivate}
           subtitle="Order KAI-1042 shipped with DHL"
@@ -81,19 +99,17 @@ function HomeTabRows(props: { onActivate: () => void }) {
         >
           <span class="font-semibold">Where is my order?</span>
         </Row>
-      </div>
-      {/* 2 · CTA: full-width filled row, label left, arrow right. */}
-      <div class="overflow-hidden rounded-xl">
-        <Row
-          onActivate={props.onActivate}
-          class="bg-primary text-primary-foreground hover:bg-primary/90"
-          trailing={renderIcon('arrow-right', { class: 'size-4 shrink-0 text-primary-foreground' })}
-        >
-          <span class="text-primary-foreground">Send us a message</span>
-        </Row>
-      </div>
-      {/* 3 · Help link: leading icon, subtitle, chevron. */}
-      <div class="overflow-hidden rounded-xl border border-border">
+      </RowGroup>
+      {/* 2 · CTA: a filled row, radius matched to the framed shapes around it. */}
+      <Row
+        onActivate={props.onActivate}
+        class="rounded-xl bg-primary text-primary-foreground hover:bg-primary/90"
+        trailing={renderIcon('arrow-right', { class: 'size-4 shrink-0 text-primary-foreground' })}
+      >
+        <span class="text-primary-foreground">Send us a message</span>
+      </Row>
+      {/* 3 · Help link: one-row group, leading icon, subtitle, chevron. */}
+      <RowGroup>
         <Row
           href="https://ui.kitn.ai"
           leading={renderIcon('book-open', { class: 'size-4 shrink-0' })}
@@ -102,37 +118,47 @@ function HomeTabRows(props: { onActivate: () => void }) {
         >
           Help center
         </Row>
-      </div>
+      </RowGroup>
     </div>
   );
 }
 
 export const HomeTabShapes: Story = {
   render: (args: { onActivate: () => void }) => <HomeTabRows onActivate={args.onActivate} />,
-  ...src(`{/* recent conversation */}
-<Row
-  onActivate={() => openRecent()}
-  subtitle="Order KAI-1042 shipped with DHL"
-  trailing={<><span class="size-1.5 rounded-full bg-unread" /><span>2m ago</span></>}
->
-  <span class="font-semibold">Where is my order?</span>
-</Row>
+  ...src(`{/* recent conversation: a one-row group */}
+<RowGroup>
+  <Row
+    onActivate={() => openRecent()}
+    subtitle="Order KAI-1042 shipped with DHL"
+    trailing={<><span class="size-1.5 rounded-full bg-unread" /><span>2m ago</span></>}
+  >
+    <span class="font-semibold">Where is my order?</span>
+  </Row>
+</RowGroup>
 
-{/* CTA with trailing arrow */}
-<Row class="bg-primary text-primary-foreground" trailing={<ArrowRight />} onActivate={() => startChat()}>
+{/* full-width CTA: a filled row, not a group (radius matched to the frames) */}
+<Row
+  class="rounded-xl bg-primary text-primary-foreground"
+  trailing={<ArrowRight />}
+  onActivate={() => startChat()}
+>
   <span class="text-primary-foreground">Send us a message</span>
 </Row>
 
-{/* help link: leading icon + chevron */}
-<Row href="https://ui.kitn.ai" leading={<BookOpen />} subtitle="Guides and FAQs" chevron>
-  Help center
-</Row>`),
+{/* help link: a one-row group, leading icon + chevron */}
+<RowGroup>
+  <Row href="https://ui.kitn.ai" leading={<BookOpen />} subtitle="Guides and FAQs" chevron>
+    Help center
+  </Row>
+</RowGroup>`),
 };
 
-/** A settings screen composed of rows: the row must read well outside chat. */
+/** A settings screen composed of rows: the row must read well outside chat. One
+ *  group of three rows — the shape every settings screen wants, drawn once here
+ *  instead of a hand-rolled `divide-y` container in the story. */
 function SettingsRows(props: { onActivate: () => void }) {
   return (
-    <div class="w-80 divide-y divide-border overflow-hidden rounded-xl border border-border">
+    <RowGroup class="w-80">
       <Row
         onActivate={props.onActivate}
         leading={renderIcon('sliders-horizontal', { class: 'size-4 shrink-0' })}
@@ -152,13 +178,13 @@ function SettingsRows(props: { onActivate: () => void }) {
       <Row leading={renderIcon('file-text', { class: 'size-4 shrink-0' })} trailing={<span>1.4.2</span>}>
         Release notes
       </Row>
-    </div>
+    </RowGroup>
   );
 }
 
 export const SettingsScreen: Story = {
   render: (args: { onActivate: () => void }) => <SettingsRows onActivate={args.onActivate} />,
-  ...src(`<div class="divide-y divide-border rounded-xl border border-border">
+  ...src(`<RowGroup class="w-80">
   <Row leading={<Sliders />} subtitle="Theme, language, density" chevron onActivate={openPreferences}>
     Preferences
   </Row>
@@ -166,7 +192,7 @@ export const SettingsScreen: Story = {
     Connected repos
   </Row>
   <Row leading={<FileText />} trailing={<span>1.4.2</span>}>Release notes</Row>
-</div>`),
+</RowGroup>`),
 };
 
 /**
@@ -187,5 +213,7 @@ export const LightAndDark: Story = {
       </div>
     </div>
   ),
-  ...src(`<Row subtitle="Guides and FAQs" chevron href="https://ui.kitn.ai">Help center</Row>`),
+  ...src(`<RowGroup>
+  <Row subtitle="Guides and FAQs" chevron href="https://ui.kitn.ai">Help center</Row>
+</RowGroup>`),
 };

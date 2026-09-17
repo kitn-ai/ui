@@ -251,6 +251,16 @@ function tablesFor(el) {
     out += `\n#### Composed from\n\n${items}\n`;
   }
 
+  if (el.vars?.length) {
+    const rows = el.vars
+      .map((v) => {
+        const recipe = v.recipe ? ` <br>\`${v.recipe}\`` : '';
+        return `| \`${v.name}\` | ${v.default ? `\`${v.default}\`` : '—'} | ${v.doc ?? ''}${recipe} |`;
+      })
+      .join('\n');
+    out += `\n#### CSS custom properties\n\nSet these on the element to change how it looks.\n\n| Property | Default | Description |\n|----------|---------|-------------|\n${rows}\n`;
+  }
+
   const tokenLine = el.tokens.length
     ? ` Element-specific tokens: ${el.tokens.map((t) => `\`${t}\``).join(', ')}.`
     : '';

@@ -1,5 +1,6 @@
 import { type JSX, Show } from 'solid-js';
 import { cn } from '../utils/cn';
+import { RowGroup } from './row-group';
 
 export interface SettingsGroupProps {
   /** Small section heading shown above the card. */
@@ -16,6 +17,11 @@ export interface SettingsGroupProps {
  * rounded card that stacks `SettingItem` rows with hairline dividers between them.
  * Host-agnostic chrome: the SAME group drops into a modal or a full settings page;
  * only the content (the rows) changes per app.
+ *
+ * The card and its dividers ARE `RowGroup` — one implementation of that frame for
+ * the whole kit, rather than a second copy here. The `body` part name is kept
+ * (a settings group documents `header`/`body`, and consumers theme through it), so
+ * the frame's own `group` part is replaced rather than added to.
  */
 export function SettingsGroup(props: SettingsGroupProps): JSX.Element {
   return (
@@ -28,9 +34,9 @@ export function SettingsGroup(props: SettingsGroupProps): JSX.Element {
           <p class="text-xs text-muted-foreground">{props.description}</p>
         </Show>
       </div>
-      <div part="body" class="divide-y divide-border overflow-hidden rounded-xl border border-border bg-surface">
+      <RowGroup part="body" class="bg-surface">
         {props.children}
-      </div>
+      </RowGroup>
     </section>
   );
 }
@@ -49,10 +55,25 @@ export interface SettingItemProps {
 /**
  * One row inside a `SettingsGroup`: a left label/description block and an optional
  * right-aligned `control`, vertically centered with comfortable padding.
+ *
+ * It draws its own top hairline from `--kai-row-divide-width`, the property a
+ * `RowGroup` sets on its children by position. `Row` does the same, and it has to
+ * be the CHILD that paints the line: the group cannot reach inside a shadow-root
+ * child from the outside, and a direct declaration on the slotted host loses to a
+ * document-level preflight. `SettingsGroup` stopped using `divide-y` for exactly
+ * this reason — one divider implementation for the whole kit, and it is this one.
+ * See the row-list block in `../../kit-base.css`.
  */
 export function SettingItem(props: SettingItemProps): JSX.Element {
   return (
-    <div class={cn('flex items-center justify-between gap-4 px-4 py-3', props.class)}>
+    <div
+      class={cn(
+        'flex items-center justify-between gap-4 px-4 py-3',
+        'border-t-[length:var(--kai-row-divide-width,0px)]',
+        'border-t-[color:var(--color-border)]',
+        props.class,
+      )}
+    >
       <div part="label" class="flex min-w-0 flex-col gap-0.5">
         <span class="text-sm text-foreground">{props.label}</span>
         <Show when={props.description}>

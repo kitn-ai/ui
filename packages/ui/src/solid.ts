@@ -111,6 +111,8 @@ export { PromptDock } from './ui/prompt-dock';
 export type { PromptDockProps, PromptDockFrame, PromptDockAppearance } from './ui/prompt-dock';
 export { SettingsGroup, SettingItem } from './ui/settings-group';
 export type { SettingsGroupProps, SettingItemProps } from './ui/settings-group';
+export { RowGroup } from './ui/row-group';
+export type { RowGroupProps } from './ui/row-group';
 // `kai-icon` renders no kit component — it calls this. Solid consumers resolving
 // the same `icon` strings (named icon | URL | text fallback) need it too.
 export { renderIcon } from './ui/icon';

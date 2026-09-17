@@ -839,6 +839,12 @@ function formatReference(tag: string, provider: ToolProvider): string {
       const desc = prop.description?.trim() ?? '';
       const def = prop.default ? ` (default: ${prop.default})` : '';
       lines.push(`- **${prop.name}**${def}${desc ? ` — ${desc}` : ''}`);
+      // Same shape as a ::part recipe below, and for the same reason: the value to
+      // write is the actionable half. A var documented in src/elements/slots.ts
+      // carries one; a theme token (also a cssProperty in the manifest) does not.
+      if (prop.recipe) {
+        lines.push('  ```css', `  ${prop.recipe}`, '  ```');
+      }
     }
   }
 

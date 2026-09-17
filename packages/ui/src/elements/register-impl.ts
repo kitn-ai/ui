@@ -115,6 +115,7 @@ import './tab-bar-item';
 import './view-stack';
 import './view';
 import './row';
+import './row-group';
 
 // The devtools recorder hook, installed HERE because this file is already the
 // browser-only half of the elements entry (register.ts gates it behind a window

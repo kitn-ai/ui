@@ -24,6 +24,11 @@ import { isSafeUrl } from '../primitives/url-scheme-policy';
  * button that still fires a handler. The row renders as a plain,
  * non-interactive `<div>`: label visible, no anchor, no handler. Escaping into
  * visibility, never silent promotion.
+ *
+ * Rounds through `--kai-row-radius-top` / `--kai-row-radius-bottom` (falling back
+ * to `--kai-row-radius`, then to the `--radius-lg` token `rounded-lg` reads)
+ * rather than a `rounded-lg` class, so a `RowGroup` can leave round only the
+ * corners a row's position has. See the row-list block in `../../kit-base.css`.
  */
 // `ref` is omitted because which element renders (div, button, or anchor) is
 // decided by the interaction model, so no single element type is honest.
@@ -62,7 +67,28 @@ export function Row(props: RowProps) {
 
   const rowClass = () =>
     cn(
-      'flex w-full items-center gap-3 rounded-lg p-3 text-left text-foreground',
+      'flex w-full items-center gap-3 p-3 text-left text-foreground',
+      // Radius comes from custom properties so a `RowGroup` can round only the
+      // CORNERS a row's position in the list actually has (first: top, last:
+      // bottom, middle: none) and so a fill that wants a different radius sets
+      // `--kai-row-radius` once instead of fighting a class. Standalone, nothing
+      // sets them and the chain lands on `--radius-lg` — the very token
+      // `rounded-lg` reads — so this changed no standalone row's shape. The
+      // geometry, and why it cannot be a class, is in kit-base.css's row-list
+      // block. A caller's own `rounded-*` still wins: tailwind-merge drops both
+      // of these in favour of it (see `cn`).
+      'rounded-t-[var(--kai-row-radius-top,var(--kai-row-radius,var(--radius-lg)))]',
+      'rounded-b-[var(--kai-row-radius-bottom,var(--kai-row-radius,var(--radius-lg)))]',
+      // The hairline between rows is OURS, drawn here rather than by the group,
+      // and the width arrives as a custom property for the same reason the radius
+      // does: a declaration written on the slotted host loses to a document-level
+      // preflight's `* { border: 0 solid }`, while a class in the utilities layer
+      // is the last word on the element it styles. Only the WIDTH is a var: a
+      // consumer wanting a different hairline color sets `--color-border` (or
+      // scopes the token), rather than learning a second knob that does the same
+      // thing. Full comment: kit-base.css.
+      'border-t-[length:var(--kai-row-divide-width,0px)]',
+      'border-t-[color:var(--color-border)]',
       interactive() &&
         'cursor-pointer transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
       local.class,
