@@ -1,5 +1,5 @@
 import { type Placement } from '@floating-ui/dom';
-import { HoverCardRoot, HoverCardTrigger, HoverCardContent, type HoverCardController } from '../ui/hover-card';
+import { HoverCardRoot, HoverCardTrigger, HoverCardContent, type HoverCardController } from '../components/hover-card';
 import { defineWebComponent } from './define';
 import { wireDisclosure } from './disclosure';
 

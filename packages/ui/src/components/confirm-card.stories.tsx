@@ -81,7 +81,7 @@ const DESTRUCTIVE_ACTIONS: ConfirmAction[] = [
 ];
 
 const meta = {
-  title: 'Components/Elements/ConfirmCard',
+  title: 'Components/ConfirmCard',
   component: ConfirmCard,
   tags: ['autodocs'],
   render: (args: ConfirmArgs) => <Demo args={args} />,

@@ -7,7 +7,7 @@
  * Measured in Chromium: editable and placeholder `::before` both computed
  * `center`, typed text sat 149px from each edge. `Composer` (the control
  * `PromptInput` wraps) had the identical hole in its DEFAULT editable class and
- * reproduced the same way on `components-elements-composer--playground`.
+ * reproduced the same way on `components-composer--playground`.
  *
  * THE PIN. An input control's reading direction is a fact about the control, so
  * it states it rather than inheriting it: `text-start` on the editable's class.

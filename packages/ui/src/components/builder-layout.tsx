@@ -1,6 +1,6 @@
 import { type JSX, createSignal, createMemo, For } from 'solid-js';
 import { cn } from '../utils/cn';
-import { Button } from '../ui/button';
+import { Button } from './button';
 import { Monitor, Tablet, Smartphone, Download } from 'lucide-solid';
 
 export type BuilderViewport = 'desktop' | 'tablet' | 'mobile';
@@ -21,7 +21,7 @@ export interface BuilderLayoutProps {
   /** The preview content — typically a device frame wrapping `<ChatThread>`.
    *  Callers that need to reflow their OWN preview at narrower widths (e.g.
    *  a docked-rail template collapsing to full-bleed on `mobile`, matching
-   *  `ui/dock.tsx`'s own <=480px takeover) should read `viewport`/
+   *  `components/dock.tsx`'s own <=480px takeover) should read `viewport`/
    *  `defaultViewport`/`onViewportChange` below and drive their preview's
    *  shape from the same signal they hand this component — see
    *  `builder-in-app-assistant.stories.tsx` and `builder.stories.tsx` for

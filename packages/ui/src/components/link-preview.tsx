@@ -10,7 +10,7 @@ import {
   Show,
 } from 'solid-js';
 import { cn } from '../utils/cn';
-import { Skeleton } from '../ui/skeleton';
+import { Skeleton } from './skeleton';
 import { Link as LinkIcon } from 'lucide-solid';
 import type { CardEvent } from '../primitives/card-contract';
 import {

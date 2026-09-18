@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { CodeBlock, CodeBlockCode, CodeBlockGroup } from './code-block';
-import { Button } from '../ui/button';
+import { Button } from './button';
 import { componentDescription } from '../stories/docs/element-controls';
 
 const tsCode = `interface User {
@@ -43,7 +43,7 @@ const cssCode = `:root {
  * props live on `CodeBlockCode`, so `Playground` drives that piece directly.
  */
 const meta = {
-  title: 'Components/Elements/CodeBlock',
+  title: 'Components/CodeBlock',
   component: CodeBlockCode,
   tags: ['autodocs'],
   parameters: {

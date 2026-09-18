@@ -1,7 +1,7 @@
 import { createEffect, createSignal, untrack } from 'solid-js';
 import { defineWebComponent } from './define';
-import { Segmented, type SegmentedOption } from '../ui/segmented';
-import { renderIcon } from '../ui/icon';
+import { Segmented, type SegmentedOption } from '../components/segmented';
+import { renderIcon } from '../components/icon';
 // Public shape of the `options` prop; lives in ./element-data-types so the ROOT
 // entry can re-export it (see that file's header).
 import type { KaiSegmentedOption } from './element-data-types';

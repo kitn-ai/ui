@@ -37,85 +37,85 @@ export * from './index';
 // ---------------------------------------------------------------------------
 // Layer 2 additions: UI primitives the coarse elements render.
 // ---------------------------------------------------------------------------
-export { HoverCardRoot, HoverCardTrigger, HoverCardContent } from './ui/hover-card';
+export { HoverCardRoot, HoverCardTrigger, HoverCardContent } from './components/hover-card';
 export type {
   HoverCardRootProps, HoverCardTriggerProps, HoverCardContentProps,
-} from './ui/hover-card';
+} from './components/hover-card';
 export {
   DropdownSeparator, DropdownLabel, DropdownCheckboxItem, DropdownRadioItem,
   DropdownSub, DropdownSubTrigger, DropdownSubContent,
-} from './ui/dropdown';
+} from './components/dropdown';
 export type {
   DropdownSeparatorProps, DropdownLabelProps, DropdownCheckboxItemProps, DropdownRadioItemProps,
   DropdownSubProps, DropdownSubTriggerProps, DropdownSubContentProps,
-} from './ui/dropdown';
-export { clampBasis } from './ui/resizable';
-export { Input } from './ui/input';
-export type { InputProps } from './ui/input';
-export { ColorField, isValidHex } from './ui/color-field';
-export type { ColorFieldProps } from './ui/color-field';
-export { Kbd } from './ui/kbd';
-export type { KbdProps, KbdPlatform } from './ui/kbd';
-export { Checkbox } from './ui/checkbox';
-export type { CheckboxProps } from './ui/checkbox';
-export { Radio, RadioGroup } from './ui/radio';
-export type { RadioProps, RadioGroupProps, RadioOption } from './ui/radio';
-export { CheckboxGroup } from './ui/checkbox-group';
-export type { CheckboxGroupProps, CheckboxOption } from './ui/checkbox-group';
-export { Switch } from './ui/switch';
-export type { SwitchProps } from './ui/switch';
-export { ToggleChip, toggleChipVariants } from './ui/toggle-chip';
-export type { ToggleChipProps } from './ui/toggle-chip';
-export { Slider } from './ui/slider';
-export type { SliderProps } from './ui/slider';
-export { Select } from './ui/select';
-export type { SelectProps, SelectOption } from './ui/select';
-export { Tabs } from './ui/tabs';
-export type { TabsProps, TabsVariant, KaiTabItem } from './ui/tabs';
-export { Segmented } from './ui/segmented';
-export type { SegmentedProps, SegmentedOption } from './ui/segmented';
-export { Status } from './ui/status';
-export type { StatusProps, StatusKind } from './ui/status';
-export { ProgressBar } from './ui/progress-bar';
-export type { ProgressBarProps, ProgressTone } from './ui/progress-bar';
-export { Notice } from './ui/notice';
-export type { NoticeProps, NoticeSeverity } from './ui/notice';
-export { EditableLabel } from './ui/editable-label';
-export type { EditableLabelProps } from './ui/editable-label';
-export { Dialog } from './ui/dialog';
-export type { DialogProps, DialogController } from './ui/dialog';
-export { Dock, DockLauncherGlyph, DockCloseGlyph, DockLauncherImage } from './ui/dock';
-export type { DockProps, DockController, DockPosition, DockFocusOnOpen, DockLauncherImageProps } from './ui/dock';
-export { Popover } from './ui/popover';
-export type { PopoverProps, PopoverController } from './ui/popover';
-export { Nav } from './ui/nav';
-export type { NavProps, KaiNavItem, NavItemStatus, NavStatusTone } from './ui/nav';
-export { CommandList } from './ui/command';
-export type { CommandListProps, CommandRow, CommandGroup } from './ui/command';
-export { AgentCard } from './ui/agent-card';
-export type { AgentCardProps, AgentStatus, AgentStatusTone } from './ui/agent-card';
-export { Pane } from './ui/pane';
-export type { PaneProps, PaneStatus, PaneStatusTone } from './ui/pane';
-export { PaneGroup } from './ui/pane-group';
-export type { PaneGroupProps, PaneTab, PaneTabStatus } from './ui/pane-group';
+} from './components/dropdown';
+export { clampBasis } from './components/resizable';
+export { Input } from './components/input';
+export type { InputProps } from './components/input';
+export { ColorField, isValidHex } from './components/color-field';
+export type { ColorFieldProps } from './components/color-field';
+export { Kbd } from './components/kbd';
+export type { KbdProps, KbdPlatform } from './components/kbd';
+export { Checkbox } from './components/checkbox';
+export type { CheckboxProps } from './components/checkbox';
+export { Radio, RadioGroup } from './components/radio';
+export type { RadioProps, RadioGroupProps, RadioOption } from './components/radio';
+export { CheckboxGroup } from './components/checkbox-group';
+export type { CheckboxGroupProps, CheckboxOption } from './components/checkbox-group';
+export { Switch } from './components/switch';
+export type { SwitchProps } from './components/switch';
+export { ToggleChip, toggleChipVariants } from './components/toggle-chip';
+export type { ToggleChipProps } from './components/toggle-chip';
+export { Slider } from './components/slider';
+export type { SliderProps } from './components/slider';
+export { Select } from './components/select';
+export type { SelectProps, SelectOption } from './components/select';
+export { Tabs } from './components/tabs';
+export type { TabsProps, TabsVariant, KaiTabItem } from './components/tabs';
+export { Segmented } from './components/segmented';
+export type { SegmentedProps, SegmentedOption } from './components/segmented';
+export { Status } from './components/status';
+export type { StatusProps, StatusKind } from './components/status';
+export { ProgressBar } from './components/progress-bar';
+export type { ProgressBarProps, ProgressTone } from './components/progress-bar';
+export { Notice } from './components/notice';
+export type { NoticeProps, NoticeSeverity } from './components/notice';
+export { EditableLabel } from './components/editable-label';
+export type { EditableLabelProps } from './components/editable-label';
+export { Dialog } from './components/dialog';
+export type { DialogProps, DialogController } from './components/dialog';
+export { Dock, DockLauncherGlyph, DockCloseGlyph, DockLauncherImage } from './components/dock';
+export type { DockProps, DockController, DockPosition, DockFocusOnOpen, DockLauncherImageProps } from './components/dock';
+export { Popover } from './components/popover';
+export type { PopoverProps, PopoverController } from './components/popover';
+export { Nav } from './components/nav';
+export type { NavProps, KaiNavItem, NavItemStatus, NavStatusTone } from './components/nav';
+export { CommandList } from './components/command';
+export type { CommandListProps, CommandRow, CommandGroup } from './components/command';
+export { AgentCard } from './components/agent-card';
+export type { AgentCardProps, AgentStatus, AgentStatusTone } from './components/agent-card';
+export { Pane } from './components/pane';
+export type { PaneProps, PaneStatus, PaneStatusTone } from './components/pane';
+export { PaneGroup } from './components/pane-group';
+export type { PaneGroupProps, PaneTab, PaneTabStatus } from './components/pane-group';
 // PaneGrid and the three overlay primitives have Storybook pages that tell a
 // consumer to `import { … } from '@kitn.ai/ui'` — and were exported from NEITHER
 // entry, so those snippets named symbols nobody could import. They belong on
 // ./solid (Solid-only building blocks, and the overlay trio is what you compose a
 // custom popover/tooltip out of).
-export { PaneGrid } from './ui/pane-grid';
-export type { PaneGridProps } from './ui/pane-grid';
-export { createPresence, usePosition, useDismiss } from './ui/overlay';
-export type { UsePositionOptions, UseDismissOptions, DismissReason } from './ui/overlay';
-export { PromptDock } from './ui/prompt-dock';
-export type { PromptDockProps, PromptDockFrame, PromptDockAppearance } from './ui/prompt-dock';
-export { SettingsGroup, SettingItem } from './ui/settings-group';
-export type { SettingsGroupProps, SettingItemProps } from './ui/settings-group';
-export { RowGroup } from './ui/row-group';
-export type { RowGroupProps } from './ui/row-group';
+export { PaneGrid } from './components/pane-grid';
+export type { PaneGridProps } from './components/pane-grid';
+export { createPresence, usePosition, useDismiss } from './components/overlay';
+export type { UsePositionOptions, UseDismissOptions, DismissReason } from './components/overlay';
+export { PromptDock } from './components/prompt-dock';
+export type { PromptDockProps, PromptDockFrame, PromptDockAppearance } from './components/prompt-dock';
+export { SettingsGroup, SettingItem } from './components/settings-group';
+export type { SettingsGroupProps, SettingItemProps } from './components/settings-group';
+export { RowGroup } from './components/row-group';
+export type { RowGroupProps } from './components/row-group';
 // `kai-icon` renders no kit component — it calls this. Solid consumers resolving
 // the same `icon` strings (named icon | URL | text fallback) need it too.
-export { renderIcon } from './ui/icon';
+export { renderIcon } from './components/icon';
 
 // ---------------------------------------------------------------------------
 // Layer 3 additions: AI/feature components.

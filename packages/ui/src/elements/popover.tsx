@@ -1,5 +1,5 @@
 import { defineWebComponent } from './define';
-import { Popover, type PopoverController } from '../ui/popover';
+import { Popover, type PopoverController } from '../components/popover';
 import { wireDisclosure } from './disclosure';
 import type { Placement } from '@floating-ui/dom';
 

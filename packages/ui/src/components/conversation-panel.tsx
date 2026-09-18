@@ -1,6 +1,6 @@
 import { For, Show, createMemo } from 'solid-js';
 import { cn } from '../utils/cn';
-import { ScrollArea } from '../ui/scroll-area';
+import { ScrollArea } from './scroll-area';
 import { relativeTimeShort, isConversationUnread } from './conversation-item';
 import { byRecency } from '../primitives/conversation-store';
 import type { ConversationSummary } from '../types';

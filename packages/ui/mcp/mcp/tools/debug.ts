@@ -184,7 +184,7 @@ const RULES: Rule[] = [
     cause:
       'On versions <=0.27.x, the package shipped TypeScript/TSX source, and a type entry ' +
       'value-re-exports from it, so the consumer\'s `tsc` resolves and compiles the library\'s ' +
-      'SolidJS internals (`src/ui/*.tsx`) under the app\'s React JSX config — `Show`/`Portal`/' +
+      'SolidJS internals (`src/components/*.tsx`) under the app\'s React JSX config — `Show`/`Portal`/' +
       '`Dynamic` aren\'t React components, causing TS2786 / "cannot be used as a JSX component" ' +
       'errors. `vite`/esbuild build fine (they strip types); only `tsc` breaks. `skipLibCheck` ' +
       'does not help (these are `.tsx` source, not `.d.ts`). Fixed for newer releases: the ' +

@@ -213,8 +213,11 @@ const composedImports = (sourceFile, seen = new Set([sourceFile.fileName])) => {
     const spec = st.moduleSpecifier.text;
     const named = st.importClause.namedBindings;
     if (!ts.isNamedImports(named)) continue;
-    const group = spec.startsWith('../components/') ? 'Components'
-                : spec.startsWith('../ui/') ? 'UI' : null;
+    // Single-valued since src/ui/ was merged into src/components/: a facade's
+    // Solid components all come from the one directory, so there is no second
+    // group to map. The `group` KEY stays in element-meta.json regardless — it is
+    // part of the published shape that `ComposedFrom` on the docs site reads.
+    const group = spec.startsWith('../components/') ? 'Components' : null;
     if (!group) {
       if (!spec.startsWith('./')) continue;
       const local = localModule(sourceFile, spec);
@@ -871,9 +874,9 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
 
   // ---- emit the curated icon-name list (the `name=` values kai-icon/icon props
   // accept) so the docs can render a no-drift gallery. Source of truth is the
-  // NAMED_ICONS object in src/ui/icon.tsx; extract its keys from the literal. ----
+  // NAMED_ICONS object in src/components/icon.tsx; extract its keys from the literal. ----
   {
-    const iconSrc = readFileSync(resolve(root, 'src/ui/icon.tsx'), 'utf8');
+    const iconSrc = readFileSync(resolve(root, 'src/components/icon.tsx'), 'utf8');
     const block = iconSrc.match(/NAMED_ICONS[^=]*=\s*\{([\s\S]*?)\n\};/);
     const names = block
       ? [...block[1].matchAll(/^\s*'?([a-z][a-z0-9-]*)'?\s*:/gm)].map((m) => m[1]).sort()

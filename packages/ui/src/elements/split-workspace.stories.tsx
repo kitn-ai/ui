@@ -9,9 +9,9 @@ import {
   type LucideProps,
 } from 'lucide-solid';
 import './register'; // every kai-* element used below
-import { type AgentStatus, type AgentStatusTone } from '../ui/agent-card';
+import { type AgentStatus, type AgentStatusTone } from '../components/agent-card';
 import { cn } from '../utils/cn';
-import type { KaiNavItem } from '../ui/nav';
+import type { KaiNavItem } from '../components/nav';
 import type { KaiCommandItem } from './command';
 import { toast, configureToasts } from '../primitives/toast-store';
 

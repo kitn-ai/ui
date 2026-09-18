@@ -1,6 +1,6 @@
 import { Show, createSignal, onCleanup, onMount } from 'solid-js';
 import { cn } from '../utils/cn';
-import { Button } from '../ui/button';
+import { Button } from '../components/button';
 import { ArrowDown } from 'lucide-solid';
 import { defineWebComponent } from './define';
 

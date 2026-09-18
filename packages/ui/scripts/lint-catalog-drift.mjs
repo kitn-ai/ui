@@ -604,7 +604,7 @@ export function check({
  * suffix in the story files, plus the basename of every Labs/Apps story file
  * (the nine apps share one title and are distinguished by file).
  *
- * Walks ALL of src/, not src/elements/: `Labs/Settings` lives in src/ui/ and
+ * Walks ALL of src/, not src/elements/: `Labs/Settings` lives in src/components/ and
  * `Labs/Audio Visualizers` under src/components/, so a scan scoped to
  * src/elements/ false-fails on both. Measured, not assumed.
  *

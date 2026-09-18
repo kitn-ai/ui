@@ -94,7 +94,7 @@ const unreadFixtureConversations: ConversationSummary[] = fixtureConversations.m
  * research-intercom-messages-view.md`).
  */
 const meta = {
-  title: 'Components/Elements/ChatThread',
+  title: 'Components/ChatThread',
   component: ChatThread,
   tags: ['autodocs'],
   parameters: {

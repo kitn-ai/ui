@@ -10,7 +10,7 @@ import { componentDescription } from '../stories/docs/element-controls';
  * while a model synthesis is in flight.
  */
 const meta = {
-  title: 'Components/Elements/VoiceOutput',
+  title: 'Components/VoiceOutput',
   component: VoiceOutput,
   tags: ['autodocs'],
   parameters: {

@@ -57,7 +57,7 @@ function ScrollDemo(props: {
 }
 
 const meta = {
-  title: 'Components/Elements/ScrollButton',
+  title: 'Components/ScrollButton',
   component: ScrollButton,
   tags: ['autodocs'],
   parameters: {

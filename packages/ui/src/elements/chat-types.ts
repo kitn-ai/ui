@@ -20,7 +20,7 @@ export type ChatMessageAction = (typeof CHAT_MESSAGE_ACTIONS)[number];
 export type FeedbackVote = 'like' | 'dislike';
 
 /** A host-defined action button. `icon` is a curated registry name (see
- *  `src/ui/action-icons.ts`); unknown/absent icons render label-only. */
+ *  `src/components/action-icons.ts`); unknown/absent icons render label-only. */
 export interface CustomAction {
   /** Emitted as the `kai-message-action` detail `action` when clicked. */
   id: string;

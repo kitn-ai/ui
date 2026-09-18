@@ -7,9 +7,9 @@ import { resolveAccentWrapperStyle } from '../components/builder-preview';
 import { ChatThread } from '../components/chat-thread';
 import { Source, SourceTrigger, SourceContent } from '../components/source';
 import { PromptSuggestion } from '../components/prompt-suggestion';
-import { Tabs, type KaiTabItem } from '../ui/tabs';
-import { Button } from '../ui/button';
-import { Switch } from '../ui/switch';
+import { Tabs, type KaiTabItem } from '../components/tabs';
+import { Button } from '../components/button';
+import { Switch } from '../components/switch';
 import { isRenderableLink } from '../primitives/link-preview';
 import type { Source as SourceCitation } from './chat-types';
 
@@ -35,7 +35,7 @@ import type { Source as SourceCitation } from './chat-types';
 //    overflow, confirmed by reading that story's own comment on it)
 //  - an Answer / Sources / Images TAB STRIP — Perplexity's own `kai-tabs
 //    variant="underline"`, reused here via the kit's real Solid `Tabs`
-//    component (`ui/tabs.tsx`), not a fork
+//    component (`components/tabs.tsx`), not a fork
 //  - the Answer tab: HAND-WOVEN prose with INLINE numbered citation chips —
 //    Perplexity's story states directly why: "the markdown renderer renders
 //    a string and can't interleave citation chips at citation offsets," so

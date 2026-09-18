@@ -1,4 +1,4 @@
-import { renderIcon } from '../ui/icon';
+import { renderIcon } from '../components/icon';
 import { cn } from '../utils/cn';
 import { defineWebComponent } from './define';
 

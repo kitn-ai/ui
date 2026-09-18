@@ -1,7 +1,7 @@
 import { Show } from 'solid-js';
 import { MoreHorizontal } from 'lucide-solid';
-import { Dropdown, DropdownTrigger, DropdownContent, type DropdownController } from '../ui/dropdown';
-import { renderIcon } from '../ui/icon';
+import { Dropdown, DropdownTrigger, DropdownContent, type DropdownController } from '../components/dropdown';
+import { renderIcon } from '../components/icon';
 import { cn } from '../utils/cn';
 import { defineWebComponent } from './define';
 import { wireDisclosure } from './disclosure';
@@ -63,7 +63,7 @@ interface Events {
  *
  * KEYBOARD: give each row `role="menuitem"` and it joins roving focus. ArrowUp/Down,
  * Home/End and typeahead reach SLOTTED rows because `menuItems()` in
- * `../ui/dropdown.tsx` walks the flat tree rather than querying the shadow tree,
+ * `../components/dropdown.tsx` walks the flat tree rather than querying the shadow tree,
  * which contains none of the light-DOM nodes a `<slot>` projects. Rows carrying
  * `aria-disabled="true"` are skipped.
  */

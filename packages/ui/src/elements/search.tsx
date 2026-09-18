@@ -1,9 +1,9 @@
 import { createEffect, createSignal, untrack, Show } from 'solid-js';
 import { defineWebComponent } from './define';
-import { Input } from '../ui/input';
-import { Kbd } from '../ui/kbd';
+import { Input } from '../components/input';
+import { Kbd } from '../components/kbd';
 import { Loader } from '../components/loader';
-import { renderIcon } from '../ui/icon';
+import { renderIcon } from '../components/icon';
 
 interface Props extends Record<string, unknown> {
   /** Controlled query. Settable and reflected to the `value` attribute. Read

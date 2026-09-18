@@ -4,7 +4,7 @@ import { X } from 'lucide-solid';
 import type { Placement } from '@floating-ui/dom';
 import { cn } from '../utils/cn';
 import { useChatConfig } from '../primitives/chat-config';
-import { createPresence, usePosition } from '../ui/overlay';
+import { createPresence, usePosition } from './overlay';
 
 /** Imperative open controller, handed to the kai-coachmark facade via
  *  `controllerRef` so it can drive/observe open state with `wireDisclosure`. */

@@ -1,5 +1,5 @@
 import { createEffect, createMemo, createSignal, createUniqueId, on } from 'solid-js';
-import { CommandList, type CommandGroup } from '../ui/command';
+import { CommandList, type CommandGroup } from '../components/command';
 import { defineWebComponent } from './define';
 import type { KaiCommandItem } from './element-data-types';
 

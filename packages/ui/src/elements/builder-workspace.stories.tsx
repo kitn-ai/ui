@@ -32,13 +32,13 @@ import {
   ShellSection,
   CommandPaletteOverlay,
 } from '../components/builder-shell-controls';
-import { RadioGroup, type RadioOption } from '../ui/radio';
-import { Switch } from '../ui/switch';
-import { Select } from '../ui/select';
-import { Input } from '../ui/input';
-import { Button } from '../ui/button';
-import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem } from '../ui/dropdown';
-import { renderIcon } from '../ui/icon';
+import { RadioGroup, type RadioOption } from '../components/radio';
+import { Switch } from '../components/switch';
+import { Select } from '../components/select';
+import { Input } from '../components/input';
+import { Button } from '../components/button';
+import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem } from '../components/dropdown';
+import { renderIcon } from '../components/icon';
 import type { ChatMessage, ChatMessageAction, CustomAction } from './chat-types';
 
 // Labs/Builder/Workspace — T-1 build-out (docs/superpowers/specs/
@@ -85,7 +85,7 @@ import type { ChatMessage, ChatMessageAction, CustomAction } from './chat-types'
 // 2. EXPAND (owner amendment): a v0-style maximize toggle, also optional.
 //    Checked `elements/v0.stories.tsx` first: v0's real `<kai-artifact
 //    expandable>` maximizes "via the kai-resizable maximize protocol" (that
-//    file's own comment) — `ui/resizable.tsx`'s `ResizablePanelGroup` has a
+//    file's own comment) — `components/resizable.tsx`'s `ResizablePanelGroup` has a
 //    real `maximizedIndex`/`onMaximizeChange` API. But `WorkspaceShell`
 //    (what THIS template's split actually uses, confirmed by reading it
 //    before building) does NOT forward that prop to its internal
@@ -219,7 +219,7 @@ interface ComposerChip {
 interface ComposerMenuEntry {
   id: string;
   label: string;
-  /** A curated `renderIcon` name (`ui/icon.tsx`'s `NAMED_ICONS`), typed as
+  /** A curated `renderIcon` name (`components/icon.tsx`'s `NAMED_ICONS`), typed as
    *  free text per the assignment ("a text field with the renderIcon names
    *  is fine for the story") — resolved through the REAL `renderIcon`
    *  helper, not a lookalike icon lookup. */
@@ -238,7 +238,7 @@ const PANE_KIND_OPTIONS: readonly RadioOption<ArtifactTab>[] = [
 ];
 
 /** Primary→`default`, Secondary→`outline`, Ghost→`ghost`. The kit's real
- *  `Button` variant vocabulary (`ui/button.tsx`) is `default`/`ghost`/
+ *  `Button` variant vocabulary (`components/button.tsx`) is `default`/`ghost`/
  *  `subtle`/`outline`/`destructive` — there is no literal `primary` or
  *  `secondary` variant. Mapped honestly rather than inventing new variant
  *  names on `Button` itself: `default` IS the kit's filled/primary-looking

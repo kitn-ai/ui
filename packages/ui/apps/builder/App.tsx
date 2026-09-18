@@ -20,9 +20,9 @@ import { HomeScreen, type ConstructListing } from './HomeScreen';
 import { createEditGuard, type EditOutcome } from './edit-guard';
 import type { ThemePayload } from '../../src/themes/theme-payload';
 import { ToastRegion, type ToastItem, type ToastVariant } from '../../src/components/toast';
-import { Input } from '../../src/ui/input';
-import { Button } from '../../src/ui/button';
-import { Dialog } from '../../src/ui/dialog';
+import { Input } from '../../src/components/input';
+import { Button } from '../../src/components/button';
+import { Dialog } from '../../src/components/dialog';
 
 // The AI/UI brand magenta — matches builder-start.stories.tsx's own
 // BRAND_STYLE exactly (design-parity fix wave, 2026-08-29 audit item 3a).

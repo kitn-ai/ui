@@ -1,4 +1,4 @@
-import { Skeleton, type SkeletonVariant } from '../ui/skeleton';
+import { Skeleton, type SkeletonVariant } from '../components/skeleton';
 import { defineWebComponent } from './define';
 
 interface Props extends Record<string, unknown> {

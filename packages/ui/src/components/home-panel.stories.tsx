@@ -20,7 +20,7 @@ const frame = (children: any) => (
 );
 
 const meta = {
-  title: 'Components/Elements/HomePanel',
+  title: 'Components/HomePanel',
   component: HomePanel,
   tags: ['autodocs'],
   parameters: { layout: 'centered' },

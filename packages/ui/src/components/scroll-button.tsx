@@ -1,6 +1,6 @@
 import { Show } from 'solid-js';
 import { cn } from '../utils/cn';
-import { Button } from '../ui/button';
+import { Button } from './button';
 import { useChatContainer } from './chat-container';
 import { ArrowDown } from 'lucide-solid';
 

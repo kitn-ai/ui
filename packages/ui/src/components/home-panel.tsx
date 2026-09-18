@@ -1,10 +1,10 @@
 import { For, Show } from 'solid-js';
 import { cn } from '../utils/cn';
-import { Button } from '../ui/button';
-import { renderIcon } from '../ui/icon';
+import { Button } from './button';
+import { renderIcon } from './icon';
 import { relativeTimeShort, isConversationUnread } from './conversation-item';
 import { Row } from './row';
-import { RowGroup } from '../ui/row-group';
+import { RowGroup } from './row-group';
 import type { ConversationSummary, HomeLinkEntry } from '../types';
 
 export interface HomePanelProps {

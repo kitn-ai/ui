@@ -4,7 +4,7 @@ import { FeedbackBar } from './feedback-bar';
 import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
-  title: 'Components/Elements/FeedbackBar',
+  title: 'Components/FeedbackBar',
   component: FeedbackBar,
   tags: ['autodocs'],
   parameters: {

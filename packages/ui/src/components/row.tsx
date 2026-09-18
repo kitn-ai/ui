@@ -1,6 +1,6 @@
 import { Show, splitProps, type JSX } from 'solid-js';
 import { cn } from '../utils/cn';
-import { renderIcon } from '../ui/icon';
+import { renderIcon } from './icon';
 import { isSafeUrl } from '../primitives/url-scheme-policy';
 
 /**

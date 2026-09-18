@@ -5,9 +5,9 @@ import {
   DropdownSeparator, DropdownLabel, DropdownCheckboxItem, DropdownRadioItem,
   DropdownSub, DropdownSubTrigger, DropdownSubContent,
   type DropdownController,
-} from '../ui/dropdown';
-import { renderIcon } from '../ui/icon';
-import { Kbd } from '../ui/kbd';
+} from '../components/dropdown';
+import { renderIcon } from '../components/icon';
+import { Kbd } from '../components/kbd';
 import { cn } from '../utils/cn';
 import { defineWebComponent } from './define';
 import { wireDisclosure } from './disclosure';

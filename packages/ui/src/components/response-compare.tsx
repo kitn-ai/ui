@@ -13,7 +13,7 @@ import {
   createUniqueId,
 } from 'solid-js';
 import { cn } from '../utils/cn';
-import { Button } from '../ui/button';
+import { Button } from './button';
 import { Card } from './card';
 import { MessageBody } from './message';
 import { TextShimmer } from './text-shimmer';

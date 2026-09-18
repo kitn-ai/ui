@@ -3,7 +3,7 @@ import { createEffect, createSignal } from 'solid-js';
 import { WorkspaceShell, type WorkspaceShellController, type WorkspaceShellProps } from './workspace-shell';
 import { componentDescription } from '../stories/docs/element-controls';
 
-// Components/Elements: the chat-agnostic workspace layout shell (SolidJS layer).
+// Components: the chat-agnostic workspace layout shell (SolidJS layer).
 // The B4 real-browser probes (packages/ui/scripts/probe-workspace-shell-*.mjs)
 // drive the <kai-workspace> facade over this same component; these stories are
 // the human-viewable copies of those probe scenes.
@@ -15,7 +15,7 @@ const box = (label: string, extra: Record<string, string> = {}) => (
 );
 
 const meta = {
-  title: 'Components/Elements/WorkspaceShell',
+  title: 'Components/WorkspaceShell',
   component: WorkspaceShell,
   tags: ['autodocs'],
   parameters: {

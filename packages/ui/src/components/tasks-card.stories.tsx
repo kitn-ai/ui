@@ -104,7 +104,7 @@ const ONBOARDING_TASKS: TasksTask[] = [
 ];
 
 const meta = {
-  title: 'Components/Elements/TasksCard',
+  title: 'Components/TasksCard',
   component: TasksCard,
   tags: ['autodocs'],
   render: (args: TasksArgs) => <Demo args={args} />,

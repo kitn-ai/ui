@@ -22,9 +22,9 @@ import {
   DEFAULT_SLASH_ENTRIES,
   DEFAULT_MENTION_ENTRIES,
 } from '../components/builder-composer-triggers';
-import { Switch } from '../ui/switch';
-import { RadioGroup, type RadioOption } from '../ui/radio';
-import { Select } from '../ui/select';
+import { Switch } from '../components/switch';
+import { RadioGroup, type RadioOption } from '../components/radio';
+import { Select } from '../components/select';
 import { cn } from '../utils/cn';
 import type { ChatMessage, ChatMessageAction, CustomAction } from './chat-types';
 

@@ -104,7 +104,7 @@ describe('every animation reference in src/ resolves to a declared keyframe', ()
   });
 
   it('the kit never spells the tw-animate-css collapsible utilities, whose keyframes read a Radix variable the kit does not set', () => {
-    // The kit's Collapsible (src/ui/collapsible.tsx) animates with a
+    // The kit's Collapsible (src/components/collapsible.tsx) animates with a
     // grid-template-rows transition and sets no content-height variable at all;
     // tw-animate-css's `animate-collapsible-*` keyframes read
     // `--radix-collapsible-content-height`, so in the kit they animate to nothing.

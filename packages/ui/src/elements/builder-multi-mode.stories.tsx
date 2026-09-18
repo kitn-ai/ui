@@ -21,12 +21,12 @@ import {
   CommandPaletteTrigger,
   UserMenu,
 } from '../components/builder-shell-controls';
-import { Tabs, type KaiTabItem } from '../ui/tabs';
-import { RadioGroup, type RadioOption } from '../ui/radio';
-import { Switch } from '../ui/switch';
-import { Select } from '../ui/select';
-import { Input } from '../ui/input';
-import { Button } from '../ui/button';
+import { Tabs, type KaiTabItem } from '../components/tabs';
+import { RadioGroup, type RadioOption } from '../components/radio';
+import { Switch } from '../components/switch';
+import { Select } from '../components/select';
+import { Input } from '../components/input';
+import { Button } from '../components/button';
 import type { ChatMessage } from './chat-types';
 import type { ConversationGroup, ConversationSummary } from '../types';
 

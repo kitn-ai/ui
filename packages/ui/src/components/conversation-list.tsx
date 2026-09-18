@@ -1,10 +1,10 @@
 import { splitProps, For, Show, createSignal, createMemo, onMount, type JSX } from 'solid-js';
 import { PanelLeftOpen } from 'lucide-solid';
 import { cn } from '../utils/cn';
-import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '../ui/collapsible';
-import { Button } from '../ui/button';
-import { Badge } from '../ui/badge';
-import { ScrollArea } from '../ui/scroll-area';
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from './collapsible';
+import { Button } from './button';
+import { Badge } from './badge';
+import { ScrollArea } from './scroll-area';
 import { ConversationItem, type ConversationRowDensity } from './conversation-item';
 import type { ConversationSummary, ConversationGroup } from '../types';
 

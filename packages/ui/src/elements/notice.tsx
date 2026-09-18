@@ -1,4 +1,4 @@
-import { Notice, noticeIconNode } from '../ui/notice';
+import { Notice, noticeIconNode } from '../components/notice';
 import { defineWebComponent } from './define';
 
 interface Props extends Record<string, unknown> {

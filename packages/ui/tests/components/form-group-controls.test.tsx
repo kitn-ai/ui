@@ -242,7 +242,7 @@ const numberProps = (over: Partial<WidgetProps> = {}) =>
   widgetProps({ id: 'f-count', label: 'Count', field: { type: 'integer' } as FormField, ...over });
 
 test('NumberWidget keeps the SAME input node when `invalid` flips', () => {
-  // The focus-node-reuse property `ui/input.tsx:262-268` documents. `kai-form` derives
+  // The focus-node-reuse property `components/input.tsx:262-268` documents. `kai-form` derives
   // `invalid` from the field's own value, so this flip happens on every keystroke that
   // crosses a validity boundary.
   //

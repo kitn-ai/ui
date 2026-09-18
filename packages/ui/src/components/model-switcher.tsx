@@ -1,7 +1,7 @@
 import { splitProps, For, Show, createSignal } from 'solid-js';
 import { cn } from '../utils/cn';
-import { Dropdown, DropdownTrigger, DropdownContent, DropdownRadioItem, type DropdownController } from '../ui/dropdown';
-import { Button } from '../ui/button';
+import { Dropdown, DropdownTrigger, DropdownContent, DropdownRadioItem, type DropdownController } from './dropdown';
+import { Button } from './button';
 import type { ModelOption } from '../types';
 
 export interface ModelSwitcherProps {

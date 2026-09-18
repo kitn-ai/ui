@@ -7,7 +7,7 @@ import {
 } from 'lucide-solid';
 import './register'; // every kai-* element used below
 import type { FileTreeFile } from '../components/file-tree';
-import type { KaiTabItem } from '../ui/tabs';
+import type { KaiTabItem } from '../components/tabs';
 
 // Labs/Apps: a faithful replica of Lovable (lovable.dev), the AI app-builder.
 // Lovable's signature is the SPLIT SHELL: a chat/conversation column on the LEFT

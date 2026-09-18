@@ -131,9 +131,9 @@ describe('form-control boundary contrast (WCAG 2.1 SC 1.4.11)', () => {
 // border in `--color-input` — the token the radios/checkboxes/inputs already use
 // and that the block above already holds to 3:1. These read the component, not
 // just the theme, because which token the track carries is a fact about
-// src/ui/switch.tsx.
+// src/components/switch.tsx.
 const switchSrc = readFileSync(
-  join(dirname(fileURLToPath(import.meta.url)), '../../src/ui/switch.tsx'),
+  join(dirname(fileURLToPath(import.meta.url)), '../../src/components/switch.tsx'),
   'utf8',
 );
 /** The `isOn() ? … : …` track-class ternary, read from the component. */

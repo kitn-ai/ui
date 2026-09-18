@@ -1,6 +1,6 @@
 import { createSignal } from 'solid-js';
 import { defineWebComponent } from './define';
-import { Tabs, type KaiTabItem, type TabsVariant } from '../ui/tabs';
+import { Tabs, type KaiTabItem, type TabsVariant } from '../components/tabs';
 
 interface Props extends Record<string, unknown> {
   /** Tabs to render. Set as a JS property, not an HTML attribute. */

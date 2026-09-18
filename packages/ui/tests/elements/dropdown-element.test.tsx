@@ -171,8 +171,8 @@ describe('kai-dropdown', () => {
    *
    * This group was written RED against `menu.querySelectorAll(ITEM_SELECTOR)`, which
    * finds none of the light-DOM nodes a `<slot>` projects, and went green with the
-   * flat-tree `menuItems()` walk in `../../src/ui/dropdown.tsx` (same class as
-   * `hasFocusableChild` in `ui/hover-card.tsx`).
+   * flat-tree `menuItems()` walk in `../../src/components/dropdown.tsx` (same class as
+   * `hasFocusableChild` in `components/hover-card.tsx`).
    *
    * Sequential navigation is the half that needed the SECOND fix and is the one worth
    * guarding: finding the items is not enough if `currentIndex()` cannot tell which

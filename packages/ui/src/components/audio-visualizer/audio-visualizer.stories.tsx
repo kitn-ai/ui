@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal, onCleanup, Show, For, type JSX } from 'solid-js';
 import { AudioVisualizer, type AudioVisualizerProps } from './index';
-import { Button } from '../../ui/button';
-import { Notice } from '../../ui/notice';
+import { Button } from '../button';
+import { Notice } from '../notice';
 import { componentDescription } from '../../stories/docs/element-controls';
 import {
   SIZES,
@@ -24,7 +24,7 @@ const STATES = ['idle', 'connecting', 'listening', 'thinking', 'speaking', 'disc
 const ALL_VARIANTS = ['bar', 'grid', 'radial', 'wave', 'aurora', 'custom'] as const;
 
 const meta = {
-  title: 'Components/Elements/AudioVisualizer',
+  title: 'Components/AudioVisualizer',
   component: AudioVisualizer,
   tags: ['autodocs'],
   parameters: {

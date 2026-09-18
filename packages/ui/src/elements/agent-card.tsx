@@ -1,5 +1,5 @@
 import { defineWebComponent } from './define';
-import { AgentCard, type AgentStatus } from '../ui/agent-card';
+import { AgentCard, type AgentStatus } from '../components/agent-card';
 
 interface Props extends Record<string, unknown> {
   /** The agent's name, the primary label. Attribute: `name`. */

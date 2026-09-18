@@ -1,6 +1,6 @@
 import { createSignal, createEffect, Show, untrack } from 'solid-js';
 import { defineWebComponent } from './define';
-import { PaneGroup, type PaneTab } from '../ui/pane-group';
+import { PaneGroup, type PaneTab } from '../components/pane-group';
 
 interface Props extends Record<string, unknown> {
   /** The tabs to render. An array of `{ id, name, status?, needsAttention?, number? }`

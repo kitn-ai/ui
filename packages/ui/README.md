@@ -9,7 +9,7 @@ It can be consumed two ways:
 
 ## Highlights
 
-- **Composable components** across three layers: headless primitives → accessible UI primitives (built in-house, WCAG 2.1 AA — no third-party UI dependency) → AI feature components. `npm run verify:solid-coverage` prints the current element and component counts.
+- **Composable components** across three layers: headless primitives → Solid components (the accessible building blocks and the AI surface, built in-house, WCAG 2.1 AA — no third-party UI dependency) → `kai-*` web components. `npm run verify:solid-coverage` prints the current element and component counts.
 - **Shadow-DOM web components** — zero CSS conflicts in any host. The host's styles can't leak in; the kit's Tailwind can't leak out.
 - **Load it your way** — register every element in one import, cherry-pick per-element with a bundler, or drop in a CDN autoloader that loads each on demand. Syntax highlighting loads lazily, per language, only when you render code.
 - **Tailwind v4** design tokens — rebrand every element by overriding `--kai-color-*` custom properties on `:root`.
@@ -387,8 +387,7 @@ This catches packaging / exports / SSR / scaffold-output bugs that the unit suit
 ```
 src/
   primitives/    Headless logic hooks + ChatConfig + on-demand highlighter
-  ui/            Accessible UI primitives (Button, Dropdown, Tooltip, HoverCard, … built in-house, no third-party UI deps)
-  components/    AI feature components (Message, PromptInput, Markdown, Tool, …)
+  components/    Every Solid component — accessible building blocks (Button, Dropdown, Tooltip, HoverCard, …) and the AI surface (Message, PromptInput, Markdown, Tool, …). Built in-house, no third-party UI deps
   elements/      Web-component facades + defineWebComponent wrapper + Vite lib entry
   stories/       Composed example stories (full chat app, layouts)
 theme.css        Design tokens (--color-*), animations, markdown styles

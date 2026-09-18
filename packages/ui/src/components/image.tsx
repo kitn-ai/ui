@@ -1,6 +1,6 @@
 import { type JSX, splitProps, createSignal, createEffect, onCleanup, Show } from 'solid-js';
 import { cn } from '../utils/cn';
-import { Skeleton } from '../ui/skeleton';
+import { Skeleton } from './skeleton';
 
 export interface GeneratedImageLike {
   base64?: string;

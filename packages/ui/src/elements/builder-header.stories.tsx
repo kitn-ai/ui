@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal, Show, For } from 'solid-js';
 import { SlidersHorizontal } from 'lucide-solid';
 import { BuilderHeader } from '../components/builder-header';
-import { Button } from '../ui/button';
+import { Button } from '../components/button';
 
 // Labs/Builder: "Header" — story-first (owner policy: new visual surfaces
 // get a stub-data story before any wiring). The full-width top bar for the

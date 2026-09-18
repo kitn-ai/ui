@@ -66,7 +66,7 @@ describe('ChatThread header composition', () => {
 
   // headerEndContent: a Solid-composed caller's JSX escape hatch for the header-end
   // region (a docked widget's own close control being the motivating case — see
-  // ui/dock.tsx's hideClose doc). Renders ALONGSIDE the named slot, not instead of
+  // components/dock.tsx's hideClose doc). Renders ALONGSIDE the named slot, not instead of
   // it, and counts toward showHeader() on its own.
   it('shows the header for headerEndContent alone, with no title/models/context/slots', () => {
     const { container } = render(() => <ChatThread messages={[]} headerEndContent={<button>Close</button>} />);

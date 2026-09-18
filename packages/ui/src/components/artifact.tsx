@@ -11,7 +11,7 @@ import {
   Show,
 } from 'solid-js';
 import { cn } from '../utils/cn';
-import { Button } from '../ui/button';
+import { Button } from './button';
 import { CodeBlock, CodeBlockCode } from './code-block';
 import { FileTree, type FileTreeFile } from './file-tree';
 import { Loader } from './loader';

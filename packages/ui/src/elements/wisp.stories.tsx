@@ -3,7 +3,7 @@ import { createSignal, createEffect, Show, For, type Component } from 'solid-js'
 import { Code2, FileText, Globe, MessageSquare } from 'lucide-solid';
 import { expect, userEvent, waitFor } from 'storybook/test';
 import './register'; // every kai-* element used below
-import type { KaiNavItem } from '../ui/nav';
+import type { KaiNavItem } from '../components/nav';
 import type { KaiCommandItem } from './command';
 import type { KaiMenuItem } from './menu';
 import { textMessage } from '../state';
@@ -580,6 +580,36 @@ export const WispInteractions: Story = {
     docs: {
       description: {
         story: 'Same composition as the Wisp showcase above, isolated on its own story so the kebab interaction test never runs on the showcase view. See Wisp for the source.',
+      },
+      // The Code panel needs a snippet for THIS story. The comment above says
+      // "see Wisp for the source", which works for a human reading the docs and
+      // not at all for the panel, which had no authored code to show here. This
+      // is the row + kebab contract the interaction actually exercises.
+      source: {
+        language: 'html',
+        code: `<!-- one composed row: your loop emits this per record. -->
+<kai-conversation-item conversation-id="c0" active>
+  <span slot="leading"><!-- your icon --></span>
+  Debounce vs throttle in TS
+  <span slot="meta">2h ago</span>
+  <!-- your OWN menu in the menu region; a click here never selects the row -->
+  <kai-menu slot="menu" label="Actions for Debounce vs throttle in TS">
+    <span slot="trigger" aria-hidden="true">&#8942;</span>
+  </kai-menu>
+</kai-conversation-item>
+
+<script type="module">
+  import '@kitn.ai/ui/elements';
+  // Each row's kebab is a real kai-menu: items as a property, actions on kai-select.
+  const menu = document.querySelector('kai-conversation-item kai-menu');
+  menu.items = [
+    { id: 'rename', label: 'Rename', icon: 'pencil' },
+    { id: 'archive', label: 'Archive', icon: 'archive' },
+    { separator: true },
+    { id: 'delete', label: 'Delete', icon: 'x' },
+  ];
+  menu.addEventListener('kai-select', (e) => applyAction(e.detail.id, 'c0'));
+</script>`,
       },
     },
   },

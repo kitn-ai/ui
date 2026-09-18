@@ -82,12 +82,12 @@
 import { type JSX, Show, For } from 'solid-js';
 import { Search, Sun, Moon, ChevronDown, Settings, CircleHelp, LogOut } from 'lucide-solid';
 import { cn } from '../utils/cn';
-import { Button } from '../ui/button';
-import { Separator } from '../ui/separator';
-import { Tooltip } from '../ui/tooltip';
-import { Avatar } from '../ui/avatar';
-import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem, DropdownSeparator } from '../ui/dropdown';
-import type { ButtonVariantName } from '../ui/button-variant-names';
+import { Button } from './button';
+import { Separator } from './separator';
+import { Tooltip } from './tooltip';
+import { Avatar } from './avatar';
+import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem, DropdownSeparator } from './dropdown';
+import type { ButtonVariantName } from './button-variant-names';
 
 /** One header action button. `variant` is the kit Button's OWN variant name —
  *  the construct schema's `header.actions[].variant` enum is built from the

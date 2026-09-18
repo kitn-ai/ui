@@ -13,7 +13,7 @@ import { componentDescription } from '../stories/docs/element-controls';
  */
 
 const meta = {
-  title: 'Components/Elements/ViewStack',
+  title: 'Components/ViewStack',
   component: ViewStack,
   tags: ['autodocs'],
   parameters: {

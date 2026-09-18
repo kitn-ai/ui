@@ -1,6 +1,6 @@
 import { createSignal, onMount, onCleanup, Index } from 'solid-js';
 import { defineWebComponent } from './define';
-import { PaneGrid } from '../ui/pane-grid';
+import { PaneGrid } from '../components/pane-grid';
 
 interface Props extends Record<string, unknown> {
   /** Minimum width of every pane, in px, before columns drop / the grid scrolls.

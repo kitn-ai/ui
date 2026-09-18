@@ -331,6 +331,25 @@ export const Prefilled: Story = {
   },
 };
 
+const PILL_KINDS_SNIPPET = `<!-- seed pills by setting the value property to a ComposerDoc:
+     a skill and an agent render inline, a plugin renders as a richer chip -->
+<kai-composer id="composer" style="display:block; width:100%;"></kai-composer>
+
+<script type="module">
+  import '@kitn.ai/ui/elements';
+
+  const composer = document.getElementById('composer');
+  composer.value = [
+    { type: 'text', text: 'Review ' },
+    { type: 'entity', entity: { kind: 'skill', id: 'record-replay', label: 'Record-Replay' } },
+    { type: 'text', text: ' then ask ' },
+    { type: 'entity', entity: { kind: 'agent', id: 'code-reviewer', label: 'Code-Reviewer' } },
+    { type: 'text', text: ' to use ' },
+    { type: 'entity', entity: { kind: 'plugin', id: 'documents', label: 'Documents' } },
+    { type: 'text', text: ' on this PR.' },
+  ];
+</script>`;
+
 // ---------------------------------------------------------------------------
 // Pill kinds (decoration per kind)
 // ---------------------------------------------------------------------------
@@ -368,6 +387,7 @@ export const PillKinds: Story = {
       </div>
     );
   },
+  parameters: { docs: { source: { code: PILL_KINDS_SNIPPET, language: 'html' } } },
 };
 
 // ---------------------------------------------------------------------------

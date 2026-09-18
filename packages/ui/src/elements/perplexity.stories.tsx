@@ -2,8 +2,8 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal, For, Show } from 'solid-js';
 import { Copy, RefreshCw } from 'lucide-solid';
 import './register'; // every kai-* element used below
-import type { KaiNavItem } from '../ui/nav';
-import type { KaiTabItem } from '../ui/tabs';
+import type { KaiNavItem } from '../components/nav';
+import type { KaiTabItem } from '../components/tabs';
 import type { ConversationSummary, ConversationGroup } from '../types';
 
 // Labs/Apps: a third dogfood — "Perplexity", an answer-engine UI, built on the
@@ -70,7 +70,7 @@ type Story = StoryObj;
 type El = HTMLElement & Record<string, unknown>;
 
 // The left rail. kai-nav is a flat list of named-icon rows. NOTE: the named-icon
-// registry (src/ui/icon.tsx) is curated — Perplexity's own glyphs (Compass for
+// registry (src/components/icon.tsx) is curated — Perplexity's own glyphs (Compass for
 // Discover, a Layers/Spaces mark, an Image mark) are NOT registered, so Discover
 // and Spaces use stand-in icons here (globe / box).
 const NAV: KaiNavItem[] = [

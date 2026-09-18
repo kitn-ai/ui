@@ -6,7 +6,7 @@ import { Upload } from 'lucide-solid';
 import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
-  title: 'Components/Elements/FileUpload',
+  title: 'Components/FileUpload',
   component: FileUpload,
   tags: ['autodocs'],
   parameters: {

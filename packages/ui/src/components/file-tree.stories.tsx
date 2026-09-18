@@ -27,7 +27,7 @@ const CHANGED: FileTreeFile[] = [
 ];
 
 const meta = {
-  title: 'Components/Elements/FileTree',
+  title: 'Components/FileTree',
   component: FileTree,
   tags: ['autodocs'],
   parameters: {

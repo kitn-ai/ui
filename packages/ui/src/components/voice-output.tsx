@@ -1,7 +1,7 @@
 import { splitProps, Show, createSignal, createEffect, on, onCleanup } from 'solid-js';
 import { cn } from '../utils/cn';
-import { Button } from '../ui/button';
-import { Tooltip } from '../ui/tooltip';
+import { Button } from './button';
+import { Tooltip } from './tooltip';
 import { hasSpeechSynthesis, cancelSpeech, speakUtterance, pauseSpeech, resumeSpeech } from '../primitives/speech';
 
 /** Imperative handle exposed via `controllerRef` — surfaces the playback controls

@@ -27,7 +27,7 @@ import { z } from 'zod';
 // pulls in HTMLElement/window/CustomEvent that pass can't see.
 import { isSafeUrl } from '../../src/primitives/url-scheme-policy';
 import { CHAT_MESSAGE_ACTIONS } from '../../src/elements/chat-actions';
-import { BUTTON_VARIANT_NAMES } from '../../src/ui/button-variant-names';
+import { BUTTON_VARIANT_NAMES } from '../../src/components/button-variant-names';
 import { KNOWN_THEME_TOKENS, themeTokenValueProblem } from './theme-token-policy';
 
 export { CONSTRUCT_SCHEMA_URL } from './schema-url';

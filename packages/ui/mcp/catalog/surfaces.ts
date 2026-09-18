@@ -25,7 +25,7 @@ import {
  *
  * Every `title` is a real Storybook title segment under `Labs/` — the app names
  * are the `Labs/Apps` story FILENAMES, the rest are `title: 'Labs/<x>'` values
- * under src/ (note: NOT all under src/elements/ — Settings lives in src/ui/ and
+ * under src/ (note: NOT all under src/elements/ — Settings lives in src/components/ and
  * Audio Visualizers under src/components/, so a check scoped to src/elements/
  * alone would wrongly flag them).
  *

@@ -13,9 +13,9 @@ import {
   createUniqueId,
 } from 'solid-js';
 import { cn } from '../utils/cn';
-import { Button } from '../ui/button';
-import { Checkbox } from '../ui/checkbox';
-import { ProgressBar } from '../ui/progress-bar';
+import { Button } from './button';
+import { Checkbox } from './checkbox';
+import { ProgressBar } from './progress-bar';
 import { Card } from './card';
 import { DismissedStub } from './dismissed-stub';
 import type { CardEnvelope, CardEvent, CardHost, CardResolution } from '../primitives/card-contract';

@@ -68,8 +68,8 @@
     "composedFrom": [
       {
         "name": "AgentCard",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-agentcard--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-agentcard--docs"
       }
     ],
     "tokens": [],
@@ -751,8 +751,8 @@
     "composedFrom": [
       {
         "name": "Avatar",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-avatar--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-avatar--docs"
       }
     ],
     "tokens": []
@@ -787,8 +787,8 @@
     "composedFrom": [
       {
         "name": "Badge",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-badge--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-badge--docs"
       }
     ],
     "tokens": [],
@@ -932,8 +932,8 @@
     "composedFrom": [
       {
         "name": "Button",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-button--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-button--docs"
       }
     ],
     "tokens": [],
@@ -1068,9 +1068,9 @@
     "methods": [],
     "composedFrom": [
       {
-        "name": "Card",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-card--docs"
+        "name": "CardSurface",
+        "group": "Components",
+        "storyId": "solid-advanced-elements-cardsurface--docs"
       }
     ],
     "tokens": [],
@@ -2026,8 +2026,8 @@
     "composedFrom": [
       {
         "name": "Checkbox",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-checkbox--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-checkbox--docs"
       }
     ],
     "tokens": []
@@ -2111,8 +2111,8 @@
     "composedFrom": [
       {
         "name": "CheckboxGroup",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-checkboxgroup--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-checkboxgroup--docs"
       }
     ],
     "tokens": []
@@ -2662,8 +2662,8 @@
     "composedFrom": [
       {
         "name": "CommandList",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-commandlist--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-commandlist--docs"
       }
     ],
     "tokens": [],
@@ -3623,8 +3623,8 @@
     "composedFrom": [
       {
         "name": "Dialog",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-dialog--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-dialog--docs"
       }
     ],
     "tokens": [],
@@ -3809,18 +3809,18 @@
     "composedFrom": [
       {
         "name": "Dock",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-dock--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-dock--docs"
       },
       {
         "name": "DockCloseGlyph",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-dockcloseglyph--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-dockcloseglyph--docs"
       },
       {
         "name": "DockLauncherGlyph",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-docklauncherglyph--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-docklauncherglyph--docs"
       }
     ],
     "tokens": [],
@@ -3976,18 +3976,18 @@
     "composedFrom": [
       {
         "name": "Dropdown",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-dropdown--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-dropdown--docs"
       },
       {
         "name": "DropdownTrigger",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-dropdowntrigger--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-dropdowntrigger--docs"
       },
       {
         "name": "DropdownContent",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-dropdowncontent--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-dropdowncontent--docs"
       }
     ],
     "tokens": [],
@@ -4091,8 +4091,8 @@
     "composedFrom": [
       {
         "name": "EditableLabel",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-editablelabel--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-editablelabel--docs"
       }
     ],
     "tokens": [],
@@ -4740,18 +4740,18 @@
     "composedFrom": [
       {
         "name": "HoverCardRoot",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-hovercardroot--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-hovercardroot--docs"
       },
       {
         "name": "HoverCardTrigger",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-hovercardtrigger--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-hovercardtrigger--docs"
       },
       {
         "name": "HoverCardContent",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-hovercardcontent--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-hovercardcontent--docs"
       }
     ],
     "tokens": [],
@@ -5099,8 +5099,8 @@
     "composedFrom": [
       {
         "name": "Input",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-input--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-input--docs"
       }
     ],
     "tokens": [],
@@ -5186,8 +5186,8 @@
     "composedFrom": [
       {
         "name": "Kbd",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-kbd--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-kbd--docs"
       }
     ],
     "tokens": [],
@@ -5510,63 +5510,63 @@
     "composedFrom": [
       {
         "name": "Dropdown",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-dropdown--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-dropdown--docs"
       },
       {
         "name": "DropdownTrigger",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-dropdowntrigger--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-dropdowntrigger--docs"
       },
       {
         "name": "DropdownContent",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-dropdowncontent--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-dropdowncontent--docs"
       },
       {
         "name": "DropdownItem",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-dropdownitem--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-dropdownitem--docs"
       },
       {
         "name": "DropdownSeparator",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-dropdownseparator--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-dropdownseparator--docs"
       },
       {
         "name": "DropdownLabel",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-dropdownlabel--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-dropdownlabel--docs"
       },
       {
         "name": "DropdownCheckboxItem",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-dropdowncheckboxitem--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-dropdowncheckboxitem--docs"
       },
       {
         "name": "DropdownRadioItem",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-dropdownradioitem--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-dropdownradioitem--docs"
       },
       {
         "name": "DropdownSub",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-dropdownsub--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-dropdownsub--docs"
       },
       {
         "name": "DropdownSubTrigger",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-dropdownsubtrigger--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-dropdownsubtrigger--docs"
       },
       {
         "name": "DropdownSubContent",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-dropdownsubcontent--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-dropdownsubcontent--docs"
       },
       {
         "name": "Kbd",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-kbd--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-kbd--docs"
       }
     ],
     "tokens": [],
@@ -6010,8 +6010,8 @@
     "composedFrom": [
       {
         "name": "Nav",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-nav--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-nav--docs"
       }
     ],
     "tokens": [],
@@ -6107,8 +6107,8 @@
     "composedFrom": [
       {
         "name": "Notice",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-notice--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-notice--docs"
       }
     ],
     "tokens": [],
@@ -6240,8 +6240,8 @@
     "composedFrom": [
       {
         "name": "Pane",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-pane--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-pane--docs"
       }
     ],
     "tokens": [],
@@ -6351,8 +6351,8 @@
     "composedFrom": [
       {
         "name": "PaneGrid",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-panegrid--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-panegrid--docs"
       }
     ],
     "tokens": []
@@ -6438,8 +6438,8 @@
     "composedFrom": [
       {
         "name": "PaneGroup",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-panegroup--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-panegroup--docs"
       }
     ],
     "tokens": [],
@@ -6738,8 +6738,8 @@
     "composedFrom": [
       {
         "name": "Popover",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-popover--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-popover--docs"
       }
     ],
     "tokens": [],
@@ -6810,8 +6810,8 @@
     "composedFrom": [
       {
         "name": "ProgressBar",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-progressbar--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-progressbar--docs"
       }
     ],
     "tokens": [],
@@ -6867,8 +6867,8 @@
     "composedFrom": [
       {
         "name": "PromptDock",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-promptdock--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-promptdock--docs"
       }
     ],
     "tokens": [],
@@ -7149,13 +7149,13 @@
       },
       {
         "name": "Button",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-button--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-button--docs"
       },
       {
         "name": "Tooltip",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-tooltip--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-tooltip--docs"
       },
       {
         "name": "Attachments",
@@ -7301,8 +7301,8 @@
     "composedFrom": [
       {
         "name": "RadioGroup",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-radiogroup--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-radiogroup--docs"
       }
     ],
     "tokens": []
@@ -7563,8 +7563,8 @@
     "composedFrom": [
       {
         "name": "ResizableHandle",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-resizablehandle--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-resizablehandle--docs"
       }
     ],
     "tokens": [],
@@ -7667,8 +7667,8 @@
     "composedFrom": [
       {
         "name": "ResizableHandle",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-resizablehandle--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-resizablehandle--docs"
       }
     ],
     "tokens": [],
@@ -7882,8 +7882,8 @@
     "composedFrom": [
       {
         "name": "RowGroup",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-rowgroup--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-rowgroup--docs"
       }
     ],
     "tokens": [],
@@ -8194,8 +8194,8 @@
     "composedFrom": [
       {
         "name": "ScrollArea",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-scrollarea--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-scrollarea--docs"
       }
     ],
     "tokens": [],
@@ -8284,8 +8284,8 @@
     "composedFrom": [
       {
         "name": "Button",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-button--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-button--docs"
       }
     ],
     "tokens": []
@@ -8395,13 +8395,13 @@
     "composedFrom": [
       {
         "name": "Input",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-input--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-input--docs"
       },
       {
         "name": "Kbd",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-kbd--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-kbd--docs"
       },
       {
         "name": "Loader",
@@ -8485,8 +8485,8 @@
     "composedFrom": [
       {
         "name": "Segmented",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-segmented--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-segmented--docs"
       }
     ],
     "tokens": [],
@@ -8614,8 +8614,8 @@
     "composedFrom": [
       {
         "name": "Select",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-select--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-select--docs"
       }
     ],
     "tokens": []
@@ -8650,8 +8650,8 @@
     "composedFrom": [
       {
         "name": "Separator",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-separator--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-separator--docs"
       }
     ],
     "tokens": [],
@@ -8701,8 +8701,8 @@
     "composedFrom": [
       {
         "name": "SettingItem",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-settingitem--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-settingitem--docs"
       }
     ],
     "tokens": [],
@@ -8764,8 +8764,8 @@
     "composedFrom": [
       {
         "name": "SettingsGroup",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-settingsgroup--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-settingsgroup--docs"
       }
     ],
     "tokens": [],
@@ -8843,8 +8843,8 @@
     "composedFrom": [
       {
         "name": "Skeleton",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-skeleton--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-skeleton--docs"
       }
     ],
     "tokens": [],
@@ -9010,8 +9010,8 @@
     "composedFrom": [
       {
         "name": "Slider",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-slider--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-slider--docs"
       }
     ],
     "tokens": []
@@ -9244,8 +9244,8 @@
     "composedFrom": [
       {
         "name": "Status",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-status--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-status--docs"
       }
     ],
     "tokens": [],
@@ -9444,8 +9444,8 @@
     "composedFrom": [
       {
         "name": "Switch",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-switch--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-switch--docs"
       }
     ],
     "tokens": []
@@ -9727,8 +9727,8 @@
     "composedFrom": [
       {
         "name": "Tabs",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-tabs--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-tabs--docs"
       }
     ],
     "tokens": [],
@@ -10448,8 +10448,8 @@
     "composedFrom": [
       {
         "name": "Tooltip",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-tooltip--docs"
+        "group": "Components",
+        "storyId": "solid-advanced-elements-tooltip--docs"
       }
     ],
     "tokens": [],

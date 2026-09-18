@@ -8,12 +8,12 @@ import { AudioVisualizer, type VisualizerVariant } from '../components/audio-vis
 import { ChatThread } from '../components/chat-thread';
 import { WorkspaceShell } from '../components/workspace-shell';
 import { Captions, type CaptionSegment, type CaptionsVariant } from '../components/captions';
-import { Switch } from '../ui/switch';
-import { Select } from '../ui/select';
-import { RadioGroup, type RadioOption } from '../ui/radio';
-import { Button } from '../ui/button';
-import { Tooltip } from '../ui/tooltip';
-import { Kbd } from '../ui/kbd';
+import { Switch } from '../components/switch';
+import { Select } from '../components/select';
+import { RadioGroup, type RadioOption } from '../components/radio';
+import { Button } from '../components/button';
+import { Tooltip } from '../components/tooltip';
+import { Kbd } from '../components/kbd';
 import { cn } from '../utils/cn';
 import type { ChatMessage } from './chat-types';
 
@@ -85,7 +85,7 @@ import type { ChatMessage } from './chat-types';
 //    — the owner's own instruction: accent stays reserved for the
 //    visualizer. Restyled from `bg-primary`/`text-primary-foreground` to
 //    the kit's real `outline` Button variant's own color classes
-//    (`ui/button.tsx`: `bg-muted/50 text-foreground hover:bg-muted` — the
+//    (`components/button.tsx`: `bg-muted/50 text-foreground hover:bg-muted` — the
 //    closest existing "secondary/neutral" look; there is no literal
 //    `secondary` variant, same mapping the Workspace round's header-action
 //    editor already had to make and documented there). Kept as bespoke
@@ -242,7 +242,7 @@ function TranscriptPanel(props: { dockSide: DockSide; textInput: boolean; showDo
           </Button>
         </div>
       </div>
-      {/* Owner feedback round: the built-in composer (`ui/prompt-input.tsx`'s
+      {/* Owner feedback round: the built-in composer (`components/prompt-input.tsx`'s
           `bg-surface`) collided with this panel's own `bg-surface` toning
           (the round-B fix above, matched to `t3code.stories.tsx`'s rail
           token) — the input frame disappeared into its own background. The

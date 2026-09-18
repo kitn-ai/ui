@@ -1,4 +1,4 @@
-import { Badge } from '../ui/badge';
+import { Badge } from '../components/badge';
 import { defineWebComponent } from './define';
 
 interface Props extends Record<string, unknown> {

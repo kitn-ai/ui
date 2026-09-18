@@ -13,9 +13,9 @@ import {
   createUniqueId,
 } from 'solid-js';
 import { cn } from '../utils/cn';
-import { Button } from '../ui/button';
-import { Radio } from '../ui/radio';
-import { HoverCard } from '../ui/hover-card';
+import { Button } from './button';
+import { Radio } from './radio';
+import { HoverCard } from './hover-card';
 import { Card } from './card';
 import { DismissedStub } from './dismissed-stub';
 import type { CardEnvelope, CardEvent, CardHost, CardResolution } from '../primitives/card-contract';

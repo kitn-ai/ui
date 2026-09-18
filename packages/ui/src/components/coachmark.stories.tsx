@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import type { Placement } from '@floating-ui/dom';
 import { createSignal, Show } from 'solid-js';
 import { Coachmark } from './coachmark';
-import { Button } from '../ui/button';
+import { Button } from './button';
 import { ChatConfig } from '../primitives/chat-config';
 import { componentDescription } from '../stories/docs/element-controls';
 
@@ -14,7 +14,7 @@ import { componentDescription } from '../stories/docs/element-controls';
  * bubble is visible, inside a padded canvas so it has room to sit below the anchor.
  */
 const meta = {
-  title: 'Components/Elements/Coachmark',
+  title: 'Components/Coachmark',
   component: Coachmark,
   tags: ['autodocs'],
   parameters: {

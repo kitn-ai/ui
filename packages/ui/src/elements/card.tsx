@@ -1,6 +1,6 @@
 import { createSignal, onCleanup, onMount } from 'solid-js';
 import { defineWebComponent } from './define';
-import { Card, type CardAppearance, type CardOrientation } from '../ui/card';
+import { CardSurface, type CardAppearance, type CardOrientation } from '../components/card-surface';
 
 interface Props extends Record<string, unknown> {
   /** Surface treatment: `outlined` (default) | `filled` | `plain` | `accent`.
@@ -108,7 +108,7 @@ defineWebComponent<Props, Events>('kai-card', {
   const region = (name: SlotName) => (filled()[name] ? <slot name={name} /> : undefined);
 
   return (
-    <Card
+    <CardSurface
       appearance={props.appearance as CardAppearance}
       orientation={props.orientation as CardOrientation}
       collapse={props.collapse as string}
@@ -128,6 +128,6 @@ defineWebComponent<Props, Events>('kai-card', {
       hasBody={hasBody()}
     >
       <slot />
-    </Card>
+    </CardSurface>
   );
 });

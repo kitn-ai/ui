@@ -262,7 +262,7 @@ describe('widget chrome (Task 19a)', () => {
 
   // Owner finding, 2026-08-26: a hand-rolled <img> left a permanently broken
   // icon in kai dev's own live FAB when its URL never resolved. DockLauncherImage
-  // (ui/dock.tsx) is the graceful-degradation component — see src/ui/dock.test.tsx
+  // (components/dock.tsx) is the graceful-degradation component — see src/components/dock.test.tsx
   // for its own render-level fallback behavior; this only asserts the WIRE.
   it('launcherIcon renders a DockLauncherImage launcher override, JSON.stringify-escaped, and imports it', () => {
     const app = file(

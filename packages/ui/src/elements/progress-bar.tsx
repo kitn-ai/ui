@@ -1,4 +1,4 @@
-import { ProgressBar, type ProgressTone } from '../ui/progress-bar';
+import { ProgressBar, type ProgressTone } from '../components/progress-bar';
 import { defineWebComponent } from './define';
 
 interface Props extends Record<string, unknown> {

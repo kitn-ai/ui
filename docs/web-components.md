@@ -10,7 +10,7 @@
 | `<kai-chat>` | Full chat UI — message list plus prompt input |
 | `<kai-conversations>` | Sidebar conversation browser with group support |
 | `<kai-prompt-input>` | Standalone text-input area with send button |
-| + 94 composable primitives | See the full roster below |
+| + 94 composable custom elements | See the full roster below |
 <!-- /spec:overview -->
 
 Each element renders into its own **Shadow DOM** so the host page's CSS cannot leak in, and the kit's Tailwind classes cannot leak out. SolidJS and all kit dependencies are bundled inside the element bundle — the host does not need SolidJS.
@@ -523,7 +523,7 @@ Restyle from outside the Shadow DOM via `kai-prompt-input::part(name)`.
 
 #### Composed from
 
-`Components/PromptInput`, `Components/PromptInputTextarea`, `Components/PromptInputActions`, `Components/PromptSuggestion`, `UI/Button`, `UI/Tooltip`, `Components/Attachments`, `Components/Attachment`, `Components/AttachmentPreview`, `Components/AttachmentInfo`, `Components/AttachmentRemove`
+`Components/PromptInput`, `Components/PromptInputTextarea`, `Components/PromptInputActions`, `Components/PromptSuggestion`, `Components/Button`, `Components/Tooltip`, `Components/Attachments`, `Components/Attachment`, `Components/AttachmentPreview`, `Components/AttachmentInfo`, `Components/AttachmentRemove`
 
 #### Theming
 
@@ -2084,7 +2084,7 @@ Restyle from outside the Shadow DOM via `kai-button::part(name)`.
 
 #### Composed from
 
-`UI/Button`
+`Components/Button`
 
 #### Theming
 
@@ -2110,7 +2110,7 @@ A themed button — `variant` (incl. `subtle`), `size` (incl. icon-only), leadin
 
 #### Composed from
 
-`UI/Avatar`
+`Components/Avatar`
 
 #### Theming
 
@@ -2149,7 +2149,7 @@ Restyle from outside the Shadow DOM via `kai-badge::part(name)`.
 
 #### Composed from
 
-`UI/Badge`
+`Components/Badge`
 
 #### Theming
 
@@ -2230,7 +2230,7 @@ Project your own markup with `slot="name"` on a light-DOM child.
 
 #### Composed from
 
-`UI/Tooltip`
+`Components/Tooltip`
 
 #### Theming
 
@@ -2283,7 +2283,7 @@ Project your own markup with `slot="name"` on a light-DOM child.
 
 #### Composed from
 
-`UI/HoverCardRoot`, `UI/HoverCardTrigger`, `UI/HoverCardContent`
+`Components/HoverCardRoot`, `Components/HoverCardTrigger`, `Components/HoverCardContent`
 
 #### Theming
 
@@ -2324,7 +2324,7 @@ Project your own markup with `slot="name"` on a light-DOM child.
 
 #### Composed from
 
-`UI/Notice`
+`Components/Notice`
 
 #### Theming
 
@@ -2355,7 +2355,7 @@ Restyle from outside the Shadow DOM via `kai-separator::part(name)`.
 
 #### Composed from
 
-`UI/Separator`
+`Components/Separator`
 
 #### Theming
 
@@ -2394,7 +2394,7 @@ Restyle from outside the Shadow DOM via `kai-scroll-area::part(name)`.
 
 #### Composed from
 
-`UI/ScrollArea`
+`Components/ScrollArea`
 
 #### Theming
 
@@ -2428,7 +2428,7 @@ Restyle from outside the Shadow DOM via `kai-skeleton::part(name)`.
 
 #### Composed from
 
-`UI/Skeleton`
+`Components/Skeleton`
 
 #### Theming
 
@@ -2493,7 +2493,7 @@ Restyle from outside the Shadow DOM via `kai-menu::part(name)`.
 
 #### Composed from
 
-`UI/Dropdown`, `UI/DropdownTrigger`, `UI/DropdownContent`, `UI/DropdownItem`, `UI/DropdownSeparator`, `UI/DropdownLabel`, `UI/DropdownCheckboxItem`, `UI/DropdownRadioItem`, `UI/DropdownSub`, `UI/DropdownSubTrigger`, `UI/DropdownSubContent`, `UI/Kbd`
+`Components/Dropdown`, `Components/DropdownTrigger`, `Components/DropdownContent`, `Components/DropdownItem`, `Components/DropdownSeparator`, `Components/DropdownLabel`, `Components/DropdownCheckboxItem`, `Components/DropdownRadioItem`, `Components/DropdownSub`, `Components/DropdownSubTrigger`, `Components/DropdownSubContent`, `Components/Kbd`
 
 #### Theming
 
@@ -2544,7 +2544,7 @@ Restyle from outside the Shadow DOM via `kai-command::part(name)`.
 
 #### Composed from
 
-`UI/CommandList`
+`Components/CommandList`
 
 #### Theming
 
@@ -2625,7 +2625,7 @@ Restyle from outside the Shadow DOM via `kai-input::part(name)`.
 
 #### Composed from
 
-`UI/Input`
+`Components/Input`
 
 #### Theming
 
@@ -2689,7 +2689,7 @@ Restyle from outside the Shadow DOM via `kai-card::part(name)`.
 
 #### Composed from
 
-`UI/Card`
+`Components/CardSurface`
 
 #### Theming
 
@@ -2753,7 +2753,7 @@ Restyle from outside the Shadow DOM via `kai-dialog::part(name)`.
 
 #### Composed from
 
-`UI/Dialog`
+`Components/Dialog`
 
 #### Theming
 
@@ -2805,7 +2805,7 @@ Project your own markup with `slot="name"` on a light-DOM child.
 
 #### Composed from
 
-`UI/Popover`
+`Components/Popover`
 
 #### Theming
 
@@ -2862,7 +2862,7 @@ Project your own markup with `slot="name"` on a light-DOM child.
 
 #### Composed from
 
-`UI/Dropdown`, `UI/DropdownTrigger`, `UI/DropdownContent`
+`Components/Dropdown`, `Components/DropdownTrigger`, `Components/DropdownContent`
 
 #### Theming
 
@@ -2914,7 +2914,7 @@ Restyle from outside the Shadow DOM via `kai-tabs::part(name)`.
 
 #### Composed from
 
-`UI/Tabs`
+`Components/Tabs`
 
 #### Theming
 
@@ -2954,7 +2954,7 @@ Restyle from outside the Shadow DOM via `kai-segmented::part(name)`.
 
 #### Composed from
 
-`UI/Segmented`
+`Components/Segmented`
 
 #### Theming
 
@@ -2988,7 +2988,7 @@ Restyle from outside the Shadow DOM via `kai-status::part(name)`.
 
 #### Composed from
 
-`UI/Status`
+`Components/Status`
 
 #### Theming
 
@@ -3030,7 +3030,7 @@ Restyle from outside the Shadow DOM via `kai-kbd::part(name)`.
 
 #### Composed from
 
-`UI/Kbd`
+`Components/Kbd`
 
 #### Theming
 
@@ -3082,7 +3082,7 @@ Restyle from outside the Shadow DOM via `kai-editable-label::part(name)`.
 
 #### Composed from
 
-`UI/EditableLabel`
+`Components/EditableLabel`
 
 #### Theming
 
@@ -3117,7 +3117,7 @@ Restyle from outside the Shadow DOM via `kai-progress-bar::part(name)`.
 
 #### Composed from
 
-`UI/ProgressBar`
+`Components/ProgressBar`
 
 #### Theming
 
@@ -3159,7 +3159,7 @@ Restyle from outside the Shadow DOM via `kai-agent-card::part(name)`.
 
 #### Composed from
 
-`UI/AgentCard`
+`Components/AgentCard`
 
 #### Theming
 
@@ -3219,7 +3219,7 @@ Restyle from outside the Shadow DOM via `kai-nav::part(name)`.
 
 #### Composed from
 
-`UI/Nav`
+`Components/Nav`
 
 #### Theming
 
@@ -3345,7 +3345,7 @@ Restyle from outside the Shadow DOM via `kai-pane::part(name)`.
 
 #### Composed from
 
-`UI/Pane`
+`Components/Pane`
 
 #### Theming
 
@@ -3407,7 +3407,7 @@ Restyle from outside the Shadow DOM via `kai-pane-group::part(name)`.
 
 #### Composed from
 
-`UI/PaneGroup`
+`Components/PaneGroup`
 
 #### Theming
 
@@ -3457,7 +3457,7 @@ Project your own markup with `slot="name"` on a light-DOM child.
 
 #### Composed from
 
-`UI/ResizableHandle`
+`Components/ResizableHandle`
 
 #### Theming
 
@@ -3501,7 +3501,7 @@ Project your own markup with `slot="name"` on a light-DOM child.
 
 #### Composed from
 
-`UI/ResizableHandle`
+`Components/ResizableHandle`
 
 #### Theming
 
@@ -3571,7 +3571,7 @@ Restyle from outside the Shadow DOM via `kai-dock::part(name)`.
 
 #### Composed from
 
-`UI/Dock`, `UI/DockCloseGlyph`, `UI/DockLauncherGlyph`
+`Components/Dock`, `Components/DockCloseGlyph`, `Components/DockLauncherGlyph`
 
 #### Theming
 
@@ -3615,7 +3615,7 @@ Restyle from outside the Shadow DOM via `kai-prompt-dock::part(name)`.
 
 #### Composed from
 
-`UI/PromptDock`
+`Components/PromptDock`
 
 #### Theming
 
@@ -3656,7 +3656,7 @@ Restyle from outside the Shadow DOM via `kai-setting-item::part(name)`.
 
 #### Composed from
 
-`UI/SettingItem`
+`Components/SettingItem`
 
 #### Theming
 
@@ -3863,7 +3863,7 @@ Both files are at the repo root, the npm package root (`node_modules/@kitn.ai/ui
 ## Icon roster
 
 <!-- spec:icon-roster -->
-Every name `kai-icon` (and every `icon` prop/attribute across the elements) resolves — 77 names, derived from the `NAMED_ICONS` map in `src/ui/icon.tsx` (also exported at runtime as `ICON_NAMES`). An icon-shaped name outside this roster renders a fallback glyph and logs a console error, in dev and prod alike; URLs render an `<img>`, and emoji/arbitrary text passes through as text.
+Every name `kai-icon` (and every `icon` prop/attribute across the elements) resolves — 77 names, derived from the `NAMED_ICONS` map in `src/components/icon.tsx` (also exported at runtime as `ICON_NAMES`). An icon-shaped name outside this roster renders a fallback glyph and logs a console error, in dev and prod alike; URLs render an `<img>`, and emoji/arbitrary text passes through as text.
 
 `archive` · `arrow-down` · `arrow-left` · `arrow-right` · `arrow-up` · `audio-lines` · `bell` · `book-open` · `bookmark` · `box` · `briefcase` · `check` · `chevron-down` · `chevron-left` · `chevron-right` · `chevron-up` · `circle` · `circle-alert` · `circle-check` · `circle-x` · `clock` · `code` · `copy` · `desktop` · `download` · `ellipsis` · `external-link` · `eye` · `eye-off` · `file-text` · `flag` · `folder` · `git-branch` · `git-pull-request` · `github` · `globe` · `home` · `image` · `info` · `laptop` · `link` · `list-filter` · `lock` · `maximize-2` · `message-circle` · `message-square` · `mic` · `minimize-2` · `minus` · `mobile` · `monitor` · `moon` · `more-horizontal` · `panel-left` · `panel-right` · `paperclip` · `pencil` · `play` · `plus` · `rotate-ccw` · `rotate-cw` · `search` · `settings` · `share` · `sliders-horizontal` · `smartphone` · `smile` · `sparkles` · `square` · `square-pen` · `sun` · `tablet` · `trash` · `triangle-alert` · `upload` · `workflow` · `x`
 <!-- /spec:icon-roster -->

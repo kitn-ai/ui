@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal, Show, For } from 'solid-js';
 import './register'; // every kai-* element used below
-import type { KaiNavItem } from '../ui/nav';
+import type { KaiNavItem } from '../components/nav';
 import type { KaiCommandItem } from './command';
 import type { ConversationSummary, ConversationGroup } from '../types';
 import { textMessage } from '../state';

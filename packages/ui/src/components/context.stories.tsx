@@ -20,7 +20,7 @@ import { componentDescription } from '../stories/docs/element-controls';
  * drives the root and composes a full hover-card breakdown.
  */
 const meta = {
-  title: 'Components/Elements/Context',
+  title: 'Components/Context',
   component: Context,
   tags: ['autodocs'],
   parameters: {

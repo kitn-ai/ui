@@ -6,7 +6,7 @@ import { Reasoning, ReasoningTrigger, ReasoningContent } from './reasoning';
 import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
-  title: 'Components/Elements/Reasoning',
+  title: 'Components/Reasoning',
   component: Reasoning,
   tags: ['autodocs'],
   parameters: {
@@ -133,6 +133,12 @@ export const KeyboardReachability: Story = {
       </button>
     </div>
   ),
+  ...src(`<Reasoning>
+  <ReasoningTrigger>View reasoning</ReasoningTrigger>
+  <ReasoningContent>
+    <p>Cross-checking the <a href="#cited">cited source</a> before answering.</p>
+  </ReasoningContent>
+</Reasoning>`),
   play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     const canvas = within(canvasElement);
     const toggle = canvas.getByRole('button', { name: /view reasoning/i });

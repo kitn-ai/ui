@@ -30,8 +30,8 @@ import {
   CommandPaletteTrigger,
   UserMenu,
 } from '../components/builder-shell-controls';
-import { Switch } from '../ui/switch';
-import { Select } from '../ui/select';
+import { Switch } from '../components/switch';
+import { Select } from '../components/select';
 import { cn } from '../utils/cn';
 import type { ChatMessage, ChatMessageAction, CustomAction } from './chat-types';
 import type { ConversationGroup, ConversationSummary, ModelOption } from '../types';

@@ -1,8 +1,8 @@
 import { type JSX, Switch, Match, For, Show, createSignal } from 'solid-js';
 import { cn } from '../utils/cn';
 import { ThumbsUp, ThumbsDown, X, Check } from 'lucide-solid';
-import { Button } from '../ui/button';
-import { Textarea } from '../ui/textarea';
+import { Button } from './button';
+import { Textarea } from './textarea';
 
 export type FeedbackValue = 'helpful' | 'not-helpful';
 

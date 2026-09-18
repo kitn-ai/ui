@@ -14,7 +14,7 @@ function imgData(fill: string, glyph: string): string {
 const SKILL_ICON = imgData('#7c3aed', '▶');
 
 const meta = {
-  title: 'Components/Elements/Composer',
+  title: 'Components/Composer',
   component: Composer,
   tags: ['autodocs'],
   parameters: {

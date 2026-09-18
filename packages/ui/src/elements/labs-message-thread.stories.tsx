@@ -155,7 +155,12 @@ const meta = {
             'See the **Code** tab for the HTML.',
           ].join('\n\n'),
       },
-      source: { code: HTML_SNIPPET, language: 'html' },
+      // The snippet lives on the STORY, not here. It did live here, and a
+      // `parameters.docs.source.code` on the meta is inherited by every story in
+      // the file -- which reads as per-story documentation while being one
+      // snippet for all of them. This file has exactly one story, so moving it
+      // costs nothing and keeps the `lint:story-conventions` rule at three
+      // attribution routes instead of four.
     },
   },
 } satisfies Meta;
@@ -168,4 +173,5 @@ type Story = StoryObj;
 export const ComposedMessageThread: Story = {
   name: 'Per-message slots (header, sources, avatar)',
   render: () => <ComposedThread />,
+  parameters: { docs: { source: { code: HTML_SNIPPET, language: 'html' } } },
 };

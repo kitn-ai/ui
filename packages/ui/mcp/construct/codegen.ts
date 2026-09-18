@@ -1119,7 +1119,7 @@ function emitChatControllerRefProp(c: Construct): string {
     : '';
 }
 
-/** `Dock`'s own `onOpenChange` (ui/dock.tsx) already fires on EVERY close
+/** `Dock`'s own `onOpenChange` (components/dock.tsx) already fires on EVERY close
  *  path — the header X, the launcher toggle, and Escape all resolve through
  *  its single `setOpen` — so wiring it once here covers all three with no
  *  per-path duplication (the alternative `emitDockCloseVar`/`dockClose`
@@ -1152,7 +1152,7 @@ function emitConversationsResetTypeImport(c: Construct): string {
  *  `ChatThread` reads it REACTIVELY every render (`hostOpen={dockOpen()}`),
  *  not just calls it imperatively on an event; `anyUnread` is the reverse
  *  direction, `ChatThread` writing outward via `onUnreadChange={setAnyUnread}`
- *  so `Dock`'s own `unread` prop (ui/dock.tsx — already exists, already
+ *  so `Dock`'s own `unread` prop (components/dock.tsx — already exists, already
  *  tested, no change needed there) can mirror it onto the FAB.
  *  `dockOpen`'s initial value matches `widget.defaultOpen` (mirroring
  *  `emitDockDefaultOpen`'s own read of the same field) — a widget that opens
@@ -1178,7 +1178,7 @@ function emitDockUnreadProp(c: Construct): string {
 }
 
 /** The local closure `emitHeaderEndContentProp`/`emitDockControllerRef` share:
- *  Dock's `controllerRef` hands back `{ open, setOpen }` (ui/dock.tsx) — the
+ *  Dock's `controllerRef` hands back `{ open, setOpen }` (components/dock.tsx) — the
  *  existing imperative seam, not a new one — and this captures `setOpen`
  *  behind a plain function so ChatThread's `headerEndContent` button (which
  *  renders as a sibling, not a Dock descendant) can call it. Declared inside
@@ -2051,7 +2051,7 @@ function emitSlots(slots: readonly string[] | undefined, indent: string): string
  *    workspace-shell.tsx) for its frame -- chat in `children` (the main
  *    region), the end pane's `<slot name="pane">` seam projected via `end`.
  *    Superseded from Task 12's `PaneGroup` (recorded decision 2): `PaneGroup`
- *    is an editor GROUP contract (src/ui/pane-group.tsx) -- a tab strip over
+ *    is an editor GROUP contract (src/components/pane-group.tsx) -- a tab strip over
  *    ONE content area -- so getting two SIMULTANEOUS panes out of it meant a
  *    single always-active tab whose one body was a hand-rolled flex row doing
  *    the actual two-column math; the "kit component" was supplying a frame
@@ -2127,7 +2127,7 @@ function hasLauncherIcon(c: Construct): boolean {
 }
 
 /** widget.launcherIcon -> Dock's `launcher` prop, via `DockLauncherImage`
- *  (ui/dock.tsx) rather than a hand-rolled `<img>`: a construct-authored URL
+ *  (components/dock.tsx) rather than a hand-rolled `<img>`: a construct-authored URL
  *  is exactly as capable of 404ing as any other network fetch (this is what
  *  the fix report found — `kai dev`'s own `owner-widget` fixture pinned a
  *  `https://example.com/logo.png` placeholder that never resolved, so the
@@ -2283,7 +2283,7 @@ function emitLayoutOpen(c: Construct): string {
       const inset = position === 'start' ? "'inset-inline-start': '0'" : "'inset-inline-end': '0'";
       const borderSide = position === 'start' ? 'border-inline-end' : 'border-inline-start';
       return `    <aside data-kai-layout="aside" style={{ position: 'fixed', 'inset-block': '0', ${inset}, width: ${width}, display: 'flex', 'flex-direction': 'column', '${borderSide}': '1px solid var(--kai-color-border)' }}>
-      {/* Mirrors Dock's own narrow-viewport full-bleed rule (ui/dock.tsx:229-240)
+      {/* Mirrors Dock's own narrow-viewport full-bleed rule (components/dock.tsx:229-240)
           — aside has no dedicated kit component (see the emitLayoutOpen doc
           comment above), so this is the honest hand-rolled equivalent, not a
           new responsive strategy. */}
@@ -2310,7 +2310,7 @@ function emitLayoutOpen(c: Construct): string {
       // drawerBelow: split's mobile takeover is the kit's OWN WorkspaceShell
       // capability (components/workspace-shell.tsx), not hand-rolled CSS — wiring
       // it here is composition-over-reauthoring, not a media-query duplicate. 480
-      // matches Dock's own breakpoint (ui/dock.tsx:229) so every layout takes over
+      // matches Dock's own breakpoint (components/dock.tsx:229) so every layout takes over
       // at the same viewport width.
       if (!ws) {
         // No work surface: the end pane is a PURE PROJECTION SEAM. It must not

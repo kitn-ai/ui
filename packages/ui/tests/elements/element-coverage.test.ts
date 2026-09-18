@@ -500,7 +500,7 @@ describe('element coverage', () => {
     // analyzer problem. Pin both a positive and the known negative.
     const withSolid = TAGS.filter((t) => solidModulesOf(t).size > 0);
     expect(withSolid.length).toBeGreaterThan(60);
-    expect([...solidModulesOf('kai-dialog')]).toEqual([join(PKG, 'src/ui/dialog.tsx')]);
+    expect([...solidModulesOf('kai-dialog')]).toEqual([join(PKG, 'src/components/dialog.tsx')]);
     // kai-icon renders via renderIcon(), not JSX — the documented edge above.
     expect([...solidModulesOf('kai-icon')]).toEqual([]);
   });

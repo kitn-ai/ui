@@ -111,7 +111,7 @@ function ChatPanel(props: { construct: BuilderConstruct; class?: string }): JSX.
  * exists to switch to for this template, so there's nothing left to
  * dispatch on).
  *
- * Round A4: reads the toolbar's `viewport` to mirror `ui/dock.tsx`'s own
+ * Round A4: reads the toolbar's `viewport` to mirror `components/dock.tsx`'s own
  * real mobile takeover (its <=480px `@media` block: the panel goes
  * `position: fixed; inset: 0` — full-bleed, square corners, no border —
  * and the launcher/FAB hides while the panel is "open"). This frame is a

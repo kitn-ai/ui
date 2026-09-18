@@ -1,6 +1,6 @@
 import { createEffect, createSignal, onCleanup, onMount, untrack } from 'solid-js';
 import { defineWebComponent } from './define';
-import { DEFAULT_FORMAT, Input, type InputProps } from '../ui/input';
+import { DEFAULT_FORMAT, Input, type InputProps } from '../components/input';
 import {
   compileMask,
   formatForDisplay,
@@ -215,7 +215,7 @@ defineWebComponent<Props, Events>('kai-input', {
    * `el.value` still read `chg4821`.
    *
    * This is a derivation, not a second policy -- `field-mask`, `field-semantics` and the
-   * `DEFAULT_FORMAT` sentinel are all read from where `ui/input.tsx` reads them, so
+   * `DEFAULT_FORMAT` sentinel are all read from where `components/input.tsx` reads them, so
    * nothing about the resolution is restated here. A bad format or an unresolvable
    * `default` falls through unmasked exactly as it does there (the widget is the one
    * that warns; warning twice for one misconfiguration would be noise).

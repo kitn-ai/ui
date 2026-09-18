@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal, Show } from 'solid-js';
 import { Asterisk, Sparkles, Download } from 'lucide-solid';
-import { PromptDock } from '../ui/prompt-dock';
+import { PromptDock } from '../components/prompt-dock';
 import './register'; // every kai-* element used below
-import type { KaiNavItem } from '../ui/nav';
-import type { KaiTabItem } from '../ui/tabs';
+import type { KaiNavItem } from '../components/nav';
+import type { KaiTabItem } from '../components/tabs';
 import type { KaiCommandItem } from './command';
 import type { ConversationSummary, ConversationGroup } from '../types';
 

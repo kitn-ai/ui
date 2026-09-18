@@ -1,5 +1,5 @@
 import { type JSX, Show, For, createMemo } from 'solid-js';
-import { createPresence } from '../ui/overlay';
+import { createPresence } from './overlay';
 import { cn } from '../utils/cn';
 
 /**
@@ -38,7 +38,7 @@ import { cn } from '../utils/cn';
  *   history, so it can't double-announce anything a transcript component
  *   elsewhere on the page is already announcing.
  * - Appear/update reuses the kit's real exit-animation primitive,
- *   `createPresence` (`ui/overlay.tsx`), for the whole component's
+ *   `createPresence` (`components/overlay.tsx`), for the whole component's
  *   mount/unmount, and a keyed `<For>` around the current line so a NEW
  *   segment object (the same "new object per changed item" contract the
  *   rest of the kit's reactive props follow) retriggers its own

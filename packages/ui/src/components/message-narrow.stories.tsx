@@ -2,11 +2,11 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { Message, MessageAvatar, MessageContent } from './message';
 import { ChatContainer } from './chat-container';
 import { ChatConfig } from '../primitives/chat-config';
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '../ui/resizable';
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from './resizable';
 import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
-  title: 'Components/Elements/Message/Narrow Panel',
+  title: 'Components/Message/Narrow Panel',
   component: Message,
   tags: ['autodocs'],
   parameters: {

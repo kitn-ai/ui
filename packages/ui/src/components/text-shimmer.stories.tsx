@@ -3,7 +3,7 @@ import { TextShimmer } from './text-shimmer';
 import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
-  title: 'Components/Elements/TextShimmer',
+  title: 'Components/TextShimmer',
   component: TextShimmer,
   tags: ['autodocs'],
   parameters: {

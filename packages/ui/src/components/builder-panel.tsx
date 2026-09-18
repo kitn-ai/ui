@@ -1,13 +1,13 @@
 import { type JSX, Show, For, createSignal, createEffect, on } from 'solid-js';
 import { cn } from '../utils/cn';
-import { Input } from '../ui/input';
-import { Textarea } from '../ui/textarea';
-import { Switch } from '../ui/switch';
-import { RadioGroup, type RadioOption } from '../ui/radio';
-import { Select } from '../ui/select';
-import { Button } from '../ui/button';
-import { ColorField } from '../ui/color-field';
-import { ToggleChip } from '../ui/toggle-chip';
+import { Input } from './input';
+import { Textarea } from './textarea';
+import { Switch } from './switch';
+import { RadioGroup, type RadioOption } from './radio';
+import { Select } from './select';
+import { Button } from './button';
+import { ColorField } from './color-field';
+import { ToggleChip } from './toggle-chip';
 import { X } from 'lucide-solid';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -363,7 +363,7 @@ export function AcceptTypeEditor(props: { accept: string[]; onChange: (next: str
           Advanced: exact MIME types
         </summary>
         <div class="mt-2 flex flex-col gap-1.5">
-          {/* `Textarea` is already an autosizing box (`ui/textarea.tsx` ->
+          {/* `Textarea` is already an autosizing box (`components/textarea.tsx` ->
               `useAutoResize`) — the same primitive `kai-form`'s
               `TextareaWidget` and the feedback bar's comment box already
               grow on, reused here rather than duplicated. `maxHeight` caps

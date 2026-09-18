@@ -89,7 +89,7 @@ test.beforeAll(() => {
 // unnecessary one: wave/aurora/custom defer their compile until visible,
 // so anchoring on one adds a real (if small) visibility/compile dependency
 // this file's own tests don't need and shouldn't pay for.
-const STORY_ANCHOR = '/iframe.html?id=components-elements-audiovisualizer--bar&viewMode=story';
+const STORY_ANCHOR = '/iframe.html?id=components-audiovisualizer--bar&viewMode=story';
 
 const VARIANTS = ['bar', 'grid', 'radial', 'wave', 'aurora', 'custom'] as const;
 const STATES = ['idle', 'connecting', 'listening', 'thinking', 'speaking'] as const;
@@ -1123,7 +1123,7 @@ test.describe('Check 10: shader recompile guard holds under the real dispatcher 
       // leak in production. A manually-mounted element with no live audio
       // source has no ticking `bands` signal to leak through in the first
       // place, so it would not reproduce this regression.
-      await page.goto(`/iframe.html?id=components-elements-audiovisualizer--${variant}&viewMode=story`);
+      await page.goto(`/iframe.html?id=components-audiovisualizer--${variant}&viewMode=story`);
       await page.waitForFunction(() => document.body.classList.contains('sb-show-main'), { timeout: 15_000 });
       await page.locator('canvas').first().waitFor({ state: 'attached', timeout: 10_000 });
 

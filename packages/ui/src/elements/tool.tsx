@@ -2,7 +2,7 @@ import { createSignal, Show } from 'solid-js';
 import { defineWebComponent } from './define';
 import { Tool, type ToolPart } from '../components/tool';
 import { wireDisclosure } from './disclosure';
-import type { CollapsibleController } from '../ui/collapsible';
+import type { CollapsibleController } from '../components/collapsible';
 
 interface Props extends Record<string, unknown> {
   /** The tool-call to display. Set as a JS property. */

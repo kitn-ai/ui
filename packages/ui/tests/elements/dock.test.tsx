@@ -834,7 +834,7 @@ describe('content-agnostic by construction', () => {
     // Spec §10: no knowledge of the slotted content. The residue the rung-1 app keeps
     // (`chat.scrollToBottom` on kai-open-change) is deliberately the CONSUMER's; the
     // seam is the event, never a reach into the slot.
-    for (const file of ['src/elements/dock.tsx', 'src/ui/dock.tsx']) {
+    for (const file of ['src/elements/dock.tsx', 'src/components/dock.tsx']) {
       const source = readFileSync(resolve(pkgRoot, file), 'utf8');
       const code = source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1');
       expect(code, `${file} must not name kai-chat`).not.toMatch(/kai-chat/);

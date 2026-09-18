@@ -138,7 +138,7 @@ describe('debug', () => {
   it('tsc TS2786 Show error in @kitn.ai/ui → tsc-source-pull paths/stub fix', async () => {
     const out = await debug.handler({
       symptom:
-        'node_modules/@kitn.ai/ui/src/ui/Chat.tsx error TS2786: Show cannot be used as a JSX component',
+        'node_modules/@kitn.ai/ui/src/components/chat-container.tsx error TS2786: Show cannot be used as a JSX component',
     });
     const text = (out.content as { type: string; text: string }[])[0].text;
     expect(text).toMatch(/paths|kitn-elements\.d\.ts|skipLibCheck/i);

@@ -1,9 +1,9 @@
 import { type JSX, For, createSignal } from 'solid-js';
 import { ChevronUp, ChevronDown, X } from 'lucide-solid';
-import { Switch } from '../ui/switch';
-import { Input } from '../ui/input';
-import { Button } from '../ui/button';
-import { renderIcon } from '../ui/icon';
+import { Switch } from './switch';
+import { Input } from './input';
+import { Button } from './button';
+import { renderIcon } from './icon';
 import type { TriggerDef, TriggerItem } from './composer';
 
 /**

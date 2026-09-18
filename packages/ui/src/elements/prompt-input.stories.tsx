@@ -316,6 +316,22 @@ const ENTITY_TRIGGERS: TriggerDef[] = [
   },
 ];
 
+const ENTITY_PILLS_SNIPPET = `<!-- set triggers to the entities you support; / and @ open the picker -->
+<kai-prompt-input id="input" placeholder="Type / for a skill or @ for an agent…"></kai-prompt-input>
+
+<script type="module">
+  import '@kitn.ai/ui/elements';
+
+  const input = document.getElementById('input');
+  input.triggers = [
+    { char: '/', kind: 'skill', items: [{ id: 'record-replay', label: 'Record-Replay' }] },
+    { char: '@', kind: 'agent', items: [{ id: 'code-reviewer', label: 'Code-Reviewer' }] },
+  ];
+
+  // kai-submit carries the structured doc + entities alongside the flattened value.
+  input.addEventListener('kai-submit', (e) => console.log(e.detail.value, e.detail.doc, e.detail.entities));
+</script>`;
+
 /** Rich entity pills inside the real prompt input: `/` inserts a **skill**; `@`
  *  inserts an **agent** (plugins are the grouping/provenance, carried in `data`).
  *  Each pill is atomic; `kai-submit`/`kai-value-change` carry the structured
@@ -341,7 +357,24 @@ export const WithEntityPills: Story = {
       </div>
     );
   },
+  parameters: { docs: { source: { code: ENTITY_PILLS_SNIPPET, language: 'html' } } },
 };
+
+const PREFILLED_SNIPPET = `<!-- seed pills programmatically: value takes a ComposerDoc, not a string -->
+<kai-prompt-input id="input"></kai-prompt-input>
+
+<script type="module">
+  import '@kitn.ai/ui/elements';
+
+  const input = document.getElementById('input');
+  input.value = [
+    { type: 'text', text: 'Review ' },
+    { type: 'entity', entity: { kind: 'skill', id: 'summarize', label: 'Summarize', promptText: 'Summarize the thread.' } },
+    { type: 'text', text: ' then hand to ' },
+    { type: 'entity', entity: { kind: 'agent', id: 'code-reviewer', label: 'Code Reviewer' } },
+    { type: 'text', text: '.' },
+  ];
+</script>`;
 
 /** Programmatic pre-population: set `value` to a **ComposerDoc** (not a string) to
  *  seed pills (skills/agents/plugins) that the user can then edit. `kai-submit`
@@ -374,5 +407,6 @@ export const Prefilled: Story = {
       </div>
     );
   },
+  parameters: { docs: { source: { code: PREFILLED_SNIPPET, language: 'html' } } },
 };
 

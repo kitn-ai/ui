@@ -1,7 +1,7 @@
 import { type JSX, type Component, For } from 'solid-js';
 import { Copy, ThumbsUp, ThumbsDown, RefreshCw, Pencil, Volume2, ChevronUp, ChevronDown } from 'lucide-solid';
-import { Switch } from '../ui/switch';
-import { Button } from '../ui/button';
+import { Switch } from './switch';
+import { Button } from './button';
 import type { ChatMessageAction } from '../elements/chat-types';
 
 /**

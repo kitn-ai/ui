@@ -32,7 +32,7 @@ const baseConversation = {
  * count, with an active (selected) state.
  */
 const meta = {
-  title: 'Components/Elements/ConversationItem',
+  title: 'Components/ConversationItem',
   component: ConversationItem,
   tags: ['autodocs'],
   parameters: {
@@ -295,6 +295,16 @@ export const SlottedRowsInteractions: StoryObj = {
   // there); still `test`-tagged, so the vitest storybook project runs it.
   tags: ['!dev', '!autodocs'],
   render: () => <SlottedRowsDemo />,
+  // The snippet is the part this story actually exercises -- the per-row menu
+  // wiring -- rather than a second copy of `SlottedRows`' full composition.
+  ...src(`<kai-conversation-item conversation-id="c1" active>
+  Debounce vs throttle in TS
+  <span slot="meta">2h ago</span>
+  <!-- your OWN menu in the menu region; a click here never selects the row -->
+  <kai-menu slot="menu" label="Actions for Debounce vs throttle in TS">
+    <span slot="trigger" aria-hidden="true">&#8942;</span>
+  </kai-menu>
+</kai-conversation-item>`),
   // The kebab really works: open the first row's menu from its trigger, close it
   // with Escape (focus returns to the trigger), then reopen and Rename — the row
   // title visibly changes. Everything lives in kai-menu's shadow root, so the

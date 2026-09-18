@@ -290,7 +290,7 @@
   the composer assembles a submit payload," "how reasoning/tool panels expand"
   is platform-neutral. This is what you carefully specify, and arguably what
   could be shared (Kotlin for the logic, or just a precise contract).
-  - src/ui/ and src/components/ (the view layer). This is where you do genuine
+  - src/components/ (the view layer -- every Solid component). This is where you do genuine
   idiomatic native reimplementation. CSS to Compose modifiers, Solid signals to
   Compose State/SwiftUI @Observable, Shadow DOM theming to MaterialTheme/SwiftUI
   Environment.

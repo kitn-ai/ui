@@ -1,7 +1,7 @@
 import { type JSX, createContext, useContext, splitProps, Show } from 'solid-js';
 import { cn } from '../utils/cn';
-import { Button } from '../ui/button';
-import { HoverCardRoot, HoverCardTrigger, HoverCardContent } from '../ui/hover-card';
+import { Button } from './button';
+import { HoverCardRoot, HoverCardTrigger, HoverCardContent } from './hover-card';
 import {
   FileCode,
   FileText,

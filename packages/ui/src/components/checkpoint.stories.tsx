@@ -4,7 +4,7 @@ import { Checkpoint, CheckpointIcon, CheckpointTrigger } from './checkpoint';
 import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
-  title: 'Components/Elements/Checkpoint',
+  title: 'Components/Checkpoint',
   component: Checkpoint,
   tags: ['autodocs'],
   parameters: {

@@ -1,12 +1,12 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { Message, MessageAvatar, MessageContent, MessageActions, MessageBody } from './message';
 import type { MessagePart } from '../elements/chat-types';
-import { Button } from '../ui/button';
+import { Button } from './button';
 import { Copy, ThumbsUp, ThumbsDown, RefreshCw, Pencil } from 'lucide-solid';
 import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
-  title: 'Components/Elements/Message',
+  title: 'Components/Message',
   component: Message,
   tags: ['autodocs'],
   parameters: {
@@ -370,4 +370,18 @@ export const CitationsWithoutNumbers: Story = {
       </div>
     );
   },
+  ...src(`const parts: MessagePart[] = [
+  { type: 'text', text: 'Here is what I found.' },
+  { type: 'source', source: { url: 'https://ui.kitn.ai/guides/theming', title: 'Theming', snippet: 'Token-driven theming.' } },
+  { type: 'source', source: { url: 'https://www.solidjs.com/docs', title: 'SolidJS docs' } },
+  // No url at all: degrades to an inert chip labelled with the title.
+  { type: 'source', source: { title: 'Internal design note (no public URL)', snippet: 'A citation with no url at all.' } },
+];
+
+<Message>
+  <MessageAvatar src="" fallback="AI" alt="Assistant" />
+  <div class="flex w-full flex-col gap-0">
+    <MessageBody parts={parts} isUser={false} markdown />
+  </div>
+</Message>`),
 };

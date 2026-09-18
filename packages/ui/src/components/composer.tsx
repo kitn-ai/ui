@@ -31,7 +31,7 @@ import {
   kindGlyph,
 } from './composer-dom';
 import { activeTriggerFor } from '../primitives/composer-triggers';
-import { usePosition, useDismiss, createPresence } from '../ui/overlay';
+import { usePosition, useDismiss, createPresence } from './overlay';
 import { findHighlightMatches, applyHighlights } from './composer-highlight';
 import { createHistory } from './composer-history';
 

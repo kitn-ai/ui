@@ -108,4 +108,27 @@ export const AccountMenu: Story = {
 export const Trigger: Story = {
   name: 'Trigger (closed)',
   render: () => <UserMenu />,
+  parameters: {
+    docs: {
+      source: {
+        language: 'html',
+        code: `<kai-menu>
+  <span slot="trigger" class="user-menu-trigger">
+    <kai-avatar fallback="JD" size="sm"></kai-avatar>
+    <span>John</span><span class="muted">Max</span>
+  </span>
+</kai-menu>
+<script type="module">
+  import '@kitn.ai/ui/elements';
+  const menu = document.querySelector('kai-menu');
+  menu.items = [
+    { id: 'settings', label: 'Settings', icon: 'settings' },
+    { separator: true },
+    { id: 'logout', label: 'Log out' },
+  ];
+  menu.addEventListener('kai-select', (e) => console.log(e.detail.id));
+</script>`,
+      },
+    },
+  },
 };

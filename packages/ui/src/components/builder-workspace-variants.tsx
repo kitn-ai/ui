@@ -1,6 +1,6 @@
 import { type JSX, For } from 'solid-js';
 import { cn } from '../utils/cn';
-import { Card } from '../ui/card';
+import { CardSurface } from './card-surface';
 import { BLUEPRINT_BG, STROKE, LINE, BORDER, ACCENT } from './builder-start';
 
 // The Workspace template's SECOND screen — owner-approved addition (T-1
@@ -10,7 +10,7 @@ import { BLUEPRINT_BG, STROKE, LINE, BORDER, ACCENT } from './builder-start';
 // builder-workspace.stories.tsx`'s module doc comment) shipped two real,
 // distinct anatomies — an artifact/code pane beside chat (v0's own shape)
 // and a full browser-chrome app preview with a device toggle (Lovable's own
-// shape). Reuses `builder-start.tsx`'s own `Card`-based card pattern and
+// shape). Reuses `builder-start.tsx`'s own `CardSurface`-based card pattern and
 // blueprint-illustration language (`BLUEPRINT_BG`/`STROKE`/`LINE`/`BORDER`/
 // `ACCENT`, exported from that module for exactly this reuse) AT THE SAME
 // SCALE as Step 1's own cards — same `h-44` media height, same grid classes
@@ -118,7 +118,7 @@ const VARIANT_ILLUSTRATIONS: Record<WorkspaceVariantId, () => JSX.Element> = {
 
 /**
  * `WorkspaceVariantPicker` — the Workspace family's second screen: two
- * function-named variant cards (smaller-scale `Card`s, reusing `Builder
+ * function-named variant cards (smaller-scale `CardSurface`s, reusing `Builder
  * Start`'s own pattern) plus a back affordance to the template picker.
  * Selection fires `onSelect` with the variant id the same click-to-advance
  * shape `BuilderStart` itself uses (T-7's own reasoning: nothing a second
@@ -149,7 +149,7 @@ export function WorkspaceVariantPicker(props: WorkspaceVariantPickerProps): JSX.
             const selected = () => props.value === variant.id;
             const Illustration = VARIANT_ILLUSTRATIONS[variant.id];
             return (
-              <Card
+              <CardSurface
                 appearance="outlined"
                 clickable
                 aria-pressed={selected()}
@@ -173,7 +173,7 @@ export function WorkspaceVariantPicker(props: WorkspaceVariantPickerProps): JSX.
                   <h3 class="text-sm font-semibold text-foreground">{variant.name}</h3>
                   <p class="text-sm leading-snug text-muted-foreground">{variant.description}</p>
                 </div>
-              </Card>
+              </CardSurface>
             );
           }}
         </For>

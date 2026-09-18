@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { fn } from 'storybook/test';
 import { Row } from './row';
-import { RowGroup } from '../ui/row-group';
-import { renderIcon } from '../ui/icon';
+import { RowGroup } from './row-group';
+import { renderIcon } from './icon';
 import { componentDescription } from '../stories/docs/element-controls';
 
 /**
@@ -14,11 +14,11 @@ import { componentDescription } from '../stories/docs/element-controls';
  * `RowGroup` is the frame around a list of them, and it is where the geometry
  * comes from: a hairline between adjacent rows, the first rounded at the top
  * only, the last at the bottom only. One row in a group is a framed card. The
- * frame has its own page (`Components/Primitives/RowGroup`) — the stories here use
+ * frame has its own page (`Components/RowGroup`) — the stories here use
  * it, and show the row shapes it frames.
  */
 const meta = {
-  title: 'Components/Primitives/Row',
+  title: 'Components/Row',
   component: Row,
   tags: ['autodocs'],
   parameters: {
@@ -26,7 +26,7 @@ const meta = {
     docs: {
       description: componentDescription([
         'A generic list row: leading region, title with optional subtitle, trailing region, optional chevron affordance. Pressable with real button semantics via `onActivate`, or a real anchor via a safe `href`; with neither it is a plain display row. Covers the widget home-tab shapes (recent conversation, CTA with trailing arrow, help link) and general settings screens alike.',
-        'These stories frame the rows in `RowGroup` (its own page: `Components/Primitives/RowGroup`), which is what decides the divider and the per-position corners. The two ways of using it are visible across the stories below: a settings screen is ONE group with N rows, a home tab is ONE GROUP PER ROW with space between them, where rounding every corner is correct.',
+        'These stories frame the rows in `RowGroup` (its own page: `Components/RowGroup`), which is what decides the divider and the per-position corners. The two ways of using it are visible across the stories below: a settings screen is ONE group with N rows, a home tab is ONE GROUP PER ROW with space between them, where rounding every corner is correct.',
       ]),
       controls: { exclude: ['use:eventListener'] },
     },

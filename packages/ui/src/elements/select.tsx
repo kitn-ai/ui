@@ -1,6 +1,6 @@
 import { createEffect, createSignal, untrack } from 'solid-js';
 import { defineWebComponent } from './define';
-import { Select } from '../ui/select';
+import { Select } from '../components/select';
 // Public shape of the `options` prop; lives in ./element-data-types so the ROOT
 // entry can re-export it (see that file's header).
 import type { KaiSelectOption } from './element-data-types';

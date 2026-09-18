@@ -52,7 +52,7 @@
 import { type JSX, Show, For, createMemo, createSignal } from 'solid-js';
 import { Code2, Globe, Monitor, Tablet, Smartphone, Lock, ExternalLink, Maximize2, Minimize2 } from 'lucide-solid';
 import { cn } from '../utils/cn';
-import { Button } from '../ui/button';
+import { Button } from './button';
 import { Artifact, type ArtifactController, type ArtifactTab } from './artifact';
 
 /** The pane's own device canvas. Independent of `builder-layout.tsx`'s

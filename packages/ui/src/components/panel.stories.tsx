@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { X, ArrowLeft } from 'lucide-solid';
 import { Panel, PanelHeader, PanelBody, PanelFooter } from './panel';
-import { Button } from '../ui/button';
+import { Button } from './button';
 import { componentDescription } from '../stories/docs/element-controls';
 
 /**
@@ -10,7 +10,7 @@ import { componentDescription } from '../stories/docs/element-controls';
  * chrome, per the story-first policy.
  */
 const meta = {
-  title: 'Components/Elements/Panel',
+  title: 'Components/Panel',
   component: Panel,
   tags: ['autodocs'],
   parameters: {

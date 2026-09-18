@@ -1,7 +1,7 @@
 import { splitProps, Show, For, createSignal, createEffect, on } from 'solid-js';
 import { cn } from '../utils/cn';
-import { Button } from '../ui/button';
-import { Tooltip } from '../ui/tooltip';
+import { Button } from './button';
+import { Tooltip } from './tooltip';
 import { useVoiceRecorder } from '../primitives/use-voice-recorder';
 import { useSpeechRecognition } from '../primitives/use-speech-recognition';
 

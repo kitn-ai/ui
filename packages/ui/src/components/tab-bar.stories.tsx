@@ -23,7 +23,7 @@ const frame = (children: any) => (
 );
 
 const meta = {
-  title: 'Components/Elements/TabBar',
+  title: 'Components/TabBar',
   component: TabBar,
   tags: ['autodocs'],
   parameters: { layout: 'centered' },

@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal } from 'solid-js';
 import { Screen } from './screen';
-import { Button } from '../ui/button';
+import { Button } from './button';
 import { componentDescription } from '../stories/docs/element-controls';
 
 /**
@@ -12,7 +12,7 @@ import { componentDescription } from '../stories/docs/element-controls';
  * bounded, positioned canvas so the absolutely-positioned surface has room to fill.
  */
 const meta = {
-  title: 'Components/Elements/Screen',
+  title: 'Components/Screen',
   component: Screen,
   tags: ['autodocs'],
   parameters: {

@@ -1,11 +1,11 @@
 import { type JSX, createSignal, createMemo, Show } from 'solid-js';
 import { Search, ChevronDown, Settings, CircleHelp, LogOut } from 'lucide-solid';
-import { CommandList, type CommandGroup } from '../ui/command';
-import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem, DropdownSeparator } from '../ui/dropdown';
-import { Avatar } from '../ui/avatar';
-import { Input } from '../ui/input';
-import { Button } from '../ui/button';
-import { Switch } from '../ui/switch';
+import { CommandList, type CommandGroup } from './command';
+import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem, DropdownSeparator } from './dropdown';
+import { Avatar } from './avatar';
+import { Input } from './input';
+import { Button } from './button';
+import { Switch } from './switch';
 import { cn } from '../utils/cn';
 
 /**
@@ -16,7 +16,7 @@ import { cn } from '../utils/cn';
  * consistent with `builder-composer-triggers.tsx`'s own rule-of-three
  * extraction earlier this round.
  *
- * COMMAND PALETTE: composes the kit's real `CommandList` (`ui/command.tsx`)
+ * COMMAND PALETTE: composes the kit's real `CommandList` (`components/command.tsx`)
  * — a presentational grouped listbox — inside a hand-built overlay
  * (backdrop + centered panel + Escape/backdrop-click to close), the SAME
  * shape `elements/claude-code.stories.tsx`'s own command-center overlay

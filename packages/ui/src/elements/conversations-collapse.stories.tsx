@@ -124,6 +124,26 @@ function DefaultCollapsedDemo() {
 export const DefaultCollapsed: Story = {
   name: 'Start collapsed (default-collapsed)',
   render: () => <DefaultCollapsedDemo />,
+  parameters: {
+    docs: {
+      source: {
+        language: 'html',
+        code: `<!-- starts as the floating reopen button instead of the full rail -->
+<kai-conversations default-collapsed></kai-conversations>
+
+<script type="module">
+  import '@kitn.ai/ui/elements';
+  const rail = document.querySelector('kai-conversations');
+  rail.groups = [/* ConversationGroup[] */];
+  rail.conversations = [/* ConversationSummary[] */];
+
+  // default-collapsed is the INITIAL state only; drive it afterwards in either
+  // direction and read the result off the same property.
+  rail.addEventListener('kai-collapse-toggle', (e) => console.log(e.detail.collapsed));
+</script>`,
+      },
+    },
+  },
 };
 
 function DemoButton(props: { onClick: () => void; children: string }) {

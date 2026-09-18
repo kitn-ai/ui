@@ -10,7 +10,7 @@ import { componentDescription } from '../stories/docs/element-controls';
 // support). Toggle Storybook's dark-mode control (toolbar) to see each
 // variant against both themes — none of these are theme-specific stories.
 const meta = {
-  title: 'Components/Elements/Captions',
+  title: 'Components/Captions',
   component: Captions,
   tags: ['autodocs'],
   parameters: {

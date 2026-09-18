@@ -10,7 +10,7 @@
 //   import { attachKaiActions } from '../stories/docs/story-actions';
 //   onMount(() => onCleanup(attachKaiActions(el)));
 //
-// For SolidJS *component* stories (Components/Elements, Components/Primitives)
+// For SolidJS *component* stories (Components)
 // there are no CustomEvents; wire their callback props with `fn()` in `args`
 // per the Button exemplar instead.
 import { action } from 'storybook/actions';

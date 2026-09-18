@@ -353,7 +353,7 @@ describe('ELEMENT_COMPOSITION registry (single source of truth the build extract
    *
    * This is the ONE place that decides what "declares a part" means. Both the
    * global guards below and the per-element attribution further down read it, so
-   * they cannot drift apart on the exclusions (`.test.`/`.stories.`, `ui/stat.tsx`,
+   * they cannot drift apart on the exclusions (`.test.`/`.stories.`, `components/stat.tsx`,
    * `UNSCANNED_DIRS`) — a name this map does not carry justifies nothing, anywhere.
    */
   const partNamesByFile = lazy((): Map<string, Set<string>> => {
@@ -361,9 +361,9 @@ describe('ELEMENT_COMPOSITION registry (single source of truth the build extract
     const scanFile = (p: string, name: string) => {
       if (!name.endsWith('.tsx') && !name.endsWith('.ts')) return;
       if (/\.(test|stories)\.tsx?$/.test(name)) return;
-      // `ui/stat.tsx` is an internal-only SolidJS component — there is no
+      // `components/stat.tsx` is an internal-only SolidJS component — there is no
       // `kai-stat` web component, so its parts are intentionally unregistered.
-      if (p.endsWith(join('ui', 'stat.tsx'))) return;
+      if (p.endsWith(join('components', 'stat.tsx'))) return;
       const src = read(p);
       const found = new Set<string>();
       for (const m of src.matchAll(STATIC_PART_RE)) {
@@ -419,7 +419,7 @@ describe('ELEMENT_COMPOSITION registry (single source of truth the build extract
 
   // Parts whose `part="…"` value reaches the DOM through a local helper's
   // PARAMETER instead of a literal JSX attribute, so the scan structurally
-  // cannot see them. `ui/input.tsx` renders one shared `<input part={part}>` via
+  // cannot see them. `components/input.tsx` renders one shared `<input part={part}>` via
   // `const inputEl = (cls: string, part: string) => …` and passes the literal at
   // the two CALL SITES -- `inputEl(…, 'field input')` and `inputEl(ROW_INPUT,
   // 'input')`. Those literals are function arguments, not `part=` attributes, so
@@ -440,7 +440,7 @@ describe('ELEMENT_COMPOSITION registry (single source of truth the build extract
   // that evidence from source, so a stale exception FAILS instead of quietly
   // excusing a part that has since been deleted.
   const INDIRECT_PART_DECLARATIONS: Record<string, string> = {
-    input: join('ui', 'input.tsx'),
+    input: join('components', 'input.tsx'),
   };
 
   /** Tokens from string literals in `src` that are pure part-token lists —
@@ -652,7 +652,7 @@ describe('ELEMENT_COMPOSITION registry (single source of truth the build extract
    * whose declaring FILE the closure reaches.
    *
    * That last clause is what keeps the `input` exception honest per-element
-   * instead of blanket. `ui/input.tsx` renders `<input part={part}>` and takes the
+   * instead of blanket. `components/input.tsx` renders `<input part={part}>` and takes the
    * literal at its call sites, so no scanner sees it — but the exception map
    * already names the file, so `input` is credited to `kai-input` / `kai-search` /
    * `kai-editable-label` (all of which import that module) and to nothing else. A
@@ -744,7 +744,7 @@ describe('ELEMENT_COMPOSITION registry (single source of truth the build extract
   // `row` to four elements that deliberately document it under one.
   //
   // For a SMALL closure the over-approximation stops mattering. `kai-context`
-  // reaches exactly one part-declaring module (ui/progress-bar.tsx) and renders
+  // reaches exactly one part-declaring module (components/progress-bar.tsx) and renders
   // its ProgressBar unconditionally inside the hover-card breakdown, so
   // "attributed" and "actually rendered" are the same two names, which is why
   // this element can carry the strict rule the registry as a whole cannot.
@@ -757,7 +757,7 @@ describe('ELEMENT_COMPOSITION registry (single source of truth the build extract
   // throughout, because both names were already registered under
   // kai-progress-bar and both are really rendered somewhere in src/.
   const CONVERSE_ENFORCED: Record<string, string> = {
-    'kai-context': 'closure reaches one part-declaring module (ui/progress-bar.tsx)',
+    'kai-context': 'closure reaches one part-declaring module (components/progress-bar.tsx)',
   };
 
   it('registers every ::part its own tree renders, for elements opted into the converse', () => {
@@ -808,7 +808,7 @@ describe('ELEMENT_COMPOSITION registry (single source of truth the build extract
     }
 
     // The `input` exception resolves per-element, not blanket: only the elements
-    // whose tree reaches `ui/input.tsx` are credited with it.
+    // whose tree reaches `components/input.tsx` are credited with it.
     expect(partsOf('kai-search').has('input')).toBe(true);
     expect(partsOf('kai-status').has('input')).toBe(false);
   });

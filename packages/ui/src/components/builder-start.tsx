@@ -1,6 +1,6 @@
 import { type JSX, For } from 'solid-js';
 import { cn } from '../utils/cn';
-import { Card } from '../ui/card';
+import { CardSurface } from './card-surface';
 import { TEMPLATES, type TemplateId } from '../../mcp/construct/templates';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -80,12 +80,12 @@ export const BLUEPRINT_BG = {
 /**
  * `BuilderStart` — the builder's opening screen: six selectable template
  * cards (T-7, grown from four in Round P2). Each card is a real
- * `ui/card.tsx` `Card` (`clickable`,
+ * `components/card-surface.tsx` `CardSurface` (`clickable`,
  * `media` for the illustration, `header` for the name), not a hand-rolled
  * button — the kit's own primitive already gives a `role="button"` with
  * Enter/Space activation, which settles this screen's keyboard-semantics
  * question: a `radiogroup` was the other defensible reading (this IS a
- * single choice among six), but `Card` already implements exactly the
+ * single choice among six), but `CardSurface` already implements exactly the
  * button-per-card pattern with no extra wiring, and reusing it beats
  * building a second selection primitive for one screen.
  *
@@ -111,7 +111,7 @@ export function BuilderStart(props: BuilderStartProps): JSX.Element {
           arbitrary-value `minmax()` class would NOT be, so the responsive
           step-down uses the kit's existing breakpoint scale instead of a
           true fluid minmax track. */}
-      {/* Ring-color fix (owner flag from Round P2): `Card` itself already
+      {/* Ring-color fix (owner flag from Round P2): `CardSurface` itself already
           does the right generic thing — `focus-visible:outline-none
           focus-visible:ring-2 focus-visible:ring-ring` suppresses the
           browser's own outline and substitutes ITS OWN visible ring, never
@@ -120,15 +120,15 @@ export function BuilderStart(props: BuilderStartProps): JSX.Element {
           and `.focus-visible\:ring-ring:focus-visible` (class + pseudo)
           outranks the plain `.ring-primary` (class only) in specificity,
           so on `:focus-visible` — which Chromium grants to a `clickable`
-          `Card` (a `div[role=button]`, not a native `<button>`) on BOTH a
+          `CardSurface` (a `div[role=button]`, not a native `<button>`) on BOTH a
           keyboard Enter/Space AND a script/pointer `.click()`, confirmed
-          live via Playwright — Card's own default `--color-ring` (a
+          live via Playwright — CardSurface's own default `--color-ring` (a
           neutral blue, unrelated to this story's brand-magenta
           `--color-primary`) won regardless of selection. `!ring-primary`
           and `focus-visible:ring-primary` are real Tailwind utilities but
           NEITHER is in the checked-in compiled.css this live Storybook
           serves (same constraint as every class-must-already-exist note
-          elsewhere in this file), so raw CSS injected the same way Card
+          elsewhere in this file), so raw CSS injected the same way CardSurface
           injects its own per-instance rules — not a new Tailwind class —
           is the honest fix here: this rule sits ONLY on `[aria-pressed=
           "true"]`, so it recolors the ring precisely where selection
@@ -141,7 +141,7 @@ export function BuilderStart(props: BuilderStartProps): JSX.Element {
           const selected = () => props.value === template.id;
           const Illustration = TEMPLATE_ILLUSTRATIONS[template.id];
           return (
-            <Card
+            <CardSurface
               appearance="outlined"
               clickable
               aria-pressed={selected()}
@@ -168,13 +168,13 @@ export function BuilderStart(props: BuilderStartProps): JSX.Element {
               }
             >
               {/* Title + one-liner as one `hasBody` block, NOT split across
-                  Card's `header`/body slots — those two sections are
-                  separated by `var(--kai-card-spacing)` (Card's own,
+                  CardSurface's `header`/body slots — those two sections are
+                  separated by `var(--kai-card-spacing)` (CardSurface's own,
                   shared-across-the-kit gap), which read as too loose for a
                   name-plus-one-liner pairing that belongs visually
                   together (owner amendment, live review). `gap-1` here is
                   local to this one block, so it tightens only this pairing
-                  without touching `ui/card.tsx`'s shared spacing. */}
+                  without touching `components/card-surface.tsx`'s shared spacing. */}
               <div class="flex flex-col gap-1">
                 {/* h2, not h3: the start screen's own page heading is an h1
                     ("Choose a starting point"), and these card titles sit
@@ -188,16 +188,16 @@ export function BuilderStart(props: BuilderStartProps): JSX.Element {
                     Storybook serves. */}
                 <p class="text-sm leading-snug text-muted-foreground">{template.description}</p>
               </div>
-            </Card>
+            </CardSurface>
           );
         }}
       </For>
       </div>
       {/* "Start from scratch" — link-weight, not a seventh card (owner
           amendment): a plain `<button>`, styled muted/small rather than as
-          a `Card`, so it reads as subordinate to the grid above it. Still
+          a `CardSurface`, so it reads as subordinate to the grid above it. Still
           fully keyboard-operable (a real `<button>` needs no extra wiring
-          for Enter/Space, unlike `Card`'s hand-rolled `role="button"`) and
+          for Enter/Space, unlike `CardSurface`'s hand-rolled `role="button"`) and
           participates in selection the same way a card does — `onSelect`
           fires with `'scratch'`, and `aria-pressed` reflects `value` — it
           just has no ring/illustration of its own to show it, muted text

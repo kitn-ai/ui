@@ -46,7 +46,7 @@ function Counter() {
 ];
 
 const meta = {
-  title: 'Components/Elements/Thread',
+  title: 'Components/Thread',
   component: Thread,
   tags: ['autodocs'],
   parameters: {

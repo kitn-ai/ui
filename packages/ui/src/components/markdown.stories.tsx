@@ -3,7 +3,7 @@ import { Markdown } from './markdown';
 import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
-  title: 'Components/Elements/Markdown',
+  title: 'Components/Markdown',
   component: Markdown,
   tags: ['autodocs'],
   parameters: {

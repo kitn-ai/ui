@@ -185,34 +185,34 @@ export {
 export type { EmbedCardData, EmbedCardEnvelope, EmbedProvider, ResolvedEmbed } from './primitives/embed-providers';
 
 // Layer 2: UI Primitives
-export { Button, buttonVariants } from './ui/button';
-export type { ButtonProps } from './ui/button';
-export { Avatar } from './ui/avatar';
-export type { AvatarProps } from './ui/avatar';
-export { Tooltip } from './ui/tooltip';
-export type { TooltipProps, TooltipController } from './ui/tooltip';
-export { HoverCard } from './ui/hover-card';
-export type { HoverCardProps, HoverCardController } from './ui/hover-card';
-export { Collapsible, CollapsibleTrigger, CollapsibleContent } from './ui/collapsible';
+export { Button, buttonVariants } from './components/button';
+export type { ButtonProps } from './components/button';
+export { Avatar } from './components/avatar';
+export type { AvatarProps } from './components/avatar';
+export { Tooltip } from './components/tooltip';
+export type { TooltipProps, TooltipController } from './components/tooltip';
+export { HoverCard } from './components/hover-card';
+export type { HoverCardProps, HoverCardController } from './components/hover-card';
+export { Collapsible, CollapsibleTrigger, CollapsibleContent } from './components/collapsible';
 export type {
   CollapsibleProps, CollapsibleTriggerProps, CollapsibleContentProps, CollapsibleController,
-} from './ui/collapsible';
-export { ScrollArea } from './ui/scroll-area';
-export type { ScrollAreaProps, ScrollOrientation } from './ui/scroll-area';
-export { Dropdown, DropdownTrigger, DropdownContent, DropdownItem } from './ui/dropdown';
+} from './components/collapsible';
+export { ScrollArea } from './components/scroll-area';
+export type { ScrollAreaProps, ScrollOrientation } from './components/scroll-area';
+export { Dropdown, DropdownTrigger, DropdownContent, DropdownItem } from './components/dropdown';
 export type {
   DropdownProps, DropdownTriggerProps, DropdownContentProps, DropdownItemProps, DropdownController,
-} from './ui/dropdown';
-export { Textarea } from './ui/textarea';
-export type { TextareaProps } from './ui/textarea';
-export { Badge } from './ui/badge';
-export type { BadgeProps } from './ui/badge';
-export { Separator } from './ui/separator';
-export type { SeparatorProps } from './ui/separator';
-export { ResizablePanelGroup, ResizablePanel, ResizableHandle, Resizable, normalizeSize, resolveToPx } from './ui/resizable';
-export type { ResizablePanelGroupProps, ResizablePanelProps, ResizableHandleProps, ResizableProps, SizeValue } from './ui/resizable';
-export { Skeleton } from './ui/skeleton';
-export type { SkeletonProps, SkeletonVariant } from './ui/skeleton';
+} from './components/dropdown';
+export { Textarea } from './components/textarea';
+export type { TextareaProps } from './components/textarea';
+export { Badge } from './components/badge';
+export type { BadgeProps } from './components/badge';
+export { Separator } from './components/separator';
+export type { SeparatorProps } from './components/separator';
+export { ResizablePanelGroup, ResizablePanel, ResizableHandle, Resizable, normalizeSize, resolveToPx } from './components/resizable';
+export type { ResizablePanelGroupProps, ResizablePanelProps, ResizableHandleProps, ResizableProps, SizeValue } from './components/resizable';
+export { Skeleton } from './components/skeleton';
+export type { SkeletonProps, SkeletonVariant } from './components/skeleton';
 export { FileTree, buildFileTree } from './components/file-tree';
 export type {
   FileTreeProps, FileTreeFile, FileTreeNode, FileTreeFolderNode, FileTreeFileNode,
@@ -356,8 +356,8 @@ export type { ConversationItemProps } from './components/conversation-item';
 export type { ConversationRowDensity } from './components/conversation-item';
 export { Row } from './components/row';
 export type { RowProps } from './components/row';
-export { RowGroup } from './ui/row-group';
-export type { RowGroupProps } from './ui/row-group';
+export { RowGroup } from './components/row-group';
+export type { RowGroupProps } from './components/row-group';
 export { ModelSwitcher } from './components/model-switcher';
 export type { ModelSwitcherProps } from './components/model-switcher';
 export { ChatScopePicker } from './components/chat-scope-picker';
@@ -429,11 +429,11 @@ export type { ComposerDoc, Segment, EntityRef } from './primitives/composer-mode
 export type { TriggerDef, TriggerItem } from './components/composer';
 export type { ChatThreadContextUsage } from './components/chat-thread';
 export type { Skill } from './components/message-skills';
-export type { AgentStatus } from './ui/agent-card';
-export type { KaiNavItem } from './ui/nav';
-export type { KaiTabItem } from './ui/tabs';
-export type { PaneStatus } from './ui/pane';
-export type { PaneTab } from './ui/pane-group';
+export type { AgentStatus } from './components/agent-card';
+export type { KaiNavItem } from './components/nav';
+export type { KaiTabItem } from './components/tabs';
+export type { PaneStatus } from './components/pane';
+export type { PaneTab } from './components/pane-group';
 export type {
   KaiCheckboxOption, KaiCommandItem, KaiContextUsage, KaiMenuItem, KaiRadioOption, KaiSegmentedOption, KaiSelectOption,
   KaiSourceItem,

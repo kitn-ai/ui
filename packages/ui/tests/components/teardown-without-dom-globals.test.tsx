@@ -54,7 +54,7 @@ import { fileURLToPath } from 'node:url';
 import { Composer } from '../../src/components/composer';
 import { FileUpload } from '../../src/components/file-upload';
 import { ToastRegion } from '../../src/components/toast';
-import { useDismiss } from '../../src/ui/overlay';
+import { useDismiss } from '../../src/components/overlay';
 import { useAudioAnalysis } from '../../src/primitives/use-audio-analysis';
 import { useSequencer } from '../../src/primitives/use-sequencer';
 import { LabVisualizer } from '../../src/components/audio-visualizer/labs/lab-visualizer';
@@ -813,7 +813,7 @@ it('KNOWN_UNFIXED carries no stale entry for an already-fixed site', () => {
  */
 const UNRESOLVED_TEARDOWN_CALLBACKS = [
   'components/reasoning.tsx  onCleanup(dispose)',
-  'ui/dropdown.tsx  onCleanup(unregister)',
+  'components/dropdown.tsx  onCleanup(unregister)',
 ];
 
 it('every teardown callback the scan cannot resolve is one that was reviewed', () => {

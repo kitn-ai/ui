@@ -1,7 +1,7 @@
 import { type JSX, For, Show, createSignal, createMemo, onCleanup } from 'solid-js';
 import { Check, CircleAlert } from 'lucide-solid';
 import { cn } from '../utils/cn';
-import { Notice } from '../ui/notice';
+import { Notice } from './notice';
 import {
   BLUEPRINT_BG,
   STROKE,

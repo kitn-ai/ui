@@ -92,7 +92,7 @@ const SAMPLE_DURATION_MS = 7500;
 const SYMMETRY_TOLERANCE = 0.045;
 
 async function gotoStory(page: Page, storyId: string): Promise<void> {
-  await page.goto(`/iframe.html?id=components-elements-audiovisualizer--${storyId}&viewMode=story`);
+  await page.goto(`/iframe.html?id=components-audiovisualizer--${storyId}&viewMode=story`);
   await page.waitForFunction(() => document.body.classList.contains('sb-show-main'), { timeout: 15_000 });
   await page.locator('[data-kai-state="speaking"]').first().waitFor({ state: 'attached', timeout: 10_000 });
   // Let the mount/landing tween settle before sampling the steady-state loop.

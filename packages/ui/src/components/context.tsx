@@ -1,8 +1,8 @@
 import { type JSX, Show, createContext, createMemo, useContext } from 'solid-js';
-import { HoverCardRoot, HoverCardTrigger, HoverCardContent } from '../ui/hover-card';
+import { HoverCardRoot, HoverCardTrigger, HoverCardContent } from './hover-card';
 import { cn } from '../utils/cn';
-import { Button } from '../ui/button';
-import { ProgressBar, type ProgressTone } from '../ui/progress-bar';
+import { Button } from './button';
+import { ProgressBar, type ProgressTone } from './progress-bar';
 
 const ICON_RADIUS = 10;
 const ICON_VIEWBOX = 24;

@@ -24,7 +24,7 @@ import type { ConversationStore } from '../primitives/conversation-store';
 import { ConversationPanel } from './conversation-panel';
 import type { ConversationSummary } from '../types';
 import { MessagesSquare, ArrowLeft } from 'lucide-solid';
-import { Button } from '../ui/button';
+import { Button } from './button';
 import { HomePanel } from './home-panel';
 import { WidgetTabBar } from './widget-tab-bar';
 import { Panel, PanelHeader, PanelBody, PanelFooter } from './panel';

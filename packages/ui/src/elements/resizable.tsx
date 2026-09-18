@@ -1,6 +1,6 @@
 import { createSignal, createEffect, on, onMount, onCleanup, For, Show, type JSX } from 'solid-js';
 import { defineWebComponent } from './define';
-import { ResizableHandle, normalizeSize, clampBasis } from '../ui/resizable';
+import { ResizableHandle, normalizeSize, clampBasis } from '../components/resizable';
 
 type Orientation = 'horizontal' | 'vertical';
 

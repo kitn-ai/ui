@@ -1,8 +1,8 @@
 import { type JSX, Show, splitProps } from 'solid-js';
 import { cn } from '../utils/cn';
-import { Button } from '../ui/button';
-import { Tooltip } from '../ui/tooltip';
-import { Separator } from '../ui/separator';
+import { Button } from './button';
+import { Tooltip } from './tooltip';
+import { Separator } from './separator';
 
 export interface CheckpointProps extends JSX.HTMLAttributes<HTMLDivElement> {}
 

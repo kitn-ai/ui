@@ -67,7 +67,7 @@ The blanket spike-era rule — "generic UI primitives stay Solid-only; a host fr
 has these" — is **overturned as a blanket rule** (history in §6). The replacement test, from
 the Dropdown lesson: *is it kit composition surface a consumer can only reach through an
 element (themed, composed, wrapper-generated), or a widget their framework already has?* Under
-that test, the `src/ui/` atoms still without facades ruled 2026-08-25:
+that test, the atoms then in `src/ui/` (now `src/components/`) still without facades ruled 2026-08-25:
 
 | Atom | Ruling | Why |
 |---|---|---|
@@ -87,16 +87,16 @@ The 2026-08-24 annotation (kept in §6) left an open question: was the real gap 
 element-izing Dropdown *menu semantics* — and should `kai-popover` and `kai-dropdown`
 therefore converge? Read against the source, the hypothesized gap does not exist:
 
-- `ui/dropdown.tsx` already ships full menu semantics: `role="menu"`, roving focus whose item
+- `src/components/dropdown.tsx` already ships full menu semantics: `role="menu"`, roving focus whose item
   set includes `menuitem`, `menuitemcheckbox`, `menuitemradio` (disabled skipped, slotted
   light-DOM rows included via a flat-tree walk), typeahead, Home/End, `role="separator"`
   dividers, non-focusable labels, and submenus with `aria-haspopup`/`aria-expanded`.
-- `ui/popover.tsx` is deliberately the *other* WAI-ARIA pattern: its own comment contrasts it
+- `src/components/popover.tsx` is deliberately the *other* WAI-ARIA pattern: its own comment contrasts it
   with Dropdown, and its panel is `role="dialog"` for arbitrary content.
 
 So popover and dropdown are the two distinct ARIA patterns, not duplicates; merging them would
 un-decide a decision the code already made correctly. The actual near-pair is
-**`kai-dropdown` vs `kai-menu`** — both facades over the same `ui/Dropdown`, split by
+**`kai-dropdown` vs `kai-menu`** — both facades over the same `src/components/dropdown.tsx`, split by
 authoring model: `kai-dropdown` is slot-composed (you write the rows in markup), `kai-menu` is
 data-driven (`items: KaiMenuItem[]`). That split is legitimate and matches the kit's
 construction-over-configuration direction (slot form for construction, property form for

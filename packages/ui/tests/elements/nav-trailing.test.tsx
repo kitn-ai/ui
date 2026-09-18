@@ -1,5 +1,5 @@
 import '../../src/elements/nav';
-import type { KaiNavItem } from '../../src/ui/nav';
+import type { KaiNavItem } from '../../src/components/nav';
 
 // kai-nav per-item trailing action / close button.
 //

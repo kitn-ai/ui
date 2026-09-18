@@ -173,7 +173,7 @@ const LONG_DESCRIPTION =
   'The rebuild locks writes on the conversations table for the whole window, so pick a slot when the workspace is quiet. Anything queued while the lock is held is retried afterwards, in order, and nothing is dropped — but the assistant will look unresponsive to anyone typing during it.';
 
 const meta = {
-  title: 'Components/Elements/Form',
+  title: 'Components/Form',
   component: Form,
   tags: ['autodocs'],
   render: (args: FormArgs) => <Demo args={args} />,

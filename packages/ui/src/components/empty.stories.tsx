@@ -3,8 +3,8 @@ import { createSignal, For } from 'solid-js';
 import {
   Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription, EmptyContent,
 } from './empty';
-import { Button } from '../ui/button';
-import { Avatar } from '../ui/avatar';
+import { Button } from './button';
+import { Avatar } from './avatar';
 import { PromptSuggestion } from './prompt-suggestion';
 import { PromptInput, PromptInputTextarea, PromptInputActions } from './prompt-input';
 import {
@@ -19,7 +19,7 @@ import { componentDescription } from '../stories/docs/element-controls';
  * common composition, and the variation stories are compositional showcases.
  */
 const meta = {
-  title: 'Components/Elements/Empty',
+  title: 'Components/Empty',
   component: Empty,
   tags: ['autodocs'],
   parameters: {

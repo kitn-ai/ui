@@ -18,7 +18,7 @@
  */
 import { afterEach, describe, expect, test } from 'vitest';
 import '../../src/elements/pane-group';
-import type { PaneTab } from '../../src/ui/pane-group';
+import type { PaneTab } from '../../src/components/pane-group';
 
 const flush = () => new Promise((r) => setTimeout(r, 0));
 

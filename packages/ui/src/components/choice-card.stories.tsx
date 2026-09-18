@@ -114,7 +114,7 @@ const REGION_OPTIONS: ChoiceOption[] = [
 ];
 
 const meta = {
-  title: 'Components/Elements/ChoiceCard',
+  title: 'Components/ChoiceCard',
   component: ChoiceCard,
   tags: ['autodocs'],
   render: (args: ChoiceArgs) => <Demo args={args} />,

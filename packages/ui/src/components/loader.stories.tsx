@@ -4,7 +4,7 @@ import { Loader, type LoaderVariant, type LoaderSize } from './loader';
 import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
-  title: 'Components/Elements/Loader',
+  title: 'Components/Loader',
   component: Loader,
   tags: ['autodocs'],
   parameters: {

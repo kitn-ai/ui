@@ -39,6 +39,12 @@ so the primary onboarding path produces non-rendering code.
 
 ## P0 — Issue 2: package ships raw `.tsx` source → consumers' `tsc` compiles the SolidJS internals and breaks
 
+**Status: the preferred fix shipped.** `exports` now points `.`, `./react` and `./elements` at compiled `.js` +
+`.d.ts`, so no component source reaches a consumer. What follows is the field-test record, unedited: the paths
+in the **Symptom** and **Root cause** quotes are from that run and predate the `src/ui` → `src/components`
+merge, which is why they name `src/ui/*.tsx` — `hover-card.tsx` and `overlay.tsx` now live in
+`src/components/`.
+
 **Symptom.** `npm run build` (`tsc -b && vite build`) fails with ~25 errors, **all inside
 `node_modules/@kitn.ai/ui/src/ui/*.tsx`** (TS2786/TS2322 for `Show`/`Portal`/`Dynamic`, `onFocusIn`, etc.),
 none in app code. `vite`/`vite build` alone succeed (esbuild strips types); only `tsc` breaks. This blocks
@@ -70,7 +76,7 @@ so runtime is unaffected):
   `configureCodeHighlighting`/`isCodeHighlightingEnabled` to the runtime `./elements` JS, so the `.d.ts`
   pulls no implementation.
 
-**Affected:** `package.json` `exports`, `src/elements/element-types.d.ts`, the build pipeline (emit `.d.ts`+`.js`), and (only if you keep shipping source) `src/ui/hover-card.tsx` / `src/ui/overlay.tsx`.
+**Affected:** `package.json` `exports`, `src/elements/element-types.d.ts`, the build pipeline (emit `.d.ts`+`.js`), and (only if you keep shipping source) `src/components/hover-card.tsx` / `src/components/overlay.tsx`.
 
 **Already partly surfaced in agent-tooling:** `debug` has a rule that recognizes "tsc errors inside node_modules/@kitn.ai/ui/src" and hands back the `paths`-stub workaround, noting it's a tracked packaging gap.
 
@@ -134,7 +140,7 @@ namespaced `--kai-color-*`) avoids all of it.
 - *Globals prefixed:* every `@keyframes` in `theme.css` is now `kai-<name>` (`kai-blink`, `kai-shimmer`,
   `kai-spinner-fade`, …) and `.scrollbar-thin` is `.kai-scrollbar-thin`. The `collapsible-down` / `-up` pair
   was deleted rather than prefixed: it shadowed tw-animate-css's keyframes of the same name, and both were dead
-  (`CollapsibleContent` in `src/ui/collapsible.tsx` puts the caller's class on an inner div that carries no
+  (`CollapsibleContent` in `src/components/collapsible.tsx` puts the caller's class on an inner div that carries no
   `data-state`, so the `data-[state=*]:animate-*` classes on `tool.tsx` / `chain-of-thought.tsx` never matched;
   the visible collapse is the grid-template-rows transition). Those classes are gone too. No alias for the old
   names: no consumer-facing doc ever named one.
@@ -155,7 +161,7 @@ namespaced `--kai-color-*`) avoids all of it.
   `--kai-color-*` for the no-collision path. The dark variant, radius and text re-points stay too; they are the
   opt-in the file now says it is.
 
-**Affected:** `theme.css`, `dist/theme.tokens.css` (derived), `src/components/loader.tsx` / `text-shimmer.tsx` / `tool.tsx` / `chain-of-thought.tsx` / `artifact.tsx`, `src/ui/scroll-area.tsx`, `src/elements/file-tree.tsx`, `apps/docs/src/content/docs/guides/theming.mdx`, `apps/docs/src/content/docs/guides/installation.mdx`, `docs/coupling-map.md` (§4 keyframes ↔ references, §9 theme.css ↔ the consumer's `@theme`).
+**Affected:** `theme.css`, `dist/theme.tokens.css` (derived), `src/components/loader.tsx` / `text-shimmer.tsx` / `tool.tsx` / `chain-of-thought.tsx` / `artifact.tsx`, `src/components/scroll-area.tsx`, `src/elements/file-tree.tsx`, `apps/docs/src/content/docs/guides/theming.mdx`, `apps/docs/src/content/docs/guides/installation.mdx`, `docs/coupling-map.md` (§4 keyframes ↔ references, §9 theme.css ↔ the consumer's `@theme`).
 
 ---
 

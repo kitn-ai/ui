@@ -1,7 +1,7 @@
 import { defineWebComponent } from './define';
 import { ChatScopePicker } from '../components/chat-scope-picker';
 import { wireDisclosure } from './disclosure';
-import type { DropdownController } from '../ui/dropdown';
+import type { DropdownController } from '../components/dropdown';
 import type { SearchFilters } from '../types';
 
 interface Props extends Record<string, unknown> {

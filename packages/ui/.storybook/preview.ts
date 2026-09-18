@@ -2,6 +2,10 @@ import type { Preview, Decorator } from 'storybook-solidjs-vite';
 import { createComponent, onCleanup, type JSX } from 'solid-js';
 import { themes } from 'storybook/theming';
 import { toast } from '../src/primitives/toast-store';
+import {
+  isStoryObjectDump,
+  STORY_OBJECT_DUMP_PLACEHOLDER,
+} from '../src/stories/docs/source-transform';
 // Register the kai-* elements via the BUILT bundle (`dist/kai.es.js`), not the
 // src entry: the src registration is a result-unused, SSR-gated dynamic import
 // that the PRODUCTION storybook build (Rollup) tree-shakes away entirely, so a
@@ -150,20 +154,24 @@ const preview: Preview = {
     // false`.
     docs: {
       codePanel: true,
-      // A `render:` story with no hand-authored `docs.source.code` (see
-      // `scripts/lint-story-conventions.mjs`) leaves Storybook's default
-      // source doc-block to fall back to a raw serialized dump of the story
-      // OBJECT -- `{ render: [Function], parameters: {...}, ... }` -- which is
-      // noise, not a usage snippet, and reads as though something rendered
-      // correctly when nothing was authored at all. Swap that one shape for
-      // an honest placeholder instead of trying to synthesize real usage code
-      // (there is no way to reconstruct a hand-drawn `render:` body from its
-      // compiled function). The guard is what actually closes the gap; this
-      // is only about not lying in the meantime.
+      // THE DECISION IS NOT "IT STARTS WITH A BRACE". That was the first cut of
+      // this fix, and it is wrong: measured over the tree, 15 snippet literals
+      // open with `{` and 14 of them are legitimate, paste-ready snippets that
+      // open with a JSX comment (a brace, a slash-star comment, then the
+      // component) -- plus a package.json snippet. Swapping on the brace alone
+      // would have replaced 15 authored snippets with the placeholder, i.e.
+      // deleted documentation while claiming none was authored. The predicate
+      // therefore keys on the FIRST KEY of the object (a story key, unquoted),
+      // which is what a dump has and no authored snippet does. It lives in
+      // `src/stories/docs/source-transform.ts` -- typechecked and table-tested,
+      // unlike anything under `.storybook/` -- and the reasoning is recorded
+      // there. It stays honest by refusing to synthesize usage code: there is no
+      // way to reconstruct a hand-drawn `render:` body from its compiled
+      // function.
       source: {
         transform: (sourceCode: string) =>
-          sourceCode.startsWith('{') && sourceCode.includes('render:')
-            ? '// no usage snippet authored for this story yet — see lint:story-conventions'
+          isStoryObjectDump(sourceCode)
+            ? STORY_OBJECT_DUMP_PLACEHOLDER
             : sourceCode,
       },
     },
@@ -189,7 +197,9 @@ const preview: Preview = {
           'Getting Started',
           ['Overview', "How it's built", 'Working with the primitives', 'Create or modify a component', 'Building in the Labs', 'Run the kit locally', 'Token Reference'],
           'Components',
-          ['Overview', 'Elements', 'Primitives'],
+          // One sub-order entry: the old `Elements`/`Primitives` tiers collapsed
+          // when src/ui/ merged into src/components/, so `*` is every component.
+          ['Overview', '*'],
           'Labs',
           ['Apps', ['*', 'AMUX'], '*'],
           'Test Fixtures',

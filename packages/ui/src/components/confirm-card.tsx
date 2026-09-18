@@ -11,7 +11,7 @@ import {
   ErrorBoundary,
 } from 'solid-js';
 import { cn } from '../utils/cn';
-import { Button } from '../ui/button';
+import { Button } from './button';
 import { Card } from './card';
 import { DismissedStub } from './dismissed-stub';
 import type { CardEnvelope, CardEvent, CardHost, CardResolution } from '../primitives/card-contract';

@@ -1,10 +1,10 @@
 import { type JSX, For, Index, Switch, Match, createMemo, createSignal, splitProps, Show } from "solid-js";
-import { Tooltip } from "../ui/tooltip";
+import { Tooltip } from "./tooltip";
 import { Copy, Check } from "lucide-solid";
 import { cn } from "../utils/cn";
 import { Markdown } from "./markdown";
-import { Button } from "../ui/button";
-import { actionIcon, BUILTIN_ACTION_LABEL } from "../ui/action-icons";
+import { Button } from "./button";
+import { actionIcon, BUILTIN_ACTION_LABEL } from "./action-icons";
 import type { ChatMessageAction, CustomAction, FeedbackVote, MessagePart, MessageSource } from "../elements/chat-types";
 import { useChatConfig, textClass } from "../primitives/chat-config";
 import { Reasoning, ReasoningTrigger, ReasoningContent } from "./reasoning";

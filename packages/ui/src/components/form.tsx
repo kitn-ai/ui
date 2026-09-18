@@ -13,7 +13,7 @@ import {
 } from 'solid-js';
 import { createStore, produce, unwrap } from 'solid-js/store';
 import { cn } from '../utils/cn';
-import { Button } from '../ui/button';
+import { Button } from './button';
 import { Card } from './card';
 import { DismissedStub } from './dismissed-stub';
 import {

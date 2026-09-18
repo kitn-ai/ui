@@ -34,7 +34,7 @@ const FILES: ArtifactFile[] = [
 ];
 
 const meta = {
-  title: 'Components/Elements/Artifact',
+  title: 'Components/Artifact',
   component: Artifact,
   tags: ['autodocs'],
   parameters: {
@@ -160,6 +160,7 @@ export const PdfPreview: Story = {
       <Artifact src={`${BASE}/assets/report.pdf`} files={FILES} />
     </div>
   ),
+  ...src('<Artifact src="/assets/report.pdf" />'),
 };
 
 /** Fallback card when inline rendering can't work (here the src 404s). */
@@ -170,4 +171,6 @@ export const PdfFallback: Story = {
       <Artifact src={`${BASE}/assets/does-not-exist.pdf`} />
     </div>
   ),
+  ...src(`// A src that cannot be rendered inline falls back to the card.
+<Artifact src="/assets/does-not-exist.pdf" />`),
 };
