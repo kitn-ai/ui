@@ -50,7 +50,6 @@
 @plugin "@tailwindcss/typography";
 
 @source "../components";
-@source "../ui";
 @source "../elements";
 @source "../primitives";
 @source "../utils";
@@ -58,6 +57,14 @@
 @source not "../**/*.stories.tsx";
 @source not "../**/*.test.tsx";
 @source not "../**/*.test.ts";
+/* src/utils/cn-merge.ts is the class merger's conflict table. Its regexes, its group keys and
+   the class names in its comments are PATTERNS and documentation, not strings any element
+   emits — but Tailwind's scanner reads the file as text, COMMENTS INCLUDED, so it would treat
+   the table as usage and compile ~33 utility rules no component can reach into every
+   consumer's shadow root (measured: 111,332 -> 115,625 bytes, byte-identical again with this
+   line in place). tests/styles/shadow-sheet-scan.test.ts excludes the SAME file, because a
+   token that appears in shipped source with no rule in this sheet is a failure there. */
+@source not "../utils/cn-merge.ts";
 
 @layer base {
   /* Base typography is token-driven so a theme can restyle it. --kai-font-base is

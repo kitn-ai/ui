@@ -19,9 +19,20 @@
 //      them would go red on every rebuild and get bumped reflexively — a check
 //      that proves nothing. Rule 2 covers dist.
 //
-//   2. CRUDE — total unpacked size must stay under MAX_UNPACKED_BYTES. Cruder
-//      than rule 1 and it names nothing, but it is the backstop for growth that
-//      rule 1 cannot see: many small files, or bundle bloat inside `dist/`.
+//   2. CRUDE — the PACKED tarball must stay under MAX_PACKED_BYTES. Cruder than
+//      rule 1 and it names nothing, but it is the backstop for growth rule 1
+//      cannot see: bundle bloat inside `dist/`, or a second copy of something
+//      already shipped. It asserts PACKED bytes -- a consumer downloads the
+//      tarball, so that is the only number here that is a cost rather than a
+//      reading off a developer machine's disk. Unpacked size and the file count
+//      are PRINTED on every run and never asserted: unpacked file-sum moves
+//      OPPOSITE to transfer cost, because per-module output writes many small
+//      files and many small files compress better. The 2026-09-18 entry on
+//      MAX_PACKED_BYTES below is the measurement that settled it.
+//
+//      Both figures stay in the success line on purpose. A ceiling is a claim
+//      about a cost; the other two are facts a future reader needs to interpret
+//      it, and printing them costs nothing.
 //
 //   3. ROOTS — every packed file must live under an allowed root
 //      (ALLOWED_ROOT_PREFIXES) or be one of a short list of exact paths
@@ -39,7 +50,7 @@
 //      packed, named or not, large or not.
 //
 // Run it AFTER a build. Without `dist/` the tarball is a fraction of its real
-// size and both rules would pass vacuously, so a missing `dist/` is a failure,
+// size and every rule would pass vacuously, so a missing `dist/` is a failure,
 // not a skip.
 //
 // Usage:
@@ -180,9 +191,16 @@ if (SELF_TEST) {
 }
 
 /**
- * Backstop ceiling on total unpacked size. Headroom over the current figure is
- * deliberate — this should catch a step change, not normal drift. Raise it only
- * with a note saying what grew and that the growth is genuinely needed.
+ * Backstop ceiling on the PACKED tarball — the bytes a consumer downloads.
+ * Headroom over the current figure is deliberate — this should catch a step
+ * change, not normal drift. Raise it only with a note saying what grew and that
+ * the growth is genuinely needed.
+ *
+ * The entries below were all written against the unpacked file-sum that this
+ * constant used to hold, and are kept in the units they were written in — they
+ * are the record of where the number came from. Every unpacked figure in them is
+ * still produced on every run, as printed output. See the 2026-09-18 entry at the
+ * end for why the asserted quantity moved.
  *
  * 12.5 → 13.0 MiB (2026-08-20, the workspace re-cast): the batch that tripped
  * the old ceiling measured 12.60 MiB, audited file-by-file against the pack
@@ -434,8 +452,106 @@ if (SELF_TEST) {
  * headroom -> 10.90 MiB (rounded to the same 0.05 grain the prior entries
  * use). Lowering it is the point: left at 11.85 the guard would not notice
  * the page, or anything else that size, coming back.
+ *
+ * 10.90 -> 11.25 MiB (2026-09-17, the barrels go per-module): covers a growth
+ * this ceiling measures badly and that no other number sees.
+ *
+ * WHAT GREW. `index` (".") and `solid` ("./solid") now emit one file per
+ * source module instead of one aggregate module (`perModule` in
+ * config/vite/lib.ts), which (a) materialises `dist/node_modules/**` as real
+ * files — the kit's inlined dependencies, from `marked` to the whole shiki
+ * grammar set, are now modules a consumer's bundler can drop — and (b) pays
+ * per-file overhead the aggregate did not. Measured on this tool: 11.04 MiB
+ * unpacked, 1,018 files, from 10.64 MiB / 663 files. **This constant is a
+ * file-sum proxy**; it is the only thing that sees (a) at all, which is why it
+ * moves even though the number a consumer pays went the other way.
+ *
+ * WHAT THE CONSUMER PAYS IS `PACKED`, AND THAT IS THE METRIC THIS CHANGE WAS
+ * JUDGED ON. Packed went 2,693,970 -> 2,726,011 B (+32 kB, +1.2%) against a
+ * 61–77% reduction in the consumer's own bundled output for the same imports
+ * (`cn`-only 125,975 -> 28,575 B eager, Vite 8/Rolldown minified; measured
+ * before/after on a scratch app, not estimated). A crude proxy rising while
+ * transfer cost and consumer cost both move down is the trade being made, said
+ * out loud.
+ *
+ * THE A-vs-B RECORD, so this is not re-litigated. A = per-module on all four
+ * barrel targets including the SSR twins; B = per-module on the client pair
+ * only (what shipped). On PACKED, A is 2,631,868 B — 62 kB SMALLER than the
+ * baseline — and B is 32 kB larger. On UNPACKED, A is 11.53 MiB and B is
+ * 11.04. So the two metrics disagree about A and B, and both readings are
+ * defensible. B was chosen as a SCOPE decision, not as a weight argument: the
+ * client pair is what a consumer bundles, and the SSR twins' per-module output
+ * adds 2.1 MB of `.server.js` files that change no measured number. Nothing
+ * here claims A was worse on the metric consumers pay; it was better on it.
+ *
+ * Margin: 11.04 + ~0.21 MiB of headroom -> 11.25 MiB. Deliberately below the
+ * ~0.29 MiB the entries above use, because that headroom is what stops the next
+ * routine dependency bump from tripping this and having the ceiling raised
+ * again without thought — a hair-trigger ceiling trains people to ignore it.
+ *
+ * 2026-09-18: THE ASSERTED QUANTITY MOVES FROM THE UNPACKED FILE-SUM TO THE
+ * PACKED TARBALL, and the ceiling drops 11.25 -> 2.68 MiB for the same tarball.
+ *
+ * The entry above says the problem out loud and then raises the ceiling anyway:
+ * "This constant is a file-sum proxy ... it moved the other way." Per-module
+ * output writes many small files (663 -> 1,018) that compress better, so
+ * unpacked went 10.64 -> 11.04 MiB while PACKED went 2,693,970 -> 2,726,011 B.
+ * The guard was asserting the number that got worse and ignoring the one
+ * consumers pay. Every entry that moved it UP did so on that axis; the four
+ * that moved it down were dedupes and retirements. The most recent move
+ * (10.90 -> 11.25) raised it, in the same breath as recording that packed had
+ * moved the OTHER way. A ceiling raised repeatedly on the axis nobody pays is
+ * not measuring anything, which is the point at which to change the metric
+ * rather than the margin.
+ *
+ * What the ceiling holds now: `report.size`, the packed tarball `npm pack`
+ * would write. Unpacked size and the packed file count are PRINTED, not
+ * asserted. Asserting the file count would be the same mistake in a third unit
+ * — it grew 663 -> 1,018 files under per-module output, legitimately, and a
+ * ceiling on it would fight the direction this change was for.
+ *
+ * THE NUMBERS, all measured, all on this tree:
+ *
+ *   packed baseline            2,726,011 B / 2.6008 MiB
+ *   unpacked (printed)        11,575,833 B / 11.04 MiB / 1,018 files
+ *
+ * The two regression classes the entries above document, measured on a copy of
+ * this tree in /tmp by planting each one and re-packing, so the margin is sized
+ * against real deltas rather than a guessed fraction:
+ *
+ *   llms-full.txt copied back into dist/llms/
+ *     +887,234 B unpacked -> +181,058 B PACKED
+ *   ~40 already-shipped chunks forked into a second path (the dedupe regression)
+ *     +535,259 B unpacked -> +97,478 B PACKED
+ *
+ * Packed deltas are roughly a fifth of the unpacked ones for the same
+ * regression — which is exactly why the ~0.29 MiB headroom rule the entries
+ * above used is not reusable here, and why this constant is not "11.25 in a new
+ * unit". 2.6008 + 0.0792 MiB -> 2.68 MiB, i.e. 2,810,674 B, a headroom of
+ * 84,663 B, which trips on BOTH classes above (the smaller by 12,815 B) and
+ * leaves ~0.08 MiB for ordinary feature drift — about two more batches the size
+ * of the change that motivated this rewrite (+32 kB). A dedupe landing is the
+ * one thing that moves this number DOWN, so an unexplained rise is always worth
+ * a human: it is either new shipped surface or something already shipped
+ * arriving twice.
+ *
+ * 2.68 -> 2.56 MiB, LOWERED (2026-09-18, `cn` stops shipping `tailwind-merge`):
+ * measured 2,600,242 B / 2.4798 MiB packed on this tree, down from 2,726,011 B. The
+ * per-module barrels materialise inlined dependencies as files under
+ * `dist/node_modules/**`, so `tailwind-merge` — which `src/utils/cn.ts` used to import —
+ * shipped its own dist bundle inside the tarball; `src/utils/cn-merge.ts` does that job
+ * now at ~10 kB raw, and the packed drop is that difference plus ordinary drift from the
+ * other work in this same tree (so the arithmetic is not all attributable to this change,
+ * only the direction is). Lowered rather than left at 2.68 MiB because the headroom IS the
+ * guard: 2.68 would have left ~0.20 MiB of slack, while the dedupe-regression class this
+ * constant was sized against — ~40 already-shipped chunks forked into a second path — is
+ * +97,478 B packed, and this entry's whole point is that the smaller regression trips it.
+ * So the ceiling keeps the same 84,663 B of headroom: 2,600,242 + 84,663 -> 2,684,905 B,
+ * rounded to the 2.56 MiB grain the entries above use. Nothing else about the rule
+ * changes, and a rise still means new surface or a second copy of something already
+ * shipped.
  */
-const MAX_UNPACKED_BYTES = 10.90 * 1024 * 1024;
+const MAX_PACKED_BYTES = Math.floor(2.56 * 1024 * 1024); // 2.56 MiB = 2,684,354 B
 
 const kib = (n) => `${(n / 1024).toFixed(1)} KiB`;
 const mib = (n) => `${(n / 1024 / 1024).toFixed(2)} MiB`;
@@ -501,14 +617,26 @@ if (unexpected.length > 0) {
   );
 }
 
-// --- Rule 2: total unpacked size ceiling ------------------------------------
-if (report.unpackedSize > MAX_UNPACKED_BYTES) {
+// --- Rule 2: packed tarball ceiling -----------------------------------------
+if (report.size > MAX_PACKED_BYTES) {
+  const over = report.size - MAX_PACKED_BYTES;
   failures.push(
-    `unpacked size ${mib(report.unpackedSize)} exceeds the ${mib(MAX_UNPACKED_BYTES)} ceiling ` +
-      `(over by ${mib(report.unpackedSize - MAX_UNPACKED_BYTES)}).\n\n` +
-      '    Find what grew:  npm pack --dry-run --ignore-scripts --json | ...\n' +
-      '    Then either drop it from `files`, or raise MAX_UNPACKED_BYTES in\n' +
-      '    scripts/verify-pack-weight.mjs with a note on what grew and why.',
+    `packed tarball ${mib(report.size)} exceeds the ${mib(MAX_PACKED_BYTES)} ceiling: ` +
+      `over by ${over.toLocaleString('en-US')} B (${mib(over)}, ` +
+      `+${((over / MAX_PACKED_BYTES) * 100).toFixed(1)}% of the ceiling).\n` +
+      `    measured  ${report.size.toLocaleString('en-US')} B packed, ` +
+      `${report.unpackedSize.toLocaleString('en-US')} B unpacked, ${report.entryCount} files\n\n` +
+      '    This is the number a consumer downloads. It only moves DOWN when a dedupe\n' +
+      '    lands, so a rise is either new shipped surface or a second copy of\n' +
+      '    something already shipped — and the second one is what the entries on\n' +
+      '    MAX_PACKED_BYTES were written against.\n\n' +
+      '    Find what grew by diffing the pack listing against a known-good one:\n' +
+      '      npm pack --dry-run --ignore-scripts --json   # compare .files[] paths + sizes\n\n' +
+      '    `verify:consumer` weighs the OTHER half of this — how much a consumer\n' +
+      '    BUNDLES for a minimal import — so if this rose while that fell, the trade\n' +
+      '    may still be the right one. Attribute the delta either way, then raise\n' +
+      '    MAX_PACKED_BYTES in scripts/verify-pack-weight.mjs with a note saying what\n' +
+      '    grew and that it is genuinely needed.',
   );
 }
 
@@ -540,10 +668,10 @@ const stale = [...ALLOWED_LARGE_FILES.keys()].filter(
 );
 
 console.log(
-  `✓ pack weight (npm ${npmVersion}): ${report.entryCount} files, ` +
-    `${mib(report.unpackedSize)} unpacked ` +
-    `(ceiling ${mib(MAX_UNPACKED_BYTES)}); every non-dist file over ${kib(MAX_FILE_BYTES)} ` +
-    `is one of the ${ALLOWED_LARGE_FILES.size} allowlisted.`,
+  `✓ pack weight (npm ${npmVersion}): ${mib(report.size)} packed ` +
+    `(ceiling ${mib(MAX_PACKED_BYTES)}); ${mib(report.unpackedSize)} unpacked and ` +
+    `${report.entryCount} files (printed, not asserted); every non-dist file over ` +
+    `${kib(MAX_FILE_BYTES)} is one of the ${ALLOWED_LARGE_FILES.size} allowlisted.`,
 );
 
 if (stale.length > 0) {

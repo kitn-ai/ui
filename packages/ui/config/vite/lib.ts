@@ -58,6 +58,63 @@ interface Target {
   /** 'dom' = Solid's client transform, 'ssr' = the server transform, 'none' = no Solid plugin. */
   transform: 'dom' | 'ssr' | 'none';
   external?: (string | RegExp)[];
+  /**
+   * Emit one file per SOURCE module instead of one aggregate module.
+   *
+   * WHY: one 711 kB aggregate module is opaque to a consumer's bundler. Rollup's
+   * statement-level DCE cannot remove a module-scope init it cannot prove pure, so
+   * `import { cn } from '@kitn.ai/ui'` retained ~121 kB of eager code — `marked`,
+   * `lucide-solid` and the rest of the component tree included — no matter what got
+   * imported. Per-module output moves that decision to the MODULE graph, where whole
+   * modules drop the way they do in any normal dependency. Measured on a scratch app
+   * against the packed tarball (Vite 8/Rolldown, minified, eager = statically
+   * reachable only): `cn`-only 125,975 -> 28,575 B, `Button`-only 126,253 ->
+   * 49,143 B, three components 128,392 -> 50,684 B. In the `cn`-only bundle the
+   * remaining modules are `tailwind-merge` (27,922 B), `clsx` (362 B) and
+   * utils/cn.js (144 B); `marked` and `lucide-solid` are gone from the output
+   * entirely, and the twelve lazy highlighter chunks it used to pull in are gone
+   * with them. The `./solid` namespace import (the ceiling) is unchanged, as it
+   * should be.
+   *
+   * WHERE IT IS SET: on all four barrels a consumer resolves — the two client
+   * barrels `index` (".") and `solid` ("./solid"), plus their server twins
+   * `index.server` and `solid.server` (the `node` / `worker` / `deno` halves of
+   * the same exports entries).
+   *
+   * · `state` / `wire` / `stores` stay aggregate because they are promised
+   *   self-contained for a raw CDN URL (see the comment above this table).
+   *   Per-module output would replace that self-containment with relative
+   *   `./x.js` specifiers, so they are out of scope by contract, not by
+   *   measurement.
+   * · THE SERVER TWINS, MEASURED. Until the twins were included here, the
+   *   `node` / `worker` / `deno` conditions resolved to the aggregate
+   *   `dist/index.server.js` (626,182 B) / `dist/solid.server.js`, so an SSR or
+   *   serverless consumer paid the same unpurgeable floor this change removed on
+   *   the client. Measured on the packed tarball in a scratch app, built under
+   *   the `node` condition (Vite 8/Rolldown, minified, eager = entry chunk plus
+   *   its static import closure, one probe per invocation): importing `cn` alone
+   *   from `@kitn.ai/ui` cost 103,311 B eager against the aggregate
+   *   `dist/index.server.js` and 28,353 B against `dist/index.js` under `browser` —
+   *   3.6x the client figure for an import that reaches none of it. On the twins
+   *   the same probe lands at 28,388 B. The current pair is asserted, not restated:
+   *   the `node-cn` probe in EAGER_PROBES
+   *   (scripts/verify-consumer-sideeffects.mjs) is where the figures are kept.
+   * · THE TWINS MUST NOT LAND ON THE CLIENT'S FILE PATHS. Same entry, same
+   *   source modules, different transform: an SSR twin emitting `[name].js` would
+   *   overwrite `dist/components/badge.js` with the server transform and
+   *   `dist/index.js` would then import it — unobservable in a diff, surfacing as
+   *   a client bundle throwing "Client-only API used on the server side". So an
+   *   SSR per-module target emits `[name].server.js`, which is also the filename
+   *   the `exports` map already names for it. See PER_MODULE_OUTPUT below.
+   *
+   * ONE CONSEQUENCE TO KNOW ABOUT: this materialises the kit's inlined dependencies
+   * as real modules under `dist/node_modules/**` (they are what the consumer's
+   * bundler can now drop), which is a nested `node_modules` inside a published
+   * package — a path some tooling special-cases or strips. `npm pack` includes it,
+   * `verify:consumer` bundles it, and renaming it (e.g. `dist/vendor/`) would be a
+   * separate change with its own verification.
+   */
+  perModule?: boolean;
   /** vite-plugin-dts options, for the targets that own a declaration emit. */
   dts?: Parameters<typeof dts>[0];
 }
@@ -118,6 +175,7 @@ const TARGETS: Record<string, Target> = {
     fileName: 'index.js',
     transform: 'dom',
     external: SOLID_ELEMENT,
+    perModule: true,
     dts: {
       include: ['src/**/*.ts', 'src/**/*.tsx'],
       exclude: [
@@ -218,11 +276,16 @@ const TARGETS: Record<string, Target> = {
   // that resolves to Solid's server renderer, which is exactly what this output targets.
   //
   // emptyOutDir: false — later build in the chain; do NOT clobber earlier output.
+  //
+  // perModule: true, like the DOM barrel it twins. It emits `[name].server.js`
+  // per source module (see PER_MODULE_OUTPUT); without a distinct name the two
+  // builds would write the same paths, since they cover the same modules.
   'index.server': {
     entry: 'src/index.ts',
     fileName: 'index.server.js',
     transform: 'ssr',
     external: SOLID_ELEMENT,
+    perModule: true,
   },
 
   // dist/solid.js, the "./solid" export.
@@ -257,6 +320,7 @@ const TARGETS: Record<string, Target> = {
     fileName: 'solid.js',
     transform: 'dom',
     external: SOLID_ELEMENT,
+    perModule: true,
   },
 
   // dist/solid.server.js, the "./solid" server twin.
@@ -280,11 +344,15 @@ const TARGETS: Record<string, Target> = {
   // markup, not so it can hand off to hydrate().
   //
   // emptyOutDir: false — later build in the chain; do NOT clobber earlier output.
+  //
+  // perModule: true, matching the DOM `solid` target it twins, and so emitting
+  // `[name].server.js` per module rather than overwriting its files.
   'solid.server': {
     entry: 'src/solid.ts',
     fileName: 'solid.server.js',
     transform: 'ssr',
     external: SOLID_ELEMENT,
+    perModule: true,
   },
 
   // dist/state.js
@@ -567,6 +635,32 @@ if (!Object.hasOwn(TARGETS, requested)) {
 }
 const target = TARGETS[requested];
 
+/**
+ * Output options for a `perModule` target. `preserveModulesRoot` is `src/`, so a
+ * module keeps its source path under dist/ (src/components/badge.tsx ->
+ * dist/components/badge.js) — which is also the layout the barrel's declaration
+ * emit has always used (`entryRoot: 'src'`), so every emitted .js now has the
+ * .d.ts beside it that a deep import or an editor resolves.
+ *
+ * `.server` ON THE SSR TWINS, AND IT IS LOAD-BEARING. A per-module target rooted
+ * at src/ writes one file per source module, and the SSR twins cover the SAME
+ * source modules as `index` / `solid`, so `[name].js` on both would have the
+ * second build silently overwrite the first one's files and `dist/index.js` would
+ * end up importing modules compiled by the SSR transform. That is unobservable in
+ * a diff and surfaces as a client bundle throwing "Client-only API used on the
+ * server side" — so the suffix belongs on the target the day it is added, not
+ * after the failure. It is keyed on the transform because that is the axis the two
+ * builds differ on, and `[name].server.js` is also the `fileName` the exports map
+ * already names for `index.server` / `solid.server`, so no exports entry moves.
+ * The declaration emit is unaffected: it rides the DOM build alone (`entryRoot:
+ * 'src'`), and those .d.ts keep their unsuffixed names.
+ */
+const PER_MODULE_OUTPUT = {
+  preserveModules: true,
+  preserveModulesRoot: resolve(PKG, 'src'),
+  entryFileNames: `[name]${target.transform === 'ssr' ? '.server' : ''}.js`,
+};
+
 const plugins: PluginOption[] = [];
 if (target.transform === 'dom') plugins.push(solidPlugin());
 // `solid` overrides the preset options the plugin would otherwise pick from
@@ -586,6 +680,9 @@ export default defineConfig({
       formats: ['es'],
       fileName: () => target.fileName,
     },
-    rollupOptions: { external: target.external ?? [] },
+    rollupOptions: {
+      external: target.external ?? [],
+      ...(target.perModule ? { output: PER_MODULE_OUTPUT } : {}),
+    },
   },
 });
