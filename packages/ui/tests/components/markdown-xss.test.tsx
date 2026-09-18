@@ -168,6 +168,26 @@ describe('markdown sink: dangerous URL schemes never reach an href/src', () => {
     });
   }
 
+  // The vector that makes the "URLs are never decoded" rule visible. Every one of
+  // the schemes above is written LITERALLY in the markdown; this one hides its
+  // colon behind a character reference, so a renderer that decoded `href` before
+  // handing it to the scheme filter would turn a blocked link into a live one.
+  // `isSafeUrl` and the browser both see `&` where a scheme needs `:`, read the
+  // string as a relative path, and resolve it against the base -- which is why
+  // this renders as an ordinary, harmless anchor rather than script.
+  test('an entity-encoded scheme is NOT decoded into a live javascript: URL', () => {
+    const el = mount('[click me](javascript&#58;window.__PWNED__=1)');
+    const a = el.querySelector('a');
+    // Whatever element came out, no URL-bearing attribute decodes into a scheme.
+    for (const u of urls(el)) {
+      expect(u.toLowerCase()).not.toContain('javascript:');
+    }
+    // The resolved URL is the relative path the browser also reads, not `javascript:`.
+    expect(a?.href ?? '').not.toContain('javascript:');
+    // And the source stayed VISIBLE, encoded form and all.
+    expect(el.textContent).toContain('click me');
+  });
+
   test('a blocked link still shows its text, so nothing vanishes silently', () => {
     const el = mount('[click me](javascript:window.__PWNED__=1)');
     expect(el.textContent).toContain('click me');
@@ -253,6 +273,87 @@ describe('markdown sink: legitimate markdown still works', () => {
     const el = mount('Tom & Jerry, 3 < 5');
     expect(el.textContent).toContain('Tom & Jerry');
     expect(el.textContent).toContain('3 < 5');
+  });
+
+  // GFM task lists. Pinned nowhere else: the `[x]` strings elsewhere in this suite
+  // are markdown LINKS, not task items. The checked state is a DOM PROPERTY (which
+  // is what the renderer binds, and what an HTML string could not have carried), so
+  // that is what is asserted -- not `outerHTML`.
+  test('GFM task lists render disabled checkboxes in the right state', () => {
+    const el = mount('- [x] done\n- [ ] todo');
+    const boxes = [...el.querySelectorAll<HTMLInputElement>('input[type="checkbox"]')];
+    expect(boxes).toHaveLength(2);
+    expect(boxes.every((b) => b.disabled)).toBe(true);
+    expect(boxes[0].checked).toBe(true);
+    expect(boxes[1].checked).toBe(false);
+  });
+});
+
+describe('markdown sink: character references read as their characters', () => {
+  // The old string sink got this from the browser's HTML parser for free; the token
+  // stream does not, so the decoder is asserted here rather than assumed. Both
+  // halves matter: what decodes, and what stays byte-for-byte literal.
+  test('named references in prose decode', () => {
+    expect(mount('AT&amp;T').textContent).toBe('AT&T');
+    expect(mount('&copy; 2026').textContent).toBe('© 2026');
+  });
+
+  test('numeric and hexadecimal references decode', () => {
+    expect(mount('&#65;').textContent).toBe('A');
+    expect(mount('&#x41;').textContent).toBe('A');
+    expect(mount('&#X41;').textContent).toBe('A');
+  });
+
+  test('everything that is not a complete reference stays literal', () => {
+    expect(mount('AT&T').textContent).toBe('AT&T');
+    expect(mount('&unknown;').textContent).toBe('&unknown;');
+    expect(mount('&amp').textContent).toBe('&amp');
+    expect(mount('a & b').textContent).toBe('a & b');
+  });
+
+  test('out-of-range and malformed numerics stay literal instead of throwing', () => {
+    expect(mount('&#999999999;').textContent).toBe('&#999999999;');
+    expect(mount('&#xZZ;').textContent).toBe('&#xZZ;');
+  });
+
+  // The spec says a character reference inside code is literal, so a sample
+  // showing `&amp;` has to keep showing `&amp;`.
+  test('an entity inside a code span is not decoded', () => {
+    const el = mount('use `&amp;` here');
+    expect(el.querySelector('code')?.textContent).toBe('&amp;');
+  });
+
+  test('an entity inside a fenced code block is not decoded', () => {
+    const el = mount('```\n&amp;\n```');
+    expect(el.querySelector('pre code')?.textContent).toContain('&amp;');
+  });
+
+  // Display-only attributes: the reader sees these, nothing navigates on them.
+  test('link titles decode', () => {
+    const a = mount('[x](https://example.com "a &amp; b")').querySelector('a');
+    expect(a?.getAttribute('title')).toBe('a & b');
+    expect(a?.getAttribute('href')).toBe('https://example.com');
+  });
+
+  test('image alt and title decode, while src stays verbatim', () => {
+    const img = mount('![a &amp; b](https://example.com/x.png?a=1&amp;b=2 "t &amp; t")').querySelector('img');
+    expect(img?.getAttribute('alt')).toBe('a & b');
+    expect(img?.getAttribute('title')).toBe('t & t');
+    expect(img?.getAttribute('src')).toBe('https://example.com/x.png?a=1&amp;b=2');
+  });
+
+  // Every branch that renders model text into a text node, not just `paragraph`.
+  test('references decode in headings, list items and table cells too', () => {
+    expect(mount('# AT&amp;T').querySelector('h1')?.textContent).toBe('AT&T');
+    expect(mount('- AT&amp;T').querySelector('li')?.textContent).toBe('AT&T');
+    expect(
+      mount('| a |\n| - |\n| AT&amp;T |').querySelector('td')?.textContent,
+    ).toBe('AT&T');
+    expect(mount('> AT&amp;T').querySelector('blockquote')?.textContent).toBe('AT&T');
+    expect(mount('**AT&amp;T**').querySelector('strong')?.textContent).toBe('AT&T');
+    expect(mount('*AT&amp;T*').querySelector('em')?.textContent).toBe('AT&T');
+    expect(mount('~~AT&amp;T~~').querySelector('del')?.textContent).toBe('AT&T');
+    expect(mount('[AT&amp;T](https://example.com)').querySelector('a')?.textContent).toBe('AT&T');
   });
 });
 
