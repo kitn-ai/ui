@@ -5059,7 +5059,9 @@ function renderSolid(components: readonly string[], ctx: RenderCtx): string {
             `            />`,
           ]
         : []),
-      `            <Button size="sm" class="rounded-full" disabled={!input().trim() || loading()} onClick={onSubmit}>`,
+      // rounded-pill, not rounded-full: the kit's own pills (badge, switch, tool chip)
+      // spell the rung that follows --radius-pill, and Tailwind hardcodes rounded-full.
+      `            <Button size="sm" class="rounded-pill" disabled={!input().trim() || loading()} onClick={onSubmit}>`,
       `              Send`,
       `            </Button>`,
       `          </PromptInputActions>`,

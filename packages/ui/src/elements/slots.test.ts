@@ -231,6 +231,65 @@ describe('CONTEXT_PARTS registry', () => {
   });
 });
 
+/**
+ * A recipe is copy-paste CSS a consumer pastes OUTSIDE the shadow root, so every
+ * custom property it names must already have a value where it lands. `--kai-*`
+ * names are HOOKS the sheet READS with a fallback (`--color-primary:
+ * var(--kai-color-primary, …)` at `:root, :host`), never declarations, so
+ * `var(--kai-…)` in a recipe is undefined and its declaration silently does
+ * nothing — the shape three `kai-audio-visualizer` recipes shipped as
+ * `var(--brand)`, a token no file in the repo declares.
+ */
+describe('part + var recipes paint with declared properties only', () => {
+  // The sheets a consumer's build installs before pasting a recipe.
+  const SHEET = ['theme.css', 'kit-base.css']
+    .map((f) => readFileSync(join(HERE, '..', '..', f), 'utf8'))
+    .join('\n');
+
+  /** Every `var(--x)` name a block of CSS text reads. */
+  const varNames = (css: string): string[] =>
+    [...css.matchAll(/var\(\s*(--[a-zA-Z0-9-]+)/g)].map((m) => m[1]!);
+
+  /** The subset of `recipes`' names that no shipped sheet declares. A `--kai-*`
+   *  hook is declared by nobody, so it is caught by the same rule as a typo. */
+  const undeclared = (recipes: string[]): string[] => {
+    const out = new Set<string>();
+    for (const name of recipes.flatMap(varNames)) {
+      if (!new RegExp(`${name}\\s*:`).test(SHEET)) out.add(name);
+    }
+    return [...out].sort();
+  };
+
+  const REGISTERED = Object.entries(ELEMENT_COMPOSITION).flatMap(([tag, def]) => [
+    ...(def.parts ?? []).map((p) => ({ where: `${tag}::part(${p.name})`, recipe: p.recipe })),
+    ...(def.vars ?? []).map((v) => ({ where: `${tag} ${v.name}`, recipe: v.recipe })),
+  ]);
+
+  it('finds recipes, and variables inside them, to check', () => {
+    const recipes = REGISTERED.map((r) => r.recipe).filter((r): r is string => Boolean(r));
+    expect(recipes.length, 'no recipes found — the scan is looking at nothing').toBeGreaterThan(20);
+    expect(recipes.flatMap(varNames).length, 'no recipe reads a custom property').toBeGreaterThan(3);
+  });
+
+  it('every custom property a recipe reads is declared by the shipped sheet', () => {
+    const bad = REGISTERED.flatMap((r) =>
+      r.recipe ? undeclared([r.recipe]).map((name) => `${r.where} -> ${name}`) : [],
+    );
+    expect(
+      bad.sort(),
+      `these recipes paint with a property nothing declares, so the declaration is invalid at ` +
+        `computed-value time and silently does nothing (\`--kai-*\` names are hooks the sheet READS; ` +
+        `they are never declared):\n  ${bad.join('\n  ')}`,
+    ).toEqual([]);
+  });
+
+  it('control: the rule catches a typo AND a hook name, and passes a declared token', () => {
+    expect(undeclared(['x { background: var(--brand) }'])).toEqual(['--brand']);
+    expect(undeclared(['x { background: var(--kai-color-primary) }'])).toEqual(['--kai-color-primary']);
+    expect(undeclared(['x { background: var(--color-primary); color: var(--color-muted-foreground) }'])).toEqual([]);
+  });
+});
+
 describe('ELEMENT_COMPOSITION registry (single source of truth the build extracts)', () => {
   // Every `::part` a consumer can style is declared by writing `part="name"`
   // (or, for a value that toggles, `part={lit ? 'name modifier' : 'name'}`)

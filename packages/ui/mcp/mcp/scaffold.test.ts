@@ -3482,6 +3482,19 @@ describe('scaffold — solid', () => {
     expect(f).toContain('@source "../node_modules/@kitn.ai/ui"');
   });
 
+  it('spells the Send button as the kit pill, not Tailwind\'s hardcoded full round', async () => {
+    const f = front(await emit());
+    const send = f.split('\n').find((l) => l.includes('<Button size="sm"'));
+    expect(send, 'no Send button in the emitted solid front end').toBeDefined();
+    expect(send).toContain('class="rounded-pill"');
+    expect(send).not.toContain('rounded-full');
+    // `rounded-pill` resolves in the emitted app because the setup block above
+    // installs the kit's solid.css -> theme.css, where the rung is declared. The
+    // rung is READ rather than restated, so renaming it in theme.css fails here.
+    const sheet = await readFile(join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'theme.css'), 'utf8');
+    expect(sheet, 'theme.css declares no --radius-pill, so the emitted class is dead').toMatch(/--radius-pill\s*:/);
+  });
+
   it('takes the submitted text from the controlled input signal, not a kai-submit event', async () => {
     const f = front(await emit());
     expect(f).toContain('const value = input().trim();');

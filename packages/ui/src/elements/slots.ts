@@ -145,7 +145,8 @@ export interface PartDef {
   name: string;
   /** One-line contract: what the part is. */
   doc: string;
-  /** A copy-pasteable styling example for docs / the MCP reference. */
+  /** A copy-pasteable styling example for docs / the MCP reference. Paint with the
+   *  DECLARED `--color-*` names: a `--kai-*` hook is read-with-fallback, never declared, so `var(--kai-…)` here is a silent no-op. */
   recipe?: string;
 }
 
@@ -738,17 +739,17 @@ export const AUDIO_VISUALIZER_PARTS: PartDef[] = [
   {
     name: 'bar',
     doc: 'A single bar in the `bar` variant, or a single spoke in the `radial` variant. Also carries `data-kai-index` and `data-kai-highlighted` ("true"/"false") for use inside the shadow root; to style the lit state from OUTSIDE, combine with the `highlighted` part below rather than an attribute selector.',
-    recipe: 'kai-audio-visualizer::part(bar) { border-radius: 2px }\nkai-audio-visualizer::part(bar highlighted) { background: var(--brand) }',
+    recipe: 'kai-audio-visualizer::part(bar) { border-radius: 2px }\nkai-audio-visualizer::part(bar highlighted) { background: var(--color-primary) }',
   },
   {
     name: 'cell',
     doc: 'A single dot in the `grid` variant. Also carries `data-kai-index` and `data-kai-highlighted` ("true"/"false") for use inside the shadow root; to style the lit state from OUTSIDE, combine with the `highlighted` part below rather than an attribute selector.',
-    recipe: 'kai-audio-visualizer::part(cell) { border-radius: 9999px }\nkai-audio-visualizer::part(cell highlighted) { background: var(--brand) }',
+    recipe: 'kai-audio-visualizer::part(cell) { border-radius: 9999px }\nkai-audio-visualizer::part(cell highlighted) { background: var(--color-primary) }',
   },
   {
     name: 'highlighted',
     doc: 'A second part TOKEN present on a `bar` or `cell` exactly when the sequencer or live audio has it lit, not a standalone styleable element. Combine it in the same `::part()` argument: `::part(bar highlighted)` or `::part(cell highlighted)`. This is the external equivalent of the internal `data-kai-highlighted="true"` attribute, which a `::part()` selector cannot reach (an attribute selector cannot follow a pseudo-element).',
-    recipe: 'kai-audio-visualizer::part(bar highlighted) { background: var(--brand) }\nkai-audio-visualizer::part(cell highlighted) { background: var(--brand) }',
+    recipe: 'kai-audio-visualizer::part(bar highlighted) { background: var(--color-primary) }\nkai-audio-visualizer::part(cell highlighted) { background: var(--color-primary) }',
   },
   {
     name: 'canvas',
