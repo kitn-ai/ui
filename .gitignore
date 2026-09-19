@@ -15,6 +15,9 @@ packages/ui/scripts/block-driver/pages/generated/
 # Brainstorming visual companion
 .superpowers/
 
+# AI project config
+.pi/
+
 # Throwaway agent git worktrees (full repo copies)
 .claude/worktrees/
 test-results/
