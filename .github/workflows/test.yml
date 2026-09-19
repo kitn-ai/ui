@@ -228,6 +228,13 @@ jobs:
       - name: Retired layer-name guard (elements -> web-components)
         run: pnpm --filter @kitn.ai/ui run lint:layer-names
 
+      # Layer direction guard: a VALUE import may target the importing file's own
+      # source layer or one below it, never above. src/web-components/ is a facade
+      # over the Solid components, so a component importing the facade layer is a
+      # real cycle, not a style nit. Type-only imports are erased and stay legal.
+      - name: Layer-direction guard (no upward value import)
+        run: pnpm --filter @kitn.ai/ui run lint:layer-direction
+
       - name: CDN version-pin staleness guard (docs, README, examples)
         run: pnpm --filter @kitn.ai/ui run lint:cdn-pins
 

@@ -28,8 +28,8 @@ export type { ModelOption, SearchFilters, ConversationScope, ConversationSummary
 export { cn } from './utils/cn';
 
 // Layer 1: Headless Primitives
-export { createKaiChat } from './primitives/create-kai-chat';
-export type { CreateKaiChatOptions, KaiChatStore } from './primitives/create-kai-chat';
+export { createKaiChat } from './stores/create-kai-chat';
+export type { CreateKaiChatOptions, KaiChatStore } from './stores/create-kai-chat';
 export { useAutoResize } from './primitives/use-auto-resize';
 export { useStickToBottom } from './primitives/use-stick-to-bottom';
 export { useTextStream } from './primitives/use-text-stream';
@@ -69,6 +69,12 @@ export { applyResolution, resolutionFromEvent } from './primitives/card-resoluti
 export { CardProvider, useCardHost } from './primitives/card-host';
 export type { CardProviderProps } from './primitives/card-host';
 export { CARD_EVENT_NAME, emitCardEvent, routeCardEvent, listenForCardEvents } from './primitives/card-routing';
+// PUBLIC because generated apps have to obey them and used to re-type the lists: the
+// kai MCP's invariant catalog tells a consumer to gate a model url, and until these
+// were exported its only option was a hand-typed ['http:','https:','mailto:'] copy in
+// app code, with no guard reading the emitted result. One policy, importable.
+export { isSafeUrl, isScriptUrl, isSafeImageSrc } from './primitives/url-scheme-policy';
+export { isRenderableLink } from './primitives/link-preview';
 export { dismissRecovery, defaultIsReopenable } from './primitives/card-recovery';
 export type {
   RecoveryToast, ReopenEnv, DismissRecoveryOptions,

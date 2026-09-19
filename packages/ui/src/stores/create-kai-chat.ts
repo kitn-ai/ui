@@ -1,4 +1,4 @@
-// src/primitives/create-kai-chat.ts
+// src/stores/create-kai-chat.ts
 import { createSignal } from 'solid-js';
 import type { ChatMessage } from '../web-components/chat/chat-types';
 import type { AttachmentData } from '../components/attachments/attachments';
