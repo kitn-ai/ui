@@ -481,3 +481,35 @@ builder"). Guarded by jsdom sheet checks, the studio wiring test, and 6 browser 
    `--radius-pill`, `--code-radius`, `--kai-shadow-strength`, the weight rungs or density. No test
    reads it. Cheap fix: derive the name lists the way every other guard here derives them, and it
    becomes the ladder view for free — in the place where a reference belongs.
+
+---
+
+## 11. Queue closed out: what landed, and the two families decided NO
+
+**Landed since §10.** Palette defects (13 sites in 10 components: 8 `dark:text-red-400`, 5 raw
+success greens; `--kai-color-success` already existed, one new token `--kai-color-destructive-text`
+was added — light unchanged, dark readable — and the OLD values were an accessibility bug, not a
+cosmetic one: dark `text-destructive` as text measured **1.79:1**, `text-emerald-400` in light
+**1.92:1**, both far under WCAG AA). `var(--brand)` in 3 slot recipes → `var(--color-primary)` (the
+`--kai-*` names are hooks the sheet READS, never declares; a recipe painting with one is a silent
+no-op, verified in a real shadow root). Scaffold emits `rounded-pill` instead of Tailwind's
+hardcoded `rounded-full`. The Storybook Token Reference now derives its radius rows by shape and its
+option rows from every `var(--kai-…)` declaration instead of hand-typed lists.
+
+**DECIDED NO — easing.** §10 listed it as "the last cheap family: one line per rung". That was wrong:
+the catalogue rule (`tests/styles/theme-studio-coverage.test.ts`) requires a studio control for every
+token theme.css declares, so `--kai-ease-*` means three more knobs, and the only honest control for a
+cubic-bezier is a text field — a wart in a panel whose whole job is to offer choices that look good.
+The three curves are also deliberate (they are what every kit transition was tuned against). If a
+consumer wants a different motion feel they can set `--ease-*` themselves in their own Tailwind theme.
+
+**DECIDED NO — transition durations.** `duration-*` compiles to a literal per utility (verified in the
+sheet), so it is 7 per-site edits for three micro-timings (150/200/300ms) that are chosen per
+interaction. Same shape as the border/ring/opacity skips: literal in Tailwind's output, so
+"tokenizing" is per-call-site work, not a rung.
+
+**Hypothesis that measurement killed, recorded so nobody re-runs it.** The studio's own chrome reads
+~37 `var(--kai-color-*)` hooks and declares none of them, so it looked like a page full of silent
+no-ops. It is not: every one of the 97 such usages on the built page RESOLVES, because they are all
+inside the canvas, where the studio's effect writes every `ALL_TOKENS` name onto the wrapper. The
+panel uses none. No fix needed, nothing changed.
