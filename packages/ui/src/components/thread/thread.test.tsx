@@ -3,11 +3,11 @@ import '@testing-library/jest-dom/vitest';
 import { createSignal } from 'solid-js';
 import { render, cleanup, fireEvent } from '@solidjs/testing-library';
 import { Thread, type ThreadController } from './thread';
-import type { ChatMessage } from '../elements/chat-types';
+import type { ChatMessage } from '../../elements/chat-types';
 
 // Spy on the imperative toast() the feedback controller raises.
 const toastSpy = vi.fn();
-vi.mock('../primitives/toast-store', () => {
+vi.mock('../../primitives/toast-store', () => {
   const fn = Object.assign((...args: unknown[]) => toastSpy(...args), {
     success: (...args: unknown[]) => toastSpy(...args),
     dismiss: vi.fn(),

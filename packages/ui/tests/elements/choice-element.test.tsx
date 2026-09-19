@@ -6,7 +6,7 @@
 import '../../src/elements/choice';
 import { CARD_EVENT_NAME } from '../../src/primitives/card-routing';
 import type { CardEvent } from '../../src/primitives/card-contract';
-import type { ChoiceCardData } from '../../src/components/choice-card';
+import type { ChoiceCardData } from '../../src/components/choice-card/choice-card';
 
 const flush = () => new Promise((r) => setTimeout(r, 0));
 

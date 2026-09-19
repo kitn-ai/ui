@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { consumeModelStream } from './consume';
 import { applyToolFailure, applyToolOutput, bufferText } from './sink-helpers';
 import type { AssistantStreamSink } from './chunk';
-import type { ToolPart } from '../components/tool-types';
+import type { ToolPart } from '../components/tool/tool-types';
 import { replayChunks } from './fixtures/chunks';
 
 /** Records every patch, and can replay them into a merged ToolPart the way the

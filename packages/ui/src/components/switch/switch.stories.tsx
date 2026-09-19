@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { fn } from 'storybook/test';
 import { Switch, type SwitchProps } from './switch';
-import { componentDescription } from '../stories/docs/element-controls';
+import { componentDescription } from '../../stories/docs/element-controls';
 
 const meta = {
   title: 'Components/Switch',

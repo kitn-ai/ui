@@ -1,12 +1,12 @@
 import { splitProps, For, Show, createSignal, createMemo, onMount, type JSX } from 'solid-js';
 import { PanelLeftOpen } from 'lucide-solid';
-import { cn } from '../utils/cn';
-import { Collapsible, CollapsibleTrigger, CollapsibleContent } from './collapsible';
-import { Button } from './button';
-import { Badge } from './badge';
-import { ScrollArea } from './scroll-area';
+import { cn } from '../../utils/cn';
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '../collapsible/collapsible';
+import { Button } from '../button/button';
+import { Badge } from '../badge/badge';
+import { ScrollArea } from '../scroll/scroll-area';
 import { ConversationItem, type ConversationRowDensity } from './conversation-item';
-import type { ConversationSummary, ConversationGroup } from '../types';
+import type { ConversationSummary, ConversationGroup } from '../../types';
 
 /**
  * The collapsed-rail fallback: a floating reopen button shown when the

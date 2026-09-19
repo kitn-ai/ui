@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { fn } from 'storybook/test';
 import { ConversationList, type ConversationListProps } from './conversation-list';
-import type { ConversationSummary, ConversationGroup } from '../types';
-import { componentDescription } from '../stories/docs/element-controls';
+import type { ConversationSummary, ConversationGroup } from '../../types';
+import { componentDescription } from '../../stories/docs/element-controls';
 
 const scope = { type: 'document' as const };
 

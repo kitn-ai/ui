@@ -1,6 +1,6 @@
 import { Show } from 'solid-js';
 import { defineWebComponent } from './define';
-import { Checkpoint, CheckpointIcon, CheckpointTrigger } from '../components/checkpoint';
+import { Checkpoint, CheckpointIcon, CheckpointTrigger } from '../components/checkpoint/checkpoint';
 
 interface Props extends Record<string, unknown> {
   /** Optional text beside the icon. */

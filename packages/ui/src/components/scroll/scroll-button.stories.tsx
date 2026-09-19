@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { For } from 'solid-js';
 import { ScrollButton } from './scroll-button';
-import { ChatContainerRoot, ChatContainerContent } from './chat-container';
-import { componentDescription } from '../stories/docs/element-controls';
+import { ChatContainerRoot, ChatContainerContent } from '../chat/chat-container';
+import { componentDescription } from '../../stories/docs/element-controls';
 
 /**
  * `ScrollButton` reads scroll state from the surrounding `ChatContainerRoot`

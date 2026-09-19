@@ -1,7 +1,7 @@
 /**
  * `<kai-tab-bar>` + `<kai-tab-bar-item>` — the element pair over the headless
  * tab-bar controller (blocks-and-parts P-2). The Solid-layer behavior lives in
- * src/components/tab-bar.test.tsx; THIS file exercises the element seam a
+ * src/components/tabs/tab-bar.test.tsx; THIS file exercises the element seam a
  * consumer actually hits: light-DOM `<kai-tab-bar-item>` children, the bar's
  * MutationObserver discovery, the parent-item contract stamped across the
  * shadow boundary (role/aria-selected/roving tabindex on each item's shadow

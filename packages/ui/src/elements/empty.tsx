@@ -1,6 +1,6 @@
 import { Show } from 'solid-js';
 import { defineWebComponent } from './define';
-import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription, EmptyContent } from '../components/empty';
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription, EmptyContent } from '../components/empty/empty';
 
 interface Props extends Record<string, unknown> {
   /** Title text. Attribute: `empty-title` (`title` is a global HTML attribute). */

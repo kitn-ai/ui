@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { type JSX } from 'solid-js';
 import { PromptDock, type PromptDockProps } from './prompt-dock';
-import { PromptInput, PromptInputTextarea, PromptInputActions } from '../components/prompt-input';
-import { Button } from './button';
-import { componentDescription } from '../stories/docs/element-controls';
+import { PromptInput, PromptInputTextarea, PromptInputActions } from './prompt-input';
+import { Button } from '../button/button';
+import { componentDescription } from '../../stories/docs/element-controls';
 
 // --- Story helpers -------------------------------------------------------
 

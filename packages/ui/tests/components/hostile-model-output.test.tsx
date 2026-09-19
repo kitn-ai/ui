@@ -16,7 +16,7 @@ import { afterEach, beforeAll, describe, expect, test } from 'vitest';
 import { createSignal } from 'solid-js';
 import { readOpenAIStream, readAnthropicStream } from '../../src/wire/index';
 import { createAssistantStream } from '../../src/state/stream';
-import { MessageBody } from '../../src/components/message';
+import { MessageBody } from '../../src/components/message/message';
 import type { ChatMessage } from '../../src/elements/chat-types';
 
 beforeAll(() => {

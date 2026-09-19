@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { fn } from 'storybook/test';
 import { Button } from './button';
-import { componentDescription } from '../stories/docs/element-controls';
+import { componentDescription } from '../../stories/docs/element-controls';
 
 /**
  * Convention exemplar: every component story should follow this shape:

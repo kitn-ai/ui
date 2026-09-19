@@ -1,5 +1,5 @@
 import { defineWebComponent } from './define';
-import { LinkPreview } from '../components/link-preview';
+import { LinkPreview } from '../components/link-preview/link-preview';
 import type { LinkPreviewData } from '../primitives/link-preview';
 import { emitCardEvent } from '../primitives/card-routing';
 

@@ -25,7 +25,7 @@ import './thread';
 import './chat';
 import './message';
 import { createCardRegistry } from '../schemas/registry';
-import type { CardSchema } from '../schemas';
+import type { CardSchema } from '../schemas/index';
 import type { KaiThreadElement } from './element-types';
 
 // jsdom doesn't implement Element.scrollTo; mounting <kai-thread>/<kai-chat> calls

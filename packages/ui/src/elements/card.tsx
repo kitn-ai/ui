@@ -1,6 +1,6 @@
 import { createSignal, onCleanup, onMount } from 'solid-js';
 import { defineWebComponent } from './define';
-import { CardSurface, type CardAppearance, type CardOrientation } from '../components/card-surface';
+import { CardSurface, type CardAppearance, type CardOrientation } from '../components/card/card-surface';
 
 interface Props extends Record<string, unknown> {
   /** Surface treatment: `outlined` (default) | `filled` | `plain` | `accent`.

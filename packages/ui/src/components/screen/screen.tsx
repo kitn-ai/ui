@@ -1,7 +1,7 @@
 import { createEffect, createSignal, onCleanup, Show, type Accessor, type JSX } from 'solid-js';
 import { ArrowLeft } from 'lucide-solid';
-import { cn } from '../utils/cn';
-import { createPresence } from './overlay';
+import { cn } from '../../utils/cn';
+import { createPresence } from '../overlay/overlay';
 
 /** Imperative open controller, handed to a parent (the kai-screen facade) via
  *  `controllerRef` so it can drive/observe open state with `wireDisclosure`. */

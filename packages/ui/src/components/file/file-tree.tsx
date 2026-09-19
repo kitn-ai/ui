@@ -6,7 +6,7 @@ import {
   createSignal,
   createMemo,
 } from 'solid-js';
-import { cn } from '../utils/cn';
+import { cn } from '../../utils/cn';
 import {
   ChevronRight,
   Folder,
@@ -26,8 +26,8 @@ import {
  *  on purpose) cannot resolve a `.tsx` at all — so leaving this declaration here
  *  would put TS6142 back on any backend that names an artifact card payload. See
  *  that file's header. */
-export type { ArtifactCardFile as FileTreeFile } from '../primitives/card-data-types';
-import type { ArtifactCardFile as FileTreeFile } from '../primitives/card-data-types';
+export type { ArtifactCardFile as FileTreeFile } from '../../primitives/card-data-types';
+import type { ArtifactCardFile as FileTreeFile } from '../../primitives/card-data-types';
 
 /** A change status a file can carry. */
 export type FileStatus = NonNullable<FileTreeFile['status']>;

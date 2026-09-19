@@ -4,7 +4,7 @@
 import '../../src/elements/confirm-card';
 import { CARD_EVENT_NAME } from '../../src/primitives/card-routing';
 import type { CardEvent } from '../../src/primitives/card-contract';
-import type { ConfirmCardData } from '../../src/components/confirm-card';
+import type { ConfirmCardData } from '../../src/components/confirm-card/confirm-card';
 
 const flush = () => new Promise((r) => setTimeout(r, 0));
 

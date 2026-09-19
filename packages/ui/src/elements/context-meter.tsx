@@ -15,7 +15,7 @@ import {
   DEFAULT_WARN_THRESHOLD,
   DEFAULT_DANGER_THRESHOLD,
   type ContextSeverity,
-} from '../components/context';
+} from '../components/context/context';
 // Public shape of the `context` prop; lives in ./element-data-types so the ROOT
 // entry can re-export it (see that file's header).
 import type { KaiContextUsage } from './element-data-types';

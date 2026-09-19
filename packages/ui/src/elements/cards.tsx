@@ -12,8 +12,8 @@ import { CARD_EVENT_NAME, emitCardEvent, routeCardEvent } from '../primitives/ca
 import { BUILTIN_CARD_TAGS, mergeCardTags } from '../primitives/card-registry';
 import type { JsonSchema } from '../primitives/card-validate';
 import { cardValidationMessage, validateCardData, type CardValidationReport } from '../primitives/card-validate-cards';
-import { hasConsumerSchema } from '../components/card-renderer';
-import { CardFallback } from '../components/card-fallback';
+import { hasConsumerSchema } from '../components/card/card-renderer';
+import { CardFallback } from '../components/card/card-fallback';
 // Register the built-in child card elements so that importing <kai-cards> is self-contained.
 import './form';
 import './confirm-card';
@@ -44,7 +44,7 @@ interface Props extends Record<string, unknown> {
    *  deliberately: an imported `.json` schema widens `"type"` to `string`, and an
    *  authored one carries `$schema`/`title`/`description`/`additionalProperties`,
    *  so the tighter type would reject both of the normal ways to supply one. See
-   *  `CardSchemaMap` in components/card-renderer.tsx. */
+   *  `CardSchemaMap` in components/card/card-renderer.tsx. */
   schemas?: Record<string, object>;
   /** Optional CardPolicy handling child events. Property: `el.policy`. */
   policy?: CardPolicy;
@@ -100,7 +100,7 @@ function CardSlot(props: {
   let ref: HTMLElement | undefined;
 
   // MIRRORS src/remote/provider-runtime.ts:139-147, the same way
-  // components/card-renderer.tsx does. The remote (iframe) transport has validated
+  // components/card/card-renderer.tsx does. The remote (iframe) transport has validated
   // every incoming envelope since the contract landed and this native one did not,
   // so the same bad payload was caught in one transport and rendered silently in the
   // other. Two tiers: `hard` (nothing to render) replaces the card with a diagnostic
@@ -114,7 +114,7 @@ function CardSlot(props: {
   // wrote it about their own card, and it is the shape their model was told to
   // emit, so it applies whichever element draws the type. That is what validates a
   // `pricing-table` — nobody's built-in, and until this prop existed the one card in
-  // the app that nothing checked. Same rule as components/card-renderer.tsx, which
+  // the app that nothing checked. Same rule as components/card/card-renderer.tsx, which
   // compares component identity where this compares tag identity; `hasConsumerSchema`
   // is shared with it so the gate is spelled once.
   const report = createMemo<CardValidationReport | null>(() => {

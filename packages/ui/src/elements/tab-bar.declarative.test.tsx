@@ -15,7 +15,7 @@ import {
   isTabBarItemDisabled,
   readTabBarItemValue,
   type TabBarItemsController,
-} from '../components/tab-bar';
+} from '../components/tabs/tab-bar';
 
 // ---------------------------------------------------------------------------
 // readTabBarItemValue / isTabBarItemDisabled — pure helpers

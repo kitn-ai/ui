@@ -1,7 +1,7 @@
 import { type JSX, Show, createSignal } from 'solid-js';
 import { Info, TriangleAlert, CircleAlert, CircleCheck, X } from 'lucide-solid';
-import { cn } from '../utils/cn';
-import { renderIcon } from './icon';
+import { cn } from '../../utils/cn';
+import { renderIcon } from '../icon/icon';
 
 export type NoticeSeverity = 'neutral' | 'info' | 'warning' | 'error' | 'success';
 

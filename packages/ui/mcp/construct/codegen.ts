@@ -250,7 +250,7 @@ function emitCardComponentImport(c: Construct): string {
  *  (format rule: undeclared -> no affordance, no import).
  *
  *  RULING (supervisor, this task): v1 renders EVERY declared card as the kit's own
- *  `form` card (`BUILTIN_CARD_COMPONENTS.form`, components/form.tsx) — it walks a
+ *  `form` card (`BUILTIN_CARD_COMPONENTS.form`, components/form/form.tsx) — it walks a
  *  JSON-Schema-shaped `data` into real input fields and honors `x-kai-format`/
  *  `x-kai-mask`/`x-kai-mask-guide` hints itself (field-mask.ts); no engine work is
  *  needed for masks specifically. This is deliberately NOT the same precedent as
@@ -266,11 +266,11 @@ function emitCardsImport(c: Construct): string {
     c.provider.mode === 'endpoint' ? (c.provider.wire === 'openai' ? ', toOpenAITools' : ', toAnthropicTools') : '';
   return `import { cards } from './cards';
 // Generative-UI cards, v1: every declared card renders as the kit's own
-// schema-driven FORM (BUILTIN_CARD_COMPONENTS.form, components/form.tsx) — it
+// schema-driven FORM (BUILTIN_CARD_COMPONENTS.form, components/form/form.tsx) — it
 // walks the card's JSON Schema into real input fields, honoring
 // x-kai-format/x-kai-mask/x-kai-mask-guide hints itself. ChatThread's own
 // MessageBody already matches \`part.type === 'card'\` in its part rendering and
-// draws it with the kit's own \`CardRenderer\` (components/card-renderer.tsx),
+// draws it with the kit's own \`CardRenderer\` (components/card/card-renderer.tsx),
 // which picks the component from \`cardTypes\` (below) by envelope.type — so
 // there is nothing to hand-compose beyond that one map. Turning a model's tool
 // call into that renderable part is \`cardFromToolCall\` (the inverse of
@@ -773,7 +773,7 @@ ${emitHistorySetup(c)}
 //     mirroring webSearch/voice). ChatThread ALREADY owns the whole
 //     round-trip end to end — the paperclip button, staged previews, staging
 //     each file as a data URI (never a blob object URL; see
-//     AttachmentData.url's doc in components/attachment-types.ts), and
+//     AttachmentData.url's doc in components/attachment-types/attachment-types.ts), and
 //     handing the staged list back via onSubmit's \`attachments\` — and its
 //     Message component ALREADY groups consecutive file parts into one
 //     attachment row (message.tsx). So there is nothing to hand-compose
@@ -835,7 +835,7 @@ ${emitLayoutClose(c)}${emitShellPaletteOverlay(c)}${hasShellPalette(c) ? '    </
  * `layout: 'custom'` — the escape hatch's own layout: minimal/no chrome, just
  * the bare chat spine plus the declared `slots` positioned by the consumer.
  * Composed from `Thread` (the message-list primitive, no composer/header/
- * suggestions of its own — components/thread.tsx) + the `PromptInput`
+ * suggestions of its own — components/thread/thread.tsx) + the `PromptInput`
  * compound primitive, NOT `ChatThread`: `ChatThread` bundles its composer
  * INSIDE itself (`DefaultPromptInput`, internal-only), which leaves no seam to
  * splice a slot between the thread and the input the way this layout's
@@ -885,7 +885,7 @@ ${emitHistorySetup(c)}
 // attachments, reasoning display-mode, reasoningOpen, header.title, empty,
 // conversations, header.themeToggle/actions, composer.triggers, shell) are
 // NOT wired here in v1 — this file is the eject artifact; add them the
-// way ChatThread composes them (components/chat-thread.tsx in the kit's own
+// way ChatThread composes them (components/chat/chat-thread.tsx in the kit's own
 // source) if this construct needs them on a custom layout.
 export function App() {
   const [value, setValue] = createSignal('');
@@ -949,7 +949,7 @@ function emitHeaderProp(c: Construct): string {
  *  that this REPLACES only the empty MESSAGE LIST.
  *
  *  Uses the kit's own `Empty`/`EmptyHeader`/`EmptyMedia`/`EmptyTitle`/
- *  `EmptyDescription` composition (components/empty.tsx) rather than hand-
+ *  `EmptyDescription` composition (components/empty/empty.tsx) rather than hand-
  *  rolled markup — the same "don't restate the kit's own layout" rule
  *  `emitApp`'s header comment states for ChatThread itself. `title`/
  *  `description` are construct-authored/untrusted text, JSON.stringify'd into
@@ -1119,7 +1119,7 @@ function emitChatControllerRefProp(c: Construct): string {
     : '';
 }
 
-/** `Dock`'s own `onOpenChange` (components/dock.tsx) already fires on EVERY close
+/** `Dock`'s own `onOpenChange` (components/dock/dock.tsx) already fires on EVERY close
  *  path — the header X, the launcher toggle, and Escape all resolve through
  *  its single `setOpen` — so wiring it once here covers all three with no
  *  per-path duplication (the alternative `emitDockCloseVar`/`dockClose`
@@ -1152,7 +1152,7 @@ function emitConversationsResetTypeImport(c: Construct): string {
  *  `ChatThread` reads it REACTIVELY every render (`hostOpen={dockOpen()}`),
  *  not just calls it imperatively on an event; `anyUnread` is the reverse
  *  direction, `ChatThread` writing outward via `onUnreadChange={setAnyUnread}`
- *  so `Dock`'s own `unread` prop (components/dock.tsx — already exists, already
+ *  so `Dock`'s own `unread` prop (components/dock/dock.tsx — already exists, already
  *  tested, no change needed there) can mirror it onto the FAB.
  *  `dockOpen`'s initial value matches `widget.defaultOpen` (mirroring
  *  `emitDockDefaultOpen`'s own read of the same field) — a widget that opens
@@ -1178,7 +1178,7 @@ function emitDockUnreadProp(c: Construct): string {
 }
 
 /** The local closure `emitHeaderEndContentProp`/`emitDockControllerRef` share:
- *  Dock's `controllerRef` hands back `{ open, setOpen }` (components/dock.tsx) — the
+ *  Dock's `controllerRef` hands back `{ open, setOpen }` (components/dock/dock.tsx) — the
  *  existing imperative seam, not a new one — and this captures `setOpen`
  *  behind a plain function so ChatThread's `headerEndContent` button (which
  *  renders as a sibling, not a Dock descendant) can call it. Declared inside
@@ -1425,7 +1425,7 @@ function emitChromeImports(c: Construct): string {
     names += ', Dropdown, DropdownTrigger, DropdownContent, DropdownItem, DropdownSeparator, Avatar';
   }
   // The app header strip composes ONE component instead of all of the above —
-  // that is the whole point of the promotion (components/app-header.tsx owns
+  // that is the whole point of the promotion (components/app-header/app-header.tsx owns
   // the arrangement, so the emitted app cannot drift off it).
   if (hasAppHeader(c)) names += ', AppHeader';
   if (hasShellPalette(c)) names += ', CommandList, Input';
@@ -2051,7 +2051,7 @@ function emitSlots(slots: readonly string[] | undefined, indent: string): string
  *    workspace-shell.tsx) for its frame -- chat in `children` (the main
  *    region), the end pane's `<slot name="pane">` seam projected via `end`.
  *    Superseded from Task 12's `PaneGroup` (recorded decision 2): `PaneGroup`
- *    is an editor GROUP contract (src/components/pane-group.tsx) -- a tab strip over
+ *    is an editor GROUP contract (src/components/pane/pane-group.tsx) -- a tab strip over
  *    ONE content area -- so getting two SIMULTANEOUS panes out of it meant a
  *    single always-active tab whose one body was a hand-rolled flex row doing
  *    the actual two-column math; the "kit component" was supplying a frame
@@ -2127,7 +2127,7 @@ function hasLauncherIcon(c: Construct): boolean {
 }
 
 /** widget.launcherIcon -> Dock's `launcher` prop, via `DockLauncherImage`
- *  (components/dock.tsx) rather than a hand-rolled `<img>`: a construct-authored URL
+ *  (components/dock/dock.tsx) rather than a hand-rolled `<img>`: a construct-authored URL
  *  is exactly as capable of 404ing as any other network fetch (this is what
  *  the fix report found — `kai dev`'s own `owner-widget` fixture pinned a
  *  `https://example.com/logo.png` placeholder that never resolved, so the
@@ -2182,7 +2182,7 @@ function emitWorkSurfaceVars(c: Construct, indent: string): string {
     ? `${indent}// workSurface.chrome.expand -> WorkspaceShell's own CONTROLLED startCollapsed
 ${indent}// (collapse the chat rail, click again to restore). NOT the kai-resizable
 ${indent}// maximize protocol: WorkspaceShell does not forward maximizedIndex/
-${indent}// onMaximizeChange — see components/work-surface.tsx's doc comment.
+${indent}// onMaximizeChange — see components/work-surface/work-surface.tsx's doc comment.
 ${indent}const [surfaceExpanded, setSurfaceExpanded] = createSignal(false);\n`
     : '';
 }
@@ -2283,7 +2283,7 @@ function emitLayoutOpen(c: Construct): string {
       const inset = position === 'start' ? "'inset-inline-start': '0'" : "'inset-inline-end': '0'";
       const borderSide = position === 'start' ? 'border-inline-end' : 'border-inline-start';
       return `    <aside data-kai-layout="aside" style={{ position: 'fixed', 'inset-block': '0', ${inset}, width: ${width}, display: 'flex', 'flex-direction': 'column', '${borderSide}': '1px solid var(--kai-color-border)' }}>
-      {/* Mirrors Dock's own narrow-viewport full-bleed rule (components/dock.tsx:229-240)
+      {/* Mirrors Dock's own narrow-viewport full-bleed rule (components/dock/dock.tsx:229-240)
           — aside has no dedicated kit component (see the emitLayoutOpen doc
           comment above), so this is the honest hand-rolled equivalent, not a
           new responsive strategy. */}
@@ -2308,9 +2308,9 @@ function emitLayoutOpen(c: Construct): string {
         : `    <div style={{ height: '100dvh' }}>\n`;
       const shellClass = header ? 'min-h-0 flex-1' : 'h-full';
       // drawerBelow: split's mobile takeover is the kit's OWN WorkspaceShell
-      // capability (components/workspace-shell.tsx), not hand-rolled CSS — wiring
+      // capability (components/workspace/workspace-shell.tsx), not hand-rolled CSS — wiring
       // it here is composition-over-reauthoring, not a media-query duplicate. 480
-      // matches Dock's own breakpoint (components/dock.tsx:229) so every layout takes over
+      // matches Dock's own breakpoint (components/dock/dock.tsx:229) so every layout takes over
       // at the same viewport width.
       if (!ws) {
         // No work surface: the end pane is a PURE PROJECTION SEAM. It must not

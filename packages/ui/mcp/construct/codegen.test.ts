@@ -262,7 +262,7 @@ describe('widget chrome (Task 19a)', () => {
 
   // Owner finding, 2026-08-26: a hand-rolled <img> left a permanently broken
   // icon in kai dev's own live FAB when its URL never resolved. DockLauncherImage
-  // (components/dock.tsx) is the graceful-degradation component — see src/components/dock.test.tsx
+  // (components/dock/dock.tsx) is the graceful-degradation component — see src/components/dock/dock.test.tsx
   // for its own render-level fallback behavior; this only asserts the WIRE.
   it('launcherIcon renders a DockLauncherImage launcher override, JSON.stringify-escaped, and imports it', () => {
     const app = file(
@@ -2081,7 +2081,7 @@ describe('workSurface — the split pane renders (2026-08-30)', () => {
     expect(app).toContain('codeSrc={"/src.html"}');
   });
 
-  it('codeView with NO codeUrl still emits the toggle and no codeSrc — components/work-surface.tsx owns the empty state (owner ruling, 2026-08-30)', () => {
+  it('codeView with NO codeUrl still emits the toggle and no codeSrc — components/work-surface/work-surface.tsx owns the empty state (owner ruling, 2026-08-30)', () => {
     const app = file(generateProject(ws({ chrome: { codeView: true } })), 'src/App.tsx');
     expect(app).toContain('showCodeView={true}');
     expect(app).not.toContain('codeSrc=');

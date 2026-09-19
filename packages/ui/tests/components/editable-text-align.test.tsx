@@ -39,8 +39,8 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import { render, cleanup } from '@solidjs/testing-library';
 import compiledCss from '../../src/elements/compiled.css?inline';
-import { PromptInput, PromptInputTextarea } from '../../src/components/prompt-input';
-import { Composer } from '../../src/components/composer';
+import { PromptInput, PromptInputTextarea } from '../../src/components/prompt/prompt-input';
+import { Composer } from '../../src/components/composer/composer';
 
 afterEach(cleanup);
 

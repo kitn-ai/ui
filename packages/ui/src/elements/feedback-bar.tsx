@@ -1,5 +1,5 @@
 import { defineWebComponent } from './define';
-import { FeedbackBar, type FeedbackValue, type FeedbackDetail } from '../components/feedback-bar';
+import { FeedbackBar, type FeedbackValue, type FeedbackDetail } from '../components/feedback/feedback-bar';
 
 interface Props extends Record<string, unknown> {
   /** The banner label (e.g. "Was this helpful?"). Attribute: `bar-title`

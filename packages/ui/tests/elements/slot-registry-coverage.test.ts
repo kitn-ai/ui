@@ -12,7 +12,7 @@
  * SCOPE, deliberately narrow. This walks a facade file and the ELEMENT-LOCAL
  * helper modules it imports (`./default-input`, where `<kai-prompt-input>` builds
  * its composer). It does NOT follow into ../components/ — `<kai-chat>`'s slots are
- * declared in components/chat-thread.tsx, which `<kai-workspace>` also renders, and
+ * declared in components/chat/chat-thread.tsx, which `<kai-workspace>` also renders, and
  * asserting a slot is reachable through a second element's shadow root without
  * having verified that it is would be a check pretending to know something. Those
  * registry entries are simply left unasserted here.

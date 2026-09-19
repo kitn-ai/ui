@@ -1,7 +1,7 @@
 import { test, expect, afterEach } from 'vitest';
 import { render } from '@solidjs/testing-library';
 import { createSignal } from 'solid-js';
-import { Switch } from '../../src/components/switch';
+import { Switch } from '../../src/components/switch/switch';
 
 afterEach(() => { document.body.innerHTML = ''; });
 

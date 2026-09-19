@@ -1,5 +1,5 @@
 import { defineWebComponent } from './define';
-import { TasksCard, type TasksCardController, type TasksCardData } from '../components/tasks-card';
+import { TasksCard, type TasksCardController, type TasksCardData } from '../components/tasks/tasks-card';
 import type { CardResolution } from '../primitives/card-contract';
 
 interface Props extends Record<string, unknown> {

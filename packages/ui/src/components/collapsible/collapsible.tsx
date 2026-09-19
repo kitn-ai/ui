@@ -7,7 +7,7 @@ import {
   type JSX,
   type Accessor,
 } from 'solid-js';
-import { cn } from '../utils/cn';
+import { cn } from '../../utils/cn';
 
 // Extend SolidJS JSX to allow `bool:inert` (forces setAttribute so jsdom reflects it as an attribute).
 declare module 'solid-js' {

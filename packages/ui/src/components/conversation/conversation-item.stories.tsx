@@ -2,9 +2,9 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { expect, fn, userEvent, waitFor } from 'storybook/test';
 import { createSignal, For } from 'solid-js';
 import '../elements/register'; // side effect: registers kai-menu for the slotted rows' kebab
-import type { KaiMenuItem } from '../elements/menu';
+import type { KaiMenuItem } from '../../elements/menu';
 import { ConversationItem, SlottedConversationItem } from './conversation-item';
-import { componentDescription } from '../stories/docs/element-controls';
+import { componentDescription } from '../../stories/docs/element-controls';
 
 // kai-menu is used as a JSX element below; the tag is declared (identically) by
 // sibling story files. TypeScript merges identical global augmentations, so this

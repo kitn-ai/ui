@@ -4,10 +4,10 @@
 // re-openable DismissedStub; Reopen emits `{ kind:'reopen', cardId }`.
 import { test, expect, afterEach } from 'vitest';
 import { render, fireEvent } from '@solidjs/testing-library';
-import { ConfirmCard, type ConfirmCardData } from '../../src/components/confirm-card';
-import { ChoiceCard, type ChoiceCardData } from '../../src/components/choice-card';
-import { TasksCard, type TasksCardData } from '../../src/components/tasks-card';
-import { Form, type FormDefinition } from '../../src/components/form';
+import { ConfirmCard, type ConfirmCardData } from '../../src/components/confirm-card/confirm-card';
+import { ChoiceCard, type ChoiceCardData } from '../../src/components/choice-card/choice-card';
+import { TasksCard, type TasksCardData } from '../../src/components/tasks/tasks-card';
+import { Form, type FormDefinition } from '../../src/components/form/form';
 import type { CardEvent, CardHost, CardContext } from '../../src/primitives/card-contract';
 
 afterEach(() => { document.body.innerHTML = ''; });

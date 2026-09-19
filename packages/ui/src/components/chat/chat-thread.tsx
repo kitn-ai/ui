@@ -1,36 +1,36 @@
 import { createSignal, createEffect, createComputed, createMemo, For, Show, Switch, Match, onMount, untrack } from 'solid-js';
-import { ChatConfig, useChatConfig } from '../primitives/chat-config';
-import { type ComposerDoc, normalizeValue, serializeToText } from '../primitives/composer-model';
+import { ChatConfig, useChatConfig } from '../../primitives/chat-config';
+import { type ComposerDoc, normalizeValue, serializeToText } from '../../primitives/composer-model';
 import { ChatContainer, ChatContainerContent, ChatContainerScrollAnchor } from './chat-container';
-import { Message, MessageAvatar, MessageBody } from './message';
-import { type AttachmentData } from './attachments';
-import { createMessageFeedback, type MessageActionDetail } from '../primitives/message-feedback';
-import { ModelSwitcher } from './model-switcher';
-import { ScrollButton } from './scroll-button';
+import { Message, MessageAvatar, MessageBody } from '../message/message';
+import { type AttachmentData } from '../attachments/attachments';
+import { createMessageFeedback, type MessageActionDetail } from '../../primitives/message-feedback';
+import { ModelSwitcher } from '../model/model-switcher';
+import { ScrollButton } from '../scroll/scroll-button';
 import {
   Context, ContextTrigger, ContextContent, ContextContentHeader,
   ContextContentBody, ContextContentFooter, ContextInputUsage, ContextOutputUsage,
-} from './context';
-import { DefaultPromptInput, type RejectedAttachment } from '../elements/default-input';
-import type { MediaTypeFilter } from '../wire/media-types';
-import type { TriggerDef } from './composer';
-import type { ChatMessage, ChatMessageAction, CustomAction } from '../elements/chat-types';
-import type { ProseSize } from '../primitives/chat-config';
-import type { ModelOption } from '../types';
-import type { CardComponentMap } from '../primitives/card-registry';
-import type { CardSchemaMap } from './card-renderer';
+} from '../context/context';
+import { DefaultPromptInput, type RejectedAttachment } from '../../elements/default-input';
+import type { MediaTypeFilter } from '../../wire/media-types';
+import type { TriggerDef } from '../composer/composer';
+import type { ChatMessage, ChatMessageAction, CustomAction } from '../../elements/chat-types';
+import type { ProseSize } from '../../primitives/chat-config';
+import type { ModelOption } from '../../types';
+import type { CardComponentMap } from '../../primitives/card-registry';
+import type { CardSchemaMap } from '../card/card-renderer';
 import type { JSX } from 'solid-js';
-import type { ConversationStore } from '../primitives/conversation-store';
-import { ConversationPanel } from './conversation-panel';
-import type { ConversationSummary } from '../types';
+import type { ConversationStore } from '../../primitives/conversation-store';
+import { ConversationPanel } from '../conversation/conversation-panel';
+import type { ConversationSummary } from '../../types';
 import { MessagesSquare, ArrowLeft } from 'lucide-solid';
-import { Button } from './button';
-import { HomePanel } from './home-panel';
-import { WidgetTabBar } from './widget-tab-bar';
-import { Panel, PanelHeader, PanelBody, PanelFooter } from './panel';
-import { createViewStack, type ViewEntry } from './view-stack';
-import { createConversationController, type ConversationController } from '../stores/conversation-controller';
-import type { HomeConfig, HomeLinkEntry } from '../types';
+import { Button } from '../button/button';
+import { HomePanel } from '../home/home-panel';
+import { WidgetTabBar } from '../widget-tab-bar/widget-tab-bar';
+import { Panel, PanelHeader, PanelBody, PanelFooter } from '../panel/panel';
+import { createViewStack, type ViewEntry } from '../view/view-stack';
+import { createConversationController, type ConversationController } from '../../stores/conversation-controller';
+import type { HomeConfig, HomeLinkEntry } from '../../types';
 
 export interface ChatThreadContextUsage {
   usedTokens: number;
@@ -230,7 +230,7 @@ export interface ChatThreadProps {
    *  `ChatThread` directly as a Solid component rather than through the `<kai-chat>`
    *  shadow-DOM boundary that `empty`/`slot="empty"` targets. Renders INSIDE this
    *  component's own tree — so a caller passing the kit's own `<Empty>` composition
-   *  (`components/empty.tsx`) gets it fully styled by the adopted stylesheet, unlike
+   *  (`components/empty/empty.tsx`) gets it fully styled by the adopted stylesheet, unlike
    *  `slot="empty"`: that slot only ever receives LIGHT-DOM children of the shadow
    *  HOST, and light-DOM nodes are outside the shadow root's adopted stylesheets, so
    *  Tailwind-utility-class content projected there renders bare. Takes priority

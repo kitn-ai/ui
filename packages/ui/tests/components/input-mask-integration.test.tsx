@@ -30,7 +30,7 @@ import { describe, it, expect, afterEach, vi } from 'vitest';
 import '@testing-library/jest-dom/vitest';
 import { createSignal } from 'solid-js';
 import { render, cleanup } from '@solidjs/testing-library';
-import { Input } from '../../src/components/input';
+import { Input } from '../../src/components/input/input';
 
 afterEach(cleanup);
 

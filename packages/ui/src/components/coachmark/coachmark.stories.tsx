@@ -2,9 +2,9 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import type { Placement } from '@floating-ui/dom';
 import { createSignal, Show } from 'solid-js';
 import { Coachmark } from './coachmark';
-import { Button } from './button';
-import { ChatConfig } from '../primitives/chat-config';
-import { componentDescription } from '../stories/docs/element-controls';
+import { Button } from '../button/button';
+import { ChatConfig } from '../../primitives/chat-config';
+import { componentDescription } from '../../stories/docs/element-controls';
 
 /**
  * Story for the presentational `Coachmark`: an onboarding hint bubble anchored to

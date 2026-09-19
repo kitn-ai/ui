@@ -82,10 +82,10 @@ import { fileURLToPath } from 'node:url';
 import { scaffold } from '../mcp/tools/scaffold';
 import { listIntegrations } from '../registry';
 import { defaultModelFor } from '../route-emit';
-import { toOpenAIMessages } from '../../src/wire';
+import { toOpenAIMessages } from '../../src/wire/index';
 import type { Integration } from '../types';
 import type { ChatMessage } from '../../src/elements/chat-types';
-import type { OpenAIWireMessage } from '../../src/wire';
+import type { OpenAIWireMessage } from '../../src/wire/index';
 
 const PKG = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 /** Outside `tests/` and outside `src/` — same reason as the other emitted guards. */

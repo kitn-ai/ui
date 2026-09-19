@@ -1,32 +1,32 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { type JSX, createSignal, createMemo, For } from 'solid-js';
 import { ChevronUp, ChevronDown, X, PanelLeft, Search } from 'lucide-solid';
-import { BuilderPanel, type BuilderConstruct } from '../components/builder-panel';
-import { BuilderLayout, type BuilderViewport } from '../components/builder-layout';
-import { resolveAccentWrapperStyle } from '../components/builder-preview';
-import { ChatThread } from '../components/chat-thread';
-import { ConversationList } from '../components/conversation-list';
-import { mix, StubStatTile, StubCodeBlock } from '../components/builder-skeleton';
+import { BuilderPanel, type BuilderConstruct } from '../components/builder/builder-panel';
+import { BuilderLayout, type BuilderViewport } from '../components/builder/builder-layout';
+import { resolveAccentWrapperStyle } from '../components/builder/builder-preview';
+import { ChatThread } from '../components/chat/chat-thread';
+import { ConversationList } from '../components/conversation/conversation-list';
+import { mix, StubStatTile, StubCodeBlock } from '../components/builder/builder-skeleton';
 import {
   type TriggerGroupState,
   ComposerTriggersSection,
   buildTriggerDefs,
   DEFAULT_SLASH_ENTRIES,
   DEFAULT_MENTION_ENTRIES,
-} from '../components/builder-composer-triggers';
+} from '../components/builder/builder-composer-triggers';
 import {
   type ShellControlsState,
   ShellSection,
   CommandPaletteOverlay,
   CommandPaletteTrigger,
   UserMenu,
-} from '../components/builder-shell-controls';
-import { Tabs, type KaiTabItem } from '../components/tabs';
-import { RadioGroup, type RadioOption } from '../components/radio';
-import { Switch } from '../components/switch';
-import { Select } from '../components/select';
-import { Input } from '../components/input';
-import { Button } from '../components/button';
+} from '../components/builder/builder-shell-controls';
+import { Tabs, type KaiTabItem } from '../components/tabs/tabs';
+import { RadioGroup, type RadioOption } from '../components/radio/radio';
+import { Switch } from '../components/switch/switch';
+import { Select } from '../components/select/select';
+import { Input } from '../components/input/input';
+import { Button } from '../components/button/button';
 import type { ChatMessage } from './chat-types';
 import type { ConversationGroup, ConversationSummary } from '../types';
 
@@ -615,7 +615,7 @@ const meta = { title: 'Labs/Builder/Multi-mode', parameters: { layout: 'fullscre
 export default meta;
 type Story = StoryObj;
 
-// BuilderPanel/BuilderLayout are internal to the builder app (src/components/builder-panel.tsx,
+// BuilderPanel/BuilderLayout are internal to the builder app (src/components/builder/builder-panel.tsx,
 // builder-layout.tsx) -- neither ships in a public @kitn.ai/ui entry point. The snippet below
 // names the real composition and wiring rather than a package import; ChatThread and
 // ConversationList ARE public (@kitn.ai/ui) and are shown as the two modes actually use them.

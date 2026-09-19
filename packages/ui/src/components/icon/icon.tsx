@@ -158,7 +158,7 @@ export function renderIcon(
   if (!isUrl && /^[a-z][a-z0-9-]*$/.test(icon)) {
     console.error(
       `[kai-icon] unknown icon name "${icon}" — rendering a fallback glyph. ` +
-        'Add it to NAMED_ICONS in src/components/icon.tsx, or pass a URL / an inline SVG via slot="icon". ' +
+        'Add it to NAMED_ICONS in src/components/icon/icon.tsx, or pass a URL / an inline SVG via slot="icon". ' +
         'The full roster is exported as ICON_NAMES.',
     );
     return <CircleAlert class={opts?.imgClass ?? opts?.class ?? 'size-4 shrink-0'} />;

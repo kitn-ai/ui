@@ -1,6 +1,6 @@
 import { type JSX, createSignal, createEffect, on } from 'solid-js';
-import { cn } from '../utils/cn';
-import { Input } from './input';
+import { cn } from '../../utils/cn';
+import { Input } from '../input/input';
 
 /** A 3- or 6-digit CSS hex color, `#` included (`#e91e63`, `#fff`). */
 const HEX_RE = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;

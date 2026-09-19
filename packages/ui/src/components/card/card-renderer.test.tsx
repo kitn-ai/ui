@@ -16,9 +16,9 @@ import { describe, it, expect, afterEach, vi } from 'vitest';
 import '@testing-library/jest-dom/vitest';
 import { render, cleanup } from '@solidjs/testing-library';
 import { CardRenderer } from './card-renderer';
-import { cardFromToolCall } from '../schemas/from-tool-call';
-import { CardProvider } from '../primitives/card-host';
-import type { CardContext, CardEnvelope } from '../primitives/card-contract';
+import { cardFromToolCall } from '../../schemas/from-tool-call';
+import { CardProvider } from '../../primitives/card-host';
+import type { CardContext, CardEnvelope } from '../../primitives/card-contract';
 
 const CTX: CardContext = { theme: { mode: 'light' }, locale: 'en' };
 
@@ -219,7 +219,7 @@ describe('CardRenderer: the unknown-TYPE path is unchanged', () => {
     // business. `confirm.schema.json` describes OUR ConfirmCard; applying it to
     // someone else's would reject payloads that are correct for what is on screen.
     // Two existing tests in the suite depend on this
-    // (tests/components/card-renderer.test.tsx and
+    // (tests/components/card/card-renderer.test.tsx and
     // src/elements/thread-cards.declarative.test.tsx, both of which override
     // `confirm` with `data: {}`), which is how the rule was found.
     const Custom = (p: { envelope: CardEnvelope }) => <div data-custom>{p.envelope.id}</div>;

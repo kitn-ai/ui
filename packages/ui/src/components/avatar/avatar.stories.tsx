@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { Avatar } from './avatar';
-import { componentDescription } from '../stories/docs/element-controls';
+import { componentDescription } from '../../stories/docs/element-controls';
 
 const meta = {
   title: 'Components/Avatar',

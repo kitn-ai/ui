@@ -5,8 +5,8 @@ import { readSlots, CONVERSATIONS_SLOTS } from './slots';
 import {
   ConversationList, CollapsedRail, createConversationItemsController,
   type ConversationListController,
-} from '../components/conversation-list';
-import type { ConversationRowDensity } from '../components/conversation-item';
+} from '../components/conversation/conversation-list';
+import type { ConversationRowDensity } from '../components/conversation/conversation-item';
 import type { ConversationGroup, ConversationSummary } from '../types';
 
 interface Props extends Record<string, unknown> {
@@ -145,7 +145,7 @@ defineWebComponent<Props, Events>('kai-conversations', {
 
   // The parent-item contract: selection flowing container→item, roving tabindex,
   // ARIA list-row bookkeeping — pure DOM, host-agnostic (see the controller's JSDoc in
-  // components/conversation-list.tsx). Solid context cannot cross the element
+  // components/conversation/conversation-list.tsx). Solid context cannot cross the element
   // boundary, so the channel is DOM traversal by construction.
   const itemsController = createConversationItemsController({
     getItems: itemHosts,

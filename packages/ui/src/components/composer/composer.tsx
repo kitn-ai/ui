@@ -10,8 +10,8 @@ import {
   Show,
   For,
 } from 'solid-js';
-import { cn } from '../utils/cn';
-import { useChatConfig, textClass } from '../primitives/chat-config';
+import { cn } from '../../utils/cn';
+import { useChatConfig, textClass } from '../../primitives/chat-config';
 import {
   type ComposerDoc,
   type EntityRef,
@@ -19,7 +19,7 @@ import {
   serializeToText,
   entitiesOf,
   docIsEmpty,
-} from '../primitives/composer-model';
+} from '../../primitives/composer-model';
 import {
   parseDom,
   renderDoc,
@@ -30,8 +30,8 @@ import {
   isEntityEl,
   kindGlyph,
 } from './composer-dom';
-import { activeTriggerFor } from '../primitives/composer-triggers';
-import { usePosition, useDismiss, createPresence } from './overlay';
+import { activeTriggerFor } from '../../primitives/composer-triggers';
+import { usePosition, useDismiss, createPresence } from '../overlay/overlay';
 import { findHighlightMatches, applyHighlights } from './composer-highlight';
 import { createHistory } from './composer-history';
 

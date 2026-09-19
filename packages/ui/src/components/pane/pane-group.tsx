@@ -1,7 +1,7 @@
 import { type JSX, For, Show } from 'solid-js';
 import { MoreHorizontal, X } from 'lucide-solid';
 import { type PaneStatusTone } from './pane';
-import { cn } from '../utils/cn';
+import { cn } from '../../utils/cn';
 
 /** The work state of a tab's agent/process, mapped to the kit's tool / status
  *  hues — the SAME vocabulary as {@link './pane'.PaneStatus} and the AgentCard:

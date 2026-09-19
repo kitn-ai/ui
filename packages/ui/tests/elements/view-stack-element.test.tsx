@@ -5,7 +5,7 @@
  * reflected as navigation happens AND drives navigation when written).
  *
  * Exists because the first block build found a bug the Solid-layer suite
- * (src/components/view-stack.test.tsx) could not see: on the bare element,
+ * (src/components/view/view-stack.test.tsx) could not see: on the bare element,
  * `selectTab('messages'); push('chat'); back()` landed on the DEFAULT root
  * ('home') instead of the root the drill was entered from ('messages').
  *
@@ -16,7 +16,7 @@
 import { afterEach, describe, expect, test } from 'vitest';
 import '../../src/elements/view-stack';
 import '../../src/elements/view';
-import type { ViewStackState } from '../../src/components/view-stack';
+import type { ViewStackState } from '../../src/components/view/view-stack';
 
 const flush = () => new Promise((r) => setTimeout(r, 0));
 

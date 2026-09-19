@@ -6,7 +6,7 @@
  * `defineWebComponent` registers a real Shadow-DOM custom element and is not
  * suitable for jsdom behavioral tests, so the element's pure helpers are
  * tested in isolation here; the navigation semantics themselves are pinned in
- * `src/components/view-stack.test.tsx` against the same `createViewStack`
+ * `src/components/view/view-stack.test.tsx` against the same `createViewStack`
  * core both the Solid component and the element facade run on.
  */
 import { describe, it, expect } from 'vitest';

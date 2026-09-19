@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal } from 'solid-js';
-import { DerivedBuilderPanel } from '../components/builder-panel-derived';
+import { DerivedBuilderPanel } from '../components/builder/builder-panel-derived';
 import { buildableTemplates, type BuildableTemplate } from '../../mcp/construct/templates';
 import { validateConstruct, type Construct, type ConstructProblem } from '../../mcp/construct/schema';
 
@@ -30,7 +30,7 @@ function Demo(props: { template: BuildableTemplate }) {
 const meta = { title: 'Labs/Builder/Derived panel', parameters: { layout: 'fullscreen' } } satisfies Meta;
 export default meta;
 
-// DerivedBuilderPanel is internal to the builder app (src/components/builder-panel-derived.tsx,
+// DerivedBuilderPanel is internal to the builder app (src/components/builder/builder-panel-derived.tsx,
 // consumed by apps/builder/App.tsx) -- it ships in no public @kitn.ai/ui entry point, so the
 // snippet below shows real call-site usage rather than a package import.
 const src = (code: string) => ({

@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { action } from 'storybook/actions';
 import { Checkpoint, CheckpointIcon, CheckpointTrigger } from './checkpoint';
-import { componentDescription } from '../stories/docs/element-controls';
+import { componentDescription } from '../../stories/docs/element-controls';
 
 const meta = {
   title: 'Components/Checkpoint',

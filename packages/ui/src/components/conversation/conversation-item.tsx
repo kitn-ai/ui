@@ -1,8 +1,8 @@
 import { Show, splitProps, createMemo, type JSX } from 'solid-js';
 import { MessageSquare } from 'lucide-solid';
-import { cn } from '../utils/cn';
-import { isConversationUnread } from '../primitives/conversation-store';
-import type { ConversationSummary } from '../types';
+import { cn } from '../../utils/cn';
+import { isConversationUnread } from '../../primitives/conversation-store';
+import type { ConversationSummary } from '../../types';
 
 /**
  * Row density, the P-7 public axis (blocks-and-parts design 2026-08-31).
@@ -89,7 +89,7 @@ export function relativeTimeShort(iso?: string, now: number = Date.now()): strin
 // package root — it is headless data logic, not rendering. Re-exported here
 // so this file's existing importers (ConversationPanel, HomePanel,
 // ChatThread, tests) keep their paths.
-export { isConversationUnread } from '../primitives/conversation-store';
+export { isConversationUnread } from '../../primitives/conversation-store';
 
 /**
  * The slotted-item shape rendered by `<kai-conversation-item>` — the composed
@@ -247,7 +247,7 @@ export function ConversationItem(props: ConversationItemProps) {
   // below. The consumer needs BOTH — a new array (which is what notifies at all) and a
   // new object for the item that changed (which is what this row can see). Adds,
   // removes and reorders are fine on a fresh array alone, since those rows' identities
-  // already differ. Pinned by `src/components/reactivity-contract.test.tsx`.
+  // already differ. Pinned by `src/components/reactivity-contract/reactivity-contract.test.tsx`.
   const trailing = createMemo(
     () => local.conversation.trailing ?? relativeTimeShort(local.conversation.updatedAt ?? local.conversation.lastMessageAt),
   );
@@ -262,8 +262,8 @@ export function ConversationItem(props: ConversationItemProps) {
       // `isActive` drives the selected LOOK below; it has to reach assistive tech
       // too, or the active conversation is visible only to sighted users. `true`
       // rather than `page` because this selects a conversation within the app, it
-      // is not page navigation — same call as components/agent-card.tsx and components/pane-group.tsx
-      // (components/nav.tsx uses `page` because its items really are nav links).
+      // is not page navigation — same call as components/agent-card/agent-card.tsx and components/pane/pane-group.tsx
+      // (components/nav/nav.tsx uses `page` because its items really are nav links).
       aria-current={local.isActive ? 'true' : undefined}
       onClick={() => local.onSelect(local.conversation.id)}
       class={cn(

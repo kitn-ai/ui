@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { For, createSignal, onCleanup } from 'solid-js';
-import { BuildWait, BUILD_WAIT_STEPS } from '../components/build-wait';
-import { BUILDER_TEMPLATES, type BuilderCardTemplateId } from '../components/builder-start';
+import { BuildWait, BUILD_WAIT_STEPS } from '../components/build-wait/build-wait';
+import { BUILDER_TEMPLATES, type BuilderCardTemplateId } from '../components/builder/builder-start';
 
 // Labs/Builder/Build wait — the screen the builder shows while a construct's
 // preview boots. It replaces one line of small text, which the owner called
@@ -27,7 +27,7 @@ const meta = { title: 'Labs/Builder/Build wait', parameters: { layout: 'centered
 export default meta;
 type Story = StoryObj;
 
-// BuildWait is internal to the builder app (src/components/build-wait.tsx) -- it ships in no
+// BuildWait is internal to the builder app (src/components/build-wait/build-wait.tsx) -- it ships in no
 // public @kitn.ai/ui entry point, so the snippet below shows real usage of the component itself
 // rather than a package import.
 const src = (code: string) => ({

@@ -5,7 +5,7 @@
 // real computed-color proof lives in tests/e2e/content-brand-bleed.spec.ts.
 import { describe, it, expect } from 'vitest';
 import { render } from '@solidjs/testing-library';
-import { PromptSuggestion } from '../../src/components/prompt-suggestion';
+import { PromptSuggestion } from '../../src/components/prompt/prompt-suggestion';
 
 describe('PromptSuggestion highlight token', () => {
   it('never emits text-primary on the matched substring; uses text-foreground', () => {

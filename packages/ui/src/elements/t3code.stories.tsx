@@ -3,7 +3,7 @@ import { createSignal, Show } from 'solid-js';
 import { ChevronDown } from 'lucide-solid';
 import './register'; // every kai-* element used below
 import t3Favicon from './logos/t3.ico'; // the gathered t3 brand mark, for the real-domain project rows
-import type { KaiNavItem } from '../components/nav';
+import type { KaiNavItem } from '../components/nav/nav';
 import type { KaiCommandItem } from './command';
 
 // Labs/Apps: a second dogfood — "T3 Code", a desktop control plane for coding

@@ -1,5 +1,5 @@
 import { defineWebComponent } from './define';
-import { Screen, type ScreenController } from '../components/screen';
+import { Screen, type ScreenController } from '../components/screen/screen';
 import { wireDisclosure } from './disclosure';
 
 interface Props extends Record<string, unknown> {

@@ -2,7 +2,7 @@
 import { describe, it, expect } from 'vitest';
 import { createRoot } from 'solid-js';
 import { createKaiChat } from './create-kai-chat';
-import { partsToText } from '../state';
+import { partsToText } from '../state/index';
 
 describe('createKaiChat (Solid)', () => {
   it('append/update/remove drive the messages accessor', () => {

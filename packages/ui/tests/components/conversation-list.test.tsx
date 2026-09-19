@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@solidjs/testing-library';
-import { ConversationList, CollapsedRail } from '../../src/components/conversation-list';
+import { ConversationList, CollapsedRail } from '../../src/components/conversation/conversation-list';
 import type { ConversationSummary, ConversationGroup } from '../../src/types';
 
 describe('ConversationList', () => {

@@ -28,7 +28,7 @@ import './context-meter';
 import './toast';
 
 // jsdom does not implement PointerEvent — shim it so fireEvent.pointerEnter works.
-// Same shim as components/context.test.tsx.
+// Same shim as components/context/context.test.tsx.
 if (typeof (globalThis as unknown as Record<string, unknown>).PointerEvent === 'undefined') {
   (globalThis as unknown as Record<string, unknown>).PointerEvent = class PointerEvent extends MouseEvent {
     constructor(type: string, params?: PointerEventInit) { super(type, params); }

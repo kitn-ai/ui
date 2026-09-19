@@ -1,6 +1,6 @@
 import { render, fireEvent, screen } from '@solidjs/testing-library';
 import { ChatConfig } from '../../src/primitives/chat-config';
-import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem } from '../../src/components/dropdown';
+import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem } from '../../src/components/dropdown/dropdown';
 
 test('dropdown content portals into the configured mount node when open', () => {
   const mount = document.createElement('div');

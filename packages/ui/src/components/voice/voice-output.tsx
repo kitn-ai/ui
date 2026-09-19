@@ -1,8 +1,8 @@
 import { splitProps, Show, createSignal, createEffect, on, onCleanup } from 'solid-js';
-import { cn } from '../utils/cn';
-import { Button } from './button';
-import { Tooltip } from './tooltip';
-import { hasSpeechSynthesis, cancelSpeech, speakUtterance, pauseSpeech, resumeSpeech } from '../primitives/speech';
+import { cn } from '../../utils/cn';
+import { Button } from '../button/button';
+import { Tooltip } from '../tooltip/tooltip';
+import { hasSpeechSynthesis, cancelSpeech, speakUtterance, pauseSpeech, resumeSpeech } from '../../primitives/speech';
 
 /** Imperative handle exposed via `controllerRef` — surfaces the playback controls
  *  so the `<kai-voice-output>` facade can forward them as instance methods. Both

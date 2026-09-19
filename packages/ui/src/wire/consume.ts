@@ -17,7 +17,7 @@ import {
   type ModelUsage,
   type StopReason,
 } from './chunk';
-import type { RawOrigin } from '../components/tool-types';
+import type { RawOrigin } from '../components/tool/tool-types';
 import {
   emitWireDiagnostic,
   nextStreamId,

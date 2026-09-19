@@ -1,7 +1,7 @@
 import { type JSX, For } from 'solid-js';
-import { cn } from '../utils/cn';
-import { CardSurface } from './card-surface';
-import { TEMPLATES, type TemplateId } from '../../mcp/construct/templates';
+import { cn } from '../../utils/cn';
+import { CardSurface } from '../card/card-surface';
+import { TEMPLATES, type TemplateId } from '../../../mcp/construct/templates';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // The template picker's data — T-3/T-4 (docs/superpowers/specs/
@@ -80,7 +80,7 @@ export const BLUEPRINT_BG = {
 /**
  * `BuilderStart` — the builder's opening screen: six selectable template
  * cards (T-7, grown from four in Round P2). Each card is a real
- * `components/card-surface.tsx` `CardSurface` (`clickable`,
+ * `components/card/card-surface.tsx` `CardSurface` (`clickable`,
  * `media` for the illustration, `header` for the name), not a hand-rolled
  * button — the kit's own primitive already gives a `role="button"` with
  * Enter/Space activation, which settles this screen's keyboard-semantics
@@ -174,7 +174,7 @@ export function BuilderStart(props: BuilderStartProps): JSX.Element {
                   name-plus-one-liner pairing that belongs visually
                   together (owner amendment, live review). `gap-1` here is
                   local to this one block, so it tightens only this pairing
-                  without touching `components/card-surface.tsx`'s shared spacing. */}
+                  without touching `components/card/card-surface.tsx`'s shared spacing. */}
               <div class="flex flex-col gap-1">
                 {/* h2, not h3: the start screen's own page heading is an h1
                     ("Choose a starting point"), and these card titles sit

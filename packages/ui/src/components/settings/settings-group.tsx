@@ -1,6 +1,6 @@
 import { type JSX, Show } from 'solid-js';
-import { cn } from '../utils/cn';
-import { RowGroup } from './row-group';
+import { cn } from '../../utils/cn';
+import { RowGroup } from '../row/row-group';
 
 export interface SettingsGroupProps {
   /** Small section heading shown above the card. */

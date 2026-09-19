@@ -1,5 +1,5 @@
 import { defineWebComponent } from './define';
-import { Form, type FormController, type FormDefinition } from '../components/form';
+import { Form, type FormController, type FormDefinition } from '../components/form/form';
 import type { CardResolution } from '../primitives/card-contract';
 
 interface Props extends Record<string, unknown> {

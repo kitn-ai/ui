@@ -1,5 +1,5 @@
 import { type JSX, createSignal, splitProps } from 'solid-js';
-import { cn } from '../utils/cn';
+import { cn } from '../../utils/cn';
 
 export interface SwitchProps
   extends Omit<

@@ -1,5 +1,5 @@
 import { defineWebComponent } from './define';
-import { Reasoning, ReasoningTrigger, ReasoningContent, type ReasoningController } from '../components/reasoning';
+import { Reasoning, ReasoningTrigger, ReasoningContent, type ReasoningController } from '../components/reasoning/reasoning';
 import { ChatConfig, useChatConfig } from '../primitives/chat-config';
 import { wireDisclosure } from './disclosure';
 

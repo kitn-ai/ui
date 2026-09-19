@@ -1,7 +1,7 @@
 import { type JSX, Show } from 'solid-js';
-import { cn } from '../utils/cn';
-import { Button } from './button';
-import { Card } from './card';
+import { cn } from '../../utils/cn';
+import { Button } from '../button/button';
+import { Card } from '../card/card';
 import { RotateCcw } from 'lucide-solid';
 
 // ─────────────────────────────────────────────────────────────────────────────

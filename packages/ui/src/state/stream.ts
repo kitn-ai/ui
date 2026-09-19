@@ -1,8 +1,8 @@
 // src/state/stream.ts
 import type { ChatMessage, MessagePart, Source } from '../elements/chat-types';
-import type { ToolPart } from '../components/tool-types';
+import type { ToolPart } from '../components/tool/tool-types';
 import type { CardEnvelope } from '../primitives/card-contract';
-import type { AttachmentData } from '../components/attachment-types';
+import type { AttachmentData } from '../components/attachment-types/attachment-types';
 import { appendReasoningPart, appendTextPart, upsertCardPart, upsertToolPart, type ReasoningOpts } from './parts';
 
 /** The one universal contract: a functional-updater setter (React setState shape). */
@@ -22,7 +22,7 @@ export type SetMessages = (updater: (prev: ChatMessage[]) => ChatMessage[]) => v
  * nine, and fails with nine "Unused '@ts-expect-error'" if this guard is lifted.
  *
  * Tightening the PAYLOAD types is not available. A citation with no url and no
- * title is a rendered, tested state (`citationTitle` in components/message.tsx
+ * title is a rendered, tested state (`citationTitle` in components/message/message.tsx
  * falls through title -> url -> a generic word, and message.stories.tsx ships
  * "a citation with no url at all"), and a patch/opts bag is optional by
  * definition. So the exclusivity lives on the PARAMETER instead, which leaves

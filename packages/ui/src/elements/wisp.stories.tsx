@@ -3,12 +3,12 @@ import { createSignal, createEffect, Show, For, type Component } from 'solid-js'
 import { Code2, FileText, Globe, MessageSquare } from 'lucide-solid';
 import { expect, userEvent, waitFor } from 'storybook/test';
 import './register'; // every kai-* element used below
-import type { KaiNavItem } from '../components/nav';
+import type { KaiNavItem } from '../components/nav/nav';
 import type { KaiCommandItem } from './command';
 import type { KaiMenuItem } from './menu';
-import { textMessage } from '../state';
+import { textMessage } from '../state/index';
 import type { ChatMessage } from './chat-types';
-import { relativeTimeShort } from '../components/conversation-item';
+import { relativeTimeShort } from '../components/conversation/conversation-item';
 
 // Labs/Apps: "Wisp" - an invented general-chat product (no real app; it just
 // looks like one) whose whole job is to be the living demo of CONSTRUCTION over

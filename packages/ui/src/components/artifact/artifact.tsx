@@ -10,13 +10,13 @@ import {
   onCleanup,
   Show,
 } from 'solid-js';
-import { cn } from '../utils/cn';
-import { Button } from './button';
-import { CodeBlock, CodeBlockCode } from './code-block';
-import { FileTree, type FileTreeFile } from './file-tree';
-import { Loader } from './loader';
-import { isPdfPreviewEnabled, renderPdfInto } from '../primitives/pdf-preview';
-import { isSafeUrl, isScriptUrl } from '../primitives/card-routing';
+import { cn } from '../../utils/cn';
+import { Button } from '../button/button';
+import { CodeBlock, CodeBlockCode } from '../code-block/code-block';
+import { FileTree, type FileTreeFile } from '../file/file-tree';
+import { Loader } from '../loader/loader';
+import { isPdfPreviewEnabled, renderPdfInto } from '../../primitives/pdf-preview';
+import { isSafeUrl, isScriptUrl } from '../../primitives/card-routing';
 import {
   ArrowLeft,
   ArrowRight,

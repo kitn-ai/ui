@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@solidjs/testing-library';
 import { createSignal } from 'solid-js';
-import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem, DropdownRadioItem } from '../../src/components/dropdown';
+import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem, DropdownRadioItem } from '../../src/components/dropdown/dropdown';
 
 // jsdom (v24) does not implement the PointerEvent constructor. useDismiss
 // listens for `pointerdown`; copy the shim from overlay.test.tsx.

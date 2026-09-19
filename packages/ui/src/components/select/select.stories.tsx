@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { fn } from 'storybook/test';
 import { createSignal, createEffect } from 'solid-js';
 import { Select, type SelectProps } from './select';
-import { componentDescription } from '../stories/docs/element-controls';
+import { componentDescription } from '../../stories/docs/element-controls';
 
 const MODELS = [
   { value: 'opus', label: 'Claude Opus' },

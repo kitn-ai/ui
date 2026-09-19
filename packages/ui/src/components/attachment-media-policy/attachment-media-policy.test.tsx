@@ -40,10 +40,10 @@ import {
   getMediaCategory,
   type AttachmentData,
   type AttachmentVariant,
-} from './attachments';
-import { MessageBody } from './message';
-import { DEFAULT_MEDIA_POLICY, encodableMediaTypes } from '../wire/media-types';
-import type { MessagePart } from '../elements/chat-types';
+} from '../attachments/attachments';
+import { MessageBody } from '../message/message';
+import { DEFAULT_MEDIA_POLICY, encodableMediaTypes } from '../../wire/media-types';
+import type { MessagePart } from '../../elements/chat-types';
 
 afterEach(cleanup);
 

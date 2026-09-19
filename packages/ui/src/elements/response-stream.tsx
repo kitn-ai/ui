@@ -1,5 +1,5 @@
 import { defineWebComponent } from './define';
-import { ResponseStream, type Mode } from '../components/response-stream';
+import { ResponseStream, type Mode } from '../components/response/response-stream';
 
 interface Props extends Record<string, unknown> {
   /** Text to stream. A string, or an `AsyncIterable<string>` (set as a JS

@@ -1,5 +1,5 @@
 import { type JSX, splitProps } from 'solid-js';
-import { cn } from '../utils/cn';
+import { cn } from '../../utils/cn';
 import { Dynamic } from 'solid-js/web';
 
 export interface TextShimmerProps extends JSX.HTMLAttributes<HTMLElement> {

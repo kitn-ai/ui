@@ -1,8 +1,8 @@
-// src/components/artifact-card.tsx
+// src/components/artifact/artifact-card.tsx
 // The `artifact` built-in card: chrome + sizing around <Artifact>, plus the
 // bridge from its observation callbacks onto the frozen Card Contract.
 import { createUniqueId, untrack, Show, type JSX } from 'solid-js';
-import type { CardHost } from '../primitives/card-contract';
+import type { CardHost } from '../../primitives/card-contract';
 import { Artifact } from './artifact';
 
 // `ArtifactCardData` is AUTHORED IN ../primitives/card-data-types.ts, along with
@@ -11,14 +11,14 @@ import { Artifact } from './artifact';
 // that file's header, for why the card payload types left a `.tsx` and why they
 // are `type` aliases. Re-exported here unchanged.
 
-import type { ArtifactCardData } from '../primitives/card-data-types';
+import type { ArtifactCardData } from '../../primitives/card-data-types';
 
 export type {
   ArtifactCardData,
   ArtifactCardEnvelope,
   ArtifactCardFile,
   ArtifactCardTab,
-} from '../primitives/card-data-types';
+} from '../../primitives/card-data-types';
 
 /** Height the artifact card falls back to. Tall enough that a framed page is
  *  actually legible in a thread, short enough to leave the conversation visible. */

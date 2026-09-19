@@ -92,4 +92,4 @@ export type {
 // consumer importing only from '@kitn.ai/ui/wire' can annotate the values these
 // functions take and return without a second import.
 export type { ChatMessage, MessagePart, MessageSource, RawOrigin } from '../elements/chat-types';
-export type { ToolPart } from '../components/tool-types';
+export type { ToolPart } from '../components/tool/tool-types';

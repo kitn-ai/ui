@@ -1,5 +1,5 @@
 import { type JSX, splitProps, createEffect } from 'solid-js';
-import { cn } from '../utils/cn';
+import { cn } from '../../utils/cn';
 
 export interface CheckboxProps extends Omit<JSX.InputHTMLAttributes<HTMLInputElement>, 'type' | 'children'> {
   /**

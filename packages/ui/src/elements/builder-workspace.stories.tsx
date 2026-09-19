@@ -1,15 +1,15 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { type JSX, createSignal, createMemo, createEffect, onCleanup, For, Show } from 'solid-js';
 import { Plus, ChevronUp, ChevronDown, X } from 'lucide-solid';
-import { BuilderPanel, type BuilderConstruct } from '../components/builder-panel';
-import { BuilderLayout, type BuilderViewport } from '../components/builder-layout';
-import { resolveAccentWrapperStyle } from '../components/builder-preview';
-import { ChatThread } from '../components/chat-thread';
-import { WorkspaceShell } from '../components/workspace-shell';
-import { WorkSurface } from '../components/work-surface';
-import { AppHeader, type AppHeaderAction } from '../components/app-header';
-import type { ArtifactTab } from '../components/artifact';
-import { mix, StubStatTile, StubCodeBlock } from '../components/builder-skeleton';
+import { BuilderPanel, type BuilderConstruct } from '../components/builder/builder-panel';
+import { BuilderLayout, type BuilderViewport } from '../components/builder/builder-layout';
+import { resolveAccentWrapperStyle } from '../components/builder/builder-preview';
+import { ChatThread } from '../components/chat/chat-thread';
+import { WorkspaceShell } from '../components/workspace/workspace-shell';
+import { WorkSurface } from '../components/work-surface/work-surface';
+import { AppHeader, type AppHeaderAction } from '../components/app-header/app-header';
+import type { ArtifactTab } from '../components/artifact/artifact';
+import { mix, StubStatTile, StubCodeBlock } from '../components/builder/builder-skeleton';
 import {
   type UserActionId,
   type AssistantActionId,
@@ -19,26 +19,26 @@ import {
   DEFAULT_USER_ACTION_ROWS,
   DEFAULT_ASSISTANT_ACTION_ROWS,
   ActionRowPicker,
-} from '../components/builder-message-actions';
+} from '../components/builder/builder-message-actions';
 import {
   type TriggerGroupState,
   ComposerTriggersSection,
   buildTriggerDefs,
   DEFAULT_SLASH_ENTRIES,
   DEFAULT_MENTION_ENTRIES,
-} from '../components/builder-composer-triggers';
+} from '../components/builder/builder-composer-triggers';
 import {
   type ShellControlsState,
   ShellSection,
   CommandPaletteOverlay,
-} from '../components/builder-shell-controls';
-import { RadioGroup, type RadioOption } from '../components/radio';
-import { Switch } from '../components/switch';
-import { Select } from '../components/select';
-import { Input } from '../components/input';
-import { Button } from '../components/button';
-import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem } from '../components/dropdown';
-import { renderIcon } from '../components/icon';
+} from '../components/builder/builder-shell-controls';
+import { RadioGroup, type RadioOption } from '../components/radio/radio';
+import { Switch } from '../components/switch/switch';
+import { Select } from '../components/select/select';
+import { Input } from '../components/input/input';
+import { Button } from '../components/button/button';
+import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem } from '../components/dropdown/dropdown';
+import { renderIcon } from '../components/icon/icon';
 import type { ChatMessage, ChatMessageAction, CustomAction } from './chat-types';
 
 // Labs/Builder/Workspace — T-1 build-out (docs/superpowers/specs/
@@ -50,7 +50,7 @@ import type { ChatMessage, ChatMessageAction, CustomAction } from './chat-types'
 // Layout radio.
 //
 // THE SPLIT FRAME IS A REAL COMPONENT, NOT A HAND-ROLLED FLEX ROW:
-// `components/workspace-shell.tsx`'s `WorkspaceShell` — "the chat-agnostic
+// `components/workspace/workspace-shell.tsx`'s `WorkspaceShell` — "the chat-agnostic
 // workspace layout shell: five regions ... with resize handles between the
 // columns" (its own doc comment, read before use) — already IS this split:
 // `start` holds the chat rail, `children` (the main region, always
@@ -64,7 +64,7 @@ import type { ChatMessage, ChatMessageAction, CustomAction } from './chat-types'
 // building any of this rather than guessed at:
 //
 // 1. WORK-PANE CHROME. PROMOTED 2026-08-30 into the real component
-//    `components/work-surface.tsx` (`WorkSurface`) — this story now RENDERS
+//    `components/work-surface/work-surface.tsx` (`WorkSurface`) — this story now RENDERS
 //    that component instead of holding its own copy, so the approved design
 //    and the shipped product cannot drift. Everything below is the recorded
 //    reasoning for the design it carries; the component's own doc comment
@@ -85,7 +85,7 @@ import type { ChatMessage, ChatMessageAction, CustomAction } from './chat-types'
 // 2. EXPAND (owner amendment): a v0-style maximize toggle, also optional.
 //    Checked `elements/v0.stories.tsx` first: v0's real `<kai-artifact
 //    expandable>` maximizes "via the kai-resizable maximize protocol" (that
-//    file's own comment) — `components/resizable.tsx`'s `ResizablePanelGroup` has a
+//    file's own comment) — `components/resizable/resizable.tsx`'s `ResizablePanelGroup` has a
 //    real `maximizedIndex`/`onMaximizeChange` API. But `WorkspaceShell`
 //    (what THIS template's split actually uses, confirmed by reading it
 //    before building) does NOT forward that prop to its internal
@@ -99,7 +99,7 @@ import type { ChatMessage, ChatMessageAction, CustomAction } from './chat-types'
 //    the v0/kai-artifact maximize protocol, which this shell does not carry.
 //
 // APP HEADER: PROMOTED 2026-08-30 into the real component
-// `components/app-header.tsx` (`AppHeader`) — the same treatment the work
+// `components/app-header/app-header.tsx` (`AppHeader`) — the same treatment the work
 // pane's chrome got above, and for the same reason: the emitted app had
 // drifted off this design (a text "Theme" button, no search at all, a bare
 // avatar with no menu, and the whole cluster stuffed into ChatThread's own
@@ -155,7 +155,7 @@ import type { ChatMessage, ChatMessageAction, CustomAction } from './chat-types'
 //    additive to the composer. So the composer menu here renders as its
 //    own strip directly above the rail's `ChatThread`, composing the kit's
 //    REAL `Dropdown`/`DropdownTrigger`/`DropdownContent`/`DropdownItem`
-//    primitives (the same ones `components/model-switcher.tsx` composes,
+//    primitives (the same ones `components/model/model-switcher.tsx` composes,
 //    read as a real usage example before building this) — a real, working
 //    menu, just not literally inside `ChatThread`'s own shadow-gated
 //    composer. Kit-tier gap worth naming: `ChatThread` could grow a
@@ -219,7 +219,7 @@ interface ComposerChip {
 interface ComposerMenuEntry {
   id: string;
   label: string;
-  /** A curated `renderIcon` name (`components/icon.tsx`'s `NAMED_ICONS`), typed as
+  /** A curated `renderIcon` name (`components/icon/icon.tsx`'s `NAMED_ICONS`), typed as
    *  free text per the assignment ("a text field with the renderIcon names
    *  is fine for the story") — resolved through the REAL `renderIcon`
    *  helper, not a lookalike icon lookup. */
@@ -230,7 +230,7 @@ let nextRowId = 1;
 const newRowId = (prefix: string): string => `${prefix}-${nextRowId++}`;
 
 /** The pane-kind radio in the panel. The pane's own device list and canvas
- *  widths now live on the promoted component (`components/work-surface.tsx`'s
+ *  widths now live on the promoted component (`components/work-surface/work-surface.tsx`'s
  *  `DEVICES` / `WORK_SURFACE_DEVICE_WIDTHS`) — one definition, not a copy. */
 const PANE_KIND_OPTIONS: readonly RadioOption<ArtifactTab>[] = [
   { value: 'preview', label: 'Preview', description: 'Rendered-output skeleton' },
@@ -238,7 +238,7 @@ const PANE_KIND_OPTIONS: readonly RadioOption<ArtifactTab>[] = [
 ];
 
 /** Primary→`default`, Secondary→`outline`, Ghost→`ghost`. The kit's real
- *  `Button` variant vocabulary (`components/button.tsx`) is `default`/`ghost`/
+ *  `Button` variant vocabulary (`components/button/button.tsx`) is `default`/`ghost`/
  *  `subtle`/`outline`/`destructive` — there is no literal `primary` or
  *  `secondary` variant. Mapped honestly rather than inventing new variant
  *  names on `Button` itself: `default` IS the kit's filled/primary-looking
@@ -448,7 +448,7 @@ function WorkspacePreview(props: {
       data-builder-pane-expanded={props.expanded}
     >
       <CommandPaletteOverlay open={props.shell.commandPalette && paletteOpen()} onClose={() => setPaletteOpen(false)} />
-      {/* The REAL promoted component (`components/app-header.tsx`), not a local
+      {/* The REAL promoted component (`components/app-header/app-header.tsx`), not a local
           copy of it — same treatment `WorkSurface` got below. The ARRANGEMENT
           lives in the component (owner ruling: not configurable); this call
           site only decides PRESENCE, and supplies the mechanism behind each
@@ -498,7 +498,7 @@ function WorkspacePreview(props: {
             </div>
           }
         >
-          {/* The REAL promoted component (`components/work-surface.tsx`), not a
+          {/* The REAL promoted component (`components/work-surface/work-surface.tsx`), not a
               local copy of it. The story keeps its STUB CONTENT — the chrome is
               what got promoted; what the pane frames still comes from whoever
               mounts it (here: skeleton tiles; an emitted construct: a url). */}
@@ -976,7 +976,7 @@ const meta = { title: 'Labs/Builder/Workspace', parameters: { layout: 'fullscree
 export default meta;
 type Story = StoryObj;
 
-// BuilderPanel/BuilderLayout are internal to the builder app (src/components/builder-panel.tsx,
+// BuilderPanel/BuilderLayout are internal to the builder app (src/components/builder/builder-panel.tsx,
 // builder-layout.tsx) -- neither ships in a public @kitn.ai/ui entry point. The snippet below
 // names the real composition and wiring rather than a package import; WorkspaceShell, WorkSurface,
 // AppHeader and ChatThread ARE public (@kitn.ai/ui) and are shown as this preview actually uses them.

@@ -1,5 +1,5 @@
 import { defineWebComponent } from './define';
-import { ToastRegion, type ToastDismissReason, type ToastPosition, type ToastAppearance } from '../components/toast';
+import { ToastRegion, type ToastDismissReason, type ToastPosition, type ToastAppearance } from '../components/toast/toast';
 import { toast as toastStore, type ToastItem } from '../primitives/toast-store';
 
 interface Props extends Record<string, unknown> {

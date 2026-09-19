@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal, Show } from 'solid-js';
 import { Portal } from 'solid-js/web';
 import { createPresence, usePosition, useDismiss } from './overlay';
-import { buttonVariants } from './button';
+import { buttonVariants } from '../button/button';
 
 /**
  * `overlay.tsx` is not a component; it's the small DIY toolkit that every

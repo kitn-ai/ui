@@ -4,9 +4,9 @@
 // Submit), which the consumer turns into a `(prompt, chosen, rejected)`
 // preference pair. Kept framework-agnostic and DOM-free so it unit-tests in
 // isolation.
-import type { ToolPart } from './tool';
-import type { AttachmentData } from './attachments';
-import type { MessagePart } from '../elements/chat-types';
+import type { ToolPart } from '../tool/tool';
+import type { AttachmentData } from '../attachments/attachments';
+import type { MessagePart } from '../../elements/chat-types';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types

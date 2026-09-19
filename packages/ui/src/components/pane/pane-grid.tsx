@@ -1,5 +1,5 @@
 import { type JSX, For, children as resolveChildren } from 'solid-js';
-import { cn } from '../utils/cn';
+import { cn } from '../../utils/cn';
 
 export interface PaneGridProps {
   /** The panes - arbitrary N. Each top-level child is one tile in the grid. */

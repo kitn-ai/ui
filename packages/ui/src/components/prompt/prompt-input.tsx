@@ -1,8 +1,8 @@
 import { type JSX, splitProps, createSignal, createContext, useContext } from 'solid-js';
-import { cn } from '../utils/cn';
-import { useChatConfig, textClass } from '../primitives/chat-config';
-import { Composer, type TriggerDef, type ComposerChange } from './composer';
-import type { ComposerDoc } from '../primitives/composer-model';
+import { cn } from '../../utils/cn';
+import { useChatConfig, textClass } from '../../primitives/chat-config';
+import { Composer, type TriggerDef, type ComposerChange } from '../composer/composer';
+import type { ComposerDoc } from '../../primitives/composer-model';
 
 // --- Context ---
 

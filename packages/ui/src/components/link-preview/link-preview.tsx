@@ -9,17 +9,17 @@ import {
   onCleanup,
   Show,
 } from 'solid-js';
-import { cn } from '../utils/cn';
-import { Skeleton } from './skeleton';
+import { cn } from '../../utils/cn';
+import { Skeleton } from '../skeleton/skeleton';
 import { Link as LinkIcon } from 'lucide-solid';
-import type { CardEvent } from '../primitives/card-contract';
+import type { CardEvent } from '../../primitives/card-contract';
 import {
   type LinkPreviewData,
   deriveDomain,
   isRenderableLink,
   hasLinkPreviewFetcher,
   resolveLinkMetadata,
-} from '../primitives/link-preview';
+} from '../../primitives/link-preview';
 
 export interface LinkPreviewProps {
   /** The card id correlating every emitted event. */
@@ -192,4 +192,4 @@ export function LinkPreview(props: LinkPreviewProps): JSX.Element {
   );
 }
 
-export type { LinkPreviewData } from '../primitives/link-preview';
+export type { LinkPreviewData } from '../../primitives/link-preview';

@@ -1,5 +1,5 @@
 import { defineWebComponent } from './define';
-import { Embed } from '../components/embed';
+import { Embed } from '../components/embed/embed';
 import type { EmbedCardData } from '../primitives/embed-providers';
 import { emitCardEvent } from '../primitives/card-routing';
 

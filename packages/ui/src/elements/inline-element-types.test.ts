@@ -91,7 +91,7 @@ describe('gen-element-types.mjs inline type block', () => {
       `  RawOrigin as SourceRawOrigin,`,
       `  MessageSource as SourceMessageSource,`,
       `} from './chat-types';`,
-      `import type { ToolPart as SourceToolPart } from '../components/tool-types';`,
+      `import type { ToolPart as SourceToolPart } from '../components/tool/tool-types';`,
       ``,
       inline,
       ``,
@@ -141,7 +141,7 @@ describe('gen-element-types.mjs inline type block', () => {
     );
 
     const probe = [
-      `import { classifyTool as sourceClassifyTool } from '../components/tool-classify';`,
+      `import { classifyTool as sourceClassifyTool } from '../components/tool/tool-classify';`,
       ``,
       inline,
       ``,

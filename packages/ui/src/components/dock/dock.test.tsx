@@ -3,7 +3,7 @@
  * launcher icon (owner finding, 2026-08-26: `kai dev`'s own `owner-widget`
  * fixture pinned `launcherIcon: "https://example.com/logo.png"`, a
  * placeholder that never resolves, so the live FAB rendered a permanently
- * broken image the whole time). Everything else in `components/dock.tsx` (the `Dock`
+ * broken image the whole time). Everything else in `components/dock/dock.tsx` (the `Dock`
  * component itself) is covered end to end through the `kai-dock` element
  * facade in `tests/elements/dock.test.tsx`; this is the one piece with no
  * facade equivalent, since `DockLauncherImage` is a plain Solid helper the

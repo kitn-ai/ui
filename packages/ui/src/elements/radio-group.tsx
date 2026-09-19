@@ -1,6 +1,6 @@
 import { createEffect, createSignal, untrack } from 'solid-js';
 import { defineWebComponent } from './define';
-import { RadioGroup } from '../components/radio';
+import { RadioGroup } from '../components/radio/radio';
 // Public shape of the `options` prop; lives in ./element-data-types so the ROOT
 // entry can re-export it (see that file's header).
 import type { KaiRadioOption } from './element-data-types';

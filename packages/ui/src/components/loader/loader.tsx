@@ -1,5 +1,5 @@
 import { Switch, Match, For, Show } from 'solid-js';
-import { cn } from '../utils/cn';
+import { cn } from '../../utils/cn';
 
 export type LoaderVariant =
   | 'circular'

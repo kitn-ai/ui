@@ -1,8 +1,8 @@
 import { createSignal, onCleanup, onMount } from 'solid-js';
 import { defineWebComponent } from './define';
 import { readSlots, CONVERSATION_ITEM_SLOTS } from './slots';
-import { SlottedConversationItem, type ConversationRowDensity } from '../components/conversation-item';
-import { isStandaloneConversationItem, readConversationItemId } from '../components/conversation-list';
+import { SlottedConversationItem, type ConversationRowDensity } from '../components/conversation/conversation-item';
+import { isStandaloneConversationItem, readConversationItemId } from '../components/conversation/conversation-list';
 
 interface Props extends Record<string, unknown> {
   /** The row's identity: the `conversation-id` attribute (host `id` is the

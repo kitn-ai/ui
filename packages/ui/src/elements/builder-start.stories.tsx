@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal, Show } from 'solid-js';
-import { BuilderStart, BUILDER_TEMPLATES, type BuilderTemplateId } from '../components/builder-start';
-import { WorkspaceVariantPicker, type WorkspaceVariantId } from '../components/builder-workspace-variants';
+import { BuilderStart, BUILDER_TEMPLATES, type BuilderTemplateId } from '../components/builder/builder-start';
+import { WorkspaceVariantPicker, type WorkspaceVariantId } from '../components/builder/builder-workspace-variants';
 
 // Labs/Builder: "Start" - T-7
 // (docs/superpowers/specs/2026-08-28-template-builder-design.md): the
@@ -110,7 +110,7 @@ export const Preselected: Story = {
  * screen only once it has >=2 genuinely different starting points, and
  * Workspace's own owner-feedback round shipped exactly two (an artifact/
  * code pane beside chat, v0's shape; a full app preview with device
- * toggles, Lovable's shape — see `components/builder-workspace-variants.tsx`'s
+ * toggles, Lovable's shape — see `components/builder/builder-workspace-variants.tsx`'s
  * own module doc comment for the "why not a third card" reasoning re:
  * Multi-mode's "Switchable views").
  *

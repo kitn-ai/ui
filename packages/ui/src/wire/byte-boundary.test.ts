@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { readAnthropicStream, readOpenAIStream } from './read';
-import { OPENAI_FIXTURES } from './fixtures/openai';
-import { ANTHROPIC_FIXTURES } from './fixtures/anthropic';
+import { OPENAI_FIXTURES } from './fixtures/openai/index';
+import { ANTHROPIC_FIXTURES } from './fixtures/anthropic/index';
 import { BYTE_SIZES, nullSink, replayBytes, replayReadable } from './fixtures/replay';
 import type { ModelTurn } from './chunk';
 

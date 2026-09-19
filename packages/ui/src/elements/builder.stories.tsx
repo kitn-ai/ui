@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { type JSX, createSignal, createMemo } from 'solid-js';
 import { MessageCircle } from 'lucide-solid';
-import { BuilderPanel, type BuilderConstruct } from '../components/builder-panel';
-import { BuilderLayout, type BuilderViewport } from '../components/builder-layout';
-import { resolveAccentWrapperStyle } from '../components/builder-preview';
-import { ChatThread } from '../components/chat-thread';
+import { BuilderPanel, type BuilderConstruct } from '../components/builder/builder-panel';
+import { BuilderLayout, type BuilderViewport } from '../components/builder/builder-layout';
+import { resolveAccentWrapperStyle } from '../components/builder/builder-preview';
+import { ChatThread } from '../components/chat/chat-thread';
 import { cn } from '../utils/cn';
 import type { ChatMessage } from './chat-types';
 
@@ -111,7 +111,7 @@ function ChatPanel(props: { construct: BuilderConstruct; class?: string }): JSX.
  * exists to switch to for this template, so there's nothing left to
  * dispatch on).
  *
- * Round A4: reads the toolbar's `viewport` to mirror `components/dock.tsx`'s own
+ * Round A4: reads the toolbar's `viewport` to mirror `components/dock/dock.tsx`'s own
  * real mobile takeover (its <=480px `@media` block: the panel goes
  * `position: fixed; inset: 0` — full-bleed, square corners, no border —
  * and the launcher/FAB hides while the panel is "open"). This frame is a
@@ -187,7 +187,7 @@ const meta = { title: 'Labs/Builder/Support widget', parameters: { layout: 'full
 export default meta;
 type Story = StoryObj;
 
-// BuilderPanel/BuilderLayout are internal to the builder app (src/components/builder-panel.tsx,
+// BuilderPanel/BuilderLayout are internal to the builder app (src/components/builder/builder-panel.tsx,
 // builder-layout.tsx) -- neither ships in a public @kitn.ai/ui entry point, so the snippet below
 // names the real composition and wiring rather than a package import.
 const src = (code: string) => ({

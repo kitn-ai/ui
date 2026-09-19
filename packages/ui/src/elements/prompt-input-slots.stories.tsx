@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { onMount, onCleanup } from 'solid-js';
 import './register'; // side effect: registers <kai-prompt-input> et al.
 import { attachKaiActions } from '../stories/docs/story-actions';
-import type { AttachmentData } from '../components/attachments';
+import type { AttachmentData } from '../components/attachments/attachments';
 
 // Wire a kai-* element's declared CustomEvents to the Actions panel from a `ref`.
 const withActions = (e: Element) => onMount(() => onCleanup(attachKaiActions(e as HTMLElement)));

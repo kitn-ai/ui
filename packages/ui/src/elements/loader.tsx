@@ -1,5 +1,5 @@
 import { defineWebComponent } from './define';
-import { Loader, type LoaderVariant, type LoaderSize } from '../components/loader';
+import { Loader, type LoaderVariant, type LoaderSize } from '../components/loader/loader';
 
 interface Props extends Record<string, unknown> {
   /** The animation style: `'circular' | 'classic' | 'pulse' | 'pulse-dot' |

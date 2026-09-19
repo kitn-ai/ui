@@ -3,7 +3,7 @@ import { defineWebComponent } from './define';
 import {
   Dock, DockCloseGlyph, DockLauncherGlyph,
   type DockController, type DockFocusOnOpen, type DockPosition,
-} from '../components/dock';
+} from '../components/dock/dock';
 import { wireDisclosure } from './disclosure';
 
 interface Props extends Record<string, unknown> {

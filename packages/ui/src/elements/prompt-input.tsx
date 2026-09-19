@@ -1,9 +1,9 @@
 import { createEffect, createSignal, onMount, onCleanup } from 'solid-js';
 import { defineWebComponent } from './define';
 import { DefaultPromptInput } from './default-input';
-import type { AttachmentData } from '../components/attachments';
+import type { AttachmentData } from '../components/attachments/attachments';
 import type { CustomAction } from './chat-types';
-import type { TriggerDef, ComposerChange } from '../components/composer';
+import type { TriggerDef, ComposerChange } from '../components/composer/composer';
 import { type ComposerDoc, type EntityRef, normalizeValue, serializeToText, entitiesOf } from '../primitives/composer-model';
 
 interface Props extends Record<string, unknown> {

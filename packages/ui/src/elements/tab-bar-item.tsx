@@ -4,7 +4,7 @@ import {
   TabBarItemContent,
   tabBarTabClass,
   tabBarItemAccessibleName,
-} from '../components/tab-bar';
+} from '../components/tabs/tab-bar';
 
 interface Props extends Record<string, unknown> {
   /** The tab's identity: the `value` attribute (host `id` is the fallback).

@@ -5,7 +5,7 @@
 import { createSignal } from 'solid-js';
 import { render } from '@solidjs/testing-library';
 import { BUILTIN_CARD_COMPONENTS } from '../../src/primitives/card-registry';
-import { CardRenderer } from '../../src/components/card-renderer';
+import { CardRenderer } from '../../src/components/card/card-renderer';
 import { CardProvider } from '../../src/primitives/card-host';
 import { upsertCardPart } from '../../src/state/parts';
 import type { MessagePart } from '../../src/elements/chat-types';
@@ -170,7 +170,7 @@ test('emitting without a host does not throw', () => {
 // hands the same live component a new envelope; it must not reach in and undo
 // what the user did in the meantime.
 //
-// The rendering shape here mirrors components/message.tsx: an <Index> + accessor
+// The rendering shape here mirrors components/message/message.tsx: an <Index> + accessor
 // keeps ONE component instance alive and only updates its props. Using a keyed
 // <For> would recreate the component and mask the effect being tested, so the
 // envelope must arrive through a reactive accessor exactly as it does there.

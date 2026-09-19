@@ -1,4 +1,4 @@
-import { TAB_BAR_CLASS, tabBarTabClass, tabBarItemAccessibleName, TabBarItemContent } from './tab-bar';
+import { TAB_BAR_CLASS, tabBarTabClass, tabBarItemAccessibleName, TabBarItemContent } from '../tabs/tab-bar';
 
 export interface WidgetTabBarProps {
   active: 'home' | 'messages';

@@ -1,4 +1,4 @@
-import type { ComposerDoc } from '../primitives/composer-model';
+import type { ComposerDoc } from '../../primitives/composer-model';
 
 /**
  * Undo/redo history for the composer.

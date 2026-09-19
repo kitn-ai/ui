@@ -1,13 +1,13 @@
 import { createSignal, onCleanup, onMount } from 'solid-js';
 import { defineWebComponent } from './define';
 import { CHAT_SLOTS, readSlots } from './slots';
-import { ChatThread, type ChatThreadProps, type ChatThreadContextUsage, type ChatThreadController } from '../components/chat-thread';
+import { ChatThread, type ChatThreadProps, type ChatThreadContextUsage, type ChatThreadController } from '../components/chat/chat-thread';
 import { cardComponentsFromTags } from './message';
 import { createMessagesGuard } from './validate-messages';
-import type { AttachmentData } from '../components/attachments';
+import type { AttachmentData } from '../components/attachments/attachments';
 import type { RejectedAttachment } from './default-input';
 import type { ChatMessage, ChatMessageAction, CustomAction } from './chat-types';
-import type { TriggerDef } from '../components/composer';
+import type { TriggerDef } from '../components/composer/composer';
 import type { ComposerDoc } from '../primitives/composer-model';
 import type { ProseSize } from '../primitives/chat-config';
 import type { ModelOption, HomeConfig, HomeLinkEntry } from '../types';

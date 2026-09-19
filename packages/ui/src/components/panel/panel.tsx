@@ -1,5 +1,5 @@
 import { Show, splitProps, type JSX } from 'solid-js';
-import { cn } from '../utils/cn';
+import { cn } from '../../utils/cn';
 
 /**
  * `Panel` / `PanelHeader` / `PanelBody` / `PanelFooter` -- the widget panel

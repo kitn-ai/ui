@@ -1,4 +1,4 @@
-import { ScrollArea, type ScrollOrientation } from '../components/scroll-area';
+import { ScrollArea, type ScrollOrientation } from '../components/scroll/scroll-area';
 import { defineWebComponent } from './define';
 
 interface Props extends Record<string, unknown> {

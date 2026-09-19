@@ -1,5 +1,5 @@
 import { type JSX, splitProps, createSignal, createEffect, createContext, useContext, For, Show, children as resolveChildren } from 'solid-js';
-import { cn } from '../utils/cn';
+import { cn } from '../../utils/cn';
 
 // --- Types ---
 

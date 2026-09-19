@@ -13,7 +13,7 @@ describe('composedFrom story ids', () => {
   it('names only real components, never constants', () => {
     // `composedFrom` used to be "every imported binding matching /^[A-Z]/", which
     // swept in `DEFAULT_WARN_THRESHOLD` and `DEFAULT_DANGER_THRESHOLD` — two numbers
-    // from src/components/context.tsx — and handed each a story id that resolves to
+    // from src/components/context/context.tsx — and handed each a story id that resolves to
     // nothing. The generator now asks the checker for the declaration; this pins the
     // symptom so a looser filter cannot come back.
     const names = [...new Set((meta as any[]).flatMap((e) => e.composedFrom).map((l: any) => l.name))];

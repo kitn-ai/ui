@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { Notice } from './notice';
-import { Button } from './button';
-import { renderIcon } from './icon';
-import { componentDescription } from '../stories/docs/element-controls';
+import { Button } from '../button/button';
+import { renderIcon } from '../icon/icon';
+import { componentDescription } from '../../stories/docs/element-controls';
 
 const meta = {
   title: 'Components/Notice',

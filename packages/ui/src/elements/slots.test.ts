@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { componentSourcePath } from '../../tests/helpers/kit-paths';
 import {
   CHAT_SLOTS,
   PROMPT_INPUT_SLOTS,
@@ -478,7 +479,7 @@ describe('ELEMENT_COMPOSITION registry (single source of truth the build extract
 
   // Parts whose `part="…"` value reaches the DOM through a local helper's
   // PARAMETER instead of a literal JSX attribute, so the scan structurally
-  // cannot see them. `components/input.tsx` renders one shared `<input part={part}>` via
+  // cannot see them. `components/input/input.tsx` renders one shared `<input part={part}>` via
   // `const inputEl = (cls: string, part: string) => …` and passes the literal at
   // the two CALL SITES -- `inputEl(…, 'field input')` and `inputEl(ROW_INPUT,
   // 'input')`. Those literals are function arguments, not `part=` attributes, so
@@ -499,7 +500,9 @@ describe('ELEMENT_COMPOSITION registry (single source of truth the build extract
   // that evidence from source, so a stale exception FAILS instead of quietly
   // excusing a part that has since been deleted.
   const INDIRECT_PART_DECLARATIONS: Record<string, string> = {
-    input: join('components', 'input.tsx'),
+    // Resolved by basename: which family folder the component sits in is not a
+    // fact about the passthrough, and the flat path here went stale on the reorg.
+    input: relative(SRC, componentSourcePath('input.tsx')),
   };
 
   /** Tokens from string literals in `src` that are pure part-token lists —
@@ -534,7 +537,7 @@ describe('ELEMENT_COMPOSITION registry (single source of truth the build extract
 
   it('declares every registered ::part somewhere in the source (reverse drift guard)', () => {
     // The other half of the pair above. Without it the registry can name parts
-    // that no longer exist: deleting `part="row"` from components/message.tsx
+    // that no longer exist: deleting `part="row"` from components/message/message.tsx
     // left `kai-message::part(row)` registered with a full styling recipe and
     // every test still passed. The "declares row / bubble / content / actions"
     // test is NOT this guard -- it pins the registry against a hardcoded list,
@@ -561,7 +564,7 @@ describe('ELEMENT_COMPOSITION registry (single source of truth the build extract
   // Everything above is GLOBAL. The reverse guard proves a registered name is
   // rendered SOMEWHERE under `src/` — never that it is rendered by the element it
   // is registered under. So `kai-status` can register `::part(row)`, a name only
-  // `components/message.tsx` renders, and stay perfectly green. The consumer then
+  // `components/message/message.tsx` renders, and stay perfectly green. The consumer then
   // follows the docs, writes `kai-status::part(row) { … }`, and gets silence: the
   // selector matches nothing, and a `::part()` that matches nothing is not an
   // error anywhere — not in CSS, not in the console, not in the build.
@@ -711,7 +714,7 @@ describe('ELEMENT_COMPOSITION registry (single source of truth the build extract
    * whose declaring FILE the closure reaches.
    *
    * That last clause is what keeps the `input` exception honest per-element
-   * instead of blanket. `components/input.tsx` renders `<input part={part}>` and takes the
+   * instead of blanket. `components/input/input.tsx` renders `<input part={part}>` and takes the
    * literal at its call sites, so no scanner sees it — but the exception map
    * already names the file, so `input` is credited to `kai-input` / `kai-search` /
    * `kai-editable-label` (all of which import that module) and to nothing else. A
@@ -799,11 +802,11 @@ describe('ELEMENT_COMPOSITION registry (single source of truth the build extract
   // The CONVERSE of the guard above, opted into per element. The blanket version
   // is the KNOWN GAP documented at the top of this section: it fails loudly on
   // correct code across most of the registry, because the closure is an
-  // over-approximation and a shared module like components/message.tsx credits
+  // over-approximation and a shared module like components/message/message.tsx credits
   // `row` to four elements that deliberately document it under one.
   //
   // For a SMALL closure the over-approximation stops mattering. `kai-context`
-  // reaches exactly one part-declaring module (components/progress-bar.tsx) and renders
+  // reaches exactly one part-declaring module (components/progress/progress-bar.tsx) and renders
   // its ProgressBar unconditionally inside the hover-card breakdown, so
   // "attributed" and "actually rendered" are the same two names, which is why
   // this element can carry the strict rule the registry as a whole cannot.
@@ -816,7 +819,7 @@ describe('ELEMENT_COMPOSITION registry (single source of truth the build extract
   // throughout, because both names were already registered under
   // kai-progress-bar and both are really rendered somewhere in src/.
   const CONVERSE_ENFORCED: Record<string, string> = {
-    'kai-context': 'closure reaches one part-declaring module (components/progress-bar.tsx)',
+    'kai-context': 'closure reaches one part-declaring module (components/progress/progress-bar.tsx)',
   };
 
   it('registers every ::part its own tree renders, for elements opted into the converse', () => {
@@ -848,7 +851,7 @@ describe('ELEMENT_COMPOSITION registry (single source of truth the build extract
     const modules = elementModules();
     const partsOf = (tag: string) => attributedParts(importClosure(modules.get(tag)!), byFile);
 
-    // NEGATIVE. `row` lives in `components/message.tsx`, which `kai-status`'s tree
+    // NEGATIVE. `row` lives in `components/message/message.tsx`, which `kai-status`'s tree
     // never reaches — so registering `row` under `kai-status` MUST be rejected.
     // Without this, a closure that quietly widened to "all of src/" would make the
     // guard above vacuous and every test would still pass.
@@ -858,7 +861,7 @@ describe('ELEMENT_COMPOSITION registry (single source of truth the build extract
     expect(status.has('send')).toBe(false);
 
     // POSITIVE — the false-positive direction, and the one that gets a guard
-    // disabled. `row` is genuinely SHARED: `components/message.tsx` renders it and
+    // disabled. `row` is genuinely SHARED: `components/message/message.tsx` renders it and
     // three different elements mount that module, so all four must be credited.
     // A naive "the part must appear in the element's OWN file" rule would fail
     // three of these on correct code.
@@ -867,7 +870,7 @@ describe('ELEMENT_COMPOSITION registry (single source of truth the build extract
     }
 
     // The `input` exception resolves per-element, not blanket: only the elements
-    // whose tree reaches `components/input.tsx` are credited with it.
+    // whose tree reaches `components/input/input.tsx` are credited with it.
     expect(partsOf('kai-search').has('input')).toBe(true);
     expect(partsOf('kai-status').has('input')).toBe(false);
   });

@@ -510,7 +510,7 @@ ${importLines}
 // \`skipLibCheck: true\`, which is exactly why this file is now compiled with it off
 // (tests/elements/element-types-lib-check.test.ts).
 import type { CodeHighlightingOptions } from '../primitives/highlighter';
-import type { ToolKind } from '../components/tool-classify';
+import type { ToolKind } from '../components/tool/tool-classify';
 
 // Re-exports for \`import { … } from '@kitn.ai/ui/elements'\`. Mirrors the names the
 // shipped dist/elements.d.ts inlines, so both copies expose the same surface.
@@ -524,9 +524,9 @@ export type {
   MessageSource,
   RawOrigin,
 } from './chat-types';
-export type { ToolPart } from '../components/tool-types';
-export type { ToolKind } from '../components/tool-classify';
-export type { AttachmentData } from '../components/attachment-types';
+export type { ToolPart } from '../components/tool/tool-types';
+export type { ToolKind } from '../components/tool/tool-classify';
+export type { AttachmentData } from '../components/attachment-types/attachment-types';
 export type { CardEnvelope, CardResolution } from '../primitives/card-contract';
 export type { CodeHighlightingOptions } from '../primitives/highlighter';
 export declare function configureCodeHighlighting(options: CodeHighlightingOptions): void;

@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal, Show, For } from 'solid-js';
 import './register'; // every kai-* element used below
-import type { FileTreeFile } from '../components/file-tree';
-import type { ToolPart } from '../components/tool-types';
-import { PromptDock } from '../components/prompt-dock';
+import type { FileTreeFile } from '../components/file/file-tree';
+import type { ToolPart } from '../components/tool/tool-types';
+import { PromptDock } from '../components/prompt/prompt-dock';
 import openaiLogo from './logos/openai.svg';
 
 // Labs/Apps: a faithful replica of OpenAI's Codex WEB (chatgpt.com/codex) - a

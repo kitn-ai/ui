@@ -15,7 +15,7 @@ import '@testing-library/jest-dom/vitest';
 import { render, cleanup, fireEvent } from '@solidjs/testing-library';
 import { createSignal } from 'solid-js';
 import { cn } from '../utils/cn';
-import { Button } from '../components/button';
+import { Button } from '../components/button/button';
 import { ChevronDown } from 'lucide-solid';
 
 afterEach(cleanup);

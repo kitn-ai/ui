@@ -1,5 +1,5 @@
 import { type JSX, splitProps, For, Show } from 'solid-js';
-import { cn } from '../utils/cn';
+import { cn } from '../../utils/cn';
 
 export type SkeletonVariant = 'text' | 'rect' | 'circle';
 

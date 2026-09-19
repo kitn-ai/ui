@@ -1,8 +1,8 @@
 import { createSignal } from 'solid-js';
 import { defineWebComponent } from './define';
 import type { ComposerDoc, EntityRef } from '../primitives/composer-model';
-import type { TriggerDef, TriggerItem, HighlightRule, ComposerChange, ComposerController } from '../components/composer';
-import { Composer } from '../components/composer';
+import type { TriggerDef, TriggerItem, HighlightRule, ComposerChange, ComposerController } from '../components/composer/composer';
+import { Composer } from '../components/composer/composer';
 
 /**
  * Parse a single light-DOM `<kai-trigger-item>` element into a TriggerItem.

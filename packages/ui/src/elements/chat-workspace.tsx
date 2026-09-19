@@ -7,7 +7,7 @@ import {
   type WorkspaceAsideSide,
   type WorkspaceAsideToggleDetail,
   type WorkspaceAsideResizeDetail,
-} from '../components/workspace-shell';
+} from '../components/workspace/workspace-shell';
 
 interface Props extends Record<string, unknown> {
   /** Controlled collapsed state of the start aside. Set this as a JS property

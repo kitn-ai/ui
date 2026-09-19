@@ -26,7 +26,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 // A separate module because it parses declarations with the TypeScript API,
 // which nothing else in this file needs.
 import { buildProgrammaticSection } from './gen-llms-programmatic.mjs';
-// The icon roster, derived from the NAMED_ICONS map in src/components/icon.tsx — the
+// The icon roster, derived from the NAMED_ICONS map in src/components/icon/icon.tsx — the
 // SAME extraction docs/web-components.md's icon-roster region uses (P-8), so
 // the two artifacts cannot disagree about what resolves.
 import { iconNames } from './gen-web-components-md.mjs';
@@ -475,10 +475,10 @@ export const FULL_ONLY_SECTIONS = [
       '- Icon roster (every name `kai-icon` and the elements\' `icon` props resolve; anything else fails loud): the "Icon roster" section of llms-full.txt',
     render: ({ icons }) =>
       [
-        `## Icon roster (${icons.length} names, derived from NAMED_ICONS in src/components/icon.tsx)`,
+        `## Icon roster (${icons.length} names, derived from NAMED_ICONS in src/components/icon/icon.tsx)`,
         '',
         'Every name `kai-icon` (and every `icon` prop/attribute across the elements) resolves — ' +
-          'derived from the `NAMED_ICONS` map in `src/components/icon.tsx` (also exported at runtime as ' +
+          'derived from the `NAMED_ICONS` map in `src/components/icon/icon.tsx` (also exported at runtime as ' +
           '`ICON_NAMES`). An icon-shaped name outside this roster renders a fallback glyph and ' +
           'logs a console error, in dev and prod alike; URLs render an `<img>`, and ' +
           'emoji/arbitrary text passes through as text.',

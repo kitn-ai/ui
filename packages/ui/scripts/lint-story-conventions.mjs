@@ -6,7 +6,7 @@
 //     author one by hand: either the local
 //     `const src = (code) => ({ parameters: { docs: { source: { code, ... } } } })`
 //     helper most component `.stories.tsx` files define for themselves (see
-//     `src/components/composer.stories.tsx`), or an inline
+//     `src/components/composer/composer.stories.tsx`), or an inline
 //     `parameters.docs.source.code`. A story with neither leaves the Code
 //     panel to Storybook's auto-source, which for a story that is not
 //     reconstructable from `args` is a raw serialized dump of the story
@@ -68,7 +68,7 @@
 // WHAT (c) AND (d) DELIBERATELY DO NOT CHECK: that `title` equals the
 // component's directory. The mapping is NOT 1:1 and a strict rule would
 // false-positive on legitimate stories -- `src/components/audio-visualizer/labs/`
-// is titled `Labs/Audio Visualizers` and `src/components/settings.stories.tsx`
+// is titled `Labs/Audio Visualizers` and `src/components/settings/settings.stories.tsx`
 // is titled `Labs/Settings`, both correct. A guard that cries wolf gets
 // waived into uselessness, so these two rules assert only shapes that cannot
 // be legitimate.

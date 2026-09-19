@@ -2,10 +2,10 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { expect, fn, userEvent, waitFor } from 'storybook/test';
 import { createSignal } from 'solid-js';
 import { ChatThread, type ChatThreadProps } from './chat-thread';
-import type { ConversationStore } from '../primitives/conversation-store';
-import type { ConversationSummary } from '../types';
-import type { ChatMessage } from '../elements/chat-types';
-import { componentDescription } from '../stories/docs/element-controls';
+import type { ConversationStore } from '../../primitives/conversation-store';
+import type { ConversationSummary } from '../../types';
+import type { ChatMessage } from '../../elements/chat-types';
+import { componentDescription } from '../../stories/docs/element-controls';
 
 /**
  * A stub `ConversationStore` — no localStorage, no network — so this story is

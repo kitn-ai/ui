@@ -27,7 +27,7 @@ export const invariants: TInvariant[] = [
     statement:
       'A new array reference NOTIFIES; a new object for each changed item makes the change VISIBLE. Editing an existing item needs both. Adds and removes need only the fresh array. Setting the same array back is a no-op even if an item inside it was swapped. The test pins how the KIT behaves — it will render stale unless both arrive — but nothing checks CONSUMER code, so this is a rule you apply, not a guarantee you will be warned about. Reorders follow the same rule as adds and removes; the test names reorders in its title but exercises only an add and a remove, so treat that half as reasoned rather than pinned.',
     appliesTo: { tags: ['kai-chat', 'kai-conversations'] },
-    enforcedBy: { kind: 'test', paths: ['packages/ui/src/components/reactivity-contract.test.tsx'] },
+    enforcedBy: { kind: 'test', paths: ['packages/ui/src/components/reactivity-contract/reactivity-contract.test.tsx'] },
     status: 'enforced',
     diagnosis: [
       {
@@ -193,7 +193,7 @@ export const invariants: TInvariant[] = [
       {
         wrong: 'el.innerHTML = part.text;',
         right: 'el.textContent = part.text;',
-        note: 'For rich text render the part through <kai-markdown>, which escapes rather than sanitizes (src/components/markdown.tsx) and filters link and image URLs. Never hand-roll a second markdown-to-innerHTML path.',
+        note: 'For rich text render the part through <kai-markdown>, which escapes rather than sanitizes (src/components/markdown/markdown.tsx) and filters link and image URLs. Never hand-roll a second markdown-to-innerHTML path.',
       },
       {
         wrong: "window.open(card.url, '_blank');",

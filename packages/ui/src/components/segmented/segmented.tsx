@@ -1,5 +1,5 @@
 import { type JSX, For, Show, mergeProps } from 'solid-js';
-import { cn } from '../utils/cn';
+import { cn } from '../../utils/cn';
 
 export interface SegmentedOption {
   value: string;

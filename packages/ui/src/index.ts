@@ -1,4 +1,4 @@
-// The package root entry (".").
+// The package root entry ("./index").
 //
 // SCOPE — read before adding an export here.
 // -----------------------------------------
@@ -55,10 +55,10 @@ export { toast, configureToasts, ensureMounted as ensureToastRegion, getToasts }
 export type {
   ToastItem, ToastVariant, ToastAction, ToastOptions, ToastHandle, ToastFn, ToastConfig,
 } from './primitives/toast-store';
-export { Toast, ToastRegion } from './components/toast';
+export { Toast, ToastRegion } from './components/toast/toast';
 export type {
   ToastProps, ToastRegionProps, ToastDismissReason, ToastPosition,
-} from './components/toast';
+} from './components/toast/toast';
 
 // Card Contract (generative-UI foundation)
 export { CARD_CONTRACT_VERSION } from './primitives/card-contract';
@@ -81,21 +81,21 @@ export { mountRemoteCard } from './remote/host-embed';
 export type { MountRemoteCardOptions, RemoteCardHandle } from './remote/host-embed';
 
 // Card dispatcher (generative-UI host glue)
-export { CardRenderer, renderCard } from './components/card-renderer';
-export type { CardRendererProps } from './components/card-renderer';
-export { CardFallback } from './components/card-fallback';
-export type { CardFallbackProps } from './components/card-fallback';
+export { CardRenderer, renderCard } from './components/card/card-renderer';
+export type { CardRendererProps } from './components/card/card-renderer';
+export { CardFallback } from './components/card/card-fallback';
+export type { CardFallbackProps } from './components/card/card-fallback';
 export {
   BUILTIN_CARD_TAGS, BUILTIN_CARD_COMPONENTS, mergeCardTags, mergeCardComponents,
 } from './primitives/card-registry';
 export type { CardComponent, CardComponentMap, CardTagMap } from './primitives/card-registry';
 
 // Card: kai-card (base shell) + kai-form (JSON-Schema form renderer)
-export { Card } from './components/card';
-export type { CardProps } from './components/card';
-export { DismissedStub, stubIntent } from './components/dismissed-stub';
-export type { DismissedStubProps, DismissedCardType } from './components/dismissed-stub';
-export { Form, validateForm, buildResult, widgetFor, orderedKeys, coerceValue } from './components/form';
+export { Card } from './components/card/card';
+export type { CardProps } from './components/card/card';
+export { DismissedStub, stubIntent } from './components/dismissed-stub/dismissed-stub';
+export type { DismissedStubProps, DismissedCardType } from './components/dismissed-stub/dismissed-stub';
+export { Form, validateForm, buildResult, widgetFor, orderedKeys, coerceValue } from './components/form/form';
 export type {
   FormProps,
   FormField,
@@ -103,7 +103,7 @@ export type {
   FormCardEnvelope,
   FormValidation,
   WidgetKind,
-} from './components/form';
+} from './components/form/form';
 
 // Card: kai-confirm (approval) + kai-tasks (selectable plan)
 export {
@@ -112,7 +112,7 @@ export {
   buttonVariantForStyle,
   normalizeActions,
   defaultActionId,
-} from './components/confirm-card';
+} from './components/confirm-card/confirm-card';
 export type {
   ConfirmCardProps,
   ConfirmAction,
@@ -120,7 +120,7 @@ export type {
   ConfirmTone,
   ConfirmCardData,
   ConfirmCardEnvelope,
-} from './components/confirm-card';
+} from './components/confirm-card/confirm-card';
 export {
   TasksCard,
   TASKS_CARD_TYPE,
@@ -133,7 +133,7 @@ export {
   canConfirm,
   isMaxReached,
   confirmReason,
-} from './components/tasks-card';
+} from './components/tasks/tasks-card';
 export type {
   TasksCardProps,
   TasksTask,
@@ -141,7 +141,7 @@ export type {
   TasksCardResult,
   TasksCardEnvelope,
   SelectAllState,
-} from './components/tasks-card';
+} from './components/tasks/tasks-card';
 
 // Card: kai-choice (single-select option card)
 export {
@@ -152,7 +152,7 @@ export {
   resolveOtherConfig,
   nextEnabledIndex,
   firstEnabledIndex,
-} from './components/choice-card';
+} from './components/choice-card/choice-card';
 export type {
   ChoiceCardProps,
   ChoiceOption,
@@ -160,13 +160,13 @@ export type {
   ChoiceAllowOther,
   ChoiceCardData,
   ChoiceCardEnvelope,
-} from './components/choice-card';
+} from './components/choice-card/choice-card';
 
 // Card: kai-link-preview (OG/link preview) + kai-embed (lazy media embed)
-export { LinkPreview } from './components/link-preview';
-export type { LinkPreviewProps } from './components/link-preview';
-export { Embed } from './components/embed';
-export type { EmbedProps } from './components/embed';
+export { LinkPreview } from './components/link-preview/link-preview';
+export type { LinkPreviewProps } from './components/link-preview/link-preview';
+export { Embed } from './components/embed/embed';
+export type { EmbedProps } from './components/embed/embed';
 export {
   configureLinkPreview,
   resolveLinkMetadata,
@@ -185,45 +185,45 @@ export {
 export type { EmbedCardData, EmbedCardEnvelope, EmbedProvider, ResolvedEmbed } from './primitives/embed-providers';
 
 // Layer 2: UI Primitives
-export { Button, buttonVariants } from './components/button';
-export type { ButtonProps } from './components/button';
-export { Avatar } from './components/avatar';
-export type { AvatarProps } from './components/avatar';
-export { Tooltip } from './components/tooltip';
-export type { TooltipProps, TooltipController } from './components/tooltip';
-export { HoverCard } from './components/hover-card';
-export type { HoverCardProps, HoverCardController } from './components/hover-card';
-export { Collapsible, CollapsibleTrigger, CollapsibleContent } from './components/collapsible';
+export { Button, buttonVariants } from './components/button/button';
+export type { ButtonProps } from './components/button/button';
+export { Avatar } from './components/avatar/avatar';
+export type { AvatarProps } from './components/avatar/avatar';
+export { Tooltip } from './components/tooltip/tooltip';
+export type { TooltipProps, TooltipController } from './components/tooltip/tooltip';
+export { HoverCard } from './components/hover/hover-card';
+export type { HoverCardProps, HoverCardController } from './components/hover/hover-card';
+export { Collapsible, CollapsibleTrigger, CollapsibleContent } from './components/collapsible/collapsible';
 export type {
   CollapsibleProps, CollapsibleTriggerProps, CollapsibleContentProps, CollapsibleController,
-} from './components/collapsible';
-export { ScrollArea } from './components/scroll-area';
-export type { ScrollAreaProps, ScrollOrientation } from './components/scroll-area';
-export { Dropdown, DropdownTrigger, DropdownContent, DropdownItem } from './components/dropdown';
+} from './components/collapsible/collapsible';
+export { ScrollArea } from './components/scroll/scroll-area';
+export type { ScrollAreaProps, ScrollOrientation } from './components/scroll/scroll-area';
+export { Dropdown, DropdownTrigger, DropdownContent, DropdownItem } from './components/dropdown/dropdown';
 export type {
   DropdownProps, DropdownTriggerProps, DropdownContentProps, DropdownItemProps, DropdownController,
-} from './components/dropdown';
-export { Textarea } from './components/textarea';
-export type { TextareaProps } from './components/textarea';
-export { Badge } from './components/badge';
-export type { BadgeProps } from './components/badge';
-export { Separator } from './components/separator';
-export type { SeparatorProps } from './components/separator';
-export { ResizablePanelGroup, ResizablePanel, ResizableHandle, Resizable, normalizeSize, resolveToPx } from './components/resizable';
-export type { ResizablePanelGroupProps, ResizablePanelProps, ResizableHandleProps, ResizableProps, SizeValue } from './components/resizable';
-export { Skeleton } from './components/skeleton';
-export type { SkeletonProps, SkeletonVariant } from './components/skeleton';
-export { FileTree, buildFileTree } from './components/file-tree';
+} from './components/dropdown/dropdown';
+export { Textarea } from './components/textarea/textarea';
+export type { TextareaProps } from './components/textarea/textarea';
+export { Badge } from './components/badge/badge';
+export type { BadgeProps } from './components/badge/badge';
+export { Separator } from './components/separator/separator';
+export type { SeparatorProps } from './components/separator/separator';
+export { ResizablePanelGroup, ResizablePanel, ResizableHandle, Resizable, normalizeSize, resolveToPx } from './components/resizable/resizable';
+export type { ResizablePanelGroupProps, ResizablePanelProps, ResizableHandleProps, ResizableProps, SizeValue } from './components/resizable/resizable';
+export { Skeleton } from './components/skeleton/skeleton';
+export type { SkeletonProps, SkeletonVariant } from './components/skeleton/skeleton';
+export { FileTree, buildFileTree } from './components/file/file-tree';
 export type {
   FileTreeProps, FileTreeFile, FileTreeNode, FileTreeFolderNode, FileTreeFileNode,
-} from './components/file-tree';
-export { Artifact } from './components/artifact';
-export type { ArtifactProps, ArtifactFile, ArtifactTab } from './components/artifact';
-export { WorkSurface, WORK_SURFACE_DEVICE_WIDTHS } from './components/work-surface';
-export type { WorkSurfaceProps, WorkSurfaceDevice } from './components/work-surface';
-export { AppHeader } from './components/app-header';
-export type { AppHeaderProps, AppHeaderAction, AppHeaderUserMenuItem } from './components/app-header';
-export { ArtifactCard, DEFAULT_ARTIFACT_CARD_HEIGHT } from './components/artifact-card';
+} from './components/file/file-tree';
+export { Artifact } from './components/artifact/artifact';
+export type { ArtifactProps, ArtifactFile, ArtifactTab } from './components/artifact/artifact';
+export { WorkSurface, WORK_SURFACE_DEVICE_WIDTHS } from './components/work-surface/work-surface';
+export type { WorkSurfaceProps, WorkSurfaceDevice } from './components/work-surface/work-surface';
+export { AppHeader } from './components/app-header/app-header';
+export type { AppHeaderProps, AppHeaderAction, AppHeaderUserMenuItem } from './components/app-header/app-header';
+export { ArtifactCard, DEFAULT_ARTIFACT_CARD_HEIGHT } from './components/artifact/artifact-card';
 // `ArtifactCardFile` is the SAME declaration `FileTreeFile` and `ArtifactFile`
 // alias, authored in primitives/card-data-types.ts because `ArtifactCardData.files`
 // reaches it and that module has to stay resolvable from a Node/no-DOM project.
@@ -237,89 +237,89 @@ export type {
   ArtifactCardEnvelope,
   ArtifactCardFile,
   ArtifactCardTab,
-} from './components/artifact-card';
+} from './components/artifact/artifact-card';
 
 // Layer 3: AI/Feature Components
 export {
   ChatContainer, ChatContainerRoot, ChatContainerContent, ChatContainerScrollAnchor,
   useChatContainer,
-} from './components/chat-container';
+} from './components/chat/chat-container';
 export type {
   ChatContainerProps, ChatContainerRootProps, ChatContainerContentProps, ChatContainerScrollAnchorProps,
-} from './components/chat-container';
-export { Message, MessageAvatar, MessageContent, MessageActions, MessageAction, MessageCopyButton, MessageBody } from './components/message';
+} from './components/chat/chat-container';
+export { Message, MessageAvatar, MessageContent, MessageActions, MessageAction, MessageCopyButton, MessageBody } from './components/message/message';
 export type {
   MessageProps, MessageAvatarProps, MessageContentProps, MessageActionsProps,
   MessageActionProps, MessageCopyButtonProps, MessageBodyProps,
-} from './components/message';
-export { ResponseCompare, useResolved } from './components/response-compare';
-export type { ResponseCompareProps, CompareLayout, ResolvedController } from './components/response-compare';
+} from './components/message/message';
+export { ResponseCompare, useResolved } from './components/response/response-compare';
+export type { ResponseCompareProps, CompareLayout, ResolvedController } from './components/response/response-compare';
 export {
   normalizeCandidates,
   buildSelection,
   isAnyStreaming,
-} from './components/response-compare';
+} from './components/response/response-compare';
 export type {
   CompareCandidate,
   ComparePair,
   CompareCollapse,
   ResponseCompareData,
   CompareSelection,
-} from './components/response-compare';
-export { MessageSkills } from './components/message-skills';
-export type { MessageSkillsProps, Skill as MessageSkill } from './components/message-skills';
+} from './components/response/response-compare';
+export { MessageSkills } from './components/message/message-skills';
+export type { MessageSkillsProps, Skill as MessageSkill } from './components/message/message-skills';
 export {
   PromptInput, PromptInputTextarea, PromptInputActions, PromptInputAction,
   usePromptInput,
-} from './components/prompt-input';
+} from './components/prompt/prompt-input';
 export type {
   PromptInputProps, PromptInputTextareaProps, PromptInputActionsProps, PromptInputActionProps,
-} from './components/prompt-input';
-export { ResponseStream } from './components/response-stream';
-export type { ResponseStreamProps } from './components/response-stream';
-export { Markdown } from './components/markdown';
-export type { MarkdownProps } from './components/markdown';
-export { CodeBlock, CodeBlockCode, CodeBlockGroup } from './components/code-block';
-export type { CodeBlockProps, CodeBlockCodeProps, CodeBlockGroupProps } from './components/code-block';
-export { Loader } from './components/loader';
-export type { LoaderVariant, LoaderSize, LoaderProps } from './components/loader';
+} from './components/prompt/prompt-input';
+export { ResponseStream } from './components/response/response-stream';
+export type { ResponseStreamProps } from './components/response/response-stream';
+export { Markdown } from './components/markdown/markdown';
+export type { MarkdownProps } from './components/markdown/markdown';
+export { CodeBlock, CodeBlockCode, CodeBlockGroup } from './components/code-block/code-block';
+export type { CodeBlockProps, CodeBlockCodeProps, CodeBlockGroupProps } from './components/code-block/code-block';
+export { Loader } from './components/loader/loader';
+export type { LoaderVariant, LoaderSize, LoaderProps } from './components/loader/loader';
 export {
   CircularLoader, ClassicLoader, PulseLoader, PulseDotLoader,
   DotsLoader, TypingLoader, WaveLoader, BarsLoader,
   TerminalLoader, TextBlinkLoader, TextShimmerLoader, TextDotsLoader,
-} from './components/loader';
+} from './components/loader/loader';
 export type {
   LoaderShapeProps, LoaderTextProps,
   CircularLoaderProps, ClassicLoaderProps, PulseLoaderProps, PulseDotLoaderProps,
   DotsLoaderProps, TypingLoaderProps, WaveLoaderProps, BarsLoaderProps,
   TerminalLoaderProps, TextBlinkLoaderProps, TextShimmerLoaderProps, TextDotsLoaderProps,
-} from './components/loader';
-export { FeedbackBar, type FeedbackValue, type FeedbackDetail, type FeedbackBarProps } from './components/feedback-bar';
+} from './components/loader/loader';
+export { FeedbackBar, type FeedbackValue, type FeedbackDetail, type FeedbackBarProps } from './components/feedback/feedback-bar';
 export {
   ChainOfThought, ChainOfThoughtStep, ChainOfThoughtTrigger,
   ChainOfThoughtContent, ChainOfThoughtItem,
-} from './components/chain-of-thought';
+} from './components/chain-of-thought/chain-of-thought';
 export type {
   ChainOfThoughtProps, ChainOfThoughtStepProps, ChainOfThoughtTriggerProps,
   ChainOfThoughtContentProps, ChainOfThoughtItemProps,
   ChainOfThoughtType, ChainOfThoughtStepData, ChainOfThoughtController,
-} from './components/chain-of-thought';
-export { Source, SourceTrigger, SourceContent, SourceList } from './components/source';
-export type { SourceProps, SourceTriggerProps, SourceContentProps, SourceListProps } from './components/source';
-export { PromptSuggestion } from './components/prompt-suggestion';
-export type { PromptSuggestionProps } from './components/prompt-suggestion';
+} from './components/chain-of-thought/chain-of-thought';
+export { Source, SourceTrigger, SourceContent, SourceList } from './components/source/source';
+export type { SourceProps, SourceTriggerProps, SourceContentProps, SourceListProps } from './components/source/source';
+export { PromptSuggestion } from './components/prompt/prompt-suggestion';
+export type { PromptSuggestionProps } from './components/prompt/prompt-suggestion';
 export {
   Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription, EmptyContent, emptyMediaVariants,
-} from './components/empty';
+} from './components/empty/empty';
 export type {
   EmptyProps, EmptyHeaderProps, EmptyMediaProps, EmptyTitleProps, EmptyDescriptionProps, EmptyContentProps,
-} from './components/empty';
-export { ScrollButton } from './components/scroll-button';
-export type { ScrollButtonProps } from './components/scroll-button';
-export { TextShimmer } from './components/text-shimmer';
-export type { TextShimmerProps } from './components/text-shimmer';
-export { Checkpoint, CheckpointIcon, CheckpointTrigger } from './components/checkpoint';
-export type { CheckpointProps, CheckpointIconProps, CheckpointTriggerProps } from './components/checkpoint';
+} from './components/empty/empty';
+export { ScrollButton } from './components/scroll/scroll-button';
+export type { ScrollButtonProps } from './components/scroll/scroll-button';
+export { TextShimmer } from './components/text-shimmer/text-shimmer';
+export type { TextShimmerProps } from './components/text-shimmer/text-shimmer';
+export { Checkpoint, CheckpointIcon, CheckpointTrigger } from './components/checkpoint/checkpoint';
+export type { CheckpointProps, CheckpointIconProps, CheckpointTriggerProps } from './components/checkpoint/checkpoint';
 export {
   Context,
   ContextTrigger,
@@ -331,7 +331,7 @@ export {
   ContextOutputUsage,
   ContextReasoningUsage,
   ContextCacheUsage,
-} from './components/context';
+} from './components/context/context';
 export type {
   ContextProps,
   ContextTriggerProps,
@@ -344,52 +344,52 @@ export type {
   ContextOutputUsageProps,
   ContextReasoningUsageProps,
   ContextCacheUsageProps,
-} from './components/context';
-export { VoiceInput } from './components/voice-input';
-export type { VoiceInputProps, VoiceInputController } from './components/voice-input';
-export { ConversationList } from './components/conversation-list';
-export type { ConversationListProps, ConversationListController } from './components/conversation-list';
-export { ConversationItem } from './components/conversation-item';
-export { SlottedConversationItem } from './components/conversation-item';
-export type { SlottedConversationItemProps } from './components/conversation-item';
-export type { ConversationItemProps } from './components/conversation-item';
-export type { ConversationRowDensity } from './components/conversation-item';
-export { Row } from './components/row';
-export type { RowProps } from './components/row';
-export { RowGroup } from './components/row-group';
-export type { RowGroupProps } from './components/row-group';
-export { ModelSwitcher } from './components/model-switcher';
-export type { ModelSwitcherProps } from './components/model-switcher';
-export { ChatScopePicker } from './components/chat-scope-picker';
-export type { ChatScopePickerProps } from './components/chat-scope-picker';
-export { Tool } from './components/tool';
-export type { ToolPart, ToolProps } from './components/tool';
+} from './components/context/context';
+export { VoiceInput } from './components/voice/voice-input';
+export type { VoiceInputProps, VoiceInputController } from './components/voice/voice-input';
+export { ConversationList } from './components/conversation/conversation-list';
+export type { ConversationListProps, ConversationListController } from './components/conversation/conversation-list';
+export { ConversationItem } from './components/conversation/conversation-item';
+export { SlottedConversationItem } from './components/conversation/conversation-item';
+export type { SlottedConversationItemProps } from './components/conversation/conversation-item';
+export type { ConversationItemProps } from './components/conversation/conversation-item';
+export type { ConversationRowDensity } from './components/conversation/conversation-item';
+export { Row } from './components/row/row';
+export type { RowProps } from './components/row/row';
+export { RowGroup } from './components/row/row-group';
+export type { RowGroupProps } from './components/row/row-group';
+export { ModelSwitcher } from './components/model/model-switcher';
+export type { ModelSwitcherProps } from './components/model/model-switcher';
+export { ChatScopePicker } from './components/chat/chat-scope-picker';
+export type { ChatScopePickerProps } from './components/chat/chat-scope-picker';
+export { Tool } from './components/tool/tool';
+export type { ToolPart, ToolProps } from './components/tool/tool';
 // ToolPart.kind's doc comment says "Derive with `classifyTool(type)`", so the
 // function has to be reachable from every entry that surfaces ToolPart. It is
 // total, deterministic and terminates in 'generic', so it is safe public API and
 // genuinely useful to anyone rendering tool calls themselves.
-export { classifyTool } from './components/tool-classify';
-export type { ToolKind } from './components/tool-classify';
-export { ThinkingBar } from './components/thinking-bar';
-export type { ThinkingBarProps } from './components/thinking-bar';
-export { Reasoning, ReasoningTrigger, ReasoningContent } from './components/reasoning';
-export type { ReasoningProps, ReasoningTriggerProps, ReasoningContentProps } from './components/reasoning';
-export { Image } from './components/image';
-export type { ImageProps, GeneratedImageLike } from './components/image';
-export { FileUpload, FileUploadTrigger, FileUploadContent } from './components/file-upload';
-export type { FileUploadProps, FileUploadTriggerProps, FileUploadContentProps } from './components/file-upload';
+export { classifyTool } from './components/tool/tool-classify';
+export type { ToolKind } from './components/tool/tool-classify';
+export { ThinkingBar } from './components/thinking-bar/thinking-bar';
+export type { ThinkingBarProps } from './components/thinking-bar/thinking-bar';
+export { Reasoning, ReasoningTrigger, ReasoningContent } from './components/reasoning/reasoning';
+export type { ReasoningProps, ReasoningTriggerProps, ReasoningContentProps } from './components/reasoning/reasoning';
+export { Image } from './components/image/image';
+export type { ImageProps, GeneratedImageLike } from './components/image/image';
+export { FileUpload, FileUploadTrigger, FileUploadContent } from './components/file/file-upload';
+export type { FileUploadProps, FileUploadTriggerProps, FileUploadContentProps } from './components/file/file-upload';
 export {
   Attachments, Attachment, AttachmentPreview, AttachmentInfo, AttachmentRemove,
   AttachmentHoverCard, AttachmentHoverCardTrigger, AttachmentHoverCardContent,
   AttachmentEmpty, getMediaCategory, getAttachmentLabel,
   useAttachmentsContext, useAttachmentContext,
-} from './components/attachments';
+} from './components/attachments/attachments';
 export type {
   AttachmentData, AttachmentMediaCategory, AttachmentVariant,
   AttachmentsProps, AttachmentProps, AttachmentPreviewProps,
   AttachmentInfoProps, AttachmentRemoveProps, AttachmentEmptyProps,
   AttachmentHoverCardProps, AttachmentHoverCardTriggerProps, AttachmentHoverCardContentProps,
-} from './components/attachments';
+} from './components/attachments/attachments';
 
 // Chat message types — public API for consumers who need to type their own message arrays.
 // NOTE: chat-types.ts also exports an unrelated `Source` interface (a citation), and
@@ -426,14 +426,14 @@ export type { ComposerDoc, Segment, EntityRef } from './primitives/composer-mode
 // Guarded by tests/elements/prop-types-exported.test.ts, which re-derives the
 // list from the facades with the TS checker and fails on a new unexported one.
 // ---------------------------------------------------------------------------
-export type { TriggerDef, TriggerItem } from './components/composer';
-export type { ChatThreadContextUsage } from './components/chat-thread';
-export type { Skill } from './components/message-skills';
-export type { AgentStatus } from './components/agent-card';
-export type { KaiNavItem } from './components/nav';
-export type { KaiTabItem } from './components/tabs';
-export type { PaneStatus } from './components/pane';
-export type { PaneTab } from './components/pane-group';
+export type { TriggerDef, TriggerItem } from './components/composer/composer';
+export type { ChatThreadContextUsage } from './components/chat/chat-thread';
+export type { Skill } from './components/message/message-skills';
+export type { AgentStatus } from './components/agent-card/agent-card';
+export type { KaiNavItem } from './components/nav/nav';
+export type { KaiTabItem } from './components/tabs/tabs';
+export type { PaneStatus } from './components/pane/pane';
+export type { PaneTab } from './components/pane/pane-group';
 export type {
   KaiCheckboxOption, KaiCommandItem, KaiContextUsage, KaiMenuItem, KaiRadioOption, KaiSegmentedOption, KaiSelectOption,
   KaiSourceItem,
@@ -441,4 +441,4 @@ export type {
 // `kai-audio-visualizer.shader` takes a ShaderSpec. The element arrived from main
 // after this block was written, and prop-types-exported.test.ts caught it, which
 // is the point of deriving that list from the facades rather than maintaining it.
-export type { ShaderSpec } from './components/audio-visualizer';
+export type { ShaderSpec } from './components/audio-visualizer/index';

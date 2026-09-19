@@ -1,7 +1,7 @@
 import { Show } from 'solid-js';
-import { cn } from '../utils/cn';
-import { Button } from './button';
-import { useChatContainer } from './chat-container';
+import { cn } from '../../utils/cn';
+import { Button } from '../button/button';
+import { useChatContainer } from '../chat/chat-container';
 import { ArrowDown } from 'lucide-solid';
 
 /** The accessible name used when the consumer does not supply one. */

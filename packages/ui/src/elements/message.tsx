@@ -3,7 +3,7 @@ import { Dynamic } from 'solid-js/web';
 import { defineWebComponent } from './define';
 import { readSlots, MESSAGE_SLOTS } from './slots';
 import { ChatConfig, useChatConfig, type ProseSize } from '../primitives/chat-config';
-import { Message, MessageAvatar, MessageBody } from '../components/message';
+import { Message, MessageAvatar, MessageBody } from '../components/message/message';
 import { createMessageFeedback } from '../primitives/message-feedback';
 import {
   mergeCardTags,
@@ -232,7 +232,7 @@ defineWebComponent<Props, Events>('kai-message', {
 
   // Read declarative <kai-action> children from light DOM.
   // Shadow DOM with no <slot> suppresses them visually — they're invisible data carriers.
-  const [slottedActions, setSlottedActions] = createSignal<import('../elements/chat-types').CustomAction[]>([]);
+  const [slottedActions, setSlottedActions] = createSignal<import('./chat-types').CustomAction[]>([]);
   // Which composition slots (before-body / after-body / avatar) the consumer filled.
   const [slots, setSlots] = createSignal<Record<string, boolean>>({});
   onMount(() => {

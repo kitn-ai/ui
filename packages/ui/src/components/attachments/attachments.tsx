@@ -1,7 +1,7 @@
 import { type JSX, createContext, useContext, splitProps, Show } from 'solid-js';
-import { cn } from '../utils/cn';
-import { Button } from './button';
-import { HoverCardRoot, HoverCardTrigger, HoverCardContent } from './hover-card';
+import { cn } from '../../utils/cn';
+import { Button } from '../button/button';
+import { HoverCardRoot, HoverCardTrigger, HoverCardContent } from '../hover/hover-card';
 import {
   FileCode,
   FileText,
@@ -11,9 +11,9 @@ import {
   Paperclip,
   X,
 } from 'lucide-solid';
-import { DEFAULT_MEDIA_POLICY } from '../wire/media-types';
-import type { AttachmentData, AttachmentMediaCategory, AttachmentVariant } from './attachment-types';
-export type { AttachmentData, AttachmentMediaCategory, AttachmentVariant } from './attachment-types';
+import { DEFAULT_MEDIA_POLICY } from '../../wire/media-types';
+import type { AttachmentData, AttachmentMediaCategory, AttachmentVariant } from '../attachment-types/attachment-types';
+export type { AttachmentData, AttachmentMediaCategory, AttachmentVariant } from '../attachment-types/attachment-types';
 
 // ============================================================================
 // Types

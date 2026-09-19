@@ -35,7 +35,8 @@ import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import '../../src/elements/code-block';
-import { CodeBlock, CodeBlockCode } from '../../src/components/code-block';
+import { componentSource, componentSourceRel } from '../helpers/kit-paths';
+import { CodeBlock, CodeBlockCode } from '../../src/components/code-block/code-block';
 
 const pkgRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -532,15 +533,14 @@ describe('markdown and artifact are unchanged — the Solid default is OFF', () 
     expect(container.querySelector('[part="copy"]')).toBeNull();
   });
 
-  test.each([
-    ['markdown.tsx', 'src/components/markdown.tsx'],
-    ['artifact.tsx', 'src/components/artifact.tsx'],
-  ])('%s does not opt in to `copy`', (_name, file) => {
+  test.each(['markdown.tsx', 'artifact.tsx'])('%s does not opt in to `copy`', (name) => {
     // Behaviour is pinned above; this pins the CALL SITES, which is what would have to
     // change for the behaviour to. Reading the source is the honest check here: both
     // files render CodeBlock deep inside components with their own heavy setup, and a
     // full render test of each would be asserting their scaffolding, not this.
-    const source = readFileSync(resolve(pkgRoot, file), 'utf8');
+    // Resolved by basename — the path is not the subject, the call site is.
+    const file = componentSourceRel(name);
+    const source = componentSource(name);
     expect(source, `${file} must really render a CodeBlock, or this pin is vacuous`).toMatch(/<CodeBlock[\s>]/);
     for (const m of source.matchAll(/<CodeBlock\b([^>]*)>/g)) {
       expect(m[1], `${file} must not enable the copy button`).not.toMatch(/\bcopy\b/);

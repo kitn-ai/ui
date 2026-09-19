@@ -1,6 +1,6 @@
 import { type JSX, splitProps } from 'solid-js';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { cn } from '../utils/cn';
+import { cn } from '../../utils/cn';
 
 /**
  * Empty — a composable empty-state block, modeled on shadcn/ui's `Empty`.

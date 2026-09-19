@@ -2,10 +2,10 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal } from 'solid-js';
 import { Monitor, Sun, Moon } from 'lucide-solid';
 import { SettingsGroup, SettingItem, type SettingsGroupProps } from './settings-group';
-import { Segmented } from './segmented';
-import { Switch } from './switch';
-import { Select } from './select';
-import { componentDescription } from '../stories/docs/element-controls';
+import { Segmented } from '../segmented/segmented';
+import { Switch } from '../switch/switch';
+import { Select } from '../select/select';
+import { componentDescription } from '../../stories/docs/element-controls';
 
 // The building blocks in isolation — no modal/page host. A `SettingsGroup` is a
 // titled, bordered card that stacks `SettingItem` rows with hairline dividers;

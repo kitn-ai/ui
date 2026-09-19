@@ -2,8 +2,8 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal } from 'solid-js';
 import { action } from 'storybook/actions';
 import { ChoiceCard, type ChoiceCardData, type ChoiceOption } from './choice-card';
-import { componentDescription } from '../stories/docs/element-controls';
-import type { CardEvent, CardHost, CardContext, CardResolution } from '../primitives/card-contract';
+import { componentDescription } from '../../stories/docs/element-controls';
+import type { CardEvent, CardHost, CardContext, CardResolution } from '../../primitives/card-contract';
 
 const ctx: CardContext = { theme: { mode: 'light' }, locale: 'en' };
 

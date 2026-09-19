@@ -2,9 +2,9 @@ import {
   createEffect, createSignal, createUniqueId, Show, type Accessor, type JSX,
 } from 'solid-js';
 import { Portal } from 'solid-js/web';
-import { cn } from '../utils/cn';
-import { useChatConfig } from '../primitives/chat-config';
-import { createPresence } from './overlay';
+import { cn } from '../../utils/cn';
+import { useChatConfig } from '../../primitives/chat-config';
+import { createPresence } from '../overlay/overlay';
 
 /** Imperative open controller, handed to a parent (e.g. the kai-dialog facade)
  *  via `controllerRef` so it can drive/observe open state with `wireDisclosure`. */

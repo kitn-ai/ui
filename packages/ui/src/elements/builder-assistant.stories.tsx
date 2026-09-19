@@ -1,11 +1,11 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { type JSX, createSignal, createMemo } from 'solid-js';
-import { BuilderPanel, type BuilderConstruct } from '../components/builder-panel';
-import { BuilderLayout, type BuilderViewport } from '../components/builder-layout';
-import { resolveAccentWrapperStyle } from '../components/builder-preview';
-import { ChatThread } from '../components/chat-thread';
-import { ConversationList } from '../components/conversation-list';
-import { Empty, EmptyHeader, EmptyTitle, EmptyDescription } from '../components/empty';
+import { BuilderPanel, type BuilderConstruct } from '../components/builder/builder-panel';
+import { BuilderLayout, type BuilderViewport } from '../components/builder/builder-layout';
+import { resolveAccentWrapperStyle } from '../components/builder/builder-preview';
+import { ChatThread } from '../components/chat/chat-thread';
+import { ConversationList } from '../components/conversation/conversation-list';
+import { Empty, EmptyHeader, EmptyTitle, EmptyDescription } from '../components/empty/empty';
 import {
   type UserActionId,
   type AssistantActionId,
@@ -15,23 +15,23 @@ import {
   DEFAULT_USER_ACTION_ROWS,
   DEFAULT_ASSISTANT_ACTION_ROWS,
   ActionRowPicker,
-} from '../components/builder-message-actions';
+} from '../components/builder/builder-message-actions';
 import {
   type TriggerGroupState,
   ComposerTriggersSection,
   buildTriggerDefs,
   DEFAULT_SLASH_ENTRIES,
   DEFAULT_MENTION_ENTRIES,
-} from '../components/builder-composer-triggers';
+} from '../components/builder/builder-composer-triggers';
 import {
   type ShellControlsState,
   ShellSection,
   CommandPaletteOverlay,
   CommandPaletteTrigger,
   UserMenu,
-} from '../components/builder-shell-controls';
-import { Switch } from '../components/switch';
-import { Select } from '../components/select';
+} from '../components/builder/builder-shell-controls';
+import { Switch } from '../components/switch/switch';
+import { Select } from '../components/select/select';
 import { cn } from '../utils/cn';
 import type { ChatMessage, ChatMessageAction, CustomAction } from './chat-types';
 import type { ConversationGroup, ConversationSummary, ModelOption } from '../types';
@@ -46,7 +46,7 @@ import type { ConversationGroup, ConversationSummary, ModelOption } from '../typ
 // 'never', provider: true, home: false }}`).
 //
 // SIDEBAR IS A STORY-OWN COMPOSITION, NOT `ChatThread`'s `sidebar` SLOT:
-// `ChatThread`'s own `sidebar` prop (`components/chat-thread.tsx`) renders a
+// `ChatThread`'s own `sidebar` prop (`components/chat/chat-thread.tsx`) renders a
 // `<slot name="sidebar">` — real light-DOM slotting, meant for the
 // `kai-chat` web-component facade's projected children, not something a
 // bare Solid `<ChatThread>` usage can fill with JSX. This preview instead
@@ -61,12 +61,12 @@ import type { ConversationGroup, ConversationSummary, ModelOption } from '../typ
 //
 // MODEL SWITCHER: `ChatThread` has a REAL built-in header model switcher
 // (`models`/`currentModel`/`onModelChange` props, confirmed in
-// `components/chat-thread.tsx` before use) — no bespoke switcher built here.
+// `components/chat/chat-thread.tsx` before use) — no bespoke switcher built here.
 //
 // Panel sections: Identity, Provider, Theme, Capabilities (starters/
 // attachments/history/conversations toggle), plus the same role-scoped,
 // ordered Message actions picker `Labs/Builder/In-app assistant` uses
-// (imported from `components/builder-message-actions.tsx`, not forked).
+// (imported from `components/builder/builder-message-actions.tsx`, not forked).
 // No Layout radio (T-2), no Widget chrome (this template is never widget
 // framing), no Home section (a fullscreen assistant's empty state is its
 // own greeting field below, not the widget-lineage Home/links tab).
@@ -410,7 +410,7 @@ const meta = { title: 'Labs/Builder/Assistant', parameters: { layout: 'fullscree
 export default meta;
 type Story = StoryObj;
 
-// BuilderPanel/BuilderLayout are internal to the builder app (src/components/builder-panel.tsx,
+// BuilderPanel/BuilderLayout are internal to the builder app (src/components/builder/builder-panel.tsx,
 // builder-layout.tsx) -- neither ships in a public @kitn.ai/ui entry point. The snippet below
 // names the real composition and wiring rather than a package import; ChatThread and
 // ConversationList ARE public (@kitn.ai/ui) and are shown as this preview actually uses them.

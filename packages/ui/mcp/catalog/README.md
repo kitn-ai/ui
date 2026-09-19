@@ -117,7 +117,7 @@ enforces it — read that line rather than assuming CI catches a violation, beca
 nothing here reads YOUR code. 3 of the 7 below are enforced by NOTHING at all,
 and 2 more by only half of what they say.
 
-#### reactivity-two-halves (only kai-chat, kai-conversations) — enforced by the kit's own tests (packages/ui/src/components/reactivity-contract.test.tsx)
+#### reactivity-two-halves (only kai-chat, kai-conversations) — enforced by the kit's own tests (packages/ui/src/components/reactivity-contract/reactivity-contract.test.tsx)
 ```
 
 ---

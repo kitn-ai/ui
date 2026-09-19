@@ -14,8 +14,8 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import '@testing-library/jest-dom/vitest';
 import { render, cleanup, fireEvent, waitFor } from '@solidjs/testing-library';
-import { ResponseCompare } from '../components/response-compare';
-import type { ResponseCompareData, CompareSelection } from '../components/response-compare';
+import { ResponseCompare } from '../components/response/response-compare';
+import type { ResponseCompareData, CompareSelection } from '../components/response/response-compare';
 
 afterEach(cleanup);
 

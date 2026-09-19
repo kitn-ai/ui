@@ -17,7 +17,7 @@ import '@testing-library/jest-dom/vitest';
 import { render, cleanup, fireEvent } from '@solidjs/testing-library';
 import { For } from 'solid-js';
 import { parseSuggestionNode } from './prompt-suggestions';
-import { PromptSuggestion } from '../components/prompt-suggestion';
+import { PromptSuggestion } from '../components/prompt/prompt-suggestion';
 
 afterEach(cleanup);
 

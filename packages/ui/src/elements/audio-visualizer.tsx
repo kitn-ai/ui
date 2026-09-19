@@ -1,5 +1,5 @@
 import type { JSX } from 'solid-js';
-import { AudioVisualizer, type ShaderSpec, type VisualizerVariant } from '../components/audio-visualizer';
+import { AudioVisualizer, type ShaderSpec, type VisualizerVariant } from '../components/audio-visualizer/index';
 import type { VisualizerSize } from '../components/audio-visualizer/sizes';
 import { defineWebComponent, type WebComponentContext } from './define';
 

@@ -2,7 +2,7 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import '@testing-library/jest-dom/vitest';
 import { render, cleanup, fireEvent, screen } from '@solidjs/testing-library';
 import { ModelSwitcher } from './model-switcher';
-import type { ModelOption } from '../types';
+import type { ModelOption } from '../../types';
 
 afterEach(cleanup);
 

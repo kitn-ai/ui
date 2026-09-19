@@ -1,8 +1,8 @@
 import { test, expect, afterEach } from 'vitest';
 import { render } from '@solidjs/testing-library';
 import { createSignal } from 'solid-js';
-import { RatingWidget, SwitchWidget, type WidgetProps } from '../../src/components/form-widgets';
-import { Switch } from '../../src/components/switch';
+import { RatingWidget, SwitchWidget, type WidgetProps } from '../../src/components/form/form-widgets';
+import { Switch } from '../../src/components/switch/switch';
 
 afterEach(() => { document.body.innerHTML = ''; });
 
@@ -109,7 +109,7 @@ function primitiveSwitch(checked: boolean): HTMLElement {
 test('SwitchWidget IS the Switch primitive — same rendered control, both states', () => {
   // Two consequences of the old inline copy, both measured in the audit: the form's
   // switch was 44x24 (`h-6 w-11`) where `<kai-switch>` is 36x20 (`h-5 w-9`), and its
-  // thumb used `bg-background` where `components/switch.tsx:80` documents needing
+  // thumb used `bg-background` where `components/switch/switch.tsx:80` documents needing
   // `bg-primary-foreground` because a hard-coded light thumb vanishes in dark mode.
   // jsdom has no layout so it cannot measure 36x20; comparing the rendered class
   // strings against the primitive's own output pins both facts without a magic number.

@@ -3,8 +3,8 @@ import '@testing-library/jest-dom/vitest';
 import { createSignal } from 'solid-js';
 import { render, cleanup, fireEvent } from '@solidjs/testing-library';
 import { groupMessageParts, MessageBody } from './message';
-import { appendReasoningPart, appendTextPart, upsertToolPart } from '../state/parts';
-import type { MessagePart } from '../elements/chat-types';
+import { appendReasoningPart, appendTextPart, upsertToolPart } from '../../state/parts';
+import type { MessagePart } from '../../elements/chat-types';
 
 // jsdom has no ResizeObserver; the reasoning disclosure wires one when its
 // content mounts (same stub as response-compare.test.tsx / thread.test.tsx).

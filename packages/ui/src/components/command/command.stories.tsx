@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal } from 'solid-js';
 import { fn } from 'storybook/test';
 import { CommandList, type CommandGroup } from './command';
-import { componentDescription } from '../stories/docs/element-controls';
+import { componentDescription } from '../../stories/docs/element-controls';
 
 /** Two groups of rows. Icons are curated names from `NAMED_ICONS`. */
 const SAMPLE_GROUPS: CommandGroup[] = [

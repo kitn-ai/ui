@@ -43,7 +43,7 @@
  *     dead affordance this repo's menu-honesty rule rejects.
  *
  * STYLING: plain inline `color-mix()`, not a Tailwind opacity-modifier class.
- * That is the story's own precedent and `components/builder-skeleton.tsx`'s
+ * That is the story's own precedent and `components/builder/builder-skeleton.tsx`'s
  * `mix()` doc comment explains why (a fresh opacity-modifier combination proved
  * non-deterministic under the Storybook dev server's JIT pass). The helper is
  * inlined rather than imported: `builder-skeleton.tsx` is builder-story
@@ -51,9 +51,9 @@
  */
 import { type JSX, Show, For, createMemo, createSignal } from 'solid-js';
 import { Code2, Globe, Monitor, Tablet, Smartphone, Lock, ExternalLink, Maximize2, Minimize2 } from 'lucide-solid';
-import { cn } from '../utils/cn';
-import { Button } from './button';
-import { Artifact, type ArtifactController, type ArtifactTab } from './artifact';
+import { cn } from '../../utils/cn';
+import { Button } from '../button/button';
+import { Artifact, type ArtifactController, type ArtifactTab } from '../artifact/artifact';
 
 /** The pane's own device canvas. Independent of `builder-layout.tsx`'s
  *  `BuilderViewport`, which scales the whole BUILDER frame. */

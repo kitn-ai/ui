@@ -1,6 +1,6 @@
 import { type JSX, Show, splitProps, mergeProps, createSignal, createUniqueId } from 'solid-js';
 import { Dynamic } from 'solid-js/web';
-import { cn } from '../utils/cn';
+import { cn } from '../../utils/cn';
 import { X } from 'lucide-solid';
 
 export type CardAppearance = 'outlined' | 'filled' | 'plain' | 'accent';

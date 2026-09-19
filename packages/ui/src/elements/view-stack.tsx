@@ -1,6 +1,6 @@
 import { createSignal, createEffect, on, onMount, onCleanup, untrack } from 'solid-js';
 import { defineWebComponent } from './define';
-import { createViewStack, type ViewEntry, type ViewStackState } from '../components/view-stack';
+import { createViewStack, type ViewEntry, type ViewStackState } from '../components/view/view-stack';
 
 /** Is this element a `<kai-view>` child the stack should manage? */
 export function isKaiViewElement(el: Element): boolean {

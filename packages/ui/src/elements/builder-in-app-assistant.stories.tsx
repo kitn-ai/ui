@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { type JSX, createSignal, createMemo } from 'solid-js';
-import { BuilderPanel, type BuilderConstruct } from '../components/builder-panel';
-import { BuilderLayout, type BuilderViewport } from '../components/builder-layout';
-import { resolveAccentWrapperStyle } from '../components/builder-preview';
-import { ChatThread } from '../components/chat-thread';
-import { mix, SkeletonBar, StubStatTile, StubNavRow, StubTableRow } from '../components/builder-skeleton';
+import { BuilderPanel, type BuilderConstruct } from '../components/builder/builder-panel';
+import { BuilderLayout, type BuilderViewport } from '../components/builder/builder-layout';
+import { resolveAccentWrapperStyle } from '../components/builder/builder-preview';
+import { ChatThread } from '../components/chat/chat-thread';
+import { mix, SkeletonBar, StubStatTile, StubNavRow, StubTableRow } from '../components/builder/builder-skeleton';
 import {
   type UserActionId,
   type AssistantActionId,
@@ -14,17 +14,17 @@ import {
   DEFAULT_USER_ACTION_ROWS,
   DEFAULT_ASSISTANT_ACTION_ROWS,
   ActionRowPicker,
-} from '../components/builder-message-actions';
+} from '../components/builder/builder-message-actions';
 import {
   type TriggerGroupState,
   ComposerTriggersSection,
   buildTriggerDefs,
   DEFAULT_SLASH_ENTRIES,
   DEFAULT_MENTION_ENTRIES,
-} from '../components/builder-composer-triggers';
-import { Switch } from '../components/switch';
-import { RadioGroup, type RadioOption } from '../components/radio';
-import { Select } from '../components/select';
+} from '../components/builder/builder-composer-triggers';
+import { Switch } from '../components/switch/switch';
+import { RadioGroup, type RadioOption } from '../components/radio/radio';
+import { Select } from '../components/select/select';
 import { cn } from '../utils/cn';
 import type { ChatMessage, ChatMessageAction, CustomAction } from './chat-types';
 
@@ -60,7 +60,7 @@ import type { ChatMessage, ChatMessageAction, CustomAction } from './chat-types'
 // — Composer/Mic, Messages/Message actions, Rail placement — each one a
 // genuine T-5 vocabulary-gap candidate, not decided here, listed so the
 // gap is loud rather than silently faked as already-wired:
-//  - **Mic** (`ChatThread`'s own `voice` prop, `components/chat-thread.tsx`)
+//  - **Mic** (`ChatThread`'s own `voice` prop, `components/chat/chat-thread.tsx`)
 //    exists at the COMPONENT tier today; `construct.v1`'s `capabilities`
 //    block has no `voice`/`mic` key, so an emitted construct can't turn
 //    this on yet. Candidate: `capabilities.voice: boolean`.
@@ -187,7 +187,7 @@ const DEFAULT_CONSTRUCT: BuilderConstruct = {
 };
 
 // Skeleton-tint helpers (mix/SkeletonBar/StubStatTile/StubNavRow/
-// StubTableRow) moved to `components/builder-skeleton.tsx` (T-1 build-out
+// StubTableRow) moved to `components/builder/builder-skeleton.tsx` (T-1 build-out
 // cross-cutting refactor) — every template's preview host now shares one
 // wordless-skeleton definition. See that module's doc comment for the
 // PLAIN-inline-CSS-over-Tailwind-arbitrary-classes rationale (a real
@@ -415,13 +415,13 @@ function InAppAssistantPreview(props: {
  * The Round A2 preview-only knobs, appended below `BuilderPanel` — see the
  * module doc comment's T-5 list for what each one is missing from
  * `construct.v1` today. Deliberately styled to match `BuilderPanel`'s own
- * Section/Field/Row rhythm (`components/builder-panel.tsx`'s local
+ * Section/Field/Row rhythm (`components/builder/builder-panel.tsx`'s local
  * helpers, not exported, so the small class duplication here is the
  * honest cost of these three living OUTSIDE the shared panel rather than
  * inside it — they aren't real construct fields and don't belong in a
  * component every other template's story also renders).
  */
-// ActionRowPicker moved to `components/builder-message-actions.tsx` (T-1
+// ActionRowPicker moved to `components/builder/builder-message-actions.tsx` (T-1
 // build-out cross-cutting refactor) — imported above.
 
 function PreviewOnlyControls(props: {
@@ -592,7 +592,7 @@ const meta = { title: 'Labs/Builder/In-app assistant', parameters: { layout: 'fu
 export default meta;
 type Story = StoryObj;
 
-// BuilderPanel/BuilderLayout are internal to the builder app (src/components/builder-panel.tsx,
+// BuilderPanel/BuilderLayout are internal to the builder app (src/components/builder/builder-panel.tsx,
 // builder-layout.tsx) -- neither ships in a public @kitn.ai/ui entry point. The snippet below
 // names the real composition and wiring rather than a package import; ChatThread IS public
 // (@kitn.ai/ui) and is shown as this preview actually uses it, docked beside the host app.

@@ -1,5 +1,5 @@
 import { type JSX, For, Show, splitProps } from 'solid-js';
-import { cn } from '../utils/cn';
+import { cn } from '../../utils/cn';
 import { Checkbox } from './checkbox';
 
 /** One choice in a {@link CheckboxGroup}. */

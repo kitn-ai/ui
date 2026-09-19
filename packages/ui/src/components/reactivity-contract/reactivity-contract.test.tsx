@@ -36,10 +36,10 @@ import { describe, it, expect, afterEach, vi } from 'vitest';
 import '@testing-library/jest-dom/vitest';
 import { createSignal } from 'solid-js';
 import { render, cleanup } from '@solidjs/testing-library';
-import { ConversationList } from './conversation-list';
-import { Thread } from './thread';
-import type { ConversationSummary } from '../types';
-import type { ChatMessage } from '../elements/chat-types';
+import { ConversationList } from '../conversation/conversation-list';
+import { Thread } from '../thread/thread';
+import type { ConversationSummary } from '../../types';
+import type { ChatMessage } from '../../elements/chat-types';
 
 // jsdom lacks these; the thread's auto-scroll container and reasoning disclosure
 // wire them up. Same stubs as thread.test.tsx.
@@ -51,7 +51,7 @@ if (typeof globalThis.ResizeObserver === 'undefined') {
     disconnect() {}
   } as unknown as typeof ResizeObserver;
 }
-vi.mock('../primitives/toast-store', () => {
+vi.mock('../../primitives/toast-store', () => {
   const fn = Object.assign(() => {}, { success: () => {}, dismiss: vi.fn(), clear: vi.fn() });
   return { toast: fn };
 });

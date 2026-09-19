@@ -10,14 +10,14 @@ import {
   onMount,
   ErrorBoundary,
 } from 'solid-js';
-import { cn } from '../utils/cn';
-import { Button } from './button';
-import { Card } from './card';
-import { DismissedStub } from './dismissed-stub';
-import type { CardEnvelope, CardEvent, CardHost, CardResolution } from '../primitives/card-contract';
-import { useCardResolution } from './use-card-resolution';
-import { emitCardEvent } from '../primitives/card-routing';
-import { useCardHost } from '../primitives/card-host';
+import { cn } from '../../utils/cn';
+import { Button } from '../button/button';
+import { Card } from '../card/card';
+import { DismissedStub } from '../dismissed-stub/dismissed-stub';
+import type { CardEnvelope, CardEvent, CardHost, CardResolution } from '../../primitives/card-contract';
+import { useCardResolution } from '../use-card-resolution/use-card-resolution';
+import { emitCardEvent } from '../../primitives/card-routing';
+import { useCardHost } from '../../primitives/card-host';
 import { AlertTriangle, Check } from 'lucide-solid';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -39,7 +39,7 @@ import type {
   ConfirmActionStyle,
   ConfirmCardData,
   ConfirmTone,
-} from '../primitives/card-data-types';
+} from '../../primitives/card-data-types';
 
 export type {
   ConfirmAction,
@@ -47,7 +47,7 @@ export type {
   ConfirmCardData,
   ConfirmCardEnvelope,
   ConfirmTone,
-} from '../primitives/card-data-types';
+} from '../../primitives/card-data-types';
 
 export const CONFIRM_CARD_TYPE = 'confirm' as const;
 

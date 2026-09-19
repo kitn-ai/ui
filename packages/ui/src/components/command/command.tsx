@@ -1,7 +1,7 @@
 import { For, Show, type JSX } from 'solid-js';
-import { cn } from '../utils/cn';
-import { renderIcon } from './icon';
-import { Kbd } from './kbd';
+import { cn } from '../../utils/cn';
+import { renderIcon } from '../icon/icon';
+import { Kbd } from '../kbd/kbd';
 
 export interface CommandRow {
   id: string;

@@ -2,8 +2,8 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { fn } from 'storybook/test';
 import { Row } from './row';
 import { RowGroup } from './row-group';
-import { renderIcon } from './icon';
-import { componentDescription } from '../stories/docs/element-controls';
+import { renderIcon } from '../icon/icon';
+import { componentDescription } from '../../stories/docs/element-controls';
 
 /**
  * The generic mobile list row (P-4): leading region, title + optional

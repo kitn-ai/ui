@@ -22,7 +22,7 @@
 
 import { createRoot, createSignal } from 'solid-js';
 import { createStore, produce } from 'solid-js/store';
-import type { ToastPosition } from '../components/toast';
+import type { ToastPosition } from '../components/toast/toast';
 
 export type ToastVariant = 'neutral' | 'success' | 'warning' | 'error' | 'info';
 /** Visual treatment: `'pill'` (default, compact single-line) or `'card'` (richer

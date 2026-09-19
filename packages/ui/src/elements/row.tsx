@@ -1,7 +1,7 @@
 import { createSignal, onCleanup, onMount } from 'solid-js';
 import { defineWebComponent } from './define';
 import { readSlots, ROW_SLOTS } from './slots';
-import { Row } from '../components/row';
+import { Row } from '../components/row/row';
 
 interface Props extends Record<string, unknown> {
   /** Pressable row: renders real button semantics (click, Enter, Space) and

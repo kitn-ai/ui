@@ -1,7 +1,7 @@
 import { type JSX, createContext, useContext, Show, splitProps } from 'solid-js';
-import { cn } from '../utils/cn';
-import { HoverCardRoot, HoverCardTrigger, HoverCardContent } from './hover-card';
-import { isRenderableLink } from '../primitives/link-preview';
+import { cn } from '../../utils/cn';
+import { HoverCardRoot, HoverCardTrigger, HoverCardContent } from '../hover/hover-card';
+import { isRenderableLink } from '../../primitives/link-preview';
 
 // --- Context ---
 

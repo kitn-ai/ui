@@ -1,6 +1,6 @@
 import { type JSX, splitProps, createContext, useContext } from 'solid-js';
-import { cn } from '../utils/cn';
-import { useStickToBottom } from '../primitives/use-stick-to-bottom';
+import { cn } from '../../utils/cn';
+import { useStickToBottom } from '../../primitives/use-stick-to-bottom';
 
 interface ChatContainerContextValue {
   isAtBottom: () => boolean;

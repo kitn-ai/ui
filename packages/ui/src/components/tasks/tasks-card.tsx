@@ -12,16 +12,16 @@ import {
   ErrorBoundary,
   createUniqueId,
 } from 'solid-js';
-import { cn } from '../utils/cn';
-import { Button } from './button';
-import { Checkbox } from './checkbox';
-import { ProgressBar } from './progress-bar';
-import { Card } from './card';
-import { DismissedStub } from './dismissed-stub';
-import type { CardEnvelope, CardEvent, CardHost, CardResolution } from '../primitives/card-contract';
-import { useCardResolution } from './use-card-resolution';
-import { emitCardEvent } from '../primitives/card-routing';
-import { useCardHost } from '../primitives/card-host';
+import { cn } from '../../utils/cn';
+import { Button } from '../button/button';
+import { Checkbox } from '../checkbox/checkbox';
+import { ProgressBar } from '../progress/progress-bar';
+import { Card } from '../card/card';
+import { DismissedStub } from '../dismissed-stub/dismissed-stub';
+import type { CardEnvelope, CardEvent, CardHost, CardResolution } from '../../primitives/card-contract';
+import { useCardResolution } from '../use-card-resolution/use-card-resolution';
+import { emitCardEvent } from '../../primitives/card-routing';
+import { useCardHost } from '../../primitives/card-host';
 import { Check, Circle, CircleCheck } from 'lucide-solid';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -30,14 +30,14 @@ import { Check, Circle, CircleCheck } from 'lucide-solid';
 // `.tsx` and why they are `type` aliases. Re-exported here unchanged.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import type { TasksCardData, TasksCardResult, TasksTask } from '../primitives/card-data-types';
+import type { TasksCardData, TasksCardResult, TasksTask } from '../../primitives/card-data-types';
 
 export type {
   TasksCardData,
   TasksCardEnvelope,
   TasksCardResult,
   TasksTask,
-} from '../primitives/card-data-types';
+} from '../../primitives/card-data-types';
 
 export const TASKS_CARD_TYPE = 'tasks' as const;
 

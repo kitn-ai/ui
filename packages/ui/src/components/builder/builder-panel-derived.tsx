@@ -14,23 +14,23 @@
 import { type JSX, Show, For, createUniqueId } from 'solid-js';
 import { Dynamic } from 'solid-js/web';
 import { X } from 'lucide-solid';
-import { cn } from '../utils/cn';
-import { Input } from './input';
-import { Select } from './select';
-import { Switch } from './switch';
-import { Button } from './button';
-import { ColorField } from './color-field';
-import { BUTTON_VARIANT_NAMES } from './button-variant-names';
+import { cn } from '../../utils/cn';
+import { Input } from '../input/input';
+import { Select } from '../select/select';
+import { Switch } from '../switch/switch';
+import { Button } from '../button/button';
+import { ColorField } from '../color/color-field';
+import { BUTTON_VARIANT_NAMES } from '../button/button-variant-names';
 import { Section, Field, Row, TagEditor, AcceptTypeEditor, LinksEditor } from './builder-panel';
 import { ActionRowPicker, USER_ACTION_CATALOG, ASSISTANT_ACTION_CATALOG } from './builder-message-actions';
-import type { BuildableTemplate } from '../../mcp/construct/templates';
-import type { Construct, ConstructProblem } from '../../mcp/construct/schema';
+import type { BuildableTemplate } from '../../../mcp/construct/templates';
+import type { Construct, ConstructProblem } from '../../../mcp/construct/schema';
 import {
   getAtPath, setAtPath, deleteAtPath,
   readPresenceBoolean, writePresenceBoolean, PRESENCE_BOOLEAN_PATHS,
   readAnchoredBoolean, writeAnchoredBoolean, ANCHORED_BOOLEAN_DEFAULTS,
   schemaNodeAt, controlKindFor, RULE_VISIBILITY,
-} from './construct-form-paths';
+} from '../construct-form-paths/construct-form-paths';
 
 export interface DerivedBuilderPanelProps {
   value: Construct; // controlled; the panel holds no copy

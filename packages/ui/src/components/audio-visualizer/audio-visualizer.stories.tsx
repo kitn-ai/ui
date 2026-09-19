@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal, onCleanup, Show, For, type JSX } from 'solid-js';
 import { AudioVisualizer, type AudioVisualizerProps } from './index';
-import { Button } from '../button';
-import { Notice } from '../notice';
+import { Button } from '../button/button';
+import { Notice } from '../notice/notice';
 import { componentDescription } from '../../stories/docs/element-controls';
 import {
   SIZES,

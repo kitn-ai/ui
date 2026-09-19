@@ -1,8 +1,8 @@
 import { test, expect, afterEach } from 'vitest';
 import { render } from '@solidjs/testing-library';
 import { createSignal } from 'solid-js';
-import { Checkbox } from '../../src/components/checkbox';
-import { CheckboxWidget, CheckboxGroupWidget, type WidgetProps } from '../../src/components/form-widgets';
+import { Checkbox } from '../../src/components/checkbox/checkbox';
+import { CheckboxWidget, CheckboxGroupWidget, type WidgetProps } from '../../src/components/form/form-widgets';
 
 afterEach(() => { document.body.innerHTML = ''; });
 

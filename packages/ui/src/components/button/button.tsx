@@ -1,6 +1,6 @@
 import { type JSX, splitProps } from 'solid-js';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { cn } from '../utils/cn';
+import { cn } from '../../utils/cn';
 import { type ButtonVariantName } from './button-variant-names';
 
 /** The variant → classes record, extracted from the cva call so (a) the

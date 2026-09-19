@@ -20,7 +20,7 @@ import {
   createConversationItemsController,
   readConversationItemId,
 } from './conversation-list';
-import type { ConversationSummary } from '../types';
+import type { ConversationSummary } from '../../types';
 
 afterEach(cleanup);
 

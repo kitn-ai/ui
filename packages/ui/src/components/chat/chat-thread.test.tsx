@@ -3,13 +3,13 @@ import '@testing-library/jest-dom/vitest';
 import { createSignal } from 'solid-js';
 import { render, cleanup, fireEvent } from '@solidjs/testing-library';
 import { ChatThread, type ChatThreadController } from './chat-thread';
-import type { ChatMessage } from '../elements/chat-types';
-import { localStorageStore } from '../primitives/conversation-store';
+import type { ChatMessage } from '../../elements/chat-types';
+import { localStorageStore } from '../../primitives/conversation-store';
 
 // Spy on the imperative toast() so we can assert when feedback raises one. The
 // feedback controller imports it from primitives/toast-store.
 const toastSpy = vi.fn();
-vi.mock('../primitives/toast-store', () => {
+vi.mock('../../primitives/toast-store', () => {
   const fn = Object.assign((...args: unknown[]) => toastSpy(...args), {
     success: (...args: unknown[]) => toastSpy(...args),
     dismiss: vi.fn(),
@@ -66,7 +66,7 @@ describe('ChatThread header composition', () => {
 
   // headerEndContent: a Solid-composed caller's JSX escape hatch for the header-end
   // region (a docked widget's own close control being the motivating case — see
-  // components/dock.tsx's hideClose doc). Renders ALONGSIDE the named slot, not instead of
+  // components/dock/dock.tsx's hideClose doc). Renders ALONGSIDE the named slot, not instead of
   // it, and counts toward showHeader() on its own.
   it('shows the header for headerEndContent alone, with no title/models/context/slots', () => {
     const { container } = render(() => <ChatThread messages={[]} headerEndContent={<button>Close</button>} />);

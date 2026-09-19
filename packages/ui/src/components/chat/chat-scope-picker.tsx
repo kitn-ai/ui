@@ -1,8 +1,8 @@
 import { splitProps, Show, For } from 'solid-js';
-import { cn } from '../utils/cn';
-import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem, type DropdownController } from './dropdown';
-import { Button } from './button';
-import type { SearchFilters } from '../types';
+import { cn } from '../../utils/cn';
+import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem, type DropdownController } from '../dropdown/dropdown';
+import { Button } from '../button/button';
+import type { SearchFilters } from '../../types';
 
 export interface ChatScopePickerProps {
   currentLabel: string;

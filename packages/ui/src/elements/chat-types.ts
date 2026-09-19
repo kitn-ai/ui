@@ -1,10 +1,10 @@
-import type { ToolPart, RawOrigin } from '../components/tool-types';
-import type { AttachmentData } from '../components/attachment-types';
+import type { ToolPart, RawOrigin } from '../components/tool/tool-types';
+import type { AttachmentData } from '../components/attachment-types/attachment-types';
 import type { CardEnvelope } from '../primitives/card-contract';
 import { CHAT_MESSAGE_ACTIONS } from './chat-actions';
 
 /** Re-exported so consumers of chat-types (and MessagePart) can keep using
- *  RawOrigin unqualified. It is defined in components/tool-types.ts, not here,
+ *  RawOrigin unqualified. It is defined in components/tool/tool-types.ts, not here,
  *  to keep the components -> elements import direction one-way. */
 export type { RawOrigin };
 
@@ -20,7 +20,7 @@ export type ChatMessageAction = (typeof CHAT_MESSAGE_ACTIONS)[number];
 export type FeedbackVote = 'like' | 'dislike';
 
 /** A host-defined action button. `icon` is a curated registry name (see
- *  `src/components/action-icons.ts`); unknown/absent icons render label-only. */
+ *  `src/components/action-icons/action-icons.ts`); unknown/absent icons render label-only. */
 export interface CustomAction {
   /** Emitted as the `kai-message-action` detail `action` when clicked. */
   id: string;

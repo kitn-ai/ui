@@ -21,14 +21,14 @@ import { render } from '@solidjs/testing-library';
 import { createSignal } from 'solid-js';
 import { computeAccessibleName } from 'dom-accessibility-api';
 import axe from 'axe-core';
-import { Form, type FormField } from '../../src/components/form';
+import { Form, type FormField } from '../../src/components/form/form';
 import {
   NumberWidget,
   TagListWidget,
   MultiSelectWidget,
   CheckboxGroupWidget,
   type WidgetProps,
-} from '../../src/components/form-widgets';
+} from '../../src/components/form/form-widgets';
 
 afterEach(() => { document.body.innerHTML = ''; });
 
@@ -242,7 +242,7 @@ const numberProps = (over: Partial<WidgetProps> = {}) =>
   widgetProps({ id: 'f-count', label: 'Count', field: { type: 'integer' } as FormField, ...over });
 
 test('NumberWidget keeps the SAME input node when `invalid` flips', () => {
-  // The focus-node-reuse property `components/input.tsx:262-268` documents. `kai-form` derives
+  // The focus-node-reuse property `components/input/input.tsx:262-268` documents. `kai-form` derives
   // `invalid` from the field's own value, so this flip happens on every keystroke that
   // crosses a validity boundary.
   //

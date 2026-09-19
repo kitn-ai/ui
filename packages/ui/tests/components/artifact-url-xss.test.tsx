@@ -50,7 +50,7 @@
 // filtered.
 import { render, fireEvent } from '@solidjs/testing-library';
 import { afterEach, describe, expect, test, vi } from 'vitest';
-import { Artifact, type ArtifactController, type ArtifactFile } from '../../src/components/artifact';
+import { Artifact, type ArtifactController, type ArtifactFile } from '../../src/components/artifact/artifact';
 import { BUILTIN_CARD_COMPONENTS } from '../../src/primitives/card-registry';
 import { configurePdfPreview, __resetPdfPreviewForTests } from '../../src/primitives/pdf-preview';
 import type { CardEnvelope } from '../../src/primitives/card-contract';

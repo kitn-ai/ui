@@ -1,7 +1,7 @@
 import type { MessagePart, RawOrigin } from '../elements/chat-types';
-import type { ToolPart } from '../components/tool-types';
+import type { ToolPart } from '../components/tool/tool-types';
 import type { CardEnvelope } from '../primitives/card-contract';
-import { classifyTool } from '../components/tool-classify';
+import { classifyTool } from '../components/tool/tool-classify';
 
 /** Stable structural fingerprint. Key order independent, so an identical snapshot
  *  arriving twice compares equal and can be skipped. */
@@ -232,7 +232,7 @@ function resolveKind(cur: ToolPart, patch: Partial<ToolPart>, nextType: string):
 
 /** Every `ToolPart` key, in the order `toolsEqual` checks them (cheap identity
  *  checks first, the two fingerprint-based checks last). See `ToolPart` in
- *  `components/tool-types.ts`, which points back here.
+ *  `components/tool/tool-types.ts`, which points back here.
  *
  *  This is not just documentation: `_toolKeysExhaustive` below fails to compile
  *  if `ToolPart` gains a key that is not listed here, and `TOOL_COMPARATORS`

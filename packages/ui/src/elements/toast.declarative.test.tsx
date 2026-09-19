@@ -14,7 +14,7 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import '@testing-library/jest-dom/vitest';
 import { render, cleanup, fireEvent, waitFor } from '@solidjs/testing-library';
 import { createSignal } from 'solid-js';
-import { ToastRegion } from '../components/toast';
+import { ToastRegion } from '../components/toast/toast';
 import type { ToastItem } from '../primitives/toast-store';
 
 afterEach(cleanup);

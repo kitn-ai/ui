@@ -3,7 +3,7 @@ import { onMount, onCleanup } from 'solid-js';
 import { LifeBuoy, Sparkles } from 'lucide-solid';
 import './register'; // side effect: registers <kai-chat> et al.
 import { attachKaiActions } from '../stories/docs/story-actions';
-import { textMessage } from '../state';
+import { textMessage } from '../state/index';
 import type { ChatMessage } from './chat-types';
 import type { ConversationSummary, ConversationGroup } from '../types';
 

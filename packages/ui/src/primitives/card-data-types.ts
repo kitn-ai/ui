@@ -14,10 +14,10 @@
 //
 // `tsconfig.mcp.json` is Node-only — `lib: ["ESNext"]`, no `jsx` — and a type import
 // still has to RESOLVE even though it erases. While `ConfirmCardData` and friends
-// lived in components/confirm-card.tsx, any Node/no-DOM project that named one got
+// lived in components/confirm-card/confirm-card.tsx, any Node/no-DOM project that named one got
 //
 //   error TS6142: Module '../../components/choice-card' was resolved to
-//   '.../src/components/choice-card.tsx', but '--jsx' is not set.
+//   '.../src/components/choice-card/choice-card.tsx', but '--jsx' is not set.
 //
 // measured on this tree, and `@kitn.ai/ui/schemas` — the server-safe entry that
 // exists precisely so a route can hand a model tool definitions — could not
@@ -282,8 +282,8 @@ export type FormCardEnvelope = CardEnvelope<'form', FormDefinition>;
  * One file behind an artifact card: the Code tab's tree row, plus where the
  * preview loads it.
  *
- * The SAME declaration the `FileTree` primitive uses — `components/file-tree.tsx`
- * re-exports this as `FileTreeFile` and `components/artifact.tsx` aliases that to
+ * The SAME declaration the `FileTree` primitive uses — `components/file/file-tree.tsx`
+ * re-exports this as `FileTreeFile` and `components/artifact/artifact.tsx` aliases that to
  * `ArtifactFile`, so there is one shape here and not a copy of one. It is authored
  * in this file rather than in file-tree.tsx for this module's whole reason: it is
  * reachable from `ArtifactCardData`, so leaving it in a `.tsx` would put TS6142

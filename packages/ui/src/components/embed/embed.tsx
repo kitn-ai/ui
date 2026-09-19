@@ -8,9 +8,9 @@ import {
   onMount,
   Show,
 } from 'solid-js';
-import { cn } from '../utils/cn';
+import { cn } from '../../utils/cn';
 import { Play, Video, ExternalLink, TriangleAlert } from 'lucide-solid';
-import type { CardEvent } from '../primitives/card-contract';
+import type { CardEvent } from '../../primitives/card-contract';
 import {
   type EmbedCardData,
   type ResolvedEmbed,
@@ -18,7 +18,7 @@ import {
   watchUrl,
   providerLabel,
   aspectRatioValue,
-} from '../primitives/embed-providers';
+} from '../../primitives/embed-providers';
 
 export interface EmbedProps extends Omit<JSX.HTMLAttributes<HTMLDivElement>, 'onError'> {
   /** The card id correlating every emitted event. */
@@ -197,4 +197,4 @@ export function Embed(props: EmbedProps): JSX.Element {
   );
 }
 
-export type { EmbedCardData } from '../primitives/embed-providers';
+export type { EmbedCardData } from '../../primitives/embed-providers';

@@ -1,4 +1,4 @@
-import { Avatar } from '../components/avatar';
+import { Avatar } from '../components/avatar/avatar';
 import { defineWebComponent } from './define';
 
 interface Props extends Record<string, unknown> {

@@ -128,7 +128,7 @@ describe('cardFromToolCall', () => {
     // Decision, argued in the module header: `kai_` alone decides "this is a card
     // tool". Whether the type is renderable is asked once, downstream, where it is
     // already answered specifically: CardRenderer emits {kind:'error', cardId} and
-    // renders CardFallback naming the type (tests/components/card-renderer.test.tsx:38,
+    // renders CardFallback naming the type (tests/components/card/card-renderer.test.tsx:38,
     // src/elements/thread-cards.declarative.test.tsx:55).
     //
     // The alternative (gate on the 7 built-ins, return null otherwise) would send a

@@ -1,11 +1,11 @@
 // src/primitives/create-kai-chat.ts
 import { createSignal } from 'solid-js';
 import type { ChatMessage } from '../elements/chat-types';
-import type { AttachmentData } from '../components/attachments';
+import type { AttachmentData } from '../components/attachments/attachments';
 import {
   appendMessage, updateMessage, removeMessage, addSuggestion, removeSuggestion,
   createAssistantStream, onStreamSettled, type AssistantStream, type SetMessages,
-} from '../state';
+} from '../state/index';
 
 export interface CreateKaiChatOptions {
   /** Seed messages, read once at creation and copied. Later changes are ignored — drive updates through the returned ops. */

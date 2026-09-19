@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@solidjs/testing-library';
 import { createSignal } from 'solid-js';
-import { createPresence, As, useDismiss, usePosition } from '../../src/components/overlay';
+import { createPresence, As, useDismiss, usePosition } from '../../src/components/overlay/overlay';
 
 // jsdom (v24) does not implement the PointerEvent constructor. useDismiss
 // listens for `pointerdown`, so the outside-dismiss test dispatches one. Real

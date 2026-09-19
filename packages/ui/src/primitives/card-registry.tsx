@@ -21,13 +21,13 @@
 // `BUILTIN_CARD_COMPONENTS` and `mergeCardComponents` stayed, because they are JSX and
 // have nowhere to go. Re-exported below, so this module's surface is unchanged.
 import type { CardComponentMap } from './card-component-types';
-import { Form } from '../components/form';
-import { ConfirmCard } from '../components/confirm-card';
-import { TasksCard } from '../components/tasks-card';
-import { ChoiceCard } from '../components/choice-card';
-import { LinkPreview } from '../components/link-preview';
-import { Embed } from '../components/embed';
-import { ArtifactCard, type ArtifactCardData } from '../components/artifact-card';
+import { Form } from '../components/form/form';
+import { ConfirmCard } from '../components/confirm-card/confirm-card';
+import { TasksCard } from '../components/tasks/tasks-card';
+import { ChoiceCard } from '../components/choice-card/choice-card';
+import { LinkPreview } from '../components/link-preview/link-preview';
+import { Embed } from '../components/embed/embed';
+import { ArtifactCard, type ArtifactCardData } from '../components/artifact/artifact-card';
 
 // The tag half, re-exported so this module's surface is unchanged. Authored in
 // ./card-tags.ts because that file has no Solid below it and can therefore be read

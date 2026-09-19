@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal } from 'solid-js';
 import { Screen } from './screen';
-import { Button } from './button';
-import { componentDescription } from '../stories/docs/element-controls';
+import { Button } from '../button/button';
+import { componentDescription } from '../../stories/docs/element-controls';
 
 /**
  * Story for the presentational `Screen`: a full-bleed overlay surface that fills

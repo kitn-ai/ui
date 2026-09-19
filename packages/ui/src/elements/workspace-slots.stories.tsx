@@ -6,7 +6,7 @@ import './conversation-list';
 import './chat';
 import './card';
 import { attachKaiActions } from '../stories/docs/story-actions';
-import { textMessage } from '../state';
+import { textMessage } from '../state/index';
 import type { ChatMessage } from './chat-types';
 import type { ConversationSummary, ConversationGroup } from '../types';
 

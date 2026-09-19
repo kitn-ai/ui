@@ -1,6 +1,6 @@
 import { For, type JSX, splitProps } from 'solid-js';
-import { renderIcon } from './icon';
-import { cn } from '../utils/cn';
+import { renderIcon } from '../icon/icon';
+import { cn } from '../../utils/cn';
 
 /** One tab in a `Tabs` strip. `id` is the selected `value` throughout. */
 export interface KaiTabItem {

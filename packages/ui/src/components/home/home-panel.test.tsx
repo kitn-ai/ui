@@ -1,8 +1,8 @@
 import { render, fireEvent } from '@solidjs/testing-library';
 import { describe, it, expect, vi } from 'vitest';
 import { HomePanel } from './home-panel';
-import { WidgetTabBar } from './widget-tab-bar';
-import type { ConversationSummary } from '../types';
+import { WidgetTabBar } from '../widget-tab-bar/widget-tab-bar';
+import type { ConversationSummary } from '../../types';
 
 const tick = () => new Promise((r) => setTimeout(r, 0));
 const summary: ConversationSummary = {

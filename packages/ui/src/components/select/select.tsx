@@ -1,7 +1,7 @@
 import { type JSX, For, Show, createEffect, splitProps } from 'solid-js';
 import { ChevronDown } from 'lucide-solid';
-import { cn } from '../utils/cn';
-import { FIELD_BASE, FIELD_INVALID } from './input';
+import { cn } from '../../utils/cn';
+import { FIELD_BASE, FIELD_INVALID } from '../input/input';
 
 /** One choice in a {@link Select}. */
 export interface SelectOption<T = string> {

@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal } from 'solid-js';
 import { Thread } from './thread';
-import { ChatConfig } from '../primitives/chat-config';
-import { componentDescription } from '../stories/docs/element-controls';
-import { textMessage } from '../state';
-import type { ChatMessage } from '../elements/chat-types';
+import { ChatConfig } from '../../primitives/chat-config';
+import { componentDescription } from '../../stories/docs/element-controls';
+import { textMessage } from '../../state/index';
+import type { ChatMessage } from '../../elements/chat-types';
 
 const conversation: ChatMessage[] = [
   textMessage('user', 'What is SolidJS in one line?', { id: 'u1' }),

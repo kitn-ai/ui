@@ -13,7 +13,7 @@ import {
   confirmReason,
   type TasksTask,
   type TasksCardData,
-} from '../../src/components/tasks-card';
+} from '../../src/components/tasks/tasks-card';
 
 const T = (id: string, extra: Partial<TasksTask> = {}): TasksTask => ({ id, label: id, ...extra });
 

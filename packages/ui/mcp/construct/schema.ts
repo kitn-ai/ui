@@ -27,7 +27,7 @@ import { z } from 'zod';
 // pulls in HTMLElement/window/CustomEvent that pass can't see.
 import { isSafeUrl } from '../../src/primitives/url-scheme-policy';
 import { CHAT_MESSAGE_ACTIONS } from '../../src/elements/chat-actions';
-import { BUTTON_VARIANT_NAMES } from '../../src/components/button-variant-names';
+import { BUTTON_VARIANT_NAMES } from '../../src/components/button/button-variant-names';
 import { KNOWN_THEME_TOKENS, themeTokenValueProblem } from './theme-token-policy';
 
 export { CONSTRUCT_SCHEMA_URL } from './schema-url';
@@ -36,7 +36,7 @@ export { CONSTRUCT_SCHEMA_URL } from './schema-url';
 const TAG_RE = /^[a-z][a-z0-9]*-[a-z0-9-]+$/;
 
 /** One composer trigger menu entry — the kit's own TriggerItem
- *  (components/composer.tsx) narrowed to its pure display fields (B-5):
+ *  (components/composer/composer.tsx) narrowed to its pure display fields (B-5):
  *  `promptText`/`data`/`kind`/`icon`/`group` stay kit-side. All three are
  *  construct-authored untrusted text, JSON.stringify'd at their one emit
  *  site (the whole triggers array is stringified in one go). */
@@ -495,7 +495,7 @@ export const ConstructSchema = z
      *  content, so a consumer projecting their own pane still WINS (native
      *  slot semantics: assigned nodes replace fallback).
      *
-     *  Backed by `components/work-surface.tsx`'s `WorkSurface`, promoted from
+     *  Backed by `components/work-surface/work-surface.tsx`'s `WorkSurface`, promoted from
      *  `elements/builder-workspace.stories.tsx` — the approved design AND a
      *  working implementation. Every key below is one real affordance that
      *  component ships; an affordance with no mechanism is not here.
@@ -605,7 +605,7 @@ export type Construct = z.infer<typeof ConstructSchema>;
 
 /** One cross-field rule of the construct format (B-20). The table is the
  *  visibility layer's guard: the builder's RULE_VISIBILITY registry
- *  (src/components/construct-form-paths.ts) is keyed by these ids, and a
+ *  (src/components/construct-form-paths/construct-form-paths.ts) is keyed by these ids, and a
  *  key-set-equality test fails any new rule until the builder classifies
  *  it. `paths` names the dotted construct paths the rule READS — panel
  *  metadata, not zod mechanics. Bodies are the pre-table superRefine code

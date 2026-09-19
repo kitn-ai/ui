@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { For } from 'solid-js';
 import { ChatContainerRoot, ChatContainerContent, ChatContainerScrollAnchor } from './chat-container';
-import { Message, MessageAvatar, MessageContent } from './message';
-import { componentDescription } from '../stories/docs/element-controls';
+import { Message, MessageAvatar, MessageContent } from '../message/message';
+import { componentDescription } from '../../stories/docs/element-controls';
 
 const sampleMessages = [
   { role: 'user', content: 'What is SolidJS?' },

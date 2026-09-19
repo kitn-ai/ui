@@ -2,8 +2,8 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { fn, within, expect } from 'storybook/test';
 import { Composer } from './composer';
 import type { TriggerDef, ComposerProps } from './composer';
-import type { ComposerDoc } from '../primitives/composer-model';
-import { componentDescription } from '../stories/docs/element-controls';
+import type { ComposerDoc } from '../../primitives/composer-model';
+import { componentDescription } from '../../stories/docs/element-controls';
 
 // Minimal inline data: URI icon, a plain colored square with a glyph.
 function imgData(fill: string, glyph: string): string {

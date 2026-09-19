@@ -1,5 +1,5 @@
 import { defineWebComponent } from './define';
-import { Image } from '../components/image';
+import { Image } from '../components/image/image';
 
 interface Props extends Record<string, unknown> {
   /** Base64-encoded image data (pair with `media-type`). */

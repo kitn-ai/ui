@@ -31,7 +31,7 @@
  * emitted text or the `conversations` property: the property holds the right
  * numbers and the screen holds the old ones. So the load-bearing assertions here
  * are read off the rail's own SHADOW DOM — the count and the title as rendered —
- * never off the array that was assigned to it. `src/components/reactivity-contract.test.tsx`
+ * never off the array that was assigned to it. `src/components/reactivity-contract/reactivity-contract.test.tsx`
  * pins the same invariant for the component; this pins that the emitted code obeys it.
  *
  * WHY `mock`. The turn has to complete for the row to advance, and the mock

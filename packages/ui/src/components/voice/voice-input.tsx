@@ -1,9 +1,9 @@
 import { splitProps, Show, For, createSignal, createEffect, on } from 'solid-js';
-import { cn } from '../utils/cn';
-import { Button } from './button';
-import { Tooltip } from './tooltip';
-import { useVoiceRecorder } from '../primitives/use-voice-recorder';
-import { useSpeechRecognition } from '../primitives/use-speech-recognition';
+import { cn } from '../../utils/cn';
+import { Button } from '../button/button';
+import { Tooltip } from '../tooltip/tooltip';
+import { useVoiceRecorder } from '../../primitives/use-voice-recorder';
+import { useSpeechRecognition } from '../../primitives/use-speech-recognition';
 
 /** Imperative handle exposed via `controllerRef` — surfaces the recorder's latent
  *  start/stop so the `<kai-voice-input>` facade can forward them as instance

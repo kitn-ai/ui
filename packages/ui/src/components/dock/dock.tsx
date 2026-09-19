@@ -406,7 +406,7 @@ const DOCK_CSS = `
 /**
  * The deepest active element, drilling through nested shadow roots.
  *
- * A local copy of the helper `components/dialog.tsx` already carries. Deliberately not
+ * A local copy of the helper `components/dialog/dialog.tsx` already carries. Deliberately not
  * refactored into a shared module by this change: dialog is not this task's file, and
  * a four-line tree walk duplicated once is cheaper than a cross-file move nobody
  * asked for. If a third caller appears, hoist it then.
@@ -457,7 +457,7 @@ function isWithin(root: Node, node: Node | null): boolean {
  * - **Focus.** On open, focus moves per `focusOnOpen`; on close it returns to the
  *   launcher, always. `inert` is cleared and visibility restored BEFORE `focus()` runs
  *   — a `focus()` into an inert or hidden subtree is silently dropped, no error — via
- *   a `queueMicrotask`, the same shape `components/dialog.tsx` uses. Mount moves no focus.
+ *   a `queueMicrotask`, the same shape `components/dialog/dialog.tsx` uses. Mount moves no focus.
  * - **Escape.** Closes only while the dock CONTAINS focus, and never stops the event.
  *   A background widget that ate every Escape on the page would break the host page's
  *   own menus; swallowing a key from a page you are a guest on is a decide-quietly move.

@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { onMount, onCleanup } from 'solid-js';
 import './register'; // side effect: registers all kai-* custom elements (incl. kai-composer)
 import { attachKaiActions } from '../stories/docs/story-actions';
-import type { TriggerDef } from '../components/composer';
+import type { TriggerDef } from '../components/composer/composer';
 import type { ComposerDoc } from '../primitives/composer-model';
 import { expect } from 'storybook/test';
 import { specDescription } from '../stories/docs/element-controls';

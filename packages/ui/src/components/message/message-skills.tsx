@@ -1,5 +1,5 @@
 import { Show, For, type JSX, splitProps } from "solid-js";
-import { cn } from "../utils/cn";
+import { cn } from "../../utils/cn";
 
 // --- MessageSkills ---
 

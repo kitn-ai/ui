@@ -1,6 +1,6 @@
 import { type JSX, Show } from 'solid-js';
 import { Maximize2, Minimize2, X, Columns2, PanelRight } from 'lucide-solid';
-import { cn } from '../utils/cn';
+import { cn } from '../../utils/cn';
 
 /** The work state of the pane's agent/process. Drives a tone-colored status dot
  *  (and optional label) in the header. */

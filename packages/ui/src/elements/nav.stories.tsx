@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { onMount } from 'solid-js';
 import './nav';
-import type { KaiNavItem } from '../components/nav';
+import type { KaiNavItem } from '../components/nav/nav';
 
 // Declare the custom element tag for SolidJS JSX.
 declare module 'solid-js' {

@@ -1,6 +1,6 @@
 import { type JSX, createSignal, splitProps } from 'solid-js';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { cn } from '../utils/cn';
+import { cn } from '../../utils/cn';
 
 // Owns its classes rather than delegating to `Button` (owner amendment, design
 // round 4): Button's smallest size (`sm`, `h-8`) reads as a small BUTTON, not

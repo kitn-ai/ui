@@ -1,15 +1,15 @@
 import { type JSX, For, Index, Switch, Match, createMemo, createSignal, splitProps, Show } from "solid-js";
-import { Tooltip } from "./tooltip";
+import { Tooltip } from "../tooltip/tooltip";
 import { Copy, Check } from "lucide-solid";
-import { cn } from "../utils/cn";
-import { Markdown } from "./markdown";
-import { Button } from "./button";
-import { actionIcon, BUILTIN_ACTION_LABEL } from "./action-icons";
-import type { ChatMessageAction, CustomAction, FeedbackVote, MessagePart, MessageSource } from "../elements/chat-types";
-import { useChatConfig, textClass } from "../primitives/chat-config";
-import { Reasoning, ReasoningTrigger, ReasoningContent } from "./reasoning";
-import { Loader } from "./loader";
-import { Tool } from "./tool";
+import { cn } from "../../utils/cn";
+import { Markdown } from "../markdown/markdown";
+import { Button } from "../button/button";
+import { actionIcon, BUILTIN_ACTION_LABEL } from "../action-icons/action-icons";
+import type { ChatMessageAction, CustomAction, FeedbackVote, MessagePart, MessageSource } from "../../elements/chat-types";
+import { useChatConfig, textClass } from "../../primitives/chat-config";
+import { Reasoning, ReasoningTrigger, ReasoningContent } from "../reasoning/reasoning";
+import { Loader } from "../loader/loader";
+import { Tool } from "../tool/tool";
 import {
   Attachments,
   Attachment,
@@ -20,10 +20,10 @@ import {
   AttachmentHoverCardContent,
   getAttachmentLabel,
   getMediaCategory,
-} from "./attachments";
-import { Source, SourceTrigger, SourceContent, SourceList } from "./source";
-import { CardRenderer, type CardSchemaMap } from "./card-renderer";
-import type { CardComponentMap } from "../primitives/card-registry";
+} from "../attachments/attachments";
+import { Source, SourceTrigger, SourceContent, SourceList } from "../source/source";
+import { CardRenderer, type CardSchemaMap } from "../card/card-renderer";
+import type { CardComponentMap } from "../../primitives/card-registry";
 
 // --- Message ---
 

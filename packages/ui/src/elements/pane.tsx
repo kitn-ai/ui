@@ -1,6 +1,6 @@
 import { createSignal, onCleanup, onMount } from 'solid-js';
 import { defineWebComponent } from './define';
-import { Pane, type PaneStatus } from '../components/pane';
+import { Pane, type PaneStatus } from '../components/pane/pane';
 
 interface Props extends Record<string, unknown> {
   /** The pane title (the agent / window name). Named `headline` because `title`

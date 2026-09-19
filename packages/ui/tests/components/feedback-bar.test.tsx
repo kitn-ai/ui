@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@solidjs/testing-library';
-import { FeedbackBar } from '../../src/components/feedback-bar';
+import { FeedbackBar } from '../../src/components/feedback/feedback-bar';
 
 describe('FeedbackBar', () => {
   it('renders with title', () => {

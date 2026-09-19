@@ -1,8 +1,8 @@
 import { createSignal, onCleanup, onMount } from 'solid-js';
 import { defineWebComponent } from './define';
-import { ModelSwitcher } from '../components/model-switcher';
+import { ModelSwitcher } from '../components/model/model-switcher';
 import { wireDisclosure } from './disclosure';
-import type { DropdownController } from '../components/dropdown';
+import type { DropdownController } from '../components/dropdown/dropdown';
 import type { ModelOption } from '../types';
 
 interface Props extends Record<string, unknown> {

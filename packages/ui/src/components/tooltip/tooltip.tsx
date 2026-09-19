@@ -1,9 +1,9 @@
 import { createSignal, createUniqueId, onCleanup, Show, type JSX, type Accessor, splitProps } from 'solid-js';
 import { Portal } from 'solid-js/web';
 import { type Placement } from '@floating-ui/dom';
-import { cn } from '../utils/cn';
-import { useChatConfig } from '../primitives/chat-config';
-import { createPresence, usePosition, useDismiss, As } from './overlay';
+import { cn } from '../../utils/cn';
+import { useChatConfig } from '../../primitives/chat-config';
+import { createPresence, usePosition, useDismiss, As } from '../overlay/overlay';
 
 /** Imperative open controller, handed to a parent (e.g. the kai-tooltip facade)
  *  via `controllerRef` so it can drive/observe open state. */

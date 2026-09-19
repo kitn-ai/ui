@@ -14,6 +14,7 @@ import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, it, expect } from 'vitest';
+import { componentSource } from '../helpers/kit-paths';
 
 const themeCss = readFileSync(
   join(dirname(fileURLToPath(import.meta.url)), '../../theme.css'),
@@ -131,11 +132,9 @@ describe('form-control boundary contrast (WCAG 2.1 SC 1.4.11)', () => {
 // border in `--color-input` — the token the radios/checkboxes/inputs already use
 // and that the block above already holds to 3:1. These read the component, not
 // just the theme, because which token the track carries is a fact about
-// src/components/switch.tsx.
-const switchSrc = readFileSync(
-  join(dirname(fileURLToPath(import.meta.url)), '../../src/components/switch.tsx'),
-  'utf8',
-);
+// the Switch component. Resolved by basename: the family layout puts it in
+// `switch/`, which is not a fact about the track.
+const switchSrc = componentSource('switch.tsx');
 /** The `isOn() ? … : …` track-class ternary, read from the component. */
 const trackStates = (() => {
   const m = /isOn\(\)\s*\?\s*'([^']*bg-primary[^']*)'\s*:\s*'([^']*bg-muted[^']*)'/.exec(switchSrc);
@@ -209,10 +208,7 @@ describe('switch track boundary contrast (WCAG 2.1 SC 1.4.11)', () => {
 // and `theme="light"` on a dark-OS machine is an ordinary setup — it painted the
 // DARK hue on the LIGHT field at 2.33:1. Matched light/dark pairs both measured
 // fine, which is exactly why it survived review.
-const composerSrc = readFileSync(
-  join(dirname(fileURLToPath(import.meta.url)), '../../src/components/composer.tsx'),
-  'utf8',
-);
+const composerSrc = componentSource('composer.tsx');
 /** The `.kai-composer-pill` <style> block, read from the component itself. */
 const pillCss = (() => {
   const at = composerSrc.indexOf('.kai-composer-pill {');

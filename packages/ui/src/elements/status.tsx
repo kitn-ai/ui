@@ -1,5 +1,5 @@
 import { defineWebComponent } from './define';
-import { Status, type StatusKind } from '../components/status';
+import { Status, type StatusKind } from '../components/status/status';
 
 interface Props extends Record<string, unknown> {
   /** Presence/notification state → color. `new` (default) maps to the blue hue. */

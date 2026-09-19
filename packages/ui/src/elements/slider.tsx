@@ -1,6 +1,6 @@
 import { createEffect, createSignal, untrack } from 'solid-js';
 import { defineWebComponent } from './define';
-import { Slider } from '../components/slider';
+import { Slider } from '../components/slider/slider';
 
 interface Props extends Record<string, unknown> {
   /** Lowest selectable value. Required: a range with no bounds is a guess, and the

@@ -4,7 +4,7 @@
 import '../../src/elements/form';
 import { CARD_EVENT_NAME } from '../../src/primitives/card-routing';
 import type { CardEvent } from '../../src/primitives/card-contract';
-import type { FormDefinition } from '../../src/components/form';
+import type { FormDefinition } from '../../src/components/form/form';
 
 const flush = () => new Promise((r) => setTimeout(r, 0));
 

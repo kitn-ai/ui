@@ -1,5 +1,5 @@
 import { defineWebComponent } from './define';
-import { ChoiceCard, type ChoiceCardData, type ChoiceController } from '../components/choice-card';
+import { ChoiceCard, type ChoiceCardData, type ChoiceController } from '../components/choice-card/choice-card';
 import type { CardResolution } from '../primitives/card-contract';
 
 interface Props extends Record<string, unknown> {

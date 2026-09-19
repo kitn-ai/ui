@@ -1,5 +1,5 @@
 import { defineWebComponent } from './define';
-import { FileTree, type FileTreeFile } from '../components/file-tree';
+import { FileTree, type FileTreeFile } from '../components/file/file-tree';
 
 interface Props extends Record<string, unknown> {
   /** The files to render. Set as a JS property (array of `{ path, url?, code?, language?, type?, additions?, deletions?, status? }`). */

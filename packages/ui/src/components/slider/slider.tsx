@@ -1,5 +1,5 @@
 import { type JSX, Show, splitProps, createSignal } from 'solid-js';
-import { cn } from '../utils/cn';
+import { cn } from '../../utils/cn';
 
 export interface SliderProps
   extends Omit<JSX.InputHTMLAttributes<HTMLInputElement>, 'type' | 'children' | 'min' | 'max' | 'step' | 'value'> {

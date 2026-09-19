@@ -1,12 +1,12 @@
 import { type JSX, createSignal, createMemo, Show } from 'solid-js';
 import { Search, ChevronDown, Settings, CircleHelp, LogOut } from 'lucide-solid';
-import { CommandList, type CommandGroup } from './command';
-import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem, DropdownSeparator } from './dropdown';
-import { Avatar } from './avatar';
-import { Input } from './input';
-import { Button } from './button';
-import { Switch } from './switch';
-import { cn } from '../utils/cn';
+import { CommandList, type CommandGroup } from '../command/command';
+import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem, DropdownSeparator } from '../dropdown/dropdown';
+import { Avatar } from '../avatar/avatar';
+import { Input } from '../input/input';
+import { Button } from '../button/button';
+import { Switch } from '../switch/switch';
+import { cn } from '../../utils/cn';
 
 /**
  * "App chrome" — the Command palette and User menu shell knobs (owner
@@ -16,7 +16,7 @@ import { cn } from '../utils/cn';
  * consistent with `builder-composer-triggers.tsx`'s own rule-of-three
  * extraction earlier this round.
  *
- * COMMAND PALETTE: composes the kit's real `CommandList` (`components/command.tsx`)
+ * COMMAND PALETTE: composes the kit's real `CommandList` (`components/command/command.tsx`)
  * — a presentational grouped listbox — inside a hand-built overlay
  * (backdrop + centered panel + Escape/backdrop-click to close), the SAME
  * shape `elements/claude-code.stories.tsx`'s own command-center overlay
@@ -32,7 +32,7 @@ import { cn } from '../utils/cn';
  * slotted trigger (kai-avatar + name + plan + a chevron + a kai-status
  * dot)". Reused here as the Solid-tier equivalent: `Dropdown`/
  * `DropdownTrigger`/`DropdownContent`/`DropdownItem` (the same primitives
- * `components/model-switcher.tsx` and the Workspace composer menu already
+ * `components/model/model-switcher.tsx` and the Workspace composer menu already
  * compose) with an `Avatar` + name/plan trigger.
  */
 
@@ -117,7 +117,7 @@ export function CommandPaletteTrigger(props: { onOpen: () => void }): JSX.Elemen
  *  The COMPACT header placement (avatar + chevron only, no text) used to be a
  *  `compact` prop here, added for Workspace's app-header rework. It moved out
  *  on 2026-08-30 when that header was promoted into the real component
- *  `components/app-header.tsx`, which owns its own compact cluster — this prop
+ *  `components/app-header/app-header.tsx`, which owns its own compact cluster — this prop
  *  had exactly one caller and that caller is now the component. Removed rather
  *  than left behind: an option nothing passes is the rot this repo keeps
  *  paying for. */

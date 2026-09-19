@@ -31,7 +31,7 @@ import {
   DENSITY_ROW_BOX,
   resolveRowDensity,
 } from './conversation-item';
-import type { ConversationSummary } from '../types';
+import type { ConversationSummary } from '../../types';
 
 afterEach(cleanup);
 

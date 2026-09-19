@@ -1,6 +1,6 @@
 import { render } from '@solidjs/testing-library';
 import { createSignal } from 'solid-js';
-import { Resizable, ResizablePanel } from '../../src/components/resizable';
+import { Resizable, ResizablePanel } from '../../src/components/resizable/resizable';
 
 afterEach(() => { document.body.innerHTML = ''; });
 

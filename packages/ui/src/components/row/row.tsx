@@ -1,7 +1,7 @@
 import { Show, splitProps, type JSX } from 'solid-js';
-import { cn } from '../utils/cn';
-import { renderIcon } from './icon';
-import { isSafeUrl } from '../primitives/url-scheme-policy';
+import { cn } from '../../utils/cn';
+import { renderIcon } from '../icon/icon';
+import { isSafeUrl } from '../../primitives/url-scheme-policy';
 
 /**
  * The generic mobile list row (P-4, blocks-and-parts design 2026-08-31): a

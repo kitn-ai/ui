@@ -12,11 +12,11 @@ import {
   ErrorBoundary,
   createUniqueId,
 } from 'solid-js';
-import { cn } from '../utils/cn';
-import { Button } from './button';
-import { Card } from './card';
-import { MessageBody } from './message';
-import { TextShimmer } from './text-shimmer';
+import { cn } from '../../utils/cn';
+import { Button } from '../button/button';
+import { Card } from '../card/card';
+import { MessageBody } from '../message/message';
+import { TextShimmer } from '../text-shimmer/text-shimmer';
 import { Check } from 'lucide-solid';
 import {
   type CompareCandidate,

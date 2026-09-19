@@ -1,6 +1,6 @@
 import { type JSX, Show, splitProps } from 'solid-js';
 import { Bell, MoreHorizontal } from 'lucide-solid';
-import { cn } from '../utils/cn';
+import { cn } from '../../utils/cn';
 
 /** The run state of an agent, mapped to the kit's tool / status hues.
  *  - `working` (blue) the agent is actively running.

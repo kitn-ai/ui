@@ -1,14 +1,14 @@
 import { type JSX, For, Show, createMemo, createSignal } from 'solid-js';
-import { cn } from '../utils/cn';
-import { Textarea } from './textarea';
-import { Input, FIELD_BASE as inputBase } from './input';
-import { Slider } from './slider';
-import { Select } from './select';
-import { Switch } from './switch';
-import { Checkbox } from './checkbox';
-import { RadioGroup } from './radio';
-import { CheckboxGroup } from './checkbox-group';
-import { Button } from './button';
+import { cn } from '../../utils/cn';
+import { Textarea } from '../textarea/textarea';
+import { Input, FIELD_BASE as inputBase } from '../input/input';
+import { Slider } from '../slider/slider';
+import { Select } from '../select/select';
+import { Switch } from '../switch/switch';
+import { Checkbox } from '../checkbox/checkbox';
+import { RadioGroup } from '../radio/radio';
+import { CheckboxGroup } from '../checkbox/checkbox-group';
+import { Button } from '../button/button';
 import { Star, X } from 'lucide-solid';
 import type { FieldMaskHint, FormField } from './form';
 
@@ -150,7 +150,7 @@ export function NumberWidget(props: WidgetProps): JSX.Element {
   const step = () => props.field['x-kai-step'] ?? (props.field.type === 'integer' ? 1 : undefined);
   // `Input`, not a raw `<input class={inputBase}>` (plan step 6). The two render the
   // same box — `FIELD_BASE` is the former `inputBase` — so nothing is visible. What the
-  // bypass lost was the focus-node-reuse fix documented at `components/input.tsx:262-268`: with
+  // bypass lost was the focus-node-reuse fix documented at `components/input/input.tsx:262-268`: with
   // the class computed at the CALL SITE, `props.invalid` changing rebuilt the `<input>`
   // node and took focus and caret with it, and `kai-form` derives `invalid` from the
   // field's own value. `min`/`max`/`step` come from the schema and are forwarded
@@ -291,13 +291,13 @@ export function RatingWidget(props: WidgetProps): JSX.Element {
 }
 
 /**
- * The boolean field's switch IS `components/switch.tsx` — it is not a lookalike.
+ * The boolean field's switch IS `components/switch/switch.tsx` — it is not a lookalike.
  *
  * This used to hand-roll its own `<button role="switch">` at 44×24 while
  * `<kai-switch>` shipped the same control at 36×20, so a consumer putting the two
  * side by side saw two different switches; and its thumb used `bg-background`,
  * re-introducing in the copy the dark-mode disappearing-thumb bug that
- * `components/switch.tsx:80` carries a comment about having fixed. Delegating removes both.
+ * `components/switch/switch.tsx:80` carries a comment about having fixed. Delegating removes both.
  * The size convergence (44×24 → 36×20) is visible inside `kai-form` and intended.
  *
  * The four form-only hooks — `id`, `data-control` and the `aria-required` /
@@ -402,7 +402,7 @@ function itemEnum(field: FormField): unknown[] {
  * An array field whose items are an `enum`, as a list of checkboxes.
  *
  * The bordered/divided row chrome, the `role="group"` wrapper and the rows themselves
- * live in `components/checkbox-group.tsx` now — this widget only turns a JSON-Schema
+ * live in `components/checkbox/checkbox-group.tsx` now — this widget only turns a JSON-Schema
  * `items.enum` into options and owns the array in and out. It used to hand-roll the
  * identical chrome beside `RadioGroup`, which already owned it.
  *
@@ -497,7 +497,7 @@ export function TagListWidget(props: WidgetProps): JSX.Element {
       <div class="flex items-center gap-2">
         {/* `Input` rather than a raw `<input class={inputBase}>` (plan step 6). Same box,
             same classes; what the bypass lost was the focus-node-reuse fix at
-            `components/input.tsx:262-268` and the masking `Input` owns. The draft field is not a
+            `components/input/input.tsx:262-268` and the masking `Input` owns. The draft field is not a
             form control of its own — it holds text on its way to becoming a tag — so it
             carries the row's `id` and `data-control` and nothing else. */}
         <Input

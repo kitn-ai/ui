@@ -1,8 +1,8 @@
 import { type JSX, type Component, For } from 'solid-js';
 import { Copy, ThumbsUp, ThumbsDown, RefreshCw, Pencil, Volume2, ChevronUp, ChevronDown } from 'lucide-solid';
-import { Switch } from './switch';
-import { Button } from './button';
-import type { ChatMessageAction } from '../elements/chat-types';
+import { Switch } from '../switch/switch';
+import { Button } from '../button/button';
+import type { ChatMessageAction } from '../../elements/chat-types';
 
 /**
  * The role-scoped, ordered message-action picker — extracted from

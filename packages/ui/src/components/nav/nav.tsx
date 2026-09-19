@@ -1,8 +1,8 @@
 import { For, Show, type JSX, createSignal, splitProps } from 'solid-js';
 import { ChevronRight } from 'lucide-solid';
-import { cn } from '../utils/cn';
-import { renderIcon } from './icon';
-import { Badge } from './badge';
+import { cn } from '../../utils/cn';
+import { renderIcon } from '../icon/icon';
+import { Badge } from '../badge/badge';
 
 /** Status tone for a nav item's dot. `primary` is the theme accent; the rest use
  *  the kit's tool hues (the same colors as kai-status / kai-progress-bar). Generic

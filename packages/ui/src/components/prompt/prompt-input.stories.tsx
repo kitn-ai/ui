@@ -2,8 +2,8 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { fn } from 'storybook/test';
 import { createSignal } from 'solid-js';
 import { PromptInput, PromptInputTextarea, PromptInputActions } from './prompt-input';
-import { Button } from './button';
-import { componentDescription } from '../stories/docs/element-controls';
+import { Button } from '../button/button';
+import { componentDescription } from '../../stories/docs/element-controls';
 
 const meta = {
   title: 'Components/PromptInput',

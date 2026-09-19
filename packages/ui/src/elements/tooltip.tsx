@@ -1,5 +1,5 @@
 import { type Placement } from '@floating-ui/dom';
-import { Tooltip, type TooltipController } from '../components/tooltip';
+import { Tooltip, type TooltipController } from '../components/tooltip/tooltip';
 import { defineWebComponent } from './define';
 import { wireDisclosure } from './disclosure';
 

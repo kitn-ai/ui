@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { onMount } from 'solid-js';
 import './tabs';
-import type { KaiTabItem } from '../components/tabs';
+import type { KaiTabItem } from '../components/tabs/tabs';
 
 // Declare the custom element tag for SolidJS JSX.
 declare module 'solid-js' {

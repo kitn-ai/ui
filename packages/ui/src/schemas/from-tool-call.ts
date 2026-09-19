@@ -50,7 +50,7 @@
 //   "can this card render / is the  -> the DISPATCHER. An unregistered type already
 //    data well-formed?"                renders `CardFallback` and emits
 //                                      `{ kind: 'error', cardId }`
-//                                      (components/card-renderer.tsx:33-42), and
+//                                      (components/card/card-renderer.tsx:33-42), and
 //                                      T1.5 adds the same treatment for data that
 //                                      does not match its schema, mirroring
 //                                      remote/provider-runtime.ts:142.

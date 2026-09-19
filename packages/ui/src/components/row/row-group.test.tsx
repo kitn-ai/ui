@@ -16,7 +16,8 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { RowGroup } from './row-group';
-import { Row } from '../components/row';
+import { Row } from './row';
+import { PKG_ROOT } from '../../../tests/helpers/kit-paths';
 
 afterEach(cleanup);
 
@@ -24,10 +25,10 @@ afterEach(cleanup);
 // doc block merely MENTIONS satisfies the assertion (this file's own prose names
 // `::slotted(*)` to explain why it is wrong) — a green that proves nothing. Rule
 // text only, please.
-const KIT_BASE_CSS = readFileSync(
-  resolve(dirname(fileURLToPath(import.meta.url)), '../../kit-base.css'),
-  'utf8',
-).replace(/\/\*[\s\S]*?\*\//g, '');
+const KIT_BASE_CSS = readFileSync(resolve(PKG_ROOT, 'kit-base.css'), 'utf8').replace(
+  /\/\*[\s\S]*?\*\//g,
+  '',
+);
 
 describe('RowGroup', () => {
   it('renders one frame element carrying the class the geometry rules target', () => {
@@ -122,12 +123,12 @@ describe('the geometry contract with kit-base.css', () => {
     // corners INSIDE a group, which no type or lint can see. `SettingItem` is the
     // one that proved the need: it draws its own hairline now, where `SettingsGroup`
     // used to get dividers from a `divide-y` class on the frame.
-    const facadeDir = resolve(dirname(fileURLToPath(import.meta.url)), '../elements');
+    const facadeDir = resolve(PKG_ROOT, 'src/elements');
     const rowShaped = readdirSync(facadeDir)
       .filter((f) => f.endsWith('.tsx') && !f.endsWith('.stories.tsx'))
       .map((f) => ({ file: f, src: readFileSync(resolve(facadeDir, f), 'utf8') }))
       .filter(({ src }) =>
-        [...src.matchAll(/import\s*\{([^}]*)\}\s*from\s*'\.\.\/(?:components\/row|ui\/settings-group)'/g)]
+        [...src.matchAll(/import\s*\{([^}]*)\}\s*from\s*'\.\.\/components\/(?:row\/row|settings\/settings-group)'/g)]
           .some((m) => /\b(Row|SettingItem)\b/.test(m[1])),
       );
 

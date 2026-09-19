@@ -7,7 +7,7 @@ import {
   upsertToolPart,
 } from './parts';
 import type { MessagePart } from '../elements/chat-types';
-import type { ToolPart } from '../components/tool-types';
+import type { ToolPart } from '../components/tool/tool-types';
 
 const reasoningAt = (parts: MessagePart[], i: number) =>
   parts[i] as Extract<MessagePart, { type: 'reasoning' }>;

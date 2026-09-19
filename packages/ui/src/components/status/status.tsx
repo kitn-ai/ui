@@ -1,5 +1,5 @@
 import { type JSX, Show, splitProps } from 'solid-js';
-import { cn } from '../utils/cn';
+import { cn } from '../../utils/cn';
 
 export type StatusKind = 'new' | 'online' | 'busy' | 'away' | 'offline';
 

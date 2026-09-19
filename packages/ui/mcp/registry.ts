@@ -26,7 +26,7 @@ export {
 // The code-recipe axis, same contract as the two above: the gate loads it from
 // this registry bundle, so registering a recipe adds its compile cells without
 // touching the verify script.
-export { listCodeRecipes, getCodeRecipe, type CodeRecipe, type CodeRecipeFile } from './recipes';
+export { listCodeRecipes, getCodeRecipe, type CodeRecipe, type CodeRecipeFile } from './recipes/index';
 
 // Order is the order a scaffolding agent reads them in. `openai` and `anthropic`
 // lead because they are the two keys a developer is most likely to already hold.

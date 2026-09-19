@@ -15,7 +15,7 @@ import { test, expect, afterEach } from 'vitest';
 import { render } from '@solidjs/testing-library';
 import { createSignal } from 'solid-js';
 import { computeAccessibleName } from 'dom-accessibility-api';
-import { CheckboxGroup, type CheckboxOption } from '../../src/components/checkbox-group';
+import { CheckboxGroup, type CheckboxOption } from '../../src/components/checkbox/checkbox-group';
 
 afterEach(() => { document.body.innerHTML = ''; });
 

@@ -1,5 +1,5 @@
 import { defineWebComponent } from './define';
-import { ThinkingBar } from '../components/thinking-bar';
+import { ThinkingBar } from '../components/thinking-bar/thinking-bar';
 
 interface Props extends Record<string, unknown> {
   /** The shimmering label, e.g. "Thinking…". */

@@ -16,7 +16,7 @@ import '@testing-library/jest-dom/vitest';
 import { render, cleanup } from '@solidjs/testing-library';
 import { For } from 'solid-js';
 import { parseKaiSkillElement } from './message-skills';
-import { MessageSkills } from '../components/message-skills';
+import { MessageSkills } from '../components/message/message-skills';
 
 afterEach(cleanup);
 

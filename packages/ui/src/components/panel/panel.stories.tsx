@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { X, ArrowLeft } from 'lucide-solid';
 import { Panel, PanelHeader, PanelBody, PanelFooter } from './panel';
-import { Button } from './button';
-import { componentDescription } from '../stories/docs/element-controls';
+import { Button } from '../button/button';
+import { componentDescription } from '../../stories/docs/element-controls';
 
 /**
  * The widget panel chrome as public parts (blocks-and-parts ruling P-1).

@@ -6,8 +6,8 @@ import {
   For,
   Show,
 } from 'solid-js';
-import { cn } from '../utils/cn';
-import { Collapsible, CollapsibleTrigger, CollapsibleContent } from './collapsible';
+import { cn } from '../../utils/cn';
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '../collapsible/collapsible';
 import { ChevronDown, Circle } from 'lucide-solid';
 
 // --- ChainOfThoughtItem ---

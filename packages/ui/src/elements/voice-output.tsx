@@ -1,5 +1,5 @@
 import { defineWebComponent } from './define';
-import { VoiceOutput, type VoiceOutputController } from '../components/voice-output';
+import { VoiceOutput, type VoiceOutputController } from '../components/voice/voice-output';
 
 interface Props extends Record<string, unknown> {
   /** The utterance to read aloud. */

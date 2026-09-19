@@ -1,5 +1,5 @@
 import { createSignal, onCleanup, onMount } from 'solid-js';
-import { SettingItem } from '../components/settings-group';
+import { SettingItem } from '../components/settings/settings-group';
 import { defineWebComponent } from './define';
 
 interface Props extends Record<string, unknown> {

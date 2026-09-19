@@ -1,16 +1,16 @@
-// src/components/card-renderer.tsx
+// src/components/card/card-renderer.tsx
 // The Solid single-envelope dispatcher: pick the card for envelope.type and render it
 // with the envelope spread onto its props. Routing uses the ambient CardProvider
 // (useCardHost). Unknown type → CardFallback + a one-shot contract `error` emit.
 // Invalid data → two-tier validation, mirroring the remote transport; see below.
 import { createEffect, createMemo, untrack, Show, type JSX } from 'solid-js';
 import { Dynamic } from 'solid-js/web';
-import type { CardContext, CardEnvelope, CardHost } from '../primitives/card-contract';
-import { useCardHost } from '../primitives/card-host';
-import { emitCardEvent } from '../primitives/card-routing';
-import { BUILTIN_CARD_COMPONENTS, mergeCardComponents, type CardComponentMap } from '../primitives/card-registry';
-import type { JsonSchema } from '../primitives/card-validate';
-import { cardValidationMessage, validateCardData, type CardValidationReport } from '../primitives/card-validate-cards';
+import type { CardContext, CardEnvelope, CardHost } from '../../primitives/card-contract';
+import { useCardHost } from '../../primitives/card-host';
+import { emitCardEvent } from '../../primitives/card-routing';
+import { BUILTIN_CARD_COMPONENTS, mergeCardComponents, type CardComponentMap } from '../../primitives/card-registry';
+import type { JsonSchema } from '../../primitives/card-validate';
+import { cardValidationMessage, validateCardData, type CardValidationReport } from '../../primitives/card-validate-cards';
 import { CardFallback } from './card-fallback';
 
 /**

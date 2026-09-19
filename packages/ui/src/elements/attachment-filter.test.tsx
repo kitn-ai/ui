@@ -19,7 +19,7 @@ import '@testing-library/jest-dom/vitest';
 import { render, cleanup, fireEvent } from '@solidjs/testing-library';
 import { DefaultPromptInput } from './default-input';
 import { encodableMediaTypes, resolveMediaPolicy } from '../wire/media-types';
-import type { AttachmentData } from '../components/attachments';
+import type { AttachmentData } from '../components/attachments/attachments';
 
 afterEach(cleanup);
 

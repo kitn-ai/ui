@@ -1,4 +1,4 @@
-import { Separator } from '../components/separator';
+import { Separator } from '../components/separator/separator';
 import { defineWebComponent } from './define';
 
 interface Props extends Record<string, unknown> {

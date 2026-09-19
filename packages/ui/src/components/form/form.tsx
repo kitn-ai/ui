@@ -12,20 +12,20 @@ import {
   ErrorBoundary,
 } from 'solid-js';
 import { createStore, produce, unwrap } from 'solid-js/store';
-import { cn } from '../utils/cn';
-import { Button } from './button';
-import { Card } from './card';
-import { DismissedStub } from './dismissed-stub';
+import { cn } from '../../utils/cn';
+import { Button } from '../button/button';
+import { Card } from '../card/card';
+import { DismissedStub } from '../dismissed-stub/dismissed-stub';
 import {
   validateAgainstSchema,
   type JsonSchema,
-} from '../primitives/card-validate';
-import type { CardEnvelope, CardEvent, CardHost, CardResolution } from '../primitives/card-contract';
-import { emitCardEvent } from '../primitives/card-routing';
-import { compileMask, formatForDisplay, formatRaw, normalizeToRaw } from '../primitives/field-mask';
-import { FIELD_SEMANTIC_TYPES, fieldSemantics, type FieldSemanticType } from '../primitives/field-semantics';
-import { useCardHost } from '../primitives/card-host';
-import { useCardResolution } from './use-card-resolution';
+} from '../../primitives/card-validate';
+import type { CardEnvelope, CardEvent, CardHost, CardResolution } from '../../primitives/card-contract';
+import { emitCardEvent } from '../../primitives/card-routing';
+import { compileMask, formatForDisplay, formatRaw, normalizeToRaw } from '../../primitives/field-mask';
+import { FIELD_SEMANTIC_TYPES, fieldSemantics, type FieldSemanticType } from '../../primitives/field-semantics';
+import { useCardHost } from '../../primitives/card-host';
+import { useCardResolution } from '../use-card-resolution/use-card-resolution';
 import { Check } from 'lucide-solid';
 import {
   TextWidget,
@@ -53,13 +53,13 @@ import {
 // `Record<string, unknown>` placeholder, and an interface is not assignable to
 // that. Re-exported here unchanged.
 
-import type { FormDefinition, FormField } from '../primitives/card-data-types';
+import type { FormDefinition, FormField } from '../../primitives/card-data-types';
 
 export type {
   FormCardEnvelope,
   FormDefinition,
   FormField,
-} from '../primitives/card-data-types';
+} from '../../primitives/card-data-types';
 
 /** The internal widget identifiers `widgetFor` resolves to. */
 export type WidgetKind =

@@ -39,10 +39,10 @@
  */
 import { type JSX, Show } from 'solid-js';
 import { LayoutTemplate, Sun, Moon, House } from 'lucide-solid';
-import { cn } from '../utils/cn';
-import { Button } from './button';
-import { Separator } from './separator';
-import { Tooltip } from './tooltip';
+import { cn } from '../../utils/cn';
+import { Button } from '../button/button';
+import { Separator } from '../separator/separator';
+import { Tooltip } from '../tooltip/tooltip';
 
 export interface BuilderHeaderProps {
   /** Back to the builder's home screen (the construct list). Renders the

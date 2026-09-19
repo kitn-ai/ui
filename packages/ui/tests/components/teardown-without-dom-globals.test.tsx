@@ -50,17 +50,18 @@ import ts from 'typescript';
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative, dirname, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { componentSourcePath } from '../helpers/kit-paths';
 
-import { Composer } from '../../src/components/composer';
-import { FileUpload } from '../../src/components/file-upload';
-import { ToastRegion } from '../../src/components/toast';
-import { useDismiss } from '../../src/components/overlay';
+import { Composer } from '../../src/components/composer/composer';
+import { FileUpload } from '../../src/components/file/file-upload';
+import { ToastRegion } from '../../src/components/toast/toast';
+import { useDismiss } from '../../src/components/overlay/overlay';
 import { useAudioAnalysis } from '../../src/primitives/use-audio-analysis';
 import { useSequencer } from '../../src/primitives/use-sequencer';
 import { LabVisualizer } from '../../src/components/audio-visualizer/labs/lab-visualizer';
 import { ShaderCanvas } from '../../src/components/audio-visualizer/shader-canvas';
 import { createTween } from '../../src/primitives/create-tween';
-import { VoiceOutput } from '../../src/components/voice-output';
+import { VoiceOutput } from '../../src/components/voice/voice-output';
 
 const SRC = join(dirname(fileURLToPath(import.meta.url)), '../../src');
 
@@ -812,9 +813,15 @@ it('KNOWN_UNFIXED carries no stale entry for an already-fixed site', () => {
  * have to be actionable and are expected to be empty anyway.
  */
 const UNRESOLVED_TEARDOWN_CALLBACKS = [
-  'components/reasoning.tsx  onCleanup(dispose)',
-  'components/dropdown.tsx  onCleanup(unregister)',
-];
+  'reasoning.tsx  onCleanup(dispose)',
+  'dropdown.tsx  onCleanup(unregister)',
+].map((entry) => {
+  // The scan reports paths relative to `src/`, so build the expectation the same
+  // way instead of typing the family folder — the file is the subject, its depth
+  // is not.
+  const [basename, ...rest] = entry.split('  ');
+  return `${relative(SRC, componentSourcePath(basename))}  ${rest.join('  ')}`;
+});
 
 it('every teardown callback the scan cannot resolve is one that was reviewed', () => {
   expect(scanSrc().unresolved).toEqual([...UNRESOLVED_TEARDOWN_CALLBACKS].sort());

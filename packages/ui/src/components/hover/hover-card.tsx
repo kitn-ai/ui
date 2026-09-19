@@ -4,9 +4,9 @@ import {
 } from 'solid-js';
 import { Portal } from 'solid-js/web';
 import { type Placement } from '@floating-ui/dom';
-import { cn } from '../utils/cn';
-import { useChatConfig } from '../primitives/chat-config';
-import { createPresence, usePosition, useDismiss, As } from './overlay';
+import { cn } from '../../utils/cn';
+import { useChatConfig } from '../../primitives/chat-config';
+import { createPresence, usePosition, useDismiss, As } from '../overlay/overlay';
 
 interface HoverCardCtx {
   open: Accessor<boolean>;

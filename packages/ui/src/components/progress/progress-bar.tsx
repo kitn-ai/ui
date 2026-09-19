@@ -1,5 +1,5 @@
 import { type JSX, Show, splitProps, createUniqueId } from 'solid-js';
-import { cn } from '../utils/cn';
+import { cn } from '../../utils/cn';
 
 export type ProgressTone = 'primary' | 'success' | 'warning' | 'error' | 'info';
 

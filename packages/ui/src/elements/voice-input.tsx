@@ -1,5 +1,5 @@
 import { defineWebComponent } from './define';
-import { VoiceInput, type VoiceInputController } from '../components/voice-input';
+import { VoiceInput, type VoiceInputController } from '../components/voice/voice-input';
 
 interface Props extends Record<string, unknown> {
   /**

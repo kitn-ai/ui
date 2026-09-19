@@ -1,5 +1,5 @@
 import { defineWebComponent } from './define';
-import { FileUpload, FileUploadTrigger } from '../components/file-upload';
+import { FileUpload, FileUploadTrigger } from '../components/file/file-upload';
 import { Upload } from 'lucide-solid';
 
 interface Props extends Record<string, unknown> {

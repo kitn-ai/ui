@@ -1,6 +1,6 @@
 import { type JSX, splitProps, createEffect, on } from 'solid-js';
-import { cn } from '../utils/cn';
-import { useAutoResize } from '../primitives/use-auto-resize';
+import { cn } from '../../utils/cn';
+import { useAutoResize } from '../../primitives/use-auto-resize';
 
 export interface TextareaProps extends JSX.TextareaHTMLAttributes<HTMLTextAreaElement> {
   maxHeight?: number;

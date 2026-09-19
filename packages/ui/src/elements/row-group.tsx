@@ -1,5 +1,5 @@
 import { defineWebComponent } from './define';
-import { RowGroup } from '../components/row-group';
+import { RowGroup } from '../components/row/row-group';
 
 type Props = Record<string, unknown>;
 

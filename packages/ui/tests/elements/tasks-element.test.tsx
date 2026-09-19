@@ -4,7 +4,7 @@
 import '../../src/elements/tasks';
 import { CARD_EVENT_NAME } from '../../src/primitives/card-routing';
 import type { CardEvent } from '../../src/primitives/card-contract';
-import type { TasksCardData } from '../../src/components/tasks-card';
+import type { TasksCardData } from '../../src/components/tasks/tasks-card';
 
 const flush = () => new Promise((r) => setTimeout(r, 0));
 

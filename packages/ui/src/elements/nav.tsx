@@ -1,6 +1,6 @@
 import { createSignal } from 'solid-js';
 import { defineWebComponent } from './define';
-import { Nav, type KaiNavItem } from '../components/nav';
+import { Nav, type KaiNavItem } from '../components/nav/nav';
 
 interface Props extends Record<string, unknown> {
   /** The nav items. Set as a JS property (array, not an attribute). Each item may

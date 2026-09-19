@@ -1,5 +1,5 @@
-import type { EntityRef, ComposerDoc } from '../primitives/composer-model';
-import { normalizeValue } from '../primitives/composer-model';
+import type { EntityRef, ComposerDoc } from '../../primitives/composer-model';
+import { normalizeValue } from '../../primitives/composer-model';
 
 export const ZWSP = '​';
 export const ENTITY_ATTR = 'data-kai-entity';

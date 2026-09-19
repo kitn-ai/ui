@@ -2,7 +2,7 @@ import { createSignal, onCleanup, onMount } from 'solid-js';
 import { defineWebComponent } from './define';
 // The badge shape is the Solid component's own `Skill` — one declaration, so the
 // element and `<MessageSkills>` cannot drift, and the ROOT entry re-exports it.
-import { MessageSkills, type Skill } from '../components/message-skills';
+import { MessageSkills, type Skill } from '../components/message/message-skills';
 
 
 interface Props extends Record<string, unknown> {

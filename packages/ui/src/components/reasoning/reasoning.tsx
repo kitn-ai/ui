@@ -1,9 +1,9 @@
 import { type JSX, type Accessor, splitProps, createSignal, createContext, useContext, createEffect, createUniqueId, onCleanup, Show } from 'solid-js';
-import { cn } from '../utils/cn';
+import { cn } from '../../utils/cn';
 import { ChevronDown } from 'lucide-solid';
-import { Markdown } from './markdown';
-import { observeContentHeight } from '../primitives/use-resize-observer';
-import { TextShimmer } from './text-shimmer';
+import { Markdown } from '../markdown/markdown';
+import { observeContentHeight } from '../../primitives/use-resize-observer';
+import { TextShimmer } from '../text-shimmer/text-shimmer';
 
 interface ReasoningContextValue {
   isOpen: () => boolean;

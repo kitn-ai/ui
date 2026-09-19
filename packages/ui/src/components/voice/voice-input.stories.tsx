@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { fn } from 'storybook/test';
 import { VoiceInput } from './voice-input';
-import { componentDescription } from '../stories/docs/element-controls';
+import { componentDescription } from '../../stories/docs/element-controls';
 
 /** Sample transcription handler: resolves the recorded audio to text. */
 const transcribe = async (_audio: Blob): Promise<string> => {

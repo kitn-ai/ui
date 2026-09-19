@@ -7,8 +7,8 @@ import {
   DropdownSeparator, DropdownLabel, DropdownCheckboxItem,
   DropdownSub, DropdownSubTrigger, DropdownSubContent,
 } from './dropdown';
-import { buttonVariants } from './button';
-import { componentDescription } from '../stories/docs/element-controls';
+import { buttonVariants } from '../button/button';
+import { componentDescription } from '../../stories/docs/element-controls';
 
 const meta = {
   title: 'Components/Dropdown',

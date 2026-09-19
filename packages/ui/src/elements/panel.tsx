@@ -1,4 +1,4 @@
-import { Panel, PanelBody, PanelFooter, PanelHeader } from '../components/panel';
+import { Panel, PanelBody, PanelFooter, PanelHeader } from '../components/panel/panel';
 import { defineWebComponent } from './define';
 
 interface PanelElementProps extends Record<string, unknown> {

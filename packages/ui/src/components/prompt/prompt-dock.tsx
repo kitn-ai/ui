@@ -1,5 +1,5 @@
 import { type JSX, Show } from 'solid-js';
-import { cn } from '../utils/cn';
+import { cn } from '../../utils/cn';
 
 /** How the tray frames the input — the SPATIAL axis (padding/inset only).
  *  Orthogonal to {@link PromptDockAppearance}, which controls the surface.

@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { type JSX } from 'solid-js';
 import { Bot, Terminal } from 'lucide-solid';
 import { Pane } from './pane';
-import { componentDescription } from '../stories/docs/element-controls';
+import { componentDescription } from '../../stories/docs/element-controls';
 
 // --- Story helpers -------------------------------------------------------
 
@@ -17,7 +17,7 @@ const Avatar = (props: { children: JSX.Element }) => (
 const Body = () => (
   <div class="space-y-2 p-3 text-sm text-muted-foreground">
     <p class="text-foreground">Planning the refactor.</p>
-    <p>Read <code class="rounded bg-surface-strong px-1 text-foreground">src/components/pane.tsx</code> and the surrounding primitives.</p>
+    <p>Read <code class="rounded bg-surface-strong px-1 text-foreground">src/components/pane/pane.tsx</code> and the surrounding primitives.</p>
     <p>Mapped the header, body, and footer regions.</p>
     <p>Wiring the window controls to their callbacks…</p>
     <p>Verifying the scroll plumbing holds at a bounded height.</p>

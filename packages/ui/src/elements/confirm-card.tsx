@@ -1,5 +1,5 @@
 import { defineWebComponent } from './define';
-import { ConfirmCard, type ConfirmCardData, type ConfirmController } from '../components/confirm-card';
+import { ConfirmCard, type ConfirmCardData, type ConfirmController } from '../components/confirm-card/confirm-card';
 import type { CardResolution } from '../primitives/card-contract';
 
 interface Props extends Record<string, unknown> {

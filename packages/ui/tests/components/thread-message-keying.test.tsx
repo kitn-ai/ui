@@ -36,9 +36,9 @@
 import { describe, it, expect, beforeAll, afterEach } from 'vitest';
 import { render, fireEvent, cleanup } from '@solidjs/testing-library';
 import { createSignal, type Accessor } from 'solid-js';
-import { ChatThread } from '../../src/components/chat-thread';
-import { Thread } from '../../src/components/thread';
-import { createAssistantStream, type AssistantStream } from '../../src/state';
+import { ChatThread } from '../../src/components/chat/chat-thread';
+import { Thread } from '../../src/components/thread/thread';
+import { createAssistantStream, type AssistantStream } from '../../src/state/index';
 import type { ChatMessage } from '../../src/elements/chat-types';
 
 beforeAll(() => {

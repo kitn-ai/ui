@@ -1,6 +1,6 @@
 import { createSignal, For, onCleanup, onMount, Show } from 'solid-js';
 import { defineWebComponent } from './define';
-import { Source, SourceTrigger, SourceContent, SourceList } from '../components/source';
+import { Source, SourceTrigger, SourceContent, SourceList } from '../components/source/source';
 // Public shape of the `sources` prop; lives in ./element-data-types so the ROOT
 // entry can re-export it (see that file's header).
 import type { KaiSourceItem } from './element-data-types';

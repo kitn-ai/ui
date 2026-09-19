@@ -1,6 +1,6 @@
 import { For, createSignal, onMount, onCleanup } from 'solid-js';
 import { defineWebComponent } from './define';
-import { PromptSuggestion } from '../components/prompt-suggestion';
+import { PromptSuggestion } from '../components/prompt/prompt-suggestion';
 
 type Item = string | { label: string; value?: string; icon?: string };
 

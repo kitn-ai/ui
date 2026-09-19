@@ -7,7 +7,7 @@
  * the field: .superpowers/sdd/2026-08-20-rung-3/latency-debug/report.md) is
  * now opt-in via `reasoningOpen` on `<kai-chat>`, forwarded to ChatThread's
  * `reasoningOpen` -> message.tsx's `reasoningDefaultOpen` -> Reasoning's
- * `defaultOpen`/`openOnStream` (src/components/message.tsx, src/elements/chat.tsx).
+ * `defaultOpen`/`openOnStream` (src/components/message/message.tsx, src/elements/chat.tsx).
  */
 import '../../src/elements/chat';
 import type { ChatMessage } from '../../src/elements/chat-types';
@@ -41,7 +41,7 @@ const reasoningOpen = (el: HTMLElement) =>
 
 // TextShimmer renders with this animation class; the disclosure trigger swaps
 // its plain label for a shimmering one while `isStreaming` (see
-// src/components/reasoning.tsx / text-shimmer.tsx).
+// src/components/reasoning/reasoning.tsx / text-shimmer.tsx).
 const reasoningShimmering = (el: HTMLElement) =>
   !!reasoningTrigger(el)?.querySelector('[class*="animate-"]');
 

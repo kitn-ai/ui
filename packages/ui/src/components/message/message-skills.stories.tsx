@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "storybook-solidjs-vite";
 import { MessageSkills } from "./message-skills";
 import { Message, MessageContent, MessageActions } from "./message";
-import { ChatConfig } from "../primitives/chat-config";
+import { ChatConfig } from "../../primitives/chat-config";
 import { Copy, ThumbsUp, ThumbsDown } from "lucide-solid";
-import { componentDescription } from '../stories/docs/element-controls';
+import { componentDescription } from '../../stories/docs/element-controls';
 
 const meta = {
   title: "Components/MessageSkills",

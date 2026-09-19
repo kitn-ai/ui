@@ -1,10 +1,10 @@
 import { splitProps, createMemo, createUniqueId, For, Switch, Match } from 'solid-js';
 import type { JSX } from 'solid-js';
-import { cn } from '../utils/cn';
+import { cn } from '../../utils/cn';
 import { Marked, type MarkedToken, type Token, type Tokens } from 'marked';
-import { CodeBlock, CodeBlockCode } from './code-block';
-import { useChatConfig, textClass } from '../primitives/chat-config';
-import { isSafeUrl } from '../primitives/card-routing';
+import { CodeBlock, CodeBlockCode } from '../code-block/code-block';
+import { useChatConfig, textClass } from '../../primitives/chat-config';
+import { isSafeUrl } from '../../primitives/card-routing';
 
 // --- Markdown, rendered from the parser's TOKEN STREAM -----------------------
 //

@@ -9,7 +9,7 @@ import { cardTagForType, cardHostTags, entryForTag, getElement, listElements } f
 import { invariants } from '../catalog/invariants';
 import { surfaceRecipes } from '../catalog/surfaces';
 import type { TInvariant } from '../catalog/catalog-types';
-import { listCodeRecipes, getCodeRecipe } from '../recipes';
+import { listCodeRecipes, getCodeRecipe } from '../recipes/index';
 
 describe('component_reference', () => {
   it('returns kai-chat props + events', async () => {

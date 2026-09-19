@@ -28,8 +28,8 @@
 import { test, expect, afterEach } from 'vitest';
 import { type Component, type JSX, createComponent, createRoot } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import sliderMeta from '../../src/components/slider.stories';
-import selectMeta from '../../src/components/select.stories';
+import sliderMeta from '../../src/components/slider/slider.stories';
+import selectMeta from '../../src/components/select/select.stories';
 
 afterEach(() => { document.body.innerHTML = ''; });
 

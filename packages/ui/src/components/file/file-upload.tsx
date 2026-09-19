@@ -1,6 +1,6 @@
 import { type JSX, splitProps, createSignal, createContext, useContext, createEffect, onCleanup, Show } from 'solid-js';
 import { Portal } from 'solid-js/web';
-import { cn } from '../utils/cn';
+import { cn } from '../../utils/cn';
 
 interface FileUploadContextValue {
   isDragging: () => boolean;

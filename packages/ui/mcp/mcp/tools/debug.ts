@@ -406,7 +406,7 @@ const RULES: Rule[] = [
   },
   {
     // Rule 12 — kai-compare contract: two candidates, JS data prop, stream both, terminal pick
-    // Source: src/elements/compare.tsx + src/components/response-compare-types.ts
+    // Source: src/elements/compare.tsx + src/components/response/response-compare-types.ts
     id: 'compare-contract',
     test: (t) => {
       if (/<kai-compare\b|kai-compare-select|ResponseCompareData|response.?compare/i.test(t)) return true;
@@ -487,7 +487,7 @@ const RULES: Rule[] = [
   },
   {
     // Rule 14 — blob: attachment URLs: the wire refuses them; use a data: URI
-    // Source: src/components/attachment-types.ts (AttachmentData.url doc),
+    // Source: src/components/attachment-types/attachment-types.ts (AttachmentData.url doc),
     // src/elements/default-input.tsx (readAsDataUrl), src/wire/files.ts (the refusal),
     // apps/docs patterns/attachments-flow.mdx. Rung-6 F-44; the defect PR #186 shipped.
     id: 'attachment-blob-url',

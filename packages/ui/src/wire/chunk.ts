@@ -1,7 +1,7 @@
 // The provider-neutral chunk surface. Everything the adapter needs out of one
 // streaming chunk, and nothing else. A WireFormat maps a decoded provider frame
 // onto these; nothing below this line knows a provider exists.
-import type { RawOrigin, ToolPart } from '../components/tool-types';
+import type { RawOrigin, ToolPart } from '../components/tool/tool-types';
 import type { MessagePart, MessageSource } from '../elements/chat-types';
 import type { ReasoningOpts } from '../state/parts';
 

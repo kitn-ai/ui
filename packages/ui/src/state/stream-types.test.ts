@@ -74,8 +74,8 @@ function typecheckVirtualModule(source: string): string[] {
 const PREAMBLE = [
   `import type { AssistantStream } from './stream';`,
   `import type { Source } from '../elements/chat-types';`,
-  `import type { AttachmentData } from '../components/attachment-types';`,
-  `import type { ToolPart } from '../components/tool-types';`,
+  `import type { AttachmentData } from '../components/attachment-types/attachment-types';`,
+  `import type { ToolPart } from '../components/tool/tool-types';`,
   `import type { CardEnvelope } from '../primitives/card-contract';`,
   `import type { ReasoningOpts } from './parts';`,
   ``,

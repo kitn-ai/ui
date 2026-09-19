@@ -12,7 +12,7 @@
 // (a `data:` URI) or already carries an address the provider can resolve
 // itself. That constraint is what makes a `blob:` URL unencodable rather than
 // merely inconvenient -- resolving one requires the browser tab that minted it.
-import type { AttachmentData } from '../components/attachment-types';
+import type { AttachmentData } from '../components/attachment-types/attachment-types';
 import {
   DEFAULT_MEDIA_POLICY,
   UNNAMED_TEXT_MEDIA_TYPE,

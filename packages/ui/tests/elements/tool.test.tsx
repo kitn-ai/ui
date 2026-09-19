@@ -35,7 +35,7 @@
  */
 import { afterEach, describe, expect, test } from 'vitest';
 import '../../src/elements/tool';
-import type { ToolPart } from '../../src/components/tool-types';
+import type { ToolPart } from '../../src/components/tool/tool-types';
 
 /**
  * Past a macrotask, not just a microtask. The facade's `open` reflection lands in

@@ -2,7 +2,7 @@ import { describe, it, expect, afterEach, vi } from 'vitest';
 import '@testing-library/jest-dom/vitest';
 import { render, cleanup, fireEvent } from '@solidjs/testing-library';
 import { createSignal } from 'solid-js';
-import { DefaultPromptInput } from '../elements/default-input';
+import { DefaultPromptInput } from '../../elements/default-input';
 
 // jsdom doesn't implement Element.scrollTo; some inner controls may call it.
 if (!Element.prototype.scrollTo) (Element.prototype as unknown as { scrollTo: () => void }).scrollTo = () => {};

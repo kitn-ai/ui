@@ -3,7 +3,7 @@ import '@testing-library/jest-dom/vitest';
 import { render, cleanup } from '@solidjs/testing-library';
 import { For } from 'solid-js';
 import { Source, SourceTrigger, SourceContent, SourceList } from './source';
-import { parseKaiSourceElement } from '../elements/source';
+import { parseKaiSourceElement } from '../../elements/source';
 
 afterEach(cleanup);
 

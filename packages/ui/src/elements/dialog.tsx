@@ -1,6 +1,6 @@
 import { createSignal, onCleanup, onMount } from 'solid-js';
 import { defineWebComponent } from './define';
-import { Dialog, type DialogController } from '../components/dialog';
+import { Dialog, type DialogController } from '../components/dialog/dialog';
 import { wireDisclosure } from './disclosure';
 
 interface Props extends Record<string, unknown> {

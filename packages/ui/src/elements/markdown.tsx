@@ -1,5 +1,5 @@
 import { defineWebComponent } from './define';
-import { Markdown } from '../components/markdown';
+import { Markdown } from '../components/markdown/markdown';
 import { ChatConfig, useChatConfig, type ProseSize } from '../primitives/chat-config';
 
 interface Props extends Record<string, unknown> {

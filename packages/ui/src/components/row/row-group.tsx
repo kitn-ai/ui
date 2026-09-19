@@ -1,5 +1,5 @@
 import { splitProps, type JSX } from 'solid-js';
-import { cn } from '../utils/cn';
+import { cn } from '../../utils/cn';
 
 /**
  * `RowGroup` — the frame that turns loose rows into a LIST: one bordered, rounded

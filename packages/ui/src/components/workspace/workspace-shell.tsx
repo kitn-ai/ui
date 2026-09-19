@@ -1,7 +1,7 @@
 import { Show, createSignal, createMemo, onMount, onCleanup, type JSX } from 'solid-js';
-import { createControllableSignal } from '../primitives/controllable';
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from './resizable';
-import { cn } from '../utils/cn';
+import { createControllableSignal } from '../../primitives/controllable';
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '../resizable/resizable';
+import { cn } from '../../utils/cn';
 
 /** The two aside columns of the shell, named logically (`start` follows the
  *  writing direction; on an RTL page it is the right column). */

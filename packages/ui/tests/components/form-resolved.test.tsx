@@ -1,6 +1,6 @@
 import { test, expect, afterEach } from 'vitest';
 import { render } from '@solidjs/testing-library';
-import { Form, type FormDefinition } from '../../src/components/form';
+import { Form, type FormDefinition } from '../../src/components/form/form';
 import type { CardEvent, CardHost, CardContext } from '../../src/primitives/card-contract';
 
 afterEach(() => { document.body.innerHTML = ''; });

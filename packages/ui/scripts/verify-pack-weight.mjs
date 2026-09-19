@@ -160,8 +160,8 @@ if (SELF_TEST) {
     },
     {
       name: 'a src/ file outside the two JSON exports is caught (the 2026-08-27 regression class)',
-      paths: ['dist/index.js', 'src/components/chat-thread.tsx'],
-      expectViolations: ['src/components/chat-thread.tsx'],
+      paths: ['dist/index.js', 'src/components/chat/chat-thread.tsx'],
+      expectViolations: ['src/components/chat/chat-thread.tsx'],
     },
     {
       name: 'a stray test file outside bin/dist/frameworks is caught',
@@ -307,7 +307,7 @@ if (SELF_TEST) {
  * and the Home/Messages tabbed home screen (bf77a890) directly into its
  * existing facade -- no new element files were added (`git diff --stat
  * 62ac3ea4 HEAD -- src/elements/` touches only chat.tsx + the generated
- * manifests), so the growth is concentrated: src/components/chat-thread.tsx
+ * manifests), so the growth is concentrated: src/components/chat/chat-thread.tsx
  * doubled (30.1 KB -> 59.2 KB packed) and dist/register-impl-*.js +
  * dist/solid-*.js + dist/define-*.js grew by tens of KB each carrying that
  * source; the rest is the generated fan-out the CLAUDE.md "derive it, don't

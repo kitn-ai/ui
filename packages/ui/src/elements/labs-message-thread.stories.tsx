@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { onMount, onCleanup } from 'solid-js';
 import './register'; // side effect: registers <kai-message>, <kai-source>, …
 import { attachKaiActions } from '../stories/docs/story-actions';
-import { textMessage } from '../state';
+import { textMessage } from '../state/index';
 import type { ChatMessage } from './chat-types';
 
 // The web components are custom DOM elements, so declare the tags for JSX.

@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { SlidersHorizontal } from 'lucide-solid';
 import { CardSurface } from './card-surface';
-import { Button } from './button';
-import { componentDescription } from '../stories/docs/element-controls';
-import cover from '../elements/card-media.jpg';
+import { Button } from '../button/button';
+import { componentDescription } from '../../stories/docs/element-controls';
+import cover from '../../elements/card-media.jpg';
 
 const meta = {
   title: 'Components/Card Surface',
@@ -88,7 +88,7 @@ type Story = StoryObj<typeof meta>;
 //
 // The sample imports RELATIVELY, like `tab-bar.stories.tsx` and `panel.stories.tsx`:
 // `CardSurface` is not on any barrel. The public `Card` export is the generative-UI
-// CONTRACT card (`src/components/card.tsx`), a different component with a different
+// CONTRACT card (`src/components/card/card.tsx`), a different component with a different
 // prop set, so naming it here would compile and render the wrong thing.
 const IMPORT = `import { CardSurface } from './card-surface';`;
 const src = (code: string) => ({

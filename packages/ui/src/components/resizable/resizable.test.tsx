@@ -4,7 +4,7 @@ import { render, cleanup } from '@solidjs/testing-library';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle, clampBasis } from './resizable';
 
 // Scope: both halves of the resizable pair. The components under test live at
-// `src/components/resizable.tsx` (this test's sibling) and the custom element at
+// `src/components/resizable/resizable.tsx` (this test's sibling) and the custom element at
 // `src/elements/resizable.tsx`. It exercises the components (`ResizableHandle`
 // affordances + never-shrink contract, dblclick-reset, default-size reflection)
 // and the element (`<kai-resizable>` size-preservation across content-only
@@ -182,7 +182,7 @@ describe('ResizableHandle dblclick resets adjacent panels to defaults', () => {
 describe('<kai-resizable> size preservation across content-only re-renders', () => {
   beforeAll(async () => {
     // Importing registers the custom element. jsdom supports customElements.
-    await import('../elements/resizable');
+    await import('../../elements/resizable');
   });
 
   function mount(html: string): HTMLElement {

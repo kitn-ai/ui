@@ -637,8 +637,8 @@ const target = TARGETS[requested];
 
 /**
  * Output options for a `perModule` target. `preserveModulesRoot` is `src/`, so a
- * module keeps its source path under dist/ (src/components/badge.tsx ->
- * dist/components/badge.js) — which is also the layout the barrel's declaration
+ * module keeps its source path under dist/ (src/components/badge/badge.tsx ->
+ * dist/components/badge/badge.js) — which is also the layout the barrel's declaration
  * emit has always used (`entryRoot: 'src'`), so every emitted .js now has the
  * .d.ts beside it that a deep import or an editor resolves.
  *

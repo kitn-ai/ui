@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@solidjs/testing-library';
-import { Tooltip } from '../../src/components/tooltip';
+import { Tooltip } from '../../src/components/tooltip/tooltip';
 
 // jsdom (v24) does not implement the PointerEvent constructor. fireEvent.pointerEnter/Leave
 // need it. Real browsers implement PointerEvent, so this is a jsdom-only shim.

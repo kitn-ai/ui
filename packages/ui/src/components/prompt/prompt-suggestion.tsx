@@ -1,7 +1,7 @@
 import { type JSX, Show, splitProps } from 'solid-js';
-import { cn } from '../utils/cn';
-import { Button } from './button';
-import { renderIcon } from './icon';
+import { cn } from '../../utils/cn';
+import { Button } from '../button/button';
+import { renderIcon } from '../icon/icon';
 
 export interface PromptSuggestionProps extends JSX.ButtonHTMLAttributes<HTMLButtonElement> {
   children: JSX.Element | string;

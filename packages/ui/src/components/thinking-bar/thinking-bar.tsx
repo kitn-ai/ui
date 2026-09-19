@@ -1,6 +1,6 @@
 import { type JSX, splitProps, Show } from 'solid-js';
-import { cn } from '../utils/cn';
-import { TextShimmer } from './text-shimmer';
+import { cn } from '../../utils/cn';
+import { TextShimmer } from '../text-shimmer/text-shimmer';
 import { ChevronRight } from 'lucide-solid';
 
 export interface ThinkingBarProps {

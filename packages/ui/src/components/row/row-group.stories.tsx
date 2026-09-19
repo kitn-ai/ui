@@ -2,9 +2,9 @@ import { For } from 'solid-js';
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { fn } from 'storybook/test';
 import { RowGroup, type RowGroupProps } from './row-group';
-import { Row } from '../components/row';
-import { renderIcon } from './icon';
-import { componentDescription } from '../stories/docs/element-controls';
+import { Row } from './row';
+import { renderIcon } from '../icon/icon';
+import { componentDescription } from '../../stories/docs/element-controls';
 
 /**
  * `RowGroup` on its own page, the way `CheckboxGroup` has one beside `Checkbox`:

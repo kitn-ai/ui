@@ -1,11 +1,11 @@
 import { defineWebComponent } from './define';
 import { ChatConfig, useChatConfig, type ProseSize } from '../primitives/chat-config';
-import { ResponseCompare, type CompareLayout } from '../components/response-compare';
+import { ResponseCompare, type CompareLayout } from '../components/response/response-compare';
 import type {
   ResponseCompareData,
   CompareSelection,
   ResponseCompareController,
-} from '../components/response-compare';
+} from '../components/response/response-compare';
 
 interface Props extends Record<string, unknown> {
   /** The compare definition (prompt + the two candidates). Set as a JS PROPERTY:

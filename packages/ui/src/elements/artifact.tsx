@@ -1,6 +1,6 @@
 import { createSignal, onMount, onCleanup } from 'solid-js';
 import { defineWebComponent } from './define';
-import { Artifact, type ArtifactController, type ArtifactFile, type ArtifactTab } from '../components/artifact';
+import { Artifact, type ArtifactController, type ArtifactFile, type ArtifactTab } from '../components/artifact/artifact';
 
 interface Props extends Record<string, unknown> {
   /** URL the preview iframe frames. Consumer-controlled. */

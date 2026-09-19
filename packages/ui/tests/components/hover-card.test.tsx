@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent } from '@solidjs/testing-library';
-import { HoverCardRoot, HoverCardTrigger, HoverCardContent } from '../../src/components/hover-card';
+import { HoverCardRoot, HoverCardTrigger, HoverCardContent } from '../../src/components/hover/hover-card';
 
 // jsdom (v24) does not implement the PointerEvent constructor. fireEvent.pointerEnter/Leave
 // need it. Real browsers implement PointerEvent, so this is a jsdom-only shim. We extend

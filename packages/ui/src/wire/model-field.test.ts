@@ -3,8 +3,8 @@ import { readOpenAIStream } from './read';
 import { sseJson } from './sse';
 import { openaiChatFormat } from './formats/openai';
 import { anthropicMessagesFormat } from './formats/anthropic';
-import { OPENAI_FIXTURES } from './fixtures/openai';
-import { ANTHROPIC_FIXTURES } from './fixtures/anthropic';
+import { OPENAI_FIXTURES } from './fixtures/openai/index';
+import { ANTHROPIC_FIXTURES } from './fixtures/anthropic/index';
 import { nullSink, replayBytes } from './fixtures/replay';
 import type { ModelStreamChunk, WireFormat } from './chunk';
 

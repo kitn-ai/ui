@@ -2,11 +2,11 @@ import {
   createSignal, createEffect, onCleanup, on, For, Show, createMemo,
 } from 'solid-js';
 import { X, Check, AlertTriangle, XCircle, Info } from 'lucide-solid';
-import { cn } from '../utils/cn';
-import { createPresence } from './overlay';
+import { cn } from '../../utils/cn';
+import { createPresence } from '../overlay/overlay';
 import {
   type ToastItem, type ToastVariant, type ToastAppearance, resolveDuration,
-} from '../primitives/toast-store';
+} from '../../primitives/toast-store';
 
 export type { ToastItem, ToastVariant, ToastAppearance };
 
@@ -218,7 +218,7 @@ export function Toast(props: ToastProps) {
         // a failure is announced with the same (polite, easily missed) urgency as
         // a success. `alert` is implicitly assertive and interrupts, which is what
         // the region's `aria-live="polite"` alone will not do for the toast that
-        // actually matters. Same expression as components/notice.tsx.
+        // actually matters. Same expression as components/notice/notice.tsx.
         role={variant() === 'error' ? 'alert' : 'status'}
         data-appearance={appearance()}
         data-inverse={inverse() ? '' : undefined}

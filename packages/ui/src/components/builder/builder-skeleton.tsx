@@ -1,5 +1,5 @@
 import type { JSX } from 'solid-js';
-import { cn } from '../utils/cn';
+import { cn } from '../../utils/cn';
 
 /**
  * Shared wordless-skeleton language for `Labs/Builder/<Template>` preview

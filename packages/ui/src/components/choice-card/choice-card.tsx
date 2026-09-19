@@ -12,16 +12,16 @@ import {
   ErrorBoundary,
   createUniqueId,
 } from 'solid-js';
-import { cn } from '../utils/cn';
-import { Button } from './button';
-import { Radio } from './radio';
-import { HoverCard } from './hover-card';
-import { Card } from './card';
-import { DismissedStub } from './dismissed-stub';
-import type { CardEnvelope, CardEvent, CardHost, CardResolution } from '../primitives/card-contract';
-import { useCardResolution } from './use-card-resolution';
-import { emitCardEvent } from '../primitives/card-routing';
-import { useCardHost } from '../primitives/card-host';
+import { cn } from '../../utils/cn';
+import { Button } from '../button/button';
+import { Radio } from '../radio/radio';
+import { HoverCard } from '../hover/hover-card';
+import { Card } from '../card/card';
+import { DismissedStub } from '../dismissed-stub/dismissed-stub';
+import type { CardEnvelope, CardEvent, CardHost, CardResolution } from '../../primitives/card-contract';
+import { useCardResolution } from '../use-card-resolution/use-card-resolution';
+import { emitCardEvent } from '../../primitives/card-routing';
+import { useCardHost } from '../../primitives/card-host';
 import { Check } from 'lucide-solid';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -35,7 +35,7 @@ import type {
   ChoiceCardData,
   ChoiceOption,
   ChoiceOptionMedia,
-} from '../primitives/card-data-types';
+} from '../../primitives/card-data-types';
 
 export type {
   ChoiceAllowOther,
@@ -43,7 +43,7 @@ export type {
   ChoiceCardEnvelope,
   ChoiceOption,
   ChoiceOptionMedia,
-} from '../primitives/card-data-types';
+} from '../../primitives/card-data-types';
 
 export const CHOICE_CARD_TYPE = 'choice' as const;
 

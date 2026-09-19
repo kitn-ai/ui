@@ -58,7 +58,7 @@ function Feed(props: {
     <div style={{ position: 'relative', width: '22rem' }}>
       <div
         id={props.id}
-        // Mirrors ChatContainer's own scroll region (src/components/chat-container.tsx):
+        // Mirrors ChatContainer's own scroll region (src/components/chat/chat-container.tsx):
         // a scrollable box whose content carries no focusable control has to be a tab
         // stop itself, or a keyboard user cannot scroll it at all (WCAG 2.1.1 -- axe
         // `scrollable-region-focusable`). A demo feed is no exception.

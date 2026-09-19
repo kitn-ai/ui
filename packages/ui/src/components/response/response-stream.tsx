@@ -1,7 +1,7 @@
 import { splitProps, Show, For, createEffect, on } from 'solid-js';
 import { Dynamic } from 'solid-js/web';
-import { cn } from '../utils/cn';
-import { useTextStream, defaultFadeDuration, defaultSegmentDelay } from '../primitives/use-text-stream';
+import { cn } from '../../utils/cn';
+import { useTextStream, defaultFadeDuration, defaultSegmentDelay } from '../../primitives/use-text-stream';
 
 export type Mode = 'typewriter' | 'fade';
 

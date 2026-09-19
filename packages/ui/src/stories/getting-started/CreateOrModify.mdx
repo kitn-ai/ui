@@ -11,7 +11,7 @@ Adding a component means working down the layers: write the Solid component, giv
 Solid components go in `src/components/`. Keep them accessible and token-styled (no hard-coded colors). The real `Switch` is a `role="switch"` button supporting controlled and uncontrolled state:
 
 ```tsx
-// src/components/switch.tsx
+// src/components/switch/switch.tsx
 import { createSignal } from 'solid-js';
 import { cn } from '../utils/cn';
 
@@ -58,7 +58,7 @@ Support both a controlled `checked` and an uncontrolled `defaultChecked`, and us
 A component's story sits beside it in `src/components/`:
 
 ```tsx
-// src/components/switch.stories.tsx
+// src/components/switch/switch.stories.tsx
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { fn } from 'storybook/test';
 import { Switch } from './switch';

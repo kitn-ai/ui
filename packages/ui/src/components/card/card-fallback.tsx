@@ -1,4 +1,4 @@
-// src/components/card-fallback.tsx
+// src/components/card/card-fallback.tsx
 // Rendered by the dispatcher when an envelope cannot be rendered: its `type` has no
 // registered card, or its `data` failed HARD validation against the built-in schema
 // for that type (see primitives/card-validate-cards.ts for what "hard" means).

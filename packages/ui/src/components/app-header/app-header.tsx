@@ -6,7 +6,7 @@
  * emitted app had drifted off it (a text "Theme" button, no search at all, a
  * bare avatar with no menu, and the whole cluster stuffed into ChatThread's
  * own header row inside the chat rail). The story now renders THIS component
- * instead of its own copy, exactly as `components/work-surface.tsx` did for the
+ * instead of its own copy, exactly as `components/work-surface/work-surface.tsx` did for the
  * pane chrome, so design and product cannot drift apart again.
  *
  * WHERE IT SITS: a top-level strip ABOVE the split entirely (a sibling of
@@ -81,13 +81,13 @@
  */
 import { type JSX, Show, For } from 'solid-js';
 import { Search, Sun, Moon, ChevronDown, Settings, CircleHelp, LogOut } from 'lucide-solid';
-import { cn } from '../utils/cn';
-import { Button } from './button';
-import { Separator } from './separator';
-import { Tooltip } from './tooltip';
-import { Avatar } from './avatar';
-import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem, DropdownSeparator } from './dropdown';
-import type { ButtonVariantName } from './button-variant-names';
+import { cn } from '../../utils/cn';
+import { Button } from '../button/button';
+import { Separator } from '../separator/separator';
+import { Tooltip } from '../tooltip/tooltip';
+import { Avatar } from '../avatar/avatar';
+import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem, DropdownSeparator } from '../dropdown/dropdown';
+import type { ButtonVariantName } from '../button/button-variant-names';
 
 /** One header action button. `variant` is the kit Button's OWN variant name —
  *  the construct schema's `header.actions[].variant` enum is built from the

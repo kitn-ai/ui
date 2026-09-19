@@ -1,15 +1,15 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { type JSX, createSignal, createMemo, For, Show } from 'solid-js';
 import { Copy, RefreshCw, Share2, Image as ImageIcon, Sparkles } from 'lucide-solid';
-import { BuilderPanel, type BuilderConstruct } from '../components/builder-panel';
-import { BuilderLayout, type BuilderViewport } from '../components/builder-layout';
-import { resolveAccentWrapperStyle } from '../components/builder-preview';
-import { ChatThread } from '../components/chat-thread';
-import { Source, SourceTrigger, SourceContent } from '../components/source';
-import { PromptSuggestion } from '../components/prompt-suggestion';
-import { Tabs, type KaiTabItem } from '../components/tabs';
-import { Button } from '../components/button';
-import { Switch } from '../components/switch';
+import { BuilderPanel, type BuilderConstruct } from '../components/builder/builder-panel';
+import { BuilderLayout, type BuilderViewport } from '../components/builder/builder-layout';
+import { resolveAccentWrapperStyle } from '../components/builder/builder-preview';
+import { ChatThread } from '../components/chat/chat-thread';
+import { Source, SourceTrigger, SourceContent } from '../components/source/source';
+import { PromptSuggestion } from '../components/prompt/prompt-suggestion';
+import { Tabs, type KaiTabItem } from '../components/tabs/tabs';
+import { Button } from '../components/button/button';
+import { Switch } from '../components/switch/switch';
 import { isRenderableLink } from '../primitives/link-preview';
 import type { Source as SourceCitation } from './chat-types';
 
@@ -35,7 +35,7 @@ import type { Source as SourceCitation } from './chat-types';
 //    overflow, confirmed by reading that story's own comment on it)
 //  - an Answer / Sources / Images TAB STRIP — Perplexity's own `kai-tabs
 //    variant="underline"`, reused here via the kit's real Solid `Tabs`
-//    component (`components/tabs.tsx`), not a fork
+//    component (`components/tabs/tabs.tsx`), not a fork
 //  - the Answer tab: HAND-WOVEN prose with INLINE numbered citation chips —
 //    Perplexity's story states directly why: "the markdown renderer renders
 //    a string and can't interleave citation chips at citation offsets," so
@@ -440,7 +440,7 @@ const meta = { title: 'Labs/Builder/Research', parameters: { layout: 'fullscreen
 export default meta;
 type Story = StoryObj;
 
-// BuilderPanel/BuilderLayout are internal to the builder app (src/components/builder-panel.tsx,
+// BuilderPanel/BuilderLayout are internal to the builder app (src/components/builder/builder-panel.tsx,
 // builder-layout.tsx) -- neither ships in a public @kitn.ai/ui entry point. The snippet below
 // names the real composition and wiring rather than a package import; ChatThread IS public
 // (@kitn.ai/ui) and is shown as this preview actually uses its `emptyContent` prop.

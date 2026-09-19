@@ -1,25 +1,25 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { type JSX, createSignal, createMemo, createEffect, onCleanup } from 'solid-js';
 import { Mic, PanelLeftOpen, PanelRightOpen, X, Download } from 'lucide-solid';
-import { BuilderPanel, type BuilderConstruct } from '../components/builder-panel';
-import { BuilderLayout, type BuilderViewport } from '../components/builder-layout';
-import { resolveAccentWrapperStyle } from '../components/builder-preview';
-import { AudioVisualizer, type VisualizerVariant } from '../components/audio-visualizer';
-import { ChatThread } from '../components/chat-thread';
-import { WorkspaceShell } from '../components/workspace-shell';
-import { Captions, type CaptionSegment, type CaptionsVariant } from '../components/captions';
-import { Switch } from '../components/switch';
-import { Select } from '../components/select';
-import { RadioGroup, type RadioOption } from '../components/radio';
-import { Button } from '../components/button';
-import { Tooltip } from '../components/tooltip';
-import { Kbd } from '../components/kbd';
+import { BuilderPanel, type BuilderConstruct } from '../components/builder/builder-panel';
+import { BuilderLayout, type BuilderViewport } from '../components/builder/builder-layout';
+import { resolveAccentWrapperStyle } from '../components/builder/builder-preview';
+import { AudioVisualizer, type VisualizerVariant } from '../components/audio-visualizer/index';
+import { ChatThread } from '../components/chat/chat-thread';
+import { WorkspaceShell } from '../components/workspace/workspace-shell';
+import { Captions, type CaptionSegment, type CaptionsVariant } from '../components/captions/captions';
+import { Switch } from '../components/switch/switch';
+import { Select } from '../components/select/select';
+import { RadioGroup, type RadioOption } from '../components/radio/radio';
+import { Button } from '../components/button/button';
+import { Tooltip } from '../components/tooltip/tooltip';
+import { Kbd } from '../components/kbd/kbd';
 import { cn } from '../utils/cn';
 import type { ChatMessage } from './chat-types';
 
 // Labs/Builder/Voice — T-1/T-1a build-out (docs/superpowers/specs/
 // 2026-08-28-template-builder-design.md), reshaped in an owner design
-// round to a workspace-like layout. Reused `components/workspace-shell.tsx`'s
+// round to a workspace-like layout. Reused `components/workspace/workspace-shell.tsx`'s
 // `WorkspaceShell` (the SAME real collapse mechanism the Workspace
 // template's Expand control found — controlled `startCollapsed`/
 // `endCollapsed`, confirmed by reading `WorkspaceShell` again rather than
@@ -66,7 +66,7 @@ import type { ChatMessage } from './chat-types';
 //    Thread` already has for a different stated purpose, not a new one
 //    invented for this story.
 //
-// 2. CAPTIONS: `components/captions.tsx` (NEW kit component this round —
+// 2. CAPTIONS: `components/captions/captions.tsx` (NEW kit component this round —
 //    see its own doc comment for the full contract: presence-gated
 //    appear/fade via the kit's REAL `createPresence` primitive, speaker-
 //    aware styling, `motion-reduce:animate-none`, empty renders nothing).
@@ -85,7 +85,7 @@ import type { ChatMessage } from './chat-types';
 //    — the owner's own instruction: accent stays reserved for the
 //    visualizer. Restyled from `bg-primary`/`text-primary-foreground` to
 //    the kit's real `outline` Button variant's own color classes
-//    (`components/button.tsx`: `bg-muted/50 text-foreground hover:bg-muted` — the
+//    (`components/button/button.tsx`: `bg-muted/50 text-foreground hover:bg-muted` — the
 //    closest existing "secondary/neutral" look; there is no literal
 //    `secondary` variant, same mapping the Workspace round's header-action
 //    editor already had to make and documented there). Kept as bespoke
@@ -121,7 +121,7 @@ import type { ChatMessage } from './chat-types';
 // real mouse press, and a real `window` keydown/keyup pair toggles the same
 // pressed state while Space is held, cleaned up via `onCleanup` when
 // `talkMode` changes or the component unmounts. `open` is an HONEST STUB:
-// checked `components/voice-input.tsx` and `primitives/use-voice-
+// checked `components/voice/voice-input.tsx` and `primitives/use-voice-
 // recorder.ts` for a VAD/continuous-listening API before adding this
 // option, and neither has one, so "open mic" here renders the INDICATOR a
 // real continuous-listen mode would need (a pulsing ring, no press
@@ -219,7 +219,7 @@ const DEFAULT_CONSTRUCT: BuilderConstruct = {
 // Panel surface tone (owner amendment): matched to `elements/t3code.stories.tsx`'s
 // own rail/panel background — that story's `slot="start"` carries no bg
 // class of its own, so it renders `WorkspaceShell`'s (there, `kai-workspace`'s)
-// own default aside token, `bg-surface` (`components/workspace-shell.tsx`'s
+// own default aside token, `bg-surface` (`components/workspace/workspace-shell.tsx`'s
 // `asideColumn`, read to confirm before reusing it here). `ChatThread`'s own
 // root hardcodes `bg-background` on itself, which would otherwise paint over
 // that surface tone, so it's overridden explicitly on the `class` prop below
@@ -242,7 +242,7 @@ function TranscriptPanel(props: { dockSide: DockSide; textInput: boolean; showDo
           </Button>
         </div>
       </div>
-      {/* Owner feedback round: the built-in composer (`components/prompt-input.tsx`'s
+      {/* Owner feedback round: the built-in composer (`components/prompt/prompt-input.tsx`'s
           `bg-surface`) collided with this panel's own `bg-surface` toning
           (the round-B fix above, matched to `t3code.stories.tsx`'s rail
           token) — the input frame disappeared into its own background. The
@@ -321,7 +321,7 @@ function VoicePreview(props: {
   const micPressed = createMemo(() => props.talkMode === 'space' && spacePressed());
   // `open` mode's mic renders as a live LISTENING INDICATOR, not a press
   // affordance — no `kai-voice-input`/component-tier VAD or continuous-
-  // listening API exists today (checked `components/voice-input.tsx` and
+  // listening API exists today (checked `components/voice/voice-input.tsx` and
   // `primitives/use-voice-recorder.ts` before writing this — neither has
   // one), so this is an honest STUB state, not a real continuous-listen
   // wire-up. See the module doc comment's T-5 note.
@@ -629,7 +629,7 @@ const meta = { title: 'Labs/Builder/Voice', parameters: { layout: 'fullscreen' }
 export default meta;
 type Story = StoryObj;
 
-// BuilderPanel/BuilderLayout are internal to the builder app (src/components/builder-panel.tsx,
+// BuilderPanel/BuilderLayout are internal to the builder app (src/components/builder/builder-panel.tsx,
 // builder-layout.tsx) -- neither ships in a public @kitn.ai/ui entry point. The snippet below
 // names the real composition and wiring rather than a package import; AudioVisualizer, Captions
 // and ChatThread ARE public (@kitn.ai/ui) and are shown as this preview actually uses them.

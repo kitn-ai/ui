@@ -1,7 +1,7 @@
 import { type JSX, For, Show, createSignal, createMemo, onCleanup } from 'solid-js';
 import { Check, CircleAlert } from 'lucide-solid';
-import { cn } from '../utils/cn';
-import { Notice } from './notice';
+import { cn } from '../../utils/cn';
+import { Notice } from '../notice/notice';
 import {
   BLUEPRINT_BG,
   STROKE,
@@ -10,7 +10,7 @@ import {
   ACCENT,
   ACCENT_FILL,
   type BuilderCardTemplateId,
-} from './builder-start';
+} from '../builder/builder-start';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // `BuildWait` — what the builder shows while a construct's preview boots.

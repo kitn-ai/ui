@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal, Show, For } from 'solid-js';
 import './register'; // every kai-* element used below
-import type { KaiNavItem } from '../components/nav';
+import type { KaiNavItem } from '../components/nav/nav';
 import type { KaiCommandItem } from './command';
 import type { ConversationSummary, ConversationGroup } from '../types';
-import { textMessage } from '../state';
+import { textMessage } from '../state/index';
 import type { ChatMessage } from './chat-types';
 
 // Labs/Apps: a fourth dogfood - "ChatGPT", a replica of chatgpt.com, the

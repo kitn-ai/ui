@@ -1,8 +1,8 @@
 import { type JSX, splitProps, createResource, createSignal, onCleanup, Show } from 'solid-js';
 import { Copy, Check } from 'lucide-solid';
-import { cn } from '../utils/cn';
-import { useChatConfig } from '../primitives/chat-config';
-import { highlight, isCodeHighlightingEnabled } from '../primitives/highlighter';
+import { cn } from '../../utils/cn';
+import { useChatConfig } from '../../primitives/chat-config';
+import { highlight, isCodeHighlightingEnabled } from '../../primitives/highlighter';
 
 // --- CodeBlock (Root) ---
 

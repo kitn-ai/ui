@@ -1,5 +1,5 @@
 import { defineWebComponent } from './define';
-import { TextShimmer } from '../components/text-shimmer';
+import { TextShimmer } from '../components/text-shimmer/text-shimmer';
 
 interface Props extends Record<string, unknown> {
   /** The text to shimmer. */

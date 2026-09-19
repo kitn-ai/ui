@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { readAnthropicStream } from './read';
-import { ANTHROPIC_FIXTURES } from './fixtures/anthropic';
+import { ANTHROPIC_FIXTURES } from './fixtures/anthropic/index';
 import { nullSink, replayBytes } from './fixtures/replay';
 import type { MessagePart } from '../elements/chat-types';
 

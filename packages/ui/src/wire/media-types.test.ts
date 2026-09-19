@@ -12,7 +12,7 @@
 import { describe, expect, it } from 'vitest';
 import { encodableMediaTypes, resolveMediaPolicy } from './media-types';
 import { WireEncodeError, toAnthropicMessages, toOpenAIMessages } from './encode';
-import type { AttachmentData } from '../components/attachment-types';
+import type { AttachmentData } from '../components/attachment-types/attachment-types';
 import type { ChatMessage } from '../elements/chat-types';
 
 /** base64 of the given text, without pulling in Buffer (this layer runs in a

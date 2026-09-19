@@ -2,8 +2,8 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { onMount, onCleanup } from 'solid-js';
 import './register'; // side effect: registers <kai-chat>, <kai-conversations>, <kai-prompt-input>
 import { attachKaiActions } from '../stories/docs/story-actions';
-import type { AttachmentData } from '../components/attachments';
-import type { TriggerDef } from '../components/composer';
+import type { AttachmentData } from '../components/attachments/attachments';
+import type { TriggerDef } from '../components/composer/composer';
 import type { ComposerDoc } from '../primitives/composer-model';
 import { argTypesFor, specDescription } from '../stories/docs/element-controls';
 

@@ -1,6 +1,6 @@
 import { type JSX, For } from 'solid-js';
-import { cn } from '../utils/cn';
-import { CardSurface } from './card-surface';
+import { cn } from '../../utils/cn';
+import { CardSurface } from '../card/card-surface';
 import { BLUEPRINT_BG, STROKE, LINE, BORDER, ACCENT } from './builder-start';
 
 // The Workspace template's SECOND screen — owner-approved addition (T-1

@@ -1,5 +1,5 @@
 import { defineWebComponent } from './define';
-import { CodeBlock, CodeBlockCode } from '../components/code-block';
+import { CodeBlock, CodeBlockCode } from '../components/code-block/code-block';
 import { ChatConfig, useChatConfig, type ProseSize } from '../primitives/chat-config';
 
 interface Props extends Record<string, unknown> {

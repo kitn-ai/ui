@@ -1,6 +1,6 @@
 import { type JSX, Show, For, createMemo } from 'solid-js';
-import { createPresence } from './overlay';
-import { cn } from '../utils/cn';
+import { createPresence } from '../overlay/overlay';
+import { cn } from '../../utils/cn';
 
 /**
  * `Captions` — live closed-captioning: the text shown WHILE someone (the
@@ -38,7 +38,7 @@ import { cn } from '../utils/cn';
  *   history, so it can't double-announce anything a transcript component
  *   elsewhere on the page is already announcing.
  * - Appear/update reuses the kit's real exit-animation primitive,
- *   `createPresence` (`components/overlay.tsx`), for the whole component's
+ *   `createPresence` (`components/overlay/overlay.tsx`), for the whole component's
  *   mount/unmount, and a keyed `<For>` around the current line so a NEW
  *   segment object (the same "new object per changed item" contract the
  *   rest of the kit's reactive props follow) retriggers its own

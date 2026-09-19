@@ -5,7 +5,7 @@ import {
   type ChainOfThoughtController,
   type ChainOfThoughtStepData,
   type ChainOfThoughtType,
-} from '../components/chain-of-thought';
+} from '../components/chain-of-thought/chain-of-thought';
 
 /**
  * A reasoning step descriptor.

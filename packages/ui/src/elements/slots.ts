@@ -249,7 +249,7 @@ export const SKELETON_PARTS: PartDef[] = [
 ];
 
 /**
- * The parts of ONE attachment item, declared by `components/attachments.tsx`
+ * The parts of ONE attachment item, declared by `components/attachments/attachments.tsx`
  * and therefore surfaced by every element that renders an attachment — the
  * standalone `<kai-attachments>` AND the thread inside `<kai-message>` /
  * `<kai-chat>`. Shared rather than duplicated so the two can never document

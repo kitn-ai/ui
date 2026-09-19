@@ -1,6 +1,6 @@
 import { createEffect, createSignal, untrack } from 'solid-js';
 import { defineWebComponent } from './define';
-import { Switch } from '../components/switch';
+import { Switch } from '../components/switch/switch';
 
 interface Props extends Record<string, unknown> {
   /** Controlled checked state. Settable and reflected to the `checked` attribute.

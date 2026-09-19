@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal } from 'solid-js';
 import { HomePanel } from './home-panel';
-import { WidgetTabBar } from './widget-tab-bar';
-import type { ConversationSummary } from '../types';
+import { WidgetTabBar } from '../widget-tab-bar/widget-tab-bar';
+import type { ConversationSummary } from '../../types';
 
 const recent: ConversationSummary = {
   id: 'c1',

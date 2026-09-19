@@ -1,6 +1,6 @@
 // tests/components/card.test.tsx
 import { render, fireEvent } from '@solidjs/testing-library';
-import { Card } from '../../src/components/card';
+import { Card } from '../../src/components/card/card';
 
 afterEach(() => {
   document.body.innerHTML = '';

@@ -6,7 +6,7 @@
  * CSS in `kit-base.css` (`.kai-row-group > *` for the Solid path, `::slotted(
  * kai-row)` for the element path) and drawn on the row's surface. jsdom applies NO
  * shadow-root rules and implements no `::slotted()` matching, so
- * `src/components/row-group.test.tsx` can only pin the CONTRACT (class name, the frames's
+ * `src/components/row/row-group.test.tsx` can only pin the CONTRACT (class name, the frames's
  * children, the var names). It cannot see whether a single row ends up rounded on
  * all four corners, whether a middle row loses its radius, whether the divider
  * paints at all, or whether the two paths agree. Nothing else in the tree renders
@@ -94,8 +94,8 @@ const PAGE = /* html */ `<!doctype html>
       // which is the half of the geometry ::slotted() cannot reach.
       const [{ render }, { RowGroup }, { Row }, { createComponent }] = await Promise.all([
         import('solid-js/web'),
-        import('/src/components/row-group.tsx'),
-        import('/src/components/row.tsx'),
+        import('/src/components/row/row-group.tsx'),
+        import('/src/components/row/row.tsx'),
         import('solid-js'),
       ]);
       const mount = (rows) => {

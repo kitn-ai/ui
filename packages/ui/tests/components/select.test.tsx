@@ -15,8 +15,8 @@
 import { test, expect, afterEach } from 'vitest';
 import { render } from '@solidjs/testing-library';
 import { createSignal } from 'solid-js';
-import { Select } from '../../src/components/select';
-import { SelectWidget, type WidgetProps } from '../../src/components/form-widgets';
+import { Select } from '../../src/components/select/select';
+import { SelectWidget, type WidgetProps } from '../../src/components/form/form-widgets';
 
 afterEach(() => { document.body.innerHTML = ''; });
 
@@ -154,7 +154,7 @@ test('Select accepts raw children for lists a flat array cannot express', () => 
 test('Select invalid state matches the shared field constant, not a second copy', async () => {
   // `docs/coupling-map.md` §4: the destructive border is Input's string, imported, so
   // a select and a text field in one form cannot drift into two error looks.
-  const { FIELD_INVALID } = await import('../../src/components/input');
+  const { FIELD_INVALID } = await import('../../src/components/input/input');
   const { container } = render(() => <Select options={MODELS} invalid />);
   const el = container.querySelector('select')!;
   for (const cls of FIELD_INVALID.split(' ')) expect(el.classList.contains(cls)).toBe(true);

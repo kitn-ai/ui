@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen, fireEvent } from '@solidjs/testing-library';
 import { createSignal } from 'solid-js';
-import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '../../src/components/collapsible';
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '../../src/components/collapsible/collapsible';
 
 describe('Collapsible', () => {
   it('trigger has aria-expanded reflecting controlled open + toggles via onOpenChange', () => {

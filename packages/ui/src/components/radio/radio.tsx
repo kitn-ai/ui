@@ -1,5 +1,5 @@
 import { type JSX, For, Show, splitProps, createUniqueId } from 'solid-js';
-import { cn } from '../utils/cn';
+import { cn } from '../../utils/cn';
 
 export interface RadioProps extends Omit<JSX.InputHTMLAttributes<HTMLInputElement>, 'type' | 'children'> {}
 

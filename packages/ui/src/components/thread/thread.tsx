@@ -1,14 +1,14 @@
 import { For, Show, createMemo, onMount, type JSX } from 'solid-js';
-import { ChatConfig, useChatConfig } from '../primitives/chat-config';
-import { ChatContainer, ChatContainerContent, ChatContainerScrollAnchor } from './chat-container';
-import { Message, MessageAvatar, MessageBody } from './message';
-import { createMessageFeedback, type MessageActionDetail } from '../primitives/message-feedback';
-import { ScrollButton } from './scroll-button';
-import { Loader } from './loader';
-import type { ChatMessage } from '../elements/chat-types';
-import type { ProseSize } from '../primitives/chat-config';
-import type { CardComponentMap } from '../primitives/card-registry';
-import type { CardSchemaMap } from './card-renderer';
+import { ChatConfig, useChatConfig } from '../../primitives/chat-config';
+import { ChatContainer, ChatContainerContent, ChatContainerScrollAnchor } from '../chat/chat-container';
+import { Message, MessageAvatar, MessageBody } from '../message/message';
+import { createMessageFeedback, type MessageActionDetail } from '../../primitives/message-feedback';
+import { ScrollButton } from '../scroll/scroll-button';
+import { Loader } from '../loader/loader';
+import type { ChatMessage } from '../../elements/chat-types';
+import type { ProseSize } from '../../primitives/chat-config';
+import type { CardComponentMap } from '../../primitives/card-registry';
+import type { CardSchemaMap } from '../card/card-renderer';
 
 /** Imperative handle exposed via `controllerRef` — the thread's scroll control,
  *  forwarded onto `<kai-thread>` as the `scrollToBottom()` instance method. */

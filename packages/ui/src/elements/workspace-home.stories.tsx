@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { onMount } from 'solid-js';
 import './register'; // registers kai-workspace, kai-nav, kai-notice, kai-prompt-input, kai-suggestions, kai-card
-import type { KaiNavItem } from '../components/nav';
+import type { KaiNavItem } from '../components/nav/nav';
 
 // Labs: the home/dashboard assembly on the re-cast shell. The workspace is a
 // chat-agnostic layout element now: the consumer composes the rail themselves

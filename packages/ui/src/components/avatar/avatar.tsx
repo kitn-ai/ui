@@ -1,5 +1,5 @@
 import { type JSX, splitProps, Show } from 'solid-js';
-import { cn } from '../utils/cn';
+import { cn } from '../../utils/cn';
 
 export interface AvatarProps extends JSX.HTMLAttributes<HTMLDivElement> {
   src?: string;

@@ -5,7 +5,7 @@ import {
   createTabBarItemsController,
   isTabBarItemDisabled,
   readTabBarItemValue,
-} from '../components/tab-bar';
+} from '../components/tabs/tab-bar';
 import { cn } from '../utils/cn';
 
 interface Props extends Record<string, unknown> {
@@ -101,7 +101,7 @@ defineWebComponent<Props, Events>('kai-tab-bar', {
 
   // The parent-item contract: selection flowing bar to item, roving tabindex,
   // tab/aria-selected bookkeeping. Pure DOM and host-agnostic (see the
-  // controller's JSDoc in components/tab-bar.tsx): Solid context cannot cross
+  // controller's JSDoc in components/tabs/tab-bar.tsx): Solid context cannot cross
   // the element boundary, so the channel is DOM traversal by construction.
   const controller = createTabBarItemsController({
     getItems: itemHosts,

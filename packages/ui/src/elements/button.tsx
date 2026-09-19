@@ -1,6 +1,6 @@
 import { Show } from 'solid-js';
-import { Button } from '../components/button';
-import { renderIcon } from '../components/icon';
+import { Button } from '../components/button/button';
+import { renderIcon } from '../components/icon/icon';
 import { defineWebComponent } from './define';
 import { createSlotText } from './slot-text';
 

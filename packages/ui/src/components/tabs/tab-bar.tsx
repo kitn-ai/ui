@@ -1,6 +1,6 @@
 import { For, Show, splitProps, type JSX } from 'solid-js';
-import { cn } from '../utils/cn';
-import { renderIcon } from './icon';
+import { cn } from '../../utils/cn';
+import { renderIcon } from '../icon/icon';
 
 /**
  * One tab in a `TabBar` (data-driven mode). `id` is the selected `value`

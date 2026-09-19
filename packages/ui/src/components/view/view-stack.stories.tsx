@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal, For, Show } from 'solid-js';
 import { ViewStack, View, type ViewStackController, type ViewStackState } from './view-stack';
-import { componentDescription } from '../stories/docs/element-controls';
+import { componentDescription } from '../../stories/docs/element-controls';
 
 /**
  * Stub story for the P-3 view navigator: three views (two tab roots and a

@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal, Show, For } from 'solid-js';
 import { SlidersHorizontal } from 'lucide-solid';
-import { BuilderHeader } from '../components/builder-header';
-import { Button } from '../components/button';
+import { BuilderHeader } from '../components/builder/builder-header';
+import { Button } from '../components/button/button';
 
 // Labs/Builder: "Header" — story-first (owner policy: new visual surfaces
 // get a stub-data story before any wiring). The full-width top bar for the
@@ -22,7 +22,7 @@ const meta = { title: 'Labs/Builder/Header', parameters: { layout: 'fullscreen' 
 export default meta;
 type Story = StoryObj;
 
-// BuilderHeader is internal to the builder app (src/components/builder-header.tsx) -- it ships
+// BuilderHeader is internal to the builder app (src/components/builder/builder-header.tsx) -- it ships
 // in no public @kitn.ai/ui entry point, so the snippet below shows real usage of the component
 // itself rather than a package import.
 const src = (code: string) => ({

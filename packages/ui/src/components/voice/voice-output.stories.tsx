@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { VoiceOutput } from './voice-output';
-import { componentDescription } from '../stories/docs/element-controls';
+import { componentDescription } from '../../stories/docs/element-controls';
 
 /**
  * Story for `VoiceOutput`: a read-aloud button. By default it speaks `text` via

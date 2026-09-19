@@ -2,7 +2,7 @@
  * CAPABILITY 2 — the re-render contract, reported as a diagnostic.
  *
  * The rule, verbatim from root CLAUDE.md and pinned as BEHAVIOUR by
- * `components/reactivity-contract.test.tsx`:
+ * `components/reactivity-contract/reactivity-contract.test.tsx`:
  *
  *   A new array reference is what NOTIFIES  — the same array set back is a
  *                                             no-op, even with an item swapped

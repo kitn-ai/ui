@@ -1,6 +1,6 @@
 import { type JSX, Show, createSignal, createEffect, untrack } from 'solid-js';
-import { cn } from '../utils/cn';
-import { Input } from './input';
+import { cn } from '../../utils/cn';
+import { Input } from '../input/input';
 
 export interface EditableLabelProps {
   /** The label text. */

@@ -12,7 +12,7 @@
 // `skipLibCheck: true`, which is exactly why this file is now compiled with it off
 // (tests/elements/element-types-lib-check.test.ts).
 import type { CodeHighlightingOptions } from '../primitives/highlighter';
-import type { ToolKind } from '../components/tool-classify';
+import type { ToolKind } from '../components/tool/tool-classify';
 
 // Re-exports for `import { … } from '@kitn.ai/ui/elements'`. Mirrors the names the
 // shipped dist/elements.d.ts inlines, so both copies expose the same surface.
@@ -26,9 +26,9 @@ export type {
   MessageSource,
   RawOrigin,
 } from './chat-types';
-export type { ToolPart } from '../components/tool-types';
-export type { ToolKind } from '../components/tool-classify';
-export type { AttachmentData } from '../components/attachment-types';
+export type { ToolPart } from '../components/tool/tool-types';
+export type { ToolKind } from '../components/tool/tool-classify';
+export type { AttachmentData } from '../components/attachment-types/attachment-types';
 export type { CardEnvelope, CardResolution } from '../primitives/card-contract';
 export type { CodeHighlightingOptions } from '../primitives/highlighter';
 export declare function configureCodeHighlighting(options: CodeHighlightingOptions): void;
@@ -330,7 +330,7 @@ export interface KaiCardsElement extends HTMLElement {
   cards?: { type: string; id: string; data: unknown; title?: string; resolution?: { kind: "action"; action: string; payload?: unknown; at?: string } | { kind: "submit"; data: unknown; at?: string } | { kind: "dismissed"; at?: string } | { kind: "expired"; reason?: string; at?: string } }[];
   /** Optional type→tag overrides/additions (merged over the built-ins). Property: `el.types`. Typed as a plain string map (not the `CardTagMap` alias) so the generated React wrapper inlines it instead of emitting an unresolved named type. */
   types?: Record<string, string>;
-  /** JSON Schemas for the card types this app renders, keyed by envelope type. The companion of `types`, which says what DRAWS a card while this says what a VALID one looks like. An OBJECT, so it is a JS property only: `el.schemas = { 'pricing-table': pricingSchema }`, never an attribute. `createCardRegistry(...).validationSchemas` is exactly this shape. Without it the kit validates its own seven built-ins and leaves your own card type, the one your app actually cares about, as the only unchecked thing on screen. A schema here WINS over a built-in of the same name, matching `mergeCardTags`, where your entry is spread over ours. Typed `Record<string, object>` rather than `Record<string, JsonSchema>` deliberately: an imported `.json` schema widens `"type"` to `string`, and an authored one carries `$schema`/`title`/`description`/`additionalProperties`, so the tighter type would reject both of the normal ways to supply one. See `CardSchemaMap` in components/card-renderer.tsx. */
+  /** JSON Schemas for the card types this app renders, keyed by envelope type. The companion of `types`, which says what DRAWS a card while this says what a VALID one looks like. An OBJECT, so it is a JS property only: `el.schemas = { 'pricing-table': pricingSchema }`, never an attribute. `createCardRegistry(...).validationSchemas` is exactly this shape. Without it the kit validates its own seven built-ins and leaves your own card type, the one your app actually cares about, as the only unchecked thing on screen. A schema here WINS over a built-in of the same name, matching `mergeCardTags`, where your entry is spread over ours. Typed `Record<string, object>` rather than `Record<string, JsonSchema>` deliberately: an imported `.json` schema widens `"type"` to `string`, and an authored one carries `$schema`/`title`/`description`/`additionalProperties`, so the tighter type would reject both of the normal ways to supply one. See `CardSchemaMap` in components/card/card-renderer.tsx. */
   schemas?: Record<string, object>;
   /** Optional CardPolicy handling child events. Property: `el.policy`. */
   policy?: { onSubmit?: ((cardId: string, data: unknown) => void); onAction?: ((cardId: string, action: string, payload?: unknown) => void); onSendPrompt?: ((text: string, opts: { mode: "compose" | "send"; context?: unknown }) => void); onOpen?: ((url: string, target: "tab" | "artifact") => void); onState?: ((cardId: string, patch: unknown) => void); onDismiss?: ((cardId: string) => void); onReopen?: ((cardId: string) => void); onError?: ((cardId: string, message: string) => void); maxSendPromptMode?: "compose" | "send" };
@@ -2417,7 +2417,7 @@ export interface KaiCardsElementProps {
   cards?: { type: string; id: string; data: unknown; title?: string; resolution?: { kind: "action"; action: string; payload?: unknown; at?: string } | { kind: "submit"; data: unknown; at?: string } | { kind: "dismissed"; at?: string } | { kind: "expired"; reason?: string; at?: string } }[];
   /** Optional type→tag overrides/additions (merged over the built-ins). Property: `el.types`. Typed as a plain string map (not the `CardTagMap` alias) so the generated React wrapper inlines it instead of emitting an unresolved named type. */
   types?: Record<string, string>;
-  /** JSON Schemas for the card types this app renders, keyed by envelope type. The companion of `types`, which says what DRAWS a card while this says what a VALID one looks like. An OBJECT, so it is a JS property only: `el.schemas = { 'pricing-table': pricingSchema }`, never an attribute. `createCardRegistry(...).validationSchemas` is exactly this shape. Without it the kit validates its own seven built-ins and leaves your own card type, the one your app actually cares about, as the only unchecked thing on screen. A schema here WINS over a built-in of the same name, matching `mergeCardTags`, where your entry is spread over ours. Typed `Record<string, object>` rather than `Record<string, JsonSchema>` deliberately: an imported `.json` schema widens `"type"` to `string`, and an authored one carries `$schema`/`title`/`description`/`additionalProperties`, so the tighter type would reject both of the normal ways to supply one. See `CardSchemaMap` in components/card-renderer.tsx. */
+  /** JSON Schemas for the card types this app renders, keyed by envelope type. The companion of `types`, which says what DRAWS a card while this says what a VALID one looks like. An OBJECT, so it is a JS property only: `el.schemas = { 'pricing-table': pricingSchema }`, never an attribute. `createCardRegistry(...).validationSchemas` is exactly this shape. Without it the kit validates its own seven built-ins and leaves your own card type, the one your app actually cares about, as the only unchecked thing on screen. A schema here WINS over a built-in of the same name, matching `mergeCardTags`, where your entry is spread over ours. Typed `Record<string, object>` rather than `Record<string, JsonSchema>` deliberately: an imported `.json` schema widens `"type"` to `string`, and an authored one carries `$schema`/`title`/`description`/`additionalProperties`, so the tighter type would reject both of the normal ways to supply one. See `CardSchemaMap` in components/card/card-renderer.tsx. */
   schemas?: Record<string, object>;
   /** Optional CardPolicy handling child events. Property: `el.policy`. */
   policy?: { onSubmit?: ((cardId: string, data: unknown) => void); onAction?: ((cardId: string, action: string, payload?: unknown) => void); onSendPrompt?: ((text: string, opts: { mode: "compose" | "send"; context?: unknown }) => void); onOpen?: ((url: string, target: "tab" | "artifact") => void); onState?: ((cardId: string, patch: unknown) => void); onDismiss?: ((cardId: string) => void); onReopen?: ((cardId: string) => void); onError?: ((cardId: string, message: string) => void); maxSendPromptMode?: "compose" | "send" };

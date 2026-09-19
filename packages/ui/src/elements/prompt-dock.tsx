@@ -1,6 +1,6 @@
 import { createSignal, onCleanup, onMount } from 'solid-js';
 import { defineWebComponent } from './define';
-import { PromptDock, type PromptDockAppearance, type PromptDockFrame } from '../components/prompt-dock';
+import { PromptDock, type PromptDockAppearance, type PromptDockFrame } from '../components/prompt/prompt-dock';
 
 interface Props extends Record<string, unknown> {
   /** How the tray frames the input, the SPATIAL inset axis: `inset` (default, the

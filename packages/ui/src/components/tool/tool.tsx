@@ -1,7 +1,7 @@
 import { type JSX, splitProps, createSignal, Show, For } from 'solid-js';
-import { cn } from '../utils/cn';
-import { Collapsible, CollapsibleTrigger, CollapsibleContent, type CollapsibleController } from './collapsible';
-import { Button } from './button';
+import { cn } from '../../utils/cn';
+import { Collapsible, CollapsibleTrigger, CollapsibleContent, type CollapsibleController } from '../collapsible/collapsible';
+import { Button } from '../button/button';
 import { CheckCircle, ChevronDown, Loader2, Settings, XCircle } from 'lucide-solid';
 import type { ToolPart } from './tool-types';
 export type { ToolPart } from './tool-types';

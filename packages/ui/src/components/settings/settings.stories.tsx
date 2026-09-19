@@ -2,11 +2,11 @@ import type { Meta, StoryObj, Decorator } from 'storybook-solidjs-vite';
 import { createSignal } from 'solid-js';
 import { Monitor, Sun, Moon, X, ChevronLeft } from 'lucide-solid';
 import { SettingsGroup, SettingItem } from './settings-group';
-import { Segmented } from './segmented';
-import { Switch } from './switch';
-import { Select } from './select';
-import { Nav, type KaiNavItem } from './nav';
-import { componentDescription } from '../stories/docs/element-controls';
+import { Segmented } from '../segmented/segmented';
+import { Switch } from '../switch/switch';
+import { Select } from '../select/select';
+import { Nav, type KaiNavItem } from '../nav/nav';
+import { componentDescription } from '../../stories/docs/element-controls';
 
 // --- A composed SETTINGS SCREEN ------------------------------------------
 //

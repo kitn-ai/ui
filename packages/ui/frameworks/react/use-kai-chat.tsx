@@ -8,15 +8,15 @@ export type {
   ChatMessage, ChatMessageAction, CustomAction, AvatarData, FeedbackVote, MessagePart,
   MessageSource, RawOrigin,
 } from '../../src/elements/chat-types';
-export type { ToolPart } from '../../src/components/tool-types';
-export type { ToolKind } from '../../src/components/tool-classify';
+export type { ToolPart } from '../../src/components/tool/tool-types';
+export type { ToolKind } from '../../src/components/tool/tool-classify';
 export type { CardEnvelope } from '../../src/primitives/card-contract';
-export type { AttachmentData } from '../../src/components/attachment-types';
-import type { AttachmentData } from '../../src/components/attachment-types';
+export type { AttachmentData } from '../../src/components/attachment-types/attachment-types';
+import type { AttachmentData } from '../../src/components/attachment-types/attachment-types';
 import {
   appendMessage, updateMessage, removeMessage, addSuggestion, removeSuggestion,
   createAssistantStream, onStreamSettled, type AssistantStream, type SetMessages,
-} from '../../src/state';
+} from '../../src/state/index';
 
 export interface UseKaiChatOptions {
   /** Seed messages, read once at mount and copied. Later changes are ignored — drive updates through the returned ops. */

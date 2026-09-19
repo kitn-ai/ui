@@ -17,7 +17,7 @@
 // answer. A filter that deleted the text would pass (1) and be a worse UI.
 import { render } from '@solidjs/testing-library';
 import { afterEach, describe, expect, test } from 'vitest';
-import { Markdown } from '../../src/components/markdown';
+import { Markdown } from '../../src/components/markdown/markdown';
 
 afterEach(() => {
   document.body.innerHTML = '';

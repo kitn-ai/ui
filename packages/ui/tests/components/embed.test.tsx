@@ -1,7 +1,7 @@
 // tests/components/embed.test.tsx
 import { render, fireEvent } from '@solidjs/testing-library';
 import { afterEach, describe, expect, test } from 'vitest';
-import { Embed } from '../../src/components/embed';
+import { Embed } from '../../src/components/embed/embed';
 import type { CardEvent } from '../../src/primitives/card-contract';
 import {
   configureEmbedAllowlist,

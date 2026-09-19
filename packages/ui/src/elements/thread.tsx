@@ -1,7 +1,7 @@
 import { createSignal, onMount, onCleanup } from 'solid-js';
 import { defineWebComponent } from './define';
 import { readSlots, THREAD_SLOTS } from './slots';
-import { Thread, type ThreadController } from '../components/thread';
+import { Thread, type ThreadController } from '../components/thread/thread';
 import { cardComponentsFromTags } from './message';
 import { createMessagesGuard } from './validate-messages';
 import type { ChatMessage } from './chat-types';

@@ -1,13 +1,13 @@
 import { type JSX, Show, splitProps, createUniqueId, createEffect, onCleanup, untrack } from 'solid-js';
-import { cn } from '../utils/cn';
-import type { CaseMode } from '../primitives/field-mask';
-import { fieldSemantics, type FieldSemanticType } from '../primitives/field-semantics';
+import { cn } from '../../utils/cn';
+import type { CaseMode } from '../../primitives/field-mask';
+import { fieldSemantics, type FieldSemanticType } from '../../primitives/field-semantics';
 import {
   createInputMask,
   type CopyPolicy,
   type InputMask,
   type InputMaskRejectReason,
-} from '../primitives/input-mask';
+} from '../../primitives/input-mask';
 
 export interface InputProps extends Omit<JSX.InputHTMLAttributes<HTMLInputElement>, 'onInput' | 'onChange' | 'size'> {
   /** Field label rendered above the control and linked via `for`/`id`. */
@@ -77,7 +77,7 @@ export interface InputProps extends Omit<JSX.InputHTMLAttributes<HTMLInputElemen
 export const DEFAULT_FORMAT = 'default';
 
 // The single source of the field shell styling — lifted verbatim from the
-// `inputBase` constant that used to live in `src/components/form-widgets.tsx`.
+// `inputBase` constant that used to live in `src/components/form/form-widgets.tsx`.
 // `Input` now owns it; the form widgets render `Input` rather than re-pasting it.
 export const FIELD_BASE =
   'w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50 disabled:pointer-events-none';
@@ -91,7 +91,7 @@ const ROW_INPUT =
   'min-w-0 flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed';
 
 const SIZE_SM = 'px-2.5 py-1';
-// The invalid-state border, EXPORTED because `src/components/select.tsx` renders the same
+// The invalid-state border, EXPORTED because `src/components/select/select.tsx` renders the same
 // field box and a second hand-typed copy of this string is exactly the kind of
 // restatement that rots (`docs/coupling-map.md` §4). `INVALID` stays as the local
 // alias so the three call sites below read unchanged.

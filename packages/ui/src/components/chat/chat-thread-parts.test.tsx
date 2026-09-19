@@ -29,7 +29,9 @@ const source = readFileSync(resolve(HERE, 'chat-thread.tsx'), 'utf8');
 
 describe('P-9 grep-level assertions over chat-thread.tsx', () => {
   it('imports the conversation policy from the shipped controller (P-5)', () => {
-    expect(source).toMatch(/import \{[^}]*createConversationController[^}]*\} from '\.\.\/stores\/conversation-controller'/);
+    // Matched by MODULE PATH, not by depth: a colocated test's specifier is a fact
+    // about where this file sits, and the family reorg moved it a level deeper.
+    expect(source).toMatch(/import \{[^}]*createConversationController[^}]*\} from '\.\.\/[^']*\/conversation-controller'/);
     expect(source).toContain('createConversationController(');
   });
 
@@ -50,7 +52,7 @@ describe('P-9 grep-level assertions over chat-thread.tsx', () => {
   });
 
   it('routes views through the shipped navigator (P-3), not a private view signal', () => {
-    expect(source).toMatch(/import \{[^}]*createViewStack[^}]*\} from '\.\/view-stack'/);
+    expect(source).toMatch(/import \{[^}]*createViewStack[^}]*\} from '\.\.\/[^']*\/view-stack'/);
     expect(source).toContain('createViewStack(');
     // The old grammar's private state.
     expect(source).not.toContain('chatEntry');
@@ -58,7 +60,7 @@ describe('P-9 grep-level assertions over chat-thread.tsx', () => {
   });
 
   it('renders its chrome through the Panel family (P-1)', () => {
-    expect(source).toMatch(/import \{[^}]*Panel[^}]*\} from '\.\/panel'/);
+    expect(source).toMatch(/import \{[^}]*Panel[^}]*\} from '\.\.\/[^']*\/panel'/);
     for (const tag of ['<Panel', '<PanelHeader', '<PanelBody', '<PanelFooter']) {
       expect(source).toContain(tag);
     }

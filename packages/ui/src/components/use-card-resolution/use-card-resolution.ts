@@ -8,7 +8,7 @@
 // states (action | submit | expired) and `isDeferred` for `dismissed` — a set-aside
 // card that still offers a Reopen affordance.
 import { createSignal, createMemo, createEffect, on, type Accessor } from 'solid-js';
-import type { CardResolution } from '../primitives/card-contract';
+import type { CardResolution } from '../../primitives/card-contract';
 
 export interface ResolutionController<R extends CardResolution = CardResolution> {
   resolution: Accessor<R | undefined>;

@@ -16,7 +16,7 @@ import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import '@testing-library/jest-dom/vitest';
 import { render, cleanup, waitFor } from '@solidjs/testing-library';
 import { createSignal } from 'solid-js';
-import { AudioVisualizer, normalizeVariant } from '../components/audio-visualizer';
+import { AudioVisualizer, normalizeVariant } from '../components/audio-visualizer/index';
 import { num, AudioVisualizerFacade } from './audio-visualizer';
 
 afterEach(cleanup);

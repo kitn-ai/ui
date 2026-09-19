@@ -3,7 +3,7 @@ import '@testing-library/jest-dom/vitest';
 import { render, cleanup, fireEvent, waitFor } from '@solidjs/testing-library';
 import { createSignal } from 'solid-js';
 import { Toast, ToastRegion, type ToastPosition } from './toast';
-import type { ToastItem } from '../primitives/toast-store';
+import type { ToastItem } from '../../primitives/toast-store';
 
 afterEach(cleanup);
 

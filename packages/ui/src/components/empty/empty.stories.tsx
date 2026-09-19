@@ -3,14 +3,14 @@ import { createSignal, For } from 'solid-js';
 import {
   Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription, EmptyContent,
 } from './empty';
-import { Button } from './button';
-import { Avatar } from './avatar';
-import { PromptSuggestion } from './prompt-suggestion';
-import { PromptInput, PromptInputTextarea, PromptInputActions } from './prompt-input';
+import { Button } from '../button/button';
+import { Avatar } from '../avatar/avatar';
+import { PromptSuggestion } from '../prompt/prompt-suggestion';
+import { PromptInput, PromptInputTextarea, PromptInputActions } from '../prompt/prompt-input';
 import {
   FolderPlus, MessageCircleQuestion, Inbox, Search, Sparkles, FileText, ArrowUp, Plus, Upload,
 } from 'lucide-solid';
-import { componentDescription } from '../stories/docs/element-controls';
+import { componentDescription } from '../../stories/docs/element-controls';
 
 /**
  * Story for the compound `Empty` family. `Empty` is the root container; the

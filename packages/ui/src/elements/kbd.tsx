@@ -1,5 +1,5 @@
 import { defineWebComponent } from './define';
-import { Kbd, type KbdPlatform } from '../components/kbd';
+import { Kbd, type KbdPlatform } from '../components/kbd/kbd';
 
 interface Props extends Record<string, unknown> {
   /** Shortcut spec: tokens joined by `+` (e.g. `Mod+Shift+K`). Omit it to show

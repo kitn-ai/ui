@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { WireEncodeError, toAnthropicMessages, toOpenAIMessages } from './encode';
 import { consumeModelStream } from './consume';
 import { readOpenAIStream } from './read';
-import { OPENAI_FIXTURES } from './fixtures/openai';
+import { OPENAI_FIXTURES } from './fixtures/openai/index';
 import { nullSink, replayBytes } from './fixtures/replay';
 import type { AssistantStreamSink, ModelStreamChunk } from './chunk';
 import { appendReasoningPart, appendTextPart, upsertToolPart } from '../state/parts';

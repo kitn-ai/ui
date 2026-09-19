@@ -15,8 +15,8 @@
 import { test, expect, afterEach } from 'vitest';
 import { render } from '@solidjs/testing-library';
 import { createSignal } from 'solid-js';
-import { Slider } from '../../src/components/slider';
-import { SliderWidget, type WidgetProps } from '../../src/components/form-widgets';
+import { Slider } from '../../src/components/slider/slider';
+import { SliderWidget, type WidgetProps } from '../../src/components/form/form-widgets';
 
 afterEach(() => { document.body.innerHTML = ''; });
 

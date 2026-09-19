@@ -1,6 +1,6 @@
 import { Show, createSignal, onCleanup, onMount } from 'solid-js';
 import { cn } from '../utils/cn';
-import { Button } from '../components/button';
+import { Button } from '../components/button/button';
 import { ArrowDown } from 'lucide-solid';
 import { defineWebComponent } from './define';
 
@@ -39,7 +39,7 @@ const DEFAULT_LABEL = 'Scroll to bottom';
 
 /**
  * The floating chip surface. Mirrors `surfaceClasses` in
- * `components/scroll-button.tsx`: the shared `outline` button variant is
+ * `components/scroll/scroll-button.tsx`: the shared `outline` button variant is
  * `bg-muted/50`, half-transparent, so message text showed through a control
  * floating over scrolling content and its edge measured about 1.05:1 against
  * the thread behind it (SC 1.4.11 wants 3:1). `bg-card` is the opaque surface
@@ -147,7 +147,7 @@ defineWebComponent<Props, Events>('kai-scroll-button', {
       aria-label={showLabel() ? undefined : label()}
       // While at the bottom this button is fully transparent and pointer-inert,
       // but it stayed in the tab order — a keyboard user landed on a control
-      // they could not see. Mirrors ScrollButton in components/scroll-button.tsx.
+      // they could not see. Mirrors ScrollButton in components/scroll/scroll-button.tsx.
       tabindex={isAtBottom() ? -1 : 0}
       aria-hidden={isAtBottom() ? 'true' : undefined}
       class={cn(
@@ -164,7 +164,7 @@ defineWebComponent<Props, Events>('kai-scroll-button', {
       }}
     >
       {/* h-4, not the h-5 the chevron used, and the same reasoning as
-          components/scroll-button.tsx: a ChevronDown only inks the lower part of
+          components/scroll/scroll-button.tsx: a ChevronDown only inks the lower part of
           its 24px viewBox, so at a 20px box its visible mass is small, while
           ArrowDown inks the full height (stem + head) and at 20px crowded the
           padding. Re-checked here because this button box is 36px (size="icon")

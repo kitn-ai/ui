@@ -4,9 +4,9 @@ import {
 } from 'solid-js';
 import { Portal } from 'solid-js/web';
 import { ChevronRight, Check } from 'lucide-solid';
-import { cn } from '../utils/cn';
-import { useChatConfig } from '../primitives/chat-config';
-import { createPresence, usePosition, useDismiss, As, type AsTag } from './overlay';
+import { cn } from '../../utils/cn';
+import { useChatConfig } from '../../primitives/chat-config';
+import { createPresence, usePosition, useDismiss, As, type AsTag } from '../overlay/overlay';
 
 interface DropdownCtx {
   open: Accessor<boolean>;

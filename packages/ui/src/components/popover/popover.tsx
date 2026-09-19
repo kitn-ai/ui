@@ -1,7 +1,7 @@
 import { createSignal, Show, type JSX, type Accessor } from 'solid-js';
 import type { Placement } from '@floating-ui/dom';
-import { cn } from '../utils/cn';
-import { createPresence, usePosition, useDismiss } from './overlay';
+import { cn } from '../../utils/cn';
+import { createPresence, usePosition, useDismiss } from '../overlay/overlay';
 
 /** Imperative open controller, handed to a parent (e.g. the kai-popover facade)
  *  via `controllerRef` so it can drive/observe open state. */

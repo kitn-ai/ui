@@ -1,10 +1,10 @@
 import { type JSX, For, createSignal } from 'solid-js';
 import { ChevronUp, ChevronDown, X } from 'lucide-solid';
-import { Switch } from './switch';
-import { Input } from './input';
-import { Button } from './button';
-import { renderIcon } from './icon';
-import type { TriggerDef, TriggerItem } from './composer';
+import { Switch } from '../switch/switch';
+import { Input } from '../input/input';
+import { Button } from '../button/button';
+import { renderIcon } from '../icon/icon';
+import type { TriggerDef, TriggerItem } from '../composer/composer';
 
 /**
  * The composer TRIGGERS control group — `/` (commands/skills) and `@`
@@ -13,7 +13,7 @@ import type { TriggerDef, TriggerItem } from './composer';
  * SAME editor and the SAME real-`TriggerDef` builder, rather than each
  * template inventing its own.
  *
- * THIS WIRES THE KIT'S REAL MECHANISM, NOT A STUB: `components/composer.tsx`
+ * THIS WIRES THE KIT'S REAL MECHANISM, NOT A STUB: `components/composer/composer.tsx`
  * (read before building this) ships `ComposerProps.triggers?: TriggerDef[]`
  * — a real, shipped, atomic-pill trigger system (`TriggerDef = { char, kind,
  * items?: TriggerItem[] }`) that `ChatThread` already forwards straight
@@ -208,7 +208,7 @@ export function ComposerTriggersSection(props: {
         </>
       )}
       <p class="text-xs text-muted-foreground">
-        Real triggers — wired to ChatThread's own `triggers` prop (components/composer.tsx). Typing the character opens the real menu
+        Real triggers — wired to ChatThread's own `triggers` prop (components/composer/composer.tsx). Typing the character opens the real menu
         and inserts a real pill.
       </p>
     </div>

@@ -27,10 +27,11 @@
  */
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { dirname, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 import '../../src/elements/dock';
+import { componentSourcePath } from '../helpers/kit-paths';
 
 const pkgRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -834,11 +835,14 @@ describe('content-agnostic by construction', () => {
     // Spec §10: no knowledge of the slotted content. The residue the rung-1 app keeps
     // (`chat.scrollToBottom` on kai-open-change) is deliberately the CONSUMER's; the
     // seam is the event, never a reach into the slot.
-    for (const file of ['src/elements/dock.tsx', 'src/components/dock.tsx']) {
-      const source = readFileSync(resolve(pkgRoot, file), 'utf8');
+    // The component's own path is resolved by basename; the facade's is fixed
+    // because `src/elements/` is still flat.
+    for (const file of [resolve(pkgRoot, 'src/elements/dock.tsx'), componentSourcePath('dock.tsx')]) {
+      const source = readFileSync(file, 'utf8');
+      const label = relative(pkgRoot, file);
       const code = source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1');
-      expect(code, `${file} must not name kai-chat`).not.toMatch(/kai-chat/);
-      expect(code, `${file} must not reach for scrollToBottom`).not.toMatch(/scrollToBottom/);
+      expect(code, `${label} must not name kai-chat`).not.toMatch(/kai-chat/);
+      expect(code, `${label} must not reach for scrollToBottom`).not.toMatch(/scrollToBottom/);
     }
   });
 });

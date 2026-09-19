@@ -2,9 +2,9 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { fn } from 'storybook/test';
 import { createSignal, Show, For } from 'solid-js';
 import { Popover, type PopoverProps } from './popover';
-import { Switch } from './switch';
-import { Button } from './button';
-import { componentDescription } from '../stories/docs/element-controls';
+import { Switch } from '../switch/switch';
+import { Button } from '../button/button';
+import { componentDescription } from '../../stories/docs/element-controls';
 
 const meta = {
   title: 'Components/Popover',

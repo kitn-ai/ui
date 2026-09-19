@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal } from 'solid-js';
 import { action } from 'storybook/actions';
-import { TasksCard, type TasksCardData } from '../components/tasks-card';
+import { TasksCard, type TasksCardData } from '../components/tasks/tasks-card';
 
 /**
  * `mode: 'progress'` is the onboarding-checklist look on `kai-tasks` (the same

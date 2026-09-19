@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal } from 'solid-js';
 import { fn } from 'storybook/test';
 import { Artifact, type ArtifactFile, type ArtifactTab } from './artifact';
-import { componentDescription } from '../stories/docs/element-controls';
+import { componentDescription } from '../../stories/docs/element-controls';
 
 // Storybook serves examples/artifact-fixtures at /artifact-fixtures.
 const BASE = new URL('artifact-fixtures', document.baseURI).href;

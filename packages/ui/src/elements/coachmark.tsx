@@ -1,5 +1,5 @@
 import { defineWebComponent } from './define';
-import { Coachmark, type CoachmarkController } from '../components/coachmark';
+import { Coachmark, type CoachmarkController } from '../components/coachmark/coachmark';
 import { wireDisclosure } from './disclosure';
 
 interface Props extends Record<string, unknown> {

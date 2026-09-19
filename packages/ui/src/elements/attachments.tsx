@@ -14,7 +14,7 @@ import {
   getMediaCategory,
   type AttachmentData,
   type AttachmentVariant,
-} from '../components/attachments';
+} from '../components/attachments/attachments';
 
 interface Props extends Record<string, unknown> {
   /** The attachments to render. Omit (or pass an empty array) for the empty

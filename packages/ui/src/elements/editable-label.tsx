@@ -1,6 +1,6 @@
 import { createEffect, createSignal, untrack } from 'solid-js';
 import { defineWebComponent } from './define';
-import { EditableLabel } from '../components/editable-label';
+import { EditableLabel } from '../components/editable/editable-label';
 
 interface Props extends Record<string, unknown> {
   /** The label text. Settable and reflected to the `value` attribute. Read

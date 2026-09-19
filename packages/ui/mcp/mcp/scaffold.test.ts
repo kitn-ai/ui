@@ -3395,7 +3395,7 @@ describe('scaffold — solid', () => {
    * The two part kinds that render as a RUN, and the one placement fact that is
    * load-bearing rather than cosmetic.
    *
-   * `components/message.tsx` collapses consecutive `source` parts into ONE
+   * `components/message/message.tsx` collapses consecutive `source` parts into ONE
    * citation row and puts it OUTSIDE the message bubble on purpose: a citation
    * nested in `MessageContent` is indistinguishable from a link the model typed
    * into its own prose. The emitted scaffold has to do the same, or a Solid
