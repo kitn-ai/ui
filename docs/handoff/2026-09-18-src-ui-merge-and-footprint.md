@@ -435,3 +435,37 @@ them already cover the elevation asks that showed up in practice.
 on a pill button in generated consumer code, so scaffolds hand out a shape the kit's own pills no
 longer use. Changing emitted code needs its CSS story checked first (the class only resolves if the
 consumer's Tailwind sees theme.css, which the scaffolds do import).
+
+---
+
+## 10. State of the queue (after phases 1–3)
+
+**Done and verified:** density/spacing token, complete radius ladder, `--radius-pill` (22 sites moved,
+44 circles left alone), `--code-radius`, elevation as one multiplier, the weight ladder, the studio's
+Radius/Density/Pill/Code/Elevation/Weights controls, and the hand-written `.kai-elevation` rules now
+scaling (cards moved with the tint but not the scale — found by asking "where do I see this in the
+builder"). Guarded by jsdom sheet checks, the studio wiring test, and 6 browser tests.
+
+**Next, in the order I would take them:**
+
+1. **Palette defects** (bugs, not features). 8 `dark:text-red-400` and 5 raw success-green
+   occurrences across 10 shipping components — so `--kai-color-destructive` governs light mode only
+   and success has no token at all. 4 test assertions pin the raw class names, so the fix ripples
+   into them. Cheap, and it closes the last hole in "everything is themed".
+2. **`var(--brand)` ×3 in `src/elements/slots.ts`** — a token the kit never declares. Either declare
+   it or point at an existing one.
+3. **Easing** — the last cheap family: `--ease-*` are theme variables and 23 sites use
+   `ease-out`/`linear`/`in-out`. One line per rung.
+4. **A geometry ladder view in the builder** — OPTIONAL, and only from real elements: hand-written
+   demo markup cannot follow these knobs (the studio's own stylesheet is Tailwind's default theme, not
+   the kit's, and importing theme.css would repaint its chrome). Mounting `kai-badge` / `kai-switch` /
+   `kai-avatar` needs sample data for those tags first.
+5. **Recorded skips** — border width (102 sites), ring width/offset (45) and opacity (25) compile to
+   LITERALS, so tokenizing them is per-call-site work, not a rung. Left out deliberately. Duration
+   (7 sites) could go either way.
+6. **Scaffold inconsistency** — `mcp/mcp/tools/scaffold.ts` emits `class="rounded-full"` on a pill
+   button in generated consumer code, which the kit's own pills no longer use. Needs its CSS story
+   checked (the class resolves only if the consumer's Tailwind sees theme.css).
+7. **Hygiene** — `nx build docs` has not been run this session (deploy-time guard for the docs rows
+   and the studio shim), and one earlier full unit run had a single failure that three later runs
+   could not reproduce.
