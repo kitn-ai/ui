@@ -112,24 +112,6 @@ const COMPONENT_SLOTS: Slot[] = [
   { tag: 'kai-attachments', label: 'Attachments' },
 ];
 
-/** Literal box size, so only the shape knobs move these. */
-const SHAPE_RUNGS: { cls: string; label: string }[] = [
-  { cls: 'rounded-sm', label: 'sm' },
-  { cls: 'rounded-md', label: 'md' },
-  { cls: 'rounded-lg', label: 'lg' },
-  { cls: 'rounded-xl', label: 'xl' },
-  { cls: 'rounded-2xl', label: '2xl' },
-  { cls: 'rounded-3xl', label: '3xl' },
-  { cls: 'rounded-pill', label: 'pill' },
-];
-
-/** All three read `calc(var(--spacing) * N)` — that is the demo. */
-const DENSITY_STEPS: { cls: string; label: string }[] = [
-  { cls: 'p-1', label: 'p-1' },
-  { cls: 'p-2', label: 'p-2' },
-  { cls: 'p-4', label: 'p-4' },
-];
-
 /** Shared modal: centered panel + backdrop, portaled to <body> so the editor's
  *  overflow can't clip it. Escape/backdrop close is wired by the caller. */
 function Modal(props: { title: string; onClose: () => void; wide?: boolean; children: JSX.Element }) {
@@ -1381,43 +1363,6 @@ export default function ThemeStudio() {
               <div class="grid gap-3 sm:grid-cols-2">
                 <For each={COMPONENT_SLOTS}>{(s) => <ShowSlot s={s} />}</For>
               </div>
-              {/* Drawn with the kit's own utilities, so this is the real cascade. The
-                  circle is the boundary: `rounded-full` is a literal. */}
-              <div class="flex flex-col gap-3 rounded-xl border p-3" style={{ 'border-color': 'var(--kai-color-border)', color: 'var(--kai-color-foreground)' }} data-token="--kai-radius --kai-radius-pill --kai-code-radius --kai-density">
-                <div class="flex flex-wrap items-baseline gap-2">
-                  <span class="text-xs font-semibold">Geometry</span>
-                  <span class="text-[11px]" style={{ color: 'var(--kai-color-muted-foreground)' }}>Shape: Radius (sm → 3xl), Pill, Code. The circle does not move — it is a circle. Density: padding, gaps, control height and icon size, all from one token.</span>
-                </div>
-                <div class="flex flex-wrap items-end gap-2.5">
-                  <For each={SHAPE_RUNGS}>{(r) => (
-                    <div class="flex flex-col items-center gap-1">
-                      <div class={`size-[3rem] border ${r.cls}`} style={{ 'border-color': 'var(--kai-color-border)', background: 'var(--kai-color-surface)' }} data-token={`--kai-radius* -> ${r.cls}`} />
-                      <span class="font-mono text-[10px]" style={{ color: 'var(--kai-color-muted-foreground)' }}>{r.label}</span>
-                    </div>
-                  )}</For>
-                  <div class="flex flex-col items-center gap-1">
-                    <div class="size-[3rem] rounded-full" style={{ background: 'var(--kai-color-primary)' }} data-token="circle (rounded-full, unreachable)" />
-                    <span class="font-mono text-[10px]" style={{ color: 'var(--kai-color-muted-foreground)' }}>circle</span>
-                  </div>
-                </div>
-                <div class="flex flex-wrap items-end gap-4">
-                  <For each={DENSITY_STEPS}>{(d) => (
-                    <div class="flex flex-col items-center gap-1">
-                      <div class={`${d.cls} border`} style={{ 'border-color': 'var(--kai-color-border)' }} data-token={`--kai-density -> ${d.cls}`}>
-                        <div class="size-4" style={{ background: 'var(--kai-color-primary)' }} />
-                      </div>
-                      <span class="font-mono text-[10px]" style={{ color: 'var(--kai-color-muted-foreground)' }}>{d.label}</span>
-                    </div>
-                  )}</For>
-                  <div class="flex flex-col items-center gap-1">
-                    <div class="flex h-9 items-center rounded-pill border px-3" style={{ 'border-color': 'var(--kai-color-border)' }} data-token="--kai-density -> h-9 --kai-radius-pill -> rounded-pill">
-                      <span class="size-2 rounded-full" style={{ background: 'var(--kai-color-primary)' }} />
-                    </div>
-                    <span class="font-mono text-[10px]" style={{ color: 'var(--kai-color-muted-foreground)' }}>h-9 pill</span>
-                  </div>
-                </div>
-              </div>
-
               {/* Coverage strip — tokens not surfaced at rest, reading the live vars.
                   Status badges are solid + soft pairs (bg-success / bg-success-soft
                   with text-success); the interaction row is hover / selected /
