@@ -1,16 +1,19 @@
 import { describe, expect, it } from 'vitest';
 import meta from '../../src/web-components/web-component-meta.json';
 
-describe('composedFrom story ids', () => {
-  it('points at the SolidJS (advanced) tier path', () => {
+describe('composedFrom', () => {
+  it('carries a name and a group, and NO story id', () => {
+    // The absence is the decision, pinned so it cannot come back by accident. A story
+    // id used to be emitted here (`solid-advanced-<dir>-<name>--docs`) for a Storybook
+    // tier that was retitled on 2026-09-18: no story title matched those slugs, so
+    // every id was a dead link, and nothing read the field (the docs render `name`,
+    // gen-catalog maps `name`, the MCP serves names). Re-adding one turns this red.
     const links = (meta as any[]).flatMap((e) => e.composedFrom);
     expect(links.length).toBeGreaterThan(0);
     for (const l of links) {
-      // The segment is the composed component's SOURCE DIR (gen-web-component-api.mjs), so the
-      // 2026-09-19 rename moved it from `elements` to `web-components`. These ids are SYNTHETIC:
-      // the `Solid (Advanced)/Elements` tier they were minted for no longer exists in any title
-      // (retitled 2026-09-18), so nothing resolves them either way. Pinned as the derived shape.
-      expect(l.storyId).toMatch(/^solid-advanced-(web-components|primitives)-[a-z0-9-]+--docs$/);
+      expect(l).toHaveProperty('name');
+      expect(['Components', 'UI']).toContain(l.group);
+      expect(l).not.toHaveProperty('storyId');
     }
   });
 

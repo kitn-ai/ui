@@ -68,8 +68,7 @@
     "composedFrom": [
       {
         "name": "AgentCard",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-agentcard--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -352,8 +351,7 @@
     "composedFrom": [
       {
         "name": "Artifact",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-artifact--docs"
+        "group": "Components"
       }
     ],
     "tokens": []
@@ -442,48 +440,39 @@
     "composedFrom": [
       {
         "name": "Attachments",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-attachments--docs"
+        "group": "Components"
       },
       {
         "name": "Attachment",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-attachment--docs"
+        "group": "Components"
       },
       {
         "name": "AttachmentPreview",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-attachmentpreview--docs"
+        "group": "Components"
       },
       {
         "name": "AttachmentInfo",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-attachmentinfo--docs"
+        "group": "Components"
       },
       {
         "name": "AttachmentRemove",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-attachmentremove--docs"
+        "group": "Components"
       },
       {
         "name": "AttachmentHoverCard",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-attachmenthovercard--docs"
+        "group": "Components"
       },
       {
         "name": "AttachmentHoverCardTrigger",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-attachmenthovercardtrigger--docs"
+        "group": "Components"
       },
       {
         "name": "AttachmentHoverCardContent",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-attachmenthovercardcontent--docs"
+        "group": "Components"
       },
       {
         "name": "AttachmentEmpty",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-attachmentempty--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -668,8 +657,7 @@
     "composedFrom": [
       {
         "name": "AudioVisualizer",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-audiovisualizer--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -751,8 +739,7 @@
     "composedFrom": [
       {
         "name": "Avatar",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-avatar--docs"
+        "group": "Components"
       }
     ],
     "tokens": []
@@ -787,8 +774,7 @@
     "composedFrom": [
       {
         "name": "Badge",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-badge--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -932,8 +918,7 @@
     "composedFrom": [
       {
         "name": "Button",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-button--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -1069,8 +1054,7 @@
     "composedFrom": [
       {
         "name": "CardSurface",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-cardsurface--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -1233,8 +1217,7 @@
     "composedFrom": [
       {
         "name": "CardFallback",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-cardfallback--docs"
+        "group": "Components"
       }
     ],
     "tokens": []
@@ -1322,8 +1305,7 @@
     "composedFrom": [
       {
         "name": "ChainOfThoughtAccordion",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-chainofthoughtaccordion--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -1846,8 +1828,7 @@
     "composedFrom": [
       {
         "name": "ChatThread",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-chatthread--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -2026,8 +2007,7 @@
     "composedFrom": [
       {
         "name": "Checkbox",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-checkbox--docs"
+        "group": "Components"
       }
     ],
     "tokens": []
@@ -2111,8 +2091,7 @@
     "composedFrom": [
       {
         "name": "CheckboxGroup",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-checkboxgroup--docs"
+        "group": "Components"
       }
     ],
     "tokens": []
@@ -2179,18 +2158,15 @@
     "composedFrom": [
       {
         "name": "Checkpoint",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-checkpoint--docs"
+        "group": "Components"
       },
       {
         "name": "CheckpointIcon",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-checkpointicon--docs"
+        "group": "Components"
       },
       {
         "name": "CheckpointTrigger",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-checkpointtrigger--docs"
+        "group": "Components"
       }
     ],
     "tokens": []
@@ -2313,8 +2289,7 @@
     "composedFrom": [
       {
         "name": "ChoiceCard",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-choicecard--docs"
+        "group": "Components"
       }
     ],
     "tokens": []
@@ -2429,8 +2404,7 @@
     "composedFrom": [
       {
         "name": "Coachmark",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-coachmark--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -2548,13 +2522,11 @@
     "composedFrom": [
       {
         "name": "CodeBlock",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-codeblock--docs"
+        "group": "Components"
       },
       {
         "name": "CodeBlockCode",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-codeblockcode--docs"
+        "group": "Components"
       }
     ],
     "tokens": [
@@ -2662,8 +2634,7 @@
     "composedFrom": [
       {
         "name": "CommandList",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-commandlist--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -2785,8 +2756,7 @@
     "composedFrom": [
       {
         "name": "ResponseCompare",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-responsecompare--docs"
+        "group": "Components"
       }
     ],
     "tokens": []
@@ -2971,8 +2941,7 @@
     "composedFrom": [
       {
         "name": "Composer",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-composer--docs"
+        "group": "Components"
       }
     ],
     "tokens": []
@@ -3067,8 +3036,7 @@
     "composedFrom": [
       {
         "name": "ConfirmCard",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-confirmcard--docs"
+        "group": "Components"
       }
     ],
     "tokens": []
@@ -3128,53 +3096,43 @@
     "composedFrom": [
       {
         "name": "Context",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-context--docs"
+        "group": "Components"
       },
       {
         "name": "ContextTrigger",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-contexttrigger--docs"
+        "group": "Components"
       },
       {
         "name": "ContextContent",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-contextcontent--docs"
+        "group": "Components"
       },
       {
         "name": "ContextContentHeader",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-contextcontentheader--docs"
+        "group": "Components"
       },
       {
         "name": "ContextContentBody",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-contextcontentbody--docs"
+        "group": "Components"
       },
       {
         "name": "ContextContentFooter",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-contextcontentfooter--docs"
+        "group": "Components"
       },
       {
         "name": "ContextInputUsage",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-contextinputusage--docs"
+        "group": "Components"
       },
       {
         "name": "ContextOutputUsage",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-contextoutputusage--docs"
+        "group": "Components"
       },
       {
         "name": "ContextReasoningUsage",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-contextreasoningusage--docs"
+        "group": "Components"
       },
       {
         "name": "ContextCacheUsage",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-contextcacheusage--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -3259,8 +3217,7 @@
     "composedFrom": [
       {
         "name": "SlottedConversationItem",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-slottedconversationitem--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -3486,13 +3443,11 @@
     "composedFrom": [
       {
         "name": "ConversationList",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-conversationlist--docs"
+        "group": "Components"
       },
       {
         "name": "CollapsedRail",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-collapsedrail--docs"
+        "group": "Components"
       }
     ],
     "tokens": [
@@ -3623,8 +3578,7 @@
     "composedFrom": [
       {
         "name": "Dialog",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-dialog--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -3809,18 +3763,15 @@
     "composedFrom": [
       {
         "name": "Dock",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-dock--docs"
+        "group": "Components"
       },
       {
         "name": "DockCloseGlyph",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-dockcloseglyph--docs"
+        "group": "Components"
       },
       {
         "name": "DockLauncherGlyph",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-docklauncherglyph--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -3976,18 +3927,15 @@
     "composedFrom": [
       {
         "name": "Dropdown",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-dropdown--docs"
+        "group": "Components"
       },
       {
         "name": "DropdownTrigger",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-dropdowntrigger--docs"
+        "group": "Components"
       },
       {
         "name": "DropdownContent",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-dropdowncontent--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -4091,8 +4039,7 @@
     "composedFrom": [
       {
         "name": "EditableLabel",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-editablelabel--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -4149,8 +4096,7 @@
     "composedFrom": [
       {
         "name": "Embed",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-embed--docs"
+        "group": "Components"
       }
     ],
     "tokens": []
@@ -4194,33 +4140,27 @@
     "composedFrom": [
       {
         "name": "Empty",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-empty--docs"
+        "group": "Components"
       },
       {
         "name": "EmptyHeader",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-emptyheader--docs"
+        "group": "Components"
       },
       {
         "name": "EmptyMedia",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-emptymedia--docs"
+        "group": "Components"
       },
       {
         "name": "EmptyTitle",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-emptytitle--docs"
+        "group": "Components"
       },
       {
         "name": "EmptyDescription",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-emptydescription--docs"
+        "group": "Components"
       },
       {
         "name": "EmptyContent",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-emptycontent--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -4334,8 +4274,7 @@
     "composedFrom": [
       {
         "name": "FeedbackBar",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-feedbackbar--docs"
+        "group": "Components"
       }
     ],
     "tokens": []
@@ -4405,8 +4344,7 @@
     "composedFrom": [
       {
         "name": "FileTree",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-filetree--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -4496,13 +4434,11 @@
     "composedFrom": [
       {
         "name": "FileUpload",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-fileupload--docs"
+        "group": "Components"
       },
       {
         "name": "FileUploadTrigger",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-fileuploadtrigger--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -4639,8 +4575,7 @@
     "composedFrom": [
       {
         "name": "Form",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-form--docs"
+        "group": "Components"
       }
     ],
     "tokens": []
@@ -4740,18 +4675,15 @@
     "composedFrom": [
       {
         "name": "HoverCardRoot",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-hovercardroot--docs"
+        "group": "Components"
       },
       {
         "name": "HoverCardTrigger",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-hovercardtrigger--docs"
+        "group": "Components"
       },
       {
         "name": "HoverCardContent",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-hovercardcontent--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -4868,8 +4800,7 @@
     "composedFrom": [
       {
         "name": "Image",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-image--docs"
+        "group": "Components"
       }
     ],
     "tokens": []
@@ -5099,8 +5030,7 @@
     "composedFrom": [
       {
         "name": "Input",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-input--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -5186,8 +5116,7 @@
     "composedFrom": [
       {
         "name": "Kbd",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-kbd--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -5251,8 +5180,7 @@
     "composedFrom": [
       {
         "name": "LinkPreview",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-linkpreview--docs"
+        "group": "Components"
       }
     ],
     "tokens": []
@@ -5304,8 +5232,7 @@
     "composedFrom": [
       {
         "name": "Loader",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-loader--docs"
+        "group": "Components"
       }
     ],
     "tokens": []
@@ -5367,8 +5294,7 @@
     "composedFrom": [
       {
         "name": "Markdown",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-markdown--docs"
+        "group": "Components"
       }
     ],
     "tokens": []
@@ -5510,63 +5436,51 @@
     "composedFrom": [
       {
         "name": "Dropdown",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-dropdown--docs"
+        "group": "Components"
       },
       {
         "name": "DropdownTrigger",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-dropdowntrigger--docs"
+        "group": "Components"
       },
       {
         "name": "DropdownContent",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-dropdowncontent--docs"
+        "group": "Components"
       },
       {
         "name": "DropdownItem",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-dropdownitem--docs"
+        "group": "Components"
       },
       {
         "name": "DropdownSeparator",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-dropdownseparator--docs"
+        "group": "Components"
       },
       {
         "name": "DropdownLabel",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-dropdownlabel--docs"
+        "group": "Components"
       },
       {
         "name": "DropdownCheckboxItem",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-dropdowncheckboxitem--docs"
+        "group": "Components"
       },
       {
         "name": "DropdownRadioItem",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-dropdownradioitem--docs"
+        "group": "Components"
       },
       {
         "name": "DropdownSub",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-dropdownsub--docs"
+        "group": "Components"
       },
       {
         "name": "DropdownSubTrigger",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-dropdownsubtrigger--docs"
+        "group": "Components"
       },
       {
         "name": "DropdownSubContent",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-dropdownsubcontent--docs"
+        "group": "Components"
       },
       {
         "name": "Kbd",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-kbd--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -5724,18 +5638,15 @@
     "composedFrom": [
       {
         "name": "Message",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-message--docs"
+        "group": "Components"
       },
       {
         "name": "MessageAvatar",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-messageavatar--docs"
+        "group": "Components"
       },
       {
         "name": "MessageBody",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-messagebody--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -5909,8 +5820,7 @@
     "composedFrom": [
       {
         "name": "ModelSwitcher",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-modelswitcher--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -6010,8 +5920,7 @@
     "composedFrom": [
       {
         "name": "Nav",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-nav--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -6107,8 +6016,7 @@
     "composedFrom": [
       {
         "name": "Notice",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-notice--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -6240,8 +6148,7 @@
     "composedFrom": [
       {
         "name": "Pane",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-pane--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -6351,8 +6258,7 @@
     "composedFrom": [
       {
         "name": "PaneGrid",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-panegrid--docs"
+        "group": "Components"
       }
     ],
     "tokens": []
@@ -6438,8 +6344,7 @@
     "composedFrom": [
       {
         "name": "PaneGroup",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-panegroup--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -6508,23 +6413,19 @@
     "composedFrom": [
       {
         "name": "Panel",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-panel--docs"
+        "group": "Components"
       },
       {
         "name": "PanelBody",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-panelbody--docs"
+        "group": "Components"
       },
       {
         "name": "PanelFooter",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-panelfooter--docs"
+        "group": "Components"
       },
       {
         "name": "PanelHeader",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-panelheader--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -6589,23 +6490,19 @@
     "composedFrom": [
       {
         "name": "Panel",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-panel--docs"
+        "group": "Components"
       },
       {
         "name": "PanelBody",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-panelbody--docs"
+        "group": "Components"
       },
       {
         "name": "PanelFooter",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-panelfooter--docs"
+        "group": "Components"
       },
       {
         "name": "PanelHeader",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-panelheader--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -6738,8 +6635,7 @@
     "composedFrom": [
       {
         "name": "Popover",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-popover--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -6810,8 +6706,7 @@
     "composedFrom": [
       {
         "name": "ProgressBar",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-progressbar--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -6867,8 +6762,7 @@
     "composedFrom": [
       {
         "name": "PromptDock",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-promptdock--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -7129,8 +7023,7 @@
     "composedFrom": [
       {
         "name": "DefaultPromptInput",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-defaultpromptinput--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -7251,8 +7144,7 @@
     "composedFrom": [
       {
         "name": "RadioGroup",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-radiogroup--docs"
+        "group": "Components"
       }
     ],
     "tokens": []
@@ -7364,18 +7256,15 @@
     "composedFrom": [
       {
         "name": "Reasoning",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-reasoning--docs"
+        "group": "Components"
       },
       {
         "name": "ReasoningTrigger",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-reasoningtrigger--docs"
+        "group": "Components"
       },
       {
         "name": "ReasoningContent",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-reasoningcontent--docs"
+        "group": "Components"
       }
     ],
     "tokens": []
@@ -7513,8 +7402,7 @@
     "composedFrom": [
       {
         "name": "ResizableHandle",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-resizablehandle--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -7617,8 +7505,7 @@
     "composedFrom": [
       {
         "name": "ResizableHandle",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-resizablehandle--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -7693,8 +7580,7 @@
     "composedFrom": [
       {
         "name": "ResponseStream",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-responsestream--docs"
+        "group": "Components"
       }
     ],
     "tokens": []
@@ -7751,8 +7637,7 @@
     "composedFrom": [
       {
         "name": "Row",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-row--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -7832,8 +7717,7 @@
     "composedFrom": [
       {
         "name": "RowGroup",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-rowgroup--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -7964,8 +7848,7 @@
     "composedFrom": [
       {
         "name": "ChatScopePicker",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-chatscopepicker--docs"
+        "group": "Components"
       }
     ],
     "tokens": []
@@ -8069,8 +7952,7 @@
     "composedFrom": [
       {
         "name": "Screen",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-screen--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -8144,8 +8026,7 @@
     "composedFrom": [
       {
         "name": "ScrollArea",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-scrollarea--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -8234,8 +8115,7 @@
     "composedFrom": [
       {
         "name": "Button",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-button--docs"
+        "group": "Components"
       }
     ],
     "tokens": []
@@ -8345,18 +8225,15 @@
     "composedFrom": [
       {
         "name": "Input",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-input--docs"
+        "group": "Components"
       },
       {
         "name": "Kbd",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-kbd--docs"
+        "group": "Components"
       },
       {
         "name": "Loader",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-loader--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -8435,8 +8312,7 @@
     "composedFrom": [
       {
         "name": "Segmented",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-segmented--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -8564,8 +8440,7 @@
     "composedFrom": [
       {
         "name": "Select",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-select--docs"
+        "group": "Components"
       }
     ],
     "tokens": []
@@ -8600,8 +8475,7 @@
     "composedFrom": [
       {
         "name": "Separator",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-separator--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -8651,8 +8525,7 @@
     "composedFrom": [
       {
         "name": "SettingItem",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-settingitem--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -8714,8 +8587,7 @@
     "composedFrom": [
       {
         "name": "SettingsGroup",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-settingsgroup--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -8793,8 +8665,7 @@
     "composedFrom": [
       {
         "name": "Skeleton",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-skeleton--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -8839,8 +8710,7 @@
     "composedFrom": [
       {
         "name": "MessageSkills",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-messageskills--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -8960,8 +8830,7 @@
     "composedFrom": [
       {
         "name": "Slider",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-slider--docs"
+        "group": "Components"
       }
     ],
     "tokens": []
@@ -9031,23 +8900,19 @@
     "composedFrom": [
       {
         "name": "Source",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-source--docs"
+        "group": "Components"
       },
       {
         "name": "SourceTrigger",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-sourcetrigger--docs"
+        "group": "Components"
       },
       {
         "name": "SourceContent",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-sourcecontent--docs"
+        "group": "Components"
       },
       {
         "name": "SourceList",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-sourcelist--docs"
+        "group": "Components"
       }
     ],
     "tokens": []
@@ -9103,23 +8968,19 @@
     "composedFrom": [
       {
         "name": "Source",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-source--docs"
+        "group": "Components"
       },
       {
         "name": "SourceTrigger",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-sourcetrigger--docs"
+        "group": "Components"
       },
       {
         "name": "SourceContent",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-sourcecontent--docs"
+        "group": "Components"
       },
       {
         "name": "SourceList",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-sourcelist--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -9194,8 +9055,7 @@
     "composedFrom": [
       {
         "name": "Status",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-status--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -9288,8 +9148,7 @@
     "composedFrom": [
       {
         "name": "PromptSuggestion",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-promptsuggestion--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -9394,8 +9253,7 @@
     "composedFrom": [
       {
         "name": "Switch",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-switch--docs"
+        "group": "Components"
       }
     ],
     "tokens": []
@@ -9564,8 +9422,7 @@
     "composedFrom": [
       {
         "name": "TabBarItemContent",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-tabbaritemcontent--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -9677,8 +9534,7 @@
     "composedFrom": [
       {
         "name": "Tabs",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-tabs--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -9829,8 +9685,7 @@
     "composedFrom": [
       {
         "name": "TasksCard",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-taskscard--docs"
+        "group": "Components"
       }
     ],
     "tokens": []
@@ -9892,8 +9747,7 @@
     "composedFrom": [
       {
         "name": "TextShimmer",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-textshimmer--docs"
+        "group": "Components"
       }
     ],
     "tokens": []
@@ -9953,8 +9807,7 @@
     "composedFrom": [
       {
         "name": "ThinkingBar",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-thinkingbar--docs"
+        "group": "Components"
       }
     ],
     "tokens": []
@@ -10083,8 +9936,7 @@
     "composedFrom": [
       {
         "name": "Thread",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-thread--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -10195,8 +10047,7 @@
     "composedFrom": [
       {
         "name": "ToastRegion",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-toastregion--docs"
+        "group": "Components"
       }
     ],
     "tokens": []
@@ -10283,8 +10134,7 @@
     "composedFrom": [
       {
         "name": "Tool",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-tool--docs"
+        "group": "Components"
       }
     ],
     "tokens": [
@@ -10398,8 +10248,7 @@
     "composedFrom": [
       {
         "name": "Tooltip",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-tooltip--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -10636,8 +10485,7 @@
     "composedFrom": [
       {
         "name": "VoiceInput",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-voiceinput--docs"
+        "group": "Components"
       }
     ],
     "tokens": []
@@ -10742,8 +10590,7 @@
     "composedFrom": [
       {
         "name": "VoiceOutput",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-voiceoutput--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],
@@ -10864,8 +10711,7 @@
     "composedFrom": [
       {
         "name": "WorkspaceShell",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-workspaceshell--docs"
+        "group": "Components"
       }
     ],
     "tokens": [],

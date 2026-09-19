@@ -640,12 +640,16 @@ for (const file of facadeFiles) {
 }
 elements.sort((a, b) => a.tag.localeCompare(b.tag));
 
-// Resolve story ids for composedFrom entries (after the loop so all elements are collected).
+// NO storyId. A SYNTHETIC story id used to be emitted here
+// (`solid-advanced-<source-dir>-<kebab-name>--docs`) for a Storybook tier that was
+// retitled on 2026-09-18 and whose titles no longer exist in any story file, so every
+// one of those ids was a dead link; and nothing read the field: the docs site's
+// ComposedFrom.astro renders `name`, gen-catalog maps `name` into derived.json, and the
+// MCP serves names. A link-shaped value in a PUBLISHED artifact that resolves to
+// nothing is worse than no field, because a consumer can spend an afternoon on it.
+// Deleting it is the fix; tests/scripts/composed-from.test.ts pins the absence.
 for (const el of elements) {
-  el.composedFrom = el.composedFrom.map(({ name, group }) => {
-    const seg = group === 'UI' ? 'primitives' : 'web-components';
-    return { name, group, storyId: `solid-advanced-${seg}-${kebabId(name)}--docs` };
-  });
+  el.composedFrom = el.composedFrom.map(({ name, group }) => ({ name, group }));
 }
 
 // ---- attach composition seams (slots + ::part) from the slots.ts registry ----

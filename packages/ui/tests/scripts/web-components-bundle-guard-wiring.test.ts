@@ -70,9 +70,17 @@ const tree = (over: Record<string, string | null> = {}) => ({
   'package.json': JSON.stringify({
     sideEffects: ['**/*.css', './dist/kai.es.js', './dist/register-impl-*.js', './dist/web-components/*.js'],
   }),
-  'src/web-components/web-component-manifest.json': JSON.stringify({ tags: Object.fromEntries(TAGS.map((t) => [t, {}])) }),
+  // The real shape: tag -> module BASENAME, which is the file the autoloader fetches
+  // from dist/web-components/. It used to be tag -> {}, a shape no build produces, so
+  // the guard could read the map without ever resolving it.
+  'src/web-components/web-component-manifest.json': JSON.stringify({
+    tags: Object.fromEntries(TAGS.map((t) => [t, t.replace(/^kai-/, '')])),
+  }),
   'dist/kai.es.js': 'export const webComponentsReady = import("./register-impl-abc123.js");\n',
   'dist/register-impl-abc123.js': CHUNK,
+  // One emitted module per tag: the guard checks these exist, because a missing one is
+  // a 404 in a consumer's page when the autoloader fetches it.
+  ...Object.fromEntries(TAGS.map((t) => [`dist/web-components/${t.replace(/^kai-/, '')}.js`, 'export {};\n'])),
   ...over,
 });
 
