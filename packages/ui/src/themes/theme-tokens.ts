@@ -139,7 +139,7 @@ export const EXTRA_TOKENS = [
   // p-*/m-*/gap-*/size-* family. Reachable from the editor for the same reason
   // the colour knobs are — a denser or airier product is a taste decision, and it
   // should not require a class-override surface to express.
-  '--kai-spacing',
+  '--kai-density',
   '--kai-font-base',
   '--kai-font-code',
   '--kai-tracking',

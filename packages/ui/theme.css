@@ -15,9 +15,9 @@
        prefers-color-scheme to the `.dark` class.
      - the `--color-*` names merge into their @theme (last import wins).
      - `--radius-sm/md/lg/xl` re-point Tailwind's stock radius scale at --radius.
-     - `--spacing` re-points Tailwind's whole spacing scale at --kai-spacing
+     - `--spacing` re-points Tailwind's whole spacing scale at --kai-density
        (stock Tailwind's 0.25rem is the fallback, so nothing moves until a
-       --kai-spacing token is set). Every numeric spacing utility is
+       --kai-density token is set). Every numeric spacing utility is
        `calc(var(--spacing) * N)`, so this ONE line moves p-*, m-*, gap-*, h-*,
        size-*, space-y-* and the offsets (top-*, -mt-*, translate-*) together:
        density, not merely padding. size-* is the one to think about — icons
@@ -208,7 +208,7 @@
      had, or every upgrade shifts every layout. `tests/styles/geometry-tokens.test.ts`
      pins that equality and the :host emission, and
      `tests/e2e/geometry-token.spec.ts` proves the resolution in a real browser. */
-  --spacing: var(--kai-spacing, 0.25rem);
+  --spacing: var(--kai-density, 0.25rem);
 
   /* Typography scale — ONE scale for the whole kit. Each semantic name
      (text-micro / text-caption / text-meta / text-compact / text-body /

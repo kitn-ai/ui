@@ -38,7 +38,7 @@ interface Family {
   fallback: string;
 }
 
-const FAMILIES: Family[] = [{ kai: '--kai-spacing', tw: '--spacing', fallback: '0.25rem' }];
+const FAMILIES: Family[] = [{ kai: '--kai-density', tw: '--spacing', fallback: '0.25rem' }];
 
 const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 

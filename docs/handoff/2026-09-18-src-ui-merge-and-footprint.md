@@ -277,28 +277,31 @@ React and Solid probes are the cheapest next win — the mechanism (`EAGER_PROBE
 
 ---
 
-## 7. §2.1 phase 1 landed: `--kai-spacing` (density), and the mechanism it proves
+## 7. §2.1 phase 1 landed: `--kai-density`, and the mechanism it proves
 
-**What shipped.** `theme.css` now declares `--spacing: var(--kai-spacing, 0.25rem)`; the editor
-catalog and the theme studio carry the knob; the docs tables were updated in the same change.
+**What shipped.** `theme.css` declares `--spacing: var(--kai-density, 0.25rem)`; the editor catalog
+and the theme studio carry the knob; the docs tables were updated in the same change. The token was
+briefly called `--kai-spacing` and renamed to `--kai-density` before anything shipped — see the last
+paragraph of this section for why that name was wrong.
 
 **The mechanism, now proven rather than asserted.** Tailwind emits its `@theme` block as
 `:root,:host{...}`, so the compiled sheet declares `--spacing` ON THE HOST ELEMENT. A declaration on
 the element beats an inherited value, which is why `:root { --spacing: 1rem }` — the variable a
 consumer naturally reaches for — moved nothing and said nothing. What makes a token overridable is
-the sheet READING it (`--spacing: var(--kai-spacing, …)`), which is the shape `--radius` has always
+the sheet READING it (`--spacing: var(--kai-density, …)`), which is the shape `--radius` has always
 had. Both halves are pinned in a real Chromium now, including the negative one
 (`tests/e2e/geometry-token.spec.ts`, project `geometry-token`, `npm run test:geometry-token`).
 
-**`--kai-spacing` is a DENSITY knob, not "whitespace".** This is the one thing to understand before
-touching it. Every numeric spacing utility is `calc(var(--spacing) * N)`, so the single token drives
-padding and margins and gaps (the design sense of spacing) AND control heights (`h-9`), icon sizes
-(`size-4`) and the offset/motion utilities (`top-2`, `-mt-1`, `translate-x-0.5`). In shipping source
-the split is roughly 733 whitespace / 203 size / 59 offset occurrences. Mature density scales move
-these together on purpose; the NAME is what over-promises. OPEN DECISION, not taken: rename to
-`--kai-density` while nothing has shipped (cost: one commit across ~8 files), or keep `--kai-spacing`
-with the scope documented in `theme.css`'s header and `guides/theming.mdx` (both now say it moves
-`size-*` too). Do not silently split space-only tokens: that is ~203 re-authored call sites.
+**`--kai-density` moves more than whitespace, which is why it is not called `--kai-spacing`.** Every
+numeric spacing utility is `calc(var(--spacing) * N)`, so the single token drives padding and margins
+and gaps (the design sense of "spacing") AND control heights (`h-9`), icon sizes (`size-4`) and the
+offset/motion utilities (`top-2`, `-mt-1`, `translate-x-0.5`). In shipping source the split is
+roughly 733 whitespace / 203 size / 59 offset occurrences. Mature density scales move these together
+on purpose, so the knob is right; `--kai-spacing` was the wrong NAME, because in design vocabulary
+spacing is empty area around and between elements and nothing else — a consumer setting it for
+breathing room would have been surprised by smaller icons. Renamed 2026-09-19, while the only
+consumers were this branch's own tests. Do not silently split space-only tokens from size ones
+either: that is ~203 re-authored call sites.
 
 **Guards added** (each mutation-proved, i.e. shown to fail when the thing it guards is removed):
 `tests/styles/geometry-tokens.test.ts` (source declaration, the `:host` selector in the COMPILED

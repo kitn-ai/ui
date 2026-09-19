@@ -215,7 +215,7 @@ export default defineConfig({
        *
        * The question it answers is the one that separates "the kit has a theme
        * surface" from "the kit's theme surface works": does a consumer's
-       * `:root { --kai-spacing: ... }` actually move geometry inside a shadow root?
+       * `:root { --kai-density: ... }` actually move geometry inside a shadow root?
        * Only the real cascade can say, which is why this drives the built bundle in
        * the bare, Tailwind-free harness rather than asserting class names in jsdom —
        * same reasoning as the three guards above.
