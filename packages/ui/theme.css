@@ -194,48 +194,25 @@
   --color-tool-green: var(--kai-color-tool-green, hsl(142 71% 26%));
   --color-tool-red: var(--kai-color-tool-red, hsl(0 72% 42%));
 
-  /* Radius ladder. EVERY rung is derived from --radius, and that completeness is
-     the point rather than tidiness: Tailwind's `--radius-2xl` and `-3xl` are
-     their OWN stock values (1rem, 1.5rem), so before these two lines existed a
-     component spelled `rounded-2xl` ignored --kai-radius entirely -- the knob
-     worked on the cards tab and silently did nothing to a message bubble. A new
-     rung added here without adding a line is the same defect one size up, which
-     is what tests/styles/geometry-tokens.test.ts now derives and checks.
-
-     `rounded-full` is NOT on this ladder and cannot be: Tailwind compiles it to a
-     literal 3.40282e38px, so no custom property can reach it. Surfaces that are
-     semantically a rounded RECTANGLE with round caps (pills, badges, chips) would
-     have to be re-authored to an arbitrary value to follow the knob, and
-     genuinely circular things (avatars, dots, rings, spinners) must NOT. */
-  /* ELEVATION. One knob for the whole shadow family, because the family is one
-     idea: how present is elevation in this product? Each rung is Tailwind's own
-     default geometry with its lengths scaled by --kai-shadow-strength (offsets and
-     blur; the spread stays literal, being a shape refinement rather than depth).
-     At the default strength of 1 every expression evaluates to exactly Tailwind's
-     value, so nothing moves until a consumer sets it.
-
-     WHY A MULTIPLIER RATHER THAN SEVEN TOKENS: seven knobs for one decision is
-     seven chances to make an incoherent theme, and "flat" is the value people
-     actually want (a flat product sets one number to 0). The rungs below are
-     copied from tailwindcss/theme.css rather than retyped from memory — a
-     fallback that differed from Tailwind's would move every card on upgrade. */
+  /* Every rung derives from --radius. A rung left at Tailwind's stock value is a
+     component that silently ignores the knob (`rounded-2xl` did, before these).
+     `rounded-full` cannot be here: it compiles to a literal 3.40282e38px. */
+  /* Elevation is ONE multiplier, not seven tokens: "flat" is one value, and seven
+     knobs for one decision invite incoherent themes. Defaults are copied from
+     tailwindcss/theme.css, so at strength 1 nothing moves. */
   --shadow-2xs: 0 calc(1px * var(--kai-shadow-strength, 1)) rgb(0 0 0 / 0.05);
   --shadow-xs: 0 calc(1px * var(--kai-shadow-strength, 1)) calc(2px * var(--kai-shadow-strength, 1)) 0 rgb(0 0 0 / 0.05);
   --shadow-sm: 0 calc(1px * var(--kai-shadow-strength, 1)) calc(3px * var(--kai-shadow-strength, 1)) 0 rgb(0 0 0 / 0.1), 0 calc(1px * var(--kai-shadow-strength, 1)) calc(2px * var(--kai-shadow-strength, 1)) -1px rgb(0 0 0 / 0.1);
-  /* Bare `shadow` is the one the kit uses most (82 call sites against 13 for every
-     named rung together), and it reads this key rather than `--shadow-sm`, which is
-     why it is declared separately even though the two values are equal. */
+  /* Bare `shadow` reads this key, not `--shadow-sm` — 82 call sites, so it is
+     declared separately even though the values are equal. */
   --shadow: 0 calc(1px * var(--kai-shadow-strength, 1)) calc(3px * var(--kai-shadow-strength, 1)) 0 rgb(0 0 0 / 0.1), 0 calc(1px * var(--kai-shadow-strength, 1)) calc(2px * var(--kai-shadow-strength, 1)) -1px rgb(0 0 0 / 0.1);
   --shadow-md: 0 calc(4px * var(--kai-shadow-strength, 1)) calc(6px * var(--kai-shadow-strength, 1)) -1px rgb(0 0 0 / 0.1), 0 calc(2px * var(--kai-shadow-strength, 1)) calc(4px * var(--kai-shadow-strength, 1)) -2px rgb(0 0 0 / 0.1);
   --shadow-lg: 0 calc(10px * var(--kai-shadow-strength, 1)) calc(15px * var(--kai-shadow-strength, 1)) -3px rgb(0 0 0 / 0.1), 0 calc(4px * var(--kai-shadow-strength, 1)) calc(6px * var(--kai-shadow-strength, 1)) -4px rgb(0 0 0 / 0.1);
   --shadow-xl: 0 calc(20px * var(--kai-shadow-strength, 1)) calc(25px * var(--kai-shadow-strength, 1)) -5px rgb(0 0 0 / 0.1), 0 calc(8px * var(--kai-shadow-strength, 1)) calc(10px * var(--kai-shadow-strength, 1)) -6px rgb(0 0 0 / 0.1);
   --shadow-2xl: 0 calc(25px * var(--kai-shadow-strength, 1)) calc(50px * var(--kai-shadow-strength, 1)) -12px rgb(0 0 0 / 0.25);
 
-  /* FONT WEIGHTS, the last family Tailwind routes through theme variables. Four
-     rungs, each its own knob: a weight ladder is not one number (a product that
-     wants a heavier SEMIBOLD almost never wants a heavier normal too), so unlike
-     elevation this is exposed rung by rung. Defaults are Tailwind's own, so the
-     kit renders identically until a token is set. */
+  /* One knob per weight rung: wanting a heavier semibold rarely means wanting a
+     heavier normal. Defaults are Tailwind's. */
   --font-weight-normal: var(--kai-weight-normal, 400);
   --font-weight-medium: var(--kai-weight-medium, 500);
   --font-weight-semibold: var(--kai-weight-semibold, 600);
@@ -249,60 +226,21 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
 
-  /* The PILL rung. Tailwind compiles `rounded-full` to a literal
-     `3.40282e38px`, so no custom property can reach it, and the kit's pills --
-     badges, chips, tags, switch tracks, count bubbles, progress tracks, toast
-     caps -- could not be squared off with the rest of the shape system. This
-     rung is what they read instead, declared in the `--radius-*` namespace so
-     Tailwind generates the `rounded-pill` utility with no @utility rule needed.
-
-     ITS DEFAULT IS 4rem RATHER THAN Tailwind's huge literal, and that is an
-     equivalence rather than an approximation to be tolerated: border-radius
-     clamps to half the box, so 4rem (64px) is fully round on every box up to 8rem
-     (128px) tall. That margin is deliberately wider than the kit's own pills
-     (badges, chips, tracks, toast caps — all far under it) because a pill can be
-     CONSUMER-sized: `builder-skeleton.tsx` takes a `heightClass` from the caller
-     and the audio-visualizer bars are amplitude-driven, so 2rem would have left a
-     tall bar with visibly round-but-not-full caps while `rounded-full` never
-     would. A consumer needing a full cap above 8rem sets the token higher; the
-     default only has to be right for every pill the kit ships.
-
-     It buys a usable slider range: `remValue` in the theme editor requires a rem
-     literal, and a 3.4e38 sentinel cannot be dragged.
-
-     4rem derived from a token is also what makes SQUARE themes coherent -- a
-     consumer who sets `--kai-radius: 0` gets square cards AND square badges,
-     instead of square cards with round pills, which is the mismatch this rung
-     exists to close. A consumer who wants round pills over square cards sets
-     `--kai-radius-pill` back up on its own. The default moves nothing visually:
-     pills look exactly as they did under `rounded-full`. */
+  /* `rounded-full` cannot read a token, so badges/chips/tracks read this rung and
+     Tailwind generates `rounded-pill` from the namespace. 4rem not Tailwind's
+     3.4e38: radius clamps to half the box, so 4rem is fully round to 8rem tall
+     (covers caller-sized pills), and the editor needs a rem literal it can drag. */
   --radius-pill: var(--kai-radius-pill, 4rem);
 
-  /* The code surface's corner. NOT on the radius ladder on purpose: a code block
-     inside a card wants a value of its own, and it was already a token
-     (`--kai-code-radius`) that the theme editor could not see because theme.css
-     never named it -- so `code-block.tsx` read a token no consumer-facing surface
-     could set. Declared here, it becomes a knob like every other. */
+  /* Its own corner rather than a rung: a code block inside a card wants a value of
+     its own. The token existed but theme.css never named it, so nothing could set it. */
   --code-radius: var(--kai-code-radius, 0.75rem);
 
-  /* SPACING — the widest-reaching geometry family, and the one the kit left
-     un-tokenized until now. Every `p-*` / `m-*` / `gap-*` / `w-*` / `h-*`
-     utility Tailwind generates is `calc(var(--spacing) * N)`, so ONE token here
-     moves every one of those call sites.
-
-     It is declared in this @theme block for the same reason the colours above
-     are: Tailwind emits the block as `:root,:host{...}`, and the `:host` half is
-     what lets the value cross a shadow boundary. A consumer's bare
-     `:root{--spacing: 1rem}` does NOT work — the sheet's own `:host` declaration
-     is a value on the host itself, so it beats the inherited one, and the
-     consumer ends up with a file that themes nothing. Re-pointing the variable
-     here is the difference between "overridable" and "silently ignored".
-
-     The fallback is Tailwind's own default for `--spacing`, deliberately: a
-     consumer who overrides nothing must get exactly the geometry they already
-     had, or every upgrade shifts every layout. `tests/styles/geometry-tokens.test.ts`
-     pins that equality and the :host emission, and
-     `tests/e2e/geometry-token.spec.ts` proves the resolution in a real browser. */
+  /* Every padding, margin, gap and size utility is `calc(var(--spacing) * N)`, so
+     this one token moves the whole kit's density. Declared here because Tailwind
+     emits the @theme block as `:root,:host{...}` — a consumer's own
+     `:root{--spacing}` loses to the sheet's `:host` declaration in a shadow root.
+     Fallback is Tailwind's default, so nothing moves unless it is set. */
   --spacing: var(--kai-density, 0.25rem);
 
   /* Typography scale — ONE scale for the whole kit. Each semantic name
@@ -462,19 +400,17 @@
 .chat-markdown th, .chat-markdown td { border: 1px solid var(--color-border); padding: 0.4em 0.6em; text-align: left; }
 .chat-markdown th { font-weight: 600; background: color-mix(in oklab, var(--color-muted-foreground) 8%, transparent); }
 
-/* Themeable elevation. The kit is mostly flat (borders), but a few surfaces lift
-   off the page — popovers, dropdowns, hover cards, cards. The shadow COLOR is a
-   token (--kai-shadow-color, default near-black); set it transparent for a fully
-   flat look, or tint it to match a theme. Defined here (not as a Tailwind shadow
-   utility) so the color stays overridable and works in both the web-component and
-   SolidJS layers. */
+/* Lifted surfaces (cards, popovers, dropdowns). Hand-written so the shadow COLOR
+   stays a token; geometry scaled by --kai-shadow-strength like the rungs, or the
+   Elevation control would do nothing here. Focus rings are deliberately not scaled:
+   a flat theme still has to show where focus is. */
 .kai-elevation {
   box-shadow:
-    0 4px 12px -2px color-mix(in oklab, var(--kai-shadow-color, oklch(0 0 0)) 14%, transparent),
-    0 2px 6px -2px color-mix(in oklab, var(--kai-shadow-color, oklch(0 0 0)) 10%, transparent);
+    0 calc(4px * var(--kai-shadow-strength, 1)) calc(12px * var(--kai-shadow-strength, 1)) -2px color-mix(in oklab, var(--kai-shadow-color, oklch(0 0 0)) 14%, transparent),
+    0 calc(2px * var(--kai-shadow-strength, 1)) calc(6px * var(--kai-shadow-strength, 1)) -2px color-mix(in oklab, var(--kai-shadow-color, oklch(0 0 0)) 10%, transparent);
 }
 .kai-elevation-sm {
-  box-shadow: 0 1px 2px 0 color-mix(in oklab, var(--kai-shadow-color, oklch(0 0 0)) 8%, transparent);
+  box-shadow: 0 calc(1px * var(--kai-shadow-strength, 1)) calc(2px * var(--kai-shadow-strength, 1)) 0 color-mix(in oklab, var(--kai-shadow-color, oklch(0 0 0)) 8%, transparent);
 }
 
 /* Cross-platform thin scrollbar utility (Firefox + WebKit). Used by ScrollArea

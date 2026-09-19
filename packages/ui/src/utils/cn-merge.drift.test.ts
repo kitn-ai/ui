@@ -77,13 +77,9 @@ const oracle = extendTailwindMerge({
   extend: {
     classGroups: {
       'font-size': [{ text: ['micro', 'caption', 'meta', 'compact', 'body', 'title'] }],
-      // Kit-ADDED rungs have to be taught to the oracle, and `rounded-pill` is one:
-      // tailwind-merge does not know `pill` (it is the kit's own rung for the shapes
-      // Tailwind hardcodes as `rounded-full`), so left untaught it treats the class as
-      // unknown and reports NO conflict against `rounded-lg` — while the kit's merger
-      // correctly keys both into `radius`. The drift then reads as a merger bug when in
-      // fact the oracle is the side that is behind, which is the failure this line
-      // prevents rather than papers over. Same argument as the font-size aliases above.
+      // Kit-added rungs must be taught to the oracle: tailwind-merge does not know
+      // `pill`, so it reports no conflict with `rounded-lg` while the kit's merger
+      // keys both into `radius` — otherwise this reads as a merger bug.
       rounded: [{ rounded: ['pill'] }],
     },
   },

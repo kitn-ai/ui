@@ -112,10 +112,7 @@ const COMPONENT_SLOTS: Slot[] = [
   { tag: 'kai-attachments', label: 'Attachments' },
 ];
 
-/** The shape ladder the Geometry strip below draws. Boxes are a LITERAL size
- *  (`size-[3rem]`) rather than a spacing utility, so only the shape knobs can move
- *  them: a strip that resized itself when Density changed would not be able to say
- *  which knob did what. */
+/** Literal box size, so only the shape knobs move these. */
 const SHAPE_RUNGS: { cls: string; label: string }[] = [
   { cls: 'rounded-sm', label: 'sm' },
   { cls: 'rounded-md', label: 'md' },
@@ -126,10 +123,7 @@ const SHAPE_RUNGS: { cls: string; label: string }[] = [
   { cls: 'rounded-pill', label: 'pill' },
 ];
 
-/** The density ladder: every one of these reads `calc(var(--spacing) * N)`, so a
- *  single slider moves padding, control height and icon size together — which is
- *  the whole point of the Density knob and the thing a reader has to SEE to
- *  believe, since `p-*` is where they expect it and `size-*` is not. */
+/** All three read `calc(var(--spacing) * N)` — that is the demo. */
 const DENSITY_STEPS: { cls: string; label: string }[] = [
   { cls: 'p-1', label: 'p-1' },
   { cls: 'p-2', label: 'p-2' },
@@ -165,24 +159,16 @@ const kitDefault = (token: string, mode: 'light' | 'dark'): string => {
   return d[mode];
 };
 const DEFAULT_RADIUS = remValue(kitDefault('--kai-radius', 'light')); // rem
-/** Tailwind's own `--spacing` default, read out of theme.css rather than typed
- *  here as 0.25: a hardcoded default that disagreed with theme.css would move
- *  every `p-*` / `gap-*` / `size-*` in the kit the moment the file changed. */
+/** Density default, read from theme.css (0.25rem = Tailwind's own). */
 const DEFAULT_DENSITY = remValue(kitDefault('--kai-density', 'light')); // rem
-/** The pill family's corner, read out of theme.css like the rest. The default
- *  there is deliberately generous — fully round on any box up to 8rem tall, which
- *  covers consumer-sized pills (`builder-skeleton`'s caller-chosen height, the
- *  amplitude-driven audio bars) and not just the kit's own badges. */
+/** Pill default from theme.css: 4rem, i.e. fully round up to 8rem tall. */
 const DEFAULT_PILL = remValue(kitDefault('--kai-radius-pill', 'light')); // rem
 /** The code surface's own corner. Separate from the radius ladder by design. */
 const DEFAULT_CODE_RADIUS = remValue(kitDefault('--kai-code-radius', 'light')); // rem
-/** Elevation strength: a MULTIPLIER, so it is parsed as a plain number rather than a
- *  rem value. theme.css scales every shadow rung's lengths by it, which is what lets
- *  one knob cover the whole family — and what makes "Flat" a single value. */
+/** Elevation multiplier — unitless, so parsed as a number rather than rem. */
 const DEFAULT_ELEVATION = Number.parseFloat(kitDefault('--kai-shadow-strength', 'light'));
 
-/** The weight rungs the Typography tab exposes, each its own knob: a weight ladder is
- *  not one number (see theme.css). */
+/** One knob per rung: a heavier semibold rarely means a heavier normal. */
 const WEIGHT_RUNGS = [
   { name: 'normal', token: '--kai-weight-normal', label: 'Normal' },
   { name: 'medium', token: '--kai-weight-medium', label: 'Medium' },
@@ -190,24 +176,16 @@ const WEIGHT_RUNGS = [
   { name: 'bold', token: '--kai-weight-bold', label: 'Bold' },
 ] as const;
 type WeightName = (typeof WEIGHT_RUNGS)[number]['name'];
-/** A weight rung's default, from theme.css. Unitless, so not `remValue`. */
+/** Unitless — not `remValue`. */
 const weightDef = (name: WeightName): number => Number.parseFloat(kitDefault(`--kai-weight-${name}`, 'light'));
 type WeightScale = Record<WeightName, number>;
 const seedWeights = (): WeightScale =>
   Object.fromEntries(WEIGHT_RUNGS.map((r) => [r.name, weightDef(r.name)])) as WeightScale;
 const WEIGHT_VALUES = [100, 200, 300, 400, 500, 600, 700, 800, 900];
 
-/**
- * Named STEPS for Density, not a slider, and the reason is a real one: the slider's
- * extremes are not designs. 0 collapses every `p-*` / `gap-*` / `size-*` in the kit
- * into itself — labels overlap, controls fuse, badges vanish — and 0.75rem fights
- * every layout the kit ships. A slider invites the user to walk into both and judge
- * the kit by them. These five are ±25% around Tailwind's own 0.25rem step: enough to
- * change how a product feels, not enough to break one.
- *
- * A value that is NOT one of these still renders, as "Custom" — an imported or saved
- * theme is never silently snapped to a nearby step, because that would edit the
- * user's file. */
+/** Steps, not a free slider: 0 collapses the kit's spacing and 0.75rem fights every
+ *  layout, so the range only offers bad choices. ±25% around Tailwind's 0.25rem. A
+ *  value outside these renders as Custom rather than being snapped. */
 const DENSITY_CHOICES: { label: string; value: number }[] = [
   { label: 'Very tight', value: 0.1875 },
   { label: 'Tight', value: 0.21875 },
@@ -216,9 +194,7 @@ const DENSITY_CHOICES: { label: string; value: number }[] = [
   { label: 'Very loose', value: 0.3125 },
 ];
 
-/** Elevation steps, same argument as Density: below 0 there is nothing to choose, and
- *  past ~2x every surface shouts. "Flat" is the one designers actually ask for, and it
- *  is one click rather than a hunt. */
+/** Same argument as Density: past ~2x every surface shouts. */
 const ELEVATION_CHOICES: { label: string; value: number }[] = [
   { label: 'Flat', value: 0 },
   { label: 'Subtle', value: 0.5 },
@@ -478,8 +454,7 @@ const isRail = (): boolean =>
 
 interface ThemeExtras { radius: number; density: number; pill: number; codeRadius: number; elevation: number; weights: WeightScale; fontBase: string; fontCode: string; tracking: number; shadow: string; text: TextScale }
 
-/** Build paste-ready CSS: full light set on :root (+ radius/density/pill/code/
- *  elevation/weights/type scale/font/tracking/shadow), dark set on .dark. */
+/** Paste-ready CSS: the light set on :root, the dark set on .dark. */
 function buildCss(light: Palette, dark: Palette, x: ThemeExtras): string {
   const rootExtra = [
     `  --kai-radius: ${x.radius}rem;`,
@@ -511,10 +486,8 @@ function parseCss(css: string): { light: Palette; dark: Palette; radius?: number
   };
   const light = grab(':root');
   const dark = grab('\\.dark');
-  // A rem knob the parser reads back: pasting only these already counts as a
-  // theme. `--kai-radius` stays out on purpose — a radius-only paste was
-  // rejected before `--kai-density` existed and still is, because widening what
-  // the importer accepts is a separate call from wiring this token.
+  // A rem knob alone counts as a paste. `--kai-radius` stays out: a radius-only
+  // paste is still rejected, which is a separate decision from wiring tokens.
   const hasRemKnob = /--kai-(?:text-[a-z-]+|density|radius-pill|code-radius|weight-[a-z]+|shadow-strength)\s*:\s*[\d.]+/.test(css);
   if (!Object.keys(light).length && !Object.keys(dark).length && !hasRemKnob) return null;
   const radiusMatch = css.match(/--kai-radius\s*:\s*([\d.]+)rem/);
@@ -613,9 +586,8 @@ export default function ThemeStudio() {
     const rootExtras: Record<string, string> = {};
     const scale = textScale();
     for (const r of TEXT_RUNGS) rootExtras[r.token] = `${scale[r.token] ?? rungDef(r)}rem`;
-    // Carried at rest like --kai-shadow-color and `radius` below, not only when
-    // moved: the rail host re-themes its preview from what the payload NAMES, and
-    // the default IS Tailwind's own 0.25rem, so naming it changes nothing there.
+    // Carried at rest, like --kai-shadow-color: the rail re-themes from what the
+    // payload names, and the default is Tailwind's own value anyway.
     rootExtras['--kai-density'] = `${density()}rem`;
     rootExtras['--kai-radius-pill'] = `${pill()}rem`;
     rootExtras['--kai-code-radius'] = `${codeRadius()}rem`;
@@ -749,12 +721,9 @@ export default function ThemeStudio() {
     if (s) {
       // Tokens the kit grew after the preset was saved get their derived default.
       setLight(resolvePalette('light', s.light)); setDark(resolvePalette('dark', s.dark)); setRadius(s.radius);
-      // Optional, because localStorage holds JSON an older build wrote. A preset
-      // saved before --kai-density existed was saved under Tailwind's own 0.25rem,
-      // so the derived default is what it meant — not a silent reset.
+      // Optional: presets written by older builds carry that knob's theme.css
+      // default, which is what they meant.
       setDensity(typeof s.density === 'number' && Number.isFinite(s.density) ? s.density : DEFAULT_DENSITY);
-      // Same argument for both shape knobs: a preset saved before them was saved
-      // under their theme.css defaults, so the derived default is what it meant.
       setPill(typeof s.pill === 'number' && Number.isFinite(s.pill) ? s.pill : DEFAULT_PILL);
       setCodeRadius(typeof s.codeRadius === 'number' && Number.isFinite(s.codeRadius) ? s.codeRadius : DEFAULT_CODE_RADIUS);
       // Same for elevation and the weight ladder: a preset saved before them carries
@@ -974,7 +943,7 @@ export default function ThemeStudio() {
     const clamp = (n: number) => Math.min(props.max, Math.max(props.min, n));
     return (
       <div class="flex items-center gap-2.5 text-sm">
-        <span class="w-[4.5rem] shrink-0 text-ink-2">{props.label}</span>
+        <span class="w-[5.5rem] shrink-0 whitespace-nowrap text-ink-2">{props.label}</span>
         <input
           type="range" min={props.min} max={props.max} step={props.step} value={props.value}
           onInput={(e) => props.onInput(parseFloat(e.currentTarget.value))}
@@ -995,22 +964,13 @@ export default function ThemeStudio() {
     );
   };
 
-  /**
-   * A row of mutually exclusive NAMED options, in the same visual language as the
-   * toolbar's light/dark toggle. Used where a slider's extremes are not designs —
-   * Density and Elevation — so the user picks between options that all look good
-   * rather than discovering the ones that do not.
-   *
-   * `Custom` appears ONLY when the current value is not one of the named ones, which
-   * happens when a theme is imported or a saved preset carries a value from an older
-   * build. The control never silently snaps it to a neighbour: the number the user
-   * wrote is what the export must keep saying.
-   */
+  /** Mutually exclusive named options. `Custom` appears only when the value is not a
+   *  step (an imported theme), so a number the user wrote is never snapped. */
   const ChoiceRow = (props: { label: string; value: number; choices: { label: string; value: number }[]; unit?: string; onInput: (n: number) => void }) => {
     const match = () => props.choices.find((c) => Math.abs(c.value - props.value) < 1e-9);
     return (
       <div class="flex items-start gap-2.5 text-sm">
-        <span class="w-[4.5rem] shrink-0 pt-1 text-ink-2">{props.label}</span>
+        <span class="w-[5.5rem] shrink-0 whitespace-nowrap pt-1 text-ink-2">{props.label}</span>
         <div class="flex min-w-0 flex-wrap gap-1">
           <div class="flex overflow-hidden rounded-md border border-line">
             <For each={props.choices}>{(c) => (
@@ -1018,13 +978,9 @@ export default function ThemeStudio() {
                 type="button"
                 onClick={() => props.onInput(c.value)}
                 aria-pressed={match()?.label === c.label}
-                // The visible label is the step word, but the ACCESSIBLE name says what
-                // it sets: a row of bare "Default"/"Loose" buttons is ambiguous to a
-                // screen reader and collides with the theme dropdown's own "Default".
+                // Accessible name says what it sets (a bare "Default" collides with the
+                // theme dropdown); `data-value` lets tests read the step itself.
                 aria-label={`${props.label}: ${c.label}`}
-                // The value rides on the element, so a test can read the step it is
-                // about to pick instead of restating the studio's taste call as a
-                // constant that would drift the day a step moves.
                 data-value={String(c.value)}
                 class="px-2 py-1 text-xs transition-colors"
                 classList={{
@@ -1077,7 +1033,7 @@ export default function ThemeStudio() {
             class="w-16 shrink-0 rounded-md border border-line bg-surface px-1.5 py-1 text-right text-xs tabular-nums text-ink [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
             aria-label={`${props.r.label} size in rem`}
           />
-          <span class="w-[4.5rem] shrink-0 text-right text-xs tabular-nums text-ink-3">rem · {remPx(val())}</span>
+          <span class="w-[5.5rem] shrink-0 text-right text-xs tabular-nums text-ink-3">rem · {remPx(val())}</span>
         </div>
       </div>
     );
@@ -1301,12 +1257,9 @@ export default function ThemeStudio() {
             <p class="mb-3 text-xs text-ink/55">One semantic scale for the whole kit — each rung is a <span class="font-mono text-ink-2">--kai-text-*</span> token, so moving it moves every component that sits on that rung. Body is the medium rung the rest step off.</p>
             <div class="flex flex-col gap-3">
               <For each={TEXT_RUNGS}>{(r) => <RungRow r={r} />}</For>
-              {/* The weight ladder. One select per rung, because each rung is its own
-                  token: a product that wants a heavier semibold rarely wants a heavier
-                  normal too, and a single "weight" knob would have to invent a
-                  relationship between them that nobody asked for. */}
+              {/* One select per rung — see WEIGHT_RUNGS. */}
               <div class="mt-3 flex items-center gap-2.5 text-sm">
-                <span class="w-[4.5rem] shrink-0 text-ink-2">Weights</span>
+                <span class="w-[5.5rem] shrink-0 whitespace-nowrap text-ink-2">Weights</span>
                 <div class="flex min-w-0 flex-wrap gap-2">
                   <For each={WEIGHT_RUNGS}>{(r) => (
                     <label class="flex items-center gap-1 text-xs text-ink-2">
@@ -1323,7 +1276,7 @@ export default function ThemeStudio() {
                   )}</For>
                 </div>
               </div>
-              <p class="mt-2 text-xs text-ink/55">Each rung is a token (<span class="font-mono text-ink-2">--kai-weight-medium</span> …), so bolding one thing does not bold everything. The defaults are Tailwind's own 400 / 500 / 600 / 700.</p>
+
             </div>
           </div>
           </Show>
@@ -1346,43 +1299,32 @@ export default function ThemeStudio() {
           </div>
           <div class="border-t border-line/60 px-3 py-3">
             <div class="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-2">Shape</div>
-            <SliderRow label="Radius" value={radius()} min={0} max={1.4} step={0.05} unit="rem" onInput={(n) => { setRadius(n); setPreset('Custom'); }} />
-            {/* Bounds are the studio's own taste call, not a limit the token
-                imposes. 0.0625rem is 1px at the 16px root (TEXT_STEP's
-                granularity) and keeps 0.25rem on-step; 0.75rem is 3x Tailwind's
-                default, as airy as a preview is worth reading. */}
-            {/* Density and the two shapes below the Radius slider. Density is STEPS
-                rather than a slider on purpose — its extremes collapse the kit or
-                fight every layout it ships, so the control offers only options that
-                look right; see DENSITY_CHOICES. */}
-            <ChoiceRow label="Density" value={density()} choices={DENSITY_CHOICES} unit="rem" onInput={(n) => { setDensity(n); setPreset('Custom'); }} />
-            {/* The two shapes Tailwind does NOT route through the radius ladder.
-                Pill exists because `rounded-full` compiles to a literal no custom
-                property can reach, so the kit's badges/chips/tracks read
-                `--kai-radius-pill` instead; its 4rem default is fully round on any
-                box up to 8rem tall, which covers consumer-sized pills too. Code is
-                a separate token because a code surface wants its own corner. */}
-            <SliderRow label="Pill" value={pill()} min={0} max={4} step={0.0625} unit="rem" onInput={(n) => { setPill(n); setPreset('Custom'); }} />
-            <SliderRow label="Code radius" value={codeRadius()} min={0} max={1.4} step={0.05} unit="rem" onInput={(n) => { setCodeRadius(n); setPreset('Custom'); }} />
-            <p class="mt-1 text-xs text-ink/55">Radius moves cards, bubbles, popovers and inputs — <span class="font-mono text-ink-2">sm</span> through <span class="font-mono text-ink-2">3xl</span>. Pill moves badges, chips, tags, switch tracks and count bubbles. Code moves fenced blocks. Circles (avatars, status dots, spinners) stay circles: that is what they are.</p>
-            <p class="mt-2 text-xs text-ink/55">Density is the base of every Tailwind spacing utility — <span class="font-mono text-ink-2">p-*</span>, <span class="font-mono text-ink-2">gap-*</span>, <span class="font-mono text-ink-2">size-*</span> are all <span class="font-mono text-ink-2">calc(--kai-density × N)</span> — so one step moves padding, gaps, control heights and icon sizes together. The steps are ±25% around Tailwind's own 0.25rem; leave it on Default and the kit's geometry is unchanged.</p>
+            {/* One gapped column: a ChoiceRow is taller than a SliderRow. */}
+            <div class="flex flex-col gap-2.5">
+              {/* Bounds are the studio's own taste call, not a limit the token imposes.
+                  0.0625rem is 1px at the 16px root (TEXT_STEP's granularity) and keeps
+                  0.25rem on-step; 0.75rem is 3x Tailwind's default, as airy as a preview
+                  is worth reading. */}
+              <SliderRow label="Radius" value={radius()} min={0} max={1.4} step={0.05} unit="rem" onInput={(n) => { setRadius(n); setPreset('Custom'); }} />
+              {/* Steps rather than a slider — see DENSITY_CHOICES. */}
+              <ChoiceRow label="Density" value={density()} choices={DENSITY_CHOICES} unit="rem" onInput={(n) => { setDensity(n); setPreset('Custom'); }} />
+              {/* Pill: `rounded-full` is a literal. Code: its own corner. */}
+              <SliderRow label="Pill" value={pill()} min={0} max={4} step={0.0625} unit="rem" onInput={(n) => { setPill(n); setPreset('Custom'); }} />
+              <SliderRow label="Code" value={codeRadius()} min={0} max={1.4} step={0.05} unit="rem" onInput={(n) => { setCodeRadius(n); setPreset('Custom'); }} />
+            </div>
           </div>
           <div class="border-t border-line/60 px-3 py-3">
             <div class="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-2">Shadow</div>
-            <label class="flex items-center gap-2.5">
-              <input type="color" value={shadowColor()} onInput={(e) => { setShadowColor(e.currentTarget.value); setPreset('Custom'); }} class={swatch} aria-label="Shadow color" />
-              <span class="flex min-w-0 flex-col leading-tight">
-                <span class="truncate text-sm font-medium text-ink">Shadow color</span>
-                <span class="truncate text-xs text-ink/55">Elevation tint — cards, popovers</span>
-              </span>
-            </label>
-            {/* Elevation as STEPS, same argument as Density: past ~2x every surface
-                shouts and below 0 there is nothing to choose. One knob covers every
-                shadow rung because theme.css scales them all by this multiplier. */}
-            <div class="mt-3">
+            <div class="flex flex-col gap-2.5">
+              <label class="flex items-center gap-2.5">
+                <input type="color" value={shadowColor()} onInput={(e) => { setShadowColor(e.currentTarget.value); setPreset('Custom'); }} class={swatch} aria-label="Shadow color" />
+                <span class="flex min-w-0 flex-col leading-tight">
+                  <span class="truncate text-sm font-medium text-ink">Color</span>
+                </span>
+              </label>
+              {/* Steps, same argument as Density; one knob scales every rung. */}
               <ChoiceRow label="Elevation" value={elevation()} choices={ELEVATION_CHOICES} onInput={(n) => { setElevation(n); setPreset('Custom'); }} />
             </div>
-            <p class="mt-2 text-xs text-ink/55">Scales every shadow in the kit — cards, popovers, toasts, dropdowns — so Flat is one click and nothing else has to be hunted down. 1 is Tailwind's own geometry.</p>
           </div>
           </Show>
         </div>
@@ -1439,12 +1381,8 @@ export default function ThemeStudio() {
               <div class="grid gap-3 sm:grid-cols-2">
                 <For each={COMPONENT_SLOTS}>{(s) => <ShowSlot s={s} />}</For>
               </div>
-              {/* Geometry strip — the three shape knobs and the density knob, drawn
-                  with the kit's own utilities so what you see is the real cascade
-                  and not a mock. The circle is deliberate: it is the boundary the
-                  radius system cannot cross (Tailwind hardcodes `rounded-full`),
-                  so seeing it stay round while the ladder squares off is the
-                  honest picture rather than a bug in the knob. */}
+              {/* Drawn with the kit's own utilities, so this is the real cascade. The
+                  circle is the boundary: `rounded-full` is a literal. */}
               <div class="flex flex-col gap-3 rounded-xl border p-3" style={{ 'border-color': 'var(--kai-color-border)', color: 'var(--kai-color-foreground)' }} data-token="--kai-radius --kai-radius-pill --kai-code-radius --kai-density">
                 <div class="flex flex-wrap items-baseline gap-2">
                   <span class="text-xs font-semibold">Geometry</span>

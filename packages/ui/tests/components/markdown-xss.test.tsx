@@ -1,22 +1,13 @@
 // tests/components/markdown-xss.test.tsx
 //
-// The markdown path is where a string the MODEL produced becomes live DOM in the
-// host page's origin. Every vector below was confirmed executing in Chromium
-// against the shipped pipeline before the fix (assistant text -> marked ->
-// innerHTML).
+// The markdown path, where model output becomes live DOM in the host origin. The
+// threat model is model OUTPUT, not a hostile server: a pasted example, a
+// prompt-injection, or RAG over an untrusted document.
 //
-// THE SINK IS NO LONGER A RAW `innerHTML` WRITE. Since e66c004d the renderer emits
-// a token stream, so raw HTML becomes a TEXT node and the escaping is done by the
-// DOM rather than by a string filter. The kit's one remaining raw-`innerHTML`
-// write is `code-block.tsx`'s `innerHTML={highlighted()}`, pinned by the hostile
-// census in `tests/elements/code-block.test.tsx`; the fenced-code group at the
-// bottom of this file covers the markdown path INTO that component, which is the
-// one every assistant message with a code sample in it takes.
-//
-// The threat model is NOT "a hostile server". The attacker only has to
-// influence the model's OUTPUT: a user pasting an example, a prompt-injected
-// model, or RAG over an untrusted document all reach this sink against a
-// perfectly trusted provider.
+// The renderer emits a token stream now (e66c004d), so raw HTML is a text node; the
+// kit's remaining raw-`innerHTML` write is code-block.tsx, covered by
+// tests/elements/code-block.test.tsx and by the fenced group at the bottom of this
+// file.
 //
 // Two properties are asserted for every vector, and BOTH matter:
 //   1. no live element / handler / dangerous scheme lands in the DOM, and
@@ -203,21 +194,10 @@ describe('markdown sink: dangerous URL schemes never reach an href/src', () => {
 });
 
 describe('markdown sink: a fenced code block, through both fence paths', () => {
-  // A code block is the one surface where the hostile string is ALSO the legitimate
-  // content — "show me an HTML snippet" is an ordinary thing to ask a coding
-  // assistant — so deleting it is not an option and the reader seeing the tag is
-  // the correct answer.
-  //
-  // The two fence paths are different sinks, which is why both are here. A
-  // TOP-LEVEL fence is split out by `parseMarkdownIntoBlocks` and rendered by the
-  // Solid `CodeBlock`, whose finished HTML is written via `innerHTML`; a NESTED
-  // fence (inside a quote or a list item) never leaves the token renderer and
-  // becomes a text node in a plain `<pre><code>`. `CodeBlockCode` has three
-  // suppliers of that `innerHTML` — shiki (a known grammar), the kit's own
-  // `escapeHtml` via `plain()` (an unknown one), and the JSX `<Show>` fallback — and
-  // all three escape `<` to `&lt;`, so the FORM does not identify which one ran. What
-  // identifies it is `pre.shiki` for shiki and the `<span>` tokens as a live-census
-  // control; the escape form is asserted only to prove the tag arrived as text.
+  // Two fence paths, two sinks: a top-level fence goes through CodeBlock's
+  // `innerHTML`, a nested one stays a text node. All three suppliers of that
+  // `innerHTML` escape `<` to `&lt;`, so `pre.shiki` and the span census identify
+  // which ran — the escape form only proves the tag arrived as text.
   //
   // (A handoff note claimed the shiki form was `&#x3C;` and that asserting `&lt;`
   // would fail. The raw `innerHTML` below says otherwise — it is `&lt;` — so that

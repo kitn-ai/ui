@@ -147,14 +147,14 @@ describe('theme studio — --kai-density is wired, not merely catalogued', () =>
     // The font and tracking knobs are emitted only once set, so set them: the
     // claim under test is "catalogued implies emitted", not "emitted at rest".
     postInit({ light: { '--kai-tracking': '0.02em' }, dark: {}, fonts: { '--kai-font-base': 'Inter', '--kai-font-code': 'monospace' } });
-    fireEvent.click(screen.getByText('Code'));
+    fireEvent.click(screen.getByRole('button', { name: 'Code' }));
     const css = exportedCss();
     expect(EXTRA_TOKENS.filter((t) => !css.includes(`${t}:`)), css).toEqual([]);
   });
 
   it('publishes Tailwind geometry by default: the exported density is the value theme.css declares', () => {
     render(() => <ThemeStudio />);
-    fireEvent.click(screen.getByText('Code'));
+    fireEvent.click(screen.getByRole('button', { name: 'Code' }));
     expect(exportedCss()).toContain(`--kai-density: ${KIT_DENSITY}rem;`);
     expect(KIT_DENSITY).toBe(0.25); // Tailwind's own default — the whole reason the fallback is 0.25
   });
@@ -188,7 +188,7 @@ describe('theme studio — --kai-density is wired, not merely catalogued', () =>
     render(() => <ThemeStudio />);
     openOtherTab();
     pickStep('Density', 'Loose');
-    fireEvent.click(screen.getByText('Code'));
+    fireEvent.click(screen.getByRole('button', { name: 'Code' }));
     const css = exportedCss();
     expect(css).toContain(`--kai-density: ${stepValue('Density', 'Loose')}rem;`);
     fireEvent.click(screen.getByLabelText('Close'));
@@ -215,7 +215,7 @@ describe('theme studio — --kai-density is wired, not merely catalogued', () =>
     await waitFor(() => expect(screen.getByText(/Custom — 0\.3rem/)).toBeDefined());
     expect(stepActive('Density', 'Tight')).toBe(false);
     expect(stepActive('Density', 'Loose')).toBe(false);
-    fireEvent.click(screen.getByText('Code'));
+    fireEvent.click(screen.getByRole('button', { name: 'Code' }));
     expect(exportedCss(), 'and the export keeps the number the user wrote').toContain('--kai-density: 0.3rem;');
   });
 

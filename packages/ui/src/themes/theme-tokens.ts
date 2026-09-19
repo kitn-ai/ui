@@ -134,24 +134,15 @@ export const TEXT_RUNGS: TextRung[] = [
  *  element stylesheet rather than theme.css; the rest resolve through theme.css. */
 export const EXTRA_TOKENS = [
   '--kai-radius',
-  // Geometry, and the one knob here with kit-wide reach: every Tailwind spacing
-  // utility is `calc(var(--spacing) * N)`, so this single token moves the whole
-  // p-*/m-*/gap-*/size-* family. Reachable from the editor for the same reason
-  // the colour knobs are — a denser or airier product is a taste decision, and it
-  // should not require a class-override surface to express.
+  // Density: every spacing utility is `calc(var(--spacing) * N)`.
   '--kai-density',
-  // The pill family's corner (badges, chips, tags, switch tracks, count bubbles).
-  // Its own knob rather than a rung of --kai-radius, because Tailwind's
-  // `rounded-full` is a literal no custom property can reach — see theme.css.
+  // Pill: `rounded-full` is a literal, so the pill family needs its own rung.
   '--kai-radius-pill',
-  // The code surface's corner, deliberately not a rung of the radius ladder.
+  // Code: its own corner, not a rung of the radius ladder.
   '--kai-code-radius',
-  // Elevation: ONE multiplier for the whole shadow family, because the family is one
-  // decision (how present is elevation here?) and "flat" is the value people want.
-  // Unitless, so the studio seeds it with parseFloat rather than `remValue`.
+  // Elevation: one multiplier over every shadow rung (unitless, not rem).
   '--kai-shadow-strength',
-  // Font weights, rung by rung: a weight ladder is not one number — a product that
-  // wants a heavier SEMIBOLD rarely wants a heavier normal.
+  // Weights: one knob per rung.
   '--kai-weight-normal',
   '--kai-weight-medium',
   '--kai-weight-semibold',

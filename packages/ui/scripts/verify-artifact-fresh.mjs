@@ -167,27 +167,9 @@ const SOURCE_DIRS = ['src', 'scripts', 'mcp'];
 const EXTRA_SOURCE_FILES = ['package.json'];
 const SKIP_DIRS = new Set(['node_modules', '.git', '.nx', 'dist']);
 
-// Files the BUILD writes back into the source tree. Each is a build OUTPUT that
-// happens to live among the inputs, so its mtime is always a second or two NEWER
-// than dist/ and would make this guard un-passable on a correctly built tree.
-//
-// AN ENTRY ENDING IN `/` EXCLUDES THE WHOLE SUBTREE, and that form is not
-// convenience: two of these outputs are SETS whose membership is DERIVED — one
-// driver page per block (from the block registry) and one fixture per buildable
-// starter (from mcp/construct/templates.ts). A hand-listed copy of either rots
-// the moment a block or a template is added, and it rots QUIETLY in the worst
-// direction: the new file is simply a newer-than-dist source, so a correctly
-// built tree fails again — which is exactly how this guard stood before these
-// entries existed, naming 11 files on a tree nobody had touched. The trailing
-// slash is load-bearing: `pages/generated/` must not excuse
-// `pages/generated-extra/` (the self-test carries that decoy).
-//
-// This list is a COPY -- the authority for each entry is the generator named
-// beside it, and the guard named beside it is what checks the CONTENT, so an
-// exclusion here does not drop coverage, it moves it to the guard that owns it.
-// If a fresh, clean build ever fails this guard naming a file under src/, mcp/
-// or scripts/, the answer is almost certainly a new generator writing there that
-// needs adding to this list, not a stale tree.
+// An entry ending in `/` excludes a whole subtree. Those two outputs are SETS with
+// derived membership (one page per block, one fixture per template), so a hand-listed
+// copy rots as soon as one is added. The trailing slash is load-bearing.
 const GENERATED_SOURCES = new Set([
   'src/elements/compiled.css', // build:css (gitignored)
   'src/elements/element-manifest.json', // scripts/gen-elements-manifest.mjs
@@ -209,11 +191,7 @@ const GENERATED_SOURCES = new Set([
   'scripts/block-driver/pages/generated/', // scripts/gen-blocks.mjs -- one page per block
 ]);
 
-// Exact-path entries plus subtree entries, matched on a PATH prefix -- the
-// separator lives in the entry itself (its trailing slash), so no basename or
-// suffix match can creep in. See the prefix decoy in the self-test: a mutant
-// that matched `startsWith(p.replace(/\/$/, ''))` excused a sibling directory
-// and passed every other case here.
+// Exact paths plus subtree entries, matched on a path prefix (the trailing slash).
 const GENERATED_PREFIXES = [...GENERATED_SOURCES].filter((rel) => rel.endsWith('/'));
 const isGenerated = (rel) => GENERATED_SOURCES.has(rel) || GENERATED_PREFIXES.some((p) => rel.startsWith(p));
 // NOT excluded, deliberately: `src/primitives/card-validate-schemas.ts` is
@@ -382,10 +360,7 @@ function makeFixture(root, { sourceOffset, artifactOffset, artifacts, withSource
     // Carried by every fixture for the same reason as the line above.
     touch('mcp/construct/fixtures/templates/widget.construct.json', '{}\n', artifactOffset + 5);
   }
-  // A path that shares the prefix TEXT with a subtree entry but not the path:
-  // `pages/generated-extra/` where the entry is `pages/generated/`. It must
-  // still be reported. The positive control for the separator being part of the
-  // match, the way `decoy` is for the exact-path entries.
+  // Shares the entry text but not its path: must still be stale (the separator matters).
   if (prefixDecoy) touch('scripts/block-driver/pages/generated-extra/index.html', '<!doctype html>\n', artifactOffset + 5);
   // A file that SHARES A BASENAME with an excluded generated artifact but sits
   // at a different path, planted newer than dist. It must still be reported

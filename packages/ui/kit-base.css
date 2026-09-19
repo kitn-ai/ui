@@ -166,7 +166,8 @@
     background-color: var(--color-background);
     display: inline-grid;
     place-content: center;
-    box-shadow: 0 1px 2px rgb(0 0 0 / 0.04);
+    /* Scales with elevation like every other shadow; neutral, not tinted. */
+    box-shadow: 0 calc(1px * var(--kai-shadow-strength, 1)) calc(2px * var(--kai-shadow-strength, 1)) rgb(0 0 0 / 0.04);
     transition: border-color 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease,
       transform 0.1s ease;
   }

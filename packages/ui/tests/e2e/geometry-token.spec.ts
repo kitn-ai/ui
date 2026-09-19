@@ -2,46 +2,15 @@ import { test, expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
 /**
- * `--kai-density` must reach the geometry INSIDE a shadow root, and the bare
- * `--spacing` variable must NOT.
+ * Shape, density, elevation and code-radius tokens, proven through the real cascade
+ * on the built bundle: a bare `:root{--spacing}` does NOT work (the sheet declares
+ * it on :host) and `--kai-density` does. jsdom pins the declarations; only a browser
+ * settles what a custom property resolves to inside a shadow root.
  *
- * Colour, type and radius were tokenized from the start; geometry was not. The
- * consequence was a theme surface that looked complete and was not: a consumer
- * could set `:root { --spacing: 1rem }` — the documented Tailwind variable, the
- * one an experienced consumer reaches for first — and nothing moved. The reason
- * is structural rather than a missing declaration. Tailwind emits its theme block
- * as `:root,:host{...}`, so the compiled sheet declares `--spacing` ON THE HOST
- * ELEMENT; a declaration on the element itself beats an inherited value, so the
- * consumer's `:root` value is discarded inside every shadow root. Re-pointing the
- * variable at a `--kai-*` token (`--spacing: var(--kai-density, 0.25rem)`) is what
- * turns "silently ignored" into "overridable", and both halves of that claim are
- * asserted below — the positive one and, more importantly, the negative one, since
- * the negative one is the trap the token exists to close.
- *
- * This has to run against the BUILT bundle in a bare, Tailwind-free harness, for
- * the reason `message-text-token.spec.ts` and `focus-ring-paints.spec.ts` document:
- * a real consumer app never loads Tailwind at document level, and this guard is
- * about what a custom property RESOLVES to for a shadow-root element. Only the real
- * cascade can settle that. `tests/styles/geometry-tokens.test.ts` pins the source
- * and compiled declarations in jsdom (and is where a missing `:host` shows up as a
- * one-line failure); this is the end-to-end proof that the plumbing works.
- *
- * THE MATCHED PAIR IS THE POINT. A positive-only test would pass against a build
- * where `--spacing` had simply been widened globally, or against a Storybook page
- * where document-level Tailwind leaks in. So each test names what must move and,
- * in the same run, what must stay put.
- *
- * Needs a build first (`nx build ui`): it drives `dist/`, and the config-wide
- * globalSetup refuses to run against a stale bundle.
- * Run: `npm run test:geometry-token` inside packages/ui.
+ * Needs a build first. Run: `npm run test:geometry-token`.
  */
 
-/**
- * One step of Tailwind's spacing scale: `--spacing` is 0.25rem, or 4px at a 16px
- * root font size. Utilities multiply it — `px-4` is `calc(0.25rem * 4)` = 1rem =
- * 16px — which is why this is the STEP and not "the value of --spacing in px".
- * Getting that wrong is how this test first failed: it expected 64px for `px-4`.
- */
+/** One step of the spacing scale (0.25rem = 4px); `px-4` is 4 × this, not 4 × 16. */
 const SPACING_STEP_PX = 4;
 /** `md` size is `h-9` = calc(var(--spacing) * 9): 2.25rem, or 36px, by default. */
 const BUTTON_MD_HEIGHT_PX = 9 * SPACING_STEP_PX;
@@ -149,16 +118,9 @@ test('the bare --spacing variable does NOT work — the trap the token exists to
   await clearRootVar(page, '--kai-density');
 });
 
-/**
- * The pill and code knobs, proven the same way: through the real cascade, on the
- * built bundle, with the boundary asserted alongside the effect. `rounded-full` is
- * a literal Tailwind hardcodes, so the pill family could never follow a consumer's
- * shape choice — the kit's `--radius-pill` rung is what makes badges, chips and
- * switch tracks part of the shape system. The circle in the same run is the
- * control: it must NOT move, because it is a circle and not a rounded rectangle.
- */
+/** The pill and code knobs, and the control that must NOT move: the circle. */
 
-/** The largest computed corner radius anywhere in an element's shadow tree. */
+/** Largest computed corner radius in a shadow tree. */
 async function maxShadowRadius(page: Page, selector: string): Promise<number> {
   return page.evaluate((sel) => {
     const host = document.querySelector(sel) as HTMLElement | null;
@@ -170,14 +132,7 @@ async function maxShadowRadius(page: Page, selector: string): Promise<number> {
   }, selector);
 }
 
-/**
- * The computed radius of the element that actually CARRIES a given token in its
- * class list — `rounded-[var(--code-radius)]` and friends. Needed because a shadow
- * tree holds several radii at once and they belong to different tokens: the max
- * across the tree for a code block is the copy button's `--radius-md` (7.6px), not
- * the code surface, so measuring the maximum would have asserted nothing about the
- * knob under test while looking like it did.
- */
+/** Radius of the element carrying `token` — one shadow tree holds several radii. */
 async function tokenRadius(page: Page, selector: string, token: string): Promise<number> {
   return page.evaluate(
     ([sel, tok]) => {
@@ -251,12 +206,7 @@ test('--kai-code-radius reaches the fenced-block surface', async ({ page }) => {
   await clearRootVar(page, '--kai-code-radius');
 });
 
-/**
- * ELEVATION is one multiplier over every shadow rung, so the proof is that a real
- * surface's computed `box-shadow` actually flattens — not that a token changed.
- * The lengths are what is asserted (`0px 0px 0px`), because that is what a flat theme
- * has to produce; the colour is irrelevant once the geometry is zero.
- */
+/** Elevation: a real surface's computed box-shadow must flatten, then come back. */
 test('--kai-shadow-strength flattens a real surface and puts it back', async ({ page }) => {
   await page.evaluate(() => {
     const mounts = document.getElementById('mounts')!;
