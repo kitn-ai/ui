@@ -136,7 +136,7 @@ tool parts.
   label — a server-rendered **SolidJS 2** app with six routes, an interaction in
   every section, and a persistent cart. It uses **none of the kit**; it is here
   because it began as the page the **Labs/Apps → v0** story
-  (`packages/ui/src/web-components/v0.stories.tsx`) builds inline and frames in
+  (`packages/ui/src/stories/showcase/v0.stories.tsx`) builds inline and frames in
   `<kai-artifact>`, and because it is a useful place to keep a real Solid 2 app.
 
   Worth reading its `README.md` before starting any Solid 2 work: Start is now a

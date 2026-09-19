@@ -1,12 +1,12 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { type JSX, createSignal, createMemo } from 'solid-js';
 import { MessageCircle } from 'lucide-solid';
-import { BuilderPanel, type BuilderConstruct } from '../components/builder/builder-panel';
-import { BuilderLayout, type BuilderViewport } from '../components/builder/builder-layout';
-import { resolveAccentWrapperStyle } from '../components/builder/builder-preview';
-import { ChatThread } from '../components/chat/chat-thread';
-import { cn } from '../utils/cn';
-import type { ChatMessage } from './chat-types';
+import { BuilderPanel, type BuilderConstruct } from '../../components/builder/builder-panel';
+import { BuilderLayout, type BuilderViewport } from '../../components/builder/builder-layout';
+import { resolveAccentWrapperStyle } from '../../components/builder/builder-preview';
+import { ChatThread } from '../../components/chat/chat-thread';
+import { cn } from '../../utils/cn';
+import type { ChatMessage } from '../../web-components/chat-types';
 
 // Labs/Builder/Support widget — Round W (T-2/T-6, docs/superpowers/specs/
 // 2026-08-28-template-builder-design.md): the FIRST template story,

@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal, onMount, onCleanup, type JSX } from 'solid-js';
 import './register'; // side effect: registers the custom elements
-import { attachKaiActions } from '../stories/docs/story-actions';
+import { attachKaiActions } from '../docs/story-actions';
 
 // The web components are custom DOM elements, so declare the tags for JSX. This
 // labs story declares its own intrinsic types (including the new `collapsed`

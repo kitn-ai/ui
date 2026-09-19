@@ -2,7 +2,7 @@
 //
 //   node tools/extract-from-story.mjs
 //
-// `packages/ui/src/web-components/v0.stories.tsx` builds the "Vesper" page it frames in
+// `packages/ui/src/stories/showcase/v0.stories.tsx` builds the "Vesper" page it frames in
 // <kai-artifact> entirely inline: the CSS in a template literal, the fonts and the
 // photography as base64 data: URIs, the section markup as string builders. This
 // script EVALUATES those builders (rather than re-typing their output) and writes
@@ -17,7 +17,7 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 // must have no index.html at its root -- the plugin generates the entries --
 // and leaving one there is both confusing to read and a real footgun.
 const OUT = resolve(HERE, '../static-original');
-const STORY = resolve(HERE, '../../../../packages/ui/src/web-components/v0.stories.tsx');
+const STORY = resolve(HERE, '../../../../packages/ui/src/stories/showcase/v0.stories.tsx');
 
 // The generated-page section of the story: everything from the "framed for real"
 // banner down to the version→URL map. Sliced by its own comment markers so an

@@ -172,7 +172,7 @@ with hydration comment markers, so that text is never contiguous in the HTML.
 
 ## Where it came from
 
-`packages/ui/src/web-components/v0.stories.tsx` -- the **Labs/Apps → v0** story, an
+`packages/ui/src/stories/showcase/v0.stories.tsx` -- the **Labs/Apps → v0** story, an
 app-builder shell whose right pane is a real `<kai-artifact>`. That story
 builds a Vesper landing page entirely inline (CSS in a template literal, fonts
 and photography as base64 `data:` URIs) and frames it as the artifact's

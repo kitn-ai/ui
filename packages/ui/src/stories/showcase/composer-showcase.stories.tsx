@@ -2,9 +2,9 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { onMount, onCleanup } from 'solid-js';
 import { action } from 'storybook/actions';
 import './register'; // side-effect: registers kai-prompt-input, kai-menu, kai-model-switcher, etc.
-import { attachKaiActions } from '../stories/docs/story-actions';
-import type { KaiMenuItem } from './menu';
-import type { ModelOption } from '../types';
+import { attachKaiActions } from '../docs/story-actions';
+import type { KaiMenuItem } from '../../web-components/menu';
+import type { ModelOption } from '../../types';
 
 // Declare custom element tags used in this story for Solid JSX.
 declare module 'solid-js' {

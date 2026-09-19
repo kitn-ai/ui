@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal } from 'solid-js';
-import { DerivedBuilderPanel } from '../components/builder/builder-panel-derived';
-import { buildableTemplates, type BuildableTemplate } from '../../mcp/construct/templates';
-import { validateConstruct, type Construct, type ConstructProblem } from '../../mcp/construct/schema';
+import { DerivedBuilderPanel } from '../../components/builder/builder-panel-derived';
+import { buildableTemplates, type BuildableTemplate } from '../../../mcp/construct/templates';
+import { validateConstruct, type Construct, type ConstructProblem } from '../../../mcp/construct/schema';
 
 /**
  * Labs/Builder/Derived panel — the B-19 panel, one story per buildable

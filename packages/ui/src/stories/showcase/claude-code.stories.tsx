@@ -1,12 +1,12 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal, Show } from 'solid-js';
 import { Asterisk, Sparkles, Download } from 'lucide-solid';
-import { PromptDock } from '../components/prompt/prompt-dock';
+import { PromptDock } from '../../components/prompt/prompt-dock';
 import './register'; // every kai-* element used below
-import type { KaiNavItem } from '../components/nav/nav';
-import type { KaiTabItem } from '../components/tabs/tabs';
-import type { KaiCommandItem } from './command';
-import type { ConversationSummary, ConversationGroup } from '../types';
+import type { KaiNavItem } from '../../components/nav/nav';
+import type { KaiTabItem } from '../../components/tabs/tabs';
+import type { KaiCommandItem } from '../../web-components/command';
+import type { ConversationSummary, ConversationGroup } from '../../types';
 
 // Labs: a working interactive prototype of the Claude desktop app, built on the
 // re-cast kai-workspace SHELL (five layout slots) + the kai-* elements. The rail

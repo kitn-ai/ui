@@ -5,7 +5,7 @@ import { cn } from '../../utils/cn';
 /**
  * `Captions` — live closed-captioning: the text shown WHILE someone (the
  * user or the agent) is speaking, distinct from a scrollback transcript.
- * Built for the Voice template (`web-components/builder-voice.stories.tsx`) but
+ * Built for the Voice template (`stories/showcase/builder-voice.stories.tsx`) but
  * kept generic — any voice surface that wants a caption line can use this
  * directly.
  *

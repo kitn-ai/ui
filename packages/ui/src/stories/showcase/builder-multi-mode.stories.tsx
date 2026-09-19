@@ -1,34 +1,34 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { type JSX, createSignal, createMemo, For } from 'solid-js';
 import { ChevronUp, ChevronDown, X, PanelLeft, Search } from 'lucide-solid';
-import { BuilderPanel, type BuilderConstruct } from '../components/builder/builder-panel';
-import { BuilderLayout, type BuilderViewport } from '../components/builder/builder-layout';
-import { resolveAccentWrapperStyle } from '../components/builder/builder-preview';
-import { ChatThread } from '../components/chat/chat-thread';
-import { ConversationList } from '../components/conversation/conversation-list';
-import { mix, StubStatTile, StubCodeBlock } from '../components/builder/builder-skeleton';
+import { BuilderPanel, type BuilderConstruct } from '../../components/builder/builder-panel';
+import { BuilderLayout, type BuilderViewport } from '../../components/builder/builder-layout';
+import { resolveAccentWrapperStyle } from '../../components/builder/builder-preview';
+import { ChatThread } from '../../components/chat/chat-thread';
+import { ConversationList } from '../../components/conversation/conversation-list';
+import { mix, StubStatTile, StubCodeBlock } from '../../components/builder/builder-skeleton';
 import {
   type TriggerGroupState,
   ComposerTriggersSection,
   buildTriggerDefs,
   DEFAULT_SLASH_ENTRIES,
   DEFAULT_MENTION_ENTRIES,
-} from '../components/builder/builder-composer-triggers';
+} from '../../components/builder/builder-composer-triggers';
 import {
   type ShellControlsState,
   ShellSection,
   CommandPaletteOverlay,
   CommandPaletteTrigger,
   UserMenu,
-} from '../components/builder/builder-shell-controls';
-import { Tabs, type KaiTabItem } from '../components/tabs/tabs';
-import { RadioGroup, type RadioOption } from '../components/radio/radio';
-import { Switch } from '../components/switch/switch';
-import { Select } from '../components/select/select';
-import { Input } from '../components/input/input';
-import { Button } from '../components/button/button';
-import type { ChatMessage } from './chat-types';
-import type { ConversationGroup, ConversationSummary } from '../types';
+} from '../../components/builder/builder-shell-controls';
+import { Tabs, type KaiTabItem } from '../../components/tabs/tabs';
+import { RadioGroup, type RadioOption } from '../../components/radio/radio';
+import { Switch } from '../../components/switch/switch';
+import { Select } from '../../components/select/select';
+import { Input } from '../../components/input/input';
+import { Button } from '../../components/button/button';
+import type { ChatMessage } from '../../web-components/chat-types';
+import type { ConversationGroup, ConversationSummary } from '../../types';
 
 // Labs/Builder/"Multi-mode" — T-1 build-out, owner discovery round. WORKING
 // NAME ONLY (T-4: neutral public names — the owner will name this properly;
@@ -41,7 +41,7 @@ import type { ConversationGroup, ConversationSummary } from '../types';
 //
 // THE SHARED ANATOMY, extracted from three real Labs examples (read closely
 // before building anything, per the assignment):
-//  - `web-components/perplexity-pro.stories.tsx`: a REAL match. A segmented
+//  - `stories/showcase/perplexity-pro.stories.tsx`: a REAL match. A segmented
 //    Assistant | Computer toggle (`kai-tabs variant="segmented" block`) at
 //    the TOP OF THE RAIL swaps BOTH the rail's own content and the main
 //    view (`<Show when={mode() === 'assistant'}>...<Show when={mode() ===
@@ -49,14 +49,14 @@ import type { ConversationGroup, ConversationSummary } from '../types';
 //    This is the one example that actually matches "each mode swaps the
 //    entire working surface" — the assignment's own framing — so it's the
 //    anatomy this template builds against.
-//  - `web-components/claude-code.stories.tsx`: a RELATED but DIFFERENT shape, not
+//  - `stories/showcase/claude-code.stories.tsx`: a RELATED but DIFFERENT shape, not
 //    the same anatomy. Its `kai-tabs` (Home/Code) swaps ONLY the main view
 //    — the rail (a conversation list) stays constant across both tabs — and
 //    a separate `kai-screen` peer provides a full-app TAKEOVER (Design)
 //    outside the tab model entirely. Worth naming as a second real
 //    precedent for "a mode swap," but it is a narrower one (main-only) than
 //    what this template builds.
-//  - `web-components/codex.stories.tsx`: CHECKED AND FOUND NOT TO APPLY. Grepped
+//  - `stories/showcase/codex.stories.tsx`: CHECKED AND FOUND NOT TO APPLY. Grepped
 //    for a mode signal/switch and found none — Codex Web is a single,
 //    composer-led column with no mode toggle at all (its own module
 //    comment: "a deliberately DIFFERENT shape... to showcase the kit's
@@ -125,7 +125,7 @@ import type { ConversationGroup, ConversationSummary } from '../types';
 // here (owner's default matrix: agentic/dev shapes default on, alongside
 // Workspace). Also carries a NEW "Context pills" control — read-only
 // label/value chips shown near the composer — modeled on Codex's real
-// repo/branch environment-pill pattern (`web-components/codex.stories.tsx`,
+// repo/branch environment-pill pattern (`stories/showcase/codex.stories.tsx`,
 // inventoried above), which generalizes to dev/workspace-shaped templates
 // but not to Support widget/Voice/Research, so it is added here and to
 // `Labs/Builder/Workspace` only, not universally. Codex's other real

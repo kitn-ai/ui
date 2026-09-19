@@ -210,8 +210,8 @@ export const surfaceRecipes: TSurfaceRecipe[] = [
     // composes kai-resizable with kai-artifact, and surfaces.test.ts is where
     // the four wiring edges above are actually executed.
     corpus: [
-      'packages/ui/src/web-components/chat-slots.stories.tsx',
-      'packages/ui/src/web-components/split-workspace.stories.tsx',
+      'packages/ui/src/stories/showcase/chat-slots.stories.tsx',
+      'packages/ui/src/stories/showcase/split-workspace.stories.tsx',
       'packages/ui/mcp/catalog/surfaces.test.ts',
     ],
   },

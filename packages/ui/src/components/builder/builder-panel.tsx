@@ -517,7 +517,7 @@ const DEFAULT_PANEL_SECTIONS: Required<BuilderPanelSections> = {
  * describes unchanged; pass it to scope the panel to ONE template's control
  * set — no Layout radio, Widget chrome shown unconditionally rather than
  * `layout`-conditionally, a Provider section — the shape `Labs/Builder/
- * Support widget` (`src/web-components/builder.stories.tsx`) actually uses.
+ * Support widget` (`src/stories/showcase/builder.stories.tsx`) actually uses.
  *
  * Three patterns from the spike (plus the owner's own round-8 ruling) get
  * real design treatment here rather than being hand-waved:

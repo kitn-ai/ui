@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal, Show } from 'solid-js';
-import { BuilderStart, BUILDER_TEMPLATES, type BuilderTemplateId } from '../components/builder/builder-start';
-import { WorkspaceVariantPicker, type WorkspaceVariantId } from '../components/builder/builder-workspace-variants';
+import { BuilderStart, BUILDER_TEMPLATES, type BuilderTemplateId } from '../../components/builder/builder-start';
+import { WorkspaceVariantPicker, type WorkspaceVariantId } from '../../components/builder/builder-workspace-variants';
 
 // Labs/Builder: "Start" - T-7
 // (docs/superpowers/specs/2026-08-28-template-builder-design.md): the

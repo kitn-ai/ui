@@ -1,21 +1,21 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { type JSX, createSignal, createMemo, For, Show } from 'solid-js';
 import { Copy, RefreshCw, Share2, Image as ImageIcon, Sparkles } from 'lucide-solid';
-import { BuilderPanel, type BuilderConstruct } from '../components/builder/builder-panel';
-import { BuilderLayout, type BuilderViewport } from '../components/builder/builder-layout';
-import { resolveAccentWrapperStyle } from '../components/builder/builder-preview';
-import { ChatThread } from '../components/chat/chat-thread';
-import { Source, SourceTrigger, SourceContent } from '../components/source/source';
-import { PromptSuggestion } from '../components/prompt/prompt-suggestion';
-import { Tabs, type KaiTabItem } from '../components/tabs/tabs';
-import { Button } from '../components/button/button';
-import { Switch } from '../components/switch/switch';
-import { isRenderableLink } from '../primitives/link-preview';
-import type { Source as SourceCitation } from './chat-types';
+import { BuilderPanel, type BuilderConstruct } from '../../components/builder/builder-panel';
+import { BuilderLayout, type BuilderViewport } from '../../components/builder/builder-layout';
+import { resolveAccentWrapperStyle } from '../../components/builder/builder-preview';
+import { ChatThread } from '../../components/chat/chat-thread';
+import { Source, SourceTrigger, SourceContent } from '../../components/source/source';
+import { PromptSuggestion } from '../../components/prompt/prompt-suggestion';
+import { Tabs, type KaiTabItem } from '../../components/tabs/tabs';
+import { Button } from '../../components/button/button';
+import { Switch } from '../../components/switch/switch';
+import { isRenderableLink } from '../../primitives/link-preview';
+import type { Source as SourceCitation } from '../../web-components/chat-types';
 
 // Labs/Builder/Research — T-1 build-out (docs/superpowers/specs/
 // 2026-08-28-template-builder-design.md), reshaped in an owner design round
-// to match the REAL Perplexity Labs anatomy (`web-components/perplexity.stories.tsx`,
+// to match the REAL Perplexity Labs anatomy (`stories/showcase/perplexity.stories.tsx`,
 // read closely line by line before rebuilding any of this) rather than an
 // invented shape. layout: 'fullscreen', no conversations sidebar, no Layout
 // radio (T-2).

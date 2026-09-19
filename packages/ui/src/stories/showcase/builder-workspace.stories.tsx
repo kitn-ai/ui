@@ -1,15 +1,15 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { type JSX, createSignal, createMemo, createEffect, onCleanup, For, Show } from 'solid-js';
 import { Plus, ChevronUp, ChevronDown, X } from 'lucide-solid';
-import { BuilderPanel, type BuilderConstruct } from '../components/builder/builder-panel';
-import { BuilderLayout, type BuilderViewport } from '../components/builder/builder-layout';
-import { resolveAccentWrapperStyle } from '../components/builder/builder-preview';
-import { ChatThread } from '../components/chat/chat-thread';
-import { WorkspaceShell } from '../components/workspace/workspace-shell';
-import { WorkSurface } from '../components/work-surface/work-surface';
-import { AppHeader, type AppHeaderAction } from '../components/app-header/app-header';
-import type { ArtifactTab } from '../components/artifact/artifact';
-import { mix, StubStatTile, StubCodeBlock } from '../components/builder/builder-skeleton';
+import { BuilderPanel, type BuilderConstruct } from '../../components/builder/builder-panel';
+import { BuilderLayout, type BuilderViewport } from '../../components/builder/builder-layout';
+import { resolveAccentWrapperStyle } from '../../components/builder/builder-preview';
+import { ChatThread } from '../../components/chat/chat-thread';
+import { WorkspaceShell } from '../../components/workspace/workspace-shell';
+import { WorkSurface } from '../../components/work-surface/work-surface';
+import { AppHeader, type AppHeaderAction } from '../../components/app-header/app-header';
+import type { ArtifactTab } from '../../components/artifact/artifact';
+import { mix, StubStatTile, StubCodeBlock } from '../../components/builder/builder-skeleton';
 import {
   type UserActionId,
   type AssistantActionId,
@@ -19,27 +19,27 @@ import {
   DEFAULT_USER_ACTION_ROWS,
   DEFAULT_ASSISTANT_ACTION_ROWS,
   ActionRowPicker,
-} from '../components/builder/builder-message-actions';
+} from '../../components/builder/builder-message-actions';
 import {
   type TriggerGroupState,
   ComposerTriggersSection,
   buildTriggerDefs,
   DEFAULT_SLASH_ENTRIES,
   DEFAULT_MENTION_ENTRIES,
-} from '../components/builder/builder-composer-triggers';
+} from '../../components/builder/builder-composer-triggers';
 import {
   type ShellControlsState,
   ShellSection,
   CommandPaletteOverlay,
-} from '../components/builder/builder-shell-controls';
-import { RadioGroup, type RadioOption } from '../components/radio/radio';
-import { Switch } from '../components/switch/switch';
-import { Select } from '../components/select/select';
-import { Input } from '../components/input/input';
-import { Button } from '../components/button/button';
-import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem } from '../components/dropdown/dropdown';
-import { renderIcon } from '../components/icon/icon';
-import type { ChatMessage, ChatMessageAction, CustomAction } from './chat-types';
+} from '../../components/builder/builder-shell-controls';
+import { RadioGroup, type RadioOption } from '../../components/radio/radio';
+import { Switch } from '../../components/switch/switch';
+import { Select } from '../../components/select/select';
+import { Input } from '../../components/input/input';
+import { Button } from '../../components/button/button';
+import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem } from '../../components/dropdown/dropdown';
+import { renderIcon } from '../../components/icon/icon';
+import type { ChatMessage, ChatMessageAction, CustomAction } from '../../web-components/chat-types';
 
 // Labs/Builder/Workspace — T-1 build-out (docs/superpowers/specs/
 // 2026-08-28-template-builder-design.md), FIFTH and hardest template story:
@@ -69,7 +69,7 @@ import type { ChatMessage, ChatMessageAction, CustomAction } from './chat-types'
 //    and the shipped product cannot drift. Everything below is the recorded
 //    reasoning for the design it carries; the component's own doc comment
 //    repeats it at the code. It mirrors Lovable's browser chrome
-//    (`web-components/lovable.stories.tsx`'s preview toolbar, read line by line):
+//    (`stories/showcase/lovable.stories.tsx`'s preview toolbar, read line by line):
 //    a device toggle (desktop/tablet/mobile, segmented, scoped to
 //    the PANE's own canvas only — independent of `BuilderLayout`'s outer
 //    builder-chrome viewport chips, which scale the whole builder frame) ·
@@ -83,7 +83,7 @@ import type { ChatMessage, ChatMessageAction, CustomAction } from './chat-types'
 //    `showCodeView: false` removes the Preview|Code toggle ENTIRELY (not
 //    just disables it) and the pane always renders its preview content.
 // 2. EXPAND (owner amendment): a v0-style maximize toggle, also optional.
-//    Checked `web-components/v0.stories.tsx` first: v0's real `<kai-artifact
+//    Checked `stories/showcase/v0.stories.tsx` first: v0's real `<kai-artifact
 //    expandable>` maximizes "via the kai-resizable maximize protocol" (that
 //    file's own comment) — `components/resizable/resizable.tsx`'s `ResizablePanelGroup` has a
 //    real `maximizedIndex`/`onMaximizeChange` API. But `WorkspaceShell`

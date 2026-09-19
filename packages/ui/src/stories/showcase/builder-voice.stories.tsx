@@ -1,21 +1,21 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { type JSX, createSignal, createMemo, createEffect, onCleanup } from 'solid-js';
 import { Mic, PanelLeftOpen, PanelRightOpen, X, Download } from 'lucide-solid';
-import { BuilderPanel, type BuilderConstruct } from '../components/builder/builder-panel';
-import { BuilderLayout, type BuilderViewport } from '../components/builder/builder-layout';
-import { resolveAccentWrapperStyle } from '../components/builder/builder-preview';
-import { AudioVisualizer, type VisualizerVariant } from '../components/audio-visualizer/index';
-import { ChatThread } from '../components/chat/chat-thread';
-import { WorkspaceShell } from '../components/workspace/workspace-shell';
-import { Captions, type CaptionSegment, type CaptionsVariant } from '../components/captions/captions';
-import { Switch } from '../components/switch/switch';
-import { Select } from '../components/select/select';
-import { RadioGroup, type RadioOption } from '../components/radio/radio';
-import { Button } from '../components/button/button';
-import { Tooltip } from '../components/tooltip/tooltip';
-import { Kbd } from '../components/kbd/kbd';
-import { cn } from '../utils/cn';
-import type { ChatMessage } from './chat-types';
+import { BuilderPanel, type BuilderConstruct } from '../../components/builder/builder-panel';
+import { BuilderLayout, type BuilderViewport } from '../../components/builder/builder-layout';
+import { resolveAccentWrapperStyle } from '../../components/builder/builder-preview';
+import { AudioVisualizer, type VisualizerVariant } from '../../components/audio-visualizer/index';
+import { ChatThread } from '../../components/chat/chat-thread';
+import { WorkspaceShell } from '../../components/workspace/workspace-shell';
+import { Captions, type CaptionSegment, type CaptionsVariant } from '../../components/captions/captions';
+import { Switch } from '../../components/switch/switch';
+import { Select } from '../../components/select/select';
+import { RadioGroup, type RadioOption } from '../../components/radio/radio';
+import { Button } from '../../components/button/button';
+import { Tooltip } from '../../components/tooltip/tooltip';
+import { Kbd } from '../../components/kbd/kbd';
+import { cn } from '../../utils/cn';
+import type { ChatMessage } from '../../web-components/chat-types';
 
 // Labs/Builder/Voice — T-1/T-1a build-out (docs/superpowers/specs/
 // 2026-08-28-template-builder-design.md), reshaped in an owner design
@@ -216,7 +216,7 @@ const DEFAULT_CONSTRUCT: BuilderConstruct = {
  *  button on the dock side's own edge) over a real `ChatThread` — message
  *  history always on, the composer gated by `textInput` per the module
  *  doc comment's real-mechanism note. */
-// Panel surface tone (owner amendment): matched to `web-components/t3code.stories.tsx`'s
+// Panel surface tone (owner amendment): matched to `stories/showcase/t3code.stories.tsx`'s
 // own rail/panel background — that story's `slot="start"` carries no bg
 // class of its own, so it renders `WorkspaceShell`'s (there, `kai-workspace`'s)
 // own default aside token, `bg-surface` (`components/workspace/workspace-shell.tsx`'s

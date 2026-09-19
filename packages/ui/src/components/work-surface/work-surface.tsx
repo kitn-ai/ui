@@ -1,6 +1,6 @@
 /**
  * `WorkSurface` — the work pane's chrome, PROMOTED from
- * `src/web-components/builder-workspace.stories.tsx`'s `WorkPane`/`WorkPaneToolbar`
+ * `src/stories/showcase/builder-workspace.stories.tsx`'s `WorkPane`/`WorkPaneToolbar`
  * (2026-08-30). That story is the APPROVED DESIGN and was already a working
  * implementation carrying many rounds of recorded owner feedback; the story now
  * renders THIS component instead of its own copy, so the design contract and the
@@ -9,7 +9,7 @@
  * The reasoning below is the story's, carried over verbatim in substance —
  * read `builder-workspace.stories.tsx`'s module comment for the full record:
  *
- *  - The toolbar mirrors Lovable's browser chrome (`web-components/lovable.stories.tsx`,
+ *  - The toolbar mirrors Lovable's browser chrome (`stories/showcase/lovable.stories.tsx`,
  *    read line by line in that round): a device toggle · a READ-ONLY URL bar
  *    (lock icon + address text, never an editable field) · an open-in-new-tab
  *    button · an expand toggle · a Preview|Code segmented toggle with PREVIEW
@@ -75,7 +75,7 @@ export const WORK_SURFACE_DEVICE_WIDTHS: Record<WorkSurfaceDevice, string> = {
 
 /** The story's own recorded reasoning, carried over: the surrounding viewport —
  *  behind BOTH the preview and the code branch, which share one root — sits on a
- *  MUTED backdrop, matching `web-components/lovable.stories.tsx`'s real preview surface
+ *  MUTED backdrop, matching `stories/showcase/lovable.stories.tsx`'s real preview surface
  *  (its right `<section>`, read line by line: the muted token at 30% around
  *  toolbar + canvas, the toolbar bar itself lighter, and the previewed content
  *  card bordered ON TOP of the muted backdrop). The literal Tailwind

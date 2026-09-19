@@ -1,6 +1,6 @@
 /**
  * `AppHeader` — the workspace's app-level top bar, PROMOTED from
- * `src/web-components/builder-workspace.stories.tsx`'s local `AppHeader`/
+ * `src/stories/showcase/builder-workspace.stories.tsx`'s local `AppHeader`/
  * `ThemeToggleButton` (2026-08-30). That story is the APPROVED DESIGN — the
  * owner's own feedback rounds are recorded in its module comment — and the
  * emitted app had drifted off it (a text "Theme" button, no search at all, a

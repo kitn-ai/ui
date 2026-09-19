@@ -1,11 +1,11 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { type JSX, createSignal, createMemo } from 'solid-js';
-import { BuilderPanel, type BuilderConstruct } from '../components/builder/builder-panel';
-import { BuilderLayout, type BuilderViewport } from '../components/builder/builder-layout';
-import { resolveAccentWrapperStyle } from '../components/builder/builder-preview';
-import { ChatThread } from '../components/chat/chat-thread';
-import { ConversationList } from '../components/conversation/conversation-list';
-import { Empty, EmptyHeader, EmptyTitle, EmptyDescription } from '../components/empty/empty';
+import { BuilderPanel, type BuilderConstruct } from '../../components/builder/builder-panel';
+import { BuilderLayout, type BuilderViewport } from '../../components/builder/builder-layout';
+import { resolveAccentWrapperStyle } from '../../components/builder/builder-preview';
+import { ChatThread } from '../../components/chat/chat-thread';
+import { ConversationList } from '../../components/conversation/conversation-list';
+import { Empty, EmptyHeader, EmptyTitle, EmptyDescription } from '../../components/empty/empty';
 import {
   type UserActionId,
   type AssistantActionId,
@@ -15,26 +15,26 @@ import {
   DEFAULT_USER_ACTION_ROWS,
   DEFAULT_ASSISTANT_ACTION_ROWS,
   ActionRowPicker,
-} from '../components/builder/builder-message-actions';
+} from '../../components/builder/builder-message-actions';
 import {
   type TriggerGroupState,
   ComposerTriggersSection,
   buildTriggerDefs,
   DEFAULT_SLASH_ENTRIES,
   DEFAULT_MENTION_ENTRIES,
-} from '../components/builder/builder-composer-triggers';
+} from '../../components/builder/builder-composer-triggers';
 import {
   type ShellControlsState,
   ShellSection,
   CommandPaletteOverlay,
   CommandPaletteTrigger,
   UserMenu,
-} from '../components/builder/builder-shell-controls';
-import { Switch } from '../components/switch/switch';
-import { Select } from '../components/select/select';
-import { cn } from '../utils/cn';
-import type { ChatMessage, ChatMessageAction, CustomAction } from './chat-types';
-import type { ConversationGroup, ConversationSummary, ModelOption } from '../types';
+} from '../../components/builder/builder-shell-controls';
+import { Switch } from '../../components/switch/switch';
+import { Select } from '../../components/select/select';
+import { cn } from '../../utils/cn';
+import type { ChatMessage, ChatMessageAction, CustomAction } from '../../web-components/chat-types';
+import type { ConversationGroup, ConversationSummary, ModelOption } from '../../types';
 
 // Labs/Builder/Assistant — T-1 build-out (docs/superpowers/specs/
 // 2026-08-28-template-builder-design.md), THIRD template story: the

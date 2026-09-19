@@ -3,7 +3,7 @@
  *  slot="toolbar-start", a trailing cluster (model switcher + effort menu + mic /
  *  voice buttons) in slot="toolbar-end", and a row of suggestion chips below.
  *
- *  Ported from src/web-components/composer-showcase.stories.tsx. Built like
+ *  Ported from src/stories/showcase/composer-showcase.stories.tsx. Built like
  *  ComposedShell.tsx: array/object data is set as JS properties in onMount and
  *  events are wired with addEventListener, because Solid's on:/onClick handlers
  *  don't cross the shadow boundary. Theme-aware — mirrors the page theme. */

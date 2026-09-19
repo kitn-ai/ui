@@ -5,10 +5,10 @@ import './chat-workspace';
 import './conversation-list';
 import './chat';
 import './card';
-import { attachKaiActions } from '../stories/docs/story-actions';
-import { textMessage } from '../state/index';
-import type { ChatMessage } from './chat-types';
-import type { ConversationSummary, ConversationGroup } from '../types';
+import { attachKaiActions } from '../docs/story-actions';
+import { textMessage } from '../../state/index';
+import type { ChatMessage } from '../../web-components/chat-types';
+import type { ConversationSummary, ConversationGroup } from '../../types';
 
 // Labs: the re-cast kai-workspace shell slots. Five bounded regions the
 // consumer fills with their own light-DOM markup:

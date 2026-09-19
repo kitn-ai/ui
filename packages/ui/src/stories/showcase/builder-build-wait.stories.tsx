@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { For, createSignal, onCleanup } from 'solid-js';
-import { BuildWait, BUILD_WAIT_STEPS } from '../components/build-wait/build-wait';
-import { BUILDER_TEMPLATES, type BuilderCardTemplateId } from '../components/builder/builder-start';
+import { BuildWait, BUILD_WAIT_STEPS } from '../../components/build-wait/build-wait';
+import { BUILDER_TEMPLATES, type BuilderCardTemplateId } from '../../components/builder/builder-start';
 
 // Labs/Builder/Build wait — the screen the builder shows while a construct's
 // preview boots. It replaces one line of small text, which the owner called

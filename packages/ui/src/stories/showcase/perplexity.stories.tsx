@@ -2,9 +2,9 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal, For, Show } from 'solid-js';
 import { Copy, RefreshCw } from 'lucide-solid';
 import './register'; // every kai-* element used below
-import type { KaiNavItem } from '../components/nav/nav';
-import type { KaiTabItem } from '../components/tabs/tabs';
-import type { ConversationSummary, ConversationGroup } from '../types';
+import type { KaiNavItem } from '../../components/nav/nav';
+import type { KaiTabItem } from '../../components/tabs/tabs';
+import type { ConversationSummary, ConversationGroup } from '../../types';
 
 // Labs/Apps: a third dogfood — "Perplexity", an answer-engine UI, built on the
 // re-cast kai-workspace SHELL (five layout slots; the rail is a real

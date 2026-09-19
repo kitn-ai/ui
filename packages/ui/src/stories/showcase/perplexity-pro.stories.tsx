@@ -2,8 +2,8 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal, createEffect, For, Show } from 'solid-js';
 import { Download, Copy, VenetianMask, BatteryMedium, Image as ImageIcon, LayoutGrid } from 'lucide-solid';
 import './register'; // every kai-* element used below
-import type { KaiNavItem } from '../components/nav/nav';
-import type { KaiTabItem } from '../components/tabs/tabs';
+import type { KaiNavItem } from '../../components/nav/nav';
+import type { KaiTabItem } from '../../components/tabs/tabs';
 
 // Labs/Apps: a fourth dogfood - "Perplexity Pro", the Perplexity DESKTOP app
 // (the Comet-style native shell), distinct from the web "Perplexity" answer-engine

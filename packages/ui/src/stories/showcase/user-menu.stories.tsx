@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { onMount } from 'solid-js';
 import { ChevronDown } from 'lucide-solid';
 import './register'; // registers kai-menu, kai-avatar, kai-status (and the rest)
-import type { KaiMenuItem } from './menu';
+import type { KaiMenuItem } from '../../web-components/menu';
 
 // Labs: the user menu is a RECIPE, not an element. It is kai-menu with a slotted
 // trigger (kai-avatar + name + plan + a chevron + a kai-status dot) and an items

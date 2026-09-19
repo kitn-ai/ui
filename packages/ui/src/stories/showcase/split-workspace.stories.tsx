@@ -9,11 +9,11 @@ import {
   type LucideProps,
 } from 'lucide-solid';
 import './register'; // every kai-* element used below
-import { type AgentStatus, type AgentStatusTone } from '../components/agent-card/agent-card';
-import { cn } from '../utils/cn';
-import type { KaiNavItem } from '../components/nav/nav';
-import type { KaiCommandItem } from './command';
-import { toast, configureToasts } from '../primitives/toast-store';
+import { type AgentStatus, type AgentStatusTone } from '../../components/agent-card/agent-card';
+import { cn } from '../../utils/cn';
+import type { KaiNavItem } from '../../components/nav/nav';
+import type { KaiCommandItem } from '../../web-components/command';
+import { toast, configureToasts } from '../../primitives/toast-store';
 
 // Labs/Apps: AMUX — a full multi-agent workspace. A desktop shell with a LEFT
 // workspace rail (kai-nav) and a TOP-LEVEL view toggle — AGENTS or BROWSER — that

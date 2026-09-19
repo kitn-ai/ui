@@ -36,7 +36,7 @@ inherited. Regenerate with `node tools/fetch-photos.mjs --force`.
 
 ## Inherited, provenance unrecorded
 
-These three arrived base64-inlined in `packages/ui/src/web-components/v0.stories.tsx`
+These three arrived base64-inlined in `packages/ui/src/stories/showcase/v0.stories.tsx`
 and carried no attribution, so their photographers are unknown. They are almost
 certainly Unsplash as well, from the same searches.
 

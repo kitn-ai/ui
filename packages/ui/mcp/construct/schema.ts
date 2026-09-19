@@ -496,7 +496,7 @@ export const ConstructSchema = z
      *  slot semantics: assigned nodes replace fallback).
      *
      *  Backed by `components/work-surface/work-surface.tsx`'s `WorkSurface`, promoted from
-     *  `web-components/builder-workspace.stories.tsx` — the approved design AND a
+     *  `stories/showcase/builder-workspace.stories.tsx` — the approved design AND a
      *  working implementation. Every key below is one real affordance that
      *  component ships; an affordance with no mechanism is not here.
      *

@@ -1,5 +1,5 @@
 import { readFileSync, readdirSync } from 'node:fs';
-import { join } from 'node:path';
+import { basename, join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import '../../src/web-components/artifact';
 import '../../src/web-components/attachments';
@@ -43,16 +43,28 @@ describe('authored surface layer', () => {
     // stripper then replaced that bug with a worse one (an unbalanced
     // apostrophe in JSX text left it stuck in string state), so this reads the
     // real parser: comments are trivia and are never nodes.
-    const elDir = join(__dirname, '..', '..', 'src', 'web-components');
-    const appFiles = readdirSync(elDir).filter(
-      (f) =>
-        f.endsWith('.stories.tsx') &&
-        readLabsTitles(readFileSync(join(elDir, f), 'utf8'), f).includes('Labs/Apps'),
+    // Walks ALL of src/, not one directory: the Labs/Apps entries are story
+    // FILES, and moving one (the 2026-09-19 showcase move took all 38 story-only
+    // entries to src/stories/showcase/) must not read as "no apps exist". This
+    // was a flat readdir of src/web-components until the move dropped it to 0
+    // and the vacuity check below fired -- which is the check doing its job.
+    const srcDir = join(__dirname, '..', '..', 'src');
+    const walk = (dir: string, out: string[] = []): string[] => {
+      for (const entry of readdirSync(dir, { withFileTypes: true })) {
+        const full = join(dir, entry.name);
+        if (entry.isDirectory()) walk(full, out);
+        else if (entry.name.endsWith('.stories.tsx')) out.push(full);
+      }
+      return out;
+    };
+    const appFiles = walk(srcDir).filter((f) =>
+      readLabsTitles(readFileSync(f, 'utf8'), basename(f)).includes('Labs/Apps'),
     );
     expect(appFiles.length).toBeGreaterThan(0);
     const surfaces = new Set(inventory.filter((e) => e.sort === 'surface').map((e) => e.title));
     for (const f of appFiles) {
-      expect(surfaces.has(f.replace('.stories.tsx', '')), `${f} is not sorted as a surface`).toBe(true);
+      const name = basename(f).replace('.stories.tsx', '');
+      expect(surfaces.has(name), `${name} is not sorted as a surface`).toBe(true);
     }
   });
 

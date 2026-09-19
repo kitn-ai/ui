@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { type JSX, createSignal, createMemo } from 'solid-js';
-import { BuilderPanel, type BuilderConstruct } from '../components/builder/builder-panel';
-import { BuilderLayout, type BuilderViewport } from '../components/builder/builder-layout';
-import { resolveAccentWrapperStyle } from '../components/builder/builder-preview';
-import { ChatThread } from '../components/chat/chat-thread';
-import { mix, SkeletonBar, StubStatTile, StubNavRow, StubTableRow } from '../components/builder/builder-skeleton';
+import { BuilderPanel, type BuilderConstruct } from '../../components/builder/builder-panel';
+import { BuilderLayout, type BuilderViewport } from '../../components/builder/builder-layout';
+import { resolveAccentWrapperStyle } from '../../components/builder/builder-preview';
+import { ChatThread } from '../../components/chat/chat-thread';
+import { mix, SkeletonBar, StubStatTile, StubNavRow, StubTableRow } from '../../components/builder/builder-skeleton';
 import {
   type UserActionId,
   type AssistantActionId,
@@ -14,19 +14,19 @@ import {
   DEFAULT_USER_ACTION_ROWS,
   DEFAULT_ASSISTANT_ACTION_ROWS,
   ActionRowPicker,
-} from '../components/builder/builder-message-actions';
+} from '../../components/builder/builder-message-actions';
 import {
   type TriggerGroupState,
   ComposerTriggersSection,
   buildTriggerDefs,
   DEFAULT_SLASH_ENTRIES,
   DEFAULT_MENTION_ENTRIES,
-} from '../components/builder/builder-composer-triggers';
-import { Switch } from '../components/switch/switch';
-import { RadioGroup, type RadioOption } from '../components/radio/radio';
-import { Select } from '../components/select/select';
-import { cn } from '../utils/cn';
-import type { ChatMessage, ChatMessageAction, CustomAction } from './chat-types';
+} from '../../components/builder/builder-composer-triggers';
+import { Switch } from '../../components/switch/switch';
+import { RadioGroup, type RadioOption } from '../../components/radio/radio';
+import { Select } from '../../components/select/select';
+import { cn } from '../../utils/cn';
+import type { ChatMessage, ChatMessageAction, CustomAction } from '../../web-components/chat-types';
 
 // Labs/Builder/In-app assistant — Round A (T-1/T-2/T-6, docs/superpowers/
 // specs/2026-08-28-template-builder-design.md): the SECOND template story,

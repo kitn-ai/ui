@@ -1863,7 +1863,7 @@ describe('the app header strip — `split` composes the promoted AppHeader (2026
   // The owner-reported defect: the emitted Workspace rendered its header chrome
   // as a text "Theme" button, no search at all and a bare avatar, all inside
   // ChatThread's own header row (so, inside the chat rail's width). The story
-  // `src/web-components/builder-workspace.stories.tsx` is the binding acceptance
+  // `src/stories/showcase/builder-workspace.stories.tsx` is the binding acceptance
   // surface; its `AppHeader` is now a real component and codegen composes THAT.
   const split = (over: Record<string, unknown> = {}): Construct =>
     construct({

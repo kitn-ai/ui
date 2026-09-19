@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { onMount, onCleanup } from 'solid-js';
 import './conversation-list';
-import { attachKaiActions } from '../stories/docs/story-actions';
-import type { ConversationSummary, ConversationGroup } from '../types';
+import { attachKaiActions } from '../docs/story-actions';
+import type { ConversationSummary, ConversationGroup } from '../../types';
 
 // Labs: rail collapse on the standalone <kai-conversations>. Collapsed shrinks
 // the whole rail to a floating reopen button (the same fallback kai-workspace

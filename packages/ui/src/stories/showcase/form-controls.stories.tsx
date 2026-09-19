@@ -11,7 +11,7 @@ import './checkbox-group';
 import './radio-group';
 import './slider';
 import './select';
-import { attachKaiActions } from '../stories/docs/story-actions';
+import { attachKaiActions } from '../docs/story-actions';
 
 // Wire a kai-* element's declared CustomEvents to the Actions panel from a `ref`.
 const withActions = (e: Element) => onMount(() => onCleanup(attachKaiActions(e as HTMLElement)));
