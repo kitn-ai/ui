@@ -329,3 +329,70 @@ those class names, so tokenizing ripples into them); and the 3 `var(--brand)` re
 `packages/ui/mcp/mcp/tools/theme.ts` derives `DECLARED_TOKENS` via `declaredKaiTokens(themeCss)` and
 resolves its curated `BRAND_TOKENS` against that, erroring loudly on a name the file no longer
 declares. The row's verdict is stale, not the code.
+
+---
+
+## 8. §2.1 phase 2 landed: the shape system, and why the radius slider looked half-wired
+
+**The owner's observation, explained.** The radius slider visibly moved the cards tab and
+"not as much" on chat and components. Three separate causes, each measured:
+
+1. `--radius-2xl` / `-3xl` were NEVER re-pointed, so `rounded-2xl` — the class the message
+   bubble uses — kept Tailwind's stock `1rem` and ignored `--kai-radius` entirely.
+2. Every tab's outer wrapper is `rounded-xl`, which DOES follow. So the knob appeared to
+   work while the contents ignored it; the defect read as "not as much" rather than broken,
+   which is exactly the shape of defect that survives review.
+3. `rounded-full` compiles to the literal `3.40282e38px` — unreachable by any custom
+   property — so the pill family (badges, chips, tags, switch tracks, count bubbles) could
+   not follow a shape choice at all.
+
+**What shipped.** The ladder is complete (`2xl: +8px`, `3xl: +12px`), the pill family reads
+a kit rung `--radius-pill` (declared in the `--radius-*` namespace, so Tailwind generates
+`rounded-pill` itself) with **22 sites** re-authored and **44 circles deliberately left
+alone**, and code blocks read `--code-radius` — a token that existed but which theme.css
+never named, so no consumer-facing surface could set it. The theme studio's Shape panel now
+has Radius / Density / Pill / Code, and the Components tab has a geometry example: a shape
+ladder, a density ladder, and the circle drawn beside them as the boundary.
+
+**Two traps worth carrying forward.**
+
+- **A new class name enters `cn`'s conflict graph, and then its ORACLE.** `rounded-pill` made
+  four drift tests fail. The merger was RIGHT (both `rounded-lg` and `rounded-pill` key into
+  `radius`); `tailwind-merge` was behind, because it does not know the kit's rung and reported
+  no conflict. The fix is to teach the oracle — the same move the font-size aliases already
+  needed — and the failure reads as a merger bug until you check which side is stale.
+- **Pill defaults are a clamp, not a value.** Border-radius clamps to half the box, so a rem
+  default means "fully round up to N tall" and NOT "always round". 2rem would have left a
+  caller-heighted skeleton bar and the amplitude-driven audio bars with round-but-not-full
+  caps; the default is 4rem (fully round to 8rem / 128px tall) for that reason.
+
+**The remaining geometry families, measured, split by what Tailwind actually routes.**
+
+| family | call sites | routed through a theme variable? | cost to tokenize |
+|---|---:|---|---|
+| spacing | ~986 | yes (`--spacing`) | DONE |
+| radius ladder | — | yes (`--radius-*`) | DONE (ladder + pill) |
+| font weight | 132 | **yes** (`--font-weight-*`) | cheap: 4 rungs, one line each |
+| shadow geometry | 100 | **yes** — proven by experiment: declaring `--shadow-md: var(--kai-shadow-md, …)` in `@theme` rewrites `.shadow-md` to read it | cheap: rungs, one line each |
+| ease | few | yes (`--ease-*`) | cheap |
+| border width | 102 | **no** — `.border{border-width:1px}` is a literal | expensive: per-site |
+| ring width/offset | 45 | **no** — `calc(1px + …)` literal | expensive: per-site |
+| opacity | 25 | **no** — `.opacity-50{opacity:.5}` | expensive: per-site |
+| transition duration | 7 | partly (`--default-transition-duration` only covers implicit transitions) | cheap-ish: 7 sites |
+
+**Recommendation for phase 3, in order:** shadow rungs and font-weight rungs (both cheap,
+232 call sites between them, and both visible in the studio's existing Shadow and Typography
+panels); then decide explicitly about the expensive three and RECORD the decision either way
+— border width, ring width and opacity are Tailwind *literals*, so "tokenizing" them is a
+per-call-site edit (172 sites) and not a one-line rung, and a knob most consumers never turn
+may not be worth it. Do not start them without saying that out loud.
+
+**Noted, not done:** `mcp/mcp/tools/scaffold.ts` emits `class="rounded-full"` on a pill
+button in generated consumer code. Now inconsistent with the kit's own pills; changing
+emitted code needs the scaffold's CSS story (does the consumer's Tailwind see `rounded-pill`?
+only if they import theme.css, which the scaffolds do) checked first.
+
+**How to see any of this:** `pnpm dev` from the repo root → the docs site at
+`http://localhost:4321/theme/editor` (that page renders the kit's studio through
+`apps/docs/src/components/ThemeStudio.tsx`), or serve the built standalone page
+`packages/ui/dist/theme-studio/index.html` from `kai dev`.
