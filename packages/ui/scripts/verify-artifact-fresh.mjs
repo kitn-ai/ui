@@ -68,13 +68,21 @@
 //
 // SCOPE
 // -----
-// Sources are every file under `src/` and `scripts/`, plus `package.json`.
-// Files the BUILD ITSELF writes back into `src/` are excluded (see
-// GENERATED_SOURCES) — otherwise a correctly built tree fails instantly, since
-// postbuild's `build:api` writes `src/elements/element-meta.json` a second after
-// `dist/kai.es.js`. Excluding them leaves no hole: those files are derived, and
-// whether they match their generator is exactly what `verify:generated` checks.
-// This guard covers hand-written source; that one covers generated source.
+// Sources are every file under `src/`, `scripts/` and `mcp/`, plus
+// `package.json` (see SOURCE_DIRS — `mcp` is there because the MCP tree was
+// `src/agent-tooling/` until 2026-09-02). Files the BUILD ITSELF writes back
+// into those trees are excluded (see GENERATED_SOURCES) — otherwise a correctly
+// built tree fails instantly, since postbuild's `build:api` writes
+// `src/elements/element-meta.json` a second after `dist/kai.es.js`.
+//
+// Excluding them leaves no hole, and the proof is per entry, not a general
+// claim: the build writes into THREE trees now — `src/` (prebuild + build:api),
+// `mcp/` and `scripts/` (build:api and build:blocks in postbuild) — and each
+// exclusion names the guard that owns those bytes (`verify:generated` for the
+// `src/` and `mcp/` artifacts, `verify:blocks`' spawned `gen-blocks --check`
+// for the driver pages). This guard covers hand-written source; those cover
+// generated source. An entry with no owning guard belongs here only with a
+// reason written beside it.
 //
 // A ZERO-SCAN RUN IS A HARD FAILURE. Resolve no artifacts, or find no sources,
 // and this exits non-zero rather than reporting a clean tree. A runner that
@@ -159,14 +167,26 @@ const SOURCE_DIRS = ['src', 'scripts', 'mcp'];
 const EXTRA_SOURCE_FILES = ['package.json'];
 const SKIP_DIRS = new Set(['node_modules', '.git', '.nx', 'dist']);
 
-// Files the BUILD writes back into `src/`. Each is a build OUTPUT that happens
-// to live among the inputs, so its mtime is always a second or two NEWER than
-// dist/ and would make this guard un-passable on a correctly built tree.
+// Files the BUILD writes back into the source tree. Each is a build OUTPUT that
+// happens to live among the inputs, so its mtime is always a second or two NEWER
+// than dist/ and would make this guard un-passable on a correctly built tree.
+//
+// AN ENTRY ENDING IN `/` EXCLUDES THE WHOLE SUBTREE, and that form is not
+// convenience: two of these outputs are SETS whose membership is DERIVED — one
+// driver page per block (from the block registry) and one fixture per buildable
+// starter (from mcp/construct/templates.ts). A hand-listed copy of either rots
+// the moment a block or a template is added, and it rots QUIETLY in the worst
+// direction: the new file is simply a newer-than-dist source, so a correctly
+// built tree fails again — which is exactly how this guard stood before these
+// entries existed, naming 11 files on a tree nobody had touched. The trailing
+// slash is load-bearing: `pages/generated/` must not excuse
+// `pages/generated-extra/` (the self-test carries that decoy).
 //
 // This list is a COPY -- the authority for each entry is the generator named
-// beside it, and `scripts/verify-generated-sync.mjs` is the guard that checks
-// their CONTENT. If a fresh, clean build ever fails this guard naming a file
-// under src/, the answer is almost certainly a new generator writing here that
+// beside it, and the guard named beside it is what checks the CONTENT, so an
+// exclusion here does not drop coverage, it moves it to the guard that owns it.
+// If a fresh, clean build ever fails this guard naming a file under src/, mcp/
+// or scripts/, the answer is almost certainly a new generator writing there that
 // needs adding to this list, not a stale tree.
 const GENERATED_SOURCES = new Set([
   'src/elements/compiled.css', // build:css (gitignored)
@@ -176,7 +196,26 @@ const GENERATED_SOURCES = new Set([
   'src/elements/element-nonscalar.json', // scripts/gen-element-nonscalar.mjs
   'src/elements/element-types.d.ts', // scripts/gen-element-types.mjs
   'mcp/catalog/derived.json', // scripts/gen-catalog.mjs
+  // build:api. Content drift is verify:generated's (both addresses of the schema
+  // are on its list); the template fixtures are on its list AND swept by
+  // directory, so a fixture the generator writes for a NEW template is a red
+  // there rather than an unguarded file here.
+  'mcp/construct/construct.v1.schema.json', // scripts/gen-construct-schema.mjs
+  'mcp/construct/fixtures/templates/', // scripts/gen-construct-template-fixtures.mjs -- one file per template
+  // build:blocks (postbuild). verify:blocks' [fresh] step spawns
+  // `gen-blocks --check`, which diffs EVERY entry of the same `outputs` map
+  // these pages are written from, and its per-block prereq check requires each
+  // page to exist. That is the guard that owns these bytes.
+  'scripts/block-driver/pages/generated/', // scripts/gen-blocks.mjs -- one page per block
 ]);
+
+// Exact-path entries plus subtree entries, matched on a PATH prefix -- the
+// separator lives in the entry itself (its trailing slash), so no basename or
+// suffix match can creep in. See the prefix decoy in the self-test: a mutant
+// that matched `startsWith(p.replace(/\/$/, ''))` excused a sibling directory
+// and passed every other case here.
+const GENERATED_PREFIXES = [...GENERATED_SOURCES].filter((rel) => rel.endsWith('/'));
+const isGenerated = (rel) => GENERATED_SOURCES.has(rel) || GENERATED_PREFIXES.some((p) => rel.startsWith(p));
 // NOT excluded, deliberately: `src/primitives/card-validate-schemas.ts` is
 // generated by the build too -- `prebuild` runs `build:card-validation`, which
 // is `scripts/gen-card-validation-schemas.mjs` writing exactly that path. It
@@ -211,7 +250,7 @@ function walkSources(dir, root, out) {
     }
     if (!entry.isFile()) continue;
     const rel = posix(relative(root, abs));
-    if (GENERATED_SOURCES.has(rel)) continue;
+    if (isGenerated(rel)) continue;
     out.push({ rel, mtimeMs: statSync(abs).mtimeMs });
   }
 }
@@ -278,7 +317,7 @@ function analyze(pkgRoot, artifactRels) {
     // exists so that an over-broad GENERATED_SOURCES cannot hide behind one
     // file that silently bypasses it. A mutant that excluded every fixture
     // source survived the self-test until this path honoured the set too.
-    if (GENERATED_SOURCES.has(f)) continue;
+    if (isGenerated(f)) continue;
     const abs = join(pkgRoot, f);
     if (existsSync(abs)) sources.push({ rel: f, mtimeMs: statSync(abs).mtimeMs });
   }
@@ -318,7 +357,7 @@ const REBUILD_ADVICE =
 // ---------------------------------------------------------------------------
 const BASE_SECONDS = Math.floor(Date.now() / 1000) - 86_400;
 
-function makeFixture(root, { sourceOffset, artifactOffset, artifacts, withSources = true, decoy = false, artifactDirs = [] }) {
+function makeFixture(root, { sourceOffset, artifactOffset, artifacts, withSources = true, decoy = false, prefixDecoy = false, artifactDirs = [] }) {
   mkdirSync(join(root, 'src/elements'), { recursive: true });
   mkdirSync(join(root, 'scripts'), { recursive: true });
   mkdirSync(join(root, 'dist'), { recursive: true });
@@ -338,7 +377,16 @@ function makeFixture(root, { sourceOffset, artifactOffset, artifacts, withSource
     // fixture carries one, so the exclusion is exercised by the passing case
     // rather than only asserted in a comment.
     touch('src/elements/element-meta.json', '{}\n', artifactOffset + 5);
+    // The same, for the SUBTREE form: a file under a `/`-terminated entry, newer
+    // than dist, in a tree (`mcp/`) that is scanned but was never excluded from.
+    // Carried by every fixture for the same reason as the line above.
+    touch('mcp/construct/fixtures/templates/widget.construct.json', '{}\n', artifactOffset + 5);
   }
+  // A path that shares the prefix TEXT with a subtree entry but not the path:
+  // `pages/generated-extra/` where the entry is `pages/generated/`. It must
+  // still be reported. The positive control for the separator being part of the
+  // match, the way `decoy` is for the exact-path entries.
+  if (prefixDecoy) touch('scripts/block-driver/pages/generated-extra/index.html', '<!doctype html>\n', artifactOffset + 5);
   // A file that SHARES A BASENAME with an excluded generated artifact but sits
   // at a different path, planted newer than dist. It must still be reported
   // stale. The exclusion is a set of exact repo-relative paths, and this is the
@@ -383,6 +431,11 @@ const SELF_TEST_CASES = [
   {
     name: 'the exclusion is path-exact: a same-basename file elsewhere is still STALE',
     fixture: { sourceOffset: 0, artifactOffset: 3600, artifacts: DEFAULT_ARTIFACTS, decoy: true },
+    expect: 'stale',
+  },
+  {
+    name: 'a SUBTREE entry does not excuse a sibling sharing its prefix text',
+    fixture: { sourceOffset: 0, artifactOffset: 3600, artifacts: DEFAULT_ARTIFACTS, prefixDecoy: true },
     expect: 'stale',
   },
   {
