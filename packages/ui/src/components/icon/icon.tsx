@@ -20,6 +20,7 @@ import {
   // Pane / media chrome.
   Maximize2, Minimize2, Eye, EyeOff, Bell, Square, Minus, Play,
 } from 'lucide-solid';
+import { isSafeImageSrc } from '../../primitives/url-scheme-policy';
 
 type IconComponent = Component<{ class?: string }>;
 
@@ -145,7 +146,10 @@ export function renderIcon(
   if (Named) {
     return <Named class={opts?.imgClass ?? opts?.class ?? 'mr-2 size-4 shrink-0'} />;
   }
-  const isUrl = /^(https?:|\/|data:)/.test(icon);
+  // The image policy, not a local regex (it used to be `/^(https?:|\/|data:)/`, a
+  // third URL policy inside a package that claims one). Image-only by name: it must
+  // never be reused for an href.
+  const isUrl = isSafeImageSrc(icon);
   // Fail-loud guard (P-8, blocks-and-parts spec 2026-08-31; spike finding
   // F-7): a kebab/identifier-shaped string that isn't a URL and isn't a known
   // name is almost certainly a typo'd/unregistered icon (e.g. `icon="send"`

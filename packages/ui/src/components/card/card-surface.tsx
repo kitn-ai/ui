@@ -1,6 +1,7 @@
 import { type JSX, Show, splitProps, mergeProps, createSignal, createUniqueId } from 'solid-js';
 import { Dynamic } from 'solid-js/web';
 import { cn } from '../../utils/cn';
+import { isSafeUrl } from '../../primitives/url-scheme-policy';
 import { X } from 'lucide-solid';
 
 export type CardAppearance = 'outlined' | 'filled' | 'plain' | 'accent';
@@ -110,8 +111,13 @@ export function CardSurface(props: CardSurfaceProps): JSX.Element {
     local.onDismiss?.();
   };
 
-  const isLink = () => Boolean(local.href);
-  const isButton = () => !isLink() && Boolean(local.clickable);
+  // Only a SAFE href makes the card a link, and an href that exists but FAILED the
+  // policy forces the inert branch: `!local.href` (not `!isLink()`) is what lets
+  // `clickable` promote a card to a button, so a hostile href cannot silently become
+  // an event-emitter. Same shape as row.tsx's interactive().
+  const safeHref = () => (local.href && isSafeUrl(local.href) ? local.href : undefined);
+  const isLink = () => Boolean(safeHref());
+  const isButton = () => !local.href && Boolean(local.clickable);
   const isInteractive = () => isLink() || isButton();
 
   // The responsive layout is driven by a per-instance @container rule (a query on
@@ -198,7 +204,7 @@ export function CardSurface(props: CardSurfaceProps): JSX.Element {
       <Dynamic
         component={isLink() ? 'a' : 'div'}
         part="card"
-        href={isLink() ? local.href : undefined}
+        href={isLink() ? safeHref() : undefined}
         target={isLink() ? local.target : undefined}
         rel={isLink() ? rel() : undefined}
         role={isButton() ? 'button' : undefined}

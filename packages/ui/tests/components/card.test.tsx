@@ -156,6 +156,44 @@ describe('<Card>', () => {
     expect(root.getAttribute('role')).toBeNull();
   });
 
+  // --- unsafe-href rule ------------------------------------------------------
+  // The same policy on the same sink as `Row` (src/components/row/row.tsx). Before
+  // 2026-09-19 `Card` put the raw href on the anchor while `Row` refused an unsafe
+  // one, and the pair disagreed silently. No built-in card renderer reaches this
+  // sink with model data today, but `CardRenderer`'s `types` map is the sanctioned
+  // extension point for a consumer renderer, which is how a model URL would arrive.
+  test('a javascript: href renders the inert card: content visible, no anchor, no handler', () => {
+    const onCardClick = vi.fn();
+    const { container } = render(() => (
+      // eslint-disable-next-line no-script-url
+      <Card heading="Docs" href="javascript:alert(1)" clickable onCardClick={onCardClick}>
+        body
+      </Card>
+    ));
+    const root = container.firstElementChild as HTMLElement;
+    expect(container.textContent).toContain('Docs'); // escaping into visibility
+    expect(container.textContent).toContain('body');
+    expect(root.tagName).not.toBe('A');
+    expect(root.hasAttribute('href')).toBe(false);
+    // NOT promoted into a button either: an unsafe href must not become an emitter.
+    expect(root.tagName).not.toBe('BUTTON');
+    expect(root.getAttribute('role')).toBeNull();
+    root.click();
+    expect(onCardClick).not.toHaveBeenCalled();
+  });
+
+  test('a data:text/html href is refused the same way', () => {
+    const { container } = render(() => (
+      <Card heading="Docs" href="data:text/html,<script>alert(1)</script>">
+        body
+      </Card>
+    ));
+    const root = container.firstElementChild as HTMLElement;
+    expect(root.hasAttribute('href')).toBe(false);
+    expect(root.tagName).not.toBe('A');
+    expect(container.textContent).toContain('Docs');
+  });
+
   test('href target=_blank gets a safe default rel', () => {
     const { container } = render(() => (
       <Card heading="External" href="https://kitn.ai" target="_blank">

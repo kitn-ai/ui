@@ -79,3 +79,30 @@ test('clickable makes the card a role=button that fires kai-card-click', async (
   card.click();
   expect(fired).toBe(true);
 });
+
+// The `<kai-card href>` ATTRIBUTE path, which reaches the same sink as the component
+// prop. `Card` refused an unsafe href only from 2026-09-19 (see tests/components/
+// card.test.tsx); before that this attribute put `javascript:` straight on the
+// anchor's href, and the mirrored `Row` primitive already refused it.
+test('an unsafe href ATTRIBUTE renders the inert card, not an anchor', async () => {
+  const el = document.createElement('kai-card');
+  el.setAttribute('href', 'javascript:alert(1)');
+  el.innerHTML = '<h3 slot="header">Title</h3>body';
+  document.body.appendChild(el);
+  await flush();
+  const root = el.shadowRoot!;
+  expect(root.querySelector('a')).toBeNull();
+  expect(root.querySelector('[part="card"]')?.tagName).not.toBe('A');
+  expect(root.querySelector('[part="card"]')?.hasAttribute('href')).toBe(false);
+  // Content stays visible: escaping into visibility, never a silent drop.
+  expect(root.textContent).toContain('body');
+});
+
+test('a safe href ATTRIBUTE still renders the anchor (the control)', async () => {
+  const el = document.createElement('kai-card');
+  el.setAttribute('href', 'https://kitn.ai');
+  document.body.appendChild(el);
+  await flush();
+  const anchor = el.shadowRoot!.querySelector('a');
+  expect(anchor?.getAttribute('href')).toBe('https://kitn.ai');
+});

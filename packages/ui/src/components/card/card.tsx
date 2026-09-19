@@ -1,8 +1,18 @@
 import { type JSX, Show, splitProps, mergeProps, createSignal, createUniqueId } from 'solid-js';
 import { Dynamic } from 'solid-js/web';
 import { cn } from '../../utils/cn';
+import { isSafeUrl } from '../../primitives/url-scheme-policy';
 import { AlertTriangle, X } from 'lucide-solid';
 
+/**
+ * Unsafe-href rule (the same policy and the same sink as `Row`): an `href` that
+ * fails `isSafeUrl` (e.g. `javascript:`) is NOT downgraded into a clickable card
+ * that still fires a handler, not even when `clickable` is also set (the first cut
+ * of this fix let `clickable` promote it to a role=button emitter; a test caught
+ * that). The card renders inert - heading and body visible,
+ * no anchor, no `onCardClick` - mirroring `row.tsx`. Two sibling primitives with
+ * the identical sink disagreeing about this was the defect.
+ */
 export interface CardProps extends JSX.HTMLAttributes<HTMLDivElement> {
   /** Heading rendered in the card chrome (the contract's CardEnvelope.title).
    *  NB: NOT `title` — `title` is a reserved IDL attr (see define.tsx RESERVED). */
@@ -97,8 +107,13 @@ export function Card(props: CardProps): JSX.Element {
     local.onDismiss?.();
   };
 
-  const isLink = () => Boolean(local.href);
-  const isButton = () => !isLink() && Boolean(local.clickable);
+  // Only a SAFE href makes the card a link, and an href that exists but FAILED the
+  // policy forces the inert branch: `!local.href` (not `!isLink()`) is what lets
+  // `clickable` promote a card to a button, so a hostile href cannot silently become
+  // an event-emitter. Same shape as row.tsx's interactive().
+  const safeHref = () => (local.href && isSafeUrl(local.href) ? local.href : undefined);
+  const isLink = () => Boolean(safeHref());
+  const isButton = () => !local.href && Boolean(local.clickable);
   const isInteractive = () => isLink() || isButton();
 
   const activate = (event: MouseEvent | KeyboardEvent) => local.onCardClick?.(event);
@@ -173,7 +188,7 @@ export function Card(props: CardProps): JSX.Element {
       <Dynamic
         component={isLink() ? 'a' : 'div'}
         part="card"
-        href={isLink() ? local.href : undefined}
+        href={isLink() ? safeHref() : undefined}
         target={isLink() ? local.target : undefined}
         rel={isLink() ? rel() : undefined}
         role={isButton() ? 'button' : undefined}
