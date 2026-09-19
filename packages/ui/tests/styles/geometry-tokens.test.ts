@@ -28,6 +28,11 @@ import { describe, expect, it } from 'vitest';
 const ROOT = join(__dirname, '..', '..');
 const THEME_CSS = readFileSync(join(ROOT, 'theme.css'), 'utf8');
 const COMPILED = readFileSync(join(ROOT, 'src', 'elements', 'compiled.css'), 'utf8');
+/** Tailwind's OWN theme source, so the kit's fallbacks can be compared against the
+ *  values they claim to reproduce instead of against numbers typed into this file. */
+const TW_THEME = readFileSync(join(ROOT, '..', '..', 'node_modules', 'tailwindcss', 'theme.css'), 'utf8');
+const twDecl = (name: string): string | undefined =>
+  TW_THEME.match(new RegExp(`^\\s*${name}:\\s*([^;]+);`, 'm'))?.[1]?.replace(/\s+/g, ' ').trim();
 
 /** Every file whose class strings ship in the element bundle. Stories and tests are
  *  excluded for the same reason `src/elements/styles.css` excludes them from
@@ -100,6 +105,52 @@ describe('geometry tokens are overridable by a consumer', () => {
     expect(solid, 'solid.css must keep importing the sheet that declares the tokens').toMatch(
       /@import\s+['"]\.\/theme\.css['"]/,
     );
+  });
+});
+
+describe('elevation and the weight ladder are routed through kit tokens too', () => {
+  const shadowDecls = [...THEME_CSS.matchAll(/^\s*(--shadow[a-z0-9-]*):\s*([^;]+);/gm)].map(
+    (m) => [m[1], m[2].replace(/\s+/g, ' ').trim()] as const,
+  );
+
+  it('every shadow rung theme.css declares scales by --kai-shadow-strength', () => {
+    // Derived from what theme.css declares, so a rung added later without the
+    // multiplier is red here — a rung that escapes the knob is exactly how
+    // `rounded-2xl` escaped the radius knob.
+    expect(shadowDecls.length, 'no shadow rungs declared — the derivation broke').toBeGreaterThan(5);
+    const escaped = shadowDecls
+      .filter(([, v]) => !v.includes('var(--kai-shadow-strength, 1)'))
+      .map(([k]) => k);
+    expect(escaped, `these rungs ignore the elevation knob: ${escaped.join(', ')}`).toEqual([]);
+    expect(
+      shadowDecls.map(([k]) => k),
+      "bare `shadow` is 82 of the kit's call sites and reads its own key — it must be declared",
+    ).toContain('--shadow');
+  });
+
+  it("un-scaled, every rung is exactly Tailwind's own value — so the default moves nothing", () => {
+    for (const [name, value] of shadowDecls) {
+      const unscaled = value.replace(/calc\(([^()]*?)\s*\*\s*var\(--kai-shadow-strength,\s*1\)\)/g, '$1').trim();
+      expect(unscaled, `${name} must reproduce Tailwind's value for the same rung`).toBe(twDecl(name));
+    }
+  });
+
+  it('the compiled sheet proves the plumbing rather than the declaration', () => {
+    // The declaration could be right while the utility reads something else; the
+    // sheet is what a shadow root actually resolves.
+    expect(compiledRule('shadow') ?? '', 'bare .shadow must read the multiplier').toContain('--kai-shadow-strength');
+    expect(compiledRule('shadow-md') ?? '', '.shadow-md too').toContain('--kai-shadow-strength');
+  });
+
+  it("each weight rung reads its own --kai-weight-* token, defaulting to Tailwind's number", () => {
+    for (const rung of ['normal', 'medium', 'semibold', 'bold']) {
+      const declared = twDecl(`--font-weight-${rung}`);
+      expect(declared, `Tailwind declares no --font-weight-${rung}`).toBeDefined();
+      expect(THEME_CSS, `--font-weight-${rung} must read --kai-weight-${rung}`).toMatch(
+        new RegExp(`--font-weight-${rung}\\s*:\\s*var\\(\\s*--kai-weight-${rung}\\s*,\\s*${declared}\\s*\\)`),
+      );
+    }
+    expect(compiledRule('font-medium') ?? '', 'and the utility must read the rung').toContain('var(--font-weight-medium)');
   });
 });
 

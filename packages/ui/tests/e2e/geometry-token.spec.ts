@@ -250,3 +250,47 @@ test('--kai-code-radius reaches the fenced-block surface', async ({ page }) => {
 
   await clearRootVar(page, '--kai-code-radius');
 });
+
+/**
+ * ELEVATION is one multiplier over every shadow rung, so the proof is that a real
+ * surface's computed `box-shadow` actually flattens — not that a token changed.
+ * The lengths are what is asserted (`0px 0px 0px`), because that is what a flat theme
+ * has to produce; the colour is irrelevant once the geometry is zero.
+ */
+test('--kai-shadow-strength flattens a real surface and puts it back', async ({ page }) => {
+  await page.evaluate(() => {
+    const mounts = document.getElementById('mounts')!;
+    mounts.replaceChildren();
+    // Content surfaces that paint at rest. A popup (hover-card, dropdown) is
+    // display:none while closed, so its shadow computes to `none` and the guard would
+    // find nothing to flatten — measured, hence this list.
+    for (const t of ['kai-artifact', 'kai-link-preview', 'kai-card', 'kai-hover-card', 'kai-dropdown']) mounts.appendChild(document.createElement(t));
+  });
+  await page.waitForTimeout(250);
+
+  /** The computed box-shadow of the first element in a shadow tree that paints one. */
+  const paintedShadow = () =>
+    page.evaluate(() => {
+      for (const host of document.querySelectorAll('*')) {
+        if (!host.shadowRoot) continue;
+        for (const el of host.shadowRoot.querySelectorAll('*')) {
+          const s = getComputedStyle(el).boxShadow;
+          if (s && s !== 'none' && /[1-9]/.test(s)) return s;
+        }
+      }
+      return '';
+    });
+
+  const before = await paintedShadow();
+  expect(before, 'no element on the page paints a non-zero shadow — pick another surface for this guard').not.toBe('');
+
+  await setRootVar(page, '--kai-shadow-strength', '0');
+  await page.waitForTimeout(120);
+  const flat = await paintedShadow();
+  expect(flat, 'a flat theme must zero the shadow geometry, not merely dim it').toContain('0px 0px 0px');
+  expect(flat, 'and it must differ from the elevated reading').not.toBe(before);
+
+  await clearRootVar(page, '--kai-shadow-strength');
+  await page.waitForTimeout(120);
+  expect(await paintedShadow(), 'and clearing the token restores it').toBe(before);
+});

@@ -146,6 +146,16 @@ export const EXTRA_TOKENS = [
   '--kai-radius-pill',
   // The code surface's corner, deliberately not a rung of the radius ladder.
   '--kai-code-radius',
+  // Elevation: ONE multiplier for the whole shadow family, because the family is one
+  // decision (how present is elevation here?) and "flat" is the value people want.
+  // Unitless, so the studio seeds it with parseFloat rather than `remValue`.
+  '--kai-shadow-strength',
+  // Font weights, rung by rung: a weight ladder is not one number — a product that
+  // wants a heavier SEMIBOLD rarely wants a heavier normal.
+  '--kai-weight-normal',
+  '--kai-weight-medium',
+  '--kai-weight-semibold',
+  '--kai-weight-bold',
   '--kai-font-base',
   '--kai-font-code',
   '--kai-tracking',

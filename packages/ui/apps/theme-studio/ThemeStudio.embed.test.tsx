@@ -126,7 +126,16 @@ describe('theme studio — --kai-density is wired, not merely catalogued', () =>
 
   /** The Code modal's `<pre><code>` — the paste-ready block, as exported. */
   const exportedCss = (): string => document.querySelector('pre code')?.textContent ?? '';
-  const densityField = (): HTMLInputElement => screen.getByLabelText('Density value') as HTMLInputElement;
+  /** Density and Elevation are NAMED STEPS now, not sliders — their extremes are not
+   *  designs — so the tests pick steps. The accessible name is `Row: Step`, which is
+   *  also what keeps "Density: Default" distinct from the theme dropdown's "Default". */
+  const pickStep = (row: string, step: string) => fireEvent.click(screen.getByRole('button', { name: `${row}: ${step}` }));
+  const stepActive = (row: string, step: string): boolean =>
+    screen.getByRole('button', { name: `${row}: ${step}` }).getAttribute('aria-pressed') === 'true';
+  /** The step's value, read off the control the user clicks — never a constant here,
+   *  which would be a copy of the studio's taste call and drift the day it moved. */
+  const stepValue = (row: string, step: string): string =>
+    screen.getByRole('button', { name: `${row}: ${step}` }).getAttribute('data-value')!;
   const radiusField = (): HTMLInputElement => screen.getByLabelText('Radius value') as HTMLInputElement;
   const openOtherTab = () => fireEvent.click(screen.getByText('Other'));
   /** In embed mode the toolbar carries an Apply of its own, so the modal's is
@@ -157,30 +166,57 @@ describe('theme studio — --kai-density is wired, not merely catalogued', () =>
     expect(atRest.light['--kai-density']).toBe(`${KIT_DENSITY}rem`);
 
     openOtherTab();
-    fireEvent.change(densityField(), { target: { value: '0.375' } });
-    await waitFor(() => expect(densityField().value).toBe('0.375'));
+    pickStep('Density', 'Loose');
     clickModalApply();
     const moved = framesOf(postSpy, 'kai-theme-apply').at(-1) as { light: Record<string, string> };
-    expect(moved.light['--kai-density']).toBe('0.375rem');
+    expect(moved.light['--kai-density']).toBe(`${stepValue('Density', 'Loose')}rem`);
+  });
+
+  it('offers only steps that are safe to choose — no zero, no extreme, and the default is Tailwind geometry', () => {
+    render(() => <ThemeStudio />);
+    openOtherTab();
+    // The knob exists (phase 1) and every step it offers is a viable design. This is
+    // the assertion that keeps a later "let's just make it a slider again" from
+    // silently reintroducing 0rem, which collapses every p-*/gap-*/size-* in the kit.
+    const steps = ['Very tight', 'Tight', 'Default', 'Loose', 'Very loose'];
+    for (const s of steps) expect(screen.getByRole('button', { name: `Density: ${s}` })).toBeDefined();
+    expect(stepActive('Density', 'Default')).toBe(true);
+    expect(Number(KIT_DENSITY)).toBe(0.25);
   });
 
   it('round-trips: the exported CSS pasted back in reproduces the density it exported', async () => {
     render(() => <ThemeStudio />);
     openOtherTab();
-    fireEvent.change(densityField(), { target: { value: '0.5' } });
-    await waitFor(() => expect(densityField().value).toBe('0.5'));
+    pickStep('Density', 'Loose');
     fireEvent.click(screen.getByText('Code'));
     const css = exportedCss();
-    expect(css).toContain('--kai-density: 0.5rem;');
+    expect(css).toContain(`--kai-density: ${stepValue('Density', 'Loose')}rem;`);
     fireEvent.click(screen.getByLabelText('Close'));
-    // Move the knob AWAY first: a parser that returned nothing would leave 0.75
-    // in the control and this round trip would pass vacuously.
-    fireEvent.change(densityField(), { target: { value: '0.75' } });
-    await waitFor(() => expect(densityField().value).toBe('0.75'));
+    // Move the knob AWAY first: a parser that returned nothing would leave the Loose
+    // step active and this round trip would pass vacuously.
+    openOtherTab();
+    pickStep('Density', 'Very loose');
+    expect(stepActive('Density', 'Very loose')).toBe(true);
     fireEvent.click(screen.getByText('Import'));
     fireEvent.input(screen.getByRole('textbox'), { target: { value: css } });
     clickModalApply();
-    await waitFor(() => expect(densityField().value).toBe('0.5'));
+    await waitFor(() => expect(stepActive('Density', 'Loose')).toBe(true));
+  });
+
+  it('a density that is NOT one of the steps shows as Custom rather than being snapped', async () => {
+    render(() => <ThemeStudio />);
+    openOtherTab();
+    pickStep('Density', 'Tight');
+    fireEvent.click(screen.getByText('Import'));
+    // A value from a hand-written theme or an older build. Snapping it to the nearest
+    // step would silently edit the user's file on the next export.
+    fireEvent.input(screen.getByRole('textbox'), { target: { value: ':root { --kai-density: 0.3rem; }' } });
+    clickModalApply();
+    await waitFor(() => expect(screen.getByText(/Custom — 0\.3rem/)).toBeDefined());
+    expect(stepActive('Density', 'Tight')).toBe(false);
+    expect(stepActive('Density', 'Loose')).toBe(false);
+    fireEvent.click(screen.getByText('Code'));
+    expect(exportedCss(), 'and the export keeps the number the user wrote').toContain('--kai-density: 0.3rem;');
   });
 
   it('loads a preset saved before the knob existed: default density, everything else untouched', async () => {
@@ -196,7 +232,7 @@ describe('theme studio — --kai-density is wired, not merely catalogued', () =>
     await waitFor(() => expect(screen.getByText('Legacy')).toBeDefined());
     fireEvent.click(screen.getByText('Legacy'));
     openOtherTab();
-    await waitFor(() => expect(densityField().value).toBe(String(KIT_DENSITY)));
+    await waitFor(() => expect(stepActive('Density', 'Default')).toBe(true));
     expect(radiusField().value).toBe('0.9');
   });
 });

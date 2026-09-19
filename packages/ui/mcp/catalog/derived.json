@@ -5889,6 +5889,7 @@
     "--kai-radius",
     "--kai-radius-pill",
     "--kai-shadow-color",
+    "--kai-shadow-strength",
     "--kai-text-",
     "--kai-text-body",
     "--kai-text-caption",
@@ -5896,7 +5897,11 @@
     "--kai-text-lg",
     "--kai-text-meta",
     "--kai-text-micro",
-    "--kai-text-title"
+    "--kai-text-title",
+    "--kai-weight-bold",
+    "--kai-weight-medium",
+    "--kai-weight-normal",
+    "--kai-weight-semibold"
   ],
   "eventExceptions": [
     {
