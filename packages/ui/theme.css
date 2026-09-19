@@ -15,6 +15,13 @@
        prefers-color-scheme to the `.dark` class.
      - the `--color-*` names merge into their @theme (last import wins).
      - `--radius-sm/md/lg/xl` re-point Tailwind's stock radius scale at --radius.
+     - `--spacing` re-points Tailwind's whole spacing scale at --kai-spacing
+       (stock Tailwind's 0.25rem is the fallback, so nothing moves until a
+       --kai-spacing token is set). Every numeric spacing utility is
+       `calc(var(--spacing) * N)`, so this ONE line moves p-*, m-*, gap-*, h-*,
+       size-*, space-y-* and the offsets (top-*, -mt-*, translate-*) together:
+       density, not merely padding. size-* is the one to think about — icons
+       follow it, so a much denser theme needs them re-sized per call site.
      - `--text-xs/sm/base/lg` are aliased onto the kit's type scale (defaults
        equal stock Tailwind, so nothing moves until a --kai-text-* token is set).
    Everything else global carries a `kai-` prefix so it cannot clash by name:
@@ -182,6 +189,26 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  /* SPACING — the widest-reaching geometry family, and the one the kit left
+     un-tokenized until now. Every `p-*` / `m-*` / `gap-*` / `w-*` / `h-*`
+     utility Tailwind generates is `calc(var(--spacing) * N)`, so ONE token here
+     moves every one of those call sites.
+
+     It is declared in this @theme block for the same reason the colours above
+     are: Tailwind emits the block as `:root,:host{...}`, and the `:host` half is
+     what lets the value cross a shadow boundary. A consumer's bare
+     `:root{--spacing: 1rem}` does NOT work — the sheet's own `:host` declaration
+     is a value on the host itself, so it beats the inherited one, and the
+     consumer ends up with a file that themes nothing. Re-pointing the variable
+     here is the difference between "overridable" and "silently ignored".
+
+     The fallback is Tailwind's own default for `--spacing`, deliberately: a
+     consumer who overrides nothing must get exactly the geometry they already
+     had, or every upgrade shifts every layout. `tests/styles/geometry-tokens.test.ts`
+     pins that equality and the :host emission, and
+     `tests/e2e/geometry-token.spec.ts` proves the resolution in a real browser. */
+  --spacing: var(--kai-spacing, 0.25rem);
 
   /* Typography scale — ONE scale for the whole kit. Each semantic name
      (text-micro / text-caption / text-meta / text-compact / text-body /

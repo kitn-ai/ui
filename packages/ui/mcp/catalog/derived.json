@@ -5886,6 +5886,7 @@
     "--kai-font-code",
     "--kai-radius",
     "--kai-shadow-color",
+    "--kai-spacing",
     "--kai-text-",
     "--kai-text-body",
     "--kai-text-caption",

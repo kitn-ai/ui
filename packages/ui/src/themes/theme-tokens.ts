@@ -134,6 +134,12 @@ export const TEXT_RUNGS: TextRung[] = [
  *  element stylesheet rather than theme.css; the rest resolve through theme.css. */
 export const EXTRA_TOKENS = [
   '--kai-radius',
+  // Geometry, and the one knob here with kit-wide reach: every Tailwind spacing
+  // utility is `calc(var(--spacing) * N)`, so this single token moves the whole
+  // p-*/m-*/gap-*/size-* family. Reachable from the editor for the same reason
+  // the colour knobs are — a denser or airier product is a taste decision, and it
+  // should not require a class-override surface to express.
+  '--kai-spacing',
   '--kai-font-base',
   '--kai-font-code',
   '--kai-tracking',

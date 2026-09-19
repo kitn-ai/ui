@@ -67,10 +67,21 @@ A plain `<link>` can't use `theme.css`: the browser discards its `@theme` block 
 | `--color-*` in `@theme` | Merge into your `@theme` under the shadcn names. The last import wins, so a `--color-primary` you already define is replaced unless yours comes later. |
 | `--radius-sm` / `-md` / `-lg` / `-xl` | Re-pointed at the kit's `--radius` (`0.6rem`): `--radius-lg: var(--radius)`, `-sm: calc(var(--radius) - 4px)`, `-md: calc(var(--radius) - 2px)`, `-xl: calc(var(--radius) + 4px)`. Your `rounded-*` utilities follow, so `rounded-lg` is `0.6rem` instead of Tailwind's `0.5rem`. |
 | `--text-xs` / `-sm` / `-base` / `-lg` | Aliased onto the kit's [type scale](#typography). The defaults equal stock Tailwind, so nothing moves until you set a `--kai-text-*` token, and then your `text-sm` moves with it. |
+| `--spacing` | Re-pointed at the kit's `--kai-spacing`, whose fallback is stock Tailwind's `0.25rem` — so nothing moves until you set it. Every numeric spacing utility is `calc(var(--spacing) * N)`, which makes this the widest-reaching declaration in the file: your `p-*`, `m-*`, `gap-*`, `h-*`, `size-*`, `space-y-*` and the offset utilities (`top-*`, `-mt-*`, `translate-*`) all follow it. Set it once for a denser or airier kit. |
 | `@utility bg-surface`, `bg-hover`, `bg-selected`, `bg-*-soft` | New utilities in your build. Additive, they collide with nothing Tailwind ships. |
 | `@keyframes kai-*`, `.kai-scrollbar-thin`, `.chat-markdown` | Global names, listed [below](#global-names-the-kit-owns). |
 
-`theme.tokens.css` skips the first row and the `@utility` row. It still declares the same `--color-*`, `--radius-*` and `--text-*` names on `:root`, and Tailwind v4 utilities read those variables at runtime, so the radius values above change under it as well. If you want none of the kit's scale, import neither file and theme through `--kai-*`.
+`theme.tokens.css` skips the first row and the `@utility` row. It still declares the same `--color-*`, `--radius-*`, `--text-*` and `--spacing` names on `:root`, and Tailwind v4 utilities read those variables at runtime, so the radius values above change under it as well. If you want none of the kit's scale, import neither file and theme through `--kai-*`.
+
+Density is the one scale with kit-wide reach, and it costs one declaration:
+
+```css
+:root {
+  --kai-spacing: 0.2rem; /* 20% tighter everywhere, stock Tailwind is 0.25rem */
+}
+```
+
+That moves padding, gaps, control heights, list rhythm and micro-offsets together, because they share the variable. It also moves `size-*`, so icon sizes follow the same scale — worth a look at your own icons before shipping a much denser theme.
 
 Import whichever file you choose **before** your own `@theme` and token overrides so yours win.
 

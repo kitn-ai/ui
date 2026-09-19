@@ -1260,6 +1260,18 @@ jobs:
       - name: Content brand-bleed guard (accent must not color content/chrome, built bundle)
         run: pnpm --filter @kitn.ai/ui run test:content-brand-bleed
 
+      # Geometry was the half of the theme surface that never worked, and it
+      # failed silently: the compiled sheet declares `--spacing` on the host, so a
+      # consumer setting Tailwind's own variable on :root saw nothing move in any
+      # shadow root. The kit now re-points each geometry family at a `--kai-*`
+      # token, and this step is what proves the plumbing actually resolves -- the
+      # jsdom test (tests/styles/geometry-tokens.test.ts) can only read the
+      # declarations out of the source and compiled sheets. Same bare,
+      # Tailwind-free, built-bundle harness; asserts the NEGATIVE too (a bare
+      # `--spacing` still must NOT work), so neither half can pass vacuously.
+      - name: Geometry token guard (spacing override must reach the shadow root, built bundle)
+        run: pnpm --filter @kitn.ai/ui run test:geometry-token
+
       # Keyboard tab-stop behaviour for the hover-card, same shape as above:
       # Storybook-free, own port, drives the BUILT bundle. Added by PR #284;
       # this step is wired here deliberately BEFORE that branch merged, because

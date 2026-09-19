@@ -33,6 +33,15 @@ import { fileURLToPath } from 'node:url';
 // the times the deleted configs recorded, the added cost is roughly two seconds
 // per step. That is the whole bill and it is not worth restructuring for.
 //
+// AMENDED 2026-09-18: there are FIVE projects here now, not four. The geometry
+// guard (`geometry-token.spec.ts`, `npm run test:geometry-token`) joined the set,
+// on its own port (6214), reusing the same node harness. The counts above ("all
+// four", "the four-server boot is paid four times", "four separate steps") were
+// written when there were four and are left as they were measured rather than
+// rewritten into a number nobody re-timed; the reasoning they carry is unaffected.
+// Read the real set from `node scripts/lint-gate-parity.mjs --list`, never from a
+// count in this comment.
+//
 // THE PART THAT IS WORTH KNOWING is not the seconds, it is that four CI steps
 // now bind the SAME four ports. `reuseExistingServer` is `!process.env.CI`, so
 // on CI it is false and every step starts its own servers rather than attaching
@@ -202,6 +211,36 @@ export default defineConfig({
     },
     {
       /**
+       * Standalone config for the GEOMETRY token guard (`geometry-token.spec.ts`).
+       *
+       * The question it answers is the one that separates "the kit has a theme
+       * surface" from "the kit's theme surface works": does a consumer's
+       * `:root { --kai-spacing: ... }` actually move geometry inside a shadow root?
+       * Only the real cascade can say, which is why this drives the built bundle in
+       * the bare, Tailwind-free harness rather than asserting class names in jsdom —
+       * same reasoning as the three guards above.
+       *
+       * The failure it pins down is not a missing declaration but a WON cascade: the
+       * compiled sheet declares `--spacing` on the host, so a consumer setting
+       * Tailwind's own variable sees nothing happen. Its negative half asserts that
+       * trap is still closed rather than assuming it.
+       *
+       * Needs a build first (`nx build ui`) — it drives `dist/`, and the config-wide
+       * globalSetup refuses to run against a stale bundle.
+       * Run: `npm run test:geometry-token` inside packages/ui.
+       */
+      name: 'geometry-token',
+      testMatch: /geometry-token\.spec\.ts/,
+      timeout: 60_000,
+      use: {
+        ...CHROMIUM,
+        baseURL: 'http://localhost:6214',
+        trace: 'off',
+        viewport: { width: 900, height: 700 },
+      },
+    },
+    {
+      /**
        * Standalone config for the hover-card TAB-STOP + focus-open matrix.
        *
        * Why it exists at all: jsdom has no tab-order engine, so it can never press
@@ -262,6 +301,7 @@ export default defineConfig({
     harness(6210),
     harness(6211),
     harness(6212),
+    harness(6214),
     {
       // The workspace's own vite via pnpm exec, never bare npx, for hermetic
       // CI. pnpm exec rather than a path because pnpm hoists vite to the

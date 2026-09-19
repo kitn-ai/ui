@@ -256,7 +256,8 @@
     "test:promptinput": "playwright test --config config/playwright/storybook.config.ts --project=promptinput",
     "test:shot": "playwright test --config config/playwright/storybook.config.ts --project=shot",
     "test:audio-visualizer": "playwright test --config config/playwright/storybook.config.ts --project=audio-visualizer",
-    "test:audio-visualizer-band-shape": "playwright test --config config/playwright/storybook.config.ts --project=audio-visualizer-band-shape"
+    "test:audio-visualizer-band-shape": "playwright test --config config/playwright/storybook.config.ts --project=audio-visualizer-band-shape",
+    "test:geometry-token": "playwright test --config config/playwright/bare.config.ts --project=geometry-token"
   },
   "dependencies": {
     "@floating-ui/dom": "^1.7.6",
