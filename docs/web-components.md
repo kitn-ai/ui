@@ -1640,11 +1640,11 @@ Restyle from outside the Shadow DOM via `kai-audio-visualizer::part(name)`.
 | Part | Description |
 |------|-------------|
 | `::part(bar)` | A single bar in the `bar` variant, or a single spoke in the `radial` variant. Also carries `data-kai-index` and `data-kai-highlighted` ("true"/"false") for use inside the shadow root; to style the lit state from OUTSIDE, combine with the `highlighted` part below rather than an attribute selector. <br>`kai-audio-visualizer::part(bar) { border-radius: 2px }
-kai-audio-visualizer::part(bar highlighted) { background: var(--brand) }` |
+kai-audio-visualizer::part(bar highlighted) { background: var(--color-primary) }` |
 | `::part(cell)` | A single dot in the `grid` variant. Also carries `data-kai-index` and `data-kai-highlighted` ("true"/"false") for use inside the shadow root; to style the lit state from OUTSIDE, combine with the `highlighted` part below rather than an attribute selector. <br>`kai-audio-visualizer::part(cell) { border-radius: 9999px }
-kai-audio-visualizer::part(cell highlighted) { background: var(--brand) }` |
-| `::part(highlighted)` | A second part TOKEN present on a `bar` or `cell` exactly when the sequencer or live audio has it lit, not a standalone styleable element. Combine it in the same `::part()` argument: `::part(bar highlighted)` or `::part(cell highlighted)`. This is the external equivalent of the internal `data-kai-highlighted="true"` attribute, which a `::part()` selector cannot reach (an attribute selector cannot follow a pseudo-element). <br>`kai-audio-visualizer::part(bar highlighted) { background: var(--brand) }
-kai-audio-visualizer::part(cell highlighted) { background: var(--brand) }` |
+kai-audio-visualizer::part(cell highlighted) { background: var(--color-primary) }` |
+| `::part(highlighted)` | A second part TOKEN present on a `bar` or `cell` exactly when the sequencer or live audio has it lit, not a standalone styleable element. Combine it in the same `::part()` argument: `::part(bar highlighted)` or `::part(cell highlighted)`. This is the external equivalent of the internal `data-kai-highlighted="true"` attribute, which a `::part()` selector cannot reach (an attribute selector cannot follow a pseudo-element). <br>`kai-audio-visualizer::part(bar highlighted) { background: var(--color-primary) }
+kai-audio-visualizer::part(cell highlighted) { background: var(--color-primary) }` |
 | `::part(canvas)` | The WebGL canvas backing the `wave` and `aurora` variants. Restyle its size or radius, or layer a mask/filter, from outside. <br>`kai-audio-visualizer::part(canvas) { border-radius: 0.75rem }` |
 
 #### Composed from
