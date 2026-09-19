@@ -11,7 +11,7 @@ import {
   BUILTIN_CARD_COMPONENTS,
   type CardTagMap,
   type CardComponentMap,
-} from '../../primitives/card-registry';
+} from '../../components/card/card-registry';
 import type { CardEnvelope } from '../../primitives/card-contract';
 import { hasParts } from './validate-messages';
 import type { ChatMessage } from '../chat/chat-types';

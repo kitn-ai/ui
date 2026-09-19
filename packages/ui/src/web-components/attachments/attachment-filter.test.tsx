@@ -17,7 +17,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import '@testing-library/jest-dom/vitest';
 import { render, cleanup, fireEvent } from '@solidjs/testing-library';
-import { DefaultPromptInput } from '../prompt/default-input';
+import { DefaultPromptInput } from '../../components/prompt/default-input';
 import { encodableMediaTypes, resolveMediaPolicy } from '../../wire/media-types';
 import type { AttachmentData } from '../../components/attachments/attachments';
 

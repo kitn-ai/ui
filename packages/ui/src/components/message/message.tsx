@@ -23,7 +23,7 @@ import {
 } from "../attachments/attachments";
 import { Source, SourceTrigger, SourceContent, SourceList } from "../source/source";
 import { CardRenderer, type CardSchemaMap } from "../card/card-renderer";
-import type { CardComponentMap } from "../../primitives/card-registry";
+import type { CardComponentMap } from "../card/card-registry";
 
 // --- Message ---
 

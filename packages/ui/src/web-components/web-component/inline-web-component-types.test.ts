@@ -141,7 +141,7 @@ describe('gen-web-component-types.mjs inline type block', () => {
     );
 
     const probe = [
-      `import { classifyTool as sourceClassifyTool } from '../../components/tool/tool-classify';`,
+      `import { classifyTool as sourceClassifyTool } from '../../primitives/tool-classify';`,
       ``,
       inline,
       ``,

@@ -3637,17 +3637,7 @@
         "send"
       ],
       "composedFrom": [
-        "PromptInput",
-        "PromptInputTextarea",
-        "PromptInputActions",
-        "PromptSuggestion",
-        "Button",
-        "Tooltip",
-        "Attachments",
-        "Attachment",
-        "AttachmentPreview",
-        "AttachmentInfo",
-        "AttachmentRemove"
+        "DefaultPromptInput"
       ],
       "tokens": []
     },

@@ -1,6 +1,6 @@
 import { createEffect, createSignal, onMount, onCleanup } from 'solid-js';
 import { defineWebComponent } from '../define/define';
-import { DefaultPromptInput } from './default-input';
+import { DefaultPromptInput } from '../../components/prompt/default-input';
 import type { AttachmentData } from '../../components/attachments/attachments';
 import type { CustomAction } from '../chat/chat-types';
 import type { TriggerDef, ComposerChange } from '../../components/composer/composer';

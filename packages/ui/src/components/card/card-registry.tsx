@@ -20,25 +20,25 @@
 // that entry's types reached this `.tsx` and hit TS6142. The types went to a `.ts`;
 // `BUILTIN_CARD_COMPONENTS` and `mergeCardComponents` stayed, because they are JSX and
 // have nowhere to go. Re-exported below, so this module's surface is unchanged.
-import type { CardComponentMap } from './card-component-types';
-import { Form } from '../components/form/form';
-import { ConfirmCard } from '../components/confirm-card/confirm-card';
-import { TasksCard } from '../components/tasks/tasks-card';
-import { ChoiceCard } from '../components/choice-card/choice-card';
-import { LinkPreview } from '../components/link-preview/link-preview';
-import { Embed } from '../components/embed/embed';
-import { ArtifactCard, type ArtifactCardData } from '../components/artifact/artifact-card';
+import type { CardComponentMap } from '../../primitives/card-component-types';
+import { Form } from '../form/form';
+import { ConfirmCard } from '../confirm-card/confirm-card';
+import { TasksCard } from '../tasks/tasks-card';
+import { ChoiceCard } from '../choice-card/choice-card';
+import { LinkPreview } from '../link-preview/link-preview';
+import { Embed } from '../embed/embed';
+import { ArtifactCard, type ArtifactCardData } from '../artifact/artifact-card';
 
 // The tag half, re-exported so this module's surface is unchanged. Authored in
 // ./card-tags.ts because that file has no Solid below it and can therefore be read
 // from a Node process; this one cannot.
-export { BUILTIN_CARD_TAGS, mergeCardTags } from './card-tags';
-export type { CardTagMap } from './card-tags';
+export { BUILTIN_CARD_TAGS, mergeCardTags } from '../../primitives/card-tags';
+export type { CardTagMap } from '../../primitives/card-tags';
 
 // The component TYPES, re-exported for the same reason. Authored in
 // ./card-component-types.ts because resolving a `.tsx` is what a no-`jsx` project
 // cannot do; the values below stay here because they are JSX.
-export type { CardComponent, CardComponentMap } from './card-component-types';
+export type { CardComponent, CardComponentMap } from '../../primitives/card-component-types';
 
 export const BUILTIN_CARD_COMPONENTS: CardComponentMap = {
   form: (p) => (

@@ -9,7 +9,7 @@ import { resolve } from 'node:path';
 
 // Self-contained inline type declarations for the runtime-adjacent exports of the
 // `./web-components` subpath. These mirror the source types in ./chat-types,
-// ../components/tool/tool-types, ../primitives/attachment-types, ../primitives/card-contract
+// ../components/tool/tool-types, ../primitives/tool-classify, ../primitives/attachment-types, ../primitives/card-contract
 // and ../primitives/highlighter, but are INLINED here so the shipped .d.ts has NO
 // relative import that would resolve a library .ts SOURCE file into a consumer's
 // type graph (tsc compiles a .ts reached from a .d.ts even under skipLibCheck —
@@ -510,7 +510,7 @@ ${importLines}
 // \`skipLibCheck: true\`, which is exactly why this file is now compiled with it off
 // (tests/web-components/types-lib-check.test.ts).
 import type { CodeHighlightingOptions } from '../primitives/highlighter';
-import type { ToolKind } from '../components/tool/tool-classify';
+import type { ToolKind } from '../primitives/tool-classify';
 
 // Re-exports for \`import { … } from '@kitn.ai/ui/web-components'\`. Mirrors the names the
 // shipped dist/web-components.d.ts inlines, so both copies expose the same surface.
@@ -525,7 +525,7 @@ export type {
   RawOrigin,
 } from './chat/chat-types';
 export type { ToolPart } from '../components/tool/tool-types';
-export type { ToolKind } from '../components/tool/tool-classify';
+export type { ToolKind } from '../primitives/tool-classify';
 export type { AttachmentData } from '../primitives/attachment-types';
 export type { CardEnvelope, CardResolution } from '../primitives/card-contract';
 export type { CodeHighlightingOptions } from '../primitives/highlighter';

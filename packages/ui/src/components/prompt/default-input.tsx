@@ -1,10 +1,10 @@
 import { For, Show } from 'solid-js';
-import { PromptInput, PromptInputTextarea, PromptInputActions } from '../../components/prompt/prompt-input';
-import type { TriggerDef, ComposerChange } from '../../components/composer/composer';
+import { PromptInput, PromptInputTextarea, PromptInputActions } from './prompt-input';
+import type { TriggerDef, ComposerChange } from '../composer/composer';
 import { type ComposerDoc, normalizeValue, serializeToText } from '../../primitives/composer-model';
-import { PromptSuggestion } from '../../components/prompt/prompt-suggestion';
-import { Button } from '../../components/button/button';
-import { Tooltip } from '../../components/tooltip/tooltip';
+import { PromptSuggestion } from './prompt-suggestion';
+import { Button } from '../button/button';
+import { Tooltip } from '../tooltip/tooltip';
 import { Paperclip, Globe, Mic, Square } from 'lucide-solid';
 import {
   Attachments,
@@ -13,9 +13,9 @@ import {
   AttachmentInfo,
   AttachmentRemove,
   type AttachmentData,
-} from '../../components/attachments/attachments';
-import { actionIcon } from '../../components/action-icons/action-icons';
-import type { CustomAction } from '../chat/chat-types';
+} from '../attachments/attachments';
+import { actionIcon } from '../action-icons/action-icons';
+import type { CustomAction } from '../../web-components/chat/chat-types';
 // The LEAF module, deliberately not the `../wire` barrel: this needs the media
 // declaration, and importing the barrel would pull the whole stream adapter into
 // the web-components bundle for a table of strings. Sharing the module itself (rather

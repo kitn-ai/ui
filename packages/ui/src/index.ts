@@ -87,8 +87,8 @@ export { CardFallback } from './components/card/card-fallback';
 export type { CardFallbackProps } from './components/card/card-fallback';
 export {
   BUILTIN_CARD_TAGS, BUILTIN_CARD_COMPONENTS, mergeCardTags, mergeCardComponents,
-} from './primitives/card-registry';
-export type { CardComponent, CardComponentMap, CardTagMap } from './primitives/card-registry';
+} from './components/card/card-registry';
+export type { CardComponent, CardComponentMap, CardTagMap } from './components/card/card-registry';
 
 // Card: kai-card (base shell) + kai-form (JSON-Schema form renderer)
 export { Card } from './components/card/card';
@@ -368,8 +368,8 @@ export type { ToolPart, ToolProps } from './components/tool/tool';
 // function has to be reachable from every entry that surfaces ToolPart. It is
 // total, deterministic and terminates in 'generic', so it is safe public API and
 // genuinely useful to anyone rendering tool calls themselves.
-export { classifyTool } from './components/tool/tool-classify';
-export type { ToolKind } from './components/tool/tool-classify';
+export { classifyTool } from './primitives/tool-classify';
+export type { ToolKind } from './primitives/tool-classify';
 export { ThinkingBar } from './components/thinking-bar/thinking-bar';
 export type { ThinkingBarProps } from './components/thinking-bar/thinking-bar';
 export { Reasoning, ReasoningTrigger, ReasoningContent } from './components/reasoning/reasoning';

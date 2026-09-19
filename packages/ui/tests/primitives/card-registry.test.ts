@@ -26,7 +26,7 @@ import {
   BUILTIN_CARD_COMPONENTS,
   mergeCardTags,
   mergeCardComponents,
-} from '../../src/primitives/card-registry';
+} from '../../src/components/card/card-registry';
 import { cardSchemaNames } from '../../src/schemas/index';
 
 // `Object.keys(cardSchemas)`, the same value `cardTools()` offers a model and

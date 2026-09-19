@@ -9,7 +9,7 @@ import { Dynamic } from 'solid-js/web';
 import { defineWebComponent } from '../define/define';
 import type { CardEnvelope, CardEvent, CardPolicy, CardResolution } from '../../primitives/card-contract';
 import { CARD_EVENT_NAME, emitCardEvent, routeCardEvent } from '../../primitives/card-routing';
-import { BUILTIN_CARD_TAGS, mergeCardTags } from '../../primitives/card-registry';
+import { BUILTIN_CARD_TAGS, mergeCardTags } from '../../components/card/card-registry';
 import type { JsonSchema } from '../../primitives/card-validate';
 import { cardValidationMessage, validateCardData, type CardValidationReport } from '../../primitives/card-validate-cards';
 import { hasConsumerSchema } from '../../components/card/card-renderer';

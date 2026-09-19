@@ -5,7 +5,7 @@ import { ChatThread, type ChatThreadProps, type ChatThreadContextUsage, type Cha
 import { cardComponentsFromTags } from '../message/message';
 import { createMessagesGuard } from '../message/validate-messages';
 import type { AttachmentData } from '../../components/attachments/attachments';
-import type { RejectedAttachment } from '../prompt/default-input';
+import type { RejectedAttachment } from '../../components/prompt/default-input';
 import type { ChatMessage, ChatMessageAction, CustomAction } from './chat-types';
 import type { TriggerDef } from '../../components/composer/composer';
 import type { ComposerDoc } from '../../primitives/composer-model';

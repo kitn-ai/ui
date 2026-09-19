@@ -8,7 +8,7 @@ import { Dynamic } from 'solid-js/web';
 import type { CardContext, CardEnvelope, CardHost } from '../../primitives/card-contract';
 import { useCardHost } from '../../primitives/card-host';
 import { emitCardEvent } from '../../primitives/card-routing';
-import { BUILTIN_CARD_COMPONENTS, mergeCardComponents, type CardComponentMap } from '../../primitives/card-registry';
+import { BUILTIN_CARD_COMPONENTS, mergeCardComponents, type CardComponentMap } from './card-registry';
 import type { JsonSchema } from '../../primitives/card-validate';
 import { cardValidationMessage, validateCardData, type CardValidationReport } from '../../primitives/card-validate-cards';
 import { CardFallback } from './card-fallback';

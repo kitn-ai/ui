@@ -1,4 +1,4 @@
-import type { ToolKind } from './tool-classify';
+import type { ToolKind } from '../../primitives/tool-classify';
 
 /** The untranslated provider payload a part was normalized from.
  *

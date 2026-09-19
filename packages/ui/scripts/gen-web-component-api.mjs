@@ -17,7 +17,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const webComponentsDir = resolve(root, 'src/web-components');
 
 // Facade files only (skip infra/helpers/stories).
-const SKIP = new Set(['define.tsx', 'register.ts', 'register-impl.ts', 'css.ts', 'chat-types.ts', 'default-input.tsx']);
+const SKIP = new Set(['define.tsx', 'register.ts', 'register-impl.ts', 'css.ts', 'chat-types.ts']);
 // RECURSIVE: the layer is organised in family folders (2026-09-19), so a flat
 // readdir would silently emit a 0-facade catalog and the generator would exit 0.
 const walkSources = (dir) => {
@@ -211,7 +211,8 @@ const isComponentBinding = (node) => {
 // inline `type` specifiers, and non-component bindings (see isComponentBinding).
 //
 // Recurses through WEB-COMPONENT-LOCAL helper modules. `kai-prompt-input` composes its
-// whole UI in ./default-input (so `<kai-chat>` can render the same composer), and
+// whole UI in components/prompt/default-input.tsx (so `<kai-chat>` renders the same
+// composer; it is a Solid component that registers nothing, so it lives there), and
 // with a facade-file-only walk it reported `composedFrom: []` — the one web component
 // whose composition a consumer most wants to see. Recursion stops at any module
 // that registers a web component of its own, so a web component never inherits another's

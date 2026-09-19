@@ -1,5 +1,8 @@
 import type { ChatMessage, MessagePart } from '../web-components/chat/chat-types';
 import { appendTextPart } from './parts';
+// Re-exported, not defined here: it is a pure fold over MessagePart and primitives needs
+// it too (see src/primitives/parts-text.ts). The public `@kitn.ai/ui/state` list is unchanged.
+export { partsToText } from '../primitives/parts-text';
 
 function newId(): string {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
@@ -9,12 +12,6 @@ function newId(): string {
 /** Convenience for the common single-text-part message. */
 export function textMessage(role: ChatMessage['role'], text: string, init: Partial<ChatMessage> = {}): ChatMessage {
   return { id: init.id ?? newId(), role, parts: [{ type: 'text', text }], ...init };
-}
-
-/** Concatenates every text part. Use where a plain string is genuinely needed
- *  (copy-to-clipboard, TTS, a length check). Do NOT use it for rendering. */
-export function partsToText(parts: MessagePart[]): string {
-  return parts.filter((p) => p.type === 'text').map((p) => p.text).join('');
 }
 
 /** Append a message; returns a new array. */

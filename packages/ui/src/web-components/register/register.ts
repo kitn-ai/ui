@@ -36,8 +36,8 @@ export type { CodeHighlightingOptions } from '../../primitives/highlighter';
 // and always terminating in 'generic' — safe to expose, and needed by anyone
 // rendering tool calls themselves. tool-classify.ts imports nothing, so this stays
 // SSR-safe and adds no weight to the register-all bundle.
-export { classifyTool } from '../../components/tool/tool-classify';
-export type { ToolKind } from '../../components/tool/tool-classify';
+export { classifyTool } from '../../primitives/tool-classify';
+export type { ToolKind } from '../../primitives/tool-classify';
 
 // Element-layer diagnostics. `emitWebComponentRegistry()` re-emits the which-elements-
 // are-defined snapshot on demand, for a panel that attached mid-session and so

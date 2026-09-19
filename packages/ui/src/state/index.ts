@@ -34,11 +34,11 @@ export type {
   MessageSource, RawOrigin,
 } from '../web-components/chat/chat-types';
 export type { ToolPart } from '../components/tool/tool-types';
-export type { ToolKind } from '../components/tool/tool-classify';
+export type { ToolKind } from '../primitives/tool-classify';
 // upsertToolPart defaults `kind` to classifyTool(type) and reverts it on a type
 // change (see ./parts), and ToolPart.kind's doc comment names the function, so a
 // consumer computing `kind` itself needs the identical classifier — not a
 // hand-rolled copy that drifts from ours.
-export { classifyTool } from '../components/tool/tool-classify';
+export { classifyTool } from '../primitives/tool-classify';
 export type { CardEnvelope } from '../primitives/card-contract';
 export type { AttachmentData } from '../primitives/attachment-types';

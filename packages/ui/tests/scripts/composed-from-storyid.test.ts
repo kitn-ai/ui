@@ -24,13 +24,22 @@ describe('composedFrom story ids', () => {
     expect(names.filter((n) => /^[A-Z0-9_]+$/.test(n))).toEqual([]);
   });
 
-  it('is not empty for an element that composes its UI in an element-local helper', () => {
-    // `kai-prompt-input` builds its whole UI in src/web-components/prompt/default-input.tsx (so
-    // `<kai-chat>` can render the same composer). A facade-file-only walk reported
-    // `composedFrom: []` for it.
+  it('is not empty for an element whose whole UI is built in a helper module', () => {
+    // `kai-prompt-input` builds its whole UI in a helper (so `<kai-chat>` renders the
+    // same composer). A facade-file-only walk reported `composedFrom: []` for it, and
+    // that is what this pins.
+    //
+    // The helper MOVED on 2026-09-19: `default-input.tsx` registers nothing and is a
+    // plain Solid component, yet it lived in the web-components layer while a Solid
+    // component (components/chat/chat-thread.tsx) imported it -- an upward VALUE edge.
+    // It now lives in components/prompt/, so this facade composes it DIRECTLY and the
+    // reported name is that helper rather than the three primitives inside it. The
+    // in-layer recursion branch this test once exercised is exercised by nothing today
+    // (the remaining local imports are a CSS string and a validator), which is why the
+    // expectation is now the single direct name.
     const promptInput = (meta as any[]).find((e) => e.tag === 'kai-prompt-input');
     expect(promptInput.composedFrom.map((c: any) => c.name)).toEqual(
-      expect.arrayContaining(['PromptInput', 'PromptInputTextarea', 'PromptSuggestion']),
+      expect.arrayContaining(['DefaultPromptInput']),
     );
   });
 

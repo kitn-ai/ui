@@ -38,7 +38,7 @@ import {
   mergeCardTags,
   type CardComponentMap,
   type CardTagMap,
-} from '../primitives/card-registry';
+} from '../components/card/card-registry';
 
 // Restored centrally rather than at the end of each test: an inline `mockRestore()`
 // after the assertions never runs when an assertion FAILS, so the spy leaks into the

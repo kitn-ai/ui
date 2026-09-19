@@ -523,7 +523,7 @@ Restyle from outside the Shadow DOM via `kai-prompt-input::part(name)`.
 
 #### Composed from
 
-`Components/PromptInput`, `Components/PromptInputTextarea`, `Components/PromptInputActions`, `Components/PromptSuggestion`, `Components/Button`, `Components/Tooltip`, `Components/Attachments`, `Components/Attachment`, `Components/AttachmentPreview`, `Components/AttachmentInfo`, `Components/AttachmentRemove`
+`Components/DefaultPromptInput`
 
 #### Theming
 

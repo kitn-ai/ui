@@ -12,7 +12,7 @@
 // `skipLibCheck: true`, which is exactly why this file is now compiled with it off
 // (tests/web-components/types-lib-check.test.ts).
 import type { CodeHighlightingOptions } from '../primitives/highlighter';
-import type { ToolKind } from '../components/tool/tool-classify';
+import type { ToolKind } from '../primitives/tool-classify';
 
 // Re-exports for `import { … } from '@kitn.ai/ui/web-components'`. Mirrors the names the
 // shipped dist/web-components.d.ts inlines, so both copies expose the same surface.
@@ -27,7 +27,7 @@ export type {
   RawOrigin,
 } from './chat/chat-types';
 export type { ToolPart } from '../components/tool/tool-types';
-export type { ToolKind } from '../components/tool/tool-classify';
+export type { ToolKind } from '../primitives/tool-classify';
 export type { AttachmentData } from '../primitives/attachment-types';
 export type { CardEnvelope, CardResolution } from '../primitives/card-contract';
 export type { CodeHighlightingOptions } from '../primitives/highlighter';

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { classifyTool } from './tool-classify';
+import { classifyTool } from '../../src/primitives/tool-classify';
 
 describe('classifyTool', () => {
   it('classifies shell-ish tools as command', () => {

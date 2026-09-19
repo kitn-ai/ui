@@ -9,7 +9,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import '@testing-library/jest-dom/vitest';
 import { render, cleanup, fireEvent } from '@solidjs/testing-library';
-import { DefaultPromptInput } from './default-input';
+import { DefaultPromptInput } from '../../components/prompt/default-input';
 
 afterEach(cleanup);
 

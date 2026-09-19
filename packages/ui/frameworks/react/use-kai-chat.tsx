@@ -9,7 +9,7 @@ export type {
   MessageSource, RawOrigin,
 } from '../../src/web-components/chat/chat-types';
 export type { ToolPart } from '../../src/components/tool/tool-types';
-export type { ToolKind } from '../../src/components/tool/tool-classify';
+export type { ToolKind } from '../../src/primitives/tool-classify';
 export type { CardEnvelope } from '../../src/primitives/card-contract';
 export type { AttachmentData } from '../../src/primitives/attachment-types';
 import type { AttachmentData } from '../../src/primitives/attachment-types';

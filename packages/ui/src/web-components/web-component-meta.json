@@ -7128,59 +7128,9 @@
     ],
     "composedFrom": [
       {
-        "name": "PromptInput",
+        "name": "DefaultPromptInput",
         "group": "Components",
-        "storyId": "solid-advanced-web-components-promptinput--docs"
-      },
-      {
-        "name": "PromptInputTextarea",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-promptinputtextarea--docs"
-      },
-      {
-        "name": "PromptInputActions",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-promptinputactions--docs"
-      },
-      {
-        "name": "PromptSuggestion",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-promptsuggestion--docs"
-      },
-      {
-        "name": "Button",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-button--docs"
-      },
-      {
-        "name": "Tooltip",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-tooltip--docs"
-      },
-      {
-        "name": "Attachments",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-attachments--docs"
-      },
-      {
-        "name": "Attachment",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-attachment--docs"
-      },
-      {
-        "name": "AttachmentPreview",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-attachmentpreview--docs"
-      },
-      {
-        "name": "AttachmentInfo",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-attachmentinfo--docs"
-      },
-      {
-        "name": "AttachmentRemove",
-        "group": "Components",
-        "storyId": "solid-advanced-web-components-attachmentremove--docs"
+        "storyId": "solid-advanced-web-components-defaultpromptinput--docs"
       }
     ],
     "tokens": [],

@@ -1,7 +1,7 @@
 import type { MessagePart, RawOrigin } from '../web-components/chat/chat-types';
 import type { ToolPart } from '../components/tool/tool-types';
 import type { CardEnvelope } from '../primitives/card-contract';
-import { classifyTool } from '../components/tool/tool-classify';
+import { classifyTool } from '../primitives/tool-classify';
 
 /** Stable structural fingerprint. Key order independent, so an identical snapshot
  *  arriving twice compares equal and can be skipped. */

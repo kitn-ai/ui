@@ -9,7 +9,7 @@
 
 import { createSignal, onCleanup } from 'solid-js';
 import type { ChatMessage, FeedbackVote } from '../web-components/chat/chat-types';
-import { partsToText } from '../state/index';
+import { partsToText } from './parts-text';
 import { toast } from './toast-store';
 import { speakText } from './speech';
 

@@ -11,13 +11,13 @@ import {
   Context, ContextTrigger, ContextContent, ContextContentHeader,
   ContextContentBody, ContextContentFooter, ContextInputUsage, ContextOutputUsage,
 } from '../context/context';
-import { DefaultPromptInput, type RejectedAttachment } from '../../web-components/prompt/default-input';
+import { DefaultPromptInput, type RejectedAttachment } from '../prompt/default-input';
 import type { MediaTypeFilter } from '../../wire/media-types';
 import type { TriggerDef } from '../composer/composer';
 import type { ChatMessage, ChatMessageAction, CustomAction } from '../../web-components/chat/chat-types';
 import type { ProseSize } from '../../primitives/chat-config';
 import type { ModelOption } from '../../types';
-import type { CardComponentMap } from '../../primitives/card-registry';
+import type { CardComponentMap } from '../card/card-registry';
 import type { CardSchemaMap } from '../card/card-renderer';
 import type { JSX } from 'solid-js';
 import type { ConversationStore } from '../../primitives/conversation-store';

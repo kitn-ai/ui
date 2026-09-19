@@ -4,7 +4,7 @@
 // its stable handles, and the emit wiring onto the frozen CardEvent set.
 import { createSignal } from 'solid-js';
 import { render } from '@solidjs/testing-library';
-import { BUILTIN_CARD_COMPONENTS } from '../../src/primitives/card-registry';
+import { BUILTIN_CARD_COMPONENTS } from '../../src/components/card/card-registry';
 import { CardRenderer } from '../../src/components/card/card-renderer';
 import { CardProvider } from '../../src/primitives/card-host';
 import { upsertCardPart } from '../../src/state/parts';

@@ -355,8 +355,8 @@ Every export (57, derived from `dist/state/index.d.ts`):
 | `MessageSource` | type | `../web-components/chat/chat-types` |
 | `RawOrigin` | type | `../web-components/chat/chat-types` |
 | `ToolPart` | type | `../components/tool/tool-types` |
-| `ToolKind` | type | `../components/tool/tool-classify` |
-| `classifyTool` | value | `../components/tool/tool-classify` |
+| `ToolKind` | type | `../primitives/tool-classify` |
+| `classifyTool` | value | `../primitives/tool-classify` |
 | `CardEnvelope` | type | `../primitives/card-contract` |
 | `AttachmentData` | type | `../primitives/attachment-types` |
 
