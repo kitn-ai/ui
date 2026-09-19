@@ -132,7 +132,103 @@ const VITE = 'vite@^8';
  * `node`). A condition whose traces record no `solid-js/web` resolution at all is
  * a failure too, so the weaker half of this check cannot go vacuous in silence.
  */
-const EAGER_PROBES = [
+/**
+ * PROBES FOR THE SUBPATHS THE ROOT PROBES CANNOT SEE. Every probe above imports
+ * `@kitn.ai/ui`, which is the SolidJS barrel; until these landed there was NO size
+ * proof for `./react`, `./solid`, or a single `./web-components/<module>` import —
+ * the three surfaces a React app, a Solid app and a plain-HTML/Vue/Svelte/Angular app
+ * respectively resolve. A regression that re-aggregated one of them would have shipped
+ * silently.
+ *
+ * The web-component probes are the ones the handoff asked for by name ("prove
+ * tree-shaking works when a web component is imported through node_modules"):
+ * `import '@kitn.ai/ui/web-components/chat'` must pull the shared runtime (define +
+ * the Solid component tree it needs) and NOT the register-all bundle. Measured at
+ * introduction: chat 563,238 B eager against the register-all entry's 761,383 B lazy
+ * chunk, and `loader` 170,251 B flooring on the 148,633 B `define-*.js` chunk — i.e.
+ * the per-module build does its job, and the floor every facade pays IS the shared
+ * runtime. Ceilings are set from those reads with headroom, so growth is what trips
+ * them; the floors keep a probe from passing by measuring an empty bundle.
+ */
+const SUBPATH_PROBES = [
+  {
+    name: 'wc-chat-eager',
+    condition: 'browser',
+    expectEntry: 'dist/web-components/chat.js',
+    subject: 'one web component through node_modules: the biggest facade, and the register-all bundle must be unreachable from it',
+    source:
+      `import '@kitn.ai/ui/web-components/chat';\n` +
+      `customElements.whenDefined('kai-chat').then(() => console.log('chat ready'));\n`,
+    minEagerBytes: 200 * 1024,
+    maxEagerBytes: 800 * 1024,
+    onGrowth:
+      'a single facade is reaching the register-all bundle (dist/kai.es.js + its 761 kB register-impl chunk) '
+      + 'instead of its own per-module closure',
+  },
+  {
+    name: 'wc-loader-eager',
+    condition: 'browser',
+    expectEntry: 'dist/web-components/loader.js',
+    subject: 'the smallest facade: what one web component costs when the component tree is trivial, i.e. the shared facade runtime',
+    source:
+      `import '@kitn.ai/ui/web-components/loader';\n` +
+      `customElements.whenDefined('kai-loader').then(() => console.log('loader ready'));\n`,
+    minEagerBytes: 64 * 1024,
+    maxEagerBytes: 260 * 1024,
+    onGrowth:
+      'the shared facade runtime (the define chunk) grew, so EVERY per-module import got more expensive',
+  },
+  {
+    name: 'react-button',
+    condition: 'browser',
+    expectEntry: 'dist/react.js',
+    subject: 'one React wrapper from ./react, which is the generated surface a React consumer imports',
+    source:
+      `import { Button } from '@kitn.ai/ui/react';\n` +
+      `console.log(Button?.displayName ?? Button?.name ?? 'button');\n`,
+    // Measured 4,557 B eager with 23 lazy chunks: the wrapper GLUE is all that is
+    // eager, and each element's module arrives through the wrapper's dynamic import.
+    // The floor is deliberately low (it only has to catch an empty bundle) because a
+    // healthy react import is small on purpose.
+    minEagerBytes: 2 * 1024,
+    maxEagerBytes: 24 * 1024,
+    onGrowth:
+      'the ./react entry aggregated every wrapper again, so importing one component pulls the catalog; '
+      + 'the lazy-chunk count beside this number is the other half of the signal (23 today)',
+  },
+  {
+    name: 'solid-thread',
+    condition: 'browser',
+    expectEntry: 'dist/solid.js',
+    subject: 'one Solid component from ./solid, the authored surface',
+    source:
+      `import { Thread } from '@kitn.ai/ui/solid';\n` +
+      `console.log(Thread?.name ?? 'thread');\n`,
+    // Measured 305,199 B. That is the component's OWN closure (thread -> message ->
+    // markdown/tool/...), not the barrel: the `solid-badge` probe below is the control
+    // that proves the difference. A ceiling of 200 KiB was a guess and this build is
+    // legitimately bigger than it.
+    minEagerBytes: 128 * 1024,
+    maxEagerBytes: 420 * 1024,
+    onGrowth:
+      'either ./solid stopped being per-module, or Thread grew a large eager dependency',
+  },
+  {
+    name: 'solid-badge',
+    condition: 'browser',
+    expectEntry: 'dist/solid.js',
+    subject: 'the CONTROL for solid-thread: a leaf component must cost a fraction of a composite one, which is per-module output working',
+    source:
+      `import { Badge } from '@kitn.ai/ui/solid';\n` +
+      `console.log(Badge?.name ?? 'badge');\n`,
+    minEagerBytes: 4 * 1024,
+    maxEagerBytes: 80 * 1024,
+    onGrowth:
+      'a leaf component now costs what a composite one costs, which is the aggregate-module signature',
+  },
+];
+
+const ROOT_PROBES = [
   {
     name: 'minimal-cn',
     condition: 'browser',
@@ -197,6 +293,9 @@ const EAGER_PROBES = [
       + 'resolves one self-contained aggregate again — this probe measured 105,024 B against a fresh build of it',
   },
 ];
+
+/** The four root probes plus the subpath probes: one list, one report, one set of ceilings. */
+const EAGER_PROBES = [...ROOT_PROBES, ...SUBPATH_PROBES];
 
 /** What each condition's build must be seen resolving, per probe. */
 const CONDITION_EXPECTATIONS = {
@@ -310,7 +409,7 @@ const resolveTracePlugin = (traceFile) =>
   `  name: 'kai-resolve-trace',\n` +
   `  enforce: 'pre',\n` +
   `  async resolveId(source, importer, opts) {\n` +
-  `    if (source === '@kitn.ai/ui' || source === 'solid-js/web') {\n` +
+  `    if (source === '@kitn.ai/ui' || source.startsWith('@kitn.ai/ui/') || source === 'solid-js/web') {\n` +
   `      const resolved = await this.resolve(source, importer, { ...opts, skipSelf: true });\n` +
   `      fs.appendFileSync(${JSON.stringify(traceFile)}, JSON.stringify({ source, id: resolved && resolved.id }) + '\\n');\n` +
   `    }\n` +
@@ -414,7 +513,10 @@ try {
 
   step(`npm install ${VITE} + the packed tarball`);
   try {
-    run('npm', ['install', '--no-audit', '--no-fund', '--loglevel=error', tarball, VITE], app);
+    // react + react-dom because the ./react probe imports @kitn.ai/ui/react, whose
+    // wrappers import react/jsx-runtime: without them the probe measures a resolution
+    // failure, not a bundle.
+    run('npm', ['install', '--no-audit', '--no-fund', '--loglevel=error', tarball, VITE, 'react', 'react-dom'], app);
   } catch (e) {
     fail(`npm install failed (network?):\n${e.stderr || e.message}`);
   }
@@ -462,7 +564,11 @@ try {
     eager.push({
       ...probe,
       ...readEagerJs(join(app, `out-${probe.name}`), probe.name),
-      resolvedKit: resolved.find((r) => r.source === '@kitn.ai/ui')?.id ?? null,
+      // ANY kit specifier: a subpath probe resolves '@kitn.ai/ui/react' or
+      // '@kitn.ai/ui/web-components/chat', not the bare root.
+      resolvedKit: resolved.find((r) => r.source === '@kitn.ai/ui' || r.source.startsWith('@kitn.ai/ui/'))?.id ?? null,
+      resolvedKitSpecifier:
+        resolved.find((r) => r.source === '@kitn.ai/ui' || r.source.startsWith('@kitn.ai/ui/'))?.source ?? null,
       resolvedSolid: resolved.find((r) => r.source === 'solid-js/web')?.id ?? null,
     });
   }
@@ -473,9 +579,13 @@ try {
   const shown = (id) => (id ? id.slice(id.indexOf('node_modules/')) : 'never resolved');
   for (const p of eager) {
     const want = CONDITION_EXPECTATIONS[p.condition];
-    if (!p.resolvedKit?.endsWith(want.entry)) {
+    // A subpath probe names its OWN dist file (`expectEntry`); everything else
+    // resolves an entry build, which is what the condition dictates.
+    const expectedEntry = p.expectEntry ?? want.entry;
+    if (!p.resolvedKit?.endsWith(expectedEntry)) {
       misresolved.push(
-        `  ${p.name} [${p.condition}]: @kitn.ai/ui -> ${shown(p.resolvedKit)}, expected ${want.entry}`,
+        `  ${p.name} [${p.condition}]: ${p.resolvedKitSpecifier ?? '@kitn.ai/ui'} -> ${shown(p.resolvedKit)}, ` +
+          `expected ${expectedEntry}`,
       );
     }
     if (p.resolvedSolid && !p.resolvedSolid.endsWith(want.solidRuntime)) {
