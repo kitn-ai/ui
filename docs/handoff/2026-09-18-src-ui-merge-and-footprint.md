@@ -274,3 +274,55 @@ entry (`cn`, `Button`) in both conditions. There is **no** size proof for `@kitn
 `elements` register-all/per-element bytes are computed and printed but never bounded;
 `verify:shader-lazy` and `verify:react-wrappers` run only inside the cache-skippable `build`. The
 React and Solid probes are the cheapest next win — the mechanism (`EAGER_PROBES`) already exists.
+
+---
+
+## 7. §2.1 phase 1 landed: `--kai-spacing` (density), and the mechanism it proves
+
+**What shipped.** `theme.css` now declares `--spacing: var(--kai-spacing, 0.25rem)`; the editor
+catalog and the theme studio carry the knob; the docs tables were updated in the same change.
+
+**The mechanism, now proven rather than asserted.** Tailwind emits its `@theme` block as
+`:root,:host{...}`, so the compiled sheet declares `--spacing` ON THE HOST ELEMENT. A declaration on
+the element beats an inherited value, which is why `:root { --spacing: 1rem }` — the variable a
+consumer naturally reaches for — moved nothing and said nothing. What makes a token overridable is
+the sheet READING it (`--spacing: var(--kai-spacing, …)`), which is the shape `--radius` has always
+had. Both halves are pinned in a real Chromium now, including the negative one
+(`tests/e2e/geometry-token.spec.ts`, project `geometry-token`, `npm run test:geometry-token`).
+
+**`--kai-spacing` is a DENSITY knob, not "whitespace".** This is the one thing to understand before
+touching it. Every numeric spacing utility is `calc(var(--spacing) * N)`, so the single token drives
+padding and margins and gaps (the design sense of spacing) AND control heights (`h-9`), icon sizes
+(`size-4`) and the offset/motion utilities (`top-2`, `-mt-1`, `translate-x-0.5`). In shipping source
+the split is roughly 733 whitespace / 203 size / 59 offset occurrences. Mature density scales move
+these together on purpose; the NAME is what over-promises. OPEN DECISION, not taken: rename to
+`--kai-density` while nothing has shipped (cost: one commit across ~8 files), or keep `--kai-spacing`
+with the scope documented in `theme.css`'s header and `guides/theming.mdx` (both now say it moves
+`size-*` too). Do not silently split space-only tokens: that is ~203 re-authored call sites.
+
+**Guards added** (each mutation-proved, i.e. shown to fail when the thing it guards is removed):
+`tests/styles/geometry-tokens.test.ts` (source declaration, the `:host` selector in the COMPILED
+sheet, and the light-DOM import) · `tests/e2e/geometry-token.spec.ts` (real cascade, positive +
+negative) · `apps/theme-studio/ThemeStudio.embed.test.tsx` (the studio wiring, derived from
+`EXTRA_TOKENS` so the next catalogued-but-unwired knob is red).
+
+**The lesson worth carrying into the remaining phases.** The coverage test
+(`tests/styles/theme-studio-coverage.test.ts`) asserts that every token `theme.css` declares has a
+knob in `studioTokens()` — but `studioTokens()` is a LIST, and the studio UI keeps its own separate
+list of extras. So it was green about `--kai-spacing` while `buildCss` emitted no line for it. A
+guard that reads a registry is not a guard that the registry is wired; the new studio test reads the
+same registry and then asserts the OUTPUT, which is the difference.
+
+**What §2.1 still has open** (unchanged from the table above, in the order I would take them):
+`rounded-full` (Tailwind hardcodes `3.40282e38px`; `--kai-radius` provably cannot reach it — needs a
+decision on re-authoring those sites, then border width, ring width/offset, opacity, shadow geometry,
+durations and font-weight, each following the `--radius` shape); the two palette defects (14
+component files bypassing `--kai-*`, with `dark:text-red-400` and a success green, and the TESTS pin
+those class names, so tokenizing ripples into them); and the 3 `var(--brand)` recipes in
+`src/elements/slots.ts`, a token the kit never declares.
+
+**Also found while doing this, not acted on:** `docs/coupling-map.md` row 132 says the `kai` MCP
+`theme` tool "hardcodes token names in `cssBlock()` and never reads `theme.css`". It does read it —
+`packages/ui/mcp/mcp/tools/theme.ts` derives `DECLARED_TOKENS` via `declaredKaiTokens(themeCss)` and
+resolves its curated `BRAND_TOKENS` against that, erroring loudly on a name the file no longer
+declares. The row's verdict is stale, not the code.
