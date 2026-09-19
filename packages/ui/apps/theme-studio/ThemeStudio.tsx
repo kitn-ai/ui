@@ -2,15 +2,15 @@
  *
  *  How it works: every kit color is a CSS custom property the consumer can
  *  override. The studio writes the active palette as inline `--kai-color-*` /
- *  `--kai-radius` properties on a single canvas wrapper; custom properties
+ *  `--kai-radius` / `--kai-spacing` properties on a single canvas wrapper; custom properties
  *  inherit through the Shadow DOM, so every `kai-*` element inside the canvas
  *  reskins at once — the exact mechanism you'd ship in a stylesheet.
  *
  *  Light and dark are edited independently (each canvas host runs at the studio's
  *  own mode, not the page's), and Copy CSS exports the paste-ready `:root` +
- *  `.dark` blocks. Bounded to real tokens — colors, radius, the type scale and
- *  the font/tracking/shadow knobs — so it never promises theming the kit can't
- *  actually do. The type-size rungs earned their place when theme.css re-pointed
+ *  `.dark` blocks. Bounded to real tokens — colors, radius, spacing, the type
+ *  scale and the font/tracking/shadow knobs — so it never promises theming the
+ *  kit can't actually do. The type-size rungs earned their place when theme.css re-pointed
  *  Tailwind's `text-xs`/`text-sm`/`text-base`/`text-lg` at `--kai-text-*`: before
  *  that a size slider would have moved a small minority of the kit's call sites.
  *
@@ -141,6 +141,10 @@ const kitDefault = (token: string, mode: 'light' | 'dark'): string => {
   return d[mode];
 };
 const DEFAULT_RADIUS = remValue(kitDefault('--kai-radius', 'light')); // rem
+/** Tailwind's own `--spacing` default, read out of theme.css rather than typed
+ *  here as 0.25: a hardcoded default that disagreed with theme.css would move
+ *  every `p-*` / `gap-*` / `size-*` in the kit the moment the file changed. */
+const DEFAULT_SPACING = remValue(kitDefault('--kai-spacing', 'light')); // rem
 
 /** A rung's default rem, from theme.css. */
 const rungDef = (r: TextRung): number => remValue(kitDefault(r.token, 'light'));
@@ -391,13 +395,14 @@ const isEmbedded = (): boolean =>
 const isRail = (): boolean =>
   typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('embed');
 
-interface ThemeExtras { radius: number; fontBase: string; fontCode: string; tracking: number; shadow: string; text: TextScale }
+interface ThemeExtras { radius: number; spacing: number; fontBase: string; fontCode: string; tracking: number; shadow: string; text: TextScale }
 
-/** Build paste-ready CSS: full light set on :root (+ radius/type scale/font/
- *  tracking/shadow), dark set on .dark. */
+/** Build paste-ready CSS: full light set on :root (+ radius/spacing/type scale/
+ *  font/tracking/shadow), dark set on .dark. */
 function buildCss(light: Palette, dark: Palette, x: ThemeExtras): string {
   const rootExtra = [
     `  --kai-radius: ${x.radius}rem;`,
+    `  --kai-spacing: ${x.spacing}rem;`,
     ...TEXT_RUNGS.map((r) => `  ${r.token}: ${x.text[r.token] ?? rungDef(r)}rem;`),
     x.fontBase ? `  --kai-font-base: ${x.fontBase};` : '',
     x.fontCode ? `  --kai-font-code: ${x.fontCode};` : '',
@@ -411,7 +416,7 @@ function buildCss(light: Palette, dark: Palette, x: ThemeExtras): string {
 
 /** Tolerant parse of pasted CSS: pull --kai-* declarations from the :root block
  *  (light) and the .dark block (dark). Unknown tokens are ignored. */
-function parseCss(css: string): { light: Palette; dark: Palette; radius?: number; text: TextScale } | null {
+function parseCss(css: string): { light: Palette; dark: Palette; radius?: number; spacing?: number; text: TextScale } | null {
   const grab = (selector: string): Palette => {
     const re = new RegExp(`${selector}\\s*\\{([^}]*)\\}`);
     const block = css.match(re)?.[1] ?? '';
@@ -421,15 +426,21 @@ function parseCss(css: string): { light: Palette; dark: Palette; radius?: number
   };
   const light = grab(':root');
   const dark = grab('\\.dark');
-  const anyText = /--kai-text-[a-z-]+\s*:\s*[\d.]+rem/.test(css);
-  if (!Object.keys(light).length && !Object.keys(dark).length && !anyText) return null;
+  // A rem knob the parser reads back: pasting only these already counts as a
+  // theme. `--kai-radius` stays out on purpose — a radius-only paste was
+  // rejected before `--kai-spacing` existed and still is, because widening what
+  // the importer accepts is a separate call from wiring this token.
+  const hasRemKnob = /--kai-(?:text-[a-z-]+|spacing)\s*:\s*[\d.]+rem/.test(css);
+  if (!Object.keys(light).length && !Object.keys(dark).length && !hasRemKnob) return null;
   const radiusMatch = css.match(/--kai-radius\s*:\s*([\d.]+)rem/);
+  // Spacing is a rem value too, so `buildCss` output pasted back in round-trips.
+  const spacingMatch = css.match(/--kai-spacing\s*:\s*([\d.]+)rem/);
   // Type scale: rem only, and only rungs the kit actually has.
   const text: TextScale = {};
   for (const m of css.matchAll(/(--kai-text-[a-z-]+)\s*:\s*([\d.]+)rem/g)) {
     if (TEXT_RUNGS.some((r) => r.token === m[1])) text[m[1]] = parseFloat(m[2]);
   }
-  return { light, dark, radius: radiusMatch ? parseFloat(radiusMatch[1]) : undefined, text };
+  return { light, dark, radius: radiusMatch ? parseFloat(radiusMatch[1]) : undefined, spacing: spacingMatch ? parseFloat(spacingMatch[1]) : undefined, text };
 }
 
 export default function ThemeStudio() {
@@ -445,6 +456,7 @@ export default function ThemeStudio() {
   const [light, setLight] = createSignal<Palette>({});
   const [dark, setDark] = createSignal<Palette>({});
   const [radius, setRadius] = createSignal(DEFAULT_RADIUS);
+  const [spacing, setSpacing] = createSignal(DEFAULT_SPACING); // rem — base of every Tailwind spacing utility
   const [fontBase, setFontBase] = createSignal('');
   const [fontCode, setFontCode] = createSignal('');
   const [tracking, setTracking] = createSignal(0); // em
@@ -454,7 +466,7 @@ export default function ThemeStudio() {
   const [hsl, setHsl] = createSignal<Hsl>({ ...HSL_IDENTITY });
   const [preset, setPreset] = createSignal('Default');
   // Custom presets the user saves (persisted to localStorage).
-  type SavedPreset = { name: string; light: Palette; dark: Palette; radius: number; fontBase: string; fontCode: string; tracking: number; shadow: string; text?: TextScale };
+  type SavedPreset = { name: string; light: Palette; dark: Palette; radius: number; spacing?: number; fontBase: string; fontCode: string; tracking: number; shadow: string; text?: TextScale };
   const PRESET_KEY = 'kai-theme-studio-presets';
   const [saved, setSaved] = createSignal<SavedPreset[]>([]);
   const persistSaved = (list: SavedPreset[]) => { setSaved(list); try { localStorage.setItem(PRESET_KEY, JSON.stringify(list)); } catch { /* storage blocked */ } };
@@ -480,7 +492,7 @@ export default function ThemeStudio() {
   const toggleGroup = (name: string) => setOpenGroups((o) => ({ ...o, [name]: !o[name] }));
 
   const active = () => (mode() === 'light' ? light() : dark());
-  const extras = (): ThemeExtras => ({ radius: radius(), fontBase: fontBase(), fontCode: fontCode(), tracking: tracking(), shadow: shadowColor(), text: textScale() });
+  const extras = (): ThemeExtras => ({ radius: radius(), spacing: spacing(), fontBase: fontBase(), fontCode: fontCode(), tracking: tracking(), shadow: shadowColor(), text: textScale() });
   // The palette as the canvas/export actually see it: base colors + the HSL nudge.
   const effLight = () => shiftPalette(light(), hsl());
   const effDark = () => shiftPalette(dark(), hsl());
@@ -501,6 +513,10 @@ export default function ThemeStudio() {
     const rootExtras: Record<string, string> = {};
     const scale = textScale();
     for (const r of TEXT_RUNGS) rootExtras[r.token] = `${scale[r.token] ?? rungDef(r)}rem`;
+    // Carried at rest like --kai-shadow-color and `radius` below, not only when
+    // moved: the rail host re-themes its preview from what the payload NAMES, and
+    // the default IS Tailwind's own 0.25rem, so naming it changes nothing there.
+    rootExtras['--kai-spacing'] = `${spacing()}rem`;
     if (tracking()) rootExtras['--kai-tracking'] = `${tracking()}em`;
     rootExtras['--kai-shadow-color'] = shadowColor();
     const fonts: Record<string, string> = {};
@@ -566,6 +582,8 @@ export default function ThemeStudio() {
       if (m) text[r.token] = parseFloat(m[1]);
     }
     setTextScale(fillText(Object.keys(text).length ? text : undefined));
+    const sp = t.light?.['--kai-spacing']?.match(/^([\d.]+)rem$/);
+    setSpacing(sp ? parseFloat(sp[1]) : DEFAULT_SPACING);
     const rm = t.radius?.match(/^([\d.]+)rem$/);
     setRadius(rm ? parseFloat(rm[1]) : DEFAULT_RADIUS);
     const tr = t.light?.['--kai-tracking']?.match(/^(-?[\d.]+)em$/);
@@ -590,6 +608,7 @@ export default function ThemeStudio() {
     const p = effActive();
     for (const t of ALL_TOKENS) canvasEl.style.setProperty(t.token, p[t.token]);
     canvasEl.style.setProperty('--kai-radius', `${radius()}rem`);
+    canvasEl.style.setProperty('--kai-spacing', `${spacing()}rem`);
     canvasEl.style.background = p['--kai-color-background'];
     // Typography + shadow tokens.
     const setOrClear = (name: string, val: string) => val ? canvasEl!.style.setProperty(name, val) : canvasEl!.style.removeProperty(name);
@@ -620,6 +639,10 @@ export default function ThemeStudio() {
     if (s) {
       // Tokens the kit grew after the preset was saved get their derived default.
       setLight(resolvePalette('light', s.light)); setDark(resolvePalette('dark', s.dark)); setRadius(s.radius);
+      // Optional, because localStorage holds JSON an older build wrote. A preset
+      // saved before --kai-spacing existed was saved under Tailwind's own 0.25rem,
+      // so the derived default is what it meant — not a silent reset.
+      setSpacing(typeof s.spacing === 'number' && Number.isFinite(s.spacing) ? s.spacing : DEFAULT_SPACING);
       setFontBase(s.fontBase); setFontCode(s.fontCode); setTracking(s.tracking); setShadowColor(s.shadow);
       setTextScale(fillText(s.text));
       ensureFont(s.fontBase); ensureFont(s.fontCode);
@@ -629,6 +652,7 @@ export default function ThemeStudio() {
     const lo: Palette = {};
     const dk: Palette = {};
     setTextScale(seedText()); // no built-in preset ships a type scale — back to the kit ladder
+    setSpacing(DEFAULT_SPACING); // no built-in preset ships a spacing either — back to Tailwind's 0.25rem
     const t = THEME_PRESETS.find((x) => x.name === name);
     if (t) {
       for (const [k, tok] of Object.entries(SHADCN_TO_KAI)) {
@@ -668,7 +692,7 @@ export default function ThemeStudio() {
   const commitSave = () => {
     const name = saveName().trim();
     if (!name) { setSaveError('Give the theme a name.'); return; }
-    const p: SavedPreset = { name, light: effLight(), dark: effDark(), radius: radius(), fontBase: fontBase(), fontCode: fontCode(), tracking: tracking(), shadow: shadowColor(), text: textScale() };
+    const p: SavedPreset = { name, light: effLight(), dark: effDark(), radius: radius(), spacing: spacing(), fontBase: fontBase(), fontCode: fontCode(), tracking: tracking(), shadow: shadowColor(), text: textScale() };
     persistSaved([...saved().filter((x) => x.name !== name), p]);
     setPreset(name);
     setSaveOpen(false);
@@ -695,12 +719,13 @@ export default function ThemeStudio() {
   const applyImport = () => {
     const parsed = parseCss(importText());
     if (!parsed) {
-      setImportError('No --kai-color-* or --kai-text-* tokens found. Paste a :root / .dark block.');
+      setImportError('No --kai-color-*, --kai-text-* or --kai-spacing token found. Paste a :root / .dark block.');
       return;
     }
     setLight((v) => ({ ...v, ...parsed.light }));
     setDark((v) => ({ ...v, ...parsed.dark }));
     if (parsed.radius !== undefined) setRadius(parsed.radius);
+    if (parsed.spacing !== undefined) setSpacing(parsed.spacing);
     if (Object.keys(parsed.text).length) setTextScale((v) => ({ ...v, ...parsed.text }));
     setPreset('Custom');
     setImportOpen(false);
@@ -1117,6 +1142,12 @@ export default function ThemeStudio() {
           <div class="border-t border-line/60 px-3 py-3">
             <div class="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-2">Shape</div>
             <SliderRow label="Radius" value={radius()} min={0} max={1.4} step={0.05} unit="rem" onInput={(n) => { setRadius(n); setPreset('Custom'); }} />
+            {/* Bounds are the studio's own taste call, not a limit the token
+                imposes. 0.0625rem is 1px at the 16px root (TEXT_STEP's
+                granularity) and keeps 0.25rem on-step; 0.75rem is 3x Tailwind's
+                default, as airy as a preview is worth reading. */}
+            <SliderRow label="Spacing" value={spacing()} min={0} max={0.75} step={0.0625} unit="rem" onInput={(n) => { setSpacing(n); setPreset('Custom'); }} />
+            <p class="mt-2 text-xs text-ink/55">The base of every Tailwind spacing utility — <span class="font-mono text-ink-2">p-*</span>, <span class="font-mono text-ink-2">gap-*</span>, <span class="font-mono text-ink-2">size-*</span> are all <span class="font-mono text-ink-2">calc(--kai-spacing × N)</span>, so this one knob moves the whole kit's density. 0.25rem is Tailwind's own default: leave it there and the kit's geometry is unchanged.</p>
           </div>
           <div class="border-t border-line/60 px-3 py-3">
             <div class="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-2">Shadow</div>
