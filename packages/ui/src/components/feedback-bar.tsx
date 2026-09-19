@@ -156,7 +156,7 @@ export function FeedbackBar(props: FeedbackBarProps) {
         {/* ── Thanks ── */}
         <Match when={phase() === 'thanks'}>
           <div class="flex items-center gap-2 px-4 py-3" role="status">
-            <Check class="size-4 text-emerald-500" />
+            <Check class="size-4 text-success" />
             <span class="text-foreground font-medium">{props.thanksMessage ?? 'Thanks for your feedback'}</span>
           </div>
         </Match>

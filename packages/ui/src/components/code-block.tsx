@@ -63,7 +63,7 @@ function CodeBlockCopyButton(props: { text: string }) {
       }}
     >
       <Show when={copied()} fallback={<Copy size={14} aria-hidden="true" />}>
-        <Check size={14} aria-hidden="true" class="text-emerald-500" />
+        <Check size={14} aria-hidden="true" class="text-success" />
       </Show>
     </button>
   );

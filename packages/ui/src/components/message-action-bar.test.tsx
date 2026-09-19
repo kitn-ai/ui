@@ -113,18 +113,21 @@ describe('MessageActionBar', () => {
 
   // ── feedback + copied props (pure/prop-driven) ─────────────────────────────
 
-  it('copied → the copy button swaps the Copy glyph for the emerald Check', () => {
+  it('copied → the copy button swaps the Copy glyph for the success Check', () => {
     const [copied, setCopied] = createSignal(false);
     const { getByLabelText } = render(() => (
       <MessageActionBar actions={['copy']} copied={copied()} onAction={() => {}} />
     ));
-    // default: aria-label "Copy", no emerald check
-    expect(getByLabelText('Copy').querySelector('.text-emerald-400')).toBeFalsy();
+    // default: aria-label "Copy", no success check. Asserted on the kit's semantic
+    // class, not the raw hue it used to reach for ('.text-emerald-400'): that pin
+    // survived a success mark that was illegible in light mode, because it named
+    // the palette the component happened to use rather than the meaning.
+    expect(getByLabelText('Copy').querySelector('.text-success')).toBeFalsy();
 
     setCopied(true);
     const btn = getByLabelText('Copied');
     expect(btn).toBeInTheDocument();
-    expect(btn.querySelector('.text-emerald-400')).toBeTruthy();
+    expect(btn.querySelector('.text-success')).toBeTruthy();
   });
 
   it("activeFeedback='like' → like is pressed and dislike collapses", () => {

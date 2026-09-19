@@ -1029,7 +1029,7 @@ function FieldRow(props: FieldRowProps): JSX.Element {
         <label id={labelId} for={groupOnly() ? undefined : id} class="text-sm font-medium text-foreground">
           {label()}
           <Show when={props.required}>
-            <span class="text-destructive dark:text-red-400" aria-hidden="true">{' *'}</span>
+            <span class="text-destructive-text" aria-hidden="true">{' *'}</span>
           </Show>
         </label>
       </Show>
@@ -1052,7 +1052,7 @@ function FieldRow(props: FieldRowProps): JSX.Element {
       <WidgetSwitch widget={widget()} common={common} fieldKey={props.fieldKey} />
 
       <Show when={props.error()}>
-        <p id={errorId} role="alert" class="text-xs text-destructive dark:text-red-400">
+        <p id={errorId} role="alert" class="text-xs text-destructive-text">
           {props.error()}
         </p>
       </Show>

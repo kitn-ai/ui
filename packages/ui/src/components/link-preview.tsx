@@ -131,7 +131,7 @@ export function LinkPreview(props: LinkPreviewProps): JSX.Element {
           role="img"
           aria-label="Invalid link"
           class={cn(
-            'flex items-center gap-2 rounded-xl border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive dark:border-red-400/50 dark:bg-destructive/20 dark:text-red-400',
+            'flex items-center gap-2 rounded-xl border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive-text dark:border-red-400/50 dark:bg-destructive/20',
             local.class,
           )}
         >

@@ -191,7 +191,7 @@ export interface MessageActionBarProps {
    *  marked pressed (filled) and the OTHER vote button animates out. `undefined`
    *  shows both. Pure/prop-driven so the bar survives re-renders. */
   activeFeedback?: FeedbackVote;
-  /** When true, the `copy` button shows its emerald check icon instead of the
+  /** When true, the `copy` button shows its success check icon instead of the
    *  copy glyph (cleared by the owner after ~2s). */
   copied?: boolean;
   class?: string;
@@ -223,7 +223,7 @@ function feedbackVoteOf(a: ChatMessageAction | CustomAction): FeedbackVote | und
  * a vote active, the chosen `like`/`dislike` button is marked `aria-pressed` +
  * filled and the other vote button collapses its width (sliding the active thumb
  * into its place) via a 0fr↔1fr grid transition. The
- * `copy` button swaps to an emerald check while `copied`.
+ * `copy` button swaps to a success check while `copied`.
  */
 function MessageActionBar(props: MessageActionBarProps) {
   return (
@@ -269,7 +269,7 @@ function MessageActionBar(props: MessageActionBarProps) {
                   </Show>
                 }
               >
-                <Check class="size-3.5 text-emerald-400" />
+                <Check class="size-3.5 text-success" />
               </Show>
             </Button>
           );
@@ -763,7 +763,7 @@ function MessageCopyButton(props: MessageCopyButtonProps) {
       }}
     >
       <Show when={copied()} fallback={<Copy size={iconSize()} />}>
-        <Check size={iconSize()} class="text-emerald-400" />
+        <Check size={iconSize()} class="text-success" />
       </Show>
     </button>
   );

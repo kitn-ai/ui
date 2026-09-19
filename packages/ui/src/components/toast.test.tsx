@@ -17,15 +17,19 @@ describe('Toast — rendering', () => {
       <Toast item={base({ duration: 0 })} onDismiss={() => {}} />
     ));
     expect(getByText('Hello')).toBeInTheDocument();
-    // lucide Check renders an <svg>; the emerald class is the success tell.
-    expect(container.querySelector('.text-emerald-500')).toBeNull();
+    // lucide Check renders an <svg>; the success text colour is the tell. Pinned
+    // on the kit's semantic class, not the raw hue: the old '.text-emerald-500'
+    // assertion pinned the palette name the component happened to reach for, so
+    // it passed while the mark was illegible in light mode and would have gone on
+    // passing through any retheme of --kai-color-success.
+    expect(container.querySelector('.text-success')).toBeNull();
   });
 
-  it('renders a success toast with the emerald check icon', () => {
+  it('renders a success toast with the success check icon', () => {
     const { container } = render(() => (
       <Toast item={base({ variant: 'success', duration: 0 })} onDismiss={() => {}} />
     ));
-    expect(container.querySelector('.text-emerald-500')).not.toBeNull();
+    expect(container.querySelector('.text-success')).not.toBeNull();
   });
 
   it('has role=status for assistive tech', () => {

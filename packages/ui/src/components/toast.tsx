@@ -156,7 +156,7 @@ export function Toast(props: ToastProps) {
   const VariantIcon = () => (
     <>
       <Show when={variant() === 'success'}>
-        <Check class={cn('size-4 shrink-0 text-emerald-500', iconAlign())} />
+        <Check class={cn('size-4 shrink-0 text-success', iconAlign())} />
       </Show>
       <Show when={variant() === 'warning'}>
         <AlertTriangle class={cn('size-4 shrink-0 text-warning', iconAlign())} />

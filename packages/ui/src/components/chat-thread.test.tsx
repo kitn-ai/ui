@@ -202,7 +202,7 @@ describe('ChatThread action-row feedback', () => {
       const { getByLabelText } = render(() => <ChatThread messages={[assistant('Copy me')]} />);
       fireEvent.click(getByLabelText('Copy'));
       expect(writeText).toHaveBeenCalledWith('Copy me');
-      // The copy button now shows the emerald check (aria-label flips to "Copied").
+      // The copy button now shows the success check (aria-label flips to "Copied").
       expect(getByLabelText('Copied')).toBeInTheDocument();
       // After the 2s window it reverts.
       vi.advanceTimersByTime(2000);

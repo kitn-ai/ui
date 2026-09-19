@@ -33,7 +33,7 @@ export function CardFallback(props: CardFallbackProps): JSX.Element {
         when={props.reason}
         fallback={
           <div data-card-fallback role="alert" class="flex items-center gap-2 p-4 text-sm text-muted-foreground">
-            <AlertTriangle class="size-4 shrink-0 text-destructive dark:text-red-400" aria-hidden="true" />
+            <AlertTriangle class="size-4 shrink-0 text-destructive-text" aria-hidden="true" />
             <span>
               Unsupported card type: <code class="font-mono">{props.type}</code>
             </span>
@@ -47,7 +47,7 @@ export function CardFallback(props: CardFallbackProps): JSX.Element {
             role="alert"
             class="flex items-start gap-2 p-4 text-sm text-muted-foreground"
           >
-            <AlertTriangle class="size-4 shrink-0 translate-y-0.5 text-destructive dark:text-red-400" aria-hidden="true" />
+            <AlertTriangle class="size-4 shrink-0 translate-y-0.5 text-destructive-text" aria-hidden="true" />
             <span class="min-w-0">
               Invalid <code class="font-mono">{props.type}</code> card:{' '}
               <code data-card-invalid-reason class="font-mono break-words">{reason()}</code>

@@ -68,6 +68,7 @@ export const GROUPS: Group[] = [
     tokens: [
       { token: '--kai-color-destructive', label: 'Destructive', hint: 'Danger / delete' },
       { token: '--kai-color-destructive-foreground', label: 'On destructive', hint: 'Text on danger' },
+      { token: '--kai-color-destructive-text', label: 'Destructive text', hint: 'Error text — legible in both modes' },
       { token: '--kai-color-destructive-soft', label: 'Destructive soft', hint: 'Tinted danger callout' },
       { token: '--kai-color-success', label: 'Success', hint: 'Done / confirmed' },
       { token: '--kai-color-success-foreground', label: 'On success', hint: 'Text on success' },

@@ -5847,6 +5847,7 @@
     "--kai-color-destructive",
     "--kai-color-destructive-foreground",
     "--kai-color-destructive-soft",
+    "--kai-color-destructive-text",
     "--kai-color-foreground",
     "--kai-color-highlight",
     "--kai-color-hover",

@@ -73,6 +73,18 @@
   --color-accent-foreground: var(--kai-color-accent-foreground, hsl(240 5.9% 10%));
   --color-destructive: var(--kai-color-destructive, hsl(0 72% 45%));
   --color-destructive-foreground: var(--kai-color-destructive-foreground, hsl(0 0% 98%));
+  /* Error TEXT. Its own token rather than a reuse of --color-destructive, because
+     a FILL and TEXT need different values in dark: the dark fill is deliberately
+     low-lightness so a light foreground reads on it, which leaves it 1.79:1 as
+     text on the dark background and 1.64:1 on a dark card — unreadable, and the
+     reason eight call sites reached past the palette for `dark:text-red-400`.
+     This is the text member of the destructive family: light is the destructive
+     value exactly (5.81:1 on white, 4.94:1 on the `destructive/10` callout tint,
+     5.60:1 on --color-surface), dark is the bright red --color-tool-red already
+     flips to (6.36:1 on the dark background, 5.84:1 on a dark card, 5.52:1 on the
+     `destructive/20` tint). Use text-destructive-text for error copy — never
+     text-destructive, which is the fill. Override via --kai-color-destructive-text. */
+  --color-destructive-text: var(--kai-color-destructive-text, hsl(0 72% 45%));
   /* Semantic status colors - solid fills with a legible foreground, matched to
      the kit's tool-green / -amber / -blue hues so they read on-brand. Use
      bg-success / bg-warning / bg-info with the matching -foreground for badges,
@@ -318,6 +330,9 @@
   --color-accent-foreground: var(--kai-color-accent-foreground, hsl(0 0% 98%));
   --color-destructive: var(--kai-color-destructive, hsl(0 62.8% 30.6%));
   --color-destructive-foreground: var(--kai-color-destructive-foreground, hsl(0 0% 98%));
+  /* Error TEXT — dark. The brighter red for the reason in the light block: the
+     dark --color-destructive fill is a fill, and 1.79:1 as text. */
+  --color-destructive-text: var(--kai-color-destructive-text, hsl(0 84% 70%));
   /* Semantic status colors - dark mode flips to the brighter tool-* dark hues
      (matching the chip values) carried over a near-black foreground, so the color
      both reads as text on a dark soft tint AND backs a legible foreground. See

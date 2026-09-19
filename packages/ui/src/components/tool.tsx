@@ -164,7 +164,7 @@ function Tool(props: ToolProps) {
 
             <Show when={state() === 'output-error' && local.toolPart.errorText}>
               <div>
-                <h4 class="mb-2 text-sm font-medium text-red-600 dark:text-red-400">Error</h4>
+                <h4 class="mb-2 text-sm font-medium text-destructive-text">Error</h4>
                 <div class="rounded bg-red-500/10 p-2 text-sm">
                   {local.toolPart.errorText}
                 </div>
