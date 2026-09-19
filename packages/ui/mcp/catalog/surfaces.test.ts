@@ -11,7 +11,7 @@ import '../../src/elements/conversation-list';
 import '../../src/elements/resizable';
 import '../../src/elements/thread';
 import '../../src/elements/toast';
-import type { AttachmentData } from '../../src/components/attachment-types/attachment-types';
+import type { AttachmentData } from '../../src/primitives/attachment-types';
 import type { ToastItem } from '../../src/primitives/toast-store';
 import type { ConversationGroup, ConversationSummary } from '../../src/types';
 import { InventoryEntry, SurfaceRecipe } from './catalog-types';

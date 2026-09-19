@@ -12,7 +12,7 @@ import {
   defaultRadialBarCount,
   type VisualizerSize,
 } from './sizes';
-import { VOICE_BANDS, VOICE_FRAME_MS } from './audio-visualizer.voice-fixture';
+import { VOICE_BANDS, VOICE_FRAME_MS } from '../../stories/fixtures/audio-visualizer.voice-fixture';
 // The SAME mirror primitives the component's live-audio path runs (see
 // `bands()` in index.tsx) -- imported, never reimplemented here, so the
 // stories' pre-computed `bands` demo the real centre-outward mapping

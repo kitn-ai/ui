@@ -2,7 +2,7 @@
 import type { ChatMessage, MessagePart, Source } from '../elements/chat-types';
 import type { ToolPart } from '../components/tool/tool-types';
 import type { CardEnvelope } from '../primitives/card-contract';
-import type { AttachmentData } from '../components/attachment-types/attachment-types';
+import type { AttachmentData } from '../primitives/attachment-types';
 import { appendReasoningPart, appendTextPart, upsertCardPart, upsertToolPart, type ReasoningOpts } from './parts';
 
 /** The one universal contract: a functional-updater setter (React setState shape). */

@@ -21,7 +21,7 @@ import {
   // The FULL union. This file now sweeps both layers, and both ride one emitter.
   type KaiDiagnosticEvent,
 } from './diagnostics';
-import type { AttachmentData } from '../components/attachment-types/attachment-types';
+import type { AttachmentData } from '../primitives/attachment-types';
 import type { ChatMessage } from '../elements/chat-types';
 // The ELEMENT layer emits onto this same stream, so it is swept by this same
 // file rather than by a second one with a second idea of the rule. See the

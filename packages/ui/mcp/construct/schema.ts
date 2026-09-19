@@ -605,7 +605,7 @@ export type Construct = z.infer<typeof ConstructSchema>;
 
 /** One cross-field rule of the construct format (B-20). The table is the
  *  visibility layer's guard: the builder's RULE_VISIBILITY registry
- *  (src/components/construct-form-paths/construct-form-paths.ts) is keyed by these ids, and a
+ *  (src/primitives/construct-form-paths.ts) is keyed by these ids, and a
  *  key-set-equality test fails any new rule until the builder classifies
  *  it. `paths` names the dotted construct paths the rule READS — panel
  *  metadata, not zod mechanics. Bodies are the pre-table superRefine code

@@ -9,7 +9,7 @@ import { resolve } from 'node:path';
 
 // Self-contained inline type declarations for the runtime-adjacent exports of the
 // `./elements` subpath. These mirror the source types in ./chat-types,
-// ../components/tool-types, ../components/attachment-types, ../primitives/card-contract
+// ../components/tool/tool-types, ../primitives/attachment-types, ../primitives/card-contract
 // and ../primitives/highlighter, but are INLINED here so the shipped .d.ts has NO
 // relative import that would resolve a library .ts SOURCE file into a consumer's
 // type graph (tsc compiles a .ts reached from a .d.ts even under skipLibCheck —
@@ -526,7 +526,7 @@ export type {
 } from './chat-types';
 export type { ToolPart } from '../components/tool/tool-types';
 export type { ToolKind } from '../components/tool/tool-classify';
-export type { AttachmentData } from '../components/attachment-types/attachment-types';
+export type { AttachmentData } from '../primitives/attachment-types';
 export type { CardEnvelope, CardResolution } from '../primitives/card-contract';
 export type { CodeHighlightingOptions } from '../primitives/highlighter';
 export declare function configureCodeHighlighting(options: CodeHighlightingOptions): void;

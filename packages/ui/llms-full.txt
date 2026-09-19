@@ -358,7 +358,7 @@ Every export (57, derived from `dist/state/index.d.ts`):
 | `ToolKind` | type | `../components/tool/tool-classify` |
 | `classifyTool` | value | `../components/tool/tool-classify` |
 | `CardEnvelope` | type | `../primitives/card-contract` |
-| `AttachmentData` | type | `../components/attachment-types/attachment-types` |
+| `AttachmentData` | type | `../primitives/attachment-types` |
 
 #### `@kitn.ai/ui/state` · `stream` — the shipped declarations
 

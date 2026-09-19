@@ -41,4 +41,4 @@ export type { ToolKind } from '../components/tool/tool-classify';
 // hand-rolled copy that drifts from ours.
 export { classifyTool } from '../components/tool/tool-classify';
 export type { CardEnvelope } from '../primitives/card-contract';
-export type { AttachmentData } from '../components/attachment-types/attachment-types';
+export type { AttachmentData } from '../primitives/attachment-types';

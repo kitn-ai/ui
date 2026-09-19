@@ -73,10 +73,14 @@ function shippedSource(): { label: string; files: string[] } {
     return { label: `dist: ${files.length} modules reachable from dist/index.js + dist/solid.js`, files };
   }
   return {
-    label: 'src/components (dist absent)',
-    files: [...walk(join(PKG, 'src/components'), /\.tsx?$/)].filter(
-      (f) => !/\.(test|stories)\.tsx?$/.test(f),
-    ),
+    // src/primitives is included because it IS shipped through the barrels
+    // (headless logic the components call), and because leaving it out made
+    // this fallback silently partial the moment files moved there (the
+    // 2026-09-19 non-component extraction).
+    label: 'src/{components,primitives} (dist absent)',
+    files: ['components', 'primitives']
+      .flatMap((dir) => walk(join(PKG, 'src', dir), /\.tsx?$/))
+      .filter((f) => !/\.(test|stories)\.tsx?$/.test(f)),
   };
 }
 

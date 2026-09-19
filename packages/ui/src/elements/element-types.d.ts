@@ -28,7 +28,7 @@ export type {
 } from './chat-types';
 export type { ToolPart } from '../components/tool/tool-types';
 export type { ToolKind } from '../components/tool/tool-classify';
-export type { AttachmentData } from '../components/attachment-types/attachment-types';
+export type { AttachmentData } from '../primitives/attachment-types';
 export type { CardEnvelope, CardResolution } from '../primitives/card-contract';
 export type { CodeHighlightingOptions } from '../primitives/highlighter';
 export declare function configureCodeHighlighting(options: CodeHighlightingOptions): void;

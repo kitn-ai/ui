@@ -11,8 +11,8 @@ export type {
 export type { ToolPart } from '../../src/components/tool/tool-types';
 export type { ToolKind } from '../../src/components/tool/tool-classify';
 export type { CardEnvelope } from '../../src/primitives/card-contract';
-export type { AttachmentData } from '../../src/components/attachment-types/attachment-types';
-import type { AttachmentData } from '../../src/components/attachment-types/attachment-types';
+export type { AttachmentData } from '../../src/primitives/attachment-types';
+import type { AttachmentData } from '../../src/primitives/attachment-types';
 import {
   appendMessage, updateMessage, removeMessage, addSuggestion, removeSuggestion,
   createAssistantStream, onStreamSettled, type AssistantStream, type SetMessages,

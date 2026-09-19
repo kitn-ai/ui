@@ -25,7 +25,7 @@ import { emitCardEvent } from '../../primitives/card-routing';
 import { compileMask, formatForDisplay, formatRaw, normalizeToRaw } from '../../primitives/field-mask';
 import { FIELD_SEMANTIC_TYPES, fieldSemantics, type FieldSemanticType } from '../../primitives/field-semantics';
 import { useCardHost } from '../../primitives/card-host';
-import { useCardResolution } from '../use-card-resolution/use-card-resolution';
+import { useCardResolution } from '../../primitives/use-card-resolution';
 import { Check } from 'lucide-solid';
 import {
   TextWidget,

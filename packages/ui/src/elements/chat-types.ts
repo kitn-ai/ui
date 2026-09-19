@@ -1,5 +1,5 @@
 import type { ToolPart, RawOrigin } from '../components/tool/tool-types';
-import type { AttachmentData } from '../components/attachment-types/attachment-types';
+import type { AttachmentData } from '../primitives/attachment-types';
 import type { CardEnvelope } from '../primitives/card-contract';
 import { CHAT_MESSAGE_ACTIONS } from './chat-actions';
 

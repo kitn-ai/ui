@@ -773,7 +773,7 @@ ${emitHistorySetup(c)}
 //     mirroring webSearch/voice). ChatThread ALREADY owns the whole
 //     round-trip end to end — the paperclip button, staged previews, staging
 //     each file as a data URI (never a blob object URL; see
-//     AttachmentData.url's doc in components/attachment-types/attachment-types.ts), and
+//     AttachmentData.url's doc in primitives/attachment-types.ts), and
 //     handing the staged list back via onSubmit's \`attachments\` — and its
 //     Message component ALREADY groups consecutive file parts into one
 //     attachment row (message.tsx). So there is nothing to hand-compose

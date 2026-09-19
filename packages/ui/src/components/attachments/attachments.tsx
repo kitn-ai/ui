@@ -12,8 +12,8 @@ import {
   X,
 } from 'lucide-solid';
 import { DEFAULT_MEDIA_POLICY } from '../../wire/media-types';
-import type { AttachmentData, AttachmentMediaCategory, AttachmentVariant } from '../attachment-types/attachment-types';
-export type { AttachmentData, AttachmentMediaCategory, AttachmentVariant } from '../attachment-types/attachment-types';
+import type { AttachmentData, AttachmentMediaCategory, AttachmentVariant } from '../../primitives/attachment-types';
+export type { AttachmentData, AttachmentMediaCategory, AttachmentVariant } from '../../primitives/attachment-types';
 
 // ============================================================================
 // Types

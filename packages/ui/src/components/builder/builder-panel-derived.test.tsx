@@ -3,7 +3,7 @@ import '@testing-library/jest-dom/vitest';
 import { render, cleanup, screen, fireEvent } from '@solidjs/testing-library';
 import { createSignal } from 'solid-js';
 import { DerivedBuilderPanel, FIELD_OVERRIDES } from './builder-panel-derived';
-import { schemaNodeAt, getAtPath } from '../construct-form-paths/construct-form-paths';
+import { schemaNodeAt, getAtPath } from '../../primitives/construct-form-paths';
 import { buildableTemplates, type BuildableTemplate } from '../../../mcp/construct/templates';
 import type { Construct } from '../../../mcp/construct/schema';
 

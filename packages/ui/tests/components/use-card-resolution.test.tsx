@@ -1,7 +1,7 @@
 import { test, expect, afterEach } from 'vitest';
 import { render } from '@solidjs/testing-library';
 import { createSignal } from 'solid-js';
-import { useCardResolution } from '../../src/components/use-card-resolution/use-card-resolution';
+import { useCardResolution } from '../../src/primitives/use-card-resolution';
 import type { CardResolution } from '../../src/primitives/card-contract';
 
 afterEach(() => { document.body.innerHTML = ''; });

@@ -19,7 +19,7 @@ import { ProgressBar } from '../progress/progress-bar';
 import { Card } from '../card/card';
 import { DismissedStub } from '../dismissed-stub/dismissed-stub';
 import type { CardEnvelope, CardEvent, CardHost, CardResolution } from '../../primitives/card-contract';
-import { useCardResolution } from '../use-card-resolution/use-card-resolution';
+import { useCardResolution } from '../../primitives/use-card-resolution';
 import { emitCardEvent } from '../../primitives/card-routing';
 import { useCardHost } from '../../primitives/card-host';
 import { Check, Circle, CircleCheck } from 'lucide-solid';

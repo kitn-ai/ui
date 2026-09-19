@@ -12,7 +12,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { toAnthropicMessages, toOpenAIMessages } from './encode';
 import { subscribeWireDiagnostics, type KaiDiagnosticEvent, type WireDiagnosticEvent } from './diagnostics';
-import type { AttachmentData } from '../components/attachment-types/attachment-types';
+import type { AttachmentData } from '../primitives/attachment-types';
 import type { ChatMessage } from '../elements/chat-types';
 
 const PNG = 'data:image/png;base64,iVBORw0KGgo=';

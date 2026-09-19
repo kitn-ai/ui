@@ -30,7 +30,7 @@ import {
   readPresenceBoolean, writePresenceBoolean, PRESENCE_BOOLEAN_PATHS,
   readAnchoredBoolean, writeAnchoredBoolean, ANCHORED_BOOLEAN_DEFAULTS,
   schemaNodeAt, controlKindFor, RULE_VISIBILITY,
-} from '../construct-form-paths/construct-form-paths';
+} from '../../primitives/construct-form-paths';
 
 export interface DerivedBuilderPanelProps {
   value: Construct; // controlled; the panel holds no copy
