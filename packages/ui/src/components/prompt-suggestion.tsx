@@ -42,7 +42,7 @@ function PromptSuggestion(props: PromptSuggestionProps) {
                 <Button
                   variant={local.variant ?? 'outline'}
                   size="lg"
-                  class={cn('rounded-full', local.class)}
+                  class={cn('rounded-pill', local.class)}
                   {...rest}
                 >
                   <Icon />

@@ -472,7 +472,7 @@ export function TagListWidget(props: WidgetProps): JSX.Element {
       <div class="flex flex-wrap gap-1.5">
         <For each={tags()}>
           {(tag, i) => (
-            <span class="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-xs text-foreground">
+            <span class="inline-flex items-center gap-1 rounded-pill bg-muted px-2 py-0.5 text-xs text-foreground">
               {tag}
               {/* `Button`, not a bare `<button>`, and a lucide `X` rather than the
                   literal "✕" character it used to render. A bare glyph is what a screen

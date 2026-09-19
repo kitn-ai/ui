@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
@@ -28,6 +28,29 @@ import { describe, expect, it } from 'vitest';
 const ROOT = join(__dirname, '..', '..');
 const THEME_CSS = readFileSync(join(ROOT, 'theme.css'), 'utf8');
 const COMPILED = readFileSync(join(ROOT, 'src', 'elements', 'compiled.css'), 'utf8');
+
+/** Every file whose class strings ship in the element bundle. Stories and tests are
+ *  excluded for the same reason `src/elements/styles.css` excludes them from
+ *  Tailwind's `@source`: their classes never reach a consumer. */
+function shippingSources(): string[] {
+  const out: string[] = [];
+  const walk = (dir: string) => {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const abs = join(dir, entry.name);
+      if (entry.isDirectory()) walk(abs);
+      else if (/\.tsx?$/.test(entry.name) && !/\.(stories|test)\.tsx?$/.test(entry.name)) out.push(abs);
+    }
+  };
+  for (const d of ['components', 'elements', 'primitives']) walk(join(ROOT, 'src', d));
+  return out;
+}
+
+/** The compiled rule for exactly this class, or null when the sheet has none. */
+function compiledRule(cls: string): string | null {
+  const esc = cls.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const m = COMPILED.match(new RegExp(`\\.${esc}\\{[^}]*\\}`));
+  return m ? m[0] : null;
+}
 
 interface Family {
   /** The token a consumer sets. */
@@ -68,7 +91,6 @@ describe('geometry tokens are overridable by a consumer', () => {
   });
 
   it('the light-DOM path reaches the same declarations through the import, not a second copy', () => {
-    // `solid.css` is the Tailwind SOURCE sheet a light-DOM Solid consumer builds
     // from. It carries no tokens of its own: it IMPORTS theme.css, which stays the
     // one place a family is declared. Copies are forbidden in both directions here,
     // and the kit has been bitten by each of them (see the header of
@@ -78,5 +100,92 @@ describe('geometry tokens are overridable by a consumer', () => {
     expect(solid, 'solid.css must keep importing the sheet that declares the tokens').toMatch(
       /@import\s+['"]\.\/theme\.css['"]/,
     );
+  });
+});
+
+describe('the radius ladder is complete, so `rounded-*` is never a dead knob', () => {
+  /**
+   * Derived from what components actually SPELL, not from the ladder theme.css
+   * declares — because that is the direction the defect arrived in. Tailwind's
+   * `--radius-2xl`/`-3xl` are their own stock values, so a component using
+   * `rounded-2xl` ignored `--kai-radius` completely: the knob visibly worked on the
+   * cards tab and did nothing to a message bubble. The set below cannot notice a
+   * rung nobody uses, and does not need to; it notices every rung somebody DOES.
+   */
+  const used = new Set<string>();
+  for (const file of shippingSources()) {
+    const text = readFileSync(file, 'utf8');
+    for (const m of text.matchAll(/\brounded(?:-[trblxy])?(?:-(sm|md|lg|xl|2xl|3xl|4xl|full|none|pill))?\b/g)) {
+      // Normalise sides away: `.rounded-t-lg` reads the same `--radius-lg` rung.
+      used.add(m[0].replace(/-[trblxy](?=-|$)/, ''));
+    }
+  }
+
+  /** Genuinely circular, and Tailwind hardcodes it to `3.40282e38px`: no custom
+   *  property can reach it, so it is out of scope by construction rather than by
+   *  choice. A pill/badge that SHOULD follow the knob has to be re-authored. */
+  const CIRCLE = new Set(['rounded-full']);
+  /** Zero, deliberately not the knob. */
+  const LITERAL = new Set(['rounded-none']);
+  /**
+   * Not derived from `--radius`, and that is the design rather than a gap: a pill
+   * is its own shape family (badges, chips, tags, switch tracks) and a consumer
+   * may want round pills over square cards. Its rung therefore reads its OWN token
+   * — checked separately below, because "derived from --radius" is the assertion
+   * that makes every OTHER rung follow the knob.
+   */
+  const INDEPENDENT = new Set(['rounded-pill']);
+
+  it('the derivation is not vacuous', () => {
+    expect(used.size, 'no rounded-* class found in shipping source — the walk broke').toBeGreaterThan(4);
+    expect(used.has('rounded-lg')).toBe(true);
+    expect(used.has('rounded-full')).toBe(true);
+  });
+
+  it('every rung a component uses compiles to a rule that reads a --radius variable', () => {
+    const dead: string[] = [];
+    for (const cls of [...used].sort()) {
+      if (CIRCLE.has(cls) || LITERAL.has(cls)) continue;
+      const rule = compiledRule(cls);
+      if (rule === null) continue; // unused in the shipped sheet (see the vacuity case)
+      if (!/var\(--radius/.test(rule)) dead.push(`${cls} -> ${rule}`);
+    }
+    expect(
+      dead,
+      `these rounded-* classes do not resolve through --radius, so --kai-radius silently ignores every surface that spells them:\n  ${dead.join('\n  ')}`,
+    ).toEqual([]);
+  });
+
+  it('every rung it reads is derived from --radius in theme.css, not a stock value', () => {
+    const rungs = new Set<string>();
+    for (const cls of used) {
+      if (CIRCLE.has(cls) || LITERAL.has(cls)) continue;
+      const rule = compiledRule(cls);
+      if (!rule) continue;
+      for (const m of rule.matchAll(/var\(--radius(?:-([a-z0-9]+))?\)/g)) rungs.add(m[1] ?? '');
+    }
+    expect(rungs.size, 'no rung resolved — the check above would be vacuous').toBeGreaterThan(1);
+    for (const rung of rungs) {
+      const tw = rung ? `--radius-${rung}` : '--radius';
+      if (tw === '--radius') continue; // the ladder's root, asserted by the family case
+      if (INDEPENDENT.has(`rounded-${rung}`)) continue; // see INDEPENDENT above
+      expect(THEME_CSS, `${tw} must be derived from --radius in theme.css, not left at Tailwind's stock value`).toMatch(
+        new RegExp(`${tw}\\s*:\\s*(?:calc\\(\\s*)?var\\(--radius`),
+      );
+    }
+  });
+
+  it('the pill rung is overridable — its own token, with a rem fallback the editor can drag', () => {
+    // Two things at once, both required for the knob to exist at all: the rung
+    // must read a `--kai-*` token (so a consumer can set it) and the fallback must
+    // be a rem LITERAL, because the theme editor's `remValue` cannot parse
+    // `calc()` and a 3.4e38 sentinel has no usable slider range. 4rem is the rem
+    // expression of "fully round on any box up to 8rem tall", which covers the
+    // consumer-sized pills (`builder-skeleton`'s caller-chosen height, the
+    // amplitude-driven audio bars) and not only the kit's own badges.
+    expect(THEME_CSS, 'the pill rung must read --kai-radius-pill with a rem fallback').toMatch(
+      /--radius-pill\s*:\s*var\(\s*--kai-radius-pill\s*,\s*[\d.]+rem\s*\)/,
+    );
+    expect(compiledRule('rounded-pill'), 'rounded-pill must exist and read the rung').toMatch(/var\(--radius-pill\)/);
   });
 });

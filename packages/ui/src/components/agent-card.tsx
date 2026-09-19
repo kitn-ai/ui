@@ -185,7 +185,7 @@ export function AgentCard(props: AgentCardProps) {
 
       <span class="flex shrink-0 items-center gap-2">
         <Show when={local.needsAttention}>
-          <span class="inline-flex items-center gap-1 rounded-full bg-tool-amber/15 px-2 py-0.5 text-caption font-medium leading-none text-tool-amber">
+          <span class="inline-flex items-center gap-1 rounded-pill bg-tool-amber/15 px-2 py-0.5 text-caption font-medium leading-none text-tool-amber">
             <Bell class="size-3" aria-hidden="true" />
             Needs you
           </span>

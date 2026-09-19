@@ -148,3 +148,105 @@ test('the bare --spacing variable does NOT work — the trap the token exists to
   expect(withToken.hostHeight, 'the kit token must move what the bare variable could not').toBe(before.hostHeight * 2);
   await clearRootVar(page, '--kai-density');
 });
+
+/**
+ * The pill and code knobs, proven the same way: through the real cascade, on the
+ * built bundle, with the boundary asserted alongside the effect. `rounded-full` is
+ * a literal Tailwind hardcodes, so the pill family could never follow a consumer's
+ * shape choice — the kit's `--radius-pill` rung is what makes badges, chips and
+ * switch tracks part of the shape system. The circle in the same run is the
+ * control: it must NOT move, because it is a circle and not a rounded rectangle.
+ */
+
+/** The largest computed corner radius anywhere in an element's shadow tree. */
+async function maxShadowRadius(page: Page, selector: string): Promise<number> {
+  return page.evaluate((sel) => {
+    const host = document.querySelector(sel) as HTMLElement | null;
+    if (!host?.shadowRoot) return -1;
+    const radii = [...host.shadowRoot.querySelectorAll('*')].map(
+      (el) => Number.parseFloat(getComputedStyle(el).borderTopLeftRadius) || 0,
+    );
+    return radii.length ? Math.max(...radii) : -1;
+  }, selector);
+}
+
+/**
+ * The computed radius of the element that actually CARRIES a given token in its
+ * class list — `rounded-[var(--code-radius)]` and friends. Needed because a shadow
+ * tree holds several radii at once and they belong to different tokens: the max
+ * across the tree for a code block is the copy button's `--radius-md` (7.6px), not
+ * the code surface, so measuring the maximum would have asserted nothing about the
+ * knob under test while looking like it did.
+ */
+async function tokenRadius(page: Page, selector: string, token: string): Promise<number> {
+  return page.evaluate(
+    ([sel, tok]) => {
+      const host = document.querySelector(sel) as HTMLElement | null;
+      if (!host?.shadowRoot) return -1;
+      const el = [...host.shadowRoot.querySelectorAll('*')].find((n) =>
+        typeof (n as HTMLElement).className === 'string' && ((n as HTMLElement).className as string).includes(tok),
+      ) as HTMLElement | undefined;
+      return el ? Number.parseFloat(getComputedStyle(el).borderTopLeftRadius) : -1;
+    },
+    [selector, token] as const,
+  );
+}
+
+async function mountTwo(page: Page, tags: string[]) {
+  await page.evaluate((ts) => {
+    const mounts = document.getElementById('mounts')!;
+    mounts.replaceChildren();
+    for (const t of ts) {
+      const el = document.createElement(t);
+      if (t === 'kai-badge') el.textContent = 'New';
+      mounts.appendChild(el);
+    }
+  }, tags);
+  await page.waitForTimeout(200);
+}
+
+test('--kai-radius-pill squares the pill family and leaves a circle alone', async ({ page }) => {
+  await mountTwo(page, ['kai-badge', 'kai-avatar']);
+
+  const pillBefore = await maxShadowRadius(page, 'kai-badge');
+  const circleBefore = await maxShadowRadius(page, 'kai-avatar');
+  expect(pillBefore, 'the badge really is a pill to begin with').toBeGreaterThan(0);
+  expect(circleBefore, 'and the avatar really is a circle').toBeGreaterThan(0);
+
+  await setRootVar(page, '--kai-radius-pill', '0rem');
+  await page.waitForTimeout(120);
+
+  expect(await maxShadowRadius(page, 'kai-badge'), 'a square theme must reach the badges').toBe(0);
+  expect(
+    await maxShadowRadius(page, 'kai-avatar'),
+    'a circle is a circle: this is the boundary the token system does not cross, and rounding it off would be the bug',
+  ).toBe(circleBefore);
+
+  await clearRootVar(page, '--kai-radius-pill');
+});
+
+test('--kai-code-radius reaches the fenced-block surface', async ({ page }) => {
+  await page.evaluate(() => {
+    const mounts = document.getElementById('mounts')!;
+    mounts.replaceChildren();
+    const el = document.createElement('kai-code-block') as HTMLElement & { code?: string; language?: string };
+    el.code = 'const answer = 42;';
+    el.language = 'ts';
+    mounts.appendChild(el);
+  });
+  await page.waitForTimeout(250);
+
+  await setRootVar(page, '--kai-code-radius', '1.25rem');
+  await page.waitForTimeout(120);
+  const rounded = await tokenRadius(page, 'kai-code-block', '--code-radius');
+  expect(rounded, 'the code surface reads its own token (and the element carrying it exists)').toBeGreaterThan(0);
+
+  await setRootVar(page, '--kai-code-radius', '0rem');
+  await page.waitForTimeout(120);
+  expect(
+    await tokenRadius(page, 'kai-code-block', '--code-radius'),
+    'and it is a real knob, not a default the tree happened to compute',
+  ).toBe(0);
+
+  await clearRootVar(page, '--kai-code-radius');
+});

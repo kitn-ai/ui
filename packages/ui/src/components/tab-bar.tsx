@@ -95,7 +95,7 @@ export function TabBarItemContent(props: TabBarItemContentProps) {
           <span
             data-kai-tab-badge
             aria-hidden="true"
-            class="absolute -right-2 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-unread px-1 text-caption font-medium leading-none text-white"
+            class="absolute -right-2 -top-1 flex h-4 min-w-4 items-center justify-center rounded-pill bg-unread px-1 text-caption font-medium leading-none text-white"
           >
             {props.badge}
           </span>

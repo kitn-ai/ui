@@ -116,7 +116,7 @@ export function BuilderHeader(props: BuilderHeaderProps): JSX.Element {
           </span>
         </Show>
         <Show when={props.status}>
-          <span class="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">{props.status}</span>
+          <span class="rounded-pill bg-muted px-2 py-0.5 text-xs text-muted-foreground">{props.status}</span>
         </Show>
         <Show when={props.onSwitchTemplate}>
           <Button

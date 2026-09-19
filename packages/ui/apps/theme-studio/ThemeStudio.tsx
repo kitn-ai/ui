@@ -112,6 +112,30 @@ const COMPONENT_SLOTS: Slot[] = [
   { tag: 'kai-attachments', label: 'Attachments' },
 ];
 
+/** The shape ladder the Geometry strip below draws. Boxes are a LITERAL size
+ *  (`size-[3rem]`) rather than a spacing utility, so only the shape knobs can move
+ *  them: a strip that resized itself when Density changed would not be able to say
+ *  which knob did what. */
+const SHAPE_RUNGS: { cls: string; label: string }[] = [
+  { cls: 'rounded-sm', label: 'sm' },
+  { cls: 'rounded-md', label: 'md' },
+  { cls: 'rounded-lg', label: 'lg' },
+  { cls: 'rounded-xl', label: 'xl' },
+  { cls: 'rounded-2xl', label: '2xl' },
+  { cls: 'rounded-3xl', label: '3xl' },
+  { cls: 'rounded-pill', label: 'pill' },
+];
+
+/** The density ladder: every one of these reads `calc(var(--spacing) * N)`, so a
+ *  single slider moves padding, control height and icon size together — which is
+ *  the whole point of the Density knob and the thing a reader has to SEE to
+ *  believe, since `p-*` is where they expect it and `size-*` is not. */
+const DENSITY_STEPS: { cls: string; label: string }[] = [
+  { cls: 'p-1', label: 'p-1' },
+  { cls: 'p-2', label: 'p-2' },
+  { cls: 'p-4', label: 'p-4' },
+];
+
 /** Shared modal: centered panel + backdrop, portaled to <body> so the editor's
  *  overflow can't clip it. Escape/backdrop close is wired by the caller. */
 function Modal(props: { title: string; onClose: () => void; wide?: boolean; children: JSX.Element }) {
@@ -145,6 +169,13 @@ const DEFAULT_RADIUS = remValue(kitDefault('--kai-radius', 'light')); // rem
  *  here as 0.25: a hardcoded default that disagreed with theme.css would move
  *  every `p-*` / `gap-*` / `size-*` in the kit the moment the file changed. */
 const DEFAULT_DENSITY = remValue(kitDefault('--kai-density', 'light')); // rem
+/** The pill family's corner, read out of theme.css like the rest. The default
+ *  there is deliberately generous — fully round on any box up to 8rem tall, which
+ *  covers consumer-sized pills (`builder-skeleton`'s caller-chosen height, the
+ *  amplitude-driven audio bars) and not just the kit's own badges. */
+const DEFAULT_PILL = remValue(kitDefault('--kai-radius-pill', 'light')); // rem
+/** The code surface's own corner. Separate from the radius ladder by design. */
+const DEFAULT_CODE_RADIUS = remValue(kitDefault('--kai-code-radius', 'light')); // rem
 
 /** A rung's default rem, from theme.css. */
 const rungDef = (r: TextRung): number => remValue(kitDefault(r.token, 'light'));
@@ -395,14 +426,16 @@ const isEmbedded = (): boolean =>
 const isRail = (): boolean =>
   typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('embed');
 
-interface ThemeExtras { radius: number; density: number; fontBase: string; fontCode: string; tracking: number; shadow: string; text: TextScale }
+interface ThemeExtras { radius: number; density: number; pill: number; codeRadius: number; fontBase: string; fontCode: string; tracking: number; shadow: string; text: TextScale }
 
-/** Build paste-ready CSS: full light set on :root (+ radius/density/type scale/
- *  font/tracking/shadow), dark set on .dark. */
+/** Build paste-ready CSS: full light set on :root (+ radius/density/pill/code/
+ *  type scale/font/tracking/shadow), dark set on .dark. */
 function buildCss(light: Palette, dark: Palette, x: ThemeExtras): string {
   const rootExtra = [
     `  --kai-radius: ${x.radius}rem;`,
     `  --kai-density: ${x.density}rem;`,
+    `  --kai-radius-pill: ${x.pill}rem;`,
+    `  --kai-code-radius: ${x.codeRadius}rem;`,
     ...TEXT_RUNGS.map((r) => `  ${r.token}: ${x.text[r.token] ?? rungDef(r)}rem;`),
     x.fontBase ? `  --kai-font-base: ${x.fontBase};` : '',
     x.fontCode ? `  --kai-font-code: ${x.fontCode};` : '',
@@ -416,7 +449,7 @@ function buildCss(light: Palette, dark: Palette, x: ThemeExtras): string {
 
 /** Tolerant parse of pasted CSS: pull --kai-* declarations from the :root block
  *  (light) and the .dark block (dark). Unknown tokens are ignored. */
-function parseCss(css: string): { light: Palette; dark: Palette; radius?: number; density?: number; text: TextScale } | null {
+function parseCss(css: string): { light: Palette; dark: Palette; radius?: number; density?: number; pill?: number; codeRadius?: number; text: TextScale } | null {
   const grab = (selector: string): Palette => {
     const re = new RegExp(`${selector}\\s*\\{([^}]*)\\}`);
     const block = css.match(re)?.[1] ?? '';
@@ -430,17 +463,20 @@ function parseCss(css: string): { light: Palette; dark: Palette; radius?: number
   // theme. `--kai-radius` stays out on purpose — a radius-only paste was
   // rejected before `--kai-density` existed and still is, because widening what
   // the importer accepts is a separate call from wiring this token.
-  const hasRemKnob = /--kai-(?:text-[a-z-]+|density)\s*:\s*[\d.]+rem/.test(css);
+  const hasRemKnob = /--kai-(?:text-[a-z-]+|density|radius-pill|code-radius)\s*:\s*[\d.]+rem/.test(css);
   if (!Object.keys(light).length && !Object.keys(dark).length && !hasRemKnob) return null;
   const radiusMatch = css.match(/--kai-radius\s*:\s*([\d.]+)rem/);
   // Density is a rem value too, so `buildCss` output pasted back in round-trips.
   const densityMatch = css.match(/--kai-density\s*:\s*([\d.]+)rem/);
+  // The two shape knobs are rem values too, so one export/import round-trips whole.
+  const pillMatch = css.match(/--kai-radius-pill\s*:\s*([\d.]+)rem/);
+  const codeRadiusMatch = css.match(/--kai-code-radius\s*:\s*([\d.]+)rem/);
   // Type scale: rem only, and only rungs the kit actually has.
   const text: TextScale = {};
   for (const m of css.matchAll(/(--kai-text-[a-z-]+)\s*:\s*([\d.]+)rem/g)) {
     if (TEXT_RUNGS.some((r) => r.token === m[1])) text[m[1]] = parseFloat(m[2]);
   }
-  return { light, dark, radius: radiusMatch ? parseFloat(radiusMatch[1]) : undefined, density: densityMatch ? parseFloat(densityMatch[1]) : undefined, text };
+  return { light, dark, radius: radiusMatch ? parseFloat(radiusMatch[1]) : undefined, density: densityMatch ? parseFloat(densityMatch[1]) : undefined, pill: pillMatch ? parseFloat(pillMatch[1]) : undefined, codeRadius: codeRadiusMatch ? parseFloat(codeRadiusMatch[1]) : undefined, text };
 }
 
 export default function ThemeStudio() {
@@ -457,6 +493,8 @@ export default function ThemeStudio() {
   const [dark, setDark] = createSignal<Palette>({});
   const [radius, setRadius] = createSignal(DEFAULT_RADIUS);
   const [density, setDensity] = createSignal(DEFAULT_DENSITY); // rem — the base of every Tailwind spacing utility
+  const [pill, setPill] = createSignal(DEFAULT_PILL); // rem — the pill family's cap radius
+  const [codeRadius, setCodeRadius] = createSignal(DEFAULT_CODE_RADIUS); // rem — the code surface's corner
   const [fontBase, setFontBase] = createSignal('');
   const [fontCode, setFontCode] = createSignal('');
   const [tracking, setTracking] = createSignal(0); // em
@@ -466,7 +504,7 @@ export default function ThemeStudio() {
   const [hsl, setHsl] = createSignal<Hsl>({ ...HSL_IDENTITY });
   const [preset, setPreset] = createSignal('Default');
   // Custom presets the user saves (persisted to localStorage).
-  type SavedPreset = { name: string; light: Palette; dark: Palette; radius: number; density?: number; fontBase: string; fontCode: string; tracking: number; shadow: string; text?: TextScale };
+  type SavedPreset = { name: string; light: Palette; dark: Palette; radius: number; density?: number; pill?: number; codeRadius?: number; fontBase: string; fontCode: string; tracking: number; shadow: string; text?: TextScale };
   const PRESET_KEY = 'kai-theme-studio-presets';
   const [saved, setSaved] = createSignal<SavedPreset[]>([]);
   const persistSaved = (list: SavedPreset[]) => { setSaved(list); try { localStorage.setItem(PRESET_KEY, JSON.stringify(list)); } catch { /* storage blocked */ } };
@@ -492,7 +530,7 @@ export default function ThemeStudio() {
   const toggleGroup = (name: string) => setOpenGroups((o) => ({ ...o, [name]: !o[name] }));
 
   const active = () => (mode() === 'light' ? light() : dark());
-  const extras = (): ThemeExtras => ({ radius: radius(), density: density(), fontBase: fontBase(), fontCode: fontCode(), tracking: tracking(), shadow: shadowColor(), text: textScale() });
+  const extras = (): ThemeExtras => ({ radius: radius(), density: density(), pill: pill(), codeRadius: codeRadius(), fontBase: fontBase(), fontCode: fontCode(), tracking: tracking(), shadow: shadowColor(), text: textScale() });
   // The palette as the canvas/export actually see it: base colors + the HSL nudge.
   const effLight = () => shiftPalette(light(), hsl());
   const effDark = () => shiftPalette(dark(), hsl());
@@ -517,6 +555,8 @@ export default function ThemeStudio() {
     // moved: the rail host re-themes its preview from what the payload NAMES, and
     // the default IS Tailwind's own 0.25rem, so naming it changes nothing there.
     rootExtras['--kai-density'] = `${density()}rem`;
+    rootExtras['--kai-radius-pill'] = `${pill()}rem`;
+    rootExtras['--kai-code-radius'] = `${codeRadius()}rem`;
     if (tracking()) rootExtras['--kai-tracking'] = `${tracking()}em`;
     rootExtras['--kai-shadow-color'] = shadowColor();
     const fonts: Record<string, string> = {};
@@ -609,6 +649,8 @@ export default function ThemeStudio() {
     for (const t of ALL_TOKENS) canvasEl.style.setProperty(t.token, p[t.token]);
     canvasEl.style.setProperty('--kai-radius', `${radius()}rem`);
     canvasEl.style.setProperty('--kai-density', `${density()}rem`);
+    canvasEl.style.setProperty('--kai-radius-pill', `${pill()}rem`);
+    canvasEl.style.setProperty('--kai-code-radius', `${codeRadius()}rem`);
     canvasEl.style.background = p['--kai-color-background'];
     // Typography + shadow tokens.
     const setOrClear = (name: string, val: string) => val ? canvasEl!.style.setProperty(name, val) : canvasEl!.style.removeProperty(name);
@@ -643,6 +685,10 @@ export default function ThemeStudio() {
       // saved before --kai-density existed was saved under Tailwind's own 0.25rem,
       // so the derived default is what it meant — not a silent reset.
       setDensity(typeof s.density === 'number' && Number.isFinite(s.density) ? s.density : DEFAULT_DENSITY);
+      // Same argument for both shape knobs: a preset saved before them was saved
+      // under their theme.css defaults, so the derived default is what it meant.
+      setPill(typeof s.pill === 'number' && Number.isFinite(s.pill) ? s.pill : DEFAULT_PILL);
+      setCodeRadius(typeof s.codeRadius === 'number' && Number.isFinite(s.codeRadius) ? s.codeRadius : DEFAULT_CODE_RADIUS);
       setFontBase(s.fontBase); setFontCode(s.fontCode); setTracking(s.tracking); setShadowColor(s.shadow);
       setTextScale(fillText(s.text));
       ensureFont(s.fontBase); ensureFont(s.fontCode);
@@ -653,6 +699,8 @@ export default function ThemeStudio() {
     const dk: Palette = {};
     setTextScale(seedText()); // no built-in preset ships a type scale — back to the kit ladder
     setDensity(DEFAULT_DENSITY); // no built-in preset ships a density either — back to Tailwind's 0.25rem
+    setPill(DEFAULT_PILL); // and both shape knobs go back to their theme.css defaults
+    setCodeRadius(DEFAULT_CODE_RADIUS);
     const t = THEME_PRESETS.find((x) => x.name === name);
     if (t) {
       for (const [k, tok] of Object.entries(SHADCN_TO_KAI)) {
@@ -692,7 +740,7 @@ export default function ThemeStudio() {
   const commitSave = () => {
     const name = saveName().trim();
     if (!name) { setSaveError('Give the theme a name.'); return; }
-    const p: SavedPreset = { name, light: effLight(), dark: effDark(), radius: radius(), density: density(), fontBase: fontBase(), fontCode: fontCode(), tracking: tracking(), shadow: shadowColor(), text: textScale() };
+    const p: SavedPreset = { name, light: effLight(), dark: effDark(), radius: radius(), density: density(), pill: pill(), codeRadius: codeRadius(), fontBase: fontBase(), fontCode: fontCode(), tracking: tracking(), shadow: shadowColor(), text: textScale() };
     persistSaved([...saved().filter((x) => x.name !== name), p]);
     setPreset(name);
     setSaveOpen(false);
@@ -719,13 +767,15 @@ export default function ThemeStudio() {
   const applyImport = () => {
     const parsed = parseCss(importText());
     if (!parsed) {
-      setImportError('No --kai-color-*, --kai-text-* or --kai-density token found. Paste a :root / .dark block.');
+      setImportError('No --kai-color-*, --kai-text-*, --kai-density, --kai-radius-pill or --kai-code-radius token found. Paste a :root / .dark block.');
       return;
     }
     setLight((v) => ({ ...v, ...parsed.light }));
     setDark((v) => ({ ...v, ...parsed.dark }));
     if (parsed.radius !== undefined) setRadius(parsed.radius);
     if (parsed.density !== undefined) setDensity(parsed.density);
+    if (parsed.pill !== undefined) setPill(parsed.pill);
+    if (parsed.codeRadius !== undefined) setCodeRadius(parsed.codeRadius);
     if (Object.keys(parsed.text).length) setTextScale((v) => ({ ...v, ...parsed.text }));
     setPreset('Custom');
     setImportOpen(false);
@@ -1147,6 +1197,15 @@ export default function ThemeStudio() {
                 granularity) and keeps 0.25rem on-step; 0.75rem is 3x Tailwind's
                 default, as airy as a preview is worth reading. */}
             <SliderRow label="Density" value={density()} min={0} max={0.75} step={0.0625} unit="rem" onInput={(n) => { setDensity(n); setPreset('Custom'); }} />
+            {/* The two shapes Tailwind does NOT route through the radius ladder.
+                Pill exists because `rounded-full` compiles to a literal no custom
+                property can reach, so the kit's badges/chips/tracks read
+                `--kai-radius-pill` instead; its 4rem default is fully round on any
+                box up to 8rem tall, which covers consumer-sized pills too. Code is
+                a separate token because a code surface wants its own corner. */}
+            <SliderRow label="Pill" value={pill()} min={0} max={4} step={0.0625} unit="rem" onInput={(n) => { setPill(n); setPreset('Custom'); }} />
+            <SliderRow label="Code radius" value={codeRadius()} min={0} max={1.4} step={0.05} unit="rem" onInput={(n) => { setCodeRadius(n); setPreset('Custom'); }} />
+            <p class="mt-1 text-xs text-ink/55">Radius moves cards, bubbles, popovers and inputs — <span class="font-mono text-ink-2">sm</span> through <span class="font-mono text-ink-2">3xl</span>. Pill moves badges, chips, tags, switch tracks and count bubbles. Code moves fenced blocks. Circles (avatars, status dots, spinners) stay circles: that is what they are.</p>
             <p class="mt-2 text-xs text-ink/55">The base of every Tailwind spacing utility — <span class="font-mono text-ink-2">p-*</span>, <span class="font-mono text-ink-2">gap-*</span>, <span class="font-mono text-ink-2">size-*</span> are all <span class="font-mono text-ink-2">calc(--kai-density × N)</span>, so this one knob moves the whole kit's density. 0.25rem is Tailwind's own default: leave it there and the kit's geometry is unchanged.</p>
           </div>
           <div class="border-t border-line/60 px-3 py-3">
@@ -1214,6 +1273,47 @@ export default function ThemeStudio() {
               <div class="grid gap-3 sm:grid-cols-2">
                 <For each={COMPONENT_SLOTS}>{(s) => <ShowSlot s={s} />}</For>
               </div>
+              {/* Geometry strip — the three shape knobs and the density knob, drawn
+                  with the kit's own utilities so what you see is the real cascade
+                  and not a mock. The circle is deliberate: it is the boundary the
+                  radius system cannot cross (Tailwind hardcodes `rounded-full`),
+                  so seeing it stay round while the ladder squares off is the
+                  honest picture rather than a bug in the knob. */}
+              <div class="flex flex-col gap-3 rounded-xl border p-3" style={{ 'border-color': 'var(--kai-color-border)', color: 'var(--kai-color-foreground)' }} data-token="--kai-radius --kai-radius-pill --kai-code-radius --kai-density">
+                <div class="flex flex-wrap items-baseline gap-2">
+                  <span class="text-xs font-semibold">Geometry</span>
+                  <span class="text-[11px]" style={{ color: 'var(--kai-color-muted-foreground)' }}>Shape: Radius (sm → 3xl), Pill, Code. The circle does not move — it is a circle. Density: padding, gaps, control height and icon size, all from one token.</span>
+                </div>
+                <div class="flex flex-wrap items-end gap-2.5">
+                  <For each={SHAPE_RUNGS}>{(r) => (
+                    <div class="flex flex-col items-center gap-1">
+                      <div class={`size-[3rem] border ${r.cls}`} style={{ 'border-color': 'var(--kai-color-border)', background: 'var(--kai-color-surface)' }} data-token={`--kai-radius* -> ${r.cls}`} />
+                      <span class="font-mono text-[10px]" style={{ color: 'var(--kai-color-muted-foreground)' }}>{r.label}</span>
+                    </div>
+                  )}</For>
+                  <div class="flex flex-col items-center gap-1">
+                    <div class="size-[3rem] rounded-full" style={{ background: 'var(--kai-color-primary)' }} data-token="circle (rounded-full, unreachable)" />
+                    <span class="font-mono text-[10px]" style={{ color: 'var(--kai-color-muted-foreground)' }}>circle</span>
+                  </div>
+                </div>
+                <div class="flex flex-wrap items-end gap-4">
+                  <For each={DENSITY_STEPS}>{(d) => (
+                    <div class="flex flex-col items-center gap-1">
+                      <div class={`${d.cls} border`} style={{ 'border-color': 'var(--kai-color-border)' }} data-token={`--kai-density -> ${d.cls}`}>
+                        <div class="size-4" style={{ background: 'var(--kai-color-primary)' }} />
+                      </div>
+                      <span class="font-mono text-[10px]" style={{ color: 'var(--kai-color-muted-foreground)' }}>{d.label}</span>
+                    </div>
+                  )}</For>
+                  <div class="flex flex-col items-center gap-1">
+                    <div class="flex h-9 items-center rounded-pill border px-3" style={{ 'border-color': 'var(--kai-color-border)' }} data-token="--kai-density -> h-9 --kai-radius-pill -> rounded-pill">
+                      <span class="size-2 rounded-full" style={{ background: 'var(--kai-color-primary)' }} />
+                    </div>
+                    <span class="font-mono text-[10px]" style={{ color: 'var(--kai-color-muted-foreground)' }}>h-9 pill</span>
+                  </div>
+                </div>
+              </div>
+
               {/* Coverage strip — tokens not surfaced at rest, reading the live vars.
                   Status badges are solid + soft pairs (bg-success / bg-success-soft
                   with text-success); the interaction row is hover / selected /

@@ -116,7 +116,7 @@ export function ConversationPanel(props: ConversationPanelProps) {
           type="button"
           data-kai-new-conversation
           onClick={props.onNewChat}
-          class="pointer-events-auto rounded-full border border-border bg-background px-4 py-2 text-sm font-medium text-foreground shadow-md transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          class="pointer-events-auto rounded-pill border border-border bg-background px-4 py-2 text-sm font-medium text-foreground shadow-md transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           {props.newChatLabel ?? 'New conversation'}
         </button>

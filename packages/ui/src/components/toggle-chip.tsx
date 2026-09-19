@@ -10,7 +10,7 @@ import { cn } from '../utils/cn';
 // larger variant kept for a row that wants more presence, e.g. a filter bar
 // with fewer, more prominent chips — see the story's size-comparison row.
 const toggleChipVariants = cva(
-  'inline-flex items-center justify-center gap-1 whitespace-nowrap rounded-full font-medium leading-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50',
+  'inline-flex items-center justify-center gap-1 whitespace-nowrap rounded-pill font-medium leading-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50',
   {
     variants: {
       pressed: {

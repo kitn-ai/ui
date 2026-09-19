@@ -14,7 +14,17 @@
      - `@custom-variant dark` below switches their `dark:` utilities from
        prefers-color-scheme to the `.dark` class.
      - the `--color-*` names merge into their @theme (last import wins).
-     - `--radius-sm/md/lg/xl` re-point Tailwind's stock radius scale at --radius.
+     - `--radius-sm/md/lg/xl/2xl/3xl` re-point Tailwind's stock radius scale at
+       --radius. The ladder must be COMPLETE: Tailwind's `--radius-2xl`/`-3xl` are
+       separate stock values that read no kit token, so a component using
+       `rounded-2xl` ignores the radius knob entirely and looks like a bug in the
+       knob. `rounded-full` is the one radius Tailwind hardcodes
+       (`3.40282e38px`), so it can never follow it -- which is why the kit adds
+       its own `--radius-pill` rung for the shapes that are rounded RECTANGLES
+       with round caps (badges, chips, switch tracks). See the note above the
+       radius block.
+     - `--code-radius` is the code surface's own corner, deliberately separate
+       from the ladder: a code block wants its own value, not the card's.
      - `--spacing` re-points Tailwind's whole spacing scale at --kai-density
        (stock Tailwind's 0.25rem is the fallback, so nothing moves until a
        --kai-density token is set). Every numeric spacing utility is
@@ -184,11 +194,62 @@
   --color-tool-green: var(--kai-color-tool-green, hsl(142 71% 26%));
   --color-tool-red: var(--kai-color-tool-red, hsl(0 72% 42%));
 
+  /* Radius ladder. EVERY rung is derived from --radius, and that completeness is
+     the point rather than tidiness: Tailwind's `--radius-2xl` and `-3xl` are
+     their OWN stock values (1rem, 1.5rem), so before these two lines existed a
+     component spelled `rounded-2xl` ignored --kai-radius entirely -- the knob
+     worked on the cards tab and silently did nothing to a message bubble. A new
+     rung added here without adding a line is the same defect one size up, which
+     is what tests/styles/geometry-tokens.test.ts now derives and checks.
+
+     `rounded-full` is NOT on this ladder and cannot be: Tailwind compiles it to a
+     literal 3.40282e38px, so no custom property can reach it. Surfaces that are
+     semantically a rounded RECTANGLE with round caps (pills, badges, chips) would
+     have to be re-authored to an arbitrary value to follow the knob, and
+     genuinely circular things (avatars, dots, rings, spinners) must NOT. */
   --radius: var(--kai-radius, 0.6rem);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+
+  /* The PILL rung. Tailwind compiles `rounded-full` to a literal
+     `3.40282e38px`, so no custom property can reach it, and the kit's pills --
+     badges, chips, tags, switch tracks, count bubbles, progress tracks, toast
+     caps -- could not be squared off with the rest of the shape system. This
+     rung is what they read instead, declared in the `--radius-*` namespace so
+     Tailwind generates the `rounded-pill` utility with no @utility rule needed.
+
+     ITS DEFAULT IS 4rem RATHER THAN Tailwind's huge literal, and that is an
+     equivalence rather than an approximation to be tolerated: border-radius
+     clamps to half the box, so 4rem (64px) is fully round on every box up to 8rem
+     (128px) tall. That margin is deliberately wider than the kit's own pills
+     (badges, chips, tracks, toast caps — all far under it) because a pill can be
+     CONSUMER-sized: `builder-skeleton.tsx` takes a `heightClass` from the caller
+     and the audio-visualizer bars are amplitude-driven, so 2rem would have left a
+     tall bar with visibly round-but-not-full caps while `rounded-full` never
+     would. A consumer needing a full cap above 8rem sets the token higher; the
+     default only has to be right for every pill the kit ships.
+
+     It buys a usable slider range: `remValue` in the theme editor requires a rem
+     literal, and a 3.4e38 sentinel cannot be dragged.
+
+     4rem derived from a token is also what makes SQUARE themes coherent -- a
+     consumer who sets `--kai-radius: 0` gets square cards AND square badges,
+     instead of square cards with round pills, which is the mismatch this rung
+     exists to close. A consumer who wants round pills over square cards sets
+     `--kai-radius-pill` back up on its own. The default moves nothing visually:
+     pills look exactly as they did under `rounded-full`. */
+  --radius-pill: var(--kai-radius-pill, 4rem);
+
+  /* The code surface's corner. NOT on the radius ladder on purpose: a code block
+     inside a card wants a value of its own, and it was already a token
+     (`--kai-code-radius`) that the theme editor could not see because theme.css
+     never named it -- so `code-block.tsx` read a token no consumer-facing surface
+     could set. Declared here, it becomes a knob like every other. */
+  --code-radius: var(--kai-code-radius, 0.75rem);
 
   /* SPACING — the widest-reaching geometry family, and the one the kit left
      un-tokenized until now. Every `p-*` / `m-*` / `gap-*` / `w-*` / `h-*`

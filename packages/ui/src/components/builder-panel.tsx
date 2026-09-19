@@ -263,7 +263,7 @@ export function TagEditor(props: {
         <div class="flex flex-wrap gap-1.5">
           <For each={props.tags}>
             {(tag, i) => (
-              <span class="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-xs text-foreground">
+              <span class="inline-flex items-center gap-1 rounded-pill bg-muted px-2 py-0.5 text-xs text-foreground">
                 {tag}
                 <Button
                   type="button"

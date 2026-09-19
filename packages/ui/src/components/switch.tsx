@@ -84,7 +84,7 @@ export function Switch(props: SwitchProps) {
           if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggle(); }
         }}
         class={cn(
-          'relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border transition-colors',
+          'relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-pill border transition-colors',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
           'disabled:cursor-not-allowed disabled:opacity-50',
           // WCAG 2.1 SC 1.4.11: the track IS this control's visual boundary, so it

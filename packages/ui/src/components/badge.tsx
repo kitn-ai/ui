@@ -2,7 +2,7 @@ import { type JSX, splitProps } from 'solid-js';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../utils/cn';
 
-const badgeVariants = cva('inline-flex items-center justify-center rounded-full text-xs font-medium min-h-5 min-w-5', {
+const badgeVariants = cva('inline-flex items-center justify-center rounded-pill text-xs font-medium min-h-5 min-w-5', {
   variants: {
     variant: {
       default: 'bg-muted text-muted-foreground px-2 py-0.5',

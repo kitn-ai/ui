@@ -134,7 +134,7 @@ export function RadialVisualizer(
                   data-kai-index={item.index}
                   data-kai-highlighted={item.highlighted()}
                   class={cn(
-                    'origin-bottom rounded-full bg-current/10',
+                    'origin-bottom rounded-pill bg-current/10',
                     'data-[kai-highlighted=true]:bg-current',
                   )}
                   style={{

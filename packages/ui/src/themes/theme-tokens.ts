@@ -140,6 +140,12 @@ export const EXTRA_TOKENS = [
   // the colour knobs are — a denser or airier product is a taste decision, and it
   // should not require a class-override surface to express.
   '--kai-density',
+  // The pill family's corner (badges, chips, tags, switch tracks, count bubbles).
+  // Its own knob rather than a rung of --kai-radius, because Tailwind's
+  // `rounded-full` is a literal no custom property can reach — see theme.css.
+  '--kai-radius-pill',
+  // The code surface's corner, deliberately not a rung of the radius ladder.
+  '--kai-code-radius',
   '--kai-font-base',
   '--kai-font-code',
   '--kai-tracking',

@@ -148,7 +148,12 @@ describe('switch track boundary contrast (WCAG 2.1 SC 1.4.11)', () => {
     // `border` on the base classes + a colour per state. Without the width the
     // colour below paints nothing and every ratio here would be measuring a
     // token the user never sees.
-    expect(switchSrc).toMatch(/rounded-full border transition-colors/);
+    //
+    // The cap class is ALLOWED to be either: the track reads `--kai-radius-pill`
+    // now (so a square theme gets square switches), and this assertion is about
+    // the BORDER, not about which cap the track wears. Pinning the old literal
+    // here would have made a shape change fail a contrast test.
+    expect(switchSrc).toMatch(/rounded-(?:full|pill) border transition-colors/);
   });
 
   it('the OFF track carries the control-edge token, not a bare fill', () => {

@@ -301,7 +301,7 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
                 type="button"
                 variant="outline"
                 size="sm"
-                class="rounded-full gap-1"
+                class="rounded-pill gap-1"
                 aria-label="Search the web"
                 disabled={props.disabled}
                 onClick={() => props.onWebSearch?.()}

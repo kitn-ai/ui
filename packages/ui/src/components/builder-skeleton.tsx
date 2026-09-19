@@ -42,7 +42,7 @@ export function SkeletonBar(props: {
   return (
     <span
       aria-hidden="true"
-      class={cn('rounded-full', props.heightClass ?? 'h-2', props.flex ? 'flex-1' : props.widthClass)}
+      class={cn('rounded-pill', props.heightClass ?? 'h-2', props.flex ? 'flex-1' : props.widthClass)}
       style={{ width: props.flex ? undefined : props.width, 'background-color': mix('--color-muted-foreground', props.pct) }}
     />
   );

@@ -5835,6 +5835,7 @@
     }
   ],
   "themeTokens": [
+    "--kai-code-radius",
     "--kai-color-",
     "--kai-color-accent",
     "--kai-color-accent-foreground",
@@ -5886,6 +5887,7 @@
     "--kai-density",
     "--kai-font-code",
     "--kai-radius",
+    "--kai-radius-pill",
     "--kai-shadow-color",
     "--kai-text-",
     "--kai-text-body",

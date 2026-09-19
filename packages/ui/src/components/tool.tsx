@@ -71,7 +71,7 @@ function stateChip(state: ToolPart['state']): JSX.CSSProperties {
 }
 
 function ToolStateBadge(props: { state: ToolPart['state'] }) {
-  const baseClasses = 'px-2 py-1 rounded-full text-xs font-medium';
+  const baseClasses = 'px-2 py-1 rounded-pill text-xs font-medium';
   return (
     <>
       <Show when={props.state === 'input-streaming'}>

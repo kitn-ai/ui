@@ -583,7 +583,7 @@ interface RowProps {
 
 function RecommendedPill(): JSX.Element {
   return (
-    <span class="inline-flex items-center rounded-full bg-[var(--color-primary)] px-1.5 py-0.5 text-micro font-medium uppercase leading-none tracking-wide text-[var(--color-primary-foreground,white)]">
+    <span class="inline-flex items-center rounded-pill bg-[var(--color-primary)] px-1.5 py-0.5 text-micro font-medium uppercase leading-none tracking-wide text-[var(--color-primary-foreground,white)]">
       Recommended
     </span>
   );

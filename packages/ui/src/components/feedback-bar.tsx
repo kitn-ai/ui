@@ -128,7 +128,7 @@ export function FeedbackBar(props: FeedbackBarProps) {
                       aria-pressed={category() === c}
                       onClick={() => setCategory(category() === c ? undefined : c)}
                       class={cn(
-                        'rounded-full border px-2.5 py-1 text-xs transition-colors',
+                        'rounded-pill border px-2.5 py-1 text-xs transition-colors',
                         category() === c
                           ? 'border-primary bg-primary text-primary-foreground'
                           : 'border-border text-muted-foreground hover:text-foreground',

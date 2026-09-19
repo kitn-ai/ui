@@ -78,7 +78,7 @@ function CodeBlock(props: CodeBlockProps) {
         'border-border bg-card text-card-foreground',
         // Radius is a CSS var (default = rounded-xl) so it can be set to 0 for
         // flush embedding, e.g. under framework tabs in the docs Code panel.
-        'rounded-[var(--kai-code-radius,0.75rem)]',
+        'rounded-[var(--code-radius)]',
         local.class
       )}
       {...rest}
