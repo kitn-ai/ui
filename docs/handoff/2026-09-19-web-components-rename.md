@@ -1,5 +1,7 @@
 # Handoff — the components reorg's blocker, the non-component extraction, and the `web-components` rename
 
+**Followed by:** [`2026-09-19-layering-security-and-shaking.md`](2026-09-19-layering-security-and-shaking.md) — the layer order became a guarded DAG, an independent security audit's findings were fixed, and tree-shaking got real proofs for `./react` / `./solid` / one web component.
+
 **Date:** 2026-09-19 (second session) · **Branch:** `update/primitives` · **Status:** the blocker is
 fixed, the extraction and the rename are landed and green. Step 5(a) — the family-folder reorg of
 `src/web-components/` — is NOT started; its mapping and every coupling are measured below.
