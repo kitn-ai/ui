@@ -219,6 +219,7 @@
     "verify:playwright-projects": "node scripts/verify-playwright-projects.mjs --self-test && node scripts/verify-playwright-projects.mjs",
     "verify:starters": "node scripts/verify-starters.mjs",
     "lint:attachment-object-urls": "node scripts/lint-attachment-object-urls.mjs --self-test && node scripts/lint-attachment-object-urls.mjs",
+    "lint:layer-names": "node scripts/lint-layer-names.mjs --self-test && node scripts/lint-layer-names.mjs",
     "lint:cdn-pins": "node scripts/lint-cdn-pins.mjs --self-test && node scripts/lint-cdn-pins.mjs --check-release-wiring && node scripts/lint-cdn-pins.mjs",
     "lint:llms-size": "node scripts/lint-llms-size.mjs --self-test && node scripts/lint-llms-size.mjs",
     "lint:pack-parse": "node scripts/lint-pack-json-parse.mjs --self-test && node scripts/lint-pack-json-parse.mjs",

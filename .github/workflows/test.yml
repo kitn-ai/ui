@@ -219,6 +219,15 @@ jobs:
       # Reads source and package.json only, no dist/, so it is a seam anyone can
       # grab to watch it fail (`node packages/ui/scripts/lint-cdn-pins.mjs`).
       # `--fix` rewrites every stale pin when the version bumps.
+      # The kai-* layer is called web components (renamed 2026-09-19). Nothing
+      # else catches a straggler: the CDN guard above checks VERSIONS, not paths,
+      # so a doc or a scaffold copy-pasting the old subpath reintroduces a
+      # specifier that resolves to nothing and no build step complains. Reads
+      # tracked source only, no dist/, so it is a seam anyone can grab:
+      # `node packages/ui/scripts/lint-layer-names.mjs`.
+      - name: Retired layer-name guard (elements -> web-components)
+        run: pnpm --filter @kitn.ai/ui run lint:layer-names
+
       - name: CDN version-pin staleness guard (docs, README, examples)
         run: pnpm --filter @kitn.ai/ui run lint:cdn-pins
 
