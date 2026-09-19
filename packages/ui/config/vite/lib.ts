@@ -4,11 +4,7 @@ import solidPlugin from 'vite-plugin-solid';
 import dts from 'vite-plugin-dts';
 import { relative, resolve } from 'node:path';
 
-// Matches an actual import specifier crossing the mcp/ boundary
-// ('../../mcp/...' or import('../../mcp/...')), not any mention of "/mcp/"
-// -- a TSDoc comment that merely names the mcp/ directory must not trip the
-// rewrite/throw below.
-const MCP_SPECIFIER = /(?:from|import\()\s*['"]\.\.\/\.\.\/mcp\//;
+import { rewriteMcpDtsSpecifiers } from './mcp-dts-rewrite';
 
 // One config for every library subpath bundle. Selected by KAI_BUILD, one value
 // per emitted file, named after the output stem so the mapping needs no lookup.
@@ -201,44 +197,28 @@ const TARGETS: Record<string, Target> = {
       // A handful of SHIPPED declarations under dist/components/ (three at the
       // time of writing; read the count off the tree with
       // `grep -rln "\.\./agent-tooling/" dist --include='*.d.ts'`, never off
-      // this comment) import the construct
-      // schema and the template registry across the boundary by a relative
-      // path. That worked for free while the source lived at
-      // src/agent-tooling/: src/components -> ../agent-tooling and
-      // dist/components -> ../agent-tooling are the same string. With the
+      // this comment) import the construct schema and the template registry
+      // across the boundary by a relative path. That worked for free while the
+      // source lived at src/agent-tooling/: src/components -> ../agent-tooling
+      // and dist/components -> ../agent-tooling are the same string. With the
       // source at mcp/, the source specifier is '../../mcp/construct/schema'
       // and tsc emits it verbatim, where from dist/components/ it points
       // outside dist/ at a directory `files` does not ship. A consumer's tsc
-      // then cannot resolve Construct, and the emit itself says nothing: it
-      // succeeds and the bytes look plausible. One thing downstream does say
-      // so -- `verify:dts` (scripts/verify-dts-boundaries.mjs, self-tested)
-      // runs in `postbuild` and fails on any relative specifier resolving
-      // outside dist/. That is a backstop, not the mechanism: it fires after
-      // the whole emit, names the file rather than the depth, and does not
-      // know how to repair it. The rewrite below is what keeps the emit right
-      // in the first place.
+      // then cannot resolve Construct, and the emit itself says nothing. So the
+      // specifier is rewritten onto dist/agent-tooling/**, where the `construct`
+      // target below already emits the declarations.
       //
-      // The declarations for those targets ARE emitted, by the construct target
-      // below, at dist/agent-tooling/construct/. So the fix is to rewrite the
-      // specifier back to the path that already exists.
-      //
-      // It THROWS rather than no-ops on an unexpected shape, because the
-      // rewrite is depth-sensitive: every affected file today sits exactly one
-      // directory under dist/, so '../../mcp/' maps to '../agent-tooling/'. A
-      // future importer at another depth must fail loudly here instead of
-      // silently emitting a path that resolves to nothing.
+      // The rewrite itself is a pure function in ./mcp-dts-rewrite.ts, importing
+      // WHY it derives the upward prefix from the emitted path rather than
+      // matching a literal one -- the depth-baked regex that let the
+      // 2026-09-19 components reorg ship three escaping declarations. It throws
+      // (naming the file) on anything it cannot make resolve inside dist/,
+      // rather than emitting a path that only resolves because raw src/ ships.
+      // `verify:dts` in postbuild is the backstop over the whole tree.
       beforeWriteFile(filePath: string, content: string) {
-        if (!MCP_SPECIFIER.test(content)) return;
-        const rel = relative(resolve(PKG, 'dist'), filePath);
-        const depth = rel.split(/[\\/]/).length - 1;
-        if (depth !== 1) {
-          throw new Error(
-            `config/vite/lib.ts: ${rel} imports across the mcp/ boundary from depth ${depth}. ` +
-              `The rewrite below only knows depth 1 (dist/<dir>/<file>.d.ts). Teach it the new ` +
-              `depth or stop importing mcp/ from that file.`,
-          );
-        }
-        return { content: content.replaceAll("'../../mcp/", "'../agent-tooling/") };
+        const distRelPath = relative(resolve(PKG, 'dist'), filePath);
+        const rewritten = rewriteMcpDtsSpecifiers({ content, distRelPath });
+        return rewritten === content ? undefined : { content: rewritten };
       },
       outDir: 'dist',
       entryRoot: 'src',
