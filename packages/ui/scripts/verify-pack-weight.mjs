@@ -480,9 +480,11 @@ if (SELF_TEST) {
  * baseline — and B is 32 kB larger. On UNPACKED, A is 11.53 MiB and B is
  * 11.04. So the two metrics disagree about A and B, and both readings are
  * defensible. B was chosen as a SCOPE decision, not as a weight argument: the
- * client pair is what a consumer bundles, and the SSR twins' per-module output
+ * perspective, and the SSR twins' per-module output
  * adds 2.1 MB of `.server.js` files that change no measured number. Nothing
  * here claims A was worse on the metric consumers pay; it was better on it.
+ * (SUPERSEDED, same day: B is no longer what ships — the twins are per-module
+ * now, so A is. See the amendment at the end of this comment.)
  *
  * Margin: 11.04 + ~0.21 MiB of headroom -> 11.25 MiB. Deliberately below the
  * ~0.29 MiB the entries above use, because that headroom is what stops the next
@@ -550,6 +552,35 @@ if (SELF_TEST) {
  * rounded to the 2.56 MiB grain the entries above use. Nothing else about the rule
  * changes, and a rise still means new surface or a second copy of something already
  * shipped.
+ *
+ * 2026-09-18, LATER THE SAME DAY: THE TWINS ARE PER-MODULE NOW, WHICH MAKES THE
+ * A-vs-B RECORD ABOVE STALE AS A DESCRIPTION OF WHAT SHIPS.
+ *
+ * That record says B — per-module on the CLIENT pair only — is "what shipped", and
+ * justifies the choice by saying the twins' per-module output "adds 2.1 MB of
+ * `.server.js` files that change no measured number". Both sentences were true when
+ * written and neither is true now: `perModule: true` is set on `index.server` and
+ * `solid.server` (`config/vite/lib.ts`), the `define.server` twin with them, and
+ * `find dist -name '*.server.js' | wc -l` reports 360 of them. So A is what ships,
+ * and that 2.1 MB IS in the tree.
+ *
+ * What this does to the guard: nothing, and that is worth being explicit about
+ * rather than leaving to be re-derived. The asserted quantity is PACKED, and the
+ * twins' modules compress into the same tarball. It DID move the numbers this entry
+ * prints, so the two readings are recorded together: `node
+ * scripts/verify-pack-weight.mjs` on this tree prints 2.48 MiB packed and 11.39 MiB
+ * unpacked across 1371 files, against the 2,600,242 B and 11.04 MiB / 1,018 above.
+ * Packed went DOWN, so the 2.56 MiB ceiling still holds with MORE headroom than it
+ * was sized with, and it is deliberately not re-tuned here: a ceiling retuned on a
+ * reading taken from a tree mid-change encodes a number nobody chose.
+ *
+ * The lesson is about the RECORD rather than the ceiling. The A-vs-B decision was
+ * a SCOPE call recorded with a size claim attached, and the size claim is the half
+ * that rotted — three lines below the sentence saying as much, the entry concedes
+ * "Nothing here claims A was worse on the metric consumers pay; it was better on
+ * it." A record that carries a number it did not have to carry is a record that
+ * will disagree with the tree, and the next reader has no way to tell which of the
+ * two is right without re-measuring.
  */
 const MAX_PACKED_BYTES = Math.floor(2.56 * 1024 * 1024); // 2.56 MiB = 2,684,354 B
 
