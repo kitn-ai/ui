@@ -456,10 +456,15 @@ builder"). Guarded by jsdom sheet checks, the studio wiring test, and 6 browser 
    it or point at an existing one.
 3. **Easing** — the last cheap family: `--ease-*` are theme variables and 23 sites use
    `ease-out`/`linear`/`in-out`. One line per rung.
-4. **A geometry ladder view in the builder** — OPTIONAL, and only from real elements: hand-written
-   demo markup cannot follow these knobs (the studio's own stylesheet is Tailwind's default theme, not
-   the kit's, and importing theme.css would repaint its chrome). Mounting `kai-badge` / `kai-switch` /
-   `kai-avatar` needs sample data for those tags first.
+4. **A geometry ladder view in the builder — DECIDED NO, do not re-propose it.** A ladder means
+   showing every rung of a scale at once (radius sm→3xl, pill, circle, density steps, every shadow).
+   Three reasons it is not worth building: hand-written demo markup CANNOT follow these knobs (measured
+   — the studio's own stylesheet is Tailwind's default theme: `--radius-lg` is `.5rem`, there is no
+   `--shadow` rung and no `.kai-elevation`), so it would have to be real elements plus new sample data
+   for kai-badge/kai-switch/kai-avatar; the canvas ALREADY demonstrates every knob on the real
+   components that use it (that is where the elevation bug surfaced); and a ladder is reference
+   material, not a theming control — it belongs where the token reference already lives.
+   The thing worth doing instead, if any: the reference itself is STALE (next item).
 5. **Recorded skips** — border width (102 sites), ring width/offset (45) and opacity (25) compile to
    LITERALS, so tokenizing them is per-call-site work, not a rung. Left out deliberately. Duration
    (7 sites) could go either way.
@@ -469,3 +474,10 @@ builder"). Guarded by jsdom sheet checks, the studio wiring test, and 6 browser 
 7. **Hygiene** — `nx build docs` has not been run this session (deploy-time guard for the docs rows
    and the studio shim), and one earlier full unit run had a single failure that three later runs
    could not reproduce.
+
+8. **The Storybook token reference is stale and unguarded.** `src/stories/docs/theme-tokens.tsx` reads
+   token VALUES live from the loaded CSS (so it cannot drift on values) but takes its NAME lists by
+   hand: `KIT_RADII` is `--radius` + sm/md/lg/xl and nothing knows about `--radius-2xl`/`-3xl`,
+   `--radius-pill`, `--code-radius`, `--kai-shadow-strength`, the weight rungs or density. No test
+   reads it. Cheap fix: derive the name lists the way every other guard here derives them, and it
+   becomes the ladder view for free — in the place where a reference belongs.
