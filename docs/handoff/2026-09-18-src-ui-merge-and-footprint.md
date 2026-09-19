@@ -396,3 +396,42 @@ only if they import theme.css, which the scaffolds do) checked first.
 `http://localhost:4321/theme/editor` (that page renders the kit's studio through
 `apps/docs/src/components/ThemeStudio.tsx`), or serve the built standalone page
 `packages/ui/dist/theme-studio/index.html` from `kai dev`.
+
+---
+
+## 9. §2.1 phase 3 landed: elevation, weights, and steps instead of sliders
+
+**Two families, both cheap because Tailwind routes them through theme variables.** Elevation is
+ONE multiplier (`--kai-shadow-strength`, scaling every shadow rung's lengths) rather than seven
+tokens — a flat product is one declaration, and seven knobs for one decision is seven ways to build
+an incoherent theme. Bare `shadow` needs its own line even though its value equals `--shadow-sm`:
+it reads the `--shadow` key and carries 82 of the kit's ~95 shadow call sites (measured; the key was
+confirmed by experiment, not from docs). Weights are the opposite shape on purpose — one rung per
+token, because wanting a heavier *semibold* says nothing about normal.
+
+**The usability finding, from actually using the builder.** Density's slider extremes are not
+designs: 0 collapses every `p-*` / `gap-*` / `size-*` into itself and 0.75rem fights every layout in
+the kit, so the control let a user walk into both. Density and Elevation are now NAMED STEPS
+(±25% around Tailwind's 0.25rem; Flat→Dramatic for elevation), and a value that is not a step still
+renders as `Custom` — snapping an imported theme would silently rewrite the user's file. The steps
+carry `aria-label="Density: Loose"` (a bare "Loose" collides with the theme dropdown's "Default" and
+is ambiguous to a screen reader) and their numbers ride on `data-value`, so tests read the step
+rather than restating the studio's taste call.
+
+**Guards that came with it:** every shadow rung must scale, DERIVED from what theme.css declares (a
+rung added later cannot escape the knob — the `rounded-2xl` failure mode); un-scaled rungs are
+compared byte-for-byte against `node_modules/tailwindcss/theme.css` rather than against numbers typed
+into the test; the studio test asserts the steps exist and that the default IS Tailwind geometry; and
+the browser guard flattens a real surface's computed `box-shadow` to `0px 0px 0px` and restores it.
+
+**STILL OPEN — the expensive three, and they need a DECISION rather than more work.** Border width
+(102 call sites), ring width/offset (45) and opacity (25) are compiled to *literals* by Tailwind, so
+tokenizing them is not a rung: it is 172 per-site edits for knobs most consumers never turn.
+Recommendation: leave them, and say so here rather than leaving them looking unfinished. Transition
+duration is 7 sites and could go either way. `--kai-shadow-color` and `--kai-shadow-strength` between
+them already cover the elevation asks that showed up in practice.
+
+**One inconsistency, recorded not fixed:** `mcp/mcp/tools/scaffold.ts` emits `class="rounded-full"`
+on a pill button in generated consumer code, so scaffolds hand out a shape the kit's own pills no
+longer use. Changing emitted code needs its CSS story checked first (the class only resolves if the
+consumer's Tailwind sees theme.css, which the scaffolds do import).
