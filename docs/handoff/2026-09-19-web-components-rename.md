@@ -151,73 +151,73 @@ in 49ms. It now walks all of `src/` recursively — the same move `lint-catalog-
 documents ("Walks ALL of src/, not src/web-components/: measured, not assumed"). Red before the fix,
 green after: the mutation is a failure that actually happened.
 
-## 5. Still open: step 5(a), the family folders for `src/web-components/`
+## 5. Step 5(a) landed (`b9257f7d`): the layer folded into 88 family folders
 
-### What it is, in plain terms
+167 files that sat flat in `src/web-components/` now live in a folder per family — the shape
+`src/components/` got on 2026-09-19. Seven generated artifacts stay at the layer root
+(`web-component-{meta,manifest,nonscalar}.json`, `web-component-types.d.ts`, `icon-names.json`,
+`styles.css`, `compiled.css`): their paths are exports-map keys, generator outputs and three guards'
+inputs.
 
-The layer's own source is 174 files sitting FLAT in `src/web-components/`: `chat.tsx`,
-`chat-types.ts`, `chat-actions.ts`, `card.tsx`, `cards.tsx`, `card-schemas.declarative.test.tsx`,
-`message.tsx`, `message-skills.tsx`, `validate-messages.ts`, and so on. `src/components/` does not
-look like that any more — the 2026-09-19 reorg gave it 92 family folders (`row/{row,row-group}`,
-`tool/{tool,tool-classify,tool-types}`, `tabs/{tabs,tab-bar}`). Step 5(a) is "do that here too",
-which is what the owner asked for when they said the Carbon shape is the target.
+**Invisible to consumers, by design.** The per-web-component build names its output after the source
+FILE (`entryFileNames: 'web-components/[name].js'`), so `@kitn.ai/ui/web-components/chat` still
+resolves to `dist/web-components/chat.js` whichever folder `chat.tsx` lives in. The manifest's keys
+therefore had to stay BASENAMES (they ARE the public module names), and the split build now locates
+each source by a recursive walk with a duplicate check. Measured on the packed tarball: register-all
+96/96 tags, per-web-component resolves, `verify:pack` 2.51 MiB against the 2.56 MiB ceiling.
 
-### What it is NOT — the part that makes it decide-able
+**Groupings are derived, not typed.** Family roots are the non-test modules and a file joins the
+LONGEST hyphen-boundary prefix match (`audio-visualizer.declarative.test.tsx` → `audio-visualizer/`),
+with an override table wherever `src/components/` had already decided: `message/` takes
+`message-skills` + `validate-messages`, `prompt/` takes `prompt-input` + `default-input`, `tabs/`
+takes `tab-bar[-item]`, `pane/` takes `pane-group` + `pane-grid`, `row/` takes `row-group`, `card/`
+takes `cards`, `conversation/`, `checkbox/`, `radio/`, `settings/`, `workspace/`, `chat/` — plus
+`define/`, `register/`, `slots/`, `autoloader/`, `web-component/` for the infrastructure that has no
+component. 167 files → 88 families, 0 unassigned.
 
-**No consumer can see a folder under `src/web-components/`.** The per-web-component build names its
-output after the source FILE (`entryFileNames: 'web-components/[name].js'`), so
-`@kitn.ai/ui/web-components/chat` resolves to `dist/web-components/chat.js` whether `chat.tsx` sits
-at the layer root or in `chat/chat.tsx`. No export key, no emitted filename, no public type name
-changes. It is a purely internal layout change, reverting it is one `git revert`, and the whole
-build+test ladder is the check. That is why it is safe to do, and also why it is not urgent.
+### Four things this broke that no single guard would have caught
 
-### The work, measured
+1. **`tsc` does not report an unresolved SIDE-EFFECT import in this config.** Measured by appending
+   `import './nope'` to `src/index.ts` (no error) beside `import { z } from './nope'` (TS2307). So a
+   codemod that rewrites only `from '…'` specifiers leaves `import './x'` pointing at the old
+   directory with six green tsc passes: **step 5(b) had already shipped 31 such imports** in the
+   showcase stories, and this move added 206 more. Both passes handle `import '…'` now, and the tree
+   was verified with a resolver over every relative specifier instead of trusting tsc — the build and
+   `--project=unit` catch them, tsc does not.
+2. **Two derivations encoded the facade's DEPTH as a string prefix** and silently produced empty
+   results for all 97 web components: `gen-web-component-api.mjs`'s `spec.startsWith('../components/')`
+   for `composedFrom` (gen-catalog then refused the artifact: *"carries no non-empty composedFrom on
+   ANY of its 97"*) and `coverage.test.ts`'s `/^\.\.\/(components|ui)\//` for the Solid-module
+   derivation (its own vacuity check fired: *"expected 0 to be greater than 60"*). Both resolve the
+   specifier now. `composedFrom` matches HEAD exactly: 92 web components, 164 links, zero missing.
+3. **Eight guards walked the layer with a flat `readdirSync`**, so they would have gone VACUOUS rather
+   than red — finding 0 facades and asserting nothing. Five had a vacuity floor that said so; three
+   did not and were found by reading the failures. All eight walk recursively now.
+4. **`dist/web-components/remote.d.ts` disappeared.** The barrel's declaration emit used to mirror
+   `src/web-components/remote.tsx` onto that flat path by accident; nesting the emit removed the
+   accident without replacing it, so `@kitn.ai/ui/web-components/remote` shipped `.js` with no types.
+   `gen-web-component-dts.mjs` now derives its file set from the emitted modules (the public
+   per-module set IS the flat `.js` set) rather than from the manifest, which never listed `remote`.
 
-1. **Groupings — the only judgement call, and ~20 cases.** A mechanical rule does most of it: family
-   roots are the non-test modules, and a file joins the LONGEST hyphen-boundary prefix match
-   (`audio-visualizer.declarative.test.tsx` -> `audio-visualizer/`; `card-schemas.…` -> `card/`;
-   `tab-bar-item.tsx` -> `tab-bar/`). Then mirror `src/components/`, which is what "the same family
-   folders" means: `message/` <- `message-skills.tsx`, `messages-guard.…`, `validate-messages.ts`;
-   `prompt/` <- `prompt-dock.tsx`, `prompt-input*`, `prompt-suggestions.tsx`, `default-input.tsx`;
-   `tabs/` <- `tab-bar.tsx`, `tab-bar-item.tsx`; `pane/` <- `pane-group.tsx`, `pane-grid.tsx`;
-   `row/` <- `row-group.tsx`; `card/` <- `cards.tsx`, `card-media.jpg`; `conversation/` <-
-   `conversation-item.tsx`, `conversation-list.tsx`; `checkbox/` <- `checkbox-group.tsx`; `radio/` <-
-   `radio-group.tsx`; `settings/` <- `setting-item.tsx`, `settings-group.tsx`; `workspace/` <-
-   `chat-workspace.tsx`; `chat/` <- `chat-actions.ts`, `chat-types.ts`, `chat-scope-picker.tsx`.
-   Layer infrastructure, which has no component: `define/` <- `define.tsx`, `define-entry.ts`,
-   `define-entry.test.ts`, `css.ts`, `slot-text.ts`; `register/`; `slots/`; `autoloader/`;
-   `web-component/` <- every `web-component-*.ts`, `diagnostic-events.ts`, and the layer-wide tests.
-2. **Leave four generated artifacts at the layer root** (`web-component-meta.json`,
-   `-manifest.json`, `-nonscalar.json`, `-types.d.ts`, plus `icon-names.json`, `styles.css`): their
-   paths are `exports` map keys, generator outputs and three guards' inputs. Moving them buys
-   tidiness and costs a cross-cutting path change for no reader benefit.
-3. **One atomic codemod**, the shape built for step 5(b): `git mv` everything, then rewrite relative
-   specifiers by RESOLUTION (resolve against the OLD directory, re-emit relative to the new one),
-   line-wise, skipping comments and template literals. Do not prefix-replace.
-4. **The couplings** (all measured): `config/vite/web-components.ts` pins five paths (`register.ts` as
-   a rollup entry, `autoloader.ts` and `remote.tsx` in the split build's input map, and it READS
-   `web-component-manifest.json` at config time); `config/vite/lib.ts` pins `define-entry.ts` twice
-   (the `./define` and `./define.server` targets); `tests/helpers/kit-paths.ts` must gain
-   `src/web-components` in `SOURCE_DIRS` in the same change (a dozen guards resolve a facade by
-   basename through it and throw on 0 hits — a hard, good failure); and the three generators that walk
-   the directory (`gen-web-components-manifest`, `gen-web-component-api`, `gen-catalog`) must be read
-   before anything moves. `.storybook`'s glob and both catalog guards walk recursively and tolerate
-   the move.
-5. **Verify** as steps 4 and 5(b) were: `tsc` ×6, `--project=unit`, `npm run build`,
-   `verify:generated`, plus `nx build docs`, `verify:scaffold` and `verify:consumer` because the
-   scaffolder's emitted specifiers are generated from the same walk.
+Plus a pile of flat-path pins and depth assumptions, each fixed at the site: the vite targets'
+`register`/`autoloader`/`remote` entries, `config/vite/lib.ts`'s define entry,
+`emit-subpath-dts.mjs`'s `REAL_TYPES_SOURCE` for `./define`, `gen-web-component-types.mjs`'s emitted
+`from './chat-types'` (now `./chat/chat-types`, caught only by `types-lib-check` because
+`skipLibCheck` hides it), six emitted-scaffold fixtures that rewrite a specifier into a source path, a
+`vi.doMock` path, and tests that read a sibling artifact via `resolve(HERE, …)` after moving one level
+deeper.
 
-### Recommendation
-
-**Do it, in one commit, after printing the mapping for review.** The grouping is the only taste call
-and is worth five minutes of reading a table before 174 files move — mis-grouping is cheap in git and
-expensive in attention. Everything else is mechanical and already guarded.
-
-**Do not do it** if the diff is unwelcome this week: nothing is broken by leaving the layer flat, the
-visible win (38 story-only entries out of the facade directory) already landed, and this is the one
-remaining item from the arc that no consumer, guard or doc depends on.
+**One widening was reverted the same day.** `tests/helpers/kit-paths.ts` gained `src/web-components`
+so facades would resolve by basename — but a facade and its Solid component share a basename BY DESIGN
+(`switch.tsx`, `badge.tsx`, …), so one unique-basename index over both trees threw on a legitimate
+lookup. The reason is at the site now. A guard that means the facade names its path or walks the layer.
 
 ## 6. Traps from this session (do not re-derive)
+
+**`tsc` is not a check on imports in this repo.** It does not report an unresolved SIDE-EFFECT import
+(`import './nope'`) — measured, next to a `from` import that does error. Any structural move must
+verify relative specifiers with a resolver, or rely on the build and the unit suite.
+
 
 1. **`verify:generated` in parallel with `tsc`** produces fake TS1005 JSON errors (it rewrites
    source-tree artifacts in place). Serial.
@@ -261,7 +261,7 @@ a trap for the next guard of this shape; the commit message has the detail.
 | `npm run build` | exit 0 |
 | `verify:dts` | 364 declarations, 583 relative specifiers, zero escapes |
 | tsc src / tests / apps / mcp / react / react.test | all exit 0 |
-| `--project=unit` | 420 files, 6001 tests green |
+| `--project=unit` | 421 files, 6008 tests green |
 | `--project=emitted` | 5 files, 36 tests green |
 | `verify:generated` | 19 artifacts in sync |
 | `verify:quarantine` | clean, no entries owed |
@@ -269,14 +269,15 @@ a trap for the next guard of this shape; the commit message has the detail.
 | `lint:cdn-pins`, `lint:llms-size`, `lint:silent-drops`, `lint:attachment-object-urls`, `lint:pack-parse` | green |
 | `verify:scaffold` | green (11 integrations × 8 surfaces, 110 emitted routes, 6 block forms) |
 | `verify:consumer` | register-all 96/96 tags, per-web-component 1/1; four eager ceilings hold |
-| `verify:pack` | 2.50 MiB packed against a 2.56 MiB ceiling |
+| `verify:pack` | 2.51 MiB packed against a 2.56 MiB ceiling (1465 files) |
 | `test:geometry-token` | 6/6 browser |
 | `nx build docs` | 127 pages |
 | `packages/blocks` | 142 tests, tsc ×2 green; `apps/docs` 58 tests green |
 
 Commits on this branch from this session: `1fad7fa4` (the dts rewrite), `373a99f6` (the extraction),
 `9629f924` (the rename), `2a9651e2` (the showcase move), `777c4dcc` (symbols, data keys, event types,
-generated names — the owner's call, pre-1.0), `ba6862f0` (the straggler guard and the archive note).
+generated names — the owner's call, pre-1.0), `ba6862f0` (the straggler guard and the archive note),
+`b9257f7d` (the family folders — the last item; step 5 is complete).
 
 Landed after the tables above were written: `lint:layer-names` 14/14 self-test cases and clean over
 2603 tracked files; 421 files / 6008 unit tests; create-kai 909 after rebuilding its `dist/templates`,
