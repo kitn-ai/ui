@@ -32,7 +32,7 @@ frameworks were ready, and it was wrong within a day of each one landing — so
 the list lives in `src/frameworks.ts` and at runtime in `--list --json`, and
 nowhere else.
 
-Vue went first among the `registration: 'elements'` + `composedWorkspace: true`
+Vue went first among the `registration: 'web-components'` + `composedWorkspace: true`
 cells and paid for the shared machinery: a framework could go `ready` with **no
 patches at all** and the build would still print "2 patches verified", shipping
 the kit's own example title and `nx build ui` into a user's project. That hole

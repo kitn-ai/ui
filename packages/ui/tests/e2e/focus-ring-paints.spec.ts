@@ -438,14 +438,14 @@ test('every focusable control in every kai-* element paints a focus indicator', 
 
   const failures: string[] = [];
   const passes: string[] = [];
-  let elementsWithFocusables = 0;
+  let webComponentsWithFocusables = 0;
   let measured = 0;
 
   for (const tag of TAGS) {
     await mountOnly(page, tag);
     const handles = await focusablesOf(page, 'mounts');
     if (handles.length === 0) continue;
-    elementsWithFocusables++;
+    webComponentsWithFocusables++;
 
     for (let i = 0; i < handles.length; i++) {
       const m = await measureFocusPaint(page, handles[i]);
@@ -462,12 +462,12 @@ test('every focusable control in every kai-* element paints a focus indicator', 
     }
   }
 
-  console.log(`\nmeasured ${measured} focusable controls across ${elementsWithFocusables} elements`);
+  console.log(`\nmeasured ${measured} focusable controls across ${webComponentsWithFocusables} elements`);
   console.log(`paints a focus indicator: ${passes.length} | NO focus indicator: ${failures.length}`);
 
   // Floors first: if the population collapsed, report THAT, not a green run.
   expect(
-    elementsWithFocusables,
+    webComponentsWithFocusables,
     'far fewer elements rendered focusable controls than expected — the suite is measuring almost nothing',
   ).toBeGreaterThanOrEqual(MIN_ELEMENTS_WITH_FOCUSABLES);
   expect(

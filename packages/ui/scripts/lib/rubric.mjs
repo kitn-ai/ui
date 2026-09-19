@@ -78,7 +78,7 @@ export const severity = (id) => SEVERITIES.find((s) => s.id === id);
  */
 export const DIMENSIONS = [
   {
-    id: 'elements-exist',
+    id: 'web-components-exist',
     title: 'Correct web components — nothing fabricated',
     gate: 'mechanical',
     runner: 'evaluator',

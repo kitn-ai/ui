@@ -31,7 +31,7 @@ These are the real adoption-blocker questions for a Shadow-DOM web-component lib
 **Yes** — `@kitn.ai/ui/autoloader` as a **static module script** (CDN/static hosting) lazily registers only the `kai-*` web components present in the DOM (scans on load + a MutationObserver for runtime injections). Verified: it registers `kai-status`/`kai-badge` when present and correctly skips web components that aren't. **Caveat:** the autoloader is NOT importable through a bundler (it resolves siblings off `import.meta.url`) — doing so 404s, but it emits a clear warning naming the fix. In a bundled app use per-web-component or register-all imports (or `setAutoloaderBasePath('<cdn>/')`).
 
 ### 5. Does `import '@kitn.ai/ui/web-components'` register everything?
-**Yes.** (This was BROKEN — tree-shaken — and is now fixed + guarded by `scripts/verify-web-components-bundle.mjs`.) Verified in vanilla/Vue/Svelte and the docs site. Tip: `await elementsReady` (exported from the entry) or `customElements.whenDefined(tag)` before setting array/object props.
+**Yes.** (This was BROKEN — tree-shaken — and is now fixed + guarded by `scripts/verify-web-components-bundle.mjs`.) Verified in vanilla/Vue/Svelte and the docs site. Tip: `await webComponentsReady` (exported from the entry) or `customElements.whenDefined(tag)` before setting array/object props.
 
 ### 6. Does `registerAll()` work?
 **Yes** (it imports the now-fixed coarse bundle).
@@ -48,10 +48,10 @@ These are the real adoption-blocker questions for a Shadow-DOM web-component lib
 - **Vue:** set `compilerOptions.isCustomElement: (t) => t.startsWith('kai-')`; bind array/object props with `:prop.prop` (or assign the JS property after `whenDefined`); listen with `@kai-event`.
 - **Angular:** `CUSTOM_ELEMENTS_SCHEMA`; `[prop]` / `(kai-event)`.
 - **Svelte:** works as-is; `bind:this` + assign props, `on:kai-event`.
-- **Vanilla:** `import '@kitn.ai/ui/web-components'` (or the autoloader for CDN); set props in JS after `elementsReady`.
+- **Vanilla:** `import '@kitn.ai/ui/web-components'` (or the autoloader for CDN); set props in JS after `webComponentsReady`.
 
 ## Known minor issues (none block adoption)
 - **`@utility` CSS warnings** (P2): shipped `dist/web-components/compiled.css` + `dist/theme.tokens.css` carry Tailwind v4 `@utility` at-rules → non-fatal `lightningcss` warnings in consumer builds (styling still works; they're redundant leftovers). Fix: strip `@utility` from the distributed CSS.
 - **Autoloader-through-a-bundler** (P3): 404s by design; well-warned. Document the static-only contract.
 - **`register-impl` chunk-size warning** (P3): expected for register-all; recommend per-web-component/autoloader for lean builds.
-- **`elementsReady`/`toast` types on `/web-components`**: `elementsReady` now typed; `toast`/`configureToasts` re-exports on `/web-components` still untyped (use the main entry).
+- **`webComponentsReady`/`toast` types on `/web-components`**: `webComponentsReady` now typed; `toast`/`configureToasts` re-exports on `/web-components` still untyped (use the main entry).

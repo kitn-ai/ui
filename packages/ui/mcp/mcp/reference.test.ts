@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { BUILTIN_CARD_TAGS, cardSchemas, cardSchemaNames, cardTools } from '@kitn.ai/ui/schemas';
 import type { AnthropicToolDef, JsonSchemaToolDef, OpenAIToolDef } from '@kitn.ai/ui/schemas';
 import { reference, coverageSummary } from './tools/reference';
-import { cardTagForType, cardHostTags, entryForTag, getElement, listElements } from './manifest';
+import { cardTagForType, cardHostTags, entryForTag, getElement, listWebComponents } from './manifest';
 import { invariants } from '../catalog/invariants';
 import { surfaceRecipes } from '../catalog/surfaces';
 import type { TInvariant } from '../catalog/catalog-types';
@@ -86,7 +86,7 @@ describe('component_reference', () => {
     const withPayload: string[] = [];
     const withoutPayload: string[] = [];
 
-    for (const tag of listElements()) {
+    for (const tag of listWebComponents()) {
       const events = getElement(tag)?.events ?? [];
       if (events.length === 0) continue;
 
@@ -143,7 +143,7 @@ describe('component_reference', () => {
     // opt-in exception documented at web-component-diagnostics.ts:347-363. Finding it by
     // walking the manifest (instead of writing 'kai-remote' or '79'/'80' here) means
     // a second such element is covered by this test the day it exists.
-    const optedOut = listElements().filter((t) => entryForTag(t) === undefined);
+    const optedOut = listWebComponents().filter((t) => entryForTag(t) === undefined);
     expect(optedOut.length).toBeGreaterThan(0);
     const tag = optedOut[0];
 
@@ -176,7 +176,7 @@ describe('component_reference', () => {
       dirname(fileURLToPath(import.meta.url)),
       '../../dist/web-components',
     );
-    const optedOut = listElements().filter((t) => entryForTag(t) === undefined);
+    const optedOut = listWebComponents().filter((t) => entryForTag(t) === undefined);
     expect(optedOut.length).toBeGreaterThan(0);
 
     for (const tag of optedOut) {
@@ -449,17 +449,17 @@ describe('component_reference — card contract', () => {
 
 describe('component_reference — exposed methods', () => {
   interface MethodMeta { name: string; params: string; returns: string }
-  interface ElementMeta { tag: string; methods?: MethodMeta[] }
+  interface WebComponentMeta { tag: string; methods?: MethodMeta[] }
 
   // Same resolution manifest.ts uses to find the CEM, for the same reason: this
   // file runs from source under vitest and from nowhere else.
-  const elementMeta: ElementMeta[] = JSON.parse(
+  const webComponentMeta: WebComponentMeta[] = JSON.parse(
     readFileSync(
       resolve(dirname(fileURLToPath(import.meta.url)), '../../src/web-components/web-component-meta.json'),
       'utf8',
     ),
   );
-  const withMethods = elementMeta.filter((e) => e.methods?.length);
+  const withMethods = webComponentMeta.filter((e) => e.methods?.length);
   const TOTAL_METHODS = withMethods.reduce((n, e) => n + e.methods!.length, 0);
 
   /** The `### Methods …` section of a reference, up to the next `###`. */
@@ -504,7 +504,7 @@ describe('component_reference — exposed methods', () => {
   it('an element that exposes nothing gets no Methods section', async () => {
     // resizable.tsx declares kai-resizable AND kai-resizable-item; only the group
     // exposes maximize/restore.
-    const item = elementMeta.find((e) => e.tag === 'kai-resizable-item');
+    const item = webComponentMeta.find((e) => e.tag === 'kai-resizable-item');
     expect(item?.methods ?? []).toEqual([]);
     expect(methodsSection(await textFor({ name: 'kai-resizable-item' }))).toBeUndefined();
   });
@@ -660,7 +660,7 @@ describe('component_reference does not overstate what the catalog enforces', () 
    * fifth ingredient is covered here the day it is added.
    */
   it('an element with a recipe section points at the recipes appendix, as the invariants section does at its own', async () => {
-    const ingredients = listElements().filter((tag) =>
+    const ingredients = listWebComponents().filter((tag) =>
       surfaceRecipes.some((r) => r.ingredients.includes(tag)),
     );
     expect(ingredients.length).toBeGreaterThan(0);
@@ -675,7 +675,7 @@ describe('component_reference does not overstate what the catalog enforces', () 
 
     // and no signpost where there is no section to point from — a pointer on an
     // element in no recipe is the "fabricated membership" failure in another form
-    const outsiders = listElements().filter((tag) => !ingredients.includes(tag));
+    const outsiders = listWebComponents().filter((tag) => !ingredients.includes(tag));
     expect(outsiders.length).toBeGreaterThan(0);
     for (const tag of outsiders.slice(0, 5)) {
       expect(await textFor(tag), `${tag} is in no recipe but points at the recipes appendix`).not.toMatch(
@@ -978,7 +978,7 @@ describe('component_reference — programmatic layer + code recipes (rung-6 F-46
   });
 
   it('no code-recipe id shadows an element tag or a reserved topic', () => {
-    const tags = new Set(listElements());
+    const tags = new Set(listWebComponents());
     const reserved = new Set(['list', 'invariants', 'recipes', 'programmatic', 'state', 'wire', 'state-wire']);
     expect(listCodeRecipes().length).toBeGreaterThan(0);
     for (const r of listCodeRecipes()) {

@@ -236,7 +236,7 @@ function redactScoringLines(text, scenarios) {
 // The agent-facing pages
 // ---------------------------------------------------------------------------
 
-function renderReadme({ scenario, kitVersion, derived, elementPageCount }) {
+function renderReadme({ scenario, kitVersion, derived, webComponentPageCount }) {
   return `# @kitn.ai/ui composition pack — ${scenario.id}
 
 Kit version: \`${kitVersion}\`. Every fact in this pack was read out of that
@@ -248,11 +248,11 @@ everything.
 1. **PROMPT.md** — the task.
 2. **DELIVERY.md** — how to install, load and register the kit. Read this before
    writing any import or script tag; the specifiers are not guessable.
-3. **ELEMENTS.md** — the index of all ${derived.elements.length} web components, one line each. **Open only the
-   web-component pages you actually need** (\`elements/<tag>.md\`). There are
-   ${elementPageCount} of them and reading them all is a waste of your context.
+3. **WEB-COMPONENTS.md** — the index of all ${derived.webComponents.length} web components, one line each. **Open only the
+   web-component pages you actually need** (\`web-components/<tag>.md\`). There are
+   ${webComponentPageCount} of them and reading them all is a waste of your context.
 4. **SHARED-PROPS.md** — the props every web component has. They are listed once here
-   and NOT repeated on the ${elementPageCount} web-component pages.
+   and NOT repeated on the ${webComponentPageCount} web-component pages.
 5. **INVARIANTS.md** — the rules that break real consumers. Each carries a
    wrong/right code pair. Apply these; they are not style advice.
 6. **RECIPES.md** — proven compositions, with the host wiring written out.
@@ -265,8 +265,8 @@ everything.
 
 This is the part that matters most, so it is repeated on each list page:
 
-- **ELEMENTS.md is every web component this kit defines** — all
-  ${derived.elements.length} of them. If a tag is not in that list, **it does not
+- **WEB-COMPONENTS.md is every web component this kit defines** — all
+  ${derived.webComponents.length} of them. If a tag is not in that list, **it does not
   exist**. There is no larger catalog elsewhere.
 - **PARTS.md is every \`MessagePart\` variant the wire can represent** —
   ${derived.partVariants.length} of them. A part with any other \`type\` cannot be
@@ -347,7 +347,7 @@ function renderDelivery({ pkg, kitVersion, derived, solidExports }) {
   // than typed: it is `dist/kai.es.js` today and that is not this file's fact to
   // remember. The version is read from package.json for the same reason, and
   // because a hand-typed pin is what `lint:cdn-pins` exists to catch.
-  const elementsTarget = (pkg.exports['./web-components']?.default ?? '').replace(/^\.\//, '');
+  const webComponentsTarget = (pkg.exports['./web-components']?.default ?? '').replace(/^\.\//, '');
   const themeTarget = (pkg.exports['./theme.css'] ?? '').replace(/^\.\//, '');
 
   return `# Delivery — installing, loading and registering
@@ -391,7 +391,7 @@ land before the element upgrades and be lost. Wait for the registry:
 
 ${fence("await customElements.whenDefined('kai-chat');\nchat.messages = messages;", 'js')}
 
-\`elementsReady\` from \`@kitn.ai/ui/web-components\` is a promise that resolves once
+\`webComponentsReady\` from \`@kitn.ai/ui/web-components\` is a promise that resolves once
 every web component is registered — await that instead if you are setting properties
 on several web components at once. See \`upgrade-race\` in INVARIANTS.md.
 
@@ -402,8 +402,8 @@ The web-components bundle is a self-contained **ES module**, so it loads over
 
 ${fence(
   `<script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui@${kitVersion}/${elementsTarget}';
-  // …or unpkg: import 'https://unpkg.com/@kitn.ai/ui@${kitVersion}/${elementsTarget}';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui@${kitVersion}/${webComponentsTarget}';
+  // …or unpkg: import 'https://unpkg.com/@kitn.ai/ui@${kitVersion}/${webComponentsTarget}';
 
   await customElements.whenDefined('kai-chat');
   const chat = document.querySelector('kai-chat');
@@ -462,7 +462,7 @@ writing a Solid app, ignore them entirely and use the \`kai-*\` tag.
 
 function renderElementIndex({ derived, meta, universal, intents, capabilityOf }) {
   const byTag = new Map(meta.map((m) => [m.tag, m]));
-  const rows = derived.elements
+  const rows = derived.webComponents
     .slice()
     .sort((a, b) => a.tag.localeCompare(b.tag))
     .map((e) => {
@@ -472,12 +472,12 @@ function renderElementIndex({ derived, meta, universal, intents, capabilityOf })
       // here must exclude them too. A row saying 5 next to a page listing 4 is
       // the kind of small falsehood that makes an agent stop trusting the pack.
       const props = e.props.filter((p) => !universal.includes(p.name)).length;
-      return `| [\`${e.tag}\`](elements/${e.tag}.md) | ${intents.get(e.tag) ?? '—'} | ${capabilityOf.get(e.tag) ?? '—'} | ${props} | ${e.events.length} | ${e.methods.length} | ${slots} | ${e.parts.length} |`;
+      return `| [\`${e.tag}\`](web-components/${e.tag}.md) | ${intents.get(e.tag) ?? '—'} | ${capabilityOf.get(e.tag) ?? '—'} | ${props} | ${e.events.length} | ${e.methods.length} | ${slots} | ${e.parts.length} |`;
     });
 
   return `# Web components — the complete index
 
-**This list is EXHAUSTIVE.** These ${derived.elements.length} tags are every
+**This list is EXHAUSTIVE.** These ${derived.webComponents.length} tags are every
 web component \`@kitn.ai/ui\` defines. **If a tag is not on this list, it does
 not exist** — do not write it, do not import it, do not assume a sibling of one
 that is here. If the task needs one that is missing, say so.
@@ -486,7 +486,7 @@ Counts below exclude the shared props in [SHARED-PROPS.md](SHARED-PROPS.md),
 which every web component also has.
 
 **On the "what it is" column, read this before trusting a blank.** Only
-${intents.size} of these ${derived.elements.length} web components carry a curated
+${intents.size} of these ${derived.webComponents.length} web components carry a curated
 one-line description upstream, so most rows show \`—\`. A blank means *nobody has
 written one*, never *this web component is unimportant*. The counts and the capability
 group are the other signals; if you are choosing between two candidates, open
@@ -518,7 +518,7 @@ here; each web-component page carries its full prop list.
   });
   return `# Shared props
 
-Every one of the web components in [ELEMENTS.md](ELEMENTS.md) has these props. They are
+Every one of the web components in [WEB-COMPONENTS.md](WEB-COMPONENTS.md) has these props. They are
 listed here once and are **deliberately absent from the individual web-component
 pages** — a web-component page showing no \`theme\` row still has \`theme\`.
 
@@ -721,9 +721,9 @@ ${items}
 
 These need no needle. Run each over your finished output.
 
-1. **Every \`kai-…\` tag you wrote must appear in ELEMENTS.md.** Extract every
+1. **Every \`kai-…\` tag you wrote must appear in WEB-COMPONENTS.md.** Extract every
    tag matching \`kai-[a-z-]+\` from your output and look each one up in the
-   index. There are ${derived.elements.length} legal tags. A tag that is not on
+   index. There are ${derived.webComponents.length} legal tags. A tag that is not on
    that list does not exist, and shipping it is worse than not answering — go
    back and say what is missing instead.
 2. **Every \`@kitn.ai/ui…\` import specifier you wrote must appear in
@@ -1038,7 +1038,7 @@ ${
  * check can resolve it. Not `src/<sub>/index.ts` by convention: review found
  * that convention silently skipping five subpaths -- react, web-components, solid,
  * provider, autoloader -- which is to say `Chat`, `useKaiChat` and
- * `elementsReady`, exactly what S1 and S5 lean on. A silent `continue` is the
+ * `webComponentsReady`, exactly what S1 and S5 lean on. A silent `continue` is the
  * shape this branch has spent the week deleting, so anything not resolved here
  * is REPORTED as unchecked rather than passed over.
  */
@@ -1145,9 +1145,9 @@ const pkg = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
 const kitVersion = pkg.version;
 
 const helpers = {
-  derivedTags: new Set(derived.elements.map((e) => e.tag)),
-  derivedProp: (tag, name) => derived.elements.find((e) => e.tag === tag)?.props.find((p) => p.name === name),
-  derivedEvents: (tag) => derived.elements.find((e) => e.tag === tag)?.events ?? [],
+  derivedTags: new Set(derived.webComponents.map((e) => e.tag)),
+  derivedProp: (tag, name) => derived.webComponents.find((e) => e.tag === tag)?.props.find((p) => p.name === name),
+  derivedEvents: (tag) => derived.webComponents.find((e) => e.tag === tag)?.events ?? [],
   wireIndexSource: readFileSync(join(ROOT, 'src/wire/index.ts'), 'utf8'),
   defineSource: readFileSync(join(ROOT, 'src/web-components/define.tsx'), 'utf8'),
   exportsKeys: Object.keys(pkg.exports ?? {}),
@@ -1203,7 +1203,7 @@ if (!floor.ok) {
   );
 }
 
-assertArtifactsAgree(derived.elements, meta);
+assertArtifactsAgree(derived.webComponents, meta);
 
 const needleProblems = verifyNeedles(invariants);
 if (needleProblems.length) {
@@ -1220,7 +1220,7 @@ const metaByTag = new Map(meta.map((m) => [m.tag, m]));
 const universal = [
   ...new Set(meta.flatMap((m) => (m.props ?? []).filter((p) => p.universal).map((p) => p.name))),
 ].filter((name) => {
-  const everywhere = derived.elements.every((e) => e.props.some((p) => p.name === name));
+  const everywhere = derived.webComponents.every((e) => e.props.some((p) => p.name === name));
   if (!everywhere) {
     fail(
       `web-component-meta.json flags \`${name}\` universal, but it is not on every web component in derived.json. Factoring it out of the web-component pages would hide its absence.`,
@@ -1262,7 +1262,7 @@ const solidExported = new Set(
       .filter(Boolean),
   ),
 );
-const allSolidNames = [...new Set(derived.elements.flatMap((e) => e.composedFrom ?? []))];
+const allSolidNames = [...new Set(derived.webComponents.flatMap((e) => e.composedFrom ?? []))];
 const solidExports = {
   total: allSolidNames.length,
   exported: allSolidNames.filter((n) => solidExported.has(n)).length,
@@ -1300,20 +1300,20 @@ const partConsumption = catalog.listPartConsumption();
 // --- render everything, in memory ------------------------------------------
 
 const agentPages = [];
-const elementPages = [];
+const webComponentPages = [];
 const judgePages = [];
 const addAgent = (name, body) => agentPages.push({ name, body });
-const addElement = (name, body) => elementPages.push({ name, body });
+const addElement = (name, body) => webComponentPages.push({ name, body });
 const addJudge = (name, body) => judgePages.push({ name, body });
 
-for (const el of derived.elements) {
+for (const el of derived.webComponents) {
   addElement(
     `${el.tag}.md`,
     renderElementPage({ el, m: metaByTag.get(el.tag), universal, solidExported, tokenFor }),
   );
 }
 
-addAgent('README.md', renderReadme({ scenario, kitVersion, derived, elementPageCount: derived.elements.length }));
+addAgent('README.md', renderReadme({ scenario, kitVersion, derived, webComponentPageCount: derived.webComponents.length }));
 addAgent(
   'PROMPT.md',
   `# Your task
@@ -1333,7 +1333,7 @@ path to close the gap.
 `,
 );
 addAgent('DELIVERY.md', renderDelivery({ pkg, kitVersion, derived, solidExports }));
-addAgent('ELEMENTS.md', renderElementIndex({ derived, meta, universal, intents, capabilityOf }));
+addAgent('WEB-COMPONENTS.md', renderElementIndex({ derived, meta, universal, intents, capabilityOf }));
 addAgent('SHARED-PROPS.md', renderSharedProps({ universal, meta }));
 addAgent('INVARIANTS.md', renderInvariants({ invariants, derived }));
 addAgent('SELF-AUDIT.md', renderSelfAudit({ selfAuditItems, derived }));
@@ -1351,11 +1351,11 @@ addJudge('JUDGE.md', renderJudge({ scenario, invariants, recipes, kitVersion, fl
 // Answer-key redaction, over EVERY scenario's lines rather than this one's:
 // the leak found in review was S2's line inside an invariant statement, in a
 // pack for S1, so a check scoped to the packed scenario could not see it.
-for (const page of [...agentPages, ...elementPages]) {
+for (const page of [...agentPages, ...webComponentPages]) {
   page.body = redactScoringLines(page.body, scenarios);
 }
 
-const agentText = [...agentPages, ...elementPages].map((p) => p.body).join('\n');
+const agentText = [...agentPages, ...webComponentPages].map((p) => p.body).join('\n');
 
 const specifiers = verifySpecifiers(agentText, pkg, readSubpathSource);
 if (specifiers.problems.length) {
@@ -1389,7 +1389,7 @@ if (existsSync(out) && readdirSync(out).length) {
     `--out ${out} is not empty. Point it at a new or empty directory: the pack refuses to write into one it does not own, and its cleanup only ever removes what it created.`,
   );
 }
-mkdirSync(join(agentDir, 'elements'), { recursive: true });
+mkdirSync(join(agentDir, 'web-components'), { recursive: true });
 mkdirSync(judgeDir, { recursive: true });
 // EXACTLY what this run creates -- never `out` itself, which may have existed.
 createdEntries = [agentDir, judgeDir, join(out, 'PACK.md')];
@@ -1397,7 +1397,7 @@ floorMark = floor.mark;
 
 const write = (dir, name, body) => writeFileSync(join(dir, name), body.endsWith('\n') ? body : body + '\n');
 for (const p of agentPages) write(agentDir, p.name, p.body);
-for (const p of elementPages) write(join(agentDir, 'elements'), p.name, p.body);
+for (const p of webComponentPages) write(join(agentDir, 'web-components'), p.name, p.body);
 for (const p of judgePages) write(judgeDir, p.name, p.body);
 
 write(
@@ -1409,7 +1409,7 @@ write(
       scenario: scenario.id,
       generatedFrom: {
         derived: 'packages/ui/mcp/catalog/derived.json',
-        elementMeta: 'packages/ui/src/web-components/web-component-meta.json',
+        webComponentMeta: 'packages/ui/src/web-components/web-component-meta.json',
       },
       derived,
       invariants,
@@ -1447,7 +1447,7 @@ Scenario: ${scenario.id} — ${scenario.depth}.
 
 finish(0);
 console.log(
-  `acceptance-pack: packed ${scenario.id} into ${out} (agent/: ${elementPages.length} web-component pages + ${agentPages.length} guides; judge/: ${judgePages.length} reports + catalog.json)`,
+  `acceptance-pack: packed ${scenario.id} into ${out} (agent/: ${webComponentPages.length} web-component pages + ${agentPages.length} guides; judge/: ${judgePages.length} reports + catalog.json)`,
 );
 }
 

@@ -28,7 +28,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { expect, test } from 'vitest';
 
-const elementsDir = resolve(dirname(fileURLToPath(import.meta.url)), '../../src/web-components');
+const webComponentsDir = resolve(dirname(fileURLToPath(import.meta.url)), '../../src/web-components');
 
 /**
  * Files that DEFINE elements, anywhere UNDER `src/web-components` — tests, stories and type
@@ -42,7 +42,7 @@ const elementsDir = resolve(dirname(fileURLToPath(import.meta.url)), '../../src/
  * the comment to "directly in src/web-components" — would have been honest but would have
  * made the guard quietly weaker than its own name suggests.
  */
-function facadeSources(dir = elementsDir, prefix = ''): string[] {
+function facadeSources(dir = webComponentsDir, prefix = ''): string[] {
   const out: string[] = [];
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
     const rel = prefix ? `${prefix}/${entry.name}` : entry.name;
@@ -229,7 +229,7 @@ test('ignores toggleAttribute mentioned in comments and strings', () => {
 test('every reflection routes through reflectFlag, or is a named exemption', () => {
   const offenders: string[] = [];
   for (const file of facadeSources()) {
-    const sites = toggleAttributeSites(readFileSync(resolve(elementsDir, file), 'utf8'));
+    const sites = toggleAttributeSites(readFileSync(resolve(webComponentsDir, file), 'utf8'));
     if (sites.length && !(file in EXEMPT)) {
       offenders.push(`${file}:${sites.join(',')}`);
     }
@@ -250,7 +250,7 @@ test('each exemption still has a call site to justify it', () => {
   for (const file of Object.keys(EXEMPT)) {
     let source: string;
     try {
-      source = readFileSync(resolve(elementsDir, file), 'utf8');
+      source = readFileSync(resolve(webComponentsDir, file), 'utf8');
     } catch {
       stale.push(`${file} (no such file)`);
       continue;
@@ -276,7 +276,7 @@ test('the migrated facades really do call reflectFlag', () => {
     'disclosure.ts': ['open'],
   };
   for (const [file, props] of Object.entries(expected)) {
-    const { code } = stripComments(readFileSync(resolve(elementsDir, file), 'utf8'));
+    const { code } = stripComments(readFileSync(resolve(webComponentsDir, file), 'utf8'));
     for (const prop of props) {
       expect(code, `${file} should reflect ${prop} via reflectFlag`).toMatch(
         new RegExp(`reflectFlag\\(\\s*'${prop}'`),

@@ -46,7 +46,7 @@ export function writeReact(root, elements, IMPORTS) {
   // dist/ that verify:dts fails on. A bare self-reference to a subpath the
   // exports map declares is what that guard accepts, and it is what a
   // consumer writes.
-  const elementTypeImport = `import type {\n${elements
+  const webComponentTypeImport = `import type {\n${elements
     .map((el) => `  ${el.className},`)
     .sort()
     .join('\n')}\n} from '@kitn.ai/ui/web-components';`;
@@ -69,7 +69,7 @@ export function writeReact(root, elements, IMPORTS) {
 
     const name = el.displayName;
     const propsName = `${name}Props`;
-    const elementType = el.className;
+    const webComponentType = el.className;
     // Lazy-import the web component by its SOURCE-MODULE basename (set in gen-web-component-api.mjs),
     // not its tag: the per-web-component build emits dist/web-components/<source-file>.js, so deriving
     // from the tag (e.g. kai-confirm → "confirm") points at a file that does not exist.
@@ -78,7 +78,7 @@ export function writeReact(root, elements, IMPORTS) {
 ${[...propLines, ...eventLines].join('\n')}
 }
 
-export const ${name} = /*#__PURE__*/ createWebComponent<${propsName}, ${elementType}>(
+export const ${name} = /*#__PURE__*/ createWebComponent<${propsName}, ${webComponentType}>(
   '${el.tag}',
   ${propNames},
   ${eventMap},
@@ -96,7 +96,7 @@ export const ${name} = /*#__PURE__*/ createWebComponent<${propsName}, ${elementT
 // — not the register-all bundle. SSR-safe: registration fires only in a client effect.
 // For eager all-registration call registerAll() or import '@kitn.ai/ui/web-components'.
 import { createWebComponent, registerAll, type WebComponentProps } from './runtime';
-${elementTypeImport}
+${webComponentTypeImport}
 export { registerAll };
 export { useKaiChat } from './use-kai-chat';
 export type { UseKaiChatOptions, KaiChatController } from './use-kai-chat';

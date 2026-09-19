@@ -11,7 +11,7 @@ import { NEEDLES, variantsOf } from '../../scripts/lib/audit-needles.mjs';
 const PKG = join(__dirname, '..', '..');
 const SCRIPT = join(PKG, 'scripts/acceptance-pack.mjs');
 const derived = JSON.parse(readFileSync(join(PKG, 'mcp/catalog/derived.json'), 'utf8')) as {
-  elements: { tag: string; props: { name: string; scalar: boolean }[]; tokens: string[]; composedFrom: string[] }[];
+  webComponents: { tag: string; props: { name: string; scalar: boolean }[]; tokens: string[]; composedFrom: string[] }[];
   partVariants: string[];
   themeTokens: string[];
 };
@@ -72,7 +72,7 @@ describe('acceptance pack', () => {
       'README.md',
       'PROMPT.md',
       'DELIVERY.md',
-      'ELEMENTS.md',
+      'WEB-COMPONENTS.md',
       'SHARED-PROPS.md',
       'INVARIANTS.md',
       'SELF-AUDIT.md',
@@ -95,7 +95,7 @@ describe('acceptance pack', () => {
     const catalog = JSON.parse(readFileSync(join(judge, 'catalog.json'), 'utf8'));
     expect(catalog.kitVersion).toBe(pkgJson.version);
     expect(readFileSync(join(dir, 'PACK.md'), 'utf8')).toContain(pkgJson.version);
-    expect(catalog.derived.elements.length).toBe(derived.elements.length);
+    expect(catalog.derived.webComponents.length).toBe(derived.webComponents.length);
     expect(catalog.invariants.length).toBe(listInvariants().length);
   });
 
@@ -144,7 +144,7 @@ describe('acceptance pack', () => {
 
     // F-8a-8: the Solid component names must not read as import paths.
     expect(d).toContain('provenance, not import paths');
-    const pageText = readAll(join(agent, 'elements'));
+    const pageText = readAll(join(agent, 'web-components'));
     expect(pageText).toContain('(internal — not importable)');
     expect(pageText).toContain('(also exported from `@kitn.ai/ui` for SolidJS)');
   });
@@ -169,16 +169,16 @@ describe('acceptance pack', () => {
 
   // A1 -- the pack is navigable markdown, not one blob.
   it('renders one page per element, and the index links exactly those pages', () => {
-    const pages = readdirSync(join(agent, 'elements'));
-    expect(pages.length).toBe(derived.elements.length);
+    const pages = readdirSync(join(agent, 'web-components'));
+    expect(pages.length).toBe(derived.webComponents.length);
     expect(pages.length).toBeGreaterThan(0);
 
-    const index = readFileSync(join(agent, 'ELEMENTS.md'), 'utf8');
-    const linked = [...index.matchAll(/\]\(elements\/([a-z0-9-]+)\.md\)/g)].map((m) => m[1]).sort();
+    const index = readFileSync(join(agent, 'WEB-COMPONENTS.md'), 'utf8');
+    const linked = [...index.matchAll(/\]\(web-components\/([a-z0-9-]+)\.md\)/g)].map((m) => m[1]).sort();
     // BOTH directions. A one-way check passes on an index that links half the
     // pages, and also on an index that links pages which do not exist.
-    expect(linked).toEqual(derived.elements.map((e) => e.tag).sort());
-    expect(pages.sort()).toEqual(derived.elements.map((e) => `${e.tag}.md`).sort());
+    expect(linked).toEqual(derived.webComponents.map((e) => e.tag).sort());
+    expect(pages.sort()).toEqual(derived.webComponents.map((e) => `${e.tag}.md`).sort());
 
     const readme = readFileSync(join(agent, 'README.md'), 'utf8');
     expect(readme).toMatch(/Open only the\s+web-component pages you actually need/);
@@ -199,23 +199,23 @@ describe('acceptance pack', () => {
     const shared = readFileSync(join(agent, 'SHARED-PROPS.md'), 'utf8');
     for (const name of universal) expect(shared).toContain(`**\`${name}\`**`);
 
-    const pageText = readAll(join(agent, 'elements'));
+    const pageText = readAll(join(agent, 'web-components'));
     for (const name of universal) {
       expect(pageText.includes(`**\`${name}\`**`), `${name} is repeated on an element page`).toBe(false);
     }
 
     // POSITIVE CONTROL, and this is the whole point: "the string is absent" is
     // vacuous until the same scan is shown finding a prop that SHOULD be there.
-    const sample = derived.elements.flatMap((e) => e.props.map((p) => p.name)).find((n) => !universal.includes(n));
+    const sample = derived.webComponents.flatMap((e) => e.props.map((p) => p.name)).find((n) => !universal.includes(n));
     expect(sample).toBeDefined();
     expect(pageText).toContain(`**\`${sample}\`**`);
   });
 
   // A2 -- the lists must SAY they are complete.
   it('states that the element list and the part-variant list are exhaustive, with counts that match', () => {
-    const index = readFileSync(join(agent, 'ELEMENTS.md'), 'utf8');
+    const index = readFileSync(join(agent, 'WEB-COMPONENTS.md'), 'utf8');
     expect(index).toContain('EXHAUSTIVE');
-    expect(index).toContain(`These ${derived.elements.length} tags`);
+    expect(index).toContain(`These ${derived.webComponents.length} tags`);
     expect(index).toMatch(/If a tag is not on this list, it does\s+not exist/);
 
     const parts = readFileSync(join(agent, 'PARTS.md'), 'utf8');
@@ -226,7 +226,7 @@ describe('acceptance pack', () => {
     // The refusal scenario needs the same statement in the pack it actually
     // gets, not only in S1's.
     const s6 = join(pack('S6'), 'agent');
-    expect(readFileSync(join(s6, 'ELEMENTS.md'), 'utf8')).toContain('EXHAUSTIVE');
+    expect(readFileSync(join(s6, 'WEB-COMPONENTS.md'), 'utf8')).toContain('EXHAUSTIVE');
     expect(readFileSync(join(s6, 'PROMPT.md'), 'utf8')).toMatch(/name what is\s+missing, and stop/);
   });
 
@@ -247,10 +247,10 @@ describe('acceptance pack', () => {
 
     // Every token an element page names must be spelled the way THEME.md
     // spells it, or an agent following the page fails its own self-audit.
-    const elementTokens = [...new Set(derived.elements.flatMap((e) => e.tokens))];
-    expect(elementTokens.length, 'no element declares a token; this test would be vacuous').toBeGreaterThan(0);
-    const pageText = readAll(join(agent, 'elements'));
-    for (const t of elementTokens) {
+    const webComponentTokens = [...new Set(derived.webComponents.flatMap((e) => e.tokens))];
+    expect(webComponentTokens.length, 'no element declares a token; this test would be vacuous').toBeGreaterThan(0);
+    const pageText = readAll(join(agent, 'web-components'));
+    for (const t of webComponentTokens) {
       const prefixed = `--kai-${t.slice(2)}`;
       expect(pageText, `${prefixed} is not on any element page`).toContain(`\`${prefixed}\``);
       expect(listed, `${prefixed} is on an element page but not in THEME.md`).toContain(prefixed);
@@ -298,7 +298,7 @@ describe('acceptance pack', () => {
     }
     expect(checked).toBe(examples.length);
 
-    expect(audit).toContain(`There are ${derived.elements.length} legal tags`);
+    expect(audit).toContain(`There are ${derived.webComponents.length} legal tags`);
     expect(audit).toContain(`There are ${derived.partVariants.length}:`);
     expect(audit).toContain('must appear in\n   DELIVERY.md');
   });
@@ -310,7 +310,7 @@ describe('acceptance pack', () => {
     const rows = fab.split('\n').filter((l) => l.trim().startsWith('|'));
     expect(rows).toHaveLength(2);
     const tags = [...fab.matchAll(/\bkai-[a-z0-9-]+/g)].map((m) => m[0]);
-    const real = new Set(derived.elements.map((e) => e.tag));
+    const real = new Set(derived.webComponents.map((e) => e.tag));
     for (const t of tags) expect(real.has(t), `${t} is not a real element`).toBe(true);
   });
 
@@ -388,7 +388,7 @@ describe('acceptance pack', () => {
     // first version of this said "is not reported as checked" and could not mean
     // it. What proves coverage is ABSENCE from the UNCHECKED section.
     const uncheckedSection = floorReport.slice(floorReport.indexOf('## Import specifiers the pack names'));
-    for (const sym of ['Chat (react)', 'useKaiChat (react)', 'elementsReady (web-components)', 'createAssistantStream (state)']) {
+    for (const sym of ['Chat (react)', 'useKaiChat (react)', 'webComponentsReady (web-components)', 'createAssistantStream (state)']) {
       expect(floorReport, `${sym} is not named at all`).toContain(sym);
       expect(uncheckedSection, `${sym} is reported UNCHECKED`).not.toContain(
         `\`${sym.split(' ')[0]}\` was NOT checked`,

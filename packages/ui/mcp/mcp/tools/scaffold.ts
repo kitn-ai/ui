@@ -2336,7 +2336,7 @@ function htmlModule(ctx: RenderCtx, components: readonly string[]): string {
   // rule — the `items =` assignment needs it. KaiFileUploadElement is deliberately
   // NOT imported: the dropzone is only ever listened to, and `as HTMLElement`
   // types addEventListener fully.
-  const elementTypes = [
+  const webComponentTypes = [
     'KaiChatElement',
     ...(hasSources ? ['KaiSourcesElement'] : []),
     ...(attachments ? ['KaiAttachmentsElement'] : []),
@@ -2372,7 +2372,7 @@ function htmlModule(ctx: RenderCtx, components: readonly string[]): string {
     `import '@kitn.ai/ui/web-components';  // registers <kai-*> — required, must come first`,
     `// The kit ships the web-component interfaces, so one cast at the lookup below types`,
     `// every property assignment that follows.`,
-    `import type { ${elementTypes} } from '@kitn.ai/ui/web-components';`,
+    `import type { ${webComponentTypes} } from '@kitn.ai/ui/web-components';`,
     ...wireImportLines({
       typed: annotatesChatMessage,
       toolLoop: ctx.emitToolLoop,
@@ -4537,7 +4537,7 @@ function renderAngular(components: readonly string[], ctx: RenderCtx): string {
   // KaiSourcesElement is imported only when a kai-sources companion is really
   // declared: an always-on import is unused on every other archetype, and a stock
   // Angular tsconfig turns on the checks that make that a build error.
-  const elementTypes = [
+  const webComponentTypes = [
     'KaiChatElement',
     ...(block ? ['KaiConversationsElement'] : []),
     ...(hasSourcesCompanion ? ['KaiSourcesElement'] : []),
@@ -4592,7 +4592,7 @@ function renderAngular(components: readonly string[], ctx: RenderCtx): string {
     `// Tailwind source and is only for apps that compile Tailwind themselves.)`,
     `import { CUSTOM_ELEMENTS_SCHEMA, Component, ElementRef, afterNextRender, ${block ? 'computed, effect, ' : ''}signal, viewChild } from '@angular/core';`,
     `import '@kitn.ai/ui/web-components';  // registers <kai-*> — required, must come first`,
-    `import type { ${elementTypes} } from '@kitn.ai/ui/web-components';`,
+    `import type { ${webComponentTypes} } from '@kitn.ai/ui/web-components';`,
     ...wireImportLines({
       typed: true,
       toolLoop: emitToolLoop,

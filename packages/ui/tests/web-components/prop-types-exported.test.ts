@@ -24,15 +24,15 @@ import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 
 const pkgRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
-const elementsDir = resolve(pkgRoot, 'src/web-components');
+const webComponentsDir = resolve(pkgRoot, 'src/web-components');
 
 // Same skip list as scripts/gen-web-component-api.mjs — infra/helpers, not facades.
 const SKIP = new Set([
   'define.tsx', 'register.ts', 'register-impl.ts', 'css.ts', 'chat-types.ts', 'default-input.tsx',
 ]);
-const facadeFiles = readdirSync(elementsDir)
+const facadeFiles = readdirSync(webComponentsDir)
   .filter((f) => /\.tsx?$/.test(f) && !/\.(stories|test)\.tsx?$/.test(f) && !SKIP.has(f))
-  .map((f) => resolve(elementsDir, f));
+  .map((f) => resolve(webComponentsDir, f));
 
 const ROOT_ENTRY = resolve(pkgRoot, 'src/index.ts');
 

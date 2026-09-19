@@ -71,7 +71,7 @@ const tree = (over: Record<string, string | null> = {}) => ({
     sideEffects: ['**/*.css', './dist/kai.es.js', './dist/register-impl-*.js', './dist/web-components/*.js'],
   }),
   'src/web-components/web-component-manifest.json': JSON.stringify({ tags: Object.fromEntries(TAGS.map((t) => [t, {}])) }),
-  'dist/kai.es.js': 'export const elementsReady = import("./register-impl-abc123.js");\n',
+  'dist/kai.es.js': 'export const webComponentsReady = import("./register-impl-abc123.js");\n',
   'dist/register-impl-abc123.js': CHUNK,
   ...over,
 });
@@ -112,7 +112,7 @@ describe('the web-components-bundle guard detects, and build runs it', () => {
     // ALONE rather than both at once.
     const root = fixtureRoot(
       tree({
-        'dist/kai.es.js': 'export const elementsReady = import("./web-components-registry-abc123.js");\n',
+        'dist/kai.es.js': 'export const webComponentsReady = import("./web-components-registry-abc123.js");\n',
         'dist/register-impl-abc123.js': null,
         'dist/web-components-registry-abc123.js': CHUNK,
         'package.json': JSON.stringify({

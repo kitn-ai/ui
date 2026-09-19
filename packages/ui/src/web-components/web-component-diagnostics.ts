@@ -57,9 +57,9 @@ import {
   wireDiagnosticsActive,
 } from '../wire/diagnostics';
 import type {
-  ElementRegistryEvent,
-  ElementViolationEvent,
-  ElementViolationKind,
+  WebComponentRegistryEvent,
+  WebComponentViolationEvent,
+  WebComponentViolationKind,
 } from './diagnostic-events';
 import NON_SCALAR from './web-component-nonscalar.json';
 // NAMED import, and it is worth 2.2 KB. `web-component-manifest.json` holds two maps:
@@ -143,13 +143,13 @@ export function classifyAttributeValue(raw: string): string | undefined {
 /** Build and deliver one violation. Callers gate on `wireDiagnosticsActive()`
  *  BEFORE calling, so nothing here is allocated on the inactive path. */
 function emitViolation(
-  kind: ElementViolationKind,
+  kind: WebComponentViolationKind,
   tag: string,
   prop: string,
   extra?: { valuePreview?: string; length?: number },
 ): void {
-  const event: ElementViolationEvent = {
-    type: 'element.violation',
+  const event: WebComponentViolationEvent = {
+    type: 'web-component.violation',
     t: Date.now(),
     kind,
     tag,
@@ -182,7 +182,7 @@ const INSTALLED = Symbol.for('kai.element.diagnostics.installed.v1');
 /** Whether this tag has anything to watch at all. `defineWebComponent` asks
  *  BEFORE it decides whether it needs to intercept the registry, so a tag with
  *  no non-scalar prop pays not even the interception. */
-export function elementDiagnosticsWanted(tag: string): boolean {
+export function webComponentDiagnosticsWanted(tag: string): boolean {
   const props = NON_SCALAR_PROPS[tag];
   return props !== undefined && props.length > 0;
 }
@@ -330,7 +330,7 @@ export function installElementDiagnostics(tag: string, proto: object): void {
 
 // ---- Capability 3: which kai-* elements are DEFINED ------------------------
 
-/** Every tag the manifest knows about. See `emitElementRegistry` for why this
+/** Every tag the manifest knows about. See `emitWebComponentRegistry` for why this
  *  is the manifest and not `web-component-meta.json`. */
 const MANIFEST_TAGS: string[] = Object.keys(MANIFEST_TAG_MAP as Record<string, string>);
 
@@ -371,7 +371,7 @@ const MANIFEST_TAGS: string[] = Object.keys(MANIFEST_TAG_MAP as Record<string, s
  * Returns the event it emitted, or `undefined` where there is no custom-element
  * registry (SSR) or nobody is listening.
  */
-export function emitElementRegistry(): ElementRegistryEvent | undefined {
+export function emitWebComponentRegistry(): WebComponentRegistryEvent | undefined {
   if (typeof customElements === 'undefined') return undefined;
   if (!wireDiagnosticsActive()) return undefined;
 
@@ -381,8 +381,8 @@ export function emitElementRegistry(): ElementRegistryEvent | undefined {
     (customElements.get(tag) ? defined : notDefined).push(tag);
   }
 
-  const event: ElementRegistryEvent = {
-    type: 'element.registry',
+  const event: WebComponentRegistryEvent = {
+    type: 'web-component.registry',
     t: Date.now(),
     defined,
     notDefined,

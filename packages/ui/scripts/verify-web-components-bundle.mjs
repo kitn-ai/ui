@@ -112,7 +112,7 @@ function checkTree(root) {
       `${BUNDLE} does NOT reference "${NEEDLE}".\n` +
         `  The register-all bundle is missing element registration — it was likely\n` +
         `  tree-shaken away. Consumers of @kitn.ai/ui/web-components would get nothing\n` +
-        `  registered. See src/web-components/register.ts (keep elementsReady exported) and\n` +
+        `  registered. See src/web-components/register.ts (keep webComponentsReady exported) and\n` +
         `  config/vite/web-components.ts under KAI_BUILD=register\n` +
         `  (build.rollupOptions.treeshake: false for this entry).`,
     );
@@ -219,7 +219,7 @@ const fixtureFiles = (over = {}) => ({
   'src/web-components/web-component-manifest.json': JSON.stringify({
     tags: Object.fromEntries(FIXTURE_TAGS.map((t) => [t, { module: `src/web-components/${t}.ts` }])),
   }),
-  'dist/kai.es.js': `export const elementsReady = import("./register-impl-abc123.js");\n`,
+  'dist/kai.es.js': `export const webComponentsReady = import("./register-impl-abc123.js");\n`,
   'dist/register-impl-abc123.js': registrationChunkBody(),
   ...over,
 });
@@ -246,7 +246,7 @@ const SELF_TEST_CASES = [
     // The chunk is still imported, still classified, still covered — only the
     // NAME the needle looks for is gone. Proves (1) fires on its own.
     files: fixtureFiles({
-      'dist/kai.es.js': `export const elementsReady = import("./web-components-registry-abc123.js");\n`,
+      'dist/kai.es.js': `export const webComponentsReady = import("./web-components-registry-abc123.js");\n`,
       'dist/register-impl-abc123.js': null,
       'dist/web-components-registry-abc123.js': registrationChunkBody(),
       'package.json': JSON.stringify({
@@ -271,7 +271,7 @@ const SELF_TEST_CASES = [
   {
     name: 'both defects at once are both reported',
     files: fixtureFiles({
-      'dist/kai.es.js': `export const elementsReady = import("./web-components-registry-abc123.js");\n`,
+      'dist/kai.es.js': `export const webComponentsReady = import("./web-components-registry-abc123.js");\n`,
       'dist/register-impl-abc123.js': null,
       'dist/web-components-registry-abc123.js': registrationChunkBody(),
       'package.json': JSON.stringify({

@@ -160,7 +160,7 @@ export declare function isCodeHighlightingEnabled(): boolean;
 export declare function classifyTool(name: string): ToolKind;
 
 /** Resolves once the kai-* elements are registered (browser); inert on the server. */
-export declare const elementsReady: Promise<unknown>;`;
+export declare const webComponentsReady: Promise<unknown>;`;
 
 // Imperative toast API surface — mirrors src/primitives/toast-store.ts (the `toast`
 // callable + `configureToasts` + the re-exported Toast* types from
@@ -538,7 +538,7 @@ export declare function isCodeHighlightingEnabled(): boolean;
 export declare function classifyTool(name: string): ToolKind;
 
 /** Resolves once the kai-* elements are registered (browser); inert on the server. */
-export declare const elementsReady: Promise<unknown>;
+export declare const webComponentsReady: Promise<unknown>;
 
 ${TOAST_TYPES}
 

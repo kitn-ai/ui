@@ -128,7 +128,7 @@ export function fencedBlocks(text) {
  * KNOWN RESIDUAL, and it applies to BOTH evaluator-run gates rather than only
  * the tag one:
  *
- *  - `gateElementsExist` reads a fenced `<kai-datagrid>` as a proposal even when
+ *  - `gateWebComponentsExist` reads a fenced `<kai-datagrid>` as a proposal even when
  *    the surrounding prose says "do not write this".
  *  - `gateAuditClean` has the identical shape: a ```ts block illustrating
  *    `chat.messages.push(m)` as the WRONG form fires `reactivity-two-halves#0`,
@@ -222,11 +222,11 @@ export function tagsUsedIn(text) {
  *
  * @param {{ files: { name: string, text: string }[], knownTags: Iterable<string> }} input
  */
-export function gateElementsExist({ files, knownTags }) {
+export function gateWebComponentsExist({ files, knownTags }) {
   const known = new Set(knownTags);
   if (!known.size) {
     throw new Error(
-      'gateElementsExist was given an empty known-tag set. Every tag would be reported fabricated, which is a broken input, not a finding.',
+      'gateWebComponentsExist was given an empty known-tag set. Every tag would be reported fabricated, which is a broken input, not a finding.',
     );
   }
   const code = codeUnits(files);
@@ -241,7 +241,7 @@ export function gateElementsExist({ files, knownTags }) {
     }
   }
   return {
-    id: 'elements-exist',
+    id: 'web-components-exist',
     passed: fabricated.length === 0,
     filesScanned: code.length,
     filesSeen: files.length,

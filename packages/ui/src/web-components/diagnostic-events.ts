@@ -38,7 +38,7 @@
  *  rather than imported so this file keeps its zero-import property; the two are
  *  kept in step by `web-component-diagnostics.test.ts`, which asserts every emitted
  *  element event carries a `type` and a numeric `t`. */
-export interface ElementDiagnosticBase {
+export interface WebComponentDiagnosticBase {
   type: string;
   /** `Date.now()` at emission. */
   t: number;
@@ -46,7 +46,7 @@ export interface ElementDiagnosticBase {
 
 /** Which contract was broken. A closed vocabulary, so a panel keys its own
  *  explanation off the kind and never needs prose from the kit. */
-export type ElementViolationKind =
+export type WebComponentViolationKind =
   /** A non-scalar prop received a value through the ATTRIBUTE channel. The
    *  attribute cannot carry an array or an object, so the property now holds a
    *  string and the element renders nothing. */
@@ -67,9 +67,9 @@ export type ElementViolationKind =
   | 'mutated-in-place';
 
 /** A consumer broke one of the three `kai-` contract rules on a live element. */
-export interface ElementViolationEvent extends ElementDiagnosticBase {
-  type: 'element.violation';
-  kind: ElementViolationKind;
+export interface WebComponentViolationEvent extends WebComponentDiagnosticBase {
+  type: 'web-component.violation';
+  kind: WebComponentViolationKind;
   /** The custom-element tag, e.g. `kai-chat`. */
   tag: string;
   /** The camelCase prop name, e.g. `messages`. */
@@ -99,8 +99,8 @@ export interface ElementViolationEvent extends ElementDiagnosticBase {
  *  error, because an undefined custom element is a valid, inert HTMLElement.
  *  The SSR starters already answer this by hand for a hard-coded handful
  *  (`HydrationBadge.tsx`); this is the same answer over the whole manifest. */
-export interface ElementRegistryEvent extends ElementDiagnosticBase {
-  type: 'element.registry';
+export interface WebComponentRegistryEvent extends WebComponentDiagnosticBase {
+  type: 'web-component.registry';
   /** Tags `customElements.get()` resolved. */
   defined: string[];
   /** Tags in the manifest that are NOT defined in this realm. Named for what it
@@ -111,4 +111,4 @@ export interface ElementRegistryEvent extends ElementDiagnosticBase {
   total: number;
 }
 
-export type ElementDiagnosticEvent = ElementViolationEvent | ElementRegistryEvent;
+export type WebComponentDiagnosticEvent = WebComponentViolationEvent | WebComponentRegistryEvent;

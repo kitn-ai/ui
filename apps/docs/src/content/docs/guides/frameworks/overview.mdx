@@ -24,12 +24,12 @@ Import `@kitn.ai/ui/web-components` once for its side effect. It registers every
 import '@kitn.ai/ui/web-components';
 ```
 
-Registration is **async**. If your framework sets array or object properties as it mounts (Vue, Angular, Svelte all do), mount behind the `elementsReady` promise the same entry exports. A property written before the element upgrades is lost.
+Registration is **async**. If your framework sets array or object properties as it mounts (Vue, Angular, Svelte all do), mount behind the `webComponentsReady` promise the same entry exports. A property written before the element upgrades is lost.
 
 ```ts
-import { elementsReady } from '@kitn.ai/ui/web-components';
+import { webComponentsReady } from '@kitn.ai/ui/web-components';
 
-elementsReady.then(() => mountYourApp());
+webComponentsReady.then(() => mountYourApp());
 ```
 
 Then use them in your templates:
@@ -81,8 +81,8 @@ Then use them in your templates:
   <TabItem label="Angular">
     ```ts
     // main.ts
-    import { elementsReady } from '@kitn.ai/ui/web-components';
-    elementsReady.then(() => bootstrapApplication(AppComponent, appConfig));
+    import { webComponentsReady } from '@kitn.ai/ui/web-components';
+    webComponentsReady.then(() => bootstrapApplication(AppComponent, appConfig));
     ```
 
     ```ts

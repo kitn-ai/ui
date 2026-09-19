@@ -45,14 +45,14 @@ interface MetaProp {
   scalar: boolean;
   default?: string;
 }
-interface MetaElement {
+interface MetaWebComponent {
   tag: string;
   className: string;
   displayName: string;
   props: MetaProp[];
 }
 
-const elements: MetaElement[] = JSON.parse(readFileSync(META, 'utf8'));
+const elements: MetaWebComponent[] = JSON.parse(readFileSync(META, 'utf8'));
 const types = readFileSync(SRC_TYPES, 'utf8');
 
 /** The body of one `export interface <name> …{ … }` block. */

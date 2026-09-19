@@ -828,11 +828,11 @@ describe('scaffold', () => {
       framework: 'react',
     });
     const text = (out.content as { type: string; text: string }[])[0].text;
-    const elementsIdx = text.indexOf("import '@kitn.ai/ui/web-components'");
+    const webComponentsIdx = text.indexOf("import '@kitn.ai/ui/web-components'");
     const reactIdx = text.indexOf("from '@kitn.ai/ui/react'");
-    expect(elementsIdx).toBeGreaterThanOrEqual(0);
+    expect(webComponentsIdx).toBeGreaterThanOrEqual(0);
     expect(reactIdx).toBeGreaterThanOrEqual(0);
-    expect(elementsIdx).toBeLessThan(reactIdx);
+    expect(webComponentsIdx).toBeLessThan(reactIdx);
   });
 
   // SCAF-6: next uses next/dynamic { ssr: false } — no top-level @kitn.ai/ui/web-components or

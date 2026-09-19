@@ -36,12 +36,12 @@ const pkgRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const SRC_TYPES = resolve(pkgRoot, 'src/web-components/web-component-types.d.ts');
 const DIST_TYPES = resolve(pkgRoot, 'dist/web-components.d.ts');
 
-interface ElementMeta {
+interface WebComponentMeta {
   tag: string;
   className: string;
   methods?: { name: string }[];
 }
-const meta: ElementMeta[] = JSON.parse(readFileSync(resolve(pkgRoot, 'src/web-components/web-component-meta.json'), 'utf8'));
+const meta: WebComponentMeta[] = JSON.parse(readFileSync(resolve(pkgRoot, 'src/web-components/web-component-meta.json'), 'utf8'));
 
 /** What a consumer actually writes: query the element, call the documented method.
  *  `skipLibCheck: true` on purpose — that is the setting every consumer template

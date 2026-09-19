@@ -210,10 +210,10 @@ describe('generateProject (widget + mock core)', () => {
     expect(html).toMatch(/This blank page stands in for your site/);
     expect(html).toMatch(/bottom-right corner/);
     const hintIndex = html.indexOf('This blank page stands in for your site');
-    const elementIndex = html.indexOf('<acme-support>');
+    const webComponentIndex = html.indexOf('<acme-support>');
     expect(hintIndex).toBeGreaterThan(-1);
-    expect(elementIndex).toBeGreaterThan(-1);
-    expect(hintIndex).toBeLessThan(elementIndex);
+    expect(webComponentIndex).toBeGreaterThan(-1);
+    expect(hintIndex).toBeLessThan(webComponentIndex);
   });
 
   it('routes the theme accent onto the HOST only — App.tsx (message content) carries no accent/primary token at all', () => {

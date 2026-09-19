@@ -40,7 +40,7 @@ export declare function isCodeHighlightingEnabled(): boolean;
 export declare function classifyTool(name: string): ToolKind;
 
 /** Resolves once the kai-* elements are registered (browser); inert on the server. */
-export declare const elementsReady: Promise<unknown>;
+export declare const webComponentsReady: Promise<unknown>;
 
 // --- Inlined from src/primitives/toast-store.ts (kept self-contained: no source imports) ---
 export type ToastVariant = 'neutral' | 'success' | 'warning' | 'error' | 'info';

@@ -257,7 +257,7 @@ export function AudioVisualizer(props: AudioVisualizerProps): JSX.Element {
   // GridVisualizer), radial off its own bar-count default, everything else
   // off the bar count -- pulled from `sizes.ts` rather than re-derived here,
   // so this stays in sync with what each variant actually renders.
-  const elementCount = () => {
+  const webComponentCount = () => {
     if (variant() === 'grid') return props.count ?? defaultGridCount(size());
     if (variant() === 'radial') return props.barCount ?? defaultRadialBarCount(size());
     return props.barCount ?? defaultBarCount(size());
@@ -265,13 +265,13 @@ export function AudioVisualizer(props: AudioVisualizerProps): JSX.Element {
 
   // Only ceil(n/2) bands are requested from the analyser, not one per
   // element: useAudioAnalysis's output is mirrored back out to the full
-  // elementCount below (centre-out for bar/grid, across the ring's vertical
+  // webComponentCount below (centre-out for bar/grid, across the ring's vertical
   // axis for radial), which is what turns a real voice's natural
   // low-to-high spectral tilt into a shape that grows from the centre
   // outward instead of always ramping in one direction. See
   // mirrorBandsCenterOut / mirrorBandsAroundRing in primitives/audio-bands.ts
   // for the full rationale and the real-clip measurements behind it.
-  const bandCount = () => Math.ceil(elementCount() / 2);
+  const bandCount = () => Math.ceil(webComponentCount() / 2);
 
   // A caller-supplied `bands` array short-circuits Web Audio entirely, which is
   // what keeps the headless and SSR paths free of an AudioContext.
@@ -286,7 +286,7 @@ export function AudioVisualizer(props: AudioVisualizerProps): JSX.Element {
   // has whatever shape the caller intends, mirrored or not, and mirroring it
   // again here would be a second, unwanted transform on data we don't own.
   // The analyser's own output is only ceil(n/2) values (bandCount above);
-  // mirror it back out to the FULL elementCount so it lines up EXACTLY with
+  // mirror it back out to the FULL webComponentCount so it lines up EXACTLY with
   // what each variant's own `normalizeVolumeBands(props.bands, count())`
   // expects. Matching the count exactly here, rather than leaning on that
   // pad-by-repeating-the-last-value, matters specifically because the mirror
@@ -295,8 +295,8 @@ export function AudioVisualizer(props: AudioVisualizerProps): JSX.Element {
   const bands = () => {
     if (props.bands) return props.bands;
     return variant() === 'radial'
-      ? mirrorBandsAroundRing(analysis.bands(), elementCount())
-      : mirrorBandsCenterOut(analysis.bands(), elementCount());
+      ? mirrorBandsAroundRing(analysis.bands(), webComponentCount())
+      : mirrorBandsCenterOut(analysis.bands(), webComponentCount());
   };
 
   // The shader variants read `volume`, a scalar, not `bands`. When

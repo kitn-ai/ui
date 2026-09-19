@@ -43,7 +43,7 @@ interface Member {
   description?: string;
   doc?: string;
 }
-interface ElementMeta {
+interface WebComponentMeta {
   tag: string;
   props?: Member[];
   events?: Member[];
@@ -52,7 +52,7 @@ interface ElementMeta {
   parts?: Member[];
 }
 
-const meta: ElementMeta[] = JSON.parse(
+const meta: WebComponentMeta[] = JSON.parse(
   readFileSync(resolve(pkgRoot, 'src/web-components/web-component-meta.json'), 'utf8'),
 );
 

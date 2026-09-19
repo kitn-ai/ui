@@ -11,10 +11,10 @@ import {
 // that the PRODUCTION storybook build (Rollup) tree-shakes away entirely, so a
 // deployed static Storybook would ship every kai-* element unregistered/inert.
 // The dist bundle is listed in package.json `sideEffects`, so it's never shaken,
-// and it self-registers (browser-gated + SSR-safe). `elementsReady` resolves
+// and it self-registers (browser-gated + SSR-safe). `webComponentsReady` resolves
 // once registration completes. (Requires the kit to be built — `nx build ui` —
 // before `storybook build`; wired into the dev/build scripts + deploy workflow.)
-import { elementsReady } from '../dist/kai.es.js';
+import { webComponentsReady } from '../dist/kai.es.js';
 import './styles.css';
 
 // ── AI/UI brand for the manager (top-left) ──────────────────────────────────
@@ -108,7 +108,7 @@ const preview: Preview = {
   // axe checks it, failing `scrollable-region-focusable`.
   async beforeEach() {
     if (typeof window === 'undefined') return;
-    await elementsReady;
+    await webComponentsReady;
   },
   // Outermost decorator: clear any imperatively-raised toasts when a story
   // unmounts so sticky toasts don't leak across story navigation (see

@@ -137,7 +137,7 @@ async function compileConsumerSheet(entry: string, candidates: Iterable<string>)
 }
 
 /** Every `.kai-*` selector the web-component sheet defines, read off compiled.css. */
-function elementSheetKaiClasses(): Set<string> {
+function webComponentSheetKaiClasses(): Set<string> {
   const compiled = readFileSync(join(PKG, 'src/web-components/compiled.css'), 'utf8');
   return new Set([...compiled.matchAll(/\.(kai-[a-z0-9-]+)/g)].map((m) => m[1]));
 }
@@ -156,7 +156,7 @@ let kaiClasses: string[];
 beforeAll(() => {
   source = shippedSource();
   candidates = candidatesOf(source.files);
-  const defined = elementSheetKaiClasses();
+  const defined = webComponentSheetKaiClasses();
   kaiClasses = [...candidates].filter((c) => /^kai-[a-z0-9-]+$/.test(c) && defined.has(c)).sort();
 });
 

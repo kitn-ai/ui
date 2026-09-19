@@ -122,7 +122,7 @@ if (missingKeys.length > 0) {
   );
 }
 
-const elements = meta
+const webComponents = meta
   .map((e) => ({
     tag: e.tag,
     props: (e.props ?? []).map((p) => ({
@@ -143,7 +143,7 @@ const elements = meta
     tokens: e.tokens ?? [],
   }))
   .sort((a, b) => a.tag.localeCompare(b.tag));
-// (The zero-web-component floor moved ABOVE the per-key check — `elements` is 1:1 with
+// (The zero-web-component floor moved ABOVE the per-key check — `webComponents` is 1:1 with
 // `meta`, so a second test here could never fire and would be a check that
 // proves nothing.)
 
@@ -290,9 +290,9 @@ if (eventExceptions.length === 0)
 
 writeFileSync(
   OUT,
-  JSON.stringify({ elements, partVariants, integrations, capabilityGroups, themeTokens, eventExceptions }, null, 2) +
+  JSON.stringify({ webComponents, partVariants, integrations, capabilityGroups, themeTokens, eventExceptions }, null, 2) +
     '\n',
 );
 console.log(
-  `gen-catalog: wrote ${OUT} (${elements.length} web components, ${partVariants.length} part variants, ${integrations.length} integrations, ${eventExceptions.length} event exceptions)`,
+  `gen-catalog: wrote ${OUT} (${webComponents.length} web components, ${partVariants.length} part variants, ${integrations.length} integrations, ${eventExceptions.length} event exceptions)`,
 );

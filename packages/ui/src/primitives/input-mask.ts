@@ -737,7 +737,7 @@ export function createInputMask(el: HTMLInputElement, options: InputMaskOptions)
     return canonicalize(pattern, formatRaw(pattern, raw), semantic);
   }
 
-  const elementListeners: Array<[string, EventListener]> = [
+  const webComponentListeners: Array<[string, EventListener]> = [
     ['beforeinput', onBeforeInput],
     ['input', onInputEvent],
     ['compositionstart', onCompositionStart],
@@ -758,7 +758,7 @@ export function createInputMask(el: HTMLInputElement, options: InputMaskOptions)
   ];
   const doc = el.ownerDocument;
 
-  for (const [kind, handler] of elementListeners) el.addEventListener(kind, handler);
+  for (const [kind, handler] of webComponentListeners) el.addEventListener(kind, handler);
   // `selectionchange` fires on the DOCUMENT for `<input>` in every browser this kit
   // targets; the element-targeted version is newer and not yet universal.
   doc.addEventListener('selectionchange', clampSelection);
@@ -846,7 +846,7 @@ export function createInputMask(el: HTMLInputElement, options: InputMaskOptions)
       if (detached) return;
       detached = true;
       pendingWrite = null; // a deferred write must not fire into a field we no longer own
-      for (const [kind, handler] of elementListeners) el.removeEventListener(kind, handler);
+      for (const [kind, handler] of webComponentListeners) el.removeEventListener(kind, handler);
       doc.removeEventListener('selectionchange', clampSelection);
     },
   };

@@ -1,5 +1,5 @@
 {
-  "elements": [
+  "webComponents": [
     {
       "tag": "kai-agent-card",
       "props": [

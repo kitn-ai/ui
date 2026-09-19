@@ -96,10 +96,10 @@ export function loadSurface(uiRoot) {
   // web-component-meta carries) comes from the JSON. Deriving this rather than
   // hard-coding `theme` means the next universal prop is handled for free —
   // without it, every `theme="dark"` in the docs was a false positive.
-  const elementsDts = entryFiles.find((e) => e.specifier === '@kitn.ai/ui/web-components');
+  const webComponentsDts = entryFiles.find((e) => e.specifier === '@kitn.ai/ui/web-components');
   const dtsMembers = new Map(); // interface name -> Set<member>
-  if (elementsDts) {
-    const sf = program.getSourceFile(elementsDts.dts);
+  if (webComponentsDts) {
+    const sf = program.getSourceFile(webComponentsDts.dts);
     if (sf) {
       for (const stmt of sf.statements) {
         if (!ts.isInterfaceDeclaration(stmt)) continue;

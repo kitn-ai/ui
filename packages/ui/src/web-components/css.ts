@@ -2,4 +2,4 @@
 // injected into custom-element shadow roots. Run `npm run build:css` first.
 import compiled from './compiled.css?inline';
 
-export const ELEMENT_CSS: string = compiled;
+export const WEB_COMPONENT_CSS: string = compiled;

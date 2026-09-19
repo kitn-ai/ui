@@ -3,7 +3,7 @@ import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { DerivedCatalog, DerivedElement } from '../../mcp/catalog/catalog-types';
+import { DerivedCatalog, DerivedWebComponent } from '../../mcp/catalog/catalog-types';
 import { listCapabilityGroups, listIntegrations } from '../../mcp/registry';
 import { WEB_COMPONENT_META_KEYS } from '../../scripts/lib/web-component-meta-keys.mjs';
 
@@ -48,10 +48,10 @@ describe('derived catalog artifact', () => {
   it('exists, parses against DerivedCatalog, and derives from the tree', () => {
     const derived = read();
     // Same web-component set as web-component-meta.json, no more, no less.
-    expect(derived.elements.map((e) => e.tag).sort()).toEqual(meta().map((m) => m.tag).sort());
+    expect(derived.webComponents.map((e) => e.tag).sort()).toEqual(meta().map((m) => m.tag).sort());
     // Web components carry the spec §3 fields.
-    expect(derived.elements.some((e) => e.composedFrom.length > 0)).toBe(true);
-    expect(derived.elements.some((e) => e.tokens.length > 0)).toBe(true);
+    expect(derived.webComponents.some((e) => e.composedFrom.length > 0)).toBe(true);
+    expect(derived.webComponents.some((e) => e.tokens.length > 0)).toBe(true);
   });
 
   /**
@@ -84,7 +84,7 @@ describe('derived catalog artifact', () => {
    * so `events`→`eventz` left everything green and empty).
    *
    * So the list is pinned against a source authored independently of it —
-   * `DerivedElement`'s zod shape, which is the catalog's OUTPUT contract and
+   * `DerivedWebComponent`'s zod shape, which is the catalog's OUTPUT contract and
    * names the same six fields beside `tag`. Drop `tokens` from the shared list
    * and this fails naming it, while the shape guard above quietly stops
    * checking it. Order is asserted too: `toEqual` on arrays, not set equality,
@@ -92,7 +92,7 @@ describe('derived catalog artifact', () => {
    * list is a diff worth seeing.
    */
   it('the shared key list matches the derived element contract, so it cannot be quietly shortened', () => {
-    const contractKeys = Object.keys(DerivedElement.shape).filter((k) => k !== 'tag');
+    const contractKeys = Object.keys(DerivedWebComponent.shape).filter((k) => k !== 'tag');
     expect(WEB_COMPONENT_META_KEYS).toEqual(contractKeys);
   });
 
@@ -150,7 +150,7 @@ describe('derived catalog artifact', () => {
         };
       })
       .sort((a, b) => a.tag.localeCompare(b.tag));
-    expect(read().elements).toEqual(expected);
+    expect(read().webComponents).toEqual(expected);
   });
 
   it('re-derives integrations and theme tokens from their sources, not merely non-empty', () => {
@@ -208,14 +208,14 @@ describe('derived catalog artifact', () => {
   // result, not a spot check.
   it('marks exactly the function-valued props, and nothing that merely contains a callback', () => {
     const derived = read();
-    const fnProps = derived.elements.flatMap((e) => e.props.filter((p) => p.fn).map((p) => `${e.tag}.${p.name}`));
+    const fnProps = derived.webComponents.flatMap((e) => e.props.filter((p) => p.fn).map((p) => `${e.tag}.${p.name}`));
     expect(fnProps.sort()).toEqual([...FUNCTION_VALUED].sort());
 
     // The two conjuncts of the rule, each with the case that breaks it alone.
     // `includes('=>')` without `startsWith('(')` would sweep these in: they are
     // an object and an array that CONTAIN callbacks, not callbacks.
     const named = (tag: string, prop: string) =>
-      derived.elements.find((e) => e.tag === tag)?.props.find((p) => p.name === prop);
+      derived.webComponents.find((e) => e.tag === tag)?.props.find((p) => p.name === prop);
     expect(named('kai-cards', 'policy')?.fn).toBe(false);
     expect(named('kai-toast-region', 'toasts')?.fn).toBe(false);
     // `startsWith('(')` without `includes('=>')` would sweep these in: parenthesised
@@ -225,7 +225,7 @@ describe('derived catalog artifact', () => {
 
     // `fn` is non-optional by design: absent and false must not be confusable,
     // so every prop record carries it.
-    expect(derived.elements.every((e) => e.props.every((p) => typeof p.fn === 'boolean'))).toBe(true);
+    expect(derived.webComponents.every((e) => e.props.every((p) => typeof p.fn === 'boolean'))).toBe(true);
   });
 
   /**

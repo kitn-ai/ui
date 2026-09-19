@@ -178,7 +178,7 @@ const LAZY_CHUNK = `const frag = "vec3 auroraWarp(vec2 p){return vec3(0.0);}\\nf
 
 /** The healthy tree, with `over` merged on top (a `null` value deletes a file). */
 const fixtureFiles = (over = {}) => ({
-  'dist/kai.es.js': `export const elementsReady = import("./register-impl-abc123.js");\n`,
+  'dist/kai.es.js': `export const webComponentsReady = import("./register-impl-abc123.js");\n`,
   'dist/register-impl-abc123.js': `customElements.define("kai-chat", C);\nconst v = () => import("./variant-aurora-x1.js");\n`,
   'dist/variant-aurora-x1.js': LAZY_CHUNK,
   ...over,
@@ -213,7 +213,7 @@ const SELF_TEST_CASES = [
     name: 'DEFECT: a marker in kai.es.js itself',
     files: fixtureFiles({
       'dist/kai.es.js':
-        `export const elementsReady = import("./register-impl-abc123.js");\nconst m = "void main(){ mainImage(gl_FragColor, gl_FragCoord.xy); }";\n`,
+        `export const webComponentsReady = import("./register-impl-abc123.js");\nconst m = "void main(){ mainImage(gl_FragColor, gl_FragCoord.xy); }";\n`,
     }),
     expect: ['leaked into the register-all bundle', 'mainImage(gl_FragColor'],
   },

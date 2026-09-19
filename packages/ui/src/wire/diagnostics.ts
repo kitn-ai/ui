@@ -38,7 +38,7 @@ import type { ModelUsage } from './chunk';
 // and the union is what lets it discriminate on `type` instead of being handed
 // an open bag. The alternative -- declaring the element events inside this file
 // -- puts element concepts in the wire layer, which is worse.
-import type { ElementDiagnosticEvent } from '../web-components/diagnostic-events';
+import type { WebComponentDiagnosticEvent } from '../web-components/diagnostic-events';
 
 /** The envelope every diagnostic event shares. `t` is `Date.now()` at emission. */
 export interface WireDiagnosticBase {
@@ -514,13 +514,13 @@ export function wireCorrelation(
  * parameter straight into a `WireDiagnosticEvent` needs a narrowing check it
  * should have had anyway.
  */
-export type KaiDiagnosticEvent = WireDiagnosticEvent | ElementDiagnosticEvent;
+export type KaiDiagnosticEvent = WireDiagnosticEvent | WebComponentDiagnosticEvent;
 
 /**
  * Narrow the shared stream to the element half — and, by negation, to the wire
  * half, which is what most callers actually want:
  *
- *   if (isElementDiagnosticEvent(e)) { … } else { e.streamId … }
+ *   if (isWebComponentDiagnosticEvent(e)) { … } else { e.streamId … }
  *
  * WHY THIS DIRECTION and not an `isWireDiagnosticEvent`. The element family is
  * CLOSED and small; the non-element side is the one that keeps growing, and it
@@ -535,8 +535,8 @@ export type KaiDiagnosticEvent = WireDiagnosticEvent | ElementDiagnosticEvent;
  * `traceId` off "every event", needs exactly this one check now that two layers
  * share one channel. The prefix is pinned by `web-component-artifact-divergence.test.ts`.
  */
-export function isElementDiagnosticEvent(e: KaiDiagnosticEvent): e is ElementDiagnosticEvent {
-  return e.type.startsWith('element.');
+export function isWebComponentDiagnosticEvent(e: KaiDiagnosticEvent): e is WebComponentDiagnosticEvent {
+  return e.type.startsWith('web-component.');
 }
 
 type Subscriber = (e: KaiDiagnosticEvent) => void;

@@ -1,5 +1,5 @@
 /** How an emitted project reaches the kit. Mirrors `kai.json`'s `registration`. */
-export type Registration = 'elements' | 'solid';
+export type Registration = 'web-components' | 'solid';
 
 export type Layout = 'full-screen' | 'widget';
 export type WidgetStyle = 'fab' | 'side';

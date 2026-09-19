@@ -15,7 +15,7 @@ import {
   cardTypeForTag,
   entryForTag,
   getElement,
-  listElements,
+  listWebComponents,
   optInEntryForTag,
 } from '../manifest';
 import type { CemMember } from '../manifest';
@@ -664,7 +664,7 @@ function formatReference(tag: string, provider: ToolProvider): string {
   const el = getElement(tag);
 
   if (!el) {
-    const all = listElements();
+    const all = listWebComponents();
     const sample = all.slice(0, 5).join(', ');
     return (
       `Unknown element: ${tag}\n\n` +
@@ -949,7 +949,7 @@ export const reference: Tool = {
     let text: string;
 
     if (!name || name === 'list') {
-      const tags = listElements();
+      const tags = listWebComponents();
       const cardRows = cardSchemaNames
         .map((t) => cardTagForType(t))
         .filter((t): t is string => t !== undefined);

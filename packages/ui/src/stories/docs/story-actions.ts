@@ -14,12 +14,12 @@
 // there are no CustomEvents; wire their callback props with `fn()` in `args`
 // per the Button exemplar instead.
 import { action } from 'storybook/actions';
-import elementMeta from '../../web-components/web-component-meta.json';
+import webComponentMeta from '../../web-components/web-component-meta.json';
 
-type ElementMetaEntry = { tag: string; events?: { name: string }[] };
+type WebComponentMetaEntry = { tag: string; events?: { name: string }[] };
 
 const eventsByTag = new Map<string, string[]>(
-  (elementMeta as ElementMetaEntry[]).map((e) => [e.tag, (e.events ?? []).map((ev) => ev.name)]),
+  (webComponentMeta as WebComponentMetaEntry[]).map((e) => [e.tag, (e.events ?? []).map((ev) => ev.name)]),
 );
 
 /**

@@ -442,13 +442,13 @@ export const FULL_ONLY_SECTIONS = [
     key: 'Element reference',
     pointer: (count) =>
       `- Element reference (all ${count} elements, every prop/event/method/slot/part): the "Element reference" section of ./llms-full.txt — https://kitn.dev/llms-full.txt`,
-    render: ({ count, elementSection }) =>
+    render: ({ count, webComponentSection }) =>
       [
         `## Element reference (${count} elements, generated from custom-elements.json)`,
         '',
         'Every element also accepts the `theme` attribute. Array/object properties are marked with a `—` attribute: they must be set as JS properties.',
         '',
-        elementSection,
+        webComponentSection,
       ].join('\n'),
   },
   {
@@ -603,20 +603,20 @@ function fromManifest(cem) {
   });
 }
 
-export function generate(elementsInput) {
-  const els = elementsInput ? fromElements(elementsInput) : fromManifest(
+export function generate(webComponentsInput) {
+  const els = webComponentsInput ? fromElements(webComponentsInput) : fromManifest(
     JSON.parse(readFileSync(resolve(root, 'dist/custom-elements.json'), 'utf8')),
   );
   els.sort((a, b) => a.tag.localeCompare(b.tag));
   const count = els.length;
 
-  const elementSection = els.map(renderElement).join('\n\n');
+  const webComponentSection = els.map(renderElement).join('\n\n');
   // Derived from dist/state/*.d.ts + dist/wire/*.d.ts — the layer a builder
   // that leaves <kai-chat> writes against, previously on no surface (F-46).
   const programmatic = buildProgrammaticSection();
   const ctx = {
     count,
-    elementSection,
+    webComponentSection,
     programmaticMarkdown: programmatic.markdown,
     icons: iconNames(root),
   };

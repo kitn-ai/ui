@@ -155,7 +155,7 @@ function getContext(): AudioContext | undefined {
  * there is no API to ask whether an element already has a source node. Cache
  * them. A WeakMap so a removed <audio> can still be collected.
  */
-const elementSources = new WeakMap<HTMLMediaElement, MediaElementAudioSourceNode>();
+const webComponentSources = new WeakMap<HTMLMediaElement, MediaElementAudioSourceNode>();
 
 /**
  * `createMediaStreamSource` does NOT throw on a second call for the same
@@ -203,7 +203,7 @@ function resumeOnGesture(ctx: AudioContext): () => void {
  * silently forced one smoothing behavior onto both and made bars snap back
  * to rest instead of easing like upstream's do. What this still saves over
  * upstream: one shared, cached source node per element/stream (see
- * elementSources/streamSources below) instead of a fresh one per hook
+ * webComponentSources/streamSources below) instead of a fresh one per hook
  * instance, and one requestAnimationFrame loop reading both analysers each
  * tick instead of two independent timers.
  *
@@ -272,7 +272,7 @@ export function useAudioAnalysis(
       // destination, cached or not.
     } else {
       const el = src;
-      let elNode = elementSources.get(el);
+      let elNode = webComponentSources.get(el);
       if (!elNode) {
         elNode = ctx.createMediaElementSource(el);
         // Connect to destination exactly once, right here at creation, so the
@@ -282,7 +282,7 @@ export function useAudioAnalysis(
         // one also connects to destination. If either did, N consumers on
         // one element would sum to N times the amplitude.
         elNode.connect(ctx.destination);
-        elementSources.set(el, elNode);
+        webComponentSources.set(el, elNode);
       }
       node = elNode;
     }

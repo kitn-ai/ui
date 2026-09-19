@@ -232,7 +232,7 @@ export function getElement(tag: string): Declaration | undefined {
 }
 
 /** Returns all custom-element tagNames, sorted alphabetically. */
-export function listElements(): string[] {
+export function listWebComponents(): string[] {
   return getDeclarations()
     .filter((d) => d.tagName)
     .map((d) => d.tagName!)
@@ -249,7 +249,7 @@ export function listElements(): string[] {
 // data with no runtime file dependency. NAMED import (not the whole module), matching
 // the same tradeoff web-component-diagnostics.ts already made for this file: a default
 // import would pull `files` in too for 0 benefit here.
-import { tags as ELEMENT_ENTRY_TAGS } from '../../src/web-components/web-component-manifest.json';
+import { tags as WEB_COMPONENT_ENTRY_TAGS } from '../../src/web-components/web-component-manifest.json';
 
 /**
  * The per-web-component entry basename for a tag, e.g. 'kai-chat' -> 'chat'.
@@ -260,7 +260,7 @@ import { tags as ELEMENT_ENTRY_TAGS } from '../../src/web-components/web-compone
  * broken import for them.
  */
 export function entryForTag(tag: string): string | undefined {
-  return (ELEMENT_ENTRY_TAGS as Record<string, string>)[tag];
+  return (WEB_COMPONENT_ENTRY_TAGS as Record<string, string>)[tag];
 }
 
 /**
@@ -309,7 +309,7 @@ function optInEntries(): Map<string, string> {
   const dir = join(dirname(resolveManifestPath()), 'web-components');
   let candidates: string[];
   try {
-    const registered = new Set(Object.values(ELEMENT_ENTRY_TAGS as Record<string, string>));
+    const registered = new Set(Object.values(WEB_COMPONENT_ENTRY_TAGS as Record<string, string>));
     candidates = readdirSync(dir)
       .filter((f) => f.endsWith('.js'))
       .map((f) => f.slice(0, -'.js'.length))
@@ -321,7 +321,7 @@ function optInEntries(): Map<string, string> {
   // Only the tags web-component-manifest.json does not already answer for. Narrow on
   // purpose: a web-component module may mention a tag it merely renders, and matching
   // against the whole tag list would let that be read as a registration.
-  const unclaimed = listElements().filter((t) => !entryForTag(t));
+  const unclaimed = listWebComponents().filter((t) => !entryForTag(t));
 
   for (const base of candidates) {
     let code: string;
@@ -379,13 +379,13 @@ let _cardHosts: string[] | undefined;
  * with no registered web component are dropped, so the answer is a real tag or nothing.
  *
  * WHEN IT BREAKS, IT BREAKS LOUDLY. reference.test.ts asserts every member of
- * `cardSchemaNames` resolves AND that what it resolves to is in `listElements()`, so a
+ * `cardSchemaNames` resolves AND that what it resolves to is in `listWebComponents()`, so a
  * card type missing from the map, or pointed at a tag nobody registered, fails a test
  * instead of silently losing its schema in the reference.
  */
 export function cardTagForType(type: string): string | undefined {
   if (!_cardTags) {
-    const present = new Set(listElements());
+    const present = new Set(listWebComponents());
     _cardTags = new Map(Object.entries(BUILTIN_CARD_TAGS).filter(([, tag]) => present.has(tag)));
   }
   return _cardTags.get(type);

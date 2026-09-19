@@ -25,7 +25,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { subscribeWireDiagnostics, type KaiDiagnosticEvent } from '../wire/diagnostics';
 import { classifyAttributeValue } from './web-component-diagnostics';
-import type { ElementViolationEvent } from './diagnostic-events';
+import type { WebComponentViolationEvent } from './diagnostic-events';
 import { assertElementEventsVocabulary } from '../../tests/helpers/web-component-event-vocabulary';
 import './conversation-list';
 import './agent-card';
@@ -50,7 +50,7 @@ afterEach(() => {
 });
 
 const violations = () =>
-  events.filter((e): e is ElementViolationEvent => e.type === 'element.violation');
+  events.filter((e): e is WebComponentViolationEvent => e.type === 'web-component.violation');
 
 /**
  * A real, UPGRADED element that is not in the document.
@@ -73,7 +73,7 @@ function upgraded(tag = TAG): HTMLElement & Record<string, unknown> {
   return document.createElement(tag) as HTMLElement & Record<string, unknown>;
 }
 
-describe('element.violation — array prop set as an HTML attribute', () => {
+describe('web-component.violation — array prop set as an HTML attribute', () => {
   it('fires when an array is stringified into the attribute (the classic case)', () => {
     const el = upgraded();
     const list = [{ id: 'a', title: 'A' }, { id: 'b', title: 'B' }];
@@ -85,7 +85,7 @@ describe('element.violation — array prop set as an HTML attribute', () => {
     const v = violations();
     expect(v).toHaveLength(1);
     expect(v[0]).toMatchObject({
-      type: 'element.violation',
+      type: 'web-component.violation',
       kind: 'array-prop-as-attribute',
       tag: TAG,
       prop: 'conversations',

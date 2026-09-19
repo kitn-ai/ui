@@ -45,7 +45,7 @@ const SELF_TEST = argv.includes('--self-test');
 
 // Absolute for fs, short for humans: the messages below read the same as they always did.
 const BUNDLE = 'dist/react.js';
-const ELEMENTS_DIR = 'dist/web-components';
+const WEB_COMPONENTS_DIR = 'dist/web-components';
 const SPECIFIER = /@kitn\.ai\/ui\/web-components\/([a-z0-9-]+)/g;
 
 /**
@@ -84,9 +84,9 @@ function checkTree(root) {
   // 1. A missing dist/web-components/ ENTIRELY is a different fact from N missing files,
   //    and saying so is what stops the "all 78 wrappers are broken" alarm from
   //    ever reading as a wrapper problem again.
-  if (!existsSync(join(root, ELEMENTS_DIR))) {
+  if (!existsSync(join(root, WEB_COMPONENTS_DIR))) {
     problems.push(
-      `${ELEMENTS_DIR}/ does not exist under ${root}.\n` +
+      `${WEB_COMPONENTS_DIR}/ does not exist under ${root}.\n` +
         `  All ${names.length} specifier(s) would be reported missing, which is one broken or\n` +
         `  partial build — not ${names.length} broken wrappers. Run the lib build (npm run build:web-components).`,
     );
@@ -94,12 +94,12 @@ function checkTree(root) {
   }
 
   // 2. Every per-web-component specifier must resolve to a real dist/web-components file.
-  const missing = names.filter((name) => !existsSync(join(root, `${ELEMENTS_DIR}/${name}.js`)));
+  const missing = names.filter((name) => !existsSync(join(root, `${WEB_COMPONENTS_DIR}/${name}.js`)));
   if (missing.length > 0) {
     problems.push(
       `${missing.length} react wrapper specifier(s) point at non-existent web-component files:\n` +
         missing
-          .map((name) => `    @kitn.ai/ui/web-components/${name} → ${ELEMENTS_DIR}/${name}.js (missing)`)
+          .map((name) => `    @kitn.ai/ui/web-components/${name} → ${WEB_COMPONENTS_DIR}/${name}.js (missing)`)
           .join('\n'),
     );
   }
@@ -140,7 +140,7 @@ const wrapperBundle = (elements = FIXTURE_ELEMENTS, { useClient = true } = {}) =
 /** The healthy tree, with `over` merged on top (a `null` value deletes a file). */
 const fixtureFiles = (over = {}) => ({
   'dist/react.js': wrapperBundle(),
-  ...Object.fromEntries(FIXTURE_ELEMENTS.map((el) => [`${ELEMENTS_DIR}/${el}.js`, `export const ${el} = 1;\n`])),
+  ...Object.fromEntries(FIXTURE_ELEMENTS.map((el) => [`${WEB_COMPONENTS_DIR}/${el}.js`, `export const ${el} = 1;\n`])),
   ...over,
 });
 
@@ -168,7 +168,7 @@ const SELF_TEST_CASES = [
   },
   {
     name: 'DEFECT: a specifier whose dist/web-components/<X>.js was never emitted',
-    files: fixtureFiles({ [`${ELEMENTS_DIR}/kai-thread.js`]: null }),
+    files: fixtureFiles({ [`${WEB_COMPONENTS_DIR}/kai-thread.js`]: null }),
     // Naming the offender is half the check: "1 wrapper is broken" is not actionable.
     expect: ['non-existent web-component files', '@kitn.ai/ui/web-components/kai-thread', 'dist/web-components/kai-thread.js (missing)'],
     reject: ["missing its 'use client' banner"],
@@ -183,7 +183,7 @@ const SELF_TEST_CASES = [
     name: 'both defects at once are both reported',
     files: fixtureFiles({
       'dist/react.js': wrapperBundle(FIXTURE_ELEMENTS, { useClient: false }),
-      [`${ELEMENTS_DIR}/kai-message.js`]: null,
+      [`${WEB_COMPONENTS_DIR}/kai-message.js`]: null,
     }),
     expect: ['@kitn.ai/ui/web-components/kai-message', "missing its 'use client' banner"],
   },

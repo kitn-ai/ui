@@ -21,7 +21,7 @@
  *  (KAI_BUILD=register, config/vite/web-components.ts → dist/kai.es.js) tree-shakes away
  *  as dead code, leaving the bundle with NOTHING registered. Exporting the promise
  *  keeps the import live. */
-export const elementsReady: Promise<unknown> =
+export const webComponentsReady: Promise<unknown> =
   typeof window !== 'undefined' && typeof customElements !== 'undefined'
     ? import('./register-impl')
     : Promise.resolve();
@@ -39,7 +39,7 @@ export type { CodeHighlightingOptions } from '../primitives/highlighter';
 export { classifyTool } from '../components/tool/tool-classify';
 export type { ToolKind } from '../components/tool/tool-classify';
 
-// Element-layer diagnostics. `emitElementRegistry()` re-emits the which-elements-
+// Element-layer diagnostics. `emitWebComponentRegistry()` re-emits the which-elements-
 // are-defined snapshot on demand, for a panel that attached mid-session and so
 // missed the one register-impl emits at load. SSR-safe and a no-op with no
 // subscriber, so calling it unconditionally is fine.
@@ -58,13 +58,13 @@ export type { ToolKind } from '../components/tool/tool-classify';
 // The event TYPES are re-exported here as well as from @kitn.ai/ui/diagnostics:
 // a consumer already importing the web-components entry should not have to add a
 // second specifier to name the events it is handed.
-export { emitElementRegistry } from './web-component-diagnostics';
+export { emitWebComponentRegistry } from './web-component-diagnostics';
 export type {
-  ElementDiagnosticBase,
-  ElementDiagnosticEvent,
-  ElementRegistryEvent,
-  ElementViolationEvent,
-  ElementViolationKind,
+  WebComponentDiagnosticBase,
+  WebComponentDiagnosticEvent,
+  WebComponentRegistryEvent,
+  WebComponentViolationEvent,
+  WebComponentViolationKind,
 } from './diagnostic-events';
 
 // Imperative toast API — usable directly from the web-components entry so consumers

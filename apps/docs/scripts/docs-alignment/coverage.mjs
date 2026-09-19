@@ -51,7 +51,7 @@ export function coverage(docs, surface) {
 
   // Shipped but never rendered by a Playground/PropTable/Example — i.e. named in
   // passing at most. Weaker than "undocumented" but still a real gap.
-  const elementsWithoutPage = [...surface.tags]
+  const webComponentsWithoutPage = [...surface.tags]
     .filter((t) => !dedicated.has(t))
     .sort()
     .map((t) => ({ tag: t, mentionedIn: tagPages.get(t) ?? [] }));
@@ -93,7 +93,7 @@ export function coverage(docs, surface) {
 
   return {
     undocumentedElements,
-    elementsWithoutPage: elementsWithoutPage.filter((e) => !undocumentedElements.includes(e.tag)),
+    webComponentsWithoutPage: webComponentsWithoutPage.filter((e) => !undocumentedElements.includes(e.tag)),
     undocumentedComponents,
     staleTags: [...staleTags.entries()].map(([tag, pages]) => ({ tag, pages: [...pages] })).sort((a, b) => a.tag.localeCompare(b.tag)),
     staleEntries: [...staleEntries.entries()].map(([spec, pages]) => ({ spec, pages: [...pages] })).sort((a, b) => a.spec.localeCompare(b.spec)),

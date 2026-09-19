@@ -15,16 +15,16 @@ npm install @kitn.ai/ui
 
 ## Register web components
 
-Register the web components **before** `createApp().mount()`. Vue stamps tags at mount time, and registration is async, so an import alone is not enough: a `.prop` binding written before the element upgrades is discarded and the UI renders blank. Mount behind `elementsReady`, the promise the entry exports.
+Register the web components **before** `createApp().mount()`. Vue stamps tags at mount time, and registration is async, so an import alone is not enough: a `.prop` binding written before the element upgrades is discarded and the UI renders blank. Mount behind `webComponentsReady`, the promise the entry exports.
 
 ```ts
 // src/main.ts
-import { elementsReady } from '@kitn.ai/ui/web-components';
+import { webComponentsReady } from '@kitn.ai/ui/web-components';
 import { createApp } from 'vue';
 import App from './App.vue';
 
 // Resolves once every kai-* element is defined.
-elementsReady.then(() => createApp(App).mount('#app'));
+webComponentsReady.then(() => createApp(App).mount('#app'));
 ```
 
 ## Configure Vite

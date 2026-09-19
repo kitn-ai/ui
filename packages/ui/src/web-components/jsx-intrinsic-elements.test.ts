@@ -28,7 +28,7 @@ import { fileURLToPath } from 'node:url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 
-function readElementTypes(): string {
+function readWebComponentTypes(): string {
   return readFileSync(resolve(HERE, 'web-component-types.d.ts'), 'utf8');
 }
 
@@ -39,13 +39,13 @@ function readElementTags(): string[] {
 
 describe('JSX.IntrinsicElements augmentation for kai-* tags', () => {
   it('augments react JSX.IntrinsicElements, not just HTMLElementTagNameMap', () => {
-    const src = readElementTypes();
+    const src = readWebComponentTypes();
     expect(src).toContain(`declare module 'react'`);
     expect(src).toContain('interface IntrinsicElements');
   });
 
   it('every registered element tag has an IntrinsicElements entry', () => {
-    const src = readElementTypes();
+    const src = readWebComponentTypes();
     const tags = readElementTags();
     expect(tags.length).toBeGreaterThan(0);
 
@@ -61,7 +61,7 @@ describe('JSX.IntrinsicElements augmentation for kai-* tags', () => {
     // identifier that only exists inside the real 'react' module (rather than a
     // fully-qualified `import('react').Foo` or a locally-declared type) breaks
     // tsc for consumers who don't have react installed at all.
-    const src = readElementTypes();
+    const src = readWebComponentTypes();
     const reactBlock = src.slice(src.indexOf(`declare module 'react'`));
     for (const forbidden of ['HTMLAttributes', 'DetailedHTMLProps', 'ReactNode', 'React.']) {
       expect(reactBlock, `references react-only identifier "${forbidden}"`).not.toContain(forbidden);
@@ -72,7 +72,7 @@ describe('JSX.IntrinsicElements augmentation for kai-* tags', () => {
     // The augmentation must not add a relative import (that would drag library
     // source into a consumer's type graph, same LIB-2 class of bug the
     // dist/web-components.d.ts self-containment comment already guards against).
-    const src = readElementTypes();
+    const src = readWebComponentTypes();
     const propsTypeMatch = src.match(/interface (KaiElementJsxProps) \{/);
     expect(propsTypeMatch, 'no local KaiElementJsxProps interface found').toBeTruthy();
   });

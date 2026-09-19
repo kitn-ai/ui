@@ -22,10 +22,10 @@ import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
-import { ELEMENT_COMPOSITION } from '../../src/web-components/slots';
+import { WEB_COMPONENT_COMPOSITION } from '../../src/web-components/slots';
 
 const pkgRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
-const elementsDir = resolve(pkgRoot, 'src/web-components');
+const webComponentsDir = resolve(pkgRoot, 'src/web-components');
 
 interface FacadeSlots {
   /** Tags this file registers. */
@@ -83,9 +83,9 @@ function collect(file: string, acc: FacadeSlots, seen: Set<string>, isRoot: bool
 }
 
 const SKIP = new Set(['define.tsx', 'register.ts', 'register-impl.ts', 'css.ts', 'chat-types.ts']);
-const facades = readdirSync(elementsDir)
+const facades = readdirSync(webComponentsDir)
   .filter((f) => /\.tsx?$/.test(f) && !/\.(stories|test)\.tsx?$/.test(f) && !SKIP.has(f))
-  .map((f) => resolve(elementsDir, f))
+  .map((f) => resolve(webComponentsDir, f))
   .map((file) => {
     const acc: FacadeSlots = { tags: [], named: new Set(), hasDefault: false };
     collect(file, acc, new Set(), true);
@@ -94,7 +94,7 @@ const facades = readdirSync(elementsDir)
   .filter((f) => f.tags.length > 0);
 
 const registered = (tag: string) => {
-  const comp = ELEMENT_COMPOSITION[tag];
+  const comp = WEB_COMPONENT_COMPOSITION[tag];
   return {
     named: new Set((comp?.slots ?? []).map((s) => s.name)),
     children: comp?.children,

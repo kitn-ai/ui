@@ -13,7 +13,7 @@ import {
   NAV_PARTS,
   CONTEXT_PARTS,
   PROGRESS_BAR_PARTS,
-  ELEMENT_COMPOSITION,
+  WEB_COMPONENT_COMPOSITION,
   readSlots,
 } from './slots';
 
@@ -184,8 +184,8 @@ describe('FILE_TREE_PARTS registry', () => {
     expect(FILE_TREE_PARTS.every((p) => p.doc.trim().length > 0)).toBe(true);
   });
 
-  it('is wired into ELEMENT_COMPOSITION under kai-file-tree', () => {
-    expect(ELEMENT_COMPOSITION['kai-file-tree'].parts).toBe(FILE_TREE_PARTS);
+  it('is wired into WEB_COMPONENT_COMPOSITION under kai-file-tree', () => {
+    expect(WEB_COMPONENT_COMPOSITION['kai-file-tree'].parts).toBe(FILE_TREE_PARTS);
   });
 });
 
@@ -200,8 +200,8 @@ describe('NAV_PARTS registry', () => {
     expect(NAV_PARTS.every((p) => p.doc.trim().length > 0)).toBe(true);
   });
 
-  it('is wired into ELEMENT_COMPOSITION under kai-nav', () => {
-    expect(ELEMENT_COMPOSITION['kai-nav'].parts).toBe(NAV_PARTS);
+  it('is wired into WEB_COMPONENT_COMPOSITION under kai-nav', () => {
+    expect(WEB_COMPONENT_COMPOSITION['kai-nav'].parts).toBe(NAV_PARTS);
   });
 });
 
@@ -227,8 +227,8 @@ describe('CONTEXT_PARTS registry', () => {
     }
   });
 
-  it('is wired into ELEMENT_COMPOSITION under kai-context', () => {
-    expect(ELEMENT_COMPOSITION['kai-context'].parts).toBe(CONTEXT_PARTS);
+  it('is wired into WEB_COMPONENT_COMPOSITION under kai-context', () => {
+    expect(WEB_COMPONENT_COMPOSITION['kai-context'].parts).toBe(CONTEXT_PARTS);
   });
 });
 
@@ -261,7 +261,7 @@ describe('part + var recipes paint with declared properties only', () => {
     return [...out].sort();
   };
 
-  const REGISTERED = Object.entries(ELEMENT_COMPOSITION).flatMap(([tag, def]) => [
+  const REGISTERED = Object.entries(WEB_COMPONENT_COMPOSITION).flatMap(([tag, def]) => [
     ...(def.parts ?? []).map((p) => ({ where: `${tag}::part(${p.name})`, recipe: p.recipe })),
     ...(def.vars ?? []).map((v) => ({ where: `${tag} ${v.name}`, recipe: v.recipe })),
   ]);
@@ -291,7 +291,7 @@ describe('part + var recipes paint with declared properties only', () => {
   });
 });
 
-describe('ELEMENT_COMPOSITION registry (single source of truth the build extracts)', () => {
+describe('WEB_COMPONENT_COMPOSITION registry (single source of truth the build extracts)', () => {
   // Every `::part` a consumer can style is declared by writing `part="name"`
   // (or, for a value that toggles, `part={lit ? 'name modifier' : 'name'}`)
   // in a facade/component. The registry must name each one so docs + the kai
@@ -462,7 +462,7 @@ describe('ELEMENT_COMPOSITION registry (single source of truth the build extract
 
   function registeredPartNames(): Set<string> {
     const out = new Set<string>();
-    for (const def of Object.values(ELEMENT_COMPOSITION)) {
+    for (const def of Object.values(WEB_COMPONENT_COMPOSITION)) {
       for (const part of def.parts ?? []) out.add(part.name);
       for (const slot of def.slots ?? []) if (slot.part) out.add(slot.name);
     }
@@ -544,7 +544,7 @@ describe('ELEMENT_COMPOSITION registry (single source of truth the build extract
     // i.e. against itself, which a stale entry satisfies perfectly.
     //
     // This compares the registry to the FILESYSTEM (`partNamesInSource` reads
-    // `src/` and never looks at ELEMENT_COMPOSITION), so it cannot be satisfied
+    // `src/` and never looks at WEB_COMPONENT_COMPOSITION), so it cannot be satisfied
     // by the registry agreeing with itself.
     const inCode = partNamesInSource();
     const registered = registeredPartNames();
@@ -581,7 +581,7 @@ describe('ELEMENT_COMPOSITION registry (single source of truth the build extract
   // assumed: each one is guarded, named below, so if it ever stops holding the
   // suite says so instead of quietly degrading.
   //   1. A tag is bound to exactly ONE module, by a single literal
-  //      `defineWebComponent('kai-…', …)` call. `elementModules()` reads those
+  //      `defineWebComponent('kai-…', …)` call. `webComponentModules()` reads those
   //      calls out of `elements/`; "every composable element resolves to a facade
   //      module" fails if a registered tag has no such call. The tag -> module
   //      edge is therefore derived, never declared.
@@ -618,7 +618,7 @@ describe('ELEMENT_COMPOSITION registry (single source of truth the build extract
   // below. That list is an opt-in, not a backlog. 22 of 80 web components render a part
   // they do not register today, and most of those readings are inflated by the
   // over-approximation, so opting one in means reading its tree first.
-  const ELEMENTS_DIR = join(SRC, 'web-components');
+  const WEB_COMPONENTS_DIR = join(SRC, 'web-components');
 
   /** The single literal binding a tag to a module. A generic argument list cannot
    *  contain `(`, so `[^(]*?` can never run past the call's own opening paren. */
@@ -697,12 +697,12 @@ describe('ELEMENT_COMPOSITION registry (single source of truth the build extract
   });
 
   /** `kai-*` tag -> the facade module whose `defineWebComponent` call declares it. */
-  const elementModules = lazy((): Map<string, string> => {
+  const webComponentModules = lazy((): Map<string, string> => {
     const out = new Map<string, string>();
-    for (const name of readdirSync(ELEMENTS_DIR)) {
+    for (const name of readdirSync(WEB_COMPONENTS_DIR)) {
       if (!name.endsWith('.tsx') && !name.endsWith('.ts')) continue;
       if (/\.(test|stories)\.tsx?$/.test(name)) continue;
-      const p = join(ELEMENTS_DIR, name);
+      const p = join(WEB_COMPONENTS_DIR, name);
       for (const m of read(p).matchAll(DEFINE_TAG_RE)) out.set(m[1], p);
     }
     return out;
@@ -732,17 +732,17 @@ describe('ELEMENT_COMPOSITION registry (single source of truth the build extract
   }
 
   it('every composable element resolves to exactly one facade module', () => {
-    const modules = elementModules();
+    const modules = webComponentModules();
     // Sanity: the scan found the real element population, not three stragglers.
     expect(modules.size).toBeGreaterThan(60);
-    const unresolved = Object.keys(ELEMENT_COMPOSITION)
+    const unresolved = Object.keys(WEB_COMPONENT_COMPOSITION)
       .filter((tag) => !modules.has(tag))
       .sort();
     // A registered tag with no `defineWebComponent('<tag>', …)` call means either
     // the element was renamed/deleted out from under the registry, or the tag is
     // declared in a shape DEFINE_TAG_RE cannot see — in which case the per-web-component
     // guard below would silently skip it. Fail rather than skip.
-    expect(unresolved, 'ELEMENT_COMPOSITION tags with no defineWebComponent call').toEqual([]);
+    expect(unresolved, 'WEB_COMPONENT_COMPOSITION tags with no defineWebComponent call').toEqual([]);
   });
 
   it('no element forwards parts out of a nested shadow root (exportparts)', () => {
@@ -777,11 +777,11 @@ describe('ELEMENT_COMPOSITION registry (single source of truth the build extract
 
   it('renders every registered ::part from that element\'s own tree (per-web-component drift guard)', () => {
     const byFile = partNamesByFile();
-    const modules = elementModules();
+    const modules = webComponentModules();
     expect(byFile.size).toBeGreaterThan(0); // sanity: the scan actually found parts
 
     const misattributed: string[] = [];
-    for (const [tag, def] of Object.entries(ELEMENT_COMPOSITION)) {
+    for (const [tag, def] of Object.entries(WEB_COMPONENT_COMPOSITION)) {
       const entry = modules.get(tag);
       if (!entry) continue; // reported by the resolve test above
       const closure = importClosure(entry);
@@ -824,14 +824,14 @@ describe('ELEMENT_COMPOSITION registry (single source of truth the build extract
 
   it('registers every ::part its own tree renders, for elements opted into the converse', () => {
     const byFile = partNamesByFile();
-    const modules = elementModules();
+    const modules = webComponentModules();
     const undocumented: string[] = [];
     for (const tag of Object.keys(CONVERSE_ENFORCED)) {
       const entry = modules.get(tag);
       expect(entry, `${tag} has no defineWebComponent call`).toBeDefined();
       const rendered = attributedParts(importClosure(entry!), byFile);
-      const def = ELEMENT_COMPOSITION[tag];
-      expect(def, `${tag} is opted into the converse but not in ELEMENT_COMPOSITION`).toBeDefined();
+      const def = WEB_COMPONENT_COMPOSITION[tag];
+      expect(def, `${tag} is opted into the converse but not in WEB_COMPONENT_COMPOSITION`).toBeDefined();
       const registered = new Set([
         ...(def.parts ?? []).map((p) => p.name),
         ...(def.slots ?? []).filter((s) => s.part).map((s) => s.name),
@@ -848,7 +848,7 @@ describe('ELEMENT_COMPOSITION registry (single source of truth the build extract
 
   it('attribution actually discriminates (control: the guard above can fail)', () => {
     const byFile = partNamesByFile();
-    const modules = elementModules();
+    const modules = webComponentModules();
     const partsOf = (tag: string) => attributedParts(importClosure(modules.get(tag)!), byFile);
 
     // NEGATIVE. `row` lives in `components/message/message.tsx`, which `kai-status`'s tree
@@ -876,7 +876,7 @@ describe('ELEMENT_COMPOSITION registry (single source of truth the build extract
   });
 
   it('maps each composable element to its slots/parts arrays', () => {
-    expect(Object.keys(ELEMENT_COMPOSITION).sort()).toEqual([
+    expect(Object.keys(WEB_COMPONENT_COMPOSITION).sort()).toEqual([
       'kai-agent-card',
       'kai-attachments',
       'kai-audio-visualizer',
@@ -936,15 +936,15 @@ describe('ELEMENT_COMPOSITION registry (single source of truth the build extract
       'kai-voice-output',
       'kai-workspace',
     ]);
-    expect(ELEMENT_COMPOSITION['kai-chat'].slots).toBe(CHAT_SLOTS);
-    expect(ELEMENT_COMPOSITION['kai-message'].slots).toBe(MESSAGE_SLOTS);
-    expect(ELEMENT_COMPOSITION['kai-message'].parts).toBe(MESSAGE_PARTS);
-    expect(ELEMENT_COMPOSITION['kai-prompt-input'].slots).toBe(PROMPT_INPUT_SLOTS);
-    expect(ELEMENT_COMPOSITION['kai-prompt-input'].parts).toBe(PROMPT_INPUT_PARTS);
+    expect(WEB_COMPONENT_COMPOSITION['kai-chat'].slots).toBe(CHAT_SLOTS);
+    expect(WEB_COMPONENT_COMPOSITION['kai-message'].slots).toBe(MESSAGE_SLOTS);
+    expect(WEB_COMPONENT_COMPOSITION['kai-message'].parts).toBe(MESSAGE_PARTS);
+    expect(WEB_COMPONENT_COMPOSITION['kai-prompt-input'].slots).toBe(PROMPT_INPUT_SLOTS);
+    expect(WEB_COMPONENT_COMPOSITION['kai-prompt-input'].parts).toBe(PROMPT_INPUT_PARTS);
   });
 
   it('every registered part carries a non-empty doc contract', () => {
-    for (const def of Object.values(ELEMENT_COMPOSITION)) {
+    for (const def of Object.values(WEB_COMPONENT_COMPOSITION)) {
       for (const part of def.parts ?? []) {
         expect(part.doc.trim().length).toBeGreaterThan(0);
       }
@@ -972,7 +972,7 @@ describe('ELEMENT_COMPOSITION registry (single source of truth the build extract
     walk(resolve(HERE, '..'));
     const haystack = source.join('\n');
 
-    const vars = Object.entries(ELEMENT_COMPOSITION).flatMap(([tag, def]) =>
+    const vars = Object.entries(WEB_COMPONENT_COMPOSITION).flatMap(([tag, def]) =>
       (def.vars ?? []).map((v) => ({ tag, ...v })),
     );
     expect(vars.length, 'no element documents a custom property — the scan is looking at nothing').toBeGreaterThan(0);

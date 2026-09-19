@@ -279,7 +279,7 @@ describe('the two readLabsTitles implementations cannot diverge', () => {
  */
 describe('check() observes both presence and absence', () => {
   const derived = {
-    elements: [
+    webComponents: [
       {
         tag: 'kai-a',
         props: [{ name: 'value', scalar: true, optional: true, fn: false }],

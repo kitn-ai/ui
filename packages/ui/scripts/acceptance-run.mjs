@@ -102,9 +102,9 @@ function selfTest() {
   // The handover scan, watched detecting each thing it claims to detect.
   const base = mkdtempSync(join(tmpdir(), 'acceptance-run-selftest-'));
   const src = join(base, 'src');
-  mkdirSync(join(src, 'elements'), { recursive: true });
+  mkdirSync(join(src, 'web-components'), { recursive: true });
   writeFileSync(join(src, 'README.md'), '# pack\n');
-  writeFileSync(join(src, 'elements', 'kai-chat.md'), '# kai-chat\n');
+  writeFileSync(join(src, 'web-components', 'kai-chat.md'), '# kai-chat\n');
   const runs = join(base, 'runs');
   mkdirSync(runs, { recursive: true });
 

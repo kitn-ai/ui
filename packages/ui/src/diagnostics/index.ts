@@ -74,9 +74,9 @@ export type {
 // stays free of element bytes and a consumer who only parses streams pays
 // nothing for them. `KaiDiagnosticEvent` above is the union a panel switches on.
 export type {
-  ElementDiagnosticBase,
-  ElementDiagnosticEvent,
-  ElementRegistryEvent,
-  ElementViolationEvent,
-  ElementViolationKind,
+  WebComponentDiagnosticBase,
+  WebComponentDiagnosticEvent,
+  WebComponentRegistryEvent,
+  WebComponentViolationEvent,
+  WebComponentViolationKind,
 } from '../web-components/diagnostic-events';

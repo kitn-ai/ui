@@ -8,7 +8,7 @@ import { loadKit } from './example/kit';
 import { Resizer } from './example/Resizer';
 import { CodePanel } from './example/CodePanel';
 import meta from '@kitn.ai/ui/web-component-meta.json';
-import { generateSnippets, type ElementMeta, type State } from '../lib/codegen';
+import { generateSnippets, type WebComponentMeta, type State } from '../lib/codegen';
 import { sampleFor } from '../lib/sample-data';
 
 const camelToKebab = (s: string) => s.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
@@ -22,7 +22,7 @@ interface Props {
 }
 
 export default function Example(props: Props) {
-  const el = (meta as ElementMeta[]).find((e) => e.tag === props.tag);
+  const el = (meta as WebComponentMeta[]).find((e) => e.tag === props.tag);
   if (!el) return <div class="text-ink-3">Unknown element: {props.tag}</div>;
   const config = props.config ?? {};
   const sample = sampleFor(props.tag, props.data);

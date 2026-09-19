@@ -14,13 +14,13 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createTsHelpers, displayNameFromClass } from './_ts-helpers.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const elementsDir = resolve(root, 'src/web-components');
+const webComponentsDir = resolve(root, 'src/web-components');
 
 // Facade files only (skip infra/helpers/stories).
 const SKIP = new Set(['define.tsx', 'register.ts', 'register-impl.ts', 'css.ts', 'chat-types.ts', 'default-input.tsx']);
-const facadeFiles = readdirSync(elementsDir)
+const facadeFiles = readdirSync(webComponentsDir)
   .filter((f) => (f.endsWith('.tsx') || f.endsWith('.ts')) && !f.endsWith('.stories.tsx') && !SKIP.has(f))
-  .map((f) => resolve(elementsDir, f));
+  .map((f) => resolve(webComponentsDir, f));
 
 const tsconfig = ts.parseJsonConfigFileContent(
   ts.readConfigFile(resolve(root, 'tsconfig.json'), ts.sys.readFile).config,
@@ -247,7 +247,7 @@ const composedImports = (sourceFile, seen = new Set([sourceFile.fileName])) => {
 // and the CEM `members` list the kai MCP serves. Read it off the source literal
 // instead, with its type and doc comment from the checker.
 const UNIVERSAL_PROPS = (() => {
-  const sf = program.getSourceFile(resolve(elementsDir, 'define.tsx'));
+  const sf = program.getSourceFile(resolve(webComponentsDir, 'define.tsx'));
   let objLit = null;
   const visit = (n) => {
     if (objLit) return;
@@ -622,11 +622,11 @@ for (const el of elements) {
 
 // ---- attach composition seams (slots + ::part) from the slots.ts registry ----
 // This script runs under plain node, so it can't `import` the TS registry; instead
-// read the ELEMENT_COMPOSITION literal straight from the AST (slots.ts is already
+// read the WEB_COMPONENT_COMPOSITION literal straight from the AST (slots.ts is already
 // in the program — chat.tsx imports it). Generic literal eval covering the
 // registry's pure-data shape: string/bool/number/array/object/identifier-ref.
 {
-  const slotsSf = program.getSourceFile(resolve(elementsDir, 'slots.ts'));
+  const slotsSf = program.getSourceFile(resolve(webComponentsDir, 'slots.ts'));
   if (slotsSf) {
     const symbols = new Map();
     for (const st of slotsSf.statements) {
@@ -648,7 +648,7 @@ for (const el of elements) {
     // verify-generated-sync.mjs re-runs this same generator, so it only ever proves the
     // extractor agrees with itself. A blind extractor here is therefore silent all the
     // way down. Hence: no path below may return `undefined` quietly.
-    const REGISTRY = 'the ELEMENT_COMPOSITION registry in src/web-components/slots.ts';
+    const REGISTRY = 'the WEB_COMPONENT_COMPOSITION registry in src/web-components/slots.ts';
     const evalNode = (node) => {
       if (ts.isStringLiteralLike(node)) return node.text;
       if (node.kind === ts.SyntaxKind.TrueKeyword) return true;
@@ -727,10 +727,10 @@ for (const el of elements) {
           + 'and references to top-level consts in slots.ts are evaluated.',
       });
     };
-    const compositionNode = symbols.get('ELEMENT_COMPOSITION');
+    const compositionNode = symbols.get('WEB_COMPONENT_COMPOSITION');
     if (!compositionNode) {
       throw new Error(
-        'gen-web-component-api (evalNode): src/web-components/slots.ts declares no top-level `ELEMENT_COMPOSITION`\n' +
+        'gen-web-component-api (evalNode): src/web-components/slots.ts declares no top-level `WEB_COMPONENT_COMPOSITION`\n' +
           '  const. Every element would lose its slots and parts from every generated artifact, and the\n' +
           '  ::part drift guards that read this same registry would go quiet at the same moment.',
       );

@@ -376,7 +376,7 @@ export function check({
 }) {
   const errors = [];
   const gaps = [];
-  const tags = new Map(derived.elements.map((e) => [e.tag, e]));
+  const tags = new Map(derived.webComponents.map((e) => [e.tag, e]));
   const invariantIds = new Set(invariants.map((i) => i.id));
 
   // Anti-vacuity: this lint exists to check records the design requires. Every
@@ -387,7 +387,7 @@ export function check({
   if (inventory.length === 0) errors.push('zero inventory entries.');
   if (scenarios.length === 0) errors.push('zero scenarios.');
   if (partConsumption.length === 0) errors.push('zero part-consumption records: the registered copy is empty.');
-  if (derived.elements.length === 0) errors.push('zero derived elements: derived.json is empty or unreadable.');
+  if (derived.webComponents.length === 0) errors.push('zero derived elements: derived.json is empty or unreadable.');
   if (derived.partVariants.length === 0) errors.push('zero derived MessagePart variants.');
   if (labsTitles.length === 0) errors.push('zero Labs titles derived from the tree: the deriver is broken.');
 
@@ -718,7 +718,7 @@ async function main() {
 
 function selfTest() {
   const derived = {
-    elements: [
+    webComponents: [
       { tag: 'kai-a', props: [{ name: 'items', scalar: false, optional: true, fn: false }], events: ['kai-pick'], methods: [], parts: [], composedFrom: [], tokens: [] },
       { tag: 'kai-b', props: [{ name: 'value', scalar: true, optional: true, fn: false }], events: [], methods: [], parts: [], composedFrom: [], tokens: [] },
     ],

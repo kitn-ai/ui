@@ -31,7 +31,7 @@
  */
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { subscribeWireDiagnostics, type KaiDiagnosticEvent } from '../wire/diagnostics';
-import type { ElementViolationEvent } from './diagnostic-events';
+import type { WebComponentViolationEvent } from './diagnostic-events';
 import { assertElementEventsVocabulary } from '../../tests/helpers/web-component-event-vocabulary';
 import './conversation-list';
 
@@ -54,7 +54,7 @@ afterEach(() => {
 });
 
 const violations = () =>
-  events.filter((e): e is ElementViolationEvent => e.type === 'element.violation');
+  events.filter((e): e is WebComponentViolationEvent => e.type === 'web-component.violation');
 const kinds = () => violations().map((v) => v.kind);
 
 /**
@@ -79,7 +79,7 @@ const seed = () => [
   { id: 'b', title: 'Beta', scope: { type: 'collection' }, messageCount: 1 },
 ];
 
-describe('element.violation — the same array reference handed back', () => {
+describe('web-component.violation — the same array reference handed back', () => {
   it('fires when a list prop is set to the reference it already holds', () => {
     const el = mount();
     const list = seed();
@@ -128,7 +128,7 @@ describe('element.violation — the same array reference handed back', () => {
   });
 });
 
-describe('element.violation — a new array of the same item objects', () => {
+describe('web-component.violation — a new array of the same item objects', () => {
   it('fires for the #224 case: mutate the item, spread the array', () => {
     const el = mount();
     el.conversations = seed();

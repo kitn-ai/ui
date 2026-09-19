@@ -124,11 +124,11 @@ if (!existsSync(resolve(pkgRoot, 'src/web-components/web-component-meta.json')))
   };
 }
 const srcDir = resolve(pkgRoot, 'src');
-const elementsDir = resolve(srcDir, 'web-components');
+const webComponentsDir = resolve(srcDir, 'web-components');
 const rel = (f) => (f && f.startsWith(pkgRoot) ? relative(pkgRoot, f) : f);
 
 // ---- 1. the catalog ---------------------------------------------------------
-const catalog = JSON.parse(readFileSync(resolve(elementsDir, 'web-component-meta.json'), 'utf8'));
+const catalog = JSON.parse(readFileSync(resolve(webComponentsDir, 'web-component-meta.json'), 'utf8'));
 // VACUITY. Every row below is derived from this list, so an empty one produces no
 // rows, no gaps, and the cheerful "✓ solid coverage: 0/0 web components have a writable
 // SolidJS equivalent" — a sentence that is true of a package with no web components at
@@ -145,9 +145,9 @@ if (!Array.isArray(catalog) || catalog.length === 0) {
 
 // ---- 2. TS program over the facades + the public entry ----------------------
 const SKIP = new Set(['define.tsx', 'register.ts', 'register-impl.ts', 'css.ts', 'chat-types.ts']);
-const facadeFiles = readdirSync(elementsDir)
+const facadeFiles = readdirSync(webComponentsDir)
   .filter((f) => /\.tsx?$/.test(f) && !/\.(stories|test)\.tsx?$/.test(f) && !SKIP.has(f))
-  .map((f) => resolve(elementsDir, f));
+  .map((f) => resolve(webComponentsDir, f));
 
 const tsconfig = ts.parseJsonConfigFileContent(
   ts.readConfigFile(resolve(pkgRoot, 'tsconfig.json'), ts.sys.readFile).config,
@@ -222,7 +222,7 @@ const LAYER = (file) =>
   : file.startsWith(resolve(srcDir, 'primitives') + '/') ? 'primitives'
   : file.startsWith(resolve(srcDir, 'remote') + '/') ? 'remote'
   : file.startsWith(resolve(srcDir, 'state') + '/') ? 'state'
-  : file.startsWith(elementsDir + '/') ? 'element-local'
+  : file.startsWith(webComponentsDir + '/') ? 'element-local'
   : file.startsWith(srcDir) ? 'src-other'
   : 'external';
 const KIT = new Set(['ui', 'components', 'primitives', 'remote', 'state']);
@@ -534,7 +534,7 @@ const grades = rows.filter((r) => r.verdict === 'GAP').reduce((a, r) => ((a[r.gr
 const result = {
   generatedFrom: { catalog: 'src/web-components/web-component-meta.json', surface: ['src/solid.ts (TS checker)', 'dist/solid.server.js (runtime keys)'] },
   totals: {
-    elements: catalog.length,
+    webComponents: catalog.length,
     publicValueExports: publicValues.size,
     publicTypeExports: publicTypes.size,
     runtimeKeys: runtimeExports?.size ?? null,

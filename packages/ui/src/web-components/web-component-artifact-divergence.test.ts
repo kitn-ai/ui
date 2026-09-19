@@ -41,8 +41,8 @@
  *     standing behind its choice.
  */
 import { describe, it, expect } from 'vitest';
-import { isElementDiagnosticEvent } from '../wire/diagnostics';
-import type { ElementDiagnosticEvent } from './diagnostic-events';
+import { isWebComponentDiagnosticEvent } from '../wire/diagnostics';
+import type { WebComponentDiagnosticEvent } from './diagnostic-events';
 import manifest from './web-component-manifest.json';
 import meta from './web-component-meta.json';
 import nonScalar from './web-component-nonscalar.json';
@@ -112,7 +112,7 @@ describe('web-component-nonscalar.json — the ~2 KB of web-component-meta.json 
   });
 
   it('every element event type starts with `element.`, which is what the guard tests', () => {
-    // `isElementDiagnosticEvent` in wire/diagnostics.ts narrows the shared
+    // `isWebComponentDiagnosticEvent` in wire/diagnostics.ts narrows the shared
     // stream by that prefix, and it is the ONE place the prefix is restated.
     // Everything downstream — every test that reads `streamId` or `traceId` off
     // "every event", and any panel that switches on the two families — depends
@@ -121,23 +121,23 @@ describe('web-component-nonscalar.json — the ~2 KB of web-component-meta.json 
     // event, which is the quiet wrong answer this pins.
     //
     // Exhaustive by construction: the array is typed as the union's `type`
-    // field, so adding a member to `ElementDiagnosticEvent` without adding it
+    // field, so adding a member to `WebComponentDiagnosticEvent` without adding it
     // here is a compile error, not a silent gap.
-    const ALL_ELEMENT_TYPES: Array<ElementDiagnosticEvent['type']> = [
-      'element.violation',
-      'element.registry',
+    const ALL_ELEMENT_TYPES: Array<WebComponentDiagnosticEvent['type']> = [
+      'web-component.violation',
+      'web-component.registry',
     ];
     for (const type of ALL_ELEMENT_TYPES) {
-      expect(type.startsWith('element.')).toBe(true);
-      expect(isElementDiagnosticEvent({ type, t: 0 } as ElementDiagnosticEvent)).toBe(true);
+      expect(type.startsWith('web-component.')).toBe(true);
+      expect(isWebComponentDiagnosticEvent({ type, t: 0 } as WebComponentDiagnosticEvent)).toBe(true);
     }
     // And the complement really is the complement — otherwise "not an element
     // event" would not mean "a wire event". All THREE non-element prefixes,
     // because that is the point of testing the closed set: the other side does
     // not share one prefix and keeps gaining families.
-    expect(isElementDiagnosticEvent({ type: 'wire.open', t: 0 } as never)).toBe(false);
-    expect(isElementDiagnosticEvent({ type: 'encode.request', t: 0 } as never)).toBe(false);
-    expect(isElementDiagnosticEvent({ type: 'app.request', t: 0 } as never)).toBe(false);
+    expect(isWebComponentDiagnosticEvent({ type: 'wire.open', t: 0 } as never)).toBe(false);
+    expect(isWebComponentDiagnosticEvent({ type: 'encode.request', t: 0 } as never)).toBe(false);
+    expect(isWebComponentDiagnosticEvent({ type: 'app.request', t: 0 } as never)).toBe(false);
   });
 
   it('covers the props the kai- contract is actually about', () => {

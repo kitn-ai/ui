@@ -4,7 +4,7 @@
 // there. This file is hand-maintained (the generator gen-web-component-api.mjs SKIPs
 // register.ts AND this file); keep the component import list here in sync.
 import { installKaiDevtoolsHook } from '../diagnostics/hook';
-import { emitElementRegistry } from './web-component-diagnostics';
+import { emitWebComponentRegistry } from './web-component-diagnostics';
 import './conversation-list';
 import './conversation-item';
 import './prompt-input';
@@ -147,10 +147,10 @@ installKaiDevtoolsHook();
 // the hook has already subscribed by this point, so this snapshot lands in the
 // history buffer and a panel attaching seconds later still sees the state at
 // load -- which is the state that answers the hydration question. On the dormant
-// branch `emitElementRegistry()` short-circuits on the active check and costs a
+// branch `emitWebComponentRegistry()` short-circuits on the active check and costs a
 // symbol read.
 //
 // A panel attaching mid-session with no history gets no snapshot from here and
-// should ask for a fresh one: `emitElementRegistry()` is exported from
+// should ask for a fresh one: `emitWebComponentRegistry()` is exported from
 // @kitn.ai/ui/web-components for exactly that.
-emitElementRegistry();
+emitWebComponentRegistry();

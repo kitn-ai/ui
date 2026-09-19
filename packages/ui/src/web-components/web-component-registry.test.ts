@@ -16,8 +16,8 @@
  */
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { subscribeWireDiagnostics, type KaiDiagnosticEvent } from '../wire/diagnostics';
-import { emitElementRegistry } from './web-component-diagnostics';
-import type { ElementRegistryEvent } from './diagnostic-events';
+import { emitWebComponentRegistry } from './web-component-diagnostics';
+import type { WebComponentRegistryEvent } from './diagnostic-events';
 import manifest from './web-component-manifest.json';
 import { assertElementEventsVocabulary } from '../../tests/helpers/web-component-event-vocabulary';
 
@@ -39,11 +39,11 @@ afterEach(() => {
 });
 
 const snapshots = () =>
-  events.filter((e): e is ElementRegistryEvent => e.type === 'element.registry');
+  events.filter((e): e is WebComponentRegistryEvent => e.type === 'web-component.registry');
 
-describe('element.registry', () => {
+describe('web-component.registry', () => {
   it('partitions every manifest tag into defined and not-defined', () => {
-    const event = emitElementRegistry();
+    const event = emitWebComponentRegistry();
 
     expect(event).toBeDefined();
     expect(snapshots()).toHaveLength(1);
@@ -66,14 +66,14 @@ describe('element.registry', () => {
   it('agrees with customElements.get() tag by tag', () => {
     // The control that stops this being a restatement of the implementation:
     // every verdict is checked against the registry independently.
-    const event = emitElementRegistry()!;
+    const event = emitWebComponentRegistry()!;
     for (const tag of event.defined) expect(customElements.get(tag)).toBeTruthy();
     for (const tag of event.notDefined) expect(customElements.get(tag)).toBeUndefined();
   });
 
   it('carries the shared envelope', () => {
-    const event = emitElementRegistry()!;
-    expect(event.type).toBe('element.registry');
+    const event = emitWebComponentRegistry()!;
+    expect(event.type).toBe('web-component.registry');
     expect(typeof event.t).toBe('number');
   });
 
@@ -81,7 +81,7 @@ describe('element.registry', () => {
     off?.();
     off = undefined;
 
-    expect(emitElementRegistry()).toBeUndefined();
+    expect(emitWebComponentRegistry()).toBeUndefined();
 
     events = [];
     off = subscribeWireDiagnostics((e) => events.push(e));
@@ -89,14 +89,14 @@ describe('element.registry', () => {
   });
 
   it('reports a tag that becomes defined later as defined', async () => {
-    const before = emitElementRegistry()!;
+    const before = emitWebComponentRegistry()!;
     expect(before.notDefined).toContain('kai-badge');
 
     // Registering is a side effect of importing the element module — which is
     // exactly how a lazily-loaded or autoloaded element arrives in a real page.
     await import('./badge');
 
-    const after = emitElementRegistry()!;
+    const after = emitWebComponentRegistry()!;
     expect(after.defined).toContain('kai-badge');
     expect(after.notDefined).not.toContain('kai-badge');
     expect(after.total).toBe(before.total);

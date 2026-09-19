@@ -59,11 +59,11 @@ export const VIOLATION_KINDS = new Set([
 /** Exactly the keys each event type may carry. An unexpected key is a leak
  *  channel by definition -- it is a field nobody wrote an assertion for. */
 const ALLOWED_KEYS: Record<string, Set<string>> = {
-  'element.violation': new Set(['type', 't', 'kind', 'tag', 'prop', 'valuePreview', 'length']),
-  'element.registry': new Set(['type', 't', 'defined', 'notDefined', 'total']),
+  'web-component.violation': new Set(['type', 't', 'kind', 'tag', 'prop', 'valuePreview', 'length']),
+  'web-component.registry': new Set(['type', 't', 'defined', 'notDefined', 'total']),
 };
 
-const isElementEvent = (e: KaiDiagnosticEvent) => e.type.startsWith('element.');
+const isElementEvent = (e: KaiDiagnosticEvent) => e.type.startsWith('web-component.');
 
 /**
  * Assert one element event is entirely built from closed vocabularies.
@@ -84,7 +84,7 @@ export function assertElementEventVocabulary(event: KaiDiagnosticEvent): void {
   }
   expect(typeof e.t).toBe('number');
 
-  if (event.type === 'element.violation') {
+  if (event.type === 'web-component.violation') {
     expect(VIOLATION_KINDS.has(e.kind as string), `unknown kind: ${String(e.kind)}`).toBe(true);
 
     // `tag` and `prop` are NAMES from the generated non-scalar map -- the only

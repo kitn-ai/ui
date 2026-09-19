@@ -944,12 +944,12 @@ function comparePair(pair: Pair): Compared {
       const itemsSchema = isNode(childSchema.items) ? (childSchema.items as SchemaNode) : undefined;
 
       if (arrayPart && itemsSchema) {
-        const elementShape = stripNullish(shapeOf(arrayPart.element.type, arrayPart.element.module));
+        const webComponentShape = stripNullish(shapeOf(arrayPart.element.type, arrayPart.element.module));
         if (isNode(itemsSchema.properties)) {
-          walk(itemsSchema, elementShape, `${childPath}[]`);
-        } else if (tsHasShape(elementShape) && !declaredOmissions.has(`${childPath}[]`)) {
+          walk(itemsSchema, webComponentShape, `${childPath}[]`);
+        } else if (tsHasShape(webComponentShape) && !declaredOmissions.has(`${childPath}[]`)) {
           errors.push(
-            `${at(childPath)}[]: the type's element is ${describeShape(elementShape)} but ` +
+            `${at(childPath)}[]: the type's element is ${describeShape(webComponentShape)} but ` +
               `${pair.cardType}.schema.json describes no \`properties\` for it, and no ` +
               `'schema-omits-shape' divergence declares that gap.`,
           );

@@ -235,7 +235,7 @@ The handover directory is a flat set of markdown files:
 ```
 $ ls /var/folders/.../T/kai-handover-20260818-111237-S7-claude-opus-5-V3vZSo
 DELIVERY.md   FABRICATED.md   INVARIANTS.md   PARTS.md    README.md   SELF-AUDIT.md   THEME.md
-ELEMENTS.md   INTEGRATIONS.md INVENTORY.md    PROMPT.md   RECIPES.md  SHARED-PROPS.md elements
+WEB-COMPONENTS.md   INTEGRATIONS.md INVENTORY.md    PROMPT.md   RECIPES.md  SHARED-PROPS.md web-components
 $ ls .../judge
 ls: .../judge: No such file or directory
 ```
@@ -388,7 +388,7 @@ $ find /tmp/pack-S6 -maxdepth 2 -not -path '*/agent/elements/*' | sort
 ./PACK.md
 ./agent
 ./agent/DELIVERY.md
-./agent/ELEMENTS.md
+./agent/WEB-COMPONENTS.md
 ./agent/FABRICATED.md
 ./agent/INTEGRATIONS.md
 ./agent/INVARIANTS.md

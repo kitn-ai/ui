@@ -1,7 +1,7 @@
 import { customElement } from 'solid-element';
 import { ChatConfig } from '../primitives/chat-config';
-import { ELEMENT_CSS } from './css';
-import { elementDiagnosticsWanted, installElementDiagnostics } from './web-component-diagnostics';
+import { WEB_COMPONENT_CSS } from './css';
+import { webComponentDiagnosticsWanted, installElementDiagnostics } from './web-component-diagnostics';
 import { createEffect, createSignal, onCleanup, Show, untrack, type JSX } from 'solid-js';
 
 /**
@@ -18,7 +18,7 @@ function getSharedSheet(): CSSStyleSheet | null {
   try {
     if (typeof CSSStyleSheet === 'undefined') throw new Error('no CSSStyleSheet');
     const sheet = new CSSStyleSheet();
-    sheet.replaceSync(ELEMENT_CSS);
+    sheet.replaceSync(WEB_COMPONENT_CSS);
     sharedSheet = sheet;
   } catch {
     sharedSheet = null;
@@ -498,7 +498,7 @@ export function defineWebComponent<P extends Record<string, unknown>, E = Record
     return (
       <>
         <Show when={!sheet}>
-          <style>{ELEMENT_CSS}</style>
+          <style>{WEB_COMPONENT_CSS}</style>
         </Show>
         {/* display:contents — no layout box; carries the .dark token scope and
             re-roots the inherited `color` to the active mode's foreground, so text
@@ -551,9 +551,9 @@ export function defineWebComponent<P extends Record<string, unknown>, E = Record
   //
   // Through the pre-define seam, not after the fact, because the registry
   // snapshots lifecycle callbacks at definition time; see `alsoPatch` above.
-  // `elementDiagnosticsWanted` is asked first so a tag with no non-scalar prop
+  // `webComponentDiagnosticsWanted` is asked first so a tag with no non-scalar prop
   // (37 of the 80) does not even pay for the registry interception.
-  const wantsDiagnostics = elementDiagnosticsWanted(tag);
+  const wantsDiagnostics = webComponentDiagnosticsWanted(tag);
 
   const { result: Ctor, handled } = defineWithNonReflectingProps(
     tag,

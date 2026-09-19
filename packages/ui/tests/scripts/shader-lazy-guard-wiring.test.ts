@@ -67,7 +67,7 @@ const LAZY =
   'const frag = "vec3 auroraWarp(vec2 p){return vec3(0.0);} float randFibo(float x){return x;} ' +
   'void main(){ mainImage(gl_FragColor, gl_FragCoord.xy); }";\n';
 const tree = (over: Record<string, string | null> = {}) => ({
-  'dist/kai.es.js': 'export const elementsReady = import("./register-impl-abc123.js");\n',
+  'dist/kai.es.js': 'export const webComponentsReady = import("./register-impl-abc123.js");\n',
   'dist/register-impl-abc123.js': 'customElements.define("kai-chat", C);\n',
   'dist/variant-aurora-x1.js': LAZY,
   ...over,

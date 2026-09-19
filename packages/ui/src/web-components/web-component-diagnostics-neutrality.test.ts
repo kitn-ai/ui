@@ -153,7 +153,7 @@ describe('a subscriber changes nothing about how an element behaves', () => {
     // The diagnostics really did fire on the second run — otherwise this would
     // be comparing two runs that both did nothing.
     expect(
-      events.filter((e) => e.type === 'element.violation').map((e) => (e as { kind: string }).kind),
+      events.filter((e) => e.type === 'web-component.violation').map((e) => (e as { kind: string }).kind),
     ).toEqual(['same-array-reference', 'mutated-in-place']);
 
     expect(without.updates.length).toBeGreaterThan(0);
@@ -177,7 +177,7 @@ describe('a subscriber changes nothing about how an element behaves', () => {
     });
 
     expect(
-      events.filter((e) => e.type === 'element.violation').map((e) => (e as { kind: string }).kind),
+      events.filter((e) => e.type === 'web-component.violation').map((e) => (e as { kind: string }).kind),
     ).toEqual(['array-prop-as-attribute']);
 
     expect(without.dom).toContain('Scout');
@@ -238,7 +238,7 @@ describe('the payload signal changes nothing at the element layer', () => {
     off2();
 
     // The violations really fired in the payload-on run.
-    const violations = events.filter((e) => e.type === 'element.violation');
+    const violations = events.filter((e) => e.type === 'web-component.violation');
     expect(violations.length).toBeGreaterThan(0);
     // And not one of them grew a payload key.
     for (const e of violations) expect('payload' in e).toBe(false);

@@ -201,12 +201,12 @@ export function renderReport({ findings, flags, coverage, surface, docs, units, 
   p();
   p(coverage.undocumentedElements.length ? coverage.undocumentedElements.map((t) => `\`${t}\``).join(', ') : '_none_');
   p();
-  p(`**${coverage.elementsWithoutPage.length} element(s) are mentioned but have no \`<Playground>\`/\`<Example>\`/\`<PropTable>\` of their own** (named in passing only):`);
+  p(`**${coverage.webComponentsWithoutPage.length} element(s) are mentioned but have no \`<Playground>\`/\`<Example>\`/\`<PropTable>\` of their own** (named in passing only):`);
   p();
-  if (coverage.elementsWithoutPage.length) {
+  if (coverage.webComponentsWithoutPage.length) {
     p('| element | mentioned in |');
     p('|---|---|');
-    for (const e of coverage.elementsWithoutPage) p(`| \`${e.tag}\` | ${e.mentionedIn.slice(0, 4).map((x) => `\`${x}\``).join(', ')}${e.mentionedIn.length > 4 ? ` +${e.mentionedIn.length - 4}` : ''} |`);
+    for (const e of coverage.webComponentsWithoutPage) p(`| \`${e.tag}\` | ${e.mentionedIn.slice(0, 4).map((x) => `\`${x}\``).join(', ')}${e.mentionedIn.length > 4 ? ` +${e.mentionedIn.length - 4}` : ''} |`);
   } else p('_none_');
   p();
   p(`**${coverage.undocumentedComponents.length} SolidJS component export(s) are never named in the docs** (of ${surface.components.size} detected components on the root entry):`);

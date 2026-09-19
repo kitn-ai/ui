@@ -313,8 +313,8 @@ step('reportRequest emits from ./diagnostics to a ./wire subscriber, under node,
 // real read, and that count was 0 before this fix.
 step('the web-components bundle installs a hook that receives events from a ./wire read');
 {
-  const elementsPath = resolve(ROOT, 'dist/kai.es.js');
-  if (!existsSync(elementsPath)) {
+  const registerAllPath = resolve(ROOT, 'dist/kai.es.js');
+  if (!existsSync(registerAllPath)) {
     console.error(`\n✗ verify-diagnostics-wiring: dist/kai.es.js missing — run \`nx build ui\` first.\n`);
     process.exit(1);
   }
@@ -338,7 +338,7 @@ step('the web-components bundle installs a hook that receives events from a ./wi
   }
   globalThis.window = dom.window;
 
-  await import(pathToFileURL(elementsPath).href);
+  await import(pathToFileURL(registerAllPath).href);
   await customElements.whenDefined('kai-chat');
 
   const hook = dom.window.__KAI_DEVTOOLS_HOOK__;

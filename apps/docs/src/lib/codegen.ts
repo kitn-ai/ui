@@ -26,7 +26,7 @@ export interface PropMeta {
   default?: string;
 }
 export interface EventMeta { name: string }
-export interface ElementMeta {
+export interface WebComponentMeta {
   tag: string;
   displayName: string;
   className?: string;
@@ -88,7 +88,7 @@ interface Resolved {
   events: string[];
 }
 
-function resolve(meta: ElementMeta, state: State): Resolved {
+function resolve(meta: WebComponentMeta, state: State): Resolved {
   const attrs: Resolved['attrs'] = [];
   const properties: string[] = [];
 
@@ -125,7 +125,7 @@ const handlerName = (evt: string) =>
 // HTML attribute, so it's set as a property; every other framework binds it.
 const falseBool = (a: Resolved['attrs'][number]) => a.bool && a.value === false;
 
-function htmlCode(meta: ElementMeta, r: Resolved): string {
+function htmlCode(meta: WebComponentMeta, r: Resolved): string {
   const attrs = r.attrs
     .filter((a) => !falseBool(a))
     .map((a) => (a.bool ? camelToKebab(a.name) : `${camelToKebab(a.name)}="${a.value}"`));
@@ -146,7 +146,7 @@ function htmlCode(meta: ElementMeta, r: Resolved): string {
   return lines.join('\n');
 }
 
-function jsxCode(meta: ElementMeta, r: Resolved, importLine: string): string {
+function jsxCode(meta: WebComponentMeta, r: Resolved, importLine: string): string {
   const lines: string[] = [importLine, ''];
   const indent = '  ';
   const parts: string[] = [];
@@ -159,7 +159,7 @@ function jsxCode(meta: ElementMeta, r: Resolved, importLine: string): string {
   return lines.join('\n');
 }
 
-function vueCode(meta: ElementMeta, r: Resolved): string {
+function vueCode(meta: WebComponentMeta, r: Resolved): string {
   const parts: string[] = [];
   for (const a of r.attrs) parts.push(a.bool ? (a.value ? camelToKebab(a.name) : `:${camelToKebab(a.name)}="false"`) : `${camelToKebab(a.name)}="${a.value}"`);
   for (const prop of r.properties) parts.push(`:${camelToKebab(prop)}.prop="${prop}"`);
@@ -171,7 +171,7 @@ function vueCode(meta: ElementMeta, r: Resolved): string {
   return `<script setup>\nimport '@kitn.ai/ui/web-components';\n</script>\n\n<template>\n  ${tag.replace(/\n/g, '\n  ')}\n</template>`;
 }
 
-function svelteCode(meta: ElementMeta, r: Resolved): string {
+function svelteCode(meta: WebComponentMeta, r: Resolved): string {
   const parts: string[] = [];
   for (const a of r.attrs) parts.push(a.bool ? (a.value ? camelToKebab(a.name) : `${camelToKebab(a.name)}={false}`) : `${camelToKebab(a.name)}="${a.value}"`);
   for (const prop of r.properties) parts.push(`{${prop}}`);
@@ -183,7 +183,7 @@ function svelteCode(meta: ElementMeta, r: Resolved): string {
   return `<script>\n  import '@kitn.ai/ui/web-components';\n</script>\n\n${tag}`;
 }
 
-function angularCode(meta: ElementMeta, r: Resolved): string {
+function angularCode(meta: WebComponentMeta, r: Resolved): string {
   const parts: string[] = [];
   for (const a of r.attrs) parts.push(a.bool ? (a.value ? camelToKebab(a.name) : `[${a.name}]="false"`) : `${camelToKebab(a.name)}="${a.value}"`);
   for (const prop of r.properties) parts.push(`[${prop}]="${prop}"`);
@@ -196,7 +196,7 @@ function angularCode(meta: ElementMeta, r: Resolved): string {
 // Public API
 // ---------------------------------------------------------------------------
 
-export function generateSnippets(meta: ElementMeta, state: State = {}): Record<Framework, string> {
+export function generateSnippets(meta: WebComponentMeta, state: State = {}): Record<Framework, string> {
   const r = resolve(meta, state);
   const Name = meta.displayName.replace(/\s/g, '');
   return {
@@ -230,7 +230,7 @@ const CONTROL_EXCLUDE: Record<string, Set<string>> = {
   'kai-artifact': new Set(['tab', 'sandbox']),
 };
 
-export function controlsFor(meta: ElementMeta): ControlKind[] {
+export function controlsFor(meta: WebComponentMeta): ControlKind[] {
   const controls: ControlKind[] = [];
   const excluded = CONTROL_EXCLUDE[meta.tag];
   for (const p of meta.props) {

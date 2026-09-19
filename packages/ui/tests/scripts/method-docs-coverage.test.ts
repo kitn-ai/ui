@@ -52,19 +52,19 @@ interface MethodMeta {
   returns: string;
   description: string;
 }
-interface ElementMeta {
+interface WebComponentMeta {
   tag: string;
   methods?: MethodMeta[];
 }
 
-const meta: ElementMeta[] = JSON.parse(
+const meta: WebComponentMeta[] = JSON.parse(
   readFileSync(resolve(pkgRoot, 'src/web-components/web-component-meta.json'), 'utf8'),
 );
 const withMethods = meta.filter((e) => e.methods?.length);
 const TOTAL_METHODS = withMethods.reduce((n, e) => n + e.methods!.length, 0);
 
 /** Names the model says this element exposes, sorted. */
-const expectedFor = (el: ElementMeta) => [...el.methods!.map((m) => m.name)].sort();
+const expectedFor = (el: WebComponentMeta) => [...el.methods!.map((m) => m.name)].sort();
 
 // ─────────────────────────────────────────────────────────────────────────────
 // The model itself, re-derived from source.
@@ -76,12 +76,12 @@ const expectedFor = (el: ElementMeta) => [...el.methods!.map((m) => m.name)].sor
 // come from counting, not from a literal 131.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const ELEMENTS_DIR = resolve(pkgRoot, 'src/web-components');
+const WEB_COMPONENTS_DIR = resolve(pkgRoot, 'src/web-components');
 /** Same file set the generator walks (see gen-web-component-api.mjs). */
 const SKIP = new Set(['define.tsx', 'register.ts', 'register-impl.ts', 'css.ts', 'chat-types.ts', 'default-input.tsx']);
-const facadeFiles = readdirSync(ELEMENTS_DIR)
+const facadeFiles = readdirSync(WEB_COMPONENTS_DIR)
   .filter((f) => (f.endsWith('.tsx') || f.endsWith('.ts')) && !f.endsWith('.stories.tsx') && !SKIP.has(f))
-  .map((f) => resolve(ELEMENTS_DIR, f));
+  .map((f) => resolve(WEB_COMPONENTS_DIR, f));
 
 const parse = (file: string) =>
   ts.createSourceFile(file, readFileSync(file, 'utf8'), ts.ScriptTarget.ESNext, true, ts.ScriptKind.TSX);
@@ -110,7 +110,7 @@ function exposedNames(scope: ts.Node): string[] {
 /** The names `wireDisclosure()` contributes, read off the helper's own expose
  *  literal so this never restates them. */
 const HELPER_NAMES: Record<string, string[]> = {
-  wireDisclosure: exposedNames(parse(resolve(ELEMENTS_DIR, 'disclosure.ts'))),
+  wireDisclosure: exposedNames(parse(resolve(WEB_COMPONENTS_DIR, 'disclosure.ts'))),
 };
 
 /** How many times `name(` is called under `scope`. */

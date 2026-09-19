@@ -9,7 +9,7 @@ import { For, type JSX } from 'solid-js';
 // directly defines the tag synchronously. `nav.stories.tsx` does the same.
 //
 // HAZARD 2 -- which CODE this story actually runs, which the import above does
-// NOT control. `.storybook/preview.ts` imports `elementsReady` from the BUILT
+// NOT control. `.storybook/preview.ts` imports `webComponentsReady` from the BUILT
 // `../dist/kai.es.js`. That bundle registers every kai-* element and wins the
 // `customElements.define` race, so a Labs facade story paints `dist/`, never
 // `src/`, however the story imports the module. Edit a facade and this story

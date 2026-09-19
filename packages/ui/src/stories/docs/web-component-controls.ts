@@ -1,8 +1,8 @@
 import meta from '../../web-components/web-component-meta.json';
 
 type Prop = { name: string; type: string; default?: string; scalar: boolean };
-type ElementMeta = { tag: string; props: Prop[] };
-const all = meta as unknown as ElementMeta[];
+type WebComponentMeta = { tag: string; props: Prop[] };
+const all = meta as unknown as WebComponentMeta[];
 
 /**
  * Build a Storybook `docs.description` from an element's intro paragraphs.

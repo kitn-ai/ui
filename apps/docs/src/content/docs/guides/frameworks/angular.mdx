@@ -15,18 +15,18 @@ npm install @kitn.ai/ui
 
 ## Register the web components
 
-The elements register **asynchronously**: `@kitn.ai/ui/web-components` defers the actual `customElements.define` calls behind a browser check, so an import alone does not guarantee the tags exist yet. Angular writes array and object DOM properties the moment it stamps a `<kai-*>` tag; a write that lands before the element upgrades is discarded when the element applies its own empty defaults. Gate `bootstrapApplication` on the `elementsReady` promise the entry exports:
+The elements register **asynchronously**: `@kitn.ai/ui/web-components` defers the actual `customElements.define` calls behind a browser check, so an import alone does not guarantee the tags exist yet. Angular writes array and object DOM properties the moment it stamps a `<kai-*>` tag; a write that lands before the element upgrades is discarded when the element applies its own empty defaults. Gate `bootstrapApplication` on the `webComponentsReady` promise the entry exports:
 
 ```ts
 // main.ts
-import { elementsReady } from '@kitn.ai/ui/web-components';
+import { webComponentsReady } from '@kitn.ai/ui/web-components';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { AppComponent } from './app/app.component';
 import { appConfig } from './app/app.config';
 
 // Resolves once every kai-* element is defined. Angular then binds against
 // upgraded elements, so [messages] / [conversations] survive.
-elementsReady.then(() => bootstrapApplication(AppComponent, appConfig));
+webComponentsReady.then(() => bootstrapApplication(AppComponent, appConfig));
 ```
 
 Then add **`CUSTOM_ELEMENTS_SCHEMA`** to every standalone component whose template uses `kai-*` tags. Without it, the Angular compiler rejects the unknown element names at build time.

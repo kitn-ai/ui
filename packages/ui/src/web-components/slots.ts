@@ -542,7 +542,7 @@ export const FILE_TREE_PARTS: PartDef[] = [
  * Adding a `part="…"` in a facade/component without registering it here fails the
  * `slots.test.ts` drift guard — keep this in sync with the source.
  */
-export interface ElementComposition {
+export interface WebComponentComposition {
   slots?: SlotDef[];
   parts?: PartDef[];
   /**
@@ -890,7 +890,7 @@ export const CODE_BLOCK_VARS: VarDef[] = [
   },
 ];
 
-export const ELEMENT_COMPOSITION: Record<string, ElementComposition> = {  'kai-chat': { slots: CHAT_SLOTS, parts: CHAT_PARTS },
+export const WEB_COMPONENT_COMPOSITION: Record<string, WebComponentComposition> = {  'kai-chat': { slots: CHAT_SLOTS, parts: CHAT_PARTS },
   'kai-command': { parts: COMMAND_PARTS },
   'kai-conversations': { slots: CONVERSATIONS_SLOTS, parts: CONVERSATIONS_PARTS, children: 'Your own `<kai-conversation-item>` rows (item mode: the consumer-owned loop). Data rows do not render while any are present.' },
   'kai-conversation-item': { slots: CONVERSATION_ITEM_SLOTS, parts: CONVERSATION_ITEM_PARTS, children: 'The row title. `leading`, `meta` and `menu` are the named regions around it.' },

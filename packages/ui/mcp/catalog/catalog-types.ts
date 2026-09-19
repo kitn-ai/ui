@@ -149,7 +149,7 @@ export const Scenario = z.object({
 });
 
 /** The derived layer's committed artifact. Task 3's generator writes it; Task 3's test parses it. */
-export const DerivedElement = z.object({
+export const DerivedWebComponent = z.object({
   tag: z.string(),
   props: z.array(
     z.object({
@@ -195,7 +195,7 @@ export const EventException = z.object({
 });
 
 export const DerivedCatalog = z.object({
-  elements: z.array(DerivedElement).min(1),
+  webComponents: z.array(DerivedWebComponent).min(1),
   // REGISTERED COPY: this floor restates MIN_VARIANTS, which lives in
   // scripts/lib/message-part-variants.mjs (Task 2) and cannot be imported into a
   // .ts module that also runs in the browser bundle. The generator asserts the

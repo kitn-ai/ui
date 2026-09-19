@@ -14,7 +14,7 @@ import { fileURLToPath } from 'node:url';
  *
  * Every test appends its own `<kai-audio-visualizer>` elements straight to
  * `document.body` on an anchor story page (any story works: `.storybook/
- * preview.ts` awaits `elementsReady` before every story renders, so the
+ * preview.ts` awaits `webComponentsReady` before every story renders, so the
  * kai-* custom elements are already registered by the time the anchor
  * story settles). This sidesteps two problems at once: it needs no new
  * source file (no fixture story), and it exercises the exact registration
@@ -144,7 +144,7 @@ async function installPreserveDrawingBuffer(page: Page): Promise<void> {
   });
 }
 
-/** Navigate to any story; `preview.ts` awaits `elementsReady` before it
+/** Navigate to any story; `preview.ts` awaits `webComponentsReady` before it
  *  renders, so kai-* custom elements are registered by the time it settles.
  *  Also waits for Storybook's own `sb-loader` overlay (`body.sb-show-main`)
  *  to clear -- it sits on top of the whole viewport (opaque) until the
@@ -909,7 +909,7 @@ test.describe('Check 8: element audio not silenced, not doubled', () => {
     // rules warn about.
     expect(beforeMax, `bar amplitude before the second mount must be genuinely nonzero, not a degenerate 0/0; before=${JSON.stringify(before)}`).toBeGreaterThan(0.05);
 
-    // The cache in useAudioAnalysis (`elementSources` WeakMap) means
+    // The cache in useAudioAnalysis (`webComponentSources` WeakMap) means
     // createMediaElementSource — which THROWS if called twice for the same
     // element — and the destination connection must each happen exactly
     // once, no matter how many visualizers subsequently tap the element.

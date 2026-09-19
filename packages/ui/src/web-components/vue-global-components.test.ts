@@ -27,19 +27,19 @@ import { fileURLToPath } from 'node:url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 
-function readElementTypes(): string {
+function readWebComponentTypes(): string {
   return readFileSync(resolve(HERE, 'web-component-types.d.ts'), 'utf8');
 }
 
-interface ElementMeta {
+interface WebComponentMeta {
   tag: string;
   className: string;
   props: { name: string }[];
   events: { name: string }[];
 }
 
-function readElements(): ElementMeta[] {
-  return JSON.parse(readFileSync(resolve(HERE, 'web-component-meta.json'), 'utf8')) as ElementMeta[];
+function readElements(): WebComponentMeta[] {
+  return JSON.parse(readFileSync(resolve(HERE, 'web-component-meta.json'), 'utf8')) as WebComponentMeta[];
 }
 
 const pascal = (s: string) =>
@@ -56,7 +56,7 @@ function vueBlock(src: string): string {
 
 describe('Vue GlobalComponents augmentation for kai-* tags', () => {
   it('augments vue GlobalComponents, not just HTMLElementTagNameMap', () => {
-    const src = readElementTypes();
+    const src = readWebComponentTypes();
     expect(src).toContain(`declare module 'vue'`);
     expect(src).toContain('interface GlobalComponents');
   });
@@ -66,7 +66,7 @@ describe('Vue GlobalComponents augmentation for kai-* tags', () => {
     // depending on `vueCompilerOptions.strictTemplates`, so both must be present.
     // Measured: with strictTemplates on, vue-tsc reports a MISSING entry as
     // "Property 'KaiChat' does not exist on type '{}'" — the PascalCase key.
-    const src = readElementTypes();
+    const src = readWebComponentTypes();
     const block = vueBlock(src);
     const elements = readElements();
     expect(elements.length).toBeGreaterThan(0);
@@ -86,7 +86,7 @@ describe('Vue GlobalComponents augmentation for kai-* tags', () => {
     // any prop whose name collides with an HTMLElement member — measured: it drops
     // kai-message's `role`, kai-resizable-item's `hidden` and kai-confirm's
     // `autofocus`, so bad values for those three sail through unchecked.
-    const src = readElementTypes();
+    const src = readWebComponentTypes();
     for (const el of readElements()) {
       const start = src.indexOf(`export interface ${el.className}Props {`);
       expect(start, `no props interface for ${el.tag}`).toBeGreaterThan(-1);
@@ -102,7 +102,7 @@ describe('Vue GlobalComponents augmentation for kai-* tags', () => {
 
   it('the collision-prone props survive into the Vue props interfaces', () => {
     // Explicit pin for the three props an Omit-based derivation would erase.
-    const src = readElementTypes();
+    const src = readWebComponentTypes();
     const cases: [string, string][] = [
       ['KaiMessageElementProps', 'role'],
       ['KaiResizableItemElementProps', 'hidden'],
@@ -122,7 +122,7 @@ describe('Vue GlobalComponents augmentation for kai-* tags', () => {
     // Measured against vue-tsc: `@kai-submit` binds the prop `onKaiSubmit` —
     // camelized with the `kai-` prefix KEPT. (The React wrappers strip it and use
     // `onSubmit`, so the two transforms must not be conflated.)
-    const src = readElementTypes();
+    const src = readWebComponentTypes();
     for (const el of readElements()) {
       const start = src.indexOf(`export interface ${el.className}Events {`);
       expect(start, `no events interface for ${el.tag}`).toBeGreaterThan(-1);
@@ -140,7 +140,7 @@ describe('Vue GlobalComponents augmentation for kai-* tags', () => {
     // so the block must not assume 'vue' is installed. Verified against a real
     // consumer app with NEITHER vue nor react installed: with skipLibCheck both on
     // and off, the augmentation adds zero errors.
-    const block = vueBlock(readElementTypes());
+    const block = vueBlock(readWebComponentTypes());
     for (const forbidden of ['DefineComponent', 'ComponentCustomProps', 'VNode', 'Vue.']) {
       expect(block, `references vue-only identifier "${forbidden}"`).not.toContain(forbidden);
     }
@@ -150,7 +150,7 @@ describe('Vue GlobalComponents augmentation for kai-* tags', () => {
     // No relative import may appear: that would drag library source into a
     // consumer's type graph (the LIB-2 class of bug dist/web-components.d.ts's
     // self-containment comment already guards against).
-    const src = readElementTypes();
+    const src = readWebComponentTypes();
     expect(src).toContain('export interface KaiElementVueProps {');
     expect(src).toContain('export type KaiVueElement<Props, Events>');
   });
