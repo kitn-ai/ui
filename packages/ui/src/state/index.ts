@@ -32,7 +32,7 @@ export type { MockReply, MockResponder, MockResponderOptions, MockSource, MockTo
 export type {
   ChatMessage, ChatMessageAction, CustomAction, AvatarData, FeedbackVote, MessagePart,
   MessageSource, RawOrigin,
-} from '../elements/chat-types';
+} from '../web-components/chat-types';
 export type { ToolPart } from '../components/tool/tool-types';
 export type { ToolKind } from '../components/tool/tool-classify';
 // upsertToolPart defaults `kind` to classifyTool(type) and reverts it on a type

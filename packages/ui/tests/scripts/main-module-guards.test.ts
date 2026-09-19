@@ -30,9 +30,9 @@ import { fileURLToPath } from 'node:url';
  *       `npm run verify:card-validation`, a guard, proving nothing.
  *   node scripts/gen-llms.mjs                              -> exit 0, llms.txt and
  *       llms-full.txt stay deleted.
- *   node scripts/gen-element-api.mjs                       -> exit 0 and prints
- *       "✓ dist/custom-elements.json — 80 elements", while element-meta.json,
- *       icon-names.json, element-types.d.ts, the React wrappers, llms.txt/llms-full.txt
+ *   node scripts/gen-web-component-api.mjs                       -> exit 0 and prints
+ *       "✓ dist/custom-elements.json — 80 elements", while web-component-meta.json,
+ *       icon-names.json, web-component-types.d.ts, the React wrappers, llms.txt/llms-full.txt
  *       and docs/web-components.md are all skipped. Unspaced, the identical command
  *       prints eight ✓ lines. That is `npm run build:api`.
  *

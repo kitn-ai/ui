@@ -11,10 +11,10 @@ import {
   Context, ContextTrigger, ContextContent, ContextContentHeader,
   ContextContentBody, ContextContentFooter, ContextInputUsage, ContextOutputUsage,
 } from '../context/context';
-import { DefaultPromptInput, type RejectedAttachment } from '../../elements/default-input';
+import { DefaultPromptInput, type RejectedAttachment } from '../../web-components/default-input';
 import type { MediaTypeFilter } from '../../wire/media-types';
 import type { TriggerDef } from '../composer/composer';
-import type { ChatMessage, ChatMessageAction, CustomAction } from '../../elements/chat-types';
+import type { ChatMessage, ChatMessageAction, CustomAction } from '../../web-components/chat-types';
 import type { ProseSize } from '../../primitives/chat-config';
 import type { ModelOption } from '../../types';
 import type { CardComponentMap } from '../../primitives/card-registry';
@@ -59,7 +59,7 @@ export interface ChatThreadProps {
   cardSchemas?: CardSchemaMap;
   /** The custom-element host node to emit card events off when no `CardProvider`
    *  is present, forwarded through `MessageBody` to `CardRenderer`. The
-   *  element facades pass their own host element so card events leave as the
+   *  web-component facades pass their own host element so card events leave as the
    *  bubbling `kai-card` CustomEvent. */
   cardHostElement?: HTMLElement;
   /** Value of the input. A **string** is controlled (the host owns the text and

@@ -985,10 +985,10 @@ export async function devBuilder(
       }
       // The standalone theme studio (dist/theme-studio), iframed by the
       // builder page. /theme-studio/kit/* maps onto the package's own dist
-      // root, so the studio's external `import('@kitn.ai/ui/elements')`
+      // root, so the studio's external `import('@kitn.ai/ui/web-components')`
       // (rewritten to /theme-studio/kit/kai.es.js at build time) loads the
-      // element bundle + its chunks WITHOUT dist/theme-studio re-bundling the
-      // kit. Same trust story as pageDir: our own build output, loopback only.
+      // web-components bundle + its chunks WITHOUT dist/theme-studio re-bundling
+      // the kit. Same trust story as pageDir: our own build output, loopback only.
       if (req.method === 'GET' && (url === '/theme-studio' || url.startsWith('/theme-studio?'))) {
         const q = url.indexOf('?');
         res.writeHead(302, { location: `/theme-studio/${q === -1 ? '' : url.slice(q)}` });

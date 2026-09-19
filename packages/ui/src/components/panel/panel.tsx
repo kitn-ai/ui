@@ -13,7 +13,7 @@ import { cn } from '../../utils/cn';
  * container region, and an optional standalone frame (border, radius,
  * shadow). Chrome color is a kit decision (HOW it renders, not WHETHER), so
  * every color here is a kit token: `--kai-color-*` overrides retint the
- * panel together with the elements inside it, which the spike measured as
+ * panel together with the web components inside it, which the spike measured as
  * the fine grain's win once the chrome used tokens (phase 3, observation 12).
  *
  * Two postures, prop-driven:

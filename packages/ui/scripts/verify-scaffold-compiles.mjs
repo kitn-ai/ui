@@ -421,13 +421,13 @@ async function angularStructureCheck(scaffold) {
  * So: every variant of the `MessagePart` union must appear as a
  * `partAs(part(), '<variant>')` branch in every emitted Solid scaffold.
  *
- * The variant list is DERIVED from the union in src/elements/chat-types.ts and
+ * The variant list is DERIVED from the union in src/web-components/chat-types.ts and
  * is never restated here. A literal list would be the same defect one level up —
  * it goes stale the day someone adds a part kind, and it passes while doing so.
  */
 function messagePartVariants() {
   const ts = require('typescript');
-  const file = resolve(ROOT, 'src/elements/chat-types.ts');
+  const file = resolve(ROOT, 'src/web-components/chat-types.ts');
   if (!existsSync(file)) fail(`cannot derive the MessagePart variants: ${file} does not exist.`);
   // `setParentNodes` so `.getText()` works for the error messages below.
   const src = ts.createSourceFile(file, readFileSync(file, 'utf8'), ts.ScriptTarget.Latest, true);
@@ -438,7 +438,7 @@ function messagePartVariants() {
   });
   if (!alias)
     fail(
-      'no `type MessagePart = …` alias in src/elements/chat-types.ts.\n' +
+      'no `type MessagePart = …` alias in src/web-components/chat-types.ts.\n' +
         '  This check derives its variant list from that union. If the union MOVED, point this\n' +
         '  function at its new home — do NOT hard-code the variants, which is the failure mode\n' +
         '  the whole check exists to prevent.',

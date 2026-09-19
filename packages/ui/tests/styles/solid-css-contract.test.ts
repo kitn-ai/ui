@@ -9,7 +9,7 @@ import { beforeAll, describe, expect, it } from 'vitest';
  * GUARD: what a light-DOM SolidJS consumer's Tailwind build produces from
  * `@kitn.ai/ui/solid.css`.
  *
- * Two style paths ship. The `kai-*` elements adopt `compiled.css` into every
+ * Two style paths ship. The `kai-*` web components adopt `compiled.css` into every
  * shadow root, and that sheet is complete. The Solid entries (`.` / `./solid`)
  * ship class-name strings and NO CSS: the consumer compiles those strings with
  * THEIR Tailwind, `@source`-pointed at the kit. Until solid.css existed the
@@ -136,9 +136,9 @@ async function compileConsumerSheet(entry: string, candidates: Iterable<string>)
   return compiler.build([...candidates]);
 }
 
-/** Every `.kai-*` selector the element sheet defines, read off compiled.css. */
+/** Every `.kai-*` selector the web-component sheet defines, read off compiled.css. */
 function elementSheetKaiClasses(): Set<string> {
-  const compiled = readFileSync(join(PKG, 'src/elements/compiled.css'), 'utf8');
+  const compiled = readFileSync(join(PKG, 'src/web-components/compiled.css'), 'utf8');
   return new Set([...compiled.matchAll(/\.(kai-[a-z0-9-]+)/g)].map((m) => m[1]));
 }
 

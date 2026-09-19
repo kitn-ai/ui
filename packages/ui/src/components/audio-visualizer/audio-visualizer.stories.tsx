@@ -3,7 +3,7 @@ import { createSignal, onCleanup, Show, For, type JSX } from 'solid-js';
 import { AudioVisualizer, type AudioVisualizerProps } from './index';
 import { Button } from '../button/button';
 import { Notice } from '../notice/notice';
-import { componentDescription } from '../../stories/docs/element-controls';
+import { componentDescription } from '../../stories/docs/web-component-controls';
 import {
   SIZES,
   CONTAINER_HEIGHT,
@@ -962,7 +962,7 @@ export const Microphone: Story = {
  * through a control. Six `useAudioAnalysis` instances end up tapping the
  * same stream simultaneously: each calls its own `ctx.createMediaStreamSource
  * (stream)`, which -- unlike `createMediaElementSource` -- has no
- * once-per-element restriction, so this is expected to just work, but it had
+ * once-per-web-component restriction, so this is expected to just work, but it had
  * never actually been exercised with six concurrent consumers before this
  * story. Verified in the browser: all six react independently to the same
  * stream, not just the first.

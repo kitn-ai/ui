@@ -3,7 +3,7 @@ import { PromptInput } from '@kitn.ai/ui/react';
 import type { PromptInputProps } from '@kitn.ai/ui/react';
 import type { Theme } from '../App';
 import { useVoiceInput } from '@kitn.ai/ui/react';
-import type { KaiPromptInputElement } from '@kitn.ai/ui/elements';
+import type { KaiPromptInputElement } from '@kitn.ai/ui/web-components';
 
 interface ComposerProps {
   theme: Theme;

@@ -27,7 +27,7 @@ Only scalar values (string/number/boolean) work as attributes (e.g. `placeholder
 
 ## Two layers
 
-**Layer 1 — batteries-included web components** (`import '@kitn.ai/ui/elements'`):
+**Layer 1 — batteries-included web components** (`import '@kitn.ai/ui/web-components'`):
 Drop an element into any framework (React, Vue, plain HTML). Data in via JS properties; interactions out via non-bubbling CustomEvents.
 
 - `<kai-chat>` — full chat UI (message list + prompt input). The primary starting point.
@@ -115,7 +115,7 @@ Types are importable: `import type { ChatMessage, MessagePart, MessageSource } f
 
 **Plain HTML / CDN**
 ```html
-<script type="module" src="https://unpkg.com/@kitn.ai/ui/elements"></script>
+<script type="module" src="https://unpkg.com/@kitn.ai/ui/web-components"></script>
 <kai-chat style="display:block;height:100vh"></kai-chat>
 <script type="module">
   const chat = document.querySelector('kai-chat');

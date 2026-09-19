@@ -21,7 +21,7 @@ import { chatRoutePreamble, defaultModelFor } from '../../route-emit';
 // so the Node MCP pass typechecks and bundles it unchanged. See
 // `ATTACHMENT_ACCEPT`.
 import { encodableMediaTypes } from '../../../src/wire/media-types';
-// The composition catalog, read for one fact: where a companion element GOES.
+// The composition catalog, read for one fact: where a companion web component GOES.
 // The RAW literal rather than `listSurfaceRecipes()`, matching `reference.ts` —
 // the accessor re-runs a zod parse over the whole catalog on every call, and
 // these records are already validated by their own tests and by
@@ -1662,7 +1662,7 @@ export const ATTACHMENT_WIRE_NOTE = [
  * the consumer can edit.
  *
  * It reads the file with `FileReader.readAsDataURL` and stages a `data:` URI —
- * the same call `readAsDataUrl` in `elements/default-input.tsx` makes, for the
+ * the same call `readAsDataUrl` in `web-components/default-input.tsx` makes, for the
  * same reason. `URL.createObjectURL` would draw an identical thumbnail and be
  * meaningless to anything downstream: an object URL resolves only inside the tab
  * that minted it, so `toOpenAIMessages` / `toAnthropicMessages` refuse it rather
@@ -2049,7 +2049,7 @@ function componentTags(components: readonly string[], chatFill: string): string 
  * injected call to a function that does not exist anywhere left `npm run build`
  * exiting 0 in a stock app.
  *
- * The hand-cast worry does not survive contact either — the kit SHIPS the element
+ * The hand-cast worry does not survive contact either — the kit SHIPS the web-component
  * interfaces, so one `as KaiChatElement` at the lookup types every property that
  * follows, which is what the svelte and angular targets already do. And the
  * message type comes from the element itself
@@ -2282,7 +2282,7 @@ function htmlModule(ctx: RenderCtx, components: readonly string[]): string {
         `    showWorkspace();`,
         `  };`,
         ``,
-        `  // Project the records onto the elements. NEW arrays per write — the array`,
+        `  // Project the records onto the web components. NEW arrays per write — the array`,
         `  // reference is what notifies (reactivity-two-halves; the changed objects`,
         `  // inside come from the helpers' folds).`,
         `  function showWorkspace(): void {`,
@@ -2369,10 +2369,10 @@ function htmlModule(ctx: RenderCtx, components: readonly string[]): string {
     `// \`tsc && vite build\` and scopes its tsconfig to "include": ["src"], so an`,
     `// inline <script> is checked by nothing at all. Delete the template's own`,
     `// src/main.ts and save this in its place; index.html already points at it.`,
-    `import '@kitn.ai/ui/elements';  // registers <kai-*> — required, must come first`,
-    `// The kit ships the element interfaces, so one cast at the lookup below types`,
+    `import '@kitn.ai/ui/web-components';  // registers <kai-*> — required, must come first`,
+    `// The kit ships the web-component interfaces, so one cast at the lookup below types`,
     `// every property assignment that follows.`,
-    `import type { ${elementTypes} } from '@kitn.ai/ui/elements';`,
+    `import type { ${elementTypes} } from '@kitn.ai/ui/web-components';`,
     ...wireImportLines({
       typed: annotatesChatMessage,
       toolLoop: ctx.emitToolLoop,
@@ -2925,7 +2925,7 @@ function renderJsx(components: readonly string[], ctx: RenderCtx, framework: str
   const useClientDirective = framework === 'next' ? [`'use client';`, ``] : [];
 
   // SCAF-6: For Next.js ONLY — use next/dynamic with { ssr: false }. NOT because
-  // importing the package on the server crashes: `@kitn.ai/ui/react`, `@kitn.ai/ui/elements`
+  // importing the package on the server crashes: `@kitn.ai/ui/react`, `@kitn.ai/ui/web-components`
   // and the state helpers are all SSR-import-safe (verified by prerendering a server
   // component that statically imports them). The reason is rendering: <kai-*> are
   // CLIENT-ONLY custom elements, and the server has no customElements registry, so a
@@ -3006,7 +3006,7 @@ function renderJsx(components: readonly string[], ctx: RenderCtx, framework: str
     ...useClientDirective,
     // (1) REQUIRED: registers <kai-*> — the react wrappers do NOT auto-register.
     // Must come BEFORE importing the wrappers, or <kai-chat> renders empty.
-    `import '@kitn.ai/ui/elements';  // registers <kai-*> — required, must come first`,
+    `import '@kitn.ai/ui/web-components';  // registers <kai-*> — required, must come first`,
     `import { ${block ? 'useEffect, useState' : 'useState'} } from 'react';`,
     `import { ${importList} } from '@kitn.ai/ui/react';`,
     ...wireImportLines({
@@ -3344,7 +3344,7 @@ function renderVue(components: readonly string[], ctx: RenderCtx): string {
     `     component: kai-chat" in dev — the app still renders, but the console does`,
     `     not, and that warning is Vue asking you for exactly that config. -->`,
     `<script setup lang="ts">`,
-    `import '@kitn.ai/ui/elements';  // registers <kai-*> — required, must come first`,
+    `import '@kitn.ai/ui/web-components';  // registers <kai-*> — required, must come first`,
     ...wireImportLines({
       typed: true,
       toolLoop: emitToolLoop,
@@ -3715,7 +3715,7 @@ function renderSvelte(components: readonly string[], ctx: RenderCtx): string {
     `     Svelte-4 forms this used to emit are hard errors there, not deprecations:`,
     `     "\`$:\` is not allowed in runes mode" fails svelte-check AND vite build. -->`,
     `<script lang="ts">`,
-    `  import '@kitn.ai/ui/elements';  // registers <kai-*> — required, must come first`,
+    `  import '@kitn.ai/ui/web-components';  // registers <kai-*> — required, must come first`,
     // KaiSourcesElement is only imported when a kai-sources companion is actually
     // declared below: an always-on import would be unused (and fail noUnusedLocals)
     // on every archetype without kai-sources.
@@ -3724,7 +3724,7 @@ function renderSvelte(components: readonly string[], ctx: RenderCtx): string {
       ...(block ? ['KaiConversationsElement'] : []),
       ...(hasSourcesCompanion ? ['KaiSourcesElement'] : []),
       ...(attachments ? ['KaiAttachmentsElement'] : []),
-    ].join(', ')} } from '@kitn.ai/ui/elements';`,
+    ].join(', ')} } from '@kitn.ai/ui/web-components';`,
     ...wireImportLines({
       pad: '  ',
       typed: true,
@@ -3856,8 +3856,8 @@ function renderTanstackStart(components: readonly string[], ctx: RenderCtx): str
   //   1. `import { createFileRoute } from '@tanstack/react-router'` instead of no-op router import
   //   2. `export const Route = createFileRoute('/chat')({ ssr: false, component: ChatPage })`
   //   3. The page function is named `ChatPage` (not `App`) — no export-default clash with createFileRoute
-  //   4. No `import '@kitn.ai/ui/elements'` needed as a top-level import (same as next's dynamic approach
-  //      is not needed here — the library is SSR-import-safe, but we include elements for safety)
+  //   4. No `import '@kitn.ai/ui/web-components'` needed as a top-level import (same as next's dynamic approach
+  //      is not needed here — the library is SSR-import-safe, but we include the web components for safety)
 
   const hasEmbedded = components.some((t) => MESSAGE_EMBEDDED_TAGS.has(t));
   const workspace = isArtifactSplit(components);
@@ -4192,8 +4192,8 @@ function renderTanstackStart(components: readonly string[], ctx: RenderCtx): str
     // TanStack Start uses @tanstack/react-router's createFileRoute
     `import { createFileRoute } from '@tanstack/react-router'`,
     `import { ${block ? 'useEffect, useState' : 'useState'} } from 'react'`,
-    // Elements registration: the library is SSR-import-safe; top-level import is safe here
-    `import '@kitn.ai/ui/elements';  // registers <kai-*> — required, must come first`,
+    // Web-component registration: the library is SSR-import-safe; top-level import is safe here
+    `import '@kitn.ai/ui/web-components';  // registers <kai-*> — required, must come first`,
     `import { ${importList} } from '@kitn.ai/ui/react'`,
     ...wireImportLines({
       typed: true,
@@ -4591,8 +4591,8 @@ function renderAngular(components: readonly string[], ctx: RenderCtx): string {
     `// (@kitn.ai/ui/theme.tokens.css is the compiled token file; theme.css is`,
     `// Tailwind source and is only for apps that compile Tailwind themselves.)`,
     `import { CUSTOM_ELEMENTS_SCHEMA, Component, ElementRef, afterNextRender, ${block ? 'computed, effect, ' : ''}signal, viewChild } from '@angular/core';`,
-    `import '@kitn.ai/ui/elements';  // registers <kai-*> — required, must come first`,
-    `import type { ${elementTypes} } from '@kitn.ai/ui/elements';`,
+    `import '@kitn.ai/ui/web-components';  // registers <kai-*> — required, must come first`,
+    `import type { ${elementTypes} } from '@kitn.ai/ui/web-components';`,
     ...wireImportLines({
       typed: true,
       toolLoop: emitToolLoop,
@@ -4711,7 +4711,7 @@ function renderAngular(components: readonly string[], ctx: RenderCtx): string {
  *
  * The kit is AUTHORED in Solid, so a Solid consumer imports the real components
  * from the `@kitn.ai/ui` root entry and gets real props and real fine-grained
- * reactivity. Routing it through the custom-element facade would ship the Solid
+ * reactivity. Routing it through the web-component facade would ship the Solid
  * runtime twice and put a reactive-context boundary in the middle of the app for
  * no gain.
  *
@@ -5106,13 +5106,13 @@ function renderSolid(components: readonly string[], ctx: RenderCtx): string {
           `// NOT WIRED, and not rendered: ${unrenderedCompanions.join(', ')}.`,
           `// You asked for ${unrenderedCompanions.length === 1 ? 'it' : 'them'} and this target has no branch for`,
           `// ${unrenderedCompanions.length === 1 ? 'it' : 'them'} — see the note below on why this file renders Solid`,
-          `// components rather than <kai-*> elements. Compose the Solid component`,
+          `// components rather than <kai-*> web components. Compose the Solid component`,
           `// yourself (ask the component_reference MCP tool for what it exports), or`,
-          `// scaffold the html target, which drives the custom elements directly.`,
+          `// scaffold the html target, which drives the kai-* web components directly.`,
           `//`,
         ]
       : []),
-    `// This target does NOT use the <kai-*> custom elements, and that is deliberate:`,
+    `// This target does NOT use the <kai-*> web components, and that is deliberate:`,
     `// the kit is AUTHORED in SolidJS, so a Solid app renders the real components`,
     `// with real props and real fine-grained reactivity. Going through the`,
     `// web-component facade would ship the Solid runtime twice and cross a reactive`,
@@ -5128,7 +5128,7 @@ function renderSolid(components: readonly string[], ctx: RenderCtx): string {
     `// The @source line is NOT optional: without it Tailwind scans only src/, strips`,
     `// every kit utility class as unused, and the whole UI renders unstyled.`,
     `// solid.css, not theme.css: theme.css is the tokens only. solid.css imports it and`,
-    `// adds what the kai-* elements carry in their shadow roots and this app has to`,
+    `// adds what the kai-* web components carry in their shadow roots and this app has to`,
     `// compile itself: the form-control and focus-ring rules, tw-animate-css (every`,
     `// overlay animation) and the typography plugin (prose-sm/prose-lg). The two`,
     `// plugins are optional peers of the kit, hence the extra installs above.`,
@@ -6486,32 +6486,32 @@ function compose(
   ].join('\n');
 
   // SCAF-16: loading-options note — inform consumers about the two opt-in load modes
-  // (per-element tree-shaking + autoloader) without changing the default import above.
+  // (per-web-component tree-shaking + autoloader) without changing the default import above.
   // Leads with "the default is right" rather than a size headline; the debug tool
   // carries the full KB breakdown for developers who ask for it.
   // The default varies by framework, so describe what THIS scaffold actually emits:
-  // every framework but `next` emits a top-level `import '@kitn.ai/ui/elements'`;
+  // every framework but `next` emits a top-level `import '@kitn.ai/ui/web-components'`;
   // the next output loads the React wrappers through next/dynamic instead, and each
   // wrapper lazy-registers its own element on first client mount.
   const defaultLoadNote =
     framework === 'solid'
       ? [
-          `The scaffold emits NO \`import '@kitn.ai/ui/elements'\` — a Solid app renders`,
-          `the SolidJS components straight from the root entry, so no custom element is`,
+          `The scaffold emits NO \`import '@kitn.ai/ui/web-components'\` — a Solid app renders`,
+          `the SolidJS components straight from the root entry, so no web component is`,
           `registered at all and your bundler already tree-shakes what you never import.`,
           `Leave it as is. The two modes below matter only if you ALSO put raw \`<kai-*>\``,
           `tags on the page (you do not need to):`,
         ]
       : framework === 'next'
       ? [
-          `The scaffold emits NO \`import '@kitn.ai/ui/elements'\` — it loads the React`,
+          `The scaffold emits NO \`import '@kitn.ai/ui/web-components'\` — it loads the React`,
           `wrappers through next/dynamic, and each wrapper lazy-registers ITS element on`,
-          `first client mount, so you already ship only the elements you use. Leave it as`,
+          `first client mount, so you already ship only the web components you use. Leave it as`,
           `is. Two other modes exist if you drop the wrappers for raw \`<kai-*>\` tags:`,
         ]
       : [
-          `The scaffold uses \`import '@kitn.ai/ui/elements'\` (register-all) — the right`,
-          `default: it registers every kai-* element and is SSR-safe, so leave it as is.`,
+          `The scaffold uses \`import '@kitn.ai/ui/web-components'\` (register-all) — the right`,
+          `default: it registers every kai-* web component and is SSR-safe, so leave it as is.`,
           `Two opt-in modes load less if a page only ever uses a few elements:`,
         ];
 
@@ -6520,12 +6520,12 @@ function compose(
     ``,
     ...defaultLoadNote,
     ``,
-    `  Per-element (bundler apps): import '@kitn.ai/ui/elements/<file>'`,
+    `  Per-web-component (bundler apps): import '@kitn.ai/ui/web-components/<file>'`,
     `    Registers just that element; your bundler tree-shakes the rest away.`,
-    `    Example: import '@kitn.ai/ui/elements/chat'  (client-only — not for SSR)`,
+    `    Example: import '@kitn.ai/ui/web-components/chat'  (client-only — not for SSR)`,
     ``,
     `  Autoloader (no-build / CDN pages): a <script type="module"> tag pointing at`,
-    `    dist/elements/autoloader.js — loads each kai-* element on demand as it`,
+    `    dist/web-components/autoloader.js — loads each kai-* web component on demand as it`,
     `    appears in the DOM. A CDN/static-file tool; not importable through a bundler.`,
     ``,
     `Run the debug tool with "reduce bundle size" for the full breakdown and sizes.`,
@@ -6556,15 +6556,15 @@ function compose(
  *
  * Framework-agnostic (plain TS / DOM) so it drops into any of the front-end
  * targets; the imports are valid from `@kitn.ai/ui` (and `toast` also from
- * `@kitn.ai/ui/elements`).
+ * `@kitn.ai/ui/web-components`).
  */
 function interactionPatternsBlock(): string {
   const toastPattern = [
     `--- Pattern: toast() — confirmation + Undo ---`,
     `// toast is IMPERATIVE — call it; there is no <kai-toast> to place. The first`,
     `// call auto-mounts one <kai-toast-region> on document.body. Exported from`,
-    `// both '@kitn.ai/ui' and '@kitn.ai/ui/elements'.`,
-    `import { toast } from '@kitn.ai/ui/elements';`,
+    `// both '@kitn.ai/ui' and '@kitn.ai/ui/web-components'.`,
+    `import { toast } from '@kitn.ai/ui/web-components';`,
     ``,
     `toast('Copied to clipboard');      // neutral, auto-dismisses`,
     `toast.success('Saved');            // emerald success variant`,
@@ -6577,7 +6577,7 @@ function interactionPatternsBlock(): string {
     ``,
     `// Collapsed (Sonner-style) stacking — toasts pile + expand on hover/focus.`,
     `// Opt in once at startup, or per-region via <kai-toast-region stack="collapsed">.`,
-    `import { configureToasts } from '@kitn.ai/ui/elements';`,
+    `import { configureToasts } from '@kitn.ai/ui/web-components';`,
     `configureToasts({ stack: 'collapsed' });`,
   ].join('\n');
 
@@ -6587,7 +6587,7 @@ function interactionPatternsBlock(): string {
     `// 'dismissed' resolution and collapses to a reopenable stub. Keep dismissed`,
     `// envelopes in your array; wire the policy with dismissRecovery().`,
     `import { dismissRecovery } from '@kitn.ai/ui';`,
-    `import { toast } from '@kitn.ai/ui/elements';`,
+    `import { toast } from '@kitn.ai/ui/web-components';`,
     ``,
     `// Adapter: map dismissRecovery's toast shape onto the imperative toast().`,
     `const toastAdapter = {`,
@@ -6753,7 +6753,7 @@ export const scaffold: Tool = {
     ),
     framework: Framework.describe(
       'Target front-end/back-end framework: html | react | next | vue | svelte | angular | solid | fastapi | express | worker | tanstack-start. ' +
-        'Note "solid" emits the SolidJS components from the @kitn.ai/ui root entry, not <kai-*> elements — the kit is authored in Solid.',
+        'Note "solid" emits the SolidJS components from the @kitn.ai/ui root entry, not <kai-*> web components — the kit is authored in Solid.',
     ),
     suggestions: z
       .array(z.string())

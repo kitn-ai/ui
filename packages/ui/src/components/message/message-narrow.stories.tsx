@@ -3,7 +3,7 @@ import { Message, MessageAvatar, MessageContent } from './message';
 import { ChatContainer } from '../chat/chat-container';
 import { ChatConfig } from '../../primitives/chat-config';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '../resizable/resizable';
-import { componentDescription } from '../../stories/docs/element-controls';
+import { componentDescription } from '../../stories/docs/web-component-controls';
 
 const meta = {
   title: 'Components/Message/Narrow Panel',

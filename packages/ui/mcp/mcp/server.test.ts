@@ -97,7 +97,7 @@ describe('createServer', () => {
     await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
 
     const result = await client.callTool({ name: 'component_reference', arguments: {} });
-    // component_reference with no args returns the list of all kai-* elements
+    // component_reference with no args returns the list of all kai-* web components
     const text = (result.content as { type: string; text: string }[])[0].text;
     expect(text).toMatch(/kai-chat/);
 
@@ -112,7 +112,7 @@ describe('createServer', () => {
   // `request.params.arguments` straight to the handler. The observed failure
   // (candidate A, twice reproduced — see the ladder spec and the W1 harness
   // report): component_reference called with { element: "kai-chat" } instead of
-  // { name: "kai-chat" } silently returned the full 80+-element index with
+  // { name: "kai-chat" } silently returned the full index of 80+ web components with
   // isError unset, which reads as a successful answer to the question asked.
   // These tests pin the loud version, uniformly across all four tools, from the
   // ONE validation path in validate-args.ts.
@@ -150,7 +150,7 @@ describe('createServer', () => {
     expect(text).toMatch(/did you mean "name"/i);
     expect(text).toMatch(/component_reference/);
     // And it must NOT be the silent index the bug returned.
-    expect(text).not.toMatch(/AI\/UI elements \(\d+ total\)/);
+    expect(text).not.toMatch(/AI\/UI web components \(\d+ total\)/);
 
     await close();
   });

@@ -40,16 +40,16 @@ const TARGETS: Record<string, Page> = {
   // time so the CLI's thin server serves static files and compiles nothing at
   // consumer runtime. base './' because dev.ts serves it under /theme-studio/.
   //
-  // The kai-* element bundle is NOT re-bundled into this app: the one dynamic
-  // `import('@kitn.ai/ui/elements')` (apps/theme-studio/kit.ts) is external,
+  // The kai-* web-components bundle is NOT re-bundled into this app: the one dynamic
+  // `import('@kitn.ai/ui/web-components')` (apps/theme-studio/kit.ts) is external,
   // rewritten to the absolute /theme-studio/kit/kai.es.js route, which dev.ts
   // maps onto the package's own dist/ — zero duplication, and this build stays
-  // ordering-independent of build:elements.
+  // ordering-independent of build:web-components.
   'theme-studio': {
     root: 'apps/theme-studio',
     outDir: 'dist/theme-studio',
-    external: ['@kitn.ai/ui/elements'],
-    paths: { '@kitn.ai/ui/elements': '/theme-studio/kit/kai.es.js' },
+    external: ['@kitn.ai/ui/web-components'],
+    paths: { '@kitn.ai/ui/web-components': '/theme-studio/kit/kai.es.js' },
   },
 };
 

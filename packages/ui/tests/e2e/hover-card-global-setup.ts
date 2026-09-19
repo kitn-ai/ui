@@ -20,14 +20,14 @@ import ts from 'typescript';
  * the second only narrowed the window rather than closing it:
  *
  *   v1  newest-under-`src/`  vs  `dist/kai.es.js`
- *       False-positived on a freshly built tree, because `element-types.d.ts` is
+ *       False-positived on a freshly built tree, because `web-component-types.d.ts` is
  *       generated into `src/` by `build:api` in POSTbuild — after the bundle.
  *
  *   v2  newest-under-`src/`  vs  newest-under-`dist/`
  *       Same bug, smaller window. It assumed `dist/` is always written last.
  *       That is not guaranteed, it merely held locally — and it broke a required
  *       CI job on an unrelated PR with
- *       `element-types.d.ts is 0s newer than dist/llms/llms-full.txt`.
+ *       `web-component-types.d.ts is 0s newer than dist/llms/llms-full.txt`.
  *       ZERO SECONDS: same-second writes, decided by scheduling.
  *
  * The mistake both times was counting build OUTPUTS that happen to live under
@@ -38,7 +38,7 @@ import ts from 'typescript';
  * ── THE EXCLUSION IS DERIVED, NOT TYPED ──────────────────────────────────────
  *
  * `scripts/verify-generated-sync.mjs` already owns the authoritative record of
- * "checked-in files DERIVED from src/elements" — that guard exists to prove each
+ * "checked-in files DERIVED from src/web-components" — that guard exists to prove each
  * one still matches its generator. Its `GENERATED` array is read here, so adding
  * a generator updates both guards at once. A private second list in this file is
  * the exact "derive it, don't type it" failure this repo keeps paying for, and
@@ -47,12 +47,12 @@ import ts from 'typescript';
  * It is READ rather than imported because that script is a CLI: it runs the
  * guard and calls `process.exit` at module scope, so importing it would execute
  * it. The read is a real parse (the TypeScript AST, the same approach
- * `gen-element-api.mjs` uses on `slots.ts`) and not a regex, so a change to the
+ * `gen-web-component-api.mjs` uses on `slots.ts`) and not a regex, so a change to the
  * record's shape fails loudly here instead of silently matching nothing.
  *
  * ── WHAT IS DELIBERATELY *NOT* EXCLUDED ──────────────────────────────────────
  *
- * `src/elements/compiled.css` and `src/primitives/card-validate-schemas.ts` are
+ * `src/web-components/compiled.css` and `src/primitives/card-validate-schemas.ts` are
  * generated too, and they STAY in the population on purpose. Both are written by
  * `prebuild`, and both are compiled INTO the bundle — `compiled.css` is imported
  * as `./compiled.css?inline`. If either is newer than the bundle, the bundle
@@ -60,7 +60,7 @@ import ts from 'typescript';
  * input to the artifact under test" is, and the `GENERATED` record happens to
  * name exactly the postbuild outputs that are not.
  *
- * One of those, `element-manifest.json`, is both generated AND imported (by
+ * One of those, `web-component-manifest.json`, is both generated AND imported (by
  * `autoloader.ts`), so excluding it does lose a theoretical signal: a HAND EDIT
  * to it would not be caught here. That is the right trade — it is a generated
  * file, hand-editing it is not a supported operation, and

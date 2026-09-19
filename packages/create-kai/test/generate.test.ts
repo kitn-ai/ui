@@ -685,7 +685,7 @@ describe('generate (solid + full-screen + conversations + mock)', () => {
 
     const entry = await readFile(path.join(dir, 'src/index.tsx'), 'utf8');
     expect(entry).toContain('solid-js/web');
-    expect(entry).not.toContain('@kitn.ai/ui/elements');
+    expect(entry).not.toContain('@kitn.ai/ui/web-components');
   });
 
   it('applies the solid patch — its only one', async () => {

@@ -1,9 +1,9 @@
 /**
  * GUARD — `verify-solid-coverage` still DETECTS, and CI still runs it.
  *
- * The guard itself fails the build when a registered element has no writable SolidJS
+ * The guard itself fails the build when a registered web component has no writable SolidJS
  * equivalent, or when a public component ships no public `<Name>Props` type. Solid is
- * the authored layer here, so an element whose Solid surface is unreachable is a hole
+ * the authored layer here, so a web component whose Solid surface is unreachable is a hole
  * in the source of truth, not a Solid-only inconvenience.
  *
  * WHY IT NEEDS THIS. Every verdict comes out of the TypeScript checker resolving real
@@ -11,7 +11,7 @@
  * intersected with the runtime keys of the BUILT bundle. If any of that resolution
  * quietly stops working — a moved directory, a changed tsconfig, an entry that no
  * longer re-exports — the counts move but the shape of the output does not, and
- * "80/80 elements have a writable SolidJS equivalent" prints either way. A resolver
+ * "80/80 web components have a writable SolidJS equivalent" prints either way. A resolver
  * that resolves nothing reports total coverage of nothing.
  *
  * Each case below runs the script as a subprocess, with NO `--self-test` flag, against
@@ -58,11 +58,11 @@ function fixtureRoot(over: Record<string, string | null> = {}): string {
     'tsconfig.json': JSON.stringify(TSCONFIG, null, 2),
     'src/components/foo.tsx':
       'export type FooProps = { a?: string };\nexport function Foo(props: FooProps) { return <div>{props.a}</div>; }\n',
-    'src/elements/define.tsx':
+    'src/web-components/define.tsx':
       'export function defineWebComponent(tag: string, props: unknown, render: unknown) { return { tag, props, render }; }\n',
-    'src/elements/x.tsx':
+    'src/web-components/x.tsx':
       "import { defineWebComponent } from './define';\nimport { Foo } from '../components/foo';\ndefineWebComponent('kai-x', {}, () => <Foo a=\"hi\" />);\n",
-    'src/elements/element-meta.json': JSON.stringify([{ tag: 'kai-x', displayName: 'X' }], null, 2),
+    'src/web-components/web-component-meta.json': JSON.stringify([{ tag: 'kai-x', displayName: 'X' }], null, 2),
     'src/index.ts': 'export const version = "1";\n',
     'src/solid.ts':
       "export * from './index';\nexport { Foo } from './components/foo';\nexport type { FooProps } from './components/foo';\n",
@@ -123,7 +123,7 @@ describe('the solid-coverage guard detects, and CI runs it', () => {
     ).toContain('--project=unit');
     expect(
       block,
-      `the \`test\` job does not run \`${NPM_SCRIPT}\`. Nothing else checks that a registered element ` +
+      `the \`test\` job does not run \`${NPM_SCRIPT}\`. Nothing else checks that a registered web component ` +
         `is writable in the authored layer.`,
     ).toContain(NPM_SCRIPT);
   });
@@ -131,7 +131,7 @@ describe('the solid-coverage guard detects, and CI runs it', () => {
   it('passes on a synthesized package whose element renders a public component', () => {
     const { code, output } = runGuard(['--package-root', fixtureRoot()]);
     expect(code, `the guard failed a package with nothing wrong with it: ${output}`).toBe(0);
-    expect(output).toContain('1/1 elements have a writable SolidJS equivalent');
+    expect(output).toContain('1/1 web components have a writable SolidJS equivalent');
   });
 
   it('fires when the element renders a component ./solid does not export', () => {
@@ -175,7 +175,7 @@ describe('the solid-coverage guard detects, and CI runs it', () => {
   });
 
   // The `solid-coverage: equivalent` directive — the reviewed facade-site
-  // declaration for elements whose Solid twin shares the contract but not the
+  // declaration for web components whose Solid twin shares the contract but not the
   // render path (kai-view/View). Two subprocess cases: the directive works when
   // it names a PUBLIC component, and it is not an exemption when it does not.
   const SLOT_ONLY_META = JSON.stringify(
@@ -186,21 +186,21 @@ describe('the solid-coverage guard detects, and CI runs it', () => {
 
   it('accepts a slot-only element whose facade declares a PUBLIC solid equivalent', () => {
     const root = fixtureRoot({
-      'src/elements/y.tsx':
+      'src/web-components/y.tsx':
         "import { defineWebComponent } from './define';\n// solid-coverage: equivalent Foo -- same contract, different mechanism\ndefineWebComponent('kai-y', {}, () => <div><slot /></div>);\n",
-      'src/elements/element-meta.json': SLOT_ONLY_META,
+      'src/web-components/web-component-meta.json': SLOT_ONLY_META,
     });
     const { code, output } = runGuard(['--package-root', root]);
     expect(code, `the guard failed a package whose directive names a public component: ${output}`).toBe(0);
-    expect(output).toContain('2/2 elements have a writable SolidJS equivalent');
+    expect(output).toContain('2/2 web components have a writable SolidJS equivalent');
     expect(output, 'the DECLARED verdict is not counted').toContain('DECLARED 1');
   });
 
   it('fires when the declared equivalent is not on the public ./solid surface', () => {
     const root = fixtureRoot({
-      'src/elements/y.tsx':
+      'src/web-components/y.tsx':
         "import { defineWebComponent } from './define';\n// solid-coverage: equivalent Bar -- wishful thinking\ndefineWebComponent('kai-y', {}, () => <div><slot /></div>);\n",
-      'src/elements/element-meta.json': SLOT_ONLY_META,
+      'src/web-components/web-component-meta.json': SLOT_ONLY_META,
     });
     const { code, output } = runGuard(['--package-root', root]);
     expect(code, `the guard exited ${code} on a directive naming a non-public component`).not.toBe(0);
@@ -210,7 +210,7 @@ describe('the solid-coverage guard detects, and CI runs it', () => {
 
   it('fires when a directive sits on an element that is not a TOTAL gap', () => {
     const root = fixtureRoot({
-      'src/elements/x.tsx':
+      'src/web-components/x.tsx':
         "import { defineWebComponent } from './define';\nimport { Foo } from '../components/foo';\n// solid-coverage: equivalent Foo -- dead weight\ndefineWebComponent('kai-x', {}, () => <Foo a=\"hi\" />);\n",
     });
     const { code, output } = runGuard(['--package-root', root]);
@@ -220,8 +220,8 @@ describe('the solid-coverage guard detects, and CI runs it', () => {
 
   it('treats an empty element catalog as a failure, not 0/0 success', () => {
     // Every row is derived from the catalog, so an empty one produced no rows, no
-    // gaps, and a cheerful "0/0 elements have a writable SolidJS equivalent".
-    const root = fixtureRoot({ 'src/elements/element-meta.json': '[]' });
+    // gaps, and a cheerful "0/0 web components have a writable SolidJS equivalent".
+    const root = fixtureRoot({ 'src/web-components/web-component-meta.json': '[]' });
     const { code, output } = runGuard(['--package-root', root]);
     expect(code, 'an empty catalog exited 0, reporting coverage of nothing').not.toBe(0);
     expect(output).toContain('EMPTY CATALOG');

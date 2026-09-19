@@ -6,7 +6,7 @@
 //
 // The renderer emits a token stream now (e66c004d), so raw HTML is a text node; the
 // kit's remaining raw-`innerHTML` write is code-block.tsx, covered by
-// tests/elements/code-block.test.tsx and by the fenced group at the bottom of this
+// tests/web-components/code-block.test.tsx and by the fenced group at the bottom of this
 // file.
 //
 // Two properties are asserted for every vector, and BOTH matter:

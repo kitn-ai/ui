@@ -67,7 +67,7 @@
  * names (`flex`, `rounded`, `shadow`, `transition`, `transform`, `resize`,
  * `backdrop-blur`, `container`) are valid Tailwind utilities themselves. That
  * would normally be free — those eight already have rules in `compiled.css`
- * because components use them — but `src/elements/styles.css` compiles the
+ * because components use them — but `src/web-components/styles.css` compiles the
  * shipped shadow sheet from `@source "../utils"`, so a string literal here that
  * spells a generable class the kit does NOT use would add a rule to every
  * consumer's shadow root. The keys below therefore never spell a generable class

@@ -1,10 +1,10 @@
 ---
 // Declarative light-DOM children an element accepts, from the generated
-// element-meta.json's `declarativeChildren`. These are markup-only child tags
+// web-component-meta.json's `declarativeChildren`. These are markup-only child tags
 // (`<kai-step>`, `<kai-model>`, …) parsed into the equivalent prop item on
 // mount and re-parsed on every light-DOM mutation — the SSR / no-JS-wiring
 // alternative to setting the array prop directly.
-import meta from '@kitn.ai/ui/element-meta.json';
+import meta from '@kitn.ai/ui/web-component-meta.json';
 interface Props { tag: string }
 const { tag } = Astro.props;
 const el = (meta as any[]).find((e) => e.tag === tag);

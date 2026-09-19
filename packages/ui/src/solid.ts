@@ -206,9 +206,9 @@ export { createViewStack } from './components/view/view-stack';
 export type { CreateViewStackOptions } from './components/view/view-stack';
 // ViewStack/View — the pure-Solid twin of `<kai-view-stack>`/`<kai-view>`:
 // same contract (named views, tab roots vs drill views, hidden-not-unmounted
-// inactive content), coordinated through context instead of the elements'
+// inactive content), coordinated through context instead of the web components'
 // light-DOM MutationObserver. `<kai-view>`'s solid-coverage directive
-// (src/elements/view.tsx) names `View` as its writable equivalent, and the
+// (src/web-components/view.tsx) names `View` as its writable equivalent, and the
 // coverage guard verifies that export survives the build.
 export { ViewStack, View, useViewStack } from './components/view/view-stack';
 export type { ViewStackProps, ViewProps, ViewStackController, ViewStackState, ViewEntry } from './components/view/view-stack';

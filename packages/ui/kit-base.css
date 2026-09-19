@@ -2,8 +2,8 @@
    consumers are different style paths, which is the whole reason this file
    exists:
 
-     src/elements/styles.css  compiled to compiled.css and adopted into every
-                              kai-* shadow root (the ./elements and ./define
+     src/web-components/styles.css  compiled to compiled.css and adopted into every
+                              kai-* shadow root (the ./web-components and ./define
                               entries). It also sets the :host rules.
      solid.css                Tailwind SOURCE that a light-DOM SolidJS consumer
                               @imports into their own Tailwind build (the . and
@@ -19,7 +19,7 @@
    NEVER copy a rule from here into either consumer, and never add a rule to one
    consumer that both need. Add it here. The one thing that cannot live here is
    :host, which selects nothing in a light DOM; those rules stay in
-   src/elements/styles.css, and .storybook/styles.css re-states them on body.
+   src/web-components/styles.css, and .storybook/styles.css re-states them on body.
 
    This file relies on the --color-* tokens from theme.css and on the classes
    tw-animate-css emits; both consumers import those alongside it. */

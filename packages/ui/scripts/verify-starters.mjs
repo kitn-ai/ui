@@ -51,7 +51,7 @@
 // browser). This guard is the compile floor beneath both, not a substitute.
 //
 // Deliberately NOT attempted: grepping the emitted bundles for `kai-*` tags to
-// "prove" registration survived. Every element's tag name appears in the kit's
+// "prove" registration survived. Every web component's tag name appears in the kit's
 // metadata whether or not the `customElements.define` calls were tree-shaken,
 // so that check passes on a broken build. `verify:consumer` does this properly,
 // against a packed tarball, by counting defines in the emitted chunk.
@@ -353,7 +353,7 @@ if (problems.length > 0) {
 //
 // ROOT IS BANNED OUTRIGHT HERE, not merely discouraged: because "./solid" is a
 // superset, a Solid app has no reason to reach for "." at all. Every OTHER
-// subpath stays legal (`/state`, `/wire`, `/elements`, ...) — those are
+// subpath stays legal (`/state`, `/wire`, `/web-components`, ...) — those are
 // framework-neutral and Solid consumers use them normally. This says nothing
 // about the Vue/Svelte/vanilla starters, which import types from "." correctly.
 //

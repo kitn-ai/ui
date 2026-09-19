@@ -141,7 +141,7 @@ describe('registry.tags / registry.components fit the render seam', () => {
   const componentsIntoMerge: Parameters<typeof mergeCardComponents>[0] = registry.components;
   // Reverse: the registry's own field types are no NARROWER than the seam's, so a
   // consumer can build a map by hand and assign it in. Mutual assignability, the same
-  // shape inline-element-types.test.ts uses, because one direction alone passes for a
+  // shape inline-web-component-types.test.ts uses, because one direction alone passes for a
   // type that is merely a subtype.
   const seamTagsIntoRegistry: typeof registry.tags = {} as CardTagMap;
   const seamComponentsIntoRegistry: typeof registry.components = {} as CardComponentMap;

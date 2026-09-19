@@ -6,10 +6,10 @@ const kebab = (n) => n.replace(/([A-Z])/g, '-$1').toLowerCase();
 // ---------------------------------------------------------------------------
 // Type-shortening map — DISPLAY ONLY (markdown). These are the fully-expanded
 // inline object types emitted by the TypeScript compiler, mapped back to their
-// readable named aliases. Do NOT use these aliases anywhere else (element-types
+// readable named aliases. Do NOT use these aliases anywhere else (web-component-types
 // .d.ts must keep the full expansions so consumers get complete type info).
 //
-// To update: run `node -e "const m=require('./src/elements/element-meta.json');
+// To update: run `node -e "const m=require('./src/web-components/web-component-meta.json');
 // console.log(m.find(e=>e.tag==='kai-chat').props.find(p=>p.name==='messages').type)"`
 // and add the resulting string → alias pair.
 // ---------------------------------------------------------------------------
@@ -132,10 +132,10 @@ function iconRosterBlock(root) {
 //
 // Everything OUTSIDE a `<!-- spec:… -->` marker in docs/web-components.md is
 // hand-written prose that this generator preserves byte-for-byte. That is
-// exactly why the element count rotted: it was typed by hand as "27" while the
+// exactly why the web-component count rotted: it was typed by hand as "27" while the
 // kit had grown to 80, and `verify:generated` could not see it — regeneration
 // reproduced the stale sentence byte-identically, so the drift check passed.
-// Re-typing "80" here would rot the same way on the next element.
+// Re-typing "80" here would rot the same way on the next web component.
 //
 // So the count is DERIVED from the same in-memory model that writes every table
 // below. It now moves with the roster on its own, and because it lives inside a
@@ -143,9 +143,9 @@ function iconRosterBlock(root) {
 // ---------------------------------------------------------------------------
 
 /**
- * Editorial: the three headline elements. The purposes are authored prose (the
+ * Editorial: the three headline web components. The purposes are authored prose (the
  * model's own descriptions are written for a props table, not a lede); the tags
- * are checked against the model so this block can never advertise an element
+ * are checked against the model so this block can never advertise a web component
  * the kit stopped shipping.
  */
 const FEATURED = [
@@ -162,7 +162,7 @@ function overviewBlock(elements) {
       `gen-web-components-md: the Overview block features ${missing.join(', ')}, ` +
         'which the element model no longer contains. Update FEATURED in ' +
         'scripts/gen-web-components-md.mjs rather than shipping a roster that ' +
-        'points at an element the kit does not have.',
+        'points at a web component the kit does not have.',
     );
   }
   const rows = FEATURED.map(([tag, purpose]) => `| \`<${tag}>\` | ${purpose} |`).join('\n');
@@ -201,7 +201,7 @@ function tablesFor(el) {
 
   // The imperative half of the interaction API. `params`/`returns` are the
   // AUTHORED text, not the self-contained expansion the .d.ts carries (see
-  // `withDts` in gen-element-api.mjs): this table is read by a human, the .d.ts
+  // `withDts` in gen-web-component-api.mjs): this table is read by a human, the .d.ts
   // by a compiler.
   //
   // A `|` inside a signature (`HTMLElement | null`) splits the markdown row even
@@ -273,7 +273,7 @@ export function writeWebComponentsMd(root, elements) {
   const path = resolve(root, '..', '..', 'docs/web-components.md');
   let md = readFileSync(path, 'utf8');
 
-  // Derived element counts — see overviewBlock. Unlike the per-element blocks
+  // Derived web-component counts — see overviewBlock. Unlike the per-web-component blocks
   // below there is no "insert it on first run" fallback: this region wraps
   // hand-written prose, so guessing where to put it would be worse than saying
   // it is gone. A missing marker is the stale-count bug coming back, so fail.
@@ -284,7 +284,7 @@ export function writeWebComponentsMd(root, elements) {
     if (!re.test(md)) {
       throw new Error(
         `gen-web-components-md: docs/web-components.md has no ${start} … ${end} region. ` +
-          'It carries the DERIVED element count; without it the count is hand-typed ' +
+          'It carries the DERIVED web-component count; without it the count is hand-typed ' +
           'prose again and goes stale silently (regeneration reproduces it exactly, ' +
           'so verify:generated cannot see it). Restore the markers.',
       );
@@ -304,9 +304,9 @@ export function writeWebComponentsMd(root, elements) {
       // Subsequent runs: rewrite the block in place.
       md = md.replace(re, replacement);
     } else {
-      // First run: insert markers right after the element's heading line.
+      // First run: insert markers right after the web component's heading line.
       // Headings look like:  ### `<kai-chat>` / `KaiChat`
-      // The / KitnClass suffix is optional (some elements may not have it).
+      // The / KitnClass suffix is optional (some web components may not have it).
       const headingRe = new RegExp(
         `(### \`<${el.tag}>\`[^\\n]*\\n)`,
       );

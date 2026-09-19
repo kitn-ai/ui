@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { HoverCard } from './hover-card';
 import { Button } from '../button/button';
-import { componentDescription } from '../../stories/docs/element-controls';
+import { componentDescription } from '../../stories/docs/web-component-controls';
 
 const meta = {
   title: 'Components/HoverCard',

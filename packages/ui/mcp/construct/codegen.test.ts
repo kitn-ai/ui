@@ -150,7 +150,7 @@ describe('generateProject (widget + mock core)', () => {
     // clipped a focus ring (round 4 patched the symptom with inline padding).
     // Owner-ruled root cause: emitApp was re-deriving layout the kit already
     // owns. ChatThread (chat-thread.tsx) — the same composition
-    // src/elements/chat.tsx renders behind <kai-chat> — owns the message
+    // src/web-components/chat.tsx renders behind <kai-chat> — owns the message
     // list AND the composer (padding, focus ring, send button) as one unit,
     // so there is nothing left here to restate.
     const app = file(generateProject(construct()), 'src/App.tsx');
@@ -1863,7 +1863,7 @@ describe('the app header strip — `split` composes the promoted AppHeader (2026
   // The owner-reported defect: the emitted Workspace rendered its header chrome
   // as a text "Theme" button, no search at all and a bare avatar, all inside
   // ChatThread's own header row (so, inside the chat rail's width). The story
-  // `src/elements/builder-workspace.stories.tsx` is the binding acceptance
+  // `src/web-components/builder-workspace.stories.tsx` is the binding acceptance
   // surface; its `AppHeader` is now a real component and codegen composes THAT.
   const split = (over: Record<string, unknown> = {}): Construct =>
     construct({

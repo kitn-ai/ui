@@ -9,10 +9,10 @@ It can be consumed two ways:
 
 ## Highlights
 
-- **Composable components** across three layers: headless primitives → Solid components (the accessible building blocks and the AI surface, built in-house, WCAG 2.1 AA — no third-party UI dependency) → `kai-*` web components. `npm run verify:solid-coverage` prints the current element and component counts.
+- **Composable components** across three layers: headless primitives → Solid components (the accessible building blocks and the AI surface, built in-house, WCAG 2.1 AA — no third-party UI dependency) → `kai-*` web components. `npm run verify:solid-coverage` prints the current web-component and component counts.
 - **Shadow-DOM web components** — zero CSS conflicts in any host. The host's styles can't leak in; the kit's Tailwind can't leak out.
-- **Load it your way** — register every element in one import, cherry-pick per-element with a bundler, or drop in a CDN autoloader that loads each on demand. Syntax highlighting loads lazily, per language, only when you render code.
-- **Tailwind v4** design tokens — rebrand every element by overriding `--kai-color-*` custom properties on `:root`.
+- **Load it your way** — register every web component in one import, cherry-pick per-web-component with a bundler, or drop in a CDN autoloader that loads each on demand. Syntax highlighting loads lazily, per language, only when you render code.
+- **Tailwind v4** design tokens — rebrand every web component by overriding `--kai-color-*` custom properties on `:root`.
 
 ## Install
 
@@ -30,14 +30,14 @@ npm install solid-js
 
 ### Option A — Web components (any framework / plain HTML)
 
-`npm install` ships the built bundle, so there is nothing to compile. Import it once as a side effect and every element registers itself:
+`npm install` ships the built bundle, so there is nothing to compile. Import it once as a side effect and every web component registers itself:
 
 ```html
 <body style="height: 100vh; margin: 0;">
   <kai-chat style="display:block; height:100%;"></kai-chat>
 
   <script type="module">
-    import '@kitn.ai/ui/elements';
+    import '@kitn.ai/ui/web-components';
 
     // Registration is async (SSR-safe) — wait for the element to be defined
     // before setting properties, or the upgrade clobbers them.
@@ -59,11 +59,11 @@ npm install solid-js
 </body>
 ```
 
-The element bundle is **ES-module only** and loads via `<script type="module">` in every modern browser. See **[docs/web-components.md](https://github.com/kitn-ai/ui/blob/main/docs/web-components.md)** for the full element API (every property, event, and the `ChatMessage` schema).
+The web-components bundle is **ES-module only** and loads via `<script type="module">` in every modern browser. See **[docs/web-components.md](https://github.com/kitn-ai/ui/blob/main/docs/web-components.md)** for the full web-component API (every property, event, and the `ChatMessage` schema).
 
 #### Or load from a CDN (no build, no npm)
 
-The element bundle is a self-contained ES module — load it directly from [jsDelivr](https://www.jsdelivr.com/package/npm/@kitn.ai/ui) or [unpkg](https://unpkg.com/browse/@kitn.ai/ui/), no install or bundler required:
+The web-components bundle is a self-contained ES module — load it directly from [jsDelivr](https://www.jsdelivr.com/package/npm/@kitn.ai/ui) or [unpkg](https://unpkg.com/browse/@kitn.ai/ui/), no install or bundler required:
 
 ```html
 <script type="module">
@@ -80,9 +80,9 @@ The URLs above track the **latest** release — handy for trying things out. **F
 
 > **Pin `0.25.0` or newer.** Every version from `0.14.1` through `0.24.0` is covered by a [critical security advisory](https://github.com/kitn-ai/ui/security/advisories) and is deprecated on npm. `npm install` warns you about a deprecated version; **a CDN fetch does not**, so an old pinned URL in a page keeps serving the vulnerable bundle silently.
 
-One fetch registers everything — right for a `<kai-chat>` page, which pulls most of the kit anyway. A page placing only an element or two can load `dist/elements/autoloader.js` instead, which fetches each element on demand (see [Loading](#loading)).
+One fetch registers everything — right for a `<kai-chat>` page, which pulls most of the kit anyway. A page placing only a web component or two can load `dist/web-components/autoloader.js` instead, which fetches each web component on demand (see [Loading](#loading)).
 
-SolidJS and the kit's CSS are bundled in, and the lazy code-highlighting chunks load from the same CDN on demand. To retheme the elements, set `--kai-color-*` custom properties on `:root` — no stylesheet needed (see [Theming](#theming)). Include `theme.tokens.css` only when you want the kit's `--color-*` tokens for your own page chrome around the elements:
+SolidJS and the kit's CSS are bundled in, and the lazy code-highlighting chunks load from the same CDN on demand. To retheme the web components, set `--kai-color-*` custom properties on `:root` — no stylesheet needed (see [Theming](#theming)). Include `theme.tokens.css` only when you want the kit's `--color-*` tokens for your own page chrome around the web components:
 
 ```html
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/theme.tokens.css">
@@ -136,7 +136,7 @@ The components are deliberately **transport-agnostic**: `<kai-chat>` just render
 <kai-chat id="chat" style="display:block; height:100vh;"></kai-chat>
 
 <script type="module">
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
   import { createAssistantStream } from '@kitn.ai/ui/state';
   import { readOpenAIStream, toOpenAIMessages } from '@kitn.ai/ui/wire';
 
@@ -303,7 +303,7 @@ Syntax highlighting uses [Shiki](https://shiki.style) and is wired to be as ligh
 - Default languages: `javascript`/`js`, `typescript`/`ts`, `tsx`, `json`, `bash`/`sh`. Add more or turn it off:
 
 ```js
-import { configureCodeHighlighting } from '@kitn.ai/ui/elements'; // or '@kitn.ai/ui'
+import { configureCodeHighlighting } from '@kitn.ai/ui/web-components'; // or '@kitn.ai/ui'
 
 configureCodeHighlighting({
   languages: { python: () => import('@shikijs/langs/python') },
@@ -313,11 +313,11 @@ configureCodeHighlighting({
 configureCodeHighlighting({ enabled: false });
 ```
 
-Per element: `<kai-chat codeHighlight={false}>` renders code as plain text.
+Per web component: `<kai-chat codeHighlight={false}>` renders code as plain text.
 
 ## Theming
 
-Every element reads its colors from `--color-*` custom properties, and each of those is defined on `:host` inside the shadow root as `var(--kai-color-*, <default>)`. A `:host` declaration beats anything inherited from the page, so setting `--color-primary` on `:root` does NOT reach the elements. Set the `--kai-` names instead; custom properties inherit through the shadow boundary and the `:host` fallback picks them up:
+Every web component reads its colors from `--color-*` custom properties, and each of those is defined on `:host` inside the shadow root as `var(--kai-color-*, <default>)`. A `:host` declaration beats anything inherited from the page, so setting `--color-primary` on `:root` does NOT reach the web components. Set the `--kai-` names instead; custom properties inherit through the shadow boundary and the `:host` fallback picks them up:
 
 ```css
 :root {
@@ -327,7 +327,7 @@ Every element reads its colors from `--color-*` custom properties, and each of t
 }
 ```
 
-To rebrand one element rather than the page, target the element itself. A rule in the document (`kai-chat { --color-primary: #7c3aed }`) outranks the shadow root's `:host` rule, so the bare `--color-*` names work there.
+To rebrand one web component rather than the page, target the element itself. A rule in the document (`kai-chat { --color-primary: #7c3aed }`) outranks the shadow root's `:host` rule, so the bare `--color-*` names work there.
 
 The kit's CSS is injected into each shadow root automatically, so the token stylesheet is optional for web components. The unprefixed `--color-*` names it defines are for your own host-page chrome and the light-DOM SolidJS components, which have no shadow root.
 
@@ -338,7 +338,7 @@ Two builds of the same tokens; the condition is whether **Tailwind processes the
 - **`@kitn.ai/ui/theme.css`** — Tailwind v4 source (`@theme` block; needs `tailwindcss` as a peer). Import it only in an app whose build runs Tailwind over its CSS. Served raw to a browser, the `@theme` block is discarded whole and the tokens never apply.
 - **`@kitn.ai/ui/theme.tokens.css`** — the compiled plain-CSS build of the same tokens, no toolchain requirements. Use it in every non-Tailwind bundler app and for `<link>`/CDN pages.
 
-For the SolidJS components (Option B) import **`@kitn.ai/ui/solid.css`** instead of `theme.css`. It imports `theme.css` and adds what the `kai-*` elements carry in their shadow roots and a light-DOM app must compile itself: the form-control and focus-ring rules, `tw-animate-css` (overlay animations) and `@tailwindcss/typography` (`prose-*`). Those two are optional peer dependencies: `npm i -D tw-animate-css @tailwindcss/typography`. Keep the `@source` line pointing at the kit either way.
+For the SolidJS components (Option B) import **`@kitn.ai/ui/solid.css`** instead of `theme.css`. It imports `theme.css` and adds what the `kai-*` web components carry in their shadow roots and a light-DOM app must compile itself: the form-control and focus-ring rules, `tw-animate-css` (overlay animations) and `@tailwindcss/typography` (`prose-*`). Those two are optional peer dependencies: `npm i -D tw-animate-css @tailwindcss/typography`. Keep the `@source` line pointing at the kit either way.
 
 ## For AI agents / LLMs
 
@@ -353,7 +353,7 @@ Config for other harnesses (Codex, OpenCode, VS Code, GitHub Copilot, Cursor, Wi
 The package also ships [llmstxt.org](https://llmstxt.org)-style files so coding agents (Claude Code, Copilot, Cursor, Codex) can wire up the components correctly:
 
 - **[`llms.txt`](./llms.txt)** — dense orientation: install, the property-vs-attribute rule, the two-layer architecture, theming, and framework wiring.
-- **[`llms-full.txt`](./llms-full.txt)** — the above plus a generated props/events reference for every `kai-*` element, a streaming recipe, and a build runbook.
+- **[`llms-full.txt`](./llms-full.txt)** — the above plus a generated props/events reference for every `kai-*` web component, a streaming recipe, and a build runbook.
 
 Both are auto-generated from `dist/custom-elements.json` during `npm run build` (so they never drift) and are published in the npm package — find them at `node_modules/@kitn.ai/ui/llms.txt` after install.
 
@@ -386,10 +386,10 @@ This catches packaging / exports / SSR / scaffold-output bugs that the unit suit
 
 ```
 src/
-  primitives/    Headless logic hooks + ChatConfig + on-demand highlighter
-  components/    Every Solid component — accessible building blocks (Button, Dropdown, Tooltip, HoverCard, …) and the AI surface (Message, PromptInput, Markdown, Tool, …). Built in-house, no third-party UI deps
-  elements/      Web-component facades + defineWebComponent wrapper + Vite lib entry
-  stories/       Composed example stories (full chat app, layouts)
+  primitives/     Headless logic hooks + ChatConfig + on-demand highlighter
+  components/     Every Solid component — accessible building blocks (Button, Dropdown, Tooltip, HoverCard, …) and the AI surface (Message, PromptInput, Markdown, Tool, …). Built in-house, no third-party UI deps
+  web-components/ Web-component facades + defineWebComponent wrapper + Vite lib entry
+  stories/        Composed example stories (full chat app, layouts)
 theme.css        Design tokens (--color-*), animations, markdown styles
 docs/
   web-components.md   Full web-component API reference
@@ -403,7 +403,7 @@ A set of runnable examples and a hosted component playground are included in the
 
 ### Composable showcase
 
-The composable showcase demonstrates every individual element in one page. Build the package first, then serve from the repo root:
+The composable showcase demonstrates every individual web component in one page. Build the package first, then serve from the repo root:
 
 ```bash
 npm run build     # produces dist/kai.es.js
@@ -444,23 +444,23 @@ cd examples/vue && npm install && npm run dev
 
 ### Docs and reference
 
-- **[docs/web-components.md](https://github.com/kitn-ai/ui/blob/main/docs/web-components.md)** — full element API: every property, event, and the `ChatMessage` schema.
+- **[docs/web-components.md](https://github.com/kitn-ai/ui/blob/main/docs/web-components.md)** — full web-component API: every property, event, and the `ChatMessage` schema.
 - **[llms.txt](llms.txt)** / **[llms-full.txt](llms-full.txt)** — dense machine-readable references for AI coding agents.
 
 ## Loading
 
-Three ways to load the elements — register all (the simple default), cherry-pick per-element, or a CDN autoloader:
+Three ways to load the web components — register all (the simple default), cherry-pick per-web-component, or a CDN autoloader:
 
 | How you load | What it does |
 |---|---|
-| `import '@kitn.ai/ui/elements'` | registers every element — the simple default |
-| `import '@kitn.ai/ui/elements/chat'` | one element, bundler tree-shakes |
-| `import '@kitn.ai/ui/autoloader'` (opt-in **DOM autoloader**) | loads each element's module **on demand** as `<kai-*>` appears |
+| `import '@kitn.ai/ui/web-components'` | registers every web component — the simple default |
+| `import '@kitn.ai/ui/web-components/chat'` | one web component, bundler tree-shakes |
+| `import '@kitn.ai/ui/autoloader'` (opt-in **DOM autoloader**) | loads each web component's module **on demand** as `<kai-*>` appears |
 
 The autoloader watches the DOM (initial scan + `MutationObserver`) and dynamically imports only the
-elements actually present — so a page with just `<kai-chat>` never downloads the others. It's additive:
-the register-all bundle stays the default. (Direct per-element imports and the autoloader are client-side;
-SSR apps use the register-all `@kitn.ai/ui/elements` or render client-only.)
+web components actually present — so a page with just `<kai-chat>` never downloads the others. It's additive:
+the register-all bundle stays the default. (Direct per-web-component imports and the autoloader are client-side;
+SSR apps use the register-all `@kitn.ai/ui/web-components` or render client-only.)
 
 Code highlighting (Shiki) is always lazy — loaded per-language on first code block, with no WASM, and never
 at all if you don't render code. The build is ES-module only (a UMD/IIFE build can't code-split).

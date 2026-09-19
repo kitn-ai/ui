@@ -5,7 +5,7 @@ what each one requires, and the invariants that must hold. It exists so a coding
 agent building `kai-*` into someone else's app has the **contracts** — which
 event carries which detail, which prop must be a JS property, what breaks if you
 set the same array back — and not just a prop list it can already read off
-`element-meta.json`.
+`web-component-meta.json`.
 
 The measurement is the point. An acceptance deck of seven scenarios hands an
 agent the catalog and **no kit source**; whatever it cannot build names what the
@@ -26,7 +26,7 @@ of the tree by a generator; everything else is written by hand.
 
 | file | what it is | who writes it | edit by hand? |
 | --- | --- | --- | --- |
-| `derived.json` | Every element's props/events/methods/parts, the `MessagePart` variants, integrations, capability groups, theme tokens, event exceptions | `scripts/gen-catalog.mjs`, via `build:api` | **Never.** Change the source it reads (`src/elements/element-meta.json`, `src/elements/chat-types.ts`, `mcp/registry.ts`, `archetypes.ts`, `theme.css`) and regenerate |
+| `derived.json` | Every web component's props/events/methods/parts, the `MessagePart` variants, integrations, capability groups, theme tokens, event exceptions | `scripts/gen-catalog.mjs`, via `build:api` | **Never.** Change the source it reads (`src/web-components/web-component-meta.json`, `src/web-components/chat-types.ts`, `mcp/registry.ts`, `archetypes.ts`, `theme.css`) and regenerate |
 | `catalog-types.ts` | The Zod schemas every authored record is parsed against | you | yes |
 | `invariants.ts` | The rules that break real consumers, each with a statement, `diagnosis` symptom/cause pairs, wrong/right code examples, and an honest `enforcedBy` | you | yes |
 | `surfaces.ts` | `inventory` (what is a surface vs an ingredient vs corpus), `surfaceRecipes` (proven compositions with their host wiring written out), `partConsumption` | you | yes |
@@ -67,7 +67,7 @@ Three things fire on their own. You do not have to do anything for these.
 end of it, so a normal build keeps the derived layer current:
 
 ```
-"build:api": "node scripts/gen-elements-manifest.mjs && node scripts/gen-element-api.mjs && node scripts/gen-catalog.mjs"
+"build:api": "node scripts/gen-web-components-manifest.mjs && node scripts/gen-web-component-api.mjs && node scripts/gen-catalog.mjs"
 ```
 
 **`verify:generated` fails CI if a checked-in generated artifact is stale.**
@@ -80,7 +80,7 @@ verify-generated-sync: regenerating 9 artifacts via `npm run build:api`
 
   · model parsed: 80 kai-* elements
 
-  ✓ packages/ui/src/elements/element-meta.json
+  ✓ packages/ui/src/web-components/web-component-meta.json
   ...
   ✓ packages/ui/mcp/catalog/derived.json
   ✓ docs/web-components.md

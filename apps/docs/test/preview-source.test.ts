@@ -30,14 +30,14 @@ describe('previewSource', () => {
 describe('rewriteKitBase', () => {
   const form = [
     '<script type="module">',
-    `import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui@${VERSION}/dist/elements/autoloader.js'; // x-release-please-version`,
+    `import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui@${VERSION}/dist/web-components/autoloader.js'; // x-release-please-version`,
     `import { readModelStream } from 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui@${VERSION}/dist/wire.js';`,
     '</script>',
   ].join('\n');
 
   it('points every kit import at the local mount', () => {
     const out = rewriteKitBase(form, 'support-widget.cdn.html');
-    expect(out).toContain(`import '${LOCAL_KIT_BASE}elements/autoloader.js'`);
+    expect(out).toContain(`import '${LOCAL_KIT_BASE}web-components/autoloader.js'`);
     expect(out).toContain(`from '${LOCAL_KIT_BASE}wire.js'`);
     expect(out).not.toContain('cdn.jsdelivr.net');
   });

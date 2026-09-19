@@ -17,7 +17,7 @@
 // signature_delta, the block stop). They depend on consume.ts gating reasoning
 // on `reasoning !== undefined || reasoningRaw || reasoningSignature` rather than
 // on truthiness. Under the old guard all three vanish.
-import type { MessageSource } from '../../elements/chat-types';
+import type { MessageSource } from '../../web-components/chat-types';
 import type { ModelStreamChunk, ModelUsage, WireFormat, WireFormatReader } from '../chunk';
 
 function isRecord(v: unknown): v is Record<string, unknown> {

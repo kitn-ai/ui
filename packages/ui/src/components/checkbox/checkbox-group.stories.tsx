@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { fn } from 'storybook/test';
 import { createSignal } from 'solid-js';
 import { CheckboxGroup, type CheckboxGroupProps } from './checkbox-group';
-import { componentDescription } from '../../stories/docs/element-controls';
+import { componentDescription } from '../../stories/docs/web-component-controls';
 
 const meta = {
   title: 'Components/CheckboxGroup',

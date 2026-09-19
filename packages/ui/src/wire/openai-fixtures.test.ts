@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { readOpenAIStream } from './read';
 import { OPENAI_FIXTURES } from './fixtures/openai/index';
 import { nullSink, recordingSink, replayBytes } from './fixtures/replay';
-import type { MessagePart } from '../elements/chat-types';
+import type { MessagePart } from '../web-components/chat-types';
 
 const read = (name: string, sink = nullSink()) => {
   const sse = OPENAI_FIXTURES[name];

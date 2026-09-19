@@ -8,7 +8,7 @@ import { BUILTIN_CARD_COMPONENTS } from '../../src/primitives/card-registry';
 import { CardRenderer } from '../../src/components/card/card-renderer';
 import { CardProvider } from '../../src/primitives/card-host';
 import { upsertCardPart } from '../../src/state/parts';
-import type { MessagePart } from '../../src/elements/chat-types';
+import type { MessagePart } from '../../src/web-components/chat-types';
 import type { CardEnvelope, CardEvent, CardHost } from '../../src/primitives/card-contract';
 
 afterEach(() => { document.body.innerHTML = ''; });

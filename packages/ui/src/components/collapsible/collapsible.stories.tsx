@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { fn } from 'storybook/test';
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from './collapsible';
-import { componentDescription } from '../../stories/docs/element-controls';
+import { componentDescription } from '../../stories/docs/web-component-controls';
 
 const meta = {
   title: 'Components/Collapsible',

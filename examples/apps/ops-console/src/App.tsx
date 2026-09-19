@@ -11,7 +11,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Chat, Resizable, ResizableItem } from '@kitn.ai/ui/react';
 import { applyResolution, dismissRecovery, listenForCardEvents } from '@kitn.ai/ui';
 import type { CardEnvelope, CardEvent, CardPolicy, RecoveryToast } from '@kitn.ai/ui';
-import { toast } from '@kitn.ai/ui/elements';
+import { toast } from '@kitn.ai/ui/web-components';
 import type { ChatMessage } from '@kitn.ai/ui/state';
 import { APPROVAL_ACTION_IDS, CARD, cards } from '../shared/cards';
 import type { CardOutcomes } from './assistant';

@@ -91,7 +91,7 @@ export const archetypes: Archetype[] = [
    * THE PRESET THAT EXISTS TO MAKE A CAPABILITY REACHABLE, not to name a product
    * shape someone asked for.
    *
-   * `kai-file-upload` and `kai-attachments` were registered elements that NO
+   * `kai-file-upload` and `kai-attachments` were registered web components that NO
    * preset composed, and `listCapabilityGroups` derives its answer from this
    * table — so the attachments capability reached neither `listSurfaceProbes`
    * nor `verify:scaffold`, and `renderSurface` had no branch that emitted either

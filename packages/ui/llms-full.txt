@@ -29,7 +29,7 @@ Only scalar values (string/number/boolean) work as attributes (e.g. `placeholder
 
 ## Two layers
 
-**Layer 1 — batteries-included web components** (`import '@kitn.ai/ui/elements'`):
+**Layer 1 — batteries-included web components** (`import '@kitn.ai/ui/web-components'`):
 Drop an element into any framework (React, Vue, plain HTML). Data in via JS properties; interactions out via non-bubbling CustomEvents.
 
 - `<kai-chat>` — full chat UI (message list + prompt input). The primary starting point.
@@ -117,7 +117,7 @@ Types are importable: `import type { ChatMessage, MessagePart, MessageSource } f
 
 **Plain HTML / CDN**
 ```html
-<script type="module" src="https://unpkg.com/@kitn.ai/ui/elements"></script>
+<script type="module" src="https://unpkg.com/@kitn.ai/ui/web-components"></script>
 <kai-chat style="display:block;height:100vh"></kai-chat>
 <script type="module">
   const chat = document.querySelector('kai-chat');
@@ -171,12 +171,12 @@ npm install @kitn.ai/ui
 ```
 
 ### 2 — Pick your layer
-Drop-in: use `<kai-chat>` for a full chat UI in one tag (`import '@kitn.ai/ui/elements'`).
+Drop-in: use `<kai-chat>` for a full chat UI in one tag (`import '@kitn.ai/ui/web-components'`).
 Composable: combine `<kai-message>`, `<kai-prompt-input>`, `<kai-reasoning>`, … in your own markup.
 
 ### 3 — Handle `submit` and stream
 ```js
-import '@kitn.ai/ui/elements';
+import '@kitn.ai/ui/web-components';
 // The streaming fold. It is 5 lines if you would rather inline it: see the
 // Streaming recipe below.
 import { appendTextPart } from '@kitn.ai/ui/state';
@@ -346,14 +346,14 @@ Every export (57, derived from `dist/state/index.d.ts`):
 | `MockSource` | type | `mock` |
 | `MockToolCall` | type | `mock` |
 | `MockTurn` | type | `mock` |
-| `ChatMessage` | type | `../elements/chat-types` |
-| `ChatMessageAction` | type | `../elements/chat-types` |
-| `CustomAction` | type | `../elements/chat-types` |
-| `AvatarData` | type | `../elements/chat-types` |
-| `FeedbackVote` | type | `../elements/chat-types` |
-| `MessagePart` | type | `../elements/chat-types` |
-| `MessageSource` | type | `../elements/chat-types` |
-| `RawOrigin` | type | `../elements/chat-types` |
+| `ChatMessage` | type | `../web-components/chat-types` |
+| `ChatMessageAction` | type | `../web-components/chat-types` |
+| `CustomAction` | type | `../web-components/chat-types` |
+| `AvatarData` | type | `../web-components/chat-types` |
+| `FeedbackVote` | type | `../web-components/chat-types` |
+| `MessagePart` | type | `../web-components/chat-types` |
+| `MessageSource` | type | `../web-components/chat-types` |
+| `RawOrigin` | type | `../web-components/chat-types` |
 | `ToolPart` | type | `../components/tool/tool-types` |
 | `ToolKind` | type | `../components/tool/tool-classify` |
 | `classifyTool` | value | `../components/tool/tool-classify` |
@@ -715,10 +715,10 @@ Every export (66, derived from `dist/wire/index.d.ts`):
 | `StopReason` | type | `chunk` |
 | `WireFormat` | type | `chunk` |
 | `WireFormatReader` | type | `chunk` |
-| `ChatMessage` | type | `../elements/chat-types` |
-| `MessagePart` | type | `../elements/chat-types` |
-| `MessageSource` | type | `../elements/chat-types` |
-| `RawOrigin` | type | `../elements/chat-types` |
+| `ChatMessage` | type | `../web-components/chat-types` |
+| `MessagePart` | type | `../web-components/chat-types` |
+| `MessageSource` | type | `../web-components/chat-types` |
+| `RawOrigin` | type | `../web-components/chat-types` |
 | `ToolPart` | type | `../components/tool/tool-types` |
 
 #### `@kitn.ai/ui/wire` · `read` — the shipped declarations
@@ -2459,7 +2459,7 @@ _No events._
 | Property | Attribute | Type | Description |
 |---|---|---|---|
 | `theme` | `theme` | `"light" \| "dark" \| "auto"` | Color mode (`auto` follows prefers-color-scheme). |
-| `data` | — | `undefined \| { type: "object"; title?: undefined \| string; description?: undefined \| string; required?: undefined \| string[]; properties: Record<string, { type: "string" \| "number" \| "integer" \| "boolean" \| "array" \| "object"; title?: undefined \| string; description?: undefined \| string; default?: unknown; enum?: undefined \| unknown[]; format?: undefined \| "email" \| "uri" \| "url" \| "date" \| "date-time" \| "time"; minimum?: undefined \| number; maximum?: undefined \| number; minLength?: undefined \| number; maxLength?: undefined \| number; pattern?: undefined \| string; minItems?: undefined \| number; maxItems?: undefined \| number; items?: undefined \| Record<string, unknown> \| { enum: unknown[] }; properties?: undefined \| Record<string, Record<string, unknown>>; required?: undefined \| string[]; readOnly?: undefined \| false \| true; "x-kai-widget"?: undefined \| "textarea" \| "slider" \| "rating" \| "radio" \| "select" \| "checkbox" \| "password" \| "switch"; "x-kai-placeholder"?: undefined \| string; "x-kai-step"?: undefined \| number; "x-kai-format"?: undefined \| "tel" \| "ssn" \| "credit-card" \| "custom"; "x-kai-mask"?: undefined \| string; "x-kai-mask-guide"?: undefined \| string }>; "x-kai-order"?: undefined \| string[]; "x-kai-inlineMax"?: undefined \| number; "x-kai-submitLabel"?: undefined \| string; "x-kai-dismissible"?: undefined \| false \| true; "x-kai-actions"?: undefined \| { id: string; label: string; variant?: undefined \| "default" \| "ghost" \| "outline" }[] }` | The form definition: a JSON Schema (`type:'object'`) + `x-kai-*` UI hints (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { type:'object', properties:{…} }`. Import the `FormDefinition` type from `@kitn.ai/ui` for the full shape. It IS self-referential (`FormField.properties` is another `FormField` map), and the generated `element-types.d.ts` inlines every named type, so the shipped declaration bottoms out in a `Record<string, unknown>` placeholder one level down rather than carrying the recursion. That is why `FormDefinition` is a `type` alias: an interface gets no implicit index signature, so it would not be assignable to that placeholder. |
+| `data` | — | `undefined \| { type: "object"; title?: undefined \| string; description?: undefined \| string; required?: undefined \| string[]; properties: Record<string, { type: "string" \| "number" \| "integer" \| "boolean" \| "array" \| "object"; title?: undefined \| string; description?: undefined \| string; default?: unknown; enum?: undefined \| unknown[]; format?: undefined \| "email" \| "uri" \| "url" \| "date" \| "date-time" \| "time"; minimum?: undefined \| number; maximum?: undefined \| number; minLength?: undefined \| number; maxLength?: undefined \| number; pattern?: undefined \| string; minItems?: undefined \| number; maxItems?: undefined \| number; items?: undefined \| Record<string, unknown> \| { enum: unknown[] }; properties?: undefined \| Record<string, Record<string, unknown>>; required?: undefined \| string[]; readOnly?: undefined \| false \| true; "x-kai-widget"?: undefined \| "textarea" \| "slider" \| "rating" \| "radio" \| "select" \| "checkbox" \| "password" \| "switch"; "x-kai-placeholder"?: undefined \| string; "x-kai-step"?: undefined \| number; "x-kai-format"?: undefined \| "tel" \| "ssn" \| "credit-card" \| "custom"; "x-kai-mask"?: undefined \| string; "x-kai-mask-guide"?: undefined \| string }>; "x-kai-order"?: undefined \| string[]; "x-kai-inlineMax"?: undefined \| number; "x-kai-submitLabel"?: undefined \| string; "x-kai-dismissible"?: undefined \| false \| true; "x-kai-actions"?: undefined \| { id: string; label: string; variant?: undefined \| "default" \| "ghost" \| "outline" }[] }` | The form definition: a JSON Schema (`type:'object'`) + `x-kai-*` UI hints (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { type:'object', properties:{…} }`. Import the `FormDefinition` type from `@kitn.ai/ui` for the full shape. It IS self-referential (`FormField.properties` is another `FormField` map), and the generated `web-component-types.d.ts` inlines every named type, so the shipped declaration bottoms out in a `Record<string, unknown>` placeholder one level down rather than carrying the recursion. That is why `FormDefinition` is a `type` alias: an interface gets no implicit index signature, so it would not be assignable to that placeholder. |
 | `cardId` | `card-id` | `undefined \| string` | Stable card id correlating every emitted CardEvent. Attribute: `card-id`. |
 | `heading` | `heading` | `undefined \| string` | Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`. |
 | `resolution` | — | `undefined \| Record<string, unknown>` | Set when the user resolved this card; renders the read-only view. Property: `el.resolution = { kind:'submit', data:{…} }`. |

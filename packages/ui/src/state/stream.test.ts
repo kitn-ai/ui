@@ -1,6 +1,6 @@
 // src/state/stream.test.ts
 import { describe, it, expect } from 'vitest';
-import type { ChatMessage, Source } from '../elements/chat-types';
+import type { ChatMessage, Source } from '../web-components/chat-types';
 import type { AttachmentData } from '../primitives/attachment-types';
 import { createAssistantStream, onStreamSettled, type SetMessages } from './stream';
 

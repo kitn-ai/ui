@@ -1,12 +1,16 @@
 import { describe, expect, it } from 'vitest';
-import meta from '../../src/elements/element-meta.json';
+import meta from '../../src/web-components/web-component-meta.json';
 
 describe('composedFrom story ids', () => {
   it('points at the SolidJS (advanced) tier path', () => {
     const links = (meta as any[]).flatMap((e) => e.composedFrom);
     expect(links.length).toBeGreaterThan(0);
     for (const l of links) {
-      expect(l.storyId).toMatch(/^solid-advanced-(elements|primitives)-[a-z0-9-]+--docs$/);
+      // The segment is the composed component's SOURCE DIR (gen-web-component-api.mjs), so the
+      // 2026-09-19 rename moved it from `elements` to `web-components`. These ids are SYNTHETIC:
+      // the `Solid (Advanced)/Elements` tier they were minted for no longer exists in any title
+      // (retitled 2026-09-18), so nothing resolves them either way. Pinned as the derived shape.
+      expect(l.storyId).toMatch(/^solid-advanced-(web-components|primitives)-[a-z0-9-]+--docs$/);
     }
   });
 
@@ -21,7 +25,7 @@ describe('composedFrom story ids', () => {
   });
 
   it('is not empty for an element that composes its UI in an element-local helper', () => {
-    // `kai-prompt-input` builds its whole UI in src/elements/default-input.tsx (so
+    // `kai-prompt-input` builds its whole UI in src/web-components/default-input.tsx (so
     // `<kai-chat>` can render the same composer). A facade-file-only walk reported
     // `composedFrom: []` for it.
     const promptInput = (meta as any[]).find((e) => e.tag === 'kai-prompt-input');

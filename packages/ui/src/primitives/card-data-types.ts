@@ -46,7 +46,7 @@
 //   const r2: Record<string, unknown> = alias;  // OK
 //
 // Every card element's `data` prop is a `Record<string, unknown>` at some point in
-// the chain — the generated `element-types.d.ts` used to declare it that way
+// the chain — the generated `web-component-types.d.ts` used to declare it that way
 // outright, and `renderType` in scripts/_ts-helpers.mjs still emits exactly that
 // string as its cycle placeholder when it inlines a self-referential type (which
 // `FormField` is). So as interfaces these types were not assignable to the very
@@ -57,7 +57,7 @@
 // Aliases fix that at the root instead of at each of the four call sites, and they
 // are what makes `FormDefinition` work at all: it is self-referential, so the
 // generator can only inline it down to a `Record<string, unknown>` placeholder, and
-// an interface would fail against that placeholder no matter what the elements
+// an interface would fail against that placeholder no matter what the web components
 // declare.
 //
 // Nothing here merges declarations, so the one capability `interface` has that

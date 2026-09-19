@@ -14,7 +14,7 @@
 // quietly drop it; they are not evidence that the migration happened.
 //
 // WHAT jsdom CANNOT SEE, stated so nothing here is mistaken for more than it is:
-// jsdom performs no layout and does not adopt `src/elements/compiled.css`, so
+// jsdom performs no layout and does not adopt `src/web-components/compiled.css`, so
 // `.kai-radio` is an inert class string here. Nothing in this file pins the control's
 // geometry, its drop shadow, its hover halo, the row's inset focus ring, or the
 // left-alignment of the control column in PIXELS. The ragged-column fix is therefore

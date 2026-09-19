@@ -1,6 +1,6 @@
 # React example — chat workspace, composed by hand
 
-A small chat **workspace assembled from `@kitn.ai/ui`'s individual elements** —
+A small chat **workspace assembled from `@kitn.ai/ui`'s individual web components** —
 a `<Conversations>` sidebar, a thread of `<Message>` elements, and a
 `<PromptInput>` composer — wired together with plain React state. The point is to
 show **how the pieces fit together**, not to drop in one batteries-included
@@ -20,10 +20,10 @@ SSE comment, every frame carries a `_kai_mock` field, `model` reports as
 
 ## How it works
 
-- `src/main.tsx` registers the `kai-*` custom elements
-  (`import '@kitn.ai/ui/elements'`) and loads the plain `--color-*` tokens
+- `src/main.tsx` registers the `kai-*` web components
+  (`import '@kitn.ai/ui/web-components'`) and loads the plain `--color-*` tokens
   (`import '@kitn.ai/ui/theme.tokens.css'`) used by the surrounding shell.
-- `src/App.tsx` composes three elements by hand:
+- `src/App.tsx` composes three web components by hand:
   - `<Conversations>` — the sidebar list, fed a `conversations` array; emits
     `onConversationSelect` / `onNewChat`.
   - `<Message>` × N — the thread, one element per message, mapped from state.
@@ -42,7 +42,7 @@ builds against the local `@kitn.ai/ui` source.
 ## Run it
 
 From the repo root, build the kit once so its `dist/` exists (the example imports
-the compiled `@kitn.ai/ui/elements` + `@kitn.ai/ui/theme.tokens.css`), then start
+the compiled `@kitn.ai/ui/web-components` + `@kitn.ai/ui/theme.tokens.css`), then start
 the example:
 
 ```bash

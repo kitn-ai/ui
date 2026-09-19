@@ -27,7 +27,7 @@ import path from 'node:path';
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 
 // The markup is PARSED first; the module script (deferred by definition) then
-// imports the element modules, whose top-level defineWebComponent() calls run
+// imports the web-component modules, whose top-level defineWebComponent() calls run
 // customElements.define() and synchronously upgrade everything above.
 const PAGE = /* html */ `<!doctype html>
 <html><head><meta charset="utf-8"><title>upgrade probe</title></head>
@@ -55,9 +55,9 @@ const PAGE = /* html */ `<!doctype html>
 
     let error = null;
     try {
-      await import('/src/elements/message.tsx');
-      await import('/src/elements/resizable.tsx');
-      await import('/src/elements/confirm-card.tsx');
+      await import('/src/web-components/message.tsx');
+      await import('/src/web-components/resizable.tsx');
+      await import('/src/web-components/confirm-card.tsx');
     } catch (e) { error = String((e && e.stack) || e); }
 
     // Let solid render and the parent's readItems() settle.

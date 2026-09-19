@@ -25,7 +25,7 @@ describe('component_reference', () => {
     const text = (out.content as { type: string; text: string }[])[0].text;
 
     expect(text).toMatch(/### Getting the element/);
-    expect(text).toMatch(/import '@kitn\.ai\/ui\/elements'/);
+    expect(text).toMatch(/import '@kitn\.ai\/ui\/web-components'/);
     // it must come BEFORE the props, or a reader who stops early still misses it
     expect(text.indexOf('### Getting the element')).toBeLessThan(
       text.indexOf('### Props (JavaScript properties)'),
@@ -67,7 +67,7 @@ describe('component_reference', () => {
    * The `detail` clause, pinned over EVERY event in the manifest rather than
    * kai-chat's.
    *
-   * The rule is read off the generator, not guessed: gen-element-api.mjs writes
+   * The rule is read off the generator, not guessed: gen-web-component-api.mjs writes
    * an event's CEM type as `CustomEvent<${e.detail}>` when the element declares
    * a payload and the bare string `CustomEvent` when it does not (a `void`
    * detail, e.g. `'kai-click': void` in button.tsx). Exactly two shapes, so the
@@ -133,14 +133,14 @@ describe('component_reference', () => {
     // not match the naive derivation, so this asserts the manifest is consulted.
     const out = await reference.handler({ name: 'kai-conversations' });
     const text = (out.content as { type: string; text: string }[])[0].text;
-    expect(text).toMatch(/@kitn\.ai\/ui\/elements\/conversation-list/);
-    expect(text).not.toMatch(/@kitn\.ai\/ui\/elements\/conversations'/);
+    expect(text).toMatch(/@kitn\.ai\/ui\/web-components\/conversation-list/);
+    expect(text).not.toMatch(/@kitn\.ai\/ui\/web-components\/conversations'/);
   });
 
   it('does not claim register-all for an element register-all does not cover', async () => {
     // Derived, not hard-coded: entryForTag is undefined for exactly the tags
     // register-impl.ts does not import — currently one, kai-remote, the deliberate
-    // opt-in exception documented at element-diagnostics.ts:347-363. Finding it by
+    // opt-in exception documented at web-component-diagnostics.ts:347-363. Finding it by
     // walking the manifest (instead of writing 'kai-remote' or '79'/'80' here) means
     // a second such element is covered by this test the day it exists.
     const optedOut = listElements().filter((t) => entryForTag(t) === undefined);
@@ -152,7 +152,7 @@ describe('component_reference', () => {
 
     expect(text).toMatch(/### Getting the element/);
     // the false claim this exists to catch: register-all does NOT register this tag
-    expect(text).not.toMatch(/import '@kitn\.ai\/ui\/elements';\n/);
+    expect(text).not.toMatch(/import '@kitn\.ai\/ui\/web-components';\n/);
     // it must still decide loudly rather than staying quiet about the exception
     expect(text).toMatch(/not part of|opt-in|does not register|is not registered/i);
   });
@@ -166,7 +166,7 @@ describe('component_reference', () => {
    * to name it.
    *
    * This probe does NOT re-run the tool's own lookup. It reads the specifier back
-   * out of the rendered text and resolves it against dist/elements/ — so the
+   * out of the rendered text and resolves it against dist/web-components/ — so the
    * assertion is that the string the reference hands a consumer resolves to a
    * built module which registers this exact tag, which is the thing that was
    * wrong when the reference guessed and the thing that would be wrong again.
@@ -174,7 +174,7 @@ describe('component_reference', () => {
   it('names the entry point for an opt-in element instead of telling the reader to go find it', async () => {
     const distElements = resolve(
       dirname(fileURLToPath(import.meta.url)),
-      '../../dist/elements',
+      '../../dist/web-components',
     );
     const optedOut = listElements().filter((t) => entryForTag(t) === undefined);
     expect(optedOut.length).toBeGreaterThan(0);
@@ -183,8 +183,8 @@ describe('component_reference', () => {
       const out = await reference.handler({ name: tag });
       const text = (out.content as { type: string; text: string }[])[0].text;
 
-      const named = [...text.matchAll(/@kitn\.ai\/ui\/elements\/([a-z0-9-]+)/g)].map((m) => m[1]);
-      expect(named, `${tag}: no @kitn.ai/ui/elements/<name> specifier in the reference`).not.toHaveLength(0);
+      const named = [...text.matchAll(/@kitn\.ai\/ui\/web-components\/([a-z0-9-]+)/g)].map((m) => m[1]);
+      expect(named, `${tag}: no @kitn.ai/ui/web-components/<name> specifier in the reference`).not.toHaveLength(0);
 
       for (const name of named) {
         const module = resolve(distElements, `${name}.js`);
@@ -441,7 +441,7 @@ describe('component_reference — card contract', () => {
 // coding agent actually consults, so a method it does not mention may as well
 // not exist.
 //
-// Expectations come from src/elements/element-meta.json — the sibling artifact
+// Expectations come from src/web-components/web-component-meta.json — the sibling artifact
 // of the manifest this tool reads, written by the same generator run. Nothing is
 // restated here: a method added to a facade moves both sides at once, and a
 // method that reaches only ONE of the two artifacts fails instead of half-shipping.
@@ -455,7 +455,7 @@ describe('component_reference — exposed methods', () => {
   // file runs from source under vitest and from nowhere else.
   const elementMeta: ElementMeta[] = JSON.parse(
     readFileSync(
-      resolve(dirname(fileURLToPath(import.meta.url)), '../../src/elements/element-meta.json'),
+      resolve(dirname(fileURLToPath(import.meta.url)), '../../src/web-components/web-component-meta.json'),
       'utf8',
     ),
   );
@@ -603,7 +603,7 @@ describe('component_reference does not overstate what the catalog enforces', () 
     expect(line).toBeDefined();
     // Not "not enforced", not "partially enforced" — and it names its real guard.
     expect(line).not.toMatch(/not enforced|partially enforced/i);
-    expect(line).toContain('src/elements/define.tsx');
+    expect(line).toContain('src/web-components/define.tsx');
   });
 
   it('upgrade-race is served with the delivery scope that makes it conditional', async () => {

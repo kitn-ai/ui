@@ -15,7 +15,7 @@
 // fallbacks" is the easy version and it is wrong. Dark mode is fine — those tokens
 // are a plain `.dark` rule. In light mode `:root` defines no `--color-*` at all,
 // but anything nested inside a `kai-*` element still resolves — nothing re-scopes
-// anything: Tailwind emits `@theme` to `:root, :host`, so the elements' own
+// anything: Tailwind emits `@theme` to `:root, :host`, so the web components' own
 // compiled CSS pins the tokens on every host and children inherit off it, slotted
 // or not. What loses its colours is the chrome OUTSIDE every element — this app's
 // `.app` shell and `html`/`body`, measured computing

@@ -75,7 +75,7 @@ const MODES = [
 /**
  * One deliberately wrong assignment per entry point whose declarations reach
  * other files through RELATIVE specifiers — the entries this bug class affects.
- * (`./elements`, `./elements/*` and `./autoloader` are generated self-contained,
+ * (`./web-components`, `./web-components/*` and `./autoloader` are generated self-contained,
  * with no relative specifiers, so there is nothing to degrade.)
  *
  * Each type is re-exported ACROSS a relative specifier, which is what makes it a
@@ -122,8 +122,8 @@ const PROBE_TYPES = {
 /** Entries whose declarations reach nothing through a RELATIVE specifier, so
  *  there is no degradation for this bug class to cause. Each needs its reason. */
 const NO_RELATIVE_SPECIFIERS = {
-  './elements': 'generated self-contained',
-  './elements/*': 'generated self-contained',
+  './web-components': 'generated self-contained',
+  './web-components/*': 'generated self-contained',
   './autoloader': 'generated self-contained',
   './schemas': 'generated self-contained',
   './schemas/*': 'generated self-contained',
@@ -206,7 +206,7 @@ export type Turn = ModelTurn;
 // frameworks/, not dist/. Types only, no JSX, so every tsc mode can compile it.
 import type { ComponentProps } from 'react';
 import { ViewStack } from '@kitn.ai/ui/react';
-import type { KaiViewStackElement } from '@kitn.ai/ui/elements';
+import type { KaiViewStackElement } from '@kitn.ai/ui/web-components';
 
 // A callback ref whose parameter is the element interface: the shape a consumer
 // writes. A PIN, not the red. It compiles against a wrapper typed

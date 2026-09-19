@@ -14,7 +14,7 @@ hydrate and register cleanly on the App Router, and where does `'use client'`
 go?*
 
 **Yes — verified end to end** (Playwright/Chromium, `next dev` *and* the
-production build): the `kai-*` elements prerender as bare tags, then on the client
+production build): the `kai-*` web components prerender as bare tags, then on the client
 they register, hydrate, populate their shadow DOM and stream — with **no console
 errors and no hydration mismatches**. No consumer-side workarounds; it is the
 standard App Router setup.
@@ -26,7 +26,7 @@ standard App Router setup.
   hooks and event-handler props — the standard RSC rule, not a kit requirement.
   You never need a directive just to render a wrapper: the wrappers carry their
   own `'use client'` banner, so a Server Component can render one directly.
-- **SSR-safe custom elements.** The wrappers register elements *client-only* (in
+- **SSR-safe custom elements.** The wrappers register web components *client-only* (in
   a layout effect) and assign array/object props as live DOM *properties* after
   hydration. So the prerender emits bare `<kai-*>` tags and there is nothing to
   mismatch between the two renders. `curl` this app and you will find
@@ -39,13 +39,13 @@ standard App Router setup.
   hydrated badly can still look right; it cannot stream.
 - **A visible hydration check.** The badge in the top bar reads
   "server-rendered" in the prerendered HTML and only flips to "hydrated · 5/5"
-  once client JavaScript has defined the elements. This matters more on Next than
+  once client JavaScript has defined the web components. This matters more on Next than
   anywhere else: a **production** React build minifies hydration errors into a
   numbered link, so `next start` shows you a silently dead page. Run `next dev`
   when you want the mismatch in words.
-- **Per-element registration / tree-shaking.** Importing the wrappers you use is
-  enough to register just those — no `import '@kitn.ai/ui/elements'` side effect,
-  and the elements you don't render aren't downloaded at runtime.
+- **Per-web-component registration / tree-shaking.** Importing the wrappers you use is
+  enough to register just those — no `import '@kitn.ai/ui/web-components'` side effect,
+  and the web components you don't render aren't downloaded at runtime.
 
 ## Run it
 
@@ -73,7 +73,7 @@ registry yields.
 ## Consumer setup notes (the parts specific to Next)
 
 1. **No `transpilePackages`, no webpack config.** The kit ships pre-compiled ESM,
-   and `@kitn.ai/ui/elements` is SSR-safe: it touches no `window` /
+   and `@kitn.ai/ui/web-components` is SSR-safe: it touches no `window` /
    `customElements` at import time. (`outputFileTracingRoot` in
    `next.config.mjs` and the local `postcss.config.mjs` are here only because
    this example is nested inside the library's monorepo.)
@@ -89,8 +89,8 @@ registry yields.
    you can recognise it: dark mode is unaffected (those tokens are a plain
    `.dark` rule), and anything nested inside a `kai-*` element still resolves.
    Nothing re-scopes anything — Tailwind emits `@theme` to `:root, :host`, so
-   the elements' own compiled CSS pins the tokens on every host and children
-   inherit off it. The casualty is your own chrome *outside* the elements —
+   the web components' own compiled CSS pins the tokens on every host and children
+   inherit off it. The casualty is your own chrome *outside* the web components —
    here `.app` computes `background-color: rgba(0, 0, 0, 0)` in light mode. The
    page looks nearly right, which is why this is worth checking rather than
    eyeballing.
@@ -130,11 +130,11 @@ your provider and streams the response back.
 ## Tree-shaking note
 
 At **runtime** the win holds: loading this page fetches only the chunks for the
-elements actually rendered — the other ~70 elements are never downloaded. But the
+web components actually rendered — the other ~70 web components are never downloaded. But the
 **build** still *emits* a lazy chunk for every element, because the wrapper
 factory calls in the published `dist/react.js` aren't annotated
 `/*@__PURE__*/`, so the bundler can't prove the unused wrappers are
 side-effect-free and keeps all their `import()` split points. Net: good for end
 users, but the build output carries dead chunks. For the smallest output, import
-elements directly: `import '@kitn.ai/ui/elements/button'` and render the
+web components directly: `import '@kitn.ai/ui/web-components/button'` and render the
 `<kai-button>` tag yourself.

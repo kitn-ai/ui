@@ -1,5 +1,5 @@
 // src/state/stream.ts
-import type { ChatMessage, MessagePart, Source } from '../elements/chat-types';
+import type { ChatMessage, MessagePart, Source } from '../web-components/chat-types';
 import type { ToolPart } from '../components/tool/tool-types';
 import type { CardEnvelope } from '../primitives/card-contract';
 import type { AttachmentData } from '../primitives/attachment-types';

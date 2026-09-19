@@ -58,12 +58,12 @@ beats neutral mush.
 Every fact, import path, command, and API must be **verified against the real
 source** — never invented or assumed:
 
-- Package + entry points: `package.json` `exports` — `@kitn.ai/ui/elements`
+- Package + entry points: `package.json` `exports` — `@kitn.ai/ui/web-components`
   (web components, any framework), `@kitn.ai/ui/react` (React adapter), `.`
   (SolidJS layer), `@kitn.ai/ui/theme.css`, `@kitn.ai/ui/provider`.
-- Real usage per framework: `src/elements/framework-usage.json` and the existing
+- Real usage per framework: `src/web-components/framework-usage.json` and the existing
   `src/stories/docs/**` MDX (the current source of truth — improve, don't copy).
-- Element APIs: `src/elements/element-meta.json`. Theme tokens: `theme.css` /
+- Element APIs: `src/web-components/web-component-meta.json`. Theme tokens: `theme.css` /
   `dist/theme.tokens.css` and `src/stories/docs/Theming.mdx`.
 - The README (`README.md`) for install, quick start, integrations, theming.
 
@@ -89,7 +89,7 @@ description: <one tight sentence — shows in search + meta>
 - Use `<Tabs>`/`<TabItem>` (Starlight) for the same step across frameworks.
 - Code fences must have the correct language and be **runnable + realistic** (no
   `foo`/`bar`; use real element names, real props).
-- Register the elements with `import '@kitn.ai/ui/elements';` as the primary
+- Register the elements with `import '@kitn.ai/ui/web-components';` as the primary
   path; show the CDN `<script>` only as a secondary option.
 
 ## Component pages

@@ -73,7 +73,7 @@
 // `src/agent-tooling/` until 2026-09-02). Files the BUILD ITSELF writes back
 // into those trees are excluded (see GENERATED_SOURCES) — otherwise a correctly
 // built tree fails instantly, since postbuild's `build:api` writes
-// `src/elements/element-meta.json` a second after `dist/kai.es.js`.
+// `src/web-components/web-component-meta.json` a second after `dist/kai.es.js`.
 //
 // Excluding them leaves no hole, and the proof is per entry, not a general
 // claim: the build writes into THREE trees now — `src/` (prebuild + build:api),
@@ -156,7 +156,7 @@ for (let i = 0; i < argv.length; i++) {
 const SELF_TEST = argv.includes('--self-test');
 const PKG_ROOT = resolve(argOf('--package-root') ?? join(SCRIPT_DIR, '..'));
 
-// What a measurement run actually loads: the registered-elements bundle a
+// What a measurement run actually loads: the registered-web-components bundle a
 // consumer executes, and the manifest the `kai` MCP answers from.
 const DEFAULT_ARTIFACTS = ['dist/kai.es.js', 'dist/custom-elements.json'];
 // `mcp` is here because the MCP tree used to be `src/agent-tooling/` and was
@@ -171,12 +171,12 @@ const SKIP_DIRS = new Set(['node_modules', '.git', '.nx', 'dist']);
 // derived membership (one page per block, one fixture per template), so a hand-listed
 // copy rots as soon as one is added. The trailing slash is load-bearing.
 const GENERATED_SOURCES = new Set([
-  'src/elements/compiled.css', // build:css (gitignored)
-  'src/elements/element-manifest.json', // scripts/gen-elements-manifest.mjs
-  'src/elements/element-meta.json', // scripts/gen-element-api.mjs
-  'src/elements/icon-names.json', // scripts/gen-element-api.mjs
-  'src/elements/element-nonscalar.json', // scripts/gen-element-nonscalar.mjs
-  'src/elements/element-types.d.ts', // scripts/gen-element-types.mjs
+  'src/web-components/compiled.css', // build:css (gitignored)
+  'src/web-components/web-component-manifest.json', // scripts/gen-web-components-manifest.mjs
+  'src/web-components/web-component-meta.json', // scripts/gen-web-component-api.mjs
+  'src/web-components/icon-names.json', // scripts/gen-web-component-api.mjs
+  'src/web-components/web-component-nonscalar.json', // scripts/gen-web-component-nonscalar.mjs
+  'src/web-components/web-component-types.d.ts', // scripts/gen-web-component-types.mjs
   'mcp/catalog/derived.json', // scripts/gen-catalog.mjs
   // build:api. Content drift is verify:generated's (both addresses of the schema
   // are on its list); the template fixtures are on its list AND swept by
@@ -336,7 +336,7 @@ const REBUILD_ADVICE =
 const BASE_SECONDS = Math.floor(Date.now() / 1000) - 86_400;
 
 function makeFixture(root, { sourceOffset, artifactOffset, artifacts, withSources = true, decoy = false, prefixDecoy = false, artifactDirs = [] }) {
-  mkdirSync(join(root, 'src/elements'), { recursive: true });
+  mkdirSync(join(root, 'src/web-components'), { recursive: true });
   mkdirSync(join(root, 'scripts'), { recursive: true });
   mkdirSync(join(root, 'dist'), { recursive: true });
 
@@ -348,13 +348,13 @@ function makeFixture(root, { sourceOffset, artifactOffset, artifacts, withSource
   };
 
   if (withSources) {
-    touch('src/elements/chat.ts', 'export const a = 1;\n', sourceOffset);
+    touch('src/web-components/chat.ts', 'export const a = 1;\n', sourceOffset);
     touch('scripts/gen.mjs', '// generator\n', sourceOffset);
     touch('package.json', '{"name":"fixture"}\n', sourceOffset);
     // A build-written file under src/ that is ALWAYS newer than dist. Every
     // fixture carries one, so the exclusion is exercised by the passing case
     // rather than only asserted in a comment.
-    touch('src/elements/element-meta.json', '{}\n', artifactOffset + 5);
+    touch('src/web-components/web-component-meta.json', '{}\n', artifactOffset + 5);
     // The same, for the SUBTREE form: a file under a `/`-terminated entry, newer
     // than dist, in a tree (`mcp/`) that is scanned but was never excluded from.
     // Carried by every fixture for the same reason as the line above.
@@ -366,9 +366,9 @@ function makeFixture(root, { sourceOffset, artifactOffset, artifacts, withSource
   // at a different path, planted newer than dist. It must still be reported
   // stale. The exclusion is a set of exact repo-relative paths, and this is the
   // positive control for that: a mutant that relaxed it to a basename or
-  // suffix match (`rel.endsWith('element-meta.json')`) passed every other case
+  // suffix match (`rel.endsWith('web-component-meta.json')`) passed every other case
   // in this file while quietly excusing any file anywhere with a matching tail.
-  if (decoy) touch('src/other/element-meta.json', '{"hand-written":true}\n', artifactOffset + 5);
+  if (decoy) touch('src/other/web-component-meta.json', '{"hand-written":true}\n', artifactOffset + 5);
   for (const rel of artifacts) touch(rel, `// ${rel}\n`, artifactOffset);
   // A DIRECTORY standing where an artifact was asked for: the one shape that
   // resolves to something real, has a perfectly good mtime, and still cannot be

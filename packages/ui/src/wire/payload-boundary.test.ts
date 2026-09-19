@@ -22,14 +22,14 @@ import {
   type KaiDiagnosticEvent,
 } from './diagnostics';
 import type { AttachmentData } from '../primitives/attachment-types';
-import type { ChatMessage } from '../elements/chat-types';
+import type { ChatMessage } from '../web-components/chat-types';
 // The ELEMENT layer emits onto this same stream, so it is swept by this same
 // file rather than by a second one with a second idea of the rule. See the
 // element block at the bottom.
-import '../elements/conversation-list';
-import '../elements/agent-card';
-import { emitElementRegistry } from '../elements/element-diagnostics';
-import { assertElementEventsVocabulary } from '../../tests/helpers/element-event-vocabulary';
+import '../web-components/conversation-list';
+import '../web-components/agent-card';
+import { emitElementRegistry } from '../web-components/web-component-diagnostics';
+import { assertElementEventsVocabulary } from '../../tests/helpers/web-component-event-vocabulary';
 
 const nullSink = () =>
   ({
@@ -389,13 +389,13 @@ describe('the payload boundary', () => {
 //
 // That matters more than it looks. Element props hold the entire conversation,
 // the user's own drafted text, conversation titles and file names -- and unlike
-// the wire code, this ships to every consumer of the elements bundle whether or
-// not they ever parse a stream. If the payload switch ever grew an element
+// the wire code, this ships to every consumer of the web-components bundle whether or
+// not they ever parse a stream. If the payload switch ever grew a web-component
 // branch, this block fails rather than the leak shipping.
 // ---------------------------------------------------------------------------
 
 /**
- * A SHORT, unmistakable token at the head of every element sentinel.
+ * A SHORT, unmistakable token at the head of every web component sentinel.
  *
  * Long descriptive sentinels alone are not enough here, and a mutation proved
  * it: a leak that shipped `raw.slice(0, 20)` beside the length was caught only
@@ -590,7 +590,7 @@ describe('the payload boundary — element events', () => {
     expect(JSON.stringify(driveElements())).not.toContain(E.title);
   });
 
-  it('EVERY field of every element event comes from a closed vocabulary', () => {
+  it('EVERY field of every web component event comes from a closed vocabulary', () => {
     // THE ASSERTION THAT ACTUALLY HOLDS THE LINE, and the reason the sentinel
     // cases above are documentation rather than proof.
     //

@@ -44,10 +44,10 @@ const pkg = JSON.parse(readFileSync(resolve(pkgRoot, 'package.json'), 'utf-8')) 
 /** A throwaway package root the linter can be pointed at with `--package-root`. */
 function fixtureRoot(wireSource: string): string {
   const root = mkdtempSync(join(tmpdir(), 'silent-drop-guard-'));
-  mkdirSync(join(root, 'src/elements'), { recursive: true });
+  mkdirSync(join(root, 'src/web-components'), { recursive: true });
   mkdirSync(join(root, 'src/wire'), { recursive: true });
   writeFileSync(
-    join(root, 'src/elements/chat-types.ts'),
+    join(root, 'src/web-components/chat-types.ts'),
     `export type MessagePart =
   | { type: 'text'; text: string }
   | { type: 'reasoning'; text: string }
@@ -116,7 +116,7 @@ describe('the silent-drop guard detects, and CI runs it', () => {
     // The #186 shape: an exclusion guard that returns, dropping every variant it
     // did not name. Not a self-report -- the linter is run and must exit non-zero.
     const root = fixtureRoot(
-      `import type { MessagePart } from '../elements/chat-types';
+      `import type { MessagePart } from '../web-components/chat-types';
 export function toWire(parts: MessagePart[]): string[] {
   const out: string[] = [];
   parts.forEach((part) => {

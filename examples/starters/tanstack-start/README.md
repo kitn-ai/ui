@@ -14,14 +14,14 @@ It also doubles as the SSR compatibility test: *does the kit server-render,
 hydrate, and register cleanly on TanStack Start?*
 
 **Yes — verified end to end** (Playwright/Chromium, dev *and* production build):
-the `kai-*` elements server-render as bare tags, then on the client they
+the `kai-*` web components server-render as bare tags, then on the client they
 register, hydrate, populate their shadow DOM and stream — with **no console
 errors and no hydration-mismatch warnings**. No consumer-side workarounds are
 needed; it's the standard TanStack Start setup.
 
 ## What it demonstrates
 
-- **SSR-safe custom elements.** The React wrappers register elements
+- **SSR-safe custom elements.** The React wrappers register web components
   *client-only* (in a layout effect) and assign array/object props as live DOM
   *properties* after hydration. So the server emits bare `<kai-*>` tags, the
   client registers + populates them, and there is nothing to mismatch between the
@@ -35,11 +35,11 @@ needed; it's the standard TanStack Start setup.
   hydrated badly can still look right; it cannot stream.
 - **A visible hydration check.** The badge in the top bar reads
   "server-rendered" in the SSR'd HTML and only flips to "hydrated · 5/5" once
-  client JavaScript has defined the elements. Hydration failure otherwise looks
+  client JavaScript has defined the web components. Hydration failure otherwise looks
   exactly like success.
-- **Per-element registration / tree-shaking.** Importing the wrappers you use is
-  enough to register just those — no `import '@kitn.ai/ui/elements'` side effect,
-  and the elements you don't render aren't downloaded at runtime.
+- **Per-web-component registration / tree-shaking.** Importing the wrappers you use is
+  enough to register just those — no `import '@kitn.ai/ui/web-components'` side effect,
+  and the web components you don't render aren't downloaded at runtime.
 
 ## Run it
 
@@ -79,7 +79,7 @@ a real `npm install` from the registry yields.
    that *does* run Tailwind, like the Solid starter, should import `theme.css`.)
    The loss is narrower than "nothing is styled": dark mode is unaffected and
    anything inside a `kai-*` element still resolves, so the casualty is your own
-   chrome *outside* the elements — here `html`/`body` and `.app`. It builds green
+   chrome *outside* the web components — here `html`/`body` and `.app`. It builds green
    either way, which is what makes it worth knowing. Importing the tokens from
    `__root.tsx` is what puts the `<link rel="stylesheet">` in the
    **server-rendered** `<head>`, so there is no flash of unstyled custom elements.
@@ -87,8 +87,8 @@ a real `npm install` from the registry yields.
    `typeof window`, so they're inert during SSR and only touch `customElements`
    in the browser.
 4. **Leave `@kitn.ai/ui` external to the SSR build** (the Vite default — don't
-   add it to `ssr.noExternal`). The per-element registration uses
-   `import('@kitn.ai/ui/elements/<name>')`, which only runs in the browser, so
+   add it to `ssr.noExternal`). The per-web-component registration uses
+   `import('@kitn.ai/ui/web-components/<name>')`, which only runs in the browser, so
    the server just renders the bare tags. Forcing it into the SSR bundle makes
    the bundler eagerly resolve those browser-only imports for no benefit.
 5. **Keep browser-only values out of render.** `useVoiceInput` reports
@@ -97,7 +97,7 @@ a real `npm install` from the registry yields.
    on a value like that and the server builds a different tree than the client
    does — the textbook hydration mismatch.
 
-That's it — no `optimizeDeps` tweaks, no resolver shims, no per-element import
+That's it — no `optimizeDeps` tweaks, no resolver shims, no per-web-component import
 fixups.
 
 ## Production serving
@@ -128,7 +128,7 @@ One expression in `src/routes/index.tsx` changes to ship for real:
 ## Tree-shaking note
 
 At **runtime** the win holds: loading this page fetches only the chunks for the
-elements actually rendered — the other ~70 elements are never downloaded. But the
+web components actually rendered — the other ~70 web components are never downloaded. But the
 **build** still *emits* a lazy chunk for every element, because the wrapper
 factory calls in the published `dist/react.js` aren't annotated
 `/*@__PURE__*/`, so Rollup can't prove the unused wrappers are side-effect-free

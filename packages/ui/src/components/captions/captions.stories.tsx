@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import type { JSX } from 'solid-js';
 import { Captions, type CaptionSegment, type CaptionsProps } from './captions';
-import { componentDescription } from '../../stories/docs/element-controls';
+import { componentDescription } from '../../stories/docs/web-component-controls';
 
 // Live closed-captioning: the text shown WHILE someone (the user or the
 // agent) is speaking, distinct from a scrollback transcript. See

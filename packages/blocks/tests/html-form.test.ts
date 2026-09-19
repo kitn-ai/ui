@@ -123,7 +123,7 @@ describe('the html form', () => {
 
   it('binds registration and the whenDefined await, and adapts the import for a bundler', () => {
     const binder = byPath(renderHtmlForm(stripped())).get('fixture.js')!;
-    expect(binder).toContain("import '@kitn.ai/ui/elements';");
+    expect(binder).toContain("import '@kitn.ai/ui/web-components';");
     expect(binder).not.toContain('@kitn.ai/ui/autoloader');
     expect(binder).toContain('customElements.whenDefined');
     expect(binder).toContain("'kai-conversation-item'");
@@ -132,7 +132,7 @@ describe('the html form', () => {
   it('keeps the autoloader when the caller asks for it (the cdn form s native pattern)', () => {
     const binder = byPath(renderHtmlForm(stripped(), { registration: 'autoloader' })).get('fixture.js')!;
     expect(binder).toContain("import '@kitn.ai/ui/autoloader';");
-    expect(binder).not.toContain("import '@kitn.ai/ui/elements';");
+    expect(binder).not.toContain("import '@kitn.ai/ui/web-components';");
   });
 
   it('writes the seed once, before the first apply, and never inside apply()', () => {
@@ -245,7 +245,7 @@ describe('the html form', () => {
     // this form is the one config fact a consumer cannot guess: the scripts
     // import a bare specifier, so the folder goes through a bundler.
     expect(readme!.content).toContain('fixture.html');
-    expect(readme!.content).toContain('@kitn.ai/ui/elements');
+    expect(readme!.content).toContain('@kitn.ai/ui/web-components');
   });
 
   it('the README carries none of the tokens the stream-reader scan bans', () => {

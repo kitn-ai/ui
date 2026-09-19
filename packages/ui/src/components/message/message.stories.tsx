@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { Message, MessageAvatar, MessageContent, MessageActions, MessageBody } from './message';
-import type { MessagePart } from '../../elements/chat-types';
+import type { MessagePart } from '../../web-components/chat-types';
 import { Button } from '../button/button';
 import { Copy, ThumbsUp, ThumbsDown, RefreshCw, Pencil } from 'lucide-solid';
-import { componentDescription } from '../../stories/docs/element-controls';
+import { componentDescription } from '../../stories/docs/web-component-controls';
 
 const meta = {
   title: 'Components/Message',

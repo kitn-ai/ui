@@ -1,6 +1,6 @@
 import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { localStorageStore, fetchStore, byRecency, isConversationUnread } from './conversation-store';
-import type { ChatMessage } from '../elements/chat-types';
+import type { ChatMessage } from '../web-components/chat-types';
 
 const msg = (id: string, text: string): ChatMessage => ({
   id,

@@ -24,7 +24,7 @@ Register the web components once, then wire the element:
 <kai-voice-input id="voice"></kai-voice-input>
 
 <script type="module">
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
 
   await customElements.whenDefined('kai-voice-input');
 
@@ -62,7 +62,7 @@ Alternatively, place `<kai-voice-input>` beside the chat element and push the tr
 </div>
 
 <script type="module">
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
 
   await customElements.whenDefined('kai-voice-input');
 
@@ -117,7 +117,7 @@ export function VoiceButton({ onTranscription }: { onTranscription: (text: strin
 </template>
 
 <script setup>
-import '@kitn.ai/ui/elements';
+import '@kitn.ai/ui/web-components';
 import { onMounted, ref } from 'vue';
 
 const voiceRef = ref(null);
@@ -140,7 +140,7 @@ const onTranscription = (e) => emit('transcription', e.detail.text);
 <TabItem label="Svelte">
 ```svelte
 <script>
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
 
   let voiceEl;
 
@@ -239,5 +239,5 @@ function onReplyDone() { voice.disabled = false; }
 
 ## What's next
 
-- [Installation](/guides/installation/) — register the elements and add the theme.
+- [Installation](/guides/installation/) — register the web components and add the theme.
 - [Text to Speech](/guides/recipes/text-to-speech/) — the reverse direction: stream synthesized audio from the assistant.

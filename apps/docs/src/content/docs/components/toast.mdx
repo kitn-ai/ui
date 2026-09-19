@@ -22,7 +22,7 @@ import ToastDemo from '../../../components/ToastDemo.tsx';
 Import `toast` and call it. No element, no setup:
 
 ```js
-import { toast } from '@kitn.ai/ui/elements';
+import { toast } from '@kitn.ai/ui/web-components';
 
 toast('Copied to clipboard');
 toast.success('Saved');
@@ -39,7 +39,7 @@ Confirm an action the user just took — copied text, saved a draft, sent feedba
 `toast(message, options?)` returns a `{ id, dismiss, update }` handle. Two named helpers cover the common cases:
 
 ```js
-import { toast } from '@kitn.ai/ui/elements';
+import { toast } from '@kitn.ai/ui/web-components';
 
 toast('Copied to clipboard');        // neutral
 toast.success('Profile updated');    // emerald check
@@ -83,7 +83,7 @@ t.dismiss();
 A confirmation with the emerald check. Auto-dismisses after 5 seconds.
 
 ```js
-import { toast } from '@kitn.ai/ui/elements';
+import { toast } from '@kitn.ai/ui/web-components';
 
 toast.success('Copied to clipboard');
 ```
@@ -93,7 +93,7 @@ toast.success('Copied to clipboard');
 Add an `action` to offer a one-tap reversal. The toast stays up at least 7 seconds when it carries an action, so the user has time to react:
 
 ```js
-import { toast } from '@kitn.ai/ui/elements';
+import { toast } from '@kitn.ai/ui/web-components';
 
 function deleteItem(item) {
   remove(item);
@@ -110,7 +110,7 @@ Returning `false` from `onAction` keeps the toast open — useful when the actio
 Raise several toasts and they stack newest-on-top. The region shows up to `max` at once (3 by default); the rest queue and promote as slots free up:
 
 ```js
-import { toast } from '@kitn.ai/ui/elements';
+import { toast } from '@kitn.ai/ui/web-components';
 
 toast('Connecting…');
 toast('Syncing files');
@@ -122,7 +122,7 @@ toast.success('All set');
 Set `duration: 0` to keep a toast until you dismiss it — for ongoing work whose end you'll signal yourself. Update it in place when the work finishes:
 
 ```js
-import { toast } from '@kitn.ai/ui/elements';
+import { toast } from '@kitn.ai/ui/web-components';
 
 const t = toast('Generating report…', { duration: 0 });
 
@@ -141,7 +141,7 @@ You only touch the element directly to **own the toast list yourself** (e.g. dri
 <kai-toast-region position="bottom-right" max="2"></kai-toast-region>
 
 <script type="module">
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
 
   await customElements.whenDefined('kai-toast-region');
 

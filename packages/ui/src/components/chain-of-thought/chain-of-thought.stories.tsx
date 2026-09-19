@@ -6,7 +6,7 @@ import {
   ChainOfThoughtContent,
   ChainOfThoughtItem,
 } from './chain-of-thought';
-import { componentDescription } from '../../stories/docs/element-controls';
+import { componentDescription } from '../../stories/docs/web-component-controls';
 
 const meta = {
   title: 'Components/ChainOfThought',

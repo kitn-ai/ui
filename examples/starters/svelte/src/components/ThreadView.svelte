@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { ChatMessage } from '@kitn.ai/ui';
   import { partsToText } from '@kitn.ai/ui/state';
-  import type { KaiThreadElement } from '@kitn.ai/ui/elements';
+  import type { KaiThreadElement } from '@kitn.ai/ui/web-components';
   import type { Theme } from '../lib/types';
 
   /**

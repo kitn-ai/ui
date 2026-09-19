@@ -715,7 +715,7 @@ function ProgressChecklist(props: {
                         row is done-or-not rather than selected-or-not — the todo-list
                         affordance, which is how this mode has been described since it landed
                         (see the `mode` argType in tasks-card.stories.tsx and the JSDoc on
-                        src/elements/tasks.tsx). D-2 in
+                        src/web-components/tasks.tsx). D-2 in
                         docs/superpowers/plans/2026-08-25-form-control-primitives.md tracks
                         whether to keep the split; unruled, so leave both. NOTE the cost: the
                         icon replaces the visible native control, which is why the real input

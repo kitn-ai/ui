@@ -91,5 +91,5 @@ export type {
 // The content-model types every signature above mentions, re-exported so a
 // consumer importing only from '@kitn.ai/ui/wire' can annotate the values these
 // functions take and return without a second import.
-export type { ChatMessage, MessagePart, MessageSource, RawOrigin } from '../elements/chat-types';
+export type { ChatMessage, MessagePart, MessageSource, RawOrigin } from '../web-components/chat-types';
 export type { ToolPart } from '../components/tool/tool-types';

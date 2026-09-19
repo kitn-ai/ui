@@ -2,7 +2,7 @@
  * Guards for the `Slider` primitive and its one migrated call site.
  *
  * WHAT JSDOM CANNOT SEE, STATED SO NOTHING HERE READS AS MORE THAN IT IS. jsdom does
- * no layout and does not load `src/elements/styles.css`, so nothing below proves the
+ * no layout and does not load `src/web-components/styles.css`, so nothing below proves the
  * slider LOOKS right: `.kai-range` computes to nothing here, the pseudo-element track
  * and thumb do not exist, and `getComputedStyle` on the input reports the UA default.
  * What these pin is the part that is real in a DOM with no CSS at all: that the control

@@ -342,8 +342,8 @@ export function buildRegistryItem(block: Block): BlockManifest & {
  *  The root export is deliberately absent: phase 2 captured it failing live
  *  on a bare `solid-js` import (`index-root-import.html`). */
 export const CDN_IMPORT_ENTRIES: Readonly<Record<string, string>> = {
-  '@kitn.ai/ui/autoloader': 'elements/autoloader.js',
-  '@kitn.ai/ui/elements': 'kai.es.js',
+  '@kitn.ai/ui/autoloader': 'web-components/autoloader.js',
+  '@kitn.ai/ui/web-components': 'kai.es.js',
   '@kitn.ai/ui/state': 'state.js',
   '@kitn.ai/ui/wire': 'wire.js',
   '@kitn.ai/ui/stores': 'stores.js',
@@ -633,7 +633,7 @@ export function generateCdnForm(block: Block, opts: CdnFormOptions): { html?: st
  * Structural checks over a block's AUTHORED source — the generator refuses to
  * emit a form that breaks the kai- contract or hand-rolls the wire:
  * - a non-scalar prop appearing as an HTML attribute (list DERIVED from
- *   `element-nonscalar.json`, the same one-definition-of-scalar the runtime
+ *   `web-component-nonscalar.json`, the same one-definition-of-scalar the runtime
  *   check uses — injected by the caller, never restated);
  * - the legacy `kitn-` prefix;
  * - `kai-*` listeners on document/window (the events do not bubble);

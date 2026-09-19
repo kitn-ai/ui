@@ -3,7 +3,7 @@ import { fn } from 'storybook/test';
 import { createSignal } from 'solid-js';
 import { PromptInput, PromptInputTextarea, PromptInputActions } from './prompt-input';
 import { Button } from '../button/button';
-import { componentDescription } from '../../stories/docs/element-controls';
+import { componentDescription } from '../../stories/docs/web-component-controls';
 
 const meta = {
   title: 'Components/PromptInput',

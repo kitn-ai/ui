@@ -32,7 +32,7 @@ interface MessagePart {
 }
 
 /** The staged file as a `data:` URI — the same thing `<kai-prompt-input>`'s own
- *  paperclip does (see `readAsDataUrl` in `src/elements/default-input.tsx`).
+ *  paperclip does (see `readAsDataUrl` in `src/web-components/default-input.tsx`).
  *
  *  NOT `URL.createObjectURL`. An object URL resolves only inside the tab that
  *  minted it, so it renders a perfect thumbnail here and is meaningless to

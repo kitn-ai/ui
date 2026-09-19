@@ -7,7 +7,7 @@
 // keeps a per-token stream from hitting storage per token. No storage call,
 // no fetch, no DOM; the save fn, the delay, and the reaction to a drop are
 // all the consumer's.
-import type { ChatMessage, FeedbackVote, MessagePart } from '../elements/chat-types';
+import type { ChatMessage, FeedbackVote, MessagePart } from '../web-components/chat-types';
 
 /** One record the parse refused, and why. Deciding loudly is the caller's
  *  verb (warn, reject the whole record, count it); this is the information
@@ -30,7 +30,7 @@ function isRecord(v: unknown): v is Record<string, unknown> {
 
 /**
  * One payload check per `MessagePart` variant. The key set is DERIVED from the
- * union in `src/elements/chat-types.ts` at compile time: `satisfies
+ * union in `src/web-components/chat-types.ts` at compile time: `satisfies
  * Record<MessagePart['type'], …>` makes a missing key (a 7th variant landed)
  * and a stale key (a variant renamed away) each a type error in THIS file —
  * the same union `lint:silent-drops` and `verify:scaffold` read, so the lists
@@ -39,7 +39,7 @@ function isRecord(v: unknown): v is Record<string, unknown> {
  *
  * These are shape checks, not a trust boundary for rendering: a rehydrated
  * part is model output twice over (it was model output before it was
- * hand-editable storage), and it stays safe to draw because the elements are
+ * hand-editable storage), and it stays safe to draw because the web components are
  * what draw it. What this buys is that a truncated or half-written record
  * reaches the element as a well-formed thread minus the broken piece, instead
  * of as `parts: undefined` taking the whole app down on first render.

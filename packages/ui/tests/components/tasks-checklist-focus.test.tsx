@@ -95,7 +95,7 @@ test('the has-[:focus-visible] variant really compiles — it is not a silently-
   // generated sheet and prove the selector is in it.
   // `import.meta.url` is an http:// URL under Vite, so resolve from the package root
   // (vitest runs with cwd = packages/ui) rather than from the module.
-  const css = resolve(process.cwd(), 'src/elements/compiled.css');
+  const css = resolve(process.cwd(), 'src/web-components/compiled.css');
   if (!existsSync(css)) {
     throw new Error(
       `${css} is missing. It is generated and gitignored — run ` +

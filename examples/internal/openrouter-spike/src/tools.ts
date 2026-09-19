@@ -365,14 +365,14 @@ const DOCS: { title: string; url: string; snippet: string; tags: string[] }[] = 
     title: 'Getting started',
     url: 'https://ui.kitn.ai/guides/getting-started',
     snippet:
-      'Install @kitn.ai/ui, import the elements bundle to register the kai-* custom elements, and drop <kai-chat> into any framework.',
+      'Install @kitn.ai/ui, import the web-components bundle to register the kai-* custom elements, and drop <kai-chat> into any framework.',
     tags: ['install', 'setup', 'start', 'npm', 'register'],
   },
   {
     title: 'Streaming',
     url: 'https://ui.kitn.ai/guides/recipes/streaming',
     snippet:
-      'Read OpenAI-format SSE and assign a NEW messages array per chunk. Mutating the array in place does not re-render: the elements compare references.',
+      'Read OpenAI-format SSE and assign a NEW messages array per chunk. Mutating the array in place does not re-render: the web components compare references.',
     tags: ['stream', 'sse', 'token', 'render', 'chunk'],
   },
   {

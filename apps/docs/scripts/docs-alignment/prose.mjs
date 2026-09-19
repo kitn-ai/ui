@@ -109,8 +109,8 @@ export function checkProse(doc, surface) {
     findings.push(
       surface.knownTokens.has(t)
         ? {
-            kind: 'undeclared-in-element-meta',
-            detail: `\`${t}\` exists in the kit (a declarative child element or a dispatched event) but is not a registered element or a declared event, so element-meta.json omits it`,
+            kind: 'undeclared-in-web-component-meta',
+            detail: `\`${t}\` exists in the kit (a declarative child element or a dispatched event) but is not a registered element or a declared event, so web-component-meta.json omits it`,
             line,
             context: context.slice(0, 160),
             severity: 'advisory',
@@ -277,7 +277,7 @@ const CLAIM_PATTERNS = [
 /** Only claims that are ABOUT the kit — otherwise every "by default" in every
  *  sentence lands on the list and nobody reads it. */
 const ABOUT_KIT =
-  /@kitn\.ai\/ui|\bkai-[a-z]|\bthe kit\b|\bthe package\b|\bentry point\b|\bthe library\b|\bthis package\b|\belements bundle\b|\bthe elements\b/i;
+  /@kitn\.ai\/ui|\bkai-[a-z]|\bthe kit\b|\bthe package\b|\bentry point\b|\bthe library\b|\bthis package\b|\bweb-components bundle\b|\bthe web components\b/i;
 
 export function flagForHuman(doc) {
   const flags = [];

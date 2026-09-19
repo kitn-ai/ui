@@ -13,7 +13,7 @@ import {
   AttachmentEmpty,
 } from './attachments';
 import type { AttachmentData } from './attachments';
-import { componentDescription } from '../../stories/docs/element-controls';
+import { componentDescription } from '../../stories/docs/web-component-controls';
 
 const sampleAttachments: AttachmentData[] = [
   {

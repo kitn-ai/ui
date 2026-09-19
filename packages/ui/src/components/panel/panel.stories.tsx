@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { X, ArrowLeft } from 'lucide-solid';
 import { Panel, PanelHeader, PanelBody, PanelFooter } from './panel';
 import { Button } from '../button/button';
-import { componentDescription } from '../../stories/docs/element-controls';
+import { componentDescription } from '../../stories/docs/web-component-controls';
 
 /**
  * The widget panel chrome as public parts (blocks-and-parts ruling P-1).
@@ -17,7 +17,7 @@ const meta = {
     layout: 'centered',
     docs: {
       description: componentDescription([
-        'The widget panel frame and chrome, public: surface, optional standalone frame (border, radius, shadow), the header row (leading controls, title, trailing controls), the view container, and a footer strip. Painted entirely from kit tokens, so a `--kai-color-*` override retints the chrome with the elements inside it. Back and close are slotted content in the header, never props.',
+        'The widget panel frame and chrome, public: surface, optional standalone frame (border, radius, shadow), the header row (leading controls, title, trailing controls), the view container, and a footer strip. Painted entirely from kit tokens, so a `--kai-color-*` override retints the chrome with the web components inside it. Back and close are slotted content in the header, never props.',
       ]),
     },
   },
@@ -164,7 +164,7 @@ export const FramelessInDock: Story = {
  * light-DOM subtree the documented knob is the `--color-*` value itself
  * (theme.css: "rebrand by overriding the --color-* values, optionally
  * scoped to a subtree"); the `--kai-color-*` spelling re-resolves inside
- * the shadow roots of the `kai-*` element facades, which is the phase-2
+ * the shadow roots of the `kai-*` web-component facades, which is the phase-2
  * block driver's probe.
  *
  * The accent's LIGHTNESS is measured, not decorative. This story ships a

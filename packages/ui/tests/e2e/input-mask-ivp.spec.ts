@@ -60,7 +60,7 @@ import { fileURLToPath } from 'node:url';
  * (menu / composer / command / slots IVPs). Each is a `--project` of
  * `config/playwright/storybook.config.ts` + an npm script; the cross-origin
  * config (`config/playwright/cross-origin.config.ts`, run by `test:e2e`)
- * `testMatch`es only `remote-element.spec.ts`. The
+ * `testMatch`es only `remote-web-component.spec.ts`. The
  * required CI `test` job runs the menu and command ones and not this one. This
  * file follows that arrangement.
  *

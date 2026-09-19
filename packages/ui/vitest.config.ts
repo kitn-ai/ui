@@ -135,7 +135,7 @@ export default defineConfig({
     // file absent from this list gets `export default ""` and the plugin loses
     // the tie, since both are enforce:post. Every entry is a CSS file some module
     // imports for its TEXT, not for its styling:
-    //   • compiled.css — injected into shadow roots (src/elements/css.ts)
+    //   • compiled.css — injected into shadow roots (src/web-components/css.ts)
     //   • theme.css    — the `--kai-*` token names the theme MCP tool emits
     //                    (mcp/mcp/tools/theme.ts)
     // Silently empty is the dangerous failure here: it turns a derived list into

@@ -1,4 +1,4 @@
-import type { MessagePart, RawOrigin } from '../elements/chat-types';
+import type { MessagePart, RawOrigin } from '../web-components/chat-types';
 import type { ToolPart } from '../components/tool/tool-types';
 import type { CardEnvelope } from '../primitives/card-contract';
 import { classifyTool } from '../components/tool/tool-classify';

@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal, For, Show, type JSX } from 'solid-js';
 import { PaneGrid } from './pane-grid';
 import { Button } from '../button/button';
-import { componentDescription } from '../../stories/docs/element-controls';
+import { componentDescription } from '../../stories/docs/web-component-controls';
 
 // --- Story helpers -------------------------------------------------------
 

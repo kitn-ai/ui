@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal } from 'solid-js';
 import { Tabs, type KaiTabItem } from './tabs';
-import { componentDescription } from '../../stories/docs/element-controls';
+import { componentDescription } from '../../stories/docs/web-component-controls';
 
 const ITEMS: KaiTabItem[] = [
   { id: 'chat', label: 'Chat', icon: 'message-circle' },

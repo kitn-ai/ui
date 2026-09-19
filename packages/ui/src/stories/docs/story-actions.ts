@@ -1,7 +1,7 @@
 // Story-only helper: route a kai-* element's CustomEvents to the Storybook
 // Actions panel. The kai-* facade events are NON-bubbling (they don't reach a
 // canvas-root delegate), so each must be listened for ON THE ELEMENT. This
-// attaches one listener per event the element declares in element-meta and logs
+// attaches one listener per event the element declares in web-component-meta and logs
 // the `detail` payload via `action(name)`. Auto-discovered, so a story never has
 // to enumerate (or drift from) the element's event list.
 //
@@ -14,7 +14,7 @@
 // there are no CustomEvents; wire their callback props with `fn()` in `args`
 // per the Button exemplar instead.
 import { action } from 'storybook/actions';
-import elementMeta from '../../elements/element-meta.json';
+import elementMeta from '../../web-components/web-component-meta.json';
 
 type ElementMetaEntry = { tag: string; events?: { name: string }[] };
 

@@ -38,7 +38,7 @@ const SNIPPETS: Array<[string, string]> = [
   ['a brace-wrapped JSX expression (builder-build-wait)', `{BUILDER_TEMPLATES.map((template) => (\n  <BuildWait templateId={template.id} current="generate" />\n))}`],
   ['a package.json snippet (v0)', `{\n  "name": "vesper",\n  "dependencies": { "next": "15.0.0" }\n}`],
   ['a TSX snippet with an import line', `import { Switch } from '@kitn.ai/ui/solid';\n\n<Switch label="Temporary chat" />`],
-  ['a plain HTML snippet', `<kai-input label="Workspace name"></kai-input>\n\n<script type="module">\n  import '@kitn.ai/ui/elements';\n</script>`],
+  ['a plain HTML snippet', `<kai-input label="Workspace name"></kai-input>\n\n<script type="module">\n  import '@kitn.ai/ui/web-components';\n</script>`],
   ['a snippet opening with a const', `const [on, setOn] = createSignal(false);\n\n<Switch checked={on()} onChange={setOn} />`],
   ['a snippet opening with an elided-argument call', `<Select options={MODELS} value="sonnet" />`],
 ];

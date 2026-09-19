@@ -7,7 +7,7 @@
  * version broke a required CI job on an unrelated PR:
  *
  *   STALE BUNDLE — refusing to run.
- *     src/elements/element-types.d.ts
+ *     src/web-components/web-component-types.d.ts
  *     is 0s newer than the most recent build output (dist/llms/llms-full.txt).
  *
  * The exclusion is now DERIVED from `scripts/verify-generated-sync.mjs`, which
@@ -49,10 +49,10 @@ describe('the stale-bundle guard derives its exclusions from the generated-artif
     for (const p of excluded) expect(p.startsWith('/')).toBe(true);
   });
 
-  it('excludes element-types.d.ts — the artifact that broke CI', () => {
+  it('excludes web-component-types.d.ts — the artifact that broke CI', () => {
     // The regression pin. This file is generated into `src/` by `build:api` in
     // POSTbuild, so it is always newer than the bundle on a clean build.
-    expect(generatedArtifacts()).toContain(join(PKG, 'src/elements/element-types.d.ts'));
+    expect(generatedArtifacts()).toContain(join(PKG, 'src/web-components/web-component-types.d.ts'));
   });
 
   it('does NOT exclude build inputs that merely happen to be generated', () => {
@@ -61,7 +61,7 @@ describe('the stale-bundle guard derives its exclusions from the generated-artif
     // bundle really is stale, so firing is correct and excluding them would
     // trade a false positive for a false negative.
     const excluded = generatedArtifacts();
-    expect(excluded).not.toContain(join(PKG, 'src/elements/compiled.css'));
+    expect(excluded).not.toContain(join(PKG, 'src/web-components/compiled.css'));
     expect(excluded).not.toContain(join(PKG, 'src/primitives/card-validate-schemas.ts'));
   });
 

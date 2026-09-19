@@ -132,7 +132,7 @@ describe('acceptance pack', () => {
     }
 
     expect(d).toContain('npm install @kitn.ai/ui');
-    expect(d).toContain("import '@kitn.ai/ui/elements';");
+    expect(d).toContain("import '@kitn.ai/ui/web-components';");
     expect(d).toContain('<script type="module">');
     expect(d).toContain("customElements.whenDefined('kai-chat')");
     expect(d).toContain("from '@kitn.ai/ui/react'");
@@ -181,7 +181,7 @@ describe('acceptance pack', () => {
     expect(pages.sort()).toEqual(derived.elements.map((e) => `${e.tag}.md`).sort());
 
     const readme = readFileSync(join(agent, 'README.md'), 'utf8');
-    expect(readme).toMatch(/Open only the\s+element pages you actually need/);
+    expect(readme).toMatch(/Open only the\s+web-component pages you actually need/);
     // A blank "what it is" cell must be labelled as a missing description, not
     // left to read as a judgement about the element.
     expect(index).toMatch(/A blank means \*nobody has\s+written one\*/);
@@ -189,7 +189,7 @@ describe('acceptance pack', () => {
 
   // A1 -- the universal props are factored out once.
   it('factors the universal props out of every element page, and the absence is observable', () => {
-    const meta = JSON.parse(readFileSync(join(PKG, 'src/elements/element-meta.json'), 'utf8')) as {
+    const meta = JSON.parse(readFileSync(join(PKG, 'src/web-components/web-component-meta.json'), 'utf8')) as {
       tag: string;
       props: { name: string; universal?: boolean }[];
     }[];
@@ -388,7 +388,7 @@ describe('acceptance pack', () => {
     // first version of this said "is not reported as checked" and could not mean
     // it. What proves coverage is ABSENCE from the UNCHECKED section.
     const uncheckedSection = floorReport.slice(floorReport.indexOf('## Import specifiers the pack names'));
-    for (const sym of ['Chat (react)', 'useKaiChat (react)', 'elementsReady (elements)', 'createAssistantStream (state)']) {
+    for (const sym of ['Chat (react)', 'useKaiChat (react)', 'elementsReady (web-components)', 'createAssistantStream (state)']) {
       expect(floorReport, `${sym} is not named at all`).toContain(sym);
       expect(uncheckedSection, `${sym} is reported UNCHECKED`).not.toContain(
         `\`${sym.split(' ')[0]}\` was NOT checked`,
@@ -432,10 +432,10 @@ describe('acceptance pack', () => {
     }
     // I4: the artifact-agreement guard must be bidirectional and per-field.
     for (const expected of [
-      'a tag only element-meta.json has',
+      'a tag only web-component-meta.json has',
       'a prop only derived.json has',
-      'a prop only element-meta.json has',
-      'an event only element-meta.json has',
+      'a prop only web-component-meta.json has',
+      'an event only web-component-meta.json has',
       'a prop whose type makes it function-valued on one side only',
       'a prop whose scalar flag disagrees',
     ]) {

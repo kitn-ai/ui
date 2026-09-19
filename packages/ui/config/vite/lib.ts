@@ -35,7 +35,7 @@ import { rewriteMcpDtsSpecifiers } from './mcp-dts-rewrite';
 // `construct-cli` target in config/vite/node.ts. And `vite.config.ts` -- the
 // register-all build that runs first and is the only emptyOutDir:true build
 // writing to dist/ root -- is now `KAI_BUILD=register vite build --config
-// config/vite/elements.ts`.
+// config/vite/web-components.ts`.
 
 // This file lives two levels below the package root, so entries resolve from
 // PKG rather than __dirname. Vite's `root` is process.cwd(), always packages/ui
@@ -271,10 +271,10 @@ const TARGETS: Record<string, Target> = {
   // dist/solid.js, the "./solid" export.
   //
   // The `@kitn.ai/ui/solid` entry (src/solid.ts → dist/solid.js) — the COMPLETE
-  // SolidJS surface: a writable component for EVERY registered element plus a
+  // SolidJS surface: a writable component for EVERY registered web component plus a
   // `<Name>Props` type for every public component. The catalog is
-  // src/elements/element-meta.json; `npm run verify:solid-coverage` prints the
-  // element count and fails on any gap, so the number is not restated here.
+  // src/web-components/web-component-meta.json; `npm run verify:solid-coverage` prints the
+  // web-component count and fails on any gap, so the number is not restated here.
   //
   // WHY IT IS ITS OWN BUILD TARGET RATHER THAN PART OF THE BARREL
   // ------------------------------------------------------------
@@ -397,13 +397,13 @@ const TARGETS: Record<string, Target> = {
   // populated dist/.
   //
   // The .d.ts is NOT emitted here. The barrel build (vite-plugin-dts over
-  // src/**, entryRoot: 'src') already emits dist/elements/define-entry.d.ts —
+  // src/**, entryRoot: 'src') already emits dist/web-components/define-entry.d.ts —
   // but this subpath's declared `types` is the flat dist/define.d.ts, matching
   // the flat dist/define.js this build produces, so scripts/emit-subpath-dts.mjs
   // generates dist/define.d.ts as a shim onto the barrel's real declarations
   // (see REAL_TYPES_SOURCE in that script). This build is JS-only.
   define: {
-    entry: 'src/elements/define-entry.ts',
+    entry: 'src/web-components/define-entry.ts',
     fileName: 'define.js',
     transform: 'dom',
     external: SOLID,
@@ -437,7 +437,7 @@ const TARGETS: Record<string, Target> = {
   //
   // emptyOutDir: false — later build in the chain; do NOT clobber earlier output.
   'define.server': {
-    entry: 'src/elements/define-entry.ts',
+    entry: 'src/web-components/define-entry.ts',
     fileName: 'define.server.js',
     transform: 'ssr',
     external: SOLID,

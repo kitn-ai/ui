@@ -1,5 +1,5 @@
 /** Generic focused example — a fixed-config live preview + its code, for the
- *  Examples section. Data-driven from element-meta + lib/codegen + sample-data,
+ *  Examples section. Data-driven from web-component-meta + lib/codegen + sample-data,
  *  so every element's named examples reuse one component. `config` is the fixed
  *  scalar prop values; `data` selects a NAMED sample set. Modeled on the
  *  approved AttachmentsExample. */
@@ -7,7 +7,7 @@ import { onMount } from 'solid-js';
 import { loadKit } from './example/kit';
 import { Resizer } from './example/Resizer';
 import { CodePanel } from './example/CodePanel';
-import meta from '@kitn.ai/ui/element-meta.json';
+import meta from '@kitn.ai/ui/web-component-meta.json';
 import { generateSnippets, type ElementMeta, type State } from '../lib/codegen';
 import { sampleFor } from '../lib/sample-data';
 

@@ -103,7 +103,7 @@ describe('form-control boundary contrast (WCAG 2.1 SC 1.4.11)', () => {
       // --color-primary-foreground on a --color-primary fill. They are the state
       // indicator of a control, so 1.4.11 applies to them and not 1.4.3 — 3:1.
       // One assertion covers both marks because they share the token pair by
-      // construction (see the :indeterminate comment in src/elements/styles.css);
+      // construction (see the :indeterminate comment in src/web-components/styles.css);
       // that the marks are actually DIFFERENT shapes is pinned separately in
       // tests/ui/checkbox-indeterminate-paint.test.ts.
       const mark = tokenDefault(block, 'color-primary-foreground');

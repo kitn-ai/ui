@@ -43,7 +43,7 @@ import {
 } from '../attachments/attachments';
 import { MessageBody } from '../message/message';
 import { DEFAULT_MEDIA_POLICY, encodableMediaTypes } from '../../wire/media-types';
-import type { MessagePart } from '../../elements/chat-types';
+import type { MessagePart } from '../../web-components/chat-types';
 
 afterEach(cleanup);
 

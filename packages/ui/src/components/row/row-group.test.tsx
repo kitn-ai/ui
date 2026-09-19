@@ -111,7 +111,7 @@ describe('the geometry contract with kit-base.css', () => {
     expect(KIT_BASE_CSS).toMatch(/::slotted\(\[data-kai-row\]:last-child\)\s*\{/);
     expect(KIT_BASE_CSS).toMatch(/::slotted\(\[data-kai-row\]:not\(:first-child\)\)\s*\{[^}]*--kai-row-divide-width:\s*1px/);
     // The slotted half is scoped by a MARKER, never a tag and never `*`: this sheet
-    // is shared by every element's shadow root, so `::slotted(*)` would restyle
+    // is shared by every web component's shadow root, so `::slotted(*)` would restyle
     // every other element's slotted children, and a tag list is a roster a third
     // row-shaped element would silently miss.
     expect(KIT_BASE_CSS).not.toMatch(/::slotted\(\*\)/);
@@ -123,7 +123,7 @@ describe('the geometry contract with kit-base.css', () => {
     // corners INSIDE a group, which no type or lint can see. `SettingItem` is the
     // one that proved the need: it draws its own hairline now, where `SettingsGroup`
     // used to get dividers from a `divide-y` class on the frame.
-    const facadeDir = resolve(PKG_ROOT, 'src/elements');
+    const facadeDir = resolve(PKG_ROOT, 'src/web-components');
     const rowShaped = readdirSync(facadeDir)
       .filter((f) => f.endsWith('.tsx') && !f.endsWith('.stories.tsx'))
       .map((f) => ({ file: f, src: readFileSync(resolve(facadeDir, f), 'utf8') }))

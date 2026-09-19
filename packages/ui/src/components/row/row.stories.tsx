@@ -3,7 +3,7 @@ import { fn } from 'storybook/test';
 import { Row } from './row';
 import { RowGroup } from './row-group';
 import { renderIcon } from '../icon/icon';
-import { componentDescription } from '../../stories/docs/element-controls';
+import { componentDescription } from '../../stories/docs/web-component-controls';
 
 /**
  * The generic mobile list row (P-4): leading region, title + optional

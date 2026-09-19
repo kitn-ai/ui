@@ -3,7 +3,7 @@ import { fn } from 'storybook/test';
 import { createSignal, For } from 'solid-js';
 import { FileUpload, FileUploadTrigger, FileUploadContent } from './file-upload';
 import { Upload } from 'lucide-solid';
-import { componentDescription } from '../../stories/docs/element-controls';
+import { componentDescription } from '../../stories/docs/web-component-controls';
 
 const meta = {
   title: 'Components/FileUpload',

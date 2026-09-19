@@ -31,13 +31,13 @@ Reach for `<kai-prompt-input>` whenever you need a chat composer outside of Soli
 
 ## Usage
 
-Register elements once, then wire up JS properties and DOM events:
+Register web components once, then wire up JS properties and DOM events:
 
 ```html
 <kai-prompt-input id="input" style="display:block; width:100%;"></kai-prompt-input>
 
 <script type="module">
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
 
   await customElements.whenDefined('kai-prompt-input');
 

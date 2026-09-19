@@ -16,9 +16,9 @@ const pkgRoot = dirname(require.resolve('@kitn.ai/ui/package.json'));
 const here = dirname(fileURLToPath(import.meta.url));
 const pub = join(here, '..', 'public');
 
-mkdirSync(join(pub, 'kitn', 'elements'), { recursive: true });
+mkdirSync(join(pub, 'kitn', 'web-components'), { recursive: true });
 // autoloader-demo.html loads these two as raw assets (the zero-build CDN path):
-cpSync(join(pkgRoot, 'dist/elements/autoloader.js'), join(pub, 'kitn/elements/autoloader.js'));
+cpSync(join(pkgRoot, 'dist/web-components/autoloader.js'), join(pub, 'kitn/web-components/autoloader.js'));
 cpSync(join(pkgRoot, 'dist/theme.tokens.css'), join(pub, 'kitn/theme.tokens.css'));
 // llms.txt / llms-full.txt served at the site root for AI agents:
 cpSync(join(pkgRoot, 'llms.txt'), join(pub, 'llms.txt'));

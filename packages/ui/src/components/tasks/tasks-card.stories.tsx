@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal } from 'solid-js';
 import { action } from 'storybook/actions';
 import { TasksCard, type TasksCardData, type TasksTask } from './tasks-card';
-import { componentDescription } from '../../stories/docs/element-controls';
+import { componentDescription } from '../../stories/docs/web-component-controls';
 import type { CardEvent, CardHost, CardContext, CardResolution } from '../../primitives/card-contract';
 
 const ctx: CardContext = { theme: { mode: 'light' }, locale: 'en' };

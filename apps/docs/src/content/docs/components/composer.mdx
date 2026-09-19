@@ -28,13 +28,13 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 ## Usage
 
-Register elements once, then set the trigger definitions as a JS property and listen for events:
+Register web components once, then set the trigger definitions as a JS property and listen for events:
 
 ```html
 <kai-composer id="composer" style="display:block; width:100%;"></kai-composer>
 
 <script type="module">
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
 
   await customElements.whenDefined('kai-composer');
   const composer = document.getElementById('composer');

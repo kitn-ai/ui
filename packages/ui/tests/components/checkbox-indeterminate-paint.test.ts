@@ -9,7 +9,7 @@
 //
 // WHY THIS IS A TEXT ASSERTION AND NOT A COMPUTED-STYLE ONE. jsdom does no
 // layout, does not resolve `::after`, and never applies the element stylesheet
-// (`src/elements/compiled.css` is injected into a shadow root at runtime), so
+// (`src/web-components/compiled.css` is injected into a shadow root at runtime), so
 // "the indeterminate box computes differently from the unchecked one" is not
 // expressible here — `getComputedStyle` would return the same empty answer for
 // both and the check would pass vacuously in the worst way. What IS honestly
@@ -28,7 +28,7 @@ import { fileURLToPath } from 'node:url';
 import { describe, it, expect } from 'vitest';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const compiledPath = join(HERE, '../../src/elements/compiled.css');
+const compiledPath = join(HERE, '../../src/web-components/compiled.css');
 let compiled: string;
 try {
   compiled = readFileSync(compiledPath, 'utf8');

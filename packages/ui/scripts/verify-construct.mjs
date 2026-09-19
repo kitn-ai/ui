@@ -33,7 +33,7 @@
  *   4. `tsc --noEmit` under the cell's OWN emitted tsconfig.json (strict +
  *      noUnusedLocals are IN that file — the gate compiles exactly what an
  *      ejecting consumer compiles)
- *   5. `npm run build` (the emitted vite lib config) — the element must
+ *   5. `npm run build` (the emitted vite lib config) — the web component must
  *      actually bundle
  *   6. for one cell per LAYOUT (the layout × all-capabilities cell): a
  *      minimal Vite 8 consumer app that imports the COMPILED output and
@@ -100,7 +100,7 @@ const SCHEMA_PATH = join(PKG_ROOT, 'mcp/construct/construct.v1.schema.json');
 const BIN = join(PKG_ROOT, 'bin/mcp.js');
 
 for (const [path, what] of [
-  [KAI_ES, 'dist/kai.es.js (the built elements entry)'],
+  [KAI_ES, 'dist/kai.es.js (the built web-components entry)'],
   [CONSTRUCT_CLI, 'dist/construct-cli.es.js (the built construct CLI, what bin/mcp.js loads for eject/dev/compile)'],
   [SCHEMA_PATH, 'the drift-guarded construct.v1.schema.json artifact'],
 ]) {

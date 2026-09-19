@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Chat, Resizable, ResizableItem } from '@kitn.ai/ui/react';
-import { toast } from '@kitn.ai/ui/elements';
+import { toast } from '@kitn.ai/ui/web-components';
 import { listenForCardEvents } from '@kitn.ai/ui';
 import { createAssistantStream, type ChatMessage } from '@kitn.ai/ui/state';
 import { cardFromToolCall, isCardTool, type ArtifactCardData } from '@kitn.ai/ui/schemas';

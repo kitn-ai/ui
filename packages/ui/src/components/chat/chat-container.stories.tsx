@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { For } from 'solid-js';
 import { ChatContainerRoot, ChatContainerContent, ChatContainerScrollAnchor } from './chat-container';
 import { Message, MessageAvatar, MessageContent } from '../message/message';
-import { componentDescription } from '../../stories/docs/element-controls';
+import { componentDescription } from '../../stories/docs/web-component-controls';
 
 const sampleMessages = [
   { role: 'user', content: 'What is SolidJS?' },

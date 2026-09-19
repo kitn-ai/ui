@@ -12,7 +12,7 @@ import ArtifactsCanvasDemo from '../../../components/ArtifactsCanvasDemo.tsx';
 
 ## How it works
 
-Three elements compose the shell. `<kai-resizable>` splits chat from the canvas column; a nested vertical `<kai-resizable>` stacks the tree above the artifact. Selecting a file in `<kai-file-tree>` fires `kai-select`; the handler sets the artifact's `activeFile` (and, for files with a hosted `url`, its `src`) so the canvas follows the tree.
+Three web components compose the shell. `<kai-resizable>` splits chat from the canvas column; a nested vertical `<kai-resizable>` stacks the tree above the artifact. Selecting a file in `<kai-file-tree>` fires `kai-select`; the handler sets the artifact's `activeFile` (and, for files with a hosted `url`, its `src`) so the canvas follows the tree.
 
 ```html
 <kai-resizable orientation="horizontal" style="display:block;height:620px">
@@ -39,7 +39,7 @@ Three elements compose the shell. `<kai-resizable>` splits chat from the canvas 
 </kai-resizable>
 
 <script type="module">
-  import '@kitn.ai/ui/elements'; // registers the custom elements
+  import '@kitn.ai/ui/web-components'; // registers the web components
 
   await customElements.whenDefined('kai-file-tree');
 

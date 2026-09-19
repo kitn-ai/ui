@@ -35,7 +35,7 @@ import {
   isConversationUnread,
   type ConversationSummary,
 } from '@kitn.ai/ui/stores';
-import type { KaiPromptInputElement } from '@kitn.ai/ui/elements';
+import type { KaiPromptInputElement } from '@kitn.ai/ui/web-components';
 import { MOCK_SCRIPT, MOCK_TOOL_OUTPUTS, SUGGESTIONS, MODELS, type ModelOption } from './mock';
 
 // KNOWN RESIDUAL: the "2m ago" formatter is internal to the Solid layer and

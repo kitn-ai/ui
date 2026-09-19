@@ -15,7 +15,7 @@
     "jsxImportSource": "solid-js",
     "baseUrl": ".",
     "paths": {
-      "@kitn.ai/ui/elements": ["./src/elements/register.ts"]
+      "@kitn.ai/ui/web-components": ["./src/web-components/register.ts"]
     }
   },
   "include": ["apps/**/*.ts", "apps/**/*.tsx"],

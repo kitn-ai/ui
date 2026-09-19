@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { KaiResizableItemElement } from '@kitn.ai/ui/elements';
+  import type { KaiResizableItemElement } from '@kitn.ai/ui/web-components';
   import { readOpenAIStream } from '@kitn.ai/ui/wire';
   import { CONVERSATIONS, THREADS, SUGGESTIONS, TRIGGERS, newId, mockResponse } from './chat-data';
   import type { Theme } from './lib/types';
@@ -11,7 +11,7 @@
   import ThemeToggle from './components/ThemeToggle.svelte';
 
   /**
-   * A mini chat workspace COMPOSED BY HAND from @kitn.ai/ui's individual elements —
+   * A mini chat workspace COMPOSED BY HAND from @kitn.ai/ui's individual web components —
    * the Svelte mirror of `examples/react` + `examples/vue`. It shows how the raw
    * `kai-*` web components fit together (vs. dropping in one batteries-included
    * `<kai-chat>`/`<kai-workspace>`):

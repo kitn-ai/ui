@@ -7,7 +7,7 @@ import { createSignal, onMount, onCleanup } from 'solid-js';
 import type { ChatMessage } from '@kitn.ai/ui';
 import { loadKit } from './example/kit';
 
-// ConversationSummary shape (verified against element-meta.json)
+// ConversationSummary shape (verified against web-component-meta.json)
 const CONVERSATIONS = [
   {
     id: 'c1',
@@ -47,7 +47,7 @@ const CONVERSATIONS = [
   },
 ];
 
-// ConversationGroup shape (verified against element-meta.json)
+// ConversationGroup shape (verified against web-component-meta.json)
 const GROUPS = [
   { id: 'today', name: 'Today', sortOrder: 0, createdAt: '2026-06-17T00:00:00.000Z' },
   { id: 'yesterday', name: 'Yesterday', sortOrder: 1, createdAt: '2026-06-16T00:00:00.000Z' },

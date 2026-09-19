@@ -59,7 +59,7 @@ const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 // `--radius-lg`, which the row's radius fallback resolves through; without the
 // tokens that fallback is invalid at computed-value time and every radius reads
 // 0, which would make the corner checks pass for the wrong reason.
-const COMPILED_CSS = readFileSync(path.join(root, 'src/elements/compiled.css'), 'utf-8');
+const COMPILED_CSS = readFileSync(path.join(root, 'src/web-components/compiled.css'), 'utf-8');
 const TOKENS_CSS = readFileSync(path.join(root, 'dist/theme.tokens.css'), 'utf-8');
 
 const PAGE = /* html */ `<!doctype html>
@@ -85,10 +85,10 @@ const PAGE = /* html */ `<!doctype html>
   <script type="module">
     let error = null;
     try {
-      await import('/src/elements/row.tsx');
-      await import('/src/elements/row-group.tsx');
-      await import('/src/elements/settings-group.tsx');
-      await import('/src/elements/setting-item.tsx');
+      await import('/src/web-components/row.tsx');
+      await import('/src/web-components/row-group.tsx');
+      await import('/src/web-components/settings-group.tsx');
+      await import('/src/web-components/setting-item.tsx');
       // The Solid path: the same components a light-DOM SolidJS consumer writes,
       // mounted with the real renderer. Its rows are DOM children of the frame,
       // which is the half of the geometry ::slotted() cannot reach.

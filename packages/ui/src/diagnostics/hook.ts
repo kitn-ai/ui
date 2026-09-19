@@ -312,7 +312,7 @@ function createHook(recording: boolean, payload: boolean): KaiDevtoolsHook {
  * server, where there is no signal to read and nothing to record.
  *
  * Importing this module installs NOTHING. The call site decides, and in this kit
- * that call site is `elements/register-impl.ts`, which is already browser-only.
+ * that call site is `web-components/register-impl.ts`, which is already browser-only.
  * An app that imports the Solid components directly never runs that file and
  * must call this itself; see the module docblock in `./index.ts`.
  */

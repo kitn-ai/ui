@@ -13,7 +13,7 @@ import viteReact from '@vitejs/plugin-react';
 //
 // This is the standard TanStack Start config: the Start plugin first, then
 // React's. The kit needs no special handling — leaving `@kitn.ai/ui` external to
-// the SSR build (the Vite default) is correct, because the per-element
+// the SSR build (the Vite default) is correct, because the per-web-component
 // registration imports only run in the browser, so the server just renders the
 // bare tags.
 export default defineConfig({

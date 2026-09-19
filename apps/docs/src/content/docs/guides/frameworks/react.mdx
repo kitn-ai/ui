@@ -19,7 +19,7 @@ Register the web components once at your app entry point, then import the wrappe
 
 ```tsx
 // main.tsx (or wherever you mount your app)
-import '@kitn.ai/ui/elements'; // registers all kai-* elements globally
+import '@kitn.ai/ui/web-components'; // registers all kai-* web components globally
 ```
 
 ```tsx
@@ -40,7 +40,7 @@ Every element is styled inside its own Shadow DOM. Import `@kitn.ai/ui/theme.css
 A message is an **ordered `parts` array**, not a string: text, reasoning, tool calls, generative-UI cards and file attachments, in the order the model produced them. `ChatMessage` is the kit's own type, so import it rather than hand-rolling a text-only copy — the copy compiles and then hides every other part kind from you.
 
 ```tsx
-import '@kitn.ai/ui/elements';
+import '@kitn.ai/ui/web-components';
 import { Chat } from '@kitn.ai/ui/react';
 import type { ChatMessage } from '@kitn.ai/ui/react';
 import { appendTextPart } from '@kitn.ai/ui/state';
@@ -87,12 +87,12 @@ export function App() {
 
 `<Chat>` fills its container. Use `flex: 1` (not a hard-coded height) so it adapts to your layout.
 
-## Compose individual elements
+## Compose individual web components
 
-Every element has its own wrapper, so you can assemble your own layout. This example pairs a `<Conversations>` sidebar with a `<Chat>` thread. `groups` carries the section headers and `conversations` the rows; pass `groups={[]}` and everything lands in one Ungrouped section.
+Every web component has its own wrapper, so you can assemble your own layout. This example pairs a `<Conversations>` sidebar with a `<Chat>` thread. `groups` carries the section headers and `conversations` the rows; pass `groups={[]}` and everything lands in one Ungrouped section.
 
 ```tsx
-import '@kitn.ai/ui/elements';
+import '@kitn.ai/ui/web-components';
 import { Chat, Conversations } from '@kitn.ai/ui/react';
 import { useState } from 'react';
 
@@ -145,9 +145,9 @@ import { Chat, Conversations, Resizable, ResizableItem } from '@kitn.ai/ui/react
 </Resizable>
 ```
 
-### Standalone display elements
+### Standalone display web components
 
-Drop individual elements anywhere in your UI without adopting a full chat shell — `<Markdown>`, `<CodeBlock>`, `<Reasoning>`, `<Tool>`, `<Artifact>` all work standalone:
+Drop individual web components anywhere in your UI without adopting a full chat shell — `<Markdown>`, `<CodeBlock>`, `<Reasoning>`, `<Tool>`, `<Artifact>` all work standalone:
 
 ```tsx
 import { Markdown, Reasoning, Tool } from '@kitn.ai/ui/react';
@@ -191,7 +191,7 @@ setConversations((prev) => { prev.find((c) => c.id === id)!.title = 'Renamed'; r
 setConversations((prev) => prev.map((c) => (c.id === id ? { ...c, title: 'Renamed' } : c)));
 ```
 
-This is the same immutable update React already wants for its own state, so idiomatic React code satisfies it by default. The trap is reaching for a mutation to avoid a re-render, or handing the elements state from a store that mutates in place.
+This is the same immutable update React already wants for its own state, so idiomatic React code satisfies it by default. The trap is reaching for a mutation to avoid a re-render, or handing the web components state from a store that mutates in place.
 
 <Aside type="tip" title="Image name collision">
 `kai-image` exports as `Image`, which shadows the browser global. Alias it on import: `import { Image as KaiImage } from '@kitn.ai/ui/react'`.
@@ -219,7 +219,7 @@ Prefer to use the `kai-*` element directly — for example with React 19's impro
 
 ```tsx
 import { useEffect, useRef, useState } from 'react';
-import '@kitn.ai/ui/elements';
+import '@kitn.ai/ui/web-components';
 
 export function RawChat() {
   const ref = useRef<HTMLElement>(null);

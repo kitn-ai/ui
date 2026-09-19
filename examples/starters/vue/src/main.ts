@@ -1,5 +1,5 @@
 import { createApp } from 'vue';
-import '@kitn.ai/ui/elements'; // registers the kai-* custom elements (async)
+import '@kitn.ai/ui/web-components'; // registers the kai-* custom elements (async)
 import '@kitn.ai/ui/theme.tokens.css'; // plain --color-* tokens for the shell (NOT the tailwind source)
 import './index.css';
 import App from './App.vue';

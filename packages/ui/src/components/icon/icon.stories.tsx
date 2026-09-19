@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { For } from 'solid-js';
 import { renderIcon, ICON_NAMES } from './icon';
-import { componentDescription } from '../../stories/docs/element-controls';
+import { componentDescription } from '../../stories/docs/web-component-controls';
 
 // ICON_NAMES is DERIVED from NAMED_ICONS (src/components/icon/icon.tsx). It used to be a
 // hand-typed copy here, and it had already drifted: thirteen registered names

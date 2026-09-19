@@ -22,7 +22,7 @@ import { BLUEPRINT_BG, STROKE, LINE, BORDER, ACCENT } from './builder-start';
 //
 // "SWITCHABLE VIEWS" (the Multi-mode mechanism) IS NOT A THIRD CARD HERE —
 // decided and recorded, per the assignment's own conditional. Multi-mode's
-// own module doc comment (`elements/builder-multi-mode.stories.tsx`)
+// own module doc comment (`web-components/builder-multi-mode.stories.tsx`)
 // concluded two things that both point away from "just a Workspace
 // variant": (1) its mode-swap mechanism generalizes ACROSS template shapes
 // (an `assistant` mode and a `workspace` mode are both first-class

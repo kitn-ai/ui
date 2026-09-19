@@ -1,4 +1,4 @@
-/** Generic interactive playground — data-driven from element-meta.json. Controls
+/** Generic interactive playground — data-driven from web-component-meta.json. Controls
  *  are derived from the element's own props (enum → tabs, boolean → toggle,
  *  string → input); they drive BOTH the live <kai-*> preview AND the copyable
  *  per-framework code (lib/codegen). One component for every element — no
@@ -7,7 +7,7 @@ import { createSignal, onMount, createEffect, onCleanup, For, Show, createMemo, 
 import { loadKit } from './example/kit';
 import { Resizer } from './example/Resizer';
 import { CodePanel } from './example/CodePanel';
-import meta from '@kitn.ai/ui/element-meta.json';
+import meta from '@kitn.ai/ui/web-component-meta.json';
 import { generateSnippets, controlsFor, type ElementMeta, type State } from '../lib/codegen';
 import { sampleFor } from '../lib/sample-data';
 

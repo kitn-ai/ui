@@ -7,7 +7,7 @@ applications; a few older demos live below them.
 ## Starter set: hand-composed chat workspaces
 
 Five parallel examples, one per framework, each building the **same** small chat
-workspace by composing the kit's individual `kai-*` elements by hand: a
+workspace by composing the kit's individual `kai-*` web components by hand: a
 resizable sidebar split, a `kai-conversations` rail, a streaming `kai-thread`, a
 `kai-prompt-input` composer, a light/dark toggle, and voice input. The point is
 to show how the pieces fit together, not to drop in one batteries-included
@@ -84,7 +84,7 @@ builds and typechecks every app the day it lands.
 | `apps/workspace/` | 3 | A multi-conversation chat workspace: `kai-conversations` rail beside `kai-chat`, thread switching, delete with undo, search, and localStorage persistence that survives a reload mid-conversation. React + Vite on the `@kitn.ai/ui/react` wrappers. Same mock/OpenRouter seam; front-door-built by a clean-room agent (provenance in its README). |
 | `apps/builder/` | 4 | An AI page builder: chat left, live preview right. Each reply carries a whole self-contained HTML page as a `kai_artifact` tool call, which becomes a `kai-artifact` preview, a compact custom card in the thread, and a `kai-checkpoint` version you can restore. Device widths, maximize, Preview/Code. React + Vite. Same mock/OpenRouter seam; front-door-built by a clean-room agent (provenance in its README). |
 | `apps/ops-console/` | 5 | An internal ops console: the assistant *proposes* consequential actions as interactive cards — approvals, a strategy picker, a parameters form, a live checklist — and nothing happens until the operator clicks. Beside the thread, a live run board served from a **second origin** and framed through `<kai-remote>`, whose rollback button arrives in the chat as a proposal. React + Vite, **two** dev servers. Same mock/OpenRouter seam; front-door-built by a clean-room agent (provenance in its README). |
-| `apps/composed-thread/` | 6 | A chat client whose conversation UI is composed **by hand from standalone elements** — no `<kai-chat>` anywhere: `kai-thread`, `kai-composer`, `kai-attachments`, `kai-conversation-item`, `kai-toast-region`, `kai-feedback-bar`, wired by a host module. Streaming via `createAssistantStream` + `readOpenAIStream` over the in-browser mock responder (a scripted `search_docs` tool call included), file attach round-trip onto the sent message. Vanilla TS + Vite, no server at all; front-door-built by a clean-room agent (provenance in its README). |
+| `apps/composed-thread/` | 6 | A chat client whose conversation UI is composed **by hand from standalone web components** — no `<kai-chat>` anywhere: `kai-thread`, `kai-composer`, `kai-attachments`, `kai-conversation-item`, `kai-toast-region`, `kai-feedback-bar`, wired by a host module. Streaming via `createAssistantStream` + `readOpenAIStream` over the in-browser mock responder (a scripted `search_docs` tool call included), file attach round-trip onto the sent message. Vanilla TS + Vite, no server at all; front-door-built by a clean-room agent (provenance in its README). |
 
 ```bash
 pnpm build:ui                                        # once
@@ -105,7 +105,7 @@ These predate the starter-set refresh and consume the kit their own way.
 
 ### Static ES-module demos
 
-- **`demos/composable/`**: the full roster of individual elements plus the
+- **`demos/composable/`**: the full roster of individual web components plus the
   batteries-included `<kai-chat>`, as a plain HTML page.
 
 It is an ES-module web-component page: it must be **served over HTTP** (opening it
@@ -136,7 +136,7 @@ tool parts.
   label — a server-rendered **SolidJS 2** app with six routes, an interaction in
   every section, and a persistent cart. It uses **none of the kit**; it is here
   because it began as the page the **Labs/Apps → v0** story
-  (`packages/ui/src/elements/v0.stories.tsx`) builds inline and frames in
+  (`packages/ui/src/web-components/v0.stories.tsx`) builds inline and frames in
   `<kai-artifact>`, and because it is a useful place to keep a real Solid 2 app.
 
   Worth reading its `README.md` before starting any Solid 2 work: Start is now a

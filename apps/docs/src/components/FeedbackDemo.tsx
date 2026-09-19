@@ -9,7 +9,7 @@ import { loadKit, syncKaiTheme, syncToastRegionTheme } from './example/kit';
 type AnyEl = HTMLElement & Record<string, unknown>;
 
 // Shape mirrors apps/docs/src/data/samples/kai-message.ts (ASSISTANT_MESSAGE) and the
-// ChatMessage interface in src/elements/chat-types.ts: { id, role, parts: MessagePart[], actions }.
+// ChatMessage interface in src/web-components/chat-types.ts: { id, role, parts: MessagePart[], actions }.
 // `actions` is REQUIRED — MessageBody only renders the bar when actions.length > 0,
 // so without it there is no copy/thumbs row to demo.
 const MESSAGE = {

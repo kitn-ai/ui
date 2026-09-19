@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { For } from 'solid-js';
 import { ScrollArea } from './scroll-area';
-import { componentDescription } from '../../stories/docs/element-controls';
+import { componentDescription } from '../../stories/docs/web-component-controls';
 
 /** Enough rows to overflow vertically, each wide enough to overflow horizontally,
  *  so switching `orientation` visibly changes which axis scrolls. */

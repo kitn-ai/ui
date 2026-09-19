@@ -305,7 +305,7 @@ import { ArrowUp, Paperclip } from 'lucide-solid';`,
 };
 
 /** The staged file as a `data:` URI — the same thing `<kai-prompt-input>` does
- *  for you internally (see `elements/default-input.tsx`).
+ *  for you internally (see `web-components/default-input.tsx`).
  *
  *  NOT `URL.createObjectURL`. An object URL resolves only inside the tab that
  *  minted it, so it renders a perfect thumbnail here and is meaningless to

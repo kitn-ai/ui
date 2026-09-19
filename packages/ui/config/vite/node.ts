@@ -46,7 +46,7 @@ const TARGETS: Record<string, Target> = {
   // records the same dependency from the other side. The two files the verbatim
   // text above names are also gone: `vite.config.provider.ts` is the `provider`
   // target in config/vite/lib.ts, and `vite.config.ts` (the main build) is
-  // `KAI_BUILD=register vite build --config config/vite/elements.ts`.
+  // `KAI_BUILD=register vite build --config config/vite/web-components.ts`.
   mcp: {
     entry: 'mcp/mcp/stdio.ts',
     out: 'mcp.es.js',

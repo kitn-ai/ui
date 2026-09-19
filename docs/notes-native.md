@@ -35,9 +35,9 @@
   Has this been done before? Am I on to something new and is it innovation? Is  
   this something worth going down and seeing how well it works?                 
                                                                                 
-  If so does it require more than just reading my file? Do you have to start    
-  off with a working codebase, kind of like what we have here where we have all 
-  of these elements and primitives and we can build things out using them and   
+  If so does it require more than just reading my file? Do you have to start off
+  with a working codebase, kind of like what we have here where we have all of  
+  these web components and primitives and we can build things out using them and
   we've proven it up? Do you need that as the base, or is the Markdown enough?  
 
 ⏺ Great topic. Let me engage with it directly rather than run you through a
@@ -99,13 +99,13 @@
   is more specific, and you should name it precisely:
 
   - The spec is anchored to a validated reference implementation. Your 70
-  SolidJS elements already work. The Markdown doesn't describe a fantasy; it
-  describes contracts you've proven. That gives the LLM ground truth and gives
-  you a way to check its output.
+  SolidJS web components already work. The Markdown doesn't describe a fantasy;
+  it describes contracts you've proven. That gives the LLM ground truth and
+  gives you a way to check its output.
   - Components are the right altitude. UML failed partly because it tried to
   model everything. Components have crisp, bounded contracts: props, events,
   states, slots, a11y, visual tokens. Your kai- contract is already that spec,
-  informally. You have element-meta, schemas, component_reference, the docs MDX.
+  informally. You have web-component-meta, schemas, component_reference, the docs MDX.
   You're maybe 60% of the way to a spec layer and didn't frame it that way.
   - The "why now" is the LLM. In 2005 the transform from model to code had to be
   a deterministic generator, and it couldn't handle nuance. An LLM can produce

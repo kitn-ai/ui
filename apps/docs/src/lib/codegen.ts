@@ -1,6 +1,6 @@
 // Generic, data-driven multi-framework code generator.
 //
-// One source of truth — the kit's generated element-meta.json — drives the
+// One source of truth — the kit's generated web-component-meta.json — drives the
 // snippet for every framework, for every kai-* element. The interactive
 // playground feeds the live control state in; focused examples feed a fixed
 // config. This replaces the hand-authored per-element `*-code.ts` files so the
@@ -40,7 +40,7 @@ export interface ElementMeta {
 export type State = Record<string, unknown>;
 
 // ---------------------------------------------------------------------------
-// Prop introspection (from element-meta displayType strings)
+// Prop introspection (from web-component-meta displayType strings)
 // ---------------------------------------------------------------------------
 
 const camelToKebab = (s: string) => s.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
@@ -64,7 +64,7 @@ export function isStringProp(p: PropMeta): boolean {
   return t.includes('string') && enumOptions(p).length === 0;
 }
 
-/** Default value parsed from element-meta (strips quotes), or undefined. */
+/** Default value parsed from web-component-meta (strips quotes), or undefined. */
 export function defaultValue(p: PropMeta): unknown {
   if (p.default == null) return undefined;
   const d = p.default.trim();
@@ -168,7 +168,7 @@ function vueCode(meta: ElementMeta, r: Resolved): string {
   const tag = parts.length
     ? `<${meta.tag}\n${parts.map((p) => indent + p).join('\n')}\n></${meta.tag}>`
     : `<${meta.tag}></${meta.tag}>`;
-  return `<script setup>\nimport '@kitn.ai/ui/elements';\n</script>\n\n<template>\n  ${tag.replace(/\n/g, '\n  ')}\n</template>`;
+  return `<script setup>\nimport '@kitn.ai/ui/web-components';\n</script>\n\n<template>\n  ${tag.replace(/\n/g, '\n  ')}\n</template>`;
 }
 
 function svelteCode(meta: ElementMeta, r: Resolved): string {
@@ -180,7 +180,7 @@ function svelteCode(meta: ElementMeta, r: Resolved): string {
   const tag = parts.length
     ? `<${meta.tag}\n${parts.map((p) => indent + p).join('\n')}\n></${meta.tag}>`
     : `<${meta.tag}></${meta.tag}>`;
-  return `<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n${tag}`;
+  return `<script>\n  import '@kitn.ai/ui/web-components';\n</script>\n\n${tag}`;
 }
 
 function angularCode(meta: ElementMeta, r: Resolved): string {

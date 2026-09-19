@@ -62,7 +62,7 @@ A component's story sits beside it in `src/components/`:
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { fn } from 'storybook/test';
 import { Switch } from './switch';
-import { componentDescription } from '../stories/docs/element-controls';
+import { componentDescription } from '../stories/docs/web-component-controls';
 
 const meta = {
   title: 'Components/Switch',
@@ -87,14 +87,14 @@ export const Playground: Story = {};
 export const On: Story = { args: { defaultChecked: true } };
 ```
 
-Wire callbacks with `fn()` so they log to the Actions panel, and give each notable variation its own story. Element stories (in `src/elements/`) pull controls from the generated metadata with `argTypesFor(tag)` and write their blurb with `specDescription`. Copy `src/elements/switch.stories.tsx`.
+Wire callbacks with `fn()` so they log to the Actions panel, and give each notable variation its own story. Element stories (in `src/web-components/`) pull controls from the generated metadata with `argTypesFor(tag)` and write their blurb with `specDescription`. Copy `src/web-components/switch.stories.tsx`.
 
 ## 3. Expose it as a `kai-*` element
 
-Wrap the component with `defineWebComponent` in `src/elements/`:
+Wrap the component with `defineWebComponent` in `src/web-components/`:
 
 ```tsx
-// src/elements/switch.tsx
+// src/web-components/switch.tsx
 import { defineWebComponent } from './define';
 import { Switch } from '../components/switch';
 
@@ -131,12 +131,12 @@ defineWebComponent<Props, Events>('kai-switch', {
 ## 4. Register and regenerate
 
 ```ts
-// src/elements/register.ts
+// src/web-components/register.ts
 import './switch';
 ```
 
 ```bash
-npm run build:api   # regenerates element-meta.json, types, React wrappers, llms.txt
+npm run build:api   # regenerates web-component-meta.json, types, React wrappers, llms.txt
 ```
 
 ## Verify

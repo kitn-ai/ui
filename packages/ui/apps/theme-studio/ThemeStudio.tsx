@@ -54,7 +54,7 @@ import { GROUPS, ALL_TOKENS, TEXT_RUNGS, parseKitDefaults, remValue, type TextRu
 
 // The showroom writes ONE kai-* tag directly in Solid JSX (<kai-chat> below);
 // every other element mounts via document.createElement in mountSample. Solid's
-// JSX namespace knows no custom elements and element-types.d.ts augments
+// JSX namespace knows no custom elements and web-component-types.d.ts augments
 // REACT's JSX, not Solid's, so declare the tag here the way the stories do
 // (chat-slots.stories.tsx uses the identical type, which keeps the interface
 // merge legal when both files share a program). It must live IN this module,

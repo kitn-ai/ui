@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal } from 'solid-js';
 import { Nav, type KaiNavItem } from './nav';
-import { componentDescription } from '../../stories/docs/element-controls';
+import { componentDescription } from '../../stories/docs/web-component-controls';
 
 const ITEMS: KaiNavItem[] = [
   { id: 'new', label: 'New task', icon: 'plus', trailing: 'pencil' },

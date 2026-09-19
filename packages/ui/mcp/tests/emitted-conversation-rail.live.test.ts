@@ -68,8 +68,8 @@ const SEP = '// ── src/main.ts ──';
 
 /**
  * The package's own exports map, applied by hand. Same rewriter as the other
- * guards; `@kitn.ai/ui/elements` resolves to the register-ALL entry point because
- * this surface mounts two tags, and `src/elements/chat` would leave
+ * guards; `@kitn.ai/ui/web-components` resolves to the register-ALL entry point because
+ * this surface mounts two tags, and `src/web-components/chat` would leave
  * `<kai-conversations>` an unupgraded unknown element with no shadow root — which
  * is precisely where every assertion below reads from.
  */
@@ -80,7 +80,7 @@ function rewrite(code: string): string {
     .filter((l) => !l.startsWith('import type '))
     .map((l) =>
       l
-        .replace("'@kitn.ai/ui/elements'", `'${PKG}/src/elements/register-impl'`)
+        .replace("'@kitn.ai/ui/web-components'", `'${PKG}/src/web-components/register-impl'`)
         .replace("'@kitn.ai/ui/state'", `'${PKG}/src/state'`)
         .replace("'@kitn.ai/ui/wire'", `'${PKG}/src/wire'`),
     )

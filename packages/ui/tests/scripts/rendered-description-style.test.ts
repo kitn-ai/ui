@@ -1,8 +1,8 @@
 /**
  * GUARD — house style over the descriptions the generators RENDER.
  *
- * `element-meta.json` is the single model every documentation artifact is built
- * from: `llms-full.txt`, `docs/web-components.md`, `src/elements/element-types.d.ts`
+ * `web-component-meta.json` is the single model every documentation artifact is built
+ * from: `llms-full.txt`, `docs/web-components.md`, `src/web-components/web-component-types.d.ts`
  * (so a consumer's editor tooltip) and the `kai` MCP's `component_reference`. A
  * sentence written in a facade is therefore read by consumers and by coding agents
  * in four places at once, and a style slip propagates to all four on the next build.
@@ -24,11 +24,11 @@
  * WHY THIS IS NOT A CHECK THAT PROVES NOTHING
  * -------------------------------------------
  * Nothing here restates a number that could drift into agreement with a broken
- * model. The description set is read off `element-meta.json`, the offender list is
+ * model. The description set is read off `web-component-meta.json`, the offender list is
  * derived, and the mirrored GROUPS are derived too (membership is "every element
  * the model says declares this member", never a hand-listed tag list). The floors
  * exist for the opposite reason: every assertion below loops over the model, so a
- * model that collapsed to two elements would make the whole file pass while
+ * model that collapsed to two web components would make the whole file pass while
  * covering nothing. The floors are what stop that.
  */
 import { describe, expect, it } from 'vitest';
@@ -53,7 +53,7 @@ interface ElementMeta {
 }
 
 const meta: ElementMeta[] = JSON.parse(
-  readFileSync(resolve(pkgRoot, 'src/elements/element-meta.json'), 'utf8'),
+  readFileSync(resolve(pkgRoot, 'src/web-components/web-component-meta.json'), 'utf8'),
 );
 
 /**
@@ -87,7 +87,7 @@ describe('the description model is big enough for the loops below to mean anythi
 
 // This file runs standalone in seconds (`pnpm exec vitest run
 // tests/scripts/rendered-description-style.test.ts` from packages/ui, after a
-// build has refreshed element-meta.json): any agent adding or editing element
+// build has refreshed web-component-meta.json): any agent adding or editing element
 // JSDoc must run it before reporting, because targeted suites skip it and the
 // slip otherwise surfaces only in full-suite CI (three times on 2026-08-31).
 describe('no rendered description uses an em dash (apps/docs/STYLE.md)', () => {
@@ -102,15 +102,15 @@ describe('no rendered description uses an em dash (apps/docs/STYLE.md)', () => {
 /**
  * Members documented with the SAME sentence on every element that declares them.
  *
- * Only the member NAMES are listed: which elements are in each group, and what the
+ * Only the member NAMES are listed: which web components are in each group, and what the
  * shared text is, both come from the model. `theme` is injected into all 80
- * elements by `define.tsx`; `show`/`hide`/`defaultOpen` are the shared disclosure
+ * web components by `define.tsx`; `show`/`hide`/`defaultOpen` are the shared disclosure
  * vocabulary; `cardTypes`/`cardSchemas` are the card-rendering pair that
  * `<kai-chat>`, `<kai-message>` and `<kai-thread>` all take.
  *
  * A name only belongs here when the members really are one concept. Most repeated
  * names are NOT: `value`, `disabled` and `select` mean different things per
- * element, and 101 such groups diverge on purpose.
+ * web component, and 101 such groups diverge on purpose.
  */
 const MIRRORED: { kind: 'props' | 'events' | 'methods'; name: string; minElements: number }[] = [
   { kind: 'props', name: 'theme', minElements: 50 },

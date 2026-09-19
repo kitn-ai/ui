@@ -2,15 +2,15 @@
 //
 // WHY IT EXISTS
 // -------------
-// dist/kai.es.js (the `@kitn.ai/ui/elements` entry) is a small facade that loads
+// dist/kai.es.js (the `@kitn.ai/ui/web-components` entry) is a small facade that loads
 // the real ~650KB registration chunk (dist/register-impl-<hash>.js) with a
 // dynamic import. Whether that chunk's `customElements.define` calls survive is
 // decided by the CONSUMER's bundler, from package.json "sideEffects". In 0.19.0
 // the glob list did not cover the hashed chunk, so Vite 8 / Rolldown shook it
-// from ~650KB to a ~1.5KB stub with zero element registrations: blank page,
+// from ~650KB to a ~1.5KB stub with zero web-component registrations: blank page,
 // silent console, customElements.whenDefined('kai-chat') hanging forever.
 //
-// The build-time guard (verify-elements-bundle.mjs) checked only that OUR build
+// The build-time guard (verify-web-components-bundle.mjs) checked only that OUR build
 // kept the reference, which was true the whole time. Nothing checked the
 // consumer side. So this script builds a real consumer app against a real
 // tarball with a real bundler and asserts the registrations are still there.
@@ -350,10 +350,10 @@ if (!existsSync(resolve(ROOT, 'dist/kai.es.js'))) {
   fail('dist/kai.es.js not found — run `nx build ui` first.');
 }
 
-const manifest = JSON.parse(readFileSync(resolve(ROOT, 'src/elements/element-manifest.json'), 'utf8'));
+const manifest = JSON.parse(readFileSync(resolve(ROOT, 'src/web-components/web-component-manifest.json'), 'utf8'));
 const ALL_TAGS = Object.keys(manifest.tags);
 const CHAT_TAGS = manifest.files.chat ?? ['kai-chat'];
-if (ALL_TAGS.length === 0) fail('src/elements/element-manifest.json lists no tags.');
+if (ALL_TAGS.length === 0) fail('src/web-components/web-component-manifest.json lists no tags.');
 
 // Temp dir deliberately OUTSIDE the repo: a consumer resolves @kitn.ai/ui from
 // its own node_modules, with no workspace links or repo tsconfig in scope.
@@ -384,18 +384,18 @@ try {
   // docs and every vanilla/plain-HTML consumer writes.
   writeFileSync(
     join(app, 'src/register-all.ts'),
-    `import '@kitn.ai/ui/elements';\ncustomElements.whenDefined('kai-chat').then(() => console.log('ready'));\n`,
+    `import '@kitn.ai/ui/web-components';\ncustomElements.whenDefined('kai-chat').then(() => console.log('ready'));\n`,
   );
-  // Entry B: the per-element path (@kitn.ai/ui/elements/*), which the React
+  // Entry B: the per-web-component path (@kitn.ai/ui/web-components/*), which the React
   // wrappers and footprint-conscious consumers use.
   writeFileSync(
-    join(app, 'src/per-element.ts'),
-    `import '@kitn.ai/ui/elements/chat';\ncustomElements.whenDefined('kai-chat').then(() => console.log('ready'));\n`,
+    join(app, 'src/per-web-component.ts'),
+    `import '@kitn.ai/ui/web-components/chat';\ncustomElements.whenDefined('kai-chat').then(() => console.log('ready'));\n`,
   );
 
   // Separate builds, separate outDirs: one shared build would let entry A's
   // chunks satisfy an assertion entry B had actually failed.
-  for (const name of ['register-all', 'per-element']) {
+  for (const name of ['register-all', 'per-web-component']) {
     writeFileSync(
       join(app, `vite.${name}.config.js`),
       `export default { logLevel: 'error', build: { outDir: 'out-${name}', emptyOutDir: true, ` +
@@ -425,7 +425,7 @@ try {
   const eager = [];
   for (const [name, required] of [
     ['register-all', ALL_TAGS],
-    ['per-element', CHAT_TAGS],
+    ['per-web-component', CHAT_TAGS],
   ]) {
     step(`vite build — ${name}`);
     try {
@@ -520,11 +520,11 @@ try {
 
   if (broken.length > 0) {
     reasons.push(
-      `a real consumer build DROPPED element registrations.\n\n` +
+      `a real consumer build DROPPED web-component registrations.\n\n` +
         broken
           .map(
             (r) =>
-              `  entry: import '@kitn.ai/ui/elements${r.name === 'per-element' ? '/chat' : ''}'\n` +
+              `  entry: import '@kitn.ai/ui/web-components${r.name === 'per-web-component' ? '/chat' : ''}'\n` +
               `    ${r.missing.length}/${r.required} kai-* tags missing from the emitted bundle\n` +
               `    (${(r.bytes / 1024).toFixed(1)} kB of JS emitted; e.g. ${r.missing.slice(0, 6).join(', ')})`,
           )

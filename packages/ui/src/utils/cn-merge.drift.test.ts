@@ -486,7 +486,7 @@ describe('cn-merge vs tailwind-merge', () => {
     expect(union.length, 'union corpus').toBeGreaterThan(800);
     // Named anchors, so an extraction that silently produced a plausible-looking corpus fails
     // here rather than passing quietly: one kit-only font token, one arbitrary value, one
-    // doubled-quote import site (`src/elements/*` uses `"../utils/cn"`).
+    // doubled-quote import site (`src/web-components/*` uses `"../utils/cn"`).
     for (const anchor of ['text-body', 'text-transparent', 'p-2']) {
       expect(kit.tokens, `kit corpus is missing ${anchor}`).toContain(anchor);
     }

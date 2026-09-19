@@ -73,7 +73,7 @@ jobs:
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
 
-      - name: Build (element bundle + provider subpath)
+      - name: Build (web-components bundle + provider subpath)
         run: pnpm exec nx build ui
 
       # SPIKE_CONTROL=1 inverts the suite: passing is the failure. Free -- it

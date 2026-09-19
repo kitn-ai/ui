@@ -2,7 +2,7 @@
  * Guards for the `CheckboxGroup` primitive — `RadioGroup`'s sibling.
  *
  * WHAT JSDOM CANNOT SEE, STATED SO NOTHING HERE READS AS MORE THAN IT IS. jsdom does no
- * layout and does not load `src/elements/styles.css`, so nothing below proves the rows
+ * layout and does not load `src/web-components/styles.css`, so nothing below proves the rows
  * LOOK right, that `.kai-checkbox` painted a box, or that the divided list has borders.
  * What these pin is real in a DOM with no CSS at all: that every row is a REAL
  * `<input type="checkbox">` inside a `<label>`, that the option list is rendered in

@@ -19,7 +19,7 @@
 // subpath is covered the day it is added.
 //
 //   REQUIRED  — every non-wildcard JS entry must import with no error.
-//   SHAPED    — the ./elements/* wildcard family (the per-element registration
+//   SHAPED    — the ./web-components/* wildcard family (the per-web-component registration
 //               modules) is compiled DOM-only by design: each one calls
 //               `customElements.define` and Solid's `delegateEvents(events,
 //               doc = window.document)` at module scope, so it cannot be imported
@@ -44,7 +44,7 @@ const VERBOSE = process.argv.includes('--verbose');
 const pkg = JSON.parse(readFileSync(resolve(ROOT, 'package.json'), 'utf8'));
 const NAME = pkg.name;
 
-// The per-element registration modules are DOM-only by design (see header).
+// The per-web-component registration modules are DOM-only by design (see header).
 // These are the errors that limitation legitimately produces; anything else is
 // a packaging bug.
 const CLIENT_ONLY_ERRORS = [
@@ -90,12 +90,12 @@ for (const [subpath, node] of Object.entries(pkg.exports ?? {})) {
 if (required.length === 0) fail('no importable entries found in package.json "exports" — the guard would assert nothing.');
 
 // Expand each wildcard subpath against what the build actually emitted, so the
-// list tracks the element set instead of drifting from it.
+// list tracks the web-component set instead of drifting from it.
 const shaped = [];
 for (const subpath of wildcards) {
-  const pattern = jsTargets(pkg.exports[subpath])[0]; // e.g. ./dist/elements/*.js
+  const pattern = jsTargets(pkg.exports[subpath])[0]; // e.g. ./dist/web-components/*.js
   const [prefix, suffix] = pattern.split('*');
-  // `prefix` already ends at the directory boundary ("./dist/elements/"), so
+  // `prefix` already ends at the directory boundary ("./dist/web-components/"), so
   // dirname() would climb one level too far and glob all of dist/.
   const dir = resolve(ROOT, prefix.endsWith('/') ? prefix : dirname(prefix));
   if (!existsSync(dir)) continue;
@@ -134,7 +134,7 @@ const importUnderNode = (specifier) => {
 
 let broken = 0;
 try {
-  console.log(`verify-ssr-imports: ${required.length} required entries, ${shaped.length} client-only element entries\n`);
+  console.log(`verify-ssr-imports: ${required.length} required entries, ${shaped.length} client-only web-component entries\n`);
 
   for (const specifier of required.sort()) {
     const err = importUnderNode(specifier);
@@ -157,7 +157,7 @@ try {
   }
   if (unexpected.length) {
     broken += unexpected.length;
-    console.log(`\n  ${unexpected.length} element subpath(s) failed for a reason OTHER than being DOM-only:`);
+    console.log(`\n  ${unexpected.length} web-component subpath(s) failed for a reason OTHER than being DOM-only:`);
     for (const u of unexpected) console.log(`  ✗ ${u}`);
   }
 } finally {

@@ -13,13 +13,13 @@ Angular binds to DOM properties natively with `[prop]="value"` and listens to Cu
 npm install @kitn.ai/ui
 ```
 
-## Register the elements
+## Register the web components
 
-The elements register **asynchronously**: `@kitn.ai/ui/elements` defers the actual `customElements.define` calls behind a browser check, so an import alone does not guarantee the tags exist yet. Angular writes array and object DOM properties the moment it stamps a `<kai-*>` tag; a write that lands before the element upgrades is discarded when the element applies its own empty defaults. Gate `bootstrapApplication` on the `elementsReady` promise the entry exports:
+The elements register **asynchronously**: `@kitn.ai/ui/web-components` defers the actual `customElements.define` calls behind a browser check, so an import alone does not guarantee the tags exist yet. Angular writes array and object DOM properties the moment it stamps a `<kai-*>` tag; a write that lands before the element upgrades is discarded when the element applies its own empty defaults. Gate `bootstrapApplication` on the `elementsReady` promise the entry exports:
 
 ```ts
 // main.ts
-import { elementsReady } from '@kitn.ai/ui/elements';
+import { elementsReady } from '@kitn.ai/ui/web-components';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { AppComponent } from './app/app.component';
 import { appConfig } from './app/app.config';
@@ -46,7 +46,7 @@ export class AppComponent {}
 
 ## Theme tokens
 
-Each element styles itself inside Shadow DOM, so nothing is required to make the elements look right. To retheme the elements, set `--kai-color-*` custom properties on `:root` in your global CSS — see [Theming](/guides/theming/). Add the token sheet when you want the kit's `--color-*` values for your own chrome around the chat.
+Each element styles itself inside Shadow DOM, so nothing is required to make the web components look right. To retheme the web components, set `--kai-color-*` custom properties on `:root` in your global CSS — see [Theming](/guides/theming/). Add the token sheet when you want the kit's `--color-*` values for your own chrome around the chat.
 
 Angular loads global CSS from the build config, **not** from a TS `import './x.css'`, which `@angular/build` ignores. Add the sheet to `architect.build.options.styles`:
 
@@ -119,9 +119,9 @@ export class AppComponent {
 </div>
 ```
 
-## Compose individual elements
+## Compose individual web components
 
-`<kai-chat>` is one option. You can assemble your own layout from individual elements. This example pairs a `<kai-conversations>` sidebar with a `<kai-chat>` thread:
+`<kai-chat>` is one option. You can assemble your own layout from individual web components. This example pairs a `<kai-conversations>` sidebar with a `<kai-chat>` thread:
 
 ```ts
 // workspace.component.ts
@@ -244,9 +244,9 @@ this.conversations = this.conversations.map((c) => (c.id === id ? { ...c, title:
 
 The same applies to a `signal()`: call `.set()` with a new array whose changed item is a new object. `.update()` that mutates and returns the same reference changes nothing the element can see.
 
-## Standalone display elements
+## Standalone display web components
 
-You can drop individual display elements anywhere in your UI without adopting a full chat shell. `<kai-markdown>`, `<kai-code-block>`, `<kai-artifact>`, `<kai-reasoning>`, and `<kai-tool>` all render rich AI content as standalone elements:
+You can drop individual display web components anywhere in your UI without adopting a full chat shell. `<kai-markdown>`, `<kai-code-block>`, `<kai-artifact>`, `<kai-reasoning>`, and `<kai-tool>` all render rich AI content as standalone web components:
 
 ```html
 <kai-markdown [content]="assistantReply"></kai-markdown>
@@ -304,5 +304,5 @@ The `kai` MCP server scaffolds the Angular front end and this `src/server.ts` to
 ## Next steps
 
 - [Installation](/guides/installation/) — package exports and theme tokens
-- [Components](/components/attachments/) — full prop and event reference for every `kai-*` element
+- [Components](/components/attachments/) — full prop and event reference for every `kai-*` web component
 - [Connect any backend](/integrations/connect-any-backend/) — the contract your `/api/chat` route fills

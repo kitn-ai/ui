@@ -5,7 +5,7 @@
  * placeholder that never resolves, so the live FAB rendered a permanently
  * broken image the whole time). Everything else in `components/dock/dock.tsx` (the `Dock`
  * component itself) is covered end to end through the `kai-dock` element
- * facade in `tests/elements/dock.test.tsx`; this is the one piece with no
+ * facade in `tests/web-components/dock.test.tsx`; this is the one piece with no
  * facade equivalent, since `DockLauncherImage` is a plain Solid helper the
  * construct engine's codegen composes into `Dock`'s `launcher` prop
  * (`emitDockLauncher`, codegen.ts) rather than a web component of its own.

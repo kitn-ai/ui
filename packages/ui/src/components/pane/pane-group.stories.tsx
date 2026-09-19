@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createEffect, createSignal, Show, type JSX } from 'solid-js';
 import { PaneGroup, type PaneGroupProps, type PaneTab } from './pane-group';
-import { componentDescription } from '../../stories/docs/element-controls';
+import { componentDescription } from '../../stories/docs/web-component-controls';
 
 // --- Story helpers -------------------------------------------------------
 

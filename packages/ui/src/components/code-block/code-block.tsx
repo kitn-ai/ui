@@ -16,7 +16,7 @@ export interface CodeBlockProps extends JSX.HTMLAttributes<HTMLDivElement> {
    * (the code panel), and the `<kai-code-block>` facade — and only the ELEMENT is
    * documented as shipping a copy button. Defaulting on would add one to every code
    * block in every message, a kit-wide visible change. The facade opts in; the other
-   * two are untouched, which `tests/elements/code-block.test.tsx` pins both
+   * two are untouched, which `tests/web-components/code-block.test.tsx` pins both
    * behaviourally and at the call sites.
    */
   copy?: boolean;

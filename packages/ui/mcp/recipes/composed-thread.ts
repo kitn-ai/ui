@@ -1,7 +1,7 @@
 import type { CodeRecipe } from './types';
 
 /**
- * composed-thread — a chat surface hand-composed from standalone elements,
+ * composed-thread — a chat surface hand-composed from standalone web components,
  * with `<kai-chat>` deliberately absent (rung-6 finding F-49).
  *
  * PROVENANCE: derived from the rung-6 clean-room build
@@ -10,7 +10,7 @@ import type { CodeRecipe } from './types';
  * corrected before it became a teaching artifact: the builder shipped
  * `AttachmentData.url = URL.createObjectURL(file)` (finding F-44, the exact
  * PR #186 defect), and this recipe stages every picked file as a `data:` URI
- * instead, the pattern `src/elements/default-input.tsx` uses and the wire
+ * instead, the pattern `src/web-components/default-input.tsx` uses and the wire
  * encoders require. `verify:scaffold` compiles the module below with a stock
  * consumer tsconfig AND asserts the object-URL line has not grown back.
  *
@@ -23,7 +23,7 @@ export const composedThread: CodeRecipe = {
   id: 'composed-thread',
   title: 'Hand-composed thread (no kai-chat)',
   intent:
-    'A full chat surface composed from standalone elements — kai-thread renders the ' +
+    'A full chat surface composed from standalone web components — kai-thread renders the ' +
     'transcript, kai-composer takes input, kai-attachments stages files, kai-toast-region ' +
     'notifies, kai-conversation-item rows form the rail — with a host module doing every ' +
     'bit of wiring (host-coordinates: the kit has no store). Streams through ' +
@@ -153,10 +153,10 @@ export const composedThread: CodeRecipe = {
       path: 'src/main.ts',
       lang: 'ts',
       code: `// The whole app: a chat surface composed by hand from standalone kai-*
-// elements. <kai-chat> is deliberately not used — kai-thread renders the
+// web components. <kai-chat> is deliberately not used — kai-thread renders the
 // transcript, kai-composer takes input, and this module is the host that
 // wires one to the other (the kit has no store: host-coordinates).
-import '@kitn.ai/ui/elements'; // registers every <kai-*>; must come first
+import '@kitn.ai/ui/web-components'; // registers every <kai-*>; must come first
 import '@kitn.ai/ui/theme.tokens.css';
 
 import type {
@@ -170,7 +170,7 @@ import type {
   KaiToastRegionElement,
   MessagePart,
   ToastItem,
-} from '@kitn.ai/ui/elements';
+} from '@kitn.ai/ui/web-components';
 import { createAssistantStream, createMockResponder } from '@kitn.ai/ui/state';
 import { readOpenAIStream } from '@kitn.ai/ui/wire';
 
@@ -181,7 +181,7 @@ import { readOpenAIStream } from '@kitn.ai/ui/wire';
 // tool call so the thread's tool panel gets exercised too.
 const mockResponse = createMockResponder({
   replies: [
-    'Hey — this thread is composed from standalone \`kai-*\` elements: ' +
+    'Hey — this thread is composed from standalone \`kai-*\` web components: ' +
       '\`kai-thread\` for the transcript, \`kai-composer\` for input, and a host ' +
       'module wiring them together.\\n\\nAttach a file with the paperclip and send it.',
     'Got it. Anything you attach is staged in \`kai-attachments\` next to the ' +

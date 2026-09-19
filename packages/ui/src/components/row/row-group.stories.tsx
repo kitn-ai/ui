@@ -4,7 +4,7 @@ import { fn } from 'storybook/test';
 import { RowGroup, type RowGroupProps } from './row-group';
 import { Row } from './row';
 import { renderIcon } from '../icon/icon';
-import { componentDescription } from '../../stories/docs/element-controls';
+import { componentDescription } from '../../stories/docs/web-component-controls';
 
 /**
  * `RowGroup` on its own page, the way `CheckboxGroup` has one beside `Checkbox`:

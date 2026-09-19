@@ -178,7 +178,7 @@ export function codeUnits(files) {
  *
  *  - `kai-submit`, `kai-conversation-select` and every other EVENT name shares
  *    the prefix. A bare /kai-[a-z-]+/ would report every event as a fabricated
- *    element. Events never appear after `<`.
+ *    web component. Events never appear after `<`.
  *  - Prose. An agent that correctly writes "there is no kai-datagrid element"
  *    is doing the right thing, and flagging it would punish the honest answer —
  *    which is the single most valuable behaviour this deck measures. Prose is

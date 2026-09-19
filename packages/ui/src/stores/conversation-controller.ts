@@ -45,7 +45,7 @@
  *   that kills the caller's turn loop.
  */
 import type { ConversationSummary } from '../types';
-import type { ChatMessage } from '../elements/chat-types';
+import type { ChatMessage } from '../web-components/chat-types';
 import { byRecency, isConversationUnread, type ConversationStore } from '../primitives/conversation-store';
 
 /** The named store operations `onError` reports on. */

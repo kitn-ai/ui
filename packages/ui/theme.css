@@ -37,7 +37,7 @@
    Everything else global carries a `kai-` prefix so it cannot clash by name:
    every @keyframes is `kai-<name>`, the scrollbar utility is `.kai-scrollbar-thin`.
    The one unprefixed global class is `.chat-markdown` (public; renaming it is a
-   breaking change). tests/elements/theme-globals.test.ts pins the prefix rule
+   breaking change). tests/web-components/theme-globals.test.ts pins the prefix rule
    and that every animation reference in src/ resolves to a keyframe here. */
 
 @custom-variant dark (&:is(.dark *));
@@ -155,7 +155,7 @@
      dark: near-white text over it is 6.7:1 — both well clear of WCAG AA. */
   --color-highlight: var(--kai-color-highlight, hsl(45 96% 78%));
   /* SELECTED text — the kit's own ::selection fill, applied inside every kai-*
-     shadow root (see src/elements/styles.css for the scoping rationale). The kit
+     shadow root (see src/web-components/styles.css for the scoping rationale). The kit
      owns this because leaving it to the UA meant the browser's blue outranked the
      kit's own deliberate emphasis: a marked keyword was LESS prominent than an
      incidental drag-select. Stays in the cool/blue family the UA trained everyone
@@ -430,7 +430,7 @@
 
 /* Cross-platform thin scrollbar utility (Firefox + WebKit). Used by ScrollArea
    and any scroll region in the SolidJS-component build (web components also get
-   this globally inside their shadow root — see src/elements/styles.css).
+   this globally inside their shadow root — see src/web-components/styles.css).
    `kai-` prefixed because this file is merged into a consumer's Tailwind build
    and `.scrollbar-thin` is a name they may well own (no consumer-facing doc ever
    named the old unprefixed class, so no alias is kept). */

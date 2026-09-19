@@ -5,7 +5,7 @@
 // delete-under-stream safety. Pure folds + callbacks per the state charter —
 // no fetch, no DOM, no storage; the only state a helper here owns is the
 // irreducible kind (which turns are in flight), never the consumer's records.
-import type { ChatMessage } from '../elements/chat-types';
+import type { ChatMessage } from '../web-components/chat-types';
 import type { SetMessages } from './stream';
 
 /** The minimal thread record the fold needs. The consumer's own record type

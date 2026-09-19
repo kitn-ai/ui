@@ -21,20 +21,20 @@
 //     passes. `status: 'partial'` exists to record the honest version and
 //     nothing mechanical can verify it was chosen; only a reader can.
 //  2. SEMANTICALLY WRONG BUT RESOLVABLE WIRING. An edge naming a real event on
-//     a real element and a real property on another real element passes here
+//     a real web component and a real property on another real web component passes here
 //     even when the pair is nonsense. Measured: rewiring `kai-new-chat` onto
 //     `kai-chat.placeholder` resolves clean. Only the executed probes in
-//     surfaces.test.ts (which drive every edge against the registered elements
+//     surfaces.test.ts (which drive every edge against the registered web components
 //     in jsdom) catch that, and only for edges someone wrote a probe for.
 //  3. A VARIANT DROPPED FROM ONE part-consumption record while ANOTHER record
 //     still lists it. The union-coverage check unions across all records, so it
 //     answers "does some record account for this variant", never "does THIS
-//     element still claim it". Measured: deleting 'file' from `kai-chat`'s
+//     web component still claim it". Measured: deleting 'file' from `kai-chat`'s
 //     `consumes` passes green, because `kai-message` also lists it; deleting it
 //     from both fires, and so does adding a variant to `derived.partVariants`.
 //     That is the check working as specified — the union gaining a variant is
-//     what it is for — but do not read a green as per-element coverage. Which
-//     elements a variant is claimed by is an EDITORIAL claim nothing in the tree
+//     what it is for — but do not read a green as per-web-component coverage. Which
+//     web components a variant is claimed by is an EDITORIAL claim nothing in the tree
 //     derives (see the registered-copy note in surfaces.ts), so it is measured
 //     by the acceptance deck, not here, and an assertion that merely looked like
 //     it covered that would be worse than the honest gap.
@@ -49,7 +49,7 @@
 //     and the four fixture rows; every other editorial field is reviewed prose.
 //  6. A WRONG `derived.json`. This lint trusts it as the tree's reading, and
 //     will happily resolve authored claims against a fiction. Measured: add a
-//     fabricated `kai-datagrid` element to derived.json, then list it as a
+//     fabricated `kai-datagrid` web component to derived.json, then list it as a
 //     recipe ingredient, and the run is clean — the very fabrication the
 //     ingredient check exists to stop, waved through because the fiction was
 //     planted upstream. derived.json's fidelity is Task 3's generator and
@@ -152,7 +152,7 @@
 //
 // DELIBERATELY NOT ASSERTED HERE: whether a wiring pair means anything (item 2).
 // This lint resolves names and genuinely cannot judge semantics; the executed
-// probes in surfaces.test.ts drive every edge against the real elements, and
+// probes in surfaces.test.ts drive every edge against the real web components, and
 // its `every wiring edge in every recipe has been driven above` completeness
 // test is what stops an edge being added without one. An assertion here would
 // look like coverage and add none.
@@ -604,9 +604,9 @@ export function check({
  * suffix in the story files, plus the basename of every Labs/Apps story file
  * (the nine apps share one title and are distinguished by file).
  *
- * Walks ALL of src/, not src/elements/: `Labs/Settings` lives in src/components/ and
+ * Walks ALL of src/, not src/web-components/: `Labs/Settings` lives in src/components/ and
  * `Labs/Audio Visualizers` under src/components/, so a scan scoped to
- * src/elements/ false-fails on both. Measured, not assumed.
+ * src/web-components/ false-fails on both. Measured, not assumed.
  *
  * Walks whatever `storyRoots` returns rather than `src/` alone: a Labs story
  * can live outside src/, and that function derives its roots from

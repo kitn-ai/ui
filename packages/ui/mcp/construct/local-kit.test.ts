@@ -55,8 +55,8 @@ function synthInstall(opts: { consumerIsAPnpmWorkspace?: boolean } = {}): string
   write(join(pkgRoot, 'dist', 'index.js'), 'export const x = 1;\n');
   // The two src json files the published tarball really does carry — proof
   // that "src/ exists" is not what the detection keys on.
-  write(join(pkgRoot, 'src', 'elements', 'element-meta.json'), '{}');
-  write(join(pkgRoot, 'src', 'elements', 'icon-names.json'), '[]');
+  write(join(pkgRoot, 'src', 'web-components', 'web-component-meta.json'), '{}');
+  write(join(pkgRoot, 'src', 'web-components', 'icon-names.json'), '[]');
   return pkgRoot;
 }
 
@@ -175,9 +175,9 @@ describe('classifyKit', () => {
 
   it('a newer build-GENERATED json under src/ is not staleness (postbuild writes those)', () => {
     const pkgRoot = synthCheckout();
-    write(join(pkgRoot, 'src', 'elements', 'element-meta.json'), '{}', NEW);
+    write(join(pkgRoot, 'src', 'web-components', 'web-component-meta.json'), '{}', NEW);
     write(join(pkgRoot, 'mcp', 'construct', 'construct.v1.schema.json'), '{}', NEW);
-    write(join(pkgRoot, 'src', 'elements', 'compiled.css'), '.a{}', NEW);
+    write(join(pkgRoot, 'src', 'web-components', 'compiled.css'), '.a{}', NEW);
     expect(classifyKit(undefined, pkgRoot).kind).toBe('checkout');
   });
 });
@@ -214,7 +214,7 @@ describe('distExportTargets — derived from the manifest, never a typed list', 
     const targets = distExportTargets({
       exports: {
         '.': { types: './dist/index.d.ts', node: './dist/index.server.js', default: './dist/index.js' },
-        './elements/*': { default: './dist/elements/*.js' },
+        './web-components/*': { default: './dist/web-components/*.js' },
         './theme.css': './theme.css',
       },
     });

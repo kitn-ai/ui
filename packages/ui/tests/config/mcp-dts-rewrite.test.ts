@@ -53,7 +53,7 @@ describe('rewriteMcpDtsSpecifiers', () => {
   it('refuses a relative specifier that resolves outside dist/', () => {
     const cases = [
       [0, '../src/x'],
-      [1, '../../src/elements/chat-types'],
+      [1, '../../src/web-components/chat-types'],
       [2, '../../../src/x'],
     ] as const;
     for (const [dirs, spec] of cases) {

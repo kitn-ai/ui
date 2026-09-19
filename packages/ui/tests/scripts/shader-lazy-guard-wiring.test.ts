@@ -94,7 +94,7 @@ describe('the shader-lazy guard detects, and build runs it', () => {
     expect(
       pkg.scripts.build,
       `the \`build\` chain no longer runs \`${NPM_SCRIPT}\`. Nothing else keeps the GLSL out of ` +
-        `the bundle every consumer of @kitn.ai/ui/elements loads.`,
+        `the bundle every consumer of @kitn.ai/ui/web-components loads.`,
     ).toContain(`npm run ${NPM_SCRIPT}`);
     expect(pkg.scripts.prepublishOnly, 'prepublishOnly no longer runs build').toContain('build');
   });

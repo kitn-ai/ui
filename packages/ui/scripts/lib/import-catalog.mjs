@@ -43,6 +43,6 @@ export async function importCatalog() {
 /** The derived layer and the element metadata, as committed artifacts. */
 export const CATALOG_PATHS = {
   derived: join(CATALOG_DIR, 'derived.json'),
-  elementMeta: join(ROOT, 'src/elements/element-meta.json'),
+  elementMeta: join(ROOT, 'src/web-components/web-component-meta.json'),
   packageJson: join(ROOT, 'package.json'),
 };

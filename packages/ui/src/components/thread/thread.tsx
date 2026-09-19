@@ -5,7 +5,7 @@ import { Message, MessageAvatar, MessageBody } from '../message/message';
 import { createMessageFeedback, type MessageActionDetail } from '../../primitives/message-feedback';
 import { ScrollButton } from '../scroll/scroll-button';
 import { Loader } from '../loader/loader';
-import type { ChatMessage } from '../../elements/chat-types';
+import type { ChatMessage } from '../../web-components/chat-types';
 import type { ProseSize } from '../../primitives/chat-config';
 import type { CardComponentMap } from '../../primitives/card-registry';
 import type { CardSchemaMap } from '../card/card-renderer';
@@ -36,7 +36,7 @@ export interface ThreadProps {
   cardSchemas?: CardSchemaMap;
   /** The custom-element host node to emit card events off when no `CardProvider`
    *  is present, forwarded through `MessageBody` to `CardRenderer`. The
-   *  element facades pass their own host element so card events leave as the
+   *  web-component facades pass their own host element so card events leave as the
    *  bubbling `kai-card` CustomEvent. */
   cardHostElement?: HTMLElement;
   /** Show a typing indicator on the pending assistant turn — use while awaiting

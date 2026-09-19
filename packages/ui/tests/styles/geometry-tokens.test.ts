@@ -10,7 +10,7 @@ import { describe, expect, it } from 'vitest';
  */
 const ROOT = join(__dirname, '..', '..');
 const THEME_CSS = readFileSync(join(ROOT, 'theme.css'), 'utf8');
-const COMPILED = readFileSync(join(ROOT, 'src', 'elements', 'compiled.css'), 'utf8');
+const COMPILED = readFileSync(join(ROOT, 'src', 'web-components', 'compiled.css'), 'utf8');
 /** Tailwind's own theme source — fallbacks compare against it, not against numbers
  *  typed here. */
 const TW_THEME = readFileSync(join(ROOT, '..', '..', 'node_modules', 'tailwindcss', 'theme.css'), 'utf8');
@@ -27,7 +27,7 @@ function shippingSources(): string[] {
       else if (/\.tsx?$/.test(entry.name) && !/\.(stories|test)\.tsx?$/.test(entry.name)) out.push(abs);
     }
   };
-  for (const d of ['components', 'elements', 'primitives']) walk(join(ROOT, 'src', d));
+  for (const d of ['components', 'web-components', 'primitives']) walk(join(ROOT, 'src', d));
   return out;
 }
 
@@ -69,7 +69,7 @@ describe('geometry tokens are overridable by a consumer', () => {
     for (const f of FAMILIES) {
       const decl = `${f.tw}:var(${f.kai},`;
       const at = COMPILED.indexOf(decl);
-      expect(at, `${decl} is missing from src/elements/compiled.css — run \`npm run build:css\``).toBeGreaterThan(-1);
+      expect(at, `${decl} is missing from src/web-components/compiled.css — run \`npm run build:css\``).toBeGreaterThan(-1);
       const braceOpen = COMPILED.lastIndexOf('{', at);
       const selector = COMPILED.slice(COMPILED.lastIndexOf('}', braceOpen) + 1, braceOpen);
       expect(selector, `the ${f.tw} declaration must sit on a selector that includes :host`).toContain(':host');
@@ -80,7 +80,7 @@ describe('geometry tokens are overridable by a consumer', () => {
     // from. It carries no tokens of its own: it IMPORTS theme.css, which stays the
     // one place a family is declared. Copies are forbidden in both directions here,
     // and the kit has been bitten by each of them (see the header of
-    // src/elements/styles.css), so the assertion is the import rather than a
+    // src/web-components/styles.css), so the assertion is the import rather than a
     // restatement that would be free to drift.
     const solid = readFileSync(join(ROOT, 'solid.css'), 'utf8');
     expect(solid, 'solid.css must keep importing the sheet that declares the tokens').toMatch(

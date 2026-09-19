@@ -3,7 +3,7 @@ import { fn, within, expect, waitFor } from 'storybook/test';
 import { action } from 'storybook/actions';
 import { createSignal } from 'solid-js';
 import { Reasoning, ReasoningTrigger, ReasoningContent } from './reasoning';
-import { componentDescription } from '../../stories/docs/element-controls';
+import { componentDescription } from '../../stories/docs/web-component-controls';
 
 const meta = {
   title: 'Components/Reasoning',

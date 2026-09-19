@@ -655,7 +655,7 @@ function ListRow(props: RowProps): JSX.Element {
         // focusable `div` painted. Focus now lands on the input inside it, so the
         // selector moves from `focus-visible:` to `has-[:focus-visible]:`; the input's
         // own outline is suppressed below so there is one ring, not two. That is the
-        // pattern src/elements/styles.css sanctions at its `:focus-visible` rule.
+        // pattern src/web-components/styles.css sanctions at its `:focus-visible` rule.
         'has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-inset has-[:focus-visible]:ring-ring',
         props.opt.disabled
           ? 'cursor-not-allowed opacity-60 text-foreground'

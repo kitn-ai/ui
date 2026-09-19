@@ -52,7 +52,7 @@ Prioritized.
 
 ## Strategic takeaway
 
-The kit's value is locked inside the shadow-DOM `kai-*` elements. A consumer
+The kit's value is locked inside the shadow-DOM `kai-*` web components. A consumer
 hand-building a bespoke screen gets only tokens - there is no lightweight
 class-recipe layer (button / badge / avatar / input as copy-paste utility
 classes, the way shadcn ships `buttonVariants`).

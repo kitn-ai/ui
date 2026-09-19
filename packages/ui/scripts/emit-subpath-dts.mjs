@@ -95,16 +95,16 @@ const typesTarget = (node) => {
  * SIBLING beside the bundle for relative importers, never to materialize the
  * declared path itself.
  *
- * `./define`'s source is `src/elements/define-entry.ts` (it lives beside the
- * OTHER elements/*, not in its own `define/` directory), so the barrel emits it
- * at `dist/elements/define-entry.d.ts` — one level deeper than the flat
+ * `./define`'s source is `src/web-components/define-entry.ts` (it lives beside the
+ * OTHER web-components/*, not in its own `define/` directory), so the barrel emits it
+ * at `dist/web-components/define-entry.d.ts` — one level deeper than the flat
  * `dist/define.d.ts` its own flat `dist/define.js` bundle declares. There is no
  * naming rule to derive that mapping from, so it is a real (and small) entry
  * list rather than a derivation — add an entry here, not a special case in the
  * loop below, if another subpath ever needs the same treatment.
  */
 const REAL_TYPES_SOURCE = {
-  './define': 'dist/elements/define-entry.d.ts',
+  './define': 'dist/web-components/define-entry.d.ts',
 };
 
 const written = [];

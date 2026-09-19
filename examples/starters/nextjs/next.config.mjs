@@ -7,7 +7,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const nextConfig = {
   // No special config is required to consume @kitn.ai/ui in a STANDALONE app:
   // - It ships pre-compiled ESM in `dist/`, so `transpilePackages` is NOT needed.
-  // - The register-all entry (`@kitn.ai/ui/elements`) is SSR-safe — it touches
+  // - The register-all entry (`@kitn.ai/ui/web-components`) is SSR-safe — it touches
   //   no `window`/`customElements` at import time, so importing it never throws
   //   during server rendering; it only registers in the browser.
   //

@@ -4,7 +4,7 @@ import { createSignal, Show, For } from 'solid-js';
 import { Popover, type PopoverProps } from './popover';
 import { Switch } from '../switch/switch';
 import { Button } from '../button/button';
-import { componentDescription } from '../../stories/docs/element-controls';
+import { componentDescription } from '../../stories/docs/web-component-controls';
 
 const meta = {
   title: 'Components/Popover',

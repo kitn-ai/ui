@@ -1,31 +1,31 @@
 ---
-title: Loading the elements
-description: Three ways to load the kai-* elements — register all, import per-element, or autoload on demand. Pick the one that fits your setup.
+title: Loading the web components
+description: Three ways to load the kai-* web components — register all, import per-web-component, or autoload on demand. Pick the one that fits your setup.
 ---
 
 import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
 
-There are three ways to get the `kai-*` elements onto a page. They render the same components — the difference is *how* their code reaches the browser. Most apps want the first one.
+There are three ways to get the `kai-*` web components onto a page. They render the same components — the difference is *how* their code reaches the browser. Most apps want the first one.
 
 ## Quick comparison
 
 | Strategy | Import | Reach for it when |
 |---|---|---|
-| **Register all** | `@kitn.ai/ui/elements` | The default. You use several elements, or you just want it to work. Works in SSR. |
-| **Per-element** | `@kitn.ai/ui/elements/chat` | You use only a couple of elements and your build tree-shakes. |
-| **Autoloader** | `<script>` (CDN / static) | No build step and a handful of elements. Loads each element on demand. |
+| **Register all** | `@kitn.ai/ui/web-components` | The default. You use several web components, or you just want it to work. Works in SSR. |
+| **Per-web-component** | `@kitn.ai/ui/web-components/chat` | You use only a couple of web components and your build tree-shakes. |
+| **Autoloader** | `<script>` (CDN / static) | No build step and a handful of web components. Loads each on demand. |
 
 <Aside type="tip" title="Register all is the easy default">
-`import '@kitn.ai/ui/elements'` registers every element in one import and works everywhere, including SSR. Reach for the other two only when you have a specific reason — a build that tree-shakes, or a no-build CDN page.
+`import '@kitn.ai/ui/web-components'` registers every web component in one import and works everywhere, including SSR. Reach for the other two only when you have a specific reason — a build that tree-shakes, or a no-build CDN page.
 </Aside>
 
 ## Register all (default)
 
 ```js
-import '@kitn.ai/ui/elements';
+import '@kitn.ai/ui/web-components';
 ```
 
-One import, every `kai-*` element registered. The simplest setup, and the SSR-safe entry point — the import is side-effect-only and doesn't touch `document` until the browser runs it, so it won't throw in a server render.
+One import, every `kai-*` web component registered. The simplest setup, and the SSR-safe entry point — the import is side-effect-only and doesn't touch `document` until the browser runs it, so it won't throw in a server render.
 
 The same bundle works with no build at all — a single self-contained fetch from a CDN:
 
@@ -35,53 +35,53 @@ The same bundle works with no build at all — a single self-contained fetch fro
 </script>
 ```
 
-## Per-element imports
+## Per-web-component imports
 
-Import an element by its file basename, and your bundler includes only that element's code:
+Import a web component by its file basename, and your bundler includes only that web component's code:
 
 ```js
-import '@kitn.ai/ui/elements/chat';
-import '@kitn.ai/ui/elements/code-block';
+import '@kitn.ai/ui/web-components/chat';
+import '@kitn.ai/ui/web-components/code-block';
 ```
 
 <Aside type="tip" title="kai-chat is a complete chat — one import">
 That single import is everything a chat needs. `<kai-chat>` already bundles everything it renders — messages, markdown, **code highlighting, reasoning, tool calls, attachments, the prompt input**, model switcher, scroll button. You do **not** import those separately, and there is no internal sub-part to forget.
 
-You only add another import for an **additional standalone element you place in your own markup** — e.g. a `<kai-artifact>` beside the chat. That's one import per element *you* write into the HTML.
+You only add another import for an **additional standalone web component you place in your own markup** — e.g. a `<kai-artifact>` beside the chat. That's one import per web component *you* write into the HTML.
 
-And it fails loud, not silent: if you place an element but forget its import, that element renders empty (un-upgraded) instead of breaking the rest of the page — and the `kai` MCP's `debug` / `component_reference` tools name the exact import to add. (Generative-UI **cards** — `kai-confirm`, `kai-form`, … — are also standalone elements, so add them only if your assistant renders card payloads.)
+And it fails loud, not silent: if you place an element but forget its import, that element renders empty (un-upgraded) instead of breaking the rest of the page — and the `kai` MCP's `debug` / `component_reference` tools name the exact import to add. (Generative-UI **cards** — `kai-confirm`, `kai-form`, … — are also standalone web components, so add them only if your assistant renders card payloads.)
 </Aside>
 
-The import path is the element's filename in `dist/elements/` — usually the tag minus the `kai-` prefix. You only need a row below for an element you place in your markup yourself; the message / markdown / reasoning / input parts of a chat are already inside `kai-chat`:
+The import path is the web component's filename in `dist/web-components/` — usually the tag minus the `kai-` prefix. You only need a row below for a web component you place in your markup yourself; the message / markdown / reasoning / input parts of a chat are already inside `kai-chat`:
 
 | Element | Import |
 |---|---|
-| `<kai-chat>` | `@kitn.ai/ui/elements/chat` |
-| `<kai-code-block>` | `@kitn.ai/ui/elements/code-block` |
-| `<kai-message>` | `@kitn.ai/ui/elements/message` |
-| `<kai-prompt-input>` | `@kitn.ai/ui/elements/prompt-input` |
-| `<kai-markdown>` | `@kitn.ai/ui/elements/markdown` |
-| `<kai-reasoning>` | `@kitn.ai/ui/elements/reasoning` |
-| `<kai-attachments>` | `@kitn.ai/ui/elements/attachments` |
-| `<kai-artifact>` | `@kitn.ai/ui/elements/artifact` |
+| `<kai-chat>` | `@kitn.ai/ui/web-components/chat` |
+| `<kai-code-block>` | `@kitn.ai/ui/web-components/code-block` |
+| `<kai-message>` | `@kitn.ai/ui/web-components/message` |
+| `<kai-prompt-input>` | `@kitn.ai/ui/web-components/prompt-input` |
+| `<kai-markdown>` | `@kitn.ai/ui/web-components/markdown` |
+| `<kai-reasoning>` | `@kitn.ai/ui/web-components/reasoning` |
+| `<kai-attachments>` | `@kitn.ai/ui/web-components/attachments` |
+| `<kai-artifact>` | `@kitn.ai/ui/web-components/artifact` |
 
 <Aside type="caution" title="Client-only">
-Per-element imports are client-only. In SSR frameworks (Next.js, Nuxt, SvelteKit, etc.) wrap them in a client-side boundary — a `'use client'` component in Next.js, an `onMount` in Svelte, or a `<ClientOnly>` wrapper in Nuxt.
+Per-web-component imports are client-only. In SSR frameworks (Next.js, Nuxt, SvelteKit, etc.) wrap them in a client-side boundary — a `'use client'` component in Next.js, an `onMount` in Svelte, or a `<ClientOnly>` wrapper in Nuxt.
 </Aside>
 
 ## Autoloader
 
-The autoloader watches the DOM and registers each element on demand — only the tags present on a given page are ever loaded.
+The autoloader watches the DOM and registers each web component on demand — only the tags present on a given page are ever loaded.
 
-That on-demand loading is paid in requests: each element's module and its dependencies arrive as separate fetches. On a page using a few elements — a `<kai-markdown>` here, a `<kai-code-block>` there — that's the cheapest path by far. A `<kai-chat>` page is close to its worst case: the chat transitively pulls most of the kit, so the autoloader downloads nearly the same bytes as the register-all bundle across many more requests. For a no-build chat page, load [`dist/kai.es.js`](#register-all-default) instead — one fetch, everything registered.
+That on-demand loading is paid in requests: each web component's module and its dependencies arrive as separate fetches. On a page using a few web components — a `<kai-markdown>` here, a `<kai-code-block>` there — that's the cheapest path by far. A `<kai-chat>` page is close to its worst case: the chat transitively pulls most of the kit, so the autoloader downloads nearly the same bytes as the register-all bundle across many more requests. For a no-build chat page, load [`dist/kai.es.js`](#register-all-default) instead — one fetch, everything registered.
 
-It is a **CDN / static-file** tool: load it from a `<script type="module">` tag. It is **not** importable through a bundler — Vite and webpack relocate it away from the element files and its on-demand imports 404. In a bundled app, use [per-element imports](#per-element-imports) instead.
+It is a **CDN / static-file** tool: load it from a `<script type="module">` tag. It is **not** importable through a bundler — Vite and webpack relocate it away from the web-component files and its on-demand imports 404. In a bundled app, use [per-web-component imports](#per-web-component-imports) instead.
 
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/elements/autoloader.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/web-components/autoloader.js"></script>
 ```
 
-Here it is running live. This iframe loads **only** the autoloader — watch the panel for the modules it fetches on demand, then add an element and see it load on the fly:
+Here it is running live. This iframe loads **only** the autoloader — watch the panel for the modules it fetches on demand, then add a web component and see it load on the fly:
 
 <iframe
   src="/autoloader-demo.html"
@@ -97,7 +97,7 @@ On import it scans for undefined `kai-*` elements and starts a `MutationObserver
 <kai-chat style="display:block; height:100dvh;"></kai-chat>
 
 <script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/elements/autoloader.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/web-components/autoloader.js';
 
   const chat = document.querySelector('kai-chat');
   chat.messages = [{ id: '1', role: 'assistant', parts: [{ type: 'text', text: 'Hello!' }] }];
@@ -106,12 +106,12 @@ On import it scans for undefined `kai-*` elements and starts a `MutationObserver
 ```
 
 <Aside type="caution" title="CDN / static-file only — not for bundlers">
-The autoloader resolves element modules relative to its own URL and uses `document` + `MutationObserver`. Load it from a `<script type="module">` on a CDN or static host. Do **not** `import '@kitn.ai/ui/autoloader'` in a bundled (Vite/webpack/Next) app or a server render — the bundler relocates it and the on-demand imports 404. In a bundled app, use per-element imports or the register-all bundle.
+The autoloader resolves web-component modules relative to its own URL and uses `document` + `MutationObserver`. Load it from a `<script type="module">` on a CDN or static host. Do **not** `import '@kitn.ai/ui/autoloader'` in a bundled (Vite/webpack/Next) app or a server render — the bundler relocates it and the on-demand imports 404. In a bundled app, use per-web-component imports or the register-all bundle.
 </Aside>
 
 <Aside type="tip" title="Pin versions in production">
 {/* x-release-please-start-version */}
-An unversioned CDN URL tracks the latest release, which is risky on a pre-1.0 package. Pin an exact version: `https://cdn.jsdelivr.net/npm/@kitn.ai/ui@0.32.0/dist/elements/autoloader.js`.
+An unversioned CDN URL tracks the latest release, which is risky on a pre-1.0 package. Pin an exact version: `https://cdn.jsdelivr.net/npm/@kitn.ai/ui@0.32.0/dist/web-components/autoloader.js`.
 {/* x-release-please-end */}
 
 Pin a version at or above `0.25.0`. Everything from `0.14.1` to `0.24.0` is covered by a [critical security advisory](https://github.com/kitn-ai/ui/security/advisories) and is deprecated on npm — and a CDN fetch, unlike `npm install`, prints no deprecation warning to tell you.
@@ -125,8 +125,8 @@ Syntax highlighting (Shiki) loads on demand — per language, the first time a c
 
 | Strategy | SSR-safe? |
 |---|---|
-| `@kitn.ai/ui/elements` | Yes — registration is gated on `window`; no `document` on import |
-| Per-element (`@kitn.ai/ui/elements/chat`) | No — throws `window is not defined`; use inside a client-only boundary |
+| `@kitn.ai/ui/web-components` | Yes — registration is gated on `window`; no `document` on import |
+| Per-web-component (`@kitn.ai/ui/web-components/chat`) | No — throws `window is not defined`; use inside a client-only boundary |
 | Autoloader | Imports without throwing, but never use it here — it must resolve relative to its own URL, so it is a CDN `<script>`, not a bundled import |
 
 For SSR meta-frameworks, see the [meta-frameworks guide](/guides/frameworks/meta-frameworks/) for framework-specific client boundary patterns.

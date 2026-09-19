@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal, For } from 'solid-js';
 import { fn } from 'storybook/test';
 import { ToggleChip } from './toggle-chip';
-import { componentDescription } from '../../stories/docs/element-controls';
+import { componentDescription } from '../../stories/docs/web-component-controls';
 
 const meta = {
   title: 'Components/ToggleChip',

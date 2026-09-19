@@ -181,11 +181,11 @@ describe('the dts-boundaries guard detects, and postbuild + CI run it', () => {
 
   it('fires on a declaration that escapes dist/ into src/', () => {
     const { armed, disarmed } = bothWays(
-      healthy({ 'dist/index.d.ts': "export type { M } from '../../src/elements/chat-types';\n" }),
+      healthy({ 'dist/index.d.ts': "export type { M } from '../../src/web-components/chat-types';\n" }),
     );
     expect(armed.code, `the guard exited ${armed.code} on a declaration reaching outside dist/`).not.toBe(0);
     expect(armed.output).toContain('ESCAPE dist/');
-    expect(armed.output).toContain('../../src/elements/chat-types');
+    expect(armed.output).toContain('../../src/web-components/chat-types');
     expect(
       disarmed.code,
       'the DISARMED copy also failed, so this fixture is red for some reason other than the ' +

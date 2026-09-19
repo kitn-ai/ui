@@ -36,7 +36,7 @@ All layout is Tailwind flex/grid + the token utilities above. No bespoke CSS in 
 | `overrides/SocialIcons.astro` | header right: GitHub + **Ask AI** pill |
 | `overrides/ThemeToggle.astro` | sun/moon toggle (replaces Starlight's dropdown) |
 | `Facts.astro` | "at a glance" pill row |
-| `PropTable.astro` | props + events table, from `element-meta.json` (no drift) |
+| `PropTable.astro` | props + events table, from `web-component-meta.json` (no drift) |
 | `AttachmentsDemo.tsx` | live `<kai-attachments>` Solid island: tabs · preview · console |
 
 ## Rules

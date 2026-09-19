@@ -1,20 +1,20 @@
 // GUARD — `npm run verify:solid-coverage`, run in the required CI `test` job.
 //
-// Fails the build when a registered element has no writable SolidJS equivalent,
+// Fails the build when a registered web component has no writable SolidJS equivalent,
 // or when a public component ships no public `<Name>Props` type. Both are the
 // same defect: a capability documented for one framework that a Solid consumer
-// cannot express. Solid is the source of truth for this kit, so an element whose
+// cannot express. Solid is the source of truth for this kit, so a web component whose
 // Solid surface is unreachable is a hole in the authored layer, not a Solid-only
 // inconvenience.
 //
-// Derives the "one row per registered element -> what a SolidJS consumer writes"
+// Derives the "one row per registered web component -> what a SolidJS consumer writes"
 // coverage map FROM THE REGISTRY AND THE COMPILER, so it cannot drift. There is
 // no hand-written mapping table anywhere in this file; the only literals are the
 // kit's own layer directory names. That is deliberate: this repo has been bitten
 // repeatedly by hand-written content inside gen-*.mjs scripts that no compiler
 // or drift check can see.
 //
-//   catalog  = src/elements/element-meta.json            (the registered kai-* elements)
+//   catalog  = src/web-components/web-component-meta.json            (the registered kai-* web components)
 //   surface  = the public SolidJS entry: `src/solid.ts` module exports resolved by
 //              the TS checker, intersected with the runtime keys of the BUILT
 //              dist/solid.server.js (a source export that does not survive the
@@ -33,16 +33,16 @@
 // the BUILT artifacts, so a build-config change cannot quietly break it.
 //   usage    = the Solid components each facade actually renders, resolved
 //              JSX-tag -> declaring module by the checker, recursing through
-//              element-local helper components
+//              web-component-local helper components
 //
 // Verdict rule (deliberately sharp):
-//   DIRECT       every Solid component the element renders is public, and it is one
-//   COMPOSITION  every Solid component the element renders is public, and it is 2+
+//   DIRECT       every Solid component the web component renders is public, and it is one
+//   COMPOSITION  every Solid component the web component renders is public, and it is 2+
 //   DECLARED     the facade renders/calls nothing kit-derived, but carries a
 //                reviewed `solid-coverage: equivalent` directive naming a PUBLIC
 //                Solid component that is the same contract by a different
 //                mechanism (see below)
-//   GAP          the element renders at least one Solid component that is NOT
+//   GAP          the web component renders at least one Solid component that is NOT
 //                reachable from the public entry (grade PARTIAL), or renders /
 //                calls nothing public at all (grade TOTAL)
 //
@@ -57,8 +57,8 @@
 //   // solid-coverage: equivalent <Component> -- <reason>
 //
 // This is NOT an exemption: the named component must be public (source entry AND
-// the runtime keys of the built dist/solid.server.js) or the element stays a GAP
-// and the directive is flagged; a directive on an element that is not a TOTAL
+// the runtime keys of the built dist/solid.server.js) or the web component stays a GAP
+// and the directive is flagged; a directive on a web component that is not a TOTAL
 // gap is STALE and fails the build, so entries cannot accumulate past their
 // usefulness; a directive without a reason is malformed and fails. There is
 // still no central mapping table — the declaration lives next to the facade it
@@ -83,7 +83,7 @@ import { pathToFileURL, fileURLToPath } from 'node:url';
 // This script lives at <package>/scripts/, so the package root is one level up and
 // is known exactly. It used to CLIMB — start at process.cwd() and walk parents
 // (unbounded, to the filesystem root) taking the first directory holding
-// src/elements/element-meta.json — which made the answer depend on where you
+// src/web-components/web-component-meta.json — which made the answer depend on where you
 // happened to be standing, and let a run bind to a different checkout than the one
 // you were editing. Same defect class as the manifest walk-up in
 // mcp/mcp/manifest.ts, which was measured escaping an agent worktree
@@ -112,33 +112,33 @@ const PKG_ROOT = resolve(argOf('--package-root') ?? resolve(dirname(fileURLToPat
  * would move, but this guard's PASS message would not.
  */
 async function analyzeSolidCoverage(pkgRoot) {
-if (!existsSync(resolve(pkgRoot, 'src/elements/element-meta.json'))) {
+if (!existsSync(resolve(pkgRoot, 'src/web-components/web-component-meta.json'))) {
   return {
     fatal:
-      `[verify:solid-coverage] Expected the element catalog at ` +
-      `${resolve(pkgRoot, 'src/elements/element-meta.json')} and it is not there.\n` +
+      `[verify:solid-coverage] Expected the web-component catalog at ` +
+      `${resolve(pkgRoot, 'src/web-components/web-component-meta.json')} and it is not there.\n` +
       `Package root resolved from this script's own location: ${pkgRoot}\n` +
-      `element-meta.json is generated by the build — run \`nx build ui\`. This does ` +
+      `web-component-meta.json is generated by the build — run \`nx build ui\`. This does ` +
       `NOT search parent directories: verifying another checkout's catalog would be ` +
       `worse than failing.`,
   };
 }
 const srcDir = resolve(pkgRoot, 'src');
-const elementsDir = resolve(srcDir, 'elements');
+const elementsDir = resolve(srcDir, 'web-components');
 const rel = (f) => (f && f.startsWith(pkgRoot) ? relative(pkgRoot, f) : f);
 
 // ---- 1. the catalog ---------------------------------------------------------
-const catalog = JSON.parse(readFileSync(resolve(elementsDir, 'element-meta.json'), 'utf8'));
+const catalog = JSON.parse(readFileSync(resolve(elementsDir, 'web-component-meta.json'), 'utf8'));
 // VACUITY. Every row below is derived from this list, so an empty one produces no
-// rows, no gaps, and the cheerful "✓ solid coverage: 0/0 elements have a writable
-// SolidJS equivalent" — a sentence that is true of a package with no elements at
+// rows, no gaps, and the cheerful "✓ solid coverage: 0/0 web components have a writable
+// SolidJS equivalent" — a sentence that is true of a package with no web components at
 // all. The catalog is generated, so an empty one means the generator broke, not
 // that the kit shipped nothing.
 if (!Array.isArray(catalog) || catalog.length === 0) {
   return {
     fatal:
-      'verify-solid-coverage: EMPTY CATALOG — src/elements/element-meta.json lists no elements.\n' +
-      '  Every verdict this guard reaches is per element, so it would report 0/0 covered\n' +
+      'verify-solid-coverage: EMPTY CATALOG — src/web-components/web-component-meta.json lists no web components.\n' +
+      '  Every verdict this guard reaches is per web component, so it would report 0/0 covered\n' +
       '  and exit 0 having checked nothing. Regenerate it: `npm run build:api`.',
   };
 }
@@ -271,7 +271,7 @@ function declarationOf(name, file) {
   return found;
 }
 
-/** Kit components rendered by a node, following element-local helpers. */
+/** Kit components rendered by a node, following web-component-local helpers. */
 function kitUsage(node, seen = new Set()) {
   const found = new Map(); // name -> { layer, file }
   for (const tag of jsxTagsIn(node)) {
@@ -347,8 +347,8 @@ function moduleExports(file) {
 // there in the call. A few hoist it into a named function and pass the reference
 // (`defineWebComponent('kai-audio-visualizer', {...}, AudioVisualizerFacade)`).
 // Walking only the argument expression finds no JSX in that shape and reports the
-// element as having NO Solid surface at all -- a false GAP, which is worse than a
-// miss: it would push someone to "fix" an element that is already fine, or to
+// web component as having NO Solid surface at all -- a false GAP, which is worse than a
+// miss: it would push someone to "fix" a web component that is already fine, or to
 // weaken this check. Resolve an identifier to its declaration in the same file
 // and walk that instead.
 function renderNodeFor(sf, renderArg) {
@@ -366,7 +366,7 @@ function renderNodeFor(sf, renderArg) {
 
 // The `solid-coverage: equivalent` directive (header: THE DIRECTIVE). Parsed,
 // not prose — a comment that does not parse is a build failure, not a shrug.
-// One per facade module; it attaches to the element(s) that module defines.
+// One per facade module; it attaches to the web component(s) that module defines.
 function parseEquivalentDirective(sf, module, problems) {
   const m = sf.getFullText().match(/\/\/\s*solid-coverage:\s*equivalent\b([^\n]*)/);
   if (!m) return null;
@@ -407,7 +407,7 @@ const rows = catalog.map((el) => {
   const missing = [];
   for (const [name, v] of info.usage) (isPublic(name) ? pub : missing).push({ name, ...v });
 
-  // API-only elements (render no kit component but call kit functions).
+  // API-only web components (render no kit component but call kit functions).
   const pubApi = [...info.api.keys()].filter(isPublic);
   const privApi = [...info.api.entries()].filter(([n]) => !isPublic(n));
 
@@ -435,7 +435,7 @@ const rows = catalog.map((el) => {
       } else {
         directiveProblems.push(
           `SOLID-EQUIVALENT NOT PUBLIC: ${el.tag} declares ${d.component}, but \`@kitn.ai/ui/solid\` does not export it ` +
-            `(source entry + built dist/solid.server.js are both required) — export it, or the element stays a GAP`,
+            `(source entry + built dist/solid.server.js are both required) — export it, or the web component stays a GAP`,
         );
       }
     } else {
@@ -468,9 +468,9 @@ const rows = catalog.map((el) => {
     solidSurface: surface.sort(),
     missing: gaps.map((g) => g.name).sort(),
     proof,
-    // nominal signal: is there a public export named exactly like the element?
+    // nominal signal: is there a public export named exactly like the web component?
     nameMatch: isPublic(el.displayName) ? el.displayName : null,
-    // cost of reproducing the element by composing public parts
+    // cost of reproducing the web component by composing public parts
     publicPiecesNeeded: publics.length,
     publicPieces: publics,
     irreducible,
@@ -496,7 +496,7 @@ const unreachable = [...publicValues]
 // component-shaped public export — PascalCase, declared as a function whose
 // first parameter is named `props`.
 //
-// Deliberately NOT scoped to the elements' composable set: `expandToPublic`
+// Deliberately NOT scoped to the web components' composable set: `expandToPublic`
 // stops walking at a public boundary, so the moment a coarse component (Thread,
 // ChatThread) becomes public the pieces below it drop out of that set. Scoping
 // the type check to it would mean improving coverage silently *shrinks* what
@@ -532,7 +532,7 @@ const propTypesMissing = propTypes.filter((p) => !p.propsType).map((p) => p.name
 const counts = rows.reduce((a, r) => ((a[r.verdict] = (a[r.verdict] ?? 0) + 1), a), {});
 const grades = rows.filter((r) => r.verdict === 'GAP').reduce((a, r) => ((a[r.grade] = (a[r.grade] ?? 0) + 1), a), {});
 const result = {
-  generatedFrom: { catalog: 'src/elements/element-meta.json', surface: ['src/solid.ts (TS checker)', 'dist/solid.server.js (runtime keys)'] },
+  generatedFrom: { catalog: 'src/web-components/web-component-meta.json', surface: ['src/solid.ts (TS checker)', 'dist/solid.server.js (runtime keys)'] },
   totals: {
     elements: catalog.length,
     publicValueExports: publicValues.size,
@@ -568,16 +568,16 @@ const FIXTURE_TSCONFIG = {
   include: ['src'],
 };
 
-/** The healthy fixture: one element rendering one public Solid component. */
+/** The healthy fixture: one web component rendering one public Solid component. */
 const fixtureFiles = (over = {}) => ({
   'tsconfig.json': JSON.stringify(FIXTURE_TSCONFIG, null, 2),
   'src/components/foo.tsx':
     'export type FooProps = { a?: string };\nexport function Foo(props: FooProps) { return <div>{props.a}</div>; }\n',
-  'src/elements/define.tsx':
+  'src/web-components/define.tsx':
     'export function defineWebComponent(tag: string, props: unknown, render: unknown) { return { tag, props, render }; }\n',
-  'src/elements/x.tsx':
+  'src/web-components/x.tsx':
     "import { defineWebComponent } from './define';\nimport { Foo } from '../components/foo';\ndefineWebComponent('kai-x', {}, () => <Foo a=\"hi\" />);\n",
-  'src/elements/element-meta.json': JSON.stringify([{ tag: 'kai-x', displayName: 'X' }], null, 2),
+  'src/web-components/web-component-meta.json': JSON.stringify([{ tag: 'kai-x', displayName: 'X' }], null, 2),
   'src/index.ts': 'export const version = "1";\n',
   'src/solid.ts':
     "export * from './index';\nexport { Foo } from './components/foo';\nexport type { FooProps } from './components/foo';\n",
@@ -617,13 +617,13 @@ function failureReasons(a) {
 
 const SELF_TEST_CASES = [
   {
-    name: 'a healthy package: the element renders a public Solid component (DIRECT)',
+    name: 'a healthy package: the web component renders a public Solid component (DIRECT)',
     files: fixtureFiles(),
     expect: [],
     check: (v) => (v.rows?.[0]?.verdict === 'DIRECT' ? null : `expected a DIRECT row, got ${v.rows?.[0]?.verdict}`),
   },
   {
-    name: 'GAP: the element renders a component ./solid does not export',
+    name: 'GAP: the web component renders a component ./solid does not export',
     files: fixtureFiles({
       'src/solid.ts': "export * from './index';\n",
       'dist/solid.server.js': 'export const version = "1";\n',
@@ -655,16 +655,16 @@ const SELF_TEST_CASES = [
   // ---- the `solid-coverage: equivalent` directive -------------------------
   // A slot-only facade (renders no kit component, calls no kit function) plus a
   // catalog carrying it. The four cases below prove the directive can rescue
-  // EXACTLY that shape and nothing else: without it the element is a TOTAL gap,
+  // EXACTLY that shape and nothing else: without it the web component is a TOTAL gap,
   // with it naming a public component it is DECLARED, and every other thing the
   // directive could say — a non-public component, a stale site, a missing
   // reason — fails the build.
   {
     name: 'DIRECTIVE baseline: a slot-only facade with no directive is a TOTAL gap',
     files: fixtureFiles({
-      'src/elements/y.tsx':
+      'src/web-components/y.tsx':
         "import { defineWebComponent } from './define';\ndefineWebComponent('kai-y', {}, () => <div><slot /></div>);\n",
-      'src/elements/element-meta.json': JSON.stringify(
+      'src/web-components/web-component-meta.json': JSON.stringify(
         [{ tag: 'kai-x', displayName: 'X' }, { tag: 'kai-y', displayName: 'Y' }], null, 2),
     }),
     expect: ['GAP kai-y (TOTAL)'],
@@ -672,9 +672,9 @@ const SELF_TEST_CASES = [
   {
     name: 'DIRECTIVE: a reviewed equivalent naming a PUBLIC component makes it DECLARED',
     files: fixtureFiles({
-      'src/elements/y.tsx':
+      'src/web-components/y.tsx':
         "import { defineWebComponent } from './define';\n// solid-coverage: equivalent Foo -- same contract, different mechanism\ndefineWebComponent('kai-y', {}, () => <div><slot /></div>);\n",
-      'src/elements/element-meta.json': JSON.stringify(
+      'src/web-components/web-component-meta.json': JSON.stringify(
         [{ tag: 'kai-x', displayName: 'X' }, { tag: 'kai-y', displayName: 'Y' }], null, 2),
     }),
     expect: [],
@@ -688,17 +688,17 @@ const SELF_TEST_CASES = [
   {
     name: 'DIRECTIVE is not an exemption: naming a component ./solid does not export still fails',
     files: fixtureFiles({
-      'src/elements/y.tsx':
+      'src/web-components/y.tsx':
         "import { defineWebComponent } from './define';\n// solid-coverage: equivalent Bar -- wishful thinking\ndefineWebComponent('kai-y', {}, () => <div><slot /></div>);\n",
-      'src/elements/element-meta.json': JSON.stringify(
+      'src/web-components/web-component-meta.json': JSON.stringify(
         [{ tag: 'kai-x', displayName: 'X' }, { tag: 'kai-y', displayName: 'Y' }], null, 2),
     }),
     expect: ['GAP kai-y (TOTAL)', 'SOLID-EQUIVALENT NOT PUBLIC: kai-y declares Bar'],
   },
   {
-    name: 'DIRECTIVE on an element that is not a TOTAL gap is STALE and fails',
+    name: 'DIRECTIVE on a web component that is not a TOTAL gap is STALE and fails',
     files: fixtureFiles({
-      'src/elements/x.tsx':
+      'src/web-components/x.tsx':
         "import { defineWebComponent } from './define';\nimport { Foo } from '../components/foo';\n// solid-coverage: equivalent Foo -- already renders it, this directive is dead weight\ndefineWebComponent('kai-x', {}, () => <Foo a=\"hi\" />);\n",
     }),
     expect: ['SOLID-EQUIVALENT STALE: kai-x declares Foo'],
@@ -706,16 +706,16 @@ const SELF_TEST_CASES = [
   {
     name: 'DIRECTIVE without a reason is MALFORMED and fails',
     files: fixtureFiles({
-      'src/elements/y.tsx':
+      'src/web-components/y.tsx':
         "import { defineWebComponent } from './define';\n// solid-coverage: equivalent Foo\ndefineWebComponent('kai-y', {}, () => <div><slot /></div>);\n",
-      'src/elements/element-meta.json': JSON.stringify(
+      'src/web-components/web-component-meta.json': JSON.stringify(
         [{ tag: 'kai-x', displayName: 'X' }, { tag: 'kai-y', displayName: 'Y' }], null, 2),
     }),
     expect: ['SOLID-EQUIVALENT MALFORMED'],
   },
   {
     name: 'VACUITY: an empty catalog is not 0/0 success',
-    files: fixtureFiles({ 'src/elements/element-meta.json': '[]' }),
+    files: fixtureFiles({ 'src/web-components/web-component-meta.json': '[]' }),
     expect: ['EMPTY CATALOG'],
   },
   {
@@ -724,9 +724,9 @@ const SELF_TEST_CASES = [
     expect: ['dist/solid.server.js is missing'],
   },
   {
-    name: 'no element catalog at all',
-    files: fixtureFiles({ 'src/elements/element-meta.json': null }),
-    expect: ['Expected the element catalog at'],
+    name: 'no web-component catalog at all',
+    files: fixtureFiles({ 'src/web-components/web-component-meta.json': null }),
+    expect: ['Expected the web-component catalog at'],
   },
 ];
 
@@ -773,7 +773,7 @@ if (jsonIdx > -1) writeFileSync(process.argv[jsonIdx + 1], JSON.stringify(result
 
 const verbose = process.argv.includes('--verbose');
 
-console.log(`elements ${catalog.length} | public values ${publicValues.size} | public types ${publicTypes.size} | runtime keys ${runtimeExports.size}`);
+console.log(`web components ${catalog.length} | public values ${publicValues.size} | public types ${publicTypes.size} | runtime keys ${runtimeExports.size}`);
 console.log(`DIRECT ${result.totals.DIRECT}  COMPOSITION ${result.totals.COMPOSITION}  DECLARED ${result.totals.DECLARED}  GAP ${result.totals.GAP} (total ${result.totals.gapTotal} / partial ${result.totals.gapPartial})\n`);
 
 if (verbose) {
@@ -781,7 +781,7 @@ if (verbose) {
     const tail = r.missing.length ? `  MISSING=[${r.missing.join(', ')}]` : '';
     console.log(`${(r.verdict + (r.grade ? `/${r.grade}` : '')).padEnd(13)} ${r.tag.padEnd(22)} pieces=${String(r.publicPiecesNeeded).padStart(2)} solid=[${r.solidSurface.join(', ')}]${tail}${r.irreducible.length ? `  IRREDUCIBLE=[${r.irreducible.join(', ')}]` : ''}`);
   }
-  console.log('\n--- public exports no element reaches ---');
+  console.log('\n--- public exports no web component reaches ---');
   for (const u of unreachable) console.log(`${u.name.padEnd(28)} ${u.module}`);
   console.log('');
 }
@@ -795,7 +795,7 @@ const failed = failureReasons(analysis).length > 0;
 
 if (gapRows.length) {
   // decided by failureReasons above
-  console.error(`✗ ${gapRows.length}/${catalog.length} element(s) have no writable SolidJS equivalent:\n`);
+  console.error(`✗ ${gapRows.length}/${catalog.length} web component(s) have no writable SolidJS equivalent:\n`);
   for (const r of gapRows) {
     console.error(`  ${r.tag} (${r.grade})`);
     if (r.solidSurface.length) console.error(`    public today : ${r.solidSurface.join(', ')}`);
@@ -808,7 +808,7 @@ if (gapRows.length) {
   }
   console.error('');
 } else {
-  console.log(`✓ solid coverage: ${catalog.length}/${catalog.length} elements have a writable SolidJS equivalent.`);
+  console.log(`✓ solid coverage: ${catalog.length}/${catalog.length} web components have a writable SolidJS equivalent.`);
 }
 
 if (directiveProblems.length) {
@@ -837,7 +837,7 @@ if (propTypesMissing.length) {
 }
 
 if (failed) {
-  console.error('A registered element must be writable in SolidJS — Solid is the authored layer, and the');
+  console.error('A registered web component must be writable in SolidJS — Solid is the authored layer, and the');
   console.error('framework docs promise the same catalog everywhere. Re-run with --verbose for the full map.');
   process.exit(1);
 }

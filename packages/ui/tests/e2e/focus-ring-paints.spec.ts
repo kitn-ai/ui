@@ -47,7 +47,7 @@ const PKG = path.resolve(HERE, '../..');
 
 /** The element population is DERIVED from the generated manifest, never typed here. */
 const MANIFEST: Array<{ tag: string }> = JSON.parse(
-  readFileSync(path.join(PKG, 'src/elements/element-meta.json'), 'utf8'),
+  readFileSync(path.join(PKG, 'src/web-components/web-component-meta.json'), 'utf8'),
 );
 const TAGS = MANIFEST.map((e) => e.tag).filter(Boolean);
 
@@ -139,23 +139,23 @@ async function assertDocumentHasNoTailwind(page: Page) {
 }
 
 /** The CSS this suite's assertions are ultimately about, read from source. */
-const SOURCE_CSS = readFileSync(path.join(PKG, 'src/elements/compiled.css'), 'utf8');
+const SOURCE_CSS = readFileSync(path.join(PKG, 'src/web-components/compiled.css'), 'utf8');
 
 /**
  * REFUSE TO MEASURE A STALE BUNDLE.
  *
  * This suite drives `dist/`, so it is only ever as true as the last build — and
  * there is a specific trap here that has now bitten twice in this repo (PR
- * #284's hover-card suite had the identical shape). `npm run build:elements`
+ * #284's hover-card suite had the identical shape). `npm run build:web-components`
  * exits 0 while leaving `dist/register-impl-*.js` BYTE-IDENTICAL, and that file
  * carries the injected element CSS. So you can revert the fix in
- * `src/elements/compiled.css`, "rebuild", and watch this suite report a serene
+ * `src/web-components/compiled.css`, "rebuild", and watch this suite report a serene
  * 38/38 against CSS that no longer exists in source. Nothing else in the repo
  * compares dist against src; in CI only step ordering protects it, and step
  * ordering is not an assertion.
  *
  * Name the cause precisely: `pnpm exec nx build ui` DOES rebuild correctly. The
- * trap is the narrower `build:elements` target, not the NX cache.
+ * trap is the narrower `build:web-components` target, not the NX cache.
  *
  * WHY A STRUCTURAL DIGEST rather than comparing the CSS text. The bundle's CSS
  * is not a verbatim copy: Vite re-minifies it, rewriting values (`calc(1.5 / 1)`
@@ -235,12 +235,12 @@ async function assertServedBundleIsFresh(page: Page) {
 
   expect(
     result.ok,
-    'THE SERVED BUNDLE IS STALE — dist/ does not match src/elements/compiled.css, so this suite ' +
+    'THE SERVED BUNDLE IS STALE — dist/ does not match src/web-components/compiled.css, so this suite ' +
       'would be measuring CSS that is no longer in source and could report a green run over a ' +
       'reverted fix.\n\n' +
       `${result.reason}\n\n` +
       'Rebuild with:  pnpm exec nx build ui\n' +
-      'NOT `npm run build:elements` — that target exits 0 while leaving dist/register-impl-*.js ' +
+      'NOT `npm run build:web-components` — that target exits 0 while leaving dist/register-impl-*.js ' +
       'untouched, which is exactly how a stale bundle survives a "successful" rebuild. ' +
       '(`nx build ui` rebuilds correctly; the NX cache is not the problem.)',
   ).toBe(true);

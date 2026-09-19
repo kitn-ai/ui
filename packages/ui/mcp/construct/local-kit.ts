@@ -140,7 +140,7 @@ export function localKitStartDir(): string {
  *
  * `mcp/construct/cli.ts` -- the published tarball's `files` carries `dist`,
  * `bin`, `frameworks`, the stylesheets and exactly TWO json files under
- * src/elements. `mcp/` is not in that list at all, so the whole directory is
+ * src/web-components. `mcp/` is not in that list at all, so the whole directory is
  * absent from an install; this particular file is the one the CLI itself is
  * compiled from, so it cannot be deleted without deleting the thing being
  * detected. (Before the 2026-09-02 move the marker was
@@ -169,7 +169,7 @@ export function isSourceCheckout(pkgRoot: string): boolean {
 /** Every concrete `./dist/…` target in the exports map — DERIVED from the
  *  manifest rather than a hand-kept list of entry points, so a new subpath is
  *  covered the day it is added. Wildcard patterns are skipped: `./dist/
- *  elements/*.js` names no single file to stat. */
+ *  web-components/*.js` names no single file to stat. */
 export function distExportTargets(pkg: unknown): string[] {
   const out = new Set<string>();
   const walk = (value: unknown): void => {
@@ -185,7 +185,7 @@ export function distExportTargets(pkg: unknown): string[] {
 
 /** Source extensions whose edit can change what the built kit EXPORTS. json
  *  is excluded on purpose: every json under src/ that moves during a build is
- *  build-GENERATED (element-meta, icon-names, construct.v1.schema.json, the
+ *  build-GENERATED (web-component-meta, icon-names, construct.v1.schema.json, the
  *  template fixtures), several of them written by `postbuild` — i.e. AFTER
  *  the bundles — so counting them would report a freshly built tree as
  *  stale. */
@@ -195,7 +195,7 @@ const SOURCE_EXTENSIONS = ['.ts', '.tsx', '.css'];
  *  normally older than the bundles — but `build:css` is runnable alone, and
  *  Storybook runs it). Paths are relative to whichever root (`src/` or
  *  `mcp/`) the walk below is reporting against. */
-const GENERATED_SOURCES = new Set([join('elements', 'compiled.css')]);
+const GENERATED_SOURCES = new Set([join('web-components', 'compiled.css')]);
 
 function isSourceInput(rel: string): boolean {
   if (GENERATED_SOURCES.has(rel)) return false;

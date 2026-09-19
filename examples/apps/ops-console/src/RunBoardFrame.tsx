@@ -23,12 +23,12 @@
  * So the element is created, configured and only THEN inserted. Same element,
  * same contract; the two lines that matter are the order of the last two.
  *
- * The static `import '@kitn.ai/ui/elements/remote'` in main.tsx is the other
+ * The static `import '@kitn.ai/ui/web-components/remote'` in main.tsx is the other
  * half: `<kai-remote>` is opt-in and register-all does not include it, and
  * `document.createElement` only upgrades a tag that is already defined.
  */
 import { useEffect, useRef } from 'react';
-import type { KaiRemoteElement } from '@kitn.ai/ui/elements';
+import type { KaiRemoteElement } from '@kitn.ai/ui/web-components';
 import type { CardEnvelope, CardPolicy } from '@kitn.ai/ui';
 
 export interface RunBoardFrameProps {

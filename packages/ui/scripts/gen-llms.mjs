@@ -1,7 +1,7 @@
 // Generates `llms.txt` (curated orientation, llmstxt.org convention) and
-// `llms-full.txt` (full per-element API reference) for AI coding agents.
+// `llms-full.txt` (full per-web-component API reference) for AI coding agents.
 //
-// Source of truth = the same `elements` model that `gen-element-api.mjs` uses
+// Source of truth = the same `elements` model that `gen-web-component-api.mjs` uses
 // to write dist/custom-elements.json, so these files can never drift from the
 // shipped API. When run standalone (no in-memory import) it falls back to
 // reading dist/custom-elements.json.
@@ -79,7 +79,7 @@ Only scalar values (string/number/boolean) work as attributes (e.g. \`placeholde
 
 ## Two layers
 
-**Layer 1 — batteries-included web components** (\`import '@kitn.ai/ui/elements'\`):
+**Layer 1 — batteries-included web components** (\`import '@kitn.ai/ui/web-components'\`):
 Drop an element into any framework (React, Vue, plain HTML). Data in via JS properties; interactions out via non-bubbling CustomEvents.
 
 - \`<kai-chat>\` — full chat UI (message list + prompt input). The primary starting point.
@@ -167,7 +167,7 @@ Types are importable: \`import type { ChatMessage, MessagePart, MessageSource } 
 
 **Plain HTML / CDN**
 \`\`\`html
-<script type="module" src="https://unpkg.com/@kitn.ai/ui/elements"></script>
+<script type="module" src="https://unpkg.com/@kitn.ai/ui/web-components"></script>
 <kai-chat style="display:block;height:100vh"></kai-chat>
 <script type="module">
   const chat = document.querySelector('kai-chat');
@@ -209,7 +209,7 @@ ${fullOnlyPointers.join('\n')}
 }
 
 // ---------------------------------------------------------------------------
-// Per-element reference (the generated body of llms-full.txt).
+// Per-web-component reference (the generated body of llms-full.txt).
 // ---------------------------------------------------------------------------
 function renderElement(el) {
   const react = el.reactName;
@@ -284,8 +284,8 @@ function renderElement(el) {
     );
   }
 
-  // "Route 2": the light-DOM child elements this element parses. The only way to
-  // drive some elements from plain HTML with no JS, and previously in no generated
+  // "Route 2": the light-DOM child elements this web component parses. The only way to
+  // drive some web components from plain HTML with no JS, and previously in no generated
   // artifact at all — so an agent reading this file could not know they exist.
   if (el.declarativeChildren?.length) {
     out.push('');
@@ -345,12 +345,12 @@ npm install @kitn.ai/ui
 \`\`\`
 
 ### 2 — Pick your layer
-Drop-in: use \`<kai-chat>\` for a full chat UI in one tag (\`import '@kitn.ai/ui/elements'\`).
+Drop-in: use \`<kai-chat>\` for a full chat UI in one tag (\`import '@kitn.ai/ui/web-components'\`).
 Composable: combine \`<kai-message>\`, \`<kai-prompt-input>\`, \`<kai-reasoning>\`, … in your own markup.
 
 ### 3 — Handle \`submit\` and stream
 \`\`\`js
-import '@kitn.ai/ui/elements';
+import '@kitn.ai/ui/web-components';
 // The streaming fold. It is 5 lines if you would rather inline it: see the
 // Streaming recipe below.
 import { appendTextPart } from '@kitn.ai/ui/state';
@@ -519,7 +519,7 @@ export function topLevelHeadings(markdown) {
 
 // ---------------------------------------------------------------------------
 // Normalize the data model: accept either the in-memory `elements` array from
-// gen-element-api.mjs OR the dist/custom-elements.json declarations.
+// gen-web-component-api.mjs OR the dist/custom-elements.json declarations.
 // ---------------------------------------------------------------------------
 function fromElements(elements) {
   return elements.map((el) => ({
@@ -588,7 +588,7 @@ function fromManifest(cem) {
       // Consumer-settable custom properties. Tokens land in the same CEM array as
       // `{ name }` with no description (they are palette entries, not knobs), so a
       // DESCRIPTION is what marks a var. Keep this filter in step with
-      // gen-element-api's emission or this path silently drops the vars — the
+      // gen-web-component-api's emission or this path silently drops the vars — the
       // failure mode the note above describes, on the field added for them.
       vars: (d.cssProperties || [])
         .filter((p) => p.description)

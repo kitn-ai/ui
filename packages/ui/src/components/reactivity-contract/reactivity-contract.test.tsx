@@ -39,7 +39,7 @@ import { render, cleanup } from '@solidjs/testing-library';
 import { ConversationList } from '../conversation/conversation-list';
 import { Thread } from '../thread/thread';
 import type { ConversationSummary } from '../../types';
-import type { ChatMessage } from '../../elements/chat-types';
+import type { ChatMessage } from '../../web-components/chat-types';
 
 // jsdom lacks these; the thread's auto-scroll container and reasoning disclosure
 // wire them up. Same stubs as thread.test.tsx.

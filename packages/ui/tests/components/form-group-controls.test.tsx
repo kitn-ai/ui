@@ -4,7 +4,7 @@
  * `taglist` routing through `Input`.
  *
  * WHAT JSDOM CANNOT SEE, STATED SO NOTHING HERE READS AS MORE THAN IT IS. jsdom does no
- * layout and does not load `src/elements/styles.css`, so nothing below proves a label is
+ * layout and does not load `src/web-components/styles.css`, so nothing below proves a label is
  * PAINTED where a sighted user would find it, only that it is a real element with text
  * in the document rather than an `aria-label` string. It also renders no native picker,
  * so the D-3 comparison against `<select multiple>` is about DOM shape, not about how

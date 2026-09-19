@@ -1,16 +1,16 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
-import '../../src/elements/artifact';
-import '../../src/elements/attachments';
-import '../../src/elements/chat';
-import type { ChatMessage } from '../../src/elements/chat-types';
-import '../../src/elements/composer';
-import '../../src/elements/conversation-item';
-import '../../src/elements/conversation-list';
-import '../../src/elements/resizable';
-import '../../src/elements/thread';
-import '../../src/elements/toast';
+import '../../src/web-components/artifact';
+import '../../src/web-components/attachments';
+import '../../src/web-components/chat';
+import type { ChatMessage } from '../../src/web-components/chat-types';
+import '../../src/web-components/composer';
+import '../../src/web-components/conversation-item';
+import '../../src/web-components/conversation-list';
+import '../../src/web-components/resizable';
+import '../../src/web-components/thread';
+import '../../src/web-components/toast';
 import type { AttachmentData } from '../../src/primitives/attachment-types';
 import type { ToastItem } from '../../src/primitives/toast-store';
 import type { ConversationGroup, ConversationSummary } from '../../src/types';
@@ -43,7 +43,7 @@ describe('authored surface layer', () => {
     // stripper then replaced that bug with a worse one (an unbalanced
     // apostrophe in JSX text left it stuck in string state), so this reads the
     // real parser: comments are trivia and are never nodes.
-    const elDir = join(__dirname, '..', '..', 'src', 'elements');
+    const elDir = join(__dirname, '..', '..', 'src', 'web-components');
     const appFiles = readdirSync(elDir).filter(
       (f) =>
         f.endsWith('.stories.tsx') &&

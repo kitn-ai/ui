@@ -2,8 +2,8 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { SlidersHorizontal } from 'lucide-solid';
 import { CardSurface } from './card-surface';
 import { Button } from '../button/button';
-import { componentDescription } from '../../stories/docs/element-controls';
-import cover from '../../elements/card-media.jpg';
+import { componentDescription } from '../../stories/docs/web-component-controls';
+import cover from '../../web-components/card-media.jpg';
 
 const meta = {
   title: 'Components/Card Surface',

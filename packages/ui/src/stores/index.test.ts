@@ -12,7 +12,7 @@
  */
 import { describe, expect, it, beforeEach } from 'vitest';
 import * as stores from './index';
-import type { ChatMessage } from '../elements/chat-types';
+import type { ChatMessage } from '../web-components/chat-types';
 import type { ConversationSummary } from './index';
 
 beforeEach(() => {

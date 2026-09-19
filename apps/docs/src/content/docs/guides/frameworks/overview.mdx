@@ -11,23 +11,23 @@ The `kai-*` web components drop into React, Vue, Angular, Svelte, or plain HTML 
 
 | Entry | Use it for |
 |---|---|
-| `@kitn.ai/ui/elements` | Any framework — registers every `kai-*` element |
+| `@kitn.ai/ui/web-components` | Any framework — registers every `kai-*` web component |
 | `@kitn.ai/ui/react` | React — typed wrappers with camelCase props and event handlers |
 | `@kitn.ai/ui/solid` | SolidJS — native Solid components for full compositional control |
 | `@kitn.ai/ui` | The shared layer every framework uses — types, state and card helpers |
 
 ## Any framework: the web components
 
-Import `@kitn.ai/ui/elements` once for its side effect. It registers every `kai-*` element; after that they work like built-in HTML.
+Import `@kitn.ai/ui/web-components` once for its side effect. It registers every `kai-*` web component; after that they work like built-in HTML.
 
 ```ts
-import '@kitn.ai/ui/elements';
+import '@kitn.ai/ui/web-components';
 ```
 
 Registration is **async**. If your framework sets array or object properties as it mounts (Vue, Angular, Svelte all do), mount behind the `elementsReady` promise the same entry exports. A property written before the element upgrades is lost.
 
 ```ts
-import { elementsReady } from '@kitn.ai/ui/elements';
+import { elementsReady } from '@kitn.ai/ui/web-components';
 
 elementsReady.then(() => mountYourApp());
 ```
@@ -40,7 +40,7 @@ Then use them in your templates:
     <kai-chat style="display:block; height:100%;"></kai-chat>
 
     <script type="module">
-      import '@kitn.ai/ui/elements';
+      import '@kitn.ai/ui/web-components';
 
       await customElements.whenDefined('kai-chat');
 
@@ -53,7 +53,7 @@ Then use them in your templates:
   <TabItem label="Vue">
     ```vue
     <script setup>
-    import '@kitn.ai/ui/elements';
+    import '@kitn.ai/ui/web-components';
     const messages = ref([{ id: '1', role: 'assistant', parts: [{ type: 'text', text: 'Hello!' }] }]);
     </script>
 
@@ -68,7 +68,7 @@ Then use them in your templates:
   <TabItem label="Svelte">
     ```svelte
     <script>
-    import '@kitn.ai/ui/elements';
+    import '@kitn.ai/ui/web-components';
     let messages = [{ id: '1', role: 'assistant', parts: [{ type: 'text', text: 'Hello!' }] }];
     </script>
 
@@ -81,7 +81,7 @@ Then use them in your templates:
   <TabItem label="Angular">
     ```ts
     // main.ts
-    import { elementsReady } from '@kitn.ai/ui/elements';
+    import { elementsReady } from '@kitn.ai/ui/web-components';
     elementsReady.then(() => bootstrapApplication(AppComponent, appConfig));
     ```
 
@@ -119,7 +119,7 @@ Scalars — `placeholder`, `loading`, `theme`, `prose-size` — work fine as att
 
 ## Events
 
-Every `kai-*` element dispatches `CustomEvent`s with a `detail` payload, named with a `kai-` prefix (`kai-submit`, `kai-model-change`, `kai-remove`, …).
+Every `kai-*` web component dispatches `CustomEvent`s with a `detail` payload, named with a `kai-` prefix (`kai-submit`, `kai-model-change`, `kai-remove`, …).
 
 ```js
 chat.addEventListener('kai-submit', (e) => {
@@ -132,7 +132,7 @@ The events don't bubble — listen on the element itself.
 
 ## React adapter
 
-`@kitn.ai/ui/react` exports a typed component for every element. Props take arrays and objects directly (no `.prop` modifier), and events arrive as camelCase handler props that receive the `CustomEvent`.
+`@kitn.ai/ui/react` exports a typed component for every web component. Props take arrays and objects directly (no `.prop` modifier), and events arrive as camelCase handler props that receive the `CustomEvent`.
 
 ```tsx
 import { Chat } from '@kitn.ai/ui/react';
@@ -206,7 +206,7 @@ Solid usage also needs `solid-js` as a peer dependency:
 npm install solid-js
 ```
 
-Unlike the elements, the native components are Tailwind v4 classes, so this path also needs Tailwind in the app plus an `@source` line pointing at the package. Rendering a real thread means `MessageBody` over each message's ordered `parts`, or `Thread` for the whole list at once. Both are covered in the [SolidJS guide](/guides/frameworks/solid/).
+Unlike the web components, the native components are Tailwind v4 classes, so this path also needs Tailwind in the app plus an `@source` line pointing at the package. Rendering a real thread means `MessageBody` over each message's ordered `parts`, or `Thread` for the whole list at once. Both are covered in the [SolidJS guide](/guides/frameworks/solid/).
 
 ## Per-framework guides
 

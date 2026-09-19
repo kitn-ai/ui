@@ -424,7 +424,7 @@ function ResizableHandle(props: ResizableHandleProps) {
     e.preventDefault();
     resetPanelToDefault(prev);
     resetPanelToDefault(next);
-    // Re-emit so consumers (and the element facade) observe the new sizes.
+    // Re-emit so consumers (and the web-component facade) observe the new sizes.
     local.onPanelResize?.(0);
   };
 

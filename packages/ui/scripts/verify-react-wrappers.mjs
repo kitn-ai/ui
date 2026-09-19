@@ -1,7 +1,7 @@
 // Regression guard for the generated React wrappers bundle (dist/react.js, the
-// `@kitn.ai/ui/react` entry). Each wrapper lazily imports its element via a
-// per-element specifier `@kitn.ai/ui/elements/<X>` — if the generator emits a
-// specifier whose `dist/elements/<X>.js` does not exist, the import 404s at
+// `@kitn.ai/ui/react` entry). Each wrapper lazily imports its web component via a
+// per-web-component specifier `@kitn.ai/ui/web-components/<X>` — if the generator emits a
+// specifier whose `dist/web-components/<X>.js` does not exist, the import 404s at
 // runtime and `<Chat>` (et al.) silently never registers in every React
 // consumer. The bundle must ALSO open with a 'use client' directive or RSC
 // builds reject the hooks it uses. This asserts both so that regression can
@@ -10,9 +10,9 @@
 // Paths are anchored to THIS FILE, not to the cwd. `npm run build` sets the cwd to the
 // package, but CLAUDE.md tells everyone to run from the REPO ROOT, and done that way the
 // cwd-relative version MISDIAGNOSED ITSELF: it reported "not found — run the lib build
-// first" against a tree that had just built green. The element lookup below was worse
+// first" against a tree that had just built green. The web-component lookup below was worse
 // than that, because it is a check rather than a bail: a cwd holding `dist/react.js` but
-// no `dist/elements/` reported all 78 wrappers as pointing at missing files (measured),
+// no `dist/web-components/` reported all 78 wrappers as pointing at missing files (measured),
 // which is a loud alarm about nothing. Both now resolve against the package, and that
 // FALSE-POSITIVE shape is one of the self-test cases below — it is the failure mode no
 // planted defect can catch, because every planted defect expects red.
@@ -45,8 +45,8 @@ const SELF_TEST = argv.includes('--self-test');
 
 // Absolute for fs, short for humans: the messages below read the same as they always did.
 const BUNDLE = 'dist/react.js';
-const ELEMENTS_DIR = 'dist/elements';
-const SPECIFIER = /@kitn\.ai\/ui\/elements\/([a-z0-9-]+)/g;
+const ELEMENTS_DIR = 'dist/web-components';
+const SPECIFIER = /@kitn\.ai\/ui\/web-components\/([a-z0-9-]+)/g;
 
 /**
  * Everything wrong with ONE package tree, as a list of messages. A pure function
@@ -72,8 +72,8 @@ function checkTree(root) {
   if (names.length === 0) {
     return {
       problems: [
-        `${BUNDLE} contains NO \`@kitn.ai/ui/elements/<X>\` specifier at all.\n` +
-          `  Every wrapper is supposed to lazily import its element through one, so this is\n` +
+        `${BUNDLE} contains NO \`@kitn.ai/ui/web-components/<X>\` specifier at all.\n` +
+          `  Every wrapper is supposed to lazily import its web component through one, so this is\n` +
           `  either an empty bundle or the generator having changed its import shape — and\n` +
           `  in both cases the checks below would pass over nothing. See frameworks/react/.`,
       ],
@@ -81,25 +81,25 @@ function checkTree(root) {
     };
   }
 
-  // 1. A missing dist/elements/ ENTIRELY is a different fact from N missing files,
+  // 1. A missing dist/web-components/ ENTIRELY is a different fact from N missing files,
   //    and saying so is what stops the "all 78 wrappers are broken" alarm from
   //    ever reading as a wrapper problem again.
   if (!existsSync(join(root, ELEMENTS_DIR))) {
     problems.push(
       `${ELEMENTS_DIR}/ does not exist under ${root}.\n` +
         `  All ${names.length} specifier(s) would be reported missing, which is one broken or\n` +
-        `  partial build — not ${names.length} broken wrappers. Run the lib build (npm run build:elements).`,
+        `  partial build — not ${names.length} broken wrappers. Run the lib build (npm run build:web-components).`,
     );
     return { problems, names };
   }
 
-  // 2. Every per-element specifier must resolve to a real dist/elements file.
+  // 2. Every per-web-component specifier must resolve to a real dist/web-components file.
   const missing = names.filter((name) => !existsSync(join(root, `${ELEMENTS_DIR}/${name}.js`)));
   if (missing.length > 0) {
     problems.push(
-      `${missing.length} react wrapper specifier(s) point at non-existent element files:\n` +
+      `${missing.length} react wrapper specifier(s) point at non-existent web-component files:\n` +
         missing
-          .map((name) => `    @kitn.ai/ui/elements/${name} → ${ELEMENTS_DIR}/${name}.js (missing)`)
+          .map((name) => `    @kitn.ai/ui/web-components/${name} → ${ELEMENTS_DIR}/${name}.js (missing)`)
           .join('\n'),
     );
   }
@@ -131,7 +131,7 @@ const wrapperBundle = (elements = FIXTURE_ELEMENTS, { useClient = true } = {}) =
     .map((el) => {
       const id = el.replace(/-/g, '_');
       return (
-        `const load_${id} = () => import('@kitn.ai/ui/elements/${el}');\n` +
+        `const load_${id} = () => import('@kitn.ai/ui/web-components/${el}');\n` +
         `export const ${id} = () => { useEffect(() => { load_${id}(); }, []); return null; };`
       );
     })
@@ -167,17 +167,17 @@ const SELF_TEST_CASES = [
     expect: [],
   },
   {
-    name: 'DEFECT: a specifier whose dist/elements/<X>.js was never emitted',
+    name: 'DEFECT: a specifier whose dist/web-components/<X>.js was never emitted',
     files: fixtureFiles({ [`${ELEMENTS_DIR}/kai-thread.js`]: null }),
     // Naming the offender is half the check: "1 wrapper is broken" is not actionable.
-    expect: ['non-existent element files', '@kitn.ai/ui/elements/kai-thread', 'dist/elements/kai-thread.js (missing)'],
+    expect: ['non-existent web-component files', '@kitn.ai/ui/web-components/kai-thread', 'dist/web-components/kai-thread.js (missing)'],
     reject: ["missing its 'use client' banner"],
   },
   {
     name: 'DEFECT: the `use client` banner is gone',
     files: fixtureFiles({ 'dist/react.js': wrapperBundle(FIXTURE_ELEMENTS, { useClient: false }) }),
     expect: ["missing its 'use client' banner"],
-    reject: ['non-existent element files'],
+    reject: ['non-existent web-component files'],
   },
   {
     name: 'both defects at once are both reported',
@@ -185,19 +185,19 @@ const SELF_TEST_CASES = [
       'dist/react.js': wrapperBundle(FIXTURE_ELEMENTS, { useClient: false }),
       [`${ELEMENTS_DIR}/kai-message.js`]: null,
     }),
-    expect: ['@kitn.ai/ui/elements/kai-message', "missing its 'use client' banner"],
+    expect: ['@kitn.ai/ui/web-components/kai-message', "missing its 'use client' banner"],
   },
   {
-    name: 'VACUITY: a bundle with no element specifier at all is a FAILURE, not a pass',
+    name: 'VACUITY: a bundle with no web-component specifier at all is a FAILURE, not a pass',
     files: fixtureFiles({ 'dist/react.js': `'use client';\nexport const Chat = () => null;\n` }),
-    expect: ['NO `@kitn.ai/ui/elements/<X>` specifier'],
-    reject: ['non-existent element files'],
+    expect: ['NO `@kitn.ai/ui/web-components/<X>` specifier'],
+    reject: ['non-existent web-component files'],
   },
   {
-    name: 'a missing dist/elements/ reads as ONE broken build, not N broken wrappers',
+    name: 'a missing dist/web-components/ reads as ONE broken build, not N broken wrappers',
     files: { 'dist/react.js': wrapperBundle() },
     expect: ['does not exist under'],
-    reject: ['non-existent element files'],
+    reject: ['non-existent web-component files'],
   },
   {
     name: 'no dist/react.js at all',
@@ -243,12 +243,12 @@ if (problems.length > 0) {
   console.error(
     `✗ verify-react-wrappers: ${BUNDLE} failed validation.\n` +
       problems.map((p) => `  ${p}`).join('\n') +
-      `\n  See frameworks/react/ (the wrapper generator) and src/elements/ —\n` +
-      `  every wrapped element needs a matching dist/elements/<X>.js entry.`,
+      `\n  See frameworks/react/ (the wrapper generator) and src/web-components/ —\n` +
+      `  every wrapped element needs a matching dist/web-components/<X>.js entry.`,
   );
   process.exit(1);
 }
 
 console.log(
-  `✓ verify-react-wrappers — ${BUNDLE} has 'use client' and all ${names.length} element specifiers resolve`,
+  `✓ verify-react-wrappers — ${BUNDLE} has 'use client' and all ${names.length} web-component specifiers resolve`,
 );

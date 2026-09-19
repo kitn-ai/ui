@@ -8,7 +8,7 @@ import {
   DropdownSub, DropdownSubTrigger, DropdownSubContent,
 } from './dropdown';
 import { buttonVariants } from '../button/button';
-import { componentDescription } from '../../stories/docs/element-controls';
+import { componentDescription } from '../../stories/docs/web-component-controls';
 
 const meta = {
   title: 'Components/Dropdown',

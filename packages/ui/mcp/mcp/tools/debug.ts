@@ -131,7 +131,7 @@ const RULES: Rule[] = [
       '```',
   },
   {
-    // Rule 6 — custom elements not registered / renders nothing (React #1 failure)
+    // Rule 6 — web components not registered / renders nothing (React #1 failure)
     // Source: field-test reports; for-ai-agents.mdx §"Import order matters"
     id: 'elements-not-registered',
     test: (t) => {
@@ -154,21 +154,21 @@ const RULES: Rule[] = [
         return true;
       return false;
     },
-    title: 'Custom elements not registered — renders nothing / empty box',
+    title: 'Web components not registered — renders nothing / empty box',
     cause:
       'The `@kitn.ai/ui/react` wrappers (and bare `<kai-*>` tags) do NOT register the ' +
-      'custom elements by themselves. Without the element-registration side-effect import, ' +
+      'web components by themselves. Without the registration side-effect import, ' +
       '`<kai-chat>` / `<Chat>` is an un-upgraded unknown element — an empty box. ' +
       '`customElements.get(\'kai-chat\') === undefined`.',
     fix:
-      'Import the elements bundle for its side effect BEFORE your first render — ' +
+      'Import the web-components bundle for its side effect BEFORE your first render — ' +
       'it must run before the component mounts.\n\n' +
       '```tsx\n' +
-      "import '@kitn.ai/ui/elements'   // registers <kai-*> — REQUIRED, must come first\n" +
+      "import '@kitn.ai/ui/web-components'   // registers <kai-*> — REQUIRED, must come first\n" +
       "import { Chat } from '@kitn.ai/ui/react'\n" +
       "import '@kitn.ai/ui/theme.css'\n" +
       '```\n\n' +
-      'In plain HTML: `import \'@kitn.ai/ui/elements\'` in your module script. ' +
+      'In plain HTML: `import \'@kitn.ai/ui/web-components\'` in your module script. ' +
       'The import is a side effect — keep it even if your linter flags it as "unused".',
   },
   {
@@ -197,10 +197,10 @@ const RULES: Rule[] = [
       '```jsonc\n' +
       '// tsconfig (app)\n' +
       '"baseUrl": ".",\n' +
-      '"paths": { "@kitn.ai/ui/elements": ["./src/stubs/kitn-elements.d.ts"] }\n' +
+      '"paths": { "@kitn.ai/ui/web-components": ["./src/stubs/kitn-web-components.d.ts"] }\n' +
       '```\n\n' +
       '```ts\n' +
-      '// src/stubs/kitn-elements.d.ts\n' +
+      '// src/stubs/kitn-web-components.d.ts\n' +
       'export {}\n' +
       '```\n\n' +
       '(This is a known packaging gap being tracked upstream.)',
@@ -238,7 +238,7 @@ const RULES: Rule[] = [
   },
   {
     // Rule 9 — reduce bundle size / footprint / "how much does @kitn.ai/ui add"
-    // Source: dist/elements/<file>.js per-element exports; dist/autoloader.js
+    // Source: dist/web-components/<file>.js per-web-component exports; dist/autoloader.js
     id: 'bundle-footprint',
     test: (t) =>
       /bundle\s*size|footprint|tree.?shak|how\s+much.*does.*@kitn|reduce.*import|import.*only.*element|per.?element\s+import|autoload|cdn.*no.?build|no.?build.*cdn/i.test(
@@ -246,41 +246,41 @@ const RULES: Rule[] = [
       ),
     title: 'Reducing bundle footprint — three load modes',
     cause:
-      'The default `import \'@kitn.ai/ui/elements\'` registers every `kai-*` element. ' +
+      'The default `import \'@kitn.ai/ui/web-components\'` registers every `kai-*` web component. ' +
       'If your page uses only one or two elements, that pulls in the full ~119 KB gz bundle. ' +
       'Two opt-in modes let you load only what you need.',
     fix:
       '**Mode 1 — register-all (default, SSR-safe):**\n' +
       'Best for multi-element apps or any SSR/meta-framework. ' +
-      'Load once and every `kai-*` element is available.\n\n' +
+      'Load once and every `kai-*` web component is available.\n\n' +
       '```js\n' +
-      "import '@kitn.ai/ui/elements';  // ~119 KB gz — registers everything\n" +
+      "import '@kitn.ai/ui/web-components';  // ~119 KB gz — registers everything\n" +
       '```\n\n' +
-      '**Mode 2 — per-element import (tree-shaking, bundler apps):**\n' +
-      'Use `import \'@kitn.ai/ui/elements/<file>\'` to register only one element. ' +
+      '**Mode 2 — per-web-component import (tree-shaking, bundler apps):**\n' +
+      'Use `import \'@kitn.ai/ui/web-components/<file>\'` to register only one web component. ' +
       'A bundler (Vite, webpack, Rollup) will tree-shake to just its chunks (~73 KB gz for `kai-chat` alone). ' +
       'Client-only — do not use in SSR entry points.\n\n' +
       '```js\n' +
       "// Registers only <kai-chat> (~73 KB gz vs ~119 KB gz register-all)\n" +
-      "import '@kitn.ai/ui/elements/chat';\n\n" +
+      "import '@kitn.ai/ui/web-components/chat';\n\n" +
       "// Other examples:\n" +
-      "import '@kitn.ai/ui/elements/code-block';  // <kai-code-block>\n" +
-      "import '@kitn.ai/ui/elements/confirm-card'; // <kai-confirm>\n" +
+      "import '@kitn.ai/ui/web-components/code-block';  // <kai-code-block>\n" +
+      "import '@kitn.ai/ui/web-components/confirm-card'; // <kai-confirm>\n" +
       '```\n\n' +
-      'The file name is the element\'s source basename from `element-manifest.json` ' +
+      'The file name is the web component\'s source basename from `web-component-manifest.json` ' +
       '(e.g. `kai-chat` → `chat`, `kai-confirm` → `confirm-card`).\n\n' +
       '**Mode 3 — autoloader (no-build / CDN pages only):**\n' +
-      'Watches the DOM and dynamically imports each `kai-*` element\'s module on demand. ' +
-      'A page that uses only `<kai-chat>` never downloads the other elements. ' +
+      'Watches the DOM and dynamically imports each `kai-*` web component\'s module on demand. ' +
+      'A page that uses only `<kai-chat>` never downloads the other web components. ' +
       'It is a CDN / static-file tool — load it from a `<script type="module">` tag. ' +
       'It is NOT importable through a bundler: Vite/webpack relocate it and the on-demand imports 404. ' +
       'Client-only.\n\n' +
       '```html\n' +
-      '<script type="module" src="https://cdn.jsdelivr.net/npm/@kitn.ai/ui@<version>/dist/elements/autoloader.js"></script>\n' +
+      '<script type="module" src="https://cdn.jsdelivr.net/npm/@kitn.ai/ui@<version>/dist/web-components/autoloader.js"></script>\n' +
       '```\n\n' +
       'In a BUNDLED app (Vite/webpack/Next) use Mode 1 or Mode 2 instead — not the autoloader.\n\n' +
       '**SSR note:** use Mode 1 (register-all) in SSR apps — ' +
-      'per-element imports and the autoloader are client-only (they call DOM APIs at module eval). ' +
+      'per-web-component imports and the autoloader are client-only (they call DOM APIs at module eval). ' +
       'Modes 1 & 2 are side-effect imports; keep them even if your linter flags them as "unused".',
   },
   {
@@ -294,24 +294,24 @@ const RULES: Rule[] = [
       if (/hydration/.test(t) && /kai|web.?component|custom.?element|<[a-z]+-/.test(t)) return true;
       return false;
     },
-    title: 'SSR / server-side rendering — element requires the browser DOM',
+    title: 'SSR / server-side rendering — web components require the browser DOM',
     cause:
-      '`kai-*` elements are client-side web components. They require `document` and ' +
+      '`kai-*` web components are client-side, and require `document` and ' +
       '`customElements` to register and render. Importing them in a server component ' +
       '(Next.js App Router server component, Nuxt SSR, etc.) throws ' +
       '"document is not defined" or silently produces no output.',
     fix:
-      'Register the element on the client only. ' +
+      'Register the web components on the client only. ' +
       'Use your framework\'s "client-only" / island / dynamic-import pattern.\n\n' +
       '```js\n' +
       "// ✅ Plain HTML / vanilla — import in a <script type=\"module\">\n" +
-      "import '@kitn.ai/ui/elements';\n\n" +
+      "import '@kitn.ai/ui/web-components';\n\n" +
       '// ✅ Next.js App Router — mark the component with "use client"\n' +
       "'use client';\n" +
-      "import '@kitn.ai/ui/elements';\n\n" +
+      "import '@kitn.ai/ui/web-components';\n\n" +
       '// ✅ Next.js — dynamic import with ssr: false\n' +
       "import dynamic from 'next/dynamic';\n" +
-      "const KaiChat = dynamic(() => import('@kitn.ai/ui/elements').then(() => 'kai-chat'), { ssr: false });\n\n" +
+      "const KaiChat = dynamic(() => import('@kitn.ai/ui/web-components').then(() => 'kai-chat'), { ssr: false });\n\n" +
       '// ✅ React wrapper (already client-safe)\n' +
       "import { Chat } from '@kitn.ai/ui/react';\n" +
       '```',
@@ -341,10 +341,10 @@ const RULES: Rule[] = [
       'wrong model.',
     fix:
       'Import `toast` and call it. It is exported from BOTH the root `@kitn.ai/ui` and ' +
-      'the `@kitn.ai/ui/elements` bundle, so the web-components-only consumer gets it too. ' +
+      'the `@kitn.ai/ui/web-components` bundle, so the web-components-only consumer gets it too. ' +
       'It is SSR-safe (no DOM is touched until the first call on the client).\n\n' +
       '```js\n' +
-      "import { toast } from '@kitn.ai/ui/elements'; // or '@kitn.ai/ui'\n\n" +
+      "import { toast } from '@kitn.ai/ui/web-components'; // or '@kitn.ai/ui'\n\n" +
       "// ✅ Fire-and-forget\n" +
       "toast('Copied to clipboard');\n" +
       "toast.success('Saved');\n\n" +
@@ -382,7 +382,7 @@ const RULES: Rule[] = [
       'over your store and can show a "Dismissed · Undo" toast via an injected adapter.\n\n' +
       '```ts\n' +
       "import { dismissRecovery } from '@kitn.ai/ui';\n" +
-      "import { toast } from '@kitn.ai/ui/elements';\n\n" +
+      "import { toast } from '@kitn.ai/ui/web-components';\n\n" +
       '// Adapter: map dismissRecovery\'s toast shape onto the imperative toast().\n' +
       'const toastAdapter = {\n' +
       '  show: ({ message, action, durationMs }) => {\n' +
@@ -406,7 +406,7 @@ const RULES: Rule[] = [
   },
   {
     // Rule 12 — kai-compare contract: two candidates, JS data prop, stream both, terminal pick
-    // Source: src/elements/compare.tsx + src/components/response/response-compare-types.ts
+    // Source: src/web-components/compare.tsx + src/components/response/response-compare-types.ts
     id: 'compare-contract',
     test: (t) => {
       if (/<kai-compare\b|kai-compare-select|ResponseCompareData|response.?compare/i.test(t)) return true;
@@ -429,7 +429,7 @@ const RULES: Rule[] = [
       'Set `data` in JS with two candidates, stream by reassigning a fresh `data` object ' +
       'per chunk, and listen for `kai-compare-select` directly on the element.\n\n' +
       '```ts\n' +
-      "import { toast } from '@kitn.ai/ui/elements';\n" +
+      "import { toast } from '@kitn.ai/ui/web-components';\n" +
       "import type { ResponseCompareData, CompareSelection } from '@kitn.ai/ui';\n\n" +
       "const el = document.querySelector('kai-compare')!;\n" +
       '// data is a JS PROPERTY — exactly two candidates, each with a unique id.\n' +
@@ -455,7 +455,7 @@ const RULES: Rule[] = [
   },
   {
     // Rule 13 — kai-composer is the bare editor; attachments + send live on kai-prompt-input
-    // Source: src/elements/composer.tsx (element doc), src/elements/prompt-input.tsx,
+    // Source: src/web-components/composer.tsx (element doc), src/web-components/prompt-input.tsx,
     // apps/docs components/composer.mdx (the taxonomy sentence). Rung-6 F-43.
     id: 'composer-attachments',
     test: (t) => {
@@ -488,7 +488,7 @@ const RULES: Rule[] = [
   {
     // Rule 14 — blob: attachment URLs: the wire refuses them; use a data: URI
     // Source: src/primitives/attachment-types.ts (AttachmentData.url doc),
-    // src/elements/default-input.tsx (readAsDataUrl), src/wire/files.ts (the refusal),
+    // src/web-components/default-input.tsx (readAsDataUrl), src/wire/files.ts (the refusal),
     // apps/docs patterns/attachments-flow.mdx. Rung-6 F-44; the defect PR #186 shipped.
     id: 'attachment-blob-url',
     test: (t) => {

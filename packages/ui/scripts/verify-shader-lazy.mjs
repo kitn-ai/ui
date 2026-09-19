@@ -1,6 +1,6 @@
 // Regression guard for the WebGL shader path in the audio visualizer
 // (components/audio-visualizer/{shader-canvas,wave.glsl,aurora.glsl,
-// variant-wave,variant-aurora,variant-custom}). `config/vite/elements.ts`
+// variant-wave,variant-aurora,variant-custom}). `config/vite/web-components.ts`
 // (KAI_BUILD=register) sets
 // `treeshake: false` on the register-all bundle by design, so if
 // `SHADER_VARIANTS`'s dynamic `import()` calls in
@@ -10,13 +10,13 @@
 // uses <kai-chat>. This asserts the shader path stays out of that bundle so
 // that regression can never silently ship again.
 //
-// dist/kai.es.js (the `@kitn.ai/ui/elements` entry) is a thin stub: it
+// dist/kai.es.js (the `@kitn.ai/ui/web-components` entry) is a thin stub: it
 // dynamically imports a hashed dist/register-impl-<hash>.js chunk, and THAT
-// file -- not kai.es.js itself -- is where every kai-* element's code
+// file -- not kai.es.js itself -- is where every kai-* web component's code
 // actually lives, because treeshake:false keeps it all in one place. Since
 // kai.es.js unconditionally imports register-impl on load, register-impl's
 // weight ships to every consumer of the register-all bundle regardless of
-// which element they use. Checking kai.es.js alone would miss a leak
+// which web component they use. Checking kai.es.js alone would miss a leak
 // entirely (verified empirically: a static `import './variant-aurora'`
 // added to index.tsx left kai.es.js's 23,964 bytes untouched and only grew
 // register-impl-<hash>.js), so both files are checked here.
@@ -33,7 +33,7 @@
 // fatal and both of them exercised by `--self-test`:
 //
 //   NO CHUNK. `findRegisterImpl()` returning null means the file holding every
-//   element's code was not found, so the scan below would run over kai.es.js
+//   web component's code was not found, so the scan below would run over kai.es.js
 //   alone -- the file the header above records as unable to show a leak at all.
 //   "Found nothing to check" is not a pass.
 //
@@ -125,7 +125,7 @@ function checkTree(root) {
       problems: [
         `no dist/register-impl-*.js chunk found — run the lib build first.\n` +
           `  ${kaiEs} dynamically imports this chunk; it must exist alongside it.\n` +
-          `  Every element's code lives in THAT file, so without it this guard would be\n` +
+          `  Every web component's code lives in THAT file, so without it this guard would be\n` +
           `  searching kai.es.js alone, where a leak is invisible. Not a pass.`,
       ],
       registerImplPath,

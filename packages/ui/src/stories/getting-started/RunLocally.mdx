@@ -21,7 +21,7 @@ npm run dev   # http://localhost:6006
 `npm run dev` and `npm run storybook` are the same command: build the CSS, launch Storybook on 6006. Stories live next to their source:
 
 - `src/components/*.stories.tsx`: the Solid components, under `Components`.
-- `src/elements/*.stories.tsx`: the `kai-*` elements and the compositions built from them, under `Labs` (two are `Test Fixtures`).
+- `src/web-components/*.stories.tsx`: the `kai-*` elements and the compositions built from them, under `Labs` (two are `Test Fixtures`).
 - `src/primitives/`: no stories. The headless layer is covered by tests.
 
 Editing a story or its source hot-reloads the open story.
@@ -44,4 +44,4 @@ npm run build
 
 Compiles the library bundles, then (in `postbuild`) builds the theme tokens, regenerates the API metadata, and emits the schemas.
 
-`npm run build:api` (run by the build) reads the elements and emits the machine-readable specs: `element-meta.json`, `dist/custom-elements.json`, the React wrappers, and `llms.txt` / `llms-full.txt`. These drive the reference tables, the React adapter, and the for-agents output. They're generated, so change the source and regenerate; don't hand-edit.
+`npm run build:api` (run by the build) reads the elements and emits the machine-readable specs: `web-component-meta.json`, `dist/custom-elements.json`, the React wrappers, and `llms.txt` / `llms-full.txt`. These drive the reference tables, the React adapter, and the for-agents output. They're generated, so change the source and regenerate; don't hand-edit.

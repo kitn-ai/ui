@@ -1,7 +1,7 @@
 /**
  * Solid JSX declarations for the kai-* elements this section binds.
  *
- * The kit ships React typings (`dist/elements.d.ts` augments React's
+ * The kit ships React typings (`dist/web-components.d.ts` augments React's
  * namespace) and generated React wrappers, but nothing augments Solid's
  * JSX.IntrinsicElements, so a Solid island using the elements directly has no
  * types for them. Scoped to the elements the card uses rather than generated:
@@ -17,11 +17,11 @@
  * keys are a mapped type over CustomEvents in JSX.DOMAttributes, so a bare
  * interface fails TS2322 on every `ref=` and leaves every handler parameter
  * implicitly any. `children` arrives the same way; only kai-button and
- * kai-tooltip actually have slots (element-meta.json), and the JSX types
+ * kai-tooltip actually have slots (web-component-meta.json), and the JSX types
  * cannot express that without giving up ref and on: with it.
  *
  * The prop lists below are the SCALAR props of each element as
- * packages/ui/src/elements/element-meta.json states them. Array and object
+ * packages/ui/src/web-components/web-component-meta.json states them. Array and object
  * props (`options`, `files`) are deliberately absent: they are set as JS
  * properties in effects, never as attributes, which is the kai- contract, and
  * leaving them out of the JSX types is what stops someone writing

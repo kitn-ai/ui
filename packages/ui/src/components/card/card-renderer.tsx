@@ -57,7 +57,7 @@ export interface CardRendererProps {
    * broken card while the developer's laptop looks fine. The cost is the projected
    * schema data for all seven card types, measured by building this package twice
    * (once with the projection stubbed to `{}`) rather than estimated: +834 B gzip on
-   * `dist/index.js` and +775 B gzip on the elements register bundle. That is below
+   * `dist/index.js` and +775 B gzip on the web components register bundle. That is below
    * the noise floor of a package that already ships a Solid runtime and `marked`.
    *
    * Set `false` to opt out. A type with no schema at all — no built-in, and none
@@ -85,7 +85,7 @@ export interface CardRendererProps {
  *
  * The fallback's `context()` mirrors the remote transport's `defaultContext()`
  * (`remote/provider-runtime.ts`): the contract return is non-optional, but no
- * native card reads it today — the element facades own theme/locale through
+ * native card reads it today — the web-component facades own theme/locale through
  * `ChatConfig`, not through card context.
  */
 function resolveHost(ctxHost: CardHost | undefined, hostElement: HTMLElement | undefined): CardHost | undefined {
@@ -103,7 +103,7 @@ function resolveHost(ctxHost: CardHost | undefined, hostElement: HTMLElement | u
  * that is not ours. `hasOwnProperty` (not `in`) so a type named `toString` cannot
  * pick up `Object.prototype`, and the `typeof` check so a `{ 'x': null }` entry
  * reads as "not registered" instead of matching and then validating against
- * nothing. The same predicate lives in elements/cards.tsx for `<kai-cards>`; the
+ * nothing. The same predicate lives in web-components/cards.tsx for `<kai-cards>`; the
  * two dispatchers already duplicate this rule (they compare component identity vs
  * tag identity), so keep them in step.
  */
@@ -133,7 +133,7 @@ export function CardRenderer(props: CardRendererProps): JSX.Element {
   // our schema would reject shapes that are correct for the component actually on
   // screen. So OUR schema applies only to OUR component: the identity check is
   // against BUILTIN_CARD_COMPONENTS, the same object `mergeCardComponents` puts in
-  // the map when nothing overrode the type, and the same one elements/message.tsx
+  // the map when nothing overrode the type, and the same one web-components/message.tsx
   // reuses for a non-overridden built-in.
   //
   // A schema the CONSUMER registered is the other way round: they wrote it about

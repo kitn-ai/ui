@@ -13,13 +13,13 @@
 | + 94 composable custom elements | See the full roster below |
 <!-- /spec:overview -->
 
-Each element renders into its own **Shadow DOM** so the host page's CSS cannot leak in, and the kit's Tailwind classes cannot leak out. SolidJS and all kit dependencies are bundled inside the element bundle — the host does not need SolidJS.
+Each web component renders into its own **Shadow DOM** so the host page's CSS cannot leak in, and the kit's Tailwind classes cannot leak out. SolidJS and all kit dependencies are bundled inside the web-components bundle — the host does not need SolidJS.
 
-The authoritative machine-readable API is the **Custom Elements Manifest** at `dist/custom-elements.json` (`customElements` field in `package.json`). The human- and agent-readable summary files are `llms.txt` (orientation) and `llms-full.txt` (full per-element reference, generated from the manifest — do not edit by hand).
+The authoritative machine-readable API is the **Custom Elements Manifest** at `dist/custom-elements.json` (`customElements` field in `package.json`). The human- and agent-readable summary files are `llms.txt` (orientation) and `llms-full.txt` (full per-web-component reference, generated from the manifest — do not edit by hand).
 
 ---
 
-## How the elements work (read this first)
+## How the web components work (read this first)
 
 - **Controlled, not stateful.** The host owns the data. You push it in via JS **properties** (`el.messages = …`, `el.conversations = …`), the element pushes interactions out via **events**, and you update the properties in response. The element keeps no message store of its own — to stream a reply you keep reassigning `el.messages`.
 - **Data in = properties, config = attributes, data out = events.** Object/array data (messages, models, context) must be set as properties; simple config (`theme`, `prose-size`, `search`) also works as attributes.
@@ -41,7 +41,7 @@ Some kit features are **primitive-only** — not surfaced by the web component: 
 npm run build
 ```
 
-Internally this runs `build:css` (compiles Tailwind to `src/elements/compiled.css`) then `vite build`, producing:
+Internally this runs `build:css` (compiles Tailwind to `src/web-components/compiled.css`) then `vite build`, producing:
 
 | File | Format | Notes |
 |------|--------|-------|
@@ -49,15 +49,15 @@ Internally this runs `build:css` (compiles Tailwind to `src/elements/compiled.cs
 
 The build is **ES-module only** by design. A UMD/IIFE build cannot code-split, so it would have to inline every lazy chunk (all the Shiki syntax-highlighting languages) into one multi-MB file. The ES build keeps those chunks lazy and is loadable directly via `<script type="module">` in every modern browser.
 
-### Register the elements
+### Register the web components
 
-Import the ES module as a side-effect. Every element the bundle ships registers itself via `customElements.define`:
+Import the ES module as a side-effect. Every web component the bundle ships registers itself via `customElements.define`:
 
 ```js
-import '@kitn.ai/ui/elements';
+import '@kitn.ai/ui/web-components';
 ```
 
-The `./elements` export in `package.json` resolves to `dist/kai.es.js`.
+The `./web-components` export in `package.json` resolves to `dist/kai.es.js`.
 
 For plain HTML pages:
 
@@ -75,7 +75,7 @@ All rich props (arrays, objects) must be set as **JavaScript properties**, not H
 
 ```html
 <script type="module">
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
 
   const chat = document.querySelector('kai-chat');
 
@@ -96,10 +96,10 @@ All rich props (arrays, objects) must be set as **JavaScript properties**, not H
 
 ### TypeScript
 
-Importing the elements entry augments `HTMLElementTagNameMap`, so DOM lookups are typed (props autocompleted, wrong assignments rejected):
+Importing the web-components entry augments `HTMLElementTagNameMap`, so DOM lookups are typed (props autocompleted, wrong assignments rejected):
 
 ```ts
-import '@kitn.ai/ui/elements';
+import '@kitn.ai/ui/web-components';
 const chat = document.querySelector('kai-chat'); // : KaiChatElement | null
 chat!.messages = [/* … */];                        // typed
 ```
@@ -108,7 +108,7 @@ A [Custom Elements Manifest](https://github.com/webcomponents/custom-elements-ma
 
 ### React
 
-Typed wrappers are generated for every element under `@kitn.ai/ui/react` (React is an optional peer dependency). They set rich data as DOM **properties** (so arrays/objects pass through correctly) and expose CustomEvents as `on<Event>` props:
+Typed wrappers are generated for every web component under `@kitn.ai/ui/react` (React is an optional peer dependency). They set rich data as DOM **properties** (so arrays/objects pass through correctly) and expose CustomEvents as `on<Event>` props:
 
 ```tsx
 import { Chat } from '@kitn.ai/ui/react';
@@ -121,13 +121,13 @@ import { Chat } from '@kitn.ai/ui/react';
 />;
 ```
 
-Component names are the bare friendly name of the element (`kai-chat` → `Chat`); event props are `on` + the event name with the `kai-` prefix stripped and each hyphen-segment PascalCased (`kai-message-action` → `onMessageAction`).
+Component names are the bare friendly name of the web component (`kai-chat` → `Chat`); event props are `on` + the event name with the `kai-` prefix stripped and each hyphen-segment PascalCased (`kai-message-action` → `onMessageAction`).
 
 ---
 
-## Full Element Reference
+## Full Web Component Reference
 
-Every element also accepts a `theme` attribute (`'light' | 'dark' | 'auto'`, default `'auto'`). Array/object properties are marked with a `—` in the Attribute column — they **must** be set as JS properties.
+Every web component also accepts a `theme` attribute (`'light' | 'dark' | 'auto'`, default `'auto'`). Array/object properties are marked with a `—` in the Attribute column — they **must** be set as JS properties.
 
 ---
 
@@ -321,13 +321,13 @@ Restyle from outside the Shadow DOM via `kai-workspace::part(name)`.
 Themed by the global design tokens (override any `--color-*`).
 <!-- /spec:kai-workspace -->
 
-The full app shell in one tag — a collapsible conversation-list sidebar (left), a drag-to-resize handle, and the complete chat thread (right) — all wired together. Drop in a single element and own the data; the workspace handles layout, resize, and collapse state internally.
+The full app shell in one tag — a collapsible conversation-list sidebar (left), a drag-to-resize handle, and the complete chat thread (right) — all wired together. Drop in a single web component and own the data; the workspace handles layout, resize, and collapse state internally.
 
 **Example:**
 
 ```html
 <script type="module">
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
 
   const workspace = document.getElementById('workspace');
 
@@ -1752,7 +1752,7 @@ Call these on the element instance: `document.querySelector('kai-cards').resolve
 Themed by the global design tokens (override any `--color-*`).
 <!-- /spec:kai-cards -->
 
-The list dispatcher for generative-UI card envelopes: set `cards` as a JS property and it renders one child `kai-*` card element per envelope by type, validating each envelope's `data` against its schema first. An unknown type renders the shared fallback plus a contract `error` instead of a blank. Register your own card types with the `types` and `schemas` properties, and route the children's bubbling `kai-card` events through an optional `policy`.
+The list dispatcher for generative-UI card envelopes: set `cards` as a JS property and it renders one child `kai-*` card web component per envelope by type, validating each envelope's `data` against its schema first. An unknown type renders the shared fallback plus a contract `error` instead of a blank. Register your own card types with the `types` and `schemas` properties, and route the children's bubbling `kai-card` events through an optional `policy`.
 
 ---
 
@@ -1849,7 +1849,7 @@ A pick-one-of-N card: a prompt plus a radiogroup of rich option rows, set via th
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
-| `data` | — | `undefined | { type: "object"; title?: undefined | string; description?: undefined | string; required?: undefined | string[]; properties: Record<string, { type: "string" | "number" | "integer" | "boolean" | "array" | "object"; title?: undefined | string; description?: undefined | string; default?: unknown; enum?: undefined | unknown[]; format?: undefined | "email" | "uri" | "url" | "date" | "date-time" | "time"; minimum?: undefined | number; maximum?: undefined | number; minLength?: undefined | number; maxLength?: undefined | number; pattern?: undefined | string; minItems?: undefined | number; maxItems?: undefined | number; items?: undefined | Record<string, unknown> | { enum: unknown[] }; properties?: undefined | Record<string, Record<string, unknown>>; required?: undefined | string[]; readOnly?: undefined | false | true; "x-kai-widget"?: undefined | "textarea" | "slider" | "rating" | "radio" | "select" | "checkbox" | "password" | "switch"; "x-kai-placeholder"?: undefined | string; "x-kai-step"?: undefined | number; "x-kai-format"?: undefined | "tel" | "ssn" | "credit-card" | "custom"; "x-kai-mask"?: undefined | string; "x-kai-mask-guide"?: undefined | string }>; "x-kai-order"?: undefined | string[]; "x-kai-inlineMax"?: undefined | number; "x-kai-submitLabel"?: undefined | string; "x-kai-dismissible"?: undefined | false | true; "x-kai-actions"?: undefined | { id: string; label: string; variant?: undefined | "default" | "ghost" | "outline" }[] }` | — | The form definition: a JSON Schema (`type:'object'`) + `x-kai-*` UI hints (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { type:'object', properties:{…} }`. Import the `FormDefinition` type from `@kitn.ai/ui` for the full shape. It IS self-referential (`FormField.properties` is another `FormField` map), and the generated `element-types.d.ts` inlines every named type, so the shipped declaration bottoms out in a `Record<string, unknown>` placeholder one level down rather than carrying the recursion. That is why `FormDefinition` is a `type` alias: an interface gets no implicit index signature, so it would not be assignable to that placeholder. |
+| `data` | — | `undefined | { type: "object"; title?: undefined | string; description?: undefined | string; required?: undefined | string[]; properties: Record<string, { type: "string" | "number" | "integer" | "boolean" | "array" | "object"; title?: undefined | string; description?: undefined | string; default?: unknown; enum?: undefined | unknown[]; format?: undefined | "email" | "uri" | "url" | "date" | "date-time" | "time"; minimum?: undefined | number; maximum?: undefined | number; minLength?: undefined | number; maxLength?: undefined | number; pattern?: undefined | string; minItems?: undefined | number; maxItems?: undefined | number; items?: undefined | Record<string, unknown> | { enum: unknown[] }; properties?: undefined | Record<string, Record<string, unknown>>; required?: undefined | string[]; readOnly?: undefined | false | true; "x-kai-widget"?: undefined | "textarea" | "slider" | "rating" | "radio" | "select" | "checkbox" | "password" | "switch"; "x-kai-placeholder"?: undefined | string; "x-kai-step"?: undefined | number; "x-kai-format"?: undefined | "tel" | "ssn" | "credit-card" | "custom"; "x-kai-mask"?: undefined | string; "x-kai-mask-guide"?: undefined | string }>; "x-kai-order"?: undefined | string[]; "x-kai-inlineMax"?: undefined | number; "x-kai-submitLabel"?: undefined | string; "x-kai-dismissible"?: undefined | false | true; "x-kai-actions"?: undefined | { id: string; label: string; variant?: undefined | "default" | "ghost" | "outline" }[] }` | — | The form definition: a JSON Schema (`type:'object'`) + `x-kai-*` UI hints (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { type:'object', properties:{…} }`. Import the `FormDefinition` type from `@kitn.ai/ui` for the full shape. It IS self-referential (`FormField.properties` is another `FormField` map), and the generated `web-component-types.d.ts` inlines every named type, so the shipped declaration bottoms out in a `Record<string, unknown>` placeholder one level down rather than carrying the recursion. That is why `FormDefinition` is a `type` alias: an interface gets no implicit index signature, so it would not be assignable to that placeholder. |
 | `cardId` | `card-id` | `undefined | string` | — | Stable card id correlating every emitted CardEvent. Attribute: `card-id`. |
 | `heading` | `heading` | `undefined | string` | — | Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`. |
 | `resolution` | — | `undefined | Record<string, unknown>` | — | Set when the user resolved this card; renders the read-only view. Property: `el.resolution = { kind:'submit', data:{…} }`. |
@@ -2027,7 +2027,7 @@ An anchored onboarding hint: wrap a trigger in the default slot and it points a 
 
 ---
 
-### Composition primitives & interactive elements
+### Composition primitives & interactive web components
 
 The polished building blocks you compose your own chrome from — themed, accessible, and Shadow-DOM-isolated. Each exposes its styleable `::part`s below (also discoverable via the `kai` MCP `component_reference`).
 
@@ -2696,7 +2696,7 @@ Restyle from outside the Shadow DOM via `kai-card::part(name)`.
 Themed by the global design tokens (override any `--color-*`).
 <!-- /spec:kai-card -->
 
-The presentational card: one element whose flexibility comes from structural slots (`media`, `header`, `header-actions`, the default body, `footer`, `footer-actions`), `appearance` and `orientation` variants, and a single `--kai-card-spacing` knob. `orientation="responsive"` flips between horizontal and vertical on the card's own container width. `href` makes the whole card a link, `clickable` makes it a button emitting `kai-card-click`, and `dismissible` adds a close button that hides the card and emits `kai-dismiss`.
+The presentational card: one web component whose flexibility comes from structural slots (`media`, `header`, `header-actions`, the default body, `footer`, `footer-actions`), `appearance` and `orientation` variants, and a single `--kai-card-spacing` knob. `orientation="responsive"` flips between horizontal and vertical on the card's own container width. `href` makes the whole card a link, `clickable` makes it a button emitting `kai-card-click`, and `dismissible` adds a close button that hides the card and emits `kai-dismiss`.
 
 ---
 
@@ -3170,7 +3170,7 @@ The compact glanceable card for one agent in a multi-agent workspace: the agent 
 
 ---
 
-### Layout & shell elements
+### Layout & shell web components
 
 Chat-agnostic arrangement: the navigation, panes, docks and settings rows you compose an app shell from. Data goes in as JS properties, intents come back out as `kai-*` events on the element; the shell never owns your routing or your state.
 
@@ -3784,14 +3784,14 @@ chat.messages = chat.messages.map((m) =>
 
 ## Styling and Theming
 
-Each element renders into its own Shadow DOM. This provides **full CSS isolation**:
+Each web component renders into its own Shadow DOM. This provides **full CSS isolation**:
 
 - Tailwind classes used by the kit do not affect the host page.
 - The host page's stylesheets do not bleed into the components.
 
 ### Design tokens
 
-**The elements are self-themed.** Each element's Shadow DOM already contains the full compiled token set, so the components render correctly with **no host-side stylesheet required** — including light/dark via the `theme` attribute.
+**The web components are self-themed.** Each web component's Shadow DOM already contains the full compiled token set, so the components render correctly with **no host-side stylesheet required** — including light/dark via the `theme` attribute.
 
 To **rebrand**, override the kit's **namespaced** tokens — `--kai-color-*` (and `--kai-text-*`, `--kai-radius`) — on `:root` or a parent. The components read these via a `var(--kai-…, default)` fallback that pierces the Shadow DOM, so your overrides reach them.
 
@@ -3806,11 +3806,11 @@ To **rebrand**, override the kit's **namespaced** tokens — `--kai-color-*` (an
 
 > **Two stylesheets — pick by how you consume the kit:**
 > - **Tailwind builds** (composing the SolidJS primitives): `@import "@kitn.ai/ui/theme.css"` in your CSS.
-> - **Plain HTML / CDN** (web components): `<link rel="stylesheet" href="…/@kitn.ai/ui/theme.tokens.css">` — only needed to theme your own host-page markup; the elements carry their own tokens.
+> - **Plain HTML / CDN** (web components): `<link rel="stylesheet" href="…/@kitn.ai/ui/theme.tokens.css">` — only needed to theme your own host-page markup; the web components carry their own tokens.
 
 ### Theme attribute
 
-Every element accepts `theme="light"`, `theme="dark"`, or `theme="auto"` (default). `auto` follows the OS `prefers-color-scheme` media query.
+Every web component accepts `theme="light"`, `theme="dark"`, or `theme="auto"` (default). `auto` follows the OS `prefers-color-scheme` media query.
 
 ```html
 <kai-chat theme="dark"></kai-chat>
@@ -3833,7 +3833,7 @@ A small default set loads on demand: `bash`/`sh`, `javascript`/`js`, `html`, `cs
 ### Configure or disable
 
 ```js
-import { configureCodeHighlighting } from '@kitn.ai/ui/elements';
+import { configureCodeHighlighting } from '@kitn.ai/ui/web-components';
 
 configureCodeHighlighting({
   languages: {
@@ -3851,12 +3851,12 @@ configureCodeHighlighting({ enabled: false });
 
 ## Machine-readable API
 
-The authoritative source for all element APIs is `dist/custom-elements.json` (generated by `@custom-elements-manifest/analyzer` as part of `npm run build`). Do not edit it by hand.
+The authoritative source for all web-component APIs is `dist/custom-elements.json` (generated by `@custom-elements-manifest/analyzer` as part of `npm run build`). Do not edit it by hand.
 
 Two human/agent-readable files are generated from the manifest by `scripts/gen-llms.mjs`:
 
 - **`llms.txt`** (~4 KB) — orientation: install, the property-vs-attribute rule, architecture, theming, and framework wiring.
-- **`llms-full.txt`** (~54 KB) — everything in `llms.txt` plus a generated props/events table for each element, a streaming recipe, and a build-a-chat-app runbook.
+- **`llms-full.txt`** (~54 KB) — everything in `llms.txt` plus a generated props/events table for each web component, a streaming recipe, and a build-a-chat-app runbook.
 
 Both files are at the repo root, the npm package root (`node_modules/@kitn.ai/ui/llms.txt`), and https://kitn.dev/llms.txt.
 

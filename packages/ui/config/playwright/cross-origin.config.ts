@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
  *   - host page   → http://localhost:6006   (examples/remote-host, Vite)
  *   - provider    → http://localhost:6007   (examples/remote-provider, Vite)
  *
- * The Storybook visual/interaction stories (src/elements/remote.stories.tsx) run
+ * The Storybook visual/interaction stories (src/web-components/remote.stories.tsx) run
  * SAME-origin and are covered by `npm run test:storybook`; this suite is the
  * security matrix (origin/source/nonce pinning, auto-height, theme push, fallback)
  * that jsdom and same-origin Storybook can't prove.
@@ -49,7 +49,7 @@ export default defineConfig({
   // *.shot specs need Storybook, so they run via their own projects in
   // config/playwright/storybook.config.ts (--project=composer, =promptinput,
   // =shot) — keep them out of this one.
-  testMatch: /remote-element\.spec\.ts$/,
+  testMatch: /remote-web-component\.spec\.ts$/,
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,

@@ -20,7 +20,7 @@
 // diagnostic, which fails the empty-array expectation. A negative type test
 // that passes either way proves nothing.
 //
-// Same virtual-module machinery as ./../elements/inline-element-types.test.ts.
+// Same virtual-module machinery as ./../web-components/inline-web-component-types.test.ts.
 
 import { describe, expect, it } from 'vitest';
 import { createRequire } from 'node:module';
@@ -73,7 +73,7 @@ function typecheckVirtualModule(source: string): string[] {
 
 const PREAMBLE = [
   `import type { AssistantStream } from './stream';`,
-  `import type { Source } from '../elements/chat-types';`,
+  `import type { Source } from '../web-components/chat-types';`,
   `import type { AttachmentData } from '../primitives/attachment-types';`,
   `import type { ToolPart } from '../components/tool/tool-types';`,
   `import type { CardEnvelope } from '../primitives/card-contract';`,

@@ -24,12 +24,12 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 <Playground client:only="solid" tag="kai-icon" />
 
 <Aside type="tip" title="When to use">
-Reach for `kai-icon` when you need one of the kit's icons in your *own* markup — a glyph next to a heading, in a stat tile, beside a custom button — and want it to match the kit's look without bundling a separate icon library. It's one of three icon tiers: most elements take an `icon` prop that resolves the same curated names (see [Button](/components/button/)); `kai-icon` exposes that resolver as a standalone element; and for anything outside the curated set, drop your own inline `<svg slot="icon">` into an element. Use this tier when the icon stands alone rather than decorating another component.
+Reach for `kai-icon` when you need one of the kit's icons in your *own* markup — a glyph next to a heading, in a stat tile, beside a custom button — and want it to match the kit's look without bundling a separate icon library. It's one of three icon tiers: most web components take an `icon` prop that resolves the same curated names (see [Button](/components/button/)); `kai-icon` exposes that resolver as a standalone element; and for anything outside the curated set, drop your own inline `<svg slot="icon">` into an element. Use this tier when the icon stands alone rather than decorating another component.
 </Aside>
 
 ## All icons
 
-The set is deliberately small — these are the glyphs the kit's own elements use, not a general-purpose icon library. Pick any one by `name`:
+The set is deliberately small — these are the glyphs the kit's own web components use, not a general-purpose icon library. Pick any one by `name`:
 
 <IconGallery />
 

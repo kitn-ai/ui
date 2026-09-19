@@ -210,7 +210,7 @@ export function FileTree(props: FileTreeProps): JSX.Element {
   // `files` is REQUIRED, so it is read straight off `props` — no `mergeProps`
   // default. Defaulting it to `[]` here would turn a caller who forgot it into a
   // silently empty tree, which fails far from the mistake. The `<kai-file-tree>`
-  // facade declares its own `files: []` default (elements/file-tree.tsx), so the
+  // facade declares its own `files: []` default (web-components/file-tree.tsx), so the
   // web-component path is covered where the property genuinely arrives late.
   // Same shape as `Segmented`, which reads `merged.options` directly.
   const [local, rest] = splitProps(props, [

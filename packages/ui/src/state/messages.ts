@@ -1,4 +1,4 @@
-import type { ChatMessage, MessagePart } from '../elements/chat-types';
+import type { ChatMessage, MessagePart } from '../web-components/chat-types';
 import { appendTextPart } from './parts';
 
 function newId(): string {

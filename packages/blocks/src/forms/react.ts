@@ -29,7 +29,7 @@ import type { Binding, FormFile, TemplateNode } from '../contract/types';
 const camel = (name: string): string => name.replace(/-([a-z])/g, (_, c: string) => c.toUpperCase());
 const pascalTag = (tag: string): string => pascal(tag.replace(/^kai-/, ''));
 
-/** `packages/ui/scripts/gen-element-react.mjs`'s `onName`, restated once and
+/** `packages/ui/scripts/gen-web-component-react.mjs`'s `onName`, restated once and
  *  pinned against the original for every event the kit declares. */
 export const handlerName = (event: string): string => `on${pascal(event.replace(/^kai-/, ''))}`;
 

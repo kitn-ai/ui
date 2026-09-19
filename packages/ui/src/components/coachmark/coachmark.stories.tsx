@@ -4,7 +4,7 @@ import { createSignal, Show } from 'solid-js';
 import { Coachmark } from './coachmark';
 import { Button } from '../button/button';
 import { ChatConfig } from '../../primitives/chat-config';
-import { componentDescription } from '../../stories/docs/element-controls';
+import { componentDescription } from '../../stories/docs/web-component-controls';
 
 /**
  * Story for the presentational `Coachmark`: an onboarding hint bubble anchored to

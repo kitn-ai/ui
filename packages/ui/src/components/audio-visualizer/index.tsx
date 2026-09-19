@@ -121,7 +121,7 @@ export interface AudioVisualizerProps {
   /**
    * Explicit `'light'` or `'dark'` wins; `'auto'` (the default) follows a
    * live `prefers-color-scheme` listener -- the same rule
-   * `elements/define.tsx`'s `createDarkMode` applies for every `kai-*`
+   * `web-components/define.tsx`'s `createDarkMode` applies for every `kai-*`
    * element. Only the shader variants read this (aurora/wave pick a colour
    * pipeline with it): the three DOM variants already get dark-mode styling
    * for free via CSS custom properties, which a shader baking colour into a
@@ -150,13 +150,13 @@ export function usePrefersReducedMotion(): Accessor<boolean> {
 
 /**
  * Resolves `theme` (`'light' | 'dark' | 'auto'`) to a boolean, mirroring
- * `elements/define.tsx`'s `createDarkMode` rule exactly: an explicit value
+ * `web-components/define.tsx`'s `createDarkMode` rule exactly: an explicit value
  * wins, `'auto'` (the default) follows a live `prefers-color-scheme`
  * listener.
  *
  * This is a SEPARATE implementation of that rule, not an import of it:
  * `components/` is the framework-agnostic layer `elements/` wraps (see the
- * kit's architecture), so it cannot depend on `elements/define.tsx` without
+ * kit's architecture), so it cannot depend on `web-components/define.tsx` without
  * inverting that direction. When driven through `<kai-audio-visualizer>`,
  * the facade has already resolved `'auto'` against its OWN listener (the one
  * already wired to the visible `.dark` class) before handing this an
@@ -199,7 +199,7 @@ export interface ShaderVariantProps extends Omit<VariantProps, 'children'> {
   shader?: ShaderSpec;
   /**
    * Already-resolved: `true` selects the dark colour pipeline, `false`
-   * selects light -- matching `elements/define.tsx`'s `createDarkMode`
+   * selects light -- matching `web-components/define.tsx`'s `createDarkMode`
    * output exactly (`classList={{ dark: isDark() }}`). This is that SAME
    * resolved value forwarded down, not a re-derivation, so a shader baking
    * colour into a GLSL uniform never needs its own `prefers-color-scheme`
@@ -228,7 +228,7 @@ export interface ShaderVariantProps extends Omit<VariantProps, 'children'> {
  * GLSL strings (about 25 to 30 KB) never reach a consumer who does not ask for
  * them.
  *
- * This MUST stay dynamic. `config/vite/elements.ts` (KAI_BUILD=register) disables
+ * This MUST stay dynamic. `config/vite/web-components.ts` (KAI_BUILD=register) disables
  * tree-shaking on the register-all bundle by design, so a static import here would put the whole
  * shader path into `kai.es.js` for everyone, including a `<kai-chat>`-only
  * user. A dynamic import splits into its own chunk under `treeshake: false`;

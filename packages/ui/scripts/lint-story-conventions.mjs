@@ -57,7 +57,7 @@
 // matches `/^on[A-Z]/` must carry `table: { category: 'Events' }` verbatim.
 // A key introduced only via a spread (`...argTypesFor('kai-x')`) is not
 // checked here -- there is no static key to check, and `argTypesFor` itself
-// now stamps the category (see `src/stories/docs/element-controls.ts`).
+// now stamps the category (see `src/stories/docs/web-component-controls.ts`).
 // (c) is a per-TITLE finding: the meta object's `title` string must not pass
 // through `Elements` or `Primitives` immediately under a leading
 // `Components`. Scoped to that exact shape -- see `retiredTier`.

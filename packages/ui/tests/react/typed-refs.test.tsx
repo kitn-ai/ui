@@ -1,7 +1,7 @@
 /**
  * F-9 (blocks contract spike): a forwarded ref must hand back the ELEMENT
  * INTERFACE, not a bare HTMLElement. The interfaces exist and ship
- * (dist/elements.d.ts, one Kai*Element per tag, methods included); the wrapper
+ * (dist/web-components.d.ts, one Kai*Element per tag, methods included); the wrapper
  * generator simply did not use them, so `#ref` promised a typed handle the
  * react form could not honour and every ref site needed a cast.
  *
@@ -24,7 +24,7 @@ import { render, cleanup } from '@testing-library/react';
 import { useEffect, useRef } from 'react';
 import { afterEach, expect, test } from 'vitest';
 import { View, ViewStack } from '@kitn.ai/ui/react';
-import type { KaiViewStackElement } from '@kitn.ai/ui/elements';
+import type { KaiViewStackElement } from '@kitn.ai/ui/web-components';
 
 afterEach(cleanup);
 

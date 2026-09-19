@@ -4,7 +4,7 @@
 // PROVIDER SDK. The only kit values imported are the three part builders, which
 // are REUSED rather than reimplemented so that `ModelTurn.parts` is produced by
 // exactly the code that drove the sink.
-import type { MessagePart, MessageSource } from '../elements/chat-types';
+import type { MessagePart, MessageSource } from '../web-components/chat-types';
 import { appendReasoningPart, appendTextPart, fingerprint, upsertToolPart } from '../state/parts';
 import {
   normalizeStopReason,

@@ -4,20 +4,20 @@ description: AI/UI is a set of Shadow-DOM web components for building AI chat an
 ---
 
 import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
-import ElementCount from '../../../components/ElementCount.astro';
+import WebComponentCount from '../../../components/WebComponentCount.astro';
 
-**AI/UI** (`@kitn.ai/ui`) is a set of web components for AI chat and agent UIs — message threads, prompt input, streaming responses, markdown and code rendering, reasoning and tool-call panels, attachments, a conversation sidebar, and more. <ElementCount /> elements, all named `kai-*`, all droppable into the app you already have.
+**AI/UI** (`@kitn.ai/ui`) is a set of web components for AI chat and agent UIs — message threads, prompt input, streaming responses, markdown and code rendering, reasoning and tool-call panels, attachments, a conversation sidebar, and more. <WebComponentCount /> web components, all named `kai-*`, all droppable into the app you already have.
 
 ## What you're working with
 
-The `kai-*` elements are real custom elements. You register them once, then use `<kai-chat>` (and the rest) like any built-in HTML tag — in React, Vue, Svelte, Angular, or a plain `.html` file. There's no per-framework package to install and no wrapper to learn.
+The `kai-*` web components are real custom elements. You register them once, then use `<kai-chat>` (and the rest) like any built-in HTML tag — in React, Vue, Svelte, Angular, or a plain `.html` file. There's no per-framework package to install and no wrapper to learn.
 
 Each element renders inside its own **Shadow DOM**. Your page's CSS can't leak in and break the kit; the kit's styles can't leak out and break your page. You get a clean, isolated component you can drop anywhere.
 
 Register everything with one import:
 
 ```js
-import '@kitn.ai/ui/elements';
+import '@kitn.ai/ui/web-components';
 ```
 
 Then it's just HTML:
@@ -26,7 +26,7 @@ Then it's just HTML:
 <kai-chat style="display: block; height: 100vh;"></kai-chat>
 
 <script type="module">
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
 
   await customElements.whenDefined('kai-chat');
 
@@ -43,10 +43,10 @@ Then it's just HTML:
 </script>
 ```
 
-Two things carry across every element: rich data (`messages`, `models`, `context`, `items`) goes on a JavaScript property, and the element talks back through `CustomEvent`s named `kai-*`. Scalars like `placeholder`, `loading`, and `theme` work as plain attributes.
+Two things carry across every web component: rich data (`messages`, `models`, `context`, `items`) goes on a JavaScript property, and the element talks back through `CustomEvent`s named `kai-*`. Scalars like `placeholder`, `loading`, and `theme` work as plain attributes.
 
 <Aside type="note" title="Built with SolidJS — but you don't have to care">
-The elements are authored in SolidJS, which is why they're small and fast. That's an implementation detail: nothing about using `<kai-chat>` requires knowing Solid. If you do write Solid, you can import the underlying components directly for deeper composition — see the [Solid guide](/guides/frameworks/solid/). Developing the primitives themselves lives in the kit's Storybook (the contributor surface).
+The web components are authored in SolidJS, which is why they're small and fast. That's an implementation detail: nothing about using `<kai-chat>` requires knowing Solid. If you do write Solid, you can import the underlying components directly for deeper composition — see the [Solid guide](/guides/frameworks/solid/). Developing the primitives themselves lives in the kit's Storybook (the contributor surface).
 </Aside>
 
 ## Use it in your framework
@@ -83,7 +83,7 @@ import { Chat } from '@kitn.ai/ui/react';
 <TabItem label="Svelte">
 ```html
 <script>
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
 </script>
 
 <kai-chat
@@ -95,7 +95,7 @@ import { Chat } from '@kitn.ai/ui/react';
 <TabItem label="HTML">
 ```html
 <script type="module">
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
 
   await customElements.whenDefined('kai-chat');
 
@@ -108,11 +108,11 @@ import { Chat } from '@kitn.ai/ui/react';
 </TabItem>
 </Tabs>
 
-React is the one framework that gets a thin extra layer: `@kitn.ai/ui/react` ships typed wrappers that turn events into `onEventName` props, so you skip the `.prop` and `addEventListener` ceremony. Everywhere else, you use the elements straight.
+React is the one framework that gets a thin extra layer: `@kitn.ai/ui/react` ships typed wrappers that turn events into `onEventName` props, so you skip the `.prop` and `addEventListener` ceremony. Everywhere else, you use the web components straight.
 
 ## What's in the box
 
-The kit ships <ElementCount /> elements, from a full `<kai-chat>` down to single building blocks like a markdown renderer or a tool-call panel. Reach for the high-level ones to ship fast, the small ones to compose your own layout.
+The kit ships <WebComponentCount /> web components, from a full `<kai-chat>` down to single building blocks like a markdown renderer or a tool-call panel. Reach for the high-level ones to ship fast, the small ones to compose your own layout.
 
 | Component | What it does |
 |---|---|
@@ -129,5 +129,5 @@ The kit ships <ElementCount /> elements, from a full `<kai-chat>` down to single
 
 ## Next
 
-- [Installation](/guides/installation/) — add the package and register the elements
+- [Installation](/guides/installation/) — add the package and register the web components
 - [Getting started](/guides/getting-started/) — a working chat in a few lines

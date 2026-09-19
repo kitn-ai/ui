@@ -16,7 +16,7 @@
 // for a small one -- and small models are the primary measurement instrument
 // here, because a strong model supplies a missing contract from its own priors
 // and so MASKS the deficiency this deck exists to find. So the pack is an INDEX
-// plus one page per element: the agent reads the index and opens only what it
+// plus one page per web component: the agent reads the index and opens only what it
 // needs. `derived.json` stays the machine artifact and the drift lint's input;
 // `catalog.json` is still written, for programmatic consumers, but it is not
 // what the agent reads.
@@ -193,7 +193,7 @@ async function importCatalog() {
 // ---------------------------------------------------------------------------
 
 /**
- * element-meta.json prints an optional prop's type as `undefined | T`. The
+ * web-component-meta.json prints an optional prop's type as `undefined | T`. The
  * optionality is already carried by its own `optional` flag and stated on the
  * line, so printing it twice buys nothing and makes every type longer than the
  * thing it describes. Strip ONLY that leading union member, never an interior
@@ -248,11 +248,11 @@ everything.
 1. **PROMPT.md** — the task.
 2. **DELIVERY.md** — how to install, load and register the kit. Read this before
    writing any import or script tag; the specifiers are not guessable.
-3. **ELEMENTS.md** — the index of all ${derived.elements.length} elements, one line each. **Open only the
-   element pages you actually need** (\`elements/<tag>.md\`). There are
+3. **ELEMENTS.md** — the index of all ${derived.elements.length} web components, one line each. **Open only the
+   web-component pages you actually need** (\`elements/<tag>.md\`). There are
    ${elementPageCount} of them and reading them all is a waste of your context.
-4. **SHARED-PROPS.md** — the props every element has. They are listed once here
-   and NOT repeated on the ${elementPageCount} element pages.
+4. **SHARED-PROPS.md** — the props every web component has. They are listed once here
+   and NOT repeated on the ${elementPageCount} web-component pages.
 5. **INVARIANTS.md** — the rules that break real consumers. Each carries a
    wrong/right code pair. Apply these; they are not style advice.
 6. **RECIPES.md** — proven compositions, with the host wiring written out.
@@ -265,7 +265,7 @@ everything.
 
 This is the part that matters most, so it is repeated on each list page:
 
-- **ELEMENTS.md is every custom element this kit defines** — all
+- **ELEMENTS.md is every web component this kit defines** — all
   ${derived.elements.length} of them. If a tag is not in that list, **it does not
   exist**. There is no larger catalog elsewhere.
 - **PARTS.md is every \`MessagePart\` variant the wire can represent** —
@@ -273,8 +273,8 @@ This is the part that matters most, so it is repeated on each list page:
   produced, parsed or rendered.
 - **DELIVERY.md is every entry point the package publishes.** An import
   specifier that is not on that page does not resolve.
-- The props, events, methods, slots and CSS parts on an element page are that
-  element's complete API. There are no undocumented ones.
+- The props, events, methods, slots and CSS parts on a web-component page are that
+  web component's complete API. There are no undocumented ones.
 
 **So if this task needs something that is not here, say so and stop.** Inventing
 a plausible \`<kai-…>\` tag, prop, event or import path is the single worst
@@ -285,10 +285,10 @@ correct and useful answer.
 ## The shape of this kit, in four sentences
 
 Web components prefixed \`kai-\`, Shadow DOM, framework-agnostic. Arrays,
-objects and functions go on the element as **JS properties**; only scalars work
+objects and functions go on the web component as **JS properties**; only scalars work
 as attributes. Events are **non-bubbling \`kai-*\` CustomEvents** — listen on the
-element that dispatches them. There is no store: the **host** wires element A's
-event to element B's property.
+web component that dispatches them. There is no store: the **host** wires web component A's
+event to web component B's property.
 `;
 }
 
@@ -301,28 +301,28 @@ event to element B's property.
  */
 const EXPORT_NOTES = {
   '.': { agent: true, what: 'The SolidJS components, for a Solid app. Not needed to use the web components.' },
-  './elements': { agent: true, what: 'Registers **every** `kai-*` element as a side effect. The simple default; also the file a CDN serves.' },
-  './elements/*': { agent: true, what: 'One element at a time, e.g. `@kitn.ai/ui/elements/chat` — a bundler then tree-shakes the rest away.' },
-  './autoloader': { agent: true, what: 'Opt-in DOM autoloader: watches the document and imports each element on demand as a `<kai-*>` tag appears.' },
+  './web-components': { agent: true, what: 'Registers **every** `kai-*` web component as a side effect. The simple default; also the file a CDN serves.' },
+  './web-components/*': { agent: true, what: 'One web component at a time, e.g. `@kitn.ai/ui/web-components/chat` — a bundler then tree-shakes the rest away.' },
+  './autoloader': { agent: true, what: 'Opt-in DOM autoloader: watches the document and imports each web component on demand as a `<kai-*>` tag appears.' },
   './theme.css': { agent: true, what: 'The design-token stylesheet. Import it through a build that runs Tailwind over it, or link it directly on a no-build page.' },
   './theme.tokens.css': { agent: true, what: 'The pre-built token sheet — plain CSS custom properties, no Tailwind step required.' },
-  './solid.css': { agent: true, what: 'The stylesheet for the SolidJS components: `theme.css` plus the base and form-control rules, `tw-animate-css` and the typography plugin the `kai-*` elements carry in their shadow roots. Tailwind source; import it after `@import "tailwindcss"` and install the two optional peers.' },
+  './solid.css': { agent: true, what: 'The stylesheet for the SolidJS components: `theme.css` plus the base and form-control rules, `tw-animate-css` and the typography plugin the `kai-*` web components carry in their shadow roots. Tailwind source; import it after `@import "tailwindcss"` and install the two optional peers.' },
   './react': { agent: true, what: 'Typed React wrappers (`Chat`, `Message`, …) plus `useKaiChat`. Sets array/object props for you as properties.' },
   './solid': { agent: true, what: 'The SolidJS entry with the server build wired up.' },
   './state': { agent: true, what: 'I/O-free helpers over `ChatMessage[]`: `createAssistantStream`, `appendTextPart`, `upsertToolPart`.' },
   './wire': { agent: true, what: 'The model-stream adapter: `readOpenAIStream` / `readAnthropicStream` / `readModelStream` parse provider SSE; `toOpenAIMessages` / `toAnthropicMessages` encode the thread back.' },
   './stores': { agent: true, what: 'The built-in `ConversationStore` implementations — `localStorageStore` / `fetchStore` — plus `byRecency` / `isConversationUnread`. Self-contained (no bare imports), so it also loads raw from a CDN URL, unlike the root export.' },
-  './define': { agent: true, what: 'The compiled facade-definition seam: `defineWebComponent` + `WebComponentContext`. Used by construct-engine-generated projects (and any consumer wrapping a pure-Solid interior) to register one self-registering element without pulling in the full `./elements` bundle.' },
+  './define': { agent: true, what: 'The compiled facade-definition seam: `defineWebComponent` + `WebComponentContext`. Used by construct-engine-generated projects (and any consumer wrapping a pure-Solid interior) to register one self-registering web component without pulling in the full `./web-components` bundle.' },
   './diagnostics': {
     agent: true,
-    what: 'Browser-only devtools surface: `installKaiDevtoolsHook()` (idempotent, SSR-safe, and already called for you by anything that registers the elements), `subscribeWireDiagnostics` to observe the wire, and `reportRequest` for the app to disclose what it actually sent. Subscription and types only — the producer side stays internal, so a consumer cannot forge events or switch on payload capture.',
+    what: 'Browser-only devtools surface: `installKaiDevtoolsHook()` (idempotent, SSR-safe, and already called for you by anything that registers the web components), `subscribeWireDiagnostics` to observe the wire, and `reportRequest` for the app to disclose what it actually sent. Subscription and types only — the producer side stays internal, so a consumer cannot forge events or switch on payload capture.',
   },
-  './provider': { agent: true, what: 'The remote-provider element bundle.' },
+  './provider': { agent: true, what: 'The remote-provider web-components bundle.' },
   './schemas': { agent: true, what: 'The generative-UI card schemas.' },
   './schemas/*': { agent: true, what: 'One card schema JSON file at a time.' },
   './construct': { agent: true, what: 'The construct format: `ConstructSchema` (Zod), `validateConstruct`, `CONSTRUCT_SCHEMA_URL`. Lets a build-time tool (e.g. a scaffolder) validate a construct against the same schema the `kai` CLI and MCP `construct` tool use.' },
   './construct/templates': { agent: true, what: 'The template registry: `TEMPLATES`, `buildableTemplates()`, `templateById()`. A zod-free leaf — starter constructs plus control manifests for the buildable templates — safe for a bundler that bans zod (e.g. `create-kai`).' },
-  './element-meta.json': { agent: false, what: 'Tooling manifest of every element API. This pack is rendered from it.' },
+  './web-component-meta.json': { agent: false, what: 'Tooling manifest of every web-component API. This pack is rendered from it.' },
   './icon-names.json': { agent: false, what: 'Tooling manifest of icon names.' },
   './package.json': { agent: false, what: 'The manifest itself.' },
 };
@@ -343,16 +343,16 @@ function renderDelivery({ pkg, kitVersion, derived, solidExports }) {
     .map((k) => `| \`@kitn.ai/ui${k === '.' ? '' : k.slice(1)}\` | ${EXPORT_NOTES[k].what} |`)
     .join('\n');
 
-  // The CDN path is the `./elements` target, read from the exports map rather
+  // The CDN path is the `./web-components` target, read from the exports map rather
   // than typed: it is `dist/kai.es.js` today and that is not this file's fact to
   // remember. The version is read from package.json for the same reason, and
   // because a hand-typed pin is what `lint:cdn-pins` exists to catch.
-  const elementsTarget = (pkg.exports['./elements']?.default ?? '').replace(/^\.\//, '');
+  const elementsTarget = (pkg.exports['./web-components']?.default ?? '').replace(/^\.\//, '');
   const themeTarget = (pkg.exports['./theme.css'] ?? '').replace(/^\.\//, '');
 
   return `# Delivery — installing, loading and registering
 
-Nothing in this kit works until the elements are **registered**. Registration is
+Nothing in this kit works until the web components are **registered**. Registration is
 a side effect of importing an entry point; there is no \`init()\` to call.
 
 ## Install (bundler / npm)
@@ -372,15 +372,15 @@ not on it does not resolve, whatever it looks like.
 | --- | --- |
 ${rows}
 
-## Registering the elements
+## Registering the web components
 
 Three ways, all client-side:
 
 ${fence(
   [
-    "import '@kitn.ai/ui/elements';        // registers every element — the simple default",
-    "import '@kitn.ai/ui/elements/chat';   // one element; the bundler drops the rest",
-    "import '@kitn.ai/ui/autoloader';      // loads each element on demand as its tag appears",
+    "import '@kitn.ai/ui/web-components';        // registers every web component — the simple default",
+    "import '@kitn.ai/ui/web-components/chat';   // one web component; the bundler drops the rest",
+    "import '@kitn.ai/ui/autoloader';      // loads each web component on demand as its tag appears",
   ].join('\n'),
   'js',
 )}
@@ -391,13 +391,13 @@ land before the element upgrades and be lost. Wait for the registry:
 
 ${fence("await customElements.whenDefined('kai-chat');\nchat.messages = messages;", 'js')}
 
-\`elementsReady\` from \`@kitn.ai/ui/elements\` is a promise that resolves once
-every element is registered — await that instead if you are setting properties
-on several elements at once. See \`upgrade-race\` in INVARIANTS.md.
+\`elementsReady\` from \`@kitn.ai/ui/web-components\` is a promise that resolves once
+every web component is registered — await that instead if you are setting properties
+on several web components at once. See \`upgrade-race\` in INVARIANTS.md.
 
 ## No build step: a script tag
 
-The element bundle is a self-contained **ES module**, so it loads over
+The web-components bundle is a self-contained **ES module**, so it loads over
 \`<script type="module">\` with no bundler and no install:
 
 ${fence(
@@ -434,10 +434,10 @@ reactivity rule is unchanged.
 
 ## Vue, Svelte, Angular, plain HTML
 
-Import \`@kitn.ai/ui/elements\` once, then use the tags directly. There are no
+Import \`@kitn.ai/ui/web-components\` once, then use the tags directly. There are no
 per-framework wrappers beyond React. In a template, remember that only scalars
 can be bound as attributes — arrays, objects and functions must be assigned to
-the element instance in code.
+the web-component instance in code.
 
 ## Styling
 
@@ -449,13 +449,13 @@ that block. On a page with no build step use the \`<link>\` above, or
 \`@kitn.ai/ui/theme.tokens.css\`, which is the pre-built plain-CSS token sheet.
 The token names are in THEME.md.
 
-## The Solid component names on the element pages
+## The Solid component names on the web-component pages
 
-Each element page names the SolidJS component it wraps (\`ChatThread\`,
+Each web-component page names the SolidJS component it wraps (\`ChatThread\`,
 \`Conversations\`, …). **Those names are provenance, not import paths.** Of the
 ${solidExports.total} names that appear, ${solidExports.exported} are also exported from
 \`@kitn.ai/ui\` for SolidJS consumers and ${solidExports.internal} are internal and
-cannot be imported at all. The element pages mark which is which. If you are not
+cannot be imported at all. The web-component pages mark which is which. If you are not
 writing a Solid app, ignore them entirely and use the \`kai-*\` tag.
 `;
 }
@@ -468,33 +468,33 @@ function renderElementIndex({ derived, meta, universal, intents, capabilityOf })
     .map((e) => {
       const m = byTag.get(e.tag);
       const slots = (m.slots ?? []).length;
-      // The shared props are factored out of the element PAGES, so the count
+      // The shared props are factored out of the web-component PAGES, so the count
       // here must exclude them too. A row saying 5 next to a page listing 4 is
       // the kind of small falsehood that makes an agent stop trusting the pack.
       const props = e.props.filter((p) => !universal.includes(p.name)).length;
       return `| [\`${e.tag}\`](elements/${e.tag}.md) | ${intents.get(e.tag) ?? '—'} | ${capabilityOf.get(e.tag) ?? '—'} | ${props} | ${e.events.length} | ${e.methods.length} | ${slots} | ${e.parts.length} |`;
     });
 
-  return `# Elements — the complete index
+  return `# Web components — the complete index
 
 **This list is EXHAUSTIVE.** These ${derived.elements.length} tags are every
-custom element \`@kitn.ai/ui\` defines. **If a tag is not on this list, it does
+web component \`@kitn.ai/ui\` defines. **If a tag is not on this list, it does
 not exist** — do not write it, do not import it, do not assume a sibling of one
 that is here. If the task needs one that is missing, say so.
 
 Counts below exclude the shared props in [SHARED-PROPS.md](SHARED-PROPS.md),
-which every element also has.
+which every web component also has.
 
 **On the "what it is" column, read this before trusting a blank.** Only
-${intents.size} of these ${derived.elements.length} elements carry a curated
+${intents.size} of these ${derived.elements.length} web components carry a curated
 one-line description upstream, so most rows show \`—\`. A blank means *nobody has
-written one*, never *this element is unimportant*. The counts and the capability
+written one*, never *this web component is unimportant*. The counts and the capability
 group are the other signals; if you are choosing between two candidates, open
 both pages rather than guessing from the name.
 
 Open a row's page for its full API. Do not open pages you do not need.
 
-| element | what it is | capability group | props | events | methods | slots | CSS parts |
+| web component | what it is | capability group | props | events | methods | slots | CSS parts |
 | --- | --- | --- | --: | --: | --: | --: | --: |
 ${rows.join('\n')}
 `;
@@ -504,12 +504,12 @@ function renderSharedProps({ universal, meta }) {
   if (!universal.length) {
     return `# Shared props
 
-No prop is present on every element in this release, so nothing is factored out
-here; each element page carries its full prop list.
+No prop is present on every web component in this release, so nothing is factored out
+here; each web-component page carries its full prop list.
 `;
   }
-  // Read the documentation for a universal prop off the first element that
-  // declares it: it is the same declaration on every element, which is what
+  // Read the documentation for a universal prop off the first web component that
+  // declares it: it is the same declaration on every web component, which is what
   // makes it universal and what makes printing it once correct.
   const blocks = universal.map((name) => {
     const owner = meta.find((m) => (m.props ?? []).some((p) => p.name === name));
@@ -518,9 +518,9 @@ here; each element page carries its full prop list.
   });
   return `# Shared props
 
-Every one of the elements in [ELEMENTS.md](ELEMENTS.md) has these props. They are
-listed here once and are **deliberately absent from the individual element
-pages** — an element page showing no \`theme\` row still has \`theme\`.
+Every one of the web components in [ELEMENTS.md](ELEMENTS.md) has these props. They are
+listed here once and are **deliberately absent from the individual web-component
+pages** — a web-component page showing no \`theme\` row still has \`theme\`.
 
 ${blocks.join('\n')}`;
 }
@@ -565,7 +565,7 @@ function renderElementPage({ el, m, universal, solidExported, tokenFor }) {
     (p) => `- **\`::part(${p.name})\`**${p.doc ? ` — ${p.doc}` : ''}${p.recipe ? `\n${fence(p.recipe, 'css')}` : ''}`,
   );
 
-  // The element's own token names are the sheet's INTERNAL aliases
+  // The web component's own token names are the sheet's INTERNAL aliases
   // (`--color-sidebar`), which read from the consumer-settable `--kai-` name.
   // Printing the internal one would contradict THEME.md and make the pack's own
   // self-audit fire on correct code, so the consumer-settable name is what is
@@ -590,8 +590,8 @@ function renderElementPage({ el, m, universal, solidExported, tokenFor }) {
   return `# \`${el.tag}\`
 
 ${solid.length ? `Solid source: ${solid.join(', ')}. Provenance, not an import path — see [../DELIVERY.md](../DELIVERY.md).\n` : ''}
-This page is this element's **complete** API. Anything not listed does not exist
-on it. Every element also has the props in
+This page is this web component's **complete** API. Anything not listed does not exist
+on it. Every web component also has the props in
 [../SHARED-PROPS.md](../SHARED-PROPS.md), which are not repeated here.
 
 Registering the tag: [../DELIVERY.md](../DELIVERY.md).
@@ -599,7 +599,7 @@ Registering the tag: [../DELIVERY.md](../DELIVERY.md).
 ${usage}
 
 ${section('Props', props.length ? props.join('\n') : '_No props beyond the shared ones._')}
-${section('Events', events.length ? events.join('\n') : '_This element dispatches no events._')}
+${section('Events', events.length ? events.join('\n') : '_This web component dispatches no events._')}
 ${section('Methods', methods.length ? methods.join('\n') : '')}
 ${section('Slots', slots.length ? slots.join('\n') : '')}
 ${section('CSS parts', parts.length ? parts.join('\n') : '')}
@@ -619,7 +619,7 @@ function renderInvariants({ invariants, derived }) {
       .join('\n');
     const extra =
       inv.id === 'events-non-bubbling'
-        ? `\n**The complete list of protocol exceptions** — these ${derived.eventExceptions.length} events, and no others, cross the element boundary:\n\n| event | bubbles | composed |\n| --- | --- | --- |\n${derived.eventExceptions
+        ? `\n**The complete list of protocol exceptions** — these ${derived.eventExceptions.length} events, and no others, cross the web-component boundary:\n\n| event | bubbles | composed |\n| --- | --- | --- |\n${derived.eventExceptions
             .map((e) => `| \`${e.event}\` | ${e.bubbles} | ${e.composed} |`)
             .join('\n')}\n`
         : '';
@@ -730,13 +730,13 @@ These need no needle. Run each over your finished output.
    DELIVERY.md.** That table is the complete published surface; anything else
    fails to resolve at install time, which is the most expensive place to find
    out.
-3. **Every prop you set must appear on that element's page.** Not on a different
-   element's page: props are not shared between elements except the ones in
+3. **Every prop you set must appear on that web component's page.** Not on a different
+   web component's page: props are not shared between web components except the ones in
    SHARED-PROPS.md.
 4. **Every prop you set as an ATTRIBUTE must be marked settable as an attribute
    on that page.** Anything marked "JS property only" must be assigned:
    \`el.prop = value\`.
-5. **Every event you listen for must be listed on the element you attached the
+5. **Every event you listen for must be listed on the web component you attached the
    listener to.** Not on a parent, not on \`document\` — except for the protocol
    exceptions listed in INVARIANTS.md under \`events-non-bubbling\`.
 6. **Every \`MessagePart\` you construct must use a \`type\` from PARTS.md.**
@@ -763,7 +763,7 @@ ${r.intent}
 - **Backend:** a **${r.backend.endpoint}** endpoint, read with \`${r.backend.reader}\` from \`@kitn.ai/ui/wire\`. This kit ships no client and no key handling: you fetch, it parses.
 - **Invariants this recipe instances:** ${r.invariants.map((i) => `\`${i}\``).join(', ')} — see INVARIANTS.md.
 
-**Host wiring.** Nothing coordinates these elements automatically. Every row is
+**Host wiring.** Nothing coordinates these web components automatically. Every row is
 code you must write:
 
 | from | event | to | property | what the host does |
@@ -792,9 +792,9 @@ A part with any other \`type\` cannot be produced by the wire layer, cannot be
 parsed by it, and will not render. If the task needs a kind of content that is
 not on this list, **say so** rather than inventing a variant.
 
-## Which element renders which
+## Which web component renders which
 
-| element | consumes |
+| web component | consumes |
 | --- | --- |
 ${partConsumption.map((p) => `| \`${p.tag}\` | ${p.consumes.map((c) => `\`${c}\``).join(', ')} |`).join('\n')}
 `;
@@ -816,7 +816,7 @@ ${derived.integrations.map((i) => `| \`${i.id}\` | ${i.category} | \`${i.streamF
 
 ## Capability groups
 
-Elements that are normally adopted together.
+Web components that are normally adopted together.
 
 ${derived.capabilityGroups.map((g) => `- **${g.id}** — ${g.components.map((c) => `\`${c}\``).join(', ')}`).join('\n')}
 `;
@@ -830,9 +830,9 @@ every token the kit reads. Setting one that is not on this list does nothing.
 
 Set them on a host element or on \`:root\`; they cross the shadow boundary
 because custom properties inherit. Do not reach into a shadow root and do not
-style by internal class name — use the \`::part()\` names on each element page.
+style by internal class name — use the \`::part()\` names on each web-component page.
 
-An element page may also name the sheet's **internal alias** for a token (e.g.
+A web-component page may also name the sheet's **internal alias** for a token (e.g.
 \`--color-sidebar\`). Set the \`--kai-\` name from this list; the alias reads from
 it and is not something you assign.
 
@@ -926,7 +926,7 @@ ${recipes.map((r) => `- **${r.id}** — ${r.corpus.map((c) => `\`${c}\``).join('
 Every \`examples[].right\` in the catalog was executed against the stand-ins
 named in [FLOOR.md](FLOOR.md) before this pack was written; ${floor.results.length}
 examples, ${floor.results.filter((r) => r.status === 'passed').length} passed.
-None of them ran against the kit's real registered elements — read FLOOR.md
+None of them ran against the kit's real registered web components — read FLOOR.md
 before treating a green floor as a statement about the shipped components.
 `;
 }
@@ -941,8 +941,8 @@ asserted. If the catalog's own recommended code does not run, nothing measured
 downstream of it is worth anything.
 
 **Read the stand-ins column as part of the result, not as a footnote.** This is a
-Node script: it has no browser and no built element bundle, so **no example ran
-against a real registered \`kai-*\` element.** What ran is the fragment, against
+Node script: it has no browser and no built web-components bundle, so **no example ran
+against a real registered \`kai-*\` web component.** What ran is the fragment, against
 the stand-ins listed below. Where a stand-in is the SUBJECT of the claim, the row
 carries a corroboration that checks the real thing by another route.
 
@@ -1036,7 +1036,7 @@ ${
 /**
  * Where each published subpath's SOURCE barrel lives, so the symbol half of the
  * check can resolve it. Not `src/<sub>/index.ts` by convention: review found
- * that convention silently skipping five subpaths -- react, elements, solid,
+ * that convention silently skipping five subpaths -- react, web-components, solid,
  * provider, autoloader -- which is to say `Chat`, `useKaiChat` and
  * `elementsReady`, exactly what S1 and S5 lean on. A silent `continue` is the
  * shape this branch has spent the week deleting, so anything not resolved here
@@ -1044,14 +1044,14 @@ ${
  */
 const SUBPATH_SOURCES = {
   '.': 'src/index.ts',
-  elements: 'src/elements/register.ts',
+  'web-components': 'src/web-components/register.ts',
   solid: 'src/solid.ts',
   state: 'src/state/index.ts',
   wire: 'src/wire/index.ts',
   schemas: 'src/schemas/index.ts',
   react: 'frameworks/react/index.tsx',
   provider: 'src/remote/provider.ts',
-  autoloader: 'src/elements/autoloader.ts',
+  autoloader: 'src/web-components/autoloader.ts',
 };
 
 const specOf = (sub) => (sub === '.' ? '@kitn.ai/ui' : `@kitn.ai/ui/${sub}`);
@@ -1063,7 +1063,7 @@ function verifySpecifiers(text, pkg, readSource) {
   const resolves = (spec) => {
     const sub = spec === '@kitn.ai/ui' ? '.' : `.${spec.slice('@kitn.ai/ui'.length)}`;
     if (keys.has(sub)) return true;
-    // Wildcard keys: `./elements/*`, `./schemas/*`.
+    // Wildcard keys: `./web-components/*`, `./schemas/*`.
     return [...keys].some((k) => k.endsWith('/*') && sub.startsWith(k.slice(0, -1)));
   };
 
@@ -1076,10 +1076,10 @@ function verifySpecifiers(text, pkg, readSource) {
   // `import { a, b } from '@kitn.ai/ui/x'` and the prose form `Name from '@kitn.ai/ui/x'`,
   // plus the bare-package forms for the Solid entry.
   const named = [
-    ...text.matchAll(/import\s*\{([^}]*)\}\s*from\s*['"]@kitn\.ai\/ui(?:\/([a-z]+))?['"]/g),
+    ...text.matchAll(/import\s*\{([^}]*)\}\s*from\s*['"]@kitn\.ai\/ui(?:\/([a-z0-9-]+))?['"]/g),
   ].flatMap((m) => m[1].split(',').map((n) => [n.trim(), m[2] ?? '.']));
   named.push(
-    ...[...text.matchAll(/([A-Za-z_$][\w$]*)\s+from\s+['"]@kitn\.ai\/ui(?:\/([a-z]+))?['"]/g)].map((m) => [
+    ...[...text.matchAll(/([A-Za-z_$][\w$]*)\s+from\s+['"]@kitn\.ai\/ui(?:\/([a-z0-9-]+))?['"]/g)].map((m) => [
       m[1],
       m[2] ?? '.',
     ]),
@@ -1089,7 +1089,7 @@ function verifySpecifiers(text, pkg, readSource) {
   // ordinary English -- "exported from `@kitn.ai/ui`" would otherwise be read as
   // a symbol named `exported` and reported as a missing export.
   named.push(
-    ...[...text.matchAll(/`([A-Za-z_$][\w$]*)`\s+from\s+`@kitn\.ai\/ui(?:\/([a-z]+))?`/g)].map((m) => [
+    ...[...text.matchAll(/`([A-Za-z_$][\w$]*)`\s+from\s+`@kitn\.ai\/ui(?:\/([a-z0-9-]+))?`/g)].map((m) => [
       m[1],
       m[2] ?? '.',
     ]),
@@ -1114,7 +1114,7 @@ function verifySpecifiers(text, pkg, readSource) {
       continue;
     }
     // `export type { … }` counts. It did not until the markdown-prose pattern
-    // above started finding real type names in element-meta descriptions, and
+    // above started finding real type names in web-component-meta descriptions, and
     // four correctly-exported card types were reported missing -- a widening
     // that immediately exposed a hole in the narrower check beside it.
     if (
@@ -1140,7 +1140,7 @@ if (args.includes('--list')) {
 }
 
 const derived = JSON.parse(readFileSync(join(CATALOG_DIR, 'derived.json'), 'utf8'));
-const meta = JSON.parse(readFileSync(join(ROOT, 'src/elements/element-meta.json'), 'utf8'));
+const meta = JSON.parse(readFileSync(join(ROOT, 'src/web-components/web-component-meta.json'), 'utf8'));
 const pkg = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
 const kitVersion = pkg.version;
 
@@ -1149,7 +1149,7 @@ const helpers = {
   derivedProp: (tag, name) => derived.elements.find((e) => e.tag === tag)?.props.find((p) => p.name === name),
   derivedEvents: (tag) => derived.elements.find((e) => e.tag === tag)?.events ?? [],
   wireIndexSource: readFileSync(join(ROOT, 'src/wire/index.ts'), 'utf8'),
-  defineSource: readFileSync(join(ROOT, 'src/elements/define.tsx'), 'utf8'),
+  defineSource: readFileSync(join(ROOT, 'src/web-components/define.tsx'), 'utf8'),
   exportsKeys: Object.keys(pkg.exports ?? {}),
 };
 
@@ -1212,9 +1212,9 @@ if (needleProblems.length) {
 
 const metaByTag = new Map(meta.map((m) => [m.tag, m]));
 
-// A prop is universal when element-meta.json flags it so -- the flag is set by
+// A prop is universal when web-component-meta.json flags it so -- the flag is set by
 // the generator, not inferred here. Cross-checked against the derived spine:
-// a "universal" prop missing from any element would make the dedup a lie, and
+// a "universal" prop missing from any web component would make the dedup a lie, and
 // dropping the row from every page while it is absent from one is worse than
 // not deduping at all.
 const universal = [
@@ -1223,7 +1223,7 @@ const universal = [
   const everywhere = derived.elements.every((e) => e.props.some((p) => p.name === name));
   if (!everywhere) {
     fail(
-      `element-meta.json flags \`${name}\` universal, but it is not on every element in derived.json. Factoring it out of the element pages would hide its absence.`,
+      `web-component-meta.json flags \`${name}\` universal, but it is not on every web component in derived.json. Factoring it out of the web-component pages would hide its absence.`,
     );
   }
   return true;
@@ -1237,7 +1237,7 @@ const universal = [
 const droppedFragments = derived.themeTokens.filter((t) => t.endsWith('-'));
 const themeTokens = derived.themeTokens.filter((t) => !t.endsWith('-'));
 
-// An element's `tokens` are the sheet's internal aliases (`--color-sidebar`),
+// A web component's `tokens` are the sheet's internal aliases (`--color-sidebar`),
 // which read from the consumer-settable `--kai-` name. Map each to the name a
 // consumer actually sets, and fail loudly if one has no counterpart rather than
 // printing a token the self-audit would then flag.
@@ -1246,13 +1246,13 @@ const tokenFor = (alias) => {
   const prefixed = alias.startsWith('--kai-') ? alias : `--kai-${alias.slice(2)}`;
   if (!themeTokenSet.has(prefixed)) {
     fail(
-      `element token ${alias} has no consumer-settable counterpart ${prefixed} in the theme token list, so the element page and THEME.md would contradict each other.`,
+      `element token ${alias} has no consumer-settable counterpart ${prefixed} in the theme token list, so the web-component page and THEME.md would contradict each other.`,
     );
   }
   return prefixed;
 };
 
-// Which Solid component names are importable, so the element pages can say.
+// Which Solid component names are importable, so the web-component pages can say.
 const solidBarrel = readFileSync(join(ROOT, 'src/index.ts'), 'utf8');
 const solidExported = new Set(
   [...solidBarrel.matchAll(/export\s*\{([^}]*)\}/g)].flatMap((m) =>
@@ -1269,7 +1269,7 @@ const solidExports = {
   internal: allSolidNames.filter((n) => !solidExported.has(n)).length,
 };
 
-// The only curated per-element one-liners in the tree. There are very few; the
+// The only curated per-web-component one-liners in the tree. There are very few; the
 // index says how few rather than implying the blanks mean anything.
 const intents = new Map(
   [...readFileSync(join(ROOT, 'llms.txt'), 'utf8').matchAll(/^- `<(kai-[a-z0-9-]+)>` — (.+)$/gm)].map((m) => [
@@ -1328,7 +1328,7 @@ before writing any import, and run [SELF-AUDIT.md](SELF-AUDIT.md) over your
 output before you deliver.
 
 If this task cannot be built from what is here, **say that, name what is
-missing, and stop**. Do not invent an element, a prop, an event or an import
+missing, and stop**. Do not invent a web component, a prop, an event or an import
 path to close the gap.
 `,
 );
@@ -1409,7 +1409,7 @@ write(
       scenario: scenario.id,
       generatedFrom: {
         derived: 'packages/ui/mcp/catalog/derived.json',
-        elementMeta: 'packages/ui/src/elements/element-meta.json',
+        elementMeta: 'packages/ui/src/web-components/web-component-meta.json',
       },
       derived,
       invariants,
@@ -1447,7 +1447,7 @@ Scenario: ${scenario.id} — ${scenario.depth}.
 
 finish(0);
 console.log(
-  `acceptance-pack: packed ${scenario.id} into ${out} (agent/: ${elementPages.length} element pages + ${agentPages.length} guides; judge/: ${judgePages.length} reports + catalog.json)`,
+  `acceptance-pack: packed ${scenario.id} into ${out} (agent/: ${elementPages.length} web-component pages + ${agentPages.length} guides; judge/: ${judgePages.length} reports + catalog.json)`,
 );
 }
 

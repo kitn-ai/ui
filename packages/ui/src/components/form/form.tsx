@@ -49,7 +49,7 @@ import {
 // AUTHORED IN ../primitives/card-data-types.ts. See the note in confirm-card.tsx,
 // or that file's header, for why they left a `.tsx` and why they are `type`
 // aliases. `FormField` in particular CANNOT be an interface: it is
-// self-referential, so the element-types generator can only inline it down to a
+// self-referential, so the web-component-types generator can only inline it down to a
 // `Record<string, unknown>` placeholder, and an interface is not assignable to
 // that. Re-exported here unchanged.
 

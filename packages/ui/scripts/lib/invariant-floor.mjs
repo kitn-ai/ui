@@ -35,7 +35,7 @@
 // without this its whole subject was unmeasured.
 //
 // HONESTY ABOUT STAND-INS. Not one example runs against the real registered
-// element: this is a Node script and the elements need a built bundle and the
+// web component: this is a Node script and the web components need a built bundle and the
 // Solid runtime. Every harness therefore names its stand-ins in `stubs`,
 // including the ones it would be easy to leave unstated -- the jsdom document,
 // the plain object standing in for an element, the JSX factory. The report
@@ -416,8 +416,8 @@ export const HARNESSES = {
       assert(derivedEvents('kai-chat').includes('kai-submit'), 'kai-chat does not dispatch kai-submit in the derived layer');
       // The stand-in dispatches non-bubbling because the kit's helper does. If
       // that stops being true, the stand-in is modelling nothing.
-      assert(/bubbles:\s*false/.test(defineSource), 'src/elements/define.tsx no longer hard-codes bubbles: false');
-      assert(/composed:\s*false/.test(defineSource), 'src/elements/define.tsx no longer hard-codes composed: false');
+      assert(/bubbles:\s*false/.test(defineSource), 'src/web-components/define.tsx no longer hard-codes bubbles: false');
+      assert(/composed:\s*false/.test(defineSource), 'src/web-components/define.tsx no longer hard-codes composed: false');
     },
   },
 
@@ -1123,14 +1123,14 @@ export async function selfTest(helpers) {
   const goodMeta = [{ tag: 'kai-a', props: [{ name: 'p', scalar: true, type: 'string' }], events: [{ name: 'kai-x' }] }];
   const agreementProbes = [
     ['a tag only derived.json has', good, []],
-    ['a tag only element-meta.json has', [], goodMeta],
+    ['a tag only web-component-meta.json has', [], goodMeta],
     ['a prop only derived.json has', good, [{ ...goodMeta[0], props: [] }]],
     [
-      'a prop only element-meta.json has',
+      'a prop only web-component-meta.json has',
       [{ ...good[0], props: [] }],
       goodMeta,
     ],
-    ['an event only element-meta.json has', [{ ...good[0], events: [] }], goodMeta],
+    ['an event only web-component-meta.json has', [{ ...good[0], events: [] }], goodMeta],
     [
       'a prop whose type makes it function-valued on one side only',
       good,
@@ -1186,16 +1186,16 @@ const setsDiffer = (a, b) => {
 };
 
 /**
- * derived.json and element-meta.json are written by the same `build:api` run, so
+ * derived.json and web-component-meta.json are written by the same `build:api` run, so
  * they agree by construction -- until one of them is regenerated alone. The pack
- * reads the element SPINE from derived.json (the tag list, the scalar/fn flags,
- * the index's counts) and the prose from element-meta.json (types, defaults,
- * slots, docs), so a divergence produces element pages that quietly contradict
+ * reads the web-component SPINE from derived.json (the tag list, the scalar/fn flags,
+ * the index's counts) and the prose from web-component-meta.json (types, defaults,
+ * slots, docs), so a divergence produces web-component pages that quietly contradict
  * the index the pack calls complete. Decide loudly: fail instead.
  *
  * BOTH DIRECTIONS, per element, over props and events. A one-directional tag
  * membership check -- what this was before review -- passes on an extra tag in
- * element-meta, on a prop dropped from either side, and on a `fn`/`scalar` flag
+ * web-component-meta, on a prop dropped from either side, and on a `fn`/`scalar` flag
  * that no longer matches the printed type. The last of those is S3's whole
  * scoring line, so it is cross-checked against the generator's rule rather than
  * merely compared.
@@ -1212,26 +1212,26 @@ export function assertArtifactsAgree(derivedElements, metaElements) {
     derivedElements.map((e) => e.tag),
     metaElements.map((m) => m.tag),
   );
-  for (const t of onlyDerived) problems.push(`${t}: in derived.json, absent from element-meta.json`);
-  for (const t of onlyMeta) problems.push(`${t}: in element-meta.json, absent from derived.json`);
+  for (const t of onlyDerived) problems.push(`${t}: in derived.json, absent from web-component-meta.json`);
+  for (const t of onlyMeta) problems.push(`${t}: in web-component-meta.json, absent from derived.json`);
 
   for (const el of derivedElements) {
     const m = metaByTag.get(el.tag);
     if (!m) continue;
     const [dp, mp] = setsDiffer(el.props.map((p) => p.name), (m.props ?? []).map((p) => p.name));
     for (const p of dp) problems.push(`${el.tag}.${p}: prop in derived.json only`);
-    for (const p of mp) problems.push(`${el.tag}.${p}: prop in element-meta.json only`);
+    for (const p of mp) problems.push(`${el.tag}.${p}: prop in web-component-meta.json only`);
 
     const [de, me] = setsDiffer(el.events ?? [], (m.events ?? []).map((e) => e.name));
     for (const e of de) problems.push(`${el.tag}: event ${e} in derived.json only`);
-    for (const e of me) problems.push(`${el.tag}: event ${e} in element-meta.json only`);
+    for (const e of me) problems.push(`${el.tag}: event ${e} in web-component-meta.json only`);
 
     for (const p of el.props) {
       const mprop = (m.props ?? []).find((x) => x.name === p.name);
       if (!mprop) continue;
       if (fnValuedFromType(mprop.type) !== p.fn) {
         problems.push(
-          `${el.tag}.${p.name}: derived.json says fn=${p.fn}, but element-meta.json's type says ${!p.fn} (${mprop.type})`,
+          `${el.tag}.${p.name}: derived.json says fn=${p.fn}, but web-component-meta.json's type says ${!p.fn} (${mprop.type})`,
         );
       }
       if (mprop.scalar !== undefined && mprop.scalar !== p.scalar) {
@@ -1242,7 +1242,7 @@ export function assertArtifactsAgree(derivedElements, metaElements) {
 
   if (problems.length) {
     throw new Error(
-      `derived.json and element-meta.json have diverged in ${problems.length} place(s):\n  - ${problems
+      `derived.json and web-component-meta.json have diverged in ${problems.length} place(s):\n  - ${problems
         .slice(0, 20)
         .join('\n  - ')}${problems.length > 20 ? `\n  … and ${problems.length - 20} more` : ''}\n` +
         'Regenerate both with `npm run build:api` inside packages/ui.',

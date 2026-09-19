@@ -6,7 +6,7 @@ import { Segmented } from '../segmented/segmented';
 import { Switch } from '../switch/switch';
 import { Select } from '../select/select';
 import { Nav, type KaiNavItem } from '../nav/nav';
-import { componentDescription } from '../../stories/docs/element-controls';
+import { componentDescription } from '../../stories/docs/web-component-controls';
 
 // --- A composed SETTINGS SCREEN ------------------------------------------
 //

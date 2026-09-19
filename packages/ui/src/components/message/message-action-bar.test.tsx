@@ -4,7 +4,7 @@ import { createSignal } from 'solid-js';
 import { render, cleanup, fireEvent } from '@solidjs/testing-library';
 import { MessageActionBar, MessageAvatar } from './message';
 import { actionIcon, BUILTIN_ACTION_LABEL } from '../action-icons/action-icons';
-import type { ChatMessageAction, CustomAction, FeedbackVote } from '../../elements/chat-types';
+import type { ChatMessageAction, CustomAction, FeedbackVote } from '../../web-components/chat-types';
 
 afterEach(cleanup);
 

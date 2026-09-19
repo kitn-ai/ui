@@ -11,7 +11,7 @@ import type { KaiDiagnosticEvent, WireDiagnosticEvent } from './diagnostics';
  *
  * And it is not only our build config, which is why the fix is a shared global
  * rather than a chunking change: a consumer who bundles the kit and ALSO loads
- * the elements bundle from a CDN duplicates the module identically, and nothing
+ * the web-components bundle from a CDN duplicates the module identically, and nothing
  * we do to our own build prevents that.
  *
  * `vi.resetModules()` between two imports is the honest simulation -- the first

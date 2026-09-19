@@ -2,7 +2,7 @@
  * Guards for the `Select` primitive and its two migrated call sites.
  *
  * WHAT JSDOM CANNOT SEE, STATED SO NOTHING HERE READS AS MORE THAN IT IS. jsdom does no
- * layout, does not load `src/elements/styles.css` and never renders a native dropdown,
+ * layout, does not load `src/web-components/styles.css` and never renders a native dropdown,
  * so nothing below proves the select LOOKS right, that the chevron sits over the box,
  * or that `appearance: none` suppressed the OS arrow. What these pin is the part that
  * is real in a DOM with no CSS at all: that the control is a NATIVE `<select>` rather

@@ -11,7 +11,7 @@ import {
   ContextReasoningUsage,
   ContextCacheUsage,
 } from './context';
-import { componentDescription } from '../../stories/docs/element-controls';
+import { componentDescription } from '../../stories/docs/web-component-controls';
 
 /**
  * Story for the compound `Context` family. `Context` is the root provider that

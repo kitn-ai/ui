@@ -19,7 +19,7 @@ import { cn } from '../../utils/cn';
  * COMMAND PALETTE: composes the kit's real `CommandList` (`components/command/command.tsx`)
  * — a presentational grouped listbox — inside a hand-built overlay
  * (backdrop + centered panel + Escape/backdrop-click to close), the SAME
- * shape `elements/claude-code.stories.tsx`'s own command-center overlay
+ * shape `web-components/claude-code.stories.tsx`'s own command-center overlay
  * uses around `kai-command` (read before building this — `CommandList` is
  * that facade's underlying Solid piece; the facade adds the search input's
  * filtering behavior itself, which `CommandList` does not own). A plain
@@ -27,7 +27,7 @@ import { cn } from '../../utils/cn';
  * catalog, matching claude-code's own placeholder copy style ("Search
  * commands...").
  *
- * USER MENU: `elements/user-menu.stories.tsx`'s own doc comment states it
+ * USER MENU: `web-components/user-menu.stories.tsx`'s own doc comment states it
  * plainly — "the user menu is a RECIPE, not an element... kai-menu with a
  * slotted trigger (kai-avatar + name + plan + a chevron + a kai-status
  * dot)". Reused here as the Solid-tier equivalent: `Dropdown`/

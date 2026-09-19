@@ -144,7 +144,7 @@ describe('the react form', () => {
   it('emits no registration import: the wrappers self-register', () => {
     const tsx = byPath(renderReactForm(block())).get('Fixture.tsx')!;
     expect(tsx).not.toContain('registerAll');
-    expect(tsx).not.toContain('@kitn.ai/ui/elements');
+    expect(tsx).not.toContain('@kitn.ai/ui/web-components');
     expect(tsx).not.toContain('whenDefined');
   });
 

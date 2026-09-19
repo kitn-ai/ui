@@ -67,8 +67,8 @@ const PAGE = /* html */ `<!doctype html>
   <script type="module">
     let error = null;
     try {
-      await import('/src/elements/thread.tsx');
-      await import('/src/elements/chat.tsx');
+      await import('/src/web-components/thread.tsx');
+      await import('/src/web-components/chat.tsx');
     } catch (e) { error = String((e && e.stack) || e); }
 
     const messages = ${JSON.stringify(MESSAGES)};

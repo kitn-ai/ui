@@ -2,7 +2,7 @@
  * The conversations data contract (C-3, C-5, C-7): a JS-property interface,
  * never REST/events baked into the format. The kit owns the interface, the
  * payload types (ConversationSummary/ConversationGroup from ../types,
- * ChatMessage from ../elements/chat-types — reused, never duplicated), and
+ * ChatMessage from ../web-components/chat-types — reused, never duplicated), and
  * the lifecycle (list() on mount + list-view open, load() on row select,
  * save() on message-array change). The dev owns invocation, retrieval,
  * transport, auth, retention.
@@ -18,7 +18,7 @@
  * root bundle — see src/stores/index.ts for the decision record.
  */
 import type { ConversationSummary } from '../types';
-import type { ChatMessage } from '../elements/chat-types';
+import type { ChatMessage } from '../web-components/chat-types';
 
 export interface ConversationStore {
   // `list()`/`load()` implementations MUST return a fresh array (and, for any

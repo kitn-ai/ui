@@ -153,10 +153,10 @@ async function catalogFacts() {
   const derived = JSON.parse(readFileSync(CATALOG_PATHS.derived, 'utf8'));
   const knownTags = derived.elements.map((e) => e.tag);
 
-  // WHICH ELEMENTS HAVE A DESCRIPTION ANYWHERE. Derived, because the answer is
-  // the point: element-meta.json carries no element-level description at all, so
+  // WHICH WEB COMPONENTS HAVE A DESCRIPTION ANYWHERE. Derived, because the answer is
+  // the point: web-component-meta.json carries no web-component-level description at all, so
   // the only curated one-liners in the tree are the handful in llms.txt. An
-  // attribution claiming an element is undescribed is therefore true for almost
+  // attribution claiming a web component is undescribed is therefore true for almost
   // all of them and FALSE for those few — which is exactly the check that stops
   // "no description" becoming the catch-all every finding gets filed under.
   const meta = JSON.parse(readFileSync(CATALOG_PATHS.elementMeta, 'utf8'));
@@ -193,7 +193,7 @@ async function evaluate({ runDir, findingsPath, gatesPath }) {
   // anything — which is the one property that keeps it from swallowing the
   // analysis. Read from the pack, not from a list here, so it is this run's pack.
   // WALKED, not a top-level listing. A flat readdir saw 13 of the pack's 93
-  // pages -- every per-element page lives under `elements/`, and those are the
+  // pages -- every per-web-component page lives under `elements/`, and those are the
   // ones an agent reads most. So the escape hatch was unusable for exactly the
   // pages a finding is most likely to be about, which forces the mis-filing the
   // resolution exists to prevent.
@@ -417,7 +417,7 @@ ${
 
 ${
   e.fabricationProposals.length
-    ? `## Proposed FABRICATED.md rows\n\nPaste into \`mcp/catalog/fabrications.ts\` after checking each tag. **Not written automatically:** a mis-scored run editing the catalog would teach every later agent that a real element is imaginary.\n\n\`\`\`json\n${JSON.stringify(e.fabricationProposals, null, 2)}\n\`\`\`\n`
+    ? `## Proposed FABRICATED.md rows\n\nPaste into \`mcp/catalog/fabrications.ts\` after checking each tag. **Not written automatically:** a mis-scored run editing the catalog would teach every later agent that a real web component is imaginary.\n\n\`\`\`json\n${JSON.stringify(e.fabricationProposals, null, 2)}\n\`\`\`\n`
     : ''
 }
 ## Read this before quoting the score
@@ -543,12 +543,12 @@ async function selfTest() {
     'already exists',
   );
   catch_(
-    'recording a REAL element as fabricated is refused',
+    'recording a REAL web component as fabricated is refused',
     () => attributeFindings({ findings: [{ id: 'f4', attribution: { kind: 'fabricated-element', invented: 'kai-chat', useInstead: 'kai-thread' } }], catalog: facts }),
-    'is a real element',
+    'is a real web component',
   );
   catch_(
-    'claiming a described element is undescribed is refused',
+    'claiming a described web component is undescribed is refused',
     () => attributeFindings({ findings: [{ id: 'f5', attribution: { kind: 'missing-element-description', tag: facts.describedTags[0] } }], catalog: facts }),
     'DOES have a description',
   );

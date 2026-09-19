@@ -12,8 +12,8 @@
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
-      "@kitn.ai/ui/elements": ["./src/elements/element-types.d.ts"],
-      "@kitn.ai/ui/elements/*": ["./tests/react/elements-stub.d.ts"]
+      "@kitn.ai/ui/web-components": ["./src/web-components/web-component-types.d.ts"],
+      "@kitn.ai/ui/web-components/*": ["./tests/react/web-components-stub.d.ts"]
     }
   },
   "include": ["frameworks/**/*.tsx"]

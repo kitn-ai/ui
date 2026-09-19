@@ -59,7 +59,7 @@ export default defineConfig({
        * config in this package. Storybook loads Tailwind at DOCUMENT level, which
        * registers the `--tw-*` custom properties globally and makes shadow-root rings
        * paint — the precise condition that hid this defect. This suite runs against a
-       * bare harness that serves only the built element bundle, which is what a real
+       * bare harness that serves only the built web-components bundle, which is what a real
        * consumer app looks like, and the spec asserts that absence before it measures
        * anything.
        *
@@ -88,7 +88,7 @@ export default defineConfig({
        * (`message-text-token.spec.ts`).
        *
        * Reuses `focus-ring-harness-server.mjs` verbatim: a bare page that loads only
-       * the built `dist/kai.es.js` element bundle with NO document-level Tailwind, on
+       * the built `dist/kai.es.js` web-components bundle with NO document-level Tailwind, on
        * its own port. That is exactly the condition this spec needs too — the same
        * reason `focus-ring-paints.spec.ts` cannot run under Storybook applies here:
        * this guard is about what CSS CUSTOM PROPERTIES resolve to inside a shadow

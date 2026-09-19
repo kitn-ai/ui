@@ -5,7 +5,7 @@ import { SettingsGroup, SettingItem, type SettingsGroupProps } from './settings-
 import { Segmented } from '../segmented/segmented';
 import { Switch } from '../switch/switch';
 import { Select } from '../select/select';
-import { componentDescription } from '../../stories/docs/element-controls';
+import { componentDescription } from '../../stories/docs/web-component-controls';
 
 // The building blocks in isolation — no modal/page host. A `SettingsGroup` is a
 // titled, bordered card that stacks `SettingItem` rows with hairline dividers;

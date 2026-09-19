@@ -3,7 +3,7 @@ import '@testing-library/jest-dom/vitest';
 import { createSignal } from 'solid-js';
 import { render, cleanup, fireEvent } from '@solidjs/testing-library';
 import { ChatThread, type ChatThreadController } from './chat-thread';
-import type { ChatMessage } from '../../elements/chat-types';
+import type { ChatMessage } from '../../web-components/chat-types';
 import { localStorageStore } from '../../primitives/conversation-store';
 
 // Spy on the imperative toast() so we can assert when feedback raises one. The

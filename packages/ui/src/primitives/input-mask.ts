@@ -23,7 +23,7 @@
 //      the composition outright, and Android word suggestion is far more common in these
 //      fields than CJK input.
 //   4. `.value` is never shadowed with `Object.defineProperty` (§5.8). The canonical value
-//      is read through `getCanonicalValue()`; the element facade will publish it with
+//      is read through `getCanonicalValue()`; the web-component facade will publish it with
 //      `setFormValue()`.
 //
 // ONE KNOWN IMPRECISION, recorded rather than papered over. An undo entry's selection is
@@ -801,7 +801,7 @@ export function createInputMask(el: HTMLInputElement, options: InputMaskOptions)
       // or a guide that does not align, and the throw must leave this masker exactly as it
       // was. Merging into `opts` first would park the rejected config in state where the
       // NEXT update -- one that says nothing about `format` -- picks it up and applies a
-      // change that was already refused. The element facade hits precisely this shape when
+      // change that was already refused. The web-component facade hits precisely this shape when
       // `format` and `guide` are separate reactive attributes that do not land in the same
       // tick.
       const merged: InputMaskOptions = { ...opts, ...next };

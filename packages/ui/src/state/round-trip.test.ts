@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createAssistantStream, type SetMessages } from './stream';
-import type { ChatMessage } from '../elements/chat-types';
+import type { ChatMessage } from '../web-components/chat-types';
 
 describe('round-trip fidelity', () => {
   it('carries an Anthropic thinking block byte-identically through the stream', () => {

@@ -31,7 +31,7 @@
     "**/*.css",
     "./dist/kai.es.js",
     "./dist/register-impl-*.js",
-    "./dist/elements/*.js"
+    "./dist/web-components/*.js"
   ],
   "description": "Framework-agnostic, Shadow-DOM web components for building AI chat interfaces — works in React, Vue, Angular, Svelte, or plain HTML. Authored in SolidJS.",
   "keywords": [
@@ -80,23 +80,23 @@
       "node": "./dist/index.server.js",
       "default": "./dist/index.js"
     },
-    "./elements": {
-      "types": "./dist/elements.d.ts",
+    "./web-components": {
+      "types": "./dist/web-components.d.ts",
       "default": "./dist/kai.es.js"
     },
-    "./elements/*": {
-      "types": "./dist/elements/*.d.ts",
-      "default": "./dist/elements/*.js"
+    "./web-components/*": {
+      "types": "./dist/web-components/*.d.ts",
+      "default": "./dist/web-components/*.js"
     },
     "./autoloader": {
-      "types": "./dist/elements/autoloader.d.ts",
-      "default": "./dist/elements/autoloader.js"
+      "types": "./dist/web-components/autoloader.d.ts",
+      "default": "./dist/web-components/autoloader.js"
     },
     "./theme.css": "./theme.css",
     "./solid.css": "./solid.css",
     "./theme.tokens.css": "./dist/theme.tokens.css",
-    "./element-meta.json": "./src/elements/element-meta.json",
-    "./icon-names.json": "./src/elements/icon-names.json",
+    "./web-component-meta.json": "./src/web-components/web-component-meta.json",
+    "./icon-names.json": "./src/web-components/icon-names.json",
     "./package.json": "./package.json",
     "./react": {
       "types": "./dist/react/index.d.ts",
@@ -164,8 +164,8 @@
   },
   "files": [
     "dist",
-    "src/elements/element-meta.json",
-    "src/elements/icon-names.json",
+    "src/web-components/web-component-meta.json",
+    "src/web-components/icon-names.json",
     "bin",
     "!bin/**/*.test.js",
     "!dist/**/*.testlib.*",
@@ -180,11 +180,11 @@
   "scripts": {
     "prepublishOnly": "npm run build",
     "prebuild": "npm run build:css && npm run build:card-validation",
-    "build": "KAI_BUILD=register vite build --config config/vite/elements.ts && KAI_BUILD=provider vite build --config config/vite/lib.ts && vite build --config config/vite/react.ts && KAI_BUILD=index vite build --config config/vite/lib.ts && KAI_BUILD=index.server vite build --config config/vite/lib.ts && KAI_BUILD=solid vite build --config config/vite/lib.ts && KAI_BUILD=solid.server vite build --config config/vite/lib.ts && KAI_BUILD=state vite build --config config/vite/lib.ts && KAI_BUILD=wire vite build --config config/vite/lib.ts && KAI_BUILD=stores vite build --config config/vite/lib.ts && KAI_BUILD=define vite build --config config/vite/lib.ts && KAI_BUILD=define.server vite build --config config/vite/lib.ts && KAI_BUILD=diagnostics vite build --config config/vite/lib.ts && KAI_BUILD=schemas vite build --config config/vite/lib.ts && KAI_BUILD=mcp vite build --config config/vite/node.ts && KAI_BUILD=construct-cli vite build --config config/vite/node.ts && KAI_BUILD=construct vite build --config config/vite/lib.ts && KAI_BUILD=construct-templates vite build --config config/vite/lib.ts && KAI_BUILD=builder vite build --config config/vite/page.ts && KAI_BUILD=theme-studio vite build --config config/vite/page.ts && npm run build:elements && npm run dedupe:shiki && npm run verify:elements-bundle && npm run verify:react-wrappers && npm run verify:shader-lazy",
-    "build:elements": "node scripts/gen-elements-manifest.mjs && KAI_BUILD=split vite build --config config/vite/elements.ts && node scripts/gen-element-dts.mjs",
+    "build": "KAI_BUILD=register vite build --config config/vite/web-components.ts && KAI_BUILD=provider vite build --config config/vite/lib.ts && vite build --config config/vite/react.ts && KAI_BUILD=index vite build --config config/vite/lib.ts && KAI_BUILD=index.server vite build --config config/vite/lib.ts && KAI_BUILD=solid vite build --config config/vite/lib.ts && KAI_BUILD=solid.server vite build --config config/vite/lib.ts && KAI_BUILD=state vite build --config config/vite/lib.ts && KAI_BUILD=wire vite build --config config/vite/lib.ts && KAI_BUILD=stores vite build --config config/vite/lib.ts && KAI_BUILD=define vite build --config config/vite/lib.ts && KAI_BUILD=define.server vite build --config config/vite/lib.ts && KAI_BUILD=diagnostics vite build --config config/vite/lib.ts && KAI_BUILD=schemas vite build --config config/vite/lib.ts && KAI_BUILD=mcp vite build --config config/vite/node.ts && KAI_BUILD=construct-cli vite build --config config/vite/node.ts && KAI_BUILD=construct vite build --config config/vite/lib.ts && KAI_BUILD=construct-templates vite build --config config/vite/lib.ts && KAI_BUILD=builder vite build --config config/vite/page.ts && KAI_BUILD=theme-studio vite build --config config/vite/page.ts && npm run build:web-components && npm run dedupe:shiki && npm run verify:web-components-bundle && npm run verify:react-wrappers && npm run verify:shader-lazy",
+    "build:web-components": "node scripts/gen-web-components-manifest.mjs && KAI_BUILD=split vite build --config config/vite/web-components.ts && node scripts/gen-web-component-dts.mjs",
     "postbuild": "npm run build:theme && npm run build:api && npm run build:blocks && npm run build:schemas && npm run build:subpath-dts && npm run verify:dts && npm run verify:cdn-entries",
     "build:theme": "node scripts/build-theme-tokens.mjs",
-    "build:api": "node scripts/gen-elements-manifest.mjs && node scripts/gen-element-api.mjs && node scripts/gen-element-nonscalar.mjs && node scripts/gen-catalog.mjs && node scripts/gen-construct-schema.mjs && node scripts/gen-construct-template-fixtures.mjs",
+    "build:api": "node scripts/gen-web-components-manifest.mjs && node scripts/gen-web-component-api.mjs && node scripts/gen-web-component-nonscalar.mjs && node scripts/gen-catalog.mjs && node scripts/gen-construct-schema.mjs && node scripts/gen-construct-template-fixtures.mjs",
     "build:schemas": "node scripts/copy-card-schemas.mjs",
     "build:blocks": "node scripts/gen-blocks.mjs",
     "build:card-validation": "node scripts/gen-card-validation-schemas.mjs",
@@ -195,7 +195,7 @@
     "verify:consumer": "node scripts/verify-consumer-sideeffects.mjs",
     "verify:construct": "node scripts/verify-construct.mjs --self-test && node scripts/verify-construct.mjs",
     "verify:dts": "node scripts/verify-dts-boundaries.mjs --self-test && node scripts/verify-dts-boundaries.mjs",
-    "verify:elements-bundle": "node scripts/verify-elements-bundle.mjs --self-test && node scripts/verify-elements-bundle.mjs",
+    "verify:web-components-bundle": "node scripts/verify-web-components-bundle.mjs --self-test && node scripts/verify-web-components-bundle.mjs",
     "verify:fresh": "node scripts/verify-artifact-fresh.mjs --self-test && node scripts/verify-artifact-fresh.mjs",
     "verify:dts:consumer": "node scripts/verify-dts-consumer.mjs",
     "verify:generated": "node scripts/verify-generated-sync.mjs --self-test && node scripts/verify-generated-sync.mjs",
@@ -238,9 +238,9 @@
     "dev": "npm run build:css && storybook dev -p 6006",
     "storybook": "npm run build:css && storybook dev -p 6006",
     "build-storybook": "npm run build:css && storybook build",
-    "build:css": "tailwindcss -i src/elements/styles.css -o src/elements/compiled.css --minify && npm run postprocess:css",
-    "build:css:watch": "tailwindcss -i src/elements/styles.css -o src/elements/compiled.css --watch",
-    "postprocess:css": "node scripts/postprocess-element-css.mjs --self-test && node scripts/postprocess-element-css.mjs",
+    "build:css": "tailwindcss -i src/web-components/styles.css -o src/web-components/compiled.css --minify && npm run postprocess:css",
+    "build:css:watch": "tailwindcss -i src/web-components/styles.css -o src/web-components/compiled.css --watch",
+    "postprocess:css": "node scripts/postprocess-web-component-css.mjs --self-test && node scripts/postprocess-web-component-css.mjs",
     "dev:provider": "vite ../../examples/internal/remote-provider --port 6007 --strictPort",
     "dev:host": "vite ../../examples/internal/remote-host --port 6006 --strictPort",
     "test:e2e": "playwright test --config config/playwright/cross-origin.config.ts",

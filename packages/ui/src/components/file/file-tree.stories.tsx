@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal } from 'solid-js';
 import { fn } from 'storybook/test';
 import { FileTree, type FileTreeFile } from './file-tree';
-import { componentDescription } from '../../stories/docs/element-controls';
+import { componentDescription } from '../../stories/docs/web-component-controls';
 
 const FILES: FileTreeFile[] = [
   { path: 'index.html', type: 'html' },

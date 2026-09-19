@@ -3,7 +3,7 @@ import { type JSX } from 'solid-js';
 import { PromptDock, type PromptDockProps } from './prompt-dock';
 import { PromptInput, PromptInputTextarea, PromptInputActions } from './prompt-input';
 import { Button } from '../button/button';
-import { componentDescription } from '../../stories/docs/element-controls';
+import { componentDescription } from '../../stories/docs/web-component-controls';
 
 // --- Story helpers -------------------------------------------------------
 

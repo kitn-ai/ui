@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createEffect, createSignal } from 'solid-js';
 import { WorkspaceShell, type WorkspaceShellController, type WorkspaceShellProps } from './workspace-shell';
-import { componentDescription } from '../../stories/docs/element-controls';
+import { componentDescription } from '../../stories/docs/web-component-controls';
 
 // Components: the chat-agnostic workspace layout shell (SolidJS layer).
 // The B4 real-browser probes (packages/ui/scripts/probe-workspace-shell-*.mjs)

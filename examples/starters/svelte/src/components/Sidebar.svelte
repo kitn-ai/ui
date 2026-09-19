@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { KaiConversationsElement } from '@kitn.ai/ui/elements';
+  import type { KaiConversationsElement } from '@kitn.ai/ui/web-components';
   import type { Theme } from '../lib/types';
   import type { Conversation } from '../chat-data';
 

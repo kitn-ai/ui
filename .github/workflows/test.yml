@@ -153,7 +153,7 @@ jobs:
       - name: Silent-drop guard (wire encoders)
         run: pnpm --filter @kitn.ai/ui run lint:silent-drops
 
-      # Every authored catalog claim (element tags, events, properties, invariant
+      # Every authored catalog claim (web-component tags, events, properties, invariant
       # ids, corpus paths, inventory titles, scenario invariant refs) must resolve
       # against the derived layer and the tree. This is what stops the authored
       # surface layer becoming prose about a tree that moved underneath it.
@@ -223,7 +223,7 @@ jobs:
         run: pnpm --filter @kitn.ai/ui run lint:cdn-pins
 
       # Size budget for the committed llms-full.txt. The file is generated, so
-      # it grows as a SIDE EFFECT of unrelated work -- a new element, a fatter
+      # it grows as a SIDE EFFECT of unrelated work -- a new web component, a fatter
       # doc comment, a new generated section -- and nothing else prices that
       # growth. Both costs it guards degrade quietly with the byte count: grep
       # precision (more near-duplicate rows per query) and whole-file ingestion
@@ -383,7 +383,7 @@ jobs:
       - name: Ignored-path snapshot (what is on disk before the build writes)
         run: git status --porcelain --ignored=matching packages/ui > "$RUNNER_TEMP/ignored-before.txt"
 
-      - name: Build (element bundle + provider subpath)
+      - name: Build (web-components bundle + provider subpath)
         run: pnpm exec nx build ui
 
       # THE ARTIFACT GLOB IS THE NEW `outputs:` LIST, and it has the nx list's
@@ -403,7 +403,7 @@ jobs:
       # gitignored-and-build-written set under packages/ui: dist/, the
       # `build:css` prebuild output, and the block driver pages `build:blocks`
       # generates for `verify:blocks`. Everything else the build writes --
-      # element-meta.json, derived.json, llms-full.txt, the React wrappers,
+      # web-component-meta.json, derived.json, llms-full.txt, the React wrappers,
       # docs/web-components.md, the construct template fixtures -- is COMMITTED,
       # so a downstream `checkout` already has it, and `verify:generated` in
       # `dist-guards` proves it is the right version.
@@ -431,14 +431,14 @@ jobs:
           if-no-files-found: error
           path: |
             packages/ui/dist/**
-            packages/ui/src/elements/compiled.css
+            packages/ui/src/web-components/compiled.css
             packages/ui/scripts/block-driver/pages/generated/**
 
   # 30% of the whole gate, sharing nothing with anything else, so it gets its own
   # leg. `verify-construct.mjs` ejects against THIS CHECKOUT'S OWN packed tarball
   # and then runs a real `npm install` per cell, which is where the time goes.
   #
-  # NO PATH FILTER, deliberately. A PR touching only src/elements/ changes what
+  # NO PATH FILTER, deliberately. A PR touching only src/web-components/ changes what
   # every cell installs while matching nothing a construct-scoped filter would
   # look at -- "the tree is not the tarball, and the tarball is not what npx
   # runs", in its most literal form. A filter safe enough to use would have to
@@ -469,7 +469,7 @@ jobs:
 
       # `actions/upload-artifact` does not preserve mtimes: every file in the
       # tarball is stamped at EXTRACTION time, in the order the zip holds them.
-      # `dist/**` comes out before `src/elements/compiled.css`, so the source ends
+      # `dist/**` comes out before `src/web-components/compiled.css`, so the source ends
       # up looking NEWER than the bundle built from it -- and the mtime-based
       # stale-bundle guard in tests/e2e/hover-card-global-setup.ts reads exactly
       # that shape as "you edited src and forgot to rebuild" and refuses to run.
@@ -578,7 +578,7 @@ jobs:
       # project owns them, not about whether
       # they gate a merge: they must stay inside the one required context, next to the
       # build they depend on, or splitting them out would have traded a slow check for
-      # no check. Needs the `build` leg's artifact (src/elements/compiled.css). ~10s, which
+      # no check. Needs the `build` leg's artifact (src/web-components/compiled.css). ~10s, which
       # restates the same invalidated local "idle" reading and is not a figure from
       # this runner; treat it as an order of magnitude, not a budget.
       # (The required context is now the `test` GRAPH rather than one job, and
@@ -760,12 +760,12 @@ jobs:
         run: find packages/ui/dist -exec touch {} +
 
       # Re-runs the generators and fails if any checked-in derived artifact
-      # differs -- element-meta.json, element-types.d.ts, icon-names.json, the
+      # differs -- web-component-meta.json, web-component-types.d.ts, icon-names.json, the
       # React wrappers, llms.txt / llms-full.txt and docs/web-components.md.
       # fc40a10 registered a new ::part(citations) and regenerated none of them;
       # nothing went red, and because the `kai` MCP's component_reference and the
       # docs site's PartTable.astro read those files, a part that existed in the
-      # SHIPPED element was invisible to every tool a developer would use to find
+      # SHIPPED web component was invisible to every tool a developer would use to find
       # it. A human noticing does not scale.
       #
       # This deliberately does NOT lean on the build step above. `nx build ui`
@@ -898,7 +898,7 @@ jobs:
       - name: Server guard (every entry imports AND every component renders under `node`)
         run: pnpm --filter @kitn.ai/ui run verify:ssr
 
-      # Diffs the registered-element catalog (src/elements/element-meta.json)
+      # Diffs the registered-web-component catalog (src/web-components/web-component-meta.json)
       # against the public SolidJS surface, derived from the TS checker and
       # cross-checked against the BUILT entry's runtime keys. The catalog size is
       # not restated here -- the script prints `elements <n>` and the n/n verdict
@@ -907,12 +907,12 @@ jobs:
       # Solid is the authored layer, and the framework docs promise the same
       # catalog everywhere -- but src/index.ts was grown by hand and nobody ever
       # diffed it against the registry, so when this guard was introduced 33 of
-      # the then-79 elements had no writable Solid equivalent (kai-chat,
+      # the then-79 web components had no writable Solid equivalent (kai-chat,
       # kai-thread and kai-workspace among them). Those gaps are closed: it
       # reports GAP 0 today. Also asserts every public component ships a
       # <Name>Props type. Needs the `build` leg's artifact; a missing build fails the check
       # rather than skipping it.
-      - name: Solid coverage guard (every element writable in SolidJS)
+      - name: Solid coverage guard (every web component writable in SolidJS)
         run: pnpm --filter @kitn.ai/ui run verify:solid-coverage
 
       # Packs the tarball and weighs what a consumer actually downloads. `files`
@@ -1043,14 +1043,14 @@ jobs:
         run: pnpm --filter @kitn.ai/ui run verify:tool-schemas
 
       # Compiles every fenced code block in apps/docs against the SHIPPED API --
-      # the built dist/*.d.ts and element-meta.json, read at run time, nothing
+      # the built dist/*.d.ts and web-component-meta.json, read at run time, nothing
       # baked in -- and checks kai-* markup, events, ::part() names and prose
       # symbols against the same source. Docs are the one consumer surface with
       # no compiler behind it, so a renamed prop or a symbol that moved entries
       # stays wrong on the site indefinitely.
       #
       # BLOCKING, and it earned that: an adversarial pass planted 12 defects --
-      # camelCased attributes, a real kit prop on the wrong element, a typo'd
+      # camelCased attributes, a real kit prop on the wrong web component, a typo'd
       # component prop, a wrong property on a kit type inside an UNTYPED js
       # fence, four real symbols imported from the wrong entry point, a
       # misspelled event, a bad ::part(), an array set as an attribute -- and it
@@ -1178,7 +1178,7 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       # Small, focused, retried-internally cross-origin postMessage SECURITY
-      # matrix (remote-element.spec.ts) -- proves the host<>provider handshake
+      # matrix (remote-web-component.spec.ts) -- proves the host<>provider handshake
       # across two real origins, which jsdom and same-origin storybook can't.
       - name: Cross-origin e2e matrix
         run: pnpm --filter @kitn.ai/ui test:e2e
@@ -1425,7 +1425,7 @@ jobs:
         timeout-minutes: 5
         run: npx playwright install --with-deps chromium
 
-      - name: Build (element bundle + provider subpath)
+      - name: Build (web-components bundle + provider subpath)
         run: pnpm exec nx build ui
 
       - name: Storybook tests (a11y + interaction) -- shard ${{ matrix.shard }}/4

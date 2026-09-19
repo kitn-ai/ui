@@ -7,7 +7,7 @@
 // the surface that shipped: adding a Solid component here taxes four frameworks
 // to serve one. Closing the element coverage gaps on this file grew it
 // 591,359 -> 705,031 bytes (+19.2%), which is what motivated the split. (That
-// measurement was taken at the then-79 elements; the catalog grows, the bytes
+// measurement was taken at the then-79 web components; the catalog grows, the bytes
 // quoted do not — they are a record of the split, not a current reading.)
 //
 // The COMPLETE SolidJS surface — a component for EVERY registered element plus a
@@ -228,8 +228,8 @@ export { ArtifactCard, DEFAULT_ARTIFACT_CARD_HEIGHT } from './components/artifac
 // alias, authored in primitives/card-data-types.ts because `ArtifactCardData.files`
 // reaches it and that module has to stay resolvable from a Node/no-DOM project.
 // It is exported here under its authored name because that is the name the
-// generated element metadata records for `kai-artifact.files` / `kai-file-tree.files`,
-// and tests/elements/prop-types-exported.ts requires every named prop type to be
+// generated web-component metadata records for `kai-artifact.files` / `kai-file-tree.files`,
+// and tests/web-components/prop-types-exported.ts requires every named prop type to be
 // importable from this entry. The two aliases stay exported above, unchanged.
 export type {
   ArtifactCardProps,
@@ -400,7 +400,7 @@ export type {
 export type {
   ChatMessage, ChatMessageAction, CustomAction, AvatarData, FeedbackVote, MessagePart,
   MessageSource, RawOrigin,
-} from './elements/chat-types';
+} from './web-components/chat-types';
 
 // Composer document model. This belongs on "." rather than "./solid" because it
 // is part of the ELEMENT contract, not the Solid-only surface: `ComposerDoc` is
@@ -415,15 +415,15 @@ export type { ComposerDoc, Segment, EntityRef } from './primitives/composer-mode
 // Named types for the remaining kai-* array/object PROPERTIES.
 //
 // Same rationale as `ComposerDoc` above, applied to the whole class instead of
-// one instance: the generated `./elements` declarations and React wrappers expand
+// one instance: the generated `./web-components` declarations and React wrappers expand
 // every prop type structurally (deliberately — see the `IMPORTS = {}` note in
-// scripts/gen-element-api.mjs), so a consumer who wants to NAME the shape had to
+// scripts/gen-web-component-api.mjs), so a consumer who wants to NAME the shape had to
 // write `NonNullable<KaiPromptInputElementProps['triggers']>`. Every element-prop
 // type that has a name in source is now reachable from "." — the entry a React /
 // Vue / Svelte / vanilla consumer imports — not only from "./solid".
 //
 // Type-only, so the root barrel pays nothing at runtime.
-// Guarded by tests/elements/prop-types-exported.test.ts, which re-derives the
+// Guarded by tests/web-components/prop-types-exported.test.ts, which re-derives the
 // list from the facades with the TS checker and fails on a new unexported one.
 // ---------------------------------------------------------------------------
 export type { TriggerDef, TriggerItem } from './components/composer/composer';
@@ -437,7 +437,7 @@ export type { PaneTab } from './components/pane/pane-group';
 export type {
   KaiCheckboxOption, KaiCommandItem, KaiContextUsage, KaiMenuItem, KaiRadioOption, KaiSegmentedOption, KaiSelectOption,
   KaiSourceItem,
-} from './elements/element-data-types';
+} from './web-components/web-component-data-types';
 // `kai-audio-visualizer.shader` takes a ShaderSpec. The element arrived from main
 // after this block was written, and prop-types-exported.test.ts caught it, which
 // is the point of deriving that list from the facades rather than maintaining it.

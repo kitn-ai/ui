@@ -10,7 +10,7 @@ import { PromptInput, PromptInputTextarea, PromptInputActions } from '../prompt/
 import {
   FolderPlus, MessageCircleQuestion, Inbox, Search, Sparkles, FileText, ArrowUp, Plus, Upload,
 } from 'lucide-solid';
-import { componentDescription } from '../../stories/docs/element-controls';
+import { componentDescription } from '../../stories/docs/web-component-controls';
 
 /**
  * Story for the compound `Empty` family. `Empty` is the root container; the

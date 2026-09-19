@@ -14,7 +14,7 @@ import { Aside } from '@astrojs/starlight/components';
 </kai-workspace>
 
 <script type="module">
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
 
   const rail = document.querySelector('kai-conversations');
   const chat = document.querySelector('kai-chat');
@@ -57,7 +57,7 @@ Before the 2026-08-20 re-cast, `<kai-workspace>` was a chat preset that took `me
 | `sidebarCollapsed`, `defaultSidebarCollapsed` | `startCollapsed` / `defaultStartCollapsed` (the end aside has its own pair) |
 | `collapseBelow` | kept, now collapsing both asides |
 | `compact` | kept as a reflected density hint; the rail's row density is `<kai-conversations>`' own `compact` |
-| `theme` | unchanged, as on every element |
+| `theme` | unchanged, as on every web component |
 
 Events moved with their owners: listen for `kai-conversation-select` and `kai-new-chat` on `<kai-conversations>`, for `kai-submit`, `kai-message-action`, `kai-model-change`, `kai-value-change`, `kai-suggestion-click`, `kai-voice`, and `kai-web-search` (was `kai-search`) on `<kai-chat>`. The shell itself fires only `kai-aside-toggle` (was `kai-sidebar-toggle`, now with a `side`) and `kai-aside-resize`. The old sidebar methods `toggleSidebar()` / `collapseSidebar()` / `expandSidebar()` are `toggleAside(side)` / `collapseAside(side)` / `expandAside(side)`, and the thread methods (`focus()`, `clear()`, `send()`, `scrollToBottom()`) live on your `<kai-chat>`.
 

@@ -1,7 +1,7 @@
 // Register <kai-audio-visualizer> (and the rest of the kai-* catalog) from
 // this worktree's BUILT dist -- the same compiled bundle a consumer gets.
 // Rebuild with `pnpm exec nx build ui` at the repo root to pick up kit changes.
-import '@kit-dist/elements/audio-visualizer.js';
+import '@kit-dist/web-components/audio-visualizer.js';
 import './index.css';
 import { createRoot } from 'react-dom/client';
 import App from './App';

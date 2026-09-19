@@ -8,12 +8,12 @@
 // drifted apart, which is precisely the failure being guarded against.
 //
 // The composer half of the proof lives in
-// `src/elements/attachment-filter.test.tsx` -- it needs a DOM.
+// `src/web-components/attachment-filter.test.tsx` -- it needs a DOM.
 import { describe, expect, it } from 'vitest';
 import { encodableMediaTypes, resolveMediaPolicy } from './media-types';
 import { WireEncodeError, toAnthropicMessages, toOpenAIMessages } from './encode';
 import type { AttachmentData } from '../primitives/attachment-types';
-import type { ChatMessage } from '../elements/chat-types';
+import type { ChatMessage } from '../web-components/chat-types';
 
 /** base64 of the given text, without pulling in Buffer (this layer runs in a
  *  browser too). */

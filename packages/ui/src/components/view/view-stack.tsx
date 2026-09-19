@@ -84,7 +84,7 @@ export interface ViewStackController {
 }
 
 export interface CreateViewStackOptions {
-  /** The registered views, in declaration order. Reactive: element facades
+  /** The registered views, in declaration order. Reactive: web-component facades
    *  feed this from observed light-DOM children. The first tab root (else
    *  the first entry) is the default root. */
   entries: () => readonly ViewEntry[];

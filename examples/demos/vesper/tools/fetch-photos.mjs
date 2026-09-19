@@ -131,7 +131,7 @@ ${Object.entries(MANIFEST)
 
 ## Inherited, provenance unrecorded
 
-These three arrived base64-inlined in \`packages/ui/src/elements/v0.stories.tsx\`
+These three arrived base64-inlined in \`packages/ui/src/web-components/v0.stories.tsx\`
 and carried no attribution, so their photographers are unknown. They are almost
 certainly Unsplash as well, from the same searches.
 

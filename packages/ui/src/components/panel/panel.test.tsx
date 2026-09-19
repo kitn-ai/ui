@@ -9,7 +9,7 @@
  *
  *   1. every chrome color is a KIT TOKEN class (bg-background /
  *      text-foreground / border-border), never an invented palette, so a
- *      `--kai-color-*` override retints the chrome with the elements;
+ *      `--kai-color-*` override retints the chrome with the web components;
  *   2. the header row's box is byte-for-byte ChatThread's built-in header
  *      (h-14 · border-b · px-5 · gap-2 clusters · sm semibold title), so the
  *      P-9 refactor can render kai-chat's header THROUGH these parts with no
