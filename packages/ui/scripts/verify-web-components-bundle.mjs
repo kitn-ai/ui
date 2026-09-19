@@ -39,7 +39,7 @@
 // A ZERO-CHUNK RUN IS A HARD FAILURE. If kai.es.js dynamically imports nothing
 // carrying element registrations, that is this script reading the wrong thing —
 // or a bundle that genuinely registers nothing — and either way it is not a pass.
-import { readFileSync, existsSync, mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
+import { readFileSync, existsSync, mkdirSync, mkdtempSync, writeFileSync, readdirSync } from 'node:fs';
 import { resolve, dirname, join, posix } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
@@ -149,6 +149,30 @@ function checkTree(root) {
     return { problems };
   }
 
+  // THE AUTOLOADER'S OWN CONTRACT: it fetches `${base}${manifest.tags[tag]}.js`, so
+  // every tag in this map must have a REAL emitted module at dist/web-components/.
+  // The manifest's values are source BASENAMES, and the per-web-component build names
+  // its output after the source file, so this holds by construction - but nothing
+  // checked it, and the layers directory layout has changed twice. A tag whose module
+  // is missing is a 404 at run time in a consumer's page, which is the failure the
+  // autoloader reports only as a console warning.
+  const emittedModules = new Set(
+    readdirSync(join(root, 'dist/web-components'))
+      .filter((f) => f.endsWith('.js'))
+      .map((f) => f.slice(0, -'.js'.length)),
+  );
+  if (emittedModules.size === 0) {
+    problems.push('dist/web-components holds no .js modules, so the autoloader check below would assert nothing.');
+  }
+  const missingModules = TAGS.filter((tag) => !emittedModules.has(manifest.tags[tag]));
+  if (missingModules.length > 0) {
+    problems.push(
+      `${missingModules.length} tag(s) map to a module the autoloader CANNOT fetch - ` +
+        `dist/web-components/<module>.js is missing for them, so the autoloader would 404 in a consumer page:\n` +
+        missingModules.map((t) => `    ${t} -> dist/web-components/${manifest.tags[t]}.js`).join('\n'),
+    );
+  }
+
   // Every relative dynamic import kai.es.js makes. The registration chunk is one
   // of them; the rest are the lazily loaded Shiki grammars (zero kai-* tags).
   const specifiers = [...code.matchAll(/import\(\s*["'](\.\/[^"']+\.js)["']\s*\)/g)].map((m) => m[1]);
@@ -214,13 +238,20 @@ const registrationChunkBody = (tags = FIXTURE_TAGS) =>
   tags.map((t) => `customElements.define(${JSON.stringify(t)}, C);`).join('\n');
 
 /** The healthy tree, with `over` merged on top (a `null` value deletes a file). */
+const FIXTURE_TAG_MODULE = Object.fromEntries(FIXTURE_TAGS.map((t) => [t, t.replace(/^kai-/, '')]));
+
 const fixtureFiles = (over = {}) => ({
   'package.json': JSON.stringify({ name: '@kitn.ai/ui', sideEffects: FIXTURE_SIDE_EFFECTS }),
-  'src/web-components/web-component-manifest.json': JSON.stringify({
-    tags: Object.fromEntries(FIXTURE_TAGS.map((t) => [t, { module: `src/web-components/${t}.ts` }])),
-  }),
+  // The REAL shape: tag -> module BASENAME, which is the file the autoloader fetches
+  // from dist/web-components/. This used to be tag -> { module: <source path> }, which
+  // no build ever produced, so nothing exercised the shape the autoloader depends on.
+  'src/web-components/web-component-manifest.json': JSON.stringify({ tags: FIXTURE_TAG_MODULE }),
   'dist/kai.es.js': `export const webComponentsReady = import("./register-impl-abc123.js");\n`,
   'dist/register-impl-abc123.js': registrationChunkBody(),
+  // One emitted module per tag: the tree the new check reads.
+  ...Object.fromEntries(
+    Object.values(FIXTURE_TAG_MODULE).map((mod) => [`dist/web-components/${mod}.js`, `export {};\n`]),
+  ),
   ...over,
 });
 
@@ -240,6 +271,13 @@ const SELF_TEST_CASES = [
     name: 'a healthy tree draws no findings at all',
     files: fixtureFiles(),
     expect: [],
+  },
+  {
+    name: 'DEFECT (3): a tag whose module the autoloader cannot fetch',
+    // The autoloader fetches `${base}${manifest.tags[tag]}.js`; a missing emitted
+    // module is a 404 in a consumer page whose only symptom is a console warning.
+    files: fixtureFiles({ 'dist/web-components/thread.js': null }),
+    expect: ['kai-thread -> dist/web-components/thread.js', 'CANNOT fetch'],
   },
   {
     name: 'DEFECT (1) ALONE: the register-impl specifier is stripped from kai.es.js',
