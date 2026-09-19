@@ -191,6 +191,39 @@ describe('hostile code renders VISIBLE and INERT, in BOTH paints', () => {
     expect(handlerAttrs(shadow(el))).toEqual([]);
     expect(region(el).textContent).toBe(HOSTILE);
   });
+
+  test('an UNKNOWN language keeps the hostile source escaped through `plain()`', async () => {
+    // The THIRD supplier of `innerHTML`, and the only one where the escaping is the
+    // kit's own `escapeHtml` rather than shiki's (a known grammar) or JSX's (the
+    // `<Show>` fallback above). `plain()` is what a model naming a language the kit
+    // has never heard of lands on, which is the ordinary case rather than an edge
+    // one, so it needs the same census as the other two.
+    const el = create({ code: HOSTILE, language: 'cobol' });
+    document.body.appendChild(el);
+
+    // Assert on the FIRST paint too, synchronously: the security property has to
+    // hold in both, so neither of these can be a race the test won.
+    expect(tags(shadow(el)).has('img')).toBe(false);
+    expect(region(el).textContent).toBe(HOSTILE);
+
+    // Settle the resource rather than guessing an interval: without a grammar the
+    // highlight resolves to `plain()`, which replaces the fallback through
+    // `innerHTML` — the swap that is the whole point of this case.
+    await new Promise((r) => setTimeout(r, 300));
+
+    expect(shikiPre(el), 'no grammar means no shiki markup').toBeNull();
+    expect(tags(shadow(el)).has('script')).toBe(false);
+    expect(tags(shadow(el)).has('img')).toBe(false);
+    expect(tags(shadow(el)).has('a')).toBe(false);
+    expect(handlerAttrs(shadow(el))).toEqual([]);
+    expect(region(el).textContent, 'the source stays readable, escaped not deleted').toBe(HOSTILE);
+    // The escaping FORM, and the reason this case is worth its own test: `escapeHtml`
+    // writes `&lt;`, which `innerHTML` then parses back into a text node, so the
+    // serialization reads `&lt;` while shiki's path (above) reads `&#x3C;`. Asserting
+    // one form against the other's path is how a green test proves nothing.
+    expect(region(el).innerHTML).toContain('&lt;script&gt;');
+    expect(region(el).innerHTML, 'no raw tag survives the write').not.toContain('<img');
+  });
 });
 
 // ---------------------------------------------------------------------------

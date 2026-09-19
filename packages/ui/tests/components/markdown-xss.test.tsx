@@ -1,9 +1,17 @@
 // tests/components/markdown-xss.test.tsx
 //
-// The markdown sink is the kit's one raw-`innerHTML` write, so it is the one
-// place where a string the MODEL produced becomes live DOM in the host page's
-// origin. Every vector below was confirmed executing in Chromium against the
-// shipped pipeline before the fix (assistant text -> marked -> innerHTML).
+// The markdown path is where a string the MODEL produced becomes live DOM in the
+// host page's origin. Every vector below was confirmed executing in Chromium
+// against the shipped pipeline before the fix (assistant text -> marked ->
+// innerHTML).
+//
+// THE SINK IS NO LONGER A RAW `innerHTML` WRITE. Since e66c004d the renderer emits
+// a token stream, so raw HTML becomes a TEXT node and the escaping is done by the
+// DOM rather than by a string filter. The kit's one remaining raw-`innerHTML`
+// write is `code-block.tsx`'s `innerHTML={highlighted()}`, pinned by the hostile
+// census in `tests/elements/code-block.test.tsx`; the fenced-code group at the
+// bottom of this file covers the markdown path INTO that component, which is the
+// one every assistant message with a code sample in it takes.
 //
 // The threat model is NOT "a hostile server". The attacker only has to
 // influence the model's OUTPUT: a user pasting an example, a prompt-injected
@@ -191,6 +199,105 @@ describe('markdown sink: dangerous URL schemes never reach an href/src', () => {
   test('a blocked link still shows its text, so nothing vanishes silently', () => {
     const el = mount('[click me](javascript:window.__PWNED__=1)');
     expect(el.textContent).toContain('click me');
+  });
+});
+
+describe('markdown sink: a fenced code block, through both fence paths', () => {
+  // A code block is the one surface where the hostile string is ALSO the legitimate
+  // content — "show me an HTML snippet" is an ordinary thing to ask a coding
+  // assistant — so deleting it is not an option and the reader seeing the tag is
+  // the correct answer.
+  //
+  // The two fence paths are different sinks, which is why both are here. A
+  // TOP-LEVEL fence is split out by `parseMarkdownIntoBlocks` and rendered by the
+  // Solid `CodeBlock`, whose finished HTML is written via `innerHTML`; a NESTED
+  // fence (inside a quote or a list item) never leaves the token renderer and
+  // becomes a text node in a plain `<pre><code>`. `CodeBlockCode` has three
+  // suppliers of that `innerHTML` — shiki (a known grammar), the kit's own
+  // `escapeHtml` via `plain()` (an unknown one), and the JSX `<Show>` fallback — and
+  // all three escape `<` to `&lt;`, so the FORM does not identify which one ran. What
+  // identifies it is `pre.shiki` for shiki and the `<span>` tokens as a live-census
+  // control; the escape form is asserted only to prove the tag arrived as text.
+  //
+  // (A handoff note claimed the shiki form was `&#x3C;` and that asserting `&lt;`
+  // would fail. The raw `innerHTML` below says otherwise — it is `&lt;` — so that
+  // note was wrong for this pipeline and is not encoded here.)
+  const HOSTILE = '<img src=x onerror="window.__PWNED__=1">\n<script>window.__PWNED__=1</script>';
+
+  /** Shiki's own output, distinguishable from the plain fallback by its class. */
+  const shikiPre = (el: HTMLElement) => el.querySelector('pre.shiki');
+
+  /** Every element the render created, so an injected tag cannot hide. */
+  const tags = (el: HTMLElement) => new Set([...el.querySelectorAll('*')].map((n) => n.tagName.toLowerCase()));
+
+  /** Any live event-handler attribute anywhere under `el`. */
+  const handlerAttrs = (el: HTMLElement) =>
+    [...el.querySelectorAll('*')].flatMap((n) => [...n.attributes].map((a) => a.name)).filter((n) => /^on/i.test(n));
+
+  /**
+   * Poll until `check` holds. The highlight is async because shiki's first call
+   * builds the core and dynamically imports the engine, theme and grammar, so the
+   * latency is real and variable — a fixed sleep would be flaky or slow, and both
+   * would be a worse test than waiting for the fact itself.
+   */
+  async function until(check: () => boolean, what: string, ms = 4000): Promise<void> {
+    const deadline = Date.now() + ms;
+    while (Date.now() < deadline) {
+      if (check()) return;
+      await new Promise((r) => setTimeout(r, 10));
+    }
+    throw new Error(`timed out waiting for: ${what}`);
+  }
+
+  test('a top-level fence: every injected element stays text, source stays visible', async () => {
+    const el = mount('```html\n' + HOSTILE + '\n```');
+
+    // The first paint is the plain fallback and lands synchronously, so it is
+    // asserted before any await rather than after one.
+    expect(el.querySelector('img')).toBeNull();
+    expect(el.textContent).toContain('<img src=x onerror="window.__PWNED__=1">');
+
+    // Then the paint that goes through `innerHTML={highlighted()}`.
+    await until(() => shikiPre(el) !== null, 'the highlight to land on the innerHTML path');
+
+    expect(el.querySelector('img')).toBeNull();
+    expect(el.querySelector('script')).toBeNull();
+    expect(el.querySelector('a')).toBeNull();
+    expect(handlerAttrs(el)).toEqual([]);
+    expect(tags(el).has('span'), 'CONTROL: the census is live, shiki tokens are real elements').toBe(true);
+    expect(el.textContent, 'the source stays readable, escaped not deleted').toContain(
+      '<img src=x onerror="window.__PWNED__=1">',
+    );
+    expect(el.innerHTML, 'the tag arrived as text, in the form the DOM serializes').toContain('&lt;');
+    expect(el.innerHTML, 'and no raw tag survived the write').not.toContain("<img");
+  });
+
+  test('an UNKNOWN language fence: plain() escapes it, and stays visible', async () => {
+    const el = mount('```cobol\n' + HOSTILE + '\n```');
+    expect(el.querySelector('img')).toBeNull();
+
+    // No grammar means no shiki markup, so `shikiPre` never appears and there is no
+    // fact to poll for; the census is what has to hold, and it holds in both paints.
+    await new Promise((r) => setTimeout(r, 300));
+
+    expect(shikiPre(el)).toBeNull();
+    expect(el.querySelector('img')).toBeNull();
+    expect(el.querySelector('script')).toBeNull();
+    expect(handlerAttrs(el)).toEqual([]);
+    expect(el.textContent).toContain('<script>window.__PWNED__=1</script>');
+    expect(el.innerHTML, 'the same escape form, because all three suppliers agree on it').toContain('&lt;script&gt;');
+    expect(el.innerHTML).not.toContain('<img');
+  });
+
+  test('a NESTED fence stays in the token renderer and is text, not markup', () => {
+    // The other path: inside a blockquote this never reaches `CodeBlock` at all, so
+    // it must hold with no highlighter involved and no await needed.
+    const el = mount('> ```html\n> ' + HOSTILE + '\n> ```');
+    expect(el.querySelector('blockquote'), 'the quote itself still renders').not.toBeNull();
+    expect(el.querySelector('img')).toBeNull();
+    expect(el.querySelector('script')).toBeNull();
+    expect(handlerAttrs(el)).toEqual([]);
+    expect(el.textContent).toContain('<img src=x onerror="window.__PWNED__=1">');
   });
 });
 
