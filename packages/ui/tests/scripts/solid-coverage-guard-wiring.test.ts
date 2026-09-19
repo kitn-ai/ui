@@ -58,7 +58,7 @@ function fixtureRoot(over: Record<string, string | null> = {}): string {
     'tsconfig.json': JSON.stringify(TSCONFIG, null, 2),
     'src/components/foo.tsx':
       'export type FooProps = { a?: string };\nexport function Foo(props: FooProps) { return <div>{props.a}</div>; }\n',
-    'src/web-components/define.tsx':
+    'src/web-components/define/define.tsx':
       'export function defineWebComponent(tag: string, props: unknown, render: unknown) { return { tag, props, render }; }\n',
     'src/web-components/x.tsx':
       "import { defineWebComponent } from './define';\nimport { Foo } from '../components/foo';\ndefineWebComponent('kai-x', {}, () => <Foo a=\"hi\" />);\n",

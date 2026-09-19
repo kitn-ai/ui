@@ -1044,14 +1044,14 @@ ${
  */
 const SUBPATH_SOURCES = {
   '.': 'src/index.ts',
-  'web-components': 'src/web-components/register.ts',
+  'web-components': 'src/web-components/register/register.ts',
   solid: 'src/solid.ts',
   state: 'src/state/index.ts',
   wire: 'src/wire/index.ts',
   schemas: 'src/schemas/index.ts',
   react: 'frameworks/react/index.tsx',
   provider: 'src/remote/provider.ts',
-  autoloader: 'src/web-components/autoloader.ts',
+  autoloader: 'src/web-components/autoloader/autoloader.ts',
 };
 
 const specOf = (sub) => (sub === '.' ? '@kitn.ai/ui' : `@kitn.ai/ui/${sub}`);
@@ -1149,7 +1149,7 @@ const helpers = {
   derivedProp: (tag, name) => derived.webComponents.find((e) => e.tag === tag)?.props.find((p) => p.name === name),
   derivedEvents: (tag) => derived.webComponents.find((e) => e.tag === tag)?.events ?? [],
   wireIndexSource: readFileSync(join(ROOT, 'src/wire/index.ts'), 'utf8'),
-  defineSource: readFileSync(join(ROOT, 'src/web-components/define.tsx'), 'utf8'),
+  defineSource: readFileSync(join(ROOT, 'src/web-components/define/define.tsx'), 'utf8'),
   exportsKeys: Object.keys(pkg.exports ?? {}),
 };
 

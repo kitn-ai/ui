@@ -26,7 +26,7 @@ import { z } from 'zod';
 // DOM-lib pass (transitively, via mcp/tools/construct.ts), and card-routing.ts
 // pulls in HTMLElement/window/CustomEvent that pass can't see.
 import { isSafeUrl } from '../../src/primitives/url-scheme-policy';
-import { CHAT_MESSAGE_ACTIONS } from '../../src/web-components/chat-actions';
+import { CHAT_MESSAGE_ACTIONS } from '../../src/web-components/chat/chat-actions';
 import { BUTTON_VARIANT_NAMES } from '../../src/components/button/button-variant-names';
 import { KNOWN_THEME_TOKENS, themeTokenValueProblem } from './theme-token-policy';
 

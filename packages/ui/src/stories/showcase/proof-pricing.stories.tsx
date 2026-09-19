@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal, For, Show } from 'solid-js';
-import './register'; // registers kai-icon (the only kai-* element used here)
+import '../../web-components/register/register'; // registers kai-icon (the only kai-* element used here)
 
 // Labs/Proofs: a TOKEN-DRIVEN proof. A Pricing & Plans page built ONLY from the
 // design tokens + raw markup (Tailwind utilities that map to our --color-*/radius/

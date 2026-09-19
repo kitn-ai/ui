@@ -17,8 +17,8 @@
  * assertion is paired with a positive over the same harness.
  */
 import { afterEach, describe, expect, test } from 'vitest';
-import '../../src/web-components/segmented';
-import type { KaiSegmentedOption } from '../../src/web-components/web-component-data-types';
+import '../../src/web-components/segmented/segmented';
+import type { KaiSegmentedOption } from '../../src/web-components/web-component/web-component-data-types';
 
 /** Past a macrotask — attribute reflection lands a task after the Solid effect. */
 const flush = () => new Promise((r) => setTimeout(r, 0));

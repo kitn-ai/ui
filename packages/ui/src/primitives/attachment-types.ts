@@ -11,7 +11,7 @@ export interface AttachmentData {
    *  flawless preview and is meaningless to any provider —
    *  `toOpenAIMessages`/`toAnthropicMessages` refuse it rather than send an
    *  address the model cannot fetch. Read picked files with
-   *  `FileReader.readAsDataURL` instead (see `web-components/default-input.tsx`). */
+   *  `FileReader.readAsDataURL` instead (see `web-components/prompt/default-input.tsx`). */
   url?: string;
   title?: string;
 }

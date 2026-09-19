@@ -1,6 +1,6 @@
 // tests/web-components/artifact.test.tsx
-import '../../src/web-components/file-tree';
-import '../../src/web-components/artifact';
+import '../../src/web-components/file-tree/file-tree';
+import '../../src/web-components/artifact/artifact';
 import {
   configurePdfPreview,
   __resetPdfPreviewForTests,

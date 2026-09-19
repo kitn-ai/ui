@@ -7,10 +7,10 @@
  * the field: .superpowers/sdd/2026-08-20-rung-3/latency-debug/report.md) is
  * now opt-in via `reasoningOpen` on `<kai-chat>`, forwarded to ChatThread's
  * `reasoningOpen` -> message.tsx's `reasoningDefaultOpen` -> Reasoning's
- * `defaultOpen`/`openOnStream` (src/components/message/message.tsx, src/web-components/chat.tsx).
+ * `defaultOpen`/`openOnStream` (src/components/message/message.tsx, src/web-components/chat/chat.tsx).
  */
-import '../../src/web-components/chat';
-import type { ChatMessage } from '../../src/web-components/chat-types';
+import '../../src/web-components/chat/chat';
+import type { ChatMessage } from '../../src/web-components/chat/chat-types';
 
 // jsdom does not implement Element.prototype.scrollTo (same shim as
 // chat.test.tsx): ChatContainer's stick-to-bottom primitive calls it

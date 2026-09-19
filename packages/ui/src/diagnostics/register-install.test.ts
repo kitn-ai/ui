@@ -10,7 +10,7 @@
 // It lives in its own file for the same reason: hook.test.ts asserts that
 // importing the hook module installs NOTHING, and a side-effecting import at the
 // top of that file would make the assertion meaningless.
-import '../web-components/register-impl';
+import '../web-components/register/register-impl';
 import { describe, expect, it } from 'vitest';
 
 describe('register-impl installs the devtools hook', () => {

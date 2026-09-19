@@ -16,7 +16,7 @@
  * hang fails rather than wedging the suite.
  */
 import { afterEach, describe, expect, test } from 'vitest';
-import '../../src/web-components/response-stream';
+import '../../src/web-components/response-stream/response-stream';
 
 const flush = () => new Promise((r) => setTimeout(r, 0));
 

@@ -2,7 +2,7 @@
 // <kai-cards>: renders the right child kai-* per envelope, sets data/cardId/heading/theme,
 // routes child events through .policy, bubbles the raw kai-card event, and shows a
 // fallback (+ error) for unknown types.
-import '../../src/web-components/cards';
+import '../../src/web-components/card/cards';
 import { CARD_EVENT_NAME } from '../../src/primitives/card-routing';
 import type { CardEnvelope, CardEvent, CardPolicy } from '../../src/primitives/card-contract';
 

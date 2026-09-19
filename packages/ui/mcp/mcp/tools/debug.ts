@@ -406,7 +406,7 @@ const RULES: Rule[] = [
   },
   {
     // Rule 12 — kai-compare contract: two candidates, JS data prop, stream both, terminal pick
-    // Source: src/web-components/compare.tsx + src/components/response/response-compare-types.ts
+    // Source: src/web-components/compare/compare.tsx + src/components/response/response-compare-types.ts
     id: 'compare-contract',
     test: (t) => {
       if (/<kai-compare\b|kai-compare-select|ResponseCompareData|response.?compare/i.test(t)) return true;
@@ -455,7 +455,7 @@ const RULES: Rule[] = [
   },
   {
     // Rule 13 — kai-composer is the bare editor; attachments + send live on kai-prompt-input
-    // Source: src/web-components/composer.tsx (element doc), src/web-components/prompt-input.tsx,
+    // Source: src/web-components/composer/composer.tsx (element doc), src/web-components/prompt/prompt-input.tsx,
     // apps/docs components/composer.mdx (the taxonomy sentence). Rung-6 F-43.
     id: 'composer-attachments',
     test: (t) => {
@@ -488,7 +488,7 @@ const RULES: Rule[] = [
   {
     // Rule 14 — blob: attachment URLs: the wire refuses them; use a data: URI
     // Source: src/primitives/attachment-types.ts (AttachmentData.url doc),
-    // src/web-components/default-input.tsx (readAsDataUrl), src/wire/files.ts (the refusal),
+    // src/web-components/prompt/default-input.tsx (readAsDataUrl), src/wire/files.ts (the refusal),
     // apps/docs patterns/attachments-flow.mdx. Rung-6 F-44; the defect PR #186 shipped.
     id: 'attachment-blob-url',
     test: (t) => {

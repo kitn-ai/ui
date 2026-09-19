@@ -14,7 +14,7 @@ import {
   Trash2,
   UserPlus,
 } from 'lucide-solid';
-import './search';
+import '../../web-components/search/search';
 
 // Declare the custom element tag for SolidJS JSX.
 declare module 'solid-js' {

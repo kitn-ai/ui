@@ -29,10 +29,10 @@
  * carried a hand-rolled version of the fix since long before this file, so it was
  * GREEN in the same run, proving the harness can distinguish the two.
  */
-import '../../src/web-components/chat';
-import '../../src/web-components/resizable';
-import '../../src/web-components/switch';
-import '../../src/web-components/reasoning';
+import '../../src/web-components/chat/chat';
+import '../../src/web-components/resizable/resizable';
+import '../../src/web-components/switch/switch';
+import '../../src/web-components/reasoning/reasoning';
 import { expect, test, afterEach, describe } from 'vitest';
 
 // jsdom does not implement Element.prototype.scrollTo; <kai-chat>'s stick-to-bottom
@@ -262,7 +262,7 @@ describe('the seam itself', () => {
   test('reflectFlag on an undeclared prop warns instead of silently doing nothing', async () => {
     // "Decide loudly". A facade reflecting a prop it never declared gets no accessor
     // to wrap, and the quiet version of that looks exactly like a working read-back.
-    const { defineWebComponent } = await import('../../src/web-components/define');
+    const { defineWebComponent } = await import('../../src/web-components/define/define');
     const warnings: unknown[][] = [];
     const original = console.warn;
     console.warn = (...args: unknown[]) => void warnings.push(args);

@@ -3,7 +3,7 @@ import { SlidersHorizontal } from 'lucide-solid';
 import { CardSurface } from './card-surface';
 import { Button } from '../button/button';
 import { componentDescription } from '../../stories/docs/web-component-controls';
-import cover from '../../web-components/card-media.jpg';
+import cover from '../../web-components/card/card-media.jpg';
 
 const meta = {
   title: 'Components/Card Surface',

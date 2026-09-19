@@ -97,7 +97,7 @@ const clearToastsOnUnmount: Decorator = (Story) =>
   });
 
 const preview: Preview = {
-  // `@kitn.ai/ui/web-components` (src/web-components/register.ts) is now SSR-import-safe: it
+  // `@kitn.ai/ui/web-components` (src/web-components/register/register.ts) is now SSR-import-safe: it
   // registers the kai-* custom elements via a gated dynamic `import()` (browser-
   // only), so registration completes on a microtask AFTER the module imports —
   // not synchronously. Storybook always runs in a browser, so eagerly trigger +

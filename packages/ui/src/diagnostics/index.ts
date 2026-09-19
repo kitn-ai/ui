@@ -7,7 +7,7 @@
 // Keeping them apart leaves a consumer who only parses streams at zero cost.
 //
 // WHO CALLS `installKaiDevtoolsHook()`. The kit calls it for you from
-// `web-components/register-impl.ts`, so any app that registers the `kai-*` elements --
+// `web-components/register/register-impl.ts`, so any app that registers the `kai-*` elements --
 // which is every consumer of `@kitn.ai/ui/web-components`, the React wrappers, or the
 // CDN bundle -- gets the hook with no work.
 //
@@ -79,4 +79,4 @@ export type {
   WebComponentRegistryEvent,
   WebComponentViolationEvent,
   WebComponentViolationKind,
-} from '../web-components/diagnostic-events';
+} from '../web-components/web-component/diagnostic-events';

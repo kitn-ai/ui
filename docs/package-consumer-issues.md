@@ -161,7 +161,7 @@ namespaced `--kai-color-*`) avoids all of it.
   `--kai-color-*` for the no-collision path. The dark variant, radius and text re-points stay too; they are the
   opt-in the file now says it is.
 
-**Affected:** `theme.css`, `dist/theme.tokens.css` (derived), `src/components/loader.tsx` / `text-shimmer.tsx` / `tool.tsx` / `chain-of-thought.tsx` / `artifact.tsx`, `src/components/scroll-area.tsx`, `src/web-components/file-tree.tsx`, `apps/docs/src/content/docs/guides/theming.mdx`, `apps/docs/src/content/docs/guides/installation.mdx`, `docs/coupling-map.md` (§4 keyframes ↔ references, §9 theme.css ↔ the consumer's `@theme`).
+**Affected:** `theme.css`, `dist/theme.tokens.css` (derived), `src/components/loader.tsx` / `text-shimmer.tsx` / `tool.tsx` / `chain-of-thought.tsx` / `artifact.tsx`, `src/components/scroll-area.tsx`, `src/web-components/file-tree/file-tree.tsx`, `apps/docs/src/content/docs/guides/theming.mdx`, `apps/docs/src/content/docs/guides/installation.mdx`, `docs/coupling-map.md` (§4 keyframes ↔ references, §9 theme.css ↔ the consumer's `@theme`).
 
 ---
 

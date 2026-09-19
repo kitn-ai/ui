@@ -1,7 +1,7 @@
 // tests/web-components/confirm-card.test.tsx
 // Contract integration for <kai-confirm>: the bubbling `kai-card` CustomEvent reaches
 // a document listener with the right `action` payload + resolved single-shot state.
-import '../../src/web-components/confirm-card';
+import '../../src/web-components/confirm-card/confirm-card';
 import { CARD_EVENT_NAME } from '../../src/primitives/card-routing';
 import type { CardEvent } from '../../src/primitives/card-contract';
 import type { ConfirmCardData } from '../../src/components/confirm-card/confirm-card';

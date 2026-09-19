@@ -482,7 +482,7 @@ function isWithin(root: Node, node: Node | null): boolean {
  * `--kai-dock-height` · `--kai-dock-inset` · `--kai-dock-gap` · `--kai-dock-radius` ·
  * `--kai-dock-z` · `--kai-dock-launcher-size`.
  *
- * @see `web-components/dock.tsx` for the `<kai-dock>` web-component facade.
+ * @see `web-components/dock/dock.tsx` for the `<kai-dock>` web-component facade.
  */
 export function Dock(props: DockProps) {
   const panelId = `kai-dock-panel-${createUniqueId()}`;

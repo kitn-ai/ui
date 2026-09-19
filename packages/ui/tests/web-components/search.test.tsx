@@ -1,5 +1,5 @@
 import { vi } from 'vitest';
-import '../../src/web-components/search';
+import '../../src/web-components/search/search';
 
 /** Let Solid's scheduler flush effects + renders (mirrors input.test). */
 const flush = () => new Promise((r) => setTimeout(r, 0));

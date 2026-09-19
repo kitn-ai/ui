@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import type { ChatMessage } from '../web-components/chat-types';
+import type { ChatMessage } from '../web-components/chat/chat-types';
 import { appendMessage, upsertMessage, updateMessage, removeMessage, appendText, textMessage, partsToText } from './messages';
 import { appendTextPart } from './parts';
 

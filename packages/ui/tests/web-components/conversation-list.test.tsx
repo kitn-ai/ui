@@ -1,4 +1,4 @@
-import '../../src/web-components/conversation-list';
+import '../../src/web-components/conversation/conversation-list';
 import type { ConversationGroup, ConversationSummary } from '../../src/types';
 
 const groups: ConversationGroup[] = [{ id: 'g1', name: 'Today', sortOrder: 0, createdAt: '2026-06-01' }];

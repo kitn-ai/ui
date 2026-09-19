@@ -6,7 +6,7 @@ import { BuilderLayout, type BuilderViewport } from '../../components/builder/bu
 import { resolveAccentWrapperStyle } from '../../components/builder/builder-preview';
 import { ChatThread } from '../../components/chat/chat-thread';
 import { cn } from '../../utils/cn';
-import type { ChatMessage } from '../../web-components/chat-types';
+import type { ChatMessage } from '../../web-components/chat/chat-types';
 
 // Labs/Builder/Support widget — Round W (T-2/T-6, docs/superpowers/specs/
 // 2026-08-28-template-builder-design.md): the FIRST template story,

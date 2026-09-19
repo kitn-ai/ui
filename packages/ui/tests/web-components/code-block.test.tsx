@@ -34,7 +34,7 @@ import { render } from '@solidjs/testing-library';
 import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import '../../src/web-components/code-block';
+import '../../src/web-components/code-block/code-block';
 import { componentSource, componentSourceRel } from '../helpers/kit-paths';
 import { CodeBlock, CodeBlockCode } from '../../src/components/code-block/code-block';
 
@@ -336,7 +336,7 @@ describe('the copy control', () => {
     // WAS A REAL, CONSUMER-FACING DEFECT: the promise and the element disagreed, and
     // the promise is the half that gets published.
     //
-    //   · src/web-components/code-block.tsx, the facade's own doc comment:
+    //   · src/web-components/code-block/code-block.tsx, the facade's own doc comment:
     //       "`<kai-code-block>` — one syntax-highlighted code block (with a copy button)."
     //   · docs/web-components.md (generated, and the file the docs site renders):
     //       "A single syntax-highlighted code block with a copy button."
@@ -505,7 +505,7 @@ describe('the copy control', () => {
     // files rather than trusted. The RULING was to make the element true to the docs
     // rather than the docs true to the element, so these strings must stay put —
     // if someone edits the docs instead, this fails and says so.
-    const facade = readFileSync(resolve(pkgRoot, 'src/web-components/code-block.tsx'), 'utf8');
+    const facade = readFileSync(resolve(pkgRoot, 'src/web-components/code-block/code-block.tsx'), 'utf8');
     expect(facade).toContain('(with a copy button)');
     const docs = readFileSync(resolve(pkgRoot, '../../docs/web-components.md'), 'utf8');
     expect(docs).toContain('code block with a copy button');

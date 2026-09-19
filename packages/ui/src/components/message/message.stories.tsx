@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { Message, MessageAvatar, MessageContent, MessageActions, MessageBody } from './message';
-import type { MessagePart } from '../../web-components/chat-types';
+import type { MessagePart } from '../../web-components/chat/chat-types';
 import { Button } from '../button/button';
 import { Copy, ThumbsUp, ThumbsDown, RefreshCw, Pencil } from 'lucide-solid';
 import { componentDescription } from '../../stories/docs/web-component-controls';

@@ -3,7 +3,7 @@
 // Submit button emits the bubbling `kai-card` `action` event with the right payload +
 // resolved single-shot state, plus the unified allowOther flow. Modeled on
 // confirm-card.test.tsx.
-import '../../src/web-components/choice';
+import '../../src/web-components/choice/choice';
 import { CARD_EVENT_NAME } from '../../src/primitives/card-routing';
 import type { CardEvent } from '../../src/primitives/card-contract';
 import type { ChoiceCardData } from '../../src/components/choice-card/choice-card';

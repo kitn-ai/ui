@@ -33,7 +33,7 @@ import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { expect, test } from 'vitest';
-import { defineWebComponent, reflectedGlobalPropNames } from '../../src/web-components/define';
+import { defineWebComponent, reflectedGlobalPropNames } from '../../src/web-components/define/define';
 
 const pkgRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const meta: { tag: string; props?: { name: string }[] }[] = JSON.parse(

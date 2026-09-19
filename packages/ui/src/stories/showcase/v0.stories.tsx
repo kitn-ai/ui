@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal, For, Show } from 'solid-js';
 import { RotateCcw } from 'lucide-solid';
-import './register'; // every kai-* element used below
+import '../../web-components/register/register'; // every kai-* element used below
 
 // Labs/Apps: a third dogfood — "v0", an AI app-builder UI (inspired by v0.app)
 // that stress-tests the artifact/preview pattern. It is the SPLIT shell every

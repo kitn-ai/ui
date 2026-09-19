@@ -18,7 +18,7 @@
  * root bundle — see src/stores/index.ts for the decision record.
  */
 import type { ConversationSummary } from '../types';
-import type { ChatMessage } from '../web-components/chat-types';
+import type { ChatMessage } from '../web-components/chat/chat-types';
 
 export interface ConversationStore {
   // `list()`/`load()` implementations MUST return a fresh array (and, for any

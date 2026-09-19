@@ -2,12 +2,12 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal, createEffect, Show, For, type Component } from 'solid-js';
 import { Code2, FileText, Globe, MessageSquare } from 'lucide-solid';
 import { expect, userEvent, waitFor } from 'storybook/test';
-import './register'; // every kai-* element used below
+import '../../web-components/register/register'; // every kai-* element used below
 import type { KaiNavItem } from '../../components/nav/nav';
-import type { KaiCommandItem } from '../../web-components/command';
-import type { KaiMenuItem } from '../../web-components/menu';
+import type { KaiCommandItem } from '../../web-components/command/command';
+import type { KaiMenuItem } from '../../web-components/menu/menu';
 import { textMessage } from '../../state/index';
-import type { ChatMessage } from '../../web-components/chat-types';
+import type { ChatMessage } from '../../web-components/chat/chat-types';
 import { relativeTimeShort } from '../../components/conversation/conversation-item';
 
 // Labs/Apps: "Wisp" - an invented general-chat product (no real app; it just

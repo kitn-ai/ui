@@ -1,4 +1,4 @@
-import '../../src/web-components/prompt-input';
+import '../../src/web-components/prompt/prompt-input';
 import type { ComposerDoc } from '../../src/primitives/composer-model';
 
 test('value as a ComposerDoc seeds a pill; submit emits a flattened string value + the seeded entities', async () => {

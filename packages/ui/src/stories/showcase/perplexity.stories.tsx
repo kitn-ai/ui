@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal, For, Show } from 'solid-js';
 import { Copy, RefreshCw } from 'lucide-solid';
-import './register'; // every kai-* element used below
+import '../../web-components/register/register'; // every kai-* element used below
 import type { KaiNavItem } from '../../components/nav/nav';
 import type { KaiTabItem } from '../../components/tabs/tabs';
 import type { ConversationSummary, ConversationGroup } from '../../types';

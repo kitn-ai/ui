@@ -12,8 +12,8 @@
  *
  * Derived from web-component-meta.json, not a hand-kept list.
  */
-import '../../src/web-components/register-impl';
-import '../../src/web-components/register';
+import '../../src/web-components/register/register-impl';
+import '../../src/web-components/register/register';
 import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';

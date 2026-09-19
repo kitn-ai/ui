@@ -4,7 +4,7 @@ import { createSignal } from 'solid-js';
 import { ChatThread, type ChatThreadProps } from './chat-thread';
 import type { ConversationStore } from '../../primitives/conversation-store';
 import type { ConversationSummary } from '../../types';
-import type { ChatMessage } from '../../web-components/chat-types';
+import type { ChatMessage } from '../../web-components/chat/chat-types';
 import { componentDescription } from '../../stories/docs/web-component-controls';
 
 /**

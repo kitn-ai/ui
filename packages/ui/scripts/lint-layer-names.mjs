@@ -227,7 +227,7 @@ function checkTree(root) {
 
 const CLEAN = {
   'docs/README.md': `# Docs\n\nThe kai-* layer is called web components.\n\nlint-layer-names: archive-note\n`,
-  'packages/ui/src/web-components/chat.tsx': `import { defineWebComponent } from './define';\nexport const ready = webComponentsReady;\n`,
+  'packages/ui/src/web-components/chat/chat.tsx': `import { defineWebComponent } from './define';\nexport const ready = webComponentsReady;\n`,
   'packages/ui/dist/web-components/chat.js': `import '@kitn.ai/ui/elements';\n`,
   'docs/superpowers/plans/2026-01-01-old.md': `we shipped @kitn.ai/ui/elements and src/elements/chat.tsx\n`,
   'packages/ui/CHANGELOG.md': `chore: src/elements -> src/web-components\n`,

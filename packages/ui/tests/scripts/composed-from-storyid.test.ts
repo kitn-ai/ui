@@ -25,7 +25,7 @@ describe('composedFrom story ids', () => {
   });
 
   it('is not empty for an element that composes its UI in an element-local helper', () => {
-    // `kai-prompt-input` builds its whole UI in src/web-components/default-input.tsx (so
+    // `kai-prompt-input` builds its whole UI in src/web-components/prompt/default-input.tsx (so
     // `<kai-chat>` can render the same composer). A facade-file-only walk reported
     // `composedFrom: []` for it.
     const promptInput = (meta as any[]).find((e) => e.tag === 'kai-prompt-input');

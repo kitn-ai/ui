@@ -39,7 +39,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { basename, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 
@@ -79,9 +79,18 @@ const expectedFor = (el: WebComponentMeta) => [...el.methods!.map((m) => m.name)
 const WEB_COMPONENTS_DIR = resolve(pkgRoot, 'src/web-components');
 /** Same file set the generator walks (see gen-web-component-api.mjs). */
 const SKIP = new Set(['define.tsx', 'register.ts', 'register-impl.ts', 'css.ts', 'chat-types.ts', 'default-input.tsx']);
-const facadeFiles = readdirSync(WEB_COMPONENTS_DIR)
-  .filter((f) => (f.endsWith('.tsx') || f.endsWith('.ts')) && !f.endsWith('.stories.tsx') && !SKIP.has(f))
-  .map((f) => resolve(WEB_COMPONENTS_DIR, f));
+const walkFacades = (dir: string, out: string[] = []): string[] => {
+  // RECURSIVE: family folders (2026-09-19). A flat readdir found nothing, so this
+  // guard parsed an empty file set and every count below was a count of zero.
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = resolve(dir, entry.name);
+    if (entry.isDirectory()) { walkFacades(full, out); continue; }
+    if (/\.(tsx|ts)$/.test(entry.name)) out.push(full);
+  }
+  return out;
+};
+const facadeFiles = walkFacades(WEB_COMPONENTS_DIR)
+  .filter((f) => !/\.(stories|test)\.tsx?$/.test(f) && !SKIP.has(basename(f)));
 
 const parse = (file: string) =>
   ts.createSourceFile(file, readFileSync(file, 'utf8'), ts.ScriptTarget.ESNext, true, ts.ScriptKind.TSX);
@@ -110,7 +119,7 @@ function exposedNames(scope: ts.Node): string[] {
 /** The names `wireDisclosure()` contributes, read off the helper's own expose
  *  literal so this never restates them. */
 const HELPER_NAMES: Record<string, string[]> = {
-  wireDisclosure: exposedNames(parse(resolve(WEB_COMPONENTS_DIR, 'disclosure.ts'))),
+  wireDisclosure: exposedNames(parse(resolve(WEB_COMPONENTS_DIR, 'disclosure/disclosure.ts'))),
 };
 
 /** How many times `name(` is called under `scope`. */

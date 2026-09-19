@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
 import { createSaveScheduler, parseStoredThread } from './persistence';
 import { createAssistantStream, type SetMessages } from './stream';
-import type { ChatMessage, MessagePart } from '../web-components/chat-types';
+import type { ChatMessage, MessagePart } from '../web-components/chat/chat-types';
 
 const msg = (over: Partial<ChatMessage> = {}): ChatMessage => ({
   id: 'm1',
@@ -106,7 +106,7 @@ describe('parseStoredThread', () => {
    * failure this test exists to produce when a 7th variant lands.
    */
   it('recognizes every variant the chat-types union declares (derived, not hand-typed)', () => {
-    const src = readFileSync(join(__dirname, '..', 'web-components', 'chat-types.ts'), 'utf8');
+    const src = readFileSync(join(__dirname, '..', 'web-components', 'chat', 'chat-types.ts'), 'utf8');
     const start = src.indexOf('export type MessagePart =');
     expect(start).toBeGreaterThan(-1);
     const end = src.indexOf('\n\n', start);

@@ -19,7 +19,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import { readdirSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { basename, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 
@@ -30,9 +30,18 @@ const webComponentsDir = resolve(pkgRoot, 'src/web-components');
 const SKIP = new Set([
   'define.tsx', 'register.ts', 'register-impl.ts', 'css.ts', 'chat-types.ts', 'default-input.tsx',
 ]);
-const facadeFiles = readdirSync(webComponentsDir)
-  .filter((f) => /\.tsx?$/.test(f) && !/\.(stories|test)\.tsx?$/.test(f) && !SKIP.has(f))
-  .map((f) => resolve(webComponentsDir, f));
+const walkFacades = (dir: string, out: string[] = []): string[] => {
+  // RECURSIVE: the layer is organised in family folders (2026-09-19), so a flat
+  // readdir finds nothing and every assertion below passes over an empty set.
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = resolve(dir, entry.name);
+    if (entry.isDirectory()) { walkFacades(full, out); continue; }
+    if (/\.[cm]?tsx?$/.test(entry.name)) out.push(full);
+  }
+  return out;
+};
+const facadeFiles = walkFacades(webComponentsDir)
+  .filter((f) => !/\.(stories|test)\.tsx?$/.test(f) && !SKIP.has(basename(f)));
 
 const ROOT_ENTRY = resolve(pkgRoot, 'src/index.ts');
 

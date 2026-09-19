@@ -3,7 +3,7 @@ import '@testing-library/jest-dom/vitest';
 import { createSignal } from 'solid-js';
 import { render, cleanup, fireEvent } from '@solidjs/testing-library';
 import { Thread, type ThreadController } from './thread';
-import type { ChatMessage } from '../../web-components/chat-types';
+import type { ChatMessage } from '../../web-components/chat/chat-types';
 
 // Spy on the imperative toast() the feedback controller raises.
 const toastSpy = vi.fn();

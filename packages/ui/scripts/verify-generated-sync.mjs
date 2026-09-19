@@ -3,7 +3,7 @@
 //
 // WHY IT EXISTS
 // -------------
-// fc40a10 registered a new `::part(citations)` in src/web-components/slots.ts and did
+// fc40a10 registered a new `::part(citations)` in src/web-components/slots/slots.ts and did
 // not regenerate the artifacts derived from it. Nothing went red. The `kai`
 // MCP's `component_reference` and the docs site's PartTable.astro both read from
 // those artifacts, so a part that existed in the SHIPPED web component was invisible
@@ -128,7 +128,7 @@ const GENERATED = [
   { file: 'packages/ui/src/web-components/web-component-meta.json', probe: 'overwrite' },
   { file: 'packages/ui/src/web-components/web-component-manifest.json', probe: 'overwrite' },
   // The ~2 KB of web-component-meta.json that SHIPS: tag -> its non-scalar prop names,
-  // read at runtime by src/web-components/web-component-diagnostics.ts. Stale bytes here mean
+  // read at runtime by src/web-components/web-component/web-component-diagnostics.ts. Stale bytes here mean
   // a prop that silently stopped being watched, which is invisible by nature —
   // the check for it is a check that does not fire.
   { file: 'packages/ui/src/web-components/web-component-nonscalar.json', probe: 'overwrite' },
@@ -402,7 +402,7 @@ function runGuard(cfg, { log = () => {} } = {}) {
           "  `kai` MCP's component_reference and the docs site's PartTable.astro read them,\n" +
           '  so a prop, event or ::part you added to the source is invisible to every tool a\n' +
           '  developer would use to discover it until these are regenerated.\n\n' +
-          '  web-component-manifest.json is worse than invisible: src/web-components/autoloader.ts\n' +
+          '  web-component-manifest.json is worse than invisible: src/web-components/autoloader/autoloader.ts\n' +
           '  imports it AT RUNTIME to map a tag to the chunk that registers it. A tag\n' +
           '  missing from the committed manifest hits `if (!file) return` and the web component\n' +
           '  never upgrades — silently, since the warnOnce path below it only fires when a\n' +

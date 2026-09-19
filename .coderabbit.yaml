@@ -114,7 +114,7 @@ reviews:
         1. Decide loudly. This layer turns `parts` into a provider request, so a
            variant it does not encode is gone once the request leaves. A
            function that discriminates a `MessagePart` must account for EVERY
-           variant of the union in src/web-components/chat-types.ts, or carry a
+           variant of the union in src/web-components/chat/chat-types.ts, or carry a
            `// lint-silent-drops: drops <variants> -- <reason>` directive at the
            site. A prose comment explaining a drop is NOT a waiver -- that
            exact form already shipped a defect. Flag any silent drop, silent

@@ -38,7 +38,7 @@ import type { ModelUsage } from './chunk';
 // and the union is what lets it discriminate on `type` instead of being handed
 // an open bag. The alternative -- declaring the element events inside this file
 // -- puts element concepts in the wire layer, which is worse.
-import type { WebComponentDiagnosticEvent } from '../web-components/diagnostic-events';
+import type { WebComponentDiagnosticEvent } from '../web-components/web-component/diagnostic-events';
 
 /** The envelope every diagnostic event shares. `t` is `Date.now()` at emission. */
 export interface WireDiagnosticBase {

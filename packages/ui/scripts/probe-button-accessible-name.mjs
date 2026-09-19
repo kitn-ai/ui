@@ -196,9 +196,9 @@ const CASES = [
 /** The web-component modules the cases need, deduped. */
 const TAGS = [...new Set(CASES.map((c) => c.tag ?? 'kai-button'))];
 const MODULE_OF = {
-  'kai-button': '/src/web-components/button.tsx',
-  'kai-menu': '/src/web-components/menu.tsx',
-  'kai-checkpoint': '/src/web-components/checkpoint.tsx',
+  'kai-button': '/src/web-components/button/button.tsx',
+  'kai-menu': '/src/web-components/menu/menu.tsx',
+  'kai-checkpoint': '/src/web-components/checkpoint/checkpoint.tsx',
 };
 
 const PAGE = /* html */ `<!doctype html>

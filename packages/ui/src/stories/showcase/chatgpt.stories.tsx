@@ -1,11 +1,11 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal, Show, For } from 'solid-js';
-import './register'; // every kai-* element used below
+import '../../web-components/register/register'; // every kai-* element used below
 import type { KaiNavItem } from '../../components/nav/nav';
-import type { KaiCommandItem } from '../../web-components/command';
+import type { KaiCommandItem } from '../../web-components/command/command';
 import type { ConversationSummary, ConversationGroup } from '../../types';
 import { textMessage } from '../../state/index';
-import type { ChatMessage } from '../../web-components/chat-types';
+import type { ChatMessage } from '../../web-components/chat/chat-types';
 
 // Labs/Apps: a fourth dogfood - "ChatGPT", a replica of chatgpt.com, the
 // general-chat flagship. Its whole job is to validate the kit's CORE chat

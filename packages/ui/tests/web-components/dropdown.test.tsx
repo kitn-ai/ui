@@ -22,7 +22,7 @@
  * slotted row would silently vanish. That is asserted, not assumed.
  */
 import { afterEach, describe, expect, test } from 'vitest';
-import '../../src/web-components/dropdown';
+import '../../src/web-components/dropdown/dropdown';
 
 /**
  * Past a macrotask, not just a microtask: the facade's reflections land in

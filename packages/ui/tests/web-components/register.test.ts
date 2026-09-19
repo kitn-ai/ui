@@ -6,10 +6,10 @@
 // test file's import phase and (b) means vitest transforms the 44 web-component
 // modules up front rather than on-demand inside the test body (which, under
 // full-suite parallel contention, can exceed the test timeout).
-import '../../src/web-components/register-impl';
+import '../../src/web-components/register/register-impl';
 // Import the public entry too, to assert it loads without throwing (its gated
 // dynamic import is a no-op re-resolve once register-impl is already in cache).
-import '../../src/web-components/register';
+import '../../src/web-components/register/register';
 
 test('all three custom elements are defined', async () => {
   // whenDefined mirrors how the React runtime waits for the async upgrade.

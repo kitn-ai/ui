@@ -28,9 +28,9 @@
  * been a check that proves nothing.
  */
 import { describe, it, expect, afterEach } from 'vitest';
-import '../../src/web-components/thread';
-import '../../src/web-components/chat';
-import type { ChatMessage } from '../../src/web-components/chat-types';
+import '../../src/web-components/thread/thread';
+import '../../src/web-components/chat/chat';
+import type { ChatMessage } from '../../src/web-components/chat/chat-types';
 
 // jsdom doesn't implement Element.scrollTo; the stick-to-bottom primitive calls
 // it on a requestAnimationFrame when rows mount. Same shim as chat.test.tsx.

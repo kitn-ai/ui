@@ -15,7 +15,7 @@ import { Button } from '../../components/button/button';
 import { Tooltip } from '../../components/tooltip/tooltip';
 import { Kbd } from '../../components/kbd/kbd';
 import { cn } from '../../utils/cn';
-import type { ChatMessage } from '../../web-components/chat-types';
+import type { ChatMessage } from '../../web-components/chat/chat-types';
 
 // Labs/Builder/Voice — T-1/T-1a build-out (docs/superpowers/specs/
 // 2026-08-28-template-builder-design.md), reshaped in an owner design

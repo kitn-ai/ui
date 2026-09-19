@@ -6,11 +6,11 @@ import { onMount, onCleanup, createSignal } from 'solid-js';
 // renders before the upgrade, an array prop assigned in the meantime is only a plain
 // data property, and the upgrade replaces it with the declared default. That is what
 // made this story render an empty group.
-import './checkbox';
-import './checkbox-group';
-import './radio-group';
-import './slider';
-import './select';
+import '../../web-components/checkbox/checkbox';
+import '../../web-components/checkbox/checkbox-group';
+import '../../web-components/radio/radio-group';
+import '../../web-components/slider/slider';
+import '../../web-components/select/select';
 import { attachKaiActions } from '../docs/story-actions';
 
 // Wire a kai-* element's declared CustomEvents to the Actions panel from a `ref`.

@@ -13,7 +13,7 @@
 // `input` diff-reconciliation fallback (spec §5.1) rather than the `beforeinput` path.
 // Caret placement, cancelation semantics and composition are NOT testable here and are
 // deliberately not asserted; they belong to the real-Chromium pass.
-import '../../src/web-components/input';
+import '../../src/web-components/input/input';
 
 /** Let Solid's scheduler flush effects + the queued post-attach canonical sync. */
 const flush = () => new Promise((r) => setTimeout(r, 0));

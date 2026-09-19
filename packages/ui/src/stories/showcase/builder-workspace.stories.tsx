@@ -39,7 +39,7 @@ import { Input } from '../../components/input/input';
 import { Button } from '../../components/button/button';
 import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem } from '../../components/dropdown/dropdown';
 import { renderIcon } from '../../components/icon/icon';
-import type { ChatMessage, ChatMessageAction, CustomAction } from '../../web-components/chat-types';
+import type { ChatMessage, ChatMessageAction, CustomAction } from '../../web-components/chat/chat-types';
 
 // Labs/Builder/Workspace — T-1 build-out (docs/superpowers/specs/
 // 2026-08-28-template-builder-design.md), FIFTH and hardest template story:
@@ -424,7 +424,7 @@ function WorkspacePreview(props: {
   // Owner feedback round: the header's theme toggle needs a REAL dark mode
   // to flip, scoped to just this preview frame — not the whole Storybook
   // page (that's the manager's own theme toggle, an unrelated control).
-  // `web-components/define.tsx`'s real `<kai-*>` facade does exactly this per
+  // `web-components/define/define.tsx`'s real `<kai-*>` facade does exactly this per
   // shadow root already: `classList={{ dark: isDark() }}` on a wrapper div,
   // because `theme.css`'s `.dark { --color-background: ...; ... }` is a
   // plain class selector (not `:root`/`:host`-scoped), so it re-declares
@@ -855,7 +855,7 @@ function WorkspaceBuilderDemo(): JSX.Element {
   // unwired to anything visual in this template, same as every other
   // template's Theme > Mode — this round is the first to actually apply
   // it). `system` follows `prefers-color-scheme`, matching
-  // `web-components/define.tsx`'s own `createDarkMode` resolution exactly (that
+  // `web-components/define/define.tsx`'s own `createDarkMode` resolution exactly (that
   // helper is module-private, replicated here — see the comment above
   // `WorkspacePreview`'s root div for why).
   const [systemDark, setSystemDark] = createSignal(

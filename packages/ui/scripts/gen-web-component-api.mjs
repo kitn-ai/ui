@@ -18,9 +18,21 @@ const webComponentsDir = resolve(root, 'src/web-components');
 
 // Facade files only (skip infra/helpers/stories).
 const SKIP = new Set(['define.tsx', 'register.ts', 'register-impl.ts', 'css.ts', 'chat-types.ts', 'default-input.tsx']);
-const facadeFiles = readdirSync(webComponentsDir)
-  .filter((f) => (f.endsWith('.tsx') || f.endsWith('.ts')) && !f.endsWith('.stories.tsx') && !SKIP.has(f))
-  .map((f) => resolve(webComponentsDir, f));
+// RECURSIVE: the layer is organised in family folders (2026-09-19), so a flat
+// readdir would silently emit a 0-facade catalog and the generator would exit 0.
+const walkSources = (dir) => {
+  const out = [];
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = resolve(dir, entry.name);
+    if (entry.isDirectory()) { out.push(...walkSources(full)); continue; }
+    if (!/\.(tsx|ts)$/.test(entry.name)) continue;
+    if (/\.(test|stories)\./.test(entry.name) || /^(element|web-component)-.*\.test\./.test(entry.name)) continue;
+    if (SKIP.has(entry.name)) continue;
+    out.push(full);
+  }
+  return out;
+};
+const facadeFiles = walkSources(webComponentsDir);
 
 const tsconfig = ts.parseJsonConfigFileContent(
   ts.readConfigFile(resolve(root, 'tsconfig.json'), ts.sys.readFile).config,
@@ -217,7 +229,22 @@ const composedImports = (sourceFile, seen = new Set([sourceFile.fileName])) => {
     // Solid components all come from the one directory, so there is no second
     // group to map. The `group` KEY stays in web-component-meta.json regardless — it is
     // part of the published shape that `ComposedFrom` on the docs site reads.
-    const group = spec.startsWith('../components/') ? 'Components' : null;
+    // RESOLVED, not prefix-matched. This used to read `spec.startsWith('../components/')`,
+    // which is a function of the FACADE's DEPTH: folding the layer into family folders
+    // (2026-09-19) made every facade one level deeper, the specifier became
+    // '../../components/...' and this returned null for all 97 web components -- so
+    // composedFrom came out empty EVERYWHERE and gen-catalog refused the artifact
+    // ("carries no non-empty composedFrom on ANY of its 97 web components"). Resolving
+    // against the importing file cannot rot that way.
+    const importedFrom = (() => {
+      const dir = dirname(sourceFile.fileName);
+      for (const ext of ['', '.tsx', '.ts', '.d.ts']) {
+        const p = resolve(dir, spec + ext);
+        if (p.includes(`/src/components/`)) return p;
+      }
+      return null;
+    })();
+    const group = importedFrom ? 'Components' : null;
     if (!group) {
       if (!spec.startsWith('./')) continue;
       const local = localModule(sourceFile, spec);
@@ -247,7 +274,7 @@ const composedImports = (sourceFile, seen = new Set([sourceFile.fileName])) => {
 // and the CEM `members` list the kai MCP serves. Read it off the source literal
 // instead, with its type and doc comment from the checker.
 const UNIVERSAL_PROPS = (() => {
-  const sf = program.getSourceFile(resolve(webComponentsDir, 'define.tsx'));
+  const sf = program.getSourceFile(resolve(webComponentsDir, 'define/define.tsx'));
   let objLit = null;
   const visit = (n) => {
     if (objLit) return;
@@ -262,11 +289,11 @@ const UNIVERSAL_PROPS = (() => {
   if (!objLit) {
     throw new Error(
       "gen-web-component-api: could not find defineWebComponent's injected `defaults` literal " +
-      '(`const defaults = { …, ...propDefaults }`) in src/web-components/define.tsx — the universal ' +
+      '(`const defaults = { …, ...propDefaults }`) in src/web-components/define/define.tsx — the universal ' +
       'props would silently vanish from every generated artifact.',
     );
   }
-  const construct = "defineWebComponent's injected `defaults` literal in src/web-components/define.tsx";
+  const construct = "defineWebComponent's injected `defaults` literal in src/web-components/define/define.tsx";
   const out = [];
   for (const p of objLit.properties) {
     // The one DELIBERATE spread. `...propDefaults` is the facade's own per-element
@@ -626,7 +653,7 @@ for (const el of elements) {
 // in the program — chat.tsx imports it). Generic literal eval covering the
 // registry's pure-data shape: string/bool/number/array/object/identifier-ref.
 {
-  const slotsSf = program.getSourceFile(resolve(webComponentsDir, 'slots.ts'));
+  const slotsSf = program.getSourceFile(resolve(webComponentsDir, 'slots/slots.ts'));
   if (slotsSf) {
     const symbols = new Map();
     for (const st of slotsSf.statements) {
@@ -648,7 +675,7 @@ for (const el of elements) {
     // verify-generated-sync.mjs re-runs this same generator, so it only ever proves the
     // extractor agrees with itself. A blind extractor here is therefore silent all the
     // way down. Hence: no path below may return `undefined` quietly.
-    const REGISTRY = 'the WEB_COMPONENT_COMPOSITION registry in src/web-components/slots.ts';
+    const REGISTRY = 'the WEB_COMPONENT_COMPOSITION registry in src/web-components/slots/slots.ts';
     const evalNode = (node) => {
       if (ts.isStringLiteralLike(node)) return node.text;
       if (node.kind === ts.SyntaxKind.TrueKeyword) return true;
@@ -730,7 +757,7 @@ for (const el of elements) {
     const compositionNode = symbols.get('WEB_COMPONENT_COMPOSITION');
     if (!compositionNode) {
       throw new Error(
-        'gen-web-component-api (evalNode): src/web-components/slots.ts declares no top-level `WEB_COMPONENT_COMPOSITION`\n' +
+        'gen-web-component-api (evalNode): src/web-components/slots/slots.ts declares no top-level `WEB_COMPONENT_COMPOSITION`\n' +
           '  const. Every element would lose its slots and parts from every generated artifact, and the\n' +
           '  ::part drift guards that read this same registry would go quiet at the same moment.',
       );
@@ -813,7 +840,7 @@ const cem = {
         ...el.tokens.map((name) => ({ name })),
         // `description`/`default` are CEM-standard on cssProperties and are what
         // the kai MCP's component reference prints, so a var documented in
-        // src/web-components/slots.ts reaches a coding agent with its contract intact.
+        // src/web-components/slots/slots.ts reaches a coding agent with its contract intact.
         ...(el.vars ?? []).map((v) => ({
           name: v.name,
           description: v.doc,

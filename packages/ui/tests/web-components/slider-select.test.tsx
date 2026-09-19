@@ -10,8 +10,8 @@
  * that made it. The look is verified in a real Chromium and reported separately.
  */
 import { test, expect } from 'vitest';
-import '../../src/web-components/slider';
-import '../../src/web-components/select';
+import '../../src/web-components/slider/slider';
+import '../../src/web-components/select/select';
 
 /** Let the element upgrade and its first effects flush. */
 const settle = async () => { await Promise.resolve(); await Promise.resolve(); };

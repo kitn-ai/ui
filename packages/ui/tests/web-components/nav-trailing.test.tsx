@@ -1,4 +1,4 @@
-import '../../src/web-components/nav';
+import '../../src/web-components/nav/nav';
 import type { KaiNavItem } from '../../src/components/nav/nav';
 
 // kai-nav per-item trailing action / close button.

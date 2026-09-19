@@ -1,4 +1,4 @@
-import '../../src/web-components/feedback-bar';
+import '../../src/web-components/feedback-bar/feedback-bar';
 
 const flush = () => new Promise((r) => setTimeout(r, 0));
 

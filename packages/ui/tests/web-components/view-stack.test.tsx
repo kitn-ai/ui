@@ -14,8 +14,8 @@
  * upgrade + MutationObserver delivery.
  */
 import { afterEach, describe, expect, test } from 'vitest';
-import '../../src/web-components/view-stack';
-import '../../src/web-components/view';
+import '../../src/web-components/view-stack/view-stack';
+import '../../src/web-components/view/view';
 import type { ViewStackState } from '../../src/components/view/view-stack';
 
 const flush = () => new Promise((r) => setTimeout(r, 0));

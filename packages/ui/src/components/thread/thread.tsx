@@ -5,7 +5,7 @@ import { Message, MessageAvatar, MessageBody } from '../message/message';
 import { createMessageFeedback, type MessageActionDetail } from '../../primitives/message-feedback';
 import { ScrollButton } from '../scroll/scroll-button';
 import { Loader } from '../loader/loader';
-import type { ChatMessage } from '../../web-components/chat-types';
+import type { ChatMessage } from '../../web-components/chat/chat-types';
 import type { ProseSize } from '../../primitives/chat-config';
 import type { CardComponentMap } from '../../primitives/card-registry';
 import type { CardSchemaMap } from '../card/card-renderer';

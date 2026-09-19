@@ -121,7 +121,7 @@ import { cardSchemas } from './index';
 import type { CardSchemaName } from './index';
 
 // Loaded through node's CJS loader rather than an ESM import, for the reason
-// src/web-components/inline-web-component-types.test.ts gives: it keeps vite from
+// src/web-components/web-component/inline-web-component-types.test.ts gives: it keeps vite from
 // transforming typescript.js when this file runs on its own.
 const ts: typeof import('typescript') = createRequire(import.meta.url)('typescript');
 

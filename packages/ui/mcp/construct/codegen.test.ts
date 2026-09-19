@@ -150,7 +150,7 @@ describe('generateProject (widget + mock core)', () => {
     // clipped a focus ring (round 4 patched the symptom with inline padding).
     // Owner-ruled root cause: emitApp was re-deriving layout the kit already
     // owns. ChatThread (chat-thread.tsx) — the same composition
-    // src/web-components/chat.tsx renders behind <kai-chat> — owns the message
+    // src/web-components/chat/chat.tsx renders behind <kai-chat> — owns the message
     // list AND the composer (padding, focus ring, send button) as one unit,
     // so there is nothing left here to restate.
     const app = file(generateProject(construct()), 'src/App.tsx');

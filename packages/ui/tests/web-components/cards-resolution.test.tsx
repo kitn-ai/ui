@@ -1,5 +1,5 @@
 import { test, expect, afterEach } from 'vitest';
-import '../../src/web-components/cards';
+import '../../src/web-components/card/cards';
 import type { CardEnvelope } from '../../src/primitives/card-contract';
 
 const flush = () => new Promise((r) => setTimeout(r, 0));

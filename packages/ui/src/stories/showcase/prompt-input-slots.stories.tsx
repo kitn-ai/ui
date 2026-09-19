@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { onMount, onCleanup } from 'solid-js';
-import './register'; // side effect: registers <kai-prompt-input> et al.
+import '../../web-components/register/register'; // side effect: registers <kai-prompt-input> et al.
 import { attachKaiActions } from '../docs/story-actions';
 import type { AttachmentData } from '../../components/attachments/attachments';
 

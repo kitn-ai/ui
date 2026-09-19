@@ -3,7 +3,7 @@ import {
   Copy, ThumbsUp, ThumbsDown, RefreshCw, Pencil,
   Share, Bookmark, Download, Link, Trash2, Check, X, Star, Flag, Reply, MoreHorizontal, Volume2,
 } from 'lucide-solid';
-import type { ChatMessageAction } from '../../web-components/chat-types';
+import type { ChatMessageAction } from '../../web-components/chat/chat-types';
 
 type IconComponent = Component<{ class?: string }>;
 

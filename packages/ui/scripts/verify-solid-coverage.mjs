@@ -145,9 +145,18 @@ if (!Array.isArray(catalog) || catalog.length === 0) {
 
 // ---- 2. TS program over the facades + the public entry ----------------------
 const SKIP = new Set(['define.tsx', 'register.ts', 'register-impl.ts', 'css.ts', 'chat-types.ts']);
-const facadeFiles = readdirSync(webComponentsDir)
-  .filter((f) => /\.tsx?$/.test(f) && !/\.(stories|test)\.tsx?$/.test(f) && !SKIP.has(f))
-  .map((f) => resolve(webComponentsDir, f));
+const facadeFiles = (function walk(dir, out = []) {
+  // RECURSIVE: family folders (2026-09-19). A flat readdir would cross-check an
+  // EMPTY facade list against ./solid and report a clean sweep of nothing.
+  for (const dirent of readdirSync(dir, { withFileTypes: true })) {
+    const full = resolve(dir, dirent.name);
+    if (dirent.isDirectory()) { walk(full, out); continue; }
+    if (!/\.(tsx|ts)$/.test(dirent.name)) continue;
+    if (/\.(test|stories)\./.test(dirent.name)) continue;
+    out.push(full);
+  }
+  return out;
+})(webComponentsDir);
 
 const tsconfig = ts.parseJsonConfigFileContent(
   ts.readConfigFile(resolve(pkgRoot, 'tsconfig.json'), ts.sys.readFile).config,
@@ -573,7 +582,7 @@ const fixtureFiles = (over = {}) => ({
   'tsconfig.json': JSON.stringify(FIXTURE_TSCONFIG, null, 2),
   'src/components/foo.tsx':
     'export type FooProps = { a?: string };\nexport function Foo(props: FooProps) { return <div>{props.a}</div>; }\n',
-  'src/web-components/define.tsx':
+  'src/web-components/define/define.tsx':
     'export function defineWebComponent(tag: string, props: unknown, render: unknown) { return { tag, props, render }; }\n',
   'src/web-components/x.tsx':
     "import { defineWebComponent } from './define';\nimport { Foo } from '../components/foo';\ndefineWebComponent('kai-x', {}, () => <Foo a=\"hi\" />);\n",

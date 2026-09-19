@@ -1,5 +1,5 @@
 // tests/web-components/card.test.tsx
-import '../../src/web-components/card';
+import '../../src/web-components/card/card';
 
 const flush = () => new Promise((r) => setTimeout(r, 0));
 

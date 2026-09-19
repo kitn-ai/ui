@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal, Show, For } from 'solid-js';
-import './register'; // every kai-* element used below
+import '../../web-components/register/register'; // every kai-* element used below
 import type { FileTreeFile } from '../../components/file/file-tree';
 import type { ToolPart } from '../../components/tool/tool-types';
 import { PromptDock } from '../../components/prompt/prompt-dock';

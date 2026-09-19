@@ -16,7 +16,7 @@
  * (`setTimeout 0`) covers attributeChangedCallback + MutationObserver delivery.
  */
 import { afterEach, describe, expect, test } from 'vitest';
-import '../../src/web-components/pane-grid';
+import '../../src/web-components/pane/pane-grid';
 
 const flush = () => new Promise((r) => setTimeout(r, 0));
 

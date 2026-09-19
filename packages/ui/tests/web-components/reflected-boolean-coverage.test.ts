@@ -42,6 +42,20 @@ const webComponentsDir = resolve(dirname(fileURLToPath(import.meta.url)), '../..
  * the comment to "directly in src/web-components" — would have been honest but would have
  * made the guard quietly weaker than its own name suggests.
  */
+/** basename -> source path, so an EXEMPT key stays readable after the layer was folded
+ *  into family folders (2026-09-19). A duplicate basename throws: two facades with
+ *  the same name would make an exemption ambiguous, and silently covering one of them
+ *  is worse than a red test. */
+function byBasename(): Map<string, string> {
+  const map = new Map<string, string>();
+  for (const rel of facadeSources()) {
+    const base = rel.split('/').pop() as string;
+    if (map.has(base)) throw new Error(`two facades named ${base}: ${map.get(base)} and ${rel}`);
+    map.set(base, rel);
+  }
+  return map;
+}
+
 function facadeSources(dir = webComponentsDir, prefix = ''): string[] {
   const out: string[] = [];
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
@@ -198,8 +212,9 @@ test('the scan is not vacuous', () => {
   // A wrong path or glob would make every assertion below pass while checking nothing.
   const files = facadeSources();
   expect(files.length).toBeGreaterThan(50);
-  expect(files).toContain('chat.tsx');
-  expect(files).toContain('define.tsx');
+  const names = new Set(files.map((f) => f.split('/').pop()));
+  expect(names.has('chat.tsx')).toBe(true);
+  expect(names.has('define.tsx')).toBe(true);
 });
 
 test('detects a planted violation — THE TEETH', () => {
@@ -230,7 +245,8 @@ test('every reflection routes through reflectFlag, or is a named exemption', () 
   const offenders: string[] = [];
   for (const file of facadeSources()) {
     const sites = toggleAttributeSites(readFileSync(resolve(webComponentsDir, file), 'utf8'));
-    if (sites.length && !(file in EXEMPT)) {
+    const base = file.split('/').pop() as string;
+    if (sites.length && !(base in EXEMPT)) {
       offenders.push(`${file}:${sites.join(',')}`);
     }
   }
@@ -250,7 +266,9 @@ test('each exemption still has a call site to justify it', () => {
   for (const file of Object.keys(EXEMPT)) {
     let source: string;
     try {
-      source = readFileSync(resolve(webComponentsDir, file), 'utf8');
+      const rel = byBasename().get(file);
+      if (!rel) { stale.push(`${file} (no such file)`); continue; }
+      source = readFileSync(resolve(webComponentsDir, rel), 'utf8');
     } catch {
       stale.push(`${file} (no such file)`);
       continue;
@@ -275,8 +293,11 @@ test('the migrated facades really do call reflectFlag', () => {
     'resizable.tsx': ['collapsed', 'locked'],
     'disclosure.ts': ['open'],
   };
+  const index = byBasename();
   for (const [file, props] of Object.entries(expected)) {
-    const { code } = stripComments(readFileSync(resolve(webComponentsDir, file), 'utf8'));
+    const rel = index.get(file);
+    if (!rel) throw new Error(`no facade named ${file} -- the exemptions/expectations table is stale`);
+    const { code } = stripComments(readFileSync(resolve(webComponentsDir, rel), 'utf8'));
     for (const prop of props) {
       expect(code, `${file} should reflect ${prop} via reflectFlag`).toMatch(
         new RegExp(`reflectFlag\\(\\s*'${prop}'`),

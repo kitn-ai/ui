@@ -30,7 +30,7 @@ import { readFileSync } from 'node:fs';
 import { dirname, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
-import '../../src/web-components/dock';
+import '../../src/web-components/dock/dock';
 import { componentSourcePath } from '../helpers/kit-paths';
 
 const pkgRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
@@ -837,7 +837,7 @@ describe('content-agnostic by construction', () => {
     // seam is the event, never a reach into the slot.
     // The component's own path is resolved by basename; the facade's is fixed
     // because `src/web-components/` is still flat.
-    for (const file of [resolve(pkgRoot, 'src/web-components/dock.tsx'), componentSourcePath('dock.tsx')]) {
+    for (const file of [resolve(pkgRoot, 'src/web-components/dock/dock.tsx'), componentSourcePath('dock.tsx')]) {
       const source = readFileSync(file, 'utf8');
       const label = relative(pkgRoot, file);
       const code = source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1');
@@ -971,7 +971,7 @@ describe('geometry is CSS tokens, and every prop is a scalar', () => {
     // Asserted over the SOURCE, not over an instance: `web-component-nonscalar.json` and the
     // element diagnostics are generated, so a runtime check against them would pass
     // vacuously until the next build. Parsing the defaults object is the fact itself.
-    const file = resolve(pkgRoot, 'src/web-components/dock.tsx');
+    const file = resolve(pkgRoot, 'src/web-components/dock/dock.tsx');
     const sf = ts.createSourceFile(file, readFileSync(file, 'utf8'), ts.ScriptTarget.ESNext, true, ts.ScriptKind.TSX);
     const offenders: string[] = [];
     let found = false;

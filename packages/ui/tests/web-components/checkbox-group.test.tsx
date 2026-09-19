@@ -17,7 +17,7 @@
  * `name` is generated when none is given, and that the element is not form-associated.
  */
 import { test, expect } from 'vitest';
-import '../../src/web-components/checkbox-group';
+import '../../src/web-components/checkbox/checkbox-group';
 
 /** Let the element upgrade and its first effects flush. */
 const settle = async () => { await Promise.resolve(); await Promise.resolve(); };

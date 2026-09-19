@@ -17,7 +17,7 @@
  * flush for upgrade + effects.
  */
 import { afterEach, describe, expect, test } from 'vitest';
-import '../../src/web-components/pane-group';
+import '../../src/web-components/pane/pane-group';
 import type { PaneTab } from '../../src/components/pane/pane-group';
 
 const flush = () => new Promise((r) => setTimeout(r, 0));

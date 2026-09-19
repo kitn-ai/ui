@@ -34,7 +34,7 @@
  * `aria-expanded="false"`, and the error affordance lives OUTSIDE that subtree.
  */
 import { afterEach, describe, expect, test } from 'vitest';
-import '../../src/web-components/tool';
+import '../../src/web-components/tool/tool';
 import type { ToolPart } from '../../src/components/tool/tool-types';
 
 /**

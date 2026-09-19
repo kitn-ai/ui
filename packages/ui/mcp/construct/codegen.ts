@@ -524,7 +524,7 @@ function emitIndexHtml(c: Construct): string {
  * WHY CSS text and not setProperty: an inline custom property on the host has
  * no mode — dark mode never reaches the host at all. The `theme` attribute
  * defineWebComponent owns drives a `.dark` class on an inner WRAPPER div
- * inside the shadow root (see web-components/define.tsx), and the injected kit CSS
+ * inside the shadow root (see web-components/define/define.tsx), and the injected kit CSS
  * re-resolves every `--color-*` token on that wrapper (`theme.css`'s
  * `.dark { --color-x: var(--kai-color-x, <dark default>) }` block). So "dark
  * only" is expressible exactly one way: a `.dark`-scoped `--kai-color-*`
@@ -743,7 +743,7 @@ ${emitProviderSetup(c)}
 ${emitHistorySetup(c)}
 
 // ChatThread is the kit's own MOST-INTEGRATED chat surface — the same
-// composition <kai-chat>'s facade renders (src/web-components/chat.tsx). It owns
+// composition <kai-chat>'s facade renders (src/web-components/chat/chat.tsx). It owns
 // the message list, the composer (padding, focus ring, the send button) and
 // their layout AS ONE UNIT, so nothing here re-derives spacing, alignment or
 // focus styling by hand: every prior version of this file that hand-composed

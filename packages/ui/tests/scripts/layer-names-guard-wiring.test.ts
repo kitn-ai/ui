@@ -50,7 +50,7 @@ function fixtureRoot(extra: Record<string, string> = {}): string {
   const root = mkdtempSync(join(tmpdir(), 'layer-names-guard-'));
   const files: Record<string, string> = {
     'docs/README.md': NOTE,
-    'packages/ui/src/web-components/chat.tsx': `export const ready = webComponentsReady;\n`,
+    'packages/ui/src/web-components/chat/chat.tsx': `export const ready = webComponentsReady;\n`,
     ...extra,
   };
   // The vacuity floor is 100 files; pad so a fixture exercises the REAL scan

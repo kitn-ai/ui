@@ -22,13 +22,13 @@ import {
   type KaiDiagnosticEvent,
 } from './diagnostics';
 import type { AttachmentData } from '../primitives/attachment-types';
-import type { ChatMessage } from '../web-components/chat-types';
+import type { ChatMessage } from '../web-components/chat/chat-types';
 // The ELEMENT layer emits onto this same stream, so it is swept by this same
 // file rather than by a second one with a second idea of the rule. See the
 // element block at the bottom.
-import '../web-components/conversation-list';
-import '../web-components/agent-card';
-import { emitWebComponentRegistry } from '../web-components/web-component-diagnostics';
+import '../web-components/conversation/conversation-list';
+import '../web-components/agent-card/agent-card';
+import { emitWebComponentRegistry } from '../web-components/web-component/web-component-diagnostics';
 import { assertElementEventsVocabulary } from '../../tests/helpers/web-component-event-vocabulary';
 
 const nullSink = () =>

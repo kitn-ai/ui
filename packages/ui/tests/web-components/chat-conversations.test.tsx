@@ -1,6 +1,6 @@
-import '../../src/web-components/chat';
+import '../../src/web-components/chat/chat';
 import { localStorageStore } from '../../src/primitives/conversation-store';
-import type { ChatMessage } from '../../src/web-components/chat-types';
+import type { ChatMessage } from '../../src/web-components/chat/chat-types';
 
 if (!Element.prototype.scrollTo) {
   Element.prototype.scrollTo = () => {};

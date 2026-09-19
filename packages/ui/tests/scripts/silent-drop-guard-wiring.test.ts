@@ -44,10 +44,10 @@ const pkg = JSON.parse(readFileSync(resolve(pkgRoot, 'package.json'), 'utf-8')) 
 /** A throwaway package root the linter can be pointed at with `--package-root`. */
 function fixtureRoot(wireSource: string): string {
   const root = mkdtempSync(join(tmpdir(), 'silent-drop-guard-'));
-  mkdirSync(join(root, 'src/web-components'), { recursive: true });
+  mkdirSync(join(root, 'src/web-components/chat'), { recursive: true });
   mkdirSync(join(root, 'src/wire'), { recursive: true });
   writeFileSync(
-    join(root, 'src/web-components/chat-types.ts'),
+    join(root, 'src/web-components/chat/chat-types.ts'),
     `export type MessagePart =
   | { type: 'text'; text: string }
   | { type: 'reasoning'; text: string }

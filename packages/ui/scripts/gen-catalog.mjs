@@ -148,7 +148,7 @@ const webComponents = meta
 // proves nothing.)
 
 // 2. Part variants, from the union, via the ONE shared derivation.
-const partVariants = readVariants(readFileSync(join(ROOT, 'src/web-components/chat-types.ts'), 'utf8'));
+const partVariants = readVariants(readFileSync(join(ROOT, 'src/web-components/chat/chat-types.ts'), 'utf8'));
 if (partVariants.length < MIN_VARIANTS) fail(`union parse degraded: ${partVariants.length} variants.`);
 
 // 3. Integrations and capability groups, esbuild-imported from the TS registries.
@@ -223,7 +223,7 @@ const SRC = join(ROOT, 'src');
 const NOT_SOURCE = /\.(test|stories)\.[cm]?tsx?$/;
 // define.tsx IS the built-in dispatch (both flags hard-coded false); it is the
 // rule these records are exceptions to, not one of them.
-const NOT_A_SOURCE_OF_EXCEPTIONS = join(SRC, 'web-components/define.tsx');
+const NOT_A_SOURCE_OF_EXCEPTIONS = join(SRC, 'web-components/define/define.tsx');
 
 /** Every .ts/.tsx under src/, relative to the package root, POSIX-separated. */
 function sourceFiles(dir) {

@@ -5,7 +5,7 @@ import { cn } from "../../utils/cn";
 import { Markdown } from "../markdown/markdown";
 import { Button } from "../button/button";
 import { actionIcon, BUILTIN_ACTION_LABEL } from "../action-icons/action-icons";
-import type { ChatMessageAction, CustomAction, FeedbackVote, MessagePart, MessageSource } from "../../web-components/chat-types";
+import type { ChatMessageAction, CustomAction, FeedbackVote, MessagePart, MessageSource } from "../../web-components/chat/chat-types";
 import { useChatConfig, textClass } from "../../primitives/chat-config";
 import { Reasoning, ReasoningTrigger, ReasoningContent } from "../reasoning/reasoning";
 import { Loader } from "../loader/loader";

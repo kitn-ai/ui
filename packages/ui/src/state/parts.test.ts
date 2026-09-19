@@ -6,7 +6,7 @@ import {
   upsertCardPart,
   upsertToolPart,
 } from './parts';
-import type { MessagePart } from '../web-components/chat-types';
+import type { MessagePart } from '../web-components/chat/chat-types';
 import type { ToolPart } from '../components/tool/tool-types';
 
 const reasoningAt = (parts: MessagePart[], i: number) =>

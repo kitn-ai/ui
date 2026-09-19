@@ -397,13 +397,13 @@ const TARGETS: Record<string, Target> = {
   // populated dist/.
   //
   // The .d.ts is NOT emitted here. The barrel build (vite-plugin-dts over
-  // src/**, entryRoot: 'src') already emits dist/web-components/define-entry.d.ts —
+  // src/**, entryRoot: 'src') already emits dist/web-components/define/define-entry.d.ts —
   // but this subpath's declared `types` is the flat dist/define.d.ts, matching
   // the flat dist/define.js this build produces, so scripts/emit-subpath-dts.mjs
   // generates dist/define.d.ts as a shim onto the barrel's real declarations
   // (see REAL_TYPES_SOURCE in that script). This build is JS-only.
   define: {
-    entry: 'src/web-components/define-entry.ts',
+    entry: 'src/web-components/define/define-entry.ts',
     fileName: 'define.js',
     transform: 'dom',
     external: SOLID,
@@ -437,7 +437,7 @@ const TARGETS: Record<string, Target> = {
   //
   // emptyOutDir: false — later build in the chain; do NOT clobber earlier output.
   'define.server': {
-    entry: 'src/web-components/define-entry.ts',
+    entry: 'src/web-components/define/define-entry.ts',
     fileName: 'define.server.js',
     transform: 'ssr',
     external: SOLID,

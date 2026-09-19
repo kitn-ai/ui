@@ -7,7 +7,7 @@
 import { describe, expect, it } from 'vitest';
 import { WireEncodeError, toAnthropicMessages, toOpenAIMessages } from './encode';
 import type { AttachmentData } from '../primitives/attachment-types';
-import type { ChatMessage } from '../web-components/chat-types';
+import type { ChatMessage } from '../web-components/chat/chat-types';
 
 const PNG = 'data:image/png;base64,iVBORw0KGgo=';
 const PDF = 'data:application/pdf;base64,JVBERi0xLjQK';

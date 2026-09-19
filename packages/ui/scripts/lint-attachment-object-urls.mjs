@@ -10,7 +10,7 @@
 // `toAnthropicMessages` now REFUSE a `blob:` URL with a written reason
 // (`src/wire/files.ts`), so the failure is loud rather than silent; this guard
 // is what stops the source of it growing back. The correct pattern is
-// `readAsDataUrl` in `src/web-components/default-input.tsx`: a `data:` URI, for EVERY
+// `readAsDataUrl` in `src/web-components/prompt/default-input.tsx`: a `data:` URI, for EVERY
 // file, not just images -- a document with no `url` at all is unencodable for
 // the same reason a blob: URL is.
 //
@@ -415,7 +415,7 @@ console.error(
     `      reader.onerror = () => reject(reader.error);\n` +
     `      reader.readAsDataURL(file);\n` +
     `    });\n` +
-    `  The reference implementation is \`readAsDataUrl\` in src/web-components/default-input.tsx.\n\n` +
+    `  The reference implementation is \`readAsDataUrl\` in src/web-components/prompt/default-input.tsx.\n\n` +
     `  Minting an object URL to render bytes IN-TAB (an <img>, an <audio>) with\n` +
     `  revokeObjectURL cleanup is CORRECT and is not what this matched -- bind it to a\n` +
     `  variable rather than to an attachment's \`url\`.`,

@@ -25,8 +25,8 @@
  * The rows that fail before the fix are the three marked `wins:` below.
  */
 import { describe, it, expect, afterEach } from 'vitest';
-import '../../src/web-components/button';
-import '../../src/web-components/menu';
+import '../../src/web-components/button/button';
+import '../../src/web-components/menu/menu';
 
 const hosts: HTMLElement[] = [];
 

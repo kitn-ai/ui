@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal, Show } from 'solid-js';
 import { ChevronDown } from 'lucide-solid';
-import './register'; // every kai-* element used below
+import '../../web-components/register/register'; // every kai-* element used below
 import t3Favicon from '../../web-components/logos/t3.ico'; // the gathered t3 brand mark, for the real-domain project rows
 import type { KaiNavItem } from '../../components/nav/nav';
-import type { KaiCommandItem } from '../../web-components/command';
+import type { KaiCommandItem } from '../../web-components/command/command';
 
 // Labs/Apps: a second dogfood — "T3 Code", a desktop control plane for coding
 // agents (think an Electron shell). Built on the re-cast kai-workspace SHELL

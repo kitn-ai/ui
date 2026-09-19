@@ -10,11 +10,11 @@
 // still drops everything). They go through the real elements — the same path
 // every real message flows through, like hostile-model-output.test.tsx does for
 // text — and drive the card with a real shadow-root click.
-import '../../src/web-components/chat';
-import '../../src/web-components/message';
-import '../../src/web-components/thread';
+import '../../src/web-components/chat/chat';
+import '../../src/web-components/message/message';
+import '../../src/web-components/thread/thread';
 import { expect, test } from 'vitest';
-import type { ChatMessage } from '../../src/web-components/chat-types';
+import type { ChatMessage } from '../../src/web-components/chat/chat-types';
 import type { CardEvent } from '../../src/primitives/card-contract';
 
 // jsdom does not implement Element.prototype.scrollTo (ChatContainer's

@@ -12,7 +12,7 @@
  * probes' job; here we assert the shadow structure the browser projects.
  */
 import { expect, test, afterEach } from 'vitest';
-import '../../src/web-components/chat-workspace';
+import '../../src/web-components/workspace/chat-workspace';
 
 afterEach(() => { document.body.replaceChildren(); });
 

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { onMount, onCleanup } from 'solid-js';
-import './conversation-list';
+import '../../web-components/conversation/conversation-list';
 import { attachKaiActions } from '../docs/story-actions';
 import type { ConversationSummary, ConversationGroup } from '../../types';
 

@@ -1,7 +1,7 @@
 // tests/web-components/link-embed.test.tsx
 import { afterEach, describe, expect, test } from 'vitest';
-import '../../src/web-components/link-preview';
-import '../../src/web-components/embed';
+import '../../src/web-components/link-preview/link-preview';
+import '../../src/web-components/embed/embed';
 import type { CardEvent } from '../../src/primitives/card-contract';
 import { CARD_EVENT_NAME } from '../../src/primitives/card-routing';
 import { configureEmbedAllowlist, __resetEmbedAllowlistForTests } from '../../src/primitives/embed-providers';

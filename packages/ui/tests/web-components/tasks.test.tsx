@@ -1,7 +1,7 @@
 // tests/web-components/tasks-element.test.tsx
 // Contract integration for <kai-tasks>: row toggles are quiet; only confirm emits
 // `submit` with ids in input order; select-all + min/max/allowEmpty gating.
-import '../../src/web-components/tasks';
+import '../../src/web-components/tasks/tasks';
 import { CARD_EVENT_NAME } from '../../src/primitives/card-routing';
 import type { CardEvent } from '../../src/primitives/card-contract';
 import type { TasksCardData } from '../../src/components/tasks/tasks-card';

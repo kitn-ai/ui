@@ -15,7 +15,7 @@
  * AND JS properties, in both orders where the ordering has ever mattered.
  */
 import { afterEach, describe, expect, test } from 'vitest';
-import '../../src/web-components/thinking-bar';
+import '../../src/web-components/thinking-bar/thinking-bar';
 
 /** Past a macrotask — attribute reflection lands a task after the Solid effect. */
 const flush = () => new Promise((r) => setTimeout(r, 0));

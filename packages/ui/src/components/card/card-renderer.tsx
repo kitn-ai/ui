@@ -103,7 +103,7 @@ function resolveHost(ctxHost: CardHost | undefined, hostElement: HTMLElement | u
  * that is not ours. `hasOwnProperty` (not `in`) so a type named `toString` cannot
  * pick up `Object.prototype`, and the `typeof` check so a `{ 'x': null }` entry
  * reads as "not registered" instead of matching and then validating against
- * nothing. The same predicate lives in web-components/cards.tsx for `<kai-cards>`; the
+ * nothing. The same predicate lives in web-components/card/cards.tsx for `<kai-cards>`; the
  * two dispatchers already duplicate this rule (they compare component identity vs
  * tag identity), so keep them in step.
  */
@@ -133,7 +133,7 @@ export function CardRenderer(props: CardRendererProps): JSX.Element {
   // our schema would reject shapes that are correct for the component actually on
   // screen. So OUR schema applies only to OUR component: the identity check is
   // against BUILTIN_CARD_COMPONENTS, the same object `mergeCardComponents` puts in
-  // the map when nothing overrode the type, and the same one web-components/message.tsx
+  // the map when nothing overrode the type, and the same one web-components/message/message.tsx
   // reuses for a non-overridden built-in.
   //
   // A schema the CONSUMER registered is the other way round: they wrote it about

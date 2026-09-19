@@ -15,11 +15,11 @@ import { resolve } from 'node:path';
 // type graph (tsc compiles a .ts reached from a .d.ts even under skipLibCheck —
 // the root cause of LIB-2).
 //
-// ★ These are NOT free-form prose: `src/web-components/inline-web-component-types.test.ts` compiles
+// ★ These are NOT free-form prose: `src/web-components/web-component/inline-web-component-types.test.ts` compiles
 // this block against the real source types and fails on ANY structural drift in
 // ChatMessage. Edit the source types, then re-run that test — do not hand-patch one
 // side and assume the other followed.
-export const INLINE_ELEMENT_TYPES = `// --- Inlined from src/web-components/chat-types.ts + the types it references
+export const INLINE_ELEMENT_TYPES = `// --- Inlined from src/web-components/chat/chat-types.ts + the types it references
 //     (kept self-contained: no source imports) ---
 export type ChatMessageAction = 'copy' | 'like' | 'dislike' | 'regenerate' | 'edit' | 'speak';
 
@@ -164,7 +164,7 @@ export declare const webComponentsReady: Promise<unknown>;`;
 
 // Imperative toast API surface — mirrors src/primitives/toast-store.ts (the `toast`
 // callable + `configureToasts` + the re-exported Toast* types from
-// src/web-components/register.ts). INLINED here (helper unions inlined, no source imports)
+// src/web-components/register/register.ts). INLINED here (helper unions inlined, no source imports)
 // so the shipped .d.ts pulls no Solid source. Keep in sync with toast-store.ts.
 const TOAST_TYPES = `// --- Inlined from src/primitives/toast-store.ts (kept self-contained: no source imports) ---
 export type ToastVariant = 'neutral' | 'success' | 'warning' | 'error' | 'info';
@@ -432,7 +432,7 @@ ${jsxTagMap}
   // nothing. This block closes that gap.
   //
   // Shape notes, all established empirically against vue-tsc (see
-  // src/web-components/vue-global-components.test.ts for the drift guard):
+  // src/web-components/web-component/vue-global-components.test.ts for the drift guard):
   //  - Volar looks the tag up under BOTH the raw kebab name and its PascalCase
   //    form, depending on `vueCompilerOptions.strictTemplates`, so both keys are
   //    emitted.
@@ -523,7 +523,7 @@ export type {
   MessagePart,
   MessageSource,
   RawOrigin,
-} from './chat-types';
+} from './chat/chat-types';
 export type { ToolPart } from '../components/tool/tool-types';
 export type { ToolKind } from '../components/tool/tool-classify';
 export type { AttachmentData } from '../primitives/attachment-types';

@@ -112,7 +112,7 @@ function checkTree(root) {
       `${BUNDLE} does NOT reference "${NEEDLE}".\n` +
         `  The register-all bundle is missing element registration — it was likely\n` +
         `  tree-shaken away. Consumers of @kitn.ai/ui/web-components would get nothing\n` +
-        `  registered. See src/web-components/register.ts (keep webComponentsReady exported) and\n` +
+        `  registered. See src/web-components/register/register.ts (keep webComponentsReady exported) and\n` +
         `  config/vite/web-components.ts under KAI_BUILD=register\n` +
         `  (build.rollupOptions.treeshake: false for this entry).`,
     );

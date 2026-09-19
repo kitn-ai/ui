@@ -33,7 +33,7 @@ import {
 import { Switch } from '../../components/switch/switch';
 import { Select } from '../../components/select/select';
 import { cn } from '../../utils/cn';
-import type { ChatMessage, ChatMessageAction, CustomAction } from '../../web-components/chat-types';
+import type { ChatMessage, ChatMessageAction, CustomAction } from '../../web-components/chat/chat-types';
 import type { ConversationGroup, ConversationSummary, ModelOption } from '../../types';
 
 // Labs/Builder/Assistant — T-1 build-out (docs/superpowers/specs/

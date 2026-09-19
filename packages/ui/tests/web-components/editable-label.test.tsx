@@ -1,4 +1,4 @@
-import '../../src/web-components/editable-label';
+import '../../src/web-components/editable-label/editable-label';
 
 /** Let Solid's scheduler flush effects + renders. */
 const flush = () => new Promise((r) => setTimeout(r, 0));

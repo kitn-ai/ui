@@ -39,7 +39,7 @@ import { createSignal, type Accessor } from 'solid-js';
 import { ChatThread } from '../../src/components/chat/chat-thread';
 import { Thread } from '../../src/components/thread/thread';
 import { createAssistantStream, type AssistantStream } from '../../src/state/index';
-import type { ChatMessage } from '../../src/web-components/chat-types';
+import type { ChatMessage } from '../../src/web-components/chat/chat-types';
 
 beforeAll(() => {
   // The disclosures measure their content with a ResizeObserver, which jsdom

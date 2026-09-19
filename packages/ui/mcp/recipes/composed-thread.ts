@@ -10,7 +10,7 @@ import type { CodeRecipe } from './types';
  * corrected before it became a teaching artifact: the builder shipped
  * `AttachmentData.url = URL.createObjectURL(file)` (finding F-44, the exact
  * PR #186 defect), and this recipe stages every picked file as a `data:` URI
- * instead, the pattern `src/web-components/default-input.tsx` uses and the wire
+ * instead, the pattern `src/web-components/prompt/default-input.tsx` uses and the wire
  * encoders require. `verify:scaffold` compiles the module below with a stock
  * consumer tsconfig AND asserts the object-URL line has not grown back.
  *

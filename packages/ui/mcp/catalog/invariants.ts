@@ -98,7 +98,7 @@ export const invariants: TInvariant[] = [
     statement:
       'Non-bubbling is the default: public kai-* events are dispatched through the one helper that hard-codes bubbles:false and composed:false, so listen on the element itself, never on a parent or document. The protocol exceptions (kai-maximize-intent, kai-maximize-state and kai-card) bubble or compose deliberately and are listed in the derived layer under eventExceptions — do not generalise from them to the rest.',
     appliesTo: {},
-    enforcedBy: { kind: 'structural', path: 'packages/ui/src/web-components/define.tsx' },
+    enforcedBy: { kind: 'structural', path: 'packages/ui/src/web-components/define/define.tsx' },
     status: 'enforced',
     diagnosis: [
       {
@@ -114,7 +114,7 @@ export const invariants: TInvariant[] = [
       {
         wrong: "document.addEventListener('kai-submit', (e) => send(e.detail.value));",
         right: "chat.addEventListener('kai-submit', (e) => send(e.detail.value));",
-        note: 'The dispatch helper in src/web-components/define.tsx passes { bubbles: false, composed: false }, so nothing above the host ever sees the event.',
+        note: 'The dispatch helper in src/web-components/define/define.tsx passes { bubbles: false, composed: false }, so nothing above the host ever sees the event.',
       },
       {
         wrong: "wrapper.addEventListener('kai-message-action', handleAction);",

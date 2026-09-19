@@ -1,5 +1,5 @@
 import { createSignal } from 'solid-js';
-import { defineWebComponent } from '../../src/web-components/define';
+import { defineWebComponent } from '../../src/web-components/define/define';
 
 test('registers a custom element that renders content and CSS into its shadow root', async () => {
   defineWebComponent('kitn-test-el', { label: 'hi' }, (props, { dispatch }) => {

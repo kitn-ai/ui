@@ -11,7 +11,7 @@ import { Tabs, type KaiTabItem } from '../../components/tabs/tabs';
 import { Button } from '../../components/button/button';
 import { Switch } from '../../components/switch/switch';
 import { isRenderableLink } from '../../primitives/link-preview';
-import type { Source as SourceCitation } from '../../web-components/chat-types';
+import type { Source as SourceCitation } from '../../web-components/chat/chat-types';
 
 // Labs/Builder/Research — T-1 build-out (docs/superpowers/specs/
 // 2026-08-28-template-builder-design.md), reshaped in an owner design round

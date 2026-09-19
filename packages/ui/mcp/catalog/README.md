@@ -26,7 +26,7 @@ of the tree by a generator; everything else is written by hand.
 
 | file | what it is | who writes it | edit by hand? |
 | --- | --- | --- | --- |
-| `derived.json` | Every web component's props/events/methods/parts, the `MessagePart` variants, integrations, capability groups, theme tokens, event exceptions | `scripts/gen-catalog.mjs`, via `build:api` | **Never.** Change the source it reads (`src/web-components/web-component-meta.json`, `src/web-components/chat-types.ts`, `mcp/registry.ts`, `archetypes.ts`, `theme.css`) and regenerate |
+| `derived.json` | Every web component's props/events/methods/parts, the `MessagePart` variants, integrations, capability groups, theme tokens, event exceptions | `scripts/gen-catalog.mjs`, via `build:api` | **Never.** Change the source it reads (`src/web-components/web-component-meta.json`, `src/web-components/chat/chat-types.ts`, `mcp/registry.ts`, `archetypes.ts`, `theme.css`) and regenerate |
 | `catalog-types.ts` | The Zod schemas every authored record is parsed against | you | yes |
 | `invariants.ts` | The rules that break real consumers, each with a statement, `diagnosis` symptom/cause pairs, wrong/right code examples, and an honest `enforcedBy` | you | yes |
 | `surfaces.ts` | `inventory` (what is a surface vs an ingredient vs corpus), `surfaceRecipes` (proven compositions with their host wiring written out), `partConsumption` | you | yes |

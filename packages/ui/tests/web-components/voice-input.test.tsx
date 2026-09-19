@@ -1,5 +1,5 @@
 import { vi } from 'vitest';
-import '../../src/web-components/voice-input';
+import '../../src/web-components/voice-input/voice-input';
 
 test('record button has an accessible name in its idle state (a11y A1)', async () => {
   const el = document.createElement('kai-voice-input');

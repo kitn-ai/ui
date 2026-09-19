@@ -5912,13 +5912,13 @@
       "composed": true
     },
     {
-      "file": "src/web-components/artifact.tsx",
+      "file": "src/web-components/artifact/artifact.tsx",
       "event": "kai-maximize-intent",
       "bubbles": true,
       "composed": true
     },
     {
-      "file": "src/web-components/resizable.tsx",
+      "file": "src/web-components/resizable/resizable.tsx",
       "event": "kai-maximize-state",
       "bubbles": false,
       "composed": true

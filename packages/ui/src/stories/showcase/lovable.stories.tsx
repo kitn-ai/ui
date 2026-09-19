@@ -5,7 +5,7 @@ import {
   Search, Bell, LayoutDashboard, BarChart3, ShoppingCart, Settings, Sparkles,
   Paperclip, TrendingUp, TrendingDown, CircleCheck, Activity, DollarSign,
 } from 'lucide-solid';
-import './register'; // every kai-* element used below
+import '../../web-components/register/register'; // every kai-* element used below
 import type { FileTreeFile } from '../../components/file/file-tree';
 import type { KaiTabItem } from '../../components/tabs/tabs';
 

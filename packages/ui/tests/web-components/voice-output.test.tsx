@@ -1,5 +1,5 @@
 import { vi } from 'vitest';
-import '../../src/web-components/voice-output';
+import '../../src/web-components/voice-output/voice-output';
 
 // jsdom ships no Web Speech API; stub the synthesis surface so the facade's
 // native path runs. The stub captures the utterance so a test can fire its

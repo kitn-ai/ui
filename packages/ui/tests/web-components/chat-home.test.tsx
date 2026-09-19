@@ -1,4 +1,4 @@
-import '../../src/web-components/chat';
+import '../../src/web-components/chat/chat';
 
 if (!Element.prototype.scrollTo) {
   Element.prototype.scrollTo = () => {};

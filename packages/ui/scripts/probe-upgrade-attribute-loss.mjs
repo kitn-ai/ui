@@ -55,9 +55,9 @@ const PAGE = /* html */ `<!doctype html>
 
     let error = null;
     try {
-      await import('/src/web-components/message.tsx');
-      await import('/src/web-components/resizable.tsx');
-      await import('/src/web-components/confirm-card.tsx');
+      await import('/src/web-components/message/message.tsx');
+      await import('/src/web-components/resizable/resizable.tsx');
+      await import('/src/web-components/confirm-card/confirm-card.tsx');
     } catch (e) { error = String((e && e.stack) || e); }
 
     // Let solid render and the parent's readItems() settle.

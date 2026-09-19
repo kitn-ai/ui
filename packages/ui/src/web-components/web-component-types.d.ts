@@ -25,7 +25,7 @@ export type {
   MessagePart,
   MessageSource,
   RawOrigin,
-} from './chat-types';
+} from './chat/chat-types';
 export type { ToolPart } from '../components/tool/tool-types';
 export type { ToolKind } from '../components/tool/tool-classify';
 export type { AttachmentData } from '../primitives/attachment-types';

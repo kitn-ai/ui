@@ -1,4 +1,4 @@
-import '../../src/web-components/kbd';
+import '../../src/web-components/kbd/kbd';
 
 test('kai-kbd renders normalized glyphs for keys + platform', async () => {
   const el = document.createElement('kai-kbd');

@@ -1,6 +1,6 @@
 // tests/web-components/resizable.test.tsx
-import '../../src/web-components/resizable';
-import type { KaiMaximizeIntentDetail, KaiMaximizeStateDetail } from '../../src/web-components/resizable';
+import '../../src/web-components/resizable/resizable';
+import type { KaiMaximizeIntentDetail, KaiMaximizeStateDetail } from '../../src/web-components/resizable/resizable';
 
 // jsdom has no layout, so we only assert DOM structure, attributes and events
 // here. Drag, keyboard and visual layout are verified via Playwright.

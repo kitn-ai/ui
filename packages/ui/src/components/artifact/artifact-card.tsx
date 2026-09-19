@@ -57,7 +57,7 @@ export interface ArtifactCardProps {
  *  `part="card"` matches the other chromed cards, which get it from `<Card>`;
  *  this one hand-rolls its chrome and so states it directly. The artifact-specific
  *  handle is `data-card-type`, NOT a second part token: every `::part` name has to
- *  be declared in `web-components/slots.ts` (the drift guard in `slots.test.ts` enforces
+ *  be declared in `web-components/slots/slots.ts` (the drift guard in `slots.test.ts` enforces
  *  it), so adding an `artifact` part is a deliberate public-API decision to make
  *  there, not something to smuggle in from a component.
  *

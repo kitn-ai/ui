@@ -5,8 +5,8 @@
  * now belong exclusively to the `<kai-search>` filter field and conversation
  * filtering; the composer no longer answers to them (feat!, no alias).
  */
-import '../../src/web-components/prompt-input';
-import '../../src/web-components/chat';
+import '../../src/web-components/prompt/prompt-input';
+import '../../src/web-components/chat/chat';
 
 const flush = () => new Promise((r) => setTimeout(r, 0));
 

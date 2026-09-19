@@ -6,7 +6,7 @@
 // isolation.
 import type { ToolPart } from '../tool/tool';
 import type { AttachmentData } from '../attachments/attachments';
-import type { MessagePart } from '../../web-components/chat-types';
+import type { MessagePart } from '../../web-components/chat/chat-types';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types

@@ -2,7 +2,7 @@ import { type JSX, type Component, For } from 'solid-js';
 import { Copy, ThumbsUp, ThumbsDown, RefreshCw, Pencil, Volume2, ChevronUp, ChevronDown } from 'lucide-solid';
 import { Switch } from '../switch/switch';
 import { Button } from '../button/button';
-import type { ChatMessageAction } from '../../web-components/chat-types';
+import type { ChatMessageAction } from '../../web-components/chat/chat-types';
 
 /**
  * The role-scoped, ordered message-action picker — extracted from
@@ -13,7 +13,7 @@ import type { ChatMessageAction } from '../../web-components/chat-types';
  * stories.tsx` was retrofitted to import from here in the same round; its
  * rendered output and behavior are unchanged — this is a pure extraction.
  *
- * Model: `ChatMessage.actions` (`web-components/chat-types.ts`) is `(ChatMessage
+ * Model: `ChatMessage.actions` (`web-components/chat/chat-types.ts`) is `(ChatMessage
  * Action | CustomAction)[]` — an ORDERED array, not a set — and role-scoped
  * only by caller curation (checked against `message.tsx`/`chat-thread.tsx`:
  * neither hard-couples any built-in id to a role). This picker enforces

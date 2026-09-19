@@ -5,7 +5,7 @@ import { ResizablePanelGroup, ResizablePanel, ResizableHandle, clampBasis } from
 
 // Scope: both halves of the resizable pair. The components under test live at
 // `src/components/resizable/resizable.tsx` (this test's sibling) and the custom element at
-// `src/web-components/resizable.tsx`. It exercises the components (`ResizableHandle`
+// `src/web-components/resizable/resizable.tsx`. It exercises the components (`ResizableHandle`
 // affordances + never-shrink contract, dblclick-reset, default-size reflection)
 // and the element (`<kai-resizable>` size-preservation across content-only
 // re-renders). The two suites were authored separately, in two directories, and
@@ -182,7 +182,7 @@ describe('ResizableHandle dblclick resets adjacent panels to defaults', () => {
 describe('<kai-resizable> size preservation across content-only re-renders', () => {
   beforeAll(async () => {
     // Importing registers the custom element. jsdom supports customElements.
-    await import('../../web-components/resizable');
+    await import('../../web-components/resizable/resizable');
   });
 
   function mount(html: string): HTMLElement {

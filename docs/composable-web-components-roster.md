@@ -33,12 +33,12 @@ These are contract, not measurement, and they held from the spike through today:
 
 Two corrections to the spike-era phrasing, both shipped: events are **`kai-`-prefixed**
 (`kai-submit`, `kai-tab-change`), not bare names; and `defineKitnElement` became
-`defineWebComponent` (`src/web-components/define.tsx`) when the `kitn-` prefix era ended.
+`defineWebComponent` (`src/web-components/define/define.tsx`) when the `kitn-` prefix era ended.
 
 ## 2. What shipped (the parts of the old plan that are now just the tree)
 
 - **Every web component is standalone by construction.** Each facade is its own Solid root with its
-  own `ChatConfig` and shadow-root portal mount (`web-components/define.tsx`). The audit verified
+  own `ChatConfig` and shadow-root portal mount (`web-components/define/define.tsx`). The audit verified
   this structurally for the whole roster: there is no web-component-tier internal glue.
 - **The per-web-component bundle split is merged and shipped** — not "measured and never merged" as
   the roadmap once said. `config/vite/web-components.ts` (KAI_BUILD=split) builds a self-registering module per tag;
@@ -50,7 +50,7 @@ Two corrections to the spike-era phrasing, both shipped: events are **`kai-`-pre
 - **No store; the host coordinates.** The v1 ruling held: data in via properties, out via
   non-bubbling events, host wires A→B. Nothing since has needed a `<kai-provider>`.
 - **Cross-element protocols exist where wiring wasn't enough** — e.g. the composed
-  `kai-maximize-intent` / `kai-maximize-state` pair in `src/web-components/resizable.tsx` — but they
+  `kai-maximize-intent` / `kai-maximize-state` pair in `src/web-components/resizable/resizable.tsx` — but they
   are opt-in events, not shared state.
 
 ## 3. Evidence tiers (from the 2026-08-25 audit — the current honest picture)

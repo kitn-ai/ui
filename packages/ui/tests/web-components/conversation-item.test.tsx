@@ -8,8 +8,8 @@
  * constructs `kai-conversation-item`.
  */
 import { describe, it, expect, afterEach } from 'vitest';
-import '../../src/web-components/conversation-list';
-import '../../src/web-components/conversation-item';
+import '../../src/web-components/conversation/conversation-list';
+import '../../src/web-components/conversation/conversation-item';
 import type { ConversationSummary } from '../../src/types';
 
 const conv = (id: string, title: string): ConversationSummary => ({

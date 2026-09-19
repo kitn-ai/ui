@@ -20,7 +20,7 @@
 import { describe, expect, it } from 'vitest';
 import { cardFromToolCall, isCardTool, toolNameForCardType, KAI_TOOL_PREFIX } from './from-tool-call';
 import { createAssistantStream } from '../state/stream';
-import type { ChatMessage, MessagePart } from '../web-components/chat-types';
+import type { ChatMessage, MessagePart } from '../web-components/chat/chat-types';
 
 /** Every name asserted anywhere in this file, so the agreement check below cannot
  *  drift out of step with the individual cases. */
@@ -129,7 +129,7 @@ describe('cardFromToolCall', () => {
     // tool". Whether the type is renderable is asked once, downstream, where it is
     // already answered specifically: CardRenderer emits {kind:'error', cardId} and
     // renders CardFallback naming the type (tests/components/card/card-renderer.test.tsx:38,
-    // src/web-components/thread-cards.declarative.test.tsx:55).
+    // src/web-components/thread/thread-cards.declarative.test.tsx:55).
     //
     // The alternative (gate on the 7 built-ins, return null otherwise) would send a
     // custom card type registered via `cardTypes` to `runTool('kai_pricing-table')`,

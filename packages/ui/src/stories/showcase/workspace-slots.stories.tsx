@@ -1,13 +1,13 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { onMount, onCleanup } from 'solid-js';
 import { Sparkles } from 'lucide-solid';
-import './chat-workspace';
-import './conversation-list';
-import './chat';
-import './card';
+import '../../web-components/workspace/chat-workspace';
+import '../../web-components/conversation/conversation-list';
+import '../../web-components/chat/chat';
+import '../../web-components/card/card';
 import { attachKaiActions } from '../docs/story-actions';
 import { textMessage } from '../../state/index';
-import type { ChatMessage } from '../../web-components/chat-types';
+import type { ChatMessage } from '../../web-components/chat/chat-types';
 import type { ConversationSummary, ConversationGroup } from '../../types';
 
 // Labs: the re-cast kai-workspace shell slots. Five bounded regions the

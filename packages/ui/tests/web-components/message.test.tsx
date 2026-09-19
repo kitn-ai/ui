@@ -21,11 +21,11 @@
 // and upgraded at registration time loses the attribute in the custom-element
 // CONSTRUCTOR, before any facade code runs, because `defineWebComponent` installs
 // its non-reflecting `role` accessor AFTER `customElements.define()`. That is a
-// defect in src/web-components/define.tsx. Every test below therefore builds its element
+// defect in src/web-components/define/define.tsx. Every test below therefore builds its element
 // with `document.createElement`, which is the state of the world after upgrade.
-import '../../src/web-components/message';
+import '../../src/web-components/message/message';
 import axe from 'axe-core';
-import type { ChatMessage } from '../../src/web-components/chat-types';
+import type { ChatMessage } from '../../src/web-components/chat/chat-types';
 
 const flush = () => new Promise((r) => setTimeout(r, 0));
 

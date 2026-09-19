@@ -27,7 +27,7 @@ import { beforeAll, describe, expect, it } from 'vitest';
  * scanned here and missed there, and that is the failure. Every candidate the
  * design system can generate a rule for must then have its selector in
  * `compiled.css`. The sheet is read, not recompiled: `compiled.css` is the
- * artifact `src/web-components/css.ts` injects into every shadow root, so it is the
+ * artifact `src/web-components/define/css.ts` injects into every shadow root, so it is the
  * thing that ships and the thing that has to be right.
  *
  * WHY NOT dist/. It was tried first. dist/index.js bundles tailwind-merge, whose

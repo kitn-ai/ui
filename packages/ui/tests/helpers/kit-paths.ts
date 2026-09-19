@@ -16,6 +16,10 @@ import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 export const PKG_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
+// NOT src/web-components: a facade and its Solid component share a basename by
+// design (switch.tsx exists in both), so folding them into one basename index made
+// this helper throw on a legitimate lookup. A guard that means the FACADE names its
+// path (or walks the layer). Widened once, reverted the same day, with the reason.
 const SOURCE_DIRS = ['src/components', 'src/primitives'].map((d) => resolve(PKG_ROOT, d));
 
 function sourceFiles(dir: string, out: string[] = []): string[] {

@@ -17,7 +17,7 @@
  * imports resolve to through the shipped exports map.
  */
 import { expect, test, vi } from 'vitest';
-import '../../src/web-components/chat';
+import '../../src/web-components/chat/chat';
 import { isConversationUnread, type ConversationStore, type ConversationSummary } from '../../src/index';
 
 if (!Element.prototype.scrollTo) {

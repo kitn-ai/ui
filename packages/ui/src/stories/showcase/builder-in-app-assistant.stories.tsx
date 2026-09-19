@@ -26,7 +26,7 @@ import { Switch } from '../../components/switch/switch';
 import { RadioGroup, type RadioOption } from '../../components/radio/radio';
 import { Select } from '../../components/select/select';
 import { cn } from '../../utils/cn';
-import type { ChatMessage, ChatMessageAction, CustomAction } from '../../web-components/chat-types';
+import type { ChatMessage, ChatMessageAction, CustomAction } from '../../web-components/chat/chat-types';
 
 // Labs/Builder/In-app assistant — Round A (T-1/T-2/T-6, docs/superpowers/
 // specs/2026-08-28-template-builder-design.md): the SECOND template story,
@@ -80,7 +80,7 @@ import type { ChatMessage, ChatMessageAction, CustomAction } from '../../web-com
 //
 // Round A3 (owner amendment) reshaped Message actions into an ORDERED,
 // ROLE-SCOPED picker, replacing Round A2's single flat toggle-chip group:
-//  - `ChatMessage.actions` (`web-components/chat-types.ts`) is `(ChatMessageAction
+//  - `ChatMessage.actions` (`web-components/chat/chat-types.ts`) is `(ChatMessageAction
 //    | CustomAction)[]` — an ORDERED array, not a set — and it's set
 //    per-message, so "enabled" alone was never the whole model; the array's
 //    ORDER is what the action bar actually renders left-to-right

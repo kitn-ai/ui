@@ -1,7 +1,7 @@
 // tests/web-components/form.test.tsx
 // Contract integration: the bubbling `kai-card` CustomEvent reaches a document
 // listener (the requirement defineWebComponent's default dispatch does NOT meet).
-import '../../src/web-components/form';
+import '../../src/web-components/form/form';
 import { CARD_EVENT_NAME } from '../../src/primitives/card-routing';
 import type { CardEvent } from '../../src/primitives/card-contract';
 import type { FormDefinition } from '../../src/components/form/form';

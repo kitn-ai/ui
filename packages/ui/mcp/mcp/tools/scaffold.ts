@@ -1662,7 +1662,7 @@ export const ATTACHMENT_WIRE_NOTE = [
  * the consumer can edit.
  *
  * It reads the file with `FileReader.readAsDataURL` and stages a `data:` URI —
- * the same call `readAsDataUrl` in `web-components/default-input.tsx` makes, for the
+ * the same call `readAsDataUrl` in `web-components/prompt/default-input.tsx` makes, for the
  * same reason. `URL.createObjectURL` would draw an identical thumbnail and be
  * meaningless to anything downstream: an object URL resolves only inside the tab
  * that minted it, so `toOpenAIMessages` / `toAnthropicMessages` refuse it rather

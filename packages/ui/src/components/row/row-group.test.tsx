@@ -124,11 +124,22 @@ describe('the geometry contract with kit-base.css', () => {
     // one that proved the need: it draws its own hairline now, where `SettingsGroup`
     // used to get dividers from a `divide-y` class on the frame.
     const facadeDir = resolve(PKG_ROOT, 'src/web-components');
-    const rowShaped = readdirSync(facadeDir)
-      .filter((f) => f.endsWith('.tsx') && !f.endsWith('.stories.tsx'))
-      .map((f) => ({ file: f, src: readFileSync(resolve(facadeDir, f), 'utf8') }))
+    // RECURSIVE (family folders, 2026-09-19) and depth-tolerant on the import
+    // specifier: a facade now sits one level deeper, so the import reads
+    // '../../components/row/row'. Matching the literal old depth made this scan
+    // find nothing and pass over an empty set -- its own vacuity check said so.
+    const walkFacades = (dir: string, out: string[] = []): string[] => {
+      for (const entry of readdirSync(dir, { withFileTypes: true })) {
+        const full = resolve(dir, entry.name);
+        if (entry.isDirectory()) { walkFacades(full, out); continue; }
+        if (entry.name.endsWith('.tsx') && !entry.name.endsWith('.stories.tsx') && !entry.name.endsWith('.test.tsx')) out.push(full);
+      }
+      return out;
+    };
+    const rowShaped = walkFacades(facadeDir)
+      .map((f) => ({ file: f, src: readFileSync(f, 'utf8') }))
       .filter(({ src }) =>
-        [...src.matchAll(/import\s*\{([^}]*)\}\s*from\s*'\.\.\/components\/(?:row\/row|settings\/settings-group)'/g)]
+        [...src.matchAll(/import\s*\{([^}]*)\}\s*from\s*'(?:\.\.\/)+components\/(?:row\/row|settings\/settings-group)'/g)]
           .some((m) => /\b(Row|SettingItem)\b/.test(m[1])),
       );
 

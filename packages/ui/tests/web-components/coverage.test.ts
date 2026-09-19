@@ -7,7 +7,7 @@
  * `kai-response-stream`, `kai-segmented`, `kai-setting-item` among them — and the
  * reason nobody noticed is that the obvious check for "is this element tested?" is a
  * grep for its tag, and a grep OVERCOUNTS every time. The tag appears in
- * `src/web-components/slots.test.ts` registry fixtures, in a `tests/react` prop table as a
+ * `src/web-components/slots/slots.test.ts` registry fixtures, in a `tests/react` prop table as a
  * string beside a React wrapper (`['kai-scope-picker', () => <ScopePicker />]`), in a
  * type-only declaration, in a doc comment, and in `payload-boundary.test.ts` as an
  * inert host with no assertion about the host at all. MOST of the elements this guard
@@ -26,7 +26,7 @@
  *       parsed out of the facade's own import lines (below), never written down here.
  *
  * WHAT IS DERIVED AND WHAT IS WRITTEN DOWN. The tag list is the manifest, the same
- * source `src/web-components/web-component-registry.test.ts` partitions. The facade module per
+ * source `src/web-components/web-component/web-component-registry.test.ts` partitions. The facade module per
  * tag is the manifest's own mapping. The Solid component per facade is parsed from
  * the facade. The test corpus is walked. The ONLY hand-written thing is EXEMPT — and
  * every entry in it is a punch-list item, not a decision to leave something untested.
@@ -51,7 +51,7 @@
  *     named them. A guard's own fixtures are not coverage.
  */
 import { readdirSync, readFileSync, existsSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
+import {dirname, join, resolve, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, it, expect } from 'vitest';
 import manifest from '../../src/web-components/web-component-manifest.json';
@@ -330,13 +330,23 @@ function constructsIn(stripped: StrippedSource, tag: string): boolean {
 const TAGS: string[] = Object.keys(manifest.tags).sort();
 
 /** The facade module the manifest itself maps this tag to. */
+/** basename -> source path, built once by a recursive walk. The manifest maps a tag
+ *  to its module BASENAME (that is the public module name), and the layer is folded
+ *  into family folders (2026-09-19), so a flat join no longer finds anything. */
+const SOURCES_BY_BASENAME = (() => {
+  const map = new Map<string, string>();
+  for (const file of walk(ELEMENTS)) {
+    const m = /^(.+)\.(tsx|ts)$/.exec(basename(file));
+    if (!m) continue;
+    if (map.has(m[1])) throw new Error(`two sources named ${m[1]}: ${map.get(m[1])} and ${file}`);
+    map.set(m[1], file);
+  }
+  return map;
+})();
+
 function facadeOf(tag: string): string | null {
   const base = (manifest.tags as Record<string, string>)[tag];
-  for (const ext of ['.tsx', '.ts']) {
-    const p = join(ELEMENTS, base + ext);
-    if (existsSync(p)) return p;
-  }
-  return null;
+  return SOURCES_BY_BASENAME.get(base) ?? null;
 }
 
 /**
@@ -365,12 +375,18 @@ function solidModulesOf(tag: string): Set<string> {
   if (!facade) return out;
   const source = readFileSync(facade, 'utf8');
   for (const imp of importsOf(source)) {
-    if (imp.typeOnly || !/^\.\.\/(components|ui)\//.test(imp.spec)) continue;
+    if (imp.typeOnly) continue;
+    // RESOLVED, not prefix-matched. This read `/^\.\.\/(components|ui)\//`, which is a
+    // function of the FACADE's DEPTH: folding the layer into family folders made every
+    // facade one level deeper ('../../components/...'), the test rejected all of them
+    // and this derivation returned an EMPTY set for all 97 web components. Its own
+    // vacuity assertion (withSolid.length > 60) is what caught it.
+    const resolved = resolveModule(facade, imp.spec);
+    if (!resolved || !resolved.startsWith(join(PKG, 'src', 'components') + '/')) continue;
     const bindings = [...imp.clause.matchAll(/([A-Za-z_$][\w$]*)/g)].map((x) => x[1]);
     const rendered = bindings.some((b) => /^[A-Z]/.test(b) && new RegExp(`<${b}[\\s/>]`).test(source));
     if (!rendered) continue;
-    const resolved = resolveModule(facade, imp.spec);
-    if (resolved) out.add(resolved);
+    out.add(resolved);
   }
   return out;
 }

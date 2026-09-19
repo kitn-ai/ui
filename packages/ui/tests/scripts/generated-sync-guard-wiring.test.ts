@@ -3,7 +3,7 @@
  *
  * The guard itself reruns the real generator and fails when a committed derived
  * artifact differs from what came out. fc40a10 is why: a new `::part(citations)`
- * went into src/web-components/slots.ts, the artifacts derived from it were not
+ * went into src/web-components/slots/slots.ts, the artifacts derived from it were not
  * regenerated, and nothing went red — so a part that existed in the shipped element
  * was invisible to the `kai` MCP and the docs site, i.e. to every tool a developer
  * would use to find it.

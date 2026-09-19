@@ -416,8 +416,8 @@ export const HARNESSES = {
       assert(derivedEvents('kai-chat').includes('kai-submit'), 'kai-chat does not dispatch kai-submit in the derived layer');
       // The stand-in dispatches non-bubbling because the kit's helper does. If
       // that stops being true, the stand-in is modelling nothing.
-      assert(/bubbles:\s*false/.test(defineSource), 'src/web-components/define.tsx no longer hard-codes bubbles: false');
-      assert(/composed:\s*false/.test(defineSource), 'src/web-components/define.tsx no longer hard-codes composed: false');
+      assert(/bubbles:\s*false/.test(defineSource), 'src/web-components/define/define.tsx no longer hard-codes bubbles: false');
+      assert(/composed:\s*false/.test(defineSource), 'src/web-components/define/define.tsx no longer hard-codes composed: false');
     },
   },
 

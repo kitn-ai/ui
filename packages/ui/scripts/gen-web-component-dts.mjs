@@ -4,7 +4,7 @@
 // so each gets `export {};` — enough for strict-TS consumers to `import
 // '@kitn.ai/ui/web-components/<file>'` without a "cannot find module" error. The autoloader
 // gets real signatures.
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { writeFileSync, existsSync, readdirSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -15,9 +15,20 @@ if (!existsSync(OUT)) {
   process.exit(1);
 }
 
-const manifest = JSON.parse(readFileSync(resolve(ROOT, 'src/web-components/web-component-manifest.json'), 'utf8'));
+// The set is DERIVED FROM THE EMITTED MODULES, not from the manifest. The manifest
+// covers register-impl's facades only, so it misses every module the split build
+// adds by hand -- which is how `@kitn.ai/ui/web-components/remote` ended up with a
+// dist .js and no .d.ts the day the layer was folded into family folders: the
+// barrel's declaration emit used to mirror src/web-components/remote.tsx to a FLAT
+// dist/web-components/remote.d.ts by accident, and nesting that emit removed the
+// accident without replacing it. The public per-module set IS the flat .js set.
+const emitted = readdirSync(OUT)
+  .filter((f) => f.endsWith('.js'))
+  .map((f) => f.slice(0, -'.js'.length))
+  .filter((f) => f !== 'autoloader' && f !== 'index')
+  .sort();
 let n = 0;
-for (const file of Object.keys(manifest.files)) {
+for (const file of emitted) {
   writeFileSync(resolve(OUT, `${file}.d.ts`), 'export {};\n');
   n++;
 }

@@ -86,7 +86,7 @@ const argOf = (flag) => {
 const PKG_ROOT = resolve(argOf('--package-root') ?? join(SCRIPT_DIR, '..'));
 const SELF_TEST = argv.includes('--self-test');
 
-const UNION_FILE = join(PKG_ROOT, 'src/web-components/chat-types.ts');
+const UNION_FILE = join(PKG_ROOT, 'src/web-components/chat/chat-types.ts');
 const WIRE_DIR = join(PKG_ROOT, 'src/wire');
 
 // The degradation floor for the parse; see `scripts/lib/message-part-variants.mjs`.

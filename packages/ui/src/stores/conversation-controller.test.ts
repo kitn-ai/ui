@@ -11,7 +11,7 @@ import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { createConversationController, type ConversationControllerHooks } from './conversation-controller';
 import { isConversationUnread, type ConversationStore } from '../primitives/conversation-store';
 import type { ConversationSummary } from '../types';
-import type { ChatMessage } from '../web-components/chat-types';
+import type { ChatMessage } from '../web-components/chat/chat-types';
 
 const msg = (text: string): ChatMessage => ({
   id: `m-${text}`,

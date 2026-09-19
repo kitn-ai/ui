@@ -1,5 +1,5 @@
-import '../../src/web-components/chat';
-import type { ChatMessage } from '../../src/web-components/chat-types';
+import '../../src/web-components/chat/chat';
+import type { ChatMessage } from '../../src/web-components/chat/chat-types';
 
 // jsdom does not implement Element.prototype.scrollTo. ChatContainer's
 // stick-to-bottom primitive calls it via requestAnimationFrame when message

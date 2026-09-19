@@ -85,10 +85,10 @@ const PAGE = /* html */ `<!doctype html>
   <script type="module">
     let error = null;
     try {
-      await import('/src/web-components/row.tsx');
-      await import('/src/web-components/row-group.tsx');
-      await import('/src/web-components/settings-group.tsx');
-      await import('/src/web-components/setting-item.tsx');
+      await import('/src/web-components/row/row.tsx');
+      await import('/src/web-components/row/row-group.tsx');
+      await import('/src/web-components/settings/settings-group.tsx');
+      await import('/src/web-components/settings/setting-item.tsx');
       // The Solid path: the same components a light-DOM SolidJS consumer writes,
       // mounted with the real renderer. Its rows are DOM children of the frame,
       // which is the half of the geometry ::slotted() cannot reach.

@@ -10,7 +10,7 @@ vi.mock('../../src/remote/host-embed', () => ({
 }));
 
 // eslint-disable-next-line import/first
-import '../../src/web-components/remote';
+import '../../src/web-components/remote/remote';
 
 afterEach(() => {
   document.querySelectorAll('kai-remote').forEach((e) => e.remove());

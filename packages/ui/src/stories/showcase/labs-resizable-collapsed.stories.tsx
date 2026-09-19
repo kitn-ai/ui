@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal, onMount, onCleanup, type JSX } from 'solid-js';
-import './register'; // side effect: registers the custom elements
+import '../../web-components/register/register'; // side effect: registers the custom elements
 import { attachKaiActions } from '../docs/story-actions';
 
 // The web components are custom DOM elements, so declare the tags for JSX. This

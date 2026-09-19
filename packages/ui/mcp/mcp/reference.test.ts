@@ -603,7 +603,7 @@ describe('component_reference does not overstate what the catalog enforces', () 
     expect(line).toBeDefined();
     // Not "not enforced", not "partially enforced" — and it names its real guard.
     expect(line).not.toMatch(/not enforced|partially enforced/i);
-    expect(line).toContain('src/web-components/define.tsx');
+    expect(line).toContain('src/web-components/define/define.tsx');
   });
 
   it('upgrade-race is served with the delivery scope that makes it conditional', async () => {

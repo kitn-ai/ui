@@ -169,7 +169,7 @@ export const TEST_TIMEOUT_BUDGETS: readonly TestTimeoutBudget[] = [
       'runs ts.createProgram over web-component-types.d.ts with skipLibCheck:false and the full DOM lib — a real compile, 3.8s idle',
   },
   {
-    file: 'src/web-components/inline-web-component-types.test.ts',
+    file: 'src/web-components/web-component/inline-web-component-types.test.ts',
     timeout: COMPILES_TYPESCRIPT,
     because:
       'compares the generated inline type block against the real sources with tsc, so it pays for a program per assertion',

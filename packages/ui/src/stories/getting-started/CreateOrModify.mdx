@@ -94,7 +94,7 @@ Wire callbacks with `fn()` so they log to the Actions panel, and give each notab
 Wrap the component with `defineWebComponent` in `src/web-components/`:
 
 ```tsx
-// src/web-components/switch.tsx
+// src/web-components/switch/switch.tsx
 import { defineWebComponent } from './define';
 import { Switch } from '../components/switch';
 
@@ -131,7 +131,7 @@ defineWebComponent<Props, Events>('kai-switch', {
 ## 4. Register and regenerate
 
 ```ts
-// src/web-components/register.ts
+// src/web-components/register/register.ts
 import './switch';
 ```
 

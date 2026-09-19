@@ -27,7 +27,7 @@ import { Switch } from '../../components/switch/switch';
 import { Select } from '../../components/select/select';
 import { Input } from '../../components/input/input';
 import { Button } from '../../components/button/button';
-import type { ChatMessage } from '../../web-components/chat-types';
+import type { ChatMessage } from '../../web-components/chat/chat-types';
 import type { ConversationGroup, ConversationSummary } from '../../types';
 
 // Labs/Builder/"Multi-mode" — T-1 build-out, owner discovery round. WORKING

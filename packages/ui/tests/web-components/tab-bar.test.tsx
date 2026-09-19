@@ -11,8 +11,8 @@
  * custom elements; a macrotask flush covers upgrade + MutationObserver delivery.
  */
 import { afterEach, describe, expect, test } from 'vitest';
-import '../../src/web-components/tab-bar';
-import '../../src/web-components/tab-bar-item';
+import '../../src/web-components/tabs/tab-bar';
+import '../../src/web-components/tabs/tab-bar-item';
 
 const flush = () => new Promise((r) => setTimeout(r, 0));
 

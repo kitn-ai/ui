@@ -42,7 +42,7 @@
 // none today) is left alone and reported.
 //
 // SCOPE: this rewrites `src/web-components/compiled.css` ONLY. That file is imported
-// as a raw string (`src/web-components/css.ts`, Vite `?inline`) and injected into
+// as a raw string (`src/web-components/define/css.ts`, Vite `?inline`) and injected into
 // custom-element shadow roots; it is never served to the host document, so no
 // consumer page is affected by the ungating or the strip.
 //

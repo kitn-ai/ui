@@ -26,7 +26,7 @@ import { describe, it, expect, afterEach, vi } from 'vitest';
 import '@testing-library/jest-dom/vitest';
 import { render, cleanup } from '@solidjs/testing-library';
 import { ChatThread } from '../../src/components/chat/chat-thread';
-import type { ChatMessage } from '../../src/web-components/chat-types';
+import type { ChatMessage } from '../../src/web-components/chat/chat-types';
 
 if (!Element.prototype.scrollTo) (Element.prototype as unknown as { scrollTo: () => void }).scrollTo = () => {};
 vi.mock('../../src/primitives/toast-store', () => {

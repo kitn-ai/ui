@@ -8,11 +8,11 @@ import {
   Folder, GitBranch, Cloud, Laptop, Layers,
   type LucideProps,
 } from 'lucide-solid';
-import './register'; // every kai-* element used below
+import '../../web-components/register/register'; // every kai-* element used below
 import { type AgentStatus, type AgentStatusTone } from '../../components/agent-card/agent-card';
 import { cn } from '../../utils/cn';
 import type { KaiNavItem } from '../../components/nav/nav';
-import type { KaiCommandItem } from '../../web-components/command';
+import type { KaiCommandItem } from '../../web-components/command/command';
 import { toast, configureToasts } from '../../primitives/toast-store';
 
 // Labs/Apps: AMUX — a full multi-agent workspace. A desktop shell with a LEFT

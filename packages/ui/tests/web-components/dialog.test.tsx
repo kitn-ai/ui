@@ -33,7 +33,7 @@
  * also a real code path.
  */
 import { afterAll, afterEach, beforeAll, describe, expect, test, vi } from 'vitest';
-import '../../src/web-components/dialog';
+import '../../src/web-components/dialog/dialog';
 
 /**
  * Past a macrotask, not just a microtask. The `open` reflection lands in

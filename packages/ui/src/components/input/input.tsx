@@ -69,7 +69,7 @@ export interface InputProps extends Omit<JSX.InputHTMLAttributes<HTMLInputElemen
 
 /** The `format` value that means: resolve the default format of the semantic type.
  *
- *  EXPORTED because `src/web-components/input.tsx` has to recognise the same sentinel when it
+ *  EXPORTED because `src/web-components/input/input.tsx` has to recognise the same sentinel when it
  *  resolves a seeded value ahead of the masker, and a restated literal there would fail
  *  SILENTLY if this string ever changed: `format === 'default'` would simply go false and
  *  `compileMask('default')` would compile seven literals, garbling the seed with no error
@@ -338,7 +338,7 @@ export function Input(props: InputProps): JSX.Element {
   // branch's node (and its effects) from being built at all.
   //
   // KEEP PROSE IN THIS FILE FREE OF STRAY QUOTE CHARACTERS. The part-name guard in
-  // `src/web-components/slots.test.ts` scans this source with a naive quote regex, so one
+  // `src/web-components/slots/slots.test.ts` scans this source with a naive quote regex, so one
   // apostrophe in a comment shifts its parity and swallows the part literals below —
   // that guard then reddens over a comment, naming a part that is still right there.
   //

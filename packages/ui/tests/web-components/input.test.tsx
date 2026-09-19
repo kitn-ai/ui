@@ -1,4 +1,4 @@
-import '../../src/web-components/input';
+import '../../src/web-components/input/input';
 
 /** Let Solid's scheduler flush effects (the value→attribute reflect) + renders. */
 const flush = () => new Promise((r) => setTimeout(r, 0));

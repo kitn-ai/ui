@@ -36,7 +36,7 @@ const FUNCTION_VALUED = new Set(['kai-voice-input.transcribe', 'kai-voice-output
  * the generator's mapper.
  */
 function unionVariants(): string[] {
-  const src = readFileSync(join(PKG, 'src/web-components/chat-types.ts'), 'utf8');
+  const src = readFileSync(join(PKG, 'src/web-components/chat/chat-types.ts'), 'utf8');
   const start = src.indexOf('export type MessagePart =');
   expect(start).toBeGreaterThan(-1);
   const end = src.indexOf('\n\n', start);
@@ -192,8 +192,8 @@ describe('derived catalog artifact', () => {
     const sorted = <T extends { file: string }>(rows: T[]): T[] => [...rows].sort((a, b) => a.file.localeCompare(b.file));
     expect(sorted(read().eventExceptions)).toEqual(
       sorted([
-        { file: 'src/web-components/artifact.tsx', event: 'kai-maximize-intent', bubbles: true, composed: true },
-        { file: 'src/web-components/resizable.tsx', event: 'kai-maximize-state', bubbles: false, composed: true },
+        { file: 'src/web-components/artifact/artifact.tsx', event: 'kai-maximize-intent', bubbles: true, composed: true },
+        { file: 'src/web-components/resizable/resizable.tsx', event: 'kai-maximize-state', bubbles: false, composed: true },
         { file: 'src/primitives/card-routing.ts', event: 'kai-card', bubbles: true, composed: true },
       ]),
     );

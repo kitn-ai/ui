@@ -4,8 +4,8 @@
  * `slot="home"` content stands it in for the built-in home screen; removing
  * it restores the default, so an absent slot changes nothing.
  */
-import '../../src/web-components/chat';
-import { CHAT_SLOTS } from '../../src/web-components/slots';
+import '../../src/web-components/chat/chat';
+import { CHAT_SLOTS } from '../../src/web-components/slots/slots';
 
 if (!Element.prototype.scrollTo) {
   Element.prototype.scrollTo = () => {};

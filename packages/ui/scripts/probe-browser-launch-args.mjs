@@ -55,7 +55,7 @@ const readArg = (name, fallback) => {
   const i = argv.indexOf(name);
   return i !== -1 && argv[i + 1] ? argv[i + 1] : fallback;
 };
-const story = readArg('--story', 'src/web-components/status.stories.tsx');
+const story = readArg('--story', 'src/web-components/status/status.stories.tsx');
 const outFile = readArg('--out', null);
 const timeoutMs = Number(readArg('--timeout', '180000'));
 

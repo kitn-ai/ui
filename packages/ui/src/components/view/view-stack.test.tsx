@@ -77,7 +77,7 @@ describe('createViewStack — the headless model', () => {
       // The root the drill was entered from, NOT the default root — the leg
       // the first block build found broken at the element seam (the facade
       // was re-creating the controller; see the untrack note in
-      // web-components/view-stack.tsx and tests/web-components/view-stack.test.tsx).
+      // web-components/view-stack/view-stack.tsx and tests/web-components/view-stack.test.tsx).
       expect(c.root()).toBe('messages');
       expect(c.drilled()).toBe(false);
     });

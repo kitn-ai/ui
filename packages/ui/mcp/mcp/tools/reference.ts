@@ -708,7 +708,7 @@ function formatReference(tag: string, provider: ToolProvider): string {
     // web component's source file — i.e. it is NOT in the register-all bundle. The only
     // current instance is kai-remote, a deliberate exception (opt-in cross-origin
     // iframe card) documented in the "WHY THE MANIFEST AND NOT web-component-meta.json"
-    // note in src/web-components/web-component-diagnostics.ts, and at the `remote` entry in
+    // note in src/web-components/web-component/web-component-diagnostics.ts, and at the `remote` entry in
     // `splitConfig()` in config/vite/web-components.ts. `import '@kitn.ai/ui/web-components'`
     // would NOT
     // register a tag in this state, so asserting it here is exactly the false
@@ -840,7 +840,7 @@ function formatReference(tag: string, provider: ToolProvider): string {
       const def = prop.default ? ` (default: ${prop.default})` : '';
       lines.push(`- **${prop.name}**${def}${desc ? ` — ${desc}` : ''}`);
       // Same shape as a ::part recipe below, and for the same reason: the value to
-      // write is the actionable half. A var documented in src/web-components/slots.ts
+      // write is the actionable half. A var documented in src/web-components/slots/slots.ts
       // carries one; a theme token (also a cssProperty in the manifest) does not.
       if (prop.recipe) {
         lines.push('  ```css', `  ${prop.recipe}`, '  ```');

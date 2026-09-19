@@ -400,7 +400,7 @@ export type {
 export type {
   ChatMessage, ChatMessageAction, CustomAction, AvatarData, FeedbackVote, MessagePart,
   MessageSource, RawOrigin,
-} from './web-components/chat-types';
+} from './web-components/chat/chat-types';
 
 // Composer document model. This belongs on "." rather than "./solid" because it
 // is part of the ELEMENT contract, not the Solid-only surface: `ComposerDoc` is
@@ -437,7 +437,7 @@ export type { PaneTab } from './components/pane/pane-group';
 export type {
   KaiCheckboxOption, KaiCommandItem, KaiContextUsage, KaiMenuItem, KaiRadioOption, KaiSegmentedOption, KaiSelectOption,
   KaiSourceItem,
-} from './web-components/web-component-data-types';
+} from './web-components/web-component/web-component-data-types';
 // `kai-audio-visualizer.shader` takes a ShaderSpec. The element arrived from main
 // after this block was written, and prop-types-exported.test.ts caught it, which
 // is the point of deriving that list from the facades rather than maintaining it.

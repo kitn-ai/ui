@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal, Show } from 'solid-js';
 import { Mail, Lock, Eye, EyeOff, Github, ArrowRight, Sparkles } from 'lucide-solid';
-import './input';
+import '../../web-components/input/input';
 
 // Declare the custom element tag for SolidJS JSX.
 declare module 'solid-js' {

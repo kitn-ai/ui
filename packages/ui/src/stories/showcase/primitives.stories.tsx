@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { onMount, onCleanup } from 'solid-js';
-import './register'; // side-effect: registers kai-avatar, kai-badge, kai-tooltip, kai-button, …
+import '../../web-components/register/register'; // side-effect: registers kai-avatar, kai-badge, kai-tooltip, kai-button, …
 import { attachKaiActions } from '../docs/story-actions';
 
 // Small helper for stories below: wire a kai-* element's declared CustomEvents to

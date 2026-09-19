@@ -346,14 +346,14 @@ Every export (57, derived from `dist/state/index.d.ts`):
 | `MockSource` | type | `mock` |
 | `MockToolCall` | type | `mock` |
 | `MockTurn` | type | `mock` |
-| `ChatMessage` | type | `../web-components/chat-types` |
-| `ChatMessageAction` | type | `../web-components/chat-types` |
-| `CustomAction` | type | `../web-components/chat-types` |
-| `AvatarData` | type | `../web-components/chat-types` |
-| `FeedbackVote` | type | `../web-components/chat-types` |
-| `MessagePart` | type | `../web-components/chat-types` |
-| `MessageSource` | type | `../web-components/chat-types` |
-| `RawOrigin` | type | `../web-components/chat-types` |
+| `ChatMessage` | type | `../web-components/chat/chat-types` |
+| `ChatMessageAction` | type | `../web-components/chat/chat-types` |
+| `CustomAction` | type | `../web-components/chat/chat-types` |
+| `AvatarData` | type | `../web-components/chat/chat-types` |
+| `FeedbackVote` | type | `../web-components/chat/chat-types` |
+| `MessagePart` | type | `../web-components/chat/chat-types` |
+| `MessageSource` | type | `../web-components/chat/chat-types` |
+| `RawOrigin` | type | `../web-components/chat/chat-types` |
 | `ToolPart` | type | `../components/tool/tool-types` |
 | `ToolKind` | type | `../components/tool/tool-classify` |
 | `classifyTool` | value | `../components/tool/tool-classify` |
@@ -715,10 +715,10 @@ Every export (66, derived from `dist/wire/index.d.ts`):
 | `StopReason` | type | `chunk` |
 | `WireFormat` | type | `chunk` |
 | `WireFormatReader` | type | `chunk` |
-| `ChatMessage` | type | `../web-components/chat-types` |
-| `MessagePart` | type | `../web-components/chat-types` |
-| `MessageSource` | type | `../web-components/chat-types` |
-| `RawOrigin` | type | `../web-components/chat-types` |
+| `ChatMessage` | type | `../web-components/chat/chat-types` |
+| `MessagePart` | type | `../web-components/chat/chat-types` |
+| `MessageSource` | type | `../web-components/chat/chat-types` |
+| `RawOrigin` | type | `../web-components/chat/chat-types` |
 | `ToolPart` | type | `../components/tool/tool-types` |
 
 #### `@kitn.ai/ui/wire` · `read` — the shipped declarations
