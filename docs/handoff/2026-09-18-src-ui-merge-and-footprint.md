@@ -191,3 +191,86 @@ This is also why the entity decoder must never touch `href`/`src` before the pol
 - Lanes have repeatedly caught their own measurement errors (a dangling `else`, `$?` captured after a grep,
   BRE where ERE was needed, `--outfile` inlining). Their corrections are trustworthy; their first numbers
   are not.
+
+---
+
+## 6. Corrections and closures (2026-09-18, later the same day)
+
+The queue above is worked. Three of its claims were WRONG, and the corrections matter more than the
+fixes, because each would otherwise cost the next reader the same time.
+
+### §2.3's first bullet is wrong: the `innerHTML` sink was already pinned
+
+`tests/elements/code-block.test.tsx` has a `hostile code renders VISIBLE and INERT, in BOTH paints`
+group, with a `HOSTILE` source and a live-census CONTROL — and it **predates this handoff**
+(`e0bb1e08`, 2026-08-19). Nothing was missing there. Do not write that test again.
+
+What WAS missing, and is now added:
+
+- `tests/elements/code-block.test.tsx` — the **third** supplier of that `innerHTML`: the unknown
+  language, where the escaping is the kit's own `escapeHtml` via `plain()`. The existing cases cover
+  shiki (a known grammar) and `codeHighlight: false` (the JSX `<Show>` fallback), which are different
+  code paths from `plain()`.
+- `tests/components/markdown-xss.test.tsx` — a fenced block, through the **message** path, in both
+  fence shapes: a top-level fence (split out and rendered by the Solid `CodeBlock`, so it reaches the
+  `innerHTML` sink) and a nested one (stays in the token renderer as a text node). Neither suite had a
+  fenced vector at all.
+- Both new groups are mutation-proved: making `plain()` stop escaping fails exactly the two
+  unknown-language cases and nothing else.
+
+**§2.3's note about the escaping form is also wrong.** It says to assert `&#x3C;` and that `&lt;`
+would fail. Measured: shiki in this pipeline emits `&lt;`/`&gt;`, exactly like `plain()`. The form
+does not identify which supplier ran — `pre.shiki` and the `<span>` census do. The committed test says
+so at the assertion.
+
+### §2.3's chunk-path collision is REFUTED
+
+Measured by rebuilding both targets for real (`register` and `split`) and comparing byte-for-byte:
+
+- At all **11** shared `[name]-[hash]` paths the two builds' bytes are **identical** (`cmp -s` →
+  SAME), and so are the shipped bytes. Rollup's hash is content-derived, so identical names mean
+  identical content; the minifier is the same plugin in both builds.
+- The **actor was wrong too**: the SSR twins are `perModule` and emit **zero** `chunkFileNames` chunks.
+  The build sharing those paths with the elements `split` build is the **register** build, and it runs
+  **first**; `build:elements` is the last writer. So there is no overwrite and nothing to win.
+- "15 files" counted the 11 shared chunks plus `core-*` ×2 and `engine-javascript-*` ×2, which are
+  *different* hashes from each build — the family `dedupe:shiki` shims on purpose.
+- The real, smaller defect found instead: several near-duplicate families this hash-dedupe **cannot**
+  reach now ship as two files each (`variant-*`, `create-tween-*`, `link-preview-*`, `message-*`),
+  and `dedupe:shiki`'s two `FAMILIES` do not cover them. That is a pack-size issue, not a correctness
+  one, and `verify-pack-weight.mjs`'s ceiling is the backstop that would see it.
+- No fix applied. Giving the split build its own chunk namespace would BREAK the dedupe the design was
+  built on (~600 KB of shiki payloads shipping twice), and a single multi-entry build was already
+  rejected for reintroducing prop-before-upgrade races.
+
+### §2.2 is fixed, and the two trees it was blind to are why it could not pass
+
+`GENERATED_SOURCES` in `verify-artifact-fresh.mjs` listed only `src/` outputs, while `SOURCE_DIRS` has
+scanned `mcp/` since the 2026-09-02 move. The 11 files were: 7 construct template fixtures + the
+construct schema (`build:api`) and 3 block-driver pages (`build:blocks`). Two of those outputs are SETS
+with derived membership, so the list now supports a `/`-terminated **subtree** entry rather than a
+hand-listed copy — one fixture per template, one page per block. Removing either prefix entry
+reproduces exactly those 11 files, which is the mutation proof.
+
+No coverage is dropped by excluding them: `verify:generated` owns the `src/` and `mcp/` artifacts, and
+`verify:blocks`' `[fresh]` step spawns `gen-blocks --check`, which diffs every entry of the same
+`outputs` map the driver pages are written from. Both run in CI.
+
+### §4's headline table and §2.3(e) are updated
+
+- `verify-pack-weight.mjs`'s dated history now says plainly that the **A-vs-B record is superseded**:
+  the twins are per-module, so A is what ships and the "2.1 MB that changes no measured number" is in
+  the tree. The asserted quantity is PACKED and it went DOWN, so the 2.56 MiB ceiling is deliberately
+  not re-tuned. Measured warning: the handoff's "~2,604,954 B" is a different moment's reading; the
+  guard prints its own number.
+- `docs/coupling-map.md` rows 89 and 38/139 updated for the sizing the consumer guard now does and for
+  the three trees `GENERATED_SOURCES` spans.
+
+### The tree-shaking question, answered
+
+`verify:consumer` is the ONLY guard with eager ceilings, and it covers exactly two imports off the `.`
+entry (`cn`, `Button`) in both conditions. There is **no** size proof for `@kitn.ai/ui/react`,
+`@kitn.ai/ui/solid`, `@kitn.ai/ui/state`, `@kitn.ai/ui/wire`, or any per-module subpath; the
+`elements` register-all/per-element bytes are computed and printed but never bounded;
+`verify:shader-lazy` and `verify:react-wrappers` run only inside the cache-skippable `build`. The
+React and Solid probes are the cheapest next win — the mechanism (`EAGER_PROBES`) already exists.
