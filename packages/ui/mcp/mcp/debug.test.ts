@@ -108,7 +108,7 @@ describe('debug', () => {
   });
 
   // ── Rule 6: web components not registered / renders nothing ────────────────
-  it('React wrapper renders nothing / empty → elements-not-registered fix', async () => {
+  it('React wrapper renders nothing / empty → web-components-not-registered fix', async () => {
     const out = await debug.handler({
       symptom:
         'Using the React wrapper, the kai-chat element renders nothing / appears empty. ' +
@@ -118,12 +118,12 @@ describe('debug', () => {
     expect(text).toMatch(/@kitn\.ai\/ui\/web-components/);
   });
 
-  it('"renders nothing" + "not registered" → elements-not-registered fix', async () => {
+  it('"renders nothing" + "not registered" → web-components-not-registered fix', async () => {
     const out = await debug.handler({
       symptom: 'kai-chat renders nothing — customElements.get returns undefined, element not registered',
     });
     const text = (out.content as { type: string; text: string }[])[0].text;
-    expect(text).toMatch(/Web components not registered|elements-not-registered|@kitn\.ai\/ui\/web-components/i);
+    expect(text).toMatch(/Web components not registered|web-components-not-registered|@kitn\.ai\/ui\/web-components/i);
   });
 
   it('generic "empty" symptom without render context does NOT fire Rule 6', async () => {

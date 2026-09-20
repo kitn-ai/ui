@@ -100,7 +100,7 @@ interface Src { url: string; title: string; snippet: string }
 const SOURCES: Src[] = [
   { url: 'https://ui.kitn.ai/docs/wire', title: 'The wire adapter', snippet: 'Parses provider SSE onto message parts; the kit parses, the consumer fetches.' },
   { url: 'https://ui.kitn.ai/docs/state', title: 'State helpers', snippet: 'I/O-free pure folds over ChatMessage[] for building an assistant stream.' },
-  { url: 'https://ui.kitn.ai/docs/elements', title: 'kai- elements', snippet: 'Coarse web-component facades wrapping the Solid components.' },
+  { url: 'https://ui.kitn.ai/docs/web-components', title: 'kai- web components', snippet: 'Coarse web-component facades wrapping the Solid components.' },
   { url: 'https://ui.kitn.ai/docs/cards', title: 'Generative-UI cards', snippet: 'Cards arrive as tool calls, validated against a JSON Schema envelope.' },
   { url: 'https://ui.kitn.ai/docs/theming', title: 'Theming', snippet: 'Token-driven accent, unread color, and light/dark mode.' },
 ];
@@ -241,7 +241,7 @@ function PerplexityAnswerView(props: { query: string; toggles: AnatomyToggles; o
           <div class="flex flex-col gap-3 text-sm leading-relaxed text-foreground">
             <p>
               The wire adapter parses provider SSE into message parts <CiteChip n={1} />, state helpers fold those parts into an
-              assistant stream <CiteChip n={2} />, and the kai- elements wrap the whole thing as web components <CiteChip n={3} />.
+              assistant stream <CiteChip n={2} />, and the kai- web components wrap the whole thing <CiteChip n={3} />.
             </p>
             <p>
               Generative-UI cards arrive as tool calls rather than structured output <CiteChip n={4} />, and every surface themes

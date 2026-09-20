@@ -387,7 +387,7 @@ export function check({
   if (inventory.length === 0) errors.push('zero inventory entries.');
   if (scenarios.length === 0) errors.push('zero scenarios.');
   if (partConsumption.length === 0) errors.push('zero part-consumption records: the registered copy is empty.');
-  if (derived.webComponents.length === 0) errors.push('zero derived elements: derived.json is empty or unreadable.');
+  if (derived.webComponents.length === 0) errors.push('zero derived web components: derived.json is empty or unreadable.');
   if (derived.partVariants.length === 0) errors.push('zero derived MessagePart variants.');
   if (labsTitles.length === 0) errors.push('zero Labs titles derived from the tree: the deriver is broken.');
 

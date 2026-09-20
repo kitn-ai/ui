@@ -2,7 +2,7 @@
 //
 // WHY THIS FILE EXISTS
 // --------------------
-// `web-component-meta.json` already knows, for all 550 props across all 80 elements,
+// `web-component-meta.json` already knows, for every prop on every web component,
 // whether a prop's type is a scalar — `gen-web-component-api.mjs` reads it off the TS
 // checker (`isScalar(t)`, written onto every prop as `scalar`). That bit is
 // exactly what the web-component-layer contract check needs: a prop that is NOT a

@@ -133,7 +133,7 @@ const RULES: Rule[] = [
   {
     // Rule 6 — web components not registered / renders nothing (React #1 failure)
     // Source: field-test reports; for-ai-agents.mdx §"Import order matters"
-    id: 'elements-not-registered',
+    id: 'web-components-not-registered',
     test: (t) => {
       // Core render-nothing / unregistered-element signals
       if (
@@ -247,7 +247,7 @@ const RULES: Rule[] = [
     title: 'Reducing bundle footprint — three load modes',
     cause:
       'The default `import \'@kitn.ai/ui/web-components\'` registers every `kai-*` web component. ' +
-      'If your page uses only one or two elements, that pulls in the full ~119 KB gz bundle. ' +
+      'If your page uses only one or two web components, that pulls in the full ~119 KB gz bundle. ' +
       'Two opt-in modes let you load only what you need.',
     fix:
       '**Mode 1 — register-all (default, SSR-safe):**\n' +

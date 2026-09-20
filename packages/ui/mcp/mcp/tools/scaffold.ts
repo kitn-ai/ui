@@ -6512,7 +6512,7 @@ function compose(
       : [
           `The scaffold uses \`import '@kitn.ai/ui/web-components'\` (register-all) — the right`,
           `default: it registers every kai-* web component and is SSR-safe, so leave it as is.`,
-          `Two opt-in modes load less if a page only ever uses a few elements:`,
+          `Two opt-in modes load less if a page only ever uses a few web components:`,
         ];
 
   const block4 = [

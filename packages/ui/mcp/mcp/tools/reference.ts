@@ -667,7 +667,7 @@ function formatReference(tag: string, provider: ToolProvider): string {
     const all = listWebComponents();
     const sample = all.slice(0, 5).join(', ');
     return (
-      `Unknown element: ${tag}\n\n` +
+      `Unknown web component: ${tag}\n\n` +
       `Valid tags include: ${sample} (and ${Math.max(0, all.length - 5)} more).\n` +
       `Call component_reference with no name (or name: "list") to list all ${all.length} web components.`
     );

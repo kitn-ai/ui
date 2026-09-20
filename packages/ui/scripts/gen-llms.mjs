@@ -87,7 +87,7 @@ Drop an element into any framework (React, Vue, plain HTML). Data in via JS prop
 - \`<kai-prompt-input>\` — standalone composer with send button.
 
 **Layer 2 — composable custom elements** (\`import { … } from '@kitn.ai/ui'\`):
-All ${count} elements are also exported individually. Use them for custom layouts or features \`<kai-chat>\` does not expose (ChainOfThought, FeedbackBar, ThinkingBar, VoiceInput, …). Your bundler tree-shakes the rest.
+All ${count} web components are also exported individually. Use them for custom layouts or features \`<kai-chat>\` does not expose (ChainOfThought, FeedbackBar, ThinkingBar, VoiceInput, …). Your bundler tree-shakes the rest.
 
 ## Key rules for the web components
 
@@ -439,12 +439,12 @@ The same reassign rule applies to every array/object property (\`models\`, \`con
 // ---------------------------------------------------------------------------
 export const FULL_ONLY_SECTIONS = [
   {
-    key: 'Element reference',
+    key: 'Web component reference',
     pointer: (count) =>
-      `- Element reference (all ${count} elements, every prop/event/method/slot/part): the "Element reference" section of ./llms-full.txt — https://kitn.dev/llms-full.txt`,
+      `- Web component reference (all ${count} web components, every prop/event/method/slot/part): the "Web component reference" section of ./llms-full.txt — https://kitn.dev/llms-full.txt`,
     render: ({ count, webComponentSection }) =>
       [
-        `## Element reference (${count} elements, generated from custom-elements.json)`,
+        `## Web component reference (${count} web components, generated from custom-elements.json)`,
         '',
         'Every element also accepts the `theme` attribute. Array/object properties are marked with a `—` attribute: they must be set as JS properties.',
         '',
@@ -496,7 +496,7 @@ const FULL_BODY_ORDER = [
   'Streaming recipe',
   'Programmatic layer',
   'Icon roster',
-  'Element reference',
+  'Web component reference',
 ];
 
 /**
@@ -675,7 +675,7 @@ export function generate(webComponentsInput) {
   rmSync(resolve(root, 'dist/llms'), { recursive: true, force: true });
 
   console.log(
-    `✓ llms.txt + llms-full.txt written (${count} elements, ${programmatic.exportCount} state/wire exports)`,
+    `✓ llms.txt + llms-full.txt written (${count} web components, ${programmatic.exportCount} state/wire exports)`,
   );
   return count;
 }

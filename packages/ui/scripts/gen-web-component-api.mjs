@@ -882,7 +882,7 @@ const cem = {
 };
 mkdirSync(resolve(root, 'dist'), { recursive: true });
 writeFileSync(resolve(root, 'dist/custom-elements.json'), JSON.stringify(cem, null, 2) + '\n');
-console.log(`✓ dist/custom-elements.json — ${elements.length} elements`);
+console.log(`✓ dist/custom-elements.json — ${elements.length} web components`);
 
 export { elements, toAttr, tagToClass, IMPORTS };
 
@@ -902,7 +902,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     for (const ev of el.events) ev.displayDetail = ev.detail ? shorten(ev.detail) : null;
   }
   writeFileSync(resolve(root, 'src/web-components/web-component-meta.json'), JSON.stringify(elements, null, 2) + '\n');
-  console.log(`✓ src/web-components/web-component-meta.json — ${elements.length} elements`);
+  console.log(`✓ src/web-components/web-component-meta.json — ${elements.length} web components`);
 
   // ---- emit the curated icon-name list (the `name=` values kai-icon/icon props
   // accept) so the docs can render a no-drift gallery. Source of truth is the

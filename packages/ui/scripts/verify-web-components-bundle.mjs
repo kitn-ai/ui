@@ -37,7 +37,7 @@
 // as together, because "fires on something" is not the same as "fires on this".
 //
 // A ZERO-CHUNK RUN IS A HARD FAILURE. If kai.es.js dynamically imports nothing
-// carrying element registrations, that is this script reading the wrong thing —
+// carrying web-component registrations, that is this script reading the wrong thing —
 // or a bundle that genuinely registers nothing — and either way it is not a pass.
 import { readFileSync, existsSync, mkdirSync, mkdtempSync, writeFileSync, readdirSync } from 'node:fs';
 import { resolve, dirname, join, posix } from 'node:path';
@@ -110,7 +110,7 @@ function checkTree(root) {
   if (!code.includes(NEEDLE)) {
     problems.push(
       `${BUNDLE} does NOT reference "${NEEDLE}".\n` +
-        `  The register-all bundle is missing element registration — it was likely\n` +
+        `  The register-all bundle is missing web-component registration — it was likely\n` +
         `  tree-shaken away. Consumers of @kitn.ai/ui/web-components would get nothing\n` +
         `  registered. See src/web-components/register/register.ts (keep webComponentsReady exported) and\n` +
         `  config/vite/web-components.ts under KAI_BUILD=register\n` +
@@ -194,7 +194,7 @@ function checkTree(root) {
     // reference reads as the stripped reference, but it is fatal on its own:
     // a run that classified no chunk has checked nothing about `sideEffects`.
     problems.push(
-      `${BUNDLE} loads no chunk carrying element registrations.\n` +
+      `${BUNDLE} loads no chunk carrying web-component registrations.\n` +
         `  Every chunk it dynamically imports has fewer than ${REGISTRATION_TAG_FLOOR} kai-* tags,\n` +
         `  so nothing in this bundle can define a custom element.`,
     );
@@ -322,14 +322,14 @@ const SELF_TEST_CASES = [
   {
     name: 'VACUITY: no imported chunk carries registrations',
     files: fixtureFiles({ 'dist/register-impl-abc123.js': 'export const nothing = 1;\n' }),
-    expect: ['loads no chunk carrying element registrations'],
+    expect: ['loads no chunk carrying web-component registrations'],
   },
   {
     name: 'VACUITY: a chunk under the tag floor is not a registration chunk',
     files: fixtureFiles({
       'dist/register-impl-abc123.js': registrationChunkBody(FIXTURE_TAGS.slice(0, REGISTRATION_TAG_FLOOR - 1)),
     }),
-    expect: ['loads no chunk carrying element registrations'],
+    expect: ['loads no chunk carrying web-component registrations'],
   },
   {
     name: 'an imported chunk that was never emitted',

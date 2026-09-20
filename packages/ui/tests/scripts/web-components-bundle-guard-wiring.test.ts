@@ -150,6 +150,6 @@ describe('the web-components-bundle guard detects, and build runs it', () => {
     const root = fixtureRoot(tree({ 'dist/register-impl-abc123.js': 'export const nothing = 1;\n' }));
     const { code, output } = runGuard(['--package-root', root]);
     expect(code, 'a run that classified nothing exited 0, which reads as "nothing was wrong"').not.toBe(0);
-    expect(output).toContain('loads no chunk carrying element registrations');
+    expect(output).toContain('loads no chunk carrying web-component registrations');
   });
 });

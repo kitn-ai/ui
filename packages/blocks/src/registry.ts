@@ -653,7 +653,7 @@ export function checkBlockContracts(
     const where = `${block.name}/${entry.path}`;
 
     if (/<\/?kitn-/.test(content) || /['"`]kitn-/.test(content)) {
-      errors.push(`${where}: uses the legacy "kitn-" prefix; elements are kai-*`);
+      errors.push(`${where}: uses the legacy "kitn-" prefix; web components are kai-*`);
     }
     if (/(document|window)\.addEventListener\(\s*['"`]kai-/.test(content)) {
       errors.push(`${where}: listens for a kai-* event on document/window; kai-* events do not bubble, listen on the element`);
