@@ -2,8 +2,9 @@
 
 **Date:** 2026-09-20 · **Branch:** `update/primitives` · **Status:** landed and verified.
 **Preceded by:** [`2026-09-19-session-close.md`](2026-09-19-session-close.md) — read that first for the
-arc, the owner's decisions and the traps. This file supersedes its §7.1 (the floor resolves kit
-imports, §1–§5 below) and §7.2 (the security audit's remaining coverage vectors, §6 below).
+arc, the owner's decisions and the traps. This file supersedes its §7.1–§7.4: the floor resolves kit
+imports (§1–§5), the security audit's remaining coverage vectors are pinned (§6), the flake is pinned
+(§7), the leftover wording is swept (§8), and the nested `.d.ts` question is measured and declined (§9).
 
 ---
 
@@ -71,25 +72,27 @@ The positive control matters as much as the negative ones: `zz-good-import` asse
 false, which a hand-typed copy of a three-scheme list cannot reproduce — `new URL('', base)` inherits
 `http:`, which is the bypass the predicate's empty-string refusal exists for.
 
-## 4. Verified ladder (raw numbers)
+## 4. Verified ladder (raw numbers, at HEAD)
 
 | check | result |
 |---|---|
-| `tsc --noEmit -p tsconfig.tests.json` / `-p tsconfig.mcp.json` / src | all exit 0 |
-| `--project=unit` | **424 files, 6041 tests** passed (6036 before: +1 the new invariants case, +4 the three F-5 vectors) |
+| `tsc --noEmit` src / tests / mcp | all exit 0 |
+| `--project=unit` | **424 files, 6043 tests** passed (6036 at the branch's start: +1 the new invariants case, +4 the three F-5 vectors, +2 the flake controls) |
+| `--project=emitted` | 5 files, 36 tests, green (re-run after the emitted scaffold wording moved, §8) |
 | `acceptance-pack.mjs --floor` | exit 0, **15 examples executed**, `imports: 2 kit symbol(s) executed from the module that defines them` |
 | `acceptance-pack.mjs --self-test` | exit 0, every planted fault detected, 3 of them new |
-| `vitest run --project=unit mcp/catalog tests/scripts mcp/mcp/reference.test.ts` | 43 files, 624 tests |
 | `lint:catalog-drift` | `3 recipes, 7 invariants, 28 inventory rows resolved clean (5 reported gaps)` |
 | `lint:gate-parity` | clean, `59 gate(s) … (73 run steps)` |
-| `verify:generated` | green, all 19 artifacts rewritten and matching (5 of them moved for the `kai-navigate` doc line, §7) |
-| `lint:llms-size` | green, `344,866 bytes … ceiling 352,256`, 7.2 KiB headroom (+329 B from the doc line) |
-| `verify:quarantine` | clean, `314 files outside src/, 0 with errors` |
+| `lint:layer-names` | clean, `2616 file(s) walked` |
+| `verify:generated` | green, all 19 artifacts rewritten and matching |
+| `lint:llms-size` | green, `344,902 bytes … ceiling 352,256`, 7.2 KiB headroom |
+| `verify:pack` | `2.51 MiB packed (ceiling 2.56 MiB); 11.45 MiB unpacked and 1468 files` |
+| `verify:web-components-bundle` · `lint:story-conventions` · `verify:quarantine` | clean (`150 .stories.tsx`, `314 files outside src/`) |
+| `packages/blocks` · `create-kai` | 142 tests · 909 tests |
 
-Not re-run for this change, and why: nothing under `dist/` moves (`verify:consumer`, `verify:pack`,
-`verify:scaffold`, `test:geometry-token` measure the built bundle, and no build output changed); the
-`--project=emitted` guards execute the scaffolder's emitted code, which this does not touch. Run them
-before a release, not for this.
+Not run for these changes, and why: `verify:consumer`, `verify:scaffold` and `test:geometry-token`
+measure the built bundle, and nothing under `dist/` moved for any of the four items (§9's measurements
+were read off the existing `dist/`, not produced by a build). Run them before a release.
 
 ## 5. Traps this cost time on
 
@@ -149,17 +152,100 @@ Mutation-proved, each watched failing and then restored:
 | `framedUrl` returns `u` unconditionally (the scheme filter disabled) | the navigate test reddens on the iframe assertion |
 | the attachment `<img src>` routed through `isSafeUrl` | the model-image case reddens — which is the point: a filter there is a visible decision, not a silent one |
 
-## 7. Still open, unchanged from the close doc
+## 7. The recorded flake, pinned (`§7.3` of the close doc)
 
-1. **Cosmetic leftovers, deliberately not churned:** generated console wording that still says
-   "elements" in places; `dist/**` shipping nested per-module `.d.ts` (well under the pack ceiling).
-2. An observed flake, recorded not hidden: one full parallel run failed
-   `tests/scripts/solid-coverage-guard-wiring.test.ts`; it passes alone and in the next full run
-   (including both full runs this session). Suspect temp-dir/parallelism. If it recurs, pin it.
-3. The owner's deferred question — whether to split into packages — §5.1 of the close doc has the
+`tests/scripts/solid-coverage-guard-wiring.test.ts` failed once in a full parallel run and passed
+everywhere else. It is not reproducible on demand: 6 concurrent copies of the file (72 spawns at once)
+also a failure, 12/12 green. 8 concurrent copies on a box already at load 6.7 pushed the worst case to
+**2558ms**, half the strict 5000ms default, which bounds the timeout explanation rather than proving
+it. So the fix is not a guess at the cause; it is making the cause NAME ITSELF next time.
+
+**The harness was throwing the distinction away.** `execFileSync`'s `status` is `null` BOTH for a child
+the OS killed and for one that never started, and `runGuard` folded both into `code: -1` with empty
+output. So "the guard disagreed with a healthy package" and "the machine gave us no guard" arrived as
+one line, which is exactly why the flake stayed unattributable. `runGuard` is now a thin wrapper over
+`runProcess`, which reports `never-ran` with the signal or the errno in the output:
+
+```
+[the guard process was killed by SIGKILL -- there is no guard verdict below]
+[the guard process could not be started (ENOENT from spawnSync node-that-does-not-exist: ...)]
+```
+
+Two controls pin that, each watched red first: a nonexistent binary must be named `ENOENT`, and a
+`process.kill(pid, 'SIGKILL')` child must be named `SIGKILL`. Without them the branch that does the
+naming is itself unproven.
+
+**And the file got the budget the measurement justifies** (`COMPILES_TYPESCRIPT`, in
+`test-timeout-budgets.ts`), because 9 of its 12 cases spawn a node process that loads the TypeScript
+compiler. Mutation-proved: set the entry to 1ms and every case in the file goes red, so the setup file
+really does apply this entry rather than the table merely listing it.
+
+**Left alone, recorded rather than churned:** the file creates 12 temp dirs per run and never removes
+them (853 were in TMPDIR at the time of this session). House style across `tests/scripts/` is to leak
+(19 of 24 files do), and keeping the fixture is what makes a failing case inspectable, so this is a
+noted leftover, not a fix.
+
+## 8. The wording sweep (`§7.4` of the close doc)
+
+"Generated console wording that still says 'elements' in places." It is real, and `lint:layer-names`
+can neither catch it nor should: it is a SPELLING guard for retired spellings, and the DOM's own
+vocabulary must not fire it. A wording lint would be a false-positive machine -- "listen on the
+element" and "N elements" are the same two words -- so this is a reviewed sweep with the boundary
+written down in the commit message rather than a new guard.
+
+Changed where "element(s)" named the LAYER: the two `gen-web-component-api.mjs` console lines and the
+`gen-llms.mjs` one (the sibling generators already said "web components", so the api one was the
+straggler); the SHIPPED `llms.txt` / `llms-full.txt` section `Element reference` ->
+`Web component reference` (key, pointer, heading and `FULL_BODY_ORDER` entry together, since
+`llms-index-coverage.test.ts` matches the key against the heading) and "All N elements are also
+exported individually"; MCP answers (`Unknown element:` -> `Unknown web component`, debug's rule id
+`elements-not-registered` -> `web-components-not-registered`, "one or two elements"); emitted consumer
+code (scaffold's loading-options note, create-kai's framework-fallback note); the CI error strings in
+`verify-web-components-bundle.mjs` and `lint-catalog-drift.mjs` plus their self-test expectations and
+the wiring test's pin; `packages/blocks`' legacy-prefix error; and a story fixture whose title AND
+stale `/docs/elements` URL both predated the rename.
+
+Deliberately left, each the DOM's own vocabulary: "custom elements", `custom-elements.json` / Custom
+Elements Manifest, "listen on the element" / "the element instance" / `Kai<Name>Element`, the
+"kai-* elements are registered" doc on `webComponentsReady` (it describes `customElements.whenDefined`),
+`parse-template.ts`'s "kai-* elements", and `element.*` / `elementsReady` / `derived.elements` -- which
+the rename doc keeps on purpose. Also left: test titles that merely say "element".
+
+The straggler that proves the sweep was worth running: `gen-web-component-nonscalar.mjs`'s header
+claimed "all 550 props across all 80 elements". The workspace is **97 web components**, so those
+numbers were wrong as well as stale -- the same "derive it, don't type it" defect in a comment.
+
+## 9. The nested per-module `.d.ts`: measured, and deliberately NOT excluded (`§7.4` of the close doc)
+
+**Verdict: do not exclude.** A read-only lane proposed it ("dist/** shipping nested per-module .d.ts
+that mirror src/ - a files-map exclusion is a packaging change with its own verification"), and its own
+measurements say no. Re-measured here rather than trusted:
+
+| fact | measured |
+|---|---|
+| `.d.ts` under `packages/ui/dist` | **459 files**; nested (`-mindepth 2`) **441 files / 989,013 B** |
+| relative specifiers in `dist/index.d.ts` | **178**, e.g. `from './components/toast/toast.js'`, `from './stores/create-kai-chat.js'` |
+| do they point INTO the mirror? | yes -- `dist/components/toast/toast.d.ts` is what that specifier resolves to |
+| what produces the mirror | `config/vite/lib.ts`, `perModule: true` + `entryRoot: 'src'` on the barrel target's `dts` block |
+| current pack weight | `verify:pack`: **2.51 MiB packed (ceiling 2.56 MiB)**, 11.45 MiB unpacked, 1468 files |
+
+So the premise in the open item is FALSE: the mirror is not an accidental byproduct. The per-module
+`.js` are deliberate (`preserveModules`), and the `.d.ts` beside them are the declaration targets the
+published barrels' own relative re-exports need. Removing them breaks types for `.`, `./solid`,
+`./state`, `./wire`, `./stores`, `./diagnostics`, `./schemas` and `./provider` at once.
+
+What a lane CAN say safely is narrower: 65 of the 441 nested `.d.ts` (171,067 B unpacked, ~75 KB
+packed) are reachable from no shipped declaration at all -- a ~1.5% cut off a ceiling with ~50 KB of
+headroom, whose correctness depends on a static reachability closure a source change can invalidate,
+and no guard catches a wrong call (`verify:dts` stays green for an unreachable file). Not worth it.
+The lever that WOULD matter is `rollupTypes: true` (one bundled `dist/index.d.ts`), and `lib.ts`
+records that it was tried and failed resolving `dist/state.js` while walking the tree; that is a
+separate, build-verified change.
+
+## 10. Still open
+
+1. The owner's deferred question -- whether to split into packages. §5.1 of the close doc has the
    measurements and the conditions that would flip the answer.
-4. Observed while measuring vector 6, not a live sink and not chased further: a STATIC style value in
-   Solid lands in the template's `style` attribute, where a `;` in a model-supplied string WOULD parse
-   as a second declaration. No component puts a model value in a static style today, and the one dynamic
-   sink is now pinned; a future component that inlines a model value into a static style object deserves
-   the same measurement rather than the assumption.
+2. The 65 unreachable nested `.d.ts`, ~75 KB packed, and `rollupTypes` as the larger version of the
+   same question (§9). Both need a build to act on, which is why neither was taken here.
+3. The 12 leaked temp dirs per run of the solid-coverage wiring test (§7).
