@@ -163,6 +163,13 @@ export function LinkPreview(props: LinkPreviewProps): JSX.Element {
         </Show>
         <Show when={!loading()}>
           <Show when={showImage()}>
+      {/* MODEL IMAGE URL, DELIBERATELY UNFILTERED. An `<img>` cannot execute a scheme, so
+          this is not an XSS sink, and `data:` images are legitimate here (see isSafeImageSrc
+          in primitives/url-scheme-policy.ts for why an image-specific allowlist exists and
+          is not applied). The residual is an outbound GET the model can force (tracking
+          pixel / referrer leak) and an arbitrary image size; whether that matters is the
+          consumer's call (SECURITY.md, "Decisions your app owns"), and
+          tests/components/model-image-sinks.test.ts pins the behaviour. */}
             <img
               src={effective().image}
               alt={effective().imageAlt ?? ''}

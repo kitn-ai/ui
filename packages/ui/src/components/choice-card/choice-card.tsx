@@ -591,6 +591,12 @@ function RecommendedPill(): JSX.Element {
 
 /** A leading image thumbnail (alt required for a11y; decorative → empty alt). */
 function Thumb(props: { media: ChoiceOptionMedia; class?: string }): JSX.Element {
+  // MODEL IMAGE URL, DELIBERATELY UNFILTERED (this is the JSX expression position, so no
+  // {/* */} here). An `<img>` cannot execute a scheme, so this is not an XSS sink, and
+  // `data:` images are legitimate. The residual is an outbound GET the model can force
+  // and an arbitrary image size; whether that matters is the consumer's call
+  // (SECURITY.md, "Decisions your app owns"). tests/components/model-image-sinks.test.ts
+  // pins the behaviour.
   return (
     <img
       src={props.media.image}

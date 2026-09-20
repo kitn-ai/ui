@@ -445,10 +445,6 @@ const EXEMPT: Record<string, { kind: 'story-only' | 'nothing'; reason: string }>
     kind: 'story-only',
     reason: 'story-only; no behavioural test. Also the one facade that renders through renderIcon() rather than JSX, so a future ../ui/icon unit test would NOT clear this entry on its own — it needs a test that mounts the element.',
   },
-  'kai-image': {
-    kind: 'story-only',
-    reason: 'story-only (perplexity-pro); no behavioural test of loading, alt text, or the failure state.',
-  },
   'kai-notice': {
     kind: 'story-only',
     reason: 'story-only across five showcases; no behavioural test of tone, the icon/action slots, or dismissal.',

@@ -15,6 +15,11 @@ export interface ImageProps extends GeneratedImageLike {
 
 function getImageSrc(base64?: string, mediaType?: string): string | undefined {
   if (base64 && mediaType) {
+    // `mediaType` can be model-supplied, so this can build `data:text/html,...`. It is
+    // still inert: an `<img src>` does not navigate or execute. isSafeImageSrc would
+    // refuse the non-image media types; it is not applied here because a refused value
+    // would have to render as SOMETHING and a visibly broken image is not better than
+    // an inert one. See tests/components/model-image-sinks.test.ts.
     return `data:${mediaType};base64,${base64}`;
   }
   return undefined;

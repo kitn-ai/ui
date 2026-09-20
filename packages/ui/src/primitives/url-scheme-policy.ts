@@ -70,7 +70,17 @@ export function isSafeUrl(url: string): boolean {
  *
  *  Do NOT reuse this for anything navigable, and do not hand-roll a third classifier
  *  at the sink -- `icon.tsx` did, with a bare `/^(https?:|\/|data:)/`, which is what
- *  this replaces. */
+ *  this replaces.
+ *
+ *  NOT APPLIED where a MODEL supplies an image url (`choice` media images, a link
+ *  card's image/favicon, an embed's poster, an attachment's url). That is a decision,
+ *  not an oversight: `<img>` cannot execute a scheme, so there is no script sink to
+ *  close, and the legitimate case is a `data:` image; the leftover risk is that a model
+ *  can force an outbound GET and pick an image size, which SECURITY.md files under
+ *  decisions the APP owns (CSP `img-src`, a proxy, or filtering the envelope). Those
+ *  sinks each carry a comment saying so, and tests/components/model-image-sinks.test.ts
+ *  pins the behaviour. If you are tempted to add a filter there, read that test first:
+ *  it will fail, and it should, because the change is a decision rather than a fix. */
 export function isSafeImageSrc(url: string): boolean {
   // TWO questions, and both are needed. The PREFIX answers "is this URL-shaped at
   // all": resolving a bare word against a base (which is what `schemeOf` does, and
