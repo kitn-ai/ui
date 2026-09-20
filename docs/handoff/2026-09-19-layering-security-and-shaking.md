@@ -1,5 +1,7 @@
 # Handoff — the layering DAG, a security audit's findings, and real tree-shaking proofs
 
+**Superseded as an entry point by:** [`2026-09-19-session-close.md`](2026-09-19-session-close.md) (the whole arc, the owner's decisions, open work, traps). This file is the technical detail for one session.
+
 **Date:** 2026-09-19 (third session) · **Branch:** `update/primitives` · **Status:** all work landed
 and verified. Continues `2026-09-19-web-components-rename.md` (the rename, the family folders) and
 `2026-09-18-src-ui-merge-and-footprint.md` (§6, the "no size proof for ./react or ./solid" note).

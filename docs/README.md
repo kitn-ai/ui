@@ -49,6 +49,8 @@ tree: `HTMLElement`, `customElements`, `createElement`, `JSX.IntrinsicElements`,
 `Kai<Name>Element` / `KaiElementJsxProps`. Those name the ELEMENT — which is what
 a custom element is — not the layer.
 
+**Session close (start here after a reset):** [`handoff/2026-09-19-session-close.md`](handoff/2026-09-19-session-close.md) — the state of `update/primitives`, every decision the owner made with the reasoning, the verified ladder, the open work, and the traps.
+
 Full account, including the deliberate exceptions and the traps:
 [`handoff/2026-09-19-web-components-rename.md`](handoff/2026-09-19-web-components-rename.md).
 
