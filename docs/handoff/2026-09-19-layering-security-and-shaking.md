@@ -219,5 +219,5 @@ Commits from this session: `e624bc3e` (the DAG), `b0511f52` (the guard), `3437cd
 **Open, in priority order:** (1) teach the acceptance floor to resolve imports so the invariant catalog
 can emit the real predicates (removes the last hand-typed copies of the scheme lists); (2) the
 model-image request-leak decision above; (3) the F-5 coverage gap from the security audit — 8 vectors
-with exact strings are listed in `/tmp/kai-lanes/lane-security-audit.md`, of which the `Card` href and
+with exact strings are listed in [`2026-09-19-lane-reports/security-sink-audit.md`](2026-09-19-lane-reports/security-sink-audit.md), of which the `Card` href and
 the predicate cases are now covered and the image-sink pins are not.
