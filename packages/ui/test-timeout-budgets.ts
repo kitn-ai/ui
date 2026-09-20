@@ -195,6 +195,12 @@ export const TEST_TIMEOUT_BUDGETS: readonly TestTimeoutBudget[] = [
     because: 'loads the real Shiki engine and its language grammars rather than a stub',
   },
   {
+    file: 'tests/scripts/solid-coverage-guard-wiring.test.ts',
+    timeout: COMPILES_TYPESCRIPT,
+    because:
+      'spawns `node scripts/verify-solid-coverage.mjs` once per case (9 of 12 cases) and the guard loads the TypeScript compiler to resolve every symbol, so each case pays a real program construction. Measured on a BUSY box (load average 6.7), 800ms per spawn; deliberately under 8 concurrent copies of this file (load 19.5) the worst case reached 2558ms, half the strict 5000ms default. That margin is why the file was seen red once in a full parallel run and green 12/12 alone and on every rerun: the budget is below the noise floor of a contended machine, and a 2-core CI runner is more contended than this box ever was. The failure this prevents is a timeout reported as a guard verdict -- see the note in the test file',
+  },
+  {
     file: 'tests/scripts/playwright-projects-guard-wiring.test.ts',
     timeout: SPAWNS_PLAYWRIGHT_LIST,
     because:
