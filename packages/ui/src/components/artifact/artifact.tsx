@@ -79,7 +79,11 @@ export interface ArtifactProps extends Omit<JSX.HTMLAttributes<HTMLDivElement>, 
   sandbox?: string;
   /** Accessible iframe title. */
   iframeTitle?: string;
-  /** Fired when the preview navigates (back/forward/reload/path-edit/file-click). */
+  /** Fired when the preview navigates (back/forward/reload/path-edit/file-click).
+   *  `detail.url` is reported AS IT ARRIVED, including a `javascript:`/`vbscript:` url
+   *  the preview itself refused (the kit must not tell a consumer the model sent
+   *  something else), and it is NOT scheme-validated -- guard it with `isSafeUrl`
+   *  from `@kitn.ai/ui` before you render, store or navigate to it. */
   onNavigate?: (url: string) => void;
   /** Fired when the Preview|Code tab changes. */
   onTabChange?: (tab: ArtifactTab) => void;

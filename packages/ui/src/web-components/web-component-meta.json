@@ -282,7 +282,7 @@
       {
         "name": "kai-navigate",
         "detail": "{ url: string }",
-        "description": "Fired when the preview navigates. `detail.url` = the new location.",
+        "description": "Fired when the preview navigates. `detail.url` = the new location, reported AS IT ARRIVED: a `javascript:`/`vbscript:` url the preview itself refused is still what `detail.url` carries, because a consumer auditing what the model sent must not be told a different story. It is NOT scheme-validated, so validate it with `isSafeUrl` from `@kitn.ai/ui` before rendering, storing or navigating to it.",
         "displayDetail": "{ url: string }"
       },
       {

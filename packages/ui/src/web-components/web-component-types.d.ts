@@ -3839,7 +3839,7 @@ export interface KaiArtifactElementEvents {
   onKaiMaximizeChange?: (event: CustomEvent<{ maximized: boolean }>) => void;
   /** The maximize PROTOCOL intent, raised as a raw bubbling + composed CustomEvent (not through `dispatch`) so an enclosing `<kai-resizable>` can catch it and maximize the containing panel. Declared here so it is typed and reaches the generated API. Listen for it to drive maximize from your own chrome, or re-emit it to trigger one. */
   onKaiMaximizeIntent?: (event: CustomEvent<{ requested: boolean }>) => void;
-  /** Fired when the preview navigates. `detail.url` = the new location. */
+  /** Fired when the preview navigates. `detail.url` = the new location, reported AS IT ARRIVED: a `javascript:`/`vbscript:` url the preview itself refused is still what `detail.url` carries, because a consumer auditing what the model sent must not be told a different story. It is NOT scheme-validated, so validate it with `isSafeUrl` from `@kitn.ai/ui` before rendering, storing or navigating to it. */
   onKaiNavigate?: (event: CustomEvent<{ url: string }>) => void;
   /** Fired when the Preview|Code tab changes. `detail.tab`. */
   onKaiTabChange?: (event: CustomEvent<{ tab: "preview" | "code" }>) => void;

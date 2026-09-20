@@ -50,7 +50,12 @@ interface Props extends Record<string, unknown> {
 }
 
 interface Events extends Record<string, unknown> {
-  /** Fired when the preview navigates. `detail.url` = the new location. */
+  /** Fired when the preview navigates. `detail.url` = the new location, reported
+   *  AS IT ARRIVED: a `javascript:`/`vbscript:` url the preview itself refused is
+   *  still what `detail.url` carries, because a consumer auditing what the model sent
+   *  must not be told a different story. It is NOT scheme-validated, so validate it
+   *  with `isSafeUrl` from `@kitn.ai/ui` before rendering, storing or navigating to
+   *  it. */
   'kai-navigate': { url: string };
   /** Fired when the Preview|Code tab changes. `detail.tab`. */
   'kai-tab-change': { tab: ArtifactTab };

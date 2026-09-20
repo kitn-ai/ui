@@ -1,9 +1,9 @@
 // tests/components/model-image-sinks.test.tsx
 //
 // A DECISION, PINNED. Model-supplied image urls (a choice option's media image, a link
-// card's image and favicon, an embed's poster, the kit's own `data:<mediaType>` builder)
-// are NOT scheme-filtered. That is deliberate, and SECURITY.md files the residual under
-// "Decisions your app owns":
+// card's image and favicon, an embed's poster, an attachment's url, the kit's own
+// `data:<mediaType>` builder) are NOT scheme-filtered. That is deliberate, and
+// SECURITY.md files the residual under "Decisions your app owns":
 //
 //   - There is no script sink to close. An `<img src>` does not navigate and does not
 //     execute a scheme: `javascript:` in `src` is inert, and SVG in an `<img>` is
@@ -29,6 +29,7 @@ import { ChoiceCard } from '../../src/components/choice-card/choice-card';
 import { LinkPreview } from '../../src/components/link-preview/link-preview';
 import { Embed } from '../../src/components/embed/embed';
 import { Image } from '../../src/components/image/image';
+import { Attachment, AttachmentPreview } from '../../src/components/attachments/attachments';
 
 afterEach(() => {
   document.body.innerHTML = '';
@@ -83,6 +84,27 @@ describe('model image urls: the value passes through, inertly', () => {
     ));
     expect(container.querySelector('button')).toBeTruthy(); // the play control
     expect(container.querySelector('img')?.getAttribute('src')).toBe(HOSTILE_IMAGE);
+    expectNoHandlerAttributes(container);
+  });
+
+  // An attachment's `url` is the fourth sink SECURITY.md names, and the one whose
+  // coverage was missing: today the value arrives through the consumer's own
+  // `addFile`, which is exactly the shape that makes it look safe while a consumer
+  // mapping model output onto `AttachmentData` gets no guard from the kit. Same
+  // decision, same pin: the value ARRIVES (so a filter is a visible decision here),
+  // inertly, and the render is not vacuous. The non-vacuous half is the `alt` rather
+  // than visible text on purpose: a GRID image tile is self-describing and renders
+  // no caption at all (`AttachmentInfo` suppresses it for `mediaCategory === 'image'`),
+  // so the filename travels as the image's own `alt`.
+  it('an attachment url reaches <img src>, and the filename still reaches the user', () => {
+    const { container } = render(() => (
+      <Attachment data={{ type: 'file', id: 'f1', filename: 'x.png', mediaType: 'image/png', url: HOSTILE_IMAGE }}>
+        <AttachmentPreview />
+      </Attachment>
+    ));
+    const img = container.querySelector('img');
+    expect(img?.getAttribute('src')).toBe(HOSTILE_IMAGE);
+    expect(img?.getAttribute('alt')).toBe('x.png');
     expectNoHandlerAttributes(container);
   });
 

@@ -49,7 +49,7 @@ tree: `HTMLElement`, `customElements`, `createElement`, `JSX.IntrinsicElements`,
 `Kai<Name>Element` / `KaiElementJsxProps`. Those name the ELEMENT — which is what
 a custom element is — not the layer.
 
-**Session close (start here after a reset):** [`handoff/2026-09-19-session-close.md`](handoff/2026-09-19-session-close.md) — the state of `update/primitives`, every decision the owner made with the reasoning, the verified ladder, the open work, and the traps. **Most recent session:** [`handoff/2026-09-20-invariant-floor-imports.md`](handoff/2026-09-20-invariant-floor-imports.md) — it supersedes the close doc's §7.1 (the acceptance floor resolves a snippet's kit imports now, so the invariant catalog imports the real URL predicates instead of copying the scheme lists).
+**Session close (start here after a reset):** [`handoff/2026-09-19-session-close.md`](handoff/2026-09-19-session-close.md) — the state of `update/primitives`, every decision the owner made with the reasoning, the verified ladder, the open work, and the traps. **Most recent session:** [`handoff/2026-09-20-invariant-floor-imports.md`](handoff/2026-09-20-invariant-floor-imports.md) — it supersedes the close doc's §7.1 (the acceptance floor resolves a snippet's kit imports now, so the invariant catalog imports the real URL predicates instead of copying the scheme lists) and §7.2 (the security audit's remaining sink-coverage vectors are pinned).
 
 Full account, including the deliberate exceptions and the traps:
 [`handoff/2026-09-19-web-components-rename.md`](handoff/2026-09-19-web-components-rename.md).

@@ -158,6 +158,34 @@ test('kai-artifact resolves a file url from src origin + path when url omitted',
   expect(navUrl).toBe('https://host.test/base/about.html');
 });
 
+// F-5 vector 8 / F-7. The refused url is REPORTED, deliberately: a consumer auditing
+// what the model sent must not be told a different story, and the card path feeds
+// `detail.url` back into the envelope. That decision is only safe while it is
+// paired with the refusal AT THE SINK, so both halves are asserted here -- an event
+// carrying the raw value, and an iframe that never took it.
+test('kai-navigate reports the url AS IT ARRIVED, including one the preview refused', async () => {
+  const el = document.createElement('kai-artifact') as HTMLElement;
+  el.setAttribute('src', 'https://host.test/base/index.html');
+  document.body.appendChild(el);
+  await flush();
+  const navs: string[] = [];
+  el.addEventListener('kai-navigate', (e) => navs.push((e as CustomEvent).detail.url));
+
+  // A path the model could supply (the card envelope's `src`, or a file url edited
+  // into the address field). The Preview tab is the default, so the iframe exists.
+  const input = el.shadowRoot!.querySelector<HTMLInputElement>('input#kai-artifact-path')!;
+  input.value = 'javascript:window.__PWNED__=1';
+  input.closest('form')!.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+  await flush();
+
+  // The public event carries the RAW url, which is what the doc on the event says.
+  expect(navs).toEqual(['javascript:window.__PWNED__=1']);
+  // ...and the sink it would feed inside this component stays refused, so the
+  // event's honesty is not also a hole.
+  const frame = el.shadowRoot!.querySelector('iframe')!;
+  expect(frame.getAttribute('src')).not.toContain('javascript:');
+});
+
 test('kai-artifact shows the fallback card for a PDF when inline preview is disabled', async () => {
   configurePdfPreview({ enabled: false });
   const el = document.createElement('kai-artifact') as HTMLElement & { src: string };

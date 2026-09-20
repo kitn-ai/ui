@@ -20,10 +20,24 @@ export type {
   ArtifactCardTab,
 } from '../../primitives/card-data-types';
 
-/** Height the artifact card falls back to. Tall enough that a framed page is
+  /** Height the artifact card falls back to. Tall enough that a framed page is
  *  actually legible in a thread, short enough to leave the conversation visible. */
 export const DEFAULT_ARTIFACT_CARD_HEIGHT = '420px';
 
+/** `data.height` is MODEL-SUPPLIED and lands in a `style` object, so it is a sink,
+ *  and the whole reason it is safe is the PATH it takes. Measured: a DYNAMIC style
+ *  value compiles to `style.setProperty('height', v)`, which rejects a value
+ *  carrying a second declaration WHOLESALE -- `'1px; background: url(https://evil)'`
+ *  applies nothing and leaves the wrapper with no style attribute at all, which
+ *  `tests/primitives/artifact-card.test.tsx` pins. Contrast a STATIC style value,
+ *  which the Solid compiler folds into the template's own `style` attribute, where a
+ *  `;` DOES parse as a second declaration; that path is not model-reachable here, and
+ *  it is why this value must stay dynamic.
+ *
+ *  NOT CLAMPED, deliberately. A valid length is applied verbatim, so a model can pick
+ *  an absurd height (`100000px`), and an invalid one collapses the card. How tall is
+ *  too tall for a reader is the app's call, not the kit's. A number means px because
+ *  that is what the numeric form in the card schema means. */
 function resolveHeight(height: number | string | undefined): string {
   if (typeof height === 'number') return `${height}px`;
   if (typeof height === 'string' && height.trim() !== '') return height;

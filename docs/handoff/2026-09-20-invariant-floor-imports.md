@@ -2,7 +2,8 @@
 
 **Date:** 2026-09-20 · **Branch:** `update/primitives` · **Status:** landed and verified.
 **Preceded by:** [`2026-09-19-session-close.md`](2026-09-19-session-close.md) — read that first for the
-arc, the owner's decisions and the traps. This file supersedes its §7.1 only.
+arc, the owner's decisions and the traps. This file supersedes its §7.1 (the floor resolves kit
+imports, §1–§5 below) and §7.2 (the security audit's remaining coverage vectors, §6 below).
 
 ---
 
@@ -74,13 +75,15 @@ false, which a hand-typed copy of a three-scheme list cannot reproduce — `new 
 
 | check | result |
 |---|---|
-| `tsc --noEmit -p tsconfig.tests.json` / `-p tsconfig.mcp.json` | both exit 0 |
-| `--project=unit` | **424 files, 6037 tests** passed (6036 before: +1 is the new invariants case) |
+| `tsc --noEmit -p tsconfig.tests.json` / `-p tsconfig.mcp.json` / src | all exit 0 |
+| `--project=unit` | **424 files, 6041 tests** passed (6036 before: +1 the new invariants case, +4 the three F-5 vectors) |
 | `acceptance-pack.mjs --floor` | exit 0, **15 examples executed**, `imports: 2 kit symbol(s) executed from the module that defines them` |
 | `acceptance-pack.mjs --self-test` | exit 0, every planted fault detected, 3 of them new |
 | `vitest run --project=unit mcp/catalog tests/scripts mcp/mcp/reference.test.ts` | 43 files, 624 tests |
 | `lint:catalog-drift` | `3 recipes, 7 invariants, 28 inventory rows resolved clean (5 reported gaps)` |
 | `lint:gate-parity` | clean, `59 gate(s) … (73 run steps)` |
+| `verify:generated` | green, all 19 artifacts rewritten and matching (5 of them moved for the `kai-navigate` doc line, §7) |
+| `lint:llms-size` | green, `344,866 bytes … ceiling 352,256`, 7.2 KiB headroom (+329 B from the doc line) |
 | `verify:quarantine` | clean, `314 files outside src/, 0 with errors` |
 
 Not re-run for this change, and why: nothing under `dist/` moves (`verify:consumer`, `verify:pack`,
@@ -104,16 +107,59 @@ before a release, not for this.
    checks the names against the barrel and erases the statement itself rather than routing it to a value
    module. No catalog example does this yet; the case is handled rather than discovered later.
 
-## 6. Still open, unchanged from the close doc
+## 6. F-5: the three remaining coverage vectors, covered (`§7.2` of the close doc)
 
-1. **The security audit's remaining coverage vectors (F-5)** — eight vectors with exact strings in
-   [`2026-09-19-lane-reports/security-sink-audit.md`](2026-09-19-lane-reports/security-sink-audit.md).
-   Covered so far: the `Card` href (component and `<kai-card>` attribute), the three predicates, the four
-   image sinks. NOT covered: the attachment-url path, `kai-navigate`'s raw-url event, and
-   `artifact-card`'s model-supplied `height`. **This is the highest-value next item** and needs no
-   build.
+The security audit's [`security-sink-audit.md`](2026-09-19-lane-reports/security-sink-audit.md) listed
+8 vectors with exact strings. Covered already: the `Card` href (component and `<kai-card>` attribute),
+the three predicates, the four image sinks. This session closed the remaining three.
+
+**Vector 6, `artifact-card`'s model-supplied `height` — and the audit's premise needed correcting.**
+The audit said a single CSS property value "is parsed as one declaration, CSSOM drops the rest".
+Measured, that is only true on the path the artifact card actually takes. `data.height` is DYNAMIC, so
+the Solid compiler emits `style.setProperty('height', v)` per key, and `'1px; background:
+url(https://evil.tld/beacon)'` is rejected WHOLESALE: no height, no background, no `style` attribute
+at all. A STATIC style value is folded into the template's own `style` attribute, where the same value
+DOES apply both declarations — verified by compiling the JSX with `babel-preset-solid`, and by
+rendering both shapes. So the sink is safe *because the value is dynamic*, which is now stated at
+`resolveHeight` and pinned by two assertions in `tests/primitives/artifact-card.test.tsx`: the hostile
+value applies nothing, and an arbitrary but VALID length (`100000px`) is applied verbatim (the ceiling
+is the app's call; the kit does not clamp).
+
+**Vector 7, the attachment url.** `SECURITY.md` already named it among the model-supplied image
+URLs and pointed at `tests/components/model-image-sinks.test.tsx`, which did not cover it — the doc was
+ahead of its own pin. The path (`Attachment` + `AttachmentPreview`, both `attachments.tsx` and
+`message.tsx`) is an `<img src>`, so it takes the same recorded decision; the case is now in that file
+and the header names it. Non-vacuity is the image's own `alt`, not visible text, because a GRID image
+tile deliberately renders no caption (`AttachmentInfo` suppresses it for `mediaCategory === 'image'`).
+
+**Vector 8, `kai-navigate`'s raw url.** The event reports the url AS IT ARRIVED, including one the
+preview refused — correct for auditing, and `artifact-card` feeds it straight back into the envelope.
+The obligation moves to the consumer, so the event's own doc (and the Solid `onNavigate` prop) now says
+it is NOT scheme-validated and to guard it with `isSafeUrl`. `tests/web-components/artifact.test.tsx`
+asserts both halves: the raw `javascript:` url is what `detail.url` carries, and the iframe never took
+it. Editing that doc comment moved five generated artifacts (`web-component-meta.json`,
+`web-component-types.d.ts`, `frameworks/react/index.tsx`, `docs/web-components.md`, `llms-full.txt`),
+regenerated with `npm run build:api` and confirmed with `verify:generated`.
+
+Mutation-proved, each watched failing and then restored:
+
+| mutation | result |
+|---|---|
+| `style={{ height: … }}` → `style={`height: ${…}`}` (the cssText path) | the injection assertion reddens: `el.style.backgroundImage` becomes the beacon url |
+| `framedUrl` returns `u` unconditionally (the scheme filter disabled) | the navigate test reddens on the iframe assertion |
+| the attachment `<img src>` routed through `isSafeUrl` | the model-image case reddens — which is the point: a filter there is a visible decision, not a silent one |
+
+## 7. Still open, unchanged from the close doc
+
+1. **Cosmetic leftovers, deliberately not churned:** generated console wording that still says
+   "elements" in places; `dist/**` shipping nested per-module `.d.ts` (well under the pack ceiling).
 2. An observed flake, recorded not hidden: one full parallel run failed
-   `tests/scripts/solid-coverage-guard-wiring.test.ts`; it passes alone and in the next full run.
-   Suspect temp-dir/parallelism. It did not recur in the run above.
-3. Cosmetic leftovers, deliberately not churned: generated console wording that still says "elements" in
-   places; `dist/**` shipping nested per-module `.d.ts` (well under the pack ceiling).
+   `tests/scripts/solid-coverage-guard-wiring.test.ts`; it passes alone and in the next full run
+   (including both full runs this session). Suspect temp-dir/parallelism. If it recurs, pin it.
+3. The owner's deferred question — whether to split into packages — §5.1 of the close doc has the
+   measurements and the conditions that would flip the answer.
+4. Observed while measuring vector 6, not a live sink and not chased further: a STATIC style value in
+   Solid lands in the template's `style` attribute, where a `;` in a model-supplied string WOULD parse
+   as a second declaration. No component puts a model value in a static style today, and the one dynamic
+   sink is now pinned; a future component that inlines a model value into a static style object deserves
+   the same measurement rather than the assumption.
