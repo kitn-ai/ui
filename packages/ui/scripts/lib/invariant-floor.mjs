@@ -43,6 +43,21 @@
 // stand-ins" rather than "executed", because the second sentence is not true.
 // Where a stand-in is the SUBJECT of the claim, the harness carries a
 // `corroborate` step that checks the real thing by another route.
+//
+// WHAT IS *NOT* A STAND-IN: A KIT IMPORT. A `right` form may `import` from
+// `@kitn.ai/ui`, and the floor resolves that specifier to the file the symbol is
+// actually defined in and bundles it (scripts/lib/kit-imports.mjs). So the URL
+// predicates the catalog recommends are the SHIPPED ones, executed, not a
+// hand-typed copy of their scheme list -- which is the only reason a security
+// policy can be quoted in an example at all. The DOM stays a stand-in; the
+// predicate does not. The resolver is REQUIRED: a snippet containing an import
+// with none supplied is a hard failure, because stripping the import would leave
+// the example unmeasured while the row still read PASS.
+//
+// `import` INSIDE a `right` form is the one construct the vm cannot take, which is
+// what this floor's own header used to say was impossible. It was not: esbuild
+// bundles the fragment, so the import is resolved at bundle time and the vm only
+// ever sees the result.
 import vm from 'node:vm';
 import { JSDOM, VirtualConsole } from 'jsdom';
 import * as esbuild from 'esbuild';
@@ -263,6 +278,51 @@ async function withAsyncFaultTrap(label, fn) {
   }
 }
 
+/** One line, because a failed row's error travels into a `; `-joined summary and a
+ *  bundler's multi-line code frame would swallow the next three failures with it. */
+const oneLine = (value) => String(value).split('\n').map((l) => l.trim()).filter(Boolean).join(' | ');
+
+/**
+ * Compile one fragment into the script the vm runs.
+ *
+ * TWO STEPS, and both are load-bearing. The kit imports are rewritten to the
+ * defining module first, so nothing is resolved against a possibly-stale `dist`;
+ * then esbuild BUNDLES the fragment, which is what lets an `import` survive at all
+ * -- and is also what makes the rewritten module's own relative imports come
+ * along. A fragment with no import takes the same path, so there is one code path
+ * rather than a tested one and a fallback.
+ */
+function compile(code, { jsx, resolveImports }) {
+  const hasImport = /^\s*import\b/m.test(code);
+  if (hasImport && !resolveImports) {
+    throw new FloorAssertionError(
+      'this right form contains an `import` and no import resolver was supplied. Every caller of runFloor must pass one (createKitImportResolver in scripts/lib/kit-imports.mjs): silently ignoring the import would leave the example unmeasured, which is the failure this stage exists to prevent.',
+    );
+  }
+  const rewritten = hasImport ? resolveImports.rewrite(code) : code;
+  try {
+    return esbuild.buildSync({
+      stdin: { contents: rewritten, resolveDir: process.cwd(), loader: jsx ? 'jsx' : 'js' },
+      bundle: true,
+      write: false,
+      // ESM, NOT CJS, and the difference is the examples that `await` at top level:
+      // esbuild refuses to EMIT a cjs bundle containing top-level await ("currently
+      // not supported with the cjs output format"), and two catalog examples are
+      // exactly that. The bundle is never loaded as a module either way -- it is
+      // wrapped in an async IIFE and run in the vm -- so the format only decides
+      // what esbuild is willing to emit.
+      format: 'esm',
+      platform: 'neutral',
+      jsx: 'transform',
+      jsxFactory: '__h',
+      jsxFragment: '__Fragment',
+      logLevel: 'silent',
+    }).outputFiles[0].text;
+  } catch (err) {
+    throw new FloorAssertionError(`could not compile the right form: ${oneLine(err && err.message ? err.message : err)}`);
+  }
+}
+
 /**
  * Execute one `right` fragment with the supplied bindings as its globals.
  *
@@ -270,11 +330,8 @@ async function withAsyncFaultTrap(label, fn) {
  * all, and awaited so a synchronous rejection surfaces as a failure. What
  * happens after it returns is `withAsyncFaultTrap`'s job.
  */
-async function execute(code, bindings, { jsx = false, owner = null } = {}) {
-  const src = jsx
-    ? esbuild.transformSync(code, { loader: 'jsx', jsx: 'transform', jsxFactory: '__h', jsxFragment: '__Fragment' })
-        .code
-    : code;
+async function execute(code, bindings, { jsx = false, owner = null, resolveImports } = {}) {
+  const src = compile(code, { jsx, resolveImports });
   const context = vm.createContext({
     // Not ECMAScript globals, so a fresh vm realm does not have them: pass in
     // exactly what a browser would have provided, and nothing else. Anything a
@@ -796,12 +853,17 @@ const describeExample = (inv, i) => {
 /**
  * Run the floor over a list of invariant records.
  *
- * Returns `{ ok, results, errors }`. `errors` holds the structural failures
- * (missing harness, empty harness, dangling harness); `results` holds one row
- * per example. Nothing is skipped and nothing is silently tolerated.
+ * Returns `{ ok, results, errors, imports }`. `errors` holds the structural failures
+ * (missing harness, empty harness, dangling harness); `results` holds one row per
+ * example; `imports` is what `resolveImports` rewrote DURING THIS RUN, so a report
+ * can say which kit symbols were executed rather than copied without trusting a
+ * hand-typed sentence. Nothing is skipped and nothing is silently tolerated.
+ *
+ * `resolveImports` is REQUIRED as soon as any example imports; see `compile`.
  */
-export async function runFloor(invariants, helpers, { harnesses = HARNESSES } = {}) {
+export async function runFloor(invariants, helpers, { harnesses = HARNESSES, resolveImports } = {}) {
   const startMark = FAULTS.length;
+  const importsMark = resolveImports?.resolved?.length ?? 0;
   const errors = [];
   const results = [];
   const seen = new Set();
@@ -839,7 +901,7 @@ export async function runFloor(invariants, helpers, { harnesses = HARNESSES } = 
           // during the check and a throw there would otherwise vanish.
           const owner = `${key}: ${c.label}`;
           await withAsyncFaultTrap(owner, async () => {
-            await execute(inv.examples[i].right, bindings, { jsx: harness.jsx, owner });
+            await execute(inv.examples[i].right, bindings, { jsx: harness.jsx, owner, resolveImports });
             await c.check(bindings, helpers);
           });
           row.cases.push({ label: c.label, status: 'passed' });
@@ -903,10 +965,10 @@ export async function runFloor(invariants, helpers, { harnesses = HARNESSES } = 
     }
   }
 
-  return { ok: errors.length === 0, results, errors, mark: FAULTS.length };
+  return { ok: errors.length === 0, results, errors, mark: FAULTS.length, imports: (resolveImports?.resolved ?? []).slice(importsMark) };
 }
 
-export function formatFloor({ results, errors }) {
+export function formatFloor({ results, errors, imports }) {
   const lines = [];
   for (const r of results) {
     const stub = r.stubs.length ? `  [stand-ins: ${r.stubs.join(', ')}]` : '';
@@ -915,6 +977,13 @@ export function formatFloor({ results, errors }) {
       lines.push(`        ${c.status === 'passed' ? '·' : '✗'} ${c.label}${c.error ? ` -- ${c.error}` : ''}`);
     }
     if (r.corroboration) lines.push(`        corroboration: ${r.corroboration}`);
+  }
+  // Derived from what the resolver actually rewrote, never from a claim about it.
+  if (imports?.length) {
+    const pairs = [...new Set(imports.map((i) => `${i.name} <- ${i.file}`))].sort();
+    lines.push(`imports: ${pairs.length} kit symbol(s) executed from the module that defines them, not copied -- ${pairs.join(', ')}`);
+  } else {
+    lines.push('imports: no right form imports from the kit, so no predicate was executed from source.');
   }
   for (const e of errors) lines.push(`ERROR ${e}`);
   return lines.join('\n');
@@ -935,7 +1004,7 @@ export function formatFloor({ results, errors }) {
  * Plus one control that must PASS, so "reports everything as failed" cannot
  * masquerade as a working detector.
  */
-export async function selfTest(helpers) {
+export async function selfTest(helpers, { resolveImports } = {}) {
   const probes = [
     { id: 'zz-throws', examples: [{ wrong: 'x', right: 'notDeclaredAnywhere.messages = [];' }] },
     {
@@ -999,6 +1068,29 @@ export async function selfTest(helpers) {
     },
     { id: 'zz-unharnessed', examples: [{ wrong: 'x', right: 'const ok = 1;' }] },
     { id: 'zz-no-cases', examples: [{ wrong: 'x', right: 'const ok = 1;' }] },
+    {
+      // The POSITIVE half of import resolution: if the imported predicate were a
+      // hand-typed copy, one of these three answers would differ. `''` is the one
+      // that matters most -- isSafeUrl refuses it because `new URL('', base)`
+      // inherits `http:` and the query used to answer true for nothing at all, so
+      // a copy of the three-scheme LIST cannot reproduce it.
+      id: 'zz-good-import',
+      examples: [
+        {
+          wrong: 'x',
+          right:
+            "import { isSafeUrl } from '@kitn.ai/ui';\nallowed.javascript = isSafeUrl('javascript:alert(1)');\nallowed.relative = isSafeUrl('/docs');\nallowed.empty = isSafeUrl('');",
+        },
+      ],
+    },
+    {
+      // The NEGATIVE half. A name the barrel does not re-export must fail the row
+      // by name, not resolve to `undefined` and quietly execute as a no-op.
+      id: 'zz-bad-import',
+      examples: [
+        { wrong: 'x', right: "import { notExportedByTheKit } from '@kitn.ai/ui';\nnotExportedByTheKit();" },
+      ],
+    },
     { id: 'zz-good', examples: [{ wrong: 'x', right: 'chat.messages = [...messages];' }] },
   ];
 
@@ -1063,11 +1155,40 @@ export async function selfTest(helpers) {
       cases: [{ label: 'a rejection that is handled a tick later', bindings: () => ({}), check: () => {} }],
     },
     'zz-no-cases#0': { stubs: [], cases: [] },
+    'zz-good-import#0': {
+      stubs: [],
+      cases: [
+        {
+          label: 'the imported predicate is the SHIPPED one, refusing an empty string and allowing a relative path',
+          bindings: () => ({ allowed: {} }),
+          check(b) {
+            assert(b.allowed.javascript === false, 'the shipped isSafeUrl allowed javascript:');
+            assert(b.allowed.relative === true, 'the shipped isSafeUrl refused an ordinary relative path');
+            assert(b.allowed.empty === false, 'the shipped isSafeUrl blessed the empty string');
+          },
+        },
+      ],
+    },
+    'zz-bad-import#0': {
+      stubs: [],
+      cases: [{ label: 'a name the barrel does not re-export', bindings: () => ({}), check: () => {} }],
+    },
     'zz-good#0': freshArray,
     'zz-dangling#0': { stubs: [], cases: [{ label: 'never runs', bindings: () => ({}), check: () => {} }] },
   };
 
-  const { results, errors } = await runFloor(probes, helpers, { harnesses: probeHarnesses });
+  const { results, errors, imports } = await runFloor(probes, helpers, { harnesses: probeHarnesses, resolveImports });
+  // A resolver that was never required on a snippet that imports would be a guard
+  // that can be defeated by forgetting to pass it, so the missing-resolver path is
+  // exercised too rather than reasoned about.
+  const unresolved = await runFloor(
+    [{ id: 'zz-no-resolver', examples: [{ wrong: 'x', right: "import { isSafeUrl } from '@kitn.ai/ui';\nisSafeUrl('x');" }] }],
+    helpers,
+    { harnesses: { 'zz-no-resolver#0': { stubs: [], cases: [{ label: 'runs', bindings: () => ({}), check: () => {} }] } } },
+  );
+  // The resolver ACCUMULATES across runs, so a report that read it directly would
+  // credit this run with the previous one's imports. An empty run must report none.
+  const { imports: laterImports } = await runFloor([], helpers, { harnesses: {}, resolveImports });
   const status = (key) => results.find((r) => r.key === key)?.status;
 
   const expectations = [
@@ -1106,6 +1227,26 @@ export async function selfTest(helpers) {
     ['an empty case list raises a structural error', errors.some((e) => e.includes('NO CASES'))],
     ['a dangling harness raises a structural error', errors.some((e) => e.includes('dangling harness zz-dangling#0'))],
     ['a correct right form still passes', status('zz-good#0') === 'passed'],
+    [
+      'a kit import executes the shipped predicate (empty string refused, relative path allowed)',
+      status('zz-good-import#0') === 'passed',
+    ],
+    [
+      'a name the barrel does not re-export fails the row, naming the name',
+      status('zz-bad-import#0') === 'failed' && errors.some((e) => e.includes('notExportedByTheKit')),
+    ],
+    [
+      'an import with no resolver supplied is a failure, not a silent skip',
+      unresolved.results[0].status === 'failed' && unresolved.errors.some((e) => e.includes('no import resolver')),
+    ],
+    [
+      'the resolver report names the symbol this run imported',
+      imports.some((i) => i.name === 'isSafeUrl' && i.file === 'src/primitives/url-scheme-policy.ts'),
+    ],
+    [
+      'a run with no imports reports none, so the report cannot outlive the run',
+      laterImports.length === 0,
+    ],
   ];
 
   const failed = expectations.filter(([, ok]) => !ok).map(([what]) => what);

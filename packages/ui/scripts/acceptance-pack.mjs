@@ -42,11 +42,18 @@ import { tmpdir } from 'node:os';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import * as esbuild from 'esbuild';
 import { runFloor, formatFloor, selfTest, assertArtifactsAgree, faultsSince, faultCount, SETTLE_MS } from './lib/invariant-floor.mjs';
+import { createKitImportResolver, SUBPATH_SOURCES } from './lib/kit-imports.mjs';
 import { NEEDLE_TABLE, NEEDLES, verifyNeedles, selfTestNeedles, variantsOf } from './lib/audit-needles.mjs';
 import { renderFabricatedPage } from './lib/fabrications.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const CATALOG_DIR = join(ROOT, 'mcp/catalog');
+// The floor executes a `right` form's `@kitn.ai/ui…` imports against the modules
+// that define them; see scripts/lib/kit-imports.mjs for why that is a security
+// concern rather than a convenience. ONE resolver for the whole script, and its
+// SUBPATH_SOURCES map is what `verifySpecifiers` below resolves the symbols the
+// pack NAMES in prose through.
+const resolveImports = createKitImportResolver({ root: ROOT });
 const args = process.argv.slice(2);
 
 function fail(msg) {
@@ -946,6 +953,19 @@ against a real registered \`kai-*\` web component.** What ran is the fragment, a
 the stand-ins listed below. Where a stand-in is the SUBJECT of the claim, the row
 carries a corroboration that checks the real thing by another route.
 
+**One thing here is NOT a stand-in: a kit import.** A \`right\` form that imports
+from \`@kitn.ai/ui\` is resolved to the file that defines the symbol and bundled, so
+the predicate that ran is the SHIPPED one. The scheme lists the catalog used to
+hand-type — a second copy of the policy in \`src/primitives/\`, with nothing keeping
+the two in step — are gone for exactly this reason, and a snippet that restates one
+is refused by \`invariants.test.ts\`.
+
+${
+  floor.imports.length
+    ? `Executed from source this run: ${[...new Set(floor.imports.map((i) => `\`${i.name}\` (\`${i.specifier}\` → \`${i.file}\`)`))].join(', ')}.`
+    : '_No `right` form imports from the kit, so nothing was executed from source in this run._'
+}
+
 ${floor.results.length} examples, ${floor.results.filter((r) => r.status === 'passed').length} passed, ${floor.results.filter((r) => r.status !== 'passed').length} not.
 
 \`\`\`
@@ -1033,27 +1053,6 @@ ${
  * subpath from the text rather than listing subpaths means a note naming a new
  * one is covered the day it is written.
  */
-/**
- * Where each published subpath's SOURCE barrel lives, so the symbol half of the
- * check can resolve it. Not `src/<sub>/index.ts` by convention: review found
- * that convention silently skipping five subpaths -- react, web-components, solid,
- * provider, autoloader -- which is to say `Chat`, `useKaiChat` and
- * `webComponentsReady`, exactly what S1 and S5 lean on. A silent `continue` is the
- * shape this branch has spent the week deleting, so anything not resolved here
- * is REPORTED as unchecked rather than passed over.
- */
-const SUBPATH_SOURCES = {
-  '.': 'src/index.ts',
-  'web-components': 'src/web-components/register/register.ts',
-  solid: 'src/solid.ts',
-  state: 'src/state/index.ts',
-  wire: 'src/wire/index.ts',
-  schemas: 'src/schemas/index.ts',
-  react: 'frameworks/react/index.tsx',
-  provider: 'src/remote/provider.ts',
-  autoloader: 'src/web-components/autoloader/autoloader.ts',
-};
-
 const specOf = (sub) => (sub === '.' ? '@kitn.ai/ui' : `@kitn.ai/ui/${sub}`);
 
 function verifySpecifiers(text, pkg, readSource) {
@@ -1162,7 +1161,7 @@ const readSubpathSource = (relPath) => {
 };
 
 if (args.includes('--self-test')) {
-  const r = await selfTest(helpers);
+  const r = await selfTest(helpers, { resolveImports });
   for (const [what, ok] of r.expectations) console.log(`${ok ? '✓' : '✗'} ${what}`);
   const needleResults = selfTestNeedles();
   for (const [what, ok] of needleResults) console.log(`${ok ? '✓' : '✗'} needle check: ${what}`);
@@ -1179,7 +1178,7 @@ if (args.includes('--self-test')) {
 }
 
 const invariants = catalog.listInvariants();
-const floor = await runFloor(invariants, helpers);
+const floor = await runFloor(invariants, helpers, { resolveImports });
 if (args.includes('--floor')) {
   console.log(formatFloor(floor));
   if (!floor.ok) fail(`${floor.errors.length} floor failure(s). The catalog's own recommended code does not run.`);

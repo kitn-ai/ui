@@ -369,9 +369,30 @@ describe('acceptance pack', () => {
         expect(row, `${inv.id}#${i} declares no stand-in`).toContain('[stand-ins:');
       }
     }
+
+    // A kit IMPORT is the one thing in a right form that is NOT a stand-in: the
+    // floor resolves it to the defining module. Derived from the catalog, so the
+    // day an example starts importing a symbol nothing asserts here, this fails
+    // rather than quietly asserting over the two it was written for.
+    const imported = listInvariants().flatMap((inv) =>
+      inv.examples.flatMap((ex) =>
+        [...ex.right.matchAll(/import\s*\{\s*([A-Za-z_$][\w$]*)\s*\}\s*from\s*'@kitn\.ai\/ui'/g)].map((m) => m[1]),
+      ),
+    );
+    expect(imported.length, 'no catalog example imports from the kit; the check below is vacuous').toBeGreaterThan(0);
+    expect(out).toMatch(/imports: \d+ kit symbol\(s\) executed from the module that defines them, not copied/);
+    for (const name of imported) {
+      expect(out, `${name} is imported by a right form but was not reported as executed from source`).toContain(name);
+    }
+
     const floorReport = readFileSync(join(judge, 'FLOOR.md'), 'utf8');
     expect(floorReport).toMatch(/no example ran\s+against a real registered/);
     expect(floorReport).toContain('Every row declares at least one stand-in.');
+    // The import half of the same honesty: a predicate executed from source, and
+    // the report NAMES it rather than claiming it in general terms.
+    expect(floorReport).toContain('One thing here is NOT a stand-in: a kit import');
+    expect(floorReport).toContain('Executed from source this run');
+    for (const name of imported) expect(floorReport, `${name} is not named in FLOOR.md`).toContain(name);
     // The three async-fault routes, and the bound, stated rather than implied.
     expect(floorReport).toContain('DOM event listener');
     expect(floorReport).toMatch(/settles for \*\*\d+ms\*\*/);
@@ -415,6 +436,11 @@ describe('acceptance pack', () => {
       'a chain of nested 0ms timers outliving the drain is also blamed on its own case',
       'a REJECTION created inside an owned timer is blamed on its own case, not on the clock',
       'a rejection HANDLED a tick later is not a failure at all',
+      'a kit import executes the shipped predicate (empty string refused, relative path allowed)',
+      'a name the barrel does not re-export fails the row, naming the name',
+      'an import with no resolver supplied is a failure, not a silent skip',
+      'the resolver report names the symbol this run imported',
+      'a run with no imports reports none, so the report cannot outlive the run',
       'needle check: a needle OVERSTATED as rename-proof is reported',
       'needle check: a needle UNDERSTATED as literal-bound is reported',
       'needle check: a needle whose other quote variant fires on a right form is reported',
