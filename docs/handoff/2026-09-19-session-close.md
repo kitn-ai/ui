@@ -173,8 +173,9 @@ so the two web-component probes cover them.
    `mcp/catalog/invariants.ts` to import them. That removes the last hand-typed copies of the scheme
    lists — the "derive it, don't type it" rule applied to a security policy.
 2. **The security audit's remaining coverage vectors (F-5).** Eight vectors with exact strings are in
-   `/tmp/kai-lanes/lane-security-audit.md` (a scratch file — if it is gone, the list is reconstructible
-   from the audit summary in `2026-09-19-layering-security-and-shaking.md` §4). Covered so far: the
+   [`2026-09-19-lane-reports/security-sink-audit.md`](2026-09-19-lane-reports/security-sink-audit.md)
+   (copied into the repo so it survives a reset; the tree-shaking plan and the guard report are beside
+   it). Covered so far: the
    `Card` href (component and `<kai-card>` attribute), the three predicates, and the four image sinks.
    Not covered: the attachment-url path, `kai-navigate`'s raw-url event, and `artifact-card`'s
    model-supplied `height` (which cannot inject a second CSS declaration but can pick an arbitrary
