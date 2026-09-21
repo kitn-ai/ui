@@ -1,9 +1,9 @@
 ---
-// Composition slots for an element, from the generated element-meta.json.
+// Composition slots for an element, from the generated web-component-meta.json.
 // `inject` = additive (the built-in region still renders); `replace` = your
 // markup stands in for that region. The default (unnamed) slot — an element's
 // primary content — is a `name: ""` entry like any other and renders here too.
-import meta from '@kitn.ai/ui/element-meta.json';
+import meta from '@kitn.ai/ui/web-component-meta.json';
 interface Props { tag: string }
 const { tag } = Astro.props;
 const el = (meta as any[]).find((e) => e.tag === tag);

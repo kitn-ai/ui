@@ -159,7 +159,7 @@ if (SELF_TEST && IS_MAIN) {
     '          name: kit-dist',
     '          path: |',
     '            packages/ui/dist/**',
-    '            packages/ui/src/elements/compiled.css',
+    '            packages/ui/src/web-components/compiled.css',
     '      - name: Something else',
     '        run: true',
     '',
@@ -167,7 +167,7 @@ if (SELF_TEST && IS_MAIN) {
 
   const globs = uploadGlobs(FIXTURE);
   report(
-    JSON.stringify(globs) === JSON.stringify(['packages/ui/dist/**', 'packages/ui/src/elements/compiled.css']),
+    JSON.stringify(globs) === JSON.stringify(['packages/ui/dist/**', 'packages/ui/src/web-components/compiled.css']),
     'the glob list is read out of the upload step, and stops at the next step',
     JSON.stringify(globs),
   );
@@ -188,7 +188,7 @@ if (SELF_TEST && IS_MAIN) {
 
   report(covers(globs, 'packages/ui/dist'), 'a `/**` glob covers the directory itself');
   report(covers(globs, 'packages/ui/dist/kai.es.js'), 'a `/**` glob covers a file under it');
-  report(covers(globs, 'packages/ui/src/elements/compiled.css'), 'an exact glob covers its own path');
+  report(covers(globs, 'packages/ui/src/web-components/compiled.css'), 'an exact glob covers its own path');
   report(
     !covers(globs, 'packages/ui/scripts/block-driver/pages/generated'),
     'THE DEFECT: a build-written path outside every glob is NOT covered',
@@ -204,7 +204,7 @@ if (SELF_TEST && IS_MAIN) {
   report(!excused('packages/ui/dist'), 'a build output is not excused');
 
   try {
-    assertBuildWroteDist(['packages/ui/dist/kai.es.js', 'packages/ui/src/elements/compiled.css']);
+    assertBuildWroteDist(['packages/ui/dist/kai.es.js', 'packages/ui/src/web-components/compiled.css']);
     report(true, 'a written set that includes packages/ui/dist passes');
   } catch {
     report(false, 'a written set that includes packages/ui/dist passes');
@@ -221,7 +221,7 @@ if (SELF_TEST && IS_MAIN) {
   }
 
   try {
-    assertBuildWroteDist(['packages/ui/src/elements/compiled.css']);
+    assertBuildWroteDist(['packages/ui/src/web-components/compiled.css']);
     report(false, 'a non-empty written set that never touched packages/ui/dist is still a hard failure');
   } catch (err) {
     report(

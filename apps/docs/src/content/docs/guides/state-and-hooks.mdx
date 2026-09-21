@@ -5,7 +5,7 @@ description: Drive messages, suggestions, and streaming without hand-rolling imm
 
 import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
 
-The elements are controlled: you own the data, pass it in, listen for events. To make
+The web components are controlled: you own the data, pass it in, listen for events. To make
 that ergonomic, `@kitn.ai/ui/state` ships immutable helpers and a streaming handle, and
 each framework gets a batteries-included store that owns the state for you.
 
@@ -170,7 +170,7 @@ const right = useKaiChat({ onSubmit: askRight });
 Without a framework hook, wire the setter contract manually and use the helpers directly:
 
 ```js
-import '@kitn.ai/ui/elements';
+import '@kitn.ai/ui/web-components';
 import { appendMessage, createAssistantStream } from '@kitn.ai/ui/state';
 
 await customElements.whenDefined('kai-chat');

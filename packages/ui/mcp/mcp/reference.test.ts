@@ -5,11 +5,11 @@ import { fileURLToPath } from 'node:url';
 import { BUILTIN_CARD_TAGS, cardSchemas, cardSchemaNames, cardTools } from '@kitn.ai/ui/schemas';
 import type { AnthropicToolDef, JsonSchemaToolDef, OpenAIToolDef } from '@kitn.ai/ui/schemas';
 import { reference, coverageSummary } from './tools/reference';
-import { cardTagForType, cardHostTags, entryForTag, getElement, listElements } from './manifest';
+import { cardTagForType, cardHostTags, entryForTag, getElement, listWebComponents } from './manifest';
 import { invariants } from '../catalog/invariants';
 import { surfaceRecipes } from '../catalog/surfaces';
 import type { TInvariant } from '../catalog/catalog-types';
-import { listCodeRecipes, getCodeRecipe } from '../recipes';
+import { listCodeRecipes, getCodeRecipe } from '../recipes/index';
 
 describe('component_reference', () => {
   it('returns kai-chat props + events', async () => {
@@ -25,7 +25,7 @@ describe('component_reference', () => {
     const text = (out.content as { type: string; text: string }[])[0].text;
 
     expect(text).toMatch(/### Getting the element/);
-    expect(text).toMatch(/import '@kitn\.ai\/ui\/elements'/);
+    expect(text).toMatch(/import '@kitn\.ai\/ui\/web-components'/);
     // it must come BEFORE the props, or a reader who stops early still misses it
     expect(text.indexOf('### Getting the element')).toBeLessThan(
       text.indexOf('### Props (JavaScript properties)'),
@@ -67,7 +67,7 @@ describe('component_reference', () => {
    * The `detail` clause, pinned over EVERY event in the manifest rather than
    * kai-chat's.
    *
-   * The rule is read off the generator, not guessed: gen-element-api.mjs writes
+   * The rule is read off the generator, not guessed: gen-web-component-api.mjs writes
    * an event's CEM type as `CustomEvent<${e.detail}>` when the element declares
    * a payload and the bare string `CustomEvent` when it does not (a `void`
    * detail, e.g. `'kai-click': void` in button.tsx). Exactly two shapes, so the
@@ -86,7 +86,7 @@ describe('component_reference', () => {
     const withPayload: string[] = [];
     const withoutPayload: string[] = [];
 
-    for (const tag of listElements()) {
+    for (const tag of listWebComponents()) {
       const events = getElement(tag)?.events ?? [];
       if (events.length === 0) continue;
 
@@ -133,17 +133,17 @@ describe('component_reference', () => {
     // not match the naive derivation, so this asserts the manifest is consulted.
     const out = await reference.handler({ name: 'kai-conversations' });
     const text = (out.content as { type: string; text: string }[])[0].text;
-    expect(text).toMatch(/@kitn\.ai\/ui\/elements\/conversation-list/);
-    expect(text).not.toMatch(/@kitn\.ai\/ui\/elements\/conversations'/);
+    expect(text).toMatch(/@kitn\.ai\/ui\/web-components\/conversation-list/);
+    expect(text).not.toMatch(/@kitn\.ai\/ui\/web-components\/conversations'/);
   });
 
   it('does not claim register-all for an element register-all does not cover', async () => {
     // Derived, not hard-coded: entryForTag is undefined for exactly the tags
     // register-impl.ts does not import — currently one, kai-remote, the deliberate
-    // opt-in exception documented at element-diagnostics.ts:347-363. Finding it by
+    // opt-in exception documented at web-component-diagnostics.ts:347-363. Finding it by
     // walking the manifest (instead of writing 'kai-remote' or '79'/'80' here) means
     // a second such element is covered by this test the day it exists.
-    const optedOut = listElements().filter((t) => entryForTag(t) === undefined);
+    const optedOut = listWebComponents().filter((t) => entryForTag(t) === undefined);
     expect(optedOut.length).toBeGreaterThan(0);
     const tag = optedOut[0];
 
@@ -152,7 +152,7 @@ describe('component_reference', () => {
 
     expect(text).toMatch(/### Getting the element/);
     // the false claim this exists to catch: register-all does NOT register this tag
-    expect(text).not.toMatch(/import '@kitn\.ai\/ui\/elements';\n/);
+    expect(text).not.toMatch(/import '@kitn\.ai\/ui\/web-components';\n/);
     // it must still decide loudly rather than staying quiet about the exception
     expect(text).toMatch(/not part of|opt-in|does not register|is not registered/i);
   });
@@ -166,7 +166,7 @@ describe('component_reference', () => {
    * to name it.
    *
    * This probe does NOT re-run the tool's own lookup. It reads the specifier back
-   * out of the rendered text and resolves it against dist/elements/ — so the
+   * out of the rendered text and resolves it against dist/web-components/ — so the
    * assertion is that the string the reference hands a consumer resolves to a
    * built module which registers this exact tag, which is the thing that was
    * wrong when the reference guessed and the thing that would be wrong again.
@@ -174,17 +174,17 @@ describe('component_reference', () => {
   it('names the entry point for an opt-in element instead of telling the reader to go find it', async () => {
     const distElements = resolve(
       dirname(fileURLToPath(import.meta.url)),
-      '../../dist/elements',
+      '../../dist/web-components',
     );
-    const optedOut = listElements().filter((t) => entryForTag(t) === undefined);
+    const optedOut = listWebComponents().filter((t) => entryForTag(t) === undefined);
     expect(optedOut.length).toBeGreaterThan(0);
 
     for (const tag of optedOut) {
       const out = await reference.handler({ name: tag });
       const text = (out.content as { type: string; text: string }[])[0].text;
 
-      const named = [...text.matchAll(/@kitn\.ai\/ui\/elements\/([a-z0-9-]+)/g)].map((m) => m[1]);
-      expect(named, `${tag}: no @kitn.ai/ui/elements/<name> specifier in the reference`).not.toHaveLength(0);
+      const named = [...text.matchAll(/@kitn\.ai\/ui\/web-components\/([a-z0-9-]+)/g)].map((m) => m[1]);
+      expect(named, `${tag}: no @kitn.ai/ui/web-components/<name> specifier in the reference`).not.toHaveLength(0);
 
       for (const name of named) {
         const module = resolve(distElements, `${name}.js`);
@@ -249,6 +249,18 @@ describe('component_reference — composition seams (slots + ::part)', () => {
     const text = await textFor('kai-button');
     expect(text).toMatch(/### Styleable parts/);
     expect(text).toMatch(/::part\(button\)/);
+  });
+
+  it('documents a consumer-settable CSS custom property, with its default and recipe', async () => {
+    // The knob has to reach the AGENT, not just the docs site: a harness told to
+    // build a settings screen needs to know how to make the list flush, and the
+    // generated artifacts are the only channel it reads. Comes from the
+    // `cssProperties` the registry emits into dist/custom-elements.json.
+    const text = await textFor('kai-row-group');
+    expect(text).toMatch(/### CSS custom properties/);
+    expect(text).toMatch(/--kai-row-radius/);
+    expect(text).toMatch(/var\(--radius-lg\)/); // the default, not just the name
+    expect(text).toMatch(/--kai-row-radius: 0/); // the copy-pasteable recipe
   });
 });
 
@@ -429,7 +441,7 @@ describe('component_reference — card contract', () => {
 // coding agent actually consults, so a method it does not mention may as well
 // not exist.
 //
-// Expectations come from src/elements/element-meta.json — the sibling artifact
+// Expectations come from src/web-components/web-component-meta.json — the sibling artifact
 // of the manifest this tool reads, written by the same generator run. Nothing is
 // restated here: a method added to a facade moves both sides at once, and a
 // method that reaches only ONE of the two artifacts fails instead of half-shipping.
@@ -437,17 +449,17 @@ describe('component_reference — card contract', () => {
 
 describe('component_reference — exposed methods', () => {
   interface MethodMeta { name: string; params: string; returns: string }
-  interface ElementMeta { tag: string; methods?: MethodMeta[] }
+  interface WebComponentMeta { tag: string; methods?: MethodMeta[] }
 
   // Same resolution manifest.ts uses to find the CEM, for the same reason: this
   // file runs from source under vitest and from nowhere else.
-  const elementMeta: ElementMeta[] = JSON.parse(
+  const webComponentMeta: WebComponentMeta[] = JSON.parse(
     readFileSync(
-      resolve(dirname(fileURLToPath(import.meta.url)), '../../src/elements/element-meta.json'),
+      resolve(dirname(fileURLToPath(import.meta.url)), '../../src/web-components/web-component-meta.json'),
       'utf8',
     ),
   );
-  const withMethods = elementMeta.filter((e) => e.methods?.length);
+  const withMethods = webComponentMeta.filter((e) => e.methods?.length);
   const TOTAL_METHODS = withMethods.reduce((n, e) => n + e.methods!.length, 0);
 
   /** The `### Methods …` section of a reference, up to the next `###`. */
@@ -492,7 +504,7 @@ describe('component_reference — exposed methods', () => {
   it('an element that exposes nothing gets no Methods section', async () => {
     // resizable.tsx declares kai-resizable AND kai-resizable-item; only the group
     // exposes maximize/restore.
-    const item = elementMeta.find((e) => e.tag === 'kai-resizable-item');
+    const item = webComponentMeta.find((e) => e.tag === 'kai-resizable-item');
     expect(item?.methods ?? []).toEqual([]);
     expect(methodsSection(await textFor({ name: 'kai-resizable-item' }))).toBeUndefined();
   });
@@ -591,7 +603,7 @@ describe('component_reference does not overstate what the catalog enforces', () 
     expect(line).toBeDefined();
     // Not "not enforced", not "partially enforced" — and it names its real guard.
     expect(line).not.toMatch(/not enforced|partially enforced/i);
-    expect(line).toContain('src/elements/define.tsx');
+    expect(line).toContain('src/web-components/define/define.tsx');
   });
 
   it('upgrade-race is served with the delivery scope that makes it conditional', async () => {
@@ -648,7 +660,7 @@ describe('component_reference does not overstate what the catalog enforces', () 
    * fifth ingredient is covered here the day it is added.
    */
   it('an element with a recipe section points at the recipes appendix, as the invariants section does at its own', async () => {
-    const ingredients = listElements().filter((tag) =>
+    const ingredients = listWebComponents().filter((tag) =>
       surfaceRecipes.some((r) => r.ingredients.includes(tag)),
     );
     expect(ingredients.length).toBeGreaterThan(0);
@@ -663,7 +675,7 @@ describe('component_reference does not overstate what the catalog enforces', () 
 
     // and no signpost where there is no section to point from — a pointer on an
     // element in no recipe is the "fabricated membership" failure in another form
-    const outsiders = listElements().filter((tag) => !ingredients.includes(tag));
+    const outsiders = listWebComponents().filter((tag) => !ingredients.includes(tag));
     expect(outsiders.length).toBeGreaterThan(0);
     for (const tag of outsiders.slice(0, 5)) {
       expect(await textFor(tag), `${tag} is in no recipe but points at the recipes appendix`).not.toMatch(
@@ -966,7 +978,7 @@ describe('component_reference — programmatic layer + code recipes (rung-6 F-46
   });
 
   it('no code-recipe id shadows an element tag or a reserved topic', () => {
-    const tags = new Set(listElements());
+    const tags = new Set(listWebComponents());
     const reserved = new Set(['list', 'invariants', 'recipes', 'programmatic', 'state', 'wire', 'state-wire']);
     expect(listCodeRecipes().length).toBeGreaterThan(0);
     for (const r of listCodeRecipes()) {

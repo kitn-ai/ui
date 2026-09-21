@@ -1,7 +1,7 @@
 // tests/components/artifact.test.tsx
 import { expect, test } from 'vitest';
-import { isPdfUrl } from '../../src/components/artifact';
-import type { ArtifactFile } from '../../src/components/artifact';
+import { isPdfUrl } from '../../src/components/artifact/artifact';
+import type { ArtifactFile } from '../../src/components/artifact/artifact';
 
 const files: ArtifactFile[] = [
   { path: 'a.html', url: 'https://x/a.html', type: 'html' },

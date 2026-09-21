@@ -19,7 +19,7 @@
  * visible text. A speech-input user says what they see, so a button reading
  * "Save" whose accessible name is "Submit" cannot be activated by voice at all.
  *
- * The sibling elements are in the table because an inconsistency across the
+ * The sibling web components are in the table because an inconsistency across the
  * family is worse than either behaviour alone: `kai-checkpoint` already drops
  * `aria-label` when its label is visible, so the kit HAS decided this once.
  *
@@ -159,7 +159,7 @@ const CASES = [
     // the name and `label` steps aside; `slot="trigger"` is VISUAL content (a
     // `+`, an `<svg>`) with the name supplied separately, so `label` names it.
     // Decoration beside a name is not a second name competing with one, which is
-    // why the same rule should not apply to both. The element's own docstring
+    // why the same rule should not apply to both. The web component's own docstring
     // example (`<span slot="trigger">+</span>` named "Open menu") is that
     // contract working.
     expect: 'Reasoning effort',
@@ -193,12 +193,12 @@ const CASES = [
   },
 ];
 
-/** The element modules the cases need, deduped. */
+/** The web-component modules the cases need, deduped. */
 const TAGS = [...new Set(CASES.map((c) => c.tag ?? 'kai-button'))];
 const MODULE_OF = {
-  'kai-button': '/src/elements/button.tsx',
-  'kai-menu': '/src/elements/menu.tsx',
-  'kai-checkpoint': '/src/elements/checkpoint.tsx',
+  'kai-button': '/src/web-components/button/button.tsx',
+  'kai-menu': '/src/web-components/menu/menu.tsx',
+  'kai-checkpoint': '/src/web-components/checkpoint/checkpoint.tsx',
 };
 
 const PAGE = /* html */ `<!doctype html>

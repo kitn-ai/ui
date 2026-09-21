@@ -25,7 +25,7 @@
 //      read performed through `./wire`. That is the exact shipped defect.
 //   2. TWO DISTINCT INSTANCES of the same module share state. This is the whole
 //      duplication CLASS, not just our build config: a consumer who bundles the
-//      kit and also loads the elements bundle from a CDN duplicates the module
+//      kit and also loads the web-components bundle from a CDN duplicates the module
 //      identically, and no amount of shared-chunk configuration on our side
 //      prevents it. Node gives us the same situation honestly by loading one
 //      file twice under different specifiers.
@@ -35,7 +35,7 @@
 //      PARTS, so a collision silently merges one stream's reasoning blocks into
 //      another's and overwrites their verbatim `raw`.
 //   4. The chain a real consumer walks, and the one the panel actually failed
-//      on: the elements bundle installs the hook, the app reads through the
+//      on: the web-components bundle installs the hook, the app reads through the
 //      separate `./wire` bundle, and the hook must receive those events.
 //
 // Needs a build (like verify:consumer): it reads dist/, deliberately, because
@@ -311,10 +311,10 @@ step('reportRequest emits from ./diagnostics to a ./wire subscriber, under node,
 //
 // It cannot pass vacuously: it asserts a NON-ZERO count of events delivered by a
 // real read, and that count was 0 before this fix.
-step('the elements bundle installs a hook that receives events from a ./wire read');
+step('the web-components bundle installs a hook that receives events from a ./wire read');
 {
-  const elementsPath = resolve(ROOT, 'dist/kai.es.js');
-  if (!existsSync(elementsPath)) {
+  const registerAllPath = resolve(ROOT, 'dist/kai.es.js');
+  if (!existsSync(registerAllPath)) {
     console.error(`\n✗ verify-diagnostics-wiring: dist/kai.es.js missing — run \`nx build ui\` first.\n`);
     process.exit(1);
   }
@@ -338,13 +338,13 @@ step('the elements bundle installs a hook that receives events from a ./wire rea
   }
   globalThis.window = dom.window;
 
-  await import(pathToFileURL(elementsPath).href);
+  await import(pathToFileURL(registerAllPath).href);
   await customElements.whenDefined('kai-chat');
 
   const hook = dom.window.__KAI_DEVTOOLS_HOOK__;
   if (!hook) {
     fail(
-      'Importing dist/kai.es.js did not install window.__KAI_DEVTOOLS_HOOK__. The elements ' +
+      'Importing dist/kai.es.js did not install window.__KAI_DEVTOOLS_HOOK__. The web-components ' +
         'bundle is the auto-install site, so without it no consumer of the kit gets a hook.',
     );
   } else if (hook.recording !== true) {

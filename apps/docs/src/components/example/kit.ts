@@ -15,7 +15,7 @@ export function getKit(): Promise<Record<string, unknown>> {
     // the elements self-register. No raw-bundle URL, no sync-kit drift. Still
     // resolves to the MODULE namespace (toast, configureCodeHighlighting, …) once
     // kai-chat is defined, so callers that read those exports keep working.
-    kitPromise = import('@kitn.ai/ui/elements').then(
+    kitPromise = import('@kitn.ai/ui/web-components').then(
       async (mod: Record<string, unknown>) => {
         await customElements.whenDefined('kai-chat');
         return mod;

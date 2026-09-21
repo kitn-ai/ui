@@ -6,7 +6,7 @@
 // docs/superpowers/specs/2026-08-24-form-field-formats-design.md (§2 tier 1, §4).
 //
 // `postal` is DROPPED from the spec's tier-1 table per decided O-2: the enum here is the
-// binding one, exported ONCE and read by the schema, the element facade and the tool
+// binding one, exported ONCE and read by the schema, the web-component facade and the tool
 // projection (CLAUDE.md "derive it, don't type it") -- no second copy of these four
 // strings anywhere else in the tree.
 import { formatRaw, rawFromFormatted, type MaskPattern } from './field-mask';

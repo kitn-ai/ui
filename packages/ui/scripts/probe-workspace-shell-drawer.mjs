@@ -34,7 +34,7 @@ const PAGE = /* html */ `<!doctype html>
   </kai-workspace>
   <script type="module">
     let error = null;
-    try { await import('/src/elements/chat-workspace.tsx'); } catch (e) { error = String((e && e.stack) || e); }
+    try { await import('/src/web-components/workspace/chat-workspace.tsx'); } catch (e) { error = String((e && e.stack) || e); }
     const ws = document.getElementById('ws');
     document.getElementById('opener').addEventListener('click', () => ws.expandAside('start'));
     await new Promise((r) => setTimeout(r, 500));

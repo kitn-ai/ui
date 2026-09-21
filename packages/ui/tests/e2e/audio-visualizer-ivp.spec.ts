@@ -14,7 +14,7 @@ import { fileURLToPath } from 'node:url';
  *
  * Every test appends its own `<kai-audio-visualizer>` elements straight to
  * `document.body` on an anchor story page (any story works: `.storybook/
- * preview.ts` awaits `elementsReady` before every story renders, so the
+ * preview.ts` awaits `webComponentsReady` before every story renders, so the
  * kai-* custom elements are already registered by the time the anchor
  * story settles). This sidesteps two problems at once: it needs no new
  * source file (no fixture story), and it exercises the exact registration
@@ -89,7 +89,7 @@ test.beforeAll(() => {
 // unnecessary one: wave/aurora/custom defer their compile until visible,
 // so anchoring on one adds a real (if small) visibility/compile dependency
 // this file's own tests don't need and shouldn't pay for.
-const STORY_ANCHOR = '/iframe.html?id=components-elements-audiovisualizer--bar&viewMode=story';
+const STORY_ANCHOR = '/iframe.html?id=components-audiovisualizer--bar&viewMode=story';
 
 const VARIANTS = ['bar', 'grid', 'radial', 'wave', 'aurora', 'custom'] as const;
 const STATES = ['idle', 'connecting', 'listening', 'thinking', 'speaking'] as const;
@@ -144,7 +144,7 @@ async function installPreserveDrawingBuffer(page: Page): Promise<void> {
   });
 }
 
-/** Navigate to any story; `preview.ts` awaits `elementsReady` before it
+/** Navigate to any story; `preview.ts` awaits `webComponentsReady` before it
  *  renders, so kai-* custom elements are registered by the time it settles.
  *  Also waits for Storybook's own `sb-loader` overlay (`body.sb-show-main`)
  *  to clear -- it sits on top of the whole viewport (opaque) until the
@@ -909,7 +909,7 @@ test.describe('Check 8: element audio not silenced, not doubled', () => {
     // rules warn about.
     expect(beforeMax, `bar amplitude before the second mount must be genuinely nonzero, not a degenerate 0/0; before=${JSON.stringify(before)}`).toBeGreaterThan(0.05);
 
-    // The cache in useAudioAnalysis (`elementSources` WeakMap) means
+    // The cache in useAudioAnalysis (`webComponentSources` WeakMap) means
     // createMediaElementSource — which THROWS if called twice for the same
     // element — and the destination connection must each happen exactly
     // once, no matter how many visualizers subsequently tap the element.
@@ -1123,7 +1123,7 @@ test.describe('Check 10: shader recompile guard holds under the real dispatcher 
       // leak in production. A manually-mounted element with no live audio
       // source has no ticking `bands` signal to leak through in the first
       // place, so it would not reproduce this regression.
-      await page.goto(`/iframe.html?id=components-elements-audiovisualizer--${variant}&viewMode=story`);
+      await page.goto(`/iframe.html?id=components-audiovisualizer--${variant}&viewMode=story`);
       await page.waitForFunction(() => document.body.classList.contains('sb-show-main'), { timeout: 15_000 });
       await page.locator('canvas').first().waitFor({ state: 'attached', timeout: 10_000 });
 

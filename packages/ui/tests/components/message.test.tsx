@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@solidjs/testing-library';
 import axe from 'axe-core';
-import { Message, MessageAvatar, MessageContent } from '../../src/components/message';
+import { Message, MessageAvatar, MessageContent } from '../../src/components/message/message';
 
 /** Run axe's ARIA-role rules over a subtree and return the violating rule ids
  *  plus the messages, so a failure names what broke instead of just a count. */

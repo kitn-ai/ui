@@ -38,7 +38,7 @@ Use `<kai-resizable>` for any app shell built from regions the user should resiz
 </kai-resizable>
 
 <script type="module">
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
   document.querySelector('kai-resizable')
     .addEventListener('kai-change', (e) => console.log(e.detail.sizes));
 </script>
@@ -80,7 +80,7 @@ Wire `<kai-artifact expandable>` inside an item — pressing **Expand** maximize
 </kai-resizable>
 
 <script type="module">
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
   const r = document.querySelector('kai-resizable');
   r.addEventListener('kai-change', (e) => console.log('sizes', e.detail.sizes));
   r.addEventListener('kai-maximize-change', (e) => console.log(e.detail));

@@ -4,11 +4,11 @@
 // its stable handles, and the emit wiring onto the frozen CardEvent set.
 import { createSignal } from 'solid-js';
 import { render } from '@solidjs/testing-library';
-import { BUILTIN_CARD_COMPONENTS } from '../../src/primitives/card-registry';
-import { CardRenderer } from '../../src/components/card-renderer';
+import { BUILTIN_CARD_COMPONENTS } from '../../src/components/card/card-registry';
+import { CardRenderer } from '../../src/components/card/card-renderer';
 import { CardProvider } from '../../src/primitives/card-host';
 import { upsertCardPart } from '../../src/state/parts';
-import type { MessagePart } from '../../src/elements/chat-types';
+import type { MessagePart } from '../../src/web-components/chat/chat-types';
 import type { CardEnvelope, CardEvent, CardHost } from '../../src/primitives/card-contract';
 
 afterEach(() => { document.body.innerHTML = ''; });
@@ -65,6 +65,33 @@ test('data.height overrides the default height (number = px)', () => {
 test('data.height accepts a CSS length string', () => {
   const { container } = renderArtifactCard({ ...BASE, data: { src: 'https://x.test', height: '30rem' } });
   expect(wrapperOf(container).style.height).toBe('30rem');
+});
+
+// F-5 vector 6: `data.height` is model-supplied and lands in a `style` object. The
+// value is DYNAMIC, so it compiles to `style.setProperty('height', v)` -- which is
+// what makes a second declaration impossible, and is the property worth pinning
+// rather than assuming (a STATIC style value is folded into the template's own
+// `style` attribute, where the `;` DOES start a second declaration).
+test('a hostile data.height injects NO second declaration -- the value is dropped whole', () => {
+  const { container } = renderArtifactCard({
+    ...BASE,
+    data: { src: 'https://x.test', height: '1px; background: url("https://evil.tld/beacon")' },
+  });
+  const el = wrapperOf(container);
+  // Not "the height is 1px": setProperty rejects the value wholesale, so nothing at
+  // all is applied -- no height, no background, and no style attribute to inspect.
+  expect(el.style.height).toBe('');
+  expect(el.style.backgroundImage).toBe('');
+  expect(el.getAttribute('style')).toBeNull();
+});
+
+// The residual that IS real, recorded rather than clamped: any VALID length applies
+// verbatim, so a model can make the card arbitrarily tall. How tall is too tall is
+// the app's call (see the note on resolveHeight); what this pins is that the kit
+// applies the value rather than quietly choosing for the consumer.
+test('an arbitrary but VALID data.height is applied verbatim (the app owns the ceiling)', () => {
+  const { container } = renderArtifactCard({ ...BASE, data: { src: 'https://x.test', height: '100000px' } });
+  expect(wrapperOf(container).style.height).toBe('100000px');
 });
 
 test('renders the framed src in the preview iframe', () => {
@@ -170,7 +197,7 @@ test('emitting without a host does not throw', () => {
 // hands the same live component a new envelope; it must not reach in and undo
 // what the user did in the meantime.
 //
-// The rendering shape here mirrors components/message.tsx: an <Index> + accessor
+// The rendering shape here mirrors components/message/message.tsx: an <Index> + accessor
 // keeps ONE component instance alive and only updates its props. Using a keyed
 // <For> would recreate the component and mask the effect being tested, so the
 // envelope must arrive through a reactive accessor exactly as it does there.

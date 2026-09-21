@@ -1,6 +1,6 @@
 ---
 name: consumer-regression
-description: Use when verifying that @kitn.ai/ui and its `kai` MCP scaffolder build and run in REAL consumer apps across frameworks — after changing the library, the scaffold tool, a catalog integration, or an element; before merging consumer-facing changes; or when adding a new framework, integration, archetype, or backend. This tests the published-package CONSUMER experience, not the kit's own unit suite.
+description: Use when verifying that @kitn.ai/ui and its `kai` MCP scaffolder build and run in REAL consumer apps across frameworks — after changing the library, the scaffold tool, a catalog integration, or a web component; before merging consumer-facing changes; or when adding a new framework, integration, archetype, or backend. This tests the published-package CONSUMER experience, not the kit's own unit suite.
 argument-hint: "[smoke|regression] [scope e.g. 'react' | 'all' | 'integrations']"
 ---
 

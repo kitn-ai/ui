@@ -16,8 +16,8 @@ import { afterEach, beforeAll, describe, expect, test } from 'vitest';
 import { createSignal } from 'solid-js';
 import { readOpenAIStream, readAnthropicStream } from '../../src/wire/index';
 import { createAssistantStream } from '../../src/state/stream';
-import { MessageBody } from '../../src/components/message';
-import type { ChatMessage } from '../../src/elements/chat-types';
+import { MessageBody } from '../../src/components/message/message';
+import type { ChatMessage } from '../../src/web-components/chat/chat-types';
 
 beforeAll(() => {
   // The reasoning disclosure measures its content with a ResizeObserver, which

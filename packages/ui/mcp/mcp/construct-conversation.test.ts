@@ -49,7 +49,7 @@ describe('four-sentence conversational construction', () => {
     // `launcherIcon` used to pin `https://example.com/logo.png` — a
     // placeholder that never resolves, so the live `kai dev` FAB rendered a
     // permanently broken image the whole time this fixture existed. The KIT
-    // fix (`DockLauncherImage`, ui/dock.tsx) makes a failing icon degrade to
+    // fix (`DockLauncherImage`, components/dock/dock.tsx) makes a failing icon degrade to
     // the default glyph instead of staying broken — codegen.test.ts's
     // `launcherIcon renders an <img> launcher override` /
     // `DockLauncherImage fallback` tests cover that in isolation with a

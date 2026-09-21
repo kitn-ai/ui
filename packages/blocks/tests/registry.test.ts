@@ -17,7 +17,7 @@
  *
  * WHAT IS NOT HERE, and where it went. Four assertions need inputs this package
  * does not have: the kit's real integration catalog, its real
- * element-nonscalar.json, its real version (the lint:cdn-pins equality), and
+ * web-component-nonscalar.json, its real version (the lint:cdn-pins equality), and
  * the BUILT artifacts under its dist/blocks/. They live in
  * packages/ui/mcp/tests/blocks-artifacts.test.ts, in the package that owns
  * those inputs, plus verify:blocks on the emitted artifact. The split is by
@@ -262,7 +262,7 @@ describe('the CDN-form generator', () => {
     expect(html).toContain('customElements.whenDefined');
     // The autoloader, not the register-all bundle: the paste form runs off
     // raw CDN URLs in a plain page, which is the autoloader's own pattern.
-    expect(html).toContain('elements/autoloader.js');
+    expect(html).toContain('web-components/autoloader.js');
   });
 
   it('the /kit/ rendering (the driver form) carries no pins at all', () => {
@@ -273,11 +273,13 @@ describe('the CDN-form generator', () => {
   });
 
   it('maps ONLY the phase-2-proven entries, refusing the root export loudly', () => {
+    // Sorted, so the list is checked as a SET: the subpath rename moved
+    // @kitn.ai/ui/web-components' position and that is not a behaviour change.
     expect(Object.keys(CDN_IMPORT_ENTRIES).sort()).toEqual([
       '@kitn.ai/ui/autoloader',
-      '@kitn.ai/ui/elements',
       '@kitn.ai/ui/state',
       '@kitn.ai/ui/stores',
+      '@kitn.ai/ui/web-components',
       '@kitn.ai/ui/wire',
     ]);
     expect(rewriteBareImport('@kitn.ai/ui', 'B/').error).toMatch(/root .* not loadable|root "@kitn\.ai\/ui" export/);
@@ -313,7 +315,7 @@ describe('the CDN-form generator', () => {
     const out = rewriteBlockScript(files.get('b.js') as string, files, { version: VERSION });
     expect(out.errors).toEqual([]);
     const code = out.code as string;
-    expect(code).toContain(`@kitn.ai/ui@${VERSION}/dist/elements/autoloader.js`);
+    expect(code).toContain(`@kitn.ai/ui@${VERSION}/dist/web-components/autoloader.js`);
     expect(code).toContain(`@kitn.ai/ui@${VERSION}/dist/wire.js`);
     expect(code).toContain('const MOCK = [];');
     expect(code).not.toContain("from './b.controller.js'");
@@ -390,7 +392,7 @@ describe('contract checks (each plant watched being caught)', () => {
     return b[0] as Block;
   };
 
-  it('catches a non-scalar prop set as an HTML attribute (derived from element-nonscalar.json)', () => {
+  it('catches a non-scalar prop set as an HTML attribute (derived from web-component-nonscalar.json)', () => {
     const block = blockWith([{ name: 'demo.html', content: '<!doctype html><kai-thread messages="[]"></kai-thread>' }]);
     expect(checkBlockContracts(block, NONSCALAR).join()).toMatch(/non-scalar prop "messages" as an HTML attribute/);
   });

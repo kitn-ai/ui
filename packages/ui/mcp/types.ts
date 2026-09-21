@@ -11,7 +11,7 @@ export const StreamFormat = z.enum(['openai-sse', 'ai-sdk', 'native']);
  *     `CUSTOM_ELEMENTS_SCHEMA` and binds arrays/objects with `[prop]="…"`.
  *   - `solid` consumes the SolidJS components DIRECTLY from the `@kitn.ai/ui`
  *     root entry. The kit is authored in Solid, so routing a Solid consumer
- *     through the custom-element facade would ship the Solid runtime twice and
+ *     through the web-component facade would ship the Solid runtime twice and
  *     cross a reactive-context boundary for nothing.
  */
 export const Framework = z.enum(['html', 'react', 'next', 'vue', 'svelte', 'angular', 'solid', 'fastapi', 'express', 'worker', 'tanstack-start']);

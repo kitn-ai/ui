@@ -150,7 +150,7 @@ describe('generateProject (widget + mock core)', () => {
     // clipped a focus ring (round 4 patched the symptom with inline padding).
     // Owner-ruled root cause: emitApp was re-deriving layout the kit already
     // owns. ChatThread (chat-thread.tsx) — the same composition
-    // src/elements/chat.tsx renders behind <kai-chat> — owns the message
+    // src/web-components/chat/chat.tsx renders behind <kai-chat> — owns the message
     // list AND the composer (padding, focus ring, send button) as one unit,
     // so there is nothing left here to restate.
     const app = file(generateProject(construct()), 'src/App.tsx');
@@ -210,10 +210,10 @@ describe('generateProject (widget + mock core)', () => {
     expect(html).toMatch(/This blank page stands in for your site/);
     expect(html).toMatch(/bottom-right corner/);
     const hintIndex = html.indexOf('This blank page stands in for your site');
-    const elementIndex = html.indexOf('<acme-support>');
+    const webComponentIndex = html.indexOf('<acme-support>');
     expect(hintIndex).toBeGreaterThan(-1);
-    expect(elementIndex).toBeGreaterThan(-1);
-    expect(hintIndex).toBeLessThan(elementIndex);
+    expect(webComponentIndex).toBeGreaterThan(-1);
+    expect(hintIndex).toBeLessThan(webComponentIndex);
   });
 
   it('routes the theme accent onto the HOST only — App.tsx (message content) carries no accent/primary token at all', () => {
@@ -262,7 +262,7 @@ describe('widget chrome (Task 19a)', () => {
 
   // Owner finding, 2026-08-26: a hand-rolled <img> left a permanently broken
   // icon in kai dev's own live FAB when its URL never resolved. DockLauncherImage
-  // (ui/dock.tsx) is the graceful-degradation component — see src/ui/dock.test.tsx
+  // (components/dock/dock.tsx) is the graceful-degradation component — see src/components/dock/dock.test.tsx
   // for its own render-level fallback behavior; this only asserts the WIRE.
   it('launcherIcon renders a DockLauncherImage launcher override, JSON.stringify-escaped, and imports it', () => {
     const app = file(
@@ -1863,7 +1863,7 @@ describe('the app header strip — `split` composes the promoted AppHeader (2026
   // The owner-reported defect: the emitted Workspace rendered its header chrome
   // as a text "Theme" button, no search at all and a bare avatar, all inside
   // ChatThread's own header row (so, inside the chat rail's width). The story
-  // `src/elements/builder-workspace.stories.tsx` is the binding acceptance
+  // `src/stories/showcase/builder-workspace.stories.tsx` is the binding acceptance
   // surface; its `AppHeader` is now a real component and codegen composes THAT.
   const split = (over: Record<string, unknown> = {}): Construct =>
     construct({
@@ -2081,7 +2081,7 @@ describe('workSurface — the split pane renders (2026-08-30)', () => {
     expect(app).toContain('codeSrc={"/src.html"}');
   });
 
-  it('codeView with NO codeUrl still emits the toggle and no codeSrc — components/work-surface.tsx owns the empty state (owner ruling, 2026-08-30)', () => {
+  it('codeView with NO codeUrl still emits the toggle and no codeSrc — components/work-surface/work-surface.tsx owns the empty state (owner ruling, 2026-08-30)', () => {
     const app = file(generateProject(ws({ chrome: { codeView: true } })), 'src/App.tsx');
     expect(app).toContain('showCodeView={true}');
     expect(app).not.toContain('codeSrc=');

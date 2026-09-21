@@ -16,13 +16,13 @@ import ModelContextDemo from '../../../components/ModelContextDemo.tsx';
 
 ## How it works
 
-`<kai-chat>` renders both header controls for you. Set `models` and `currentModel` to get the switcher dropdown, set `context` to get the token meter, and listen for `kai-model-change` to react to a selection. No separate elements to mount.
+`<kai-chat>` renders both header controls for you. Set `models` and `currentModel` to get the switcher dropdown, set `context` to get the token meter, and listen for `kai-model-change` to react to a selection. No separate web components to mount.
 
 ```html
 <kai-chat id="chat" chat-title="Board prep"></kai-chat>
 
 <script type="module">
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
 
   await customElements.whenDefined('kai-chat');
 

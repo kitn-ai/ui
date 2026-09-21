@@ -14,7 +14,7 @@ npm install @kitn.ai/ui solid-js
 import '@kitn.ai/ui/theme.css'; // design tokens, once near your entry
 ```
 
-The `.` entry ships raw TSX; your bundler compiles and tree-shakes it alongside your own code.
+The `.` entry ships compiled ESM, and the package declares those bundles side-effect-free, so your bundler tree-shakes what you don't use.
 
 ## Headless primitives
 
@@ -53,9 +53,9 @@ import { createKaiChat } from '@kitn.ai/ui';          // SolidJS store
 
 See the **Examples → State & Hooks** story for the setter contract and streaming loop.
 
-## UI primitives
+## Accessible building blocks
 
-The kit's accessible building blocks, useful well outside a chat.
+The kit's accessible building blocks, useful well outside a chat. They live in `src/components/` alongside everything else the Solid layer ships.
 
 ```tsx
 import { Button, Avatar, Badge, Separator } from '@kitn.ai/ui';
@@ -66,11 +66,11 @@ import { Resizable, ResizablePanel, ScrollArea } from '@kitn.ai/ui';
 <Badge>Beta</Badge>
 ```
 
-`Resizable` + `ResizablePanel` build a draggable split; handles drop in between visible panels. Each primitive has a story under **Components → Primitives**.
+`Resizable` + `ResizablePanel` build a draggable split; handles drop in between visible panels. Each one has a story under **Components**.
 
-## Feature components
+## The AI surface
 
-The AI surface. Compose a thread, or drop a single component anywhere:
+The chat-specific components. Compose a thread, or drop a single component anywhere:
 
 ```tsx
 import {
@@ -94,10 +94,10 @@ import {
 <Artifact files={artifactFiles} />
 ```
 
-`ChatContainer` is transport-agnostic: it owns the conversation UI, you own the request. Stream the reply into your signal from `PromptInput`'s `onSubmit`. `Markdown` reads its prose size from the surrounding `ChatConfig`, not a prop. Each component has a story under **Components → Elements**.
+`ChatContainer` is transport-agnostic: it owns the conversation UI, you own the request. Stream the reply into your signal from `PromptInput`'s `onSubmit`. `Markdown` reads its prose size from the surrounding `ChatConfig`, not a prop. Each one has a story under **Components**.
 
 ## Mixing the two
 
-Native components and `kai-*` elements ship in the same package and coexist. Compose primitives where you want control, drop a `<kai-chat>` shell where you want defaults.
+Solid components and `kai-*` elements ship in the same package and coexist. Compose the Solid components where you want control, drop a `<kai-chat>` shell where you want defaults.
 
 When you use a `kai-*` element inside Solid, bind arrays/objects with `prop:` (`prop:messages={messages()}`) so Solid sets a DOM property instead of stringifying, and listen with `on:` (`on:kai-submit`).

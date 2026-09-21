@@ -342,7 +342,7 @@ const SELF_TEST_CASES = [
   { name: 'installation.mdx as it shipped (0.20.1, in the advisory range)', expect: true, vuln: true,
     text: 'Pin an exact version: `https://cdn.jsdelivr.net/npm/@kitn.ai/ui@0.20.1/dist/kai.es.js`.' },
   { name: 'loading.mdx as it shipped (0.20.1 autoloader)', expect: true, vuln: true,
-    text: 'Pin an exact version: `https://cdn.jsdelivr.net/npm/@kitn.ai/ui@0.20.1/dist/elements/autoloader.js`.' },
+    text: 'Pin an exact version: `https://cdn.jsdelivr.net/npm/@kitn.ai/ui@0.20.1/dist/web-components/autoloader.js`.' },
   { name: 'getting-started.mdx as it shipped (bare specifier, no host)', expect: true, vuln: true,
     text: 'Pin an exact version in production (e.g. `@kitn.ai/ui@0.20.1/dist/...`).' },
   { name: 'README.md as it shipped (0.16.0, the npm landing page)', expect: true, vuln: true,
@@ -359,7 +359,7 @@ const SELF_TEST_CASES = [
     text: 'import "https://cdn.jsdelivr.net/npm/@kitn.ai/ui@0.26.0/dist/kai.es.js";' },
   // -- placeholders are honest and must not be rewritten into a false pin --
   { name: 'the MCP debug tool placeholder @<version>', expect: false,
-    text: '<script type="module" src="https://cdn.jsdelivr.net/npm/@kitn.ai/ui@<version>/dist/elements/autoloader.js"></script>' },
+    text: '<script type="module" src="https://cdn.jsdelivr.net/npm/@kitn.ai/ui@<version>/dist/web-components/autoloader.js"></script>' },
   { name: 'the create-kai README placeholder @<pinned>', expect: false,
     text: 'npm pack @kitn.ai/ui@<pinned> && tar -xzf kitn.ai-ui-<pinned>.tgz' },
   { name: 'an unpinned CDN URL is a different question and not this rule', expect: false,
@@ -414,7 +414,7 @@ const ORDER_SELF_TEST_CASES = [
   { name: 'a FROZEN advisory floor before the pin would be rewritten instead of it', ok: false,
     text: 'Pin `0.14.1` or newer, e.g. `@kitn.ai/ui@0.25.0/dist/kai.es.js`.' },
   { name: 'two pins on one line: the second is unreachable, only the first moves', ok: false,
-    text: '`@kitn.ai/ui@0.25.0/dist/kai.es.js` or `@kitn.ai/ui@0.25.0/dist/elements/autoloader.js`',
+    text: '`@kitn.ai/ui@0.25.0/dist/kai.es.js` or `@kitn.ai/ui@0.25.0/dist/web-components/autoloader.js`',
     which: 1 },
 ];
 

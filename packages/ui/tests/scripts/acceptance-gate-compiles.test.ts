@@ -126,10 +126,10 @@ describe('an external gate cannot excuse itself, and nobody can excuse it for it
   it('still lets an EVALUATOR-run gate report vacuity, which the external ones may not', () => {
     const r = scoreRun({
       scenario: S1,
-      gates: gateAll('S1', { 'elements-exist': { passed: true, vacuous: true, filesSeen: 1, unread: [] } }),
+      gates: gateAll('S1', { 'web-components-exist': { passed: true, vacuous: true, filesSeen: 1, unread: [] } }),
       judged: judgeAll('S1', 10),
     });
-    expect(r.notApplicable).toContain('elements-exist');
+    expect(r.notApplicable).toContain('web-components-exist');
     expect(r.notApplicable).not.toContain('compiles');
   });
 

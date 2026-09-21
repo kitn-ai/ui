@@ -3,7 +3,7 @@
  * =====================================
  * The reference provider's vanilla-DOM card renderers, extracted so they can be
  * reused both by the live cross-origin provider runtime (provider-entry.ts) AND by
- * the static Storybook docs (src/elements/remote.stories.tsx), which render the
+ * the static Storybook docs (src/web-components/remote.stories.tsx), which render the
  * card content directly when no second origin is available.
  *
  * Demonstrates BOTH canonical card interaction patterns:
@@ -21,7 +21,7 @@
 import type { RemoteCardRenderer } from '../../../packages/ui/src/remote/provider';
 
 // Register the <kai-form> custom element (side-effect import).
-import '../../../packages/ui/src/elements/form';
+import '../../../packages/ui/src/web-components/form/form';
 
 // ── Renderer 1: form — interactive, data-collecting ───────────────────────────
 //

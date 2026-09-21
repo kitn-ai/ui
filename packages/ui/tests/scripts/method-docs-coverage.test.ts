@@ -2,7 +2,7 @@
  * GUARD — every imperative method an element exposes must be RENDERED in the
  * documentation artifacts, not merely be callable.
  *
- * `element-methods-typed.test.ts` proves the exposed methods reach the generated
+ * `methods-typed.test.ts` proves the exposed methods reach the generated
  * TYPES. That left them discoverable only by reading source: the generators wrote
  * props and events into `llms-full.txt`, `docs/web-components.md` and the `kai`
  * MCP's `component_reference`, and dropped `el.methods` on the floor in all three.
@@ -13,19 +13,19 @@
  * --------------------------------
  * "some methods rendered" and "all of them rendered" are different facts and only
  * the second is the deliverable, so every artifact is checked with SET EQUALITY per
- * element against `element-meta.json` — the same model the generators consume —
+ * web component against `web-component-meta.json` — the same model the generators consume —
  * and then against the total. Nothing here restates a count: bump the model and
- * the expectation moves with it. A generator that renders one element's methods,
- * or renders a method under the wrong element, fails.
+ * the expectation moves with it. A generator that renders one web component's methods,
+ * or renders a method under the wrong web component, fails.
  *
- * The floors below (>30 elements, >100 methods) exist because every loop in this
+ * The floors below (>30 web components, >100 methods) exist because every loop in this
  * file iterates the model: a model that collapsed to two methods would make the
  * whole file pass while covering nothing.
  *
  * AND WHY THAT WAS STILL NOT ENOUGH
  * ---------------------------------
  * Every check described above runs OVER THE MODEL, so none of them can see a method
- * the extractor never put in it. `gen-element-api.mjs` read only
+ * the extractor never put in it. `gen-web-component-api.mjs` read only
  * `PropertyAssignment` members out of `expose({ … })`, so the three written in
  * SHORTHAND form (`expose({ clear })`) entered nothing: `kai-search.clear`,
  * `kai-editable-label.commit` and `kai-editable-label.cancel` were callable, unit
@@ -39,7 +39,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { basename, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 
@@ -52,36 +52,45 @@ interface MethodMeta {
   returns: string;
   description: string;
 }
-interface ElementMeta {
+interface WebComponentMeta {
   tag: string;
   methods?: MethodMeta[];
 }
 
-const meta: ElementMeta[] = JSON.parse(
-  readFileSync(resolve(pkgRoot, 'src/elements/element-meta.json'), 'utf8'),
+const meta: WebComponentMeta[] = JSON.parse(
+  readFileSync(resolve(pkgRoot, 'src/web-components/web-component-meta.json'), 'utf8'),
 );
 const withMethods = meta.filter((e) => e.methods?.length);
 const TOTAL_METHODS = withMethods.reduce((n, e) => n + e.methods!.length, 0);
 
 /** Names the model says this element exposes, sorted. */
-const expectedFor = (el: ElementMeta) => [...el.methods!.map((m) => m.name)].sort();
+const expectedFor = (el: WebComponentMeta) => [...el.methods!.map((m) => m.name)].sort();
 
 // ─────────────────────────────────────────────────────────────────────────────
 // The model itself, re-derived from source.
 //
 // An INDEPENDENT parse of the facades — deliberately not the generator's, and
-// deliberately not `element-meta.json` — so "the extractor missed a member" is
+// deliberately not `web-component-meta.json` — so "the extractor missed a member" is
 // something a check can actually see. Both numbers below are derived: the helper's
 // method names come from parsing the helper, not from a literal 3, and the totals
 // come from counting, not from a literal 131.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const ELEMENTS_DIR = resolve(pkgRoot, 'src/elements');
-/** Same file set the generator walks (see gen-element-api.mjs). */
+const WEB_COMPONENTS_DIR = resolve(pkgRoot, 'src/web-components');
+/** Same file set the generator walks (see gen-web-component-api.mjs). */
 const SKIP = new Set(['define.tsx', 'register.ts', 'register-impl.ts', 'css.ts', 'chat-types.ts', 'default-input.tsx']);
-const facadeFiles = readdirSync(ELEMENTS_DIR)
-  .filter((f) => (f.endsWith('.tsx') || f.endsWith('.ts')) && !f.endsWith('.stories.tsx') && !SKIP.has(f))
-  .map((f) => resolve(ELEMENTS_DIR, f));
+const walkFacades = (dir: string, out: string[] = []): string[] => {
+  // RECURSIVE: family folders (2026-09-19). A flat readdir found nothing, so this
+  // guard parsed an empty file set and every count below was a count of zero.
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = resolve(dir, entry.name);
+    if (entry.isDirectory()) { walkFacades(full, out); continue; }
+    if (/\.(tsx|ts)$/.test(entry.name)) out.push(full);
+  }
+  return out;
+};
+const facadeFiles = walkFacades(WEB_COMPONENTS_DIR)
+  .filter((f) => !/\.(stories|test)\.tsx?$/.test(f) && !SKIP.has(basename(f)));
 
 const parse = (file: string) =>
   ts.createSourceFile(file, readFileSync(file, 'utf8'), ts.ScriptTarget.ESNext, true, ts.ScriptKind.TSX);
@@ -110,7 +119,7 @@ function exposedNames(scope: ts.Node): string[] {
 /** The names `wireDisclosure()` contributes, read off the helper's own expose
  *  literal so this never restates them. */
 const HELPER_NAMES: Record<string, string[]> = {
-  wireDisclosure: exposedNames(parse(resolve(ELEMENTS_DIR, 'disclosure.ts'))),
+  wireDisclosure: exposedNames(parse(resolve(WEB_COMPONENTS_DIR, 'disclosure/disclosure.ts'))),
 };
 
 /** How many times `name(` is called under `scope`. */
@@ -163,7 +172,7 @@ describe('every method the facades expose reaches the model', () => {
     expect(SOURCE_TOTAL).toBeGreaterThan(100);
   });
 
-  it('element-meta.json lists exactly the methods the source exposes, per element', () => {
+  it('web-component-meta.json lists exactly the methods the source exposes, per element', () => {
     const modelMethods = new Map(meta.map((e) => [e.tag, [...(e.methods ?? []).map((m) => m.name)].sort()]));
     const mismatched: string[] = [];
     for (const [tag, names] of SOURCE_METHODS) {
@@ -217,7 +226,7 @@ describe('the method model is big enough for the loops below to mean anything', 
  * the method exists and then tells the reader nothing about what calling it does.
  *
  * The description is read from the JSDoc on the `expose({ ... })` property by
- * gen-element-api.mjs, so this fails the moment a method is exposed without one.
+ * gen-web-component-api.mjs, so this fails the moment a method is exposed without one.
  */
 describe('every exposed method carries a doc comment', () => {
   it('no method renders with an empty description', () => {
@@ -297,9 +306,9 @@ interface MarkdownArtifact {
   path: string;
   heading: RegExp;
   sectionFor: (text: string, tag: string) => string | undefined;
-  /** How many of the model's elements this artifact is expected to document. */
+  /** How many of the model's web components this artifact is expected to document. */
   minCoveredElements: number;
-  /** Element the per-method spot check runs against. Must be one it documents. */
+  /** Web component the per-method spot check runs against. Must be one it documents. */
   spot: string;
   optional?: boolean;
 }
@@ -322,8 +331,8 @@ const MARKDOWN_ARTIFACTS: MarkdownArtifact[] = [
     // NOT fully generated. This file is hand-written prose with generated tables
     // spliced between `<!-- spec:TAG -->` markers, and the generator only splices
     // where an author already wrote a `### \`<kai-tag>\`` heading — 40 of the 80
-    // elements today, `kai-resizable` not among them. So coverage is measured over
-    // the elements this file DOCUMENTS, not over the whole model; widening it is a
+    // web components today, `kai-resizable` not among them. So coverage is measured over
+    // the web components this file DOCUMENTS, not over the whole model; widening it is a
     // docs-authoring job, not a generator one. The floor keeps that gap from
     // quietly growing.
     label: 'docs/web-components.md',
@@ -339,7 +348,7 @@ for (const artifact of MARKDOWN_ARTIFACTS) {
   describe(`${artifact.label} documents every exposed method it covers`, () => {
     const present = () => !artifact.optional || existsSync(artifact.path);
     const read = () => readFileSync(artifact.path, 'utf8');
-    /** The elements this artifact documents at all. */
+    /** The web components this artifact documents at all. */
     const covered = (text: string) => meta.filter((e) => artifact.sectionFor(text, e.tag) !== undefined);
 
     it(`renders ${artifact.spot}'s methods with their signatures`, () => {
@@ -408,10 +417,10 @@ describe('the docs site renders a MethodTable', () => {
   const pagesDir = resolve(repoRoot, 'apps/docs/src/content/docs/components');
   const tagsWithMethods = new Set(withMethods.map((e) => e.tag));
 
-  it('the component exists and is driven by element-meta.json', () => {
+  it('the component exists and is driven by web-component-meta.json', () => {
     expect(existsSync(componentPath), 'apps/docs/src/components/MethodTable.astro').toBe(true);
     const src = readFileSync(componentPath, 'utf8');
-    expect(src).toContain('element-meta.json');
+    expect(src).toContain('web-component-meta.json');
     expect(src).toMatch(/\bmethods\b/);
   });
 
@@ -421,7 +430,7 @@ describe('the docs site renders a MethodTable', () => {
 
     for (const file of readdirSync(pagesDir).filter((f) => f.endsWith('.mdx'))) {
       const src = readFileSync(resolve(pagesDir, file), 'utf8');
-      // The elements this page already documents through the other generated tables.
+      // The web components this page already documents through the other generated tables.
       const tabled = new Set(
         [...src.matchAll(/(?:PropTable|EventTable|SlotTable|PartTable)[^>]*tag="(kai-[a-z0-9-]+)"/g)].map(
           (m) => m[1],

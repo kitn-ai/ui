@@ -1,0 +1,34 @@
+.density {
+  display: inline-flex;
+  gap: 4px;
+  padding: 5px;
+  border-radius: 999px;
+}
+.density-opt {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--body-font);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 9px 15px;
+  border-radius: 999px;
+  transition: color var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease),
+    background var(--t-fast) var(--ease);
+}
+.density-opt:hover { color: var(--ink2) }
+.density-opt[aria-checked='true'] {
+  color: var(--ink);
+  background: var(--bg);
+  box-shadow: var(--raise-sm);
+}
+@media (max-width: 640px) {
+  .density-opt span { display: none }
+  .density-opt { padding: 10px 12px }
+}

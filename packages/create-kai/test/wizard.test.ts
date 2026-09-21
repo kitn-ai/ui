@@ -396,7 +396,7 @@ describe('emitConstruct: writes the construct file to disk', () => {
     const { file, devCommand } = await emitConstruct(dir, ANSWERS);
 
     expect(path.basename(file)).toBe('kai-widget-app.construct.json');
-    expect(devCommand).toContain('npx @kitn.ai/ui dev');
+    expect(devCommand).toContain('npx @kitn.ai/kai dev');
     expect(devCommand).toContain(path.basename(file));
   });
 
@@ -419,7 +419,7 @@ describe('emitConstruct: writes the construct file to disk', () => {
   // The actual bug fix round 3 exists for: `create-kai myapp --shape widget
   // --yes` used to write `"name": "myapp"` into the construct — a valid
   // PROJECT name, but not a valid custom-element TAG (no hyphen) — so the
-  // tool's own printed next step (`npx @kitn.ai/ui dev ...`) rejected the
+  // tool's own printed next step (`npx @kitn.ai/kai dev ...`) rejected the
   // file it had just created.
   it('derives a schema-valid tag when the project name has no hyphen, and reports it as constructName', async () => {
     const dir = path.join(root, 'myapp');
@@ -586,7 +586,7 @@ describe('runDevPreview: a live-preview spawn failure decides loudly, not silent
 
   it('a spawn error (e.g. ENOENT) resolves ok:false with the error message, never rejects', async () => {
     const { spawnFn, fireError } = fakeSpawn();
-    const outcomePromise = runDevPreview('npx @kitn.ai/ui dev app.construct.json', '/tmp/app', spawnFn);
+    const outcomePromise = runDevPreview('npx @kitn.ai/kai dev app.construct.json', '/tmp/app', spawnFn);
     fireError(new Error('spawn npx ENOENT'));
     const outcome = await outcomePromise;
     expect(outcome.ok).toBe(false);
@@ -595,7 +595,7 @@ describe('runDevPreview: a live-preview spawn failure decides loudly, not silent
 
   it('the child exiting on its own with a nonzero code resolves ok:false naming the code', async () => {
     const { spawnFn, fireClose } = fakeSpawn();
-    const outcomePromise = runDevPreview('npx @kitn.ai/ui dev app.construct.json', '/tmp/app', spawnFn);
+    const outcomePromise = runDevPreview('npx @kitn.ai/kai dev app.construct.json', '/tmp/app', spawnFn);
     fireClose(1, null);
     const outcome = await outcomePromise;
     expect(outcome.ok).toBe(false);
@@ -604,7 +604,7 @@ describe('runDevPreview: a live-preview spawn failure decides loudly, not silent
 
   it('a clean exit (code 0) resolves ok:true with no message', async () => {
     const { spawnFn, fireClose } = fakeSpawn();
-    const outcomePromise = runDevPreview('npx @kitn.ai/ui dev app.construct.json', '/tmp/app', spawnFn);
+    const outcomePromise = runDevPreview('npx @kitn.ai/kai dev app.construct.json', '/tmp/app', spawnFn);
     fireClose(0, null);
     const outcome = await outcomePromise;
     expect(outcome).toEqual({ ok: true, message: null });
@@ -612,7 +612,7 @@ describe('runDevPreview: a live-preview spawn failure decides loudly, not silent
 
   it('a signal-terminated end (Ctrl-C: code null) resolves ok:true — the normal way to stop a live preview, not a failure', async () => {
     const { spawnFn, fireClose } = fakeSpawn();
-    const outcomePromise = runDevPreview('npx @kitn.ai/ui dev app.construct.json', '/tmp/app', spawnFn);
+    const outcomePromise = runDevPreview('npx @kitn.ai/kai dev app.construct.json', '/tmp/app', spawnFn);
     fireClose(null, 'SIGINT');
     const outcome = await outcomePromise;
     expect(outcome).toEqual({ ok: true, message: null });

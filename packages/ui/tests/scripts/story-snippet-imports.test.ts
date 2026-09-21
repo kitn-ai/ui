@@ -27,9 +27,9 @@ const ENTRIES: Record<string, string> = {
   '@kitn.ai/ui/solid': 'src/solid.ts',
   '@kitn.ai/ui/state': 'src/state/index.ts',
   '@kitn.ai/ui/wire': 'src/wire/index.ts',
-  // The `./elements` TYPES entry. Its dist twin (dist/elements.d.ts) is generated
-  // from this same file by scripts/gen-element-types.mjs, so the two cannot differ.
-  '@kitn.ai/ui/elements': 'src/elements/element-types.d.ts',
+  // The `./web-components` TYPES entry. Its dist twin (dist/web-components.d.ts) is generated
+  // from this same file by scripts/gen-web-component-types.mjs, so the two cannot differ.
+  '@kitn.ai/ui/web-components': 'src/web-components/web-component-types.d.ts',
 };
 
 const tsconfig = ts.parseJsonConfigFileContent(

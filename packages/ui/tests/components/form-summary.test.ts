@@ -1,6 +1,6 @@
 import { test, expect } from 'vitest';
-import { summarizeForm, formatFieldValue } from '../../src/components/form';
-import type { FormDefinition } from '../../src/components/form';
+import { summarizeForm, formatFieldValue } from '../../src/components/form/form';
+import type { FormDefinition } from '../../src/components/form/form';
 
 const DEF: FormDefinition = {
   type: 'object',

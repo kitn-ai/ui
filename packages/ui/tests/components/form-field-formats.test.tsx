@@ -20,7 +20,7 @@
 import { describe, it, expect, afterEach, vi } from 'vitest';
 import '@testing-library/jest-dom/vitest';
 import { render, cleanup } from '@solidjs/testing-library';
-import { Form, resolveFieldMask, type FormDefinition, type FormField } from '../../src/components/form';
+import { Form, resolveFieldMask, type FormDefinition, type FormField } from '../../src/components/form/form';
 import type { FieldSemanticType } from '../../src/primitives/field-semantics';
 import { FIELD_SEMANTIC_TYPES } from '../../src/primitives/field-semantics';
 

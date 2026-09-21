@@ -31,7 +31,7 @@
  * emitted text or the `conversations` property: the property holds the right
  * numbers and the screen holds the old ones. So the load-bearing assertions here
  * are read off the rail's own SHADOW DOM — the count and the title as rendered —
- * never off the array that was assigned to it. `src/components/reactivity-contract.test.tsx`
+ * never off the array that was assigned to it. `src/components/reactivity-contract/reactivity-contract.test.tsx`
  * pins the same invariant for the component; this pins that the emitted code obeys it.
  *
  * WHY `mock`. The turn has to complete for the row to advance, and the mock
@@ -68,8 +68,8 @@ const SEP = '// ── src/main.ts ──';
 
 /**
  * The package's own exports map, applied by hand. Same rewriter as the other
- * guards; `@kitn.ai/ui/elements` resolves to the register-ALL entry point because
- * this surface mounts two tags, and `src/elements/chat` would leave
+ * guards; `@kitn.ai/ui/web-components` resolves to the register-ALL entry point because
+ * this surface mounts two tags, and `src/web-components/chat/chat` would leave
  * `<kai-conversations>` an unupgraded unknown element with no shadow root — which
  * is precisely where every assertion below reads from.
  */
@@ -80,7 +80,7 @@ function rewrite(code: string): string {
     .filter((l) => !l.startsWith('import type '))
     .map((l) =>
       l
-        .replace("'@kitn.ai/ui/elements'", `'${PKG}/src/elements/register-impl'`)
+        .replace("'@kitn.ai/ui/web-components'", `'${PKG}/src/web-components/register/register-impl'`)
         .replace("'@kitn.ai/ui/state'", `'${PKG}/src/state'`)
         .replace("'@kitn.ai/ui/wire'", `'${PKG}/src/wire'`),
     )

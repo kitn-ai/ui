@@ -33,7 +33,7 @@ Key security properties baked in — no config needed:
 
 ## Host side: wire up `<kai-remote>`
 
-Register the elements and give the component its three required pieces — `provider-origin`, `src`, and the `envelope` property:
+Register the web components and give the component its three required pieces — `provider-origin`, `src`, and the `envelope` property:
 
 ```html
 <kai-remote
@@ -42,7 +42,7 @@ Register the elements and give the component its three required pieces — `prov
 ></kai-remote>
 
 <script type="module">
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
 
   await customElements.whenDefined('kai-remote');
 
@@ -89,7 +89,7 @@ remote.policy = {
 When the model streams a mix of built-in and remote cards, use `<kai-cards>` with a `types` override that maps the remote card type to `'kai-remote'`:
 
 ```js
-import '@kitn.ai/ui/elements';
+import '@kitn.ai/ui/web-components';
 
 await customElements.whenDefined('kai-cards');
 

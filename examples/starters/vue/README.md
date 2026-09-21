@@ -1,6 +1,6 @@
 # Vue example — chat workspace, composed by hand
 
-A small chat **workspace assembled from `@kitn.ai/ui`'s individual elements** — a
+A small chat **workspace assembled from `@kitn.ai/ui`'s individual web components** — a
 `<kai-conversations>` sidebar, a `<kai-thread>` of messages, and a
 `<kai-prompt-input>` composer — wired together with plain Vue refs. Non-React
 frameworks consume the **raw `kai-*` web components directly** (no wrappers), so
@@ -25,8 +25,8 @@ Consuming Shadow-DOM custom elements from Vue comes down to four things:
 - **Tell Vue the tags are custom elements.** `vite.config.ts` sets
   `isCustomElement: (tag) => tag.startsWith('kai-')` so Vue passes props/events
   straight to the DOM instead of trying to resolve `kai-*` as Vue components.
-- **Register before mount.** `src/main.ts` does `import '@kitn.ai/ui/elements'`
-  (registers the elements) and `import '@kitn.ai/ui/theme.tokens.css'` (the plain
+- **Register before mount.** `src/main.ts` does `import '@kitn.ai/ui/web-components'`
+  (registers the web components) and `import '@kitn.ai/ui/theme.tokens.css'` (the plain
   `--color-*` tokens the shell uses) **before** `createApp(App).mount(...)`.
 - **Array/object props are DOM properties, not attributes.** Use the `.prop`
   modifier for rich values: `:messages.prop`, `:conversations.prop`,
@@ -56,7 +56,7 @@ Consuming Shadow-DOM custom elements from Vue comes down to four things:
 
 ## How it works
 
-- `src/App.vue` composes the elements by hand: `<kai-resizable>` for the split,
+- `src/App.vue` composes the web components by hand: `<kai-resizable>` for the split,
   `<kai-conversations>` (via `Sidebar.vue`), `<kai-thread>` (via `ThreadView.vue`),
   and `<kai-prompt-input>` (via `Composer.vue`).
 - `src/composables/useChat.ts` owns the message array + streaming (`append`,
@@ -78,7 +78,7 @@ like a published consumer — no aliases).
 ## Run it
 
 From the repo root, build the kit once so its `dist/` exists (the example imports
-the compiled `@kitn.ai/ui/elements` + `@kitn.ai/ui/theme.tokens.css`), then start
+the compiled `@kitn.ai/ui/web-components` + `@kitn.ai/ui/theme.tokens.css`), then start
 the example:
 
 ```bash

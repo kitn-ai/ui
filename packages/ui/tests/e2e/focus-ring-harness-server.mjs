@@ -5,7 +5,7 @@
 // Storybook and the docs site both `@import "tailwindcss"` at document level,
 // which registers every `--tw-*` custom property globally and makes shadow-root
 // rings paint — that is precisely why this defect was invisible for so long.
-// Do NOT add a stylesheet link here, and do not serve `src/elements/compiled.css`
+// Do NOT add a stylesheet link here, and do not serve `src/web-components/compiled.css`
 // to the document: the guard asserts the absence of both and will fail loudly.
 import http from 'node:http';
 import fs from 'node:fs';
@@ -31,7 +31,7 @@ const MIME = {
  * away the bundler's re-minification, which Node cannot do.
  */
 function assertInputsExist() {
-  const cssPath = path.join(PKG, 'src/elements/compiled.css');
+  const cssPath = path.join(PKG, 'src/web-components/compiled.css');
   if (!fs.existsSync(cssPath)) {
     throw new Error(
       `focus-ring harness: ${cssPath} is missing.\n` +

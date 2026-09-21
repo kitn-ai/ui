@@ -9,7 +9,7 @@ import { z } from 'zod';
  * `request.params.arguments` went straight to the handler. The observed cost
  * (ladder spec candidate A, twice reproduced): `component_reference` called
  * with `{ element: "kai-chat" }` instead of `{ name: "kai-chat" }` silently
- * returned the full element index with `isError` unset — an answer to a
+ * returned the full index of web components with `isError` unset — an answer to a
  * question nobody asked, indistinguishable from success. Decide loudly.
  *
  * Scope: unknown keys and missing required keys — the two failures the declared

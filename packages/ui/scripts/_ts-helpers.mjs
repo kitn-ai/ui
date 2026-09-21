@@ -1,5 +1,5 @@
 // Shared TypeScript-compiler helpers for the API extractors
-// (gen-element-api.mjs for the web-component facades). It walks a `ts.Program`,
+// (gen-web-component-api.mjs for the web-component facades). It walks a `ts.Program`,
 // reads a Props/Events type, and renders members to a self-contained,
 // fully-expanded display string.
 //
@@ -8,8 +8,8 @@
 
 import ts from 'typescript';
 
-// Friendly element name shared by the React/Solid wrappers, story titles, and the
-// API tab. KaiArtifactElement -> Artifact. All element tags start `kai-`, so the
+// Friendly web-component name shared by the React/Solid wrappers, story titles, and the
+// API tab. KaiArtifactElement -> Artifact. All web-component tags start `kai-`, so the
 // className always starts `Kai`.
 export const displayNameFromClass = (className) =>
   className.replace(/^Kai/, '').replace(/Element$/, '');
@@ -18,7 +18,7 @@ export const displayNameFromClass = (className) =>
  * A property name as it must be written INSIDE an emitted type literal.
  *
  * Bare when it is a valid JS identifier, quoted otherwise. Not cosmetic: these
- * strings are pasted into `src/elements/element-types.d.ts` and
+ * strings are pasted into `src/web-components/web-component-types.d.ts` and
  * `frameworks/react/index.tsx`, and a hyphen is a MINUS SIGN to the parser, so an
  * unquoted `x-kai-widget?: 'textarea' | …` is not a loosely-typed member — it is a
  * syntax error that takes the rest of the file with it. Measured when
@@ -49,8 +49,8 @@ export const propKey = (name) => (/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(name) ? name
  *   array   `() => void[]`                          parses, and means the WRONG thing
  *
  * The first shipped: `kai-slider`'s `valueLabel` is the kit's first function-in-union
- * prop, and it put a syntax error into `src/elements/element-types.d.ts` AND into
- * `dist/elements.d.ts`, which is what a TypeScript consumer of the published package
+ * prop, and it put a syntax error into `src/web-components/web-component-types.d.ts` AND into
+ * `dist/web-components.d.ts`, which is what a TypeScript consumer of the published package
  * resolves. The second has never shipped only because nothing renders an array of
  * functions yet.
  *
@@ -103,7 +103,7 @@ export const bindsLoosely = (rendered) => {
  *
  * The companion to {@link bindsLoosely}, and needed for the same reason: whether a
  * type needs parens is a property of the POSITION it sits in, and some consumers move
- * it to a different position afterwards. `clean()` in gen-element-types.mjs strips the
+ * it to a different position afterwards. `clean()` in gen-web-component-types.mjs strips the
  * `undefined` arm from an optional prop before writing it into the `.d.ts`, so
  * `undefined | ((audio: Blob) => Promise<string>)` becomes a lone
  * `((audio: Blob) => Promise<string>)` — correct, but wearing parens it no longer
@@ -141,7 +141,7 @@ export const unwrapOuterParens = (rendered) => {
  * Normalise a rendered type for EMISSION into a `.d.ts` / `.tsx` declaration.
  *
  * ONE OWNER, DELIBERATELY. This lived as two byte-identical copies, in
- * gen-element-types.mjs and gen-element-react.mjs, and the duplication cost exactly
+ * gen-web-component-types.mjs and gen-web-component-react.mjs, and the duplication cost exactly
  * what this repo says duplication costs: fixing the function-in-union bug in one copy
  * left `frameworks/react/index.tsx` — a SHIPPED consumer entry point — still emitting
  * `valueLabel?: boolean | (value: number) => string`, i.e. still TS1385. That second
@@ -184,7 +184,7 @@ export function createTsHelpers(program, checker, { importable = new Set() } = {
   // source. Adding one unrelated module (measured: a new module reached through
   // the first facade's props) re-ordered `ConfirmTone` from the authored
   // `"default" | "warning" | "danger"` to `"danger" | "default" | "warning"` in
-  // element-meta.json, element-types.d.ts, llms-full.txt and the React wrappers at
+  // web-component-meta.json, web-component-types.d.ts, llms-full.txt and the React wrappers at
   // once, and `ContextSeverity` the same way.
   //
   // Two real costs. `verify:generated` diffs a fresh run against the COMMITTED
@@ -392,7 +392,7 @@ export function createTsHelpers(program, checker, { importable = new Set() } = {
     // `.d.ts` this string is spliced into carries no imports at all, so that bare
     // name is an invisible TS2304 under the `skipLibCheck: true` every consumer
     // template sets (caught here only by
-    // tests/elements/element-types-lib-check.test.ts, which runs with it off).
+    // tests/web-components/types-lib-check.test.ts, which runs with it off).
     // `getProperties().length === 0` keeps this from misfiring on an ordinary
     // object that also happens to carry call signatures (none do today).
     const callSignatures = type.getCallSignatures();
@@ -468,7 +468,7 @@ export function createTsHelpers(program, checker, { importable = new Set() } = {
     // parameter, defaults included). Reconstructing unconditionally regressed
     // exactly that case — caught in review, not by any test, because nothing
     // here asserts the FULL rendered string for every prop, only that it
-    // compiles self-contained (element-types-lib-check.test.ts), and
+    // compiles self-contained (types-lib-check.test.ts), and
     // `AsyncIterable<string, any, any>` still compiles fine. So the guard is
     // "does any type argument, anywhere in its own expansion, name a
     // non-lib type" -- checked with `needsSelfContainment` below -- not "is
@@ -539,7 +539,7 @@ export function createTsHelpers(program, checker, { importable = new Set() } = {
   // is applied to the symbol BEFORE mapping so callers can drop inherited
   // members (e.g. the DOM/JSX attribute flood on components that extend
   // JSX.HTMLAttributes). Returns { name, type, optional, scalar, description }
-  // (+ `typeName` for named object/array types) — element-meta.json is
+  // (+ `typeName` for named object/array types) — web-component-meta.json is
   // serialized straight from it.
   const memberInfo = (sym, fallbackDecl) => {
     const decl = sym.valueDeclaration ?? sym.declarations?.[0] ?? fallbackDecl;

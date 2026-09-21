@@ -1,0 +1,42 @@
+.site-footer {
+  border-top: 1px solid var(--line);
+  margin-top: 40px;
+  padding: 52px 0 64px;
+}
+.site-footer-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr;
+  gap: 40px;
+  align-items: start;
+}
+.site-footer .wordmark {
+  font-family: var(--display-font);
+  font-size: 20px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--ink);
+  display: inline-block;
+  margin-bottom: 14px;
+}
+.site-footer-note,
+.site-footer-copy {
+  font-size: 12.5px;
+  color: var(--muted);
+  max-width: 30ch;
+  line-height: 1.7;
+}
+.site-footer nav { display: flex; flex-direction: column; gap: 8px }
+.site-footer nav .kicker { margin-bottom: 4px }
+.site-footer nav a {
+  font-size: 13px;
+  color: var(--ink2);
+  text-decoration: none;
+  width: fit-content;
+}
+.site-footer nav a:hover { color: var(--ink) }
+.site-footer .kicker { margin-bottom: 12px }
+
+@media (max-width: 720px) {
+  .site-footer-grid { grid-template-columns: 1fr; gap: 28px }
+}

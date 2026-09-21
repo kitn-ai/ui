@@ -28,7 +28,7 @@ non-image trigger height 16px vs image 60px.
 
 **Attempted fix (reverted — needs proper TDD):** make the trigger carry the flex
 layout instead of being a bare inline wrapper —
-- `src/ui/hover-card.tsx`: `HoverCardTrigger` accepts an optional `class` (additive).
+- `src/components/hover-card.tsx`: `HoverCardTrigger` accepts an optional `class` (additive).
 - `src/components/attachments.tsx`: `AttachmentHoverCardTrigger` forwards `class`.
 - `src/elements/attachments.tsx`: give the trigger
   `class="flex items-center gap-1.5"` (+ `w-full` for list) and drop the inner

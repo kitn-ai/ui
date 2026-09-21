@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { readAnthropicStream } from './read';
-import { ANTHROPIC_FIXTURES } from './fixtures/anthropic';
+import { ANTHROPIC_FIXTURES } from './fixtures/anthropic/index';
 import { nullSink, replayBytes } from './fixtures/replay';
-import type { MessagePart } from '../elements/chat-types';
+import type { MessagePart } from '../web-components/chat/chat-types';
 
 const read = (name: string) => {
   const sse = ANTHROPIC_FIXTURES[name];

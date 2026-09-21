@@ -34,7 +34,7 @@ import { README_FILE, renderReadme } from './readme';
 export function adaptRegistrationForBundler(js: string): string {
   return js.replace(
     /import\s+['"]@kitn\.ai\/ui\/autoloader['"];?/g,
-    `import '@kitn.ai/ui/elements'; // add form: register-all (the autoloader is CDN-only and 404s through a bundler)`,
+    `import '@kitn.ai/ui/web-components'; // add form: register-all (the autoloader is CDN-only and 404s through a bundler)`,
   );
 }
 
@@ -306,7 +306,7 @@ export function renderHtmlForm(block: Block, opts: HtmlFormOptions = {}): FormFi
     renderReadme(block, [
       `Open \`${pageEntry.path}\` through your dev server.`,
       '',
-      'The scripts import `@kitn.ai/ui/elements` by bare specifier, so serve this folder through your bundler rather than opening the file from disk.',
+      'The scripts import `@kitn.ai/ui/web-components` by bare specifier, so serve this folder through your bundler rather than opening the file from disk.',
     ]),
   );
 

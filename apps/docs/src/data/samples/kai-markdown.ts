@@ -20,7 +20,7 @@ Here is what you can do in minutes:
 > Tip: every element registers itself from a single import, so you only need one line to get started.
 
 \`\`\`ts
-import '@kitn.ai/ui/elements';
+import '@kitn.ai/ui/web-components';
 
 const md = document.querySelector('kai-markdown') as HTMLElement & { content: string };
 md.content = '### Hello\\nRenders **bold**, _italic_, and \`code\`.';
@@ -48,7 +48,7 @@ Ordered and unordered:
 ### Code fences
 
 \`\`\`ts
-import '@kitn.ai/ui/elements';
+import '@kitn.ai/ui/web-components';
 
 const md = document.querySelector('kai-markdown') as HTMLElement & { content: string };
 md.content = '### Hello\\nRenders **bold**, _italic_, and \\\`code\\\`.';

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { ANTHROPIC_FIXTURES } from './anthropic';
-import { OPENAI_FIXTURES } from './openai';
+import { ANTHROPIC_FIXTURES } from './anthropic/index';
+import { OPENAI_FIXTURES } from './openai/index';
 
 const REQUIRED = ['fixture', 'capture', 'provider', 'model', 'captured', 'request'];
 

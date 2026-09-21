@@ -10,7 +10,7 @@ import MenuCommandDemo from '../../../components/MenuCommandDemo.tsx';
 
 <MenuCommandDemo client:only="solid" />
 
-Both elements take their data as an `items` array set in JavaScript — arrays can't be HTML attributes — and report selections through non-bubbling `kai-*` events you listen for on the element itself. That's the whole contract.
+Both web components take their data as an `items` array set in JavaScript — arrays can't be HTML attributes — and report selections through non-bubbling `kai-*` events you listen for on the element itself. That's the whole contract.
 
 <Aside type="note" title="Which one to reach for">
 `<kai-menu>` when you have a fixed, shallow tree the user clicks through — actions, toggles, a submenu or two. `<kai-command>` when the list is long enough to search, or naturally falls into groups (people, files, commands). The menu opens from a trigger; the palette is a search box you place wherever you want.
@@ -18,11 +18,11 @@ Both elements take their data as an `items` array set in JavaScript — arrays c
 
 ## The + menu — kai-menu
 
-Register the elements once, then drop the menu in. The built-in trigger is driven by props: `trigger-icon` for an icon button, `trigger-label` for a text button, `trigger-icon-trailing` for a select-style chevron. `label` gives an icon-only trigger an accessible name.
+Register the web components once, then drop the menu in. The built-in trigger is driven by props: `trigger-icon` for an icon button, `trigger-label` for a text button, `trigger-icon-trailing` for a select-style chevron. `label` gives an icon-only trigger an accessible name.
 
 ```html
 <script type="module">
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
 </script>
 
 <kai-menu trigger-icon="plus" label="Add"></kai-menu>

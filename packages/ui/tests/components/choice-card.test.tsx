@@ -3,7 +3,7 @@
 // CustomEvent). Select a row then Submit to emit `action` (id + payload), single-shot,
 // empty → error, and the unified allowOther flow emits `__other__` with the typed text.
 import { render, fireEvent } from '@solidjs/testing-library';
-import { ChoiceCard } from '../../src/components/choice-card';
+import { ChoiceCard } from '../../src/components/choice-card/choice-card';
 import type { CardEvent, CardHost, CardContext } from '../../src/primitives/card-contract';
 
 afterEach(() => {

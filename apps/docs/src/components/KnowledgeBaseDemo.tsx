@@ -11,7 +11,7 @@ import { onMount, onCleanup } from 'solid-js';
 import type { ChatMessage } from '@kitn.ai/ui';
 import { loadKit } from './example/kit';
 
-// --- Shapes (verified against element-meta.json) -------------------------
+// --- Shapes (verified against web-component-meta.json) -------------------------
 
 // The kit's own message shape — an ordered `parts` array (text, reasoning, tool,
 // card, source, file), not a text-only stand-in. See @kitn.ai/ui's MessagePart.

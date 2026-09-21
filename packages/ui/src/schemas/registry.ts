@@ -10,7 +10,7 @@
 //
 // Two things did not work, and they are what this file is for.
 //
-// 1. NOTHING TIED THE TWO ENDS TOGETHER. `cardTypes` is a per-element PROP, so there
+// 1. NOTHING TIED THE TWO ENDS TOGETHER. `cardTypes` is a per-web-component PROP, so there
 //    is no ambient registry a backend route could consult. The developer wrote their
 //    card types on the client, wrote them again in the tool definitions, and nothing
 //    made the two agree. This is the fifth-copy problem the emit contract exists to

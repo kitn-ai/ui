@@ -15,7 +15,7 @@
 export type CaseMode = 'preserve' | 'upper' | 'lower';
 
 /** Why an edit was refused. Rejection decides LOUDLY: the stateful layer
- *  surfaces this on a callback and, on the element facade, as `kai-input-rejected`. */
+ *  surfaces this on a callback and, on the web-component facade, as `kai-input-rejected`. */
 export type RejectReason = 'full' | 'wrong-class' | 'over-capacity';
 
 /** A compiled `format` + aligned display guide. Fill positions are `#` `@` `*`;

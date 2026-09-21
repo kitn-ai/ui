@@ -34,7 +34,7 @@ All four props are plain HTML attributes — nothing to set in JavaScript:
 ```html
 <kai-file-upload accept="image/*" label="Drop an image to upload"></kai-file-upload>
 <script type="module">
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
   document.querySelector('kai-file-upload')
     .addEventListener('kai-files-added', (e) => console.log(e.detail.files));
 </script>

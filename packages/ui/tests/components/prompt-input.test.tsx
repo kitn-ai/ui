@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@solidjs/testing-library';
-import { PromptInput, PromptInputTextarea } from '../../src/components/prompt-input';
+import { PromptInput, PromptInputTextarea } from '../../src/components/prompt/prompt-input';
 
 describe('PromptInput', () => {
   it('renders textarea with placeholder', () => {

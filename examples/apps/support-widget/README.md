@@ -85,7 +85,7 @@ facade's documented migration notes):
 `server/chat-api.ts` is a Vite plugin with `apply: 'serve'`. It does not exist in
 a production build: `npm run build` emits a static site whose `/api/chat` 404s.
 Shipping this means writing the same endpoint on your own host — the kit's `kai`
-MCP scaffolder emits one per framework (`npx @kitn.ai/ui mcp`).
+MCP scaffolder emits one per framework (`npx @kitn.ai/kai mcp`).
 
 ## How this app was built
 
@@ -163,7 +163,7 @@ REFERENCE MATERIAL (read before writing code — the plan's rulings bind you to 
 
 WHAT TO BUILD:
 1. examples/apps/support-widget/ — package @kitn.ai/ui-app-support-widget, private, "@kitn.ai/ui": "workspace:*", scripts: dev/build/typecheck (build must run tsc or have separate typecheck per verify-starters' rules). Vanilla TS + Vite, no framework plugin. Entry pnpm-workspace.yaml gets 'examples/apps/*' (or the specific path — match the file's existing granularity).
-2. The widget: a host page (a plausible fake product page so the docked placement means something), a floating launcher button bottom-right, click opens a docked panel containing <kai-chat> (register via import '@kitn.ai/ui/elements'). Submit flow: kai-submit → POST /api/chat with the thread encoded via @kitn.ai/ui/wire's toOpenAIMessages → response parsed with readOpenAIStream → parts appended via @kitn.ai/ui/state helpers → messages property set with a fresh array AND fresh changed-item objects. No conversation history persistence, no sidebar. Keep it SMALL — this is the smallest real surface, not a showcase.
+2. The widget: a host page (a plausible fake product page so the docked placement means something), a floating launcher button bottom-right, click opens a docked panel containing <kai-chat> (register via import '@kitn.ai/ui/web-components'). Submit flow: kai-submit → POST /api/chat with the thread encoded via @kitn.ai/ui/wire's toOpenAIMessages → response parsed with readOpenAIStream → parts appended via @kitn.ai/ui/state helpers → messages property set with a fresh array AND fresh changed-item objects. No conversation history persistence, no sidebar. Keep it SMALL — this is the smallest real surface, not a showcase.
 3. Dev middleware: a vite dev-server middleware (or tiny node server the dev script runs — prefer vite middleware, it's the route-node pattern CI already typechecks in the scaffolder) serving POST /api/chat. No OPENROUTER_API_KEY in env → stream createMockResponder frames (the kit's own mock, self-identifying). Key present → proxy to OpenRouter (model: pick a cheap default, e.g. anthropic/claude-haiku via openrouter, configurable via OPENROUTER_MODEL). .env.example documents both, with the spike's never-VITE_ warning. The client code is IDENTICAL in both modes — the seam is server-side.
 4. verify-starters.mjs: extend enumeration to also walk examples/apps/ with the same classifier and hard-fail semantics (derived, no hand-list). The script's existing conventions bind you. WATCH IT FAIL FIRST: point it at a scratch fixture app with a broken/missing build script and see the hard failure name it, then green on the real app. Do not weaken any existing behavior — all 8 starters must still pass classification (you may run the full verify:starters once at the end; it builds 8 apps, expect minutes).
 5. A short README.md in the app dir: what it is (rung 1 of the iteration ladder), how to run mock vs real, pointer to the plan.

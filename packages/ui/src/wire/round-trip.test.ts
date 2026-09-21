@@ -21,10 +21,10 @@ import {
   type AnthropicContentBlock,
 } from './encode';
 import { applyToolOutput } from './sink-helpers';
-import { ANTHROPIC_FIXTURES } from './fixtures/anthropic';
+import { ANTHROPIC_FIXTURES } from './fixtures/anthropic/index';
 import { replayBytes } from './fixtures/replay';
 import { createAssistantStream, type AssistantStream, type SetMessages } from '../state/stream';
-import type { ChatMessage } from '../elements/chat-types';
+import type { ChatMessage } from '../web-components/chat/chat-types';
 
 /** Drive a REAL AssistantStream from a captured fixture and hand back the
  *  resulting messages. No hand-built parts anywhere in this file.

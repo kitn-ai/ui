@@ -1,6 +1,6 @@
 # Angular example — chat workspace, composed by hand
 
-A small chat **workspace assembled from `@kitn.ai/ui`'s individual elements** — a
+A small chat **workspace assembled from `@kitn.ai/ui`'s individual web components** — a
 `<kai-conversations>` sidebar, a `<kai-thread>` of messages, and a
 `<kai-prompt-input>` composer — wired together with plain Angular signals. Non-React
 frameworks consume the **raw `kai-*` web components directly** (no wrappers), so this
@@ -26,9 +26,9 @@ Consuming Shadow-DOM custom elements from Angular comes down to five things:
   uses `kai-*` tags adds `schemas: [CUSTOM_ELEMENTS_SCHEMA]`, so Angular passes
   property/event bindings straight to the DOM instead of erroring on unknown
   elements.
-- **Register before bootstrap.** `src/main.ts` does `import '@kitn.ai/ui/elements'`
+- **Register before bootstrap.** `src/main.ts` does `import '@kitn.ai/ui/web-components'`
   and then gates `bootstrapApplication` on `customElements.whenDefined(...)` for
-  every tag used. The elements register **asynchronously**, and Angular sets
+  every tag used. The web components register **asynchronously**, and Angular sets
   array/object DOM properties the moment it stamps a tag — a write before upgrade is
   clobbered by the element's empty defaults on upgrade. The theme tokens
   (`@kitn.ai/ui/theme.tokens.css`) load as a global stylesheet via `angular.json`
@@ -62,7 +62,7 @@ Consuming Shadow-DOM custom elements from Angular comes down to five things:
 
 ## How it works
 
-- `src/app/app.ts` + its `app.html` template compose the elements by hand:
+- `src/app/app.ts` + its `app.html` template compose the web components by hand:
   `<kai-resizable>` for the split, `<kai-conversations>` (via
   `components/sidebar/sidebar.ts`), `<kai-thread>` (via
   `components/thread-view/thread-view.ts`), and `<kai-prompt-input>` (via
@@ -100,7 +100,7 @@ all update without Zone.
 ## Run it
 
 From the repo root, build the kit once so its `dist/` exists (the example imports the
-compiled `@kitn.ai/ui/elements` + `@kitn.ai/ui/theme.tokens.css`), then start the
+compiled `@kitn.ai/ui/web-components` + `@kitn.ai/ui/theme.tokens.css`), then start the
 example:
 
 ```bash

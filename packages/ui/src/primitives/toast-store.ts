@@ -22,7 +22,7 @@
 
 import { createRoot, createSignal } from 'solid-js';
 import { createStore, produce } from 'solid-js/store';
-import type { ToastPosition } from '../components/toast';
+import type { ToastPosition } from '../components/toast/toast';
 
 export type ToastVariant = 'neutral' | 'success' | 'warning' | 'error' | 'info';
 /** Visual treatment: `'pill'` (default, compact single-line) or `'card'` (richer
@@ -166,7 +166,7 @@ function resolveDuration(item: Pick<ToastItem, 'duration' | 'action'>): number {
 /**
  * Lazily resolve the single `<kai-toast-region>` host for a target and bind the
  * store to its `toasts` property. Idempotent + SSR-safe. The element upgrade
- * (its `defineWebComponent` registration) happens when the elements bundle
+ * (its `defineWebComponent` registration) happens when the web-components bundle
  * loads; setting the property before/after upgrade both work because
  * `customElement` reflects late-set properties.
  *

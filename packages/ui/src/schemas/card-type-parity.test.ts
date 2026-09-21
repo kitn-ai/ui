@@ -121,7 +121,7 @@ import { cardSchemas } from './index';
 import type { CardSchemaName } from './index';
 
 // Loaded through node's CJS loader rather than an ESM import, for the reason
-// src/elements/inline-element-types.test.ts gives: it keeps vite from
+// src/web-components/web-component/inline-web-component-types.test.ts gives: it keeps vite from
 // transforming typescript.js when this file runs on its own.
 const ts: typeof import('typescript') = createRequire(import.meta.url)('typescript');
 
@@ -944,12 +944,12 @@ function comparePair(pair: Pair): Compared {
       const itemsSchema = isNode(childSchema.items) ? (childSchema.items as SchemaNode) : undefined;
 
       if (arrayPart && itemsSchema) {
-        const elementShape = stripNullish(shapeOf(arrayPart.element.type, arrayPart.element.module));
+        const webComponentShape = stripNullish(shapeOf(arrayPart.element.type, arrayPart.element.module));
         if (isNode(itemsSchema.properties)) {
-          walk(itemsSchema, elementShape, `${childPath}[]`);
-        } else if (tsHasShape(elementShape) && !declaredOmissions.has(`${childPath}[]`)) {
+          walk(itemsSchema, webComponentShape, `${childPath}[]`);
+        } else if (tsHasShape(webComponentShape) && !declaredOmissions.has(`${childPath}[]`)) {
           errors.push(
-            `${at(childPath)}[]: the type's element is ${describeShape(elementShape)} but ` +
+            `${at(childPath)}[]: the type's element is ${describeShape(webComponentShape)} but ` +
               `${pair.cardType}.schema.json describes no \`properties\` for it, and no ` +
               `'schema-omits-shape' divergence declares that gap.`,
           );

@@ -21,15 +21,15 @@ import {
   // The FULL union. This file now sweeps both layers, and both ride one emitter.
   type KaiDiagnosticEvent,
 } from './diagnostics';
-import type { AttachmentData } from '../components/attachment-types';
-import type { ChatMessage } from '../elements/chat-types';
+import type { AttachmentData } from '../primitives/attachment-types';
+import type { ChatMessage } from '../web-components/chat/chat-types';
 // The ELEMENT layer emits onto this same stream, so it is swept by this same
 // file rather than by a second one with a second idea of the rule. See the
 // element block at the bottom.
-import '../elements/conversation-list';
-import '../elements/agent-card';
-import { emitElementRegistry } from '../elements/element-diagnostics';
-import { assertElementEventsVocabulary } from '../../tests/helpers/element-event-vocabulary';
+import '../web-components/conversation/conversation-list';
+import '../web-components/agent-card/agent-card';
+import { emitWebComponentRegistry } from '../web-components/web-component/web-component-diagnostics';
+import { assertElementEventsVocabulary } from '../../tests/helpers/web-component-event-vocabulary';
 
 const nullSink = () =>
   ({
@@ -389,13 +389,13 @@ describe('the payload boundary', () => {
 //
 // That matters more than it looks. Element props hold the entire conversation,
 // the user's own drafted text, conversation titles and file names -- and unlike
-// the wire code, this ships to every consumer of the elements bundle whether or
-// not they ever parse a stream. If the payload switch ever grew an element
+// the wire code, this ships to every consumer of the web-components bundle whether or
+// not they ever parse a stream. If the payload switch ever grew a web-component
 // branch, this block fails rather than the leak shipping.
 // ---------------------------------------------------------------------------
 
 /**
- * A SHORT, unmistakable token at the head of every element sentinel.
+ * A SHORT, unmistakable token at the head of every web component sentinel.
  *
  * Long descriptive sentinels alone are not enough here, and a mutation proved
  * it: a leak that shipped `raw.slice(0, 20)` beside the length was caught only
@@ -424,7 +424,7 @@ const E = {
 
 /** The full strings AND the shared head. The head is the one that survives a
  *  truncation, so it is the assertion that actually holds the line. */
-const ELEMENT_SENTINELS = [...Object.values(E), LEAK];
+const WEB_COMPONENT_SENTINELS = [...Object.values(E), LEAK];
 
 /** Every wrong thing a consumer can do that this layer reports, with a sentinel
  *  planted in each channel a value could be read from: item values, a nested
@@ -472,7 +472,7 @@ function driveElements(): KaiDiagnosticEvent[] {
     // The registry snapshot, taken while the sentinel-bearing props are live on
     // a mounted element — so "it reports tags, not the state of the props"
     // is asserted rather than assumed from reading it.
-    emitElementRegistry();
+    emitWebComponentRegistry();
 
     list.remove();
     card.remove();
@@ -482,8 +482,8 @@ function driveElements(): KaiDiagnosticEvent[] {
   return events;
 }
 
-const elementEvents = (events: KaiDiagnosticEvent[]) =>
-  events.filter((e) => e.type.startsWith('element.'));
+const webComponentEvents = (events: KaiDiagnosticEvent[]) =>
+  events.filter((e) => e.type.startsWith('web-component.'));
 
 afterEach(() => {
   document.body.innerHTML = '';
@@ -494,28 +494,28 @@ describe('the payload boundary — element events', () => {
     const events = driveElements();
 
     // Non-vacuity first: the assertions below are over something.
-    expect(elementEvents(events).length).toBeGreaterThan(3);
+    expect(webComponentEvents(events).length).toBeGreaterThan(3);
 
     const json = JSON.stringify(events);
-    for (const sentinel of ELEMENT_SENTINELS) {
+    for (const sentinel of WEB_COMPONENT_SENTINELS) {
       expect(json, `leaked: ${sentinel}`).not.toContain(sentinel);
     }
-    for (const e of elementEvents(events)) expect('payload' in e).toBe(false);
+    for (const e of webComponentEvents(events)) expect('payload' in e).toBe(false);
   });
 
   it('ON: turning payload capture on changes NOTHING about the element events', () => {
     setWirePayloadCapture(true);
     const events = driveElements();
 
-    expect(elementEvents(events).length).toBeGreaterThan(3);
+    expect(webComponentEvents(events).length).toBeGreaterThan(3);
 
     // The stronger claim: not "content moved under one key" but "there is no
     // content", in the state where the wire layer starts emitting some.
     const json = JSON.stringify(events);
-    for (const sentinel of ELEMENT_SENTINELS) {
+    for (const sentinel of WEB_COMPONENT_SENTINELS) {
       expect(json, `leaked with payload ON: ${sentinel}`).not.toContain(sentinel);
     }
-    for (const e of elementEvents(events)) expect('payload' in e).toBe(false);
+    for (const e of webComponentEvents(events)) expect('payload' in e).toBe(false);
 
     // Structural, exactly as the wire block does it: strip the one key and the
     // remainder must still be clean. Vacuous here today by construction — and
@@ -526,7 +526,7 @@ describe('the payload boundary — element events', () => {
       return rest;
     });
     const remainder = JSON.stringify(stripped);
-    for (const sentinel of ELEMENT_SENTINELS) expect(remainder).not.toContain(sentinel);
+    for (const sentinel of WEB_COMPONENT_SENTINELS) expect(remainder).not.toContain(sentinel);
   });
 
   it('ON: the switch really WAS on — proven on the wire side in the same state', async () => {
@@ -554,7 +554,7 @@ describe('the payload boundary — element events', () => {
     }
 
     // Both layers really emitted.
-    expect(elementEvents(events).length).toBeGreaterThan(3);
+    expect(webComponentEvents(events).length).toBeGreaterThan(3);
     expect(events.some((e) => e.type.startsWith('wire.'))).toBe(true);
 
     const stripped = events.map((e) => {
@@ -562,7 +562,7 @@ describe('the payload boundary — element events', () => {
       return rest;
     });
     const remainder = JSON.stringify(stripped);
-    for (const sentinel of [...SENTINELS, ...ELEMENT_SENTINELS]) {
+    for (const sentinel of [...SENTINELS, ...WEB_COMPONENT_SENTINELS]) {
       expect(remainder, `leaked beside the metadata: ${sentinel}`).not.toContain(sentinel);
     }
   });
@@ -570,7 +570,7 @@ describe('the payload boundary — element events', () => {
   it('a long attribute is reported by LENGTH — a truncation would ship a prefix', () => {
     const events = driveElements();
     const previews = events
-      .filter((e) => e.type === 'element.violation')
+      .filter((e) => e.type === 'web-component.violation')
       .map((e) => (e as unknown as { valuePreview?: string }).valuePreview)
       .filter((p): p is string => p !== undefined);
 
@@ -579,18 +579,18 @@ describe('the payload boundary — element events', () => {
     // form that can carry an arbitrary consumer value, and it carries a number.
     const longValue = `${E.agentLabel}-`.repeat(40);
     expect(previews).toContain(`string(len=${longValue.length})`);
-    for (const sentinel of ELEMENT_SENTINELS) {
+    for (const sentinel of WEB_COMPONENT_SENTINELS) {
       expect(JSON.stringify(previews)).not.toContain(sentinel);
     }
   });
 
   it('the sentinel search can FIND one — otherwise this whole block is decoration', () => {
-    const planted = JSON.stringify([{ type: 'element.violation', leaked: E.title }]);
+    const planted = JSON.stringify([{ type: 'web-component.violation', leaked: E.title }]);
     expect(planted).toContain(E.title);
     expect(JSON.stringify(driveElements())).not.toContain(E.title);
   });
 
-  it('EVERY field of every element event comes from a closed vocabulary', () => {
+  it('EVERY field of every web component event comes from a closed vocabulary', () => {
     // THE ASSERTION THAT ACTUALLY HOLDS THE LINE, and the reason the sentinel
     // cases above are documentation rather than proof.
     //
@@ -610,7 +610,7 @@ describe('the payload boundary — element events', () => {
     // generated artifact. Membership catches every leak shape at once,
     // including ones nobody has imagined, and depends on no sentinel design.
     const events = driveElements();
-    const elements = events.filter((e) => e.type.startsWith('element.'));
+    const elements = events.filter((e) => e.type.startsWith('web-component.'));
 
     // Non-vacuity, and it must be a real spread: a vocabulary check over one
     // event, or over none, proves nothing.

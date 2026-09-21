@@ -12,9 +12,9 @@
  *   · it never touches the network.
  */
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { readOpenAIStream } from '../wire';
+import { readOpenAIStream } from '../wire/index';
 import { createAssistantStream, type SetMessages } from './stream';
-import type { ChatMessage } from '../elements/chat-types';
+import type { ChatMessage } from '../web-components/chat/chat-types';
 import {
   createMockResponder,
   DEFAULT_MOCK_REPLIES,

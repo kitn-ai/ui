@@ -14,13 +14,31 @@
  * in here — irrelevant: the assertions ride on hex OVERRIDES, which pass
  * through cssToHex untouched. The rail renders no showroom (loadKit is never
  * called), which is what makes the studio mountable in jsdom at all.
+ *
+ * The last describe is the OTHER half of that contract's lesson: a catalogued
+ * knob is not a wired knob. `EXTRA_TOKENS` (src/themes/theme-tokens.ts) feeds
+ * `studioTokens()`, whose two readers are tests/styles/theme-studio-coverage.test.ts
+ * and `mcp/construct/theme-token-policy.ts` (the construct allowlist) — and NOT
+ * the studio UI, which keeps its own list of extras. That is how the coverage
+ * test stayed green about `--kai-density` while `buildCss` emitted no such line
+ * and `themePayload` never named it: the catalog said the knob existed and
+ * nothing in the studio had to agree. These assertions are therefore derived
+ * from EXTRA_TOKENS itself, so the next catalogued knob with nothing behind it
+ * is red here.
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import '@testing-library/jest-dom/vitest';
 import { render, cleanup, screen, fireEvent, waitFor } from '@solidjs/testing-library';
 import ThemeStudio from './ThemeStudio';
+import { EXTRA_TOKENS, parseKitDefaults, remValue } from '../../src/themes/theme-tokens';
+// theme.css RAW, the same import the studio itself derives every default from —
+// so "the default is 0.25rem" is read out of the kit, never typed in here. Not
+// readFileSync: the apps/ tsconfig carries vite/client, not node types.
+import kitCss from '../../theme.css?raw';
 
 const ORIGIN = window.location.origin;
+
+const KIT_DENSITY = remValue(parseKitDefaults(kitCss).get('--kai-density')!.light);
 
 /** Deliver a host frame exactly as the browser would: a same-origin
  *  MessageEvent on window (the studio's listener attaches on mount). */
@@ -32,6 +50,10 @@ const postInit = (theme: unknown): void => {
  *  window in jsdom, so the spy on window.postMessage sees them all). */
 const changeFrames = (spy: ReturnType<typeof vi.spyOn>): unknown[] =>
   spy.mock.calls.map((c: unknown[]) => c[0]).filter((d: unknown) => (d as { type?: string })?.type === 'kai-theme-change');
+
+/** Frames of any one postMessage type the studio sent its host. */
+const framesOf = (spy: ReturnType<typeof vi.spyOn>, type: string): unknown[] =>
+  spy.mock.calls.map((c: unknown[]) => c[0]).filter((d: unknown) => (d as { type?: string })?.type === type);
 
 const primaryInput = (): HTMLInputElement => screen.getByLabelText('Primary') as HTMLInputElement;
 
@@ -84,5 +106,133 @@ describe('theme studio — rail embed handshake (kai-theme-init seeding + write-
     fireEvent.input(primaryInput(), { target: { value: '#ff0000' } }); // even an edit holds until seeded
     await new Promise((r) => setTimeout(r, 50));
     expect(changeFrames(postSpy)).toHaveLength(0);
+  });
+});
+
+describe('theme studio — --kai-density is wired, not merely catalogued', () => {
+  let postSpy: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    window.history.pushState({}, '', '/?embed=1');
+    postSpy = vi.spyOn(window, 'postMessage').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    cleanup();
+    postSpy.mockRestore();
+    window.history.pushState({}, '', '/');
+    localStorage.removeItem('kai-theme-studio-presets');
+  });
+
+  /** The Code modal's `<pre><code>` — the paste-ready block, as exported. */
+  const exportedCss = (): string => document.querySelector('pre code')?.textContent ?? '';
+  /** Density and Elevation are NAMED STEPS now, not sliders — their extremes are not
+   *  designs — so the tests pick steps. The accessible name is `Row: Step`, which is
+   *  also what keeps "Density: Default" distinct from the theme dropdown's "Default". */
+  const pickStep = (row: string, step: string) => fireEvent.click(screen.getByRole('button', { name: `${row}: ${step}` }));
+  const stepActive = (row: string, step: string): boolean =>
+    screen.getByRole('button', { name: `${row}: ${step}` }).getAttribute('aria-pressed') === 'true';
+  /** The step's value, read off the control the user clicks — never a constant here,
+   *  which would be a copy of the studio's taste call and drift the day it moved. */
+  const stepValue = (row: string, step: string): string =>
+    screen.getByRole('button', { name: `${row}: ${step}` }).getAttribute('data-value')!;
+  const radiusField = (): HTMLInputElement => screen.getByLabelText('Radius value') as HTMLInputElement;
+  const openOtherTab = () => fireEvent.click(screen.getByText('Other'));
+  /** In embed mode the toolbar carries an Apply of its own, so the modal's is
+   *  the LAST `Apply` in DOM order (the modal Portals to <body>). */
+  const clickModalApply = () => fireEvent.click(screen.getAllByText('Apply').at(-1)!);
+
+  it('emits one line for EVERY token EXTRA_TOKENS catalogues — a catalogued knob with no wiring behind it fails here', () => {
+    render(() => <ThemeStudio />);
+    // The font and tracking knobs are emitted only once set, so set them: the
+    // claim under test is "catalogued implies emitted", not "emitted at rest".
+    postInit({ light: { '--kai-tracking': '0.02em' }, dark: {}, fonts: { '--kai-font-base': 'Inter', '--kai-font-code': 'monospace' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Code' }));
+    const css = exportedCss();
+    expect(EXTRA_TOKENS.filter((t) => !css.includes(`${t}:`)), css).toEqual([]);
+  });
+
+  it('publishes Tailwind geometry by default: the exported density is the value theme.css declares', () => {
+    render(() => <ThemeStudio />);
+    fireEvent.click(screen.getByRole('button', { name: 'Code' }));
+    expect(exportedCss()).toContain(`--kai-density: ${KIT_DENSITY}rem;`);
+    expect(KIT_DENSITY).toBe(0.25); // Tailwind's own default — the whole reason the fallback is 0.25
+  });
+
+  it('carries --kai-density to the rail host, so the preview beside the rail re-themes with it', async () => {
+    render(() => <ThemeStudio />);
+    clickModalApply(); // kai-theme-apply posts untimed — no need to open the change stream
+    const atRest = framesOf(postSpy, 'kai-theme-apply').at(-1) as { light: Record<string, string> };
+    expect(atRest.light['--kai-density']).toBe(`${KIT_DENSITY}rem`);
+
+    openOtherTab();
+    pickStep('Density', 'Loose');
+    clickModalApply();
+    const moved = framesOf(postSpy, 'kai-theme-apply').at(-1) as { light: Record<string, string> };
+    expect(moved.light['--kai-density']).toBe(`${stepValue('Density', 'Loose')}rem`);
+  });
+
+  it('offers only steps that are safe to choose — no zero, no extreme, and the default is Tailwind geometry', () => {
+    render(() => <ThemeStudio />);
+    openOtherTab();
+    // The knob exists (phase 1) and every step it offers is a viable design. This is
+    // the assertion that keeps a later "let's just make it a slider again" from
+    // silently reintroducing 0rem, which collapses every p-*/gap-*/size-* in the kit.
+    const steps = ['Very tight', 'Tight', 'Default', 'Loose', 'Very loose'];
+    for (const s of steps) expect(screen.getByRole('button', { name: `Density: ${s}` })).toBeDefined();
+    expect(stepActive('Density', 'Default')).toBe(true);
+    expect(Number(KIT_DENSITY)).toBe(0.25);
+  });
+
+  it('round-trips: the exported CSS pasted back in reproduces the density it exported', async () => {
+    render(() => <ThemeStudio />);
+    openOtherTab();
+    pickStep('Density', 'Loose');
+    fireEvent.click(screen.getByRole('button', { name: 'Code' }));
+    const css = exportedCss();
+    expect(css).toContain(`--kai-density: ${stepValue('Density', 'Loose')}rem;`);
+    fireEvent.click(screen.getByLabelText('Close'));
+    // Move the knob AWAY first: a parser that returned nothing would leave the Loose
+    // step active and this round trip would pass vacuously.
+    openOtherTab();
+    pickStep('Density', 'Very loose');
+    expect(stepActive('Density', 'Very loose')).toBe(true);
+    fireEvent.click(screen.getByText('Import'));
+    fireEvent.input(screen.getByRole('textbox'), { target: { value: css } });
+    clickModalApply();
+    await waitFor(() => expect(stepActive('Density', 'Loose')).toBe(true));
+  });
+
+  it('a density that is NOT one of the steps shows as Custom rather than being snapped', async () => {
+    render(() => <ThemeStudio />);
+    openOtherTab();
+    pickStep('Density', 'Tight');
+    fireEvent.click(screen.getByText('Import'));
+    // A value from a hand-written theme or an older build. Snapping it to the nearest
+    // step would silently edit the user's file on the next export.
+    fireEvent.input(screen.getByRole('textbox'), { target: { value: ':root { --kai-density: 0.3rem; }' } });
+    clickModalApply();
+    await waitFor(() => expect(screen.getByText(/Custom — 0\.3rem/)).toBeDefined());
+    expect(stepActive('Density', 'Tight')).toBe(false);
+    expect(stepActive('Density', 'Loose')).toBe(false);
+    fireEvent.click(screen.getByRole('button', { name: 'Code' }));
+    expect(exportedCss(), 'and the export keeps the number the user wrote').toContain('--kai-density: 0.3rem;');
+  });
+
+  it('loads a preset saved before the knob existed: default density, everything else untouched', async () => {
+    // A real older localStorage entry: no `density` key, radius deliberately
+    // NOT the default, so a guarded read that blanked the object would show.
+    localStorage.setItem('kai-theme-studio-presets', JSON.stringify([
+      { name: 'Legacy', light: { '--kai-color-primary': '#123456' }, dark: {}, radius: 0.9, fontBase: '', fontCode: '', tracking: 0, shadow: '#000000' },
+    ]));
+    render(() => <ThemeStudio />);
+    fireEvent.click(screen.getByRole('button', { name: 'Default' })); // the theme dropdown trigger
+    // The dropdown stays open while the onMount localStorage read lands, so this
+    // waits for the reactive list rather than racing it.
+    await waitFor(() => expect(screen.getByText('Legacy')).toBeDefined());
+    fireEvent.click(screen.getByText('Legacy'));
+    openOtherTab();
+    await waitFor(() => expect(stepActive('Density', 'Default')).toBe(true));
+    expect(radiusField().value).toBe('0.9');
   });
 });

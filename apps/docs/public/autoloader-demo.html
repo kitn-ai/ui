@@ -55,7 +55,10 @@
     const seen = new Set();
     new PerformanceObserver((list) => {
       for (const e of list.getEntries()) {
-        const m = e.name.match(/\/kitn\/elements\/(chunks\/)?([^/?]+\.js)/);
+        // Matches BOTH what the CDN serves and what the local mount served: the
+        // module dir, optional chunks/, then the file. It matched the retired
+        // /kitn/elements/ path until 2026-09-19, so this log printed nothing.
+        const m = e.name.match(/\/dist\/web-components\/(chunks\/)?([^/?]+\.js)/);
         if (!m || seen.has(m[2])) continue;
         seen.add(m[2]);
         const li = document.createElement('li');
@@ -84,7 +87,12 @@
   </script>
 
   <!-- The autoloader: a CDN/static <script> that watches the DOM and dynamically
-       imports each kai-* element's module on demand. NOT a bundler import. -->
-  <script type="module" src="/kitn/elements/autoloader.js"></script>
+       imports each kai-* element's module on demand. NOT a bundler import.
+       FROM THE CDN, pinned, because that is the deployment it demonstrates: the
+       autoloader resolves each module against its OWN directory, so serving it needs
+       dist/web-components/*.js plus the ~92 shared chunks they import (measured) -
+       copying that into this site is the full-bundle mirror the bounded copy in
+       scripts/copy-kit-assets.mjs exists to avoid. -->
+  <script type="module" src="https://cdn.jsdelivr.net/npm/@kitn.ai/ui@0.32.0/dist/web-components/autoloader.js"></script> <!-- x-release-please-version -->
 </body>
 </html>

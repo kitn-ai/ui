@@ -12,12 +12,17 @@
         "/apps/docs/src/content/docs/guides/getting-started.mdx",
         "/apps/docs/src/content/docs/guides/installation.mdx",
         "/apps/docs/src/content/docs/guides/loading.mdx",
-        "/packages/ui/README.md"
+        "/packages/ui/README.md",
+        "/apps/docs/public/autoloader-demo.html"
       ]
     },
     "packages/create-kai": {
       "release-type": "node",
       "package-name": "create-kai"
+    },
+    "packages/kai": {
+      "release-type": "node",
+      "package-name": "@kitn.ai/kai"
     }
   }
 }

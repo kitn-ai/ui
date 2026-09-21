@@ -1,6 +1,6 @@
 ---
 title: Compose a message thread
-description: Lay out your own message list from standalone kai-message elements — one per turn — and wire its per-message slots for a header, a footer, and the avatar.
+description: Lay out your own message list from standalone kai-message web components — one per turn — and wire its per-message slots for a header, a footer, and the avatar.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -18,11 +18,11 @@ A **slot** is a named region you fill with your own markup — use it to add or 
 
 ## Render one message per turn
 
-Register the elements once, then create a `<kai-message>` for each turn and hand it a `message`. Arrays and objects are JS properties — set `message` in script, never as an HTML attribute. The element renders the content (markdown for assistant, plain for user), any reasoning or tool calls, and the action bar from the actions you list.
+Register the web components once, then create a `<kai-message>` for each turn and hand it a `message`. Arrays and objects are JS properties — set `message` in script, never as an HTML attribute. The element renders the content (markdown for assistant, plain for user), any reasoning or tool calls, and the action bar from the actions you list.
 
 ```html
 <script type="module">
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
 </script>
 
 <div id="thread"></div>

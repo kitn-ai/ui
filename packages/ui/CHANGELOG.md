@@ -222,7 +222,7 @@
 
 ### ⚠ BREAKING CHANGES
 
-* three published `AssistantStream` signatures narrow — `addSource`, `upsertTool`'s patch and `appendReasoning`'s opts now reject an argument carrying a key owned by a sibling bag. Code passing the correct payload is unaffected; code passing the wrong one stops compiling, which is the point. No data type changed, so `element-meta.json`, `docs/web-components.md`, `llms-full.txt` and `custom-elements.json` are byte-identical after a `--skip-nx-cache` build.
+* three published `AssistantStream` signatures narrow — `addSource`, `upsertTool`'s patch and `appendReasoning`'s opts now reject an argument carrying a key owned by a sibling bag. Code passing the correct payload is unaffected; code passing the wrong one stops compiling, which is the point. No data type changed, so `web-component-meta.json`, `docs/web-components.md`, `llms-full.txt` and `custom-elements.json` are byte-identical after a `--skip-nx-cache` build.
 
 ### Bug Fixes
 
@@ -733,7 +733,7 @@
 * **deps:** move shiki/[@shikijs](https://github.com/shikijs) to devDependencies (-17 MB consumer install) ([7944256](https://github.com/kitn-ai/ui/commit/7944256e1088bd12230cf0ce247947aa1464fcd4))
 * **deps:** upgrade tailwind-merge ^2 → ^3 (Tailwind v4 class groups) ([186302b](https://github.com/kitn-ai/ui/commit/186302b2f786f0a6525e86313888f63fdfc2d6b1))
 * **docs-site:** await element registration before setting props (timing race) ([4797dab](https://github.com/kitn-ai/ui/commit/4797dabcae8017fe25803b57a6f59d803b982ecb))
-* **docs-site:** sync-kit ships the dist/elements/ subtree (chunks moved there in the unified build) ([d0e5fd4](https://github.com/kitn-ai/ui/commit/d0e5fd404af70b56ba6a79d09cd994316e92d32b))
+* **docs-site:** sync-kit ships the dist/web-components/ subtree (chunks moved there in the unified build) ([d0e5fd4](https://github.com/kitn-ai/ui/commit/d0e5fd404af70b56ba6a79d09cd994316e92d32b))
 * **docs:** landing hero — consistent feedback actions on the follow-up message ([0c65b8e](https://github.com/kitn-ai/ui/commit/0c65b8ea9e25d7a3f58f722bd6096c6470037e02))
 * **docs:** toast demo — remove dismissed toasts from the region, not just hide them ([139c9ed](https://github.com/kitn-ai/ui/commit/139c9ede64359770a5f533a1d06a0e0c8ee249fb))
 * **elements:** position the autoloader as CDN/static-only (consumer-regression finding) ([2d05e83](https://github.com/kitn-ai/ui/commit/2d05e83995a7b2a03ba536d790a4c9fac36506b9))
@@ -791,7 +791,7 @@
 * **pkg:** inject elements self-register via build banner (keep React wrapper source typecheck-clean; fixes 1474 react-jsx errors from walking Solid source) ([fc3b05f](https://github.com/kitn-ai/ui/commit/fc3b05fc71b452bc8fea84406999bd9308ed4e9c))
 * **pkg:** remove sideEffects field that hollowed the elements bundle (it tree-shook the registrations out of the lib's own build) ([e3bf7f9](https://github.com/kitn-ai/ui/commit/e3bf7f96989db60a3559308c2b416557df553ff8))
 * **pkg:** self-register elements from /react, SSR-safe registration, consumable theme.css, drop redundant solid-js peer ([6cc5fde](https://github.com/kitn-ai/ui/commit/6cc5fdefc834f7d33b8d1f7208bb7575ecea764a))
-* **pkg:** ship compiled . + ./react + type-only ./elements (stop shipping raw source) ([c6241fe](https://github.com/kitn-ai/ui/commit/c6241fe6be14b7a576f4390e92295072d1c9c84d))
+* **pkg:** ship compiled . + ./react + type-only ./web-components (stop shipping raw source) ([c6241fe](https://github.com/kitn-ai/ui/commit/c6241fe6be14b7a576f4390e92295072d1c9c84d))
 * **pkg:** SSR-import-safe element registration (client-only via gated dynamic import) ([d0907d5](https://github.com/kitn-ai/ui/commit/d0907d57fa178df6038198e572a7409cac3e97e8))
 * **test:** make consumer-regression harness paths portable (resolve repo via git rev-parse --show-toplevel; no hardcoded absolute paths) ([bcd1c69](https://github.com/kitn-ai/ui/commit/bcd1c69f4b7ff391e9ace997b9e0251e8451dcfb))
 
@@ -914,7 +914,7 @@
 * **examples:** docked, collapsible event console in the showcase ([25923ec](https://github.com/kitn-ai/ui/commit/25923ec2b79b587f774175f5c5d6a519541f5526))
 * full story parity for &lt;kitn-chat&gt; (header, model switcher, context, scroll button, toolbar) ([aae1541](https://github.com/kitn-ai/ui/commit/aae15414bc82a35bb53ce3372947bb7087b926c0))
 * **gen:** add composedFrom links + component tokens to element spec ([04886b8](https://github.com/kitn-ai/ui/commit/04886b87a67b72f8390d391a4413497c2e0fc98b))
-* **gen:** extract prop defaults + always emit element-meta.json ([1463793](https://github.com/kitn-ai/ui/commit/14637936022b9db8ae9954ddd672edc881c02c3d))
+* **gen:** extract prop defaults + always emit web-component-meta.json ([1463793](https://github.com/kitn-ai/ui/commit/14637936022b9db8ae9954ddd672edc881c02c3d))
 * header-composition kit — kc-switch, kc-chat header slots, grouped model-switcher ([0519b57](https://github.com/kitn-ai/ui/commit/0519b57da687af41d967d61bf799b665f535acd5))
 * kc-message/kc-chat actions reveal, avatar payload, custom actions ([3fa7cd6](https://github.com/kitn-ai/ui/commit/3fa7cd673109cc03a522b71b62128af5b9e4a321))
 * **pdf-preview:** config + enable/reset primitive scaffold ([49a0b87](https://github.com/kitn-ai/ui/commit/49a0b870f338df11df4ecef86c73a99ff404dff8))
@@ -1278,7 +1278,7 @@
 * **elements:** add &lt;kitn-conversation-list&gt; ([75ecc23](https://github.com/kitn-ai/chat/commit/75ecc237fb4f4a5d167fc3d38f02cc5cd4a249cd))
 * **elements:** add &lt;kitn-prompt-input&gt; ([a69ec56](https://github.com/kitn-ai/chat/commit/a69ec5639b4ac7186668a66c7fbf77786f9339a9))
 * **elements:** add defineKitnElement shadow-DOM wrapper helper ([80d049f](https://github.com/kitn-ai/chat/commit/80d049f8592fd990ce94f96f191720c4dfab4a11))
-* **elements:** add registration entry, Vite library build, ./elements export ([52ff40f](https://github.com/kitn-ai/chat/commit/52ff40f692681d703ca4c4716f68a301c0f33b50))
+* **elements:** add registration entry, Vite library build, ./web-components export ([52ff40f](https://github.com/kitn-ai/chat/commit/52ff40f692681d703ca4c4716f68a301c0f33b50))
 * **elements:** attachment support in the web-component input ([6cedda3](https://github.com/kitn-ai/chat/commit/6cedda328f783b33ff68a32cbe2717b50c1bec3b))
 * **elements:** bring &lt;kitn-chat&gt; web component to full-chat parity ([dbd1c24](https://github.com/kitn-ai/chat/commit/dbd1c240cebf707a3ce10242a451936b2713c0e0))
 * **elements:** compile kit Tailwind CSS to an injectable string ([ab3acd4](https://github.com/kitn-ai/chat/commit/ab3acd4508bc4bbbb71efa7f2ec00596c8aefc11))
@@ -1303,7 +1303,7 @@
 * full story parity for &lt;kitn-chat&gt; (header, model switcher, context, scroll button, toolbar) ([aae1541](https://github.com/kitn-ai/chat/commit/aae15414bc82a35bb53ce3372947bb7087b926c0))
 * full-screen theme editor (light/dark, presets, live chat preview) ([c656735](https://github.com/kitn-ai/chat/commit/c656735690c5a050e61d414ddfcc73795354e564))
 * **gen:** add composedFrom links + component tokens to element spec ([04886b8](https://github.com/kitn-ai/chat/commit/04886b87a67b72f8390d391a4413497c2e0fc98b))
-* **gen:** extract prop defaults + always emit element-meta.json ([1463793](https://github.com/kitn-ai/chat/commit/14637936022b9db8ae9954ddd672edc881c02c3d))
+* **gen:** extract prop defaults + always emit web-component-meta.json ([1463793](https://github.com/kitn-ai/chat/commit/14637936022b9db8ae9954ddd672edc881c02c3d))
 * **highlighter:** curate default language set (bash, javascript, html, css, json) ([c2c2492](https://github.com/kitn-ai/chat/commit/c2c24928fe55a163fbce5973eb02f6fda33f0bb4))
 * **highlighter:** on-demand, no-WASM Shiki; ESM-only build ([7c121d2](https://github.com/kitn-ai/chat/commit/7c121d25521cfd32bf9d7ac623884b4124393616))
 * **highlighter:** trim default languages to 5 core (js/ts/tsx/json/bash) ([c8c75bd](https://github.com/kitn-ai/chat/commit/c8c75bdd64a775f7830445a8d053eccaf8b13f80))
@@ -1523,7 +1523,7 @@
 * **elements:** declare typed Events maps on flagship facades (typed dispatch + generated detail shapes) ([a1ace5c](https://github.com/kitn-ai/chat/commit/a1ace5c317739af19c0e176893c298ef189983ac))
 * **elements:** typed Events maps on remaining dispatching facades ([fd292ec](https://github.com/kitn-ai/chat/commit/fd292ec3022ca7fb252b1317525d8017487380f4))
 * **gen:** add composedFrom links + component tokens to element spec ([04886b8](https://github.com/kitn-ai/chat/commit/04886b87a67b72f8390d391a4413497c2e0fc98b))
-* **gen:** extract prop defaults + always emit element-meta.json ([1463793](https://github.com/kitn-ai/chat/commit/14637936022b9db8ae9954ddd672edc881c02c3d))
+* **gen:** extract prop defaults + always emit web-component-meta.json ([1463793](https://github.com/kitn-ai/chat/commit/14637936022b9db8ae9954ddd672edc881c02c3d))
 * **storybook:** API spec page + live Controls on flagship element stories ([96c1d8a](https://github.com/kitn-ai/chat/commit/96c1d8a8dcefe066e5ebb3d42afc968b6c638f79))
 * **storybook:** API spec page on attachments/chain-of-thought/chat-scope-picker/checkpoint/code-block/context-meter element stories ([7dbfc0f](https://github.com/kitn-ai/chat/commit/7dbfc0ff97e2a09e5c649faef8300e372b916fd2))
 * **storybook:** API spec page on empty/feedback-bar/file-upload/image/loader/markdown element stories ([9b4dd9f](https://github.com/kitn-ai/chat/commit/9b4dd9f74b272ba4094253e96c03f249ca2af754))
@@ -1657,7 +1657,7 @@
 * **elements:** add &lt;kitn-conversation-list&gt; ([75ecc23](https://github.com/kitn-ai/chat/commit/75ecc237fb4f4a5d167fc3d38f02cc5cd4a249cd))
 * **elements:** add &lt;kitn-prompt-input&gt; ([a69ec56](https://github.com/kitn-ai/chat/commit/a69ec5639b4ac7186668a66c7fbf77786f9339a9))
 * **elements:** add defineKitnElement shadow-DOM wrapper helper ([80d049f](https://github.com/kitn-ai/chat/commit/80d049f8592fd990ce94f96f191720c4dfab4a11))
-* **elements:** add registration entry, Vite library build, ./elements export ([52ff40f](https://github.com/kitn-ai/chat/commit/52ff40f692681d703ca4c4716f68a301c0f33b50))
+* **elements:** add registration entry, Vite library build, ./web-components export ([52ff40f](https://github.com/kitn-ai/chat/commit/52ff40f692681d703ca4c4716f68a301c0f33b50))
 * **elements:** compile kit Tailwind CSS to an injectable string ([ab3acd4](https://github.com/kitn-ai/chat/commit/ab3acd4508bc4bbbb71efa7f2ec00596c8aefc11))
 * **elements:** light/dark/auto theme support for web components ([c8992e4](https://github.com/kitn-ai/chat/commit/c8992e4facb332d94cc83c2aa6751ac365c5d67b))
 * **elements:** render message attachments in &lt;kitn-chat&gt; ([6717222](https://github.com/kitn-ai/chat/commit/6717222b39bc2730acb58c095ce0a908c5f00367))

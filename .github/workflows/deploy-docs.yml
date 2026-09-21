@@ -43,7 +43,7 @@ jobs:
       # Also publish Storybook under /storybook of the docs site, so it serves at
       # ui.kitn.ai/storybook from this same GitHub Pages deploy. `nx build-storybook
       # ui` builds the kit dist first (its dependsOn) so the static build registers
-      # the kai-* elements; Storybook's relative asset paths work unchanged under
+      # the kai-* web components; Storybook's relative asset paths work unchanged under
       # the subpath. Copy it in as a /storybook subdir (additive — never touches the
       # docs at /).
       - name: Build Storybook into the docs /storybook subpath

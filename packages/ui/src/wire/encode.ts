@@ -3,8 +3,8 @@
 // and never drives the loop; these two functions are the whole contribution.
 //
 // No provider SDK, no fetch, no DOM. Pure functions over the content model.
-import type { ChatMessage, MessagePart } from '../elements/chat-types';
-import type { ToolPart } from '../components/tool-types';
+import type { ChatMessage, MessagePart } from '../web-components/chat/chat-types';
+import type { ToolPart } from '../components/tool/tool-types';
 import { classifyAttachment, textFileContent, type ClassifiedFile } from './files';
 import { resolveMediaPolicy, type MediaPolicy, type MediaTypeFilter } from './media-types';
 import { wireDiagnosticsActive, wirePayloadActive } from './diagnostics';

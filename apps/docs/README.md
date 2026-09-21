@@ -13,14 +13,14 @@ suite + a Solid/Advanced playground), not the public face.
 
 The interactive examples import `@kitn.ai/ui` directly (Vite-resolved workspace
 package — see `src/components/example/kit.ts`), and the Props/Events tables import
-`@kitn.ai/ui/element-meta.json` the same way. There is no synced bundle mirror.
+`@kitn.ai/ui/web-component-meta.json` the same way. There is no synced bundle mirror.
 
 The one bounded copy is `scripts/copy-kit-assets.mjs` (run automatically on
 `predev`/`prebuild`), which copies exactly 4 raw-served assets from the kit build:
 
 | Source (`packages/ui/`)      | → Target (gitignored)              | Used by                          |
 | :--------------------------- | :--------------------------------- | :------------------------------- |
-| `dist/elements/autoloader.js`| `public/kitn/elements/autoloader.js` | `public/autoloader-demo.html` (zero-build CDN path) |
+| `dist/web-components/autoloader.js`| `public/kitn/web-components/autoloader.js` | `public/autoloader-demo.html` (zero-build CDN path) |
 | `dist/theme.tokens.css`      | `public/kitn/theme.tokens.css`     | `public/autoloader-demo.html`    |
 | `llms.txt` / `llms-full.txt` | `public/`                          | served at the site root for AI agents |
 

@@ -4,7 +4,7 @@
 // Input is an ALREADY DECODED JSON frame typed `unknown`. Nothing here imports a
 // provider SDK, and nothing here throws: a frame this format does not recognise
 // yields [] so a provider adding a field cannot take a turn down.
-import type { MessageSource } from '../../elements/chat-types';
+import type { MessageSource } from '../../web-components/chat/chat-types';
 import type {
   ModelStreamChunk,
   ModelToolCallDelta,

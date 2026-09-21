@@ -16,11 +16,17 @@ const pkgRoot = dirname(require.resolve('@kitn.ai/ui/package.json'));
 const here = dirname(fileURLToPath(import.meta.url));
 const pub = join(here, '..', 'public');
 
-mkdirSync(join(pub, 'kitn', 'elements'), { recursive: true });
-// autoloader-demo.html loads these two as raw assets (the zero-build CDN path):
-cpSync(join(pkgRoot, 'dist/elements/autoloader.js'), join(pub, 'kitn/elements/autoloader.js'));
+// The /kitn/ mount, for the three raw-served assets below. The autoloader used to be
+// copied here too, for autoloader-demo.html; that page loads it from the CDN pin now,
+// because serving the autoloader means serving dist/web-components/*.js AND the ~92
+// shared chunks they import (measured), which is the full-bundle mirror this script
+// deliberately does not do.
+mkdirSync(join(pub, 'kitn'), { recursive: true });
+
+// autoloader-demo.html loads the stylesheet as a raw asset (its autoloader comes
+// from the CDN pin, so this mount no longer carries one):
 cpSync(join(pkgRoot, 'dist/theme.tokens.css'), join(pub, 'kitn/theme.tokens.css'));
 // llms.txt / llms-full.txt served at the site root for AI agents:
 cpSync(join(pkgRoot, 'llms.txt'), join(pub, 'llms.txt'));
 cpSync(join(pkgRoot, 'llms-full.txt'), join(pub, 'llms-full.txt'));
-console.log('[copy-kit-assets] copied 4 raw-served assets from @kitn.ai/ui');
+console.log('[copy-kit-assets] copied 3 raw-served assets from @kitn.ai/ui');

@@ -7,7 +7,7 @@ import {
   type ThreadLike,
 } from './threads';
 import { createAssistantStream } from './stream';
-import type { ChatMessage } from '../elements/chat-types';
+import type { ChatMessage } from '../web-components/chat/chat-types';
 
 interface Convo extends ThreadLike {
   title: string;

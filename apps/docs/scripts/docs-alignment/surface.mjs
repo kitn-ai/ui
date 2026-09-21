@@ -2,7 +2,7 @@
 //
 // Nothing in this file is a hard-coded list of exports, elements, props or
 // events. Every name comes from either the built `.d.ts` reached through the
-// package's own `exports` map, or from `src/elements/element-meta.json`. That is
+// package's own `exports` map, or from `src/web-components/web-component-meta.json`. That is
 // deliberate: the surface moves under this harness (a sibling change added ~330
 // root exports mid-flight), and a baked-in list would have turned every new
 // export into a phantom "docs are wrong" finding.
@@ -13,7 +13,7 @@ import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 const ts = require('typescript');
 
-/** Subpaths whose types we can enumerate. `./elements/*` is a wildcard and is
+/** Subpaths whose types we can enumerate. `./web-components/*` is a wildcard and is
  *  handled separately; the css/json ones have no types. */
 const isTypedEntry = (target) =>
   target && typeof target === 'object' && typeof target.types === 'string' && target.types.endsWith('.d.ts');
@@ -86,20 +86,20 @@ export function loadSurface(uiRoot) {
   }
 
   // ── 2. The kai-* element catalog ───────────────────────────────────────────
-  const metaPath = resolve(uiRoot, (pkg.exports?.['./element-meta.json'] ?? './src/elements/element-meta.json'));
+  const metaPath = resolve(uiRoot, (pkg.exports?.['./web-component-meta.json'] ?? './src/web-components/web-component-meta.json'));
   const elements = JSON.parse(readFileSync(metaPath, 'utf8'));
 
-  // element-meta.json records the props each element DECLARES, but `define.tsx`
+  // web-component-meta.json records the props each element DECLARES, but `define.tsx`
   // injects a universal `theme` onto every element that never reaches the JSON.
   // The shipped `Kai<Name>ElementProps` interfaces do include it, so the two are
   // unioned: names come from the .d.ts, the scalar/non-scalar flag (which only
-  // element-meta carries) comes from the JSON. Deriving this rather than
+  // web-component-meta carries) comes from the JSON. Deriving this rather than
   // hard-coding `theme` means the next universal prop is handled for free —
   // without it, every `theme="dark"` in the docs was a false positive.
-  const elementsDts = entryFiles.find((e) => e.specifier === '@kitn.ai/ui/elements');
+  const webComponentsDts = entryFiles.find((e) => e.specifier === '@kitn.ai/ui/web-components');
   const dtsMembers = new Map(); // interface name -> Set<member>
-  if (elementsDts) {
-    const sf = program.getSourceFile(elementsDts.dts);
+  if (webComponentsDts) {
+    const sf = program.getSourceFile(webComponentsDts.dts);
     if (sf) {
       for (const stmt of sf.statements) {
         if (!ts.isInterfaceDeclaration(stmt)) continue;
@@ -177,8 +177,8 @@ export function loadSurface(uiRoot) {
     if (root.has(`${name}Props`)) components.add(name);
   }
 
-  // ── 4. kai-* tokens the kit KNOWS but element-meta does not declare ────────
-  // Two real API surfaces are missing from element-meta.json:
+  // ── 4. kai-* tokens the kit KNOWS but web-component-meta does not declare ────────
+  // Two real API surfaces are missing from web-component-meta.json:
   //   · declarative light-DOM children — `<kai-step>` inside
   //     <kai-chain-of-thought>, `<kai-model>` inside <kai-model-switcher>. Both
   //     are documented routes with their own tests; neither is a registered
@@ -187,7 +187,7 @@ export function loadSurface(uiRoot) {
   //     such as `kai-maximize-intent`, which no element DECLARES.
   // Scanning the kit's own source for quoted `kai-…` literals separates "the
   // docs invented this" from "the kit has it but the metadata omits it". The
-  // second is a real finding, but about element-meta.json, not about the docs.
+  // second is a real finding, but about web-component-meta.json, not about the docs.
   const knownTokens = new Set();
   const srcDir = join(uiRoot, 'src');
   if (existsSync(srcDir)) {
@@ -245,10 +245,10 @@ export function loadSurface(uiRoot) {
     /** Is `spec` an entry point the package actually declares? */
     resolvesEntry(spec) {
       if (entries.has(spec)) return true;
-      // ./elements/* wildcard — a per-element module.
-      const m = /^@kitn\.ai\/ui\/elements\/(.+)$/.exec(spec);
-      if (m) return existsSync(join(uiRoot, 'dist/elements', `${m[1]}.d.ts`));
-      // Asset subpaths declared in the exports map (theme.css, element-meta.json…).
+      // ./web-components/* wildcard — a per-element module.
+      const m = /^@kitn\.ai\/ui\/web-components\/(.+)$/.exec(spec);
+      if (m) return existsSync(join(uiRoot, 'dist/web-components', `${m[1]}.d.ts`));
+      // Asset subpaths declared in the exports map (theme.css, web-component-meta.json…).
       const sub = spec === '@kitn.ai/ui' ? '.' : `.${spec.slice('@kitn.ai/ui'.length)}`;
       return Object.prototype.hasOwnProperty.call(pkg.exports ?? {}, sub);
     },

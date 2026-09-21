@@ -77,7 +77,7 @@ function rewrite(code: string): string {
     .filter((l) => !l.startsWith('import type '))
     .map((l) =>
       l
-        .replace("'@kitn.ai/ui/elements'", `'${PKG}/src/elements/chat'`)
+        .replace("'@kitn.ai/ui/web-components'", `'${PKG}/src/web-components/chat/chat'`)
         .replace("'@kitn.ai/ui/state'", `'${PKG}/src/state'`)
         .replace("'@kitn.ai/ui/wire'", `'${PKG}/src/wire'`),
     )

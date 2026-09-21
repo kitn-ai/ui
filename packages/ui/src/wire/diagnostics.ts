@@ -28,7 +28,7 @@
 // SSR: no `window`, no `Date` and no other global touched at module scope, so
 // this imports cleanly anywhere the rest of `wire/` does.
 import type { ModelUsage } from './chunk';
-// TYPE-ONLY, and that is what makes it legal here. `elements/diagnostic-events`
+// TYPE-ONLY, and that is what makes it legal here. `web-components/diagnostic-events`
 // declares interfaces and nothing else -- no imports, no runtime -- so this
 // specifier is erased at build and `wire/` acquires no dependency on
 // `elements/`. A real one would be a layering inversion AND would drag the
@@ -38,7 +38,7 @@ import type { ModelUsage } from './chunk';
 // and the union is what lets it discriminate on `type` instead of being handed
 // an open bag. The alternative -- declaring the element events inside this file
 // -- puts element concepts in the wire layer, which is worse.
-import type { ElementDiagnosticEvent } from '../elements/diagnostic-events';
+import type { WebComponentDiagnosticEvent } from '../web-components/web-component/diagnostic-events';
 
 /** The envelope every diagnostic event shares. `t` is `Date.now()` at emission. */
 export interface WireDiagnosticBase {
@@ -514,13 +514,13 @@ export function wireCorrelation(
  * parameter straight into a `WireDiagnosticEvent` needs a narrowing check it
  * should have had anyway.
  */
-export type KaiDiagnosticEvent = WireDiagnosticEvent | ElementDiagnosticEvent;
+export type KaiDiagnosticEvent = WireDiagnosticEvent | WebComponentDiagnosticEvent;
 
 /**
  * Narrow the shared stream to the element half — and, by negation, to the wire
  * half, which is what most callers actually want:
  *
- *   if (isElementDiagnosticEvent(e)) { … } else { e.streamId … }
+ *   if (isWebComponentDiagnosticEvent(e)) { … } else { e.streamId … }
  *
  * WHY THIS DIRECTION and not an `isWireDiagnosticEvent`. The element family is
  * CLOSED and small; the non-element side is the one that keeps growing, and it
@@ -533,10 +533,10 @@ export type KaiDiagnosticEvent = WireDiagnosticEvent | ElementDiagnosticEvent;
  *
  * Exists because a panel, and every test in this repo that reads `streamId` or
  * `traceId` off "every event", needs exactly this one check now that two layers
- * share one channel. The prefix is pinned by `element-artifact-divergence.test.ts`.
+ * share one channel. The prefix is pinned by `web-component-artifact-divergence.test.ts`.
  */
-export function isElementDiagnosticEvent(e: KaiDiagnosticEvent): e is ElementDiagnosticEvent {
-  return e.type.startsWith('element.');
+export function isWebComponentDiagnosticEvent(e: KaiDiagnosticEvent): e is WebComponentDiagnosticEvent {
+  return e.type.startsWith('web-component.');
 }
 
 type Subscriber = (e: KaiDiagnosticEvent) => void;
@@ -553,7 +553,7 @@ type Subscriber = (e: KaiDiagnosticEvent) => void;
  * deleted it outright.
  *
  * A shared chunk would fix OUR build and not the class. The second instance is a
- * consumer who bundles the kit and also loads the elements bundle from a CDN:
+ * consumer who bundles the kit and also loads the web-components bundle from a CDN:
  * that duplicates the module identically, and nothing we do to our own build
  * config prevents it. A global keyed by `Symbol.for` is the one thing every copy
  * agrees on, because the symbol registry is per-realm rather than per-module.

@@ -75,7 +75,7 @@ const TMP_DIR = resolve(PKG, '.tmp-emitted-maximal');
 
 // jsdom gaps this surface walks into, as no-op stubs: the stick-to-bottom primitive
 // calls scrollTo from a rAF (kai-chat), and the disclosures measure with a
-// ResizeObserver (kai-reasoning). Same stubs `element-methods-runtime.test.tsx`
+// ResizeObserver (kai-reasoning). Same stubs `methods-runtime.test.tsx`
 // uses, and nothing here asserts scroll position or height.
 //
 // They are load-bearing for a reason worth naming: the emitted tool loop wraps its
@@ -115,9 +115,9 @@ const SEP = '// ── src/main.ts ──';
 
 /**
  * The package's own exports map, applied by hand — same rewriter as the other two
- * guards, with ONE difference: `@kitn.ai/ui/elements` resolves to `dist/kai.es.js`,
+ * guards, with ONE difference: `@kitn.ai/ui/web-components` resolves to `dist/kai.es.js`,
  * the register-ALL bundle, and this surface needs six tags rather than one. The
- * others point it at `src/elements/chat` because `<kai-chat>` is all they mount;
+ * others point it at `src/web-components/chat/chat` because `<kai-chat>` is all they mount;
  * doing that here would leave kai-resizable / kai-artifact / kai-sources /
  * kai-voice-input as unupgraded unknown elements and every assertion below would be
  * testing inert markup. `register-impl` is that bundle's source-tree entry point.
@@ -129,7 +129,7 @@ function rewrite(code: string): string {
     .filter((l) => !l.startsWith('import type '))
     .map((l) =>
       l
-        .replace("'@kitn.ai/ui/elements'", `'${PKG}/src/elements/register-impl'`)
+        .replace("'@kitn.ai/ui/web-components'", `'${PKG}/src/web-components/register/register-impl'`)
         .replace("'@kitn.ai/ui/state'", `'${PKG}/src/state'`)
         .replace("'@kitn.ai/ui/wire'", `'${PKG}/src/wire'`)
         .replace("'@kitn.ai/ui/schemas'", `'${PKG}/src/schemas'`),

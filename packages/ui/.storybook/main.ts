@@ -60,7 +60,7 @@ function serveRemoteProvider(): Plugin {
 // `treeshake: false` and `emptyOutDir: true`. None of that was ever intended
 // for Storybook; it was inherited by accident of filename.
 //
-// That file is now config/vite/elements.ts behind KAI_BUILD, so there is
+// That file is now config/vite/web-components.ts behind KAI_BUILD, so there is
 // nothing at the root for Storybook to pick up and everything this config
 // needs is set explicitly in `viteFinal` below (the Solid plugin comes from the
 // `storybook-solidjs-vite` framework). Do NOT reintroduce a vite.config.ts at

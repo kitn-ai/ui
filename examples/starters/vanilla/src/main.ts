@@ -1,4 +1,4 @@
-import '@kitn.ai/ui/elements'; // registers the kai-* custom elements (async)
+import '@kitn.ai/ui/web-components'; // registers the kai-* custom elements (async)
 import '@kitn.ai/ui/theme.tokens.css'; // plain --color-* tokens for the shell
 import './index.css';
 import { readOpenAIStream } from '@kitn.ai/ui/wire';

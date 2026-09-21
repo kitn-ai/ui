@@ -5,14 +5,14 @@ and CLIs fluent building with `@kitn.ai/ui`. It lives beside `src/` rather
 than inside it because it is packaging and tooling on top of the library, not
 part of it. The edges between the two trees are few and worth knowing, in
 both directions: non-test modules here reach into `src/` only for pure,
-DOM-free facts (media types, theme tokens, the URL-scheme policy, the element
+DOM-free facts (media types, theme tokens, the URL-scheme policy, the web-component
 manifest, the chat-action and button-variant name lists, the mock stream), and
 `src/` reaches in here only from the builder modules that read
 `mcp/construct/*` for the construct schema and template registry. Read the
 current lists off the tree rather than off this paragraph:
 `grep -rn "\.\./\.\./mcp/" packages/ui/src` and
-`grep -rn "\.\./\.\./src/" packages/ui/mcp`. Tests under `mcp/` import
-elements freely, which is why `tsconfig.mcp.json` is scoped to `mcp/mcp/**`
+`grep -rn "\.\./\.\./src/" packages/ui/mcp`. Tests under `mcp/` import web
+components freely, which is why `tsconfig.mcp.json` is scoped to `mcp/mcp/**`
 rather than all of `mcp/`. Nothing a consumer's chat UI renders depends on
 anything in here.
 
@@ -50,7 +50,7 @@ anything in here.
   - `scaffold.ts` — generates a full chat integration (framework + backend
     route + integration wiring) from `mcp/registry.ts` and
     `mcp/archetypes.ts` (backed by `mcp/integrations/`).
-  - `reference.ts` — component/element/card lookup for an agent deciding what
+  - `reference.ts` — component/web-component/card lookup for an agent deciding what
     to use.
   - `theme.ts` — produces a `--kai-*` CSS token override block from a brand
     color or description, resolved against the kit's own `theme.css`.
@@ -101,13 +101,14 @@ engine standalone, with no MCP server involved at all.
 
 ## Usage
 
-- **`npx @kitn.ai/ui mcp`** starts the MCP server (the historical default
-  subcommand). For wiring it into a multi-harness setup, see the docs site's
-  agents guide: `apps/docs/src/content/docs/guides/for-ai-agents.mdx`.
-- **CLI form**, no MCP: `node bin/mcp.js validate|dev|compile|eject <construct.json>`
-  (`bin/mcp.js` dispatches `dev`/`compile`/`eject`/`validate` to the construct
-  CLI and anything else, including `mcp` or no argument, to the MCP server;
-  an unrecognized subcommand is a loud error, not a silent fallthrough).
+- **`npx @kitn.ai/kai mcp`** starts the MCP server (the historical default
+  subcommand; it used to be the same command under the kit's own package, and the kit
+  still ships a stub that names the new one). For wiring it into a multi-harness setup, see the
+  docs site's agents guide: `apps/docs/src/content/docs/guides/for-ai-agents.mdx`.
+- **CLI form**, no MCP: `npx @kitn.ai/kai validate|dev|compile|eject <construct.json>`
+  (`packages/kai/bin/mcp.js` dispatches `dev`/`compile`/`eject`/`validate` to the
+  construct CLI and anything else, including `mcp` or no argument, to the MCP
+  server; an unrecognized subcommand is a loud error, not a silent fallthrough).
   `eject` writes a real Solid project you own; `dev` gives a live-reload
   preview; `compile` emits one self-registering `.js`.
 - **Acceptance harness** (`packages/ui/scripts/acceptance-*.mjs`:
@@ -190,7 +191,7 @@ the artifact, there is no separate interpreter to drift from it.
 
 - Repo root [`CLAUDE.md`](../../../../CLAUDE.md)'s **Map** section for how
   this directory sits relative to `primitives/`, `ui/`, `components/`, and
-  `elements/`.
+  `web-components/`.
 - [`.claude/README.md`](../../../../.claude/README.md) for the project-local
   skills/agents that exercise this tooling (notably `/consumer-regression`).
 - The docs site's agents guide,

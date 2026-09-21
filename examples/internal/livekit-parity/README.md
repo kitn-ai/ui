@@ -51,7 +51,7 @@ satisfied by aliases in vite.config.ts/tsconfig.json.
 `public/`. It is a local fixture — a private recording of the project owner's
 voice — and is gitignored too.
 
-Our side consumes the kit's **built dist** (`packages/ui/dist/elements/audio-visualizer.js`
+Our side consumes the kit's **built dist** (`packages/ui/dist/web-components/audio-visualizer.js`
 via the `@kit-dist` alias) so the harness sees exactly what a consumer gets;
 probe math and the baked voice fixture import from `packages/ui/src` (plain TS,
 `@kit-src` alias).

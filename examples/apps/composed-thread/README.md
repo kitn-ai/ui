@@ -56,6 +56,8 @@ seen the kit's repository: a headless `claude -p` session (model
 - the kit's own `kai` MCP server over stdio
   (`node node_modules/@kitn.ai/ui/bin/mcp.js`, wired via `--mcp-config
   .mcp.json --strict-mcp-config`, the four `mcp__kai__*` tools allowed)
+  <!-- the path is a record of the run against 0.26.0 and is left as it was; the CLI
+       now lives in @kitn.ai/kai, so the current form is `npx @kitn.ai/kai mcp` -->
 - the sanctioned docs only: the package README, https://ui.kitn.ai, and the MCP
 
 No repo access, default permissions (no `--dangerously-skip-permissions`),
@@ -70,7 +72,7 @@ The one and only prompt the builder received (`builder-prompt.md`, sha256
 against the file that was launched). There were no follow-up prompts.
 
 ````text
-Build a small web app: a chat client where you compose the conversation UI yourself from standalone pieces instead of using the all-in-one chat element — do NOT use `<kai-chat>` anywhere. The `@kitn.ai/ui` package is already installed in this directory; it ships web components for AI chat UIs. Compose the thread yourself from the package's standalone elements: `kai-thread`, `kai-message`, `kai-conversation-item`, `kai-composer`, `kai-attachments`, `kai-toast-region`, and `kai-feedback-bar`. Wire streaming with the package's state and wire helpers, and drive replies from the package's mock responder (it can emit tool calls) — no API key, no remote provider. The app must let a user attach a FILE in the composer, send it, and see the attachment rendered in the thread on the sent message. Plain Vite + TypeScript, no framework. The package's `kai` MCP server is configured for you: use it to learn what the package provides and how to use it. The docs you may use are the package's README, https://ui.kitn.ai, and the kai MCP — nothing else; do not read the package's source on npm or GitHub. When done: the app must build (`npm run build`) and run (`npm run dev`), and write NOTES.md recording every question you could not answer from the MCP or the docs and where you had to guess.
+Build a small web app: a chat client where you compose the conversation UI yourself from standalone pieces instead of using the all-in-one chat element — do NOT use `<kai-chat>` anywhere. The `@kitn.ai/ui` package is already installed in this directory; it ships web components for AI chat UIs. Compose the thread yourself from the package's standalone web components: `kai-thread`, `kai-message`, `kai-conversation-item`, `kai-composer`, `kai-attachments`, `kai-toast-region`, and `kai-feedback-bar`. Wire streaming with the package's state and wire helpers, and drive replies from the package's mock responder (it can emit tool calls) — no API key, no remote provider. The app must let a user attach a FILE in the composer, send it, and see the attachment rendered in the thread on the sent message. Plain Vite + TypeScript, no framework. The package's `kai` MCP server is configured for you: use it to learn what the package provides and how to use it. The docs you may use are the package's README, https://ui.kitn.ai, and the kai MCP — nothing else; do not read the package's source on npm or GitHub. When done: the app must build (`npm run build`) and run (`npm run dev`), and write NOTES.md recording every question you could not answer from the MCP or the docs and where you had to guess.
 ````
 
 #### Independent verification (by the setup orchestrator, after the run)

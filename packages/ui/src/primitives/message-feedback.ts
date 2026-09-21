@@ -8,8 +8,8 @@
 // the toggle/toast/clipboard behavior directly testable.
 
 import { createSignal, onCleanup } from 'solid-js';
-import type { ChatMessage, FeedbackVote } from '../elements/chat-types';
-import { partsToText } from '../state';
+import type { ChatMessage, FeedbackVote } from '../web-components/chat/chat-types';
+import { partsToText } from './parts-text';
 import { toast } from './toast-store';
 import { speakText } from './speech';
 

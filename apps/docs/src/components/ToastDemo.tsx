@@ -36,7 +36,7 @@ const POS_PLACE: Record<Position, string> = {
   'bottom-right': 'bottom-1 right-1',
 };
 
-const SNIPPET_JS = `import { toast, configureToasts } from '@kitn.ai/ui/elements';
+const SNIPPET_JS = `import { toast, configureToasts } from '@kitn.ai/ui/web-components';
 
 // Opt the imperative singleton into the collapsed pile (call once at app start).
 configureToasts({ stack: 'collapsed', position: 'top-right' });
@@ -52,7 +52,7 @@ t.update({ message: 'Report ready', variant: 'success', duration: 2000 });`;
 const SNIPPET_HTML = `<kai-toast-region position="top-right" stack="collapsed"></kai-toast-region>
 
 <script type="module">
-  import { toast } from '@kitn.ai/ui/elements';
+  import { toast } from '@kitn.ai/ui/web-components';
 
   toast.success('Copied to clipboard');
   toast('Conversation dismissed', {

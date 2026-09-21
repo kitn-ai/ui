@@ -107,23 +107,23 @@ describe('debug', () => {
     expect(text).toMatch(/new array|new reference/i);
   });
 
-  // ── Rule 6: custom elements not registered / renders nothing ───────────────
-  it('React wrapper renders nothing / empty → elements-not-registered fix', async () => {
+  // ── Rule 6: web components not registered / renders nothing ────────────────
+  it('React wrapper renders nothing / empty → web-components-not-registered fix', async () => {
     const out = await debug.handler({
       symptom:
         'Using the React wrapper, the kai-chat element renders nothing / appears empty. ' +
         'How do I register the custom elements?',
     });
     const text = (out.content as { type: string; text: string }[])[0].text;
-    expect(text).toMatch(/@kitn\.ai\/ui\/elements/);
+    expect(text).toMatch(/@kitn\.ai\/ui\/web-components/);
   });
 
-  it('"renders nothing" + "not registered" → elements-not-registered fix', async () => {
+  it('"renders nothing" + "not registered" → web-components-not-registered fix', async () => {
     const out = await debug.handler({
       symptom: 'kai-chat renders nothing — customElements.get returns undefined, element not registered',
     });
     const text = (out.content as { type: string; text: string }[])[0].text;
-    expect(text).toMatch(/Custom elements not registered|elements-not-registered|@kitn\.ai\/ui\/elements/i);
+    expect(text).toMatch(/Web components not registered|web-components-not-registered|@kitn\.ai\/ui\/web-components/i);
   });
 
   it('generic "empty" symptom without render context does NOT fire Rule 6', async () => {
@@ -131,14 +131,14 @@ describe('debug', () => {
       symptom: 'the data array is empty after fetch',
     });
     const text = (out.content as { type: string; text: string }[])[0].text;
-    expect(text).not.toMatch(/Custom elements not registered/i);
+    expect(text).not.toMatch(/Web components not registered/i);
   });
 
   // ── Rule 7: tsc errors inside node_modules/@kitn.ai/ui/src ─────────────────
   it('tsc TS2786 Show error in @kitn.ai/ui → tsc-source-pull paths/stub fix', async () => {
     const out = await debug.handler({
       symptom:
-        'node_modules/@kitn.ai/ui/src/ui/Chat.tsx error TS2786: Show cannot be used as a JSX component',
+        'node_modules/@kitn.ai/ui/src/components/chat/chat-container.tsx error TS2786: Show cannot be used as a JSX component',
     });
     const text = (out.content as { type: string; text: string }[])[0].text;
     expect(text).toMatch(/paths|kitn-elements\.d\.ts|skipLibCheck/i);
@@ -154,15 +154,15 @@ describe('debug', () => {
   });
 
   // ── Rule 9: bundle footprint / reduce bundle size ─────────────────────────
-  it('bundle size symptom → explains three load modes (register-all, per-element, autoloader)', async () => {
+  it('bundle size symptom → explains three load modes (register-all, per-web-component, autoloader)', async () => {
     const out = await debug.handler({
       symptom: 'How do I reduce bundle size? How much does @kitn.ai/ui add?',
     });
     const text = (out.content as { type: string; text: string }[])[0].text;
     // must explain register-all (default)
-    expect(text).toMatch(/@kitn\.ai\/ui\/elements/);
-    // must explain per-element imports with an example
-    expect(text).toMatch(/@kitn\.ai\/ui\/elements\/chat/);
+    expect(text).toMatch(/@kitn\.ai\/ui\/web-components/);
+    // must explain per-web-component imports with an example
+    expect(text).toMatch(/@kitn\.ai\/ui\/web-components\/chat/);
     // must explain the autoloader, positioned as CDN-only (not a bundler import)
     expect(text).toMatch(/autoloader/i);
     expect(text).toMatch(/CDN|not importable through a bundler/i);
@@ -173,7 +173,7 @@ describe('debug', () => {
       symptom: 'How do I tree-shake @kitn.ai/ui to only import the elements I need?',
     });
     const text = (out.content as { type: string; text: string }[])[0].text;
-    expect(text).toMatch(/per.?element|elements\/chat/i);
+    expect(text).toMatch(/per-web-component|web-components\/chat/i);
   });
 
   it('CDN / no-build autoloader symptom → bundle-footprint rule fires', async () => {
@@ -184,7 +184,7 @@ describe('debug', () => {
     expect(text).toMatch(/autoloader/i);
   });
 
-  it('bundle-footprint rule mentions SSR constraint for per-element + autoloader', async () => {
+  it('bundle-footprint rule mentions SSR constraint for per-web-component + autoloader', async () => {
     const out = await debug.handler({
       symptom: 'reduce bundle size footprint for @kitn.ai/ui',
     });
@@ -201,7 +201,7 @@ describe('debug', () => {
     });
     const text = (out.content as { type: string; text: string }[])[0].text;
     // Must NOT match the bundle-footprint fix (no kai-* context)
-    expect(text).not.toMatch(/per.?element import|@kitn\.ai\/ui\/elements\/chat|autoloader/i);
+    expect(text).not.toMatch(/per.?element import|@kitn\.ai\/ui\/web-components\/chat|autoloader/i);
   });
 
   // ── Rule 10: toast is imperative (no <kai-toast> to place) ─────────────────
@@ -212,7 +212,7 @@ describe('debug', () => {
     const text = (out.content as { type: string; text: string }[])[0].text;
     expect(text).toMatch(/imperative|toast\(/i);
     // names the correct import path(s)
-    expect(text).toMatch(/@kitn\.ai\/ui\/elements|@kitn\.ai\/ui/);
+    expect(text).toMatch(/@kitn\.ai\/ui\/web-components|@kitn\.ai\/ui/);
     // explains the region auto-mounts (no hand-placed element)
     expect(text).toMatch(/auto.?mount|kai-toast-region/i);
   });

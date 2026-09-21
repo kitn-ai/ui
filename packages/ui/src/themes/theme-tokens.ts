@@ -68,6 +68,7 @@ export const GROUPS: Group[] = [
     tokens: [
       { token: '--kai-color-destructive', label: 'Destructive', hint: 'Danger / delete' },
       { token: '--kai-color-destructive-foreground', label: 'On destructive', hint: 'Text on danger' },
+      { token: '--kai-color-destructive-text', label: 'Destructive text', hint: 'Error text — legible in both modes' },
       { token: '--kai-color-destructive-soft', label: 'Destructive soft', hint: 'Tinted danger callout' },
       { token: '--kai-color-success', label: 'Success', hint: 'Done / confirmed' },
       { token: '--kai-color-success-foreground', label: 'On success', hint: 'Text on success' },
@@ -134,6 +135,19 @@ export const TEXT_RUNGS: TextRung[] = [
  *  element stylesheet rather than theme.css; the rest resolve through theme.css. */
 export const EXTRA_TOKENS = [
   '--kai-radius',
+  // Density: every spacing utility is `calc(var(--spacing) * N)`.
+  '--kai-density',
+  // Pill: `rounded-full` is a literal, so the pill family needs its own rung.
+  '--kai-radius-pill',
+  // Code: its own corner, not a rung of the radius ladder.
+  '--kai-code-radius',
+  // Elevation: one multiplier over every shadow rung (unitless, not rem).
+  '--kai-shadow-strength',
+  // Weights: one knob per rung.
+  '--kai-weight-normal',
+  '--kai-weight-medium',
+  '--kai-weight-semibold',
+  '--kai-weight-bold',
   '--kai-font-base',
   '--kai-font-code',
   '--kai-tracking',

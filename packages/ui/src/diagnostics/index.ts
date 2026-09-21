@@ -7,8 +7,8 @@
 // Keeping them apart leaves a consumer who only parses streams at zero cost.
 //
 // WHO CALLS `installKaiDevtoolsHook()`. The kit calls it for you from
-// `elements/register-impl.ts`, so any app that registers the `kai-*` elements --
-// which is every consumer of `@kitn.ai/ui/elements`, the React wrappers, or the
+// `web-components/register/register-impl.ts`, so any app that registers the `kai-*` elements --
+// which is every consumer of `@kitn.ai/ui/web-components`, the React wrappers, or the
 // CDN bundle -- gets the hook with no work.
 //
 // THE ONE CASE THAT DOES NOT: an app importing the SolidJS components directly
@@ -74,9 +74,9 @@ export type {
 // stays free of element bytes and a consumer who only parses streams pays
 // nothing for them. `KaiDiagnosticEvent` above is the union a panel switches on.
 export type {
-  ElementDiagnosticBase,
-  ElementDiagnosticEvent,
-  ElementRegistryEvent,
-  ElementViolationEvent,
-  ElementViolationKind,
-} from '../elements/diagnostic-events';
+  WebComponentDiagnosticBase,
+  WebComponentDiagnosticEvent,
+  WebComponentRegistryEvent,
+  WebComponentViolationEvent,
+  WebComponentViolationKind,
+} from '../web-components/web-component/diagnostic-events';

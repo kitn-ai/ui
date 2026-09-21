@@ -11,14 +11,14 @@
  *
  *     valueLabel?: boolean | (value: number) => string;
  *
- * into `src/elements/element-types.d.ts` AND into `dist/elements.d.ts`, which is what a
+ * into `src/web-components/web-component-types.d.ts` AND into `dist/web-components.d.ts`, which is what a
  * TypeScript consumer of the published package resolves. TS1385, twice.
  *
- * WHY THE EXISTING TESTS ARE NOT ENOUGH. `element-types-lib-check` and
- * `element-methods-typed` compile the generated artifact, so they DID go red once the
+ * WHY THE EXISTING TESTS ARE NOT ENOUGH. `types-lib-check` and
+ * `methods-typed` compile the generated artifact, so they DID go red once the
  * bad prop existed. They could not have caught it a day earlier, because they can only
- * see shapes some element happens to declare today. This file drives the renderer over
- * FIXTURES instead, so the rule is guarded whether or not any element uses it.
+ * see shapes some web component happens to declare today. This file drives the renderer over
+ * FIXTURES instead, so the rule is guarded whether or not any web component uses it.
  *
  * THE ARRAY CASE IS WORSE THAN THE UNION CASE AND IS THE REASON THIS IS FIXTURE-LEVEL.
  * `() => void` + `[]` is `() => void[]`: a function returning an array. It parses, tsc
@@ -186,7 +186,7 @@ describe('renderType emits type strings that parse', () => {
 
 /**
  * The other half of the rule. Whether a type needs parens is a property of the POSITION
- * it sits in, and `clean()` in gen-element-types.mjs MOVES it: it strips the `undefined`
+ * it sits in, and `clean()` in gen-web-component-types.mjs MOVES it: it strips the `undefined`
  * arm from an optional prop before writing the `.d.ts`, which can leave a function type
  * wearing parens it no longer needs. Without `unwrapOuterParens` the union fix would
  * have added redundant parens to every existing function-typed prop
@@ -252,7 +252,7 @@ describe('cleanEmittedType', () => {
 
 /**
  * The normaliser had TWO byte-identical copies, one per emitter, and that is why the
- * function-in-union fix had to be discovered twice: patching gen-element-types.mjs left
+ * function-in-union fix had to be discovered twice: patching gen-web-component-types.mjs left
  * `frameworks/react/index.tsx` — a shipped consumer entry point — still emitting
  * `valueLabel?: boolean | (value: number) => string`. The second failure was invisible
  * because `npm run typecheck` is `&&`-joined and an earlier step was already red.
@@ -270,7 +270,7 @@ describe('the emitted-type normaliser has a single owner', () => {
     expect(read('_ts-helpers.mjs')).toContain('export const cleanEmittedType');
   });
 
-  it.each(['gen-element-types.mjs', 'gen-element-react.mjs'])(
+  it.each(['gen-web-component-types.mjs', 'gen-web-component-react.mjs'])(
     '%s imports it rather than redefining it',
     (file) => {
       const src = read(file);

@@ -2,15 +2,15 @@
  *
  *  How it works: every kit color is a CSS custom property the consumer can
  *  override. The studio writes the active palette as inline `--kai-color-*` /
- *  `--kai-radius` properties on a single canvas wrapper; custom properties
+ *  `--kai-radius` / `--kai-density` properties on a single canvas wrapper; custom properties
  *  inherit through the Shadow DOM, so every `kai-*` element inside the canvas
  *  reskins at once — the exact mechanism you'd ship in a stylesheet.
  *
  *  Light and dark are edited independently (each canvas host runs at the studio's
  *  own mode, not the page's), and Copy CSS exports the paste-ready `:root` +
- *  `.dark` blocks. Bounded to real tokens — colors, radius, the type scale and
- *  the font/tracking/shadow knobs — so it never promises theming the kit can't
- *  actually do. The type-size rungs earned their place when theme.css re-pointed
+ *  `.dark` blocks. Bounded to real tokens — colors, radius, density, the type
+ *  scale and the font/tracking/shadow knobs — so it never promises theming the
+ *  kit can't actually do. The type-size rungs earned their place when theme.css re-pointed
  *  Tailwind's `text-xs`/`text-sm`/`text-base`/`text-lg` at `--kai-text-*`: before
  *  that a size slider would have moved a small minority of the kit's call sites.
  *
@@ -20,8 +20,8 @@
  *  "Default" theme is the kit's, byte for byte, and cannot drift from it.
  *
  *  This file is a standalone APP (apps/theme-studio/, built by
- *  KAI_BUILD=theme-studio in config/vite/page.ts into dist/theme-studio and
- *  served by the
+ *  KAI_BUILD=theme-studio in packages/kai/config/vite/page.ts into
+ *  packages/kai/dist/theme-studio and served by the
  *  construct dev server at /theme-studio/), and is ALSO what the docs site's
  *  /theme/editor page renders (apps/docs re-exports it). It must never be
  *  imported from any component/elements/react entry point — it is a dev tool,
@@ -54,7 +54,7 @@ import { GROUPS, ALL_TOKENS, TEXT_RUNGS, parseKitDefaults, remValue, type TextRu
 
 // The showroom writes ONE kai-* tag directly in Solid JSX (<kai-chat> below);
 // every other element mounts via document.createElement in mountSample. Solid's
-// JSX namespace knows no custom elements and element-types.d.ts augments
+// JSX namespace knows no custom elements and web-component-types.d.ts augments
 // REACT's JSX, not Solid's, so declare the tag here the way the stories do
 // (chat-slots.stories.tsx uses the identical type, which keeps the interface
 // merge legal when both files share a program). It must live IN this module,
@@ -141,6 +141,49 @@ const kitDefault = (token: string, mode: 'light' | 'dark'): string => {
   return d[mode];
 };
 const DEFAULT_RADIUS = remValue(kitDefault('--kai-radius', 'light')); // rem
+/** Density default, read from theme.css (0.25rem = Tailwind's own). */
+const DEFAULT_DENSITY = remValue(kitDefault('--kai-density', 'light')); // rem
+/** Pill default from theme.css: 4rem, i.e. fully round up to 8rem tall. */
+const DEFAULT_PILL = remValue(kitDefault('--kai-radius-pill', 'light')); // rem
+/** The code surface's own corner. Separate from the radius ladder by design. */
+const DEFAULT_CODE_RADIUS = remValue(kitDefault('--kai-code-radius', 'light')); // rem
+/** Elevation multiplier — unitless, so parsed as a number rather than rem. */
+const DEFAULT_ELEVATION = Number.parseFloat(kitDefault('--kai-shadow-strength', 'light'));
+
+/** One knob per rung: a heavier semibold rarely means a heavier normal. */
+const WEIGHT_RUNGS = [
+  { name: 'normal', token: '--kai-weight-normal', label: 'Normal' },
+  { name: 'medium', token: '--kai-weight-medium', label: 'Medium' },
+  { name: 'semibold', token: '--kai-weight-semibold', label: 'Semibold' },
+  { name: 'bold', token: '--kai-weight-bold', label: 'Bold' },
+] as const;
+type WeightName = (typeof WEIGHT_RUNGS)[number]['name'];
+/** Unitless — not `remValue`. */
+const weightDef = (name: WeightName): number => Number.parseFloat(kitDefault(`--kai-weight-${name}`, 'light'));
+type WeightScale = Record<WeightName, number>;
+const seedWeights = (): WeightScale =>
+  Object.fromEntries(WEIGHT_RUNGS.map((r) => [r.name, weightDef(r.name)])) as WeightScale;
+const WEIGHT_VALUES = [100, 200, 300, 400, 500, 600, 700, 800, 900];
+
+/** Steps, not a free slider: 0 collapses the kit's spacing and 0.75rem fights every
+ *  layout, so the range only offers bad choices. ±25% around Tailwind's 0.25rem. A
+ *  value outside these renders as Custom rather than being snapped. */
+const DENSITY_CHOICES: { label: string; value: number }[] = [
+  { label: 'Very tight', value: 0.1875 },
+  { label: 'Tight', value: 0.21875 },
+  { label: 'Default', value: 0.25 },
+  { label: 'Loose', value: 0.28125 },
+  { label: 'Very loose', value: 0.3125 },
+];
+
+/** Same argument as Density: past ~2x every surface shouts. */
+const ELEVATION_CHOICES: { label: string; value: number }[] = [
+  { label: 'Flat', value: 0 },
+  { label: 'Subtle', value: 0.5 },
+  { label: 'Default', value: 1 },
+  { label: 'Raised', value: 1.5 },
+  { label: 'Dramatic', value: 2 },
+];
 
 /** A rung's default rem, from theme.css. */
 const rungDef = (r: TextRung): number => remValue(kitDefault(r.token, 'light'));
@@ -391,13 +434,17 @@ const isEmbedded = (): boolean =>
 const isRail = (): boolean =>
   typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('embed');
 
-interface ThemeExtras { radius: number; fontBase: string; fontCode: string; tracking: number; shadow: string; text: TextScale }
+interface ThemeExtras { radius: number; density: number; pill: number; codeRadius: number; elevation: number; weights: WeightScale; fontBase: string; fontCode: string; tracking: number; shadow: string; text: TextScale }
 
-/** Build paste-ready CSS: full light set on :root (+ radius/type scale/font/
- *  tracking/shadow), dark set on .dark. */
+/** Paste-ready CSS: the light set on :root, the dark set on .dark. */
 function buildCss(light: Palette, dark: Palette, x: ThemeExtras): string {
   const rootExtra = [
     `  --kai-radius: ${x.radius}rem;`,
+    `  --kai-density: ${x.density}rem;`,
+    `  --kai-radius-pill: ${x.pill}rem;`,
+    `  --kai-code-radius: ${x.codeRadius}rem;`,
+    `  --kai-shadow-strength: ${x.elevation};`,
+    ...WEIGHT_RUNGS.map((r) => `  ${r.token}: ${x.weights[r.name]};`),
     ...TEXT_RUNGS.map((r) => `  ${r.token}: ${x.text[r.token] ?? rungDef(r)}rem;`),
     x.fontBase ? `  --kai-font-base: ${x.fontBase};` : '',
     x.fontCode ? `  --kai-font-code: ${x.fontCode};` : '',
@@ -411,7 +458,7 @@ function buildCss(light: Palette, dark: Palette, x: ThemeExtras): string {
 
 /** Tolerant parse of pasted CSS: pull --kai-* declarations from the :root block
  *  (light) and the .dark block (dark). Unknown tokens are ignored. */
-function parseCss(css: string): { light: Palette; dark: Palette; radius?: number; text: TextScale } | null {
+function parseCss(css: string): { light: Palette; dark: Palette; radius?: number; density?: number; pill?: number; codeRadius?: number; elevation?: number; weights?: Partial<WeightScale>; text: TextScale } | null {
   const grab = (selector: string): Palette => {
     const re = new RegExp(`${selector}\\s*\\{([^}]*)\\}`);
     const block = css.match(re)?.[1] ?? '';
@@ -421,15 +468,30 @@ function parseCss(css: string): { light: Palette; dark: Palette; radius?: number
   };
   const light = grab(':root');
   const dark = grab('\\.dark');
-  const anyText = /--kai-text-[a-z-]+\s*:\s*[\d.]+rem/.test(css);
-  if (!Object.keys(light).length && !Object.keys(dark).length && !anyText) return null;
+  // A rem knob alone counts as a paste. `--kai-radius` stays out: a radius-only
+  // paste is still rejected, which is a separate decision from wiring tokens.
+  const hasRemKnob = /--kai-(?:text-[a-z-]+|density|radius-pill|code-radius|weight-[a-z]+|shadow-strength)\s*:\s*[\d.]+/.test(css);
+  if (!Object.keys(light).length && !Object.keys(dark).length && !hasRemKnob) return null;
   const radiusMatch = css.match(/--kai-radius\s*:\s*([\d.]+)rem/);
+  // Density is a rem value too, so `buildCss` output pasted back in round-trips.
+  const densityMatch = css.match(/--kai-density\s*:\s*([\d.]+)rem/);
+  // The two shape knobs are rem values too, so one export/import round-trips whole.
+  const pillMatch = css.match(/--kai-radius-pill\s*:\s*([\d.]+)rem/);
+  const codeRadiusMatch = css.match(/--kai-code-radius\s*:\s*([\d.]+)rem/);
+  // Elevation is a unitless multiplier; the weight rungs are unitless numbers too,
+  // so neither goes through the `rem` matches above.
+  const elevationMatch = css.match(/--kai-shadow-strength\s*:\s*([\d.]+)/);
+  const weights: Partial<WeightScale> = {};
+  for (const r of WEIGHT_RUNGS) {
+    const m = css.match(new RegExp(`${r.token}\\s*:\\s*(\\d+)`));
+    if (m) weights[r.name] = Number.parseInt(m[1], 10);
+  }
   // Type scale: rem only, and only rungs the kit actually has.
   const text: TextScale = {};
   for (const m of css.matchAll(/(--kai-text-[a-z-]+)\s*:\s*([\d.]+)rem/g)) {
     if (TEXT_RUNGS.some((r) => r.token === m[1])) text[m[1]] = parseFloat(m[2]);
   }
-  return { light, dark, radius: radiusMatch ? parseFloat(radiusMatch[1]) : undefined, text };
+  return { light, dark, radius: radiusMatch ? parseFloat(radiusMatch[1]) : undefined, density: densityMatch ? parseFloat(densityMatch[1]) : undefined, pill: pillMatch ? parseFloat(pillMatch[1]) : undefined, codeRadius: codeRadiusMatch ? parseFloat(codeRadiusMatch[1]) : undefined, elevation: elevationMatch ? parseFloat(elevationMatch[1]) : undefined, weights: Object.keys(weights).length ? weights : undefined, text };
 }
 
 export default function ThemeStudio() {
@@ -445,6 +507,11 @@ export default function ThemeStudio() {
   const [light, setLight] = createSignal<Palette>({});
   const [dark, setDark] = createSignal<Palette>({});
   const [radius, setRadius] = createSignal(DEFAULT_RADIUS);
+  const [density, setDensity] = createSignal(DEFAULT_DENSITY); // rem — the base of every Tailwind spacing utility
+  const [pill, setPill] = createSignal(DEFAULT_PILL); // rem — the pill family's cap radius
+  const [codeRadius, setCodeRadius] = createSignal(DEFAULT_CODE_RADIUS); // rem — the code surface's corner
+  const [elevation, setElevation] = createSignal(DEFAULT_ELEVATION); // multiplier over every shadow rung
+  const [weights, setWeights] = createSignal<WeightScale>(seedWeights()); // --kai-weight-*, unitless
   const [fontBase, setFontBase] = createSignal('');
   const [fontCode, setFontCode] = createSignal('');
   const [tracking, setTracking] = createSignal(0); // em
@@ -454,7 +521,7 @@ export default function ThemeStudio() {
   const [hsl, setHsl] = createSignal<Hsl>({ ...HSL_IDENTITY });
   const [preset, setPreset] = createSignal('Default');
   // Custom presets the user saves (persisted to localStorage).
-  type SavedPreset = { name: string; light: Palette; dark: Palette; radius: number; fontBase: string; fontCode: string; tracking: number; shadow: string; text?: TextScale };
+  type SavedPreset = { name: string; light: Palette; dark: Palette; radius: number; density?: number; pill?: number; codeRadius?: number; elevation?: number; weights?: Partial<WeightScale>; fontBase: string; fontCode: string; tracking: number; shadow: string; text?: TextScale };
   const PRESET_KEY = 'kai-theme-studio-presets';
   const [saved, setSaved] = createSignal<SavedPreset[]>([]);
   const persistSaved = (list: SavedPreset[]) => { setSaved(list); try { localStorage.setItem(PRESET_KEY, JSON.stringify(list)); } catch { /* storage blocked */ } };
@@ -480,7 +547,7 @@ export default function ThemeStudio() {
   const toggleGroup = (name: string) => setOpenGroups((o) => ({ ...o, [name]: !o[name] }));
 
   const active = () => (mode() === 'light' ? light() : dark());
-  const extras = (): ThemeExtras => ({ radius: radius(), fontBase: fontBase(), fontCode: fontCode(), tracking: tracking(), shadow: shadowColor(), text: textScale() });
+  const extras = (): ThemeExtras => ({ radius: radius(), density: density(), pill: pill(), codeRadius: codeRadius(), elevation: elevation(), weights: weights(), fontBase: fontBase(), fontCode: fontCode(), tracking: tracking(), shadow: shadowColor(), text: textScale() });
   // The palette as the canvas/export actually see it: base colors + the HSL nudge.
   const effLight = () => shiftPalette(light(), hsl());
   const effDark = () => shiftPalette(dark(), hsl());
@@ -501,6 +568,14 @@ export default function ThemeStudio() {
     const rootExtras: Record<string, string> = {};
     const scale = textScale();
     for (const r of TEXT_RUNGS) rootExtras[r.token] = `${scale[r.token] ?? rungDef(r)}rem`;
+    // Carried at rest, like --kai-shadow-color: the rail re-themes from what the
+    // payload names, and the default is Tailwind's own value anyway.
+    rootExtras['--kai-density'] = `${density()}rem`;
+    rootExtras['--kai-radius-pill'] = `${pill()}rem`;
+    rootExtras['--kai-code-radius'] = `${codeRadius()}rem`;
+    rootExtras['--kai-shadow-strength'] = String(elevation());
+    const w = weights();
+    for (const r of WEIGHT_RUNGS) rootExtras[r.token] = String(w[r.name]);
     if (tracking()) rootExtras['--kai-tracking'] = `${tracking()}em`;
     rootExtras['--kai-shadow-color'] = shadowColor();
     const fonts: Record<string, string> = {};
@@ -566,6 +641,8 @@ export default function ThemeStudio() {
       if (m) text[r.token] = parseFloat(m[1]);
     }
     setTextScale(fillText(Object.keys(text).length ? text : undefined));
+    const sp = t.light?.['--kai-density']?.match(/^([\d.]+)rem$/);
+    setDensity(sp ? parseFloat(sp[1]) : DEFAULT_DENSITY);
     const rm = t.radius?.match(/^([\d.]+)rem$/);
     setRadius(rm ? parseFloat(rm[1]) : DEFAULT_RADIUS);
     const tr = t.light?.['--kai-tracking']?.match(/^(-?[\d.]+)em$/);
@@ -590,6 +667,12 @@ export default function ThemeStudio() {
     const p = effActive();
     for (const t of ALL_TOKENS) canvasEl.style.setProperty(t.token, p[t.token]);
     canvasEl.style.setProperty('--kai-radius', `${radius()}rem`);
+    canvasEl.style.setProperty('--kai-density', `${density()}rem`);
+    canvasEl.style.setProperty('--kai-radius-pill', `${pill()}rem`);
+    canvasEl.style.setProperty('--kai-code-radius', `${codeRadius()}rem`);
+    canvasEl.style.setProperty('--kai-shadow-strength', String(elevation()));
+    const wScale = weights();
+    for (const r of WEIGHT_RUNGS) canvasEl.style.setProperty(r.token, String(wScale[r.name]));
     canvasEl.style.background = p['--kai-color-background'];
     // Typography + shadow tokens.
     const setOrClear = (name: string, val: string) => val ? canvasEl!.style.setProperty(name, val) : canvasEl!.style.removeProperty(name);
@@ -620,6 +703,22 @@ export default function ThemeStudio() {
     if (s) {
       // Tokens the kit grew after the preset was saved get their derived default.
       setLight(resolvePalette('light', s.light)); setDark(resolvePalette('dark', s.dark)); setRadius(s.radius);
+      // Optional: presets written by older builds carry that knob's theme.css
+      // default, which is what they meant.
+      setDensity(typeof s.density === 'number' && Number.isFinite(s.density) ? s.density : DEFAULT_DENSITY);
+      setPill(typeof s.pill === 'number' && Number.isFinite(s.pill) ? s.pill : DEFAULT_PILL);
+      setCodeRadius(typeof s.codeRadius === 'number' && Number.isFinite(s.codeRadius) ? s.codeRadius : DEFAULT_CODE_RADIUS);
+      // Same for elevation and the weight ladder: a preset saved before them carries
+      // their theme.css defaults, so the default is what it meant.
+      setElevation(typeof s.elevation === 'number' && Number.isFinite(s.elevation) ? s.elevation : DEFAULT_ELEVATION);
+      setWeights(
+        Object.fromEntries(
+          WEIGHT_RUNGS.map((r) => {
+            const v = s.weights?.[r.name];
+            return [r.name, typeof v === 'number' && Number.isFinite(v) ? v : weightDef(r.name)];
+          }),
+        ) as WeightScale,
+      );
       setFontBase(s.fontBase); setFontCode(s.fontCode); setTracking(s.tracking); setShadowColor(s.shadow);
       setTextScale(fillText(s.text));
       ensureFont(s.fontBase); ensureFont(s.fontCode);
@@ -629,6 +728,11 @@ export default function ThemeStudio() {
     const lo: Palette = {};
     const dk: Palette = {};
     setTextScale(seedText()); // no built-in preset ships a type scale — back to the kit ladder
+    setDensity(DEFAULT_DENSITY); // no built-in preset ships a density either — back to Tailwind's 0.25rem
+    setPill(DEFAULT_PILL); // and both shape knobs go back to their theme.css defaults
+    setCodeRadius(DEFAULT_CODE_RADIUS);
+    setElevation(DEFAULT_ELEVATION);
+    setWeights(seedWeights());
     const t = THEME_PRESETS.find((x) => x.name === name);
     if (t) {
       for (const [k, tok] of Object.entries(SHADCN_TO_KAI)) {
@@ -668,7 +772,7 @@ export default function ThemeStudio() {
   const commitSave = () => {
     const name = saveName().trim();
     if (!name) { setSaveError('Give the theme a name.'); return; }
-    const p: SavedPreset = { name, light: effLight(), dark: effDark(), radius: radius(), fontBase: fontBase(), fontCode: fontCode(), tracking: tracking(), shadow: shadowColor(), text: textScale() };
+    const p: SavedPreset = { name, light: effLight(), dark: effDark(), radius: radius(), density: density(), pill: pill(), codeRadius: codeRadius(), elevation: elevation(), weights: weights(), fontBase: fontBase(), fontCode: fontCode(), tracking: tracking(), shadow: shadowColor(), text: textScale() };
     persistSaved([...saved().filter((x) => x.name !== name), p]);
     setPreset(name);
     setSaveOpen(false);
@@ -695,12 +799,17 @@ export default function ThemeStudio() {
   const applyImport = () => {
     const parsed = parseCss(importText());
     if (!parsed) {
-      setImportError('No --kai-color-* or --kai-text-* tokens found. Paste a :root / .dark block.');
+      setImportError('No --kai-color-*, --kai-text-*, --kai-density, --kai-radius-pill, --kai-code-radius, --kai-shadow-strength or --kai-weight-* token found. Paste a :root / .dark block.');
       return;
     }
     setLight((v) => ({ ...v, ...parsed.light }));
     setDark((v) => ({ ...v, ...parsed.dark }));
     if (parsed.radius !== undefined) setRadius(parsed.radius);
+    if (parsed.density !== undefined) setDensity(parsed.density);
+    if (parsed.pill !== undefined) setPill(parsed.pill);
+    if (parsed.codeRadius !== undefined) setCodeRadius(parsed.codeRadius);
+    if (parsed.elevation !== undefined) setElevation(parsed.elevation);
+    if (parsed.weights) setWeights((v) => ({ ...v, ...parsed.weights }));
     if (Object.keys(parsed.text).length) setTextScale((v) => ({ ...v, ...parsed.text }));
     setPreset('Custom');
     setImportOpen(false);
@@ -816,7 +925,7 @@ export default function ThemeStudio() {
     const clamp = (n: number) => Math.min(props.max, Math.max(props.min, n));
     return (
       <div class="flex items-center gap-2.5 text-sm">
-        <span class="w-[4.5rem] shrink-0 text-ink-2">{props.label}</span>
+        <span class="w-[5.5rem] shrink-0 whitespace-nowrap text-ink-2">{props.label}</span>
         <input
           type="range" min={props.min} max={props.max} step={props.step} value={props.value}
           onInput={(e) => props.onInput(parseFloat(e.currentTarget.value))}
@@ -833,6 +942,42 @@ export default function ThemeStudio() {
           aria-label={`${props.label} value`}
         />
         <span class="w-7 shrink-0 text-xs text-ink-3">{props.unit ?? ''}</span>
+      </div>
+    );
+  };
+
+  /** Mutually exclusive named options. `Custom` appears only when the value is not a
+   *  step (an imported theme), so a number the user wrote is never snapped. */
+  const ChoiceRow = (props: { label: string; value: number; choices: { label: string; value: number }[]; unit?: string; onInput: (n: number) => void }) => {
+    const match = () => props.choices.find((c) => Math.abs(c.value - props.value) < 1e-9);
+    return (
+      <div class="flex items-start gap-2.5 text-sm">
+        <span class="w-[5.5rem] shrink-0 whitespace-nowrap pt-1 text-ink-2">{props.label}</span>
+        <div class="flex min-w-0 flex-wrap gap-1">
+          <div class="flex overflow-hidden rounded-md border border-line">
+            <For each={props.choices}>{(c) => (
+              <button
+                type="button"
+                onClick={() => props.onInput(c.value)}
+                aria-pressed={match()?.label === c.label}
+                // Accessible name says what it sets (a bare "Default" collides with the
+                // theme dropdown); `data-value` lets tests read the step itself.
+                aria-label={`${props.label}: ${c.label}`}
+                data-value={String(c.value)}
+                class="px-2 py-1 text-xs transition-colors"
+                classList={{
+                  'bg-ink text-bg': match()?.label === c.label,
+                  'text-ink-2 hover:bg-ink/5': match()?.label !== c.label,
+                }}
+              >{c.label}</button>
+            )}</For>
+          </div>
+          <Show when={!match()}>
+            <span class="rounded-md border border-line px-2 py-1 text-xs text-ink-2" aria-live="polite">
+              Custom — {props.value}{props.unit ?? ''}
+            </span>
+          </Show>
+        </div>
       </div>
     );
   };
@@ -870,7 +1015,7 @@ export default function ThemeStudio() {
             class="w-16 shrink-0 rounded-md border border-line bg-surface px-1.5 py-1 text-right text-xs tabular-nums text-ink [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
             aria-label={`${props.r.label} size in rem`}
           />
-          <span class="w-[4.5rem] shrink-0 text-right text-xs tabular-nums text-ink-3">rem · {remPx(val())}</span>
+          <span class="w-[5.5rem] shrink-0 text-right text-xs tabular-nums text-ink-3">rem · {remPx(val())}</span>
         </div>
       </div>
     );
@@ -1094,6 +1239,26 @@ export default function ThemeStudio() {
             <p class="mb-3 text-xs text-ink/55">One semantic scale for the whole kit — each rung is a <span class="font-mono text-ink-2">--kai-text-*</span> token, so moving it moves every component that sits on that rung. Body is the medium rung the rest step off.</p>
             <div class="flex flex-col gap-3">
               <For each={TEXT_RUNGS}>{(r) => <RungRow r={r} />}</For>
+              {/* One select per rung — see WEIGHT_RUNGS. */}
+              <div class="mt-3 flex items-center gap-2.5 text-sm">
+                <span class="w-[5.5rem] shrink-0 whitespace-nowrap text-ink-2">Weights</span>
+                <div class="flex min-w-0 flex-wrap gap-2">
+                  <For each={WEIGHT_RUNGS}>{(r) => (
+                    <label class="flex items-center gap-1 text-xs text-ink-2">
+                      <span>{r.label}</span>
+                      <select
+                        class="rounded-md border border-line bg-surface px-1 py-0.5 text-xs text-ink"
+                        aria-label={`${r.label} weight`}
+                        value={String(weights()[r.name])}
+                        onChange={(e) => { setWeights((v) => ({ ...v, [r.name]: Number.parseInt(e.currentTarget.value, 10) })); setPreset('Custom'); }}
+                      >
+                        <For each={WEIGHT_VALUES}>{(v) => <option value={String(v)}>{v}</option>}</For>
+                      </select>
+                    </label>
+                  )}</For>
+                </div>
+              </div>
+
             </div>
           </div>
           </Show>
@@ -1116,17 +1281,32 @@ export default function ThemeStudio() {
           </div>
           <div class="border-t border-line/60 px-3 py-3">
             <div class="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-2">Shape</div>
-            <SliderRow label="Radius" value={radius()} min={0} max={1.4} step={0.05} unit="rem" onInput={(n) => { setRadius(n); setPreset('Custom'); }} />
+            {/* One gapped column: a ChoiceRow is taller than a SliderRow. */}
+            <div class="flex flex-col gap-2.5">
+              {/* Bounds are the studio's own taste call, not a limit the token imposes.
+                  0.0625rem is 1px at the 16px root (TEXT_STEP's granularity) and keeps
+                  0.25rem on-step; 0.75rem is 3x Tailwind's default, as airy as a preview
+                  is worth reading. */}
+              <SliderRow label="Radius" value={radius()} min={0} max={1.4} step={0.05} unit="rem" onInput={(n) => { setRadius(n); setPreset('Custom'); }} />
+              {/* Steps rather than a slider — see DENSITY_CHOICES. */}
+              <ChoiceRow label="Density" value={density()} choices={DENSITY_CHOICES} unit="rem" onInput={(n) => { setDensity(n); setPreset('Custom'); }} />
+              {/* Pill: `rounded-full` is a literal. Code: its own corner. */}
+              <SliderRow label="Pill" value={pill()} min={0} max={4} step={0.0625} unit="rem" onInput={(n) => { setPill(n); setPreset('Custom'); }} />
+              <SliderRow label="Code" value={codeRadius()} min={0} max={1.4} step={0.05} unit="rem" onInput={(n) => { setCodeRadius(n); setPreset('Custom'); }} />
+            </div>
           </div>
           <div class="border-t border-line/60 px-3 py-3">
             <div class="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-2">Shadow</div>
-            <label class="flex items-center gap-2.5">
-              <input type="color" value={shadowColor()} onInput={(e) => { setShadowColor(e.currentTarget.value); setPreset('Custom'); }} class={swatch} aria-label="Shadow color" />
-              <span class="flex min-w-0 flex-col leading-tight">
-                <span class="truncate text-sm font-medium text-ink">Shadow color</span>
-                <span class="truncate text-xs text-ink/55">Elevation tint — cards, popovers</span>
-              </span>
-            </label>
+            <div class="flex flex-col gap-2.5">
+              <label class="flex items-center gap-2.5">
+                <input type="color" value={shadowColor()} onInput={(e) => { setShadowColor(e.currentTarget.value); setPreset('Custom'); }} class={swatch} aria-label="Shadow color" />
+                <span class="flex min-w-0 flex-col leading-tight">
+                  <span class="truncate text-sm font-medium text-ink">Color</span>
+                </span>
+              </label>
+              {/* Steps, same argument as Density; one knob scales every rung. */}
+              <ChoiceRow label="Elevation" value={elevation()} choices={ELEVATION_CHOICES} onInput={(n) => { setElevation(n); setPreset('Custom'); }} />
+            </div>
           </div>
           </Show>
         </div>

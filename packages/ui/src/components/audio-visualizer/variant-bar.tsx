@@ -138,7 +138,7 @@ export function BarVisualizer(props: VariantProps & { barCount?: number }): JSX.
                 data-kai-index={item.index}
                 data-kai-highlighted={item.highlighted()}
                 class={cn(
-                  'rounded-full bg-current/10',
+                  'rounded-pill bg-current/10',
                   'data-[kai-highlighted=true]:bg-current',
                 )}
                 style={{

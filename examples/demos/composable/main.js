@@ -1,7 +1,7 @@
 // Composable web-components showcase — wiring for the demo page.
 // (The kit itself is registered by ../../../packages/ui/dist/kai.es.js, imported in the HTML.)
 
-// ── boot guard: if the bundle didn't register the elements, show how to run it ──
+// ── boot guard: if the bundle didn't register the web components, show how to run it ──
 setTimeout(() => {
   if (!customElements.get('kai-chat')) {
     const link = document.getElementById('boot-link');

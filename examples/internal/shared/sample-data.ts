@@ -65,7 +65,7 @@ export interface SampleTrigger {
 /** Message action verbs supported by <kai-chat>. */
 export type MessageAction = 'copy' | 'like' | 'dislike' | 'regenerate' | 'edit' | 'speak';
 
-/** Minimal chat message shape (mirrors ChatMessage from @kitn.ai/ui/elements). */
+/** Minimal chat message shape (mirrors ChatMessage from @kitn.ai/ui/web-components). */
 export interface SampleMessage {
   id: string;
   role: 'user' | 'assistant';

@@ -1,0 +1,63 @@
+{
+  "name": "@kitn.ai/kai",
+  "version": "0.1.0",
+  "license": "MIT",
+  "type": "module",
+  "description": "The kai command line: the MCP server for AI coding agents, and the construct dev/eject tooling for @kitn.ai/ui.",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "cli",
+    "kai"
+  ],
+  "bin": {
+    "kai": "./bin/mcp.js",
+    "kai-mcp": "./bin/mcp.js"
+  },
+  "nx": {
+    "name": "kai",
+    "implicitDependencies": [
+      "ui"
+    ],
+    "targets": {
+      "build": {
+        "dependsOn": [],
+        "inputs": [
+          "default",
+          "{workspaceRoot}/packages/ui/mcp/**/*",
+          "{workspaceRoot}/packages/ui/apps/**/*"
+        ]
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "bin",
+    "!bin/**/*.test.js"
+  ],
+  "scripts": {
+    "build": "KAI_BUILD=mcp vite build --config config/vite/node.ts && KAI_BUILD=construct-cli vite build --config config/vite/node.ts && KAI_BUILD=builder vite build --config config/vite/page.ts && KAI_BUILD=theme-studio vite build --config config/vite/page.ts",
+    "prepublishOnly": "npm run build",
+    "typecheck": "tsc --noEmit",
+    "verify:versions": "node scripts/verify-kit-range.mjs --self-test && node scripts/verify-kit-range.mjs",
+    "verify:bundle-shape": "node scripts/verify-bundle-shape.mjs --self-test && node scripts/verify-bundle-shape.mjs",
+    "lint:cli-invocations": "node scripts/lint-cli-invocations.mjs --self-test && node scripts/lint-cli-invocations.mjs",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@kitn.ai/ui": "^0.32.0",
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.2.2",
+    "tailwindcss": "^4.2.2",
+    "typescript": "^5.5.0",
+    "vite": "^6.0.0",
+    "vite-plugin-solid": "^2.11.0",
+    "vitest": "^4.1.0"
+  },
+  "engines": {
+    "node": ">=20.19"
+  }
+}

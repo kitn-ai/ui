@@ -12,6 +12,7 @@ import { createHash } from 'node:crypto';
 import { spawn } from 'node:child_process';
 import { connect } from 'node:net';
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
+import { createRequire } from 'node:module';
 import { existsSync, readFileSync, readdirSync, renameSync, statSync, watch, writeFileSync } from 'node:fs';
 import { basename, dirname, extname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -172,7 +173,7 @@ export async function dev(
 // ── kai dev --builder (B-22/B-23) ───────────────────────────────────────────
 // A SECOND, thin server beside the loop above — dev() itself is untouched
 // (plain `kai dev` stays byte-identical). The builder page is PREBUILT into
-// dist/builder-page at kit build time (KAI_BUILD=builder, config/vite/page.ts),
+// dist/builder-page at kit build time (KAI_BUILD=builder, packages/kai/config/vite/page.ts),
 // so at consumer runtime this server compiles nothing: it serves static files,
 // exposes ONE validate-then-write endpoint (the construct FILE is the sole
 // state), and iframes the generated project's own Vite dev server. Deviation
@@ -581,18 +582,72 @@ export function builderPageDir(): string {
   throw new Error(
     `Missing build artifact: builder-page/index.html — the builder page ships prebuilt. ` +
       `Tried:\n${out.tried.map((p) => `  ${p}`).join('\n')}\n` +
-      `Run \`nx build ui\` (or npm run build in packages/ui) and try again.`,
+      `Run \`nx build kai\` (or npm run build in packages/kai) and try again.`,
   );
 }
 
 /** dist/theme-studio, resolved by the same walk as dist/builder-page (it is
- *  prebuilt right beside it — KAI_BUILD=theme-studio, config/vite/page.ts).
+ *  prebuilt right beside it — KAI_BUILD=theme-studio, packages/kai/config/vite/page.ts,
+ *  so both live in the CLI package's dist, not the kit's).
  *  Nullable rather
  *  than throwing: the studio route is additive, and a build predating it must
  *  not take the whole builder down — the route 404s with instructions. */
 export function themeStudioDir(): string | undefined {
   const out = resolveBuilderPageDir(dirname(fileURLToPath(import.meta.url)), 'theme-studio');
   return 'dir' in out ? out.dir : undefined;
+}
+
+/** The KIT package's own `dist/` -- where `kai.es.js` and `web-components/*` live.
+ *
+ *  Resolved THROUGH the published package, never by walking up from this module.
+ *  The dev pages are built into the dev-tools package while the kit bundle stays
+ *  here, so `dirname(themeStudioDir())` is the WRONG dist the moment the pages
+ *  move: it holds the studio's own assets and none of the kit's. Measured symptom
+ *  of the old join: every `/theme-studio/kit/*` request 404s, silently, because a
+ *  miss and a missing root produced the same answer.
+ *
+ *  `require.resolve` on the exported `./package.json` subpath keeps the "address
+ *  it, never search" rule the MCP's manifest resolver already states: no walk-up,
+ *  no first-hit-wins. A package that is not installed throws the resolver's own
+ *  error, which names the specifier. */
+export function kitDistRoot(): string {
+  return join(dirname(createRequire(import.meta.url).resolve('@kitn.ai/ui/package.json')), 'dist');
+}
+
+/** One `/theme-studio/<sub>` request, answered. */
+export type ThemeStudioAsset =
+  | { kind: 'file'; file: string; type: string }
+  | { kind: 'problem'; status: number; message: string };
+
+/** Split out of the route so the two roots -- the page's and the kit's -- can be
+ *  driven from a SYNTHETIC layout. They coincide in the repo and differ once the
+ *  pages build into their own package, which is exactly the case that has to be
+ *  constructible in a test.
+ *
+ *  The kit root DEFAULTS to `kitDistRoot()`, so the route cannot pass the page
+ *  dir's parent by accident: that was the defect, and it is now unrepresentable at
+ *  the call site rather than merely fixed. */
+export function themeStudioAsset(sub: string, studioDir: string, kitRoot: string = kitDistRoot()): ThemeStudioAsset {
+  if (sub.startsWith('/kit/')) {
+    // A missing ROOT is a build that never happened, not a mistyped URL, and the
+    // two used to be one 404. Name the path we resolved and the command that
+    // produces it.
+    if (!existsSync(kitRoot)) {
+      return {
+        kind: 'problem',
+        status: 500,
+        message:
+          `The kit's built assets are missing: ${kitRoot} does not exist (resolved from ` +
+          `@kitn.ai/ui/package.json). Run \`npm run build\` in packages/ui (or \`nx build ui\`) and reload.`,
+      };
+    }
+    const hit = serveBuilderAsset(sub.slice('/kit'.length), kitRoot);
+    if (!hit) return { kind: 'problem', status: 404, message: 'not found' };
+    return { kind: 'file', file: hit.file, type: hit.type };
+  }
+  const hit = serveBuilderAsset(sub, studioDir);
+  if (!hit) return { kind: 'problem', status: 404, message: 'not found' };
+  return { kind: 'file', file: hit.file, type: hit.type };
 }
 
 // ── the manifest-of-constructs entry flow (owner ask, 2026-08-31) ───────────
@@ -984,11 +1039,13 @@ export async function devBuilder(
         return;
       }
       // The standalone theme studio (dist/theme-studio), iframed by the
-      // builder page. /theme-studio/kit/* maps onto the package's own dist
-      // root, so the studio's external `import('@kitn.ai/ui/elements')`
-      // (rewritten to /theme-studio/kit/kai.es.js at build time) loads the
-      // element bundle + its chunks WITHOUT dist/theme-studio re-bundling the
-      // kit. Same trust story as pageDir: our own build output, loopback only.
+      // builder page. TWO roots, and they are different packages now: the studio's
+      // own assets come from the page dir, while /theme-studio/kit/* maps onto the
+      // KIT's dist root -- the studio's external
+      // `import('@kitn.ai/ui/web-components')` is rewritten to
+      // /theme-studio/kit/kai.es.js at build time, so the kit's bundle + chunks load
+      // WITHOUT dist/theme-studio re-bundling them. Same trust story as pageDir:
+      // our own build output, loopback only.
       if (req.method === 'GET' && (url === '/theme-studio' || url.startsWith('/theme-studio?'))) {
         const q = url.indexOf('?');
         res.writeHead(302, { location: `/theme-studio/${q === -1 ? '' : url.slice(q)}` });
@@ -998,14 +1055,14 @@ export async function devBuilder(
         const studioDir = themeStudioDir();
         if (!studioDir) {
           return send(404, {
-            problems: [{ path: '', message: 'dist/theme-studio is missing — run `npm run build` in packages/ui (or nx build ui) and reload.' }],
+            problems: [{ path: '', message: 'dist/theme-studio is missing — run `npm run build` in packages/kai (or nx build kai) and reload.' }],
           });
         }
         const sub = url.slice('/theme-studio'.length);
-        const studioAsset = sub.startsWith('/kit/')
-          ? serveBuilderAsset(sub.slice('/kit'.length), dirname(studioDir))
-          : serveBuilderAsset(sub, studioDir);
-        if (!studioAsset) return send(404, { problems: [{ path: '', message: 'not found' }] });
+        const studioAsset = themeStudioAsset(sub, studioDir);
+        if (studioAsset.kind === 'problem') {
+          return send(studioAsset.status, { problems: [{ path: '', message: studioAsset.message }] });
+        }
         res.writeHead(200, { 'content-type': studioAsset.type });
         return res.end(readFileSync(studioAsset.file));
       }

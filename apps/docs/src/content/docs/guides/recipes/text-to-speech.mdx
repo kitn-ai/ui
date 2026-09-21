@@ -12,7 +12,7 @@ Make your chat speak. Call a `speak()` function when a reply finishes streaming 
 The [Web Speech API](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis) is built into every modern browser. Call `speak(answer)` right before you set `chat.loading = false`:
 
 ```js
-import '@kitn.ai/ui/elements';
+import '@kitn.ai/ui/web-components';
 import { createAssistantStream } from '@kitn.ai/ui/state';
 import { readOpenAIStream, toOpenAIMessages } from '@kitn.ai/ui/wire';
 

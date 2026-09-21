@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
-import { join } from 'node:path';
+import { dirname, join, resolve, sep } from 'node:path';
 import { compile } from '@tailwindcss/node';
 import { Scanner } from '@tailwindcss/oxide';
 import { beforeAll, describe, expect, it } from 'vitest';
@@ -9,7 +9,7 @@ import { beforeAll, describe, expect, it } from 'vitest';
  * GUARD: what a light-DOM SolidJS consumer's Tailwind build produces from
  * `@kitn.ai/ui/solid.css`.
  *
- * Two style paths ship. The `kai-*` elements adopt `compiled.css` into every
+ * Two style paths ship. The `kai-*` web components adopt `compiled.css` into every
  * shadow root, and that sheet is complete. The Solid entries (`.` / `./solid`)
  * ship class-name strings and NO CSS: the consumer compiles those strings with
  * THEIR Tailwind, `@source`-pointed at the kit. Until solid.css existed the
@@ -36,7 +36,27 @@ import { beforeAll, describe, expect, it } from 'vitest';
  */
 const PKG = join(__dirname, '..', '..');
 
-/** Shipped source: dist/ when built, else the Solid source tree it is built from. */
+/**
+ * Shipped source: dist/ when built, else the Solid source tree it is built from.
+ *
+ * THE TWO BARRELS ARE THE ROOTS, AND THE MODULES ARE WALKED FROM THEM rather
+ * than named. Naming them was never the contract, it was what the build
+ * happened to emit: `dist/index.js` + `dist/solid.js` used to BE the component
+ * tree in one file each, so a two-file list was the same set. Once they became
+ * per-module re-export barrels (`perModule` in config/vite/lib.ts) that list
+ * derived an EMPTY class set and the vacuity check below fired — correctly.
+ * The guard was right; the derivation was the stale half. Following the
+ * barrel's own import graph is what makes this check "what a consumer of
+ * `."` / `./solid` gets" instead of "the file that used to contain it".
+ *
+ * `/node_modules/` is excluded deliberately. Those modules are the kit's
+ * inlined dependencies materialised as files, and tailwind-merge alone
+ * enumerates the entire utility vocabulary as string literals — the same noise
+ * `shadow-sheet-scan.test.ts` names as its reason for scanning source rather
+ * than dist. The aggregate build carried those same strings INSIDE
+ * `dist/index.js`, so excluding them is closer to the input this check had
+ * before than a blanket `dist/**` walk would be.
+ */
 function shippedSource(): { label: string; files: string[] } {
   const dist = join(PKG, 'dist');
   const walk = (dir: string, ext: RegExp, out: string[] = []): string[] => {
@@ -47,15 +67,58 @@ function shippedSource(): { label: string; files: string[] } {
     }
     return out;
   };
-  if (existsSync(join(dist, 'index.js')) && existsSync(join(dist, 'solid.js'))) {
-    return { label: 'dist/index.js + dist/solid.js', files: [join(dist, 'index.js'), join(dist, 'solid.js')] };
+  const roots = [join(dist, 'index.js'), join(dist, 'solid.js')];
+  if (roots.every((f) => existsSync(f))) {
+    const files = reachableModules(roots);
+    return { label: `dist: ${files.length} modules reachable from dist/index.js + dist/solid.js`, files };
   }
   return {
-    label: 'src/components + src/ui (dist absent)',
-    files: [...walk(join(PKG, 'src/components'), /\.tsx?$/), ...walk(join(PKG, 'src/ui'), /\.tsx?$/)].filter(
-      (f) => !/\.(test|stories)\.tsx?$/.test(f),
-    ),
+    // src/primitives is included because it IS shipped through the barrels
+    // (headless logic the components call), and because leaving it out made
+    // this fallback silently partial the moment files moved there (the
+    // 2026-09-19 non-component extraction).
+    label: 'src/{components,primitives} (dist absent)',
+    files: ['components', 'primitives']
+      .flatMap((dir) => walk(join(PKG, 'src', dir), /\.tsx?$/))
+      .filter((f) => !/\.(test|stories)\.tsx?$/.test(f)),
   };
+}
+
+/** Every specifier an emitted ES module imports or re-exports from. */
+const SPECIFIER =
+  /(?:^|;|\n)\s*(?:import|export)\s[^'"();]*?from\s*(['"])([^'"]+)\1|(?:^|;|\n)\s*import\s*(['"])([^'"]+)\3|import\(\s*(['"])([^'"]+)\5\s*\)/g;
+
+function specifiersOf(source: string): string[] {
+  return [...source.matchAll(SPECIFIER)].map((m) => m[2] ?? m[4] ?? m[6]);
+}
+
+/**
+ * The entry module plus every module it reaches by a RELATIVE specifier,
+ * excluding the kit's materialised dependencies under dist/node_modules/.
+ * Emitted specifiers carry their `.js` extension, so this needs no resolution
+ * guesswork: a specifier either names a file that exists or is not followed.
+ */
+function reachableModules(roots: string[]): string[] {
+  const seen = new Set<string>();
+  const queue = [...roots];
+  while (queue.length > 0) {
+    const file = queue.pop() as string;
+    if (seen.has(file)) continue;
+    seen.add(file);
+    let source: string;
+    try {
+      source = readFileSync(file, 'utf8');
+    } catch {
+      continue;
+    }
+    for (const spec of specifiersOf(source)) {
+      if (!spec.startsWith('.')) continue; // solid-js and friends are the consumer's
+      const target = resolve(dirname(file), spec);
+      if (target.includes(`${sep}node_modules${sep}`)) continue;
+      if (existsSync(target)) queue.push(target);
+    }
+  }
+  return [...seen].sort();
 }
 
 /** Class candidates the oxide scanner finds in the shipped source, as a consumer's @source would. */
@@ -73,9 +136,9 @@ async function compileConsumerSheet(entry: string, candidates: Iterable<string>)
   return compiler.build([...candidates]);
 }
 
-/** Every `.kai-*` selector the element sheet defines, read off compiled.css. */
-function elementSheetKaiClasses(): Set<string> {
-  const compiled = readFileSync(join(PKG, 'src/elements/compiled.css'), 'utf8');
+/** Every `.kai-*` selector the web-component sheet defines, read off compiled.css. */
+function webComponentSheetKaiClasses(): Set<string> {
+  const compiled = readFileSync(join(PKG, 'src/web-components/compiled.css'), 'utf8');
   return new Set([...compiled.matchAll(/\.(kai-[a-z0-9-]+)/g)].map((m) => m[1]));
 }
 
@@ -93,7 +156,7 @@ let kaiClasses: string[];
 beforeAll(() => {
   source = shippedSource();
   candidates = candidatesOf(source.files);
-  const defined = elementSheetKaiClasses();
+  const defined = webComponentSheetKaiClasses();
   kaiClasses = [...candidates].filter((c) => /^kai-[a-z0-9-]+$/.test(c) && defined.has(c)).sort();
 });
 

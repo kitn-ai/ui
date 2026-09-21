@@ -31,7 +31,7 @@ function matchBraces(text, openIdx) {
  *  directives (not valid CSS a browser/lightningcss understands), so in this
  *  plain-CSS token sheet they're inert leftovers — they apply nothing yet emit
  *  "Unknown at rule: @utility" warnings in every consumer build. The classes
- *  they declare (bg-surface, …) are compiled into the elements' shadow CSS
+ *  they declare (bg-surface, …) are compiled into the web components' shadow CSS
  *  (compiled.css), where they're actually used; this <link>/CDN sheet ships
  *  tokens only, so dropping them changes no rendering. */
 function stripUtilities(css) {

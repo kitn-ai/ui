@@ -1,5 +1,5 @@
 // Per-element sample data for NON-scalar props (arrays/objects like `items`,
-// `messages`, `sources`, `files`) — the one thing element-meta can't provide.
+// `messages`, `sources`, `files`) — the one thing web-component-meta can't provide.
 //
 // Each element contributes ONE file: src/data/samples/<tag>.ts with a default
 // export `{ sample, named? }`. They're auto-aggregated here via import.meta.glob,

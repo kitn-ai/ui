@@ -1,5 +1,5 @@
 import { Badge, Button } from '@kitn.ai/ui/react';
-import { toast } from '@kitn.ai/ui/elements';
+import { toast } from '@kitn.ai/ui/web-components';
 
 /**
  * Which half of the route's mock/real seam answered the last turn — or `null`

@@ -13,7 +13,7 @@
  * There is no store. Data flows in via properties and out via events, and this
  * module is the host that wires one element to the next.
  */
-import '@kitn.ai/ui/elements'; // registers every <kai-*> — must come first
+import '@kitn.ai/ui/web-components'; // registers every <kai-*> — must come first
 import '@kitn.ai/ui/theme.tokens.css';
 import './styles.css';
 
@@ -24,7 +24,7 @@ import type {
   KaiThreadElement,
   KaiVoiceInputElement,
   KaiVoiceOutputElement,
-} from '@kitn.ai/ui/elements';
+} from '@kitn.ai/ui/web-components';
 import {
   appendMessage,
   createAssistantStream,

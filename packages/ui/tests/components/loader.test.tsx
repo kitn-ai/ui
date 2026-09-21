@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@solidjs/testing-library';
-import { Loader } from '../../src/components/loader';
+import { Loader } from '../../src/components/loader/loader';
 
 describe('Loader', () => {
   it('renders bars variant', () => {

@@ -11,7 +11,7 @@ import {
   buildResult,
   type FormDefinition,
   type FormField,
-} from '../../src/components/form';
+} from '../../src/components/form/form';
 
 const DEFAULT_INLINE_MAX = 4;
 

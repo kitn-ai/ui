@@ -1,6 +1,6 @@
 /* Storybook preview stylesheet.
 
-   THE SHIPPED ELEMENT SHEET IS IMPORTED, NOT MIRRORED. `src/elements/styles.css`
+   THE SHIPPED ELEMENT SHEET IS IMPORTED, NOT MIRRORED. `src/web-components/styles.css`
    is compiled into `compiled.css` and adopted into every `kai-*` shadow root, so
    importing it here is what makes a Solid `Components/*` story — which renders in
    the LIGHT DOM, with no shadow root and no adopted sheet — show the same thing a
@@ -27,7 +27,7 @@
    What CANNOT come across is the shim below: `:host` selects nothing in the light
    DOM. Everything else in this file styles Storybook's own docs chrome, which does
    not exist in production. */
-@import "../src/elements/styles.css";
+@import "../src/web-components/styles.css";
 @source "../src/**/*.stories.tsx";
 @source "../src/**/*.mdx";
 @source "../src/stories";
@@ -36,7 +36,7 @@
 @layer base {
   /* The one unavoidable copy: the shipped sheet puts these on `:host`, which does
      not match in the light DOM where Solid stories render. Kept in sync by hand
-     with the `:host` block in src/elements/styles.css and nothing else.
+     with the `:host` block in src/web-components/styles.css and nothing else.
      Without the font-size, stories inherit Storybook's 16px while the same
      component inside a kai-* element renders at --text-body, and every "is this
      component sized right?" judgement in Storybook is made against the wrong

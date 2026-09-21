@@ -20,10 +20,10 @@ It asks for a project name first, then what you're building. Pick "Embedded widg
 Either way, preview it live:
 
 ```bash
-npx @kitn.ai/ui dev widget.construct.json
+npx @kitn.ai/kai dev widget.construct.json
 ```
 
-That works with no install. Once `@kitn.ai/ui` is installed as a dependency, the bare `kai dev widget.construct.json` command works too. Either way it starts a server with reload-on-edit: change the JSON, see the widget update.
+That works with no install. Once `@kitn.ai/kai` is installed as a dependency, the bare `kai dev widget.construct.json` command works too. Either way it starts a server with reload-on-edit: change the JSON, see the widget update.
 
 ## The construct, annotated
 
@@ -63,7 +63,7 @@ Here's a construct using the full widget surface, more than the guided wizard wa
 Save it, then check it directly:
 
 ```bash
-npx @kitn.ai/ui validate widget.construct.json
+npx @kitn.ai/kai validate widget.construct.json
 ```
 
 ## Compile it
@@ -71,7 +71,7 @@ npx @kitn.ai/ui validate widget.construct.json
 Once the preview looks right, compile to a single self-registering file:
 
 ```bash
-npx @kitn.ai/ui compile widget.construct.json
+npx @kitn.ai/kai compile widget.construct.json
 ```
 
 This emits `dist-construct/<name>.js`: one file, no externals, that registers a `<kai-chat>`-backed widget when you load it. Drop it into any page with a `<script type="module" src="...">`; the generated source sits alongside it in `dist-construct/source/` if you want to eject and customize further.
@@ -82,5 +82,5 @@ The wizard's third choice, "Full app," reaches for a full project scaffold inste
 
 ## What's next
 
-- **[Getting Started](/guides/getting-started/)**: wire a `<kai-chat>` by hand, register the elements, stream a reply.
+- **[Getting Started](/guides/getting-started/)**: wire a `<kai-chat>` by hand, register the web components, stream a reply.
 - **[Theming](/guides/theming/)**: every token beyond `unreadColor`.

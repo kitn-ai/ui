@@ -5,11 +5,11 @@ description: Drop AI/UI into a Next.js App Router or TanStack Start app — the 
 
 import { Aside } from '@astrojs/starlight/components';
 
-<p class="kai-lede">AI/UI elements are custom elements with Shadow DOM, so they hydrate and run in the browser. In Next.js and TanStack Start that makes them client islands: the page renders on the server, and `kai-chat` comes alive where it mounts.</p>
+<p class="kai-lede">AI/UI web components are custom elements with Shadow DOM, so they hydrate and run in the browser. In Next.js and TanStack Start that makes them client islands: the page renders on the server, and `kai-chat` comes alive where it mounts.</p>
 
 ## Next.js (App Router)
 
-Register the elements in the browser, then render the tag. The cleanest path is a client component that imports `@kitn.ai/ui/elements` in an effect, so the import never runs during the server pass.
+Register the web components in the browser, then render the tag. The cleanest path is a client component that imports `@kitn.ai/ui/web-components` in an effect, so the import never runs during the server pass.
 
 ```tsx
 // app/chat-island.tsx
@@ -21,7 +21,7 @@ export default function ChatIsland() {
   const ref = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    import('@kitn.ai/ui/elements').then(() => {
+    import('@kitn.ai/ui/web-components').then(() => {
       // element is upgraded; set array props in JS, wire kai-submit, stream the reply
       if (ref.current) (ref.current as any).messages = [];
     });
@@ -79,7 +79,7 @@ The browser reads that OpenAI-format SSE and mutates `messages` token by token �
 
 ## TanStack Start
 
-Same idea, different gates. Wrap the chat in `ClientOnly` from `@tanstack/react-router` so it mounts only after hydration, and register the elements in an effect:
+Same idea, different gates. Wrap the chat in `ClientOnly` from `@tanstack/react-router` so it mounts only after hydration, and register the web components in an effect:
 
 ```tsx
 import { ClientOnly } from '@tanstack/react-router';
@@ -87,7 +87,7 @@ import { useEffect, useRef } from 'react';
 
 function Chat() {
   const ref = useRef<HTMLElement>(null);
-  useEffect(() => { import('@kitn.ai/ui/elements'); }, []);
+  useEffect(() => { import('@kitn.ai/ui/web-components'); }, []);
   return <kai-chat ref={ref} style={{ display: 'block', height: '600px' }} />;
 }
 
@@ -120,7 +120,7 @@ The adapter still hydrates client-side, so it lives behind the same `ssr: false`
 
 <Aside type="note">Server rendering emits your page's static shell; the chat is an island that comes alive on hydration. That split is the point — your content renders on the server, and the interactive surface mounts exactly where you place it.</Aside>
 
-The same elements run in a desktop shell. An Electron or Tauri webview loads the bundle and the `@kitn.ai/ui/elements` import upgrades the tags identically — no separate build, no different API.
+The same web components run in a desktop shell. An Electron or Tauri webview loads the bundle and the `@kitn.ai/ui/web-components` import upgrades the tags identically — no separate build, no different API.
 
 ## Next steps
 

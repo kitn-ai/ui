@@ -67,7 +67,7 @@ const LAZY =
   'const frag = "vec3 auroraWarp(vec2 p){return vec3(0.0);} float randFibo(float x){return x;} ' +
   'void main(){ mainImage(gl_FragColor, gl_FragCoord.xy); }";\n';
 const tree = (over: Record<string, string | null> = {}) => ({
-  'dist/kai.es.js': 'export const elementsReady = import("./register-impl-abc123.js");\n',
+  'dist/kai.es.js': 'export const webComponentsReady = import("./register-impl-abc123.js");\n',
   'dist/register-impl-abc123.js': 'customElements.define("kai-chat", C);\n',
   'dist/variant-aurora-x1.js': LAZY,
   ...over,
@@ -94,7 +94,7 @@ describe('the shader-lazy guard detects, and build runs it', () => {
     expect(
       pkg.scripts.build,
       `the \`build\` chain no longer runs \`${NPM_SCRIPT}\`. Nothing else keeps the GLSL out of ` +
-        `the bundle every consumer of @kitn.ai/ui/elements loads.`,
+        `the bundle every consumer of @kitn.ai/ui/web-components loads.`,
     ).toContain(`npm run ${NPM_SCRIPT}`);
     expect(pkg.scripts.prepublishOnly, 'prepublishOnly no longer runs build').toContain('build');
   });

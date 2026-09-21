@@ -51,7 +51,7 @@ export function coverage(docs, surface) {
 
   // Shipped but never rendered by a Playground/PropTable/Example — i.e. named in
   // passing at most. Weaker than "undocumented" but still a real gap.
-  const elementsWithoutPage = [...surface.tags]
+  const webComponentsWithoutPage = [...surface.tags]
     .filter((t) => !dedicated.has(t))
     .sort()
     .map((t) => ({ tag: t, mentionedIn: tagPages.get(t) ?? [] }));
@@ -66,7 +66,7 @@ export function coverage(docs, surface) {
   // bare scan of the source text also matched the docs' own CSS classes
   // (`kai-lede`, `kai-tag-sub`) and every `--kai-color-*` custom property, which
   // is 38 findings of pure noise. Tokens the kit's own source mentions are
-  // excluded too — those are the element-meta gaps, reported separately.
+  // excluded too — those are the web-component-meta gaps, reported separately.
   const staleTags = new Map();
   for (const doc of docs) {
     const used = new Set();
@@ -93,11 +93,11 @@ export function coverage(docs, surface) {
 
   return {
     undocumentedElements,
-    elementsWithoutPage: elementsWithoutPage.filter((e) => !undocumentedElements.includes(e.tag)),
+    webComponentsWithoutPage: webComponentsWithoutPage.filter((e) => !undocumentedElements.includes(e.tag)),
     undocumentedComponents,
     staleTags: [...staleTags.entries()].map(([tag, pages]) => ({ tag, pages: [...pages] })).sort((a, b) => a.tag.localeCompare(b.tag)),
     staleEntries: [...staleEntries.entries()].map(([spec, pages]) => ({ spec, pages: [...pages] })).sort((a, b) => a.spec.localeCompare(b.spec)),
-    documentedElementCount: tagPages.size,
+    documentedWebComponentCount: tagPages.size,
     mentionedComponentCount: nameMentions.size,
   };
 }

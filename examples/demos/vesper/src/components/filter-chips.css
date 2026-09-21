@@ -1,0 +1,21 @@
+.chips { display: flex; gap: 9px; flex-wrap: wrap }
+.chip {
+  font-family: var(--body-font);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink2);
+  padding: 10px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: color var(--t-fast) var(--ease), background var(--t-fast) var(--ease),
+    box-shadow var(--t-fast) var(--ease), transform var(--t-fast) var(--ease);
+}
+.chip:hover { color: var(--ink); transform: translateY(-1px) }
+.chip[aria-pressed='true'] {
+  color: var(--cta-ink);
+  background: var(--cta);
+  border-color: transparent;
+  box-shadow: var(--raise-sm);
+}

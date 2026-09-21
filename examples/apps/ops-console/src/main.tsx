@@ -1,7 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 // Registers every <kai-*> element. Must come before anything renders one.
-import '@kitn.ai/ui/elements';
+import '@kitn.ai/ui/web-components';
 /**
  * `<kai-remote>` is OPT-IN and register-all above does NOT include it. The React
  * `Remote` wrapper does lazily import this same module — but lazily is too late,
@@ -14,11 +14,11 @@ import '@kitn.ai/ui/elements';
  * That is the `upgrade-race` invariant. A STATIC import here is the fix: the tag
  * is defined before React renders anything, so props are set on a live element.
  */
-import '@kitn.ai/ui/elements/remote';
+import '@kitn.ai/ui/web-components/remote';
 // Compiled token defaults. `theme.css` is the Tailwind-source variant and is not
 // what a plain Vite app wants.
 import '@kitn.ai/ui/theme.tokens.css';
-import { configureToasts } from '@kitn.ai/ui/elements';
+import { configureToasts } from '@kitn.ai/ui/web-components';
 import App from './App';
 import './styles.css';
 

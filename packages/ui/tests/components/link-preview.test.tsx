@@ -1,7 +1,7 @@
 // tests/components/link-preview.test.tsx
 import { render, fireEvent, waitFor } from '@solidjs/testing-library';
 import { afterEach, describe, expect, test, vi } from 'vitest';
-import { LinkPreview } from '../../src/components/link-preview';
+import { LinkPreview } from '../../src/components/link-preview/link-preview';
 import type { CardEvent } from '../../src/primitives/card-contract';
 import {
   configureLinkPreview,

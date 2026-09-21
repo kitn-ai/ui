@@ -13,7 +13,7 @@ property-vs-attribute question.
 The practical difference is the thread. The others get it from a single
 `<kai-thread>` tag; here it is spelled out — `<ChatContainer>` for the scroll box
 and stick-to-bottom, a `<Message>` per turn, and `<MessageBody>` to walk that
-turn's ordered `parts`. If you want to see what the coarse elements are doing
+turn's ordered `parts`. If you want to see what the coarse web components are doing
 inside, read `components/ThreadView.tsx`.
 
 **Import from `@kitn.ai/ui/solid`, never from `@kitn.ai/ui`.** `/solid` is a
@@ -112,7 +112,7 @@ The `@source` line is critical: without it Tailwind v4 only scans `src/` and
 strips every kit utility class as unused, leaving components unstyled.
 
 `solid.css` rather than `theme.css`: the Solid components ship as class names
-with no CSS of their own, so the sheet the `kai-*` elements carry inside their
+with no CSS of their own, so the sheet the `kai-*` web components carry inside their
 shadow roots (form controls, focus ring, scrollbars, overlay animations, prose
 sizes) has to come from your build instead. `solid.css` imports `theme.css` and
 adds all of that; it needs `tw-animate-css` and `@tailwindcss/typography`
@@ -139,7 +139,7 @@ npm run build      # typecheck, then production build → dist/
 ```
 
 `build` runs `tsc` first. This starter imports the SolidJS components directly
-rather than the `kai-*` elements, so that pass is the only thing checking those
+rather than the `kai-*` web components, so that pass is the only thing checking those
 imports against the shipped types — Vite strips types without looking at them.
 
 Requires Node 18+.

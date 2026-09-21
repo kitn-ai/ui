@@ -5,7 +5,7 @@ description: A ChatGPT-style layout — a collapsible conversation rail beside a
 
 import WorkspaceDemo from '../../../components/WorkspaceDemo.tsx';
 
-<p class="kai-lede">Three elements give you the full workspace: the `<kai-workspace>` layout shell, a resizable, collapsible `<kai-conversations>` rail listing past conversations, and a streaming `<kai-chat>` thread. Select a conversation, start a new one, or send a message below.</p>
+<p class="kai-lede">Three web components give you the full workspace: the `<kai-workspace>` layout shell, a resizable, collapsible `<kai-conversations>` rail listing past conversations, and a streaming `<kai-chat>` thread. Select a conversation, start a new one, or send a message below.</p>
 
 <WorkspaceDemo client:only="solid" />
 
@@ -20,7 +20,7 @@ import WorkspaceDemo from '../../../components/WorkspaceDemo.tsx';
 </kai-workspace>
 
 <script type="module">
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
 
   const rail = document.querySelector('kai-conversations');
   const chat = document.querySelector('kai-chat');

@@ -8,7 +8,7 @@
 // committed - blocks/<id>/ holds only authored source + registry-item.json
 // (the shadcn-shaped file tree is the product), and everything derived lands
 // under dist/ (gitignored; runs in postbuild after build:api, which produces
-// the element-nonscalar.json input):
+// the web-component-nonscalar.json input):
 //
 //   dist/blocks/registry.json                 the index (browse surface)
 //   dist/blocks/r/<name>.json                 the per-block item JSON with
@@ -102,7 +102,7 @@ const scaffolderRegistry = await importTs(join(ROOT, 'mcp/registry.ts'));
 
 // Axes and inputs, each read where it lives - never restated:
 const routeIntegrations = scaffolderRegistry.listIntegrations().map((i) => i.id);
-const nonscalarByTag = JSON.parse(readFileSync(join(ROOT, 'src/elements/element-nonscalar.json'), 'utf8'));
+const nonscalarByTag = JSON.parse(readFileSync(join(ROOT, 'src/web-components/web-component-nonscalar.json'), 'utf8'));
 const VERSION = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8')).version;
 
 // ---------------------------------------------------------------- the scan

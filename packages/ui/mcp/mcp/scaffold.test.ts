@@ -18,7 +18,7 @@ import type { Integration } from '../types';
 // The real encoders, used to prove WHY the fabricated sample seed had to go:
 // one of them throws on it, the other quietly sends it.
 import { toAnthropicMessages, toOpenAIMessages, WireEncodeError } from '../../src/wire/encode';
-import type { ChatMessage } from '../../src/elements/chat-types';
+import type { ChatMessage } from '../../src/web-components/chat/chat-types';
 // The declaration itself, so the accept guard below compares the emitted
 // attribute against the source of truth rather than against a copy of it.
 import { encodableMediaTypes } from '../../src/wire/media-types';
@@ -820,7 +820,7 @@ describe('scaffold', () => {
   });
 
   // Issue 1 / Issue 4 — react/next MUST register elements before the wrappers.
-  it("react output imports '@kitn.ai/ui/elements' BEFORE '@kitn.ai/ui/react'", async () => {
+  it("react output imports '@kitn.ai/ui/web-components' BEFORE '@kitn.ai/ui/react'", async () => {
     const out = await scaffold.handler({
       useCase: 'drop-in-chat',
       integration: 'openrouter',
@@ -828,14 +828,14 @@ describe('scaffold', () => {
       framework: 'react',
     });
     const text = (out.content as { type: string; text: string }[])[0].text;
-    const elementsIdx = text.indexOf("import '@kitn.ai/ui/elements'");
+    const webComponentsIdx = text.indexOf("import '@kitn.ai/ui/web-components'");
     const reactIdx = text.indexOf("from '@kitn.ai/ui/react'");
-    expect(elementsIdx).toBeGreaterThanOrEqual(0);
+    expect(webComponentsIdx).toBeGreaterThanOrEqual(0);
     expect(reactIdx).toBeGreaterThanOrEqual(0);
-    expect(elementsIdx).toBeLessThan(reactIdx);
+    expect(webComponentsIdx).toBeLessThan(reactIdx);
   });
 
-  // SCAF-6: next uses next/dynamic { ssr: false } — no top-level @kitn.ai/ui/elements or
+  // SCAF-6: next uses next/dynamic { ssr: false } — no top-level @kitn.ai/ui/web-components or
   // @kitn.ai/ui/react import. NOT because importing them on the server crashes (both
   // entries are SSR-import-safe): <kai-*> are client-only custom elements, so a
   // server-rendered tag never upgrades and mismatches on hydration.
@@ -853,8 +853,8 @@ describe('scaffold', () => {
     expect(text).toContain('ssr: false');
     // @kitn.ai/ui/react must appear only inside dynamic() — not as a standalone top-level import
     expect(text).not.toMatch(/^import\s+\{[^}]*\}\s+from\s+'@kitn\.ai\/ui\/react'/m);
-    // No top-level @kitn.ai/ui/elements (the dynamic import of /react self-registers on client)
-    expect(text).not.toMatch(/^import\s+'@kitn\.ai\/ui\/elements'/m);
+    // No top-level @kitn.ai/ui/web-components (the dynamic import of /react self-registers on client)
+    expect(text).not.toMatch(/^import\s+'@kitn\.ai\/ui\/web-components'/m);
   });
 
   // SCAF-6 (contrast): plain react (Vite) STILL uses top-level imports — unchanged.
@@ -934,7 +934,7 @@ describe('scaffold', () => {
     });
     const text = (out.content as { type: string; text: string }[])[0].text;
     // Must import the typed element interface from the library
-    expect(text).toContain("import type { KaiChatElement } from '@kitn.ai/ui/elements'");
+    expect(text).toContain("import type { KaiChatElement } from '@kitn.ai/ui/web-components'");
     // Must use KaiChatElement, not bare HTMLElement, so property access is typed
     // Runes: `bind:this` writes to the binding, so it must be $state — but it still
     // has to be the kit's ELEMENT type, not a bare HTMLElement, or `chatEl.messages`
@@ -1470,7 +1470,7 @@ describe('scaffold', () => {
       framework: 'svelte',
     });
     const text = (out.content as { type: string; text: string }[])[0].text;
-    expect(text).toContain("import type { KaiChatElement, KaiSourcesElement } from '@kitn.ai/ui/elements'");
+    expect(text).toContain("import type { KaiChatElement, KaiSourcesElement } from '@kitn.ai/ui/web-components'");
     expect(text).toContain('let sourcesEl = $state<KaiSourcesElement | undefined>(undefined)');
     expect(text).not.toContain('$state<HTMLElement | undefined>');
   });
@@ -1486,7 +1486,7 @@ describe('scaffold', () => {
       framework: 'svelte',
     });
     const text = (out.content as { type: string; text: string }[])[0].text;
-    expect(text).toContain("import type { KaiChatElement } from '@kitn.ai/ui/elements'");
+    expect(text).toContain("import type { KaiChatElement } from '@kitn.ai/ui/web-components'");
     expect(text).not.toContain('KaiSourcesElement');
   });
 
@@ -1780,7 +1780,7 @@ describe('scaffold', () => {
   });
 
   // ── SCAF-15: raw-DOM frameworks must gate property-setting on element upgrade ──
-  // The elements bundle registers kai-* via an async dynamic import (SSR-safety),
+  // The web-components bundle registers kai-* via an async dynamic import (SSR-safety),
   // so the element may not be upgraded when the consumer sets array/object props.
   // Values set on a not-yet-upgraded element are dropped on upgrade — so the
   // raw-DOM frameworks (html/vue/svelte) must await customElements.whenDefined.
@@ -1870,15 +1870,15 @@ describe('scaffold', () => {
     });
     const text = (out.content as { type: string; text: string }[])[0].text;
     // per-element import path
-    expect(text).toMatch(/@kitn\.ai\/ui\/elements\/chat/);
-    // autoloader — positioned as a CDN/<script> tool (dist/elements/autoloader.js), NOT a bundler import
+    expect(text).toMatch(/@kitn\.ai\/ui\/web-components\/chat/);
+    // autoloader — positioned as a CDN/<script> tool (dist/web-components/autoloader.js), NOT a bundler import
     expect(text).toMatch(/autoloader\.js/);
     expect(text).toMatch(/CDN|not importable through a bundler/i);
   });
 
   // SCAF-16: the note must describe what the scaffold ACTUALLY emits. `next` emits no
-  // `import '@kitn.ai/ui/elements'` (the dynamic-imported wrappers self-register), so
-  // claiming "the scaffold uses import '@kitn.ai/ui/elements'" there is simply false.
+  // `import '@kitn.ai/ui/web-components'` (the dynamic-imported wrappers self-register), so
+  // claiming "the scaffold uses import '@kitn.ai/ui/web-components'" there is simply false.
   it('SCAF-16: loading-options note matches the elements import the output really emits', async () => {
     for (const framework of ['html', 'react', 'next', 'vue', 'svelte', 'tanstack-start'] as const) {
       const out = await scaffold.handler({
@@ -1890,14 +1890,14 @@ describe('scaffold', () => {
       const text = (out.content as { type: string; text: string }[])[0].text;
       const frontend = text.split('=== LOADING OPTIONS ===')[0];
       const note = text.split('=== LOADING OPTIONS ===')[1] ?? '';
-      const emitsRegisterAll = /import '@kitn\.ai\/ui\/elements';/.test(frontend);
+      const emitsRegisterAll = /import '@kitn\.ai\/ui\/web-components';/.test(frontend);
       if (emitsRegisterAll) {
         expect(note, `${framework}: emits register-all but the note denies it`).toContain(
-          "The scaffold uses `import '@kitn.ai/ui/elements'` (register-all)",
+          "The scaffold uses `import '@kitn.ai/ui/web-components'` (register-all)",
         );
       } else {
         expect(note, `${framework}: emits no register-all but the note claims it`).toContain(
-          "The scaffold emits NO `import '@kitn.ai/ui/elements'`",
+          "The scaffold emits NO `import '@kitn.ai/ui/web-components'`",
         );
       }
     }
@@ -1942,10 +1942,10 @@ describe('scaffold', () => {
     });
     const text = (out.content as { type: string; text: string }[])[0].text;
     // The default import must still be present in the front-end block
-    expect(text).toContain("import '@kitn.ai/ui/elements'");
+    expect(text).toContain("import '@kitn.ai/ui/web-components'");
     // The per-element import must ONLY appear in the loading-options note, not in the front-end block
     const frontendBlock = text.split('=== LOADING OPTIONS ===')[0];
-    expect(frontendBlock).not.toContain("@kitn.ai/ui/elements/chat");
+    expect(frontendBlock).not.toContain("@kitn.ai/ui/web-components/chat");
   });
 
   // ── SCAF-17: interaction-pattern snippets (toast / dismissRecovery / kai-compare) ──
@@ -1969,8 +1969,8 @@ describe('scaffold', () => {
       framework: 'html',
     });
     const text = (out.content as { type: string; text: string }[])[0].text;
-    // imperative toast, exported from the elements bundle
-    expect(text).toMatch(/import \{ toast \} from '@kitn\.ai\/ui\/elements'/);
+    // imperative toast, exported from the web-components bundle
+    expect(text).toMatch(/import \{ toast \} from '@kitn\.ai\/ui\/web-components'/);
     expect(text).toContain("toast('Copied to clipboard')");
     expect(text).toContain('toast.success');
     // an Undo action wired through onAction
@@ -2031,7 +2031,7 @@ describe('scaffold', () => {
       });
       const text = (out.content as { type: string; text: string }[])[0].text;
       expect(text, `${framework}: missing INTERACTION PATTERNS`).toContain('=== INTERACTION PATTERNS ===');
-      expect(text, `${framework}: missing toast pattern`).toContain("import { toast } from '@kitn.ai/ui/elements'");
+      expect(text, `${framework}: missing toast pattern`).toContain("import { toast } from '@kitn.ai/ui/web-components'");
       expect(text, `${framework}: missing dismissRecovery pattern`).toContain('dismissRecovery');
       expect(text, `${framework}: missing kai-compare pattern`).toContain('kai-compare-select');
     }
@@ -2145,7 +2145,7 @@ describe('scaffold', () => {
     );
 
     // The module is the TypeScript half: typed element handle, typed message type.
-    expect(mod).toContain("import type { KaiChatElement } from '@kitn.ai/ui/elements'");
+    expect(mod).toContain("import type { KaiChatElement } from '@kitn.ai/ui/web-components'");
     expect(mod).toContain("document.getElementById('chat') as KaiChatElement");
     // ChatMessage comes from the package, not from a local alias off the element.
     // The alias existed because the mock imported nothing; it streams through
@@ -3343,13 +3343,13 @@ describe('scaffold — solid', () => {
     // assertion fail for the very sentence that documents it.
     const code = f.replace(/^[ \t]*\/\/.*$/gm, '');
     expect(code).not.toMatch(/<kai-[a-z-]+/);
-    expect(code).not.toContain("import '@kitn.ai/ui/elements'");
+    expect(code).not.toContain("import '@kitn.ai/ui/web-components'");
   });
 
   it('and the LOADING OPTIONS note says so rather than claiming a register-all import', async () => {
     const text = await emit();
     const note = text.split('=== LOADING OPTIONS ===')[1] ?? '';
-    expect(note).toContain("The scaffold emits NO `import '@kitn.ai/ui/elements'`");
+    expect(note).toContain("The scaffold emits NO `import '@kitn.ai/ui/web-components'`");
   });
 
   /**
@@ -3395,7 +3395,7 @@ describe('scaffold — solid', () => {
    * The two part kinds that render as a RUN, and the one placement fact that is
    * load-bearing rather than cosmetic.
    *
-   * `components/message.tsx` collapses consecutive `source` parts into ONE
+   * `components/message/message.tsx` collapses consecutive `source` parts into ONE
    * citation row and puts it OUTSIDE the message bubble on purpose: a citation
    * nested in `MessageContent` is indistinguishable from a link the model typed
    * into its own prose. The emitted scaffold has to do the same, or a Solid
@@ -3480,6 +3480,19 @@ describe('scaffold — solid', () => {
     expect(f).not.toContain('@import "@kitn.ai/ui/theme.css"');
     expect(f).toContain('tw-animate-css @tailwindcss/typography');
     expect(f).toContain('@source "../node_modules/@kitn.ai/ui"');
+  });
+
+  it('spells the Send button as the kit pill, not Tailwind\'s hardcoded full round', async () => {
+    const f = front(await emit());
+    const send = f.split('\n').find((l) => l.includes('<Button size="sm"'));
+    expect(send, 'no Send button in the emitted solid front end').toBeDefined();
+    expect(send).toContain('class="rounded-pill"');
+    expect(send).not.toContain('rounded-full');
+    // `rounded-pill` resolves in the emitted app because the setup block above
+    // installs the kit's solid.css -> theme.css, where the rung is declared. The
+    // rung is READ rather than restated, so renaming it in theme.css fails here.
+    const sheet = await readFile(join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'theme.css'), 'utf8');
+    expect(sheet, 'theme.css declares no --radius-pill, so the emitted class is dead').toMatch(/--radius-pill\s*:/);
   });
 
   it('takes the submitted text from the controlled input signal, not a kai-submit event', async () => {
@@ -4178,13 +4191,13 @@ describe('the emitted surface imports its framework\'s kit entry', () => {
    * `html` does.
    */
   const COMPONENT_ENTRY: Record<string, string> = {
-    html: '@kitn.ai/ui/elements',
-    vue: '@kitn.ai/ui/elements',
-    svelte: '@kitn.ai/ui/elements',
-    angular: '@kitn.ai/ui/elements',
-    fastapi: '@kitn.ai/ui/elements',
-    express: '@kitn.ai/ui/elements',
-    worker: '@kitn.ai/ui/elements',
+    html: '@kitn.ai/ui/web-components',
+    vue: '@kitn.ai/ui/web-components',
+    svelte: '@kitn.ai/ui/web-components',
+    angular: '@kitn.ai/ui/web-components',
+    fastapi: '@kitn.ai/ui/web-components',
+    express: '@kitn.ai/ui/web-components',
+    worker: '@kitn.ai/ui/web-components',
     react: '@kitn.ai/ui/react',
     next: '@kitn.ai/ui/react',
     'tanstack-start': '@kitn.ai/ui/react',
@@ -4275,7 +4288,7 @@ describe('the emitted surface imports its framework\'s kit entry', () => {
   /**
    * The general form of the Solid bug: an emitted import must NAME the entry it
    * wants. The bare root is never the right answer for a generated app — the three
-   * web-component frameworks want `./elements`, the three React ones want
+   * web-component frameworks want `./web-components`, the three React ones want
    * `./react`, and Solid wants `./solid` — so a bare `@kitn.ai/ui` anywhere in an
    * emitted surface means some branch fell back to the default entry.
    *

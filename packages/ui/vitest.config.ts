@@ -70,10 +70,13 @@ export default defineConfig({
   // session each before it was written down.
   //
   // THIS DOES NOT WEAKEN THE EXPORTS MAP. It rewrites the specifier for vitest and
-  // nothing else: the library builds (the `mcp` target in config/vite/node.ts
-  // bundles the MCP against the BUILT dist/schemas.js, which KAI_BUILD=schemas in
-  // config/vite/lib.ts emits one step earlier
-  // in the `build` script) never load this file, and neither does any consumer.
+  // nothing else: every build emits its own bundle and none of them loads this
+  // file -- the library builds in this package, and the CLI bundles built from
+  // packages/kai/config/vite/node.ts since the dev tooling moved there. (That
+  // target used to be cited here as "bundles the MCP against the BUILT
+  // dist/schemas.js": it does not, and never did -- every `@kitn.ai/ui/schemas`
+  // in mcp/ is an EMITTED-CODE string, not an import.) Neither does any consumer
+  // load this file.
   // The consumer resolution path stays guarded by verify:schemas, verify:ssr,
   // verify:tool-schemas, verify:dts / verify:dts:consumer and verify:consumer,
   // every one of which reads the BUILT entry through the exports map from outside
@@ -135,7 +138,7 @@ export default defineConfig({
     // file absent from this list gets `export default ""` and the plugin loses
     // the tie, since both are enforce:post. Every entry is a CSS file some module
     // imports for its TEXT, not for its styling:
-    //   • compiled.css — injected into shadow roots (src/elements/css.ts)
+    //   • compiled.css — injected into shadow roots (src/web-components/define/css.ts)
     //   • theme.css    — the `--kai-*` token names the theme MCP tool emits
     //                    (mcp/mcp/tools/theme.ts)
     // Silently empty is the dangerous failure here: it turns a derived list into

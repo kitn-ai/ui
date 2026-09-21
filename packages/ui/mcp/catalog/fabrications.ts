@@ -27,7 +27,7 @@ export const Fabrication = z
     invented: z.string().regex(/^kai-[a-z0-9-]+$/),
     /** What the agent was trying to accomplish, in its own terms. */
     wanted: z.string().min(1),
-    /** The real element to reach for. Checked PRESENT in derived.json when non-null. */
+    /** The real web component to reach for. Checked PRESENT in derived.json when non-null. */
     useInstead: z.string().regex(/^kai-[a-z0-9-]+$/).nullable(),
     /**
      * Required when `useInstead` is null. "There is nothing for this" is a real
@@ -85,7 +85,7 @@ export function resolveFabrications(rows: TFabrication[], knownTags: Iterable<st
   for (const row of rows) {
     if (known.has(row.invented)) {
       problems.push(
-        `\`${row.invented}\` is recorded as invented, but the kit SHIPS it now. Delete the row: it tells every future agent that a real element does not exist, on the one page whose job is saying what is real.`,
+        `\`${row.invented}\` is recorded as invented, but the kit SHIPS it now. Delete the row: it tells every future agent that a real web component does not exist, on the one page whose job is saying what is real.`,
       );
     }
     if (row.useInstead && !known.has(row.useInstead)) {

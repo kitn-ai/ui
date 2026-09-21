@@ -23,7 +23,7 @@
 //      the composition outright, and Android word suggestion is far more common in these
 //      fields than CJK input.
 //   4. `.value` is never shadowed with `Object.defineProperty` (§5.8). The canonical value
-//      is read through `getCanonicalValue()`; the element facade will publish it with
+//      is read through `getCanonicalValue()`; the web-component facade will publish it with
 //      `setFormValue()`.
 //
 // ONE KNOWN IMPRECISION, recorded rather than papered over. An undo entry's selection is
@@ -737,7 +737,7 @@ export function createInputMask(el: HTMLInputElement, options: InputMaskOptions)
     return canonicalize(pattern, formatRaw(pattern, raw), semantic);
   }
 
-  const elementListeners: Array<[string, EventListener]> = [
+  const webComponentListeners: Array<[string, EventListener]> = [
     ['beforeinput', onBeforeInput],
     ['input', onInputEvent],
     ['compositionstart', onCompositionStart],
@@ -758,7 +758,7 @@ export function createInputMask(el: HTMLInputElement, options: InputMaskOptions)
   ];
   const doc = el.ownerDocument;
 
-  for (const [kind, handler] of elementListeners) el.addEventListener(kind, handler);
+  for (const [kind, handler] of webComponentListeners) el.addEventListener(kind, handler);
   // `selectionchange` fires on the DOCUMENT for `<input>` in every browser this kit
   // targets; the element-targeted version is newer and not yet universal.
   doc.addEventListener('selectionchange', clampSelection);
@@ -801,7 +801,7 @@ export function createInputMask(el: HTMLInputElement, options: InputMaskOptions)
       // or a guide that does not align, and the throw must leave this masker exactly as it
       // was. Merging into `opts` first would park the rejected config in state where the
       // NEXT update -- one that says nothing about `format` -- picks it up and applies a
-      // change that was already refused. The element facade hits precisely this shape when
+      // change that was already refused. The web-component facade hits precisely this shape when
       // `format` and `guide` are separate reactive attributes that do not land in the same
       // tick.
       const merged: InputMaskOptions = { ...opts, ...next };
@@ -846,7 +846,7 @@ export function createInputMask(el: HTMLInputElement, options: InputMaskOptions)
       if (detached) return;
       detached = true;
       pendingWrite = null; // a deferred write must not fire into a field we no longer own
-      for (const [kind, handler] of elementListeners) el.removeEventListener(kind, handler);
+      for (const [kind, handler] of webComponentListeners) el.removeEventListener(kind, handler);
       doc.removeEventListener('selectionchange', clampSelection);
     },
   };

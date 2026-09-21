@@ -2,7 +2,7 @@
 // `lint-silent-drops.mjs` and `gen-catalog.mjs` so the two can never disagree.
 //
 // This was moved here out of `lint-silent-drops.mjs` unchanged. It reads the
-// union in `src/elements/chat-types.ts` through the TypeScript parser rather
+// union in `src/web-components/chat/chat-types.ts` through the TypeScript parser rather
 // than restating the members, so a seventh variant is picked up with no edit
 // here -- the same reason `verify:scaffold` derives its list from that file.
 //

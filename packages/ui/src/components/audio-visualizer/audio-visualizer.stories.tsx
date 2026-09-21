@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal, onCleanup, Show, For, type JSX } from 'solid-js';
 import { AudioVisualizer, type AudioVisualizerProps } from './index';
-import { Button } from '../../ui/button';
-import { Notice } from '../../ui/notice';
-import { componentDescription } from '../../stories/docs/element-controls';
+import { Button } from '../button/button';
+import { Notice } from '../notice/notice';
+import { componentDescription } from '../../stories/docs/web-component-controls';
 import {
   SIZES,
   CONTAINER_HEIGHT,
@@ -12,7 +12,7 @@ import {
   defaultRadialBarCount,
   type VisualizerSize,
 } from './sizes';
-import { VOICE_BANDS, VOICE_FRAME_MS } from './audio-visualizer.voice-fixture';
+import { VOICE_BANDS, VOICE_FRAME_MS } from '../../stories/fixtures/audio-visualizer.voice-fixture';
 // The SAME mirror primitives the component's live-audio path runs (see
 // `bands()` in index.tsx) -- imported, never reimplemented here, so the
 // stories' pre-computed `bands` demo the real centre-outward mapping
@@ -24,7 +24,7 @@ const STATES = ['idle', 'connecting', 'listening', 'thinking', 'speaking', 'disc
 const ALL_VARIANTS = ['bar', 'grid', 'radial', 'wave', 'aurora', 'custom'] as const;
 
 const meta = {
-  title: 'Components/Elements/AudioVisualizer',
+  title: 'Components/AudioVisualizer',
   component: AudioVisualizer,
   tags: ['autodocs'],
   parameters: {
@@ -962,7 +962,7 @@ export const Microphone: Story = {
  * through a control. Six `useAudioAnalysis` instances end up tapping the
  * same stream simultaneously: each calls its own `ctx.createMediaStreamSource
  * (stream)`, which -- unlike `createMediaElementSource` -- has no
- * once-per-element restriction, so this is expected to just work, but it had
+ * once-per-web-component restriction, so this is expected to just work, but it had
  * never actually been exercised with six concurrent consumers before this
  * story. Verified in the browser: all six react independently to the same
  * stream, not just the first.

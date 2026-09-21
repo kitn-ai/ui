@@ -15,7 +15,7 @@ const srcRoot = resolve(PKG, 'src');
 // Note: the comments in this file moved here VERBATIM from vite.config.react.ts,
 // so they still name two files that are gone. `vite.config.barrel.ts` is the
 // `index` target in config/vite/lib.ts. `vite.config.ts`, the main register-all
-// build, is `KAI_BUILD=register vite build --config config/vite/elements.ts`.
+// build, is `KAI_BUILD=register vite build --config config/vite/web-components.ts`.
 
 /**
  * Rewrite `'../../src/x'` specifiers in the EMITTED declarations to the compiled
@@ -89,11 +89,11 @@ export default defineConfig({
     dts({
       tsconfigPath: 'tsconfig.react.json',
       // The wrappers type each ref as its element interface and import those from
-      // '@kitn.ai/ui/elements', the public subpath. Without this exclusion the plugin's
-      // pathsToAliases turns that tsconfig paths key into '../../src/elements/element-types.d.ts',
+      // '@kitn.ai/ui/web-components', the public subpath. Without this exclusion the plugin's
+      // pathsToAliases turns that tsconfig paths key into '../../src/web-components/web-component-types.d.ts',
       // an escaping specifier srcSpecifiersToDist below cannot repair (its target is a .d.ts,
       // which the probe for a .ts/.tsx source misses) and verify:dts fails on.
-      aliasesExclude: [/^@kitn\.ai\/ui\/elements$/],
+      aliasesExclude: [/^@kitn\.ai\/ui\/web-components$/],
       include: ['frameworks/react/**'],
       outDir: 'dist/react',
       entryRoot: 'frameworks/react',
@@ -112,10 +112,10 @@ export default defineConfig({
       fileName: () => 'react.js',
     },
     rollupOptions: {
-      // React is a peer dep. Every @kitn.ai/ui/elements entry (register-all AND the
-      // per-element chunks the wrappers lazy-import) is external — it resolves to the
+      // React is a peer dep. Every @kitn.ai/ui/web-components entry (register-all AND the
+      // per-web-component chunks the wrappers lazy-import) is external — it resolves to the
       // consumer's installed dist at runtime, and stays a code-splittable dynamic import.
-      external: ['react', 'react-dom', 'react/jsx-runtime', /^@kitn\.ai\/ui\/elements(\/.*)?$/],
+      external: ['react', 'react-dom', 'react/jsx-runtime', /^@kitn\.ai\/ui\/web-components(\/.*)?$/],
       // Re-emit the React Server Components `'use client'` directive: the wrappers are
       // hooks-based client components, required for Next.js App Router (and other RSC
       // bundlers). Rollup strips module-level directives from the source while bundling,

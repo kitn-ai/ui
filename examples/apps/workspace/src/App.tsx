@@ -3,13 +3,13 @@
 // assignment, reads it back correctly, and renders nothing — with no error and
 // no warning. The React wrappers below also register their own element lazily,
 // so this is belt-and-braces against a first-mount upgrade delay.
-import '@kitn.ai/ui/elements';
+import '@kitn.ai/ui/web-components';
 import '@kitn.ai/ui/theme.tokens.css';
 import './styles.css';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button, Chat, Conversations, Workspace } from '@kitn.ai/ui/react';
-import { toast } from '@kitn.ai/ui/elements';
+import { toast } from '@kitn.ai/ui/web-components';
 import {
   bindThreadMessages,
   createAssistantStream,

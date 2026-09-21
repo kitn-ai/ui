@@ -1,0 +1,52 @@
+.guide-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: rgba(20, 24, 40, 0.2);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+  animation: scrim-in var(--t-mid) var(--ease) both;
+}
+.guide {
+  position: fixed;
+  z-index: 71;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(440px, calc(100vw - 32px));
+  padding: 24px;
+  border-radius: 20px;
+  animation: guide-in var(--t-mid) var(--ease-out) both;
+}
+@keyframes guide-in {
+  from { opacity: 0; transform: translate(-50%, -48%) scale(0.97) }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1) }
+}
+.guide-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+.guide-title { font-size: 24px; margin-top: 6px }
+.guide-close {
+  width: 36px; height: 36px; border-radius: 999px;
+  display: grid; place-items: center; color: var(--ink); flex: none;
+}
+.guide-table { width: 100%; border-collapse: collapse; font-size: 13px }
+.guide-table th, .guide-table td {
+  text-align: left;
+  padding: 9px 8px;
+  border-bottom: 1px solid var(--line);
+  font-variant-numeric: tabular-nums;
+}
+.guide-table thead th {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 600;
+}
+.guide-table tbody th { font-weight: 600 }
+.guide-note { font-size: 11.5px; color: var(--muted); margin-top: 14px; line-height: 1.6 }

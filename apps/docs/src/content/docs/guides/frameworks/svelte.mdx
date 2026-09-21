@@ -13,23 +13,23 @@ import { Aside } from '@astrojs/starlight/components';
 npm install @kitn.ai/ui
 ```
 
-Register every `kai-*` element once, near your app entry point. Registration is async, and Svelte assigns object properties as it mounts, so mount behind `elementsReady`. A property written before the element upgrades is discarded.
+Register every `kai-*` web component once, near your app entry point. Registration is async, and Svelte assigns object properties as it mounts, so mount behind `webComponentsReady`. A property written before the element upgrades is discarded.
 
 ```js
 // src/main.js
 import { mount } from 'svelte';
-import { elementsReady } from '@kitn.ai/ui/elements';
+import { webComponentsReady } from '@kitn.ai/ui/web-components';
 import App from './App.svelte';
 
 // Resolves once every kai-* element is defined.
-elementsReady.then(() => mount(App, { target: document.getElementById('app') }));
+webComponentsReady.then(() => mount(App, { target: document.getElementById('app') }));
 ```
 
 One import covers your entire app. No CSS import is needed — each element is styled inside its own Shadow DOM. Add `@kitn.ai/ui/theme.css` only if you want to override design tokens (see [Theming](/guides/theming/)).
 
 ## Pass data and handle events
 
-The rule for every `kai-*` element: **rich data in as properties, interactions out as events.**
+The rule for every `kai-*` web component: **rich data in as properties, interactions out as events.**
 
 Svelte maps cleanly to this pattern:
 
@@ -73,7 +73,7 @@ A message is an **ordered `parts` array**, not a string: text, reasoning, tool c
 
 ```svelte
 <script lang="ts">
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
   import type { ChatMessage } from '@kitn.ai/ui';
   import { appendTextPart } from '@kitn.ai/ui/state';
 
@@ -119,7 +119,7 @@ Compose `<kai-conversations>` alongside `<kai-chat>` for a multi-thread layout. 
 
 ```svelte
 <script>
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
 
   let conversations = loadConversations();
   let activeId = conversations[0]?.id;
@@ -161,4 +161,4 @@ Compose `<kai-conversations>` alongside `<kai-chat>` for a multi-thread layout. 
 | `kai-attachments` | `kai-remove` | `{ id: string }` |
 | `kai-resizable` | `kai-change` | `{ sizes: number[] }` |
 
-Every element's full prop and event list is on its component page in the [Components](/components/attachments/) reference.
+Every web component's full prop and event list is on its component page in the [Components](/components/attachments/) reference.

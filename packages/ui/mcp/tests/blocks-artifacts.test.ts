@@ -7,7 +7,7 @@
 // Nothing here touches the DOM.
 /**
  * The four blocks assertions whose inputs live in THIS package: the real
- * integration catalog, the real element-nonscalar map, this package's version,
+ * integration catalog, the real web-component-nonscalar map, this package's version,
  * and the BUILT artifacts under dist/blocks/ plus the generated driver page.
  *
  * They were part of mcp/tests/blocks-registry.test.ts before that suite moved
@@ -33,7 +33,7 @@ import {
   type RawBlockSource,
 } from '@kitn.ai/blocks';
 import { handlerName, renderCdnFormFiles, withStrippedTwins } from '@kitn.ai/blocks/forms';
-import { onName } from '../../scripts/gen-element-react.mjs';
+import { onName } from '../../scripts/gen-web-component-react.mjs';
 import { listIntegrations } from '../registry';
 
 const ROOT = resolve(__dirname, '../..');
@@ -59,7 +59,7 @@ function readBuiltArtifact(path: string): string {
 const VERSION = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8')).version as string;
 const ROUTES = listIntegrations().map((i) => i.id);
 const NONSCALAR = JSON.parse(
-  readFileSync(join(ROOT, 'src/elements/element-nonscalar.json'), 'utf8'),
+  readFileSync(join(ROOT, 'src/web-components/web-component-nonscalar.json'), 'utf8'),
 ) as Record<string, string[]>;
 
 /** The same walk gen-blocks.mjs does -- a dir is a block iff it holds a
@@ -101,7 +101,7 @@ describe("the real blocks against this package's real inputs", () => {
     expect(blocks.map((b) => b.name).sort()).toEqual(sources.map((s) => s.dirName).sort());
   });
 
-  it('the real blocks pass the kai- contract checks against the real element-nonscalar map', () => {
+  it('the real blocks pass the kai- contract checks against the real web-component-nonscalar map', () => {
     for (const block of blocks) expect(checkBlockContracts(block, NONSCALAR)).toEqual([]);
   });
 
@@ -171,7 +171,7 @@ describe("the real blocks against this package's real inputs", () => {
  * trusted (plan R17 and R18; a docs/coupling-map.md section 4 row).
  */
 describe('the derivations the react block renderer makes', () => {
-  const meta = JSON.parse(readFileSync(join(ROOT, 'src/elements/element-meta.json'), 'utf8')) as {
+  const meta = JSON.parse(readFileSync(join(ROOT, 'src/web-components/web-component-meta.json'), 'utf8')) as {
     tag: string;
     displayName: string;
     className: string;

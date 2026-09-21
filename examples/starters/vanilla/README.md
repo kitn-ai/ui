@@ -1,6 +1,6 @@
 # Vanilla example — chat workspace, composed by hand
 
-A small chat **workspace assembled from `@kitn.ai/ui`'s individual elements** — a
+A small chat **workspace assembled from `@kitn.ai/ui`'s individual web components** — a
 `<kai-conversations>` sidebar, a `<kai-thread>` of messages, and a
 `<kai-prompt-input>` composer — wired together with plain TypeScript. No
 framework: the browser upgrades the `kai-*` custom elements natively and this
@@ -23,8 +23,8 @@ SSE comment, every frame carries a `_kai_mock` field, `model` reports as
 
 Consuming Shadow-DOM custom elements with no framework comes down to four things:
 
-- **Register before you build.** `src/main.ts` does `import '@kitn.ai/ui/elements'`
-  (registers the elements) and `import '@kitn.ai/ui/theme.tokens.css'` (the plain
+- **Register before you build.** `src/main.ts` does `import '@kitn.ai/ui/web-components'`
+  (registers the web components) and `import '@kitn.ai/ui/theme.tokens.css'` (the plain
   `--color-*` tokens the shell uses). Because registration is **async**, it then
   `await`s `customElements.whenDefined(...)` for every tag **before** creating the
   elements — a property set on an element before it upgrades is lost, and raw
@@ -59,7 +59,7 @@ Consuming Shadow-DOM custom elements with no framework comes down to four things
 
 ## How it works
 
-- `src/main.ts` registers the elements, waits for them to upgrade, wires the send
+- `src/main.ts` registers the web components, waits for them to upgrade, wires the send
   loop (append + stream), and boots the view.
 - `src/view.ts` builds the `kai-*` workspace imperatively (`<kai-resizable>` for
   the split, `<kai-conversations>`, `<kai-thread>`, `<kai-prompt-input>`), wires
@@ -80,7 +80,7 @@ like a published consumer — no aliases).
 ## Run it
 
 From the repo root, build the kit once so its `dist/` exists (the example imports
-the compiled `@kitn.ai/ui/elements` + `@kitn.ai/ui/theme.tokens.css`), then start
+the compiled `@kitn.ai/ui/web-components` + `@kitn.ai/ui/theme.tokens.css`), then start
 the example:
 
 ```bash

@@ -1,8 +1,8 @@
 // Static page server for the block driver — the spike's CDN stand-in,
 // parameterized. Serves ROOT at /, and mounts KIT (normally the built
 // packages/ui/dist) at /kit/ so harness pages import
-// `/kit/elements/autoloader.js` exactly the way a CDN page imports
-// `https://cdn.jsdelivr.net/npm/@kitn.ai/ui@<version>/dist/elements/autoloader.js`.
+// `/kit/web-components/autoloader.js` exactly the way a CDN page imports
+// `https://cdn.jsdelivr.net/npm/@kitn.ai/ui@<version>/dist/web-components/autoloader.js`.
 // Env: PORT (default 8952 — never 4400/4401/8931), ROOT, KIT.
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';

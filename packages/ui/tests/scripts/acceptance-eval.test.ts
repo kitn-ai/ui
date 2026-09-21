@@ -22,15 +22,15 @@ import {
   resolveAttribution,
   tierDelta,
 } from '../../scripts/lib/catalog-attribution.mjs';
-import { codeUnits, fencedBlocks, gateAuditClean, gateElementsExist, scanJudgeLeak } from '../../scripts/lib/output-scan.mjs';
+import { codeUnits, fencedBlocks, gateAuditClean, gateWebComponentsExist, scanJudgeLeak } from '../../scripts/lib/output-scan.mjs';
 import { proposedFabricationRow, renderFabricatedPage } from '../../scripts/lib/fabrications.mjs';
 
 const PKG = join(__dirname, '..', '..');
 const EVAL = join(PKG, 'scripts/acceptance-eval.mjs');
 const derived = JSON.parse(readFileSync(join(PKG, 'mcp/catalog/derived.json'), 'utf8')) as {
-  elements: { tag: string }[];
+  webComponents: { tag: string }[];
 };
-const knownTags = derived.elements.map((e) => e.tag);
+const knownTags = derived.webComponents.map((e) => e.tag);
 const scenarios = listScenarios();
 
 const facts = {
@@ -77,31 +77,31 @@ describe('the rubric covers the deck it scores', () => {
   // not a derivable fact — update it deliberately when the deck changes.
   const EXPECTED_SHAPE: Record<string, { dimensions: string[]; totalWeight: number }> = {
     S1: {
-      dimensions: ['audit-clean', 'compiles', 'completeness', 'contract-correctness', 'elements-exist', 'honesty-bound', 'invariant-compliance', 'registers', 'wiring-topology'],
+      dimensions: ['audit-clean', 'compiles', 'completeness', 'contract-correctness', 'web-components-exist', 'honesty-bound', 'invariant-compliance', 'registers', 'wiring-topology'],
       totalWeight: 26,
     },
     S2: {
-      dimensions: ['audit-clean', 'compiles', 'completeness', 'contract-correctness', 'elements-exist', 'honesty-bound', 'invariant-compliance', 'streams'],
+      dimensions: ['audit-clean', 'compiles', 'completeness', 'contract-correctness', 'web-components-exist', 'honesty-bound', 'invariant-compliance', 'streams'],
       totalWeight: 24,
     },
     S3: {
-      dimensions: ['audit-clean', 'completeness', 'contract-correctness', 'elements-exist', 'honesty-bound', 'invariant-compliance', 'wiring-topology'],
+      dimensions: ['audit-clean', 'completeness', 'contract-correctness', 'web-components-exist', 'honesty-bound', 'invariant-compliance', 'wiring-topology'],
       totalWeight: 21,
     },
     S4: {
-      dimensions: ['audit-clean', 'compiles', 'completeness', 'contract-correctness', 'elements-exist', 'honesty-bound', 'invariant-compliance', 'registers'],
+      dimensions: ['audit-clean', 'compiles', 'completeness', 'contract-correctness', 'web-components-exist', 'honesty-bound', 'invariant-compliance', 'registers'],
       totalWeight: 24,
     },
     S5: {
-      dimensions: ['audit-clean', 'completeness', 'contract-correctness', 'elements-exist', 'honesty-bound', 'invariant-compliance', 'registers'],
+      dimensions: ['audit-clean', 'completeness', 'contract-correctness', 'web-components-exist', 'honesty-bound', 'invariant-compliance', 'registers'],
       totalWeight: 21,
     },
     S6: {
-      dimensions: ['audit-clean', 'completeness', 'contract-correctness', 'elements-exist', 'honesty-bound', 'invariant-compliance'],
+      dimensions: ['audit-clean', 'completeness', 'contract-correctness', 'web-components-exist', 'honesty-bound', 'invariant-compliance'],
       totalWeight: 19,
     },
     S7: {
-      dimensions: ['audit-clean', 'completeness', 'contract-correctness', 'elements-exist', 'honesty-bound', 'invariant-compliance'],
+      dimensions: ['audit-clean', 'completeness', 'contract-correctness', 'web-components-exist', 'honesty-bound', 'invariant-compliance'],
       totalWeight: 19,
     },
   };
@@ -145,7 +145,7 @@ describe('the rubric covers the deck it scores', () => {
     // can invent a tag.
     for (const s of scenarios) {
       expect(ids(s.id)).toContain('honesty-bound');
-      expect(ids(s.id)).toContain('elements-exist');
+      expect(ids(s.id)).toContain('web-components-exist');
     }
   });
 
@@ -176,7 +176,7 @@ describe('the rubric covers the deck it scores', () => {
 
 describe('mechanical gates sit UNDER the judged score', () => {
   it('refuses a judged score for a mechanically gated dimension', () => {
-    expect(() => scoreRun({ scenario: scenarios.find((s) => s.id === 'S6')!, gates: gateAll('S6'), judged: { ...judgeAll('S6', 8), 'elements-exist': 10 } })).toThrow(
+    expect(() => scoreRun({ scenario: scenarios.find((s) => s.id === 'S6')!, gates: gateAll('S6'), judged: { ...judgeAll('S6', 8), 'web-components-exist': 10 } })).toThrow(
       /MECHANICALLY gated/,
     );
   });
@@ -190,7 +190,7 @@ describe('mechanical gates sit UNDER the judged score', () => {
   // The discipline this branch keeps re-learning: a green that means "the check
   // never ran" is the dangerous one.
   it('treats an UNRUN gate as an error, never as a skip and never as a pass', () => {
-    expect(() => scoreRun({ scenario: scenarios.find((s) => s.id === 'S6')!, gates: { 'elements-exist': { passed: true } }, judged: judgeAll('S6', 8) })).toThrow(
+    expect(() => scoreRun({ scenario: scenarios.find((s) => s.id === 'S6')!, gates: { 'web-components-exist': { passed: true } }, judged: judgeAll('S6', 8) })).toThrow(
       /has no gate result/,
     );
   });
@@ -212,10 +212,10 @@ describe('mechanical gates sit UNDER the judged score', () => {
     const s6 = scenarios.find((s) => s.id === 'S6')!;
     const r = scoreRun({
       scenario: s6,
-      gates: { 'elements-exist': { passed: true, vacuous: true }, 'audit-clean': { passed: true, vacuous: true } },
+      gates: { 'web-components-exist': { passed: true, vacuous: true }, 'audit-clean': { passed: true, vacuous: true } },
       judged: judgeAll('S6', 10),
     });
-    expect(r.notApplicable.sort()).toEqual(['audit-clean', 'elements-exist']);
+    expect(r.notApplicable.sort()).toEqual(['audit-clean', 'web-components-exist']);
     expect(r.verdict).toBe('scored');
     // A flawless prose refusal reaches a clean 10.
     expect(r.normalized).toBe(10);
@@ -249,7 +249,7 @@ describe('mechanical gates sit UNDER the judged score', () => {
     const withSubject = scoreRun({ scenario: s6, gates: gateAll('S6'), judged });
     const without = scoreRun({
       scenario: s6,
-      gates: { 'elements-exist': { passed: true, vacuous: true }, 'audit-clean': { passed: true, vacuous: true } },
+      gates: { 'web-components-exist': { passed: true, vacuous: true }, 'audit-clean': { passed: true, vacuous: true } },
       judged,
     });
     // Passing gates lift a middling judged score; absent ones must not.
@@ -261,11 +261,11 @@ describe('mechanical gates sit UNDER the judged score', () => {
     const s6 = scenarios.find((s) => s.id === 'S6')!;
     const r = scoreRun({
       scenario: s6,
-      gates: { ...gateAll('S6'), 'elements-exist': { passed: false, detail: 'fabricated' } },
+      gates: { ...gateAll('S6'), 'web-components-exist': { passed: false, detail: 'fabricated' } },
       judged: judgeAll('S6', 10),
     });
     expect(r.verdict).toBe('gated-fail');
-    expect(r.failedGates).toContain('elements-exist');
+    expect(r.failedGates).toContain('web-components-exist');
     expect(r.notApplicable).toEqual([]);
   });
 
@@ -290,7 +290,7 @@ describe('mechanical gates sit UNDER the judged score', () => {
     expect(() =>
       scoreRun({
         scenario: s6,
-        gates: { ...gateAll('S6'), 'elements-exist': { passed: true, vacuous } as unknown as { passed: boolean } },
+        gates: { ...gateAll('S6'), 'web-components-exist': { passed: true, vacuous } as unknown as { passed: boolean } },
         judged: judgeAll('S6', 10),
       }),
     ).toThrow(/must be a real boolean/);
@@ -299,12 +299,12 @@ describe('mechanical gates sit UNDER the judged score', () => {
   it('refuses "not applicable" while the output holds files the scan could not read', () => {
     const s6 = scenarios.find((s) => s.id === 'S6')!;
     const na = { passed: true, vacuous: true, filesSeen: 2, unread: ['main.txt'] };
-    expect(() => scoreRun({ scenario: s6, gates: { ...gateAll('S6'), 'elements-exist': na }, judged: judgeAll('S6', 10) })).toThrow(
+    expect(() => scoreRun({ scenario: s6, gates: { ...gateAll('S6'), 'web-components-exist': na }, judged: judgeAll('S6', 10) })).toThrow(
       /cannot read/,
     );
     // POSITIVE CONTROL: the same shape with nothing unread is accepted.
     const ok = { passed: true, vacuous: true, filesSeen: 1, unread: [] };
-    expect(() => scoreRun({ scenario: s6, gates: { ...gateAll('S6'), 'elements-exist': ok }, judged: judgeAll('S6', 10) })).not.toThrow();
+    expect(() => scoreRun({ scenario: s6, gates: { ...gateAll('S6'), 'web-components-exist': ok }, judged: judgeAll('S6', 10) })).not.toThrow();
   });
 
   it('says what it actually knows in the not-applicable row, not "the output contains no code"', () => {
@@ -312,12 +312,12 @@ describe('mechanical gates sit UNDER the judged score', () => {
     const r = scoreRun({
       scenario: s6,
       gates: {
-        'elements-exist': { passed: true, vacuous: true, filesSeen: 3, unread: [] },
+        'web-components-exist': { passed: true, vacuous: true, filesSeen: 3, unread: [] },
         'audit-clean': { passed: true, vacuous: true, filesSeen: 3, unread: [] },
       },
       judged: judgeAll('S6', 10),
     });
-    const row = r.rows.find((x) => x.id === 'elements-exist')!;
+    const row = r.rows.find((x) => x.id === 'web-components-exist')!;
     expect(row.source).toContain('found no code it could read');
     expect(row.source).toContain('3 output file(s)');
     expect(row.source).not.toContain('contains no code');
@@ -332,7 +332,7 @@ describe('mechanical gates sit UNDER the judged score', () => {
       expect(() =>
         scoreRun({
           scenario: s6,
-          gates: { ...gateAll('S6'), 'elements-exist': { passed } as unknown as { passed: boolean } },
+          gates: { ...gateAll('S6'), 'web-components-exist': { passed } as unknown as { passed: boolean } },
           judged: judgeAll('S6', 8),
         }),
       ).toThrow(/must be a real boolean|has no gate result/);
@@ -345,7 +345,7 @@ describe('mechanical gates sit UNDER the judged score', () => {
     try {
       scored = scoreRun({
         scenario: s6,
-        gates: { ...gateAll('S6'), 'elements-exist': { passed: 'false' } as unknown as { passed: boolean } },
+        gates: { ...gateAll('S6'), 'web-components-exist': { passed: 'false' } as unknown as { passed: boolean } },
         judged: judgeAll('S6', 10),
       });
     } catch {
@@ -420,11 +420,11 @@ describe('every finding is attributed to a catalog record', () => {
     [{ kind: 'invariant-ineffective', invariant: 'no-such-invariant', why: 'x' }, /does not exist/],
     [{ kind: 'missing-invariant', proposedId: 'upgrade-race', statement: 'x' }, /already exists/],
     [{ kind: 'recipe-ineffective', recipe: 'no-such-recipe', why: 'x' }, /does not exist/],
-    [{ kind: 'fabricated-element', invented: 'kai-chat', useInstead: 'kai-thread' }, /is a real element/],
+    [{ kind: 'fabricated-element', invented: 'kai-chat', useInstead: 'kai-thread' }, /is a real web component/],
     [{ kind: 'fabricated-element', invented: 'kai-datagrid', useInstead: 'kai-also-fake' }, /does not ship either/],
     [{ kind: 'fabricated-element', invented: 'kai-datagrid', useInstead: null }, /noReplacementReason/],
     [{ kind: 'missing-element-description', tag: 'kai-chat' }, /DOES have a description/],
-    [{ kind: 'missing-element-description', tag: 'kai-nope' }, /not an element the kit ships/],
+    [{ kind: 'missing-element-description', tag: 'kai-nope' }, /not a web component the kit ships/],
     [{ kind: 'underived-contract', tag: 'kai-nope', fact: 'x' }, /this is fabricated-element/],
     [{ kind: 'not-a-catalog-gap', page: 'INVARIANTS.md' }, /requires `quote`/],
     [{ kind: 'invented-kind' }, /unknown attribution kind/],
@@ -522,23 +522,23 @@ describe('tier delta names what the catalog leaves implicit', () => {
     const strong = evaluation({
       model: 'strong',
       rows: [
-        { id: 'elements-exist', gate: 'mechanical', weight: 3, score: null },
+        { id: 'web-components-exist', gate: 'mechanical', weight: 3, score: null },
         { id: 'honesty-bound', gate: 'judged', weight: 4, score: 10 },
       ],
     });
     const weak = evaluation({
       model: 'weak',
       rows: [
-        { id: 'elements-exist', gate: 'mechanical', weight: 3, score: 0 },
+        { id: 'web-components-exist', gate: 'mechanical', weight: 3, score: 0 },
         { id: 'honesty-bound', gate: 'judged', weight: 4, score: 10 },
       ],
     });
     const d = tierDelta({ strong, weak });
-    const row = d.rows.find((r) => r.id === 'elements-exist')!;
+    const row = d.rows.find((r) => r.id === 'web-components-exist')!;
     expect(row.delta, 'a null row was folded in as 0 and printed a false equality').toBeNull();
     expect(row.strong).toBeNull();
     // …and it is not claimed as a contract the catalog leaves implicit either.
-    expect(d.implicitContracts).not.toContain('elements-exist');
+    expect(d.implicitContracts).not.toContain('web-components-exist');
   });
 
   it('surfaces a denominator skew, which the per-run caveat can never reach', () => {
@@ -575,7 +575,7 @@ describe('tier delta names what the catalog leaves implicit', () => {
 
 describe('the gates the evaluator runs for itself', () => {
   it('catches a fabricated kai-* tag', () => {
-    const g = gateElementsExist({ files: [{ name: 'a.ts', text: '<kai-datagrid></kai-datagrid>' }], knownTags });
+    const g = gateWebComponentsExist({ files: [{ name: 'a.ts', text: '<kai-datagrid></kai-datagrid>' }], knownTags });
     expect(g.passed).toBe(false);
     expect(g.fabricated.map((f) => f.tag)).toContain('kai-datagrid');
   });
@@ -584,7 +584,7 @@ describe('the gates the evaluator runs for itself', () => {
   // is a CORRECT answer to the refusal scenario; a gate that flagged it would
   // punish the best available answer.
   it("does not call a consumer's own element a fabrication", () => {
-    const g = gateElementsExist({
+    const g = gateWebComponentsExist({
       files: [{ name: 'a.ts', text: "customElements.define('my-grid', MyGrid); chat.cardTypes = { grid: 'my-grid' };" }],
       knownTags,
     });
@@ -592,13 +592,13 @@ describe('the gates the evaluator runs for itself', () => {
   });
 
   it('does not mistake an event name for a tag', () => {
-    const g = gateElementsExist({ files: [{ name: 'a.ts', text: "chat.addEventListener('kai-submit', fn); el.dispatchEvent(new CustomEvent('kai-card'));" }], knownTags });
+    const g = gateWebComponentsExist({ files: [{ name: 'a.ts', text: "chat.addEventListener('kai-submit', fn); el.dispatchEvent(new CustomEvent('kai-card'));" }], knownTags });
     expect(g.passed).toBe(true);
     expect(g.tagsUsed).toEqual([]);
   });
 
   it('does not read tags out of prose, so a refusal naming what it declined to invent is clean', () => {
-    const g = gateElementsExist({ files: [{ name: 'NOTES.md', text: 'There is no <kai-datagrid> in this kit.' }], knownTags });
+    const g = gateWebComponentsExist({ files: [{ name: 'NOTES.md', text: 'There is no <kai-datagrid> in this kit.' }], knownTags });
     expect(g.fabricated).toEqual([]);
     // …and it SAYS it looked at nothing, rather than reporting a clean pass.
     // The scorer treats that as NOT APPLICABLE — out of the score entirely —
@@ -628,13 +628,13 @@ describe('the gates the evaluator runs for itself', () => {
     // The prose mention did not travel into the scanned unit.
     expect(units[0].text).not.toContain('kai-datagrid');
 
-    const g = gateElementsExist({ files: [file], knownTags });
+    const g = gateWebComponentsExist({ files: [file], knownTags });
     expect(g.vacuous).toBe(false);
     expect(g.passed).toBe(true);
   });
 
   it('catches a fabricated tag written inside a fence', () => {
-    const g = gateElementsExist({
+    const g = gateWebComponentsExist({
       files: [{ name: 'ANSWER.md', text: '```html\n<kai-datagrid rows="10"></kai-datagrid>\n```\n' }],
       knownTags,
     });
@@ -651,14 +651,14 @@ describe('the gates the evaluator runs for itself', () => {
     ['four tildes', '~~~~html\n<kai-datagrid></kai-datagrid>\n~~~~\n'],
     ['an unclosed fence', '```html\n<kai-datagrid></kai-datagrid>\n'],
   ])('catches a fabricated tag inside %s', (_label, text) => {
-    const g = gateElementsExist({ files: [{ name: 'A.md', text }], knownTags });
+    const g = gateWebComponentsExist({ files: [{ name: 'A.md', text }], knownTags });
     expect(g.passed).toBe(false);
     expect(g.fabricated.map((f) => f.tag)).toContain('kai-datagrid');
   });
 
   it('FAILS CLOSED when an unrecognised fence sits beside a recognised one', () => {
     const text = '```ts\nconst a = 1;\n```\n\n~~~html\n<kai-datagrid></kai-datagrid>\n~~~\n';
-    const g = gateElementsExist({ files: [{ name: 'A.md', text }], knownTags });
+    const g = gateWebComponentsExist({ files: [{ name: 'A.md', text }], knownTags });
     // The ```ts block made the scan non-vacuous, so "no hits" would have been
     // reported as a confident pass.
     expect(g.vacuous).toBe(false);
@@ -679,7 +679,7 @@ describe('the gates the evaluator runs for itself', () => {
   // gate failed to read", so anything it cannot read must be REPORTED rather
   // than silently counted as absence.
   it.each([['main.txt'], ['notes.rst'], ['run.sh'], ['data.json']])('reports %s as unread rather than as no-code', (name) => {
-    const g = gateElementsExist({ files: [{ name, text: '<kai-datagrid></kai-datagrid>' }], knownTags });
+    const g = gateWebComponentsExist({ files: [{ name, text: '<kai-datagrid></kai-datagrid>' }], knownTags });
     expect(g.unread).toContain(name);
     expect(g.vacuous).toBe(true);
     // The scorer refuses a not-applicable verdict while these exist — pinned in
@@ -687,7 +687,7 @@ describe('the gates the evaluator runs for itself', () => {
   });
 
   it.each([['a.md'], ['a.ts'], ['a.htm'], ['a.py']])('does not report %s as unread — it is read', (name) => {
-    expect(gateElementsExist({ files: [{ name, text: '// nothing\n' }], knownTags }).unread).toEqual([]);
+    expect(gateWebComponentsExist({ files: [{ name, text: '// nothing\n' }], knownTags }).unread).toEqual([]);
   });
 
   it('does not fence-extract a non-prose file, so raw code in main.txt is not "no code"', () => {
@@ -696,7 +696,7 @@ describe('the gates the evaluator runs for itself', () => {
   });
 
   it('reports how many files it saw, not only how many it read', () => {
-    const g = gateElementsExist({ files: [{ name: 'a.md', text: 'prose' }, { name: 'b.txt', text: 'x' }], knownTags });
+    const g = gateWebComponentsExist({ files: [{ name: 'a.md', text: 'prose' }, { name: 'b.txt', text: 'x' }], knownTags });
     expect(g.filesSeen).toBe(2);
     expect(g.filesScanned).toBe(0);
   });
@@ -707,7 +707,7 @@ describe('the gates the evaluator runs for itself', () => {
     ['html,twoslash', '```html,twoslash\n<kai-datagrid></kai-datagrid>\n```\n'],
     ['html:src/main.html', '```html:src/main.html\n<kai-datagrid></kai-datagrid>\n```\n'],
   ])('normalises the fence language %s so the block is still read', (_label, text) => {
-    const g = gateElementsExist({ files: [{ name: 'a.md', text }], knownTags });
+    const g = gateWebComponentsExist({ files: [{ name: 'a.md', text }], knownTags });
     expect(g.vacuous).toBe(false);
     expect(g.passed).toBe(false);
   });
@@ -718,7 +718,7 @@ describe('the gates the evaluator runs for itself', () => {
   });
 
   it('refuses to run against an empty known-tag set rather than reporting everything fabricated', () => {
-    expect(() => gateElementsExist({ files: [], knownTags: [] })).toThrow(/empty known-tag set/);
+    expect(() => gateWebComponentsExist({ files: [], knownTags: [] })).toThrow(/empty known-tag set/);
   });
 
   it('fires a self-audit needle in either quote style', () => {
@@ -836,7 +836,7 @@ describe('the evaluator CLI, end to end over a prepared run', () => {
 
   it('REFUSES a gates file that answers a gate the evaluator computes itself', () => {
     writeFileSync(join(runDir, 'findings.json'), findings());
-    writeFileSync(join(runDir, 'gates.json'), JSON.stringify({ 'elements-exist': { passed: true } }));
+    writeFileSync(join(runDir, 'gates.json'), JSON.stringify({ 'web-components-exist': { passed: true } }));
     const r = run([EVAL, '--run', runDir]);
     expect(r.code).not.toBe(0);
     expect(r.out).toContain('computes itself');
@@ -893,11 +893,11 @@ describe('the evaluator CLI, end to end over a prepared run', () => {
     expect(run([EVAL, '--run', runDir]).code).toBe(0);
   });
 
-  // F11/I3 — a flat readdir named 13 of the pack's 93 pages. Every PER-ELEMENT
-  // page lives under `elements/`, and those are the ones an attribution is most
+  // F11/I3 — a flat readdir named 13 of the pack's 93 pages. Every PER-WEB-COMPONENT
+  // page lives under `web-components/`, and those are the ones an attribution is most
   // likely to be about, so the escape hatch was unusable exactly where it is
   // needed and the finding would have to be mis-filed somewhere else.
-  it.each([['elements/kai-chat.md'], ['kai-chat.md']])('resolves the per-element page %s, not just the top level', (page) => {
+  it.each([['web-components/kai-chat.md'], ['kai-chat.md']])('resolves the per-web-component page %s, not just the top level', (page) => {
     writeFileSync(
       join(runDir, 'findings.json'),
       findings({
@@ -919,7 +919,7 @@ describe('the evaluator CLI, end to end over a prepared run', () => {
   it('the element pages really are nested, so the case above is not trivially true', () => {
     const info = JSON.parse(readFileSync(join(runDir, 'run-info.json'), 'utf8'));
     const top = readdirSync(join(info.packDir, 'agent'), { withFileTypes: true }).filter((e) => e.isFile()).length;
-    const nested = readdirSync(join(info.packDir, 'agent', 'elements')).length;
+    const nested = readdirSync(join(info.packDir, 'agent', 'web-components')).length;
     expect(nested).toBeGreaterThan(top);
   });
 
@@ -1001,7 +1001,7 @@ describe('the evaluator CLI, end to end over a prepared run', () => {
 
     const evaluation = JSON.parse(readFileSync(join(runDir, 'evaluation.json'), 'utf8'));
     expect(evaluation.verdict).toBe('scored');
-    expect(evaluation.notApplicable.sort()).toEqual(['audit-clean', 'elements-exist']);
+    expect(evaluation.notApplicable.sort()).toEqual(['audit-clean', 'web-components-exist']);
 
     // ALL FOUR LOUDNESS SIGNALS, each pinned. Deleting the comparability caveat
     // used to leave the suite green, so one of the four had nothing holding it.
@@ -1053,7 +1053,7 @@ describe('the evaluator CLI', () => {
   // the only place the fact lives.
   it('the evaluator runs exactly the gates output-scan.mjs names, and no others', () => {
     const mechanical = DIMENSIONS.filter((d) => d.gate === 'mechanical');
-    expect(mechanical.filter((d) => d.runner === 'evaluator').map((d) => d.id).sort()).toEqual(['audit-clean', 'elements-exist']);
+    expect(mechanical.filter((d) => d.runner === 'evaluator').map((d) => d.id).sort()).toEqual(['audit-clean', 'web-components-exist']);
     expect(mechanical.filter((d) => d.runner === 'external').map((d) => d.id).sort()).toEqual(['compiles', 'registers', 'streams']);
   });
 

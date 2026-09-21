@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { consumeModelStream } from './consume';
 import { readOpenAIStream } from './read';
 import { normalizeStopReason, type AssistantStreamSink, type ModelStreamChunk } from './chunk';
-import type { MessagePart } from '../elements/chat-types';
+import type { MessagePart } from '../web-components/chat/chat-types';
 import { appendReasoningPart, appendTextPart, upsertToolPart } from '../state/parts';
 import {
   FINAL_TURN,

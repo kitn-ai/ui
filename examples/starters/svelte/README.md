@@ -1,6 +1,6 @@
 # Svelte example — chat workspace, composed by hand
 
-A small chat **workspace assembled from `@kitn.ai/ui`'s individual elements** — a
+A small chat **workspace assembled from `@kitn.ai/ui`'s individual web components** — a
 `<kai-conversations>` sidebar, a `<kai-thread>` of messages, and a
 `<kai-prompt-input>` composer — wired together with plain Svelte 5 runes. Non-React
 frameworks consume the **raw `kai-*` web components directly** (no wrappers), so
@@ -25,10 +25,10 @@ Consuming Shadow-DOM custom elements from Svelte comes down to four things:
 - **No custom-element config needed.** Svelte already treats any hyphenated tag
   (`kai-*`) as a native custom element and passes props/events through to the DOM —
   there's no Svelte equivalent of Vue's `isCustomElement`.
-- **Register before mount.** `src/main.ts` does `import '@kitn.ai/ui/elements'`
-  (registers the elements) and `import '@kitn.ai/ui/theme.tokens.css'` (the plain
+- **Register before mount.** `src/main.ts` does `import '@kitn.ai/ui/web-components'`
+  (registers the web components) and `import '@kitn.ai/ui/theme.tokens.css'` (the plain
   `--color-*` tokens the shell uses), then waits on `customElements.whenDefined(...)`
-  for every tag **before** `mount(App, { target })`. The elements register
+  for every tag **before** `mount(App, { target })`. The web components register
   asynchronously; without that gate the initial property writes hit not-yet-upgraded
   elements and are lost.
 - **Array/object props + boolean flags are DOM properties, not attributes.** Rich
@@ -60,7 +60,7 @@ Consuming Shadow-DOM custom elements from Svelte comes down to four things:
 
 ## How it works
 
-- `src/App.svelte` composes the elements by hand: `<kai-resizable>` for the split,
+- `src/App.svelte` composes the web components by hand: `<kai-resizable>` for the split,
   `<kai-conversations>` (via `Sidebar.svelte`), `<kai-thread>` (via `ThreadView.svelte`),
   and `<kai-prompt-input>` (via `Composer.svelte`).
 - `src/lib/chat.svelte.ts` owns the message array + streaming (`append`,
@@ -82,7 +82,7 @@ like a published consumer — no aliases).
 ## Run it
 
 From the repo root, build the kit once so its `dist/` exists (the example imports
-the compiled `@kitn.ai/ui/elements` + `@kitn.ai/ui/theme.tokens.css`), then start
+the compiled `@kitn.ai/ui/web-components` + `@kitn.ai/ui/theme.tokens.css`), then start
 the example:
 
 ```bash

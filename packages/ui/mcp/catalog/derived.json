@@ -1,5 +1,5 @@
 {
-  "elements": [
+  "webComponents": [
     {
       "tag": "kai-agent-card",
       "props": [
@@ -609,7 +609,7 @@
         "dismiss"
       ],
       "composedFrom": [
-        "Card"
+        "CardSurface"
       ],
       "tokens": []
     },
@@ -3637,17 +3637,7 @@
         "send"
       ],
       "composedFrom": [
-        "PromptInput",
-        "PromptInputTextarea",
-        "PromptInputActions",
-        "PromptSuggestion",
-        "Button",
-        "Tooltip",
-        "Attachments",
-        "Attachment",
-        "AttachmentPreview",
-        "AttachmentInfo",
-        "AttachmentRemove"
+        "DefaultPromptInput"
       ],
       "tokens": []
     },
@@ -3998,6 +3988,26 @@
       ],
       "composedFrom": [
         "Row"
+      ],
+      "tokens": []
+    },
+    {
+      "tag": "kai-row-group",
+      "props": [
+        {
+          "name": "theme",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        }
+      ],
+      "events": [],
+      "methods": [],
+      "parts": [
+        "group"
+      ],
+      "composedFrom": [
+        "RowGroup"
       ],
       "tokens": []
     },
@@ -5815,6 +5825,7 @@
     }
   ],
   "themeTokens": [
+    "--kai-code-radius",
     "--kai-color-",
     "--kai-color-accent",
     "--kai-color-accent-foreground",
@@ -5826,6 +5837,7 @@
     "--kai-color-destructive",
     "--kai-color-destructive-foreground",
     "--kai-color-destructive-soft",
+    "--kai-color-destructive-text",
     "--kai-color-foreground",
     "--kai-color-highlight",
     "--kai-color-hover",
@@ -5863,9 +5875,12 @@
     "--kai-color-warning",
     "--kai-color-warning-foreground",
     "--kai-color-warning-soft",
+    "--kai-density",
     "--kai-font-code",
     "--kai-radius",
+    "--kai-radius-pill",
     "--kai-shadow-color",
+    "--kai-shadow-strength",
     "--kai-text-",
     "--kai-text-body",
     "--kai-text-caption",
@@ -5873,25 +5888,29 @@
     "--kai-text-lg",
     "--kai-text-meta",
     "--kai-text-micro",
-    "--kai-text-title"
+    "--kai-text-title",
+    "--kai-weight-bold",
+    "--kai-weight-medium",
+    "--kai-weight-normal",
+    "--kai-weight-semibold"
   ],
   "eventExceptions": [
     {
-      "file": "src/elements/artifact.tsx",
+      "file": "src/primitives/card-routing.ts",
+      "event": "kai-card",
+      "bubbles": true,
+      "composed": true
+    },
+    {
+      "file": "src/web-components/artifact/artifact.tsx",
       "event": "kai-maximize-intent",
       "bubbles": true,
       "composed": true
     },
     {
-      "file": "src/elements/resizable.tsx",
+      "file": "src/web-components/resizable/resizable.tsx",
       "event": "kai-maximize-state",
       "bubbles": false,
-      "composed": true
-    },
-    {
-      "file": "src/primitives/card-routing.ts",
-      "event": "kai-card",
-      "bubbles": true,
       "composed": true
     }
   ]

@@ -88,7 +88,7 @@ Only one source wins. Setting `bands` short-circuits Web Audio entirely, so `str
 <kai-audio-visualizer id="viz" variant="bar" size="icon"></kai-audio-visualizer>
 
 <script type="module">
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
 
   await customElements.whenDefined('kai-voice-input');
 
@@ -150,7 +150,7 @@ Set `variant="custom"` and a `shader` property to render your own fragment shade
 ```html
 <kai-audio-visualizer id="viz" variant="custom"></kai-audio-visualizer>
 <script type="module">
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
 
   await customElements.whenDefined('kai-audio-visualizer');
 
@@ -167,7 +167,7 @@ Set `variant="custom"` and a `shader` property to render your own fragment shade
 ```
 
 <Aside type="caution" title="Registration and upgrade order">
-Without `import '@kitn.ai/ui/elements'`, `<kai-audio-visualizer>` never registers and `variant="custom"` never renders. Without the `customElements.whenDefined` guard, the `shader` property write can land before the element upgrades and gets clobbered when it does. Skipping either one produces a blank 112px box with no console output, not an error.
+Without `import '@kitn.ai/ui/web-components'`, `<kai-audio-visualizer>` never registers and `variant="custom"` never renders. Without the `customElements.whenDefined` guard, the `shader` property write can land before the element upgrades and gets clobbered when it does. Skipping either one produces a blank 112px box with no console output, not an error.
 </Aside>
 
 Your fragment must define `mainImage(out vec4 fragColor, in vec2 fragCoord)`. The canvas declares every uniform below for you and injects them ahead of your source. Redeclaring any of them (`uniform float iTime;`, `uniform vec3 uColor;`, and so on) inside `fragment` is a GLSL redefinition and fails to compile.

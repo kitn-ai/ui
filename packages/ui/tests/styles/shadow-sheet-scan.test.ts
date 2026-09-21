@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { readdirSync, readFileSync, statSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, relative } from 'node:path';
 import { __unstable__loadDesignSystem } from '@tailwindcss/node';
 import { Scanner } from '@tailwindcss/oxide';
 import { beforeAll, describe, expect, it } from 'vitest';
@@ -8,7 +8,7 @@ import { beforeAll, describe, expect, it } from 'vitest';
 /**
  * GUARD: the shipped shadow sheet is compiled from an EXPLICIT `@source` list.
  *
- * `src/elements/styles.css` imports Tailwind with `source(none)` and names the
+ * `src/web-components/styles.css` imports Tailwind with `source(none)` and names the
  * directories whose class strings ship in dist/. That is what keeps story-only,
  * test-only and scaffold-template classes (257 of them, ~2 KB gzip) out of every
  * consumer's shadow root. The cost of an explicit list is that a new directory
@@ -27,7 +27,7 @@ import { beforeAll, describe, expect, it } from 'vitest';
  * scanned here and missed there, and that is the failure. Every candidate the
  * design system can generate a rule for must then have its selector in
  * `compiled.css`. The sheet is read, not recompiled: `compiled.css` is the
- * artifact `src/elements/css.ts` injects into every shadow root, so it is the
+ * artifact `src/web-components/define/css.ts` injects into every shadow root, so it is the
  * thing that ships and the thing that has to be right.
  *
  * WHY NOT dist/. It was tried first. dist/index.js bundles tailwind-merge, whose
@@ -44,7 +44,7 @@ import { beforeAll, describe, expect, it } from 'vitest';
  */
 const PKG = join(__dirname, '..', '..');
 const SRC = join(PKG, 'src');
-const ELEMENTS = join(SRC, 'elements');
+const ELEMENTS = join(SRC, 'web-components');
 
 /** Directories under src/ whose class strings are NOT rendered in a shadow root. */
 const NOT_SHIPPED_DIRS = new Set([
@@ -52,13 +52,35 @@ const NOT_SHIPPED_DIRS = new Set([
   'stories', // docs-only stories
 ]);
 
+/**
+ * FILES under a shipped directory whose strings are not class names.
+ *
+ * src/utils/cn-merge.ts is the class merger's conflict table — regexes, group keys and prose
+ * that name utilities without any element emitting them. Tailwind's scanner reads it as text
+ * (comments included) and compiles rules for what it finds, which is why src/web-components/styles.css
+ * carries the matching `@source not "../utils/cn-merge.ts"`. Scanning it here anyway would
+ * report every one of those tokens as "used and missing from compiled.css" and fail on a sheet
+ * that is CORRECT — the same false positive, from the opposite side. The two exclusions must
+ * move together: drop this one and this test goes red naming 33 tokens (loudly, which is the
+ * point); drop the @source line and this test still passes while every consumer pays for the
+ * rules (which is why the pair is written down in both files).
+ */
+const NOT_SHIPPED_FILES = new Set(['utils/cn-merge.ts']);
+
 function shippedSource(): { label: string; files: string[] } {
   const files: string[] = [];
   const walk = (dir: string) => {
     for (const name of readdirSync(dir)) {
       const p = join(dir, name);
       if (statSync(p).isDirectory()) walk(p);
-      else if (/\.tsx?$/.test(name) && !/\.(test|stories)\.tsx?$/.test(name) && !name.endsWith('.d.ts')) files.push(p);
+      else if (
+        /\.tsx?$/.test(name) &&
+        !/\.(test|stories)\.tsx?$/.test(name) &&
+        !name.endsWith('.d.ts') &&
+        !NOT_SHIPPED_FILES.has(relative(SRC, p))
+      ) {
+        files.push(p);
+      }
     }
   };
   for (const name of readdirSync(SRC)) {
@@ -67,7 +89,10 @@ function shippedSource(): { label: string; files: string[] } {
       if (!NOT_SHIPPED_DIRS.has(name)) walk(p);
     } else if (/\.tsx?$/.test(name)) files.push(p);
   }
-  return { label: `src/** minus {${[...NOT_SHIPPED_DIRS].join(',')}} and *.test/*.stories`, files };
+  return {
+    label: `src/** minus {${[...NOT_SHIPPED_DIRS].join(',')}}, {${[...NOT_SHIPPED_FILES].join(',')}} and *.test/*.stories`,
+    files,
+  };
 }
 
 /**
@@ -127,7 +152,7 @@ describe('compiled.css carries a rule for every utility the shipped source refer
     const missing = [...generable].filter(([, selector]) => !compiled.includes(selector)).map(([c]) => c);
     expect(
       missing,
-      `classes the shipped source (${source.label}) uses that src/elements/styles.css did not compile; ` +
+      `classes the shipped source (${source.label}) uses that src/web-components/styles.css did not compile; ` +
         'add the directory to its @source list or the token to NOT_A_CLASS with its source',
     ).toEqual([]);
   });

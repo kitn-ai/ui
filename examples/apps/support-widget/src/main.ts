@@ -1,4 +1,4 @@
-import '@kitn.ai/ui/elements'; // registers the kai-* custom elements (async)
+import '@kitn.ai/ui/web-components'; // registers the kai-* custom elements (async)
 import '@kitn.ai/ui/theme.tokens.css'; // --color-* tokens; the host page uses its own palette
 import './index.css';
 import { createSupportChat, type ChatElement } from './chat';
@@ -14,7 +14,7 @@ import { createSupportChat, type ChatElement } from './chat';
  * Two contract details this file owns, both of which a framework wrapper would
  * otherwise hide:
  *
- *  1. THE UPGRADE RACE. `@kitn.ai/ui/elements` registers asynchronously, and an
+ *  1. THE UPGRADE RACE. `@kitn.ai/ui/web-components` registers asynchronously, and an
  *     array/object PROPERTY set on a tag that has not upgraded yet is lost. So
  *     nothing touches `<kai-chat>` until `customElements.whenDefined` resolves.
  *  2. NON-BUBBLING EVENTS. `kai-submit` is a plain CustomEvent with

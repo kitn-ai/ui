@@ -1,4 +1,4 @@
-import '@kitn.ai/ui/elements'; // registers the kai-* custom elements (async)
+import '@kitn.ai/ui/web-components'; // registers the kai-* custom elements (async)
 import { bootstrapApplication } from '@angular/platform-browser';
 import { App } from './app/app';
 import { appConfig } from './app/app.config';

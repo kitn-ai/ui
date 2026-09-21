@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { KaiPromptInputElement } from '@kitn.ai/ui/elements';
+  import type { KaiPromptInputElement } from '@kitn.ai/ui/web-components';
   import type { Theme } from '../lib/types';
   import { createVoiceInput } from '../lib/voiceInput';
 

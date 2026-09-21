@@ -492,7 +492,7 @@ async function runConstructFlow(
   // so a plain `myapp` writes `myapp-widget` as the construct's own `name`,
   // even though the directory and the emitted FILENAME both stay `myapp`.
   // Silently rewriting it was the actual bug this guards: the tool's own
-  // printed next step (`npx @kitn.ai/ui dev ...`) used to reject the file it
+  // printed next step (`npx @kitn.ai/kai dev ...`) used to reject the file it
   // had just written, with no explanation anywhere in the output.
   if (result.constructName !== name) {
     stated(

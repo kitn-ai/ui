@@ -68,7 +68,7 @@ import ChatDemo from '../../../components/ChatDemo.tsx';
 Both `tool` and `reasoning` are parts inside the `parts` array of the `ChatMessage` object you pass to `<kai-chat>` or `<kai-message>`. Update the matching part in place (immutably) as the agent streams. Since the message carries arrays, you assign it in JavaScript rather than as an HTML attribute.
 
 ```js
-import '@kitn.ai/ui/elements';
+import '@kitn.ai/ui/web-components';
 
 await customElements.whenDefined('kai-chat');
 
