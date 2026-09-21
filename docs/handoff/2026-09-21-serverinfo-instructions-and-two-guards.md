@@ -313,3 +313,64 @@ and `add` writes a block into a detected existing one (it needs no `kai.json`; d
 project), but a hand-written Vite app cannot be given the wiring `create` emits. That verb is
 `kai init`, and `kai doctor` is its read-only twin. Both are project-scoped; neither touches the
 machine.
+
+---
+
+## 9. The CLI consolidation and the rename (the §3.2 answer, landed)
+
+**Decided by the owner:** one command line, `kai`, with every verb; install it globally
+(`npm i -g @kitn.ai/cli`) or per project (`npm i -D @kitn.ai/cli`); it stays optional, because
+`npm i @kitn.ai/ui` alone is still the whole library. `npm create kai` KEEPS WORKING, because
+`npm create <name>` is npm sugar for `npx create-<name>` and the package name is the mechanism, so
+`create-kai` stays and remains the implementation of `create`/`add`.
+
+**And the package NAMES changed**, which was the owner's call and is why it happened before the
+first publish of the old one: `@kitn.ai/kai` was NEVER published, so the rename costs nothing in the
+ecosystem and the migration stub can name the final destinations from day one.
+
+| what | before | after |
+|---|---|---|
+| the command line | `@kitn.ai/kai` (bin `kai` + `kai-mcp`) | `@kitn.ai/cli` (bin `kai`) |
+| the MCP server | inside the same package | `@kitn.ai/mcp` (bin `kai-mcp`, `npx -y @kitn.ai/mcp`) |
+| the sources | `packages/ui/mcp/**`, unchanged | the same, unchanged |
+
+WHY THE SPLIT IS NOT COSMETIC, measured: the MCP SDK is 5.9 MB installed with 17 direct deps and
+ONLY the MCP needs it, while `dist/construct-cli.es.js` imports nothing from the kit or the SDK at
+runtime. One package for both jobs meant `kai dev` installed the SDK for a verb that never touches
+it. The measured tarballs now: `@kitn.ai/mcp` 163,082 B packed, `@kitn.ai/cli` 211,038 B.
+
+WHAT FELL OUT OF THE SPLIT, and each was a real correction rather than a tidy-up:
+
+- **The CLI declares the kit as a `workspace:` DEV dependency now, not a runtime range.** Its
+  bundle imports nothing from the kit, so the literal range was wrong, and it was the reason the
+  old package resolved the kit from the REGISTRY (see §7.2). Only `@kitn.ai/mcp` keeps a literal
+  range, with its own guard.
+- **`link-workspace-packages=true` in the root `.npmrc`.** Without it pnpm resolves a plain range
+  from the registry, so a local build compiles against a published copy of a workspace package, and
+  a range bumped ahead of its publish cannot resolve at all -- the ERR_PNPM_OUTDATED_LOCKFILE wall
+  the 0.33.0 release hit. Measured blast radius: two edges, `@kitn.ai/mcp -> @kitn.ai/ui` and
+  `@kitn.ai/cli -> create-kai`; every other workspace importer already used `workspace:`.
+- **One derived range guard replaces the per-package one** (`scripts/verify-workspace-ranges.mjs`):
+  it walks pnpm-workspace.yaml and checks every shipped internal edge, and it exempts PRIVATE
+  members, where `workspace:` is correct. Its first run found that rule missing, because the docs
+  site and the whole examples corpus are private.
+- **`kai doctor`** is new (`packages/cli/src/doctor.ts`, 34 tests): versions and skew, the declared
+  range vs the installed kit, `kai.json`, whether anything under `src/` references the kit, whether
+  a kit stylesheet is referenced, and whether the MCP package is installed. It exits 1 on a real
+  problem and 0 on information, and it is the only place the CLI's BUILD-time kit is compared with
+  the project's runtime kit.
+- **`kai mcp` FORWARDS to `@kitn.ai/mcp`** (resolving that package's bin and spawning it with this
+  process's stdio) instead of bundling the server, so `kai --help` stays the complete surface while
+  the SDK stays out of the CLI's install. When the package is absent the verb says so and names
+  `npx -y @kitn.ai/mcp`, which is the form every harness config in the docs now uses.
+- **A new guard for workflow scalars** (`scripts/lint-workflow-scalars.mjs`). A `: ` inside an
+  unquoted step name makes libyaml reject the WHOLE workflow file and GitHub then fails every event
+  at 0 s while `gh pr checks` says "no checks reported". That happened TWICE in this session, to the
+  same class of edit, so it now has a guard: the rule is grammar-exact (a plain scalar cannot
+  contain `: `), and both real instances are its self-test fixtures.
+
+VERIFIED at the end of it: unit 424 files / 6051 tests, emitted 5/36, `tsc` on ui's four projects
+plus both new packages, `verify:construct` (113 cells) driving the NEW bin, `verify:pack`,
+`verify:fresh`, `verify:generated`, `verify:solid-coverage`, the whole lint battery (73 gates), both
+new packages' `verify:bundle-shape` and `verify:pack` (each with its self-test), `kai add --list`
+and `kai create --help` forwarding for real, and `kai doctor` run against a real starter.

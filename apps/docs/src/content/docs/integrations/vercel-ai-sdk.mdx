@@ -274,7 +274,7 @@ const result = streamText({ model: MODEL, messages }); // needs OPENAI_API_KEY
 
 The front end is the same as every other backend: `<kai-chat>` posts to `/api/chat` and reads the SSE into `messages`. That reader loop is the [Streaming recipe](/guides/recipes/streaming/) — reference it rather than rewriting it here. Reasoning deltas land in a `{ type: 'reasoning' }` part; tool calls land in a `{ type: 'tool' }` part whose `tool.state` advances `input-streaming` → `input-available` → `output-available` (or `output-error`). See the [tool](/components/tool/) and [reasoning](/components/reasoning/) components for what AI/UI draws.
 
-<Aside type="tip">`npx @kitn.ai/kai mcp` scaffolds this route and its front end together, including the `readChatRequest` and `toModelMessages` helpers elided above. See [For AI Agents](/guides/for-ai-agents/).</Aside>
+<Aside type="tip">`npx -y @kitn.ai/mcp` scaffolds this route and its front end together, including the `readChatRequest` and `toModelMessages` helpers elided above. See [For AI Agents](/guides/for-ai-agents/).</Aside>
 
 ## Next steps
 

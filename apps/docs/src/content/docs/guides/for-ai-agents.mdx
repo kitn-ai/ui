@@ -15,7 +15,7 @@ If you use [Context7](https://context7.com) — the documentation MCP most assis
 
 ## Use the AI/UI MCP server
 
-`npx @kitn.ai/kai mcp` is a stdio MCP server that gives any MCP harness four tools: **`component_reference`** (look up the real `kai-*` API), **`scaffold`** (generate a working chat wired to your backend), **`theme`** (brand it from a color or a description), and **`debug`** (catch the classic mistakes). It runs locally, holds no state, and makes no network calls.
+`npx -y @kitn.ai/mcp` is a stdio MCP server that gives any MCP harness four tools: **`component_reference`** (look up the real `kai-*` API), **`scaffold`** (generate a working chat wired to your backend), **`theme`** (brand it from a color or a description), and **`debug`** (catch the classic mistakes). It runs locally, holds no state, and makes no network calls.
 
 Where Context7 hands the agent the reference, the MCP server lets it *act* — generate a route, emit theme tokens, diagnose a broken snippet.
 
@@ -25,7 +25,7 @@ Add the server to your harness:
 <TabItem label="Claude Code">
 
 ```bash
-claude mcp add kai -- npx -y @kitn.ai/kai mcp
+claude mcp add kai -- npx -y @kitn.ai/mcp
 ```
 
 Or add it to `.mcp.json` (project scope) by hand:
@@ -35,7 +35,7 @@ Or add it to `.mcp.json` (project scope) by hand:
   "mcpServers": {
     "kai": {
       "command": "npx",
-      "args": ["-y", "@kitn.ai/kai", "mcp"]
+      "args": ["-y", "@kitn.ai/mcp"]
     }
   }
 }
@@ -49,7 +49,7 @@ In `~/.codex/config.toml` (global) or `.codex/config.toml` (project):
 ```toml
 [mcp_servers.kai]
 command = "npx"
-args = ["-y", "@kitn.ai/kai", "mcp"]
+args = ["-y", "@kitn.ai/mcp"]
 ```
 
 </TabItem>
@@ -62,7 +62,7 @@ In `opencode.json`:
   "mcp": {
     "kai": {
       "type": "local",
-      "command": ["npx", "-y", "@kitn.ai/kai", "mcp"],
+      "command": ["npx", "-y", "@kitn.ai/mcp"],
       "enabled": true
     }
   }
@@ -79,7 +79,7 @@ VS Code's native MCP support — the same config GitHub Copilot Chat's chat pane
   "servers": {
     "kai": {
       "command": "npx",
-      "args": ["-y", "@kitn.ai/kai", "mcp"]
+      "args": ["-y", "@kitn.ai/mcp"]
     }
   }
 }
@@ -93,7 +93,7 @@ The top-level key is `servers`, not `mcpServers` — the most common mistake whe
 The standalone `copilot` terminal tool reads a different file than VS Code's Copilot Chat. Either run:
 
 ```bash
-copilot mcp add kai -- npx -y @kitn.ai/kai mcp
+copilot mcp add kai -- npx -y @kitn.ai/mcp
 ```
 
 or edit `~/.copilot/mcp-config.json` (user scope) or `.mcp.json` / `.github/mcp.json` at your project root (repo scope) by hand:
@@ -104,7 +104,7 @@ or edit `~/.copilot/mcp-config.json` (user scope) or `.mcp.json` / `.github/mcp.
     "kai": {
       "type": "local",
       "command": "npx",
-      "args": ["-y", "@kitn.ai/kai", "mcp"]
+      "args": ["-y", "@kitn.ai/mcp"]
     }
   }
 }
@@ -121,7 +121,7 @@ In `.cursor/mcp.json` (project) or `~/.cursor/mcp.json` (global):
     "kai": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "@kitn.ai/kai", "mcp"]
+      "args": ["-y", "@kitn.ai/mcp"]
     }
   }
 }
@@ -137,7 +137,7 @@ In `~/.codeium/windsurf/mcp_config.json` — Windsurf doesn't create this file o
   "mcpServers": {
     "kai": {
       "command": "npx",
-      "args": ["-y", "@kitn.ai/kai", "mcp"]
+      "args": ["-y", "@kitn.ai/mcp"]
     }
   }
 }
@@ -153,7 +153,7 @@ Open the MCP Servers panel → **Configure MCP Servers**, which opens `cline_mcp
   "mcpServers": {
     "kai": {
       "command": "npx",
-      "args": ["-y", "@kitn.ai/kai", "mcp"]
+      "args": ["-y", "@kitn.ai/mcp"]
     }
   }
 }
@@ -169,7 +169,7 @@ In `settings.json` (Command Palette → `zed: open settings`):
   "context_servers": {
     "kai": {
       "command": "npx",
-      "args": ["-y", "@kitn.ai/kai", "mcp"]
+      "args": ["-y", "@kitn.ai/mcp"]
     }
   }
 }
@@ -187,7 +187,7 @@ In `~/.gemini/settings.json` (user) or `.gemini/settings.json` (project):
   "mcpServers": {
     "kai": {
       "command": "npx",
-      "args": ["-y", "@kitn.ai/kai", "mcp"]
+      "args": ["-y", "@kitn.ai/mcp"]
     }
   }
 }
@@ -196,7 +196,7 @@ In `~/.gemini/settings.json` (user) or `.gemini/settings.json` (project):
 </TabItem>
 <TabItem label="dsh (DeepSeek Harness)">
 
-dsh takes MCP servers as a cordis plugin — `@deepseek-ai/dsh-mcp-client`, one plugin instance per server, wired through a `cordis.patch.yml` patch with a `transport: stdio` config. dsh is still in developer preview and its plugin config keys are moving, so rather than paste a snippet that might already be stale, check dsh's own MCP docs (Settings → MCP in the app, or its `docs/` tree) for the current format. Whatever the surrounding config looks like, the server underneath is unchanged: a stdio process launched as `npx -y @kitn.ai/kai mcp`.
+dsh takes MCP servers as a cordis plugin — `@deepseek-ai/dsh-mcp-client`, one plugin instance per server, wired through a `cordis.patch.yml` patch with a `transport: stdio` config. dsh is still in developer preview and its plugin config keys are moving, so rather than paste a snippet that might already be stale, check dsh's own MCP docs (Settings → MCP in the app, or its `docs/` tree) for the current format. Whatever the surrounding config looks like, the server underneath is unchanged: a stdio process launched as `npx -y @kitn.ai/mcp`.
 
 </TabItem>
 <TabItem label="Pi">
@@ -208,7 +208,7 @@ Pi reads MCP servers from `~/.pi/agent/mcp.json`, using the same `mcpServers` sh
   "mcpServers": {
     "kai": {
       "command": "npx",
-      "args": ["-y", "@kitn.ai/kai", "mcp"]
+      "args": ["-y", "@kitn.ai/mcp"]
     }
   }
 }

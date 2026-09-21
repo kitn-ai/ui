@@ -143,7 +143,7 @@ derived schema rather than restating it — everything still comes from
 with no `/api/chat` at all (the plugin also mounts on `vite preview`, so the
 built app runs locally). Shipping this means deploying `server/chat.ts`'s handler
 on your own host; the kit's `kai` MCP scaffolder emits one per framework
-(`npx @kitn.ai/kai mcp`).
+(`npx -y @kitn.ai/mcp`).
 
 The generated page is framed from a `data:` URL in the kit's default sandbox
 (`allow-scripts allow-forms`, no `allow-same-origin`), so it runs in an opaque
