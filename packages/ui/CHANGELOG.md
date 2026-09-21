@@ -1,5 +1,57 @@
 # Changelog
 
+## [0.33.0](https://github.com/kitn-ai/ui/compare/@kitn.ai/ui-v0.32.0...@kitn.ai/ui-v0.33.0) (2026-09-21)
+
+
+### ⚠ BREAKING CHANGES
+
+* finish the rename — symbols, data keys, event types, generated names
+* src/elements -> src/web-components, and `@kitn.ai/ui/elements` -> `@kitn.ai/ui/web-components`
+* **create-kai:** `create-kai add <block>` writes the react form to `src/components/<id>/` instead of `src/blocks/<id>/`.
+* **blocks:** `kai dev --builder` no longer serves /gallery/ or the /kit/ mount its previews imported from, and dist/gallery leaves the published tarball. Browse blocks at https://ui.kitn.ai/blocks.
+
+### Features
+
+* **blocks:** the /blocks section, and the gallery retired ([#375](https://github.com/kitn-ai/ui/issues/375)) ([94f8989](https://github.com/kitn-ai/ui/commit/94f89894969b33c5ee40ae32ff6be071e27407c0))
+* **create-kai:** add writes at the blocks targets table, and detects the host framework ([1528bb7](https://github.com/kitn-ai/ui/commit/1528bb71684948547a2e8490c81c750e1a807b22))
+* **kai:** a guard for the class nothing caught -- a stale CLI invocation in prose ([c1d48ce](https://github.com/kitn-ai/ui/commit/c1d48ce9b5ad6c0b4b7db2798db08d9459cdef48))
+* **kai:** peel the dev tooling into [@kitn](https://github.com/kitn).ai/kai, so a browser consumer stops installing the MCP server ([0406f6c](https://github.com/kitn-ai/ui/commit/0406f6cd588e9ba5e9734f64c1a740f489faffed))
+* **lint:** guard the three release literals nobody read, including the publish order ([abc86ab](https://github.com/kitn-ai/ui/commit/abc86ab6ff9af2a90a388d5999b2dc0368a16ac4))
+* **lint:** lint:layer-direction, and the last upward value edge it found ([b0511f5](https://github.com/kitn-ai/ui/commit/b0511f5283e46df339c6efc8f04ee195b85f51f8))
+* **lint:** the retired layer names cannot come back, and the archive says what happened ([ba6862f](https://github.com/kitn-ai/ui/commit/ba6862f07100c8894a37fcbb3bd399dfe33d843d))
+* **theme-studio:** wire the spacing knob, and make a catalogued-but-unwired knob red ([095d8ca](https://github.com/kitn-ai/ui/commit/095d8cab4ef36af556474a6800bef34b1a9240dd))
+* **theme:** complete the radius ladder, add pill and code shape tokens, and wire them in the studio ([620fd0f](https://github.com/kitn-ai/ui/commit/620fd0f9e14ef1f50d1f42f34ded9f55fcf8e4a9))
+* **theme:** elevation as one knob, a weight ladder, and steps where extremes are not designs ([ed6db94](https://github.com/kitn-ai/ui/commit/ed6db94b4085fcab15687a0d43d896d0cf054d75))
+* **ui:** RowGroup + kai-row-group, and one implementation of the row-list frame ([d55ad57](https://github.com/kitn-ai/ui/commit/d55ad572694c9d6643f29062215afd2666c8ab0c))
+
+
+### Bug Fixes
+
+* **build:** derive the emitted mcp/ dts rewrite from depth, not a literal prefix ([1fad7fa](https://github.com/kitn-ai/ui/commit/1fad7fa44e5c1e84b76bd9490cb4ae62364a9a6e))
+* **ci:** the two failures the first CI run found, both pre-existing on this branch ([b7f8470](https://github.com/kitn-ai/ui/commit/b7f847093b91670adede661b703a94f664edc2ad))
+* **docs,build:** the autoloader demo actually works, and its module map is now checked ([158e456](https://github.com/kitn-ai/ui/commit/158e456a66804c4ab6eb27751cd91608c7acf589))
+* **element-recipes, scaffold:** paint with declared properties, and emit the kit pill ([d9ec6bd](https://github.com/kitn-ai/ui/commit/d9ec6bdaec064a4529b99b1b0a2549f236b9377b))
+* **guards:** verify:fresh covers the mcp/ and scripts/ trees the build writes into ([3201484](https://github.com/kitn-ai/ui/commit/320148454bde238e21bf5f749b3adf2675ae53a2))
+* **lint:** the release-wiring guard's bin check cannot run in the pre-build leg ([4e3c855](https://github.com/kitn-ai/ui/commit/4e3c855b410f1a818c98878db5fc405aaa27fe74))
+* **mcp:** the invariant catalog executes the shipped URL predicates instead of copying them ([c622fae](https://github.com/kitn-ai/ui/commit/c622fae9a909dc1e56eaea57f9c2300206af82c3))
+* **security:** pin F-5's three uncovered sinks, and correct the audit's CSS premise ([1a7029d](https://github.com/kitn-ai/ui/commit/1a7029d69af6c48170b836e74fdbab10436b790a))
+* **security:** the Card href sink takes the policy, and the third URL classifier is gone ([3437cde](https://github.com/kitn-ai/ui/commit/3437cde126ae4159739f1cae864a41cd7a61b302))
+* **solid:** export the two components the facades compose, so verify:solid-coverage passes ([067204b](https://github.com/kitn-ai/ui/commit/067204b5c1388ebeb8e0bf1dfabea5465f921801))
+* **theme-studio:** remove the demo rows that could not move ([b4fcbdb](https://github.com/kitn-ai/ui/commit/b4fcbdb660406a67973e5057bf2eec7558bd316f))
+* **theme:** elevation reaches the hand-written card shadow, and a terser panel ([40683af](https://github.com/kitn-ai/ui/commit/40683af9375f81766172c7e3c0650b41e1e15397))
+* **theme:** the palette's two holes — error text and success marks ([abd0276](https://github.com/kitn-ai/ui/commit/abd0276bd6daf6318359aac5a05192db3881b21b))
+
+
+### Performance Improvements
+
+* **footprint:** per-module output, consumer-cost guards, and a local cn merger ([b22ec5a](https://github.com/kitn-ai/ui/commit/b22ec5a086989f7c5a56ad8bb9e5d35f12351dd7))
+
+
+### Code Refactoring
+
+* finish the rename — symbols, data keys, event types, generated names ([777c4dc](https://github.com/kitn-ai/ui/commit/777c4dcc4e5e6889b24189f9b243264b8d19a2b3))
+* src/elements -&gt; src/web-components, and `[@kitn](https://github.com/kitn).ai/ui/elements` -&gt; `[@kitn](https://github.com/kitn).ai/ui/web-components` ([9629f92](https://github.com/kitn-ai/ui/commit/9629f92463690166028b50eb7dd6f0828d9154c0))
+
 ## [0.32.0](https://github.com/kitn-ai/ui/compare/@kitn.ai/ui-v0.31.0...@kitn.ai/ui-v0.32.0) (2026-09-03)
 
 

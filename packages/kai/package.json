@@ -1,6 +1,6 @@
 {
   "name": "@kitn.ai/kai",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "license": "MIT",
   "type": "module",
   "description": "The kai command line: the MCP server for AI coding agents, and the construct dev/eject tooling for @kitn.ai/ui.",
@@ -45,7 +45,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@kitn.ai/ui": "^0.32.0",
+    "@kitn.ai/ui": "^0.33.0",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "zod": "^4.4.3"
   },
