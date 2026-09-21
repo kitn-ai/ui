@@ -106,7 +106,15 @@ one package, deep paths (`@carbon/web-components/es/components/dropdown/index.js
 
 ## 4. Work at hand, ranked
 
-### 4.1 Write the entry-point table where a developer can find it (nothing measured changes)
+### 4.1 Write the entry-point table where a developer can find it (LANDED)
+
+`guides/installation.mdx`'s "Entry points" table now names all 21 keys (minus the manifest, declared
+excluded with a reason), and `apps/docs/test/entry-points.test.ts` fails if a future exports key has no
+row, if a row names something the package does not export, or if the exclusion list stops naming a real
+key. Three mutations watched red: dropping the `/stores` row, inventing a specifier on the page, and
+leaving a stale exception. `verify:docs` independently confirms every symbol the new rows name resolves
+against the shipped API, and its own prose scan covers the reverse direction (so this guard is the
+cheap, fast-failing second opinion, not the only line of defence).
 
 The list in §2 exists in the `exports` map, in `llms.txt` / `llms-full.txt` (generated) and in the
 acceptance pack's `DELIVERY.md` (agent-only, and a test asserts it names every exports key). It does NOT

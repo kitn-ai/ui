@@ -141,8 +141,16 @@ import '@kitn.ai/ui/theme.css';
 | `@kitn.ai/ui` | The shared layer every framework resolves: types, state and card helpers, and the chat components `./solid` builds on |
 | `@kitn.ai/ui/state` | Pure folds over `ChatMessage[]` — `createAssistantStream`, `appendTextPart`, … See [State & hooks](/guides/state-and-hooks/) |
 | `@kitn.ai/ui/wire` | The model-stream adapter — `readOpenAIStream`, `readAnthropicStream`, `toOpenAIMessages`, … See the [wire adapter recipe](/guides/recipes/wire-adapter/) |
+| `@kitn.ai/ui/schemas` | Card schemas and provider tool definitions: `cardTools()` plus one JSON Schema per card type, and `@kitn.ai/ui/schemas/<name>` for a single one. See [Schemas as tool definitions](/guides/schemas-as-tools/) |
+| `@kitn.ai/ui/stores` | The SolidJS store, `createKaiChat()`. Solid projects only |
+| `@kitn.ai/ui/define` | `defineWebComponent()`, the factory the kit registers its own web components with, for registering your own |
+| `@kitn.ai/ui/diagnostics` | The web-component diagnostics event stream (registration and violated-contract events) |
+| `@kitn.ai/ui/construct` | The construct engine's API: its Zod schema, validation, and template statements. `@kitn.ai/ui/construct/templates` is the template registry alone |
 | `@kitn.ai/ui/theme.css` | Tailwind v4 source: the design tokens for your own markup and the Solid components, plus the kit's radius, text scale and `.dark` variant merged into your Tailwind build. Plain-CSS twin: `@kitn.ai/ui/theme.tokens.css`. To retheme the web components, set `--kai-color-*` with no import — see [Theming](/guides/theming/) |
+| `@kitn.ai/ui/solid.css` | Tailwind source for light-DOM Solid apps: `theme.css` plus the kit's base rules, for the [`@kitn.ai/ui/solid`](/guides/frameworks/solid/) path rather than the web components |
 | `@kitn.ai/ui/provider` | Remote provider bundle for embedding the kit across origins |
+| `@kitn.ai/ui/web-component-meta.json` | Generated API metadata, one record per web component. Read by tooling, not by an app |
+| `@kitn.ai/ui/icon-names.json` | The curated icon-name roster `kai-icon` resolves against |
 
 ## Next steps
 
