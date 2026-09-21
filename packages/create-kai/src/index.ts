@@ -23,6 +23,7 @@ import * as p from '@clack/prompts';
 import pc from 'picocolors';
 
 import { runAdd } from './add';
+import { runInit } from './init';
 import { ZERO_CONFIG, defaultNameForTarget, normalizeGateway, parseArgs, validateProjectName } from './args';
 import { answerAxis, gatewayAxis, layoutAxis } from './axes';
 import type { AxisIo } from './axes';
@@ -116,6 +117,21 @@ async function main(): Promise<number> {
       blocksRoot: path.join(path.dirname(fileURLToPath(import.meta.url)), 'blocks'),
       kitRange: DEFAULT_KIT_RANGE,
       kitVersion: __KIT_VERSION__,
+      interactive: Boolean(process.stdout.isTTY),
+      io: clackAxisIo,
+      out: (line) => console.log(line),
+      error: (line) => console.error(pc.red(line)),
+    });
+  }
+
+  // `init` is the third door, beside the wizard and `add`: the wizard starts a project, `add`
+  // writes a block into one, and this makes an EXISTING project kai-aware (it merges the dependency
+  // and prints the wiring, and it deliberately writes no kai.json -- see its own docblock). Routed
+  // here so it owns its own flags.
+  if (rawArgv[0] === 'init') {
+    return runInit(rawArgv.slice(1), {
+      cwd: process.cwd(),
+      kitRange: DEFAULT_KIT_RANGE,
       interactive: Boolean(process.stdout.isTTY),
       io: clackAxisIo,
       out: (line) => console.log(line),
