@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { join } from 'node:path';
+import { join, basename, dirname } from 'node:path';
 import { mkdtempSync, readFileSync as readF, writeFileSync as writeF, readdirSync, utimesSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { createServer } from 'node:http';
 import { mkdirSync } from 'node:fs';
-import { workDirFor, installKey, regenerate, regenTurn, handleConstructPut, shapeConstructGetResponse, createEventHub, serveBuilderAsset, listenLoopbackOnly, resolveBuilderPageDir, listenWithPortFallback, portInUseNotice, probePort, handleCreate, starterFor, previewFields, waitUntilListening, announceBoot, listConstructs, resolveConstructArg, handleOpen, crossOriginProblem } from './dev';
+import { workDirFor, installKey, regenerate, regenTurn, handleConstructPut, shapeConstructGetResponse, createEventHub, serveBuilderAsset, listenLoopbackOnly, resolveBuilderPageDir, listenWithPortFallback, portInUseNotice, probePort, handleCreate, starterFor, previewFields, waitUntilListening, announceBoot, listConstructs, resolveConstructArg, handleOpen, crossOriginProblem, kitDistRoot, themeStudioAsset } from './dev';
 import { generateProject, type GeneratedFile } from './codegen';
 import { validateConstruct } from './schema';
 
@@ -208,6 +208,76 @@ describe('kai dev --builder internals (B-22)', () => {
     if ('tried' in out) {
       expect(out.tried).toEqual([join(dist, 'assets', 'builder-page'), join(dist, 'builder-page')]);
     }
+  });
+
+  // The kit mount, once the dev pages and the kit live in DIFFERENT packages.
+  // In the repo the two roots coincide (both under packages/ui/dist), which is
+  // why the old expression looked right for as long as it did; a synthetic split
+  // is the only way to hold them apart.
+  it('serves /kit/* from the KIT dist root, even when the page dir sits in another package', () => {
+    const kaiDist = mkdtempSync(join(tmpdir(), 'kai-dev-'));
+    const kitDist = mkdtempSync(join(tmpdir(), 'kit-dist-'));
+    const studioDir = join(kaiDist, 'theme-studio');
+    mkdirSync(studioDir, { recursive: true });
+    writeF(join(studioDir, 'index.html'), '<!doctype html>');
+    writeF(join(kitDist, 'kai.es.js'), 'export {};');
+
+    const kit = themeStudioAsset('/kit/kai.es.js', studioDir, kitDist);
+    expect(kit.kind === 'file' && kit.file).toBe(join(kitDist, 'kai.es.js'));
+
+    // CONTROL, and it is the whole point: the expression this replaces -- the page
+    // dir's parent -- resolves the same request to nothing, so the assertion above
+    // cannot pass by accident. Revert the mount and this file goes red here.
+    const replaced = themeStudioAsset('/kit/kai.es.js', studioDir, dirname(studioDir));
+    expect(replaced.kind === 'problem' && replaced.status).toBe(404);
+
+    // The studio's OWN assets still come from the page dir: one route, two roots.
+    const own = themeStudioAsset('/index.html', studioDir, kitDist);
+    expect(own.kind === 'file' && own.file).toBe(join(studioDir, 'index.html'));
+  });
+
+  it('reports a missing kit root as a named 500, which a miss inside a present root does not', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'kai-dev-'));
+    const absent = join(dir, 'never-built', 'dist');
+    const out = themeStudioAsset('/kit/kai.es.js', dir, absent);
+    expect(out.kind).toBe('problem');
+    if (out.kind === 'problem') {
+      expect(out.status).toBe(500);
+      // Named, not anonymous: the resolved path and the command that produces it.
+      expect(out.message).toContain(absent);
+      expect(out.message).toContain('packages/ui');
+    }
+    // A miss INSIDE a present root is a plain 404 — if these two ever collapse
+    // back into one answer, the split layout goes back to failing silently.
+    const missed = themeStudioAsset('/kit/nope.js', dir, dir);
+    expect(missed.kind === 'problem' && missed.status).toBe(404);
+  });
+
+  it('the kit dist root belongs to the @kitn.ai/ui package, not to this one', () => {
+    const root = kitDistRoot();
+    expect(basename(root)).toBe('dist');
+    const pkg = JSON.parse(readF(join(root, '..', 'package.json'), 'utf8')) as { name: string };
+    // The load-bearing half: the root is ADDRESSED through the published package
+    // rather than derived from wherever this module happens to sit.
+    expect(pkg.name).toBe('@kitn.ai/ui');
+  });
+
+  it('the DEFAULT kit root is the kit package (what the route gets when it passes no root)', () => {
+    // The route calls themeStudioAsset(sub, studioDir) with no third argument, so
+    // the default IS the route's behaviour. This drives it against a studio dir in
+    // a temp tree whose parent holds no kit bundle: if the default were still the
+    // page dir's parent, this request 404s instead of hitting the kit's real
+    // dist/kai.es.js. Needs a built tree (the unit leg has one) -- the assertion
+    // says so rather than skipping, because a skip here is the silent version.
+    const studioDir = join(mkdtempSync(join(tmpdir(), 'kai-dev-')), 'theme-studio');
+    mkdirSync(studioDir, { recursive: true });
+    writeF(join(studioDir, 'index.html'), '<!doctype html>');
+
+    const out = themeStudioAsset('/kit/kai.es.js', studioDir);
+    expect(
+      out.kind === 'file' && out.file,
+      `expected the default kit root to serve ${join(kitDistRoot(), 'kai.es.js')}; run \`npm run build\` in packages/ui if that file is missing`,
+    ).toBe(join(kitDistRoot(), 'kai.es.js'));
   });
 
   it('event hub broadcasts a payload when one is given, and the payload-free events keep their exact `data: {}` frame', () => {

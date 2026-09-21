@@ -139,7 +139,102 @@ hand-kept copy, and a narrower packed set goes the SAFE direction (allowlist wid
 expect an advisory note rather than a failure. This also hands back ~490 KB of a ceiling that currently
 has only ~50 KB of headroom (`2.51 MiB` against `2.56 MiB`).
 
-### 4.3 Peel dev tooling into `@kitn.ai/kai`
+### 4.3 Peel dev tooling into `@kitn.ai/kai` (LANDED)
+
+**The two facts that decide the shape**, both verified after a read-only inventory lane proposed a
+bigger move than necessary:
+
+- **The catalog is inlined at BUILD time.** `dist/mcp.es.js` carries the invariant ids themselves (grep
+  for `reactivity-two-halves`: 7 hits), and the bundle's only runtime filesystem reads are the CEM, the
+  meta JSON and emitted scaffold files. So the MCP's SOURCE can stay where it is; nothing needs a new
+  `exports` key, and the settled 21-specifier surface does not move.
+- **`mcp/construct/**` cannot move at all.** `src/primitives/construct-form-paths.ts` and
+  `src/components/builder/builder-start.tsx` import it (the two declared `lint:layer-direction`
+  exceptions), and it is the source of the PUBLIC `@kitn.ai/ui/construct` export.
+
+So the shape is a THIN PUBLISHING SHELL, not a source move:
+
+```
+packages/kai/
+  package.json      name @kitn.ai/kai, bins kai + kai-mcp -> ./bin/mcp.js
+                    dependencies: @modelcontextprotocol/sdk, @kitn.ai/ui (workspace:*)
+                    files: dist, bin       prepublishOnly: npm run build
+  bin/mcp.js, bin/route.js, bin/route.test.js     (moved from packages/ui/bin)
+  config/vite/{node,page}.ts                       (the four targets, building FROM ../ui sources)
+packages/ui/
+  keeps: mcp/** (all sources, tests, catalog, construct), apps/{builder,theme-studio} sources
+  loses: bin/, the four build invocations, the bin/files entries, the SDK dependency
+```
+
+Why it is safe for the agent tooling, and the three things that MUST change with it:
+
+1. **The MCP found its manifest as a SIBLING** (`mcp/mcp/manifest.ts`). `@kitn.ai/ui/custom-elements.json`
+   is NOT an exports key (corrected here: this section claimed it was, and the lane measured
+   `ERR_PACKAGE_PATH_NOT_EXPORTED`). The fix addresses the PACKAGE -- `@kitn.ai/ui/package.json`, which is
+   exported -- and takes one checked hop to `dist/custom-elements.json`, keeping the file's own
+   "address it, never search" rule. The meta JSON is a real exported key and resolves as such.
+2. **`kai dev`'s `/theme-studio/kit/*` route serves the KIT's dist** (`mcp/construct/dev.ts` maps it to
+   `dirname(studioDir)`). Once the pages build into kai's dist, that is kai's dist, which has no
+   `kai.es.js`. The route must resolve `@kitn.ai/ui`'s dist root explicitly, or it 404s silently.
+3. **Release plumbing is hand-typed and NOTHING-guarded** (see `docs/coupling-map.md` §1):
+   `release-please-config.json`'s `packages{}`, `.release-please-manifest.json`, and the publish loop at
+   `.github/workflows/release-please.yml:230` (`for pkg in packages/ui packages/create-kai`). Miss either
+   of the first two and kai is silently never published. `packages/kai/dist` is auto-gitignored (root
+   `.gitignore` is a bare `dist/`), and kai needs no CI upload glob.
+
+Migration: `npx @kitn.ai/ui mcp` becomes `npx @kitn.ai/kai mcp`, and it is in the docs, `llms.txt` and
+EVERY existing user's MCP client config. Leave a `bin/mcp.js` stub in `@kitn.ai/ui` that exits non-zero
+naming the new command, so an old config fails loudly with the fix in the message. Do not keep both
+working: the SDK is the whole reason for the peel.
+
+Order: package shell and ui's removals -> manifest resolution -> dev-server mount -> docs and llms sweep
+-> release plumbing -> one build, then the full ladder (`verify:construct` and `verify:scaffold` are the
+two that would catch a broken CLI or a missing shipped file).
+
+**What landed, and what it measured.** Three parallel lanes took the manifest resolution, the dev-server
+mount, and the docs/CLI sweep; the shell, the release plumbing and the ui-side removals were done here.
+
+| | before | after |
+|---|---|---|
+| `@kitn.ai/ui` tarball | 2.51 MiB packed / 11.45 MiB unpacked / 1468 files | **2.05 MiB / 9.67 MiB / 1441 files** |
+| `@kitn.ai/kai` tarball | -- | 0.37 MiB packed / 1.34 MiB unpacked / 12 files |
+| a browser consumer's install | `@modelcontextprotocol/sdk` + its 17-package tree, 5.9 MB | none of it |
+
+The peel is `packages/kai/{package.json,bin,config/vite}` plus a tsconfig, with the CLI's SOURCES staying
+in `packages/ui/mcp/**` and the dev pages' sources in `packages/ui/apps/**` (the docs site imports the
+theme-studio component by relative path, and `src/primitives/construct-form-paths.ts` imports
+`mcp/construct/**`; see the shape note above). So kai declares `@kitn.ai/ui` as a real dependency, which
+makes this the first published package here that depends on another one -- and npm cannot express that as
+`workspace:` (measured: `npm pack` ships the literal string). The range is therefore a literal with its own
+guard, `packages/kai/scripts/verify-kit-range.mjs`, which asserts EQUALITY of the lower bound (a
+membership check is true by construction, the `lint:cdn-pins` lesson) and is wired into the required CI
+lint leg.
+
+Also changed with it, each because it would otherwise fail or rot: `verify-construct.mjs` now drives
+`packages/kai/bin/mcp.js` (it ran the real CLI by path and would have failed loudly, which is how the
+stale path was caught); kai's own bin test moved with the CLI and needed its own CI step or it would have
+stopped running entirely; the manifest resolution, the `/theme-studio/kit/*` mount (which resolved the
+kit's dist as `dirname(studioDir)` and would have 404'd silently), the boot-time CI upload globs (unchanged:
+`packages/ui/**` is still all the downstream legs need), `release-please-config.json`, the manifest and the
+publish loop (all three hand-typed and NOTHING-guarded), and ~20 prose references.
+
+Still open from this, in order:
+
+1. **Nothing catches a stale CLI invocation in prose.** The docs sweep's own mutation proved it: putting
+   `npx @kitn.ai/ui mcp` back into an `.mdx` page leaves the docs suite, `verify:docs`, `lint:cdn-pins` and
+   `lint:gate-parity` all green. Only a grep finds it. A guard belongs here (scan the same roots
+   `lint:cdn-pins` does, exempt `packages/ui/bin/mcp.js` -- it names the old command as the INPUT side of
+   the migration message -- and the dated archive).
+2. **`serverInfo` still reports `@kitn.ai/ui`.** It is derived (it resolves the kit's package.json, so the
+   version is right), and it is honest about the API the server describes, but the running package is now
+   `@kitn.ai/kai`. Deciding that means deciding whether the agent should learn the CLI's version or the
+   kit's; a self-reference needs an `exports` map kai does not have.
+3. **kai has no pack-weight guard.** `verify-pack-weight.mjs` is `packages/ui`-specific, so the new tarball
+   has a ceiling only by inspection (0.37 MiB packed today). its `prepublishOnly` builds, which is the
+   part that matters for shipping.
+4. `examples/apps/composed-thread/README.md:57` still names `@kitn.ai/ui/bin/mcp.js`, and is left alone on
+   purpose: it is a record of a builder run against a pinned 0.26.0 tarball, so rewriting the path would
+   describe a run that never happened. The `lint:cdn-pins` `historical` waiver is the same precedent.
 
 The largest single win measured this session: ~10% of the tarball, 616 KB off the pack ceiling, and
 **5.9 MB of installed dependencies plus 17 packages out of every consumer's `node_modules`**. With a
@@ -201,4 +296,7 @@ Options when we take it up:
 3. Unchanged: no new package, keep everything in `@kitn.ai/ui`. Costs the 5.9 MB SDK tree per consumer,
    which is the whole reason 4.3 exists.
 
-Trigger to take it up: the moment 4.3 is scheduled, because options 1 and 3 are decided by it.
+Trigger to take it up: NOW. 4.3 landed, so `@kitn.ai/kai` owns `mcp`/`dev`/`compile`/`eject`/`validate`
+and `create-kai` owns `create`/`add`/`update`; the question left is whether that split should stay two
+packages or become one binary. Nothing is urgent about it: both work today, and the docs name each verb's
+package explicitly.

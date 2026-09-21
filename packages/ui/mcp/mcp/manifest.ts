@@ -2,12 +2,20 @@
  * manifest.ts — reads dist/custom-elements.json (a Custom Elements Manifest)
  * and exposes helpers for the component_reference tool.
  *
- * Resolution strategy (dual-context) — each context is an EXACT location, never a
- * search. See `resolveManifestPath` for why that distinction is the whole point:
- *  1. Bundled bin: dist/mcp.es.js lives in dist/, so custom-elements.json is
- *     a sibling → ./custom-elements.json relative to import.meta.url.
- *  2. Vitest (source): manifest.ts lives at <package>/mcp/mcp/, so
- *     the manifest is <package>/dist/custom-elements.json and nowhere else.
+ * Resolution strategy -- the manifest is ADDRESSED through the published package, never
+ * searched for. See `resolveManifestPath` for why that distinction is the whole point:
+ *  1. `@kitn.ai/ui/package.json` is resolved with Node's own package resolution
+ *     (`createRequire`), which is what "address this package" means: from SOURCE it
+ *     resolves by self-reference (this module lives inside the package), and from the
+ *     bundled bin it walks to `node_modules/@kitn.ai/ui`, i.e. the installed dependency.
+ *  2. The manifest is then ONE fixed hop from that root, `dist/custom-elements.json`,
+ *     checked to exist and to belong to this package rather than assumed.
+ *
+ * Both contexts give the same answer, and neither can bind to a directory that merely
+ * looks like this package. The bundled bin used to find the manifest as a SIBLING of
+ * itself (`dist/mcp.es.js` beside `dist/custom-elements.json`), which stopped being
+ * true when the server bundle moved to its own package (`@kitn.ai/kai`); the sibling hop
+ * is gone, and `manifest.test.ts` fails if it comes back.
  *
  * It also answers "which of these 80 web components has anything to do with cards", for
  * the card contract component_reference serves. That question lives HERE rather than
@@ -18,8 +26,9 @@
  */
 
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
-import { join, dirname, resolve } from 'node:path';
+import { join, dirname } from 'node:path';
 // The package's own public entry, by the same specifier the scaffolder tells a
 // consumer's route to use. That is now a CHOICE, and this comment used to say the
 // opposite: the barrel re-exports src/schemas/registry.ts, which type-IMPORTED
@@ -127,7 +136,7 @@ interface CustomElementsManifest {
 // It was not hypothetical. Measured from an agent git worktree at
 // `<repo>/.claude/worktrees/<agent>/packages/ui/mcp/mcp`, the loop
 // climbed past the worktree's own (unbuilt) `packages/ui/dist`, out of the worktree
-// entirely, and bound on iteration 8 to `<repo>/dist/custom-elements.json` — a
+// entirely, and bound on iteration 8 to `<repo>/dist/custom-elements.json` -- a
 // leftover from the pre-monorepo layout, six weeks stale, 78 tags, and zero web
 // components declaring `cardSchemas`. The consequence is this repo's dominant failure mode in
 // its purest form: on an unbuilt tree the MCP manifest tests did not error, they
@@ -136,20 +145,31 @@ interface CustomElementsManifest {
 //
 // So the rule here is now: a missing manifest is a HARD FAILURE that names the path
 // it expected. Never a fallback, never a wider search. If this throws, the answer is
-// to build — not to let it find someone else's build.
+// to build -- not to let it find someone else's build.
 
 const PACKAGE_NAME = '@kitn.ai/ui';
 const MANIFEST_FILE = 'custom-elements.json';
 
 /**
- * `<package>/mcp/mcp` -> `<package>`. A fixed, exact hop, and it is
- * CHECKED below rather than trusted: if this module is ever moved to a different
- * depth the derived root stops being this package and resolution throws, instead of
- * silently addressing whatever directory happens to sit two levels up.
+ * The specifier that ADDRESSES this package. Node resolves it to the package's own
+ * `package.json`, whose directory IS the package root.
+ *
+ * Not `@kitn.ai/ui/custom-elements.json`: the manifest is not an `exports` key (the
+ * exported JSON keys are `./web-component-meta.json`, `./icon-names.json` and
+ * `./package.json`), and adding one would let a consumer deep-import a build artifact
+ * whose only reader is this module. Addressing the package is enough, and the hop below
+ * is one fixed segment from a root that is itself verified.
  */
-const SOURCE_TO_PACKAGE_ROOT = ['..', '..'] as const;
+const PACKAGE_ROOT_SPECIFIER = `${PACKAGE_NAME}/package.json`;
 
-/** Is `root` the root of THIS package — not merely *a* directory holding a dist/? */
+/** Package root -> the artifact. One exact hop, checked below rather than trusted. */
+const MANIFEST_FROM_PACKAGE_ROOT = ['dist', MANIFEST_FILE] as const;
+
+/** Is `root` the root of THIS package -- not merely *a* directory holding a dist/?
+ *
+ * Node resolves the specifier by DIRECTORY, so `node_modules/@kitn.ai/ui` holding a
+ * package.json that calls itself something else still resolves. This is the check that
+ * rejects it: "found a file" and "found the right file" are different facts. */
 function isThisPackage(root: string): boolean {
   const manifest = join(root, 'package.json');
   if (!existsSync(manifest)) return false;
@@ -161,37 +181,50 @@ function isThisPackage(root: string): boolean {
 }
 
 /**
- * Absolute path to this package's Custom Elements Manifest, or a throw naming what
- * it looked for.
+ * Absolute path to this package's Custom Elements Manifest, or a throw naming what it
+ * looked for.
  *
- * `fromDir` exists for the tests and defaults to this module's own directory. It is
- * the only way to write the check that matters: the guarantee is not "a manifest was
- * found", it is "THIS package's manifest was found", and the two only come apart
- * when there is a decoy above the origin. manifest.test.ts builds exactly that tree.
+ * `fromDir` exists for the tests and defaults to this module's own directory. It is the
+ * anchor Node resolves FROM, so it is the only thing a caller can vary -- and the tests
+ * are what make the guarantee meaningful: not "a manifest was found", but "THIS
+ * package's manifest was found, from this anchor".
  */
 export function resolveManifestPath(
   fromDir: string = dirname(fileURLToPath(import.meta.url)),
 ): string {
-  // 1. Bundled bin: dist/mcp.es.js and dist/custom-elements.json are siblings.
-  //    Unambiguous by construction — a sibling cannot be another checkout's artifact.
-  const sibling = join(fromDir, MANIFEST_FILE);
-  if (existsSync(sibling)) return sibling;
+  // A synthetic filename inside `fromDir`, so Node resolves from that directory without
+  // this needing a real file there.
+  const requireFrom = createRequire(join(fromDir, 'resolve-manifest.js'));
 
-  // 2. Source (vitest, tsx): one exact location, derived and then verified.
-  const packageRoot = resolve(fromDir, ...SOURCE_TO_PACKAGE_ROOT);
-  const expected = join(packageRoot, 'dist', MANIFEST_FILE);
+  let packageJson: string;
+  try {
+    packageJson = requireFrom.resolve(PACKAGE_ROOT_SPECIFIER);
+  } catch (cause) {
+    throw new Error(
+      `[${PACKAGE_NAME}] Cannot locate the Custom Elements Manifest: the specifier ` +
+        `\`${PACKAGE_ROOT_SPECIFIER}\` did not resolve from ${fromDir}.\n` +
+        `The package has to be INSTALLED: as this module's own package when running from ` +
+        `source, or as a dependency of whichever package carries the server bundle ` +
+        `(\`@kitn.ai/kai\` makes it one).\n` +
+        `Cause: ${cause instanceof Error ? cause.message : String(cause)}\n` +
+        `Resolution deliberately does NOT search directories for a ${MANIFEST_FILE}: ` +
+        `finding some other checkout's manifest is worse than failing.`,
+    );
+  }
+
+  const packageRoot = dirname(packageJson);
 
   if (!isThisPackage(packageRoot)) {
     throw new Error(
-      `[${PACKAGE_NAME}] Cannot locate the Custom Elements Manifest: ${packageRoot} is not ` +
-        `the ${PACKAGE_NAME} package root, so ${expected} would not be this package's ` +
-        `manifest even if it existed.\n` +
+      `[${PACKAGE_NAME}] Cannot locate the Custom Elements Manifest: ` +
+        `\`${PACKAGE_ROOT_SPECIFIER}\` resolved to ${packageRoot}, and that package.json is ` +
+        `not ${PACKAGE_NAME}, so its manifest would be a different build's.\n` +
         `Resolved from: ${fromDir}\n` +
-        `This module must live at <package>/mcp/mcp/ (or be bundled beside ` +
-        `${MANIFEST_FILE} in dist/). Resolution deliberately does NOT search parent ` +
-        `directories — finding some other checkout's manifest is worse than failing.`,
+        `Resolution deliberately does NOT search directories for a ${MANIFEST_FILE}.`,
     );
   }
+
+  const expected = join(packageRoot, ...MANIFEST_FROM_PACKAGE_ROOT);
 
   if (!existsSync(expected)) {
     throw new Error(

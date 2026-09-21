@@ -101,13 +101,14 @@ engine standalone, with no MCP server involved at all.
 
 ## Usage
 
-- **`npx @kitn.ai/ui mcp`** starts the MCP server (the historical default
-  subcommand). For wiring it into a multi-harness setup, see the docs site's
-  agents guide: `apps/docs/src/content/docs/guides/for-ai-agents.mdx`.
-- **CLI form**, no MCP: `node bin/mcp.js validate|dev|compile|eject <construct.json>`
-  (`bin/mcp.js` dispatches `dev`/`compile`/`eject`/`validate` to the construct
-  CLI and anything else, including `mcp` or no argument, to the MCP server;
-  an unrecognized subcommand is a loud error, not a silent fallthrough).
+- **`npx @kitn.ai/kai mcp`** starts the MCP server (the historical default
+  subcommand; it used to be `npx @kitn.ai/ui mcp`, and the kit still ships a stub
+  that names the new command). For wiring it into a multi-harness setup, see the
+  docs site's agents guide: `apps/docs/src/content/docs/guides/for-ai-agents.mdx`.
+- **CLI form**, no MCP: `npx @kitn.ai/kai validate|dev|compile|eject <construct.json>`
+  (`packages/kai/bin/mcp.js` dispatches `dev`/`compile`/`eject`/`validate` to the
+  construct CLI and anything else, including `mcp` or no argument, to the MCP
+  server; an unrecognized subcommand is a loud error, not a silent fallthrough).
   `eject` writes a real Solid project you own; `dev` gives a live-reload
   preview; `compile` emits one self-registering `.js`.
 - **Acceptance harness** (`packages/ui/scripts/acceptance-*.mjs`:

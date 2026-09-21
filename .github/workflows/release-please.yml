@@ -227,7 +227,7 @@ jobs:
         # thing standing between a fresh checkout and a tarball with no CLI in it.
         # No NODE_AUTH_TOKEN; provenance is automatic with OIDC for a public package.
         run: |
-          for pkg in packages/ui packages/create-kai; do
+          for pkg in packages/ui packages/create-kai packages/kai; do
             NAME=$(node -p "require('./$pkg/package.json').name")
             VERSION=$(node -p "require('./$pkg/package.json').version")
             if npm view "$NAME@$VERSION" version > /dev/null 2>&1; then

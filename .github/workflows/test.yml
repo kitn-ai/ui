@@ -238,6 +238,14 @@ jobs:
       - name: CDN version-pin staleness guard (docs, README, examples)
         run: pnpm --filter @kitn.ai/ui run lint:cdn-pins
 
+      # @kitn.ai/kai depends on @kitn.ai/ui, and the MCP describes the kit it resolves
+      # at runtime -- so a stale range points every agent at an API the app may not
+      # have. The range cannot be a `workspace:` spec: npm has no such protocol and
+      # packs it verbatim (measured), which a consumer cannot install. So it is a
+      # literal, and this is what keeps it honest. No build, no network.
+      - name: Kit dependency-range guard (@kitn.ai/kai -> @kitn.ai/ui)
+        run: pnpm --filter @kitn.ai/kai run verify:versions
+
       # Size budget for the committed llms-full.txt. The file is generated, so
       # it grows as a SIDE EFFECT of unrelated work -- a new web component, a fatter
       # doc comment, a new generated section -- and nothing else prices that
@@ -517,8 +525,8 @@ jobs:
           key: construct-npm-${{ hashFiles('packages/ui/mcp/construct/construct.v1.schema.json', 'packages/ui/mcp/construct/templates.ts', 'packages/ui/package.json') }}
           restore-keys: construct-npm-
 
-      # The construct engine's real emit chain: node bin/mcp.js eject (the CLI,
-      # not the library) -> a real npm install -> tsc --noEmit under the cell's
+      # The construct engine's real emit chain: node packages/kai/bin/mcp.js eject
+      # (the CLI, not the library; it moved to @kitn.ai/kai) -> a real npm install -> tsc --noEmit under the cell's
       # OWN emitted tsconfig -> npm run build -> for one cell per layout, a real
       # Vite 8 consumer bundle asserting the registration survives. Axes (layout,
       # capability) are derived from the drift-guarded construct.v1.schema.json
@@ -563,6 +571,13 @@ jobs:
       # spin up the storybook BROWSER project; that runs in its own job now.
       - name: Unit tests (jsdom)
         run: pnpm --filter @kitn.ai/ui exec vitest run --project=unit
+
+      # @kitn.ai/kai's own suite: bin/route.test.js moved out of the ui project with
+      # the CLI, so without this step it would stop running entirely (it was picked up
+      # by the ui project's default include, and this package has no project of its own).
+      # No build needed: the unknown-command cases exit before any dist import.
+      - name: kai CLI tests (bin dispatch, no build)
+        run: pnpm --filter @kitn.ai/kai exec vitest run
 
       # The blocks package: pure functions over injected data plus the authored
       # block sources. Node-environment, no build input of any kind, so it sits
@@ -824,6 +839,11 @@ jobs:
 
       - name: Typecheck
         run: pnpm exec nx typecheck ui
+
+      # @kitn.ai/kai's own typecheck: its build configs are .ts, and they live in a
+      # package the ui project's tsc pass cannot see. No build needed.
+      - name: kai typecheck (its build configs)
+        run: pnpm --filter @kitn.ai/kai run typecheck
 
       # Compiles the `kai` MCP scaffolder's EMITTED code with real `tsc --strict
       # --noUnusedLocals`, resolving @kitn.ai/ui through the shipped exports map

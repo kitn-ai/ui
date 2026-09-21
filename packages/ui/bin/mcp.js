@@ -1,35 +1,19 @@
 #!/usr/bin/env node
-// AI/UI MCP server launcher. Loads the compiled stdio entry (built by the `mcp`
-// target in config/vite/node.ts). A bin must run under plain Node, which can't
-// execute .ts, so we import the dist ESM emit. `npx @kitn.ai/ui mcp` runs this (the sole bin).
+// The kai MCP server and the construct CLI MOVED to @kitn.ai/kai.
 //
-// The built module (dist/mcp.es.js) auto-starts the server on import. We own the
-// fatal-error / exit handling here (a .js file, outside tsc's typed src/), so the
-// stdio entry source stays free of Node globals.
-import { fileURLToPath } from 'node:url';
-import { decideEntry } from './route.js';
-
-// stdout is the JSON-RPC channel; diagnostics must go to stderr.
-function fatal(err) {
-  console.error('[kitn-ui-mcp] fatal:', err);
-  process.exit(1);
-}
-process.on('unhandledRejection', fatal);
-process.on('uncaughtException', fatal);
-
-// Subcommand dispatch. `npx @kitn.ai/ui <cmd>`: `mcp` (or nothing) starts the
-// MCP server — the historical behavior, byte-compatible and unchanged.
-// dev/compile/eject/validate load the construct CLI. Anything else is a typo
-// (e.g. `frobnicate`, `validat`) — it errors loudly to stderr and exits 2
-// rather than silently falling through to the server (decideEntry, tested in
-// route.test.js, owns that decision so it stays testable without spawning).
-const [, , command] = process.argv;
-const decision = decideEntry(command);
-if (decision.kind === 'error') {
-  console.error(`[kitn-ui-mcp] ${decision.message}`);
-  process.exit(2);
-}
-const entry = fileURLToPath(
-  new URL(decision.kind === 'construct' ? '../dist/construct-cli.es.js' : '../dist/mcp.es.js', import.meta.url),
+// This stub ships so that an existing MCP client config (or a script) that still says
+// `npx @kitn.ai/ui mcp` fails loudly and names the fix, instead of looking like a server
+// that started and then produced nothing. It is deliberately dependency-free: it must run
+// in an install that never had the MCP's SDK, which is the whole point of the move.
+//
+// Callers: `npx @kitn.ai/ui mcp|dev|compile|eject|validate` all land here. Delete this
+// file (and the `bin` entry in package.json) when the migration window closes.
+console.error(
+  [
+    '[kai] The kai MCP and the construct CLI moved to @kitn.ai/kai.',
+    '[kai]   npx @kitn.ai/ui mcp  ->  npx @kitn.ai/kai mcp',
+    '[kai]   npx @kitn.ai/ui dev  ->  npx @kitn.ai/kai dev',
+    '[kai] Update your MCP client config (or the script) and retry.',
+  ].join('\n'),
 );
-import(entry).catch(fatal);
+process.exit(2);

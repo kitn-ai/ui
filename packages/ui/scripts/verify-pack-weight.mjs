@@ -602,6 +602,23 @@ if (SELF_TEST) {
  * the point of the trim (it buys ~0.10 MiB of headroom back on a ceiling that had
  * 0.05), so re-tuning it here would spend the win instead of banking it.
  *
+ * 2026-09-20, THE SAME DAY: THE DEV TOOLING LEAVES THIS PACKAGE ENTIRELY.
+ *
+ * `@kitn.ai/kai` now owns the CLI: `dist/mcp.es.js` (571,579 B), `dist/construct-cli.es.js`
+ * (140,294 B) and the two prebuilt dev pages (`dist/builder-page`, `dist/theme-studio`) are
+ * built by packages/kai/config/vite/{node,page}.ts into packages/kai/dist, and the
+ * `@modelcontextprotocol/sdk` dependency moved with them (it is a real dependency there and a
+ * devDependency here, so a browser consumer stops installing 5.9 MB and 17 packages of MCP
+ * server). Measured on the same tree: 2.41 -> 2.05 MiB packed, 10.99 -> 9.67 MiB unpacked,
+ * 1451 -> 1441 files. The ceiling still does not move, and the headroom this buys is the
+ * point -- it is now 0.51 MiB against a ceiling that was sized with 0.05.
+ *
+ * THE ALLOWLIST NEEDED NO CHANGE FOR THAT, which is worth stating: `dist/` and `bin/` are
+ * still the only two roots (this package keeps `bin/mcp.js` as a dependency-free STUB that
+ * tells a stale MCP client config to run `npx @kitn.ai/kai mcp`, and the `files` entry with
+ * it), and the entries above that name `dist/mcp.es.js` are dated records of what shipped
+ * when. The reasons on those entries are now history rather than a description of the pack.
+ *
  * `ALLOWED_LARGE_FILES` and `ALLOWED_ROOT_PREFIXES` were pruned to match (the
  * `frameworks/react/index.tsx` entry and the `frameworks/` root), which is the
  * direction this file wants them to move: the hand-kept copy may be WIDER than the

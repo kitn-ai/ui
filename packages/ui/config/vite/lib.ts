@@ -32,7 +32,7 @@ import { rewriteMcpDtsSpecifiers } from './mcp-dts-rewrite';
 // those files exists any more. To read one: `vite.config.<stem>.ts` is the
 // `<stem>` key in the TARGETS table below, except `barrel` (now `index`) and
 // `barrel.server` (now `index.server`). `vite.config.construct-cli.ts` is the
-// `construct-cli` target in config/vite/node.ts. And `vite.config.ts` -- the
+// `construct-cli` target in packages/kai/config/vite/node.ts. And `vite.config.ts` -- the
 // register-all build that runs first and is the only emptyOutDir:true build
 // writing to dist/ root -- is now `KAI_BUILD=register vite build --config
 // config/vite/web-components.ts`.
@@ -458,9 +458,13 @@ const TARGETS: Record<string, Target> = {
     external: SOLID,
   },
 
-  // dist/schemas.js. MUST build before the mcp target in config/vite/node.ts:
-  // that bundle compiles the MCP against this built file, not against src.
-  // vitest.config.ts records the same dependency from the other side.
+  // dist/schemas.js. This USED to have to build before the mcp target in
+  // config/vite/node.ts (since moved to packages/kai), on the claim that the MCP
+  // bundle compiles against this
+  // built file rather than against src. Two things are true now instead: that
+  // target moved to packages/kai, and the claim was never load-bearing -- every
+  // `@kitn.ai/ui/schemas` in mcp/ sits inside an EMITTED-CODE STRING (codegen
+  // writing a consumer's import), so nothing in the CLI imports this file.
   //
   // The card JSON Schemas as a JS module (@kitn.ai/ui/schemas). Data only: the
   // schema documents are imported from src/primitives/card-schemas/*.json and

@@ -116,7 +116,7 @@ Every property, event and method for every web component: [`docs/web-components.
 The package ships a stdio MCP server, so an AI coding harness can build with this library instead of guessing at it:
 
 ```bash
-claude mcp add kai -- npx -y @kitn.ai/ui mcp
+claude mcp add kai -- npx -y @kitn.ai/kai mcp
 ```
 
 Four tools: `component_reference` (the real API for any `kai-*` web component, generated from the build), `scaffold` (a working chat surface wired to your framework and backend), `theme` (brand it from a color or a description), `debug` (the classic mistakes). It runs locally and makes no network calls. Config for other harnesses: [For AI agents](https://ui.kitn.ai/guides/for-ai-agents/).

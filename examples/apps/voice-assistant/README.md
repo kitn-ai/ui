@@ -81,7 +81,7 @@ dev-only plugin, it also mounts on `vite preview`, so `npm run build` +
 `npm run preview` is runnable end-to-end — but the static `dist/` itself still
 has no `/api/chat`. Shipping this means writing the same endpoint on your own
 host; the kit's `kai` MCP scaffolder emits one per framework
-(`npx @kitn.ai/ui mcp`).
+(`npx @kitn.ai/kai mcp`).
 
 ## How this app was built
 

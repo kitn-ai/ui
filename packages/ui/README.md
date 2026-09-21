@@ -342,10 +342,10 @@ For the SolidJS components (Option B) import **`@kitn.ai/ui/solid.css`** instead
 
 ## For AI agents / LLMs
 
-The package ships a stdio MCP server too — `npx @kitn.ai/ui mcp` gives any MCP harness tools to look up the real `kai-*` API, scaffold a wired chat surface, theme it, and catch the classic mistakes:
+The dev tooling ships as its own package, `@kitn.ai/kai` — `npx @kitn.ai/kai mcp` gives any MCP harness tools to look up the real `kai-*` API, scaffold a wired chat surface, theme it, and catch the classic mistakes:
 
 ```bash
-claude mcp add kai -- npx -y @kitn.ai/ui mcp
+claude mcp add kai -- npx -y @kitn.ai/kai mcp
 ```
 
 Config for other harnesses (Codex, OpenCode, VS Code, GitHub Copilot, Cursor, Windsurf, Cline, Zed, Gemini CLI, Pi, dsh): [For AI agents](https://ui.kitn.ai/guides/for-ai-agents/).

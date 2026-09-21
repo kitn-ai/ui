@@ -19,6 +19,10 @@
     "packages/create-kai": {
       "release-type": "node",
       "package-name": "create-kai"
+    },
+    "packages/kai": {
+      "release-type": "node",
+      "package-name": "@kitn.ai/kai"
     }
   }
 }

@@ -174,7 +174,7 @@ const CONSTRUCT_TAG_RE = /^[a-z][a-z0-9]*-[a-z0-9-]+$/;
  * custom-element tag: lowercase letters/digits/hyphens only, MUST start with
  * a letter, MUST contain a hyphen. The two rulesets disagree in exactly the
  * ways that made `create-kai myapp --shape widget --yes` write a construct
- * its own next-step command (`npx @kitn.ai/ui dev ...`) then rejected: no
+ * its own next-step command (`npx @kitn.ai/kai dev ...`) then rejected: no
  * hyphen, and `myapp` alone is otherwise valid everywhere else in this CLI.
  *
  * An already-valid tag passes through UNCHANGED — this only rewrites names
@@ -317,7 +317,7 @@ export async function emitConstruct(
 
   return {
     file,
-    devCommand: `npx @kitn.ai/ui dev ${fileName}`,
+    devCommand: `npx @kitn.ai/kai dev ${fileName}`,
     constructName: construct.name,
   };
 }
@@ -346,7 +346,7 @@ export type SpawnLike = (
 
 /**
  * Run the construct dev preview (`devCommand` from `emitConstruct`), stdio
- * inherited so the user sees the same live-reload server `npx @kitn.ai/ui
+ * inherited so the user sees the same live-reload server `npx @kitn.ai/kai
  * dev` would print on its own. Resolves once the child ends; NEVER throws, so
  * `index.ts` cannot accidentally let a rejection skip the fallback note.
  *
