@@ -169,7 +169,7 @@
     "bin",
     "!bin/**/*.test.js",
     "!dist/**/*.testlib.*",
-    "frameworks",
+    "!dist/blocks/**",
     "theme.css",
     "solid.css",
     "kit-base.css",

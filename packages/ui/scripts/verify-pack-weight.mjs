@@ -94,13 +94,12 @@ const MAX_FILE_BYTES = 64 * 1024;
 const ALLOWED_LARGE_FILES = new Map([
   ['src/web-components/web-component-meta.json', 'exported as the `./web-component-meta.json` subpath'],
   ['llms-full.txt', 'shipped LLM context, listed explicitly in `files`'],
-  ['frameworks/react/index.tsx', 'source of the generated React wrappers'],
 ]);
 
 /**
  * Rule 3 roots. Every packed path must start with one of these prefixes...
  */
-const ALLOWED_ROOT_PREFIXES = ['dist/', 'bin/', 'frameworks/'];
+const ALLOWED_ROOT_PREFIXES = ['dist/', 'bin/'];
 
 /**
  * ...or be exactly one of these paths. Mostly top-level (package.json,
@@ -138,13 +137,12 @@ function findRootViolations(paths, prefixes = ALLOWED_ROOT_PREFIXES, exact = ALL
 if (SELF_TEST) {
   const cases = [
     {
-      name: 'a clean pack (dist/bin/frameworks + the two src JSON exports + top-level docs) passes',
+      name: 'a clean pack (dist/bin + the two src JSON exports + top-level docs) passes',
       paths: [
         'dist/index.js',
         'dist/custom-elements.json',
         'bin/mcp.js',
         'bin/route.js',
-        'frameworks/react/index.tsx',
         'src/web-components/web-component-meta.json',
         'src/web-components/icon-names.json',
         'package.json',
@@ -164,7 +162,7 @@ if (SELF_TEST) {
       expectViolations: ['src/components/chat/chat-thread.tsx'],
     },
     {
-      name: 'a stray test file outside bin/dist/frameworks is caught',
+      name: 'a stray test file outside bin/dist is caught',
       paths: ['dist/index.js', 'bin/mcp.js', 'scripts/some-dev-script.mjs'],
       expectViolations: ['scripts/some-dev-script.mjs'],
     },
@@ -581,6 +579,35 @@ if (SELF_TEST) {
  * it." A record that carries a number it did not have to carry is a record that
  * will disagree with the tree, and the next reader has no way to tell which of the
  * two is right without re-measuring.
+ *
+ * 2026-09-20: THE PACK SHRINKS WITHOUT MOVING THE CEILING (`files` trims).
+ *
+ * Two things were in the tarball and read only from the workspace, verified by
+ * resolving every candidate against the possible readers rather than by assuming:
+ *
+ *   - `frameworks/` (4 files, 201,686 B). No `exports` key reaches it, no shipped
+ *     code reads it from disk (every mention in `dist/mcp.es.js` is prose inside a
+ *     bundled comment), and no emitted `.d.ts` references it. It is the SOURCE of
+ *     the generated React wrappers, which is a build input: `config/vite/react.ts`,
+ *     the generators, `verify:generated`, `verify-dts-consumer` and
+ *     `lint:layer-direction` all read it from the checkout, never from an install.
+ *   - `dist/blocks/**` (13 files, 285,755 B). `create-kai` bundles blocks from
+ *     `@kitn.ai/blocks`' own `blocks/` directory (see its `scripts/build.mjs`), and
+ *     the docs site reads the workspace copy through `blocks-source.ts`, so nothing
+ *     resolves this from an installed package.
+ *
+ * Both are gone from `files` (the second as a `!dist/blocks/**` negation). Measured
+ * before and after on the same tree: 2.51 -> 2.41 MiB packed, 11.45 -> 10.99 MiB
+ * unpacked, 1468 -> 1451 files. The ceiling does NOT move: 2.41 MiB against 2.56 is
+ * the point of the trim (it buys ~0.10 MiB of headroom back on a ceiling that had
+ * 0.05), so re-tuning it here would spend the win instead of banking it.
+ *
+ * `ALLOWED_LARGE_FILES` and `ALLOWED_ROOT_PREFIXES` were pruned to match (the
+ * `frameworks/react/index.tsx` entry and the `frameworks/` root), which is the
+ * direction this file wants them to move: the hand-kept copy may be WIDER than the
+ * shipped set, so a stale entry is an advisory, but a prefix that still admits
+ * `frameworks/` would let the directory come back silently. The self-test's clean
+ * pack fixture dropped the same path, so the case still describes what ships.
  */
 const MAX_PACKED_BYTES = Math.floor(2.56 * 1024 * 1024); // 2.56 MiB = 2,684,354 B
 
