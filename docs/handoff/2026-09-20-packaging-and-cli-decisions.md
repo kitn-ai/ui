@@ -305,3 +305,81 @@ Trigger to take it up: NOW. 4.3 landed, so `@kitn.ai/kai` owns `mcp`/`dev`/`comp
 and `create-kai` owns `create`/`add`/`update`; the question left is whether that split should stay two
 packages or become one binary. Nothing is urgent about it: both work today, and the docs name each verb's
 package explicitly.
+
+## 6. Discoveries and recommendations, packaged (decided-against things included)
+
+These are the conclusions from the packaging/CLI conversation that are NOT expressed in code. Each one was
+measured or read, and each is here so it does not have to be re-derived.
+
+1. **`update` is not an app-upgrade verb, and there is no such verb today.** `create-kai` has exactly two
+   behaviours: the wizard and `add`. The verb list that motivated this thread was three things wearing one
+   coat. What "update" should mean was clarified: updating the CLI to the latest version. Under `npx` that
+   is pointless (npx fetches latest) and as a self-update it is a global-install footgun, so the useful half
+   is `doctor` reporting "your CLI is older than the kit your app has".
+2. **`check` should be called `doctor`.** `check` means typecheck in Svelte's CLI, so the name would trade
+   one confusion for another. `doctor` = "diagnose this app's kit wiring", i.e. the MCP's `debug` tool with
+   a CLI face, needs the CEM the way the MCP does, and therefore belongs in kai.
+3. **No `remove`.** `add`-only is a legitimate product (shadcn has no remove); removal has to unpick wiring,
+   uninstall deps and delete possibly hand-edited files, so it would need to be report-first to be safe.
+   Not worth shipping without that.
+4. **One CLI with subcommands is the stronger pattern at this verb count**, and the precedents are real:
+   Svelte (`sv create/add/check/migrate`, with `create-svelte` DEPRECATED in favour of it), Angular
+   (`ng new/add/update`), TanStack (`tanstack create/add`), shadcn (`shadcn init/add`). Vite, Next and Astro
+   kept the `create-*` convention. Recommended shape if it is done: verbs live in `@kitn.ai/kai`;
+   `create-kai` becomes a SHIM so `npm create kai` keeps working (that name is the npm-create mechanism, so
+   it cannot fold in); `create`/`add`/`doctor`/`upgrade` all reachable from both entries.
+5. **`upgrade` is underspecified and should be decided before it is built.** Angular's `ng update` runs
+   migrations in the main CLI; Carbon's `@carbon/upgrade` is a separate jscodeshift package. Re-diffing
+   scaffolded templates is light and belongs with the templates; migrating kit API usage in hand-written
+   code is heavy and becomes its own package.
+6. **The SDK-inlining fear was MEASURED WRONG, and the correction is worth more than the guard.** Dropping
+   the SDK from the `mcp` target's `external` list (or the stronger `ssr.noExternal: true`) moves
+   `dist/mcp.es.js` from 571,579 B to 616,386 B: **+45 KB**, because the three SDK modules the server
+   imports reach almost none of the package's tree. The 5.9 MB is the INSTALL footprint, which is what the
+   peel bought and what the pack guards price; it is NOT bundle weight. Separately: the explicit
+   `/^@modelcontextprotocol\/sdk/` entry is REDUNDANT — vite's SSR build already externalises declared
+   dependencies.
+7. **The release-time registry check is not worth adding.** The range failure it was aimed at is caught
+   earlier and offline by `verify:kit-range`, which fires on the release PR that bumps the kit (the same PR
+   in which `node-workspace` must bump kai's range). The tarball-shape failures are covered by
+   `lint:release-wiring` (missing hook, missing files entry, missing bin target) and by the fact that a
+   failed build fails the publish loudly. Residual risk does not justify a network-bound guard.
+8. **`serverInfo` recommendation, revised.** It reports `@kitn.ai/ui` + the kit's version, which is HONEST
+   ABOUT THE API THE ANSWERS DESCRIBE, and that is the useful thing for an agent. Making it report kai's
+   own identity needs kai's manifest resolvable from both source and bundle (an `exports` map, or a
+   self-dependency that would make a cycle). Cheaper and better: keep the name, and add kai's version to
+   MCP's `instructions` through a build-time define — create-kai's `__KIT_VERSION__` pattern. A define, a
+   declared global and a test: its own small change, not a drive-by.
+9. **`verify:solid-coverage` WAS FAILING ON THIS BRANCH** (required CI), with two GAPs: `kai-card` could not
+   reach `CardSurface`, `kai-prompt-input` could not reach `DefaultPromptInput`. Fixed in `067204b5` by
+   exporting both from `./solid` — the same class `src/solid.ts` already documents for PaneGrid ("exported
+   from NEITHER entry, so those snippets named symbols nobody could import"). It was NOT introduced by the
+   dev-tooling peel: `git log 84b1c14f..HEAD -- src/solid.ts src/components/card src/components/prompt` is
+   empty, so it came in with the earlier layering/security work and had simply never been run in that state.
+10. **Two guards exit 1 when run standalone, BY DESIGN, and both read as failures the first time:**
+    `verify:artifact-glob` needs `ARTIFACT_GLOB_BEFORE` (the pre-build snapshot, which CI sets) and
+    `verify:fresh` needs a build to have run AFTER the last source edit (it compares mtimes and never a
+    build exit code). Neither is a defect; both cost a debug cycle if you do not know.
+
+## 7. Verification state at the end of this session (and what is left for CI)
+
+Green locally, on the final tree: `pnpm build` (17 projects) · `nx build ui --skip-nx-cache` · `nx build kai`
+· `nx build docs` · unit 423 files / 6038 tests · kai 10 · create-kai 909 · apps/docs 62 · emitted 36 · tsc
+src/tests/mcp/apps + kai typecheck · verify:construct (113 cells ejected through the real CLI) ·
+verify:scaffold · verify:consumer (9 probes) · verify:pack 2.05 MiB · verify:solid-coverage GAP 0 ·
+verify:ssr · verify:schemas · verify:tool-schemas · verify:diagnostics-wiring · verify:card-validation ·
+verify:react-wrappers · verify:blocks · verify:generated 19 artifacts · verify:fresh · lint:gate-parity
+(66 gates) · lint:release-wiring · lint:cli-invocations · lint:cdn-pins · lint:layer-names ·
+lint:layer-direction · lint:catalog-drift · lint:silent-drops · lint:story-conventions · lint:llms-size ·
+verify:quarantine · lint:thresholds · kai's verify:bundle-shape.
+
+NOT run locally, so CI is the only check on them: the `storybook` browser project (documented flaky),
+`test:e2e`, the browser IVP suites (`test:geometry-token` and friends need a browser + fresh dist),
+`verify:starters`, create-kai's `verify:add` (network), and `verify:artifact-glob` (needs the CI snapshot).
+None of them is on a path this session touched, except the construct CLI, which `verify:construct` covers
+end to end.
+
+Merging does not publish. The publish happens only when the release PR release-please opens is merged, so
+the peel's remaining risk (publish order, kai's published range, kai's `prepublishOnly` building from ui's
+sources) is gated one step AFTER this merge and can be watched there.
+
