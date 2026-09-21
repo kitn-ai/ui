@@ -22,13 +22,22 @@
  *
  * THE DATED ARCHIVE IS EXEMPT, AND THE EXEMPTION IS EXPLAINED. `docs/handoff`,
  * `docs/superpowers`, `docs/research`, `docs/proposals`, `docs/decisions`,
- * `docs/provenance` and `packages/ui/CHANGELOG.md` are records of what the tree
- * looked like THEN (docs/superpowers alone names the subpath in 235 files).
- * Rewriting them would falsify them, the same precedent as `lint:cdn-pins`'
- * `historical` waiver. But an unexplained exemption is how a later reader
- * concludes the old name is current, so the exemption is CONDITIONAL: this guard
- * fails if `docs/README.md` stops carrying the note that says what happened and
- * where. Delete the note and the exemption dies with it.
+ * `docs/provenance` and every `CHANGELOG.md` are records of what the tree looked
+ * like THEN (docs/superpowers alone names the subpath in 235 files). Rewriting
+ * them would falsify them, the same precedent as `lint:cdn-pins`' `historical`
+ * waiver. But an unexplained exemption is how a later reader concludes the old
+ * name is current, so the exemption is CONDITIONAL: this guard fails if
+ * `docs/README.md` stops carrying the note that says what happened and where.
+ * Delete the note and the exemption dies with it.
+ *
+ * THE CHANGELOG HALF IS BY BASENAME, NOT BY PACKAGE, and that is the difference
+ * between a rule and a list. release-please quotes a commit SUBJECT verbatim, so
+ * any package's changelog renders the rename commit's breaking-change footer and
+ * carries the retired spellings BY CONSTRUCTION -- there is nothing at that site
+ * for an author to fix, and the renamed package is whichever one released.
+ * `packages/ui/CHANGELOG.md` was exempt while `packages/create-kai/CHANGELOG.md`
+ * was not, which is how a required check went red on the release commit for a
+ * line the tool wrote.
  *
  * WAIVERS. `lint-layer-names: file-waived -- <reason>` anywhere in a file waives
  * that file; `lint-layer-names: historical -- <reason>` on a line waives that
@@ -74,7 +83,8 @@ const ARCHIVE_PREFIXES = [
   'docs/handoff/', 'docs/superpowers/', 'docs/research/', 'docs/proposals/', 'docs/decisions/',
   'docs/provenance/',
 ];
-const ARCHIVE_FILES = new Set(['packages/ui/CHANGELOG.md']);
+/** Generated release notes: the ONE basename release-please writes, in any package. */
+const CHANGELOG_NAME = 'CHANGELOG.md';
 /** The note that makes the exemption legitimate. Both strings must survive. */
 const NOTE_FILE = 'docs/README.md';
 const NOTE_MARKERS = ['The kai-* layer is called web components', 'lint-layer-names: archive-note'];
@@ -156,7 +166,7 @@ function listFiles(root) {
 }
 
 const isArchive = (rel) =>
-  ARCHIVE_PREFIXES.some((p) => rel.startsWith(p)) || ARCHIVE_FILES.has(rel);
+  ARCHIVE_PREFIXES.some((p) => rel.startsWith(p)) || rel.split('/').pop() === CHANGELOG_NAME;
 
 /**
  * Every finding in one tree. Pure over the filesystem so `--self-test` can drive
@@ -265,6 +275,39 @@ const SELF_TEST_CASES = [
   },
   { name: 'the dated archive is exempt', files: { ...CLEAN, 'docs/superpowers/specs/x.md': `src/elements/ was the old path\n` }, expect: [] },
   { name: 'CHANGELOG is exempt', files: { ...CLEAN, 'packages/ui/CHANGELOG.md': `renamed src/elements\n` }, expect: [] },
+  {
+    // The live defect, verbatim: the 0.6.0 breaking-change bullet release-please
+    // rendered into create-kai's changelog, which took the required `test` check
+    // red on the release commit and refused the publish gate.
+    name: "a generated changelog is a record: create-kai's 0.6.0 breaking-change bullet",
+    files: {
+      ...CLEAN,
+      'packages/create-kai/CHANGELOG.md':
+        '* src/elements -> src/web-components, and `@kitn.ai/ui/elements` -> `@kitn.ai/ui/web-components`\n',
+    },
+    expect: [],
+  },
+  {
+    // The class's second instance, named so the rule cannot quietly become
+    // create-kai-specific. Clean in this tree today, which is the point.
+    name: "and a sibling package's changelog (clean today, and that is why it is here)",
+    files: { ...CLEAN, 'packages/kai/CHANGELOG.md': `renamed src/elements -> src/web-components\n` },
+    expect: [],
+  },
+  {
+    name: "only release-please's exact filename is exempt: a lowercase changelog.md still fires",
+    files: {
+      ...CLEAN,
+      'packages/create-kai/changelog.md': `import x from '@kitn.ai/ui/elements';\n`,
+    },
+    expect: ['subpath specifier', 'changelog.md:1'],
+  },
+  {
+    // Otherwise the rule reads as "markdown is exempt".
+    name: 'a package markdown file that is not a changelog still fires',
+    files: { ...CLEAN, 'packages/create-kai/notes.md': `import x from '@kitn.ai/ui/elements';\n` },
+    expect: ['subpath specifier', 'notes.md:1'],
+  },
   {
     name: 'a line waiver is honoured, its neighbours are not',
     files: {
