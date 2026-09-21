@@ -374,3 +374,52 @@ plus both new packages, `verify:construct` (113 cells) driving the NEW bin, `ver
 `verify:fresh`, `verify:generated`, `verify:solid-coverage`, the whole lint battery (73 gates), both
 new packages' `verify:bundle-shape` and `verify:pack` (each with its self-test), `kai add --list`
 and `kai create --help` forwarding for real, and `kai doctor` run against a real starter.
+
+---
+
+## 10. The 0.34.0 release, and the wall that has now cost two of them
+
+**Released over OIDC, all four, verified from the registry:** `@kitn.ai/ui@0.34.0` (which carries the
+two metadata fields from §9's follow-up and the CORRECTED migration stub), `create-kai@0.7.0`,
+`@kitn.ai/mcp@0.2.0` and `@kitn.ai/cli@0.2.0`. The two new names published over trusted publishing on
+their first attempt, so that configuration is settled: owner `kitn-ai`, repository **`ui`** (there is
+no `kitn-ai/mcp` repo; the packages are folders inside this one), workflow `release-please.yml`,
+environment empty, action `npm publish`, identical for every package.
+
+**THE WALL, and it is release plumbing rather than anything in the kit.** release-please's
+`node-workspace` plugin rewrites the internal dependency ranges in the release PR -- pre-1.0 a caret
+cannot cross a minor, so `@kitn.ai/mcp`'s kit range and `@kitn.ai/cli`'s create-kai range move on
+every minor release -- and it does NOT regenerate `pnpm-lock.yaml`. The release commit then dies in
+every leg at `pnpm install --frozen-lockfile`:
+
+    ERR_PNPM_OUTDATED_LOCKFILE ... - @kitn.ai/ui (lockfile: ^0.33.0, manifest: ^0.34.0)
+
+so the required checks are terminally red on the SHA being published and the publish gate (correctly)
+refuses. **0.33.0 and 0.34.0 both needed a lockfile-only commit plus a fresh dispatch to escape.**
+Two halves now close it:
+
+- `.github/workflows/sync-release-lockfile.yml` regenerates the lockfile ON the release branch (push
+  to it, plus `workflow_dispatch`), so the release PR arrives mergeable. It cannot loop: it commits
+  only when the file differs, and a `GITHUB_TOKEN` push triggers no workflows. Verified against the
+  real release branch -- a deliberately stale commit got the regeneration commit, a second push
+  reported "nothing to sync", and the branch was restored afterwards.
+- `scripts/lint-lockfile-specifiers.mjs` fails it in ONE line with the fix, and **runs before
+  `pnpm install`** -- the placement is the point, since every other lint runs after the install and
+  would therefore never execute on this failure. Measured corrections to its own first rule: a root
+  `pnpm.overrides` entry REPLACES the recorded specifier, and an auto-installed peer is recorded as
+  its RESOLVED range (`react: ">=18"` sits as `^19.2.7`).
+
+**RECOVERY, in order, for the next time a release is refused:**
+1. land the lockfile regeneration on main (or let the sync job add it to the release PR, which is
+   what makes this mostly historical);
+2. check for an IN-FLIGHT Release run before dispatching, because a plain push to main makes
+   release-please re-emit `releases_created` and publish on its own -- dispatching alongside it races
+   and the loser dies with `E409 Cannot publish over previously staged version`, which reads like a
+   failure and is not one;
+3. `gh workflow run release-please.yml --ref main` publishes the versions whose manifests are on
+   main, skipping anything already on the registry.
+
+**Housekeeping still open:** `@kitn.ai/cli@0.1.0`, `@kitn.ai/mcp@0.1.0` and `create-kai@0.6.0` are on
+npm with no git tag (the two 0.1.0s were the hand-run bootstrap, and 0.6.0's tag never got cut).
+0.2.0, 0.7.0 and 0.34.0 are tagged. Creating the three missing tags would align the record; leaving
+them means the repo's release history starts at 0.2.0 for the tooling.
