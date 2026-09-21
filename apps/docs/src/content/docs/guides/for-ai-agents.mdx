@@ -201,20 +201,41 @@ dsh takes MCP servers as a cordis plugin — `@deepseek-ai/dsh-mcp-client`, one 
 </TabItem>
 <TabItem label="Pi">
 
-Pi reads MCP servers from `~/.pi/agent/mcp.json`, using the same `mcpServers` shape as Claude Code:
+Pi's core has **no MCP support**, by design. Its own README puts it plainly: "**No MCP.** Build CLI
+tools with READMEs (see Skills), or build an extension that adds MCP support." So there is no config
+file to paste. Two routes do work:
 
-```json
-{
-  "mcpServers": {
-    "kai": {
-      "command": "npx",
-      "args": ["-y", "@kitn.ai/mcp"]
-    }
-  }
-}
+**Use the CLI as a tool.** That is the shape Pi recommends, and it needs no integration at all — Pi
+runs shell commands, so `npx -y @kitn.ai/cli add support-widget`, `npx -y @kitn.ai/cli doctor` and
+`npx -y @kitn.ai/cli validate widget.construct.json` work as they are. Paste
+[`llms.txt`](#machine-readable-files) into the session (or point at `llms-full.txt`) for the API
+reference.
+
+**Or add MCP yourself** through an [extension or a Pi package](https://github.com/earendil-works/pi)
+that speaks the protocol, and the server underneath is the same one: a stdio process launched as
+`npx -y @kitn.ai/mcp`.
+
+</TabItem>
+<TabItem label="Hermes">
+
+Hermes ships MCP support in the standard install. In its `config.yaml`:
+
+```yaml
+mcp_servers:
+  kai:
+    command: "npx"
+    args: ["-y", "@kitn.ai/mcp"]
 ```
 
-If Pi's config has moved, check [Pi's MCP documentation](https://github.com/earendil-works/pi) for the current path and keys.
+Or let its CLI write the same entry, and check it:
+
+```bash
+hermes mcp add kai --command npx --args -y @kitn.ai/mcp
+hermes mcp test kai        # exits 0 on a completed connect
+```
+
+`/reload-mcp` picks up a config change without restarting. Hermes names the tools
+`mcp__kai__<tool>`.
 
 </TabItem>
 </Tabs>

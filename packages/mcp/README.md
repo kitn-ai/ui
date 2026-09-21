@@ -10,27 +10,63 @@ once; you never start it by hand.
 
 ## Configure
 
-Claude Code:
+The server is one program, so every harness config is the same two facts: launch `npx -y
+@kitn.ai/mcp`, over stdio, with no arguments. These are the mainstream harnesses; the full list of
+thirteen we have tested, each with its own file and key name, is on
+[ui.kitn.ai/guides/for-ai-agents](https://ui.kitn.ai/guides/for-ai-agents/).
+
+**Claude Code** — the CLI writes the config, or put it in `.mcp.json`:
 
 ```bash
 claude mcp add kai -- npx -y @kitn.ai/mcp
 ```
 
-Any client that takes a JSON config (VS Code, Cursor, OpenCode, Windsurf, Codex, Copilot, …):
-
 ```json
-{
-  "mcpServers": {
-    "kai": {
-      "command": "npx",
-      "args": ["-y", "@kitn.ai/mcp"]
-    }
-  }
-}
+{ "mcpServers": { "kai": { "command": "npx", "args": ["-y", "@kitn.ai/mcp"] } } }
 ```
 
-Every harness we have tested, with its own config file and key name, is on
-[ui.kitn.ai/guides/for-ai-agents](https://ui.kitn.ai/guides/for-ai-agents/).
+**Codex** — `~/.codex/config.toml` (global) or `.codex/config.toml` (project):
+
+```toml
+[mcp_servers.kai]
+command = "npx"
+args = ["-y", "@kitn.ai/mcp"]
+```
+
+**VS Code** — `.vscode/mcp.json`, or **MCP: Open User Configuration** for the user-level file. The
+top-level key is `servers`, not `mcpServers`, which is the usual copy-paste mistake:
+
+```json
+{ "servers": { "kai": { "type": "stdio", "command": "npx", "args": ["-y", "@kitn.ai/mcp"] } } }
+```
+
+**GitHub Copilot CLI** — a different file from VS Code's Copilot Chat:
+
+```bash
+copilot mcp add kai -- npx -y @kitn.ai/mcp
+```
+
+**Cursor**, **Windsurf**, **Cline**, **Zed**, **Gemini CLI** — the same `mcpServers` shape Claude Code
+uses, in each tool's own config file.
+
+**Hermes** — in `config.yaml`, or through its CLI:
+
+```yaml
+mcp_servers:
+  kai:
+    command: "npx"
+    args: ["-y", "@kitn.ai/mcp"]
+```
+
+```bash
+hermes mcp add kai --command npx --args -y @kitn.ai/mcp
+hermes mcp test kai        # exits 0 on a completed connect
+```
+
+**Pi has no MCP in its core**, by design — its README says to build CLI tools with READMEs, or add
+MCP through an extension. So on Pi, use the command line as a tool (`npx -y @kitn.ai/cli doctor`)
+and paste `llms.txt` for the API, or add MCP with an extension and launch `npx -y @kitn.ai/mcp`
+through it.
 
 ## Tools
 

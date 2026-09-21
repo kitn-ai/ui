@@ -54,5 +54,5 @@ needs the MCP SDK, and installing this CLI should not download it.
 ## Docs
 
 - [Getting started](https://ui.kitn.ai/guides/getting-started/) — scaffold your first project
-- [For AI agents](https://ui.kitn.ai/guides/for-ai-agents/) — wiring the MCP into a harness
+- [For AI agents](https://ui.kitn.ai/guides/for-ai-agents/) — wiring the MCP into a harness (Claude Code, Codex, VS Code, Copilot, Cursor, Windsurf, Cline, Zed, Gemini CLI, OpenCode, dsh, Hermes; and what to do on Pi, which has no MCP in its core)
 - [Blocks](https://ui.kitn.ai/blocks/) — what `kai add` can write
