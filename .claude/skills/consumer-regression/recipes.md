@@ -64,7 +64,7 @@ const MAIN = dirname(execSync('git rev-parse --path-format=absolute --git-common
 const HARNESS = join(dirname(MAIN), 'consumer-harness');
 const PKG = join(REPO, 'packages/ui');
 mkdirSync(join(HARNESS, 'scaffolds'), { recursive: true });
-const p = spawn('node', [join(PKG, 'bin/mcp.js')], { cwd: PKG, stdio: ['pipe','pipe','pipe'] });
+const p = spawn('node', [join(PKG, 'bin/kai-mcp.js')], { cwd: PKG, stdio: ['pipe','pipe','pipe'] });
 let buf=''; const out=[];
 p.stdout.on('data',d=>{buf+=d;let i;while((i=buf.indexOf('\n'))>=0){const l=buf.slice(0,i);buf=buf.slice(i+1);if(l.trim()){try{out.push(JSON.parse(l))}catch{}}}});
 const s=o=>p.stdin.write(JSON.stringify(o)+'\n');
@@ -82,7 +82,7 @@ setTimeout(()=>{p.kill();cells.forEach(([n],i)=>{const t=out.find(m=>m.id===40+i
 
 The same client calls the other tools: `theme` (brand → token block), `component_reference` (the real API), `debug` (gotcha → fix).
 
-**Sanity:** the bin is `$PKG/bin/mcp.js` (built by `config/vite/node.ts` (`KAI_BUILD=mcp`) → `$PKG/dist/mcp.es.js`). If a generated `.md` comes out empty/tiny, the bin didn't run: `ls "$PKG/bin/mcp.js" "$PKG/dist/mcp.es.js"`, rebuild the bin, re-run. Always eyeball one generated scaffold (it should contain `kai-chat` / `<Chat`, the suggestions, and the backend block) before fanning out probes against it.
+**Sanity:** the bin is `$PKG/bin/kai-mcp.js` (built by `config/vite/node.ts` (`KAI_BUILD=mcp`) → `$PKG/dist/mcp.es.js`). If a generated `.md` comes out empty/tiny, the bin didn't run: `ls "$PKG/bin/kai-mcp.js" "$PKG/dist/mcp.es.js"`, rebuild the bin, re-run. Always eyeball one generated scaffold (it should contain `kai-chat` / `<Chat`, the suggestions, and the backend block) before fanning out probes against it.
 
 ## The test matrix
 

@@ -70,7 +70,7 @@ sees exactly what the mock route's console line reports.
 `vite-chat-api.ts` is a dev-only Vite plugin (like the support widget's):
 `vite build` produces a static site with no `/api/chat` at all. Shipping this
 means deploying `server/chat.ts`'s handler on your own host; the kit's `kai`
-MCP scaffolder emits one per framework (`npx @kitn.ai/kai mcp`).
+MCP scaffolder emits one per framework (`npx -y @kitn.ai/mcp`).
 
 ## How this app was built
 

@@ -219,7 +219,7 @@ Two sources of truth, neither of them copied:
   of those has a build failure as its failure mode.
 
 The CLI is bundled to one zero-dependency file so `npx` cold start is fast. It
-is **not** the `kai` MCP (`npx @kitn.ai/kai mcp`), and it is not a runtime
+is **not** the `kai` MCP (`npx -y @kitn.ai/mcp`), and it is not a runtime
 dependency of anything it scaffolds.
 
 ## Commands

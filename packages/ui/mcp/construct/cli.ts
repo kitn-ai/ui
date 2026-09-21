@@ -1,6 +1,6 @@
 /**
  * The kai construct CLI: validate | eject | dev | compile.
- * Launched by bin/mcp.js (the package's one bin) via dist/construct-cli.es.js.
+ * Launched by bin/kai.js (the package's one bin) via dist/construct-cli.es.js.
  * Every subcommand goes through validateConstruct first — a validation failure
  * never reaches codegen; the problems print with paths and the exit code says so.
  */
@@ -19,7 +19,7 @@ export interface CliIo {
 
 const defaultIo: CliIo = { log: (s) => console.log(s), error: (s) => console.error(s) };
 
-const USAGE = `usage: npx @kitn.ai/ui <command>   (or \`kai <command>\` once @kitn.ai/ui is installed)
+const USAGE = `usage: npx -y @kitn.ai/cli <command>   (or \`kai <command>\` once @kitn.ai/cli is installed)
 
   kai validate <construct.json>          check a construct, print problems with paths
   kai eject <construct.json> <outDir>    write the generated Solid project (it's yours)

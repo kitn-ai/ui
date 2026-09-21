@@ -136,7 +136,7 @@ async function main() {
     // directory name like this one does not have to. `create-kai
     // smokewidgetapp --shape widget --yes` used to write `"name":
     // "smokewidgetapp"` straight into the file, which the tool's OWN printed
-    // next step (`npx @kitn.ai/kai dev ...`) then rejected — see
+    // next step (`npx @kitn.ai/cli dev ...`) then rejected — see
     // `constructTagName` in `src/wizard.ts`. A hyphenated fixture name here
     // would never have exercised that path; the earlier version of this leg
     // used `smoke-widget-construct`, which is already a valid tag and let the

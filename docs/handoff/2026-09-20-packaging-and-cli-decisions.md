@@ -1,6 +1,8 @@
 # Handoff -- packaging, naming and CLI decisions, and what follows from them
 
-**Date:** 2026-09-20 · **Branch:** `update/primitives` · **Status:** decisions taken, work not started.
+**Date:** 2026-09-20 · **Branch:** `update/primitives` (MERGED as `743b6a0c`, PR #382) ·
+**Status:** §4.1, §4.2 and §4.3 all LANDED. The state AFTER the merge, the release watch and the next work:
+[`2026-09-21-after-382-and-next-work.md`](2026-09-21-after-382-and-next-work.md).
 **Companion:** [`2026-09-20-invariant-floor-imports.md`](2026-09-20-invariant-floor-imports.md) (the
 invariant floor, the F-5 coverage, the flake, the wording sweep). This file is the packaging thread,
 which that one does not cover.

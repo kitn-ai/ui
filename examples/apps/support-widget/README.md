@@ -85,7 +85,7 @@ facade's documented migration notes):
 `server/chat-api.ts` is a Vite plugin with `apply: 'serve'`. It does not exist in
 a production build: `npm run build` emits a static site whose `/api/chat` 404s.
 Shipping this means writing the same endpoint on your own host — the kit's `kai`
-MCP scaffolder emits one per framework (`npx @kitn.ai/kai mcp`).
+MCP scaffolder emits one per framework (`npx -y @kitn.ai/mcp`).
 
 ## How this app was built
 

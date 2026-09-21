@@ -235,6 +235,23 @@ jobs:
       - name: Layer-direction guard (no upward value import)
         run: pnpm --filter @kitn.ai/ui run lint:layer-direction
 
+      # Dangling-specifier guard: every STATEMENT-POSITION relative import in the tree
+      # must resolve to a real file. tsc does NOT report an unresolved SIDE-EFFECT
+      # import in this config, and the unit project excludes *.stories.*, so on
+      # 2026-09-20 a story shipped `import '../web-components/register'` (a path that
+      # lost a `..` in the family-folder reorg) and collected 0 tests where it should
+      # have collected 9. Only the storybook browser job could have seen it, and that
+      # job is documented flaky. The same class bit this branch twice.
+      #
+      # Strings, template literals and comments are masked first, because the tree is
+      # full of `import './x'` inside emitted-code snippets for generated projects:
+      # measured, 157 unresolved specifiers without masking and ONE with it.
+      #
+      # Reads tracked source only and no dist/, so it is a seam anyone can grab:
+      # `node packages/ui/scripts/lint-dangling-imports.mjs`.
+      - name: Dangling-import guard (relative specifiers resolve)
+        run: pnpm --filter @kitn.ai/ui run lint:dangling-imports
+
       - name: CDN version-pin staleness guard (docs, README, examples)
         run: pnpm --filter @kitn.ai/ui run lint:cdn-pins
 
@@ -247,20 +264,37 @@ jobs:
       - name: Release-wiring guard (published packages vs the three literals)
         run: pnpm --filter @kitn.ai/ui run lint:release-wiring
 
-      # @kitn.ai/kai depends on @kitn.ai/ui, and the MCP describes the kit it resolves
-      # at runtime -- so a stale range points every agent at an API the app may not
-      # have. The range cannot be a `workspace:` spec: npm has no such protocol and
-      # packs it verbatim (measured), which a consumer cannot install. So it is a
-      # literal, and this is what keeps it honest. No build, no network.
-      - name: Kit dependency-range guard (@kitn.ai/kai -> @kitn.ai/ui)
-        run: pnpm --filter @kitn.ai/kai run verify:versions
+      # The one shipped dependency range in this workspace that has been wrong before:
+      # @kitn.ai/mcp depends on @kitn.ai/ui because the MCP resolves the kit's manifest at
+      # runtime, so a stale bound points every agent at an API the app may not have. The
+      # range cannot be a `workspace:` spec -- npm has no such protocol and packs it
+      # verbatim (measured), which a consumer cannot install -- so it is a literal, and
+      # this keeps every such literal honest.
+      #
+      # IT IS DERIVED, NOT PER-PACKAGE: the old form was one guard inside one package,
+      # reading its own manifest by path, which could only ever see one edge. This walks
+      # pnpm-workspace.yaml, reads every member, and checks every shipped internal edge
+      # (@kitn.ai/mcp -> @kitn.ai/ui, @kitn.ai/cli -> create-kai, and whatever lands next).
+      # Private members are exempt: `workspace:` is CORRECT in the docs site and the
+      # examples, which never publish. No build, no network.
+      # A step NAME is a YAML plain scalar until it is quoted, and a `: ` inside one makes libyaml
+      # refuse the entire file: every event then fails at 0 s with "workflow file issue" while
+      # `gh pr checks` says "no checks reported", which reads like checks that have not started.
+      # That happened twice in one session (see the guard's header), and nothing else reads these
+      # files: lint:gate-parity parses them with a narrow line reader on purpose and accepted both.
+      # The rule is grammar-exact, not a heuristic: a plain scalar cannot contain `: `.
+      - name: Workflow-scalar guard (YAML plain scalars)
+        run: node scripts/lint-workflow-scalars.mjs --self-test && node scripts/lint-workflow-scalars.mjs
+
+      - name: Workspace-range guard (every shipped internal range tracks the workspace)
+        run: node scripts/verify-workspace-ranges.mjs --self-test && node scripts/verify-workspace-ranges.mjs
 
       # Nothing else reads a CLI INVOCATION in prose: the docs suite, verify:docs (it
       # resolves import specifiers), lint:cdn-pins (it reads `@kitn.ai/ui@<version>` pins)
       # and lint:gate-parity all stayed green when the old command was put back into a
       # docs page -- measured. No build, no network.
-      - name: Retired CLI-invocation guard (prose names @kitn.ai/kai)
-        run: pnpm --filter @kitn.ai/kai run lint:cli-invocations
+      - name: Retired CLI-invocation guard (prose names a retired package)
+        run: pnpm --filter @kitn.ai/cli run lint:cli-invocations
 
       # Size budget for the committed llms-full.txt. The file is generated, so
       # it grows as a SIDE EFFECT of unrelated work -- a new web component, a fatter
@@ -541,24 +575,46 @@ jobs:
           key: construct-npm-${{ hashFiles('packages/ui/mcp/construct/construct.v1.schema.json', 'packages/ui/mcp/construct/templates.ts', 'packages/ui/package.json') }}
           restore-keys: construct-npm-
 
-      # The construct engine's real emit chain: node packages/kai/bin/mcp.js eject
-      # (the CLI, not the library; it moved to @kitn.ai/kai) -> a real npm install -> tsc --noEmit under the cell's
+      # The construct engine's real emit chain: node packages/cli/bin/kai.js eject
+      # (the CLI, not the library; it lives in @kitn.ai/cli) -> a real npm install -> tsc --noEmit under the cell's
       # OWN emitted tsconfig -> npm run build -> for one cell per layout, a real
       # Vite 8 consumer bundle asserting the registration survives. Axes (layout,
       # capability) are derived from the drift-guarded construct.v1.schema.json
       # artifact, never typed here -- the script prints what it actually ran.
       # --self-test runs first and proves the harness detects a spliced type
       # error and a hand-stripped registration before the real cells are trusted.
-      # @kitn.ai/kai owns the CLI this leg drives (`node packages/kai/bin/mcp.js eject`),
+      # @kitn.ai/cli owns the CLI this leg drives (`node packages/cli/bin/kai.js eject`),
       # and the kit-dist artifact this leg downloads carries packages/ui only. kai's build
       # reads ui's SOURCES, not its dist, so it declares `dependsOn: []` and takes those
       # trees as inputs -- building ui first would be wasted work on top of the download.
       - name: Build the kai CLI (this leg runs its bin)
-        run: pnpm exec nx build kai
+        run: pnpm exec nx build cli
+
+      # The MCP package's own bundle, built here because this leg is the one that runs the
+      # pack guard over its tarball. It has no bearing on the construct chain itself.
+      - name: Build the MCP server (its tarball is graded below)
+        run: pnpm exec nx build mcp
 
       # Runs here because this is the one leg with the CLI's bundles on disk.
       - name: Bundle-shape guard (both CLI bundles present, not empty, SDK external)
-        run: pnpm --filter @kitn.ai/kai run verify:bundle-shape
+        run: pnpm --filter @kitn.ai/cli run verify:bundle-shape
+
+      # One step per package: they are separate tarballs with separate shapes, and a compound
+      # command reads as one gate in the workflow graph (lint:gate-parity refuses the shape).
+      - name: Bundle-shape guard (MCP bundle present, SDK external, define substituted)
+        run: pnpm --filter @kitn.ai/mcp run verify:bundle-shape
+
+      # The tarball's own shape, which the guard above does not look at: the four built outputs
+      # and both bins are IN it, nothing from node_modules is, and it has not changed size by a
+      # STEP. Until this existed, kai's 367,527 B pack had a ceiling only by inspection, and the
+      # failure it is aimed at (a dependency copied into dist/, or a dev page that started
+      # bundling the kit's dist) is invisible to a guard that reads the two Node bundles. Needs
+      # the build above, so it lives here rather than in the pre-build lint leg.
+      - name: Pack-weight guard (kai tarball, required outputs in, no node_modules, no step)
+        run: pnpm --filter @kitn.ai/cli run verify:pack
+
+      - name: Pack-weight guard (MCP tarball, bundle and bin in, no node_modules, no step)
+        run: pnpm --filter @kitn.ai/mcp run verify:pack
 
       - name: Construct engine emit chain (real eject + install + tsc + build + consumer bundle)
         run: pnpm --filter @kitn.ai/ui run verify:construct
@@ -599,12 +655,12 @@ jobs:
       - name: Unit tests (jsdom)
         run: pnpm --filter @kitn.ai/ui exec vitest run --project=unit
 
-      # @kitn.ai/kai's own suite: bin/route.test.js moved out of the ui project with
+      # @kitn.ai/cli's own suite: bin/route.test.js + the doctor tests moved out of the ui project with
       # the CLI, so without this step it would stop running entirely (it was picked up
       # by the ui project's default include, and this package has no project of its own).
       # No build needed: the unknown-command cases exit before any dist import.
-      - name: kai CLI tests (bin dispatch, no build)
-        run: pnpm --filter @kitn.ai/kai exec vitest run
+      - name: CLI tests (dispatch + doctor, no build)
+        run: pnpm --filter @kitn.ai/cli exec vitest run
 
       # The blocks package: pure functions over injected data plus the authored
       # block sources. Node-environment, no build input of any kind, so it sits
@@ -867,10 +923,13 @@ jobs:
       - name: Typecheck
         run: pnpm exec nx typecheck ui
 
-      # @kitn.ai/kai's own typecheck: its build configs are .ts, and they live in a
+      # @kitn.ai/cli's and @kitn.ai/mcp's own typecheck: their build configs are .ts and live in
       # package the ui project's tsc pass cannot see. No build needed.
-      - name: kai typecheck (its build configs)
-        run: pnpm --filter @kitn.ai/kai run typecheck
+      - name: CLI typecheck (its build configs and doctor source)
+        run: pnpm --filter @kitn.ai/cli run typecheck
+
+      - name: MCP typecheck (its build config)
+        run: pnpm --filter @kitn.ai/mcp run typecheck
 
       # Compiles the `kai` MCP scaffolder's EMITTED code with real `tsc --strict
       # --noUnusedLocals`, resolving @kitn.ai/ui through the shipped exports map

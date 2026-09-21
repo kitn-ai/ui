@@ -20,9 +20,13 @@
       "release-type": "node",
       "package-name": "create-kai"
     },
-    "packages/kai": {
+    "packages/cli": {
       "release-type": "node",
-      "package-name": "@kitn.ai/kai"
+      "package-name": "@kitn.ai/cli"
+    },
+    "packages/mcp": {
+      "release-type": "node",
+      "package-name": "@kitn.ai/mcp"
     }
   }
 }

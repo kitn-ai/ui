@@ -13,6 +13,24 @@ import {
 } from './emitted-code-tests';
 const dirname = typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath(import.meta.url));
 
+// `__MCP_VERSION__` for the unit suite: `mcp/mcp/server.ts` puts the MCP package's own version
+// into the MCP `instructions`, and the shipped bundle gets it from the `define` in
+// packages/mcp/config/vite/node.ts. Without this, importing server.ts throws
+// `ReferenceError: __MCP_VERSION__ is not defined` before a single assertion runs.
+//
+// READ FROM THE SAME PLACE THE BUILD READS IT, never typed: the sibling package's manifest.
+// `server.test.ts` opens that file again by path and compares, so a value typed in here fails
+// there. Read at config-load time only; nothing shipped loads this file.
+const MCP_MANIFEST = path.resolve(dirname, '../mcp/package.json');
+const mcpVersion = (JSON.parse(readFileSync(MCP_MANIFEST, 'utf-8')) as { version?: unknown }).version;
+if (typeof mcpVersion !== 'string') {
+  throw new Error(
+    `vitest.config.ts: ${MCP_MANIFEST} has no string "version". The __MCP_VERSION__ define and ` +
+      `every test over it read that field, so its absence has to be loud here rather than an ` +
+      `undefined the tests compare against themselves.`,
+  );
+}
+
 // Makes `*.css?raw` and `*.css?inline` imports return real file content in vitest.
 // Vitest has a built-in "vitest:css-empty-post" (enforce: post) that converts all
 // CSS imports to `export default ""` in non-browser environments.  We bypass it by:
@@ -54,6 +72,10 @@ function cssRawPlugin() {
 // More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
 export default defineConfig({
   plugins: [cssRawPlugin(), solidPlugin()],
+  // One source, the MCP package's own manifest (see MCP_MANIFEST above).
+  define: {
+    __MCP_VERSION__: JSON.stringify(mcpVersion),
+  },
   // `@kitn.ai/ui/schemas` -> src, for the test run ONLY.
   //
   // mcp/mcp/ imports the schemas barrel by its PUBLIC specifier
@@ -71,9 +93,9 @@ export default defineConfig({
   //
   // THIS DOES NOT WEAKEN THE EXPORTS MAP. It rewrites the specifier for vitest and
   // nothing else: every build emits its own bundle and none of them loads this
-  // file -- the library builds in this package, and the CLI bundles built from
-  // packages/kai/config/vite/node.ts since the dev tooling moved there. (That
-  // target used to be cited here as "bundles the MCP against the BUILT
+  // file -- the library builds in this package, and the MCP and CLI bundles build from
+  // packages/mcp/config/vite/node.ts and packages/cli/config/vite/node.ts since the dev
+  // tooling moved out. (That target used to be cited here as "bundles the MCP against the BUILT
   // dist/schemas.js": it does not, and never did -- every `@kitn.ai/ui/schemas`
   // in mcp/ is an EMITTED-CODE string, not an import.) Neither does any consumer
   // load this file.

@@ -220,6 +220,7 @@
     "verify:starters": "node scripts/verify-starters.mjs",
     "lint:attachment-object-urls": "node scripts/lint-attachment-object-urls.mjs --self-test && node scripts/lint-attachment-object-urls.mjs",
     "lint:layer-direction": "node scripts/lint-layer-direction.mjs --self-test && node scripts/lint-layer-direction.mjs",
+    "lint:dangling-imports": "node scripts/lint-dangling-imports.mjs --self-test && node scripts/lint-dangling-imports.mjs",
     "lint:release-wiring": "node scripts/lint-release-wiring.mjs --self-test && node scripts/lint-release-wiring.mjs",
     "lint:layer-names": "node scripts/lint-layer-names.mjs --self-test && node scripts/lint-layer-names.mjs",
     "lint:cdn-pins": "node scripts/lint-cdn-pins.mjs --self-test && node scripts/lint-cdn-pins.mjs --check-release-wiring && node scripts/lint-cdn-pins.mjs",

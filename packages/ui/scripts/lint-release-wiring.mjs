@@ -13,7 +13,7 @@
 // `docs/coupling-map.md` §1 files each of those under **NOTHING**: a package added to one
 // and forgotten in another is either never released or never published, silently, and the
 // only way it was found before was by remembering. It happened to be found that way when
-// `@kitn.ai/kai` was added: three literals, hand-edited, with a publish ORDER that had to
+// the dev-tooling package was added: three literals, hand-edited, with a publish ORDER that had to
 // put kai after the kit it depends on -- an invariant nothing expressed.
 //
 // So this derives the published set from `packages/*/package.json` (`private !== true`) and
@@ -194,25 +194,25 @@ if (process.argv.includes('--self-test')) {
     manifest: '/tmp/nonexistent-package.json',
     pkg: { name: '@kitn.ai/ui', version: '1.2.3', scripts: { prepublishOnly: 'npm run build' }, files: ['dist'], bin: {} },
   };
-  const kai = {
-    dir: 'packages/kai',
-    name: '@kitn.ai/kai',
+  const mcp = {
+    dir: 'packages/mcp',
+    name: '@kitn.ai/mcp',
     version: '0.1.0',
     manifest: '/tmp/nonexistent-package.json',
     pkg: {
-      name: '@kitn.ai/kai',
+      name: '@kitn.ai/mcp',
       version: '0.1.0',
       scripts: { prepublishOnly: 'npm run build' },
       files: ['dist', 'bin'],
-      bin: { kai: './bin/mcp.js' },
+      bin: { 'kai-mcp': './bin/kai-mcp.js' },
       dependencies: { '@kitn.ai/ui': '^1.2.3' },
     },
   };
   const good = {
-    packages: [ui, kai],
-    configPackages: { 'packages/ui': { 'release-type': 'node', 'package-name': '@kitn.ai/ui' }, 'packages/kai': { 'release-type': 'node', 'package-name': '@kitn.ai/kai' } },
-    manifest: { 'packages/ui': '1.2.3', 'packages/kai': '0.1.0' },
-    loop: ['packages/ui', 'packages/kai'],
+    packages: [ui, mcp],
+    configPackages: { 'packages/ui': { 'release-type': 'node', 'package-name': '@kitn.ai/ui' }, 'packages/mcp': { 'release-type': 'node', 'package-name': '@kitn.ai/mcp' } },
+    manifest: { 'packages/ui': '1.2.3', 'packages/mcp': '0.1.0' },
+    loop: ['packages/ui', 'packages/mcp'],
     // The bin check reads the real tree, so point it at a path that exists for the probe.
     repoRoot: REPO,
   };
@@ -225,9 +225,9 @@ if (process.argv.includes('--self-test')) {
     ['a correct wiring has no problems', releaseWiringProblems({ ...good, repoRoot: REPO }).length === 0],
     ['a package missing from release-please-config is reported', fires(() => ({ configPackages: { 'packages/ui': good.configPackages['packages/ui'] } }), 'never gets a release PR')],
     ['a package missing from the version manifest is reported', fires(() => ({ manifest: { 'packages/ui': '1.2.3' } }), 'bootstraps it')],
-    ['a version drift between manifest and package is reported', fires(() => ({ manifest: { 'packages/ui': '1.2.3', 'packages/kai': '0.9.9' } }), 'the manifest says 0.9.9')],
+    ['a version drift between manifest and package is reported', fires(() => ({ manifest: { 'packages/ui': '1.2.3', 'packages/mcp': '0.9.9' } }), 'the manifest says 0.9.9')],
     ['a package missing from the publish loop is reported', fires(() => ({ loop: ['packages/ui'] }), 'never published')],
-    ['a dependency published BEFORE its dependency is reported', fires(() => ({ loop: ['packages/kai', 'packages/ui'] }), 'before it at')],
+    ['a dependency published BEFORE its dependency is reported', fires(() => ({ loop: ['packages/mcp', 'packages/ui'] }), 'before it at')],
     ['a missing pre-publish hook is reported', () => releaseWiringProblems({ ...good, packages: [{ ...ui, pkg: { ...ui.pkg, scripts: {} } }], repoRoot: REPO }).some((p) => p.includes('no pre-publish build hook'))],
     ['a missing files array is reported', () => releaseWiringProblems({ ...good, packages: [{ ...ui, pkg: { ...ui.pkg, files: [] } }], repoRoot: REPO }).some((p) => p.includes('no `files` array'))],
     [
@@ -235,7 +235,7 @@ if (process.argv.includes('--self-test')) {
       () =>
         releaseWiringProblems({
           ...good,
-          packages: [{ ...kai, pkg: { ...kai.pkg, bin: { kai: './bin/not-there.js' } } }],
+          packages: [{ ...mcp, pkg: { ...mcp.pkg, bin: { 'kai-mcp': './bin/not-there.js' } } }],
           repoRoot: REPO,
         }).some((p) => p.includes('is not a build output and does not exist')),
     ],
@@ -244,7 +244,7 @@ if (process.argv.includes('--self-test')) {
       () =>
         releaseWiringProblems({
           ...good,
-          packages: [{ ...kai, pkg: { ...kai.pkg, bin: { kai: './dist/mcp.js' } } }],
+          packages: [{ ...mcp, pkg: { ...mcp.pkg, bin: { 'kai-mcp': './dist/mcp.js' } } }],
           repoRoot: REPO,
         }).length === 0,
     ],
@@ -253,14 +253,14 @@ if (process.argv.includes('--self-test')) {
       () =>
         releaseWiringProblems({
           ...good,
-          packages: [{ ...kai, pkg: { ...kai.pkg, files: ['dist'], bin: { kai: './bin/mcp.js' } } }],
+          packages: [{ ...mcp, pkg: { ...mcp.pkg, files: ['dist'], bin: { 'kai-mcp': './bin/kai-mcp.js' } } }],
           repoRoot: REPO,
         }).some((p) => p.includes('does not cover')),
     ],
     ['a config entry naming no package is reported', fires(() => ({ configPackages: { ...good.configPackages, 'packages/gone': { 'release-type': 'node', 'package-name': 'x' } } }), 'is not a published package')],
     ['a manifest entry naming no package is reported', fires(() => ({ manifest: { ...good.manifest, 'packages/gone': '1.0.0' } }), 'is not a published package')],
-    ['a publish loop naming no package is reported', fires(() => ({ loop: ['packages/ui', 'packages/kai', 'packages/gone'] }), 'a private package listed here would be published')],
-    ['a package-name mismatch is reported', fires(() => ({ configPackages: { ...good.configPackages, 'packages/kai': { 'release-type': 'node', 'package-name': '@kitn.ai/wrong' } } }), 'package-name')],
+    ['a publish loop naming no package is reported', fires(() => ({ loop: ['packages/ui', 'packages/mcp', 'packages/gone'] }), 'a private package listed here would be published')],
+    ['a package-name mismatch is reported', fires(() => ({ configPackages: { ...good.configPackages, 'packages/mcp': { 'release-type': 'node', 'package-name': '@kitn.ai/wrong' } } }), 'package-name')],
   ];
 
   let failed = 0;

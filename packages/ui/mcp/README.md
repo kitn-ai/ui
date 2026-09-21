@@ -37,8 +37,8 @@ anything in here.
                   standalone,
                   no MCP involved
                        │
-              ┌────────┴────────┐
-              │ bin/mcp.js CLI   │
+              ┌────────┴─────────┐
+              │ kai CLI          │
               │ validate/dev/    │
               │ compile/eject    │
               └──────────────────┘
@@ -95,20 +95,21 @@ anything in here.
 How they relate: the MCP's `construct` and `scaffold` tools **consume** the
 construct engine and the catalogs — they don't reimplement authoring logic,
 they call into `construct/schema.ts` / `construct/codegen.ts` and read the
-registry/catalog data. The construct CLI (`bin/mcp.js validate|dev|compile|eject`,
-built from `construct/cli-entry.ts` → `dist/construct-cli.es.js`) runs the
-engine standalone, with no MCP server involved at all.
+registry/catalog data. The construct CLI (`kai validate|dev|compile|eject`,
+the `@kitn.ai/cli` bin, built from `construct/cli-entry.ts` →
+`dist/construct-cli.es.js`) runs the engine standalone, with no MCP server
+involved at all.
 
 ## Usage
 
-- **`npx @kitn.ai/kai mcp`** starts the MCP server (the historical default
-  subcommand; it used to be the same command under the kit's own package, and the kit
-  still ships a stub that names the new one). For wiring it into a multi-harness setup, see the
+- **`npx -y @kitn.ai/mcp`** starts the MCP server (its own package, one bin, no
+  subcommands — `kai mcp` from `@kitn.ai/cli` forwards to it once both are
+  installed). For wiring it into a multi-harness setup, see the
   docs site's agents guide: `apps/docs/src/content/docs/guides/for-ai-agents.mdx`.
-- **CLI form**, no MCP: `npx @kitn.ai/kai validate|dev|compile|eject <construct.json>`
-  (`packages/kai/bin/mcp.js` dispatches `dev`/`compile`/`eject`/`validate` to the
-  construct CLI and anything else, including `mcp` or no argument, to the MCP
-  server; an unrecognized subcommand is a loud error, not a silent fallthrough).
+- **CLI form**, no MCP: `npx -y @kitn.ai/cli validate|dev|compile|eject <construct.json>`
+  (`@kitn.ai/cli`'s `kai` bin routes `dev`/`compile`/`eject`/`validate` to the
+  construct CLI and forwards `create`/`add` and `mcp` to `create-kai` and
+  `@kitn.ai/mcp`; an unrecognized subcommand is a loud error, not a silent fallthrough).
   `eject` writes a real Solid project you own; `dev` gives a live-reload
   preview; `compile` emits one self-registering `.js`.
 - **Acceptance harness** (`packages/ui/scripts/acceptance-*.mjs`:

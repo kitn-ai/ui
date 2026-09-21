@@ -173,7 +173,7 @@ export async function dev(
 // ── kai dev --builder (B-22/B-23) ───────────────────────────────────────────
 // A SECOND, thin server beside the loop above — dev() itself is untouched
 // (plain `kai dev` stays byte-identical). The builder page is PREBUILT into
-// dist/builder-page at kit build time (KAI_BUILD=builder, packages/kai/config/vite/page.ts),
+// dist/builder-page at kit build time (KAI_BUILD=builder, packages/cli/config/vite/page.ts),
 // so at consumer runtime this server compiles nothing: it serves static files,
 // exposes ONE validate-then-write endpoint (the construct FILE is the sole
 // state), and iframes the generated project's own Vite dev server. Deviation
@@ -582,12 +582,12 @@ export function builderPageDir(): string {
   throw new Error(
     `Missing build artifact: builder-page/index.html — the builder page ships prebuilt. ` +
       `Tried:\n${out.tried.map((p) => `  ${p}`).join('\n')}\n` +
-      `Run \`nx build kai\` (or npm run build in packages/kai) and try again.`,
+      `Run \`nx build cli\` (or npm run build in packages/cli) and try again.`,
   );
 }
 
 /** dist/theme-studio, resolved by the same walk as dist/builder-page (it is
- *  prebuilt right beside it — KAI_BUILD=theme-studio, packages/kai/config/vite/page.ts,
+ *  prebuilt right beside it — KAI_BUILD=theme-studio, packages/cli/config/vite/page.ts,
  *  so both live in the CLI package's dist, not the kit's).
  *  Nullable rather
  *  than throwing: the studio route is additive, and a build predating it must
@@ -1055,7 +1055,7 @@ export async function devBuilder(
         const studioDir = themeStudioDir();
         if (!studioDir) {
           return send(404, {
-            problems: [{ path: '', message: 'dist/theme-studio is missing — run `npm run build` in packages/kai (or nx build kai) and reload.' }],
+            problems: [{ path: '', message: 'dist/theme-studio is missing — run `npm run build` in packages/cli (or nx build cli) and reload.' }],
           });
         }
         const sub = url.slice('/theme-studio'.length);

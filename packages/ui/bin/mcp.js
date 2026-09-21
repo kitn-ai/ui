@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-// The kai MCP server and the construct CLI MOVED to @kitn.ai/kai.
+// The MCP server and the construct CLI MOVED OUT of @kitn.ai/ui, and then SPLIT in two:
+// the MCP server is @kitn.ai/mcp, and the rest of the command line is @kitn.ai/cli.
 //
 // This stub ships so that an existing MCP client config (or a script) that still says
 // `npx @kitn.ai/ui mcp` fails loudly and names the fix, instead of looking like a server
@@ -10,9 +11,10 @@
 // file (and the `bin` entry in package.json) when the migration window closes.
 console.error(
   [
-    '[kai] The kai MCP and the construct CLI moved to @kitn.ai/kai.',
-    '[kai]   npx @kitn.ai/ui mcp  ->  npx @kitn.ai/kai mcp',
-    '[kai]   npx @kitn.ai/ui dev  ->  npx @kitn.ai/kai dev',
+    '[kai] The MCP server and the construct CLI moved out of @kitn.ai/ui.',
+    '[kai]   npx @kitn.ai/ui mcp  ->  npx -y @kitn.ai/mcp',
+    '[kai]   npx @kitn.ai/ui dev  ->  npx -y @kitn.ai/cli dev',
+    '[kai] An MCP client config needs no verb: "args": ["-y", "@kitn.ai/mcp"].',
     '[kai] Update your MCP client config (or the script) and retry.',
   ].join('\n'),
 );

@@ -12,7 +12,7 @@ import type { Tool } from './types';
  *
  * That import is the whole fix and the reason it is an import rather than a
  * `readFile`. This module ships inside dist/mcp.es.js, an SSR bundle a consumer
- * runs from bin/mcp.js in their node_modules — a runtime read of a repo-root
+ * runs from bin/kai-mcp.js in their node_modules — a runtime read of a repo-root
  * path resolves to nothing there, and the src/ and dist/ depths differ anyway.
  * `?raw` bakes the bytes in at build time from the SAME theme.css that
  * package.json `files` ships (and `exports` publishes as "./theme.css"), so the
