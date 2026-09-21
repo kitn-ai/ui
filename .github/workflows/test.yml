@@ -235,6 +235,23 @@ jobs:
       - name: Layer-direction guard (no upward value import)
         run: pnpm --filter @kitn.ai/ui run lint:layer-direction
 
+      # Dangling-specifier guard: every STATEMENT-POSITION relative import in the tree
+      # must resolve to a real file. tsc does NOT report an unresolved SIDE-EFFECT
+      # import in this config, and the unit project excludes *.stories.*, so on
+      # 2026-09-20 a story shipped `import '../web-components/register'` (a path that
+      # lost a `..` in the family-folder reorg) and collected 0 tests where it should
+      # have collected 9. Only the storybook browser job could have seen it, and that
+      # job is documented flaky. The same class bit this branch twice.
+      #
+      # Strings, template literals and comments are masked first, because the tree is
+      # full of `import './x'` inside emitted-code snippets for generated projects:
+      # measured, 157 unresolved specifiers without masking and ONE with it.
+      #
+      # Reads tracked source only and no dist/, so it is a seam anyone can grab:
+      # `node packages/ui/scripts/lint-dangling-imports.mjs`.
+      - name: Dangling-import guard (relative specifiers resolve)
+        run: pnpm --filter @kitn.ai/ui run lint:dangling-imports
+
       - name: CDN version-pin staleness guard (docs, README, examples)
         run: pnpm --filter @kitn.ai/ui run lint:cdn-pins
 
