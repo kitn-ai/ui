@@ -205,7 +205,14 @@ const destination = mkdtempSync(join(tmpdir(), 'kai-pack-'));
 let entry;
 let writtenBytes;
 try {
-  const raw = execFileSync('npm', ['pack', '--json', '--pack-destination', destination], {
+  // `--no-dry-run` IS LOAD-BEARING, and it is what running this from prepublishOnly taught.
+  // A nested `npm pack` INHERITS npm_config_dry_run from the `npm publish --dry-run` that invoked
+  // this hook, and then writes NO tarball while still reporting `files`, `size` and `unpackedSize`:
+  // measured, `npm_config_dry_run=1 node scripts/verify-pack-weight.mjs` fails on the statSync
+  // below with ENOENT. DRY RUN IS A PROPERTY OF THE PUBLISH, not of this inspection, so the child
+  // is told explicitly to produce the tarball; the flag is a no-op outside a dry run, and the
+  // file lands in a temp directory that is deleted either way.
+  const raw = execFileSync('npm', ['pack', '--json', '--no-dry-run', '--pack-destination', destination], {
     cwd: PKG,
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', 'pipe'],
@@ -215,11 +222,7 @@ try {
   // The packer's own number against the file it wrote. Independent reads, so a `size` npm stopped
   // reporting (or reported for something else) fails here instead of silently skipping the
   // ceilings above.
-  if (typeof entry.size !== 'number') {
-    writtenBytes = -1;
-  } else {
-    writtenBytes = statSync(join(destination, entry.filename)).size;
-  }
+  writtenBytes = typeof entry.size === 'number' ? statSync(join(destination, entry.filename)).size : -1;
 } finally {
   rmSync(destination, { recursive: true, force: true });
 }
@@ -246,5 +249,5 @@ if (problems.length) {
 const largest = files.reduce((a, b) => (b.size > a.size ? b : a));
 console.log(
   `✓ verify-pack-weight: ${entry.size} B packed / ${files.reduce((s, f) => s + f.size, 0)} B unpacked, ` +
-    `${files.length} files, largest ${largest.path} ${largest.size} B (npm ${npmVersion}).`,
+    `${files.length} files, largest ${largest.path} ${largest.size} B (npm ${npmVersion}); the tarball on disk matches the report.`,
 );
