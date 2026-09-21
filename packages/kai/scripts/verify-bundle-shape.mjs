@@ -3,7 +3,8 @@
 //
 // WHY THIS EXISTS, NARROWLY. Two bundles ship from this package, and this pins the shape a
 // release expects: both present, neither empty, the MCP SDK still a SPECIFIER rather than
-// inlined code, and no dist/node_modules.
+// inlined code, no dist/node_modules, and the `__KAI_VERSION__` define SUBSTITUTED in the MCP
+// bundle.
 //
 // A CLAIM IN THIS FILE'S FIRST CUT WAS MEASURED AND IS WRONG, kept here because the correction
 // is the useful part. It said the regression to fear was dropping the SDK from the `mcp`
@@ -48,6 +49,38 @@ export const BANDS = {
 /** The external dependency whose inlining this exists to catch. */
 const EXTERNAL_SPECIFIER = '@modelcontextprotocol/sdk';
 
+/** The build-time define the MCP bundle must have substituted, and what is left if it is not. */
+const DEFINE_IDENTIFIER = '__KAI_VERSION__';
+
+/**
+ * `__KAI_VERSION__`, the CLI's own version, which the MCP reports in its `instructions`
+ * (packages/ui/mcp/mcp/kai-version.d.ts explains why it is a define rather than a runtime read).
+ * A build that did not substitute it leaves the bare identifier in the bundle while both sizes
+ * stay put, the SDK stays external and both files are present, so the BUILD is the quiet half.
+ * The runtime half is not quiet: measured on a bundle built with the define key renamed,
+ * `node bin/mcp.js` exits 1 with `[kitn-ui-mcp] fatal: ReferenceError: __KAI_VERSION__ is not
+ * defined`. This check exists to move that failure from the first `initialize` in a user's
+ * harness to the release's own build leg. Pure, so `--self-test` can plant each shape.
+ */
+export function defineProblems(name, text, version) {
+  if (name !== 'mcp.es.js') return [];
+  const problems = [];
+  if (text.includes(DEFINE_IDENTIFIER)) {
+    problems.push(
+      `${name} still contains the bare ${DEFINE_IDENTIFIER} identifier: the \`define\` in config/vite/node.ts and ` +
+        `the declaration in packages/ui/mcp/mcp/kai-version.d.ts have drifted apart, and the MCP will throw ` +
+        `ReferenceError on its first initialize.`,
+    );
+  }
+  if (!text.includes(version)) {
+    problems.push(
+      `${name} does not carry this package's version (${version}), so the MCP's instructions cannot be naming it. ` +
+        `The define reads it out of packages/kai/package.json; check that it still does.`,
+    );
+  }
+  return problems;
+}
+
 /** Problems with one bundle, given its bytes and text. Pure, for the self-test. */
 export function bundleProblems(name, bytes, text, bands = BANDS) {
   const band = bands[name];
@@ -84,6 +117,20 @@ if (process.argv.includes('--self-test')) {
     ['an unknown bundle name is ignored, not guessed at', bundleProblems('nope.js', 1, '').length === 0],
     ['a bundle that does NOT import the SDK is not asked to', bundleProblems('construct-cli.es.js', 140_294, 'no sdk here').length === 0],
     ['the tiny fixture fails the floor AND the specifier, so the probes are not interchangeable', bundleProblems(name, 10, '').length === 2],
+    ['a substituted bundle with the version literal passes', defineProblems(name, 'kai 0.1.0', '0.1.0').length === 0],
+    [
+      'an unsubstituted identifier is reported',
+      defineProblems(name, `kai ${DEFINE_IDENTIFIER}`, '0.1.0').some((p) => p.includes('bare')),
+    ],
+    [
+      'a bundle that lost the version literal is reported',
+      defineProblems(name, 'kai 9.9.9', '0.1.0').some((p) => p.includes('does not carry')),
+    ],
+    ['both faults at once are both reported', defineProblems(name, DEFINE_IDENTIFIER, '0.1.0').length === 2],
+    [
+      'a bundle that carries no instructions is not asked for a define',
+      defineProblems('construct-cli.es.js', `kai ${DEFINE_IDENTIFIER}`, '0.1.0').length === 0,
+    ],
   ];
   let failed = 0;
   for (const [what, ok] of probes) {
@@ -99,13 +146,17 @@ if (process.argv.includes('--self-test')) {
 }
 
 const problems = [];
+// READ, NOT TYPED: the same manifest config/vite/node.ts substitutes from.
+const KAI_VERSION = JSON.parse(readFileSync(join(PKG, 'package.json'), 'utf8')).version;
 for (const name of Object.keys(BANDS)) {
   const file = join(DIST, name);
   if (!existsSync(file)) {
     problems.push(`${name} is missing from ${DIST}. Run \`npm run build\` in packages/kai first.`);
     continue;
   }
-  problems.push(...bundleProblems(name, statSync(file).size, readFileSync(file, 'utf8')));
+  const text = readFileSync(file, 'utf8');
+  problems.push(...bundleProblems(name, statSync(file).size, text));
+  problems.push(...defineProblems(name, text, KAI_VERSION));
 }
 
 // No `dist/node_modules`: the bundles externalise their deps rather than copying them, and a
@@ -120,4 +171,6 @@ if (problems.length) {
   process.exit(1);
 }
 const sizes = Object.keys(BANDS).map((n) => `${n} ${statSync(join(DIST, n)).size} B`);
-console.log(`✓ verify-bundle-shape: ${sizes.join(', ')}; ${EXTERNAL_SPECIFIER} stays external.`);
+console.log(
+  `✓ verify-bundle-shape: ${sizes.join(', ')}; ${EXTERNAL_SPECIFIER} stays external; ${DEFINE_IDENTIFIER} substituted (${KAI_VERSION}).`,
+);
