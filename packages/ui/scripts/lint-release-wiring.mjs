@@ -45,6 +45,14 @@ const REPO = resolve(HERE, '../../..');
 /** npm's pre-pack hooks, in npm's own vocabulary. Anything else builds nothing. */
 export const PREPACK_HOOKS = ['prepublishOnly', 'prepack', 'prepare'];
 
+/**
+ * Where a package's BUILD OUTPUT lives. A `bin` under one of these is expected to be absent
+ * before a build -- this lint runs in the pre-build leg, and create-kai's `dist/index.js`
+ * failing that check is exactly how this constant came to exist. The pre-pack hook is what
+ * has to produce it, and that is checked separately.
+ */
+export const BUILD_OUTPUT_PREFIXES = ['dist/'];
+
 /** The published subset of packages/*, derived from the tree. */
 export function publishedPackages(repoRoot = REPO) {
   const dir = join(repoRoot, 'packages');
@@ -121,8 +129,23 @@ export function releaseWiringProblems({ packages, configPackages, manifest, loop
       problems.push(`${p.dir} has no \`files\` array, so npm packs the whole package directory.`);
     }
     for (const [bin, target] of Object.entries(p.pkg.bin ?? {})) {
-      const abs = join(repoRoot, p.dir, target);
-      if (!existsSync(abs)) problems.push(`${p.dir}: bin ${bin} -> ${target}, which does not exist (a broken command on install).`);
+      const rel = target.replace(/^\.\//, '');
+      // `files` must cover the bin, or npm ships a command with no file behind it.
+      const covered = (p.pkg.files ?? []).some((f) => {
+        const entry = String(f).replace(/^!/, '').replace(/\/$/, '');
+        return rel === entry || rel.startsWith(`${entry}/`);
+      });
+      if (!covered) {
+        problems.push(`${p.dir}: bin ${bin} -> ${target}, which its \`files\` array does not cover, so npm ships a command with no file behind it.`);
+      }
+      // A bin under a build-output directory is EXPECTED to be missing before a build --
+      // this lint runs in the pre-build leg, where create-kai's dist/ does not exist yet.
+      // That case is covered by the pre-pack-hook check above instead: something has to
+      // produce it. A bin anywhere else is a committed file, and must be there.
+      const isBuildOutput = BUILD_OUTPUT_PREFIXES.some((prefix) => rel.startsWith(prefix));
+      if (!isBuildOutput && !existsSync(join(repoRoot, p.dir, target))) {
+        problems.push(`${p.dir}: bin ${bin} -> ${target}, which is not a build output and does not exist (a broken command on install).`);
+      }
     }
   }
 
@@ -207,7 +230,33 @@ if (process.argv.includes('--self-test')) {
     ['a dependency published BEFORE its dependency is reported', fires(() => ({ loop: ['packages/kai', 'packages/ui'] }), 'before it at')],
     ['a missing pre-publish hook is reported', () => releaseWiringProblems({ ...good, packages: [{ ...ui, pkg: { ...ui.pkg, scripts: {} } }], repoRoot: REPO }).some((p) => p.includes('no pre-publish build hook'))],
     ['a missing files array is reported', () => releaseWiringProblems({ ...good, packages: [{ ...ui, pkg: { ...ui.pkg, files: [] } }], repoRoot: REPO }).some((p) => p.includes('no `files` array'))],
-    ['a bin pointing at a missing file is reported', () => releaseWiringProblems({ ...good, packages: [kai], repoRoot: REPO }).some((p) => p.includes('which does not exist'))],
+    [
+      'a bin that is NOT a build output and is missing is reported',
+      () =>
+        releaseWiringProblems({
+          ...good,
+          packages: [{ ...kai, pkg: { ...kai.pkg, bin: { kai: './bin/not-there.js' } } }],
+          repoRoot: REPO,
+        }).some((p) => p.includes('is not a build output and does not exist')),
+    ],
+    [
+      'a bin under dist/ that does not exist yet is NOT reported (the pre-build leg has no dist)',
+      () =>
+        releaseWiringProblems({
+          ...good,
+          packages: [{ ...kai, pkg: { ...kai.pkg, bin: { kai: './dist/mcp.js' } } }],
+          repoRoot: REPO,
+        }).length === 0,
+    ],
+    [
+      'a bin its files array does not cover is reported',
+      () =>
+        releaseWiringProblems({
+          ...good,
+          packages: [{ ...kai, pkg: { ...kai.pkg, files: ['dist'], bin: { kai: './bin/mcp.js' } } }],
+          repoRoot: REPO,
+        }).some((p) => p.includes('does not cover')),
+    ],
     ['a config entry naming no package is reported', fires(() => ({ configPackages: { ...good.configPackages, 'packages/gone': { 'release-type': 'node', 'package-name': 'x' } } }), 'is not a published package')],
     ['a manifest entry naming no package is reported', fires(() => ({ manifest: { ...good.manifest, 'packages/gone': '1.0.0' } }), 'is not a published package')],
     ['a publish loop naming no package is reported', fires(() => ({ loop: ['packages/ui', 'packages/kai', 'packages/gone'] }), 'a private package listed here would be published')],
@@ -228,6 +277,12 @@ if (process.argv.includes('--self-test')) {
 }
 
 // ── the real run ─────────────────────────────────────────────────────────────
+// Only when this file IS the entry point. Importing it (a probe, a test) must not run the
+// check and exit the process out from under the caller.
+if (process.argv[1] !== fileURLToPath(import.meta.url)) {
+  // no-op: imported for its pure helpers
+} else {
+
 const packages = publishedPackages();
 const config = JSON.parse(readFileSync(join(REPO, 'release-please-config.json'), 'utf8'));
 const manifest = JSON.parse(readFileSync(join(REPO, '.release-please-manifest.json'), 'utf8'));
@@ -258,3 +313,4 @@ console.log(
   `✓ lint-release-wiring: ${packages.length} published package(s) (${packages.map((p) => p.name).join(', ')}) agree with ` +
     `release-please-config.json, .release-please-manifest.json and the publish loop (${(loop ?? []).join(' -> ')}).`,
 );
+}
