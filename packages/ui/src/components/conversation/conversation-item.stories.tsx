@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { expect, fn, userEvent, waitFor } from 'storybook/test';
 import { createSignal, For } from 'solid-js';
-import '../web-components/register'; // side effect: registers kai-menu for the slotted rows' kebab
+import '../../web-components/register/register'; // side effect: registers kai-menu for the slotted rows' kebab
 import type { KaiMenuItem } from '../../web-components/menu/menu';
 import { ConversationItem, SlottedConversationItem } from './conversation-item';
 import { componentDescription } from '../../stories/docs/web-component-controls';

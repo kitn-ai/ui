@@ -35,7 +35,7 @@
 //   node scripts/lint-release-wiring.mjs --self-test   # prove every check still fires
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 // This file is packages/ui/scripts/<name>, so the repo root is THREE levels up. (Getting
@@ -277,11 +277,12 @@ if (process.argv.includes('--self-test')) {
 }
 
 // ── the real run ─────────────────────────────────────────────────────────────
-// Only when this file IS the entry point. Importing it (a probe, a test) must not run the
-// check and exit the process out from under the caller.
-if (process.argv[1] !== fileURLToPath(import.meta.url)) {
-  // no-op: imported for its pure helpers
-} else {
+// Only when this file IS the entry point, in the repo's required form: importing it (a probe,
+// a test) must not run the check and exit the process out from under the caller, and the
+// NEGATED spelling of this test (`argv[1] !== fileURLToPath(import.meta.url)`) is FALSE on a
+// path containing a space -- `tests/scripts/main-module-guards.test.ts` catches exactly that,
+// and caught this.
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
 
 const packages = publishedPackages();
 const config = JSON.parse(readFileSync(join(REPO, 'release-please-config.json'), 'utf8'));
