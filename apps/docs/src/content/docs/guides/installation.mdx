@@ -152,6 +152,32 @@ import '@kitn.ai/ui/theme.css';
 | `@kitn.ai/ui/web-component-meta.json` | Generated API metadata, one record per web component. Read by tooling, not by an app |
 | `@kitn.ai/ui/icon-names.json` | The curated icon-name roster `kai-icon` resolves against |
 
+## The command line
+
+The kit needs no CLI — `npm install @kitn.ai/ui` and importing is the whole requirement. The `kai`
+command line is the convenience layer: a scaffolder, the block registry, a wiring diagnosis, and the
+construct tooling.
+
+```bash
+npm i -g @kitn.ai/cli                      # kai ... anywhere
+npm i -D @kitn.ai/cli                      # pinned per project: npx kai ...
+npx -y @kitn.ai/cli add support-widget     # no install at all
+```
+
+| Command | What it does |
+|---|---|
+| `kai create [dir]` | The scaffolder wizard — the same one `npm create kai` runs |
+| `kai add <block>` | Writes a block from the registry into an existing project. `kai add --list` prints the blocks this release ships |
+| `kai doctor` | Diagnoses this project's kit wiring: the declared range against the installed version, `kai.json`, whether anything under `src/` references the kit, whether a stylesheet is referenced, and whether the MCP server is installed. `--json` for a CI job or an agent |
+| `kai mcp` | Runs the MCP server for an AI coding harness, if `@kitn.ai/mcp` is installed |
+| `kai dev` · `kai compile` · `kai eject` · `kai validate` | The construct tooling: live preview, a self-registering `.js`, a generated Solid project you own, and validation. See [Drop-in widget](/guides/drop-in-widget/) |
+
+`kai create` and `kai add` are implemented by [`create-kai`](https://www.npmjs.com/package/create-kai),
+the package `npm create kai` resolves, so both spellings run the same code. `kai mcp` forwards to
+[`@kitn.ai/mcp`](https://www.npmjs.com/package/@kitn.ai/mcp), which is a separate install on
+purpose: it is the only piece carrying the MCP SDK, and `kai add` should not download it. To wire a
+harness up, see [For AI agents](/guides/for-ai-agents/).
+
 ## Next steps
 
 With the web components registered, head to the [framework guide](/guides/frameworks/overview/) for your stack, or render your first chat in [Getting started](/guides/getting-started/). Want a different way to load — per-web-component or a CDN autoloader? See [Loading](/guides/loading/).
