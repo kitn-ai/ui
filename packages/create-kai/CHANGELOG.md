@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.6.0](https://github.com/kitn-ai/ui/compare/create-kai-v0.5.0...create-kai-v0.6.0) (2026-09-21)
+
+
+### ⚠ BREAKING CHANGES
+
+* finish the rename — symbols, data keys, event types, generated names
+* src/elements -> src/web-components, and `@kitn.ai/ui/elements` -> `@kitn.ai/ui/web-components`
+* **create-kai:** `create-kai add <block>` writes the react form to `src/components/<id>/` instead of `src/blocks/<id>/`.
+
+### Features
+
+* **create-kai:** add writes at the blocks targets table, and detects the host framework ([1528bb7](https://github.com/kitn-ai/ui/commit/1528bb71684948547a2e8490c81c750e1a807b22))
+* **kai:** peel the dev tooling into [@kitn](https://github.com/kitn).ai/kai, so a browser consumer stops installing the MCP server ([0406f6c](https://github.com/kitn-ai/ui/commit/0406f6cd588e9ba5e9734f64c1a740f489faffed))
+
+
+### Code Refactoring
+
+* finish the rename — symbols, data keys, event types, generated names ([777c4dc](https://github.com/kitn-ai/ui/commit/777c4dcc4e5e6889b24189f9b243264b8d19a2b3))
+* src/elements -&gt; src/web-components, and `[@kitn](https://github.com/kitn).ai/ui/elements` -&gt; `[@kitn](https://github.com/kitn).ai/ui/web-components` ([9629f92](https://github.com/kitn-ai/ui/commit/9629f92463690166028b50eb7dd6f0828d9154c0))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @kitn.ai/ui bumped to 0.33.0
+
 ## [0.5.0](https://github.com/kitn-ai/ui/compare/create-kai-v0.4.0...create-kai-v0.5.0) (2026-09-03)
 
 
