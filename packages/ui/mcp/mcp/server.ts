@@ -64,6 +64,26 @@ function packageIdentity(): { name: string; version: string } {
 }
 
 /**
+ * The MCP `instructions`, and the only place the CLI's OWN version is reported (see
+ * packageIdentity for why `serverInfo` names the kit instead). Both versions are named because
+ * the CLI and the kit release independently, so an agent seeing one cannot tell which is stale.
+ *
+ * `__KAI_VERSION__` is a build-time define (./kai-version.d.ts). The tool names are derived from
+ * `tools`, so a sixth tool is described the day it is registered.
+ *
+ * THE STRING MUST STAY NON-EMPTY: the SDK spreads `instructions` onto the initialize result only
+ * when it is truthy, so an empty one is absent from the result rather than an error.
+ */
+function serverInstructions(kitVersion: string): string {
+  const names = tools.map((t) => t.name).join(', ');
+  return (
+    `The @kitn.ai/ui MCP server, running from kai ${__KAI_VERSION__} and describing ` +
+    `@kitn.ai/ui ${kitVersion}. The CLI and the kit release separately, so report both when a ` +
+    `version question comes up. Tools: ${names}.`
+  );
+}
+
+/**
  * The AI/UI MCP server. A stdio server (see ./stdio.ts) exposing the AI/UI tools
  * to any MCP harness. Registers four tools; Tasks 2–5 fill in each handler.
  *
@@ -75,7 +95,11 @@ export interface AiUiServer extends Server {
 }
 
 export function createServer(): AiUiServer {
-  const server = new Server(packageIdentity(), { capabilities: { tools: {} } }) as AiUiServer;
+  const identity = packageIdentity();
+  const server = new Server(identity, {
+    capabilities: { tools: {} },
+    instructions: serverInstructions(identity.version),
+  }) as AiUiServer;
 
   const byName = new Map(tools.map((t) => [t.name, t]));
 

@@ -17,6 +17,17 @@ const pkg = JSON.parse(readFileSync(join(packageRoot, 'package.json'), 'utf-8'))
   version?: string;
 };
 
+/**
+ * The kai CLI's manifest, two directories over. Read by path for the same reason as `pkg`, and
+ * because the MCP's OWN version now travels the other way: `__KAI_VERSION__` is a build-time
+ * define (mcp/mcp/kai-version.d.ts), so the only way to say the substituted value is kai's is
+ * to open kai's manifest here and compare.
+ */
+const kaiPkg = JSON.parse(readFileSync(join(packageRoot, '..', 'kai', 'package.json'), 'utf-8')) as {
+  name?: string;
+  version?: string;
+};
+
 describe('createServer', () => {
   it('registers exactly the five tools (helper)', () => {
     const tools = createServer().__listToolsForTest();
@@ -64,6 +75,62 @@ describe('createServer', () => {
       `server.ts must not carry a version literal — read it from package.json instead. ` +
         `Found: ${literals.join(', ')}`,
     ).toEqual([]);
+  });
+
+  // ── instructions ────────────────────────────────────────────────────────────
+  //
+  // The other half of the identity question. `serverInfo` names the KIT on purpose (that is the
+  // API the tool answers describe), so the CLI's own version is reported here or nowhere, and an
+  // agent that can see only one of the two cannot tell which is stale. It is a build-time define
+  // because kai has no `exports` map to self-resolve through (mcp/mcp/kai-version.d.ts), which
+  // makes this a coupling with three sides: the value, the substitution, and the prose that has
+  // to carry it.
+
+  it("reports the kai CLI version it was built from, alongside the kit's", async () => {
+    // Anchors first, so the comparison below cannot be undefined === undefined: kai's manifest
+    // is the real one and carries a real version.
+    expect(kaiPkg.name).toBe('@kitn.ai/kai');
+    expect(kaiPkg.version).toMatch(/^\d+\.\d+\.\d+/);
+    // The substituted global, against kai's manifest read independently. Two substitutions
+    // feed this global (packages/kai/config/vite/node.ts for the bundle, this package's
+    // vitest.config.ts for this run) and both read that one field; a value typed into either
+    // place, or a read that stopped pointing at kai, fails here rather than passing a
+    // comparison between a literal and itself.
+    expect(__KAI_VERSION__).toBe(kaiPkg.version);
+
+    const server = createServer();
+    const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+    const client = new Client({ name: 'test-client', version: '0.0.0' });
+    await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
+
+    const instructions = client.getInstructions();
+    // What a harness reads back on initialize. The SDK spreads `instructions` onto the result
+    // ONLY when it is truthy, so this assertion is also what makes an EMPTY string loud: empty,
+    // the field is absent and every assertion below would read `undefined` as "no instructions"
+    // rather than "instructions that say nothing".
+    expect(instructions, 'the SDK omits an empty instructions string entirely').toBeTruthy();
+    expect(instructions).toContain(kaiPkg.version);
+    expect(instructions).toContain(pkg.version);
+
+    await client.close();
+    await server.close();
+  });
+
+  it('names every tool it registers, in instructions', async () => {
+    const server = createServer();
+    const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+    const client = new Client({ name: 'test-client', version: '0.0.0' });
+    await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
+
+    // Derived from the registry, not from a list typed into the prose: a sixth tool is named
+    // the day it is registered, and a hand-written list that fell behind fails here.
+    const instructions = client.getInstructions() ?? '';
+    for (const name of server.__listToolsForTest()) {
+      expect(instructions, `instructions must name the ${name} tool`).toContain(name);
+    }
+
+    await client.close();
+    await server.close();
   });
 
   it('lists the five tools end-to-end over an in-memory transport', async () => {

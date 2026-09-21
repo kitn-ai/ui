@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import { builtinModules } from 'node:module';
-import { resolve } from 'node:path';
+import { readFileSync } from 'node:fs';
+import { join, resolve } from 'node:path';
 
 // The `kai` CLI's two Node bundles: dist/mcp.es.js (the MCP stdio server, launched
 // by bin/mcp.js) and dist/construct-cli.es.js (dev/compile/eject/validate). Both are
@@ -21,6 +22,28 @@ import { resolve } from 'node:path';
 // mcp/mcp/manifest.ts), which is why `@kitn.ai/ui` is a real dependency here.
 const UI_PKG = resolve(__dirname, '../../../ui');
 const KAI_PKG = resolve(__dirname, '../..');
+
+// `__KAI_VERSION__`: the MCP `instructions` name the CLI's OWN version, and `mcp/mcp/server.ts`
+// cannot read it at runtime (no `exports` map here to self-resolve through, and that module runs
+// at two depths). Substituted here and in packages/ui/vitest.config.ts, both from this package's
+// manifest; declared in packages/ui/mcp/mcp/kai-version.d.ts.
+//
+// Rename the key in server.ts and not here and tsc still passes, while the bundle keeps a bare
+// identifier: measured on a bundle built with the key renamed, the CLI exits 1 with
+// `[kitn-ui-mcp] fatal: ReferenceError: __KAI_VERSION__ is not defined`. verify:bundle-shape
+// reads the substitution back out of the artifact so the build leg catches it instead.
+//
+// Both targets, not just `mcp`: this is a fact about the package, like its name.
+function packageVersion(dir: string): string {
+  const manifest = join(dir, 'package.json');
+  const { version } = JSON.parse(readFileSync(manifest, 'utf-8')) as { version?: unknown };
+  if (typeof version !== 'string' || version.length === 0) {
+    throw new Error(`config/vite/node.ts: ${manifest} has no string "version" to substitute.`);
+  }
+  return version;
+}
+
+const KAI_VERSION = packageVersion(KAI_PKG);
 
 const NODE_BUILTINS = [...builtinModules, ...builtinModules.map((m) => `node:${m}`)];
 
@@ -67,6 +90,9 @@ const target = TARGETS[requested];
 
 export default defineConfig({
   root: KAI_PKG,
+  define: {
+    __KAI_VERSION__: JSON.stringify(KAI_VERSION),
+  },
   build: {
     // The `mcp` build runs first in `npm run build` and owns the clean, so the three
     // later targets (which write into the same dist/) cannot wipe its output. The

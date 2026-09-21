@@ -13,6 +13,24 @@ import {
 } from './emitted-code-tests';
 const dirname = typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath(import.meta.url));
 
+// `__KAI_VERSION__` for the unit suite: `mcp/mcp/server.ts` puts the CLI's own version into the
+// MCP `instructions`, and the shipped bundle gets it from the `define` in
+// packages/kai/config/vite/node.ts. Without this, importing server.ts throws
+// `ReferenceError: __KAI_VERSION__ is not defined` before a single assertion runs.
+//
+// READ FROM THE SAME PLACE THE BUILD READS IT, never typed: the sibling package's manifest.
+// `server.test.ts` opens that file again by path and compares, so a value typed in here fails
+// there. Read at config-load time only; nothing shipped loads this file.
+const KAI_MANIFEST = path.resolve(dirname, '../kai/package.json');
+const kaiVersion = (JSON.parse(readFileSync(KAI_MANIFEST, 'utf-8')) as { version?: unknown }).version;
+if (typeof kaiVersion !== 'string') {
+  throw new Error(
+    `vitest.config.ts: ${KAI_MANIFEST} has no string "version". The __KAI_VERSION__ define and ` +
+      `every test over it read that field, so its absence has to be loud here rather than an ` +
+      `undefined the tests compare against themselves.`,
+  );
+}
+
 // Makes `*.css?raw` and `*.css?inline` imports return real file content in vitest.
 // Vitest has a built-in "vitest:css-empty-post" (enforce: post) that converts all
 // CSS imports to `export default ""` in non-browser environments.  We bypass it by:
@@ -54,6 +72,10 @@ function cssRawPlugin() {
 // More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
 export default defineConfig({
   plugins: [cssRawPlugin(), solidPlugin()],
+  // One source, the CLI's own manifest (see KAI_MANIFEST above).
+  define: {
+    __KAI_VERSION__: JSON.stringify(kaiVersion),
+  },
   // `@kitn.ai/ui/schemas` -> src, for the test run ONLY.
   //
   // mcp/mcp/ imports the schemas barrel by its PUBLIC specifier
