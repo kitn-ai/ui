@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.34.0](https://github.com/kitn-ai/ui/compare/@kitn.ai/ui-v0.33.0...@kitn.ai/ui-v0.34.0) (2026-09-21)
+
+
+### ⚠ BREAKING CHANGES
+
+* **cli:** split the dev tooling into @kitn.ai/cli + @kitn.ai/mcp
+
+### Features
+
+* **cli:** the follow-ups after [#382](https://github.com/kitn-ai/ui/issues/382), and the split into [@kitn](https://github.com/kitn).ai/cli + [@kitn](https://github.com/kitn).ai/mcp ([afcca63](https://github.com/kitn-ai/ui/commit/afcca633f08ca9eadf35d198b187eea9e63c5d73))
+* **lint:** a guard for the relative specifier that resolves to nothing ([0d2e589](https://github.com/kitn-ai/ui/commit/0d2e5895b0f1a383ee446bad34dd466077904b11))
+* **mcp:** report the CLI's own version in the MCP instructions ([a5cb2a9](https://github.com/kitn-ai/ui/commit/a5cb2a954714f6750a32e7590bcc527c92c69c7c))
+
+
+### Bug Fixes
+
+* **lint:** a target git ignores is a build product, not a dangling import ([d0d66e7](https://github.com/kitn-ai/ui/commit/d0d66e7dffa59a6fdba85acc785e2ba946512b5b))
+* **lint:** exempt every CHANGELOG.md by basename, not just the kit's ([e4c93af](https://github.com/kitn-ai/ui/commit/e4c93afcc232f4a827e5cd42313a0c2d8f9452bf))
+* **packaging:** the kit declared less npm metadata than the packages beside it ([24270c3](https://github.com/kitn-ai/ui/commit/24270c3da5c32673547be86a76555fb87191b6cd))
+* **packaging:** the kit declared less npm metadata than the packages beside it ([13480f6](https://github.com/kitn-ai/ui/commit/13480f65e843b61f74227e780cd6bdc518dab48b))
+* **release:** unblock the 0.33.0 publish (lockfile link + generated-changelog exemption) ([5ae91a1](https://github.com/kitn-ai/ui/commit/5ae91a1456cad80d8fb9bd54668f5e64afd1094f))
+
+
+### Code Refactoring
+
+* **cli:** split the dev tooling into [@kitn](https://github.com/kitn).ai/cli + [@kitn](https://github.com/kitn).ai/mcp ([05df99a](https://github.com/kitn-ai/ui/commit/05df99ade57d523f0a57c6ece5e789e53b6b1997))
+
 ## [0.33.0](https://github.com/kitn-ai/ui/compare/@kitn.ai/ui-v0.32.0...@kitn.ai/ui-v0.33.0) (2026-09-21)
 
 
