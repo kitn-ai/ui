@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.35.0](https://github.com/kitn-ai/ui/compare/@kitn.ai/ui-v0.34.0...@kitn.ai/ui-v0.35.0) (2026-09-21)
+
+
+### Features
+
+* **cli:** kai doctor runs the MCP debug tool's rule set over your own sources ([f47cf2b](https://github.com/kitn-ai/ui/commit/f47cf2b007868f298904fb41d3fca0363617dc81))
+* **cli:** kai doctor runs the MCP debug tool's rule set over your own sources ([cbae694](https://github.com/kitn-ai/ui/commit/cbae694aa6461fa3e61676f80a79e86ab36829cc))
+
+
+### Bug Fixes
+
+* **lint:** a generated changelog is a record in BOTH prose guards, not in one of them ([7a9fc4f](https://github.com/kitn-ai/ui/commit/7a9fc4f26a23558e043b0e31007ad30aca9cdf9c))
+* **lint:** a generated changelog is a record in BOTH prose guards, not in one of them ([bbd474e](https://github.com/kitn-ai/ui/commit/bbd474e15f94e3b9fd49b12158dba58156c4219a))
+
 ## [0.34.0](https://github.com/kitn-ai/ui/compare/@kitn.ai/ui-v0.33.0...@kitn.ai/ui-v0.34.0) (2026-09-21)
 
 

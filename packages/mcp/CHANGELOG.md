@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.1](https://github.com/kitn-ai/ui/compare/@kitn.ai/mcp-v0.2.0...@kitn.ai/mcp-v0.2.1) (2026-09-21)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @kitn.ai/ui bumped from ^0.34.0 to ^0.35.0
+
 ## [0.2.0](https://github.com/kitn-ai/ui/compare/@kitn.ai/mcp-v0.1.0...@kitn.ai/mcp-v0.2.0) (2026-09-21)
 
 
