@@ -154,3 +154,114 @@ and `verify-starters` (network).
 7. The start doc's traps still apply, in particular `cmd | tail` reporting the pipe's status, and
    `__dirname` depth in `packages/kai/config/vite/` or `packages/ui/scripts/` (three levels below
    the repo root).
+8. **A lint leg runs its steps in sequence, so each red hides the next.** The release below was
+   unblocked twice in a row, and each fix was discovered by CI rather than before the push. Before
+   pushing a change that touches anything a pre-build leg reads, run THAT LEG's no-build scripts
+   locally as a sweep (the list is in §7.3); they cost seconds and they do not need a build.
+
+---
+
+## 7. The release, and what it actually took (in flight at the time of writing)
+
+### 7.1 What happened
+
+PR #379 merged with `--admin` on 2026-09-21 (the merge state was BLOCKED because release-please's
+runs sit in `action_required`, so the ruleset's checks can never report on that PR). Merge commit
+`01ecae1e`; the release-please action created the tags and GitHub releases `@kitn.ai/ui-v0.33.0`
+and `@kitn.ai/kai-v0.2.0` (`create-kai-v0.6.0` was not tagged). The publish then failed, and it
+failed for reasons that had nothing to do with the code being released:
+
+**Blocker 1, the lockfile (PR #385).** `node-workspace` rewrote `packages/kai`'s dependency to
+`@kitn.ai/ui: ^0.33.0`, and nothing regenerates `pnpm-lock.yaml`, whose `packages/kai` importer
+still read `specifier: ^0.32.0 / version: 0.32.0(...)`. Every leg installs with
+`--frozen-lockfile`, so `build` died at `Install dependencies` and four legs skipped behind it.
+
+The fix has a shape worth understanding, because a plain regeneration CANNOT work. `pnpm install
+--lockfile-only` fails with `ERR_PNPM_NO_MATCHING_VERSION` for `@kitn.ai/ui@^0.33.0`: that version
+does not exist on the registry until this very release publishes it. The one-file answer is the
+kai importer's entry becoming `specifier: ^0.33.0` / `version: link:../ui`, which is FORCED rather
+than chosen: the release commit necessarily carries an asymmetric pair (a published range in the
+manifest, a workspace link in the lockfile) because `workspace:*` packs verbatim and would ship an
+uninstallable kai. The durable alternatives are the owner's call:
+
+- `link-workspace-packages=true` in the root `.npmrc`. Measured blast radius today: **`packages/kai`
+  is the only workspace package left with a plain range to a workspace package** (every other
+  importer uses `workspace:*`; `examples/starters/nextjs` and `tanstack-start` use
+  `file:../../../packages/ui`). So it is a smaller change than it sounds, and it is still a
+  workspace-wide semantic change that deserves its own verification.
+- or the manual link edit per release, with a guard: fail whenever the kai importer's range is
+ahead of the registry and its entry is not a link.
+
+**Blocker 2, `lint:layer-names` on a generated changelog.** With the install fixed, the next step
+of the same leg went red on `packages/create-kai/CHANGELOG.md:9`, quoting a commit subject
+verbatim: `* src/elements -> src/web-components, and \`@kitn.ai/ui/elements\` ->
+\`@kitn.ai/ui/web-components\``. release-please writes changelogs out of commit subjects, so the
+BREAKING-CHANGES bullet of any release that renders the rename commit carries the retired
+spellings BY CONSTRUCTION. The guard exempted exactly one changelog, `packages/ui/CHANGELOG.md`,
+which is inconsistent rather than wrong-headed: the same generator produces all three. The fix is
+the derived rule (any file named `CHANGELOG.md` is a record), not a second literal, and it is
+exactly what the guard's own documented principle asks for. Two sibling guards carry the same
+latent gap and were measured clean today: `lint:cli-invocations` hard-codes
+`packages/ui/CHANGELOG.md` in its `DATED` list, and `lint:cdn-pins` exempts no changelog at all
+(0 hits for a retired invocation and 0 for a `@kitn.ai/ui@<version>` pin across all three files).
+
+**Why the gate refuses, and what the recovery path is.** `require-green-checks.mjs` is
+scoped to `github.sha` and deny-by-default, so a red check on the release commit cannot be talked
+around by re-running the workflow. `skip_required_checks` does not help either, and the line
+numbers are the proof: the gate is `release-please.yml:145` and `pnpm install --frozen-lockfile`
+is `:159`, so the hatch skips the gate and dies one step later on the same install error, having
+published nothing. The recovery is a fix landed on main (so its SHA is green) followed by
+`gh workflow run release-please.yml --ref main`; a later push does NOT re-publish on its own,
+because release-please reports `release_created: false` once the release commit is on main.
+
+### 7.2 Two findings from this that outlive the release
+
+1. **`packages/kai/node_modules/@kitn.ai/ui` was a REGISTRY COPY, not the workspace.** pnpm's
+   `link-workspace-packages` is off by default and kai's dependency is a plain caret, so local and
+   CI kai builds were resolving the kit from a published artefact rather than from the tree under
+   test. The link fixes it. Nothing asserted it, and it only surfaced because the range moved.
+2. **The publish loop has an ordering dependency it does not assert.** kai's build resolves
+   `@kitn.ai/ui/schemas` through packages/ui's own self-reference into `packages/ui/dist`, so the
+   loop only works while ui is published in the same run (ui's `prepublishOnly` is what builds
+   `dist`). That is exactly what failed in run 35611305071, where ui was skipped as
+   already-published and kai's rollup then failed to resolve the import. It needs a guard or an
+   explicit build step; it holds for THIS release only because ui@0.33.0 is genuinely new.
+
+### 7.3 The no-build sweep, for the next push that touches a lint leg
+
+`pnpm --filter @kitn.ai/ui run` for: `lint:silent-drops`, `lint:catalog-drift`,
+`lint:attachment-object-urls`, `lint:layer-names`, `lint:layer-direction`, `lint:cdn-pins`,
+`lint:release-wiring`, `lint:llms-size`, `lint:pack-parse`, `lint:story-conventions`,
+`lint:gate-parity`, `lint:thresholds`; and `pnpm --filter @kitn.ai/kai run` for `verify:versions`
+and `lint:cli-invocations`. All of them are seconds, none needs a build, and running them as one
+sweep is what turns N CI round-trips into one.
+
+---
+
+## 8. The CLI's install model, and the one verb that is missing (for the §3.2 decision)
+
+Nothing is installed. Every documented invocation is `npx`:
+
+| invocation | what resolves | what is downloaded |
+|---|---|---|
+| `npx @kitn.ai/kai <verb>` (every MCP config: `npx -y @kitn.ai/kai mcp`) | the registry, cached | kai + its deps |
+| `npm i -D @kitn.ai/kai` then `npx kai <verb>` | the LOCAL bin, npx prefers it | same, pinned per project |
+| `npm i -g @kitn.ai/kai` then `kai <verb>` | PATH, one version for every project | same (the footgun) |
+| `npm create kai` | npm sugar for `npx create-kai` | create-kai only, which has ZERO dependencies |
+
+`npx kai <verb>` does not work before an install: the unscoped npm name `kai` is taken by a 0.0.2
+placeholder (checked 2026-09-21). The bins inside `@kitn.ai/kai` are `kai` and `kai-mcp`.
+
+**`npm create kai` cannot fold into `kai`.** `npm create <name>` is sugar for `npx create-<name>`;
+the package NAME is the mechanism, so a package literally named `create-kai` must exist. It is
+266 KB packed / 202 files (the templates) / zero dependencies, and it is npm's front door for one
+verb, not a competing CLI. Dropping it would lose the conventional from-scratch idiom and the 17
+documented uses, in exchange for `npx @kitn.ai/kai create`.
+
+**No `install`, `uninstall` or self-update verb.** `npx` and the package managers own installing,
+and a self-installing CLI is the global-install hazard the packaging thread already rejected for
+`update`. What is genuinely missing is the PROJECT-level counterpart: `create` writes a new project
+and `add` writes a block into a detected existing one (it needs no `kai.json`; detection reads the
+project), but a hand-written Vite app cannot be given the wiring `create` emits. That verb is
+`kai init`, and `kai doctor` is its read-only twin. Both are project-scoped; neither touches the
+machine.
