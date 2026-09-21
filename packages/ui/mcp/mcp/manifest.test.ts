@@ -196,16 +196,16 @@ describe('resolveManifestPath — the manifest is addressed, not searched for', 
   });
 
   // ── THE LAYOUT THIS CHANGE EXISTS FOR ───────────────────────────────────────
-  // The server bundle lives in `@kitn.ai/kai` and the manifest stays in `@kitn.ai/ui`,
+  // The server bundle lives in `@kitn.ai/mcp` and the manifest stays in `@kitn.ai/ui`,
   // so the resolving anchor is inside a DIFFERENT package's dist/. A resolution that
   // derived "my package root" or looked beside itself cannot pass this: the kit is
   // reachable only as an installed dependency.
   it("resolves the kit's manifest from another package's dist, the bundled-bin layout", () => {
     inTempTree((root) => {
       const { manifest } = installPackage(root);
-      const kai = join(root, 'node_modules', '@kitn.ai', 'kai');
-      writeAt(kai, 'package.json', JSON.stringify({ name: '@kitn.ai/kai' }));
-      const bundleDir = join(kai, 'dist');
+      const mcp = join(root, 'node_modules', '@kitn.ai', 'mcp');
+      writeAt(mcp, 'package.json', JSON.stringify({ name: '@kitn.ai/mcp' }));
+      const bundleDir = join(mcp, 'dist');
       mkdirSync(bundleDir, { recursive: true });
 
       expect(resolveManifestPath(bundleDir)).toBe(manifest);

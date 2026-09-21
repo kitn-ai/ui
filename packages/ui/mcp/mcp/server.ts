@@ -39,13 +39,13 @@ const PACKAGE_NAME = '@kitn.ai/ui';
  * WHY IT SURVIVES PUBLISHING. npm always ships package.json, `exports` carries
  * `"./package.json": "./package.json"` (self-reference is restricted to the exports
  * map, so that key is load-bearing — drop it and this throws, and the test goes red
- * with it), and `bin/mcp.js` imports `../dist/mcp.es.js` by its own URL, so the
+ * with it), and `bin/kai-mcp.js` imports `../dist/mcp.es.js` by its own URL, so the
  * resolver starts inside the installed package however it was launched (npx, global
  * install, symlink). Not a JSON import: that inlines the version at BUILD time, which
  * is a second copy that can disagree with the package.json shipped beside it, and it
  * would need `resolveJsonModule` on the repo's browser tsc pass as well as this one.
  *
- * A broken resolve throws instead of falling back to a placeholder — `bin/mcp.js`
+ * A broken resolve throws instead of falling back to a placeholder — `bin/kai-mcp.js`
  * turns that into a named fatal on stderr, which is the loud version. A wrong version
  * silently announced to every harness is the quiet one.
  */
@@ -64,11 +64,12 @@ function packageIdentity(): { name: string; version: string } {
 }
 
 /**
- * The MCP `instructions`, and the only place the CLI's OWN version is reported (see
+ * The MCP `instructions`, and the only place the MCP package's OWN version is reported (see
  * packageIdentity for why `serverInfo` names the kit instead). Both versions are named because
- * the CLI and the kit release independently, so an agent seeing one cannot tell which is stale.
+ * `@kitn.ai/mcp` and the kit release independently, so an agent seeing one cannot tell which is
+ * stale.
  *
- * `__KAI_VERSION__` is a build-time define (./kai-version.d.ts). The tool names are derived from
+ * `__MCP_VERSION__` is a build-time define (./mcp-version.d.ts). The tool names are derived from
  * `tools`, so a sixth tool is described the day it is registered.
  *
  * THE STRING MUST STAY NON-EMPTY: the SDK spreads `instructions` onto the initialize result only
@@ -77,9 +78,9 @@ function packageIdentity(): { name: string; version: string } {
 function serverInstructions(kitVersion: string): string {
   const names = tools.map((t) => t.name).join(', ');
   return (
-    `The @kitn.ai/ui MCP server, running from kai ${__KAI_VERSION__} and describing ` +
-    `@kitn.ai/ui ${kitVersion}. The CLI and the kit release separately, so report both when a ` +
-    `version question comes up. Tools: ${names}.`
+    `The @kitn.ai/ui MCP server, running from @kitn.ai/mcp ${__MCP_VERSION__} and describing ` +
+    `@kitn.ai/ui ${kitVersion}. The server package and the kit release separately, so report ` +
+    `both when a version question comes up. Tools: ${names}.`
   );
 }
 

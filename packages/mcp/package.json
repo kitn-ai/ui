@@ -1,0 +1,66 @@
+{
+  "name": "@kitn.ai/mcp",
+  "version": "0.1.0",
+  "license": "MIT",
+  "type": "module",
+  "description": "The Model Context Protocol server for @kitn.ai/ui: component reference, scaffolder, theme and debug tools for any AI coding harness.",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "kitn",
+    "kai",
+    "ai",
+    "chat"
+  ],
+  "homepage": "https://ui.kitn.ai",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kitn-ai/ui.git",
+    "directory": "packages/mcp"
+  },
+  "bugs": {
+    "url": "https://github.com/kitn-ai/ui/issues"
+  },
+  "bin": {
+    "kai-mcp": "./bin/kai-mcp.js"
+  },
+  "nx": {
+    "name": "mcp",
+    "implicitDependencies": [
+      "ui"
+    ],
+    "targets": {
+      "build": {
+        "dependsOn": [],
+        "inputs": [
+          "default",
+          "{workspaceRoot}/packages/ui/mcp/mcp/**/*"
+        ]
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "bin",
+    "!bin/**/*.test.js"
+  ],
+  "scripts": {
+    "build": "KAI_BUILD=mcp vite build --config config/vite/node.ts",
+    "prepublishOnly": "npm run build && node scripts/verify-pack-weight.mjs",
+    "typecheck": "tsc --noEmit",
+    "verify:bundle-shape": "node scripts/verify-bundle-shape.mjs --self-test && node scripts/verify-bundle-shape.mjs",
+    "verify:pack": "node scripts/verify-pack-weight.mjs --self-test && node scripts/verify-pack-weight.mjs"
+  },
+  "dependencies": {
+    "@kitn.ai/ui": "^0.33.0",
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0",
+    "vite": "^6.0.0"
+  },
+  "engines": {
+    "node": ">=20.19"
+  }
+}

@@ -18,12 +18,12 @@ const pkg = JSON.parse(readFileSync(join(packageRoot, 'package.json'), 'utf-8'))
 };
 
 /**
- * The kai CLI's manifest, two directories over. Read by path for the same reason as `pkg`, and
- * because the MCP's OWN version now travels the other way: `__KAI_VERSION__` is a build-time
- * define (mcp/mcp/kai-version.d.ts), so the only way to say the substituted value is kai's is
- * to open kai's manifest here and compare.
+ * The `@kitn.ai/mcp` manifest, two directories over. Read by path for the same reason as `pkg`,
+ * and because the MCP's OWN version now travels the other way: `__MCP_VERSION__` is a build-time
+ * define (mcp/mcp/mcp-version.d.ts), so the only way to say the substituted value is
+ * `@kitn.ai/mcp`'s is to open that package's manifest here and compare.
  */
-const kaiPkg = JSON.parse(readFileSync(join(packageRoot, '..', 'kai', 'package.json'), 'utf-8')) as {
+const mcpPkg = JSON.parse(readFileSync(join(packageRoot, '..', 'mcp', 'package.json'), 'utf-8')) as {
   name?: string;
   version?: string;
 };
@@ -80,23 +80,24 @@ describe('createServer', () => {
   // ── instructions ────────────────────────────────────────────────────────────
   //
   // The other half of the identity question. `serverInfo` names the KIT on purpose (that is the
-  // API the tool answers describe), so the CLI's own version is reported here or nowhere, and an
-  // agent that can see only one of the two cannot tell which is stale. It is a build-time define
-  // because kai has no `exports` map to self-resolve through (mcp/mcp/kai-version.d.ts), which
-  // makes this a coupling with three sides: the value, the substitution, and the prose that has
-  // to carry it.
+  // API the tool answers describe), so the MCP package's own version is reported here or nowhere,
+  // and an agent that can see only one of the two cannot tell which is stale. It is a build-time
+  // define
+  // because `@kitn.ai/mcp` has no `exports` map to self-resolve through (mcp/mcp/mcp-version.d.ts),
+  // which makes this a coupling with three sides: the value, the substitution, and the prose that
+  // has to carry it.
 
-  it("reports the kai CLI version it was built from, alongside the kit's", async () => {
-    // Anchors first, so the comparison below cannot be undefined === undefined: kai's manifest
-    // is the real one and carries a real version.
-    expect(kaiPkg.name).toBe('@kitn.ai/kai');
-    expect(kaiPkg.version).toMatch(/^\d+\.\d+\.\d+/);
-    // The substituted global, against kai's manifest read independently. Two substitutions
-    // feed this global (packages/kai/config/vite/node.ts for the bundle, this package's
+  it("reports the @kitn.ai/mcp version it was built from, alongside the kit's", async () => {
+    // Anchors first, so the comparison below cannot be undefined === undefined: this package's
+    // manifest is the real one and carries a real version.
+    expect(mcpPkg.name).toBe('@kitn.ai/mcp');
+    expect(mcpPkg.version).toMatch(/^\d+\.\d+\.\d+/);
+    // The substituted global, against that manifest read independently. Two substitutions
+    // feed this global (packages/mcp/config/vite/node.ts for the bundle, this package's
     // vitest.config.ts for this run) and both read that one field; a value typed into either
-    // place, or a read that stopped pointing at kai, fails here rather than passing a
+    // place, or a read that stopped pointing at @kitn.ai/mcp, fails here rather than passing a
     // comparison between a literal and itself.
-    expect(__KAI_VERSION__).toBe(kaiPkg.version);
+    expect(__MCP_VERSION__).toBe(mcpPkg.version);
 
     const server = createServer();
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
@@ -109,7 +110,7 @@ describe('createServer', () => {
     // the field is absent and every assertion below would read `undefined` as "no instructions"
     // rather than "instructions that say nothing".
     expect(instructions, 'the SDK omits an empty instructions string entirely').toBeTruthy();
-    expect(instructions).toContain(kaiPkg.version);
+    expect(instructions).toContain(mcpPkg.version);
     expect(instructions).toContain(pkg.version);
 
     await client.close();

@@ -1,30 +1,22 @@
 #!/usr/bin/env node
 /**
- * GUARD: the kai CLI's tarball is the shape a release expects: the four built outputs and the two
- * bins are IN it, nothing from node_modules is, and it has not changed size by a STEP.
+ * GUARD: the MCP package's tarball is the shape a release expects: the bundle and the bin
+ * are IN it, nothing from node_modules is, and it has not changed size by a STEP.
  *
- * WHY THIS EXISTS. `packages/ui/scripts/verify-pack-weight.mjs` is ui-specific and kai ships a
- * package of its own, so until now kai's 367,527 B tarball had a ceiling only by inspection. The
- * failure this is aimed at is not drift: it is a dependency copied into `dist/` (vite writes
- * `dist/node_modules` when a target stops externalising) or one of the two dev pages bundling the
- * kit's own dist instead of loading the installed package. Either doubles or triples the tarball
- * in one commit, and both are invisible to `verify:bundle-shape`, which reads the two Node bundles
- * and not the pages.
+ * WHY THIS IS NOT THE CLI'S GUARD. The two packages split so that the MCP SDK (5.9 MB
+ * installed, 17 direct deps) is installed only by harness configs, and this package is now
+ * the only one that carries it. Its tarball is therefore small and its failure modes are
+ * its own: a dependency copied into `dist/` (vite writes `dist/node_modules` when a target
+ * stops externalising), or the SDK bundled in.
  *
- * MEASURED WHEN IT LANDED: 367,527 B packed, 1,344,784 B unpacked, 12 files, the largest being
- * `dist/mcp.es.js` at 571,983 B. The ceilings below are tripwires for an order-of-magnitude
- * blunder, not budgets: 1.5 MiB packed (4x), 4 MiB unpacked (3x), 2 MiB for any single file
- * (3.5x). The floors are the load-bearing half, because a build that produced nothing still packs
- * a package.json and "under the ceiling" is true of a tarball holding one file.
- *
- * THE LIST OF REQUIRED PATHS IS HAND-TYPED, and that is the one place this guard can rot: rename a
- * build output in config/vite/node.ts or page.ts and this fails naming the path, which is loud and
- * is the point. The four outputs are the whole shipped surface; the hashed `assets/*` files under
- * the pages are deliberately not listed, because their names carry a content hash.
+ * THE LIMITS ARE TRIPWIRES, NOT BUDGETS (see verify-bundle-shape.mjs for the measurement:
+ * inlining the SDK moves the bundle +45 KB, so a size ceiling is not what catches it). The
+ * FLOORS are the load-bearing half, because a build that produced nothing still packs a
+ * package.json.
  *
  * WIRED IN TWO PLACES: `prepublishOnly` (the create-kai precedent, because the tarball the
- * release is about to ship is exactly when this shape matters) and the construct leg of required
- * CI, which builds kai first.
+ * release is about to ship is exactly when this shape matters) and the construct leg of
+ * required CI, which builds this package first.
  *
  *   node scripts/verify-pack-weight.mjs
  *   node scripts/verify-pack-weight.mjs --self-test   # prove each rule still detects
@@ -40,36 +32,28 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const PKG = resolve(HERE, '..');
 
 /** Every path the tarball must carry. See the header: this list is the rot surface. */
-export const REQUIRED = [
-  'bin/mcp.js',
-  'bin/route.js',
-  'dist/construct-cli.es.js',
-  'dist/mcp.es.js',
-  'dist/builder-page/index.html',
-  'dist/theme-studio/index.html',
-  'package.json',
-];
+export const REQUIRED = ['bin/kai-mcp.js', 'dist/mcp.es.js', 'package.json'];
 
 /** Forbidden in the tarball, with the reason each is here. */
 const FORBIDDEN = [
   // A dependency copied into the bundle directory instead of staying external: the exact
-  // regression the peel removed from a browser consumer's install, one level down.
+  // regression the split removed from a CLI install, one level down.
   [/node_modules/, 'node_modules'],
   // `files` negates `!bin/**/*.test.js`; a shipped test file would mean that negation broke.
   [/^bin\/.*\.test\.js$/, 'a bin test file'],
 ];
 
 export const LIMITS = {
-  packedCeiling: 1_572_864, // 1.5 MiB; measured 367,527 B
-  packedFloor: 100_000,
-  unpackedCeiling: 4_194_304, // 4 MiB; measured 1,344,784 B
-  unpackedFloor: 400_000,
-  fileCeiling: 2_097_152, // 2 MiB; measured largest 571,983 B
+  packedCeiling: 1_048_576, // 1 MiB; measured 163,082 B
+  packedFloor: 60_000,
+  unpackedCeiling: 2_097_152, // 2 MiB; measured 575,511 B
+  unpackedFloor: 200_000,
+  fileCeiling: 1_048_576, // 1 MiB; measured largest 572,003 B
 };
 
 /**
- * Problems in one packed listing. Pure over `entry` and `files`, so `--self-test` can plant each
- * shape: the real run passes the `npm pack --json` report straight in.
+ * Problems in one packed listing. Pure over `entry` and `files`, so `--self-test` can plant
+ * each shape: the real run passes the `npm pack --json` report straight in.
  */
 export function packProblems(entry, files, limits = LIMITS) {
   const problems = [];
@@ -90,8 +74,8 @@ export function packProblems(entry, files, limits = LIMITS) {
     }
     if (file.size > limits.fileCeiling) {
       problems.push(
-        `${file.path} is ${file.size} B, over the ${limits.fileCeiling} B per-file ceiling. Something ` +
-          `started being bundled INTO a single output: look at what the build externalises.`,
+        `${file.path} is ${file.size} B, over the ${limits.fileCeiling} B per-file ceiling. Something started being ` +
+          `bundled INTO a single output: look at what config/vite/node.ts externalises.`,
       );
     }
   }
@@ -102,7 +86,7 @@ export function packProblems(entry, files, limits = LIMITS) {
   if (unpacked > limits.unpackedCeiling) {
     problems.push(
       `the unpacked size is ${unpacked} B, over the ${limits.unpackedCeiling} B ceiling: a step, not drift. ` +
-        `Check for a dependency copied into dist/ and for a dev page that started bundling the kit.`,
+        `Check for a dependency copied into dist/ and for the SDK being inlined.`,
     );
   }
   if (typeof entry.size === 'number') {
@@ -118,17 +102,11 @@ export function packProblems(entry, files, limits = LIMITS) {
 
 if (process.argv.includes('--self-test')) {
   const HEALTHY = [
-    { path: 'bin/mcp.js', size: 1_622 },
-    { path: 'bin/route.js', size: 1_109 },
-    { path: 'dist/mcp.es.js', size: 571_983 },
-    { path: 'dist/construct-cli.es.js', size: 140_294 },
-    { path: 'dist/builder-page/index.html', size: 930 },
-    { path: 'dist/builder-page/assets/index-abc.js', size: 261_583 },
-    { path: 'dist/theme-studio/index.html', size: 722 },
-    { path: 'dist/theme-studio/assets/index-def.js', size: 206_815 },
-    { path: 'package.json', size: 1_846 },
+    { path: 'bin/kai-mcp.js', size: 1_700 },
+    { path: 'dist/mcp.es.js', size: 572_451 },
+    { path: 'package.json', size: 1_500 },
   ];
-  const healthyEntry = { size: 367_527 };
+  const healthyEntry = { size: 163_082 };
   const withFile = (file) => [...HEALTHY, file];
   const drop = (path) => HEALTHY.filter((f) => f.path !== path);
   const big = (path, size) => HEALTHY.map((f) => (f.path === path ? { ...f, size } : f));
@@ -136,19 +114,15 @@ if (process.argv.includes('--self-test')) {
     ['a healthy tarball passes', packProblems(healthyEntry, HEALTHY).length === 0],
     [
       'a missing bundle is reported by name',
-      packProblems(healthyEntry, drop('dist/construct-cli.es.js')).some((p) => p.includes('dist/construct-cli.es.js is MISSING')),
+      packProblems(healthyEntry, drop('dist/mcp.es.js')).some((p) => p.includes('dist/mcp.es.js is MISSING')),
     ],
     [
-      'a missing DEV PAGE is reported (verify:bundle-shape does not look at the pages)',
-      packProblems(healthyEntry, drop('dist/theme-studio/index.html')).some((p) => p.includes('dist/theme-studio/index.html is MISSING')),
+      'a missing bin is reported (the package would install with no command)',
+      packProblems(healthyEntry, drop('bin/kai-mcp.js')).some((p) => p.includes('bin/kai-mcp.js is MISSING')),
     ],
     [
       'a copied dependency is reported',
       packProblems(healthyEntry, withFile({ path: 'dist/node_modules/zod/index.js', size: 10 })).some((p) => p.includes('node_modules')),
-    ],
-    [
-      'a shipped bin test file is reported',
-      packProblems(healthyEntry, withFile({ path: 'bin/route.test.js', size: 10 })).some((p) => p.includes('bin/route.test.js')),
     ],
     [
       'one file over the per-file ceiling is reported',
@@ -160,7 +134,6 @@ if (process.argv.includes('--self-test')) {
         ...HEALTHY,
         { path: 'dist/big-1.js', size: LIMITS.fileCeiling - 1 },
         { path: 'dist/big-2.js', size: LIMITS.fileCeiling - 1 },
-        { path: 'dist/big-3.js', size: LIMITS.fileCeiling - 1 },
       ]).some((p) => p.includes('over the') && p.includes('unpacked')),
     ],
     [
@@ -196,22 +169,19 @@ if (process.argv.includes('--self-test')) {
 }
 
 if (!existsSync(join(PKG, 'dist', 'mcp.es.js'))) {
-  console.error(`✗ verify-pack-weight: ${join(PKG, 'dist', 'mcp.es.js')} is missing. Run \`npm run build\` in packages/kai first.`);
+  console.error(`✗ verify-pack-weight: ${join(PKG, 'dist', 'mcp.es.js')} is missing. Run \`npm run build\` in packages/mcp first.`);
   process.exit(1);
 }
 
 const npmVersion = execFileSync('npm', ['--version'], { encoding: 'utf8' }).trim();
-const destination = mkdtempSync(join(tmpdir(), 'kai-pack-'));
+const destination = mkdtempSync(join(tmpdir(), 'mcp-pack-'));
 let entry;
 let writtenBytes;
 try {
-  // `--no-dry-run` IS LOAD-BEARING, and it is what running this from prepublishOnly taught.
-  // A nested `npm pack` INHERITS npm_config_dry_run from the `npm publish --dry-run` that invoked
-  // this hook, and then writes NO tarball while still reporting `files`, `size` and `unpackedSize`:
-  // measured, `npm_config_dry_run=1 node scripts/verify-pack-weight.mjs` fails on the statSync
-  // below with ENOENT. DRY RUN IS A PROPERTY OF THE PUBLISH, not of this inspection, so the child
-  // is told explicitly to produce the tarball; the flag is a no-op outside a dry run, and the
-  // file lands in a temp directory that is deleted either way.
+  // `--no-dry-run` IS LOAD-BEARING: a nested `npm pack` INHERITS npm_config_dry_run from
+  // the `npm publish --dry-run` that invoked this through prepublishOnly, and then writes
+  // NO tarball while still reporting `files`/`size` (measured). A dry run is a property of
+  // the publish, not of this inspection.
   const raw = execFileSync('npm', ['pack', '--json', '--no-dry-run', '--pack-destination', destination], {
     cwd: PKG,
     encoding: 'utf8',
@@ -219,9 +189,6 @@ try {
     maxBuffer: 64 * 1024 * 1024,
   });
   ({ entry } = readPackEntry(raw, { npmVersion }));
-  // The packer's own number against the file it wrote. Independent reads, so a `size` npm stopped
-  // reporting (or reported for something else) fails here instead of silently skipping the
-  // ceilings above.
   writtenBytes = typeof entry.size === 'number' ? statSync(join(destination, entry.filename)).size : -1;
 } finally {
   rmSync(destination, { recursive: true, force: true });
@@ -231,13 +198,13 @@ const files = entry.files.map((f) => ({ path: f.path, size: f.size }));
 const problems = packProblems(entry, files);
 if (writtenBytes === -1) {
   problems.push(
-    `npm pack reported no numeric \`size\` for the tarball (${JSON.stringify(entry.size)}), so the packed ` +
-      `ceilings were not applied.`,
+    `npm pack reported no numeric \`size\` for the tarball (${JSON.stringify(entry.size)}), so the packed ceilings ` +
+      `were not applied.`,
   );
 } else if (writtenBytes !== entry.size) {
   problems.push(
-    `npm pack reported ${entry.size} B for ${entry.filename}, but the file it wrote is ${writtenBytes} B. ` +
-      `The packed ceilings are read off the report, so a discrepancy here means they grade the wrong number.`,
+    `npm pack reported ${entry.size} B for ${entry.filename}, but the file it wrote is ${writtenBytes} B. The packed ` +
+      `ceilings are read off the report, so a discrepancy here means they grade the wrong number.`,
   );
 }
 

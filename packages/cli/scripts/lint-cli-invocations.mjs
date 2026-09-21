@@ -1,4 +1,13 @@
-// GUARD -- prose and comments may not invoke the CLI under its RETIRED package.
+// GUARD -- prose and comments may not invoke the CLI under a RETIRED package.
+//
+// TWO RETIRED NAMES NOW, and the second one never shipped: `@kitn.ai/ui` (where the MCP and the
+// construct CLI lived until they were peeled out) and `@kitn.ai/kai` (the single package they
+// moved to, which was never published -- the tooling was split into `@kitn.ai/cli` and
+// `@kitn.ai/mcp` before its first release). Both spellings are flagged, from ONE list, so a
+// third rename is a one-line change here rather than a second pattern nobody remembers to add.
+//
+// The CURRENT names are `@kitn.ai/cli` (bin `kai`) and, for the server alone, `@kitn.ai/mcp`
+// (`npx -y @kitn.ai/mcp`, with no verb: the server takes no arguments).
 //
 // WHY THIS EXISTS, and it is measured rather than assumed. When the dev tooling moved
 // to `@kitn.ai/kai`, the docs sweep's own mutation put `npx @kitn.ai/ui mcp` back into
@@ -32,36 +41,30 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = resolve(HERE, '../../..');
 
 /**
- * The retired invocation. Anchored on the five subcommands the CLI dispatches, with any
- * run of whitespace between the package and the verb (`npx -y @kitn.ai/ui  mcp`, and a
- * line wrap too -- the match runs over the WHOLE file, not line by line, because `\s`
- * crossing a newline is exactly how a wrapped command reads in markdown).
+ * The retired spellings, one entry per package name, both SHAPES each can take:
  *
- * The lookahead is not `\b`: `\b` matches between `dev` and `-`, so `@kitn.ai/ui
- * dev-tooling` would fire on a phrase about the dev tooling. It must be a word or
- * hyphen continuation that is allowed, hence `(?<![-\w])`-style trailing guard.
- */
-export const RETIRED_INVOCATION = /@kitn\.ai\/ui[ \t\n]+(mcp|dev|compile|eject|validate)(?![-\w])/g;
-
-/**
- * The SAME invocation as a separate quoted ARGUMENT, which is how every MCP client config spells
- * it: `"args": ["-y", "@kitn.ai/ui", "mcp"]`, and the TOML/YAML equivalents. Measured on the day
- * this was added: ELEVEN of these were live in `guides/for-ai-agents.mdx` (every harness tab on
- * the page that teaches an agent to connect), and the whitespace pattern above matched none of
- * them, because the separator between the package and the verb is `", "` rather than a space. The
- * reader follows the page, gets the stub's "moved to @kitn.ai/kai" error, and has to work out that
- * the page is the thing that is wrong.
+ *   whitespace   `npx @kitn.ai/ui mcp` -- the bin form a reader types after an install
+ *   quoted-arg   `"args": ["-y", "@kitn.ai/ui", "mcp"]` -- the MCP client config form, where the
+ *                package and the verb are separate JSON array elements and the separator is
+ *                `", "` rather than a space. Measured: ELEVEN live configs in one docs page used
+ *                the quoted-arg shape and the whitespace-only pattern matched none of them.
  *
- * The closing quote is NOT optional: it is what keeps `"mcp-server"` (a different package name)
- * from firing, and the `(?![−\w])` style trailing guard the name-shaped pattern needs would let
- * `"mcp-server"` through if the quote were optional here. A pretty-printed array matches too, since
- * the separator class spans newlines.
+ * The whitespace form's trailing guard is not `\b`: `\b` matches between `dev` and `-`, so
+ * `@kitn.ai/ui dev-tooling` would fire on a phrase about the dev tooling. It must be a word or
+ * hyphen continuation that is allowed, hence `(?<![-\w])`-style trailing guard. In the quoted
+ * form the closing quote plays that role, which is what keeps `"@kitn.ai/ui", "mcp-server"` -- a
+ * different package -- clean.
  */
-export const RETIRED_INVOCATION_AS_ARG =
-  /@kitn\.ai\/ui["'][ \t\n]*,[ \t\n]*["'](mcp|dev|compile|eject|validate)["']/g;
+export const RETIRED_PACKAGES = ['@kitn.ai/ui', '@kitn.ai/kai'];
 
-/** Both spellings, so a caller cannot scan for one and call it done. */
-export const RETIRED_INVOCATIONS = [RETIRED_INVOCATION, RETIRED_INVOCATION_AS_ARG];
+const escape = (name) => name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const VERBS = 'mcp|dev|compile|eject|validate';
+
+/** Both shapes, for every retired package. Exported so the self-test can count them. */
+export const RETIRED_INVOCATIONS = RETIRED_PACKAGES.flatMap((name) => [
+  new RegExp(`${escape(name)}[ \\t\\n]+(${VERBS})(?![-\\w])`, 'g'),
+  new RegExp(`${escape(name)}["'][ \\t\\n]*,[ \\t\\n]*["'](${VERBS})["']`, 'g'),
+]);
 
 /** Where prose about this kit lives. Every file under these, by extension. */
 const SCAN_ROOTS = ['apps', 'packages', 'examples', 'scripts', 'docs'];
@@ -79,7 +82,7 @@ const WAIVED = new Map([
     'the migration stub: it names the retired command as the INPUT side of the message it prints',
   ],
   [
-    'packages/kai/scripts/lint-cli-invocations.mjs',
+    'packages/cli/scripts/lint-cli-invocations.mjs',
     'this guard: the self-test plants the retired invocation, and skipping it by name keeps that from being a self-match',
   ],
 ]);
@@ -146,29 +149,60 @@ export function findingsFor(files, { waived = WAIVED, dated = DATED } = {}) {
 
 if (process.argv.includes('--self-test')) {
   const probe = (files, opts) => findingsFor(files, opts).length;
+  const VERBS = ['mcp', 'dev', 'compile', 'eject', 'validate'];
   const probes = [
-    ['the retired invocation is found', probe({ 'apps/docs/a.mdx': 'run `npx @kitn.ai/ui mcp` first' }) === 1],
-    ['every subcommand is found', ['dev', 'compile', 'eject', 'validate'].every((v) => probe({ 'x.md': `npx @kitn.ai/ui ${v} f.json` }) === 1)],
+    [
+      'the retired invocation is found, for BOTH retired packages',
+      RETIRED_PACKAGES.every((pkg) => probe({ 'apps/docs/a.mdx': `run \`npx ${pkg} mcp\` first` }) === 1),
+    ],
+    [
+      'every subcommand is found, for both packages',
+      RETIRED_PACKAGES.every((pkg) => VERBS.every((v) => probe({ 'x.md': `npx ${pkg} ${v} f.json` }) === 1)),
+    ],
     ['extra whitespace and a line wrap are found', probe({ 'x.md': 'npx @kitn.ai/ui\n  mcp' }) === 1],
-    ['the NEW invocation is clean', probe({ 'x.md': 'npx @kitn.ai/kai mcp' }) === 0],
+    [
+      'the NEW invocations are clean: the cli package, and the mcp package with NO verb',
+      probe({ 'x.md': 'npx -y @kitn.ai/cli doctor' }) === 0 &&
+        probe({ 'x.md': 'npx -y @kitn.ai/mcp' }) === 0 &&
+        probe({ 'x.md': '"args": ["-y", "@kitn.ai/mcp"]' }) === 0,
+    ],
     ['a bare package mention is clean', probe({ 'x.md': 'import { cn } from "@kitn.ai/ui";' }) === 0],
+    [
+      'a bare mention of either NEW package is clean',
+      probe({ 'x.md': 'install @kitn.ai/cli, or @kitn.ai/mcp for a harness' }) === 0,
+    ],
     ['an import subpath is clean', probe({ 'x.md': '`@kitn.ai/ui/web-components`' }) === 0],
     ['a path to the stub bin is clean', probe({ 'x.md': 'node node_modules/@kitn.ai/ui/bin/mcp.js' }) === 0],
     ['a hyphenated word after the package is clean', probe({ 'x.md': 'the @kitn.ai/ui dev-tooling' }) === 0],
     ['a dated record is skipped', probe({ 'docs/handoff/2026-01-01-x.md': 'npx @kitn.ai/ui mcp' }) === 0],
-    ['a waived file is skipped', probe({ 'packages/ui/bin/mcp.js': 'npx @kitn.ai/ui mcp -> npx @kitn.ai/kai mcp' }) === 0],
+    [
+      'a waived file is skipped',
+      probe({ 'packages/ui/bin/mcp.js': 'npx @kitn.ai/ui mcp -> npx @kitn.ai/cli mcp' }) === 0,
+    ],
     ['a waiver is by exact path, so a near-miss still fires', probe({ 'packages/ui/bin/mcp-2.js': 'npx @kitn.ai/ui mcp' }) === 1],
-    ['the MCP args-array shape is found', probe({ 'apps/docs/a.mdx': '"args": ["-y", "@kitn.ai/ui", "mcp"]' }) === 1],
+    [
+      'the MCP args-array shape is found, for both packages',
+      RETIRED_PACKAGES.every((pkg) => probe({ 'apps/docs/a.mdx': `"args": ["-y", "${pkg}", "mcp"]` }) === 1),
+    ],
     ['the TOML args-list shape is found', probe({ 'apps/docs/a.mdx': 'args = ["-y", "@kitn.ai/ui", "dev"]' }) === 1],
     [
       'a pretty-printed args array is found',
-      probe({ 'apps/docs/a.mdx': '"args": [\n  "-y",\n  "@kitn.ai/ui",\n  "mcp"\n]' }) === 1,
+      probe({ 'apps/docs/a.mdx': '"args": [\n  "-y",\n  "@kitn.ai/kai",\n  "mcp"\n]' }) === 1,
     ],
-    ['every subcommand is found in the args shape', ['dev', 'compile', 'eject', 'validate'].every((v) => probe({ 'x.md': `"args": ["-y", "@kitn.ai/ui", "${v}"]` }) === 1)],
-    ['the new package in the args shape is clean', probe({ 'apps/docs/a.mdx': '"args": ["-y", "@kitn.ai/kai", "mcp"]' }) === 0],
+    [
+      'every subcommand is found in the args shape, for both packages',
+      RETIRED_PACKAGES.every((pkg) =>
+        VERBS.every((v) => probe({ 'x.md': `"args": ["-y", "${pkg}", "${v}"]` }) === 1),
+      ),
+    ],
     ['a verb that continues into another arg is clean', probe({ 'apps/docs/a.mdx': '"args": ["-y", "@kitn.ai/ui", "mcp-server"]' }) === 0],
     ['a component name after the package is clean', probe({ 'apps/docs/a.mdx': '"args": ["-y", "@kitn.ai/ui", "chat"]' }) === 0],
+    [
+      'a hyphenated arg after a retired package is clean too',
+      probe({ 'apps/docs/a.mdx': '"args": ["-y", "@kitn.ai/kai", "dev-tooling"]' }) === 0,
+    ],
   ];
+
   let failed = 0;
   for (const [what, ok] of probes) {
     console.log(`${ok ? '✓' : '✗'} ${what}`);
@@ -198,9 +232,13 @@ for (const f of findings) {
 if (findings.length) {
   console.error(
     `\n✗ lint-cli-invocations: ${findings.length} invocation(s) of the CLI under its retired package, across ${targets.length} file(s).\n` +
-      `  The dev tooling moved to \`@kitn.ai/kai\`, and the kit's bin is now a stub that errors.\n` +
-      `  Rewrite as \`npx @kitn.ai/kai <command>\`. A dated record is exempt; anything else is not.`,
+      `  The dev tooling is \`@kitn.ai/cli\` (bin \`kai\`); the MCP server alone is \`@kitn.ai/mcp\`.\n` +
+      `  An MCP client config needs no verb: \`"args": ["-y", "@kitn.ai/mcp"]\`. Everything else is\n` +
+      `  \`npx -y @kitn.ai/cli <command>\`. A dated record is exempt; anything else is not.`,
   );
   process.exit(1);
 }
-console.log(`✓ lint-cli-invocations: ${targets.length} file(s) scanned; every CLI invocation names @kitn.ai/kai.`);
+console.log(
+  `✓ lint-cli-invocations: ${targets.length} file(s) scanned; no invocation names a retired package ` +
+    `(${RETIRED_PACKAGES.join(', ')}).`,
+);

@@ -14,7 +14,7 @@
  * Both contexts give the same answer, and neither can bind to a directory that merely
  * looks like this package. The bundled bin used to find the manifest as a SIBLING of
  * itself (`dist/mcp.es.js` beside `dist/custom-elements.json`), which stopped being
- * true when the server bundle moved to its own package (`@kitn.ai/kai`); the sibling hop
+ * true when the server bundle moved to its own package (`@kitn.ai/mcp`); the sibling hop
  * is gone, and `manifest.test.ts` fails if it comes back.
  *
  * It also answers "which of these 80 web components has anything to do with cards", for
@@ -205,7 +205,7 @@ export function resolveManifestPath(
         `\`${PACKAGE_ROOT_SPECIFIER}\` did not resolve from ${fromDir}.\n` +
         `The package has to be INSTALLED: as this module's own package when running from ` +
         `source, or as a dependency of whichever package carries the server bundle ` +
-        `(\`@kitn.ai/kai\` makes it one).\n` +
+        `(\`@kitn.ai/mcp\` makes it one).\n` +
         `Cause: ${cause instanceof Error ? cause.message : String(cause)}\n` +
         `Resolution deliberately does NOT search directories for a ${MANIFEST_FILE}: ` +
         `finding some other checkout's manifest is worse than failing.`,

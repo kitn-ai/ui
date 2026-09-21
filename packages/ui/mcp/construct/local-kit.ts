@@ -34,7 +34,7 @@
  *
  *   npm pack, CONTENT-KEYED CACHE (chosen) — the same mechanism
  *     `verify:construct` already drives every cell through
- *     (`node bin/mcp.js eject … --ui <tarball>`), so the local default is the
+ *     (`node packages/cli/bin/kai.js eject … --ui <tarball>`), so the local default is the
  *     path with the most coverage in the repo rather than a second one. The
  *     cache is not about the 0.94s: the tarball path goes INTO the emitted
  *     package.json, and `ensureInstalled` re-runs `npm install` whenever that

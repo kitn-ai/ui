@@ -615,7 +615,7 @@ if (SELF_TEST) {
  *
  * THE ALLOWLIST NEEDED NO CHANGE FOR THAT, which is worth stating: `dist/` and `bin/` are
  * still the only two roots (this package keeps `bin/mcp.js` as a dependency-free STUB that
- * tells a stale MCP client config to run `npx @kitn.ai/kai mcp`, and the `files` entry with
+ * tells a stale MCP client config which package now serves the MCP, and the `files` entry with
  * it), and the entries above that name `dist/mcp.es.js` are dated records of what shipped
  * when. The reasons on those entries are now history rather than a description of the pack.
  *
@@ -625,6 +625,14 @@ if (SELF_TEST) {
  * shipped set, so a stale entry is an advisory, but a prefix that still admits
  * `frameworks/` would let the directory come back silently. The self-test's clean
  * pack fixture dropped the same path, so the case still describes what ships.
+ *
+ * RECORD, NOT CURRENT STATE: every name and byte count in this entry describes the tree on
+ * 2026-09-20 and is kept as the measurement that was taken then. The tree has since moved
+ * again -- the old `@kitn.ai/kai` package was split into `@kitn.ai/mcp` (packages/mcp, bin
+ * `kai-mcp`, which owns the MCP server's publishing) and `@kitn.ai/cli` (packages/cli, bin
+ * `kai`, the construct verbs plus create/add/doctor) -- so `packages/kai` in the sentences
+ * above is history rather than a path on disk. The sizes stay as measured; the ceilings
+ * below are the live claim.
  */
 const MAX_PACKED_BYTES = Math.floor(2.56 * 1024 * 1024); // 2.56 MiB = 2,684,354 B
 
