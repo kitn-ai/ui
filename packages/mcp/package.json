@@ -1,6 +1,6 @@
 {
   "name": "@kitn.ai/mcp",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "license": "MIT",
   "type": "module",
   "description": "The Model Context Protocol server for @kitn.ai/ui: component reference, scaffolder, theme and debug tools for any AI coding harness.",
@@ -52,7 +52,7 @@
     "verify:pack": "node scripts/verify-pack-weight.mjs --self-test && node scripts/verify-pack-weight.mjs"
   },
   "dependencies": {
-    "@kitn.ai/ui": "^0.33.0",
+    "@kitn.ai/ui": "^0.34.0",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "zod": "^4.4.3"
   },
