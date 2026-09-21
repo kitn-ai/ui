@@ -56,6 +56,8 @@ seen the kit's repository: a headless `claude -p` session (model
 - the kit's own `kai` MCP server over stdio
   (`node node_modules/@kitn.ai/ui/bin/mcp.js`, wired via `--mcp-config
   .mcp.json --strict-mcp-config`, the four `mcp__kai__*` tools allowed)
+  <!-- the path is a record of the run against 0.26.0 and is left as it was; the CLI
+       now lives in @kitn.ai/kai, so the current form is `npx @kitn.ai/kai mcp` -->
 - the sanctioned docs only: the package README, https://ui.kitn.ai, and the MCP
 
 No repo access, default permissions (no `--dangerously-skip-permissions`),

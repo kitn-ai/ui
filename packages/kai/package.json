@@ -21,6 +21,7 @@
     ],
     "targets": {
       "build": {
+        "dependsOn": [],
         "inputs": [
           "default",
           "{workspaceRoot}/packages/ui/mcp/**/*",
@@ -39,6 +40,7 @@
     "prepublishOnly": "npm run build",
     "typecheck": "tsc --noEmit",
     "verify:versions": "node scripts/verify-kit-range.mjs --self-test && node scripts/verify-kit-range.mjs",
+    "verify:bundle-shape": "node scripts/verify-bundle-shape.mjs --self-test && node scripts/verify-bundle-shape.mjs",
     "lint:cli-invocations": "node scripts/lint-cli-invocations.mjs --self-test && node scripts/lint-cli-invocations.mjs",
     "test": "vitest run"
   },

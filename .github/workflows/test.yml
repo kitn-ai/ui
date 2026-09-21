@@ -549,6 +549,17 @@ jobs:
       # artifact, never typed here -- the script prints what it actually ran.
       # --self-test runs first and proves the harness detects a spliced type
       # error and a hand-stripped registration before the real cells are trusted.
+      # @kitn.ai/kai owns the CLI this leg drives (`node packages/kai/bin/mcp.js eject`),
+      # and the kit-dist artifact this leg downloads carries packages/ui only. kai's build
+      # reads ui's SOURCES, not its dist, so it declares `dependsOn: []` and takes those
+      # trees as inputs -- building ui first would be wasted work on top of the download.
+      - name: Build the kai CLI (this leg runs its bin)
+        run: pnpm exec nx build kai
+
+      # Runs here because this is the one leg with the CLI's bundles on disk.
+      - name: Bundle-shape guard (both CLI bundles present, not empty, SDK external)
+        run: pnpm --filter @kitn.ai/kai run verify:bundle-shape
+
       - name: Construct engine emit chain (real eject + install + tsc + build + consumer bundle)
         run: pnpm --filter @kitn.ai/ui run verify:construct
 
