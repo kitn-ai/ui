@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.7.1](https://github.com/kitn-ai/ui/compare/create-kai-v0.7.0...create-kai-v0.7.1) (2026-09-21)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @kitn.ai/ui bumped to 0.35.0
+
 ## [0.7.0](https://github.com/kitn-ai/ui/compare/create-kai-v0.6.0...create-kai-v0.7.0) (2026-09-21)
 
 
