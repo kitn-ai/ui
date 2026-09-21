@@ -37,10 +37,11 @@
   ],
   "scripts": {
     "build": "KAI_BUILD=mcp vite build --config config/vite/node.ts && KAI_BUILD=construct-cli vite build --config config/vite/node.ts && KAI_BUILD=builder vite build --config config/vite/page.ts && KAI_BUILD=theme-studio vite build --config config/vite/page.ts",
-    "prepublishOnly": "npm run build",
+    "prepublishOnly": "npm run build && node scripts/verify-pack-weight.mjs",
     "typecheck": "tsc --noEmit",
     "verify:versions": "node scripts/verify-kit-range.mjs --self-test && node scripts/verify-kit-range.mjs",
     "verify:bundle-shape": "node scripts/verify-bundle-shape.mjs --self-test && node scripts/verify-bundle-shape.mjs",
+    "verify:pack": "node scripts/verify-pack-weight.mjs --self-test && node scripts/verify-pack-weight.mjs",
     "lint:cli-invocations": "node scripts/lint-cli-invocations.mjs --self-test && node scripts/lint-cli-invocations.mjs",
     "test": "vitest run"
   },

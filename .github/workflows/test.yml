@@ -577,6 +577,15 @@ jobs:
       - name: Bundle-shape guard (both CLI bundles present, not empty, SDK external)
         run: pnpm --filter @kitn.ai/kai run verify:bundle-shape
 
+      # The tarball's own shape, which the guard above does not look at: the four built outputs
+      # and both bins are IN it, nothing from node_modules is, and it has not changed size by a
+      # STEP. Until this existed, kai's 367,527 B pack had a ceiling only by inspection, and the
+      # failure it is aimed at (a dependency copied into dist/, or a dev page that started
+      # bundling the kit's dist) is invisible to a guard that reads the two Node bundles. Needs
+      # the build above, so it lives here rather than in the pre-build lint leg.
+      - name: Pack-weight guard (kai's tarball: required outputs in, no node_modules, no step)
+        run: pnpm --filter @kitn.ai/kai run verify:pack
+
       - name: Construct engine emit chain (real eject + install + tsc + build + consumer bundle)
         run: pnpm --filter @kitn.ai/ui run verify:construct
 
