@@ -92,7 +92,18 @@ const WAIVED = new Map([
  * rewriting an invocation in one would falsify it -- the same precedent as
  * `lint:cdn-pins`' `historical` waiver and `lint:layer-names`' archive exemption.
  */
-const DATED = ['docs/handoff/', 'docs/superpowers/', 'docs/research/', 'docs/proposals/', 'docs/decisions/', 'docs/provenance/', 'packages/ui/CHANGELOG.md'];
+const DATED = ['docs/handoff/', 'docs/superpowers/', 'docs/research/', 'docs/proposals/', 'docs/decisions/', 'docs/provenance/'];
+
+/**
+ * A generated release changelog is a RECORD, never a thing to fix: release-please writes it from
+ * commit SUBJECTS, so a subject that quoted a retired invocation lands in the changelog verbatim
+ * (`chore(cli): npx @kitn.ai/ui mcp -> npx @kitn.ai/cli mcp` is exactly such a subject, and it is a
+ * real one from this rename). This used to name `packages/ui/CHANGELOG.md` alone, which the SAME
+ * generator writes for every package -- the inconsistent version of the rule that blocked the
+ * 0.33.0 release in `lint:layer-names`, so it is a basename now, and a different .md in a package
+ * is still scanned.
+ */
+export const isGeneratedRecord = (path) => path.split('/').pop() === 'CHANGELOG.md';
 
 function* walk(dir) {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
@@ -136,6 +147,7 @@ export function findingsFor(files, { waived = WAIVED, dated = DATED } = {}) {
   for (const [path, contents] of Object.entries(files)) {
     if (waived.has(path)) continue;
     if (dated.some((prefix) => path.startsWith(prefix) || path === prefix)) continue;
+    if (isGeneratedRecord(path)) continue;
     for (const pattern of RETIRED_INVOCATIONS) {
       for (const match of contents.matchAll(pattern)) {
         const line = contents.slice(0, match.index).split('\n').length;
@@ -175,6 +187,17 @@ if (process.argv.includes('--self-test')) {
     ['a path to the stub bin is clean', probe({ 'x.md': 'node node_modules/@kitn.ai/ui/bin/mcp.js' }) === 0],
     ['a hyphenated word after the package is clean', probe({ 'x.md': 'the @kitn.ai/ui dev-tooling' }) === 0],
     ['a dated record is skipped', probe({ 'docs/handoff/2026-01-01-x.md': 'npx @kitn.ai/ui mcp' }) === 0],
+    [
+      'a GENERATED changelog is skipped, in any package (the generator writes all of them)',
+      ['packages/ui/CHANGELOG.md', 'packages/create-kai/CHANGELOG.md', 'packages/cli/CHANGELOG.md', 'CHANGELOG.md'].every(
+        (path) => probe({ [path]: 'npx @kitn.ai/ui mcp' }) === 0,
+      ),
+    ],
+    [
+      'a different .md in a package is still scanned',
+      probe({ 'packages/cli/notes.md': 'npx @kitn.ai/ui mcp' }) === 1 &&
+        probe({ 'packages/cli/changelog.md': 'npx @kitn.ai/ui mcp' }) === 1,
+    ],
     [
       'a waived file is skipped',
       probe({ 'packages/ui/bin/mcp.js': 'npx @kitn.ai/ui mcp -> npx @kitn.ai/cli mcp' }) === 0,
