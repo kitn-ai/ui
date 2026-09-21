@@ -3,8 +3,9 @@
 **Date:** 2026-09-21 · **Branch:** `chore/kai-followups` (based on `main` @ `743b6a0c`) ·
 **PR:** #383 · **Status:** §3.3, §3.4 and §3.5 of
 [`2026-09-21-after-382-and-next-work.md`](2026-09-21-after-382-and-next-work.md) are LANDED.
-§3.1 (the release) and §3.2 (the CLI consolidation) are NOT, and §3.2 needs a decision the start
-doc's price note does not price. Read that doc first; this one adds only what is new.
+§3.1 (the release) is DONE except for `@kitn.ai/kai@0.2.0`, which needs one owner action and is
+written up in §7.1; §3.2 (the CLI consolidation) is NOT built, because it needs a decision the
+start doc's price note does not price (§4 and §8). Read that doc first; this one adds what is new.
 
 ---
 
@@ -161,7 +162,54 @@ and `verify-starters` (network).
 
 ---
 
-## 7. The release, and what it actually took (in flight at the time of writing)
+## 7. The release, and what it actually took
+
+### 7.0 The outcome: two of three published
+
+**Live on the registry:** `@kitn.ai/ui@0.33.0` (dist-tag `latest`) and `create-kai@0.6.0`. The
+publish ORDER held (`ui` 16:19:26 -> `create-kai` 16:19:33 -> `kai` 16:19:36), the publish gate
+passed on genuinely green checks on `5ae91a14`, and `pnpm install --frozen-lockfile` passed inside
+the release job. `create-kai`'s pin guard is green on both sides (`node
+packages/create-kai/scripts/verify-pin.mjs`: tree `^0.33.0 -> 0.33.0`, published
+`^0.33.0 -> 0.33.0`, latest, not deprecated), which is the check that matters for the artefact a
+stranger's `npm create kai` pulls.
+
+**NOT published, and it cannot be by CI: `@kitn.ai/kai@0.2.0`.**
+
+```
+npm error code E404
+npm error 404 Not Found - PUT https://registry.npmjs.org/@kitn.ai%2fkai
+```
+
+This is an npm limitation, not a defect in our tree, and it will recur for the first release of
+ANY new package name: trusted publishing configures a PER-PACKAGE relationship on npmjs.com, a
+package that does not exist yet cannot have one, so the OIDC exchange yields no permission and npm
+reports it as a deliberately misleading 404 on PUT (npm/cli#8544 is the limitation, npm/cli#9088
+the misleading-error half; npm's own docs do not state it). The proof inside our own run: same job,
+same identity, same `--access public`, and the two packages that already existed published seconds
+apart while the one with no registry record did not. The tarball itself was complete - npm printed
+`total files: 12`, `dist/mcp.es.js` 616.4 kB, both dev pages, `bin/mcp.js` - and `prepublishOnly`
+ran all four bundles, so the latent `@kitn.ai/ui/schemas` failure from run 35611305071 did not
+recur.
+
+**The owner's one action:** `cd packages/kai && npm login && npm publish --access public`, then
+add the trusted publisher for `@kitn.ai/kai` on npmjs.com with the same repo/workflow triple the
+other two carry, so every later release goes back to OIDC. That first publish carries NO provenance
+attestation (provenance is what the OIDC exchange provides), so 0.2.0 is the one kai version
+without it; a temporary workflow job with a granular publish token and `--provenance` is the only
+way to have it. Afterwards, re-running the failed Release run goes green without republishing,
+because the loop skips any name@version already on the registry.
+
+**Registry propagation is slow and a 404 right after success means nothing:** `@kitn.ai/ui@0.33.0`
+answered `version not found` at 16:24:36 and appeared at 16:25:06, about six minutes after
+`npm publish` printed success.
+
+**The docs deploy is red, and it is the EXPECTED red.** Run `35623327612` failed at 16:07:49,
+twelve minutes BEFORE `0.33.0` existed, on `Preview entries are on the CDN (strict, gates the
+deploy)` naming `MISS wire.js -> 404` against the 0.33.0 CDN path. The gate was not weakened. It
+needs a re-run once jsdelivr ingests the version (`dist/wire.js` was still 404 and
+`dist/web-components/autoloader.js` 502 when measured afterwards); `deploy-docs.yml` takes
+`workflow_dispatch`, so that is a click, not a code change.
 
 ### 7.1 What happened
 
