@@ -246,6 +246,13 @@ jobs:
       - name: Kit dependency-range guard (@kitn.ai/kai -> @kitn.ai/ui)
         run: pnpm --filter @kitn.ai/kai run verify:versions
 
+      # Nothing else reads a CLI INVOCATION in prose: the docs suite, verify:docs (it
+      # resolves import specifiers), lint:cdn-pins (it reads `@kitn.ai/ui@<version>` pins)
+      # and lint:gate-parity all stayed green when the old command was put back into a
+      # docs page -- measured. No build, no network.
+      - name: Retired CLI-invocation guard (prose names @kitn.ai/kai)
+        run: pnpm --filter @kitn.ai/kai run lint:cli-invocations
+
       # Size budget for the committed llms-full.txt. The file is generated, so
       # it grows as a SIDE EFFECT of unrelated work -- a new web component, a fatter
       # doc comment, a new generated section -- and nothing else prices that

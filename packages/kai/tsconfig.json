@@ -12,5 +12,5 @@
     "resolveJsonModule": true,
     "allowImportingTsExtensions": true
   },
-  "include": ["config/**/*.ts", "scripts/**/*.mjs"]
+  "include": ["config/**/*.ts"]
 }

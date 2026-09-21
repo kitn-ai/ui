@@ -39,6 +39,7 @@
     "prepublishOnly": "npm run build",
     "typecheck": "tsc --noEmit",
     "verify:versions": "node scripts/verify-kit-range.mjs --self-test && node scripts/verify-kit-range.mjs",
+    "lint:cli-invocations": "node scripts/lint-cli-invocations.mjs --self-test && node scripts/lint-cli-invocations.mjs",
     "test": "vitest run"
   },
   "dependencies": {

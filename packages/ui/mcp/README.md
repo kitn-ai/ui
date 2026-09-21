@@ -102,8 +102,8 @@ engine standalone, with no MCP server involved at all.
 ## Usage
 
 - **`npx @kitn.ai/kai mcp`** starts the MCP server (the historical default
-  subcommand; it used to be `npx @kitn.ai/ui mcp`, and the kit still ships a stub
-  that names the new command). For wiring it into a multi-harness setup, see the
+  subcommand; it used to be the same command under the kit's own package, and the kit
+  still ships a stub that names the new one). For wiring it into a multi-harness setup, see the
   docs site's agents guide: `apps/docs/src/content/docs/guides/for-ai-agents.mdx`.
 - **CLI form**, no MCP: `npx @kitn.ai/kai validate|dev|compile|eject <construct.json>`
   (`packages/kai/bin/mcp.js` dispatches `dev`/`compile`/`eject`/`validate` to the

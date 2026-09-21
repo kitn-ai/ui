@@ -220,11 +220,16 @@ publish loop (all three hand-typed and NOTHING-guarded), and ~20 prose reference
 
 Still open from this, in order:
 
-1. **Nothing catches a stale CLI invocation in prose.** The docs sweep's own mutation proved it: putting
-   `npx @kitn.ai/ui mcp` back into an `.mdx` page leaves the docs suite, `verify:docs`, `lint:cdn-pins` and
-   `lint:gate-parity` all green. Only a grep finds it. A guard belongs here (scan the same roots
-   `lint:cdn-pins` does, exempt `packages/ui/bin/mcp.js` -- it names the old command as the INPUT side of
-   the migration message -- and the dated archive).
+1. **LANDED: a stale CLI invocation in prose is now caught.**
+   `packages/kai/scripts/lint-cli-invocations.mjs` scans ~2900 files across apps, packages,
+   examples, scripts and docs for `@kitn.ai/ui <mcp|dev|compile|eject|validate>`, in the required CI
+   lint leg. 11 self-test probes, including the two that were real defects in its first cut: a match
+   must run over the WHOLE file (a wrapped `npx @kitn.ai/ui\n  mcp` is line-broken markdown, and
+   line-by-line scanning missed it) and the trailing guard must not be `\b` (which matches between
+   `dev` and `-`, so `dev-tooling` fired). Mutation-proved on the real tree: planting the old command
+   in for-ai-agents.mdx turns it red naming `:18`, which the docs suite, `verify:docs`,
+   `lint:cdn-pins` and `lint:gate-parity` all accept in silence. Waivers are by exact path (the
+   migration stub, and the guard's own file) or by dated-archive prefix; a near-miss path still fires.
 2. **`serverInfo` still reports `@kitn.ai/ui`.** It is derived (it resolves the kit's package.json, so the
    version is right), and it is honest about the API the server describes, but the running package is now
    `@kitn.ai/kai`. Deciding that means deciding whether the agent should learn the CLI's version or the
