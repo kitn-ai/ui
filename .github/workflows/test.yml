@@ -128,6 +128,18 @@ jobs:
             console.log(`traversal suite reported ${m[1]} tests`);
           '
 
+      # BEFORE THE INSTALL, and that placement is the whole point. On the failure this exists for,
+      # `pnpm install --frozen-lockfile` is what fails -- so a guard sitting with the other lints
+      # (which all run AFTER the install) would never execute. It needs nothing but Node and the
+      # checkout: it READS pnpm-lock.yaml, it does not run pnpm, so the staleness cannot break it.
+      #
+      # WHY: release-please's node-workspace plugin rewrites the internal ranges in the release PR
+      # and does not regenerate the lockfile, so every leg of the merge commit dies ~30s in and the
+      # publish gate refuses on checks that can never go green. That happened on BOTH of the last
+      # two releases; this turns it into one named line with the one command that fixes it.
+      - name: Lockfile-specifier guard (manifests vs pnpm-lock.yaml)
+        run: node scripts/lint-lockfile-specifiers.mjs --self-test && node scripts/lint-lockfile-specifiers.mjs
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
