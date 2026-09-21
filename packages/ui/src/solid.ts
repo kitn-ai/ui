@@ -109,6 +109,15 @@ export { createPresence, usePosition, useDismiss } from './components/overlay/ov
 export type { UsePositionOptions, UseDismissOptions, DismissReason } from './components/overlay/overlay';
 export { PromptDock } from './components/prompt/prompt-dock';
 export type { PromptDockProps, PromptDockFrame, PromptDockAppearance } from './components/prompt/prompt-dock';
+// The two components a FACADE composes but neither entry exported: `kai-card`
+// renders CardSurface, `kai-prompt-input` renders DefaultPromptInput. Same
+// argument as PaneGrid above -- they are Solid building blocks a consumer
+// composing the same thing needs -- and `verify:solid-coverage` fails without
+// them (GAP kai-card / GAP kai-prompt-input, which is how this was found).
+export { CardSurface } from './components/card/card-surface';
+export type { CardSurfaceProps, CardAppearance, CardOrientation } from './components/card/card-surface';
+export { DefaultPromptInput } from './components/prompt/default-input';
+export type { DefaultPromptInputProps, RejectedAttachment } from './components/prompt/default-input';
 export { SettingsGroup, SettingItem } from './components/settings/settings-group';
 export type { SettingsGroupProps, SettingItemProps } from './components/settings/settings-group';
 export { RowGroup } from './components/row/row-group';
