@@ -356,7 +356,20 @@ measured or read, and each is here so it does not have to be re-derived.
    from NEITHER entry, so those snippets named symbols nobody could import"). It was NOT introduced by the
    dev-tooling peel: `git log 84b1c14f..HEAD -- src/solid.ts src/components/card src/components/prompt` is
    empty, so it came in with the earlier layering/security work and had simply never been run in that state.
-10. **Two guards exit 1 when run standalone, BY DESIGN, and both read as failures the first time:**
+11. **A stale SIDE-EFFECT import shipped on this branch, and only the browser job caught it.**
+    `src/components/conversation/conversation-item.stories.tsx` began with
+    `import '../web-components/register'` -- a path that lost a `..` AND its final segment in the
+    family-folder reorg, pointing at `src/components/web-components/register`, which does not exist. It is
+    the class CLAUDE.md already documents: tsc never reports an unresolved side-effect import in this
+    config, and the unit project excludes `*.stories.*`, so nothing but the storybook job can see it.
+    Fixed (`b7f84709`); the file now collects 9 tests where it collected 0.
+    **RECOMMENDED GUARD, not shipped:** a whole-tree sweep is ~40 lines (walk `src/mcp/tests/apps`, extract
+    statement-position relative specifiers, resolve with extension probing) and it found exactly one real
+    defect in 1150 files / 2990 specifiers. Measured false-positive classes it must handle first: a line
+    inside a TEMPLATE LITERAL that emits code for a generated project (`codegen.ts`'s
+    `import { App } from './App'`, a node-safety test's probe `'./${tsx}'`). Track template-literal state,
+    or restrict the first cut to side-effect imports (no `from`), which is the class tsc is blind to.
+12. **Two guards exit 1 when run standalone, BY DESIGN, and both read as failures the first time:**
     `verify:artifact-glob` needs `ARTIFACT_GLOB_BEFORE` (the pre-build snapshot, which CI sets) and
     `verify:fresh` needs a build to have run AFTER the last source edit (it compares mtimes and never a
     build exit code). Neither is a defect; both cost a debug cycle if you do not know.
