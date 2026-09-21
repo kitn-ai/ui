@@ -32,9 +32,15 @@ npx -y @kitn.ai/cli add support-widget   # no install at all
 ## doctor
 
 ```bash
-kai doctor          # human-readable
-kai doctor --json   # the findings, for a CI job or an agent
+kai doctor            # human-readable
+kai doctor --json     # the findings, for a CI job or an agent
+kai doctor --strict   # warnings fail the run too, for CI
 ```
+
+It also runs the MCP `debug` tool's rule set over your own source files — the forty-odd classic
+kai-* mistakes (an array prop set as an HTML attribute, a wrong import path, and so on) — reporting
+each matched rule with the files it matched and the fix. Those are warnings by default, since a rule
+matches a PATTERN and a doc example can look like the mistake; `--strict` makes them fail.
 
 It reports the CLI version and the kit it was built against, the kit range this project declares
 versus the version actually installed, whether `kai.json` is present, whether anything under `src/`

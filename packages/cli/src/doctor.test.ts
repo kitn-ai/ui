@@ -117,6 +117,41 @@ describe('diagnose', () => {
     expect(exitCodeFor(list)).toBe(0);
   });
 
+  it("runs the MCP debug tool's rules over the project's sources, naming the file", () => {
+    // The rule set is the asset the agent-facing `debug` tool was built around. Before this, ONLY
+    // an agent behind an MCP harness could reach it; the rule below is the classic one (array data
+    // set as an HTML attribute), and the point of the case is that it is reported by a CLI verb now.
+    const list = findings({
+      'package.json': JSON.stringify({ name: 'app', dependencies: { '@kitn.ai/ui': '^0.34.0' } }),
+      'node_modules/@kitn.ai/ui/package.json': JSON.stringify({ name: '@kitn.ai/ui', version: '0.34.0' }),
+      'src/widget.html': '<kai-chat messages="[]"></kai-chat>\n',
+    });
+    const rule = list.find((f) => f.title.includes('Array/object prop set as an HTML attribute'));
+    expect(rule, 'the rule did not fire on a project whose source carries the mistake').toBeTruthy();
+    expect(rule?.severity).toBe('warn');
+    expect(rule?.detail, 'the finding must name the file to open').toContain('src/widget.html');
+    expect(rule?.detail, 'and carry the fix the rule already knew').toContain('Set the property in JavaScript');
+  });
+
+  it('does not fire a rule on a project that does not carry it', () => {
+    const list = findings({
+      'package.json': JSON.stringify({ name: 'app', dependencies: { '@kitn.ai/ui': '^0.34.0' } }),
+      'node_modules/@kitn.ai/ui/package.json': JSON.stringify({ name: '@kitn.ai/ui', version: '0.34.0' }),
+      'src/main.ts': "import { Button } from '@kitn.ai/ui';\nimport '@kitn.ai/ui/theme.tokens.css';\n",
+    });
+    expect(list.some((f) => f.title.includes('Array/object prop set as an HTML attribute'))).toBe(false);
+  });
+
+  it('--strict turns a warning into a failure, and the default does not', () => {
+    const warnings = [{ severity: 'warn' as const, title: 'careful' }];
+    expect(exitCodeFor(warnings)).toBe(0);
+    expect(exitCodeFor(warnings, { strict: true })).toBe(1);
+    expect(exitCodeFor([{ severity: 'error' as const, title: 'broken' }])).toBe(1);
+    const lines: string[] = [];
+    expect(render(warnings, (line) => lines.push(line), { strict: true })).toBe(1);
+    expect(lines.join('\n')).toContain('fail this run');
+  });
+
   it('renders every finding with a severity mark and a one-line verdict', () => {
     const lines: string[] = [];
     const code = render(
