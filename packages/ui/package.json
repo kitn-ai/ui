@@ -53,10 +53,14 @@
     "solid-js"
   ],
   "license": "MIT",
+  "engines": {
+    "node": ">=20.19"
+  },
   "homepage": "https://ui.kitn.ai",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kitn-ai/ui.git"
+    "url": "git+https://github.com/kitn-ai/ui.git",
+    "directory": "packages/ui"
   },
   "bugs": {
     "url": "https://github.com/kitn-ai/ui/issues"

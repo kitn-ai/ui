@@ -235,6 +235,14 @@ jobs:
       - name: Layer-direction guard (no upward value import)
         run: pnpm --filter @kitn.ai/ui run lint:layer-direction
 
+      # Every PUBLISHED package carries the same npm metadata, and repository.directory names its
+      # own folder. npm prints neither a warning nor an error for absent metadata, so this drifted
+      # unnoticed: @kitn.ai/ui was missing repository.directory and engines.node while the three
+      # packages beside it had both. A missing engines.node is the worse half -- npm then prints no
+      # EBADENGINE warning for a Node version the package's own tools refuse.
+      - name: Package-metadata guard (published manifests agree)
+        run: node scripts/lint-package-metadata.mjs --self-test && node scripts/lint-package-metadata.mjs
+
       # Dangling-specifier guard: every STATEMENT-POSITION relative import in the tree
       # must resolve to a real file. tsc does NOT report an unresolved SIDE-EFFECT
       # import in this config, and the unit project excludes *.stories.*, so on
