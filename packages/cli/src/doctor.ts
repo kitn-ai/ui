@@ -1,8 +1,11 @@
 /**
  * `kai doctor`: diagnose ONE project's @kitn.ai/ui wiring. Read-only, offline, no network.
  *
- * WHAT IT IS FOR. The MCP's `debug` tool answers the same question for an AGENT, through the
- * kit's own manifest. This is the CLI face of it, plus the one fact an agent cannot see:
+ * WHAT IT IS FOR. The MCP's `debug` tool answers a DIFFERENT question for an AGENT -- it matches a
+ * pasted snippet against a rule set -- and the two are complementary rather than the same check
+ * phrased twice (measured: `debug` takes a snippet string, this reads a project off disk). What
+ * they share is the RULE SET, imported from `mcp/mcp/tools/debug-rules.ts` and run here over the
+ * project's own sources. And this adds the one fact an agent cannot see:
  * whether the `kai` in your PATH was built against an older kit than the app has. That is the
  * useful half of the "CLI vs kit skew" question -- a self-update verb would be a global-install
  * footgun, while REPORTING the skew is a fact somebody can act on.
@@ -19,7 +22,12 @@
  * reachable" question the user's problem.
  */
 import { readFileSync, readdirSync, statSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, relative } from 'node:path';
+// The MCP `debug` tool's rule set, imported from the kit's sources: the rules encode the classic
+// kai-* mistakes (sourced from for-ai-agents.mdx and context7.json), and until now ONLY the agent
+// could reach them. The module imports nothing -- no zod, no SDK -- so bundling it here costs the
+// rules and nothing else. See its own docblock.
+import { matchRules } from '../../ui/mcp/mcp/tools/debug-rules';
 
 const KIT = '@kitn.ai/ui';
 const MCP = '@kitn.ai/mcp';
@@ -102,10 +110,10 @@ function sourceFiles(dir: string, limit = 400): string[] {
   return out;
 }
 
-const readAll = (files: string[]): string[] =>
-  files.flatMap((f) => {
+const readAll = (files: string[]): { file: string; text: string }[] =>
+  files.flatMap((file) => {
     try {
-      return [readFileSync(f, 'utf8')];
+      return [{ file, text: readFileSync(file, 'utf8') }];
     } catch {
       return [];
     }
@@ -187,7 +195,7 @@ export function diagnose(input: DoctorInput): Finding[] {
   if (declared !== undefined) {
     const files = sourceFiles(join(input.cwd, 'src'));
     const contents = readAll(files);
-    const referencing = contents.filter((text) => text.includes(KIT)).length;
+    const referencing = contents.filter((c) => c.text.includes(KIT)).length;
     if (files.length > 0 && referencing === 0) {
       findings.push({
         severity: 'warn',
@@ -197,7 +205,31 @@ export function diagnose(input: DoctorInput): Finding[] {
     } else if (referencing > 0) {
       findings.push({ severity: 'ok', title: `${referencing} file(s) under src/ reference ${KIT}` });
     }
-    const styled = contents.some((text) => /theme\.tokens\.css|theme\.css|solid\.css/.test(text));
+    // THE MCP debug TOOL'S RULES, over this project's own sources. The rules are the asset the
+    // agent-facing tool was built around and the human-facing verb could not reach; `matchRules` is
+    // one implementation both call, so a rule added for the agent shows up here the same day.
+    //
+    // A rule's `test` is a boolean over a whole text, so the report names FILES rather than lines:
+    // the tool has never carried match offsets, and inventing them by re-running someone else's
+    // regex would be a second implementation of the rule. Up to three files per rule, then a count.
+    const hitByRule = new Map();
+    for (const { file, text } of contents) {
+      for (const rule of matchRules(text)) {
+        if (!hitByRule.has(rule.id)) hitByRule.set(rule.id, { rule, files: [] });
+        hitByRule.get(rule.id).files.push(relative(input.cwd, file));
+      }
+    }
+    for (const { rule, files: hits } of hitByRule.values()) {
+      const shown = hits.slice(0, 3).join(', ');
+      const more = hits.length > 3 ? ` (and ${hits.length - 3} more file(s))` : '';
+      findings.push({
+        severity: 'warn',
+        title: `${rule.title} — ${hits.length} file(s) under src/`,
+        detail: `${shown}${more}\n${rule.fix}`,
+      });
+    }
+
+    const styled = contents.some((c) => /theme\.tokens\.css|theme\.css|solid\.css/.test(c.text));
     if (files.length > 0 && !styled) {
       findings.push({
         severity: 'info',
@@ -221,15 +253,29 @@ export function diagnose(input: DoctorInput): Finding[] {
   return findings;
 }
 
-/** The exit code a doctor run implies: 1 when something is broken, 0 otherwise. */
-export function exitCodeFor(findings: Finding[]): number {
-  return findings.some((f) => f.severity === 'error') ? 1 : 0;
+/**
+ * The exit code a doctor run implies: 1 when something is broken, 0 otherwise.
+ *
+ * `strict` makes WARNINGS fail too, which is the caller's decision rather than ours -- the kit
+ * decides how a finding is classified, the app decides whether it blocks a build. A `warn` is
+ * deliberately not an error by default: the rule set matches PATTERNS, and a project's source may
+ * legitimately contain a snippet (a doc example, a fixture) that looks like the mistake. `--strict`
+ * is the flag for a CI job that would rather be wrong loudly than quiet.
+ */
+export function exitCodeFor(findings: Finding[], { strict = false } = {}): number {
+  if (findings.some((f) => f.severity === 'error')) return 1;
+  if (strict && findings.some((f) => f.severity === 'warn')) return 1;
+  return 0;
 }
 
 const MARK: Record<Severity, string> = { ok: '✓', info: '·', warn: '!', error: '✗' };
 
 /** Print the findings, then a summary that says what the exit code means. */
-export function render(findings: Finding[], out: (line: string) => void = console.log): number {
+export function render(
+  findings: Finding[],
+  out: (line: string) => void = console.log,
+  { strict = false } = {},
+): number {
   for (const finding of findings) {
     out(`${MARK[finding.severity]} ${finding.title}`);
     if (finding.detail) out(`    ${finding.detail}`);
@@ -240,7 +286,9 @@ export function render(findings: Finding[], out: (line: string) => void = consol
   out(
     errors > 0
       ? `✗ kai doctor: ${errors} problem(s)${warns > 0 ? `, ${warns} warning(s)` : ''}.`
-      : `✓ kai doctor: no problems${warns > 0 ? `, ${warns} warning(s)` : ''}.`,
+      : strict && warns > 0
+        ? `✗ kai doctor --strict: no problems, but ${warns} warning(s) fail this run.`
+        : `✓ kai doctor: no problems${warns > 0 ? `, ${warns} warning(s)` : ''}.`,
   );
-  return exitCodeFor(findings);
+  return exitCodeFor(findings, { strict });
 }

@@ -40,6 +40,8 @@ Usage
   kai add --list             print the blocks this release ships
 
   kai doctor                 diagnose this project's kit wiring, versions and registration
+  kai doctor --strict        the same, but warnings fail the run (for CI)
+  kai doctor --json          the findings, for a CI job or an agent
 
   kai mcp                    run the MCP server for AI coding harnesses (@kitn.ai/mcp)
   kai dev <construct.json>   live preview with reload-on-edit
