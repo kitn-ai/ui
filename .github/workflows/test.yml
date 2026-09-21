@@ -583,7 +583,7 @@ jobs:
       # failure it is aimed at (a dependency copied into dist/, or a dev page that started
       # bundling the kit's dist) is invisible to a guard that reads the two Node bundles. Needs
       # the build above, so it lives here rather than in the pre-build lint leg.
-      - name: Pack-weight guard (kai's tarball: required outputs in, no node_modules, no step)
+      - name: Pack-weight guard (kai tarball, required outputs in, no node_modules, no step)
         run: pnpm --filter @kitn.ai/kai run verify:pack
 
       - name: Construct engine emit chain (real eject + install + tsc + build + consumer bundle)
