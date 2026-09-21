@@ -238,6 +238,15 @@ jobs:
       - name: CDN version-pin staleness guard (docs, README, examples)
         run: pnpm --filter @kitn.ai/ui run lint:cdn-pins
 
+      # The three release literals are hand-typed and NOTHING else reads them
+      # (docs/coupling-map.md §1): release-please-config.json's packages{}, .release-please-
+      # manifest.json, and the publish loop. A package added to one and forgotten in another
+      # is never released or never published, silently. This derives the published set from
+      # packages/*/package.json, checks all three in both directions, and holds the publish
+      # ORDER (a package depending on another must come after it). No build, no network.
+      - name: Release-wiring guard (published packages vs the three literals)
+        run: pnpm --filter @kitn.ai/ui run lint:release-wiring
+
       # @kitn.ai/kai depends on @kitn.ai/ui, and the MCP describes the kit it resolves
       # at runtime -- so a stale range points every agent at an API the app may not
       # have. The range cannot be a `workspace:` spec: npm has no such protocol and
