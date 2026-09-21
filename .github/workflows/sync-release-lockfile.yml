@@ -1,0 +1,61 @@
+name: Sync release lockfile
+
+# Keeps release-please's release PR MERGEABLE.
+#
+# WHY THIS EXISTS, and it is two releases of evidence. release-please's `node-workspace` plugin
+# rewrites the internal dependency ranges in the release PR -- pre-1.0 a caret cannot cross a minor,
+# so `@kitn.ai/mcp`'s kit range and `@kitn.ai/cli`'s create-kai range both have to move every minor
+# release -- and it does NOT regenerate `pnpm-lock.yaml`. The lockfile's importer entries keep the
+# old specifiers, so on the release commit:
+#
+#   ERR_PNPM_OUTDATED_LOCKFILE  Cannot install with "frozen-lockfile" because pnpm-lock.yaml is
+#   not up to date with <ROOT>/packages/mcp/package.json
+#
+# fails EVERY leg about 30s in, the required checks on the SHA being published are therefore
+# terminally red, and the publish gate (correctly) refuses. Both the 0.33.0 and the 0.34.0 releases
+# needed a hand-made lockfile-only commit plus a fresh dispatch to get out.
+#
+# So this regenerates the lockfile ON the release branch, where release-please puts it, and the PR
+# arrives mergeable. `scripts/lint-lockfile-specifiers.mjs` (required CI, before the install step)
+# is the other half: it names the failure in one line on any branch that is not the release branch.
+#
+# IT CANNOT LOOP. It commits only when the regenerated file actually differs, so the second run
+# finds nothing to do and pushes nothing -- and a push made with GITHUB_TOKEN does not trigger
+# workflows at all. Both facts are load-bearing, and neither is left to chance: the early exit is
+# the first thing the shell does after the regeneration.
+on:
+  push:
+    branches: ['release-please--branches--main']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      # No `--frozen-lockfile`: regenerating is the point.
+      - run: pnpm install --lockfile-only
+
+      - name: Commit the regenerated lockfile, or report that there was nothing to do
+        run: |
+          if git diff --quiet -- pnpm-lock.yaml; then
+            echo "pnpm-lock.yaml already matches every manifest: nothing to sync."
+            exit 0
+          fi
+          echo "regenerating pnpm-lock.yaml for the bumped ranges:"
+          git --no-pager diff --stat -- pnpm-lock.yaml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add pnpm-lock.yaml
+          git commit -m 'chore(release): regenerate the lockfile for the bumped internal ranges'
+          git push
