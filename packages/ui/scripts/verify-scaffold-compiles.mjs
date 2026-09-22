@@ -1639,6 +1639,236 @@ async function attachmentStagingCheck(scaffold, attachmentEmitPlan) {
 }
 
 /**
+ * The FRONT-END block with the prose sections that follow it removed.
+ *
+ * `frontEnd()` already cuts at block (2) BACKEND ROUTE, so on a well-formed
+ * scaffold this is just `frontEnd`. The second cut is the one that matters for
+ * the assertions below: the LOADING OPTIONS note TELLS the reader to write
+ * `import '@kitn.ai/ui/web-components/chat'`, so a substring search over the
+ * whole scaffold is satisfied by the documentation of an import rather than by
+ * the import. It also keeps the TOAST pattern's own `import { toast } from
+ * '@kitn.ai/ui/web-components'` (a deliberate barrel import, NOT scaffold output)
+ * out of the barrel check.
+ * (`scaffold.test.ts` builds the same split by hand for the same reason.)
+ */
+function frontEndCode(text) {
+  return frontEnd(text).split(FRONT_END_CODE_END)[0];
+}
+const FRONT_END_CODE_END = '=== (3) RUN NOTE ===';
+
+/**
+ * The two frameworks whose emitted app registers NO custom element, so it has
+ * nothing to import.
+ *
+ *   · `next` loads the generated React wrappers through `next/dynamic`
+ *     (scaffold.ts:3059, the `import dynamic from 'next/dynamic'` in renderJsx's
+ *     next branch) and every wrapper lazy-registers ITS element on first
+ *     client mount (`frameworks/react/runtime.tsx:65` `ensureRegistered`, called
+ *     at `:188`), so its front end imports no web components at all.
+ *   · `solid` composes the SolidJS components directly (the kit is authored in
+ *     Solid), so no custom element is defined there either.
+ *
+ * The scaffolder's own loading-options note names exactly these two as the
+ * exceptions to its "what THIS scaffold emits" description (scaffold.ts:6619-6643,
+ * the `defaultLoadNote` block in `compose`), and that note is the tree knowledge
+ * this list records: there is no registry, export or catalog field that enumerates
+ * them.
+ *
+ * `perTagRegistrationCheck` re-derives the claim from the emitted text on every
+ * run, because a skip that has quietly stopped being true is a target nothing
+ * checks. The moment either of these emits a per-tag import, it has to be checked
+ * rather than skipped, and this list fails instead of absorbing it.
+ */
+const NO_REGISTRATION_FRAMEWORKS = ['next', 'solid'];
+
+/**
+ * A per-tag registration import, in either shape (static `import '…/chat'` or
+ * `void import('…/chat')`) and either quote style. Used by the stale-skip guard
+ * only; the positive assertions test one named entry at a time.
+ */
+const PER_TAG_REGISTRATION_IMPORT = /['"]@kitn\.ai\/ui\/web-components\/[a-z0-9-]+['"]/;
+
+/**
+ * The register-all barrel in its VALUE-import forms, all three of which this
+ * design removes. The subpath must NOT match: the closing quote has to follow
+ * `web-components` immediately, so `…/web-components/chat'` is a wanted import
+ * and not one of these.
+ *
+ * An `import type { KaiChatElement } from '@kitn.ai/ui/web-components'` is
+ * deliberately absent from this list. The emitted code types `ref`s with the
+ * element interfaces, so a TYPE-ONLY import of the barrel is expected and stays
+ * (the negative lookahead in the second pattern is what keeps it out).
+ */
+const BARREL_VALUE_IMPORT = [
+  /^[ \t]*import\s*'@kitn\.ai\/ui\/web-components'/m,
+  /^[ \t]*import\s+(?!type\b)[^;]*from\s*'@kitn\.ai\/ui\/web-components'/m,
+  /(?:^|[^\w.])import\(\s*'@kitn\.ai\/ui\/web-components'\s*\)/m,
+];
+
+/**
+ * tag -> entry basename, straight from the kit's own manifest.
+ *
+ * NOT derived by stripping `kai-`: ten of the 96 entries do not follow the tag
+ * name (`kai-conversations -> conversation-list`, `kai-sources -> source`,
+ * `kai-context -> context-meter`), so a stripped name asks a bundler for a
+ * subpath the package does not export, and that surfaces in the CONSUMER's build,
+ * not here. Same refusal to re-type a list the tree already knows as
+ * `messagePartVariants` and the block/archetype axes above.
+ */
+function webComponentEntries() {
+  const file = resolve(ROOT, 'src/web-components/web-component-manifest.json');
+  if (!existsSync(file)) fail(`cannot derive the kai-* entry basenames: ${file} does not exist.`);
+  const manifest = JSON.parse(readFileSync(file, 'utf8'));
+  const tags = manifest?.tags;
+  if (!tags || Object.keys(tags).length === 0)
+    fail(`\`tags\` is missing or empty in ${file}, so the per-tag import check would be derived from nothing.`);
+  return tags;
+}
+
+/**
+ * THE FRONT END REGISTERS ONLY THE TAGS IT PLACES.
+ *
+ * A scaffolded app used to import the register-all barrel, so a page placing one
+ * `<kai-chat>` shipped `dist/register-impl-<hash>.js`: every custom element the kit
+ * has, 742 kB raw / 213 kB gzip. The per-tag entries under
+ * `@kitn.ai/ui/web-components/<entry>` are the fix, and this is the half tsc
+ * cannot see: `import '@kitn.ai/ui/web-components'` type-checks exactly as well
+ * as the per-tag line beside it, and every other check in this file passes over an
+ * app that registers 96 elements to render one.
+ *
+ * Two assertions, per web-components framework x integration x surface:
+ *
+ *   1. every entry `emittedTags(surface.components)` needs is imported. A missing
+ *      entry is an element that never upgrades: the tag stays an inert unknown
+ *      element and renders NOTHING, in the consumer's app, with no error anywhere.
+ *      That is the same failure mode `solidPartCoverageCheck` exists for. A tag the kit
+ *      renders internally (`kai-message` rides in with `chat`) is covered by the
+ *      entry it arrives with, which is what `emittedTags` already accounts for;
+ *      `kai-resizable` and `kai-resizable-item` share the `resizable` entry, so a
+ *      split surface needs ONE line for both. A tag the manifest has no entry for
+ *      is a hard failure here rather than a silently unupgraded element.
+ *   2. no VALUE import of the barrel survives (see BARREL_VALUE_IMPORT).
+ *
+ * DERIVED, THREE TIMES: the tag list from the scaffolder's own `emittedTags`, so
+ * the two sides cannot disagree about which tags a surface places; the tag ->
+ * entry map from the kit's manifest; and the framework set from FRAMEWORKS minus
+ * the two targets that register nothing. Nothing here is a hand-typed list of
+ * entries, so a new web component, a renamed entry or a new framework moves this
+ * gate on its own, and the counts are printed rather than asserted.
+ *
+ * WHY IT IS WORTH ITS RUNTIME. The emitted app is one `create-kai` run away from
+ * a consumer whose chat renders an empty box, and neither `tsc` nor any test in
+ * this repo reads the import list of a scaffold. The generation is cheap (no
+ * compile), so the whole FRAMEWORKS x SURFACES x INTEGRATIONS matrix runs here.
+ */
+async function perTagRegistrationCheck(scaffold, emittedTags) {
+  const entryOf = webComponentEntries();
+  const failures = [];
+  let checked = 0;
+  let skipped = 0;
+
+  const registrationFrameworks = FRAMEWORKS.filter((f) => !NO_REGISTRATION_FRAMEWORKS.includes(f));
+  if (registrationFrameworks.length === 0) {
+    cleanup();
+    fail('NO_REGISTRATION_FRAMEWORKS covers every framework in FRAMEWORKS, so this check would assert nothing.');
+  }
+
+  for (const surface of SURFACES) {
+    // entry basename -> the tags of THIS surface that ride on it, so a failure
+    // message can name the tag the consumer would find dead.
+    const entries = new Map();
+    for (const tag of emittedTags(surface.components)) {
+      const entry = entryOf[tag];
+      if (!entry) {
+        cleanup();
+        fail(
+          `surface '${surface.id}' places <${tag}>, which the kit's manifest gives no entry for.\n` +
+            '  A tag with no entry cannot be imported on its own (kai-remote is opt-in and has none),\n' +
+            '  so emitting it hands the consumer an app that never upgrades. Fix the surface, not\n' +
+            '  this check: silently dropping the tag is the failure this assertion exists to stop.',
+        );
+      }
+      if (!entries.has(entry)) entries.set(entry, []);
+      entries.get(entry).push(tag);
+    }
+    if (entries.size === 0)
+      failures.push(
+        `emittedTags([${surface.components.join(', ')}]) is empty for '${surface.id}', so every ` +
+          'assertion about that surface is vacuous',
+      );
+
+    for (const integration of INTEGRATIONS) {
+      for (const framework of FRAMEWORKS) {
+        const label = `${surface.id}__${integration}__${framework}`;
+        if (FILTER && !label.includes(FILTER)) continue;
+        const out = await scaffold.handler({
+          components: surface.components,
+          integration,
+          placement: 'full-page',
+          framework,
+        });
+        // Whole-line `//` comments go first: the emitted PROSE talks about the
+        // imports it recommends, and a documentation mention must not satisfy an
+        // assertion about an import.
+        const front = frontEndCode(out.content[0].text).replace(/^[ \t]*\/\/.*$/gm, '');
+
+        if (NO_REGISTRATION_FRAMEWORKS.includes(framework)) {
+          skipped++;
+          // The skip has to stay TRUE. A framework that starts emitting a
+          // registration import must be checked, not skipped: this is the one
+          // place where the derived framework set can go stale, and the quiet
+          // version of that is a target nothing covers.
+          const stray = PER_TAG_REGISTRATION_IMPORT.exec(front);
+          if (stray)
+            failures.push(
+              `${label}: listed in NO_REGISTRATION_FRAMEWORKS but the front end imports ${stray[0]}, so ` +
+                're-derive that list: this target needs checking now',
+            );
+          continue;
+        }
+
+        checked++;
+        for (const [entry, tags] of entries) {
+          // Either quote style: this gate is about WHICH module is imported, and
+          // the exact bytes of the line are pinned in `scaffold.test.ts`.
+          if (!new RegExp(`['"]@kitn\\.ai\\/ui\\/web-components\\/${entry}['"]`).test(front))
+            failures.push(
+              `${label}: no import of '@kitn.ai/ui/web-components/${entry}' for <${tags.join('> <')}>, and ` +
+                'an unregistered kai-* tag is an inert element that renders nothing at all',
+            );
+        }
+        for (const barrel of BARREL_VALUE_IMPORT) {
+          const m = barrel.exec(front);
+          if (m)
+            failures.push(
+              `${label}: \`${m[0].trim()}\` imports the register-all barrel into a scaffold that ` +
+                `places ${entries.size} of the ${Object.keys(entryOf).length} entries ` +
+                `(${[...entries.keys()].join(', ')})`,
+            );
+        }
+      }
+    }
+  }
+
+  if (!FILTER && checked === 0)
+    failures.push(
+      'no web-components cell was checked: the axes are empty or every framework is skipped, ' +
+        'which makes every assertion above vacuous',
+    );
+
+  if (failures.length) {
+    for (const f of failures) console.log(`  ✗ ${f}`);
+    cleanup();
+    fail(`${failures.length} per-tag registration problem(s) across ${checked} scaffolds.`);
+  }
+  console.log(
+    `  ✓ ${checked} scaffolds (${registrationFrameworks.join(', ')} x ${SURFACES.length} surfaces x ` +
+      `${INTEGRATIONS.length} integrations): one entry import per tag the surface places, no barrel ` +
+      `value import; ${skipped} skipped (${NO_REGISTRATION_FRAMEWORKS.join(', ')} register nothing)`,
+  );
+}
+
+/**
  * Fill the two catalog axes from the registry itself.
  *
  * Bundled with esbuild for the same reason the scaffolder is: it is TypeScript
@@ -1821,7 +2051,15 @@ async function main() {
     outfile: bundle,
     logLevel: 'error',
   });
-  const { scaffold, cardEmitPlan, attachmentEmitPlan } = await import(pathToFileURL(bundle).href);
+  const { scaffold, cardEmitPlan, attachmentEmitPlan, emittedTags } = await import(pathToFileURL(bundle).href);
+  if (typeof emittedTags !== 'function')
+    fail(
+      'the scaffolder no longer exports `emittedTags`.\n' +
+        '  perTagRegistrationCheck derives the tags a surface places from it rather than from a\n' +
+        '  second list here. Refusing to skip: that check is the only thing that reads the import\n' +
+        '  list of a scaffold at all, and a scaffold that registers the wrong elements renders\n' +
+        '  an empty box in the consumer app with nothing red anywhere.',
+    );
   if (typeof attachmentEmitPlan !== 'function')
     fail(
       'the scaffolder no longer exports `attachmentEmitPlan`.\n' +
@@ -1845,6 +2083,7 @@ async function main() {
   await solidSpeakerSemanticsCheck(scaffold);
   await cardRoundTripCheck(scaffold, cardEmitPlan);
   await attachmentStagingCheck(scaffold, attachmentEmitPlan);
+  await perTagRegistrationCheck(scaffold, emittedTags);
 
   const cases = [];
   for (const surface of SURFACES)
