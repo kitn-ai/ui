@@ -24,6 +24,7 @@ import pc from 'picocolors';
 
 import { runAdd } from './add';
 import { runInit } from './init';
+import { runUpgrade } from './upgrade';
 import { ZERO_CONFIG, defaultNameForTarget, normalizeGateway, parseArgs, validateProjectName } from './args';
 import { answerAxis, gatewayAxis, layoutAxis } from './axes';
 import type { AxisIo } from './axes';
@@ -134,6 +135,17 @@ async function main(): Promise<number> {
       kitRange: DEFAULT_KIT_RANGE,
       interactive: Boolean(process.stdout.isTTY),
       io: clackAxisIo,
+      out: (line) => console.log(line),
+      error: (line) => console.error(pc.red(line)),
+    });
+  }
+
+  // `upgrade` is the fourth door: it re-diffs what the scaffolder wrote for a project, using the
+  // baseline recorded in kai.json, and never touches a file its user edited. See src/upgrade.ts.
+  if (rawArgv[0] === 'upgrade') {
+    return runUpgrade(rawArgv.slice(1), {
+      cwd: process.cwd(),
+      kitRange: DEFAULT_KIT_RANGE,
       out: (line) => console.log(line),
       error: (line) => console.error(pc.red(line)),
     });

@@ -22,6 +22,7 @@ npx -y @kitn.ai/cli add support-widget   # no install at all
 | `kai add <block>` | writes a block from the registry into an existing project |
 | `kai add --list` | prints the blocks this release ships |
 | `kai init [--form <id>]` | makes an EXISTING project kai-aware: adds the kit at this CLI's pin and prints the wiring that framework needs |
+| `kai upgrade [--write]` | brings a SCAFFOLDED project up to the template this CLI emits: it replaces the files you never touched and reports the ones you edited. `--strict` exits non-zero on drift |
 | `kai doctor` | diagnoses this project's kit wiring, versions and registration |
 | `kai mcp` | runs the MCP server for an AI coding harness, if that package is installed |
 | `kai dev <construct.json>` | live preview with reload-on-edit |
