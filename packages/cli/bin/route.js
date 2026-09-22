@@ -7,9 +7,9 @@
 //   'local'      -- a bundle inside THIS package. dev/compile/eject/validate are the
 //                   construct engine; doctor is the wiring diagnosis.
 //   'forward'    -- a SEPARATE published program, launched by resolving that package's
-//                   bin and spawning it with this process's stdio. create/add are
-//                   `create-kai`'s wizard and block registry (the same implementation
-//                   `npm create kai` runs), and mcp is `@kitn.ai/mcp`'s server. They are
+//                   bin and spawning it with this process's stdio. create/add/init are
+//                   `create-kai`'s (the same implementation `npm create kai` runs), and
+//                   mcp is `@kitn.ai/mcp`'s server. They are
 //                   not bundled into this package because neither belongs to its install
 //                   weight: create-kai is the scaffolder npm's own `create` convention
 //                   reaches, and the MCP is the only thing carrying the 5.9 MB SDK.
@@ -27,6 +27,7 @@ export const CONSTRUCT_COMMANDS = ['dev', 'compile', 'eject', 'validate'];
 export const KNOWN_COMMANDS = [
   'create',
   'add',
+  'init',
   'doctor',
   'mcp',
   ...CONSTRUCT_COMMANDS,
@@ -51,6 +52,8 @@ export function decideEntry(command, rest = []) {
   // wizard is the from-scratch door, `add` the into-an-existing-project door.
   if (command === 'create') return { kind: 'forward', pkg: 'create-kai', args: rest };
   if (command === 'add') return { kind: 'forward', pkg: 'create-kai', args: ['add', ...rest] };
+  // `init` makes an EXISTING project kai-aware: it merges the dependency and prints the wiring.
+  if (command === 'init') return { kind: 'forward', pkg: 'create-kai', args: ['init', ...rest] };
   if (command === 'mcp') return { kind: 'forward', pkg: '@kitn.ai/mcp', args: [] };
   if (command === 'doctor') return { kind: 'local', verb: 'doctor' };
   if (CONSTRUCT_COMMANDS.includes(command)) return { kind: 'local', verb: 'construct' };

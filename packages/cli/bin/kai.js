@@ -38,6 +38,7 @@ Usage
   kai create [dir]           scaffold a project (the same wizard as \`npm create kai\`)
   kai add <block>            write a block from the registry into an existing project
   kai add --list             print the blocks this release ships
+  kai init [--form <id>]     make an EXISTING project kai-aware: add the kit and print the wiring
 
   kai doctor                 diagnose this project's kit wiring, versions and registration
   kai doctor --strict        the same, but warnings fail the run (for CI)
