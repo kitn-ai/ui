@@ -2688,6 +2688,7 @@ _No events._
 | `defaultOpen` | `default-open` | `undefined \| false \| true` | Initial open state on mount (uncontrolled seed). |
 | `disabled` | `disabled` | `undefined \| false \| true` | Take away the PROGRAMMATIC open path only: `show()` becomes a no-op and `toggle()` closes rather than opens. The trigger, the `open` attribute and `hide()` are untouched. These are the disclosure semantics every overlay in the kit shares; see ../disclosure. |
 | `label` | `label` | `undefined \| string` | Accessible name for the modal (`aria-label`), for a lightbox whose content carries no heading. Without one the panel is an UNNAMED `role="dialog"`, which is a WCAG failure, so name it. |
+| `showClose` | `show-close` | `undefined \| false \| true` | Show the close (X) button in the modal's top-right corner. ON WHEN ABSENT: this is a default-true flag, so `show-close`, `show-close="true"` and `el.showClose = true` all mean ON, and the only ways to turn it OFF are `show-close="false"` and `el.showClose = false`. Escape, a backdrop click and `hide()` dismiss the modal either way. |
 
 **Events** (non-bubbling `CustomEvent`s — listen directly on the element):
 
@@ -2717,6 +2718,7 @@ _No events._
 | `::part(backdrop)` | The full-area scrim behind the zoomed media. Darken, blur or recolor it from outside; it is what dims the page the modal covers. — `kai-lightbox::part(backdrop) { background: rgb(0 0 0 / 0.8) }` |
 | `::part(panel)` | The centered modal panel that shrink-wraps your media (the `85vh`/`90vw` image clamp lives here, not on your markup). Cap its width or round its corners from outside. — `kai-lightbox::part(panel) { max-width: 90vw }` |
 | `::part(body)` | The region holding whatever you put in `slot="content"`. Padding is zeroed by default so the clamp is the viewport rather than viewport-minus-padding; add an inset from outside. — `kai-lightbox::part(body) { padding: 0.5rem }` |
+| `::part(close)` | The close (X) button in the panel's top-right corner. On by default; remove it with `show-close="false"` rather than CSS. Recolor, reposition or resize it from outside. — `kai-lightbox::part(close) { background: var(--color-background) }` |
 
 ---
 

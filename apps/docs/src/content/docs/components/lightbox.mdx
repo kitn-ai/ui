@@ -46,6 +46,8 @@ Set `open` (or `default-open`) to drive it yourself and leave the trigger slot e
 </kai-lightbox>
 ```
 
+The modal carries its own close (X) button in the panel's top-right corner, on by default — it is the affordance a pointer user looks for first, and it reports through `kai-open-change` like Escape and the backdrop. Pass `show-close="false"` when the trigger or a host control already dismisses the modal, and style it with `kai-lightbox::part(close)`.
+
 ## Examples
 
 ### A thumbnail that opens

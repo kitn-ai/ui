@@ -31,13 +31,14 @@ const renderLightbox = (props: {
   open?: boolean;
   defaultOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
+  showClose?: boolean;
 } = {}) =>
   render(() => (
-    <Lightbox {...props}>
+    <Lightbox open={props.open} defaultOpen={props.defaultOpen} onOpenChange={props.onOpenChange}>
       <LightboxTrigger>
         <img alt="Thumbnail" src={IMAGE} />
       </LightboxTrigger>
-      <LightboxContent label="Photo preview">
+      <LightboxContent label="Photo preview" showClose={props.showClose}>
         <img alt="Full size" src={IMAGE} />
       </LightboxContent>
     </Lightbox>
@@ -48,6 +49,9 @@ const renderLightbox = (props: {
  *  stops resolving. */
 const trigger = () => screen.getByRole('button', { name: 'Thumbnail' });
 const backdrop = () => document.querySelector('[part="backdrop"]') as HTMLElement;
+/** The panel's own close control, scoped to the dialog: the trigger is also a
+ *  `role="button"`, and it sits outside the portaled panel. */
+const closeButton = () => within(screen.getByRole('dialog')).getByRole('button', { name: 'Close' });
 
 describe('Lightbox', () => {
   it('renders the trigger and nothing else while closed', () => {
@@ -166,6 +170,57 @@ describe('Lightbox', () => {
     ));
 
     expect(trigger().className).toContain('block');
+  });
+});
+
+/**
+ * The optional close control. Escape, the backdrop and a host control all dismiss
+ * this modal, so the X is a convenience — which is exactly why it needs pinning in
+ * BOTH directions: one that never renders, and one that renders when it was turned
+ * off, are both invisible to every assertion above.
+ */
+describe('Lightbox close control', () => {
+  it('renders an X inside the panel by default and closes through it', async () => {
+    const onOpenChange = vi.fn();
+    renderLightbox({ defaultOpen: true, onOpenChange });
+
+    const dialog = screen.getByRole('dialog');
+    const close = closeButton();
+    // Published for consumers, positioned against the PANEL it closes.
+    expect(close).toHaveAttribute('part', 'close');
+    expect(close.className).toContain('absolute');
+    expect(dialog.className).toContain('relative');
+
+    fireEvent.click(close);
+    await tick();
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(onOpenChange).toHaveBeenLastCalledWith(false);
+  });
+
+  it('stays out of the dialog accessible name, which is the label', () => {
+    renderLightbox({ defaultOpen: true });
+
+    expect(screen.getByRole('dialog', { name: 'Photo preview' })).toBeInTheDocument();
+  });
+
+  it('renders no close control at all for showClose={false}', () => {
+    renderLightbox({ defaultOpen: true, showClose: false });
+
+    const dialog = screen.getByRole('dialog');
+    expect(within(dialog).queryByRole('button')).not.toBeInTheDocument();
+    // The modal is still the modal: only the affordance is gone.
+    expect(within(dialog).getByAltText('Full size')).toBeInTheDocument();
+  });
+
+  it('leaves the trigger working with the close control off', () => {
+    renderLightbox({ showClose: false });
+
+    fireEvent.click(trigger());
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(trigger()).toHaveAttribute('aria-expanded', 'true');
+    expect(within(screen.getByRole('dialog')).queryByRole('button')).not.toBeInTheDocument();
   });
 });
 

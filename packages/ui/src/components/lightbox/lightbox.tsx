@@ -1,4 +1,5 @@
-import { createContext, createSignal, useContext, type JSX } from 'solid-js';
+import { createContext, createSignal, Show, useContext, type JSX } from 'solid-js';
+import { X } from 'lucide-solid';
 import { cn } from '../../utils/cn';
 import { As } from '../overlay/overlay';
 import { Dialog } from '../dialog/dialog';
@@ -115,6 +116,12 @@ export interface LightboxContentProps {
   class?: string;
   /** Accessible name for the dialog, used when the content carries no heading. */
   label?: string;
+  /** Render the close (X) button in the panel's top-right corner. ON by default,
+   *  matching what a pointer user reaches for first — the modal is otherwise only
+   *  dismissible by Escape, a backdrop click or a host control. Pass `false` when
+   *  something the reader can already see dismisses it and a second control would
+   *  only compete with the media. */
+  showClose?: boolean;
 }
 
 /**
@@ -131,6 +138,11 @@ export interface LightboxContentProps {
  *
  * The media is the CONSUMER's own `<img>` (a lightbox of arbitrary children),
  * so the size clamp has to reach it by descendant selector from here.
+ *
+ * The close button goes through the SAME controller as the trigger, Escape and the
+ * backdrop, so a controlled consumer's `onOpenChange` hears every dismissal from
+ * one path. It is a real `<button>` inside the panel, which is what keeps it in
+ * Dialog's Tab trap and out of the panel's accessible name.
  */
 export function LightboxContent(props: LightboxContentProps) {
   const ctx = useLightbox();
@@ -141,13 +153,33 @@ export function LightboxContent(props: LightboxContentProps) {
       onOpenChange={ctx.setOpen}
       aria-label={props.label}
       class={cn(
-        'w-auto max-w-[90vw] border-0 bg-transparent p-0 shadow-none',
+        // `relative` is the close button's containing block.
+        'relative w-auto max-w-[90vw] border-0 bg-transparent p-0 shadow-none',
         '[&>[part=body]]:p-0',
         '[&_img]:max-h-[85vh] [&_img]:max-w-[90vw] [&_img]:object-contain',
         props.class,
       )}
     >
       {props.children}
+      <Show when={props.showClose !== false}>
+        <button
+          type="button"
+          part="close"
+          aria-label="Close"
+          onClick={() => ctx.setOpen(false)}
+          class={cn(
+            // Translucent so the X stays legible over any photo, with its own ring
+            // because the panel is borderless and can sit on a light or a dark image.
+            'absolute right-2 top-2 inline-flex size-8 items-center justify-center rounded-full',
+            'bg-background/80 text-foreground ring-1 ring-border/50 backdrop-blur transition-colors hover:bg-background',
+            // The literal `[outline-style:solid]` is load-bearing in these shadow
+            // roots — same measured recipe as `LightboxTrigger`; see the note there.
+            'focus-visible:[outline-style:solid] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring',
+          )}
+        >
+          <X class="size-4" aria-hidden="true" />
+        </button>
+      </Show>
     </Dialog>
   );
 }

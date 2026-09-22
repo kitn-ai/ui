@@ -24,6 +24,12 @@ interface Props extends Record<string, unknown> {
    *  carries no heading. Without one the panel is an UNNAMED `role="dialog"`,
    *  which is a WCAG failure, so name it. */
   label?: string;
+  /** Show the close (X) button in the modal's top-right corner. ON WHEN ABSENT:
+   *  this is a default-true flag, so `show-close`, `show-close="true"` and
+   *  `el.showClose = true` all mean ON, and the only ways to turn it OFF are
+   *  `show-close="false"` and `el.showClose = false`. Escape, a backdrop click and
+   *  `hide()` dismiss the modal either way. */
+  showClose?: boolean;
 }
 
 /** Events fired by `<kai-lightbox>`. */
@@ -53,13 +59,14 @@ interface Events {
  *
  * Open state is the standard disclosure surface: settable+reflecting `open`,
  * `kai-open-change`, and `show()`/`hide()`/`toggle()`; seed with `default-open`.
- * Parts: `backdrop` · `panel` · `body`.
+ * Parts: `backdrop` · `panel` · `body` · `close`.
  */
 defineWebComponent<Props, Events>('kai-lightbox', {
   open: undefined,
   defaultOpen: undefined,
   disabled: undefined,
   label: undefined,
+  showClose: true,
 }, (props, ctx) => {
   const { element, flag } = ctx;
   let api: LightboxController | undefined;
@@ -94,6 +101,15 @@ defineWebComponent<Props, Events>('kai-lightbox', {
     onCleanup(() => observer.disconnect());
   });
 
+  // A default-ON flag, so ABSENT has to mean ON and neither `flag()` alone nor the
+  // default alone is enough. `flag()` resolves an absent attribute to OFF (correct
+  // for an opt-in flag, wrong here), and the `showClose: true` default above is
+  // overwritten by `undefined` when component-register parses a BARE `show-close`
+  // attribute (`parseAttributeValue('')` is `undefined`). So `undefined` — bare
+  // attribute, or an attribute removed at runtime — is read as the default, ON, and
+  // only an explicit `"false"`/`false` turns the button off.
+  const showClose = () => (props.showClose === undefined ? true : flag('showClose'));
+
   return (
     <>
       <style>{':host{display:inline-block}'}</style>
@@ -102,7 +118,7 @@ defineWebComponent<Props, Events>('kai-lightbox', {
         controllerRef={(a) => (api = a)}
       >
         {hasTrigger() ? <LightboxTrigger><slot /></LightboxTrigger> : undefined}
-        <LightboxContent label={props.label}>
+        <LightboxContent label={props.label} showClose={showClose()}>
           <slot name="content" />
         </LightboxContent>
       </Lightbox>

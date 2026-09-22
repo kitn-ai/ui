@@ -16,6 +16,7 @@ declare module 'solid-js' {
         'default-open'?: boolean;
         disabled?: boolean;
         label?: string;
+        'show-close'?: boolean;
       };
     }
   }
@@ -33,7 +34,8 @@ const meta: Meta = {
           '`<kai-lightbox>` shows your own markup bigger, centered over a dimmed page. '
           + 'The default slot is the TRIGGER and `slot="content"` is the media. It composes the '
           + "kit's Dialog, so it inherits Escape, backdrop dismissal, the focus move and restore, "
-          + 'the Tab trap and `role="dialog" aria-modal` rather than reimplementing them.',
+          + 'the Tab trap and `role="dialog" aria-modal` rather than reimplementing them. The '
+          + 'modal carries its own close (X) button — on by default, `show-close="false"` to remove it.',
       },
     },
   },
@@ -49,8 +51,14 @@ const meta: Meta = {
       description: 'Take away the programmatic open path only: `show()` no-ops, `toggle()` closes. The trigger still works.',
     },
     label: { control: 'text', description: 'Accessible name for the modal (`aria-label`). Without one the panel is an unnamed dialog.' },
+    showClose: {
+      name: 'show-close',
+      control: 'boolean',
+      description: 'Show the close (X) button in the panel. ON when the attribute is absent; `show-close="false"` removes it.',
+      table: { defaultValue: { summary: 'true' } },
+    },
   },
-  args: { open: false, defaultOpen: false, disabled: false, label: 'A mountain at dusk' },
+  args: { open: false, defaultOpen: false, disabled: false, label: 'A mountain at dusk', showClose: true },
 };
 export default meta;
 
@@ -76,6 +84,7 @@ export const ZoomYourOwnMarkup: StoryObj = {
         default-open={args.defaultOpen as boolean}
         disabled={args.disabled as boolean}
         label={args.label as string}
+        show-close={args.showClose as boolean}
       >
         <button
           type="button"
@@ -110,6 +119,16 @@ export const ZoomYourOwnMarkup: StoryObj = {
   <button type="button">Zoom the photo</button>
   <img slot="content" src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1600&fit=crop"
        alt="A snow-capped mountain above the clouds at dusk" />
+</kai-lightbox>
+
+<!-- Show-close, the one option that is ON when you leave it off the tag. The modal
+     renders a close (X) button in its top-right corner by DEFAULT; show-close="false"
+     removes it, which is what you want when the trigger or a host control already
+     dismisses the modal. The rest of the surface: open is settable and reflects,
+     default-open seeds, disabled takes away show() only (never the trigger). -->
+<kai-lightbox id="quiet-modal" label="A mountain at dusk" show-close="false">
+  <button type="button">Zoom the photo</button>
+  <img slot="content" src="https://…/mountain.jpg" alt="A mountain at dusk" />
 </kai-lightbox>
 
 <script type="module">

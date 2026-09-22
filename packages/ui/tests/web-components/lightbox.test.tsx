@@ -33,6 +33,7 @@ type Lightbox = HTMLElement & {
   toggle(): void;
   open?: boolean;
   label?: string;
+  showClose?: boolean;
 };
 
 afterEach(() => {
@@ -59,6 +60,10 @@ const panel = (el: Lightbox) => shadow(el).querySelector('[part="panel"]') as HT
 const trigger = (el: Lightbox) => shadow(el).querySelector<HTMLElement>('[role="button"]');
 /** The element's own answer to "am I open": a closed lightbox unmounts its panel. */
 const isOpen = (el: Lightbox) => panel(el) !== null;
+/** The close (X) the modal renders itself. `[part="close"]`, not `button`: the
+ *  trigger's own button is a `[role="button"]` span, so a bare `button` lookup
+ *  would match either. */
+const closeButton = (el: Lightbox) => shadow(el).querySelector<HTMLElement>('[part="close"]');
 
 const TRIGGER = '<button id="shutter" type="button">Zoom the photo</button>';
 const CONTENT = `<img id="photo" slot="content" alt="A mountain at dusk" src="${IMAGE_URL}" />`;
@@ -219,4 +224,64 @@ test('kai-open-change is non-bubbling and non-composed, like every other kai-* e
   expect(event).toBeInstanceOf(CustomEvent);
   expect(event!.bubbles).toBe(false);
   expect(event!.composed).toBe(false);
+});
+
+/**
+ * The close (X) control, which is ON by default — the one spelling where an ABSENT
+ * attribute means ON. Both directions need pinning: a button that never appears
+ * still leaves every assertion above green, and a button that ignores
+ * `show-close="false"` is invisible to them too.
+ */
+test('the modal carries a close button with no attribute asked for, and it closes through it', async () => {
+  const el = await mount(`${TRIGGER}${CONTENT}`);
+  el.show();
+  await flush();
+
+  const close = closeButton(el);
+  expect(close, 'absent `show-close` means the X is there').not.toBeNull();
+  expect(close!.tagName).toBe('BUTTON');
+  expect(close!.getAttribute('aria-label')).toBe('Close');
+
+  const seen: unknown[] = [];
+  el.addEventListener('kai-open-change', (e) => seen.push((e as CustomEvent).detail));
+  click(close!);
+  await flush();
+
+  expect(isOpen(el)).toBe(false);
+  expect(el.hasAttribute('open')).toBe(false);
+  expect(seen).toEqual([{ open: false }]);
+});
+
+test('a bare `show-close` attribute keeps the X, because absent means ON', async () => {
+  // The PARSER path, where the attribute is already on the element before it
+  // upgrades: that is where component-register parses a bare boolean to
+  // `undefined`, which is the whole reason this flag is read as
+  // `undefined ? true : flag(…)` and not as `flag(…)` alone.
+  document.body.innerHTML = `<kai-lightbox show-close open>${TRIGGER}${CONTENT}</kai-lightbox>`;
+  const el = document.querySelector('kai-lightbox') as Lightbox;
+  await flush();
+
+  expect(isOpen(el)).toBe(true);
+  expect(closeButton(el)).not.toBeNull();
+});
+
+test('`show-close="false"` and `el.showClose = false` both take the X away', async () => {
+  // The attribute, parsed from markup — the docs spelling.
+  const byAttribute = await mount(`${TRIGGER}${CONTENT}`);
+  byAttribute.setAttribute('show-close', 'false');
+  await flush();
+  byAttribute.show();
+  await flush();
+  expect(closeButton(byAttribute), 'the attribute turned it off').toBeNull();
+  // The rest of the modal is untouched: only the affordance is gone.
+  expect(isOpen(byAttribute)).toBe(true);
+  expect(trigger(byAttribute), 'and the trigger still works').not.toBeNull();
+
+  // The property, set from script.
+  const byProperty = await mount(`${TRIGGER}${CONTENT}`);
+  byProperty.showClose = false;
+  await flush();
+  byProperty.show();
+  await flush();
+  expect(closeButton(byProperty), 'the property turned it off').toBeNull();
 });

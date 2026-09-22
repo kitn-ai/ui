@@ -5264,6 +5264,15 @@
         "scalar": true,
         "description": "Accessible name for the modal (`aria-label`), for a lightbox whose content carries no heading. Without one the panel is an UNNAMED `role=\"dialog\"`, which is a WCAG failure, so name it.",
         "displayType": "undefined | string"
+      },
+      {
+        "name": "showClose",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Show the close (X) button in the modal's top-right corner. ON WHEN ABSENT: this is a default-true flag, so `show-close`, `show-close=\"true\"` and `el.showClose = true` all mean ON, and the only ways to turn it OFF are `show-close=\"false\"` and `el.showClose = false`. Escape, a backdrop click and `hide()` dismiss the modal either way.",
+        "default": "true",
+        "displayType": "undefined | false | true"
       }
     ],
     "events": [
@@ -5336,6 +5345,11 @@
         "name": "body",
         "doc": "The region holding whatever you put in `slot=\"content\"`. Padding is zeroed by default so the clamp is the viewport rather than viewport-minus-padding; add an inset from outside.",
         "recipe": "kai-lightbox::part(body) { padding: 0.5rem }"
+      },
+      {
+        "name": "close",
+        "doc": "The close (X) button in the panel's top-right corner. On by default; remove it with `show-close=\"false\"` rather than CSS. Recolor, reposition or resize it from outside.",
+        "recipe": "kai-lightbox::part(close) { background: var(--color-background) }"
       }
     ]
   },

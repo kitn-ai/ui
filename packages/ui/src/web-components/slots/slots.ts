@@ -653,8 +653,9 @@ export const LIGHTBOX_SLOTS: SlotDef[] = [
 ];
 
 /** Styleable `::part`s of `<kai-lightbox>`. The element composes the kit's Solid
- *  `Lightbox`/`Dialog` inside its own shadow root, so these three are the parts
- *  that dialog renders. Registered here because the selector a consumer writes is
+ *  `Lightbox`/`Dialog` inside its own shadow root, so the first three are the parts
+ *  that dialog renders and the fourth is the lightbox's own close button.
+ *  Registered here because the selector a consumer writes is
  *  `kai-lightbox::part(…)`; documenting them under `kai-dialog` would describe an
  *  element they never mounted. */
 export const LIGHTBOX_PARTS: PartDef[] = [
@@ -672,6 +673,11 @@ export const LIGHTBOX_PARTS: PartDef[] = [
     name: 'body',
     doc: 'The region holding whatever you put in `slot="content"`. Padding is zeroed by default so the clamp is the viewport rather than viewport-minus-padding; add an inset from outside.',
     recipe: 'kai-lightbox::part(body) { padding: 0.5rem }',
+  },
+  {
+    name: 'close',
+    doc: 'The close (X) button in the panel\'s top-right corner. On by default; remove it with `show-close="false"` rather than CSS. Recolor, reposition or resize it from outside.',
+    recipe: 'kai-lightbox::part(close) { background: var(--color-background) }',
   },
 ];
 

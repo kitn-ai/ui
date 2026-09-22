@@ -2778,6 +2778,12 @@
           "scalar": true,
           "optional": true,
           "fn": false
+        },
+        {
+          "name": "showClose",
+          "scalar": true,
+          "optional": true,
+          "fn": false
         }
       ],
       "events": [
@@ -2791,7 +2797,8 @@
       "parts": [
         "backdrop",
         "panel",
-        "body"
+        "body",
+        "close"
       ],
       "composedFrom": [
         "Lightbox",

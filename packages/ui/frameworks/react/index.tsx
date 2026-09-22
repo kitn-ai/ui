@@ -1233,13 +1233,15 @@ export interface LightboxProps extends WebComponentProps {
   disabled?: boolean;
   /** Accessible name for the modal (`aria-label`), for a lightbox whose content carries no heading. Without one the panel is an UNNAMED `role="dialog"`, which is a WCAG failure, so name it. */
   label?: string;
+  /** Show the close (X) button in the modal's top-right corner. ON WHEN ABSENT: this is a default-true flag, so `show-close`, `show-close="true"` and `el.showClose = true` all mean ON, and the only ways to turn it OFF are `show-close="false"` and `el.showClose = false`. Escape, a backdrop click and `hide()` dismiss the modal either way. */
+  showClose?: boolean;
   /** The modal opened or closed (trigger click, Escape, backdrop click, or a method). */
   onOpenChange?: (event: CustomEvent<{ open: boolean }>) => void;
 }
 
 export const Lightbox = /*#__PURE__*/ createWebComponent<LightboxProps, KaiLightboxElement>(
   'kai-lightbox',
-  ["theme","open","defaultOpen","disabled","label"],
+  ["theme","open","defaultOpen","disabled","label","showClose"],
   { onOpenChange: 'kai-open-change' },
   () => import('@kitn.ai/ui/web-components/lightbox'),
 );
