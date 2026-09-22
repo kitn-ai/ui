@@ -1385,6 +1385,26 @@ const ALWAYS_EMITTED_TAG = 'kai-chat';
 import { tags as WEB_COMPONENT_ENTRY_TAGS } from '../../../src/web-components/web-component-manifest.json';
 
 /**
+ * Every tag `components` ACCEPTS: the keys of the manifest's `tags` map, READ rather
+ * than restated: a list typed out here would be a copy that goes stale the day a web
+ * component is added. This is also the tag set the register-all barrel registers, since
+ * the manifest is generated from register-impl.ts's import list.
+ *
+ * Deliberately NOT `listWebComponents()`: that reads custom-elements.json, which is the
+ * wider set: it also carries `kai-remote`, opt-in by design, absent from the barrel and
+ * from every surface recipe. `kai-remote` is not scaffoldable either way, since this map
+ * has no basename for it, so `entryBasenames` has no import to emit.
+ *
+ * Exported so `scaffold.test.ts` can assert the advertised enum against this one
+ * derivation instead of re-deriving it, and so the catalog guards can check the presets
+ * and probes against it.
+ */
+export const WEB_COMPONENT_TAGS: readonly string[] = Object.keys(WEB_COMPONENT_ENTRY_TAGS);
+
+/** Membership for the same set. Derived from the array above, never spelled twice. */
+const WEB_COMPONENT_TAG_SET: ReadonlySet<string> = new Set(WEB_COMPONENT_TAGS);
+
+/**
  * The kai-* tags a surface's emitted app really PLACES in markup, in a stable order.
  *
  * The registration imports key off THIS, never off the request: `components` is
@@ -6810,6 +6830,43 @@ function interactionPatternsBlock(): string {
 
 // ── error text ────────────────────────────────────────────────────────────────
 
+/**
+ * The error text for one tag the kit does not register, and the ONE copy of it.
+ *
+ * Two callers, because a bad tag has two ways in and they are not the same code
+ * path: the input schema's enum (the advertised contract, and what a caller who
+ * validates before calling sees) and the handler (which owns value types; see the
+ * scope note in `validate-args.ts`: that path polices unknown and missing KEYS only,
+ * deliberately). Handlers are also called directly in tests, bypassing MCP validation,
+ * so the schema alone was never going to cover this.
+ *
+ * It names the offending tag because the fix is local to the caller's `components`
+ * list, and it names the barrel because that is the import which registers every tag
+ * in the list and the place to look for one that is not scaffoldable.
+ */
+function unknownComponentText(tag: unknown): string {
+  return (
+    `Unknown component ${JSON.stringify(tag)}: it is not a kai-* tag this kit registers. ` +
+    `components takes the tags the register-all barrel '@kitn.ai/ui/web-components' ` +
+    `registers, each with a per-tag entry of its own. ` +
+    `A tag outside that set is not one scaffold can place: kai-remote is the one kai-* ` +
+    `tag the barrel does not carry either (it is opt-in and loads from its own entry ` +
+    `point), so a surface that needs it has to register it by hand.`
+  );
+}
+
+/** The same text for a whole request's worth of bad tags, plus the valid list. */
+function rejectComponents(unknown: readonly string[]): string {
+  return [
+    ...unknown.map((tag) => unknownComponentText(tag)),
+    ``,
+    `Valid components (read from web-component-manifest.json's \`tags\` map):`,
+    WEB_COMPONENT_TAGS.join(', '),
+    ``,
+    `Drop the unknown tag(s), or omit \`components\` entirely and pass a \`useCase\` preset.`,
+  ].join('\n');
+}
+
 function rejectIntegration(id: string): string {
   const valid = listIntegrations()
     .map((i) => `${i.id} (${i.title})`)
@@ -6868,11 +6925,22 @@ export const scaffold: Tool = {
           'Shorthand for the preset\'s `components`. Omit it and pass `components` to compose a surface no preset names.',
       ),
     components: z
-      .array(z.string())
+      .array(
+        // The tag set, READ from the manifest (see WEB_COMPONENT_TAGS at the top of
+        // this file). This is the belt to the handler's braces, and it is also the
+        // discoverability win: `z.toJSONSchema` (server.ts, on every ListTools) turns
+        // an enum into `items.enum`, so a harness reads the valid tags off the
+        // advertised schema instead of learning them by being rejected.
+        z.enum(WEB_COMPONENT_TAGS, {
+          error: (issue) => unknownComponentText(issue.input),
+        }),
+      )
       .optional()
       .describe(
         'The kai-* components this surface composes, e.g. ["kai-chat", "kai-tool", "kai-reasoning", "kai-artifact", "kai-resizable"]. ' +
-          'The real axis: any combination is renderable, not just the seven presets. Include "kai-chat". Wins over `useCase` when both are given.',
+          'The real axis: any combination is renderable, not just the seven presets. Include "kai-chat". Wins over `useCase` when both are given. ' +
+          'This property enumerates every valid tag, read from web-component-manifest.json, so the list is checkable before the call: a tag outside it is rejected by name. ' +
+          'kai-remote is the one kai-* tag the register-all barrel does not carry (it is opt-in), so it has no per-tag entry here and is not a valid component.',
       ),
     integration: z
       .string()
@@ -6915,6 +6983,18 @@ export const scaffold: Tool = {
     const explicit = Array.isArray(args.components)
       ? args.components.map(String).filter(Boolean)
       : undefined;
+
+    // Rejected BEFORE composing, and the reason this is here as well as in the
+    // advertised schema: `validateToolArgs` deliberately does not police value types
+    // (see its scope note), and this handler is called directly by tests and by
+    // `create-kai`. Left to `entryBasenames`, an unknown tag threw out of the tool,
+    // so a caller's typo arrived as an MCP protocol error with the fix nowhere in it.
+    // A tag the KIT's own data gets wrong (an archetype's `components`) is not this
+    // path's business and still throws there, loudly, where it belongs.
+    if (explicit) {
+      const unknown = [...new Set(explicit.filter((tag) => !WEB_COMPONENT_TAG_SET.has(tag)))];
+      if (unknown.length > 0) return text(rejectComponents(unknown));
+    }
 
     let components: readonly string[];
     let preset: { id: string; title: string } | undefined;

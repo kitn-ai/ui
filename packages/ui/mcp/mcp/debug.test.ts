@@ -16,6 +16,17 @@ describe('debug', () => {
     expect(text).toMatch(/set .*messages.* in JavaScript|property, not an attribute/i);
   });
 
+  // The rule set is also run over a project's FILES by `kai doctor`, so the BINDING forms must not
+  // match: they are how Vue and Angular pass an array correctly, and the old bare `\b` matched the
+  // tail of `:messages="messages"`. Measured on a fresh vue scaffold, which is what this pins.
+  it('a leading `:` or `[` binding is NOT an attribute, so it does not fire Rule 1', async () => {
+    for (const snippet of ['<ThreadView :messages="messages" />', '<kai-chat [messages]="messages"></kai-chat>']) {
+      const out = await debug.handler({ snippet });
+      const text = (out.content as { type: string; text: string }[])[0].text;
+      expect(text, `${snippet} binds the property`).not.toMatch(/property, not an attribute/i);
+    }
+  });
+
   // ── Rule 2: in-place mutation / no re-render ────────────────────────────
   it('no re-render → new reference fix', async () => {
     const out = await debug.handler({
@@ -132,6 +143,25 @@ describe('debug', () => {
     });
     const text = (out.content as { type: string; text: string }[])[0].text;
     expect(text).not.toMatch(/Web components not registered/i);
+  });
+
+  // The rule set is ALSO run over a project's files by `kai doctor`, so a signal has to be a
+  // report's vocabulary and not an idiom a correct app contains. Both of these came from a real
+  // false positive: the four raw-tag starters gate their boot on exactly this guard.
+  it('a correct customElements guard idiom does NOT fire Rule 6', async () => {
+    const out = await debug.handler({
+      symptom:
+        "const unregistered = TAGS.filter((tag) => !customElements.get(tag));\n" +
+        'if (unregistered.length > 0) throw new Error(`no entry import above registers: ${unregistered.join(", ")}`);',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    expect(text, 'a guard is not a symptom report').not.toMatch(/Web components not registered/i);
+  });
+
+  it('a pasted undefined comparison still fires Rule 6', async () => {
+    const out = await debug.handler({ symptom: "customElements.get('kai-chat') === undefined" });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    expect(text).toMatch(/Web components not registered|web-components-not-registered|@kitn\.ai\/ui\/web-components/i);
   });
 
   // ── Rule 7: tsc errors inside node_modules/@kitn.ai/ui/src ─────────────────

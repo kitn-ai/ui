@@ -32,6 +32,21 @@ describe('component_reference', () => {
     );
     // and it must name the silent failure, which is the whole reason this exists
     expect(text).toMatch(/whenDefined/);
+
+    // PER-TAG FIRST, barrel second, and the order is asserted because it is the
+    // point of the snippet: a scaffolded app registers only the tags it places, one
+    // per-tag entry each, so the per-tag line is the one a reader is here for. The
+    // barrel keeps its place as the alternative, and the next assertion says why it has
+    // to keep saying what it is.
+    const perTagLine = text.indexOf("import '@kitn.ai/ui/web-components/chat';");
+    const barrelLine = text.indexOf("import '@kitn.ai/ui/web-components';");
+    expect(perTagLine, 'the per-tag entry dropped out of the registration snippet').toBeGreaterThan(-1);
+    expect(barrelLine, 'the register-all barrel dropped out of the registration snippet').toBeGreaterThan(-1);
+    expect(perTagLine).toBeLessThan(barrelLine);
+    // The barrel line still has to say it is the all-tags form. Without that it reads
+    // as a second required import, which would pull the whole bundle back in, which is
+    // the exact shape the per-tag change exists to remove.
+    expect(text.slice(barrelLine, barrelLine + 120)).toMatch(/all tags|register-all/);
   });
 
   it('names the shipped TypeScript interface', async () => {

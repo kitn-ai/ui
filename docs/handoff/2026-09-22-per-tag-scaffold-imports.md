@@ -154,3 +154,68 @@ measured from freshly scaffolded apps.
 - `reference.ts`'s three load modes and `apps/docs` snippets are library documentation, not scaffold
   output, so they keep showing all three modes.
 - The toast pattern snippet keeps its barrel import: `toast` is exported from there.
+- `packages/blocks/src/forms/html.ts` keeps the register-all barrel for a block's add form. A block
+  is a FRAGMENT pasted into an app whose registration strategy the block cannot know, and its
+  authored pattern is the autoloader (CDN-only through a bundler, which is what the swap exists
+  for). Recorded as a deliberate non-goal, not an oversight; safe to revisit, because
+  `defineWebComponent`'s `customElements.get()` guard means a per-tag entry beside the barrel is a
+  no-op rather than a redefinition.
+
+---
+
+## 10. The harness-facing half: how a project's agent learns the rule
+
+The per-tag default has one failure mode, and it is silent: a `kai-*` tag nothing defines is an
+inert unknown element, so it renders empty with no error, no failed import and nothing in a
+console. Three additions close it, and each works WITHOUT the agent having any of our tooling:
+
+- **`kai doctor` gains the structural finding.** `packages/cli/src/placed-tags.ts` (new leaf) scans
+  a project's own sources for placements (`<kai-*` in markup, `el('kai-*')` /
+  `createElement('kai-*')` in code), compares them against what the project registers (the barrel, a
+  per-tag entry, or its own `customElements.define`), and reports each tag with the exact line to
+  add. Measured end to end on a freshly scaffolded project: adding a bare `<kai-sources>` produced
+  `<kai-sources> in src/App.vue -> add: import '@kitn.ai/ui/web-components/source'`, plus the two
+  caveats the line needs (client-only on SSR, the barrel as the SSR-safe alternative).
+  The tag-to-entry map is a static import of the manifest, inlined at build time like
+  `mcp/mcp/manifest.ts` and `tools/scaffold.ts` already do; deriving it from the INSTALLED kit is
+  not merely heavier but unusable, because a built `dist/web-components/<entry>.js` names the tags it
+  merely dispatches (`chat.js` carries `kai-submit`, `kai-attachments-change`, ...) alongside the one
+  it defines.
+- **The MCP `scaffold` tool rejects an unknown tag at validation.** `components` is now an enum over
+  the manifest's tags (derived, exported as `WEB_COMPONENT_TAGS`), so the tool schema every agent
+  reads LISTS the valid tags, and a typo gets a message naming it. A handler guard backs the enum
+  because `validate-args.ts` deliberately polices unknown and missing KEYS only, not value types,
+  so the schema alone would not have stopped the throw reaching `tool.handler(args)`.
+- **`component_reference` leads with the per-tag entry** and keeps the barrel as the alternative,
+  recording its three remaining roles (every tag, SSR-import-safe, and `toast()`'s home).
+
+## 11. The trap this batch found, and it is the general one
+
+**`kai doctor` matches the `debug` rule set against SOURCE FILES, and those rules were written for a
+PASTED SYMPTOM. Symptom VOCABULARY therefore fires on correct code and on the comments that explain
+the failure.** Two instances, both found by running the built CLI on a fresh scaffold rather than by
+reading code:
+
+| rule | what it matched | in |
+|---|---|---|
+| `web-components-not-registered` | the bare token `unregistered`, the call `customElements.get(tag)`, and `blank` + `render` | the starters' own upgrade gate (`const unregistered = TAGS.filter((tag) => !customElements.get(tag))`) and its comment ("renders a blank page") |
+| `array-as-attribute` | the tail of `:messages="messages"` and of `[messages]="messages"` | Vue's and Angular's PROPERTY-BINDING syntax, which is the correct way to pass an array |
+
+Both were reported as warnings on a freshly scaffolded, entirely correct app. The fixes, in the
+order they generalize:
+
+1. **Comments are blanked before the rules run** (`sourceCode` in `placed-tags.ts`), because a
+   comment explains the symptom and code is the signal. String bodies stay visible: a specifier or a
+   pattern inside a string is still evidence. Measured safe in both directions: the vue starter's
+   "In-place mutation" warning came from a COMMENT in `useChat.ts` and is gone, while real markup
+   still fires the attribute rule.
+2. **Rule 6's signals need the report's shape**: a bare `unregistered` now needs a noun after it, and
+   `customElements.get` needs its `undefined` comparison, which is what a pasted diagnostic carries
+   and what a guard does not. Both directions are pinned by tests.
+3. **Rule 1 needs a lookbehind**: a leading `:`, `[`, `.` or `-` is a binding, a member access or a
+   compound attribute name, not an attribute.
+
+The lesson to keep: **when a rule set written for one input shape is pointed at another, the false
+positives are the rules' vocabulary matching the new input's own words.** No amount of reading the
+regexes finds that; running the built artifact on a correct project does. A future rule added to
+`debug-rules.ts` should be tested against `doctor` on the starters before it ships.

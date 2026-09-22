@@ -25,8 +25,15 @@ const RULES: Rule[] = [
     // Rule 1 — array/object data set as an HTML attribute
     // Source: for-ai-agents.mdx §1; context7.json rule 2
     id: 'array-as-attribute',
+    // A LEADING `:` OR `[` IS A PROPERTY BINDING, WHICH IS THE CORRECT FORM, and this rule is about
+    // HTML ATTRIBUTES. Vue writes the right thing as `:messages="messages"` (or `v-bind:`), Angular
+    // as `[messages]="messages"`, and the bare `\b` matched the tail of both: measured, `kai doctor`
+    // warned on a freshly scaffolded vue app whose only `messages` occurrence was `:messages=`,
+    // telling the reader to do what they had already done. The lookbehind excludes a binding, a
+    // member access (`x.messages=`) and a compound attribute name (`data-messages=`), so a real
+    // `<kai-chat messages="[...]">` still fires.
     test: (t) =>
-      /\b(messages|models|context|suggestions|triggers)\s*=\s*["']/.test(t),
+      /(?<![:.\[\w-])(messages|models|context|suggestions|triggers)\s*=\s*["']/.test(t),
     title: 'Array/object prop set as an HTML attribute (silent failure)',
     cause:
       'An HTML attribute is always a string. Passing `messages`, `models`, `context`, ' +
@@ -132,13 +139,28 @@ const RULES: Rule[] = [
   {
     // Rule 6 — web components not registered / renders nothing (React #1 failure)
     // Source: field-test reports; for-ai-agents.mdx §"Import order matters"
+    //
+    // THE SIGNALS MUST BE A REPORT'S VOCABULARY, NOT AN IDIOM WIRING USES. `kai doctor` runs this
+    // same rule set over a project's FILES (doctor.ts), so a signal that a correct app can contain
+    // reports a registered app as broken. Two were both, and the four raw-tag starters carry them
+    // verbatim: their upgrade gate reads
+    //   const unregistered = TAGS.filter((tag) => !customElements.get(tag));
+    // A bare `unregistered` therefore matched an identifier, and the bare `customElements.get`
+    // matched a guard. Measured: `kai doctor` on a freshly scaffolded vue app warned "Web components
+    // not registered" at src/main.ts, about an app that registers every tag it places.
+    //
+    // So the bare token now needs a noun after it (`unregistered element`, not `unregistered =`),
+    // and the idiom needs its undefined COMPARISON, which is what a pasted diagnostic carries
+    // (`customElements.get('kai-chat') === undefined`) and what a guard does not.
     id: 'web-components-not-registered',
     test: (t) => {
       // Core render-nothing / unregistered-element signals
       if (
-        /renders?\s+nothing|nothing\s+renders?|not\s+registered|unregistered|not\s+upgraded|unknown\s+element|customElements\.get|undefined\s+element|no\s+shadow\s+root/.test(t)
+        /renders?\s+nothing|nothing\s+renders?|not\s+registered|not\s+upgraded|unknown\s+element|undefined\s+element|no\s+shadow\s+root/.test(t)
       )
         return true;
+      if (/\bunregistered\s+(?:kai|element|component|tag|web)/.test(t)) return true;
+      if (/customElements\.get\s*\([^)\n]*\)\s*(?:={2,3}|!={1,2})?\s*undefined/.test(t)) return true;
       // "empty" / "blank" / "doesn't render" / "won't render" only fire when
       // a render/element/component context is also present to avoid false positives
       if (

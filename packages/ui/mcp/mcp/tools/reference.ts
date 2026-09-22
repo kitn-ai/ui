@@ -695,12 +695,21 @@ function formatReference(tag: string, provider: ToolProvider): string {
     `back correctly, and \`customElements.whenDefined('${tag}')\` never resolves.`;
   lines.push('', '### Getting the element');
   if (entry) {
+    // PER-TAG FIRST, barrel second, and that order is the change: a scaffolded app
+    // registers only the tags it places, one per-tag entry each (see `tagImports` in
+    // tools/scaffold.ts), so the per-tag line is the one a reader is here for and the
+    // barrel is the alternative. The barrel keeps its place because it is three things
+    // the per-tag line is not: every tag at once, the SSR-import-safe form
+    // (register.ts loads the implementation behind a browser check), and the module
+    // that exports the imperative `toast()` / `configureToasts` helpers
+    // (src/web-components/register/register.ts, its export list). `reference.test.ts`
+    // asserts both specifiers AND that the per-tag line comes first.
     lines.push(
       `Register it before you use it. ${neverUpgrades}`,
       '',
       '```ts',
-      "import '@kitn.ai/ui/web-components';",
-      `import '@kitn.ai/ui/web-components/${entry}'; // or just this one`,
+      `import '@kitn.ai/ui/web-components/${entry}';`,
+      "import '@kitn.ai/ui/web-components'; // or all tags at once (register-all); SSR-import-safe, and where toast() lives",
       '```',
     );
   } else {
