@@ -29,6 +29,9 @@ import { join, relative } from 'node:path';
 // could reach them. The module imports nothing -- no zod, no SDK -- so bundling it here costs the
 // rules and nothing else. See its own docblock.
 import { matchRules } from '../../ui/mcp/mcp/tools/debug-rules';
+// The per-tag default's one failure mode: a `kai-*` tag nothing defines is inert. See its own
+// docblock for where the tag -> entry map comes from and for what the scan deliberately misses.
+import { sourceCode, unregisteredPlacedTags, WEB_COMPONENTS_ENTRY } from './placed-tags';
 
 const KIT = '@kitn.ai/ui';
 const MCP = '@kitn.ai/mcp';
@@ -280,9 +283,19 @@ export function diagnose(input: DoctorInput): Finding[] {
     // A rule's `test` is a boolean over a whole text, so the report names FILES rather than lines:
     // the tool has never carried match offsets, and inventing them by re-running someone else's
     // regex would be a second implementation of the rule. Up to three files per rule, then a count.
+    //
+    // RULES RUN OVER CODE, NOT PROSE, and that is a measured correction rather than tidiness. The
+    // rules were written for `debug`, which matches a symptom someone PASTED (an error message or a
+    // paragraph), so several of them match symptom VOCABULARY. A source file also contains that
+    // vocabulary, in the comments that explain the very failure a rule describes: the vanilla
+    // starter's own upgrade gate says "the app renders a blank page with no error to show for it",
+    // and `kai doctor` reported that correct app under "Web components not registered". So comments
+    // are blanked before matching (string bodies are NOT: a specifier or a code pattern inside a
+    // string is still evidence). The rule set itself had one signal to tighten for the same reason,
+    // see debug-rules.ts rule 6.
     const hitByRule = new Map();
     for (const { file, text } of contents) {
-      for (const rule of matchRules(text)) {
+      for (const rule of matchRules(sourceCode(text))) {
         if (!hitByRule.has(rule.id)) hitByRule.set(rule.id, { rule, files: [] });
         hitByRule.get(rule.id).files.push(relative(input.cwd, file));
       }
@@ -294,6 +307,37 @@ export function diagnose(input: DoctorInput): Finding[] {
         severity: 'warn',
         title: `${rule.title} — ${hits.length} file(s) under src/`,
         detail: `${shown}${more}\n${rule.fix}`,
+      });
+    }
+
+    // PLACED, AND REGISTERED BY WHAT. The scaffold now imports one entry per tag it places, and
+    // that default has no failure mode of its own: a `<kai-*>` tag nothing defines is an inert
+    // unknown element, so it renders empty with no console error and no failed import to point at.
+    // This is that silence, broken where a reader can act on it -- the exact import line to add,
+    // with the register-all barrel as the alternative. Anti-vacuity is the shape of the finding
+    // rather than a separate check: a project that places no kai-* tag at all (a hand-built page
+    // that only imports the barrel, a Solid app renders the Solid components) reports nothing.
+    const unregistered = unregisteredPlacedTags(contents);
+    if (unregistered.length > 0) {
+      const shown = unregistered.slice(0, 3);
+      const lines = shown.map(({ tag, entry, files: placing }) => {
+        const where = placing.slice(0, 2).map((file) => relative(input.cwd, file)).join(', ');
+        const more = placing.length > 2 ? ` (+${placing.length - 2})` : '';
+        return `<${tag}> in ${where}${more} -> add: import '${WEB_COMPONENTS_ENTRY}/${entry}'`;
+      });
+      if (unregistered.length > shown.length) lines.push(`(and ${unregistered.length - shown.length} more)`);
+      // The two caveats the recommended line needs, both facts the scaffolder already states at
+      // its own site (mcp/mcp/tools/scaffold.ts:1450-1463 and the emitted load note at :6650):
+      // these entries are client-only, and the barrel is the SSR-import-safe form. Without them
+      // this would talk an SSR target into an import that throws `window is not defined`.
+      lines.push(
+        `Per-web-component entries are client-only: on an SSR target, put the import inside \`if (typeof window !== 'undefined')\`.`,
+        `Importing the register-all barrel '${WEB_COMPONENTS_ENTRY}' instead is the SSR-import-safe form and registers every tag at once.`,
+      );
+      findings.push({
+        severity: 'warn',
+        title: `${unregistered.length} placed <kai-*> tag(s) have nothing registering them`,
+        detail: lines.join('\n'),
       });
     }
 

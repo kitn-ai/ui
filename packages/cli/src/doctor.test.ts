@@ -228,3 +228,174 @@ describe('diagnose', () => {
     expect(lines.join('\n')).toContain('1 problem(s), 1 warning(s)');
   });
 });
+
+/**
+ * THE PER-TAG DEFAULT'S ONE SILENT FAILURE. A scaffold now imports one entry per tag it places, so
+ * a `<kai-*>` a consumer adds by hand with nothing registering it is an inert unknown element: no
+ * error, no console line, no failed import, just empty chrome. These fixtures pin both directions
+ * -- it fires on a placed tag nothing registers, and it stays quiet for the barrel, for the tag's
+ * own entry, and for a tag merely NAMED (in a comment, in a mock message body) rather than placed.
+ */
+describe('diagnose: a placed <kai-*> tag nothing registers', () => {
+  const app = (files: Record<string, string>) =>
+    findings({
+      'package.json': JSON.stringify({ name: 'app', dependencies: { '@kitn.ai/ui': '^0.35.0' } }),
+      'node_modules/@kitn.ai/ui/package.json': JSON.stringify({ name: '@kitn.ai/ui', version: '0.35.0' }),
+      ...files,
+    });
+
+  const unregistered = (list: ReturnType<typeof diagnose>) =>
+    list.find((f) => f.title.includes('nothing registering'));
+
+  it('warns with the tag, where it is placed, and the exact import line to add', () => {
+    // kai-sources -> 'source' is the case that makes the manifest load-bearing: stripping
+    // `kai-` would name an entry the kit does not build, which is the broken import this exists
+    // to catch.
+    const list = app({ 'src/widget.html': '<kai-sources id="sources"></kai-sources>\n' });
+    const finding = unregistered(list);
+    expect(finding?.severity, 'warn, not error: the app runs, it renders empty chrome').toBe('warn');
+    expect(finding?.title).toContain('1 placed');
+    expect(finding?.detail, 'the tag').toContain('<kai-sources>');
+    expect(finding?.detail, 'the file that places it').toContain('src/widget.html');
+    expect(finding?.detail, 'the line to add, naming the entry the app imports').toContain(
+      "import '@kitn.ai/ui/web-components/source'",
+    );
+    expect(finding?.detail, 'and the barrel as the alternative').toContain(
+      "register-all barrel '@kitn.ai/ui/web-components'",
+    );
+    expect(exitCodeFor(list), 'a warning does not fail the default run').toBe(0);
+  });
+
+  it('stays quiet for the barrel in every value-import form', () => {
+    const registrations = [
+      "import '@kitn.ai/ui/web-components';",
+      'import "@kitn.ai/ui/web-components";',
+      "import('@kitn.ai/ui/web-components');",
+      'void import(\n  "@kitn.ai/ui/web-components",\n);',
+      "import { toast } from '@kitn.ai/ui/web-components';",
+    ];
+    for (const registration of registrations) {
+      const list = app({ 'src/widget.html': '<kai-sources></kai-sources>\n', 'src/main.ts': `${registration}\n` });
+      expect(unregistered(list), `${registration} registers every tag`).toBeUndefined();
+    }
+  });
+
+  it("stays quiet for the tag's own entry, in every entry form", () => {
+    const registrations = [
+      "import '@kitn.ai/ui/web-components/source';",
+      'import "@kitn.ai/ui/web-components/source";',
+      "void import('@kitn.ai/ui/web-components/source');",
+    ];
+    for (const registration of registrations) {
+      const list = app({ 'src/widget.html': '<kai-sources></kai-sources>\n', 'src/main.ts': `${registration}\n` });
+      expect(unregistered(list), `${registration} registers <kai-sources>`).toBeUndefined();
+    }
+  });
+
+  it('does not read an `import type` of the barrel as a registration', () => {
+    // Every emitted front end types a `ref` off the barrel and registers nothing with it
+    // (mcp/mcp/tools/scaffold.ts:2489), so this is the shape the check must NOT go quiet on.
+    const list = app({
+      'src/widget.html': '<kai-sources id="sources"></kai-sources>\n',
+      'src/refs.ts': "import type { KaiSourcesElement } from '@kitn.ai/ui/web-components';\n",
+    });
+    expect(unregistered(list), 'a type-only import defines no custom element').toBeTruthy();
+  });
+
+  it('reads el() and createElement() placements, not only markup', () => {
+    const list = app({
+      'src/view.ts': [
+        "const sources = el('kai-sources');",
+        "const picker = document.createElement('kai-scope-picker');",
+      ].join('\n'),
+    });
+    const finding = unregistered(list);
+    expect(finding?.title, 'two tags placed, one in the call form each').toContain('2 placed');
+    expect(finding?.detail).toContain("import '@kitn.ai/ui/web-components/source'");
+    expect(finding?.detail, 'never the tag minus its prefix').toContain(
+      "import '@kitn.ai/ui/web-components/chat-scope-picker'",
+    );
+  });
+
+  it('ignores a tag named in a comment, in every comment spelling', () => {
+    const list = app({
+      'src/main.ts': [
+        '// <kai-sources> goes here when you wire sources',
+        '/* <kai-voice-input> is the other one */',
+        'const x = 1; // <kai-tool> once the model emits tool calls',
+      ].join('\n'),
+      'src/view.tsx': 'export const View = () => <div>{/* <kai-scope-picker /> */}</div>;\n',
+      'src/notes.html': '<!-- <kai-artifact> is rendered inside a message -->\n',
+    });
+    expect(unregistered(list), 'a tag nothing places is not a finding').toBeUndefined();
+  });
+
+  it('reads a tag inside a string as data, not as a placement', () => {
+    // The starters' mock conversation copy does exactly this
+    // (examples/starters/vanilla/src/chat-data.ts:36), and a finding there would fire on every
+    // starter this repo ships.
+    const list = app({
+      'src/chat-data.ts': "export const reply = { parts: [{ type: 'text', text: 'drop in `<kai-chat>` instead' }] };\n",
+      'src/notes.ts': 'export const hint = "place <kai-sources> where the list renders";\n',
+    });
+    expect(unregistered(list)).toBeUndefined();
+  });
+
+  it('says nothing at all when the project places no kai-* tag', () => {
+    const list = app({ 'src/main.ts': "import { Button } from '@kitn.ai/ui';\n" });
+    expect(unregistered(list), 'anti-vacuity: no placements, no finding').toBeUndefined();
+  });
+
+  it('says nothing about a tag the kit has no per-tag entry for', () => {
+    // No entry to name, so there is no line to add, and the map is generated from the same import
+    // list the register-all barrel carries. A CLI older than the project's kit is the case where
+    // that would be wrong, and doctor reports the skew as its own finding.
+    expect(unregistered(app({ 'src/widget.html': '<kai-typo></kai-typo>\n' }))).toBeUndefined();
+  });
+
+  it('treats a tag the project defines itself as registered', () => {
+    const list = app({
+      'src/widget.html': '<kai-sources></kai-sources>\n',
+      'src/own.ts': "customElements.define('kai-sources', class extends HTMLElement {});\n",
+    });
+    expect(unregistered(list)).toBeUndefined();
+  });
+});
+
+describe('diagnose: rules read code, not the prose that describes the symptom', () => {
+  const app = (files: Record<string, string>) =>
+    findings({
+      'package.json': JSON.stringify({ name: 'app', dependencies: { '@kitn.ai/ui': '^0.35.0' } }),
+      'node_modules/@kitn.ai/ui/package.json': JSON.stringify({ name: '@kitn.ai/ui', version: '0.35.0' }),
+      ...files,
+    });
+
+  // THE MEASURED REGRESSION. `kai doctor` on a freshly scaffolded vue app reported "Web components
+  // not registered" at src/main.ts, about an app that registers every tag it places. Two signals
+  // matched a rule written for a PASTED symptom report: the identifier `unregistered` and the call
+  // `customElements.get(tag)` in the app's own upgrade gate, and the comment above that gate, which
+  // explains what happens without an import ("renders a blank page").
+  it('does not warn about a correct app whose own gate and comment describe the symptom', () => {
+    const list = app({
+      'src/main.ts': [
+        "import '@kitn.ai/ui/web-components/chat';",
+        '// Without the import above the tag never defines, the wait below never settles, and the',
+        '// app renders a blank page with no error to show for it.',
+        "const unregistered = ['kai-chat'].filter((tag) => !customElements.get(tag));",
+        'if (unregistered.length > 0) throw new Error(`no entry import above registers: ${unregistered.join(", ")}`);',
+      ].join('\n'),
+    });
+    expect(titles(list), 'a registered app reports no registration warning').not.toMatch(
+      /Web components not registered/,
+    );
+  });
+
+  it('still reads the code the rules exist for, and ignores the same pattern inside a comment', () => {
+    const misuse = '<kai-chat messages="[...]"></kai-chat>\n';
+    expect(titles(app({ 'src/widget.html': misuse })), 'real markup still fires').toMatch(/HTML attribute/);
+    expect(
+      titles(app({ 'src/widget.html': `<!-- example: ${misuse} -->\n` })),
+      'the same markup inside a comment is an example, not usage',
+    ).not.toMatch(/HTML attribute/);
+  });
+});

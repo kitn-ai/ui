@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
+import { z } from 'zod';
 import {
-  cardEmitPlan, emittedTags, scaffold, renderSurface,
+  cardEmitPlan, emittedTags, scaffold, renderSurface, WEB_COMPONENT_TAGS,
   NO_PROXY_CLAIM, PROXY_REQUIRED_CLAIM, ATTACHMENT_WIRE_NOTE,
 } from './tools/scaffold';
 // The route seam a second emitter consumes, graded at the bottom of this file.
@@ -388,6 +389,77 @@ describe('scaffold', () => {
     expect(text).toMatch(/unknown use ?case|valid use ?cases|valid archetypes/i);
     // names a real archetype id so the harness can self-correct
     expect(text).toMatch(/drop-in-chat/);
+  });
+
+  /**
+   * An unknown TAG is the same class of failure as an unknown `useCase` or
+   * `integration`, and it used to be the one of the three that arrived as a protocol
+   * error instead of an answer: `components` was `z.array(z.string())`, so the tag
+   * reached `entryBasenames`, which THROWS, and server.ts returns the handler's result
+   * bare, so the throw escapes the tool call. There are two guards now, and they cover
+   * different callers: the advertised enum (for whoever validates first) and this
+   * rejection in the handler (for everyone else, including the tests that call the
+   * handler directly and `create-kai`).
+   */
+  it('rejects an unknown component tag by name without throwing', async () => {
+    const out = await scaffold.handler({
+      components: ['kai-chat', 'kai-nope'],
+      integration: 'openrouter',
+      placement: 'full-page',
+      framework: 'react',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    // the offending tag, so the caller knows exactly which entry to delete
+    expect(text).toMatch(/kai-nope/);
+    expect(text).toMatch(/unknown component/i);
+    // the register-all barrel, named as the import that registers every tag in the list
+    expect(text).toMatch(/@kitn\.ai\/ui\/web-components'/);
+    // the valid list, READ from the manifest (kai-conversations proves it is the map
+    // and not a `kai-`-stripped guess), so a bad tag still teaches the real set
+    expect(text).toMatch(/kai-conversations/);
+    expect(text).toMatch(/kai-chat/);
+    // a validation error, not a surface with a hole in it: nothing was composed
+    expect(text).not.toMatch(/=== \(1\)/);
+  });
+
+  it('advertises the whole tag set in its JSON Schema', () => {
+    // The discoverability half of the same fix, and the reason the enum is on the
+    // schema at all: server.ts runs `z.toJSONSchema` over every tool on every
+    // ListTools, so a harness can read the valid tags before it calls.
+    const schema = z.toJSONSchema(scaffold.inputSchema) as unknown as {
+      properties: { components: { items?: { enum?: string[] }; description?: string } };
+    };
+    const components = schema.properties.components;
+    expect([...(components.items?.enum ?? [])].sort()).toEqual([...WEB_COMPONENT_TAGS].sort());
+    // ...and the description says the list is there, or a reader never looks.
+    expect(components.description ?? '').toMatch(/enumerates/i);
+  });
+
+  it('admits every tag the catalog asks for, so the tag set is not narrower than a preset', () => {
+    // The enum is the manifest's map; the presets and probes are catalog data. If one
+    // named a tag the map does not carry, the schema would reject a request this
+    // project's own UI can compose. Asserted as a set difference rather than by
+    // calling the handler once per surface, so it stays cheap and names the tag.
+    const asked = new Set<string>([
+      ...listArchetypes().flatMap((a) => a.components),
+      ...listSurfaceProbes().flatMap((p) => p.components),
+    ]);
+    expect(asked.size).toBeGreaterThan(0);
+    expect([...asked].filter((tag) => !WEB_COMPONENT_TAGS.includes(tag))).toEqual([]);
+  });
+
+  it('stays loud for a caller that skips the handler', () => {
+    // The belt, kept on purpose: `renderSurface` is also called directly (by
+    // create-kai and by these tests' renderer assertions), so a tag with no entry has
+    // to fail somewhere, and the emitted app would otherwise place a <kai-*> nothing
+    // ever defines: an element that stays inert with no failure to explain it.
+    expect(() =>
+      renderSurface({
+        framework: 'html',
+        components: ['kai-chat', 'kai-nope'],
+        integration: getIntegration('mock')!,
+      }),
+    ).toThrow(/no web-component entry for kai-nope/);
   });
 
   it('docked-widget placement produces a fixed, sized container', async () => {
