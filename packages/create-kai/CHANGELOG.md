@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.9.0](https://github.com/kitn-ai/ui/compare/create-kai-v0.8.0...create-kai-v0.9.0) (2026-09-22)
+
+
+### Features
+
+* **scaffold:** register only the kai-* tags a scaffold or starter places ([e772101](https://github.com/kitn-ai/ui/commit/e772101f98f522a4efc258aeaf623efcc2e7b49c))
+* **scaffold:** register only the kai-* tags a scaffold or starter places ([cb89e66](https://github.com/kitn-ai/ui/commit/cb89e667396ff499a45a7681bcbbe3ce3af257c4))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @kitn.ai/ui bumped to 0.36.0
+
 ## [0.8.0](https://github.com/kitn-ai/ui/compare/create-kai-v0.7.1...create-kai-v0.8.0) (2026-09-22)
 
 

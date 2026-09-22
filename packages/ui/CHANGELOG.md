@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.36.0](https://github.com/kitn-ai/ui/compare/@kitn.ai/ui-v0.35.0...@kitn.ai/ui-v0.36.0) (2026-09-22)
+
+
+### Features
+
+* **doctor:** report a kai-* tag nothing registers, and reject one the scaffold cannot place ([5d93f7f](https://github.com/kitn-ai/ui/commit/5d93f7f3e24da6759643dd9f7061dbd115f0b761))
+* **doctor:** report a kai-* tag that nothing registers, and reject one the scaffold cannot place ([0d1ddf4](https://github.com/kitn-ai/ui/commit/0d1ddf4efecb2c8581b047826827da73ce31c644))
+* **scaffold:** register only the kai-* tags a scaffold or starter places ([e772101](https://github.com/kitn-ai/ui/commit/e772101f98f522a4efc258aeaf623efcc2e7b49c))
+* **scaffold:** register only the kai-* tags a scaffold or starter places ([cb89e66](https://github.com/kitn-ai/ui/commit/cb89e667396ff499a45a7681bcbbe3ce3af257c4))
+
 ## [0.35.0](https://github.com/kitn-ai/ui/compare/@kitn.ai/ui-v0.34.0...@kitn.ai/ui-v0.35.0) (2026-09-21)
 
 

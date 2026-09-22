@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.5.0](https://github.com/kitn-ai/ui/compare/@kitn.ai/cli-v0.4.0...@kitn.ai/cli-v0.5.0) (2026-09-22)
+
+
+### Features
+
+* **doctor:** report a kai-* tag nothing registers, and reject one the scaffold cannot place ([5d93f7f](https://github.com/kitn-ai/ui/commit/5d93f7f3e24da6759643dd9f7061dbd115f0b761))
+* **doctor:** report a kai-* tag that nothing registers, and reject one the scaffold cannot place ([0d1ddf4](https://github.com/kitn-ai/ui/commit/0d1ddf4efecb2c8581b047826827da73ce31c644))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * create-kai bumped from ^0.8.0 to ^0.9.0
+  * devDependencies
+    * @kitn.ai/ui bumped to 0.36.0
+
 ## [0.4.0](https://github.com/kitn-ai/ui/compare/@kitn.ai/cli-v0.3.0...@kitn.ai/cli-v0.4.0) (2026-09-22)
 
 
