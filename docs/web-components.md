@@ -3,14 +3,14 @@
 ## Overview
 
 <!-- spec:overview -->
-`@kitn.ai/ui` ships 99 framework-agnostic custom elements built on the SolidJS kit.
+`@kitn.ai/ui` ships 100 framework-agnostic custom elements built on the SolidJS kit.
 
 | Tag | Purpose |
 |-----|---------|
 | `<kai-chat>` | Full chat UI — message list plus prompt input |
 | `<kai-conversations>` | Sidebar conversation browser with group support |
 | `<kai-prompt-input>` | Standalone text-input area with send button |
-| + 96 composable custom elements | See the full roster below |
+| + 97 composable custom elements | See the full roster below |
 <!-- /spec:overview -->
 
 Each web component renders into its own **Shadow DOM** so the host page's CSS cannot leak in, and the kit's Tailwind classes cannot leak out. SolidJS and all kit dependencies are bundled inside the web-components bundle — the host does not need SolidJS.
@@ -1324,10 +1324,9 @@ Renders a string or an `AsyncIterable<string>` with a reveal animation.
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
-| `base64` | `base64` | `undefined | string` | — | Base64-encoded image data (pair with `media-type`). |
-| `bytes` | — | `undefined | Uint8Array<ArrayBufferLike>` | — | Raw image bytes (set as a JS property). |
-| `alt` | `alt` | `undefined | string` | `''` | Alt text. |
-| `mediaType` | `media-type` | `undefined | string` | — | MIME type (default `image/png`). |
+| `src` | `src` | `undefined | string` | — | The image's URL: an `https:`/`http:` location, a `data:` URI, or a `blob:` object URL you created. Attribute `src`. This is an image RESOURCE; for an image the model PRODUCED (base64 or raw bytes) use `<kai-image-artifact>`. |
+| `alt` | `alt` | `undefined | string` | `''` | Alt text. Attribute `alt`. Always give meaningful text: an empty alt marks the image as decorative. |
+| `class` | `class` | `undefined | string` | — | Extra classes for the `<img>`. |
 
 #### Composed from
 

@@ -980,14 +980,25 @@ export interface KaiIconElement extends HTMLElement {
 export interface KaiImageElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** Base64-encoded image data (pair with `media-type`). */
-  base64?: string;
-  /** Raw image bytes (set as a JS property). */
-  bytes?: Uint8Array;
-  /** Alt text. */
+  /** The image's URL: an `https:`/`http:` location, a `data:` URI, or a `blob:` object URL you created. Attribute `src`. This is an image RESOURCE; for an image the model PRODUCED (base64 or raw bytes) use `<kai-image-artifact>`. */
+  src?: string;
+  /** Alt text. Attribute `alt`. Always give meaningful text: an empty alt marks the image as decorative. */
   alt?: string;
-  /** MIME type (default `image/png`). */
+  /** Extra classes for the `<img>`. */
+  class?: string;
+}
+
+export interface KaiImageArtifactElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: "light" | "dark" | "auto";
+  /** The image PAYLOAD, as BARE base64 (never a URI) or as raw bytes. Attribute `data` for a base64 string; JS PROPERTY (`el.data = new Uint8Array([...])`) for bytes, like every other non-scalar input in this kit. A `data:image/...;base64,…` string here is a RESOURCE: it is reported and rendered as-is, and it belongs on `<kai-image>`'s `src`, which carries its own media type. */
+  data?: string | Uint8Array;
+  /** The payload's MIME type, e.g. `image/png` or `image/jpeg`. Attribute `media-type`. REQUIRED. Omit it and the element renders the skeleton and warns, because guessing `image/png` labelled a JPEG's bytes as a PNG. */
   mediaType?: string;
+  /** Alt text. Attribute `alt`. Always give meaningful text: an empty alt marks the image as decorative. */
+  alt?: string;
+  /** Extra classes for the `<img>` (and for the skeleton while nothing resolves). */
+  class?: string;
 }
 
 export interface KaiInputElement extends HTMLElement {
@@ -1072,6 +1083,8 @@ export interface KaiLightboxElement extends HTMLElement {
   label?: string;
   /** Show the close (X) button in the modal's top-right corner. ON WHEN ABSENT: this is a default-true flag, so `show-close`, `show-close="true"` and `el.showClose = true` all mean ON, and the only ways to turn it OFF are `show-close="false"` and `el.showClose = false`. Escape, a backdrop click and `hide()` dismiss the modal either way. */
   showClose?: boolean;
+  /** Close the modal on a click inside `slot="content"`. ON WHEN ABSENT, the same default-true flag as `showClose`, so `close-on-content-click`, `close-on-content-click="true"` and `el.closeOnContentClick = true` mean ON and only `"false"`/`false` turn it off. A click on a link, a button or any other interactive element inside the content is let through, so a caption link or a download button keeps working. */
+  closeOnContentClick?: boolean;
   /** Open it programmatically (no-op while disabled). */
   show(): void;
   /** Close it programmatically. */
@@ -2089,6 +2102,7 @@ declare global {
     'kai-hover-card': KaiHoverCardElement;
     'kai-icon': KaiIconElement;
     'kai-image': KaiImageElement;
+    'kai-image-artifact': KaiImageArtifactElement;
     'kai-input': KaiInputElement;
     'kai-kbd': KaiKbdElement;
     'kai-kbd-group': KaiKbdGroupElement;
@@ -2206,6 +2220,7 @@ declare module 'react' {
       'kai-hover-card': KaiElementJsxProps;
       'kai-icon': KaiElementJsxProps;
       'kai-image': KaiElementJsxProps;
+      'kai-image-artifact': KaiElementJsxProps;
       'kai-input': KaiElementJsxProps;
       'kai-kbd': KaiElementJsxProps;
       'kai-kbd-group': KaiElementJsxProps;
@@ -2971,14 +2986,25 @@ export interface KaiIconElementProps {
 export interface KaiImageElementProps {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** Base64-encoded image data (pair with `media-type`). */
-  base64?: string;
-  /** Raw image bytes (set as a JS property). */
-  bytes?: Uint8Array;
-  /** Alt text. */
+  /** The image's URL: an `https:`/`http:` location, a `data:` URI, or a `blob:` object URL you created. Attribute `src`. This is an image RESOURCE; for an image the model PRODUCED (base64 or raw bytes) use `<kai-image-artifact>`. */
+  src?: string;
+  /** Alt text. Attribute `alt`. Always give meaningful text: an empty alt marks the image as decorative. */
   alt?: string;
-  /** MIME type (default `image/png`). */
+  /** Extra classes for the `<img>`. */
+  class?: string;
+}
+
+export interface KaiImageArtifactElementProps {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: "light" | "dark" | "auto";
+  /** The image PAYLOAD, as BARE base64 (never a URI) or as raw bytes. Attribute `data` for a base64 string; JS PROPERTY (`el.data = new Uint8Array([...])`) for bytes, like every other non-scalar input in this kit. A `data:image/...;base64,…` string here is a RESOURCE: it is reported and rendered as-is, and it belongs on `<kai-image>`'s `src`, which carries its own media type. */
+  data?: string | Uint8Array;
+  /** The payload's MIME type, e.g. `image/png` or `image/jpeg`. Attribute `media-type`. REQUIRED. Omit it and the element renders the skeleton and warns, because guessing `image/png` labelled a JPEG's bytes as a PNG. */
   mediaType?: string;
+  /** Alt text. Attribute `alt`. Always give meaningful text: an empty alt marks the image as decorative. */
+  alt?: string;
+  /** Extra classes for the `<img>` (and for the skeleton while nothing resolves). */
+  class?: string;
 }
 
 export interface KaiInputElementProps {
@@ -3053,6 +3079,8 @@ export interface KaiLightboxElementProps {
   label?: string;
   /** Show the close (X) button in the modal's top-right corner. ON WHEN ABSENT: this is a default-true flag, so `show-close`, `show-close="true"` and `el.showClose = true` all mean ON, and the only ways to turn it OFF are `show-close="false"` and `el.showClose = false`. Escape, a backdrop click and `hide()` dismiss the modal either way. */
   showClose?: boolean;
+  /** Close the modal on a click inside `slot="content"`. ON WHEN ABSENT, the same default-true flag as `showClose`, so `close-on-content-click`, `close-on-content-click="true"` and `el.closeOnContentClick = true` mean ON and only `"false"`/`false` turn it off. A click on a link, a button or any other interactive element inside the content is let through, so a caption link or a download button keeps working. */
+  closeOnContentClick?: boolean;
 }
 
 export interface KaiLinkPreviewElementProps {
@@ -4139,6 +4167,10 @@ export interface KaiImageElementEvents {
 
 }
 
+export interface KaiImageArtifactElementEvents {
+
+}
+
 export interface KaiInputElementEvents {
   /** The value was committed (blur). Same detail shape as `kai-input`. */
   onKaiChange?: (event: CustomEvent<{ value: string; formattedValue: string }>) => void;
@@ -4583,6 +4615,8 @@ declare module 'vue' {
     KaiIcon: KaiVueElement<KaiIconElementProps, KaiIconElementEvents>;
     'kai-image': KaiVueElement<KaiImageElementProps, KaiImageElementEvents>;
     KaiImage: KaiVueElement<KaiImageElementProps, KaiImageElementEvents>;
+    'kai-image-artifact': KaiVueElement<KaiImageArtifactElementProps, KaiImageArtifactElementEvents>;
+    KaiImageArtifact: KaiVueElement<KaiImageArtifactElementProps, KaiImageArtifactElementEvents>;
     'kai-input': KaiVueElement<KaiInputElementProps, KaiInputElementEvents>;
     KaiInput: KaiVueElement<KaiInputElementProps, KaiInputElementEvents>;
     'kai-kbd': KaiVueElement<KaiKbdElementProps, KaiKbdElementEvents>;

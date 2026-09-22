@@ -3,7 +3,7 @@
 
 # @kitn.ai/ui
 
-> Framework-agnostic, Shadow-DOM web components for building AI chat interfaces — works in React, Vue, Angular, Svelte, or plain HTML. 99 custom elements, every one prefixed `kai-` (e.g. `<kai-chat>`, `<kai-artifact>`): streaming responses, markdown + code rendering, reasoning/tool panels, attachments, conversation sidebar, voice input. Zero framework dependency for consumers; the SolidJS runtime it is authored in is bundled in, so the host needs nothing.
+> Framework-agnostic, Shadow-DOM web components for building AI chat interfaces — works in React, Vue, Angular, Svelte, or plain HTML. 100 custom elements, every one prefixed `kai-` (e.g. `<kai-chat>`, `<kai-artifact>`): streaming responses, markdown + code rendering, reasoning/tool panels, attachments, conversation sidebar, voice input. Zero framework dependency for consumers; the SolidJS runtime it is authored in is bundled in, so the host needs nothing.
 
 ## Install
 
@@ -37,7 +37,7 @@ Drop an element into any framework (React, Vue, plain HTML). Data in via JS prop
 - `<kai-prompt-input>` — standalone composer with send button.
 
 **Layer 2 — composable custom elements** (`import { … } from '@kitn.ai/ui'`):
-All 99 web components are also exported individually. Use them for custom layouts or features `<kai-chat>` does not expose (ChainOfThought, FeedbackBar, ThinkingBar, VoiceInput, …). Your bundler tree-shakes the rest.
+All 100 web components are also exported individually. Use them for custom layouts or features `<kai-chat>` does not expose (ChainOfThought, FeedbackBar, ThinkingBar, VoiceInput, …). Your bundler tree-shakes the rest.
 
 ## Key rules for the web components
 
@@ -151,7 +151,7 @@ For Tailwind builds: `@import "@kitn.ai/ui/theme.css"` in your CSS.
 
 ## Docs
 
-- Web component reference (all 99 web components, every prop/event/method/slot/part): the "Web component reference" section of ./llms-full.txt — https://kitn.dev/llms-full.txt
+- Web component reference (all 100 web components, every prop/event/method/slot/part): the "Web component reference" section of ./llms-full.txt — https://kitn.dev/llms-full.txt
 - Programmatic layer (`@kitn.ai/ui/state` + `@kitn.ai/ui/wire`: streaming folds, the mock responder, the SSE readers/encoders): the "Programmatic layer" section of llms-full.txt
 - How to build a chat app in 5 steps (install → pick a layer → handle submit + stream → wire features → theme, with working code): the "How to build a chat app in 5 steps" section of llms-full.txt
 - Streaming recipe (the two rules that bite: reassign new references per chunk, fold deltas onto the trailing text part): the "Streaming recipe" section of llms-full.txt
@@ -1256,7 +1256,7 @@ Every name `kai-icon` (and every `icon` prop/attribute across the elements) reso
 
 ---
 
-## Web component reference (99 web components, generated from custom-elements.json)
+## Web component reference (100 web components, generated from custom-elements.json)
 
 Every element also accepts the `theme` attribute. Array/object properties are marked with a `—` attribute: they must be set as JS properties.
 
@@ -2553,10 +2553,25 @@ _No events._
 | Property | Attribute | Type | Description |
 |---|---|---|---|
 | `theme` | `theme` | `"light" \| "dark" \| "auto"` | Color mode (`auto` follows prefers-color-scheme). |
-| `base64` | `base64` | `undefined \| string` | Base64-encoded image data (pair with `media-type`). |
-| `bytes` | — | `undefined \| Uint8Array<ArrayBufferLike>` | Raw image bytes (set as a JS property). |
-| `alt` | `alt` | `undefined \| string` | Alt text. |
-| `mediaType` | `media-type` | `undefined \| string` | MIME type (default `image/png`). |
+| `src` | `src` | `undefined \| string` | The image's URL: an `https:`/`http:` location, a `data:` URI, or a `blob:` object URL you created. Attribute `src`. This is an image RESOURCE; for an image the model PRODUCED (base64 or raw bytes) use `<kai-image-artifact>`. |
+| `alt` | `alt` | `undefined \| string` | Alt text. Attribute `alt`. Always give meaningful text: an empty alt marks the image as decorative. |
+| `class` | `class` | `undefined \| string` | Extra classes for the `<img>`. |
+
+_No events._
+
+---
+
+### `kai-image-artifact` / `ImageArtifact`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `theme` | `theme` | `"light" \| "dark" \| "auto"` | Color mode (`auto` follows prefers-color-scheme). |
+| `data` | — | `undefined \| string \| Uint8Array<ArrayBufferLike>` | The image PAYLOAD, as BARE base64 (never a URI) or as raw bytes. Attribute `data` for a base64 string; JS PROPERTY (`el.data = new Uint8Array([...])`) for bytes, like every other non-scalar input in this kit. A `data:image/...;base64,…` string here is a RESOURCE: it is reported and rendered as-is, and it belongs on `<kai-image>`'s `src`, which carries its own media type. |
+| `mediaType` | `media-type` | `undefined \| string` | The payload's MIME type, e.g. `image/png` or `image/jpeg`. Attribute `media-type`. REQUIRED. Omit it and the element renders the skeleton and warns, because guessing `image/png` labelled a JPEG's bytes as a PNG. |
+| `alt` | `alt` | `undefined \| string` | Alt text. Attribute `alt`. Always give meaningful text: an empty alt marks the image as decorative. |
+| `class` | `class` | `undefined \| string` | Extra classes for the `<img>` (and for the skeleton while nothing resolves). |
 
 _No events._
 
@@ -2689,6 +2704,7 @@ _No events._
 | `disabled` | `disabled` | `undefined \| false \| true` | Take away the PROGRAMMATIC open path only: `show()` becomes a no-op and `toggle()` closes rather than opens. The trigger, the `open` attribute and `hide()` are untouched. These are the disclosure semantics every overlay in the kit shares; see ../disclosure. |
 | `label` | `label` | `undefined \| string` | Accessible name for the modal (`aria-label`), for a lightbox whose content carries no heading. Without one the panel is an UNNAMED `role="dialog"`, which is a WCAG failure, so name it. |
 | `showClose` | `show-close` | `undefined \| false \| true` | Show the close (X) button in the modal's top-right corner. ON WHEN ABSENT: this is a default-true flag, so `show-close`, `show-close="true"` and `el.showClose = true` all mean ON, and the only ways to turn it OFF are `show-close="false"` and `el.showClose = false`. Escape, a backdrop click and `hide()` dismiss the modal either way. |
+| `closeOnContentClick` | `close-on-content-click` | `undefined \| false \| true` | Close the modal on a click inside `slot="content"`. ON WHEN ABSENT, the same default-true flag as `showClose`, so `close-on-content-click`, `close-on-content-click="true"` and `el.closeOnContentClick = true` mean ON and only `"false"`/`false` turn it off. A click on a link, a button or any other interactive element inside the content is let through, so a caption link or a download button keeps working. |
 
 **Events** (non-bubbling `CustomEvent`s — listen directly on the element):
 

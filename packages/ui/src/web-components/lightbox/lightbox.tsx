@@ -30,6 +30,13 @@ interface Props extends Record<string, unknown> {
    *  `show-close="false"` and `el.showClose = false`. Escape, a backdrop click and
    *  `hide()` dismiss the modal either way. */
   showClose?: boolean;
+  /** Close the modal on a click inside `slot="content"`. ON WHEN ABSENT, the same
+   *  default-true flag as `showClose`, so `close-on-content-click`,
+   *  `close-on-content-click="true"` and `el.closeOnContentClick = true` mean ON and
+   *  only `"false"`/`false` turn it off. A click on a link, a button or any other
+   *  interactive element inside the content is let through, so a caption link or a
+   *  download button keeps working. */
+  closeOnContentClick?: boolean;
 }
 
 /** Events fired by `<kai-lightbox>`. */
@@ -55,7 +62,10 @@ interface Events {
  * you open it from your own control or from `show()`. The modal it composes gets
  * the whole modal contract from the kit's `Dialog`: Escape, backdrop dismissal,
  * focus moved in and restored, a Tab trap, `role="dialog" aria-modal`, and an
- * `aria-label` from `label`. Any descendant `<img>` is clamped to the viewport.
+ * `aria-label` from `label`. Any descendant `<img>` is clamped to the viewport. A
+ * click inside `slot="content"` dismisses the modal, except on an interactive
+ * element inside it — a link in a caption, a download button — which keeps its own
+ * click; `close-on-content-click="false"` keeps the modal open on any content click.
  *
  * Open state is the standard disclosure surface: settable+reflecting `open`,
  * `kai-open-change`, and `show()`/`hide()`/`toggle()`; seed with `default-open`.
@@ -67,6 +77,7 @@ defineWebComponent<Props, Events>('kai-lightbox', {
   disabled: undefined,
   label: undefined,
   showClose: true,
+  closeOnContentClick: true,
 }, (props, ctx) => {
   const { element, flag } = ctx;
   let api: LightboxController | undefined;
@@ -110,6 +121,13 @@ defineWebComponent<Props, Events>('kai-lightbox', {
   // only an explicit `"false"`/`false` turns the button off.
   const showClose = () => (props.showClose === undefined ? true : flag('showClose'));
 
+  // Same default-true read, for the same two reasons: `flag()` alone makes an ABSENT
+  // attribute mean OFF, and the `closeOnContentClick: true` default is overwritten by
+  // `undefined` when a BARE `close-on-content-click` attribute is parsed. See the
+  // long note on `showClose` above and WebComponentContext.flag.
+  const closeOnContentClick = () =>
+    props.closeOnContentClick === undefined ? true : flag('closeOnContentClick');
+
   return (
     <>
       <style>{':host{display:inline-block}'}</style>
@@ -118,7 +136,11 @@ defineWebComponent<Props, Events>('kai-lightbox', {
         controllerRef={(a) => (api = a)}
       >
         {hasTrigger() ? <LightboxTrigger><slot /></LightboxTrigger> : undefined}
-        <LightboxContent label={props.label} showClose={showClose()}>
+        <LightboxContent
+          label={props.label}
+          showClose={showClose()}
+          closeOnContentClick={closeOnContentClick()}
+        >
           <slot name="content" />
         </LightboxContent>
       </Lightbox>

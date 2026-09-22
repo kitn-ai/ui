@@ -19,6 +19,17 @@ said an earlier answer to it got lost.
 2. A correction on the shape: "I am imagining the Lightbox or whatever you are calling it will be a
    **new component**, and used by the attachment in some fashion." So not an attachment-scoped
    compound: a first-class component, and the attachments compose it.
+3. "should we have a way to close it using an X button at the top right? Have the option to show or
+   not show that?" Landed as `showClose` (default ON).
+4. "I see that you did not include the light box as a component ... it's fine for now to also have it
+   in foundations. but it should exist in components." Storybook already has this pairing: a Solid
+   component story at `Components/<Name>` and the element story at `Labs/Foundations/<Name>`
+   (`Components/Kbd` + `Labs/Foundations/Kbd`). The Lightbox only had the element one, so
+   `Components/Lightbox` was added.
+5. "i want a way to close on click (image) not sure if that is an event or a property or something
+   else." A property: `closeOnContentClick`, default ON.
+6. Confirmed the `Image` / `ImageArtifact` split (see §6), with the explicit instruction to update
+   the MCP, the docs and everything downstream.
 
 ---
 
@@ -33,6 +44,11 @@ said an earlier answer to it got lost.
 | `src/components/thread/thread.tsx`, `src/components/chat/chat-thread.tsx` | Both render their own `MessageBody`, so both got the prop and forward it. `<kai-chat>` inherits `ChatThreadProps` and needed nothing; `<kai-thread>` forwards it explicitly. |
 | `src/web-components/attachments/attachments.tsx` | `image-preview` attribute. Branch order: image + lightbox -> lightbox trio, else `hover-card` -> hover card, else plain. Non-images never lightbox. |
 | `apps/docs/.../components/lightbox.mdx` (NEW) + `src/topics.mjs` | The element's own page and sidebar entry, next to Hover card. The Attachments page gained a Lightbox section. |
+| `src/components/lightbox/lightbox.stories.tsx` (NEW) | `Components/Lightbox`, the Solid trio's story, which the Components group was missing. |
+| `src/components/image/image.tsx` + `src/components/image/image-artifact.tsx` (NEW) + both facades | The `Image` / `ImageArtifact` split (§6): `src` for a resource, `data` + a REQUIRED `mediaType` for a payload. |
+| `src/web-components/image/image-artifact.tsx` (NEW) + `register-impl.ts` | `<kai-image-artifact>`, registered; `kai-image` became the resource element. |
+| `apps/docs/.../components/image.mdx` (rewritten) + `image-artifact.mdx` (NEW) + `src/data/samples/kai-image*.ts` + `src/topics.mjs` | Two docs pages, two sample sets, one sidebar entry each. |
+| `tests/components/model-image-sinks.test.tsx`, `src/stories/showcase/perplexity-pro.stories.tsx`, `examples/demos/composable/*`, `guides/frameworks/react.mdx` | Every in-repo consumer of the old payload-shaped `Image` migrated: the pinned sink test, the showcase, the composable demo (which now shows both elements), and the React name-collision note. |
 
 ### The rename, and why it matters
 
@@ -72,21 +88,38 @@ The first cut was `AttachmentLightbox`/`Trigger`/`Content` under `attachments/`.
    attachments pass the attachment's own label.
 6. **Non-image tiles never lightbox.** A modal that opens onto a PDF icon is worse than the hover
    card, which carries the filename and media type a grid tile cannot fit.
+7. **The X is ON by default; the content click is ON by default.** Both are what every photo viewer
+   does, and both are opt-out (`show-close="false"`, `close-on-content-click="false"`). The
+   content-click handler walks `e.composedPath()` and STOPS at the content wrapper, because two real
+   traps sit on that path: the dialog panel above the wrapper carries `tabindex="-1"`, so an unbounded
+   `closest('[tabindex]')` matches the panel and no click ever closes anything; and with
+   `<kai-lightbox>` the media is light-DOM slotted content, whose only link to the wrapper is the
+   flattened tree, which `closest()` does not walk, so a link in a caption would read as
+   non-interactive and dismiss the modal out from under itself.
+8. **The image split is on INPUT SEMANTICS, not transport** (§6). A `<img>`-sink URL is not filtered,
+   because the repo already decided that (`isSafeImageSrc`'s docblock, pinned by
+   `tests/components/model-image-sinks.test.tsx`); `mediaType` is required and its absence is reported
+   rather than guessed; and there is no `GeneratedImageLike` type, because `data` + `mediaType`
+   describes the payload and the AI SDK's object shape is one documented mapping line, not a contract
+   the kit should carry.
 
 ---
 
 ## 4. Verification state
 
 - `nx build ui --skip-nx-cache` green. `verify:generated` (19 artifacts, each re-proven).
-- unit **428 files / 6124 tests**; emitted **5 / 36**; docs **7 / 62**; create-kai **21 / 935**;
-  cli **2 / 51**.
+- unit **432 files / 6161 tests**; emitted **5 / 36**; docs **7 / 62**; create-kai **21 / 935**;
+  cli **2 / 51**. The generated API is now **100 web components** (was 98 at the top of this branch).
 - all 13 `packages/ui` lint gates; the UI typecheck (quarantine + the four tsc passes); the cli, mcp
   and create-kai typechecks.
-- `verify:generated`, `verify:solid-coverage` (**99/99**, 197 prop types), `verify:schemas`,
+- `verify:generated`, `verify:solid-coverage` (**100/100**), `verify:schemas`,
   `verify:tool-schemas`, `verify:web-components-bundle` (the new element is in the register chunk),
-  `verify:scaffold`, `verify:construct` (113 cells, 5 consumer bundles), `verify:pack` (2.09 MiB
+  `verify:scaffold`, `verify:construct` (113 cells, 5 consumer bundles), `verify:pack` (2.10 MiB
   against the 2.56 MiB ceiling), `verify:fresh`, `verify:consumer` (`solid-thread` 312,681 B eager
   against a 430,080 B ceiling: the Dialog and the lightbox are now in that graph), and `verify:docs`.
+- **`llms-full.txt`'s ceiling was raised, 344 -> 355 KiB**, with the dated note
+  `scripts/lint-llms-size.mjs` requires: 352,800 bytes measured at 100 elements, grown by two new
+  elements and their prop tables, same ~3% headroom as the baseline and the previous raise.
 - CI-only and not run locally: the storybook browser legs (they matter here: the modal's geometry and
   the clamp are visual), `verify:starters`, create-kai's `verify:add`.
 
@@ -112,6 +145,21 @@ The first cut was `AttachmentLightbox`/`Trigger`/`Content` under `attachments/`.
    which the `<Attachments>` in the same JSX tree provides. Inline in `MessageBody` the read would
    find no context and take the default on every render: a prop that looks wired and never works.
    That is why the tile is its own component, and it is noted at the site.
+6. **A `Uint8Array` is not a `BlobPart` any more.** `new Blob([data])` is a TS2322 under this
+   tsconfig (`Uint8Array<ArrayBufferLike>` widens past `ArrayBufferView<ArrayBuffer>`), and the
+   pre-split code carried the same `as BlobPart` cast for the same reason. A lane found it in a
+   SIBLING lane's file and the parent routed the one-line fix, which is the system working: the
+   owner of the file was still running and could not see it.
+7. **An em dash in a prop JSDoc is only visible after a regeneration.** `rendered-description-style`
+   reads the GENERATED `web-component-meta.json`, not the source, so fixing the comment and re-running
+   the test still fails until `gen-web-component-api.mjs` (or `build:api`) rewrites the meta. Do the
+   regeneration before believing the fix, and remember the same text reaches `docs/web-components.md`
+   and `llms-full.txt`.
+8. **A backtick OR a `${}` inside a subagent workflow's template literal breaks the script.** The
+   first dispatch failed with `SyntaxError: Unexpected token` (an unescaped backtick) and the retry
+   with `ReferenceError: mediaType is not defined` (a `${mediaType}` that interpolated at script time).
+   Both are the same trap the repo already documents for `src(...)` snippets: build the task text with
+   a placeholder and substitute after, and never write a code sample raw into a template literal.
 
 ---
 
@@ -151,8 +199,25 @@ precedence, and apply the URL policy to it. Not a union. Two defects to fix eith
   repo whose rule is to decide loudly: either require `mediaType` alongside `base64`, or default it
   in the open.
 
-**Status:** answered, awaiting the owner's call (one name / `src` / loud `mediaType`). No code change
-made.
+**Status: SHIPPED, owner-confirmed.** The name they chose is `ImageArtifact` (not `GeneratedImage`),
+because this repo already has an `Artifact` and the family road (Audio/Video/File artifact) is
+coherent; `Artifact` itself means the code-preview surface, so the two pages each say which to reach
+for. The API is one `data` prop (`string | Uint8Array`) plus a REQUIRED `mediaType`, `alt`, `class`.
+What changed from the discussion above, and why:
+
+- the axis is input semantics (reference vs payload), NOT transport: the sendability argument was a
+  wire concern and the owner pushed back on it correctly, so it lives in `wire/` and in this file, not
+  in the component taxonomy;
+- `Uint8Array` and base64 are ONE prop discriminated by `typeof`, because they are two shapes of one
+  payload and the AI SDK's own `DefaultGeneratedFile` takes `{ data, mediaType }`;
+- `mediaType` is required at the type level, and its absence at runtime reports once and renders the
+  placeholder instead of guessing `image/png`;
+- no scheme filter at either sink, citing the repo's existing decision and its pinned test;
+- `GeneratedImageLike` is gone.
+Downstream, as instructed: the MCP catalog, the meta, the manifest, the d.ts pair, the React wrappers,
+`docs/web-components.md` and `llms-full.txt` are all regenerated; the docs site has a page per
+component; the showcase, the composable demo, the React guide note and the pinned sink test are all
+migrated.
 
 ---
 
@@ -167,9 +232,8 @@ made.
    [`2026-09-22-kbd-weld-and-tooltip-content.md`](2026-09-22-kbd-weld-and-tooltip-content.md) §4. The
    owner's `class`-row color-field report could not be reproduced in the tree; the guard would make
    that class of mistake impossible rather than re-diagnosable.
-3. **`Image`'s three-name problem** (§6), if the owner says go.
-4. **`PromptDock`'s disposition** (demo scaffolding: no data, no events, no composed kit components,
+3. **`PromptDock`'s disposition** (demo scaffolding: no data, no events, no composed kit components,
    two showcase users, no docs page).
-5. **Lightbox follow-ups, deliberately not done:** no arrow/`text-wrap: balance` parity work on the
+4. **Lightbox follow-ups, deliberately not done:** no arrow/`text-wrap: balance` parity work on the
    tooltip bubble; the lightbox's modal has no zoom or pan (a lightbox that shows an image bigger, not
    a viewer); and `label` is required in practice for an accessible name rather than defaulted.

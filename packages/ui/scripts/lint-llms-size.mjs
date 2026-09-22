@@ -33,7 +33,18 @@
 // the web components are real public API and the roster's whole value is being the
 // complete list inline. New headroom is ~2 KiB — deliberately tight, the next
 // batch of web components pays its own toll here again.
-const MAX_LLMS_FULL_BYTES = 344 * 1024; // 352,256
+//
+// 2026-09-22 raise: 344 → 355 KiB. Measured 352,800 bytes at 100 elements /
+// 123 state/wire exports. What grew: the attachment lightbox and the image split, both of them
+// element reference an agent reads HERE. `kai-lightbox` is a new element (open/show/hide/toggle,
+// `show-close`, `close-on-content-click`, three parts); `kai-image-artifact` is a new element while
+// `kai-image` changed meaning (the payload props moved out, `src` moved in); `image-preview` landed
+// on three elements that render attachments; `ImageArtifact` brought its own props. Trimming was
+// not the better fix: the growth is one row per real prop of real public API, and the alternative
+// (pointers into the Custom Elements Manifest) would hide the per-element API from the file an agent
+// reads first. 355 KiB keeps the same ~3% headroom over the measurement that the baseline and the
+// previous raise both used.
+const MAX_LLMS_FULL_BYTES = 355 * 1024; // 363,520
 
 // THE FLOOR IS A TRUNCATION TRIPWIRE, NOT A TARGET. This repo has already
 // shipped the failure it guards: running gen-llms.mjs standalone silently

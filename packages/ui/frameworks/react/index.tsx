@@ -45,6 +45,7 @@ import type {
   KaiFormElement,
   KaiHoverCardElement,
   KaiIconElement,
+  KaiImageArtifactElement,
   KaiImageElement,
   KaiInputElement,
   KaiKbdElement,
@@ -1126,21 +1127,37 @@ export const Icon = /*#__PURE__*/ createWebComponent<IconProps, KaiIconElement>(
 );
 
 export interface ImageProps extends WebComponentProps {
-  /** Base64-encoded image data (pair with `media-type`). */
-  base64?: string;
-  /** Raw image bytes (set as a JS property). */
-  bytes?: Uint8Array;
-  /** Alt text. */
+  /** The image's URL: an `https:`/`http:` location, a `data:` URI, or a `blob:` object URL you created. Attribute `src`. This is an image RESOURCE; for an image the model PRODUCED (base64 or raw bytes) use `<kai-image-artifact>`. */
+  src?: string;
+  /** Alt text. Attribute `alt`. Always give meaningful text: an empty alt marks the image as decorative. */
   alt?: string;
-  /** MIME type (default `image/png`). */
-  mediaType?: string;
+  /** Extra classes for the `<img>`. */
+  class?: string;
 }
 
 export const Image = /*#__PURE__*/ createWebComponent<ImageProps, KaiImageElement>(
   'kai-image',
-  ["theme","base64","bytes","alt","mediaType"],
+  ["theme","src","alt","class"],
   {  },
   () => import('@kitn.ai/ui/web-components/image'),
+);
+
+export interface ImageArtifactProps extends WebComponentProps {
+  /** The image PAYLOAD, as BARE base64 (never a URI) or as raw bytes. Attribute `data` for a base64 string; JS PROPERTY (`el.data = new Uint8Array([...])`) for bytes, like every other non-scalar input in this kit. A `data:image/...;base64,…` string here is a RESOURCE: it is reported and rendered as-is, and it belongs on `<kai-image>`'s `src`, which carries its own media type. */
+  data?: string | Uint8Array;
+  /** The payload's MIME type, e.g. `image/png` or `image/jpeg`. Attribute `media-type`. REQUIRED. Omit it and the element renders the skeleton and warns, because guessing `image/png` labelled a JPEG's bytes as a PNG. */
+  mediaType?: string;
+  /** Alt text. Attribute `alt`. Always give meaningful text: an empty alt marks the image as decorative. */
+  alt?: string;
+  /** Extra classes for the `<img>` (and for the skeleton while nothing resolves). */
+  class?: string;
+}
+
+export const ImageArtifact = /*#__PURE__*/ createWebComponent<ImageArtifactProps, KaiImageArtifactElement>(
+  'kai-image-artifact',
+  ["theme","data","mediaType","alt","class"],
+  {  },
+  () => import('@kitn.ai/ui/web-components/image-artifact'),
 );
 
 export interface InputProps extends WebComponentProps {
@@ -1235,13 +1252,15 @@ export interface LightboxProps extends WebComponentProps {
   label?: string;
   /** Show the close (X) button in the modal's top-right corner. ON WHEN ABSENT: this is a default-true flag, so `show-close`, `show-close="true"` and `el.showClose = true` all mean ON, and the only ways to turn it OFF are `show-close="false"` and `el.showClose = false`. Escape, a backdrop click and `hide()` dismiss the modal either way. */
   showClose?: boolean;
+  /** Close the modal on a click inside `slot="content"`. ON WHEN ABSENT, the same default-true flag as `showClose`, so `close-on-content-click`, `close-on-content-click="true"` and `el.closeOnContentClick = true` mean ON and only `"false"`/`false` turn it off. A click on a link, a button or any other interactive element inside the content is let through, so a caption link or a download button keeps working. */
+  closeOnContentClick?: boolean;
   /** The modal opened or closed (trigger click, Escape, backdrop click, or a method). */
   onOpenChange?: (event: CustomEvent<{ open: boolean }>) => void;
 }
 
 export const Lightbox = /*#__PURE__*/ createWebComponent<LightboxProps, KaiLightboxElement>(
   'kai-lightbox',
-  ["theme","open","defaultOpen","disabled","label","showClose"],
+  ["theme","open","defaultOpen","disabled","label","showClose","closeOnContentClick"],
   { onOpenChange: 'kai-open-change' },
   () => import('@kitn.ai/ui/web-components/lightbox'),
 );

@@ -24,6 +24,7 @@
     "kai-loader": "loader",
     "kai-text-shimmer": "text-shimmer",
     "kai-image": "image",
+    "kai-image-artifact": "image-artifact",
     "kai-checkpoint": "checkpoint",
     "kai-skills": "message-skills",
     "kai-source": "source",
@@ -171,6 +172,9 @@
     ],
     "image": [
       "kai-image"
+    ],
+    "image-artifact": [
+      "kai-image-artifact"
     ],
     "checkpoint": [
       "kai-checkpoint"

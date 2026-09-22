@@ -102,6 +102,7 @@ export const topics = [
           { slug: 'components/source' },
           { slug: 'components/sources' },
           { slug: 'components/image' },
+          { slug: 'components/image-artifact' },
           { slug: 'components/link-preview' },
           { slug: 'components/embed' },
         ],

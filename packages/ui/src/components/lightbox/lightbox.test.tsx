@@ -5,7 +5,8 @@
  * What the lightbox has to promise: the trigger is a real control (click, Enter,
  * Space) that announces what it opens (`aria-haspopup` / `aria-expanded`),
  * Escape and a backdrop click reach `Dialog`'s own dismiss, the consumer's image
- * lands inside the dialog, and NOTHING renders while closed.
+ * lands inside the dialog, a click on that image dismisses the modal while a click
+ * on a link or button INSIDE it does not, and NOTHING renders while closed.
  */
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import '@testing-library/jest-dom/vitest';
@@ -32,13 +33,18 @@ const renderLightbox = (props: {
   defaultOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
   showClose?: boolean;
+  closeOnContentClick?: boolean;
 } = {}) =>
   render(() => (
     <Lightbox open={props.open} defaultOpen={props.defaultOpen} onOpenChange={props.onOpenChange}>
       <LightboxTrigger>
         <img alt="Thumbnail" src={IMAGE} />
       </LightboxTrigger>
-      <LightboxContent label="Photo preview" showClose={props.showClose}>
+      <LightboxContent
+        label="Photo preview"
+        showClose={props.showClose}
+        closeOnContentClick={props.closeOnContentClick}
+      >
         <img alt="Full size" src={IMAGE} />
       </LightboxContent>
     </Lightbox>
@@ -170,6 +176,100 @@ describe('Lightbox', () => {
     ));
 
     expect(trigger().className).toContain('block');
+  });
+});
+
+/**
+ * Click-on-the-picture dismissal, the default that needs pinning in BOTH directions:
+ * a handler that never fires leaves the modal shut by Escape alone, and one that
+ * fires on a link in a caption makes that link unclickable — and neither shows up in
+ * any assertion above.
+ */
+describe('Lightbox content click to close', () => {
+  it('closes when the content is clicked, and reports the change', async () => {
+    const onOpenChange = vi.fn();
+    renderLightbox({ defaultOpen: true, onOpenChange });
+
+    fireEvent.click(screen.getByAltText('Full size'));
+    await tick();
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    // The same controller as the trigger, the X and Escape: one path to onOpenChange.
+    expect(onOpenChange).toHaveBeenLastCalledWith(false);
+  });
+
+  it('stays open when the click lands on a link or a button inside the content', async () => {
+    const onOpenChange = vi.fn();
+    render(() => (
+      <Lightbox defaultOpen onOpenChange={onOpenChange}>
+        <LightboxTrigger>
+          <img alt="Thumbnail" src={IMAGE} />
+        </LightboxTrigger>
+        <LightboxContent label="Photo preview">
+          <img alt="Full size" src={IMAGE} />
+          <a href="#original">Original</a>
+          <button type="button">Download</button>
+        </LightboxContent>
+      </Lightbox>
+    ));
+
+    fireEvent.click(screen.getByRole('link', { name: 'Original' }));
+    await tick();
+    fireEvent.click(screen.getByRole('button', { name: 'Download' }));
+    await tick();
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(onOpenChange).not.toHaveBeenCalled();
+  });
+
+  it('keeps the modal open for closeOnContentClick={false}', async () => {
+    renderLightbox({ defaultOpen: true, closeOnContentClick: false });
+
+    fireEvent.click(screen.getByAltText('Full size'));
+    await tick();
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+  });
+
+  it('leaves the panel around the content inert', async () => {
+    // The handler is scoped to the content REGION, not to the panel: the wrapper is
+    // `display: contents` and carries the click, so the panel's own padding stays
+    // inert. Bound to the panel instead, a click on the media's margin would dismiss
+    // a modal the reader was reaching into.
+    renderLightbox({ defaultOpen: true });
+
+    fireEvent.click(screen.getByRole('dialog').querySelector('[part="body"]')!);
+    await tick();
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+  });
+
+  it('wraps the content in a display:contents region, so the panel layout is untouched', () => {
+    renderLightbox({ defaultOpen: true });
+
+    const wrapper = screen.getByAltText('Full size').parentElement!;
+    expect(wrapper.className).toContain('contents');
+    // A direct child of the body region, which is what keeps `[&>[part=body]]:p-0`
+    // and the `[&_img]` clamp on the panel reaching what they reached before.
+    expect(wrapper.parentElement).toHaveAttribute('part', 'body');
+  });
+
+  it('leaves the trigger, Escape and the X working alongside it', async () => {
+    const onOpenChange = vi.fn();
+    renderLightbox({ onOpenChange });
+
+    fireEvent.click(trigger());
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
+    await tick();
+    expect(onOpenChange).toHaveBeenLastCalledWith(false);
+
+    fireEvent.click(trigger());
+    fireEvent.click(closeButton());
+    await tick();
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(onOpenChange).toHaveBeenLastCalledWith(false);
   });
 });
 

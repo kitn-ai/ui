@@ -17,6 +17,7 @@ declare module 'solid-js' {
         disabled?: boolean;
         label?: string;
         'show-close'?: boolean;
+        'close-on-content-click'?: boolean;
       };
     }
   }
@@ -35,7 +36,10 @@ const meta: Meta = {
           + 'The default slot is the TRIGGER and `slot="content"` is the media. It composes the '
           + "kit's Dialog, so it inherits Escape, backdrop dismissal, the focus move and restore, "
           + 'the Tab trap and `role="dialog" aria-modal` rather than reimplementing them. The '
-          + 'modal carries its own close (X) button — on by default, `show-close="false"` to remove it.',
+          + 'modal carries its own close (X) button — on by default, `show-close="false"` to remove it — '
+          + 'and a click inside `slot="content"` dismisses it — on by default too, with '
+          + '`close-on-content-click="false"` to keep it open. A click on an interactive element '
+          + 'inside the content is let through either way, so a caption link or a download button works.',
       },
     },
   },
@@ -57,8 +61,22 @@ const meta: Meta = {
       description: 'Show the close (X) button in the panel. ON when the attribute is absent; `show-close="false"` removes it.',
       table: { defaultValue: { summary: 'true' } },
     },
+    closeOnContentClick: {
+      name: 'close-on-content-click',
+      control: 'boolean',
+      description:
+        'Close the modal on a click inside `slot="content"`. ON when the attribute is absent; `close-on-content-click="false"` keeps it open. A click on a link or a button inside the content is let through either way.',
+      table: { defaultValue: { summary: 'true' } },
+    },
   },
-  args: { open: false, defaultOpen: false, disabled: false, label: 'A mountain at dusk', showClose: true },
+  args: {
+    open: false,
+    defaultOpen: false,
+    disabled: false,
+    label: 'A mountain at dusk',
+    showClose: true,
+    closeOnContentClick: true,
+  },
 };
 export default meta;
 
@@ -85,6 +103,7 @@ export const ZoomYourOwnMarkup: StoryObj = {
         disabled={args.disabled as boolean}
         label={args.label as string}
         show-close={args.showClose as boolean}
+        close-on-content-click={args.closeOnContentClick as boolean}
       >
         <button
           type="button"
@@ -121,12 +140,15 @@ export const ZoomYourOwnMarkup: StoryObj = {
        alt="A snow-capped mountain above the clouds at dusk" />
 </kai-lightbox>
 
-<!-- Show-close, the one option that is ON when you leave it off the tag. The modal
-     renders a close (X) button in its top-right corner by DEFAULT; show-close="false"
-     removes it, which is what you want when the trigger or a host control already
-     dismisses the modal. The rest of the surface: open is settable and reflects,
-     default-open seeds, disabled takes away show() only (never the trigger). -->
-<kai-lightbox id="quiet-modal" label="A mountain at dusk" show-close="false">
+<!-- Both options below are ON when you leave them off the tag, so each of these two
+     spells out the OPT-OUT. show-close="false" removes the close (X) button from the
+     modal's top-right corner — what you want when the trigger or a host control
+     already dismisses it. close-on-content-click="false" keeps the modal open when the
+     picture itself is clicked, for content where a click means something else; a click
+     on a link or a button inside the content never dismisses it either way. The rest of
+     the surface: open is settable and reflects, default-open seeds, disabled takes away
+     show() only (never the trigger). -->
+<kai-lightbox id="quiet-modal" label="A mountain at dusk" show-close="false" close-on-content-click="false">
   <button type="button">Zoom the photo</button>
   <img slot="content" src="https://…/mountain.jpg" alt="A mountain at dusk" />
 </kai-lightbox>

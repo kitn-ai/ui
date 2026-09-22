@@ -194,7 +194,7 @@ setConversations((prev) => prev.map((c) => (c.id === id ? { ...c, title: 'Rename
 This is the same immutable update React already wants for its own state, so idiomatic React code satisfies it by default. The trap is reaching for a mutation to avoid a re-render, or handing the web components state from a store that mutates in place.
 
 <Aside type="tip" title="Image name collision">
-`kai-image` exports as `Image`, which shadows the browser global. Alias it on import: `import { Image as KaiImage } from '@kitn.ai/ui/react'`.
+`kai-image` exports as `Image`, which shadows the browser global. Alias it on import: `import { Image as KaiImage } from '@kitn.ai/ui/react'`. The payload element exports as `ImageArtifact`, which collides with nothing, so it needs no alias.
 </Aside>
 
 ## All available wrappers

@@ -4800,36 +4800,28 @@
         "displayType": "\"light\" | \"dark\" | \"auto\""
       },
       {
-        "name": "base64",
+        "name": "src",
         "type": "undefined | string",
         "optional": true,
         "scalar": true,
-        "description": "Base64-encoded image data (pair with `media-type`).",
+        "description": "The image's URL: an `https:`/`http:` location, a `data:` URI, or a `blob:` object URL you created. Attribute `src`. This is an image RESOURCE; for an image the model PRODUCED (base64 or raw bytes) use `<kai-image-artifact>`.",
         "displayType": "undefined | string"
-      },
-      {
-        "name": "bytes",
-        "type": "undefined | Uint8Array<ArrayBufferLike>",
-        "optional": true,
-        "scalar": false,
-        "description": "Raw image bytes (set as a JS property).",
-        "displayType": "undefined | Uint8Array<ArrayBufferLike>"
       },
       {
         "name": "alt",
         "type": "undefined | string",
         "optional": true,
         "scalar": true,
-        "description": "Alt text.",
+        "description": "Alt text. Attribute `alt`. Always give meaningful text: an empty alt marks the image as decorative.",
         "default": "''",
         "displayType": "undefined | string"
       },
       {
-        "name": "mediaType",
+        "name": "class",
         "type": "undefined | string",
         "optional": true,
         "scalar": true,
-        "description": "MIME type (default `image/png`).",
+        "description": "Extra classes for the `<img>`.",
         "displayType": "undefined | string"
       }
     ],
@@ -4838,6 +4830,65 @@
     "composedFrom": [
       {
         "name": "Image",
+        "group": "Components"
+      }
+    ],
+    "tokens": []
+  },
+  {
+    "tag": "kai-image-artifact",
+    "className": "KaiImageArtifactElement",
+    "displayName": "ImageArtifact",
+    "props": [
+      {
+        "name": "theme",
+        "type": "\"light\" | \"dark\" | \"auto\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "default": "'auto'",
+        "universal": true,
+        "displayType": "\"light\" | \"dark\" | \"auto\""
+      },
+      {
+        "name": "data",
+        "type": "undefined | string | Uint8Array<ArrayBufferLike>",
+        "optional": true,
+        "scalar": false,
+        "description": "The image PAYLOAD, as BARE base64 (never a URI) or as raw bytes. Attribute `data` for a base64 string; JS PROPERTY (`el.data = new Uint8Array([...])`) for bytes, like every other non-scalar input in this kit. A `data:image/...;base64,…` string here is a RESOURCE: it is reported and rendered as-is, and it belongs on `<kai-image>`'s `src`, which carries its own media type.",
+        "displayType": "undefined | string | Uint8Array<ArrayBufferLike>"
+      },
+      {
+        "name": "mediaType",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "The payload's MIME type, e.g. `image/png` or `image/jpeg`. Attribute `media-type`. REQUIRED. Omit it and the element renders the skeleton and warns, because guessing `image/png` labelled a JPEG's bytes as a PNG.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "alt",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Alt text. Attribute `alt`. Always give meaningful text: an empty alt marks the image as decorative.",
+        "default": "''",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "class",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Extra classes for the `<img>` (and for the skeleton while nothing resolves).",
+        "displayType": "undefined | string"
+      }
+    ],
+    "events": [],
+    "methods": [],
+    "composedFrom": [
+      {
+        "name": "ImageArtifact",
         "group": "Components"
       }
     ],
@@ -5271,6 +5322,15 @@
         "optional": true,
         "scalar": true,
         "description": "Show the close (X) button in the modal's top-right corner. ON WHEN ABSENT: this is a default-true flag, so `show-close`, `show-close=\"true\"` and `el.showClose = true` all mean ON, and the only ways to turn it OFF are `show-close=\"false\"` and `el.showClose = false`. Escape, a backdrop click and `hide()` dismiss the modal either way.",
+        "default": "true",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "closeOnContentClick",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Close the modal on a click inside `slot=\"content\"`. ON WHEN ABSENT, the same default-true flag as `showClose`, so `close-on-content-click`, `close-on-content-click=\"true\"` and `el.closeOnContentClick = true` mean ON and only `\"false\"`/`false` turn it off. A click on a link, a button or any other interactive element inside the content is let through, so a caption link or a download button keeps working.",
         "default": "true",
         "displayType": "undefined | false | true"
       }

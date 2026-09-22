@@ -2508,14 +2508,8 @@
           "fn": false
         },
         {
-          "name": "base64",
+          "name": "src",
           "scalar": true,
-          "optional": true,
-          "fn": false
-        },
-        {
-          "name": "bytes",
-          "scalar": false,
           "optional": true,
           "fn": false
         },
@@ -2526,7 +2520,7 @@
           "fn": false
         },
         {
-          "name": "mediaType",
+          "name": "class",
           "scalar": true,
           "optional": true,
           "fn": false
@@ -2537,6 +2531,48 @@
       "parts": [],
       "composedFrom": [
         "Image"
+      ],
+      "tokens": []
+    },
+    {
+      "tag": "kai-image-artifact",
+      "props": [
+        {
+          "name": "theme",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "data",
+          "scalar": false,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "mediaType",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "alt",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "class",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        }
+      ],
+      "events": [],
+      "methods": [],
+      "parts": [],
+      "composedFrom": [
+        "ImageArtifact"
       ],
       "tokens": []
     },
@@ -2781,6 +2817,12 @@
         },
         {
           "name": "showClose",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "closeOnContentClick",
           "scalar": true,
           "optional": true,
           "fn": false

@@ -35,6 +35,7 @@ import '../audio-visualizer/audio-visualizer';
 import '../loader/loader';
 import '../text-shimmer/text-shimmer';
 import '../image/image';
+import '../image/image-artifact';
 import '../checkpoint/checkpoint';
 import '../message/message-skills';
 import '../source/source';

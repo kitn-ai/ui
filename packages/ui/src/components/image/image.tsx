@@ -1,69 +1,42 @@
-import { type JSX, splitProps, createSignal, createEffect, onCleanup, Show } from 'solid-js';
+import { type JSX, splitProps } from 'solid-js';
 import { cn } from '../../utils/cn';
-import { Skeleton } from '../skeleton/skeleton';
 
-export interface GeneratedImageLike {
-  base64?: string;
-  uint8Array?: Uint8Array;
-  mediaType?: string;
-}
-
-export interface ImageProps extends GeneratedImageLike {
+export interface ImageProps extends JSX.ImgHTMLAttributes<HTMLImageElement> {
+  /** The image RESOURCE: an https URL, a `data:` URI, or an object URL the
+   *  caller made. A model-produced payload has no address until something
+   *  builds one, so it belongs on `<ImageArtifact data={...} mediaType={...}>`. */
+  src: string;
+  /** Alternative text. Required: an unnamed image is invisible to a screen
+   *  reader, and `alt=""` cannot be told apart from "forgot to write one". */
   alt: string;
   class?: string;
 }
 
-function getImageSrc(base64?: string, mediaType?: string): string | undefined {
-  if (base64 && mediaType) {
-    // `mediaType` can be model-supplied, so this can build `data:text/html,...`. It is
-    // still inert: an `<img src>` does not navigate or execute. isSafeImageSrc would
-    // refuse the non-image media types; it is not applied here because a refused value
-    // would have to render as SOMETHING and a visibly broken image is not better than
-    // an inert one. See tests/components/model-image-sinks.test.ts.
-    return `data:${mediaType};base64,${base64}`;
-  }
-  return undefined;
-}
-
 function Image(props: ImageProps) {
-  const [local, rest] = splitProps(props, ['base64', 'uint8Array', 'mediaType', 'class', 'alt']);
-  const [objectUrl, setObjectUrl] = createSignal<string | undefined>(undefined);
+  const [local, rest] = splitProps(props, ['class', 'src', 'alt']);
 
-  const mediaType = () => local.mediaType ?? 'image/png';
-
-  createEffect(() => {
-    const arr = local.uint8Array;
-    const mt = mediaType();
-    if (arr && mt) {
-      const blob = new Blob([arr as BlobPart], { type: mt });
-      const url = URL.createObjectURL(blob);
-      setObjectUrl(url);
-      onCleanup(() => URL.revokeObjectURL(url));
-    } else {
-      setObjectUrl(undefined);
-    }
-  });
-
-  const src = () => getImageSrc(local.base64, mediaType()) ?? objectUrl();
-
+  // NO SKELETON HERE, deliberately. This is the shared surface for a resource
+  // the browser can already fetch, so it paints its own placeholder; a skeleton
+  // of ours would only add a flash on an already-cached image. The skeleton
+  // belongs to the PAYLOAD path (`ImageArtifact` with no `data`), where there is
+  // nothing to hand the browser until the model produces it.
+  //
+  // NO SCHEME FILTER HERE, deliberately. `<img src>` cannot execute a scheme:
+  // `javascript:` is inert, and a `data:` image is legitimate and used. Filtering
+  // model-supplied image urls is a decision the APP owns (SECURITY.md, "Decisions
+  // your app owns"): the residual is one outbound GET and an attacker-chosen
+  // size, handled with CSP `img-src` or a proxy. The reasoning is at
+  // `isSafeImageSrc` in `primitives/url-scheme-policy.ts` and
+  // `tests/components/model-image-sinks.test.tsx` pins the behaviour. A filter
+  // added here fails that test, and it should.
   return (
-    <Show
-      when={src()}
-      fallback={
-        <Skeleton
-          aria-label={local.alt}
-          role="img"
-          class={cn('h-auto max-w-full overflow-hidden', local.class)}
-        />
-      }
-    >
-      <img
-        src={src()}
-        alt={local.alt}
-        class={cn('h-auto max-w-full overflow-hidden rounded-md', local.class)}
-        role="img"
-      />
-    </Show>
+    <img
+      {...rest}
+      src={local.src}
+      alt={local.alt}
+      role="img"
+      class={cn('h-auto max-w-full overflow-hidden rounded-md', local.class)}
+    />
   );
 }
 

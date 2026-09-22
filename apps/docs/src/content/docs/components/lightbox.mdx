@@ -48,6 +48,8 @@ Set `open` (or `default-open`) to drive it yourself and leave the trigger slot e
 
 The modal carries its own close (X) button in the panel's top-right corner, on by default — it is the affordance a pointer user looks for first, and it reports through `kai-open-change` like Escape and the backdrop. Pass `show-close="false"` when the trigger or a host control already dismisses the modal, and style it with `kai-lightbox::part(close)`.
 
+A click anywhere inside the content dismisses the modal too, also on by default: every photo viewer closes on a click on the picture. A click that lands on something interactive inside the content — a link in a caption, a download button beside the media — is let through, so those keep working, and the panel's own padding does not close it either. Pass `close-on-content-click="false"` when a click inside the content means something else, such as toggling a zoom level; Escape, a backdrop click and `hide()` still dismiss the modal.
+
 ## Examples
 
 ### A thumbnail that opens

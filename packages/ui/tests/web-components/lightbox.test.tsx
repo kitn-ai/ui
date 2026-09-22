@@ -34,6 +34,7 @@ type Lightbox = HTMLElement & {
   open?: boolean;
   label?: string;
   showClose?: boolean;
+  closeOnContentClick?: boolean;
 };
 
 afterEach(() => {
@@ -284,4 +285,87 @@ test('`show-close="false"` and `el.showClose = false` both take the X away', asy
   byProperty.show();
   await flush();
   expect(closeButton(byProperty), 'the property turned it off').toBeNull();
+});
+
+/**
+ * Click-on-the-picture dismissal, ON with no attribute asked for. Both directions
+ * need pinning, and on THIS layer the interesting half is the slotted content: the
+ * image is light DOM assigned to `slot="content"`, so a containment check that walks
+ * the node tree sees no link between the image and the wrapper at all — a link inside
+ * it would read as "not interactive" and close the modal it should not touch.
+ */
+test('a click on the slotted image closes the modal and reports it', async () => {
+  const el = await mount(`${TRIGGER}${CONTENT}`);
+  el.show();
+  await flush();
+
+  const seen: unknown[] = [];
+  el.addEventListener('kai-open-change', (e) => seen.push((e as CustomEvent).detail));
+  click(el.querySelector('#photo')!);
+  await flush();
+
+  expect(isOpen(el)).toBe(false);
+  expect(el.hasAttribute('open')).toBe(false);
+  // The same path as the X, Escape and a backdrop click: one kai-open-change.
+  expect(seen).toEqual([{ open: false }]);
+});
+
+test('a link or a button slotted into the content keeps its own click', async () => {
+  const el = await mount(
+    `${TRIGGER}${CONTENT}`
+    + '<a id="original" slot="content" href="#original">Original</a>'
+    + '<button id="download" slot="content" type="button">Download</button>',
+  );
+  el.show();
+  await flush();
+
+  const seen: unknown[] = [];
+  el.addEventListener('kai-open-change', (e) => seen.push((e as CustomEvent).detail));
+
+  click(el.querySelector('#original')!);
+  await flush();
+  click(el.querySelector('#download')!);
+  await flush();
+
+  expect(isOpen(el), 'the modal stays open for both').toBe(true);
+  expect(seen, 'and nothing was reported').toEqual([]);
+});
+
+test('a bare `close-on-content-click` attribute keeps closing, because absent means ON', async () => {
+  // The PARSER path, where the attribute is already on the element before it
+  // upgrades and component-register parses a bare boolean to `undefined` — the
+  // reason this flag is read as `undefined ? true : flag(…)` and not as `flag(…)`.
+  document.body.innerHTML =
+    `<kai-lightbox close-on-content-click open>${TRIGGER}${CONTENT}</kai-lightbox>`;
+  const el = document.querySelector('kai-lightbox') as Lightbox;
+  await flush();
+
+  click(el.querySelector('#photo')!);
+  await flush();
+
+  expect(isOpen(el)).toBe(false);
+});
+
+test('`close-on-content-click="false"` and `el.closeOnContentClick = false` both keep it open', async () => {
+  const byAttribute = await mount(`${TRIGGER}${CONTENT}`);
+  byAttribute.setAttribute('close-on-content-click', 'false');
+  await flush();
+  byAttribute.show();
+  await flush();
+  click(byAttribute.querySelector('#photo')!);
+  await flush();
+  expect(isOpen(byAttribute), 'the attribute turned it off').toBe(true);
+  // The rest of the modal is untouched: only this dismissal is gone.
+  key(byAttribute.querySelector('#photo')!, 'Escape');
+  await flush();
+  expect(isOpen(byAttribute), 'and Escape still closes').toBe(false);
+
+  const byProperty = await mount(`${TRIGGER}${CONTENT}`);
+  byProperty.closeOnContentClick = false;
+  await flush();
+  byProperty.show();
+  await flush();
+  click(byProperty.querySelector('#photo')!);
+  await flush();
+  expect(isOpen(byProperty), 'the property turned it off').toBe(true);
 });

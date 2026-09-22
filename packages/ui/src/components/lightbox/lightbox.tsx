@@ -13,6 +13,19 @@ interface LightboxCtx {
   setOpen: (open: boolean) => void;
 }
 
+/**
+ * What counts as "the reader meant that, not the modal" inside the content region: a
+ * link in a caption, a download button beside the media. A click on one of these must
+ * NOT dismiss the modal, or the control it landed on is unreachable.
+ *
+ * `[tabindex]` is on the list for the same reason — but it is also why the walk that
+ * uses this is bounded at the content wrapper: the dialog panel ABOVE it carries
+ * `tabindex="-1"`, so an unbounded `closest(...)` matches the panel and then no click
+ * anywhere closes anything.
+ */
+const INTERACTIVE_SELECTOR =
+  'a, button, input, select, textarea, [contenteditable], [role="button"], [tabindex]';
+
 const Ctx = createContext<LightboxCtx>();
 
 const useLightbox = () => {
@@ -122,6 +135,12 @@ export interface LightboxContentProps {
    *  something the reader can already see dismisses it and a second control would
    *  only compete with the media. */
   showClose?: boolean;
+  /** Close the modal when a click lands inside the content region. ON by default:
+   *  every photo viewer closes on a click on the picture, and a lightbox that ignores
+   *  it is the surprising one. A click on an interactive descendant (a link in a
+   *  caption, a button in the content) is let through, so those keep working. Pass
+   *  `false` when a content click does something else, e.g. toggles zoom. */
+  closeOnContentClick?: boolean;
 }
 
 /**
@@ -139,13 +158,36 @@ export interface LightboxContentProps {
  * The media is the CONSUMER's own `<img>` (a lightbox of arbitrary children),
  * so the size clamp has to reach it by descendant selector from here.
  *
- * The close button goes through the SAME controller as the trigger, Escape and the
- * backdrop, so a controlled consumer's `onOpenChange` hears every dismissal from
- * one path. It is a real `<button>` inside the panel, which is what keeps it in
- * Dialog's Tab trap and out of the panel's accessible name.
+ * BOTH dismissals this adds go through the SAME controller as the trigger, Escape
+ * and the backdrop — `closeOnContentClick` and the close button — so a controlled
+ * consumer's `onOpenChange` hears every dismissal from one path. The close button is
+ * a real `<button>` inside the panel, which is what keeps it in Dialog's Tab trap
+ * and out of the panel's accessible name.
  */
 export function LightboxContent(props: LightboxContentProps) {
   const ctx = useLightbox();
+  let content: HTMLDivElement | undefined;
+
+  /**
+   * A click anywhere in the content region closes the modal, unless it landed on (or
+   * inside) an interactive element, which keeps its own behaviour.
+   *
+   * The walk is over the COMPOSED path and stops AT the wrapper, for two separate
+   * reasons. `e.target.closest()` alone would keep climbing past the content: the
+   * dialog panel above it is a `tabindex="-1"` element, so it both matches the
+   * selector and swallows every click. And it cannot see the wrapper at all as
+   * `<kai-lightbox>` — the media there is light-DOM slotted content, whose only link
+   * to the slot is the FLATTENED tree, which `closest()` does not walk, so a link in
+   * the slotted content would read as "not interactive" and close the modal.
+   */
+  const onContentClick = (e: MouseEvent) => {
+    if (props.closeOnContentClick === false) return;
+    for (const node of e.composedPath()) {
+      if (node === content) break;
+      if (node instanceof Element && node.matches(INTERACTIVE_SELECTOR)) return;
+    }
+    ctx.setOpen(false);
+  };
 
   return (
     <Dialog
@@ -160,7 +202,14 @@ export function LightboxContent(props: LightboxContentProps) {
         props.class,
       )}
     >
-      {props.children}
+      {/* ONE wrapper, and `contents` is what keeps it invisible to layout: the media
+          still fills the panel, `[&>[part=body]]:p-0` still lands on the body, and the
+          `[&_img]` clamp is a descendant selector so it still reaches the consumer's
+          image. Giving it a box instead would shrink the image and add the padding the
+          body was stripped of. */}
+      <div ref={content} class="contents" onClick={onContentClick}>
+        {props.children}
+      </div>
       <Show when={props.showClose !== false}>
         <button
           type="button"

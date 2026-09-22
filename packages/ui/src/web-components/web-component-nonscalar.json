@@ -87,8 +87,8 @@
     "resolution",
     "values"
   ],
-  "kai-image": [
-    "bytes"
+  "kai-image-artifact": [
+    "data"
   ],
   "kai-link-preview": [
     "data"

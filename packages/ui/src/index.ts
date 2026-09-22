@@ -381,7 +381,9 @@ export type { ThinkingBarProps } from './components/thinking-bar/thinking-bar';
 export { Reasoning, ReasoningTrigger, ReasoningContent } from './components/reasoning/reasoning';
 export type { ReasoningProps, ReasoningTriggerProps, ReasoningContentProps } from './components/reasoning/reasoning';
 export { Image } from './components/image/image';
-export type { ImageProps, GeneratedImageLike } from './components/image/image';
+export type { ImageProps } from './components/image/image';
+export { ImageArtifact } from './components/image/image-artifact';
+export type { ImageArtifactProps } from './components/image/image-artifact';
 export { FileUpload, FileUploadTrigger, FileUploadContent } from './components/file/file-upload';
 export type { FileUploadProps, FileUploadTriggerProps, FileUploadContentProps } from './components/file/file-upload';
 export {

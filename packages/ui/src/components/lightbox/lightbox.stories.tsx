@@ -24,7 +24,7 @@ const meta = {
     docs: {
       description: componentDescription([
         'Click-to-open full-size preview. `LightboxTrigger` wraps the thumbnail, `LightboxContent` holds the media, and `Lightbox` owns the open state — uncontrolled from `defaultOpen`, or controlled with `open` + `onOpenChange`.',
-        'The panel renders a close (X) button in its top-right by default; `showClose={false}` takes it away when something the reader can already see dismisses the modal. The X, Escape, a backdrop click and your own control all report through the same `onOpenChange`.',
+        'The panel renders a close (X) button in its top-right by default; `showClose={false}` takes it away when something the reader can already see dismisses the modal. A click on the picture itself dismisses the modal too — `closeOnContentClick={false}` keeps it open when a click inside the content means something else, such as a zoom toggle. The X, Escape, a backdrop click, the picture and your own control all report through the same `onOpenChange`.',
       ]),
     },
   },
@@ -43,6 +43,12 @@ const meta = {
       description: 'Render the close (X) button in the panel. On by default.',
       table: { defaultValue: { summary: 'true' } },
     },
+    closeOnContentClick: {
+      control: 'boolean',
+      description:
+        'Close the modal when a click lands inside the content. On by default; a click on a link or a button inside the content is let through instead. `false` keeps the modal open on any content click.',
+      table: { defaultValue: { summary: 'true' } },
+    },
     children: {
       control: false,
       description: 'The trigger and the content, built in `render`: a JSX child cannot cross the Storybook manager/preview boundary, so it can never ride in `args`.',
@@ -53,17 +59,22 @@ const meta = {
     },
     onOpenChange: {
       action: 'open-change',
-      description: 'Fires with the next open state for every path: the X, Escape, a backdrop click and your own control.',
+      description:
+        'Fires with the next open state for every path: the X, Escape, a backdrop click, a click on the content and your own control.',
       table: { category: 'Events' },
     },
   },
-  args: { defaultOpen: false, showClose: true, onOpenChange: fn() },
+  args: { defaultOpen: false, showClose: true, closeOnContentClick: true, onOpenChange: fn() },
   render: (args: LightboxArgs) => (
     <Lightbox defaultOpen={args.defaultOpen} onOpenChange={args.onOpenChange}>
       <LightboxTrigger class="block w-56 overflow-hidden rounded-lg ring-1 ring-border">
         <img alt={ALT} src={IMAGE_URL} class="block h-40 w-full object-cover" />
       </LightboxTrigger>
-      <LightboxContent label={ALT} showClose={args.showClose}>
+      <LightboxContent
+        label={ALT}
+        showClose={args.showClose}
+        closeOnContentClick={args.closeOnContentClick}
+      >
         <img alt={ALT} src={IMAGE_URL} class="block object-contain" />
       </LightboxContent>
     </Lightbox>
@@ -79,6 +90,7 @@ type Story = StoryObj<typeof meta>;
 type LightboxArgs = {
   defaultOpen?: boolean;
   showClose?: boolean;
+  closeOnContentClick?: boolean;
   onOpenChange?: (open: boolean) => void;
 };
 
@@ -91,7 +103,7 @@ const src = (code: string, imports: string = IMPORT) => ({
 
 /** Click the thumbnail: the image opens at the size the viewport allows. The modal
  *  owns Escape, the backdrop click and the Tab trap; `onOpenChange` hears all of
- *  them plus the X. */
+ *  them plus the X and a click on the picture itself, which closes by default. */
 export const ThumbnailTrigger: Story = {
   ...src(`<Lightbox onOpenChange={(open) => console.log('open:', open)}>
   <LightboxTrigger class="block w-56 overflow-hidden rounded-lg">
@@ -106,8 +118,10 @@ export const ThumbnailTrigger: Story = {
 /** Seeded open, so the Docs preview shows the modal without a click — `defaultOpen`
  *  is the uncontrolled seed. Note the X in the panel's top-right: `showClose` is on
  *  unless you pass `false`, and turning the `showClose` control off here leaves the
- *  panel with no X, since Escape, a backdrop click and the host's own control still
- *  close it. */
+ *  panel with no X, since Escape, a backdrop click, the picture and the host's own
+ *  control still close it. Clicking the picture dismisses the modal; the
+ *  `closeOnContentClick` control turns that off, which is what you want when a
+ *  content click means something else. */
 export const OpenAtMount: Story = {
   args: { defaultOpen: true },
   ...src(`// Open at mount: 'defaultOpen' is the uncontrolled seed. Use 'open' with
