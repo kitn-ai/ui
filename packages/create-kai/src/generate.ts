@@ -5,6 +5,7 @@
  */
 import { cp, mkdir, mkdtemp, readFile, readdir, rename, rm, stat, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -49,6 +50,17 @@ export interface GenerateOptions {
   /** overridden by tests and by the smoke script; defaults to the bundled dir */
   templateRoot?: string;
 }
+
+/**
+ * Writes one emitted file and records the sha256 of exactly what it wrote.
+ *
+ * THE POINT IS THE SAME VALUE, not two that agree. `kai.json`'s `files` map
+ * (src/kai-json.ts) is a baseline of what this tool wrote, so the hash has to
+ * come from the string handed to `writeFile` rather than from a walk that reads
+ * the tree back; a second walk can drift from the writes and then the baseline
+ * lies about the very thing it exists to record.
+ */
+type Emit = (rel: string, contents: string) => Promise<void>;
 
 export interface GenerateResult {
   dir: string;
@@ -141,18 +153,36 @@ export async function generate(
   await mkdir(parent, { recursive: true });
   const out = await mkdtemp(path.join(parent, '.create-kai-'));
 
+  /** Every file this run wrote, keyed by project-relative path, value sha256. */
+  const written = new Map<string, string>();
+  const emit: Emit = async (rel, contents) => {
+    const abs = path.join(out, rel);
+    await mkdir(path.dirname(abs), { recursive: true });
+    await writeFile(abs, contents, 'utf8');
+    written.set(rel, sha256(contents));
+  };
+
   let previousKitSpec: string | undefined;
   try {
-    await cp(templateDir, out, { recursive: true });
+    await copyTemplate(templateDir, '', emit);
 
     // The dotfiles npm refuses to pack, back from the names they travelled
     // under. Best-effort per file: `.gitignore` is required of every starter and
     // `.npmrc` only exists in the standalone ones, so absent means nothing to do.
     // Before the patches, because a patch row names the REAL name — `.npmrc` is
     // one of the files `PATCHES` opens.
+    //
+    // A COPY-THEN-DELETE rather than the rename this used to be, because the
+    // baseline is keyed by the real name: `emit` records the hash under
+    // `.gitignore` and the travelling name is dropped from the map, so a rename
+    // here would leave the baseline naming a file the project does not have.
     for (const dotfile of STRIPPED_DOTFILES) {
-      const travelling = path.join(out, travellingName(dotfile));
-      if (existsSync(travelling)) await rename(travelling, path.join(out, dotfile));
+      const travellingRel = travellingName(dotfile);
+      const travelling = path.join(out, travellingRel);
+      if (!existsSync(travelling)) continue;
+      await emit(dotfile, await readFile(travelling, 'utf8'));
+      await rm(travelling);
+      written.delete(travellingRel);
     }
 
     // The named edits that turn a reviewed starter into the user's own project.
@@ -161,7 +191,7 @@ export async function generate(
     // terminal.
     for (const patch of patchesFor(framework.templateDir)) {
       const file = path.join(out, patch.file);
-      await writeFile(file, applyPatch(patch, await readFile(file, 'utf8'), plan.name), 'utf8');
+      await emit(patch.file, applyPatch(patch, await readFile(file, 'utf8'), plan.name));
     }
 
     // The one rewrite that turns a workspace member into a standalone consumer.
@@ -172,7 +202,7 @@ export async function generate(
       gatewayDeps: integration.deps.npm,
     });
     previousKitSpec = rewritten.previousKitSpec;
-    await writeFile(pkgPath, stringifyPackageJson(rewritten.json), 'utf8');
+    await emit('package.json', stringifyPackageJson(rewritten.json));
 
     // Read BEFORE the gateway patches rewrite the call site: `goLiveThread` looks
     // for `toOpenAIMessages(...)`, which the mock-path starter carries only in the
@@ -182,19 +212,24 @@ export async function generate(
     const appSource = await readFile(path.join(out, framework.paths.app), 'utf8');
     const thread = goLiveThread(appSource, framework);
 
-    const routeFiles = await writeGateway(plan, framework, integration, out, thread);
+    const routeFiles = await writeGateway(plan, framework, integration, out, thread, emit);
 
-    await writeFile(
-      path.join(out, 'kai.json'),
-      stringifyKaiJson(buildKaiJson({ ...plan, featureIds: emittedFeatures }, framework)),
-      'utf8',
-    );
-
-    await writeFile(
-      path.join(out, 'README.md'),
+    // README BEFORE kai.json. `kai.json` carries the hash of every emitted file,
+    // so it has to be written after all of them and README is one of them.
+    await emit(
+      'README.md',
       plan.gatewayId === 'mock'
         ? renderMockReadme(plan, framework, thread, integration.docsSlug)
         : renderGatewayReadme(plan, framework, integration, routeFiles[0].path),
+    );
+
+    // NOT through `emit`: `kai.json` is the one emitted file the baseline leaves
+    // out, because a file cannot hash its own content.
+    await writeFile(
+      path.join(out, 'kai.json'),
+      stringifyKaiJson(
+        buildKaiJson({ ...plan, featureIds: emittedFeatures }, framework, recordedHashes(written)),
+      ),
       'utf8',
     );
   } catch (error) {
@@ -254,6 +289,7 @@ async function writeGateway(
   integration: Integration,
   out: string,
   thread: string,
+  emit: Emit,
 ): Promise<readonly EmittedFile[]> {
   // Everything before this point is identical for `mock` and for a real gateway,
   // which is the property that keeps the zero-config path a byte-for-byte copy
@@ -283,31 +319,24 @@ async function writeGateway(
     }
 
     for (const file of routeFiles) {
-      const abs = path.join(out, file.path);
-      await mkdir(path.dirname(abs), { recursive: true });
-      await writeFile(abs, file.contents, 'utf8');
+      await emit(file.path, file.contents);
     }
 
     for (const patch of gatewayPatchesFor(framework.templateDir)) {
       const file = path.join(out, patch.file);
-      await writeFile(
-        file,
+      await emit(
+        patch.file,
         applyGatewayPatch(patch, await readFile(file, 'utf8'), {
           thread,
           routeFile: routeFiles[0].path,
           gatewayTitle: integration.title,
           model: clientModelFor(integration),
         }),
-        'utf8',
       );
     }
 
     if (integration.envVars.length > 0) {
-      await writeFile(
-        path.join(out, framework.paths.env),
-        renderEnvFile(integration.envVars, integration.runNote),
-        'utf8',
-      );
+      await emit(framework.paths.env, renderEnvFile(integration.envVars, integration.runNote));
     }
   }
 
@@ -500,6 +529,45 @@ To go live, one expression in \`${framework.paths.app}\` changes:
 
 Docs: https://ui.kitn.ai/${docsSlug}
 `;
+}
+
+/**
+ * The template copy, with every file's bytes handed to `emit` rather than to a
+ * bulk `cp`.
+ *
+ * `cp` is faster and was what this used, but it never lets the emitter see what
+ * it wrote, and `kai.json`'s `files` map has to record the exact bytes that
+ * landed on disk (see that field's docblock). Reading the staged tree back
+ * afterwards would be the second walk that map exists to avoid; copying through
+ * `emit` makes the recorded hash and the written byte the same value by
+ * construction.
+ *
+ * The recursive walk carries the POSIX relative path as it descends, because
+ * that is the key the baseline uses, the same shape `listFiles` produces, and
+ * the same on every platform the CLI runs on.
+ */
+async function copyTemplate(fromDir: string, rel: string, emit: Emit): Promise<void> {
+  for (const entry of await readdir(fromDir, { withFileTypes: true })) {
+    const from = path.join(fromDir, entry.name);
+    const childRel = rel === '' ? entry.name : `${rel}/${entry.name}`;
+    if (entry.isDirectory()) await copyTemplate(from, childRel, emit);
+    else await emit(childRel, await readFile(from, 'utf8'));
+  }
+}
+
+/** sha256, lowercase hex, of `contents` as the UTF-8 bytes `writeFile` gets. */
+function sha256(contents: string): string {
+  return createHash('sha256').update(contents, 'utf8').digest('hex');
+}
+
+/**
+ * The recorded hashes as a plain object, keys sorted so `kai.json` is stable
+ * across runs and a diff between two scaffolds is the files that changed.
+ */
+function recordedHashes(written: Map<string, string>): Record<string, string> {
+  const files: Record<string, string> = {};
+  for (const rel of [...written.keys()].sort()) files[rel] = written.get(rel) as string;
+  return files;
 }
 
 /** Every file under `dir`, relative and sorted, ignoring `node_modules`. */

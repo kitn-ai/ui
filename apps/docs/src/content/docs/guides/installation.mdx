@@ -168,6 +168,7 @@ npx -y @kitn.ai/cli add support-widget     # no install at all
 |---|---|
 | `kai create [dir]` | The scaffolder wizard — the same one `npm create kai` runs |
 | `kai add <block>` | Writes a block from the registry into an existing project. `kai add --list` prints the blocks this release ships |
+| `kai upgrade` | Brings a SCAFFOLDED project up to the template this CLI emits. It re-renders what the scaffolder wrote (from `kai.json`) and compares: files you never touched are replaced with `--write`, files you edited are reported and left exactly as they are, and a project scaffolded before the baseline existed is reported without writing. `--strict` exits non-zero on drift |
 | `kai init` | Makes an EXISTING project kai-aware: detects your framework from its dependencies, adds `@kitn.ai/ui` at the range the CLI pins, and prints the two lines of wiring your stack needs with the file each belongs in. It writes no `kai.json` (that records what the scaffolder emitted) and patches no entry file |
 | `kai doctor` | Diagnoses this project's kit wiring: the declared range against the installed version, `kai.json`, whether anything under `src/` references the kit, whether a stylesheet is referenced, and whether the MCP server is installed. `--json` for a CI job or an agent |
 | `kai mcp` | Runs the MCP server for an AI coding harness, if `@kitn.ai/mcp` is installed |

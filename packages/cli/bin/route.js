@@ -28,6 +28,7 @@ export const KNOWN_COMMANDS = [
   'create',
   'add',
   'init',
+  'upgrade',
   'doctor',
   'mcp',
   ...CONSTRUCT_COMMANDS,
@@ -54,6 +55,9 @@ export function decideEntry(command, rest = []) {
   if (command === 'add') return { kind: 'forward', pkg: 'create-kai', args: ['add', ...rest] };
   // `init` makes an EXISTING project kai-aware: it merges the dependency and prints the wiring.
   if (command === 'init') return { kind: 'forward', pkg: 'create-kai', args: ['init', ...rest] };
+  // `upgrade` re-diffs a scaffolded project against the template this CLI emits; it replaces the
+  // files the user never touched and reports the ones they did.
+  if (command === 'upgrade') return { kind: 'forward', pkg: 'create-kai', args: ['upgrade', ...rest] };
   if (command === 'mcp') return { kind: 'forward', pkg: '@kitn.ai/mcp', args: [] };
   if (command === 'doctor') return { kind: 'local', verb: 'doctor' };
   if (CONSTRUCT_COMMANDS.includes(command)) return { kind: 'local', verb: 'construct' };

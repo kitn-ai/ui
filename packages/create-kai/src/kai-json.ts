@@ -75,9 +75,48 @@ export interface KaiJson {
    */
   paths: FrameworkDef['paths'] & { route: string | null };
   theme: { tokens: string; default: string };
+  /**
+   * The sha256 of every file this scaffold WROTE, keyed by project-relative
+   * path, so a later `upgrade` can tell a template change from a user edit.
+   *
+   * WITHOUT THIS FIELD THERE IS NO BASELINE. `kai.json` records the OPTIONS a
+   * project was scaffolded with, not the bytes that came out, so a regenerated
+   * file that differs from the current templates is indistinguishable from one
+   * the user edited: `upgrade` would either overwrite the user's work or refuse
+   * to apply a template fix it should apply. Those two cases separate only when
+   * the bytes actually written are recorded, and the files most worth protecting
+   * are exactly the ones worth hashing, so the map covers EVERY emitted file
+   * rather than a curated few.
+   *
+   * OPTIONAL, AND ITS ABSENCE MEANS "THIS PROJECT PREDATES THE BASELINE". Every
+   * project scaffolded before this field existed carries no `files` map at all,
+   * so a reader must treat a missing map as "no baseline recorded" rather than as
+   * an empty project. It is deliberately NOT a reason to bump
+   * `KAI_JSON_VERSION`: the field is purely additive, and a bump would make an
+   * older reader reject a newer file for no benefit it can act on.
+   *
+   * `kai.json` ITSELF IS NOT IN THE MAP. A file cannot hash its own content, so
+   * the hash of the file that carries the hashes is circular.
+   *
+   * EACH HASH IS OF THE BYTES ON DISK, taken from the exact string the emitter
+   * handed to `writeFile` after every patch and rewrite, NOT from the template
+   * source. A patch changes what the user receives, so hashing the source would
+   * record bytes the project never had and mark every patched file as edited on
+   * the first `upgrade`.
+   */
+  files?: Record<string, string>;
 }
 
-export function buildKaiJson(plan: ProjectPlan, framework: FrameworkDef): KaiJson {
+/**
+ * `files` is a parameter rather than something the caller assigns afterwards so
+ * the only way to produce it is from the writes themselves (src/generate.ts),
+ * and so a caller that has no writes to report simply omits it.
+ */
+export function buildKaiJson(
+  plan: ProjectPlan,
+  framework: FrameworkDef,
+  files?: Record<string, string>,
+): KaiJson {
   return {
     $schema: KAI_JSON_SCHEMA_URL,
     version: KAI_JSON_VERSION,
@@ -96,6 +135,7 @@ export function buildKaiJson(plan: ProjectPlan, framework: FrameworkDef): KaiJso
       route: plan.gatewayId === 'mock' ? null : (framework.route?.file ?? null),
     },
     theme: { tokens: '@kitn.ai/ui/theme.tokens.css', default: 'dark' },
+    ...(files === undefined ? {} : { files }),
   };
 }
 
