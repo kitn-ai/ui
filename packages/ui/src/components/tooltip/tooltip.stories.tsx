@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { Tooltip } from './tooltip';
 import { Button } from '../button/button';
+import { Kbd } from '../kbd/kbd';
 import { componentDescription } from '../../stories/docs/web-component-controls';
 
 const meta = {
@@ -11,7 +12,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'A small floating label on hover/focus of its trigger. Wrap a single interactive `children` element (it becomes the trigger) and set `content` to the hint text.',
+        'A small floating label on hover/focus of its trigger. Wrap a single interactive `children` element (it becomes the trigger) and set `content` to the hint, as text or as JSX.',
       ]),
       controls: { exclude: ['use:eventListener'] },
     },
@@ -19,7 +20,7 @@ const meta = {
   argTypes: {
     content: {
       control: 'text',
-      description: 'Text shown inside the tooltip bubble.',
+      description: 'Hint shown inside the bubble. A plain string renders as text; JSX composes a richer tip (see RichContent).',
     },
     children: {
       control: false,
@@ -48,8 +49,14 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const IMPORT = `import { Tooltip, Button } from '@kitn.ai/ui';`;
-const src = (code: string) => ({
-  parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
+const IMPORT_RICH = `import { Tooltip, Button } from '@kitn.ai/ui';
+import { Kbd } from '@kitn.ai/ui/solid';`;
+// `imports` is a parameter, not a second helper: the snippet is read by somebody who has the
+// snippet and nothing else, so a story naming a kit export its import line omits (RichContent
+// names Kbd) hands the reader code that does not compile. Keeping the composed text inside this
+// function also keeps it the single body the docs-source-code chain reads.
+const src = (code: string, imports: string = IMPORT) => ({
+  parameters: { docs: { source: { code: `${imports}\n\n${code}`, language: 'tsx' } } },
 });
 
 /** Interactive playground: set the tooltip text and hover the trigger. */
@@ -57,6 +64,20 @@ export const Playground: Story = {
   ...src(`<Tooltip content="This is a tooltip">
   <Button variant="outline">Hover me</Button>
 </Tooltip>`),
+};
+
+/** A composed tip: `content` also takes JSX, so a `Kbd` (or any kit component) can sit inside
+ *  the bubble. Built in `render`, never in `args` -- see the meta note on the
+ *  manager/preview boundary. */
+export const RichContent: Story = {
+  render: () => (
+    <Tooltip content={<span>Save changes <Kbd keys="Mod+S" platform="mac" /></span>}>
+      <Button variant="outline">Save</Button>
+    </Tooltip>
+  ),
+  ...src(`<Tooltip content={<span>Save changes <Kbd keys="Mod+S" platform="mac" /></span>}>
+  <Button variant="outline">Save</Button>
+</Tooltip>`, IMPORT_RICH),
 };
 
 export const OnIconButton: Story = {

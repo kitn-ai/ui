@@ -129,6 +129,11 @@ export const HOVER_CARD_SLOTS: SlotDef[] = [
   { name: 'card', mode: 'inject', doc: 'The rich content shown in the floating hover card.' },
 ];
 
+/** Slots of `<kai-tooltip>` (the trigger is the default slot). */
+export const TOOLTIP_SLOTS: SlotDef[] = [
+  { name: 'content', mode: 'replace', doc: 'The tip body, replacing the `content` text so it can hold markup such as a `<kai-kbd>`.' },
+];
+
 /** Slots of `<kai-menu>` (the menu items come from the `items` prop). */
 export const MENU_SLOTS: SlotDef[] = [
   { name: 'trigger', mode: 'replace', doc: 'Your own trigger element; replaces the built-in button driven by the `trigger-icon` / `trigger-label` props.' },
@@ -690,9 +695,9 @@ export const KBD_PARTS: PartDef[] = [
   { name: 'separator', doc: 'The gap between key caps. Inject a literal joiner (e.g. a plus sign) from outside.', recipe: 'kai-kbd::part(separator)::after { content: "+" }' },
 ];
 
-/** Styleable `::part`s of `<kai-kbd-group>` (several shortcuts laid out as one hint). */
+/** Styleable `::part`s of `<kai-kbd-group>` (several caps welded into one key strip). */
 export const KBD_GROUP_PARTS: PartDef[] = [
-  { name: 'group', doc: 'The flex frame that owns the gap between the kbd elements inside it.', recipe: 'kai-kbd-group::part(group) { gap: 0.375rem }' },
+  { name: 'group', doc: 'The flex frame around the welded caps. It lays them out only; each cap keeps its own border and radius, and the weld flattens the corners they share.', recipe: 'kai-kbd-group::part(group) { vertical-align: middle }' },
 ];
 
 /** Styleable `::part`s of `<kai-command>` (the command palette). */
@@ -935,7 +940,7 @@ export const WEB_COMPONENT_COMPOSITION: Record<string, WebComponentComposition> 
   'kai-input': { slots: INPUT_SLOTS, parts: INPUT_PARTS },
   'kai-search': { parts: SEARCH_PARTS },
   'kai-kbd': { parts: KBD_PARTS, children: 'Literal key text, when you are not using the `keys` prop to render key caps.' },
-  'kai-kbd-group': { parts: KBD_GROUP_PARTS, children: 'The `<kai-kbd>` elements to lay out, one per shortcut.' },
+  'kai-kbd-group': { parts: KBD_GROUP_PARTS, children: 'The `<kai-kbd>` elements to weld into one key strip, in order.' },
   'kai-editable-label': { parts: EDITABLE_LABEL_PARTS },
   'kai-empty': { slots: EMPTY_SLOTS, children: 'The empty-state body below the title/description, usually the call to action.' },
   'kai-file-upload': { children: 'Custom dropzone content, replacing the default label (the `label` prop is the fallback).' },
@@ -943,7 +948,7 @@ export const WEB_COMPONENT_COMPOSITION: Record<string, WebComponentComposition> 
   'kai-dropdown': { slots: DROPDOWN_SLOTS, children: 'The menu body: your own rows. Give each `role="menuitem"`. The control that opens it is the `trigger` slot.' },
   'kai-resizable': { children: 'The `<kai-resizable-item>` panels, in order. Dividers are inserted between them.' },
   'kai-resizable-item': { children: 'This panel\'s content.' },
-  'kai-tooltip': { children: 'The TRIGGER the tooltip describes. The tip text is the `text` prop.' },
+  'kai-tooltip': { slots: TOOLTIP_SLOTS, children: 'The TRIGGER the tooltip describes. The tip text is the `content` prop, or the `content` slot when it carries markup.' },
   'kai-code-block': { parts: CODE_BLOCK_PARTS, vars: CODE_BLOCK_VARS },
   'kai-audio-visualizer': { parts: AUDIO_VISUALIZER_PARTS },
   'kai-panel': { slots: PANEL_SLOTS, parts: PANEL_PARTS, children: 'The view content that fills the body region (a `<kai-thread>`, a `<kai-view-stack>`, a home screen). Stretched to fill the remaining height between the `header` and `footer` slots.' },

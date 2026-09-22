@@ -33,14 +33,22 @@ interface Events {
 }
 
 /**
- * `<kai-tooltip>` — wraps a trigger and shows a hint on hover/focus. Put the
- * trigger as light-DOM content; set the text via `content`. Positions itself and
- * dismisses on Escape/outside-click; the content is portaled inside the shadow
- * root so it isn't clipped.
+ * `<kai-tooltip>` — wraps a trigger and shows a hint on hover/focus. The trigger
+ * is the default light-DOM content. The tip body is the text `content` prop, or
+ * a `slot="content"` child when the tip needs markup (a `<kai-kbd>`, a label
+ * with a key cap in it); the slotted child replaces the text, and the prop stays
+ * as that slot's fallback, so a plain string renders the same as it always has.
+ * Positions itself and dismisses on Escape/outside-click; the content is portaled
+ * inside the shadow root so it isn't clipped.
  *
  * ```html
  * <kai-tooltip content="Voice input">
  *   <kai-button variant="subtle" size="icon" icon="mic" label="Voice input"></kai-button>
+ * </kai-tooltip>
+ *
+ * <kai-tooltip>
+ *   <kai-button variant="subtle" size="icon" icon="mic" label="Voice input"></kai-button>
+ *   <span slot="content">Hold to talk <kai-kbd keys="Mod+Shift+M"></kai-kbd></span>
  * </kai-tooltip>
  * ```
  */
@@ -69,8 +77,12 @@ defineWebComponent<Props, Events>('kai-tooltip', {
           flex-items-center row. inline-flex (like kai-button) drops the line box so
           the host hugs the trigger and their centers line up. */}
       <style>{':host{display:inline-flex}'}</style>
+      {/* The tip body goes through a named slot rather than the `content` string
+          alone: a web-component consumer cannot pass JSX, so a slot is the only
+          channel for a tip that has to carry markup. Slotted content replaces the
+          text; the string stays as the slot's fallback. */}
       <Tooltip
-        content={props.content ?? ''}
+        content={<slot name="content">{props.content ?? ''}</slot>}
         openDelay={props.openDelay != null ? Number(props.openDelay) : undefined}
         closeDelay={props.closeDelay != null ? Number(props.closeDelay) : undefined}
         placement={(props.placement as Placement | undefined) ?? undefined}

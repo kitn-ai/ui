@@ -2665,13 +2665,13 @@ _No events._
 
 | Slot | Mode | Description |
 |---|---|---|
-| _(default)_ | inject | The `<kai-kbd>` elements to lay out, one per shortcut. |
+| _(default)_ | inject | The `<kai-kbd>` elements to weld into one key strip, in order. |
 
 **Styleable parts** (restyle from outside via `kai-kbd-group::part(name)`):
 
 | Part | Description |
 |---|---|
-| `::part(group)` | The flex frame that owns the gap between the kbd elements inside it. — `kai-kbd-group::part(group) { gap: 0.375rem }` |
+| `::part(group)` | The flex frame around the welded caps. It lays them out only; each cap keeps its own border and radius, and the weld flattens the corners they share. — `kai-kbd-group::part(group) { vertical-align: middle }` |
 
 ---
 
@@ -4259,7 +4259,8 @@ _No events._
 
 | Slot | Mode | Description |
 |---|---|---|
-| _(default)_ | inject | The TRIGGER the tooltip describes. The tip text is the `text` prop. |
+| _(default)_ | inject | The TRIGGER the tooltip describes. The tip text is the `content` prop, or the `content` slot when it carries markup. |
+| `content` | replace | The tip body, replacing the `content` text so it can hold markup such as a `<kai-kbd>`. |
 
 ---
 

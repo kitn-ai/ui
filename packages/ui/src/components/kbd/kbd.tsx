@@ -92,7 +92,17 @@ export function Kbd(props: KbdProps): JSX.Element {
       .filter(Boolean);
 
   return (
-    <kbd {...rest} class={cn('inline-flex items-center gap-0.5 align-middle font-sans', local.class)}>
+    <kbd
+      {...rest}
+      class={cn(
+        // The chord gap reads a variant, because `<KbdGroup>` welds its caps into one
+        // key strip and has to zero this gap to do it. `[--kai-kbd-cap-gap:0px]` on
+        // the group's frame inherits down to here, so the group needs no reach into a
+        // child's classes and a lone `Kbd` gets the 0.125rem (2px) fallback.
+        'inline-flex items-center gap-[var(--kai-kbd-cap-gap,0.125rem)] align-middle font-sans',
+        local.class,
+      )}
+    >
       <Show when={local.keys != null} fallback={local.children}>
         <For each={tokens()}>
           {(token, i) => (

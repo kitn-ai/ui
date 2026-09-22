@@ -66,35 +66,54 @@ The label carries its own shortcut, so the hint travels with the action. Any ele
 </kai-button>
 ```
 
-### Several shortcuts in one group
+### One key, welded from several elements
 
-One `<kai-kbd>` is one shortcut. Every token between the `+`s is a key in the same chord, and nothing in the spec says where that chord ends. When the caps belong to two different shortcuts, or to a sequence you press in order, wrap them in `<kai-kbd-group>`: it lays its children out with a gap and adds nothing else.
+`<kai-kbd-group>` welds its `<kai-kbd>` children into ONE key strip: no gap between the caps, a single hairline at each seam, and rounded corners only at the strip's ends. Reach for it when one key is spelled with caps that come from more than one element, or as a sequence you press in order, because a single `keys` spec cannot express either.
 
 <div class="not-content my-4 flex flex-wrap items-center gap-8 rounded-xl border border-line bg-surface px-5 py-4 text-sm text-ink">
-  <span class="flex items-center gap-2">one chord <kai-kbd keys="Mod+Shift+K" platform="other"></kai-kbd></span>
-  <span class="flex items-center gap-2">two shortcuts <kai-kbd-group><kai-kbd keys="Mod+B" platform="other"></kai-kbd><kai-kbd keys="Mod+K" platform="other"></kai-kbd></kai-kbd-group></span>
-  <span class="flex items-center gap-2">a sequence <kai-kbd-group><kai-kbd>G</kai-kbd><kai-kbd>D</kai-kbd></kai-kbd-group></span>
+  <span class="flex items-center gap-2">one key from two kbd elements <kai-kbd-group><kai-kbd keys="Mod" platform="other"></kai-kbd><kai-kbd keys="K" platform="other"></kai-kbd></kai-kbd-group></span>
+  <span class="flex items-center gap-2">a sequence <kai-kbd-group><kai-kbd keys="G"></kai-kbd><kai-kbd keys="D"></kai-kbd></kai-kbd-group></span>
 </div>
 
 ```html
-<!-- two shortcuts -->
+<!-- one key: the group welds its caps into one strip -->
 <kai-kbd-group>
-  <kai-kbd keys="Mod+B"></kai-kbd>
-  <kai-kbd keys="Mod+K"></kai-kbd>
+  <kai-kbd keys="Mod"></kai-kbd>
+  <kai-kbd keys="K"></kai-kbd>
 </kai-kbd-group>
 
 <!-- one sequence: G then D -->
 <kai-kbd-group>
-  <kai-kbd>G</kai-kbd>
-  <kai-kbd>D</kai-kbd>
+  <kai-kbd keys="G"></kai-kbd>
+  <kai-kbd keys="D"></kai-kbd>
 </kai-kbd-group>
 ```
 
-The gap is the difference to look for: the caps of a single chord sit close together (the `separator` part between them), while a group spaces whole shortcuts apart. Use the token spec for a chord and the group for anything that is not one.
+Two DIFFERENT shortcuts are not a group: write them as two `<kai-kbd>` elements, or two groups, and let your own layout space them. The weld is what says the caps are one key, so a group used for two shortcuts says the wrong thing. A single `<kai-kbd>` with a `+`-joined spec renders its own caps as one chord, with the 2px gap the `separator` part sits in.
 
 <Aside type="note" title="Group props">
-`<kai-kbd-group>` declares no props of its own beyond the universal `theme`. Which shortcuts exist and in what order is your markup's business.
+`<kai-kbd-group>` declares no props of its own beyond the universal `theme`. Which caps exist and in what order is your markup's business.
 </Aside>
+
+### In a tooltip
+
+A shortcut often belongs in the tip of the control it triggers. The tooltip bubble takes markup through its `content` slot, so the cap rides along:
+
+<div class="not-content my-4 flex flex-wrap items-center gap-4 rounded-xl border border-line bg-surface px-5 py-4">
+  <kai-tooltip default-open>
+    <kai-button variant="outline">Save</kai-button>
+    <span slot="content">Save changes <kai-kbd keys="Mod+S"></kai-kbd></span>
+  </kai-tooltip>
+</div>
+
+```html
+<kai-tooltip>
+  <kai-button variant="outline">Save</kai-button>
+  <span slot="content">Save changes <kai-kbd keys="Mod+S"></kai-kbd></span>
+</kai-tooltip>
+```
+
+The bubble is an inverted surface, and it re-expresses the muted, border and foreground tokens on itself, so the cap adapts to the bubble rather than carrying the page's light-surface colours into it. Any kit component can live there for the same reason; see [Tooltip](/components/tooltip/).
 
 ### Glyphs per platform
 
