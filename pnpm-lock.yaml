@@ -453,7 +453,7 @@ importers:
   packages/cli:
     dependencies:
       create-kai:
-        specifier: ^0.7.1
+        specifier: ^0.8.0
         version: link:../create-kai
       zod:
         specifier: ^4.4.3
