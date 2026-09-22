@@ -160,15 +160,20 @@ const RULES: Rule[] = [
       '`<kai-chat>` / `<Chat>` is an un-upgraded unknown element — an empty box. ' +
       '`customElements.get(\'kai-chat\') === undefined`.',
     fix:
-      'Import the web-components bundle for its side effect BEFORE your first render — ' +
-      'it must run before the component mounts.\n\n' +
+      'Register the web components on the client BEFORE your first render: the import ' +
+      'has to run before the component mounts. A scaffolded app takes the narrowest form ' +
+      'that covers what it renders, ONE ENTRY PER TAG it places.\n\n' +
       '```tsx\n' +
-      "import '@kitn.ai/ui/web-components'   // registers <kai-*> — REQUIRED, must come first\n" +
+      "import '@kitn.ai/ui/web-components/chat';  // registers <kai-chat>, and kai-message rides in with it\n" +
       "import { Chat } from '@kitn.ai/ui/react'\n" +
       "import '@kitn.ai/ui/theme.css'\n" +
       '```\n\n' +
-      'In plain HTML: `import \'@kitn.ai/ui/web-components\'` in your module script. ' +
-      'The import is a side effect — keep it even if your linter flags it as "unused".',
+      'The register-all barrel `import \'@kitn.ai/ui/web-components\'` is still the right ' +
+      'form when you want every tag, and it is the SSR-import-safe default: a per-web-component ' +
+      'entry is client-only, so an SSR entry point wants the single barrel line instead of one ' +
+      'import per tag. It is also the barrel the imperative `toast()` helper is exported from.\n\n' +
+      'In plain HTML: either form in your module script. ' +
+      'The import is a side effect; keep it even if your linter flags it as "unused".',
   },
   {
     // Rule 7 — tsc errors inside node_modules/@kitn.ai/ui/src (SolidJS source pulled in)

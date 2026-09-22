@@ -1373,6 +1373,120 @@ function slotPlacementFor(tag: string): { parent: string; slot: string } | null 
  */
 const ALWAYS_EMITTED_TAG = 'kai-chat';
 
+// ── per-web-component registration imports ────────────────────────────────────
+
+// The tag -> entry-basename map, read from the same generated manifest the MCP's
+// own `entryForTag` reads, and as a STATIC import for the reason recorded there
+// (`mcp/manifest.ts`): web-component-manifest.json is never copied into dist/, so
+// an fs read alongside `resolveManifestPath` would 404 inside the bundled bin
+// while a static import is inlined at build time. Deliberately NOT `entryForTag`:
+// that answers `undefined` for a tag it cannot serve, and this emitter has to be
+// loud about that instead — see `entryBasenames`.
+import { tags as WEB_COMPONENT_ENTRY_TAGS } from '../../../src/web-components/web-component-manifest.json';
+
+/**
+ * The kai-* tags a surface's emitted app really PLACES in markup, in a stable order.
+ *
+ * The registration imports key off THIS, never off the request: `components` is
+ * what the caller asked for, and the emitted file must carry no import for a tag
+ * it does not place. Three adjustments, each a fact about the emitted file: the
+ * chat element is rendered whatever the caller listed (see ALWAYS_EMITTED_TAG),
+ * the tags that ride INSIDE a message object are drawn by the thread rather than
+ * placed beside it, and the artifact split needs the item tag that is its child.
+ *
+ * Exported so `verify:scaffold` asserts the emitted imports against this one
+ * derivation instead of re-deriving the same three adjustments beside it.
+ */
+export function emittedTags(components: readonly string[]): string[] {
+  return [
+    ...new Set([
+      ALWAYS_EMITTED_TAG,
+      ...components.filter((t) => !MESSAGE_EMBEDDED_TAGS.has(t)),
+      ...(isArtifactSplit(components) ? ['kai-resizable-item'] : []),
+    ]),
+  ];
+}
+
+/**
+ * The `@kitn.ai/ui/web-components/<entry>` basenames for a tag list, deduped in
+ * first-seen order: two tags can share one entry (`kai-resizable` and
+ * `kai-resizable-item` are both `resizable`), and one import line covers both.
+ *
+ * Read from the manifest's `tags` map, never derived by stripping `kai-`: the tags
+ * whose entry name is not the tag minus its prefix (`kai-conversations` is
+ * `conversation-list`) would resolve to a module that does not exist. THROWS on a tag
+ * the map does not answer for, because the quiet alternative is the worse one: the
+ * emitted app would place a `<kai-*>` nothing ever defines, so it stays an inert
+ * unknown element and the consumer sees empty chrome with no failure anywhere to
+ * explain it. The message names the tag because the fix is entirely local to the
+ * caller's components list.
+ */
+function entryBasenames(tags: readonly string[]): string[] {
+  const entries: string[] = [];
+  for (const tag of tags) {
+    const entry = (WEB_COMPONENT_ENTRY_TAGS as Record<string, string>)[tag];
+    if (!entry) {
+      throw new Error(
+        `scaffold: no web-component entry for ${tag}: web-component-manifest.json's tags ` +
+          `map has no module for it, so <${tag}> would never upgrade. Drop it from the ` +
+          `surface, or import the register-all barrel: '@kitn.ai/ui/web-components'.`,
+      );
+    }
+    if (!entries.includes(entry)) entries.push(entry);
+  }
+  return entries;
+}
+
+const WEB_COMPONENTS_ENTRY = '@kitn.ai/ui/web-components';
+
+/**
+ * The header a client-only target's per-tag import block carries.
+ *
+ * WHY DYNAMIC AND NOT A STATIC IMPORT, and it is a size decision measured on real
+ * scaffolds rather than a preference. A static per-tag block is pulled INTO the
+ * entry chunk, so the five tags the vue starter places made its entry 624.7 kB raw /
+ * 186.8 kB gzip and tripped Vite's 500 kB advisory, while the same five imported
+ * dynamically left the entry at 100.8 kB with the largest chunk at 229.4 kB (the
+ * thread) and no advisory at all. Registration timing is the same either way
+ * (`defineWebComponent` runs at module eval of whichever module loads the entry),
+ * and every emitted front end already waits on `customElements.whenDefined` before
+ * it sets a property or mounts, so the dynamic form costs nothing and buys the
+ * whole entry chunk back.
+ */
+const TAG_IMPORT_NOTE = [
+  `// Registers only the kai-* elements this app places: one dynamic import per entry, so`,
+  `// each one is its own chunk. Add a line when you place another <kai-*> tag.`,
+];
+
+/** The same block on an SSR-capable target, inside the browser guard. */
+const GUARDED_IMPORT_NOTE = [
+  `// The per-web-component entries are client-only, so they load inside the browser guard`,
+  `// (the register-all barrel is the SSR-import-safe form). Registration lands one`,
+  `// microtask later; wait on customElements.whenDefined before relying on an upgrade.`,
+];
+
+/**
+ * The per-entry import block for one tag list. `indent` is the site's own
+ * indentation (vue's `<script setup>` and html's module are flush, svelte's script
+ * block is two spaces in, so is the body of the guard); `guard` wraps the block in
+ * `if (typeof window !== 'undefined')` for the targets that are evaluated on a
+ * server, where importing a per-tag entry would throw `window is not defined`.
+ */
+function tagImports(tags: readonly string[], indent = '', guard = false): string[] {
+  const entries = entryBasenames(tags);
+  if (!guard) {
+    return [
+      ...TAG_IMPORT_NOTE.map((line) => `${indent}${line}`),
+      ...entries.map((entry) => `${indent}void import('${WEB_COMPONENTS_ENTRY}/${entry}');`),
+    ];
+  }
+  return [
+    ...GUARDED_IMPORT_NOTE.map((line) => `${indent}${line}`),
+    `${indent}if (typeof window !== 'undefined') {`,
+    ...entries.map((entry) => `${indent}  void import('${WEB_COMPONENTS_ENTRY}/${entry}');`),
+    `${indent}}`,
+  ];
+}
 /**
  * The companions this surface SLOTS into `<kai-chat>`, in `components` order.
  *
@@ -2369,7 +2483,7 @@ function htmlModule(ctx: RenderCtx, components: readonly string[]): string {
     `// \`tsc && vite build\` and scopes its tsconfig to "include": ["src"], so an`,
     `// inline <script> is checked by nothing at all. Delete the template's own`,
     `// src/main.ts and save this in its place; index.html already points at it.`,
-    `import '@kitn.ai/ui/web-components';  // registers <kai-*> — required, must come first`,
+    ...tagImports(emittedTags(components)),
     `// The kit ships the web-component interfaces, so one cast at the lookup below types`,
     `// every property assignment that follows.`,
     `import type { ${webComponentTypes} } from '@kitn.ai/ui/web-components';`,
@@ -2394,9 +2508,9 @@ function htmlModule(ctx: RenderCtx, components: readonly string[]): string {
     ...runnerLines,
     `async function init() {`,
     `  const chat = document.getElementById('chat') as KaiChatElement;`,
-    `  // SCAF-15: kai-* register via an async dynamic import (SSR-safety), so the`,
-    `  // element may not be upgraded yet. Wait for the upgrade before setting any`,
-    `  // array/object property — values set pre-upgrade are dropped on upgrade.`,
+    `  // SCAF-15: the entry imports above define <kai-chat> at module eval, so it is`,
+    `  // already upgraded here. The await stays as the gate that keeps the property`,
+    `  // assignments below correct: values set before an upgrade are dropped.`,
     `  await customElements.whenDefined('kai-chat');`,
     `  // suggestions is a JS PROPERTY (arrays can't be HTML attributes)`,
     `  chat.suggestions = ${jsArray(ctx.suggestions)};`,
@@ -3004,9 +3118,15 @@ function renderJsx(components: readonly string[], ctx: RenderCtx, framework: str
   return [
     // SCAF-2: 'use client' must be the very first line for Next.js App Router.
     ...useClientDirective,
-    // (1) REQUIRED: registers <kai-*> — the react wrappers do NOT auto-register.
-    // Must come BEFORE importing the wrappers, or <kai-chat> renders empty.
-    `import '@kitn.ai/ui/web-components';  // registers <kai-*> — required, must come first`,
+    // One import per web-component entry this surface places, never the register-all
+    // barrel. Part of what it places are RAW `<kai-*>` tags no wrapper renders, e.g.
+    // `<kai-sources ref="sourcesEl" />` among the companion lines, and a side-effect
+    // import is the only thing that registers those. The React wrappers DO
+    // lazy-register their own element on first client mount
+    // (`frameworks/react/runtime.tsx` `ensureRegistered` plus the
+    // `customElements.whenDefined` re-apply), so a wrapper-rendered tag would upgrade
+    // without this block; the raw tags would not, and this block is what they need.
+    ...tagImports(emittedTags(components)),
     `import { ${block ? 'useEffect, useState' : 'useState'} } from 'react';`,
     `import { ${importList} } from '@kitn.ai/ui/react';`,
     ...wireImportLines({
@@ -3344,7 +3464,7 @@ function renderVue(components: readonly string[], ctx: RenderCtx): string {
     `     component: kai-chat" in dev — the app still renders, but the console does`,
     `     not, and that warning is Vue asking you for exactly that config. -->`,
     `<script setup lang="ts">`,
-    `import '@kitn.ai/ui/web-components';  // registers <kai-*> — required, must come first`,
+    ...tagImports(emittedTags(components)),
     ...wireImportLines({
       typed: true,
       toolLoop: emitToolLoop,
@@ -3371,9 +3491,10 @@ function renderVue(components: readonly string[], ctx: RenderCtx): string {
     ...sourcesSeed,
     ...attachmentScript,
     ``,
-    `// SCAF-15: kai-* register via an async dynamic import (SSR-safety). The .prop`,
-    `// bindings can apply before the element upgrades, which drops them — re-apply once`,
-    `// the element is defined so the initial messages/suggestions/loading stick.`,
+    `// SCAF-15: the entry imports above define their elements at module eval, so the`,
+    `// upgrade has landed by the time this runs. The .prop bindings are re-applied`,
+    `// here regardless, which is what keeps the initial messages/suggestions/loading`,
+    `// correct on any path that registers the tag later than this module loads.`,
     `onMounted(async () => {`,
     `  await customElements.whenDefined('kai-chat');`,
     ...(ctx.emitCards ? CARD_PROP_COMMENT.map((l) => `  ${l}`) : []),
@@ -3715,7 +3836,7 @@ function renderSvelte(components: readonly string[], ctx: RenderCtx): string {
     `     Svelte-4 forms this used to emit are hard errors there, not deprecations:`,
     `     "\`$:\` is not allowed in runes mode" fails svelte-check AND vite build. -->`,
     `<script lang="ts">`,
-    `  import '@kitn.ai/ui/web-components';  // registers <kai-*> — required, must come first`,
+    ...tagImports(emittedTags(components), '  ', true),
     // KaiSourcesElement is only imported when a kai-sources companion is actually
     // declared below: an always-on import would be unused (and fail noUnusedLocals)
     // on every archetype without kai-sources.
@@ -3826,8 +3947,10 @@ function renderSvelte(components: readonly string[], ctx: RenderCtx): string {
  *
  * Verified pattern: `ssr: false` prevents the Solid-based web-component runtime
  * from running on the server — no `window is not defined` crash, no hydration
- * mismatch. The library is SSR-import-safe (customElements.define is guarded),
- * so the import itself is safe; only the *render* needs to be client-only.
+ * mismatch. A per-web-component ENTRY is not import-safe that way (it defines its
+ * element at module eval, and most of them touch `window` there), so the emitted
+ * imports sit inside a `typeof window` guard; only the register-all barrel would
+ * be safe to import at the top level.
  *
  * Scaffold command (official TanStack CLI, non-interactive):
  *   npx @tanstack/cli@latest create <app-name> --framework react --no-git --package-manager npm -y
@@ -3856,8 +3979,8 @@ function renderTanstackStart(components: readonly string[], ctx: RenderCtx): str
   //   1. `import { createFileRoute } from '@tanstack/react-router'` instead of no-op router import
   //   2. `export const Route = createFileRoute('/chat')({ ssr: false, component: ChatPage })`
   //   3. The page function is named `ChatPage` (not `App`) — no export-default clash with createFileRoute
-  //   4. No `import '@kitn.ai/ui/web-components'` needed as a top-level import (same as next's dynamic approach
-  //      is not needed here — the library is SSR-import-safe, but we include the web components for safety)
+  //   4. The web-component imports are the per-entry form, inside the browser guard
+  //      (shape B) — the route module is SSR-evaluated even though it renders client-side
 
   const hasEmbedded = components.some((t) => MESSAGE_EMBEDDED_TAGS.has(t));
   const workspace = isArtifactSplit(components);
@@ -4192,8 +4315,10 @@ function renderTanstackStart(components: readonly string[], ctx: RenderCtx): str
     // TanStack Start uses @tanstack/react-router's createFileRoute
     `import { createFileRoute } from '@tanstack/react-router'`,
     `import { ${block ? 'useEffect, useState' : 'useState'} } from 'react'`,
-    // Web-component registration: the library is SSR-import-safe; top-level import is safe here
-    `import '@kitn.ai/ui/web-components';  // registers <kai-*> — required, must come first`,
+    // The route sets `ssr: false`, but its MODULE is still evaluated on the server, so
+    // the per-web-component entries load behind the browser guard rather than at the
+    // top level.
+    ...tagImports(emittedTags(components), '', true),
     `import { ${importList} } from '@kitn.ai/ui/react'`,
     ...wireImportLines({
       typed: true,
@@ -4591,7 +4716,9 @@ function renderAngular(components: readonly string[], ctx: RenderCtx): string {
     `// (@kitn.ai/ui/theme.tokens.css is the compiled token file; theme.css is`,
     `// Tailwind source and is only for apps that compile Tailwind themselves.)`,
     `import { CUSTOM_ELEMENTS_SCHEMA, Component, ElementRef, afterNextRender, ${block ? 'computed, effect, ' : ''}signal, viewChild } from '@angular/core';`,
-    `import '@kitn.ai/ui/web-components';  // registers <kai-*> — required, must come first`,
+    // Angular SSR evaluates this module on the server, so the entries load inside the
+    // browser guard rather than at the top level.
+    ...tagImports(emittedTags(components), '', true),
     `import type { ${webComponentTypes} } from '@kitn.ai/ui/web-components';`,
     ...wireImportLines({
       typed: true,
@@ -6485,14 +6612,14 @@ function compose(
     ...keyHandlingLines(integration, route),
   ].join('\n');
 
-  // SCAF-16: loading-options note — inform consumers about the two opt-in load modes
-  // (per-web-component tree-shaking + autoloader) without changing the default import above.
-  // Leads with "the default is right" rather than a size headline; the debug tool
+  // SCAF-16: loading-options note: the modes this scaffold does NOT emit (the
+  // register-all barrel and the autoloader), stated as alternatives to what it did emit.
+  // Leads with what the front end does rather than a size headline; the debug tool
   // carries the full KB breakdown for developers who ask for it.
-  // The default varies by framework, so describe what THIS scaffold actually emits:
-  // every framework but `next` emits a top-level `import '@kitn.ai/ui/web-components'`;
-  // the next output loads the React wrappers through next/dynamic instead, and each
-  // wrapper lazy-registers its own element on first client mount.
+  // The emitted form varies by target, so describe the one THIS scaffold really used:
+  // the per-entry import block its surface calls for (`tagImports`); the next output loads the React
+  // wrappers through next/dynamic instead, and each wrapper lazy-registers its own
+  // element on first client mount.
   const defaultLoadNote =
     framework === 'solid'
       ? [
@@ -6510,9 +6637,13 @@ function compose(
           `is. Two other modes exist if you drop the wrappers for raw \`<kai-*>\` tags:`,
         ]
       : [
-          `The scaffold uses \`import '@kitn.ai/ui/web-components'\` (register-all) — the right`,
-          `default: it registers every kai-* web component and is SSR-safe, so leave it as is.`,
-          `Two opt-in modes load less if a page only ever uses a few web components:`,
+          `The scaffold imports the web components ONLY THIS SURFACE PLACES: one`,
+          `\`import '@kitn.ai/ui/web-components/<entry>'\` line per entry, and on the`,
+          `SSR-capable targets those lines sit inside an \`if (typeof window !== 'undefined')\``,
+          `guard, because a per-web-component entry is client-only. Add a line when you place`,
+          `another <kai-*> tag. \`import '@kitn.ai/ui/web-components'\` (the register-all`,
+          `barrel) stays the escape hatch for an app that wants every tag, or a single`,
+          `import on a target that cannot wait a microtask for registration:`,
         ];
 
   const block4 = [

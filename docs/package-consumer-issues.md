@@ -99,16 +99,61 @@ surfaced, but it's misleading and will warn under stricter installers / pnpm.
 
 ---
 
-## P3 — Issue 8: default bundle pulls large Shiki language chunks
+## P3 — Issue 8: register-all import, not Shiki, is the chunk over Vite's 500 kB warning
 
-A basic `<Chat>` `vite build` emits ~600 kB of Shiki language chunks (bash/css/html/js/ts/tsx/vue/svelte;
-main chunk 615 kB / 174 kB gzip → "chunks > 500 kB" warning). Syntax highlighting registers many languages
-by default, even for a chat that may never render code.
+**Status: fixed in the scaffolder and the starters (in the tree 2026-09-22).** A scaffolded app now
+registers only the tags it places. The React path imports nothing at all, because the generated wrappers
+lazy-register their own element; the raw-tag path (`vue`, `svelte`, `angular`, `vanilla`, and the MCP
+scaffold's `html` and `vue` targets) loads one entry per placed tag with a dynamic
+`void import('@kitn.ai/ui/web-components/<entry>')`. Dynamic and not static, because a static per-entry
+block is pulled INTO the entry chunk: the five tags the `vue` starter places measured 624.7 kB raw /
+186.8 kB gzip of entry chunk statically against 100.8 kB dynamically, with registration landing one
+microtask later either way and every emitted front end already waiting on
+`customElements.whenDefined`. Measured after the change, Vite 6: React 257.6 kB largest chunk / 1.7 MB
+total, Vue 224.0 kB largest / 1.6 MB total, and **the >500 kB warning no longer fires for either**.
 
-**Recommended fix.** Lazy-load language grammars on first code block, and document the existing escape
-hatches prominently: `codeHighlight={false}` on `<kai-chat>` and `configureCodeHighlighting(...)`.
+**Symptom, before that fix.** The default `import '@kitn.ai/ui/web-components'` put one chunk over Vite's
+500 kB warning. Measured on the React scaffold the published `create-kai@0.8.0` emitted (it pins
+`@kitn.ai/ui@0.35.0`), `npm run build` under Vite 6: 31 JS chunks + 1 CSS, 2.5 MB raw / 606 kB gzip with
+every chunk fetched. The only chunk over the default was `register-impl-<hash>.js` at 742.2 kB raw /
+213.0 kB gzip (Vite reports it as 759.97 kB).
 
-**Affected:** `src/primitives/highlighter.ts`, docs.
+**Root cause.** That chunk is the whole-registry registration module: 354 distinct `kai-*` names in one
+file, reached from `dist/kai.es.js`, which is what `@kitn.ai/ui/web-components` resolves to. The entry
+chunk is 285.3 kB raw / 91.2 kB gzip, eager, with zero static imports; everything else sits behind
+`import()`. The coarse bundling is deliberate: a unified build forced per-web-component granularity and
+made registration slow enough to expose prop-before-upgrade races in consumers (`config/vite/web-components.ts`,
+the register-all target). So the escape hatch is a narrower import, not a change to this bundle.
+
+**Already shipped: Shiki was never the cause.** The next largest chunks in that same build are `thread`
+224.1 / 68.6 kB, the typescript grammar 181.1 / 16.0 kB, tsx 175.5 / 16.5 kB, javascript 174.8 / 16.5 kB,
+one shared chunk Vite names `cn-<hash>.js` 158.6 / 36.5 kB (143 `kai-*` names, and not tailwind-merge: 0
+clsx/tailwind-merge hits, the kit's own `src/utils/cn-merge.ts` replaced it), shiki core 117.0 / 36.8 kB,
+shiki's javascript engine 61.0 / 21.3 kB. The 9 default grammars in `DEFAULT_LANGUAGES` total ~732 kB raw /
+88 kB gzip, each one behind its own per-language `import()` in `packages/ui/src/primitives/highlighter.ts`
+(language loaders at lines 21-29, themes at 33-34, shiki core and the javascript engine at 71-72), so a
+grammar downloads only when a code block in it renders. The lazy-loading fix the earlier version of this
+entry recommended is what the file already does.
+
+**Escape hatches that exist today.**
+- Import the web components the app uses instead of the register-all barrel:
+  `void import('@kitn.ai/ui/web-components/chat')` (the entry is 23.1 kB and statically pulls its own
+dependencies) in place of `import '@kitn.ai/ui/web-components'`. The `./web-components/*` subpath is in the
+exports map, and this is what the scaffold emits now. The barrel is still what you get if you import it,
+and it is still the only home of the imperative `toast()` helper and of `webComponentsReady`.
+- Skip Shiki: `codeHighlight={false}` on `<kai-chat>` (also on `kai-message`, `kai-markdown` and
+  `kai-code-block`), or globally with `configureCodeHighlighting({ enabled: false })`. Rebind grammars,
+  themes and aliases with `configureCodeHighlighting({ languages, themes, aliases })`.
+
+Re-measure from the scaffolder's own output plus `npm run build`; the chunk names, the sizes and the
+500 kB warning all come straight out of Vite's build report. For the pre-fix numbers above, pin
+`create-kai@0.8.0`; the fix is in the tree's `create-kai`, and reaches the registry with its next release.
+
+**Affected:** `src/web-components/register-impl.ts` (and its `src/web-components/register/` entry),
+`dist/kai.es.js`, `src/primitives/highlighter.ts`, and the registration-versus-tree-shaking guidance
+(Documentation gaps, item 7 below). The scaffolder's side was
+`packages/ui/mcp/mcp/tools/scaffold.ts` plus `examples/starters/{react,vue,svelte,angular,vanilla}`; the
+barrel itself is unchanged and still bundles every element on purpose.
 
 ---
 

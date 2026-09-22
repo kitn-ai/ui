@@ -41,6 +41,9 @@ import { writeFileSync, rmSync, mkdirSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { scaffold } from '../mcp/tools/scaffold';
+// The exports map, applied by hand — shared by the four emitted guards, since
+// every one of them executes the emitted module rather than reading it.
+import { rewriteEmittedSpecifiers } from './emitted-source-specifiers';
 
 const PKG = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 /**
@@ -55,31 +58,6 @@ const TMP_DIR = resolve(PKG, '.tmp-emitted-scaffold');
 if (!Element.prototype.scrollTo) (Element.prototype as unknown as { scrollTo: () => void }).scrollTo = () => {};
 
 const SEP = '// ── src/main.ts ──';
-
-/**
- * The package's own exports map, applied by hand: each bare specifier is pointed
- * at the source file `@kitn.ai/ui`'s `exports` resolves it to.
- *
- * The CSS import is dropped (there is nothing to style in jsdom) and type-only
- * imports go with it, since they erase anyway and `KaiChatElement` lives in a
- * `.d.ts` the exports map does not surface as a runtime module. Nothing else in
- * the emitted module is touched.
- */
-function rewrite(code: string): string {
-  return code
-    .split('\n')
-    .filter((l) => !l.includes("'@kitn.ai/ui/theme.tokens.css'"))
-    .filter((l) => !l.startsWith('import type '))
-    .map((l) =>
-      l
-        .replace("'@kitn.ai/ui/web-components'", `'${PKG}/src/web-components/chat/chat'`)
-        .replace("'@kitn.ai/ui/state'", `'${PKG}/src/state'`)
-        .replace("'@kitn.ai/ui/wire'", `'${PKG}/src/wire'`)
-        .replace("'@kitn.ai/ui/schemas'", `'${PKG}/src/schemas'`),
-    )
-    .map((l) => l.replace(/\bas KaiChatElement\b/, 'as any'))
-    .join('\n');
-}
 
 const sse = (frames: unknown[]) =>
   `${frames.map((f) => `data: ${JSON.stringify(f)}\n\n`).join('')}data: [DONE]\n\n`;
@@ -169,7 +147,7 @@ describe('the EMITTED scaffold really produces a card, end to end', () => {
     rmSync(TMP_DIR, { recursive: true, force: true });
     mkdirSync(TMP_DIR, { recursive: true });
     const tmp = resolve(TMP_DIR, `main.${Date.now()}.ts`);
-    writeFileSync(tmp, rewrite(main));
+    writeFileSync(tmp, rewriteEmittedSpecifiers(main));
     try {
       // Importing it RUNS it: the emitted module ends with `void init()`.
       await import(/* @vite-ignore */ tmp);

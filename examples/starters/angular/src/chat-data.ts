@@ -80,7 +80,7 @@ export const TRIGGERS = [
 // exactly why it is not the only one — the rest are on the wire, below.
 const MOCK_REPLIES = [
   "This reply streams token-by-token from the kit's own mock responder. No API key, no backend, no provider was contacted. Replace `mockResponse(text)` with a real model call (Anthropic, OpenAI, your own endpoint) to ship a real app.",
-  "Install it:\n\n```bash\nnpm install @kitn.ai/ui\n```\n\nThen register the web components + load the tokens:\n\n```ts\nimport '@kitn.ai/ui/web-components';\nimport '@kitn.ai/ui/theme.tokens.css';\n```\n\nNow drop `<kai-thread>` and `<kai-prompt-input>` into your template.",
+  "Install it:\n\n```bash\nnpm install @kitn.ai/ui\n```\n\nThen register the web components you place + load the tokens:\n\n```ts\nimport '@kitn.ai/ui/web-components/thread';\nimport '@kitn.ai/ui/web-components/prompt-input';\nimport '@kitn.ai/ui/theme.tokens.css';\n```\n\nNow drop `<kai-thread>` and `<kai-prompt-input>` into your template.",
   "I render **bold**, *italic*, `inline code`, lists, and code blocks:\n\n```ts\nconst stream = this.chat.streamAssistant();\nawait readOpenAIStream(mockResponse(text), stream);\nstream.done();\n```\n\n> Blockquotes too.",
   "This chat is **composed by hand**: `<kai-conversations>` for the sidebar, a `<kai-thread>` for the messages, and `<kai-prompt-input>` at the bottom, all wired with plain reactive state. Swap `mockResponse(text)` for your own model call and you're shipping.",
 ];
