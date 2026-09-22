@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.8.0](https://github.com/kitn-ai/ui/compare/create-kai-v0.7.1...create-kai-v0.8.0) (2026-09-22)
+
+
+### Features
+
+* **cli:** kai init, for the project that already exists ([3f81391](https://github.com/kitn-ai/ui/commit/3f813916a7c3f13407274ff770a2d47612196dba))
+* **cli:** kai init, for the project that already exists ([85392bc](https://github.com/kitn-ai/ui/commit/85392bcf1d6826a04a8cb80d3af5bdd293329454))
+* **cli:** kai upgrade, and the baseline in kai.json that makes it safe ([fe32f91](https://github.com/kitn-ai/ui/commit/fe32f911cf8e09cb131da4cc62d02afe1b2071fb))
+* **cli:** kai upgrade, and the baseline in kai.json that makes it safe ([059eb83](https://github.com/kitn-ai/ui/commit/059eb83171310b5dfa4c0d45dd9a633185c0d978))
+
 ## [0.7.1](https://github.com/kitn-ai/ui/compare/create-kai-v0.7.0...create-kai-v0.7.1) (2026-09-21)
 
 
