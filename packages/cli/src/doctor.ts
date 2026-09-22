@@ -21,6 +21,7 @@
  * useless in the one place people run it (CI, a fresh clone) and would make the "is the registry
  * reachable" question the user's problem.
  */
+import { createHash } from 'node:crypto';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 // The MCP `debug` tool's rule set, imported from the kit's sources: the rules encode the classic
@@ -110,6 +111,33 @@ function sourceFiles(dir: string, limit = 400): string[] {
   return out;
 }
 
+/**
+ * The drift `kai.json`'s BASELINE records, read without rendering anything.
+ *
+ * `kai upgrade` re-renders the project with the current templates and can therefore say what the
+ * template would change; this says the cheaper half at the same time -- which of the files the
+ * scaffolder wrote are no longer what it wrote -- because a hash comparison needs no template at
+ * all. That is the difference between the two verbs: this is the fact, `upgrade` is the diff. Both
+ * read the SAME recorded hashes, so they cannot disagree about what counts as untouched.
+ */
+function baselineDrift(cwd: string, files: Record<string, string>): { changed: string[]; gone: string[]; same: number } {
+  const changed: string[] = [];
+  const gone: string[] = [];
+  let same = 0;
+  for (const [file, recorded] of Object.entries(files)) {
+    let text: string;
+    try {
+      text = readFileSync(join(cwd, file), 'utf8');
+    } catch {
+      gone.push(file);
+      continue;
+    }
+    if (createHash('sha256').update(text, 'utf8').digest('hex') === recorded) same += 1;
+    else changed.push(file);
+  }
+  return { changed: changed.sort(), gone: gone.sort(), same };
+}
+
 const readAll = (files: string[]): { file: string; text: string }[] =>
   files.flatMap((file) => {
     try {
@@ -183,7 +211,47 @@ export function diagnose(input: DoctorInput): Finding[] {
     const framework = kaiJson.framework ?? '?';
     const built = kaiJson.kitBuiltAgainst ?? '?';
     const features = Array.isArray(kaiJson.features) ? kaiJson.features.join(', ') : '?';
-    findings.push({ severity: 'ok', title: `${KAI_JSON}: framework ${framework}, features ${features}`, detail: `scaffolded against kit ${built}` });
+    findings.push({
+      severity: 'ok',
+      title: `${KAI_JSON}: framework ${framework}, features ${features}`,
+      detail: `scaffolded against kit ${built}`,
+    });
+
+    // THE BASELINE, read the cheap way: the recorded hashes against the files on disk, no render.
+    // Drift here is INFORMATION rather than a warning -- editing your own app is the normal case,
+    // and `upgrade --strict` is where somebody decides it should fail a build.
+    const baseline = kaiJson.files;
+    if (baseline !== null && typeof baseline === 'object' && Object.keys(baseline).length > 0) {
+      const files = baseline as Record<string, string>;
+      const { changed, gone, same } = baselineDrift(input.cwd, files);
+      if (changed.length === 0 && gone.length === 0) {
+        findings.push({
+          severity: 'ok',
+          title: `${KAI_JSON}'s baseline: all ${same} scaffolded file(s) are exactly as written`,
+        });
+      } else {
+        const names = [...changed, ...gone];
+        const shown = names.slice(0, 3).join(', ');
+        const more = names.length > 3 ? ` (and ${names.length - 3} more)` : '';
+        findings.push({
+          severity: 'info',
+          title:
+            `${KAI_JSON}'s baseline: ${same} of ${Object.keys(files).length} scaffolded file(s) are as written, ` +
+            `${changed.length} changed, ${gone.length} gone`,
+          detail:
+            `${shown}${more}\nRun \`kai upgrade\` to see what the template this CLI emits would change ` +
+            `(it replaces only the files you never touched), or \`kai upgrade --strict\` in CI.`,
+        });
+      }
+    } else {
+      findings.push({
+        severity: 'info',
+        title: `${KAI_JSON} has no baseline`,
+        detail:
+          'it predates the recorded hashes, so this cannot tell your edits from a template change. ' +
+          '`kai upgrade` still diffs the project against the template this CLI emits, and will not write without a baseline.',
+      });
+    }
   } else {
     findings.push({
       severity: 'info',
