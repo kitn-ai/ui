@@ -101,7 +101,8 @@ surfaced, but it's misleading and will warn under stricter installers / pnpm.
 
 ## P3 — Issue 8: register-all import, not Shiki, is the chunk over Vite's 500 kB warning
 
-**Status: fixed in the scaffolder and the starters (in the tree 2026-09-22).** A scaffolded app now
+**Status: fixed in the scaffolder and the starters, and SHIPPED (2026-09-22).** It went to the
+registry in `create-kai@0.9.0` with `@kitn.ai/ui@0.36.0`. A scaffolded app now
 registers only the tags it places. The React path imports nothing at all, because the generated wrappers
 lazy-register their own element; the raw-tag path (`vue`, `svelte`, `angular`, `vanilla`, and the MCP
 scaffold's `html` and `vue` targets) loads one entry per placed tag with a dynamic
@@ -147,7 +148,8 @@ and it is still the only home of the imperative `toast()` helper and of `webComp
 
 Re-measure from the scaffolder's own output plus `npm run build`; the chunk names, the sizes and the
 500 kB warning all come straight out of Vite's build report. For the pre-fix numbers above, pin
-`create-kai@0.8.0`; the fix is in the tree's `create-kai`, and reaches the registry with its next release.
+`create-kai@0.8.0`; the numbers alongside them are from the fix, which shipped in
+`create-kai@0.9.0` (with `@kitn.ai/ui@0.36.0`).
 
 **Affected:** `src/web-components/register-impl.ts` (and its `src/web-components/register/` entry),
 `dist/kai.es.js`, `src/primitives/highlighter.ts`, and the registration-versus-tree-shaking guidance

@@ -1,7 +1,11 @@
 # Handoff -- the scaffold and the starters import only the tags they use
 
 **Date:** 2026-09-22 · **Branch:** `feat/per-tag-scaffold-imports` (based on `main` @ `41b9dd43`) ·
-**Status:** in the tree, all gates green, not yet released. Backlog:
+**Status:** RELEASED on 2026-09-22 through release PR #403 (merge `17168d5f`), over OIDC, in order:
+`@kitn.ai/ui` 0.36.0, `create-kai` 0.9.0, `@kitn.ai/mcp` 0.2.2, `@kitn.ai/cli` 0.5.0. The docs
+deploy was re-run once jsDelivr served 0.36.0 and is green. The second batch (the `doctor` finding,
+the MCP tool schema, the two false positives in `debug-rules.ts`) is sections 10 and 11 and shipped
+in the same release. Backlog:
 
 Read
 [`2026-09-22-release-shipped-and-the-skip-path.md`](2026-09-22-release-shipped-and-the-skip-path.md)
