@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
+import { fn } from 'storybook/test';
 import { createSignal } from 'solid-js';
-import { Nav, type KaiNavItem } from './nav';
+import { Nav, type KaiNavItem, type NavProps } from './nav';
 import { componentDescription } from '../../stories/docs/web-component-controls';
 
 const ITEMS: KaiNavItem[] = [
@@ -37,9 +38,22 @@ const meta = {
       description: 'Fired with the selected item id.',
       table: { category: 'Events' },
     },
+    onItemAction: {
+      action: 'item-action',
+      description: "A row's trailing `action` button was activated (not a select).",
+      table: { category: 'Events' },
+    },
+    onItemClose: {
+      action: 'item-close',
+      description: "A `closable` row's trailing close button was activated (not a select).",
+      table: { category: 'Events' },
+    },
   },
   args: {
     value: 'new',
+    onItemSelect: fn(),
+    onItemAction: fn(),
+    onItemClose: fn(),
   },
   render: (args) => {
     const [value, setValue] = createSignal(args.value ?? 'new');
@@ -189,7 +203,7 @@ const ACTIONS: KaiNavItem[] = [
  *  Both are separate from the row's select — and rendered as siblings of the
  *  item button (never nested), so they pass the a11y nested-interactive check. */
 export const TrailingActions: Story = {
-  render: () => {
+  render: (args: Pick<NavProps, 'onItemAction' | 'onItemClose'>) => {
     const [value, setValue] = createSignal('auth');
     const [items, setItems] = createSignal(ACTIONS);
     return (
@@ -200,12 +214,16 @@ export const TrailingActions: Story = {
           onItemSelect={setValue}
           // The action must NOT select the row — it does something else. Here it
           // toggles a "Pinned" badge on the item; the selection (value) is untouched.
-          onItemAction={(id) =>
+          onItemAction={(id) => {
             setItems((prev) =>
               prev.map((i) => (i.id === id ? { ...i, badge: i.badge ? undefined : 'Pinned' } : i)),
-            )
-          }
-          onItemClose={(id) => setItems((prev) => prev.filter((i) => i.id !== id))}
+            );
+            args.onItemAction?.(id);
+          }}
+          onItemClose={(id) => {
+            setItems((prev) => prev.filter((i) => i.id !== id));
+            args.onItemClose?.(id);
+          }}
         />
       </div>
     );

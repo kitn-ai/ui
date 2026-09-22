@@ -3985,6 +3985,15 @@
         "displayType": "undefined | false | true"
       },
       {
+        "name": "editTrigger",
+        "type": "undefined | \"dblclick\" | \"click\"",
+        "optional": true,
+        "scalar": true,
+        "description": "How the read view enters edit mode: `'dblclick'` (default) opens the field on a double click, `'click'` on a single click. Reflected to the `edit-trigger` attribute. `edit()` and `editing` are unaffected.",
+        "default": "'dblclick'",
+        "displayType": "undefined | \"dblclick\" | \"click\""
+      },
+      {
         "name": "placeholder",
         "type": "undefined | string",
         "optional": true,
@@ -5137,6 +5146,46 @@
         "name": "separator",
         "doc": "The gap between key caps. Inject a literal joiner (e.g. a plus sign) from outside.",
         "recipe": "kai-kbd::part(separator)::after { content: \"+\" }"
+      }
+    ]
+  },
+  {
+    "tag": "kai-kbd-group",
+    "className": "KaiKbdGroupElement",
+    "displayName": "KbdGroup",
+    "props": [
+      {
+        "name": "theme",
+        "type": "\"light\" | \"dark\" | \"auto\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "default": "'auto'",
+        "universal": true,
+        "displayType": "\"light\" | \"dark\" | \"auto\""
+      }
+    ],
+    "events": [],
+    "methods": [],
+    "composedFrom": [
+      {
+        "name": "KbdGroup",
+        "group": "Components"
+      }
+    ],
+    "tokens": [],
+    "slots": [
+      {
+        "name": "",
+        "mode": "inject",
+        "doc": "The `<kai-kbd>` elements to lay out, one per shortcut."
+      }
+    ],
+    "parts": [
+      {
+        "name": "group",
+        "doc": "The flex frame that owns the gap between the kbd elements inside it.",
+        "recipe": "kai-kbd-group::part(group) { gap: 0.375rem }"
       }
     ]
   },

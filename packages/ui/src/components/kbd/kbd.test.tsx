@@ -2,6 +2,7 @@ import { describe, it, expect, afterEach } from 'vitest';
 import '@testing-library/jest-dom/vitest';
 import { render, cleanup } from '@solidjs/testing-library';
 import { Kbd } from './kbd';
+import { KbdGroup } from './kbd-group';
 
 afterEach(cleanup);
 
@@ -33,5 +34,38 @@ describe('Kbd', () => {
   it('maps modifiers and arrows (Mod+Shift+ArrowUp on mac → ⌘ ⇧ ↑)', () => {
     const { container } = render(() => <Kbd keys="Mod+Shift+ArrowUp" platform="mac" />);
     expect(caps(container)).toEqual(['⌘', '⇧', '↑']);
+  });
+});
+
+describe('KbdGroup', () => {
+  it('renders its children', () => {
+    const { container } = render(() => (
+      <KbdGroup>
+        <span class="raw">press slash</span>
+      </KbdGroup>
+    ));
+    expect(container.querySelector('[part="group"] .raw')).toHaveTextContent('press slash');
+  });
+
+  it('renders both caps when it composes two Kbds', () => {
+    const { container } = render(() => (
+      <KbdGroup>
+        <Kbd keys="Mod+K" platform="mac" />
+        <Kbd keys="Mod+S" platform="mac" />
+      </KbdGroup>
+    ));
+    expect(caps(container)).toEqual(['⌘', 'K', '⌘', 'S']);
+  });
+
+  it('merges a caller class without dropping the gap', () => {
+    const { container } = render(() => (
+      <KbdGroup class="mt-2">
+        <Kbd keys="Mod+K" platform="mac" />
+      </KbdGroup>
+    ));
+    const group = container.querySelector('[part="group"]');
+    expect(group).toHaveClass('gap-1');
+    expect(group).toHaveClass('inline-flex');
+    expect(group).toHaveClass('mt-2');
   });
 });

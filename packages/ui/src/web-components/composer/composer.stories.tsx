@@ -4,7 +4,7 @@ import '../register/register'; // side effect: registers all kai-* custom elemen
 import { attachKaiActions } from '../../stories/docs/story-actions';
 import type { TriggerDef } from '../../components/composer/composer';
 import type { ComposerDoc } from '../../primitives/composer-model';
-import { expect } from 'storybook/test';
+import { expect, fn } from 'storybook/test';
 import { specDescription } from '../../stories/docs/web-component-controls';
 
 // The web components are custom DOM elements, declare the tag for SolidJS JSX.
@@ -69,6 +69,60 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 const meta = {
   title: 'Test Fixtures/Composer',
   tags: ['autodocs'],
+  argTypes: {
+    // Descriptions are the `kai-composer` events in
+    // src/web-components/web-component-meta.json (the DOM contract these stories drive).
+    onBlur: {
+      action: 'blur',
+      description: 'The composer lost focus.',
+      table: { category: 'Events' },
+    },
+    onEntityAdd: {
+      action: 'entity-add',
+      description: 'An entity pill was inserted into the composer.',
+      table: { category: 'Events' },
+    },
+    onEntityRemove: {
+      action: 'entity-remove',
+      description: 'An entity pill was deleted from the composer.',
+      table: { category: 'Events' },
+    },
+    onFocus: {
+      action: 'focus',
+      description: 'The composer gained focus; `focus`/`blur` are not composed natively, so these re-expose them on the host.',
+      table: { category: 'Events' },
+    },
+    onSubmit: {
+      action: 'submit',
+      description: 'The user submitted the composer (Enter or programmatic submit); the detail carries `doc`, `text` and `entities`, and no attachments.',
+      table: { category: 'Events' },
+    },
+    onTrigger: {
+      action: 'trigger',
+      description: 'A trigger character was detected at the caret (e.g. `/` or `@`).',
+      table: { category: 'Events' },
+    },
+    onTriggerClose: {
+      action: 'trigger-close',
+      description: 'The active trigger was dismissed (Escape, space, or outside click).',
+      table: { category: 'Events' },
+    },
+    onValueChange: {
+      action: 'value-change',
+      description: 'The content changed (fires on every input event).',
+      table: { category: 'Events' },
+    },
+  },
+  args: {
+    onBlur: fn(),
+    onEntityAdd: fn(),
+    onEntityRemove: fn(),
+    onFocus: fn(),
+    onSubmit: fn(),
+    onTrigger: fn(),
+    onTriggerClose: fn(),
+    onValueChange: fn(),
+  },
   parameters: {
     layout: 'fullscreen',
     docs: {

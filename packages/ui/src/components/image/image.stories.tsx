@@ -62,8 +62,9 @@ const src = (code: string) => ({
 
 /** Interactive playground: swap the base64 data, media type, and sizing classes. */
 export const Playground: Story = {
-  ...src(`<Image
-  base64={chatIconBase64}
+  ...src(`// base64: your own image data, trimmed to a prefix here.
+<Image
+  base64="PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0OCIg…"
   mediaType="image/svg+xml"
   alt="Compact gradient chat icon"
   class="h-24 w-24 rounded-md"
@@ -72,12 +73,14 @@ export const Playground: Story = {
 
 export const Basic: Story = {
   args: { class: 'h-24 w-24 rounded-md' },
-  ...src(`<Image base64={chatIconBase64} mediaType="image/svg+xml" alt="Compact gradient chat icon" class="h-24 w-24 rounded-md" />`),
+  ...src(`// base64: your own image data, trimmed to a prefix here.
+<Image base64="PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0OCIg…" mediaType="image/svg+xml" alt="Compact gradient chat icon" class="h-24 w-24 rounded-md" />`),
 };
 
 export const CustomSize: Story = {
   args: { alt: 'Large preview', class: 'h-64 w-64 rounded-lg' },
-  ...src(`<Image base64={chatIconBase64} mediaType="image/svg+xml" alt="Large preview" class="h-64 w-64 rounded-lg" />`),
+  ...src(`// base64: your own image data, trimmed to a prefix here.
+<Image base64="PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0OCIg…" mediaType="image/svg+xml" alt="Large preview" class="h-64 w-64 rounded-lg" />`),
 };
 
 /** Placeholder state shown while no `base64`/`uint8Array` source is available (showcase). */

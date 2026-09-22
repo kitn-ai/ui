@@ -103,7 +103,13 @@ export function Kbd(props: KbdProps): JSX.Element {
               <span
                 part="key"
                 class={cn(
-                  'inline-flex items-center justify-center rounded border border-border bg-muted font-medium leading-none tabular-nums text-muted-foreground',
+                  // Cap radius. shadcn's Kbd rounds each cap with `rounded-sm` (~6px);
+                  // ours was `rounded` = var(--radius) = 0.6rem = 9.6px, 40% of the md
+                  // cap's 24px height, which reads as a pill rather than a keycap.
+                  // `rounded-sm` is this kit's calc(var(--radius) - 4px) = 5.6px, 23% of
+                  // that height, and it still tracks the --radius knob every other
+                  // rung of the scale derives from.
+                  'inline-flex items-center justify-center rounded-sm border border-border bg-muted font-medium leading-none tabular-nums text-muted-foreground',
                   SIZE[local.size ?? 'md'],
                 )}
               >

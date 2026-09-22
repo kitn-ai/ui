@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
+import { fn } from 'storybook/test';
 import { createSignal } from 'solid-js';
-import { HomePanel } from './home-panel';
+import { HomePanel, type HomePanelProps } from './home-panel';
 import { WidgetTabBar } from '../widget-tab-bar/widget-tab-bar';
 import type { ConversationSummary } from '../../types';
 
@@ -24,6 +25,31 @@ const meta = {
   component: HomePanel,
   tags: ['autodocs'],
   parameters: { layout: 'centered' },
+  // `onSelectRecent` and `onNewChat` carry no doc comment on the props
+  // interface in `home-panel.tsx`, so their entries name the action and carry
+  // no invented sentence; `onLink`'s sentence is its own prop doc.
+  argTypes: {
+    onSelectRecent: {
+      action: 'select-recent',
+      description: 'A recent-conversation row was activated; carries that conversation\'s id.',
+      table: { category: 'Events' },
+    },
+    onNewChat: {
+      action: 'new-chat',
+      description: 'The new-chat button was clicked.',
+      table: { category: 'Events' },
+    },
+    onLink: {
+      action: 'link',
+      description: 'Fired only for href-less link entries: an entry with a safe `href` navigates as a real anchor instead.',
+      table: { category: 'Events' },
+    },
+  },
+  args: {
+    onSelectRecent: fn(),
+    onNewChat: fn(),
+    onLink: fn(),
+  },
 } satisfies Meta<typeof HomePanel>;
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -36,7 +62,7 @@ const src = (code: string) => ({
 /** Full home: greeting, recent conversation, new-conversation CTA, links, and
  *  the tab bar chrome with an unread badge on Messages. */
 export const FullHome: Story = {
-  render: () => {
+  render: (args: HomePanelProps) => {
     const [tab, setTab] = createSignal<'home' | 'messages'>('home');
     return frame(
       <>
@@ -47,9 +73,9 @@ export const FullHome: Story = {
             { label: 'Docs', href: 'https://ui.kitn.ai', description: 'Read the guides', icon: 'book-open' },
             { label: 'Talk to sales', description: 'Emits onLink, no href', icon: 'message-circle' },
           ]}
-          onNewChat={() => {}}
-          onSelectRecent={() => {}}
-          onLink={() => {}}
+          onNewChat={args.onNewChat}
+          onSelectRecent={args.onSelectRecent}
+          onLink={args.onLink}
         />
         <WidgetTabBar active={tab()} onChange={setTab} unread />
       </>,
@@ -71,9 +97,9 @@ export const FullHome: Story = {
 
 /** `home: {}` — defaults only, no config. */
 export const MinimalDefaults: Story = {
-  render: () => frame(
+  render: (args: HomePanelProps) => frame(
     <>
-      <HomePanel onNewChat={() => {}} />
+      <HomePanel onNewChat={args.onNewChat} />
       <WidgetTabBar active="home" onChange={() => {}} />
     </>,
   ),
@@ -83,12 +109,12 @@ export const MinimalDefaults: Story = {
 
 /** First visit — no recent conversation to show. */
 export const NoRecent: Story = {
-  render: () => frame(
+  render: (args: HomePanelProps) => frame(
     <>
       <HomePanel
         greeting={{ title: 'Welcome to Acme' }}
         links={[{ label: 'Docs', href: 'https://ui.kitn.ai', icon: 'book-open' }]}
-        onNewChat={() => {}}
+        onNewChat={args.onNewChat}
       />
       <WidgetTabBar active="home" onChange={() => {}} />
     </>,

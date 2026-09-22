@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
+import { fn } from 'storybook/test';
 import { Search } from 'lucide-solid';
 import { Input } from './input';
 import { Button } from '../button/button';
@@ -12,9 +13,7 @@ const meta = {
     layout: 'padded',
     docs: {
       controls: {
-        exclude: [
-          'leading', 'trailing', 'onValueInput', 'onValueChange', 'onMaskReject', 'class', 'children',
-        ],
+        exclude: ['leading', 'trailing', 'class', 'children'],
       },
       description: componentDescription([
         'The token-themed single-line text field. A `label`, `hint`, and `error` stack around a field row that holds an optional `leading` affix, the `<input>`, and an optional `trailing` affix. Pick density with `size`. Set `invalid` (or a non-empty `error`) for the destructive state.',
@@ -64,12 +63,32 @@ const meta = {
       description: 'What a copy or cut of a masked field puts on the clipboard.',
       table: { defaultValue: { summary: 'canonical' } },
     },
+    onValueInput: {
+      action: 'value-input',
+      description:
+        'Fires per keystroke with the current value: the canonical value when a mask is active (digits for `tel`/`ssn`/`credit-card`, the formatted text for `custom`), and the raw text of the field otherwise.',
+      table: { category: 'Events' },
+    },
+    onValueChange: {
+      action: 'value-change',
+      description: 'Fires on commit (blur) with the current value; canonical when a mask is active.',
+      table: { category: 'Events' },
+    },
+    onMaskReject: {
+      action: 'mask-reject',
+      description:
+        'A mask refused, or partly refused, some content, with `reason` of `full`, `wrong-class`, `over-capacity`, or `format-change-clipped`; it is not an error state and does not touch `invalid`.',
+      table: { category: 'Events' },
+    },
   },
   args: {
     size: 'md',
     placeholder: 'Acme Inc.',
     disabled: false,
     invalid: false,
+    onValueInput: fn(),
+    onValueChange: fn(),
+    onMaskReject: fn(),
   },
   render: (args) => (
     <div class="max-w-sm">

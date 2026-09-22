@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
+import { fn } from 'storybook/test';
 import { createSignal } from 'solid-js';
 import { Thread } from './thread';
 import { ChatConfig } from '../../primitives/chat-config';
@@ -52,7 +53,7 @@ const meta = {
   parameters: {
     layout: 'fullscreen',
     docs: {
-      controls: { exclude: ['use:eventListener', 'messages', 'empty', 'controllerRef', 'onMessageAction'] },
+      controls: { exclude: ['use:eventListener', 'messages', 'empty', 'controllerRef'] },
       description: componentDescription([
         'The message-list slice of a chat, standalone: the scrolling list of messages with per-message markdown, code highlight, reasoning + tool panels, avatars, and the action row — plus stick-to-bottom scroll, a scroll-to-bottom button, an optional typing indicator, and an empty state.',
         'No composer, header, suggestions, or sidebar — compose it with `kai-prompt-input` and your own layout, or use the batteries-included `kai-chat`. Fills the height its parent gives it (`h-full`) and scrolls internally. This is the SolidJS component behind the `<kai-thread>` web component.',
@@ -64,6 +65,14 @@ const meta = {
     proseSize: { control: 'select', options: ['xs', 'sm', 'base', 'lg'], description: 'Body/prose font scale for markdown.' },
     actionsReveal: { control: 'inline-radio', options: ['always', 'hover'], description: 'Keep each action bar visible, or reveal it on row hover.' },
     scrollButton: { control: 'boolean', description: 'Show the scroll-to-bottom button.' },
+    onMessageAction: {
+      action: 'message-action',
+      description: "Fired when a message's action button is clicked (copy / vote / regenerate / edit / custom).",
+      table: { category: 'Events' },
+    },
+  },
+  args: {
+    onMessageAction: fn(),
   },
   render: (args) => (
     <div style={{ height: '520px' }} class="overflow-hidden rounded-lg border border-border">

@@ -78,6 +78,7 @@ type Story = StoryObj<typeof meta>;
 
 const IMPORT = `import {
   Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription, EmptyContent,
+  Button, Avatar, PromptSuggestion, PromptInput, PromptInputTextarea, PromptInputActions,
 } from '@kitn.ai/ui';`;
 const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },

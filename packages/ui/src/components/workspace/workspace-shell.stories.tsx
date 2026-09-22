@@ -88,7 +88,8 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const IMPORT = `import { WorkspaceShell } from '@kitn.ai/ui/solid';`;
+const IMPORT = `import { WorkspaceShell } from '@kitn.ai/ui/solid';
+import { FileTree } from '@kitn.ai/ui';`;
 const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });

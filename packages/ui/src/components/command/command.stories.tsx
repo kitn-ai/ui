@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal } from 'solid-js';
 import { fn } from 'storybook/test';
-import { CommandList, type CommandGroup } from './command';
+import { CommandList, type CommandGroup, type CommandListProps } from './command';
 import { componentDescription } from '../../stories/docs/web-component-controls';
 
 /** Two groups of rows. Icons are curated names from `NAMED_ICONS`. */
@@ -30,7 +30,7 @@ const meta = {
   parameters: {
     layout: 'padded',
     docs: {
-      controls: { exclude: ['groups', 'onSelect', 'id', 'use:eventListener'] },
+      controls: { exclude: ['groups', 'id', 'use:eventListener'] },
       description: componentDescription([
         'A presentational grouped listbox for command / mention palettes. Each `groups` entry is an optional section header plus rows (`id`, `label`, optional `icon`, `description`, and a `shortcut` shown as right-aligned key caps). Rows are `role="option"` buttons; clicking one calls `onSelect(id)`. With no items it renders `emptyLabel`.',
       ]),
@@ -50,6 +50,11 @@ const meta = {
       control: 'text',
       description: 'Accessible name for the listbox.',
       table: { defaultValue: { summary: 'Command palette' } },
+    },
+    onSelect: {
+      action: 'select',
+      description: 'Called with the row id when a row is clicked.',
+      table: { category: 'Events' },
     },
   },
   args: {
@@ -108,7 +113,7 @@ export const Selectable: Story = {
 
 /** Rows without descriptions read as a compact menu. */
 export const LabelsOnly: Story = {
-  render: () => (
+  render: (args: Pick<CommandListProps, 'onSelect'>) => (
     <div class="max-w-xs overflow-hidden rounded-lg border border-border py-1">
       <CommandList
         groups={[
@@ -121,7 +126,7 @@ export const LabelsOnly: Story = {
           },
         ]}
         activeId="new"
-        onSelect={() => {}}
+        onSelect={args.onSelect}
       />
     </div>
   ),

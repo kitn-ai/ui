@@ -1,5 +1,5 @@
 import { describe, it, expect, afterEach, vi } from 'vitest';
-import { render, cleanup, fireEvent } from '@solidjs/testing-library';
+import { render, cleanup, fireEvent, screen } from '@solidjs/testing-library';
 import { createSignal } from 'solid-js';
 import { Composer } from './composer';
 import { createEntityEl, ZWSP } from './composer-dom';
@@ -67,6 +67,54 @@ describe('Composer controlled value reactivity', () => {
     setValue('new value');
     await Promise.resolve();
     expect(el.textContent).toContain('new value');
+  });
+});
+
+describe('Composer suggestion menu placement', () => {
+  // jsdom does not implement `Range#getClientRects` at all (not even as a zero-sized
+  // stub), and `getCaretRect` reads it to decide whether to open the menu. Defined
+  // for the duration of these tests, then removed again so nothing downstream sees a
+  // jsdom that lies about rects.
+  const rangeProto = Range.prototype as unknown as { getClientRects?: () => DOMRectList };
+  const hadGetClientRects = 'getClientRects' in rangeProto;
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    if (!hadGetClientRects) delete rangeProto.getClientRects;
+  });
+
+  it('portals the suggestion menu out of a clipping ancestor', () => {
+    // The bug this guards: the menu is `position: fixed`, and fixed does NOT escape a
+    // containing block. The `transform` below makes this div one, so a menu that is
+    // not portaled is laid out — and clipped by `overflow: hidden` — inside it.
+    //
+    // The faked caret rect is this environment's, not the menu's: nothing about the
+    // trigger detection, the items, the position or the dismissal is stubbed.
+    rangeProto.getClientRects = () => [
+      { width: 1, height: 16, top: 0, left: 0, right: 1, bottom: 16, x: 0, y: 0, toJSON: () => ({}) },
+    ] as unknown as DOMRectList;
+
+    let clip!: HTMLDivElement;
+    render(() => (
+      <div ref={clip} style={{ overflow: 'hidden', transform: 'translateZ(0)' }}>
+        <Composer triggers={[{ char: '/', kind: 'skill', items: [{ id: 'rec', label: 'Record & Replay' }] }]} />
+      </div>
+    ));
+    const el = clip.querySelector('[data-kai-composer-editable]') as HTMLElement;
+    el.textContent = '/';
+    const range = document.createRange();
+    range.setStart(el.firstChild!, 1);
+    range.collapse(true);
+    const selection = document.getSelection()!;
+    selection.removeAllRanges();
+    selection.addRange(range);
+    fireEvent.input(el);
+
+    const menu = screen.getByRole('listbox');
+    expect(clip.contains(menu)).toBe(false);
+    // No provider -> `portalMount()` is undefined -> Solid's `<Portal>` default,
+    // `document.body` (inside the wrapper div Solid inserts there).
+    expect(document.body.contains(menu)).toBe(true);
   });
 });
 

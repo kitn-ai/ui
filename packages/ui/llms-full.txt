@@ -3,7 +3,7 @@
 
 # @kitn.ai/ui
 
-> Framework-agnostic, Shadow-DOM web components for building AI chat interfaces — works in React, Vue, Angular, Svelte, or plain HTML. 97 custom elements, every one prefixed `kai-` (e.g. `<kai-chat>`, `<kai-artifact>`): streaming responses, markdown + code rendering, reasoning/tool panels, attachments, conversation sidebar, voice input. Zero framework dependency for consumers; the SolidJS runtime it is authored in is bundled in, so the host needs nothing.
+> Framework-agnostic, Shadow-DOM web components for building AI chat interfaces — works in React, Vue, Angular, Svelte, or plain HTML. 98 custom elements, every one prefixed `kai-` (e.g. `<kai-chat>`, `<kai-artifact>`): streaming responses, markdown + code rendering, reasoning/tool panels, attachments, conversation sidebar, voice input. Zero framework dependency for consumers; the SolidJS runtime it is authored in is bundled in, so the host needs nothing.
 
 ## Install
 
@@ -37,7 +37,7 @@ Drop an element into any framework (React, Vue, plain HTML). Data in via JS prop
 - `<kai-prompt-input>` — standalone composer with send button.
 
 **Layer 2 — composable custom elements** (`import { … } from '@kitn.ai/ui'`):
-All 97 web components are also exported individually. Use them for custom layouts or features `<kai-chat>` does not expose (ChainOfThought, FeedbackBar, ThinkingBar, VoiceInput, …). Your bundler tree-shakes the rest.
+All 98 web components are also exported individually. Use them for custom layouts or features `<kai-chat>` does not expose (ChainOfThought, FeedbackBar, ThinkingBar, VoiceInput, …). Your bundler tree-shakes the rest.
 
 ## Key rules for the web components
 
@@ -151,7 +151,7 @@ For Tailwind builds: `@import "@kitn.ai/ui/theme.css"` in your CSS.
 
 ## Docs
 
-- Web component reference (all 97 web components, every prop/event/method/slot/part): the "Web component reference" section of ./llms-full.txt — https://kitn.dev/llms-full.txt
+- Web component reference (all 98 web components, every prop/event/method/slot/part): the "Web component reference" section of ./llms-full.txt — https://kitn.dev/llms-full.txt
 - Programmatic layer (`@kitn.ai/ui/state` + `@kitn.ai/ui/wire`: streaming folds, the mock responder, the SSE readers/encoders): the "Programmatic layer" section of llms-full.txt
 - How to build a chat app in 5 steps (install → pick a layer → handle submit + stream → wire features → theme, with working code): the "How to build a chat app in 5 steps" section of llms-full.txt
 - Streaming recipe (the two rules that bite: reassign new references per chunk, fold deltas onto the trailing text part): the "Streaming recipe" section of llms-full.txt
@@ -1256,7 +1256,7 @@ Every name `kai-icon` (and every `icon` prop/attribute across the elements) reso
 
 ---
 
-## Web component reference (97 web components, generated from custom-elements.json)
+## Web component reference (98 web components, generated from custom-elements.json)
 
 Every element also accepts the `theme` attribute. Array/object properties are marked with a `—` attribute: they must be set as JS properties.
 
@@ -2310,6 +2310,7 @@ _No events._
 | `theme` | `theme` | `"light" \| "dark" \| "auto"` | Color mode (`auto` follows prefers-color-scheme). |
 | `value` | `value` | `undefined \| string` | The label text. Settable and reflected to the `value` attribute. Read `el.value` for live state. |
 | `editing` | `editing` | `undefined \| false \| true` | Controlled edit state. `el.editing = true` opens the field; reflected to the `editing` attribute. |
+| `editTrigger` | `edit-trigger` | `undefined \| "dblclick" \| "click"` | How the read view enters edit mode: `'dblclick'` (default) opens the field on a double click, `'click'` on a single click. Reflected to the `edit-trigger` attribute. `edit()` and `editing` are unaffected. |
 | `placeholder` | `placeholder` | `undefined \| string` | Placeholder shown while editing / when the value is empty. |
 | `disabled` | `disabled` | `undefined \| false \| true` | Disable entering edit mode. |
 
@@ -2647,6 +2648,30 @@ _No events._
 |---|---|
 | `::part(key)` | Each key cap. Restyle its surface, border, radius, or font. — `kai-kbd::part(key) { border-radius: 0.375rem }` |
 | `::part(separator)` | The gap between key caps. Inject a literal joiner (e.g. a plus sign) from outside. — `kai-kbd::part(separator)::after { content: "+" }` |
+
+---
+
+### `kai-kbd-group` / `KbdGroup`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `theme` | `theme` | `"light" \| "dark" \| "auto"` | Color mode (`auto` follows prefers-color-scheme). |
+
+_No events._
+
+**Slots** (project your own markup via `slot="name"` on a light-DOM child):
+
+| Slot | Mode | Description |
+|---|---|---|
+| _(default)_ | inject | The `<kai-kbd>` elements to lay out, one per shortcut. |
+
+**Styleable parts** (restyle from outside via `kai-kbd-group::part(name)`):
+
+| Part | Description |
+|---|---|
+| `::part(group)` | The flex frame that owns the gap between the kbd elements inside it. — `kai-kbd-group::part(group) { gap: 0.375rem }` |
 
 ---
 

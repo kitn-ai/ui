@@ -47,12 +47,25 @@ const meta = {
       description: 'Fired with `true` when recording starts and `false` when it stops.',
       table: { category: 'Events' },
     },
+    onInterim: {
+      action: 'interim',
+      description: 'Live partial transcript from native recognition (when `interim`).',
+      table: { category: 'Events' },
+    },
+    onError: {
+      action: 'error',
+      description:
+        'A recognition session failed or produced nothing, with `error` carrying the platform error code, the thrown exception name, or `no-result`.',
+      table: { category: 'Events' },
+    },
   },
   args: {
     disabled: false,
     onTranscribe: transcribe,
     onTranscription: fn(),
     onRecordingChange: fn(),
+    onInterim: fn(),
+    onError: fn(),
   },
   render: (args) => <VoiceInput {...args} />,
 } satisfies Meta<typeof VoiceInput>;
@@ -78,7 +91,13 @@ export const Playground: Story = {
 
 export const Disabled: Story = {
   args: { disabled: true },
-  ...src(`<VoiceInput
+  ...src(`// Your STT call: resolve the recorded audio to text.
+const transcribe = async (audio: Blob): Promise<string> => {
+  const res = await fetch('/api/transcribe', { method: 'POST', body: audio });
+  return (await res.json()).text;
+};
+
+<VoiceInput
   disabled
   onTranscribe={transcribe}
   onTranscription={(text) => setInput(text)}

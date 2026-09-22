@@ -122,7 +122,8 @@ export const CodeTab: Story = {
       <Artifact src={args.src} files={args.files} tab="code" activeFile="index.html" iframeTitle="Starboard artifact preview" />
     </div>
   ),
-  ...src(`<Artifact src={src} files={files} tab="code" activeFile="index.html" />`),
+  ...src(`// \`files\` is your own ArtifactFile[] -- it feeds the Code tab's tree.
+<Artifact src="https://your-app.dev/index.html" files={files} tab="code" activeFile="index.html" />`),
 };
 
 /** Controlled: observe the emitted nav model. */
@@ -148,7 +149,8 @@ export const Controlled: Story = {
       </div>
     );
   },
-  ...src(`<Artifact src={src} files={files}
+  ...src(`// \`files\` is your own ArtifactFile[].
+<Artifact src="https://your-app.dev/index.html" files={files}
   onNavigate={(url) => …} onTabChange={(t) => …} onFileSelect={(p) => …} />`),
 };
 

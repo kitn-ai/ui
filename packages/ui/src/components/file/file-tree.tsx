@@ -442,24 +442,30 @@ function TreeNode(props: TreeNodeProps): JSX.Element {
             })()}
             <span class={cn('truncate', hasMeta && 'min-w-0 flex-1')}>{node().name}</span>
             <Show when={hasMeta}>
+              {/* A GRID of fixed tracks, not a flex of variable-width spans. The numbers are
+                  right-aligned within their own track, so they read as columns down the tree
+                  instead of drifting with each row's digit count, and a track keeps its width
+                  when its value is absent: no slot has to render an empty node to hold the
+                  column, which is why `stat-additions` still exists only on a file that has
+                  additions. `gap-1.5` is the space between the two numbers. */}
               <span
-                class="ml-auto flex items-center gap-1.5 shrink-0 pl-2 text-xs"
+                class="ml-auto grid grid-cols-[2rem_2rem_0.75rem] items-center justify-items-end gap-1.5 shrink-0 pl-2 text-xs"
                 aria-hidden="true"
               >
                 <Show when={file.additions !== undefined}>
-                  <span part="stat-additions" class="text-tool-green tabular-nums">
+                  <span part="stat-additions" class="col-start-1 text-tool-green tabular-nums">
                     +{file.additions}
                   </span>
                 </Show>
                 <Show when={file.deletions !== undefined}>
-                  <span part="stat-deletions" class="text-tool-red tabular-nums">
+                  <span part="stat-deletions" class="col-start-2 text-tool-red tabular-nums">
                     -{file.deletions}
                   </span>
                 </Show>
                 <Show when={status}>
                   <span
                     part="status"
-                    class={cn('w-3 text-center font-mono font-semibold', status!.class)}
+                    class={cn('col-start-3 w-3 text-center font-mono font-semibold', status!.class)}
                   >
                     {status!.letter}
                   </span>

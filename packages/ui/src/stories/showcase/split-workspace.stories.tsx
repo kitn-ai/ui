@@ -96,6 +96,7 @@ declare module 'solid-js' {
         editing?: boolean;
         placeholder?: string;
         disabled?: boolean;
+        'edit-trigger'?: 'dblclick' | 'click';
         theme?: string;
       };
     }
@@ -2089,9 +2090,10 @@ export const SplitWorkspace: Story = {
         // (⌘K), kai-dialog (modals), kai-file-tree (explorer) + toast() round it out.
         code: `// AMUX — an IDE-style shell COMPOSED from kit elements.
 // The kit provides the building blocks; the 2-level tiling, drag-to-split, tab
-// reorder + rename are your app's own logic (abbreviated here as <Group>/<Tab>/…).
+// reorder + rename are your app's own logic (abbreviated here as <Tab>/<Gutter>/…).
 import '@kitn.ai/ui/web-components';                 // registers the kai-* elements
 import { toast } from '@kitn.ai/ui/web-components';  // imperative notifications
+import { Switch, Match, For, Show } from 'solid-js'; // the Agents / Browser branch
 
 // Agents carry their own working context; the UI just reflects it.
 type Agent = {
@@ -2127,12 +2129,14 @@ type Agent = {
 
     <kai-resizable-item min="460px">
       <Switch>
-        {/* AGENTS — resizable COLUMNS, each a stack of editor GROUPS (your tiling logic) */}
+        {/* AGENTS — resizable COLUMNS: a flex row of columns, each a stack of editor GROUPS (your tiling logic) */}
         <Match when={topView() === 'agents'}>
-          <For each={columns()}>{(col) =>
-            <Column>
-              <For each={col.groups}>{(group) =>
-                <Group focused={group.id === focusedGroupId()}>
+          <For each={columns()}>{(col) => (
+            // one column per tiling column: your own resizable row of groups
+            <div class="flex min-w-0 flex-1 gap-2">
+              <For each={col.groups}>{(group) => (
+                // one group per row: your own stack; the focused one wears the ring
+                <section class="flex min-h-0 min-w-0 flex-1 flex-col">
                   {/* the tab gutter IS the header */}
                   <Gutter>
                     <For each={group.agentIds}>{(id) =>
@@ -2144,10 +2148,10 @@ type Agent = {
                   <AgentBody agent={active(group)} />
                   <kai-prompt-input />                                  {/* the composer */}
                   <ContextBar agent={active(group)} />                  {/* status · dir · branch · runtime */}
-                </Group>
-              }</For>
-            </Column>
-          }</For>
+                </section>
+              )}</For>
+            </div>
+          )}</For>
         </Match>
 
         {/* BROWSER — full-screen kai-artifact + your own preview tab strip */}

@@ -491,7 +491,7 @@ export const T3Code: Story = {
     <!-- Commit & push is a REAL menu; the trigger is a non-interactive OUTLINE
          span (a kai-button would double-nest — kai-menu supplies the button). -->
     <kai-menu label="Commit and push actions">
-      <span slot="trigger" class="commit-trigger">Commit &amp; push ▾</span>
+      <span slot="trigger" class="commit-trigger inline-flex items-center gap-1.5">Commit &amp; push <kai-icon name="chevron-down"></kai-icon></span>
     </kai-menu>
     <kai-tooltip content="Window">
       <kai-button variant="ghost" size="icon-sm" icon="monitor" label="Window"></kai-button>

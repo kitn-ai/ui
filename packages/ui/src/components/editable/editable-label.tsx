@@ -8,6 +8,10 @@ export interface EditableLabelProps {
   /** Controlled edit state. When it flips true the field opens; double-click and
    *  the host's `edit()` open it too. */
   editing?: boolean;
+  /** How the read view enters edit mode: `'dblclick'` (default) opens the field on
+   *  a double click, `'click'` on a single click. Enter / F2 and `editing` /
+   *  `edit()` are unaffected. */
+  editTrigger?: 'dblclick' | 'click';
   /** Placeholder shown while editing (and as muted text when the value is empty). */
   placeholder?: string;
   /** Disable entering edit mode. */
@@ -20,9 +24,10 @@ export interface EditableLabelProps {
 }
 
 /**
- * `EditableLabel`: inline rename. Shows `value` as text; double-click (or the
- * `editing` prop, or a host `edit()`) swaps in an autofocused `Input` with the
- * text pre-selected. Enter or blur commits (fires `onRename` only when the value
+ * `EditableLabel`: inline rename. Shows `value` as text; double-click (or a single
+ * click when `editTrigger="click"`; the default is `'dblclick'`), the `editing`
+ * prop, or a host `edit()` swaps in an autofocused `Input` with the text
+ * pre-selected. Enter or blur commits (fires `onRename` only when the value
  * changed); Esc cancels (fires `onCancel`, restores the text). Both exit editing.
  *
  * Parts: `text` (the read view), `input` (the field while editing).
@@ -50,6 +55,15 @@ export function EditableLabel(props: EditableLabelProps): JSX.Element {
   createEffect(() => { if (editing()) queueMicrotask(focusSelect); });
 
   const enterEdit = () => { if (!props.disabled) setEditing(true); };
+
+  // The read view's entry gesture — one or the other, never both. In single-click
+  // mode the field opens on the first click of a double click; the second click then
+  // lands on the field (the read view it started on is gone), so the `dblclick` that
+  // follows has no read view to re-enter and the effect that autofocuses and selects
+  // never re-runs.
+  const editTrigger = () => props.editTrigger ?? 'dblclick';
+  const onReadClick = () => { if (editTrigger() === 'click') enterEdit(); };
+  const onReadDblClick = () => { if (editTrigger() === 'dblclick') enterEdit(); };
 
   const commit = (next: string) => {
     if (!untrack(editing)) return; // idempotent: a teardown blur after Enter is a no-op
@@ -87,7 +101,8 @@ export function EditableLabel(props: EditableLabelProps): JSX.Element {
               props.disabled ? 'cursor-default opacity-60' : 'cursor-text hover:bg-muted',
               !text() && 'text-muted-foreground',
             )}
-            onDblClick={enterEdit}
+            onClick={onReadClick}
+            onDblClick={onReadDblClick}
             onKeyDown={(e) => {
               if (!props.disabled && (e.key === 'Enter' || e.key === 'F2')) { e.preventDefault(); enterEdit(); }
             }}

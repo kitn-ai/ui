@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
+import { fn } from 'storybook/test';
 import { createSignal } from 'solid-js';
 import { Screen } from './screen';
 import { Button } from '../button/button';
@@ -32,10 +33,35 @@ const meta = {
       description: 'Show the back button.',
       table: { defaultValue: { summary: 'true' } },
     },
+    onOpenChange: {
+      action: 'open-change',
+      description: 'Fires whenever `open` wants to change, from the back button or a method.',
+      table: { category: 'Events' },
+    },
+    onBack: {
+      action: 'back',
+      description: 'Back navigation intent: the back button or Escape.',
+      table: { category: 'Events' },
+    },
   },
-  render: (args: { title?: string; back?: boolean }) => (
+  args: {
+    onOpenChange: fn(),
+    onBack: fn(),
+  },
+  render: (args: {
+    title?: string;
+    back?: boolean;
+    onOpenChange?: (open: boolean) => void;
+    onBack?: () => void;
+  }) => (
     <div class="relative h-[440px] w-full overflow-hidden rounded-xl border border-border bg-background">
-      <Screen defaultOpen title={args.title} back={args.back}>
+      <Screen
+        defaultOpen
+        title={args.title}
+        back={args.back}
+        onOpenChange={args.onOpenChange}
+        onBack={args.onBack}
+      >
         <div class="p-6">
           <h3 class="mb-1 text-base font-semibold text-foreground">Design surface</h3>
           <p class="text-sm text-muted-foreground">
@@ -50,7 +76,8 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const IMPORT = `import { Screen } from '@kitn.ai/ui/solid';`;
+const IMPORT = `import { Screen } from '@kitn.ai/ui/solid';
+import { Button } from '@kitn.ai/ui';`;
 const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });

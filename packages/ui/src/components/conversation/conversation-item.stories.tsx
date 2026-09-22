@@ -74,7 +74,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const IMPORT = `import { ConversationItem } from '@kitn.ai/ui';
+const IMPORT = `import { ConversationItem, ConversationList, SlottedConversationItem } from '@kitn.ai/ui';
 import type { ConversationSummary } from '@kitn.ai/ui';`;
 const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },

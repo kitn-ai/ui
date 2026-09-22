@@ -170,6 +170,7 @@ export const topics = [
           { slug: 'components/tooltip' },
           { slug: 'components/hover-card' },
           { slug: 'components/separator' },
+          { slug: 'components/kbd' },
           { slug: 'components/scroll-area' },
           { slug: 'components/skeleton' },
         ],

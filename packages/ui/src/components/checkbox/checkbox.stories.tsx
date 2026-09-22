@@ -167,7 +167,10 @@ export const ParentAndChildren: Story = {
       </div>
     );
   },
-  ...src(`const all = () => on().length === TOOLS.length;
+  ...src(`// The tool list is your own data: this is what the parent box stands for.
+const TOOLS = ['Web search', 'Code interpreter', 'File retrieval'];
+
+const all = () => on().length === TOOLS.length;
 const some = () => on().length > 0 && !all();
 
 <Checkbox

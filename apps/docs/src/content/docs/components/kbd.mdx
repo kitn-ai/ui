@@ -1,0 +1,130 @@
+---
+title: Kbd
+description: A keyboard-shortcut display that renders one cap per key, maps each token to a platform-aware glyph, and composes several shortcuts into one group.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Playground from '../../../components/Playground.tsx';
+import PropTable from '../../../components/PropTable.astro';
+import PartTable from '../../../components/PartTable.astro';
+import ComposedFrom from '../../../components/ComposedFrom.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kai-tag-sub">kai-kbd</p>
+
+<p class="kai-lede">Shows a keyboard shortcut as key caps. Give it a `keys` spec and it splits the tokens on `+`, maps each to a platform glyph (`Mod` to ⌘ on a Mac, Ctrl elsewhere) and renders one inset cap per key.</p>
+
+<Facts items={['Shadow DOM', 'Display only', 'Platform glyphs', 'Groups with kai-kbd-group']} />
+
+## Preview
+
+<Playground client:only="solid" tag="kai-kbd" />
+
+<Aside type="tip" title="When to use">
+Show the shortcut next to the control it triggers: a menu row, a toolbar button, an icon button. It displays keys and does not bind them, so keep your own keydown handler and use the element as the hint beside it.
+</Aside>
+
+## Usage
+
+Set `keys` to the tokens joined by `+` and you get one cap per token, in the order you wrote them. `platform` defaults to `auto`, which sniffs the OS so `Mod` renders as ⌘ on a Mac and Ctrl everywhere else; pass `mac` or `other` when you need a fixed glyph set (a screenshot, a comparison). `size` defaults to `md`, with `sm` for tight rows.
+
+```html
+<kai-kbd keys="Mod+K"></kai-kbd>
+<kai-kbd keys="Mod+Shift+ArrowUp" platform="mac"></kai-kbd>
+<kai-kbd keys="Esc" size="sm"></kai-kbd>
+```
+
+Omit `keys` to render your own content in the default slot. That covers a key the token map does not, or a cap you want to label yourself.
+
+```html
+<kai-kbd>Esc</kai-kbd>
+```
+
+### Next to a label
+
+The menu-row shape, the shortcut at the trailing edge of the thing it triggers.
+
+<div class="not-content my-4 flex items-center gap-2 rounded-xl border border-line bg-surface px-5 py-3 text-sm text-ink">
+  <span>Command palette</span>
+  <kai-kbd keys="Mod+K" platform="other" style="margin-left:auto"></kai-kbd>
+</div>
+
+### Inside a button
+
+The label carries its own shortcut, so the hint travels with the action. Any element that slots children can hold a `<kai-kbd>`.
+
+<div class="not-content my-4 flex flex-wrap items-center gap-3 rounded-xl border border-line bg-surface px-5 py-4">
+  <kai-button variant="outline">Accept <kai-kbd keys="Enter" platform="other"></kai-kbd></kai-button>
+  <kai-button variant="ghost">Search <kai-kbd keys="Mod+K" platform="other"></kai-kbd></kai-button>
+</div>
+
+```html
+<kai-button variant="outline">
+  Accept
+  <kai-kbd keys="Enter"></kai-kbd>
+</kai-button>
+```
+
+### Several shortcuts in one group
+
+One `<kai-kbd>` is one shortcut. Every token between the `+`s is a key in the same chord, and nothing in the spec says where that chord ends. When the caps belong to two different shortcuts, or to a sequence you press in order, wrap them in `<kai-kbd-group>`: it lays its children out with a gap and adds nothing else.
+
+<div class="not-content my-4 flex flex-wrap items-center gap-8 rounded-xl border border-line bg-surface px-5 py-4 text-sm text-ink">
+  <span class="flex items-center gap-2">one chord <kai-kbd keys="Mod+Shift+K" platform="other"></kai-kbd></span>
+  <span class="flex items-center gap-2">two shortcuts <kai-kbd-group><kai-kbd keys="Mod+B" platform="other"></kai-kbd><kai-kbd keys="Mod+K" platform="other"></kai-kbd></kai-kbd-group></span>
+  <span class="flex items-center gap-2">a sequence <kai-kbd-group><kai-kbd>G</kai-kbd><kai-kbd>D</kai-kbd></kai-kbd-group></span>
+</div>
+
+```html
+<!-- two shortcuts -->
+<kai-kbd-group>
+  <kai-kbd keys="Mod+B"></kai-kbd>
+  <kai-kbd keys="Mod+K"></kai-kbd>
+</kai-kbd-group>
+
+<!-- one sequence: G then D -->
+<kai-kbd-group>
+  <kai-kbd>G</kai-kbd>
+  <kai-kbd>D</kai-kbd>
+</kai-kbd-group>
+```
+
+The gap is the difference to look for: the caps of a single chord sit close together (the `separator` part between them), while a group spaces whole shortcuts apart. Use the token spec for a chord and the group for anything that is not one.
+
+<Aside type="note" title="Group props">
+`<kai-kbd-group>` declares no props of its own beyond the universal `theme`. Which shortcuts exist and in what order is your markup's business.
+</Aside>
+
+### Glyphs per platform
+
+`platform="auto"` is right for most apps. These are the glyphs `mac` and `other` resolve to, so you can pick a fixed one when it matters.
+
+| Token | `platform="mac"` | `platform="other"` |
+| --- | --- | --- |
+| `Mod` | ⌘ | Ctrl |
+| `Shift` | ⇧ | ⇧ |
+| `Alt` | ⌥ | Alt |
+| `ArrowUp` | ↑ | ↑ |
+| `Enter` | ⏎ | Enter |
+| `Esc` | Esc | Esc |
+
+A token with no mapping renders uppercased, so `k` becomes `K`.
+
+## Styling
+
+Every cap is one part and the gap between caps is another, so you can restyle the surface, border, radius or font without touching the shadow root.
+
+<PartTable tag="kai-kbd" />
+
+The group's frame is a single part (`part="group"`); each cap inside it keeps its own `key` part.
+
+## Props
+
+<PropTable tag="kai-kbd" />
+
+## Composed from
+
+<ComposedFrom tag="kai-kbd" />
+
+<NeedAHand />

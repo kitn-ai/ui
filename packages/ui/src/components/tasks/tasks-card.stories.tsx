@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal } from 'solid-js';
 import { action } from 'storybook/actions';
-import { TasksCard, type TasksCardData, type TasksTask } from './tasks-card';
+import { fn } from 'storybook/test';
+import { TasksCard, type TasksCardData, type TasksCardProps, type TasksTask } from './tasks-card';
 import { componentDescription } from '../../stories/docs/web-component-controls';
 import type { CardEvent, CardHost, CardContext, CardResolution } from '../../primitives/card-contract';
 
@@ -28,6 +29,7 @@ interface TasksArgs {
   disabled?: boolean;
   readonly?: boolean;
   resolution?: CardResolution;
+  onValueChange?: TasksCardProps['onValueChange'];
 }
 
 const toData = (a: TasksArgs): TasksCardData => ({
@@ -65,7 +67,7 @@ function Demo(props: { args: TasksArgs }) {
         disabled={props.args.disabled}
         readonly={props.args.readonly}
         resolution={props.args.resolution}
-        onValueChange={action('onValueChange')}
+        onValueChange={props.args.onValueChange}
       />
       <pre
         style={{
@@ -160,6 +162,7 @@ const meta = {
     },
     cardId: { control: 'text', description: 'Correlates every emitted CardEvent.' },
     onValueChange: {
+      action: 'value-change',
       control: false,
       description: 'Fires on every selection change, before submit.',
       table: { category: 'Events' },
@@ -176,6 +179,7 @@ const meta = {
     dismissible: false,
     disabled: false,
     readonly: false,
+    onValueChange: fn(),
   },
 } satisfies Meta<TasksArgs>;
 

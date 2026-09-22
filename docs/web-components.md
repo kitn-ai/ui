@@ -3,14 +3,14 @@
 ## Overview
 
 <!-- spec:overview -->
-`@kitn.ai/ui` ships 97 framework-agnostic custom elements built on the SolidJS kit.
+`@kitn.ai/ui` ships 98 framework-agnostic custom elements built on the SolidJS kit.
 
 | Tag | Purpose |
 |-----|---------|
 | `<kai-chat>` | Full chat UI — message list plus prompt input |
 | `<kai-conversations>` | Sidebar conversation browser with group support |
 | `<kai-prompt-input>` | Standalone text-input area with send button |
-| + 94 composable custom elements | See the full roster below |
+| + 95 composable custom elements | See the full roster below |
 <!-- /spec:overview -->
 
 Each web component renders into its own **Shadow DOM** so the host page's CSS cannot leak in, and the kit's Tailwind classes cannot leak out. SolidJS and all kit dependencies are bundled inside the web-components bundle — the host does not need SolidJS.
@@ -3051,6 +3051,7 @@ A keyboard-shortcut display: feed `keys` tokens joined by `+` (`Mod+Shift+K`) an
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
 | `value` | `value` | `undefined | string` | — | The label text. Settable and reflected to the `value` attribute. Read `el.value` for live state. |
 | `editing` | `editing` | `undefined | false | true` | `false` | Controlled edit state. `el.editing = true` opens the field; reflected to the `editing` attribute. |
+| `editTrigger` | `edit-trigger` | `undefined | "dblclick" | "click"` | `'dblclick'` | How the read view enters edit mode: `'dblclick'` (default) opens the field on a double click, `'click'` on a single click. Reflected to the `edit-trigger` attribute. `edit()` and `editing` are unaffected. |
 | `placeholder` | `placeholder` | `undefined | string` | — | Placeholder shown while editing / when the value is empty. |
 | `disabled` | `disabled` | `undefined | false | true` | `false` | Disable entering edit mode. |
 

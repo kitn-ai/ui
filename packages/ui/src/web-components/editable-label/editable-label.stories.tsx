@@ -11,6 +11,7 @@ declare module 'solid-js' {
         editing?: boolean;
         placeholder?: string;
         disabled?: boolean;
+        'edit-trigger'?: 'dblclick' | 'click';
         theme?: string;
       };
     }
@@ -49,6 +50,23 @@ export const Default: StoryObj = {
   // label.edit();   // open the field programmatically
   // label.commit(); // commit the current text
   // label.cancel(); // discard and restore
+</script>`),
+};
+
+/** Single-click entry: `edit-trigger="click"` opens the field on one click instead of a
+ *  double click. Suits a label that is its own target; in a dense list, where a click
+ *  also selects the row, the `'dblclick'` default is the safer gesture. */
+export const SingleClick: StoryObj = {
+  render: () => (
+    <div style={frameStyle}>
+      <kai-editable-label value="One click to rename" edit-trigger="click"></kai-editable-label>
+    </div>
+  ),
+  parameters: src(`<kai-editable-label value="One click to rename" edit-trigger="click"></kai-editable-label>
+<script type="module">
+  import '@kitn.ai/ui/web-components';
+  const label = document.querySelector('kai-editable-label');
+  label.addEventListener('kai-rename', (e) => console.log('renamed', e.detail.value));
 </script>`),
 };
 

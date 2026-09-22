@@ -87,11 +87,12 @@ const unreadFixtureConversations: ConversationSummary[] = fixtureConversations.m
 /**
  * The widget-box conversations experience: a header toggle that swaps between
  * a chat-bubble glyph and a back arrow, and a list view that fully replaces
- * the content area (no composer, no suggestions — see `ConversationPanel`).
- * Rebuilt 2026-08-26 after the owner rejected a retrofit of the desktop
- * `ConversationList` into this box at the live demo; modeled on Intercom's
- * Messenger "Messages" tab (`.superpowers/sdd/2026-08-26-conversations/
- * research-intercom-messages-view.md`).
+ * the content area (no composer, no suggestions, see `ConversationPanel`).
+ *
+ * Modeled on Intercom's Messenger "Messages" tab. The desktop
+ * `ConversationList` is not reused in this box: at this size the list does one
+ * job at a time, browsing conversations or having one, and it replaces the
+ * entire content area.
  */
 const meta = {
   title: 'Components/ChatThread',
@@ -107,10 +108,90 @@ const meta = {
       ]),
     },
   },
+  argTypes: {
+    // Descriptions come from each prop's own doc comment, or, for the props
+    // declared as plain callbacks with no doc of their own, from the
+    // `kai-chat` entry's `events` in src/web-components/web-component-meta.json
+    // — the DOM contract the facade maps these onto (`kai-submit` -> onSubmit).
+    onConversationLoad: {
+      action: 'conversation-load',
+      description:
+        "Fires when `load(id)` resolves: the hook a caller uses to own and re-render `messages` with that conversation's history, whose id is the second argument (`undefined` for a new conversation).",
+      table: { category: 'Events' },
+    },
+    onUnreadChange: {
+      action: 'unread-change',
+      description:
+        'Fires with the same unread value this thread renders as a dot on its own header toggle, so a sibling control can mirror it; only meaningful with `conversations` on.',
+      table: { category: 'Events' },
+    },
+    onHomeLink: {
+      action: 'home-link',
+      description:
+        'Fires when a `home.links` entry with no `href` is activated; an `href`-bearing entry navigates as a real anchor instead.',
+      table: { category: 'Events' },
+    },
+    onAttachmentsRejected: {
+      action: 'attachments-rejected',
+      description: 'Files the composer refused because `accept` excluded them.',
+      table: { category: 'Events' },
+    },
+    onValueChange: {
+      action: 'value-change',
+      description: 'Fired on every input change.',
+      table: { category: 'Events' },
+    },
+    onSubmit: {
+      action: 'submit',
+      description: 'User submitted a message.',
+      table: { category: 'Events' },
+    },
+    onAttachmentsChange: {
+      action: 'attachments-change',
+      description: 'The staged attachments changed, carrying the full current list so a consumer can react in real time.',
+      table: { category: 'Events' },
+    },
+    onSuggestionClick: {
+      action: 'suggestion-click',
+      description: 'A suggestion chip was clicked, which only happens in `suggestionMode="fill"`.',
+      table: { category: 'Events' },
+    },
+    onModelChange: {
+      action: 'model-change',
+      description: 'The header model switcher changed.',
+      table: { category: 'Events' },
+    },
+    onMessageAction: {
+      action: 'message-action',
+      description:
+        'An action button on a message was clicked; `action` is the built-in name or a custom id, and `state` is present only for the toggleable like/dislike votes.',
+      table: { category: 'Events' },
+    },
+    onWebSearch: {
+      action: 'web-search',
+      description: 'The web-search (Globe) toolbar button was clicked.',
+      table: { category: 'Events' },
+    },
+    onVoice: {
+      action: 'voice',
+      description: 'The Mic / voice button was clicked.',
+      table: { category: 'Events' },
+    },
+  },
   args: {
     messages: [],
     onSubmit: fn(),
     onConversationLoad: fn(),
+    onUnreadChange: fn(),
+    onHomeLink: fn(),
+    onAttachmentsRejected: fn(),
+    onValueChange: fn(),
+    onAttachmentsChange: fn(),
+    onSuggestionClick: fn(),
+    onModelChange: fn(),
+    onMessageAction: fn(),
+    onWebSearch: fn(),
+    onVoice: fn(),
     chatTitle: 'Support',
     placeholder: 'Message support…',
   },
@@ -188,7 +269,7 @@ export const ListViewEmpty: Story = {
 <ChatThread conversations store={emptyConversationStore} chatTitle="Support" />`),
 };
 
-/** Unread indicators (owner round, 2026-08-26): a header-toggle badge (any
+/** Unread indicators: a header-toggle badge (any
  *  conversation other than the active one is unread) and, in the list, a
  *  trailing dot on each unread row. `conv-2`/`conv-3` are unread; `conv-1`
  *  is auto-selected as active on mount (most-recently-updated) and marked
@@ -217,8 +298,8 @@ export const ListViewWithUnread: Story = {
 <ChatThread conversations store={conversationStore} chatTitle="Support" />`),
 };
 
-/** Role-scoped default action bars (B-7b): the user turn gets `userActions`,
- *  the assistant turn gets `assistantActions` — neither message sets its own
+/** Role-scoped default action bars: the user turn gets `userActions`, the
+ *  assistant turn gets `assistantActions`. Neither message sets its own
  *  `actions`, so both fall through to the role default. */
 export const PerRoleActions: Story = {
   args: {
@@ -244,9 +325,9 @@ export const PerRoleActions: Story = {
 />`),
 };
 
-/** `hideSources` (B-8): the same assistant turn as `PerRoleActions`, with the
- *  citations row toggled via the Storybook control — the answer text still
- *  renders either way, only the `part="citations"` row is skipped. */
+/** `hideSources`: the same assistant turn as `PerRoleActions`, with the
+ *  citations row toggled via the Storybook control. The answer text still
+ *  renders either way; only the `part="citations"` row is skipped. */
 export const HideSources: Story = {
   args: {
     conversations: false,

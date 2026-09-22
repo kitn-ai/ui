@@ -43,9 +43,18 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const IMPORT = `import { Message, MessageAvatar, MessageContent, ChatContainer, ChatConfig } from '@kitn.ai/ui';`;
+const IMPORT = `import { Message, MessageAvatar, MessageContent, ChatContainer, ChatConfig, ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@kitn.ai/ui';`;
+
+// Every snippet carries the text it renders: these stories are about how `Message`
+// wraps in a narrow column, so the copy is the caller's own data, not the subject.
+const PREAMBLE = `${IMPORT}
+
+// The message copy is your own data.
+const message =
+  'The document is a transcript of a YouTube video where Andre Karpathy discusses building AI agents and how he structures his personal knowledge base.';`;
+
 const src = (code: string) => ({
-  parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
+  parameters: { docs: { source: { code: `${PREAMBLE}\n\n${code}`, language: 'tsx' } } },
 });
 
 const longText =
@@ -57,7 +66,7 @@ export const Playground: Story = {
   <div style={{ width: '380px' }} class="p-3 rounded-lg">
     <Message>
       <MessageAvatar src="" alt="AI" fallback="AI" />
-      <MessageContent>{longText}</MessageContent>
+      <MessageContent>{message}</MessageContent>
     </Message>
   </div>
 </ChatConfig>`),
@@ -90,7 +99,7 @@ export const NarrowPanel380: Story = {
     <ChatContainer class="flex-1 min-w-0 px-3 py-3">
       <Message>
         <MessageAvatar src="" alt="AI" fallback="AI" />
-        <MessageContent>{longText}</MessageContent>
+        <MessageContent>{message}</MessageContent>
       </Message>
     </ChatContainer>
   </div>
@@ -129,7 +138,7 @@ export const NarrowPanel300: Story = {
     <ChatContainer class="flex-1 min-w-0 px-3 py-3">
       <Message>
         <MessageAvatar src="" alt="AI" fallback="AI" />
-        <MessageContent>{longText}</MessageContent>
+        <MessageContent>{message}</MessageContent>
       </Message>
     </ChatContainer>
   </div>
@@ -155,7 +164,7 @@ export const NarrowDivOnly: Story = {
   <div style={{ width: '380px' }} class="p-3 rounded-lg">
     <Message>
       <MessageAvatar src="" alt="AI" fallback="AI" />
-      <MessageContent>{longText}</MessageContent>
+      <MessageContent>{message}</MessageContent>
     </Message>
   </div>
 </ChatConfig>`),
@@ -178,7 +187,7 @@ export const AvatarIsolation: Story = {
   ),
   ...src(`<div class="flex items-start gap-3">
   <MessageAvatar src="" alt="AI" fallback="AI" />
-  <div class="min-w-0 rounded-lg p-2 bg-secondary break-words">{longText}</div>
+  <div class="min-w-0 rounded-lg p-2 bg-secondary break-words">{message}</div>
 </div>`),
 };
 
@@ -255,7 +264,7 @@ export const FullExtensionLayout: Story = {
     <ChatContainer class="flex-1 min-w-0 px-3 py-3">
       <Message>
         <MessageAvatar src="" alt="AI" fallback="AI" />
-        <MessageContent>{longText}</MessageContent>
+        <MessageContent>{message}</MessageContent>
       </Message>
     </ChatContainer>
   </ResizablePanel>
@@ -319,7 +328,7 @@ export const InsideResizablePanel: Story = {
     <ChatContainer class="flex-1 min-w-0 px-3 py-3">
       <Message>
         <MessageAvatar src="" alt="AI" fallback="AI" />
-        <MessageContent>{longText}</MessageContent>
+        <MessageContent>{message}</MessageContent>
       </Message>
     </ChatContainer>
   </ResizablePanel>

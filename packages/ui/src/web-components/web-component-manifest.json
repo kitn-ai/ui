@@ -87,6 +87,7 @@
     "kai-input": "input",
     "kai-search": "search",
     "kai-kbd": "kbd",
+    "kai-kbd-group": "kbd-group",
     "kai-editable-label": "editable-label",
     "kai-panel": "panel",
     "kai-panel-header": "panel",
@@ -354,6 +355,9 @@
     ],
     "kbd": [
       "kai-kbd"
+    ],
+    "kbd-group": [
+      "kai-kbd-group"
     ],
     "editable-label": [
       "kai-editable-label"

@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
+import { fn } from 'storybook/test';
 import { type JSX } from 'solid-js';
 import { Bot, Terminal } from 'lucide-solid';
-import { Pane } from './pane';
+import { Pane, type PaneProps } from './pane';
 import { componentDescription } from '../../stories/docs/web-component-controls';
 
 // --- Story helpers -------------------------------------------------------
@@ -63,6 +64,32 @@ const meta = {
     maximized: { control: 'boolean', description: 'Show restore instead of maximize.' },
     children: { control: false, description: 'The pane body (scrolls).' },
     class: { control: 'text', description: 'Extra classes for the outer frame.' },
+    onMaximize: {
+      action: 'maximize',
+      description: 'The maximize/restore window control was clicked.',
+      table: { category: 'Events' },
+    },
+    onClose: {
+      action: 'close',
+      description: 'The close window control was clicked.',
+      table: { category: 'Events' },
+    },
+    onSplit: {
+      action: 'split',
+      description: 'The optional split control was clicked; the button only renders when this prop is provided.',
+      table: { category: 'Events' },
+    },
+    onDock: {
+      action: 'dock',
+      description: 'The optional dock-to-side control was clicked; the button only renders when this prop is provided.',
+      table: { category: 'Events' },
+    },
+  },
+  args: {
+    onMaximize: fn(),
+    onClose: fn(),
+    onSplit: fn(),
+    onDock: fn(),
   },
   render: (args) => (
     <div class="h-80 max-w-md">
@@ -71,8 +98,6 @@ const meta = {
         leading={<Avatar><Bot class="size-4" aria-hidden="true" /></Avatar>}
         status={{ tone: 'working', label: 'Working', pulse: true }}
         footer={<Composer />}
-        onMaximize={() => {}}
-        onClose={() => {}}
       >
         <Body />
       </Pane>
@@ -91,7 +116,7 @@ const src = (code: string) => ({
 /** The default pane: header with a leading avatar, a working status, window
  *  controls, a scrolling body, and a footer composer. */
 export const Default: Story = {
-  render: () => (
+  render: (args: PaneProps) => (
     <div class="h-80 max-w-md">
       <Pane
         title="Refactor agent"
@@ -99,8 +124,8 @@ export const Default: Story = {
         leading={<Avatar><Bot class="size-4" aria-hidden="true" /></Avatar>}
         status={{ tone: 'working', label: 'Working', pulse: true }}
         footer={<Composer />}
-        onMaximize={() => {}}
-        onClose={() => {}}
+        onMaximize={args.onMaximize}
+        onClose={args.onClose}
       >
         <Body />
       </Pane>
@@ -111,7 +136,12 @@ export const Default: Story = {
   subtitle="claude-sonnet"
   leading={<Bot class="size-4" />}
   status={{ tone: 'working', label: 'Working', pulse: true }}
-  footer={<Composer />}
+  footer={
+    <div class="flex items-center gap-2 p-2">
+      <input class="min-w-0 flex-1 rounded-md border border-border px-2.5 py-1.5 text-sm" placeholder="Reply to the agent..." />
+      <button type="button" class="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground">Send</button>
+    </div>
+  }
   onMaximize={() => toggleMaximize()}
   onClose={() => closePane()}
 >
@@ -122,7 +152,7 @@ export const Default: Story = {
 /** `focused` rings the frame to mark the active pane. Optional split + dock
  *  controls appear because `onSplit` / `onDock` are passed. */
 export const Focused: Story = {
-  render: () => (
+  render: (args: PaneProps) => (
     <div class="h-80 max-w-md">
       <Pane
         title="Reviewer agent"
@@ -131,10 +161,10 @@ export const Focused: Story = {
         status={{ tone: 'working', label: 'Working', pulse: true }}
         focused
         footer={<Composer />}
-        onMaximize={() => {}}
-        onClose={() => {}}
-        onSplit={() => {}}
-        onDock={() => {}}
+        onMaximize={args.onMaximize}
+        onClose={args.onClose}
+        onSplit={args.onSplit}
+        onDock={args.onDock}
       >
         <Body />
       </Pane>
@@ -146,7 +176,12 @@ export const Focused: Story = {
   leading={<Bot class="size-4" />}
   status={{ tone: 'working', label: 'Working', pulse: true }}
   focused
-  footer={<Composer />}
+  footer={
+    <div class="flex items-center gap-2 p-2">
+      <input class="min-w-0 flex-1 rounded-md border border-border px-2.5 py-1.5 text-sm" placeholder="Reply to the agent..." />
+      <button type="button" class="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground">Send</button>
+    </div>
+  }
   onMaximize={() => toggleMaximize()}
   onClose={() => closePane()}
   onSplit={() => splitPane()}   // adds the split control
@@ -161,15 +196,15 @@ export const Focused: Story = {
  *  error → red, blocked → amber. */
 export const StatusTones: Story = {
   name: 'Status Tones',
-  render: () => (
+  render: (args: PaneProps) => (
     <div class="grid h-80 grid-cols-2 gap-4 lg:grid-cols-4">
       <Pane
         title="Builder"
         subtitle="Compiling"
         leading={<Avatar><Terminal class="size-4" aria-hidden="true" /></Avatar>}
         status={{ tone: 'working', label: 'Working', pulse: true }}
-        onMaximize={() => {}}
-        onClose={() => {}}
+        onMaximize={args.onMaximize}
+        onClose={args.onClose}
       >
         <Body />
       </Pane>
@@ -178,8 +213,8 @@ export const StatusTones: Story = {
         subtitle="Waiting on input"
         leading={<Avatar><Bot class="size-4" aria-hidden="true" /></Avatar>}
         status={{ tone: 'blocked', label: 'Blocked' }}
-        onMaximize={() => {}}
-        onClose={() => {}}
+        onMaximize={args.onMaximize}
+        onClose={args.onClose}
       >
         <Body />
       </Pane>
@@ -188,8 +223,8 @@ export const StatusTones: Story = {
         subtitle="All checks passed"
         leading={<Avatar><Bot class="size-4" aria-hidden="true" /></Avatar>}
         status={{ tone: 'done', label: 'Done' }}
-        onMaximize={() => {}}
-        onClose={() => {}}
+        onMaximize={args.onMaximize}
+        onClose={args.onClose}
       >
         <Body />
       </Pane>
@@ -198,8 +233,8 @@ export const StatusTones: Story = {
         subtitle="Build failed"
         leading={<Avatar><Bot class="size-4" aria-hidden="true" /></Avatar>}
         status={{ tone: 'error', label: 'Error' }}
-        onMaximize={() => {}}
-        onClose={() => {}}
+        onMaximize={args.onMaximize}
+        onClose={args.onClose}
       >
         <Body />
       </Pane>
@@ -217,7 +252,7 @@ export const StatusTones: Story = {
 /** `maximized` swaps the maximize glyph for restore — the state a workspace sets
  *  on the one pane it has blown up to fill the view. */
 export const Maximized: Story = {
-  render: () => (
+  render: (args: PaneProps) => (
     <div class="h-96 max-w-2xl">
       <Pane
         title="Refactor agent"
@@ -227,8 +262,8 @@ export const Maximized: Story = {
         maximized
         focused
         footer={<Composer />}
-        onMaximize={() => {}}
-        onClose={() => {}}
+        onMaximize={args.onMaximize}
+        onClose={args.onClose}
       >
         <Body />
       </Pane>
@@ -241,7 +276,12 @@ export const Maximized: Story = {
   status={{ tone: 'done', label: 'Done' }}
   maximized   // shows the restore glyph instead of maximize
   focused
-  footer={<Composer />}
+  footer={
+    <div class="flex items-center gap-2 p-2">
+      <input class="min-w-0 flex-1 rounded-md border border-border px-2.5 py-1.5 text-sm" placeholder="Reply to the agent..." />
+      <button type="button" class="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground">Send</button>
+    </div>
+  }
   onMaximize={() => toggleMaximize()}
   onClose={() => closePane()}
 >

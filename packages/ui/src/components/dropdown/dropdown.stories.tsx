@@ -8,6 +8,8 @@ import {
   DropdownSub, DropdownSubTrigger, DropdownSubContent,
 } from './dropdown';
 import { buttonVariants } from '../button/button';
+import { renderIcon } from '../icon/icon';
+import { cn } from '../../utils/cn';
 import { componentDescription } from '../../stories/docs/web-component-controls';
 
 const meta = {
@@ -43,7 +45,8 @@ type Story = StoryObj<typeof meta>;
  *  local signal so the UI shows the last selection inline. */
 type SelectHandler = (label: string) => void;
 
-const IMPORT = `import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem } from '@kitn.ai/ui';`;
+const IMPORT = `import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem, buttonVariants, cn } from '@kitn.ai/ui';
+import { renderIcon } from '@kitn.ai/ui/solid';`;
 const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
@@ -54,7 +57,10 @@ function DropdownDemo(props: { onSelect?: SelectHandler }) {
   return (
     <div class="space-y-3">
       <Dropdown>
-        <DropdownTrigger class={buttonVariants({ variant: 'outline' })}>Actions ▾</DropdownTrigger>
+        <DropdownTrigger class={cn(buttonVariants({ variant: 'outline' }), 'gap-1.5')}>
+          Actions
+          {renderIcon('chevron-down', { class: 'size-3.5 shrink-0 opacity-60' })}
+        </DropdownTrigger>
         <DropdownContent>
           <DropdownItem onSelect={() => select('Rename')}>Rename</DropdownItem>
           <DropdownItem onSelect={() => select('Duplicate')}>Duplicate</DropdownItem>
@@ -69,7 +75,10 @@ function DropdownDemo(props: { onSelect?: SelectHandler }) {
 /** Click the trigger (or focus it and press ↓ / Enter) to open the menu; Arrow keys move, Escape closes. */
 export const Playground: Story = {
   ...src(`<Dropdown>
-  <DropdownTrigger class={buttonVariants({ variant: 'outline' })}>Actions ▾</DropdownTrigger>
+  <DropdownTrigger class={cn(buttonVariants({ variant: 'outline' }), 'gap-1.5')}>
+    Actions
+    {renderIcon('chevron-down', { class: 'size-3.5 shrink-0 opacity-60' })}
+  </DropdownTrigger>
   <DropdownContent>
     <DropdownItem onSelect={() => rename()}>Rename</DropdownItem>
     <DropdownItem onSelect={() => duplicate()}>Duplicate</DropdownItem>

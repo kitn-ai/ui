@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
+import { fn } from 'storybook/test';
 import { onMount, onCleanup } from 'solid-js';
 import '../register/register'; // side effect: registers <kai-chat>, <kai-conversations>, <kai-prompt-input>
 import { attachKaiActions } from '../../stories/docs/story-actions';
@@ -127,7 +128,61 @@ function Composer() {
 const meta = {
   title: 'Test Fixtures/Prompt Input',
   tags: ['autodocs'],
-  argTypes: argTypesFor('kai-prompt-input'),
+  argTypes: {
+    ...argTypesFor('kai-prompt-input'),
+    // Descriptions are the `kai-prompt-input` events in
+    // src/web-components/web-component-meta.json (the DOM contract these stories drive).
+    onAttachmentsChange: {
+      action: 'attachments-change',
+      description: 'The staged attachments changed: a file was added (via the paperclip) or removed (per-chip ×).',
+      table: { category: 'Events' },
+    },
+    onStop: {
+      action: 'stop',
+      description: 'The Stop button was clicked while `stoppable` and `loading` are both true.',
+      table: { category: 'Events' },
+    },
+    onSubmit: {
+      action: 'submit',
+      description: 'The user submitted the prompt (Enter or send button).',
+      table: { category: 'Events' },
+    },
+    onSuggestionClick: {
+      action: 'suggestion-click',
+      description: 'A suggestion was clicked while `suggestion-mode="fill"`.',
+      table: { category: 'Events' },
+    },
+    onToolbarAction: {
+      action: 'toolbar-action',
+      description: 'A custom `<kai-action>` toolbar button was clicked; `detail.action` is the clicked element `id`.',
+      table: { category: 'Events' },
+    },
+    onValueChange: {
+      action: 'value-change',
+      description: 'The input changed (fires on every edit); carries the flattened `value` plus the structured `doc` and `entities`.',
+      table: { category: 'Events' },
+    },
+    onVoice: {
+      action: 'voice',
+      description: 'The Voice (Mic) toolbar button was clicked.',
+      table: { category: 'Events' },
+    },
+    onWebSearch: {
+      action: 'web-search',
+      description: 'The web-search (Globe) toolbar button was clicked.',
+      table: { category: 'Events' },
+    },
+  },
+  args: {
+    onAttachmentsChange: fn(),
+    onStop: fn(),
+    onSubmit: fn(),
+    onSuggestionClick: fn(),
+    onToolbarAction: fn(),
+    onValueChange: fn(),
+    onVoice: fn(),
+    onWebSearch: fn(),
+  },
   parameters: {
     layout: 'fullscreen',
     docs: {

@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
-import { Notice } from './notice';
+import { fn } from 'storybook/test';
+import { Notice, type NoticeProps } from './notice';
 import { Button } from '../button/button';
 import { renderIcon } from '../icon/icon';
 import { componentDescription } from '../../stories/docs/web-component-controls';
@@ -11,7 +12,7 @@ const meta = {
   parameters: {
     layout: 'padded',
     docs: {
-      controls: { exclude: ['iconSlot', 'onDismiss', 'children', 'action', 'class', 'use:eventListener'] },
+      controls: { exclude: ['iconSlot', 'children', 'action', 'class', 'use:eventListener'] },
       description: componentDescription([
         'An inline notice / alert: a leading severity icon, a message, an optional trailing `action`, and an optional dismiss. `severity` picks the hue and default glyph. Carries the right a11y role (`alert` for errors, `status` otherwise).',
       ]),
@@ -32,10 +33,16 @@ const meta = {
       control: 'boolean',
       description: 'Show a dismiss (×) that hides the notice and fires `onDismiss`.',
     },
+    onDismiss: {
+      action: 'dismiss',
+      description: 'Called after the notice is dismissed.',
+      table: { category: 'Events' },
+    },
   },
   args: {
     severity: 'info',
     dismissible: false,
+    onDismiss: fn(),
   },
   render: (args) => <Notice {...args} class="max-w-md">Your draft was saved automatically.</Notice>,
 } satisfies Meta<typeof Notice>;
@@ -43,7 +50,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const IMPORT = `import { Notice } from '@kitn.ai/ui/solid';`;
+const IMPORT = `import { Notice, renderIcon } from '@kitn.ai/ui/solid';`;
 const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
@@ -99,8 +106,8 @@ export const Severities: Story = {
 
 /** Dismissible: shows a × that hides the notice and fires `onDismiss`. */
 export const Dismissible: Story = {
-  render: () => (
-    <Notice severity="info" dismissible class="max-w-md" onDismiss={() => {}}>
+  render: (args: Pick<NoticeProps, 'onDismiss'>) => (
+    <Notice severity="info" dismissible class="max-w-md" onDismiss={args.onDismiss}>
       We refreshed the home page. Tell us what you think.
     </Notice>
   ),

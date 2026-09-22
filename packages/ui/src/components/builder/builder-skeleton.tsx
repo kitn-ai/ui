@@ -2,26 +2,22 @@ import type { JSX } from 'solid-js';
 import { cn } from '../../utils/cn';
 
 /**
- * Shared wordless-skeleton language for `Labs/Builder/<Template>` preview
- * hosts (docs/superpowers/specs/2026-08-28-template-builder-design.md).
+ * Shared wordless-skeleton language for the `Labs/Builder/<Template>` preview
+ * hosts.
  *
- * Extracted from `builder-in-app-assistant.stories.tsx` (Round A2) into this
- * standalone module during the T-1 build-out (Assistant/Research/Workspace/
- * Voice) so every template's "the rest of your app" skeleton chrome shares
- * one definition instead of four copies drifting apart — the cross-cutting
- * mandate the design spec's Process step names ("as shared needs emerge,
- * refactor the shared components ONCE"). `builder-in-app-assistant.stories.tsx`
- * was retrofitted to import from here in the same round; nothing about its
- * rendered output changed.
+ * Extracted from `builder-in-app-assistant.stories.tsx` into this standalone
+ * module (Assistant / Research / Workspace / Voice) so every template's "the
+ * rest of your app" skeleton chrome shares one definition instead of four
+ * copies drifting apart. `builder-in-app-assistant.stories.tsx` imports from
+ * here; nothing about its rendered output changed.
  *
  * PLAIN inline CSS (`color-mix`), not a Tailwind opacity-modifier class
- * on a color utility or an arbitrary-bracket width value — see the
- * original Round A2 note in git blame: this Storybook dev server's
- * Tailwind JIT pass proved non-deterministic for FRESH combinations
- * introduced by a single file (a class would show correctly in the rendered
- * `className` while `getComputedStyle` reported the rule simply wasn't
- * compiled). `color-mix()` is real CSS with no compile step to race, and
- * matches what Tailwind's own `/NN` opacity modifier generates.
+ * on a color utility or an arbitrary-bracket width value: this Storybook
+ * dev server's Tailwind JIT pass proved non-deterministic for FRESH
+ * combinations introduced by a single file (a class would show correctly in
+ * the rendered `className` while `getComputedStyle` reported the rule simply
+ * wasn't compiled). `color-mix()` is real CSS with no compile step to race,
+ * and matches what Tailwind's own `/NN` opacity modifier generates.
  */
 export function mix(colorVar: string, pct: number): string {
   return `color-mix(in oklab, var(${colorVar}) ${pct}%, transparent)`;

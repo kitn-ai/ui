@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
+import { fn } from 'storybook/test';
 import { SlidersHorizontal } from 'lucide-solid';
-import { CardSurface } from './card-surface';
+import { CardSurface, type CardSurfaceProps } from './card-surface';
 import { Button } from '../button/button';
 import { componentDescription } from '../../stories/docs/web-component-controls';
 import cover from '../../web-components/card/card-media.jpg';
@@ -19,8 +20,6 @@ const meta = {
           'headerActions',
           'footer',
           'footerActions',
-          'onDismiss',
-          'onCardClick',
           'href',
           'target',
           'rel',
@@ -64,6 +63,16 @@ const meta = {
       control: 'boolean',
       description: 'Make the whole card a button with Enter/Space activation.',
     },
+    onDismiss: {
+      action: 'dismiss',
+      description: 'Called when the dismiss (×) hides the card.',
+      table: { category: 'Events' },
+    },
+    onCardClick: {
+      action: 'card-click',
+      description: 'Fired when the card is activated as a button, by click or Enter / Space.',
+      table: { category: 'Events' },
+    },
   },
   args: {
     appearance: 'outlined',
@@ -72,6 +81,8 @@ const meta = {
     hasBody: true,
     dismissible: false,
     clickable: false,
+    onDismiss: fn(),
+    onCardClick: fn(),
   },
   render: (args) => (
     <CardSurface {...args} class="max-w-sm" header={<strong class="font-semibold">Weekly report</strong>}>
@@ -183,8 +194,15 @@ import { SlidersHorizontal } from 'lucide-solid';
 
 /** A dismissible promo: a filled surface with a dismiss (×) in the corner. */
 export const Dismissible: Story = {
-  render: () => (
-    <CardSurface appearance="filled" dismissible class="max-w-xs" hasBody header={<strong class="font-semibold">2x usage for Cowork</strong>}>
+  render: (args: Pick<CardSurfaceProps, 'onDismiss'>) => (
+    <CardSurface
+      appearance="filled"
+      dismissible
+      class="max-w-xs"
+      hasBody
+      header={<strong class="font-semibold">2x usage for Cowork</strong>}
+      onDismiss={args.onDismiss}
+    >
       Do more with a higher session limit, now through July 5.
     </CardSurface>
   ),
@@ -198,13 +216,13 @@ export const Dismissible: Story = {
 
 /** The whole card as one button (no inner action buttons). */
 export const Clickable: Story = {
-  render: () => (
+  render: (args: Pick<CardSurfaceProps, 'onCardClick'>) => (
     <CardSurface
       clickable
       class="max-w-sm"
       hasBody
       header={<strong class="font-semibold">Open the workspace</strong>}
-      onCardClick={() => {}}
+      onCardClick={args.onCardClick}
     >
       The entire card is one button. Press Enter or Space when focused.
     </CardSurface>

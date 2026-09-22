@@ -3,6 +3,7 @@ import { type JSX } from 'solid-js';
 import { PromptDock, type PromptDockProps } from './prompt-dock';
 import { PromptInput, PromptInputTextarea, PromptInputActions } from './prompt-input';
 import { Button } from '../button/button';
+import { renderIcon } from '../../components/icon/icon';
 import { componentDescription } from '../../stories/docs/web-component-controls';
 
 // --- Story helpers -------------------------------------------------------
@@ -17,13 +18,17 @@ const DockedInput = () => (
   </PromptInput>
 );
 
-/** A small bordered pill control, the look used by the reference mode rows. */
+/** A small bordered pill control, the look used by the reference mode rows. It
+ *  draws its own trailing chevron the way `<kai-dropdown>` does: `gap-1.5` on the
+ *  chip, and the icon at `size-3.5` / `opacity-60` via `renderIcon`, never a text
+ *  glyph, so a caller passes the label alone. */
 const Pill = (props: { children: JSX.Element }) => (
   <button
     type="button"
-    class="inline-flex items-center gap-1 rounded-full border border-border bg-background px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+    class="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
   >
     {props.children}
+    {renderIcon('chevron-down', { class: 'size-3.5 shrink-0 opacity-60' })}
   </button>
 );
 
@@ -81,7 +86,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const IMPORT = `import { PromptDock, PromptInput, PromptInputTextarea, PromptInputActions, Button } from '@kitn.ai/ui/solid';`;
+const IMPORT = `import { PromptDock, PromptInput, PromptInputTextarea, PromptInputActions, Button, renderIcon } from '@kitn.ai/ui/solid';`;
 const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
@@ -97,8 +102,8 @@ export const Playground: Story = {
         top={<span>Heads up, context is getting long.</span>}
         bottom={
           <div class="flex items-center gap-2">
-            <Pill>Project or folder ▾</Pill>
-            <Pill>Ask ▾</Pill>
+            <Pill>Project or folder</Pill>
+            <Pill>Ask</Pill>
           </div>
         }
       >
@@ -106,7 +111,17 @@ export const Playground: Story = {
       </PromptDock>
     </div>
   ),
-  ...src(`<PromptDock frame="inset" appearance="soft" top={<Notice />} bottom={<Controls />}>
+  ...src(`<PromptDock
+  frame="inset"
+  appearance="soft"
+  top={<span>Heads up, context is getting long.</span>}
+  bottom={
+    <div class="flex items-center gap-2">
+      <button type="button" class="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1 text-xs">Project or folder{renderIcon('chevron-down', { class: 'size-3.5 shrink-0 opacity-60' })}</button>
+      <button type="button" class="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1 text-xs">Ask{renderIcon('chevron-down', { class: 'size-3.5 shrink-0 opacity-60' })}</button>
+    </div>
+  }
+>
   <PromptInput>
     <PromptInputTextarea placeholder="Ask anything..." />
     <PromptInputActions class="w-full justify-end px-1 pb-0.5">
@@ -145,7 +160,7 @@ export const BottomLip: Story = {
       <PromptDock
         bottom={
           <div class="flex items-center gap-2">
-            <Pill>Work in a project ▾</Pill>
+            <Pill>Work in a project</Pill>
           </div>
         }
       >
@@ -156,7 +171,7 @@ export const BottomLip: Story = {
   ...src(`<PromptDock
   bottom={
     <div class="flex items-center gap-2">
-      <Pill>Work in a project ▾</Pill>
+      <button type="button" class="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1 text-xs">Work in a project{renderIcon('chevron-down', { class: 'size-3.5 shrink-0 opacity-60' })}</button>
     </div>
   }
 >
@@ -189,8 +204,8 @@ export const TopAndBottom: Story = {
         }
         bottom={
           <div class="flex items-center gap-2">
-            <Pill>Project or folder ▾</Pill>
-            <Pill>Ask ▾</Pill>
+            <Pill>Project or folder</Pill>
+            <Pill>Ask</Pill>
             <span class="ml-auto text-xs text-muted-foreground">⚡ 2x more usage until July 5</span>
           </div>
         }
@@ -213,8 +228,8 @@ export const TopAndBottom: Story = {
   }
   bottom={
     <div class="flex items-center gap-2">
-      <Pill>Project or folder ▾</Pill>
-      <Pill>Ask ▾</Pill>
+      <button type="button" class="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1 text-xs">Project or folder{renderIcon('chevron-down', { class: 'size-3.5 shrink-0 opacity-60' })}</button>
+      <button type="button" class="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1 text-xs">Ask{renderIcon('chevron-down', { class: 'size-3.5 shrink-0 opacity-60' })}</button>
       <span class="ml-auto text-xs text-muted-foreground">⚡ 2x more usage until July 5</span>
     </div>
   }
@@ -241,8 +256,8 @@ export const Frames: Story = {
     );
     const Controls = () => (
       <div class="flex items-center gap-2">
-        <Pill>Project or folder ▾</Pill>
-        <Pill>Ask ▾</Pill>
+        <Pill>Project or folder</Pill>
+        <Pill>Ask</Pill>
       </div>
     );
     const Caption = (props: { children: JSX.Element }) => (
@@ -274,7 +289,16 @@ export const Frames: Story = {
   ...src(`// frame is the SPATIAL axis (inset only); pair frame="none" with appearance="plain"
 // for a truly bare stack. inset (default): inset on every edge - edge: top/bottom only,
 // input flush left/right - none: no inset.
-<PromptDock frame="inset" top={<Notice />} bottom={<Controls />}>
+<PromptDock
+  frame="inset"
+  top={<span>Heads up - context is getting long.</span>}
+  bottom={
+    <div class="flex items-center gap-2">
+      <button type="button" class="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1 text-xs">Project or folder{renderIcon('chevron-down', { class: 'size-3.5 shrink-0 opacity-60' })}</button>
+      <button type="button" class="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1 text-xs">Ask{renderIcon('chevron-down', { class: 'size-3.5 shrink-0 opacity-60' })}</button>
+    </div>
+  }
+>
   <PromptInput>
     <PromptInputTextarea placeholder="Ask anything..." />
     <PromptInputActions class="w-full justify-end px-1 pb-0.5">
@@ -283,11 +307,30 @@ export const Frames: Story = {
   </PromptInput>
 </PromptDock>
 
-<PromptDock frame="edge" top={<Notice />} bottom={<Controls />}>
+<PromptDock
+  frame="edge"
+  top={<span>Heads up - context is getting long.</span>}
+  bottom={
+    <div class="flex items-center gap-2">
+      <button type="button" class="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1 text-xs">Project or folder{renderIcon('chevron-down', { class: 'size-3.5 shrink-0 opacity-60' })}</button>
+      <button type="button" class="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1 text-xs">Ask{renderIcon('chevron-down', { class: 'size-3.5 shrink-0 opacity-60' })}</button>
+    </div>
+  }
+>
   {/* ...same PromptInput... */}
 </PromptDock>
 
-<PromptDock frame="none" appearance="plain" top={<Notice />} bottom={<Controls />}>
+<PromptDock
+  frame="none"
+  appearance="plain"
+  top={<span>Heads up - context is getting long.</span>}
+  bottom={
+    <div class="flex items-center gap-2">
+      <button type="button" class="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1 text-xs">Project or folder{renderIcon('chevron-down', { class: 'size-3.5 shrink-0 opacity-60' })}</button>
+      <button type="button" class="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1 text-xs">Ask{renderIcon('chevron-down', { class: 'size-3.5 shrink-0 opacity-60' })}</button>
+    </div>
+  }
+>
   {/* ...same PromptInput... */}
 </PromptDock>
 
@@ -311,8 +354,8 @@ export const Appearances: Story = {
     );
     const Controls = () => (
       <div class="flex items-center gap-2">
-        <Pill>Project or folder ▾</Pill>
-        <Pill>Ask ▾</Pill>
+        <Pill>Project or folder</Pill>
+        <Pill>Ask</Pill>
       </div>
     );
     const Caption = (props: { children: JSX.Element }) => (
@@ -349,7 +392,17 @@ export const Appearances: Story = {
   },
   ...src(`// appearance is the SURFACE axis (background / border / radius), orthogonal to frame.
 // soft (default): fill + border - outlined: border only - filled: fill only - plain: bare
-<PromptDock frame="inset" appearance="soft" top={<Notice />} bottom={<Controls />}>
+<PromptDock
+  frame="inset"
+  appearance="soft"
+  top={<span>Heads up - context is getting long.</span>}
+  bottom={
+    <div class="flex items-center gap-2">
+      <button type="button" class="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1 text-xs">Project or folder{renderIcon('chevron-down', { class: 'size-3.5 shrink-0 opacity-60' })}</button>
+      <button type="button" class="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1 text-xs">Ask{renderIcon('chevron-down', { class: 'size-3.5 shrink-0 opacity-60' })}</button>
+    </div>
+  }
+>
   <PromptInput>
     <PromptInputTextarea placeholder="Ask anything..." />
     <PromptInputActions class="w-full justify-end px-1 pb-0.5">
@@ -358,15 +411,45 @@ export const Appearances: Story = {
   </PromptInput>
 </PromptDock>
 
-<PromptDock frame="inset" appearance="outlined" top={<Notice />} bottom={<Controls />}>
+<PromptDock
+  frame="inset"
+  appearance="outlined"
+  top={<span>Heads up - context is getting long.</span>}
+  bottom={
+    <div class="flex items-center gap-2">
+      <button type="button" class="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1 text-xs">Project or folder{renderIcon('chevron-down', { class: 'size-3.5 shrink-0 opacity-60' })}</button>
+      <button type="button" class="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1 text-xs">Ask{renderIcon('chevron-down', { class: 'size-3.5 shrink-0 opacity-60' })}</button>
+    </div>
+  }
+>
   {/* ...same PromptInput... */}
 </PromptDock>
 
-<PromptDock frame="inset" appearance="filled" top={<Notice />} bottom={<Controls />}>
+<PromptDock
+  frame="inset"
+  appearance="filled"
+  top={<span>Heads up - context is getting long.</span>}
+  bottom={
+    <div class="flex items-center gap-2">
+      <button type="button" class="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1 text-xs">Project or folder{renderIcon('chevron-down', { class: 'size-3.5 shrink-0 opacity-60' })}</button>
+      <button type="button" class="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1 text-xs">Ask{renderIcon('chevron-down', { class: 'size-3.5 shrink-0 opacity-60' })}</button>
+    </div>
+  }
+>
   {/* ...same PromptInput... */}
 </PromptDock>
 
-<PromptDock frame="inset" appearance="plain" top={<Notice />} bottom={<Controls />}>
+<PromptDock
+  frame="inset"
+  appearance="plain"
+  top={<span>Heads up - context is getting long.</span>}
+  bottom={
+    <div class="flex items-center gap-2">
+      <button type="button" class="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1 text-xs">Project or folder{renderIcon('chevron-down', { class: 'size-3.5 shrink-0 opacity-60' })}</button>
+      <button type="button" class="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1 text-xs">Ask{renderIcon('chevron-down', { class: 'size-3.5 shrink-0 opacity-60' })}</button>
+    </div>
+  }
+>
   {/* ...same PromptInput... */}
 </PromptDock>`),
 };

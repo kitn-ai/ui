@@ -20,6 +20,16 @@ const meta = {
       control: 'text',
       description: 'Utility classes that set the size and rounding of the placeholder.',
     },
+    // WHY explicit: docgen types `width` and `height` as `string | number`, a name no
+    // case in Storybook's control switch matches, so each would render an object control.
+    width: {
+      control: 'text',
+      description: 'CSS width (a number is treated as px). With a `variant` and no width it fills its container; for `circle` it is the diameter.',
+    },
+    height: {
+      control: 'text',
+      description: 'CSS height (a number is treated as px). Defaults per variant.',
+    },
   },
   args: {
     class: 'h-4 w-64',

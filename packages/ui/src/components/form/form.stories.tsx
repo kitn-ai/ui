@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal } from 'solid-js';
 import { action } from 'storybook/actions';
-import { Form, type FormDefinition, type FormField } from './form';
+import { fn } from 'storybook/test';
+import { Form, type FormDefinition, type FormField, type FormProps } from './form';
 import { componentDescription } from '../../stories/docs/web-component-controls';
 import type { CardEvent, CardHost, CardContext, CardResolution } from '../../primitives/card-contract';
 
@@ -26,6 +27,7 @@ interface FormArgs {
   inlineMax?: number;
   disabled?: boolean;
   resolution?: CardResolution;
+  onValuesChange?: FormProps['onValuesChange'];
 }
 
 const toData = (a: FormArgs): FormDefinition => ({
@@ -61,7 +63,7 @@ function Demo(props: { args: FormArgs }) {
         heading={props.args.heading}
         resolution={props.args.resolution}
         disabled={props.args.disabled}
-        onValuesChange={action('onValuesChange')}
+        onValuesChange={props.args.onValuesChange}
       />
       <pre
         style={{
@@ -226,6 +228,7 @@ const meta = {
     },
     cardId: { control: 'text', description: 'Correlates every emitted CardEvent.' },
     onValuesChange: {
+      action: 'values-change',
       control: false,
       description: 'Fires on input with the coerced values + validity, before submit.',
       table: { category: 'Events' },
@@ -241,6 +244,7 @@ const meta = {
     dismissible: true,
     inlineMax: 4,
     disabled: false,
+    onValuesChange: fn(),
   },
 } satisfies Meta<FormArgs>;
 

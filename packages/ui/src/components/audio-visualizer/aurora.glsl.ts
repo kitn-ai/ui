@@ -1,16 +1,13 @@
 /**
  * Aurora ("veil") fragment shader.
  *
- * ORIGINAL WORK for @kitn.ai/ui. Written for Task 14 of
- * docs/superpowers/plans/2026-08-07-audio-visualizers.md, from two inputs
- * only:
- *   1. .superpowers/sdd/2026-08-07-audio-visualizers/reference/aura-prototype/
- *      lk-aura-factsheet.md -- a two-team clean-room functional spec (facts
- *      and mathematics; no code and no expression, and no identifiers
+ * ORIGINAL WORK for @kitn.ai/ui. Written from two inputs only:
+ *   1. The project's clean-room "fact sheet" for LiveKit's public "aura"
+ *      visualizer look -- a two-team functional spec stating facts and
+ *      mathematics only, with no code and no expression and no identifiers
  *      beyond the public prop names and the uniform inventory, both
- *      disclosed in that document's own preamble) covering LiveKit's
- *      public "aura" visualizer look. What was checked, and how, is in
- *      `docs/provenance/aurora-clean-room.md` section 4.
+ *      disclosed in that document's own preamble. What was checked, and how,
+ *      is in `docs/provenance/aurora-clean-room.md` section 4.
  *   2. The adopted prototype's own `aura-proto.html` (mode 3, "veil"), which
  *      was itself implemented from that fact sheet by an author who never
  *      saw LiveKit's source.
@@ -43,7 +40,7 @@
  * other number and formula but replaces the final write with true
  * premultiplied output, `fragColor = vec4(rgb * alpha, alpha)`.
  *
- * PARITY RE-TUNE (campaign task #6). A pixel-level behavioral audit
+ * PARITY RE-TUNE. A pixel-level behavioral audit
  * (examples/internal/livekit-parity scripts/aurora-audit.mjs) measured the
  * rendered output against the reference and this file was re-tuned to the
  * MEASURED targets -- numbers from screenshots and Rob's reference
@@ -75,8 +72,8 @@
  *
  * Uniforms are declared by ShaderCanvas. Do not declare them here.
  *
- * Uniform contract (see the module doc in the Task 14 report for the full
- * per-state table):
+ * Uniform contract (the full per-state table is `auroraTargets` in
+ * variant-aurora.tsx):
  *   uColor       vec3  -- accent RGB, 0..1.
  *   uIntensity   float -- brightness/gain, fact sheet section 5's
  *                         "brightness" column directly (roughly 0.5..2.5,

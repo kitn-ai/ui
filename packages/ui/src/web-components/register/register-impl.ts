@@ -107,6 +107,7 @@ import '../dock/dock';
 import '../input/input';
 import '../search/search';
 import '../kbd/kbd';
+import '../kbd/kbd-group';
 import '../editable-label/editable-label';
 // Blocks & parts phase 1: widget chrome, drill navigation, tab bar, generic row
 import '../panel/panel'; // kai-panel + kai-panel-header

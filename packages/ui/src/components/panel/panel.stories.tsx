@@ -34,7 +34,9 @@ type Story = StoryObj<typeof meta>;
 
 // Not yet part of the public export surface (blocks-and-parts phase 1) --
 // this mirrors the file's own relative import rather than a package path.
-const IMPORT = `import { Panel, PanelHeader, PanelBody, PanelFooter } from './panel';`;
+const IMPORT = `import { Panel, PanelHeader, PanelBody, PanelFooter } from './panel';
+import { Button } from '@kitn.ai/ui/solid';
+import { X, ArrowLeft } from 'lucide-solid';`;
 const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
@@ -88,7 +90,7 @@ export const WidgetBox: Story = {
     </div>
   ),
   ...src(`<Panel frame>
-  <PanelHeader end={<CloseButton />}>Aurora Support</PanelHeader>
+  <PanelHeader end={<Button variant="ghost" size="icon-sm" aria-label="Close"><X size={24} aria-hidden="true" /></Button>}>Aurora Support</PanelHeader>
   <PanelBody>...</PanelBody>
   <PanelFooter>Powered by Aurora</PanelFooter>
 </Panel>`),
@@ -123,7 +125,7 @@ export const DrilledHeader: Story = {
     </div>
   ),
   ...src(`<Panel frame>
-  <PanelHeader start={<BackButton />} end={<CloseButton />}>Aurora Support</PanelHeader>
+  <PanelHeader start={<Button variant="ghost" size="icon-sm" aria-label="Back"><ArrowLeft size={24} aria-hidden="true" /></Button>} end={<Button variant="ghost" size="icon-sm" aria-label="Close"><X size={24} aria-hidden="true" /></Button>}>Aurora Support</PanelHeader>
   <PanelBody>Thread view goes here</PanelBody>
 </Panel>`),
 };
@@ -151,7 +153,7 @@ export const FramelessInDock: Story = {
   ...src(`{/* the wrapper owns border, radius, and shadow -- Panel just clips to it */}
 <div class="rounded-2xl border border-border shadow-xl">
   <Panel>
-    <PanelHeader end={<CloseButton />}>Aurora Support</PanelHeader>
+    <PanelHeader end={<Button variant="ghost" size="icon-sm" aria-label="Close"><X size={24} aria-hidden="true" /></Button>}>Aurora Support</PanelHeader>
     <PanelBody>...</PanelBody>
   </Panel>
 </div>`),
@@ -190,7 +192,7 @@ export const AccentOverride: Story = {
   ),
   ...src(`<div style={{ '--color-primary': 'oklch(0.58 0.25 330)', '--color-primary-foreground': 'oklch(0.985 0 0)' }}>
   <Panel frame>
-    <PanelHeader end={<CloseButton />}>Aurora Support</PanelHeader>
+    <PanelHeader end={<Button variant="ghost" size="icon-sm" aria-label="Close"><X size={24} aria-hidden="true" /></Button>}>Aurora Support</PanelHeader>
     <PanelBody>...</PanelBody>
   </Panel>
 </div>`),

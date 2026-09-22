@@ -727,7 +727,8 @@ export const FullExample: Story = {
     );
   },
   ...src(
-    `const SUGGESTION_GROUPS = [
+    `// SUGGESTION_GROUPS and MODELS are your own data: the snippet declares both.
+const SUGGESTION_GROUPS = [
   { label: 'Get started', items: ['Summarize this document', 'What are the key takeaways?', 'Create an outline'] },
   { label: 'Go deeper', items: ['Compare with similar approaches', 'What are the tradeoffs?', 'Find contradictions'] },
 ];
