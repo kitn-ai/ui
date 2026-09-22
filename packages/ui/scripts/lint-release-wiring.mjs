@@ -31,6 +31,18 @@
 //     with no code in it and exits 0.
 //   - a `bin` entry whose file is not there, which npm ships as a broken command.
 //
+// AND THE THIRD WAY, WHICH IS THE LOOP'S OWN SKIP PATH. The loop skips a name@version the
+// registry already has, and a skipped publish runs NO pre-publish hook -- so on a release
+// that does not bump a package, nothing builds its `dist/`. That is only a problem for the
+// packages that come after it, whose OWN builds resolve it: create-kai, mcp and cli each
+// import `@kitn.ai/ui/<subpath>` at build time, and a `workspace:` link resolves that into
+// `packages/ui/dist`. On the 0.4.0 release (2026-09-22) ui@0.35.0 was already published, the
+// loop skipped it, and create-kai's build died with
+//   Cannot find module '.../create-kai/node_modules/@kitn.ai/ui/dist/construct.js'
+// after the publish gate and `--frozen-lockfile` install had both passed. So: every published
+// package that another published package BUILDS AGAINST must be BUILT before the loop, and
+// that is checked below rather than left to a comment.
+//
 //   node scripts/lint-release-wiring.mjs
 //   node scripts/lint-release-wiring.mjs --self-test   # prove every check still fires
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
@@ -67,18 +79,76 @@ export function publishedPackages(repoRoot = REPO) {
   return out.sort((a, b) => a.dir.localeCompare(b.dir));
 }
 
+/** The publish loop, matched in both readers below so they cannot disagree. */
+const PUBLISH_LOOP = /for\s+pkg\s+in\s+([^;\n]+);\s*do/;
+
 /** `for pkg in a b c; do` -> ['a','b','c'], or null when the loop is gone. */
 export function publishLoopPackages(workflowText) {
-  const m = /for\s+pkg\s+in\s+([^;\n]+);\s*do/.exec(workflowText);
+  const m = PUBLISH_LOOP.exec(workflowText);
   if (!m) return null;
   return m[1].trim().split(/\s+/).filter(Boolean);
+}
+
+/**
+ * Everything in the release job BEFORE the publish loop. That is where a build has to be:
+ * the loop is the thing whose skip check strands a later package's build, so a build placed
+ * after the loop cannot help whoever is skipped, and a build placed inside it is the
+ * `prepublishOnly` that already failed to run.
+ */
+export function textBeforePublishLoop(workflowText) {
+  const m = PUBLISH_LOOP.exec(workflowText);
+  return m ? workflowText.slice(0, m.index) : null;
+}
+
+/**
+ * Published packages that ANOTHER published package BUILDS AGAINST. The derivable signal is
+ * `devDependencies`: a dev dependency is resolved into a build by construction, which is why
+ * release-please's `node-workspace` plugin counts it and treats peerDependencies as opt-in.
+ *
+ * `dependencies` is deliberately NOT a signal, and the live instance is why: `@kitn.ai/cli`
+ * depends on `create-kai` at RUNTIME -- it forwards the verbs by resolving that package's bin
+ * and spawning it -- and nothing under `packages/cli/config` or `packages/cli/src` imports it,
+ * so cli's build never reads create-kai's `dist/`. Counting runtime edges here would demand a
+ * pre-loop build of create-kai that nothing needs. (The same reasoning is what makes
+ * `@kitn.ai/mcp`'s runtime edge to the kit harmless: its build EXTERNALISES the kit specifier,
+ * and the kit is a devDependency of create-kai and cli anyway, so it is still built.)
+ *
+ * These are the packages whose `dist/` has to exist BEFORE the loop runs, because the loop's
+ * skip path runs no pre-publish hook. `create-kai`'s `"@kitn.ai/ui": "workspace:*"` is that
+ * edge, and it is how the 0.4.0 release died.
+ */
+export function buildInputPackages(packages) {
+  const byName = new Map(packages.map((p) => [p.name, p]));
+  const out = new Map();
+  for (const p of packages) {
+    for (const dep of Object.keys(p.pkg.devDependencies ?? {})) {
+      const target = byName.get(dep);
+      if (target && target.dir !== p.dir) out.set(target.dir, target);
+    }
+  }
+  return [...out.values()].sort((a, b) => a.dir.localeCompare(b.dir));
+}
+
+/**
+ * The accepted spellings of "build this workspace package", all three in use in this repo:
+ * `pnpm exec nx build ui` (test.yml's build leg), `pnpm --filter <name> run build`, and
+ * `npm --prefix <dir> run build`. A fourth spelling is a failure by design, and the message
+ * names the accepted three so the fix is one line -- the same trade `lint:gate-parity` makes
+ * in reading these files with a narrow reader instead of a YAML parser.
+ */
+export function buildSpellings(p) {
+  return [
+    `nx build ${p.dir.split('/').pop()}`,
+    `--filter ${p.name} run build`,
+    `--prefix ${p.dir} run build`,
+  ];
 }
 
 /**
  * Every problem with the release wiring of `packages`, given the three literals.
  * Pure, so the self-test drives it with synthetic packages and literals.
  */
-export function releaseWiringProblems({ packages, configPackages, manifest, loop, repoRoot = REPO }) {
+export function releaseWiringProblems({ packages, configPackages, manifest, loop, preLoop, repoRoot = REPO }) {
   const problems = [];
   const byDir = new Map(packages.map((p) => [p.dir, p]));
   const byName = new Map(packages.map((p) => [p.name, p]));
@@ -167,7 +237,26 @@ export function releaseWiringProblems({ packages, configPackages, manifest, loop
     }
   }
 
-  // 6. The other direction: a literal naming a directory that is not a published package.
+  // 6. THE LOOP'S SKIP PATH BUILDS NOTHING, so a package the loop builds against has to be
+  // built before the loop. Skipped when the caller did not ask (a synthetic probe), and the
+  // real run passes it alongside `loop`.
+  if (preLoop != null) {
+    for (const p of buildInputPackages(packages)) {
+      const spellings = buildSpellings(p);
+      if (spellings.some((s) => preLoop.includes(s))) continue;
+      problems.push(
+        `${p.dir} (${p.name}) is a build input for another published package, but nothing BUILDS it ` +
+          `before the publish loop. The loop skips a name@version already on the registry, and a skipped ` +
+          `publish runs no prepublishOnly, so on a release that does not bump ${p.name} its dist/ never ` +
+          `exists and the later package's own build fails with ERR_MODULE_NOT_FOUND (create-kai@0.8.0, ` +
+          `2026-09-22). Add a step before the loop that builds it; accepted spellings: ` +
+          spellings.map((s) => `\`${s}\``).join(', ') +
+          `.`,
+      );
+    }
+  }
+
+  // 7. The other direction: a literal naming a directory that is not a published package.
   for (const key of Object.keys(configPackages ?? {})) {
     if (!byDir.has(key)) {
       problems.push(`release-please-config.json's packages{} names ${key}, which is not a published package under packages/.`);
@@ -205,7 +294,12 @@ if (process.argv.includes('--self-test')) {
       scripts: { prepublishOnly: 'npm run build' },
       files: ['dist', 'bin'],
       bin: { 'kai-mcp': './bin/kai-mcp.js' },
+      // Both edges mirror the real tree, and each feeds a different rule: the runtime
+      // `dependencies` entry is what the ORDER check reads (mcp must publish after ui), and the
+      // `devDependencies` entry is what the BUILD-INPUT check reads (a dev dependency is
+      // resolved into a build). In the real tree that dev edge is create-kai's and cli's.
       dependencies: { '@kitn.ai/ui': '^1.2.3' },
+      devDependencies: { '@kitn.ai/ui': '^1.2.3' },
     },
   };
   const good = {
@@ -213,6 +307,8 @@ if (process.argv.includes('--self-test')) {
     configPackages: { 'packages/ui': { 'release-type': 'node', 'package-name': '@kitn.ai/ui' }, 'packages/mcp': { 'release-type': 'node', 'package-name': '@kitn.ai/mcp' } },
     manifest: { 'packages/ui': '1.2.3', 'packages/mcp': '0.1.0' },
     loop: ['packages/ui', 'packages/mcp'],
+    // mcp depends on @kitn.ai/ui, so ui is a build input and needs a pre-loop build.
+    preLoop: 'pnpm exec nx build ui\n',
     // The bin check reads the real tree, so point it at a path that exists for the probe.
     repoRoot: REPO,
   };
@@ -261,6 +357,50 @@ if (process.argv.includes('--self-test')) {
     ['a manifest entry naming no package is reported', fires(() => ({ manifest: { ...good.manifest, 'packages/gone': '1.0.0' } }), 'is not a published package')],
     ['a publish loop naming no package is reported', fires(() => ({ loop: ['packages/ui', 'packages/mcp', 'packages/gone'] }), 'a private package listed here would be published')],
     ['a package-name mismatch is reported', fires(() => ({ configPackages: { ...good.configPackages, 'packages/mcp': { 'release-type': 'node', 'package-name': '@kitn.ai/wrong' } } }), 'package-name')],
+    [
+      'a build input with no pre-loop build is reported',
+      fires(() => ({ preLoop: 'pnpm install --frozen-lockfile\n' }), 'is a build input for another published package'),
+    ],
+    [
+      'a RUNTIME dependency on a sibling is NOT a build input (cli -> create-kai is spawned, never built against)',
+      releaseWiringProblems({
+        packages: [
+          { ...mcp, pkg: { ...mcp.pkg, dependencies: { 'create-kai': '^1.0.0' }, devDependencies: {} } },
+          {
+            dir: 'packages/ui',
+            name: 'create-kai',
+            version: '1.2.3',
+            manifest: '/tmp/nonexistent-package.json',
+            pkg: { name: 'create-kai', version: '1.2.3', scripts: { prepublishOnly: 'npm run build' }, files: ['dist'], bin: {} },
+          },
+        ],
+        configPackages: {
+          'packages/ui': { 'release-type': 'node', 'package-name': 'create-kai' },
+          'packages/mcp': good.configPackages['packages/mcp'],
+        },
+        manifest: { 'packages/ui': '1.2.3', 'packages/mcp': '0.1.0' },
+        loop: ['packages/ui', 'packages/mcp'],
+        preLoop: '',
+        repoRoot: REPO,
+      }).length === 0,
+    ],
+    [
+      'a build input built before the loop is NOT reported (each accepted spelling)',
+      buildSpellings(ui).every((spelling) =>
+        releaseWiringProblems({ ...good, preLoop: `${spelling}\n` }).length === 0,
+      ),
+    ],
+    [
+      'no pre-loop build is required when nothing depends on a sibling',
+      releaseWiringProblems({
+        ...good,
+        packages: [{ ...ui, pkg: { ...ui.pkg, dependencies: {}, devDependencies: {} } }],
+        configPackages: { 'packages/ui': good.configPackages['packages/ui'] },
+        manifest: { 'packages/ui': '1.2.3' },
+        loop: ['packages/ui'],
+        preLoop: '',
+      }).length === 0,
+    ],
   ];
 
   let failed = 0;
@@ -289,6 +429,7 @@ const config = JSON.parse(readFileSync(join(REPO, 'release-please-config.json'),
 const manifest = JSON.parse(readFileSync(join(REPO, '.release-please-manifest.json'), 'utf8'));
 const workflow = readFileSync(join(REPO, '.github/workflows/release-please.yml'), 'utf8');
 const loop = publishLoopPackages(workflow);
+const preLoop = textBeforePublishLoop(workflow);
 
 // Anti-vacuity: a derived set of zero or one package would make every check below pass.
 if (packages.length < 3) {
@@ -299,7 +440,11 @@ if (packages.length < 3) {
   process.exit(1);
 }
 
-const problems = releaseWiringProblems({ packages, configPackages: config.packages, manifest, loop });
+const problems = releaseWiringProblems({ packages, configPackages: config.packages, manifest, loop, preLoop });
+
+// Anti-vacuity for the pre-loop build rule: print what it derived, so a run that checked
+// nothing is visible rather than merely green.
+const buildInputs = buildInputPackages(packages);
 
 if (problems.length) {
   console.error(`✗ lint-release-wiring: ${problems.length} problem(s) with the release wiring:`);
@@ -312,6 +457,7 @@ if (problems.length) {
 }
 console.log(
   `✓ lint-release-wiring: ${packages.length} published package(s) (${packages.map((p) => p.name).join(', ')}) agree with ` +
-    `release-please-config.json, .release-please-manifest.json and the publish loop (${(loop ?? []).join(' -> ')}).`,
+    `release-please-config.json, .release-please-manifest.json and the publish loop (${(loop ?? []).join(' -> ')}). ` +
+    `Build inputs built before the loop: ${buildInputs.length ? buildInputs.map((p) => p.dir).join(', ') : 'none'}.`,
 );
 }

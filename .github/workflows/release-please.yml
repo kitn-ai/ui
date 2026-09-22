@@ -168,6 +168,34 @@ jobs:
       - run: npm install -g npm@12.0.2
         if: ${{ steps.release.outputs.release_created || steps.release.outputs.releases_created || github.event_name == 'workflow_dispatch' }}
 
+      # BUILD THE KIT BEFORE THE LOOP, and it is not for the kit's own tarball: ui's
+      # `prepublishOnly` builds `packages/ui/dist` when ui is published, and the
+      # publish step below does that for every package it actually publishes. This
+      # step exists for the loop's SKIP PATH. When a name@version is already on the
+      # registry the loop `continue`s, and a skipped publish runs NO
+      # `prepublishOnly` -- so nothing builds the kit's `dist/`. create-kai, mcp and
+      # cli all resolve `@kitn.ai/ui/<subpath>` through the workspace link into that
+      # `dist/` while they build, so on any release that does NOT bump the kit they
+      # all fail at their build step.
+      #
+      # MEASURED, on the 0.4.0 release (2026-09-22): ui@0.35.0 was already published,
+      # the loop skipped it, and create-kai's `npm run build` exited 1 with
+      #   Error [ERR_MODULE_NOT_FOUND]: Cannot find module
+      #   '.../create-kai/node_modules/@kitn.ai/ui/dist/construct.js'
+      # The publish gate and `pnpm install --frozen-lockfile` had both passed on that
+      # commit, so the failure read like a broken create-kai rather than a release
+      # job that only works when the kit is part of the release. The same class hit
+      # the loop once before (run 35611305071, mcp's predecessor resolving
+      # `@kitn.ai/ui/schemas`), which is why this is a step and not a note.
+      #
+      # `lint:release-wiring` now derives every package the loop builds against and
+      # fails if this step is missing, so it cannot be dropped quietly.
+      #
+      # Same invocation as test.yml's build leg, deliberately.
+      - name: Build the kit before the publish loop (a skipped publish builds nothing)
+        if: ${{ steps.release.outputs.release_created || steps.release.outputs.releases_created || github.event_name == 'workflow_dispatch' }}
+        run: pnpm exec nx build ui
+
       # Publish with the npm CLI (NOT pnpm publish -- pnpm does not do npm's OIDC
       # token exchange, so it publishes unauthenticated and gets E404). Run from the
       # package dir; prepublishOnly runs the build. No NODE_AUTH_TOKEN; provenance
