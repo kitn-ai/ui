@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { createHash } from 'node:crypto';
 import { compareVersions, diagnose, exitCodeFor, render } from './doctor';
 
 /**
@@ -150,6 +151,64 @@ describe('diagnose', () => {
     const lines: string[] = [];
     expect(render(warnings, (line) => lines.push(line), { strict: true })).toBe(1);
     expect(lines.join('\n')).toContain('fail this run');
+  });
+
+  it("reads kai.json's baseline and reports drift without rendering anything", () => {
+    // The SAME recorded hashes `kai upgrade` uses, compared straight against the files on disk: no
+    // template needed, which is why a doctor run stays instant. Drift is INFORMATION, not a
+    // warning: editing your own app is the normal case, and `upgrade --strict` is where somebody
+    // decides it should fail a build.
+    const hash = (text: string) => createHash('sha256').update(text, 'utf8').digest('hex');
+    const untouched = 'export const a = 1;\n';
+    const mine = 'export const b = 2;\n// mine\n';
+    const list = findings({
+      'package.json': JSON.stringify({ name: 'app', dependencies: { '@kitn.ai/ui': '^0.34.0' } }),
+      'node_modules/@kitn.ai/ui/package.json': JSON.stringify({ name: '@kitn.ai/ui', version: '0.34.0' }),
+      'src/main.ts': "import '@kitn.ai/ui/web-components';\n",
+      'src/a.ts': untouched,
+      'src/b.ts': mine,
+      'kai.json': JSON.stringify({
+        framework: 'react',
+        features: [],
+        kitBuiltAgainst: '0.34.0',
+        files: {
+          'src/a.ts': hash(untouched),
+          'src/b.ts': hash('export const b = 2;\n'), // as scaffolded, before the user's line
+          'src/gone.ts': hash('export const c = 3;\n'),
+        },
+      }),
+    });
+    const drift = list.find((f) => f.title.includes("baseline:"));
+    expect(drift, 'doctor said nothing about the baseline').toBeTruthy();
+    expect(drift?.severity, 'drift is information, not a problem').toBe('info');
+    expect(drift?.title).toContain('1 of 3');
+    expect(drift?.title).toContain('1 changed, 1 gone');
+    expect(drift?.detail, 'the changed file must be named').toContain('src/b.ts');
+    expect(drift?.detail, 'so must the one that is gone').toContain('src/gone.ts');
+    expect(drift?.detail, 'and it must point at the verb that can act on it').toContain('kai upgrade');
+  });
+
+  it('says so when every scaffolded file still matches, and when there is no baseline at all', () => {
+    const hash = (text: string) => createHash('sha256').update(text, 'utf8').digest('hex');
+    const body = 'export const a = 1;\n';
+    const clean = findings({
+      'package.json': JSON.stringify({ name: 'app', dependencies: { '@kitn.ai/ui': '^0.34.0' } }),
+      'node_modules/@kitn.ai/ui/package.json': JSON.stringify({ name: '@kitn.ai/ui', version: '0.34.0' }),
+      'src/main.ts': "import '@kitn.ai/ui/web-components';\n",
+      'src/a.ts': body,
+      'kai.json': JSON.stringify({ framework: 'react', features: [], kitBuiltAgainst: '0.34.0', files: { 'src/a.ts': hash(body) } }),
+    });
+    expect(clean.find((f) => f.title.includes('exactly as written'))?.severity).toBe('ok');
+
+    const old = findings({
+      'package.json': JSON.stringify({ name: 'app', dependencies: { '@kitn.ai/ui': '^0.34.0' } }),
+      'node_modules/@kitn.ai/ui/package.json': JSON.stringify({ name: '@kitn.ai/ui', version: '0.34.0' }),
+      'src/main.ts': "import '@kitn.ai/ui/web-components';\n",
+      'kai.json': JSON.stringify({ framework: 'react', features: [], kitBuiltAgainst: '0.34.0' }),
+    });
+    const noBaseline = old.find((f) => f.title.includes('no baseline'));
+    expect(noBaseline?.severity).toBe('info');
+    expect(noBaseline?.detail).toContain('kai upgrade');
   });
 
   it('renders every finding with a severity mark and a one-line verdict', () => {

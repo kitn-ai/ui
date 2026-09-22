@@ -31,6 +31,20 @@ npx -y @kitn.ai/cli add support-widget   # no install at all
 | `kai eject <construct.json> <outDir>` | writes the generated Solid project out; the source is yours |
 | `kai validate <construct.json>` | checks a construct and prints problems with paths |
 
+## upgrade
+
+A project made with `npm create kai` is a copy of a template, and the templates move. `kai upgrade` brings that copy up to what the current CLI emits and **never overwrites something you wrote**:
+
+| | verdict | `--write` |
+|---|---|---|
+| `^` | outdated: untouched since you scaffolded it, so the template moved | replaces it |
+| `+` | missing: the template emits it and you do not have it | adds it |
+| `!` | edited: you changed it | nothing, ever |
+| `?` | unknown: it differs, and there is no baseline to say whose change it is | nothing |
+| `=` | same: already current | nothing |
+
+`kai.json` records a sha256 of every file the scaffolder wrote, which is what makes that distinction possible. A project scaffolded before that was recorded has no baseline, so `upgrade` reports the drift and refuses to write. It renders into a temp directory with the same code the scaffolder runs, it deletes nothing, and `--strict` makes drift exit non-zero for CI. `doctor` reads the same recorded hashes and reports how far your copy has moved, without rendering anything.
+
 ## doctor
 
 ```bash
