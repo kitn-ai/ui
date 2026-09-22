@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.4.0](https://github.com/kitn-ai/ui/compare/@kitn.ai/cli-v0.3.0...@kitn.ai/cli-v0.4.0) (2026-09-22)
+
+
+### Features
+
+* **cli:** doctor reads the same baseline, and the docs explain upgrade ([1b84b94](https://github.com/kitn-ai/ui/commit/1b84b94b3749370c130d88785e30f792756dddfc))
+* **cli:** doctor reads the same baseline, and the docs explain upgrade ([e7643c4](https://github.com/kitn-ai/ui/commit/e7643c48da4ee7858bbc8fe3f1e29a6b4146d0f8))
+* **cli:** kai init, for the project that already exists ([3f81391](https://github.com/kitn-ai/ui/commit/3f813916a7c3f13407274ff770a2d47612196dba))
+* **cli:** kai init, for the project that already exists ([85392bc](https://github.com/kitn-ai/ui/commit/85392bcf1d6826a04a8cb80d3af5bdd293329454))
+* **cli:** kai upgrade, and the baseline in kai.json that makes it safe ([fe32f91](https://github.com/kitn-ai/ui/commit/fe32f911cf8e09cb131da4cc62d02afe1b2071fb))
+* **cli:** kai upgrade, and the baseline in kai.json that makes it safe ([059eb83](https://github.com/kitn-ai/ui/commit/059eb83171310b5dfa4c0d45dd9a633185c0d978))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * create-kai bumped from ^0.7.1 to ^0.8.0
+
 ## [0.3.0](https://github.com/kitn-ai/ui/compare/@kitn.ai/cli-v0.2.0...@kitn.ai/cli-v0.3.0) (2026-09-21)
 
 
