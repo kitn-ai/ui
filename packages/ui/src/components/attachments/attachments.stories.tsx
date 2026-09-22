@@ -116,6 +116,8 @@ type Story = StoryObj<typeof meta>;
 
 const IMPORT = `import {
   Attachments, Attachment, AttachmentPreview, AttachmentInfo, AttachmentRemove,
+  AttachmentHoverCard, AttachmentHoverCardTrigger, AttachmentHoverCardContent,
+  AttachmentEmpty,
   type AttachmentData,
 } from '@kitn.ai/ui';`;
 const src = (code: string) => ({

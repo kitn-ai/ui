@@ -32,15 +32,22 @@ const meta = {
   },
   args: {
     content: 'This is a tooltip',
-    children: <Button variant="outline">Hover me</Button>,
   },
-  render: (args) => <Tooltip {...args} />,
+  // The trigger is built HERE, not passed through `args`. A JSX element in `args` cannot be
+  // serialized across Storybook's manager/preview boundary, so the Docs page's primary preview
+  // re-renders from empty args and shows an empty canvas while the story itself (which runs with
+  // the live args) looks right. Keep everything in `args` serializable: scalars, arrays, `fn()`.
+  render: (args) => (
+    <Tooltip content={args.content} class={args.class}>
+      <Button variant="outline">Hover me</Button>
+    </Tooltip>
+  ),
 } satisfies Meta<typeof Tooltip>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const IMPORT = `import { Tooltip } from '@kitn.ai/ui';`;
+const IMPORT = `import { Tooltip, Button } from '@kitn.ai/ui';`;
 const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });

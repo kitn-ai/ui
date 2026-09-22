@@ -96,7 +96,14 @@ const box = { 'max-width': '20rem' } as const;
 
 /** Every prop on a control panel. Edit `options` live in the Controls tab. */
 export const Playground: Story = {
-  ...src(`const [model, setModel] = createSignal('sonnet');
+  ...src(`// MODELS is your own data
+const MODELS = [
+  { value: 'opus', label: 'Claude Opus' },
+  { value: 'sonnet', label: 'Claude Sonnet' },
+  { value: 'haiku', label: 'Claude Haiku' },
+];
+
+const [model, setModel] = createSignal('sonnet');
 
 <Select
   options={MODELS}
@@ -127,7 +134,7 @@ export const OptionsOrChildren: Story = {
       </Select>
     </div>
   ),
-  ...src(`<Select options={[{ value: 'opus', label: 'Claude Opus' }, …]} value="haiku" aria-label="Model" />
+  ...src(`<Select options={[{ value: 'opus', label: 'Claude Opus' }, { value: 'sonnet', label: 'Claude Sonnet' }]} value="haiku" aria-label="Model" />
 
 <Select value="us-east" aria-label="Region">
   <optgroup label="Americas">
@@ -147,7 +154,14 @@ export const Placeholder: Story = {
       <Select options={MODELS} placeholder="Choose a model…" aria-label="Model" />
     </div>
   ),
-  ...src(`<Select options={MODELS} placeholder="Choose a model…" aria-label="Model" />`),
+  ...src(`// MODELS is your own data
+const MODELS = [
+  { value: 'opus', label: 'Claude Opus' },
+  { value: 'sonnet', label: 'Claude Sonnet' },
+  { value: 'haiku', label: 'Claude Haiku' },
+];
+
+<Select options={MODELS} placeholder="Choose a model…" aria-label="Model" />`),
 };
 
 /**
@@ -167,10 +181,17 @@ export const States: Story = {
       />
     </div>
   ),
-  ...src(`<Select options={MODELS} value="opus" />
+  ...src(`// MODELS is your own data
+const MODELS = [
+  { value: 'opus', label: 'Claude Opus' },
+  { value: 'sonnet', label: 'Claude Sonnet' },
+  { value: 'haiku', label: 'Claude Haiku' },
+];
+
+<Select options={MODELS} value="opus" />
 <Select options={MODELS} value="opus" invalid />
 <Select options={MODELS} value="opus" disabled />
-<Select options={[…, { value: 'legacy', label: 'Legacy (retired)', disabled: true }]} value="opus" />`),
+<Select options={[...MODELS, { value: 'legacy', label: 'Legacy (retired)', disabled: true }]} value="opus" />`),
 };
 
 /**
@@ -195,7 +216,14 @@ export const Multiple: Story = {
       </div>
     );
   },
-  ...src(`const [picked, setPicked] = createSignal(['sonnet']);
+  ...src(`// MODELS is your own data
+const MODELS = [
+  { value: 'opus', label: 'Claude Opus' },
+  { value: 'sonnet', label: 'Claude Sonnet' },
+  { value: 'haiku', label: 'Claude Haiku' },
+];
+
+const [picked, setPicked] = createSignal(['sonnet']);
 
 <Select
   multiple
@@ -228,7 +256,14 @@ export const InAForm: Story = {
       </form>
     );
   },
-  ...src(`<form onSubmit={(e) => { e.preventDefault(); console.log(new FormData(e.currentTarget).get('model')); }}>
+  ...src(`// MODELS is your own data
+const MODELS = [
+  { value: 'opus', label: 'Claude Opus' },
+  { value: 'sonnet', label: 'Claude Sonnet' },
+  { value: 'haiku', label: 'Claude Haiku' },
+];
+
+<form onSubmit={(e) => { e.preventDefault(); console.log(new FormData(e.currentTarget).get('model')); }}>
   <Select name="model" options={MODELS} value="haiku" aria-label="Model" />
   <button type="submit">Submit</button>
 </form>`),

@@ -2063,6 +2063,12 @@
           "fn": false
         },
         {
+          "name": "editTrigger",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
           "name": "placeholder",
           "scalar": true,
           "optional": true,
@@ -2702,6 +2708,26 @@
       ],
       "composedFrom": [
         "Kbd"
+      ],
+      "tokens": []
+    },
+    {
+      "tag": "kai-kbd-group",
+      "props": [
+        {
+          "name": "theme",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        }
+      ],
+      "events": [],
+      "methods": [],
+      "parts": [
+        "group"
+      ],
+      "composedFrom": [
+        "KbdGroup"
       ],
       "tokens": []
     },

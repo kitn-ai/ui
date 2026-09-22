@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
-import { AgentCard } from './agent-card';
+import { fn } from 'storybook/test';
+import { AgentCard, type AgentCardProps } from './agent-card';
 import { componentDescription } from '../../stories/docs/web-component-controls';
 
 const meta = {
@@ -21,16 +22,39 @@ const meta = {
     needsAttention: { control: 'boolean', description: 'Raise the "Needs you" pill + glowing edge.' },
     active: { control: 'boolean', description: 'Selected / focused state.' },
     status: { control: 'object', description: '{ tone, label?, pulse? } status dot config.' },
+    // Descriptions come from the `kai-agent-card` entry's `events` in
+    // src/web-components/web-component-meta.json, which is the DOM contract these
+    // Solid props map onto (`kai-activate` -> onActivate, `kai-menu` -> onMenu).
+    onActivate: {
+      action: 'activate',
+      description:
+        'The card was activated by a click, or by Enter / Space while focused. Promote this agent back to focus. `onClick` is an alias and fires alongside it.',
+      table: { category: 'Events' },
+    },
+    onMenu: {
+      action: 'menu',
+      description:
+        'The trailing "..." kebab was clicked. The consumer opens its own menu; the card only surfaces the affordance (the click does not also activate the card).',
+      table: { category: 'Events' },
+    },
+    onClick: {
+      action: 'click',
+      description: 'Alias for `onActivate`; both fire when both are set.',
+      table: { category: 'Events' },
+    },
   },
   args: {
     name: 'Planner',
     needsAttention: false,
     active: false,
     status: { tone: 'working', label: 'Working', pulse: true },
+    onActivate: fn(),
+    onMenu: fn(),
+    onClick: fn(),
   },
   render: (args) => (
     <div class="w-80">
-      <AgentCard {...args} onMenu={() => {}} />
+      <AgentCard {...args} />
     </div>
   ),
 } satisfies Meta<typeof AgentCard>;
@@ -56,13 +80,13 @@ export const Playground: Story = {
 /** Every status tone, so the hue mapping reads at a glance: `working` blue (pulsing),
  *  `idle` muted, `done` green, `error` red, `blocked` amber. */
 export const Tones: Story = {
-  render: () => (
+  render: (args: Pick<AgentCardProps, 'onActivate' | 'onMenu'>) => (
     <div class="flex w-96 flex-col gap-2">
-      <AgentCard name="Planner" status={{ tone: 'working', label: 'Working', pulse: true }} onMenu={() => {}} />
-      <AgentCard name="Researcher" status={{ tone: 'idle', label: 'Idle' }} onMenu={() => {}} />
-      <AgentCard name="Builder" status={{ tone: 'done', label: 'Done' }} onMenu={() => {}} />
-      <AgentCard name="Runner" status={{ tone: 'error', label: 'Failed' }} onMenu={() => {}} />
-      <AgentCard name="Reviewer" status={{ tone: 'blocked', label: 'Blocked' }} onMenu={() => {}} />
+      <AgentCard name="Planner" status={{ tone: 'working', label: 'Working', pulse: true }} onActivate={args.onActivate} onMenu={args.onMenu} />
+      <AgentCard name="Researcher" status={{ tone: 'idle', label: 'Idle' }} onActivate={args.onActivate} onMenu={args.onMenu} />
+      <AgentCard name="Builder" status={{ tone: 'done', label: 'Done' }} onActivate={args.onActivate} onMenu={args.onMenu} />
+      <AgentCard name="Runner" status={{ tone: 'error', label: 'Failed' }} onActivate={args.onActivate} onMenu={args.onMenu} />
+      <AgentCard name="Reviewer" status={{ tone: 'blocked', label: 'Blocked' }} onActivate={args.onActivate} onMenu={args.onMenu} />
     </div>
   ),
   ...src(`<div class="flex w-96 flex-col gap-2">
@@ -110,14 +134,14 @@ export const Active: Story = {
  *  agent pulsing, an idle one, a finished one, an errored one, one that `needsAttention`,
  *  and one `active` (focused). Each carries a trailing "..." menu. */
 export const Stack: Story = {
-  render: () => (
+  render: (args: Pick<AgentCardProps, 'onActivate' | 'onMenu'>) => (
     <div class="flex w-96 flex-col gap-2">
-      <AgentCard name="Planner" status={{ tone: 'working', label: 'Working', pulse: true }} onMenu={() => {}} />
-      <AgentCard name="Researcher" status={{ tone: 'idle', label: 'Idle' }} onMenu={() => {}} />
-      <AgentCard name="Builder" status={{ tone: 'done', label: 'Done' }} onMenu={() => {}} />
-      <AgentCard name="Runner" status={{ tone: 'error', label: 'Failed' }} onMenu={() => {}} />
-      <AgentCard name="Reviewer" status={{ tone: 'blocked', label: 'Blocked' }} needsAttention onMenu={() => {}} />
-      <AgentCard name="Orchestrator" status={{ tone: 'working', label: 'Working', pulse: true }} active onMenu={() => {}} />
+      <AgentCard name="Planner" status={{ tone: 'working', label: 'Working', pulse: true }} onActivate={args.onActivate} onMenu={args.onMenu} />
+      <AgentCard name="Researcher" status={{ tone: 'idle', label: 'Idle' }} onActivate={args.onActivate} onMenu={args.onMenu} />
+      <AgentCard name="Builder" status={{ tone: 'done', label: 'Done' }} onActivate={args.onActivate} onMenu={args.onMenu} />
+      <AgentCard name="Runner" status={{ tone: 'error', label: 'Failed' }} onActivate={args.onActivate} onMenu={args.onMenu} />
+      <AgentCard name="Reviewer" status={{ tone: 'blocked', label: 'Blocked' }} needsAttention onActivate={args.onActivate} onMenu={args.onMenu} />
+      <AgentCard name="Orchestrator" status={{ tone: 'working', label: 'Working', pulse: true }} active onActivate={args.onActivate} onMenu={args.onMenu} />
     </div>
   ),
   ...src(`<div class="flex w-96 flex-col gap-2">
@@ -132,11 +156,11 @@ export const Stack: Story = {
 
 /** As a narrow side RAIL. The name truncates so the same card fits a tight column. */
 export const Rail: Story = {
-  render: () => (
+  render: (args: Pick<AgentCardProps, 'onActivate' | 'onMenu'>) => (
     <div class="flex w-60 flex-col gap-2 rounded-xl border border-border bg-surface-sunken p-2">
-      <AgentCard name="Planner" status={{ tone: 'working', pulse: true }} onMenu={() => {}} />
-      <AgentCard name="Builder" status={{ tone: 'done' }} onMenu={() => {}} />
-      <AgentCard name="Reviewer" status={{ tone: 'blocked' }} needsAttention onMenu={() => {}} />
+      <AgentCard name="Planner" status={{ tone: 'working', pulse: true }} onActivate={args.onActivate} onMenu={args.onMenu} />
+      <AgentCard name="Builder" status={{ tone: 'done' }} onActivate={args.onActivate} onMenu={args.onMenu} />
+      <AgentCard name="Reviewer" status={{ tone: 'blocked' }} needsAttention onActivate={args.onActivate} onMenu={args.onMenu} />
     </div>
   ),
   ...src(`<div class="flex w-60 flex-col gap-2">

@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal, Show } from 'solid-js';
 import { Asterisk, Sparkles, Download } from 'lucide-solid';
 import { PromptDock } from '../../components/prompt/prompt-dock';
+import { renderIcon } from '../../components/icon/icon';
 import '../../web-components/register/register'; // every kai-* element used below
 import type { KaiNavItem } from '../../components/nav/nav';
 import type { KaiTabItem } from '../../components/tabs/tabs';
@@ -116,7 +117,7 @@ const greeting = 'flex items-center gap-2 font-serif font-normal';
 const mainView = 'flex h-full flex-col items-center gap-6';
 const footerRow = 'border-t border-border';
 // A bordered control pill for the dock's bottom mode row (neutral / muted).
-const dockPill = 'inline-flex items-center gap-1 rounded-full border border-border bg-background px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground';
+const dockPill = 'inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground';
 
 // A labeled placeholder for a region the consumer owns. It names the slot it
 // fills so the prototype documents the shell instead of faking app content. An
@@ -289,8 +290,12 @@ export const ClaudeCode: Story = {
                       // Bottom lip: a mode row. Neutral / muted controls on the
                       // left, a muted usage hint trailing right.
                       <div class="flex items-center gap-2">
-                        <button type="button" class={dockPill}>Project or folder ▾</button>
-                        <button type="button" class={dockPill}>Ask ▾</button>
+                        <button type="button" class={dockPill}>
+                          Project or folder{renderIcon('chevron-down', { class: 'size-3.5 shrink-0 opacity-60' })}
+                        </button>
+                        <button type="button" class={dockPill}>
+                          Ask{renderIcon('chevron-down', { class: 'size-3.5 shrink-0 opacity-60' })}
+                        </button>
                         <span class="ml-auto text-xs text-muted-foreground">⚡ 2× more usage until July 5</span>
                       </div>
                     }

@@ -10,6 +10,7 @@ import {
   Show,
   For,
 } from 'solid-js';
+import { Portal } from 'solid-js/web';
 import { cn } from '../../utils/cn';
 import { useChatConfig, textClass } from '../../primitives/chat-config';
 import {
@@ -988,68 +989,86 @@ export function Composer(props: ComposerProps): JSX.Element {
 
       {/* Trigger menu */}
       <Show when={present()}>
-        <div
-          ref={(el) => { setMenuRef(el); setRef(el); }}
-          role="listbox"
-          aria-label="Suggestions"
-          data-state={state()}
-          class={cn(
-            'absolute z-50 min-w-[240px] max-w-[420px] max-h-[320px] overflow-y-auto rounded-lg bg-card shadow-lg py-1',
-            'border border-border',
-          )}
-          style={{
-            position: 'fixed',
-            left: `${pos().x}px`,
-            top: `${pos().y}px`,
-            visibility: hidden() ? 'hidden' : 'visible',
-          }}
-        >
-          <For each={groupedItems()}>
-            {(section) => (
-              <>
-                <Show when={section.group}>
-                  <div class="px-3 pt-2 pb-1 text-xs font-medium text-muted-foreground select-none">{section.group}</div>
-                </Show>
-                <For each={section.items}>
-                  {(entry) => (
-                    <button
-                      role="option"
-                      aria-selected={selectedIndex() === entry.index}
-                      data-index={entry.index}
-                      class={cn(
-                        'w-full flex items-center gap-2 px-3 py-1.5 text-left text-sm transition-colors',
-                        selectedIndex() === entry.index
-                          ? 'bg-muted text-foreground'
-                          : 'text-foreground hover:bg-muted',
-                      )}
-                      onMouseEnter={() => setSelectedIndex(entry.index)}
-                      // Keep focus (and the caret) in the editable so insertion works.
-                      onMouseDown={(e) => e.preventDefault()}
-                      onClick={(e) => { e.preventDefault(); selectItem(entry.item); }}
-                    >
-                      <Show
-                        when={itemIconSrc(entry.item)}
-                        fallback={
-                          <Show when={kindGlyph(itemKind(entry.item))}>
-                            {(glyph) => (
-                              <span class="kai-composer-pill-glyph w-4 h-4 shrink-0" aria-hidden="true" innerHTML={glyph()} />
-                            )}
-                          </Show>
-                        }
-                      >
-                        {(src) => <img src={src()} alt="" class="w-4 h-4 rounded object-cover shrink-0" />}
-                      </Show>
-                      <span class="font-medium whitespace-nowrap shrink-0">{entry.item.label}</span>
-                      <Show when={entry.item.description}>
-                        <span class="text-muted-foreground truncate min-w-0">{entry.item.description}</span>
-                      </Show>
-                    </button>
-                  )}
-                </For>
-              </>
+        {/* PORTALED for the same reason the popover is: `position: fixed` does not
+            escape a containing block, so a `transform`/`filter`/`contain` ancestor
+            makes this listbox lay out inside it and an `overflow: hidden` ancestor
+            clips it. The portal moves it out of that subtree; the fixed coordinates
+            below stay because with no containing-block ancestor left they are
+            viewport coordinates — which is what `usePosition` computed against the
+            caret rect.
+
+            `config.portalMount()` is the kit's one mount point (undefined -> body),
+            and a `<kai-composer>` facade points it at its own shadow root. The
+            menu's own styles come from bare-class rules in this component's
+            `<style>` blocks (`.kai-composer-pill*`), which sit in the SAME tree as
+            that mount point, so nothing here depended on being a descendant of the
+            composer root. The one ancestry-keyed rule that does apply —
+            `.dark .kai-composer-pill[data-kind=…]` — still matches, because the
+            facade's portal node lives inside its `.dark` wrapper. */}
+        <Portal mount={config.portalMount()}>
+          <div
+            ref={(el) => { setMenuRef(el); setRef(el); }}
+            role="listbox"
+            aria-label="Suggestions"
+            data-state={state()}
+            class={cn(
+              'z-50 min-w-[240px] max-w-[420px] max-h-[320px] overflow-y-auto rounded-lg bg-card shadow-lg py-1',
+              'border border-border',
             )}
-          </For>
-        </div>
+            style={{
+              position: 'fixed',
+              left: `${pos().x}px`,
+              top: `${pos().y}px`,
+              visibility: hidden() ? 'hidden' : 'visible',
+            }}
+          >
+            <For each={groupedItems()}>
+              {(section) => (
+                <>
+                  <Show when={section.group}>
+                    <div class="px-3 pt-2 pb-1 text-xs font-medium text-muted-foreground select-none">{section.group}</div>
+                  </Show>
+                  <For each={section.items}>
+                    {(entry) => (
+                      <button
+                        role="option"
+                        aria-selected={selectedIndex() === entry.index}
+                        data-index={entry.index}
+                        class={cn(
+                          'w-full flex items-center gap-2 px-3 py-1.5 text-left text-sm transition-colors',
+                          selectedIndex() === entry.index
+                            ? 'bg-muted text-foreground'
+                            : 'text-foreground hover:bg-muted',
+                        )}
+                        onMouseEnter={() => setSelectedIndex(entry.index)}
+                        // Keep focus (and the caret) in the editable so insertion works.
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={(e) => { e.preventDefault(); selectItem(entry.item); }}
+                      >
+                        <Show
+                          when={itemIconSrc(entry.item)}
+                          fallback={
+                            <Show when={kindGlyph(itemKind(entry.item))}>
+                              {(glyph) => (
+                                <span class="kai-composer-pill-glyph w-4 h-4 shrink-0" aria-hidden="true" innerHTML={glyph()} />
+                              )}
+                            </Show>
+                          }
+                        >
+                          {(src) => <img src={src()} alt="" class="w-4 h-4 rounded object-cover shrink-0" />}
+                        </Show>
+                        <span class="font-medium whitespace-nowrap shrink-0">{entry.item.label}</span>
+                        <Show when={entry.item.description}>
+                          <span class="text-muted-foreground truncate min-w-0">{entry.item.description}</span>
+                        </Show>
+                      </button>
+                    )}
+                  </For>
+                </>
+              )}
+            </For>
+          </div>
+        </Portal>
       </Show>
     </>
   );

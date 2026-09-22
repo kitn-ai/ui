@@ -190,8 +190,9 @@ type Story = StoryObj;
 // BuilderPanel/BuilderLayout are internal to the builder app (src/components/builder/builder-panel.tsx,
 // builder-layout.tsx) -- neither ships in a public @kitn.ai/ui entry point, so the snippet below
 // names the real composition and wiring rather than a package import.
+const IMPORT = `import { ChatThread } from '@kitn.ai/ui/solid';`;
 const src = (code: string) => ({
-  parameters: { docs: { source: { code, language: 'tsx' } } },
+  parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
 /**
@@ -219,7 +220,14 @@ export const SupportWidget: Story = {
       sections={{ layout: false, widget: 'always', provider: true }}
     />
   }
-  preview={<SupportWidgetPreview construct={construct} viewport={viewport} />}
+  preview={
+    // The template's own framing: the construct's chat in a floating card with a
+    // launcher in the corner - the widget layout, minus the mobile takeover.
+    <div class="relative h-[640px] w-[400px]">
+      <ChatThread class="h-full w-full rounded-[28px] shadow-2xl" messages={messages} onSubmit={() => {}} />
+      <button type="button" aria-label="Open the chat" class="absolute -bottom-4 -right-4 size-14 rounded-full bg-primary text-primary-foreground" />
+    </div>
+  }
   viewport={viewport}
   onViewportChange={setViewport}
 />`),

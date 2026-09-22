@@ -596,8 +596,9 @@ type Story = StoryObj;
 // builder-layout.tsx) -- neither ships in a public @kitn.ai/ui entry point. The snippet below
 // names the real composition and wiring rather than a package import; ChatThread IS public
 // (@kitn.ai/ui) and is shown as this preview actually uses it, docked beside the host app.
+const IMPORT = `import { ChatThread } from '@kitn.ai/ui/solid';`;
 const src = (code: string) => ({
-  parameters: { docs: { source: { code, language: 'tsx' } } },
+  parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
 /**

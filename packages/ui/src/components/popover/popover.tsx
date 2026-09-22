@@ -1,6 +1,8 @@
 import { createSignal, Show, type JSX, type Accessor } from 'solid-js';
+import { Portal } from 'solid-js/web';
 import type { Placement } from '@floating-ui/dom';
 import { cn } from '../../utils/cn';
+import { useChatConfig } from '../../primitives/chat-config';
 import { createPresence, usePosition, useDismiss } from '../overlay/overlay';
 
 /** Imperative open controller, handed to a parent (e.g. the kai-popover facade)
@@ -42,6 +44,7 @@ export interface PopoverProps {
  * come from the shared overlay primitives.
  */
 export function Popover(props: PopoverProps) {
+  const config = useChatConfig();
   const [internalOpen, setInternalOpen] = createSignal(props.defaultOpen ?? false);
   const [trigger, setTrigger] = createSignal<HTMLElement>();
   const [panel, setPanel] = createSignal<HTMLElement>();
@@ -79,27 +82,47 @@ export function Popover(props: PopoverProps) {
       >
         {props.trigger}
       </span>
+      {/* PORTALED, and `position: fixed` alone does NOT make that redundant: a fixed
+          element is still laid out inside its nearest CONTAINING BLOCK, and any
+          ancestor with `transform`, `filter`, `perspective`, `contain` or
+          `will-change` becomes one — after which an `overflow: hidden`/`auto` ancestor
+          clips the panel. That is the reported bug: the dropdown looked right inside
+          a clipping story frame and the popover did not, and the whole difference was
+          this element. Reproducible in a consumer app too — a popover inside an
+          `overflow-hidden` card is a popover with its bottom cut off.
+
+          The portal is what escapes it: the panel is moved out of the clipping
+          subtree, so neither the containing block nor the overflow applies. The
+          `position: fixed` coords stay, because with no containing block ancestor
+          they are viewport coords, which is what `usePosition` computed.
+
+          `config.portalMount()` is the kit's ONE mount point, not a second mechanism:
+          `useChatConfig` falls back to the defaults (undefined) with no provider, and
+          a web-component facade points it at its shadow root so the panel keeps the
+          facade's tokens and stylesheet. Never hardcode `document.body` here. */}
       <Show when={presence.present()}>
-        <div
-          ref={(el) => { setPanel(el); presence.setRef(el); }}
-          role="dialog"
-          data-expanded={presence.state() === 'open' ? '' : undefined}
-          data-closed={presence.state() === 'closed' ? '' : undefined}
-          style={{
-            position: 'fixed', left: `${position.pos().x}px`, top: `${position.pos().y}px`,
-            // hide (without unmounting) when the trigger scrolls out of view
-            visibility: position.hidden() ? 'hidden' : 'visible',
-            'pointer-events': position.hidden() ? 'none' : undefined,
-          }}
-          class={cn(
-            // text-sm is a sensible menu default; slotted content can override it.
-            'z-50 min-w-[12rem] rounded-lg bg-card p-1 text-sm kai-elevation',
-            'animate-in fade-in-0 zoom-in-95 data-[closed]:animate-out data-[closed]:fade-out-0 data-[closed]:zoom-out-95',
-            props.class,
-          )}
-        >
-          {props.children}
-        </div>
+        <Portal mount={config.portalMount()}>
+          <div
+            ref={(el) => { setPanel(el); presence.setRef(el); }}
+            role="dialog"
+            data-expanded={presence.state() === 'open' ? '' : undefined}
+            data-closed={presence.state() === 'closed' ? '' : undefined}
+            style={{
+              position: 'fixed', left: `${position.pos().x}px`, top: `${position.pos().y}px`,
+              // hide (without unmounting) when the trigger scrolls out of view
+              visibility: position.hidden() ? 'hidden' : 'visible',
+              'pointer-events': position.hidden() ? 'none' : undefined,
+            }}
+            class={cn(
+              // text-sm is a sensible menu default; slotted content can override it.
+              'z-50 min-w-[12rem] rounded-lg bg-card p-1 text-sm kai-elevation',
+              'animate-in fade-in-0 zoom-in-95 data-[closed]:animate-out data-[closed]:fade-out-0 data-[closed]:zoom-out-95',
+              props.class,
+            )}
+          >
+            {props.children}
+          </div>
+        </Portal>
       </Show>
     </>
   );

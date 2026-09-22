@@ -690,6 +690,11 @@ export const KBD_PARTS: PartDef[] = [
   { name: 'separator', doc: 'The gap between key caps. Inject a literal joiner (e.g. a plus sign) from outside.', recipe: 'kai-kbd::part(separator)::after { content: "+" }' },
 ];
 
+/** Styleable `::part`s of `<kai-kbd-group>` (several shortcuts laid out as one hint). */
+export const KBD_GROUP_PARTS: PartDef[] = [
+  { name: 'group', doc: 'The flex frame that owns the gap between the kbd elements inside it.', recipe: 'kai-kbd-group::part(group) { gap: 0.375rem }' },
+];
+
 /** Styleable `::part`s of `<kai-command>` (the command palette). */
 export const COMMAND_PARTS: PartDef[] = [
   { name: 'shortcut', doc: 'The right-aligned per-row keyboard shortcut, rendered as kai-kbd key caps. Shown only when a row carries a `shortcut`.', recipe: 'kai-command::part(shortcut) { opacity: 0.8 }' },
@@ -930,6 +935,7 @@ export const WEB_COMPONENT_COMPOSITION: Record<string, WebComponentComposition> 
   'kai-input': { slots: INPUT_SLOTS, parts: INPUT_PARTS },
   'kai-search': { parts: SEARCH_PARTS },
   'kai-kbd': { parts: KBD_PARTS, children: 'Literal key text, when you are not using the `keys` prop to render key caps.' },
+  'kai-kbd-group': { parts: KBD_GROUP_PARTS, children: 'The `<kai-kbd>` elements to lay out, one per shortcut.' },
   'kai-editable-label': { parts: EDITABLE_LABEL_PARTS },
   'kai-empty': { slots: EMPTY_SLOTS, children: 'The empty-state body below the title/description, usually the call to action.' },
   'kai-file-upload': { children: 'Custom dropzone content, replacing the default label (the `label` prop is the fallback).' },

@@ -9,9 +9,7 @@ import auroraShader from './aurora.glsl';
 
 /**
  * Per-state uniform targets, straight from fact sheet section 5's measured
- * table (`.superpowers/sdd/2026-08-07-audio-visualizers/reference/
- * aura-prototype/lk-aura-factsheet.md`) and reconciled against `aurora.glsl.ts`'s
- * own module doc / the Task 14 report's "Uniform list for Task 15" table.
+ * table, reconciled against `aurora.glsl.ts`'s own module doc.
  *
  * ATTRIBUTION: these same values are upstream's, and upstream's copy is
  * Apache-2.0. They live in `packages/shadcn/hooks/agents-ui/
@@ -32,9 +30,9 @@ import auroraShader from './aurora.glsl';
  * is non-monotonic across those same two axes (thinking/connecting has LOWER
  * amplitude than idle despite HIGHER brightness) and every value below is a
  * direct fact-sheet pass-through, not a normalized knob, so reusing that
- * helper cannot reproduce it. The Task 14 report calls this out explicitly
- * and asks for this shader's own mapping, parallel to how `waveTargets()`
- * already exists alongside `shaderTargets()` for the wave shader.
+ * helper cannot reproduce it. This shader needs its own mapping, parallel to
+ * how `waveTargets()` already exists alongside `shaderTargets()` for the wave
+ * shader.
  *
  * `speed` here is fact sheet section 5's `S / 20` (state speed 10..70,
  * divided by 20) -- NOT the raw 10..70 value. `complexity` is `freqParam`
@@ -42,9 +40,10 @@ import auroraShader from './aurora.glsl';
  *
  * `rotation` (deg/s, positive = clockwise ON SCREEN) is NOT from the fact
  * sheet: it is this port's own solid-body trim on top of the wind's
- * emergent angular drift, calibrated offline (campaign task #6's probe,
- * replicating scripts/aurora-audit.mjs's estimator at its capture cadence)
- * so the audit-measured per-state rotation lands on the reference values:
+ * emergent angular drift, calibrated offline (a probe replicating
+ * `examples/internal/livekit-parity/scripts/aurora-audit.mjs`'s estimator at
+ * its capture cadence) so the audit-measured per-state rotation lands on the
+ * reference values:
  * speaking ~+17 (their +12.9, Rob's reference ~20 CW), listening ~+4.6,
  * thinking ~+9. The wind supplies most of the apparent motion (post-flip
  * it reads ~+22 CW at speaking, ~0 elsewhere); these trims close the
@@ -146,22 +145,21 @@ function usePrefersDark(): Accessor<boolean> {
  * cascade into soft veils. See `aurora.glsl.ts`'s module doc for the shader
  * itself and its provenance.
  *
- * The uniform contract is a direct pass-through of fact sheet section 5's
- * measured per-state table (`auroraTargets` above), NOT the 0..1 convention
- * `wave` and `custom` use. There is deliberately no `uVolume` uniform: the
- * shader would double-apply voice-driven growth if it read one itself on top
- * of whatever this component also does at the state layer, so the live
- * volume drives the scale TWEEN here, in exactly one place (the
+ * The uniform contract is a direct pass-through of the measured per-state
+ * table for LiveKit's public aura (`auroraTargets` above), NOT the 0..1
+ * convention `wave` and `custom` use. There is deliberately no `uVolume`
+ * uniform: the shader would double-apply voice-driven growth if it read one
+ * itself on top of whatever this component also does at the state layer, so
+ * the live volume drives the scale TWEEN here, in exactly one place (the
  * volume-override effect below), and nowhere else.
  *
  * `dark` is an extra field on top of `ShaderVariantProps`, not yet a member
  * of that shared type: it is meant to carry the FACADE's already-resolved
  * `theme="light"|"dark"|"auto"` decision (see `define.tsx`'s
  * `createDarkMode`), threaded down through the dispatcher, once that wiring
- * lands (see the task report for the exact shape requested). Optional, with
- * a live `prefers-color-scheme` fallback, so this component still works
- * correctly when mounted standalone (no facade above it resolving a
- * `theme` attribute at all).
+ * lands. Optional, with a live `prefers-color-scheme` fallback, so this
+ * component still works correctly when mounted standalone (no facade above
+ * it resolving a `theme` attribute at all).
  */
 export default function AuroraVisualizer(props: ShaderVariantProps & { dark?: boolean }): JSX.Element {
   const intensity = createTween(1.0);

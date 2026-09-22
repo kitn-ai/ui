@@ -174,7 +174,16 @@ export const InAForm: Story = {
     );
   },
   ...src(`<form onSubmit={(e) => { e.preventDefault(); console.log(new FormData(e.currentTarget).getAll('env')); }}>
-  <CheckboxGroup name="env" label="Environments" options={ENVS} />
+  <CheckboxGroup
+    name="env"
+    label="Environments"
+    // the options are your own data, in the order they render
+    options={[
+      { value: 'prod', label: 'Production' },
+      { value: 'staging', label: 'Staging' },
+      { value: 'local', label: 'Local' },
+    ]}
+  />
   <button type="submit">Submit</button>
 </form>`),
 };
@@ -205,7 +214,16 @@ export const WithVisibleLabel: Story = {
     );
   },
   ...src(`<span id="notify-heading" class="text-sm font-medium">Notify me about</span>
-<CheckboxGroup aria-labelledby="notify-heading" options={OPTIONS} value={on()} onChange={setOn} />`),
+<CheckboxGroup
+  aria-labelledby="notify-heading"
+  options={[
+    { value: 'replies', label: 'Replies' },
+    { value: 'mentions', label: 'Mentions' },
+    { value: 'digest', label: 'Weekly digest' },
+  ]}
+  value={on()}
+  onChange={setOn}
+/>`),
 };
 
 /**
@@ -231,7 +249,13 @@ export const Disabled: Story = {
       />
     </div>
   ),
-  ...src(`<CheckboxGroup disabled options={OPTIONS} />
+  ...src(`<CheckboxGroup
+  disabled
+  options={[
+    { value: 'prod', label: 'Production' },
+    { value: 'staging', label: 'Staging' },
+  ]}
+/>
 
 <CheckboxGroup options={[
   { value: 'prod', label: 'Production' },
@@ -269,7 +293,19 @@ export const PresentationSlot: Story = {
       </CheckboxGroup>
     );
   },
-  ...src(`<CheckboxGroup label="Models to compare" options={MODELS} value={on()} onChange={setOn}>
+  ...src(`// PRICE is your own data: the right-hand column is whatever the slot returns.
+const PRICE = { opus: '$15/M', sonnet: '$3/M', haiku: '$0.80/M' };
+
+<CheckboxGroup
+  label="Models to compare"
+  options={[
+    { value: 'opus', label: 'Claude Opus' },
+    { value: 'sonnet', label: 'Claude Sonnet' },
+    { value: 'haiku', label: 'Claude Haiku' },
+  ]}
+  value={on()}
+  onChange={setOn}
+>
   {(opt, state) => (
     <span class="flex flex-1 items-center justify-between gap-4">
       <span>{opt.label}</span>

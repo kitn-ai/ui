@@ -34,6 +34,14 @@ const meta = {
       description: 'Height/padding preset. `icon` / `icon-sm` are square for icon-only buttons.',
       table: { defaultValue: { summary: 'md' } },
     },
+    // WHY explicit: docgen prints this union as `"center" | "start" | "end" | null`, which
+    // matches no case in Storybook's control switch, so it would render an object control.
+    align: {
+      control: 'select',
+      options: ['start', 'center', 'end'],
+      description: 'Alignment of the content inside the button. `start` / `end` are the visible half on a full-width button.',
+      table: { defaultValue: { summary: 'center' } },
+    },
     disabled: {
       control: 'boolean',
       description: 'Disables interaction and dims the button.',
@@ -116,7 +124,12 @@ const PlusIcon = () => (
 
 export const Icon: Story = {
   args: { size: 'icon', children: <PlusIcon />, 'aria-label': 'Add' } as never,
-  ...src(`<Button size="icon" aria-label="Add">\n  <PlusIcon />\n</Button>`),
+  ...src(`<Button size="icon" aria-label="Add">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <line x1="12" y1="5" x2="12" y2="19" />
+    <line x1="5" y1="12" x2="19" y2="12" />
+  </svg>
+</Button>`),
 };
 
 /** All variants and sizes side by side (showcase, not driven by controls). */
@@ -137,6 +150,11 @@ export const AllVariants: Story = {
   <Button variant="outline">Outline</Button>
   <Button size="sm">Small</Button>
   <Button size="lg">Large</Button>
-  <Button size="icon" aria-label="Add"><PlusIcon /></Button>
+  <Button size="icon" aria-label="Add">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <line x1="12" y1="5" x2="12" y2="19" />
+      <line x1="5" y1="12" x2="19" y2="12" />
+    </svg>
+  </Button>
 </div>`),
 };

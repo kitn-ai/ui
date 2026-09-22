@@ -48,6 +48,7 @@ import type {
   KaiImageElement,
   KaiInputElement,
   KaiKbdElement,
+  KaiKbdGroupElement,
   KaiLinkPreviewElement,
   KaiLoaderElement,
   KaiMarkdownElement,
@@ -938,6 +939,8 @@ export interface EditableLabelProps extends WebComponentProps {
   value?: string;
   /** Controlled edit state. `el.editing = true` opens the field; reflected to the `editing` attribute. */
   editing?: boolean;
+  /** How the read view enters edit mode: `'dblclick'` (default) opens the field on a double click, `'click'` on a single click. Reflected to the `edit-trigger` attribute. `edit()` and `editing` are unaffected. */
+  editTrigger?: "dblclick" | "click";
   /** Placeholder shown while editing / when the value is empty. */
   placeholder?: string;
   /** Disable entering edit mode. */
@@ -950,7 +953,7 @@ export interface EditableLabelProps extends WebComponentProps {
 
 export const EditableLabel = /*#__PURE__*/ createWebComponent<EditableLabelProps, KaiEditableLabelElement>(
   'kai-editable-label',
-  ["theme","value","editing","placeholder","disabled"],
+  ["theme","value","editing","editTrigger","placeholder","disabled"],
   { onCancel: 'kai-cancel', onRename: 'kai-rename' },
   () => import('@kitn.ai/ui/web-components/editable-label'),
 );
@@ -1203,6 +1206,17 @@ export const Kbd = /*#__PURE__*/ createWebComponent<KbdProps, KaiKbdElement>(
   ["theme","keys","platform","size"],
   {  },
   () => import('@kitn.ai/ui/web-components/kbd'),
+);
+
+export interface KbdGroupProps extends WebComponentProps {
+
+}
+
+export const KbdGroup = /*#__PURE__*/ createWebComponent<KbdGroupProps, KaiKbdGroupElement>(
+  'kai-kbd-group',
+  ["theme"],
+  {  },
+  () => import('@kitn.ai/ui/web-components/kbd-group'),
 );
 
 export interface LinkPreviewProps extends WebComponentProps {

@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
+import { fn } from 'storybook/test';
 import { VoiceOutput } from './voice-output';
 import { componentDescription } from '../../stories/docs/web-component-controls';
 
@@ -26,10 +27,40 @@ const meta = {
   argTypes: {
     text: { control: 'text', description: 'The utterance to read aloud.' },
     disabled: { control: 'boolean', description: 'Force the inert state.' },
+    onSynthesize: {
+      action: 'synthesize',
+      description:
+        'TTS model seam: given text, return an audio Blob to play; when set, the native speechSynthesis path is bypassed.',
+      table: { category: 'Events' },
+    },
+    onSpeakingChange: {
+      action: 'speaking-change',
+      description:
+        'Fires whenever playback starts or stops; `speaking: true` means audio has actually started, not that `speak()` was called.',
+      table: { category: 'Events' },
+    },
+    onError: {
+      action: 'error',
+      description:
+        'Synthesis failed: a native utterance error, a rejecting `onSynthesize`, or audio playback failing to start; deliberate cancellation does not fire.',
+      table: { category: 'Events' },
+    },
+    onSynthesized: {
+      action: 'synthesized',
+      description: 'Fires once the model path resolves audio (model path only).',
+      table: { category: 'Events' },
+    },
   },
   args: {
     text: 'The quick brown fox jumps over the lazy dog.',
     disabled: false,
+    // `onSynthesize` is deliberately NOT in `args`: any function there switches
+    // every args-driven story off the native path, so `Native` and `Disabled`
+    // would stop exercising `speechSynthesis` and fail through a mocked Blob.
+    // The `ModelSeam` story supplies the real seam handler.
+    onSpeakingChange: fn(),
+    onError: fn(),
+    onSynthesized: fn(),
   },
   render: (args) => <VoiceOutput {...args} />,
 } satisfies Meta<typeof VoiceOutput>;

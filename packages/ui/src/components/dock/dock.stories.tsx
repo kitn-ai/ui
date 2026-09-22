@@ -17,6 +17,7 @@ import { componentDescription } from '../../stories/docs/web-component-controls'
 const meta = {
   title: 'Components/Dock',
   component: Dock,
+  tags: ['autodocs'],
   parameters: {
     layout: 'fullscreen',
     docs: {
@@ -90,8 +91,13 @@ function PanelBody() {
 }
 
 export const Default: Story = {
-  ...src(`<Dock label="Aurora support">
-  <PanelBody />
+  ...src(`{/* the panel is yours - a chat, a form, or your own component */}
+<Dock label="Aurora support">
+  <div class="flex h-full flex-col">
+    <header class="border-b border-border px-4 py-3 text-sm font-semibold">Aurora Support</header>
+    <div class="min-h-0 flex-1 px-4 py-3 text-sm text-muted-foreground">Anything goes in here: your own component.</div>
+    <input class="m-4 rounded-md border border-border px-2 py-1.5 text-sm" placeholder="Ask a question" aria-label="Ask a question" />
+  </div>
 </Dock>`),
   render: (args: DockArgs) => (
     <HostPage>
@@ -105,7 +111,11 @@ export const Default: Story = {
 export const OpenWithUnread: Story = {
   ...src(`{/* \`unread\` is the consumer's: the dot shows while closed and the dock never clears it. */}
 <Dock label="Aurora support" unread defaultOpen>
-  <PanelBody />
+  <div class="flex h-full flex-col">
+    <header class="border-b border-border px-4 py-3 text-sm font-semibold">Aurora Support</header>
+    <div class="min-h-0 flex-1 px-4 py-3 text-sm text-muted-foreground">Anything goes in here: your own component.</div>
+    <input class="m-4 rounded-md border border-border px-2 py-1.5 text-sm" placeholder="Ask a question" aria-label="Ask a question" />
+  </div>
 </Dock>`),
   render: (args: DockArgs) => (
     <HostPage note="Opened at mount via defaultOpen — note that it took no focus doing so.">
@@ -119,7 +129,11 @@ export const OpenWithUnread: Story = {
 export const BottomStart: Story = {
   ...src(`{/* Logical, so an RTL page docks on the opposite side with no extra work. */}
 <Dock label="Aurora support" position="bottom-start">
-  <PanelBody />
+  <div class="flex h-full flex-col">
+    <header class="border-b border-border px-4 py-3 text-sm font-semibold">Aurora Support</header>
+    <div class="min-h-0 flex-1 px-4 py-3 text-sm text-muted-foreground">Anything goes in here: your own component.</div>
+    <input class="m-4 rounded-md border border-border px-2 py-1.5 text-sm" placeholder="Ask a question" aria-label="Ask a question" />
+  </div>
 </Dock>`),
   render: (args: DockArgs) => (
     <HostPage note={'position="bottom-start" — logical, so RTL flips it for free.'}>
@@ -134,7 +148,11 @@ export const Tokenized: Story = {
   ...src(`{/* Geometry is CSS custom properties, never props. */}
 <div style={{ '--kai-dock-width': '320px', '--kai-dock-height': '420px', '--kai-dock-radius': '28px' }}>
   <Dock label="Aurora support">
-    <PanelBody />
+    <div class="flex h-full flex-col">
+      <header class="border-b border-border px-4 py-3 text-sm font-semibold">Aurora Support</header>
+      <div class="min-h-0 flex-1 px-4 py-3 text-sm text-muted-foreground">Anything goes in here: your own component.</div>
+      <input class="m-4 rounded-md border border-border px-2 py-1.5 text-sm" placeholder="Ask a question" aria-label="Ask a question" />
+    </div>
   </Dock>
 </div>`),
   render: (args: DockArgs) => (

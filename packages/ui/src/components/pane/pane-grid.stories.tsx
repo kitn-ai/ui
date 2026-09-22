@@ -113,8 +113,15 @@ export const Default: Story = {
 
 // Fills up to maxColumns (default 3) when wide, drops columns then scrolls as it
 // narrows - panes never go below minPaneWidth (280) / minPaneHeight (200).
+// Each top-level child is one tile, so panes is your own list.
+const panes = [1, 2, 3, 4, 5, 6];
+
 <PaneGrid>
-  <For each={panes}>{(n) => <Pane n={n} />}</For>
+  <For each={panes}>{(n) => (
+    <section class="min-h-0 min-w-0 overflow-auto rounded-lg border border-border bg-card p-3 text-xs">
+      Pane {n}
+    </section>
+  )}</For>
 </PaneGrid>`,
       },
     },
@@ -149,9 +156,16 @@ export const Narrow: Story = {
         code: `${IMPORT}
 
 // In a 360px-wide box the 3-col cap drops to 1 and the grid scrolls vertically.
+// Each top-level child is one tile, so panes is your own list.
+const panes = [1, 2, 3, 4, 5, 6];
+
 <div style={{ width: '360px', height: '460px', overflow: 'hidden' }}>
   <PaneGrid>
-    <For each={panes}>{(n) => <Pane n={n} />}</For>
+    <For each={panes}>{(n) => (
+      <section class="min-h-0 min-w-0 overflow-auto rounded-lg border border-border bg-card p-3 text-xs">
+        Pane {n}
+      </section>
+    )}</For>
   </PaneGrid>
 </div>`,
       },
@@ -200,11 +214,17 @@ export const Maximized: Story = {
         code: `${IMPORT}
 
 const [max, setMax] = createSignal<number | null>(2);
+// Each top-level child is one tile, so panes is your own list.
+const panes = [1, 2, 3, 4, 5, 6];
 
 // Set maximizedIndex to a child index to render only that pane full-bleed;
 // pass null (or an out-of-range index) for the full tiled grid.
 <PaneGrid maximizedIndex={max()}>
-  <For each={panes}>{(n) => <Pane n={n} />}</For>
+  <For each={panes}>{(n) => (
+    <section class="min-h-0 min-w-0 overflow-auto rounded-lg border border-border bg-card p-3 text-xs">
+      Pane {n}
+    </section>
+  )}</For>
 </PaneGrid>`,
       },
     },

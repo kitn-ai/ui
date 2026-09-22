@@ -4,6 +4,7 @@ import { createSignal, Show, For } from 'solid-js';
 import { Popover, type PopoverProps } from './popover';
 import { Switch } from '../switch/switch';
 import { Button } from '../button/button';
+import { renderIcon } from '../icon/icon';
 import { componentDescription } from '../../stories/docs/web-component-controls';
 
 const meta = {
@@ -59,14 +60,17 @@ export const ModelMenu: Story = {
   render: (args: Partial<PopoverProps>) => {
     const [legacyOpen, setLegacyOpen] = createSignal(false);
     return (
-      <Popover {...args} trigger={<Button variant="ghost" size="sm">GPT-5.5 ▾</Button>}>
+      <Popover {...args} trigger={<Button variant="ghost" size="sm" class="gap-1.5">GPT-5.5{renderIcon('chevron-down', { class: 'size-3.5 shrink-0 opacity-60' })}</Button>}>
         <div style={{ width: '15rem' }}>
           <button type="button" class={row}>
             <span style={{ 'font-weight': 600 }}>GPT-5.5</span>
             <span class="text-caption text-muted-foreground">Flagship</span>
           </button>
           <button type="button" class={row} aria-expanded={legacyOpen()} onClick={() => setLegacyOpen(!legacyOpen())}>
-            Legacy models {legacyOpen() ? '▴' : '▾'}
+            Legacy models
+            {renderIcon('chevron-down', {
+              class: legacyOpen() ? 'size-3.5 shrink-0 transition-transform rotate-180' : 'size-3.5 shrink-0 transition-transform',
+            })}
           </button>
           <Show when={legacyOpen()}>
             <For each={LEGACY}>{(m) => <button type="button" class={row} style={{ 'padding-left': '1.75rem' }}>{m}</button>}</For>
@@ -86,14 +90,17 @@ export const ModelMenu: Story = {
   const legacy = ['GPT-4o', 'GPT-4.1', 'GPT-4o mini'];
   const row = 'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-foreground hover:bg-muted';
   return (
-    <Popover trigger={<Button variant="ghost" size="sm">GPT-5.5 ▾</Button>}>
+    <Popover trigger={<Button variant="ghost" size="sm" class="gap-1.5">GPT-5.5{renderIcon('chevron-down', { class: 'size-3.5 shrink-0 opacity-60' })}</Button>}>
       <div style={{ width: '15rem' }}>
         <button type="button" class={row}>
           <span style={{ 'font-weight': 600 }}>GPT-5.5</span>
           <span class="text-caption text-muted-foreground">Flagship</span>
         </button>
         <button type="button" class={row} aria-expanded={legacyOpen()} onClick={() => setLegacyOpen(!legacyOpen())}>
-          Legacy models {legacyOpen() ? '▴' : '▾'}
+          Legacy models
+          {renderIcon('chevron-down', {
+            class: legacyOpen() ? 'size-3.5 shrink-0 transition-transform rotate-180' : 'size-3.5 shrink-0 transition-transform',
+          })}
         </button>
         <Show when={legacyOpen()}>
           <For each={legacy}>{(m) => <button type="button" class={row} style={{ 'padding-left': '1.75rem' }}>{m}</button>}</For>
@@ -107,7 +114,7 @@ export const ModelMenu: Story = {
     </Popover>
   );
 }`,
-    `import { createSignal, Show, For } from 'solid-js';\nimport { Popover, Switch, Button } from '@kitn.ai/ui/solid';`,
+    `import { createSignal, Show, For } from 'solid-js';\nimport { Popover, Switch, Button, renderIcon } from '@kitn.ai/ui/solid';`,
   ),
 };
 

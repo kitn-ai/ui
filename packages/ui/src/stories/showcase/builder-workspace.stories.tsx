@@ -41,12 +41,10 @@ import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem } from '../../
 import { renderIcon } from '../../components/icon/icon';
 import type { ChatMessage, ChatMessageAction, CustomAction } from '../../web-components/chat/chat-types';
 
-// Labs/Builder/Workspace — T-1 build-out (docs/superpowers/specs/
-// 2026-08-28-template-builder-design.md), FIFTH and hardest template story:
-// chat rail + work surface (v0/lovable/split-workspace's own shape, the
-// design spec's own words: "expected to split into a construct-expressible
-// core and eject-tier composition; its round's primary deliverable is that
-// boundary, drawn concretely"). T-2: the template fixes the layout, no
+// Labs/Builder/Workspace: chat rail + work surface (the v0 / lovable /
+// split-workspace shape: "expected to split into a construct-expressible core
+// and eject-tier composition; its round's primary deliverable is that
+// boundary, drawn concretely"). The template fixes the layout, so there is no
 // Layout radio.
 //
 // THE SPLIT FRAME IS A REAL COMPONENT, NOT A HAND-ROLLED FLEX ROW:
@@ -125,8 +123,8 @@ import type { ChatMessage, ChatMessageAction, CustomAction } from '../../web-com
 // rather than picking one half and silently dropping the other.
 // `header.title` is the REAL, already-existing construct field (reused, not
 // duplicated); the action buttons are new preview-only rows (`HeaderAction
-// Row[]`), since `construct.v1` has no header-actions vocabulary — see the
-// widened T-5 note below.
+// Row[]`), since `construct.v1` has no header-actions vocabulary. See the
+// note on construct vocabulary below.
 //
 // SUPERSEDED (owner feedback round, explicit this time — no judgment call
 // needed): title moves to the LEFT, actions to the RIGHT — the opposite of
@@ -151,7 +149,7 @@ import type { ChatMessage, ChatMessageAction, CustomAction } from '../../web-com
 //    the bare Solid `<ChatThread>` directly (same choice every other
 //    template story makes), which has NO JSX prop for its composer
 //    toolbar — `emptyContent` is the one JSX-form escape hatch `ChatThread`
-//    has (Round R), and it is REPLACE-only for the empty state, not
+//    has, and it is REPLACE-only for the empty state, not
 //    additive to the composer. So the composer menu here renders as its
 //    own strip directly above the rail's `ChatThread`, composing the kit's
 //    REAL `Dropdown`/`DropdownTrigger`/`DropdownContent`/`DropdownItem`
@@ -173,11 +171,8 @@ import type { ChatMessage, ChatMessageAction, CustomAction } from '../../web-com
 //    In-app assistant` — out of scope for this Workspace-only round, noted
 //    here rather than reached into their files.)
 //
-// THE WORK PANE'S CONTENT HAS NO CONSTRUCT VOCABULARY — drawn concretely,
-// per the design spec's own framing of this round's deliverable, and now
-// WIDER after this feedback round (see the widened T-5 proposal in
-// docs/superpowers/research/2026-08-28-builder-t5-vocabulary-proposals.md,
-// item 8):
+// THE WORK PANE'S CONTENT HAS NO CONSTRUCT VOCABULARY: drawn concretely as
+// this round's deliverable, and now WIDER after this feedback round:
 //  - The SPLIT FRAME ITSELF fits today's schema cleanly: `layout: 'split'`
 //    already exists in `BuilderLayoutKind` and codegen has a real emission
 //    for it. The frame is construct-expressible NOW.
@@ -185,7 +180,7 @@ import type { ChatMessage, ChatMessageAction, CustomAction } from '../../web-com
 //    is construct vocabulary now — `workSurface.chrome.deviceToggle` /
 //    `urlBar` / `openInNewTab` / `expand` / `codeView`, plus `kind` and a
 //    required `url` — and the app header's ACTIONS have been
-//    `header.actions` since T-5 shipped, so that half of this note was
+//    `header.actions` since the schema landed, so that half of this note was
 //    already stale before this round.
 //  - STILL NOT EXPRESSIBLE: the pane's CONTENT beyond a url (a construct
 //    cannot author the framed document — model-produced artifacts need a
@@ -785,10 +780,9 @@ function ComposerSection(props: {
       />
 
       <p class="text-xs text-muted-foreground">
-        Preview-only — none of the composer knobs above exist in construct.v1 today (T-5, see this file's module doc comment and the
-        widened Workspace proposal in docs/superpowers/research/2026-08-28-builder-t5-vocabulary-proposals.md). Triggers are the one
-        exception: they're wired to ChatThread's real `triggers` prop, a real mechanism already shipped at the component tier — ON by
-        default for this template (owner's default matrix: agentic/dev shapes default on).
+        Preview-only: none of the composer knobs above exist in construct.v1 today. Triggers are the one
+        exception: they're wired to ChatThread's real `triggers` prop, a real mechanism already shipped at the component tier. ON by
+        default for this template, like the other agentic and dev-shaped templates.
       </p>
     </section>
   );
@@ -832,9 +826,8 @@ function WorkspaceBuilderDemo(): JSX.Element {
   const [composerChips, setComposerChips] = createSignal<ComposerChip[]>(DEFAULT_COMPOSER_CHIPS);
   const [composerMenuEnabled, setComposerMenuEnabled] = createSignal(true);
   const [composerMenuEntries, setComposerMenuEntries] = createSignal<ComposerMenuEntry[]>(DEFAULT_COMPOSER_MENU_ENTRIES);
-  // Owner's default matrix (docs/superpowers/research/2026-08-28-builder-t5-
-  // vocabulary-proposals.md, composer.triggers): ON by default for Workspace,
-  // an agentic/dev shape (the Claude-Code/Codex precedent).
+  // ON by default for Workspace, an agentic/dev shape (the Claude-Code/Codex
+  // precedent, `composer.triggers` in the default matrix).
   const [slashTriggers, setSlashTriggers] = createSignal<TriggerGroupState>({ enabled: true, entries: DEFAULT_SLASH_ENTRIES });
   const [mentionTriggers, setMentionTriggers] = createSignal<TriggerGroupState>({ enabled: true, entries: DEFAULT_MENTION_ENTRIES });
   const [mic, setMic] = createSignal(false);
@@ -980,39 +973,38 @@ type Story = StoryObj;
 // builder-layout.tsx) -- neither ships in a public @kitn.ai/ui entry point. The snippet below
 // names the real composition and wiring rather than a package import; WorkspaceShell, WorkSurface,
 // AppHeader and ChatThread ARE public (@kitn.ai/ui) and are shown as this preview actually uses them.
+const IMPORT = `import { AppHeader, WorkSurface } from '@kitn.ai/ui';
+import { WorkspaceShell, ChatThread } from '@kitn.ai/ui/solid';`;
 const src = (code: string) => ({
-  parameters: { docs: { source: { code, language: 'tsx' } } },
+  parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
 /**
- * The Workspace template's builder: a resizable split — a chat rail
+ * The Workspace template's builder: a resizable split, a chat rail
  * (`WorkspaceShell`'s `start`) beside a large work pane (`children`).
- * Modeled on `Labs/Apps`'s Lovable and v0 stories (read closely before
- * building): the work pane carries Lovable's own browser-chrome toolbar
- * (device toggle, URL bar, open-in-new-tab, Preview|Code with Preview
- * first) plus a v0-style Expand control wired through `WorkspaceShell`'s
- * REAL controlled `startCollapsed` prop — every toolbar affordance is
- * individually optional. The pane's own viewport (behind both the preview
- * and code content, matching Lovable's real preview surface) sits on a
- * muted background, distinct from the pane's toolbar and content cards.
- * An app-level header sits above the split: title on the left; on the
- * right, a fixed left-to-right arrangement (search + a real dark-mode
- * toggle scoped to just this preview frame, a divider, the configurable
- * Share/Deploy actions row, a divider, a compact avatar+chevron user menu)
- * — every web component individually optional via a panel toggle, the
- * arrangement itself is not. The composer gains optional quick-fill
- * chips (wired to `ChatThread`'s real controlled `value`) and a v0-style
- * `+` menu (the kit's real `Dropdown` primitives), plus Microphone and a
- * now-actually-wired Attachments toggle. Panel: Identity, Provider, Theme,
- * Capabilities, Work surface, App header, Composer, and the shared Message
- * actions picker.
+ * Modeled on the Lovable and v0 app stories: the work pane carries a
+ * browser-chrome toolbar (device toggle, URL bar, open-in-new-tab,
+ * Preview|Code with Preview first) plus an Expand control wired through
+ * `WorkspaceShell`'s REAL controlled `startCollapsed` prop, and every toolbar
+ * affordance is individually optional. The pane's own viewport (behind both
+ * the preview and code content) sits on a muted background, distinct from the
+ * pane's toolbar and content cards. An app-level header sits above the split:
+ * title on the left; on the right, a fixed left-to-right arrangement (search,
+ * a real dark-mode toggle scoped to just this preview frame, a divider, the
+ * configurable Share/Deploy actions row, a divider, a compact avatar+chevron
+ * user menu). Every header element is individually optional via a panel
+ * toggle; the arrangement itself is not. The composer gains optional
+ * quick-fill chips (wired to `ChatThread`'s real controlled `value`) and a
+ * `+` menu (the kit's real `Dropdown` primitives), plus Microphone and an
+ * Attachments toggle that really reaches the composer. Panel: Identity,
+ * Provider, Theme, Capabilities, Work surface, App header, Composer, and the
+ * shared Message actions picker.
  *
- * This template's own module doc comment draws the construct-expressible
- * boundary concretely: the split FRAME is real (`layout: 'split'`);
- * everything else this round added — pane content, pane chrome, header
- * actions, and all four composer knobs — has no construct vocabulary
- * today (T-5, widened proposal in docs/superpowers/research/
- * 2026-08-28-builder-t5-vocabulary-proposals.md).
+ * The split FRAME is construct-expressible (`layout: 'split'` already exists
+ * and codegen emits it). The pane content, pane chrome, header actions and
+ * composer knobs this story adds are preview-only: they write to local
+ * signals, never to `BuilderConstruct`, which is why the Raw JSON section does
+ * not reflect them.
  */
 export const Workspace: Story = {
   render: () => <WorkspaceBuilderDemo />,

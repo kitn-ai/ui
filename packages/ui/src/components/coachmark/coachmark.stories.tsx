@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
+import { fn } from 'storybook/test';
 import type { Placement } from '@floating-ui/dom';
 import { createSignal, Show } from 'solid-js';
 import { Coachmark } from './coachmark';
@@ -43,6 +44,20 @@ const meta = {
       description: 'Bubble placement relative to the anchor.',
       table: { defaultValue: { summary: 'bottom' } },
     },
+    onOpenChange: {
+      action: 'open-change',
+      description: 'Fires whenever `open` wants to change, from the × button or a method.',
+      table: { category: 'Events' },
+    },
+    onDismiss: {
+      action: 'dismiss',
+      description: 'Dismiss intent: the × button.',
+      table: { category: 'Events' },
+    },
+  },
+  args: {
+    onOpenChange: fn(),
+    onDismiss: fn(),
   },
   render: (args: {
     headline?: string;
@@ -50,6 +65,8 @@ const meta = {
     badge?: string;
     tone?: 'primary' | 'info' | 'success' | 'warning' | 'error';
     placement?: Placement;
+    onOpenChange?: (open: boolean) => void;
+    onDismiss?: () => void;
   }) => (
     <div class="flex min-h-[260px] items-center justify-center">
       <Coachmark
@@ -59,6 +76,8 @@ const meta = {
         headline={args.headline}
         badge={args.badge}
         content={args.content}
+        onOpenChange={args.onOpenChange}
+        onDismiss={args.onDismiss}
       >
         <Button variant="outline">Cowork</Button>
       </Coachmark>
@@ -69,7 +88,8 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const IMPORT = `import { Coachmark } from '@kitn.ai/ui/solid';`;
+const IMPORT = `import { Coachmark } from '@kitn.ai/ui/solid';
+import { Button } from '@kitn.ai/ui';`;
 const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });

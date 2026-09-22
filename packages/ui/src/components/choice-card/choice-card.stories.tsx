@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal } from 'solid-js';
 import { action } from 'storybook/actions';
-import { ChoiceCard, type ChoiceCardData, type ChoiceOption } from './choice-card';
+import { fn } from 'storybook/test';
+import { ChoiceCard, type ChoiceCardData, type ChoiceCardProps, type ChoiceOption } from './choice-card';
 import { componentDescription } from '../../stories/docs/web-component-controls';
 import type { CardEvent, CardHost, CardContext, CardResolution } from '../../primitives/card-contract';
 
@@ -26,6 +27,7 @@ interface ChoiceArgs {
   disabled?: boolean;
   defaultValue?: string;
   resolution?: CardResolution;
+  onValueChange?: ChoiceCardProps['onValueChange'];
 }
 
 const toData = (a: ChoiceArgs): ChoiceCardData => ({
@@ -61,7 +63,7 @@ function Demo(props: { args: ChoiceArgs }) {
         resolution={props.args.resolution}
         disabled={props.args.disabled}
         defaultValue={props.args.defaultValue}
-        onValueChange={action('onValueChange')}
+        onValueChange={props.args.onValueChange}
       />
       <pre
         style={{
@@ -158,7 +160,12 @@ const meta = {
         'Set to render the read-only resolved view instead of the list, e.g. `{ kind: "action", action: "team" }`.',
     },
     cardId: { control: 'text', description: 'Correlates every emitted CardEvent.' },
-    onValueChange: { control: false, description: 'Fires on each selection change, before submit.', table: { category: 'Events' } },
+    onValueChange: {
+      action: 'value-change',
+      control: false,
+      description: 'Fires on each selection change, before submit.',
+      table: { category: 'Events' },
+    },
   },
   args: {
     heading: 'Pick a plan',
@@ -171,6 +178,7 @@ const meta = {
     allowOtherLabel: 'Something else…',
     allowOtherPlaceholder: 'Tell me what you need',
     disabled: false,
+    onValueChange: fn(),
   },
 } satisfies Meta<ChoiceArgs>;
 

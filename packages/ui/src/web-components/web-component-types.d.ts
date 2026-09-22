@@ -833,6 +833,8 @@ export interface KaiEditableLabelElement extends HTMLElement {
   value?: string;
   /** Controlled edit state. `el.editing = true` opens the field; reflected to the `editing` attribute. */
   editing?: boolean;
+  /** How the read view enters edit mode: `'dblclick'` (default) opens the field on a double click, `'click'` on a single click. Reflected to the `edit-trigger` attribute. `edit()` and `editing` are unaffected. */
+  editTrigger?: "dblclick" | "click";
   /** Placeholder shown while editing / when the value is empty. */
   placeholder?: string;
   /** Disable entering edit mode. */
@@ -1046,6 +1048,11 @@ export interface KaiKbdElement extends HTMLElement {
   platform?: "auto" | "mac" | "other";
   /** Cap size: `sm` or `md`. Defaults to `md`. */
   size?: "sm" | "md";
+}
+
+export interface KaiKbdGroupElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: "light" | "dark" | "auto";
 }
 
 export interface KaiLinkPreviewElement extends HTMLElement {
@@ -2057,6 +2064,7 @@ declare global {
     'kai-image': KaiImageElement;
     'kai-input': KaiInputElement;
     'kai-kbd': KaiKbdElement;
+    'kai-kbd-group': KaiKbdGroupElement;
     'kai-link-preview': KaiLinkPreviewElement;
     'kai-loader': KaiLoaderElement;
     'kai-markdown': KaiMarkdownElement;
@@ -2172,6 +2180,7 @@ declare module 'react' {
       'kai-image': KaiElementJsxProps;
       'kai-input': KaiElementJsxProps;
       'kai-kbd': KaiElementJsxProps;
+      'kai-kbd-group': KaiElementJsxProps;
       'kai-link-preview': KaiElementJsxProps;
       'kai-loader': KaiElementJsxProps;
       'kai-markdown': KaiElementJsxProps;
@@ -2810,6 +2819,8 @@ export interface KaiEditableLabelElementProps {
   value?: string;
   /** Controlled edit state. `el.editing = true` opens the field; reflected to the `editing` attribute. */
   editing?: boolean;
+  /** How the read view enters edit mode: `'dblclick'` (default) opens the field on a double click, `'click'` on a single click. Reflected to the `edit-trigger` attribute. `edit()` and `editing` are unaffected. */
+  editTrigger?: "dblclick" | "click";
   /** Placeholder shown while editing / when the value is empty. */
   placeholder?: string;
   /** Disable entering edit mode. */
@@ -2989,6 +3000,11 @@ export interface KaiKbdElementProps {
   platform?: "auto" | "mac" | "other";
   /** Cap size: `sm` or `md`. Defaults to `md`. */
   size?: "sm" | "md";
+}
+
+export interface KaiKbdGroupElementProps {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: "light" | "dark" | "auto";
 }
 
 export interface KaiLinkPreviewElementProps {
@@ -4086,6 +4102,10 @@ export interface KaiKbdElementEvents {
 
 }
 
+export interface KaiKbdGroupElementEvents {
+
+}
+
 export interface KaiLinkPreviewElementEvents {
 
 }
@@ -4512,6 +4532,8 @@ declare module 'vue' {
     KaiInput: KaiVueElement<KaiInputElementProps, KaiInputElementEvents>;
     'kai-kbd': KaiVueElement<KaiKbdElementProps, KaiKbdElementEvents>;
     KaiKbd: KaiVueElement<KaiKbdElementProps, KaiKbdElementEvents>;
+    'kai-kbd-group': KaiVueElement<KaiKbdGroupElementProps, KaiKbdGroupElementEvents>;
+    KaiKbdGroup: KaiVueElement<KaiKbdGroupElementProps, KaiKbdGroupElementEvents>;
     'kai-link-preview': KaiVueElement<KaiLinkPreviewElementProps, KaiLinkPreviewElementEvents>;
     KaiLinkPreview: KaiVueElement<KaiLinkPreviewElementProps, KaiLinkPreviewElementEvents>;
     'kai-loader': KaiVueElement<KaiLoaderElementProps, KaiLoaderElementEvents>;

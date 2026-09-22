@@ -9,6 +9,10 @@ interface Props extends Record<string, unknown> {
   /** Controlled edit state. `el.editing = true` opens the field; reflected to the
    *  `editing` attribute. */
   editing?: boolean;
+  /** How the read view enters edit mode: `'dblclick'` (default) opens the field on
+   *  a double click, `'click'` on a single click. Reflected to the `edit-trigger`
+   *  attribute. `edit()` and `editing` are unaffected. */
+  editTrigger?: 'dblclick' | 'click';
   /** Placeholder shown while editing / when the value is empty. */
   placeholder?: string;
   /** Disable entering edit mode. */
@@ -25,12 +29,15 @@ interface Events {
 
 /**
  * `<kai-editable-label>` — inline rename, built on `kai-input`. Shows `value` as
- * text; double-click (or `el.edit()`, or `editing`) swaps in an autofocused
- * field. Enter or blur commits → `kai-rename` (only when the value changed); Esc
- * cancels → `kai-cancel` (the text is restored).
+ * text; double-click, or a single click when `edit-trigger="click"` (or
+ * `el.edit()`, or `editing`), swaps in an autofocused field. Enter or blur commits
+ * → `kai-rename` (only when the value changed); Esc cancels → `kai-cancel` (the
+ * text is restored).
  *
  * ```html
  * <kai-editable-label value="Project Alpha"></kai-editable-label>
+ * <!-- edit-trigger="click" opens the field on one click instead of a double click -->
+ * <kai-editable-label value="Project Beta" edit-trigger="click"></kai-editable-label>
  * <script type="module">
  *   import '@kitn.ai/ui/web-components';
  *   const label = document.querySelector('kai-editable-label');
@@ -45,6 +52,7 @@ interface Events {
 defineWebComponent<Props, Events>('kai-editable-label', {
   value: undefined,
   editing: false,
+  editTrigger: 'dblclick',
   placeholder: undefined,
   disabled: false,
 }, (props, ctx) => {
@@ -92,6 +100,9 @@ defineWebComponent<Props, Events>('kai-editable-label', {
     element.shadowRoot?.querySelector<HTMLInputElement>('input') ?? null;
 
   const enter = () => { if (!flag('disabled')) setEditing(true); };
+  // The attribute is an untyped boundary (any string reaches it), so normalize it
+  // here rather than pass an unexpected value into the primitive.
+  const editTrigger = () => (props.editTrigger === 'click' ? 'click' : 'dblclick');
   // Blur drives the primitive's blur-commit; Escape drives its cancel.
   const commit = () => { getInput()?.blur(); };
   const cancel = () => {
@@ -127,6 +138,7 @@ defineWebComponent<Props, Events>('kai-editable-label', {
       <EditableLabel
         value={value()}
         editing={editing()}
+        editTrigger={editTrigger()}
         placeholder={props.placeholder as string | undefined}
         disabled={flag('disabled')}
         onRename={(next) => {

@@ -122,6 +122,8 @@ export { SettingsGroup, SettingItem } from './components/settings/settings-group
 export type { SettingsGroupProps, SettingItemProps } from './components/settings/settings-group';
 export { RowGroup } from './components/row/row-group';
 export type { RowGroupProps } from './components/row/row-group';
+export { KbdGroup } from './components/kbd/kbd-group';
+export type { KbdGroupProps } from './components/kbd/kbd-group';
 // `kai-icon` renders no kit component — it calls this. Solid consumers resolving
 // the same `icon` strings (named icon | URL | text fallback) need it too.
 export { renderIcon } from './components/icon/icon';
