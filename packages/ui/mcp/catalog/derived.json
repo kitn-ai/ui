@@ -218,6 +218,12 @@
           "fn": false
         },
         {
+          "name": "imagePreview",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
           "name": "removable",
           "scalar": true,
           "optional": true,
@@ -254,7 +260,10 @@
         "AttachmentHoverCard",
         "AttachmentHoverCardTrigger",
         "AttachmentHoverCardContent",
-        "AttachmentEmpty"
+        "AttachmentEmpty",
+        "Lightbox",
+        "LightboxTrigger",
+        "LightboxContent"
       ],
       "tokens": []
     },
@@ -768,6 +777,12 @@
         },
         {
           "name": "codeTheme",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "imagePreview",
           "scalar": true,
           "optional": true,
           "fn": false
@@ -2728,6 +2743,60 @@
       ],
       "composedFrom": [
         "KbdGroup"
+      ],
+      "tokens": []
+    },
+    {
+      "tag": "kai-lightbox",
+      "props": [
+        {
+          "name": "theme",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "open",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "defaultOpen",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "disabled",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "label",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        }
+      ],
+      "events": [
+        "kai-open-change"
+      ],
+      "methods": [
+        "show",
+        "hide",
+        "toggle"
+      ],
+      "parts": [
+        "backdrop",
+        "panel",
+        "body"
+      ],
+      "composedFrom": [
+        "Lightbox",
+        "LightboxTrigger",
+        "LightboxContent"
       ],
       "tokens": []
     },
@@ -5260,6 +5329,12 @@
         },
         {
           "name": "codeHighlight",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "imagePreview",
           "scalar": true,
           "optional": true,
           "fn": false

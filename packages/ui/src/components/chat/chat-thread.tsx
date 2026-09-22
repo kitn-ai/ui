@@ -3,7 +3,7 @@ import { ChatConfig, useChatConfig } from '../../primitives/chat-config';
 import { type ComposerDoc, normalizeValue, serializeToText } from '../../primitives/composer-model';
 import { ChatContainer, ChatContainerContent, ChatContainerScrollAnchor } from './chat-container';
 import { Message, MessageAvatar, MessageBody } from '../message/message';
-import { type AttachmentData } from '../attachments/attachments';
+import { type AttachmentData, type AttachmentImagePreview } from '../attachments/attachments';
 import { createMessageFeedback, type MessageActionDetail } from '../../primitives/message-feedback';
 import { ModelSwitcher } from '../model/model-switcher';
 import { ScrollButton } from '../scroll/scroll-button';
@@ -87,6 +87,12 @@ export interface ChatThreadProps {
   /** Shiki theme name for syntax-highlighted code blocks (e.g.
    *  `'github-dark-dimmed'`). */
   codeTheme?: string;
+  /** How an image tile in a message's attachment grid reveals its full size:
+   *  `'hover'` (default) is the pointer-only hover card; `'lightbox'` opens the
+   *  image in a modal on click, which is the only one of the two a keyboard or
+   *  touch user can reach. Forwarded to every `MessageBody` this thread renders,
+   *  and inert for non-image tiles, which keep the hover card. */
+  imagePreview?: AttachmentImagePreview;
   /** Enable Shiki syntax highlighting in code blocks. Turn off to render plain
    *  `<pre>` blocks (lighter, no highlighter load). Default true. */
   codeHighlight?: boolean;
@@ -880,6 +886,7 @@ export function ChatThread(props: ChatThreadProps) {
                             isStreaming={props.loading === true && m().role === 'assistant' && i() === props.messages.length - 1}
                             reasoningMode={props.reasoning}
                             reasoningDefaultOpen={props.reasoningOpen}
+                            imagePreview={props.imagePreview}
                             cardTypes={props.cardTypes}
                             cardSchemas={props.cardSchemas}
                             cardHostElement={props.cardHostElement}

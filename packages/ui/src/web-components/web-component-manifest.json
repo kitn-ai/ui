@@ -83,6 +83,7 @@
     "kai-pane-grid": "pane-grid",
     "kai-agent-card": "agent-card",
     "kai-dialog": "dialog",
+    "kai-lightbox": "lightbox",
     "kai-dock": "dock",
     "kai-input": "input",
     "kai-search": "search",
@@ -343,6 +344,9 @@
     ],
     "dialog": [
       "kai-dialog"
+    ],
+    "lightbox": [
+      "kai-lightbox"
     ],
     "dock": [
       "kai-dock"

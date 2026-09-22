@@ -49,6 +49,7 @@ import type {
   KaiInputElement,
   KaiKbdElement,
   KaiKbdGroupElement,
+  KaiLightboxElement,
   KaiLinkPreviewElement,
   KaiLoaderElement,
   KaiMarkdownElement,
@@ -205,6 +206,8 @@ export interface AttachmentsProps extends WebComponentProps {
   variant?: "grid" | "inline" | "list";
   /** Wrap each item in a hover card that previews its details. */
   hoverCard?: boolean;
+  /** How an image item previews: `hover` = the hover card, `lightbox` = click the tile to open the image full-size in a dialog. Attribute: `image-preview`. Inert for non-image items, which have no image for a dialog to show. */
+  imagePreview?: "hover" | "lightbox";
   /** Show a remove button per item; clicking it fires a `kai-remove` event. */
   removable?: boolean;
   /** Also show the media type beneath the filename (non-grid variants). */
@@ -217,7 +220,7 @@ export interface AttachmentsProps extends WebComponentProps {
 
 export const Attachments = /*#__PURE__*/ createWebComponent<AttachmentsProps, KaiAttachmentsElement>(
   'kai-attachments',
-  ["theme","items","variant","hoverCard","removable","showMediaType","emptyText"],
+  ["theme","items","variant","hoverCard","imagePreview","removable","showMediaType","emptyText"],
   { onRemove: 'kai-remove' },
   () => import('@kitn.ai/ui/web-components/attachments'),
 );
@@ -417,6 +420,8 @@ export interface ChatProps extends WebComponentProps {
   proseSize?: "xs" | "sm" | "base" | "lg";
   /** Shiki theme name for syntax-highlighted code blocks (e.g. `'github-dark-dimmed'`). */
   codeTheme?: string;
+  /** How an image tile in a message's attachment grid reveals its full size: `'hover'` (default) is the pointer-only hover card; `'lightbox'` opens the image in a modal on click, which is the only one of the two a keyboard or touch user can reach. Forwarded to every `MessageBody` this thread renders, and inert for non-image tiles, which keep the hover card. */
+  imagePreview?: "hover" | "lightbox";
   /** Enable Shiki syntax highlighting in code blocks. Turn off to render plain `<pre>` blocks (lighter, no highlighter load). Default true. */
   codeHighlight?: boolean;
   /** How `reasoning` parts render across the thread. `'full'` (default) is the current collapsible-disclosure behavior; `'compact'` shows only a shimmer loader while a reasoning part streams and nothing once it settles (no expandable detail); `'off'` renders reasoning parts not at all. Forwarded to every `MessageBody` as `reasoningMode`. */
@@ -513,7 +518,7 @@ export interface ChatProps extends WebComponentProps {
 
 export const Chat = /*#__PURE__*/ createWebComponent<ChatProps, KaiChatElement>(
   'kai-chat',
-  ["theme","value","placeholder","loading","suggestions","suggestionMode","persistSuggestions","proseSize","codeTheme","codeHighlight","reasoning","reasoningOpen","chatTitle","models","currentModel","context","scrollButton","headerStart","headerEnd","headerFull","homeFull","sidebar","empty","composer","composerActions","footer","attach","webSearch","voice","triggers","kindIcons","actionsReveal","userActions","assistantActions","hideSources","accept","messages","cardTypes","cardSchemas","conversations","store","home","hostOpen"],
+  ["theme","value","placeholder","loading","suggestions","suggestionMode","persistSuggestions","proseSize","codeTheme","imagePreview","codeHighlight","reasoning","reasoningOpen","chatTitle","models","currentModel","context","scrollButton","headerStart","headerEnd","headerFull","homeFull","sidebar","empty","composer","composerActions","footer","attach","webSearch","voice","triggers","kindIcons","actionsReveal","userActions","assistantActions","hideSources","accept","messages","cardTypes","cardSchemas","conversations","store","home","hostOpen"],
   { onAttachmentsChange: 'kai-attachments-change', onAttachmentsRejected: 'kai-attachments-rejected', onConversationLoad: 'kai-conversation-load', onHomeLink: 'kai-home-link', onMessageAction: 'kai-message-action', onModelChange: 'kai-model-change', onSubmit: 'kai-submit', onSuggestionClick: 'kai-suggestion-click', onUnreadChange: 'kai-unread-change', onValueChange: 'kai-value-change', onVoice: 'kai-voice', onWebSearch: 'kai-web-search' },
   () => import('@kitn.ai/ui/web-components/chat'),
 );
@@ -1217,6 +1222,26 @@ export const KbdGroup = /*#__PURE__*/ createWebComponent<KbdGroupProps, KaiKbdGr
   ["theme"],
   {  },
   () => import('@kitn.ai/ui/web-components/kbd-group'),
+);
+
+export interface LightboxProps extends WebComponentProps {
+  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute, while the trigger click still works). Set `el.open = true`, or `<kai-lightbox open>`; listen for `kai-open-change`. */
+  open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** Take away the PROGRAMMATIC open path only: `show()` becomes a no-op and `toggle()` closes rather than opens. The trigger, the `open` attribute and `hide()` are untouched. These are the disclosure semantics every overlay in the kit shares; see ../disclosure. */
+  disabled?: boolean;
+  /** Accessible name for the modal (`aria-label`), for a lightbox whose content carries no heading. Without one the panel is an UNNAMED `role="dialog"`, which is a WCAG failure, so name it. */
+  label?: string;
+  /** The modal opened or closed (trigger click, Escape, backdrop click, or a method). */
+  onOpenChange?: (event: CustomEvent<{ open: boolean }>) => void;
+}
+
+export const Lightbox = /*#__PURE__*/ createWebComponent<LightboxProps, KaiLightboxElement>(
+  'kai-lightbox',
+  ["theme","open","defaultOpen","disabled","label"],
+  { onOpenChange: 'kai-open-change' },
+  () => import('@kitn.ai/ui/web-components/lightbox'),
 );
 
 export interface LinkPreviewProps extends WebComponentProps {
@@ -2275,6 +2300,8 @@ export interface ThreadProps extends WebComponentProps {
   codeTheme?: string;
   /** Enable Shiki syntax highlighting in code blocks. Turn off to render plain `<pre>` blocks (lighter, no highlighter load). Default true. */
   codeHighlight?: boolean;
+  /** How an image tile in a message's attachment grid reveals its full size: `hover` (default) is the pointer-only hover card, `lightbox` opens the image in a modal on click. Attribute: `image-preview`. Inert for non-image tiles. */
+  imagePreview?: "hover" | "lightbox";
   /** Whether each message's action bar is always visible (`'always'`, default) or only revealed on hover of that message row (`'hover'`). */
   actionsReveal?: "always" | "hover";
   /** Show the scroll-to-bottom button inside the scroll area. Default true. */
@@ -2291,7 +2318,7 @@ export interface ThreadProps extends WebComponentProps {
 
 export const Thread = /*#__PURE__*/ createWebComponent<ThreadProps, KaiThreadElement>(
   'kai-thread',
-  ["theme","messages","loading","proseSize","codeTheme","codeHighlight","actionsReveal","scrollButton","class","cardTypes","cardSchemas"],
+  ["theme","messages","loading","proseSize","codeTheme","codeHighlight","imagePreview","actionsReveal","scrollButton","class","cardTypes","cardSchemas"],
   { onMessageAction: 'kai-message-action' },
   () => import('@kitn.ai/ui/web-components/thread'),
 );

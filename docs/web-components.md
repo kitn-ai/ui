@@ -3,14 +3,14 @@
 ## Overview
 
 <!-- spec:overview -->
-`@kitn.ai/ui` ships 98 framework-agnostic custom elements built on the SolidJS kit.
+`@kitn.ai/ui` ships 99 framework-agnostic custom elements built on the SolidJS kit.
 
 | Tag | Purpose |
 |-----|---------|
 | `<kai-chat>` | Full chat UI — message list plus prompt input |
 | `<kai-conversations>` | Sidebar conversation browser with group support |
 | `<kai-prompt-input>` | Standalone text-input area with send button |
-| + 95 composable custom elements | See the full roster below |
+| + 96 composable custom elements | See the full roster below |
 <!-- /spec:overview -->
 
 Each web component renders into its own **Shadow DOM** so the host page's CSS cannot leak in, and the kit's Tailwind classes cannot leak out. SolidJS and all kit dependencies are bundled inside the web-components bundle — the host does not need SolidJS.
@@ -147,6 +147,7 @@ Every web component also accepts a `theme` attribute (`'light' | 'dark' | 'auto'
 | `persistSuggestions` | `persist-suggestions` | `undefined | false | true` | `false` | Keep suggestions visible after the conversation starts. By default suggestions are conversation starters and hide once `messages` is non-empty; set this to keep them always shown. Default false. |
 | `proseSize` | `prose-size` | `undefined | "xs" | "sm" | "base" | "lg"` | `'sm'` | Body/prose font scale for rendered markdown (`'xs' | 'sm' | 'base' | 'lg'`). Defaults to `'sm'`. |
 | `codeTheme` | `code-theme` | `undefined | string` | `'github-dark-dimmed'` | Shiki theme name for syntax-highlighted code blocks (e.g. `'github-dark-dimmed'`). |
+| `imagePreview` | `image-preview` | `undefined | "hover" | "lightbox"` | — | How an image tile in a message's attachment grid reveals its full size: `'hover'` (default) is the pointer-only hover card; `'lightbox'` opens the image in a modal on click, which is the only one of the two a keyboard or touch user can reach. Forwarded to every `MessageBody` this thread renders, and inert for non-image tiles, which keep the hover card. |
 | `codeHighlight` | `code-highlight` | `undefined | false | true` | `true` | Enable Shiki syntax highlighting in code blocks. Turn off to render plain `<pre>` blocks (lighter, no highlighter load). Default true. |
 | `reasoning` | `reasoning` | `undefined | "full" | "compact" | "off"` | — | How `reasoning` parts render across the thread. `'full'` (default) is the current collapsible-disclosure behavior; `'compact'` shows only a shimmer loader while a reasoning part streams and nothing once it settles (no expandable detail); `'off'` renders reasoning parts not at all. Forwarded to every `MessageBody` as `reasoningMode`. |
 | `reasoningOpen` | `reasoning-open` | `undefined | false | true` | — | Seeds the reasoning disclosure open AND keeps it tracking the stream (open while streaming, closes when it settles): the pre-Task-19f `full` behavior. Default false/absent: the panel starts closed (just the "Thinking" shimmer chip) and only opens on click, the current default (owner ruling, 2026-08-26). Meaningless when `reasoning` is `'compact'` or `'off'`. Forwarded to every `MessageBody` as `reasoningDefaultOpen`. |
@@ -789,6 +790,7 @@ No events.
 | `items` | — | `AttachmentData[] | undefined` | `[]` | The attachments to render. Omit (or pass an empty array) for the empty state, which shows `emptyText` if set and nothing otherwise. Set as a JS property (array). Each item's `url` must be a `data:` URI or an https URL, never `URL.createObjectURL`: a `blob:` URL previews here but the wire encoders (`toOpenAIMessages`/`toAnthropicMessages`) refuse it. |
 | `variant` | `variant` | `undefined | "grid" | "inline" | "list"` | `'grid'` | Layout: `grid` = visual tiles, `inline` = icon + label chips, `list` = rows. |
 | `hoverCard` | `hover-card` | `undefined | false | true` | `false` | Wrap each item in a hover card that previews its details. |
+| `imagePreview` | `image-preview` | `undefined | "hover" | "lightbox"` | `'hover'` | How an image item previews: `hover` = the hover card, `lightbox` = click the tile to open the image full-size in a dialog. Attribute: `image-preview`. Inert for non-image items, which have no image for a dialog to show. |
 | `removable` | `removable` | `undefined | false | true` | `false` | Show a remove button per item; clicking it fires a `kai-remove` event. |
 | `showMediaType` | `show-media-type` | `undefined | false | true` | `false` | Also show the media type beneath the filename (non-grid variants). |
 | `emptyText` | `empty-text` | `undefined | string` | — | Text shown when `items` is empty. |
@@ -811,7 +813,7 @@ Restyle from outside the Shadow DOM via `kai-attachments::part(name)`.
 
 #### Composed from
 
-`Components/Attachments`, `Components/Attachment`, `Components/AttachmentPreview`, `Components/AttachmentInfo`, `Components/AttachmentRemove`, `Components/AttachmentHoverCard`, `Components/AttachmentHoverCardTrigger`, `Components/AttachmentHoverCardContent`, `Components/AttachmentEmpty`
+`Components/Attachments`, `Components/Attachment`, `Components/AttachmentPreview`, `Components/AttachmentInfo`, `Components/AttachmentRemove`, `Components/AttachmentHoverCard`, `Components/AttachmentHoverCardTrigger`, `Components/AttachmentHoverCardContent`, `Components/AttachmentEmpty`, `Components/Lightbox`, `Components/LightboxTrigger`, `Components/LightboxContent`
 
 #### Theming
 
@@ -1500,6 +1502,7 @@ No events.
 | `proseSize` | `prose-size` | `undefined | "xs" | "sm" | "base" | "lg"` | `'sm'` | Body/prose font scale for rendered markdown (`'xs' | 'sm' | 'base' | 'lg'`). Defaults to `'sm'`. |
 | `codeTheme` | `code-theme` | `undefined | string` | `'github-dark-dimmed'` | Shiki theme name for syntax-highlighted code blocks (e.g. `'github-dark-dimmed'`). |
 | `codeHighlight` | `code-highlight` | `undefined | false | true` | `true` | Enable Shiki syntax highlighting in code blocks. Turn off to render plain `<pre>` blocks (lighter, no highlighter load). Default true. |
+| `imagePreview` | `image-preview` | `undefined | "hover" | "lightbox"` | `'hover'` | How an image tile in a message's attachment grid reveals its full size: `hover` (default) is the pointer-only hover card, `lightbox` opens the image in a modal on click. Attribute: `image-preview`. Inert for non-image tiles. |
 | `actionsReveal` | `actions-reveal` | `undefined | "always" | "hover"` | `'always'` | Whether each message's action bar is always visible (`'always'`, default) or only revealed on hover of that message row (`'hover'`). |
 | `scrollButton` | `scroll-button` | `undefined | false | true` | `true` | Show the scroll-to-bottom button inside the scroll area. Default true. |
 | `class` | `class` | `undefined | string` | — | Extra classes applied to the thread's inner root. |

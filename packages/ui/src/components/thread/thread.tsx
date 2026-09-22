@@ -9,6 +9,7 @@ import type { ChatMessage } from '../../web-components/chat/chat-types';
 import type { ProseSize } from '../../primitives/chat-config';
 import type { CardComponentMap } from '../card/card-registry';
 import type { CardSchemaMap } from '../card/card-renderer';
+import type { AttachmentImagePreview } from '../attachments/attachments';
 
 /** Imperative handle exposed via `controllerRef` — the thread's scroll control,
  *  forwarded onto `<kai-thread>` as the `scrollToBottom()` instance method. */
@@ -51,6 +52,12 @@ export interface ThreadProps {
   /** Enable Shiki syntax highlighting in code blocks. Turn off to render plain
    *  `<pre>` blocks (lighter, no highlighter load). Default true. */
   codeHighlight?: boolean;
+  /** How an image tile in a message's attachment grid reveals its full size:
+   *  `'hover'` (default) is the pointer-only hover card; `'lightbox'` opens the
+   *  image in a modal on click, which is the only one of the two a keyboard or
+   *  touch user can reach. Forwarded to every `MessageBody` this list renders,
+   *  and inert for non-image tiles, which keep the hover card. */
+  imagePreview?: AttachmentImagePreview;
   /** Whether each message's action bar is always visible (`'always'`, default) or
    *  only revealed on hover of that message row (`'hover'`). */
   actionsReveal?: 'always' | 'hover';
@@ -152,6 +159,7 @@ export function Thread(props: ThreadProps) {
                         cardTypes={props.cardTypes}
                         cardSchemas={props.cardSchemas}
                         cardHostElement={props.cardHostElement}
+                        imagePreview={props.imagePreview}
                         isUser={m().role === 'user'}
                         markdown={m().role === 'assistant'}
                         actions={m().actions}

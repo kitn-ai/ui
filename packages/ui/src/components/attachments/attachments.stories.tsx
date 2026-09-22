@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
-import { createSignal, For } from 'solid-js';
+import { createSignal, For, Show } from 'solid-js';
 import { action } from 'storybook/actions';
 import {
   Attachments,
@@ -11,8 +11,14 @@ import {
   AttachmentHoverCardTrigger,
   AttachmentHoverCardContent,
   AttachmentEmpty,
+  useAttachmentsContext,
 } from './attachments';
-import type { AttachmentData } from './attachments';
+import type { AttachmentData, AttachmentsProps } from './attachments';
+import {
+  Lightbox,
+  LightboxTrigger,
+  LightboxContent,
+} from '../lightbox/lightbox';
 import { componentDescription } from '../../stories/docs/web-component-controls';
 
 const sampleAttachments: AttachmentData[] = [
@@ -78,6 +84,13 @@ const meta = {
       description: 'Layout of the attachment items.',
       table: { defaultValue: { summary: 'grid' } },
     },
+    imagePreview: {
+      control: 'select',
+      options: ['hover', 'lightbox'],
+      description:
+        'How an image tile reveals its full size: a pointer-only hover card, or a click-to-open lightbox. Read by the tile from context; a non-image tile always keeps the hover card.',
+      table: { defaultValue: { summary: 'hover' } },
+    },
     children: {
       control: false,
       description: 'The `Attachment` items to render inside the container.',
@@ -114,10 +127,50 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+/**
+ * The image tile from `sampleAttachments`, rendered the way the thread renders
+ * it: which affordance shows the full image is chosen by `imagePreview`, read
+ * from context. It is a component and not inline markup because
+ * `useAttachmentsContext()` resolves from the OWNER scope — the read has to sit
+ * below the `<Attachments>` provider, or it finds nothing and always takes the
+ * `'hover'` fallback.
+ */
+function ImageTile() {
+  const ctx = useAttachmentsContext();
+  const item = sampleAttachments[0];
+  return (
+    <Attachment data={item}>
+      <Show
+        when={ctx.imagePreview === 'lightbox'}
+        fallback={
+          <AttachmentHoverCard>
+            <AttachmentHoverCardTrigger class="block size-full">
+              <AttachmentPreview />
+            </AttachmentHoverCardTrigger>
+            <AttachmentHoverCardContent>
+              <img alt={item.filename} class="block max-w-xs rounded object-contain" src={item.url} />
+            </AttachmentHoverCardContent>
+          </AttachmentHoverCard>
+        }
+      >
+        <Lightbox>
+          <LightboxTrigger class="block size-full">
+            <AttachmentPreview />
+          </LightboxTrigger>
+          <LightboxContent label={item.filename}>
+            <img alt={item.filename} class="block object-contain" src={item.url} />
+          </LightboxContent>
+        </Lightbox>
+      </Show>
+    </Attachment>
+  );
+}
+
 const IMPORT = `import {
   Attachments, Attachment, AttachmentPreview, AttachmentInfo, AttachmentRemove,
   AttachmentHoverCard, AttachmentHoverCardTrigger, AttachmentHoverCardContent,
-  AttachmentEmpty,
+  Lightbox, LightboxTrigger, LightboxContent,
+  AttachmentEmpty, useAttachmentsContext,
   type AttachmentData,
 } from '@kitn.ai/ui';`;
 const src = (code: string) => ({
@@ -320,4 +373,81 @@ export const Empty: Story = {
   ...src(`<Attachments variant="grid">
   <AttachmentEmpty />
 </Attachments>`),
+};
+
+/** Click the thumbnail: the full image opens as a modal, and Escape or a
+ *  backdrop click closes it. Switch `imagePreview` to `hover` to compare the two
+ *  affordances. */
+// Named `LightboxTile`, not `Lightbox`: a story's own name is a binding in this
+// module, and one that shadows an imported kit export makes the snippet lint read
+// the story as the component it is demonstrating. See rule (i) in
+// scripts/lint-story-conventions.mjs.
+export const LightboxTile: Story = {
+  args: { imagePreview: 'lightbox' },
+  render: (args: AttachmentsProps) => (
+    <Attachments variant="grid" imagePreview={args.imagePreview}>
+      <ImageTile />
+    </Attachments>
+  ),
+  ...src(`// The container names the affordance; the image tile branches on it.
+const item: AttachmentData = {
+  id: '1', type: 'file', filename: 'mountain.jpg', mediaType: 'image/jpeg',
+  url: 'https://…/mountain.jpg',
+};
+
+<Attachments variant="grid" imagePreview="lightbox">
+  <Attachment data={item}>
+    <Lightbox>
+      <LightboxTrigger class="block size-full">
+        <AttachmentPreview />
+      </LightboxTrigger>
+      <LightboxContent label={item.filename}>
+        <img src={item.url} alt={item.filename} class="block object-contain" />
+      </LightboxContent>
+    </Lightbox>
+  </Attachment>
+</Attachments>`),
+};
+
+/** The modal with no click at all: `defaultOpen` seeds it open for a screenshot
+ *  or a first-run tour. The trio is composed directly here because only the
+ *  lightbox owns that state (an `Attachments` grid composes it per tile).
+ *
+ *  A JSX child can never ride in `args` — it cannot cross the Storybook
+ *  manager/preview boundary — so this story's markup lives in `render` and its
+ *  args stay empty. */
+export const LightboxOpenAtMount: Story = {
+  render: () => (
+    <Lightbox defaultOpen>
+      <LightboxTrigger class="block size-24 overflow-hidden rounded-lg">
+        <img
+          alt={sampleAttachments[0].filename}
+          class="size-full object-cover"
+          src={sampleAttachments[0].url}
+        />
+      </LightboxTrigger>
+      <LightboxContent label={sampleAttachments[0].filename}>
+        <img
+          alt={sampleAttachments[0].filename}
+          class="block object-contain"
+          src={sampleAttachments[0].url}
+        />
+      </LightboxContent>
+    </Lightbox>
+  ),
+  ...src(`// Open at mount: 'defaultOpen' is the uncontrolled seed. Drive it yourself
+// with 'open' + onOpenChange for controlled use.
+const item: AttachmentData = {
+  id: '1', type: 'file', filename: 'mountain.jpg', mediaType: 'image/jpeg',
+  url: 'https://…/mountain.jpg',
+};
+
+<Lightbox defaultOpen>
+  <LightboxTrigger class="block size-24 overflow-hidden rounded-lg">
+    <img src={item.url} alt={item.filename} class="size-full object-cover" />
+  </LightboxTrigger>
+  <LightboxContent label={item.filename}>
+    <img src={item.url} alt={item.filename} class="block object-contain" />
+  </LightboxContent>
+</Lightbox>`),
 };

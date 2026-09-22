@@ -3,7 +3,7 @@
 
 # @kitn.ai/ui
 
-> Framework-agnostic, Shadow-DOM web components for building AI chat interfaces — works in React, Vue, Angular, Svelte, or plain HTML. 98 custom elements, every one prefixed `kai-` (e.g. `<kai-chat>`, `<kai-artifact>`): streaming responses, markdown + code rendering, reasoning/tool panels, attachments, conversation sidebar, voice input. Zero framework dependency for consumers; the SolidJS runtime it is authored in is bundled in, so the host needs nothing.
+> Framework-agnostic, Shadow-DOM web components for building AI chat interfaces — works in React, Vue, Angular, Svelte, or plain HTML. 99 custom elements, every one prefixed `kai-` (e.g. `<kai-chat>`, `<kai-artifact>`): streaming responses, markdown + code rendering, reasoning/tool panels, attachments, conversation sidebar, voice input. Zero framework dependency for consumers; the SolidJS runtime it is authored in is bundled in, so the host needs nothing.
 
 ## Install
 
@@ -37,7 +37,7 @@ Drop an element into any framework (React, Vue, plain HTML). Data in via JS prop
 - `<kai-prompt-input>` — standalone composer with send button.
 
 **Layer 2 — composable custom elements** (`import { … } from '@kitn.ai/ui'`):
-All 98 web components are also exported individually. Use them for custom layouts or features `<kai-chat>` does not expose (ChainOfThought, FeedbackBar, ThinkingBar, VoiceInput, …). Your bundler tree-shakes the rest.
+All 99 web components are also exported individually. Use them for custom layouts or features `<kai-chat>` does not expose (ChainOfThought, FeedbackBar, ThinkingBar, VoiceInput, …). Your bundler tree-shakes the rest.
 
 ## Key rules for the web components
 
@@ -151,7 +151,7 @@ For Tailwind builds: `@import "@kitn.ai/ui/theme.css"` in your CSS.
 
 ## Docs
 
-- Web component reference (all 98 web components, every prop/event/method/slot/part): the "Web component reference" section of ./llms-full.txt — https://kitn.dev/llms-full.txt
+- Web component reference (all 99 web components, every prop/event/method/slot/part): the "Web component reference" section of ./llms-full.txt — https://kitn.dev/llms-full.txt
 - Programmatic layer (`@kitn.ai/ui/state` + `@kitn.ai/ui/wire`: streaming folds, the mock responder, the SSE readers/encoders): the "Programmatic layer" section of llms-full.txt
 - How to build a chat app in 5 steps (install → pick a layer → handle submit + stream → wire features → theme, with working code): the "How to build a chat app in 5 steps" section of llms-full.txt
 - Streaming recipe (the two rules that bite: reassign new references per chunk, fold deltas onto the trailing text part): the "Streaming recipe" section of llms-full.txt
@@ -1256,7 +1256,7 @@ Every name `kai-icon` (and every `icon` prop/attribute across the elements) reso
 
 ---
 
-## Web component reference (98 web components, generated from custom-elements.json)
+## Web component reference (99 web components, generated from custom-elements.json)
 
 Every element also accepts the `theme` attribute. Array/object properties are marked with a `—` attribute: they must be set as JS properties.
 
@@ -1350,6 +1350,7 @@ Every element also accepts the `theme` attribute. Array/object properties are ma
 | `items` | — | `undefined \| { id: string; type: "file" \| "source-document"; filename?: undefined \| string; mediaType?: undefined \| string; url?: undefined \| string; title?: undefined \| string }[]` | The attachments to render. Omit (or pass an empty array) for the empty state, which shows `emptyText` if set and nothing otherwise. Set as a JS property (array). Each item's `url` must be a `data:` URI or an https URL, never `URL.createObjectURL`: a `blob:` URL previews here but the wire encoders (`toOpenAIMessages`/`toAnthropicMessages`) refuse it. |
 | `variant` | `variant` | `undefined \| "grid" \| "inline" \| "list"` | Layout: `grid` = visual tiles, `inline` = icon + label chips, `list` = rows. |
 | `hoverCard` | `hover-card` | `undefined \| false \| true` | Wrap each item in a hover card that previews its details. |
+| `imagePreview` | `image-preview` | `undefined \| "hover" \| "lightbox"` | How an image item previews: `hover` = the hover card, `lightbox` = click the tile to open the image full-size in a dialog. Attribute: `image-preview`. Inert for non-image items, which have no image for a dialog to show. |
 | `removable` | `removable` | `undefined \| false \| true` | Show a remove button per item; clicking it fires a `kai-remove` event. |
 | `showMediaType` | `show-media-type` | `undefined \| false \| true` | Also show the media type beneath the filename (non-grid variants). |
 | `emptyText` | `empty-text` | `undefined \| string` | Text shown when `items` is empty. |
@@ -1621,6 +1622,7 @@ _No events._
 | `persistSuggestions` | `persist-suggestions` | `undefined \| false \| true` | Keep suggestions visible after the conversation starts. By default suggestions are conversation starters and hide once `messages` is non-empty; set this to keep them always shown. Default false. |
 | `proseSize` | `prose-size` | `undefined \| "xs" \| "sm" \| "base" \| "lg"` | Body/prose font scale for rendered markdown (`'xs' \| 'sm' \| 'base' \| 'lg'`). Defaults to `'sm'`. |
 | `codeTheme` | `code-theme` | `undefined \| string` | Shiki theme name for syntax-highlighted code blocks (e.g. `'github-dark-dimmed'`). |
+| `imagePreview` | `image-preview` | `undefined \| "hover" \| "lightbox"` | How an image tile in a message's attachment grid reveals its full size: `'hover'` (default) is the pointer-only hover card; `'lightbox'` opens the image in a modal on click, which is the only one of the two a keyboard or touch user can reach. Forwarded to every `MessageBody` this thread renders, and inert for non-image tiles, which keep the hover card. |
 | `codeHighlight` | `code-highlight` | `undefined \| false \| true` | Enable Shiki syntax highlighting in code blocks. Turn off to render plain `<pre>` blocks (lighter, no highlighter load). Default true. |
 | `reasoning` | `reasoning` | `undefined \| "full" \| "compact" \| "off"` | How `reasoning` parts render across the thread. `'full'` (default) is the current collapsible-disclosure behavior; `'compact'` shows only a shimmer loader while a reasoning part streams and nothing once it settles (no expandable detail); `'off'` renders reasoning parts not at all. Forwarded to every `MessageBody` as `reasoningMode`. |
 | `reasoningOpen` | `reasoning-open` | `undefined \| false \| true` | Seeds the reasoning disclosure open AND keeps it tracking the stream (open while streaming, closes when it settles): the pre-Task-19f `full` behavior. Default false/absent: the panel starts closed (just the "Thinking" shimmer chip) and only opens on click, the current default (owner ruling, 2026-08-26). Meaningless when `reasoning` is `'compact'` or `'off'`. Forwarded to every `MessageBody` as `reasoningDefaultOpen`. |
@@ -2672,6 +2674,49 @@ _No events._
 | Part | Description |
 |---|---|
 | `::part(group)` | The flex frame that owns the gap between the kbd elements inside it. — `kai-kbd-group::part(group) { gap: 0.375rem }` |
+
+---
+
+### `kai-lightbox` / `Lightbox`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `theme` | `theme` | `"light" \| "dark" \| "auto"` | Color mode (`auto` follows prefers-color-scheme). |
+| `open` | `open` | `undefined \| false \| true` | Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute, while the trigger click still works). Set `el.open = true`, or `<kai-lightbox open>`; listen for `kai-open-change`. |
+| `defaultOpen` | `default-open` | `undefined \| false \| true` | Initial open state on mount (uncontrolled seed). |
+| `disabled` | `disabled` | `undefined \| false \| true` | Take away the PROGRAMMATIC open path only: `show()` becomes a no-op and `toggle()` closes rather than opens. The trigger, the `open` attribute and `hide()` are untouched. These are the disclosure semantics every overlay in the kit shares; see ../disclosure. |
+| `label` | `label` | `undefined \| string` | Accessible name for the modal (`aria-label`), for a lightbox whose content carries no heading. Without one the panel is an UNNAMED `role="dialog"`, which is a WCAG failure, so name it. |
+
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `kai-open-change` | `CustomEvent<{ open: false \| true }>` | The modal opened or closed (trigger click, Escape, backdrop click, or a method). |
+
+**Methods** (call on the element instance: `document.querySelector('kai-lightbox').show()`):
+
+| Method | Signature | Description |
+|---|---|---|
+| `show` | `(): void` | Open it programmatically (no-op while disabled). |
+| `hide` | `(): void` | Close it programmatically. |
+| `toggle` | `(): void` | Flip the open state (closes while disabled). |
+
+**Slots** (project your own markup via `slot="name"` on a light-DOM child):
+
+| Slot | Mode | Description |
+|---|---|---|
+| _(default)_ | inject | The TRIGGER the modal opens from: plain markup of your own, and optional. With nothing here the element renders no button and you drive it from `show()` or the `open` attribute. The zoomed media is the `content` slot. |
+| `content` | replace | The media the modal shows; the default slot is the trigger. |
+
+**Styleable parts** (restyle from outside via `kai-lightbox::part(name)`):
+
+| Part | Description |
+|---|---|
+| `::part(backdrop)` | The full-area scrim behind the zoomed media. Darken, blur or recolor it from outside; it is what dims the page the modal covers. — `kai-lightbox::part(backdrop) { background: rgb(0 0 0 / 0.8) }` |
+| `::part(panel)` | The centered modal panel that shrink-wraps your media (the `85vh`/`90vw` image clamp lives here, not on your markup). Cap its width or round its corners from outside. — `kai-lightbox::part(panel) { max-width: 90vw }` |
+| `::part(body)` | The region holding whatever you put in `slot="content"`. Padding is zeroed by default so the clamp is the viewport rather than viewport-minus-padding; add an inset from outside. — `kai-lightbox::part(body) { padding: 0.5rem }` |
 
 ---
 
@@ -4148,6 +4193,7 @@ _No events._
 | `proseSize` | `prose-size` | `undefined \| "xs" \| "sm" \| "base" \| "lg"` | Body/prose font scale for rendered markdown (`'xs' \| 'sm' \| 'base' \| 'lg'`). Defaults to `'sm'`. |
 | `codeTheme` | `code-theme` | `undefined \| string` | Shiki theme name for syntax-highlighted code blocks (e.g. `'github-dark-dimmed'`). |
 | `codeHighlight` | `code-highlight` | `undefined \| false \| true` | Enable Shiki syntax highlighting in code blocks. Turn off to render plain `<pre>` blocks (lighter, no highlighter load). Default true. |
+| `imagePreview` | `image-preview` | `undefined \| "hover" \| "lightbox"` | How an image tile in a message's attachment grid reveals its full size: `hover` (default) is the pointer-only hover card, `lightbox` opens the image in a modal on click. Attribute: `image-preview`. Inert for non-image tiles. |
 | `actionsReveal` | `actions-reveal` | `undefined \| "always" \| "hover"` | Whether each message's action bar is always visible (`'always'`, default) or only revealed on hover of that message row (`'hover'`). |
 | `scrollButton` | `scroll-button` | `undefined \| false \| true` | Show the scroll-to-bottom button inside the scroll area. Default true. |
 | `class` | `class` | `undefined \| string` | Extra classes applied to the thread's inner root. |

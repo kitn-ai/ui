@@ -20,7 +20,15 @@ import {
   AttachmentHoverCardContent,
   getAttachmentLabel,
   getMediaCategory,
+  useAttachmentsContext,
+  type AttachmentData,
+  type AttachmentImagePreview,
 } from "../attachments/attachments";
+import {
+  Lightbox,
+  LightboxTrigger,
+  LightboxContent,
+} from "../lightbox/lightbox";
 import { Source, SourceTrigger, SourceContent, SourceList } from "../source/source";
 import { CardRenderer, type CardSchemaMap } from "../card/card-renderer";
 import type { CardComponentMap } from "../card/card-registry";
@@ -389,6 +397,12 @@ export interface MessageBodyProps {
    *  citation / sources row, a token-cost / latency line. In the `<kai-message>`
    *  shadow this is `<slot name="after-body" />`. */
   afterBody?: JSX.Element;
+  /** How an image tile in this message's attachment grid reveals its full size:
+   *  a hover card (`'hover'`, the default) or a click-to-open lightbox. Forwarded
+   *  to the body's own `<Attachments>` grid, which publishes it on context for
+   *  the tiles to read — so the choice is made in ONE place, the container.
+   *  Absent means today's rendering, byte-for-byte. */
+  imagePreview?: AttachmentImagePreview;
 }
 
 /** One render group over an ordered `parts` array. Two part types collapse runs:
@@ -471,6 +485,83 @@ function partAs<T extends MessagePart['type']>(
 }
 
 /**
+ * One file tile in a message's attachment grid.
+ *
+ * ★ A COMPONENT OF ITS OWN, and for one reason: the lightbox is selected by
+ * `AttachmentsContext.imagePreview`, which is provided by the `<Attachments>`
+ * container FURTHER DOWN this same JSX tree. `useContext` reads from the owner
+ * scope, so the read has to happen below that provider — inline in `MessageBody`
+ * it would find no context and take the `'hover'` fallback every time, which is
+ * a lightbox prop that looks wired and never opens.
+ *
+ * The value is read through the context getter rather than destructured, for the
+ * same reason `<Attachment>` does not destructure `variant`: the container's prop
+ * can change after mount and a captured value would freeze the tile at its first
+ * render.
+ *
+ * ★ ONLY AN IMAGE GETS THE LIGHTBOX, and only when the container asked for it.
+ * Every other tile keeps the hover card, which is a real upgrade for them rather
+ * than a redundant one: it carries the filename and media type a grid tile could
+ * not fit. A lightbox around a PDF tile would be a modal that opens onto an icon.
+ */
+function AttachmentTile(props: { data: AttachmentData }) {
+  const ctx = useAttachmentsContext();
+  const isImage = () =>
+    getMediaCategory(props.data) === 'image' && props.data.type === 'file' && !!props.data.url;
+  const label = () => getAttachmentLabel(props.data);
+
+  return (
+    <Attachment data={props.data}>
+      <Show
+        when={isImage() && ctx.imagePreview === 'lightbox'}
+        fallback={
+          <AttachmentHoverCard>
+            <AttachmentHoverCardTrigger class="block size-full">
+              <AttachmentPreview />
+              <AttachmentInfo />
+            </AttachmentHoverCardTrigger>
+            <AttachmentHoverCardContent>
+              {/* An image gets the full preview; everything else
+                  gets the name and type the tile could not fit. */}
+              <Show
+                when={isImage()}
+                fallback={
+                  <>
+                    <div class="text-body font-medium">{label()}</div>
+                    <Show when={props.data.mediaType}>
+                      <div class="text-muted-foreground text-caption">{props.data.mediaType}</div>
+                    </Show>
+                  </>
+                }
+              >
+                <img
+                  alt={label()}
+                  class="block max-h-64 max-w-xs rounded object-contain"
+                  src={props.data.url}
+                />
+              </Show>
+            </AttachmentHoverCardContent>
+          </AttachmentHoverCard>
+        }
+      >
+        <Lightbox>
+          <LightboxTrigger class="block size-full">
+            <AttachmentPreview />
+          </LightboxTrigger>
+          <LightboxContent label={label()}>
+            <img
+              alt={label()}
+              class="block"
+              src={props.data.url}
+            />
+          </LightboxContent>
+        </Lightbox>
+      </Show>
+    </Attachment>
+  );
+}
+
+/**
  * The shared message body: the message's `parts` rendered in a single ordered
  * pass (text, reasoning, tool calls, generative-UI cards, citations and file
  * attachments interleaved exactly as they appear), followed by the action bar.
@@ -544,50 +635,12 @@ function MessageBody(props: MessageBodyProps) {
                    no focus, no tap required — and the hover card is an upgrade
                    to the full name and media type rather than the only way to
                    get either. */
-                <Attachments variant="grid" class={props.isUser ? 'mb-2 ml-auto' : 'mb-2'}>
+                <Attachments variant="grid" imagePreview={props.imagePreview} class={props.isUser ? 'mb-2 ml-auto' : 'mb-2'}>
                   {/* Reference-keyed <For> is right HERE: the run's part objects
                       are carried over untouched by the folds, and an attachment
                       holds no state worth preserving. */}
                   <For each={g().parts}>
-                    {(fp) => (
-                      <Attachment data={fp.attachment}>
-                        <AttachmentHoverCard>
-                          <AttachmentHoverCardTrigger class="block size-full">
-                            <AttachmentPreview />
-                            <AttachmentInfo />
-                          </AttachmentHoverCardTrigger>
-                          <AttachmentHoverCardContent>
-                            {/* An image gets the full preview; everything else
-                                gets the name and type the tile could not fit. */}
-                            <Show
-                              when={
-                                getMediaCategory(fp.attachment) === 'image' &&
-                                fp.attachment.type === 'file' &&
-                                fp.attachment.url
-                              }
-                              fallback={
-                                <>
-                                  <div class="text-body font-medium">
-                                    {getAttachmentLabel(fp.attachment)}
-                                  </div>
-                                  <Show when={fp.attachment.mediaType}>
-                                    <div class="text-muted-foreground text-caption">
-                                      {fp.attachment.mediaType}
-                                    </div>
-                                  </Show>
-                                </>
-                              }
-                            >
-                              <img
-                                alt={getAttachmentLabel(fp.attachment)}
-                                class="block max-h-64 max-w-xs rounded object-contain"
-                                src={fp.attachment.url}
-                              />
-                            </Show>
-                          </AttachmentHoverCardContent>
-                        </AttachmentHoverCard>
-                      </Attachment>
-                    )}
+                    {(fp) => <AttachmentTile data={fp.attachment} />}
                   </For>
                 </Attachments>
               )}

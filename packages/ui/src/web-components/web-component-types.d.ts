@@ -204,6 +204,8 @@ export interface KaiAttachmentsElement extends HTMLElement {
   variant?: "grid" | "inline" | "list";
   /** Wrap each item in a hover card that previews its details. */
   hoverCard?: boolean;
+  /** How an image item previews: `hover` = the hover card, `lightbox` = click the tile to open the image full-size in a dialog. Attribute: `image-preview`. Inert for non-image items, which have no image for a dialog to show. */
+  imagePreview?: "hover" | "lightbox";
   /** Show a remove button per item; clicking it fires a `kai-remove` event. */
   removable?: boolean;
   /** Also show the media type beneath the filename (non-grid variants). */
@@ -382,6 +384,8 @@ export interface KaiChatElement extends HTMLElement {
   proseSize?: "xs" | "sm" | "base" | "lg";
   /** Shiki theme name for syntax-highlighted code blocks (e.g. `'github-dark-dimmed'`). */
   codeTheme?: string;
+  /** How an image tile in a message's attachment grid reveals its full size: `'hover'` (default) is the pointer-only hover card; `'lightbox'` opens the image in a modal on click, which is the only one of the two a keyboard or touch user can reach. Forwarded to every `MessageBody` this thread renders, and inert for non-image tiles, which keep the hover card. */
+  imagePreview?: "hover" | "lightbox";
   /** Enable Shiki syntax highlighting in code blocks. Turn off to render plain `<pre>` blocks (lighter, no highlighter load). Default true. */
   codeHighlight?: boolean;
   /** How `reasoning` parts render across the thread. `'full'` (default) is the current collapsible-disclosure behavior; `'compact'` shows only a shimmer loader while a reasoning part streams and nothing once it settles (no expandable detail); `'off'` renders reasoning parts not at all. Forwarded to every `MessageBody` as `reasoningMode`. */
@@ -1053,6 +1057,25 @@ export interface KaiKbdElement extends HTMLElement {
 export interface KaiKbdGroupElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
+}
+
+export interface KaiLightboxElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: "light" | "dark" | "auto";
+  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute, while the trigger click still works). Set `el.open = true`, or `<kai-lightbox open>`; listen for `kai-open-change`. */
+  open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** Take away the PROGRAMMATIC open path only: `show()` becomes a no-op and `toggle()` closes rather than opens. The trigger, the `open` attribute and `hide()` are untouched. These are the disclosure semantics every overlay in the kit shares; see ../disclosure. */
+  disabled?: boolean;
+  /** Accessible name for the modal (`aria-label`), for a lightbox whose content carries no heading. Without one the panel is an UNNAMED `role="dialog"`, which is a WCAG failure, so name it. */
+  label?: string;
+  /** Open it programmatically (no-op while disabled). */
+  show(): void;
+  /** Close it programmatically. */
+  hide(): void;
+  /** Flip the open state (closes while disabled). */
+  toggle(): void;
 }
 
 export interface KaiLinkPreviewElement extends HTMLElement {
@@ -1855,6 +1878,8 @@ export interface KaiThreadElement extends HTMLElement {
   codeTheme?: string;
   /** Enable Shiki syntax highlighting in code blocks. Turn off to render plain `<pre>` blocks (lighter, no highlighter load). Default true. */
   codeHighlight?: boolean;
+  /** How an image tile in a message's attachment grid reveals its full size: `hover` (default) is the pointer-only hover card, `lightbox` opens the image in a modal on click. Attribute: `image-preview`. Inert for non-image tiles. */
+  imagePreview?: "hover" | "lightbox";
   /** Whether each message's action bar is always visible (`'always'`, default) or only revealed on hover of that message row (`'hover'`). */
   actionsReveal?: "always" | "hover";
   /** Show the scroll-to-bottom button inside the scroll area. Default true. */
@@ -2065,6 +2090,7 @@ declare global {
     'kai-input': KaiInputElement;
     'kai-kbd': KaiKbdElement;
     'kai-kbd-group': KaiKbdGroupElement;
+    'kai-lightbox': KaiLightboxElement;
     'kai-link-preview': KaiLinkPreviewElement;
     'kai-loader': KaiLoaderElement;
     'kai-markdown': KaiMarkdownElement;
@@ -2181,6 +2207,7 @@ declare module 'react' {
       'kai-input': KaiElementJsxProps;
       'kai-kbd': KaiElementJsxProps;
       'kai-kbd-group': KaiElementJsxProps;
+      'kai-lightbox': KaiElementJsxProps;
       'kai-link-preview': KaiElementJsxProps;
       'kai-loader': KaiElementJsxProps;
       'kai-markdown': KaiElementJsxProps;
@@ -2306,6 +2333,8 @@ export interface KaiAttachmentsElementProps {
   variant?: "grid" | "inline" | "list";
   /** Wrap each item in a hover card that previews its details. */
   hoverCard?: boolean;
+  /** How an image item previews: `hover` = the hover card, `lightbox` = click the tile to open the image full-size in a dialog. Attribute: `image-preview`. Inert for non-image items, which have no image for a dialog to show. */
+  imagePreview?: "hover" | "lightbox";
   /** Show a remove button per item; clicking it fires a `kai-remove` event. */
   removable?: boolean;
   /** Also show the media type beneath the filename (non-grid variants). */
@@ -2466,6 +2495,8 @@ export interface KaiChatElementProps {
   proseSize?: "xs" | "sm" | "base" | "lg";
   /** Shiki theme name for syntax-highlighted code blocks (e.g. `'github-dark-dimmed'`). */
   codeTheme?: string;
+  /** How an image tile in a message's attachment grid reveals its full size: `'hover'` (default) is the pointer-only hover card; `'lightbox'` opens the image in a modal on click, which is the only one of the two a keyboard or touch user can reach. Forwarded to every `MessageBody` this thread renders, and inert for non-image tiles, which keep the hover card. */
+  imagePreview?: "hover" | "lightbox";
   /** Enable Shiki syntax highlighting in code blocks. Turn off to render plain `<pre>` blocks (lighter, no highlighter load). Default true. */
   codeHighlight?: boolean;
   /** How `reasoning` parts render across the thread. `'full'` (default) is the current collapsible-disclosure behavior; `'compact'` shows only a shimmer loader while a reasoning part streams and nothing once it settles (no expandable detail); `'off'` renders reasoning parts not at all. Forwarded to every `MessageBody` as `reasoningMode`. */
@@ -3005,6 +3036,19 @@ export interface KaiKbdElementProps {
 export interface KaiKbdGroupElementProps {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
+}
+
+export interface KaiLightboxElementProps {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: "light" | "dark" | "auto";
+  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute, while the trigger click still works). Set `el.open = true`, or `<kai-lightbox open>`; listen for `kai-open-change`. */
+  open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** Take away the PROGRAMMATIC open path only: `show()` becomes a no-op and `toggle()` closes rather than opens. The trigger, the `open` attribute and `hide()` are untouched. These are the disclosure semantics every overlay in the kit shares; see ../disclosure. */
+  disabled?: boolean;
+  /** Accessible name for the modal (`aria-label`), for a lightbox whose content carries no heading. Without one the panel is an UNNAMED `role="dialog"`, which is a WCAG failure, so name it. */
+  label?: string;
 }
 
 export interface KaiLinkPreviewElementProps {
@@ -3715,6 +3759,8 @@ export interface KaiThreadElementProps {
   codeTheme?: string;
   /** Enable Shiki syntax highlighting in code blocks. Turn off to render plain `<pre>` blocks (lighter, no highlighter load). Default true. */
   codeHighlight?: boolean;
+  /** How an image tile in a message's attachment grid reveals its full size: `hover` (default) is the pointer-only hover card, `lightbox` opens the image in a modal on click. Attribute: `image-preview`. Inert for non-image tiles. */
+  imagePreview?: "hover" | "lightbox";
   /** Whether each message's action bar is always visible (`'always'`, default) or only revealed on hover of that message row (`'hover'`). */
   actionsReveal?: "always" | "hover";
   /** Show the scroll-to-bottom button inside the scroll area. Default true. */
@@ -4104,6 +4150,11 @@ export interface KaiKbdElementEvents {
 
 export interface KaiKbdGroupElementEvents {
 
+}
+
+export interface KaiLightboxElementEvents {
+  /** The modal opened or closed (trigger click, Escape, backdrop click, or a method). */
+  onKaiOpenChange?: (event: CustomEvent<{ open: boolean }>) => void;
 }
 
 export interface KaiLinkPreviewElementEvents {
@@ -4534,6 +4585,8 @@ declare module 'vue' {
     KaiKbd: KaiVueElement<KaiKbdElementProps, KaiKbdElementEvents>;
     'kai-kbd-group': KaiVueElement<KaiKbdGroupElementProps, KaiKbdGroupElementEvents>;
     KaiKbdGroup: KaiVueElement<KaiKbdGroupElementProps, KaiKbdGroupElementEvents>;
+    'kai-lightbox': KaiVueElement<KaiLightboxElementProps, KaiLightboxElementEvents>;
+    KaiLightbox: KaiVueElement<KaiLightboxElementProps, KaiLightboxElementEvents>;
     'kai-link-preview': KaiVueElement<KaiLinkPreviewElementProps, KaiLinkPreviewElementEvents>;
     KaiLinkPreview: KaiVueElement<KaiLinkPreviewElementProps, KaiLinkPreviewElementEvents>;
     'kai-loader': KaiVueElement<KaiLoaderElementProps, KaiLoaderElementEvents>;

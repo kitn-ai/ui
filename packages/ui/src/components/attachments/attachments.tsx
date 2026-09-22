@@ -15,6 +15,17 @@ import { DEFAULT_MEDIA_POLICY } from '../../wire/media-types';
 import type { AttachmentData, AttachmentMediaCategory, AttachmentVariant } from '../../primitives/attachment-types';
 export type { AttachmentData, AttachmentMediaCategory, AttachmentVariant } from '../../primitives/attachment-types';
 
+/**
+ * How an image tile reveals its full size.
+ *
+ * `hover` is the pointer-only hover card the thread has always shipped;
+ * `lightbox` is a click-to-open modal, which is the only one of the two a
+ * keyboard or touch user can reach. Named here once because the container's
+ * prop and the context it publishes are the same union, and a second spelling
+ * of it is how the two drift.
+ */
+export type AttachmentImagePreview = 'hover' | 'lightbox';
+
 // ============================================================================
 // Types
 // ============================================================================
@@ -116,6 +127,7 @@ export const getAttachmentLabel = (data: AttachmentData): string => {
 
 interface AttachmentsContextValue {
   variant: AttachmentVariant;
+  imagePreview: AttachmentImagePreview;
 }
 
 const AttachmentsContext = createContext<AttachmentsContextValue>();
@@ -133,8 +145,13 @@ const AttachmentContext = createContext<AttachmentContextValue>();
 // Hooks
 // ============================================================================
 
+// The fallback is what a consumer's own tile sees when it composes
+// `<Attachment>` outside an `<Attachments>` container: an unchecked tile is a
+// grid tile, and it previews on hover. Both defaults are spelled here rather
+// than left `undefined` so a consumer reading through the getter never has to
+// branch on the context being missing.
 export const useAttachmentsContext = () =>
-  useContext(AttachmentsContext) ?? { variant: 'grid' as const };
+  useContext(AttachmentsContext) ?? { variant: 'grid' as const, imagePreview: 'hover' as const };
 
 export const useAttachmentContext = () => {
   const ctx = useContext(AttachmentContext);
@@ -150,14 +167,20 @@ export const useAttachmentContext = () => {
 
 export interface AttachmentsProps extends JSX.HTMLAttributes<HTMLDivElement> {
   variant?: AttachmentVariant;
+  /** How an image tile reveals its full size. Default `hover`. */
+  imagePreview?: AttachmentImagePreview;
 }
 
 function Attachments(props: AttachmentsProps) {
-  const [local, rest] = splitProps(props, ['variant', 'class', 'children']);
+  const [local, rest] = splitProps(props, ['variant', 'imagePreview', 'class', 'children']);
   const variant = () => local.variant ?? 'grid';
+  const imagePreview = () => local.imagePreview ?? 'hover';
 
   return (
-    <AttachmentsContext.Provider value={{ get variant() { return variant(); } }}>
+    <AttachmentsContext.Provider value={{
+      get variant() { return variant(); },
+      get imagePreview() { return imagePreview(); },
+    }}>
       <div
         class={cn(
           'flex items-start',

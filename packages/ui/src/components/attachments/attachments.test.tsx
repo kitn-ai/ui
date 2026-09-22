@@ -18,6 +18,7 @@ import {
   AttachmentInfo,
   AttachmentHoverCard,
   AttachmentHoverCardTrigger,
+  useAttachmentsContext,
   type AttachmentData,
   type AttachmentVariant,
 } from './attachments';
@@ -102,5 +103,48 @@ describe('AttachmentHoverCardTrigger', () => {
     const trigger = container.querySelector('span');
     expect(trigger).toBeTruthy();
     expect(trigger!.className).toContain('flex');
+  });
+});
+
+/**
+ * `imagePreview` is the container's choice of how an image tile reveals its full
+ * size, and the tile reads it OFF CONTEXT — which is why the value's reactivity
+ * is what these pin, not just its presence. A consumer's tile composes
+ * `<Attachment>` itself, so the read is a getter on the provider and a captured
+ * value would freeze the affordance at whatever the container was on mount.
+ */
+describe('Attachments imagePreview', () => {
+  const Probe = () => {
+    const ctx = useAttachmentsContext();
+    return <span data-testid="probe">{ctx.imagePreview}</span>;
+  };
+
+  it('defaults to hover', () => {
+    const { getByTestId } = render(() => (
+      <Attachments>
+        <Probe />
+      </Attachments>
+    ));
+
+    expect(getByTestId('probe')).toHaveTextContent('hover');
+  });
+
+  it('publishes the lightbox choice and re-reads it when the container changes', () => {
+    const [preview, setPreview] = createSignal<'hover' | 'lightbox'>('lightbox');
+    const { getByTestId } = render(() => (
+      <Attachments imagePreview={preview()}>
+        <Probe />
+      </Attachments>
+    ));
+
+    expect(getByTestId('probe')).toHaveTextContent('lightbox');
+    setPreview('hover');
+    expect(getByTestId('probe')).toHaveTextContent('hover');
+  });
+
+  it('falls back to hover for a tile composed outside any container', () => {
+    const { getByTestId } = render(() => <Probe />);
+
+    expect(getByTestId('probe')).toHaveTextContent('hover');
   });
 });

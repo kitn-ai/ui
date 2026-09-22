@@ -402,6 +402,15 @@
         "displayType": "undefined | false | true"
       },
       {
+        "name": "imagePreview",
+        "type": "undefined | \"hover\" | \"lightbox\"",
+        "optional": true,
+        "scalar": true,
+        "description": "How an image item previews: `hover` = the hover card, `lightbox` = click the tile to open the image full-size in a dialog. Attribute: `image-preview`. Inert for non-image items, which have no image for a dialog to show.",
+        "default": "'hover'",
+        "displayType": "undefined | \"hover\" | \"lightbox\""
+      },
+      {
         "name": "removable",
         "type": "undefined | false | true",
         "optional": true,
@@ -472,6 +481,18 @@
       },
       {
         "name": "AttachmentEmpty",
+        "group": "Components"
+      },
+      {
+        "name": "Lightbox",
+        "group": "Components"
+      },
+      {
+        "name": "LightboxTrigger",
+        "group": "Components"
+      },
+      {
+        "name": "LightboxContent",
         "group": "Components"
       }
     ],
@@ -1405,6 +1426,14 @@
         "description": "Shiki theme name for syntax-highlighted code blocks (e.g. `'github-dark-dimmed'`).",
         "default": "'github-dark-dimmed'",
         "displayType": "undefined | string"
+      },
+      {
+        "name": "imagePreview",
+        "type": "undefined | \"hover\" | \"lightbox\"",
+        "optional": true,
+        "scalar": true,
+        "description": "How an image tile in a message's attachment grid reveals its full size: `'hover'` (default) is the pointer-only hover card; `'lightbox'` opens the image in a modal on click, which is the only one of the two a keyboard or touch user can reach. Forwarded to every `MessageBody` this thread renders, and inert for non-image tiles, which keep the hover card.",
+        "displayType": "undefined | \"hover\" | \"lightbox\""
       },
       {
         "name": "codeHighlight",
@@ -5186,6 +5215,127 @@
         "name": "group",
         "doc": "The flex frame that owns the gap between the kbd elements inside it.",
         "recipe": "kai-kbd-group::part(group) { gap: 0.375rem }"
+      }
+    ]
+  },
+  {
+    "tag": "kai-lightbox",
+    "className": "KaiLightboxElement",
+    "displayName": "Lightbox",
+    "props": [
+      {
+        "name": "theme",
+        "type": "\"light\" | \"dark\" | \"auto\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "default": "'auto'",
+        "universal": true,
+        "displayType": "\"light\" | \"dark\" | \"auto\""
+      },
+      {
+        "name": "open",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute, while the trigger click still works). Set `el.open = true`, or `<kai-lightbox open>`; listen for `kai-open-change`.",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "defaultOpen",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Initial open state on mount (uncontrolled seed).",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "disabled",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Take away the PROGRAMMATIC open path only: `show()` becomes a no-op and `toggle()` closes rather than opens. The trigger, the `open` attribute and `hide()` are untouched. These are the disclosure semantics every overlay in the kit shares; see ../disclosure.",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "label",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Accessible name for the modal (`aria-label`), for a lightbox whose content carries no heading. Without one the panel is an UNNAMED `role=\"dialog\"`, which is a WCAG failure, so name it.",
+        "displayType": "undefined | string"
+      }
+    ],
+    "events": [
+      {
+        "name": "kai-open-change",
+        "detail": "{ open: false | true }",
+        "description": "The modal opened or closed (trigger click, Escape, backdrop click, or a method).",
+        "displayDetail": "{ open: false | true }"
+      }
+    ],
+    "methods": [
+      {
+        "name": "show",
+        "params": "",
+        "returns": "void",
+        "description": "Open it programmatically (no-op while disabled)."
+      },
+      {
+        "name": "hide",
+        "params": "",
+        "returns": "void",
+        "description": "Close it programmatically."
+      },
+      {
+        "name": "toggle",
+        "params": "",
+        "returns": "void",
+        "description": "Flip the open state (closes while disabled)."
+      }
+    ],
+    "composedFrom": [
+      {
+        "name": "Lightbox",
+        "group": "Components"
+      },
+      {
+        "name": "LightboxTrigger",
+        "group": "Components"
+      },
+      {
+        "name": "LightboxContent",
+        "group": "Components"
+      }
+    ],
+    "tokens": [],
+    "slots": [
+      {
+        "name": "",
+        "mode": "inject",
+        "doc": "The TRIGGER the modal opens from: plain markup of your own, and optional. With nothing here the element renders no button and you drive it from `show()` or the `open` attribute. The zoomed media is the `content` slot."
+      },
+      {
+        "name": "content",
+        "mode": "replace",
+        "doc": "The media the modal shows; the default slot is the trigger."
+      }
+    ],
+    "parts": [
+      {
+        "name": "backdrop",
+        "doc": "The full-area scrim behind the zoomed media. Darken, blur or recolor it from outside; it is what dims the page the modal covers.",
+        "recipe": "kai-lightbox::part(backdrop) { background: rgb(0 0 0 / 0.8) }"
+      },
+      {
+        "name": "panel",
+        "doc": "The centered modal panel that shrink-wraps your media (the `85vh`/`90vw` image clamp lives here, not on your markup). Cap its width or round its corners from outside.",
+        "recipe": "kai-lightbox::part(panel) { max-width: 90vw }"
+      },
+      {
+        "name": "body",
+        "doc": "The region holding whatever you put in `slot=\"content\"`. Padding is zeroed by default so the clamp is the viewport rather than viewport-minus-padding; add an inset from outside.",
+        "recipe": "kai-lightbox::part(body) { padding: 0.5rem }"
       }
     ]
   },
@@ -9922,6 +10072,15 @@
         "description": "Enable Shiki syntax highlighting in code blocks. Turn off to render plain `<pre>` blocks (lighter, no highlighter load). Default true.",
         "default": "true",
         "displayType": "undefined | false | true"
+      },
+      {
+        "name": "imagePreview",
+        "type": "undefined | \"hover\" | \"lightbox\"",
+        "optional": true,
+        "scalar": true,
+        "description": "How an image tile in a message's attachment grid reveals its full size: `hover` (default) is the pointer-only hover card, `lightbox` opens the image in a modal on click. Attribute: `image-preview`. Inert for non-image tiles.",
+        "default": "'hover'",
+        "displayType": "undefined | \"hover\" | \"lightbox\""
       },
       {
         "name": "actionsReveal",

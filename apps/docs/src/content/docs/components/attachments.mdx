@@ -16,7 +16,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kai-lede">Render a set of file attachments — one element, three presentations chosen by a single attribute. Tiles for a gallery, chips for inline, rows for a list.</p>
 
-<Facts items={['Shadow DOM', '3 variants', 'Hover-card preview', 'Removable items']} />
+<Facts items={['Shadow DOM', '3 variants', 'Hover-card preview', 'Optional lightbox']} />
 
 ## Preview
 
@@ -61,6 +61,27 @@ Add `removable` for a per-item remove button (the **×**); it fires the `kai-rem
 Add `hover-card` to reveal each item's details on hover — useful on `grid`, where the tile shows only the image.
 
 <Example client:visible tag="kai-attachments" config={{ variant: 'grid', hoverCard: true }} data="images" />
+
+### Lightbox
+
+For a gallery where the point is looking at the picture, `image-preview="lightbox"` trades the hover card for a modal: click an image tile and it opens full-size, with Escape, a backdrop click or the close control to dismiss it. It applies to image items only; every other item keeps the hover card, so one container can serve a mixed set.
+
+<Example client:visible tag="kai-attachments" config={{ variant: 'grid', imagePreview: 'lightbox' }} data="images" />
+
+The modal is the kit's own [Lightbox](/components/lightbox/), which composes the kit's Dialog: it portals through the host's mount point, moves focus into the panel and restores it on close, traps Tab, and carries `role="dialog" aria-modal`. Nothing about it is a second modal implementation, so an attachment lightbox behaves like every other dialog in the kit for keyboard and screen-reader users.
+
+Composing your own tile? The trio is public in the Solid entry:
+
+```tsx
+<Lightbox>
+  <LightboxTrigger>
+    <AttachmentPreview />
+  </LightboxTrigger>
+  <LightboxContent label="Screenshot">
+    <img src={url} alt="" class="block" />
+  </LightboxContent>
+</Lightbox>
+```
 
 ## Props
 

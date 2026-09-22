@@ -395,7 +395,14 @@ export type {
   AttachmentsProps, AttachmentProps, AttachmentPreviewProps,
   AttachmentInfoProps, AttachmentRemoveProps, AttachmentEmptyProps,
   AttachmentHoverCardProps, AttachmentHoverCardTriggerProps, AttachmentHoverCardContentProps,
+  AttachmentImagePreview,
 } from './components/attachments/attachments';
+export {
+  Lightbox, LightboxTrigger, LightboxContent,
+} from './components/lightbox/lightbox';
+export type {
+  LightboxProps, LightboxTriggerProps, LightboxContentProps,
+} from './components/lightbox/lightbox';
 
 // Chat message types — public API for consumers who need to type their own message arrays.
 // NOTE: chat-types.ts also exports an unrelated `Source` interface (a citation), and

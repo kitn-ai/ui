@@ -919,6 +919,7 @@ describe('WEB_COMPONENT_COMPOSITION registry (single source of truth the build e
       'kai-input',
       'kai-kbd',
       'kai-kbd-group',
+      'kai-lightbox',
       'kai-menu',
       'kai-message',
       'kai-nav',

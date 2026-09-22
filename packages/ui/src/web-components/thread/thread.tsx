@@ -25,6 +25,10 @@ interface Props extends Record<string, unknown> {
   /** Enable Shiki syntax highlighting in code blocks. Turn off to render plain
    *  `<pre>` blocks (lighter, no highlighter load). Default true. */
   codeHighlight?: boolean;
+  /** How an image tile in a message's attachment grid reveals its full size:
+   *  `hover` (default) is the pointer-only hover card, `lightbox` opens the image
+   *  in a modal on click. Attribute: `image-preview`. Inert for non-image tiles. */
+  imagePreview?: 'hover' | 'lightbox';
   /** Whether each message's action bar is always visible (`'always'`, default) or
    *  only revealed on hover of that message row (`'hover'`). */
   actionsReveal?: 'always' | 'hover';
@@ -80,6 +84,7 @@ defineWebComponent<Props, Events>('kai-thread', {
   proseSize: 'sm',
   codeTheme: 'github-dark-dimmed',
   codeHighlight: true,
+  imagePreview: 'hover',
   actionsReveal: 'always',
   scrollButton: true,
   class: undefined,
@@ -131,6 +136,7 @@ defineWebComponent<Props, Events>('kai-thread', {
         proseSize={props.proseSize as ProseSize}
         codeTheme={props.codeTheme as string}
         codeHighlight={flag('codeHighlight')}
+        imagePreview={(props.imagePreview as 'hover' | 'lightbox' | undefined) ?? 'hover'}
         actionsReveal={props.actionsReveal as 'always' | 'hover'}
         scrollButton={props.scrollButton !== false}
         cardTypes={cardComponentsFromTags(props.cardTypes as Record<string, string> | undefined, (props as { theme?: string }).theme)}

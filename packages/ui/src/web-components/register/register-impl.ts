@@ -102,6 +102,7 @@ import '../pane/pane-group';
 import '../pane/pane-grid';
 import '../agent-card/agent-card';
 import '../dialog/dialog';
+import '../lightbox/lightbox';
 import '../dock/dock';
 // Input & search field family
 import '../input/input';
