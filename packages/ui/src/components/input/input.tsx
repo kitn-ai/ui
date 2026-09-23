@@ -20,9 +20,9 @@ export interface InputProps extends Omit<JSX.InputHTMLAttributes<HTMLInputElemen
   size?: 'sm' | 'md';
   /** Force the invalid (destructive-border) state without an `error` string. */
   invalid?: boolean;
-  /** Leading affix (icon, unit). Rendered inside the field row, before the input. */
+  /** Affix inside the field row before the input, wrapped by the row's focus ring. */
   leading?: JSX.Element;
-  /** Trailing affix (icon, inline button). Rendered inside the field row, after the input. */
+  /** Affix inside the field row after the input, wrapped by the row's focus ring. */
   trailing?: JSX.Element;
   /** Fires per keystroke with the value: canonical when a mask is active, the raw
    *  field text otherwise. */
@@ -45,8 +45,8 @@ export interface InputProps extends Omit<JSX.InputHTMLAttributes<HTMLInputElemen
   /** Placeholder shown at unfilled positions, aligned to `format`; without it the
    *  field shows only up to the last typed character. */
   guide?: string;
-  /** Sets the `inputmode`, `autocomplete` and casing attributes of the field and picks
-   *  the canonical value; never masks on its own. */
+  /** Field type that decides `inputmode`, `autocomplete`, casing and the canonical
+   *  value. Never masks on its own. */
   semantic?: FieldSemanticType;
   /** Case folding applied to typed and pasted text. Defaults to `preserve`. */
   caseMode?: CaseMode;

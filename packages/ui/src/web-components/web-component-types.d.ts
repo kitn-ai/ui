@@ -372,69 +372,69 @@ export interface KaiChatElement extends HTMLElement {
   value?: string | ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: string; promptText?: string; data?: Record<string, unknown> } })[];
   /** Placeholder text shown in the empty input. */
   placeholder?: string;
-  /** When true, shows the loading/streaming state and disables submit (use while awaiting the assistant's reply). */
+  /** Disables submit and shows the streaming state. */
   loading?: boolean;
-  /** Starter prompts shown above the input when the thread is empty. Clicking one follows `suggestionMode`. Set as a JS property. */
+  /** Starter prompts shown above the input while the thread is empty. */
   suggestions?: string[];
-  /** What clicking a suggestion does: `'submit'` (default) sends it immediately as if typed and submitted; `'fill'` just places it in the input. */
+  /** What clicking a suggestion does: `'submit'` (default) sends it, `'fill'` only fills the input. */
   suggestionMode?: "submit" | "fill";
   /** Keep suggestions visible after the conversation starts; they otherwise hide once `messages` is non-empty. Default false. */
   persistSuggestions?: boolean;
-  /** Body/prose font scale for rendered markdown (`'xs' | 'sm' | 'base' | 'lg'`). Defaults to `'sm'`. */
+  /** Body/prose font scale for rendered markdown. Defaults to `'sm'`. */
   proseSize?: "xs" | "sm" | "base" | "lg";
   /** Shiki theme name for syntax-highlighted code blocks (e.g. `'github-dark-dimmed'`). */
   codeTheme?: string;
-  /** How an image tile reveals full size. Default `'hover'` is a hover card; `'lightbox'` opens a modal on click, the only one keyboard/touch can reach. */
+  /** How an image tile reveals full size. `'lightbox'` is the only value keyboard and touch can reach. Default `'hover'`. */
   imagePreview?: "hover" | "lightbox";
-  /** Enable Shiki syntax highlighting in code blocks. Turn off to render plain `<pre>` blocks (lighter, no highlighter load). Default true. */
+  /** Renders plain `<pre>` blocks with no highlighter load when false. Default true. */
   codeHighlight?: boolean;
-  /** How reasoning parts render. Default `'full'` is the collapsible disclosure, `'compact'` streams only a shimmer, `'off'` renders none. */
+  /** How reasoning parts render. `'compact'` streams only a shimmer and `'off'` renders none. Default `'full'`. */
   reasoning?: "full" | "compact" | "off";
   /** Seeds the reasoning disclosure open and keeps it tracking the stream. Default false; inert unless `reasoning` is `'full'`. */
   reasoningOpen?: boolean;
-  /** Optional header title shown on the left of the header. */
+  /** Title shown at the start of the header bar. */
   chatTitle?: string;
-  /** Optional model list. When set (>1 model) a ModelSwitcher is shown in the header and a `kai-model-change` event fires on selection. */
+  /** Model list; more than one renders a switcher in the header. */
   models?: { id: string; name: string; provider?: string; description?: string; group?: string }[];
   /** The currently selected model id (pairs with `models`). */
   currentModel?: string;
-  /** Optional context-window token usage. When set, a Context token meter is shown in the header. */
+  /** Token usage, shown as a context meter in the header. */
   context?: { usedTokens: number; maxTokens: number; inputTokens?: number; outputTokens?: number; estimatedCost?: number };
   /** Show the scroll-to-bottom button inside the scroll area. Default true. */
   scrollButton?: boolean;
-  /** Whether the host has `slot="header-start"` content (left of the title). Set by the `<kai-chat>` facade so a custom control forces the header open. */
+  /** Whether `slot="header-start"` content is projected, which forces the header row open. */
   headerStart?: boolean;
   /** Whether the host has `slot="header-end"` content (right of the controls). */
   headerEnd?: boolean;
-  /** REPLACE: full custom header in place of the built-in title/model/context bar. */
+  /** Replaces the built-in header bar with `slot="header"` content. */
   headerFull?: boolean;
-  /** REPLACE: custom home-tab content in place of the built-in home screen; rendered only while the home view shows, so only with `home` set. */
+  /** Replaces the built-in home screen with `slot="home"` content, while the home view shows. */
   homeFull?: boolean;
-  /** INJECT: left sidebar column (e.g. a conversation list / your own nav). */
+  /** Whether `slot="sidebar"` content is projected, which shows the left sidebar column. */
   sidebar?: boolean;
-  /** REPLACE: custom zero-state in the message area while the thread is empty; the composer and its suggestions still render. */
+  /** Replaces the empty-state message area with `slot="empty"` content. The composer still renders. */
   empty?: boolean;
-  /** REPLACE: full custom composer in place of the built-in prompt input. The projected content wires its own submit (the data-flow boundary). */
+  /** Replaces the built-in composer with `slot="composer"` content, which wires its own submit. */
   composer?: boolean;
-  /** INJECT: accessory row just above the composer (e.g. extra actions). */
+  /** Whether `slot="composer-actions"` content is projected, which shows the row above the composer. */
   composerActions?: boolean;
-  /** INJECT: footer row below the composer (disclaimers, token meter, …). */
+  /** Whether `slot="footer"` content is projected, which shows the footer row below the composer. */
   footer?: boolean;
   /** Hides the built-in paperclip attach button; only an explicit `false` hides it. Default true. */
   attach?: boolean;
   /** Show a web-search (Globe) button in the input toolbar; calls `onWebSearch`. */
   webSearch?: boolean;
-  /** Show a Voice (Mic) button in the input toolbar; fires a `voice` event. */
+  /** Show a voice-input button in the input toolbar; calls `onVoice`. */
   voice?: boolean;
-  /** Rich entity triggers: each opens a caret-anchored menu that inserts an atomic pill (`/` skills, `@` agents). Set as a JS property. */
+  /** Rich entity triggers. Each opens a menu at the caret that inserts an atomic pill. */
   triggers?: { char: string; kind: string; items?: { id: string; label: string; icon?: string; description?: string; group?: string; kind?: string; promptText?: string; data?: Record<string, unknown> }[] }[];
   /** Default icon per entity kind (kind → image src) for pills/menu items. */
   kindIcons?: Record<string, string>;
-  /** Whether each message's action bar is always visible (`'always'`, default) or only revealed on hover of that message row (`'hover'`). */
+  /** Whether each message's action bar is always visible or revealed on hover of that row. Default `'always'`. */
   actionsReveal?: "always" | "hover";
-  /** Default action bar for user messages with no `actions` of their own; a message's own `actions` replaces it rather than merging. Set as JS properties. */
+  /** Default action bar for user messages that have no `actions` of their own; a message's own `actions` replaces it. */
   userActions?: ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: string; tooltip?: string })[];
-  /** See `userActions`, the assistant-role default. */
+  /** Default action bar for assistant messages, as `userActions` is for user ones. */
   assistantActions?: ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: string; tooltip?: string })[];
   /** Hide the citations row that consecutive `source` parts collapse into; absent or `false` renders it. */
   hideSources?: boolean;
@@ -2500,69 +2500,69 @@ export interface KaiChatElementProps {
   value?: string | ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: string; promptText?: string; data?: Record<string, unknown> } })[];
   /** Placeholder text shown in the empty input. */
   placeholder?: string;
-  /** When true, shows the loading/streaming state and disables submit (use while awaiting the assistant's reply). */
+  /** Disables submit and shows the streaming state. */
   loading?: boolean;
-  /** Starter prompts shown above the input when the thread is empty. Clicking one follows `suggestionMode`. Set as a JS property. */
+  /** Starter prompts shown above the input while the thread is empty. */
   suggestions?: string[];
-  /** What clicking a suggestion does: `'submit'` (default) sends it immediately as if typed and submitted; `'fill'` just places it in the input. */
+  /** What clicking a suggestion does: `'submit'` (default) sends it, `'fill'` only fills the input. */
   suggestionMode?: "submit" | "fill";
   /** Keep suggestions visible after the conversation starts; they otherwise hide once `messages` is non-empty. Default false. */
   persistSuggestions?: boolean;
-  /** Body/prose font scale for rendered markdown (`'xs' | 'sm' | 'base' | 'lg'`). Defaults to `'sm'`. */
+  /** Body/prose font scale for rendered markdown. Defaults to `'sm'`. */
   proseSize?: "xs" | "sm" | "base" | "lg";
   /** Shiki theme name for syntax-highlighted code blocks (e.g. `'github-dark-dimmed'`). */
   codeTheme?: string;
-  /** How an image tile reveals full size. Default `'hover'` is a hover card; `'lightbox'` opens a modal on click, the only one keyboard/touch can reach. */
+  /** How an image tile reveals full size. `'lightbox'` is the only value keyboard and touch can reach. Default `'hover'`. */
   imagePreview?: "hover" | "lightbox";
-  /** Enable Shiki syntax highlighting in code blocks. Turn off to render plain `<pre>` blocks (lighter, no highlighter load). Default true. */
+  /** Renders plain `<pre>` blocks with no highlighter load when false. Default true. */
   codeHighlight?: boolean;
-  /** How reasoning parts render. Default `'full'` is the collapsible disclosure, `'compact'` streams only a shimmer, `'off'` renders none. */
+  /** How reasoning parts render. `'compact'` streams only a shimmer and `'off'` renders none. Default `'full'`. */
   reasoning?: "full" | "compact" | "off";
   /** Seeds the reasoning disclosure open and keeps it tracking the stream. Default false; inert unless `reasoning` is `'full'`. */
   reasoningOpen?: boolean;
-  /** Optional header title shown on the left of the header. */
+  /** Title shown at the start of the header bar. */
   chatTitle?: string;
-  /** Optional model list. When set (>1 model) a ModelSwitcher is shown in the header and a `kai-model-change` event fires on selection. */
+  /** Model list; more than one renders a switcher in the header. */
   models?: { id: string; name: string; provider?: string; description?: string; group?: string }[];
   /** The currently selected model id (pairs with `models`). */
   currentModel?: string;
-  /** Optional context-window token usage. When set, a Context token meter is shown in the header. */
+  /** Token usage, shown as a context meter in the header. */
   context?: { usedTokens: number; maxTokens: number; inputTokens?: number; outputTokens?: number; estimatedCost?: number };
   /** Show the scroll-to-bottom button inside the scroll area. Default true. */
   scrollButton?: boolean;
-  /** Whether the host has `slot="header-start"` content (left of the title). Set by the `<kai-chat>` facade so a custom control forces the header open. */
+  /** Whether `slot="header-start"` content is projected, which forces the header row open. */
   headerStart?: boolean;
   /** Whether the host has `slot="header-end"` content (right of the controls). */
   headerEnd?: boolean;
-  /** REPLACE: full custom header in place of the built-in title/model/context bar. */
+  /** Replaces the built-in header bar with `slot="header"` content. */
   headerFull?: boolean;
-  /** REPLACE: custom home-tab content in place of the built-in home screen; rendered only while the home view shows, so only with `home` set. */
+  /** Replaces the built-in home screen with `slot="home"` content, while the home view shows. */
   homeFull?: boolean;
-  /** INJECT: left sidebar column (e.g. a conversation list / your own nav). */
+  /** Whether `slot="sidebar"` content is projected, which shows the left sidebar column. */
   sidebar?: boolean;
-  /** REPLACE: custom zero-state in the message area while the thread is empty; the composer and its suggestions still render. */
+  /** Replaces the empty-state message area with `slot="empty"` content. The composer still renders. */
   empty?: boolean;
-  /** REPLACE: full custom composer in place of the built-in prompt input. The projected content wires its own submit (the data-flow boundary). */
+  /** Replaces the built-in composer with `slot="composer"` content, which wires its own submit. */
   composer?: boolean;
-  /** INJECT: accessory row just above the composer (e.g. extra actions). */
+  /** Whether `slot="composer-actions"` content is projected, which shows the row above the composer. */
   composerActions?: boolean;
-  /** INJECT: footer row below the composer (disclaimers, token meter, …). */
+  /** Whether `slot="footer"` content is projected, which shows the footer row below the composer. */
   footer?: boolean;
   /** Hides the built-in paperclip attach button; only an explicit `false` hides it. Default true. */
   attach?: boolean;
   /** Show a web-search (Globe) button in the input toolbar; calls `onWebSearch`. */
   webSearch?: boolean;
-  /** Show a Voice (Mic) button in the input toolbar; fires a `voice` event. */
+  /** Show a voice-input button in the input toolbar; calls `onVoice`. */
   voice?: boolean;
-  /** Rich entity triggers: each opens a caret-anchored menu that inserts an atomic pill (`/` skills, `@` agents). Set as a JS property. */
+  /** Rich entity triggers. Each opens a menu at the caret that inserts an atomic pill. */
   triggers?: { char: string; kind: string; items?: { id: string; label: string; icon?: string; description?: string; group?: string; kind?: string; promptText?: string; data?: Record<string, unknown> }[] }[];
   /** Default icon per entity kind (kind → image src) for pills/menu items. */
   kindIcons?: Record<string, string>;
-  /** Whether each message's action bar is always visible (`'always'`, default) or only revealed on hover of that message row (`'hover'`). */
+  /** Whether each message's action bar is always visible or revealed on hover of that row. Default `'always'`. */
   actionsReveal?: "always" | "hover";
-  /** Default action bar for user messages with no `actions` of their own; a message's own `actions` replaces it rather than merging. Set as JS properties. */
+  /** Default action bar for user messages that have no `actions` of their own; a message's own `actions` replaces it. */
   userActions?: ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: string; tooltip?: string })[];
-  /** See `userActions`, the assistant-role default. */
+  /** Default action bar for assistant messages, as `userActions` is for user ones. */
   assistantActions?: ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: string; tooltip?: string })[];
   /** Hide the citations row that consecutive `source` parts collapse into; absent or `false` renders it. */
   hideSources?: boolean;

@@ -77,7 +77,7 @@ export interface UsePositionOptions {
   // trigger's subtree, so Solid's onCleanup never sees it), and an anchor behind an
   // `inert` ancestor is no more reachable than a removed one, so both count.
   /** Fired once when the anchor is removed from the document or hidden behind an
-   *  `inert` ancestor; wire it to close the overlay. */
+   *  `inert` ancestor. */
   onDisconnect?: () => void;
 }
 

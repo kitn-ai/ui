@@ -183,13 +183,14 @@ export function widgetFor(field: FormField, inlineMax: number): WidgetKind {
  * byte the behavior of today" means here.
  */
 export interface FieldMaskHint {
-  /** The compiled-clean mask pattern handed to `Input`'s `format`. */
+  /** Mask pattern in the same syntax as `Input`'s `format`. */
   format?: string;
   /** An explicit, aligned display guide. Absent = the pattern derives its own. */
   guide?: string;
-  /** The tier-1 semantic type: `inputmode`, `autocomplete`, and the canonical form. */
+  /** Field type that decides `inputmode`, `autocomplete`, casing and the canonical
+   *  value. Never masks on its own. */
   semantic?: FieldSemanticType;
-  /** The expected format, stated in text for the description chain. */
+  /** Text stating the expected format, read out with the field's description. */
   hint?: string;
   // Resolution runs inside a memo on a render path, so it must never throw and must
   // not warn twice for the same reason on a re-render. Returning the messages instead
@@ -575,15 +576,15 @@ export interface FormProps {
   cardId?: string;
   /** The envelope title rendered in the card chrome. */
   heading?: string;
-  /** Optional explicit CardHost (otherwise read from a CardProvider, otherwise the
-   *  bubbling `kai-card` CustomEvent off `hostElement`). */
+  /** Explicit CardHost. Otherwise it comes from a `CardProvider`, or the bubbling
+   *  `kai-card` event off `hostElement`. */
   host?: CardHost;
   /** The custom-element host node, for the bubbling `kai-card` fallback emit. */
   hostElement?: HTMLElement;
   class?: string;
   /** When set, render the chromed read-only view instead of the form inputs. */
   resolution?: CardResolution;
-  /** Controlled field values — when set, this wins over internal/uncontrolled state. */
+  /** Controlled field values. When present they win over the internal state. */
   values?: Record<string, unknown>;
   /** Initial values overlaying the schema defaults (uncontrolled seed). */
   defaultValues?: Record<string, unknown>;

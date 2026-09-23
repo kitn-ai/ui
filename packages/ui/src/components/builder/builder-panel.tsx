@@ -109,15 +109,14 @@ export interface BuilderConstruct {
  */
 export interface BuilderPanelSections {
   /** Show the Layout radio section. Default `true`; a template panel sets it
-   *  `false` because the template fixes the layout. */
+   *  `false`. */
   layout?: boolean;
-  /** Widget-chrome section visibility. Default `'auto'` follows
-   *  `value.layout === 'widget'`; `'always'` and `'never'` override it. */
+  /** Widget-chrome section visibility. Default `'auto'` follows the layout;
+   *  `'always'` and `'never'` override it. */
   widget?: 'auto' | 'always' | 'never';
   /** Show the Provider section. Default `false`; a template panel opts in. */
   provider?: boolean;
-  /** Show the Home section. Default `true`; a template with no Home concept sets
-   *  it `false` to remove the section outright. */
+  /** Show the Home section. Default `true`. */
   home?: boolean;
   // Read-only on purpose: the panel acknowledges card names a construct basis
   // declares instead of silently dropping them, without faking a card-schema editor.
@@ -127,12 +126,11 @@ export interface BuilderPanelSections {
 }
 
 export interface BuilderPanelProps {
-  /** The construct being edited. Controlled — the panel never holds its own copy. */
+  /** The construct being edited. Controlled: the panel never holds its own copy. */
   value: BuilderConstruct;
   /** Fires with the next construct on every edit. */
   onChange: (next: BuilderConstruct) => void;
-  /** Which sections render — see `BuilderPanelSections`. Omit for the
-   *  original generic, layout-driven panel. */
+  /** Which sections render. Omitted, each section keeps its own default. */
   sections?: BuilderPanelSections;
   class?: string;
 }

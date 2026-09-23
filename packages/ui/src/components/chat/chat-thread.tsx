@@ -43,11 +43,10 @@ export interface ChatThreadContextUsage {
 export interface ChatThreadProps {
   /** Extra classes for the thread root (e.g. `h-full`). */
   class?: string;
-  /** The message thread to render, newest last. Set as a JS property; a new array
-   *  reference is what re-renders. */
+  /** The message thread to render, newest last. A new array reference is what
+   *  re-renders. */
   messages: ChatMessage[];
-  /** Add/override card type -> component entries, forwarded to `CardRenderer`
-   *  for `card` parts. */
+  /** Adds or overrides the component that draws a `card` part, keyed by card type. */
   cardTypes?: CardComponentMap;
   // The companion of `cardTypes`: that says what DRAWS a card, this says what a VALID
   // one looks like. Without it the kit validates only its own built-ins and leaves your
@@ -55,69 +54,62 @@ export interface ChatThreadProps {
   /** JSON Schemas keyed by card envelope type; each wins over a built-in of the same
    *  name. `createCardRegistry(...).validationSchemas` is this shape. */
   cardSchemas?: CardSchemaMap;
-  /** Host element to emit card events from when no `CardProvider` is present; the
-   *  `<kai-chat>` facade passes its own so events bubble as `kai-card`. */
+  /** Host element that card events are emitted from when no `CardProvider` is present. */
   cardHostElement?: HTMLElement;
   /** Value of the input: a string is controlled, a `ComposerDoc` is a one-time seed
    *  that pre-populates pills, unset is uncontrolled. */
   value?: string | ComposerDoc;
   /** Placeholder text shown in the empty input. */
   placeholder?: string;
-  /** When true, shows the loading/streaming state and disables submit (use while
-   *  awaiting the assistant's reply). */
+  /** Disables submit and shows the streaming state. */
   loading?: boolean;
-  /** Starter prompts shown above the input when the thread is empty. Clicking one
-   *  follows `suggestionMode`. Set as a JS property. */
+  /** Starter prompts shown above the input while the thread is empty. */
   suggestions?: string[];
-  /** What clicking a suggestion does: `'submit'` (default) sends it immediately
-   *  as if typed and submitted; `'fill'` just places it in the input. */
+  /** What clicking a suggestion does: `'submit'` (default) sends it, `'fill'` only
+   *  fills the input. */
   suggestionMode?: 'submit' | 'fill';
   /** Keep suggestions visible after the conversation starts; they otherwise hide
    *  once `messages` is non-empty. Default false. */
   persistSuggestions?: boolean;
-  /** Body/prose font scale for rendered markdown (`'xs' | 'sm' | 'base' | 'lg'`).
-   *  Defaults to `'sm'`. */
+  /** Body/prose font scale for rendered markdown. Defaults to `'sm'`. */
   proseSize?: ProseSize;
   /** Shiki theme name for syntax-highlighted code blocks (e.g.
    *  `'github-dark-dimmed'`). */
   codeTheme?: string;
   // Forwarded to every `MessageBody` this thread renders; inert for non-image tiles,
   // which keep the hover card.
-  /** How an image tile reveals full size. Default `'hover'` is a hover card;
-   *  `'lightbox'` opens a modal on click, the only one keyboard/touch can reach. */
+  /** How an image tile reveals full size. `'lightbox'` is the only value keyboard
+   *  and touch can reach. Default `'hover'`. */
   imagePreview?: AttachmentImagePreview;
-  /** Enable Shiki syntax highlighting in code blocks. Turn off to render plain
-   *  `<pre>` blocks (lighter, no highlighter load). Default true. */
+  /** Renders plain `<pre>` blocks with no highlighter load when false. Default true. */
   codeHighlight?: boolean;
   // Forwarded to every `MessageBody` as `reasoningMode`.
-  /** How reasoning parts render. Default `'full'` is the collapsible disclosure,
-   *  `'compact'` streams only a shimmer, `'off'` renders none. */
+  /** How reasoning parts render. `'compact'` streams only a shimmer and `'off'`
+   *  renders none. Default `'full'`. */
   reasoning?: 'full' | 'compact' | 'off';
   // Forwarded to every `MessageBody` as `reasoningDefaultOpen`.
   /** Seeds the reasoning disclosure open and keeps it tracking the stream. Default
    *  false; inert unless `reasoning` is `'full'`. */
   reasoningOpen?: boolean;
-  /** Optional header title shown on the left of the header. */
+  /** Title shown at the start of the header bar. */
   chatTitle?: string;
-  /** Optional model list. When set (>1 model) a ModelSwitcher is shown in the
-   *  header and a `kai-model-change` event fires on selection. */
+  /** Model list; more than one renders a switcher in the header. */
   models?: ModelOption[];
   /** The currently selected model id (pairs with `models`). */
   currentModel?: string;
-  /** Optional context-window token usage. When set, a Context token meter is
-   *  shown in the header. */
+  /** Token usage, shown as a context meter in the header. */
   context?: ChatThreadContextUsage;
   /** Show the scroll-to-bottom button inside the scroll area. Default true. */
   scrollButton?: boolean;
-  /** Whether the host has `slot="header-start"` content (left of the title). Set
-   *  by the `<kai-chat>` facade so a custom control forces the header open. */
+  /** Whether `slot="header-start"` content is projected, which forces the header
+   *  row open. */
   headerStart?: boolean;
   /** Whether the host has `slot="header-end"` content (right of the controls). */
   headerEnd?: boolean;
   // A Solid caller composing ChatThread directly has no shadow-DOM host, so there is
   // no light-DOM node to slot; the docked construct widget is the motivating case.
-  /** Extra header-end content rendered after `slot="header-end"` rather than
-   *  replacing it, and counted as header content. JSX-only, never via `<kai-chat>`. */
+  /** JSX rendered after `slot="header-end"` in the header row rather than replacing
+   *  it, which forces the header open. */
   headerEndContent?: JSX.Element;
   // Without `onConversationLoad` a caller has no path to actually receive a loaded
   // conversation's messages back (this component never mutates `props.messages`), so a
@@ -129,8 +121,8 @@ export interface ChatThreadProps {
   // `list()` on mount and on every list-view open, `load(id)` on row select,
   // `save(id, messages)` on every message-array change for the active conversation. A
   // kit-owned interface: invocation, transport, auth and retention are the dev's.
-  /** The adapter this thread persists through when `conversations` is on. A JS
-   *  property only; `localStorageStore`/`fetchStore` are the shipped built-ins. */
+  /** The adapter this thread persists through when `conversations` is on.
+   *  `localStorageStore` and `fetchStore` ship with the kit. */
   store?: ConversationStore;
   /** Fires when a loaded conversation is about to replace `messages`; the caller
    *  owns and re-renders them. Required when `conversations` is on. */
@@ -150,8 +142,7 @@ export interface ChatThreadProps {
   // The prior-conversations list moves from the header toggle onto the Messages tab;
   // a drilled-into chat (list row, recent card, "new conversation") hides the tab bar
   // and shows a back arrow in the header instead.
-  /** Turns on the widget home screen: greeting, most-recent conversation, links and
-   *  a Home/Messages tab bar. Off by default. */
+  /** The widget home screen shown before the first message. Off by default. */
   home?: HomeConfig;
   /** Fires when a `home.links` entry with no `href` is activated; one with an `href`
    *  navigates instead. Only meaningful when `home` is set. */
@@ -166,30 +157,29 @@ export interface ChatThreadProps {
   //               content owns its own data/events — a slotted (light-DOM) node
   //               can't read this component's reactive state. That boundary is
   //               the whole reason `messages` stays a data prop, not a slot.
-  /** REPLACE: full custom header in place of the built-in title/model/context bar. */
+  /** Replaces the built-in header bar with `slot="header"` content. */
   headerFull?: boolean;
   // Set by the facade when light-DOM `slot="home"` content is projected; the tab bar
   // and navigation stay the kit's own.
-  /** REPLACE: custom home-tab content in place of the built-in home screen; rendered
-   *  only while the home view shows, so only with `home` set. */
+  /** Replaces the built-in home screen with `slot="home"` content, while the home
+   *  view shows. */
   homeFull?: boolean;
-  /** INJECT: left sidebar column (e.g. a conversation list / your own nav). */
+  /** Whether `slot="sidebar"` content is projected, which shows the left sidebar column. */
   sidebar?: boolean;
-  /** REPLACE: custom zero-state in the message area while the thread is empty; the
-   *  composer and its suggestions still render. */
+  /** Replaces the empty-state message area with `slot="empty"` content. The composer
+   *  still renders. */
   empty?: boolean;
   // `slot="empty"` only ever receives light-DOM children of the shadow HOST, and those
   // sit outside the shadow root's adopted stylesheets, so Tailwind-class content there
   // renders bare; content passed here renders inside this tree and stays styled.
-  /** REPLACE, JSX form: the empty-state content itself, rendered inside this tree so
-   *  it keeps the kit's styling. Takes priority over `empty`. */
+  /** The empty-state content as JSX, taking priority over `empty`. */
   emptyContent?: JSX.Element;
-  /** REPLACE: full custom composer in place of the built-in prompt input. The
-   *  projected content wires its own submit (the data-flow boundary). */
+  /** Replaces the built-in composer with `slot="composer"` content, which wires its
+   *  own submit. */
   composer?: boolean;
-  /** INJECT: accessory row just above the composer (e.g. extra actions). */
+  /** Whether `slot="composer-actions"` content is projected, which shows the row above the composer. */
   composerActions?: boolean;
-  /** INJECT: footer row below the composer (disclaimers, token meter, …). */
+  /** Whether `slot="footer"` content is projected, which shows the footer row below the composer. */
   footer?: boolean;
   /** Attachment media types the user may stage, in HTML `accept` syntax; omitted
    *  means no filter. Narrowed by what the encoders can send. */
@@ -201,20 +191,19 @@ export interface ChatThreadProps {
   attach?: boolean;
   /** Show a web-search (Globe) button in the input toolbar; calls `onWebSearch`. */
   webSearch?: boolean;
-  /** Show a Voice (Mic) button in the input toolbar; fires a `voice` event. */
+  /** Show a voice-input button in the input toolbar; calls `onVoice`. */
   voice?: boolean;
-  /** Rich entity triggers: each opens a caret-anchored menu that inserts an atomic
-   *  pill (`/` skills, `@` agents). Set as a JS property. */
+  /** Rich entity triggers. Each opens a menu at the caret that inserts an atomic pill. */
   triggers?: TriggerDef[];
   /** Default icon per entity kind (kind → image src) for pills/menu items. */
   kindIcons?: Record<string, string>;
-  /** Whether each message's action bar is always visible (`'always'`, default)
-   *  or only revealed on hover of that message row (`'hover'`). */
+  /** Whether each message's action bar is always visible or revealed on hover of that
+   *  row. Default `'always'`. */
   actionsReveal?: 'always' | 'hover';
-  /** Default action bar for user messages with no `actions` of their own; a message's
-   *  own `actions` replaces it rather than merging. Set as JS properties. */
+  /** Default action bar for user messages that have no `actions` of their own; a
+   *  message's own `actions` replaces it. */
   userActions?: (ChatMessageAction | CustomAction)[];
-  /** See `userActions`, the assistant-role default. */
+  /** Default action bar for assistant messages, as `userActions` is for user ones. */
   assistantActions?: (ChatMessageAction | CustomAction)[];
   /** Hide the citations row that consecutive `source` parts collapse into; absent or
    *  `false` renders it. */
@@ -222,7 +211,7 @@ export interface ChatThreadProps {
   /** JSX rendered immediately before the composer region. JSX-only, so never
    *  reachable through `<kai-chat>`. */
   composerStart?: JSX.Element;
-  /** JSX rendered immediately AFTER the composer region (see composerStart). */
+  /** JSX rendered after the composer region. */
   composerEnd?: JSX.Element;
   // callbacks (the facade maps these to dispatch())
   onValueChange?: (value: string) => void;
@@ -233,8 +222,7 @@ export interface ChatThreadProps {
   onMessageAction?: (detail: MessageActionDetail) => void;
   onWebSearch?: () => void;
   onVoice?: () => void;
-  /** Receive the imperative controller once mounted. The kai-chat facade forwards
-   *  these as element methods (focus/clear/send/scrollToBottom). */
+  /** Receive the imperative controller once mounted. */
   controllerRef?: (controller: ChatThreadController) => void;
 }
 
@@ -250,7 +238,7 @@ export interface ChatThreadController {
   // `onOpenChange` fires on every close path (header X, launcher, Escape), so a single
   // `onOpenChange={(open) => !open && controller.closeConversationsList()}` covers all.
   /** Returns the widget to its default landing view: `'home'` when `home` is set,
-   *  `'chat'` otherwise. Call it on hide so the next open is not a stale list. */
+   *  otherwise `'chat'`. */
   closeConversationsList(): void;
   /** Starts a fresh conversation: clears the active id, returns to the chat view and
    *  delivers `[]` through `onConversationLoad`. */

@@ -41,8 +41,7 @@ export interface KaiNavItem {
   /** Trailing icon (a named icon), e.g. an edit/compose affordance. */
   trailing?: string;
   disabled?: boolean;
-  /** Nested items: the row becomes a collapsible group with a disclosure chevron
-   *  over an indented child list; recurses to any depth. */
+  /** Nested items. The row becomes a collapsible group, to any depth. */
   children?: KaiNavItem[];
   /** A small colored status dot (+ optional label) on the row. */
   status?: NavItemStatus;

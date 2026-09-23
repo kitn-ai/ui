@@ -100,12 +100,12 @@ export interface AudioVisualizerProps {
   children?: VariantProps['children'];
   // `'auto'` follows a live `prefers-color-scheme` listener, the same rule
   // `web-components/define/define.tsx`'s `createDarkMode` applies for every `kai-*` element.
-  // Only the shader variants read it (aurora/wave pick a colour pipeline with it): the three
+  // Only the shader variants read it (aurora picks a colour pipeline with it): the three
   // DOM variants get dark-mode styling free through CSS custom properties, which a shader
   // baking colour into a GLSL uniform cannot do. `<kai-audio-visualizer>` forwards its own
   // already-resolved `theme` through this prop; a bare `<AudioVisualizer>` needs it set
   // directly.
-  /** Colour pipeline for the shader variants; follows the OS when unset. */
+  /** Colour pipeline for aurora; follows the OS when unset. */
   theme?: 'light' | 'dark' | 'auto';
 }
 

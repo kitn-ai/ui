@@ -1390,7 +1390,7 @@
         "type": "undefined | false | true",
         "optional": true,
         "scalar": true,
-        "description": "When true, shows the loading/streaming state and disables submit (use while awaiting the assistant's reply).",
+        "description": "Disables submit and shows the streaming state.",
         "default": "false",
         "displayType": "undefined | false | true"
       },
@@ -1399,7 +1399,7 @@
         "type": "undefined | string[]",
         "optional": true,
         "scalar": false,
-        "description": "Starter prompts shown above the input when the thread is empty. Clicking one follows `suggestionMode`. Set as a JS property.",
+        "description": "Starter prompts shown above the input while the thread is empty.",
         "displayType": "undefined | string[]"
       },
       {
@@ -1407,7 +1407,7 @@
         "type": "undefined | \"submit\" | \"fill\"",
         "optional": true,
         "scalar": true,
-        "description": "What clicking a suggestion does: `'submit'` (default) sends it immediately as if typed and submitted; `'fill'` just places it in the input.",
+        "description": "What clicking a suggestion does: `'submit'` (default) sends it, `'fill'` only fills the input.",
         "default": "'submit'",
         "displayType": "undefined | \"submit\" | \"fill\""
       },
@@ -1425,7 +1425,7 @@
         "type": "undefined | \"xs\" | \"sm\" | \"base\" | \"lg\"",
         "optional": true,
         "scalar": true,
-        "description": "Body/prose font scale for rendered markdown (`'xs' | 'sm' | 'base' | 'lg'`). Defaults to `'sm'`.",
+        "description": "Body/prose font scale for rendered markdown. Defaults to `'sm'`.",
         "default": "'sm'",
         "displayType": "undefined | \"xs\" | \"sm\" | \"base\" | \"lg\""
       },
@@ -1443,7 +1443,7 @@
         "type": "undefined | \"hover\" | \"lightbox\"",
         "optional": true,
         "scalar": true,
-        "description": "How an image tile reveals full size. Default `'hover'` is a hover card; `'lightbox'` opens a modal on click, the only one keyboard/touch can reach.",
+        "description": "How an image tile reveals full size. `'lightbox'` is the only value keyboard and touch can reach. Default `'hover'`.",
         "displayType": "undefined | \"hover\" | \"lightbox\""
       },
       {
@@ -1451,7 +1451,7 @@
         "type": "undefined | false | true",
         "optional": true,
         "scalar": true,
-        "description": "Enable Shiki syntax highlighting in code blocks. Turn off to render plain `<pre>` blocks (lighter, no highlighter load). Default true.",
+        "description": "Renders plain `<pre>` blocks with no highlighter load when false. Default true.",
         "default": "true",
         "displayType": "undefined | false | true"
       },
@@ -1460,7 +1460,7 @@
         "type": "undefined | \"full\" | \"compact\" | \"off\"",
         "optional": true,
         "scalar": true,
-        "description": "How reasoning parts render. Default `'full'` is the collapsible disclosure, `'compact'` streams only a shimmer, `'off'` renders none.",
+        "description": "How reasoning parts render. `'compact'` streams only a shimmer and `'off'` renders none. Default `'full'`.",
         "displayType": "undefined | \"full\" | \"compact\" | \"off\""
       },
       {
@@ -1476,7 +1476,7 @@
         "type": "undefined | string",
         "optional": true,
         "scalar": true,
-        "description": "Optional header title shown on the left of the header.",
+        "description": "Title shown at the start of the header bar.",
         "displayType": "undefined | string"
       },
       {
@@ -1484,7 +1484,7 @@
         "type": "undefined | { id: string; name: string; provider?: undefined | string; description?: undefined | string; group?: undefined | string }[]",
         "optional": true,
         "scalar": false,
-        "description": "Optional model list. When set (>1 model) a ModelSwitcher is shown in the header and a `kai-model-change` event fires on selection.",
+        "description": "Model list; more than one renders a switcher in the header.",
         "typeName": "ModelOption[]",
         "typeShape": "{ id: string; name: string; provider?: undefined | string; description?: undefined | string; group?: undefined | string }[]",
         "typeImport": "ModelOption",
@@ -1503,7 +1503,7 @@
         "type": "undefined | { usedTokens: number; maxTokens: number; inputTokens?: undefined | number; outputTokens?: undefined | number; estimatedCost?: undefined | number }",
         "optional": true,
         "scalar": false,
-        "description": "Optional context-window token usage. When set, a Context token meter is shown in the header.",
+        "description": "Token usage, shown as a context meter in the header.",
         "typeName": "ChatThreadContextUsage",
         "typeShape": "{ usedTokens: number; maxTokens: number; inputTokens?: undefined | number; outputTokens?: undefined | number; estimatedCost?: undefined | number }",
         "typeImport": "ChatThreadContextUsage",
@@ -1523,7 +1523,7 @@
         "type": "undefined | false | true",
         "optional": true,
         "scalar": true,
-        "description": "Whether the host has `slot=\"header-start\"` content (left of the title). Set by the `<kai-chat>` facade so a custom control forces the header open.",
+        "description": "Whether `slot=\"header-start\"` content is projected, which forces the header row open.",
         "displayType": "undefined | false | true"
       },
       {
@@ -1539,7 +1539,7 @@
         "type": "undefined | false | true",
         "optional": true,
         "scalar": true,
-        "description": "REPLACE: full custom header in place of the built-in title/model/context bar.",
+        "description": "Replaces the built-in header bar with `slot=\"header\"` content.",
         "displayType": "undefined | false | true"
       },
       {
@@ -1547,7 +1547,7 @@
         "type": "undefined | false | true",
         "optional": true,
         "scalar": true,
-        "description": "REPLACE: custom home-tab content in place of the built-in home screen; rendered only while the home view shows, so only with `home` set.",
+        "description": "Replaces the built-in home screen with `slot=\"home\"` content, while the home view shows.",
         "displayType": "undefined | false | true"
       },
       {
@@ -1555,7 +1555,7 @@
         "type": "undefined | false | true",
         "optional": true,
         "scalar": true,
-        "description": "INJECT: left sidebar column (e.g. a conversation list / your own nav).",
+        "description": "Whether `slot=\"sidebar\"` content is projected, which shows the left sidebar column.",
         "displayType": "undefined | false | true"
       },
       {
@@ -1563,7 +1563,7 @@
         "type": "undefined | false | true",
         "optional": true,
         "scalar": true,
-        "description": "REPLACE: custom zero-state in the message area while the thread is empty; the composer and its suggestions still render.",
+        "description": "Replaces the empty-state message area with `slot=\"empty\"` content. The composer still renders.",
         "displayType": "undefined | false | true"
       },
       {
@@ -1571,7 +1571,7 @@
         "type": "undefined | false | true",
         "optional": true,
         "scalar": true,
-        "description": "REPLACE: full custom composer in place of the built-in prompt input. The projected content wires its own submit (the data-flow boundary).",
+        "description": "Replaces the built-in composer with `slot=\"composer\"` content, which wires its own submit.",
         "displayType": "undefined | false | true"
       },
       {
@@ -1579,7 +1579,7 @@
         "type": "undefined | false | true",
         "optional": true,
         "scalar": true,
-        "description": "INJECT: accessory row just above the composer (e.g. extra actions).",
+        "description": "Whether `slot=\"composer-actions\"` content is projected, which shows the row above the composer.",
         "displayType": "undefined | false | true"
       },
       {
@@ -1587,7 +1587,7 @@
         "type": "undefined | false | true",
         "optional": true,
         "scalar": true,
-        "description": "INJECT: footer row below the composer (disclaimers, token meter, …).",
+        "description": "Whether `slot=\"footer\"` content is projected, which shows the footer row below the composer.",
         "displayType": "undefined | false | true"
       },
       {
@@ -1613,7 +1613,7 @@
         "type": "undefined | false | true",
         "optional": true,
         "scalar": true,
-        "description": "Show a Voice (Mic) button in the input toolbar; fires a `voice` event.",
+        "description": "Show a voice-input button in the input toolbar; calls `onVoice`.",
         "default": "false",
         "displayType": "undefined | false | true"
       },
@@ -1622,7 +1622,7 @@
         "type": "undefined | { char: string; kind: string; items?: undefined | { id: string; label: string; icon?: undefined | string; description?: undefined | string; group?: undefined | string; kind?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }[]",
         "optional": true,
         "scalar": false,
-        "description": "Rich entity triggers: each opens a caret-anchored menu that inserts an atomic pill (`/` skills, `@` agents). Set as a JS property.",
+        "description": "Rich entity triggers. Each opens a menu at the caret that inserts an atomic pill.",
         "typeName": "TriggerDef[]",
         "typeShape": "{ char: string; kind: string; items?: undefined | { id: string; label: string; icon?: undefined | string; description?: undefined | string; group?: undefined | string; kind?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }[]",
         "typeImport": "TriggerDef",
@@ -1641,7 +1641,7 @@
         "type": "undefined | \"always\" | \"hover\"",
         "optional": true,
         "scalar": true,
-        "description": "Whether each message's action bar is always visible (`'always'`, default) or only revealed on hover of that message row (`'hover'`).",
+        "description": "Whether each message's action bar is always visible or revealed on hover of that row. Default `'always'`.",
         "default": "'always'",
         "displayType": "undefined | \"always\" | \"hover\""
       },
@@ -1650,7 +1650,7 @@
         "type": "undefined | (\"copy\" | \"dislike\" | \"edit\" | \"like\" | \"regenerate\" | \"speak\" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]",
         "optional": true,
         "scalar": false,
-        "description": "Default action bar for user messages with no `actions` of their own; a message's own `actions` replaces it rather than merging. Set as JS properties.",
+        "description": "Default action bar for user messages that have no `actions` of their own; a message's own `actions` replaces it.",
         "displayType": "undefined | (\"copy\" | \"dislike\" | \"edit\" | \"like\" | \"regenerate\" | \"speak\" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]"
       },
       {
@@ -1658,7 +1658,7 @@
         "type": "undefined | (\"copy\" | \"dislike\" | \"edit\" | \"like\" | \"regenerate\" | \"speak\" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]",
         "optional": true,
         "scalar": false,
-        "description": "See `userActions`, the assistant-role default.",
+        "description": "Default action bar for assistant messages, as `userActions` is for user ones.",
         "displayType": "undefined | (\"copy\" | \"dislike\" | \"edit\" | \"like\" | \"regenerate\" | \"speak\" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]"
       },
       {
