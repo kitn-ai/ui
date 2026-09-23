@@ -1,6 +1,7 @@
-import { createContext, createSignal, Show, useContext, type JSX } from 'solid-js';
+import { createContext, createSignal, onCleanup, Show, useContext, type JSX } from 'solid-js';
 import { X } from 'lucide-solid';
 import { cn } from '../../utils/cn';
+import { hasFocusableChild } from '../../primitives/focusable-child';
 import { As } from '../overlay/overlay';
 import { Dialog } from '../dialog/dialog';
 
@@ -25,6 +26,19 @@ interface LightboxCtx {
  */
 const INTERACTIVE_SELECTOR =
   'a, button, input, select, textarea, [contenteditable], [role="button"], [tabindex]';
+
+/**
+ * Elements the platform activates from the keyboard on its own: Enter (and Space
+ * for a button, a summary) fires the click that bubbles to `LightboxTrigger`'s
+ * `onClick`. When the reader is on one of these, the trigger must step aside
+ * instead of answering the same keystroke — a `preventDefault` there CANCELS the
+ * child's own activation, so a slotted `<a href>` would stop navigating and a
+ * button would stop being a button.
+ */
+const NATIVELY_ACTIVATABLE = 'a[href],button,input,select,textarea,summary';
+
+const activatesItself = (target: EventTarget | null) =>
+  target instanceof Element && target.closest(NATIVELY_ACTIVATABLE) !== null;
 
 const Ctx = createContext<LightboxCtx>();
 
@@ -76,14 +90,26 @@ export interface LightboxTriggerProps {
 }
 
 /**
- * ★ THE TRIGGER IS A REAL BUTTON, UNLIKE `HoverCardTrigger`.
+ * ★ THE TRIGGER IS A BUTTON WHEN, AND ONLY WHEN, ITS CHILDREN ARE NOT ONE.
  *
- * `HoverCardTrigger` delegates its tab stop because a hover card is DESCRIPTIVE:
- * opening it is not an activation, so it must not promise one. This one opens a
- * modal, so it carries `role="button"` + `aria-haspopup` + `aria-expanded` and
- * owns the tab stop unconditionally — the same delegation would leave a tile
- * whose children are a div, an `<img>` and an svg with no keyboard way in at
- * all, which is the failure `HoverCardTrigger` was fixed for.
+ * A trigger whose children are inert (a div, an `<img>`, an svg tile) has no
+ * keyboard way in without one supplied here, so this span carries
+ * `role="button"` + `aria-haspopup` + `aria-expanded` and the tab stop.
+ *
+ * But a consumer may slot their OWN control — a `<button>`, a link — and then
+ * that same role is a defect: `role="button"` is a children-presentational role,
+ * so `axe` reports `nested-interactive` ("Element has focusable descendants",
+ * WCAG 4.1.2) for a control inside a control. Measured on
+ * `<kai-lightbox><button>…</button></kai-lightbox>`, which failed the Storybook
+ * a11y leg on every commit of PR #409.
+ *
+ * So the role, the stop and the ARIA are delegated exactly like
+ * `HoverCardTrigger`'s tab stop: only a subtree with NO focusable descendant gets
+ * a stop of its own (`hasFocusableChild`, src/primitives/focusable-child). A
+ * slotted control keeps its own semantics and its own activation; the span keeps
+ * the click and key handlers, because they have to work for the focusable-but-
+ * inert case too (a `<div tabindex="0">` tile is focusable, so it may not sit
+ * inside a `role="button"`, but nothing activates it by itself).
  *
  * `aria-expanded` is bound to the shared open state rather than to the dialog's
  * presence, so a controlled consumer's own `open` prop drives it too.
@@ -96,27 +122,45 @@ export interface LightboxTriggerProps {
  */
 export function LightboxTrigger(props: LightboxTriggerProps) {
   const ctx = useLightbox();
+  const [ownsControl, setOwnsControl] = createSignal(true);
 
   return (
     <As
       as="span"
-      role="button"
-      tabIndex={0}
-      aria-haspopup="dialog"
-      aria-expanded={ctx.open()}
+      role={ownsControl() ? 'button' : undefined}
+      tabIndex={ownsControl() ? 0 : undefined}
+      aria-haspopup={ownsControl() ? 'dialog' : undefined}
+      aria-expanded={ownsControl() ? ctx.open() : undefined}
       class={cn(
-        'inline-block cursor-zoom-in rounded-sm focus-visible:[outline-style:solid] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring',
+        'inline-block cursor-zoom-in',
+        // A ring around a delegating wrapper would draw the wrapper's own focus
+        // state, which is not where focus is; same rule as `HoverCardTrigger`.
+        ownsControl() &&
+          'rounded-sm focus-visible:[outline-style:solid] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring',
         props.class,
       )}
+      ref={(el: HTMLElement) => {
+        // Ask now for the direct-children case, and again whenever a slot is
+        // filled or emptied: `slotchange` never fires for a trigger with no slot
+        // in it, and the ref-time answer is wrong for one that has.
+        const evaluate = () => setOwnsControl(!hasFocusableChild(el));
+        evaluate();
+        for (const slot of Array.from(el.querySelectorAll('slot'))) {
+          slot.addEventListener('slotchange', evaluate);
+          onCleanup(() => slot.removeEventListener('slotchange', evaluate));
+        }
+      }}
       onClick={() => ctx.setOpen(true)}
       onKeyDown={(e: KeyboardEvent) => {
         // Space is handled because a real button opens on it. `preventDefault`
         // is not optional there: without it the keystroke scrolls the thread
         // behind the modal as well as opening it.
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          ctx.setOpen(true);
-        }
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        // A child that activates itself already produces the click that bubbles
+        // to `onClick`; see NATIVELY_ACTIVATABLE.
+        if (activatesItself(e.target)) return;
+        e.preventDefault();
+        ctx.setOpen(true);
       }}
     >
       {props.children}

@@ -3,14 +3,15 @@
  *
  * jsdom has no layout, so every assertion here is DOM or ARIA — never geometry.
  * What the lightbox has to promise: the trigger is a real control (click, Enter,
- * Space) that announces what it opens (`aria-haspopup` / `aria-expanded`),
+ * Space) that announces what it opens (`aria-haspopup` / `aria-expanded`) when it
+ * has to be one, and leaves those to a consumer's own control when it does not,
  * Escape and a backdrop click reach `Dialog`'s own dismiss, the consumer's image
  * lands inside the dialog, a click on that image dismisses the modal while a click
  * on a link or button INSIDE it does not, and NOTHING renders while closed.
  */
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import '@testing-library/jest-dom/vitest';
-import { render, cleanup, fireEvent, screen, within } from '@solidjs/testing-library';
+import { render, cleanup, createEvent, fireEvent, screen, within } from '@solidjs/testing-library';
 import {
   Lightbox,
   LightboxTrigger,
@@ -362,5 +363,72 @@ describe('MessageBody attachment tiles', () => {
     expect(screen.getByAltText('mountain.jpg')).toBeInTheDocument();
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+});
+
+/**
+ * ★ THE TRIGGER IS A BUTTON WHEN, AND ONLY WHEN, ITS CHILDREN ARE NOT ONE.
+ *
+ * `role="button"` is a children-presentational role, so wrapping a consumer's own
+ * focusable control in one is `nested-interactive` (WCAG 4.1.2, axe: "Element has
+ * focusable descendants"). Both shapes are pinned here because only the second
+ * one is the failure: an inert child (a div, an `<img>`, an svg tile) has no
+ * keyboard way in without a stop of the wrapper's own, so removing the role
+ * unconditionally would trade an axe violation for an unreachable control.
+ */
+describe('Lightbox trigger delegation', () => {
+  const renderWithButtonTrigger = () =>
+    render(() => (
+      <Lightbox>
+        <LightboxTrigger>
+          <button type="button">Zoom the photo</button>
+        </LightboxTrigger>
+        <LightboxContent label="Photo preview">
+          <img alt="Full size" src={IMAGE} />
+        </LightboxContent>
+      </Lightbox>
+    ));
+
+  it('leaves the role, the stop and the ARIA to a slotted control', () => {
+    renderWithButtonTrigger();
+
+    const control = screen.getByRole('button', { name: 'Zoom the photo' });
+    const wrapper = control.parentElement!;
+    expect(wrapper).not.toHaveAttribute('role');
+    expect(wrapper).not.toHaveAttribute('tabindex');
+    expect(wrapper).not.toHaveAttribute('aria-haspopup');
+    expect(wrapper).not.toHaveAttribute('aria-expanded');
+
+    // The click still opens through the wrapper's handler.
+    fireEvent.click(control);
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+  });
+
+  it('keeps the wrapper as the control when nothing inside is focusable', () => {
+    renderLightbox();
+
+    const wrapper = trigger();
+    expect(wrapper).toHaveAttribute('role', 'button');
+    expect(wrapper).toHaveAttribute('tabindex', '0');
+    expect(wrapper).toHaveAttribute('aria-haspopup', 'dialog');
+  });
+
+  it('consumes the keystroke only when the wrapper is the control', () => {
+    // An inert child: the wrapper is the control, so Space must not also scroll
+    // the thread behind the modal.
+    renderLightbox();
+    const owned = createEvent.keyDown(trigger(), { key: ' ' });
+    fireEvent(trigger(), owned);
+    expect(owned.defaultPrevented).toBe(true);
+
+    cleanup();
+
+    // A slotted control: the keystroke is the BUTTON's, and a preventDefault here
+    // would cancel its own activation.
+    renderWithButtonTrigger();
+    const control = screen.getByRole('button', { name: 'Zoom the photo' });
+    const delegated = createEvent.keyDown(control, { key: ' ' });
+    fireEvent(control, delegated);
+    expect(delegated.defaultPrevented).toBe(false);
   });
 });

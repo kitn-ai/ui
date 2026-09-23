@@ -82,56 +82,69 @@ export default meta;
 
 const src = (code: string) => ({ docs: { source: { language: 'html', code } } });
 
+/**
+ * The args->attributes plumbing, shared by both trigger shapes: the only thing
+ * that differs between the two stories is what goes in the default slot. One
+ * slots the consumer's own `<button>` (the element must leave the control to it);
+ * the other slots a plain thumbnail with nothing focusable in it (the element must
+ * supply the control itself). Both are a11y-checked by the storybook run, which is
+ * what pins the difference: only the second shape is unreachable without a
+ * wrapper that IS the button.
+ */
+const renderWith = (trigger: JSX.Element) => (args: Record<string, unknown>) => (
+  <div
+    style={{
+      display: 'flex',
+      'align-items': 'center',
+      'justify-content': 'center',
+      height: '360px',
+      width: '100%',
+      background: 'var(--color-background)',
+    }}
+  >
+    <kai-lightbox
+      open={args.open as boolean}
+      default-open={args.defaultOpen as boolean}
+      disabled={args.disabled as boolean}
+      label={args.label as string}
+      show-close={args.showClose as boolean}
+      close-on-content-click={args.closeOnContentClick as boolean}
+    >
+      {trigger}
+      <img
+        slot="content"
+        src={IMAGE_URL}
+        alt="A snow-capped mountain above the clouds at dusk"
+        style={{ display: 'block', 'object-fit': 'contain' }}
+      />
+    </kai-lightbox>
+  </div>
+);
+
 /** The element used the plain-HTML way: your own `<button>` as the trigger, the
  *  image you already have as the content. */
 export const ZoomYourOwnMarkup: StoryObj = {
   name: 'Zoom Your Own Markup',
-  render: (args: Record<string, unknown>) => (
-    <div
+  render: renderWith(
+    <button
+      type="button"
       style={{
-        display: 'flex',
+        display: 'inline-flex',
         'align-items': 'center',
-        'justify-content': 'center',
-        height: '360px',
-        width: '100%',
-        background: 'var(--color-background)',
+        gap: '0.5rem',
+        height: '2.25rem',
+        padding: '0 0.875rem',
+        'border-radius': '0.5rem',
+        border: '1px solid var(--color-border)',
+        cursor: 'zoom-in',
+        'font-size': '0.875rem',
+        'font-weight': '500',
+        background: 'var(--color-card)',
+        color: 'var(--color-foreground)',
       }}
     >
-      <kai-lightbox
-        open={args.open as boolean}
-        default-open={args.defaultOpen as boolean}
-        disabled={args.disabled as boolean}
-        label={args.label as string}
-        show-close={args.showClose as boolean}
-        close-on-content-click={args.closeOnContentClick as boolean}
-      >
-        <button
-          type="button"
-          style={{
-            display: 'inline-flex',
-            'align-items': 'center',
-            gap: '0.5rem',
-            height: '2.25rem',
-            padding: '0 0.875rem',
-            'border-radius': '0.5rem',
-            border: '1px solid var(--color-border)',
-            cursor: 'zoom-in',
-            'font-size': '0.875rem',
-            'font-weight': '500',
-            background: 'var(--color-card)',
-            color: 'var(--color-foreground)',
-          }}
-        >
-          Zoom the photo
-        </button>
-        <img
-          slot="content"
-          src={IMAGE_URL}
-          alt="A snow-capped mountain above the clouds at dusk"
-          style={{ display: 'block', 'object-fit': 'contain' }}
-        />
-      </kai-lightbox>
-    </div>
+      Zoom the photo
+    </button>,
   ),
   parameters: src(`<!-- The trigger is YOUR markup in the default slot, the media is slot="content". -->
 <kai-lightbox id="photo-modal" label="A mountain at dusk">
@@ -164,4 +177,35 @@ export const ZoomYourOwnMarkup: StoryObj = {
 
   lightbox.addEventListener('kai-open-change', (e) => console.log(e.detail.open));
 </script>`),
+};
+
+/** The other trigger shape: a thumbnail you already have, with nothing focusable
+ *  inside it. The element supplies the button role, the tab stop and the ARIA,
+ *  and Enter or Space opens the modal. */
+export const ZoomAThumbnail: StoryObj = {
+  name: 'Zoom a Thumbnail',
+  render: renderWith(
+    <img
+      src={IMAGE_URL}
+      alt="A snow-capped mountain above the clouds at dusk"
+      width={224}
+      height={144}
+      style={{
+        display: 'block',
+        width: '14rem',
+        height: '9rem',
+        'object-fit': 'cover',
+        'border-radius': '0.5rem',
+        cursor: 'zoom-in',
+      }}
+    />,
+  ),
+  parameters: src(`<!-- Nothing focusable inside: the element makes the trigger a real button,
+     so a keyboard reaches it. Enter and Space both open the modal. -->
+<kai-lightbox label="A mountain at dusk">
+  <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&fit=crop"
+       alt="A snow-capped mountain above the clouds at dusk" width="224" height="144" />
+  <img slot="content" src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1600&fit=crop"
+       alt="A snow-capped mountain above the clouds at dusk" />
+</kai-lightbox>`),
 };

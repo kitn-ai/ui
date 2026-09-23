@@ -67,6 +67,9 @@ const isOpen = (el: Lightbox) => panel(el) !== null;
 const closeButton = (el: Lightbox) => shadow(el).querySelector<HTMLElement>('[part="close"]');
 
 const TRIGGER = '<button id="shutter" type="button">Zoom the photo</button>';
+/** A trigger with nothing focusable in it, so the element must supply the control
+ *  itself. The other shape — the consumer's own `<button>` — is `TRIGGER`. */
+const INERT_TRIGGER = `<img id="thumb" alt="A mountain at dusk" src="${IMAGE_URL}" />`;
 const CONTENT = `<img id="photo" slot="content" alt="A mountain at dusk" src="${IMAGE_URL}" />`;
 
 /** Bubbling + composed: Solid delegates `click` to the document. */
@@ -124,9 +127,9 @@ test('a click on the slotted trigger opens it, firing exactly one kai-open-chang
   // EXACTLY one: a second dispatch would make a consumer's own state machine flap.
   expect(seen).toEqual([{ open: true }]);
 
-  // The trigger is a real button, so it carries the ARIA that promises activation.
-  expect(trigger(el)!.getAttribute('aria-haspopup')).toBe('dialog');
-  expect(trigger(el)!.getAttribute('aria-expanded')).toBe('true');
+  // The consumer's button is the control here, so the wrapper must NOT be a
+  // second one. Both shapes are pinned in the delegation group below.
+  expect(trigger(el), 'no role="button" wrapper around a real button').toBeNull();
 });
 
 test('show(), hide() and toggle() drive it, and each change is announced once', async () => {
@@ -167,23 +170,26 @@ test('an empty default slot renders NO role="button" tab stop, and the modal sti
   expect(shadow(el).querySelector('slot:not([name])'), 'the trigger slot was never rendered').toBeNull();
   expect(shadow(el).querySelector('slot[name="content"]'), 'the content slot is unconditional').not.toBeNull();
 
-  const withTrigger = await mount(`${TRIGGER}${CONTENT}`);
-  expect(trigger(withTrigger)).not.toBeNull();
+  const withTrigger = await mount(`${INERT_TRIGGER}${CONTENT}`);
+  expect(trigger(withTrigger), 'an inert trigger does get the stop').not.toBeNull();
 });
 
 test('a trigger added LATER lights up its button, and removing it takes the button away', async () => {
   // The occupancy gate re-reads on child mutations, which is what makes the element
-  // usable with markup that arrives after mount.
+  // usable with markup that arrives after mount. The late child here is INERT, so
+  // the wrapper is the control: the late-arriving-<button> shape is the delegation
+  // group's swap case, where the role moves to the child instead.
   const el = await mount(CONTENT);
   expect(trigger(el)).toBeNull();
 
-  const button = document.createElement('button');
-  button.textContent = 'Zoom the photo';
-  el.append(button);
+  const image = document.createElement('img');
+  image.id = 'thumb';
+  image.alt = 'A mountain at dusk';
+  el.append(image);
   await flush();
   expect(trigger(el), 'the late trigger was picked up').not.toBeNull();
 
-  button.remove();
+  image.remove();
   await flush();
   expect(trigger(el), 'and its removal takes the button with it').toBeNull();
 });
@@ -267,8 +273,10 @@ test('a bare `show-close` attribute keeps the X, because absent means ON', async
 });
 
 test('`show-close="false"` and `el.showClose = false` both take the X away', async () => {
-  // The attribute, parsed from markup — the docs spelling.
-  const byAttribute = await mount(`${TRIGGER}${CONTENT}`);
+  // The attribute, parsed from markup — the docs spelling. Mounted on the inert
+  // trigger, whose wrapper is the control, so the assertion below still says
+  // something about the trigger rather than about the consumer's button.
+  const byAttribute = await mount(`${INERT_TRIGGER}${CONTENT}`);
   byAttribute.setAttribute('show-close', 'false');
   await flush();
   byAttribute.show();
@@ -279,7 +287,7 @@ test('`show-close="false"` and `el.showClose = false` both take the X away', asy
   expect(trigger(byAttribute), 'and the trigger still works').not.toBeNull();
 
   // The property, set from script.
-  const byProperty = await mount(`${TRIGGER}${CONTENT}`);
+  const byProperty = await mount(`${INERT_TRIGGER}${CONTENT}`);
   byProperty.showClose = false;
   await flush();
   byProperty.show();
@@ -368,4 +376,96 @@ test('`close-on-content-click="false"` and `el.closeOnContentClick = false` both
   click(byProperty.querySelector('#photo')!);
   await flush();
   expect(isOpen(byProperty), 'the property turned it off').toBe(true);
+});
+
+/**
+ * ★ BOTH TRIGGER SHAPES. The element must supply the control for one and must NOT
+ * for the other, and only the second half is a WCAG failure when it goes wrong:
+ * `role="button"` is a children-presentational role, so a `role="button"` wrapper
+ * around the consumer's own focusable control is `nested-interactive` (axe:
+ * "Element has focusable descendants"), which reddened the Storybook a11y leg on
+ * every commit of PR #409. The rule is `hasFocusableChild` — the same delegation
+ * `HoverCardTrigger` already uses for its tab stop.
+ */
+test('an inert trigger gets the role, the stop and the ARIA from the wrapper', async () => {
+  const el = await mount(`${INERT_TRIGGER}${CONTENT}`);
+  const wrapper = trigger(el);
+  expect(wrapper, 'the wrapper is the control').not.toBeNull();
+  expect(wrapper!.tagName).toBe('SPAN');
+  expect(wrapper!.getAttribute('tabindex'), 'and it owns the tab stop').toBe('0');
+  expect(wrapper!.getAttribute('aria-haspopup')).toBe('dialog');
+  expect(wrapper!.getAttribute('aria-expanded'), 'bound to the shared open state').toBe('false');
+
+  el.show();
+  await flush();
+  expect(wrapper!.getAttribute('aria-expanded')).toBe('true');
+});
+
+test('the wrapper that owns the control consumes Enter and Space', async () => {
+  // `preventDefault` is what keeps the keystroke from ALSO scrolling the thread
+  // behind the modal; on this shape the wrapper is the only thing that can open it.
+  const el = await mount(`${INERT_TRIGGER}${CONTENT}`);
+  const thumb = el.querySelector('#thumb')!;
+
+  const enter = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, composed: true, cancelable: true });
+  thumb.dispatchEvent(enter);
+  await flush();
+  expect(enter.defaultPrevented, 'the keystroke was consumed').toBe(true);
+  expect(isOpen(el)).toBe(true);
+
+  const other = await mount(`${INERT_TRIGGER}${CONTENT}`);
+  const space = new KeyboardEvent('keydown', { key: ' ', bubbles: true, composed: true, cancelable: true });
+  other.querySelector('#thumb')!.dispatchEvent(space);
+  await flush();
+  expect(space.defaultPrevented).toBe(true);
+  expect(isOpen(other)).toBe(true);
+});
+
+test("a slotted control keeps its own role, stop and keystroke — the wrapper gets none", async () => {
+  const el = await mount(`${TRIGGER}${CONTENT}`);
+  expect(trigger(el), 'no role="button" around the consumer\'s button').toBeNull();
+
+  const wrapper = shadow(el).querySelector('slot:not([name])')!.parentElement!;
+  expect(wrapper.getAttribute('tabindex'), 'and no tab stop of its own').toBeNull();
+  expect(wrapper.getAttribute('aria-haspopup')).toBeNull();
+  expect(wrapper.getAttribute('aria-expanded')).toBeNull();
+
+  // The keystroke belongs to the BUTTON: a `preventDefault` here would cancel the
+  // control's own activation (and, for a slotted `<a href>`, its navigation).
+  const shutter = el.querySelector('#shutter')!;
+  const space = new KeyboardEvent('keydown', { key: ' ', bubbles: true, composed: true, cancelable: true });
+  shutter.dispatchEvent(space);
+  await flush();
+  expect(space.defaultPrevented, 'the control keeps its activation').toBe(false);
+
+  // The click still opens it exactly once: it bubbles from the child to the
+  // wrapper's handler, which is what makes the delegation safe.
+  const seen: unknown[] = [];
+  el.addEventListener('kai-open-change', (e) => seen.push((e as CustomEvent).detail));
+  click(shutter);
+  await flush();
+  expect(isOpen(el)).toBe(true);
+  expect(seen).toEqual([{ open: true }]);
+});
+
+test('a slot that swaps an inert child for a control moves the role with it', async () => {
+  // The occupancy gate stays true across the swap, so only the focusable-child
+  // re-evaluation on `slotchange` can notice this.
+  const el = await mount(`${INERT_TRIGGER}${CONTENT}`);
+  expect(trigger(el), 'an inert trigger is the control').not.toBeNull();
+
+  const button = document.createElement('button');
+  button.id = 'shutter';
+  button.textContent = 'Zoom the photo';
+  el.querySelector('#thumb')!.replaceWith(button);
+  await flush();
+  expect(trigger(el), 'the consumer control took the role').toBeNull();
+
+  const img = document.createElement('img');
+  img.id = 'thumb';
+  img.alt = 'A mountain at dusk';
+  img.src = IMAGE_URL;
+  button.replaceWith(img);
+  await flush();
+  expect(trigger(el), 'and the wrapper took it back').not.toBeNull();
 });
