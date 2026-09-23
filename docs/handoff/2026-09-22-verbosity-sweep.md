@@ -31,6 +31,10 @@ Their words, in order, because the sequence IS the spec:
 9. "you need to work on the wording ... use shadcn UI as a sample for the verbiage they use" and "I don't
    want you to just copy the text from Shadcn."
 10. "I think you need to create an agent that is an expert copy reviewer."
+11. On `aria-label`: "there is aria-label on prop which over explained imo. think developer, they may or
+    may not know this but is that really the purpose of the description? or is clarification in the
+    stories below enough?" -> a description does not TEACH: no consequence, no preference, no rationale,
+    no cross-reference. The example shows it; the concept page says the why once."
 
 The distilled rule, now rule 7 in the living doc: **the top description is ONE plain statement of what
 the component IS or DOES.** No property names, no events, no mechanics, no inventory, no instructions,
@@ -115,19 +119,65 @@ generator, so they cost nothing and reached nobody. Now they are the element's o
   the other 12 lint gates green; the four UI tsc passes green.
 - Re-measure before quoting any of it: this file is a snapshot, the living doc carries the counters.
 
-## 6. Open work, ranked
+## 6. The plan, pass by pass, with the derived work list each pass needs
 
-1. **Solid prop docs** (200 over cap, the last two lanes), then widen `lint:prop-docs` to
-   `src/components/**`.
-2. **The copy reviewer's second pass**, over prop docs and the new docstrings. It judged page tops and
-   story descriptions so far; prop docs are next, and the length gate is not a wording gate.
-3. **Concept pages** (guides, patterns, examples): 60 are over a cap, and they are allowed more prose,
-   so the rule there is "no paragraph over ~4 lines", not a cap.
-4. **Code comments**: `lint:comment-references` (a plan path, task/round/finding ID, dated ruling or
-   section ref) plus the 156 sites, then the comment-block trim (181 blocks over 20 lines, 36 over 40,
-   starting with the 109-line module header in `aurora.glsl.ts`).
-5. **JSX in `args`**: the note repeated in four stories becomes a rule in `lint-story-conventions`.
-6. **Lower `MAX_LLMS_FULL_BYTES` back.** It was raised 344 -> 355 KiB to measure the docstring cost; the
-   trims pay it down, so the raise must be reverted with a note rather than left as drift.
-7. **`docs.description.story`** (40+ sites) is out of scope for rule (l), which reads the component
-   description only. Decide later whether a story description may mention its own story.
+Everything below is measured on the tree as of this handoff. Every list is a MEASUREMENT, not a
+memory: re-derive it in the same command that does the work, because four hand-written lists in this
+session were wrong, including one pasted from the tail of a measurement.
+
+**Pass A -- the story surfaces (next, and the owner is looking at these right now).**
+- story `argTypes` descriptions: 620 one-line values, **33 with a problem** (18 over 160 chars, 16 with
+  an em dash, 0 instructing). This is the fifth surface; they override the component's own prop docs in
+  Storybook. `components/checkbox/checkbox.stories.tsx` is the worked example.
+- story component descriptions: the mechanical rule passes everywhere (<= 3 paragraphs, no docs-system
+  talk), but only 24 components have been judged on WORDING (10 by the copy reviewer, plus the docs-talk
+  fixes). The other ~37 Solid stories and the 11 element stories have never been judged: expect em
+  dashes, rationale and inventories there.
+- the reviewer's prop-doc findings on the six worst Solid files: 11 FAIL, 35 WEAK (instructions,
+  rationale, inventories, em dashes -- all under the length cap, so no gate sees them).
+- guard to add: extend the `lint-story-conventions` em-dash + length checks to argType `description`
+  values (mechanical, ~33 sites).
+
+**Pass B -- the prose classes no length gate can see.** 43 hand-written docs name 2+ of their own union's
+literals (41 name all of them), 14 instruct, 291 doc blocks contain an em dash, 23 method or callback
+docs are over 160 (rule 2 has no cap there; worst 591), 17 member docs over 160 in shared `.ts` files
+(worst 652, `tool-part.state`).
+Guards: a type-restatement checker (doc + the union it names, from the AST), an em-dash rule over DOC
+COMMENTS rather than only the meta, and a cap for method docs.
+
+**Pass C -- the comment slice.** 156 sites cite a plan path, task/round/finding ID, dated ruling or a
+section ref; 181 comment blocks are over 20 lines (36 over 40, the worst a 109-line module header in
+`aurora.glsl.ts`). Write `lint:comment-references` first (parsed waiver with a reason, self-test, its own
+CI step), then sweep, then the block cap.
+
+**Pass D -- the concept tier and the story blurbs.** 60 guide/pattern/example pages are over a cap; those
+pages are allowed prose, so the rule there is "no paragraph over ~4 lines". And
+`docs.description.story` (40+ sites) is out of rule (l)'s scope by decision.
+
+**Pass E -- JSX in `args`.** The note is repeated in four stories (one of them inside a rendered prop
+table) because it is a Storybook rule, not a component fact. Make it a rule in `lint-story-conventions`
+and delete the notes.
+
+**Then: publish.** Merge #409 and release; the smaller `llms-full.txt`, MCP catalog and Storybook only
+reach anyone on the next published package. Until then nothing the owner can open reflects this work.
+
+## 7. How to resume without re-learning the rules
+
+1. Read `docs/verbosity-sweep.md` (the rules, the counters, the batch table, the follow-ups) and this
+   file. Those two ARE the memory; do not re-derive the criteria from the commit log.
+2. Run the four gates to see the real state: `lint:prop-docs`, `lint:story-conventions`,
+   `pnpm --filter @kitn.ai/docs test` (it carries the copy guard), `lint:llms-size`.
+3. Derive the work list for the pass you are on, in the same command that does the work.
+4. Batches of ~10 components per lane, one writer per file, then the `copy-reviewer` agent judges the
+   batch (read-only; it reads the criteria file, so it cannot drift from the owner's rules). A batch is
+   done only when the reviewer passes and the parent has re-measured the counter.
+5. The owner reviews components; tell them what "done" means so they do not report untouched work:
+   - done and gated for all 100: element one-liner, prop docs (length), and the page top for the 62 with
+     a docs page
+   - done for 24 components only: story wording
+   - not started for any component: code comments, and every Pass B class
+   - not judged yet: the ~37 components whose stories have never been through the reviewer. Em dashes,
+     rationale and inventories there are expected, not regressions.
+6. The reviewer is NOT CI. Nothing mechanical covers "does this teach" or "is this well written", so the
+   guard against regrowth on the wording half is running it per batch. Do not claim a component is done
+   on a green `lint:prop-docs`.
