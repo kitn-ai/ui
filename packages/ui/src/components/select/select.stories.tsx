@@ -34,7 +34,7 @@ const meta = {
     name: { control: 'text', description: 'Form-control name. This is what a native form submits.' },
     class: { control: 'text', description: 'Extra classes for the `<select>`, merged with the kit box rather than replacing it.' },
     containerClass: { control: 'text', description: 'Extra classes for the positioning wrapper that holds the chevron.' },
-    'aria-label': { control: 'text', description: 'Accessible name. A select with no visible `<label for>` needs one, or it announces as an unnamed control.' },
+    'aria-label': { control: 'text', description: 'Accessible name, for a select with no visible label.' },
     onChange: { action: 'change', description: 'Native change event. Read `e.currentTarget.value`, or `selectedOptions` when `multiple`.', table: { category: 'Events' } },
   },
   args: {

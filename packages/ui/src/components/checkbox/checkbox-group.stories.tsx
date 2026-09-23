@@ -21,7 +21,7 @@ const meta = {
     options: { control: 'object', description: 'The choices, in order. Each is `{ value, label, description?, disabled? }`. Rendered in full, never truncated or de-duplicated.' },
     value: { control: 'object', description: 'The selected values, as an array. Each option is checked when its `value` is in here, matched by identity.' },
     name: { control: 'text', description: 'Shared form-control name. No default: without one the group renders and behaves correctly but submits nothing.' },
-    label: { control: 'text', description: 'Accessible name for the group (`aria-label` on the `group`). Prefer `aria-labelledby` pointing at visible text when you have some.' },
+    label: { control: 'text', description: 'Accessible name for the group. Ignored when `aria-labelledby` is set.' },
     disabled: { control: 'boolean', description: 'Disable every row. Individual rows can be disabled on the option.' },
     itemClass: { control: 'text', description: 'Extra classes for each row.' },
     onChange: { action: 'change', description: 'Fires with the next selection, the option that moved, and whether it went on or off.', table: { category: 'Events' } },

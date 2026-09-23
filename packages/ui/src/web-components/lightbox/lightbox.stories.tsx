@@ -54,7 +54,7 @@ const meta: Meta = {
       control: 'boolean',
       description: 'Take away the programmatic open path only: `show()` no-ops, `toggle()` closes. The trigger still works.',
     },
-    label: { control: 'text', description: 'Accessible name for the modal (`aria-label`). Without one the panel is an unnamed dialog.' },
+    label: { control: 'text', description: 'Accessible name for the modal.' },
     showClose: {
       name: 'show-close',
       control: 'boolean',

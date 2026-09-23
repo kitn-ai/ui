@@ -31,7 +31,7 @@ const meta = {
     },
     name: { control: 'text', description: 'Form-control name. This is what a native form submits.' },
     class: { control: 'text', description: 'Extra classes, merged with the kit rule rather than replacing it.' },
-    'aria-label': { control: 'text', description: 'Accessible name. A slider with no visible label needs one, or it announces as an unnamed control.' },
+    'aria-label': { control: 'text', description: 'Accessible name, for a slider with no visible label.' },
     onInput: { action: 'input', description: 'Fires per step while dragging. Read `e.currentTarget.valueAsNumber`.', table: { category: 'Events' } },
     onChange: { action: 'change', description: 'Fires on commit (pointer release). Read `e.currentTarget.valueAsNumber`.', table: { category: 'Events' } },
   },

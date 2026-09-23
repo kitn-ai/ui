@@ -9,6 +9,18 @@ surfaces are measured clean, not when it is edited.
    Says what the prop does plus only what the name and type cannot: the default, the unit, a real
    trap. No type enumeration, no restating the prop name, no rationale. The rationale moves to a `//`
    comment beside the prop, which no generator reads.
+   **A description does not TEACH.** No consequence ("or it announces as an unnamed control"), no
+   preference ("prefer `aria-labelledby`"), no rationale, no cross-reference to a story. A developer may
+   not know the consequence yet, and that is not this surface's job: the example below shows a labelled
+   box next to an unlabelled one, and the concept page says the why once
+   (`apps/docs/src/content/docs/guides/accessibility.mdx` owns accessible names). Rejected/approved from
+   the owner reading Checkbox:
+   "Accessible name. A checkbox with no visible label needs one, or it announces as an unnamed control.
+   A wrapping `<label>` is the better answer when there is text to wrap" -> "Accessible name, for a box
+   with no visible label."
+   This is the wording half of the prop rule and NO mechanical gate covers it: the length cap passed all
+   six of those descriptions, and a "does it teach" regex only finds 4 of 620 argType descriptions, so it
+   is the copy reviewer's job, not CI's.
 2. **Slots, parts, events, methods**: one clause each. They feed the docs tables and llms-full.txt.
 3. **The component description** (what Storybook renders above the props table): ONE statement of what
    the component is (rule 7 below is the authority; this line used to say "1-3 sentences" and the two
@@ -72,6 +84,7 @@ surfaces are measured clean, not when it is edited.
 | the widened gate | 227 files, 1,586 props, 0 over cap, self-test 10/10 | done |
 | facade prop-doc text | 94,098 -> 54,354 chars, mean 139 -> 80, 0 waivers | done |
 | rendered component descriptions with docs-system talk | 0 of 88 | done |
+| story `argTypes` descriptions (a FIFTH surface: not the component's prop docs, and they WIN in Storybook's props table) | 620 one-line values, 18 over 160, 16 with an em dash, 0 instructing | checkbox done as the example; the rest queued |
 | element docstrings | 100 of 100 present, 75,917 -> ~7.8 KB, mean 808 -> 69, longest 161 | done |
 | component page tops (description <= 100, lede <= 140, aside <= 200, no em dash, no instruction, lede not restating) | 0 offenders across 63 pages, 88 docs tests green, verify:docs exit 0 | done |
 | concept pages over cap (guides, patterns, examples) | 60 | paragraphs <= 4 lines |
@@ -81,6 +94,12 @@ surfaces are measured clean, not when it is edited.
 The copy guard `apps/docs/test/docs-copy.test.ts` now measures the page tops on every run (caps, em dashes,
 instructive shapes, a lede that restates its description, anti-vacuity floors on pages, ledes, asides AND
 the extracted text length). It runs inside the docs vitest step, so no workflow edit was needed.
+
+**A fifth surface, found by the owner reading Checkbox**: a story's hand-written `argTypes`
+`description` values. They are not the component's prop docs and they win in Storybook, which is why props
+still read verbose after the component-side trim. `components/checkbox/checkbox.stories.tsx` is the worked
+example: a three-paragraph component description became one statement, six argType descriptions became one
+sentence each, and the deleted rationale is a `//` comment above the meta.
 
 **Every hand-written list the parent produced for this sweep was WRONG**, four times: a floating-things
 list that omitted composer, a `component:` grep that matched a description field, a docs page list that

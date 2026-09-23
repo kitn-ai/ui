@@ -4,6 +4,12 @@ import { createSignal, For } from 'solid-js';
 import { Checkbox, type CheckboxProps } from './checkbox';
 import { componentDescription } from '../../stories/docs/web-component-controls';
 
+// The component renders a real `<input type="checkbox">` behind `appearance: none`, so keyboard
+// operation, the focus ring, form participation and screen-reader announcement are the browser's.
+// Everything it does not own is forwarded to that input; the one thing it adds is `indeterminate`,
+// which is a DOM property with no attribute. No validation is applied: `required` reaches the native
+// attribute and stops there, and whether an unticked box is an error is the application's rule.
+
 const meta = {
   title: 'Components/Checkbox',
   component: Checkbox,
@@ -12,26 +18,24 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'A checkbox. A real `<input type="checkbox">` behind `appearance: none` — never a `<div>` wearing `role="checkbox"` — so keyboard operation (Space), the focus ring, form participation and screen-reader announcement come from the browser and are correct by construction.',
-        'Everything the component does not own is forwarded to the input: `id`, `name`, `value`, `required`, `checked`, `disabled`, `aria-*`, any `data-*` hook, and the DOM events. The one thing it adds is `indeterminate`, which has no HTML attribute and otherwise needs a `ref`.',
-        'No validation is applied. `required` reaches the native attribute and stops there — whether an unticked box is an error is your application\'s rule, not the kit\'s.',
+        'A control for turning an option on or off.',
       ]),
     },
   },
   argTypes: {
-    checked: { control: 'boolean', description: 'Checked state. Controlled — drive it from `onChange`.' },
+    checked: { control: 'boolean', description: 'Checked state; drive it from `onChange`.' },
     indeterminate: {
       control: 'boolean',
-      description: 'The mixed state, for a parent box whose children are partly ticked. A DOM property with no attribute, so it can only be set from JS.',
+      description: 'The mixed state of a parent box whose children are partly ticked. A DOM property, so set it from JS.',
     },
-    disabled: { control: 'boolean', description: 'Disable interaction. Dims the box and blocks the pointer.' },
-    required: { control: 'boolean', description: 'Sets the native `required` attribute. Adds no validation of its own.' },
-    name: { control: 'text', description: 'Form-control name. With `value`, this is what a native form submits.' },
+    disabled: { control: 'boolean', description: 'Disables interaction and dims the box.' },
+    required: { control: 'boolean', description: 'Native `required`; the kit adds no validation.' },
+    name: { control: 'text', description: 'Name the form submits, paired with `value`.' },
     value: { control: 'text', description: 'Submitted value when checked. Defaults to `on`.' },
     class: { control: 'text', description: 'Extra classes, merged with the kit rule rather than replacing it.' },
     'aria-label': {
       control: 'text',
-      description: 'Accessible name. A checkbox with no visible label needs one, or it announces as an unnamed control. A wrapping `<label>` is the better answer when there is text to wrap -- see "In a label row".',
+      description: 'Accessible name, for a box with no visible label.',
     },
     onChange: { action: 'change', description: 'Native change event. Read `e.currentTarget.checked`.', table: { category: 'Events' } },
   },
