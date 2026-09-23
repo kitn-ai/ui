@@ -29,7 +29,10 @@ export default {
       alt: 'A beach at sunset',
     },
     inline: {
-      src: `data:image/svg+xml;base64,${btoa(INLINE_SVG)}`,
+      // `unescape(encodeURIComponent(...))` first: the star is outside Latin-1 and a bare `btoa`
+    // throws InvalidCharacterError, which fails the whole docs build while prerendering a page
+    // that imports this module.
+    src: `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(INLINE_SVG)))}`,
       alt: 'A purple star icon, inlined as a data URI',
     },
   },
