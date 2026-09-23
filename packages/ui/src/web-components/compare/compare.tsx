@@ -8,17 +8,15 @@ import type {
 } from '../../components/response/response-compare';
 
 interface Props extends Record<string, unknown> {
-  /** The compare definition (prompt + the two candidates). Set as a JS PROPERTY:
-   *  `el.data = { prompt, candidates: [A, B], collapse? }`. Import
-   *  `ResponseCompareData` from `@kitn.ai/ui` for the full shape. */
+  // Import `ResponseCompareData` from `@kitn.ai/ui` for the full shape.
+  /** The compare definition (prompt + the two candidates). JS property: `el.data = { prompt, candidates: [A, B] }`. */
   data?: Record<string, unknown>;
   /** Stable id correlating every emitted event. Attribute: `compare-id`. */
   compareId?: string;
   /** Re-hydrate / control the user's pick. Set as a JS PROPERTY:
    *  `el.selection = { chosenId, rejectedIds }`. Renders the collapsed winner. */
   selection?: Record<string, unknown>;
-  /** Layout: `'auto'` (default, columns when wide, tabs when narrow, by CONTAINER width) |
-   *  `'columns'` (side-by-side) | `'tabs'` (pills to switch). Attribute: `layout`. */
+  /** Layout: `auto` (default, by CONTAINER width), `columns` (side-by-side), or `tabs` (pills). */
   layout?: CompareLayout;
   /** Prose/text size for the rendered candidates. Attribute: `prose-size`. */
   proseSize?: ProseSize;
@@ -36,22 +34,14 @@ interface Events extends Record<string, unknown> {
   /** The definition was unusable. */
   'kai-error': { compareId: string; message: string };
 }
-
+// A COMMIT, not a Submit: the pick is the terminal step and fires `kai-compare-select` (non-
+// bubbling) off the host so the consumer can send a `(prompt, chosen, rejected)` preference
+// pair. Single-shot; the card optimistically collapses to the chosen candidate. Both candidates
+// may stream (push a fresh `data` reference per chunk) and the pick stays disabled with a
+// per-column shimmer until BOTH settle, then `kai-ready` fires. The columns are a WAI-ARIA
+// radiogroup with roving tabindex (Arrow moves A<->B, Enter/Space picks).
 /**
- * `<kai-compare>` — a **dual-response comparison** (set via the `data` property):
- * two assistant candidates for the same prompt, rendered side-by-side (or as tabs),
- * each exactly like an assistant message (reasoning + tools + attachments +
- * markdown). The user **picks** the better one — a COMMIT, not a Submit — which
- * fires a non-bubbling **`kai-compare-select`** CustomEvent off the host
- * (`{ chosenId, rejectedIds:[other], at }`) for the consumer to send a
- * `(prompt, chosen, rejected)` preference pair. The card optimistically collapses
- * to the chosen candidate. Single-shot.
- *
- * Both candidates can stream (push a fresh `data` reference per chunk); the pick is
- * disabled with a per-column shimmer until BOTH settle, then `kai-ready` fires. The
- * columns are a WAI-ARIA radiogroup with roving tabindex (Arrow keys move A↔B,
- * Enter/Space picks). `kai-error` fires for a malformed definition. Isolated in
- * Shadow DOM; theme-aware via the shared tokens.
+ * A dual-response comparison in which the reader picks the better of two answers to one prompt.
  */
 defineWebComponent<Props, Events>(
   'kai-compare',

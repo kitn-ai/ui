@@ -1,6 +1,6 @@
 ---
 title: Button
-description: The kit's button as a drop-in web component — variants, sizes, leading/trailing icons, and a slot for your own SVG.
+description: Displays a button.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -17,7 +17,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kai-tag-sub">kai-button</p>
 
-<p class="kai-lede">The kit's button as a drop-in web component — five variants, text and icon sizes, leading and trailing icons, and a slot for your own SVG. Compose polished, theme-aware controls instead of hand-rolling a `<button>` plus hover styles.</p>
+<p class="kai-lede">Handles every action in the UI, from the primary submit down to a quiet icon in a toolbar.</p>
 
 <Facts items={['Shadow DOM', '5 variants', 'Named + URL icons', 'Emits kai-click']} />
 
@@ -26,12 +26,12 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 <Playground client:only="solid" tag="kai-button" />
 
 <Aside type="tip" title="When to use">
-Reach for `<kai-button>` for any user-triggered action — submitting input, a toolbar action, confirming or dismissing. Use `default` for the primary action and `subtle`/`ghost`/`outline` for secondary or low-emphasis ones. It's the same button the kit's own controls use, so a custom action row sitting next to a [Prompt input](/components/prompt-input/) or [Suggestions](/components/suggestions/) matches without extra styling.
+Any user-triggered action: submitting input, a toolbar action, confirming, dismissing. `default` is the primary action, `subtle` / `ghost` / `outline` the low-emphasis ones.
 </Aside>
 
 ## Usage
 
-Put the label as light-DOM text inside the element. Set `variant` and `size` for emphasis and footprint, add `icon` for a leading glyph, and listen for `kai-click`. For an icon-only button, drop the text, set `size="icon"`, and name it with `label`.
+Put the label as light-DOM text inside the element. Set `variant` and `size`, add `icon` for a leading glyph, and listen for `kai-click`. For an icon-only button, drop the text, set `size="icon"`, and name it with `label`.
 
 ```html
 <kai-button variant="subtle" size="icon" icon="mic" label="Voice input"></kai-button>
@@ -43,7 +43,7 @@ Put the label as light-DOM text inside the element. Set `variant` and `size` for
 
 ### Variants
 
-`variant` sets the emphasis: `default` (filled), `subtle` (muted text, hover tint — the toolbar look), `ghost` (transparent, hover fill), `outline`, and `destructive`.
+`variant` sets the emphasis: `default` (filled), `subtle` (muted text, hover tint), `ghost`, `outline`, `destructive`.
 
 <Example client:visible tag="kai-button" config={{ variant: 'default' }} data="send" />
 
@@ -55,27 +55,25 @@ Put the label as light-DOM text inside the element. Set `variant` and `size` for
 
 ### Sizes
 
-`sm`, `md` (default), and `lg` size text buttons.
-
 <Example client:visible tag="kai-button" config={{ size: 'sm' }} data="send" />
 
 <Example client:visible tag="kai-button" config={{ size: 'lg' }} data="send" />
 
 ### Icon-only
 
-Drop the text, use a square `size` (`icon` / `icon-sm`), and set `label` for the accessible name. `icon` takes a named icon, an image URL, or a data-URI.
+Square sizes are `icon` / `icon-sm`; set `label` for the accessible name. `icon` takes a named icon, an image URL, or a data-URI.
 
 <Example client:visible tag="kai-button" config={{ variant: 'subtle', size: 'icon', icon: 'mic', label: 'Voice input' }} data="iconOnly" />
 
 ### Trailing icon
 
-`icon-trailing` sits after the label — a `chevron-down` reads as a menu affordance.
+`icon-trailing` sits after the label.
 
 <Example client:visible tag="kai-button" config={{ variant: 'ghost', iconTrailing: 'chevron-down' }} data="model" />
 
 ### Custom icon via slot
 
-For a glyph the `icon` prop can't name — your own SVG, an icon library — slot it into `slot="icon"`; it wins over the `icon` prop. Keep `label` for the accessible name.
+For a glyph the `icon` prop can't name, slot it into `slot="icon"`; it wins over the prop. Keep `label` for the accessible name.
 
 <Example client:visible tag="kai-button" config={{ label: 'Ship' }} data="slottedIcon" />
 
@@ -94,7 +92,7 @@ The label is the default slot; `icon` is the one named seam:
 
 ## Styling
 
-The whole button is one `::part` — restyle radius, padding, color, or weight from outside while keeping `variant`/`size` as the defaults.
+The button is a single `::part`, so radius, padding, color, and weight restyle from outside while `variant` / `size` stay the defaults.
 
 <PartTable tag="kai-button" />
 

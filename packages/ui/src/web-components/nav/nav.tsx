@@ -28,35 +28,8 @@ interface Events {
 }
 
 /**
- * `<kai-nav>` — a vertical navigation list driven by a JSON `items` tree
- * (id + label + optional leading `icon`, a trailing text `badge`, a trailing
- * icon). Items may nest via `children` (a collapsible group with a disclosure
- * chevron), carry a `status` dot (`{ tone, label?, pulse? }`), and a trailing
- * `meta` string (e.g. a relative time). The active item is `value`; selecting a
- * leaf fires `kai-nav-select` (group rows toggle expand/collapse instead).
- *
- * Items may also carry an `action` (`{ icon, label }`) or `closable: true`, which
- * render a trailing button — firing `kai-nav-item-action` `{ value, action }` or
- * `kai-nav-item-close` `{ value }` (never `kai-nav-select`). Style it via
- * `::part(item-action)`.
- *
- * ```html
- * <kai-nav default-value="home"></kai-nav>
- * <script type="module">
- *   const nav = document.querySelector('kai-nav');
- *   nav.items = [
- *     { id: 'home', label: 'New task', icon: 'plus', trailing: 'pencil' },
- *     { id: 'acme', label: 'Acme', icon: 'folder', children: [
- *       { id: 't1', label: 'Refactor auth', status: { tone: 'info', label: 'Working', pulse: true }, meta: '2m' },
- *       { id: 't2', label: 'Landing page', status: { tone: 'success', label: 'Done' }, meta: '1d' },
- *     ] },
- *     { id: 'dispatch', label: 'Dispatch', icon: 'share', badge: 'Beta' },
- *   ];
- *   nav.addEventListener('kai-nav-select', (e) => console.log(e.detail.id));
- * </script>
- * ```
- * Restyle via `::part(nav)` / `::part(item)` (active items carry `aria-current`),
- * plus `::part(group)` / `::part(chevron)` / `::part(status)` / `::part(meta)`.
+ * A vertical navigation list built from an item tree, with nested groups, status
+ * dots and trailing actions.
  */
 defineWebComponent<Props, Events>('kai-nav', {
   items: undefined,

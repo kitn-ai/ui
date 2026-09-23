@@ -17,14 +17,11 @@ export interface WidgetProps {
   id: string;
   value: unknown;
   field: FormField;
-  /**
-   * The field's resolved format hints, or an empty resolution.
-   *
-   * RESOLVED IN `FieldRow`, not here. The row already has to resolve them to render
-   * the format hint text and put its id in `aria-describedby`, and resolving the same
-   * untrusted `x-kai-*` keys a second time in the widget would warn twice about the
-   * same bad hint and could disagree with what the row said out loud.
-   */
+  // RESOLVED IN `FieldRow`, not here. The row already has to resolve them to render the
+  // format hint text and put its id in `aria-describedby`, and resolving the same
+  // untrusted `x-kai-*` keys a second time in the widget would warn twice about the same
+  // bad hint and could disagree with what the row said out loud.
+  /** The field's resolved format hints, or an empty resolution. */
   mask?: FieldMaskHint;
   disabled: boolean;
   placeholder?: string;
@@ -32,17 +29,14 @@ export interface WidgetProps {
   invalid: boolean;
   describedBy?: string;
   label: string;
-  /**
-   * The id of the row's VISIBLE label element, for widgets whose control is a group
-   * rather than one labelable input.
-   *
-   * `FieldRow` used to suppress its `<label>` for those kinds and each widget named
-   * itself with `aria-label={props.label}`, which is a name only a screen reader can
-   * reach: "Severity", "Environments" and "Tags" were announced and invisible. The row
-   * now always renders the text and hands its id down here, so one string names the
-   * group and everybody can see it. Absent means the widget is on its own (a bare
-   * widget rendered outside `FieldRow`), so `aria-label` stays the fallback.
-   */
+  // Group widgets (radio, checkbox group, rating) have no single labelable input, so
+  // `FieldRow` names them by the id of its own visible `<label>`, which it always
+  // renders. It used to suppress that label for those kinds and each widget named
+  // itself with `aria-label={props.label}` -- a name only a screen reader could reach,
+  // so "Severity", "Environments" and "Tags" were announced and invisible. Absent
+  // means the widget is on its own (rendered outside `FieldRow`) and `aria-label` is
+  // the fallback.
+  /** The id of the row's visible label element, for widgets whose control is a group. */
   labelledBy?: string;
   onInput: (value: unknown) => void;
   onBlur: () => void;

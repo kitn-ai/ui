@@ -45,35 +45,30 @@ import { Separator } from '../separator/separator';
 import { Tooltip } from '../tooltip/tooltip';
 
 export interface BuilderHeaderProps {
-  /** Back to the builder's home screen (the construct list). Renders the
-   *  leftmost icon button only when given — same menu-honesty gate as every
-   *  other affordance here. */
+  /** Fires when the home button is pressed; the button renders only when this is given. */
   onHome?: () => void;
 
-  /** The construct/template name, rendered on the LEFT. */
+  /** The construct or template name, rendered on the left. */
   title?: string;
-  /** Optional small status chip beside the title (e.g. "preview starting…"). */
+  /** Optional small status chip beside the title (e.g. "preview starting..."). */
   status?: string;
 
-  /** Opens the switch-template overlay. Renders the button only when given. */
+  /** Fires from the switch-template button, which renders only when this is given. */
   onSwitchTemplate?: () => void;
 
-  /** Current resolved mode of the PREVIEW CANVAS — controlled, never owned
-   *  here. Drives which icon shows (the mode you would switch TO) and the
-   *  accessible name. */
+  /** Resolved mode of the preview canvas, controlled here; drives the icon and the accessible name. */
   canvasDark?: boolean;
-  /** Flips the preview canvas's theme. Renders the toggle only when given. */
+  /** Fires from the canvas theme toggle, which renders only when this is given. */
   onToggleCanvasDark?: () => void;
 
-  /** The primary Save action, rightmost. Renders only when given. */
+  /** The primary save action, rightmost. Renders only when given. */
   onSave?: () => void;
-  /** Disables Save and swaps its label (e.g. mid-write). */
+  /** Disables save and swaps its label (e.g. mid-write). */
   saving?: boolean;
-  /** Everything already persisted: disables Save and labels it "Saved" —
-   *  the honest state for a page that autosaves (the builder debounces its
-   *  POSTs; Save is only ACTIVE while a write is pending, and clicking it
-   *  flushes the debounce, never a second persistence path). `saving`
-   *  takes precedence. */
+  // The honest state for a page that autosaves: the builder debounces its POSTs,
+  // so save is only ACTIVE while a write is pending, and pressing it flushes the
+  // debounce rather than opening a second persistence path.
+  /** Every write persisted: disables save and labels it "Saved"; `saving` takes precedence. */
   saved?: boolean;
 
   class?: string;

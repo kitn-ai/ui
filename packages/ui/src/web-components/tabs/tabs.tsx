@@ -24,27 +24,8 @@ interface Events {
 }
 
 /**
- * `<kai-tabs>`, an accessible tab strip. Selection only: it emits the chosen id;
- * you render what each tab shows (this is not a content router).
- *
- * Set the `items` property in JavaScript (array, not attribute):
- *
- * ```html
- * <kai-tabs default-value="chat"></kai-tabs>
- * <script type="module">
- *   import '@kitn.ai/ui/web-components';
- *   const tabs = document.querySelector('kai-tabs');
- *   tabs.items = [
- *     { id: 'chat', label: 'Chat', icon: 'message-circle' },
- *     { id: 'cowork', label: 'Cowork' },
- *     { id: 'code', label: 'Code', icon: 'code' },
- *   ];
- *   tabs.addEventListener('kai-tab-change', (e) => console.log(e.detail.value));
- * </script>
- * ```
- *
- * Each tab carries a stable `id`, so you can wire `aria-controls` on the tab and
- * `aria-labelledby` on your own panel. Style the active tab via `::part(tab)[data-active]`.
+ * An accessible tab strip that reports the selected tab and renders no panels of its
+ * own.
  */
 defineWebComponent<Props, Events>('kai-tabs', {
   items: undefined,

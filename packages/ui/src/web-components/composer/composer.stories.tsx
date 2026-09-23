@@ -127,10 +127,7 @@ const meta = {
     layout: 'fullscreen',
     docs: {
       description: specDescription('kai-composer', [
-        '`<kai-composer>` is a framework-agnostic **web component** for rich prompt input. It types like a plain textarea but supports atomic inline entity pills (skills, mentions) via `/` and `@` trigger menus, keyword highlighting via the CSS Custom Highlight API, and emits a structured `{ doc, text, entities }` payload.',
-        '**When to use:** any non-Solid app (React, Vue, Svelte, plain HTML) that needs a prompt input with entity-pill support.',
-        '**How to use:** register once with `import \'@kitn.ai/ui/web-components\'`. Set **JS properties** for `triggers`, `value`, and `highlights` (arrays/objects). Scalars (`placeholder`, `disabled`, `loading`) work as attributes. Listen for **CustomEvents** (`kai-submit`, `kai-value-change`, `kai-entity-add`, `kai-entity-remove`, `kai-trigger`, `kai-trigger-close`) directly on the element.',
-        '**Not an RTE**: no bold/italic. Entity pills are the only non-text nodes; the content surface is `contenteditable="plaintext-only"`.',
+        'The bare prompt editor: a reference stays one atomic pill inside the text, with no send button or toolbar.',
       ]),
     },
   },

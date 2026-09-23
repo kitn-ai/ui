@@ -42,7 +42,7 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'A collapsible panel for a single tool/function call: its state (processing, ready, completed, error), input, output, and error. Drive it with a `toolPart`; state sets the icon/badge automatically, and `defaultOpen` starts it expanded.',
+        'A collapsible panel that shows one tool call, from its input to its output.',
       ]),
     },
   },

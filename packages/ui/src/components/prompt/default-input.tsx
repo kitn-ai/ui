@@ -33,10 +33,10 @@ import { classifyAttachment } from '../../wire/files';
  *  says what happened; the application decides what the user reads. */
 export interface RejectedAttachment {
   filename: string;
-  /** The browser's media type for the file, or `''` when it could not tell. An
-   *  empty one is not by itself why a file was rejected: an unnamed file is
-   *  decided by decoding its bytes, so `''` here means the decode is what said
-   *  no (binary), or that your `accept` left no text type for it to land in. */
+  // An empty one is not by itself why a file was rejected: an unnamed file is decided by
+  // decoding its bytes, so `''` here means the decode is what said no (binary), or that
+  // the `accept` filter left no text type for it to land in.
+  /** The browser's media type for the file, or `''` when it could not tell. */
   mediaType: string;
   /** `'filtered'` = this kit could have sent it, your `accept` excluded it.
    *  `'unsupported'` = no API takes this as message content at all. */
@@ -53,32 +53,25 @@ export interface DefaultPromptInputProps {
   /** Attachments staged in the input. Provide `onAttachmentsChange` to enable
    *  the attach button + removable previews. */
   attachments?: AttachmentData[];
-  /** When `false`, the built-in paperclip attach button is hidden even if
-   *  `onAttachmentsChange` is provided (e.g. when a `+` menu already covers
-   *  file-attach). Defaults to `true`. */
+  /** Whether the built-in paperclip attach button renders. On by default. */
   attach?: boolean;
-  /** Which attachment media types the user may stage, in HTML `accept` syntax
-   *  (`'image/*,application/pdf'`). Omitted means no filter, exactly as before.
-   *
-   *  NARROWED BY WHAT THE ENCODERS CAN SEND: `'image/*'` here resolves to the
-   *  four image formats both APIs actually accept, not to every image type the
-   *  OS will offer. It is the same string, resolved by the same function against
-   *  the same declaration, as `toOpenAIMessages(msgs, { accept })` -- so a file
-   *  the picker allows is a file the wire can carry. */
+  // NARROWED BY WHAT THE ENCODERS CAN SEND: `'image/*'` resolves to the four image
+  // formats both APIs actually accept, not to every image type the OS will offer. The
+  // same string, resolved by the same function against the same declaration, that
+  // `toOpenAIMessages(msgs, { accept })` uses, so a file the picker allows is a file the
+  // wire can carry.
+  /** Which attachment media types the user may stage, in HTML `accept` syntax. */
   accept?: MediaTypeFilter;
-  /** Files that were dropped because `accept` excluded them. Carries the facts
-   *  (name, media type, reason) and renders nothing itself: what the user should
-   *  see is the application's call, not the kit's. */
+  /** Fired with the files `accept` excluded, as facts (name, media type, reason); it
+   *  renders nothing itself. */
   onAttachmentsRejected?: (rejected: RejectedAttachment[]) => void;
   /** Show a web-search (Globe) button in the left toolbar; calls `onWebSearch`. */
   webSearch?: boolean;
   /** Show a Voice (Mic) button in the left toolbar; calls `onVoice`. */
   voice?: boolean;
-  /** Send-button visibility. `'always'` (default) always shows it; `'auto'` shows
-   *  it only when there's text/attachments (an empty composer hides it, though
-   *  Enter still submits). To hide it entirely (Enter-only), it's pure CSS:
-   *  `::part(send){display:none}`, no prop needed. Restyle via `::part(send)`.
-   *  The Stop button (stoppable + loading) is unaffected. */
+  // Hiding it entirely (Enter-only) is pure CSS: `::part(send){display:none}`, no prop
+  // needed. The Stop button (stoppable + loading) is unaffected.
+  /** Send-button visibility, `'always'` by default. */
   submit?: 'always' | 'auto';
   onValueChange: (v: string) => void;
   onSubmit: () => void;

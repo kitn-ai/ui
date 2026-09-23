@@ -10,9 +10,7 @@ interface Props extends Record<string, unknown> {
   /** The tab's identity: the `value` attribute (host `id` is the fallback).
    *  It is the `value` in the bar's `kai-tab-change` detail. */
   value?: string;
-  /** Named icon from the kit roster (e.g. "home", "message-square"). The icon
-   *  renders at the element's own default size, so equal glyphs across tabs
-   *  need no consumer sizing. */
+  /** Named icon from the kit roster (e.g. "home"). Renders at the element's own default size. */
   icon?: string;
   /** Unread dot on the icon's corner. Reaches the tab's accessible name too:
    *  a dot alone is invisible to assistive tech. */
@@ -30,25 +28,11 @@ interface Props extends Record<string, unknown> {
    *  `icon-only` attribute. */
   iconOnly?: boolean;
 }
-
+// Inside a bar, selection flows bar to item (`active`, `aria-selected`) and activation surfaces
+// once as `kai-tab-change` on the BAR; the item fires no event of its own. Outside a bar it
+// renders inert: tab chrome has no standalone activation story.
 /**
- * `<kai-tab-bar-item>`, one tab of a `<kai-tab-bar>`: an icon-over-label
- * column (or icon-only) with an optional unread dot or count badge on the
- * icon's corner. The default slot is the label text.
- *
- * ```html
- * <kai-tab-bar value="home">
- *   <kai-tab-bar-item value="home" icon="home">Home</kai-tab-bar-item>
- *   <kai-tab-bar-item value="messages" icon="message-square" dot>Messages</kai-tab-bar-item>
- * </kai-tab-bar>
- * ```
- *
- * Slotted into `<kai-tab-bar>` (a direct child), the bar runs the parent-item
- * contract: selection state flows bar to item (`active`, `aria-selected`),
- * roving tabindex and arrow-key traversal live on the bar, and activation
- * surfaces once, as `kai-tab-change` on the bar. The item itself fires no
- * event of its own; outside a bar it renders inert (tab chrome has no
- * standalone activation story).
+ * One tab of a tab bar.
  */
 defineWebComponent<Props>('kai-tab-bar-item', {
   value: undefined,

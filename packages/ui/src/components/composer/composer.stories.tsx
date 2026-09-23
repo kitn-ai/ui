@@ -21,8 +21,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'A plain-text prompt input with atomic entity pills (skills, mentions) via `/` and `@` trigger menus, keyword highlighting through the CSS Custom Highlight API, and a structured `{ doc, text, entities }` submit event. Not an RTE: `contenteditable="plaintext-only"`; pills are the only non-text nodes.',
-        'On `<kai-composer>`, array/object props (`value`, `triggers`, `highlights`) are set as JS properties; scalars (`placeholder`, `disabled`, `loading`, `maxHeight`, `submitOnEnter`) work as attributes.',
+        'The bare editing surface for a prompt, where a mention or a skill becomes a pill.',
       ]),
     },
   },

@@ -32,11 +32,11 @@ const meta = {
   tags: ['autodocs'],
   parameters: {
     layout: 'padded',
+    // The changed-files view is a mode of this tree: give files `additions`/`deletions`/`status`
+    // and set `summary` for a header carrying the count, the summed `+/-` and a Collapse-all toggle.
     docs: {
       description: componentDescription([
-        'A collapsible, keyboard-navigable file explorer (ARIA `tree`) built from a flat `files` list of `/`-delimited paths: nested folders are derived automatically and `type` picks each icon.',
-        'Drive the highlight with `activeFile`, open folders with `defaultExpanded`, and handle selection via `onSelect(path, file)`. Used in the Code tab of `Artifact`.',
-        'For a changed-files view, give files `additions`/`deletions`/`status` and set `summary` for a header with the count, summed `+/-`, and a Collapse-all toggle.',
+        'A collapsible file explorer built from a flat list of paths.',
       ]),
     },
   },

@@ -32,12 +32,11 @@ export interface ToggleChipProps
       'type' | 'role' | 'aria-pressed' | 'onChange' | 'onclick' | 'onClick' | 'onKeyDown' | 'onkeydown' | 'children'
     >,
     VariantProps<typeof toggleChipVariants> {
-  /** Controlled pressed state. When set, the component defers state to the
-   *  parent; drive it from `onChange`. Omit for uncontrolled (internal)
-   *  state — same controlled/uncontrolled shape as `Switch`'s
-   *  `checked`/`defaultChecked`, renamed to `pressed` because that's the
-   *  ARIA state a toggle BUTTON carries (`aria-pressed`, not
-   *  `aria-checked` — this is a button, not a switch/checkbox/radio). */
+  // Same controlled/uncontrolled shape as `Switch`'s `checked`/`defaultChecked`, named
+  // `pressed` because that is the ARIA state a toggle BUTTON carries (`aria-pressed`, not
+  // `aria-checked`: this is a button, not a switch, checkbox or radio). When set, the
+  // component defers state to the parent.
+  /** Controlled pressed state. */
   pressed?: boolean;
   /** Initial pressed state when uncontrolled. */
   defaultPressed?: boolean;

@@ -10,9 +10,7 @@ interface Props extends Record<string, unknown> {
   max?: number;
   /** Granularity. Omitted means the native default of 1; `any` means continuous. */
   step?: number | 'any';
-  /** Controlled value. Settable and reflected to the `value` attribute. `el.value = 40`
-   *  drives it; dragging updates it and fires `kai-input` per step, `kai-change` on
-   *  release. Read `el.value` for live state. */
+  /** Controlled value, reflected to the `value` attribute. `kai-input` fires per step, `kai-change` on release. */
   value?: number;
   /** Disable interaction. */
   disabled?: boolean;
@@ -20,16 +18,14 @@ interface Props extends Record<string, unknown> {
   label?: string;
   /** Form-control name, for a native form submit. */
   name?: string;
-  /** Show the current value beside the track. Off by default.
-   *
-   *  Two ways in, because one of them is not a scalar. As a bare ATTRIBUTE
-   *  (`<kai-slider value-label>`) it renders the raw number. As a JS PROPERTY it also
-   *  accepts a formatter function (`el.valueLabel = (v) => v + '%'`), for a slider that
-   *  is not counting bare numbers. A function cannot survive an attribute, so that half
-   *  is property-only.
-   *
-   *  The readout is hidden from assistive tech: the slider already reports the same
-   *  number, and an exposed copy would be announced twice. */
+  // Two ways in, because one of them is not a scalar. As a bare ATTRIBUTE
+  // (`<kai-slider value-label>`) it renders the raw number. As a JS PROPERTY it also
+  // accepts a formatter function (`el.valueLabel = (v) => v + '%'`). A function cannot
+  // survive an attribute, so that half is property-only.
+  //
+  // The readout is hidden from assistive tech: the slider already reports the same number,
+  // and an exposed copy would be announced twice.
+  /** Show the current value beside the track. Off by default; as a property it also accepts a formatter. */
   valueLabel?: boolean | ((value: number) => string);
 }
 
@@ -40,25 +36,12 @@ interface Events {
   /** The value was committed: pointer released, or a key press finished. */
   'kai-change': { value: number };
 }
-
+// `min` and `max` have no defaults on purpose: a range with no bounds is a guess, and the guess
+// belongs to whoever knows what the number means. The readout is hidden from assistive tech
+// because the slider already reports the same number and an exposed copy would be announced
+// twice.
 /**
- * `<kai-slider>` — a slider over a real `<input type="range">`, with the kit's filled
- * track and thumb. Arrows, Home, End and PageUp/PageDown all work because the control
- * underneath is the browser's, not a reimplementation.
- *
- * Give it `min` and `max` (there are no defaults on purpose), drive and read the
- * position with the `value` property, and listen for `kai-input` while dragging or
- * `kai-change` on release.
- *
- * ```html
- * <kai-slider min="0" max="100" step="5" value="40" label="Temperature"></kai-slider>
- * <script type="module">
- *   import '@kitn.ai/ui/web-components';
- *   const slider = document.querySelector('kai-slider');
- *   slider.addEventListener('kai-input', (e) => console.log(e.detail.value));
- *   slider.value = 70;   // drive it (no event — the host already knows)
- * </script>
- * ```
+ * A slider built on a real `<input type="range">`.
  */
 defineWebComponent<Props, Events>('kai-slider', {
   min: undefined,

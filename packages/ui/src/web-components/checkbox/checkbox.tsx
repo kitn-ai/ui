@@ -3,9 +3,7 @@ import { defineWebComponent } from '../define/define';
 import { Checkbox } from '../../components/checkbox/checkbox';
 
 interface Props extends Record<string, unknown> {
-  /** Controlled checked state. Settable and reflected to the `checked` attribute.
-   *  `el.checked = true` (or `<kai-checkbox checked>`) drives it; ticking the box
-   *  updates it and fires `kai-change`. Read `el.checked` for live state. */
+  /** Controlled checked state, reflected to the `checked` attribute. Ticking the box updates it and fires `kai-change`. */
   checked?: boolean;
   /** Initial checked state on mount (uncontrolled seed). Bare attribute
    *  (`<kai-checkbox default-checked>`) turns it on. */
@@ -33,25 +31,7 @@ interface Events {
 }
 
 /**
- * `<kai-checkbox>` — a checkbox over a real `<input type="checkbox">`. Drive/read
- * its state with the `checked` property (settable + reflected to the `checked`
- * attribute, so `:host([checked])` and `el.checked` see live state); seed the
- * initial state with `default-checked` and read changes from `kai-change`.
- *
- * ```html
- * <label>
- *   <kai-checkbox default-checked label="Stream responses"></kai-checkbox>
- *   Stream responses
- * </label>
- * <script type="module">
- *   import '@kitn.ai/ui/web-components';
- *   const box = document.querySelector('kai-checkbox');
- *   box.addEventListener('kai-change', (e) => console.log(e.detail.checked));
- *   box.checked = false;    // drive it (no kai-change — the host already knows)
- *   box.indeterminate = true;
- *   box.toggle();           // flip it (fires kai-change)
- * </script>
- * ```
+ * A single checkbox; `kai-checkbox-group` is the list form.
  */
 defineWebComponent<Props, Events>('kai-checkbox', {
   checked: undefined,

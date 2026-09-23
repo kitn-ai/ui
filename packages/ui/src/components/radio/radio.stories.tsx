@@ -10,12 +10,13 @@ const meta = {
   tags: ['autodocs'],
   parameters: {
     layout: 'padded',
+    // One shared `name` is what makes the set a single control to the browser: one tab stop, arrow keys
+    // between members, mutual exclusion, form participation, "2 of 3" from a screen reader. That comes
+    // from the native input, not from code here. `name` defaults to a generated id, so the set stays
+    // exclusive even when nothing is submitted.
     docs: {
       description: componentDescription([
-        '`RadioGroup` is the kit\'s "pick exactly one" control: a bordered, divided list of rows over real `<input type="radio">`s that share a `name`. `Radio` is the single control, for when you are laying the group out yourself.',
-        'The shared `name` is what makes the set ONE control to the browser: one tab stop, arrow keys to move between members, mutual exclusion, form participation, and "2 of 3" from a screen reader. None of that is code in this kit, which is the point — a hand-rolled `<div role="radio">` has to reimplement all of it and usually loses some.',
-        'Each row is a `<label>`, so the whole row is a click target. Rows can carry a second line via `description`, or you can replace the label column entirely with the presentation slot and keep the control and the group semantics.',
-        'No validation is applied: `required` reaches the native attribute and stops there.',
+        'A list of radio rows where exactly one choice is selected.',
       ]),
     },
   },
@@ -27,7 +28,7 @@ const meta = {
     disabled: { control: 'boolean', description: 'Disable every row. Individual rows can be disabled on the option.' },
     itemClass: { control: 'text', description: 'Extra classes for each row.' },
     onChange: { action: 'change', description: 'Fires with the selected value and the option that carried it.', table: { category: 'Events' } },
-    onOptionBlur: { action: 'blur', description: 'Fires when a radio loses focus — the commit point for a form field.', table: { category: 'Events' } },
+    onOptionBlur: { action: 'blur', description: 'Fires with no payload when a radio in the group loses focus.', table: { category: 'Events' } },
   },
   args: {
     label: 'Severity',

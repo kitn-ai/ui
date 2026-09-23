@@ -7,15 +7,10 @@ import type { ConversationSummary } from '../../types';
 import type { ChatMessage } from '../../web-components/chat/chat-types';
 import { componentDescription } from '../../stories/docs/web-component-controls';
 
-/**
- * A stub `ConversationStore` — no localStorage, no network — so this story is
- * a fast design-iteration surface for the widget-box list view: edit the
- * fixture data or the row/pill markup in `conversation-panel.tsx` and this
- * canvas reflects it immediately, no build/pack/redeploy loop. `markRead` IS
- * implemented (mutating an in-memory copy of the seed data) — unlike
- * `save`, which stays a no-op — so `ListViewWithUnread` demonstrates the
- * real write path: select a row, reopen the list, its dot is gone.
- */
+// A stub store: no localStorage, no network. `markRead` IS implemented (it mutates an
+// in-memory copy of the seed data) while `save` stays a no-op, which is what lets the
+// unread-dot story exercise the real write path.
+
 function stubStore(summaries: ConversationSummary[]): ConversationStore {
   const threads: Record<string, ChatMessage[]> = {
     'conv-1': [
@@ -103,8 +98,7 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener', 'messages', 'controllerRef', 'cardHostElement', 'onMessageAction'] },
       description: componentDescription([
-        'The full chat surface: header, message thread, suggestions and composer — plus, with `conversations` + `store` set, a second widget-box-shaped list view (`ConversationPanel`) behind a header toggle. The list view fully replaces the content area: no composer, no suggestions, one floating "New conversation" pill.',
-        'This story pins a box-sized container (380×600, the `kai-dock` panel default) and a stub `ConversationStore` so the states below iterate fast — no build/pack/demo cycle needed to see a row or pill tweak.',
+        'A complete chat surface, from the conversation list down to the prompt input.',
       ]),
     },
   },
@@ -115,14 +109,14 @@ const meta = {
     // — the DOM contract the facade maps these onto (`kai-submit` -> onSubmit).
     onConversationLoad: {
       action: 'conversation-load',
+      // The hook for owning `messages` yourself: re-render them with the loaded conversation's history.
       description:
-        "Fires when `load(id)` resolves: the hook a caller uses to own and re-render `messages` with that conversation's history, whose id is the second argument (`undefined` for a new conversation).",
+        'Fires when a conversation loads or a new one starts, with its messages and the id (`undefined` when new).',
       table: { category: 'Events' },
     },
     onUnreadChange: {
       action: 'unread-change',
-      description:
-        'Fires with the same unread value this thread renders as a dot on its own header toggle, so a sibling control can mirror it; only meaningful with `conversations` on.',
+      description: 'Fires with the unread value the header toggle draws as a dot. Only meaningful with `conversations` on.',
       table: { category: 'Events' },
     },
     onHomeLink: {

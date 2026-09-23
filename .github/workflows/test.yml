@@ -378,6 +378,20 @@ jobs:
       - name: Story-convention guard (docs.source.code + argType Events category)
         run: pnpm --filter @kitn.ai/ui run lint:story-conventions
 
+      # A prop doc comment is generated into FIVE artifacts at once: the element
+      # meta, llms-full.txt (what an agent reads), the MCP catalog, the docs prop
+      # table and Storybook. The owner's rule is that it says what the prop does
+      # plus only what the name and type cannot (default, unit, a real trap), in
+      # one sentence: measured on the web-component facades, the long tail ran to
+      # 986 chars and the same 872-char text sat in three of them. The reasoning
+      # belongs in a `//` comment beside the prop, which no generator reads.
+      #
+      # `--self-test` proves the analyzer fires on an over-cap prop, honours a
+      # waiver only when it carries a reason, and refuses to pass on a walk that
+      # read nothing. Source only, no dist/.
+      - name: Prop-doc verbosity guard (one sentence per prop)
+        run: pnpm --filter @kitn.ai/ui run lint:prop-docs
+
       # Does a document that ENUMERATES the merge gate still match this job?
       # A handoff said "every gate is green" over a five-command list while this
       # job was red on `verify:pack`, which was not one of the five --

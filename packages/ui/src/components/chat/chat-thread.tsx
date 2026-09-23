@@ -3,7 +3,7 @@ import { ChatConfig, useChatConfig } from '../../primitives/chat-config';
 import { type ComposerDoc, normalizeValue, serializeToText } from '../../primitives/composer-model';
 import { ChatContainer, ChatContainerContent, ChatContainerScrollAnchor } from './chat-container';
 import { Message, MessageAvatar, MessageBody } from '../message/message';
-import { type AttachmentData } from '../attachments/attachments';
+import { type AttachmentData, type AttachmentImagePreview } from '../attachments/attachments';
 import { createMessageFeedback, type MessageActionDetail } from '../../primitives/message-feedback';
 import { ModelSwitcher } from '../model/model-switcher';
 import { ScrollButton } from '../scroll/scroll-button';
@@ -43,166 +43,109 @@ export interface ChatThreadContextUsage {
 export interface ChatThreadProps {
   /** Extra classes for the thread root (e.g. `h-full`). */
   class?: string;
-  /** The full message thread to render, newest last. Each entry carries its role,
-   *  ordered `parts`, and optional actions/avatar/feedback. Set as a JS property
-   *  (`el.messages = [...]`). */
+  /** The message thread to render, newest last. A new array reference is what
+   *  re-renders. */
   messages: ChatMessage[];
-  /** Add/override card type -> component entries, forwarded to `CardRenderer`
-   *  for `card` parts. */
+  /** Adds or overrides the component that draws a `card` part, keyed by card type. */
   cardTypes?: CardComponentMap;
-  /** JSON Schemas for the card types this app renders, keyed by envelope type,
-   *  forwarded to `CardRenderer` for `card` parts. The companion of `cardTypes`:
-   *  that says what DRAWS a card, this says what a VALID one looks like.
-   *  `createCardRegistry(...).validationSchemas` is exactly this shape. Without it
-   *  the kit checks its own seven built-ins and leaves your own card type
-   *  unvalidated. A schema here WINS over a built-in of the same name. */
+  // The companion of `cardTypes`: that says what DRAWS a card, this says what a VALID
+  // one looks like. Without it the kit validates only its own built-ins and leaves your
+  // own card type unchecked.
+  /** JSON Schemas keyed by card envelope type; each wins over a built-in of the same
+   *  name. `createCardRegistry(...).validationSchemas` is this shape. */
   cardSchemas?: CardSchemaMap;
-  /** The custom-element host node to emit card events off when no `CardProvider`
-   *  is present, forwarded through `MessageBody` to `CardRenderer`. The
-   *  web-component facades pass their own host element so card events leave as the
-   *  bubbling `kai-card` CustomEvent. */
+  /** Host element that card events are emitted from when no `CardProvider` is present. */
   cardHostElement?: HTMLElement;
-  /** Value of the input. A **string** is controlled (the host owns the text and
-   *  updates it on `kai-value-change`). A **ComposerDoc** is a one-time seed that
-   *  pre-populates pills; the user then edits freely. Leave unset for uncontrolled. */
+  /** Value of the input: a string is controlled, a `ComposerDoc` is a one-time seed
+   *  that pre-populates pills, unset is uncontrolled. */
   value?: string | ComposerDoc;
   /** Placeholder text shown in the empty input. */
   placeholder?: string;
-  /** When true, shows the loading/streaming state and disables submit (use while
-   *  awaiting the assistant's reply). */
+  /** Disables submit and shows the streaming state. */
   loading?: boolean;
-  /** Starter prompts shown above the input when the thread is empty. Clicking one
-   *  follows `suggestionMode`. Set as a JS property. */
+  /** Starter prompts shown above the input while the thread is empty. */
   suggestions?: string[];
-  /** What clicking a suggestion does: `'submit'` (default) sends it immediately
-   *  as if typed and submitted; `'fill'` just places it in the input. */
+  /** What clicking a suggestion does: `'submit'` (default) sends it, `'fill'` only
+   *  fills the input. */
   suggestionMode?: 'submit' | 'fill';
-  /** Keep suggestions visible after the conversation starts. By default
-   *  suggestions are conversation starters and hide once `messages` is
-   *  non-empty; set this to keep them always shown. Default false. */
+  /** Keep suggestions visible after the conversation starts; they otherwise hide
+   *  once `messages` is non-empty. Default false. */
   persistSuggestions?: boolean;
-  /** Body/prose font scale for rendered markdown (`'xs' | 'sm' | 'base' | 'lg'`).
-   *  Defaults to `'sm'`. */
+  /** Body/prose font scale for rendered markdown. Defaults to `'sm'`. */
   proseSize?: ProseSize;
   /** Shiki theme name for syntax-highlighted code blocks (e.g.
    *  `'github-dark-dimmed'`). */
   codeTheme?: string;
-  /** Enable Shiki syntax highlighting in code blocks. Turn off to render plain
-   *  `<pre>` blocks (lighter, no highlighter load). Default true. */
+  // Forwarded to every `MessageBody` this thread renders; inert for non-image tiles,
+  // which keep the hover card.
+  /** How an image tile reveals full size. `'lightbox'` is the only value keyboard
+   *  and touch can reach. Default `'hover'`. */
+  imagePreview?: AttachmentImagePreview;
+  /** Renders plain `<pre>` blocks with no highlighter load when false. Default true. */
   codeHighlight?: boolean;
-  /** How `reasoning` parts render across the thread. `'full'` (default) is the
-   *  current collapsible-disclosure behavior; `'compact'` shows only a shimmer
-   *  loader while a reasoning part streams and nothing once it settles (no
-   *  expandable detail); `'off'` renders reasoning parts not at all. Forwarded
-   *  to every `MessageBody` as `reasoningMode`. */
+  // Forwarded to every `MessageBody` as `reasoningMode`.
+  /** How reasoning parts render. `'compact'` streams only a shimmer and `'off'`
+   *  renders none. Default `'full'`. */
   reasoning?: 'full' | 'compact' | 'off';
-  /** Seeds the reasoning disclosure open AND keeps it tracking the stream
-   *  (open while streaming, closes when it settles): the pre-Task-19f `full`
-   *  behavior. Default false/absent: the panel starts closed (just the
-   *  "Thinking" shimmer chip) and only opens on click, the current default
-   *  (owner ruling, 2026-08-26). Meaningless when `reasoning` is `'compact'`
-   *  or `'off'`. Forwarded to every `MessageBody` as `reasoningDefaultOpen`. */
+  // Forwarded to every `MessageBody` as `reasoningDefaultOpen`.
+  /** Seeds the reasoning disclosure open and keeps it tracking the stream. Default
+   *  false; inert unless `reasoning` is `'full'`. */
   reasoningOpen?: boolean;
-  /** Optional header title shown on the left of the header. */
+  /** Title shown at the start of the header bar. */
   chatTitle?: string;
-  /** Optional model list. When set (>1 model) a ModelSwitcher is shown in the
-   *  header and a `kai-model-change` event fires on selection. */
+  /** Model list; more than one renders a switcher in the header. */
   models?: ModelOption[];
   /** The currently selected model id (pairs with `models`). */
   currentModel?: string;
-  /** Optional context-window token usage. When set, a Context token meter is
-   *  shown in the header. */
+  /** Token usage, shown as a context meter in the header. */
   context?: ChatThreadContextUsage;
   /** Show the scroll-to-bottom button inside the scroll area. Default true. */
   scrollButton?: boolean;
-  /** Whether the host has `slot="header-start"` content (left of the title). Set
-   *  by the `<kai-chat>` facade so a custom control forces the header open. */
+  /** Whether `slot="header-start"` content is projected, which forces the header
+   *  row open. */
   headerStart?: boolean;
   /** Whether the host has `slot="header-end"` content (right of the controls). */
   headerEnd?: boolean;
-  /** Extra content rendered in the header-end region, AFTER `slot="header-end"`.
-   *  This is a JSX escape hatch for a caller composing `ChatThread` directly as a
-   *  Solid component (no shadow-DOM host, so there is no light-DOM node to slot) —
-   *  the `kai-dock`-docked construct widget is the motivating case: it needs its
-   *  own close affordance to sit IN the header row, sharing it with the title
-   *  instead of floating as a second control with no visible relationship to the
-   *  chat surface. Renders alongside the named slot rather than replacing it, so a
-   *  real `slot="header-end"` consumer and this prop can both be present. Counts
-   *  toward `showHeader()` the same as `headerEnd`, so a construct with no title
-   *  and only this content still gets a header row to sit in. */
+  // A Solid caller composing ChatThread directly has no shadow-DOM host, so there is
+  // no light-DOM node to slot; the docked construct widget is the motivating case.
+  /** JSX rendered after `slot="header-end"` in the header row rather than replacing
+   *  it, which forces the header open. */
   headerEndContent?: JSX.Element;
-  /** Turns on the prior-conversations list: a list-toggle button appears in
-   *  the header row and the panel gains a second, list, view (C-1 — one
-   *  panel, two states, never a persistent sidebar). Off by default, same
-   *  convention as every other capability in this file. Requires BOTH
-   *  `store` AND `onConversationLoad` — the second is the only path a caller
-   *  has to actually receive a loaded conversation's messages back (this
-   *  component never mutates `props.messages` itself). Set with either
-   *  missing, the feature decides loudly (one `console.error` on mount) and
-   *  stays visually off rather than throwing or silently going inert: a
-   *  `store` with no `onConversationLoad` would otherwise make row-select/
-   *  new/restore fire and do nothing visible, and mount's own auto-restore
-   *  would still stamp an active conversation id that the save effect could
-   *  then clobber with whatever `props.messages` the caller drives in next. */
+  // Without `onConversationLoad` a caller has no path to actually receive a loaded
+  // conversation's messages back (this component never mutates `props.messages`), so a
+  // row-select would fire and do nothing visible. An active id auto-restored at mount
+  // could then be clobbered by the save effect with whatever the caller drives in next.
+  /** Turns on the prior-conversations list. Requires both `store` and
+   *  `onConversationLoad`: with either missing it logs once and stays off. */
   conversations?: boolean;
-  /** The adapter this thread persists through when `conversations` is on:
-   *  `list()` on mount and on every list-view open, `load(id)` on row select,
-   *  `save(id, messages)` on every message-array change for the active
-   *  conversation. A kit-owned INTERFACE (C-3) — the dev owns invocation,
-   *  transport, auth and retention entirely; `localStorageStore`/`fetchStore`
-   *  (`@kitn.ai/ui`'s `primitives/conversation-store`) are the shipped
-   *  built-ins. Set as a JS property; never expressible as an attribute (an
-   *  adapter is a live object of functions, not scalar data). */
+  // `list()` on mount and on every list-view open, `load(id)` on row select,
+  // `save(id, messages)` on every message-array change for the active conversation. A
+  // kit-owned interface: invocation, transport, auth and retention are the dev's.
+  /** The adapter this thread persists through when `conversations` is on.
+   *  `localStorageStore` and `fetchStore` ship with the kit. */
   store?: ConversationStore;
-  /** Fires whenever `load(id)` resolves and this thread's `messages` are
-   *  about to be replaced with that conversation's history — the hook a
-   *  caller uses to actually own and re-render `messages` (this component
-   *  does not mutate `props.messages` itself; C-8 keeps the state machine
-   *  here but the message ARRAY stays the caller's own state, matching every
-   *  other prop in this file). The second argument is the conversation's id
-   *  — `undefined` for the "new conversation" case (C-6: no id exists until
-   *  the first message mints one). Required whenever `conversations` is on;
-   *  see that prop's own doc for the guard this component runs without it. */
+  /** Fires when a loaded conversation is about to replace `messages`; the caller
+   *  owns and re-renders them. Required when `conversations` is on. */
   onConversationLoad?: (messages: ChatMessage[], id?: string) => void;
-  /** Whether the surrounding chrome that HOSTS this thread is currently
-   *  VISIBLE to the visitor — e.g. a docked widget's open/closed state.
-   *  `ChatThread` has no knowledge of whatever hosts it (a `Dock`, a plain
-   *  page, anything — same boundary `closeConversationsList` documents), so
-   *  this is the seam: a host that can hide itself sets it, everyone else
-   *  leaves it unset.
-   *
-   *  Meaningful only when `conversations` is on, where it's the third leg of
-   *  "seen" (owner round, 2026-08-26 — unread indicators): the active
-   *  conversation counts as seen, and gets `store.markRead` called for it,
-   *  only while it's ALSO the active conversation AND the chat view (not the
-   *  list) is showing AND this is true. Undeclared/`true` (the default) means
-   *  "always visible" — correct for every layout with no show/hide concept at
-   *  all (fullscreen/aside/split/custom) and for any widget consumer that
-   *  doesn't wire it, which just means unread never distinguishes "closed"
-   *  from "open" for them (a smaller inaccuracy than the alternative: without
-   *  this leg, a message arriving to the active conversation while the
-   *  widget is actually closed would get silently marked read behind the
-   *  visitor's back, purely because it happened to be the active id). */
+  // The seam for whatever chrome hosts this thread, which ChatThread knows nothing
+  // about. Third leg of "seen": the active conversation is marked read (and
+  // `store.markRead` called for it) only while it is the active one AND the chat view
+  // (not the list) shows AND this is true. A consumer that never wires it simply never
+  // distinguishes closed from open, which beats marking a message read behind a closed
+  // widget.
+  /** Whether the chrome hosting this thread is visible to the visitor; `undefined`
+   *  means always visible. Consulted only when `conversations` is on. */
   hostOpen?: boolean;
-  /** Fires whenever "is any OTHER conversation (not the active one) unread"
-   *  changes — the value this thread already renders as a dot on its own
-   *  header toggle, reported outward so a sibling control with no view into
-   *  `ChatThread`'s internal conversation-summary state (a `Dock`'s own
-   *  `unread` prop, say) can mirror it. Only meaningful with `conversations`
-   *  on; never fires otherwise. */
+  /** Fires when any conversation other than the active one becomes unread or read.
+   *  Never fires unless `conversations` is on. */
   onUnreadChange?: (unread: boolean) => void;
-  /** Turns on the widget home screen (Intercom-pattern, H-1/H-2): the panel
-   *  boots into a `home` view — greeting, most-recent-conversation card, a
-   *  "new conversation" CTA, and host-defined links — with a Home/Messages
-   *  tab bar beneath the content area. The prior-conversations list moves
-   *  from the header toggle onto the Messages tab (H-2); a drilled-into chat
-   *  (from a list row, the recent card, or "new conversation") hides the tab
-   *  bar and shows a back arrow in the header instead. Off by default: unset,
-   *  the widget renders byte-for-byte as it does today. */
+  // The prior-conversations list moves from the header toggle onto the Messages tab;
+  // a drilled-into chat (list row, recent card, "new conversation") hides the tab bar
+  // and shows a back arrow in the header instead.
+  /** The widget home screen shown before the first message. Off by default. */
   home?: HomeConfig;
-  /** Fires when a `home.links` entry with no `href` is activated (an
-   *  `href`-bearing entry navigates as a real anchor instead — see
-   *  `HomePanelProps.onLink`). Meaningful only when `home` is set. */
+  /** Fires when a `home.links` entry with no `href` is activated; one with an `href`
+   *  navigates instead. Only meaningful when `home` is set. */
   onHomeLink?: (entry: HomeLinkEntry) => void;
   // ── Composition slots ─────────────────────────────────────────────────────
   // Each flag below is set by the `<kai-chat>` facade when matching light-DOM
@@ -214,80 +157,61 @@ export interface ChatThreadProps {
   //               content owns its own data/events — a slotted (light-DOM) node
   //               can't read this component's reactive state. That boundary is
   //               the whole reason `messages` stays a data prop, not a slot.
-  /** REPLACE: full custom header in place of the built-in title/model/context bar. */
+  /** Replaces the built-in header bar with `slot="header"` content. */
   headerFull?: boolean;
-  /** REPLACE: custom home-tab content in place of the built-in home screen
-   *  (greeting, recent-conversation card, links). Rendered only while the home
-   *  view is showing, so it is meaningful only when `home` is set; the tab bar
-   *  and navigation stay the kit's own. Set by the facade when light-DOM
-   *  `slot="home"` content is projected (region slots, P-6). */
+  // Set by the facade when light-DOM `slot="home"` content is projected; the tab bar
+  // and navigation stay the kit's own.
+  /** Replaces the built-in home screen with `slot="home"` content, while the home
+   *  view shows. */
   homeFull?: boolean;
-  /** INJECT: left sidebar column (e.g. a conversation list / your own nav). */
+  /** Whether `slot="sidebar"` content is projected, which shows the left sidebar column. */
   sidebar?: boolean;
-  /** REPLACE: custom zero-state rendered in the message area while the thread is empty (replaces the empty message list only; the composer and its suggestions still render). */
+  /** Replaces the empty-state message area with `slot="empty"` content. The composer
+   *  still renders. */
   empty?: boolean;
-  /** REPLACE, JSX form: the empty-state content itself, for a caller composing
-   *  `ChatThread` directly as a Solid component rather than through the `<kai-chat>`
-   *  shadow-DOM boundary that `empty`/`slot="empty"` targets. Renders INSIDE this
-   *  component's own tree — so a caller passing the kit's own `<Empty>` composition
-   *  (`components/empty/empty.tsx`) gets it fully styled by the adopted stylesheet, unlike
-   *  `slot="empty"`: that slot only ever receives LIGHT-DOM children of the shadow
-   *  HOST, and light-DOM nodes are outside the shadow root's adopted stylesheets, so
-   *  Tailwind-utility-class content projected there renders bare. Takes priority
-   *  over `empty`/`slot="empty"` when both are set — the two are alternate delivery
-   *  mechanisms for the same region, not additive like `headerEndContent`. */
+  // `slot="empty"` only ever receives light-DOM children of the shadow HOST, and those
+  // sit outside the shadow root's adopted stylesheets, so Tailwind-class content there
+  // renders bare; content passed here renders inside this tree and stays styled.
+  /** The empty-state content as JSX, taking priority over `empty`. */
   emptyContent?: JSX.Element;
-  /** REPLACE: full custom composer in place of the built-in prompt input. The
-   *  projected content wires its own submit (the data-flow boundary). */
+  /** Replaces the built-in composer with `slot="composer"` content, which wires its
+   *  own submit. */
   composer?: boolean;
-  /** INJECT: accessory row just above the composer (e.g. extra actions). */
+  /** Whether `slot="composer-actions"` content is projected, which shows the row above the composer. */
   composerActions?: boolean;
-  /** INJECT: footer row below the composer (disclaimers, token meter, …). */
+  /** Whether `slot="footer"` content is projected, which shows the footer row below the composer. */
   footer?: boolean;
-  /** Which attachment media types the user may stage, in HTML `accept` syntax
-   *  (`'image/*,application/pdf'`). Omitted means no filter. Narrowed by what the
-   *  encoders can actually send — the same string, and the same resolver, as
-   *  `toOpenAIMessages(msgs, { accept })`. */
+  /** Attachment media types the user may stage, in HTML `accept` syntax; omitted
+   *  means no filter. Narrowed by what the encoders can send. */
   accept?: MediaTypeFilter;
   /** Files the composer refused because `accept` excluded them. */
   onAttachmentsRejected?: (rejected: RejectedAttachment[]) => void;
-  /** When `false`, hides the built-in paperclip attach button. Defaults to
-   *  `true` (undeclared keeps today's behavior: attach visible), matching
-   *  `DefaultPromptInput`'s own default: only an explicit `false` hides it. */
+  /** Hides the built-in paperclip attach button; only an explicit `false` hides it.
+   *  Default true. */
   attach?: boolean;
   /** Show a web-search (Globe) button in the input toolbar; calls `onWebSearch`. */
   webSearch?: boolean;
-  /** Show a Voice (Mic) button in the input toolbar; fires a `voice` event. */
+  /** Show a voice-input button in the input toolbar; calls `onVoice`. */
   voice?: boolean;
-  /** Rich entity triggers. Each `{ char, kind, items }` opens a caret-anchored
-   *  menu that inserts an atomic pill (`/` skills, `@` agents/plugins). Set as a
-   *  JS property; forwarded to the input. */
+  /** Rich entity triggers. Each opens a menu at the caret that inserts an atomic pill. */
   triggers?: TriggerDef[];
   /** Default icon per entity kind (kind → image src) for pills/menu items. */
   kindIcons?: Record<string, string>;
-  /** Whether each message's action bar is always visible (`'always'`, default)
-   *  or only revealed on hover of that message row (`'hover'`). */
+  /** Whether each message's action bar is always visible or revealed on hover of that
+   *  row. Default `'always'`. */
   actionsReveal?: 'always' | 'hover';
-  /** Role-scoped DEFAULT action bars (B-7b): a user message with no `actions`
-   *  of its own gets `userActions`; an assistant message, `assistantActions`.
-   *  A per-message `m.actions` OVERRIDES the role default (replace, not
-   *  merge), so a message that sets `actions: []` renders NO action bar even
-   *  when a role default is set. Set as JS properties. */
+  /** Default action bar for user messages that have no `actions` of their own; a
+   *  message's own `actions` replaces it. */
   userActions?: (ChatMessageAction | CustomAction)[];
-  /** See `userActions`, the assistant-role default. */
+  /** Default action bar for assistant messages, as `userActions` is for user ones. */
   assistantActions?: (ChatMessageAction | CustomAction)[];
-  /** Hide the citations row consecutive `source` parts collapse into
-   *  (`part="citations"`, message.tsx). Named as a HIDE, not `sources:
-   *  boolean`, so absence-means-default stays unambiguous: absent/false is
-   *  today's rendering, byte-for-byte (B-8). */
+  /** Hide the citations row that consecutive `source` parts collapse into; absent or
+   *  `false` renders it. */
   hideSources?: boolean;
-  /** JSX rendered immediately BEFORE the composer region — the `emptyContent`
-   *  escape-hatch pattern verbatim (plain JSX handed down inside the same
-   *  tree, no Portal), for a caller composing ChatThread directly as a Solid
-   *  component (B-9). Not reachable through `<kai-chat>` (JSX has no
-   *  web-component consumer form — same boundary as `headerEndContent`). */
+  /** JSX rendered immediately before the composer region. JSX-only, so never
+   *  reachable through `<kai-chat>`. */
   composerStart?: JSX.Element;
-  /** JSX rendered immediately AFTER the composer region (see composerStart). */
+  /** JSX rendered after the composer region. */
   composerEnd?: JSX.Element;
   // callbacks (the facade maps these to dispatch())
   onValueChange?: (value: string) => void;
@@ -298,8 +222,7 @@ export interface ChatThreadProps {
   onMessageAction?: (detail: MessageActionDetail) => void;
   onWebSearch?: () => void;
   onVoice?: () => void;
-  /** Receive the imperative controller once mounted. The kai-chat facade forwards
-   *  these as element methods (focus/clear/send/scrollToBottom). */
+  /** Receive the imperative controller once mounted. */
   controllerRef?: (controller: ChatThreadController) => void;
 }
 
@@ -310,24 +233,15 @@ export interface ChatThreadController {
   clear(): void;
   send(): void;
   scrollToBottom(behavior?: ScrollBehavior): void;
-  /** Force the widget back to its default landing view — `'home'` when the
-   *  `home` prop is set (H-5), `'chat'` otherwise (a no-op if already there,
-   *  or if neither `home` nor `conversations` is on). ChatThread has no knowledge of
-   *  whatever chrome hosts it — a `Dock`, a plain page, anything — so it
-   *  cannot know when that host closes. The seam is this one imperative
-   *  call: a host that can go from visible to hidden and back (the `kai-dock`
-   *  widget being the motivating case) calls it on every hide, so the NEXT
-   *  open always lands on the chat view rather than wherever the list was
-   *  left (owner: reopening the widget should show the default screen, not
-   *  a stale list view). `Dock`'s own `onOpenChange` already fires on every
-   *  close path — header X, the launcher toggle, and Escape — so a single
-   *  `onOpenChange={(open) => !open && controller.closeConversationsList()}`
-   *  at the call site covers all three with no per-path wiring. */
+  // ChatThread knows nothing of whatever chrome hosts it, so it cannot know when that
+  // host closes. A host that can hide and re-show calls this on every hide. Dock's own
+  // `onOpenChange` fires on every close path (header X, launcher, Escape), so a single
+  // `onOpenChange={(open) => !open && controller.closeConversationsList()}` covers all.
+  /** Returns the widget to its default landing view: `'home'` when `home` is set,
+   *  otherwise `'chat'`. */
   closeConversationsList(): void;
-  /** Start a fresh conversation — the same path as the list view's "+ New
-   *  conversation" row: clears the active id, returns to the chat view,
-   *  and delivers `[]` through `onConversationLoad`. The imperative seam
-   *  the construct shell palette's "New conversation" entry drives (B-10). */
+  /** Starts a fresh conversation: clears the active id, returns to the chat view and
+   *  delivers `[]` through `onConversationLoad`. */
   startNewConversation(): void;
 }
 
@@ -880,6 +794,7 @@ export function ChatThread(props: ChatThreadProps) {
                             isStreaming={props.loading === true && m().role === 'assistant' && i() === props.messages.length - 1}
                             reasoningMode={props.reasoning}
                             reasoningDefaultOpen={props.reasoningOpen}
+                            imagePreview={props.imagePreview}
                             cardTypes={props.cardTypes}
                             cardSchemas={props.cardSchemas}
                             cardHostElement={props.cardHostElement}

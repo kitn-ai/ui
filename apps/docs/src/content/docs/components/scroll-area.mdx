@@ -1,6 +1,6 @@
 ---
 title: Scroll area
-description: A themed, thin-scrollbar scroll container for any overflowing region.
+description: A scroll container with a themed thin scrollbar.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -15,7 +15,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kai-tag-sub">kai-scroll-area</p>
 
-<p class="kai-lede">A themed, thin-scrollbar scroll container for any overflowing region. Give it a bounded height, put the content in the default slot, and it scrolls inside — with a cross-browser scrollbar that follows your theme.</p>
+<p class="kai-lede">Gives an overflowing region a consistent scrollbar that follows the page's theme.</p>
 
 <Facts items={['Shadow DOM', 'Light-DOM content', 'Themed thin scrollbar', 'Keyboard-reachable']} />
 
@@ -24,12 +24,12 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 <Playground client:only="solid" tag="kai-scroll-area" />
 
 <Aside type="tip" title="When to use">
-Wrap any region that overflows its space — a long message thread, a settings panel, a changelog, a list of search results — when you want a thin, consistent scrollbar instead of the browser's default. For a full chat transcript that auto-sticks to the latest message, reach for [Conversations](/components/conversations/) instead.
+Any region that overflows its space: a long thread, a settings panel. For a chat transcript that auto-sticks to the latest message, reach for [Conversations](/components/conversations/) instead.
 </Aside>
 
 ## Usage
 
-Put the scrollable content as light-DOM children — it lands in the default slot — and give the element a bounded height in your own layout. Once the content is taller than that height, it scrolls inside, and the thin scrollbar follows the `--color-scrollbar-thumb` token. Restyle the inner padding or max-height from outside via `::part(viewport)`; the behavior stays in the component.
+Put the content as light-DOM children, which land in the default slot, and give the element a bounded height in your own layout. Past that height the content scrolls inside, and the thin scrollbar follows the `--color-scrollbar-thumb` token. The inner padding or max-height restyles from outside via `::part(viewport)`.
 
 ```html
 <kai-scroll-area style="height: 16rem">
@@ -42,19 +42,15 @@ Put the scrollable content as light-DOM children — it lands in the default slo
 
 ### Vertical (default)
 
-`orientation="vertical"` — a bounded box with a tall column; the content scrolls down and the thin scrollbar appears.
-
 <Example client:visible tag="kai-scroll-area" config={{ orientation: 'vertical' }} data="paragraphs" />
 
 ### Horizontal
 
-`orientation="horizontal"` — a wide row (chips, a gallery) that scrolls sideways. The vertical axis is clamped.
+A wide row of chips or a gallery that scrolls sideways; the vertical axis is clamped.
 
 <Example client:visible tag="kai-scroll-area" config={{ orientation: 'horizontal' }} data="horizontal" />
 
 ### Both axes
-
-`orientation="both"` — content larger than the box on both axes scrolls in two directions.
 
 <Example client:visible tag="kai-scroll-area" config={{ orientation: 'both' }} data="both" />
 
@@ -64,7 +60,7 @@ Put the scrollable content as light-DOM children — it lands in the default slo
 
 ## Styling
 
-Restyle the scrolling container through its part — add padding, cap the height, or tune the scrollbar via the `--color-scrollbar-thumb` token from outside the element.
+The scrolling container is one part: add padding, cap the height, or tune the scrollbar via the `--color-scrollbar-thumb` token.
 
 <PartTable tag="kai-scroll-area" />
 

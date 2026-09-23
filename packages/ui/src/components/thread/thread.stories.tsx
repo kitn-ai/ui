@@ -55,8 +55,7 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener', 'messages', 'empty', 'controllerRef'] },
       description: componentDescription([
-        'The message-list slice of a chat, standalone: the scrolling list of messages with per-message markdown, code highlight, reasoning + tool panels, avatars, and the action row — plus stick-to-bottom scroll, a scroll-to-bottom button, an optional typing indicator, and an empty state.',
-        'No composer, header, suggestions, or sidebar — compose it with `kai-prompt-input` and your own layout, or use the batteries-included `kai-chat`. Fills the height its parent gives it (`h-full`) and scrolls internally. This is the SolidJS component behind the `<kai-thread>` web component.',
+        'The scrolling message list of a chat, without the header or the composer.',
       ]),
     },
   },

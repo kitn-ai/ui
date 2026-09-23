@@ -138,9 +138,9 @@ export interface WorkSurfaceProps {
   urlLabel?: string;
   /** Accessible title for the framed document. */
   iframeTitle?: string;
-  /** `'preview'` fills the canvas edge to edge (a browser preview);
-   *  `'artifact'` centers the content in a bordered card on the muted
-   *  backdrop (a framed artifact). Default `'preview'` — the story's look. */
+  // `'preview'` fills the canvas edge to edge (a browser preview); `'artifact'` centers
+  // the content in a bordered card on the muted backdrop (a framed artifact).
+  /** How the framed document is presented; `'preview'` by default. */
   variant?: 'artifact' | 'preview';
 
   /** Controlled tab. Reuses `ArtifactTab` — one union, never a second. */

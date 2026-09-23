@@ -37,11 +37,10 @@ export interface DerivedBuilderPanelProps {
   onChange: (next: Construct) => void; // fires a whole next Construct per edit
   template: BuildableTemplate; // registry entry — controls manifest + starter (section seeds)
   problems?: readonly ConstructProblem[]; // server-side rejections, rendered per path
-  /** Section-header actions, keyed by section id: a small affordance rendered
-   *  to the RIGHT of that section's title (e.g. the Theme section's "Advanced"
-   *  button opening the theme-studio takeover — an App.tsx concern, so the
-   *  CALLER supplies the whole element and this panel only places it). The
-   *  minimal seam: sections had no header-action slot before 2026-08-31. */
+  // A small affordance rendered to the RIGHT of that section's title, e.g. the Theme
+  // section's "Advanced" button opening the theme-studio takeover. An App.tsx concern, so
+  // the CALLER supplies the whole element and this panel only places it.
+  /** Section-header actions, keyed by section id. */
   sectionActions?: Record<string, JSX.Element>;
   class?: string;
 }

@@ -18,8 +18,8 @@ import type { KaiTabItem } from '../../components/tabs/tabs';
 //      chat-agnostic shell is for;
 //   2. WORKING Answer / Sources / Images tab-switching in the answer view;
 //   3. the answer assembled from real pieces - kai-message (query + prose),
-//      inline kai-source citations, kai-reasoning (the steps disclosure), kai-image
-//      (the generated chart), kai-sources (the numbered Sources tab), a kai-image
+//      inline kai-source citations, kai-reasoning (the steps disclosure), kai-image-artifact
+//      (the generated chart), kai-sources (the numbered Sources tab), a kai-image-artifact
 //      grid (the Images tab), and a follow-up kai-prompt-input;
 //   4. the rails (recent sessions / projects) via kai-nav.
 //
@@ -30,7 +30,7 @@ import type { KaiTabItem } from '../../components/tabs/tabs';
 // These kai-* tags are used as JSX elements below. Sibling story files declare the
 // same shared tags; TypeScript merges identical global augmentations across the
 // compilation (they must match BYTE-FOR-BYTE or it errors TS2717), so the shared
-// ones are copied verbatim from perplexity.stories.tsx. kai-image and kai-reasoning
+// ones are copied verbatim from perplexity.stories.tsx. kai-image-artifact and kai-reasoning
 // are declared here for the first time (no other story augments them).
 declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -60,7 +60,7 @@ declare module 'solid-js' {
         rel?: string;
         clickable?: boolean;
       };
-      'kai-image': JSX.HTMLAttributes<HTMLElement>;
+      'kai-image-artifact': JSX.HTMLAttributes<HTMLElement>;
       'kai-reasoning': JSX.HTMLAttributes<HTMLElement> & { label?: string; 'default-open'?: boolean; streaming?: boolean; markdown?: boolean };
       'kai-search': JSX.HTMLAttributes<HTMLElement> & {
         value?: string;
@@ -81,8 +81,9 @@ type Story = StoryObj;
 type El = HTMLElement & Record<string, unknown>;
 
 // ── generated visuals ────────────────────────────────────────────────────────
-// kai-image renders base64/bytes (NOT a URL), so these "generated" charts +
-// thumbnails are inline SVGs, base64-encoded, fed to kai-image as real elements.
+// The charts and thumbnails here are PAYLOADS, so they are real kai-image-artifact
+// elements fed base64 as a property: inline SVGs keep this story self-contained (no
+// network) and offline-stable, which is the point of a committed showcase.
 // They stand in for a consumer's own chart output; the element rendering it is
 // real. A faint "perplexity" watermark mimics the app.
 const CHART = 'PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NDAiIGhlaWdodD0iMzAwIiB2aWV3Qm94PSIwIDAgNjQwIDMwMCIgZm9udC1mYW1pbHk9InVpLXNhbnMtc2VyaWYsc3lzdGVtLXVpLHNhbnMtc2VyaWYiPgo8cmVjdCB3aWR0aD0iNjQwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iIzBmMTAxMSIvPgo8dGV4dCB4PSIyNCIgeT0iMzQiIGZpbGw9IiNlN2U3ZTciIGZvbnQtc2l6ZT0iMTYiIGZvbnQtd2VpZ2h0PSI2MDAiPkNsb3VkIEdQVSBwcmljZSBjb21wYXJpc29uIC0gJC9ociAob24tZGVtYW5kIEExMDAgODBHQik8L3RleHQ+CjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDAsOCkiPgo8bGluZSB4MT0iNjAiIHkxPSI4MCIgeDI9IjYwIiB5Mj0iMjUyIiBzdHJva2U9IiMzYTNjM2UiLz4KPGxpbmUgeDE9IjYwIiB5MT0iMjUyIiB4Mj0iNjA4IiB5Mj0iMjUyIiBzdHJva2U9IiMzYTNjM2UiLz4KPGcgZmlsbD0iIzlhOWE5YSIgZm9udC1zaXplPSIxMSIgdGV4dC1hbmNob3I9ImVuZCI+Cjx0ZXh0IHg9IjUyIiB5PSIyNTIiPjA8L3RleHQ+PHRleHQgeD0iNTIiIHk9IjIwOSI+MTwvdGV4dD48dGV4dCB4PSI1MiIgeT0iMTY2Ij4yPC90ZXh0Pjx0ZXh0IHg9IjUyIiB5PSIxMjMiPjM8L3RleHQ+PHRleHQgeD0iNTIiIHk9Ijg0Ij40PC90ZXh0Pgo8L2c+CjxnIHRleHQtYW5jaG9yPSJtaWRkbGUiPgo8cmVjdCB4PSI5MiIgeT0iMTY2IiB3aWR0aD0iODQiIGhlaWdodD0iODYiIHJ4PSIzIiBmaWxsPSIjMjA4MDhkIi8+PHRleHQgeD0iMTM0IiB5PSIyNzAiIGZpbGw9IiNjZmNmY2YiIGZvbnQtc2l6ZT0iMTIiPkFXUzwvdGV4dD48dGV4dCB4PSIxMzQiIHk9IjE1OCIgZmlsbD0iI2U3ZTdlNyIgZm9udC1zaXplPSIxMiIgZm9udC13ZWlnaHQ9IjYwMCI+JDMuMDY8L3RleHQ+CjxyZWN0IHg9IjIxNiIgeT0iMTg3IiB3aWR0aD0iODQiIGhlaWdodD0iNjUiIHJ4PSIzIiBmaWxsPSIjMjA4MDhkIi8+PHRleHQgeD0iMjU4IiB5PSIyNzAiIGZpbGw9IiNjZmNmY2YiIGZvbnQtc2l6ZT0iMTIiPkdDUDwvdGV4dD48dGV4dCB4PSIyNTgiIHk9IjE3OSIgZmlsbD0iI2U3ZTdlNyIgZm9udC1zaXplPSIxMiIgZm9udC13ZWlnaHQ9IjYwMCI+JDIuNDk8L3RleHQ+CjxyZWN0IHg9IjM0MCIgeT0iMTc0IiB3aWR0aD0iODQiIGhlaWdodD0iNzgiIHJ4PSIzIiBmaWxsPSIjMjA4MDhkIi8+PHRleHQgeD0iMzgyIiB5PSIyNzAiIGZpbGw9IiNjZmNmY2YiIGZvbnQtc2l6ZT0iMTIiPkF6dXJlPC90ZXh0Pjx0ZXh0IHg9IjM4MiIgeT0iMTY2IiBmaWxsPSIjZTdlN2U3IiBmb250LXNpemU9IjEyIiBmb250LXdlaWdodD0iNjAwIj4kMi44MTwvdGV4dD4KPHJlY3QgeD0iNDY0IiB5PSIyMjMiIHdpZHRoPSI4NCIgaGVpZ2h0PSIyOSIgcng9IjMiIGZpbGw9IiMyZjlhYTYiLz48dGV4dCB4PSI1MDYiIHk9IjI3MCIgZmlsbD0iI2NmY2ZjZiIgZm9udC1zaXplPSIxMiI+TGFtYmRhPC90ZXh0Pjx0ZXh0IHg9IjUwNiIgeT0iMjE1IiBmaWxsPSIjZTdlN2U3IiBmb250LXNpemU9IjEyIiBmb250LXdlaWdodD0iNjAwIj4kMS4xMDwvdGV4dD4KPC9nPgo8L2c+Cjx0ZXh0IHg9IjYwMCIgeT0iMjkwIiBmaWxsPSIjM2Y0MTQzIiBmb250LXNpemU9IjM0IiBmb250LXdlaWdodD0iNzAwIiB0ZXh0LWFuY2hvcj0iZW5kIiBvcGFjaXR5PSIwLjUiIHRyYW5zZm9ybT0icm90YXRlKC02IDYwMCAyOTApIj5wZXJwbGV4aXR5PC90ZXh0Pgo8L3N2Zz4=';
@@ -434,7 +435,7 @@ export const PerplexityPro: Story = {
                     <Show when={tab() === 'answer'}>
                       <div class="flex flex-col gap-5">
                         {/* the "Generated chart" artifact card: kai-card shell +
-                            a real kai-image + a download action. */}
+                            a real kai-image-artifact + a download action. */}
                         <kai-card appearance="outlined" class="block">
                           <div class="flex flex-col gap-2">
                             <div class="flex items-center justify-between">
@@ -445,10 +446,10 @@ export const PerplexityPro: Story = {
                                 <kai-button variant="ghost" size="icon-sm" label="Download"><Download slot="icon" class="size-4" /></kai-button>
                               </kai-tooltip>
                             </div>
-                            <kai-image
-                              ref={(el) => { const i = el as El; i.base64 = CHART; i.mediaType = 'image/svg+xml'; i.alt = 'Cloud GPU price comparison, $/hr'; }}
+                            <kai-image-artifact
+                              ref={(el) => { const i = el as El; i.data = CHART; i.mediaType = 'image/svg+xml'; i.alt = 'Cloud GPU price comparison, $/hr'; }}
                               class="block overflow-hidden rounded-md"
-                            ></kai-image>
+                            ></kai-image-artifact>
                           </div>
                         </kai-card>
 
@@ -489,12 +490,12 @@ export const PerplexityPro: Story = {
                           style={{ display: 'block' }}
                         ></kai-message>
 
-                        {/* an embedded chart image with a caption - a REAL kai-image */}
+                        {/* an embedded chart image with a caption - a REAL kai-image-artifact */}
                         <figure class="flex flex-col gap-1.5">
-                          <kai-image
-                            ref={(el) => { const i = el as El; i.base64 = CHART2; i.mediaType = 'image/svg+xml'; i.alt = 'Estimated monthly cost for one A100 at 50% utilization'; }}
+                          <kai-image-artifact
+                            ref={(el) => { const i = el as El; i.data = CHART2; i.mediaType = 'image/svg+xml'; i.alt = 'Estimated monthly cost for one A100 at 50% utilization'; }}
                             class="block overflow-hidden rounded-md border border-border"
-                          ></kai-image>
+                          ></kai-image-artifact>
                           <figcaption class="text-xs text-muted-foreground">Estimated monthly cost for a single A100 at 50% utilization, by provider.</figcaption>
                         </figure>
 
@@ -525,14 +526,14 @@ export const PerplexityPro: Story = {
                     <Show when={tab() === 'images'}>
                       <div class="flex flex-col gap-2">
                         {/* the grid arrangement is consumer layout (a few grid
-                            classes); each tile is a REAL kai-image. */}
+                            classes); each tile is a REAL kai-image-artifact. */}
                         <div class="grid grid-cols-2 gap-2 sm:grid-cols-3">
                           <For each={IMAGES}>
                             {(b64, i) => (
-                              <kai-image
-                                ref={(el) => { const im = el as El; im.base64 = b64; im.mediaType = 'image/svg+xml'; im.alt = `Related image ${i() + 1}`; }}
+                              <kai-image-artifact
+                                ref={(el) => { const im = el as El; im.data = b64; im.mediaType = 'image/svg+xml'; im.alt = `Related image ${i() + 1}`; }}
                                 class="block overflow-hidden rounded-lg border border-border"
-                              ></kai-image>
+                              ></kai-image-artifact>
                             )}
                           </For>
                         </div>
@@ -635,18 +636,18 @@ export const PerplexityPro: Story = {
     <!-- ANSWER tab -->
     <kai-card appearance="outlined"> <!-- "Generated chart" artifact card -->
       Generated chart <kai-button label="Download"><svg slot="icon">…</svg></kai-button>
-      <kai-image></kai-image> <!-- base64 SVG set as a property (no URL support) -->
+      <kai-image-artifact></kai-image-artifact> <!-- base64 SVG set as a property -->
     </kai-card>
     <kai-reasoning></kai-reasoning> <!-- "7 steps completed" disclosure (REAL; label set as a property) -->
     <p>… cited prose with inline <kai-source label="1" headline="…" description="…"></kai-source> chips …</p>
     <kai-message><!-- the comparison table: GFM markdown, message set as a property --></kai-message>
-    <kai-image></kai-image> <!-- an embedded chart image + a caption -->
+    <kai-image-artifact></kai-image-artifact> <!-- an embedded chart image + a caption -->
 
     <!-- SOURCES tab: the numbered source list (REAL) -->
     <kai-sources numbered show-favicon></kai-sources>
 
-    <!-- IMAGES tab: a grid of real kai-image tiles -->
-    <div class="grid grid-cols-3 gap-2"><kai-image></kai-image>…</div>
+    <!-- IMAGES tab: a grid of real kai-image-artifact tiles -->
+    <div class="grid grid-cols-3 gap-2"><kai-image-artifact></kai-image-artifact>…</div>
 
     <!-- the pinned follow-up composer -->
     <kai-prompt-input placeholder="Ask a follow up... (Cmd K)"></kai-prompt-input>
@@ -668,8 +669,8 @@ export const PerplexityPro: Story = {
   document.querySelector('kai-message').message = { id: 'm1', role: 'assistant', parts: [{ type: 'text', text: '…' }] };
   document.querySelector('kai-reasoning').label = '7 steps completed';
   document.querySelector('kai-reasoning').text = '1. …';
-  document.querySelector('kai-image').base64 = '<base64 SVG>';
-  document.querySelector('kai-image').mediaType = 'image/svg+xml';
+  document.querySelector('kai-image-artifact').data = '<base64 SVG>';
+  document.querySelector('kai-image-artifact').mediaType = 'image/svg+xml';
   document.querySelector('kai-sources').sources = [{ href: '…', title: '…', description: '…' }, /* … */];
 
   // Interactions: the segmented toggle swaps rail + main; the tab strip swaps the panel.

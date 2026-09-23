@@ -2,12 +2,11 @@ import { defineWebComponent } from '../define/define';
 import { ResponseStream, type Mode } from '../../components/response/response-stream';
 
 interface Props extends Record<string, unknown> {
-  /** Text to stream. A string, or an `AsyncIterable<string>` (set as a JS
-   *  property, since async iterables can't be HTML attributes). */
+  /** Text to stream: a string, or an `AsyncIterable<string>` set as a property. */
   text?: string | AsyncIterable<string>;
   /** Reveal animation. */
   mode?: Mode;
-  /** Characters/segments per tick. */
+  /** Characters or segments per tick. */
   speed?: number;
   /** Element tag to render as. */
   as?: string;
@@ -20,8 +19,7 @@ interface Events {
 }
 
 /**
- * `<kai-response-stream>` — reveals text with a typewriter or fade animation.
- * Text via the `text` property; `mode`/`speed` attributes; emits `kai-complete`.
+ * Reveals streamed text with a typewriter or fade animation.
  */
 defineWebComponent<Props, Events>('kai-response-stream', {
   text: '',

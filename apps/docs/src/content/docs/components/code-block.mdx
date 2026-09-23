@@ -1,6 +1,6 @@
 ---
 title: Code Block
-description: Syntax-highlighted code with a copy button — one element, every language, light and dark.
+description: Displays a syntax-highlighted code snippet with a copy button.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -13,7 +13,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kai-tag-sub">kai-code-block</p>
 
-<p class="kai-lede">Drop in a syntax-highlighted snippet with a built-in copy button — set one property, pick a language, and Shiki handles the rest.</p>
+<p class="kai-lede">Picks up the page's light or dark theme, so a snippet matches the thread around it.</p>
 
 <Facts items={['Shadow DOM', 'Shiki highlighting', '100+ languages', 'Built-in copy button', 'Light / dark themes']} />
 
@@ -22,7 +22,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 <Playground client:only="solid" tag="kai-code-block" />
 
 <Aside type="tip" title="When to use">
-Use `<kai-code-block>` for highlighted snippets outside SolidJS — message bubbles, tutorial cards, documentation panes. In SolidJS, compose `CodeBlock` and `CodeBlockCode` directly for finer control. The element is `display: block` and fills its container.
+For a snippet shown on its own: a message bubble, a tutorial card, a doc pane. When the code sits inside prose, [Markdown](/components/markdown/) highlights the fence for you.
 </Aside>
 
 ## Usage

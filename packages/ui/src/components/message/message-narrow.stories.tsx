@@ -11,11 +11,12 @@ const meta = {
   tags: ['autodocs'],
   parameters: {
     layout: 'centered',
+    // The pattern: wrap the messages in a min-width container with `ChatConfig proseSize="sm"`,
+    // keeping `min-w-0` on the flex children so long text wraps instead of overflowing.
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'Layout stress-tests for `Message` inside narrow chat panels (300–380px) and resizable side panels: a reference for embedding the chat in a constrained column like a browser-extension side panel or a docked drawer.',
-        'The pattern: wrap messages in a min-width container with `ChatConfig proseSize="sm"`, keeping `min-w-0` on flex children so long text wraps instead of overflowing. These stories are full-composition showcases, not control-driven.',
+        'Message in a narrow column, where long text wraps instead of overflowing.',
       ]),
     },
   },

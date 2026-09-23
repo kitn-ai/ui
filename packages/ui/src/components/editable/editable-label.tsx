@@ -8,9 +8,9 @@ export interface EditableLabelProps {
   /** Controlled edit state. When it flips true the field opens; double-click and
    *  the host's `edit()` open it too. */
   editing?: boolean;
-  /** How the read view enters edit mode: `'dblclick'` (default) opens the field on
-   *  a double click, `'click'` on a single click. Enter / F2 and `editing` /
-   *  `edit()` are unaffected. */
+  // `'dblclick'` opens the field on a double click, `'click'` on a single click. Enter / F2
+  // and `editing` / `edit()` are unaffected.
+  /** How the read view enters edit mode; `'dblclick'` by default. */
   editTrigger?: 'dblclick' | 'click';
   /** Placeholder shown while editing (and as muted text when the value is empty). */
   placeholder?: string;

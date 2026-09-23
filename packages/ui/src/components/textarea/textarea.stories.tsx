@@ -12,7 +12,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'The transparent, borderless `<textarea>` behind `PromptInput`: it auto-grows up to `maxHeight` (px), then scrolls. Drop it in a framed container that owns the border and focus ring. Set `autoResize={false}` for a fixed height.',
+        'An auto-growing text field with no border or background of its own.',
       ]),
     },
   },

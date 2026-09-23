@@ -121,14 +121,11 @@ export interface ChainOfThoughtStepProps {
   children: JSX.Element;
   class?: string;
   isLast?: boolean;
-  /** Controlled open state. When provided, the step's Collapsible is driven by
-   *  this value (the parent owns it — used by the Accordion model below). When
-   *  OMITTED the step stays uncontrolled, preserving the original behaviour
-   *  (every step independently toggleable, starting closed). */
+  // The Accordion model below drives this; omitted, every step is independently
+  // toggleable and starts closed.
+  /** Controlled open state; omitted, the step keeps its own. */
   open?: boolean;
-  /** Called with the desired next open state when the user clicks the trigger.
-   *  Only meaningful when `open` is also provided (controlled mode); the parent
-   *  Accordion routes this through its open-set handler. */
+  /** Fires with the next open state when the trigger is clicked; paired with `open`. */
   onOpenChange?: (open: boolean) => void;
 }
 
@@ -197,11 +194,12 @@ export interface ChainOfThoughtAccordionProps {
   value?: string | string[];
   /** Uncontrolled initial open step key(s). Seeds the internal open-set. */
   defaultValue?: string | string[];
-  /** Fired whenever the open set changes (user click OR a controller method).
-   *  The single emit point — the facade turns this into `kai-value-change`. The
-   *  payload is a string in `single` mode, a string[] in `multiple` mode. */
+  // The single emit point: the `<kai-chain-of-thought>` facade turns this into
+  // `kai-value-change`. The payload is a string in `single` mode, a string[] in
+  // `multiple` mode.
+  /** Fires with the open keys whenever the open set changes, by click or by a controller method. */
   onValueChange?: (value: string | string[]) => void;
-  /** Receive the imperative controller once set up (Pattern C). */
+  /** Receives the imperative controller once set up. */
   controllerRef?: (api: ChainOfThoughtController) => void;
   class?: string;
 }

@@ -25,10 +25,10 @@ export interface CardSurfaceProps extends JSX.HTMLAttributes<HTMLDivElement> {
   appearance?: CardAppearance;
   /** `vertical` (media on top) or `horizontal` (media at the start). */
   orientation?: CardOrientation;
-  /** The card width below which a `responsive` card collapses to vertical and the
-   *  footer action cluster stacks. A CSS length (e.g. `'24rem'`); default `'28rem'`.
-   *  Container-query breakpoints can't be CSS variables, so this prop is baked into
-   *  a per-card `@container` rule. */
+  // A CSS length such as `'24rem'`, default `'28rem'`. Container-query breakpoints cannot
+  // be CSS variables, so this is baked into a per-card `@container` rule. The rule also
+  // stacks the footer action cluster.
+  /** Width below which a `responsive` card collapses to vertical; default `'28rem'`. */
   collapse?: string;
   /** Tighter spacing for dense lists (shrinks `--kai-card-spacing`). */
   dense?: boolean;

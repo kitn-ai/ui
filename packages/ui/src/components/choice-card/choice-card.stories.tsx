@@ -129,9 +129,7 @@ const meta = {
     controls: { exclude: ['data', 'host', 'hostElement', 'class', 'controllerRef', 'value'] },
     docs: {
       description: componentDescription([
-        'The SolidJS layer behind `<kai-choice>`: pick one of N rich options (plans, regions, quick replies) inside `Card` chrome. Pass a `host` (a `CardHost`) to receive emitted `CardEvent`s directly, or wrap in a `CardProvider`.',
-        'The rows are a WAI-ARIA radiogroup with roving tabindex. Clicking a row selects it locally and reports through `onValueChange`; only **Submit** emits `action` with the chosen option id and resolves the card, so the same pick cannot double-fire. `allowOther` appends a free-text row that submits as `__other__`.',
-        'The controls flatten `ChoiceCardData` — edit `options` as JSON, or flip `allowOther` / `disabled` / `dismissible` — and the card re-renders from them.',
+        'A card that asks the reader to pick one of several rich options.',
       ]),
     },
   },

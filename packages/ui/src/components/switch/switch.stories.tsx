@@ -11,7 +11,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'A `role="switch"` toggle for an immediate on/off setting. Uncontrolled via `defaultChecked`, or controlled via `checked` + `onChange`; pass `label` for the accessible name.',
+        'A toggle for an on/off setting.',
       ]),
     },
   },

@@ -2,31 +2,29 @@ import { defineWebComponent } from '../define/define';
 import { Image } from '../../components/image/image';
 
 interface Props extends Record<string, unknown> {
-  /** Base64-encoded image data (pair with `media-type`). */
-  base64?: string;
-  /** Raw image bytes (set as a JS property). */
-  bytes?: Uint8Array;
-  /** Alt text. */
+  // This is an image RESOURCE; for an image the model PRODUCED (base64 or raw bytes) use
+  // `<kai-image-artifact>`.
+  /** The image URL: an `https:`/`http:` location, a `data:` URI, or a `blob:` object URL you created. */
+  src?: string;
+  /** Alt text. Attribute `alt`. Always give meaningful text: an empty alt marks
+   *  the image as decorative. */
   alt?: string;
-  /** MIME type (default `image/png`). */
-  mediaType?: string;
+  /** Extra classes for the `<img>`. */
+  class?: string;
 }
-
+// No skeleton: the browser paints its own placeholder for a resource it can already fetch, and the
+// payload element (`<kai-image-artifact>`) owns that state instead.
 /**
- * `<kai-image>` — renders a base64 or byte-array image with a skeleton
- * fallback while it resolves. `base64`/`alt`/`media-type` via attributes;
- * `bytes` via property.
+ * An image at a URL.
  */
 defineWebComponent<Props>('kai-image', {
-  base64: undefined,
-  bytes: undefined,
+  src: undefined,
   alt: '',
-  mediaType: undefined,
+  class: undefined,
 }, (props) => (
   <Image
+    src={props.src as string}
     alt={props.alt ?? ''}
-    base64={props.base64}
-    uint8Array={props.bytes}
-    mediaType={props.mediaType}
+    class={props.class as string | undefined}
   />
 ));

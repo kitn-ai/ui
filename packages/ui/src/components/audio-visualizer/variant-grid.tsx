@@ -47,11 +47,11 @@ const SILENCE_FLOOR = 0.02;
  */
 export function GridVisualizer(
   props: VariantProps & {
-    /** Rows AND columns of the (always square) grid. Default from the size
-     *  preset. Replaced the former independent rowCount/columnCount pre-1.0:
-     *  columns alone carry the audio signal, so a non-square grid only ever
-     *  changed threshold-ring resolution — never expression (Rob, 2026-08-09;
-     *  upstream is square-by-default via `rowCount ?? columnCount` too). */
+    // Replaced the former independent rowCount/columnCount pre-1.0: columns alone
+    // carry the audio signal, so a non-square grid only ever changed
+    // threshold-ring resolution, never expression. Upstream is square by default
+    // too (`rowCount ?? columnCount`).
+    /** Rows and columns of the always-square grid; defaults to the size preset's count. */
     count?: number;
     /** Ring distance from center for the connecting animation, in cells. */
     spread?: number;

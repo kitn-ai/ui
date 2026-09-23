@@ -1,6 +1,6 @@
 ---
 title: Empty
-description: A centred empty-state block — icon, title, description, and actions — for when a list or thread has nothing to show yet.
+description: A centred empty state.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -14,7 +14,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kai-tag-sub">kai-empty</p>
 
-<p class="kai-lede">A centred empty-state block with a media slot, a title, a description, and a content slot for actions — keeps layouts grounded instead of leaving users with a blank screen.</p>
+<p class="kai-lede">Fills a region that has nothing to show yet, so a layout does not go blank.</p>
 
 <Facts items={['Shadow DOM', '2 props', 'Media slot', 'Actions slot', 'Works in any framework']} />
 
@@ -23,7 +23,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 <Playground client:only="solid" tag="kai-empty" />
 
 <Aside type="tip" title="When to use">
-Place `<kai-empty>` where content would normally appear — a conversation list, search results panel, file explorer — whenever that area is empty. Give the element or its parent an explicit height so vertical centering renders correctly. Project a contextual icon into `slot="media"` and a CTA into the default slot.
+Where content would normally appear, whenever that area is empty: a conversation list, a file explorer. Give the element or its parent an explicit height so the vertical centring works.
 </Aside>
 
 ## Usage
@@ -57,7 +57,7 @@ Place `<kai-empty>` where content would normally appear — a conversation list,
 
 ### Title Only
 
-Omitting the description gives a minimal, uncluttered treatment.
+Omitting the description gives a minimal treatment.
 
 <Example client:visible tag="kai-empty" config={{ emptyTitle: 'Nothing here yet' }} />
 

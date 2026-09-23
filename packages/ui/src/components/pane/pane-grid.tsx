@@ -16,9 +16,7 @@ export interface PaneGridProps {
   /** Gap between panes - any CSS length. Defaults to the kit gap
    *  (`var(--kai-pane-grid-gap, 0.5rem)`). */
   gap?: string;
-  /** When set to a valid child index, render ONLY that pane full-bleed (a single
-   *  filling cell) - a simple maximize hook the consumer drives. `null`/`undefined`
-   *  (or an out-of-range index) shows the full tiled grid. */
+  /** The child index to render alone, filling the grid; `null` shows the full grid. */
   maximizedIndex?: number | null;
   /** Extra classes for the grid container. */
   class?: string;

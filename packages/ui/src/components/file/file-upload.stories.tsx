@@ -11,11 +11,12 @@ const meta = {
   tags: ['autodocs'],
   parameters: {
     layout: 'padded',
+    // Headless: compose `FileUploadTrigger` (opens the picker) and `FileUploadContent` (the
+    // full-screen drop overlay) around it.
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'A headless file-upload root for chat attachments: handles window-wide drag-and-drop plus a hidden file input. Compose `FileUploadTrigger` (opens the picker) and `FileUploadContent` (full-screen drop overlay).',
-        'Read selected files from `onFilesAdded`; constrain with `multiple`, `accept`, and `disabled`.',
+        'Adds files to a chat by drag-and-drop anywhere in the window, or through a picker.',
       ]),
     },
   },

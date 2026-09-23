@@ -2,19 +2,16 @@ import { defineWebComponent } from '../define/define';
 import { Loader, type LoaderVariant, type LoaderSize } from '../../components/loader/loader';
 
 interface Props extends Record<string, unknown> {
-  /** The animation style: `'circular' | 'classic' | 'pulse' | 'pulse-dot' |
-   *  'dots' | 'typing' | 'wave' | 'bars' | 'terminal' | 'text-blink' |
-   *  'text-shimmer' | 'loading-dots'`. Defaults to `'circular'`. */
+  /** Animation style. Default `circular`. */
   variant?: LoaderVariant;
-  /** Loader size: `'sm' | 'md' | 'lg'`. Defaults to `'md'`. */
+  /** Loader size. Default `md`. */
   size?: LoaderSize;
   /** Label for the text-based variants. */
   text?: string;
 }
 
 /**
- * `<kai-loader>` — an animated loader. `variant` selects the style (circular,
- * dots, wave, text-shimmer, …); `size` and `text` are attributes.
+ * An animated loading indicator.
  */
 defineWebComponent<Props>('kai-loader', {
   variant: 'circular',

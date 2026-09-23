@@ -12,8 +12,7 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'A loading indicator with twelve animated `variant`s (spinners, dots, bars, terminal, text-based) in three `size`s, for streaming responses, tool calls, and pending states.',
-        'The text variants (`text-blink`, `text-shimmer`, `loading-dots`) display the `text` prop (defaults to "Thinking").',
+        'An animated spinner for work that has started but has no progress to report.',
       ]),
     },
   },

@@ -8,15 +8,7 @@ interface Props extends Record<string, unknown> {
 }
 
 /**
- * `<kai-badge>` — a small pill for labels, status, counts, or citation markers.
- * Put the content as light-DOM text.
- *
- * ```html
- * <kai-badge>Beta</kai-badge>
- * <kai-badge variant="count">3</kai-badge>
- * <kai-badge variant="citation">1</kai-badge>
- * ```
- * Restyle via `::part(badge)`.
+ * A compact pill for status text, counts, or source citations.
  */
 defineWebComponent<Props>('kai-badge', {
   variant: 'default',

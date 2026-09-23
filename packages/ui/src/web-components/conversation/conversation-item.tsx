@@ -5,73 +5,40 @@ import { SlottedConversationItem, type ConversationRowDensity } from '../../comp
 import { isStandaloneConversationItem, readConversationItemId } from '../../components/conversation/conversation-list';
 
 interface Props extends Record<string, unknown> {
-  /** The row's identity: the `conversation-id` attribute (host `id` is the
-   *  fallback). Inside `<kai-conversations>` it is handed to the container's
-   *  selection contract (`kai-conversation-select`); standalone it is the `id`
-   *  in this element's own `kai-select` detail. */
+  // Inside `<kai-conversations>` it is handed to the container's selection contract
+  // (`kai-conversation-select`); standalone it is the `id` in this element's own
+  // `kai-select` detail.
+  /** The row's identity: the `conversation-id` attribute, else the host `id`. */
   conversationId?: string;
-  /** Selected state. Reflected as `aria-current` on the row body and a
-   *  `data-active` styling hook on the row; inside a container the container
-   *  drives it from its `activeId`, standalone you set it yourself. */
+  /** Selected state, reflected as `aria-current` and a `data-active` styling hook. Inside a container the container drives it. */
   active?: boolean;
   /** Dense single-line row padding. */
   compact?: boolean;
-  /** Row density: `default`, `compact` (same as the `compact` flag), or
-   *  `panel`, the widget-panel presentation matching the facade panel's
-   *  measured row box (12px/10px padding, a 40px single-line row). Previously
-   *  that box was a private interior class a composition could only
-   *  approximate by smuggling padding through slotted spans (2026-08-31
-   *  composition spike, phase 3 round 3). An explicit density wins over
-   *  `compact`. */
+  // `panel` is the widget-panel presentation, matching the facade panel's measured row
+  // box (12px/10px padding, a 40px single-line row). Previously that box was a private
+  // interior class a composition could only approximate by smuggling padding through
+  // slotted spans (2026-08-31 composition spike, phase 3 round 3). An explicit density
+  // wins over `compact`.
+  /** Row density: `default`, `compact` (same as the `compact` flag), or `panel` (the widget-panel row box). */
   density?: ConversationRowDensity;
-  /** Show the unread indicator dot at the row's trailing edge, inside the
-   *  activation surface and before the `menu` region, with a screen-reader
-   *  "Unread" label. Drive it from `isConversationUnread` (exported from the
-   *  package root and from `dist/stores.js`). */
+  // Drive it from `isConversationUnread` (exported from the package root and from
+  // `dist/stores.js`). The dot sits inside the activation surface and before the `menu`
+  // region.
+  /** Show the unread indicator dot at the row's trailing edge, with a screen-reader "Unread" label. */
   unread?: boolean;
 }
 
 interface Events {
-  /** STANDALONE activation only: the row was activated (click, Enter or Space on its body) while the item is NOT a
-   *  direct child of `<kai-conversations>`. `id` is the row's identity: the
-   *  `conversation-id` attribute, else the host `id`. Inside a container this
-   *  never fires: activation surfaces once, as `kai-conversation-select` on the
-   *  container. */
+  // Inside a container this never fires: activation surfaces once, as
+  // `kai-conversation-select` on the container. `id` is the row's identity, the same one
+  // `conversationId` resolves.
+  /** STANDALONE activation of the row (click, Enter or Space on its body). Never fires inside `<kai-conversations>`. */
   'kai-select': { id: string };
 }
 
 /**
- * `<kai-conversation-item>` — one composed row of a consumer-owned conversation
- * loop. Two placements, one activation event each:
- *
- * SLOTTED into `<kai-conversations>`' light DOM (a direct child): the consumer
- * owns the loop (framework-native `map`, `<For>`, `v-for`); the container
- * detects these children, skips its data rendering, and runs the parent-item
- * contract over them — selection state flowing container to item, roving
- * tabindex, arrow-key traversal, and the accessible list/row relationship
- * (list rows with button bodies and `aria-current` marking the active one;
- * axe's nested-interactive and aria-required-children
- * rules are why this is not listbox/option). Activation (click, Enter, Space)
- * surfaces as `kai-conversation-select` on the container, and the item itself
- * fires nothing — no double event.
- *
- * STANDALONE (anywhere else — a hand-composed rail, or wrapped in another
- * element even inside a container, since the container manages only direct
- * children): the row activates ITSELF.
- * Its shadow body is a tabbable `role="button"`, and click / Enter / Space
- * fire `kai-select` on this element with `{ id }` — non-bubbling, like every
- * `kai-*` event, so listen on the item itself. What a standalone row does NOT
- * have is the container's LIST story: roving tabindex across rows, arrow-key
- * traversal, and the shared `role="list"` relationship — each standalone row
- * is an ordinary tab stop, and a hand-composed rail brings its own list
- * semantics (or slots the rows into `<kai-conversations>` and gets them for
- * free).
- *
- * Slots: the default slot is the title; `leading`, `meta` and `menu` are the
- * named regions. The `menu` slot takes your OWN popover (rename, fork, archive
- * live there); the element provides only the region plus focus and ARIA
- * plumbing, never a declarative actions prop, and a click inside it never
- * selects the row — in either placement.
+ * One selectable row of a conversation list; `kai-conversations` is the container
+ * that gives its rows selection and keyboard traversal.
  */
 defineWebComponent<Props, Events>('kai-conversation-item', {
   conversationId: undefined,

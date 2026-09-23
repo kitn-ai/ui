@@ -1,6 +1,6 @@
 ---
 title: Image
-description: Renders a base64 or byte-array image with a skeleton placeholder while it resolves — no hosted URL required.
+description: Displays an image from a URL.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -13,62 +13,48 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kai-tag-sub">kai-image</p>
 
-<p class="kai-lede">Display a model-generated or in-memory image directly from a base64 string or raw byte array — no CDN upload, no hosted URL needed.</p>
+<p class="kai-lede">Alt text is required, so a picture never goes out unnamed to a screen reader.</p>
 
-<Facts items={['Shadow DOM', 'Base64 or Uint8Array input', 'Skeleton while resolving', 'SVG / PNG / JPEG / any MIME type', 'Alt text for accessibility']} />
+<Facts items={['Shadow DOM', 'https / data: / blob:', 'Alt text required', 'Kit chrome']} />
 
 ## Preview
 
 <Playground client:only="solid" tag="kai-image" />
 
 <Aside type="tip" title="When to use">
-Use `<kai-image>` when you receive raw image data from a model or API response and need to display it inline — inside a message bubble, a card body, or an artifact preview — without uploading first. The element is `display: inline-block` and fills its container width; constrain width on the parent as needed.
+When you have a *reference*: a photo, a chart your API rendered. For image *data* from a model, use [Image artifact](/components/image-artifact/) instead.
 </Aside>
 
 ## Usage
 
-Assign either `base64` (paired with `media-type`) or `bytes` as a property:
+Set `src` to the image address and `alt` to a real description. Every form of image URL works: https, a `data:` URI, and a `blob:` object URL the app created itself.
 
 ```html
-<kai-image id="img" media-type="image/png" alt="A generated chart"></kai-image>
+<kai-image src="https://example.com/photo.jpg" alt="A mountain landscape at dusk"></kai-image>
 
-<script type="module">
-  import '@kitn.ai/ui/web-components';
-
-  const img = document.getElementById('img');
-
-  // base64 string:
-  img.base64 = '<...base64 encoded image data...>';
-
-  // or raw bytes:
-  // img.bytes = new Uint8Array([...]);
-</script>
+<!-- an inline SVG, no request at all -->
+<kai-image src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0i…" alt="A purple star icon"></kai-image>
 ```
 
-- **`base64`** — scalar attribute or property; pair with `media-type` so the browser decodes correctly.
-- **`bytes`** — assign it in JavaScript (`Uint8Array`); `media-type` is recommended but not required when the format is detectable.
-- **`media-type`** defaults to `image/png`. Override for SVG (`image/svg+xml`), JPEG, or any other MIME type.
-- **`alt`** defaults to an empty string — always provide meaningful alt text.
+`alt` is required rather than optional: an image with no name is invisible to a screen reader, and a placeholder string ("image") is worse than none.
+
+The element filters no schemes, because an `<img>` cannot execute one. Where a URL is *navigable* the kit applies its own policy; that is a different guard for a different sink.
 
 ## Examples
 
-### Purple Star
-
-A base64-encoded SVG with explicit `media-type` and descriptive alt text.
+### A hosted image
 
 <Example client:visible tag="kai-image" />
 
-### Teal Circle
+### A second source
 
-A different base64 SVG — swap `base64` and `media-type` for each image you display.
+<Example client:visible tag="kai-image" data="portrait" />
 
-<Example client:visible tag="kai-image" data="circle" />
+### An inline data URI
 
-### With Descriptive Alt Text
+No request, no CDN: the bytes ride in the URL.
 
-Pairs the image with a specific `alt` string so screen readers announce it correctly.
-
-<Example client:visible tag="kai-image" data="checkmark" />
+<Example client:visible tag="kai-image" data="inline" />
 
 ## Props
 

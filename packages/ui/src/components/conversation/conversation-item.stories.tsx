@@ -39,7 +39,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'A single conversation row for a history sidebar: title (truncated) and message count, with a highlighted active state. Pass a `conversation` summary, an `isActive` flag, and `onSelect(id)`. Usually rendered for you by `ConversationList`; use it directly for a custom list.',
+        'One conversation in a history list, with its title and message count.',
       ]),
       controls: { exclude: ['use:eventListener'] },
     },

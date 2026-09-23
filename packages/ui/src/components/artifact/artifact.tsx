@@ -79,11 +79,11 @@ export interface ArtifactProps extends Omit<JSX.HTMLAttributes<HTMLDivElement>, 
   sandbox?: string;
   /** Accessible iframe title. */
   iframeTitle?: string;
-  /** Fired when the preview navigates (back/forward/reload/path-edit/file-click).
-   *  `detail.url` is reported AS IT ARRIVED, including a `javascript:`/`vbscript:` url
-   *  the preview itself refused (the kit must not tell a consumer the model sent
-   *  something else), and it is NOT scheme-validated -- guard it with `isSafeUrl`
-   *  from `@kitn.ai/ui` before you render, store or navigate to it. */
+  // `detail.url` is reported AS IT ARRIVED, including a `javascript:`/`vbscript:` url the
+  // preview itself refused (the kit must not tell a consumer the model sent something
+  // else), and it is NOT scheme-validated: guard it with `isSafeUrl` from `@kitn.ai/ui`
+  // before rendering, storing or navigating to it.
+  /** Fired when the preview navigates (back/forward/reload/path-edit/file-click). */
   onNavigate?: (url: string) => void;
   /** Fired when the Preview|Code tab changes. */
   onTabChange?: (tab: ArtifactTab) => void;
@@ -115,14 +115,11 @@ export interface ArtifactProps extends Omit<JSX.HTMLAttributes<HTMLDivElement>, 
   standalone?: boolean;
   /** Make the path field read-only (visible, nav-tracking, non-editable). */
   readonlyPath?: boolean;
-  /** Friendly address shown in the path field INSTEAD of the real current url
-   *  (read-only, non-navigable). Use when the framed url is not consumer-facing
-   *  (e.g. a `data:` blob) so a clean address is shown instead of leaking it.
-   *  Unset = show the real url (editable per `readonlyPath`). */
+  // For a framed url that is not consumer-facing (e.g. a `data:` blob), so a clean address
+  // is shown instead of leaking it. Unset shows the real url (editable per `readonlyPath`).
+  /** Read-only, non-navigable address shown in the path field instead of the current url. */
   displayUrl?: string;
-  /** Receive the imperative controller once mounted. The `<kai-artifact>` facade
-   *  forwards these as element methods (back/forward/reload/home/navigate/
-   *  selectFile/openExternal/maximize/restore). */
+  /** Receive the imperative controller once mounted. */
   controllerRef?: (controller: ArtifactController) => void;
 }
 

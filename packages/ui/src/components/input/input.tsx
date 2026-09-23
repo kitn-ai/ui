@@ -20,13 +20,12 @@ export interface InputProps extends Omit<JSX.InputHTMLAttributes<HTMLInputElemen
   size?: 'sm' | 'md';
   /** Force the invalid (destructive-border) state without an `error` string. */
   invalid?: boolean;
-  /** Leading affix (icon, unit). Rendered inside the field row, before the input. */
+  /** Affix inside the field row before the input, wrapped by the row's focus ring. */
   leading?: JSX.Element;
-  /** Trailing affix (icon, inline button). Rendered inside the field row, after the input. */
+  /** Affix inside the field row after the input, wrapped by the row's focus ring. */
   trailing?: JSX.Element;
-  /** Fires per keystroke with the current value — the CANONICAL value when a mask is
-   *  active (digits for `tel`/`ssn`/`credit-card`, the formatted text for
-   *  `custom`), and the raw text of the field otherwise. */
+  /** Fires per keystroke with the value: canonical when a mask is active, the raw
+   *  field text otherwise. */
   onValueInput?: (value: string) => void;
   /** Fires on commit (blur) with the current value; canonical when a mask is active. */
   onValueChange?: (value: string) => void;
@@ -36,34 +35,27 @@ export interface InputProps extends Omit<JSX.InputHTMLAttributes<HTMLInputElemen
   // `semantic` is the behavior of today, byte for byte (owner decision 1 / spec §1.1): no mask,
   // no extra attributes, nothing.
 
-  /** Tier-2 mask pattern: `#` a digit, `@` an alphanumeric, `*` an obscurable
-   *  alphanumeric, everything else a positional literal (`@@@-####`).
-   *
-   *  The literal `default` is the OPT-IN sentinel: it resolves to the default format of
-   *  `semantic` (`tel` → `###-###-####`). It cannot collide with a real pattern — `default`
-   *  as a format is eight literals with no fill position, i.e. a field that can hold
-   *  nothing — and an opt-in token is needed because decision 1 forbids a bare semantic
-   *  type from starting to mask on its own. */
+  // The literal `default` is the opt-in sentinel: it resolves to the `semantic` format. A
+  // sentinel is needed because a bare semantic type must never start masking on its
+  // own, and it cannot collide with a real pattern: `default` as a format is eight
+  // literals with no fill position, a field that can hold nothing.
+  /** Mask pattern: `#` digit, `@` alphanumeric, `*` obscurable alphanumeric,
+   *  anything else a literal; the literal `default` selects the `semantic` format. */
   format?: string;
-  /** The placeholder guide shown at unfilled positions, aligned position-for-position
-   *  with `format` (`   -   -    `, `mm/dd/yyyy`). Without it the field shows only up
-   *  to the last typed character. */
+  /** Placeholder shown at unfilled positions, aligned to `format`; without it the
+   *  field shows only up to the last typed character. */
   guide?: string;
-  /** Tier-1 semantic type. On its own it applies `inputmode` / `autocomplete` /
-   *  `spellcheck` / `autocorrect` / `autocapitalize` and decides the canonical value —
-   *  it never starts masking by itself. */
+  /** Field type that decides `inputmode`, `autocomplete`, casing and the canonical
+   *  value. Never masks on its own. */
   semantic?: FieldSemanticType;
   /** Case folding applied to typed and pasted text. Defaults to `preserve`. */
   caseMode?: CaseMode;
   /** What a copy or cut of a masked field puts on the clipboard. Defaults to `canonical`. */
   copyPolicy?: CopyPolicy;
-  /** A mask refused, or partly refused, some content — `full`, `wrong-class`,
-   *  `over-capacity`, or `format-change-clipped`. Not a scalar and therefore not an
-   *  attribute: the facade projects this onto its `kai-input-rejected` event.
-   *
-   *  NOT an error state. `format-change-clipped` in particular fires on a routine
-   *  reactive `format` change, so this widget deliberately does not touch `invalid` —
-   *  validity belongs to the consumer, and stays there. */
+  // Not an error state, and the widget never touches `invalid` for it: a routine
+  // reactive `format` change fires the `format-change-clipped` reason too. Not a
+  // scalar, so the facade projects it onto its `kai-input-rejected` event.
+  /** Fires when the mask refused or partly refused input; not an error state. */
   onMaskReject?: (detail: { reason: InputMaskRejectReason; data: string }) => void;
 }
 
@@ -99,8 +91,8 @@ export const FIELD_INVALID = 'border-destructive dark:border-red-400/70';
 const INVALID = FIELD_INVALID;
 
 // Suppress the native search affordances Chrome/WebKit render for `type="search"`.
-// Without this the browser's `::-webkit-search-cancel-button` (×) stacks on top of
-// a custom clear control (e.g. kai-search's `part="clear"`) — a double ×. Applied
+// Without this the browser-native `::-webkit-search-cancel-button` (×) stacks on top of
+// a custom clear control (e.g. the `part="clear"` in kai-search), a double ×. Applied
 // to the inner `<input>` in BOTH layouts (the field can be `type="search"` either
 // way; kai-search uses the affix layout for its leading icon).
 const SEARCH_RESET =
@@ -263,7 +255,7 @@ export function Input(props: InputProps): JSX.Element {
 
   // The class arrives as an ACCESSOR, not a string, and this is load-bearing.
   //
-  // Solid evaluates a `<Show>` `fallback` inside the Show's own memo. When the
+  // Solid evaluates a `<Show>` `fallback` inside the memo of the Show. When the
   // class was computed at the call site — `inputEl(cn(FIELD_BASE, …,
   // isInvalid() && INVALID, local.class), …)` — those reads happened in that
   // memo, so any of them changing re-ran the memo and BUILT A NEW `<input>`
@@ -335,7 +327,7 @@ export function Input(props: InputProps): JSX.Element {
 
   // Created on first use and then REUSED, so toggling an affix on or off does
   // not discard a focused input either. The lazy cache also keeps the unused
-  // branch's node (and its effects) from being built at all.
+  // the branch node (and its effects) from being built at all.
   //
   // KEEP PROSE IN THIS FILE FREE OF STRAY QUOTE CHARACTERS. The part-name guard in
   // `src/web-components/slots/slots.test.ts` scans this source with a naive quote regex, so one

@@ -1,6 +1,6 @@
 ---
 title: Voice Input
-description: A mic button that records audio and transcribes it — drop it anywhere, wire one async function, and you have voice dictation.
+description: A mic button that records speech for your transcriber.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -15,7 +15,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kai-tag-sub">kai-voice-input</p>
 
-<p class="kai-lede">A self-contained mic button that records audio, hands the `Blob` to your transcription function, and fires the result — plug in any speech-to-text backend to get voice dictation.</p>
+<p class="kai-lede">Keeps the recording on the element, so your page only supplies the transcription call.</p>
 
 <Facts items={['Shadow DOM', '2 events', 'Function-property pattern', 'Framework agnostic', 'Disableable']} />
 
@@ -24,7 +24,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 <Playground client:only="solid" tag="kai-voice-input" />
 
 <Aside type="tip" title="When to use">
-Reach for `<kai-voice-input>` to add mic dictation to a prompt input, search bar, or form field in any framework. In SolidJS, compose `VoiceInput` from `@kitn.ai/ui` directly for tighter reactive control.
+In a prompt input, a search bar, or a form field, wherever typing is the slow part. For the visual response while audio plays, use [Audio visualizer](/components/audio-visualizer/).
 </Aside>
 
 ## Usage

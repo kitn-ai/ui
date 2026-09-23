@@ -11,8 +11,7 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'Renders a Markdown string to styled HTML (GFM: tables, lists, blockquotes) and splits fenced code into highlighted `CodeBlock`s. This is what powers assistant message content.',
-        'Pass the source as `content`; set `codeTheme` for fences. Prose sizing follows the surrounding `ChatConfig`.',
+        'Renders a Markdown string, with fenced code as highlighted code blocks.',
       ]),
     },
   },

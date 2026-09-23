@@ -6,15 +6,15 @@ import type { DropdownController } from '../../components/dropdown/dropdown';
 import type { ModelOption } from '../../types';
 
 interface Props extends Record<string, unknown> {
-  /** The selectable models. Set as a JS property (array). Omit to supply them as
-   *  `<kai-model>` light-DOM children instead; when both are present the
-   *  property's models come first. */
+  // When both this property and light-DOM children are present, the property's models
+  // come first.
+  /** The selectable models. JS property (array); omit to pass `<kai-model>` light-DOM children instead. */
   models?: ModelOption[];
   /** The currently-selected model id. Defaults to the first model. */
   currentModel?: string;
-  /** Drive/observe the dropdown's open state (Shoelace-style: settable + reflected
-   *  to the `open` attribute, the dropdown still self-manages on click/keyboard).
-   *  Set `el.open = true`, or `<kai-model-switcher open>`; listen for `kai-open-change`. */
+  // Shoelace-style: settable and reflected to the `open` attribute, while the dropdown
+  // still self-manages on click/keyboard.
+  /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
   /** Initial open state on mount (uncontrolled seed). */
   defaultOpen?: boolean;
@@ -48,33 +48,12 @@ export function parseKaiModelElement(n: Element): ModelOption {
     group: n.getAttribute('group') ?? undefined,
   };
 }
-
+// Renders only when more than one model is provided, like the primitive it wraps.
+// Children are light-DOM data carriers (hidden by Shadow DOM): `id` (required), `provider`,
+// `description`, `group` and the text label. `models` items render first, declarative children
+// after.
 /**
- * `<kai-model-switcher>` — an event-emitting leaf element. Data in via the
- * `models` property, selection out via a `kai-model-change` event. Mirrors the
- * header switcher inside `<kai-chat>` as a standalone, composable piece.
- *
- * Note: like the underlying primitive, this only renders when more than one
- * model is provided.
- *
- * **How to use:**
- *
- * _Property API_ — set `models` as a JS property and listen for `kai-model-change`:
- * ```js
- * el.models = [{ id: 'gpt-4o', name: 'GPT-4o', provider: 'OpenAI' }];
- * el.addEventListener('kai-model-change', (e) => console.log(e.detail.modelId));
- * ```
- *
- * _Declarative child API_ — compose `<kai-model>` light-DOM children (no JS needed):
- * ```html
- * <kai-model-switcher>
- *   <kai-model id="gpt-4o" provider="OpenAI">GPT-4o</kai-model>
- *   <kai-model id="gpt-4o-mini" provider="OpenAI">GPT-4o mini</kai-model>
- * </kai-model-switcher>
- * ```
- * Each `<kai-model>` child carries `id` (required), `provider` (optional), and
- * a text label as its `textContent`. Children are light-DOM data carriers hidden
- * by Shadow DOM. Prop `models` items render first; declarative children follow.
+ * A model picker that reports the chosen model outward instead of owning the selection.
  */
 defineWebComponent<Props, Events>('kai-model-switcher', {
   models: [],

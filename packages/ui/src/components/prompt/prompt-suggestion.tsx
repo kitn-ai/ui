@@ -12,13 +12,12 @@ export interface PromptSuggestionProps extends JSX.ButtonHTMLAttributes<HTMLButt
   /** Optional leading icon (named icon, image URL/data-URI, or text). */
   icon?: string;
   highlight?: string;
-  /** Render as a full-width, left-aligned list row (the "suggested questions"
-   *  idiom) instead of a rounded pill. Wraps long text. Ignored in highlight
-   *  mode, which is always a list row. */
+  // Full-width and left-aligned, the "suggested questions" idiom, wrapping long text.
+  // Ignored in highlight mode, which is always a list row.
+  /** Render as a list row instead of a rounded pill. */
   block?: boolean;
-  /** Render as a full-width "Ideas for you" list row: a leading icon, a
-   *  left-aligned label, and a hover background. Like `block`, but keeps the
-   *  leading icon. Ignored in highlight mode. */
+  // Like `block` but keeps the leading icon, with a hover background.
+  /** Render as an "Ideas for you" list row. Ignored in highlight mode. */
   list?: boolean;
 }
 

@@ -14,10 +14,9 @@ interface Props extends Record<string, unknown> {
   /** Gap between panes, any CSS length. Defaults to the kit gap
    *  (`var(--kai-pane-grid-gap, 0.5rem)`). Attribute: `gap`. */
   gap?: string;
-  /** When set to a valid child index, render ONLY that pane full-bleed: a simple
-   *  maximize hook the consumer drives (pair it with `<kai-pane>`'s `kai-maximize`
-   *  event). Clear it (or point out of range) for the full tiled grid.
-   *  Attribute: `maximized-index`. */
+  // A simple maximize hook the consumer drives (pair it with `<kai-pane>`'s
+  // `kai-maximize` event).
+  /** A valid child index renders ONLY that pane full-bleed; clear it or point out of range for the tiled grid. */
   maximizedIndex?: number | null;
 }
 
@@ -27,31 +26,12 @@ function num(value: unknown): number | undefined {
   const n = Number(value);
   return Number.isFinite(n) ? n : undefined;
 }
-
+// Under the shadow root each pane child is projected through its OWN auto-assigned named slot,
+// so light children become grid tiles directly; an author-set `slot` attribute on a direct child
+// is respected and left alone. The grid never maximizes itself: `maximized-index` is a plain
+// hook the consumer drives (pair it with `<kai-pane>`'s `kai-maximize`). No events.
 /**
- * `<kai-pane-grid>` — an N-pane responsive tiling grid with a min-size + scroll
- * floor. Each direct light child is one tile: the grid fills up to `max-columns`
- * columns when wide, DROPS columns as the container narrows so panes never squish
- * below `min-pane-width`, then SCROLLS once even one column can't fit. Rows keep
- * at least `min-pane-height` the same way. The natural children are `<kai-pane>` /
- * `<kai-pane-group>`, but any elements tile.
- *
- * ```html
- * <kai-pane-grid max-columns="2" min-pane-width="320" style="height: 480px">
- *   <kai-pane headline="Atlas">…</kai-pane>
- *   <kai-pane headline="Otto">…</kai-pane>
- *   <kai-pane headline="Nova">…</kai-pane>
- * </kai-pane-grid>
- * ```
- *
- * Maximize: set `maximized-index` to a child index to show only that pane
- * full-bleed; clear it to restore. The grid never decides this itself — drive it
- * from your own control (e.g. `<kai-pane>`'s `kai-maximize` event). Scalar
- * attributes only; no events.
- *
- * Under the shadow root each pane child is projected through its own named slot
- * (assigned automatically — an author-set `slot` attribute on a direct child is
- * respected and left alone), so the light children become the grid tiles directly.
+ * A responsive grid of panes that drops columns and eventually scrolls rather than squashing them.
  */
 defineWebComponent<Props>('kai-pane-grid', {
   minPaneWidth: undefined,

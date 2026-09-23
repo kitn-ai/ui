@@ -10,24 +10,23 @@ interface Props extends Record<string, unknown> {
   /** Built-in trigger: leading icon (a named icon like `"plus"`, an image
    *  URL/data-URI, or text). A slotted `slot="trigger"` overrides it. */
   triggerIcon?: string;
-  /** Built-in trigger: a text label. This is the trigger's VISIBLE text, so it is
-   *  also its accessible name, and `label` does not override it: an accessible
-   *  name that does not contain the visible text is unreachable by speech input
-   *  (WCAG 2.5.3, Label in Name). Same rule `kai-menu` follows. */
+  // This is the trigger's VISIBLE text, so it is also its accessible name, and `label`
+  // does not override it: an accessible name that does not contain the visible text is
+  // unreachable by speech input (WCAG 2.5.3, Label in Name). Same rule `kai-menu` follows.
+  /** Built-in trigger: a text label. */
   triggerLabel?: string;
   /** Built-in trigger: a trailing icon (e.g. `"chevron-down"` for a select look). */
   triggerIconTrailing?: string;
-  /** Accessible name for a trigger with no visible label. Ignored when
-   *  `triggerLabel` is set, which is already the visible name. It DOES name a
-   *  slotted `slot="trigger"`, which is VISUAL content with the name supplied
-   *  separately: the same two-slot distinction `kai-menu` documents. */
+  // It DOES name a slotted `slot="trigger"`, which is VISUAL content with the name
+  // supplied separately: the same two-slot distinction `kai-menu` documents.
+  /** Accessible name for a trigger with no visible label. Ignored when `triggerLabel` is set. */
   label?: string;
   /** Stretch the trigger to the full width of its container (a block row).
    *  Attribute: `full`. */
   full?: boolean;
-  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open`
-   *  attribute, the menu still self-manages on click/keyboard). Set `el.open = true`,
-   *  or `<kai-dropdown open>`; listen for `kai-open-change`. */
+  // Shoelace-style: settable and reflected to the `open` attribute, while the menu
+  // still self-manages on click/keyboard.
+  /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
   /** Initial open state on mount (uncontrolled seed). */
   defaultOpen?: boolean;
@@ -42,30 +41,8 @@ interface Events {
 }
 
 /**
- * `<kai-dropdown>` — a trigger plus a floating menu surface you fill yourself.
- *
- * The sibling of `<kai-menu>`, split by who owns the menu body: `kai-menu` renders
- * a JSON `items` tree for you, this one gives you the surface and lets you slot
- * ARBITRARY markup into it — the shape a framework consumer needs when the rows
- * are their own components rather than data.
- *
- * ```html
- * <kai-dropdown label="Row actions">
- *   <span slot="trigger">&#8942;</span>
- *   <div role="menuitem" tabindex="-1">Rename</div>
- *   <div role="menuitem" tabindex="-1">Duplicate</div>
- * </kai-dropdown>
- * ```
- *
- * The default slot is the menu body; `trigger` is the control it anchors to. It
- * fires `kai-open-change` with `{ open }` on every change, accepts `open` /
- * `defaultOpen` / `disabled`, and exposes `show()` / `hide()` / `toggle()`.
- *
- * KEYBOARD: give each row `role="menuitem"` and it joins roving focus. ArrowUp/Down,
- * Home/End and typeahead reach SLOTTED rows because `menuItems()` in
- * `../components/dropdown/dropdown.tsx` walks the flat tree rather than querying the shadow tree,
- * which contains none of the light-DOM nodes a `<slot>` projects. Rows carrying
- * `aria-disabled="true"` are skipped.
+ * A trigger with a floating surface you fill with your own markup. `kai-menu` is the
+ * same surface driven by an item list.
  */
 defineWebComponent<Props, Events>('kai-dropdown', {
   triggerIcon: undefined,

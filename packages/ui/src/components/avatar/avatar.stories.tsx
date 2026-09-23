@@ -11,7 +11,7 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'A rounded avatar that shows the `src` image, or the `fallback` initials (1–2 chars) when no image is set or it fails to load. Sized via `size`.',
+        'A small picture of a person or agent, falling back to their initials when there is no image.',
       ]),
     },
   },

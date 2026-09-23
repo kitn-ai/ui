@@ -2,19 +2,13 @@ import { type JSX, splitProps, createEffect } from 'solid-js';
 import { cn } from '../../utils/cn';
 
 export interface CheckboxProps extends Omit<JSX.InputHTMLAttributes<HTMLInputElement>, 'type' | 'children'> {
-  /**
-   * The mixed / partially-checked state ("some of the things below are ticked").
-   *
-   * `indeterminate` is a DOM PROPERTY with no HTML attribute, so it cannot be set
-   * from markup — every caller that wanted it used to reach for a `ref` plus a
-   * `createEffect`. That effect now lives in here, once, and callers pass a prop.
-   *
-   * Note that the property is purely visual plus an accessibility hint: a checkbox
-   * whose `indeterminate` is true still reports `checked === false` and submits
-   * accordingly. A native indeterminate checkbox already announces as "mixed", so
-   * this component does not stamp `aria-checked="mixed"` on top of it — pass one
-   * yourself if you also want the attribute in the DOM.
-   */
+  // `indeterminate` is a DOM PROPERTY with no HTML attribute, so markup cannot set
+  // it and every caller that wanted it used to wire a `ref` plus a `createEffect`.
+  // That effect lives in here once. The property is visual plus an accessibility
+  // hint, so `checked` still reports false and a form submits accordingly, and a
+  // native indeterminate checkbox already announces as "mixed" without an
+  // `aria-checked="mixed"` attribute stamped on top of it.
+  /** The mixed, partially-checked state. */
   indeterminate?: boolean;
 }
 

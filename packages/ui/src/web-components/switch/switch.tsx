@@ -3,9 +3,7 @@ import { defineWebComponent } from '../define/define';
 import { Switch } from '../../components/switch/switch';
 
 interface Props extends Record<string, unknown> {
-  /** Controlled checked state. Settable and reflected to the `checked` attribute.
-   *  `el.checked = true` (or `<kai-switch checked>`) drives it; the toggle UI updates
-   *  it and fires `kai-change`. Read `el.checked` for live state. */
+  /** Controlled checked state, reflected to the `checked` attribute. The toggle updates it and fires `kai-change`. */
   checked?: boolean;
   /** Initial checked state on mount (uncontrolled seed). Bare attribute
    *  (`<kai-switch default-checked>`) turns it on. */
@@ -25,23 +23,8 @@ interface Events {
   /** The toggle changed. */
   'kai-change': { checked: boolean };
 }
-
 /**
- * `<kai-switch>` — a toggle switch. Drive/read its state with the `checked`
- * property (settable + reflected to the `checked` attribute, so `:host([checked])`
- * and `el.checked` see live state); seed the initial state with `default-checked`
- * and read changes from `kai-change`.
- *
- * ```html
- * <kai-switch default-checked label="Temporary chat"></kai-switch>
- * <script type="module">
- *   import '@kitn.ai/ui/web-components';
- *   const sw = document.querySelector('kai-switch');
- *   sw.addEventListener('kai-change', (e) => console.log(e.detail.checked));
- *   sw.checked = false;   // drive it (no kai-change — the host already knows)
- *   sw.toggle();          // flip it (fires kai-change)
- * </script>
- * ```
+ * A toggle switch.
  */
 defineWebComponent<Props, Events>('kai-switch', {
   checked: undefined,

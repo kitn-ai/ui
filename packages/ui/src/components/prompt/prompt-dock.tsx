@@ -19,30 +19,22 @@ export type PromptDockFrame = 'inset' | 'edge' | 'none';
 export type PromptDockAppearance = 'soft' | 'outlined' | 'filled' | 'plain';
 
 export interface PromptDockProps {
-  /** Optional content for the recessed band ABOVE the input (a notice, a hint).
-   *  When omitted, no top lip renders and only the input shows. */
+  /** Content for the recessed band above the input (a notice, a hint); omitted, no top lip renders. */
   top?: JSX.Element;
-  /** Optional content for the recessed band BELOW the input (a mode / control row).
-   *  When omitted, no bottom lip renders. */
+  /** Content for the recessed band below the input (a mode or control row); omitted, no bottom lip renders. */
   bottom?: JSX.Element;
-  /** Extra classes for the TOP lip wrapper, merged over the default band styling.
-   *  Use this to give the top region its own surface (e.g. a tinted notice) without
-   *  affecting the bottom. The eventual `kai-prompt-dock` element will expose the
-   *  same region via `::part(top)`. */
+  // The eventual `kai-prompt-dock` element exposes this region as `::part(top)`. A
+  // tinted notice here leaves the bottom lip alone.
+  /** Extra classes for the top lip wrapper, merged over the default band styling. */
   topClass?: string;
-  /** Extra classes for the BOTTOM lip wrapper, merged over the default band styling.
-   *  The eventual `kai-prompt-dock` element will expose this region via
-   *  `::part(bottom)`. */
+  // The eventual `kai-prompt-dock` element exposes this region as `::part(bottom)`.
+  /** Extra classes for the bottom lip wrapper, merged over the default band styling. */
   bottomClass?: string;
-  /** How the tray frames the input — the SPATIAL inset only. Defaults to `'inset'`
-   *  (the classic recessed look), so existing consumers are unaffected.
-   *  See {@link PromptDockFrame}. */
+  /** How the tray frames the input, spatial inset only. Defaults to `'inset'`. */
   frame?: PromptDockFrame;
-  /** How the tray surface looks — the VISUAL axis (background / border / radius),
-   *  orthogonal to `frame`. Defaults to `'soft'` (the classic look), so existing
-   *  consumers are unaffected. See {@link PromptDockAppearance}. */
+  /** The tray's surface treatment, independent of the frame. Defaults to `'soft'`. */
   appearance?: PromptDockAppearance;
-  /** The prompt input - the raised card that floats on the tray. */
+  /** The prompt input: the raised card that floats on the tray. */
   children: JSX.Element;
   /** Extra classes for the outer tray. */
   class?: string;

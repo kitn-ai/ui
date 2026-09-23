@@ -11,8 +11,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'A thin separator-style row, placed between messages, that lets a user revert the conversation to a saved point (before an edit or a branch). `Checkpoint` wraps a `CheckpointIcon` and a `CheckpointTrigger` button.',
-        'Give the trigger an `onClick` and optional `tooltip`; pass SVG children to `CheckpointIcon` to override the default flag.',
+        'A divider in the conversation that marks a point the reader can revert to.',
       ]),
       controls: { exclude: ['use:eventListener'] },
     },

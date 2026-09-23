@@ -3,9 +3,8 @@ import { ConfirmCard, type ConfirmCardData, type ConfirmController } from '../..
 import type { CardResolution } from '../../primitives/card-contract';
 
 interface Props extends Record<string, unknown> {
-  /** The confirm definition (the CardEnvelope.data). Set as a JS PROPERTY:
-   *  `el.data = { body, tone, actions:[…] }`. Import `ConfirmCardData` from
-   *  `@kitn.ai/ui` for the full shape. */
+  // Import `ConfirmCardData` from `@kitn.ai/ui` for the full shape.
+  /** The confirm definition (the card's `data`). JS property: `el.data = { body, tone, actions: [...] }`. */
   data?: ConfirmCardData;
   /** Stable card id correlating every emitted CardEvent. Attribute: `card-id`. */
   cardId?: string;
@@ -20,17 +19,7 @@ interface Props extends Record<string, unknown> {
 }
 
 /**
- * `<kai-confirm>` — a named-intent **approval** card (set via the `data` property):
- * a title + body + a small set of action buttons. Activating an action emits the
- * Card contract's **`action`** verb up a bubbling **`kai-card`** CustomEvent
- * (`{ kind:'action', cardId, action, payload }`) and resolves the card so the same
- * approval can't double-fire. Also emits `ready` on mount, `dismiss` for the
- * optional close affordance, and `error` for a malformed definition (inline error).
- * Routes through a `CardProvider` when present, else the bubbling `kai-card` event.
- * Isolated in Shadow DOM; theme-aware via the shared kit tokens.
- *
- * Exposes instance methods `focus()`/`confirm(actionId?)`/`dismiss()`/`reopen()`
- * that drive the same internal paths as the buttons.
+ * A card that presents an approval and a small set of actions for it.
  */
 defineWebComponent<Props>(
   'kai-confirm',

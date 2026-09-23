@@ -646,6 +646,41 @@ export const DIALOG_PARTS: PartDef[] = [
   { name: 'body', doc: 'The scrolling content region (the default slot).', recipe: 'kai-dialog::part(body) { padding: 1.25rem }' },
 ];
 
+/** Slots of `<kai-lightbox>`. The default slot is the TRIGGER (gated on
+ *  occupancy), so this is the one named region. */
+export const LIGHTBOX_SLOTS: SlotDef[] = [
+  { name: 'content', mode: 'replace', doc: 'The media the modal shows; the default slot is the trigger.' },
+];
+
+/** Styleable `::part`s of `<kai-lightbox>`. The element composes the kit's Solid
+ *  `Lightbox`/`Dialog` inside its own shadow root, so the first three are the parts
+ *  that dialog renders and the fourth is the lightbox's own close button.
+ *  Registered here because the selector a consumer writes is
+ *  `kai-lightbox::part(…)`; documenting them under `kai-dialog` would describe an
+ *  element they never mounted. */
+export const LIGHTBOX_PARTS: PartDef[] = [
+  {
+    name: 'backdrop',
+    doc: 'The full-area scrim behind the zoomed media. Darken, blur or recolor it from outside; it is what dims the page the modal covers.',
+    recipe: 'kai-lightbox::part(backdrop) { background: rgb(0 0 0 / 0.8) }',
+  },
+  {
+    name: 'panel',
+    doc: 'The centered modal panel that shrink-wraps your media (the `85vh`/`90vw` image clamp lives here, not on your markup). Cap its width or round its corners from outside.',
+    recipe: 'kai-lightbox::part(panel) { max-width: 90vw }',
+  },
+  {
+    name: 'body',
+    doc: 'The region holding whatever you put in `slot="content"`. Padding is zeroed by default so the clamp is the viewport rather than viewport-minus-padding; add an inset from outside.',
+    recipe: 'kai-lightbox::part(body) { padding: 0.5rem }',
+  },
+  {
+    name: 'close',
+    doc: 'The close (X) button in the panel\'s top-right corner. On by default; remove it with `show-close="false"` rather than CSS. Recolor, reposition or resize it from outside.',
+    recipe: 'kai-lightbox::part(close) { background: var(--color-background) }',
+  },
+];
+
 /** Styleable `::part`s of `<kai-pane-group>` (the editor group: a tab strip over
  *  the active tab's pane). The per-tab content slots are NAMED DYNAMICALLY by tab
  *  id (`slot="<tab id>"`) plus a default slot, so they are not enumerable here —
@@ -931,6 +966,7 @@ export const WEB_COMPONENT_COMPOSITION: Record<string, WebComponentComposition> 
   'kai-pane-group': { parts: PANE_GROUP_PARTS, children: 'Content shown for every tab. Use it INSTEAD of the per-tab `slot="<tab id>"` seams when you swap the content yourself.' },
   'kai-agent-card': { parts: AGENT_CARD_PARTS },
   'kai-dialog': { slots: DIALOG_SLOTS, parts: DIALOG_PARTS, children: 'The dialog body, between the `header` and `footer` slots.' },
+  'kai-lightbox': { slots: LIGHTBOX_SLOTS, parts: LIGHTBOX_PARTS, children: 'The TRIGGER the modal opens from: plain markup of your own, and optional. With nothing here the element renders no button and you drive it from `show()` or the `open` attribute. The zoomed media is the `content` slot.' },
   'kai-dock': { slots: DOCK_SLOTS, parts: DOCK_PARTS, children: 'The panel body, the same region as `slot="panel"`.' },
   'kai-input': { slots: INPUT_SLOTS, parts: INPUT_PARTS },
   'kai-search': { parts: SEARCH_PARTS },

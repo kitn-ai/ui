@@ -12,8 +12,7 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'An inline helpful / not-helpful rating bar for an assistant message. It owns the whole flow: it asks, optionally collects a category and comment on a not-helpful vote, then confirms with a thank-you, all in place. It does not disappear on a vote (only the close button dismisses it).',
-        'The vote fires `onFeedback` immediately; set `collectDetail` plus `categories` for the detail step (fires `onSubmitDetail`).',
+        'An inline rating bar for an assistant reply.',
       ]),
     },
   },

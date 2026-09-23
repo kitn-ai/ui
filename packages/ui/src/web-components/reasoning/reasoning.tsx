@@ -8,9 +8,9 @@ interface Props extends Record<string, unknown> {
   text: string;
   /** Trigger label. */
   label?: string;
-  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open`
-   *  attribute; the element still self-manages on trigger click + while
-   *  streaming). Set `el.open = true`; listen for `kai-open-change`. */
+  // Shoelace-style: settable and reflected to the `open` attribute, while the element
+  // still self-manages on trigger click and while streaming.
+  /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
   /** Initial open state on mount (uncontrolled seed). */
   defaultOpen?: boolean;
@@ -31,11 +31,8 @@ interface Events {
 }
 
 /**
- * `<kai-reasoning>` — a collapsible reasoning/thinking block that auto-expands
- * while `streaming`. Text via the `text` property; `markdown`/`streaming` flags.
- * Open state is the standard disclosure surface: settable+reflecting `open`,
- * `kai-open-change`, and `show()`/`hide()`/`toggle()` (gated by `disabled`);
- * seed with `defaultOpen`.
+ * A collapsible block of the model's reasoning text. `kai-chain-of-thought` is the
+ * stepped version.
  */
 defineWebComponent<Props, Events>('kai-reasoning', {
   text: '',

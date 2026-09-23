@@ -9,9 +9,7 @@ interface Props extends Record<string, unknown> {
   /** Controlled edit state. `el.editing = true` opens the field; reflected to the
    *  `editing` attribute. */
   editing?: boolean;
-  /** How the read view enters edit mode: `'dblclick'` (default) opens the field on
-   *  a double click, `'click'` on a single click. Reflected to the `edit-trigger`
-   *  attribute. `edit()` and `editing` are unaffected. */
+  /** How the read view enters edit mode: `dblclick` (default) or `click`. Reflects to `edit-trigger`; `edit()` and `editing` are unaffected. */
   editTrigger?: 'dblclick' | 'click';
   /** Placeholder shown while editing / when the value is empty. */
   placeholder?: string;
@@ -26,28 +24,8 @@ interface Events {
   /** Edit was cancelled (Esc); the text is restored. */
   'kai-cancel': Record<string, never>;
 }
-
 /**
- * `<kai-editable-label>` — inline rename, built on `kai-input`. Shows `value` as
- * text; double-click, or a single click when `edit-trigger="click"` (or
- * `el.edit()`, or `editing`), swaps in an autofocused field. Enter or blur commits
- * → `kai-rename` (only when the value changed); Esc cancels → `kai-cancel` (the
- * text is restored).
- *
- * ```html
- * <kai-editable-label value="Project Alpha"></kai-editable-label>
- * <!-- edit-trigger="click" opens the field on one click instead of a double click -->
- * <kai-editable-label value="Project Beta" edit-trigger="click"></kai-editable-label>
- * <script type="module">
- *   import '@kitn.ai/ui/web-components';
- *   const label = document.querySelector('kai-editable-label');
- *   label.addEventListener('kai-rename', (e) => save(e.detail.value));
- *   label.edit(); // open the field programmatically
- * </script>
- * ```
- *
- * Methods: `edit()`, `commit()`, `cancel()`. Restyle via `::part(text)` and
- * `::part(input)`.
+ * A text label that swaps itself for an input field when edited.
  */
 defineWebComponent<Props, Events>('kai-editable-label', {
   value: undefined,

@@ -18,10 +18,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'A select. A real native `<select>` behind `appearance: none`, in the same box as `Input`, with the kit\'s own chevron drawn over it.',
-        '**Native, not a listbox, and that is the design.** A hand-built popup can be made to look identical and cannot be made to behave identically: the native control brings the platform picker on mobile, type-ahead on desktop, form participation and the OS accessibility tree.',
-        'The trade is that the *open dropdown* stays OS chrome — it renders outside the page and no stylesheet reaches it. What the kit does is make it follow the kit\'s light/dark mode rather than the OS\'s. Styling the closed control and leaving the open list to the platform is the whole of the bargain.',
-        'Options are rendered in full: no truncation, no re-ordering, no de-duplication. Everything the component does not own is forwarded to the `<select>` — `id`, `name`, `required`, `multiple`, `size`, `aria-*`, any `data-*` hook and the DOM events.',
+        'A native select styled to match the other input controls.',
       ]),
     },
   },
@@ -36,7 +33,7 @@ const meta = {
     name: { control: 'text', description: 'Form-control name. This is what a native form submits.' },
     class: { control: 'text', description: 'Extra classes for the `<select>`, merged with the kit box rather than replacing it.' },
     containerClass: { control: 'text', description: 'Extra classes for the positioning wrapper that holds the chevron.' },
-    'aria-label': { control: 'text', description: 'Accessible name. A select with no visible `<label for>` needs one, or it announces as an unnamed control.' },
+    'aria-label': { control: 'text', description: 'Accessible name, for a select with no visible label.' },
     onChange: { action: 'change', description: 'Native change event. Read `e.currentTarget.value`, or `selectedOptions` when `multiple`.', table: { category: 'Events' } },
   },
   args: {

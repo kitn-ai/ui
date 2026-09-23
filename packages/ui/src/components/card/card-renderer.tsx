@@ -34,48 +34,31 @@ export interface CardRendererProps {
   envelope: CardEnvelope;
   /** Add/override type→component entries (merged over the built-ins). */
   types?: CardComponentMap;
-  /**
-   * JSON Schemas for the card types this app renders, keyed by `envelope.type`.
-   * `createCardRegistry(...).validationSchemas` is exactly this shape.
-   *
-   * The companion of `types`, and the half that was missing: `types` says WHAT
-   * draws a `pricing-table`, `schemas` says what a VALID one looks like. Without it
-   * the kit checks its own seven built-ins and leaves the developer's own card —
-   * the one the app actually cares about — as the only unvalidated thing on screen.
-   *
-   * A schema given here WINS over a built-in of the same name, matching
-   * `mergeCardComponents`, where the consumer's entry is spread over ours.
-   */
+  // The companion of `types`: `types` says what DRAWS a `pricing-table`, `schemas` says
+  // what a VALID one looks like. `createCardRegistry(...).validationSchemas` is exactly
+  // this shape. Without it the kit validates its own seven built-ins and leaves the
+  // consumer's own card the only unchecked thing on screen. A schema here WINS over a
+  // built-in of the same name, matching `mergeCardComponents`, where the consumer's
+  // entry is spread over ours.
+  /** Card-type JSON Schemas keyed by `envelope.type`. */
   schemas?: CardSchemaMap;
-  /**
-   * Validate `envelope.data` against the built-in schema for `envelope.type` before
-   * rendering. Default `true`.
-   *
-   * ON IN PRODUCTION TOO, DELIBERATELY. The obvious alternative, stripping the check
-   * from production builds, inverts the point: a model emitting a bad shape is a
-   * production failure mode, so stripping it means the developer's USERS get the
-   * broken card while the developer's laptop looks fine. The cost is the projected
-   * schema data for all seven card types, measured by building this package twice
-   * (once with the projection stubbed to `{}`) rather than estimated: +834 B gzip on
-   * `dist/index.js` and +775 B gzip on the web components register bundle. That is below
-   * the noise floor of a package that already ships a Solid runtime and `marked`.
-   *
-   * Set `false` to opt out. A type with no schema at all — no built-in, and none
-   * supplied through `schemas` — is never validated either way.
-   */
+  // ON IN PRODUCTION TOO, DELIBERATELY. The obvious alternative, stripping the check from
+  // production builds, inverts the point: a model emitting a bad shape is a production
+  // failure mode, so stripping it means the developer's USERS get the broken card while
+  // the developer's laptop looks fine. The cost is the projected schema data for all
+  // seven card types, measured by building this package twice (once with the projection
+  // stubbed to `{}`) rather than estimated: +834 B gzip on `dist/index.js` and +775 B
+  // gzip on the web components register bundle, below the noise floor of a package that
+  // already ships a Solid runtime and `marked`. A type with no schema at all -- no
+  // built-in, and none supplied through `schemas` -- is never validated either way.
+  /** Validate `envelope.data` against the schema for `envelope.type` before rendering. On
+   *  by default. */
   validateCards?: boolean;
-  /**
-   * The custom-element host node to emit off when no `CardProvider` is above this
-   * renderer: events leave as the bubbling, composed `kai-card` CustomEvent
-   * (`emitCardEvent`), so `listenForCardEvents(element)` — or a plain
-   * `addEventListener('kai-card', …)` on the element — receives them.
-   *
-   * This is what makes cards INSIDE `<kai-chat>`/`<kai-message>`/`<kai-thread>`
-   * interactive: those facades pass their own host element down here, and
-   * with neither this nor a `CardProvider` every emit — ready/action/submit/
-   * dismiss/reopen and the contract `error` — used to be silently discarded.
-   * An ambient `CardProvider` still wins when present.
-   */
+  // Makes cards INSIDE `<kai-chat>`/`<kai-message>`/`<kai-thread>` interactive: those
+  // facades pass their own host element, and with neither this nor a `CardProvider`
+  // every emit -- ready/action/submit/dismiss/reopen and the contract `error` -- used to
+  // be silently discarded. An ambient `CardProvider` still wins when present.
+  /** Host node card events bubble off when no `CardProvider` is above this renderer. */
   hostElement?: HTMLElement;
 }
 

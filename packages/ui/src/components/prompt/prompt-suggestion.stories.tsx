@@ -9,9 +9,11 @@ const meta = {
   tags: ['autodocs'],
   parameters: {
     layout: 'padded',
+    // A rounded pill by default; `block` makes a full-width list row, and `highlight` emphasises a
+    // matched substring in the list layout, for type-ahead filtering.
     docs: {
       description: componentDescription([
-        'A clickable starter/follow-up prompt. Text goes in children; `onClick` submits it. Renders as a rounded pill by default; `block` makes a full-width list row, and `highlight` emphasizes a matched substring (forcing the list-row layout) for type-ahead filtering.',
+        'A clickable starter prompt for an empty conversation.',
       ]),
       controls: { exclude: ['use:eventListener'] },
     },
@@ -44,7 +46,7 @@ const meta = {
     },
     list: {
       control: 'boolean',
-      description: 'Render as a full-width "Ideas for you" row: a leading icon, a left-aligned label, and a hover background. Like `block`, but keeps the leading icon. Ignored in highlight mode.',
+      description: 'Render as a full-width list row with a leading icon, unlike `block`. Ignored in highlight mode.',
       table: { defaultValue: { summary: 'false' } },
     },
     icon: {

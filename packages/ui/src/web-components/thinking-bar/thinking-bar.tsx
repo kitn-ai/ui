@@ -15,11 +15,10 @@ interface Events {
   /** The "stop / answer now" affordance was clicked. */
   'kai-stop': void;
 }
-
+// A pure leaf: config via attributes and the single interaction (`stop`) comes back as an event.
+// The batteries-included `<kai-chat>` does not surface it; it renders its own loading state.
 /**
- * `<kai-thinking-bar>` — a pure leaf element: an animated "thinking" indicator
- * (one of the primitives the batteries-included `<kai-chat>` does NOT surface).
- * Config via attributes, the only interaction (`stop`) comes back as an event.
+ * An animated indicator that the model is still working.
  */
 defineWebComponent<Props, Events>('kai-thinking-bar', {
   text: 'Thinking',

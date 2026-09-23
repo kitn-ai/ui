@@ -16,7 +16,11 @@ packages/ui/scripts/block-driver/pages/generated/
 .superpowers/
 
 # AI project config
-.pi/
+# Local Pi state (sessions, settings) stays out; agent DEFINITIONS are shared, the same way
+# .claude/ is, so a reviewer or specialist travels with the repo instead of one checkout.
+.pi/*
+!.pi/agents/
+!.pi/agents/**
 
 # Throwaway agent git worktrees (full repo copies)
 .claude/worktrees/

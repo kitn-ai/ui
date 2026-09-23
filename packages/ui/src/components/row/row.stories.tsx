@@ -5,18 +5,12 @@ import { RowGroup } from './row-group';
 import { renderIcon } from '../icon/icon';
 import { componentDescription } from '../../stories/docs/web-component-controls';
 
-/**
- * The generic mobile list row (P-4): leading region, title + optional
- * subtitle, trailing region, optional chevron, pressable when interactive.
- * Stub-data story-first artifact for the blocks-and-parts round: the three
- * widget home-tab row shapes plus a settings-style row, light and dark.
- *
- * `RowGroup` is the frame around a list of them, and it is where the geometry
- * comes from: a hairline between adjacent rows, the first rounded at the top
- * only, the last at the bottom only. One row in a group is a framed card. The
- * frame has its own page (`Components/RowGroup`) — the stories here use
- * it, and show the row shapes it frames.
- */
+// `RowGroup` is the frame and it owns the geometry: a hairline between adjacent rows,
+// the first rounded at the top only and the last at the bottom only. One row in a
+// group is a framed card.
+//
+// Two ways of framing rows: a settings screen is ONE group with N rows; a home tab is
+// ONE GROUP PER ROW with space between them, where rounding every corner is correct.
 const meta = {
   title: 'Components/Row',
   component: Row,
@@ -25,8 +19,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'A generic list row: leading region, title with optional subtitle, trailing region, optional chevron affordance. Pressable with real button semantics via `onActivate`, or a real anchor via a safe `href`; with neither it is a plain display row. Covers the widget home-tab shapes (recent conversation, CTA with trailing arrow, help link) and general settings screens alike.',
-        'These stories frame the rows in `RowGroup` (its own page: `Components/RowGroup`), which is what decides the divider and the per-position corners. The two ways of using it are visible across the stories below: a settings screen is ONE group with N rows, a home tab is ONE GROUP PER ROW with space between them, where rounding every corner is correct.',
+        'A list row: a title, with room before and after it for an icon or a value.',
       ]),
       controls: { exclude: ['use:eventListener'] },
     },

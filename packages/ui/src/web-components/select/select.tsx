@@ -9,14 +9,11 @@ interface Props extends Record<string, unknown> {
   /** The choices, in display order. Set as a JS PROPERTY (array), never an attribute.
    *  Rendered in full: the kit never truncates, re-orders or de-duplicates them. */
   options: KaiSelectOption[];
-  /** Controlled selected value. Settable and reflected to the `value` attribute.
-   *  `el.value = 'high'` drives it; choosing an option updates it and fires
-   *  `kai-change`. Read `el.value` for live state; for a `multiple` select read
-   *  `el.values` instead. */
+  /** Controlled selected value, reflected to the `value` attribute. For a `multiple` select read `el.values`. */
   value?: string;
-  /** Text for a leading, disabled, empty option: the "nothing chosen yet" row.
-   *  Omitted means no such row at all; there is no default wording, because inventing
-   *  one would put words in your UI. */
+  // Omitted means no such row at all; there is no default wording, because inventing one
+  // would put words in your UI.
+  /** Text for a leading, disabled, empty option (the "nothing chosen yet" row). */
   placeholder?: string;
   /** Allow more than one selection. Turns the control into the platform's list box, so
    *  the kit's chevron is not drawn. */
@@ -36,46 +33,19 @@ interface Props extends Record<string, unknown> {
 
 /** Events fired by `<kai-select>`. */
 interface Events {
-  /** A choice was made. `value` is the first selected option (empty when nothing is
-   *  selected); `values` is every selected option, which is what a `multiple` select
-   *  needs. Both are always present, so neither shape silently loses the other. */
+  // `values` is every selected option, which is what a `multiple` select needs. Both are
+  // always present, so neither shape silently loses the other.
+  /** A choice was made. `value` is the first selected option, empty when nothing is selected. */
   'kai-change': { value: string; values: string[] };
 }
-
+// A real native `<select>`, deliberately not a hand-built listbox: that is what keeps the
+// platform picker on mobile, type-ahead on desktop, form participation and the OS
+// accessibility tree. The dropdown list itself stays OS chrome (it renders outside the page and
+// no stylesheet reaches it); all this element does is make it follow the kit's light/dark mode
+// rather than the OS's. `multiple` therefore turns it into the platform list box and the kit's
+// chevron is not drawn.
 /**
- * `<kai-select>` — a select over a REAL native `<select>`, in the kit's field box with
- * the kit's own chevron. Native, not a hand-built listbox: that is what keeps the
- * platform picker on mobile, type-ahead on desktop, form participation and the OS
- * accessibility tree.
- *
- * The dropdown list itself stays OS chrome — it renders outside the page and no
- * stylesheet reaches it. What the element does do is make it follow the kit's
- * light/dark mode rather than the OS's.
- *
- * Feed it `options` (a JS-property array of `{ value, label?, disabled? }`), drive and
- * read the selection with the `value` property (settable + reflected to the `value`
- * attribute, so `:host([value])` and `el.value` see live state), and listen for
- * `kai-change`.
- *
- * Re-rendering follows the kit's reactivity contract: hand it a NEW array reference,
- * and a new object for any option whose content changed — the list is
- * reference-keyed, so mutating an option in place changes nothing on screen.
- *
- * ```html
- * <kai-select value="high" placeholder="Choose a severity…" label="Severity"></kai-select>
- * <script type="module">
- *   import '@kitn.ai/ui/web-components';
- *   const select = document.querySelector('kai-select');
- *   // ARRAY prop — a JS property, never an attribute.
- *   select.options = [
- *     { value: 'low', label: 'Low' },
- *     { value: 'high', label: 'High priority' },
- *     { value: 'legacy', label: 'Legacy', disabled: true },
- *   ];
- *   select.addEventListener('kai-change', (e) => console.log(e.detail.value, e.detail.values));
- *   select.value = 'low';   // drive it (no kai-change — the host already knows)
- * </script>
- * ```
+ * A select control built on a real native `<select>` element.
  */
 defineWebComponent<Props, Events>('kai-select', {
   options: [],

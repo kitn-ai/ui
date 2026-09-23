@@ -3,13 +3,11 @@ import { ToastRegion, type ToastDismissReason, type ToastPosition, type ToastApp
 import { toast as toastStore, type ToastItem } from '../../primitives/toast-store';
 
 interface Props extends Record<string, unknown> {
-  /** The toasts to render. Newest is shown on top. Set as a JS property (array);
-   *  pass a new array reference to update. Omit for an empty region, which is
-   *  the normal resting state and how the imperative `toast()` API starts.
-   *  Note the handover: the first `toast()` call ADOPTS a region you placed in
-   *  markup (no second region mounts) and binds the imperative store to this
-   *  property, replacing any array you set. Drive a region as data OR via
-   *  `toast()`, not both at once. */
+  // Note the handover: the first `toast()` call ADOPTS a region you placed in markup (no
+  // second region mounts) and binds the imperative store to this property, replacing any
+  // array you set. Drive a region as data OR via `toast()`, not both at once. Omitted is
+  // the normal resting state, and how the imperative `toast()` API starts.
+  /** The toasts to render, newest on top. JS property; a new array reference updates it. */
   toasts?: ToastItem[];
   /** Stack anchor: `'top-center'` (default), `'top-right'`, `'bottom-center'`, … */
   position?: ToastPosition;
@@ -18,9 +16,7 @@ interface Props extends Record<string, unknown> {
   /** Stacking: 'expanded' (default, full column) | 'collapsed' (Sonner-style
    *  pile that expands on hover/focus). Attribute: stack. */
   stack?: 'expanded' | 'collapsed';
-  /** Default appearance for this region's toasts: `'pill'` (default, compact) |
-   *  `'card'` (richer, with a description line). A per-toast `appearance` wins.
-   *  Attribute: `appearance`. */
+  /** Default appearance for this region's toasts: `pill` (default, compact) or `card` (richer). A per-toast `appearance` wins. */
   appearance?: ToastAppearance;
   /** Default high-contrast inverse treatment for this region's toasts. A per-toast
    *  `inverse` wins. Off by default. Attribute: `inverse`. */
@@ -36,33 +32,16 @@ interface Events {
   /** A toast's action button was pressed. */
   'kai-action': { id: string; label: string };
 }
-
+// The store lazily mounts ONE region on `document.body`; `toast()` ADOPTS the first connected
+// `<kai-toast-region>` instead of mounting a second, and creates its own only when none exists.
+// Adoption keeps the authored attributes (position/stack/appearance) but binds the imperative
+// store to `toasts`, replacing an array driven as data, so within one app either own the array
+// or call `toast()`, never both. With two or more regions placed the first in document order is
+// adopted and a one-time console.warn flags the ambiguity.
+// `--kai-toast-z` (default 100) is the consumer knob that moves the layer; it is not in the
+// slots registry, so this comment is the only source-tree copy.
 /**
- * `<kai-toast-region>` — the viewport overlay that renders the toast stack.
- *
- * It is the substrate behind the imperative `toast()` API: the store lazily
- * mounts ONE of these on `document.body` and binds the list to `toasts`. It is
- * also usable declaratively — set `el.toasts = [...]` (a JS property, never an
- * attribute) and listen for `kai-dismiss` / `kai-action`.
- *
- * The two modes meet gracefully: `toast()` ADOPTS the first connected
- * `<kai-toast-region>` already in the document instead of mounting a second
- * one, and creates its own on `document.body` only when none exists. Adoption
- * keeps your authored attributes (position/stack/appearance) but binds the
- * imperative store to `toasts`, replacing an array you were driving as data —
- * so within one app, either own the array or call `toast()`, not both. With
- * two or more regions placed, the first in document order is adopted and a
- * one-time console.warn flags the ambiguity.
- *
- * Because it is a real `kai-*` element it carries its own shadow root + the
- * shared kit stylesheet, so it is viewport-positioned AND kit-styled.
- *
- * Stack-level defaults are also declarative: `<kai-toast-region appearance="card"
- * inverse>` makes every toast that doesn't set its own `appearance`/`inverse`
- * render as an inverted card. A per-toast value always wins.
- *
- * Your app chrome must stay below the toast layer; set `--kai-toast-z`
- * (default 100) on the host to move the layer.
+ * The viewport overlay that stacks toasts.
  */
 defineWebComponent<Props, Events>('kai-toast-region', {
   toasts: [],

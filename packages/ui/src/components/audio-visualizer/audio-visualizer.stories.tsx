@@ -34,9 +34,7 @@ const meta = {
         exclude: ['use:eventListener', 'stream', 'audioElement', 'shader', 'bands'],
       },
       description: componentDescription([
-        'Renders live audio as bars, a grid, a ring, a wave, or a glowing aurora. Set `stream` or `audioElement` to tap real audio, or `bands` to drive it yourself.',
-        'With no audio source at all it animates from `state` alone: idle, connecting, listening, thinking, speaking, disconnected (connection down -- the dead, flat look, matching LiveKit\'s). That is what drives it when the audio cannot be tapped, like browser speech synthesis, which exposes no audio node.',
-        '`wave`, `aurora`, and `custom` render through WebGL behind a dynamic import, and fall back to bars if that fails or WebGL is unavailable. Each look gets its own story across all six states, embedded below and in the sidebar: a shader canvas acquires its GL context when it scrolls into view and releases it when it leaves, so a page full of them stays well under the browser\'s concurrent context limit however far you scroll. Expect a frame or two of blank canvas as one scrolls in. The Bar, Grid, and Radial stories each cover every state for that DOM variant; Microphone is the real thing -- click-to-enable, since Storybook cannot answer a permission prompt -- and MicrophoneAll (sidebar only) drives all six looks from the same live voice at once.',
+        'Animates live audio, or an agent state, as a moving visual.',
       ]),
     },
   },
@@ -63,7 +61,9 @@ const meta = {
     theme: {
       control: 'select',
       options: ['auto', 'light', 'dark'],
-      description: 'Explicit `light`/`dark` wins; `auto` follows `prefers-color-scheme`. Only aurora reads this today, for its color pipeline -- see its story. Bar, grid, and radial already adapt through CSS `currentColor` instead; wave and custom accept the prop but do not read it yet, always drawing the shader\'s fixed default color unless `color` overrides it.',
+      // Bar, grid and radial adapt through CSS `currentColor` instead; wave and custom accept the
+      // prop but always draw the shader's fixed default color unless `color` overrides it.
+      description: 'Explicit `light`/`dark` wins; `auto` follows `prefers-color-scheme`. Only aurora renders differently.',
       table: { defaultValue: { summary: 'auto' } },
     },
     barCount: {
@@ -102,8 +102,11 @@ const meta = {
     },
     animateWhenNotVisible: {
       control: 'boolean',
+      // Off, a canvas scrolled out of view stops drawing and releases its WebGL context, taking it
+      // back on the way in; on, the context is held for as long as the tile is mounted. A tile scrolled
+      // off screen with this on and off is the way to feel the difference.
       description:
-        'Shader variants only. Off by default: a canvas scrolled out of view stops drawing and releases its WebGL context, taking it back on the way in. Turn it on to keep a visualizer running unseen, at the cost of holding a context for as long as it is mounted. Never overrides `prefers-reduced-motion`. Scroll a tile off screen with this on and off to feel the difference.',
+        'Shader variants only. Keep drawing while scrolled out of view, holding a WebGL context. Never overrides `prefers-reduced-motion`.',
       table: { defaultValue: { summary: 'false' } },
     },
     label: {

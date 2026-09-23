@@ -3,13 +3,13 @@ import { FileUpload, FileUploadTrigger } from '../../components/file/file-upload
 import { Upload } from 'lucide-solid';
 
 interface Props extends Record<string, unknown> {
-  /** Allow selecting multiple files (default true). */
+  /** Allow picking more than one file. Default true. */
   multiple?: boolean;
-  /** `accept` attribute for the file picker (e.g. `image/*`). */
+  /** `accept` for the file picker, e.g. `image/*`. */
   accept?: string;
-  /** Disable the dropzone: no clicking, no drag-and-drop. */
+  /** No clicking and no drag-and-drop. */
   disabled?: boolean;
-  /** Default dropzone label (overridable via the default slot). */
+  /** Default dropzone label; replace it with your own markup via the default slot. */
   label?: string;
 }
 
@@ -20,9 +20,7 @@ interface Events {
 }
 
 /**
- * `<kai-file-upload>` — a click/drag-drop dropzone. Emits `filesadded`. The
- * default dropzone label can be replaced with your own markup via the default
- * `<slot>` (a "Route 2" custom-content slot).
+ * A dropzone for picking files or dropping them in.
  */
 defineWebComponent<Props, Events>('kai-file-upload', {
   multiple: true,

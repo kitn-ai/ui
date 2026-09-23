@@ -11,7 +11,7 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'A pulsing loading placeholder with no shape of its own: size and rounding come from the `class` you pass (e.g. `class="h-4 w-3/4"`). Compose several to mirror the layout they stand in for.',
+        'A pulsing placeholder that stands in for content while it loads.',
       ]),
     },
   },

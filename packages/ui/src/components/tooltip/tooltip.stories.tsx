@@ -11,7 +11,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'A small floating label on hover/focus of its trigger. Wrap a single interactive `children` element (it becomes the trigger) and set `content` to the hint text.',
+        'A small floating label that explains its trigger on hover or keyboard focus.',
       ]),
       controls: { exclude: ['use:eventListener'] },
     },
@@ -33,10 +33,6 @@ const meta = {
   args: {
     content: 'This is a tooltip',
   },
-  // The trigger is built HERE, not passed through `args`. A JSX element in `args` cannot be
-  // serialized across Storybook's manager/preview boundary, so the Docs page's primary preview
-  // re-renders from empty args and shows an empty canvas while the story itself (which runs with
-  // the live args) looks right. Keep everything in `args` serializable: scalars, arrays, `fn()`.
   render: (args) => (
     <Tooltip content={args.content} class={args.class}>
       <Button variant="outline">Hover me</Button>

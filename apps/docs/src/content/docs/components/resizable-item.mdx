@@ -1,6 +1,6 @@
 ---
 title: Resizable Item
-description: A passive panel slot inside a resizable layout — carries size, min, max, locked, and hidden attributes that the parent kai-resizable reads to lay out and constrain each panel.
+description: One panel of a resizable layout.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -14,7 +14,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kai-tag-sub">kai-resizable-item</p>
 
-<p class="kai-lede">A passive panel slot that carries layout config for its enclosing `<kai-resizable>` — set `size`, `min`, `max`, `locked`, or `hidden` as attributes and the parent handles the rest.</p>
+<p class="kai-lede">Carries that panel's size and limits, so the layout around it needs no extra code.</p>
 
 <Facts items={['Shadow DOM', 'All-attribute API', 'px or % sizes', 'Lockable panel', 'Hideable with reflow']} />
 
@@ -23,7 +23,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 <Playground client:only="solid" tag="kai-resizable-item" />
 
 <Aside type="tip" title="When to use">
-Use `<kai-resizable-item>` as a direct child of `<kai-resizable>` to define each panel. Give panels with a natural default width an explicit `size` (e.g. a sidebar at `"260px"`); leave `size` off the main content area so it fills remaining space. Use `locked` for chrome panels that must never resize, and toggle `hidden` to collapse a panel on demand.
+A direct child of `<kai-resizable>`, one per panel. Give a panel with a natural default width an explicit `size`; leave `size` off the main area so it fills what remains. `locked` for chrome panels.
 </Aside>
 
 ## Usage
@@ -59,19 +59,19 @@ Resize events (`kai-change`, `kai-maximize-change`) fire on the parent `<kai-res
 
 ### Flexible Panel
 
-No `size` — stretches to fill whatever space siblings leave. Right choice for the primary content area.
+No `size`, so it stretches to fill what siblings leave. Right choice for the primary content area.
 
 <Example client:visible tag="kai-resizable-item" data="flexible" />
 
 ### Sized Panel
 
-`size="260px"` sets the initial width. The user can still drag to resize unless `locked` is also set.
+`size` sets the initial width; the user can still drag unless `locked` is also set.
 
 <Example client:visible tag="kai-resizable-item" config={{ size: '260px', min: '140px', max: '50%' }} data="sized" />
 
 ### Locked Panel
 
-`locked` fixes the panel at its `size` — adjacent dividers become non-draggable. Use for nav sidebars and tool panels.
+`locked` fixes the panel at its `size` and turns adjacent dividers into non-draggable separators.
 
 <Example client:visible tag="kai-resizable-item" config={{ size: '240px', locked: true }} data="locked" />
 

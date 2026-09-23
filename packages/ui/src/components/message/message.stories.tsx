@@ -14,8 +14,7 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'A message row for any chat turn, composing an optional `MessageAvatar`, a `MessageContent` body (set `markdown` to render markdown), and an optional `MessageActions` toolbar.',
-        'Layout is driven by `class`: a bubble plus right alignment for user turns; an avatar plus transparent content for assistant turns.',
+        'Displays one chat turn, with its reasoning, tool calls and actions.',
       ]),
     },
   },

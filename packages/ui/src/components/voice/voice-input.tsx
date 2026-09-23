@@ -21,9 +21,9 @@ export interface VoiceInputProps {
   onTranscription: (text: string) => void;
   disabled?: boolean;
   class?: string;
-  /** Host supplied a `transcribe` callback. When true the MediaRecorder →
-   *  onTranscribe path runs. When false the component prefers native
-   *  SpeechRecognition (capable browsers), falling back to record-only. */
+  // True when the host supplied the `onTranscribe` callback. When false the component
+  // prefers native SpeechRecognition (capable browsers), falling back to record-only.
+  /** Whether the host supplied a transcription callback. */
   hasTranscribe?: boolean;
   /** BCP-47 language tag for native recognition (e.g. `en-US`). */
   lang?: string;
@@ -31,16 +31,16 @@ export interface VoiceInputProps {
   interim?: boolean;
   /** Live partial transcript from native recognition (when `interim`). */
   onInterim?: (text: string) => void;
-  /** Fires whenever recording starts or stops. Guarded against the spurious
-   *  initial `false` — only true transitions emit (the facade maps this to
-   *  kai-recording-change). */
+  // Guarded against the spurious initial `false`: only true transitions emit. The facade
+  // maps this to `kai-recording-change`.
+  /** Fires whenever recording starts or stops. */
   onRecordingChange?: (recording: boolean) => void;
   /** Receive the imperative controller once mounted. The `<kai-voice-input>`
    *  facade forwards these as element methods (start/stop). */
   controllerRef?: (controller: VoiceInputController) => void;
-  /** A recognition session failed or produced nothing. `error` is the platform
-   *  error code, the thrown exception's name, or `no-result` when the session
-   *  ended with no error and no text. The facade maps this to kai-voice-error. */
+  // `error` is the platform error code, the thrown exception's name, or `no-result` when
+  // the session ended with no error and no text. The facade maps this to `kai-voice-error`.
+  /** A recognition session failed or produced nothing. */
   onError?: (detail: { source: 'recognition'; error: string; message: string }) => void;
 }
 

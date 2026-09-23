@@ -1,6 +1,6 @@
 ---
 title: File Upload
-description: A click-or-drag dropzone that fires a single event with the selected files — ready to drop into any framework or plain HTML.
+description: A file dropzone.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -15,7 +15,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kai-tag-sub">kai-file-upload</p>
 
-<p class="kai-lede">A click-or-drag dropzone that fires one event with the selected files — constrain it to a file type, limit to a single pick, or lock it entirely with a single attribute.</p>
+<p class="kai-lede">Accepts a click or a drag and hands you the files that were chosen.</p>
 
 <Facts items={['Shadow DOM', '1 event', 'Click or drag-and-drop', 'Filterable by file type', 'Customisable label']} />
 
@@ -24,7 +24,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 <Playground client:only="solid" tag="kai-file-upload" />
 
 <Aside type="tip" title="When to use">
-Reach for `<kai-file-upload>` for a standalone dropzone — above a prompt input, in a dedicated upload panel, or anywhere you need a zero-dependency drag-and-drop target. In SolidJS, compose the `FileUpload` and `FileUploadTrigger` primitives directly for finer control. The element is `display: block` and fills its container width; set a `max-width` on the parent to constrain the dropzone.
+A standalone dropzone: above a prompt input, in an upload panel, or anywhere you need a drag-and-drop target. It fills its container width, so constrain the dropzone with a `max-width` on the parent.
 </Aside>
 
 ## Usage
@@ -48,25 +48,17 @@ All four props are plain HTML attributes — nothing to set in JavaScript:
 
 ### Default
 
-Accepts any file type; click or drag to trigger `kai-files-added`.
-
 <Example client:visible tag="kai-file-upload" />
 
 ### Images Only
-
-`accept="image/*"` and `multiple={false}` — useful for avatar or cover-photo uploads.
 
 <Example client:visible tag="kai-file-upload" config={{ accept: 'image/*', multiple: false, label: 'Click or drop an image' }} />
 
 ### Custom Label
 
-Override the default copy with `label` when context makes it too generic.
-
 <Example client:visible tag="kai-file-upload" config={{ label: 'Drop your PDF or DOCX here to import' }} />
 
 ### Disabled
-
-Lock the dropzone while an upload is in progress or the user lacks permissions.
 
 <Example client:visible tag="kai-file-upload" config={{ disabled: true, label: 'Uploads are disabled' }} />
 

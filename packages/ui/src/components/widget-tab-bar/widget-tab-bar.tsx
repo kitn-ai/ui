@@ -3,9 +3,7 @@ import { TAB_BAR_CLASS, tabBarTabClass, tabBarItemAccessibleName, TabBarItemCont
 export interface WidgetTabBarProps {
   active: 'home' | 'messages';
   onChange: (tab: 'home' | 'messages') => void;
-  /** Whether the Messages tab has unread activity. Reaches BOTH the visible
-   *  dot and the tab's accessible name (`aria-label`) — a dot alone is
-   *  invisible to assistive tech, the #336 lesson this test pins. */
+  /** Whether the Messages tab has unread activity; also adds the fact to the tab's accessible name. */
   unread?: boolean;
   homeLabel?: string;
   messagesLabel?: string;

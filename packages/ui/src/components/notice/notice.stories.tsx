@@ -11,10 +11,12 @@ const meta = {
   tags: ['autodocs'],
   parameters: {
     layout: 'padded',
+    // `severity` picks the hue and the default glyph, and with it the a11y role: `alert` for an
+    // error, `status` otherwise.
     docs: {
       controls: { exclude: ['iconSlot', 'children', 'action', 'class', 'use:eventListener'] },
       description: componentDescription([
-        'An inline notice / alert: a leading severity icon, a message, an optional trailing `action`, and an optional dismiss. `severity` picks the hue and default glyph. Carries the right a11y role (`alert` for errors, `status` otherwise).',
+        'Displays a short message inline, styled by its severity.',
       ]),
     },
   },

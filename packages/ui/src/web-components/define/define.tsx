@@ -51,71 +51,55 @@ function createDarkMode(getTheme: () => string | undefined) {
 export interface WebComponentContext<E = Record<string, unknown>> {
   /** The custom-element host node. */
   element: HTMLElement;
-  /** Fire a non-bubbling, non-composed CustomEvent off the host. Consumers
-   *  listen directly on the element (`el.addEventListener(...)`). Typed by the
-   *  element's event map `E`. */
+  /** Fire a non-bubbling, non-composed CustomEvent off the host, typed by the element's event map `E`. */
   dispatch: <K extends keyof E & string>(type: K, detail?: E[K]) => void;
-  /**
-   * Resolve a boolean flag from a prop the way HTML authors expect.
-   *
-   * `component-register` parses a *bare* boolean attribute (`<el removable>`) to
-   * `undefined`, not `true` — so a facade can't rely on the prop value alone.
-   * `flag('removable')` returns ON when the property is `true`, OR when the
-   * matching attribute is present and not explicitly `="false"`. So all of
-   * `<el removable>`, `<el removable="true">`, and `el.removable = true` turn it
-   * on; `<el removable="false">`, absent, and `el.removable = false` turn it off.
-   *
-   * `name` is the camelCase prop name; the matching kebab attribute is derived.
-   */
+  // `component-register` parses a *bare* boolean attribute (`<el removable>`) to
+  // `undefined`, not `true`, so a facade cannot rely on the prop value alone.
+  // `flag('removable')` returns ON when the property is `true`, OR when the matching
+  // attribute is present and not explicitly `="false"`. So all of `<el removable>`,
+  // `<el removable="true">` and `el.removable = true` turn it on; `<el removable="false">`,
+  // absent, and `el.removable = false` turn it off. `name` is the camelCase prop name;
+  // the matching kebab attribute is derived.
+  /** Resolve a boolean flag the way HTML authors expect: bare attribute, `="true"` and `prop = true` are ON. */
   flag: (name: string) => boolean;
-  /**
-   * Expose imperative methods on the host element instance — the input half of a
-   * component's interaction surface (`el.focus()`, `el.clear()`, `el.scrollToBottom()`,
-   * …), the counterpart to the events `dispatch` fires. Call once from the facade
-   * with closures over its internal state/refs; each entry is assigned to the host,
-   * so a consumer calls it directly: `document.querySelector('kai-prompt-input').focus()`.
-   * Overriding a native method name (e.g. `focus`) shadows it on the instance so it
-   * can target the right control inside the shadow root (the WebAwesome/Shoelace
-   * convention). Methods are attached when the facade renders (on element upgrade).
-   */
+  // The input half of a component's interaction surface (`el.focus()`, `el.clear()`,
+  // `el.scrollToBottom()`, ...), the counterpart to the events `dispatch` fires. Call
+  // once from the facade with closures over its internal state/refs; each entry is
+  // assigned to the host, so a consumer calls it directly:
+  // `document.querySelector('kai-prompt-input').focus()`. Overriding a native method name
+  // (e.g. `focus`) shadows it on the instance so it can target the right control inside
+  // the shadow root (the WebAwesome/Shoelace convention). Methods are attached when the
+  // facade renders (on element upgrade).
+  /** Expose imperative methods on the host element (`el.focus()`), the input half of the interaction surface. */
   expose: (methods: Record<string, (...args: never[]) => unknown>) => void;
-  /**
-   * Reflect a boolean prop to its host attribute AND make that prop read back what
-   * was set. Use this instead of hand-rolling
-   * `createEffect(() => element.toggleAttribute('x', flag('x')))`.
-   *
-   * WHY IT IS ONE CALL AND NOT TWO. The reflection is what BREAKS the read-back, so
-   * the fix has to be attached to it or it gets forgotten — and it was, three times.
-   * `toggleAttribute(name, true)` sets the attribute to the EMPTY STRING;
-   * component-register's `attributeChangedCallback` then writes the prop back as
-   * `this[name] = parseAttributeValue("")`, and `parseAttributeValue` returns
-   * `undefined` for the empty string. So a reflected flag became write-only:
-   * `el.loading = true` left `el.loading === undefined` while `[loading]` was on the
-   * host. The element kept BEHAVING correctly, because `flag()` reads the attribute —
-   * which is precisely why nobody noticed until a consumer tried to read the property
-   * back (findings G-05).
-   *
-   * What this installs is an instance-level wrapper around the accessor
-   * component-register already created, coercing every incoming value through the
-   * same `flag()` policy (`resolveFlag`) — so the `undefined` write-back resolves to
-   * the attribute that caused it, and the property and the attribute can no longer
-   * disagree. It delegates to the underlying setter, so reactivity is untouched.
-   *
-   * `source` overrides where the ON/OFF value comes from, for an element whose truth
-   * is an internal controller rather than the prop (see `wireDisclosure`). Returning
-   * `undefined` from it means "not ready, leave the attribute alone".
-   */
+  // WHY IT IS ONE CALL AND NOT TWO. The reflection is what BREAKS the read-back, so the
+  // fix has to be attached to it or it gets forgotten -- and it was, three times.
+  // `toggleAttribute(name, true)` sets the attribute to the EMPTY STRING;
+  // component-register's `attributeChangedCallback` then writes the prop back as
+  // `this[name] = parseAttributeValue("")`, and `parseAttributeValue` returns `undefined`
+  // for the empty string. So a reflected flag became write-only: `el.loading = true` left
+  // `el.loading === undefined` while `[loading]` was on the host. The element kept
+  // BEHAVING correctly, because `flag()` reads the attribute -- which is precisely why
+  // nobody noticed until a consumer tried to read the property back (findings G-05).
+  //
+  // What this installs is an instance-level wrapper around the accessor
+  // component-register already created, coercing every incoming value through the same
+  // `flag()` policy (`resolveFlag`) -- so the `undefined` write-back resolves to the
+  // attribute that caused it, and the property and the attribute can no longer disagree.
+  // It delegates to the underlying setter, so reactivity is untouched.
+  //
+  // `source` overrides where the ON/OFF value comes from, for an element whose truth is
+  // an internal controller rather than the prop (see `wireDisclosure`). Returning
+  // `undefined` from it means "not ready, leave the attribute alone".
+  /** Reflect a flag to its host attribute and keep the property readable. Use instead of hand-rolling `toggleAttribute`. */
   reflectFlag: (name: string, source?: () => boolean | undefined) => void;
-  /**
-   * Whether the element should currently render its dark-mode look --
-   * exactly the SAME resolved value that already drives the `.dark` class
-   * every facade's content sits inside (not a second computation of the
-   * `theme='light'|'dark'|'auto'` rule; see `createDarkMode` above). Most
-   * facades never need this directly, since the injected kit CSS already
-   * flips its custom properties under `.dark`. It exists for content that
-   * cannot read CSS at all -- e.g. a WebGL shader baking a colour choice
-   * into a GLSL uniform, which is why `kai-audio-visualizer` reads it.
-   */
+  // Exactly the SAME resolved value that already drives the `.dark` class every facade's
+  // content sits inside (not a second computation of the `theme='light'|'dark'|'auto'`
+  // rule; see `createDarkMode` above). Most facades never need this directly, since the
+  // injected kit CSS already flips its custom properties under `.dark`. It exists for
+  // content that cannot read CSS at all -- e.g. a WebGL shader baking a colour choice
+  // into a GLSL uniform, which is why `kai-audio-visualizer` reads it.
+  /** The resolved dark-mode value that drives the `.dark` class. */
   dark: () => boolean;
 }
 

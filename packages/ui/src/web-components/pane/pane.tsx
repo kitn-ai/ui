@@ -3,9 +3,7 @@ import { defineWebComponent } from '../define/define';
 import { Pane, type PaneStatus } from '../../components/pane/pane';
 
 interface Props extends Record<string, unknown> {
-  /** The pane title (the agent / window name). Named `headline` because `title`
-   *  collides with the global `HTMLElement.title` attribute (it throws at
-   *  registration). Attribute: `headline`. */
+  /** The pane title (the agent / window name). Named `headline` because `title` collides with the global `HTMLElement.title`. */
   headline?: string;
   /** A role / label shown under the title (e.g. "Reviewer", "claude-sonnet").
    *  Attribute: `subtitle`. */
@@ -47,37 +45,12 @@ interface Events {
  *  divider when unfilled). */
 const SLOT_NAMES = ['leading', 'actions', 'footer'] as const;
 type SlotName = (typeof SLOT_NAMES)[number];
-
+// Window controls fire events and hold no state: `kai-maximize` reports the intended NEXT state
+// and the consumer drives `maximized` from it, so the element stays uncontrolled-friendly.
+// Slots `leading`/`actions`/`footer` are occupancy-gated (an empty `<slot>` is always a truthy
+// node, so the facade tracks which are filled and only passes those regions to the primitive).
 /**
- * `<kai-pane>` — a framed panel for a multi-agent workspace: a header (leading
- * glyph + title/subtitle + status dot + extra actions + window controls), a
- * scrolling body, and an optional pinned footer (e.g. a composer). Composable:
- * slots + parts + events, not a config blob.
- *
- * Slots: `leading` (header glyph/avatar), `actions` (extra header controls,
- * placed before the window controls), the DEFAULT slot (body), `footer`.
- *
- * Window controls (right of the header): maximize/restore and close are always
- * present; split and dock appear only with `show-split` / `show-dock`. Each
- * fires a `kai-*` event so the consumer drives state itself (uncontrolled-
- * friendly): listen for `kai-maximize` and set `maximized` from
- * `event.detail.maximized`.
- *
- * Parts: `::part(header|body|footer|controls)`.
- *
- * ```html
- * <kai-pane headline="Reviewer" subtitle="claude-sonnet" focused show-split
- *           onkai-maximize="this.maximized = event.detail.maximized">
- *   <img slot="leading" src="…" alt="" />
- *   <kai-button slot="actions" variant="ghost">Retry</kai-button>
- *   <kai-message-thread>…</kai-message-thread>
- *   <kai-prompt-input slot="footer"></kai-prompt-input>
- * </kai-pane>
- * <script>
- *   const pane = document.querySelector('kai-pane');
- *   pane.status = { tone: 'working', label: 'Running tests…', pulse: true };
- * </script>
- * ```
+ * A framed window for one agent or task in a workspace.
  */
 defineWebComponent<Props, Events>('kai-pane', {
   headline: '',

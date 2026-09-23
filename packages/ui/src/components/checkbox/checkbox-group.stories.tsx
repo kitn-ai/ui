@@ -12,11 +12,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        '`CheckboxGroup` is the kit\'s "pick any number" control: a bordered, divided list of rows over real `<input type="checkbox">`s. It is `RadioGroup`\'s sibling and takes the same shapes, so switching a field between "one of" and "any of" is a one word change.',
-        'Every row is a `<label>` wrapping its box, so the whole row is a click target and the row text IS the accessible name, with no ARIA involved. Give the group a `name` and a native `<form>` submits the selection under one key: `new FormData(form).getAll(name)` reads it back with no JavaScript of yours in the path.',
-        'Unlike `RadioGroup`, `name` has no default. A radio set needs a shared name for the browser to make it exclusive; checkboxes are independent controls and need nothing. Generating one here would submit the selection under a random key, which is worse than submitting nothing.',
-        'Rows can carry a second line via `description`, or you can replace the label column entirely with the presentation slot and keep the control, the row chrome and the group semantics.',
-        'No validation is applied. "At least one" is your application\'s rule, and so is a cap on how many may be picked.',
+        'A list of checkboxes as rows, for choosing any number of options; the radio group is its one-choice sibling.',
       ]),
     },
   },
@@ -24,7 +20,7 @@ const meta = {
     options: { control: 'object', description: 'The choices, in order. Each is `{ value, label, description?, disabled? }`. Rendered in full, never truncated or de-duplicated.' },
     value: { control: 'object', description: 'The selected values, as an array. Each option is checked when its `value` is in here, matched by identity.' },
     name: { control: 'text', description: 'Shared form-control name. No default: without one the group renders and behaves correctly but submits nothing.' },
-    label: { control: 'text', description: 'Accessible name for the group (`aria-label` on the `group`). Prefer `aria-labelledby` pointing at visible text when you have some.' },
+    label: { control: 'text', description: 'Accessible name for the group. Ignored when `aria-labelledby` is set.' },
     disabled: { control: 'boolean', description: 'Disable every row. Individual rows can be disabled on the option.' },
     itemClass: { control: 'text', description: 'Extra classes for each row.' },
     onChange: { action: 'change', description: 'Fires with the next selection, the option that moved, and whether it went on or off.', table: { category: 'Events' } },

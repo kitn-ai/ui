@@ -2,9 +2,9 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { Image } from './image';
 import { componentDescription } from '../../stories/docs/web-component-controls';
 
-// Compact SVG chat typing icon as base64
-const chatIconBase64 =
-  'PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0OCIgaGVpZ2h0PSI0OCIgdmlld0JveD0iMCAwIDQ4IDQ4Ij48cmVjdCB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHJ4PSIxMCIgZmlsbD0iIzdjM2FlZCIvPjxjaXJjbGUgY3g9IjE2IiBjeT0iMjQiIHI9IjQiIGZpbGw9IiNmZmYiLz48Y2lyY2xlIGN4PSIyNCIgY3k9IjI0IiByPSI0IiBmaWxsPSIjZmZmIi8+PGNpcmNsZSBjeD0iMzIiIGN5PSIyNCIgcj0iNCIgZmlsbD0iI2ZmZiIvPjwvc3ZnPg==';
+const PHOTO_URL = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&fit=crop';
+const ICON_URI =
+  "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'><rect width='48' height='48' rx='10' fill='%237c3aed'/><circle cx='16' cy='24' r='4' fill='%23fff'/><circle cx='24' cy='24' r='4' fill='%23fff'/><circle cx='32' cy='24' r='4' fill='%23fff'/></svg>";
 
 const meta = {
   title: 'Components/Image',
@@ -15,39 +15,33 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'Renders a model-generated or attached image from raw bytes rather than a URL: pass `base64` or `uint8Array` plus `mediaType`, and it builds the data/object URL for you.',
-        'Shows a pulsing placeholder until a source is available. Always set `alt`.',
+        'Displays an image the app already has an address for. Image artifact is for data a model produced.',
       ]),
     },
   },
   argTypes: {
-    base64: {
+    src: {
       control: 'text',
-      description: 'Base64-encoded image data. Combined with `mediaType` to form a data URL.',
-    },
-    uint8Array: {
-      control: 'object',
-      description: 'Raw image bytes. Combined with `mediaType` to form an object URL.',
-    },
-    mediaType: {
-      control: 'text',
-      description: 'MIME type of the image data, e.g. `image/png` or `image/svg+xml`.',
-      table: { defaultValue: { summary: 'image/png' } },
+      description: 'The image address: `https`, `data:`, or an object URL the caller made.',
     },
     alt: {
       control: 'text',
-      description: 'Alternative text describing the image (also used on the placeholder).',
+      description: 'Alternative text. Required: an unnamed image is invisible to a screen reader.',
+    },
+    loading: {
+      control: 'select',
+      options: ['eager', 'lazy', 'auto'],
+      description: 'Native loading hint. Any other `<img>` attribute passes through too.',
     },
     class: {
       control: 'text',
-      description: 'Additional CSS classes for the image / placeholder element.',
+      description: 'Additional CSS classes, merged with the kit chrome.',
     },
   },
   args: {
-    base64: chatIconBase64,
-    mediaType: 'image/svg+xml',
-    alt: 'Compact gradient chat icon',
-    class: 'h-24 w-24 rounded-md',
+    src: PHOTO_URL,
+    alt: 'A mountain lake at sunrise',
+    class: 'h-48 w-auto',
   },
   render: (args) => <Image {...args} />,
 } satisfies Meta<typeof Image>;
@@ -60,31 +54,41 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/** Interactive playground: swap the base64 data, media type, and sizing classes. */
+/** Interactive playground: swap the url, the alt, and the sizing classes. */
 export const Playground: Story = {
-  ...src(`// base64: your own image data, trimmed to a prefix here.
-<Image
-  base64="PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0OCIg…"
-  mediaType="image/svg+xml"
-  alt="Compact gradient chat icon"
-  class="h-24 w-24 rounded-md"
+  ...src(`<Image
+  src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&fit=crop"
+  alt="A mountain lake at sunrise"
+  class="h-48 w-auto"
 />`),
 };
 
-export const Basic: Story = {
-  args: { class: 'h-24 w-24 rounded-md' },
-  ...src(`// base64: your own image data, trimmed to a prefix here.
-<Image base64="PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0OCIg…" mediaType="image/svg+xml" alt="Compact gradient chat icon" class="h-24 w-24 rounded-md" />`),
+/** A `data:` URI is a resource like any other address, and needs no `mediaType`. */
+export const DataUri: Story = {
+  args: { src: ICON_URI, alt: 'A gradient chat icon', class: 'h-12 w-12' },
+  ...src(`// A data: URI is a resource like any other address: no mediaType prop exists here.
+<Image
+  src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='48' height='48'></svg>"
+  alt="A gradient chat icon"
+  class="h-12 w-12"
+/>`),
+};
+
+/** `loading="lazy"` is not a prop of its own: every remaining `<img>` attribute passes through. */
+export const LazyLoading: Story = {
+  args: { loading: 'lazy', class: 'h-48 w-auto' },
+  ...src(`<Image
+  src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&fit=crop"
+  alt="A mountain lake at sunrise"
+  loading="lazy"
+/>`),
 };
 
 export const CustomSize: Story = {
-  args: { alt: 'Large preview', class: 'h-64 w-64 rounded-lg' },
-  ...src(`// base64: your own image data, trimmed to a prefix here.
-<Image base64="PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0OCIg…" mediaType="image/svg+xml" alt="Large preview" class="h-64 w-64 rounded-lg" />`),
-};
-
-/** Placeholder state shown while no `base64`/`uint8Array` source is available (showcase). */
-export const Placeholder: Story = {
-  render: () => <Image alt="Loading image" class="h-24 w-24 rounded-md" />,
-  ...src(`<Image alt="Loading image" class="h-24 w-24 rounded-md" />`),
+  args: { alt: 'A large preview', class: 'h-64 w-auto rounded-lg' },
+  ...src(`<Image
+  src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&fit=crop"
+  alt="A large preview"
+  class="h-64 w-auto rounded-lg"
+/>`),
 };

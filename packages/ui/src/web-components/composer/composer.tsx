@@ -54,10 +54,10 @@ interface Props extends Record<string, unknown> {
 
 /** Events fired by `<kai-composer>`. */
 interface Events {
-  /** The user submitted the composer (Enter or programmatic submit). Note the
-   *  detail carries no `attachments`; `<kai-composer>` is the bare editing
-   *  surface: no send button, toolbar, or attachments. For a drop-in composer
-   *  row with all three, reach for `<kai-prompt-input>`, which is built on this. */
+  // Carries no `attachments`: `<kai-composer>` is the bare editing surface -- no send
+  // button, toolbar or attachments. For a drop-in composer row with all three, reach for
+  // `<kai-prompt-input>`, which is built on this.
+  /** The user submitted (Enter or programmatic submit). */
   'kai-submit': { doc: ComposerDoc; text: string; entities: EntityRef[] };
   /** The content changed (fires on every input event). */
   'kai-value-change': { doc: ComposerDoc; text: string; entities: EntityRef[] };
@@ -69,22 +69,20 @@ interface Events {
   'kai-trigger': { char: string; query: string; rect: DOMRect };
   /** The active trigger was dismissed (Escape, space, or outside click). */
   'kai-trigger-close': Record<string, never>;
-  /** The composer gained focus. `focus`/`blur` are NOT composed natively, so they
-   *  don't escape the shadow root; these re-expose them on the host. (For
-   *  `keydown`/`paste`/`focusin`/`focusout`, listen NATIVELY on `<kai-composer>`:
-   *  they're composed and already cross the shadow boundary.) */
+  // `focus`/`blur` are NOT composed natively, so they don't escape the shadow root;
+  // these re-expose them on the host. For `keydown`/`paste`/`focusin`/`focusout`, listen
+  // NATIVELY on `<kai-composer>`: they're composed and already cross the boundary.
+  /** The composer gained focus. */
   'kai-focus': { originalEvent: FocusEvent };
   /** The composer lost focus. */
   'kai-blur': { originalEvent: FocusEvent };
 }
-
+// Carries no attachments, no send button and no toolbar, deliberately: that is the difference from
+// `<kai-prompt-input>`, which is built on this element. `focus`/`blur` are NOT composed natively,
+// so the facade re-exposes them as `kai-focus`/`kai-blur`; for `keydown`/`paste`/`focusin`/
+// `focusout` listen natively, since those already cross the shadow boundary.
 /**
- * `<kai-composer>` — the bare editing surface: rich text, entity pills,
- * trigger menus, Enter-to-submit, and nothing else. No send button, no
- * toolbar, no attachments — that division is deliberate. For a drop-in chat
- * composer with a send button, toolbar, and attachment staging, reach for
- * `<kai-prompt-input>`, which is built on this element. Keep `<kai-composer>`
- * when you are composing the input row yourself and want to own those pieces.
+ * The bare rich-text editing surface for a prompt.
  */
 defineWebComponent<Props, Events>('kai-composer', {
   value: undefined,

@@ -1,6 +1,6 @@
 ---
 title: Loader
-description: A dozen animated busy indicators in a single web component — pick a style with one attribute.
+description: An animated indicator that shows work in progress.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -13,7 +13,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kai-tag-sub">kai-loader</p>
 
-<p class="kai-lede">An animated busy indicator that fits anywhere — buttons, toolbars, empty panels, or standalone skeletons — with twelve visual styles from a single `variant` attribute.</p>
+<p class="kai-lede">Comes in twelve styles and three sizes, so one element covers a button, a toolbar, or a panel.</p>
 
 <Facts items={['Shadow DOM', '12 variants', '3 sizes', 'Text label support']} />
 
@@ -22,7 +22,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 <Playground client:only="solid" tag="kai-loader" />
 
 <Aside type="tip" title="When to use">
-Use `<kai-loader>` for a "working" indicator outside the chat thread — inside a send button, a toolbar corner, or as a panel placeholder. In SolidJS, use the `Loader` primitive directly for finer composition control.
+Where the thread is not: inside a send button, a toolbar corner, or a panel still filling. For a panel that has not arrived yet, [Skeleton](/components/skeleton/) holds its shape.
 </Aside>
 
 ## Usage

@@ -4,9 +4,8 @@ import { useAutoResize } from '../../primitives/use-auto-resize';
 
 export interface TextareaProps extends JSX.TextareaHTMLAttributes<HTMLTextAreaElement> {
   maxHeight?: number;
-  /** Floor the auto-resized height at this many pixels, even when the field
-   *  is empty. Omit to fall back to `useAutoResize`'s own default (one
-   *  visible line, derived from computed line-height + padding/border). */
+  /** Lowest auto-resized height in pixels, even when the field is empty; unset uses
+   *  `useAutoResize`'s default of one visible line. */
   minHeight?: number;
   autoResize?: boolean;
 }

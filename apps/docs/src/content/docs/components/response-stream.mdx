@@ -1,6 +1,6 @@
 ---
 title: Response Stream
-description: Reveals text with a typewriter or fade animation — the building block for streaming assistant replies in any framework.
+description: Reveals text a piece at a time as it arrives.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -14,7 +14,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kai-tag-sub">kai-response-stream</p>
 
-<p class="kai-lede">Animates text into view — character by character or segment by segment — for live-streamed assistant replies, accepting a plain string or an `AsyncIterable<string>`.</p>
+<p class="kai-lede">Takes a plain string or an async iterable, so it can animate a reply that is still coming.</p>
 
 <Facts items={['Shadow DOM', '2 animation modes', 'Accepts AsyncIterable', 'Tunable speed', 'Fires kai-complete']} />
 
@@ -23,7 +23,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 <Playground client:only="solid" tag="kai-response-stream" />
 
 <Aside type="tip" title="When to use">
-`typewriter` (default) suits most chat UIs; `fade` works better for longer document-style answers. In SolidJS, use the `ResponseStream` primitive directly for finer control.
+For a reply that streams in live, so the reader watches it grow instead of waiting. For a finished string in prose, use [Markdown](/components/markdown/).
 </Aside>
 
 ## Usage

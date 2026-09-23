@@ -27,13 +27,13 @@ export function Radio(props: RadioProps): JSX.Element {
 
 /** One choice in a {@link RadioGroup}. */
 export interface RadioOption<T = string> {
-  /** The value this row selects. Compared to the group's `value` by identity. */
+  /** The value this row selects; matched against the group's `value` by identity. */
   value: T;
   /** The row's visible label. */
   label: JSX.Element;
-  /** Optional second line under the label. */
+  /** The second line under the label. */
   description?: JSX.Element;
-  /** Disable this row alone (the group's `disabled` disables all of them). */
+  /** Disable this row alone (the group's `disabled` covers all of them). */
   disabled?: boolean;
 }
 
@@ -41,29 +41,23 @@ export interface RadioGroupProps<T = string>
   extends Omit<JSX.HTMLAttributes<HTMLDivElement>, 'onChange' | 'children'> {
   /** The choices, in display order. */
   options: readonly RadioOption<T>[];
-  /** The selected value. Matched against each option's `value` by identity. */
+  /** The selected value; matched against each option's `value` by identity. */
   value?: T;
-  /**
-   * The shared form-control name every radio in the group carries — what makes the
-   * browser treat them as one control. Defaults to a generated id, so the group is
-   * exclusive and keyboard-navigable even when nothing is being submitted.
-   */
+  /** The form-control name every radio in the group shares; defaults to a generated id. */
   name?: string;
-  /** Disable every row. */
+  /** Disables every row. */
   disabled?: boolean;
-  /** Accessible name for the group. Rendered as `aria-label` on the `radiogroup`. */
+  /** Accessible name for the group, rendered as `aria-label` on the `radiogroup`. */
   label?: string;
   /** Fires with the newly selected value (and its option) on selection. */
   onChange?: (value: T, option: RadioOption<T>) => void;
-  /** Fires when a radio loses focus — the commit point for a form field. */
+  /** Fires when a radio loses focus, the commit point for a form field. */
   onOptionBlur?: () => void;
   /** Extra classes for each row. */
   itemClass?: string;
-  /**
-   * Presentation slot. Replaces the default label/description column with whatever
-   * you return, so a row can carry media, a badge or a price without a second radio
-   * component existing. The control, the row chrome and the group semantics stay ours.
-   */
+  // The control, the row chrome and the group semantics stay ours, so a row can
+  // carry media, a badge or a price without a second radio component existing.
+  /** Renders each row's label column in place of the default label and description. */
   children?: (option: RadioOption<T>, state: { checked: boolean; disabled: boolean }) => JSX.Element;
 }
 

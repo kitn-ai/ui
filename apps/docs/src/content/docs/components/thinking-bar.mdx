@@ -1,6 +1,6 @@
 ---
 title: Thinking Bar
-description: An animated "thinking" indicator with an optional stop affordance — drop it in when the assistant is reasoning and let users interrupt if they want an answer sooner.
+description: An animated indicator that the assistant is working.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -14,7 +14,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kai-tag-sub">kai-thinking-bar</p>
 
-<p class="kai-lede">A shimmering "thinking" indicator that signals the assistant is still reasoning. Add `stoppable` and it gains a stop button that fires `kai-stop` so users can skip to an answer.</p>
+<p class="kai-lede">Tells the reader a response is coming, and lets them interrupt instead of waiting.</p>
 
 <Facts items={['Shadow DOM', 'Animated shimmer', 'Optional stop affordance', '1 event', 'Fully attribute-driven']} />
 
@@ -23,7 +23,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 <Playground client:only="solid" tag="kai-thinking-bar" />
 
 <Aside type="tip" title="When to use">
-Place `<kai-thinking-bar>` in the message thread while the assistant is generating a response — it sits naturally above the streaming reply. Enable `stoppable` whenever users should be able to cut a long reasoning step short; handle `kai-stop` to cancel the in-flight request and prompt the model to answer with what it has.
+Sits above the streaming reply while the assistant is generating. Turn on `stoppable` so users can cut a long reasoning step short, and handle `kai-stop` to cancel the request.
 </Aside>
 
 ## Usage
@@ -46,8 +46,6 @@ Remove the element from the DOM once the assistant reply arrives.
 <Example client:visible tag="kai-thinking-bar" config={{ text: 'Thinking' }} />
 
 ### Custom Label
-
-Override `text` for a specific task like web search or code analysis.
 
 <Example client:visible tag="kai-thinking-bar" config={{ text: 'Searching the web…' }} />
 

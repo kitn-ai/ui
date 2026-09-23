@@ -12,12 +12,8 @@ import {
 } from 'lucide-solid';
 import { componentDescription } from '../../stories/docs/web-component-controls';
 
-/**
- * Story for the compound `Empty` family. `Empty` is the root container; the
- * header/media/title/description/content subcomponents compose the layout. The
- * only real enum prop is `EmptyMedia`'s `variant`, so the controls focus on the
- * common composition, and the variation stories are compositional showcases.
- */
+// `EmptyMedia`'s `variant` is the only enum prop, so the controls cover the composition
+// and the variation stories are compositional.
 const meta = {
   title: 'Components/Empty',
   component: Empty,
@@ -26,8 +22,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'A composable empty-state block (modeled on shadcn/ui `Empty`): compose `EmptyHeader` (with `EmptyMedia`, `EmptyTitle`, `EmptyDescription`) and an optional `EmptyContent` for actions or prompt suggestions.',
-        'Set `EmptyMedia` `variant` to `icon` for a muted tile or `default` for a bare slot (avatar/illustration). Drop it into blank chats, empty lists, no-results panes, or file drop zones.',
+        'A placeholder block for a region with nothing to show yet.',
       ]),
       controls: { exclude: ['use:eventListener'] },
     },

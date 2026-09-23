@@ -46,10 +46,13 @@ const meta = {
   tags: ['autodocs'],
   parameters: {
     layout: 'padded',
+    // Maximize/restore and close are built in; split and dock appear only when `onSplit` / `onDock`
+    // are passed. `focused` rings the active pane and `maximized` swaps the glyph for restore. Give the
+    // pane a bounded height so the body scroll engages.
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'A framed panel for a multi-agent workspace: a header (leading glyph + title/subtitle + tone-colored status dot + actions + window controls), a scrolling body, and an optional pinned footer (a composer). The "pane frame" every agent tile otherwise re-hand-rolls. Maximize/restore and close are built in; split and dock appear only when you pass `onSplit` / `onDock`. `focused` rings the active pane; `maximized` swaps the maximize glyph for restore. Give the pane a bounded height for the body scroll to engage.',
+        'A framed pane for an agent tile, with a pinned header and a scrolling body.',
       ]),
     },
   },

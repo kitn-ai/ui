@@ -10,17 +10,11 @@ import { AlertTriangle } from 'lucide-solid';
 export interface CardFallbackProps {
   /** The envelope type, shown to aid debugging. */
   type: string;
-  /** The envelope id (for parity with cards; not displayed). */
+  /** The envelope id, for parity with cards; not displayed. */
   cardId?: string;
-  /**
-   * Why this card could not render, when the type WAS known but the data was not
-   * usable. Carries the failing field paths verbatim, e.g.
-   * `(root).actions: fewer than minItems 1`.
-   *
-   * Absent means the older case: an unrecognized type. The two are told apart by
-   * this prop rather than by a mode flag so a caller cannot ask for the diagnostic
-   * and forget to supply the diagnosis.
-   */
+  // The two cases are told apart by this prop rather than by a mode flag, so a
+  // caller cannot ask for the diagnostic and forget to supply the diagnosis.
+  /** Why the card could not render, carrying the failing field paths; absent means the type was unknown. */
   reason?: string;
 }
 

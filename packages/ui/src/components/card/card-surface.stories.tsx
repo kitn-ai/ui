@@ -30,7 +30,7 @@ const meta = {
         ],
       },
       description: componentDescription([
-        'A presentational surface with structural regions: `media`, `header` (+ `headerActions`), the body (the default slot, shown when `hasBody` is set), and `footer` (+ `footerActions`). Pick a surface with `appearance` and a layout with `orientation`. Make the whole card a link (`href`) or a button (`clickable`), but not alongside footer action buttons.',
+        'A framed card surface around media and a body of content.',
       ]),
     },
   },

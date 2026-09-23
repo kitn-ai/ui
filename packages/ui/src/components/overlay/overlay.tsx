@@ -73,17 +73,11 @@ export interface UsePositionOptions {
   placement?: Placement;
   gutter?: number;
   arrowEl?: Accessor<HTMLElement | undefined>;
-  /**
-   * Fired ONCE when the reference (anchor) "goes away" — either removed from the
-   * document OR hidden behind an `inert` ancestor (e.g. a modal/takeover that
-   * inert-s the background while open). In both cases the anchor is no longer a
-   * valid, interactive target, so the caller should close the overlay and unmount
-   * its portal instead of leaving it orphaned (floating over an inert background or
-   * anchored to a node that no longer exists). Anchored overlays portal OUT of the
-   * trigger's subtree, so Solid's onCleanup does not catch an anchor that is
-   * removed/inerted independently of the overlay component. Wire this to set the
-   * overlay's open state to false.
-   */
+  // The anchor can vanish independently of the overlay (portals sit outside the
+  // trigger's subtree, so Solid's onCleanup never sees it), and an anchor behind an
+  // `inert` ancestor is no more reachable than a removed one, so both count.
+  /** Fired once when the anchor is removed from the document or hidden behind an
+   *  `inert` ancestor. */
   onDisconnect?: () => void;
 }
 

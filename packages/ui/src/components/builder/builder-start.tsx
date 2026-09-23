@@ -45,25 +45,16 @@ export const BUILDABLE_BUILDER_TEMPLATES: readonly BuilderTemplate[] = TEMPLATES
 ).map(({ id, name, description }) => ({ id, name, description }));
 
 export interface BuilderStartProps {
-  /** The currently selected template id, or unset for none yet. Controlled —
-   *  this component holds no selection state of its own. */
+  /** The selected template id, controlled here; unset means none chosen yet. */
   value?: BuilderTemplateId;
-  /**
-   * Fires with a template's id when its card is chosen. Click-to-advance
-   * (design choice, this round): T-7 says "selection advances to that
-   * template's builder", and there is nothing a second "Continue" step
-   * would add here that the click itself doesn't already mean — a
-   * disambiguating confirm step belongs to T-2's SWITCHING-template case
-   * (control set changes, so a re-pick needs a confirm), not to picking a
-   * template for the first time. So `onSelect` fires on the same click that
-   * shows the selected ring; the story's Continue readout below just proves
-   * the callback fired, since there's no template builder screen yet to
-   * navigate to.
-   */
+  // Click-to-advance: the click that shows the selected ring IS the selection, so
+  // there is no second Continue step to add. A confirm step belongs to the
+  // switching-template case, where the control set changes and a re-pick needs one.
+  /** Fires with a template's id when its card is chosen. */
   onSelect: (id: BuilderTemplateId) => void;
-  /** Which cards to render. Defaults to BUILDABLE_BUILDER_TEMPLATES
-   *  (menu-honest by default). The Labs story passes BUILDER_TEMPLATES (all
-   *  six) explicitly to show the full catalog. */
+  // Menu-honest by default: only the buildable templates render as cards. A story
+  // showing the full catalog passes all six explicitly.
+  /** The template cards to render; defaults to the buildable templates. */
   templates?: readonly BuilderTemplate[];
   class?: string;
 }

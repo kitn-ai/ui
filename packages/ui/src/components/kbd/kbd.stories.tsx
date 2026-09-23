@@ -13,7 +13,7 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'A keyboard-shortcut display. `keys` is a `+`-joined spec (`Mod+Shift+K`); each token maps to a platform glyph (`Mod` → ⌘ on mac else Ctrl, `Shift` → ⇧, `ArrowUp` → ↑, `Enter` → ⏎) and renders as an inset cap. `platform` forces `mac`/`other` or `auto`-sniffs the OS. Display only; it does not bind keys. Omit `keys` to render your own content.',
+        'Displays a keyboard shortcut as key caps, one per key. Display only; it does not bind the keys.',
       ]),
     },
   },

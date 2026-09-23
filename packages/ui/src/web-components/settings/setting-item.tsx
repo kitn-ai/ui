@@ -10,18 +10,7 @@ interface Props extends Record<string, unknown> {
 }
 
 /**
- * `<kai-setting-item>` — one row inside a `<kai-settings-group>`: a left
- * label/description block and an optional right-aligned control. Slot the control
- * (a `<kai-switch>`, segmented control, select, …) into `slot="control"`; omit it
- * for a plain label row.
- *
- * Themeable `::part`s: `label` (the label/description block) and `control`.
- *
- * ```html
- * <kai-setting-item label="Reduce motion" description="Minimize animations.">
- *   <kai-switch slot="control"></kai-switch>
- * </kai-setting-item>
- * ```
+ * One labelled row of a settings group, with an optional trailing control.
  */
 defineWebComponent<Props>('kai-setting-item', {
   label: '',

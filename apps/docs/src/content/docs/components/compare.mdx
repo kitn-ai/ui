@@ -1,6 +1,6 @@
 ---
 title: Compare
-description: Show two assistant responses side by side and let the user pick the better one — a clean way to capture preference data.
+description: Shows two responses and records which one the user prefers.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -14,12 +14,12 @@ import Playground from '../../../components/Playground.tsx';
 
 <p class="kai-tag-sub">kai-compare</p>
 
-<p class="kai-lede">"Which response do you prefer?" — render two assistant candidates for the same prompt side by side, let the user pick one, and turn that pick into a `(prompt, chosen, rejected)` preference pair.</p>
+<p class="kai-lede">Collects a preference pair from a single pick, for evaluation or feedback data.</p>
 
 <Facts items={['Shadow DOM', 'Preference capture', 'Both candidates stream', 'Keyboard radiogroup', 'Collapses to the winner']} />
 
 <Aside type="tip" title="When to use">
-Reach for `<kai-compare>` when you want to **capture which of two answers a user prefers** — A/B preference collection, RLHF-style feedback, or a "regenerate and compare" flow. The pick is a one-shot commit, not a form submit: it fires once, the card collapses to the chosen answer, and you send the preference pair to your backend.
+When you want to capture which of two answers a user prefers: A/B collection, RLHF-style feedback, a regenerate-and-compare flow. The pick is a one-shot commit, not a form submit.
 </Aside>
 
 ## Try it
@@ -56,9 +56,9 @@ Set `data` in JavaScript — it's an object with exactly two `candidates` (array
 </script>
 ```
 
-- **`data`** — `{ prompt?, candidates: [A, B], collapse? }`. Each candidate is an assistant response; it renders exactly like a [message](/components/message/) body (markdown, reasoning, tool calls, attachments).
+- **`data`**: `{ prompt?, candidates: [A, B], collapse? }`. Each candidate renders exactly like a [message](/components/message/) body (markdown, reasoning, tool calls, attachments).
 - **`kai-compare-select`** — fires once when the user picks. `detail` is `{ chosenId, rejectedIds, at }`.
-- The pick **commits and collapses** to the chosen candidate. It's single-shot — `<kai-compare>` won't emit again for the same definition.
+- The pick **commits and collapses** to the chosen candidate, and `<kai-compare>` won't emit again for the same definition.
 
 ## The candidate shape
 
@@ -79,7 +79,7 @@ A comparison needs **exactly two** candidates with unique, non-empty `id`s. Anyt
 
 ## Capturing the preference
 
-The selection is the whole point. `kai-compare-select` hands you `chosenId` and `rejectedIds` (for a pair, the other candidate's id). Pair that with the prompt and send it to wherever you collect preference data:
+The selection is the whole point. `kai-compare-select` hands you `chosenId` and `rejectedIds` (for a pair, the other candidate's id); pair that with the prompt and send it wherever you collect preference data:
 
 ```js
 cmp.addEventListener('kai-compare-select', (e) => {
@@ -99,7 +99,7 @@ cmp.addEventListener('kai-compare-select', (e) => {
 
 ## Streaming both candidates
 
-Both responses can stream at once. Mark a candidate `streaming: true` and its column shows a shimmer; the pick controls stay disabled until **both** settle, then `kai-ready` fires.
+Both responses can stream at once: mark a candidate `streaming: true` and its column shows a shimmer, while the pick controls stay disabled until **both** settle and `kai-ready` fires.
 
 Push a **fresh `data` reference per chunk** — assign a new object, never mutate the existing one in place, or the element won't re-render:
 
@@ -128,7 +128,7 @@ This is the kit-wide rule for any array/object prop. Mutating `cmp.data.candidat
 
 ## Re-hydrating a past pick
 
-To show a comparison the user already answered (e.g. loading a conversation), set `selection`. The card renders collapsed to the chosen candidate and emits nothing:
+To show a comparison the user already answered (loading a conversation), set `selection`: the card renders collapsed to the chosen candidate and emits nothing.
 
 ```js
 cmp.data = { prompt, candidates: [a, b] };
@@ -145,7 +145,7 @@ cmp.selection = { chosenId: 'a', rejectedIds: ['b'] };
 | `'columns'` | Always two columns. |
 | `'tabs'` | Always tabbed — one candidate at a time with pills to switch. |
 
-The two columns are a WAI-ARIA radiogroup with roving focus: Arrow keys move between A and B, Enter or Space picks the focused one.
+The columns are a WAI-ARIA radiogroup with roving focus: Arrow keys move between A and B, Enter or Space picks the focused one.
 
 ## Props
 

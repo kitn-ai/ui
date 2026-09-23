@@ -41,8 +41,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'The "canvas / artifacts" pattern: a framed viewer for an AI-generated artifact your backend hosts (page, doc, image, PDF), shown beside the conversation. A sandboxed `<iframe>` with a nav toolbar and a Preview | Code toggle (the Code tab pairs a `FileTree` with `CodeBlock`).',
-        'Set `src` to the hosted URL and `files` for the Code tree; handle `onNavigate`, `onTabChange`, `onFileSelect`. It fills its container, so give the parent a height.',
+        'Displays an artifact your backend hosts, framed beside the conversation.',
       ]),
     },
   },

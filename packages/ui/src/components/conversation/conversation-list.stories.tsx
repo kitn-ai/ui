@@ -33,8 +33,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'The chat-history sidebar: a header (sidebar toggle + new chat), a search box that filters by title, and conversations bucketed into collapsible, count-badged groups.',
-        'Pass `groups` and `conversations`, the `activeId`, and handlers `onSelect(id)` / `onNewChat()` (plus optional `onToggleSidebar()`); give it a sized, overflow-hidden container.',
+        'The history sidebar: past conversations, searchable and grouped.',
       ]),
       controls: { exclude: ['use:eventListener'] },
     },

@@ -3,17 +3,17 @@ import { Form, type FormController, type FormDefinition } from '../../components
 import type { CardResolution } from '../../primitives/card-contract';
 
 interface Props extends Record<string, unknown> {
-  /** The form definition: a JSON Schema (`type:'object'`) + `x-kai-*` UI hints
-   *  (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { type:'object',
-   *  properties:{…} }`. Import the `FormDefinition` type from `@kitn.ai/ui` for
-   *  the full shape.
-   *
-   *  It IS self-referential (`FormField.properties` is another `FormField` map),
-   *  and the generated `web-component-types.d.ts` inlines every named type, so the
-   *  shipped declaration bottoms out in a `Record<string, unknown>` placeholder
-   *  one level down rather than carrying the recursion. That is why
-   *  `FormDefinition` is a `type` alias: an interface gets no implicit index
-   *  signature, so it would not be assignable to that placeholder. */
+  // The shape is a JSON Schema (`type:'object'`) + `x-kai-*` UI hints (the
+  // CardEnvelope.data). Import the `FormDefinition` type from `@kitn.ai/ui` for the full
+  // shape.
+  //
+  // It IS self-referential (`FormField.properties` is another `FormField` map), and the
+  // generated `web-component-types.d.ts` inlines every named type, so the shipped
+  // declaration bottoms out in a `Record<string, unknown>` placeholder one level down
+  // rather than carrying the recursion. That is why `FormDefinition` is a `type` alias:
+  // an interface gets no implicit index signature, so it would not be assignable to that
+  // placeholder.
+  /** The form definition: a JSON Schema + `x-kai-*` UI hints. JS property: `el.data = { type: 'object', properties: {...} }`. */
   data?: FormDefinition;
   /** Stable card id correlating every emitted CardEvent. Attribute: `card-id`. */
   cardId?: string;
@@ -40,14 +40,8 @@ interface Events {
 }
 
 /**
- * `<kai-form>` — renders a JSON-Schema **form definition** (set via the `data`
- * property) into themed, accessible widgets inside `<kai-card>` chrome, validates
- * input client-side, and emits the collected, coerced, validated object up the
- * Card contract as a bubbling **`kai-card`** CustomEvent of `{ kind:'submit' }`.
- * It also emits `ready` on mount, `action`/`dismiss` for secondary affordances, and
- * `error` for a malformed definition. Routes through a `CardProvider` when present,
- * else the bubbling `kai-card` event (so a bare `<kai-form>` works without a host).
- * Isolated in Shadow DOM; theme-aware via the shared kit tokens.
+ * A form rendered from a JSON-Schema definition and submitted as one validated
+ * object.
  */
 defineWebComponent<Props, Events>('kai-form', {
   data: undefined,

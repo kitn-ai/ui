@@ -22,31 +22,15 @@ interface Events {
   'kai-select': { id: string };
   /** Fired on every keystroke in the search input. */
   'kai-query-change': { value: string };
-  /** Fired when the highlighted/active item changes, via Arrow keys or when
-   *  filtering re-clamps the active row. `id` is the newly active item's id, or
-   *  `undefined` when no item is active (e.g. the filtered list is empty). Lets a
-   *  host preview the active item without committing a selection. */
+  // Via Arrow keys, or when filtering re-clamps the active row. Lets a host preview
+  // the active item without committing a selection.
+  /** The highlighted item changed. `detail.id` is `undefined` when nothing is active (e.g. the filtered list is empty). */
   'kai-active-change': { id: string | undefined };
 }
 
 /**
- * `<kai-command>` — a grouped, filterable command/mention palette.
- *
- * Set the `items` property in JavaScript (array, not attribute), listen for
- * `kai-select` to know which item was picked, and `kai-query-change` to mirror
- * the search query to your own logic (e.g. async server-side filtering).
- *
- * ```html
- * <kai-command placeholder="Search…"></kai-command>
- * <script type="module">
- *   import '@kitn.ai/ui/web-components';
- *   const el = document.querySelector('kai-command');
- *   el.items = [
- *     { id: 'foo', label: 'Foo', icon: 'search', shortcut: 'Mod+K', group: 'Recent' },
- *   ];
- *   el.addEventListener('kai-select', (e) => console.log(e.detail.id));
- * </script>
- * ```
+ * A grouped, filterable command palette. `kai-menu` is the static action menu
+ * instead.
  */
 defineWebComponent<Props, Events>('kai-command', {
   items: undefined,

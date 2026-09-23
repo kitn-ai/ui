@@ -115,29 +115,27 @@ const USER_MENU_ITEMS: readonly {
 ];
 
 export interface AppHeaderProps {
-  /** Rendered on the LEFT. Absent or empty renders no title (and no gap). */
+  /** Rendered on the left; absent or empty renders no title and no gap. */
   title?: string;
 
-  /** Asks for the search affordance. It renders only when `onSearch` is also
-   *  given — see the menu-honesty note in this module's doc comment. */
+  /** Shows the search affordance, only when `onSearch` is also given. */
   showSearch?: boolean;
-  /** What search DOES. In both real call sites: open the command palette. */
+  /** Fires when the search affordance is used; both real call sites open the command palette. */
   onSearch?: () => void;
 
-  /** Asks for the theme toggle. Renders only with `onToggleDark`. */
+  /** Shows the theme toggle, only when `onToggleDark` is also given. */
   showThemeToggle?: boolean;
-  /** Current resolved mode — CONTROLLED, never owned here. Drives which icon
-   *  shows (the mode you would switch TO) and the accessible name. */
+  /** Resolved mode, controlled here; drives the icon and the accessible name. */
   dark?: boolean;
   onToggleDark?: () => void;
 
-  /** The ordered action row. Renders only with `onActionSelect`. */
+  /** The ordered action row, rendered only when `onActionSelect` is given. */
   actions?: readonly AppHeaderAction[];
   onActionSelect?: (action: AppHeaderAction) => void;
 
-  /** The signed-in user. `name` feeds the initials and the accessible name;
-   *  `plan` only the accessible name (the compact cluster shows no text).
-   *  Renders only with `onUserMenuSelect`. */
+  // `name` feeds the initials and the accessible name; `plan` only the accessible
+  // name, since the compact cluster shows no text.
+  /** The signed-in user, rendered only when `onUserMenuSelect` is given. */
   user?: { name: string; plan?: string };
   onUserMenuSelect?: (item: AppHeaderUserMenuItem) => void;
 

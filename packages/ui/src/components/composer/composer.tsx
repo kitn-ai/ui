@@ -82,9 +82,9 @@ export interface ComposerProps {
   submitOnEnter?: boolean;
   triggers?: TriggerDef[];
   highlights?: HighlightRule[];
-  /** Default icon per entity kind (kind → image URL/data-URI), shown on a pill +
-   *  menu item when the item has no `icon` of its own. Overrides the built-in
-   *  glyphs (agent/plugin). Example: `{ agent: '/icons/bot.svg' }`. */
+  // Shown on a pill and a menu item when the item has no `icon` of its own. Overrides
+  // the built-in agent/plugin glyphs.
+  /** Default icon per entity kind (kind to image URL or data-URI). */
   kindIcons?: Record<string, string>;
   /** Render WITHOUT the rounded frame/background/padding — just the editable +
    *  placeholder + menu. For embedding inside another frame (e.g. PromptInput). */
@@ -106,9 +106,10 @@ export interface ComposerProps {
   onTriggerClose?: () => void;
   onEntityAdd?: (entity: EntityRef) => void;
   onEntityRemove?: (entity: EntityRef) => void;
-  /** The editable gained focus. `focus`/`blur` are NOT composed, so they don't
-   *  escape the shadow root — this re-exposes them. (keydown/paste/focusin/focusout
-   *  are composed and already reach the host as native events; no wrapper needed.) */
+  // `focus`/`blur` are NOT composed, so they do not escape the shadow root; this
+  // re-exposes them. keydown/paste/focusin/focusout are composed and already reach the
+  // host as native events, so they need no wrapper.
+  /** The editable gained focus. */
   onFocus?: (e: FocusEvent) => void;
   /** The editable lost focus. */
   onBlur?: (e: FocusEvent) => void;

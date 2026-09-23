@@ -7,11 +7,8 @@ import { Switch } from '../switch/switch';
 import { Select } from '../select/select';
 import { componentDescription } from '../../stories/docs/web-component-controls';
 
-// The building blocks in isolation — no modal/page host. A `SettingsGroup` is a
-// titled, bordered card that stacks `SettingItem` rows with hairline dividers;
-// each row pairs a label/description with an optional control (`Switch`,
-// `Segmented`, `Select`, or nothing). The composed settings SCREEN that assembles
-// these into a two-pane modal/page lives in `Labs/Settings`.
+// The building blocks in isolation, no modal/page host. The composed settings SCREEN
+// that assembles these into a two-pane modal/page lives in `Labs/Settings`.
 
 /** The kit's `Select`. This used to be a hand-styled native `<select>` with a note
  *  saying a real build would swap in a menu trigger; the kit owns a select now, so the
@@ -47,9 +44,7 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener', 'children'] },
       description: componentDescription([
-        'The uniform settings building blocks: `SettingsGroup` (a titled, bordered card) stacks `SettingItem` rows with hairline dividers, and each row pairs a label/description with an optional control (`Switch`, `Segmented`, `Select`, or none).',
-        'These are the primitives. The composed settings SCREEN — the two-pane category rail + groups assembled into a modal or full page — lives in `Labs/Settings`.',
-        'The controls drive the group chrome (`heading`, `description`, `class`). The rows are `SettingItem`s you compose as children; the Playground fixes one representative set so the chrome is what changes.',
+        'A titled, bordered card that stacks settings rows, each pairing a label with an optional control.',
       ]),
     },
   },

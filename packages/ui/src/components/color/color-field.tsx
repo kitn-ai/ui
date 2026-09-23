@@ -29,26 +29,22 @@ function toNativeColorValue(hex: string | undefined): string {
 }
 
 export interface ColorFieldProps {
-  /** Accessible name for the color control — the swatch/native picker's
-   *  `aria-label`. The hex text field gets its own derived label so the two
-   *  controls announce distinctly. */
+  /** Accessible name for the color control, used as the picker's `aria-label`. */
   label: string;
-  /** The committed color as a CSS hex string, or `undefined`/empty for
-   *  unset. Controlled — this component holds no color state of its own,
-   *  only the hex text field's in-progress draft (see `onChange`). */
+  // Controlled: no color state of its own lives here, only the hex text field's
+  // in-progress draft (see `onChange`). The text field derives its own label so
+  // the two controls announce distinctly.
+  /** The committed hex color; unset or empty renders as no color chosen. */
   value?: string;
   /** Placeholder for the hex text field when `value` is unset. */
   placeholder?: string;
   disabled?: boolean;
-  /**
-   * Fires with the next value once it is syntactically valid: immediately
-   * for the native color picker (which only ever emits a valid 6-digit hex),
-   * or on blur/commit of the hex text field when what's typed matches
-   * {@link isValidHex}. An invalid or partial hex in the text field never
-   * fires this — the field just doesn't commit, and keeps whatever was
-   * typed rather than snapping back (owner ruling, design round 3: "invalid
-   * text doesn't nuke state, just doesn't commit").
-   */
+  // Fires with the next value once it is syntactically valid: immediately for the
+  // native color picker (which only ever emits a valid 6-digit hex), or on
+  // blur/commit of the hex text field (`isValidHex` is the test). An invalid or
+  // partial hex never fires it: the field keeps what was typed rather than
+  // snapping back.
+  /** Fires with the next value once it is syntactically valid. */
   onChange: (value: string) => void;
   class?: string;
 }

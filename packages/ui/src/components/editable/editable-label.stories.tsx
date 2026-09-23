@@ -12,7 +12,7 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'Inline rename. Shows `value` as text; double-click (or a single click with `editTrigger="click"`; the default is `dblclick`), the `editing` prop, or a host `edit()` swaps in an autofocused field with the text pre-selected. Enter or blur commits (fires `onRename` only when the value changed); Esc cancels (fires `onCancel`, restores the text).',
+        'A label a reader can rename in place.',
       ]),
     },
   },

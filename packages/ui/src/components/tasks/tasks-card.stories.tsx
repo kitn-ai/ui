@@ -119,8 +119,7 @@ const meta = {
     controls: { exclude: ['data', 'host', 'hostElement', 'class', 'controllerRef', 'value', 'defaultValue'] },
     docs: {
       description: componentDescription([
-        'The SolidJS layer behind `<kai-tasks>`: a checklist card the assistant can put up for plan approval or multi-select. Pass a `host` (a `CardHost`) to receive emitted `CardEvent`s directly, or wrap in a `CardProvider`. Toggling rows is local; only confirm emits `submit` with `{ selected }` in input order.',
-        'The controls flatten `TasksCardData` — switch `mode` to `progress` for the onboarding look, edit the `tasks` JSON, or set `min`/`max` to gate the confirm button.',
+        'A checklist card the assistant can put up for plan approval or multi-select.',
       ]),
     },
   },
@@ -130,7 +129,7 @@ const meta = {
       control: 'select',
       options: ['select', 'progress'],
       description:
-        '`select` = checkbox rows + a confirm button that emits `submit`. `progress` = the onboarding look: a `done / total` count, circular indicators, and no confirm button (checking a row IS the action).',
+        'Whether the card confirms with a button or completes as rows are checked.',
       table: { defaultValue: { summary: 'select' } },
     },
     listHeading: {

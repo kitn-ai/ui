@@ -16,11 +16,11 @@ const meta = {
   tags: ['autodocs'],
   parameters: {
     layout: 'padded',
+    // Renders nothing with fewer than two models, so it is safe to mount unconditionally.
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'A compact dropdown that shows the active model and switches between the available `models` (each `{ id, name }` with optional `provider`, `description`, or `group`).',
-        'Pass `models` and `currentModelId`, then handle `onModelChange`. Renders nothing with fewer than two models, so it is safe to mount unconditionally.',
+        'A dropdown that shows and changes the active model.',
       ]),
     },
   },

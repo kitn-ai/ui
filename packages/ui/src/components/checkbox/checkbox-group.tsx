@@ -23,37 +23,28 @@ export interface CheckboxGroupProps<T = string>
   options: readonly CheckboxOption<T>[];
   /** The selected values. Each option is checked when its `value` is in here (by identity). */
   value?: readonly T[];
-  /**
-   * The shared form-control name every box in the group carries, so a native form
-   * submits the whole selection under one key and `FormData.getAll(name)` reads it back.
-   *
-   * UNLIKE {@link RadioGroup}, this has no default. A radio group needs a shared `name`
-   * for the browser to make the set exclusive and arrow-navigable, so one is generated
-   * when none is given; checkboxes are independent controls and need nothing to behave
-   * correctly. Generating a name here would submit the selection under a random key,
-   * which is worse than submitting nothing.
-   */
+  // No default, UNLIKE {@link RadioGroup}: a radio set needs a shared `name` for the browser
+  // to make it exclusive and arrow-navigable, so one is generated when none is given, but
+  // checkboxes are independent controls and need nothing to behave correctly. Generating one
+  // here would submit the selection under a random key, which is worse than submitting
+  // nothing.
+  /** Shared form-control name every box carries, so a native form submits the set under one key. */
   name?: string;
   /** Disable every row. */
   disabled?: boolean;
   /** Accessible name for the group. Rendered as `aria-label` on the `group`. */
   label?: string;
-  /**
-   * Fires on every toggle with the NEXT selection, plus the option that moved and
-   * which way it went. The next selection is a fresh array — the group holds no state
-   * of its own, so `value` is yours to own.
-   */
+  // The next selection is a fresh array, since the group holds no state of its own.
+  /** Fires on every toggle, with the next selection plus the option that moved. */
   onChange?: (value: T[], option: CheckboxOption<T>, checked: boolean) => void;
   /** Fires when a box loses focus — the commit point for a form field. */
   onOptionBlur?: () => void;
   /** Extra classes for each row. */
   itemClass?: string;
-  /**
-   * Presentation slot. Replaces the default label/description column with whatever
-   * you return, so a row can carry media, a badge or a price without a second
-   * checkbox component existing. The control, the row chrome and the group semantics
-   * stay ours.
-   */
+  // Replaces the default label/description column, so a row can carry media, a badge or
+  // a price without a second checkbox component existing. The control, the row chrome and
+  // the group semantics stay ours.
+  /** Presentation slot for the row's label column. */
   children?: (option: CheckboxOption<T>, state: { checked: boolean; disabled: boolean }) => JSX.Element;
 }
 

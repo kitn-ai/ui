@@ -83,8 +83,8 @@ export const Invariant = z.object({
  * the emitter did the other thing.
  *
  * NOT resolvable by `lint:catalog-drift`. That lint's ground truth is
- * derived.json, which carries props, events, methods, parts, composedFrom and
- * tokens — no slots — so `child`/`parent` resolve as elements and the SLOT NAME
+ * derived.json, which carries the element `description`, props, events, methods, parts,
+ * composedFrom and tokens, but no slots, so `child`/`parent` resolve as elements and the SLOT NAME
  * resolves against nothing. web-component-meta.json has the slots; wiring them into
  * the derived layer is the way to close it.
  */
@@ -151,6 +151,19 @@ export const Scenario = z.object({
 /** The derived layer's committed artifact. Task 3's generator writes it; Task 3's test parses it. */
 export const DerivedWebComponent = z.object({
   tag: z.string(),
+  /**
+   * WHAT THIS ELEMENT IS, in one sentence: the doc comment above its
+   * `defineWebComponent(...)` call, whitespace-collapsed. `''` when a facade carries
+   * no doc comment, never absent: every row has the same shape.
+   *
+   * The reason this is here at all: an agent choosing between two elements was served
+   * props, events, methods, parts and composedFrom for every one of the 100, and not a
+   * sentence saying what any of them is. Required rather than optional so the field
+   * cannot come back as "some rows have it" without a failure somewhere, and a plain
+   * string because that is what it is: see the string-key handling in
+   * scripts/lib/web-component-meta-keys.mjs for the floor that keeps it non-empty.
+   */
+  description: z.string(),
   props: z.array(
     z.object({
       name: z.string(),

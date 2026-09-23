@@ -9,7 +9,7 @@
 //     execute a scheme: `javascript:` in `src` is inert, and SVG in an `<img>` is
 //     non-scripted and cannot load external resources.
 //   - The legitimate case here IS a `data:` image (`data:image/svg+xml`,
-//     `image.tsx`'s `data:<mediaType>;base64,`), which any navigable-url allowlist
+//     `image-artifact.tsx`'s `data:<mediaType>;base64,`), which any navigable-url allowlist
 //     refuses. So the guard for these sinks is not `isSafeUrl`.
 //   - The residual is real and is the CONSUMER's call: a model can force the reader's
 //     browser to issue an outbound GET (tracking pixel, referrer leak) with no user
@@ -28,7 +28,7 @@ import { render } from '@solidjs/testing-library';
 import { ChoiceCard } from '../../src/components/choice-card/choice-card';
 import { LinkPreview } from '../../src/components/link-preview/link-preview';
 import { Embed } from '../../src/components/embed/embed';
-import { Image } from '../../src/components/image/image';
+import { ImageArtifact } from '../../src/components/image/image-artifact';
 import { Attachment, AttachmentPreview } from '../../src/components/attachments/attachments';
 
 afterEach(() => {
@@ -109,7 +109,7 @@ describe('model image urls: the value passes through, inertly', () => {
   });
 
   it('the kit’s own data: builder passes its media type through, inertly', () => {
-    const { container } = render(() => <Image base64="AAAA" mediaType="text/html" alt="x" />);
+    const { container } = render(() => <ImageArtifact data="AAAA" mediaType="text/html" alt="x" />);
     // `data:text/html,...` in an <img> renders nothing and executes nothing; the
     // attribute is present exactly as built.
     expect(container.querySelector('img')?.getAttribute('src')).toBe('data:text/html;base64,AAAA');
@@ -117,17 +117,17 @@ describe('model image urls: the value passes through, inertly', () => {
   });
 
   it('the case these sinks exist for still works: a data:image renders as an <img>', () => {
-    const { container } = render(() => <Image base64="AAAA" mediaType="image/svg+xml" alt="icon" />);
+    const { container } = render(() => <ImageArtifact data="AAAA" mediaType="image/svg+xml" alt="icon" />);
     expect(container.querySelector('img')?.getAttribute('src')).toBe('data:image/svg+xml;base64,AAAA');
     // And an inline SVG icon url is accepted by the image predicate the icon sink uses,
     // which is the reason a navigable-url allowlist was the wrong tool here.
-    const { container: c2 } = render(() => <Image base64="AAAA" mediaType="image/png" alt="png" />);
+    const { container: c2 } = render(() => <ImageArtifact data="AAAA" mediaType="image/png" alt="png" />);
     expect(c2.querySelector('img')?.getAttribute('src')).toBe('data:image/png;base64,AAAA');
   });
 
   it('an svg data url carrying a handler reaches src and does NOT become a live element', () => {
     const { container } = render(() => (
-      <Image base64="PHN2ZyBvbmxvYWQ9ImFsZXJ0KDEpIj48L3N2Zz4=" mediaType={SVG_DATA.slice('data:'.length)} alt="x" />
+      <ImageArtifact data="PHN2ZyBvbmxvYWQ9ImFsZXJ0KDEpIj48L3N2Zz4=" mediaType={SVG_DATA.slice('data:'.length)} alt="x" />
     ));
     // Whatever the media type string is, this renders ONE <img>: there is no HTML parse
     // step and no innerHTML write, so nothing in the value can become an element.

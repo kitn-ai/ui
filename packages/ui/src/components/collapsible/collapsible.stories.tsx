@@ -11,7 +11,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'A disclosure that expands/collapses `CollapsibleContent` from a `CollapsibleTrigger`, with the right `aria-expanded` wiring and `inert` collapsed content. Controlled (`open` + `onOpenChange`) or uncontrolled (`defaultOpen`).',
+        'A disclosure that shows or hides a region on demand.',
       ]),
     },
   },

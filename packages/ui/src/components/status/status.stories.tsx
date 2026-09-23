@@ -11,7 +11,7 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'A presence dot. `status` picks the hue (`new`, `online`, `busy`, `away`, `offline`), `size` is `sm` or `md`, and `pulse` adds an animated ping ring. Pass `label` to announce it; without one the dot is decorative.',
+        'A small dot that shows a presence state.',
       ]),
     },
   },

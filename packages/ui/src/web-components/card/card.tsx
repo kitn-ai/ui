@@ -6,9 +6,9 @@ interface Props extends Record<string, unknown> {
   /** Surface treatment: `outlined` (default) | `filled` | `plain` | `accent`.
    *  Attribute: `appearance`. */
   appearance?: CardAppearance;
-  /** `vertical` (default, media on top) | `horizontal` (media at the start) |
-   *  `responsive` (horizontal when the card's container is wide enough, else vertical,
-   *  via a container query on the card's own width). Attribute: `orientation`. */
+  // `responsive` goes horizontal when the card's container is wide enough, else
+  // vertical, via a container query on the card's own width.
+  /** `vertical` (default, media on top), `horizontal` (media at the start), or `responsive`. */
   orientation?: CardOrientation;
   /** The card width below which a `responsive` card collapses to vertical and the
    *  footer actions stack. A CSS length; default `28rem`. Attribute: `collapse`. */
@@ -44,27 +44,8 @@ const SLOT_NAMES = ['media', 'header', 'header-actions', 'footer', 'footer-actio
 type SlotName = (typeof SLOT_NAMES)[number];
 
 /**
- * `<kai-card>` — the kit's presentational card, modeled on the WebAwesome card:
- * ONE element whose flexibility comes from a few structural slots, `appearance`
- * and `orientation` variants, themeable `::part`s, and a single
- * `--kai-card-spacing` knob. The title/description are not slots — they are body
- * (default slot) or `slot="header"` content you mark up yourself.
- *
- * Slots: `media` (full-bleed image/video/illustration), `header` + `header-actions`,
- * the default slot (body), `footer` + `footer-actions`.
- *
- * Behaviors (all OFF by default): `dismissible` (× → `kai-dismiss`), and
- * `href`/`clickable` (whole card a link/button → `kai-card-click`). A
- * clickable/href card must NOT also contain action buttons.
- *
- * ```html
- * <kai-card appearance="filled" dismissible>
- *   <div slot="media"><img src="…" alt="…" /></div>
- *   <h3 slot="header">2× usage</h3>
- *   Do more with a higher session limit.
- *   <kai-button slot="footer-actions">Start task</kai-button>
- * </kai-card>
- * ```
+ * A presentational surface for framing one piece of content, with optional media,
+ * header and footer regions.
  */
 defineWebComponent<Props, Events>('kai-card', {
   appearance: 'outlined',
