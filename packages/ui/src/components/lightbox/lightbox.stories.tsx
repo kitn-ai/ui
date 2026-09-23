@@ -7,13 +7,7 @@ const IMAGE_URL = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?
 const ALT = 'A snow-capped mountain above the clouds at dusk';
 
 /**
- * The Solid story for the `Lightbox` trio. The `<kai-lightbox>` element carries its
- * own Labs story for the plain-HTML spelling of the same thing; this one is the
- * composed components a Solid app imports from `@kitn.ai/ui`.
- *
- * The modal is `Dialog`, not a second implementation of one. Escape, the backdrop
- * click, the focus move in and back out, and the Tab trap all come from there, so
- * the trigger and the panel cannot disagree about what "dismissed" means.
+ * Displays media at full size in a modal on click.
  */
 const meta = {
   title: 'Components/Lightbox',
@@ -23,8 +17,7 @@ const meta = {
     layout: 'centered',
     docs: {
       description: componentDescription([
-        'Click-to-open full-size preview. `LightboxTrigger` wraps the thumbnail, `LightboxContent` holds the media, and `Lightbox` owns the open state — uncontrolled from `defaultOpen`, or controlled with `open` + `onOpenChange`.',
-        'The panel renders a close (X) button in its top-right by default; `showClose={false}` takes it away when something the reader can already see dismisses the modal. A click on the picture itself dismisses the modal too — `closeOnContentClick={false}` keeps it open when a click inside the content means something else, such as a zoom toggle. The X, Escape, a backdrop click, the picture and your own control all report through the same `onOpenChange`.',
+        'Displays media at full size in a modal on click.',
       ]),
     },
   },
@@ -51,7 +44,7 @@ const meta = {
     },
     children: {
       control: false,
-      description: 'The trigger and the content, built in `render`: a JSX child cannot cross the Storybook manager/preview boundary, so it can never ride in `args`.',
+      description: 'The trigger and the media.',
     },
     controllerRef: {
       control: false,

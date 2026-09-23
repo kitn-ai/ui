@@ -4,9 +4,9 @@ import { cn } from '../../utils/cn';
 export type SkeletonVariant = 'text' | 'rect' | 'circle';
 
 export interface SkeletonProps extends JSX.HTMLAttributes<HTMLDivElement> {
-  /** Shape preset. `text` = one or more lines; `rect` = a block; `circle` =
-   *  round. Omit for the bare, class-driven block (size it with utility classes
-   *  yourself — the original low-level usage). */
+  // `text` is one or more lines, `rect` a block, `circle` round; omit for the bare,
+  // class-driven block, which the caller sizes with utility classes.
+  /** Shape preset. */
   variant?: SkeletonVariant;
   /** CSS width (a number is treated as px). With a `variant` and no width it
    *  fills its container (responsive); for `circle` it is the diameter. */

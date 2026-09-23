@@ -9,33 +9,30 @@ import { defineWebComponent } from '../define/define';
 import { wireDisclosure } from '../disclosure/disclosure';
 
 interface Props extends Record<string, unknown> {
-  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open`
-   *  attribute, while the trigger click still works). Set `el.open = true`, or
-   *  `<kai-lightbox open>`; listen for `kai-open-change`. */
+  // Shoelace-style: settable and reflected to the `open` attribute, while the trigger
+  // click still works.
+  /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
   /** Initial open state on mount (uncontrolled seed). */
   defaultOpen?: boolean;
-  /** Take away the PROGRAMMATIC open path only: `show()` becomes a no-op and
-   *  `toggle()` closes rather than opens. The trigger, the `open` attribute and
-   *  `hide()` are untouched. These are the disclosure semantics every overlay in
-   *  the kit shares; see ../disclosure. */
+  // These are the disclosure semantics every overlay in the kit shares; see
+  // ../disclosure. The trigger, the `open` attribute and `hide()` are untouched.
+  /** Take away the PROGRAMMATIC open path only: `show()` becomes a no-op and `toggle()` closes rather than opens. */
   disabled?: boolean;
-  /** Accessible name for the modal (`aria-label`), for a lightbox whose content
-   *  carries no heading. Without one the panel is an UNNAMED `role="dialog"`,
-   *  which is a WCAG failure, so name it. */
+  /** Accessible name for the modal (`aria-label`). Name it: an unnamed `role="dialog"` is a WCAG failure. */
   label?: string;
-  /** Show the close (X) button in the modal's top-right corner. ON WHEN ABSENT:
-   *  this is a default-true flag, so `show-close`, `show-close="true"` and
-   *  `el.showClose = true` all mean ON, and the only ways to turn it OFF are
-   *  `show-close="false"` and `el.showClose = false`. Escape, a backdrop click and
-   *  `hide()` dismiss the modal either way. */
+  // A default-true flag, so `show-close`, `show-close="true"` and `el.showClose = true`
+  // all mean ON, and the only ways to turn it OFF are `show-close="false"` and
+  // `el.showClose = false`. Escape, a backdrop click and `hide()` dismiss the modal
+  // either way.
+  /** Show the close (X) button in the modal's top-right corner. Default `true`. */
   showClose?: boolean;
-  /** Close the modal on a click inside `slot="content"`. ON WHEN ABSENT, the same
-   *  default-true flag as `showClose`, so `close-on-content-click`,
-   *  `close-on-content-click="true"` and `el.closeOnContentClick = true` mean ON and
-   *  only `"false"`/`false` turn it off. A click on a link, a button or any other
-   *  interactive element inside the content is let through, so a caption link or a
-   *  download button keeps working. */
+  // The same default-true flag as `showClose`, so `close-on-content-click`,
+  // `close-on-content-click="true"` and `el.closeOnContentClick = true` mean ON and only
+  // `"false"`/`false` turn it off. A click on a link, a button or any other interactive
+  // element inside the content is let through, so a caption link or a download button
+  // keeps working.
+  /** Close the modal on a click inside `slot="content"`. Default `true`. */
   closeOnContentClick?: boolean;
 }
 
@@ -46,30 +43,7 @@ interface Events {
 }
 
 /**
- * `<kai-lightbox>` — the GENERAL case: wrap your own markup and show it bigger,
- * centered, over a dimmed page. The trigger is the default light-DOM content, the
- * media is `slot="content"`.
- *
- * ```html
- * <kai-lightbox label="Sunset over the bay">
- *   <button type="button">Zoom the photo</button>
- *   <img slot="content" src="/sunset.jpg" alt="Sunset over the bay" />
- * </kai-lightbox>
- * ```
- *
- * The trigger is OCCUPANCY-GATED: with nothing in the default slot there is no
- * `role="button"` in the shadow root at all, so this element is also usable when
- * you open it from your own control or from `show()`. The modal it composes gets
- * the whole modal contract from the kit's `Dialog`: Escape, backdrop dismissal,
- * focus moved in and restored, a Tab trap, `role="dialog" aria-modal`, and an
- * `aria-label` from `label`. Any descendant `<img>` is clamped to the viewport. A
- * click inside `slot="content"` dismisses the modal, except on an interactive
- * element inside it — a link in a caption, a download button — which keeps its own
- * click; `close-on-content-click="false"` keeps the modal open on any content click.
- *
- * Open state is the standard disclosure surface: settable+reflecting `open`,
- * `kai-open-change`, and `show()`/`hide()`/`toggle()`; seed with `default-open`.
- * Parts: `backdrop` · `panel` · `body` · `close`.
+ * Enlarges the markup wrapped around it, centered over a dimmed page.
  */
 defineWebComponent<Props, Events>('kai-lightbox', {
   open: undefined,

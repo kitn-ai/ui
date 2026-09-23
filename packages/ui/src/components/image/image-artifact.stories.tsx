@@ -18,8 +18,8 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'Renders an image PAYLOAD the model produced: bare base64 or raw bytes, plus the `mediaType` that names it. For a resource with an address (`https`, a `data:` URI, an object URL you made), use `Image` instead.',
-        '`mediaType` is required. Bare base64 is not self-describing, and a default would mislabel every JPEG, WebP and SVG that reached it; a payload with no `mediaType` reports once and shows the placeholder rather than an image with a guessed type.',
+        'Displays an image the model produced, as base64 or raw bytes. For an image you already have an address for, use Image.',
+        'Displays image data a model or a tool produced.',
       ]),
     },
   },

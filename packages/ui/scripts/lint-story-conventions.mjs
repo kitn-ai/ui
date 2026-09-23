@@ -1,7 +1,7 @@
-// Regression guard for ten STORY-CONVENTION defects, all of which were
+// Regression guard for twelve STORY-CONVENTION defects, all of which were
 // hand-authored per story with nothing enforcing them.
 //
-// THE TEN DEFECTS
+// THE TWELVE DEFECTS
 // (a) A STORY with no usage snippet of its own. The house convention is to
 //     author one by hand: either the local
 //     `const src = (code) => ({ parameters: { docs: { source: { code, ... } } } })`
@@ -116,6 +116,20 @@
 //     intrinsic (`div`, `span`), a DOM global and another package's component
 //     are out of scope BY CONSTRUCTION: no such name is a kit export, so
 //     nothing here can demand an import for one.
+// (l) A rendered component DESCRIPTION that describes the DOCUMENTATION
+//     instead of the component: the strings handed to
+//     `componentDescription([...])` / `specDescription(tag, [...])`, and the
+//     object `docs.description.component` renders. That string is not a
+//     comment -- it is the blurb above the props table, and `llms-full.txt`
+//     and the MCP catalog copy it -- so a sentence about the story the reader
+//     is in is documentation about documentation. The owner, on the Lightbox
+//     story: "we know its solidjs, we don't need to talk about the labs story
+//     either. the doc for components should be focus on the component." The
+//     same rule caps a description at `DESCRIPTION_PARAGRAPH_LIMIT`
+//     paragraphs: past three it is an article, and the detail belongs in the
+//     examples and the props table. `sidebar` is deliberately NOT vocabulary
+//     -- the kit renders a real sidebar (the conversation list), so `a
+//     sidebar conversation list` is component behaviour.
 //
 // THE INVARIANT
 // (a) is a per-STORY finding: every exported story object must have a snippet
@@ -180,6 +194,14 @@
 // runs, intersected with the kit's public export names read from
 // `src/index.ts` and `src/solid.ts`. A name the snippet's own import line
 // brings is clean, and so is a name the snippet declares for itself.
+// (l) is a per-DESCRIPTION finding: every paragraph of every RENDERED component
+// description -- read from the four authoring shapes the tree writes, all of
+// which land on `docs.description.component` -- must be free of `DOCS_TALK`,
+// and the description must carry at most `DESCRIPTION_PARAGRAPH_LIMIT`
+// paragraphs. A description this reader cannot read statically (a template with
+// a hole, an array with a spread) is UNVERIFIED. A
+// `// lint-story-conventions: docs-talk -- <reason>` waiver on the site's line or
+// the line above covers the whole description.
 //
 // (i) AND (k) ARE THE TWO DIRECTIONS OF ONE FACT. A docs source snippet is the
 // code a reader PASTES, so a name it cannot resolve is broken either way: the
@@ -198,13 +220,17 @@
 // be legitimate.
 //
 // WHY AST, NOT REGEX
-// All ten rules are about a SHAPE in the code or in a file the code names (a
-// property chain, a story's `render` key, a title's segment path, a props type
-// declared in the module a story imports, an element's events, the docgen
-// options, a meta's `component`/`tags` properties, an identifier in expression
-// position), not a token that also legitimately appears in prose --
+// Every rule here but (l) is about a SHAPE in the code or in a file the code
+// names (a property chain, a story's `render` key, a title's segment path, a
+// props type declared in the module a story imports, an element's events, the
+// docgen options, a meta's `component`/`tags` properties, an identifier in
+// expression position), not a token that also legitimately appears in prose --
 // `lint-cdn-pins` justifies regex for exactly that distinction and rejects it
-// for shape-matching. A real parse also means renamed variables, multiline
+// for shape-matching. (l) earns the same exception from the same place: it
+// reads a rendered STRING, and the WORDS in it are the defect. The AST is still
+// what decides WHICH strings those are -- the argument of the right call, the
+// `component` property under `docs.description` -- never a grep for the word.
+// A real parse also means renamed variables, multiline
 // object literals and reordered keys don't produce false negatives the way a
 // line-oriented scan would.
 //
@@ -215,7 +241,8 @@
 // this script being broken. The same rule covers every derivation the new
 // rules depend on: a run that resolved NO component props type, read NO event
 // off the element meta, found NO story meta declaring a `component`, read NO
-// snippet text, read NO rendered text node, or parsed NO kit export name exits
+// snippet text, read NO rendered text node, read NO rendered component
+// description string, or parsed NO kit export name exits
 // 1 instead of reporting a clean tree.
 //
 // UNVERIFIED IS A FAILURE, NOT A PASS. Where a new rule cannot read the fact it
@@ -1776,6 +1803,195 @@ function findGlyphAffordances(sf, text) {
   return { findings, textRegions };
 }
 
+// ---------------------------------------------------------------------------
+// (l) a rendered component description that describes the DOCUMENTATION
+// ---------------------------------------------------------------------------
+
+/** The words that make a description talk about the DOCUMENTATION around the
+ *  component instead of the component: Storybook's own name, the story the
+ *  reader is in, the Labs tier, the page or demo around it. The description is
+ *  rendered ABOVE the props table and copied into `llms-full.txt`, so a reader
+ *  meeting `the story` there learns about Storybook and not about the component.
+ *
+ *  `story` AND `Labs` ARE BARE WORDS, and that is the point: a rendered
+ *  description of a component has no legitimate use for either. An enumeration
+ *  of phrases is always incomplete -- it missed `its own story`, which is what
+ *  `audio-visualizer.stories.tsx` shipped -- while the bare word cannot be.
+ *
+ *  `sidebar` is deliberately NOT here, and do not "complete" this list with
+ *  that word: the kit renders a real sidebar (the conversation list), so `a
+ *  sidebar conversation list` is component behaviour, not docs talk. */
+const DOCS_TALK = /\b(Storybook|story|Labs|this page|this demo|the demo|docs page)\b/i;
+
+/** The most paragraphs a description may carry. Past three it has stopped being
+ *  a description of the component and become an article: the detail belongs in
+ *  the examples and the props table. */
+const DESCRIPTION_PARAGRAPH_LIMIT = 3;
+
+/** The two helpers a story hands its description paragraphs to. */
+const DESCRIPTION_HELPERS = ['componentDescription', 'specDescription'];
+
+/** A line waiver for a description that has to name the documentation -- prose
+ *  quoting the vocabulary, or a component whose own subject IS its docs.
+ *
+ *  A parsed directive for the same reason `GLYPH_WAIVER` is: the text already
+ *  reads as deliberate prose, so a rule honouring a written reason would pass
+ *  the defect it was written about. Covers the line it sits on and the line
+ *  above. */
+const DOCS_TALK_WAIVER = /lint-story-conventions:\s*docs-talk\s*--\s*(.{15,})/;
+
+/** The docs-talk defect in the RENDERED component descriptions: a description
+ *  that names Storybook, the story or the page, or one long enough to be an
+ *  article.
+ *
+ *  Four authoring shapes, one rendered string each:
+ *    componentDescription([p1, p2])        -- `src/components/**`
+ *    specDescription('kai-x', [p1, p2])    -- `src/web-components/**`
+ *    description: { component: <string> }  -- either root, including the `+`
+ *                                             row of literals
+ *                                             (`web-components/lightbox/`) and
+ *                                             the `[...].join('\n\n')`
+ *                                             (`overlay.stories.tsx`)
+ *  All of them land on `docs.description.component`, which is what Storybook
+ *  renders and what the docs page, `llms-full.txt` and the MCP catalog copy. */
+function findDescriptionDocsTalk(sf, text) {
+  const lines = text.split('\n');
+  const findings = [];
+  const unverified = [];
+  let descriptions = 0;
+
+  /** Is the site at `anchor` waived? The waiver sits on that line or the line
+   *  above it, the same window `GLYPH_WAIVER` covers. */
+  const waivedAt = (anchor) =>
+    DOCS_TALK_WAIVER.test(lines[anchor - 1] ?? '') || DOCS_TALK_WAIVER.test(lines[anchor - 2] ?? '');
+
+  /** A string literal -- or the row of literals a `+` joins, which are ONE
+   *  paragraph -- as `{ text, line }` segments. Anything else (a template with
+   *  a hole, an identifier, a call) is not statically readable. */
+  const stringSegments = (node) => {
+    if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) {
+      return [{ text: node.text, line: lineAt(sf, node) }];
+    }
+    if (ts.isBinaryExpression(node) && node.operatorToken.kind === ts.SyntaxKind.PlusToken) {
+      const left = stringSegments(node.left);
+      const right = stringSegments(node.right);
+      if (left && right) return [...left, ...right];
+    }
+    return undefined;
+  };
+
+  /** The paragraph list an expression renders: one paragraph per array entry,
+   *  each entry itself possibly a `+` row. A single string is a one-paragraph
+   *  list. `undefined` is a description this reader cannot read, which the
+   *  caller reports as UNVERIFIED rather than skipping quietly. */
+  const paragraphsOf = (node) => {
+    const single = stringSegments(node);
+    if (single) return [single];
+    if (ts.isArrayLiteralExpression(node)) return arrayParagraphs(node);
+    if (ts.isCallExpression(node)) {
+      if (ts.isIdentifier(node.expression) && DESCRIPTION_HELPERS.includes(node.expression.text)) {
+        const arg = node.arguments[node.arguments.length - 1];
+        return arg && ts.isArrayLiteralExpression(arg) ? arrayParagraphs(arg) : undefined;
+      }
+      const callee = node.expression;
+      if (
+        ts.isPropertyAccessExpression(callee) &&
+        callee.name.text === 'join' &&
+        ts.isArrayLiteralExpression(callee.expression)
+      ) {
+        return arrayParagraphs(callee.expression);
+      }
+    }
+    return undefined;
+  };
+
+  // A function declaration, so `paragraphsOf` can call it above its definition.
+  function arrayParagraphs(array) {
+    const out = [];
+    for (const element of array.elements) {
+      const paragraph = stringSegments(element);
+      if (!paragraph) return undefined;
+      out.push(paragraph);
+    }
+    return out;
+  }
+
+  /** The line a match at `index` of a paragraph's JOINED text sits on -- a
+   *  `+`-split paragraph starts each segment on its own line. */
+  const lineOf = (paragraph, index) => {
+    let at = 0;
+    for (const segment of paragraph) {
+      if (index < at + segment.text.length) {
+        return segment.line + (segment.text.slice(0, index - at).match(/\n/g)?.length ?? 0);
+      }
+      at += segment.text.length;
+    }
+    return paragraph[paragraph.length - 1].line;
+  };
+
+  const record = (paragraphs, anchor, unreadable) => {
+    if (!paragraphs) {
+      unverified.push({ line: anchor, what: unreadable });
+      return;
+    }
+    const waived = waivedAt(anchor);
+    for (const paragraph of paragraphs) {
+      descriptions++;
+      if (waived) continue;
+      const match = paragraph
+        .map((segment) => segment.text)
+        .join('')
+        .match(DOCS_TALK);
+      if (match) {
+        findings.push({
+          word: match[0],
+          line: lineOf(paragraph, match.index),
+          reason: `the description talks about the documentation ('${match[0]}'), not the component`,
+        });
+      }
+    }
+    if (!waived && paragraphs.length > DESCRIPTION_PARAGRAPH_LIMIT) {
+      findings.push({
+        word: `${paragraphs.length} paragraphs`,
+        line: anchor,
+        reason:
+          `${paragraphs.length} paragraphs in one description (the limit is ${DESCRIPTION_PARAGRAPH_LIMIT}): ` +
+          `the detail belongs in the examples and the props table`,
+      });
+    }
+  };
+
+  const visit = (node) => {
+    if (
+      ts.isCallExpression(node) &&
+      ts.isIdentifier(node.expression) &&
+      DESCRIPTION_HELPERS.includes(node.expression.text) &&
+      // Read by the `component` property below, which handles the same call --
+      // counting it in both places would report one description twice.
+      !isNamedProp(node.parent, 'component')
+    ) {
+      const anchor = lineAt(sf, node);
+      const arg = node.arguments[node.arguments.length - 1];
+      record(paragraphsOf(arg), anchor, `the ${node.expression.text}(...) argument is not statically readable`);
+    } else if (
+      ts.isPropertyAssignment(node) &&
+      propName(node) === 'component' &&
+      isNamedProp(node.parent?.parent, 'description') &&
+      isNamedProp(node.parent?.parent?.parent?.parent, 'docs')
+    ) {
+      const anchor = lineAt(sf, node);
+      record(
+        paragraphsOf(node.initializer),
+        anchor,
+        'the docs.description.component value is not statically readable',
+      );
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sf);
+  return { findings, unverified, descriptions };
+}
+
 function analyzeFile(path, text, ctx) {
   const sf = parse(path, text);
   const findings = {
@@ -1811,6 +2027,10 @@ function analyzeFile(path, text, ctx) {
   const glyphs = findGlyphAffordances(sf, text);
   findings.glyphs = glyphs.findings;
   findings.renderedTextRegions = glyphs.textRegions;
+  const descriptions = findDescriptionDocsTalk(sf, text);
+  findings.descriptionDocsTalk = descriptions.findings;
+  findings.descriptionStrings = descriptions.descriptions;
+  findings.unverified.push(...descriptions.unverified);
   const title = findMetaTitle(sf);
   if (title) {
     if (retiredTier(title.value)) findings.retiredTier = title;
@@ -2625,6 +2845,72 @@ const SELF_TEST_CASES = [
     expectUnimportedExports: ['Switch'],
   },
   {
+    name: "(l) a description naming the story it renders in is flagged (the Solid story for X shape)",
+    code: `const meta = { parameters: { docs: { description: componentDescription([
+      'Renders live audio as bars, a grid, a ring, a wave, or a glowing aurora.',
+      'The Solid story for X is where the shader canvas is driven.',
+    ]) } } };`,
+    expectDocsTalk: ['story'],
+  },
+  {
+    name: "(l) a description naming its own story is flagged (the audio-visualizer sentence worth flagging)",
+    code: `const meta = { parameters: { docs: { description: componentDescription([
+      'Each look gets its own story across all six states, embedded below.',
+    ]) } } };`,
+    expectDocsTalk: ['story'],
+  },
+  {
+    name: '(l) a four-paragraph description is flagged (the blog-article shape)',
+    code: `const meta = { parameters: { docs: { description: componentDescription([
+      'One thing.', 'Two things.', 'Three things.', 'Four things.',
+    ]) } } };`,
+    expectDocsTalk: ['4 paragraphs'],
+  },
+  {
+    name: '(l) a clean two-paragraph description about the component is not flagged',
+    code: `const meta = { parameters: { docs: { description: componentDescription([
+      'A small floating label on hover/focus of its trigger.',
+      'Wrap one interactive child and set content to the hint text.',
+    ]) } } };`,
+    expectDocsTalk: [],
+  },
+  {
+    name: '(l) a docs-talk line waiver on the line above the call silences the finding',
+    code: `const meta = { parameters: { docs: {
+      // lint-story-conventions: docs-talk -- quotes the vocabulary the component copies
+      description: componentDescription(['The story for X is what this mirrors.']),
+    } } };`,
+    expectDocsTalk: [],
+  },
+  {
+    name: '(l) a waiver carrying no reason is not a waiver',
+    code: `const meta = { parameters: { docs: {
+      // lint-story-conventions: docs-talk -- short
+      description: componentDescription(['The story for X is what this mirrors.']),
+    } } };`,
+    expectDocsTalk: ['story'],
+  },
+  {
+    name: "(l) a `+` row of literals is ONE paragraph, and `Labs` is a bare word (the element-story form)",
+    code: `const meta = { parameters: { docs: { description: {
+      component: 'Shows your markup bigger, centered over a dimmed page. '
+        + 'The trigger lives on a Labs/Foundations page.',
+    } } } };`,
+    expectDocsTalk: ['Labs'],
+  },
+  {
+    name: '(l) an array joined into the description is read as paragraphs (the overlay.stories.tsx shape)',
+    code: `const meta = { parameters: { docs: { description: {
+      component: ['First paragraph.', 'Second paragraph.', 'Third.', 'Fourth.'].join('\n\n'),
+    } } } };`,
+    expectDocsTalk: ['4 paragraphs'],
+  },
+  {
+    name: '(l) a file with no rendered component description reads nothing (what makes the run vacuous)',
+    code: `export const Playground = { render: () => <Widget /> };`,
+    expectDescriptions: 0,
+  },
+  {
     // Reads the REAL entry points, so a misrooted path or a parser that stopped
     // finding exports fails here rather than making every (k) assertion vacuous.
     name: "(k) the real entry points still parse to the kit's export names",
@@ -2785,6 +3071,22 @@ function runSelfTest() {
         notes.push(`glyphs: expected [${c.expectGlyphs.join(', ')}], got [${got.join(', ')}]`);
       }
     }
+    if ('expectDocsTalk' in c || 'expectDescriptions' in c) {
+      const got = findDescriptionDocsTalk(sf, c.code ?? '');
+      if ('expectDocsTalk' in c) {
+        const words = got.findings.map((f) => f.word);
+        const expected = c.expectDocsTalk;
+        const same = words.length === expected.length && words.every((k, i) => k === expected[i]);
+        if (!same) {
+          ok = false;
+          notes.push(`docs-talk: expected [${expected.join(', ')}], got [${words.join(', ')}]`);
+        }
+      }
+      if ('expectDescriptions' in c && got.descriptions !== c.expectDescriptions) {
+        ok = false;
+        notes.push(`descriptions: expected ${c.expectDescriptions}, got ${got.descriptions}`);
+      }
+    }
     if ('expectKitExports' in c) {
       const kit = loadKitExports(PKG_ROOT);
       if (kit.names.size === 0) {
@@ -2900,6 +3202,7 @@ const elementEventOffenders = [];
 const autodocsOffenders = [];
 const snippetLocalNameOffenders = [];
 const glyphOffenders = [];
+const docsTalkOffenders = [];
 const unimportedExportOffenders = [];
 const unverified = [];
 let resolvedComponents = 0;
@@ -2910,6 +3213,7 @@ let requiredElementEvents = 0;
 let componentMetas = 0;
 let snippetsScanned = 0;
 let renderedTextRegions = 0;
+let descriptionStrings = 0;
 for (const path of files) {
   const rel = relative(PKG_ROOT, path);
   const text = readFileSync(path, 'utf8');
@@ -2922,6 +3226,7 @@ for (const path of files) {
   for (const f of findings.snippetLocalNames) snippetLocalNameOffenders.push({ file: rel, ...f });
   for (const f of findings.snippetUnimportedExports) unimportedExportOffenders.push({ file: rel, ...f });
   for (const g of findings.glyphs) glyphOffenders.push({ file: rel, ...g });
+  for (const d of findings.descriptionDocsTalk) docsTalkOffenders.push({ file: rel, ...d });
   for (const u of findings.unverified) unverified.push({ file: rel, ...u });
   if (findings.retiredTier) retiredTierOffenders.push({ file: rel, ...findings.retiredTier });
   if (findings.doubledToken) doubledTokenOffenders.push({ file: rel, ...findings.doubledToken });
@@ -2930,6 +3235,7 @@ for (const path of files) {
   requiredComponentEvents += findings.componentEventsRequired;
   snippetsScanned += findings.snippetsScanned;
   renderedTextRegions += findings.renderedTextRegions;
+  descriptionStrings += findings.descriptionStrings;
   if (findings.elementTags.length > 0) {
     elementTagFiles++;
     elementTags += findings.elementTags.length;
@@ -2955,6 +3261,9 @@ if (snippetsScanned === 0) {
 if (renderedTextRegions === 0) {
   vacuous.push('(j) read no rendered string/template/JSX-text region, so no glyph could be found');
 }
+if (descriptionStrings === 0) {
+  vacuous.push('(l) read no rendered component description string, so no docs-talk or over-long description could be found');
+}
 
 const total =
   snippetOffenders.length +
@@ -2967,6 +3276,7 @@ const total =
   snippetLocalNameOffenders.length +
   unimportedExportOffenders.length +
   glyphOffenders.length +
+  docsTalkOffenders.length +
   (docgenIssue ? 1 : 0);
 const unverifiedTotal = unverified.length + eventsSkipped.length + kit.starUnfollowed.length;
 if (total === 0 && unverifiedTotal === 0 && vacuous.length === 0) {
@@ -2981,7 +3291,9 @@ if (total === 0 && unverifiedTotal === 0 && vacuous.length === 0) {
       `Every one of the ${componentMetas} meta(s) declaring a \`component\` carries tags: ['autodocs']; every ` +
       `snippet read (${snippetsScanned}) names only what it brings with it or imports, and imports every ` +
       `kit export it uses (${kit.names.size} public name(s) parsed out of ${KIT_ENTRY_FILES.join(' + ')}); and ` +
-      `no story hand-rolls one of ${GLYPH_CHARS.join(' ')} across ${renderedTextRegions} rendered text region(s).`,
+      `no story hand-rolls one of ${GLYPH_CHARS.join(' ')} across ${renderedTextRegions} rendered text region(s); and ` +
+      `every one of the ${descriptionStrings} rendered component description string(s) in those stories describes the ` +
+      `component -- not Storybook, the story or the page -- in ${DESCRIPTION_PARAGRAPH_LIMIT} paragraph(s) or fewer.`,
   );
   process.exit(0);
 }
@@ -2998,6 +3310,7 @@ console.error(
     `${componentMetas} meta(s) declare a component, ${snippetsScanned} docs-source snippet(s) were read, ` +
     `${kit.names.size} kit export name(s) were parsed out of ${KIT_ENTRY_FILES.join(' + ')}, ` +
     `${renderedTextRegions} rendered text region(s) were scanned for glyphs; ` +
+    `${descriptionStrings} rendered component description string(s) were read for docs talk and for over-long descriptions; ` +
     `${relative(PKG_ROOT, mainPath)} read for the framework docgen options.\n`,
 );
 
@@ -3134,6 +3447,23 @@ if (glyphOffenders.length > 0) {
       `    the text runs at, and it carries no accessible name.\n` +
       `    A story that deliberately SHOWS the character waives the line:\n` +
       `      // lint-story-conventions: glyph -- <why it is deliberate, 15+ chars>\n`,
+  );
+}
+
+if (docsTalkOffenders.length > 0) {
+  const filesAffected = new Set(docsTalkOffenders.map((f) => f.file)).size;
+  console.error(
+    `  (l) ${docsTalkOffenders.length} problem(s) in the rendered component descriptions (${filesAffected} file(s)):`,
+  );
+  for (const f of docsTalkOffenders) console.error(`    ${f.file}:${f.line}  ${f.word}  (${f.reason})`);
+  console.error(
+    `    A description renders ABOVE the props table, and the same string is copied into llms-full.txt and\n` +
+      `    the MCP catalog, so it has to describe the COMPONENT. Drop the words about the documentation\n` +
+      `    (Storybook, the story, the page) and, past ${DESCRIPTION_PARAGRAPH_LIMIT} paragraphs, move the detail into\n` +
+      `    the examples and the props table.\n` +
+      `    A description that has to name the documentation waives its site:\n` +
+      `      // lint-story-conventions: docs-talk -- <why it is deliberate, 15+ chars>\n` +
+      `    on the line of the componentDescription(...) call / the \`component:\` key, or the line above.\n`,
   );
 }
 

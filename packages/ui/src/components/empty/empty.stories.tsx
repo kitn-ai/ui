@@ -12,12 +12,8 @@ import {
 } from 'lucide-solid';
 import { componentDescription } from '../../stories/docs/web-component-controls';
 
-/**
- * Story for the compound `Empty` family. `Empty` is the root container; the
- * header/media/title/description/content subcomponents compose the layout. The
- * only real enum prop is `EmptyMedia`'s `variant`, so the controls focus on the
- * common composition, and the variation stories are compositional showcases.
- */
+// `EmptyMedia`'s `variant` is the only enum prop, so the controls cover the composition
+// and the variation stories are compositional.
 const meta = {
   title: 'Components/Empty',
   component: Empty,

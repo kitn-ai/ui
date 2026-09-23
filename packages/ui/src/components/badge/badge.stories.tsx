@@ -11,7 +11,7 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'A compact pill for status text, counts, or source citations. Set `variant`: `default` (label), `count` (numeric pill), or `citation` (clickable source marker).',
+        'A compact pill for status text, counts, or source citations.',
       ]),
     },
   },

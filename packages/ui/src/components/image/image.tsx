@@ -2,12 +2,11 @@ import { type JSX, splitProps } from 'solid-js';
 import { cn } from '../../utils/cn';
 
 export interface ImageProps extends JSX.ImgHTMLAttributes<HTMLImageElement> {
-  /** The image RESOURCE: an https URL, a `data:` URI, or an object URL the
-   *  caller made. A model-produced payload has no address until something
-   *  builds one, so it belongs on `<ImageArtifact data={...} mediaType={...}>`. */
+  // A model-produced payload has no address until something builds one, so it goes
+  // to `<ImageArtifact data={...} mediaType={...}>` instead.
+  /** The image resource: an https URL, a `data:` URI, or an object URL the caller made. */
   src: string;
-  /** Alternative text. Required: an unnamed image is invisible to a screen
-   *  reader, and `alt=""` cannot be told apart from "forgot to write one". */
+  /** Alternative text. Required: an unnamed image is invisible to a screen reader. */
   alt: string;
   class?: string;
 }

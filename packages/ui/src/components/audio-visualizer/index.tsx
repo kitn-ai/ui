@@ -32,29 +32,21 @@ export function normalizeVariant(input: string | undefined): VisualizerVariant {
 
 /** A consumer-supplied fragment shader, for `variant="custom"`. */
 export interface ShaderSpec {
-  /**
-   * GLSL source defining `mainImage(out vec4 fragColor, in vec2 fragCoord)`.
-   *
-   * MUST output premultiplied colour: `fragColor = vec4(rgb * alpha, alpha);`,
-   * never `vec4(rgb, alpha)`. The canvas composites using the browser's
-   * default `premultipliedAlpha: true`; a translucent edge written the
-   * natural (straight-alpha) way gets a dark fringe where it meets a light
-   * page background.
-   */
+  // MUST output premultiplied colour (`fragColor = vec4(rgb * alpha, alpha);`, never
+  // `vec4(rgb, alpha)`): the canvas composites with the browser default
+  // `premultipliedAlpha: true`, so a translucent edge written the natural (straight-alpha)
+  // way gets a dark fringe where it meets a light page background.
+  /** GLSL source defining `mainImage(out vec4 fragColor, in vec2 fragCoord)`. */
   fragment: string;
-  /**
-   * Custom uniforms. The canvas DECLARES these for you; declaring them in the
-   * shader too is a compile error.
-   *
-   * `type` is narrowed to `UniformType`, not a bare string: an unrecognized
-   * type here is caught by TypeScript for a TS-authored `shader` prop, before
-   * it can produce `uniform undefined <name>;` in the assembled source (a
-   * confusing compile error). A consumer reaching this through the
-   * `<kai-audio-visualizer>` custom element or an attribute-driven wrapper
-   * bypasses this check entirely (it is JS at that boundary, not TS) --
-   * `variant-custom.tsx`'s `customUniforms` re-checks `type` at runtime for
-   * exactly that reason.
-   */
+  // The canvas DECLARES these for you; declaring them in the shader too is a compile error.
+  //
+  // `type` is narrowed to `UniformType` rather than a bare string, so an unrecognized type
+  // is caught by TypeScript for a TS-authored `shader` prop before it can produce
+  // `uniform undefined <name>;` in the assembled source. A consumer reaching this through
+  // the `<kai-audio-visualizer>` element or an attribute-driven wrapper bypasses that check
+  // (the boundary is JS, not TS), which is why `variant-custom.tsx`'s `customUniforms`
+  // re-checks `type` at runtime.
+  /** Custom uniforms for the shader source. */
   uniforms?: Record<string, { type: UniformType; value: number | number[] }>;
 }
 
@@ -76,59 +68,44 @@ export interface AudioVisualizerProps {
   complexity?: number;
   /** Setting this makes the element an announced image instead of decorative. */
   label?: string;
-  /** Live audio to analyze. NOTE: amplitude renders only while
-   *  `state === 'speaking'` unless `listeningAmplitude` is set; every other
-   *  state plays its scripted animation and the analysis output is unused. */
+  // Every other state plays its scripted animation and the analysis output is unused.
+  /** Live audio to analyze; only read while `state === 'speaking'`. */
   stream?: MediaStream;
   /** Same speaking-only amplitude rule as `stream`: see `listeningAmplitude`. */
   audioElement?: HTMLMediaElement;
   /** Pre-computed levels. Set this and no AudioContext is ever constructed.
    *  Same speaking-only amplitude rule as `stream`: see `listeningAmplitude`. */
   bands?: number[];
-  /**
-   * Opt in to rendering live amplitude during `listening` as well, using the
-   * same presentation as `speaking`. Default off, which keeps LiveKit parity:
-   * amplitude (from `stream`, `audioElement` or `bands`) renders only while
-   * `state === 'speaking'`. Set this to show a real mic-level picture while
-   * the USER is the one talking. Forwarded to every variant; see
-   * `amplitudeRenderState` in variant-bar for the single mapping they share.
-   */
+  // Default off keeps LiveKit parity: amplitude (from `stream`, `audioElement` or
+  // `bands`) renders only while `state === 'speaking'`. The point of turning it on is a real
+  // mic-level picture while the USER is the one talking. Forwarded to every variant through
+  // the single mapping in `amplitudeRenderState`.
+  /** Render live amplitude during the `listening` state too. Off by default. */
   listeningAmplitude?: boolean;
-  /**
-   * Custom fragment shader for `variant="custom"`. See `ShaderSpec` for the
-   * full contract -- most importantly, `fragment` MUST output premultiplied
-   * colour (`vec4(rgb * alpha, alpha)`, not `vec4(rgb, alpha)`), or
-   * translucent edges get dark fringes on light backgrounds.
-   */
+  // The whole contract is on `ShaderSpec`; the premultiplied-alpha rule above is the part
+  // that bites in practice.
+  /** Custom fragment shader for `variant="custom"`. */
   shader?: ShaderSpec;
-  /**
-   * Shader variants only (`wave`/`aurora`/`custom`): keep animating while the
-   * element is scrolled off screen. Default `false`, which stops the draw loop
-   * and releases the WebGL context until it comes back -- see `ShaderCanvas`'s
-   * `animateWhenNotVisible` for the context-budget reasoning and the cost of
-   * opting out. Does not override `prefers-reduced-motion`.
-   */
+  // Default `false` stops the draw loop and releases the WebGL context until the element
+  // comes back; `ShaderCanvas`'s own `animateWhenNotVisible` documents the context budget
+  // and the cost of opting out.
+  /** Shader variants only: keep animating while scrolled off screen. Off by default; does
+   *  not override `prefers-reduced-motion`. */
   animateWhenNotVisible?: boolean;
   class?: string;
-  /**
-   * Render each DOM variant's items yourself -- the same render-prop the
-   * underlying bar/grid/radial component takes, imported rather than
-   * redeclared so the two cannot drift. Not used by the shader variants
-   * (`wave`/`aurora`/`custom`): a fragment shader has no per-item DOM for it
-   * to replace.
-   */
+  // The same render-prop the underlying bar/grid/radial component takes, imported rather
+  // than redeclared so the two cannot drift. Unused by the shader variants
+  // (`wave`/`aurora`/`custom`), which have no per-item DOM to replace.
+  /** Render each DOM variant's items yourself. */
   children?: VariantProps['children'];
-  /**
-   * Explicit `'light'` or `'dark'` wins; `'auto'` (the default) follows a
-   * live `prefers-color-scheme` listener -- the same rule
-   * `web-components/define/define.tsx`'s `createDarkMode` applies for every `kai-*`
-   * element. Only the shader variants read this (aurora/wave pick a colour
-   * pipeline with it): the three DOM variants already get dark-mode styling
-   * for free via CSS custom properties, which a shader baking colour into a
-   * GLSL uniform cannot do. `<kai-audio-visualizer>` forwards its own
-   * already-resolved `theme` attribute through this prop; a bare
-   * `<AudioVisualizer>` with no wrapping element needs it set directly.
-   */
+  // `'auto'` follows a live `prefers-color-scheme` listener, the same rule
+  // `web-components/define/define.tsx`'s `createDarkMode` applies for every `kai-*` element.
+  // Only the shader variants read it (aurora/wave pick a colour pipeline with it): the three
+  // DOM variants get dark-mode styling free through CSS custom properties, which a shader
+  // baking colour into a GLSL uniform cannot do. `<kai-audio-visualizer>` forwards its own
+  // already-resolved `theme` through this prop; a bare `<AudioVisualizer>` needs it set
+  // directly.
+  /** Colour pipeline for the shader variants; follows the OS when unset. */
   theme?: 'light' | 'dark' | 'auto';
 }
 
@@ -197,29 +174,19 @@ export interface ShaderVariantProps extends Omit<VariantProps, 'children'> {
   complexity?: number;
   /** Only meaningful for `variant="custom"`. */
   shader?: ShaderSpec;
-  /**
-   * Already-resolved: `true` selects the dark colour pipeline, `false`
-   * selects light -- matching `web-components/define/define.tsx`'s `createDarkMode`
-   * output exactly (`classList={{ dark: isDark() }}`). This is that SAME
-   * resolved value forwarded down, not a re-derivation, so a shader baking
-   * colour into a GLSL uniform never needs its own `prefers-color-scheme`
-   * listener for the common case. Optional: a shader mounted standalone (no
-   * dispatcher resolving `theme` above it) may fall back to reading the
-   * media query itself.
-   */
+  // The SAME resolved value `web-components/define/define.tsx`'s `createDarkMode` produces
+  // (`classList={{ dark: isDark() }}`), forwarded down rather than re-derived, so a shader
+  // baking colour into a GLSL uniform needs no `prefers-color-scheme` listener of its own.
+  // Optional for a shader mounted standalone, with no dispatcher resolving `theme` above it.
+  /** Selects the dark colour pipeline when true. */
   dark?: boolean;
-  /**
-   * Keep animating while off screen instead of releasing the WebGL context.
-   * Relayed straight through to `ShaderCanvas`, which owns the behaviour and
-   * documents the trade-off; the variants are pure conduits for it.
-   */
+  // Relayed straight through to `ShaderCanvas`, which owns the behaviour and documents the
+  // trade-off; the variants are pure conduits for it.
+  /** Shader variants only: keep animating while scrolled off screen. Off by default. */
   animateWhenNotVisible?: boolean;
-  /**
-   * Call this if the shader cannot render at all -- most commonly
-   * `canvas.getContext('webgl')` returning null. Permanent for this mount:
-   * the dispatcher swaps to the bar fallback and will not retry the shader
-   * on any later reactive update, only on switching to a different variant.
-   */
+  // Permanent for this mount: the dispatcher swaps to the bar fallback and will not retry the
+  // shader on a later reactive update, only on switching to a different variant.
+  /** Called when the shader cannot render at all, most commonly a null WebGL context. */
   onUnavailable: () => void;
 }
 

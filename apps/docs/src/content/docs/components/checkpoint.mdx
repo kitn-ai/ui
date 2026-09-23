@@ -1,6 +1,6 @@
 ---
 title: Checkpoint
-description: A compact bookmark button that marks a restore point in a conversation — with an optional label and tooltip.
+description: A button that marks a restore point in a conversation.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -14,7 +14,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kai-tag-sub">kai-checkpoint</p>
 
-<p class="kai-lede">A compact bookmark button that marks a restore point in a conversation thread.</p>
+<p class="kai-lede">Fits a dense action bar, taking either an icon alone or a short label.</p>
 
 <Facts items={['Shadow DOM', '1 event', '3 variants', '5 sizes', 'Icon-only or labeled']} />
 
@@ -23,7 +23,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 <Playground client:only="solid" tag="kai-checkpoint" />
 
 <Aside type="tip" title="When to use">
-Place `<kai-checkpoint>` in a message action bar or chat toolbar wherever users may want to save and jump back to a point. Use the `ghost` variant (default) to keep it unobtrusive; switch to `outline` or `default` for more visual emphasis. For icon-only buttons, always set `tooltip` so the intent is clear to screen readers and mouse users.
+Wherever readers may want to save a spot and jump back to it: a message action bar, a chat toolbar. For the whole row it sits in, use [Message](/components/message/).
 </Aside>
 
 ## Usage

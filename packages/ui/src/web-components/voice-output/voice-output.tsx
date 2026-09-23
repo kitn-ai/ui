@@ -6,13 +6,11 @@ interface Props extends Record<string, unknown> {
   text?: string;
   /** Speak automatically when `text` is set/changed. */
   autoplay?: boolean;
-  /**
-   * TTS model seam the host supplies: given text, returns an audio `Blob` to
-   * play. This is a **function-valued property** (`el.synthesize = async text =>
-   * blob`); when set, the native `speechSynthesis` path is bypassed. Mirrors
-   * `<kai-voice-input>`'s `transcribe`. A value-returning callback can't be
-   * modelled as a fire-and-forget event, hence a property.
-   */
+  //
+  // When set, the native `speechSynthesis` path is bypassed. Mirrors
+  // `<kai-voice-input>`'s `transcribe`; a value-returning callback can't be modelled as a
+  // fire-and-forget event, hence a property.
+  /** TTS model seam the host supplies: given text, returns an audio `Blob`. **Function-valued property.** */
   synthesize?: (text: string) => Promise<Blob>;
   /** Disable the button (non-interactive). */
   disabled?: boolean;
@@ -20,30 +18,27 @@ interface Props extends Record<string, unknown> {
 
 /** Events fired by `<kai-voice-output>`. */
 interface Events {
-  /** Playback started or stopped. Drive your own UI in sync. `speaking: true`
-   *  fires when audio actually starts (utterance.onstart natively; audio playback
-   *  beginning on the `synthesize` path), not when speak() is called; earlier
-   *  releases fired it optimistically inside speak() itself. Fires on real
-   *  transitions only (manual click and programmatic speak()/stop()), never on
-   *  mount. */
+  // `speaking: true` fires when audio actually starts
+  // (utterance.onstart natively; audio playback beginning on the `synthesize` path), not
+  // when speak() is called; earlier releases fired it optimistically inside speak()
+  // itself. Fires on real transitions only (manual click and programmatic
+  // speak()/stop()), never on mount.
+  /** Playback started or stopped. */
   'kai-speaking-change': { speaking: boolean };
   /** The model path (`synthesize`) resolved audio: the raw `Blob` before playback. */
   'kai-synthesized': { blob: Blob };
-  /** A voice session failed, so no failure is ever silent. `detail.source` names
-   *  the failing side (`recognition` on `<kai-voice-input>`, `synthesis` on
-   *  `<kai-voice-output>`), `detail.error` carries the platform error code, the
-   *  thrown exception's name, or `no-result` when recognition ended with no error
-   *  and no text (the user said nothing), and `detail.message` is human-readable.
-   *  Deliberate cancellation does not fire. */
+  // `detail.source` names the failing side (`recognition` on `<kai-voice-input>`,
+  // `synthesis` on `<kai-voice-output>`), `detail.error` carries the platform error code,
+  // the thrown exception's name, or `no-result` when recognition ended with no error and
+  // no text (the user said nothing), and `detail.message` is human-readable. Deliberate
+  // cancellation does not fire.
+  /** A voice session failed, so no failure is ever silent. `detail.error` is the platform error code or the thrown name. */
   'kai-voice-error': { source: 'synthesis'; error: string; message: string };
 }
-
+// Native `speechSynthesis` by default; the `synthesize` property bypasses it and routes text
+// through the host's own TTS model. The output sibling of `<kai-voice-input>`.
 /**
- * `<kai-voice-output>` — a speaker button that reads `text` aloud. Native by
- * default (`speechSynthesis`); set `el.synthesize` to route through your TTS
- * model instead. The output sibling of `<kai-voice-input>`. Emits
- * `kai-speaking-change`, `kai-voice-error` (a failed synthesis) and (model
- * path) `kai-synthesized`.
+ * A speaker button that reads text aloud.
  */
 defineWebComponent<Props, Events>('kai-voice-output', {
   text: '',

@@ -12,11 +12,8 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        '`CheckboxGroup` is the kit\'s "pick any number" control: a bordered, divided list of rows over real `<input type="checkbox">`s. It is `RadioGroup`\'s sibling and takes the same shapes, so switching a field between "one of" and "any of" is a one word change.',
-        'Every row is a `<label>` wrapping its box, so the whole row is a click target and the row text IS the accessible name, with no ARIA involved. Give the group a `name` and a native `<form>` submits the selection under one key: `new FormData(form).getAll(name)` reads it back with no JavaScript of yours in the path.',
-        'Unlike `RadioGroup`, `name` has no default. A radio set needs a shared name for the browser to make it exclusive; checkboxes are independent controls and need nothing. Generating one here would submit the selection under a random key, which is worse than submitting nothing.',
-        'Rows can carry a second line via `description`, or you can replace the label column entirely with the presentation slot and keep the control, the row chrome and the group semantics.',
-        'No validation is applied. "At least one" is your application\'s rule, and so is a cap on how many may be picked.',
+        'A bordered, divided list of rows over real `<input type="checkbox">`s: the kit\'s "pick any number" control, and `RadioGroup`\'s sibling, so switching a field between "one of" and "any of" is a one word change.',
+        'Every row is a `<label>` wrapping its box, so the whole row is a click target and the row text is the accessible name, with no ARIA involved. Unlike `RadioGroup`, `name` has no default: a radio set needs a shared name to be exclusive and checkboxes do not, so a generated one would submit the selection under a key nobody chose. Nothing is validated -- "at least one" and any cap are the application\'s rules.',
       ]),
     },
   },

@@ -2,16 +2,13 @@ import { defineWebComponent } from '../define/define';
 import { ImageArtifact } from '../../components/image/image-artifact';
 
 interface Props extends Record<string, unknown> {
-  /** The image PAYLOAD, as BARE base64 (never a URI) or as raw bytes.
-   *  Attribute `data` for a base64 string; JS PROPERTY (`el.data = new
-   *  Uint8Array([...])`) for bytes, like every other non-scalar input in this kit.
-   *  A `data:image/...;base64,…` string here is a RESOURCE: it is reported and
-   *  rendered as-is, and it belongs on `<kai-image>`'s `src`, which carries its own
-   *  media type. */
+  // A `data:image/...;base64,...` string here is a RESOURCE: it is reported and rendered
+  // as-is, and it belongs on `<kai-image>`'s `src`, which carries its own media type.
+  /** The image PAYLOAD: BARE base64 (never a URI) or raw bytes. Attribute `data` for base64; JS property for `Uint8Array`. */
   data?: string | Uint8Array;
-  /** The payload's MIME type, e.g. `image/png` or `image/jpeg`. Attribute
-   *  `media-type`. REQUIRED. Omit it and the element renders the skeleton and
-   *  warns, because guessing `image/png` labelled a JPEG's bytes as a PNG. */
+  // Omit it and the element renders the skeleton and warns, because guessing
+  // `image/png` labelled a JPEG's bytes as a PNG.
+  /** The payload's MIME type, e.g. `image/png`. Attribute `media-type`. REQUIRED. */
   mediaType?: string;
   /** Alt text. Attribute `alt`. Always give meaningful text: an empty alt marks
    *  the image as decorative. */
@@ -19,12 +16,11 @@ interface Props extends Record<string, unknown> {
   /** Extra classes for the `<img>` (and for the skeleton while nothing resolves). */
   class?: string;
 }
-
+// `media-type` is required because guessing `image/png` labelled a JPEG's bytes as a PNG. A
+// `data:image/...;base64,...` string here is treated as a RESOURCE and reported and rendered as
+// is; it belongs on `<kai-image>`'s `src`, which carries its own media type.
 /**
- * `<kai-image-artifact>` — renders an image the model produced: bare base64
- * (`data` attribute) or raw bytes (`data` property) plus the required
- * `media-type`. Shows a pulsing skeleton while no source resolves. For an image
- * at a URL use `<kai-image>` instead.
+ * An image the model produced, from bare base64 or raw bytes rather than a URL.
  */
 defineWebComponent<Props>('kai-image-artifact', {
   data: undefined,

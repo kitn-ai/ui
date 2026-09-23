@@ -21,15 +21,13 @@ export type DockFocusOnOpen = 'content' | 'panel' | 'none';
 export interface DockController { open: Accessor<boolean>; setOpen: (v: boolean) => void }
 
 export interface DockProps {
-  /** The panel body. ANY content — the dock never reads or types it. */
+  /** The panel body; the dock never reads or types it. */
   children?: JSX.Element;
-  /** Content inside the built-in button while CLOSED. Defaults to a chat glyph. */
+  /** Content inside the built-in button while closed. Defaults to a chat glyph. */
   launcher?: JSX.Element;
-  /** Content inside the button while OPEN. Defaults to a ✕; when only `launcher` is
-   *  given, that content stays rather than morphing into a clashing built-in. */
+  /** Content inside the button while open; omitted with only `launcher` given, that content stays. */
   launcherOpen?: JSX.Element;
-  /** The widget's NAME. Derives the panel's accessible name and both launcher names
-   *  (`Open ${label}` / `Close ${label}`) — one string instead of three. */
+  /** The widget's name, used for the panel's accessible name and both launcher names. */
   label?: string;
   /** i18n override for the launcher's name while closed. */
   openLabel?: string;
@@ -37,46 +35,36 @@ export interface DockProps {
   closeLabel?: string;
   /** Which corner. Logical, RTL-correct. Defaults to `bottom-end`. */
   position?: DockPosition;
-  /** Render the unread dot. CONSUMER-OWNED: shown only while closed, and never
-   *  written back by the dock (see the component doc). */
+  /** Shows the unread dot while closed; the dock never writes the state back. */
   unread?: boolean;
-  /** Disable the launcher. */
+  /** Disables the launcher. */
   disabled?: boolean;
-  /** Suppress the dock's own built-in mobile `[part="close"]` X. Off (rendered) by
-   *  default — the built-in X is the FALLBACK close route for panel content with no
-   *  header of its own, which is the general case the dock has to cover since it
-   *  never reads what it holds. Set `true` when the slotted/composed content
-   *  supplies its own close affordance in its own header row (e.g. `ChatThread`'s
-   *  `headerEndContent`) — with both present the two X's stack, one floating over
-   *  the other's row, which is exactly the "doesn't look intentional" feedback this
-   *  prop exists to let a caller avoid. TRADEOFF: the mobile panel reserves a
-   *  padding band above its content so the built-in X never paints over it; that
-   *  band stays reserved unless you set `hideClose` true, so only set it once your
-   *  own control is actually in place — otherwise you get the band with no X to
-   *  justify it. */
+  // The built-in X is the FALLBACK close route for panel content with no header
+  // of its own, which is the general case since the dock never reads what it
+  // holds. With a second close affordance in the content the two X's stack, one
+  // floating over the other's row. The mobile panel reserves a padding band so
+  // the built-in X never paints over the content; that band stays reserved unless
+  // this is true.
+  /** Hides the dock's built-in close button; the mobile panel still reserves the band it would occupy. */
   hideClose?: boolean;
   /** Where focus lands on open. Defaults to `content`. */
   focusOnOpen?: DockFocusOnOpen;
-  /** Controlled open state. When set, the component never changes it itself — drive it
-   *  from `onOpenChange`. Omit for uncontrolled (internal) state. */
+  /** Controlled open state; when set, the dock only reports changes through `onOpenChange`. */
   open?: boolean;
-  /** Initial open state when uncontrolled. Does NOT move focus (see the focus contract). */
+  /** Initial open state when uncontrolled; does not move focus. */
   defaultOpen?: boolean;
-  /** Fires whenever the dock wants to open or close (launcher / Escape / a method). */
+  /** Fires whenever the dock wants to open or close (launcher, Escape, a method). */
   onOpenChange?: (open: boolean) => void;
-  /** Receive the open controller once mounted. */
+  /** Receives the open controller once mounted. */
   controllerRef?: (api: DockController) => void;
-  /** Receive the focusable panel node so a facade's `focus()` can target it. */
+  /** Receives the focusable panel node so a facade's `focus()` can target it. */
   panelRef?: (el: HTMLElement) => void;
-  /** Receive the launcher button so a facade's `focus()` can target it. */
+  /** Receives the launcher button so a facade's `focus()` can target it. */
   launcherRef?: (el: HTMLButtonElement) => void;
-  /**
-   * Resolve the element `focusOnOpen: 'content'` should focus.
-   *
-   * A PROP, because the answer is "the first element assigned to the panel slot" and
-   * only the web-component facade can see slot assignments — a Solid caller passes
-   * its own ref instead. Returning nothing falls back to focusing the panel.
-   */
+  // A prop because the answer is "the first element assigned to the panel slot"
+  // and only the web-component facade can see slot assignments; a Solid caller
+  // passes its own ref instead.
+  /** The element `focusOnOpen: 'content'` focuses; returning nothing focuses the panel itself. */
   contentTarget?: () => HTMLElement | null | undefined;
 }
 
@@ -95,9 +83,7 @@ export function DockCloseGlyph(): JSX.Element {
 export interface DockLauncherImageProps {
   /** The icon URL. */
   src: string;
-  /** Alt text — usually left empty: the launcher BUTTON already carries the
-   *  accessible name (Dock derives it from `label`/`openLabel`/`closeLabel`),
-   *  so a second name on the icon inside it would be redundant, not missing. */
+  /** Alt text for the icon, usually empty: the launcher button already carries the accessible name. */
   alt?: string;
 }
 

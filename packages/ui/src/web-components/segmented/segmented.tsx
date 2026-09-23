@@ -9,9 +9,7 @@ import type { KaiSegmentedOption } from '../web-component/web-component-data-typ
 interface Props extends Record<string, unknown> {
   /** The selectable segments, left to right. Set as a JS property (array). */
   options: KaiSegmentedOption[];
-  /** Controlled selected `value`. Settable and reflected to the `value`
-   *  attribute. `el.value = 'preview'` drives it; choosing a segment updates it
-   *  and fires `kai-change`. Read `el.value` for live state. */
+  /** Controlled selected `value`, reflected to the `value` attribute. Choosing a segment updates it and fires `kai-change`. */
   value?: string;
   /** Control density: `sm` or `md`. Defaults to `md`. */
   size?: 'sm' | 'md';
@@ -24,27 +22,7 @@ interface Events {
 }
 
 /**
- * `<kai-segmented>` — a single-select pill track (segmented / toggle group).
- * Feed it `options` (a JS-property array), drive/read the selection with the
- * `value` property (settable + reflected to the `value` attribute, so
- * `:host([value])` and `el.value` see live state), and listen for `kai-change`.
- *
- * ```html
- * <kai-segmented value="preview"></kai-segmented>
- * <script type="module">
- *   import '@kitn.ai/ui/web-components';
- *   const seg = document.querySelector('kai-segmented');
- *   seg.options = [
- *     { value: 'code', label: 'Code', icon: 'code' },
- *     { value: 'preview', label: 'Preview', icon: 'monitor' },
- *   ];
- *   seg.addEventListener('kai-change', (e) => console.log(e.detail.value));
- *   seg.value = 'code'; // drive it (no kai-change — the host already knows)
- * </script>
- * ```
- *
- * Each option's `icon` is an icon-name string resolved to a glyph (curated name,
- * URL, or text). Restyle via `::part(track)` and `::part(segment)`.
+ * A row of mutually exclusive pills for switching between a few options in place.
  */
 defineWebComponent<Props, Events>('kai-segmented', {
   options: [],

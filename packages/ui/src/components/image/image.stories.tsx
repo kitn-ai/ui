@@ -15,8 +15,8 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'Renders an image RESOURCE: an `https` URL, a `data:` URI, or an object URL the caller made. A model-produced payload has no address until something builds one, so bare base64 or bytes belong on `ImageArtifact`.',
-        'A single `<img>` with the kit chrome. The browser paints its own placeholder while the bytes stream in, so there is no skeleton here: a skeleton of ours would only flash over an already-cached image. Always set `alt`.',
+        'Displays an image the app already has an address for. Model-produced bytes belong on Image artifact.',
+        'Displays an image at a URL: https, a `data:` URI, or an object URL.',
       ]),
     },
   },

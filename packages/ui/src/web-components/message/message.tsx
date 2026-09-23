@@ -60,16 +60,16 @@ function CardTagSlot(props: { tag: string; envelope: CardEnvelope; theme: string
 interface Props extends Record<string, unknown> {
   /** The full message object. Set as a JS property. */
   message?: ChatMessage;
-  /** Who is speaking: `'user'` or `'assistant'`. Convenience for simple cases when
-   *  not passing a `message` object.
-   *
-   *  This is the SEMANTIC role of the message, not an ARIA role. The name collides
-   *  with the global ARIA `role` attribute, which is why the facade lifts it off
-   *  the host (see `liftRoleOffHost`). Neither speaker is a valid ARIA role,
-   *  so a `role="user"` left on `<kai-message>` is a CRITICAL axe `aria-roles`
-   *  violation. The accessible role lives on the row inside the shadow root
-   *  instead: `role="article"` plus an `aria-label` naming the speaker, matching
-   *  the SolidJS `<Message>` component. */
+  // Convenience for simple cases when not passing a `message` object.
+  //
+  // This is the SEMANTIC role of the message, not an ARIA role. The name collides with
+  // the global ARIA `role` attribute, which is why the facade lifts it off the host (see
+  // `liftRoleOffHost`). Neither speaker is a valid ARIA role, so a `role="user"` left on
+  // `<kai-message>` is a CRITICAL axe `aria-roles` violation. The accessible role lives on
+  // the row inside the shadow root instead: `role="article"` plus an `aria-label` naming
+  // the speaker, matching the SolidJS `<Message>` component.
+  /** Who is speaking. NOT an ARIA role: it renders role="article" with a named
+   *  aria-label instead, and shadows the ARIA role attribute (see the note above). */
   role?: 'user' | 'assistant';
   /** Force markdown on/off. Defaults to on for assistant, off for user. */
   markdown?: boolean;
@@ -86,30 +86,27 @@ interface Props extends Record<string, unknown> {
   avatarSrc?: string;
   /** Convenience avatar fallback text (used when `message.avatar` is not set). */
   avatarFallback?: string;
-  /** Avatar rail mode. `'none'` omits the avatar rail entirely so the body spans
-   *  the full row (predictable layout when you never show avatars). Any other
-   *  value keeps the default behaviour: the built-in avatar when one resolves, or
-   *  your `slot="avatar"` content when projected (which REPLACES the built-in). */
+  // `'none'` omits the avatar rail entirely so the body spans the full row (predictable
+  // layout when you never show avatars). Any other value keeps the default behaviour: the
+  // built-in avatar when one resolves, or your `slot="avatar"` content when projected
+  // (which REPLACES the built-in).
+  /** Avatar rail mode. `'none'` omits the rail so the body spans the full row; otherwise the built-in avatar or your `slot="avatar"`. */
   avatar?: 'none' | string;
-  /** Optional card type -> custom-element tag overrides/additions for `card`
-   *  parts (merged over the built-ins). Property: `el.cardTypes`. Typed as a
-   *  plain string map (not the `CardTagMap` alias) so the generated React
-   *  wrapper inlines it instead of emitting an unresolved named type. */
+  // Typed as a plain string map (not the `CardTagMap` alias) so the generated React
+  // wrapper inlines it instead of emitting an unresolved named type.
+  /** Card type → custom-element tag overrides/additions, merged over the built-ins. JS property: `el.cardTypes`. */
   cardTypes?: Record<string, string>;
-  /** JSON Schemas for the card types this app renders, keyed by envelope type. The
-   *  companion of `cardTypes`, which says what DRAWS a card while this says what a
-   *  VALID one looks like. An OBJECT, so it is a JS property only: `el.cardSchemas
-   *  = { 'pricing-table': pricingSchema }`, never an attribute.
-   *  `createCardRegistry(...).validationSchemas` is exactly this shape.
-   *
-   *  Without it the kit validates its own seven built-ins and leaves your own card
-   *  type, the one your app actually cares about, as the only unchecked thing on
-   *  screen. A schema here WINS over a built-in of the same name.
-   *
-   *  Typed `Record<string, object>` rather than `Record<string, JsonSchema>`
-   *  deliberately: an imported `.json` schema widens `"type"` to `string`, and an
-   *  authored one carries `$schema`/`title`/`description`/`additionalProperties`,
-   *  so the tighter type would reject both of the normal ways to supply one. */
+  // The companion of `cardTypes`: `cardTypes` says what DRAWS a card, this says what
+  // a VALID one looks like. `createCardRegistry(...).validationSchemas` is this shape.
+  // Without it the kit validates its own seven built-ins and leaves the consumer's own
+  // card type -- the one that actually matters -- the only unchecked thing on screen.
+  // A schema here WINS over a built-in of the same name.
+  //
+  // Typed `Record<string, object>` rather than `Record<string, JsonSchema>`
+  // deliberately: an imported `.json` schema widens `"type"` to `string`, and an
+  // authored one carries `$schema`/`title`/`description`/`additionalProperties`, so
+  // the tighter type would reject both normal ways to supply one.
+  /** Card-type JSON Schemas keyed by envelope type; validates each card's `data`. JS property: `el.cardSchemas`. */
   cardSchemas?: Record<string, object>;
 }
 
@@ -154,17 +151,16 @@ function liftRoleOffHost(element: HTMLElement): void {
 
 /** Events fired by `<kai-message>`. */
 interface Events {
-  /** An action button was clicked. `action` is the built-in name or custom id.
-   *  `state` is present only for the toggleable feedback votes: `'on'` when a
-   *  like/dislike is set, `'off'` when re-tapped to clear. */
+  // `state` is present only for the toggleable feedback votes: `'on'` when a like/dislike
+  // is set, `'off'` when re-tapped to clear.
+  /** An action button on a message was clicked. `action` is the built-in name or a custom id. */
   'kai-message-action': { messageId: string; action: string; state?: 'on' | 'off' };
 }
-
+// The keystone of the compose-your-own-message-list pattern: one object per row, the same shape
+// `<kai-chat>` keeps per message, so a consumer can own the list and still get markdown, reasoning,
+// tool calls, attachments and the action row.
 /**
- * `<kai-message>` — a single message row: markdown/plain content, reasoning,
- * tool calls, attachments, and action buttons, rendered from one `message`
- * object (the same shape `<kai-chat>` uses per message). The keystone of the
- * "compose your own message list" pattern. Emits `kai-message-action`.
+ * A single message row of a chat thread.
  */
 defineWebComponent<Props, Events>('kai-message', {
   message: undefined,

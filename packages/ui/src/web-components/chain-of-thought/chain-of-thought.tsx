@@ -18,17 +18,16 @@ import {
 type Step = ChainOfThoughtStepData;
 
 interface Props extends Record<string, unknown> {
-  /** The reasoning steps. Set as a JS property. Compound sub-parts collapse to
-   *  this one data model (Route 1). Each `{ label, content?, id? }`. Omit to
-   *  supply the steps as `<kai-step>` light-DOM children instead; when both are
-   *  present the property's steps come first. */
+  // Compound sub-parts collapse to this one data model (Route 1); each entry is
+  // `{ label, content?, id? }`. When both this property and light-DOM children are
+  // present, the property's steps come first.
+  /** The reasoning steps. JS property (array); omit to pass `<kai-step>` light-DOM children instead. */
   steps?: Step[];
   /** Open mode: `'multiple'` (default, any number of steps open at once) or
    *  `'single'` (at most one open; opening a step closes the others). */
   type?: ChainOfThoughtType;
-  /** Controlled open step key(s). When set, it WINS over user interaction (the
-   *  consumer owns the open set). String in `single` mode, string[] in
-   *  `multiple` mode. Set as a JS property. */
+  // When set, it WINS over user interaction: the consumer owns the open set.
+  /** Controlled open step key(s): a string in `single` mode, a string array in `multiple`. JS property. */
   value?: string | string[];
   /** Uncontrolled INITIAL open step key(s), seeding which steps render
    *  expanded. Ignored once `value` is provided. Set as a JS property. */
@@ -37,9 +36,9 @@ interface Props extends Record<string, unknown> {
 
 /** Events fired by `<kai-chain-of-thought>`. */
 interface Events {
-  /** The open set changed, by user click OR an expand()/collapse()/toggle()
-   *  call. `value` is a string in `single` mode, a string[] in `multiple` mode.
-   *  (Maps Radix Accordion's onValueChange.) */
+  // The consumer owns the open set while `value` is set; it wins over user
+  // interaction. Maps Radix Accordion's onValueChange.
+  /** The open set changed, by user click or an `expand()`/`collapse()`/`toggle()` call. */
   'kai-value-change': { value: string | string[] };
 }
 
@@ -58,27 +57,8 @@ export function parseKaiStepElement(n: Element): Step {
 }
 
 /**
- * `<kai-chain-of-thought>` — step-by-step reasoning with connectors and
- * per-step collapsible detail. An Accordion: by default every step is
- * independently collapsible (`type="multiple"`, all closed); set
- * `type="single"` for one-open-at-a-time.
- *
- * **Route 1 — JS property:** set the `steps` property to an array of
- * `{ label, content?, id? }` objects.
- *
- * **Route 2 — declarative children:** compose `<kai-step>` child elements in
- * light DOM (hidden by the Shadow DOM — pure data carriers). The `label`
- * attribute becomes the step heading; `textContent` becomes the expandable
- * detail; an optional `step-id` becomes the open-set key. Children are merged
- * after any prop steps.
- *
- * ```html
- * <kai-chain-of-thought>
- *   <kai-step label="Understand the request">The user wants composable web components.</kai-step>
- *   <kai-step label="Design the API">Route 1: variant + flags; rich data via properties.</kai-step>
- *   <kai-step label="Build & verify"></kai-step>
- * </kai-chain-of-thought>
- * ```
+ * Step-by-step reasoning drawn as connected steps, each with its own collapsible
+ * detail. `kai-reasoning` is the single thinking block instead.
  */
 defineWebComponent<Props, Events>('kai-chain-of-thought', {
   steps: [],

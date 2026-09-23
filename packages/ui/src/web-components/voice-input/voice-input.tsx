@@ -2,20 +2,18 @@ import { defineWebComponent } from '../define/define';
 import { VoiceInput, type VoiceInputController } from '../../components/voice/voice-input';
 
 interface Props extends Record<string, unknown> {
-  /**
-   * Transcriber the host supplies: records audio, returns the text. This is a
-   * **function-valued property** (`el.transcribe = async blob => '...'`) because
-   * a value-returning callback can't be modelled as a fire-and-forget event.
-   */
+  //
+  // Registers the tail of the chain, and the type is a function-valued property
+  // (`el.transcribe = async blob => '...'`) because a value-returning callback can't be
+  // modelled as a fire-and-forget event.
+  /** Transcriber the host supplies: records audio, returns the text. **Function-valued property.** */
   transcribe?: (audio: Blob) => Promise<string>;
   /** Disable the mic button (non-interactive). */
   disabled?: boolean;
-  /**
-   * BCP-47 language tag for the native `SpeechRecognition` path (e.g. `en-US`).
-   * Attribute: `recognition-lang` (the plain `lang` attribute is reserved by
-   * `HTMLElement` and can't be a custom-element property). No effect when
-   * `transcribe` is set or the browser lacks SpeechRecognition.
-   */
+  // Attribute: `recognition-lang` -- the plain `lang` attribute is reserved by
+  // `HTMLElement` and can't be a custom-element property. No effect when `transcribe` is
+  // set or the browser lacks SpeechRecognition.
+  /** BCP-47 language tag for the native `SpeechRecognition` path (e.g. `en-US`). Attribute: `recognition-lang`. */
   recognitionLang?: string;
   /** Emit live partial transcripts (`kai-transcript-interim`) during native
    *  recognition. Attribute: `interim`. No-op on the transcribe/fallback paths. */
@@ -24,10 +22,10 @@ interface Props extends Record<string, unknown> {
 
 /** Events fired by `<kai-voice-input>`. */
 interface Events {
-  /** Raw audio captured (before transcription), for hosts that prefer to handle
-   *  transcription themselves instead of via the `transcribe` property. Also the
-   *  unsupported-fallback signal: no `transcribe`, no SpeechRecognition, so only
-   *  the blob is produced (no text). */
+  // For hosts that prefer to handle transcription themselves instead of via the
+  // `transcribe` property. Also the unsupported-fallback signal: no `transcribe`, no
+  // SpeechRecognition, so only the blob is produced (no text).
+  /** Raw audio captured, before transcription. */
   'kai-audio-captured': { blob: Blob };
   /** Final transcript: the `transcribe` property resolved, OR native
    *  `SpeechRecognition` produced final text (no `transcribe` set). */
@@ -35,28 +33,25 @@ interface Events {
   /** Live partial transcript during native recognition (only when `interim` is
    *  set). Fires repeatedly before the final `kai-transcription`. */
   'kai-transcript-interim': { text: string };
-  /** Recording started or stopped. Lets the host drive its own UI (waveform,
-   *  push-to-talk indicator) in sync with the mic. Fires on real transitions
-   *  only (manual click and programmatic start()/stop()), never on mount. */
+  // Lets the host drive its own UI (waveform, push-to-talk indicator) in sync with the
+  // mic. Fires on real transitions only (manual click and programmatic start()/stop()),
+  // never on mount.
+  /** Recording started or stopped. */
   'kai-recording-change': { recording: boolean };
-  /** A voice session failed, so no failure is ever silent. `detail.source` names
-   *  the failing side (`recognition` on `<kai-voice-input>`, `synthesis` on
-   *  `<kai-voice-output>`), `detail.error` carries the platform error code, the
-   *  thrown exception's name, or `no-result` when recognition ended with no error
-   *  and no text (the user said nothing), and `detail.message` is human-readable.
-   *  Deliberate cancellation does not fire. */
+  // `detail.source` names the failing side (`recognition` on `<kai-voice-input>`,
+  // `synthesis` on `<kai-voice-output>`), `detail.error` carries the platform error code,
+  // the thrown exception's name, or `no-result` when recognition ended with no error and
+  // no text (the user said nothing), and `detail.message` is human-readable. Deliberate
+  // cancellation does not fire.
+  /** A voice session failed, so no failure is ever silent. `detail.error` is the platform error code or the thrown name. */
   'kai-voice-error': { source: 'recognition'; error: string; message: string };
 }
-
+// With no `transcribe` property it uses the browser's `SpeechRecognition`: Chrome and Safari, none
+// in Firefox, and cloud-based in Chrome. Where neither path is available it records the blob and
+// emits `kai-audio-captured` with no text, so an unsupported browser degrades to capture rather
+// than to silence.
 /**
- * `<kai-voice-input>` — a mic button that records and transcribes. Works
- * natively by default: with no `transcribe` callback it uses the browser's
- * `SpeechRecognition` (Chrome/Safari; no Firefox — and cloud-based in Chrome).
- * Set `el.transcribe` to route audio through your own async transcriber instead.
- * Where neither is available it records the blob and emits `kai-audio-captured`
- * with no text. Also emits `kai-transcription` (final text), `kai-voice-error`
- * (a failed or empty session) and, with `interim`, `kai-transcript-interim`
- * (live partials).
+ * A microphone button that records and transcribes speech.
  */
 defineWebComponent<Props, Events>('kai-voice-input', {
   transcribe: undefined,

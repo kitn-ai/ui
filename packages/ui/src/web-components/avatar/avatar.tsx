@@ -11,17 +11,10 @@ interface Props extends Record<string, unknown> {
   /** Size token: `sm` | `md` (default) | `lg`. */
   size?: 'sm' | 'md' | 'lg';
 }
-
+// An identity badge (the thing beside a message, or in a conversation list), not a generic icon:
+// for a glyph, use an `icon` prop on another element.
 /**
- * `<kai-avatar>` — a person/entity avatar: a rounded image that falls back to
- * initials when there's no `src`. This is an *identity* badge (the thing next to
- * a message or in a conversation list), not a generic icon — for a glyph, use an
- * `icon` prop on another element.
- *
- * ```html
- * <kai-avatar src="/me.jpg" fallback="JD"></kai-avatar>
- * <kai-avatar fallback="AI" size="sm"></kai-avatar>
- * ```
+ * A person or entity avatar: a rounded image that falls back to initials.
  */
 defineWebComponent<Props>('kai-avatar', {
   src: undefined,

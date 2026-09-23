@@ -5,14 +5,31 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { DerivedCatalog, DerivedWebComponent } from '../../mcp/catalog/catalog-types';
 import { listCapabilityGroups, listIntegrations } from '../../mcp/registry';
-import { WEB_COMPONENT_META_KEYS } from '../../scripts/lib/web-component-meta-keys.mjs';
+import {
+  WEB_COMPONENT_META_KEYS,
+  WEB_COMPONENT_META_STRING_KEYS,
+} from '../../scripts/lib/web-component-meta-keys.mjs';
 
 const PKG = join(__dirname, '..', '..');
 const ARTIFACT = join(PKG, 'mcp/catalog/derived.json');
 
 const read = () => DerivedCatalog.parse(JSON.parse(readFileSync(ARTIFACT, 'utf8')));
-const meta = (): { tag: string; [k: string]: unknown }[] =>
+const meta = (): { tag: string; description?: string; [k: string]: unknown }[] =>
   JSON.parse(readFileSync(join(PKG, 'src/web-components/web-component-meta.json'), 'utf8'));
+
+/**
+ * "Present" means A NON-EMPTY VALUE, never "the key exists": a key present-but-empty is
+ * exactly what a broken extraction produces, and it is the shape the `?? []` fallbacks
+ * already hide from the re-derivations below. Spelled out here rather than imported
+ * (see lib/web-component-meta-keys.mjs for why the list is shared and this predicate
+ * deliberately is not), but the KIND is shared, because `description` is a string and
+ * the array test is unsatisfiable for it. Relaxing the length test for every key instead
+ * would report "present" for a model whose descriptions all came out `''`.
+ */
+const carriesData = (entry: { [k: string]: unknown }, key: string): boolean =>
+  WEB_COMPONENT_META_STRING_KEYS.includes(key)
+    ? typeof entry[key] === 'string' && (entry[key] as string).trim().length > 0
+    : Array.isArray(entry[key]) && (entry[key] as unknown[]).length > 0;
 
 /**
  * The function-valued props, as MEASURED against this tree rather than as
@@ -66,11 +83,12 @@ describe('derived catalog artifact', () => {
    * the check blind. Assert the keys carry data somewhere.
    */
   it('web-component-meta.json still carries the keys the generator reads', () => {
-    const m = meta() as Record<string, unknown[]>[];
+    const m = meta();
     for (const key of WEB_COMPONENT_META_KEYS) {
-      expect(m.some((e) => Array.isArray(e[key]) && e[key].length > 0), `web-component-meta.json has no non-empty "${key}"`).toBe(
-        true,
-      );
+      expect(
+        m.some((e) => carriesData(e, key)),
+        `web-component-meta.json has no non-empty "${key}"`,
+      ).toBe(true);
     }
   });
 
@@ -127,6 +145,7 @@ describe('derived catalog artifact', () => {
       .map((m) => {
         const el = m as {
           tag: string;
+          description?: string;
           props?: { name: string; scalar?: boolean; optional?: boolean }[];
           events?: { name: string }[];
           methods?: { name: string }[];
@@ -136,6 +155,9 @@ describe('derived catalog artifact', () => {
         };
         return {
           tag: el.tag,
+          // `?? ''`, byte-identical to gen-catalog.mjs's mapping: a facade with no
+          // element doc comment omits the key, and the row still carries a string.
+          description: el.description ?? '',
           props: (el.props ?? []).map((p) => ({
             name: p.name,
             scalar: p.scalar === true,
@@ -151,6 +173,62 @@ describe('derived catalog artifact', () => {
       })
       .sort((a, b) => a.tag.localeCompare(b.tag));
     expect(read().webComponents).toEqual(expected);
+  });
+
+  /**
+   * The element doc comment is the ONE sentence that says what a tag IS, and until the
+   * generic re-derivation above existed it reached nothing: props, events, methods,
+   * parts and composedFrom all did, so an agent choosing between two elements could not
+   * tell them apart. Asserted here per element and BYTE-IDENTICAL to the model: a
+   * truncated or normalised-again description would still be a description, and still
+   * the wrong one.
+   *
+   * The floor is what stops this going vacuous: a model whose descriptions all came out
+   * empty (the failure that motivated the pipe) has nothing left to compare.
+   */
+  it('the element description reaches the catalog row', () => {
+    const derived = read();
+    const documented = meta().filter((e) => typeof e.description === 'string' && e.description.length > 0);
+    expect(documented.length, 'elements carrying an element doc comment').toBeGreaterThan(80);
+    for (const el of documented) {
+      expect(derived.webComponents.find((d) => d.tag === el.tag)?.description, el.tag).toBe(el.description);
+    }
+  });
+
+  /**
+   * The other end of the same pipe: a facade with NO doc comment above its
+   * `defineWebComponent(...)` call. `gen-web-component-api.mjs` omits the key from
+   * web-component-meta.json there (the shape every other optional key on the entry uses),
+   * so a reader that assumes the key exists would produce `undefined`, which reaches an
+   * agent as the literal word, or takes the catalog's zod parse down with it.
+   *
+   * The tree has such facades today, so the loop below runs on real data. It is not given
+   * a floor of its own: the batches documenting those six is the OUTCOME we want, and
+   * asserting "at least one is undocumented" would fire the day they finish. The row
+   * shape is exercised directly as well, so the assertion cannot go vacuous either way.
+   */
+  it('an element with no doc comment does not break the reader', () => {
+    const derived = read();
+    const undocumented = meta().filter((e) => !e.description);
+    for (const el of undocumented) {
+      expect(derived.webComponents.find((d) => d.tag === el.tag)?.description, el.tag).toBe('');
+    }
+    // No row may carry undefined for it, documented or not: that is the shape a reader
+    // would hand to an agent.
+    expect(derived.webComponents.every((d) => typeof d.description === 'string')).toBe(true);
+    // The row an un-documented facade produces, through the schema the MCP reads.
+    expect(() =>
+      DerivedWebComponent.parse({
+        tag: 'kai-undocumented',
+        description: '',
+        props: [],
+        events: [],
+        methods: [],
+        parts: [],
+        composedFrom: [],
+        tokens: [],
+      }),
+    ).not.toThrow();
   });
 
   it('re-derives integrations and theme tokens from their sources, not merely non-empty', () => {

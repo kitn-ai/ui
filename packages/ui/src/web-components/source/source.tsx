@@ -22,6 +22,9 @@ interface SourceProps extends Record<string, unknown> {
   showFavicon?: boolean;
 }
 
+/**
+ * A citation link that previews the source it points at.
+ */
 defineWebComponent<SourceProps>('kai-source', {
   href: '',
   label: undefined,
@@ -48,20 +51,15 @@ defineWebComponent<SourceProps>('kai-source', {
 
 
 interface SourceListProps extends Record<string, unknown> {
-  /** The sources to render. Set as a JS property. Omit to supply them as
-   *  `<kai-source>` light-DOM children instead; when both are present the
-   *  property's sources come first. */
+  // When both this property and light-DOM children are present, the property's sources
+  // come first.
+  /** The sources to render. JS property; omit to pass `<kai-source>` light-DOM children instead. */
   sources?: KaiSourceItem[];
   /** Show favicons on all items (per-item `showFavicon` overrides). */
   showFavicon?: boolean;
-  /**
-   * When true, each citation chip is labelled with its 1-based index in the
-   * merged (prop + declarative-children) list (`[1]`, `[2]`, …) instead of the
-   * per-item `label` or domain fallback.
-   *
-   * HTML attribute: `numbered` (boolean: a bare attribute or
-   * `numbered="true"`). JS property:   `el.numbered = true`.
-   */
+  // `numbered` works as a bare attribute or `numbered="true"`, and as `el.numbered =
+  // true`.
+  /** Label each citation chip with its 1-based index in the merged list (`[1]`, `[2]`) instead of its own `label`. */
   numbered?: boolean;
 }
 
@@ -84,6 +82,9 @@ export function parseKaiSourceElement(n: Element): KaiSourceItem {
   };
 }
 
+/**
+ * A gathered list of citation links.
+ */
 defineWebComponent<SourceListProps>('kai-sources', {
   sources: [],
   showFavicon: false,

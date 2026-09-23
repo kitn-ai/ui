@@ -21,11 +21,11 @@ function useSourceContext() {
 // --- Source (Root) ---
 
 export interface SourceProps {
-  /** The citation's URL. OPTIONAL: every field of a model-produced citation is,
-   *  so a source can arrive with a title and no url. In that case the chip
-   *  renders as a plain, inert `<a>` with NO `href` attribute — which is valid
-   *  HTML and simply not a link — rather than `<a href="">`, which would
-   *  navigate to the current page. */
+  // Every field of a model-produced citation is optional, so a source can arrive
+  // with a title and no url. That case renders a plain, inert `<a>` with NO `href`
+  // attribute (valid HTML, not a link) rather than `<a href="">`, which would
+  // navigate to the current page.
+  /** The citation's URL; absent renders the chip as an inert element. */
   href?: string;
   children: JSX.Element;
 }

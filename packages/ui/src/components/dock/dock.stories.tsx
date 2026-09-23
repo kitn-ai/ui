@@ -3,17 +3,9 @@ import { fn } from 'storybook/test';
 import { Dock } from './dock';
 import { componentDescription } from '../../stories/docs/web-component-controls';
 
-/**
- * The SolidJS story for the Dock primitive — the only story layer this element has,
- * matching its siblings in this directory (`prompt-dock.stories.tsx` is titled the
- * same way; `dialog.tsx` carries no story at all). The `<kai-dock>` facade has no
- * separate Labs story, because neither of the ui-layer components it sits beside does.
- *
- * EVERY STORY IS A DEMO PAGE, not a bare component. A dock is `position: fixed` and
- * corner-pinned, so a story that rendered it alone would put a button in the corner of
- * an empty canvas and tell you nothing about the thing it is for: floating over
- * somebody else's page without taking it over.
- */
+// The Dock primitive. A dock is `position: fixed` and corner-pinned, so every story
+// renders it over a demo page rather than alone: floating over somebody else's page
+// is the thing it is for, and a bare canvas would show none of it.
 const meta = {
   title: 'Components/Dock',
   component: Dock,

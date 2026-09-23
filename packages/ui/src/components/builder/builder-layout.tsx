@@ -18,21 +18,15 @@ export interface BuilderLayoutProps {
   name: string;
   /** The inspector panel content — typically `<BuilderPanel>`. */
   panel: JSX.Element;
-  /** The preview content — typically a device frame wrapping `<ChatThread>`.
-   *  Callers that need to reflow their OWN preview at narrower widths (e.g.
-   *  a docked-rail template collapsing to full-bleed on `mobile`, matching
-   *  `components/dock/dock.tsx`'s own <=480px takeover) should read `viewport`/
-   *  `defaultViewport`/`onViewportChange` below and drive their preview's
-   *  shape from the same signal they hand this component — see
-   *  `builder-in-app-assistant.stories.tsx` and `builder.stories.tsx` for
-   *  the pattern. */
+  // A caller that reflows its OWN preview at narrower widths (e.g. a docked-rail template
+  // collapsing to full-bleed on `mobile`, matching `components/dock/dock.tsx`'s <=480px
+  // takeover) drives that from the same signal it hands `viewport`: see
+  // `builder-in-app-assistant.stories.tsx` and `builder.stories.tsx`.
+  /** The preview content, typically a device frame wrapping `<ChatThread>`. */
   preview: JSX.Element;
-  /** Controlled viewport selection. Omit for uncontrolled (internal) state,
-   *  same controlled/uncontrolled convention as `Switch`'s
-   *  `checked`/`defaultChecked` and `ToggleChip`'s `pressed`/
-   *  `defaultPressed`. A caller that needs to reflow its own `preview` JSX
-   *  per viewport (see the doc comment on `preview`) should lift this to a
-   *  signal of its own and pass both this and `onViewportChange`. */
+  // Same controlled/uncontrolled convention as `Switch`'s `checked`/`defaultChecked` and
+  // `ToggleChip`'s `pressed`/`defaultPressed`.
+  /** Controlled viewport selection; omit for internal state. */
   viewport?: BuilderViewport;
   /** Initial viewport when uncontrolled. Defaults to `'desktop'`. */
   defaultViewport?: BuilderViewport;

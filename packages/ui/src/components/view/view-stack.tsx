@@ -60,39 +60,38 @@ export interface ViewStackController {
   root: () => string | undefined;
   drilled: () => boolean;
   stack: () => readonly string[];
-  /** Drill into a view: pushes `name` on top of the current view. A back()
-   *  returns to wherever you were. Pushing a TAB ROOT can never drill (a
-   *  root is definitionally un-drilled), so it routes to `selectTab`.
-   *  Unknown names are ignored, like `select()` on `kai-pane-group`. */
+  // A TAB ROOT can never drill (a root is definitionally un-drilled), so a
+  // root name routes to `selectTab` instead, the same shape as `select()` on
+  // `kai-pane-group` ignoring an unknown name.
+  /** Drills `name` on top of the current view; a tab-root name switches tabs instead. */
   push: (name: string) => void;
   /** Pop one drilled view. No-op at a tab root (nothing to go back to). */
   back: () => void;
-  /** Swap the CURRENT view without touching history: while drilled the top
-   *  of the stack is replaced (back() then skips the replaced view); at a
-   *  root, the root itself is replaced — `drilled` stays false and no back
-   *  affordance appears. A tab-root name routes to `selectTab`. Unknown
-   *  names are ignored. */
+  // While drilled the top of the stack is replaced, so `back()` skips the
+  // view that was replaced; at a root the root itself is swapped, so `drilled`
+  // stays false and no back affordance appears. Unknown names are ignored,
+  // and a tab-root name routes to `selectTab`.
+  /** Swaps the shown view in place, so the stack does not grow; a tab-root name switches tabs instead. */
   replace: (name: string) => void;
-  /** Switch tab roots: shows `name` as the root and clears any drill. The
-   *  views themselves stay mounted, so nothing about them resets. Names not
-   *  registered as a tab root are ignored. */
+  // The views themselves stay mounted, so switching tabs resets nothing.
+  /** Shows `name` as the tab root and clears any drill; non-root names are ignored. */
   selectTab: (name: string) => void;
-  /** Deep-link entry point (what the element's `view` attribute drives): a
-   *  tab root selects that tab; any other registered name replaces the top
-   *  while drilled, or pushes when at a root. Unknown names are ignored. */
+  // The `<kai-view-stack>` element's `view` attribute is the deep-link entry
+  // point into this method.
+  /** Resolves `name` by the current position: a tab root switches tabs, a drilled stack replaces its top, a root pushes. */
   navigate: (name: string) => void;
 }
 
 export interface CreateViewStackOptions {
-  /** The registered views, in declaration order. Reactive: web-component facades
-   *  feed this from observed light-DOM children. The first tab root (else
-   *  the first entry) is the default root. */
+  // Reactive: the web-component facades feed this from observed light-DOM
+  // children, so it is read on every access rather than captured once.
+  /** The registered views in declaration order; the first tab root (else the first entry) is the default root. */
   entries: () => readonly ViewEntry[];
-  /** Deep link / initial view. A tab-root name becomes the starting root;
-   *  any other registered name boots DRILLED over the default root, so the
-   *  back affordance is present from the first frame. Resolved lazily
-   *  against `entries`, so it works even when set before views register
-   *  (an attribute parsed before child elements upgrade). */
+  // Any other registered name boots DRILLED over the default root, so the back
+  // affordance is present from the first frame. Resolved lazily against
+  // `entries` rather than captured, so it works when set before views register
+  // (an attribute parsed before child elements upgrade).
+  /** Starting view: a tab-root name becomes the root, any other registered name boots drilled over it. */
   initialView?: string;
   /** Fired after every navigation that changed the current view or the
    *  drilled flag. Not fired for the initial state. */
@@ -254,9 +253,7 @@ export function ViewStack(props: ViewStackProps): JSX.Element {
 export interface ViewProps extends ParentProps {
   /** The view's name — what `push`/`selectTab`/`navigate` address. */
   name: string;
-  /** Marks this view as a TAB ROOT: it shows the tab bar and never a back
-   *  affordance; a tab switch lands here directly. Views without it are
-   *  DRILL views, reached by `push` and left by `back`. */
+  /** Marks this view as a tab root: it shows the tab bar and never a back affordance, unlike a drilled view. */
   tabRoot?: boolean;
   class?: string;
 }

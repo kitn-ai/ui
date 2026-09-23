@@ -1,6 +1,6 @@
 ---
 title: Tasks
-description: Selectable task/plan list that emits a single atomic result when the user confirms — checkboxes, select-all, and gated confirm in one element.
+description: A checklist of tasks the reader confirms in one go.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -14,7 +14,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kai-tag-sub">kai-tasks</p>
 
-<p class="kai-lede">Present a list of tasks the user can check off, then confirm in one go — the card stays quiet while the user picks, and only the final confirm fires with the selected ids in a single atomic event.</p>
+<p class="kai-lede">Gates the confirm on your minimum and maximum, and shows select-all with an indeterminate state.</p>
 
 <Facts items={['Shadow DOM', 'Select-all with indeterminate state', 'Min / max gating', 'Read-only resolved view']} />
 
@@ -23,7 +23,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 <Playground client:only="solid" tag="kai-tasks" />
 
 <Aside type="tip" title="When to use">
-Use `<kai-tasks>` whenever an AI needs to hand control back to the user before acting — approving a migration plan, choosing maintenance steps, or picking reviewers. The gated confirm ensures the user explicitly approved exactly the items they wanted.
+When the model needs a plan approved before it acts: a migration, a set of maintenance steps, a reviewer list. For one choice instead of a list, use [Choice](/components/choice/).
 </Aside>
 
 ## Usage

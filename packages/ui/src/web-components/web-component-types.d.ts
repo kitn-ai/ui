@@ -132,7 +132,7 @@ export interface KaiAgentCardElement extends HTMLElement {
   active?: boolean;
   /** Raise a prominent "Needs you" pill plus a glowing amber edge. This is the attention-routing signal that pulls focus to this agent. Attribute: `needs-attention`. */
   needsAttention?: boolean;
-  /** Run status. A JS PROPERTY (object), not an attribute. Shape: `{ tone, label?, pulse? }`, where `tone` is one of `working` | `idle` | `done` | `error` | `blocked` (maps to the kit's tool hues), `label` is an optional short string beside the dot, and `pulse` animates the dot. Set it with `el.status = { tone: 'working', label: 'Working', pulse: true }`. */
+  /** Run status: `{ tone, label?, pulse? }`. JS property, not an attribute. */
   status?: { tone: "working" | "idle" | "done" | "error" | "blocked"; label?: string; pulse?: boolean };
 }
 
@@ -141,11 +141,11 @@ export interface KaiArtifactElement extends HTMLElement {
   theme?: "light" | "dark" | "auto";
   /** URL the preview iframe frames. Consumer-controlled. */
   src?: string;
-  /** Files for the Code tab tree + each file's preview `url`. Omit for a preview-only artifact (the Code tab then has nothing to show; pair it with `no-tabs` to hide the toggle). Set as a JS property (array). */
+  /** Files for the Code tab tree, plus each file's preview `url`. JS property (array); omit for a preview-only artifact. */
   files: { path: string; url?: string; code?: string; language?: string; type?: "html" | "pdf" | "image" | "other"; additions?: number; deletions?: number; status?: "added" | "modified" | "deleted" | "renamed" | "untracked" }[];
   /** Controlled active tab: `preview` or `code`. When set, the artifact follows it (re-asserted on change). Leave unset for an uncontrolled tab (see `defaultTab`). */
   tab?: "preview" | "code";
-  /** Uncontrolled INITIAL tab (used only when `tab` is unset). Default `preview`. Seeds the starting tab; the user can then switch freely without the consumer re-asserting a controlled `tab`. */
+  /** Uncontrolled INITIAL tab, used only when `tab` is unset. Default `preview`. */
   defaultTab?: "preview" | "code";
   /** Selected file path. Syncs the tree highlight, Code source, and preview. */
   activeFile?: string;
@@ -173,7 +173,7 @@ export interface KaiArtifactElement extends HTMLElement {
   standalone?: boolean;
   /** Show the address but make it read-only (visible, nav-tracking, non-editable). */
   readonlyPath?: boolean;
-  /** Friendly address shown in the path field instead of the real current url (read-only, non-navigable). Use when the framed url is not consumer-facing (e.g. a `data:` blob) so a clean address shows instead of leaking it. Scalar string: set as the `display-url` attribute or the `displayUrl` property. */
+  /** Friendly read-only address shown in the path field instead of the real url. Attribute: `display-url`. */
   displayUrl?: string;
   /** Go back in the artifact's own history stack (no-op when there's no prior entry). */
   back(): void;
@@ -198,13 +198,13 @@ export interface KaiArtifactElement extends HTMLElement {
 export interface KaiAttachmentsElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** The attachments to render. Omit (or pass an empty array) for the empty state, which shows `emptyText` if set and nothing otherwise. Set as a JS property (array). Each item's `url` must be a `data:` URI or an https URL, never `URL.createObjectURL`: a `blob:` URL previews here but the wire encoders (`toOpenAIMessages`/`toAnthropicMessages`) refuse it. */
+  /** The attachments to render (omit or pass `[]` for the empty state). Each `url` must be a `data:` URI or https URL, never `blob:`. */
   items: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }[];
   /** Layout: `grid` = visual tiles, `inline` = icon + label chips, `list` = rows. */
   variant?: "grid" | "inline" | "list";
   /** Wrap each item in a hover card that previews its details. */
   hoverCard?: boolean;
-  /** How an image item previews: `hover` = the hover card, `lightbox` = click the tile to open the image full-size in a dialog. Attribute: `image-preview`. Inert for non-image items, which have no image for a dialog to show. */
+  /** How an image tile reveals its full size: `hover` (pointer-only hover card, default) or `lightbox` (modal on click). */
   imagePreview?: "hover" | "lightbox";
   /** Show a remove button per item; clicking it fires a `kai-remove` event. */
   removable?: boolean;
@@ -219,7 +219,7 @@ export interface KaiAudioVisualizerElement extends HTMLElement {
   theme?: "light" | "dark" | "auto";
   /** Look to render: `bar` (default), `grid`, `radial`, `wave`, `aurora`, `custom`. `aura` is accepted as a LiveKit-markup alias for `aurora`. Attribute: `variant`. */
   variant?: string;
-  /** `idle` (default), `connecting`, `listening`, `thinking`, `speaking`, `disconnected` (connection down: the dead, flat look). LiveKit's room-lifecycle state names are accepted as aliases. Attribute: `state`. */
+  /** `idle` (default) or `connecting`/`listening`/`thinking`/`speaking`/`disconnected`; LiveKit's room-lifecycle names are aliases. */
   state?: string;
   /** `icon` | `sm` | `md` (default) | `lg` | `xl`. Attribute: `size`. */
   size?: string;
@@ -239,17 +239,17 @@ export interface KaiAudioVisualizerElement extends HTMLElement {
   complexity?: number;
   /** Setting this makes the element an announced image (`role="img"`) instead of decorative (`aria-hidden`). Attribute: `label`. */
   label?: string;
-  /** Live microphone or WebRTC audio to analyze. JS property only. NOTE: amplitude renders only while state is "speaking" unless listening-amplitude is set; every other state plays its scripted animation and ignores the audio. */
+  /** Live microphone or WebRTC audio to analyze. JS property only; amplitude renders only while `state` is `speaking`. */
   stream?: MediaStream;
-  /** An `<audio>` or `<video>` element to tap for its audio. JS property only. NOTE: amplitude renders only while state is "speaking" unless listening-amplitude is set; every other state plays its scripted animation and ignores the audio. */
+  /** An `<audio>` or `<video>` element to tap for its audio. JS property only; amplitude renders only while `state` is `speaking`. */
   audioElement?: HTMLMediaElement;
-  /** Pre-computed levels, 0..1. Set this and no AudioContext is ever built, which is what keeps headless/SSR rendering and browser-speech-synthesis playback (which exposes no audio node) free of Web Audio entirely. JS property only. A new array reference is required for each update; mutating the existing array in place will not re-render. NOTE: amplitude renders only while state is "speaking" unless listening-amplitude is set; every other state plays its scripted animation and ignores the audio. */
+  /** Pre-computed levels, 0..1. JS property only; a NEW array reference per update; amplitude renders only while `state` is `speaking`. */
   bands?: number[];
-  /** Render live amplitude during the listening state as well, using the same presentation as speaking. Off by default, which keeps LiveKit parity: amplitude from stream, audio-element or bands renders only while state is "speaking". Set it to show a real mic-level picture while the user is the one talking. Boolean. Attribute: `listening-amplitude` (a bare attribute means true; reflected, so the property reads back what the attribute set). */
+  /** Render live amplitude during the `listening` state too. Off by default. */
   listeningAmplitude?: boolean;
   /** Custom fragment shader for `variant="custom"`. JS property only. */
   shader?: { fragment: string; uniforms?: Record<string, { type: "1f" | "1i" | "1fv" | "2f" | "3f" | "3fv" | "4f" | "4fv" | "Matrix2fv" | "Matrix3fv" | "Matrix4fv"; value: number | number[] }> };
-  /** Shader variants only: keep animating while scrolled off screen. Off by default, which stops drawing and releases the WebGL context until the element comes back (browsers ration contexts to roughly 16 a page). Does not override `prefers-reduced-motion`. Attribute: `animate-when-not-visible`. */
+  /** Shader variants only: keep animating while scrolled off screen. Off by default; does not override `prefers-reduced-motion`. */
   animateWhenNotVisible?: boolean;
 }
 
@@ -276,7 +276,7 @@ export interface KaiBadgeElement extends HTMLElement {
 export interface KaiButtonElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** Visual style. `default` (filled), `subtle` (muted text, hover tint, the toolbar icon look), `ghost` (transparent, hover fill), `outline`, or `destructive`. Defaults to `default`. */
+  /** Visual style. Defaults to `default` (filled). */
   variant?: "default" | "subtle" | "ghost" | "outline" | "destructive";
   /** Size token. `icon` / `icon-sm` are square (for icon-only buttons); `sm` / `md` / `lg` size text buttons. Defaults to `md`. */
   size?: "sm" | "md" | "lg" | "icon" | "icon-sm";
@@ -284,7 +284,7 @@ export interface KaiButtonElement extends HTMLElement {
   icon?: string;
   /** Trailing icon, after the label (e.g. `"chevron-down"` for a menu affordance). */
   iconTrailing?: string;
-  /** Accessible name. REQUIRED for icon-only buttons (no visible text); ignored when you slot visible text, which already names the button. An `aria-label` on top of visible text REPLACES that name rather than adding to it, so a button reading "Save" that answers to "Submit" is unusable by speech input (WCAG 2.5.3, Label in Name). The visible text wins. An `icon` / `icon-sm` size hides the slot, which makes the button icon-only whatever you slotted, so `label` is what names it there. */
+  /** Accessible name for an icon-only button. Ignored when visible text is slotted -- the visible text wins. */
   label?: string;
   /** Disable the button (non-interactive, dimmed). */
   disabled?: boolean;
@@ -307,7 +307,7 @@ export interface KaiCardElement extends HTMLElement {
   theme?: "light" | "dark" | "auto";
   /** Surface treatment: `outlined` (default) | `filled` | `plain` | `accent`. Attribute: `appearance`. */
   appearance?: "outlined" | "filled" | "plain" | "accent";
-  /** `vertical` (default, media on top) | `horizontal` (media at the start) | `responsive` (horizontal when the card's container is wide enough, else vertical, via a container query on the card's own width). Attribute: `orientation`. */
+  /** `vertical` (default, media on top), `horizontal` (media at the start), or `responsive`. */
   orientation?: "vertical" | "horizontal" | "responsive";
   /** The card width below which a `responsive` card collapses to vertical and the footer actions stack. A CSS length; default `28rem`. Attribute: `collapse`. */
   collapse?: string;
@@ -330,13 +330,13 @@ export interface KaiCardsElement extends HTMLElement {
   theme?: "light" | "dark" | "auto";
   /** The stream of card envelopes to render. Set as a JS PROPERTY: `el.cards = [...]`. */
   cards?: { type: string; id: string; data: unknown; title?: string; resolution?: { kind: "action"; action: string; payload?: unknown; at?: string } | { kind: "submit"; data: unknown; at?: string } | { kind: "dismissed"; at?: string } | { kind: "expired"; reason?: string; at?: string } }[];
-  /** Optional type→tag overrides/additions (merged over the built-ins). Property: `el.types`. Typed as a plain string map (not the `CardTagMap` alias) so the generated React wrapper inlines it instead of emitting an unresolved named type. */
+  /** Card type→element tag overrides/additions, merged over the built-ins. JS property: `el.types`. */
   types?: Record<string, string>;
-  /** JSON Schemas for the card types this app renders, keyed by envelope type. The companion of `types`, which says what DRAWS a card while this says what a VALID one looks like. An OBJECT, so it is a JS property only: `el.schemas = { 'pricing-table': pricingSchema }`, never an attribute. `createCardRegistry(...).validationSchemas` is exactly this shape. Without it the kit validates its own seven built-ins and leaves your own card type, the one your app actually cares about, as the only unchecked thing on screen. A schema here WINS over a built-in of the same name, matching `mergeCardTags`, where your entry is spread over ours. Typed `Record<string, object>` rather than `Record<string, JsonSchema>` deliberately: an imported `.json` schema widens `"type"` to `string`, and an authored one carries `$schema`/`title`/`description`/`additionalProperties`, so the tighter type would reject both of the normal ways to supply one. See `CardSchemaMap` in components/card/card-renderer.tsx. */
+  /** Card-type JSON Schemas keyed by envelope type; validates each card's `data`. JS property: `el.schemas`. */
   schemas?: Record<string, object>;
   /** Optional CardPolicy handling child events. Property: `el.policy`. */
   policy?: { onSubmit?: ((cardId: string, data: unknown) => void); onAction?: ((cardId: string, action: string, payload?: unknown) => void); onSendPrompt?: ((text: string, opts: { mode: "compose" | "send"; context?: unknown }) => void); onOpen?: ((url: string, target: "tab" | "artifact") => void); onState?: ((cardId: string, patch: unknown) => void); onDismiss?: ((cardId: string) => void); onReopen?: ((cardId: string) => void); onError?: ((cardId: string, message: string) => void); maxSendPromptMode?: "compose" | "send" };
-  /** Validate each envelope's `data` against the schema for its type before rendering it, using a built-in's own schema or yours from `schemas`. Default `true`; set `validate-cards="false"` (or `el.validateCards = false`) to opt out. A hard failure (wrong type, a missing required field) renders a diagnostic naming the field instead of the card; a soft failure (bounds) renders the card unchanged. Both emit a contract `error` event. On in production too: a model emitting a bad shape is a production failure mode, so stripping the check there would hide it from exactly the person who needs to see it. */
+  /** Validate each card's `data` against its schema before rendering. Default `true`; opt out with `validate-cards="false"`. */
   validateCards?: boolean;
   /** Programmatically resolve a child card by id: set that envelope's `resolution` so the child re-renders into its read-only/resolved view. The imperative twin of the consumer mutating the cards array. No-op for an unknown id. */
   resolve(cardId: string, resolution: { kind: "action"; action: string; payload?: unknown; at?: undefined | string } | { kind: "submit"; data: unknown; at?: undefined | string } | { kind: "dismissed"; at?: undefined | string } | { kind: "expired"; reason?: undefined | string; at?: undefined | string }): void;
@@ -349,11 +349,11 @@ export interface KaiCardsElement extends HTMLElement {
 export interface KaiChainOfThoughtElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** The reasoning steps. Set as a JS property. Compound sub-parts collapse to this one data model (Route 1). Each `{ label, content?, id? }`. Omit to supply the steps as `<kai-step>` light-DOM children instead; when both are present the property's steps come first. */
+  /** The reasoning steps. JS property (array); omit to pass `<kai-step>` light-DOM children instead. */
   steps: { label: string; content?: string; id?: string }[];
   /** Open mode: `'multiple'` (default, any number of steps open at once) or `'single'` (at most one open; opening a step closes the others). */
   type?: "single" | "multiple";
-  /** Controlled open step key(s). When set, it WINS over user interaction (the consumer owns the open set). String in `single` mode, string[] in `multiple` mode. Set as a JS property. */
+  /** Controlled open step key(s): a string in `single` mode, a string array in `multiple`. JS property. */
   value?: string | string[];
   /** Uncontrolled INITIAL open step key(s), seeding which steps render expanded. Ignored once `value` is provided. Set as a JS property. */
   defaultValue?: string | string[];
@@ -368,7 +368,7 @@ export interface KaiChainOfThoughtElement extends HTMLElement {
 export interface KaiChatElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** Value of the input. A **string** is controlled (the host owns the text and updates it on `kai-value-change`). A **ComposerDoc** is a one-time seed that pre-populates pills; the user then edits freely. Leave unset for uncontrolled. */
+  /** Value of the input: a string is controlled, a `ComposerDoc` is a one-time seed that pre-populates pills, unset is uncontrolled. */
   value?: string | ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: string; promptText?: string; data?: Record<string, unknown> } })[];
   /** Placeholder text shown in the empty input. */
   placeholder?: string;
@@ -378,19 +378,19 @@ export interface KaiChatElement extends HTMLElement {
   suggestions?: string[];
   /** What clicking a suggestion does: `'submit'` (default) sends it immediately as if typed and submitted; `'fill'` just places it in the input. */
   suggestionMode?: "submit" | "fill";
-  /** Keep suggestions visible after the conversation starts. By default suggestions are conversation starters and hide once `messages` is non-empty; set this to keep them always shown. Default false. */
+  /** Keep suggestions visible after the conversation starts; they otherwise hide once `messages` is non-empty. Default false. */
   persistSuggestions?: boolean;
   /** Body/prose font scale for rendered markdown (`'xs' | 'sm' | 'base' | 'lg'`). Defaults to `'sm'`. */
   proseSize?: "xs" | "sm" | "base" | "lg";
   /** Shiki theme name for syntax-highlighted code blocks (e.g. `'github-dark-dimmed'`). */
   codeTheme?: string;
-  /** How an image tile in a message's attachment grid reveals its full size: `'hover'` (default) is the pointer-only hover card; `'lightbox'` opens the image in a modal on click, which is the only one of the two a keyboard or touch user can reach. Forwarded to every `MessageBody` this thread renders, and inert for non-image tiles, which keep the hover card. */
+  /** How an image tile reveals full size. Default `'hover'` is a hover card; `'lightbox'` opens a modal on click, the only one keyboard/touch can reach. */
   imagePreview?: "hover" | "lightbox";
   /** Enable Shiki syntax highlighting in code blocks. Turn off to render plain `<pre>` blocks (lighter, no highlighter load). Default true. */
   codeHighlight?: boolean;
-  /** How `reasoning` parts render across the thread. `'full'` (default) is the current collapsible-disclosure behavior; `'compact'` shows only a shimmer loader while a reasoning part streams and nothing once it settles (no expandable detail); `'off'` renders reasoning parts not at all. Forwarded to every `MessageBody` as `reasoningMode`. */
+  /** How reasoning parts render. Default `'full'` is the collapsible disclosure, `'compact'` streams only a shimmer, `'off'` renders none. */
   reasoning?: "full" | "compact" | "off";
-  /** Seeds the reasoning disclosure open AND keeps it tracking the stream (open while streaming, closes when it settles): the pre-Task-19f `full` behavior. Default false/absent: the panel starts closed (just the "Thinking" shimmer chip) and only opens on click, the current default (owner ruling, 2026-08-26). Meaningless when `reasoning` is `'compact'` or `'off'`. Forwarded to every `MessageBody` as `reasoningDefaultOpen`. */
+  /** Seeds the reasoning disclosure open and keeps it tracking the stream. Default false; inert unless `reasoning` is `'full'`. */
   reasoningOpen?: boolean;
   /** Optional header title shown on the left of the header. */
   chatTitle?: string;
@@ -408,11 +408,11 @@ export interface KaiChatElement extends HTMLElement {
   headerEnd?: boolean;
   /** REPLACE: full custom header in place of the built-in title/model/context bar. */
   headerFull?: boolean;
-  /** REPLACE: custom home-tab content in place of the built-in home screen (greeting, recent-conversation card, links). Rendered only while the home view is showing, so it is meaningful only when `home` is set; the tab bar and navigation stay the kit's own. Set by the facade when light-DOM `slot="home"` content is projected (region slots, P-6). */
+  /** REPLACE: custom home-tab content in place of the built-in home screen; rendered only while the home view shows, so only with `home` set. */
   homeFull?: boolean;
   /** INJECT: left sidebar column (e.g. a conversation list / your own nav). */
   sidebar?: boolean;
-  /** REPLACE: custom zero-state rendered in the message area while the thread is empty (replaces the empty message list only; the composer and its suggestions still render). */
+  /** REPLACE: custom zero-state in the message area while the thread is empty; the composer and its suggestions still render. */
   empty?: boolean;
   /** REPLACE: full custom composer in place of the built-in prompt input. The projected content wires its own submit (the data-flow boundary). */
   composer?: boolean;
@@ -420,39 +420,39 @@ export interface KaiChatElement extends HTMLElement {
   composerActions?: boolean;
   /** INJECT: footer row below the composer (disclaimers, token meter, …). */
   footer?: boolean;
-  /** When `false`, hides the built-in paperclip attach button. Defaults to `true` (undeclared keeps today's behavior: attach visible), matching `DefaultPromptInput`'s own default: only an explicit `false` hides it. */
+  /** Hides the built-in paperclip attach button; only an explicit `false` hides it. Default true. */
   attach?: boolean;
   /** Show a web-search (Globe) button in the input toolbar; calls `onWebSearch`. */
   webSearch?: boolean;
   /** Show a Voice (Mic) button in the input toolbar; fires a `voice` event. */
   voice?: boolean;
-  /** Rich entity triggers. Each `{ char, kind, items }` opens a caret-anchored menu that inserts an atomic pill (`/` skills, `@` agents/plugins). Set as a JS property; forwarded to the input. */
+  /** Rich entity triggers: each opens a caret-anchored menu that inserts an atomic pill (`/` skills, `@` agents). Set as a JS property. */
   triggers?: { char: string; kind: string; items?: { id: string; label: string; icon?: string; description?: string; group?: string; kind?: string; promptText?: string; data?: Record<string, unknown> }[] }[];
   /** Default icon per entity kind (kind → image src) for pills/menu items. */
   kindIcons?: Record<string, string>;
   /** Whether each message's action bar is always visible (`'always'`, default) or only revealed on hover of that message row (`'hover'`). */
   actionsReveal?: "always" | "hover";
-  /** Role-scoped DEFAULT action bars (B-7b): a user message with no `actions` of its own gets `userActions`; an assistant message, `assistantActions`. A per-message `m.actions` OVERRIDES the role default (replace, not merge), so a message that sets `actions: []` renders NO action bar even when a role default is set. Set as JS properties. */
+  /** Default action bar for user messages with no `actions` of their own; a message's own `actions` replaces it rather than merging. Set as JS properties. */
   userActions?: ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: string; tooltip?: string })[];
   /** See `userActions`, the assistant-role default. */
   assistantActions?: ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: string; tooltip?: string })[];
-  /** Hide the citations row consecutive `source` parts collapse into (`part="citations"`, message.tsx). Named as a HIDE, not `sources: boolean`, so absence-means-default stays unambiguous: absent/false is today's rendering, byte-for-byte (B-8). */
+  /** Hide the citations row that consecutive `source` parts collapse into; absent or `false` renders it. */
   hideSources?: boolean;
-  /** Which attachment media types the user may stage, in HTML `accept` syntax: `<kai-chat accept="image/*,application/pdf">`. A plain string, so unlike `messages` it DOES work as an attribute. Omitted means no filter. MEDIA TYPES ONLY -- exact (`image/png`) or subtype wildcard (`text/*`). HTML allows a file extension here and this does not: `accept=".py"` THROWS with the entry named, rather than silently resolving to a picker that accepts nothing. It can only NARROW what the kit can already encode: `accept="image/*"` resolves to the four image formats both APIs take, not to every image type the OS offers. Pass the SAME string to `toOpenAIMessages(msgs, { accept })` and the picker and the wire cannot disagree -- both resolve it through `resolveMediaPolicy` against one declaration. That declaration is readable as `encodableMediaTypes()` from `@kitn.ai/ui/wire`, if you would rather build your own picker than use this prop. */
+  /** Which attachment media types the user may stage, in HTML `accept` syntax. Omitted = no filter; media types only, an extension THROWS. */
   accept?: string;
-  /** The full message thread to render, newest last. Each entry carries its role, ordered `parts`, and optional actions/avatar/feedback. Set as a JS property (`el.messages = [...]`); a NEW array reference per streaming chunk re-renders (mutating in place does not). Omit for an empty thread. Re-declared here (rather than inherited from `ChatThreadProps`) because the ELEMENT registers a `[]` default and renders the empty state without it, while the SolidJS `<ChatThread>` component still requires it. The facade hands it a validated array either way. Matches `<kai-thread>`. */
+  /** The message thread to render, newest last. JS property; pass a NEW array per streaming chunk. Omit for an empty thread. */
   messages: { id: string; role: "user" | "assistant"; parts: ({ type: "text"; text: string; raw?: { source: string; payload: unknown } } | { type: "reasoning"; text: string; label?: string; index?: number; streamId?: string; signature?: string; raw?: { source: string; payload: unknown } } | { type: "tool"; tool: { type: string; kind?: "command" | "file-change" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: Record<string, unknown>; rawInput?: string; output?: Record<string, unknown>; toolCallId?: string; errorText?: string; raw?: { source: string; payload: unknown } }; raw?: { source: string; payload: unknown } } | { type: "card"; envelope: { type: string; id: string; data: unknown; title?: string; resolution?: { kind: "action"; action: string; payload?: unknown; at?: string } | { kind: "submit"; data: unknown; at?: string } | { kind: "dismissed"; at?: string } | { kind: "expired"; reason?: string; at?: string } }; raw?: { source: string; payload: unknown } } | { type: "source"; source: { id?: string; url?: string; title?: string; snippet?: string; index?: number }; raw?: { source: string; payload: unknown } } | { type: "file"; attachment: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }; raw?: { source: string; payload: unknown } })[]; actions?: ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: string; tooltip?: string })[]; avatar?: { src?: string; fallback?: string; alt?: string }; feedback?: "like" | "dislike" }[];
-  /** Optional card type -> custom-element tag overrides/additions for `card` parts (merged over the built-ins). Property: `el.cardTypes`. Typed as a plain string map (not the `CardTagMap` alias) so the generated React wrapper inlines it instead of emitting an unresolved named type. */
+  /** Card type → custom-element tag overrides/additions, merged over the built-ins. JS property: `el.cardTypes`. */
   cardTypes?: Record<string, string>;
-  /** JSON Schemas for the card types this app renders, keyed by envelope type. The companion of `cardTypes`, which says what DRAWS a card while this says what a VALID one looks like. An OBJECT, so it is a JS property only: `el.cardSchemas = { 'pricing-table': pricingSchema }`, never an attribute. `createCardRegistry(...).validationSchemas` is exactly this shape. Without it the kit validates its own seven built-ins and leaves your own card type, the one your app actually cares about, as the only unchecked thing on screen. A schema here WINS over a built-in of the same name. Typed `Record<string, object>` rather than `Record<string, JsonSchema>` deliberately: an imported `.json` schema widens `"type"` to `string`, and an authored one carries `$schema`/`title`/`description`/`additionalProperties`, so the tighter type would reject both of the normal ways to supply one. */
+  /** Card-type JSON Schemas keyed by envelope type; validates each card's `data`. JS property: `el.cardSchemas`. */
   cardSchemas?: Record<string, object>;
-  /** Turns on the prior-conversations list (a list-toggle button in the header, plus a second list view sharing the panel, C-1). Attribute- settable like every other boolean flag on this element: `<kai-chat conversations>`. Requires `store`. A row select, "new conversation," or the visitor's mount-time auto-restore all deliver their messages the same way: listen for `kai-conversation-load` and set `el.messages` from `event.detail.messages` (a fresh array): this element does not update `messages` for you. Set with no `store`, the underlying `ChatThread` decides loudly (one console.error) and stays visually off; this facade always supplies its own internal load handler (the `kai-conversation-load` dispatch below), so the second ChatThread guard, missing `onConversationLoad`, never trips here, even for a consumer who never listens for the event. Default false. */
+  /** Turns on the prior-conversations list. Requires `store`; default `false`; a load arrives as `kai-conversation-load` -- set `el.messages` yourself. */
   conversations?: boolean;
-  /** The adapter this thread persists conversations through: an object of three functions (`list`/`load`/`save`; `ConversationStore`, exported from `@kitn.ai/ui`'s `primitives/conversation-store`). A JS PROPERTY ONLY: `el.store = myAdapter`. It can never be an attribute, since a function-bearing object has no HTML string form, the same reasoning that keeps `messages`/`cardSchemas` property-only (the kai- contract: array/object props are JS properties, never attributes). Two built-ins ship: `localStorageStore(name, userId?)` and `fetchStore(url, userId?)`. */
+  /** The persistence adapter: `{ list, load, save }`. JS property only (`el.store = myAdapter`). */
   store?: { list: () => Promise<{ id: string; title: string; groupId?: string; scope?: { type: "document" | "collection"; documentId?: string; filters?: { tags?: string[]; authors?: string[]; contentType?: "transcript" | "markdown"; dateRange?: { from: string; to: string } } }; messageCount: number; lastMessageAt?: string; updatedAt: string; trailing?: string; lastReadAt?: string }[]>; load: (id: string) => Promise<{ id: string; role: "user" | "assistant"; parts: ({ type: "text"; text: string; raw?: { source: string; payload: unknown } } | { type: "reasoning"; text: string; label?: string; index?: number; streamId?: string; signature?: string; raw?: { source: string; payload: unknown } } | { type: "tool"; tool: { type: string; kind?: "command" | "file-change" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: Record<string, unknown>; rawInput?: string; output?: Record<string, unknown>; toolCallId?: string; errorText?: string; raw?: { source: string; payload: unknown } }; raw?: { source: string; payload: unknown } } | { type: "card"; envelope: { type: string; id: string; data: unknown; title?: string; resolution?: { kind: "action"; action: string; payload?: unknown; at?: string } | { kind: "submit"; data: unknown; at?: string } | { kind: "dismissed"; at?: string } | { kind: "expired"; reason?: string; at?: string } }; raw?: { source: string; payload: unknown } } | { type: "source"; source: { id?: string; url?: string; title?: string; snippet?: string; index?: number }; raw?: { source: string; payload: unknown } } | { type: "file"; attachment: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }; raw?: { source: string; payload: unknown } })[]; actions?: ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: string; tooltip?: string })[]; avatar?: { src?: string; fallback?: string; alt?: string }; feedback?: "like" | "dislike" }[]>; save: (id: string, messages: { id: string; role: "user" | "assistant"; parts: ({ type: "text"; text: string; raw?: { source: string; payload: unknown } } | { type: "reasoning"; text: string; label?: string; index?: number; streamId?: string; signature?: string; raw?: { source: string; payload: unknown } } | { type: "tool"; tool: { type: string; kind?: "command" | "file-change" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: Record<string, unknown>; rawInput?: string; output?: Record<string, unknown>; toolCallId?: string; errorText?: string; raw?: { source: string; payload: unknown } }; raw?: { source: string; payload: unknown } } | { type: "card"; envelope: { type: string; id: string; data: unknown; title?: string; resolution?: { kind: "action"; action: string; payload?: unknown; at?: string } | { kind: "submit"; data: unknown; at?: string } | { kind: "dismissed"; at?: string } | { kind: "expired"; reason?: string; at?: string } }; raw?: { source: string; payload: unknown } } | { type: "source"; source: { id?: string; url?: string; title?: string; snippet?: string; index?: number }; raw?: { source: string; payload: unknown } } | { type: "file"; attachment: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }; raw?: { source: string; payload: unknown } })[]; actions?: ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: string; tooltip?: string })[]; avatar?: { src?: string; fallback?: string; alt?: string }; feedback?: "like" | "dislike" }[]) => Promise<void>; markRead?: ((id: string) => Promise<void>) };
-  /** Turns on the widget home screen (Intercom-pattern): the panel boots into a `home` view, with a greeting, most-recent-conversation card, a "new conversation" CTA, and host-defined links, plus a Home/Messages tab bar for switching back to the thread. An OBJECT, so it is a JS property only: `el.home = { greeting: { title: 'Hey' }, links: [...] }`, never an attribute (the kai- contract: array/object props are JS properties). A `links` entry with no `href` fires `kai-home-link` with that entry when tapped, rather than navigating; one WITH `href` opens it directly (only when the URL passes the kit's own scheme allowlist). Omit for the no-home widget (chat view only, unchanged). */
+  /** Turns on the Home screen (greeting, recent conversation, links, Home/Messages tabs). JS property; omit for the chat-only widget. */
   home?: { greeting?: { title?: string; subtitle?: string }; recentConversation?: boolean; newConversation?: { label?: string }; links?: { label: string; href?: string; description?: string; icon?: string }[] };
-  /** Whether the chrome that HOSTS this element is currently VISIBLE to the visitor, e.g. a composed launcher/dock's open state. Set as a JS PROPERTY (`el.hostOpen = open`), never an attribute: the default is `true` and an HTML attribute's presence can only ever say "true", so there is no attribute form that expresses the one value worth setting (`false`). Meaningful only with `conversations` on, where it is the third leg of "seen": the active conversation is marked read only while it is active AND the chat view is showing AND this is `true`. Leave it unset for any layout with no show/hide concept (fullscreen, aside, split); that just means unread never distinguishes "closed" from "open". The companion of the `kai-unread-change` event: set this from your launcher's open state, mirror that event onto its badge. */
+  /** Whether the chrome hosting this element is visible (e.g. a launcher's open state). JS property only; `false` has no attribute form. */
   hostOpen?: boolean;
   /** Focus the composer, meaning the contenteditable (or textarea) inside the shadow root. A native `focus()` on the host lands on the host itself and never reaches it, so this is the only way to focus the input programmatically. */
   focus(options?: FocusOptions): void;
@@ -473,7 +473,7 @@ export interface KaiChatElement extends HTMLElement {
 export interface KaiCheckboxElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** Controlled checked state. Settable and reflected to the `checked` attribute. `el.checked = true` (or `<kai-checkbox checked>`) drives it; ticking the box updates it and fires `kai-change`. Read `el.checked` for live state. */
+  /** Controlled checked state, reflected to the `checked` attribute. Ticking the box updates it and fires `kai-change`. */
   checked?: boolean;
   /** Initial checked state on mount (uncontrolled seed). Bare attribute (`<kai-checkbox default-checked>`) turns it on. */
   defaultChecked?: boolean;
@@ -500,9 +500,9 @@ export interface KaiCheckboxGroupElement extends HTMLElement {
   theme?: "light" | "dark" | "auto";
   /** The choices, top to bottom. Set as a JS PROPERTY (array), never an attribute. Rendered in full: the kit never truncates, re-orders or de-duplicates them. */
   options: { value: string; label: string; description?: undefined | string; disabled?: undefined | boolean }[];
-  /** The FIRST selected value. Settable and reflected to the `value` attribute, so `:host([value])` and `el.value` see live state, and a seed can be written in markup. Writing it makes that the whole selection; to read or drive the rest, use `el.values`. */
+  /** The FIRST selected value. Read or drive the rest with `el.values`. */
   value?: string;
-  /** The shared form-control name every box carries, so `FormData.getAll(name)` reads the whole selection back under one key. NO DEFAULT, unlike `<kai-radio-group>`. A radio set needs a shared `name` for the browser to make it exclusive and arrow-navigable, so one is generated when none is given; checkboxes are independent controls and behave correctly with no name at all. Generating one here would submit the selection under a random key, which is worse than submitting nothing. The element is NOT form-associated (no `ElementInternals`, no `setFormValue()`), the same known gap `<kai-input>` records: the boxes live in a shadow root, so a surrounding `<form>` collects nothing from them whether or not `name` is set. Read `el.values`. The name still lands on every inner input, so it is right the day form association arrives. */
+  /** Shared name on every box, for `FormData.getAll(name)`. No default: checkboxes are independent controls. */
   name?: string;
   /** Disable every row. Individual rows carry their own `disabled`. */
   disabled?: boolean;
@@ -515,20 +515,20 @@ export interface KaiCheckboxGroupElement extends HTMLElement {
 export interface KaiCheckpointElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** Optional text beside the icon. */
+  /** Text beside the icon. */
   label?: string;
-  /** Tooltip on hover. */
+  /** Hint shown on hover. */
   tooltip?: string;
-  /** Visual button style. */
+  /** Button style. */
   variant?: "ghost" | "default" | "outline";
-  /** Button size (use an `icon*` size for an icon-only checkpoint). */
+  /** Button size; use an icon size for an icon-only checkpoint. */
   size?: "sm" | "md" | "lg" | "icon" | "icon-sm";
 }
 
 export interface KaiChoiceElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** The choice definition (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { prompt, options:[…], allowOther?, submitLabel? }`. Import `ChoiceCardData` from `@kitn.ai/ui` for the full shape. */
+  /** The choice definition (the card's `data`). JS property: `el.data = { prompt, options: [...] }`. */
   data?: { prompt?: string; options: { id: string; label: string; description?: string; media?: { image?: string; imageAlt?: string; icon?: string }; meta?: string; recommended?: boolean; disabled?: boolean; payload?: unknown }[]; allowOther?: boolean | { label?: string; placeholder?: string }; submitLabel?: string; dismissible?: boolean };
   /** Stable card id correlating every emitted CardEvent. Attribute: `card-id`. */
   cardId?: string;
@@ -557,7 +557,7 @@ export interface KaiChoiceElement extends HTMLElement {
 export interface KaiCoachmarkElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages). Set `el.open = true`, or `<kai-coachmark open>`; listen for `kai-open-change`. */
+  /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
   /** Initial open state on mount (uncontrolled seed). */
   defaultOpen?: boolean;
@@ -616,13 +616,13 @@ export interface KaiCommandElement extends HTMLElement {
 export interface KaiCompareElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** The compare definition (prompt + the two candidates). Set as a JS PROPERTY: `el.data = { prompt, candidates: [A, B], collapse? }`. Import `ResponseCompareData` from `@kitn.ai/ui` for the full shape. */
+  /** The compare definition (prompt + the two candidates). JS property: `el.data = { prompt, candidates: [A, B] }`. */
   data?: Record<string, unknown>;
   /** Stable id correlating every emitted event. Attribute: `compare-id`. */
   compareId?: string;
   /** Re-hydrate / control the user's pick. Set as a JS PROPERTY: `el.selection = { chosenId, rejectedIds }`. Renders the collapsed winner. */
   selection?: Record<string, unknown>;
-  /** Layout: `'auto'` (default, columns when wide, tabs when narrow, by CONTAINER width) | `'columns'` (side-by-side) | `'tabs'` (pills to switch). Attribute: `layout`. */
+  /** Layout: `auto` (default, by CONTAINER width), `columns` (side-by-side), or `tabs` (pills). */
   layout?: "auto" | "columns" | "tabs";
   /** Prose/text size for the rendered candidates. Attribute: `prose-size`. */
   proseSize?: "xs" | "sm" | "base" | "lg";
@@ -672,7 +672,7 @@ export interface KaiComposerElement extends HTMLElement {
 export interface KaiConfirmElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** The confirm definition (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { body, tone, actions:[…] }`. Import `ConfirmCardData` from `@kitn.ai/ui` for the full shape. */
+  /** The confirm definition (the card's `data`). JS property: `el.data = { body, tone, actions: [...] }`. */
   data?: { heading?: string; body?: string; tone?: "default" | "warning" | "danger"; actions: { id: string; label: string; style?: "primary" | "default" | "destructive"; payload?: unknown; default?: boolean }[]; dismissible?: boolean };
   /** Stable card id correlating every emitted CardEvent. Attribute: `card-id`. */
   cardId?: string;
@@ -706,36 +706,36 @@ export interface KaiContextElement extends HTMLElement {
 export interface KaiConversationItemElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** The row's identity: the `conversation-id` attribute (host `id` is the fallback). Inside `<kai-conversations>` it is handed to the container's selection contract (`kai-conversation-select`); standalone it is the `id` in this element's own `kai-select` detail. */
+  /** The row's identity: the `conversation-id` attribute, else the host `id`. */
   conversationId?: string;
-  /** Selected state. Reflected as `aria-current` on the row body and a `data-active` styling hook on the row; inside a container the container drives it from its `activeId`, standalone you set it yourself. */
+  /** Selected state, reflected as `aria-current` and a `data-active` styling hook. Inside a container the container drives it. */
   active?: boolean;
   /** Dense single-line row padding. */
   compact?: boolean;
-  /** Row density: `default`, `compact` (same as the `compact` flag), or `panel`, the widget-panel presentation matching the facade panel's measured row box (12px/10px padding, a 40px single-line row). Previously that box was a private interior class a composition could only approximate by smuggling padding through slotted spans (2026-08-31 composition spike, phase 3 round 3). An explicit density wins over `compact`. */
+  /** Row density: `default`, `compact` (same as the `compact` flag), or `panel` (the widget-panel row box). */
   density?: "default" | "compact" | "panel";
-  /** Show the unread indicator dot at the row's trailing edge, inside the activation surface and before the `menu` region, with a screen-reader "Unread" label. Drive it from `isConversationUnread` (exported from the package root and from `dist/stores.js`). */
+  /** Show the unread indicator dot at the row's trailing edge, with a screen-reader "Unread" label. */
   unread?: boolean;
 }
 
 export interface KaiConversationsElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** The list's section headers (`{ id, name, sortOrder, createdAt }`), rendered in array order. A group carries no conversations of its own; it is matched against `conversations` by id, so the two props are complementary rather than alternatives. Omit for an ungrouped list. Set as a JS property. */
+  /** The list's section headers (`{ id, name, sortOrder, createdAt }`) in array order. JS property; omit for an ungrouped list. */
   groups: { id: string; userId?: string; teamId?: string; name: string; sortOrder: number; createdAt: string }[];
-  /** Every conversation the list renders, flat. Each one is filed under the group whose `id` equals its `groupId`; one with no `groupId`, or with a `groupId` matching no entry in `groups`, falls into a trailing "Ungrouped" section, so nothing you pass in is ever dropped. There is no recency bucketing. Set as a JS property. Omit to supply them as `<kai-conversation>` light-DOM children instead, or for the empty state. A search query that matches nothing shows a visible "No conversations match your search" state, distinct from the zero-conversations empty state. Slotted `<kai-conversation-item>` children switch the list into item mode instead: your own rows win and this array is not rendered. */
+  /** The conversations to render, flat. JS property; omit to pass `<kai-conversation>` light-DOM children instead, or for the empty state. */
   conversations: { id: string; title: string; groupId?: string; scope?: { type: "document" | "collection"; documentId?: string; filters?: { tags?: string[]; authors?: string[]; contentType?: "transcript" | "markdown"; dateRange?: { from: string; to: string } } }; messageCount: number; lastMessageAt?: string; updatedAt: string; trailing?: string; lastReadAt?: string }[];
   /** The id of the currently-open conversation, highlighted in the list. */
   activeId?: string;
-  /** Controlled collapsed state. Set as a JS property (`el.collapsed = true`) to drive the rail from your app, updating it in response to `kai-collapse-toggle`. Omit for uncontrolled (the element manages it). Collapsed shrinks the rail to a floating reopen button. */
+  /** Controlled collapsed state (`el.collapsed = true`). Omit for uncontrolled; collapsed shrinks the rail to a reopen button. */
   collapsed?: boolean;
   /** Initial collapsed state when uncontrolled (default false). Use the `default-collapsed` attribute to start collapsed in plain HTML. */
   defaultCollapsed?: boolean;
   /** Dense single-line rows (a leading dot + title, no message count). */
   compact?: boolean;
-  /** Row density for the data rows: `default`, `compact` (same as the `compact` flag), or `panel`, the widget-panel presentation matching the facade panel's measured row box (12px/10px padding, a 40px single-line row with a right-aligned relative time and an optional preview line carrying the unread dot). An explicit density wins over `compact`. Item mode is unaffected: slotted `<kai-conversation-item>` rows carry their own `density` attribute. */
+  /** Row density: `default`, `compact` (same as the `compact` flag), or `panel` (the widget-panel row box). */
   density?: "default" | "compact" | "panel";
-  /** Show the built-in search box above the list. Default `true`. Set `searchable="false"` (or `el.searchable = false`) to hide it: the widget-box case, where the facade's own list view renders no search and a fine-grain composition previously had no way to match it (2026-08-31 composition spike, phase 3 round 2). Same default-true flag convention as `<kai-prompt-input attach>`: `<kai-conversations searchable>` and omitting it are both ON. Hidden, the `focus()`/`clear()` methods reach no input and `kai-search` never fires. */
+  /** Show the built-in search box above the list. Default `true`; `searchable="false"` hides it. */
   searchable?: boolean;
   /** Focus the built-in search input inside the shadow root. */
   focus(options?: FocusOptions): void;
@@ -754,11 +754,11 @@ export interface KaiConversationsElement extends HTMLElement {
 export interface KaiDialogElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages on Escape/backdrop). Set `el.open = true`, or `<kai-dialog open>`; listen for `kai-open-change`. */
+  /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
   /** Initial open state on mount (uncontrolled seed). */
   defaultOpen?: boolean;
-  /** Accessible name for the modal, used when no `header` slot is projected: `<kai-dialog label="Delete workspace">`. A projected `header` WINS over this (it becomes `aria-labelledby`), because ARIA resolves `aria-labelledby` ahead of `aria-label` and the visible heading is the name both a sighted and a screen-reader user can be talked through. Defaults to `Dialog` so a modal is never nameless. */
+  /** Accessible name for the modal, used when no `header` slot is projected. Defaults to `Dialog`. */
   label?: string;
   /** Open it programmatically (no-op while disabled). */
   show(): void;
@@ -773,7 +773,7 @@ export interface KaiDialogElement extends HTMLElement {
 export interface KaiDockElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages on the launcher and Escape). Set `el.open = true`, or `<kai-dock open>`; listen for `kai-open-change`. */
+  /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
   /** Initial open state on mount (uncontrolled seed). */
   defaultOpen?: boolean;
@@ -789,7 +789,7 @@ export interface KaiDockElement extends HTMLElement {
   unread?: boolean;
   /** Disable the launcher; `show()` and `toggle()` are gated on it. */
   disabled?: boolean;
-  /** Suppress the dock's own built-in mobile close X. Set this when your slotted panel content supplies its own close affordance (e.g. a `<kai-chat slot="header-end">` close button), otherwise the two stack. TRADEOFF: the mobile panel reserves a padding band above its content so the built-in X never paints over slotted content; that band stays reserved unless you set this true, so only set it once your own control is actually in place. Attribute: `hide-close`. */
+  /** Suppress the dock's built-in mobile close X. Attribute: `hide-close`. */
   hideClose?: boolean;
   /** Where focus lands on open: `content` (default, the first element you slotted), `panel`, or `none`. Attribute: `focus-on-open`. */
   focusOnOpen?: "content" | "panel" | "none";
@@ -808,15 +808,15 @@ export interface KaiDropdownElement extends HTMLElement {
   theme?: "light" | "dark" | "auto";
   /** Built-in trigger: leading icon (a named icon like `"plus"`, an image URL/data-URI, or text). A slotted `slot="trigger"` overrides it. */
   triggerIcon?: string;
-  /** Built-in trigger: a text label. This is the trigger's VISIBLE text, so it is also its accessible name, and `label` does not override it: an accessible name that does not contain the visible text is unreachable by speech input (WCAG 2.5.3, Label in Name). Same rule `kai-menu` follows. */
+  /** Built-in trigger: a text label. */
   triggerLabel?: string;
   /** Built-in trigger: a trailing icon (e.g. `"chevron-down"` for a select look). */
   triggerIconTrailing?: string;
-  /** Accessible name for a trigger with no visible label. Ignored when `triggerLabel` is set, which is already the visible name. It DOES name a slotted `slot="trigger"`, which is VISUAL content with the name supplied separately: the same two-slot distinction `kai-menu` documents. */
+  /** Accessible name for a trigger with no visible label. Ignored when `triggerLabel` is set. */
   label?: string;
   /** Stretch the trigger to the full width of its container (a block row). Attribute: `full`. */
   full?: boolean;
-  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute, the menu still self-manages on click/keyboard). Set `el.open = true`, or `<kai-dropdown open>`; listen for `kai-open-change`. */
+  /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
   /** Initial open state on mount (uncontrolled seed). */
   defaultOpen?: boolean;
@@ -837,7 +837,7 @@ export interface KaiEditableLabelElement extends HTMLElement {
   value?: string;
   /** Controlled edit state. `el.editing = true` opens the field; reflected to the `editing` attribute. */
   editing?: boolean;
-  /** How the read view enters edit mode: `'dblclick'` (default) opens the field on a double click, `'click'` on a single click. Reflected to the `edit-trigger` attribute. `edit()` and `editing` are unaffected. */
+  /** How the read view enters edit mode: `dblclick` (default) or `click`. Reflects to `edit-trigger`; `edit()` and `editing` are unaffected. */
   editTrigger?: "dblclick" | "click";
   /** Placeholder shown while editing / when the value is empty. */
   placeholder?: string;
@@ -865,7 +865,7 @@ export interface KaiEmptyElement extends HTMLElement {
   theme?: "light" | "dark" | "auto";
   /** Title text. Attribute: `empty-title` (`title` is a global HTML attribute). */
   emptyTitle?: string;
-  /** Description text. */
+  /** Line of copy under the title. */
   description?: string;
 }
 
@@ -904,20 +904,20 @@ export interface KaiFileTreeElement extends HTMLElement {
 export interface KaiFileUploadElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** Allow selecting multiple files (default true). */
+  /** Allow picking more than one file. Default true. */
   multiple?: boolean;
-  /** `accept` attribute for the file picker (e.g. `image/*`). */
+  /** `accept` for the file picker, e.g. `image/*`. */
   accept?: string;
-  /** Disable the dropzone: no clicking, no drag-and-drop. */
+  /** No clicking and no drag-and-drop. */
   disabled?: boolean;
-  /** Default dropzone label (overridable via the default slot). */
+  /** Default dropzone label; replace it with your own markup via the default slot. */
   label?: string;
 }
 
 export interface KaiFormElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** The form definition: a JSON Schema (`type:'object'`) + `x-kai-*` UI hints (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { type:'object', properties:{…} }`. Import the `FormDefinition` type from `@kitn.ai/ui` for the full shape. It IS self-referential (`FormField.properties` is another `FormField` map), and the generated `web-component-types.d.ts` inlines every named type, so the shipped declaration bottoms out in a `Record<string, unknown>` placeholder one level down rather than carrying the recursion. That is why `FormDefinition` is a `type` alias: an interface gets no implicit index signature, so it would not be assignable to that placeholder. */
+  /** The form definition: a JSON Schema + `x-kai-*` UI hints. JS property: `el.data = { type: 'object', properties: {...} }`. */
   data?: { type: "object"; title?: string; description?: string; required?: string[]; properties: Record<string, { type: "string" | "number" | "integer" | "boolean" | "array" | "object"; title?: string; description?: string; default?: unknown; enum?: unknown[]; format?: "email" | "uri" | "url" | "date" | "date-time" | "time"; minimum?: number; maximum?: number; minLength?: number; maxLength?: number; pattern?: string; minItems?: number; maxItems?: number; items?: Record<string, unknown> | { enum: unknown[] }; properties?: Record<string, Record<string, unknown>>; required?: string[]; readOnly?: boolean; "x-kai-widget"?: "textarea" | "slider" | "rating" | "radio" | "select" | "checkbox" | "password" | "switch"; "x-kai-placeholder"?: string; "x-kai-step"?: number; "x-kai-format"?: "tel" | "ssn" | "credit-card" | "custom"; "x-kai-mask"?: string; "x-kai-mask-guide"?: string }>; "x-kai-order"?: string[]; "x-kai-inlineMax"?: number; "x-kai-submitLabel"?: string; "x-kai-dismissible"?: boolean; "x-kai-actions"?: { id: string; label: string; variant?: "default" | "ghost" | "outline" }[] };
   /** Stable card id correlating every emitted CardEvent. Attribute: `card-id`. */
   cardId?: string;
@@ -954,7 +954,7 @@ export interface KaiHoverCardElement extends HTMLElement {
   closeDelay?: number;
   /** Preferred placement: `'top' | 'bottom' | 'left' | 'right'` (+ optional `-start`/`-end`). Defaults to `'bottom'`; flips to stay in view. */
   placement?: string;
-  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute, the element still self-manages on hover). Set `el.open = true`, or `<kai-hover-card open>`; listen for `kai-open-change`. */
+  /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
   /** Initial open state on mount (uncontrolled seed). */
   defaultOpen?: boolean;
@@ -980,7 +980,7 @@ export interface KaiIconElement extends HTMLElement {
 export interface KaiImageElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** The image's URL: an `https:`/`http:` location, a `data:` URI, or a `blob:` object URL you created. Attribute `src`. This is an image RESOURCE; for an image the model PRODUCED (base64 or raw bytes) use `<kai-image-artifact>`. */
+  /** The image URL: an `https:`/`http:` location, a `data:` URI, or a `blob:` object URL you created. */
   src?: string;
   /** Alt text. Attribute `alt`. Always give meaningful text: an empty alt marks the image as decorative. */
   alt?: string;
@@ -991,9 +991,9 @@ export interface KaiImageElement extends HTMLElement {
 export interface KaiImageArtifactElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** The image PAYLOAD, as BARE base64 (never a URI) or as raw bytes. Attribute `data` for a base64 string; JS PROPERTY (`el.data = new Uint8Array([...])`) for bytes, like every other non-scalar input in this kit. A `data:image/...;base64,…` string here is a RESOURCE: it is reported and rendered as-is, and it belongs on `<kai-image>`'s `src`, which carries its own media type. */
+  /** The image PAYLOAD: BARE base64 (never a URI) or raw bytes. Attribute `data` for base64; JS property for `Uint8Array`. */
   data?: string | Uint8Array;
-  /** The payload's MIME type, e.g. `image/png` or `image/jpeg`. Attribute `media-type`. REQUIRED. Omit it and the element renders the skeleton and warns, because guessing `image/png` labelled a JPEG's bytes as a PNG. */
+  /** The payload's MIME type, e.g. `image/png`. Attribute `media-type`. REQUIRED. */
   mediaType?: string;
   /** Alt text. Attribute `alt`. Always give meaningful text: an empty alt marks the image as decorative. */
   alt?: string;
@@ -1006,7 +1006,7 @@ export interface KaiInputElement extends HTMLElement {
   theme?: "light" | "dark" | "auto";
   /** Native input type: `text` (default) · `email` · `url` · `search` · `tel` · `password` · `number`. Single-line only. */
   type?: string;
-  /** Controlled value, and always the CANONICAL one when a mask is active: digits for `tel` / `ssn` / `credit-card`, the formatted text for `custom`. Settable and reflected to the `value` attribute. `el.value = '5551234567'` drives it (no event) and is re-fitted to the mask on the way in, so the field shows `555-123-4567`. Read `el.value` for live state; the formatted text rides along on every `kai-input` / `kai-change` detail as `formattedValue`. */
+  /** Controlled value, reflected to the `value` attribute. */
   value?: string;
   /** Placeholder shown when empty. */
   placeholder?: string;
@@ -1032,11 +1032,11 @@ export interface KaiInputElement extends HTMLElement {
   autocomplete?: string;
   /** Virtual-keyboard hint forwarded to the inner input (e.g. `numeric`, `email`). */
   inputmode?: string;
-  /** Mask pattern: `#` a digit, `@` a letter or digit, `*` an obscurable letter or digit, and every other character a positional literal (`@@@-####` → `CHG-4821`). The literal `default` is the opt-in sentinel: it resolves to the default format of `semantic` (`tel` → `###-###-####`). A bare `semantic` never starts masking on its own, so an opt-in token is what turns tier 2 on. */
+  /** Mask pattern: `#` a digit, `@` a letter or digit, `*` an obscurable letter or digit, every other character a positional literal. */
   format?: string;
-  /** Placeholder guide shown at unfilled positions, aligned position for position with `format`: `mm/dd/yyyy` against `##/##/####`. Spaces are a valid guide character, so a guide of blanks and separators is how a phone field shows its shape without showing letters. Without a guide the field shows only up to the last typed character. A guide is a visual aid, never an accessible name: keep the `hint` text as well. */
+  /** Placeholder guide shown at unfilled positions (e.g. `mm/dd/yyyy`). */
   guide?: string;
-  /** Semantic field type: `tel` · `ssn` · `credit-card` · `custom`. On its own it sets `inputmode` / `autocomplete` / `spellcheck` / `autocorrect` / `autocapitalize` and decides the canonical value; it never starts masking by itself. */
+  /** Semantic field type: `tel`, `ssn`, `credit-card` or `custom`. Sets `inputmode`/`autocomplete`; never masks on its own. */
   semantic?: "credit-card" | "custom" | "ssn" | "tel";
   /** Case folding applied to typed and pasted text: `preserve` (default) · `upper` · `lower`. Attribute: `case-mode`. */
   caseMode?: "preserve" | "upper" | "lower";
@@ -1073,17 +1073,17 @@ export interface KaiKbdGroupElement extends HTMLElement {
 export interface KaiLightboxElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute, while the trigger click still works). Set `el.open = true`, or `<kai-lightbox open>`; listen for `kai-open-change`. */
+  /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
   /** Initial open state on mount (uncontrolled seed). */
   defaultOpen?: boolean;
-  /** Take away the PROGRAMMATIC open path only: `show()` becomes a no-op and `toggle()` closes rather than opens. The trigger, the `open` attribute and `hide()` are untouched. These are the disclosure semantics every overlay in the kit shares; see ../disclosure. */
+  /** Take away the PROGRAMMATIC open path only: `show()` becomes a no-op and `toggle()` closes rather than opens. */
   disabled?: boolean;
-  /** Accessible name for the modal (`aria-label`), for a lightbox whose content carries no heading. Without one the panel is an UNNAMED `role="dialog"`, which is a WCAG failure, so name it. */
+  /** Accessible name for the modal (`aria-label`). Name it: an unnamed `role="dialog"` is a WCAG failure. */
   label?: string;
-  /** Show the close (X) button in the modal's top-right corner. ON WHEN ABSENT: this is a default-true flag, so `show-close`, `show-close="true"` and `el.showClose = true` all mean ON, and the only ways to turn it OFF are `show-close="false"` and `el.showClose = false`. Escape, a backdrop click and `hide()` dismiss the modal either way. */
+  /** Show the close (X) button in the modal's top-right corner. Default `true`. */
   showClose?: boolean;
-  /** Close the modal on a click inside `slot="content"`. ON WHEN ABSENT, the same default-true flag as `showClose`, so `close-on-content-click`, `close-on-content-click="true"` and `el.closeOnContentClick = true` mean ON and only `"false"`/`false` turn it off. A click on a link, a button or any other interactive element inside the content is let through, so a caption link or a download button keeps working. */
+  /** Close the modal on a click inside `slot="content"`. Default `true`. */
   closeOnContentClick?: boolean;
   /** Open it programmatically (no-op while disabled). */
   show(): void;
@@ -1105,9 +1105,9 @@ export interface KaiLinkPreviewElement extends HTMLElement {
 export interface KaiLoaderElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** The animation style: `'circular' | 'classic' | 'pulse' | 'pulse-dot' | 'dots' | 'typing' | 'wave' | 'bars' | 'terminal' | 'text-blink' | 'text-shimmer' | 'loading-dots'`. Defaults to `'circular'`. */
+  /** Animation style. Default `circular`. */
   variant?: "circular" | "classic" | "pulse" | "pulse-dot" | "dots" | "typing" | "wave" | "bars" | "terminal" | "text-blink" | "text-shimmer" | "loading-dots";
-  /** Loader size: `'sm' | 'md' | 'lg'`. Defaults to `'md'`. */
+  /** Loader size. Default `md`. */
   size?: "sm" | "md" | "lg";
   /** Label for the text-based variants. */
   text?: string;
@@ -1116,13 +1116,13 @@ export interface KaiLoaderElement extends HTMLElement {
 export interface KaiMarkdownElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** The markdown source to render. */
+  /** The markdown source. */
   content: string;
-  /** Text/markdown sizing. */
+  /** Text and markdown sizing. */
   proseSize?: "xs" | "sm" | "base" | "lg";
   /** Shiki theme for fenced code blocks. */
   codeTheme?: string;
-  /** Disable syntax highlighting (no Shiki loads). */
+  /** Set false to render plain `pre` blocks, with no highlighter load. */
   codeHighlight?: boolean;
 }
 
@@ -1133,17 +1133,17 @@ export interface KaiMenuElement extends HTMLElement {
   items?: { id?: string; label?: string; icon?: string; shortcut?: string; checked?: boolean; radioGroup?: string; disabled?: boolean; separator?: boolean; heading?: boolean; items?: Record<string, unknown>[] }[];
   /** Optional placement hint (unused by the underlying Dropdown which always positions bottom-start, kept for future extension). */
   placement?: string;
-  /** Built-in trigger: leading icon (a named icon like `"plus"`, an image URL/data-URI, or text). Use this instead of slotting `slot="trigger"` for the common case; a slotted trigger overrides it. */
+  /** Built-in trigger: a leading icon (a named icon, an image URL/data-URI, or text). A slotted trigger overrides it. */
   triggerIcon?: string;
-  /** Built-in trigger: a text label (e.g. `"High"`). This is the trigger's VISIBLE text, so it is also its accessible name, and `label` does not override it: an accessible name that does not contain the visible text is unreachable by speech input, which is what WCAG 2.5.3 (Label in Name) exists for. A slotted `slot="trigger"` replaces this built-in trigger entirely and is named differently; see `label`. */
+  /** Built-in trigger: a text label. */
   triggerLabel?: string;
   /** Built-in trigger: a trailing icon (e.g. `"chevron-down"` for a select look). */
   triggerIconTrailing?: string;
-  /** Accessible name for a trigger with no visible label. Ignored when `triggerLabel` is set, which is already the visible name. It DOES name a slotted `slot="trigger"`, and that is a difference in what the two slots MEAN, not a limitation. `<kai-button>`'s slot IS the button's label, so text slotted there is the name and `label` steps aside. This slot is VISUAL content, a `+` or an `<svg>`, with the name supplied separately: decoration beside a name, never a second name competing with one. So `label` names the trigger here by design. Slotting a real WORD rather than a glyph makes that word a visible label, and an accessible name has to contain the visible text. Then either drop `label` or make it contain the word you slotted. */
+  /** Accessible name for a trigger with no visible label. Ignored when `triggerLabel` is set. */
   label?: string;
-  /** Stretch the trigger to the full width of the menu's container (a block row), e.g. a sidebar-footer account row. Same affordance as `<kai-button full>`. Attribute: `full`. */
+  /** Stretch the trigger to the full width of its container (a block row). Attribute: `full`. */
   full?: boolean;
-  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute, the menu still self-manages on click/keyboard). Set `el.open = true`, or `<kai-menu open>`; listen for `kai-open-change`. */
+  /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
   /** Initial open state on mount (uncontrolled seed). */
   defaultOpen?: boolean;
@@ -1162,7 +1162,7 @@ export interface KaiMessageElement extends HTMLElement {
   theme?: "light" | "dark" | "auto";
   /** The full message object. Set as a JS property. */
   message?: { id: string; role: "user" | "assistant"; parts: ({ type: "text"; text: string; raw?: { source: string; payload: unknown } } | { type: "reasoning"; text: string; label?: string; index?: number; streamId?: string; signature?: string; raw?: { source: string; payload: unknown } } | { type: "tool"; tool: { type: string; kind?: "command" | "file-change" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: Record<string, unknown>; rawInput?: string; output?: Record<string, unknown>; toolCallId?: string; errorText?: string; raw?: { source: string; payload: unknown } }; raw?: { source: string; payload: unknown } } | { type: "card"; envelope: { type: string; id: string; data: unknown; title?: string; resolution?: { kind: "action"; action: string; payload?: unknown; at?: string } | { kind: "submit"; data: unknown; at?: string } | { kind: "dismissed"; at?: string } | { kind: "expired"; reason?: string; at?: string } }; raw?: { source: string; payload: unknown } } | { type: "source"; source: { id?: string; url?: string; title?: string; snippet?: string; index?: number }; raw?: { source: string; payload: unknown } } | { type: "file"; attachment: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }; raw?: { source: string; payload: unknown } })[]; actions?: ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: string; tooltip?: string })[]; avatar?: { src?: string; fallback?: string; alt?: string }; feedback?: "like" | "dislike" };
-  /** Who is speaking: `'user'` or `'assistant'`. Convenience for simple cases when not passing a `message` object. This is the SEMANTIC role of the message, not an ARIA role. The name collides with the global ARIA `role` attribute, which is why the facade lifts it off the host (see `liftRoleOffHost`). Neither speaker is a valid ARIA role, so a `role="user"` left on `<kai-message>` is a CRITICAL axe `aria-roles` violation. The accessible role lives on the row inside the shadow root instead: `role="article"` plus an `aria-label` naming the speaker, matching the SolidJS `<Message>` component. Re-declares the DOM member `HTMLElement.role`, so it is NOT optional here: an interface extending HTMLElement may only narrow it, and the element always carries a value for it. */
+  /** Who is speaking. NOT an ARIA role: it renders role="article" with a named aria-label instead, and shadows the ARIA role attribute (see the note above). Re-declares the DOM member `HTMLElement.role`, so it is NOT optional here: an interface extending HTMLElement may only narrow it, and the element always carries a value for it. */
   role: "user" | "assistant";
   /** Force markdown on/off. Defaults to on for assistant, off for user. */
   markdown?: boolean;
@@ -1178,11 +1178,11 @@ export interface KaiMessageElement extends HTMLElement {
   avatarSrc?: string;
   /** Convenience avatar fallback text (used when `message.avatar` is not set). */
   avatarFallback?: string;
-  /** Avatar rail mode. `'none'` omits the avatar rail entirely so the body spans the full row (predictable layout when you never show avatars). Any other value keeps the default behaviour: the built-in avatar when one resolves, or your `slot="avatar"` content when projected (which REPLACES the built-in). */
+  /** Avatar rail mode. `'none'` omits the rail so the body spans the full row; otherwise the built-in avatar or your `slot="avatar"`. */
   avatar?: string;
-  /** Optional card type -> custom-element tag overrides/additions for `card` parts (merged over the built-ins). Property: `el.cardTypes`. Typed as a plain string map (not the `CardTagMap` alias) so the generated React wrapper inlines it instead of emitting an unresolved named type. */
+  /** Card type → custom-element tag overrides/additions, merged over the built-ins. JS property: `el.cardTypes`. */
   cardTypes?: Record<string, string>;
-  /** JSON Schemas for the card types this app renders, keyed by envelope type. The companion of `cardTypes`, which says what DRAWS a card while this says what a VALID one looks like. An OBJECT, so it is a JS property only: `el.cardSchemas = { 'pricing-table': pricingSchema }`, never an attribute. `createCardRegistry(...).validationSchemas` is exactly this shape. Without it the kit validates its own seven built-ins and leaves your own card type, the one your app actually cares about, as the only unchecked thing on screen. A schema here WINS over a built-in of the same name. Typed `Record<string, object>` rather than `Record<string, JsonSchema>` deliberately: an imported `.json` schema widens `"type"` to `string`, and an authored one carries `$schema`/`title`/`description`/`additionalProperties`, so the tighter type would reject both of the normal ways to supply one. */
+  /** Card-type JSON Schemas keyed by envelope type; validates each card's `data`. JS property: `el.cardSchemas`. */
   cardSchemas?: Record<string, object>;
   /** Copy the message content to the clipboard and show the copied check. */
   copy(): void;
@@ -1191,11 +1191,11 @@ export interface KaiMessageElement extends HTMLElement {
 export interface KaiModelSwitcherElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** The selectable models. Set as a JS property (array). Omit to supply them as `<kai-model>` light-DOM children instead; when both are present the property's models come first. */
+  /** The selectable models. JS property (array); omit to pass `<kai-model>` light-DOM children instead. */
   models: { id: string; name: string; provider?: string; description?: string; group?: string }[];
   /** The currently-selected model id. Defaults to the first model. */
   currentModel?: string;
-  /** Drive/observe the dropdown's open state (Shoelace-style: settable + reflected to the `open` attribute, the dropdown still self-manages on click/keyboard). Set `el.open = true`, or `<kai-model-switcher open>`; listen for `kai-open-change`. */
+  /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
   /** Initial open state on mount (uncontrolled seed). */
   defaultOpen?: boolean;
@@ -1238,7 +1238,7 @@ export interface KaiNoticeElement extends HTMLElement {
 export interface KaiPaneElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** The pane title (the agent / window name). Named `headline` because `title` collides with the global `HTMLElement.title` attribute (it throws at registration). Attribute: `headline`. */
+  /** The pane title (the agent / window name). Named `headline` because `title` collides with the global `HTMLElement.title`. */
   headline?: string;
   /** A role / label shown under the title (e.g. "Reviewer", "claude-sonnet"). Attribute: `subtitle`. */
   subtitle?: string;
@@ -1265,7 +1265,7 @@ export interface KaiPaneGridElement extends HTMLElement {
   maxColumns?: number;
   /** Gap between panes, any CSS length. Defaults to the kit gap (`var(--kai-pane-grid-gap, 0.5rem)`). Attribute: `gap`. */
   gap?: string;
-  /** When set to a valid child index, render ONLY that pane full-bleed: a simple maximize hook the consumer drives (pair it with `<kai-pane>`'s `kai-maximize` event). Clear it (or point out of range) for the full tiled grid. Attribute: `maximized-index`. */
+  /** A valid child index renders ONLY that pane full-bleed; clear it or point out of range for the tiled grid. */
   maximizedIndex?: number | null;
 }
 
@@ -1274,7 +1274,7 @@ export interface KaiPaneGroupElement extends HTMLElement {
   theme?: "light" | "dark" | "auto";
   /** The tabs to render. An array of `{ id, name, status?, needsAttention?, number? }` set as a JS PROPERTY (not an HTML attribute). */
   tabs?: { id: string; name: string; status?: { tone: "working" | "idle" | "done" | "error" | "blocked"; label?: string; pulse?: boolean }; needsAttention?: boolean; number?: number }[];
-  /** The active tab id (controlled, and reflected to the `active` ATTRIBUTE so `::part`/`[active]` selectors and the per-tab named slot follow it). Set it as the `active` attribute or drive it from `kai-tab-change`; omit for uncontrolled (the first tab). */
+  /** The active tab id (controlled). Omit for uncontrolled (the first tab). */
   active?: string;
   /** Highlight the frame as the ACTIVE group in a multi-group layout. Attribute: `focused`. */
   focused?: boolean;
@@ -1287,7 +1287,7 @@ export interface KaiPaneGroupElement extends HTMLElement {
 export interface KaiPanelElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** Standalone widget-box chrome: border, radius and shadow on the panel itself. Off (the default), the panel inherits its container's radius and clips to it, the right posture inside an already-framed container such as `kai-dock`'s floating panel. */
+  /** Standalone widget-box chrome: border, radius and shadow on the panel itself. */
   frame?: boolean;
 }
 
@@ -1303,7 +1303,7 @@ export interface KaiPopoverElement extends HTMLElement {
   placement?: "top" | "right" | "bottom" | "left" | "bottom-end" | "bottom-start" | "left-end" | "left-start" | "right-end" | "right-start" | "top-end" | "top-start";
   /** Gap in px between the trigger and the panel. */
   gutter?: number;
-  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute, the element still self-manages on click). Set `el.open = true`, or `<kai-popover open>`; listen for `kai-open-change`. */
+  /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
   /** Initial open state on mount (uncontrolled seed). */
   defaultOpen?: boolean;
@@ -1333,16 +1333,16 @@ export interface KaiProgressBarElement extends HTMLElement {
 export interface KaiPromptDockElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** How the tray frames the input, the SPATIAL inset axis: `inset` (default, the classic recessed frame on every side) | `edge` (top/bottom inset only; the input sits flush left/right so the lips span the full width) | `none` (no inset; the lips attach directly as a plain stack). Attribute: `frame`. */
+  /** How the tray frames the input, the SPATIAL axis: `inset` (default, recessed on every side), `edge` (top/bottom only), or `none`. */
   frame?: "inset" | "edge" | "none";
-  /** How the tray surface looks, the VISUAL axis orthogonal to `frame`: `soft` (default, sunken surface + border + radius) | `outlined` (transparent + border + radius) | `filled` (sunken, no border, + radius) | `plain` (bare). Attribute: `appearance`. */
+  /** How the tray surface looks, the VISUAL axis: `soft` (default), `outlined`, `filled`, or `plain`. */
   appearance?: "soft" | "outlined" | "filled" | "plain";
 }
 
 export interface KaiPromptInputElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** Value of the input, as a JS property. A **string** is the controlled text mirror (the host owns it and updates on `kai-value-change`). A **ComposerDoc** (array of text/entity segments) is a one-time **seed** that pre-populates pills (skills/agents/plugins); the user then edits freely. Leave unset for uncontrolled behavior. `kai-submit`/`kai-value-change` always emit `value` as the flattened string (back-compat) plus the structured `doc` + `entities`. */
+  /** Value of the input: a **string** is the controlled text mirror, a **ComposerDoc** is a one-time pill seed. */
   value?: string | ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: string; promptText?: string; data?: Record<string, unknown> } })[];
   /** Placeholder text shown in the empty input. */
   placeholder?: string;
@@ -1360,13 +1360,13 @@ export interface KaiPromptInputElement extends HTMLElement {
   voice?: boolean;
   /** When set and `loading` is true, the send button is replaced by a Stop button (square icon, "Stop" aria-label). Clicking it fires `kai-stop`. */
   stoppable?: boolean;
-  /** Send-button visibility. `'always'` (default) always shows it; `'auto'` shows it only when there's text/attachments (an empty composer hides it, though Enter still submits). To hide it entirely (Enter-only), it's pure CSS: `::part(send){display:none}`, no prop needed. Restyle via `::part(send)`. The Stop button (`stoppable` + `loading`) is unaffected. */
+  /** Send-button visibility: `always` (default) or `auto` (only when there is text/attachments). */
   submit?: "always" | "auto";
-  /** When `false`, hides the built-in paperclip attach button even though the element otherwise supports attachments. Use this when a `+` menu in `toolbar-start` already exposes "Add files", to avoid a duplicate control. Defaults to `true`. */
+  /** Show the built-in paperclip attach button. Default `true`. */
   attach?: boolean;
-  /** Attachments to seed the input with (so a consumer can pre-populate staged files without an upload). Set as a JS property; the element then manages its own attachment state from there (add via the paperclip, remove per chip). Each item's `url` must be a `data:` URI or an https URL, never `URL.createObjectURL`: a `blob:` URL previews perfectly and is meaningless outside this tab, so `toOpenAIMessages`/`toAnthropicMessages` refuse it. (The built-in paperclip already stages files as `data:` URIs.) */
+  /** Attachments to seed the input with. Each `url` must be a `data:` URI or https URL, never `blob:`. */
   attachments?: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }[];
-  /** Rich entity triggers. Each `{ char, kind, items }` opens a caret-anchored menu that inserts an atomic pill. Convention: `/` → skills, `@` → agents (plugins are the grouping/provenance of those items). Set as a JS property. */
+  /** Rich entity triggers. Each `{ char, kind, items }` opens a caret-anchored menu that inserts an atomic pill. JS property. */
   triggers?: { char: string; kind: string; items?: { id: string; label: string; icon?: string; description?: string; group?: string; kind?: string; promptText?: string; data?: Record<string, unknown> }[] }[];
   /** Default icon per entity kind (kind → image URL/data-URI) for pills/menu items without their own `icon`. Overrides the built-in agent/plugin glyphs. JS property. */
   kindIcons?: Record<string, string>;
@@ -1385,9 +1385,9 @@ export interface KaiRadioGroupElement extends HTMLElement {
   theme?: "light" | "dark" | "auto";
   /** The choices, top to bottom. Set as a JS PROPERTY (array), never an attribute. */
   options: { value: string; label: string; description?: undefined | string; disabled?: undefined | boolean }[];
-  /** Controlled selected `value`. Settable and reflected to the `value` attribute. `el.value = 'degraded'` drives it; choosing a row updates it and fires `kai-change`. Read `el.value` for live state. */
+  /** Controlled selected `value`, reflected to the `value` attribute. Choosing a row updates it and fires `kai-change`. */
   value?: string;
-  /** Shared form-control name for every radio in the group. Defaults to a generated id, so the group is exclusive and keyboard-navigable even when nothing is submitted. */
+  /** Shared form-control name for every radio. Defaults to a generated id, so the group stays exclusive unsubmitted. */
   name?: string;
   /** Disable every row. Individual rows carry their own `disabled`. */
   disabled?: boolean;
@@ -1404,7 +1404,7 @@ export interface KaiReasoningElement extends HTMLElement {
   text: string;
   /** Trigger label. */
   label?: string;
-  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages on trigger click + while streaming). Set `el.open = true`; listen for `kai-open-change`. */
+  /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
   /** Initial open state on mount (uncontrolled seed). */
   defaultOpen?: boolean;
@@ -1442,7 +1442,7 @@ export interface KaiResizableElement extends HTMLElement {
   orientation?: "horizontal" | "vertical";
   /** Which item index is maximized (null = none). Declarative source of truth. */
   maximizedIndex: number | null;
-  /** Divider affordance drawn inside each draggable handle's 8px grab zone: - `line` (default): a 1px hairline, transparent at rest, tinting on hover/drag. - `grip`: a dotted grip handle. - `none`: no visible divider, just the invisible hit-area. The full grab zone and keyboard/ARIA behavior are identical for all three. */
+  /** Divider affordance drawn inside each draggable handle's 8px grab zone: `line` (default), `grip`, or `none`. */
   handle?: "line" | "grip" | "none";
   /** Imperatively maximize the item at `index` (thin wrapper over `maximizedIndex`). */
   maximize(index: number): void;
@@ -1463,18 +1463,18 @@ export interface KaiResizableItemElement extends HTMLElement {
   locked?: boolean;
   /** Hide this panel; its divider is dropped and the rest reflow. Re-declares the DOM member `HTMLElement.hidden`, so it is NOT optional here: an interface extending HTMLElement may only narrow it, and the element always carries a value for it. */
   hidden: boolean;
-  /** Collapse this panel. Same layout effect as `hidden` (divider dropped, the rest reflow), but it WORKS as a bare boolean from framework JSX. A plain `<kai-resizable-item collapsed>` in React/Solid/Vue/Svelte collapses the panel at the first render; `hidden` does not, because a JSX boolean sets neither the `hidden` attribute nor the IDL property on a custom element, so the parent never sees it. The facade reflects `collapsed` to a `collapsed` attribute the parent reads. Prefer this over `hidden` for declarative collapse. */
+  /** Collapse this panel. Works as a bare boolean from framework JSX; `hidden` does not. */
   collapsed?: boolean;
 }
 
 export interface KaiResponseStreamElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** Text to stream. A string, or an `AsyncIterable<string>` (set as a JS property, since async iterables can't be HTML attributes). */
+  /** Text to stream: a string, or an `AsyncIterable<string>` set as a property. */
   text: string | AsyncIterable<string>;
   /** Reveal animation. */
   mode?: "typewriter" | "fade";
-  /** Characters/segments per tick. */
+  /** Characters or segments per tick. */
   speed?: number;
   /** Element tag to render as. */
   as?: string;
@@ -1485,7 +1485,7 @@ export interface KaiRowElement extends HTMLElement {
   theme?: "light" | "dark" | "auto";
   /** Pressable row: renders real button semantics (click, Enter, Space) and fires `kai-click` on activation. Ignored when `href` is set. */
   interactive?: boolean;
-  /** Navigate on press: the row renders as a real anchor opening in a new tab. An href outside the kit's safe URL schemes renders a plain non-interactive row instead (label visible, nothing clickable). */
+  /** Navigate on press: the row renders as a real anchor opening in a new tab. An unsafe URL scheme renders a plain, non-interactive row. */
   href?: string;
   /** Show a trailing chevron affordance at the row's end. */
   chevron?: boolean;
@@ -1499,17 +1499,17 @@ export interface KaiRowGroupElement extends HTMLElement {
 export interface KaiScopePickerElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** Authors to offer as scope filters. Omit to drop the Authors section (for a tag-only picker). Set as a JS property. */
+  /** Authors to offer as filters. Omit to drop the Authors section. Property only. */
   availableAuthors: string[];
-  /** Tags to offer as scope filters. Omit to drop the Tags section (for an author-only picker). Set as a JS property. */
+  /** Tags to offer as filters. Omit to drop the Tags section. Property only. */
   availableTags: string[];
-  /** The label shown on the trigger for the active scope. */
+  /** Label on the trigger for the active scope. */
   currentLabel?: string;
-  /** Drive/observe the dropdown's open state (Shoelace-style: settable + reflected to the `open` attribute, the dropdown still self-manages on click/keyboard). Set `el.open = true`, or `<kai-scope-picker open>`; listen for `kai-open-change`. */
+  /** Open state: settable, reflected to `open`, and still self-managed on click. */
   open?: boolean;
   /** Initial open state on mount (uncontrolled seed). */
   defaultOpen?: boolean;
-  /** Disable the trigger: click/keyboard and `show()` no longer open the dropdown. */
+  /** Click, keyboard and `show()` no longer open the dropdown. */
   disabled?: boolean;
   /** Open it programmatically (no-op while disabled). */
   show(): void;
@@ -1522,7 +1522,7 @@ export interface KaiScopePickerElement extends HTMLElement {
 export interface KaiScreenElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages). Set `el.open = true`, or `<kai-screen open>`; listen for `kai-open-change`. */
+  /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
   /** Initial open state on mount (uncontrolled seed). */
   defaultOpen?: boolean;
@@ -1552,7 +1552,7 @@ export interface KaiScrollAreaElement extends HTMLElement {
 export interface KaiScrollButtonElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** CSS id of the scroll container to control. When omitted the element walks up the DOM (outside its own shadow root) to find the nearest scrollable ancestor. Mirrors the `for` convention of `<label for="...">`. */
+  /** CSS id of the scroll container to control. */
   for?: string;
   /** Button visual variant: `'outline' | 'ghost' | 'default'`. Defaults to `'outline'`. */
   variant?: "outline" | "ghost" | "default";
@@ -1560,7 +1560,7 @@ export interface KaiScrollButtonElement extends HTMLElement {
   size?: "sm" | "md" | "lg" | "icon" | "icon-sm";
   /** The button's accessible name. It is announced whether or not the label is visible, so the text is always localisable. Defaults to `'Scroll to bottom'`. */
   label?: string;
-  /** Also render `label` visibly beside the icon. Defaults to `false`, which is the icon-only button. When the text is visible it IS the accessible name, so nothing gets announced twice. */
+  /** Also render `label` visibly beside the icon. Default `false` (icon-only). */
   showLabel?: boolean;
 }
 
@@ -1590,7 +1590,7 @@ export interface KaiSegmentedElement extends HTMLElement {
   theme?: "light" | "dark" | "auto";
   /** The selectable segments, left to right. Set as a JS property (array). */
   options: { value: string; label: string; icon?: undefined | string }[];
-  /** Controlled selected `value`. Settable and reflected to the `value` attribute. `el.value = 'preview'` drives it; choosing a segment updates it and fires `kai-change`. Read `el.value` for live state. */
+  /** Controlled selected `value`, reflected to the `value` attribute. Choosing a segment updates it and fires `kai-change`. */
   value?: string;
   /** Control density: `sm` or `md`. Defaults to `md`. */
   size?: "sm" | "md";
@@ -1601,9 +1601,9 @@ export interface KaiSelectElement extends HTMLElement {
   theme?: "light" | "dark" | "auto";
   /** The choices, in display order. Set as a JS PROPERTY (array), never an attribute. Rendered in full: the kit never truncates, re-orders or de-duplicates them. */
   options: { value: string; label?: undefined | string; disabled?: undefined | boolean }[];
-  /** Controlled selected value. Settable and reflected to the `value` attribute. `el.value = 'high'` drives it; choosing an option updates it and fires `kai-change`. Read `el.value` for live state; for a `multiple` select read `el.values` instead. */
+  /** Controlled selected value, reflected to the `value` attribute. For a `multiple` select read `el.values`. */
   value?: string;
-  /** Text for a leading, disabled, empty option: the "nothing chosen yet" row. Omitted means no such row at all; there is no default wording, because inventing one would put words in your UI. */
+  /** Text for a leading, disabled, empty option (the "nothing chosen yet" row). */
   placeholder?: string;
   /** Allow more than one selection. Turns the control into the platform's list box, so the kit's chevron is not drawn. */
   multiple?: boolean;
@@ -1662,7 +1662,7 @@ export interface KaiSkeletonElement extends HTMLElement {
 export interface KaiSkillsElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** The active skills to badge. Set as a JS property. Omit to supply them as `<kai-skill>` light-DOM children instead; when both are present the property's skills come first. Nothing renders when there are none. */
+  /** The active skills to badge. JS property (array); omit to pass `<kai-skill>` light-DOM children instead. */
   skills: { id: string; name: string }[];
 }
 
@@ -1675,7 +1675,7 @@ export interface KaiSliderElement extends HTMLElement {
   max?: number;
   /** Granularity. Omitted means the native default of 1; `any` means continuous. */
   step?: number | "any";
-  /** Controlled value. Settable and reflected to the `value` attribute. `el.value = 40` drives it; dragging updates it and fires `kai-input` per step, `kai-change` on release. Read `el.value` for live state. */
+  /** Controlled value, reflected to the `value` attribute. `kai-input` fires per step, `kai-change` on release. */
   value?: number;
   /** Disable interaction. */
   disabled?: boolean;
@@ -1683,7 +1683,7 @@ export interface KaiSliderElement extends HTMLElement {
   label?: string;
   /** Form-control name, for a native form submit. */
   name?: string;
-  /** Show the current value beside the track. Off by default. Two ways in, because one of them is not a scalar. As a bare ATTRIBUTE (`<kai-slider value-label>`) it renders the raw number. As a JS PROPERTY it also accepts a formatter function (`el.valueLabel = (v) => v + '%'`), for a slider that is not counting bare numbers. A function cannot survive an attribute, so that half is property-only. The readout is hidden from assistive tech: the slider already reports the same number, and an exposed copy would be announced twice. */
+  /** Show the current value beside the track. Off by default; as a property it also accepts a formatter. */
   valueLabel?: boolean | ((value: number) => string);
   /** Focus the inner range input (the host element can't reach it). */
   focus(options?: FocusOptions): void;
@@ -1707,37 +1707,37 @@ export interface KaiSourceElement extends HTMLElement {
 export interface KaiSourcesElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** The sources to render. Set as a JS property. Omit to supply them as `<kai-source>` light-DOM children instead; when both are present the property's sources come first. */
+  /** The sources to render. JS property; omit to pass `<kai-source>` light-DOM children instead. */
   sources: { href: string; title?: string; description?: string; label?: string; showFavicon?: boolean }[];
   /** Show favicons on all items (per-item `showFavicon` overrides). */
   showFavicon?: boolean;
-  /** When true, each citation chip is labelled with its 1-based index in the merged (prop + declarative-children) list (`[1]`, `[2]`, …) instead of the per-item `label` or domain fallback. HTML attribute: `numbered` (boolean: a bare attribute or `numbered="true"`). JS property: `el.numbered = true`. */
+  /** Label each citation chip with its 1-based index in the merged list (`[1]`, `[2]`) instead of its own `label`. */
   numbered?: boolean;
 }
 
 export interface KaiStatusElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** Presence/notification state → color. `new` (default) maps to the blue hue. */
+  /** Presence state, which sets the colour. Default `new`. */
   status?: "new" | "online" | "busy" | "away" | "offline";
-  /** Animated ping ring (off by default; respects prefers-reduced-motion). */
+  /** Animated ping ring; off by default and never under prefers-reduced-motion. */
   pulse?: boolean;
-  /** Accessible name. Without it the dot is decorative. */
+  /** Accessible name; without it the dot is decorative. */
   label?: string;
-  /** `sm` (default) or `md`. */
+  /** `sm` or `md`. Default `sm`. */
   size?: "sm" | "md";
 }
 
 export interface KaiSuggestionsElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** The suggestions. Strings, or `{ label, value }` when the displayed text and the emitted value differ. Set as a JS property. Omit to supply them as `<kai-suggestion>` light-DOM children instead; when both are present the property's suggestions come first. */
+  /** The suggestions: strings, or `{ label, value }` when the displayed text and emitted value differ. JS property (array). */
   suggestions: (string | { label: string; value?: string; icon?: string })[];
   /** Chip style: `'outline'` (default), `'ghost'`, or `'default'` (filled). */
   variant?: "outline" | "ghost" | "default";
   /** Row height for `layout="list"`: `'md'` (default) or `'lg'` for taller rows. Chips are unaffected. */
   size?: "md" | "lg";
-  /** Layout: `'chips'` (default) renders a wrapping row of rounded pills; `'list'` renders a vertical, full-width "Ideas for you" list where each row is left-aligned with a leading `icon`, a label, and a hover background. */
+  /** Layout: `chips` (default, a wrapping row of pills) or `list` (full-width left-aligned rows with a leading icon). */
   layout?: "chips" | "list";
   /** Full-width left-aligned rows instead of pills. */
   block?: boolean;
@@ -1748,7 +1748,7 @@ export interface KaiSuggestionsElement extends HTMLElement {
 export interface KaiSwitchElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** Controlled checked state. Settable and reflected to the `checked` attribute. `el.checked = true` (or `<kai-switch checked>`) drives it; the toggle UI updates it and fires `kai-change`. Read `el.checked` for live state. */
+  /** Controlled checked state, reflected to the `checked` attribute. The toggle updates it and fires `kai-change`. */
   checked?: boolean;
   /** Initial checked state on mount (uncontrolled seed). Bare attribute (`<kai-switch default-checked>`) turns it on. */
   defaultChecked?: boolean;
@@ -1769,7 +1769,7 @@ export interface KaiSwitchElement extends HTMLElement {
 export interface KaiTabBarElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** Controlled selected value. Set the property or the `value` attribute and drive it from your app in response to `kai-tab-change`. Omit for uncontrolled: the bar manages its own selection, seeded from `defaultValue`, else the first enabled tab. */
+  /** Controlled selected value. Omit for uncontrolled, seeded from `defaultValue` else the first enabled tab. */
   value?: string;
   /** Initial selected value when uncontrolled (the `default-value` attribute in plain HTML). */
   defaultValue?: string;
@@ -1788,7 +1788,7 @@ export interface KaiTabBarItemElement extends HTMLElement {
   theme?: "light" | "dark" | "auto";
   /** The tab's identity: the `value` attribute (host `id` is the fallback). It is the `value` in the bar's `kai-tab-change` detail. */
   value?: string;
-  /** Named icon from the kit roster (e.g. "home", "message-square"). The icon renders at the element's own default size, so equal glyphs across tabs need no consumer sizing. */
+  /** Named icon from the kit roster (e.g. "home"). Renders at the element's own default size. */
   icon?: string;
   /** Unread dot on the icon's corner. Reaches the tab's accessible name too: a dot alone is invisible to assistive tech. */
   dot?: boolean;
@@ -1826,7 +1826,7 @@ export interface KaiTabsElement extends HTMLElement {
 export interface KaiTasksElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** The tasks definition (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { tasks:[…], selectAll, confirmLabel, … }`. Import `TasksCardData` from `@kitn.ai/ui` for the full shape. */
+  /** The tasks definition (the card's `data`). JS property: `el.data = { tasks: [...], selectAll, confirmLabel }`. */
   data?: { mode?: "select" | "progress"; heading?: string; tasks: { id: string; label: string; description?: string; checked?: boolean; disabled?: boolean }[]; selectAll?: boolean; confirmLabel?: string; allowEmpty?: boolean; min?: number; max?: number; dismissible?: boolean };
   /** Stable card id correlating every emitted CardEvent. Attribute: `card-id`. */
   cardId?: string;
@@ -1861,11 +1861,11 @@ export interface KaiTextShimmerElement extends HTMLElement {
   theme?: "light" | "dark" | "auto";
   /** The text to shimmer. */
   text?: string;
-  /** Element tag to render as (default `span`). */
+  /** Element tag to render as. Default `span`. */
   as?: string;
   /** Animation duration in seconds. */
   duration?: number;
-  /** Gradient spread (5–45). */
+  /** Gradient spread, 5 to 45. */
   spread?: number;
 }
 
@@ -1883,7 +1883,7 @@ export interface KaiThinkingBarElement extends HTMLElement {
 export interface KaiThreadElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** The full message thread to render, newest last. Each entry carries its role, ordered `parts`, and optional actions/avatar/feedback. Set as a JS property (`el.messages = [...]`); a NEW array reference per streaming chunk re-renders (mutating in place does not). */
+  /** The message thread to render, newest last. JS property; pass a NEW array per streaming chunk. Omit for an empty thread. */
   messages?: { id: string; role: "user" | "assistant"; parts: ({ type: "text"; text: string; raw?: { source: string; payload: unknown } } | { type: "reasoning"; text: string; label?: string; index?: number; streamId?: string; signature?: string; raw?: { source: string; payload: unknown } } | { type: "tool"; tool: { type: string; kind?: "command" | "file-change" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: Record<string, unknown>; rawInput?: string; output?: Record<string, unknown>; toolCallId?: string; errorText?: string; raw?: { source: string; payload: unknown } }; raw?: { source: string; payload: unknown } } | { type: "card"; envelope: { type: string; id: string; data: unknown; title?: string; resolution?: { kind: "action"; action: string; payload?: unknown; at?: string } | { kind: "submit"; data: unknown; at?: string } | { kind: "dismissed"; at?: string } | { kind: "expired"; reason?: string; at?: string } }; raw?: { source: string; payload: unknown } } | { type: "source"; source: { id?: string; url?: string; title?: string; snippet?: string; index?: number }; raw?: { source: string; payload: unknown } } | { type: "file"; attachment: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }; raw?: { source: string; payload: unknown } })[]; actions?: ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: string; tooltip?: string })[]; avatar?: { src?: string; fallback?: string; alt?: string }; feedback?: "like" | "dislike" }[];
   /** Show a typing indicator on the pending assistant turn. Set it while awaiting the assistant's reply. */
   loading?: boolean;
@@ -1893,7 +1893,7 @@ export interface KaiThreadElement extends HTMLElement {
   codeTheme?: string;
   /** Enable Shiki syntax highlighting in code blocks. Turn off to render plain `<pre>` blocks (lighter, no highlighter load). Default true. */
   codeHighlight?: boolean;
-  /** How an image tile in a message's attachment grid reveals its full size: `hover` (default) is the pointer-only hover card, `lightbox` opens the image in a modal on click. Attribute: `image-preview`. Inert for non-image tiles. */
+  /** How an image tile reveals its full size: `hover` (pointer-only hover card, default) or `lightbox` (modal on click). */
   imagePreview?: "hover" | "lightbox";
   /** Whether each message's action bar is always visible (`'always'`, default) or only revealed on hover of that message row (`'hover'`). */
   actionsReveal?: "always" | "hover";
@@ -1901,9 +1901,9 @@ export interface KaiThreadElement extends HTMLElement {
   scrollButton?: boolean;
   /** Extra classes applied to the thread's inner root. */
   class?: string;
-  /** Optional card type -> custom-element tag overrides/additions for `card` parts (merged over the built-ins). Property: `el.cardTypes`. Typed as a plain string map (not the `CardTagMap` alias) so the generated React wrapper inlines it instead of emitting an unresolved named type. */
+  /** Card type → custom-element tag overrides/additions, merged over the built-ins. JS property: `el.cardTypes`. */
   cardTypes?: Record<string, string>;
-  /** JSON Schemas for the card types this app renders, keyed by envelope type. The companion of `cardTypes`, which says what DRAWS a card while this says what a VALID one looks like. An OBJECT, so it is a JS property only: `el.cardSchemas = { 'pricing-table': pricingSchema }`, never an attribute. `createCardRegistry(...).validationSchemas` is exactly this shape. Without it the kit validates its own seven built-ins and leaves your own card type, the one your app actually cares about, as the only unchecked thing on screen. A schema here WINS over a built-in of the same name. Typed `Record<string, object>` rather than `Record<string, JsonSchema>` deliberately: an imported `.json` schema widens `"type"` to `string`, and an authored one carries `$schema`/`title`/`description`/`additionalProperties`, so the tighter type would reject both of the normal ways to supply one. */
+  /** Card-type JSON Schemas keyed by envelope type; validates each card's `data`. JS property: `el.cardSchemas`. */
   cardSchemas?: Record<string, object>;
   /** Scroll the message list to the bottom (default `'smooth'`). */
   scrollToBottom(behavior?: "auto" | "instant" | "smooth"): void;
@@ -1912,7 +1912,7 @@ export interface KaiThreadElement extends HTMLElement {
 export interface KaiToastRegionElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** The toasts to render. Newest is shown on top. Set as a JS property (array); pass a new array reference to update. Omit for an empty region, which is the normal resting state and how the imperative `toast()` API starts. Note the handover: the first `toast()` call ADOPTS a region you placed in markup (no second region mounts) and binds the imperative store to this property, replacing any array you set. Drive a region as data OR via `toast()`, not both at once. */
+  /** The toasts to render, newest on top. JS property; a new array reference updates it. */
   toasts: { id: string; message: string; variant?: "neutral" | "success" | "warning" | "error" | "info"; appearance?: "pill" | "card"; inverse?: boolean; description?: string; action?: { label: string; onAction: () => void | false }; duration?: number; dismissible?: boolean; target?: HTMLElement }[];
   /** Stack anchor: `'top-center'` (default), `'top-right'`, `'bottom-center'`, … */
   position?: "top-center" | "top-right" | "top-left" | "bottom-center" | "bottom-right" | "bottom-left";
@@ -1920,7 +1920,7 @@ export interface KaiToastRegionElement extends HTMLElement {
   max?: number;
   /** Stacking: 'expanded' (default, full column) | 'collapsed' (Sonner-style pile that expands on hover/focus). Attribute: stack. */
   stack?: "expanded" | "collapsed";
-  /** Default appearance for this region's toasts: `'pill'` (default, compact) | `'card'` (richer, with a description line). A per-toast `appearance` wins. Attribute: `appearance`. */
+  /** Default appearance for this region's toasts: `pill` (default, compact) or `card` (richer). A per-toast `appearance` wins. */
   appearance?: "pill" | "card";
   /** Default high-contrast inverse treatment for this region's toasts. A per-toast `inverse` wins. Off by default. Attribute: `inverse`. */
   inverse?: boolean;
@@ -1933,7 +1933,7 @@ export interface KaiToolElement extends HTMLElement {
   theme?: "light" | "dark" | "auto";
   /** The tool-call to display. Set as a JS property. */
   tool?: { type: string; kind?: "command" | "file-change" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: Record<string, unknown>; rawInput?: string; output?: Record<string, unknown>; toolCallId?: string; errorText?: string; raw?: { source: string; payload: unknown } };
-  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages on trigger click). Set `el.open = true`, or `<kai-tool open>`; listen for `kai-open-change`. */
+  /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
   /** Initial open state on mount (uncontrolled seed). */
   defaultOpen?: boolean;
@@ -1958,7 +1958,7 @@ export interface KaiTooltipElement extends HTMLElement {
   closeDelay?: number;
   /** Preferred placement: `'top' | 'bottom' | 'left' | 'right'` (+ optional `-start`/`-end`). Defaults to `'top'`; flips to stay in view. */
   placement?: string;
-  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute, the element still self-manages on hover/focus). Set `el.open = true`, or `<kai-tooltip open>`; listen for `kai-open-change`. */
+  /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
   /** Initial open state on mount (uncontrolled seed). */
   defaultOpen?: boolean;
@@ -1977,16 +1977,16 @@ export interface KaiViewElement extends HTMLElement {
   theme?: "light" | "dark" | "auto";
   /** The view's name: what `push()` / `selectTab()` / the stack's `view` attribute address. Attribute: `name`. */
   name?: string;
-  /** Marks this view as a TAB ROOT: it shows the tab bar and never a back affordance, and a tab switch lands on it directly. Views without it are DRILL views, reached by `push()` and left by `back()`. Attribute: `tab-root`. */
+  /** Marks this view as a TAB ROOT: it shows the tab bar and never a back affordance. Attribute: `tab-root`. */
   tabRoot?: boolean;
 }
 
 export interface KaiViewStackElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** Deep link / initial view name; reflected to the `view` ATTRIBUTE as navigation happens, so `kai-view-stack[view="chat"]` selectors follow. Setting it later navigates (tab root selects that tab; a drill view replaces the top while drilled, or pushes from a root). */
+  /** Deep link / initial view name. */
   view?: string;
-  /** READ-ONLY reflection of the drilled state, present while a pushed (non-root) view is showing. THE rule this element owns: drilled hides the tab bar and shows a back affordance, so a sibling tab bar hides itself on `kai-view-stack[drilled]` (or from `kai-view-change`), and a header shows its back arrow the same way. */
+  /** READ-ONLY reflection of the drilled state, present while a pushed (non-root) view is showing. */
   drilled?: boolean;
   /** Drill into a view (fires `kai-view-change`). A tab-root name routes to `selectTab`; unknown names are ignored. */
   push(name: string): void;
@@ -2003,11 +2003,11 @@ export interface KaiViewStackElement extends HTMLElement {
 export interface KaiVoiceInputElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** Transcriber the host supplies: records audio, returns the text. This is a **function-valued property** (`el.transcribe = async blob => '...'`) because a value-returning callback can't be modelled as a fire-and-forget event. */
+  /** Transcriber the host supplies: records audio, returns the text. **Function-valued property.** */
   transcribe?: (audio: Blob) => Promise<string>;
   /** Disable the mic button (non-interactive). */
   disabled?: boolean;
-  /** BCP-47 language tag for the native `SpeechRecognition` path (e.g. `en-US`). Attribute: `recognition-lang` (the plain `lang` attribute is reserved by `HTMLElement` and can't be a custom-element property). No effect when `transcribe` is set or the browser lacks SpeechRecognition. */
+  /** BCP-47 language tag for the native `SpeechRecognition` path (e.g. `en-US`). Attribute: `recognition-lang`. */
   recognitionLang?: string;
   /** Emit live partial transcripts (`kai-transcript-interim`) during native recognition. Attribute: `interim`. No-op on the transcribe/fallback paths. */
   interim?: boolean;
@@ -2024,7 +2024,7 @@ export interface KaiVoiceOutputElement extends HTMLElement {
   text?: string;
   /** Speak automatically when `text` is set/changed. */
   autoplay?: boolean;
-  /** TTS model seam the host supplies: given text, returns an audio `Blob` to play. This is a **function-valued property** (`el.synthesize = async text => blob`); when set, the native `speechSynthesis` path is bypassed. Mirrors `<kai-voice-input>`'s `transcribe`. A value-returning callback can't be modelled as a fire-and-forget event, hence a property. */
+  /** TTS model seam the host supplies: given text, returns an audio `Blob`. **Function-valued property.** */
   synthesize?: (text: string) => Promise<Blob>;
   /** Disable the button (non-interactive). */
   disabled?: boolean;
@@ -2041,19 +2041,19 @@ export interface KaiVoiceOutputElement extends HTMLElement {
 export interface KaiWorkspaceElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** Controlled collapsed state of the start aside. Set this as a JS property (`el.startCollapsed = true`) to drive the aside from your app, updating it in response to the `kai-aside-toggle` event. Omit for uncontrolled (the element manages it). */
+  /** Controlled collapsed state of the start aside. Omit for uncontrolled (the element manages it). */
   startCollapsed?: boolean;
   /** Initial collapsed state of the start aside when uncontrolled (default false). Use the `default-start-collapsed` attribute to start collapsed in plain HTML. */
   defaultStartCollapsed?: boolean;
-  /** Controlled collapsed state of the end aside. Set this as a JS property (`el.endCollapsed = true`) to drive the aside from your app, updating it in response to the `kai-aside-toggle` event. Omit for uncontrolled (the element manages it). */
+  /** Controlled collapsed state of the end aside. Omit for uncontrolled (the element manages it). */
   endCollapsed?: boolean;
   /** Initial collapsed state of the end aside when uncontrolled (default false). Use the `default-end-collapsed` attribute to start collapsed in plain HTML. */
   defaultEndCollapsed?: boolean;
-  /** Auto-collapse both asides when the shell's own width drops below this many px, and re-expand when it grows back above. Applies to uncontrolled asides only (it never fights an app-driven collapsed prop); omit to disable. Fires `kai-aside-toggle`. Attribute: `collapse-below`. */
+  /** Auto-collapse both asides when the shell's own width drops below this many px, and re-expand above it. */
   collapseBelow?: number;
-  /** Below this shell width in px, an expanded aside renders as an overlay drawer over the main region instead of a column beside it. Escape inside the drawer closes it and returns focus to the element focused before it opened. Omit to disable. Attribute: `drawer-below`. */
+  /** Below this shell width in px, an expanded aside renders as an overlay drawer over the main region. */
   drawerBelow?: number;
-  /** Density hint. Reflected as a `data-compact` hook on the root (and as the `compact` attribute on the element) for your CSS and slotted content; the shell itself keeps no other opinion about density. */
+  /** Density hint. */
   compact?: boolean;
   /** Collapse/expand one aside (fires `kai-aside-toggle`). */
   toggleAside(side: "start" | "end"): void;
@@ -2296,7 +2296,7 @@ export interface KaiAgentCardElementProps {
   active?: boolean;
   /** Raise a prominent "Needs you" pill plus a glowing amber edge. This is the attention-routing signal that pulls focus to this agent. Attribute: `needs-attention`. */
   needsAttention?: boolean;
-  /** Run status. A JS PROPERTY (object), not an attribute. Shape: `{ tone, label?, pulse? }`, where `tone` is one of `working` | `idle` | `done` | `error` | `blocked` (maps to the kit's tool hues), `label` is an optional short string beside the dot, and `pulse` animates the dot. Set it with `el.status = { tone: 'working', label: 'Working', pulse: true }`. */
+  /** Run status: `{ tone, label?, pulse? }`. JS property, not an attribute. */
   status?: { tone: "working" | "idle" | "done" | "error" | "blocked"; label?: string; pulse?: boolean };
 }
 
@@ -2305,11 +2305,11 @@ export interface KaiArtifactElementProps {
   theme?: "light" | "dark" | "auto";
   /** URL the preview iframe frames. Consumer-controlled. */
   src?: string;
-  /** Files for the Code tab tree + each file's preview `url`. Omit for a preview-only artifact (the Code tab then has nothing to show; pair it with `no-tabs` to hide the toggle). Set as a JS property (array). */
+  /** Files for the Code tab tree, plus each file's preview `url`. JS property (array); omit for a preview-only artifact. */
   files?: { path: string; url?: string; code?: string; language?: string; type?: "html" | "pdf" | "image" | "other"; additions?: number; deletions?: number; status?: "added" | "modified" | "deleted" | "renamed" | "untracked" }[];
   /** Controlled active tab: `preview` or `code`. When set, the artifact follows it (re-asserted on change). Leave unset for an uncontrolled tab (see `defaultTab`). */
   tab?: "preview" | "code";
-  /** Uncontrolled INITIAL tab (used only when `tab` is unset). Default `preview`. Seeds the starting tab; the user can then switch freely without the consumer re-asserting a controlled `tab`. */
+  /** Uncontrolled INITIAL tab, used only when `tab` is unset. Default `preview`. */
   defaultTab?: "preview" | "code";
   /** Selected file path. Syncs the tree highlight, Code source, and preview. */
   activeFile?: string;
@@ -2337,20 +2337,20 @@ export interface KaiArtifactElementProps {
   standalone?: boolean;
   /** Show the address but make it read-only (visible, nav-tracking, non-editable). */
   readonlyPath?: boolean;
-  /** Friendly address shown in the path field instead of the real current url (read-only, non-navigable). Use when the framed url is not consumer-facing (e.g. a `data:` blob) so a clean address shows instead of leaking it. Scalar string: set as the `display-url` attribute or the `displayUrl` property. */
+  /** Friendly read-only address shown in the path field instead of the real url. Attribute: `display-url`. */
   displayUrl?: string;
 }
 
 export interface KaiAttachmentsElementProps {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** The attachments to render. Omit (or pass an empty array) for the empty state, which shows `emptyText` if set and nothing otherwise. Set as a JS property (array). Each item's `url` must be a `data:` URI or an https URL, never `URL.createObjectURL`: a `blob:` URL previews here but the wire encoders (`toOpenAIMessages`/`toAnthropicMessages`) refuse it. */
+  /** The attachments to render (omit or pass `[]` for the empty state). Each `url` must be a `data:` URI or https URL, never `blob:`. */
   items?: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }[];
   /** Layout: `grid` = visual tiles, `inline` = icon + label chips, `list` = rows. */
   variant?: "grid" | "inline" | "list";
   /** Wrap each item in a hover card that previews its details. */
   hoverCard?: boolean;
-  /** How an image item previews: `hover` = the hover card, `lightbox` = click the tile to open the image full-size in a dialog. Attribute: `image-preview`. Inert for non-image items, which have no image for a dialog to show. */
+  /** How an image tile reveals its full size: `hover` (pointer-only hover card, default) or `lightbox` (modal on click). */
   imagePreview?: "hover" | "lightbox";
   /** Show a remove button per item; clicking it fires a `kai-remove` event. */
   removable?: boolean;
@@ -2365,7 +2365,7 @@ export interface KaiAudioVisualizerElementProps {
   theme?: "light" | "dark" | "auto";
   /** Look to render: `bar` (default), `grid`, `radial`, `wave`, `aurora`, `custom`. `aura` is accepted as a LiveKit-markup alias for `aurora`. Attribute: `variant`. */
   variant?: string;
-  /** `idle` (default), `connecting`, `listening`, `thinking`, `speaking`, `disconnected` (connection down: the dead, flat look). LiveKit's room-lifecycle state names are accepted as aliases. Attribute: `state`. */
+  /** `idle` (default) or `connecting`/`listening`/`thinking`/`speaking`/`disconnected`; LiveKit's room-lifecycle names are aliases. */
   state?: string;
   /** `icon` | `sm` | `md` (default) | `lg` | `xl`. Attribute: `size`. */
   size?: string;
@@ -2385,17 +2385,17 @@ export interface KaiAudioVisualizerElementProps {
   complexity?: number;
   /** Setting this makes the element an announced image (`role="img"`) instead of decorative (`aria-hidden`). Attribute: `label`. */
   label?: string;
-  /** Live microphone or WebRTC audio to analyze. JS property only. NOTE: amplitude renders only while state is "speaking" unless listening-amplitude is set; every other state plays its scripted animation and ignores the audio. */
+  /** Live microphone or WebRTC audio to analyze. JS property only; amplitude renders only while `state` is `speaking`. */
   stream?: MediaStream;
-  /** An `<audio>` or `<video>` element to tap for its audio. JS property only. NOTE: amplitude renders only while state is "speaking" unless listening-amplitude is set; every other state plays its scripted animation and ignores the audio. */
+  /** An `<audio>` or `<video>` element to tap for its audio. JS property only; amplitude renders only while `state` is `speaking`. */
   audioElement?: HTMLMediaElement;
-  /** Pre-computed levels, 0..1. Set this and no AudioContext is ever built, which is what keeps headless/SSR rendering and browser-speech-synthesis playback (which exposes no audio node) free of Web Audio entirely. JS property only. A new array reference is required for each update; mutating the existing array in place will not re-render. NOTE: amplitude renders only while state is "speaking" unless listening-amplitude is set; every other state plays its scripted animation and ignores the audio. */
+  /** Pre-computed levels, 0..1. JS property only; a NEW array reference per update; amplitude renders only while `state` is `speaking`. */
   bands?: number[];
-  /** Render live amplitude during the listening state as well, using the same presentation as speaking. Off by default, which keeps LiveKit parity: amplitude from stream, audio-element or bands renders only while state is "speaking". Set it to show a real mic-level picture while the user is the one talking. Boolean. Attribute: `listening-amplitude` (a bare attribute means true; reflected, so the property reads back what the attribute set). */
+  /** Render live amplitude during the `listening` state too. Off by default. */
   listeningAmplitude?: boolean;
   /** Custom fragment shader for `variant="custom"`. JS property only. */
   shader?: { fragment: string; uniforms?: Record<string, { type: "1f" | "1i" | "1fv" | "2f" | "3f" | "3fv" | "4f" | "4fv" | "Matrix2fv" | "Matrix3fv" | "Matrix4fv"; value: number | number[] }> };
-  /** Shader variants only: keep animating while scrolled off screen. Off by default, which stops drawing and releases the WebGL context until the element comes back (browsers ration contexts to roughly 16 a page). Does not override `prefers-reduced-motion`. Attribute: `animate-when-not-visible`. */
+  /** Shader variants only: keep animating while scrolled off screen. Off by default; does not override `prefers-reduced-motion`. */
   animateWhenNotVisible?: boolean;
 }
 
@@ -2422,7 +2422,7 @@ export interface KaiBadgeElementProps {
 export interface KaiButtonElementProps {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** Visual style. `default` (filled), `subtle` (muted text, hover tint, the toolbar icon look), `ghost` (transparent, hover fill), `outline`, or `destructive`. Defaults to `default`. */
+  /** Visual style. Defaults to `default` (filled). */
   variant?: "default" | "subtle" | "ghost" | "outline" | "destructive";
   /** Size token. `icon` / `icon-sm` are square (for icon-only buttons); `sm` / `md` / `lg` size text buttons. Defaults to `md`. */
   size?: "sm" | "md" | "lg" | "icon" | "icon-sm";
@@ -2430,7 +2430,7 @@ export interface KaiButtonElementProps {
   icon?: string;
   /** Trailing icon, after the label (e.g. `"chevron-down"` for a menu affordance). */
   iconTrailing?: string;
-  /** Accessible name. REQUIRED for icon-only buttons (no visible text); ignored when you slot visible text, which already names the button. An `aria-label` on top of visible text REPLACES that name rather than adding to it, so a button reading "Save" that answers to "Submit" is unusable by speech input (WCAG 2.5.3, Label in Name). The visible text wins. An `icon` / `icon-sm` size hides the slot, which makes the button icon-only whatever you slotted, so `label` is what names it there. */
+  /** Accessible name for an icon-only button. Ignored when visible text is slotted -- the visible text wins. */
   label?: string;
   /** Disable the button (non-interactive, dimmed). */
   disabled?: boolean;
@@ -2447,7 +2447,7 @@ export interface KaiCardElementProps {
   theme?: "light" | "dark" | "auto";
   /** Surface treatment: `outlined` (default) | `filled` | `plain` | `accent`. Attribute: `appearance`. */
   appearance?: "outlined" | "filled" | "plain" | "accent";
-  /** `vertical` (default, media on top) | `horizontal` (media at the start) | `responsive` (horizontal when the card's container is wide enough, else vertical, via a container query on the card's own width). Attribute: `orientation`. */
+  /** `vertical` (default, media on top), `horizontal` (media at the start), or `responsive`. */
   orientation?: "vertical" | "horizontal" | "responsive";
   /** The card width below which a `responsive` card collapses to vertical and the footer actions stack. A CSS length; default `28rem`. Attribute: `collapse`. */
   collapse?: string;
@@ -2470,24 +2470,24 @@ export interface KaiCardsElementProps {
   theme?: "light" | "dark" | "auto";
   /** The stream of card envelopes to render. Set as a JS PROPERTY: `el.cards = [...]`. */
   cards?: { type: string; id: string; data: unknown; title?: string; resolution?: { kind: "action"; action: string; payload?: unknown; at?: string } | { kind: "submit"; data: unknown; at?: string } | { kind: "dismissed"; at?: string } | { kind: "expired"; reason?: string; at?: string } }[];
-  /** Optional type→tag overrides/additions (merged over the built-ins). Property: `el.types`. Typed as a plain string map (not the `CardTagMap` alias) so the generated React wrapper inlines it instead of emitting an unresolved named type. */
+  /** Card type→element tag overrides/additions, merged over the built-ins. JS property: `el.types`. */
   types?: Record<string, string>;
-  /** JSON Schemas for the card types this app renders, keyed by envelope type. The companion of `types`, which says what DRAWS a card while this says what a VALID one looks like. An OBJECT, so it is a JS property only: `el.schemas = { 'pricing-table': pricingSchema }`, never an attribute. `createCardRegistry(...).validationSchemas` is exactly this shape. Without it the kit validates its own seven built-ins and leaves your own card type, the one your app actually cares about, as the only unchecked thing on screen. A schema here WINS over a built-in of the same name, matching `mergeCardTags`, where your entry is spread over ours. Typed `Record<string, object>` rather than `Record<string, JsonSchema>` deliberately: an imported `.json` schema widens `"type"` to `string`, and an authored one carries `$schema`/`title`/`description`/`additionalProperties`, so the tighter type would reject both of the normal ways to supply one. See `CardSchemaMap` in components/card/card-renderer.tsx. */
+  /** Card-type JSON Schemas keyed by envelope type; validates each card's `data`. JS property: `el.schemas`. */
   schemas?: Record<string, object>;
   /** Optional CardPolicy handling child events. Property: `el.policy`. */
   policy?: { onSubmit?: ((cardId: string, data: unknown) => void); onAction?: ((cardId: string, action: string, payload?: unknown) => void); onSendPrompt?: ((text: string, opts: { mode: "compose" | "send"; context?: unknown }) => void); onOpen?: ((url: string, target: "tab" | "artifact") => void); onState?: ((cardId: string, patch: unknown) => void); onDismiss?: ((cardId: string) => void); onReopen?: ((cardId: string) => void); onError?: ((cardId: string, message: string) => void); maxSendPromptMode?: "compose" | "send" };
-  /** Validate each envelope's `data` against the schema for its type before rendering it, using a built-in's own schema or yours from `schemas`. Default `true`; set `validate-cards="false"` (or `el.validateCards = false`) to opt out. A hard failure (wrong type, a missing required field) renders a diagnostic naming the field instead of the card; a soft failure (bounds) renders the card unchanged. Both emit a contract `error` event. On in production too: a model emitting a bad shape is a production failure mode, so stripping the check there would hide it from exactly the person who needs to see it. */
+  /** Validate each card's `data` against its schema before rendering. Default `true`; opt out with `validate-cards="false"`. */
   validateCards?: boolean;
 }
 
 export interface KaiChainOfThoughtElementProps {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** The reasoning steps. Set as a JS property. Compound sub-parts collapse to this one data model (Route 1). Each `{ label, content?, id? }`. Omit to supply the steps as `<kai-step>` light-DOM children instead; when both are present the property's steps come first. */
+  /** The reasoning steps. JS property (array); omit to pass `<kai-step>` light-DOM children instead. */
   steps?: { label: string; content?: string; id?: string }[];
   /** Open mode: `'multiple'` (default, any number of steps open at once) or `'single'` (at most one open; opening a step closes the others). */
   type?: "single" | "multiple";
-  /** Controlled open step key(s). When set, it WINS over user interaction (the consumer owns the open set). String in `single` mode, string[] in `multiple` mode. Set as a JS property. */
+  /** Controlled open step key(s): a string in `single` mode, a string array in `multiple`. JS property. */
   value?: string | string[];
   /** Uncontrolled INITIAL open step key(s), seeding which steps render expanded. Ignored once `value` is provided. Set as a JS property. */
   defaultValue?: string | string[];
@@ -2496,7 +2496,7 @@ export interface KaiChainOfThoughtElementProps {
 export interface KaiChatElementProps {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** Value of the input. A **string** is controlled (the host owns the text and updates it on `kai-value-change`). A **ComposerDoc** is a one-time seed that pre-populates pills; the user then edits freely. Leave unset for uncontrolled. */
+  /** Value of the input: a string is controlled, a `ComposerDoc` is a one-time seed that pre-populates pills, unset is uncontrolled. */
   value?: string | ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: string; promptText?: string; data?: Record<string, unknown> } })[];
   /** Placeholder text shown in the empty input. */
   placeholder?: string;
@@ -2506,19 +2506,19 @@ export interface KaiChatElementProps {
   suggestions?: string[];
   /** What clicking a suggestion does: `'submit'` (default) sends it immediately as if typed and submitted; `'fill'` just places it in the input. */
   suggestionMode?: "submit" | "fill";
-  /** Keep suggestions visible after the conversation starts. By default suggestions are conversation starters and hide once `messages` is non-empty; set this to keep them always shown. Default false. */
+  /** Keep suggestions visible after the conversation starts; they otherwise hide once `messages` is non-empty. Default false. */
   persistSuggestions?: boolean;
   /** Body/prose font scale for rendered markdown (`'xs' | 'sm' | 'base' | 'lg'`). Defaults to `'sm'`. */
   proseSize?: "xs" | "sm" | "base" | "lg";
   /** Shiki theme name for syntax-highlighted code blocks (e.g. `'github-dark-dimmed'`). */
   codeTheme?: string;
-  /** How an image tile in a message's attachment grid reveals its full size: `'hover'` (default) is the pointer-only hover card; `'lightbox'` opens the image in a modal on click, which is the only one of the two a keyboard or touch user can reach. Forwarded to every `MessageBody` this thread renders, and inert for non-image tiles, which keep the hover card. */
+  /** How an image tile reveals full size. Default `'hover'` is a hover card; `'lightbox'` opens a modal on click, the only one keyboard/touch can reach. */
   imagePreview?: "hover" | "lightbox";
   /** Enable Shiki syntax highlighting in code blocks. Turn off to render plain `<pre>` blocks (lighter, no highlighter load). Default true. */
   codeHighlight?: boolean;
-  /** How `reasoning` parts render across the thread. `'full'` (default) is the current collapsible-disclosure behavior; `'compact'` shows only a shimmer loader while a reasoning part streams and nothing once it settles (no expandable detail); `'off'` renders reasoning parts not at all. Forwarded to every `MessageBody` as `reasoningMode`. */
+  /** How reasoning parts render. Default `'full'` is the collapsible disclosure, `'compact'` streams only a shimmer, `'off'` renders none. */
   reasoning?: "full" | "compact" | "off";
-  /** Seeds the reasoning disclosure open AND keeps it tracking the stream (open while streaming, closes when it settles): the pre-Task-19f `full` behavior. Default false/absent: the panel starts closed (just the "Thinking" shimmer chip) and only opens on click, the current default (owner ruling, 2026-08-26). Meaningless when `reasoning` is `'compact'` or `'off'`. Forwarded to every `MessageBody` as `reasoningDefaultOpen`. */
+  /** Seeds the reasoning disclosure open and keeps it tracking the stream. Default false; inert unless `reasoning` is `'full'`. */
   reasoningOpen?: boolean;
   /** Optional header title shown on the left of the header. */
   chatTitle?: string;
@@ -2536,11 +2536,11 @@ export interface KaiChatElementProps {
   headerEnd?: boolean;
   /** REPLACE: full custom header in place of the built-in title/model/context bar. */
   headerFull?: boolean;
-  /** REPLACE: custom home-tab content in place of the built-in home screen (greeting, recent-conversation card, links). Rendered only while the home view is showing, so it is meaningful only when `home` is set; the tab bar and navigation stay the kit's own. Set by the facade when light-DOM `slot="home"` content is projected (region slots, P-6). */
+  /** REPLACE: custom home-tab content in place of the built-in home screen; rendered only while the home view shows, so only with `home` set. */
   homeFull?: boolean;
   /** INJECT: left sidebar column (e.g. a conversation list / your own nav). */
   sidebar?: boolean;
-  /** REPLACE: custom zero-state rendered in the message area while the thread is empty (replaces the empty message list only; the composer and its suggestions still render). */
+  /** REPLACE: custom zero-state in the message area while the thread is empty; the composer and its suggestions still render. */
   empty?: boolean;
   /** REPLACE: full custom composer in place of the built-in prompt input. The projected content wires its own submit (the data-flow boundary). */
   composer?: boolean;
@@ -2548,46 +2548,46 @@ export interface KaiChatElementProps {
   composerActions?: boolean;
   /** INJECT: footer row below the composer (disclaimers, token meter, …). */
   footer?: boolean;
-  /** When `false`, hides the built-in paperclip attach button. Defaults to `true` (undeclared keeps today's behavior: attach visible), matching `DefaultPromptInput`'s own default: only an explicit `false` hides it. */
+  /** Hides the built-in paperclip attach button; only an explicit `false` hides it. Default true. */
   attach?: boolean;
   /** Show a web-search (Globe) button in the input toolbar; calls `onWebSearch`. */
   webSearch?: boolean;
   /** Show a Voice (Mic) button in the input toolbar; fires a `voice` event. */
   voice?: boolean;
-  /** Rich entity triggers. Each `{ char, kind, items }` opens a caret-anchored menu that inserts an atomic pill (`/` skills, `@` agents/plugins). Set as a JS property; forwarded to the input. */
+  /** Rich entity triggers: each opens a caret-anchored menu that inserts an atomic pill (`/` skills, `@` agents). Set as a JS property. */
   triggers?: { char: string; kind: string; items?: { id: string; label: string; icon?: string; description?: string; group?: string; kind?: string; promptText?: string; data?: Record<string, unknown> }[] }[];
   /** Default icon per entity kind (kind → image src) for pills/menu items. */
   kindIcons?: Record<string, string>;
   /** Whether each message's action bar is always visible (`'always'`, default) or only revealed on hover of that message row (`'hover'`). */
   actionsReveal?: "always" | "hover";
-  /** Role-scoped DEFAULT action bars (B-7b): a user message with no `actions` of its own gets `userActions`; an assistant message, `assistantActions`. A per-message `m.actions` OVERRIDES the role default (replace, not merge), so a message that sets `actions: []` renders NO action bar even when a role default is set. Set as JS properties. */
+  /** Default action bar for user messages with no `actions` of their own; a message's own `actions` replaces it rather than merging. Set as JS properties. */
   userActions?: ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: string; tooltip?: string })[];
   /** See `userActions`, the assistant-role default. */
   assistantActions?: ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: string; tooltip?: string })[];
-  /** Hide the citations row consecutive `source` parts collapse into (`part="citations"`, message.tsx). Named as a HIDE, not `sources: boolean`, so absence-means-default stays unambiguous: absent/false is today's rendering, byte-for-byte (B-8). */
+  /** Hide the citations row that consecutive `source` parts collapse into; absent or `false` renders it. */
   hideSources?: boolean;
-  /** Which attachment media types the user may stage, in HTML `accept` syntax: `<kai-chat accept="image/*,application/pdf">`. A plain string, so unlike `messages` it DOES work as an attribute. Omitted means no filter. MEDIA TYPES ONLY -- exact (`image/png`) or subtype wildcard (`text/*`). HTML allows a file extension here and this does not: `accept=".py"` THROWS with the entry named, rather than silently resolving to a picker that accepts nothing. It can only NARROW what the kit can already encode: `accept="image/*"` resolves to the four image formats both APIs take, not to every image type the OS offers. Pass the SAME string to `toOpenAIMessages(msgs, { accept })` and the picker and the wire cannot disagree -- both resolve it through `resolveMediaPolicy` against one declaration. That declaration is readable as `encodableMediaTypes()` from `@kitn.ai/ui/wire`, if you would rather build your own picker than use this prop. */
+  /** Which attachment media types the user may stage, in HTML `accept` syntax. Omitted = no filter; media types only, an extension THROWS. */
   accept?: string;
-  /** The full message thread to render, newest last. Each entry carries its role, ordered `parts`, and optional actions/avatar/feedback. Set as a JS property (`el.messages = [...]`); a NEW array reference per streaming chunk re-renders (mutating in place does not). Omit for an empty thread. Re-declared here (rather than inherited from `ChatThreadProps`) because the ELEMENT registers a `[]` default and renders the empty state without it, while the SolidJS `<ChatThread>` component still requires it. The facade hands it a validated array either way. Matches `<kai-thread>`. */
+  /** The message thread to render, newest last. JS property; pass a NEW array per streaming chunk. Omit for an empty thread. */
   messages?: { id: string; role: "user" | "assistant"; parts: ({ type: "text"; text: string; raw?: { source: string; payload: unknown } } | { type: "reasoning"; text: string; label?: string; index?: number; streamId?: string; signature?: string; raw?: { source: string; payload: unknown } } | { type: "tool"; tool: { type: string; kind?: "command" | "file-change" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: Record<string, unknown>; rawInput?: string; output?: Record<string, unknown>; toolCallId?: string; errorText?: string; raw?: { source: string; payload: unknown } }; raw?: { source: string; payload: unknown } } | { type: "card"; envelope: { type: string; id: string; data: unknown; title?: string; resolution?: { kind: "action"; action: string; payload?: unknown; at?: string } | { kind: "submit"; data: unknown; at?: string } | { kind: "dismissed"; at?: string } | { kind: "expired"; reason?: string; at?: string } }; raw?: { source: string; payload: unknown } } | { type: "source"; source: { id?: string; url?: string; title?: string; snippet?: string; index?: number }; raw?: { source: string; payload: unknown } } | { type: "file"; attachment: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }; raw?: { source: string; payload: unknown } })[]; actions?: ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: string; tooltip?: string })[]; avatar?: { src?: string; fallback?: string; alt?: string }; feedback?: "like" | "dislike" }[];
-  /** Optional card type -> custom-element tag overrides/additions for `card` parts (merged over the built-ins). Property: `el.cardTypes`. Typed as a plain string map (not the `CardTagMap` alias) so the generated React wrapper inlines it instead of emitting an unresolved named type. */
+  /** Card type → custom-element tag overrides/additions, merged over the built-ins. JS property: `el.cardTypes`. */
   cardTypes?: Record<string, string>;
-  /** JSON Schemas for the card types this app renders, keyed by envelope type. The companion of `cardTypes`, which says what DRAWS a card while this says what a VALID one looks like. An OBJECT, so it is a JS property only: `el.cardSchemas = { 'pricing-table': pricingSchema }`, never an attribute. `createCardRegistry(...).validationSchemas` is exactly this shape. Without it the kit validates its own seven built-ins and leaves your own card type, the one your app actually cares about, as the only unchecked thing on screen. A schema here WINS over a built-in of the same name. Typed `Record<string, object>` rather than `Record<string, JsonSchema>` deliberately: an imported `.json` schema widens `"type"` to `string`, and an authored one carries `$schema`/`title`/`description`/`additionalProperties`, so the tighter type would reject both of the normal ways to supply one. */
+  /** Card-type JSON Schemas keyed by envelope type; validates each card's `data`. JS property: `el.cardSchemas`. */
   cardSchemas?: Record<string, object>;
-  /** Turns on the prior-conversations list (a list-toggle button in the header, plus a second list view sharing the panel, C-1). Attribute- settable like every other boolean flag on this element: `<kai-chat conversations>`. Requires `store`. A row select, "new conversation," or the visitor's mount-time auto-restore all deliver their messages the same way: listen for `kai-conversation-load` and set `el.messages` from `event.detail.messages` (a fresh array): this element does not update `messages` for you. Set with no `store`, the underlying `ChatThread` decides loudly (one console.error) and stays visually off; this facade always supplies its own internal load handler (the `kai-conversation-load` dispatch below), so the second ChatThread guard, missing `onConversationLoad`, never trips here, even for a consumer who never listens for the event. Default false. */
+  /** Turns on the prior-conversations list. Requires `store`; default `false`; a load arrives as `kai-conversation-load` -- set `el.messages` yourself. */
   conversations?: boolean;
-  /** The adapter this thread persists conversations through: an object of three functions (`list`/`load`/`save`; `ConversationStore`, exported from `@kitn.ai/ui`'s `primitives/conversation-store`). A JS PROPERTY ONLY: `el.store = myAdapter`. It can never be an attribute, since a function-bearing object has no HTML string form, the same reasoning that keeps `messages`/`cardSchemas` property-only (the kai- contract: array/object props are JS properties, never attributes). Two built-ins ship: `localStorageStore(name, userId?)` and `fetchStore(url, userId?)`. */
+  /** The persistence adapter: `{ list, load, save }`. JS property only (`el.store = myAdapter`). */
   store?: { list: () => Promise<{ id: string; title: string; groupId?: string; scope?: { type: "document" | "collection"; documentId?: string; filters?: { tags?: string[]; authors?: string[]; contentType?: "transcript" | "markdown"; dateRange?: { from: string; to: string } } }; messageCount: number; lastMessageAt?: string; updatedAt: string; trailing?: string; lastReadAt?: string }[]>; load: (id: string) => Promise<{ id: string; role: "user" | "assistant"; parts: ({ type: "text"; text: string; raw?: { source: string; payload: unknown } } | { type: "reasoning"; text: string; label?: string; index?: number; streamId?: string; signature?: string; raw?: { source: string; payload: unknown } } | { type: "tool"; tool: { type: string; kind?: "command" | "file-change" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: Record<string, unknown>; rawInput?: string; output?: Record<string, unknown>; toolCallId?: string; errorText?: string; raw?: { source: string; payload: unknown } }; raw?: { source: string; payload: unknown } } | { type: "card"; envelope: { type: string; id: string; data: unknown; title?: string; resolution?: { kind: "action"; action: string; payload?: unknown; at?: string } | { kind: "submit"; data: unknown; at?: string } | { kind: "dismissed"; at?: string } | { kind: "expired"; reason?: string; at?: string } }; raw?: { source: string; payload: unknown } } | { type: "source"; source: { id?: string; url?: string; title?: string; snippet?: string; index?: number }; raw?: { source: string; payload: unknown } } | { type: "file"; attachment: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }; raw?: { source: string; payload: unknown } })[]; actions?: ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: string; tooltip?: string })[]; avatar?: { src?: string; fallback?: string; alt?: string }; feedback?: "like" | "dislike" }[]>; save: (id: string, messages: { id: string; role: "user" | "assistant"; parts: ({ type: "text"; text: string; raw?: { source: string; payload: unknown } } | { type: "reasoning"; text: string; label?: string; index?: number; streamId?: string; signature?: string; raw?: { source: string; payload: unknown } } | { type: "tool"; tool: { type: string; kind?: "command" | "file-change" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: Record<string, unknown>; rawInput?: string; output?: Record<string, unknown>; toolCallId?: string; errorText?: string; raw?: { source: string; payload: unknown } }; raw?: { source: string; payload: unknown } } | { type: "card"; envelope: { type: string; id: string; data: unknown; title?: string; resolution?: { kind: "action"; action: string; payload?: unknown; at?: string } | { kind: "submit"; data: unknown; at?: string } | { kind: "dismissed"; at?: string } | { kind: "expired"; reason?: string; at?: string } }; raw?: { source: string; payload: unknown } } | { type: "source"; source: { id?: string; url?: string; title?: string; snippet?: string; index?: number }; raw?: { source: string; payload: unknown } } | { type: "file"; attachment: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }; raw?: { source: string; payload: unknown } })[]; actions?: ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: string; tooltip?: string })[]; avatar?: { src?: string; fallback?: string; alt?: string }; feedback?: "like" | "dislike" }[]) => Promise<void>; markRead?: ((id: string) => Promise<void>) };
-  /** Turns on the widget home screen (Intercom-pattern): the panel boots into a `home` view, with a greeting, most-recent-conversation card, a "new conversation" CTA, and host-defined links, plus a Home/Messages tab bar for switching back to the thread. An OBJECT, so it is a JS property only: `el.home = { greeting: { title: 'Hey' }, links: [...] }`, never an attribute (the kai- contract: array/object props are JS properties). A `links` entry with no `href` fires `kai-home-link` with that entry when tapped, rather than navigating; one WITH `href` opens it directly (only when the URL passes the kit's own scheme allowlist). Omit for the no-home widget (chat view only, unchanged). */
+  /** Turns on the Home screen (greeting, recent conversation, links, Home/Messages tabs). JS property; omit for the chat-only widget. */
   home?: { greeting?: { title?: string; subtitle?: string }; recentConversation?: boolean; newConversation?: { label?: string }; links?: { label: string; href?: string; description?: string; icon?: string }[] };
-  /** Whether the chrome that HOSTS this element is currently VISIBLE to the visitor, e.g. a composed launcher/dock's open state. Set as a JS PROPERTY (`el.hostOpen = open`), never an attribute: the default is `true` and an HTML attribute's presence can only ever say "true", so there is no attribute form that expresses the one value worth setting (`false`). Meaningful only with `conversations` on, where it is the third leg of "seen": the active conversation is marked read only while it is active AND the chat view is showing AND this is `true`. Leave it unset for any layout with no show/hide concept (fullscreen, aside, split); that just means unread never distinguishes "closed" from "open". The companion of the `kai-unread-change` event: set this from your launcher's open state, mirror that event onto its badge. */
+  /** Whether the chrome hosting this element is visible (e.g. a launcher's open state). JS property only; `false` has no attribute form. */
   hostOpen?: boolean;
 }
 
 export interface KaiCheckboxElementProps {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** Controlled checked state. Settable and reflected to the `checked` attribute. `el.checked = true` (or `<kai-checkbox checked>`) drives it; ticking the box updates it and fires `kai-change`. Read `el.checked` for live state. */
+  /** Controlled checked state, reflected to the `checked` attribute. Ticking the box updates it and fires `kai-change`. */
   checked?: boolean;
   /** Initial checked state on mount (uncontrolled seed). Bare attribute (`<kai-checkbox default-checked>`) turns it on. */
   defaultChecked?: boolean;
@@ -2610,9 +2610,9 @@ export interface KaiCheckboxGroupElementProps {
   theme?: "light" | "dark" | "auto";
   /** The choices, top to bottom. Set as a JS PROPERTY (array), never an attribute. Rendered in full: the kit never truncates, re-orders or de-duplicates them. */
   options: { value: string; label: string; description?: undefined | string; disabled?: undefined | boolean }[];
-  /** The FIRST selected value. Settable and reflected to the `value` attribute, so `:host([value])` and `el.value` see live state, and a seed can be written in markup. Writing it makes that the whole selection; to read or drive the rest, use `el.values`. */
+  /** The FIRST selected value. Read or drive the rest with `el.values`. */
   value?: string;
-  /** The shared form-control name every box carries, so `FormData.getAll(name)` reads the whole selection back under one key. NO DEFAULT, unlike `<kai-radio-group>`. A radio set needs a shared `name` for the browser to make it exclusive and arrow-navigable, so one is generated when none is given; checkboxes are independent controls and behave correctly with no name at all. Generating one here would submit the selection under a random key, which is worse than submitting nothing. The element is NOT form-associated (no `ElementInternals`, no `setFormValue()`), the same known gap `<kai-input>` records: the boxes live in a shadow root, so a surrounding `<form>` collects nothing from them whether or not `name` is set. Read `el.values`. The name still lands on every inner input, so it is right the day form association arrives. */
+  /** Shared name on every box, for `FormData.getAll(name)`. No default: checkboxes are independent controls. */
   name?: string;
   /** Disable every row. Individual rows carry their own `disabled`. */
   disabled?: boolean;
@@ -2623,20 +2623,20 @@ export interface KaiCheckboxGroupElementProps {
 export interface KaiCheckpointElementProps {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** Optional text beside the icon. */
+  /** Text beside the icon. */
   label?: string;
-  /** Tooltip on hover. */
+  /** Hint shown on hover. */
   tooltip?: string;
-  /** Visual button style. */
+  /** Button style. */
   variant?: "ghost" | "default" | "outline";
-  /** Button size (use an `icon*` size for an icon-only checkpoint). */
+  /** Button size; use an icon size for an icon-only checkpoint. */
   size?: "sm" | "md" | "lg" | "icon" | "icon-sm";
 }
 
 export interface KaiChoiceElementProps {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** The choice definition (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { prompt, options:[…], allowOther?, submitLabel? }`. Import `ChoiceCardData` from `@kitn.ai/ui` for the full shape. */
+  /** The choice definition (the card's `data`). JS property: `el.data = { prompt, options: [...] }`. */
   data?: { prompt?: string; options: { id: string; label: string; description?: string; media?: { image?: string; imageAlt?: string; icon?: string }; meta?: string; recommended?: boolean; disabled?: boolean; payload?: unknown }[]; allowOther?: boolean | { label?: string; placeholder?: string }; submitLabel?: string; dismissible?: boolean };
   /** Stable card id correlating every emitted CardEvent. Attribute: `card-id`. */
   cardId?: string;
@@ -2655,7 +2655,7 @@ export interface KaiChoiceElementProps {
 export interface KaiCoachmarkElementProps {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages). Set `el.open = true`, or `<kai-coachmark open>`; listen for `kai-open-change`. */
+  /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
   /** Initial open state on mount (uncontrolled seed). */
   defaultOpen?: boolean;
@@ -2702,13 +2702,13 @@ export interface KaiCommandElementProps {
 export interface KaiCompareElementProps {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** The compare definition (prompt + the two candidates). Set as a JS PROPERTY: `el.data = { prompt, candidates: [A, B], collapse? }`. Import `ResponseCompareData` from `@kitn.ai/ui` for the full shape. */
+  /** The compare definition (prompt + the two candidates). JS property: `el.data = { prompt, candidates: [A, B] }`. */
   data?: Record<string, unknown>;
   /** Stable id correlating every emitted event. Attribute: `compare-id`. */
   compareId?: string;
   /** Re-hydrate / control the user's pick. Set as a JS PROPERTY: `el.selection = { chosenId, rejectedIds }`. Renders the collapsed winner. */
   selection?: Record<string, unknown>;
-  /** Layout: `'auto'` (default, columns when wide, tabs when narrow, by CONTAINER width) | `'columns'` (side-by-side) | `'tabs'` (pills to switch). Attribute: `layout`. */
+  /** Layout: `auto` (default, by CONTAINER width), `columns` (side-by-side), or `tabs` (pills). */
   layout?: "auto" | "columns" | "tabs";
   /** Prose/text size for the rendered candidates. Attribute: `prose-size`. */
   proseSize?: "xs" | "sm" | "base" | "lg";
@@ -2744,7 +2744,7 @@ export interface KaiComposerElementProps {
 export interface KaiConfirmElementProps {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** The confirm definition (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { body, tone, actions:[…] }`. Import `ConfirmCardData` from `@kitn.ai/ui` for the full shape. */
+  /** The confirm definition (the card's `data`). JS property: `el.data = { body, tone, actions: [...] }`. */
   data?: { heading?: string; body?: string; tone?: "default" | "warning" | "danger"; actions: { id: string; label: string; style?: "primary" | "default" | "destructive"; payload?: unknown; default?: boolean }[]; dismissible?: boolean };
   /** Stable card id correlating every emitted CardEvent. Attribute: `card-id`. */
   cardId?: string;
@@ -2770,54 +2770,54 @@ export interface KaiContextElementProps {
 export interface KaiConversationItemElementProps {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** The row's identity: the `conversation-id` attribute (host `id` is the fallback). Inside `<kai-conversations>` it is handed to the container's selection contract (`kai-conversation-select`); standalone it is the `id` in this element's own `kai-select` detail. */
+  /** The row's identity: the `conversation-id` attribute, else the host `id`. */
   conversationId?: string;
-  /** Selected state. Reflected as `aria-current` on the row body and a `data-active` styling hook on the row; inside a container the container drives it from its `activeId`, standalone you set it yourself. */
+  /** Selected state, reflected as `aria-current` and a `data-active` styling hook. Inside a container the container drives it. */
   active?: boolean;
   /** Dense single-line row padding. */
   compact?: boolean;
-  /** Row density: `default`, `compact` (same as the `compact` flag), or `panel`, the widget-panel presentation matching the facade panel's measured row box (12px/10px padding, a 40px single-line row). Previously that box was a private interior class a composition could only approximate by smuggling padding through slotted spans (2026-08-31 composition spike, phase 3 round 3). An explicit density wins over `compact`. */
+  /** Row density: `default`, `compact` (same as the `compact` flag), or `panel` (the widget-panel row box). */
   density?: "default" | "compact" | "panel";
-  /** Show the unread indicator dot at the row's trailing edge, inside the activation surface and before the `menu` region, with a screen-reader "Unread" label. Drive it from `isConversationUnread` (exported from the package root and from `dist/stores.js`). */
+  /** Show the unread indicator dot at the row's trailing edge, with a screen-reader "Unread" label. */
   unread?: boolean;
 }
 
 export interface KaiConversationsElementProps {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** The list's section headers (`{ id, name, sortOrder, createdAt }`), rendered in array order. A group carries no conversations of its own; it is matched against `conversations` by id, so the two props are complementary rather than alternatives. Omit for an ungrouped list. Set as a JS property. */
+  /** The list's section headers (`{ id, name, sortOrder, createdAt }`) in array order. JS property; omit for an ungrouped list. */
   groups?: { id: string; userId?: string; teamId?: string; name: string; sortOrder: number; createdAt: string }[];
-  /** Every conversation the list renders, flat. Each one is filed under the group whose `id` equals its `groupId`; one with no `groupId`, or with a `groupId` matching no entry in `groups`, falls into a trailing "Ungrouped" section, so nothing you pass in is ever dropped. There is no recency bucketing. Set as a JS property. Omit to supply them as `<kai-conversation>` light-DOM children instead, or for the empty state. A search query that matches nothing shows a visible "No conversations match your search" state, distinct from the zero-conversations empty state. Slotted `<kai-conversation-item>` children switch the list into item mode instead: your own rows win and this array is not rendered. */
+  /** The conversations to render, flat. JS property; omit to pass `<kai-conversation>` light-DOM children instead, or for the empty state. */
   conversations?: { id: string; title: string; groupId?: string; scope?: { type: "document" | "collection"; documentId?: string; filters?: { tags?: string[]; authors?: string[]; contentType?: "transcript" | "markdown"; dateRange?: { from: string; to: string } } }; messageCount: number; lastMessageAt?: string; updatedAt: string; trailing?: string; lastReadAt?: string }[];
   /** The id of the currently-open conversation, highlighted in the list. */
   activeId?: string;
-  /** Controlled collapsed state. Set as a JS property (`el.collapsed = true`) to drive the rail from your app, updating it in response to `kai-collapse-toggle`. Omit for uncontrolled (the element manages it). Collapsed shrinks the rail to a floating reopen button. */
+  /** Controlled collapsed state (`el.collapsed = true`). Omit for uncontrolled; collapsed shrinks the rail to a reopen button. */
   collapsed?: boolean;
   /** Initial collapsed state when uncontrolled (default false). Use the `default-collapsed` attribute to start collapsed in plain HTML. */
   defaultCollapsed?: boolean;
   /** Dense single-line rows (a leading dot + title, no message count). */
   compact?: boolean;
-  /** Row density for the data rows: `default`, `compact` (same as the `compact` flag), or `panel`, the widget-panel presentation matching the facade panel's measured row box (12px/10px padding, a 40px single-line row with a right-aligned relative time and an optional preview line carrying the unread dot). An explicit density wins over `compact`. Item mode is unaffected: slotted `<kai-conversation-item>` rows carry their own `density` attribute. */
+  /** Row density: `default`, `compact` (same as the `compact` flag), or `panel` (the widget-panel row box). */
   density?: "default" | "compact" | "panel";
-  /** Show the built-in search box above the list. Default `true`. Set `searchable="false"` (or `el.searchable = false`) to hide it: the widget-box case, where the facade's own list view renders no search and a fine-grain composition previously had no way to match it (2026-08-31 composition spike, phase 3 round 2). Same default-true flag convention as `<kai-prompt-input attach>`: `<kai-conversations searchable>` and omitting it are both ON. Hidden, the `focus()`/`clear()` methods reach no input and `kai-search` never fires. */
+  /** Show the built-in search box above the list. Default `true`; `searchable="false"` hides it. */
   searchable?: boolean;
 }
 
 export interface KaiDialogElementProps {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages on Escape/backdrop). Set `el.open = true`, or `<kai-dialog open>`; listen for `kai-open-change`. */
+  /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
   /** Initial open state on mount (uncontrolled seed). */
   defaultOpen?: boolean;
-  /** Accessible name for the modal, used when no `header` slot is projected: `<kai-dialog label="Delete workspace">`. A projected `header` WINS over this (it becomes `aria-labelledby`), because ARIA resolves `aria-labelledby` ahead of `aria-label` and the visible heading is the name both a sighted and a screen-reader user can be talked through. Defaults to `Dialog` so a modal is never nameless. */
+  /** Accessible name for the modal, used when no `header` slot is projected. Defaults to `Dialog`. */
   label?: string;
 }
 
 export interface KaiDockElementProps {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages on the launcher and Escape). Set `el.open = true`, or `<kai-dock open>`; listen for `kai-open-change`. */
+  /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
   /** Initial open state on mount (uncontrolled seed). */
   defaultOpen?: boolean;
@@ -2833,7 +2833,7 @@ export interface KaiDockElementProps {
   unread?: boolean;
   /** Disable the launcher; `show()` and `toggle()` are gated on it. */
   disabled?: boolean;
-  /** Suppress the dock's own built-in mobile close X. Set this when your slotted panel content supplies its own close affordance (e.g. a `<kai-chat slot="header-end">` close button), otherwise the two stack. TRADEOFF: the mobile panel reserves a padding band above its content so the built-in X never paints over slotted content; that band stays reserved unless you set this true, so only set it once your own control is actually in place. Attribute: `hide-close`. */
+  /** Suppress the dock's built-in mobile close X. Attribute: `hide-close`. */
   hideClose?: boolean;
   /** Where focus lands on open: `content` (default, the first element you slotted), `panel`, or `none`. Attribute: `focus-on-open`. */
   focusOnOpen?: "content" | "panel" | "none";
@@ -2844,15 +2844,15 @@ export interface KaiDropdownElementProps {
   theme?: "light" | "dark" | "auto";
   /** Built-in trigger: leading icon (a named icon like `"plus"`, an image URL/data-URI, or text). A slotted `slot="trigger"` overrides it. */
   triggerIcon?: string;
-  /** Built-in trigger: a text label. This is the trigger's VISIBLE text, so it is also its accessible name, and `label` does not override it: an accessible name that does not contain the visible text is unreachable by speech input (WCAG 2.5.3, Label in Name). Same rule `kai-menu` follows. */
+  /** Built-in trigger: a text label. */
   triggerLabel?: string;
   /** Built-in trigger: a trailing icon (e.g. `"chevron-down"` for a select look). */
   triggerIconTrailing?: string;
-  /** Accessible name for a trigger with no visible label. Ignored when `triggerLabel` is set, which is already the visible name. It DOES name a slotted `slot="trigger"`, which is VISUAL content with the name supplied separately: the same two-slot distinction `kai-menu` documents. */
+  /** Accessible name for a trigger with no visible label. Ignored when `triggerLabel` is set. */
   label?: string;
   /** Stretch the trigger to the full width of its container (a block row). Attribute: `full`. */
   full?: boolean;
-  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute, the menu still self-manages on click/keyboard). Set `el.open = true`, or `<kai-dropdown open>`; listen for `kai-open-change`. */
+  /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
   /** Initial open state on mount (uncontrolled seed). */
   defaultOpen?: boolean;
@@ -2867,7 +2867,7 @@ export interface KaiEditableLabelElementProps {
   value?: string;
   /** Controlled edit state. `el.editing = true` opens the field; reflected to the `editing` attribute. */
   editing?: boolean;
-  /** How the read view enters edit mode: `'dblclick'` (default) opens the field on a double click, `'click'` on a single click. Reflected to the `edit-trigger` attribute. `edit()` and `editing` are unaffected. */
+  /** How the read view enters edit mode: `dblclick` (default) or `click`. Reflects to `edit-trigger`; `edit()` and `editing` are unaffected. */
   editTrigger?: "dblclick" | "click";
   /** Placeholder shown while editing / when the value is empty. */
   placeholder?: string;
@@ -2889,7 +2889,7 @@ export interface KaiEmptyElementProps {
   theme?: "light" | "dark" | "auto";
   /** Title text. Attribute: `empty-title` (`title` is a global HTML attribute). */
   emptyTitle?: string;
-  /** Description text. */
+  /** Line of copy under the title. */
   description?: string;
 }
 
@@ -2928,20 +2928,20 @@ export interface KaiFileTreeElementProps {
 export interface KaiFileUploadElementProps {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** Allow selecting multiple files (default true). */
+  /** Allow picking more than one file. Default true. */
   multiple?: boolean;
-  /** `accept` attribute for the file picker (e.g. `image/*`). */
+  /** `accept` for the file picker, e.g. `image/*`. */
   accept?: string;
-  /** Disable the dropzone: no clicking, no drag-and-drop. */
+  /** No clicking and no drag-and-drop. */
   disabled?: boolean;
-  /** Default dropzone label (overridable via the default slot). */
+  /** Default dropzone label; replace it with your own markup via the default slot. */
   label?: string;
 }
 
 export interface KaiFormElementProps {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** The form definition: a JSON Schema (`type:'object'`) + `x-kai-*` UI hints (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { type:'object', properties:{…} }`. Import the `FormDefinition` type from `@kitn.ai/ui` for the full shape. It IS self-referential (`FormField.properties` is another `FormField` map), and the generated `web-component-types.d.ts` inlines every named type, so the shipped declaration bottoms out in a `Record<string, unknown>` placeholder one level down rather than carrying the recursion. That is why `FormDefinition` is a `type` alias: an interface gets no implicit index signature, so it would not be assignable to that placeholder. */
+  /** The form definition: a JSON Schema + `x-kai-*` UI hints. JS property: `el.data = { type: 'object', properties: {...} }`. */
   data?: { type: "object"; title?: string; description?: string; required?: string[]; properties: Record<string, { type: "string" | "number" | "integer" | "boolean" | "array" | "object"; title?: string; description?: string; default?: unknown; enum?: unknown[]; format?: "email" | "uri" | "url" | "date" | "date-time" | "time"; minimum?: number; maximum?: number; minLength?: number; maxLength?: number; pattern?: string; minItems?: number; maxItems?: number; items?: Record<string, unknown> | { enum: unknown[] }; properties?: Record<string, Record<string, unknown>>; required?: string[]; readOnly?: boolean; "x-kai-widget"?: "textarea" | "slider" | "rating" | "radio" | "select" | "checkbox" | "password" | "switch"; "x-kai-placeholder"?: string; "x-kai-step"?: number; "x-kai-format"?: "tel" | "ssn" | "credit-card" | "custom"; "x-kai-mask"?: string; "x-kai-mask-guide"?: string }>; "x-kai-order"?: string[]; "x-kai-inlineMax"?: number; "x-kai-submitLabel"?: string; "x-kai-dismissible"?: boolean; "x-kai-actions"?: { id: string; label: string; variant?: "default" | "ghost" | "outline" }[] };
   /** Stable card id correlating every emitted CardEvent. Attribute: `card-id`. */
   cardId?: string;
@@ -2966,7 +2966,7 @@ export interface KaiHoverCardElementProps {
   closeDelay?: number;
   /** Preferred placement: `'top' | 'bottom' | 'left' | 'right'` (+ optional `-start`/`-end`). Defaults to `'bottom'`; flips to stay in view. */
   placement?: string;
-  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute, the element still self-manages on hover). Set `el.open = true`, or `<kai-hover-card open>`; listen for `kai-open-change`. */
+  /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
   /** Initial open state on mount (uncontrolled seed). */
   defaultOpen?: boolean;
@@ -2986,7 +2986,7 @@ export interface KaiIconElementProps {
 export interface KaiImageElementProps {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** The image's URL: an `https:`/`http:` location, a `data:` URI, or a `blob:` object URL you created. Attribute `src`. This is an image RESOURCE; for an image the model PRODUCED (base64 or raw bytes) use `<kai-image-artifact>`. */
+  /** The image URL: an `https:`/`http:` location, a `data:` URI, or a `blob:` object URL you created. */
   src?: string;
   /** Alt text. Attribute `alt`. Always give meaningful text: an empty alt marks the image as decorative. */
   alt?: string;
@@ -2997,9 +2997,9 @@ export interface KaiImageElementProps {
 export interface KaiImageArtifactElementProps {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** The image PAYLOAD, as BARE base64 (never a URI) or as raw bytes. Attribute `data` for a base64 string; JS PROPERTY (`el.data = new Uint8Array([...])`) for bytes, like every other non-scalar input in this kit. A `data:image/...;base64,…` string here is a RESOURCE: it is reported and rendered as-is, and it belongs on `<kai-image>`'s `src`, which carries its own media type. */
+  /** The image PAYLOAD: BARE base64 (never a URI) or raw bytes. Attribute `data` for base64; JS property for `Uint8Array`. */
   data?: string | Uint8Array;
-  /** The payload's MIME type, e.g. `image/png` or `image/jpeg`. Attribute `media-type`. REQUIRED. Omit it and the element renders the skeleton and warns, because guessing `image/png` labelled a JPEG's bytes as a PNG. */
+  /** The payload's MIME type, e.g. `image/png`. Attribute `media-type`. REQUIRED. */
   mediaType?: string;
   /** Alt text. Attribute `alt`. Always give meaningful text: an empty alt marks the image as decorative. */
   alt?: string;
@@ -3012,7 +3012,7 @@ export interface KaiInputElementProps {
   theme?: "light" | "dark" | "auto";
   /** Native input type: `text` (default) · `email` · `url` · `search` · `tel` · `password` · `number`. Single-line only. */
   type?: string;
-  /** Controlled value, and always the CANONICAL one when a mask is active: digits for `tel` / `ssn` / `credit-card`, the formatted text for `custom`. Settable and reflected to the `value` attribute. `el.value = '5551234567'` drives it (no event) and is re-fitted to the mask on the way in, so the field shows `555-123-4567`. Read `el.value` for live state; the formatted text rides along on every `kai-input` / `kai-change` detail as `formattedValue`. */
+  /** Controlled value, reflected to the `value` attribute. */
   value?: string;
   /** Placeholder shown when empty. */
   placeholder?: string;
@@ -3038,11 +3038,11 @@ export interface KaiInputElementProps {
   autocomplete?: string;
   /** Virtual-keyboard hint forwarded to the inner input (e.g. `numeric`, `email`). */
   inputmode?: string;
-  /** Mask pattern: `#` a digit, `@` a letter or digit, `*` an obscurable letter or digit, and every other character a positional literal (`@@@-####` → `CHG-4821`). The literal `default` is the opt-in sentinel: it resolves to the default format of `semantic` (`tel` → `###-###-####`). A bare `semantic` never starts masking on its own, so an opt-in token is what turns tier 2 on. */
+  /** Mask pattern: `#` a digit, `@` a letter or digit, `*` an obscurable letter or digit, every other character a positional literal. */
   format?: string;
-  /** Placeholder guide shown at unfilled positions, aligned position for position with `format`: `mm/dd/yyyy` against `##/##/####`. Spaces are a valid guide character, so a guide of blanks and separators is how a phone field shows its shape without showing letters. Without a guide the field shows only up to the last typed character. A guide is a visual aid, never an accessible name: keep the `hint` text as well. */
+  /** Placeholder guide shown at unfilled positions (e.g. `mm/dd/yyyy`). */
   guide?: string;
-  /** Semantic field type: `tel` · `ssn` · `credit-card` · `custom`. On its own it sets `inputmode` / `autocomplete` / `spellcheck` / `autocorrect` / `autocapitalize` and decides the canonical value; it never starts masking by itself. */
+  /** Semantic field type: `tel`, `ssn`, `credit-card` or `custom`. Sets `inputmode`/`autocomplete`; never masks on its own. */
   semantic?: "credit-card" | "custom" | "ssn" | "tel";
   /** Case folding applied to typed and pasted text: `preserve` (default) · `upper` · `lower`. Attribute: `case-mode`. */
   caseMode?: "preserve" | "upper" | "lower";
@@ -3069,17 +3069,17 @@ export interface KaiKbdGroupElementProps {
 export interface KaiLightboxElementProps {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute, while the trigger click still works). Set `el.open = true`, or `<kai-lightbox open>`; listen for `kai-open-change`. */
+  /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
   /** Initial open state on mount (uncontrolled seed). */
   defaultOpen?: boolean;
-  /** Take away the PROGRAMMATIC open path only: `show()` becomes a no-op and `toggle()` closes rather than opens. The trigger, the `open` attribute and `hide()` are untouched. These are the disclosure semantics every overlay in the kit shares; see ../disclosure. */
+  /** Take away the PROGRAMMATIC open path only: `show()` becomes a no-op and `toggle()` closes rather than opens. */
   disabled?: boolean;
-  /** Accessible name for the modal (`aria-label`), for a lightbox whose content carries no heading. Without one the panel is an UNNAMED `role="dialog"`, which is a WCAG failure, so name it. */
+  /** Accessible name for the modal (`aria-label`). Name it: an unnamed `role="dialog"` is a WCAG failure. */
   label?: string;
-  /** Show the close (X) button in the modal's top-right corner. ON WHEN ABSENT: this is a default-true flag, so `show-close`, `show-close="true"` and `el.showClose = true` all mean ON, and the only ways to turn it OFF are `show-close="false"` and `el.showClose = false`. Escape, a backdrop click and `hide()` dismiss the modal either way. */
+  /** Show the close (X) button in the modal's top-right corner. Default `true`. */
   showClose?: boolean;
-  /** Close the modal on a click inside `slot="content"`. ON WHEN ABSENT, the same default-true flag as `showClose`, so `close-on-content-click`, `close-on-content-click="true"` and `el.closeOnContentClick = true` mean ON and only `"false"`/`false` turn it off. A click on a link, a button or any other interactive element inside the content is let through, so a caption link or a download button keeps working. */
+  /** Close the modal on a click inside `slot="content"`. Default `true`. */
   closeOnContentClick?: boolean;
 }
 
@@ -3095,9 +3095,9 @@ export interface KaiLinkPreviewElementProps {
 export interface KaiLoaderElementProps {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** The animation style: `'circular' | 'classic' | 'pulse' | 'pulse-dot' | 'dots' | 'typing' | 'wave' | 'bars' | 'terminal' | 'text-blink' | 'text-shimmer' | 'loading-dots'`. Defaults to `'circular'`. */
+  /** Animation style. Default `circular`. */
   variant?: "circular" | "classic" | "pulse" | "pulse-dot" | "dots" | "typing" | "wave" | "bars" | "terminal" | "text-blink" | "text-shimmer" | "loading-dots";
-  /** Loader size: `'sm' | 'md' | 'lg'`. Defaults to `'md'`. */
+  /** Loader size. Default `md`. */
   size?: "sm" | "md" | "lg";
   /** Label for the text-based variants. */
   text?: string;
@@ -3106,13 +3106,13 @@ export interface KaiLoaderElementProps {
 export interface KaiMarkdownElementProps {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** The markdown source to render. */
+  /** The markdown source. */
   content: string;
-  /** Text/markdown sizing. */
+  /** Text and markdown sizing. */
   proseSize?: "xs" | "sm" | "base" | "lg";
   /** Shiki theme for fenced code blocks. */
   codeTheme?: string;
-  /** Disable syntax highlighting (no Shiki loads). */
+  /** Set false to render plain `pre` blocks, with no highlighter load. */
   codeHighlight?: boolean;
 }
 
@@ -3123,17 +3123,17 @@ export interface KaiMenuElementProps {
   items?: { id?: string; label?: string; icon?: string; shortcut?: string; checked?: boolean; radioGroup?: string; disabled?: boolean; separator?: boolean; heading?: boolean; items?: Record<string, unknown>[] }[];
   /** Optional placement hint (unused by the underlying Dropdown which always positions bottom-start, kept for future extension). */
   placement?: string;
-  /** Built-in trigger: leading icon (a named icon like `"plus"`, an image URL/data-URI, or text). Use this instead of slotting `slot="trigger"` for the common case; a slotted trigger overrides it. */
+  /** Built-in trigger: a leading icon (a named icon, an image URL/data-URI, or text). A slotted trigger overrides it. */
   triggerIcon?: string;
-  /** Built-in trigger: a text label (e.g. `"High"`). This is the trigger's VISIBLE text, so it is also its accessible name, and `label` does not override it: an accessible name that does not contain the visible text is unreachable by speech input, which is what WCAG 2.5.3 (Label in Name) exists for. A slotted `slot="trigger"` replaces this built-in trigger entirely and is named differently; see `label`. */
+  /** Built-in trigger: a text label. */
   triggerLabel?: string;
   /** Built-in trigger: a trailing icon (e.g. `"chevron-down"` for a select look). */
   triggerIconTrailing?: string;
-  /** Accessible name for a trigger with no visible label. Ignored when `triggerLabel` is set, which is already the visible name. It DOES name a slotted `slot="trigger"`, and that is a difference in what the two slots MEAN, not a limitation. `<kai-button>`'s slot IS the button's label, so text slotted there is the name and `label` steps aside. This slot is VISUAL content, a `+` or an `<svg>`, with the name supplied separately: decoration beside a name, never a second name competing with one. So `label` names the trigger here by design. Slotting a real WORD rather than a glyph makes that word a visible label, and an accessible name has to contain the visible text. Then either drop `label` or make it contain the word you slotted. */
+  /** Accessible name for a trigger with no visible label. Ignored when `triggerLabel` is set. */
   label?: string;
-  /** Stretch the trigger to the full width of the menu's container (a block row), e.g. a sidebar-footer account row. Same affordance as `<kai-button full>`. Attribute: `full`. */
+  /** Stretch the trigger to the full width of its container (a block row). Attribute: `full`. */
   full?: boolean;
-  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute, the menu still self-manages on click/keyboard). Set `el.open = true`, or `<kai-menu open>`; listen for `kai-open-change`. */
+  /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
   /** Initial open state on mount (uncontrolled seed). */
   defaultOpen?: boolean;
@@ -3146,7 +3146,7 @@ export interface KaiMessageElementProps {
   theme?: "light" | "dark" | "auto";
   /** The full message object. Set as a JS property. */
   message?: { id: string; role: "user" | "assistant"; parts: ({ type: "text"; text: string; raw?: { source: string; payload: unknown } } | { type: "reasoning"; text: string; label?: string; index?: number; streamId?: string; signature?: string; raw?: { source: string; payload: unknown } } | { type: "tool"; tool: { type: string; kind?: "command" | "file-change" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: Record<string, unknown>; rawInput?: string; output?: Record<string, unknown>; toolCallId?: string; errorText?: string; raw?: { source: string; payload: unknown } }; raw?: { source: string; payload: unknown } } | { type: "card"; envelope: { type: string; id: string; data: unknown; title?: string; resolution?: { kind: "action"; action: string; payload?: unknown; at?: string } | { kind: "submit"; data: unknown; at?: string } | { kind: "dismissed"; at?: string } | { kind: "expired"; reason?: string; at?: string } }; raw?: { source: string; payload: unknown } } | { type: "source"; source: { id?: string; url?: string; title?: string; snippet?: string; index?: number }; raw?: { source: string; payload: unknown } } | { type: "file"; attachment: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }; raw?: { source: string; payload: unknown } })[]; actions?: ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: string; tooltip?: string })[]; avatar?: { src?: string; fallback?: string; alt?: string }; feedback?: "like" | "dislike" };
-  /** Who is speaking: `'user'` or `'assistant'`. Convenience for simple cases when not passing a `message` object. This is the SEMANTIC role of the message, not an ARIA role. The name collides with the global ARIA `role` attribute, which is why the facade lifts it off the host (see `liftRoleOffHost`). Neither speaker is a valid ARIA role, so a `role="user"` left on `<kai-message>` is a CRITICAL axe `aria-roles` violation. The accessible role lives on the row inside the shadow root instead: `role="article"` plus an `aria-label` naming the speaker, matching the SolidJS `<Message>` component. */
+  /** Who is speaking. NOT an ARIA role: it renders role="article" with a named aria-label instead, and shadows the ARIA role attribute (see the note above). */
   role?: "user" | "assistant";
   /** Force markdown on/off. Defaults to on for assistant, off for user. */
   markdown?: boolean;
@@ -3162,22 +3162,22 @@ export interface KaiMessageElementProps {
   avatarSrc?: string;
   /** Convenience avatar fallback text (used when `message.avatar` is not set). */
   avatarFallback?: string;
-  /** Avatar rail mode. `'none'` omits the avatar rail entirely so the body spans the full row (predictable layout when you never show avatars). Any other value keeps the default behaviour: the built-in avatar when one resolves, or your `slot="avatar"` content when projected (which REPLACES the built-in). */
+  /** Avatar rail mode. `'none'` omits the rail so the body spans the full row; otherwise the built-in avatar or your `slot="avatar"`. */
   avatar?: string;
-  /** Optional card type -> custom-element tag overrides/additions for `card` parts (merged over the built-ins). Property: `el.cardTypes`. Typed as a plain string map (not the `CardTagMap` alias) so the generated React wrapper inlines it instead of emitting an unresolved named type. */
+  /** Card type → custom-element tag overrides/additions, merged over the built-ins. JS property: `el.cardTypes`. */
   cardTypes?: Record<string, string>;
-  /** JSON Schemas for the card types this app renders, keyed by envelope type. The companion of `cardTypes`, which says what DRAWS a card while this says what a VALID one looks like. An OBJECT, so it is a JS property only: `el.cardSchemas = { 'pricing-table': pricingSchema }`, never an attribute. `createCardRegistry(...).validationSchemas` is exactly this shape. Without it the kit validates its own seven built-ins and leaves your own card type, the one your app actually cares about, as the only unchecked thing on screen. A schema here WINS over a built-in of the same name. Typed `Record<string, object>` rather than `Record<string, JsonSchema>` deliberately: an imported `.json` schema widens `"type"` to `string`, and an authored one carries `$schema`/`title`/`description`/`additionalProperties`, so the tighter type would reject both of the normal ways to supply one. */
+  /** Card-type JSON Schemas keyed by envelope type; validates each card's `data`. JS property: `el.cardSchemas`. */
   cardSchemas?: Record<string, object>;
 }
 
 export interface KaiModelSwitcherElementProps {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** The selectable models. Set as a JS property (array). Omit to supply them as `<kai-model>` light-DOM children instead; when both are present the property's models come first. */
+  /** The selectable models. JS property (array); omit to pass `<kai-model>` light-DOM children instead. */
   models?: { id: string; name: string; provider?: string; description?: string; group?: string }[];
   /** The currently-selected model id. Defaults to the first model. */
   currentModel?: string;
-  /** Drive/observe the dropdown's open state (Shoelace-style: settable + reflected to the `open` attribute, the dropdown still self-manages on click/keyboard). Set `el.open = true`, or `<kai-model-switcher open>`; listen for `kai-open-change`. */
+  /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
   /** Initial open state on mount (uncontrolled seed). */
   defaultOpen?: boolean;
@@ -3212,7 +3212,7 @@ export interface KaiNoticeElementProps {
 export interface KaiPaneElementProps {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** The pane title (the agent / window name). Named `headline` because `title` collides with the global `HTMLElement.title` attribute (it throws at registration). Attribute: `headline`. */
+  /** The pane title (the agent / window name). Named `headline` because `title` collides with the global `HTMLElement.title`. */
   headline?: string;
   /** A role / label shown under the title (e.g. "Reviewer", "claude-sonnet"). Attribute: `subtitle`. */
   subtitle?: string;
@@ -3239,7 +3239,7 @@ export interface KaiPaneGridElementProps {
   maxColumns?: number;
   /** Gap between panes, any CSS length. Defaults to the kit gap (`var(--kai-pane-grid-gap, 0.5rem)`). Attribute: `gap`. */
   gap?: string;
-  /** When set to a valid child index, render ONLY that pane full-bleed: a simple maximize hook the consumer drives (pair it with `<kai-pane>`'s `kai-maximize` event). Clear it (or point out of range) for the full tiled grid. Attribute: `maximized-index`. */
+  /** A valid child index renders ONLY that pane full-bleed; clear it or point out of range for the tiled grid. */
   maximizedIndex?: number | null;
 }
 
@@ -3248,7 +3248,7 @@ export interface KaiPaneGroupElementProps {
   theme?: "light" | "dark" | "auto";
   /** The tabs to render. An array of `{ id, name, status?, needsAttention?, number? }` set as a JS PROPERTY (not an HTML attribute). */
   tabs?: { id: string; name: string; status?: { tone: "working" | "idle" | "done" | "error" | "blocked"; label?: string; pulse?: boolean }; needsAttention?: boolean; number?: number }[];
-  /** The active tab id (controlled, and reflected to the `active` ATTRIBUTE so `::part`/`[active]` selectors and the per-tab named slot follow it). Set it as the `active` attribute or drive it from `kai-tab-change`; omit for uncontrolled (the first tab). */
+  /** The active tab id (controlled). Omit for uncontrolled (the first tab). */
   active?: string;
   /** Highlight the frame as the ACTIVE group in a multi-group layout. Attribute: `focused`. */
   focused?: boolean;
@@ -3257,7 +3257,7 @@ export interface KaiPaneGroupElementProps {
 export interface KaiPanelElementProps {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** Standalone widget-box chrome: border, radius and shadow on the panel itself. Off (the default), the panel inherits its container's radius and clips to it, the right posture inside an already-framed container such as `kai-dock`'s floating panel. */
+  /** Standalone widget-box chrome: border, radius and shadow on the panel itself. */
   frame?: boolean;
 }
 
@@ -3273,7 +3273,7 @@ export interface KaiPopoverElementProps {
   placement?: "top" | "right" | "bottom" | "left" | "bottom-end" | "bottom-start" | "left-end" | "left-start" | "right-end" | "right-start" | "top-end" | "top-start";
   /** Gap in px between the trigger and the panel. */
   gutter?: number;
-  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute, the element still self-manages on click). Set `el.open = true`, or `<kai-popover open>`; listen for `kai-open-change`. */
+  /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
   /** Initial open state on mount (uncontrolled seed). */
   defaultOpen?: boolean;
@@ -3297,16 +3297,16 @@ export interface KaiProgressBarElementProps {
 export interface KaiPromptDockElementProps {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** How the tray frames the input, the SPATIAL inset axis: `inset` (default, the classic recessed frame on every side) | `edge` (top/bottom inset only; the input sits flush left/right so the lips span the full width) | `none` (no inset; the lips attach directly as a plain stack). Attribute: `frame`. */
+  /** How the tray frames the input, the SPATIAL axis: `inset` (default, recessed on every side), `edge` (top/bottom only), or `none`. */
   frame?: "inset" | "edge" | "none";
-  /** How the tray surface looks, the VISUAL axis orthogonal to `frame`: `soft` (default, sunken surface + border + radius) | `outlined` (transparent + border + radius) | `filled` (sunken, no border, + radius) | `plain` (bare). Attribute: `appearance`. */
+  /** How the tray surface looks, the VISUAL axis: `soft` (default), `outlined`, `filled`, or `plain`. */
   appearance?: "soft" | "outlined" | "filled" | "plain";
 }
 
 export interface KaiPromptInputElementProps {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** Value of the input, as a JS property. A **string** is the controlled text mirror (the host owns it and updates on `kai-value-change`). A **ComposerDoc** (array of text/entity segments) is a one-time **seed** that pre-populates pills (skills/agents/plugins); the user then edits freely. Leave unset for uncontrolled behavior. `kai-submit`/`kai-value-change` always emit `value` as the flattened string (back-compat) plus the structured `doc` + `entities`. */
+  /** Value of the input: a **string** is the controlled text mirror, a **ComposerDoc** is a one-time pill seed. */
   value?: string | ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: string; promptText?: string; data?: Record<string, unknown> } })[];
   /** Placeholder text shown in the empty input. */
   placeholder?: string;
@@ -3324,13 +3324,13 @@ export interface KaiPromptInputElementProps {
   voice?: boolean;
   /** When set and `loading` is true, the send button is replaced by a Stop button (square icon, "Stop" aria-label). Clicking it fires `kai-stop`. */
   stoppable?: boolean;
-  /** Send-button visibility. `'always'` (default) always shows it; `'auto'` shows it only when there's text/attachments (an empty composer hides it, though Enter still submits). To hide it entirely (Enter-only), it's pure CSS: `::part(send){display:none}`, no prop needed. Restyle via `::part(send)`. The Stop button (`stoppable` + `loading`) is unaffected. */
+  /** Send-button visibility: `always` (default) or `auto` (only when there is text/attachments). */
   submit?: "always" | "auto";
-  /** When `false`, hides the built-in paperclip attach button even though the element otherwise supports attachments. Use this when a `+` menu in `toolbar-start` already exposes "Add files", to avoid a duplicate control. Defaults to `true`. */
+  /** Show the built-in paperclip attach button. Default `true`. */
   attach?: boolean;
-  /** Attachments to seed the input with (so a consumer can pre-populate staged files without an upload). Set as a JS property; the element then manages its own attachment state from there (add via the paperclip, remove per chip). Each item's `url` must be a `data:` URI or an https URL, never `URL.createObjectURL`: a `blob:` URL previews perfectly and is meaningless outside this tab, so `toOpenAIMessages`/`toAnthropicMessages` refuse it. (The built-in paperclip already stages files as `data:` URIs.) */
+  /** Attachments to seed the input with. Each `url` must be a `data:` URI or https URL, never `blob:`. */
   attachments?: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }[];
-  /** Rich entity triggers. Each `{ char, kind, items }` opens a caret-anchored menu that inserts an atomic pill. Convention: `/` → skills, `@` → agents (plugins are the grouping/provenance of those items). Set as a JS property. */
+  /** Rich entity triggers. Each `{ char, kind, items }` opens a caret-anchored menu that inserts an atomic pill. JS property. */
   triggers?: { char: string; kind: string; items?: { id: string; label: string; icon?: string; description?: string; group?: string; kind?: string; promptText?: string; data?: Record<string, unknown> }[] }[];
   /** Default icon per entity kind (kind → image URL/data-URI) for pills/menu items without their own `icon`. Overrides the built-in agent/plugin glyphs. JS property. */
   kindIcons?: Record<string, string>;
@@ -3341,9 +3341,9 @@ export interface KaiRadioGroupElementProps {
   theme?: "light" | "dark" | "auto";
   /** The choices, top to bottom. Set as a JS PROPERTY (array), never an attribute. */
   options: { value: string; label: string; description?: undefined | string; disabled?: undefined | boolean }[];
-  /** Controlled selected `value`. Settable and reflected to the `value` attribute. `el.value = 'degraded'` drives it; choosing a row updates it and fires `kai-change`. Read `el.value` for live state. */
+  /** Controlled selected `value`, reflected to the `value` attribute. Choosing a row updates it and fires `kai-change`. */
   value?: string;
-  /** Shared form-control name for every radio in the group. Defaults to a generated id, so the group is exclusive and keyboard-navigable even when nothing is submitted. */
+  /** Shared form-control name for every radio. Defaults to a generated id, so the group stays exclusive unsubmitted. */
   name?: string;
   /** Disable every row. Individual rows carry their own `disabled`. */
   disabled?: boolean;
@@ -3358,7 +3358,7 @@ export interface KaiReasoningElementProps {
   text: string;
   /** Trigger label. */
   label?: string;
-  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages on trigger click + while streaming). Set `el.open = true`; listen for `kai-open-change`. */
+  /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
   /** Initial open state on mount (uncontrolled seed). */
   defaultOpen?: boolean;
@@ -3390,7 +3390,7 @@ export interface KaiResizableElementProps {
   orientation?: "horizontal" | "vertical";
   /** Which item index is maximized (null = none). Declarative source of truth. */
   maximizedIndex?: number | null;
-  /** Divider affordance drawn inside each draggable handle's 8px grab zone: - `line` (default): a 1px hairline, transparent at rest, tinting on hover/drag. - `grip`: a dotted grip handle. - `none`: no visible divider, just the invisible hit-area. The full grab zone and keyboard/ARIA behavior are identical for all three. */
+  /** Divider affordance drawn inside each draggable handle's 8px grab zone: `line` (default), `grip`, or `none`. */
   handle?: "line" | "grip" | "none";
 }
 
@@ -3407,18 +3407,18 @@ export interface KaiResizableItemElementProps {
   locked?: boolean;
   /** Hide this panel; its divider is dropped and the rest reflow. */
   hidden?: boolean;
-  /** Collapse this panel. Same layout effect as `hidden` (divider dropped, the rest reflow), but it WORKS as a bare boolean from framework JSX. A plain `<kai-resizable-item collapsed>` in React/Solid/Vue/Svelte collapses the panel at the first render; `hidden` does not, because a JSX boolean sets neither the `hidden` attribute nor the IDL property on a custom element, so the parent never sees it. The facade reflects `collapsed` to a `collapsed` attribute the parent reads. Prefer this over `hidden` for declarative collapse. */
+  /** Collapse this panel. Works as a bare boolean from framework JSX; `hidden` does not. */
   collapsed?: boolean;
 }
 
 export interface KaiResponseStreamElementProps {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** Text to stream. A string, or an `AsyncIterable<string>` (set as a JS property, since async iterables can't be HTML attributes). */
+  /** Text to stream: a string, or an `AsyncIterable<string>` set as a property. */
   text?: string | AsyncIterable<string>;
   /** Reveal animation. */
   mode?: "typewriter" | "fade";
-  /** Characters/segments per tick. */
+  /** Characters or segments per tick. */
   speed?: number;
   /** Element tag to render as. */
   as?: string;
@@ -3429,7 +3429,7 @@ export interface KaiRowElementProps {
   theme?: "light" | "dark" | "auto";
   /** Pressable row: renders real button semantics (click, Enter, Space) and fires `kai-click` on activation. Ignored when `href` is set. */
   interactive?: boolean;
-  /** Navigate on press: the row renders as a real anchor opening in a new tab. An href outside the kit's safe URL schemes renders a plain non-interactive row instead (label visible, nothing clickable). */
+  /** Navigate on press: the row renders as a real anchor opening in a new tab. An unsafe URL scheme renders a plain, non-interactive row. */
   href?: string;
   /** Show a trailing chevron affordance at the row's end. */
   chevron?: boolean;
@@ -3443,24 +3443,24 @@ export interface KaiRowGroupElementProps {
 export interface KaiScopePickerElementProps {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** Authors to offer as scope filters. Omit to drop the Authors section (for a tag-only picker). Set as a JS property. */
+  /** Authors to offer as filters. Omit to drop the Authors section. Property only. */
   availableAuthors?: string[];
-  /** Tags to offer as scope filters. Omit to drop the Tags section (for an author-only picker). Set as a JS property. */
+  /** Tags to offer as filters. Omit to drop the Tags section. Property only. */
   availableTags?: string[];
-  /** The label shown on the trigger for the active scope. */
+  /** Label on the trigger for the active scope. */
   currentLabel?: string;
-  /** Drive/observe the dropdown's open state (Shoelace-style: settable + reflected to the `open` attribute, the dropdown still self-manages on click/keyboard). Set `el.open = true`, or `<kai-scope-picker open>`; listen for `kai-open-change`. */
+  /** Open state: settable, reflected to `open`, and still self-managed on click. */
   open?: boolean;
   /** Initial open state on mount (uncontrolled seed). */
   defaultOpen?: boolean;
-  /** Disable the trigger: click/keyboard and `show()` no longer open the dropdown. */
+  /** Click, keyboard and `show()` no longer open the dropdown. */
   disabled?: boolean;
 }
 
 export interface KaiScreenElementProps {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages). Set `el.open = true`, or `<kai-screen open>`; listen for `kai-open-change`. */
+  /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
   /** Initial open state on mount (uncontrolled seed). */
   defaultOpen?: boolean;
@@ -3482,7 +3482,7 @@ export interface KaiScrollAreaElementProps {
 export interface KaiScrollButtonElementProps {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** CSS id of the scroll container to control. When omitted the element walks up the DOM (outside its own shadow root) to find the nearest scrollable ancestor. Mirrors the `for` convention of `<label for="...">`. */
+  /** CSS id of the scroll container to control. */
   for?: string;
   /** Button visual variant: `'outline' | 'ghost' | 'default'`. Defaults to `'outline'`. */
   variant?: "outline" | "ghost" | "default";
@@ -3490,7 +3490,7 @@ export interface KaiScrollButtonElementProps {
   size?: "sm" | "md" | "lg" | "icon" | "icon-sm";
   /** The button's accessible name. It is announced whether or not the label is visible, so the text is always localisable. Defaults to `'Scroll to bottom'`. */
   label?: string;
-  /** Also render `label` visibly beside the icon. Defaults to `false`, which is the icon-only button. When the text is visible it IS the accessible name, so nothing gets announced twice. */
+  /** Also render `label` visibly beside the icon. Default `false` (icon-only). */
   showLabel?: boolean;
 }
 
@@ -3516,7 +3516,7 @@ export interface KaiSegmentedElementProps {
   theme?: "light" | "dark" | "auto";
   /** The selectable segments, left to right. Set as a JS property (array). */
   options: { value: string; label: string; icon?: undefined | string }[];
-  /** Controlled selected `value`. Settable and reflected to the `value` attribute. `el.value = 'preview'` drives it; choosing a segment updates it and fires `kai-change`. Read `el.value` for live state. */
+  /** Controlled selected `value`, reflected to the `value` attribute. Choosing a segment updates it and fires `kai-change`. */
   value?: string;
   /** Control density: `sm` or `md`. Defaults to `md`. */
   size?: "sm" | "md";
@@ -3527,9 +3527,9 @@ export interface KaiSelectElementProps {
   theme?: "light" | "dark" | "auto";
   /** The choices, in display order. Set as a JS PROPERTY (array), never an attribute. Rendered in full: the kit never truncates, re-orders or de-duplicates them. */
   options: { value: string; label?: undefined | string; disabled?: undefined | boolean }[];
-  /** Controlled selected value. Settable and reflected to the `value` attribute. `el.value = 'high'` drives it; choosing an option updates it and fires `kai-change`. Read `el.value` for live state; for a `multiple` select read `el.values` instead. */
+  /** Controlled selected value, reflected to the `value` attribute. For a `multiple` select read `el.values`. */
   value?: string;
-  /** Text for a leading, disabled, empty option: the "nothing chosen yet" row. Omitted means no such row at all; there is no default wording, because inventing one would put words in your UI. */
+  /** Text for a leading, disabled, empty option (the "nothing chosen yet" row). */
   placeholder?: string;
   /** Allow more than one selection. Turns the control into the platform's list box, so the kit's chevron is not drawn. */
   multiple?: boolean;
@@ -3586,7 +3586,7 @@ export interface KaiSkeletonElementProps {
 export interface KaiSkillsElementProps {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** The active skills to badge. Set as a JS property. Omit to supply them as `<kai-skill>` light-DOM children instead; when both are present the property's skills come first. Nothing renders when there are none. */
+  /** The active skills to badge. JS property (array); omit to pass `<kai-skill>` light-DOM children instead. */
   skills?: { id: string; name: string }[];
 }
 
@@ -3599,7 +3599,7 @@ export interface KaiSliderElementProps {
   max?: number;
   /** Granularity. Omitted means the native default of 1; `any` means continuous. */
   step?: number | "any";
-  /** Controlled value. Settable and reflected to the `value` attribute. `el.value = 40` drives it; dragging updates it and fires `kai-input` per step, `kai-change` on release. Read `el.value` for live state. */
+  /** Controlled value, reflected to the `value` attribute. `kai-input` fires per step, `kai-change` on release. */
   value?: number;
   /** Disable interaction. */
   disabled?: boolean;
@@ -3607,7 +3607,7 @@ export interface KaiSliderElementProps {
   label?: string;
   /** Form-control name, for a native form submit. */
   name?: string;
-  /** Show the current value beside the track. Off by default. Two ways in, because one of them is not a scalar. As a bare ATTRIBUTE (`<kai-slider value-label>`) it renders the raw number. As a JS PROPERTY it also accepts a formatter function (`el.valueLabel = (v) => v + '%'`), for a slider that is not counting bare numbers. A function cannot survive an attribute, so that half is property-only. The readout is hidden from assistive tech: the slider already reports the same number, and an exposed copy would be announced twice. */
+  /** Show the current value beside the track. Off by default; as a property it also accepts a formatter. */
   valueLabel?: boolean | ((value: number) => string);
 }
 
@@ -3629,37 +3629,37 @@ export interface KaiSourceElementProps {
 export interface KaiSourcesElementProps {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** The sources to render. Set as a JS property. Omit to supply them as `<kai-source>` light-DOM children instead; when both are present the property's sources come first. */
+  /** The sources to render. JS property; omit to pass `<kai-source>` light-DOM children instead. */
   sources?: { href: string; title?: string; description?: string; label?: string; showFavicon?: boolean }[];
   /** Show favicons on all items (per-item `showFavicon` overrides). */
   showFavicon?: boolean;
-  /** When true, each citation chip is labelled with its 1-based index in the merged (prop + declarative-children) list (`[1]`, `[2]`, …) instead of the per-item `label` or domain fallback. HTML attribute: `numbered` (boolean: a bare attribute or `numbered="true"`). JS property: `el.numbered = true`. */
+  /** Label each citation chip with its 1-based index in the merged list (`[1]`, `[2]`) instead of its own `label`. */
   numbered?: boolean;
 }
 
 export interface KaiStatusElementProps {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** Presence/notification state → color. `new` (default) maps to the blue hue. */
+  /** Presence state, which sets the colour. Default `new`. */
   status?: "new" | "online" | "busy" | "away" | "offline";
-  /** Animated ping ring (off by default; respects prefers-reduced-motion). */
+  /** Animated ping ring; off by default and never under prefers-reduced-motion. */
   pulse?: boolean;
-  /** Accessible name. Without it the dot is decorative. */
+  /** Accessible name; without it the dot is decorative. */
   label?: string;
-  /** `sm` (default) or `md`. */
+  /** `sm` or `md`. Default `sm`. */
   size?: "sm" | "md";
 }
 
 export interface KaiSuggestionsElementProps {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** The suggestions. Strings, or `{ label, value }` when the displayed text and the emitted value differ. Set as a JS property. Omit to supply them as `<kai-suggestion>` light-DOM children instead; when both are present the property's suggestions come first. */
+  /** The suggestions: strings, or `{ label, value }` when the displayed text and emitted value differ. JS property (array). */
   suggestions?: (string | { label: string; value?: string; icon?: string })[];
   /** Chip style: `'outline'` (default), `'ghost'`, or `'default'` (filled). */
   variant?: "outline" | "ghost" | "default";
   /** Row height for `layout="list"`: `'md'` (default) or `'lg'` for taller rows. Chips are unaffected. */
   size?: "md" | "lg";
-  /** Layout: `'chips'` (default) renders a wrapping row of rounded pills; `'list'` renders a vertical, full-width "Ideas for you" list where each row is left-aligned with a leading `icon`, a label, and a hover background. */
+  /** Layout: `chips` (default, a wrapping row of pills) or `list` (full-width left-aligned rows with a leading icon). */
   layout?: "chips" | "list";
   /** Full-width left-aligned rows instead of pills. */
   block?: boolean;
@@ -3670,7 +3670,7 @@ export interface KaiSuggestionsElementProps {
 export interface KaiSwitchElementProps {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** Controlled checked state. Settable and reflected to the `checked` attribute. `el.checked = true` (or `<kai-switch checked>`) drives it; the toggle UI updates it and fires `kai-change`. Read `el.checked` for live state. */
+  /** Controlled checked state, reflected to the `checked` attribute. The toggle updates it and fires `kai-change`. */
   checked?: boolean;
   /** Initial checked state on mount (uncontrolled seed). Bare attribute (`<kai-switch default-checked>`) turns it on. */
   defaultChecked?: boolean;
@@ -3687,7 +3687,7 @@ export interface KaiSwitchElementProps {
 export interface KaiTabBarElementProps {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** Controlled selected value. Set the property or the `value` attribute and drive it from your app in response to `kai-tab-change`. Omit for uncontrolled: the bar manages its own selection, seeded from `defaultValue`, else the first enabled tab. */
+  /** Controlled selected value. Omit for uncontrolled, seeded from `defaultValue` else the first enabled tab. */
   value?: string;
   /** Initial selected value when uncontrolled (the `default-value` attribute in plain HTML). */
   defaultValue?: string;
@@ -3702,7 +3702,7 @@ export interface KaiTabBarItemElementProps {
   theme?: "light" | "dark" | "auto";
   /** The tab's identity: the `value` attribute (host `id` is the fallback). It is the `value` in the bar's `kai-tab-change` detail. */
   value?: string;
-  /** Named icon from the kit roster (e.g. "home", "message-square"). The icon renders at the element's own default size, so equal glyphs across tabs need no consumer sizing. */
+  /** Named icon from the kit roster (e.g. "home"). Renders at the element's own default size. */
   icon?: string;
   /** Unread dot on the icon's corner. Reaches the tab's accessible name too: a dot alone is invisible to assistive tech. */
   dot?: boolean;
@@ -3736,7 +3736,7 @@ export interface KaiTabsElementProps {
 export interface KaiTasksElementProps {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** The tasks definition (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { tasks:[…], selectAll, confirmLabel, … }`. Import `TasksCardData` from `@kitn.ai/ui` for the full shape. */
+  /** The tasks definition (the card's `data`). JS property: `el.data = { tasks: [...], selectAll, confirmLabel }`. */
   data?: { mode?: "select" | "progress"; heading?: string; tasks: { id: string; label: string; description?: string; checked?: boolean; disabled?: boolean }[]; selectAll?: boolean; confirmLabel?: string; allowEmpty?: boolean; min?: number; max?: number; dismissible?: boolean };
   /** Stable card id correlating every emitted CardEvent. Attribute: `card-id`. */
   cardId?: string;
@@ -3759,11 +3759,11 @@ export interface KaiTextShimmerElementProps {
   theme?: "light" | "dark" | "auto";
   /** The text to shimmer. */
   text?: string;
-  /** Element tag to render as (default `span`). */
+  /** Element tag to render as. Default `span`. */
   as?: string;
   /** Animation duration in seconds. */
   duration?: number;
-  /** Gradient spread (5–45). */
+  /** Gradient spread, 5 to 45. */
   spread?: number;
 }
 
@@ -3781,7 +3781,7 @@ export interface KaiThinkingBarElementProps {
 export interface KaiThreadElementProps {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** The full message thread to render, newest last. Each entry carries its role, ordered `parts`, and optional actions/avatar/feedback. Set as a JS property (`el.messages = [...]`); a NEW array reference per streaming chunk re-renders (mutating in place does not). */
+  /** The message thread to render, newest last. JS property; pass a NEW array per streaming chunk. Omit for an empty thread. */
   messages?: { id: string; role: "user" | "assistant"; parts: ({ type: "text"; text: string; raw?: { source: string; payload: unknown } } | { type: "reasoning"; text: string; label?: string; index?: number; streamId?: string; signature?: string; raw?: { source: string; payload: unknown } } | { type: "tool"; tool: { type: string; kind?: "command" | "file-change" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: Record<string, unknown>; rawInput?: string; output?: Record<string, unknown>; toolCallId?: string; errorText?: string; raw?: { source: string; payload: unknown } }; raw?: { source: string; payload: unknown } } | { type: "card"; envelope: { type: string; id: string; data: unknown; title?: string; resolution?: { kind: "action"; action: string; payload?: unknown; at?: string } | { kind: "submit"; data: unknown; at?: string } | { kind: "dismissed"; at?: string } | { kind: "expired"; reason?: string; at?: string } }; raw?: { source: string; payload: unknown } } | { type: "source"; source: { id?: string; url?: string; title?: string; snippet?: string; index?: number }; raw?: { source: string; payload: unknown } } | { type: "file"; attachment: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }; raw?: { source: string; payload: unknown } })[]; actions?: ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: string; tooltip?: string })[]; avatar?: { src?: string; fallback?: string; alt?: string }; feedback?: "like" | "dislike" }[];
   /** Show a typing indicator on the pending assistant turn. Set it while awaiting the assistant's reply. */
   loading?: boolean;
@@ -3791,7 +3791,7 @@ export interface KaiThreadElementProps {
   codeTheme?: string;
   /** Enable Shiki syntax highlighting in code blocks. Turn off to render plain `<pre>` blocks (lighter, no highlighter load). Default true. */
   codeHighlight?: boolean;
-  /** How an image tile in a message's attachment grid reveals its full size: `hover` (default) is the pointer-only hover card, `lightbox` opens the image in a modal on click. Attribute: `image-preview`. Inert for non-image tiles. */
+  /** How an image tile reveals its full size: `hover` (pointer-only hover card, default) or `lightbox` (modal on click). */
   imagePreview?: "hover" | "lightbox";
   /** Whether each message's action bar is always visible (`'always'`, default) or only revealed on hover of that message row (`'hover'`). */
   actionsReveal?: "always" | "hover";
@@ -3799,16 +3799,16 @@ export interface KaiThreadElementProps {
   scrollButton?: boolean;
   /** Extra classes applied to the thread's inner root. */
   class?: string;
-  /** Optional card type -> custom-element tag overrides/additions for `card` parts (merged over the built-ins). Property: `el.cardTypes`. Typed as a plain string map (not the `CardTagMap` alias) so the generated React wrapper inlines it instead of emitting an unresolved named type. */
+  /** Card type → custom-element tag overrides/additions, merged over the built-ins. JS property: `el.cardTypes`. */
   cardTypes?: Record<string, string>;
-  /** JSON Schemas for the card types this app renders, keyed by envelope type. The companion of `cardTypes`, which says what DRAWS a card while this says what a VALID one looks like. An OBJECT, so it is a JS property only: `el.cardSchemas = { 'pricing-table': pricingSchema }`, never an attribute. `createCardRegistry(...).validationSchemas` is exactly this shape. Without it the kit validates its own seven built-ins and leaves your own card type, the one your app actually cares about, as the only unchecked thing on screen. A schema here WINS over a built-in of the same name. Typed `Record<string, object>` rather than `Record<string, JsonSchema>` deliberately: an imported `.json` schema widens `"type"` to `string`, and an authored one carries `$schema`/`title`/`description`/`additionalProperties`, so the tighter type would reject both of the normal ways to supply one. */
+  /** Card-type JSON Schemas keyed by envelope type; validates each card's `data`. JS property: `el.cardSchemas`. */
   cardSchemas?: Record<string, object>;
 }
 
 export interface KaiToastRegionElementProps {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** The toasts to render. Newest is shown on top. Set as a JS property (array); pass a new array reference to update. Omit for an empty region, which is the normal resting state and how the imperative `toast()` API starts. Note the handover: the first `toast()` call ADOPTS a region you placed in markup (no second region mounts) and binds the imperative store to this property, replacing any array you set. Drive a region as data OR via `toast()`, not both at once. */
+  /** The toasts to render, newest on top. JS property; a new array reference updates it. */
   toasts?: { id: string; message: string; variant?: "neutral" | "success" | "warning" | "error" | "info"; appearance?: "pill" | "card"; inverse?: boolean; description?: string; action?: { label: string; onAction: () => void | false }; duration?: number; dismissible?: boolean; target?: HTMLElement }[];
   /** Stack anchor: `'top-center'` (default), `'top-right'`, `'bottom-center'`, … */
   position?: "top-center" | "top-right" | "top-left" | "bottom-center" | "bottom-right" | "bottom-left";
@@ -3816,7 +3816,7 @@ export interface KaiToastRegionElementProps {
   max?: number;
   /** Stacking: 'expanded' (default, full column) | 'collapsed' (Sonner-style pile that expands on hover/focus). Attribute: stack. */
   stack?: "expanded" | "collapsed";
-  /** Default appearance for this region's toasts: `'pill'` (default, compact) | `'card'` (richer, with a description line). A per-toast `appearance` wins. Attribute: `appearance`. */
+  /** Default appearance for this region's toasts: `pill` (default, compact) or `card` (richer). A per-toast `appearance` wins. */
   appearance?: "pill" | "card";
   /** Default high-contrast inverse treatment for this region's toasts. A per-toast `inverse` wins. Off by default. Attribute: `inverse`. */
   inverse?: boolean;
@@ -3829,7 +3829,7 @@ export interface KaiToolElementProps {
   theme?: "light" | "dark" | "auto";
   /** The tool-call to display. Set as a JS property. */
   tool?: { type: string; kind?: "command" | "file-change" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: Record<string, unknown>; rawInput?: string; output?: Record<string, unknown>; toolCallId?: string; errorText?: string; raw?: { source: string; payload: unknown } };
-  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages on trigger click). Set `el.open = true`, or `<kai-tool open>`; listen for `kai-open-change`. */
+  /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
   /** Initial open state on mount (uncontrolled seed). */
   defaultOpen?: boolean;
@@ -3848,7 +3848,7 @@ export interface KaiTooltipElementProps {
   closeDelay?: number;
   /** Preferred placement: `'top' | 'bottom' | 'left' | 'right'` (+ optional `-start`/`-end`). Defaults to `'top'`; flips to stay in view. */
   placement?: string;
-  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute, the element still self-manages on hover/focus). Set `el.open = true`, or `<kai-tooltip open>`; listen for `kai-open-change`. */
+  /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
   /** Initial open state on mount (uncontrolled seed). */
   defaultOpen?: boolean;
@@ -3861,27 +3861,27 @@ export interface KaiViewElementProps {
   theme?: "light" | "dark" | "auto";
   /** The view's name: what `push()` / `selectTab()` / the stack's `view` attribute address. Attribute: `name`. */
   name?: string;
-  /** Marks this view as a TAB ROOT: it shows the tab bar and never a back affordance, and a tab switch lands on it directly. Views without it are DRILL views, reached by `push()` and left by `back()`. Attribute: `tab-root`. */
+  /** Marks this view as a TAB ROOT: it shows the tab bar and never a back affordance. Attribute: `tab-root`. */
   tabRoot?: boolean;
 }
 
 export interface KaiViewStackElementProps {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** Deep link / initial view name; reflected to the `view` ATTRIBUTE as navigation happens, so `kai-view-stack[view="chat"]` selectors follow. Setting it later navigates (tab root selects that tab; a drill view replaces the top while drilled, or pushes from a root). */
+  /** Deep link / initial view name. */
   view?: string;
-  /** READ-ONLY reflection of the drilled state, present while a pushed (non-root) view is showing. THE rule this element owns: drilled hides the tab bar and shows a back affordance, so a sibling tab bar hides itself on `kai-view-stack[drilled]` (or from `kai-view-change`), and a header shows its back arrow the same way. */
+  /** READ-ONLY reflection of the drilled state, present while a pushed (non-root) view is showing. */
   drilled?: boolean;
 }
 
 export interface KaiVoiceInputElementProps {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** Transcriber the host supplies: records audio, returns the text. This is a **function-valued property** (`el.transcribe = async blob => '...'`) because a value-returning callback can't be modelled as a fire-and-forget event. */
+  /** Transcriber the host supplies: records audio, returns the text. **Function-valued property.** */
   transcribe?: (audio: Blob) => Promise<string>;
   /** Disable the mic button (non-interactive). */
   disabled?: boolean;
-  /** BCP-47 language tag for the native `SpeechRecognition` path (e.g. `en-US`). Attribute: `recognition-lang` (the plain `lang` attribute is reserved by `HTMLElement` and can't be a custom-element property). No effect when `transcribe` is set or the browser lacks SpeechRecognition. */
+  /** BCP-47 language tag for the native `SpeechRecognition` path (e.g. `en-US`). Attribute: `recognition-lang`. */
   recognitionLang?: string;
   /** Emit live partial transcripts (`kai-transcript-interim`) during native recognition. Attribute: `interim`. No-op on the transcribe/fallback paths. */
   interim?: boolean;
@@ -3894,7 +3894,7 @@ export interface KaiVoiceOutputElementProps {
   text?: string;
   /** Speak automatically when `text` is set/changed. */
   autoplay?: boolean;
-  /** TTS model seam the host supplies: given text, returns an audio `Blob` to play. This is a **function-valued property** (`el.synthesize = async text => blob`); when set, the native `speechSynthesis` path is bypassed. Mirrors `<kai-voice-input>`'s `transcribe`. A value-returning callback can't be modelled as a fire-and-forget event, hence a property. */
+  /** TTS model seam the host supplies: given text, returns an audio `Blob`. **Function-valued property.** */
   synthesize?: (text: string) => Promise<Blob>;
   /** Disable the button (non-interactive). */
   disabled?: boolean;
@@ -3903,19 +3903,19 @@ export interface KaiVoiceOutputElementProps {
 export interface KaiWorkspaceElementProps {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** Controlled collapsed state of the start aside. Set this as a JS property (`el.startCollapsed = true`) to drive the aside from your app, updating it in response to the `kai-aside-toggle` event. Omit for uncontrolled (the element manages it). */
+  /** Controlled collapsed state of the start aside. Omit for uncontrolled (the element manages it). */
   startCollapsed?: boolean;
   /** Initial collapsed state of the start aside when uncontrolled (default false). Use the `default-start-collapsed` attribute to start collapsed in plain HTML. */
   defaultStartCollapsed?: boolean;
-  /** Controlled collapsed state of the end aside. Set this as a JS property (`el.endCollapsed = true`) to drive the aside from your app, updating it in response to the `kai-aside-toggle` event. Omit for uncontrolled (the element manages it). */
+  /** Controlled collapsed state of the end aside. Omit for uncontrolled (the element manages it). */
   endCollapsed?: boolean;
   /** Initial collapsed state of the end aside when uncontrolled (default false). Use the `default-end-collapsed` attribute to start collapsed in plain HTML. */
   defaultEndCollapsed?: boolean;
-  /** Auto-collapse both asides when the shell's own width drops below this many px, and re-expand when it grows back above. Applies to uncontrolled asides only (it never fights an app-driven collapsed prop); omit to disable. Fires `kai-aside-toggle`. Attribute: `collapse-below`. */
+  /** Auto-collapse both asides when the shell's own width drops below this many px, and re-expand above it. */
   collapseBelow?: number;
-  /** Below this shell width in px, an expanded aside renders as an overlay drawer over the main region instead of a column beside it. Escape inside the drawer closes it and returns focus to the element focused before it opened. Omit to disable. Attribute: `drawer-below`. */
+  /** Below this shell width in px, an expanded aside renders as an overlay drawer over the main region. */
   drawerBelow?: number;
-  /** Density hint. Reflected as a `data-compact` hook on the root (and as the `compact` attribute on the element) for your CSS and slotted content; the shell itself keeps no other opinion about density. */
+  /** Density hint. */
   compact?: boolean;
 }
 
@@ -3931,9 +3931,9 @@ export interface KaiArtifactElementEvents {
   onKaiFileSelect?: (event: CustomEvent<{ path: string }>) => void;
   /** Artifact's own maximize button toggled (consumer-observable; non-bubbling). */
   onKaiMaximizeChange?: (event: CustomEvent<{ maximized: boolean }>) => void;
-  /** The maximize PROTOCOL intent, raised as a raw bubbling + composed CustomEvent (not through `dispatch`) so an enclosing `<kai-resizable>` can catch it and maximize the containing panel. Declared here so it is typed and reaches the generated API. Listen for it to drive maximize from your own chrome, or re-emit it to trigger one. */
+  /** The maximize PROTOCOL intent, as a raw bubbling + composed CustomEvent. */
   onKaiMaximizeIntent?: (event: CustomEvent<{ requested: boolean }>) => void;
-  /** Fired when the preview navigates. `detail.url` = the new location, reported AS IT ARRIVED: a `javascript:`/`vbscript:` url the preview itself refused is still what `detail.url` carries, because a consumer auditing what the model sent must not be told a different story. It is NOT scheme-validated, so validate it with `isSafeUrl` from `@kitn.ai/ui` before rendering, storing or navigating to it. */
+  /** The preview navigated. `detail.url` is the raw new location. */
   onKaiNavigate?: (event: CustomEvent<{ url: string }>) => void;
   /** Fired when the Preview|Code tab changes. `detail.tab`. */
   onKaiTabChange?: (event: CustomEvent<{ tab: "preview" | "code" }>) => void;
@@ -3969,25 +3969,25 @@ export interface KaiCardElementEvents {
 }
 
 export interface KaiCardsElementEvents {
-  /** A child card transitioned to a resolved/deferred state (an action was chosen, a form/tasks submission landed, or it was dismissed). Re-emitted off the host as a non-bubbling convenience event so a consumer can observe resolution centrally without diffing the cards array. `detail` = `{ cardId, resolution }`. (A `reopen` un-resolves a card and has no `CardResolution`, so it does NOT fire this; observe reopen via the underlying bubbling `kai-card` event.) */
+  /** A child card resolved (an action chosen, a form/tasks submission landed, or dismissed). `detail` = `{ cardId, resolution }`. */
   onKaiCardResolved?: (event: CustomEvent<{ cardId: string; resolution: { kind: "action"; action: string; payload?: unknown; at?: undefined | string } | { kind: "submit"; data: unknown; at?: undefined | string } | { kind: "dismissed"; at?: undefined | string } | { kind: "expired"; reason?: undefined | string; at?: undefined | string } }>) => void;
 }
 
 export interface KaiChainOfThoughtElementEvents {
-  /** The open set changed, by user click OR an expand()/collapse()/toggle() call. `value` is a string in `single` mode, a string[] in `multiple` mode. (Maps Radix Accordion's onValueChange.) */
+  /** The open set changed, by user click or an `expand()`/`collapse()`/`toggle()` call. */
   onKaiValueChange?: (event: CustomEvent<{ value: string | string[] }>) => void;
 }
 
 export interface KaiChatElementEvents {
   /** The staged attachments changed (file added or removed). Carries the full current list so a consumer can react in real time. */
   onKaiAttachmentsChange?: (event: CustomEvent<{ attachments: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }>) => void;
-  /** One or more picked files were refused because `accept` excluded them. The element renders NO message of its own: it reports the facts (name, media type, whether the kit could have sent it) and what the user should see is the application's call. Only ever fires when `accept` is set. */
+  /** One or more picked files were refused because `accept` excluded them. Renders no message of its own; only fires when `accept` is set. */
   onKaiAttachmentsRejected?: (event: CustomEvent<{ rejected: { filename: string; mediaType: string; reason: "filtered" | "unsupported" }[] }>) => void;
-  /** A conversation's history loaded: a row tap in the list, "new conversation," or the visitor's own mount-time auto-restore of their most recent thread (only fires when `conversations` is on and a `store` is set). `detail.id` is that conversation's id, `undefined` for the "new conversation" case (no id exists until the first message mints one, C-6). Set `el.messages = event.detail.messages` (already a fresh array) to actually render it, since this element does not do that for you; `messages` stays your own state like everywhere else on this element. */
+  /** A conversation's history loaded. Set `el.messages` from `detail.messages` -- the element does not render it for you. */
   onKaiConversationLoad?: (event: CustomEvent<{ id: string | undefined; messages: { id: string; role: "user" | "assistant"; parts: ({ type: "text"; text: string; raw?: undefined | { source: string; payload: unknown } } | { type: "reasoning"; text: string; label?: undefined | string; index?: undefined | number; streamId?: undefined | string; signature?: undefined | string; raw?: undefined | { source: string; payload: unknown } } | { type: "tool"; tool: { type: string; kind?: undefined | "command" | "file-change" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; rawInput?: undefined | string; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string; raw?: undefined | { source: string; payload: unknown } }; raw?: undefined | { source: string; payload: unknown } } | { type: "card"; envelope: { type: string; id: string; data: unknown; title?: undefined | string; resolution?: undefined | { kind: "action"; action: string; payload?: unknown; at?: undefined | string } | { kind: "submit"; data: unknown; at?: undefined | string } | { kind: "dismissed"; at?: undefined | string } | { kind: "expired"; reason?: undefined | string; at?: undefined | string } }; raw?: undefined | { source: string; payload: unknown } } | { type: "source"; source: { id?: undefined | string; url?: undefined | string; title?: undefined | string; snippet?: undefined | string; index?: undefined | number }; raw?: undefined | { source: string; payload: unknown } } | { type: "file"; attachment: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }; raw?: undefined | { source: string; payload: unknown } })[]; actions?: undefined | ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string }; feedback?: undefined | "like" | "dislike" }[] }>) => void;
   /** A `home.links` entry with no `href` was activated (tapped/clicked/Enter). Meaningful only when `home` is set. */
   onKaiHomeLink?: (event: CustomEvent<{ entry: { label: string; href?: undefined | string; description?: undefined | string; icon?: undefined | string } }>) => void;
-  /** An action button on a message was clicked. `action` is the built-in name or custom id. `state` is present only for the toggleable feedback votes: `'on'` when a like/dislike is set, `'off'` when re-tapped to clear. */
+  /** An action button on a message was clicked. `action` is the built-in name or a custom id. */
   onKaiMessageAction?: (event: CustomEvent<{ messageId: string; action: string; state?: undefined | "on" | "off" }>) => void;
   /** The header model switcher changed. */
   onKaiModelChange?: (event: CustomEvent<{ modelId: string }>) => void;
@@ -3995,7 +3995,7 @@ export interface KaiChatElementEvents {
   onKaiSubmit?: (event: CustomEvent<{ value: string; attachments: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }>) => void;
   /** A suggestion chip was clicked (only in `suggestion-mode="fill"`). */
   onKaiSuggestionClick?: (event: CustomEvent<{ value: string }>) => void;
-  /** "Is any conversation OTHER than the currently-seen one unread" changed. This is the same value this element already renders as the dot on its own header list toggle, reported outward so a sibling control with no view into the internal conversation-summary state (a composed launcher's badge, a `kai-dock`'s `unread` prop) can mirror it: set `dock.unread = event.detail.unread`. Fires on every change, including the initial `false`. Only meaningful with `conversations` on; pairs with the `hostOpen` property, which is what lets "arrived while the widget was closed" count as unread for the active conversation too. */
+  /** Whether a conversation OTHER than the one on screen is unread. Mirror it onto a launcher badge (`dock.unread = detail.unread`). */
   onKaiUnreadChange?: (event: CustomEvent<{ unread: boolean }>) => void;
   /** Fired on every input change. */
   onKaiValueChange?: (event: CustomEvent<{ value: string }>) => void;
@@ -4011,7 +4011,7 @@ export interface KaiCheckboxElementEvents {
 }
 
 export interface KaiCheckboxGroupElementEvents {
-  /** A row was ticked or unticked. `values` is the whole selection after the change, which is what a multi-select control needs; `value` is the first of them (empty when nothing is selected). Both are always present, so neither shape silently loses the other. This is `<kai-select>`'s detail, deliberately. */
+  /** A row was ticked or unticked. `values` is the whole selection afterwards, `value` its first entry. */
   onKaiChange?: (event: CustomEvent<{ value: string; values: string[] }>) => void;
 }
 
@@ -4037,7 +4037,7 @@ export interface KaiCodeBlockElementEvents {
 }
 
 export interface KaiCommandElementEvents {
-  /** Fired when the highlighted/active item changes, via Arrow keys or when filtering re-clamps the active row. `id` is the newly active item's id, or `undefined` when no item is active (e.g. the filtered list is empty). Lets a host preview the active item without committing a selection. */
+  /** The highlighted item changed. `detail.id` is `undefined` when nothing is active (e.g. the filtered list is empty). */
   onKaiActiveChange?: (event: CustomEvent<{ id: string | undefined }>) => void;
   /** Fired on every keystroke in the search input. */
   onKaiQueryChange?: (event: CustomEvent<{ value: string }>) => void;
@@ -4061,9 +4061,9 @@ export interface KaiComposerElementEvents {
   onKaiEntityAdd?: (event: CustomEvent<{ entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } }>) => void;
   /** An entity pill was deleted from the composer. */
   onKaiEntityRemove?: (event: CustomEvent<{ entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } }>) => void;
-  /** The composer gained focus. `focus`/`blur` are NOT composed natively, so they don't escape the shadow root; these re-expose them on the host. (For `keydown`/`paste`/`focusin`/`focusout`, listen NATIVELY on `<kai-composer>`: they're composed and already cross the shadow boundary.) */
+  /** The composer gained focus. */
   onKaiFocus?: (event: CustomEvent<{ originalEvent: FocusEvent }>) => void;
-  /** The user submitted the composer (Enter or programmatic submit). Note the detail carries no `attachments`; `<kai-composer>` is the bare editing surface: no send button, toolbar, or attachments. For a drop-in composer row with all three, reach for `<kai-prompt-input>`, which is built on this. */
+  /** The user submitted (Enter or programmatic submit). */
   onKaiSubmit?: (event: CustomEvent<{ doc: ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]; text: string; entities: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }>) => void;
   /** A trigger character was detected at the caret (e.g. `/` or `@`). */
   onKaiTrigger?: (event: CustomEvent<{ char: string; query: string; rect: DOMRect }>) => void;
@@ -4083,7 +4083,7 @@ export interface KaiContextElementEvents {
 }
 
 export interface KaiConversationItemElementEvents {
-  /** STANDALONE activation only: the row was activated (click, Enter or Space on its body) while the item is NOT a direct child of `<kai-conversations>`. `id` is the row's identity: the `conversation-id` attribute, else the host `id`. Inside a container this never fires: activation surfaces once, as `kai-conversation-select` on the container. */
+  /** STANDALONE activation of the row (click, Enter or Space on its body). Never fires inside `<kai-conversations>`. */
   onKaiSelect?: (event: CustomEvent<{ id: string }>) => void;
 }
 
@@ -4176,7 +4176,7 @@ export interface KaiInputElementEvents {
   onKaiChange?: (event: CustomEvent<{ value: string; formattedValue: string }>) => void;
   /** The value changed per keystroke. `value` is the canonical value (what a backend wants); `formattedValue` is the text on screen. With no mask the two are equal. */
   onKaiInput?: (event: CustomEvent<{ value: string; formattedValue: string }>) => void;
-  /** A mask refused, or partly refused, some content. The reasons are `full` (no free position left), `wrong-class` (a letter into a digit position), `over-capacity` (a paste longer than the mask holds; what fits was kept), and `format-change-clipped` (the `format` changed under a value that no longer fits). `data` is the content that was refused. The first three are USER-INPUT errors, and are the ones worth announcing in a polite live region. `format-change-clipped` is not one: it follows the app changing its own configuration, so it reports and nothing more. None of the four touches validity, so `invalid` and `error` stay the consumer decision. */
+  /** A mask refused, or partly refused, some content. `detail.data` is what was refused. */
   onKaiInputRejected?: (event: CustomEvent<{ reason: "full" | "wrong-class" | "over-capacity" | "format-change-clipped"; data: string }>) => void;
 }
 
@@ -4208,12 +4208,12 @@ export interface KaiMarkdownElementEvents {
 export interface KaiMenuElementEvents {
   /** The menu opened or closed (by click, keyboard, Escape, outside-click, or a method). */
   onKaiOpenChange?: (event: CustomEvent<{ open: boolean }>) => void;
-  /** Fired when the user selects a leaf item. - Plain items: `{ id }`. - Checkbox items: `{ id, checked }` where `checked` is the NEW state. - Radio items: `{ id, radioGroup }`, where the consumer marks `id` as the selected one in `radioGroup` and clears the others. */
+  /** A leaf item was selected. Plain: `{ id }`; checkbox: `{ id, checked }` with the NEW state; radio: `{ id, radioGroup }`. */
   onKaiSelect?: (event: CustomEvent<{ id: string; checked?: undefined | boolean; radioGroup?: undefined | string }>) => void;
 }
 
 export interface KaiMessageElementEvents {
-  /** An action button was clicked. `action` is the built-in name or custom id. `state` is present only for the toggleable feedback votes: `'on'` when a like/dislike is set, `'off'` when re-tapped to clear. */
+  /** An action button on a message was clicked. `action` is the built-in name or a custom id. */
   onKaiMessageAction?: (event: CustomEvent<{ messageId: string; action: string; state?: undefined | "on" | "off" }>) => void;
 }
 
@@ -4284,11 +4284,11 @@ export interface KaiPromptDockElementEvents {
 }
 
 export interface KaiPromptInputElementEvents {
-  /** The staged attachments changed: a file was added (via the paperclip) or removed (per-chip ×). Carries the full current list so a consumer can react in real time (validate, show upload progress, toggle the send button). */
+  /** The staged attachments changed (file added or removed). Carries the full current list so a consumer can react in real time. */
   onKaiAttachmentsChange?: (event: CustomEvent<{ attachments: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }>) => void;
   /** The Stop button was clicked while `stoppable` and `loading` are both true. */
   onKaiStop?: (event: CustomEvent<Record<string, never>>) => void;
-  /** The user submitted the prompt (Enter or send button). `value` is the flattened text (back-compat); `doc` is the structured document and `entities` the inserted pills (skills/agents) for downstream expansion. `<kai-prompt-input>` is the batteries-included composer row (send button, toolbar, attachment staging) built on `<kai-composer>`, the bare editor. */
+  /** The user submitted the prompt (Enter or send button). `value` is the flattened text. */
   onKaiSubmit?: (event: CustomEvent<{ value: string; doc: ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]; entities: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[]; attachments: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }>) => void;
   /** A suggestion was clicked while `suggestion-mode="fill"`. */
   onKaiSuggestionClick?: (event: CustomEvent<{ value: string }>) => void;
@@ -4321,7 +4321,7 @@ export interface KaiResizableElementEvents {
   onKaiChange?: (event: CustomEvent<{ sizes: number[] }>) => void;
   /** Observe layout maximize state. */
   onKaiMaximizeChange?: (event: CustomEvent<{ maximized: boolean; index: number | null }>) => void;
-  /** Authoritative maximize state, dispatched as a raw composed CustomEvent (not through `dispatch`) onto the affected `<kai-resizable-item>` and, on restore, onto the group host. A nested element (e.g. `<kai-artifact>`) listens for it to reconcile its own toggle. */
+  /** Authoritative maximize state. */
   onKaiMaximizeState?: (event: CustomEvent<{ maximized: boolean }>) => void;
 }
 
@@ -4346,9 +4346,9 @@ export interface KaiRowGroupElementEvents {
 }
 
 export interface KaiScopePickerElementEvents {
-  /** The scope dropdown opened or closed (by click, keyboard, Escape, outside-click, or a method). */
+  /** The dropdown opened or closed. */
   onKaiOpenChange?: (event: CustomEvent<{ open: boolean }>) => void;
-  /** A scope was chosen (`undefined` filters = "All Content"). */
+  /** A scope was chosen (`undefined` filters means all content). */
   onKaiScopeChange?: (event: CustomEvent<{ filters: { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | "transcript" | "markdown"; dateRange?: undefined | { from: string; to: string } } | undefined }>) => void;
 }
 
@@ -4383,7 +4383,7 @@ export interface KaiSegmentedElementEvents {
 }
 
 export interface KaiSelectElementEvents {
-  /** A choice was made. `value` is the first selected option (empty when nothing is selected); `values` is every selected option, which is what a `multiple` select needs. Both are always present, so neither shape silently loses the other. */
+  /** A choice was made. `value` is the first selected option, empty when nothing is selected. */
   onKaiChange?: (event: CustomEvent<{ value: string; values: string[] }>) => void;
 }
 
@@ -4465,7 +4465,7 @@ export interface KaiThinkingBarElementEvents {
 }
 
 export interface KaiThreadElementEvents {
-  /** A message's action button was clicked. `action` is the built-in name (`copy` / `like` / `dislike` / `regenerate` / `edit`) or a custom id. `state` is present only for the toggleable feedback votes: `'on'` when a like/dislike is set, `'off'` when re-tapped to clear. */
+  /** An action button on a message was clicked. `action` is the built-in name or a custom id. */
   onKaiMessageAction?: (event: CustomEvent<{ messageId: string; action: string; state?: undefined | "on" | "off" }>) => void;
 }
 
@@ -4491,29 +4491,29 @@ export interface KaiViewElementEvents {
 }
 
 export interface KaiViewStackElementEvents {
-  /** The visible view or the drilled flag changed (push, back, replace, tab switch, or a `view` attribute write). `detail`: `{ view, root, drilled, stack }`; `root` is what the tab bar should mark active, defined even while drilled. */
+  /** The visible view or the drilled flag changed (push, back, replace, tab switch, or a `view` attribute write). */
   onKaiViewChange?: (event: CustomEvent<{ view: string | undefined; root: string | undefined; drilled: boolean; stack: string[] }>) => void;
 }
 
 export interface KaiVoiceInputElementEvents {
-  /** Raw audio captured (before transcription), for hosts that prefer to handle transcription themselves instead of via the `transcribe` property. Also the unsupported-fallback signal: no `transcribe`, no SpeechRecognition, so only the blob is produced (no text). */
+  /** Raw audio captured, before transcription. */
   onKaiAudioCaptured?: (event: CustomEvent<{ blob: Blob }>) => void;
-  /** Recording started or stopped. Lets the host drive its own UI (waveform, push-to-talk indicator) in sync with the mic. Fires on real transitions only (manual click and programmatic start()/stop()), never on mount. */
+  /** Recording started or stopped. */
   onKaiRecordingChange?: (event: CustomEvent<{ recording: boolean }>) => void;
   /** Live partial transcript during native recognition (only when `interim` is set). Fires repeatedly before the final `kai-transcription`. */
   onKaiTranscriptInterim?: (event: CustomEvent<{ text: string }>) => void;
   /** Final transcript: the `transcribe` property resolved, OR native `SpeechRecognition` produced final text (no `transcribe` set). */
   onKaiTranscription?: (event: CustomEvent<{ text: string }>) => void;
-  /** A voice session failed, so no failure is ever silent. `detail.source` names the failing side (`recognition` on `<kai-voice-input>`, `synthesis` on `<kai-voice-output>`), `detail.error` carries the platform error code, the thrown exception's name, or `no-result` when recognition ended with no error and no text (the user said nothing), and `detail.message` is human-readable. Deliberate cancellation does not fire. */
+  /** A voice session failed, so no failure is ever silent. `detail.error` is the platform error code or the thrown name. */
   onKaiVoiceError?: (event: CustomEvent<{ source: "recognition"; error: string; message: string }>) => void;
 }
 
 export interface KaiVoiceOutputElementEvents {
-  /** Playback started or stopped. Drive your own UI in sync. `speaking: true` fires when audio actually starts (utterance.onstart natively; audio playback beginning on the `synthesize` path), not when speak() is called; earlier releases fired it optimistically inside speak() itself. Fires on real transitions only (manual click and programmatic speak()/stop()), never on mount. */
+  /** Playback started or stopped. */
   onKaiSpeakingChange?: (event: CustomEvent<{ speaking: boolean }>) => void;
   /** The model path (`synthesize`) resolved audio: the raw `Blob` before playback. */
   onKaiSynthesized?: (event: CustomEvent<{ blob: Blob }>) => void;
-  /** A voice session failed, so no failure is ever silent. `detail.source` names the failing side (`recognition` on `<kai-voice-input>`, `synthesis` on `<kai-voice-output>`), `detail.error` carries the platform error code, the thrown exception's name, or `no-result` when recognition ended with no error and no text (the user said nothing), and `detail.message` is human-readable. Deliberate cancellation does not fire. */
+  /** A voice session failed, so no failure is ever silent. `detail.error` is the platform error code or the thrown name. */
   onKaiVoiceError?: (event: CustomEvent<{ source: "synthesis"; error: string; message: string }>) => void;
 }
 

@@ -20,13 +20,9 @@ interface Props extends Record<string, unknown> {
   proseSize?: ProseSize;
 }
 
+// The copy button writes the raw `code` value, never the highlighted markup.
 /**
- * `<kai-code-block>` — one syntax-highlighted code block (with a copy button).
- * Code via the `code` property; `language`/`code-theme` via attributes.
- *
- * The copy button is ON by default and writes the raw `code` property, never the
- * highlighted markup. Turn it off with `copy="false"`. Style it via
- * `kai-code-block::part(copy)`.
+ * One syntax-highlighted code block with a copy button.
  */
 defineWebComponent<Props>('kai-code-block', {
   code: '',

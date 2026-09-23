@@ -1,6 +1,6 @@
 ---
 title: Scope Picker
-description: A compact dropdown that lets users filter a chat or search by author or tag, firing a single event with the chosen scope.
+description: A dropdown that narrows a chat or a search to one author or tag.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -15,7 +15,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kai-tag-sub">kai-scope-picker</p>
 
-<p class="kai-lede">A lightweight filter dropdown for narrowing a conversation or search to a specific author or tag — drop it in a chat header and listen for one event.</p>
+<p class="kai-lede">Splits the choices into authors and tags, so a reader can filter on either.</p>
 
 <Facts items={['Shadow DOM', '1 event', 'Authors + tags sections', '2 array properties', 'Pairs with any header control']} />
 
@@ -24,7 +24,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 <Playground client:only="solid" tag="kai-scope-picker" />
 
 <Aside type="tip" title="When to use">
-Use `<kai-scope-picker>` when your interface has multiple authors or content tags and users need to narrow a view. It fits naturally alongside `<kai-model-switcher>` in a chat header or above a conversation list. In SolidJS, compose `ChatScopePicker` directly for full reactivity.
+In a chat header or above a conversation list, when the history holds more than one author or tag. For the model picker it often sits beside, use [Model switcher](/components/model-switcher/).
 </Aside>
 
 ## Usage

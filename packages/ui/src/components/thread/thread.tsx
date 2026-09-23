@@ -21,56 +21,41 @@ export interface ThreadController {
 export interface ThreadProps {
   /** Extra classes for the thread root (e.g. `rounded-xl`). */
   class?: string;
-  /** The full message thread to render, newest last. Each entry carries its role,
-   *  ordered `parts`, and optional actions/avatar/feedback. A new array reference
-   *  per streaming chunk re-renders (mutating in place does not). */
+  /** The messages to render, newest last; a new array reference per streaming chunk is what re-renders. */
   messages: ChatMessage[];
   /** Add/override card type -> component entries, forwarded to `CardRenderer`
    *  for `card` parts. */
   cardTypes?: CardComponentMap;
-  /** JSON Schemas for the card types this app renders, keyed by envelope type,
-   *  forwarded to `CardRenderer` for `card` parts. The companion of `cardTypes`:
-   *  that says what DRAWS a card, this says what a VALID one looks like.
-   *  `createCardRegistry(...).validationSchemas` is exactly this shape. Without it
-   *  the kit checks its own seven built-ins and leaves your own card type
-   *  unvalidated. A schema here WINS over a built-in of the same name. */
+  // The companion of `cardTypes`: that says what DRAWS a card, this says what a
+  // VALID one looks like. Without it the kit checks its own seven built-ins and
+  // leaves a consumer's own card type unchecked.
+  /** Card-type JSON Schemas keyed by envelope type; a schema here wins over a built-in of the same name. */
   cardSchemas?: CardSchemaMap;
-  /** The custom-element host node to emit card events off when no `CardProvider`
-   *  is present, forwarded through `MessageBody` to `CardRenderer`. The
-   *  web-component facades pass their own host element so card events leave as the
-   *  bubbling `kai-card` CustomEvent. */
+  // The web-component facades pass their own host element here, so card events
+  // leave as the bubbling `kai-card` CustomEvent.
+  /** Host node to emit card events off when no `CardProvider` is present. */
   cardHostElement?: HTMLElement;
-  /** Show a typing indicator on the pending assistant turn — use while awaiting
-   *  the assistant's reply. */
+  /** Shows a typing indicator on the pending assistant turn. */
   loading?: boolean;
-  /** Body/prose font scale for rendered markdown (`'xs' | 'sm' | 'base' | 'lg'`).
-   *  Defaults to `'sm'`. */
+  /** Body/prose font scale for rendered markdown. Defaults to `'sm'`. */
   proseSize?: ProseSize;
   /** Shiki theme name for syntax-highlighted code blocks (e.g.
    *  `'github-dark-dimmed'`). */
   codeTheme?: string;
-  /** Enable Shiki syntax highlighting in code blocks. Turn off to render plain
-   *  `<pre>` blocks (lighter, no highlighter load). Default true. */
+  /** Shiki syntax highlighting in code blocks; off renders plain `<pre>` with no highlighter load. Default true. */
   codeHighlight?: boolean;
-  /** How an image tile in a message's attachment grid reveals its full size:
-   *  `'hover'` (default) is the pointer-only hover card; `'lightbox'` opens the
-   *  image in a modal on click, which is the only one of the two a keyboard or
-   *  touch user can reach. Forwarded to every `MessageBody` this list renders,
-   *  and inert for non-image tiles, which keep the hover card. */
+  // Inert for non-image tiles, which keep the hover card.
+  /** How an image tile in a message's attachment grid reveals its full size; `'lightbox'` is the one a keyboard or touch user can reach. Defaults to `'hover'`. */
   imagePreview?: AttachmentImagePreview;
-  /** Whether each message's action bar is always visible (`'always'`, default) or
-   *  only revealed on hover of that message row (`'hover'`). */
+  /** Whether each message's action bar is always visible or revealed on hover of that row. Default `'always'`. */
   actionsReveal?: 'always' | 'hover';
   /** Show the scroll-to-bottom button inside the scroll area. Default true. */
   scrollButton?: boolean;
-  /** Custom zero-state shown while the thread is empty. A sensible default renders
-   *  when omitted (the `<kai-thread>` facade wires this to `slot="empty"`). */
+  /** Custom zero-state shown while the thread is empty; a built-in one renders when omitted. */
   empty?: JSX.Element;
-  /** Fired when a message's action button is clicked (copy / vote / regenerate /
-   *  edit / custom). The facade re-dispatches this as `kai-message-action`. */
+  /** Fires when a message's action button is clicked; re-dispatched as `kai-message-action`. */
   onMessageAction?: (detail: MessageActionDetail) => void;
-  /** Receive the imperative controller once mounted — the `<kai-thread>` facade
-   *  forwards `scrollToBottom` onto the host. */
+  /** Receives the imperative scroll controller once mounted. */
   controllerRef?: (controller: ThreadController) => void;
 }
 

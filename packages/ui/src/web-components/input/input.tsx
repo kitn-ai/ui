@@ -15,12 +15,12 @@ interface Props extends Record<string, unknown> {
   /** Native input type: `text` (default) · `email` · `url` · `search` · `tel` ·
    *  `password` · `number`. Single-line only. */
   type?: string;
-  /** Controlled value, and always the CANONICAL one when a mask is active: digits
-   *  for `tel` / `ssn` / `credit-card`, the formatted text for `custom`.
-   *  Settable and reflected to the `value` attribute. `el.value = '5551234567'`
-   *  drives it (no event) and is re-fitted to the mask on the way in, so the field
-   *  shows `555-123-4567`. Read `el.value` for live state; the formatted text rides
-   *  along on every `kai-input` / `kai-change` detail as `formattedValue`. */
+  // When a mask is active this is always the CANONICAL value: digits for `tel` / `ssn` /
+  // `credit-card`, the formatted text for `custom`. `el.value = '5551234567'` drives it (no
+  // event) and is re-fitted to the mask on the way in, so the field shows `555-123-4567`.
+  // The formatted text rides along on every `kai-input` / `kai-change` detail as
+  // `formattedValue`.
+  /** Controlled value, reflected to the `value` attribute. */
   value?: string;
   /** Placeholder shown when empty. */
   placeholder?: string;
@@ -51,23 +51,19 @@ interface Props extends Record<string, unknown> {
   // HTML attributes under the kai- contract. With `format` AND `semantic` both absent the
   // element behaves as it always did: no mask, no extra attributes, nothing.
 
-  /** Mask pattern: `#` a digit, `@` a letter or digit, `*` an obscurable letter or
-   *  digit, and every other character a positional literal (`@@@-####` → `CHG-4821`).
-   *
-   *  The literal `default` is the opt-in sentinel: it resolves to the default format of
-   *  `semantic` (`tel` → `###-###-####`). A bare `semantic` never starts masking on its
-   *  own, so an opt-in token is what turns tier 2 on. */
+  // The literal `default` is the opt-in sentinel: it resolves to the default format of
+  // `semantic` (`tel` -> `###-###-####`). A bare `semantic` never starts masking on its
+  // own, so an opt-in token is what turns tier 2 on.
+  /** Mask pattern: `#` a digit, `@` a letter or digit, `*` an obscurable letter or digit, every other character a positional literal. */
   format?: string;
-  /** Placeholder guide shown at unfilled positions, aligned position for position with
-   *  `format`: `mm/dd/yyyy` against `##/##/####`. Spaces are a valid guide character, so
-   *  a guide of blanks and separators is how a phone field shows its shape without
-   *  showing letters. Without a guide the field shows only up to the last typed
-   *  character. A guide is a visual aid, never an accessible name: keep the `hint` text
-   *  as well. */
+  // Aligned position for position with `format`: `mm/dd/yyyy` against `##/##/####`.
+  // Spaces are a valid guide character, so a guide of blanks and separators is how a
+  // phone field shows its shape without showing letters. Without a guide the field shows
+  // only up to the last typed character. A guide is a visual aid, never an accessible
+  // name: keep the `hint` text as well.
+  /** Placeholder guide shown at unfilled positions (e.g. `mm/dd/yyyy`). */
   guide?: string;
-  /** Semantic field type: `tel` · `ssn` · `credit-card` · `custom`. On its own it sets
-   *  `inputmode` / `autocomplete` / `spellcheck` / `autocorrect` / `autocapitalize` and
-   *  decides the canonical value; it never starts masking by itself. */
+  /** Semantic field type: `tel`, `ssn`, `credit-card` or `custom`. Sets `inputmode`/`autocomplete`; never masks on its own. */
   semantic?: FieldSemanticType;
   /** Case folding applied to typed and pasted text: `preserve` (default) · `upper` ·
    *  `lower`. Attribute: `case-mode`. */
@@ -87,16 +83,16 @@ interface Events {
   'kai-input': { value: string; formattedValue: string };
   /** The value was committed (blur). Same detail shape as `kai-input`. */
   'kai-change': { value: string; formattedValue: string };
-  /** A mask refused, or partly refused, some content. The reasons are `full` (no free
-   *  position left), `wrong-class` (a letter into a digit position), `over-capacity` (a
-   *  paste longer than the mask holds; what fits was kept), and `format-change-clipped`
-   *  (the `format` changed under a value that no longer fits). `data` is the content
-   *  that was refused.
-   *
-   *  The first three are USER-INPUT errors, and are the ones worth announcing in a
-   *  polite live region. `format-change-clipped` is not one: it follows the app changing
-   *  its own configuration, so it reports and nothing more. None of the four touches
-   *  validity, so `invalid` and `error` stay the consumer decision. */
+  // The reasons are `full` (no free position left), `wrong-class` (a letter into a digit
+  // position), `over-capacity` (a paste longer than the mask holds; what fits was kept),
+  // and `format-change-clipped` (the `format` changed under a value that no longer fits).
+  // `data` is the content that was refused.
+  //
+  // The first three are USER-INPUT errors, and are the ones worth announcing in a polite
+  // live region. `format-change-clipped` is not one: it follows the app changing its own
+  // configuration, so it reports and nothing more. None of the four touches validity, so
+  // `invalid` and `error` stay the consumer decision.
+  /** A mask refused, or partly refused, some content. `detail.data` is what was refused. */
   'kai-input-rejected': { reason: InputMaskRejectReason; data: string };
 }
 
@@ -107,70 +103,21 @@ interface Events {
 const SLOT_NAMES = ['leading', 'trailing'] as const;
 type SlotName = (typeof SLOT_NAMES)[number];
 
+// NOT form-associated: no `ElementInternals`, no `setFormValue()`, so inside a `<form>` it
+// contributes nothing to `FormData` and takes no part in native validation, masked or not.
+// Read the value off the element. There is also deliberately no `value-type` switch: canonical
+// per semantic type is the whole contract, and a per-field switch would let the same field
+// round-trip differently depending on who set it.
+// The controlled-value rule: a write that reaches this element after mount (`el.value`, the
+// `value` attribute, or a framework wrapper prop, which always drives the property) is re-fitted
+// through the masker, so it lands formatted on screen and canonical on the property, and fires
+// no event. A value present at first render and a change to `format`/`guide`/`semantic`/`case-mode`
+// are masked by the same rule, so `el.value` never disagrees with the configuration in force.
+// An over-long write is clipped to what the mask holds and says so on `kai-input-rejected`.
+// The one path none of that reaches is a consumer writing the inner `<input>` in the shadow
+// root directly, behind both this element and its masker.
 /**
- * `<kai-input>` — the kit's single-line text field. Drive/read the value with the
- * `value` property (settable + reflected to the `value` attribute, so
- * `:host([value])` and `el.value` see live state); listen for `kai-input` (per
- * keystroke) and `kai-change` (commit/blur). A `label`, `hint`, and `error` wrap
- * the control; `leading`/`trailing` slots take an icon, unit, or inline button.
- *
- * ```html
- * <kai-input label="Workspace" placeholder="Acme Inc."></kai-input>
- * <script type="module">
- *   import '@kitn.ai/ui/web-components';
- *   const field = document.querySelector('kai-input');
- *   field.addEventListener('kai-input', (e) => console.log(e.detail.value));
- *   field.value = 'Acme';   // drive it (no event — the host already knows)
- *   field.focus();          // focus the inner input
- * </script>
- * ```
- *
- * Methods: `focus()`, `select()`, `clear()`, `getRawValue()`, `getFormattedValue()`.
- * Restyle via `::part(field)`,
- * `::part(input)`, `::part(label)`, `::part(hint)`.
- *
- * ## Masked and formatted fields
- *
- * `format` turns the field into a mask; `guide`, `semantic`, `case-mode` and
- * `copy-policy` tune it. All five are scalars, so all five are plain attributes.
- *
- * ```html
- * <kai-input label="Ticket" format="@@@-####" case-mode="upper"
- *            hint="Three letters, a dash, four digits."></kai-input>
- * <kai-input label="Phone" semantic="tel" format="default"
- *            guide="   -   -    "></kai-input>
- * ```
- *
- * `el.value` is the CANONICAL value — digits for `tel` / `ssn` / `credit-card`, the
- * formatted text for `custom`. The text on screen rides along as
- * `formattedValue` on the `kai-input` / `kai-change` details. Refusals report on
- * `kai-input-rejected` and never touch validity.
- *
- * TWO THINGS THIS DELIBERATELY DOES NOT DO, both recorded rather than smuggled:
- *
- * 1. **Not form-associated.** There is no `ElementInternals` and no
- *    `setFormValue()`, so a `<kai-input>` inside a `<form>` contributes nothing to
- *    `FormData` and takes no part in native validation, with or without a mask.
- *    That is a KNOWN GAP: form association lands later, with its own migration.
- *    Read the value off the element.
- * 2. **No `value-type` prop.** Canonical-form-per-semantic-type is the whole
- *    contract; a per-field raw-or-formatted switch would make
- *    the same field round-trip differently depending on who set it.
- *
- * ### The controlled-value rule, stated
- *
- * A write to `el.value` after mount is re-fitted through the masker, so it lands
- * FORMATTED on screen and canonical on the property, and fires no event. What that
- * covers is any write that reaches this element: `el.value = x`, the `value`
- * attribute, and a React/Vue/Svelte wrapper prop, since every wrapper drives this
- * element by writing the property. A value present at first render is masked by the
- * same rule, and so is a change to `format` / `guide` / `semantic` / `case-mode`
- * AFTER mount: the canonical value is re-derived, so `el.value` never serves a
- * reading that disagrees with the configuration in force. An over-long write is
- * clipped to what the mask holds and says so on `kai-input-rejected`.
- *
- * The one thing none of that reaches is a consumer that writes the inner `<input>`
- * inside the shadow root directly, behind both this element and its mask.
+ * A single-line text field, optionally masked and reformatted as it is typed.
  */
 defineWebComponent<Props, Events>('kai-input', {
   type: 'text',

@@ -1,6 +1,6 @@
 ---
 title: Attachments
-description: Render file attachments as tiles, chips, or rows — one element, presentation chosen by attribute.
+description: Displays the files attached to a prompt or cited by a message.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -14,7 +14,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kai-tag-sub">kai-attachments</p>
 
-<p class="kai-lede">Render a set of file attachments — one element, three presentations chosen by a single attribute. Tiles for a gallery, chips for inline, rows for a list.</p>
+<p class="kai-lede">Every item keeps its own preview, size label and remove control, whatever layout you pick.</p>
 
 <Facts items={['Shadow DOM', '3 variants', 'Hover-card preview', 'Optional lightbox']} />
 
@@ -23,7 +23,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 <Playground client:only="solid" tag="kai-attachments" />
 
 <Aside type="tip" title="When to use">
-Show files a user attached (or the assistant produced) **anywhere in a chat** — the composer, a message body, a sources rail. Set `variant` to fit the space: `grid` for a gallery, `inline` for a compact chip row, `list` for a detailed column.
+Show the files a prompt carries or a message cites: the composer, a message body, a sources rail. For a cited link rather than a file, use [Link preview](/components/link-preview/).
 </Aside>
 
 ## Usage

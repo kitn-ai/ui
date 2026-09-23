@@ -5,16 +5,12 @@ import { Artifact, type ArtifactController, type ArtifactFile, type ArtifactTab 
 interface Props extends Record<string, unknown> {
   /** URL the preview iframe frames. Consumer-controlled. */
   src?: string;
-  /** Files for the Code tab tree + each file's preview `url`. Omit for a
-   *  preview-only artifact (the Code tab then has nothing to show; pair it with
-   *  `no-tabs` to hide the toggle). Set as a JS property (array). */
+  /** Files for the Code tab tree, plus each file's preview `url`. JS property (array); omit for a preview-only artifact. */
   files?: ArtifactFile[];
   /** Controlled active tab: `preview` or `code`. When set, the artifact follows it
    *  (re-asserted on change). Leave unset for an uncontrolled tab (see `defaultTab`). */
   tab?: ArtifactTab;
-  /** Uncontrolled INITIAL tab (used only when `tab` is unset). Default `preview`.
-   *  Seeds the starting tab; the user can then switch freely without the consumer
-   *  re-asserting a controlled `tab`. */
+  /** Uncontrolled INITIAL tab, used only when `tab` is unset. Default `preview`. */
   defaultTab?: ArtifactTab;
   /** Selected file path. Syncs the tree highlight, Code source, and preview. */
   activeFile?: string;
@@ -42,20 +38,18 @@ interface Props extends Record<string, unknown> {
   standalone?: boolean;
   /** Show the address but make it read-only (visible, nav-tracking, non-editable). */
   readonlyPath?: boolean;
-  /** Friendly address shown in the path field instead of the real current url
-   *  (read-only, non-navigable). Use when the framed url is not consumer-facing
-   *  (e.g. a `data:` blob) so a clean address shows instead of leaking it. Scalar
-   *  string: set as the `display-url` attribute or the `displayUrl` property. */
+  // Use when the framed url is not consumer-facing (e.g. a `data:` blob) so a clean
+  // address shows instead of leaking it.
+  /** Friendly read-only address shown in the path field instead of the real url. Attribute: `display-url`. */
   displayUrl?: string;
 }
 
 interface Events extends Record<string, unknown> {
-  /** Fired when the preview navigates. `detail.url` = the new location, reported
-   *  AS IT ARRIVED: a `javascript:`/`vbscript:` url the preview itself refused is
-   *  still what `detail.url` carries, because a consumer auditing what the model sent
-   *  must not be told a different story. It is NOT scheme-validated, so validate it
-   *  with `isSafeUrl` from `@kitn.ai/ui` before rendering, storing or navigating to
-   *  it. */
+  // `detail.url` is reported AS IT ARRIVED: a `javascript:`/`vbscript:` url the preview
+  // itself refused is still what it carries, because a consumer auditing what the model
+  // sent must not be told a different story. NOT scheme-validated, so check it with
+  // `isSafeUrl` from `@kitn.ai/ui` before rendering, storing or navigating to it.
+  /** The preview navigated. `detail.url` is the raw new location. */
   'kai-navigate': { url: string };
   /** Fired when the Preview|Code tab changes. `detail.tab`. */
   'kai-tab-change': { tab: ArtifactTab };
@@ -63,21 +57,18 @@ interface Events extends Record<string, unknown> {
   'kai-file-select': { path: string };
   /** Artifact's own maximize button toggled (consumer-observable; non-bubbling). */
   'kai-maximize-change': { maximized: boolean };
-  /** The maximize PROTOCOL intent, raised as a raw bubbling + composed CustomEvent
-   *  (not through `dispatch`) so an enclosing `<kai-resizable>` can catch it and
-   *  maximize the containing panel. Declared here so it is typed and reaches the
-   *  generated API. Listen for it to drive maximize from your own chrome, or
-   *  re-emit it to trigger one. */
+  // Raised as a raw bubbling + composed CustomEvent (not through `dispatch`) so an
+  // enclosing `<kai-resizable>` can catch it and maximize the containing panel.
+  // Declared here so it is typed and reaches the generated API. Listen for it to drive
+  // maximize from your own chrome, or re-emit it to trigger one.
+  /** The maximize PROTOCOL intent, as a raw bubbling + composed CustomEvent. */
   'kai-maximize-intent': { requested: boolean };
 }
-
+// Designed to FILL its container (a `<kai-resizable>` panel, say). `kai-maximize-intent` is raised
+// as a raw bubbling and composed CustomEvent rather than through `dispatch`, so an enclosing
+// `<kai-resizable>` can catch it and maximize the containing panel.
 /**
- * `<kai-artifact>` — a framed, switchable generated-artifact viewer: a sandboxed
- * preview iframe with a functional nav toolbar (back · forward · reload · home +
- * editable path field) and a Preview|Code toggle; the Code tab shows a file tree
- * (`<kai-file-tree>`) + the active file's source via `<kai-code-block>`. The
- * component self-navigates the iframe and emits `kai-navigate` / `kai-tab-change` /
- * `kai-file-select`. Designed to FILL its container (e.g. a `<kai-resizable>` panel).
+ * A framed viewer for a generated artifact: a sandboxed preview beside its source.
  */
 defineWebComponent<Props, Events>('kai-artifact', {
   src: undefined,

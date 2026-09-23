@@ -237,12 +237,10 @@ function ResizablePanel(props: ResizablePanelProps) {
 // --- ResizableHandle ---
 
 export interface ResizableHandleProps extends JSX.HTMLAttributes<HTMLDivElement> {
-  /**
-   * Divider affordance drawn inside the 8px grab zone:
-   * - `line` (default) — a 1px hairline, transparent at rest, tinting on hover/drag.
-   * - `grip` — a dotted grip handle.
-   * - `none` — no visible divider (invisible hit-area only).
-   */
+  // Drawn inside the 8px grab zone. `line` is a 1px hairline, transparent at rest and
+  // tinting on hover/drag; `grip` is a dotted grip handle; `none` draws no divider, only
+  // the invisible hit area.
+  /** Divider affordance drawn inside the grab zone; `line` by default. */
   handle?: 'line' | 'grip' | 'none';
   onPanelResize?: (delta: number) => void;
   /** Keyboard nudge step in pixels (default 16). Home/End jump to min/max. */

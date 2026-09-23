@@ -7,9 +7,9 @@ import {
 import { wireDisclosure } from '../disclosure/disclosure';
 
 interface Props extends Record<string, unknown> {
-  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open`
-   *  attribute; the element still self-manages on the launcher and Escape). Set
-   *  `el.open = true`, or `<kai-dock open>`; listen for `kai-open-change`. */
+  // Shoelace-style: settable and reflected to the `open` attribute, while the element
+  // still self-manages on the launcher and Escape.
+  /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
   /** Initial open state on mount (uncontrolled seed). */
   defaultOpen?: boolean;
@@ -28,13 +28,12 @@ interface Props extends Record<string, unknown> {
   unread?: boolean;
   /** Disable the launcher; `show()` and `toggle()` are gated on it. */
   disabled?: boolean;
-  /** Suppress the dock's own built-in mobile close X. Set this when your slotted
-   *  panel content supplies its own close affordance (e.g. a `<kai-chat
-   *  slot="header-end">` close button), otherwise the two stack. TRADEOFF: the
-   *  mobile panel reserves a padding band above its content so the built-in X
-   *  never paints over slotted content; that band stays reserved unless you set
-   *  this true, so only set it once your own control is actually in place.
-   *  Attribute: `hide-close`. */
+  // Set this when your slotted panel content supplies its own close affordance (e.g. a
+  // `<kai-chat slot="header-end">` close button), otherwise the two stack. TRADEOFF: the
+  // mobile panel reserves a padding band above its content so the built-in X never paints
+  // over slotted content; that band stays reserved unless you set this true, so only set
+  // it once your own control is actually in place.
+  /** Suppress the dock's built-in mobile close X. Attribute: `hide-close`. */
   hideClose?: boolean;
   /** Where focus lands on open: `content` (default, the first element you slotted),
    *  `panel`, or `none`. Attribute: `focus-on-open`. */
@@ -48,64 +47,9 @@ interface Events {
 }
 
 /**
- * `<kai-dock>` — the corner launcher: a floating button pinned to a corner of the
- * viewport, and a panel above it holding whatever you slot in. This is the "chat
- * bubble in the bottom-right" affordance. (Not to be confused with
- * `<kai-prompt-dock>`, which is a recessed tray that frames a prompt INPUT and does
- * not float, launch or open anything.)
- *
- * **How to use** — slot the surface, and let the dock own the button:
- * ```html
- * <kai-dock label="Aurora support">
- *   <kai-chat slot="panel" chat-title="Aurora Support"></kai-chat>
- * </kai-dock>
- * ```
- *
- * The panel is content-agnostic: a `<kai-chat>`, a form, your own element. The dock
- * never reads or types it. `slot="launcher"` / `slot="launcher-open"` swap the icon
- * INSIDE the built-in button — the button itself is never slotted away, because the
- * dock owns `aria-expanded`, `aria-controls`, the toggle wiring and the focus return,
- * and a replaced button would take all four with it.
- *
- * Open state is the standard disclosure surface: settable+reflecting `open`,
- * `kai-open-change`, and `show()`/`hide()`/`toggle()`; seed with `default-open`. It
- * also exposes `focus()` — the panel while open, the launcher while closed.
- *
- * Neither `default-open` nor `open` moves focus at mount. A widget docked on someone
- * else's page does not get to steal focus on load, which is the one place this
- * element differs from `<kai-dialog>`, where a modal opened at mount takes focus on
- * purpose. Opening it later does move focus, per `focus-on-open`.
- *
- * Closed does not mean gone: the panel keeps its layout box (`visibility: hidden` +
- * `inert`), so a thread inside it never re-measures from zero and a reply that lands
- * while closed is really there. `unread` is yours to set and yours to clear; the dot
- * just stops rendering while open.
- *
- * Escape closes only while the dock holds focus, and is never swallowed — a widget
- * docked on someone else's page does not get to eat their Escape. There is no focus
- * trap; the page stays usable, which is the point of "docked".
- *
- * Geometry is CSS custom properties, not props: `--kai-dock-width` ·
- * `--kai-dock-height` · `--kai-dock-inset` · `--kai-dock-gap` · `--kai-dock-radius` ·
- * `--kai-dock-z` · `--kai-dock-launcher-size`. Narrow viewports go full-bleed by
- * default. Parts: `launcher` · `panel` · `badge`.
- *
- * Put it as a body-level child: a `transform` / `filter` / `contain` ancestor makes
- * `position: fixed` resolve against that ancestor instead of the viewport.
- *
- * **Migrating a hand-rolled widget onto this element changes two behaviours**, both
- * deliberately, so check them rather than assuming a drop-in:
- *
- * 1. **Escape is scoped to the dock.** Hand-rolled versions of this widget typically
- *    listen on `document` and close on any Escape anywhere on the page. This one
- *    closes only while the dock holds focus, and never stops the event. If your app
- *    relied on Escape-anywhere, that is now the host page's key again.
- * 2. **The panel keeps its layout box while closed.** It is hidden with
- *    `visibility` + `inert`, not `display: none`, and is never unmounted, so whatever
- *    you slot in KEEPS RENDERING in the background: a stream still folds in, timers
- *    still run, and heights stay measured. That is what makes `unread` honest and
- *    what stops a reopened thread re-measuring from zero, but it does mean a panel
- *    that was free while `display: none` no longer is.
+ * A floating corner launcher: a button pinned to the viewport edge that opens a
+ * panel of your content. `kai-prompt-dock` is the in-flow tray around a prompt
+ * input.
  */
 defineWebComponent<Props, Events>('kai-dock', {
   open: undefined,

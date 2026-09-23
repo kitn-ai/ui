@@ -56,10 +56,10 @@ export interface ConversationItemProps {
   onSelect: (id: string) => void;
   /** Dense single-line row: a leading dot + title, no message count. */
   compact?: boolean;
-  /** Row density: `default`, `compact` (same as the `compact` flag), or
-   *  `panel`, the widget-panel presentation matching `ConversationPanel`'s
-   *  measured row box (single semibold title line, right-aligned time,
-   *  optional preview line). An explicit density wins over `compact`. */
+  // `panel` is the widget-panel presentation matching `ConversationPanel`'s measured row
+  // box (single semibold title line, right-aligned time, optional preview line). An explicit
+  // density wins over `compact`.
+  /** Row density. */
   density?: ConversationRowDensity;
   class?: string;
 }
@@ -129,9 +129,8 @@ export interface SlottedConversationItemProps {
   active?: boolean;
   /** Dense single-line row padding. */
   compact?: boolean;
-  /** Row density: `default`, `compact` (same as the `compact` flag), or
-   *  `panel`, the widget-panel row box measured off `ConversationPanel`.
-   *  An explicit density wins over `compact`. */
+  // The explicit prop wins over `compact`.
+  /** Row density. */
   density?: ConversationRowDensity;
   /** Show the unread indicator dot at the row's trailing edge (before the
    *  menu region), with a screen-reader "Unread" label. */
@@ -144,20 +143,18 @@ export interface SlottedConversationItemProps {
   menu?: JSX.Element;
   /** The title (the element's default slot). */
   children?: JSX.Element;
-  /** Set when the element HOST carries the row-group semantics: the inner row
-   *  then renders `role="presentation"` so the accessibility tree sees one
-   *  group (the host), never two. The `kai-conversation-item` facade sets it;
-   *  Solid consumers rendering the component directly leave it off and the row
-   *  itself is the group. */
+  // The inner row then renders `role="presentation"` and the accessibility tree sees ONE
+  // group (the host), never two. The `kai-conversation-item` facade sets it; Solid consumers
+  // rendering the component directly leave it off, and the row itself is the group.
+  /** Whether the element host carries the row-group semantics. */
   hostSemantics?: boolean;
-  /** STANDALONE activation: when set, the row body is itself the
-   *  activation control — `tabindex="0"` on the `role="button"` body, and
-   *  click / Enter / Space call this. The menu region never triggers it (it is
-   *  the body's sibling, outside the control). Inside `<kai-conversations>`
-   *  leave it UNSET: the container's controller owns activation (its delegated
-   *  click/keydown → `kai-conversation-select`) plus roving tabindex, and a
-   *  handler here would double-fire. The `kai-conversation-item` facade passes
-   *  it only when the item is standalone. */
+  // With it set, the row body IS the activation control: `tabindex="0"` on the
+  // `role="button"` body, and click / Enter / Space call this. The menu region never triggers
+  // it, being the body's sibling rather than a descendant. Inside `<kai-conversations>` it
+  // stays UNSET, because the container's controller owns activation (delegated click/keydown
+  // to `kai-conversation-select`) and roving tabindex, and a handler here would double-fire;
+  // the `kai-conversation-item` facade passes it only when the item is standalone.
+  /** Activation handler for a standalone row. */
   onActivate?: () => void;
   class?: string;
 }

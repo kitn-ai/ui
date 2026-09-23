@@ -214,17 +214,14 @@ export interface ConversationListProps {
   empty?: JSX.Element;
   /** Dense single-line rows (a leading dot + title, no message count). */
   compact?: boolean;
-  /** Row density for the data rows: `default`, `compact` (same as the
-   *  `compact` flag), or `panel`, the widget-panel presentation matching the
-   *  facade panel's measured row box (P-7, blocks-and-parts design
-   *  2026-08-31). An explicit density wins over `compact`. Item mode is
-   *  unaffected: slotted rows carry their own density. */
+  // `panel` is the widget-panel presentation, matching the facade panel's measured row
+  // box. An explicit density wins over `compact`; item mode is unaffected, since slotted
+  // rows carry their own density.
+  /** Row density for the data rows. */
   density?: ConversationRowDensity;
-  /** Show the built-in search box (default `true`). Set `false` to hide it,
-   *  e.g. a widget-box list where search earns no room (the facade's own
-   *  `ConversationPanel` renders no search; 2026-08-31 composition spike,
-   *  phase 3 round 2). Hidden, the imperative `focus()`/`clearSearch()`
-   *  still exist but reach no input, and `onSearchChange` never fires. */
+  // Hidden, the imperative `focus()`/`clearSearch()` still exist but reach no input, and
+  // `onSearchChange` never fires.
+  /** Whether the built-in search box renders. On by default. */
   searchable?: boolean;
   /** Fired whenever the built-in search box query changes (typing or a
    *  programmatic `clear()`). Lets the facade surface a `kai-search` event. */
@@ -232,13 +229,12 @@ export interface ConversationListProps {
   /** Receive the imperative controller once mounted. The `kai-conversations`
    *  facade uses it to focus / clear the internal search input. */
   controllerRef?: (controller: ConversationListController) => void;
-  /** Item mode: your OWN rows, rendered inside a list region in place of the
-   *  data rows. When set, the built-in search
-   *  filter, grouping and empty/no-match states do not apply — the consumer's
-   *  loop owns them — while the chrome (header, search box, new-chat, footer)
-   *  still renders and `onSearchChange` still reports queries. The
-   *  `kai-conversations` facade passes its default `<slot>` here when it detects
-   *  `kai-conversation-item` children. */
+  // The built-in search filter, grouping and empty/no-match states do not apply here (the
+  // caller's loop owns them), while the chrome (header, search box, new-chat, footer)
+  // still renders and `onSearchChange` still reports queries. The `kai-conversations`
+  // facade passes its default `<slot>` as this when it detects `kai-conversation-item`
+  // children.
+  /** Rows rendered in place of the data rows. */
   items?: JSX.Element;
   /** Keydown handler for the item-mode list region (the facade wires
    *  `createConversationItemsController.handleKeyDown`). */

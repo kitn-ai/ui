@@ -15,31 +15,22 @@ export interface SelectOption<T = string> {
 
 export interface SelectProps<T = string>
   extends Omit<JSX.SelectHTMLAttributes<HTMLSelectElement>, 'value' | 'children'> {
-  /**
-   * The choices, in display order. Rendered in full: the kit never truncates,
-   * re-orders or de-duplicates a consumer's option list.
-   *
-   * Omit it and pass `children` instead when you need `<optgroup>`s or anything else
-   * a flat list cannot express.
-   */
+  // Rendered in full: the kit never truncates, re-orders or de-duplicates a consumer's
+  // list.
+  /** The choices, in display order. */
   options?: readonly SelectOption<T>[];
-  /**
-   * The selected value, matched against each option's `value` by IDENTITY (so a
-   * numeric enum selects on the number, not on its string form). Pass an array for a
-   * `multiple` select.
-   */
+  // Matched by IDENTITY, so a numeric enum selects on the number rather than on its
+  // string form.
+  /** The selected value; an array for the multiple case. */
   value?: T | readonly T[];
-  /**
-   * Text for a leading, disabled, empty-valued option — the "nothing chosen yet" row.
-   * Omitted means no such row is rendered at all; there is no default placeholder,
-   * because inventing one would put words in the consumer's UI.
-   */
+  // No default: inventing placeholder text would put words in the consumer's UI.
+  /** Text for a leading, disabled, empty-valued option. No such row when omitted. */
   placeholder?: string;
   /** Force the invalid (destructive-border) state. Matches `Input`'s. */
   invalid?: boolean;
-  /** Raw `<option>` / `<optgroup>` children, for lists `options` cannot express.
-   *  `value` still drives the selection when you use these: it is applied to the
-   *  rendered options rather than quietly doing nothing. */
+  // `value` still drives the selection when these are used: it is applied to the rendered
+  // options rather than quietly doing nothing.
+  /** Raw `<option>` / `<optgroup>` children, for lists `options` cannot express. */
   children?: JSX.Element;
   /** Extra classes for the positioning wrapper that holds the chevron. */
   containerClass?: string;

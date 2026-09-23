@@ -1,6 +1,6 @@
 ---
 title: Lightbox
-description: Opens media in a modal on click — a photo, a screenshot, a diagram at full size.
+description: Displays media at full size in a modal.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -15,7 +15,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kai-tag-sub">kai-lightbox</p>
 
-<p class="kai-lede">An image or a piece of media, shown full size in a modal when the reader asks for it. The trigger is the default content; the media goes in <code>slot="content"</code>.</p>
+<p class="kai-lede">Opens the media above the page and restores focus to the trigger when it closes.</p>
 
 <Facts items={['Shadow DOM', 'Click or keyboard', 'Escape + backdrop close', 'Focus trapped']} />
 
@@ -24,7 +24,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 <Playground client:only="solid" tag="kai-lightbox" />
 
 <Aside type="tip" title="When to use">
-Reach for a lightbox when the media is the point and the thumbnail is too small to read: screenshots, diagrams, photos in a gallery, a chart in a report. It takes markup, so the modal can hold the same `<img>` with a caption under it. Inside a chat, [Attachments](/components/attachments/) composes this element for its image tiles when you ask for `image-preview="lightbox"`. For a preview that follows the pointer instead of a click, use [Hover card](/components/hover-card/).
+When the media is the point and the thumbnail is too small: a screenshot, a diagram, a chart. For a pointer preview instead of a click, use [Hover card](/components/hover-card/).
 </Aside>
 
 ## Usage

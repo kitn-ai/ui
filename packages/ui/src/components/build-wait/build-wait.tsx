@@ -89,17 +89,17 @@ export interface BuildWaitProps {
   steps?: readonly BuildWaitStep[];
   /** The id of the phase in flight. Unknown or unset means the first one. */
   current?: string;
-  /** A boot failure. Present means: stop, say so, and mark the current phase
-   *  failed — the drawing holds finished and stops breathing rather than
-   *  animating forever over a build that is not happening. */
+  // Present means: stop, say so, and mark the current phase failed, so the drawing holds
+  // finished and stops breathing rather than animating forever over a build that is not
+  // happening.
+  /** A boot failure. */
   error?: string;
-  /**
-   * Force the reduced-motion rendering (finished blueprint, no animation).
-   * Unset follows `prefers-reduced-motion`. This exists so a story can SHOW
-   * that rendering without changing the reviewer's OS setting; it is not the
-   * mechanism that honors the preference, which is both the media query read
-   * below and a media rule in the stylesheet, either of which is sufficient.
-   */
+  // Not the mechanism that honors the preference: that is both the media query read below
+  // and a media rule in the stylesheet, either of which is sufficient. This exists so a
+  // story can show the reduced-motion rendering without changing the reviewer's OS
+  // setting.
+  /** Force the reduced-motion rendering (finished blueprint, no animation); unset follows
+   *  `prefers-reduced-motion`. */
   reduceMotion?: boolean;
   class?: string;
 }

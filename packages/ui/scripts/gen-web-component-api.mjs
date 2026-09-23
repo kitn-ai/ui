@@ -161,6 +161,35 @@ function defaultsFrom(objLiteralNode, tag) {
   return out;
 }
 
+// The element-level doc comment attached to a `defineWebComponent(...)` statement.
+//
+// `jsdocOf` reads the doc off a SYMBOL (a prop, a method). The sentence that tells a
+// reader what an element IS when they are choosing between two belongs to no symbol: it
+// sits above the CALL, so its node is the statement. Nothing read it, so every artifact
+// carried props, events, methods, parts and composedFrom for all 100 elements and not
+// one sentence saying what any of them IS: measured 0 of 100 in
+// web-component-meta.json, llms-full.txt and the MCP's component_reference.
+//
+// Trivia, not a node, so `getFullStart()` is where to look: it reaches back over blank
+// lines and over any other leading comment (view.tsx carries a `// solid-coverage:` note
+// between its JSDoc and the call), and the LAST `/** */` in that run is the element's.
+// A `//` comment is never taken: the repo's rule is that only doc comments are
+// harvested, and source.tsx uses `// --- … ---` banners that document a section, not the
+// element.
+//
+// Whitespace collapses to single spaces (the same normalisation `jsdocOf` applies to a
+// prop doc), so the description is ONE line wherever it is rendered.
+const jsdocOfStatement = (stmt, sf) => {
+  if (!stmt) return '';
+  const ranges = ts.getLeadingCommentRanges(sf.text, stmt.getFullStart()) ?? [];
+  for (let i = ranges.length - 1; i >= 0; i -= 1) {
+    const text = sf.text.slice(ranges[i].pos, ranges[i].end);
+    if (!text.startsWith('/**')) continue;
+    return text.replace(/^\/\*\*|\*\/$/g, '').replace(/^\s*\*\s?/gm, '').replace(/\s+/g, ' ').trim();
+  }
+  return '';
+};
+
 // Storybook toId: lowercase, non-alphanumerics → nothing (matches our story titles).
 const kebabId = (s) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
 /** Does this module register its own custom element? Used to stop the recursion
@@ -620,8 +649,14 @@ for (const file of facadeFiles) {
       const children = node.arguments[2] ? declarativeChildren(node.arguments[2]) : [];
       // Same scoping as `children` above, and for the same reason.
       const methods = node.arguments[2] ? exposeMethods(node.arguments[2], sf) : [];
+      const description = jsdocOfStatement(ts.isExpressionStatement(node.parent) ? node.parent : node, sf);
       const el = {
         tag, className, displayName: displayNameFromClass(className),
+        // Omitted, not emptied, when a facade carries no doc comment: the shape every
+        // other optional key on this entry already uses. READERS apply `?? ''`; the
+        // facades without one are listed by
+        // tests/scripts/catalog-derived.test.ts ("an element with no doc comment…").
+        ...(description ? { description } : {}),
         props: [...UNIVERSAL_PROPS, ...props],
         events, methods, composedFrom: composed, tokens,
         ...(children.length ? { declarativeChildren: children } : {}),
@@ -813,7 +848,10 @@ const cem = {
       customElement: true,
       tagName: el.tag,
       name: el.className,
-      description: '',
+      // Was hardcoded `''`, so the one field the CEM has for "what this is" was empty
+      // on every declaration, and `component_reference` (mcp/mcp/tools/reference.ts)
+      // prints exactly this field and nothing else at the top of its answer.
+      description: el.description ?? '',
       members: [
         ...el.props.map((p) => ({
           kind: 'field',

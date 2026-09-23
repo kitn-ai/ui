@@ -23,10 +23,6 @@ const meta = {
     closeDelay: { control: 'number', description: 'Delay (ms) before the card closes after the pointer leaves. Default 300.' },
     class: { control: 'text', description: 'Extra classes applied to the card body.' },
   },
-  // `trigger` and `children` are built HERE rather than passed through `args`: a JSX element in
-  // `args` cannot be serialized across Storybook's manager/preview boundary, so the Docs page's
-  // primary preview re-rendered from empty args and showed a blank canvas while the stories
-  // themselves looked right. Everything left in `args` is serializable, which is the rule.
   render: (args) => (
     <HoverCard
       trigger={<Button variant="outline">@ada</Button>}

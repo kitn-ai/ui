@@ -43,9 +43,9 @@ export interface LightboxProps {
   defaultOpen?: boolean;
   /** Fires when the trigger click, Escape or backdrop wants a change. */
   onOpenChange?: (open: boolean) => void;
-  /** Receive the open controller (open accessor + setOpen) once mounted, which is
-   *  how `<kai-lightbox>` layers its `open` attribute, `show()`/`hide()` methods
-   *  and `kai-open-change` event onto the same state. */
+  // How `<kai-lightbox>` layers its `open` attribute, `show()`/`hide()` methods and
+  // `kai-open-change` event onto the same state.
+  /** Receive the open controller (open accessor + setOpen) once mounted. */
   controllerRef?: (api: LightboxController) => void;
 }
 
@@ -129,17 +129,12 @@ export interface LightboxContentProps {
   class?: string;
   /** Accessible name for the dialog, used when the content carries no heading. */
   label?: string;
-  /** Render the close (X) button in the panel's top-right corner. ON by default,
-   *  matching what a pointer user reaches for first — the modal is otherwise only
-   *  dismissible by Escape, a backdrop click or a host control. Pass `false` when
-   *  something the reader can already see dismisses it and a second control would
-   *  only compete with the media. */
+  /** Whether the close (X) button renders in the panel's top-right corner. On by default. */
   showClose?: boolean;
-  /** Close the modal when a click lands inside the content region. ON by default:
-   *  every photo viewer closes on a click on the picture, and a lightbox that ignores
-   *  it is the surprising one. A click on an interactive descendant (a link in a
-   *  caption, a button in the content) is let through, so those keep working. Pass
-   *  `false` when a content click does something else, e.g. toggles zoom. */
+  // On by default: every photo viewer closes on a click on the picture, and a lightbox
+  // that ignores it is the surprising one. A click on an interactive descendant (a link in
+  // a caption, a button in the content) is let through, so those keep working.
+  /** Whether a click inside the content region closes the modal. On by default. */
   closeOnContentClick?: boolean;
 }
 

@@ -4,17 +4,16 @@ import { TextShimmer } from '../../components/text-shimmer/text-shimmer';
 interface Props extends Record<string, unknown> {
   /** The text to shimmer. */
   text?: string;
-  /** Element tag to render as (default `span`). */
+  /** Element tag to render as. Default `span`. */
   as?: string;
   /** Animation duration in seconds. */
   duration?: number;
-  /** Gradient spread (5–45). */
+  /** Gradient spread, 5 to 45. */
   spread?: number;
 }
 
 /**
- * `<kai-text-shimmer>` — animated shimmering text. Text via the `text`
- * attribute; `duration`/`spread` tune the effect.
+ * Animated shimmering text, for a loading placeholder.
  */
 defineWebComponent<Props>('kai-text-shimmer', {
   text: '',

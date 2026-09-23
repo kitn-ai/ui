@@ -4,11 +4,8 @@ import { Panel, PanelHeader, PanelBody, PanelFooter } from './panel';
 import { Button } from '../button/button';
 import { componentDescription } from '../../stories/docs/web-component-controls';
 
-/**
- * The widget panel chrome as public parts (blocks-and-parts ruling P-1).
- * Stub data throughout: these stories exist to iterate the LOOK of the
- * chrome, per the story-first policy.
- */
+// The widget panel chrome as public parts. Stub data: these stories iterate the LOOK
+// of the chrome, not a real message flow.
 const meta = {
   title: 'Components/Panel',
   component: Panel,

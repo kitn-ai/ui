@@ -1,6 +1,6 @@
 ---
 title: Reasoning
-description: A collapsible block that surfaces a model's chain-of-thought — auto-expands while streaming, collapses when done.
+description: A collapsible block of a model's thinking.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -15,7 +15,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kai-tag-sub">kai-reasoning</p>
 
-<p class="kai-lede">A collapsible thinking block that auto-expands while the model's thought streams in and collapses when streaming stops — no wiring required.</p>
+<p class="kai-lede">Opens while the model is thinking and closes when it finishes, on its own.</p>
 
 <Facts items={['Shadow DOM', '1 event', 'Auto-expands while streaming', 'Markdown rendering', 'Controlled or uncontrolled']} />
 
@@ -24,7 +24,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 <Playground client:only="solid" tag="kai-reasoning" />
 
 <Aside type="tip" title="When to use">
-Place `<kai-reasoning>` between the assistant message content and any tool calls whenever the model produces a chain-of-thought trace. Set `streaming` while the thought arrives and clear it when the stream ends — the element handles expand/collapse automatically. Use `open` for programmatic control, for instance to re-open a block from a parent UI button.
+Between the assistant message content and any tool calls, wherever the model produces a chain-of-thought trace. Expand and collapse are automatic.
 </Aside>
 
 ## Usage
@@ -52,39 +52,37 @@ Set `text` in JavaScript; toggle `streaming` to drive the auto-expand/collapse b
 ```
 
 - **`text`** — assign it with `el.text = '...'`.
-- **`streaming`** — set `true` while the thought arrives; the block auto-expands. Clear it when done; the block collapses.
-- **`open`** — leave unset for uncontrolled behaviour; set explicitly when a parent needs to drive the open state.
-- **`label`** overrides the default trigger text (`"Reasoning"`) — e.g. `"Thinking"` or `"Chain of thought"`.
+- **`streaming`**: set `true` while the thought arrives, and the block auto-expands; clear it and the block collapses.
+- **`open`**: leave unset for uncontrolled behaviour; set it explicitly when a parent drives the open state.
+- **`label`** overrides the default trigger text (`"Reasoning"`), e.g. `"Thinking"`.
 
 ## Examples
 
 ### Default
 
-A collapsed block with uncontrolled open state. Click the trigger to expand and collapse.
+Click the trigger to expand and collapse.
 
 <Example client:visible tag="kai-reasoning" />
 
 ### Streaming
 
-`streaming` set to `true` auto-expands the block immediately, as it would while a model generates its chain-of-thought.
+Auto-expands, as it would while a model generates its chain-of-thought.
 
 <Example client:visible tag="kai-reasoning" config={{ streaming: true }} />
 
 ### Custom Label
 
-Override the trigger label with the `label` attribute to match your product's terminology.
-
 <Example client:visible tag="kai-reasoning" config={{ label: 'Thinking' }} />
 
 ### Markdown Rendering
 
-With `markdown` enabled (default), the text renders as styled markdown — headings, bold, code spans, and paragraphs.
+The text renders as styled markdown by default: headings, bold, code spans, paragraphs.
 
 <Example client:visible tag="kai-reasoning" data="markdown" />
 
 ### Markdown Disabled
 
-`markdown="false"` renders the text as plain pre-formatted content — useful for raw log output or content with literal backticks.
+`markdown="false"` renders plain pre-formatted content, for raw log output or literal backticks.
 
 <Example client:visible tag="kai-reasoning" config={{ markdown: false }} />
 

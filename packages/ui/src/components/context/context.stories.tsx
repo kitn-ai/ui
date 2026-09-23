@@ -13,12 +13,8 @@ import {
 } from './context';
 import { componentDescription } from '../../stories/docs/web-component-controls';
 
-/**
- * Story for the compound `Context` family. `Context` is the root provider that
- * holds the token-usage values; the trigger/content/usage-row subcomponents read
- * from it. The controllable props all live on the `Context` root, so `Playground`
- * drives the root and composes a full hover-card breakdown.
- */
+// The root holds the token-usage values; trigger, content and usage rows read from it,
+// so `Playground` drives the root.
 const meta = {
   title: 'Components/Context',
   component: Context,

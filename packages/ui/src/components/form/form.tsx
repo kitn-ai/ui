@@ -191,14 +191,11 @@ export interface FieldMaskHint {
   semantic?: FieldSemanticType;
   /** The expected format, stated in text for the description chain. */
   hint?: string;
-  /**
-   * Everything that was ignored and why, as DATA rather than as a side effect.
-   *
-   * Resolution runs inside a memo on a render path, so it must never throw and must
-   * not warn twice for the same reason on a re-render. Returning the messages lets
-   * `FieldRow` own the once-per-row discipline and lets the pure tests assert the
-   * wording without a console spy.
-   */
+  // Resolution runs inside a memo on a render path, so it must never throw and must
+  // not warn twice for the same reason on a re-render. Returning the messages instead
+  // keeps `FieldRow` in charge of the once-per-row discipline and lets the pure tests
+  // assert the wording without a console spy.
+  /** Everything ignored and why, as data rather than as a side effect. */
   warnings: string[];
 }
 

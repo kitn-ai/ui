@@ -8,10 +8,11 @@ import type { ChatMessage } from '../chat/chat-types';
 import type { ProseSize } from '../../primitives/chat-config';
 
 interface Props extends Record<string, unknown> {
-  /** The full message thread to render, newest last. Each entry carries its role,
-   *  ordered `parts`, and optional actions/avatar/feedback. Set as a JS
-   *  property (`el.messages = [...]`); a NEW array reference per streaming chunk
-   *  re-renders (mutating in place does not). */
+  // Each entry carries its role, ordered `parts`, and optional
+  // actions/avatar/feedback; mutating an entry in place does not re-render. Re-declared
+  // from `ChatThreadProps` so the element's own prop table carries its own description,
+  // matching `<kai-chat>`.
+  /** The message thread to render, newest last. JS property; pass a NEW array per streaming chunk. Omit for an empty thread. */
   messages?: ChatMessage[];
   /** Show a typing indicator on the pending assistant turn. Set it while
    *  awaiting the assistant's reply. */
@@ -25,9 +26,8 @@ interface Props extends Record<string, unknown> {
   /** Enable Shiki syntax highlighting in code blocks. Turn off to render plain
    *  `<pre>` blocks (lighter, no highlighter load). Default true. */
   codeHighlight?: boolean;
-  /** How an image tile in a message's attachment grid reveals its full size:
-   *  `hover` (default) is the pointer-only hover card, `lightbox` opens the image
-   *  in a modal on click. Attribute: `image-preview`. Inert for non-image tiles. */
+  // Inert for non-image tiles.
+  /** How an image tile reveals its full size: `hover` (pointer-only hover card, default) or `lightbox` (modal on click). */
   imagePreview?: 'hover' | 'lightbox';
   /** Whether each message's action bar is always visible (`'always'`, default) or
    *  only revealed on hover of that message row (`'hover'`). */
@@ -36,47 +36,37 @@ interface Props extends Record<string, unknown> {
   scrollButton?: boolean;
   /** Extra classes applied to the thread's inner root. */
   class?: string;
-  /** Optional card type -> custom-element tag overrides/additions for `card`
-   *  parts (merged over the built-ins). Property: `el.cardTypes`. Typed as a
-   *  plain string map (not the `CardTagMap` alias) so the generated React
-   *  wrapper inlines it instead of emitting an unresolved named type. */
+  // Typed as a plain string map (not the `CardTagMap` alias) so the generated React
+  // wrapper inlines it instead of emitting an unresolved named type.
+  /** Card type → custom-element tag overrides/additions, merged over the built-ins. JS property: `el.cardTypes`. */
   cardTypes?: Record<string, string>;
-  /** JSON Schemas for the card types this app renders, keyed by envelope type. The
-   *  companion of `cardTypes`, which says what DRAWS a card while this says what a
-   *  VALID one looks like. An OBJECT, so it is a JS property only: `el.cardSchemas
-   *  = { 'pricing-table': pricingSchema }`, never an attribute.
-   *  `createCardRegistry(...).validationSchemas` is exactly this shape.
-   *
-   *  Without it the kit validates its own seven built-ins and leaves your own card
-   *  type, the one your app actually cares about, as the only unchecked thing on
-   *  screen. A schema here WINS over a built-in of the same name.
-   *
-   *  Typed `Record<string, object>` rather than `Record<string, JsonSchema>`
-   *  deliberately: an imported `.json` schema widens `"type"` to `string`, and an
-   *  authored one carries `$schema`/`title`/`description`/`additionalProperties`,
-   *  so the tighter type would reject both of the normal ways to supply one. */
+  // The companion of `cardTypes`: `cardTypes` says what DRAWS a card, this says what
+  // a VALID one looks like. `createCardRegistry(...).validationSchemas` is this shape.
+  // Without it the kit validates its own seven built-ins and leaves the consumer's own
+  // card type -- the one that actually matters -- the only unchecked thing on screen.
+  // A schema here WINS over a built-in of the same name.
+  //
+  // Typed `Record<string, object>` rather than `Record<string, JsonSchema>`
+  // deliberately: an imported `.json` schema widens `"type"` to `string`, and an
+  // authored one carries `$schema`/`title`/`description`/`additionalProperties`, so
+  // the tighter type would reject both normal ways to supply one.
+  /** Card-type JSON Schemas keyed by envelope type; validates each card's `data`. JS property: `el.cardSchemas`. */
   cardSchemas?: Record<string, object>;
 }
 
 /** Events fired by `<kai-thread>`. */
 interface Events extends Record<string, unknown> {
-  /** A message's action button was clicked. `action` is the built-in name (`copy`
-   *  / `like` / `dislike` / `regenerate` / `edit`) or a custom id. `state` is
-   *  present only for the toggleable feedback votes: `'on'` when a like/dislike is
-   *  set, `'off'` when re-tapped to clear. */
+  // `action` is the built-in name (`copy` / `like` / `dislike` / `regenerate` / `edit`) or
+  // a custom id. `state` is present only for the toggleable feedback votes: `'on'` when a
+  // like/dislike is set, `'off'` when re-tapped to clear.
+  /** An action button on a message was clicked. `action` is the built-in name or a custom id. */
   'kai-message-action': { messageId: string; action: string; state?: 'on' | 'off' };
 }
-
+// Fills the height its parent gives it and scrolls internally (`:host{display:block;height:100%}`).
+// No composer, header, suggestions or sidebar: pair it with `<kai-prompt-input>` and your own
+// layout, or reach for the batteries-included `<kai-chat>`.
 /**
- * `<kai-thread>` — the scrolling message list of a chat, as a standalone
- * composable element: one message row per `messages` entry with markdown / code
- * highlight / reasoning + tool panels / avatars / action row, stick-to-bottom
- * scroll with a scroll-to-bottom button, an optional typing indicator, and an
- * `empty` slot. It fills the height its parent gives it and scrolls internally
- * (`:host { display:block; height:100% }`). No composer, header, suggestions, or
- * sidebar — pair it with `<kai-prompt-input>` and your own layout, or reach for
- * the batteries-included `<kai-chat>`. Emits `kai-message-action`; exposes
- * `scrollToBottom()`.
+ * The scrolling message list of a chat.
  */
 defineWebComponent<Props, Events>('kai-thread', {
   messages: undefined,

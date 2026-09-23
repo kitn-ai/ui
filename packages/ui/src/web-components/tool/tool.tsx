@@ -7,9 +7,9 @@ import type { CollapsibleController } from '../../components/collapsible/collaps
 interface Props extends Record<string, unknown> {
   /** The tool-call to display. Set as a JS property. */
   tool?: ToolPart;
-  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open`
-   *  attribute; the element still self-manages on trigger click). Set
-   *  `el.open = true`, or `<kai-tool open>`; listen for `kai-open-change`. */
+  // Shoelace-style: settable and reflected to the `open` attribute, while the element
+  // still self-manages on trigger click.
+  /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
   /** Initial open state on mount (uncontrolled seed). */
   defaultOpen?: boolean;
@@ -25,10 +25,7 @@ interface Events {
 }
 
 /**
- * `<kai-tool>` — a collapsible tool-call panel (input/output inspection with a
- * state badge). Data via the `tool` property. Open state is the standard overlay
- * surface: settable+reflecting `open`, `kai-open-change`, and
- * `show()`/`hide()`/`toggle()` (gated by `disabled`); seed with `defaultOpen`.
+ * A collapsible panel showing one tool call's input and output.
  */
 defineWebComponent<Props, Events>('kai-tool', {
   tool: undefined,

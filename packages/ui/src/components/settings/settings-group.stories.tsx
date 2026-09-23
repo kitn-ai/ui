@@ -47,9 +47,7 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener', 'children'] },
       description: componentDescription([
-        'The uniform settings building blocks: `SettingsGroup` (a titled, bordered card) stacks `SettingItem` rows with hairline dividers, and each row pairs a label/description with an optional control (`Switch`, `Segmented`, `Select`, or none).',
-        'These are the primitives. The composed settings SCREEN — the two-pane category rail + groups assembled into a modal or full page — lives in `Labs/Settings`.',
-        'The controls drive the group chrome (`heading`, `description`, `class`). The rows are `SettingItem`s you compose as children; the Playground fixes one representative set so the chrome is what changes.',
+        'The settings building blocks: `SettingsGroup` is a titled, bordered card that stacks `SettingItem` rows, each pairing a label and description with an optional control (`Switch`, `Segmented`, `Select`, or none).',
       ]),
     },
   },

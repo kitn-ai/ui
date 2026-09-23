@@ -4,14 +4,13 @@ import { Skeleton } from '../skeleton/skeleton';
 import { Image } from './image';
 
 export interface ImageArtifactProps {
-  /** The image PAYLOAD the model produced: BARE base64 (no `data:` prefix) or raw
-   *  bytes. A string that ALREADY starts with `data:` is a resource, not a
-   *  payload: it renders, and the console says where it belongs. */
+  // Bare base64 is not self-describing, so the type is required rather than
+  // defaulted: a silent `image/png` default mislabelled every JPEG, WebP and SVG
+  // that reached it. A string that already starts with `data:` is a resource, not
+  // a payload; it renders, and the console says where it belongs.
+  /** The image payload, bare base64 or raw bytes. */
   data?: string | Uint8Array;
-  /** The payload's MIME type, e.g. `image/png`. REQUIRED, at the type level and at
-   *  runtime: bare base64 is not self-describing, and the old silent `image/png`
-   *  default mislabelled every JPEG, WebP and SVG that reached it. Absent, this
-   *  reports once and renders the placeholder instead of an image with a guess. */
+  /** The payload's MIME type, e.g. `image/png`. Required; without one the placeholder renders. */
   mediaType: string;
   /** Alternative text, also the placeholder's accessible name. */
   alt: string;

@@ -50,26 +50,26 @@ const MESSAGE_ROLE_LABEL: Record<MessageRole, string> = {
 
 export interface MessageProps extends Omit<JSX.HTMLAttributes<HTMLDivElement>, 'role'> {
   children: JSX.Element;
-  /** Who is speaking: `'user'`, `'assistant'` or `'system'`.
-   *
-   *  This SHADOWS the inherited ARIA `role` attribute on purpose, and is the
-   *  reason `JSX.HTMLAttributes` is `Omit`ted above. Before this existed, `role`
-   *  resolved to ARIA and was spread straight onto the row, so `<Message
-   *  role="user">` shipped `role="user"` on a div — not a valid ARIA role, and a
-   *  critical axe `aria-roles` violation ("Role must be one of the valid ARIA
-   *  roles: user") on every message that used the prop. Chromium discards the
-   *  unknown token and computes `generic`, so the damage was a failed a11y audit
-   *  and a row with no accessible role or name at all, not a mis-announced one.
-   *
-   *  It is now consumed here and never reaches the DOM. What the row gets
-   *  instead is a VALID ARIA role that can carry a name — `role="article"` plus
-   *  an `aria-label` naming the speaker — and `data-role` for styling and
-   *  querying. Omit the prop and the row stays an unlabelled `<div>`, exactly as
-   *  before, so the many role-less call sites are untouched.
-   *
-   *  The trade-off: the row's ARIA role can no longer be set through this prop.
-   *  Pass `aria-label` (or any other ARIA attribute) to override the default
-   *  naming — the spread below still wins over what this computes. */
+  // WHY `role` SHADOWS ARIA, kept out of the generated prop table on purpose: this
+  // comment is invisible to docgen, while a doc comment here lands in the component
+  // meta, llms-full.txt, the MCP catalog, the docs prop table and Storybook at once.
+  //
+  // The prop shadows the inherited ARIA `role` attribute, which is why
+  // `JSX.HTMLAttributes` is `Omit`ted above. Before it existed, `role` resolved to ARIA
+  // and was spread onto the row, so `<Message role="user">` shipped `role="user"` on a
+  // div: not a valid ARIA role, and a critical axe `aria-roles` violation ("Role must
+  // be one of the valid ARIA roles: user") on every message that used it. Chromium
+  // discards the unknown token and computes `generic`, so the damage was a failed a11y
+  // audit and a row with no accessible role or name, not a mis-announced one.
+  //
+  // It is consumed here and never reaches the DOM. The row gets a valid ARIA role that
+  // can carry a name (`role="article"` plus an `aria-label` naming the speaker) and
+  // `data-role` for styling and querying. Omitted, the row stays an unlabelled `<div>`,
+  // so the many role-less call sites are untouched. The trade-off: the row's ARIA role
+  // cannot be set through this prop, and any other ARIA attribute passed still wins,
+  // because the spread runs after what this computes.
+  /** Who is speaking. NOT an ARIA role: the row gets `role="article"` with a named
+   *  `aria-label`, and the ARIA `role` attribute is shadowed. */
   role?: MessageRole;
 }
 
@@ -92,9 +92,7 @@ function Message(props: MessageProps) {
 // --- MessageAvatar ---
 
 export interface MessageAvatarProps {
-  /** Avatar image URL. Optional: with no `src` the component renders `fallback`
-   *  (initials), which is the whole point of having a fallback — requiring `src`
-   *  forced `<MessageAvatar src="" …/>` at every initials-only call site. */
+  /** Avatar image URL. Without one the component renders `fallback` (initials). */
   src?: string;
   /** Alt text for the image. Only meaningful alongside `src`; defaults to `''`
    *  so an avatar stays decorative rather than announcing a filename. */
@@ -134,9 +132,7 @@ function MessageAvatar(props: MessageAvatarProps) {
 export interface MessageContentProps extends JSX.HTMLAttributes<HTMLDivElement> {
   children: JSX.Element | string;
   markdown?: boolean;
-  /** `::part` name(s) exposed on the content node. The body passes
-   *  `"bubble content"` so consumers can target either the rounded bubble or the
-   *  text region from outside the shadow boundary. */
+  /** `::part` name(s) exposed on the content node. */
   part?: string;
 }
 
@@ -195,9 +191,8 @@ export interface MessageActionBarProps {
   reveal?: 'always' | 'hover';
   /** Fired with the built-in name or the custom action id when a button is clicked. */
   onAction: (id: string) => void;
-  /** The active feedback vote. When `'like'`/`'dislike'` is set, that button is
-   *  marked pressed (filled) and the OTHER vote button animates out. `undefined`
-   *  shows both. Pure/prop-driven so the bar survives re-renders. */
+  /** The active feedback vote. That button renders pressed and filled; the other vote
+   *  animates out. `undefined` shows both. */
   activeFeedback?: FeedbackVote;
   /** When true, the `copy` button shows its success check icon instead of the
    *  copy glyph (cleared by the owner after ~2s). */
@@ -321,27 +316,25 @@ function MessageActionBar(props: MessageActionBarProps) {
 // --- MessageBody ---
 
 export interface MessageBodyProps {
-  /** The message's ordered parts (text, reasoning, tool, card, source, file),
-   *  rendered in a single pass in the order they appear. A run of consecutive
-   *  `source` parts renders as ONE citation row (`part="citations"`), placed
-   *  OUTSIDE the message bubble so a citation is never confused with a link the
-   *  model typed into its prose. */
+  // A run of consecutive `source` parts renders as ONE citations row, placed OUTSIDE
+  // the message bubble so a citation is never confused with a link the model typed into
+  // its prose.
+  /** The message's ordered parts, rendered in one pass in the order they appear. */
   parts: MessagePart[];
   /** Add/override card type -> component entries, forwarded to `CardRenderer`
    *  for `card` parts. */
   cardTypes?: CardComponentMap;
-  /** JSON Schemas for the card types this app renders, keyed by envelope type,
-   *  forwarded to `CardRenderer` for `card` parts. The companion of `cardTypes`:
-   *  that says what DRAWS a card, this says what a VALID one looks like.
-   *  `createCardRegistry(...).validationSchemas` is exactly this shape. Without it
-   *  the kit checks its own seven built-ins and leaves your own card type
-   *  unvalidated. A schema here WINS over a built-in of the same name. */
+  // The companion of `cardTypes`: that says what DRAWS a card, this says what a VALID
+  // one looks like. `createCardRegistry(...).validationSchemas` is exactly this shape.
+  // Without it the kit validates its own seven built-ins and leaves the consumer's own
+  // card type the only unchecked thing on screen. A schema here WINS over a built-in of
+  // the same name.
+  /** Card-type JSON Schemas keyed by envelope type; a schema here wins over a built-in of the same name. */
   cardSchemas?: CardSchemaMap;
-  /** The custom-element host node to emit card events off when no `CardProvider`
-   *  is above this body, forwarded to `CardRenderer` as `hostElement`. The
-   *  `<kai-chat>`/`<kai-message>`/`<kai-thread>` facades pass their own element,
-   *  so a `card` part's events leave as the bubbling `kai-card` CustomEvent
-   *  instead of being silently discarded. */
+  // The `<kai-chat>`/`<kai-message>`/`<kai-thread>` facades pass their own element, so
+  // a `card` part's events leave as the bubbling `kai-card` CustomEvent instead of being
+  // silently discarded when no `CardProvider` is above this body.
+  /** Host node to emit card events off when no `CardProvider` is present. */
   cardHostElement?: HTMLElement;
   /** Whether this is a user message (right-aligned bubble) vs an assistant
    *  message (full-width transparent). */
@@ -354,10 +347,8 @@ export interface MessageBodyProps {
   /** `'always'` (default) keeps the bar visible; `'hover'` reveals it on parent
    *  `.group` hover. */
   actionsReveal?: 'always' | 'hover';
-  /** Skip the citations row that consecutive `source` parts collapse into
-   *  (`part="citations"`). The parts STAY in `parts` — the wire encoder
-   *  still needs them, in order — only the rendering is skipped. Default
-   *  absent/false: today's rendering, byte-for-byte (B-8). */
+  // The parts STAY in `parts`: the wire encoder still needs them, in order.
+  /** Skip the citations row that consecutive `source` parts collapse into. */
   hideSources?: boolean;
   /** Fired with the built-in name or custom id when an action is clicked. */
   onAction?: (id: string) => void;
@@ -366,42 +357,35 @@ export interface MessageBodyProps {
   activeFeedback?: FeedbackVote;
   /** When true, the copy button shows its "copied" check icon. */
   copied?: boolean;
-  /** Whether this message is the one currently streaming. Forwarded to each
-   *  reasoning part's `<Reasoning>` so the disclosure auto-opens while the
-   *  model is thinking and settles back once the stream ends. Without it the
-   *  user watches a static collapsed "Reasoning" label for the whole thinking
-   *  window. The caller owns the definition of "streaming" — for
-   *  `ChatThread` that is `loading` + being the last assistant message. */
+  // Forwarded to each reasoning part's `<Reasoning>` so the disclosure auto-opens while
+  // the model is thinking and settles back once the stream ends; without it the reader
+  // watches a static collapsed "Reasoning" label for the whole thinking window. The
+  // caller owns the definition of "streaming": for `ChatThread` that is `loading` plus
+  // being the last assistant message.
+  /** Whether this message is the one currently streaming. */
   isStreaming?: boolean;
-  /** How a `reasoning` part renders. `'full'` (default) is the current
-   *  behavior: the collapsible `<Reasoning>` disclosure, with the "Thinking…"
-   *  shimmer on its trigger while `isStreaming`. `'compact'` drops the
-   *  disclosure entirely and shows only a shimmer loader while the part is
-   *  streaming — nothing once it settles, so there is no expandable detail to
-   *  open. `'off'` renders the part not at all, in either state. Kit-decides-
-   *  HOW: this is a display-mode fact about the medium, not a per-message
-   *  toggle, so it applies uniformly to every reasoning part in the body. */
+  // A display-mode fact about the medium, not a per-message toggle, so it applies
+  // uniformly to every reasoning part in the body. `'compact'` drops the disclosure and
+  // shows only a shimmer loader while the part streams, nothing once it settles; `'off'`
+  // renders the part not at all, in either state.
+  /** How a `reasoning` part renders; the `'full'` default is the collapsible disclosure. */
   reasoningMode?: 'full' | 'compact' | 'off';
-  /** Seeds the reasoning disclosure open AND keeps it tracking the stream
-   *  (open while streaming, closes when it settles): the pre-Task-19f `full`
-   *  behavior. Default false/absent: the panel starts closed (just the
-   *  "Thinking" shimmer chip) and only opens on click, the current default
-   *  (owner ruling, 2026-08-26). Meaningless when `reasoningMode` is
-   *  `'compact'`/`'off'` (no disclosure exists to open). */
+  // Meaningless when `reasoningMode` is `'compact'`/`'off'`: there is no disclosure to
+  // open.
+  /** Seeds the reasoning disclosure open and tracks the stream: open while streaming,
+   *  closed once it settles. Closed by default. */
   reasoningDefaultOpen?: boolean;
-  /** INJECT slot projected at the TOP of the body — above the reasoning / tools /
-   *  content. A per-message header: a model-name label, a role + timestamp line.
-   *  In the `<kai-message>` shadow this is `<slot name="before-body" />`. */
+  // In the `<kai-message>` shadow this is `<slot name="before-body" />`. A per-message
+  // header: a model-name label, a role plus timestamp line.
+  /** Slot projected at the top of the body, above the reasoning, tools and content. */
   beforeBody?: JSX.Element;
-  /** INJECT slot projected at the BOTTOM of the body — below the action bar. A
-   *  citation / sources row, a token-cost / latency line. In the `<kai-message>`
-   *  shadow this is `<slot name="after-body" />`. */
+  // In the `<kai-message>` shadow this is `<slot name="after-body" />`. A citation /
+  // sources row, a token-cost / latency line.
+  /** Slot projected at the bottom of the body, below the action bar. */
   afterBody?: JSX.Element;
-  /** How an image tile in this message's attachment grid reveals its full size:
-   *  a hover card (`'hover'`, the default) or a click-to-open lightbox. Forwarded
-   *  to the body's own `<Attachments>` grid, which publishes it on context for
-   *  the tiles to read — so the choice is made in ONE place, the container.
-   *  Absent means today's rendering, byte-for-byte. */
+  // The choice is published on context by the body's own `<Attachments>` grid, so it is
+  // made in ONE place, the container.
+  /** How an image tile in a message's attachment grid reveals its full size. Defaults to `'hover'`. */
   imagePreview?: AttachmentImagePreview;
 }
 

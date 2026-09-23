@@ -24,19 +24,18 @@ import {
 } from '../../components/lightbox/lightbox';
 
 interface Props extends Record<string, unknown> {
-  /** The attachments to render. Omit (or pass an empty array) for the empty
-   *  state, which shows `emptyText` if set and nothing otherwise. Set as a JS
-   *  property (array). Each item's `url` must be a `data:` URI or an https
-   *  URL, never `URL.createObjectURL`: a `blob:` URL previews here but the
-   *  wire encoders (`toOpenAIMessages`/`toAnthropicMessages`) refuse it. */
+  // The empty state shows `emptyText` if set and nothing otherwise. Each item's `url`
+  // must be a `data:` URI or an https URL, never `URL.createObjectURL`: a `blob:` URL
+  // previews here but the wire encoders (`toOpenAIMessages`/`toAnthropicMessages`)
+  // refuse it.
+  /** The attachments to render (omit or pass `[]` for the empty state). Each `url` must be a `data:` URI or https URL, never `blob:`. */
   items?: AttachmentData[];
   /** Layout: `grid` = visual tiles, `inline` = icon + label chips, `list` = rows. */
   variant?: AttachmentVariant;
   /** Wrap each item in a hover card that previews its details. */
   hoverCard?: boolean;
-  /** How an image item previews: `hover` = the hover card, `lightbox` = click the
-   *  tile to open the image full-size in a dialog. Attribute: `image-preview`.
-   *  Inert for non-image items, which have no image for a dialog to show. */
+  // Inert for non-image items, which have no image for a dialog to show.
+  /** How an image tile reveals its full size: `hover` (pointer-only hover card, default) or `lightbox` (modal on click). */
   imagePreview?: 'hover' | 'lightbox';
   /** Show a remove button per item; clicking it fires a `kai-remove` event. */
   removable?: boolean;
@@ -51,21 +50,13 @@ interface Events {
   /** A remove button was clicked. */
   'kai-remove': { id: string };
 }
-
+// The web-component layer's "collapse a compound primitive to ONE configurable element" pattern:
+// the presentation knobs the Solid layer expresses by composing sub-parts (AttachmentPreview,
+// AttachmentInfo, AttachmentHoverCard, AttachmentRemove) become `variant` / `hover-card` /
+// `removable` here. A templated slot, so a consumer could keep the sub-parts, is a deliberate
+// future add rather than an omission.
 /**
- * `<kai-attachments>` — the exemplar for the "collapse a compound primitive to
- * ONE configurable element" pattern (Route 1). The presentation knobs that the
- * SolidJS layer expresses by composing sub-parts (`<AttachmentPreview>`,
- * `<AttachmentInfo>`, `<AttachmentHoverCard>`, `<AttachmentRemove>`) become
- * attributes/flags here:
- *
- *   - icon + label .......... `variant="inline"`
- *   - visual + hover card .... `variant="grid" hover-card`
- *   - removable chips ........ add `removable` (emits `kai-remove` → { id })
- *
- * Data in via the `items` property; the only interaction (`remove`) comes back
- * as an event. For fully-custom hover content, the SolidJS primitives remain the
- * escape hatch (a templated slot — "Route 2" — is a deliberate future add).
+ * The files attached to a message.
  */
 defineWebComponent<Props, Events>('kai-attachments', {
   items: [],

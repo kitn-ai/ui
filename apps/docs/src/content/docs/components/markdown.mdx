@@ -1,6 +1,6 @@
 ---
 title: Markdown
-description: Renders a markdown string — with fenced-code syntax highlighting via Shiki — as a standalone web component that works in any framework or plain HTML.
+description: Renders a markdown string.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -13,7 +13,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kai-tag-sub">kai-markdown</p>
 
-<p class="kai-lede">Turn a raw markdown string into rendered prose — headings, bold, italic, lists, blockquotes, and syntax-highlighted code fences — in any framework or plain HTML.</p>
+<p class="kai-lede">Turns text into formatted prose with highlighted code, outside a framework tree.</p>
 
 <Facts items={['Shadow DOM', 'Shiki highlighting', '4 prose sizes', 'GFM support', 'Highlight on/off']} />
 
@@ -22,7 +22,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 <Playground client:only="solid" tag="kai-markdown" />
 
 <Aside type="tip" title="When to use">
-Use `<kai-markdown>` to render model output, formatted prose, or documentation outside a SolidJS tree — message bubbles, doc viewers, help panels. In SolidJS, import the `Markdown` primitive directly. The element is `display: block` and fills its container; constrain width on the parent as needed.
+To render model output or documentation outside a SolidJS tree: message bubbles, doc viewers, help panels. In SolidJS, import the `Markdown` primitive directly.
 </Aside>
 
 ## Usage
@@ -42,7 +42,7 @@ Set `content` in JavaScript with your markdown string:
 </script>
 ```
 
-- **`content`** — assign it in JavaScript; HTML attributes don't support multiline strings cleanly.
+- **`content`**: assign it in JavaScript; multiline strings don't survive HTML attributes cleanly.
 - **`prose-size`** — scales body text: `xs`, `sm` (default), `base`, `lg`. Use `sm` in message bubbles, `base`/`lg` for doc pages.
 - **`code-theme`** — defaults to `github-dark-dimmed`; any [Shiki theme](https://shiki.style/themes) works.
 - **`code-highlight="false"`** — skips Shiki entirely, rendering code fences as plain monospace.
@@ -51,31 +51,25 @@ Set `content` in JavaScript with your markdown string:
 
 ### Default
 
-Headings, bold, italic, a list, a blockquote, and a syntax-highlighted TypeScript fence.
-
 <Example client:visible tag="kai-markdown" />
 
 ### Rich Content
-
-Ordered lists, unordered lists, blockquotes, and a fenced code block together — representative of typical model output.
 
 <Example client:visible tag="kai-markdown" data="rich" />
 
 ### Compact Text Size
 
-`prose-size="xs"` for dense contexts — cards, sidebar panels, or tooltips.
+For dense contexts: cards, sidebar panels, tooltips.
 
 <Example client:visible tag="kai-markdown" config={{ proseSize: 'xs' }} data="short" />
 
 ### Large Prose
 
-`prose-size="lg"` for standalone reading contexts — documentation pages or help articles.
-
 <Example client:visible tag="kai-markdown" config={{ proseSize: 'lg' }} />
 
 ### Highlighting Disabled
 
-`code-highlight="false"` renders code fences as plain monospace — no Shiki loads, ideal for raw terminal output or log lines.
+No Shiki loads, so it suits raw terminal output or log lines.
 
 <Example client:visible tag="kai-markdown" config={{ codeHighlight: false }} data="plain" />
 

@@ -1,6 +1,6 @@
 ---
 title: Image
-description: Displays an image from a URL — https, a data: URI, or a blob the caller created.
+description: Displays an image from a URL.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -13,7 +13,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kai-tag-sub">kai-image</p>
 
-<p class="kai-lede">A reference to an image. Give it a <code>src</code> and it renders with the kit's chrome; the bytes stay wherever they already live, whether that is a CDN, your own API, or a blob the app made.</p>
+<p class="kai-lede">Alt text is required, so a picture never goes out unnamed to a screen reader.</p>
 
 <Facts items={['Shadow DOM', 'https / data: / blob:', 'Alt text required', 'Kit chrome']} />
 
@@ -22,7 +22,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 <Playground client:only="solid" tag="kai-image" />
 
 <Aside type="tip" title="When to use">
-Reach for `Image` when you have a *reference*: a photo in your library, a chart your API rendered, an avatar the app uploaded. For image *data* a model or a tool handed you (bare base64 or a `Uint8Array`), use [Image artifact](/components/image-artifact/) instead: it owns the media type and the object-URL lifecycle, and this one would make you build both.
+When you have a *reference*: a photo, a chart your API rendered. For image *data* from a model, use [Image artifact](/components/image-artifact/) instead.
 </Aside>
 
 ## Usage
@@ -36,27 +36,23 @@ Set `src` to the image address and `alt` to a real description. Every form of im
 <kai-image src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0i…" alt="A purple star icon"></kai-image>
 ```
 
-`alt` is required rather than optional, because an image with no name is invisible to a screen reader and a placeholder string ("image") is worse than none.
+`alt` is required rather than optional: an image with no name is invisible to a screen reader, and a placeholder string ("image") is worse than none.
 
-The element does not filter schemes: an `<img>` cannot execute one, so a `data:image/*`, an https URL and a blob all render. Where a URL is *navigable* the kit applies its own policy; that is a different guard for a different sink.
+The element filters no schemes, because an `<img>` cannot execute one. Where a URL is *navigable* the kit applies its own policy; that is a different guard for a different sink.
 
 ## Examples
 
 ### A hosted image
 
-The common case: the picture lives at a URL the app already has.
-
 <Example client:visible tag="kai-image" />
 
 ### A second source
-
-The same element, a different address, no configuration.
 
 <Example client:visible tag="kai-image" data="portrait" />
 
 ### An inline data URI
 
-No request, no CDN: the bytes ride in the URL. Useful for an icon or a tiny generated chart.
+No request, no CDN: the bytes ride in the URL.
 
 <Example client:visible tag="kai-image" data="inline" />
 

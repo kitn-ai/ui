@@ -36,12 +36,8 @@ const cssCode = `:root {
   padding: 0.5rem 1rem;
 }`;
 
-/**
- * Story for the compound `CodeBlock` family. The root `CodeBlock` is a bordered
- * card container; `CodeBlockCode` does the (on-demand, Shiki) syntax
- * highlighting; `CodeBlockGroup` is a flex header/footer row. The controllable
- * props live on `CodeBlockCode`, so `Playground` drives that piece directly.
- */
+// `CodeBlockCode` does the on-demand Shiki highlighting and carries the controllable
+// props, so `Playground` drives that piece directly.
 const meta = {
   title: 'Components/CodeBlock',
   component: CodeBlockCode,

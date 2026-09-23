@@ -7,9 +7,7 @@ interface Props extends Record<string, unknown> {
   /** Pressable row: renders real button semantics (click, Enter, Space) and
    *  fires `kai-click` on activation. Ignored when `href` is set. */
   interactive?: boolean;
-  /** Navigate on press: the row renders as a real anchor opening in a new tab.
-   *  An href outside the kit's safe URL schemes renders a plain
-   *  non-interactive row instead (label visible, nothing clickable). */
+  /** Navigate on press: the row renders as a real anchor opening in a new tab. An unsafe URL scheme renders a plain, non-interactive row. */
   href?: string;
   /** Show a trailing chevron affordance at the row's end. */
   chevron?: boolean;
@@ -20,19 +18,12 @@ interface Events {
    *  and no `href` is present. Non-bubbling: listen on the element itself. */
   'kai-click': void;
 }
-
+// Interaction is one of three: a safe `href` renders a real anchor opening in a new tab;
+// `interactive` renders a real `<button>` firing `kai-click`; neither renders a plain display row.
+// An unsafe `href` (a scheme outside the kit's URL policy) renders the NON-interactive row with
+// the label still visible: no anchor, no event.
 /**
- * `<kai-row>`: the generic mobile list row (P-4, blocks-and-parts design
- * 2026-08-31): leading region, title with optional subtitle, trailing region,
- * optional chevron affordance. The one anatomy behind the widget home tab's
- * three rows (recent conversation with a timestamp, CTA with a trailing
- * arrow, help link with a leading icon and chevron) and every settings screen
- * a block grows; nothing in it is chat-specific.
- *
- * Interaction, one of three: `href` set and safe, a real anchor (new tab);
- * `interactive` set, a real `<button>` firing `kai-click`; neither, a plain
- * display row. An unsafe `href` (scheme outside the kit's URL policy) renders
- * the non-interactive row: label visible, no anchor, no event.
+ * A generic list row.
  */
 defineWebComponent<Props, Events>('kai-row', {
   interactive: undefined,

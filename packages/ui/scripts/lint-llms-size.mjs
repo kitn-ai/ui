@@ -44,7 +44,15 @@
 // (pointers into the Custom Elements Manifest) would hide the per-element API from the file an agent
 // reads first. 355 KiB keeps the same ~3% headroom over the measurement that the baseline and the
 // previous raise both used.
-const MAX_LLMS_FULL_BYTES = 355 * 1024; // 363,520
+// 2026-09-22 LOWERED: 355 -> 324 KiB. Measured 321,134 bytes at 100 elements / 123
+// state/wire exports. The 355 KiB above was raised IN THE SAME SESSION only to measure what
+// the element docstrings cost before they were trimmed (they added 75,917 bytes, which put
+// the file 29 KB over); the trims then took that whole block to ~7.8 KB and the prop docs from
+// 94,098 to ~54,000 chars, so the height is gone and leaving the raise in place would have
+// been drift with a receipt that no longer describes the tree. 324 KiB is the same ~3%
+// headroom over the measurement that the baseline and the previous raise used. If this file
+// grows again, the note above explains what to measure and what to trim first.
+const MAX_LLMS_FULL_BYTES = 324 * 1024; // 331,776
 
 // THE FLOOR IS A TRUNCATION TRIPWIRE, NOT A TARGET. This repo has already
 // shipped the failure it guards: running gen-llms.mjs standalone silently

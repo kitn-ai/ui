@@ -3,15 +3,9 @@ import { createSignal, For, Show } from 'solid-js';
 import { ViewStack, View, type ViewStackController, type ViewStackState } from './view-stack';
 import { componentDescription } from '../../stories/docs/web-component-controls';
 
-/**
- * Stub story for the P-3 view navigator: three views (two tab roots and a
- * drill view), a FAKE tab bar and a FAKE header owned by the story itself.
- * The point on show is the one rule the spike got wrong twice: a drilled
- * view hides the tab bar and shows a back arrow; a tab root shows the tab
- * bar and no back arrow. Both pieces of chrome here are driven purely off
- * the navigator's reported state, never their own.
- */
-
+// The view navigator's one rule: a drilled view hides the tab bar and shows a back
+// arrow, a tab root shows the tab bar and no back arrow. Both pieces of chrome follow
+// the navigator's reported state, never their own.
 const meta = {
   title: 'Components/ViewStack',
   component: ViewStack,

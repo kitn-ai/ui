@@ -18,15 +18,7 @@ interface Events extends Record<string, unknown> {
 }
 
 /**
- * `<kai-file-tree>` — a collapsible, keyboard-navigable file explorer built from a
- * flat list of `/`-delimited paths (folders are derived). ARIA `tree`/`treeitem`.
- * Selecting a file fires a `select` event (`detail.path`). Fills its container.
- *
- * For a changed-files / diff view, give each file `additions`/`deletions`/`status`
- * (rendered as trailing `+N`/`-N` stats and a colored status letter), and set the
- * `summary` attribute for a header with the changed-file count, summed `+/-`, and a
- * Collapse-all toggle. Restyle the diff bits via `::part(summary | status |
- * stat-additions | stat-deletions)`.
+ * A collapsible, keyboard-navigable file explorer built from a flat list of paths.
  */
 defineWebComponent<Props, Events>('kai-file-tree', {
   files: [],

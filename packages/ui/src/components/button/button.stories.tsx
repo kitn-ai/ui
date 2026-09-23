@@ -4,10 +4,7 @@ import { Button } from './button';
 import { componentDescription } from '../../stories/docs/web-component-controls';
 
 /**
- * Convention exemplar: every component story should follow this shape:
- * `component`, a description, `argTypes` (controls), `args` (defaults incl.
- * `fn()` for events), a `Playground` story rendered from args, plus showcase
- * stories for notable variations.
+ * A button that triggers an action.
  */
 const meta = {
   title: 'Components/Button',
@@ -17,7 +14,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'A native `<button>` with style `variant` (`default`, `ghost`, `outline`) and `size` presets. Use `size="icon"` / `"icon-sm"` for square icon-only buttons (give them an `aria-label`).',
+        'A button that triggers an action; icon-only buttons need a label so screen readers can announce them.',
       ]),
     },
   },

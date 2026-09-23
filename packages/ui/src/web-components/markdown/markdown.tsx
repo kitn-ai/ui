@@ -3,20 +3,18 @@ import { Markdown } from '../../components/markdown/markdown';
 import { ChatConfig, useChatConfig, type ProseSize } from '../../primitives/chat-config';
 
 interface Props extends Record<string, unknown> {
-  /** The markdown source to render. */
+  /** The markdown source. */
   content: string;
-  /** Text/markdown sizing. */
+  /** Text and markdown sizing. */
   proseSize?: ProseSize;
   /** Shiki theme for fenced code blocks. */
   codeTheme?: string;
-  /** Disable syntax highlighting (no Shiki loads). */
+  /** Set false to render plain `pre` blocks, with no highlighter load. */
   codeHighlight?: boolean;
 }
 
 /**
- * `<kai-markdown>` — renders markdown (with fenced-code syntax highlighting) as
- * a standalone element. Content via the `content` property; sizing/highlighting
- * via attributes.
+ * Renders markdown, with syntax-highlighted code blocks.
  */
 defineWebComponent<Props>('kai-markdown', {
   content: '',

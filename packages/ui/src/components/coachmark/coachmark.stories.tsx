@@ -7,13 +7,8 @@ import { Button } from '../button/button';
 import { ChatConfig } from '../../primitives/chat-config';
 import { componentDescription } from '../../stories/docs/web-component-controls';
 
-/**
- * Story for the presentational `Coachmark`: an onboarding hint bubble anchored to
- * a trigger. It wraps the anchor (the default child) and points a tinted bubble
- * with an arrow at it; the developer owns when it shows (`open` / `defaultOpen`)
- * and the `×` fires `onDismiss`. The stories render with `defaultOpen` so the
- * bubble is visible, inside a padded canvas so it has room to sit below the anchor.
- */
+// Rendered with `defaultOpen` so the bubble is visible, in a padded canvas that leaves
+// room below the anchor.
 const meta = {
   title: 'Components/Coachmark',
   component: Coachmark,

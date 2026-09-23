@@ -9,15 +9,12 @@ interface Props extends Record<string, unknown> {
   /** The embed payload (provider + id/url + options). Set as a JS **property** (object). */
   data?: EmbedCardData;
 }
-
+// Privacy first: NO provider iframe, JS or cookies until the reader presses play (YouTube through
+// `youtube-nocookie`, Vimeo with `dnt=1`). `generic` URLs are rejected unless their origin was
+// allowlisted with `configureEmbedAllowlist`; the "Open on {provider}" affordance dispatches the
+// contract `open` verb through the bubbling `kai-card` event.
 /**
- * `<kai-embed>` — a privacy-first **lazy media embed** (YouTube / Vimeo / allowlisted
- * generic player). Initial render is a poster + play button: NO provider iframe, JS,
- * or cookies until the user clicks play (YouTube via `youtube-nocookie`, Vimeo with
- * `dnt=1`). A persistent "Open on {provider}" affordance dispatches the contract
- * `open` verb via the bubbling `kai-card` event. `generic` URLs are rejected unless
- * their origin was allowlisted with `configureEmbedAllowlist`. Set `data` as a JS
- * property; `card-id` via attribute.
+ * A lazy media embed: a poster and a play button until the reader presses play.
  */
 defineWebComponent<Props>(
   'kai-embed',

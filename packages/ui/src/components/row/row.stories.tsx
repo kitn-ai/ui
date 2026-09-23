@@ -5,18 +5,9 @@ import { RowGroup } from './row-group';
 import { renderIcon } from '../icon/icon';
 import { componentDescription } from '../../stories/docs/web-component-controls';
 
-/**
- * The generic mobile list row (P-4): leading region, title + optional
- * subtitle, trailing region, optional chevron, pressable when interactive.
- * Stub-data story-first artifact for the blocks-and-parts round: the three
- * widget home-tab row shapes plus a settings-style row, light and dark.
- *
- * `RowGroup` is the frame around a list of them, and it is where the geometry
- * comes from: a hairline between adjacent rows, the first rounded at the top
- * only, the last at the bottom only. One row in a group is a framed card. The
- * frame has its own page (`Components/RowGroup`) — the stories here use
- * it, and show the row shapes it frames.
- */
+// `RowGroup` is the frame and it owns the geometry: a hairline between adjacent rows,
+// the first rounded at the top only and the last at the bottom only. One row in a
+// group is a framed card.
 const meta = {
   title: 'Components/Row',
   component: Row,

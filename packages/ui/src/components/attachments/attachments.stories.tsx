@@ -71,8 +71,8 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'A composable container for files a user attached to a prompt or documents a message cites. Built from `Attachments` plus per-item `Attachment` with `AttachmentPreview`, `AttachmentInfo`, and `AttachmentRemove` parts.',
-        'Set `variant`: `grid` (thumbnails), `inline` (compact chips), or `list` (detailed rows). Pass each item via `data` and an `onRemove` handler.',
+        'Displays the files attached to a prompt or cited by a message.',
+        'Pick the presentation from the space you have: a gallery, a chip row, or a detailed list.',
       ]),
       controls: { exclude: ['use:eventListener'] },
     },
@@ -411,11 +411,7 @@ const item: AttachmentData = {
 
 /** The modal with no click at all: `defaultOpen` seeds it open for a screenshot
  *  or a first-run tour. The trio is composed directly here because only the
- *  lightbox owns that state (an `Attachments` grid composes it per tile).
- *
- *  A JSX child can never ride in `args` — it cannot cross the Storybook
- *  manager/preview boundary — so this story's markup lives in `render` and its
- *  args stay empty. */
+ *  lightbox owns that state (an `Attachments` grid composes it per tile). */
 export const LightboxOpenAtMount: Story = {
   render: () => (
     <Lightbox defaultOpen>

@@ -5,7 +5,7 @@ This directory is a MIX, and the difference matters when you grep it.
 **Living documents** (kept current, safe to trust): `coupling-map.md`,
 `package-consumer-issues.md`, `framework-compatibility-faq.md`,
 `composable-web-components-roster.md`, `web-components.md`, `notes*.md`,
-`labs-*-gap-backlog.md`.
+`verbosity-sweep.md`, `labs-*-gap-backlog.md`.
 
 **Dated records** (a snapshot of what the tree looked like on their date, never
 rewritten): `handoff/`, `superpowers/`, `research/`, `proposals/`, `decisions/`,

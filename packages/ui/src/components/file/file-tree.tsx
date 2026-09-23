@@ -195,9 +195,7 @@ export interface FileTreeProps extends Omit<JSX.HTMLAttributes<HTMLDivElement>, 
   onSelect?: (path: string, file: FileTreeFile) => void;
   /** Folder paths expanded by default. When omitted, all folders start open. */
   defaultExpanded?: string[];
-  /** Show a summary header above the tree: the changed-file count, the summed
-   *  `+additions / -deletions`, and a Collapse-all/Expand-all toggle wired to the
-   *  folder-expand state. Off by default (no header — unchanged behavior). */
+  /** Shows a summary header above the tree with the changed-file count and a collapse-all toggle. Default off. */
   summary?: boolean;
 }
 

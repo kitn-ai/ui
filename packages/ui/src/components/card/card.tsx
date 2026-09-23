@@ -30,9 +30,8 @@ export interface CardProps extends JSX.HTMLAttributes<HTMLDivElement> {
   /** Stable id for the heading (so composing cards can `aria-labelledby` it).
    *  Auto-generated when omitted. */
   headingId?: string;
-  /** Stable id for the description (so composing cards can `aria-describedby` it
-   *  — e.g. `kai-choice`'s radiogroup points at its prompt). Auto-generated when
-   *  omitted, mirroring `headingId`. */
+  /** Stable id for the description, for composing cards that point `aria-describedby` at
+   *  it; auto-generated when omitted. */
   descriptionId?: string;
   /** Render a dismiss (×) button that hides the card and calls `onDismiss`.
    *  Opt-in, OFF by default — the contract cards never set it, so they are
@@ -46,10 +45,9 @@ export interface CardProps extends JSX.HTMLAttributes<HTMLDivElement> {
   target?: string;
   /** `rel` for the `href` anchor (default `noopener noreferrer` when `target="_blank"`). */
   rel?: string;
-  /** Make the whole card behave like a button: `role="button"`, a tabindex, and
-   *  Enter/Space activation, firing `onCardClick`. Ignored when `href` is set.
-   *  A clickable/href card must NOT also contain footer action buttons — that
-   *  nests interactive elements. Use `actions` OR clickable, never both. */
+  // Ignored when `href` is set, and a clickable/href card must NOT also contain footer
+  // action buttons, because that nests interactive elements.
+  /** Make the whole card behave like a button (`role="button"`, a tab stop, Enter/Space). */
   clickable?: boolean;
   /** Called when a `clickable` (or `href`) card is activated (click, or Enter/Space). */
   onCardClick?: (event: MouseEvent | KeyboardEvent) => void;

@@ -55,13 +55,8 @@ interface GroupProps extends Record<string, unknown> {
   orientation?: Orientation;
   /** Which item index is maximized (null = none). Declarative source of truth. */
   maximizedIndex?: number | null;
-  /**
-   * Divider affordance drawn inside each draggable handle's 8px grab zone:
-   * - `line` (default): a 1px hairline, transparent at rest, tinting on hover/drag.
-   * - `grip`: a dotted grip handle.
-   * - `none`: no visible divider, just the invisible hit-area.
-   * The full grab zone and keyboard/ARIA behavior are identical for all three.
-   */
+  // The full grab zone and keyboard/ARIA behavior are identical for all three.
+  /** Divider affordance drawn inside each draggable handle's 8px grab zone: `line` (default), `grip`, or `none`. */
   handle?: 'line' | 'grip' | 'none';
 }
 
@@ -70,20 +65,19 @@ interface GroupEvents extends Record<string, unknown> {
   'kai-change': { sizes: number[] };
   /** Observe layout maximize state. */
   'kai-maximize-change': { maximized: boolean; index: number | null };
-  /** Authoritative maximize state, dispatched as a raw composed CustomEvent (not
-   *  through `dispatch`) onto the affected `<kai-resizable-item>` and, on restore,
-   *  onto the group host. A nested element (e.g. `<kai-artifact>`) listens for it
-   *  to reconcile its own toggle. */
+  // Dispatched as a raw composed CustomEvent (not through `dispatch`) onto the affected
+  // `<kai-resizable-item>` and, on restore, onto the group host. A nested element (e.g.
+  // `<kai-artifact>`) listens for it to reconcile its own toggle.
+  /** Authoritative maximize state. */
   'kai-maximize-state': { maximized: boolean };
 }
-
+// Lays out its `<kai-resizable-item>` light children along an axis, reading each item's `size`,
+// `min`, `max`, `locked` and `hidden` through a MutationObserver, and auto-inserts the draggable
+// dividers between them. The dividers are the affordance: `handle` only chooses what is DRAWN in
+// the 8px grab zone at each one. At most 3 panels; nest for more. A divider is interactive only
+// between two unlocked, visible panels.
 /**
- * `<kai-resizable>` — a composable, resizable multi-panel layout (up to 3 panels)
- * with auto-inserted draggable dividers. It lays out its `<kai-resizable-item>`
- * light children along an axis (`orientation`), reading each item's `size`,
- * `min`, `max`, `locked` and `hidden` attributes via a `MutationObserver`. A
- * divider is interactive only between two unlocked, visible panels. Emits a
- * `change` event (`detail.sizes`, percent) on resize / visibility change.
+ * A resizable multi-panel layout with draggable dividers.
  */
 defineWebComponent<GroupProps, GroupEvents>('kai-resizable', {
   orientation: 'horizontal',
@@ -627,22 +621,20 @@ interface ItemProps extends Record<string, unknown> {
   locked?: boolean;
   /** Hide this panel; its divider is dropped and the rest reflow. */
   hidden?: boolean;
-  /**
-   * Collapse this panel. Same layout effect as `hidden` (divider dropped, the rest
-   * reflow), but it WORKS as a bare boolean from framework JSX. A plain
-   * `<kai-resizable-item collapsed>` in React/Solid/Vue/Svelte collapses the panel
-   * at the first render; `hidden` does not, because a JSX boolean sets neither the
-   * `hidden` attribute nor the IDL property on a custom element, so the parent never
-   * sees it. The facade reflects `collapsed` to a `collapsed` attribute the parent
-   * reads. Prefer this over `hidden` for declarative collapse.
-   */
+  // Same layout effect as `hidden` (divider dropped, the rest reflow), but it WORKS as a
+  // bare boolean from framework JSX. A plain `<kai-resizable-item collapsed>` in
+  // React/Solid/Vue/Svelte collapses the panel at the first render; `hidden` does not,
+  // because a JSX boolean sets neither the `hidden` attribute nor the IDL property on a
+  // custom element, so the parent never sees it. The facade reflects `collapsed` to a
+  // `collapsed` attribute the parent reads. Prefer this over `hidden` for declarative
+  // collapse.
+  /** Collapse this panel. Works as a bare boolean from framework JSX; `hidden` does not. */
   collapsed?: boolean;
 }
-
+// Passive: it renders its own slotted light content (`<slot/>`) and owns no layout of its own. The
+// parent `<kai-resizable>` reads its attributes to place it.
 /**
- * `<kai-resizable-item>` — a passive config-carrier inside `<kai-resizable>`. It
- * renders its own slotted light content (`<slot/>`); the parent `<kai-resizable>`
- * reads its `size`/`min`/`max`/`locked`/`hidden` attributes to lay it out.
+ * A config carrier inside a resizable group, standing for one panel.
  */
 defineWebComponent<ItemProps>('kai-resizable-item', {
   size: undefined,

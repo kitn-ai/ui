@@ -15,9 +15,9 @@ interface Props extends Record<string, unknown> {
   /** Preferred placement: `'top' | 'bottom' | 'left' | 'right'` (+ optional
    *  `-start`/`-end`). Defaults to `'top'`; flips to stay in view. */
   placement?: string;
-  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open`
-   *  attribute, the element still self-manages on hover/focus). Set `el.open = true`,
-   *  or `<kai-tooltip open>`; listen for `kai-open-change`. */
+  // Shoelace-style: settable and reflected to the `open` attribute, while the element
+  // still self-manages on hover/focus.
+  /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
   /** Initial open state on mount (uncontrolled seed). */
   defaultOpen?: boolean;
@@ -33,16 +33,8 @@ interface Events {
 }
 
 /**
- * `<kai-tooltip>` — wraps a trigger and shows a hint on hover/focus. Put the
- * trigger as light-DOM content; set the text via `content`. Positions itself and
- * dismisses on Escape/outside-click; the content is portaled inside the shadow
- * root so it isn't clipped.
- *
- * ```html
- * <kai-tooltip content="Voice input">
- *   <kai-button variant="subtle" size="icon" icon="mic" label="Voice input"></kai-button>
- * </kai-tooltip>
- * ```
+ * Wraps a trigger and shows a short hint on hover or focus. `kai-hover-card` is the
+ * markup-carrying popup instead.
  */
 defineWebComponent<Props, Events>('kai-tooltip', {
   content: '',

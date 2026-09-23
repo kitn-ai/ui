@@ -30,17 +30,9 @@ interface Events {
   'kai-close': void;
 }
 
+// Thread-level, not per-message: no event detail carries a message id, and when to show it is the host's call.
 /**
- * `<kai-feedback-bar>` — an inline thumbs up/down feedback banner that owns its
- * own flow: it asks, optionally collects a category + comment on a not-helpful
- * vote (`collect-detail`), then confirms with a thank-you — all in place. Emits
- * `kai-feedback` (`{ value }`), `kai-feedback-detail` (`{ value, category?, comment? }`),
- * and `kai-close`.
- *
- * Placement and lifecycle are the app's call: the component is designed as a
- * THREAD-level bar (its events carry no message id), and when to show it —
- * e.g. revealed after a settled turn, hidden again on submit — is product
- * behavior the host decides.
+ * An inline thumbs up / thumbs down bar that asks for feedback and thanks the user.
  */
 defineWebComponent<Props, Events>('kai-feedback-bar', {
   barTitle: 'Was this helpful?',

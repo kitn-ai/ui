@@ -91,15 +91,11 @@ export function HoverCardRoot(props: HoverCardRootProps) {
 export interface HoverCardTriggerProps {
   children: JSX.Element;
   class?: string;
-  /**
-   * Whether the trigger is its own tab stop. Omit for the automatic behaviour,
-   * which is right for every case in this repo: the trigger takes focus only
-   * when nothing inside it already can.
-   *
-   * Pass `false` to keep a trigger out of the tab order entirely, or `true` to
-   * force a stop. Both are escape hatches — reach for them when the automatic
-   * answer is wrong, not to restate it.
-   */
+  // Omit for the automatic behaviour, which is right for every case in this repo: the
+  // trigger takes focus only when nothing inside it already can. `false` keeps a trigger
+  // out of the tab order entirely, `true` forces a stop; both are escape hatches for when
+  // the automatic answer is wrong.
+  /** Whether the trigger is its own tab stop. */
   focusable?: boolean;
 }
 

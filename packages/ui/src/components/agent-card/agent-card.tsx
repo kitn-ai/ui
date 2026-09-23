@@ -39,9 +39,7 @@ export interface AgentCardProps {
   onActivate?: () => void;
   /** Alias for {@link AgentCardProps.onActivate}. Both fire if both are set. */
   onClick?: () => void;
-  /** Show a trailing "..." overflow button and fire this on click. The consumer
-   *  wires the actual menu; the card only surfaces the affordance. Click is
-   *  stopped from also activating the card. */
+  /** Fires from a trailing overflow button, which renders only when this is given. */
   onMenu?: (e: MouseEvent) => void;
   /** Extra classes merged over the card. */
   class?: string;

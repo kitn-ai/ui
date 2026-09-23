@@ -3,13 +3,8 @@ import { fn } from 'storybook/test';
 import { VoiceOutput } from './voice-output';
 import { componentDescription } from '../../stories/docs/web-component-controls';
 
-/**
- * Story for `VoiceOutput`: a read-aloud button. By default it speaks `text` via
- * the browser's `speechSynthesis`; set `onSynthesize` to route through a TTS model
- * instead (it returns an audio Blob, which plays through an `<audio>`). Click to
- * start, click again to stop; the icon swaps speaker -> stop and shows a spinner
- * while a model synthesis is in flight.
- */
+// Speaks `text` through the browser's `speechSynthesis` by default; `onSynthesize`
+// routes to a TTS model and its returned Blob plays through an `audio` element.
 const meta = {
   title: 'Components/VoiceOutput',
   component: VoiceOutput,

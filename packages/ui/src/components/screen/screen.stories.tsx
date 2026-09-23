@@ -5,13 +5,8 @@ import { Screen } from './screen';
 import { Button } from '../button/button';
 import { componentDescription } from '../../stories/docs/web-component-controls';
 
-/**
- * Story for the presentational `Screen`: a full-bleed overlay surface that fills
- * its mount point while `open`, under a back-header. It owns the takeover (inert
- * siblings, focus capture/restore, Escape -> `onBack`, an enter/exit transition);
- * the developer owns the swap by flipping `open`. The stories mount it in a
- * bounded, positioned canvas so the absolutely-positioned surface has room to fill.
- */
+// Owns the takeover: inert siblings, focus capture and restore, Escape -> `onBack`. The
+// stories mount it in a bounded, positioned canvas so the surface has room to fill.
 const meta = {
   title: 'Components/Screen',
   component: Screen,

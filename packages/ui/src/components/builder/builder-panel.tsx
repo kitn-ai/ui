@@ -108,37 +108,21 @@ export interface BuilderConstruct {
  * rather than the generic panel opting out.
  */
 export interface BuilderPanelSections {
-  /** Show the Layout radio section. Default `true` (the generic panel).
-   *  A template panel sets this `false` — T-2: the template fixes the
-   *  layout, so there is nothing left to choose here. */
+  /** Show the Layout radio section. Default `true`; a template panel sets it
+   *  `false` because the template fixes the layout. */
   layout?: boolean;
-  /** The Widget-chrome section's visibility. `'auto'` (default) follows
-   *  `value.layout === 'widget'`, the original cross-field-visibility
-   *  behavior. `'always'` shows it unconditionally — what a Support widget
-   *  template panel wants, since for THAT template the section is never
-   *  conditional, it's simply always this template's own controls.
-   *  `'never'` hides it — what every non-widget template wants once each
-   *  gets its own `Labs/Builder/<Template>` story. */
+  /** Widget-chrome section visibility. Default `'auto'` follows
+   *  `value.layout === 'widget'`; `'always'` and `'never'` override it. */
   widget?: 'auto' | 'always' | 'never';
-  /** Show the Provider section (mode + endpoint URL/wire when applicable).
-   *  Default `false` — the generic panel predates `provider` existing on
-   *  `BuilderConstruct` at all; a template panel opts in. */
+  /** Show the Provider section. Default `false`; a template panel opts in. */
   provider?: boolean;
-  /** Show the Home section (greeting/links tab). Default `true` (the
-   *  generic panel). A template with no Home concept at all — In-app
-   *  assistant (Round A): widget-only chrome, no Home/Messages tab bar in
-   *  its own construct basis (`fixtures/ops-console.construct.json` has no
-   *  `home` key) — sets this `false` to remove the section outright,
-   *  rather than leaving a switch that would only ever read "off". */
+  /** Show the Home section. Default `true`; a template with no Home concept sets
+   *  it `false` to remove the section outright. */
   home?: boolean;
-  /** Show a READ-ONLY Cards section: the construct's declared card names
-   *  (Round A's `cards` addition to `BuilderConstruct`), with a muted note
-   *  that editing them is a later round. Default `false`. Deliberately not
-   *  an editor — a template whose construct basis carries `cards` (like
-   *  `ops-console.construct.json`'s `deployment_parameters` form) still
-   *  needs the panel to acknowledge them exist rather than silently
-   *  dropping them from view, without this design round faking a card-
-   *  schema editor it doesn't have (decide loudly, per CLAUDE.md). */
+  // Read-only on purpose: the panel acknowledges card names a construct basis
+  // declares instead of silently dropping them, without faking a card-schema editor.
+  /** Show a read-only Cards section listing the construct's declared card names.
+   *  Default `false`; not an editor. */
   cards?: boolean;
 }
 

@@ -49,16 +49,11 @@ export interface ConversationSummary {
    *  writes it as the ~80-char truncated last-message preview on every save
    *  (`primitives/conversation-store.ts`). */
   trailing?: string;
-  /** ISO timestamp of when this conversation was last SEEN by the visitor
-   *  (widened additively, 2026-08-26 — unread indicators; no existing field
-   *  fit, since `trailing`/`lastMessageAt`/`updatedAt` are all content-timing
-   *  facts, not viewing-state). Unread = `updatedAt` is later than this.
-   *  Written by `ConversationStore.markRead` (see that doc for exactly when
-   *  and for the decide-loudly default when a store never implements it —
-   *  an absent `lastReadAt` reads as "not unread," never as "definitely
-   *  unread," so a store that doesn't support the concept at all simply
-   *  never shows an indicator rather than guessing). Round-tripped through
-   *  `list()`/`save()`; never author this by hand. */
+  // Unread means `updatedAt` is later than this. Written by `ConversationStore.markRead`,
+  // which documents exactly when and what an absent value means: "not unread", never
+  // "definitely unread", so a store that does not implement the concept shows no indicator
+  // rather than guessing. Round-tripped through `list()`/`save()`; never authored by hand.
+  /** ISO timestamp of when this conversation was last seen by the visitor. */
   lastReadAt?: string;
 }
 

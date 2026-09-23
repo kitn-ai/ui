@@ -5,13 +5,13 @@ export interface AttachmentData {
   type: 'file' | 'source-document';
   filename?: string;
   mediaType?: string;
-  /** A `data:` URI or an https URL — this is the field the wire encodes, so it
-   *  is what reaches the model. NEVER `URL.createObjectURL`: an object URL
-   *  resolves only inside the tab that minted it, so a `blob:` URL renders a
-   *  flawless preview and is meaningless to any provider —
-   *  `toOpenAIMessages`/`toAnthropicMessages` refuse it rather than send an
-   *  address the model cannot fetch. Read picked files with
-   *  `FileReader.readAsDataURL` instead (see `web-components/prompt/default-input.tsx`). */
+  // The field the wire encodes, so it is what reaches the model. NEVER
+  // `URL.createObjectURL`: an object URL resolves only inside the tab that minted it, so a
+  // `blob:` URL renders a flawless preview and is meaningless to any provider --
+  // `toOpenAIMessages`/`toAnthropicMessages` refuse it rather than send an address the model
+  // cannot fetch. Read picked files with `FileReader.readAsDataURL` instead (see
+  // `web-components/prompt/default-input.tsx`).
+  /** A `data:` URI or an https URL. */
   url?: string;
   title?: string;
 }

@@ -12,9 +12,9 @@ interface Props extends Record<string, unknown> {
   /** Preferred placement: `'top' | 'bottom' | 'left' | 'right'` (+ optional
    *  `-start`/`-end`). Defaults to `'bottom'`; flips to stay in view. */
   placement?: string;
-  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open`
-   *  attribute, the element still self-manages on hover). Set `el.open = true`,
-   *  or `<kai-hover-card open>`; listen for `kai-open-change`. */
+  // Shoelace-style: settable and reflected to the `open` attribute, while the element
+  // still self-manages on hover.
+  /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
   /** Initial open state on mount (uncontrolled seed). */
   defaultOpen?: boolean;
@@ -29,21 +29,8 @@ interface Events {
 }
 
 /**
- * `<kai-hover-card>` — reveals RICH content on hover/focus of a trigger (the
- * markup-carrying sibling of the text-only `<kai-tooltip>`). Put the trigger as
- * default light-DOM content and the card body in `slot="card"`. The card is
- * portaled + positioned inside the shadow root, with a transparent hover bridge
- * so the pointer can travel into it.
- *
- * ```html
- * <kai-hover-card>
- *   <a href="#">@acme</a>
- *   <div slot="card">
- *     <strong>Acme Corp</strong>
- *     <p>Workspace · 24 members</p>
- *   </div>
- * </kai-hover-card>
- * ```
+ * Reveals rich markup on hover or focus of the trigger it wraps. `kai-tooltip` is
+ * the text-only hint instead.
  */
 defineWebComponent<Props, Events>('kai-hover-card', {
   openDelay: undefined,

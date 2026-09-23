@@ -186,9 +186,7 @@ export interface TasksCardProps {
   defaultValue?: string[];
   /** Freeze the whole list + Confirm. */
   disabled?: boolean;
-  /** Display-only: rows can't be toggled and show the default cursor (no pointer,
-   *  no hover background, no focus ring). Keeps the visual content as-is — this only
-   *  drops the interactive affordances + a11y exposure. */
+  /** Display-only rows: no toggle, no hover or focus affordances. */
   readonly?: boolean;
   /** Fires on every selection change with the selected ids (distinct from submit). */
   onValueChange?: (payload: { value: string[] }) => void;

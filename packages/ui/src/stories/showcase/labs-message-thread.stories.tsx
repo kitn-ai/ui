@@ -149,10 +149,8 @@ const meta = {
       description: {
         component:
           [
-            'A **compose-your-own message list** built from standalone `<kai-message>` elements: the keystone of laying out a thread yourself while keeping the kit\'s rich message rendering. This Labs story exercises the three per-message composition seams.',
-            '**Slots:** `before-body` (INJECT, a per-message header above the content: a model-name label, a role/timestamp line), `after-body` (INJECT, a row below the action bar: a citation/sources row, a token-cost line), and `avatar` (REPLACE, your node stands in for the built-in avatar rail; pair with `avatar="none"` to omit the rail entirely).',
-            '**Parts:** `::part(row)`, `::part(bubble)`, `::part(content)`, `::part(actions)`, and `::part(avatar)` are exposed for outside-the-shadow styling.',
-            'See the **Code** tab for the HTML.',
+            'A compose-your-own message list built from standalone `<kai-message>` elements: the keystone of laying out a thread yourself while keeping the kit\'s rich message rendering.',
+            'Three per-message composition seams: `before-body` (INJECT, a header above the content -- a model-name label, a role/timestamp line), `after-body` (INJECT, a row below the action bar -- a citation/sources row, a token-cost line), and `avatar` (REPLACE, your node stands in for the built-in avatar rail; pair it with `avatar="none"` to omit the rail entirely). `::part(row)`, `::part(bubble)`, `::part(content)`, `::part(actions)` and `::part(avatar)` are exposed for styling from outside the shadow root.',
           ].join('\n\n'),
       },
       // The snippet lives on the STORY, not here. It did live here, and a

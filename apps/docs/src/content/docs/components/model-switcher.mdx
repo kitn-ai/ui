@@ -1,6 +1,6 @@
 ---
 title: Model Switcher
-description: A compact dropdown for picking the active AI model — drop it in any chat header and listen for one event.
+description: A dropdown for choosing the active model.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -16,7 +16,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kai-tag-sub">kai-model-switcher</p>
 
-<p class="kai-lede">A compact dropdown trigger that lets users swap the active AI model mid-conversation — set a list of models, handle one event, done.</p>
+<p class="kai-lede">Stays invisible until two models are on offer, so a single-model app shows nothing.</p>
 
 <Facts items={['Shadow DOM', '1 event', '2 props', 'Property API or declarative children', 'Only renders with 2+ models']} />
 
@@ -25,7 +25,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 <Playground client:only="solid" tag="kai-model-switcher" />
 
 <Aside type="tip" title="When to use">
-Reach for `<kai-model-switcher>` when building your own chat header and you want the model picker as a standalone piece. It sits naturally beside a context meter or title. The element stays invisible until at least two models are provided, so you can always pass the full list and let the component decide whether to show.
+In a chat header, wherever the model in use should stay visible and swappable, often beside a [Context](/components/context/) meter.
 </Aside>
 
 ## Usage
