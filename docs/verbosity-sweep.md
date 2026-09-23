@@ -84,7 +84,7 @@ surfaces are measured clean, not when it is edited.
 | the widened gate | 227 files, 1,586 props, 0 over cap, self-test 10/10 | done |
 | facade prop-doc text | 94,098 -> 54,354 chars, mean 139 -> 80, 0 waivers | done |
 | rendered component descriptions with docs-system talk | 0 of 88 | done |
-| rendered component descriptions (the story blurb above the props table), judged on WORDING | **95 judged in three reviewer batches (70 PASS, 19 WEAK, 6 FAIL); every FAIL and WEAK decided, 6,194 chars total, longest 108, 0 em dash, 0 over three paragraphs** | done |
+| rendered component descriptions (the story blurb above the props table), judged on WORDING | **95 judged in three reviewer batches (69 PASS, 20 WEAK, 6 FAIL); every FAIL and WEAK rewritten, 6,194 chars total, longest 108, 0 em dash, 0 over three paragraphs** | done |
 | story `argTypes` descriptions (a FIFTH surface: not the component's prop docs, and they WIN in Storybook's props table) | **515 values read, 0 over 160, 0 em dash** (26 findings across 14 files, all rewritten, 0 waived, rule (m) of `lint-story-conventions`) | done |
 | element docstrings | 100 of 100 present, 75,917 -> ~7.8 KB, mean 808 -> 69, longest 161 | done |
 | component page tops (description <= 100, lede <= 140, aside <= 200, no em dash, no instruction, lede not restating) | 0 offenders across 63 pages, 88 docs tests green, verify:docs exit 0 | done |
@@ -170,9 +170,10 @@ Two blind spots the passes found, both worth keeping:
 ## Done so far, kept here so it is not re-litigated
 
 - **The component descriptions, judged line by line** (95 of them, the string Storybook renders above the
-  props table). Three copy-reviewer batches: 70 PASS, 19 WEAK, 6 FAIL. Every FAIL was rewritten, every
-  WEAK decided by the parent (17 applied, 2 left with a reason), and the reviewer's fact notes fixed
-  (`voice-input` records and hands back, it does not transcribe; `voice-output` reads text, not a message).
+  props table). Three copy-reviewer batches: 69 PASS, 20 WEAK, 6 FAIL, counted from the verdict ROWS in
+  its three reports (each summary's own tally is off by one in batch A, which is why the rows are the
+  count). Every FAIL and every WEAK rewritten; the reviewer's fact notes fixed (`voice-input` records and
+  hands back the transcription, it does not transcribe; `voice-output` reads text, not a message).
   Surface total 6,194 chars, longest 108, 0 em dash, 0 over three paragraphs. Rule (l) cannot see wording,
   which is why this pass needed the reviewer and not a gate.
 - **The story `argTypes` surface, all of it** (14 files, 25 sites). Rationale moved to `//` comments. The
