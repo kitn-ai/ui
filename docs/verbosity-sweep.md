@@ -84,7 +84,7 @@ surfaces are measured clean, not when it is edited.
 | the widened gate | 227 files, 1,586 props, 0 over cap, self-test 10/10 | done |
 | facade prop-doc text | 94,098 -> 54,354 chars, mean 139 -> 80, 0 waivers | done |
 | rendered component descriptions with docs-system talk | 0 of 88 | done |
-| story `argTypes` descriptions (a FIFTH surface: not the component's prop docs, and they WIN in Storybook's props table) | 620 one-line values, 18 over 160, 16 with an em dash, 0 instructing | checkbox done as the example; the rest queued |
+| story `argTypes` descriptions (a FIFTH surface: not the component's prop docs, and they WIN in Storybook's props table) | **515 values read, 0 over 160, 0 em dash** (26 findings across 14 files, all rewritten, 0 waived, rule (m) of `lint-story-conventions`) | done |
 | element docstrings | 100 of 100 present, 75,917 -> ~7.8 KB, mean 808 -> 69, longest 161 | done |
 | component page tops (description <= 100, lede <= 140, aside <= 200, no em dash, no instruction, lede not restating) | 0 offenders across 63 pages, 88 docs tests green, verify:docs exit 0 | done |
 | concept pages over cap (guides, patterns, examples) | 60 | paragraphs <= 4 lines |
@@ -99,7 +99,15 @@ the extracted text length). It runs inside the docs vitest step, so no workflow 
 `description` values. They are not the component's prop docs and they win in Storybook, which is why props
 still read verbose after the component-side trim. `components/checkbox/checkbox.stories.tsx` is the worked
 example: a three-paragraph component description became one statement, six argType descriptions became one
-sentence each, and the deleted rationale is a `//` comment above the meta.
+sentence each, and the deleted rationale is a `//` comment above the meta. **Swept and guarded now**: 26
+findings across 14 files, all rewritten, and rule (m) of `lint-story-conventions` holds the 160 cap and
+bans the em dash.
+
+**The counter is the GUARD's counter, and the guard's surface is narrower than a grep's.** This paragraph
+said 620 one-line values, 18 over the cap and 16 em dashes; that was a text scan that counted fixture
+objects carrying a `description` (a choice list's `'N. Virginia — closest.'`) and story-level blurbs. Rule
+(m) reads the `argTypes` ENTRIES, the surface that renders in the props table: **515** of them on today's
+tree. When a number here and a number in a dated handoff disagree, re-run the guard's derivation.
 
 **Every hand-written list the parent produced for this sweep was WRONG**, four times: a floating-things
 list that omitted composer, a `component:` grep that matched a description field, a docs page list that
@@ -121,6 +129,16 @@ Two blind spots the passes found, both worth keeping:
 
 ## Follow-ups this sweep must not lose
 
+- **The story/component DESCRIPTION wording is the pass that is only partly judged.** `lint-story-conventions`
+  rule (l) passes mechanically, but that rule cannot tell whether a description TEACHES or INVENTORIES.
+  The copy reviewer has judged 10 components (the calibration sample: lightbox, attachments, kbd,
+  image-artifact, chat-thread, agent-card, message, tooltip and two more) plus the 14 docs-talk fixes; the
+  95 rendered component descriptions are otherwise unjudged. Derive the list with the reader in
+  `packages/ui/scripts/lint-story-conventions.mjs` (`findDescriptionDocsTalk`) rather than a grep: a
+  `description:` scan counts `docs.description.story`, fixture data and `parameters` that never render.
+- **The three worst patterns the reviewer named, still to sweep in the unjudged descriptions:** the top
+  description as the props table in prose, a feature inventory where the preview is the copy, and a lede
+  restating its own frontmatter line.
 - **`verify:docs` has a hole for HISTORICAL `kai-` names in prose.** Its `knownTokens` set is built from
   quoted `kai-…` literals and JSX tags in `packages/ui/src`, so it can only recognise a token the kit
   still names. Trimming `chat-workspace.tsx`'s docstring removed the last mention of
@@ -143,11 +161,20 @@ Two blind spots the passes found, both worth keeping:
   cannot cross the manager/preview boundary, so the fix is `render`). It is queued behind the lane that
   currently owns that file. Until it lands, the trap lives only in this paragraph and in the handoff,
   which is exactly the duplication this sweep is removing.
-- `lint:prop-docs` covers `src/web-components/**` today; widen it to `src/components/**` when batch 1
-  of that tree lands, or the Solid side regrows the same long tail.
+- `lint:prop-docs` covers BOTH roots now (`src/web-components/**` and `src/components/**`): 227 facades,
+  1,586 props, 0 over the cap, 0 waived. The two blind spots below are closed.
 
 ## Done so far, kept here so it is not re-litigated
 
+- **The story `argTypes` surface, all of it** (14 files, 25 sites). Rationale moved to `//` comments. The
+  copy reviewer read every rewrite (17 PASS, 7 WEAK, 1 FAIL) and its FAIL plus five WEAK were applied too.
+  The guard is rule (m), mutation-proven on the tree both ways (an em dash and a 168-char description each
+  turn the run red).
+- **The six worst Solid prop-doc files** (`chat-thread`, `builder-panel`, `input`, `nav`, `form`,
+  `overlay`): 118 documented props, all 46 reviewer verdicts (11 FAIL, 35 WEAK) judged and applied, 9 of
+  them deliberately different from the reviewer's suggested text. `llms-full.txt` 352,800 -> 320,495 bytes.
+- The two `audio-visualizer` facts that were wrong: only aurora reads the theme colour pipeline, so the
+  source comment and the story description both said something `wave.glsl.ts` never does.
 - The four rendered descriptions that talked about the documentation: `lightbox` (the owner's example),
   `audio-visualizer` (five paragraphs, including which stories exist and which are sidebar-only),
   `chat-thread` (what the story pins), `scroll-button` (see the other story), `settings-group` (lives in
