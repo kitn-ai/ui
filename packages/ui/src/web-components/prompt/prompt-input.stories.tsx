@@ -187,10 +187,8 @@ const meta = {
     layout: 'fullscreen',
     docs: {
       description: specDescription('kai-prompt-input', [
-          '`<kai-prompt-input>` is the framework-agnostic web component version of the chat composer: an auto-resizing textarea with a send button and optional suggestion chips, in Shadow DOM so the host page\'s CSS cannot leak in and the kit\'s styles cannot leak out.',
-          'Set the `triggers` JS property to a list of `{ char, kind, items }` definitions and typing the trigger char (e.g. `/` for skills, `@` for agents/plugins) opens a menu that inserts an atomic pill; `kai-submit` and `kai-value-change` carry the structured `doc` and `entities` alongside the flattened `value`. Leave `value` unset to let the element manage its own input state, and seed `attachments` to pre-populate staged files.',
-          '`loading` shows the busy state while a response streams and `disabled` blocks input; `<kai-action id icon tooltip>` children become extra ghost icon buttons in the left toolbar, each firing a `kai-toolbar-action` CustomEvent whose `detail.action` is the action id.',
-        ]),
+        'The prompt row: a rich text editor with its send button and toolbar.',
+      ]),
     },
   },
 } satisfies Meta;

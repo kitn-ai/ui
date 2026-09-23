@@ -10,10 +10,13 @@ const meta = {
   tags: ['autodocs'],
   parameters: {
     layout: 'padded',
+    // One shared `name` is what makes the set a single control to the browser: one tab stop, arrow keys
+    // between members, mutual exclusion, form participation, "2 of 3" from a screen reader. That comes
+    // from the native input, not from code here. `name` defaults to a generated id, so the set stays
+    // exclusive even when nothing is submitted.
     docs: {
       description: componentDescription([
-        'A bordered, divided list of rows over real `<input type="radio">`s that share a `name`: the kit\'s "pick exactly one" control, with each row a `<label>` so the whole row is a click target. `Radio` is the single control, for laying the group out yourself.',
-        'The shared `name` is what makes the set ONE control to the browser -- one tab stop, arrow keys between members, mutual exclusion, form participation, "2 of 3" from a screen reader -- and that behaviour comes from the native input rather than from code in this kit. `name` defaults to a generated id, so the set is exclusive even when nothing is submitted; `required` reaches the native attribute and nothing else is validated.',
+        'A list of radio rows where exactly one choice is selected.',
       ]),
     },
   },

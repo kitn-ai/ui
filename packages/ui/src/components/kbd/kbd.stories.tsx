@@ -13,7 +13,7 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'Displays a keyboard shortcut as key caps, one per key, with the glyph the platform shows. Display only; it does not bind the keys.',
+        'Displays a keyboard shortcut as key caps, one per key. Display only; it does not bind the keys.',
       ]),
     },
   },

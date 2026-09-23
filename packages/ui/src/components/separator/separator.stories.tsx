@@ -8,10 +8,11 @@ const meta = {
   tags: ['autodocs'],
   parameters: {
     layout: 'padded',
+    // `vertical` is full-height, so its parent needs a height for the line to have one.
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'A `role="separator"` divider line. Set `orientation`: `horizontal` (full-width) or `vertical` (full-height; the parent needs a height).',
+        'A divider line between two pieces of content.',
       ]),
     },
   },

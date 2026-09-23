@@ -46,8 +46,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'A bordered code card, typically emitted by the Markdown renderer for fenced blocks. `CodeBlock` is the container, `CodeBlockCode` renders the (Shiki) highlighted source, and `CodeBlockGroup` is a flex row for a filename + copy button.',
-        'Pass the source string and a `language` to `CodeBlockCode`; override `theme` if needed.',
+        'A bordered card for a block of source code.',
       ]),
       controls: { exclude: ['use:eventListener'] },
     },

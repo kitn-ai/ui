@@ -7,6 +7,8 @@ import { componentDescription } from '../../stories/docs/web-component-controls'
 
 // Owns the takeover: inert siblings, focus capture and restore, Escape -> `onBack`. The
 // stories mount it in a bounded, positioned canvas so the surface has room to fill.
+// Closed, it leaves layout entirely rather than rendering hidden; while open it is an
+// absolutely positioned surface, so its mount point has to be positioned and bounded.
 const meta = {
   title: 'Components/Screen',
   component: Screen,
@@ -16,8 +18,7 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'A full-bleed overlay destination. It fills whatever it is mounted in while `open`, renders a back-header with the `title`, and removes itself from layout when closed.',
-        'It handles the takeover details: it inerts sibling elements, captures and restores focus, and fires `onBack` on the back button or Escape. You drive the swap by setting `open` (your own routing); the surface positions itself absolutely, so give it a positioned, bounded parent.',
+        'A full-bleed overlay with a back header that takes over the surface it is mounted in.',
       ]),
     },
   },

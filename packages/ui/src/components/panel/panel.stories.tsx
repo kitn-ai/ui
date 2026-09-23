@@ -12,9 +12,11 @@ const meta = {
   tags: ['autodocs'],
   parameters: {
     layout: 'centered',
+    // Painted from kit tokens, so a `--kai-color-*` override retints the chrome and the web components
+    // inside it. Back and close are slotted content in the header, never props.
     docs: {
       description: componentDescription([
-        'The widget panel frame and chrome, public: surface, optional standalone frame (border, radius, shadow), the header row (leading controls, title, trailing controls), the view container, and a footer strip. Painted entirely from kit tokens, so a `--kai-color-*` override retints the chrome with the web components inside it. Back and close are slotted content in the header, never props.',
+        'The frame an app view sits in.',
       ]),
     },
   },

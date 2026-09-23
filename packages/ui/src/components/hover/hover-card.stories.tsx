@@ -9,10 +9,11 @@ const meta = {
   tags: ['autodocs'],
   parameters: {
     layout: 'padded',
+    // A safe bridge keeps it open as the pointer travels onto the card. Reach for `Dropdown`
+    // when the floating surface carries actions, and `Tooltip` for a one-line label.
     docs: {
       description: componentDescription([
-        'A floating card shown on hover/focus of its `trigger`, with a safe bridge so it stays open as the pointer moves onto it. Use for non-essential previews; reach for `Dropdown` if it needs actions, `Tooltip` for a one-line label.',
-        'Pass the trigger as `trigger` and the body as `children`; tune `openDelay` / `closeDelay` (ms).',
+        'A floating card that opens on hover or focus of the element it wraps.',
       ]),
     },
   },

@@ -10,11 +10,11 @@ const meta = {
   tags: ['autodocs'],
   parameters: {
     layout: 'padded',
+    // Why it is a real `<input type="range">`, why `min`/`max` have no defaults and how
+    // the filled track is computed: see the `Slider` docstring in `slider.tsx`.
     docs: {
       description: componentDescription([
-        'A slider. A real `<input type="range">` behind `appearance: none` — never a `<div>` with a drag handler — so arrows, Home, End, PageUp/PageDown, touch dragging, form participation and the `slider` role all come from the browser and are correct by construction.',
-        'What the component adds is the **filled track**. The kit paints the portion left of the thumb from a `--kai-range-fill` custom property, and the percentage is arithmetic over `min`, `max` and the current value — three things the component already has, so no caller ever computes it.',
-        '`min` and `max` are required and have no defaults. A range with no bounds is a slider-shaped guess, and the guess belongs to whoever knows what the number means. Everything else the component does not own is forwarded to the input: `id`, `name`, `disabled`, `required`, `aria-*`, any `data-*` hook and the DOM events.',
+        'A control for picking a value from a numeric range.',
       ]),
     },
   },

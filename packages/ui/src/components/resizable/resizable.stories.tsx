@@ -9,11 +9,12 @@ const meta = {
   tags: ['autodocs'],
   parameters: {
     layout: 'padded',
+    // `handle` picks the affordance: `line` (default hairline), `grip` (dotted) or `none`. Panels take a
+    // `defaultSize` in percent with optional `minSize` / `maxSize`, and the group needs a sized container.
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'A draggable split layout: `ResizablePanelGroup` lays out `ResizablePanel` children along `orientation`, divided by a `ResizableHandle`. Pick its affordance with `handle`: `line` (default hairline), `grip` (dotted), or `none`.',
-        'Give panels a `defaultSize` (percent) plus optional `minSize`/`maxSize`. The group needs a sized container.',
+        'A split layout of draggable panels separated by handles.',
       ]),
     },
   },

@@ -10,7 +10,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'An inline citation chip with a hover-card preview. Compose `Source` (root, holds the `href`) with `SourceTrigger` (the pill: `label` for custom text or a citation number, `showFavicon` for the site icon) and `SourceContent` (the `title`/`description` preview). `SourceList` lays several out side by side.',
+        'An inline citation chip that previews its source on hover or keyboard focus.',
       ]),
       controls: { exclude: ['use:eventListener'] },
     },

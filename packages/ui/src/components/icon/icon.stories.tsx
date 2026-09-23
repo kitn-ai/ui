@@ -17,9 +17,11 @@ const meta = {
   tags: ['autodocs'],
   parameters: {
     layout: 'padded',
+    // `renderIcon(name, opts)` resolves one: a curated name maps to a lucide-solid glyph, a URL,
+    // a path or a data URI renders an image, and anything else renders as text.
     docs: {
       description: componentDescription([
-        '`renderIcon(name, opts)` resolves an item icon. A curated name maps to a lucide-solid glyph; a URL, path, or data URI renders an `<img>`; anything else renders as text. Used for `kai-menu` / `kai-command` item icons, and exposed as the web component `<kai-icon name="...">`.',
+        'One icon, from a curated name, an image source, or plain text.',
       ]),
     },
   },

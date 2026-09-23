@@ -42,8 +42,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'The scrollable transcript region that sticks to the bottom as content streams in, unless the user scrolls up. Wrap messages in `ChatContainerRoot` (scroll region), place them in `ChatContainerContent`, and end with `ChatContainerScrollAnchor`.',
-        'Give the root a fixed height so it can scroll.',
+        'A scroll region that follows a streaming transcript until the reader scrolls up.',
       ]),
       controls: { exclude: ['use:eventListener'] },
     },

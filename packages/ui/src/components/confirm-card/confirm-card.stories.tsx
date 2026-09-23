@@ -94,8 +94,7 @@ const meta = {
     controls: { exclude: ['data', 'host', 'hostElement', 'class', 'controllerRef'] },
     docs: {
       description: componentDescription([
-        'The SolidJS layer behind `<kai-confirm>`. Pass a `host` (a `CardHost`) to receive the emitted `CardEvent`s directly (the native-host path), or wrap in a `CardProvider`. Activating an action emits the `action` verb and resolves the card.',
-        'The controls flatten `ConfirmCardData` — switch `tone`, rewrite `body`, or edit the `actions` JSON — and the card re-renders from them.',
+        'A card that asks the reader to confirm or cancel an action.',
       ]),
     },
   },

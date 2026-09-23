@@ -22,8 +22,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'A composable empty-state block (modeled on shadcn/ui `Empty`): compose `EmptyHeader` (with `EmptyMedia`, `EmptyTitle`, `EmptyDescription`) and an optional `EmptyContent` for actions or prompt suggestions.',
-        'Set `EmptyMedia` `variant` to `icon` for a muted tile or `default` for a bare slot (avatar/illustration). Drop it into blank chats, empty lists, no-results panes, or file drop zones.',
+        'A placeholder block for a region with nothing to show yet.',
       ]),
       controls: { exclude: ['use:eventListener'] },
     },

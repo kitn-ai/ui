@@ -18,8 +18,7 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'Displays an image the model produced, as base64 or raw bytes. For an image you already have an address for, use Image.',
-        'Displays image data a model or a tool produced.',
+        'Displays an image the model produced, as base64 or raw bytes. Image is for an address the app already has.',
       ]),
     },
   },

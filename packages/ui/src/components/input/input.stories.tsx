@@ -16,7 +16,7 @@ const meta = {
         exclude: ['leading', 'trailing', 'class', 'children'],
       },
       description: componentDescription([
-        'The token-themed single-line text field. A `label`, `hint`, and `error` stack around a field row that holds an optional `leading` affix, the `<input>`, and an optional `trailing` affix. Pick density with `size`. Set `invalid` (or a non-empty `error`) for the destructive state.',
+        'A single-line text field with a label, a hint and an error message.',
       ]),
     },
   },

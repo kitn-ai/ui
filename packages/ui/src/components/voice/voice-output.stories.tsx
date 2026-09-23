@@ -14,8 +14,7 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'A read-aloud button. By default it speaks `text` through the browser `speechSynthesis` API; the button is inert when neither native synthesis nor a model seam is available.',
-        'Set `onSynthesize` to bypass the native path and run your own TTS model: given the text, return an audio `Blob` and it plays that instead. `disabled` forces the inert state.',
+        'A button that reads text aloud.',
       ]),
     },
   },

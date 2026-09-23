@@ -7,11 +7,8 @@ import { Switch } from '../switch/switch';
 import { Select } from '../select/select';
 import { componentDescription } from '../../stories/docs/web-component-controls';
 
-// The building blocks in isolation — no modal/page host. A `SettingsGroup` is a
-// titled, bordered card that stacks `SettingItem` rows with hairline dividers;
-// each row pairs a label/description with an optional control (`Switch`,
-// `Segmented`, `Select`, or nothing). The composed settings SCREEN that assembles
-// these into a two-pane modal/page lives in `Labs/Settings`.
+// The building blocks in isolation, no modal/page host. The composed settings SCREEN
+// that assembles these into a two-pane modal/page lives in `Labs/Settings`.
 
 /** The kit's `Select`. This used to be a hand-styled native `<select>` with a note
  *  saying a real build would swap in a menu trigger; the kit owns a select now, so the
@@ -47,7 +44,7 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener', 'children'] },
       description: componentDescription([
-        'The settings building blocks: `SettingsGroup` is a titled, bordered card that stacks `SettingItem` rows, each pairing a label and description with an optional control (`Switch`, `Segmented`, `Select`, or none).',
+        'A titled, bordered card that stacks settings rows, each pairing a label with an optional control.',
       ]),
     },
   },

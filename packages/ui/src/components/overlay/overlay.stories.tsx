@@ -5,9 +5,9 @@ import { createPresence, usePosition, useDismiss } from './overlay';
 import { buttonVariants } from '../button/button';
 
 /**
- * `overlay.tsx` is not a component; it's the small DIY toolkit that every
- * floating surface in the kit (Tooltip, HoverCard, Dropdown) is built from,
- * replacing the former third-party UI dependency. Three primitives:
+ * `overlay.tsx` is not a component; it is the toolkit that every floating
+ * surface in the kit (Tooltip, HoverCard, Dropdown) is built from. Three
+ * primitives:
  *
  * - `usePosition(ref, floating, opts)`: anchors `floating` to `ref` via
  *   @floating-ui/dom with flip/shift, tracking it on scroll/resize.
@@ -25,10 +25,7 @@ const meta: Meta = {
     layout: 'padded',
     docs: {
       description: {
-        component: [
-          'The hooks toolkit (not a renderable component) behind `Tooltip`, `HoverCard`, and `Dropdown`. `usePosition(ref, floating, opts)` anchors a node via `@floating-ui/dom`; `createPresence(open)` keeps it mounted through its CSS exit animation; and `useDismiss({ enabled, onDismiss, refs })` handles Escape + outside-click. An `As` helper renders a polymorphic trigger.',
-          'Reach for `Tooltip` / `HoverCard` / `Dropdown` first; use these only for a floating surface they don\'t cover.',
-        ].join('\n\n'),
+        component: 'The shared primitives a floating surface is built from.',
       },
     },
   },

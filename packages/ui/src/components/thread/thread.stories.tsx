@@ -55,7 +55,7 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener', 'messages', 'empty', 'controllerRef'] },
       description: componentDescription([
-        'Displays the scrolling message list of a chat, for when you bring your own header and composer; `<kai-chat>` is the whole surface in one element.',
+        'The scrolling message list of a chat, without the header or the composer.',
       ]),
     },
   },

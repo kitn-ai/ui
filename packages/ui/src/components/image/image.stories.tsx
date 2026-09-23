@@ -15,8 +15,7 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'Displays an image the app already has an address for. Model-produced bytes belong on Image artifact.',
-        'Displays an image at a URL: https, a `data:` URI, or an object URL.',
+        'Displays an image the app already has an address for. Image artifact is for data a model produced.',
       ]),
     },
   },

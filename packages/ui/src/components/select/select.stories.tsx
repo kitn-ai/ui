@@ -18,8 +18,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'A real native `<select>` behind `appearance: none`, in the same box as `Input`, with the kit\'s own chevron drawn over it.',
-        'Native rather than a hand-built listbox, deliberately: the platform control brings the mobile picker, desktop type-ahead, form participation and the OS accessibility tree with it, and the trade is that the open list stays OS chrome no stylesheet can reach. What the kit adds is that the open list follows the kit\'s light/dark mode rather than the OS\'s. Options render in full, with no truncation, re-ordering or de-duplication, and everything the component does not own (`id`, `name`, `required`, `multiple`, `size`, `aria-*`, `data-*`, DOM events) is forwarded to the `<select>`.',
+        'A native select styled to match the other input controls.',
       ]),
     },
   },

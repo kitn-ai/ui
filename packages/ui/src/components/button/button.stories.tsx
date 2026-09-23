@@ -14,7 +14,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'A button that triggers an action; icon-only buttons need a label so screen readers can announce them.',
+        'A button that triggers an action.',
       ]),
     },
   },

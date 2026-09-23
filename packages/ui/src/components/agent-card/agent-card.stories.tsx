@@ -12,7 +12,7 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'One agent state at a glance in a multi-agent workspace; the focused agent belongs in the thread or the panel.',
+        "One agent's state in a multi-agent workspace.",
       ]),
     },
   },

@@ -127,8 +127,7 @@ const meta = {
     layout: 'fullscreen',
     docs: {
       description: specDescription('kai-composer', [
-        '`<kai-composer>` is the framework-agnostic web component for rich prompt input: it types like a plain textarea and supports atomic inline entity pills (skills, mentions) through `/` and `@` trigger menus, with keyword highlighting over the CSS Custom Highlight API.',
-        'Not a rich-text editor: no bold or italic, entity pills are the only non-text nodes, and the content surface is `contenteditable="plaintext-only"`. It emits one structured `{ doc, text, entities }` payload rather than markup.',
+        'The bare prompt editor: a reference stays one atomic pill inside the text, with no send button or toolbar.',
       ]),
     },
   },

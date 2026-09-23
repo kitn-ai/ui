@@ -14,8 +14,7 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'Displays one chat turn: the body, its reasoning and tool calls, and the actions row.',
-        'Lays itself out by speaker: a bubble for the user, a transparent body for the assistant.',
+        'Displays one chat turn, with its reasoning, tool calls and actions.',
       ]),
     },
   },

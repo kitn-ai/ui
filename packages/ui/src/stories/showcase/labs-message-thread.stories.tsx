@@ -141,6 +141,9 @@ const HTML_SNIPPET = `<!-- Compose your own message list: one <kai-message> per 
   turn.addEventListener('kai-message-action', (e) => console.log(e.detail));
 </script>`;
 
+// The per-message seams this page demonstrates (`before-body`, `after-body`, `avatar`) and
+// the `::part` names are on the `kai-message` element meta and in the
+// `compose-message-thread` guide.
 const meta = {
   title: 'Labs/Message Thread',
   parameters: {
@@ -149,8 +152,7 @@ const meta = {
       description: {
         component:
           [
-            'A compose-your-own message list built from standalone `<kai-message>` elements: the keystone of laying out a thread yourself while keeping the kit\'s rich message rendering.',
-            'Three per-message composition seams: `before-body` (INJECT, a header above the content -- a model-name label, a role/timestamp line), `after-body` (INJECT, a row below the action bar -- a citation/sources row, a token-cost line), and `avatar` (REPLACE, your node stands in for the built-in avatar rail; pair it with `avatar="none"` to omit the rail entirely). `::part(row)`, `::part(bubble)`, `::part(content)`, `::part(actions)` and `::part(avatar)` are exposed for styling from outside the shadow root.',
+            'A message thread assembled from standalone `<kai-message>` elements, one turn per element.',
           ].join('\n\n'),
       },
       // The snippet lives on the STORY, not here. It did live here, and a

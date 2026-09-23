@@ -11,10 +11,12 @@ const meta = {
   tags: ['autodocs'],
   parameters: {
     layout: 'padded',
+    // Compose `PromptInputActions` for the send/stop controls. `onSubmit` fires on Enter without Shift,
+    // and `isLoading` / `disabled` cover the in-flight and read-only states.
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'The chat composer: an auto-resizing `PromptInputTextarea` plus a `PromptInputActions` toolbar for your send/stop controls. Control text with `value` + `onValueChange` (or leave it uncontrolled); `onSubmit` fires on Enter without Shift. `isLoading` and `disabled` cover the in-flight and read-only states.',
+        'An auto-resizing text area for writing a chat message.',
       ]),
     },
   },

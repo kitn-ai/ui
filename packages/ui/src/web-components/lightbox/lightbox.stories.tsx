@@ -31,15 +31,7 @@ const meta: Meta = {
   parameters: {
     docs: {
       description: {
-        component:
-          '`<kai-lightbox>` shows your own markup bigger, centered over a dimmed page. '
-          + 'The default slot is the TRIGGER and `slot="content"` is the media. It composes the '
-          + "kit's Dialog, so it inherits Escape, backdrop dismissal, the focus move and restore, "
-          + 'the Tab trap and `role="dialog" aria-modal` rather than reimplementing them. The '
-          + 'modal carries its own close (X) button — on by default, `show-close="false"` to remove it — '
-          + 'and a click inside `slot="content"` dismisses it — on by default too, with '
-          + '`close-on-content-click="false"` to keep it open. A click on an interactive element '
-          + 'inside the content is let through either way, so a caption link or a download button works.',
+        component: 'Enlarges the markup wrapped around it, centered over a dimmed page.',
       },
     },
   },

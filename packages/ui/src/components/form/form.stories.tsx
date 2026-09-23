@@ -186,11 +186,12 @@ const meta = {
     // composed in `render` and moving them would do nothing. Hide the dead controls
     // rather than ship a panel where half the rows are inert.
     controls: { exclude: ['data', 'host', 'hostElement', 'class', 'controllerRef', 'values', 'defaultValues'] },
+    // The Solid layer behind `<kai-form>`: pass a `host` (a `CardHost`) to receive emitted
+    // `CardEvent`s directly, or wrap it in a `CardProvider`. The definition's `title` and
+    // `description` fill the card heading and its description, the one built-in card that fills both.
     docs: {
       description: componentDescription([
-        'The SolidJS layer behind `<kai-form>`: a JSON-Schema definition rendered into themed, accessible widgets inside `Card` chrome. Pass a `host` (a `CardHost`) to receive emitted `CardEvent`s directly, or wrap in a `CardProvider`. Typing is local and reported through `onValuesChange`; only a valid submit emits `submit` with the coerced object.',
-        "The definition's `title` and `description` become the card heading and its description — the form card is the one built-in card that fills both.",
-        'The controls flatten the definition root. Edit `properties` as JSON to add or retype a field; stretch `description` to watch the shell wrap it.',
+        'Renders a JSON Schema definition as a form card.',
       ]),
     },
   },

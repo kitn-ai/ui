@@ -84,6 +84,7 @@ surfaces are measured clean, not when it is edited.
 | the widened gate | 227 files, 1,586 props, 0 over cap, self-test 10/10 | done |
 | facade prop-doc text | 94,098 -> 54,354 chars, mean 139 -> 80, 0 waivers | done |
 | rendered component descriptions with docs-system talk | 0 of 88 | done |
+| rendered component descriptions (the story blurb above the props table), judged on WORDING | **95 judged in three reviewer batches (70 PASS, 19 WEAK, 6 FAIL); every FAIL and WEAK decided, 6,194 chars total, longest 108, 0 em dash, 0 over three paragraphs** | done |
 | story `argTypes` descriptions (a FIFTH surface: not the component's prop docs, and they WIN in Storybook's props table) | **515 values read, 0 over 160, 0 em dash** (26 findings across 14 files, all rewritten, 0 waived, rule (m) of `lint-story-conventions`) | done |
 | element docstrings | 100 of 100 present, 75,917 -> ~7.8 KB, mean 808 -> 69, longest 161 | done |
 | component page tops (description <= 100, lede <= 140, aside <= 200, no em dash, no instruction, lede not restating) | 0 offenders across 63 pages, 88 docs tests green, verify:docs exit 0 | done |
@@ -129,16 +130,18 @@ Two blind spots the passes found, both worth keeping:
 
 ## Follow-ups this sweep must not lose
 
-- **The story/component DESCRIPTION wording is the pass that is only partly judged.** `lint-story-conventions`
-  rule (l) passes mechanically, but that rule cannot tell whether a description TEACHES or INVENTORIES.
-  The copy reviewer has judged 10 components (the calibration sample: lightbox, attachments, kbd,
-  image-artifact, chat-thread, agent-card, message, tooltip and two more) plus the 14 docs-talk fixes; the
-  95 rendered component descriptions are otherwise unjudged. Derive the list with the reader in
-  `packages/ui/scripts/lint-story-conventions.mjs` (`findDescriptionDocsTalk`) rather than a grep: a
-  `description:` scan counts `docs.description.story`, fixture data and `parameters` that never render.
-- **The three worst patterns the reviewer named, still to sweep in the unjudged descriptions:** the top
-  description as the props table in prose, a feature inventory where the preview is the copy, and a lede
-  restating its own frontmatter line.
+- **A story description and its docs page lede are two files, one fact.** 9 of the 95 component
+  descriptions are near-identical to their page's `description`/`kai-lede`; two (`kai-lightbox`,
+  `kai-prompt-input`) are byte-identical to the element docstring BY DESIGN (rule 8: one source, two
+  audiences). Decide in PASS D whether a page-top and a story blurb may be the same sentence, or the
+  page should add the one fact the story cannot carry.
+- **The wording half needs the reviewer, and always will.** `lint-story-conventions` rule (l) can only
+  count paragraphs and catch docs-talk; it cannot tell whether a description TEACHES or INVENTORIES. All
+  95 rendered component descriptions have now been judged once (3 batches), so the counter starts from a
+  judged floor: any later edit to one of them needs a reviewer pass, not just a green lint.
+- **The reviewer's three worst patterns, for the next component that lands:** the top description as the
+  props table in prose, a feature inventory where the preview is the copy, and a mechanic kept in prose
+  after its prop name was removed ("driven by a plain boolean in JSX").
 - **`verify:docs` has a hole for HISTORICAL `kai-` names in prose.** Its `knownTokens` set is built from
   quoted `kai-…` literals and JSX tags in `packages/ui/src`, so it can only recognise a token the kit
   still names. Trimming `chat-workspace.tsx`'s docstring removed the last mention of
@@ -166,6 +169,12 @@ Two blind spots the passes found, both worth keeping:
 
 ## Done so far, kept here so it is not re-litigated
 
+- **The component descriptions, judged line by line** (95 of them, the string Storybook renders above the
+  props table). Three copy-reviewer batches: 70 PASS, 19 WEAK, 6 FAIL. Every FAIL was rewritten, every
+  WEAK decided by the parent (17 applied, 2 left with a reason), and the reviewer's fact notes fixed
+  (`voice-input` records and hands back, it does not transcribe; `voice-output` reads text, not a message).
+  Surface total 6,194 chars, longest 108, 0 em dash, 0 over three paragraphs. Rule (l) cannot see wording,
+  which is why this pass needed the reviewer and not a gate.
 - **The story `argTypes` surface, all of it** (14 files, 25 sites). Rationale moved to `//` comments. The
   copy reviewer read every rewrite (17 PASS, 7 WEAK, 1 FAIL) and its FAIL plus five WEAK were applied too.
   The guard is rule (m), mutation-proven on the tree both ways (an em dash and a 168-char description each

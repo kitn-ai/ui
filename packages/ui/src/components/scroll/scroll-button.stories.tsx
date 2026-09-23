@@ -56,6 +56,10 @@ function ScrollDemo(props: {
   );
 }
 
+// No `placement` prop: position it with your own absolutely positioned wrapper inside
+// the container, anchored to a non-scrolling parent. It is an opaque rounded square
+// painted with the themeable elevation (`--kai-shadow-color`) so it stays legible over
+// scrolling messages.
 const meta = {
   title: 'Components/ScrollButton',
   component: ScrollButton,
@@ -64,9 +68,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'A floating "scroll to bottom" button that reads scroll state from the enclosing `ChatContainerRoot`: it fades out while pinned to the bottom and returns once the user scrolls up.',
-        'It is an opaque rounded square with the kit\'s themeable elevation (`--kai-shadow-color`), so it stays legible over scrolling messages. `label` sets the accessible name and `showLabel` also renders it beside the arrow.',
-        'There is no `placement` prop. Position it with your own absolutely positioned wrapper inside the container, anchored to a non-scrolling parent.',
+        'A floating button that jumps a chat back to the bottom once the reader has scrolled away from it.',
       ]),
       controls: { exclude: ['use:eventListener'] },
     },

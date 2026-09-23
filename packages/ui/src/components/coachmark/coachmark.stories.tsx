@@ -18,8 +18,7 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'An anchored onboarding hint: a tinted bubble with an arrow that points at a trigger. Wrap the trigger as the default child; the bubble carries a `headline`, body `content`, and an optional `badge`.',
-        'Set `tone` to `primary` (the theme accent), `info` (blue), `success` (green), `warning` (amber), or `error` (red) — the kit tool hues. You own visibility via `open` / `defaultOpen`; the `×` fires `onDismiss` so you can record that the hint was seen.',
+        'An onboarding hint that points at the control it explains.',
       ]),
     },
   },

@@ -72,7 +72,6 @@ const meta = {
     docs: {
       description: componentDescription([
         'Displays the files attached to a prompt or cited by a message.',
-        'Pick the presentation from the space you have: a gallery, a chip row, or a detailed list.',
       ]),
       controls: { exclude: ['use:eventListener'] },
     },

@@ -11,7 +11,7 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'Sweeps a light gradient across text to signal a live "Thinking" / "Generating" status. Tune `duration` (seconds per sweep) and `spread` (gradient width, clamped 5–45); `as` sets the wrapping tag.',
+        'A light gradient that sweeps across text to signal that work is in progress.',
       ]),
     },
   },

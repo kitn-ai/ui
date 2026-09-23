@@ -54,11 +54,13 @@ const meta = {
   tags: ['autodocs'],
   parameters: {
     layout: 'padded',
+    // Fill order: up to `maxColumns` columns when wide, then 3 -> 2 -> 1 as the container narrows,
+    // and once a pane can no longer fit at its minimum the grid scrolls (vertically first).
+    // `maximizedIndex` renders one pane full-bleed; clear it to restore the grid.
     docs: {
       controls: { exclude: ['children', 'maximizedIndex'] },
       description: componentDescription([
-        'An N-pane responsive tiling grid with a min-size + scroll floor. Fills up to `maxColumns` columns when wide, then drops columns (3 -> 2 -> 1) as the container narrows so panes never squish below their minimums; once a pane can no longer fit at its minimum, the grid scrolls (vertically first) instead of shrinking. Generalizes the hand-rolled center grid from the Split Workspace demo - `kai-resizable` caps at 3 panes, this takes arbitrary N.',
-        'Set `maximizedIndex` to render a single pane full-bleed; clear it to restore the grid.',
+        'An N-pane grid that drops columns as its container narrows, then scrolls instead of squishing.',
       ]),
     },
   },

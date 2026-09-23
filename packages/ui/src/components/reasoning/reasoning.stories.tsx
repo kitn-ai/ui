@@ -11,9 +11,12 @@ const meta = {
   tags: ['autodocs'],
   parameters: {
     layout: 'padded',
+    // Compose `Reasoning` (root), `ReasoningTrigger` (the toggle) and `ReasoningContent` (the body, with
+    // `markdown` for a markdown string). `isStreaming` opens it during generation and closes it when the
+    // stream ends.
     docs: {
       description: componentDescription([
-        'A collapsible disclosure for an assistant\'s chain-of-thought. Compose `Reasoning` (root) with `ReasoningTrigger` (the toggle) and `ReasoningContent` (the body; pass `markdown` to render a markdown string). Leave it uncontrolled or drive it with `open` + `onOpenChange`; `isStreaming` auto-opens during generation and closes when it ends.',
+        "Shows what the model thought before it answered.",
       ]),
       controls: { exclude: ['use:eventListener'] },
     },

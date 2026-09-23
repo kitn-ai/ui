@@ -59,9 +59,7 @@ const meta = {
     layout: 'centered',
     docs: {
       description: {
-        component:
-          'Experimental visualizer looks on the shipped ShaderCanvas. ' +
-          'Pick a state to run the agent choreography; tune the rest live.',
+        component: 'Prototype visualizer looks that are not component variants yet.',
       },
     },
   },

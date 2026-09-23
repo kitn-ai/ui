@@ -17,11 +17,14 @@ const meta = {
   tags: ['autodocs'],
   parameters: {
     layout: 'padded',
+    // Rows must be DIRECT children (wrap one in a `<div>` and the dividers and corners land on the
+    // wrapper) and are added and removed rather than hidden: a `hidden` row stays in the sibling chain,
+    // so the row after it paints its hairline under the frame's top edge. `--kai-row-radius` sets the
+    // corner radius for the whole list and the frame is stylable through `::part(group)`. It carries no
+    // `role` of its own: pass `role="group"` with `aria-label` when the rows form one cluster.
     docs: {
       description: componentDescription([
-        'The frame that turns loose rows into a list: one bordered, rounded card with a hairline between adjacent rows, the first row rounded at the top only and the last at the bottom only. It renders no geometry itself -- the rows read the corner radius and the divider from custom properties the group sets by position -- so a list of `Row`s and a list of `SettingItem`s are framed identically.',
-        'COMPOSITION ONLY: the group takes children, not `items`, so which rows exist, in what order, what an empty list means and whether a row is allowed are the application\'s business. Rows must be DIRECT CHILDREN (wrap one in a `<div>` and the divider and the corners land on the wrapper instead) and are added and removed rather than hidden, because a `hidden` row stays in the sibling chain and the row after it paints its hairline under the frame\'s top edge.',
-        '`--kai-row-radius` is the corner-radius knob for the whole list, and the frame is styleable from outside via `::part(group)`. The frame carries no `role` of its own: pass `role="group"` with `aria-label` when the rows are one meaningful cluster.',
+        'Turns a set of loose rows into one framed list.',
       ]),
     },
   },

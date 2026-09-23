@@ -78,7 +78,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'The `collapsed` boolean on `<kai-resizable-item>`: a bare `<kai-resizable-item collapsed>` written in framework JSX (React / Solid / Vue / Svelte) collapses the panel at the **first** render, with no imperative `setAttribute` needed. `hidden` as a JSX boolean does nothing on a custom element -- it sets neither the attribute nor the IDL property, so `<kai-resizable>` never sees it and the panel renders visible.',
+          'A resizable panel that starts collapsed at the first render.',
       },
     },
   },

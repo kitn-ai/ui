@@ -12,8 +12,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'A bordered, divided list of rows over real `<input type="checkbox">`s: the kit\'s "pick any number" control, and `RadioGroup`\'s sibling, so switching a field between "one of" and "any of" is a one word change.',
-        'Every row is a `<label>` wrapping its box, so the whole row is a click target and the row text is the accessible name, with no ARIA involved. Unlike `RadioGroup`, `name` has no default: a radio set needs a shared name to be exclusive and checkboxes do not, so a generated one would submit the selection under a key nobody chose. Nothing is validated -- "at least one" and any cap are the application\'s rules.',
+        'A list of checkboxes as rows, for choosing any number of options; the radio group is its one-choice sibling.',
       ]),
     },
   },

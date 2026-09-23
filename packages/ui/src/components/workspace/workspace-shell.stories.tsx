@@ -42,9 +42,7 @@ const meta = {
       // Playground wires up, so a row for it would be inert.
       controls: { exclude: ['controllerRef', 'startCollapsed', 'endCollapsed'] },
       description: componentDescription([
-        'The chat-agnostic workspace layout shell: five regions (header, start aside, main, end aside, footer) with drag handles between the columns, per-aside collapse, a collapse-below-width breakpoint, and a mobile drawer mode.',
-        'It knows nothing about chat. A file tree in `start` is as valid as a conversation rail. Each region renders only when you pass content for it.',
-        'The Playground drives the asides in CONTROLLED mode so the collapse toggles track the panel; in your own app you can omit `startCollapsed` / `endCollapsed` and let the shell own the state from `defaultStartCollapsed` / `defaultEndCollapsed`.',
+        'A workspace layout with resizable side panels around a main region.',
       ]),
     },
   },

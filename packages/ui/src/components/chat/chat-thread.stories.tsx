@@ -98,7 +98,7 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener', 'messages', 'controllerRef', 'cardHostElement', 'onMessageAction'] },
       description: componentDescription([
-        'The full chat surface: header, message thread, suggestions and composer, plus a second list view (`ConversationPanel`) behind a header toggle when `conversations` and a `store` are set. The list view replaces the content area whole: no composer, no suggestions, one floating "New conversation" pill.',
+        'A complete chat surface, from the conversation list down to the prompt input.',
       ]),
     },
   },

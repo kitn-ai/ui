@@ -10,10 +10,12 @@ const meta = {
   tags: ['autodocs'],
   parameters: {
     layout: 'padded',
+    // `pressed`/`defaultPressed` mirror `Switch`'s `checked`/`defaultChecked`: a chip is a
+    // button (`aria-pressed`), not a switch, checkbox or radio. There is no `ChipGroup`
+    // wrapper and no grouping logic to own, so a row of chips is a plain flex-wrap div.
     docs: {
       description: componentDescription([
-        'A small pill button for a two-state, chip-shaped toggle (`aria-pressed`). Controlled via `pressed`, or uncontrolled from `defaultPressed` — the same shape as `Switch`\'s `checked`/`defaultChecked`, renamed because a chip is a BUTTON (`aria-pressed`), not a switch/checkbox/radio.',
-        'No `ChipGroup` wrapper exists: a row of chips is a plain `flex flex-wrap gap-1.5` div — there is no shared selection state or roving tabindex to own (unlike `RadioGroup`/`Segmented`, which genuinely have grouping logic). See "Row" below for that idiom.',
+        'A pill-shaped button that toggles between two states.',
       ]),
     },
   },

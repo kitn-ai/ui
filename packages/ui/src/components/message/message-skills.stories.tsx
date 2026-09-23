@@ -11,11 +11,11 @@ const meta = {
   tags: ["autodocs"],
   parameters: {
     layout: "padded",
+    // Each `{ id, name }` in `skills` becomes a badge; nothing renders for an empty array.
     docs: {
       controls: { exclude: ["use:eventListener"] },
       description: componentDescription([
-        "A row of small badges labeling which skills were active when an assistant message was generated (e.g. `Concise`, `ELI5`). Sits directly above `MessageContent`.",
-        "Pass a `skills` array of `{ id, name }`; each `name` becomes a badge. Renders nothing when the array is empty.",
+        'A row of badges naming the skills that were active when a message was generated.',
       ]),
     },
   },

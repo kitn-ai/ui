@@ -130,8 +130,7 @@ const meta = {
     layout: 'fullscreen',
     docs: {
       description: componentDescription([
-        'A composed settings SCREEN, assembled from the primitives: a two-pane body (left category `Nav` rail + grouped `SettingItem` rows with uniform controls: `Switch`, `Segmented`, `Select`).',
-        'Settings CONTENT differs per app, but the chrome is identical everywhere, so the same `SettingsContent` drops into either a modal (`AsModal`) or a full page (`AsPage`) unchanged. The host owns the frame; the content stays host-agnostic.',
+        'A settings screen: a category rail beside groups of settings rows.',
       ]),
     },
   },

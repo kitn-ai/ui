@@ -23,8 +23,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'A context-window usage indicator: a hover-card trigger with a used-percent ring, and a popover breaking down token usage (input, output, reasoning, cache) plus estimated cost.',
-        'Wrap the composition in `Context` and pass `usedTokens` / `maxTokens` (plus optional per-category counts and `estimatedCost`); compose `ContextTrigger`, `ContextContent` (Header/Body/Footer), and the usage rows.',
+        "A meter of how much of the model's context window the conversation has used.",
       ]),
       controls: { exclude: ['use:eventListener'] },
     },

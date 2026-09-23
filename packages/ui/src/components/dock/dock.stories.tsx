@@ -14,9 +14,7 @@ const meta = {
     layout: 'fullscreen',
     docs: {
       description: componentDescription([
-        'A corner-docked launcher button with a floating panel above it — the "chat bubble in the bottom-right" affordance. The panel is content-agnostic: slot a chat, a form, or your own component; the dock owns the button, `aria-expanded`, the focus return, Escape and the hide semantics, and nothing else.',
-        'Closed does not mean gone. The panel keeps its layout box (`visibility: hidden` + `inert`) and is never unmounted, so a thread inside it never re-measures from zero and a reply that arrives while closed is really there — which is what makes the `unread` dot honest. `unread` is yours: the dock renders it while closed and never writes it back.',
-        'Geometry is CSS custom properties, not props: `--kai-dock-width` · `--kai-dock-height` · `--kai-dock-inset` · `--kai-dock-gap` · `--kai-dock-radius` · `--kai-dock-z` · `--kai-dock-launcher-size`. Narrow viewports take the panel full-bleed by default.',
+        'A launcher button in the page corner that opens a floating panel.',
       ]),
     },
   },

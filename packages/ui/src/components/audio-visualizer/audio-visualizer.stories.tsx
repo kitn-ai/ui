@@ -34,8 +34,7 @@ const meta = {
         exclude: ['use:eventListener', 'stream', 'audioElement', 'shader', 'bands'],
       },
       description: componentDescription([
-        'Renders live audio as bars, a grid, a ring, a wave, or a glowing aurora. Give it a `stream` or an `audioElement`, or drive `bands` yourself; with no source it animates from `state` alone.',
-        '`wave`, `aurora` and `custom` render through WebGL behind a dynamic import and fall back to bars when a context cannot be acquired, which costs a frame or two of blank canvas.',
+        'Animates live audio, or an agent state, as a moving visual.',
       ]),
     },
   },

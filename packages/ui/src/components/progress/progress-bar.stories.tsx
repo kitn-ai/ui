@@ -8,10 +8,11 @@ const meta = {
   tags: ['autodocs'],
   parameters: {
     layout: 'padded',
+    // The track and the fill are stylable with `::part(track)` / `::part(fill)`.
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'A thin determinate progress bar: a `value` out of `max` (default 100), clamped to the track. Add a `label` caption above the track. Restyle the track and fill via `::part(track)` / `::part(fill)`.',
+        'A determinate progress bar.',
       ]),
     },
   },

@@ -6,6 +6,8 @@ import { componentDescription } from '../../stories/docs/web-component-controls'
 // The view navigator's one rule: a drilled view hides the tab bar and shows a back
 // arrow, a tab root shows the tab bar and no back arrow. Both pieces of chrome follow
 // the navigator's reported state, never their own.
+//
+// Hidden views stay MOUNTED, so switching tabs resets nothing.
 const meta = {
   title: 'Components/ViewStack',
   component: ViewStack,
@@ -14,8 +16,7 @@ const meta = {
     layout: 'centered',
     docs: {
       description: componentDescription([
-        'The mobile-stack view navigator: tab-root views behind a tab bar, drill views pushed on top. The navigator owns the rule that a drilled view hides the tab bar and shows a back affordance, and exposes `view` / `root` / `drilled` so the chrome follows instead of reimplementing it.',
-        'Views stay mounted while hidden, so switching tabs resets nothing by default.',
+        'A view navigator: tabs sit side by side, and a view you enter opens on top of its tab.',
       ]),
     },
   },
