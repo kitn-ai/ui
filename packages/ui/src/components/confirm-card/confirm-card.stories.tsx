@@ -100,7 +100,7 @@ const meta = {
     },
   },
   argTypes: {
-    heading: { control: 'text', description: 'Card chrome title — the question being asked.' },
+    heading: { control: 'text', description: 'Card chrome title.' },
     body: { control: 'text', description: 'The consequence, spelled out under the heading.' },
     tone: {
       control: 'select',
@@ -111,12 +111,13 @@ const meta = {
     actions: {
       control: 'object',
       description:
-        '1–4 buttons. Each: `{ id, label, style?: "primary" | "default" | "destructive", default?, payload? }`. `default` is the one `autofocus` and the `confirm()` method target.',
+        '1–4 buttons, each `{ id, label, style?, default?, payload? }`. `default` is the one `autofocus` and the `confirm()` method target.',
     },
     dismissible: { control: 'boolean', description: 'Show the close affordance that emits `dismiss`.' },
     autofocus: {
       control: 'boolean',
-      description: 'Focus the default action on mount. Off by default — no focus-stealing mid-stream.',
+      // Off, so a card that lands mid-stream never steals the caret.
+      description: 'Focus the default action on mount. Off by default.',
     },
     resolution: {
       control: 'object',

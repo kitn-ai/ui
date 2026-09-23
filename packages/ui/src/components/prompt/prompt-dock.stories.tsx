@@ -60,7 +60,7 @@ const meta = {
       control: 'inline-radio',
       options: ['soft', 'outlined', 'filled', 'plain'],
       description:
-        'Tray surface: `soft` (sunken fill + border, default), `outlined` (border only), `filled` (fill only), or `plain` (bare — no fill, border, or radius).',
+        'Tray surface. Defaults to `soft`; the look of each option is in the preview.',
     },
     topClass: { control: 'text', description: 'Extra classes for the TOP lip wrapper, merged over the default band styling.' },
     bottomClass: { control: 'text', description: 'Extra classes for the BOTTOM lip wrapper.' },

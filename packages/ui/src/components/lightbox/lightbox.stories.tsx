@@ -25,7 +25,7 @@ const meta = {
     open: {
       control: false,
       description:
-        'Controlled open state. While it is set the modal never changes it itself — drive it from `onOpenChange`. Left unset in these stories so the trigger owns opening.',
+        'Controlled open state. While it is set, the modal never changes it itself; drive it from `onOpenChange`.',
     },
     defaultOpen: {
       control: 'boolean',
@@ -39,7 +39,7 @@ const meta = {
     closeOnContentClick: {
       control: 'boolean',
       description:
-        'Close the modal when a click lands inside the content. On by default; a click on a link or a button inside the content is let through instead. `false` keeps the modal open on any content click.',
+        'Close the modal when a click lands inside the content. A click on a link or a button inside it is let through.',
       table: { defaultValue: { summary: 'true' } },
     },
     children: {
@@ -48,7 +48,7 @@ const meta = {
     },
     controllerRef: {
       control: false,
-      description: 'Hands the open controller to a facade — `<kai-lightbox>` layers its `open` attribute, methods and event onto the same state. Not a story argument.',
+      description: 'Hands the open controller to a facade.',
     },
     onOpenChange: {
       action: 'open-change',

@@ -25,7 +25,7 @@ const meta = {
     disabled: { control: 'boolean', description: 'Disable every row. Individual rows can be disabled on the option.' },
     itemClass: { control: 'text', description: 'Extra classes for each row.' },
     onChange: { action: 'change', description: 'Fires with the selected value and the option that carried it.', table: { category: 'Events' } },
-    onOptionBlur: { action: 'blur', description: 'Fires when a radio loses focus — the commit point for a form field.', table: { category: 'Events' } },
+    onOptionBlur: { action: 'blur', description: 'Fires with no payload when a radio in the group loses focus.', table: { category: 'Events' } },
   },
   args: {
     label: 'Severity',

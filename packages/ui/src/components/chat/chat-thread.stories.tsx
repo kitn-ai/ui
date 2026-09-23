@@ -109,14 +109,14 @@ const meta = {
     // — the DOM contract the facade maps these onto (`kai-submit` -> onSubmit).
     onConversationLoad: {
       action: 'conversation-load',
+      // The hook for owning `messages` yourself: re-render them with the loaded conversation's history.
       description:
-        "Fires when `load(id)` resolves: the hook a caller uses to own and re-render `messages` with that conversation's history, whose id is the second argument (`undefined` for a new conversation).",
+        'Fires when a conversation loads or a new one starts, with its messages and the id (`undefined` when new).',
       table: { category: 'Events' },
     },
     onUnreadChange: {
       action: 'unread-change',
-      description:
-        'Fires with the same unread value this thread renders as a dot on its own header toggle, so a sibling control can mirror it; only meaningful with `conversations` on.',
+      description: 'Fires with the unread value the header toggle draws as a dot. Only meaningful with `conversations` on.',
       table: { category: 'Events' },
     },
     onHomeLink: {

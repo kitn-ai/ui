@@ -36,7 +36,7 @@ const meta = {
     format: {
       control: 'text',
       description:
-        'Mask pattern: `#` a digit, `@` a letter or digit, `*` an obscurable letter or digit, everything else a positional literal. `default` resolves the default format of `semantic`.',
+        "Mask pattern: `#` digit, `@` letter or digit, `*` the same but hidden; others are positional literals. `default` resolves `semantic`'s format.",
     },
     guide: {
       control: 'text',
@@ -49,7 +49,7 @@ const meta = {
       // repo puts a social security number on screen.
       options: ['tel', 'credit-card', 'custom'],
       description:
-        'Semantic type. Sets `inputmode` / `autocomplete` / `spellcheck` / `autocorrect` / `autocapitalize` and decides the canonical value. Never starts masking on its own.',
+        "Sets the field's input attributes and the canonical (submitted) value. Never starts masking on its own.",
     },
     caseMode: {
       control: 'inline-radio',
@@ -66,7 +66,7 @@ const meta = {
     onValueInput: {
       action: 'value-input',
       description:
-        'Fires per keystroke with the current value: the canonical value when a mask is active (digits for `tel`/`ssn`/`credit-card`, the formatted text for `custom`), and the raw text of the field otherwise.',
+        'Fires per keystroke with the current value, canonical while a mask is active and the raw text otherwise.',
       table: { category: 'Events' },
     },
     onValueChange: {
@@ -76,8 +76,10 @@ const meta = {
     },
     onMaskReject: {
       action: 'mask-reject',
+      // `reason` names the rule that refused the content (`full`, `wrong-class`,
+      // `over-capacity`, `format-change-clipped`); none of them is an error state.
       description:
-        'A mask refused, or partly refused, some content, with `reason` of `full`, `wrong-class`, `over-capacity`, or `format-change-clipped`; it is not an error state and does not touch `invalid`.',
+        'A mask refused some content. Not an error state, and `invalid` is untouched.',
       table: { category: 'Events' },
     },
   },

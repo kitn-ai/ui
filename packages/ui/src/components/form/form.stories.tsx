@@ -199,7 +199,7 @@ const meta = {
       control: 'text',
       description: 'Card chrome title. Overrides the definition\'s own `title` when set.',
     },
-    title: { control: 'text', description: "The definition's title — the card heading when `heading` is unset." },
+    title: { control: 'text', description: "The definition's title, used as the card heading when `heading` is unset." },
     description: {
       control: 'text',
       description: 'Rendered under the heading at the body scale. The one place the card shell wraps prose.',
@@ -207,7 +207,7 @@ const meta = {
     properties: {
       control: 'object',
       description:
-        'The JSON Schema field map. Type/format/enum picks the widget; `x-kai-widget` overrides it (`textarea`, `slider`, `rating`, `radio`, `select`, `checkbox`, `password`, `switch`).',
+        'The JSON Schema field map. Type, format and enum pick the widget; `x-kai-widget` overrides it.',
     },
     required: { control: 'object', description: 'Field keys that must be filled. Required fields sort first and get a `*`.' },
     submitLabel: {

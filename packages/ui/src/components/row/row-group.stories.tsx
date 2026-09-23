@@ -26,7 +26,7 @@ const meta = {
     },
   },
   argTypes: {
-    class: { control: 'text', description: 'Extra classes on the frame — width, background, or removing its chrome.' },
+    class: { control: 'text', description: 'Extra classes on the frame.' },
     onActivate: { action: 'activate', description: 'Not a prop of the group: wired onto each demo row below, so a click shows up in the Actions panel.', table: { category: 'Events' } },
   },
   // `onActivate` belongs to `Row`, not to the frame — the cast keeps the demo

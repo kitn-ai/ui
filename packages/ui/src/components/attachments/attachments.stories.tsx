@@ -87,8 +87,7 @@ const meta = {
     imagePreview: {
       control: 'select',
       options: ['hover', 'lightbox'],
-      description:
-        'How an image tile reveals its full size: a pointer-only hover card, or a click-to-open lightbox. Read by the tile from context; a non-image tile always keeps the hover card.',
+      description: 'How an image tile reveals its full size. A non-image tile always keeps the hover card.',
       table: { defaultValue: { summary: 'hover' } },
     },
     children: {

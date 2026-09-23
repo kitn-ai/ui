@@ -44,7 +44,7 @@ const meta = {
     },
     list: {
       control: 'boolean',
-      description: 'Render as a full-width "Ideas for you" row: a leading icon, a left-aligned label, and a hover background. Like `block`, but keeps the leading icon. Ignored in highlight mode.',
+      description: 'Render as a full-width list row with a leading icon, unlike `block`. Ignored in highlight mode.',
       table: { defaultValue: { summary: 'false' } },
     },
     icon: {

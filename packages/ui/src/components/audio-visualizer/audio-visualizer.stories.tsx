@@ -62,7 +62,9 @@ const meta = {
     theme: {
       control: 'select',
       options: ['auto', 'light', 'dark'],
-      description: 'Explicit `light`/`dark` wins; `auto` follows `prefers-color-scheme`. Only aurora reads this today, for its color pipeline -- see its story. Bar, grid, and radial already adapt through CSS `currentColor` instead; wave and custom accept the prop but do not read it yet, always drawing the shader\'s fixed default color unless `color` overrides it.',
+      // Bar, grid and radial adapt through CSS `currentColor` instead; wave and custom accept the
+      // prop but always draw the shader's fixed default color unless `color` overrides it.
+      description: 'Explicit `light`/`dark` wins; `auto` follows `prefers-color-scheme`. Only aurora renders differently.',
       table: { defaultValue: { summary: 'auto' } },
     },
     barCount: {
@@ -101,8 +103,11 @@ const meta = {
     },
     animateWhenNotVisible: {
       control: 'boolean',
+      // Off, a canvas scrolled out of view stops drawing and releases its WebGL context, taking it
+      // back on the way in; on, the context is held for as long as the tile is mounted. A tile scrolled
+      // off screen with this on and off is the way to feel the difference.
       description:
-        'Shader variants only. Off by default: a canvas scrolled out of view stops drawing and releases its WebGL context, taking it back on the way in. Turn it on to keep a visualizer running unseen, at the cost of holding a context for as long as it is mounted. Never overrides `prefers-reduced-motion`. Scroll a tile off screen with this on and off to feel the difference.',
+        'Shader variants only. Keep drawing while scrolled out of view, holding a WebGL context. Never overrides `prefers-reduced-motion`.',
       table: { defaultValue: { summary: 'false' } },
     },
     label: {

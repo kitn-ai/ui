@@ -65,7 +65,7 @@ const meta: Meta = {
       name: 'close-on-content-click',
       control: 'boolean',
       description:
-        'Close the modal on a click inside `slot="content"`. ON when the attribute is absent; `close-on-content-click="false"` keeps it open. A click on a link or a button inside the content is let through either way.',
+        'Close the modal on a click inside `slot="content"`. A click on a link or a button inside the content is let through.',
       table: { defaultValue: { summary: 'true' } },
     },
   },

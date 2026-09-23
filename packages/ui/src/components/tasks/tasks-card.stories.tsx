@@ -130,7 +130,7 @@ const meta = {
       control: 'select',
       options: ['select', 'progress'],
       description:
-        '`select` = checkbox rows + a confirm button that emits `submit`. `progress` = the onboarding look: a `done / total` count, circular indicators, and no confirm button (checking a row IS the action).',
+        'Whether the card confirms with a button or completes as rows are checked.',
       table: { defaultValue: { summary: 'select' } },
     },
     listHeading: {
