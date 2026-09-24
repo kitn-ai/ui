@@ -101,7 +101,7 @@ export const Sizing: Story = {
 };
 
 /**
- * Fallbacks: an unknown name that looks like a URL / data URI renders an `<img>`;
+ * Fallbacks: an unknown name that looks like a URL / data URI renders an image;
  * any other string (an emoji, say) renders as text.
  */
 export const Fallbacks: Story = {

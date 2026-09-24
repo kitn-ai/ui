@@ -93,6 +93,7 @@ in "Follow-ups this sweep must not lose".
 | concept pages over cap (guides, patterns, examples) | **0** paragraphs over ~4 lines (was 41 across 24 pages), guarded by `docs-copy-concepts.test.ts` | done |
 | per-STORY descriptions (`docs.description.story`) | **21 judged: 13 FAIL rewritten, 6 WEAK decided; rule (l) now reads both description fields** | done |
 | JSX in a story's `args` | **0** (2 pre-existing offenders fixed), guarded by rule (n) | done |
+| raw markdown hazard in a rendered description (an angle-bracket tag or a fence) | **0** (was 28 across 17 files), guarded by rule (o) | done |
 | comment blocks over 20 lines | **0** (was 181), guarded by `lint:comment-references` | done |
 | comments citing plans / IDs / dates / sections | **0** (was 156), guarded | done |
 | DOC COMMENTS in `src/**/*.{ts,tsx}`, four rules: member cap, em dash in a doc comment, em dash in a rendered string, type restatement | **2,026 members + 1,166 declaration docs across 351 sources; 0 over the 160 cap, 0 em dash, 0 type restatement, 0 waivers** (`lint-prop-docs`, now the doc-and-copy guard) | done |
@@ -135,6 +136,12 @@ Two blind spots the passes found, both worth keeping:
 
 ## Follow-ups this sweep must not lose
 
+- **The story DOC COMMENT is a rendered surface rule (l) does not yet judge.** Rule (o) reads it
+  (that is where the hazard lived), but the docs-talk/paragraph/em-dash half of rule (l) reads only
+  the explicit `docs.description.story` field, which PASS D judged at 21 sites. Judging the doc
+  comments with the same bar fires on **86 comments across 42 files** on today's tree, so the
+  surface is about five times bigger than the pass measured. Sized, not swept: it needs a batch of
+  lanes and the copy reviewer, exactly like PASS A.
 - **A story description and its docs page lede are two files, one fact.** 9 of the 95 component
   descriptions are near-identical to their page's `description`/`kai-lede`; two (`kai-lightbox`,
   `kai-prompt-input`) are byte-identical to the element docstring BY DESIGN (rule 8: one source, two
@@ -174,6 +181,13 @@ Two blind spots the passes found, both worth keeping:
 
 ## Done so far, kept here so it is not re-litigated
 
+- **A rendered description is MARKDOWN, and that is a bug class of its own.** A story's doc
+  comment and a component description render as markdown, so an angle-bracket tag in them is parsed
+  as raw HTML: an unclosed one nests every block after it inside the description, and on the
+  Lightbox/Message docs pages the story's own Source panel (with its Copy button) rendered INSIDE the
+  blurb. Rule (o) of `lint-story-conventions` bans a tag or a fence in any rendered description; it
+  found 28 sites across 17 files, all reworded. The story that shipped it also moved its detail into
+  a `//` comment, since a `//` is not rendered.
 - **PASS E, the last trap that lived only in prose.** `lint-story-conventions` rule (n): a JSX element in
   a story's `args` (the meta's or a story's). Storybook serializes `args` across the manager/preview
   boundary, so a JSX value arrives as a plain object and the story renders nothing; the fix is a `render`

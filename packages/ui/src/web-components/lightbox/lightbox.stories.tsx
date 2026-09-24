@@ -113,7 +113,7 @@ const renderWith = (trigger: JSX.Element) => (args: Record<string, unknown>) => 
   </div>
 );
 
-/** The element used the plain-HTML way: your own `<button>` as the trigger, the
+/** The element used the plain-HTML way: your own button as the trigger, the
  *  image you already have as the content. */
 export const ZoomYourOwnMarkup: StoryObj = {
   name: 'Zoom Your Own Markup',

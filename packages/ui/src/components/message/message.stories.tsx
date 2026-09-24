@@ -2,6 +2,8 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { Message, MessageAvatar, MessageContent, MessageActions, MessageBody } from './message';
 import type { MessagePart } from '../../web-components/chat/chat-types';
 import { Button } from '../button/button';
+import { ChatContainer } from '../chat/chat-container';
+import { ChatConfig } from '../../primitives/chat-config';
 import { Copy, ThumbsUp, ThumbsDown, RefreshCw, Pencil } from 'lucide-solid';
 import { componentDescription } from '../../stories/docs/web-component-controls';
 
@@ -383,4 +385,71 @@ export const CitationsWithoutNumbers: Story = {
     <MessageBody parts={parts} isUser={false} markdown />
   </div>
 </Message>`),
+};
+
+/** The paragraph the narrow-panel story wraps: long enough to test the column. */
+const narrowText =
+  'The document is a transcript of a YouTube video where Andre Karpathy discusses building AI agents using large language models. He explains how he structures his personal knowledge base and shares techniques for prompt engineering that maximize output quality.';
+
+/**
+ * A chat turn in a narrow column, where long text wraps instead of overflowing.
+ */
+// The pattern behind that sentence: the message body carries `min-w-0 break-words
+// whitespace-normal`, so a long paragraph wraps inside the column instead of
+// stretching it. The container is what varies, not the component: any `min-w-0` flex
+// child works, and a split view is the real case (a panel dragged down to ~300px).
+// Keep this in a `//`: a /** */ above a story IS its docs description, that text is
+// markdown, and an angle-bracket tag in it is parsed as raw HTML, which swallowed the
+// story's Source block into the description on the docs page.
+export const NarrowPanel: Story = {
+  render: () => (
+    <ChatConfig proseSize="sm">
+      <div
+        style={{ width: '380px', background: 'var(--color-card, #202127)' }}
+        class="flex flex-col rounded-lg p-3"
+      >
+        <ChatContainer class="min-w-0">
+          <div class="min-w-0 space-y-3">
+            <Message>
+              <MessageAvatar src="" alt="AI" fallback="AI" />
+              <MessageContent>{narrowText}</MessageContent>
+            </Message>
+            <Message>
+              <MessageAvatar src="" alt="AI" fallback="AI" />
+              <MessageContent>A shorter reply.</MessageContent>
+            </Message>
+          </div>
+        </ChatContainer>
+      </div>
+    </ChatConfig>
+  ),
+  parameters: {
+    docs: {
+      source: {
+        language: 'tsx',
+        code: `import { Message, MessageAvatar, MessageContent, ChatContainer, ChatConfig } from '@kitn.ai/ui';
+
+// The message copy is your own data.
+const message =
+  'The document is a transcript of a YouTube video where Andre Karpathy discusses building AI agents and how he structures his personal knowledge base.';
+
+<ChatConfig proseSize="sm">
+  <div style={{ width: '380px' }} class="flex flex-col rounded-lg p-3">
+    <ChatContainer class="min-w-0">
+      <div class="min-w-0 space-y-3">
+        <Message>
+          <MessageAvatar src="" fallback="AI" />
+          <MessageContent>{message}</MessageContent>
+        </Message>
+        <Message>
+          <MessageAvatar src="" fallback="AI" />
+          <MessageContent>A shorter reply.</MessageContent>
+        </Message>
+      </div>
+    </ChatContainer>
+  </div>
+</ChatConfig>`,
+      },
+    },
+  },
 };

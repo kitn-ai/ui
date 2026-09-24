@@ -57,7 +57,7 @@ const OPTIONS = [
   { value: 'cosmetic', label: 'Cosmetic' },
 ];
 
-/** `<kai-checkbox>` in every state. `checked` is settable and reflected to the attribute. */
+/** The checkbox element in every state. `checked` is settable and reflected to the attribute. */
 export const Checkboxes: Story = {
   render: () => (
     <div class="flex items-center gap-6">
@@ -89,7 +89,7 @@ export const Checkboxes: Story = {
 </script>`),
 };
 
-/** Driving `<kai-checkbox>` from the host: read `el.checked`, write it, listen for `kai-change`. */
+/** Driving the checkbox element from the host: read `el.checked`, write it, listen for `kai-change`. */
 export const CheckboxState: Story = {
   name: 'Checkbox — host state',
   render: () => {
@@ -127,10 +127,10 @@ const ENVIRONMENTS = [
 ];
 
 /**
- * `<kai-checkbox-group>` — the "pick any number" sibling of `<kai-radio-group>`, same
- * options shape and same row chrome. `options` is an ARRAY, so it is set as a JS
- * property, never an attribute. Scalars (`value`, `label`, `name`, `disabled`) are
- * attributes.
+ * The checkbox group element is the "pick any number" sibling of the radio group
+ * element, same options shape and same row chrome. `options` is an ARRAY, so it is
+ * set as a JS property, never an attribute. Scalars (`value`, `label`, `name`,
+ * `disabled`) are attributes.
  */
 export const CheckboxGroup: Story = {
   render: () => {
@@ -168,7 +168,7 @@ export const CheckboxGroup: Story = {
 /**
  * Reading and writing the whole selection from the host through `el.values`, and the
  * group disabled. `el.value` is the FIRST selected option; `values` is the rest, the
- * same pair `<kai-select multiple>` exposes.
+ * same pair a multiple-select element exposes.
  */
 export const CheckboxGroupState: Story = {
   name: 'Checkbox group — host state',
@@ -207,8 +207,8 @@ group.addEventListener('kai-change', (e) => console.log(e.detail.values));`),
 };
 
 /**
- * `<kai-radio-group>` — `options` is an ARRAY, so it is set as a JS property, never an
- * attribute. Scalars (`value`, `label`, `disabled`) are attributes.
+ * The radio group element's `options` is an ARRAY, so it is set as a JS property, never
+ * an attribute. Scalars (`value`, `label`, `disabled`) are attributes.
  */
 export const RadioGroup: Story = {
   render: () => {
@@ -280,10 +280,10 @@ const MODELS = [
 ];
 
 /**
- * `<kai-slider>` — every scalar is an attribute. `min` and `max` have no defaults on
- * the primitive; the element falls back to the native range defaults (0..100) so an
- * author who wrote neither attribute gets exactly what a bare `<input type="range">`
- * would give them.
+ * The slider element takes every scalar as an attribute. `min` and `max` have no
+ * defaults on the primitive; the element falls back to the native range defaults
+ * (0..100) so an author who wrote neither attribute gets exactly what a bare range
+ * input would give them.
  */
 export const Sliders: Story = {
   render: () => (
@@ -338,7 +338,7 @@ export const SliderValueLabel: Story = {
 </script>`),
 };
 
-/** Driving `<kai-slider>` from the host: read `el.value`, write it, watch both events. */
+/** Driving the slider element from the host: read `el.value`, write it, watch both events. */
 export const SliderState: Story = {
   name: 'Slider — host state',
   render: () => {
@@ -376,7 +376,7 @@ slider.addEventListener('kai-change', (e) => console.log(e.detail.value));`),
 };
 
 /**
- * `<kai-select>` — `options` is an ARRAY, so it is set as a JS property, never an
+ * The select element's `options` is an ARRAY, so it is set as a JS property, never an
  * attribute. Scalars (`value`, `placeholder`, `disabled`, `invalid`) are attributes.
  * The closed control is the kit's; the open dropdown stays the platform's.
  */

@@ -112,7 +112,7 @@ export const Disabled: Story = {
 };
 
 /**
- * Wrap the control in a `<label>` and the whole row becomes the click target — the
+ * Wrap the control in a label and the whole row becomes the click target — the
  * cheapest accessible name you can give a checkbox, and it costs no ARIA.
  */
 export const WithLabel: Story = {
@@ -186,7 +186,7 @@ const some = () => on().length > 0 && !all();
 };
 
 /**
- * Give the boxes a `name` and a `value` and a native `<form>` submits them with no
+ * Give the boxes a `name` and a `value` and a native form submits them with no
  * JavaScript at all — the part a hand-rolled control silently loses.
  */
 export const InAForm: Story = {

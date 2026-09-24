@@ -186,7 +186,7 @@ export const Uncontrolled: Story = {
 
 /**
  * The readout. `valueLabel` is off by default, so a bare `Slider` is still a bare
- * `<input>`; turn it on for the number, or hand it a function when the number is not
+ * input; turn it on for the number, or hand it a function when the number is not
  * the thing to show. A percentage, a count and a duration are all the same slider.
  */
 export const ValueLabel: Story = {
@@ -228,7 +228,7 @@ export const Disabled: Story = {
 };
 
 /**
- * Give it a `name` and a native `<form>` submits it with no JavaScript at all — the
+ * Give it a `name` and a native form submits it with no JavaScript at all — the
  * part a hand-rolled slider silently loses.
  */
 export const InAForm: Story = {

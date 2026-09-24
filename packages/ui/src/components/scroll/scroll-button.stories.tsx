@@ -188,7 +188,7 @@ export const LightAndDark: Story = {
 /**
  * WHERE the button sits is your layout's call, not a prop.
  *
- * `ScrollButton` has no `placement`: it renders an inline-flex `<button>` and
+ * `ScrollButton` has no `placement`: it renders an inline-flex button and
  * nothing else. You position it by wrapping it in your own absolutely
  * positioned box inside the `ChatContainerRoot` (it has to stay inside, because
  * that is the context it reads scroll state from). Every arrangement below is

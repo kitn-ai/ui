@@ -152,7 +152,7 @@ const meta = {
       description: {
         component:
           [
-            'A message thread assembled from standalone `<kai-message>` elements, one turn per element.',
+            'A message thread assembled from standalone message elements, one turn per element.',
           ].join('\n\n'),
       },
       // The snippet lives on the STORY, not here. It did live here, and a
