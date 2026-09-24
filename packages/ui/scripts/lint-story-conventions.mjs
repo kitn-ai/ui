@@ -1968,7 +1968,9 @@ function findDescriptionDocsTalk(sf, text) {
    *  Source block nested INSIDE the description element. */
   const MARKDOWN_HAZARD = [
     { id: 'tag', re: /<\/?[A-Za-z][^>]*>/ },
-    { id: 'fence', re: /```/ },
+    // \u0060 is a backtick: written escaped so this file holds no raw triple, which the
+    // dangling-imports guard's template-literal state machine would miscount.
+    { id: 'fence', re: /\u0060{3}/ },
   ];
 
   /** The markdown-hazard half, on its own so the story DOC COMMENT can be checked
@@ -3251,7 +3253,9 @@ const SELF_TEST_CASES = [
   },
   {
     name: '(o) a code fence in a rendered description is flagged',
-    code: `const meta = { parameters: { docs: { description: { component: 'Then:\\n\\n\u0060\u0060\u0060ts\\nconst a = 1;\\n\u0060\u0060\u0060' } } } };`,
+    // A single-quoted JS string with \u0060 escapes, so this FILE stays free of raw
+    // backticks AND of raw backslash-n while the parsed fixture is a real fence.
+    code: "const meta = { parameters: { docs: { description: { component: 'Then: \u0060\u0060\u0060ts more' } } } };",
     expectHazards: ['fence'],
   },
   {
