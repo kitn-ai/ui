@@ -10,7 +10,8 @@ import { createPresence, usePosition, useDismiss, As } from '../overlay/overlay'
 export interface TooltipController { open: Accessor<boolean>; setOpen: (v: boolean) => void; }
 
 export interface TooltipProps {
-  content: string;
+  /** Hint content. A plain string renders as text; pass JSX to compose a rich tip (e.g. a Kbd carrying a shortcut). */
+  content?: string | JSX.Element;
   children: JSX.Element;
   class?: string;
   openDelay?: number;
@@ -102,9 +103,29 @@ export function Tooltip(props: TooltipProps) {
             role="tooltip"
             data-expanded={presence.state() === 'open' ? '' : undefined}
             data-closed={presence.state() === 'closed' ? '' : undefined}
-            style={{ position: 'fixed', left: `${position.pos().x}px`, top: `${position.pos().y}px`, 'pointer-events': 'none', visibility: position.hidden() ? 'hidden' : 'visible' }}
+            style={{
+              // Tailwind v4 emits `.bg-muted{background-color:var(--color-muted)}` (see
+              // src/web-components/compiled.css), so re-expressing the tokens on this inverted
+              // surface is the kit's own theming mechanism. The bubble sits on the FOREGROUND
+              // colour, so a composed cap inside it (Kbd, Badge) would otherwise read
+              // bg-muted / border-border / text-muted-foreground against the page's light tokens:
+              // a light blob with faint text on the near-black bubble.
+              '--color-muted': 'color-mix(in oklab, var(--color-background) 20%, transparent)',
+              '--color-muted-foreground': 'var(--color-background)',
+              '--color-border': 'color-mix(in oklab, var(--color-background) 25%, transparent)',
+              position: 'fixed', left: `${position.pos().x}px`, top: `${position.pos().y}px`, 'pointer-events': 'none', visibility: position.hidden() ? 'hidden' : 'visible',
+            }}
             class={cn(
-              'z-50 rounded-md bg-foreground px-2.5 py-1 text-xs text-background shadow-md',
+              // Padding is a 2:1 side:vertical step, not 2.5:1. Measured against
+              // the reference this kit mirrors (shadcn's `px-3 py-1.5`, and the
+              // kit's own row step `px-2 py-1.5` in dropdown/dropdown.tsx): at
+              // `py-1` the tip read side-heavy, and the fault is magnified by a
+              // COMPOSED tip, because a Kbd cap (h-6) is the tallest thing in the
+              // bubble and takes the padding as its clearance. `py-1.5` is the
+              // vertical rung the kit's rows already use. Do not shave px back to
+              // "even it out": the text's own half-leading sits above and below
+              // the glyphs, which is what makes an equal-looking ring.
+              'z-50 rounded-md bg-foreground px-2.5 py-1.5 text-xs text-background shadow-md',
               'animate-in fade-in-0 zoom-in-95 data-[closed]:animate-out data-[closed]:fade-out-0 data-[closed]:zoom-out-95',
               local.class,
             )}

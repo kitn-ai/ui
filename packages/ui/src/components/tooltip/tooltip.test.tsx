@@ -7,11 +7,16 @@
  * trigger therefore dismisses on click/pointerdown by default, and resets its
  * internal hover/focus flags so it stays closed until a genuine new hover/focus.
  * `dismissOnClick={false}` opts out.
+ *
+ * `content` also takes JSX. The bubble re-states the muted/border/background tokens on itself
+ * (it is painted with the foreground colour), which is what lets a composed cap such as `Kbd`
+ * stay legible inside it.
  */
 import { describe, it, expect, afterEach } from 'vitest';
 import '@testing-library/jest-dom/vitest';
 import { render, cleanup, fireEvent, within } from '@solidjs/testing-library';
 import { Tooltip } from './tooltip';
+import { Kbd } from '../kbd/kbd';
 
 afterEach(cleanup);
 
@@ -122,5 +127,53 @@ describe('Tooltip', () => {
     fireEvent.pointerDown(trigger);
     expect(triggerSpan).toHaveAttribute('aria-describedby');
     expect(tooltip()).toBeInTheDocument();
+  });
+
+  it('renders a plain string content as text', () => {
+    // The string path the union widened around: content stays a bare text node, with no
+    // wrapper element introduced between the bubble and the hint.
+    const { getByText } = render(() => (
+      <Tooltip content="Copy">
+        <button>Copy</button>
+      </Tooltip>
+    ));
+    fireEvent.focusIn(getByText('Copy'));
+    const tip = tooltip()!;
+    expect(tip.textContent).toBe('Copy');
+    expect(tip.children).toHaveLength(0);
+  });
+
+  it('renders JSX content inside the bubble', () => {
+    // content={<span>…<Kbd />…</span>} is the composition the bubble's token overrides exist
+    // for: the cap glyphs have to reach the node carrying role="tooltip".
+    const { getByText } = render(() => (
+      <Tooltip content={<span>Save changes <Kbd keys="Mod+S" platform="mac" /></span>}>
+        <button>Save</button>
+      </Tooltip>
+    ));
+    fireEvent.focusIn(getByText('Save'));
+    const tip = tooltip()!;
+    expect(tip.textContent).toContain('Save changes');
+    // one glyph per token: Mod -> ⌘ on mac, S -> S
+    expect(within(tip).getByText('⌘')).toBeInTheDocument();
+    expect(within(tip).getByText('S')).toBeInTheDocument();
+  });
+
+  it('re-expresses the muted/background tokens on the inverted bubble', () => {
+    const { getByText } = render(() => (
+      <Tooltip content={<Kbd keys="Mod+S" platform="mac" />}>
+        <button>Save</button>
+      </Tooltip>
+    ));
+    fireEvent.focusIn(getByText('Save'));
+    const tip = tooltip()!;
+    // bg-foreground/text-background is the bubble's own paint and must survive the overrides.
+    expect(tip).toHaveClass('bg-foreground', 'text-background');
+    // Tailwind v4 emits `.bg-muted{background-color:var(--color-muted)}` etc., so the composed
+    // cap resolves these instead of the page's light tokens. Read off the inline style, which
+    // is where the overrides live (Solid sets dash-prefixed names through style.setProperty).
+    expect(tip.style.getPropertyValue('--color-muted')).toBe('color-mix(in oklab, var(--color-background) 20%, transparent)');
+    expect(tip.style.getPropertyValue('--color-muted-foreground')).toBe('var(--color-background)');
+    expect(tip.style.getPropertyValue('--color-border')).toBe('color-mix(in oklab, var(--color-background) 25%, transparent)');
   });
 });

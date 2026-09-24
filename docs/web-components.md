@@ -2228,7 +2228,8 @@ Project your own markup with `slot="name"` on a light-DOM child.
 
 | Slot | Mode | Description |
 |------|------|-------------|
-| _(default)_ | inject | The TRIGGER the tooltip describes. The tip text is the `text` prop. |
+| _(default)_ | inject | The TRIGGER the tooltip describes. The tip text is the `content` prop, or the `content` slot when it carries markup. |
+| `content` | replace | The tip body, replacing the `content` text so it can hold markup such as a `<kai-kbd>`. |
 
 #### Composed from
 

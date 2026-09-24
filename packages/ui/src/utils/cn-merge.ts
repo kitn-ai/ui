@@ -418,6 +418,13 @@ export const CLASS_TABLE: ClassMergeTable = [
   [/^snap-(?:none|x|y|both)$/, 'snap-type'],
   [/^columns-/, 'columns'],
   [/^indent-/, 'indent'],
+  // An arbitrary PROPERTY — `[--kai-kbd-cap-gap:0px]`, `[mask-type:luminance]` — is one
+  // declaration, and the oracle keys it on the property NAME: the same property written
+  // twice collapses to the last, and two different properties both survive. Measured:
+  // `[--a:1] [--a:2]` -> `[--a:2]`, `[--a:1] [--b:2]` -> both. `[--a]` (no colon inside the
+  // brackets) is NOT a property and stays a pass-through class, and a bracketed VALUE
+  // (`text-[color:var(--x)]`) never reaches here because its base starts with `text-[`.
+  [/^\[([^\]:]+):[^\]]*\]$/, (m) => `arbprop-${m[1]}`],
 ];
 
 /**

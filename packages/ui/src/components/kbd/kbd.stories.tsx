@@ -159,46 +159,47 @@ export const InButton: Story = {
   ),
 };
 
-/** Two SEPARATE shortcuts in one `KbdGroup` (Ctrl+B, Ctrl+K). Compare with
- *  `TokenSpec` beside it: the group is how you say "and then", because a `keys`
- *  token spec is one shortcut and cannot mark where it ends. */
+/** ONE key whose caps come from more than one `Kbd`. The group WELDS them: no gap
+ *  between the caps, one hairline at each seam, corners only at the strip's ends. Read
+ *  it next to `TokenSpec`: the same caps, one key versus one chord. */
 export const Group: Story = {
   render: () => (
     <div class="flex flex-wrap items-center gap-5 text-sm text-foreground">
       <span class="flex items-center gap-2">
-        two shortcuts
+        one key from two Kbds
         <KbdGroup>
-          <Kbd keys="Mod+B" platform="other" />
-          <Kbd keys="Mod+K" platform="other" />
+          <Kbd keys="Mod" platform="other" />
+          <Kbd keys="K" platform="other" />
         </KbdGroup>
       </span>
       <span class="flex items-center gap-2">
         a typed sequence
         <KbdGroup>
-          <Kbd>G</Kbd>
-          <Kbd>D</Kbd>
+          <Kbd keys="G" />
+          <Kbd keys="D" />
         </KbdGroup>
       </span>
     </div>
   ),
   ...src(
-    `{/* two shortcuts: each Kbd is its own chip */}
+    `{/* one key: the group welds its caps into one strip */}
 <KbdGroup>
-  <Kbd keys="Mod+B" platform="other" />
-  <Kbd keys="Mod+K" platform="other" />
+  <Kbd keys="Mod" platform="other" />
+  <Kbd keys="K" platform="other" />
 </KbdGroup>
 
-{/* a typed sequence: omit keys and render the letters yourself */}
+{/* a typed sequence: G then D */}
 <KbdGroup>
-  <Kbd>G</Kbd>
-  <Kbd>D</Kbd>
+  <Kbd keys="G" />
+  <Kbd keys="D" />
 </KbdGroup>`,
     IMPORT_GROUP,
   ),
 };
 
-/** The contrast case: ONE shortcut with four tokens, which is what `keys` is for.
- *  Read it next to `Group` -- same caps, one chip versus several. */
+/** The contrast case: ONE shortcut with three tokens in ONE `Kbd`. Its caps keep the
+ * 2px chord gap and the `separator` part between them, which is how a chord reads; a
+ *  group is for caps that have to be welded ACROSS elements. */
 export const TokenSpec: Story = {
   render: () => (
     <div class="flex items-center gap-5 text-sm text-foreground">

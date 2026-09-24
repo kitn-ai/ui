@@ -5299,14 +5299,14 @@
       {
         "name": "",
         "mode": "inject",
-        "doc": "The `<kai-kbd>` elements to lay out, one per shortcut."
+        "doc": "The `<kai-kbd>` elements to weld into one key strip, in order."
       }
     ],
     "parts": [
       {
         "name": "group",
-        "doc": "The flex frame that owns the gap between the kbd elements inside it.",
-        "recipe": "kai-kbd-group::part(group) { gap: 0.375rem }"
+        "doc": "The flex frame around the welded caps. It lays them out only; each cap keeps its own border and radius, and the weld flattens the corners they share.",
+        "recipe": "kai-kbd-group::part(group) { vertical-align: middle }"
       }
     ]
   },
@@ -10524,7 +10524,7 @@
     "tag": "kai-tooltip",
     "className": "KaiTooltipElement",
     "displayName": "Tooltip",
-    "description": "Wraps a trigger and shows a short hint on hover or focus. `kai-hover-card` is the markup-carrying popup instead.",
+    "description": "Wraps a trigger and shows a short hint on hover or focus, as plain text or as markup.",
     "props": [
       {
         "name": "theme",
@@ -10633,7 +10633,12 @@
       {
         "name": "",
         "mode": "inject",
-        "doc": "The TRIGGER the tooltip describes. The tip text is the `text` prop."
+        "doc": "The TRIGGER the tooltip describes. The tip text is the `content` prop, or the `content` slot when it carries markup."
+      },
+      {
+        "name": "content",
+        "mode": "replace",
+        "doc": "The tip body, replacing the `content` text so it can hold markup such as a `<kai-kbd>`."
       }
     ]
   },

@@ -17,14 +17,14 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kai-lede">The hint sits above the page, so an icon-only button can still say what it does.</p>
 
-<Facts items={['Shadow DOM', 'Hover + focus', 'Self-positioning', 'Text-only hint']} />
+<Facts items={['Shadow DOM', 'Hover + focus', 'Self-positioning', 'Text or markup hint']} />
 
 ## Preview
 
 <Playground client:only="solid" tag="kai-tooltip" />
 
 <Aside type="tip" title="When to use">
-Label a control whose purpose isn't obvious from its face: an icon-only button, a terse menu item. It carries plain text only; for rich content, use [Hover card](/components/hover-card/) instead.
+Label a control whose purpose isn't obvious from its face, like an icon-only button. It takes plain text or markup through `content`; for a whole panel, use [Hover card](/components/hover-card/).
 </Aside>
 
 ## Usage
@@ -52,6 +52,26 @@ Put the trigger in the default slot (any focusable control) and set the hint tex
 `openDelay` is the hover wait in milliseconds, 600 by default.
 
 <Example client:visible tag="kai-tooltip" config={{ content: 'Voice input', openDelay: 150 }} />
+
+### Markup in the tip
+
+A child carrying `slot="content"` replaces the `content` text, so a tip can hold a key cap, an icon, or a label with a shortcut in it. The bubble is an inverted surface: it re-expresses the muted, border and foreground tokens on itself, so a kit component inside it adapts instead of reading as a light blob on a dark bubble.
+
+<div class="not-content my-4 flex flex-wrap items-center gap-4 rounded-xl border border-line bg-surface px-5 py-4">
+  <kai-tooltip default-open>
+    <kai-button variant="outline">Save</kai-button>
+    <span slot="content">Save changes <kai-kbd keys="Mod+S"></kai-kbd></span>
+  </kai-tooltip>
+</div>
+
+```html
+<kai-tooltip>
+  <kai-button variant="outline">Save</kai-button>
+  <span slot="content">Save changes <kai-kbd keys="Mod+S"></kai-kbd></span>
+</kai-tooltip>
+```
+
+Anything a light-DOM child can hold works here, because the bubble is portaled inside the element's own shadow root: the slotted content sits next to the kit's stylesheet and tokens. Set `content` as well to keep a text fallback for the same tip.
 
 ## Slots
 

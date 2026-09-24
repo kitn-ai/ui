@@ -33,8 +33,7 @@ interface Events {
 }
 
 /**
- * Wraps a trigger and shows a short hint on hover or focus. `kai-hover-card` is the
- * markup-carrying popup instead.
+ * Wraps a trigger and shows a short hint on hover or focus, as plain text or as markup.
  */
 defineWebComponent<Props, Events>('kai-tooltip', {
   content: '',
@@ -61,8 +60,12 @@ defineWebComponent<Props, Events>('kai-tooltip', {
           flex-items-center row. inline-flex (like kai-button) drops the line box so
           the host hugs the trigger and their centers line up. */}
       <style>{':host{display:inline-flex}'}</style>
+      {/* The tip body goes through a named slot rather than the `content` string
+          alone: a web-component consumer cannot pass JSX, so a slot is the only
+          channel for a tip that has to carry markup. Slotted content replaces the
+          text; the string stays as the slot's fallback. */}
       <Tooltip
-        content={props.content ?? ''}
+        content={<slot name="content">{props.content ?? ''}</slot>}
         openDelay={props.openDelay != null ? Number(props.openDelay) : undefined}
         closeDelay={props.closeDelay != null ? Number(props.closeDelay) : undefined}
         placement={(props.placement as Placement | undefined) ?? undefined}

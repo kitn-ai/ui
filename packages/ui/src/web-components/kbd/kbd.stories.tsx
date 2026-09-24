@@ -47,34 +47,35 @@ export const States: StoryObj = {
 };
 
 /**
- * `<kai-kbd-group>` lays several separate `<kai-kbd>`s out as one hint. Use it when
- * the caps come from MORE THAN ONE shortcut or from a typed sequence; a `keys`
- * token spec is a single shortcut and cannot say where one ends and the next
- * begins. The group owns the gap between the kbd elements (`::part(group)`).
+ * `<kai-kbd-group>` welds several `<kai-kbd>`s into ONE key strip: no gap between the
+ * caps, one hairline at each seam, corners only at the strip's ends. Use it when one
+ * key is spelled with caps from more than one element, or as a typed sequence; a
+ * `keys` token spec is a single `<kai-kbd>` and already renders its own caps. Two
+ * DIFFERENT shortcuts are two elements (or two groups), not one group.
  */
 export const Group: StoryObj = {
   render: () => (
     <div style={{ display: 'flex', gap: '2rem', 'align-items': 'center', 'flex-wrap': 'wrap', padding: '1rem' }}>
       <kai-kbd-group>
-        <kai-kbd keys="Mod+B" platform="other"></kai-kbd>
-        <kai-kbd keys="Mod+K" platform="other"></kai-kbd>
+        <kai-kbd keys="Mod" platform="other"></kai-kbd>
+        <kai-kbd keys="K" platform="other"></kai-kbd>
       </kai-kbd-group>
       <kai-kbd-group>
-        <kai-kbd>G</kai-kbd>
-        <kai-kbd>D</kai-kbd>
+        <kai-kbd keys="G"></kai-kbd>
+        <kai-kbd keys="D"></kai-kbd>
       </kai-kbd-group>
     </div>
   ),
-  parameters: src(`<!-- two separate shortcuts: each kai-kbd is its own chip -->
+  parameters: src(`<!-- one key: the group welds its caps into one strip -->
 <kai-kbd-group>
-  <kai-kbd keys="Mod+B" platform="other"></kai-kbd>
-  <kai-kbd keys="Mod+K" platform="other"></kai-kbd>
+  <kai-kbd keys="Mod" platform="other"></kai-kbd>
+  <kai-kbd keys="K" platform="other"></kai-kbd>
 </kai-kbd-group>
 
-<!-- a typed sequence: omit keys and slot the letters yourself -->
+<!-- a typed sequence: G then D -->
 <kai-kbd-group>
-  <kai-kbd>G</kai-kbd>
-  <kai-kbd>D</kai-kbd>
+  <kai-kbd keys="G"></kai-kbd>
+  <kai-kbd keys="D"></kai-kbd>
 </kai-kbd-group>`),
 };
 
