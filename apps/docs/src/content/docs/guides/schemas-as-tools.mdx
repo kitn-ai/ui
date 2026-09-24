@@ -86,7 +86,9 @@ For a backend that is not JavaScript, the documents themselves ship as files: `@
 | `embed` | `allOf`, `maxLength`, `format: "uri"` | the `if`/`then` inside that `allOf`, plus `pattern`, `maxLength`, `minimum` |
 | `artifact` | root `anyOf`, `oneOf`, `format: "uri"`, `maxLength` | `oneOf`, `maxItems`, `maxLength`, `minimum` |
 
-The two grammars are narrower than JSON Schema, and narrower in different places: `format: "uri"` is fine on Anthropic and unsupported on OpenAI, `minItems: 2` is fine on OpenAI and a 400 on Anthropic. `form` is the sharpest case. Its `data` is itself a JSON Schema describing the fields to collect, so a free-form object is the point, and under the mandatory `additionalProperties: false` it can only ever be `{}`.
+The two grammars are narrower than JSON Schema, and narrower in different places: `format: "uri"` is fine on Anthropic and unsupported on OpenAI, `minItems: 2` is fine on OpenAI and a 400 on Anthropic. `form` is the sharpest case.
+
+Its `data` is itself a JSON Schema describing the fields to collect, so a free-form object is the point, and under the mandatory `additionalProperties: false` it can only ever be `{}`.
 
 Non-strict is the default, the working mode, and the mode the kit's conformance sweep proved cards in. Both providers accept the loose schema and ignore what they cannot compile.
 

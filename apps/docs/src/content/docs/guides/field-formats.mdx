@@ -25,7 +25,9 @@ A `format` string is read one character at a time:
 | `*` | one letter or digit, obscurable in display |
 | anything else | a literal, shown at its position |
 
-Literals are identified by **position, not by character class**. That is the load-bearing rule: under `V-***`, pasting `V-123` yields `V-123`, because the pattern's leading letter is consumed as the literal it is rather than read as user input. Unknown characters are always literals, never new tokens, and a format longer than 64 characters is refused outright (the same cap the form card's `x-kai-mask` declares).
+Literals are identified by **position, not by character class**. That is the load-bearing rule: under `V-***`, pasting `V-123` yields `V-123`, because the pattern's leading letter is consumed as the literal it is rather than read as user input.
+
+Unknown characters are always literals, never new tokens, and a format longer than 64 characters is refused outright (the same cap the form card's `x-kai-mask` declares).
 
 `guide` shows placeholder text at the unfilled positions, aligned position for position with `format`:
 
@@ -71,7 +73,9 @@ A masked field has one submitted form, decided by its semantic type, not by a pr
 - `tel`, `ssn`, `credit-card` submit **digits only**. Separators are presentation; every backend re-derives them.
 - `custom` submits the **formatted text with trailing placeholders trimmed**. The literals are part of the datum: `CHG-4821` is the ticket id, `4821` is not. An empty field submits `''`, never the bare template.
 
-`el.value`, the `value` in every `kai-input` / `kai-change` event detail, and what a form card puts in its submission are all this canonical value. The text on screen rides along as `formattedValue` on the same details, or via `el.getFormattedValue()`. There is deliberately no raw-or-formatted switch: a per-field toggle would make the same field round-trip differently depending on who set it.
+`el.value`, the `value` in every `kai-input` / `kai-change` event detail, and what a form card puts in its submission are all this canonical value. The text on screen rides along as `formattedValue` on the same details, or via `el.getFormattedValue()`.
+
+There is deliberately no raw-or-formatted switch: a per-field toggle would make the same field round-trip differently depending on who set it.
 
 ## Rejections are loud
 
@@ -147,5 +151,7 @@ The submission carries each field's canonical value (`CHG-4821`, digits for the 
 Everything a model emits is untrusted. An `x-kai-format` outside the enum, a mask over the cap, or a pattern with no fill positions degrades that field to a plain text input with a console warning - loudly, never a guess.
 
 <Aside type="note">
-**An app cannot pin a format onto a model-authored form.** `cardTools({ require })` narrows a projected tool schema by dot-path, but a form card's payload is itself a JSON Schema: there is no node at `properties.ticketId` for a rule to land on, so the call throws rather than silently narrowing nothing. App-side format pinning is unavailable. An app that needs a specific format on a specific field authors the form definition itself and sends the envelope, instead of letting the model write the form. The enum makes a model-authored format *likely* to be valid; authoring the form is what makes it certain.
+**An app cannot pin a format onto a model-authored form.** `cardTools({ require })` narrows a projected tool schema by dot-path, but a form card's payload is itself a JSON Schema: there is no node at `properties.ticketId` for a rule to land on, so the call throws rather than silently narrowing nothing. App-side format pinning is unavailable.
+
+An app that needs a specific format on a specific field authors the form definition itself and sends the envelope, instead of letting the model write the form. The enum makes a model-authored format *likely* to be valid; authoring the form is what makes it certain.
 </Aside>
