@@ -13,56 +13,24 @@ import {
 } from '../builder/builder-start';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// `BuildWait` — what the builder shows while a construct's preview boots.
+// `BuildWait`, what the builder shows while a construct's preview boots: the chosen
+// template's own blueprint draws itself into existence, and the real boot phases report
+// underneath it. The animation is the mood and the steps are the truth, so the drawing's
+// fixed timing says nothing about progress and every claim about the boot comes from
+// `steps`/`current`/`error`, which the caller owns.
 //
-// The screen it replaces was one line of small text ("Starting the preview —
-// installing dependencies…"). The owner's brief: something that depicts
-// BUILDING, non-interactive — explicitly not a game, because a game turns a
-// wait into something to watch rather than something to get through.
+// WHY IT HOLDS RATHER THAN LOOPS: a first run installs for minutes and a warm one takes
+// seconds. The draw finishes and HOLDS fully drawn, with one slow heartbeat on the shape that
+// is the kit's chat surface, the same heartbeat as the active step's dot. Looping was rejected
+// on meaning, not taste: a blueprint that erases itself reads as "that restarted", while a
+// finished drawing with a heartbeat reads as "the build is done, the machine is still working".
 //
-// So: the chosen template's OWN blueprint draws itself into existence, and the
-// real boot phases report underneath it. The animation is the mood; the steps
-// are the truth. Nothing here fakes progress — the drawing's timing is fixed
-// and says nothing about how far along the boot is, and every claim about the
-// boot comes from `steps`/`current`/`error`, which the caller owns.
+// REPRODUCED, NOT IMPORTED: the inks come from `builder-start.tsx` so the language cannot
+// drift, but its six illustration components are module-private and prop-less while a draw-on
+// needs per-shape control, so they are restated here as SHAPE DATA and registered as a copy.
 //
-// THE 3-SECOND vs 3-MINUTE PROBLEM (a first run installing dependencies is
-// minutes; a warm one is seconds), and why it is solved this way:
-//
-//   The draw-on finishes in about two and a half seconds, then the blueprint
-//   HOLDS, fully drawn, with one slow breathing accent on the single shape
-//   that is the kit's own chat surface in that drawing. That accent is the
-//   only thing still moving after the draw.
-//
-//   The alternative — looping the draw — was rejected on meaning, not taste:
-//   a blueprint that erases itself and starts over reads as "that restarted",
-//   which at minute three is the exact wrong message about a process that is
-//   in fact still going fine. A held, finished drawing with a heartbeat reads
-//   as "the drawing is done, the machine is still working", which is true.
-//   The same heartbeat runs on the active step's dot, so the two halves of the
-//   screen are visibly on the same clock, and the steps are what actually
-//   changes over a long wait. At three seconds you see a thing being built; at
-//   three minutes you see a finished plan and a list that is still moving.
-//
-// REPRODUCED, NOT IMPORTED. The illustrations in `builder-start.tsx` are the
-// visual language this uses, and this file does NOT re-invent it — `STROKE`,
-// `LINE`, `BORDER`, `ACCENT`, `ACCENT_FILL` and `BLUEPRINT_BG` are imported
-// from there, so the stroke weight and the four inks cannot drift. But the six
-// illustration COMPONENTS are module-private there and take no props, and a
-// draw-on needs per-shape control (a path length, a build group, a delay), so
-// the six drawings are restated here as SHAPE DATA with the same coordinates.
-// That is a real copy and it is registered as one: if a drawing changes in
-// `builder-start.tsx`, the copy here has to change with it. It could not be
-// avoided from this file — the illustrations are not exported and
-// `builder-start.tsx` was off-limits this round.
-//
-// STYLED VIA INLINE STYLE, NOT UTILITY CLASSES, for every shape — the same
-// constraint `builder-start.tsx` records at its own illustrations: stroke/fill
-// utilities appear nowhere else in the tree, so they are not in the checked-in
-// compiled sheet and unstyled SVG falls back to solid black. Arbitrary-value
-// utilities are avoided everywhere in this file for the reason `captions.tsx`
-// records: their JIT emission has been non-deterministic in this repo, so
-// anything load-bearing is an inline token style.
+// Inline styles, not utilities: stroke/fill utilities appear nowhere else in the tree, so they
+// are absent from the compiled sheet and unstyled SVG falls back to solid black.
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** The boot phases the builder actually goes through, in order. Exported so a

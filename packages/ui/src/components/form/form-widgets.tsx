@@ -98,12 +98,12 @@ export function TextWidget(
       disabled={props.disabled}
       minLength={props.field.minLength}
       maxLength={props.field.maxLength}
-      // Masking (spec §7.3). Each is `undefined` for a field with no format hints, so
+      // Masking. Each is `undefined` for a field with no format hints, so
       // an unhinted field renders exactly the input it rendered before. The hint TEXT
       // is deliberately not passed as `Input`'s own `hint`: `FieldRow` renders it and
-      // owns the `aria-describedby` chain, and `Input`'s hint would mint a second one
-      // (spec §6). The submitted value is the CANONICAL one — `Input` emits canonical
-      // through `onValueInput` whenever a mask is active (spec §4), which is what
+      // owns the `aria-describedby` chain, and `Input`'s hint would mint a second one.
+      // The submitted value is the CANONICAL one — `Input` emits canonical
+      // through `onValueInput` whenever a mask is active, which is what
       // makes "exactly one value per field" true without this widget choosing.
       format={props.mask?.format}
       guide={props.mask?.guide}
@@ -172,7 +172,7 @@ export function NumberWidget(props: WidgetProps): JSX.Element {
 }
 
 export function SliderWidget(props: WidgetProps): JSX.Element {
-  // The 0..100 fallback is the WIDGET's, not the primitive's (plan §4). This widget is
+  // The 0..100 fallback is the WIDGET's, not the primitive's. This widget is
   // reading a consumer-authored JSON-Schema field where `minimum`/`maximum` are
   // optional; `Slider` itself requires both, so no other caller inherits this guess.
   const min = () => props.field.minimum ?? 0;
@@ -452,7 +452,7 @@ export function TagListWidget(props: WidgetProps): JSX.Element {
     const v = draft().trim();
     if (!v) return;
     // No cap on how many tags may be added. How many is too many lands in a policy
-    // document, which makes it the consuming application's call (CLAUDE.md, plan §4).
+    // document, which makes it the consuming application's call.
     props.onInput([...tags(), v]);
     setDraft('');
     props.onBlur();

@@ -1,53 +1,22 @@
 /**
- * `WorkSurface` — the work pane's chrome, PROMOTED from
- * `src/stories/showcase/builder-workspace.stories.tsx`'s `WorkPane`/`WorkPaneToolbar`
- * (2026-08-30). That story is the APPROVED DESIGN and was already a working
- * implementation carrying many rounds of recorded owner feedback; the story now
- * renders THIS component instead of its own copy, so the design contract and the
- * product cannot drift apart again.
+ * `WorkSurface` - the work pane's chrome.
  *
- * The reasoning below is the story's, carried over verbatim in substance —
- * read `builder-workspace.stories.tsx`'s module comment for the full record:
+ * The toolbar mirrors Lovable's browser chrome: a device toggle, a READ-ONLY URL bar
+ * (lock icon plus address text, never an editable field), an open-in-new-tab button, an
+ * expand toggle, and a Preview|Code segmented toggle with PREVIEW first.
  *
- *  - The toolbar mirrors Lovable's browser chrome (`stories/showcase/lovable.stories.tsx`,
- *    read line by line in that round): a device toggle · a READ-ONLY URL bar
- *    (lock icon + address text, never an editable field) · an open-in-new-tab
- *    button · an expand toggle · a Preview|Code segmented toggle with PREVIEW
- *    FIRST (Lovable's own `TABS` order).
- *  - Every affordance is independently optional. `showCodeView={false}` REMOVES
- *    the Preview|Code toggle entirely rather than disabling it — "someone may
- *    want preview-only" (owner's brief) — and the surface then always renders
- *    its preview branch.
- *  - The device toggle scales the PREVIEW canvas only, NEVER the Code view,
- *    mirroring Lovable, whose device toggle only ever wraps its
- *    `tab() === 'preview'` branch.
- *  - `expanded` is CONTROLLED, never owned here. The story checked v0's
- *    kai-resizable maximize protocol first and found `WorkspaceShell` does not
- *    forward `maximizedIndex`/`onMaximizeChange`; it wires expand to
- *    `WorkspaceShell`'s real controlled `startCollapsed` instead (collapse the
- *    chat rail, click again to restore). This component therefore reports the
- *    toggle and lets its host own the shell — codegen wires
- *    `startCollapsed={...}` on the emitted `WorkspaceShell`.
+ *  - Every affordance is independently optional, and `showCodeView={false}` REMOVES the
+ *    Preview|Code toggle rather than disabling it, so the surface always renders its
+ *    preview branch.
+ *  - `expanded` is CONTROLLED, never owned here: the component reports the toggle and the
+ *    host owns its shell (codegen wires `WorkspaceShell`'s `startCollapsed`).
  *
- * TWO DELIBERATE CHANGES FROM THE STORY, both decided loudly:
- *  1. The preview branch frames `src` through the kit's own `Artifact` with
- *     every Artifact toolbar flag OFF — Artifact is the bare sandboxed frame
- *     here, this component is the chrome. That reuses ONE iframe sandbox
- *     (`allow-scripts allow-forms`, no `allow-same-origin`) and ONE url policy
- *     (`isSafeUrl`, inside Artifact) rather than authoring a second of either.
- *     With no `src`, `preview` renders instead — which is the path the story
- *     takes with its stub tiles.
- *  2. Open-in-new-tab is WIRED, through `ArtifactController.openExternal()`
- *     (which already filters the scheme and warns on a refusal). The story's
- *     button had no `onClick` at all; a button that does nothing is exactly the
- *     dead affordance this repo's menu-honesty rule rejects.
- *
- * STYLING: plain inline `color-mix()`, not a Tailwind opacity-modifier class.
- * That is the story's own precedent and `components/builder/builder-skeleton.tsx`'s
- * `mix()` doc comment explains why (a fresh opacity-modifier combination proved
- * non-deterministic under the Storybook dev server's JIT pass). The helper is
- * inlined rather than imported: `builder-skeleton.tsx` is builder-story
- * furniture and this is a public component.
+ * The preview branch frames `src` through the kit's own `Artifact` with every Artifact
+ * toolbar flag off, so there is ONE iframe sandbox (`allow-scripts allow-forms`, no
+ * `allow-same-origin`) and ONE url policy (`isSafeUrl`); with no `src`, `preview` renders
+ * instead. Open-in-new-tab is wired through `ArtifactController.openExternal()`, because a
+ * button that does nothing is the dead affordance this repo's menu-honesty rule rejects.
+
  */
 import { type JSX, Show, For, createMemo, createSignal } from 'solid-js';
 import { Code2, Globe, Monitor, Tablet, Smartphone, Lock, ExternalLink, Maximize2, Minimize2 } from 'lucide-solid';
@@ -79,8 +48,10 @@ export const WORK_SURFACE_DEVICE_WIDTHS: Record<WorkSurfaceDevice, string> = {
  *  (its right `<section>`, read line by line: the muted token at 30% around
  *  toolbar + canvas, the toolbar bar itself lighter, and the previewed content
  *  card bordered ON TOP of the muted backdrop). The literal Tailwind
- *  opacity-modifier class for that is deliberately NOT used even though it is
- *  the token Lovable uses; see this module's STYLING note. (Not spelled out
+ *  opacity-modifier class for that is deliberately NOT used: a fresh opacity-modifier
+ *  combination proved non-deterministic under the Storybook dev server's JIT pass
+ *  (`builder-skeleton.tsx`'s `mix()` note), so `color-mix()` is inlined here instead of
+ *  imported. (Not spelled out
  *  here either: `tests/styles/shadow-sheet-scan.test.ts` extracts class tokens
  *  from shipped source as TEXT, so naming one in a comment makes the sheet
  *  compile a utility nothing renders.) */
@@ -89,7 +60,7 @@ const CANVAS_BG = 'color-mix(in oklab, var(--color-muted) 30%, transparent)';
 
 /** What the Code tab shows when nothing has been pointed at it: the state a
  *  construct reaches with `chrome.codeView: true` and no `codeUrl`, which is
- *  VALID vocabulary (owner ruling, 2026-08-30: the toggle has to be reachable
+ *  VALID vocabulary (the toggle has to be reachable
  *  out of the box, so an unset source is an empty state and not an authoring
  *  error).
  *
@@ -239,7 +210,7 @@ export function WorkSurface(props: WorkSurfaceProps): JSX.Element {
             `controller` — the button would render and do NOTHING. Asking for
             the affordance is not the same as having something behind it, and
             this repo's menu-honesty rule is that an affordance with nothing
-            behind it must not render at all (2026-08-30). The construct
+            behind it must not render at all. The construct
             schema makes `workSurface.url` REQUIRED for the same reason, so
             an emitted app never reaches this branch; the story's stub path
             does. */}

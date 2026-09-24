@@ -1,79 +1,22 @@
-// src/primitives/card-data-types.ts
-// The five built-in card PAYLOAD types — `CardEnvelope.data`, one per card type —
-// authored beside the schemas they mirror rather than inside the components that
-// render them.
+// The five built-in card PAYLOAD types (`CardEnvelope.data`, one per card type), authored
+// beside the schemas they mirror rather than inside the components that render them.
 //
-// THE FOURTH INSTANCE OF ONE DEFECT, AND THE LAST ONE THAT WAS LEFT
-// -----------------------------------------------------------------
-// `BUILTIN_CARD_TAGS` (card-tags.ts), `CardComponentMap` (card-component-types.ts)
-// and the tag map before it were each pulled out of a `.tsx` for the same reason,
-// and each header says so. Read card-tags.ts first; this is the same problem one
-// layer further out, and the reason it is worth a fourth file rather than a fourth
-// exception is that these are the types a BACKEND names, which makes them the ones
-// with the least business living under a Solid component.
+// WHY A SEPARATE MODULE: `tsconfig.mcp.json` is Node-only (`lib: ["ESNext"]`, no `jsx`), and
+// a type import still has to RESOLVE even though it erases. While these types lived under
+// `components/`, any Node/no-DOM project that named one failed with `TS6142: ... but '--jsx'
+// is not set`, so `@kitn.ai/ui/schemas`, the server-safe entry that exists precisely so a
+// route can hand a model tool definitions, could not re-export them: Python and Go read
+// `./schemas/*.json` and get the full shape, while a TypeScript backend got `data: unknown`.
+// Relaxing `tsconfig.mcp.json` is not the alternative and that is measured rather than
+// recalled: granting it `jsx: "preserve"` takes it from 0 errors to 130 on this case.
 //
-// `tsconfig.mcp.json` is Node-only — `lib: ["ESNext"]`, no `jsx` — and a type import
-// still has to RESOLVE even though it erases. While `ConfirmCardData` and friends
-// lived in components/confirm-card/confirm-card.tsx, any Node/no-DOM project that named one got
+// WHY `type` ALIASES AND NOT `interface`s: TypeScript gives an object type alias an implicit
+// index signature and gives an interface none, and every card element's `data` prop is a
+// `Record<string, unknown>` at some point in the chain, so as interfaces these types were not
+// assignable to the very property their own doc tells a consumer to assign them to.
 //
-//   error TS6142: Module '../../components/choice-card' was resolved to
-//   '.../src/components/choice-card/choice-card.tsx', but '--jsx' is not set.
-//
-// measured on this tree, and `@kitn.ai/ui/schemas` — the server-safe entry that
-// exists precisely so a route can hand a model tool definitions — could not
-// re-export them at all without dragging the Solid tree into that pass. So the one
-// language the kit is AUTHORED in was the only one that could not name the contract
-// it publishes: Python and Go read `./schemas/*.json` and get the full shape, while
-// a TypeScript backend building a card envelope got `data: unknown`.
-//
-// Relaxing tsconfig.mcp.json is not the alternative, and that is measured rather
-// than recalled: granting it `jsx: "preserve"` + `jsxImportSource: "solid-js"` takes
-// it from 0 errors to 130 on this exact case (838 without the import source, and
-// card-tags.ts records 1364 for the broader one), almost all `TS2304: Cannot find
-// name 'HTMLDivElement' / 'window'`, because a `jsx` setting drags the whole Solid
-// component tree into a Node-only pass. The Node/no-DOM boundary is load-bearing.
-//
-// WHY THEY ARE `type` ALIASES AND NOT `interface`S — DO NOT "TIDY" THIS BACK
-// --------------------------------------------------------------------------
-// This is the other half of the same story and it is not a style preference.
-// TypeScript gives an object TYPE ALIAS an implicit index signature and gives an
-// INTERFACE none. Measured, both directions, on a two-line file:
-//
-//   interface IFace { a: string }
-//   type    TAlias = { a: string }
-//   const r1: Record<string, unknown> = iface;  // TS2322: Index signature for type
-//                                               // 'string' is missing in type 'IFace'
-//   const r2: Record<string, unknown> = alias;  // OK
-//
-// Every card element's `data` prop is a `Record<string, unknown>` at some point in
-// the chain — the generated `web-component-types.d.ts` used to declare it that way
-// outright, and `renderType` in scripts/_ts-helpers.mjs still emits exactly that
-// string as its cycle placeholder when it inlines a self-referential type (which
-// `FormField` is). So as interfaces these types were not assignable to the very
-// property each one's own doc comment tells a consumer to assign it to:
-// `el.data = myChoiceCardData` was TS2322 while `<kai-choice>`'s JSDoc said "Import
-// `ChoiceCardData` from `@kitn.ai/ui` for the full shape".
-//
-// Aliases fix that at the root instead of at each of the four call sites, and they
-// are what makes `FormDefinition` work at all: it is self-referential, so the
-// generator can only inline it down to a `Record<string, unknown>` placeholder, and
-// an interface would fail against that placeholder no matter what the web components
-// declare.
-//
-// Nothing here merges declarations, so the one capability `interface` has that
-// `type` lacks is not in use.
-//
-// WHAT THIS FILE MAY CONTAIN
-// --------------------------
-// Types only, and only types with no DOM and no Solid below them. It must stay
-// importable from a Node process with no `jsx`, which is the whole point; the
-// discriminating check is `tsc --noEmit -p tsconfig.mcp.json` on a tree with no
-// `dist/` present, and nothing else is evidence for it. `CardEnvelope` below comes
-// from ./card-contract, which is already a `.ts` for the same reason.
-//
-// Each component re-exports its own types from here, so every existing importer of
-// `components/confirm-card` etc. is unaffected, and `@kitn.ai/ui/schemas` exports
-// them too so a backend route can finally name what it is building.
+// Types only, and only types with no DOM and no Solid below them, because `tsc --noEmit -p
+// tsconfig.mcp.json` on a tree with no `dist/` is the evidence the boundary holds.
 
 import type { CardEnvelope } from './card-contract';
 
@@ -204,37 +147,24 @@ export type FormField = {
     | 'switch';
   'x-kai-placeholder'?: string;
   'x-kai-step'?: number;
-  // NOT the JSON Schema `format` keyword, and deliberately not an extension of it:
-  // `format` has a registered vocabulary with assertion semantics, `widgetFor()` already
-  // switches on it to pick a widget, and `toJsonSchema()` turns it into a validation
-  // pattern. This is a UI hint, so it lives in the `x-kai-*` namespace with the other UI
-  // hints -- and it selects FORMATTING, never a widget.
+  // NOT the JSON Schema `format` keyword, and deliberately not an extension of it: `format`
+  // has a registered vocabulary with assertion semantics, `widgetFor()` switches on it to pick
+  // a widget and `toJsonSchema()` turns it into a validation pattern. This is a UI hint in the
+  // `x-kai-*` namespace, and it selects FORMATTING, never a widget.
   //
-  // Typed as the semantic-type union for a consumer authoring a form definition by hand.
-  // A value arriving from a MODEL is untrusted and may be anything at all;
-  // `resolveFieldMask()` degrades an unrecognised one to an unmasked text field with a
-  // console warning rather than trusting this declaration. `tel` / `ssn` / `credit-card`
-  // apply that type's standard mask and submit digits only; `custom` masks with
-  // `x-kai-mask` and submits the formatted value.
+  // A value arriving from a MODEL is untrusted: `resolveFieldMask()` degrades an unrecognised
+  // one to an unmasked text field with a console warning rather than trusting the declaration.
   //
-  // SPELLED OUT HERE RATHER THAN IMPORTED, and that is not laziness. `FieldSemanticType`
-  // is declared in `./field-semantics`, which carries the semantics TABLE and its
-  // `console.warn` -- and this file's whole reason for existing is that a Node/no-DOM
-  // backend can name a card payload with `lib: ["ESNext"]` and `types: []`, where
-  // `console` does not exist (measured: TS2584, by
-  // `tests/schemas/card-data-types-node-safe.test.ts`, which is what caught the import).
-  // A type import still has to RESOLVE, so importing the union would drag the engine into
-  // the server-safe entry's graph. It is therefore a REGISTERED COPY of
-  // `FIELD_SEMANTIC_TYPES`, and the two are pinned mutually assignable at compile time in
-  // `tests/components/form-field-formats.test.tsx`, so adding a token to the enum without
-  // adding it here fails `nx typecheck ui`.
+  // SPELLED OUT RATHER THAN IMPORTED, and that is not laziness: `FieldSemanticType` lives in
+  // `./field-semantics`, which carries the semantics table and its `console.warn`, and this
+  // file exists so a Node/no-DOM backend can name a card payload with `lib: ["ESNext"]` and
+  // `types: []`, where `console` does not exist (TS2584, caught by
+  // `tests/schemas/card-data-types-node-safe.test.ts`). A type import still has to resolve, so
+  // it is a REGISTERED COPY of `FIELD_SEMANTIC_TYPES`, pinned mutually assignable in
+  // `tests/components/form-field-formats.test.tsx`.
   //
-  // AN APP CANNOT PIN THIS ON THE MODEL TODAY: `cardTools({ require })` narrows a
-  // projected tool schema by dot-path, but no path reaches a form FIELD (a form card's
-  // payload is itself a JSON Schema, so `require: { form: [{ path: 'properties.ticketId' }] }`
-  // is a TypeError naming a path that does not resolve). "Force the model to mask the
-  // ticket field" is therefore not expressible; the enum is what makes it LIKELY, and an
-  // app that needs a guarantee validates the arriving envelope itself.
+  // An app cannot pin this on the MODEL today: `cardTools({ require })` narrows by dot-path and
+  // no path reaches a form FIELD, so the enum makes it LIKELY rather than guaranteed.
   /** Display format for a string field. Selects formatting, never a widget; the built-in masking types submit digits only. */
   'x-kai-format'?: 'tel' | 'ssn' | 'credit-card' | 'custom';
   // The pattern engine caps the length, not this field.

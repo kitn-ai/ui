@@ -2,7 +2,7 @@
 // Pure provider resolution for <kai-embed>: map an EmbedCardData → an embeddable
 // player URL + poster + iframe sandbox/allow. Covers youtube (privacy-enhanced
 // youtube-nocookie), vimeo (dnt=1), and generic (https-only, ORIGIN-ALLOWLISTED).
-// No network, no DOM. See docs/superpowers/specs/2026-06-13-kc-link-embed-cards-design.md.
+// No network, no DOM.
 import type { CardEnvelope } from './card-contract';
 
 /** Media provider for an embed card. */

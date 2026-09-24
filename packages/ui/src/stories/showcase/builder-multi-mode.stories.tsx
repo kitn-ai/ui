@@ -395,7 +395,7 @@ function MultiModePreview(props: {
         </div>
         {props.shell.userMenu && (
           <div class="border-t border-border p-1.5">
-            <UserMenu name="Ada" plan="Pro" />
+            <UserMenu name="Demo User" plan="Pro" />
           </div>
         )}
       </div>

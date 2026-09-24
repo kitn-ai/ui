@@ -1,5 +1,5 @@
 /**
- * DerivedBuilderPanel (B-19/B-25) — the REAL builder inspector: controls
+ * DerivedBuilderPanel: the REAL builder inspector: controls
  * DERIVE from ConstructSchema.shape (construct-form-paths' walk), the
  * template registry's `controls` manifest selects and orders the sections,
  * a path-keyed FIELD_OVERRIDES map supplies bespoke editors, and the
@@ -186,8 +186,7 @@ function HistoryEditor(props: FieldEditorProps): JSX.Element {
 
 /**
  * Cards. READ-ONLY (mirrors the legacy stub panel's own Cards section in
- * builder-panel.tsx, wired here for the derived panel as part of the
- * 2026-08-29 design-parity fix wave). A card is declared with a full JSON
+ * builder-panel.tsx, wired here for the derived panel too). A card is declared with a full JSON
  * Schema + `x-kai-*` widget/format/mask hints that this panel has no editor
  * for and isn't building one this round: showing nothing here would
  * silently drop a real part of the construct from view, which is worse

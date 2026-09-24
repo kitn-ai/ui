@@ -20,12 +20,10 @@ export function observeContentHeight(el: Element, onHeight: (height: number) => 
  *  (e.g. `<body>`) padding above it; the host then clips the bottom of the card by
  *  exactly those lost pixels. `scrollHeight` is the full padding-box height as actually
  *  rendered, so it stays correct no matter which element in the ancestor chain carries
- *  the padding/border, including if the provider page's own styles change later:
- *  reading contentRect off one fixed element, or hand-summing computed padding/border
- *  off a fixed list of ancestors, would both need updating every time that chain does.
+ *  the padding/border, including if the provider page's own styles change later.
  *
- *  Deliberately `document.body.scrollHeight`, NOT `document.documentElement.scrollHeight`
- *  (N1, task-10-report.md "Fix-wave re-review"): the CSSOM View spec special-cases the
+ *  Deliberately `document.body.scrollHeight`, NOT `document.documentElement.scrollHeight`:
+ *  the CSSOM View spec special-cases the
  *  scrollHeight of the ROOT element to be `max(viewport scrolling area, viewport
  *  height)`, and the host sets the iframe's viewport FROM this very measurement
  *  (`host-embed.ts` `sizeIframe`), so `documentElement.scrollHeight` can only grow for

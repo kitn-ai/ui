@@ -170,7 +170,7 @@ export function widgetFor(field: FormField, inlineMax: number): WidgetKind {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Field formats (spec §7.3) — the model-facing half of masked fields.
+// Field formats: the model-facing half of masked fields.
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
@@ -356,7 +356,7 @@ export function resolveFieldMask(field: FormField, fieldKey = ''): FieldMaskHint
     semantic,
     // The guide when there is one (`mm/dd/yyyy` reads as a format to a person); the
     // pattern otherwise, because a DERIVED guide is spaces at every fill position and
-    // says nothing out loud. A visual guide is not a description either way (spec §6).
+    // says nothing out loud. A visual guide is not a description either way.
     hint: `Format: ${guide ?? pattern}`,
     warnings,
   };

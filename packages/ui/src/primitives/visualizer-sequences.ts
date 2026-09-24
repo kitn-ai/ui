@@ -29,7 +29,7 @@ const KNOWN: readonly VisualizerState[] = [
   'listening',
   'thinking',
   'speaking',
-  // First-class since 2026-08-10 (Rob): the dead-connection look (flat wave,
+  // First-class: the dead-connection look (flat wave,
   // nothing lit) upstream renders for its 'disconnected' state. It was an
   // alias for 'idle' until idle adopted upstream's gentle wave, which left
   // the flat line unreachable.
@@ -104,7 +104,7 @@ export function barInterval(state: VisualizerState, barCount: number): number {
  * NOTE: This diverges from upstream use-agent-audio-visualizer-grid.ts in two ways:
  * (1) We use separate centerX and centerY (upstream uses row-center for both axes).
  *     Upstream never ships non-square grids, so the bug never manifested. Our public
- *     API is square-only too now (the grid's single `count` prop, 2026-08-09), but
+ *     API is square-only too now (the grid's single `count` prop), but
  *     this function keeps taking rows/columns as plain params, so the correct
  *     arbitrary-shape handling stays -- it costs nothing and guards any future caller.
  * (2) We distinguish spread === 0 from spread === undefined (upstream treats 0 as falsy).
@@ -316,7 +316,7 @@ export function waveTargets(state: VisualizerState): {
     // opacity 1), a gentle undulation (~1.05px centreline waviness, ~1.5px/s
     // phase drift, measured on the md tile). Upstream's explicitly FLAT
     // state is 'disconnected' -- the dedicated arm below. We had flattened
-    // idle instead; Rob wants upstream's look (2026-08-09).
+    // idle instead; the upstream look is wanted.
     case 'idle':
       return {
         speed: WAVE_SPEED * 2,
@@ -327,7 +327,7 @@ export function waveTargets(state: VisualizerState): {
       };
     // Upstream's EXPLICIT flat state, measured: 'disconnected' is the one
     // arm of their wave switch that zeroes the line. First-class here since
-    // 2026-08-10 (Rob: 'the disconnected wave needs to be that kind of flat
+    // The disconnected wave needs to be that kind of flat
     // line'). `default` keeps the same flat targets for out-of-union
     // strings, which normalizeState prevents real callers from reaching.
     case 'disconnected':

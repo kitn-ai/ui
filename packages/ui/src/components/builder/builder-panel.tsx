@@ -11,14 +11,13 @@ import { ToggleChip } from '../toggle/toggle-chip';
 import { X } from 'lucide-solid';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Types — a design-round stub of the real construct.v1 schema
-// (mcp/construct/schema.ts), narrowed to the fields this panel
-// edits. NOT the source of truth: a real build derives its FormDefinition
-// from ConstructSchema (per RECOMMENDATION.md, that derivation is the hard
-// part and is out of scope here). Presence, not a boolean, is what turns
-// `home` and `capabilities.attachments` on — matching the real schema's own
-// "presence enables the feature" contract, so this stub's shape stays honest
-// about the translation the real panel will also need (strain #2).
+// Types — a stub of the real construct.v1 schema (mcp/construct/schema.ts),
+// narrowed to the fields this panel edits. NOT the source of truth: a real
+// build derives its FormDefinition from ConstructSchema, and that derivation
+// is out of scope here. Presence, not a boolean, is what turns `home` and
+// `capabilities.attachments` on — matching the real schema's own "presence
+// enables the feature" contract, so this stub's shape stays honest about the
+// translation the real panel will also need.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export type BuilderLayoutKind = 'widget' | 'fullscreen' | 'aside' | 'split' | 'custom';
@@ -97,7 +96,7 @@ export interface BuilderConstruct {
 }
 
 /**
- * A template-scoped section configuration (Round W, T-2/T-6): a template
+ * A template-scoped section configuration: a template
  * FIXES its layout internally (no layout radio) and owns which of the
  * layout-scoped sections apply: a widget template shows Widget chrome
  * unconditionally (it IS the widget template, not merely "currently set to
@@ -135,8 +134,8 @@ export interface BuilderPanelProps {
 }
 
 /** One "common case" chip for `capabilities.attachments.accept`: a human label
- *  over one or more raw MIME patterns. Owner feedback (design round 2):
- *  raw MIME types are hostile to the audience this panel is for, so the
+ *  over one or more raw MIME patterns. Owner feedback: raw MIME types are
+ *  hostile to the audience this panel is for, so the
  *  common cases get a toggle chip and the raw list is a secondary, visible
  *  ("Advanced") affordance rather than the primary input. */
 export interface AcceptChip {
@@ -149,9 +148,8 @@ export interface AcceptChip {
  * The chip → MIME-pattern map for the attachments accept editor below.
  *
  * Exported (not module-local) because it's exactly the vocabulary a future
- * schema-driven wizard or capability menu (RECOMMENDATION.md's "real build")
- * will also want, one place to widen the common-case list rather than a
- * second one growing beside it.
+ * schema-driven wizard or capability menu will also want, one place to widen
+ * the common-case list rather than a second one growing beside it.
  */
 export const ACCEPT_CHIPS: readonly AcceptChip[] = [
   { id: 'images', label: 'Images', patterns: ['image/*'] },
@@ -220,10 +218,10 @@ export function Row(props: { label: string; children: JSX.Element; muted?: boole
   );
 }
 
-/** A minimal, reusable string-tag editor: the taglist pattern the spike
- *  proved out (`starters`). `capabilities.attachments.accept` moved to
- *  `AcceptTypeEditor` below (owner feedback, design round 2): raw MIME
- *  strings are a bad first surface for this audience. */
+/** A minimal, reusable string-tag editor: the taglist pattern `starters`
+ *  proved out. `capabilities.attachments.accept` moved to
+ *  `AcceptTypeEditor` below: raw MIME strings are a bad first surface for
+ *  this audience. */
 export function TagEditor(props: {
   tags: string[];
   onChange: (next: string[]) => void;

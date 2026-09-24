@@ -245,64 +245,24 @@ export interface ChatThreadController {
 }
 
 /**
- * THE MESSAGE LIST'S KEY, and the reason it is not the message object. This is
- * the canonical note; `thread.tsx` keys its identical list the same way and
- * points here.
+ * THE MESSAGE LIST'S KEY, and why it is not the message object. This is the canonical note;
+ * `thread.tsx` keys its identical list the same way and points here.
  *
- *  `<For>` is REFERENCE-keyed, and a streaming assistant message gets a brand
- *  new object identity on every delta — `createAssistantStream` rebuilds it as
- *  `{ ...prev[i], parts: next }` because a new reference IS the re-render
- *  signal. Keyed on the objects, every chunk therefore looks like an entirely
- *  new list: the whole message row is torn down and rebuilt, and everything the
- *  user did inside it dies with it. Expanding a tool or reasoning panel
- *  mid-stream did nothing at all — the disclosure opened and was discarded
- *  microseconds later by the next token. (`MessageBody` keys its PARTS by
- *  position for exactly this reason; that fix was dead while its parent kept
- *  destroying the subtree above it.)
- *
- *  So key on `message.id`, which is stable across the object churn: `<For>` over
- *  the id array diffs by string value, a delta produces an identical id list,
- *  and no row moves. The row then reads its message through `messages[i()]` —
- *  `<For>`'s index accessor, which it keeps current across inserts, removals and
- *  moves — so the CONTENT keeps updating through accessors while the DOM stays
- *  put.
- *
- *  WHY NOT `<Index>`, the other way to survive the churn: `<Index>` keys by
- *  POSITION, so a row's local state (an open panel, a half-filled form card)
- *  belongs to the slot rather than to the message. Appends and tail truncations
- *  (regenerate/edit) are fine, but prepending older turns — load-earlier-history,
- *  which every real chat grows — shifts every row, and each open disclosure
- *  stays behind with the wrong message. Position IS a valid key inside a
- *  message, where the folds only ever append or patch a part in place; it is not
- *  one for the message list, where the host owns the array and splices it.
- *  Both approaches require the row to read through accessors — that is inherent
- *  in keeping a row mounted while its object is replaced, not a cost unique to
- *  either.
- *
- *  Contract: `id` must be unique per message. It already had to be — the
- *  feedback/copy state above this list is keyed by it.
+ * `<For>` is reference-keyed, and a streaming assistant message gets a new object identity on
+ * every delta, because a new reference IS the re-render signal. Keyed on objects, every chunk
+ * looks like an entirely new list: the row is torn down and rebuilt, and anything the reader
+ * did inside it dies (an expanded tool panel was discarded microseconds later by the next
+ * token). So key on `message.id`, stable across the churn, and read the message through
+ * `messages[i()]`, so the CONTENT updates while the DOM stays put. `id` must be unique per
+ * message; the feedback state above this list already required that.
  */
-/** How an ASSISTANT row aligns its parts across the column (K-D11).
+/**
+ * How an ASSISTANT row aligns its parts across the column.
  *
- *  `stretch`, not `start`. An assistant turn is a `flex flex-col` box, so under
- *  `items-start` every part is a flex item with a fit-content cross size,
- *  `min(max-content, column)`. Prose is wider than the column so a text bubble
- *  looked right, and a generative-UI card was as wide as its widest button: the
- *  ops-console parameters form measured 285px inside a 768px column while the
- *  approval card beside it filled all 768. A card in a chat thread filling its
- *  column is a fact about the medium, and no consumer can reach it: the card
- *  element is created inside `<kai-chat>`'s shadow root.
- *
- *  Stretch rather than `w-full` on the cards, for two reasons: it is one lever
- *  instead of one per card surface (the Solid `Card` root AND every `kai-*`
- *  card host, whose shadow wrapper is `display: contents`), and stretching only
- *  applies where the cross size is `auto`, so a part that states its own width
- *  is untouched, `Attachments variant="grid"` stays `w-fit`. `Tool` and
- *  `Reasoning` already asked for `w-full` explicitly; this is the same
- *  intention, applied once.
- *
- *  USER rows keep `items-end`: their bubble is `max-w-[85%]` and right aligned,
- *  and stretching it would break both.
+ * `stretch`, not `start`: under `items-start` every part is a fit-content flex item, so a
+ * generative-UI card was as wide as its widest button while prose looked right. Stretching
+ * applies only where the cross size is `auto`, leaving a part with its own width alone. The
+ * card element lives inside `<kai-chat>`'s shadow root, so no consumer can reach this.
  */
 const ASSISTANT_ALIGN = 'items-stretch';
 
@@ -321,7 +281,7 @@ export function ChatThread(props: ChatThreadProps) {
   });
   const [internal, setInternal] = createSignal<string | ComposerDoc>(props.value ?? '');
   const [attachments, setAttachments] = createSignal<AttachmentData[]>([]);
-  // ── The widget view machine (H-1..H-6), on the shipped navigator (P-3/P-9)
+  // ── The widget view machine, on the shipped navigator
   // The routing STATE lives in `createViewStack`, so the facade and every
   // block share ONE navigation model: tab roots sit behind the tab bar, a
   // drilled view hides the tab bar and shows a back affordance, and a tab
@@ -334,7 +294,7 @@ export function ChatThread(props: ChatThreadProps) {
   //               showing the conversations list when the store is wired and
   //               the root chat otherwise) | 'chat' (drill view: entered from
   //               home, the recent card, or a list row; hides the tab bar and
-  //               shows the back arrow, H-5)
+  //               shows the back arrow)
   //   plain mode: 'chat' (root) | 'list' (drilled off the header toggle)
   const homeEnabled = () => props.home != null;
   const conversationsReady = () => props.conversations === true && props.store != null && props.onConversationLoad != null;
@@ -363,33 +323,22 @@ export function ChatThread(props: ChatThreadProps) {
    *  grammar), a root switch when it is the root (plain grammar). `navigate`
    *  resolves that from the registered entries, so this stays one call. */
   const goToChat = () => nav.navigate('chat');
-  // The home-landing decision cannot be frozen at MOUNT: the `kai-` contract
-  // has consumers set object props (like `home`) as JS properties AFTER the
-  // element is appended/upgraded (the React wrapper's `useLayoutEffect` runs
-  // post-mount by construction), so `props.home` is routinely still
-  // `undefined` on this component's first render. The navigator's untouched
-  // default root already follows `viewEntries` reactively ('home' appears
-  // as the first tab root the moment `home` is set), which covers the
-  // common late-set path on its own; this computed handles the EDGES where
-  // the visitor has already navigated:
+  // The home-landing decision cannot be frozen at MOUNT: the `kai-` contract has
+  // consumers set object props (like `home`) as JS properties AFTER the element is
+  // appended (the React wrapper's `useLayoutEffect` runs post-mount), so `props.home`
+  // is routinely still `undefined` on the first render. The navigator's untouched
+  // default root already follows `viewEntries` reactively, which covers the common
+  // late-set path; this computed handles the edges where the visitor has navigated.
   //
-  // Rising edge: from the untouched default (root chat, no drill) land on
-  // 'home'; a list opened under the plain grammar becomes the Messages tab
-  // root. A visitor already IN a chat (root or drilled) is never yanked out.
-  // Falling edge: `home` turning OFF while on 'home'/'messages' leaves a
-  // view name the plain grammar does not have — reset to its equivalent
-  // ('chat', re-drilling 'list' when the list was showing).
+  // Rising edge: from the untouched default (root chat, no drill) land on 'home'.
+  // Falling edge: `home` turning off while on 'home'/'messages' resets to 'chat',
+  // re-drilling 'list' when the list was showing.
   //
-  // NOT `on(homeEnabled, fn, { defer: true })`: Solid's `on()` skips calling
-  // `fn` on its first real invocation but does NOT capture the deferred
-  // read as `prevInput` — the first non-deferred call always sees `prev ===
-  // undefined` (confirmed against `solid-js/dist/solid.js`'s `on()`, not
-  // just inferred), so `!isOn && wasOn` can never be true and the falling
-  // edge silently never fires. Track the previous value by hand instead: a
-  // closure variable seeded with `homeEnabled()`'s value BEFORE the
-  // computed exists (so the computed's own first run sees `isOn === wasOn`
-  // and no-ops, the same "skip the initial run" behavior `defer` was for)
-  // and updated at the end of every run.
+  // NOT `on(homeEnabled, fn, { defer: true })`: Solid's `on()` skips its first real
+  // call but does not capture the deferred read as `prevInput`, so `!isOn && wasOn`
+  // can never be true and the falling edge never fires. The previous value is tracked
+  // by hand: a closure variable seeded BEFORE the computed exists (so its first run
+  // no-ops), updated at the end of every run.
   let wasHomeEnabled = untrack(homeEnabled);
   createComputed(() => {
     const isOn = homeEnabled();
@@ -408,8 +357,8 @@ export function ChatThread(props: ChatThreadProps) {
     }
     wasHomeEnabled = isOn;
   });
-  // ── Conversations (C-1..C-9) — policy in the shipped controller (P-5) ───
-  // The lifecycle policy itself (the C-6 lazy-id mint, save-per-turn, mount
+  // ── Conversations: policy in the shipped controller ───
+  // The lifecycle policy itself (the lazy-id mint, save-per-turn, mount
   // auto-restore, the three-leg seen rule for markRead, the unread
   // derivation, loud degradation) lives in `createConversationController`
   // (`@kitn.ai/ui/stores`), the same controller every composed block runs,
@@ -425,7 +374,7 @@ export function ChatThread(props: ChatThreadProps) {
   // straight back in as a new `props.messages` reference (the reactivity
   // contract requires a fresh array on every change, load included), and
   // that bounce is a load ECHO, not a turn to persist — without this flag
-  // the save effect would re-save on every load (IMPORTANT-1, 2026-08-26
+  // the save effect would re-save on every load
   // final review: phantom-unreading a fully-read conversation on reload, a
   // needless full-thread PUT for fetchStore). This is the one piece of
   // save-gating that stays in the adapter: it exists only because this
@@ -481,7 +430,7 @@ export function ChatThread(props: ChatThreadProps) {
   });
 
   const openList = () => { nav.push('list'); void controller()?.refresh(); };
-  // Messages-tab entry point (H-2): the list moved off the header toggle onto
+  // Messages-tab entry point: the list moved off the header toggle onto
   // this tab. The 'messages' tab root renders the list when the store is
   // wired and the root chat (ambiguity 1: no back arrow, tab bar stays)
   // otherwise; either way it is a tab switch, so any drill clears.
@@ -491,7 +440,7 @@ export function ChatThread(props: ChatThreadProps) {
   };
 
   const startNewConversation = () => {
-    // C-6 lives in the controller: clearing the active id and delivering []
+    // The lazy id lives in the controller: clearing the active id and delivering []
     // through `onMessagesLoad` is enough; the id itself is minted by the
     // first non-empty `saveTurn`.
     const ctrl = untrack(controller);
@@ -512,7 +461,7 @@ export function ChatThread(props: ChatThreadProps) {
   createEffect(() => { void controller()?.setView(view() ?? 'chat'); });
 
   // Save per turn: every non-empty `props.messages` change that is not the
-  // echo of a load (see `loadEcho`). The controller mints the lazy id (C-6)
+  // echo of a load (see `loadEcho`). The controller mints the lazy id
   // on the first non-empty save, saves, marks the conversation read while
   // seen, and refreshes the summary cache so the badge moves even for a
   // message landing while the host is closed.
@@ -520,7 +469,7 @@ export function ChatThread(props: ChatThreadProps) {
     const ctrl = controller();
     if (!ctrl) return;
     const messages = props.messages;
-    if (messages.length === 0) return; // C-6: nothing persists until the first message
+    if (messages.length === 0) return; // nothing persists until the first message
     if (loadEcho) { loadEcho = false; return; }
     void ctrl.saveTurn(messages).then((id) => {
       // Mirror the minted id into the signal the toggle/list UI reads.
@@ -535,7 +484,7 @@ export function ChatThread(props: ChatThreadProps) {
   // like every other render-derived callback here.
   createEffect(() => props.onUnreadChange?.(anyUnread()));
 
-  // Visitor continuity (C-7's whole point): a plain-history construct
+  // Visitor continuity: a plain-history construct
   // auto-restored the visitor's thread on mount, so upgrading to
   // `conversations` must not regress that — their most recent conversation
   // (migrated legacy thread included) has to reappear without an extra tap
@@ -590,9 +539,9 @@ export function ChatThread(props: ChatThreadProps) {
     // to put it.
     || (homeEnabled() && nav.drilled())
   );
-  // Recent-conversation card (H-1): only when explicitly opted into
+  // Recent-conversation card: only when explicitly opted into
   // (`home.recentConversation === true`), summaries are actually hydrated,
-  // and at least one exists — the newest by the shared recency rule (#335).
+  // and at least one exists — the newest by the shared recency rule.
   const recentSummary = createMemo(() => {
     if (!homeEnabled() || props.home?.recentConversation !== true || !conversationsReady()) return undefined;
     const summaries = conversationSummaries();
@@ -632,7 +581,7 @@ export function ChatThread(props: ChatThreadProps) {
             <slot name="sidebar" />
           </aside>
         </Show>
-        {/* The main column renders THROUGH the public Panel family (P-1/P-9):
+        {/* The main column renders THROUGH the public Panel family:
             frameless, so inside an already-framed host (kai-dock's floating
             panel) it inherits that container's radius; the header row, view
             container and footer strip below are the same parts every composed
@@ -684,7 +633,7 @@ export function ChatThread(props: ChatThreadProps) {
                         which renders `DockCloseGlyph` = `<X size={24} />`) — identical
                         hit-area and optical weight, so the two read as siblings.
                         Swaps to a back arrow while the list is open, returning to chat. */}
-                    {/* Back arrow for a DRILLED chat (H-5): entered from home, the
+                    {/* Back arrow for a DRILLED chat: entered from home, the
                         recent card, or a list row/new-conversation pill while `home`
                         is set. Returns to whichever surface it was entered from. */}
                     <Show when={homeEnabled() && nav.drilled()}>
@@ -698,9 +647,9 @@ export function ChatThread(props: ChatThreadProps) {
                         <ArrowLeft size={24} aria-hidden="true" />
                       </Button>
                     </Show>
-                    {/* H-2: with `home` set, the prior-conversations list moved off this
+                    {/* With `home` set, the prior-conversations list moved off this
                         header toggle onto the Messages tab — the toggle no longer renders
-                        at all (H-3). */}
+                        at all. */}
                     <Show when={props.conversations && props.store && !homeEnabled()}>
                       <Button
                         variant="ghost"
@@ -722,7 +671,7 @@ export function ChatThread(props: ChatThreadProps) {
                         <Show when={view() === 'list'} fallback={<MessagesSquare size={24} aria-hidden="true" />}>
                           <ArrowLeft size={24} aria-hidden="true" />
                         </Show>
-                        {/* Unread badge (owner round, 2026-08-26): ANY conversation other
+                        {/* Unread badge: ANY conversation other
                             than the active one is unread. Only over the chat-bubble glyph
                             — once the list is open showing the back arrow, the visitor is
                             already looking at the rows themselves, each carrying its own
@@ -783,11 +732,11 @@ export function ChatThread(props: ChatThreadProps) {
                         const body = (
                           <MessageBody
                             parts={m().parts}
-                            /* F-21: streaming-ness = the thread's ONE existing
+                            /* Streaming-ness = the thread's ONE existing
                                loading signal + being the last message and an
                                assistant turn. No second streaming source. The
                                reasoning disclosure no longer auto-opens on it
-                               by default (Task 19f, owner ruling 2026-08-26) —
+                               by default —
                                only the trigger's shimmer reflects streaming
                                unless `reasoningOpen` opts back in. */
                             isStreaming={props.loading === true && m().role === 'assistant' && i() === props.messages.length - 1}
@@ -850,7 +799,7 @@ export function ChatThread(props: ChatThreadProps) {
               }
             >
               <Match when={view() === 'home'}>
-                {/* REPLACE — custom home-tab content (region slots, P-6). The
+                {/* REPLACE — custom home-tab content (region slots). The
                     navigation (tab bar, drills, back) stays the kit's own; only
                     the home view's CONTENT is stood in for. */}
                 <Show
@@ -929,10 +878,10 @@ export function ChatThread(props: ChatThreadProps) {
               </PanelFooter>
             </Show>
           </Show>
-          {/* Home/Messages tab bar (H-2/H-6): shown on the tab roots (home,
+          {/* Home/Messages tab bar: shown on the tab roots (home,
               the Messages tab's list or root chat), hidden on a DRILLED chat
               so the back arrow above is the only way back — the navigator's
-              own drilled flag IS that rule (P-3). */}
+              own drilled flag IS that rule. */}
           <Show when={tabBarVisible()}>
             <PanelFooter>
               <WidgetTabBar

@@ -130,7 +130,7 @@ export const ICON_NAMES: readonly string[] = Object.keys(NAMED_ICONS).sort();
  *  1. Known icon name (e.g. `"paperclip"`) resolves to its lucide-solid component.
  *  2. URL / absolute path / data-URI renders an `<img>`.
  *  3. An icon-shaped name that is NOT in the roster renders a fallback glyph
- *     and console.errors, in dev and prod alike (P-8: decide loudly, non-fatal).
+ *     and console.errors, in dev and prod alike (decide loudly, non-fatal).
  *  4. Anything else (emoji, arbitrary text) renders a `<span>` text fallback.
  *  Returns `null` when `icon` is undefined/empty.
  *
@@ -150,8 +150,7 @@ export function renderIcon(
   // third URL policy inside a package that claims one). Image-only by name: it must
   // never be reused for an href.
   const isUrl = isSafeImageSrc(icon);
-  // Fail-loud guard (P-8, blocks-and-parts spec 2026-08-31; spike finding
-  // F-7): a kebab/identifier-shaped string that isn't a URL and isn't a known
+  // Fail-loud guard: a kebab/identifier-shaped string that isn't a URL and isn't a known
   // name is almost certainly a typo'd/unregistered icon (e.g. `icon="send"`
   // before it was added). The old guard was `import.meta.env.DEV`-only, so
   // prod painted the literal word as if it were a label, silently — the one

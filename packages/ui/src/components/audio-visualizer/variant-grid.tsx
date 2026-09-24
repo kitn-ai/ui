@@ -7,30 +7,20 @@ import { GRID_CELL, GRID_GAP, defaultGridCount } from './sizes';
 import { amplitudeRenderState, type VariantProps } from './variant-bar';
 
 /*
- * NOTE: The speaking thresholds below DIVERGE from upstream's GridCell math,
- * deliberately (Rob, 2026-08-09). Upstream computes
- * `threshold = |mid - y| * 1/(mid + 1)`, spreading the row thresholds evenly
- * across 0..1 (5 rows: 0, 1/3, 2/3). Two blind spots our element actually
- * exposes:
+ * The speaking thresholds below DIVERGE from upstream's GridCell math, which
+ * spreads them evenly across 0..1. Two blind spots this element exposes:
  *
- * (1) Real speech through the aligned analysis pipeline peaks at 0.51-0.54
- *     (0.68 on the recorded fixture), so distance-2 rows (top/bottom of a
- *     5-row grid) NEVER light — measured zero times across 139 speech
- *     samples, on upstream's own grid as well as ours.
- * (2) The middle row's threshold is 0, so it stays lit in the speaking state
- *     even on a silent mic.
+ * (1) Real speech through the aligned analysis pipeline peaks near 0.5, so the
+ *     outermost rows of a 5-row grid never light.
+ * (2) The middle row's threshold is 0, so it stays lit on a silent mic.
  *
- * Rob asked for both fixed: outer rows reachable by real speech (the grid
- * fills centre-outward as a cross) and an empty grid when the mic is silent.
  * So the ramp is scaled to the realistic speech ceiling, and the would-be-0
- * centre threshold becomes a small silence floor. 5 rows now: 0.02, ~0.217,
- * ~0.433 (3 rows: 0.02, 0.325; 7 rows: 0.02, ~0.163, 0.325, ~0.488).
+ * centre threshold becomes a small silence floor: the grid fills centre-outward
+ * as a cross, and is empty when the mic is silent.
  *
- * (3) A third divergence, also Rob's request (2026-08-09): at IDLE the grid
- *     highlights nothing. Upstream (and we, until now — audit-verified on
- *     both) rested one stationary centre cell there, gridSequence's default
- *     frame. Grid only: bar and radial already idle dark (their idle
- *     sequences are empty), so this also makes the family consistent.
+ * A third divergence: at IDLE the grid highlights nothing. Upstream rests one
+ * stationary centre cell there. Grid only: bar and radial already idle dark, so
+ * this makes the family consistent.
  */
 /** Realistic top of the aligned pipeline's speech range (measured 0.51-0.54 live, 0.68 fixture). */
 const SPEECH_LEVEL_CEILING = 0.65;
@@ -101,9 +91,9 @@ export function GridVisualizer(
       const threshold = Math.max(scaled, SILENCE_FLOOR);
       return (levels()[index % cols()] ?? 0) >= threshold;
     }
-    // Idle shows a fully dark grid (Rob, 2026-08-09) — divergence (3) above;
+    // Idle shows a fully dark grid — divergence (3) above;
     // upstream rests one stationary centre cell here. 'disconnected' (first-
-    // class 2026-08-10) mirrors idle's dark grid for now, pending the LiveKit
+    // class) mirrors idle's dark grid for now, pending the LiveKit
     // disconnected-state measurement.
     if (renderState() === 'idle' || renderState() === 'disconnected') return false;
     return active().x === index % cols() && active().y === Math.floor(index / cols());

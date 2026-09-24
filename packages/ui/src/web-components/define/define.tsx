@@ -80,7 +80,7 @@ export interface WebComponentContext<E = Record<string, unknown>> {
   // for the empty string. So a reflected flag became write-only: `el.loading = true` left
   // `el.loading === undefined` while `[loading]` was on the host. The element kept
   // BEHAVING correctly, because `flag()` reads the attribute -- which is precisely why
-  // nobody noticed until a consumer tried to read the property back (findings G-05).
+  // nobody noticed until a consumer tried to read the property back.
   //
   // What this installs is an instance-level wrapper around the accessor
   // component-register already created, coercing every incoming value through the same

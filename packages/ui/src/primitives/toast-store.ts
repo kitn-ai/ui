@@ -1,23 +1,19 @@
 // Module-level toast store + the imperative `toast()` API.
 //
-// This is the PRIMARY way consumers raise a toast: `toast('Saved')`,
-// `toast.success('Copied')`, `toast.dismiss(id)`. The store is a single
-// reactive list held in a long-lived `createRoot` (so its reactivity survives
-// outside any component), and `ensureMounted()` lazily creates exactly ONE
+// The PRIMARY way consumers raise a toast: `toast('Saved')`,
+// `toast.success('Copied')`, `toast.dismiss(id)`. The store is one reactive list
+// in a long-lived `createRoot` (so its reactivity survives outside any
+// component), and `ensureMounted()` lazily creates exactly ONE
 // `<kai-toast-region>` on `document.body` the first time a toast is raised,
 // binding the list to its `toasts` property. The region is a real `kai-*`
-// element, so it carries its own shadow root + the shared kit stylesheet — it's
-// viewport-positioned AND fully kit-styled, never a raw div.
+// element, so it is viewport-positioned AND kit-styled, never a raw div.
 //
-// ADOPTS, else creates: `ensureMounted` first
-// looks for a connected `<kai-toast-region>` already in the document and binds
-// the store to it, so an app that placed its own region and also calls
-// `toast()` gets ONE region, not two overlapping ones. It creates a region only
-// when none exists. With two or more candidate regions the choice is genuinely
-// ambiguous — the first in document order wins, and a one-time console.warn
-// says so (decide loudly).
+// ADOPTS, else creates: it first looks for a connected `<kai-toast-region>` and
+// binds to that, so an app with its own region gets ONE, not two overlapping
+// ones. With two or more candidates the choice is ambiguous: first in document
+// order wins, and a one-time console.warn says so (decide loudly).
 //
-// SSR-safe: every DOM touch is guarded by `typeof document`. On the server,
+// SSR-safe: every DOM touch is guarded by `typeof document`, so on the server
 // raising a toast is an inert no-op (the store updates, nothing mounts).
 
 import { createRoot, createSignal } from 'solid-js';

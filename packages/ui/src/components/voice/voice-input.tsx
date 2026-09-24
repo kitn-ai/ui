@@ -50,7 +50,7 @@ export function VoiceInput(props: VoiceInputProps) {
   const speech = useSpeechRecognition({ interim: props.interim });
   const [isProcessing, setIsProcessing] = createSignal(false);
 
-  // Path selection (§6): a `transcribe` callback always wins (MediaRecorder →
+  // Path selection: a `transcribe` callback always wins (MediaRecorder →
   // host transcriber). Otherwise prefer native SpeechRecognition when the browser
   // supports it. The unsupported-no-callback case falls through to recording the
   // blob (→ onTranscribe → kai-audio-captured) with no text.
@@ -121,7 +121,7 @@ export function VoiceInput(props: VoiceInputProps) {
     }
   }
 
-  // Drive whichever path is active (§6: start/stop must follow the live path).
+  // Drive whichever path is active (start/stop must follow the live path).
   function begin() {
     if (useNative()) void beginRecognition();
     else void beginRecording();

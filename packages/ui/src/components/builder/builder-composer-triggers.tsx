@@ -8,29 +8,17 @@ import type { TriggerDef, TriggerItem } from '../composer/composer';
 
 /**
  * The composer TRIGGERS control group: `/` (commands/skills) and `@`
- * (agents/mentions), extracted as a standalone module so every template's composer
- * control group can reuse the
- * SAME editor and the SAME real-`TriggerDef` builder, rather than each
- * template inventing its own.
+ * (agents/mentions), extracted so every template's composer control group reuses the
+ * SAME editor and the SAME real-`TriggerDef` builder instead of inventing its own.
  *
- * THIS WIRES THE KIT'S REAL MECHANISM, NOT A STUB: `components/composer/composer.tsx`
- * (read before building this) ships `ComposerProps.triggers?: TriggerDef[]`,
- * a real, shipped, atomic-pill trigger system (`TriggerDef = { char, kind,
- * items?: TriggerItem[] }`) that `ChatThread` already forwards straight
- * through to `DefaultPromptInput`/`Composer` via its own `triggers` prop
- * (confirmed in `chat-thread.tsx` before use). Typing the configured
- * character in a real, mounted `ChatThread` composer opens the REAL trigger
- * menu and inserts a REAL atomic pill on selection. There is no "honest
- * stub" fallback needed here, unlike some other preview-only controls in
- * this template family, because the composer this story mounts IS the real
- * component. (`slashCommands`-as-flat-config was deliberately removed from
- * the kit in favor of this trigger system. This control group represents
- * that real shape, not the retired one.)
+ * It wires the kit's REAL mechanism, not a stub: `composer.tsx` ships
+ * `ComposerProps.triggers?: TriggerDef[]`, an atomic-pill trigger system that
+ * `ChatThread` forwards through to its own composer, so typing the configured
+ * character in a mounted `ChatThread` opens the real menu and inserts a real pill.
+ * (`slashCommands`-as-flat-config was removed from the kit in favour of this.)
  *
- * `buildTriggerDefs` converts this panel's editable rows into the real
- * `TriggerDef[]` shape: the one and only translation point, so a story
- * wiring this into its `ChatThread` call never hand-assembles `TriggerDef`
- * itself.
+ * `buildTriggerDefs` converts this panel's editable rows into `TriggerDef[]`: the one
+ * and only translation point.
  */
 export interface TriggerEntryRow {
   id: string;

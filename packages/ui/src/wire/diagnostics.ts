@@ -1,32 +1,28 @@
+// lint-comment-references: long-block -- the covered/not-covered pair is one contract: the second half is why the observer below exists
 // The wire diagnostic event stream: what the parse pipeline SAW, as metadata.
 //
-// The kit is the only layer that sees both "frames arrived" and "parts came
-// out", so it is the only layer that can tell a wrong-dialect read from a quiet
-// one. That fact was previously visible nowhere; this is where it gets said.
+// The kit is the only layer that sees both "frames arrived" and "parts came out", so it
+// is the only layer that can tell a wrong-dialect read from a quiet one, and that fact
+// was previously visible nowhere.
 //
-// METADATA BY DEFAULT, and the rule is checkable rather than a matter of taste:
-// if a value comes from the model, the end user, or the app's data, it is
-// PAYLOAD; if it describes the shape, size, timing or identity of that value, it
-// is METADATA. Every field below is metadata by that rule. `errorCode` yes,
-// `message` no -- some providers echo request content back inside the message,
-// which is why the code is the half that travels.
+// METADATA BY DEFAULT, and the rule is checkable rather than a matter of taste: if a
+// value comes from the model, the end user or the app's data it is PAYLOAD; if it
+// describes the shape, size, timing or identity of that value it is METADATA. Every field
+// below is metadata by that rule -- `errorCode` yes, `message` no, because some providers
+// echo request content back inside the message, which is why the code is the half that
+// travels.
 //
-// PAYLOAD IS A SEPARATE, DELIBERATE SWITCH (`wirePayloadActive`), off by
-// default, with its own signal that no URL can set. Every content-bearing value
-// lives under ONE optional `payload` key, which is what makes the boundary
-// reviewable: a reviewer checks one key rather than re-reading every field
-// name, and `payload-boundary.test.ts` asserts it structurally by deleting that
-// key and finding nothing left. The one thing that never appears under it
-// either is a response URL's query string -- `?api_key=` is a CREDENTIAL, a
-// different class from conversation content, and it does not get a switch.
+// PAYLOAD IS A SEPARATE, DELIBERATE SWITCH (`wirePayloadActive`), off by default, with
+// its own signal that no URL can set, and every content-bearing value lives under ONE
+// optional `payload` key: a reviewer checks one key rather than re-reading every field
+// name, and `payload-boundary.test.ts` asserts it structurally by deleting that key and
+// finding nothing left. A response URL's query string never appears there either, because
+// `?api_key=` is a CREDENTIAL rather than conversation content.
 //
-// FORWARD COMPATIBILITY, producer side: never repurpose a field name and never
-// change what a value means. New information is a new field or a new type.
-// Consumers are required to ignore both unknown types and unknown fields, which
-// is what lets a CDN-delivered panel float free of the kit's version.
-//
-// SSR: no `window`, no `Date` and no other global touched at module scope, so
-// this imports cleanly anywhere the rest of `wire/` does.
+// FORWARD COMPATIBILITY, producer side: never repurpose a field name and never change what a
+// value means; new information is a new field or a new type. Consumers ignore unknown types and
+// unknown fields, which is what lets a CDN-delivered panel float free of the kit's version.
+
 import type { ModelUsage } from './chunk';
 // TYPE-ONLY, and that is what makes it legal here. `web-components/diagnostic-events`
 // declares interfaces and nothing else -- no imports, no runtime -- so this
@@ -470,32 +466,22 @@ type Subscriber = (e: KaiDiagnosticEvent) => void;
 /**
  * THE MUTABLE STATE LIVES ON A GLOBAL, DELIBERATELY.
  *
- * Module-scope state means one emitter PER COPY of this module, and copies are
- * normal rather than exotic. `./wire` and `./diagnostics` are separate rollup
- * bundles that each inline this file, so a subscriber registered through one saw
- * nothing emitted by the other -- which shipped, and made the devtools hook
- * inert for every consumer. Worse, rollup saw a subscriber array that nothing in
- * the diagnostics bundle ever emitted to, concluded it was write-only, and
- * deleted it outright.
+ * Module-scope state means one emitter PER COPY of this module, and copies are normal:
+ * `./wire` and `./diagnostics` are separate rollup bundles that each inline this file, so a
+ * subscriber registered through one saw nothing emitted by the other, which shipped and
+ * made the devtools hook inert. Worse, rollup saw a subscriber array nothing in the
+ * diagnostics bundle ever emitted to, concluded it was write-only and deleted it.
  *
- * A shared chunk would fix OUR build and not the class. The second instance is a
- * consumer who bundles the kit and also loads the web-components bundle from a CDN:
- * that duplicates the module identically, and nothing we do to our own build
- * config prevents it. A global keyed by `Symbol.for` is the one thing every copy
- * agrees on, because the symbol registry is per-realm rather than per-module.
+ * A shared chunk would fix OUR build and not the class: a consumer who bundles the kit and
+ * also loads the web-components bundle from a CDN duplicates the module identically, and
+ * nothing in our build config prevents it. A global keyed by `Symbol.for` is the one thing
+ * every copy agrees on, because the symbol registry is per-realm, not per-module.
  *
- * THE COUNTER HAS TO BE IN HERE TOO. Two copies each starting at `wire-1` mint
- * the same id for different streams, and that id NAMESPACES REASONING PARTS --
- * a collision merges one stream's reasoning blocks into another's and overwrites
- * their verbatim provider payload, which is the exact 400 the namespacing exists
- * to avoid.
- *
- * Still no `window`: `globalThis` exists under Node and every SSR runtime, so
- * this stays as import-safe as it was.
- *
- * PER REALM: a Worker, an iframe or an SSR isolate has its own registry and
- * therefore its own emitter -- a panel in the parent document does not see a
- * stream read inside a Worker.
+ * THE COUNTER HAS TO BE IN HERE TOO: two copies each starting at `wire-1` mint the same
+ * id for different streams, and that id NAMESPACES REASONING PARTS, so a collision
+ * merges one stream's reasoning blocks into another's and overwrites their verbatim
+ * provider payload -- the exact 400 the namespacing exists to avoid.
+
  */
 const STATE_KEY = Symbol.for('kai.wire.diagnostics.v1');
 
@@ -627,23 +613,17 @@ export function emitWireDiagnostic(e: KaiDiagnosticEvent): void {
 /**
  * INTERNAL. One id per provider response stream.
  *
- * It correlates diagnostics AND namespaces reasoning block indices. Anthropic
- * restarts content-block indices at 0 on every message, and a tool loop reads
- * several messages into ONE assistant turn, so without this round 2's block 0
- * merges into round 1's part and overwrites its verbatim `raw`. See
- * `appendReasoningPart`.
+ * It correlates diagnostics AND namespaces reasoning block indices: Anthropic restarts
+ * content-block indices at 0 on every message, and a tool loop reads several messages
+ * into ONE assistant turn, so without it the second round's block 0 merges into the
+ * first round's part and overwrites its verbatim `raw` (see `appendReasoningPart`).
  *
- * A monotonic counter, not a UUID: this never leaves the process, is compared
- * only for equality against parts built in the same process, and a counter keeps
- * the value short and reproducible in test output.
- *
- * It lives HERE rather than in `consume.ts` because `readModelStream` opens the
- * format and counts frames before `consumeModelStream` runs, and every event
- * from one read has to carry the same id.
- *
- * The counter sits in the SHARED state, so two copies of this module continue
- * one sequence instead of both restarting at `wire-1` and minting the same id
- * for different streams. See the note on `STATE_KEY`.
+ * A monotonic counter, not a UUID: it never leaves the process, is compared only for
+ * equality against parts built in the same process, and stays short and reproducible in
+ * test output. It lives HERE rather than in `consume.ts` because `readModelStream` opens
+ * the format and counts frames before `consumeModelStream` runs, and every event from
+ * one read has to carry the same id. The counter sits in the SHARED state, so two copies
+ * of this module continue one sequence instead of both restarting at `wire-1`.
  */
 export function nextStreamId(): string {
   const s = state();

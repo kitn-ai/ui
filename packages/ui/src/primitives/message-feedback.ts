@@ -118,7 +118,7 @@ export function createMessageFeedback(opts: MessageFeedbackOptions): MessageFeed
       return;
     }
     if (action === 'speak') {
-      // Built-in read-aloud (B-7a): the kit's own SpeechSynthesis mechanics
+      // Built-in read-aloud: the kit's own SpeechSynthesis mechanics
       // (primitives/speech.ts, shared with VoiceOutput) over the message's
       // text parts — free, local, no provider. Still emits, so a host can
       // layer a model-TTS path on the same kai-message-action event.

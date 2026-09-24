@@ -20,7 +20,7 @@ defineWebComponent<PanelElementProps>('kai-panel', {
 }, (props, { flag, reflectFlag }) => {
   void props;
   // Reflect so `[frame]` is styleable/inspectable on the host and the
-  // property reads back what an attribute write set (define.tsx G-05).
+  // property reads back what an attribute write set.
   reflectFlag('frame');
   return (
     <>

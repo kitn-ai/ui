@@ -89,8 +89,8 @@ surfaces are measured clean, not when it is edited.
 | element docstrings | 100 of 100 present, 75,917 -> ~7.8 KB, mean 808 -> 69, longest 161 | done |
 | component page tops (description <= 100, lede <= 140, aside <= 200, no em dash, no instruction, lede not restating) | 0 offenders across 63 pages, 88 docs tests green, verify:docs exit 0 | done |
 | concept pages over cap (guides, patterns, examples) | 60 | paragraphs <= 4 lines |
-| comment blocks over 20 lines | 181 | 0 or waived |
-| comments citing plans / IDs / dates / sections | 156 | 0 |
+| comment blocks over 20 lines | **0** (was 181), guarded by `lint:comment-references` | done |
+| comments citing plans / IDs / dates / sections | **0** (was 156), guarded | done |
 | DOC COMMENTS in `src/**/*.{ts,tsx}`, four rules: member cap, em dash in a doc comment, em dash in a rendered string, type restatement | **2,026 members + 1,166 declaration docs across 351 sources; 0 over the 160 cap, 0 em dash, 0 type restatement, 0 waivers** (`lint-prop-docs`, now the doc-and-copy guard) | done |
 
 The copy guard `apps/docs/test/docs-copy.test.ts` now measures the page tops on every run (caps, em dashes,
@@ -170,6 +170,25 @@ Two blind spots the passes found, both worth keeping:
 
 ## Done so far, kept here so it is not re-litigated
 
+- **PASS C, the comments: 162 plan/ID/date/section citations and 121 blocks over 20 lines, all swept, 9 waivers
+  (each with a parsed reason).** The guard `lint:comment-references` is new: it walks every hand-written
+  `src/**/*.{ts,tsx}` with the TS scanner (so `//` inside a URL is not a comment), flags a task/round/finding
+  ID, an issue or PR number, a dated ruling, a section ref or a path into the DATED archive, and caps one
+  comment block at 20 lines. Navigation to code and to a LIVING doc stays. Self-test 17 cases; a vitest file
+  runs the script against fixture trees that must go red; its own CI step is wired and `lint:gate-parity`
+  accepts it. Four reviewers read the sweep: **14 FAIL, ~50 WEAK**; every FAIL and every lost-fact WEAK is
+  fixed, including one that no gate could see, a deleted `*/` in `state/stream.ts` that silently swallowed
+  the next doc block.
+- **Three guard defects the SWEEP lanes found, each a class the guard could not see:** a `long-block`
+  waiver was unreachable on a `/** */` block (`commentsIn` coalesces a `//` line above the block into it,
+  and the lookup skipped the block's own first line); `task-id` cannot tell a mask SAMPLE (`V-123`) from
+  an ID, answered by a waiver; and `round 2` (the second round of a stream) is not a citation while
+  `Round A3` is, so the pattern now requires the capital. A date-shaped identifier suffix
+  (`gpt-4o-2024-08-06`) is excluded by the prefix rule.
+- **The fixture persona is no longer a person's name.** `Ada` / `Ada Lovelace` / `Ada Reyes` across 17
+  files (tests, showcase stories, the scaffolder templates and their fixture JSONs) is now `Demo User`,
+  with the derived initials moved with it (`DE` in the app-header avatar, `DU` in the avatar fixture). One
+  reader asked "what is Ada" of a review, which is the whole reason: a placeholder must read as one.
 - **PASS B, the doc comments: 249 member sites + 220 declaration/variable-doc em dashes + 50 rendered-string
   em dashes, all rewritten, 0 waivers.** Six sweep lanes derived their own slices from the guard and ran in
   parallel on disjoint files; the guard then went green tree-wide. Four copy reviewers read the result:

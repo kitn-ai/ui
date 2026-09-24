@@ -71,16 +71,8 @@ export interface RadioGroupProps<T = string>
  * each row is a `<label>`.
  *
  * Everything not listed in `RadioGroupProps` is forwarded to the group element, so
- * `id`, `aria-*` and any `data-*` hook land where a form expects them.
- *
- * ```tsx
- * <RadioGroup
- *   label="Severity"
- *   options={[{ value: 'blocking', label: 'Blocking' }, { value: 'cosmetic', label: 'Cosmetic' }]}
- *   value={severity()}
- *   onChange={setSeverity}
- * />
- * ```
+ * `id`, `aria-*` and any `data-*` hook land where a form expects them. Every usage shape is in
+ * `radio.stories.tsx`.
  */
 export function RadioGroup<T = string>(props: RadioGroupProps<T>): JSX.Element {
   const [local, rest] = splitProps(props, [

@@ -91,33 +91,22 @@ export interface LightboxTriggerProps {
 /**
  * ★ THE TRIGGER IS A BUTTON WHEN, AND ONLY WHEN, ITS CHILDREN ARE NOT ONE.
  *
- * A trigger whose children are inert (a div, an `<img>`, an svg tile) has no
- * keyboard way in without one supplied here, so this span carries
- * `role="button"` + `aria-haspopup` + `aria-expanded` and the tab stop.
+ * A trigger whose children are inert (a div, an `<img>`, an svg tile) has no keyboard
+ * way in without one supplied here, so this span carries `role="button"`,
+ * `aria-haspopup`, `aria-expanded` and the tab stop.
  *
- * But a consumer may slot their OWN control (a `<button>`, a link), and then
- * that same role is a defect: `role="button"` is a children-presentational role,
- * so `axe` reports `nested-interactive` ("Element has focusable descendants",
- * WCAG 4.1.2) for a control inside a control. Measured on
- * `<kai-lightbox><button>…</button></kai-lightbox>`, which failed the Storybook
- * a11y leg on every commit of PR #409.
+ * A consumer may slot their OWN control, and then that same role is a defect:
+ * `role="button"` is a children-presentational role, so `axe` reports
+ * `nested-interactive` (WCAG 4.1.2) for a control inside a control. So the role, the
+ * stop and the ARIA are delegated exactly like `HoverCardTrigger`'s tab stop: only a
+ * subtree with no focusable descendant gets a stop of its own (`hasFocusableChild`).
+ * The span keeps the click and key handlers, because a focusable-but-inert child (a
+ * `<div tabindex="0">`) may not sit inside a `role="button"` either, and nothing
+ * activates it by itself.
  *
- * So the role, the stop and the ARIA are delegated exactly like
- * `HoverCardTrigger`'s tab stop: only a subtree with NO focusable descendant gets
- * a stop of its own (`hasFocusableChild`, src/primitives/focusable-child). A
- * slotted control keeps its own semantics and its own activation; the span keeps
- * the click and key handlers, because they have to work for the focusable-but-
- * inert case too (a `<div tabindex="0">` tile is focusable, so it may not sit
- * inside a `role="button"`, but nothing activates it by itself).
- *
- * `aria-expanded` is bound to the shared open state rather than to the dialog's
- * presence, so a controlled consumer's own `open` prop drives it too.
- *
- * The focus indicator repeats `HoverCardTrigger`'s measured recipe and must keep
- * the literal `[outline-style:solid]`: a Tailwind v4 utility that routes through
- * `var(--tw-outline-style)` is inert inside these shadow roots, so `outline-2`
- * alone computes `outline-style: none`. See the long note there before changing
- * it.
+ * `aria-expanded` binds to the shared open state, so a controlled consumer's `open`
+ * prop drives it too. The focus indicator must keep the literal
+ * `[outline-style:solid]`: see the measured note on `HoverCardTrigger`.
  */
 export function LightboxTrigger(props: LightboxTriggerProps) {
   const ctx = useLightbox();
@@ -182,25 +171,19 @@ export interface LightboxContentProps {
 }
 
 /**
- * The modal itself. Escape, the backdrop click, the focus move and the Tab trap
- * are ALL `Dialog`'s; this composes it and contributes nothing but sizing, so
- * the two overlays cannot disagree about what "dismissed" or "focus trapped"
- * means.
+ * The modal itself. Escape, the backdrop click, the focus move and the Tab trap are ALL
+ * `Dialog`'s: this composes it and contributes sizing, so the two overlays cannot
+ * disagree about what "dismissed" or "focus trapped" means.
  *
- * A lightbox is sized by its media, not by the dialog's default prose column:
- * the panel shrink-wraps (`w-auto`), drops the card chrome, and the body's
- * padding goes with it so the `85vh` clamp is the image's height IN THE
- * VIEWPORT rather than 85vh minus 2rem of padding. Without that the tall image
- * this exists for lands in the body's `overflow-auto` and scrolls.
+ * A lightbox is sized by its media, not by the dialog's prose column: the panel
+ * shrink-wraps, drops the card chrome, and the body's padding goes with it so the
+ * `85vh` clamp is the image's height IN THE VIEWPORT. The media is the CONSUMER's own
+ * `<img>`, so the clamp reaches it by descendant selector from here.
  *
- * The media is the CONSUMER's own `<img>` (a lightbox of arbitrary children),
- * so the size clamp has to reach it by descendant selector from here.
- *
- * BOTH dismissals this adds go through the SAME controller as the trigger, Escape
- * and the backdrop (through `closeOnContentClick` and the close button), so a controlled
- * consumer's `onOpenChange` hears every dismissal from one path. The close button is
- * a real `<button>` inside the panel, which is what keeps it in Dialog's Tab trap
- * and out of the panel's accessible name.
+ * Both dismissals this adds (`closeOnContentClick`, the close button) go through the
+ * SAME controller as the trigger, Escape and the backdrop, so a controlled consumer's
+ * `onOpenChange` hears every dismissal from one path. The close button is a real
+ * `<button>` in the panel, which keeps it in Dialog's Tab trap and out of its name.
  */
 export function LightboxContent(props: LightboxContentProps) {
   const ctx = useLightbox();

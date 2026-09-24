@@ -254,7 +254,7 @@ export const Perplexity: Story = {
                     <button>, so a button/kai-button here would double-nest. */}
                 <div slot="trigger" class="flex w-full items-center gap-2 text-left">
                   <kai-avatar fallback="AR" size="sm"></kai-avatar>
-                  <span class="text-sm font-medium">Ada</span>
+                  <span class="text-sm font-medium">Demo User</span>
                   <span class="text-[0.8125rem] text-muted-foreground">Pro</span>
                 </div>
               </kai-menu>
@@ -456,7 +456,7 @@ export const Perplexity: Story = {
     </div>
     <div slot="footer">
       <kai-menu label="Account menu" full>
-        <div slot="trigger"><kai-avatar fallback="AR"></kai-avatar> Ada · Pro</div>
+        <div slot="trigger"><kai-avatar fallback="AR"></kai-avatar> Demo User · Pro</div>
       </kai-menu>
       <kai-button variant="ghost" size="icon-sm" icon="settings" label="Settings"></kai-button>
     </div>

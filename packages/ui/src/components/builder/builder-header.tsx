@@ -1,41 +1,22 @@
 /**
- * `BuilderHeader` — the full-width top bar for the `kai dev --builder` page
- * (story-first, stub round 2026-08-31; wired into `apps/builder/App.tsx` the
- * same day — the page is the one real caller, the story keeps the stub).
+ * `BuilderHeader`, the full-width top bar for the `kai dev --builder` page: the title and a
+ * "Switch template" button on the left, the canvas light/dark toggle and Save on the right.
  *
- * WHY NOT `AppHeader`: that component's arrangement is a fixed owner ruling
- * for the WORKSPACE app strip (title · search/theme · authored actions ·
- * user cluster) and its own doc comment forbids reconfiguring it. The
- * builder's chrome is a different surface with different verbs — switch the
- * template, open the theme builder, flip the preview canvas's mode, save —
- * so this is a sibling built from the same primitives (`ui/button`,
- * `ui/separator`, `ui/tooltip`, lucide-solid icons) at the same scale
- * (h-12 strip, border-b, own bg-background floor — see AppHeader's note on
- * why the strip paints its own floor).
+ * WHY NOT `AppHeader`: that component's arrangement is a fixed ruling for the WORKSPACE app
+ * strip and its doc forbids reconfiguring it. The builder's chrome has different verbs
+ * (switch the template, flip the preview canvas's mode, save), so it is a sibling built from
+ * the same primitives and at the same scale: an `h-12` strip with a border and its own
+ * `bg-background` floor, for the reason `AppHeader` records.
  *
- * Left to right:
+ * "Switch template" is an outline button with an icon and a label rather than the bare ghost
+ * button the panel used to render, which did not read as a button at all. The canvas toggle
+ * is icon-only, showing the mode you would switch TO, and it is CONTROLLED: the builder page
+ * owns what the canvas theme means. The theme-builder entry point lives in the derived
+ * panel's Theme section instead, theming being a Theme concern rather than page chrome.
  *
- *     [ title · Switch template ]        [ sun/moon ] | [ Save ]
- *
- *  - the construct/template TITLE on the left;
- *  - "Switch template" beside it as an OBVIOUS button — outline variant with
- *    an icon + label. The defect being fixed: the panel's old control was a
- *    bare ghost button that did not read as a button at all;
- *  - the canvas light/dark toggle: icon-only, showing the mode you would
- *    switch TO (AppHeader's own rule — Sun while dark, Moon while light).
- *    This flips the PREVIEW CANVAS's theme so an author can test a design in
- *    both modes; it is CONTROLLED here, never owned — the builder page owns
- *    what "the canvas theme" means;
- *  - a divider, then the primary Save button, rightmost.
- *
- * The theme-builder entry point used to live here too; it moved into the
- * derived panel's Theme section as its "Advanced" header action (owner
- * ruling, 2026-08-31) — theming is a Theme-section concern, not page chrome.
- *
- * MENU-HONESTY (the repo's standing rule, same shape as AppHeader): every
- * affordance is gated on its mechanism. No `onSwitchTemplate` → no Switch
- * button; no `onToggleCanvasDark` → no mode toggle; no `onSave` → no Save.
- * Dividers render only between two groups that both have visible content.
+ * Every affordance is gated on its mechanism, the same rule as `AppHeader`: no
+ * `onSwitchTemplate` means no Switch button, no `onToggleCanvasDark` no mode toggle, and no
+ * `onSave` no Save.
  */
 import { type JSX, Show } from 'solid-js';
 import { LayoutTemplate, Sun, Moon, House } from 'lucide-solid';

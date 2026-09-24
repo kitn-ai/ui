@@ -1,48 +1,21 @@
 /**
- * The headless conversation controller (P-5, blocks-and-parts spec
- * 2026-08-31; spike finding F-3): the ~60 lines of drift-prone glue every
- * composed app rewired by hand around a `ConversationStore` - active-id
- * tracking, mint-id-on-first-turn (the C-6 lazy-id rule), save-per-turn,
- * auto-restore, and the three-leg "seen" rule for `markRead` - shipped ONCE,
- * framework-free, so the facade (Phase 2's `kai-chat` refactor) and every
- * block run the SAME policy instead of independently drifting copies. The
- * spike's fine-grain rebuild (research/2026-08-31-composition-spike/
- * cdn-widget-src/fine.js) is the reference glue this factory replaces.
+ * The headless conversation controller: the drift-prone glue every composed app used to
+ * rewire by hand around a `ConversationStore` — active-id tracking, mint-id-on-first-turn,
+ * save-per-turn, auto-restore, and the three-leg "seen" rule for `markRead` — shipped ONCE,
+ * framework-free, so `kai-chat` and every block run the SAME policy instead of copies.
  *
- * DISCIPLINE: plain JS closures over the `ConversationStore` contract. No
- * solid imports, no DOM, no framework - the same rule that made
- * `state.js`/`wire.js` loadable raw off a CDN in phase 2. This module ships
- * in `dist/stores.js` (the self-contained entry; `verify:cdn-entries` fails
- * the build on any bare import), so a no-bundler page reaches it by raw URL.
+ * Plain JS closures over that contract: no solid, no DOM, no framework, so `dist/stores.js`
+ * stays loadable raw off a CDN (`verify:cdn-entries` fails the build on a bare import).
  *
- * THE POLICY, behavior by behavior (each pinned by its own unit test):
- *
- * - C-6 lazy id: no conversation id exists until the first message is saved.
- *   `saveTurn([])` is a no-op; the first non-empty `saveTurn` mints an id
- *   (crypto.randomUUID by default, `mintId` to override) and keeps it.
- * - Save per turn: the consumer calls `saveTurn(messages)` after each turn
- *   settles; the controller saves, refreshes the summary cache (so unread
- *   badges move even for conversations nobody is looking at), and marks the
- *   active conversation read when it is currently seen.
- * - Auto-restore: `restore()` loads the most recent conversation (byRecency,
- *   the ONE recency rule) and hands its messages to `onMessagesLoad`. Guarded:
- *   a no-op when something is already active or the store is empty. The
- *   caller decides WHEN (typically on mount, only while its own thread is
- *   still empty - the controller cannot see the caller's message array).
- * - The three-leg seen rule: a conversation counts as seen - and gets
- *   `store.markRead` called for it - only while ALL THREE legs hold: the
- *   host is open (`setOpen`), the chat view is showing (`setView('chat')`),
- *   and it is the active conversation. `seen()` exposes the derived value;
- *   each leg's transition into the seen state fires `markRead`, as does a
- *   turn arriving while seen holds. Any single missing leg suppresses it.
- * - Unread derivation: `anyUnread()` folds `isConversationUnread` (the one
- *   public read of `lastReadAt`) over the cached summaries, excluding the
- *   active conversation ONLY while it is seen - the exact rule ChatThread
- *   applies, so a message landing on the active conversation while the host
- *   is closed still raises the badge.
- * - Decide loudly: a failed `save`/`markRead`/`list` is console.error'd (or
- *   handed to `onError`) and degrades - never a silent no-op, never a throw
- *   that kills the caller's turn loop.
+ * THE POLICY, in short (each behavior is pinned by its own unit test): a lazy id minted by
+ * the first non-empty `saveTurn`; `saveTurn` refreshing the summary cache and marking the
+ * active conversation read while it is seen; `restore()` loading the most recent
+ * conversation (the one recency rule) and handing its messages to `onMessagesLoad`, as a
+ * no-op when something is already active; seen only while the host is open, the chat view
+ * shows AND it is the active conversation, so any missing leg suppresses `markRead`;
+ * `anyUnread()` folding the one public read of `lastReadAt` over the cached summaries,
+ * excluding the active conversation only while it is seen; and a failed store call
+ * reported rather than swallowed, degrading without throwing into the caller's turn loop.
  */
 import type { ConversationSummary } from '../types';
 import type { ChatMessage } from '../web-components/chat/chat-types';
@@ -67,7 +40,7 @@ export interface ConversationControllerHooks {
   /** Failure tap, replacing the default console reporting. The controller has already
    *  degraded safely by the time this fires. */
   onError?: (op: ConversationControllerOp, error: unknown) => void;
-  /** Override the C-6 id mint (defaults to `crypto.randomUUID()`). */
+  /** Override the id mint (defaults to `crypto.randomUUID()`). */
   mintId?: () => string;
   /** The view the controller starts in (default `'chat'`). Only `'chat'` satisfies the
    *  chat-view leg of the seen rule. */
@@ -79,7 +52,7 @@ export interface ConversationControllerHooks {
 
 export interface ConversationController {
   /** The active conversation id, or `undefined` before the first turn of a
-   *  new conversation mints one (C-6). */
+   *  new conversation mints one. */
   activeId(): string | undefined;
   /** The current view name (seen rule leg: only `'chat'` counts). */
   view(): string;

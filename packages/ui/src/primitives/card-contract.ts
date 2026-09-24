@@ -1,7 +1,7 @@
 // src/primitives/card-contract.ts
 // The frozen Card Contract: the one typed contract every card speaks across both
 // transports (native <kai-*> + remote iframe). Pure types only — no runtime, no DOM.
-// See docs/superpowers/specs/2026-06-13-card-contract-design.md.
+// See docs/coupling-map.md for what moves with this contract.
 
 /** Bumped on any BREAKING change to the shapes below. Additive/optional fields do not bump it. */
 export const CARD_CONTRACT_VERSION = '1' as const;

@@ -1862,7 +1862,7 @@
         "name": "startNewConversation",
         "params": "",
         "returns": "void",
-        "description": "Start a fresh conversation, on the same path as the list view's \"+ New conversation\" row: clears the active conversation id, returns to the chat view, and delivers `[]` through `kai-conversation-load` (set `el.messages = event.detail.messages` like every other load; this element never updates `messages` for you). The seam a composed app's own \"New conversation\" control drives (B-10; the construct shell palette's entry rides the same controller call). No id is minted until the first message (C-6), so calling this on an already-empty new conversation is a harmless no-op."
+        "description": "Start a fresh conversation, on the same path as the list view's \"+ New conversation\" row: clears the active conversation id, returns to the chat view, and delivers `[]` through `kai-conversation-load` (set `el.messages = event.detail.messages` like every other load; this element never updates `messages` for you). The seam a composed app's own \"New conversation\" control drives; the construct shell palette's entry rides the same controller call). No id is minted until the first message, so calling this on an already-empty new conversation is a harmless no-op."
       }
     ],
     "composedFrom": [

@@ -1,27 +1,17 @@
 /**
- * The data shapes a consumer assigns to a `kai-*` element's array/object
- * properties, when that shape has no Solid-layer twin they could import instead.
+ * The data shapes a consumer assigns to a `kai-*` element's array/object properties, when
+ * that shape has no Solid-layer twin they could import instead.
  *
- * WHY THIS FILE EXISTS. The generated `.d.ts` for `./web-components` and the React
- * wrappers expand every prop type STRUCTURALLY (see the `IMPORTS = {}` note in
- * scripts/gen-web-component-api.mjs — self-contained declarations are what keeps a
- * consumer's tsc from resolving library `.ts` source). That is right for the
- * generated files, but it means a consumer who wants to name the shape — a
- * `const items: … = [...]` in their own code, a helper that builds one — has no
- * type to import and ends up writing
- * `NonNullable<KaiCommandElementProps['items']>`. Every named element-prop type
- * must therefore be reachable from the ROOT entry (`@kitn.ai/ui`), which is what
- * a React / Vue / Svelte / vanilla consumer imports. Enforced by
- * tests/web-components/prop-types-exported.test.ts.
- *
- * These live in their own module (not in the facades that use them) because the
- * facades compile to per-web-component side-effect entry points whose shipped
- * declarations are `export {};` — a type re-exported from one of those would not
- * resolve for a consumer. Types with a Solid twin (`TriggerDef`, `KaiNavItem`,
- * `ChatThreadContextUsage`, …) stay in their own layer's module and are
- * re-exported from `src/index.ts` directly.
- *
- * Type-only: fully erased by the build, so the root barrel pays nothing.
+ * WHY. The generated `.d.ts` for `./web-components` and the React wrappers expand every prop
+ * type STRUCTURALLY, so a consumer's tsc never resolves library `.ts` source (see the
+ * `IMPORTS = {}` note in `scripts/gen-web-component-api.mjs`). That is right for the generated
+ * files, but it leaves a consumer who wants to name the shape writing
+ * `NonNullable<KaiCommandElementProps['items']>`. Every named
+ * element-prop type is therefore reachable from the ROOT entry, enforced by
+ * `tests/web-components/prop-types-exported.test.ts`. They live here rather than in the
+ * facades because a facade compiles to a side-effect entry whose declaration is
+ * `export {};`; types WITH a Solid twin stay in their own layer's module and are re-exported
+ * from `src/index.ts`. Type-only, so the root barrel pays nothing.
  */
 
 /** A single segment of `<kai-segmented>`.

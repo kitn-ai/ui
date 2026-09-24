@@ -45,13 +45,13 @@ type Props = Omit<ChatThreadProps,
   // reason as `conversations`/`store`); `onUnreadChange` is wired internally
   // (JSX prop on `<ChatThread>` below) as a dispatched `kai-unread-change`
   // event, matching every other ChatThread callback on this element. Both
-  // were EXCLUDED entirely until the 2026-08-31 composition spike: the old
+  // were EXCLUDED entirely before the composed-launcher seam: the old
   // reasoning was that `<kai-chat>` has no sibling chrome of its own to
   // report to — true, but a CONSUMER composing this element beside their own
   // launcher/dock (the spike's hand-composed widget) is exactly such sibling
   // chrome, and without this seam the kit-owned unread computation was
   // unreachable from the public element surface (report: research/
-  // 2026-08-31-composition-spike, "Real gap 1").
+  // composed-launcher seam below).
   | 'hostOpen' | 'onUnreadChange'
   // `headerEndContent`/`emptyContent` are JSX.Element escape hatches for a caller
   // composing `ChatThread` directly as a Solid component (see their doc comments in
@@ -164,7 +164,7 @@ interface Events {
   // Fires on a row tap in the list, "new conversation," or the visitor's own
   // mount-time auto-restore of their most recent thread -- only when `conversations` is
   // on and a `store` is set. `detail.id` is `undefined` for the "new conversation" case
-  // (no id exists until the first message mints one, C-6). Set
+  // (no id exists until the first message mints one). Set
   // `el.messages = event.detail.messages` (already a fresh array) to actually render it,
   // since this element does not do that for you; `messages` stays your own state like
   // everywhere else on this element.
@@ -272,9 +272,9 @@ defineWebComponent<Props, Events>('kai-chat', {
      *  chat view, and delivers `[]` through `kai-conversation-load` (set
      *  `el.messages = event.detail.messages` like every other load; this
      *  element never updates `messages` for you). The seam a composed app's
-     *  own "New conversation" control drives (B-10; the construct shell
+     *  own "New conversation" control drives; the construct shell
      *  palette's entry rides the same controller call). No id is minted until
-     *  the first message (C-6), so calling this on an already-empty new
+     *  the first message, so calling this on an already-empty new
      *  conversation is a harmless no-op. */
     startNewConversation: () => controller?.startNewConversation(),
   });
@@ -302,14 +302,14 @@ defineWebComponent<Props, Events>('kai-chat', {
     conversations={flag('conversations')}
     store={props.store as ConversationStore | undefined}
     onConversationLoad={(messages, id) => dispatch('kai-conversation-load', { id, messages })}
-    /* Composed-launcher seam (composition spike, 2026-08-31): `!== false` so
+    /* Composed-launcher seam: `!== false` so
        an attribute-shaped truthy write-back (a string) still reads open, the
        `scrollButton` pattern — only an explicit `false` closes. */
     hostOpen={props.hostOpen !== false}
     onUnreadChange={(unread) => dispatch('kai-unread-change', { unread })}
     home={props.home as HomeConfig | undefined}
     onHomeLink={(entry) => dispatch('kai-home-link', { entry })}
-    /* F-26: card parts emit off THIS element as the bubbling `kai-card` event,
+    /* Card parts emit off THIS element as the bubbling `kai-card` event,
        so `listenForCardEvents(el)` / addEventListener('kai-card') work. */
     cardHostElement={element}
     onValueChange={(value) => dispatch('kai-value-change', { value })}

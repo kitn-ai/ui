@@ -1,6 +1,6 @@
 // src/state/threads.ts — the thread-switching fold.
 //
-// The identity category from the workspace glue inventory (spec §1/§3b): an
+// The identity category this fold owns: an
 // id-bound `SetMessages`, per-thread loading state, the abort map, and
 // delete-under-stream safety. Pure folds + callbacks per the state charter —
 // no fetch, no DOM, no storage; the only state a helper here owns is the

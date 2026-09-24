@@ -1,10 +1,9 @@
-// src/primitives/link-preview.ts
 // The optional, app-supplied bare-URL → metadata hook for <kai-link-preview>, plus the
 // `link` card's data type. The card stays PURE: it renders from supplied metadata
 // and never touches the network. CORS forbids reading cross-origin HTML in the
 // browser, so there is intentionally NO built-in network implementation here — an
 // app opts in with `configureLinkPreview({ fetchMetadata })` pointing at its OWN
-// backend/proxy. See docs/superpowers/specs/2026-06-13-kc-link-embed-cards-design.md.
+// backend/proxy.
 import type { CardEnvelope } from './card-contract';
 
 /** Rich link / Open-Graph preview payload. The card renders from this; it never fetches. */

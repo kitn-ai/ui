@@ -77,29 +77,21 @@ function ControlButton(props: { label: string; onClick?: () => void; children: J
 }
 
 /**
- * Pane, a reusable framed panel for a multi-agent workspace: a header (leading
- * glyph + title/subtitle + status dot + actions + window controls), a scrolling
- * body, and an optional pinned footer (e.g. a composer). It is the "pane frame"
- * every agent tile otherwise re-hand-rolls.
+ * Pane, a reusable framed panel for a multi-agent workspace: a header (glyph, title,
+ * status dot, actions, window controls), a scrolling body and an optional pinned footer.
+ * It is the pane frame every agent tile otherwise hand-rolls.
  *
- * Layout: the outer frame is a column flexbox; the header and footer hold their
- * height (`shrink-0`) while the body takes the rest (`min-h-0 flex-1
- * overflow-y-auto`) so content scrolls INSIDE the pane. Give the pane a bounded
- * height (a fixed parent, or `h-full` inside a grid/flex track) for the scroll to
- * engage; the body imposes no padding so content controls its own.
+ * Layout: the frame is a column flexbox whose header and footer hold their height
+ * (`shrink-0`) while the body takes the rest, so content scrolls INSIDE the pane. Give the
+ * pane a bounded height (a fixed parent, or `h-full` in a grid/flex track) for the scroll
+ * to engage; the body imposes no padding.
  *
- * Window controls (right side of the header): maximize/restore (Maximize2 ↔
- * Minimize2, toggled by `maximized`) and close (X) are always present; split
- * (Columns2) and dock (PanelRight) only render when `onSplit` / `onDock` are
- * passed. Each fires its callback prop.
+ * Window controls: maximize/restore (toggled by `maximized`) and close are always present;
+ * split and dock render only when `onSplit`/`onDock` are passed, and each fires its
+ * callback. `focused` paints a ring plus an accent border to mark the active pane.
  *
- * States: `focused` paints a ring + accent border to mark the active pane;
- * `maximized` swaps the maximize glyph for restore.
- *
- * Colors come entirely from design tokens (surface / border / ring / tool-*),
- * so it reads correctly in light and dark with no hardcoded values. The header,
- * body, footer, and window-control cluster are exposed via
- * `::part(header|body|footer|controls)` for the `kai-pane` facade.
+ * Colours come from design tokens only, and the header, body, footer and control cluster
+ * are exposed as `::part(header|body|footer|controls)` for the `kai-pane` facade.
  */
 export function Pane(props: PaneProps) {
   return (

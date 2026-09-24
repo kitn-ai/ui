@@ -1,52 +1,22 @@
-// The mock responder: the zero-config first win, standardized.
+// lint-comment-references: long-block -- the mock's contract: the five tells and the constraints are what every string below must satisfy
+// The mock responder: the zero-config first win.
 //
-// WHAT IT IS
-// ----------
-// `createMockResponder()` returns a function that produces a STREAM SOURCE —
-// SSE text frames in the OpenAI chat-completions shape — which the caller hands
-// to `readOpenAIStream` from `@kitn.ai/ui/wire` exactly as it would hand over a
-// `fetch()` Response. There is no network, no key and no provider.
+// `createMockResponder()` returns a function producing a STREAM SOURCE (SSE frames in the
+// OpenAI chat-completions shape) that the caller hands to `readOpenAIStream` exactly as it
+// would hand over a `fetch()` Response. No network, no key, no provider.
 //
-// WHY IT PRODUCES A WIRE INSTEAD OF FOLDING PARTS DIRECTLY
-// -------------------------------------------------------
-// The obvious cheaper design is to yield text deltas and let the caller fold
-// them onto `parts` with `appendTextPart`. That is what the scaffolder and all
-// five composed starters used to do, in seven separate copies, and it is worse
-// on every axis that matters:
+// WHY A WIRE RATHER THAN FOLDING PARTS DIRECTLY: folding text deltas onto `parts` (what
+// the scaffolder and all five starters used to do, in seven copies) BYPASSES the kit's own
+// parser on the one code path every new developer runs first, and it makes the mock and
+// real scaffolds structurally different, so swapping in a backend becomes a rewrite rather
+// than `mockResponse(value)` -> `await fetch('/api/chat', …)`. The frames are the OpenAI
+// shape because the mock stands in for the consumer's `/api/chat` ROUTE, not a provider.
 //
-//   · It BYPASSES the kit's own parser. The zero-config default is the code path
-//     every new developer runs first, and under the folding design it exercised
-//     none of `sseDataFrames` / `sseJson` / `openaiChatFormat` /
-//     `consumeModelStream`. Producing a wire makes the first-run path a live
-//     regression test of the thing every real integration depends on.
-//   · It makes the mock scaffold and the real scaffold STRUCTURALLY DIFFERENT,
-//     so "swap the mock for a real backend" is a rewrite of the submit handler
-//     rather than a one-expression change. With a wire, the only difference
-//     between the two emitted scaffolds is `mockResponse(value)` vs
-//     `await fetch('/api/chat', …)`; `createAssistantStream`, `readOpenAIStream`,
-//     the try/catch/finally and the abort handling are byte-identical.
-//   · The hand-rolled folds drifted. One of them replaced `parts` wholesale,
-//     which silently deleted any reasoning/tool parts already on the message.
-//
-// The frames are the OpenAI chat-completions shape because the mock stands in
-// for the consumer's `/api/chat` ROUTE, not for a provider: every integration in
-// the kit's catalog except this one re-frames its provider to that shape
-// server-side (see `readOpenAIStream`), so matching it is what keeps the swap to
-// a real backend a one-line change.
-//
-// WHY YOU CAN TELL IT IS A MOCK — READ THIS BEFORE CHANGING ANY STRING BELOW
-// -------------------------------------------------------------------------
-// A mock that is indistinguishable from a real response is how a fabricated turn
-// gets believed. This repo has already shipped that bug once: a scaffold seeded a
-// tool call from fixture data, the panel rendered "search Completed", and the
-// fabricated turn was POSTed to the provider AHEAD of the user's own message. A
-// human demoing it saw success; only an assertion on the round-2 answer failed.
-//
-// Choosing a real provider's frame SHAPE (above) means shape alone can no longer
-// distinguish the mock, so the tells are deliberate and layered. Each is visible
-// at a different altitude, so whichever one a developer happens to be looking at,
-// something says "no provider was contacted":
-//
+// A MOCK MUST BE DISTINGUISHABLE FROM A REAL RESPONSE. This repo shipped the opposite once:
+// a scaffold seeded a fabricated tool call, the panel rendered it as Completed, and the
+// fabricated turn was POSTed ahead of the user's own message. So the tells below are
+// deliberate and layered, one per altitude: the raw stream, every frame, the field level,
+// and the turn level.
 //   1. RAW STREAM — the first bytes are an SSE comment banner (`: kai-mock …`).
 //      Comment lines are dropped by `sseDataFrames`, so this is free
 //      semantically and unmissable to anyone reading the stream or a capture.

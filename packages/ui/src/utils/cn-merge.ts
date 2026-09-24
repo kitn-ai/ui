@@ -1,84 +1,22 @@
 /**
- * The class-name merger behind `cn()` — a domain-specific replacement for
- * `tailwind-merge`, sized to what this kit emits.
+ * The class-name merger behind `cn()`: a replacement for `tailwind-merge` sized to
+ * what this kit emits, so an `import { cn } from '@kitn.ai/ui'` bundle stays small.
+ * cn-merge.drift.test.ts diffs it against `tailwind-merge` on the kit's own classes,
+ * its shipped literal corpus and random tuples, naming both outputs on any divergence.
  *
- * WHY THIS EXISTS
- * ---------------
- * `tailwind-merge` ships the whole Tailwind v4 vocabulary so it can merge any
- * class a consumer might write. This kit emits a few hundred distinct classes --
- * `cn-merge.drift.test.ts` prints the exact count on every run -- and the
- * import cost every consumer pays for that generality is the largest single item
- * in an `import { cn } from '@kitn.ai/ui'` bundle: minified with esbuild, one
- * probe per invocation, `tailwind-merge` measures ~27 KB raw / ~8.5 KB gzip
- * against ~13.5 KB raw / ~4.5 KB gzip for the table below -- 2x smaller, not 4x, because
- * hardening the table (the validator/arbitrary families below) is table too. The consumer-visible
- * cost is re-measured on the packed tarball by
- * `scripts/verify-consumer-sideeffects.mjs`, whose ceilings are derived from the
- * measurement it prints, not quoted from here.
+ * Two properties are load-bearing, both forced by that oracle. A class this table
+ * does not recognise keeps its own key and conflicts with nothing, so an unnamed
+ * class still behaves the way CSS says it does. And a conflict is DIRECTIONAL, not
+ * "same group, last wins": `h-2 size-4` collapses to `size-4` while `size-4 h-2`
+ * keeps both, and `pt-3 p-2` collapses while `p-2 pt-3` does not. So each key carries
+ * its own REMOVES list, and order is the whole point.
  *
- * TWO PROPERTIES ARE LOAD-BEARING, and both were forced by measurement against
- * `tailwind-merge` as an oracle. The obvious design — "same group, last wins" —
- * diverges on all of them:
- *
- * 1. PASS-THROUGH DEFAULT. A class this table does not recognise keeps its own
- *    identity as its key and can never conflict with anything. Unknown classes
- *    are never dropped. `tailwind-merge` knows all of Tailwind; this knows what
- *    the kit emits, and what the kit fails to name keeps working the way CSS
- *    says it does.
- *
- * 2. DIRECTIONAL CONFLICT. `tailwind-merge`'s model is "a class removes EARLIER
- *    classes in the groups it lists", not "same group, last wins":
- *
- *      `h-2 size-4`            -> `size-4`        (`size-*` removes `w-*`/`h-*`)
- *      `size-4 h-2`            -> `size-4 h-2`    (a bare `h-2` removes nothing)
- *      `p-2 pt-3`              -> `p-2 pt-3`
- *      `pt-3 p-2`              -> `p-2`
- *      `leading-none text-xs`  -> `text-xs`       (font-size removes leading)
- *      `text-xs leading-none`  -> both kept
- *      `border-border border-t-transparent` -> both kept (width vs color)
- *      `gap-2 gap-x-3`         -> both kept, `gap-x-3 gap-2` -> `gap-2`
- *
- *    So the table carries both the key AND the list of keys each key removes —
- *    see REMOVES. Order is the whole point: the same two classes in the other
- *    order produce a different result, and a symmetric merger gets both wrong.
- *
- * MODIFIERS AND ARBITRARY VALUES. `splitModifier` cuts at the last `:` outside
- * brackets/parens, so `[&>svg]:size-4` is the modifier stack `[&>svg]:` plus
- * `size-4`, `text-[color:var(--border)]` stays one utility, and
- * `motion-safe:group-hover:opacity-100` keys on the whole stack. That is what
- * keeps `hover:p-2` from colliding with `p-2` while `hover:p-2 hover:p-4` still
- * collapses. A bracketed length is a font size (`text-[11px]`) and a bracketed
- * anything-else is a color (`text-[var(--color-primary)]`) — measured off the
- * oracle, and the second half of the kit's own font-size aliasing below.
- *
- * THE KIT'S FONT-SIZE ALIASING IS THE CASE THIS FILE EXISTS FOR. `theme.css`
- * re-points Tailwind's scale at the kit's tokens (`text-xs` ≡ `text-meta`,
- * `text-sm` ≡ `text-body`, `text-base` ≡ `text-title`), so a semantic name and
- * its Tailwind alias are the same declaration and MUST land in one group or
- * `cn('text-sm', 'text-body')` would emit two rules for one declaration. CSS
- * cannot decide this — in the compiled sheet `.text-body` (offset 70899) sits
- * before `.text-sm` (71502), so the cascade would always hand it to `text-sm` —
- * while `cn('text-sm', 'text-body')` has to yield `text-body`, because the
- * semantic name is the one the caller wrote last. Only a name-level table can
- * do that. Pinned by `cn.test.ts`, extended and diffed against the oracle by
- * `cn-merge.drift.test.ts`.
- *
- * GROUP KEYS ARE THIS FILE'S OWN NAMESPACE, NOT TAILWIND CLASSES. A few natural
- * names (`flex`, `rounded`, `shadow`, `transition`, `transform`, `resize`,
- * `backdrop-blur`, `container`) are valid Tailwind utilities themselves. That
- * would normally be free — those eight already have rules in `compiled.css`
- * because components use them — but `src/web-components/styles.css` compiles the
- * shipped shadow sheet from `@source "../utils"`, so a string literal here that
- * spells a generable class the kit does NOT use would add a rule to every
- * consumer's shadow root. The keys below therefore never spell a generable class
- * outside a regex literal (the Tailwind scanner does not read regex source as
- * class candidates; it does read string literals and object keys). Renaming a
- * key is free: keys are only ever compared to each other.
- *
- * THE ORACLE. `tailwind-merge` stays a devDependency and
- * `cn-merge.drift.test.ts` diffs this merger against it on the classes the kit
- * emits (extracted by AST), on `tailwind-merge`'s own shipped literal corpus,
- * and on random tuples — naming both outputs and the input on any divergence.
+ * THE FONT-SIZE ALIASING IS WHY THIS FILE EXISTS. theme.css re-points Tailwind's
+ * scale at the kit's tokens (`text-xs` is `text-meta`), so a semantic name and its
+ * alias are one declaration and must share a group, or `cn('text-sm', 'text-body')`
+ * emits two rules. CSS cannot decide it: the compiled sheet puts `.text-body` before
+ * `.text-sm`. Group keys are this file's namespace, never a generable class, because
+ * the shadow sheet compiles from `@source "../utils"`.
  */
 
 /** A matcher entry: a pattern over a utility's base name, and the key it lands in. */

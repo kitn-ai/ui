@@ -109,37 +109,28 @@ interface Props extends Record<string, unknown> {
   cardSchemas?: Record<string, object>;
 }
 
+// lint-comment-references: long-block -- the covered/not-covered pair is one contract: the second half is why the observer below exists
 /**
- * Move a `role` the consumer put on the host into the element's own prop store,
- * and off the DOM.
+ * Move a `role` the consumer put on the host into the element's own prop store, and off the
+ * DOM.
  *
- * `role` names the SPEAKER here (`'user'` / `'assistant'`), the correct domain
- * word and the documented attribute, but it is also the global ARIA `role`
- * attribute, and neither speaker is a valid ARIA role. Measured in a real chromium:
- * a host left carrying `role="user"` is a CRITICAL axe `aria-roles` violation
- * ("Role must be one of the valid ARIA roles: user"), and chromium discards the
- * unknown token and computes `generic`, so the row is left with no accessible role
- * and no accessible name rather than a mis-announced one.
+ * `role` names the SPEAKER here (`'user'` / `'assistant'`), but it is also the global ARIA
+ * `role` attribute and neither speaker is a valid ARIA role. Measured in a real chromium: a
+ * host left carrying `role="user"` is a CRITICAL axe `aria-roles` violation, and chromium
+ * discards the unknown token and computes `generic`, so the row is left with no accessible
+ * role and no accessible name rather than a mis-announced one.
  *
- * Capture the value, remove the attribute, then write it back as a PROPERTY.
- * component-register's prop accessors do not reflect, so the write cannot put it
- * back on the DOM, and it feeds the same reactive prop the facade already reads.
+ * Capture the value, remove the attribute, then write it back as a PROPERTY:
+ * component-register's prop accessors do not reflect, so the write cannot put it back on the
+ * DOM. The ORDER is load-bearing, because `removeAttribute` fires `attributeChangedCallback`
+ * with `null`; the write-back has to come after that or the scrub destroys the speaker.
  *
- * The ORDER is load-bearing: `removeAttribute` fires component-register's
- * `attributeChangedCallback` with `null`, which sets the property to `null`. The
- * write-back has to come after that, or the scrub destroys the speaker it was
- * meant to preserve.
- *
- * NOTE: this covers every path where the attribute is still on the host by the
- * time the facade runs (`setAttribute` before or after connection, and any later
- * change, via the observer below). It does NOT cover an element authored in HTML
- * and upgraded at registration time: `defineWebComponent` installs its
- * non-reflecting `role` accessor AFTER `customElements.define()`, so for elements
- * already in the document the native ARIAMixin setter runs first in the constructor
- * (`this[prop] = undefined` → `role` is a nullable reflected IDL attribute →
- * `removeAttribute`) and the value is gone before any of this code executes. That
- * is a separate defect in `src/web-components/define/define.tsx`, not something the facade can
- * reach; this function composes correctly with the fix once it lands.
+ * Covered: every path where the attribute is still on the host when the facade runs, and any
+ * later change, via the observer below. NOT covered: an element authored in HTML and upgraded at
+ * registration time, because
+ * `defineWebComponent` installs its non-reflecting `role` accessor after
+ * `customElements.define()`, so the native ARIAMixin setter runs first in the constructor and
+ * the value is gone before this code executes. That is a `define.tsx` defect.
  */
 function liftRoleOffHost(element: HTMLElement): void {
   const attr = element.getAttribute('role');
@@ -280,7 +271,7 @@ defineWebComponent<Props, Events>('kai-message', {
       parts={msg().parts}
       cardTypes={cardComponentsFromTags(props.cardTypes, (props as { theme?: string }).theme)}
       cardSchemas={props.cardSchemas}
-      /* F-26: card parts emit off THIS element as the bubbling `kai-card` event. */
+      /* Card parts emit off THIS element as the bubbling `kai-card` event. */
       cardHostElement={element}
       isUser={isUser()}
       markdown={useMarkdown()}

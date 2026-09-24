@@ -325,37 +325,22 @@ export function AudioVisualizer(props: AudioVisualizerProps): JSX.Element {
     onCleanup(() => { cancelled = true; });
   });
 
-  // Props every variant shares, MINUS `bands` -- deliberately. Solid compiles
-  // a component spread (`{...shared()}` below) into per-key getters that all
-  // call this SAME function: reading ANY one key re-invokes the whole thing,
-  // so if `bands()` lived in here, reading `state` (or `size`/`frozen`/
-  // `color`) would transitively subscribe the reader to `bands()` too, which
-  // updates ~31 times a second with live or synthetic audio. That is exactly
-  // what caused two real bugs downstream: `use-sequencer.ts`'s effect reading
-  // `frozen`/`state` re-ran at band cadence and called `setTick(0)` on every
-  // run, so the tick could never advance (every scripted animation looked
-  // dead); `shader-canvas.tsx`'s compile effect reading `precision`/`fragment`
-  // re-ran the same way and recompiled the GL program 65-70 times in 4
-  // seconds while restamping its animation clock (`iTime` pinned under 0.33s,
-  // periodically negative). Both were patched locally with memos in those
-  // files (kept -- defence in depth, cheap, and they document the hazard),
-  // but the leak was still here for the next reader: `variant-wave.tsx`,
-  // `variant-aurora.tsx`, and `variant-custom.tsx` each have their OWN
-  // state/frozen-driven tween effect with no local memo at all, so they were
-  // live instances of the identical bug (`.to()` restarts a tween's clock on
-  // every call -- see `create-tween.ts` -- so a 31Hz re-run means a tween
-  // never visibly progresses). Fixing it here, at the one place the bundling
-  // happens, closes all of those at once rather than requiring every current
-  // and future reader to remember to memoize defensively.
+  // Props every variant shares, MINUS `bands`, deliberately. Solid compiles a
+  // component spread (`{...shared()}` below) into per-key getters that all call this
+  // SAME function, so reading ANY one key re-invokes it: with `bands()` in here,
+  // reading `state` (or `size`/`frozen`/`color`) would transitively subscribe the
+  // reader to `bands()`, which updates about 31 times a second with audio. That is
+  // exactly what made `use-sequencer.ts`'s effect re-run at band cadence (the tick
+  // could never advance) and `shader-canvas.tsx`'s compile effect recompile the GL
+  // program 65-70 times in 4 seconds. Both were patched locally with memos, which are
+  // kept as defence in depth, but the variants each have their own state-driven tween
+  // effect with no memo: fixing it at the one place the bundling happens closes all of
+  // them at once.
   //
-  // `bands` GENUINELY must stay reactive -- this split is about not dragging
-  // it into unrelated reads, not about freezing it. It is passed explicitly,
-  // `bands={bands()}`, at every call site below, exactly like `volume`,
-  // `complexity`, etc. already are: an explicit prop gets its OWN getter,
-  // entirely independent of this one.
-  // `listeningAmplitude` is safe inside this bundle (unlike `bands`): it is a
-  // boolean a caller sets once, not a signal driven at audio cadence, so
-  // reading it through the shared getters cannot drag in a hot subscription.
+  // `bands` must stay reactive: it is passed explicitly at every call site below, and
+  // an explicit prop gets its OWN getter, independent of this one. `listeningAmplitude`
+  // is safe inside the bundle, being a boolean a caller sets once rather than a signal
+  // driven at audio cadence.
   const shared = (): Omit<VariantProps, 'bands'> => ({
     state: state(),
     size: size(),

@@ -11,66 +11,20 @@ export type SetMessages = (updater: (prev: ChatMessage[]) => ChatMessage[]) => v
 /* --------------------------------------------------------------------------
  * Bag exclusivity: why the mutators below do not just take their payload type.
  *
- * `Source`, `Partial<ToolPart>` and `ReasoningOpts` are WEAK types — not one
- * required field between them — and TypeScript only excess-property-checks
- * OBJECT LITERALS. Hand a mutator a VARIABLE and that check never runs, so any
- * bag sharing a single optional key name flows straight in. `addSource(source:
- * Source)` therefore accepted an `AttachmentData` and a `CardEnvelope`, and
- * `addFile(a) { inner.addSource(a); }` compiled clean at exit 0 while writing a
- * file payload into a `source` part. Nine such pairs existed across these three
- * bags and not one of them was a type error; `./stream-types.test.ts` pins all
- * nine, and fails with nine "Unused '@ts-expect-error'" if this guard is lifted.
+ * `Source`, `Partial<ToolPart>` and `ReasoningOpts` are WEAK types, and TypeScript only
+ * excess-property-checks OBJECT LITERALS: hand a mutator a VARIABLE and any bag sharing one
+ * optional key name flows in. `addSource(source: Source)` accepted an `AttachmentData`, and nine
+ * such pairs existed without one type error; ./stream-types.test.ts pins all nine.
  *
- * Tightening the PAYLOAD types is not available. A citation with no url and no
- * title is a rendered, tested state (`citationTitle` in components/message/message.tsx
- * falls through title -> url -> a generic word, and message.stories.tsx ships
- * "a citation with no url at all"), and a patch/opts bag is optional by
- * definition. So the exclusivity lives on the PARAMETER instead, which leaves
- * every published data type — and every artifact generated from them — alone.
- *
- * The forbidden key set is DERIVED from the `MessagePart` union, the same
- * derivation `verify:scaffold` and `lint:silent-drops` read, so a seventh
- * variant re-fires this on its own rather than quietly widening the hole.
- *
- * THE BOUNDARY — three things this deliberately does NOT cover. Each is a
- * decision with a reason, not an unfinished edge; they are collected here so
- * the whole boundary reads in one place instead of being met one at a time.
- *
- * 1. A KEY NO SIBLING BAG OWNS still passes. `Unmixed` is a denylist over the
- *    sibling vocabulary, not an exact type, so a consumer's own superset of a
- *    citation — `{ url, title, relevance }` — keeps compiling. Full exactness
- *    would catch marginally more and push real callers toward a cast, and a
- *    cast to `Source` from an attachment is the original bug. A guard people
- *    route around is worse than a narrower guard they keep.
- *
- * 2. `addCard` / `addFile` ARE NOT WRAPPED. Both take STRONG types —
- *    `CardEnvelope` requires type+id+data, `AttachmentData` requires id+type —
- *    so ordinary assignability already does what `Unmixed` exists to do for a
- *    weak bag. Measured, not assumed: wrapping `addCard` buys ZERO (no sibling
- *    bag is assignable to `CardEnvelope`, because nothing else carries `data`).
- *    Wrapping `addFile` buys exactly one pair — `addFile(c)` with
- *    `c: CardEnvelope<'file', unknown>` — and costs two ordinary consumer
- *    shapes, since the derived denylist owns `state` and `index`:
- *
- *        { id, type: 'file', filename, state: 'uploading' }  // upload progress
- *        { id, type: 'file', filename, index: 3 }            // display position
- *
- *    That one pair needs a hand-written generic narrowing with no other
- *    purpose; an ordinarily-inferred `CardEnvelope` is ALREADY rejected.
- *    Rejecting likely code to block contrived code is the wrong trade — the
- *    same trade point 1 refused. Both facts this rests on are pinned in
- *    ./stream-types.test.ts, so it re-opens if either stops holding.
- *
- * 3. A HAND-BUILT PART BYPASSES ALL OF IT. `parts.push({ type: 'source',
- *    source: attachmentVariable })` compiles, because these mutators are not
- *    in the path. Closing it means intersecting the guard into `MessagePart`
- *    itself — and `docs/web-components.md` and `llms-full.txt` inline that
- *    union's fully-expanded structural text, so dozens of consumer-facing
- *    prop-table rows would grow `type?: undefined; state?: undefined;
- *    data?: undefined`. That cost lands on every consumer reading the docs
- *    while the benefit reaches only someone who has already stepped around
- *    the provided API. The mutators are the supported path; they are guarded.
- *    This is where the supported path ends, not a gap in it.
+ * Tightening the PAYLOAD types is not available: a citation with no url and no title is a
+ * rendered, tested state, and a patch/opts bag is optional by definition. So the exclusivity
+ * lives on the PARAMETER, leaving every published data type alone. The forbidden key set is
+ * DERIVED from the `MessagePart` union, so a seventh variant re-fires this on its own.
+ * THE BOUNDARY, all three deliberate: (1) a key no sibling bag owns still passes, because an exact
+ * type would push callers toward the cast that caused the bug; (2) `addCard`/`addFile` stay
+ * unwrapped -- nothing else is assignable to `CardEnvelope`, and wrapping `addFile` would reject
+ * two ordinary shapes to block one contrived one; (3) a hand-built `parts.push({...})` bypasses it
+ * all, and closing that would put a `type?: undefined` row in every consumer-facing prop table.
  * ------------------------------------------------------------------------ */
 
 /** Every OBJECT payload a `MessagePart` variant carries. `type`/`raw` are the

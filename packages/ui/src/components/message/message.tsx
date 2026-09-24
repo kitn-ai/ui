@@ -561,37 +561,22 @@ function MessageBody(props: MessageBodyProps) {
     <>
       {/* before-body (inject): a per-message header above everything else. */}
       <Show when={props.beforeBody}>{props.beforeBody}</Show>
-      {/* <Index>, NOT <For>, on purpose — this is load-bearing.
+      {/* <Index>, NOT <For>, on purpose: this is load-bearing.
        *
-       *  A streaming message re-renders once per delta with a brand-new `parts`
-       *  array (a new reference IS the re-render signal), and
-       *  `groupMessageParts` allocates fresh wrapper objects on top of that. A
-       *  <For> is REFERENCE-keyed, so every chunk looks like an entirely new
-       *  list and every row is torn down and rebuilt. Everything the user has
-       *  done inside a row dies with it: expanding a tool panel or a reasoning
-       *  block mid-stream silently did nothing, because the disclosure opened
-       *  and was discarded microseconds later by the next token (a live probe
-       *  caught the collapsibles' `createUniqueId()` walking cl-9 -> cl-11 ->
-       *  cl-15 across three deltas).
+       *  A streaming message re-renders once per delta with a brand-new `parts` array (a
+       *  new reference IS the re-render signal), and `groupMessageParts` allocates fresh
+       *  wrapper objects on top of that. <For> is REFERENCE-keyed, so every chunk looks
+       *  like an entirely new list and every row is torn down and rebuilt: expanding a
+       *  tool panel or a reasoning block mid-stream silently did nothing, because the
+       *  disclosure opened and was discarded microseconds later by the next token. <Index>
+       *  keys by POSITION and hands each row its value as a SIGNAL, and that is the shape
+       *  of a stream: the folds behind `parts` only ever append to the end or replace one
+       *  part IN PLACE with the same variant, so a part's position is a stable identity.
+       *  The trade-off is that a part spliced out of the MIDDLE shifts the rows after it,
+       *  and no consumer splices mid-message while every consumer streams.
        *
-       *  <Index> keys by POSITION and hands each row its value as a SIGNAL, so
-       *  a row stays mounted while its content keeps updating. That is exactly
-       *  the shape of a stream: the folds behind `parts`
-       *  (appendTextPart/appendReasoningPart/upsertToolPart) only ever append
-       *  to the end or replace one part IN PLACE with the same variant — never
-       *  reorder, never change a part's type — so a part's position is a stable
-       *  identity, and a growing text/reasoning block or a tool patched from
-       *  `input-streaming` to `output-available` reaches the DOM through the
-       *  accessor instead of through a remount.
-       *
-       *  The trade-off of position-keying: splicing a part out of the MIDDLE of
-       *  a message shifts the rows after it, so their local state (an open
-       *  disclosure) stays with the position rather than following the part.
-       *  <For> got that right for a STATIC array and got streaming wrong every
-       *  single time — no consumer splices mid-message, every consumer streams.
-       *
-       *  This only works while the children read through the accessors below:
-       *  capturing `g().part` once re-freezes the row at its first delta. */}
+       *  This only works while the children read through the accessors below: capturing
+       *  `g().part` once re-freezes the row at its first delta. */}
       <Index each={groups()}>
         {(group) => (
           <Switch fallback={null}>
@@ -699,10 +684,9 @@ function MessageBody(props: MessageBodyProps) {
                     <Match when={shownReasoning()}>
                       {(p) => {
                         // Default 'full' is the pre-existing DISPLAY MODE byte
-                        // for byte; the OPEN behavior changed under Task 19f —
-                        // it no longer auto-opens while streaming by default
-                        // (owner ruling 2026-08-26). `reasoningDefaultOpen`
-                        // reproduces the old always-auto-opens behavior when set.
+                        // for byte; the OPEN behavior no longer auto-opens while
+                        // streaming by default. `reasoningDefaultOpen` reproduces
+                        // the old always-auto-opens behavior when set.
                         const mode = () => props.reasoningMode ?? 'full';
                         return (
                           <Switch fallback={null}>

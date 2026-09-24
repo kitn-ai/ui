@@ -10,11 +10,11 @@ export interface WidgetTabBarProps {
 }
 
 /**
- * The widget's Home/Messages tab bar (Intercom-pattern chrome, H-2/H-6). Real
+ * The widget's Home/Messages tab bar (Intercom-pattern chrome). Real
  * `tablist`/`tab` semantics: this is a persistent view switch within the
  * widget, not page navigation, so it is not `<Nav>`'s `role="page"` dialect.
  *
- * A thin two-tab preset over the public tab-bar part (P-2/P-9): the bar and
+ * A thin two-tab preset over the public tab-bar part: the bar and
  * tab chrome are `TAB_BAR_CLASS`/`tabBarTabClass`, each tab's interior is
  * `TabBarItemContent`, and the accessible-name rule is
  * `tabBarItemAccessibleName`, the exact pieces the data-driven `TabBar`

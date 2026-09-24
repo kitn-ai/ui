@@ -44,54 +44,23 @@ export interface PromptDockProps {
 const LIP_BASE = 'px-3 py-2 text-sm leading-snug text-muted-foreground';
 
 /**
- * PromptDock - a recessed tray that frames a prompt input and can extend with
- * optional "lip" regions above and/or below it.
+ * PromptDock - a recessed tray that frames a prompt input and can extend with optional
+ * "lip" regions above and/or below it.
  *
- * The model: the input stays the prominent, fully-rounded RAISED card; the lips
- * sit in a slightly darker, RECESSED band tucked above and/or below it, sharing
- * the tray's outer rounding so the whole thing reads as one cohesive control.
- * When nothing is slotted top or bottom, only the input shows: no visible lip.
+ * The input stays the prominent, fully-rounded RAISED card; the lips sit in a slightly
+ * darker, RECESSED band above and/or below it, sharing the tray's outer rounding so the
+ * whole thing reads as one control. With nothing slotted, only the input shows.
  *
- * Styling splits into two ORTHOGONAL axes so the spatial framing and the surface
- * can be set independently (like a button's size vs. its variant):
+ * Two ORTHOGONAL axes, so framing and surface are set independently (a button's size vs.
+ * its variant). `frame` is the SPATIAL inset: `inset` (default), `edge` (top/bottom only)
+ * or `none` (a plain stack). `appearance` is the SURFACE: `soft` (default), `outlined`,
+ * `filled` or `plain`, differing in sunken fill, border and radius.
  *
- * `frame` - the SPATIAL inset (padding only):
- *   - `inset` (default) - a small, uniform inset frames the input on EVERY side
- *     (the tray padding plus the flex gap give a ~6px frame). The classic look.
- *   - `edge` - top/bottom inset only; the input is FLUSH on the left / right so the
- *     lips span the full width. Matches the Claude Code / Codex references, where the
- *     lip is a top/bottom phenomenon.
- *   - `none` - no inset at all; the lips attach directly to the input as a plain
- *     vertical stack. The lips keep their own internal padding so content still has
- *     breathing room.
- *
- * `appearance` - the SURFACE (background / border / radius):
- *   - `soft` (default) - sunken surface + border + radius (the classic look).
- *   - `outlined` - transparent surface + border + radius.
- *   - `filled` - sunken surface, no border, + radius.
- *   - `plain` - transparent surface, no border, no radius (truly bare).
- *
- * The two are independent: e.g. `frame="none" appearance="plain"` is a bare stack,
- * while `frame="inset" appearance="outlined"` keeps the inset but drops the fill.
- *
- * Surface, border, radius and inset come from four CSS custom-property TOKENS, so
- * a consumer can fine-tune the chrome without touching internals (override the var
- * from outside; the variant chooses the structure). Each is referenced with a
- * fallback so it resolves stand-alone:
- *   - `--kai-prompt-dock-surface` - tray background (default `var(--color-surface-sunken)`)
- *   - `--kai-prompt-dock-border`  - tray border color (default `var(--color-border)`)
- *   - `--kai-prompt-dock-radius`  - outer radius (default `1.25rem`)
- *   - `--kai-prompt-dock-inset`   - frame thickness around the input (default `0.375rem`)
- *
- * Colors default to the surface tokens (surface-sunken for the tray and lips; the
- * input brings its own raised bg-surface), so it reads correctly in both light and
- * dark themes without hardcoded colors. The top and bottom lips are independently
- * styleable via `topClass` / `bottomClass` (e.g. a tinted notice up top over a
- * neutral control row below).
- *
- * The eventual `kai-prompt-dock` element will expose the same three regions via
- * `::part(tray)` / `::part(top)` / `::part(bottom)`; the primitive's equivalent
- * hooks are the `class` / `topClass` / `bottomClass` props.
+ * Surface, border, radius and inset each come from a CSS custom-property TOKEN, read with a
+ * fallback so each resolves stand-alone, which makes the chrome tunable from outside:
+ * `--kai-prompt-dock-surface`, `--kai-prompt-dock-border`, `--kai-prompt-dock-radius`
+ * (1.25rem) and `--kai-prompt-dock-inset` (0.375rem). `topClass` / `bottomClass` style the
+ * two lips independently; the element exposes the same regions as `::part(tray|top|bottom)`.
  */
 export function PromptDock(props: PromptDockProps) {
   const frame = (): PromptDockFrame => props.frame ?? 'inset';

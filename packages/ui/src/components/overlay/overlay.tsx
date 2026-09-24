@@ -149,7 +149,7 @@ function watchAnchorGone(ref: HTMLElement, onDisconnect: () => void): () => void
 
 /**
  * Position `floating` relative to `reference` using fixed strategy + autoUpdate,
- * so the element tracks the trigger on scroll/resize (fix DD-2). Writes
+ * so the element tracks the trigger on scroll/resize. Writes
  * position into the returned `pos` signal; caller applies it as inline style.
  *
  * `options` (placement/gutter) are read at setup time: pass static values;
@@ -240,7 +240,7 @@ export interface UseDismissOptions {
 }
 
 /**
- * Escape key + outside-pointerdown dismissal. Does NOT lock page scroll (fix DD-1).
+ * Escape key + outside-pointerdown dismissal. Does NOT lock page scroll.
  *
  * `onDismiss` and `refs` are captured at call time (component setup), which is
  * fine in SolidJS since components don't re-run. Ensure they close over mutable

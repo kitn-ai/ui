@@ -12,7 +12,7 @@ export { CHAT_MESSAGE_ACTIONS };
 
 /** The built-in action buttons (each carries its own curated icon + label).
  *  Derived from the CHAT_MESSAGE_ACTIONS const in ./chat-actions, a leaf
- *  both this union and the construct schema's zod enum read (B-6/C-2); the
+ *  both this union and the construct schema's zod enum read; the
  *  const is re-exported here so existing import sites keep one address. */
 export type ChatMessageAction = (typeof CHAT_MESSAGE_ACTIONS)[number];
 

@@ -1,33 +1,24 @@
 import { createSignal, type Accessor } from 'solid-js';
 
 /**
- * Track whether a `<slot>` is projecting VISIBLE TEXT, so a facade can tell
- * "this control shows its own name" from "this control is icon-only and needs
- * one".
+ * Track whether a `<slot>` is projecting VISIBLE TEXT, so a facade can tell "this control
+ * shows its own name" from "this control is icon-only and needs one".
  *
- * WHY IT EXISTS. Slotted light-DOM text is part of the flattened tree, so it
- * names the shadow `<button>` all by itself, measured rather than assumed:
+ * WHY IT EXISTS. Slotted light-DOM text is part of the flattened tree, so it names the
+ * shadow `<button>` by itself, measured rather than assumed:
  * `scripts/probe-button-accessible-name.mjs` reads chromium's AX tree and
- * `<kai-button>Save</kai-button>` computes the name "Save" from `contents`,
- * with no `aria-label` anywhere. An `aria-label` on top of that does not add a
- * name, it REPLACES one, and a replacement that disagrees with the visible text
- * is a WCAG 2.5.3 (Label in Name) failure: speech-input users say what they
- * see, so a button reading "Save" whose accessible name is "Submit" cannot be
- * activated by voice at all. `kai-checkpoint` already resolved this the same
- * way; this is the reusable form of that decision.
+ * `<kai-button>Save</kai-button>` computes the name "Save" from `contents`. An `aria-label`
+ * on top of that REPLACES the name rather than adding one, and a replacement disagreeing
+ * with the visible text is a WCAG 2.5.3 (Label in Name) failure: a button reading "Save"
+ * whose accessible name is "Submit" cannot be activated by voice.
  *
- * WHY A SIGNAL AND NOT A ONE-OFF READ. The facade renders while the HTML parser
- * is still inside the element's own tag, so the light DOM is usually EMPTY at
- * that moment and any synchronous read of `element.childNodes` reports "no text"
- * for the most common case there is. `slotchange` is the event that tells the
- * truth, and it fires on the initial assignment too.
- *
- * The initial value is therefore `false`, meaning "assume icon-only", which
- * makes the pre-`slotchange` frame emit the `aria-label`. That direction is
- * deliberate: an overridden name is a defect, an ABSENT name is a worse one, so
- * the transient state is the named one. `slotchange` is queued as a mutation
- * observer microtask, so it lands before paint and no assistive technology
- * observes the transient.
+ * WHY A SIGNAL AND NOT A ONE-OFF READ. The facade renders while the HTML parser is still
+ * inside the element's own tag, so the light DOM is usually EMPTY at that moment and a
+ * synchronous read of `element.childNodes` reports "no text" for the most common case.
+ * `slotchange` tells the truth and fires on the initial assignment too, so the initial
+ * value is `false` (assume icon-only), which makes the pre-`slotchange` frame emit the
+ * `aria-label`: an overridden name is a defect, an ABSENT name is a worse one. That event
+ * is queued as a mutation-observer microtask, so no assistive technology sees the transient.
  */
 export function createSlotText(options: {
   /**

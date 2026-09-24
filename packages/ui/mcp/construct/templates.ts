@@ -253,7 +253,7 @@ const assistantStarter: Construct = {
   // Dark-by-default (owner ruling, dark round) — see inAppAssistantStarter's
   // note above.
   theme: { mode: 'dark' },
-  shell: { commandPalette: true, userMenu: { name: 'Ada', plan: 'Pro' } },
+  shell: { commandPalette: true, userMenu: { name: 'Demo User', plan: 'Pro' } },
   empty: {
     title: 'What can I help with?',
     description: 'Ask anything, or start from a suggestion below.',
@@ -350,7 +350,7 @@ const workspaceBase: Construct = {
     url: '/work-surface.html',
     chrome: { deviceToggle: false, urlBar: false, openInNewTab: false, expand: true, codeView: false },
   },
-  shell: { commandPalette: true, userMenu: { name: 'Ada', plan: 'Pro' } },
+  shell: { commandPalette: true, userMenu: { name: 'Demo User', plan: 'Pro' } },
   composer: workspaceTriggers,
   capabilities: {
     starters: ['Build a pricing table', 'Add a dark mode toggle'],

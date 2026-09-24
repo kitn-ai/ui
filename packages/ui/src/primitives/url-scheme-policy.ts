@@ -60,27 +60,23 @@ export function isSafeUrl(url: string): boolean {
   return scheme !== undefined && SAFE_SCHEMES.includes(scheme);
 }
 
-/** True when `url` can be an `<img src>`, which is a DIFFERENT question from
- *  `isSafeUrl` and the reason this exists: `<img>` cannot execute a scheme, so
- *  `javascript:` in `src` is inert, while a `data:` image is legitimate and used
- *  (`image.tsx` builds `data:<mediaType>;base64,`; an inline SVG icon is a documented
- *  icon input). So the allowlist is wider than SAFE_SCHEMES on one axis and narrower
- *  on another: `data:` is allowed only for `data:image/`, because a `data:` that is
- *  not an image cannot render as one and the media type there can be model-supplied.
+/** True when `url` can be an `<img src>`, a DIFFERENT question from `isSafeUrl` and the
+ *  reason this exists: `<img>` cannot execute a scheme, so `javascript:` in `src` is inert,
+ *  while a `data:` image is legitimate and used (`image.tsx` builds
+ *  `data:<mediaType>;base64,`; an inline SVG icon is a documented icon input). The
+ *  allowlist is therefore wider than SAFE_SCHEMES on one axis and narrower on another:
+ *  `data:` is allowed only for `data:image/`, because a `data:` that is not an image
+ *  cannot render as one and its media type can be model-supplied.
  *
- *  Do NOT reuse this for anything navigable, and do not hand-roll a third classifier
- *  at the sink -- `icon.tsx` did, with a bare `/^(https?:|\/|data:)/`, which is what
- *  this replaces.
+ *  Do NOT reuse this for anything navigable, and do not hand-roll a third classifier at
+ *  the sink: `icon.tsx` did, and this replaces it.
  *
- *  NOT APPLIED where a MODEL supplies an image url (`choice` media images, a link
- *  card's image/favicon, an embed's poster, an attachment's url). That is a decision,
- *  not an oversight: `<img>` cannot execute a scheme, so there is no script sink to
- *  close, and the legitimate case is a `data:` image; the leftover risk is that a model
- *  can force an outbound GET and pick an image size, which SECURITY.md files under
- *  decisions the APP owns (CSP `img-src`, a proxy, or filtering the envelope). Those
- *  sinks each carry a comment saying so, and tests/components/model-image-sinks.test.ts
- *  pins the behaviour. If you are tempted to add a filter there, read that test first:
- *  it will fail, and it should, because the change is a decision rather than a fix. */
+ *  NOT APPLIED where a MODEL supplies an image url (`choice` media images, a link card's
+ *  image/favicon, an embed's poster, an attachment's url). That is a decision, not an
+ *  oversight: there is no script sink to close, and the leftover risk (a model forcing an
+ *  outbound GET and picking an image size) is what SECURITY.md files under decisions the
+ *  APP owns. `tests/components/model-image-sinks.test.tsx` pins that behaviour, so a
+ *  filter added at one of those sinks fails a test, deliberately. */
 export function isSafeImageSrc(url: string): boolean {
   // TWO questions, and both are needed. The PREFIX answers "is this URL-shaped at
   // all": resolving a bare word against a base (which is what `schemeOf` does, and

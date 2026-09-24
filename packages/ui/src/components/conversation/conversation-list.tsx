@@ -78,29 +78,21 @@ export interface ConversationItemsController {
 }
 
 /**
- * The parent-item contract of item mode, as a pure-DOM
- * controller so it is host-agnostic: the `kai-conversations` facade wires it over
- * its slotted `kai-conversation-item` children, and the jsdom contract tests
- * drive it over plain nodes. Solid context cannot cross the element boundary
- * (each facade is its own Solid root), so the channel is DOM traversal by
- * construction:
+ * The parent-item contract of item mode, as a pure-DOM controller so it is host-agnostic:
+ * the `kai-conversations` facade wires it over its slotted `kai-conversation-item`
+ * children, and the jsdom contract tests drive it over plain nodes. Solid context cannot
+ * cross the element boundary, so the channel is DOM traversal by construction:
  *
- * - selection flows container to item: exactly one item's BODY node (the
- *   shadow body of a `kai-conversation-item`, else the node itself; see
- *   `bodyOf`) is `aria-current="true"`, plus the `active` property on the
- *   host for the item's own styling hook;
- * - `role="button"` is ensured on each item's body node (an authored role is
- *   left alone);
- * - roving tabindex: exactly one body node `tabindex="0"` (the active
- *   item's, else the first's), the rest `-1`, re-derived on every `sync()`;
- *   menu content keeps its natural tab order (it is the body's SIBLING, not a
- *   descendant);
- * - activation (click / Enter / Space) calls `onSelect` with the item's id, and
- *   is SUPPRESSED when the composed path crosses the item's `menu` region
- *   (light-DOM `slot="menu"` content or the shadow `data-kai-item-menu`
- *   wrapper), so the consumer's own popover never also selects the row;
- * - ArrowUp/ArrowDown/Home/End move focus item-to-item, tabindex following the
- *   focused item.
+ * - selection flows container to item: exactly one item's BODY node (see `bodyOf`) is
+ *   `aria-current="true"`, plus the `active` property on the host;
+ * - `role="button"` is ensured on each item's body node, leaving an authored role alone;
+ * - roving tabindex: exactly one body node is `tabindex="0"` (the active item's, else the
+ *   first's) and the rest `-1`, re-derived on every `sync()`; menu content keeps its natural
+ *   tab order, being the body's sibling;
+ * - activation (click / Enter / Space) calls `onSelect` with the item's id, and is
+ *   SUPPRESSED when the composed path crosses the item's menu region, so the consumer's
+ *   own popover never also selects the row;
+ * - ArrowUp/ArrowDown/Home/End move focus item-to-item, tabindex following it.
  */
 export function createConversationItemsController(
   opts: ConversationItemsControllerOptions,
@@ -371,7 +363,7 @@ export function ConversationList(props: ConversationListProps) {
           </Show>
         }
       >
-        {/* F-04, decide loudly: a query matching nothing renders a VISIBLE
+        {/* Decide loudly: a query matching nothing renders a VISIBLE
             no-match state, keyed off the FILTERED count — distinct from the
             zero-conversations empty state above, which keys off the unfiltered
             list (and still owns the `empty` override). */}

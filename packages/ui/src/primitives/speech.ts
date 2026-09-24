@@ -1,9 +1,8 @@
 /**
  * Browser SpeechSynthesis mechanics, shared by `VoiceOutput`
  * (components/voice/voice-output.tsx) and the message action bar's built-in
- * 'speak' action (primitives/message-feedback.ts) — ONE implementation, per
- * B-7's "back it with the existing kai-voice-output/SpeechSynthesis
- * mechanics". Free, local, no provider — no invoice concern.
+ * 'speak' action (primitives/message-feedback.ts): ONE implementation, reusing the
+ * existing kai-voice-output/SpeechSynthesis mechanics. Free, local, no provider.
  *
  * Every raw `window.speechSynthesis` access lives HERE, each wrapped in its
  * own `hasSpeechSynthesis()` guard, so `voice-output.tsx` (whose `stop()` is
