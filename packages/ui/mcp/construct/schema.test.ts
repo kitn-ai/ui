@@ -586,9 +586,9 @@ describe('shell (B-5/10a)', () => {
   it('accepts commandPalette: true and a userMenu with name/plan', () => {
     expect(validateConstruct({
       ...minimal,
-      shell: { commandPalette: true, userMenu: { name: 'Ada Lovelace', plan: 'Pro' } },
+      shell: { commandPalette: true, userMenu: { name: 'Demo User', plan: 'Pro' } },
     }).ok).toBe(true);
-    expect(validateConstruct({ ...minimal, shell: { userMenu: { name: 'Ada' } } }).ok).toBe(true);
+    expect(validateConstruct({ ...minimal, shell: { userMenu: { name: 'Demo User' } } }).ok).toBe(true);
   });
   it('rejects commandPalette: false — presence-only, matching conversations', () => {
     expect(validateConstruct({ ...minimal, shell: { commandPalette: false } }).ok).toBe(false);

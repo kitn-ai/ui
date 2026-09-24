@@ -34,7 +34,7 @@ const meta = {
       <div class="flex gap-3">
         <div class="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-medium text-primary-foreground">AL</div>
         <div class="space-y-1">
-          <p class="text-sm font-medium text-foreground">Ada Lovelace</p>
+          <p class="text-sm font-medium text-foreground">Demo User</p>
           <p class="text-xs text-muted-foreground">Wrote the first algorithm intended for a machine. Joined in 1843.</p>
         </div>
       </div>
@@ -58,7 +58,7 @@ export const Playground: Story = {
       AL
     </div>
     <div class="space-y-1">
-      <p class="text-sm font-medium">Ada Lovelace</p>
+      <p class="text-sm font-medium">Demo User</p>
       <p class="text-xs text-muted-foreground">Wrote the first algorithm for a machine.</p>
     </div>
   </div>

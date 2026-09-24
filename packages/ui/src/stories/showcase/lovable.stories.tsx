@@ -152,7 +152,7 @@ const MONTHS = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
 
 interface Customer { name: string; email: string; initials: string; plan: string; mrr: string; ok: boolean }
 const CUSTOMERS: Customer[] = [
-  { name: 'Ada Reyes', email: 'ada@northwind.io', initials: 'AR', plan: 'Pro', mrr: '$240', ok: true },
+  { name: 'Demo User', email: 'demo@northwind.io', initials: 'DU', plan: 'Pro', mrr: '$240', ok: true },
   { name: 'Tom Okafor', email: 'tom@acme.co', initials: 'TO', plan: 'Team', mrr: '$960', ok: true },
   { name: 'Mira Patel', email: 'mira@lumen.app', initials: 'MP', plan: 'Free', mrr: '$0', ok: false },
   { name: 'Jon Vega', email: 'jon@parcel.dev', initials: 'JV', plan: 'Pro', mrr: '$240', ok: true },

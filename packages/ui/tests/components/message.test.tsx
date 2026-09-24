@@ -96,10 +96,10 @@ describe('Message', () => {
 
     it('lets a caller override the generated accessible name', () => {
       const { container } = render(() => (
-        <Message role="assistant" aria-label="Reply from Ada"><MessageContent>Hi</MessageContent></Message>
+        <Message role="assistant" aria-label="Reply from Demo User"><MessageContent>Hi</MessageContent></Message>
       ));
       const row = container.firstChild as HTMLElement;
-      expect(row.getAttribute('aria-label')).toBe('Reply from Ada');
+      expect(row.getAttribute('aria-label')).toBe('Reply from Demo User');
       expect(row.getAttribute('role')).toBe('article');
     });
   });

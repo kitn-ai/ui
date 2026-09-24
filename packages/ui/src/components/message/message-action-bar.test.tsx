@@ -188,19 +188,19 @@ describe('MessageActionBar', () => {
 describe('MessageAvatar', () => {
   it('renders an img when src is set', () => {
     const { container } = render(() => (
-      <MessageAvatar src="https://example.com/a.png" alt="Ada" fallback="AD" />
+      <MessageAvatar src="https://example.com/a.png" alt="Demo User" fallback="DU" />
     ));
     const img = container.querySelector('img');
     expect(img).toBeTruthy();
     expect(img).toHaveAttribute('src', 'https://example.com/a.png');
-    expect(img).toHaveAttribute('alt', 'Ada');
+    expect(img).toHaveAttribute('alt', 'Demo User');
   });
 
   it('renders the fallback text when there is no src', () => {
     const { container, getByText } = render(() => (
-      <MessageAvatar src="" alt="Ada" fallback="AD" />
+      <MessageAvatar src="" alt="Demo User" fallback="DU" />
     ));
     expect(container.querySelector('img')).toBeFalsy();
-    expect(getByText('AD')).toBeInTheDocument();
+    expect(getByText('DU')).toBeInTheDocument();
   });
 });

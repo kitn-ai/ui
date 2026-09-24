@@ -222,7 +222,7 @@ function AssistantPreview(props: {
             (props.shell.commandPalette || props.shell.userMenu) && (
               <div class="flex items-center gap-1.5">
                 {props.shell.commandPalette && <CommandPaletteTrigger onOpen={() => setPaletteOpen(true)} />}
-                {props.shell.userMenu && <UserMenu name="Ada" plan="Pro" />}
+                {props.shell.userMenu && <UserMenu name="Demo User" plan="Pro" />}
               </div>
             )
           }

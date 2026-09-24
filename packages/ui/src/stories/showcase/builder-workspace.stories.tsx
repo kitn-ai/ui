@@ -458,7 +458,7 @@ function WorkspacePreview(props: {
         onToggleDark={props.onToggleDark}
         actions={props.headerShowActions ? headerActions() : undefined}
         onActionSelect={(action) => setLastAction(`Header action: ${action.label}`)}
-        user={props.shell.userMenu ? { name: 'Ada', plan: 'Pro' } : undefined}
+        user={props.shell.userMenu ? { name: 'Demo User', plan: 'Pro' } : undefined}
         onUserMenuSelect={(item) => setLastAction(`User menu: ${item}`)}
       />
       <div class="min-h-0 flex-1">
