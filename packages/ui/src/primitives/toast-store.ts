@@ -57,7 +57,7 @@ function applyConfig(el: HTMLElement): void {
 }
 
 /**
- * Configure the imperative `toast()` singleton — call once at app start.
+ * Configure the imperative `toast()` singleton: call once at app start.
  * `toast.success('…')` has no element to set a prop on, so this is how you opt
  * the auto-mounted region into collapsed stacking / a position / a max. Updates
  * any already-mounted regions too, so call order doesn't matter.
@@ -80,35 +80,30 @@ export interface ToastItem {
   id: string;
   message: string;
   variant?: ToastVariant;
-  /** Visual treatment: `'pill'` (default, compact single-line) or `'card'` (richer
-   *  rounded card with an optional description line). */
+  // `pill` is the compact single line; `card` is the richer rounded card with an
+  // optional description line.
+  /** Visual treatment. Defaults to `'pill'`. */
   appearance?: ToastAppearance;
-  /** High-contrast inverse surface — works on either appearance, popping in light
-   *  AND dark. Defaults to `false`. */
+  /** High-contrast inverse surface that reads on either appearance. Defaults to `false`. */
   inverse?: boolean;
   /** Secondary line shown below the message in the `'card'` appearance. The
    *  `'pill'` appearance ignores it. */
   description?: string;
   action?: ToastAction;
-  /** Auto-dismiss delay in ms. `0` = sticky (never auto-dismisses). When an
-   *  `action` is present the effective floor is 4000ms so it stays long enough
-   *  to act on. Defaults to 2000ms. */
+  /** Auto-dismiss delay in ms. `0` is sticky, a toast with an action waits at least 7000, and the default is 5000. */
   duration?: number;
   /** Whether the × close affordance is shown. Defaults to `true`. */
   dismissible?: boolean;
-  /** Container to scope this toast WITHIN — it floats anchored to that element's
-   *  bounds instead of the viewport. Omit for a global, viewport-anchored toast.
-   *  The chat targets itself by default so its copy/feedback toasts stay in-chat. */
+  /** Container this toast is anchored to instead of the viewport; the chat targets itself by default. */
   target?: HTMLElement;
 }
 
-/** Options accepted by `toast()` — everything but the message. Pass `id` to
+/** Options accepted by `toast()`: everything but the message. Pass `id` to
  *  update an existing toast in place. */
 export interface ToastOptions {
   id?: string;
   variant?: ToastVariant;
-  /** Visual treatment: `'pill'` (default) or `'card'`. Falls back to the value set
-   *  via `configureToasts`, then `'pill'`. */
+  /** Visual treatment. Falls back to `configureToasts`, then `'pill'`. */
   appearance?: ToastAppearance;
   /** High-contrast inverse surface. Falls back to `configureToasts`, then `false`. */
   inverse?: boolean;
@@ -131,7 +126,7 @@ export interface ToastHandle {
 
 /** Default auto-dismiss delay. Long enough to read + reach before it leaves. */
 export const DEFAULT_TOAST_DURATION = 5000;
-/** Minimum auto-dismiss delay when the toast carries an action (e.g. Undo) — it
+/** Minimum auto-dismiss delay when the toast carries an action (e.g. Undo); it
  *  has to stay up long enough to actually act on. */
 export const ACTION_TOAST_FLOOR = 7000;
 
@@ -172,20 +167,20 @@ function resolveDuration(item: Pick<ToastItem, 'duration' | 'action'>): number {
  *
  * ADOPT-IF-PRESENT: a connected
  * `<kai-toast-region>` already in the document (same `target`, not already
- * claimed for another target) is adopted — the store binds to IT, and no
+ * claimed for another target) is adopted: the store binds to IT, and no
  * second region mounts. Adoption respects the region's authored attributes
  * (position/stack/…): config from `configureToasts()` is not stamped onto an
  * adopted region here, though an explicit `configureToasts()` call still
  * updates every region, adopted included. Binding the store REPLACES a
- * `toasts` array the app set as data — after the first `toast()` call the
+ * `toasts` array the app set as data: after the first `toast()` call the
  * imperative store owns the adopted region's list. Only when no candidate
  * exists is a fresh region created on `document.body`. Two or more candidates
  * for the same target are genuinely ambiguous: the first in document order
  * wins, with a one-time console.warn (decide loudly).
  *
  * If an adopted (or created) region later leaves the DOM, the cache entry is
- * dropped and the next call resolves fresh — adopt again if a region exists,
- * else create — so a removed region never becomes a dead cache entry that
+ * dropped and the next call resolves fresh: adopt again if a region exists,
+ * else create, so a removed region never becomes a dead cache entry that
  * swallows toasts.
  */
 // One region per distinct target (the `null` key = the global / viewport region).
@@ -300,9 +295,9 @@ export interface ToastFn {
   (message: string, opts?: ToastOptions): ToastHandle;
   /** Raise a success (green check) toast. */
   success: (message: string, opts?: ToastOptions) => ToastHandle;
-  /** Raise a warning (amber) toast — e.g. an agent needs your input. */
+  /** Raise a warning (amber) toast, e.g. an agent needs your input. */
   warning: (message: string, opts?: ToastOptions) => ToastHandle;
-  /** Raise an error (destructive/red) toast — e.g. an agent failed. */
+  /** Raise an error (destructive/red) toast, e.g. an agent failed. */
   error: (message: string, opts?: ToastOptions) => ToastHandle;
   /** Raise an info (blue) toast. */
   info: (message: string, opts?: ToastOptions) => ToastHandle;

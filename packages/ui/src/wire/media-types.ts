@@ -166,26 +166,20 @@ export interface MediaPolicy {
   /** The effective patterns: the kit's capability set narrowed by the
    *  developer's filter. Never wider than `encodableMediaTypes()`. */
   readonly types: readonly string[];
-  /** The same set as an HTML `accept` attribute value, ready to put on an
-   *  `<input type="file">`. This is what makes the picker and the encoder
-   *  provably one thing rather than two lists that agree today. */
+  /** The same set as an HTML `accept` value, ready for an `<input type="file">`, so the
+   *  picker and the encoder cannot drift apart. */
   readonly accept: string;
-  /**
-   * What this policy makes of one media type, including "I cannot tell from
-   * this, go and read the bytes" -- see `undetermined`.
-   *
-   * The primitive behind "expose information, do not make decisions": it answers
-   * a question and returns a fact, so a consumer can build their own picker,
-   * their own validation and their own error copy on top of it without the kit
-   * deciding anything on their behalf.
-   */
+  // The primitive behind "expose information, do not make decisions": it answers a
+  // question and returns a fact, so a consumer can build their own picker, validation
+  // and error copy on top without the kit deciding anything on their behalf. That is why
+  // "I cannot tell from this, go and read the bytes" is a RESULT here and not a throw.
+  /** What this policy makes of one media type, or `undetermined` when only the bytes can say. */
   decide(mediaType: string | undefined): MediaDecision;
 }
 
 export interface MediaPolicyOptions {
-  /** Narrow the kit's capability set. Omitted means the full set. Anything here
-   *  that the kit cannot encode is dropped rather than honoured, because
-   *  allowing it would only relocate the failure to the provider. */
+  /** Narrow the kit's capability set. Omitted means the full set; anything the kit cannot
+   *  encode is dropped rather than honoured. */
   accept?: MediaTypeFilter;
 }
 

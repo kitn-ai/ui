@@ -2,11 +2,11 @@ import { splitProps, type JSX } from 'solid-js';
 import { cn } from '../../utils/cn';
 
 /**
- * `RowGroup` — the frame that turns loose rows into a LIST: one bordered, rounded
+ * `RowGroup`, the frame that turns loose rows into a LIST: one bordered, rounded
  * card with a hairline between adjacent rows, the first row rounded at the top
  * only, the last at the bottom only, and every middle row square. It is the shape
  * a settings screen, a link list and a home tab all hand-rolled before it existed
- * (`row.stories.tsx`, `settings-group.tsx`, `home-panel.tsx` — the last two also
+ * (`row.stories.tsx`, `settings-group.tsx`, `home-panel.tsx`: the last two also
  * had to fight `Row`'s own standalone radius with `rounded-none border-b
  * last:border-b-0`).
  *
@@ -16,8 +16,8 @@ import { cn } from '../../utils/cn';
  * which is a component library deciding policy it cannot see). Rows are authored
  * by the caller and this only frames them.
  *
- * It renders NO geometry itself — see the row-list block in `../kit-base.css` for
- * the dividers and the per-position corners, and the reasons they are CSS rather
+ * It renders NO geometry itself; see the row-list block in `../kit-base.css` for
+ * the dividers, the per-position corners and the reasons they are CSS rather
  * than classes. Two consequences worth knowing at the call site:
  *
  * - Rows must be DIRECT CHILDREN. Both rule sets are direct-child selectors, so a

@@ -10,14 +10,14 @@ export interface OpenController {
 
 /**
  * Wire the standard Shoelace/WebAwesome-style overlay surface onto an internal
- * open controller — the kit's convention for every open/close element (hover-card,
+ * open controller: the kit's convention for every open/close element (hover-card,
  * tooltip, popover, menu, model-switcher, scope-picker, collapsibles, …). NOT
  * React-controlled: the element keeps self-managing; this layers the host-facing
  * conveniences on top.
  *
  * Given the primitive's `{ open, setOpen }` controller, it provides:
  *  - **`open` reflects** to the host `[open]` attribute (for `:host([open])` CSS),
- *    and is **settable** — `el.open = true` / `<el open>` drives it;
+ *    and is **settable**: `el.open = true` / `<el open>` drives it;
  *  - **`kai-open-change` `{ open }`** fires once per change (a guarded reflect
  *    avoids the attribute⇄prop feedback loop);
  *  - **`show()` / `hide()` / `toggle()`** instance methods, gated by `disabled`.
@@ -29,7 +29,7 @@ export interface OpenController {
  *
  * @param ctx      the facade's WebComponentContext (its Events must include kai-open-change).
  * @param getApi   returns the open controller once the primitive has handed it up (may be undefined early).
- * @param openProp reads the raw reactive `open` prop (e.g. `() => props.open`) — used to tell
+ * @param openProp reads the raw reactive `open` prop (e.g. `() => props.open`): used to tell
  *                 "consumer explicitly set open" from "unset" so a `defaultOpen` seed isn't clobbered.
  */
 export function wireDisclosure<E extends { 'kai-open-change': { open: boolean } }>(

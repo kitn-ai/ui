@@ -41,13 +41,13 @@ export function readConversationItemId(el: Element): string {
   return el.getAttribute('conversation-id') ?? el.id;
 }
 
-/** Whether a `<kai-conversation-item>` is STANDALONE — outside the management
- *  of a `<kai-conversations>` container — and therefore activates ITSELF:
+/** Whether a `<kai-conversation-item>` is STANDALONE, outside the management
+ *  of a `<kai-conversations>` container, and therefore activates ITSELF:
  *  the facade makes its row body a
  *  tabbable button and fires `kai-select` on click / Enter / Space. Derived
  *  from the container's own membership rule, not from mere ancestry: item mode
  *  queries `:scope > kai-conversation-item` (direct children only), so an item
- *  wrapped in another element inside a container is standalone too — the
+ *  wrapped in another element inside a container is standalone too; the
  *  container's controller never stamps or activates it. Inside a container
  *  (a direct child), the parent-item contract is the ONLY activation
  *  path: the container dispatches `kai-conversation-select` and owns roving
@@ -85,13 +85,13 @@ export interface ConversationItemsController {
  * (each facade is its own Solid root), so the channel is DOM traversal by
  * construction:
  *
- * - selection flows container to item — exactly one item's BODY node (the
+ * - selection flows container to item: exactly one item's BODY node (the
  *   shadow body of a `kai-conversation-item`, else the node itself; see
  *   `bodyOf`) is `aria-current="true"`, plus the `active` property on the
  *   host for the item's own styling hook;
  * - `role="button"` is ensured on each item's body node (an authored role is
  *   left alone);
- * - roving tabindex — exactly one body node `tabindex="0"` (the active
+ * - roving tabindex: exactly one body node `tabindex="0"` (the active
  *   item's, else the first's), the rest `-1`, re-derived on every `sync()`;
  *   menu content keeps its natural tab order (it is the body's SIBLING, not a
  *   descendant);
@@ -109,7 +109,7 @@ export function createConversationItemsController(
     const items = opts.getItems();
     return e.composedPath().find((n): n is HTMLElement => items.includes(n as HTMLElement));
   };
-  /** The item's ACTIVATION node — the target of role/aria-current/tabindex/
+  /** The item's ACTIVATION node, the target of role/aria-current/tabindex/
    *  focus. For a `kai-conversation-item` host that is its shadow body (the
    *  sibling restructure: the host is the row listitem
    *  wrapping the body AND the consumer's tabbable menu, so the control
@@ -134,7 +134,7 @@ export function createConversationItemsController(
    *  (the item facade defers to an authored role), and axe then sees exactly
    *  the role="button"-host-with-focusable-menu shape the restructure removed.
    *  Measured in the focus-order probe: the container's first sync can run
-   *  before the item elements upgrade. A later sync catches them — the
+   *  before the item elements upgrade. A later sync catches them; the
    *  facade's own mount mutates host attributes, which re-runs sync through
    *  the container's MutationObserver read(). Bare nodes (no dash: the jsdom
    *  stand-ins) are always ready. */
@@ -245,7 +245,7 @@ export interface ConversationListProps {
   class?: string;
 }
 
-/** Imperative handle exposed via `controllerRef` — surfaces the internal search
+/** Imperative handle exposed via `controllerRef`, surfaces the internal search
  *  box to the `kai-conversations` facade (the searchQuery signal lives here). */
 export interface ConversationListController {
   /** Focus the built-in search `<input>`. */
@@ -296,7 +296,7 @@ export function ConversationList(props: ConversationListProps) {
    * The second half used to be dropped on the floor. `groups` drives the render
    * loop, so a conversation pointing at a group the consumer had not declared
    * (a stale id, a group removed from the array, a filtered/paginated `groups`
-   * response) vanished from the sidebar with no error and no empty state — the
+   * response) vanished from the sidebar with no error and no empty state; the
    * list just silently held fewer rows than the data it was given. Falling through
    * to "Ungrouped" keeps every conversation the consumer passed in reachable.
    */

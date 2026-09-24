@@ -28,7 +28,7 @@ export type ByteSource = AsyncIterable<Uint8Array | string> | ReadableStream<Uin
  *  connection has to be closed.
  *
  *  What must NOT land here is normal completion. `drained` is only honest if
- *  every layer above reads to EOF rather than returning on a sentinel — see
+ *  every layer above reads to EOF rather than returning on a sentinel; see
  *  `sseJson` and `[DONE]`. */
 export async function* readableToAsyncIterable(
   stream: ReadableStream<Uint8Array>,
@@ -116,7 +116,7 @@ export async function* sseDataFrames(source: ByteSource): AsyncGenerator<string>
  *  `[DONE]` stops the YIELDING, not the READING. Returning at the sentinel
  *  unwinds the generator chain while the reader has not yet seen `done: true`,
  *  so `readableToAsyncIterable` treats normal completion as an early exit and
- *  CANCELS the body — and since every OpenAI-format stream ends in `[DONE]`,
+ *  CANCELS the body, and since every OpenAI-format stream ends in `[DONE]`,
  *  that aborts the response on the normal path, one `net::ERR_ABORTED` per
  *  turn. Reading on to EOF instead lets the producer's own close end the
  *  iteration, which is the only thing that makes `drained` mean what it says.

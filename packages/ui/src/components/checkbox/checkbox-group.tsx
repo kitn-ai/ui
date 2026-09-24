@@ -37,7 +37,8 @@ export interface CheckboxGroupProps<T = string>
   // The next selection is a fresh array, since the group holds no state of its own.
   /** Fires on every toggle, with the next selection plus the option that moved. */
   onChange?: (value: T[], option: CheckboxOption<T>, checked: boolean) => void;
-  /** Fires when a box loses focus — the commit point for a form field. */
+  // A blur is the commit point for a form field.
+  /** Fires with no payload when a box loses focus. */
   onOptionBlur?: () => void;
   /** Extra classes for each row. */
   itemClass?: string;
@@ -49,7 +50,7 @@ export interface CheckboxGroupProps<T = string>
 }
 
 /**
- * A vertical set of checkbox rows in a bordered, divided list — the kit's standard
+ * A vertical set of checkbox rows in a bordered, divided list, the kit's standard
  * "pick any number" control, and {@link RadioGroup}'s sibling: same options shape,
  * same row chrome, same presentation slot, multi-value instead of single.
  *
@@ -61,7 +62,7 @@ export interface CheckboxGroupProps<T = string>
  *
  * Everything not listed in `CheckboxGroupProps` is forwarded to the group element, so
  * `id`, `aria-labelledby`, any other `aria-*` and any `data-*` hook land where a form
- * expects them. No validation is applied — "at least one" is your application's rule,
+ * expects them. No validation is applied: "at least one" is your application's rule,
  * not the kit's.
  *
  * ```tsx

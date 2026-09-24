@@ -8,7 +8,8 @@ interface Props extends Record<string, unknown> {
   alt?: string;
   /** Short text shown when there's no image, usually initials (e.g. "JD", "AI"). */
   fallback?: string;
-  /** Size token: `sm` | `md` (default) | `lg`. */
+  // sm, md (default) or lg.
+  /** Size token. */
   size?: 'sm' | 'md' | 'lg';
 }
 // An identity badge (the thing beside a message, or in a conversation list), not a generic icon:

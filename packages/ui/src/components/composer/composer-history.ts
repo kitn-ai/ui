@@ -4,12 +4,12 @@ import type { ComposerDoc } from '../../primitives/composer-model';
  * Undo/redo history for the composer.
  *
  * The browser's native contenteditable undo stack can't track our programmatic
- * pill insertion/deletion — it leaves pills stuck and replays text edits against
+ * pill insertion/deletion: it leaves pills stuck and replays text edits against
  * a DOM we changed underneath it, corrupting the content. So we own the history:
  * a stack of document-model snapshots. Restoring a snapshot re-renders the doc
  * (pills included, since each snapshot holds full EntityRefs) and the caret.
  *
- * Pure module — no DOM. The caller computes `coalesce` (true to merge a run of
+ * Pure module, no DOM. The caller computes `coalesce` (true to merge a run of
  * consecutive typing into one undo step; false for a structural edit like a pill
  * insert/delete, which gets its own step).
  */

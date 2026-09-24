@@ -34,7 +34,7 @@ export interface MountRemoteCardOptions {
   context: CardContext;
   /** The SAME routing policy native cards use. resize/focus-edge are handled by the SDK. */
   policy?: CardPolicy;
-  /** Override sandbox. Default: allow-scripts allow-forms allow-same-origin (NO allow-popups — H-G). */
+  /** Override sandbox. Defaults to `allow-scripts allow-forms allow-same-origin` (no `allow-popups`). */
   sandbox?: string;
   /** Cap auto-height (px); frame scrolls internally beyond it. */
   maxHeight?: number;
@@ -164,7 +164,7 @@ export function mountRemoteCard(options: MountRemoteCardOptions): RemoteCardHand
     el.setAttribute('referrerpolicy', 'no-referrer');
     el.setAttribute('allow', '');
     const titleBase = currentEnvelope.title ?? currentEnvelope.type;
-    el.setAttribute('title', `${titleBase} — provided by ${providerHost(providerOrigin)}`);
+    el.setAttribute('title', `${titleBase}, provided by ${providerHost(providerOrigin)}`);
     el.style.border = '0';
     el.style.width = '100%';
 

@@ -38,7 +38,7 @@ function hasMetadata(data: LinkPreviewData): boolean {
 }
 
 /**
- * `LinkPreview` — a pure, themed, accessible rich link / OG preview. Renders from the
+ * `LinkPreview`, a pure, themed, accessible rich link / OG preview. Renders from the
  * supplied metadata; it never fetches the network itself. When the payload is a
  * bare `{ url }` and an app has registered a `configureLinkPreview` fetcher, it
  * shows a skeleton, calls the hook, merges the result, and renders. Activating the

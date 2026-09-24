@@ -377,8 +377,8 @@ type MutatorBag = PartPayload | ReasoningOpts;
 type KeysOf<T> = T extends unknown ? keyof T : never;
 /** `Shape`, but any key that belongs exclusively to a SIBLING bag is a compile
  *  error. Keys `Shape` never heard of are untouched, so a consumer's own
- *  superset of a citation still passes — only the mix-ups fail. That is a
- *  denylist, not an exact type, and deliberately so: boundary point 1. */
+ *  superset of a citation still passes; only the mix-ups fail. That is a
+ *  denylist, not an exact type, on purpose; see `state/stream-types.test.ts`. */
 type Unmixed<Shape> = Shape & {
     [K in Exclude<KeysOf<MutatorBag>, keyof Shape>]?: never;
 };
@@ -388,64 +388,12 @@ export interface AssistantStream {
     appendText(delta: string): AssistantStream;
     appendReasoning(delta: string, opts?: Unmixed<ReasoningOpts>): AssistantStream;
     upsertTool(toolCallId: string, patch: Unmixed<Partial<ToolPart>>): AssistantStream;
-    /** Adds a card, or REPLACES the existing one with the same `envelope.id`. A
-     *  model that revises a card mid-turn re-sends the whole envelope, so a second
-     *  call with a known id revises that card in place rather than rendering a
-     *  second copy of it. See `upsertCardPart`. */
+    /** Adds a card, or replaces the existing one with the same `envelope.id`. */
     addCard(envelope: CardEnvelope): AssistantStream;
     addSource(source: Unmixed<Source>): AssistantStream;
     addFile(attachment: AttachmentData): AssistantStream;
     done(): void;
-    /** Settles the turn as FAILED and puts `reason` where the reader can find it.
-     *
-     *  WHERE THE REASON LANDS, in order:
-     *  1. every tool part that has NOT produced a result flips to `output-error`
-     *     with `errorText: reason`, so no panel spins forever. A tool ALREADY in
-     *     `output-error` with its own non-empty `errorText` is left exactly as it
-     *     is: "search index offline" is the answer to what went wrong and
-     *     "Connection lost." is the generic outer symptom, so overwriting the
-     *     specific with the generic loses the only actionable thing on the
-     *     message. It still counts as carrying the failure. A tool in
-     *     `output-error` with NO text does get filled in — an error panel with
-     *     nothing in it says no more than a blank bubble does.
-     *  2. if no part was able to carry it, the reason is APPENDED as its own text
-     *     part.
-     *
-     *  Never both — a turn does not report the same failure twice.
-     *
-     *  "Where the reader can FIND it" is deliberate, and rule 1 and rule 2 are not
-     *  equally loud. Rule 2 is text in the thread: read without any interaction.
-     *  Rule 1 is a tool panel, which renders COLLAPSED — the header shows an error
-     *  icon and a badge, so the failure is unmissable, but the `errorText` itself
-     *  is one click away. That is the right default for a failed tool inside an
-     *  otherwise readable answer, and it is why rule 2 exists rather than always
-     *  stamping the panel and calling it reported.
-     *
-     *  Rule 2 is the whole point and it used to be missing. `abort` only ever did
-     *  rule 1, so a TEXT-ONLY turn — every turn of a text-only support widget —
-     *  had nothing to stamp: the string was discarded and a failed request
-     *  rendered an EMPTY assistant bubble, while the consumer that passed a
-     *  perfectly good sentence believed it had reported the failure. That is the
-     *  repo's "decide loudly" rule broken on the one path where being quiet is
-     *  worst, and it shipped because the discard is invisible from the call site.
-     *
-     *  It is a NEW part, never a merge onto the trailing text: gluing "Connection
-     *  lost." onto the model's half-finished sentence reads as the model saying
-     *  it. Text that already streamed stays exactly where it is.
-     *
-     *  The reason is TRIMMED, and `abort()` with no reason — or one that is empty
-     *  or all whitespace — appends nothing: there is no reason to discard, and the
-     *  kit will not invent copy the consumer did not write. Rule 1 still runs,
-     *  with `errorText: undefined`. Whitespace is not a pedantic case here: the
-     *  scaffold hands over `err.message`, and an `Error` is free to carry `''`,
-     *  which would otherwise render an INVISIBLE text part — a blank bubble that
-     *  also claims to have said something.
-     *
-     *  Settled is settled: after `done()` or a first `abort()`, this is a no-op
-     *  like every other mutator, so the reason cannot be appended twice.
-     *
-     *  The reason is CONSUMER-facing text and is rendered as markdown like any
-     *  other text part. Pass a sentence a visitor can read, not a stack trace. */
+    /** Settles the turn as FAILED and puts `reason` where the reader can find it. */
     abort(reason?: string): void;
 }
 /** Start an assistant message and drive it through `set`. New refs on every mutation. */
@@ -514,11 +462,11 @@ export declare function appendReasoningPart(parts: MessagePart[], delta: string,
  *
  *  WHY THIS REPLACES WHERE `upsertToolPart` MERGES. A tool part is patched
  *  fragment-by-fragment as its arguments stream in, which is why that function
- *  needs carry-forward rules for `raw` and `kind` — a later patch that omits a
+ *  needs carry-forward rules for `raw` and `kind`; a later patch that omits a
  *  field is not asserting the field is gone. A card envelope is the opposite: it
  *  arrives WHOLE, as one complete tool result, so an omitted field IS an
  *  assertion. Last-write-wins is both simpler and the only semantics under which
- *  a host can CLEAR `resolution` to re-open a dismissed card — a field-by-field
+ *  a host can CLEAR `resolution` to re-open a dismissed card; a field-by-field
  *  merge can only ever set that field, never unset it, so `CardPolicy.onReopen`
  *  (see `primitives/card-contract.ts`) would have no way to express its result.
  *
@@ -545,22 +493,22 @@ export declare function upsertToolPart(parts: MessagePart[], toolCallId: string,
 #### `@kitn.ai/ui/state` · `mock` — the shipped declarations
 
 ```ts
-/** The `model` every mock frame reports. Not a model any provider serves — see
+/** The `model` every mock frame reports. Not a model any provider serves; see
  *  tell 3 in the header. */
 export declare const MOCK_MODEL_ID = "kai-mock";
 /** The marker field carried by every mock frame. Tell 2. */
 export declare const MOCK_MARKER_KEY = "_kai_mock";
 /** The value of that marker: a whole sentence, because it is read by a human
  *  staring at a logged frame and wondering where the reply came from. */
-export declare const MOCK_MARKER = "no provider was contacted \u2014 this reply was generated locally by createMockResponder() from @kitn.ai/ui/state";
+export declare const MOCK_MARKER = "no provider was contacted: this reply was generated locally by createMockResponder() from @kitn.ai/ui/state";
 /** The SSE comment that opens every mock stream. Tell 1. */
-export declare const MOCK_BANNER = ": kai-mock \u2014 NO PROVIDER WAS CONTACTED. no provider was contacted \u2014 this reply was generated locally by createMockResponder() from @kitn.ai/ui/state.";
+export declare const MOCK_BANNER = ": kai-mock, NO PROVIDER WAS CONTACTED. no provider was contacted: this reply was generated locally by createMockResponder() from @kitn.ai/ui/state.";
 /** The default canned replies, cycled per turn so a multi-turn preview stays
  *  coherent instead of repeating one line forever. */
 export declare const DEFAULT_MOCK_REPLIES: readonly string[];
 /** One scripted tool call for a mock turn. Framed exactly the way the OpenAI
- *  chat-completions wire frames a real one — an announce fragment carrying
- *  `id`/`function.name`, then the argument JSON streamed in fragments — so the
+ *  chat-completions wire frames a real one: an announce fragment carrying
+ *  `id`/`function.name`, then the argument JSON streamed in fragments, so the
  *  kit's own reader (`readOpenAIStream`) reassembles it through the same path a
  *  real provider's call takes. */
 export interface MockToolCall {
@@ -574,8 +522,8 @@ export interface MockToolCall {
     id?: string;
 }
 /** One scripted citation for a mock turn. Framed as an OpenAI-wire
- *  `url_citation` annotation — the shape `readOpenAIStream` already parses into
- *  a `source` MessagePart — so a scripted citation takes the exact path a real
+ *  `url_citation` annotation, the shape `readOpenAIStream` already parses into
+ *  a `source` MessagePart, so a scripted citation takes the exact path a real
  *  provider's takes and renders through the same guarded sinks. */
 export interface MockSource {
     /** The cited URL. Scheme policy is enforced at the render sink
@@ -591,40 +539,27 @@ export interface MockSource {
  *  exactly as a real tool-calling turn does; a turn without them finishes
  *  `'stop'`. */
 export interface MockTurn {
-    /** Reasoning streamed (token by token) BEFORE the text, as `delta.reasoning`
-     *  — the OpenRouter-normalized sibling `readOpenAIStream` folds into a
-     *  `reasoning` part. Models think before they answer; the mock does too. */
+    /** Reasoning streamed before the text, as `delta.reasoning` frames. */
     reasoning?: string;
     /** Text streamed (token by token) before the tool calls. */
     text?: string;
-    /** Citations announced after the text, one `url_citation` annotation frame
-     *  each, so consecutive `source` parts land the way a real cited answer's
-     *  do (and collapse into the citations strip). */
+    /** Citations announced after the text, each as one `url_citation` annotation frame. */
     sources?: readonly MockSource[];
     /** Tool calls announced this turn, in order. */
     toolCalls?: readonly MockToolCall[];
 }
 /** A canned reply: plain text, or a scripted turn. A string is exactly
- *  `{ text }` — the pre-tool-call API unchanged. */
+ *  `{ text }`, the pre-tool-call API unchanged. */
 export type MockReply = string | MockTurn;
 export interface MockResponderOptions {
-    /** Canned replies, cycled one per turn. Plain strings stream as text; a
-     *  `MockTurn` can also script reasoning, citations and tool calls
-     *  (`{ reasoning, text, sources, toolCalls }`), which is what lets the
-     *  zero-config mock exercise the kit's reasoning/source/tool/card paths
-     *  without hand-rolled SSE framing. Defaults to `DEFAULT_MOCK_REPLIES`. */
+    /** Canned replies, cycled one per turn. Defaults to `DEFAULT_MOCK_REPLIES`. */
     replies?: readonly MockReply[];
-    /** Delay between chunks, in ms. Defaults to 24 — fast enough to feel alive,
-     *  slow enough that the streaming is visible. `0` streams as fast as the
-     *  event loop allows, which is what tests want. */
+    /** Delay between chunks, in ms. Defaults to 24; `0` streams as fast as the event loop allows. */
     delayMs?: number;
     /** How many whitespace-delimited tokens ride in each frame. Defaults to 1
      *  (token by token). Larger values coarsen the cadence. */
     chunkSize?: number;
-    /** Log a one-time notice on the first turn. Defaults to `true`: the point of
-     *  this module is that a mock reply is hard to mistake for a real one, and a
-     *  console line is the fastest way for a human to notice. Pass `false` in
-     *  tests, or wherever the banner and the frame markers are tell enough. */
+    /** Log a one-time notice on the first turn. Defaults to `true`. */
     announce?: boolean;
 }
 /** Produces one turn's worth of SSE frames. Structurally a `StreamSource`, so it
@@ -787,9 +722,7 @@ export type OpenAIContentPart = {
 };
 export interface OpenAIWireMessage {
     role: 'system' | 'user' | 'assistant' | 'tool';
-    /** An ARRAY only when the turn carries an encodable `file` part. A text-only
-     *  turn stays a plain string, so adding attachment support changed nothing
-     *  about what an existing thread puts on the wire. */
+    /** An array only when the turn carries an encodable `file` part; a text-only turn stays a string. */
     content: string | OpenAIContentPart[] | null;
     tool_calls?: OpenAIToolCall[];
     tool_call_id?: string;
@@ -802,27 +735,7 @@ export interface OpenAIWireMessage {
  *  `accept` mean the same thing on both wires, and a second declaration of them
  *  here is a second place to forget to update. */
 export interface OpenAIEncodeOptions extends FileEncodeOptions {
-    /**
-     * Whether to send the assistant's own reasoning back with the thread.
-     *
-     * DEFAULT `'omit'`, and that default is a measurement, not caution. Omitting
-     * reasoning is accepted by every configuration tested -- five live omission
-     * trials plus 28 recorded live requests per configuration across the spike's
-     * conformance sweep, zero 400s -- so the path that ships today demonstrably
-     * works, while including reasoning cost about 25% more prompt tokens per round
-     * when measured (665 -> 834 on a two-round loop). A library does not get to
-     * raise every consumer's bill and add a new provider-validation surface as a
-     * side effect of a bug fix.
-     *
-     * `'include'` is for a multi-round TOOL loop, which is where OpenRouter says it
-     * pays: "when you post tool results, including the original reasoning ensures
-     * the model can continue its reasoning from where it left off". Measured
-     * accepted (HTTP 200) for a signed Anthropic block and for an OpenAI encrypted
-     * block, over the OpenAI-compatible wire.
-     *
-     * The Anthropic wire has no such knob because it has no such choice: a filtered
-     * or rebuilt thinking block there is a hard 400.
-     */
+    /** Whether to send the assistant's own reasoning back with the thread. Default omits it. */
     reasoning?: 'omit' | 'include';
 }
 /**
@@ -841,38 +754,9 @@ export interface OpenAIEncodeOptions extends FileEncodeOptions {
 export type UnencodableFilePolicy = 'throw' | 'skip';
 export interface FileEncodeOptions {
     onUnencodableFile?: UnencodableFilePolicy;
-    /**
-     * Narrow which attachment media types reach the wire, as HTML `accept` syntax
-     * (`'image/*,application/pdf'`) or an array of the same.
-     *
-     * THE SAME STRING the composer takes as `<kai-chat accept="...">`, resolved by
-     * the same function against the same declaration -- so a developer writes the
-     * set once as a constant and hands it to both ends. Omitted means the kit's
-     * full capability set, which is `encodableMediaTypes()`.
-     *
-     * It can only NARROW. Naming a type the encoders cannot represent does not
-     * enable it; that would just move the failure to a provider 400.
-     */
+    /** Which attachment media types reach the wire, in HTML `accept` syntax or as an array. Omitted means everything `encodableMediaTypes()` reports. */
     accept?: MediaTypeFilter;
-    /**
-     * The app's own id for the logical turn this encode belongs to, carried onto
-     * every diagnostic event the encode emits. Purely diagnostic: nothing here
-     * branches on it and it never reaches a provider.
-     *
-     * THE SAME FIELD, THE SAME MEANING, as `ConsumeOptions.traceId` -- and that
-     * symmetry is the whole payoff. Encoding happens BEFORE a read opens, so
-     * there is no stream to attach an encode to and the kit will not invent one.
-     * Pass the same id to both halves:
-     *
-     *   const body = toOpenAIMessages(messages, { traceId: 'turn-42' });
-     *   readOpenAIStream(res, sink, { traceId: 'turn-42' });
-     *
-     * and the request and the response it produced sit together, with a tool loop
-     * or a sub-agent fan-out grouping into one trace. Without it you still see
-     * both halves; they are simply unlinked, which is the honest rendering --
-     * pinning an encode to "the next stream that opens" would be a guess, and an
-     * encode may be followed by no stream at all.
-     */
+    /** The app's own id for the logical turn, carried onto every diagnostic event this encode emits. */
     traceId?: string;
     /** The app's name for this call inside its trace (`'planner'`, `'retry-2'`).
      *  Same field and same meaning as `ConsumeOptions.label`. Absent when not
@@ -1004,13 +888,7 @@ export declare function toAnthropicMessages(messages: ChatMessage[], options?: A
 ```ts
 /** One fragment of a tool call. */
 export interface ModelToolCallDelta {
-    /**
-     * The ONLY thing correlating fragments, and its NAMESPACE IS FORMAT-DEFINED.
-     * `openaiChatFormat` uses the position in `delta.tool_calls`;
-     * `anthropicMessagesFormat` uses the content-block index. Both are correct and
-     * both are stable within one stream, but they are not the same number, so a
-     * third-party format must pick one and stay consistent with itself.
-     */
+    /** Correlates fragments within one stream. Its numbering is defined by the format. */
     index: number;
     id?: string;
     /** Usually whole on the first fragment; a few providers split it. */
@@ -1037,38 +915,14 @@ export interface ModelUsage {
 }
 export interface ModelStreamChunk {
     text?: string;
-    /**
-     * The model id the RESPONSE stated, verbatim; REPORT, NEVER INFER.
-     *
-     * Read from the response rather than the request, which is what makes it work
-     * at all when the app builds its own fetch and the kit never sees what was
-     * asked for. Providers commonly resolve an alias (ask for `gpt-4o`, get
-     * `gpt-4o-2024-08-06`); through a gateway the value is the gateway's own id.
-     * Both are reasons to pass the string through untouched.
-     *
-     * It is NOT guaranteed. A proxy can strip or rewrite it and a custom endpoint
-     * may omit it, so a consumer renders it as ABSENT when it is absent. Filling
-     * the gap with the requested id would lie in exactly the requested-vs-served
-     * mismatch this field exists to catch.
-     */
+    /** The model id the RESPONSE stated, verbatim. Absent when the provider omits it. */
     model?: string;
-    /**
-     * Reasoning delta. `''` is MEANINGFUL, not a no-op: a redacted block has no
-     * readable text but still carries a payload that must round-trip, and a format
-     * uses an empty delta to OPEN a reasoning part at the right position in the
-     * stream so block order survives into `parts`.
-     */
+    /** Reasoning delta. An empty string opens a reasoning part at this position. */
     reasoning?: string;
     /** The provider's BLOCK index. Keeps parallel reasoning blocks distinct.
      *  Omitted means block 0, the single-block case every provider degrades to. */
     reasoningIndex?: number;
-    /**
-     * The UNTRANSLATED provider payload for this reasoning block. Valid on a chunk
-     * with NO reasoning text at all, which is the whole point: Anthropic returns
-     * 400 if a `thinking` block is modified, reordered or RECONSTRUCTED, so an
-     * encoder has to echo the original block rather than rebuild one from `text`
-     * plus `signature`.
-     */
+    /** The untranslated provider payload for this reasoning block, echoed back on encode. */
     reasoningRaw?: RawOrigin;
     /** Informational. `reasoningRaw` is the round-trip channel, not this. */
     reasoningSignature?: string;
@@ -1158,55 +1012,18 @@ export interface ModelTurn {
 export interface ConsumeOptions {
     /** Label for the reasoning disclosure. Defaults to 'Thinking'. */
     reasoningLabel?: string;
-    /**
-     * Correlates diagnostics and namespaces reasoning parts for this consume call;
-     * assigned automatically when absent.
-     *
-     * Supply one only to tie a read to an id you already hold. Two reads into the
-     * SAME sink must not share a value: the id is what keeps a second round's
-     * block 0 from merging into the first round's reasoning part.
-     */
+    /** Correlates diagnostics and namespaces reasoning parts for this read; assigned when absent. */
     streamId?: string;
-    /**
-     * The app's own grouping of several reads into ONE logical turn, carried onto
-     * every diagnostic event this read emits.
-     *
-     * THE KIT REPORTS WHAT THE APP DECLARES AND GROUPS NOTHING ON ITS OWN. A chat
-     * app running a tool loop, or fanning out to sub-agents, makes several model
-     * calls that belong to one turn; the kit sees one Response at a time and has
-     * no way to know which ones those are. So it does not guess:
-     *
-     *   readOpenAIStream(res, sink, { traceId: 'turn-42', label: 'planner' })
-     *
-     * Absent when not supplied -- the key is not present on the events at all,
-     * rather than present and undefined. Purely diagnostic: nothing in the parse
-     * branches on it and it never reaches a provider.
-     */
+    /** The app's own grouping of several reads into one logical turn. Diagnostic only. */
     traceId?: string;
-    /** The app's name for THIS read inside its trace (`'planner'`,
-     *  `'executor'`, `'retry-2'`). Carried onto every diagnostic event, and
-     *  absent when not supplied. Never derived from the format or the model.
-     *
-     *  Not to be confused with `reasoningLabel`, which is UI copy for the
-     *  reasoning disclosure; this one is never rendered to an end user. */
+    /** The app's name for THIS read inside its trace (`'planner'`, `'retry-2'`). Never rendered. */
     label?: string;
-    /** Fires once per tool call the moment its arguments parse cleanly. This is
-     *  the hook a host's tool loop waits on. There is deliberately no
-     *  per-fragment callback: `ToolPart.rawInput` is written on every fragment,
-     *  so the streaming text is already on the part. */
+    /** Fires once per tool call, the moment its arguments parse cleanly. */
     onToolCallReady?: (call: ModelToolCall) => void;
 }
 /** Per-stream state for one format. */
 export interface WireFormatReader {
-    /**
-     * Map one decoded frame onto zero or more neutral chunks. Returns an ARRAY
-     * because the mapping is not one-to-one: an Anthropic `message_start` yields
-     * usage, a `content_block_start` for `tool_use` yields an id-plus-name delta,
-     * a `ping` yields nothing.
-     *
-     * MUST NOT throw on an unrecognized frame. Return `[]` instead: providers add
-     * event types without warning.
-     */
+    /** Maps one decoded frame onto zero or more neutral chunks. */
     push(frame: unknown): ModelStreamChunk[];
 }
 /** A pluggable wire format. Values, not a flag, so a third party can add one
@@ -1356,7 +1173,7 @@ The files attached to a message.
 | `items` | — | `undefined \| { id: string; type: "file" \| "source-document"; filename?: undefined \| string; mediaType?: undefined \| string; url?: undefined \| string; title?: undefined \| string }[]` | The attachments to render (omit or pass `[]` for the empty state). Each `url` must be a `data:` URI or https URL, never `blob:`. |
 | `variant` | `variant` | `undefined \| "grid" \| "inline" \| "list"` | Layout: `grid` = visual tiles, `inline` = icon + label chips, `list` = rows. |
 | `hoverCard` | `hover-card` | `undefined \| false \| true` | Wrap each item in a hover card that previews its details. |
-| `imagePreview` | `image-preview` | `undefined \| "hover" \| "lightbox"` | How an image tile reveals its full size: `hover` (pointer-only hover card, default) or `lightbox` (modal on click). |
+| `imagePreview` | `image-preview` | `undefined \| "hover" \| "lightbox"` | How an image tile reveals its full size: a pointer-only card by default, or a modal on click. |
 | `removable` | `removable` | `undefined \| false \| true` | Show a remove button per item; clicking it fires a `kai-remove` event. |
 | `showMediaType` | `show-media-type` | `undefined \| false \| true` | Also show the media type beneath the filename (non-grid variants). |
 | `emptyText` | `empty-text` | `undefined \| string` | Text shown when `items` is empty. |
@@ -1429,7 +1246,7 @@ A person or entity avatar: a rounded image that falls back to initials.
 | `src` | `src` | `undefined \| string` | Image URL/data-URI. When absent, the `fallback` initials show instead. |
 | `alt` | `alt` | `undefined \| string` | Alt text for the image. Defaults to `fallback`. |
 | `fallback` | `fallback` | `undefined \| string` | Short text shown when there's no image, usually initials (e.g. "JD", "AI"). |
-| `size` | `size` | `undefined \| "sm" \| "md" \| "lg"` | Size token: `sm` \| `md` (default) \| `lg`. |
+| `size` | `size` | `undefined \| "sm" \| "md" \| "lg"` | Size token. |
 
 _No events._
 
@@ -1444,7 +1261,7 @@ A compact pill for status text, counts, or source citations.
 | Property | Attribute | Type | Description |
 |---|---|---|---|
 | `theme` | `theme` | `"light" \| "dark" \| "auto"` | Color mode (`auto` follows prefers-color-scheme). |
-| `variant` | `variant` | `undefined \| "default" \| "count" \| "citation"` | `default` (muted pill) · `count` (compact number badge) · `citation` (filled primary, for inline citation markers). Defaults to `default`. |
+| `variant` | `variant` | `undefined \| "default" \| "count" \| "citation"` | Badge style; `default` is the muted pill. |
 
 _No events._
 
@@ -1472,13 +1289,13 @@ A button that triggers an action.
 |---|---|---|---|
 | `theme` | `theme` | `"light" \| "dark" \| "auto"` | Color mode (`auto` follows prefers-color-scheme). |
 | `variant` | `variant` | `undefined \| "default" \| "subtle" \| "ghost" \| "outline" \| "destructive"` | Visual style. Defaults to `default` (filled). |
-| `size` | `size` | `undefined \| "sm" \| "md" \| "lg" \| "icon" \| "icon-sm"` | Size token. `icon` / `icon-sm` are square (for icon-only buttons); `sm` / `md` / `lg` size text buttons. Defaults to `md`. |
+| `size` | `size` | `undefined \| "sm" \| "md" \| "lg" \| "icon" \| "icon-sm"` | Size token: the square glyph-only sizes, or the text-button sizes. Defaults to `md`. |
 | `icon` | `icon` | `undefined \| string` | Leading icon: a named icon (e.g. `"mic"`, `"plus"`), an image URL/data-URI, or plain text. Renders before any slotted label. |
 | `iconTrailing` | `icon-trailing` | `undefined \| string` | Trailing icon, after the label (e.g. `"chevron-down"` for a menu affordance). |
 | `label` | `label` | `undefined \| string` | Accessible name for an icon-only button. Ignored when visible text is slotted -- the visible text wins. |
 | `disabled` | `disabled` | `undefined \| false \| true` | Disable the button (non-interactive, dimmed). |
 | `full` | `full` | `undefined \| false \| true` | Stretch the button to the full width of its container (a block button), e.g. a card CTA or a stacked action. Attribute: `full`. |
-| `align` | `align` | `undefined \| "start" \| "center" \| "end"` | Justify the button's content: `start`, `center` (default), or `end`. Combine with `full` for a full-width, left-aligned button. |
+| `align` | `align` | `undefined \| "start" \| "center" \| "end"` | Justify the button's content. Default is centered; combine with `full` for a full-width, left-aligned button. |
 | `type` | `type` | `undefined \| "button" \| "submit" \| "reset"` | Native button `type`. Defaults to `button` (so it never submits a form). |
 
 **Events** (non-bubbling `CustomEvent`s — listen directly on the element):
@@ -1640,13 +1457,13 @@ A complete chat surface: a message thread with its own header and prompt input.
 | `placeholder` | `placeholder` | `undefined \| string` | Placeholder text shown in the empty input. |
 | `loading` | `loading` | `undefined \| false \| true` | Disables submit and shows the streaming state. |
 | `suggestions` | — | `undefined \| string[]` | Starter prompts shown above the input while the thread is empty. |
-| `suggestionMode` | `suggestion-mode` | `undefined \| "submit" \| "fill"` | What clicking a suggestion does: `'submit'` (default) sends it, `'fill'` only fills the input. |
+| `suggestionMode` | `suggestion-mode` | `undefined \| "submit" \| "fill"` | What clicking a suggestion does. Default sends it immediately; `'fill'` places it in the input without sending. |
 | `persistSuggestions` | `persist-suggestions` | `undefined \| false \| true` | Keep suggestions visible after the conversation starts; they otherwise hide once `messages` is non-empty. Default false. |
 | `proseSize` | `prose-size` | `undefined \| "xs" \| "sm" \| "base" \| "lg"` | Body/prose font scale for rendered markdown. Defaults to `'sm'`. |
 | `codeTheme` | `code-theme` | `undefined \| string` | Shiki theme name for syntax-highlighted code blocks (e.g. `'github-dark-dimmed'`). |
 | `imagePreview` | `image-preview` | `undefined \| "hover" \| "lightbox"` | How an image tile reveals full size. `'lightbox'` is the only value keyboard and touch can reach. Default `'hover'`. |
 | `codeHighlight` | `code-highlight` | `undefined \| false \| true` | Renders plain `<pre>` blocks with no highlighter load when false. Default true. |
-| `reasoning` | `reasoning` | `undefined \| "full" \| "compact" \| "off"` | How reasoning parts render. `'compact'` streams only a shimmer and `'off'` renders none. Default `'full'`. |
+| `reasoning` | `reasoning` | `undefined \| "full" \| "compact" \| "off"` | How reasoning parts render. Default is the collapsible disclosure. |
 | `reasoningOpen` | `reasoning-open` | `undefined \| false \| true` | Seeds the reasoning disclosure open and keeps it tracking the stream. Default false; inert unless `reasoning` is `'full'`. |
 | `chatTitle` | `chat-title` | `undefined \| string` | Title shown at the start of the header bar. |
 | `models` | — | `undefined \| { id: string; name: string; provider?: undefined \| string; description?: undefined \| string; group?: undefined \| string }[]` | Model list; more than one renders a switcher in the header. |
@@ -1667,7 +1484,7 @@ A complete chat surface: a message thread with its own header and prompt input.
 | `voice` | `voice` | `undefined \| false \| true` | Show a voice-input button in the input toolbar; calls `onVoice`. |
 | `triggers` | — | `undefined \| { char: string; kind: string; items?: undefined \| { id: string; label: string; icon?: undefined \| string; description?: undefined \| string; group?: undefined \| string; kind?: undefined \| string; promptText?: undefined \| string; data?: undefined \| Record<string, unknown> }[] }[]` | Rich entity triggers. Each opens a menu at the caret that inserts an atomic pill. |
 | `kindIcons` | — | `undefined \| Record<string, string>` | Default icon per entity kind (kind → image src) for pills/menu items. |
-| `actionsReveal` | `actions-reveal` | `undefined \| "always" \| "hover"` | Whether each message's action bar is always visible or revealed on hover of that row. Default `'always'`. |
+| `actionsReveal` | `actions-reveal` | `undefined \| "always" \| "hover"` | Whether each message's action bar is visible at rest or revealed on pointer-over. Visible at rest by default. |
 | `userActions` | — | `undefined \| ("copy" \| "dislike" \| "edit" \| "like" \| "regenerate" \| "speak" \| { id: string; label: string; icon?: undefined \| string; tooltip?: undefined \| string })[]` | Default action bar for user messages that have no `actions` of their own; a message's own `actions` replaces it. |
 | `assistantActions` | — | `undefined \| ("copy" \| "dislike" \| "edit" \| "like" \| "regenerate" \| "speak" \| { id: string; label: string; icon?: undefined \| string; tooltip?: undefined \| string })[]` | Default action bar for assistant messages, as `userActions` is for user ones. |
 | `hideSources` | `hide-sources` | `undefined \| false \| true` | Hide the citations row that consecutive `source` parts collapse into; absent or `false` renders it. |
@@ -1867,7 +1684,7 @@ An anchored onboarding bubble with an arrow, pointing at the trigger it wraps. `
 | `headline` | `headline` | `undefined \| string` | The bold title. Named `headline` because `title` collides with the global `HTMLElement.title` attribute (it throws at registration). |
 | `badge` | `badge` | `undefined \| string` | A small badge pill beside the headline (e.g. "New"). |
 | `placement` | `placement` | `undefined \| string` | Floating placement relative to the anchor (default `bottom`). |
-| `tone` | `tone` | `undefined \| "primary" \| "info" \| "success" \| "warning" \| "error"` | Color tone: `primary` (default, theme accent), `info` (blue), `success` (green), `warning` (amber), or `error` (red), reusing the kit's tool hues. |
+| `tone` | `tone` | `undefined \| "primary" \| "info" \| "success" \| "warning" \| "error"` | Color tone, reusing the kit's tool hues. Defaults to the theme accent. |
 | `arrow` | `arrow` | `undefined \| false \| true` | Render the arrow that points at the anchor (default `true`). Set `arrow="false"` for a plain bubble with no pointer. |
 
 **Events** (non-bubbling `CustomEvent`s — listen directly on the element):
@@ -2203,7 +2020,7 @@ A conversation list or rail.
 
 | Child element | Attributes | Text content | Notes |
 |---|---|---|---|
-| `<kai-conversation>` | `group-id`, `id` | yes | Parse a single light-DOM `<kai-conversation>` element into a `ConversationSummary`. Attribute mapping: - `id` → ConversationSummary.id - `group-id` → ConversationSummary.groupId (optional) - textContent → ConversationSummary.title Fields not expressible as HTML attributes are NOT fabricated: the optional `scope` and `lastMessageAt` stay absent, and the required `messageCount`/`updatedAt` get honest defaults — zero messages, and an empty `updatedAt` from which no trailing relative time is derived (the epoch it used to fabricate rendered a bogus "many days ago" on every declarative row). |
+| `<kai-conversation>` | `group-id`, `id` | yes | Parse a single light-DOM `<kai-conversation>` element into a `ConversationSummary`. Attribute mapping: - `id` → ConversationSummary.id - `group-id` → ConversationSummary.groupId (optional) - textContent → ConversationSummary.title Fields not expressible as HTML attributes are NOT fabricated: the optional `scope` and `lastMessageAt` stay absent, and the required `messageCount`/`updatedAt` get honest defaults: zero messages, and an empty `updatedAt` from which no trailing relative time is derived (the epoch it used to fabricate rendered a bogus "many days ago" on every declarative row). |
 
 **Styleable parts** (restyle from outside via `kai-conversations::part(name)`):
 
@@ -2368,7 +2185,7 @@ A text label that swaps itself for an input field when edited.
 | `theme` | `theme` | `"light" \| "dark" \| "auto"` | Color mode (`auto` follows prefers-color-scheme). |
 | `value` | `value` | `undefined \| string` | The label text. Settable and reflected to the `value` attribute. Read `el.value` for live state. |
 | `editing` | `editing` | `undefined \| false \| true` | Controlled edit state. `el.editing = true` opens the field; reflected to the `editing` attribute. |
-| `editTrigger` | `edit-trigger` | `undefined \| "dblclick" \| "click"` | How the read view enters edit mode: `dblclick` (default) or `click`. Reflects to `edit-trigger`; `edit()` and `editing` are unaffected. |
+| `editTrigger` | `edit-trigger` | `undefined \| "dblclick" \| "click"` | How the read view enters edit mode. Default is a double click; `edit()` and `editing` are unaffected. |
 | `placeholder` | `placeholder` | `undefined \| string` | Placeholder shown while editing / when the value is empty. |
 | `disabled` | `disabled` | `undefined \| false \| true` | Disable entering edit mode. |
 
@@ -2606,7 +2423,7 @@ An inline glyph from a small curated icon set, so surrounding markup can match t
 |---|---|---|---|
 | `theme` | `theme` | `"light" \| "dark" \| "auto"` | Color mode (`auto` follows prefers-color-scheme). |
 | `name` | `name` | `undefined \| string` | A curated icon name (e.g. `"mic"`, `"globe"`), an image URL/data-URI, or plain text. |
-| `size` | `size` | `undefined \| "sm" \| "md" \| "lg"` | Size token: `sm` \| `md` (default) \| `lg`. |
+| `size` | `size` | `undefined \| "sm" \| "md" \| "lg"` | Size token. |
 
 _No events._
 
@@ -2668,7 +2485,7 @@ A single-line text field, optionally masked and reformatted as it is typed.
 | `label` | `label` | `undefined \| string` | Field label, linked to the input. |
 | `hint` | `hint` | `undefined \| string` | Helper text below the control. |
 | `error` | `error` | `undefined \| string` | Error text; flips the field invalid (`aria-invalid` + destructive border). |
-| `size` | `size` | `undefined \| "sm" \| "md"` | Control density: `sm` or `md`. Defaults to `md`. |
+| `size` | `size` | `undefined \| "sm" \| "md"` | Control density. Defaults to `md`. |
 | `disabled` | `disabled` | `undefined \| false \| true` | Disable interaction. |
 | `readonly` | `readonly` | `undefined \| false \| true` | Make the input read-only. |
 | `required` | `required` | `undefined \| false \| true` | Mark the input required. |
@@ -2729,7 +2546,7 @@ A keyboard-shortcut display: one inset cap per key, in the platform's own glyphs
 | `theme` | `theme` | `"light" \| "dark" \| "auto"` | Color mode (`auto` follows prefers-color-scheme). |
 | `keys` | `keys` | `undefined \| string` | Shortcut spec: tokens joined by `+` (e.g. `Mod+Shift+K`). Omit it to show default-slot content instead. Display only; the element does not bind keys. |
 | `platform` | `platform` | `undefined \| "auto" \| "mac" \| "other"` | `mac` uses ⌘/⌥, `other` uses Ctrl. `auto` (default) sniffs the OS. |
-| `size` | `size` | `undefined \| "sm" \| "md"` | Cap size: `sm` or `md`. Defaults to `md`. |
+| `size` | `size` | `undefined \| "sm" \| "md"` | Cap size. Defaults to `md`. |
 
 _No events._
 
@@ -2937,7 +2754,7 @@ A single message row of a chat thread.
 | `proseSize` | `prose-size` | `undefined \| "xs" \| "sm" \| "base" \| "lg"` | Text/markdown sizing for the message body. |
 | `codeTheme` | `code-theme` | `undefined \| string` | Shiki theme name used for fenced code blocks in the content. |
 | `codeHighlight` | `code-highlight` | `undefined \| false \| true` | Disable syntax highlighting for code blocks (no Shiki loads). |
-| `actionsReveal` | `actions-reveal` | `undefined \| "always" \| "hover"` | Whether the action bar is always visible (`'always'`, default) or only revealed on hover of the message row (`'hover'`). |
+| `actionsReveal` | `actions-reveal` | `undefined \| "always" \| "hover"` | Whether the action bar stays visible or appears on pointer-over; visible by default. |
 | `avatarSrc` | `avatar-src` | `undefined \| string` | Convenience avatar image URL (used when `message.avatar` is not set). |
 | `avatarFallback` | `avatar-fallback` | `undefined \| string` | Convenience avatar fallback text (used when `message.avatar` is not set). |
 | `avatar` | `avatar` | `undefined \| string` | Avatar rail mode. `'none'` omits the rail so the body spans the full row; otherwise the built-in avatar or your `slot="avatar"`. |
@@ -3074,7 +2891,7 @@ An inline notice box with a leading status icon.
 | Property | Attribute | Type | Description |
 |---|---|---|---|
 | `theme` | `theme` | `"light" \| "dark" \| "auto"` | Color mode (`auto` follows prefers-color-scheme). |
-| `severity` | `severity` | `undefined \| "neutral" \| "info" \| "warning" \| "error" \| "success"` | `neutral` (default) · `info` · `warning` · `error` · `success`. Drives the leading icon's color and the a11y role (`alert` for errors, else `status`). |
+| `severity` | `severity` | `undefined \| "neutral" \| "info" \| "warning" \| "error" \| "success"` | Severity. Defaults to `'neutral'`. |
 | `icon` | `icon` | `undefined \| string` | Leading icon: omit for the severity default, `"none"` to hide it, or a named icon to override. |
 | `dismissible` | `dismissible` | `undefined \| false \| true` | Show a dismiss (×) that hides the notice and emits `kai-dismiss`. |
 
@@ -3377,11 +3194,11 @@ The prompt row: a rich text editor with its send button and toolbar.
 | `disabled` | `disabled` | `undefined \| false \| true` | Disable the input and submit button entirely (non-interactive). |
 | `loading` | `loading` | `undefined \| false \| true` | Show the loading/streaming state and block submit (use while awaiting a reply). |
 | `suggestions` | — | `undefined \| string[]` | Starter prompts shown above the input. Clicking one follows `suggestionMode`. Set as a JS property. |
-| `suggestionMode` | `suggestion-mode` | `undefined \| "submit" \| "fill"` | What clicking a suggestion does: `'submit'` (default) sends it immediately as if typed and submitted; `'fill'` just places it in the input. |
+| `suggestionMode` | `suggestion-mode` | `undefined \| "submit" \| "fill"` | What clicking a suggestion does. Defaults to `'submit'`. |
 | `webSearch` | `web-search` | `undefined \| false \| true` | Show a web-search (Globe) button in the left toolbar; clicking it fires a `kai-web-search` event. Attribute: `web-search`. |
 | `voice` | `voice` | `undefined \| false \| true` | Show a Voice (Mic) button in the left toolbar; clicking it fires a `voice` event. |
 | `stoppable` | `stoppable` | `undefined \| false \| true` | When set and `loading` is true, the send button is replaced by a Stop button (square icon, "Stop" aria-label). Clicking it fires `kai-stop`. |
-| `submit` | `submit` | `undefined \| "always" \| "auto"` | Send-button visibility: `always` (default) or `auto` (only when there is text/attachments). |
+| `submit` | `submit` | `undefined \| "always" \| "auto"` | Send-button visibility. Defaults to `'always'`. |
 | `attach` | `attach` | `undefined \| false \| true` | Show the built-in paperclip attach button. Default `true`. |
 | `attachments` | — | `undefined \| { id: string; type: "file" \| "source-document"; filename?: undefined \| string; mediaType?: undefined \| string; url?: undefined \| string; title?: undefined \| string }[]` | Attachments to seed the input with. Each `url` must be a `data:` URI or https URL, never `blob:`. |
 | `triggers` | — | `undefined \| { char: string; kind: string; items?: undefined \| { id: string; label: string; icon?: undefined \| string; description?: undefined \| string; group?: undefined \| string; kind?: undefined \| string; promptText?: undefined \| string; data?: undefined \| Record<string, unknown> }[] }[]` | Rich entity triggers. Each `{ char, kind, items }` opens a caret-anchored menu that inserts an atomic pill. JS property. |
@@ -3520,9 +3337,9 @@ A resizable multi-panel layout with draggable dividers.
 | Property | Attribute | Type | Description |
 |---|---|---|---|
 | `theme` | `theme` | `"light" \| "dark" \| "auto"` | Color mode (`auto` follows prefers-color-scheme). |
-| `orientation` | `orientation` | `undefined \| "horizontal" \| "vertical"` | Layout axis: `horizontal` (row, default) or `vertical` (column). |
+| `orientation` | `orientation` | `undefined \| "horizontal" \| "vertical"` | Whether the group lays out as a row or a column. |
 | `maximizedIndex` | — | `undefined \| number \| null` | Which item index is maximized (null = none). Declarative source of truth. |
-| `handle` | `handle` | `undefined \| "line" \| "grip" \| "none"` | Divider affordance drawn inside each draggable handle's 8px grab zone: `line` (default), `grip`, or `none`. |
+| `handle` | `handle` | `undefined \| "line" \| "grip" \| "none"` | Divider affordance drawn inside each draggable handle's 8px grab zone. |
 
 **Events** (non-bubbling `CustomEvent`s — listen directly on the element):
 
@@ -3794,7 +3611,7 @@ A floating button that scrolls a container to its bottom, visible while the cont
 |---|---|---|---|
 | `theme` | `theme` | `"light" \| "dark" \| "auto"` | Color mode (`auto` follows prefers-color-scheme). |
 | `for` | `for` | `undefined \| string` | CSS id of the scroll container to control. |
-| `variant` | `variant` | `undefined \| "outline" \| "ghost" \| "default"` | Button visual variant: `'outline' \| 'ghost' \| 'default'`. Defaults to `'outline'`. |
+| `variant` | `variant` | `undefined \| "outline" \| "ghost" \| "default"` | Button visual variant. Defaults to `outline`. |
 | `size` | `size` | `undefined \| "sm" \| "md" \| "lg" \| "icon" \| "icon-sm"` | Button size token. Defaults to `'icon'` (square). |
 | `label` | `label` | `undefined \| string` | The button's accessible name. It is announced whether or not the label is visible, so the text is always localisable. Defaults to `'Scroll to bottom'`. |
 | `showLabel` | `show-label` | `undefined \| false \| true` | Also render `label` visibly beside the icon. Default `false` (icon-only). |
@@ -3859,7 +3676,7 @@ A row of mutually exclusive pills for switching between a few options in place.
 | `theme` | `theme` | `"light" \| "dark" \| "auto"` | Color mode (`auto` follows prefers-color-scheme). |
 | `options` | — | `{ value: string; label: string; icon?: undefined \| string }[]` | The selectable segments, left to right. Set as a JS property (array). |
 | `value` | `value` | `undefined \| string` | Controlled selected `value`, reflected to the `value` attribute. Choosing a segment updates it and fires `kai-change`. |
-| `size` | `size` | `undefined \| "sm" \| "md"` | Control density: `sm` or `md`. Defaults to `md`. |
+| `size` | `size` | `undefined \| "sm" \| "md"` | Control density. Defaults to `md`. |
 
 **Events** (non-bubbling `CustomEvent`s — listen directly on the element):
 
@@ -3918,7 +3735,7 @@ A divider between groups of content.
 | Property | Attribute | Type | Description |
 |---|---|---|---|
 | `theme` | `theme` | `"light" \| "dark" \| "auto"` | Color mode (`auto` follows prefers-color-scheme). |
-| `orientation` | `orientation` | `undefined \| "horizontal" \| "vertical"` | `horizontal` (default, block + full-width) or `vertical` (a rule inside a flex/grid row, stretching to the row height). |
+| `orientation` | `orientation` | `undefined \| "horizontal" \| "vertical"` | The separator's axis. Defaults to a full-width block; the cross-axis form suits a flex or grid row. |
 
 _No events._
 
@@ -4120,7 +3937,7 @@ A small presence or unread dot.
 | `status` | `status` | `undefined \| "new" \| "online" \| "busy" \| "away" \| "offline"` | Presence state, which sets the colour. Default `new`. |
 | `pulse` | `pulse` | `undefined \| false \| true` | Animated ping ring; off by default and never under prefers-reduced-motion. |
 | `label` | `label` | `undefined \| string` | Accessible name; without it the dot is decorative. |
-| `size` | `size` | `undefined \| "sm" \| "md"` | `sm` or `md`. Default `sm`. |
+| `size` | `size` | `undefined \| "sm" \| "md"` | Size token. Defaults to `'sm'`. |
 
 _No events._
 
@@ -4142,9 +3959,9 @@ A row or list of suggestion chips.
 |---|---|---|---|
 | `theme` | `theme` | `"light" \| "dark" \| "auto"` | Color mode (`auto` follows prefers-color-scheme). |
 | `suggestions` | — | `undefined \| (string \| { label: string; value?: undefined \| string; icon?: undefined \| string })[]` | The suggestions: strings, or `{ label, value }` when the displayed text and emitted value differ. JS property (array). |
-| `variant` | `variant` | `undefined \| "outline" \| "ghost" \| "default"` | Chip style: `'outline'` (default), `'ghost'`, or `'default'` (filled). |
-| `size` | `size` | `undefined \| "md" \| "lg"` | Row height for `layout="list"`: `'md'` (default) or `'lg'` for taller rows. Chips are unaffected. |
-| `layout` | `layout` | `undefined \| "chips" \| "list"` | Layout: `chips` (default, a wrapping row of pills) or `list` (full-width left-aligned rows with a leading icon). |
+| `variant` | `variant` | `undefined \| "outline" \| "ghost" \| "default"` | Chip style. Defaults to `outline`. |
+| `size` | `size` | `undefined \| "md" \| "lg"` | Row height for the list layout. Defaults to `md`; chips are unaffected. |
+| `layout` | `layout` | `undefined \| "chips" \| "list"` | A wrapping row of pills (the default), or full-width rows with a leading icon. |
 | `block` | `block` | `undefined \| false \| true` | Full-width left-aligned rows instead of pills. |
 | `highlight` | `highlight` | `undefined \| string` | Substring to highlight within each suggestion. |
 
@@ -4395,8 +4212,8 @@ The scrolling message list of a chat.
 | `proseSize` | `prose-size` | `undefined \| "xs" \| "sm" \| "base" \| "lg"` | Body/prose font scale for rendered markdown (`'xs' \| 'sm' \| 'base' \| 'lg'`). Defaults to `'sm'`. |
 | `codeTheme` | `code-theme` | `undefined \| string` | Shiki theme name for syntax-highlighted code blocks (e.g. `'github-dark-dimmed'`). |
 | `codeHighlight` | `code-highlight` | `undefined \| false \| true` | Enable Shiki syntax highlighting in code blocks. Turn off to render plain `<pre>` blocks (lighter, no highlighter load). Default true. |
-| `imagePreview` | `image-preview` | `undefined \| "hover" \| "lightbox"` | How an image tile reveals its full size: `hover` (pointer-only hover card, default) or `lightbox` (modal on click). |
-| `actionsReveal` | `actions-reveal` | `undefined \| "always" \| "hover"` | Whether each message's action bar is always visible (`'always'`, default) or only revealed on hover of that message row (`'hover'`). |
+| `imagePreview` | `image-preview` | `undefined \| "hover" \| "lightbox"` | How an image tile reveals its full size. Default is the pointer-only hover card; the modal on click is the only one keyboard and touch reach. |
+| `actionsReveal` | `actions-reveal` | `undefined \| "always" \| "hover"` | Whether each message's action bar is visible at rest or only revealed on pointer-over. Visible at rest by default. |
 | `scrollButton` | `scroll-button` | `undefined \| false \| true` | Show the scroll-to-bottom button inside the scroll area. Default true. |
 | `class` | `class` | `undefined \| string` | Extra classes applied to the thread's inner root. |
 | `cardTypes` | — | `undefined \| Record<string, string>` | Card type → custom-element tag overrides/additions, merged over the built-ins. JS property: `el.cardTypes`. |
@@ -4434,7 +4251,7 @@ The viewport overlay that stacks toasts.
 | `toasts` | — | `undefined \| { id: string; message: string; variant?: undefined \| "neutral" \| "success" \| "warning" \| "error" \| "info"; appearance?: undefined \| "pill" \| "card"; inverse?: undefined \| false \| true; description?: undefined \| string; action?: undefined \| { label: string; onAction: () => void \| false }; duration?: undefined \| number; dismissible?: undefined \| false \| true; target?: undefined \| HTMLElement }[]` | The toasts to render, newest on top. JS property; a new array reference updates it. |
 | `position` | `position` | `undefined \| "top-center" \| "top-right" \| "top-left" \| "bottom-center" \| "bottom-right" \| "bottom-left"` | Stack anchor: `'top-center'` (default), `'top-right'`, `'bottom-center'`, … |
 | `max` | `max` | `undefined \| number` | Max simultaneously-visible toasts; the rest queue. Defaults to `3`. |
-| `stack` | `stack` | `undefined \| "expanded" \| "collapsed"` | Stacking: 'expanded' (default, full column) \| 'collapsed' (Sonner-style pile that expands on hover/focus). Attribute: stack. |
+| `stack` | `stack` | `undefined \| "expanded" \| "collapsed"` | Stacking; the default is the full column. Attribute: `stack`. |
 | `appearance` | `appearance` | `undefined \| "pill" \| "card"` | Default appearance for this region's toasts: `pill` (default, compact) or `card` (richer). A per-toast `appearance` wins. |
 | `inverse` | `inverse` | `undefined \| false \| true` | Default high-contrast inverse treatment for this region's toasts. A per-toast `inverse` wins. Off by default. Attribute: `inverse`. |
 | `target` | — | `undefined \| HTMLElement` | Container element to anchor this region to (JS property). Set by the store for a scoped region; unset = the global viewport region. |

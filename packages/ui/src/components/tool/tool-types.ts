@@ -12,7 +12,7 @@ export interface RawOrigin {
   payload: unknown;
 }
 
-/** A tool-call part rendered by <Tool>. Pure type — kept JSX-free so it can be
+/** A tool-call part rendered by <Tool>. Pure type, kept JSX-free so it can be
  *  imported by the framework-neutral state core and the React typecheck pass.
  *
  *  Adding a field here also requires adding it to `TOOL_KEYS` (and a comparator
@@ -25,15 +25,14 @@ export interface ToolPart {
   type: string;
   /** Semantic classification for rendering. Derive with classifyTool(type). */
   kind?: ToolKind;
-  /** The call's lifecycle. A provider stream (real or `createMockResponder`)
-   *  only ever ANNOUNCES a call: arguments stream in (`input-streaming`), then
-   *  the part parks at `input-available` — and stays there. The kit parses and
-   *  renders the call; EXECUTING it and answering is the host's side of the
-   *  seam: after the read settles, run the tool and patch the part forward with
-   *  `stream.upsertTool(id, { state: 'output-available', output })` (or
-   *  `upsertToolPart`), or `output-error` + `errorText` on failure. The one
-   *  exception is a call the provider ran itself (`raw` carries the result and
-   *  the wire sets `output` directly) — never re-execute those. */
+  // A provider stream (real or `createMockResponder`) only ever ANNOUNCES a call: arguments stream
+  // in, then the part parks at `input-available` and stays there. The kit parses and renders the call;
+  // EXECUTING it and answering is the host's side of the seam. After the read settles, run the tool
+  // and patch the part forward with `stream.upsertTool(id, { state: 'output-available', output })` (or
+  // `upsertToolPart`), or `output-error` + `errorText` on failure. The one exception is a call the
+  // provider ran itself (`raw` carries the result and the wire sets `output` directly): never
+  // re-execute those.
+  /** Where the call is in its lifecycle; a stream on its own only reaches `input-available`. */
   state: 'input-streaming' | 'input-available' | 'output-available' | 'output-error';
   /** Last VALID parsed snapshot, fingerprint-deduped. The primary channel: this is
    *  what the kit renders. */

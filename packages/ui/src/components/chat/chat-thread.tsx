@@ -65,8 +65,8 @@ export interface ChatThreadProps {
   loading?: boolean;
   /** Starter prompts shown above the input while the thread is empty. */
   suggestions?: string[];
-  /** What clicking a suggestion does: `'submit'` (default) sends it, `'fill'` only
-   *  fills the input. */
+  /** What clicking a suggestion does. Default sends it immediately; `'fill'`
+   *  places it in the input without sending. */
   suggestionMode?: 'submit' | 'fill';
   /** Keep suggestions visible after the conversation starts; they otherwise hide
    *  once `messages` is non-empty. Default false. */
@@ -84,8 +84,7 @@ export interface ChatThreadProps {
   /** Renders plain `<pre>` blocks with no highlighter load when false. Default true. */
   codeHighlight?: boolean;
   // Forwarded to every `MessageBody` as `reasoningMode`.
-  /** How reasoning parts render. `'compact'` streams only a shimmer and `'off'`
-   *  renders none. Default `'full'`. */
+  /** How reasoning parts render. Default is the collapsible disclosure. */
   reasoning?: 'full' | 'compact' | 'off';
   // Forwarded to every `MessageBody` as `reasoningDefaultOpen`.
   /** Seeds the reasoning disclosure open and keeps it tracking the stream. Default
@@ -197,8 +196,8 @@ export interface ChatThreadProps {
   triggers?: TriggerDef[];
   /** Default icon per entity kind (kind → image src) for pills/menu items. */
   kindIcons?: Record<string, string>;
-  /** Whether each message's action bar is always visible or revealed on hover of that
-   *  row. Default `'always'`. */
+  /** Whether each message's action bar is visible at rest or revealed on pointer-over.
+   *  Visible at rest by default. */
   actionsReveal?: 'always' | 'hover';
   /** Default action bar for user messages that have no `actions` of their own; a
    *  message's own `actions` replaces it. */
@@ -226,7 +225,7 @@ export interface ChatThreadProps {
   controllerRef?: (controller: ChatThreadController) => void;
 }
 
-/** Imperative handle exposed via `controllerRef` — the input half of the chat's
+/** Imperative handle exposed via `controllerRef`: the input half of the chat's
  *  interaction surface, forwarded onto `<kai-chat>` as instance methods. */
 export interface ChatThreadController {
   focus(options?: FocusOptions): void;
@@ -286,19 +285,19 @@ export interface ChatThreadController {
 /** How an ASSISTANT row aligns its parts across the column (K-D11).
  *
  *  `stretch`, not `start`. An assistant turn is a `flex flex-col` box, so under
- *  `items-start` every part is a flex item with a fit-content cross size —
+ *  `items-start` every part is a flex item with a fit-content cross size,
  *  `min(max-content, column)`. Prose is wider than the column so a text bubble
  *  looked right, and a generative-UI card was as wide as its widest button: the
  *  ops-console parameters form measured 285px inside a 768px column while the
  *  approval card beside it filled all 768. A card in a chat thread filling its
- *  column is a fact about the medium, and no consumer can reach it — the card
+ *  column is a fact about the medium, and no consumer can reach it: the card
  *  element is created inside `<kai-chat>`'s shadow root.
  *
  *  Stretch rather than `w-full` on the cards, for two reasons: it is one lever
  *  instead of one per card surface (the Solid `Card` root AND every `kai-*`
  *  card host, whose shadow wrapper is `display: contents`), and stretching only
  *  applies where the cross size is `auto`, so a part that states its own width
- *  is untouched — `Attachments variant="grid"` stays `w-fit`. `Tool` and
+ *  is untouched, `Attachments variant="grid"` stays `w-fit`. `Tool` and
  *  `Reasoning` already asked for `w-full` explicitly; this is the same
  *  intention, applied once.
  *
@@ -475,9 +474,9 @@ export function ChatThread(props: ChatThreadProps) {
 
   onMount(() => {
     if (props.conversations && !props.store) {
-      console.error('ChatThread: `conversations` is true but no `store` was provided — the conversations feature needs a ConversationStore to persist to. Staying in chat-only mode.');
+      console.error('ChatThread: `conversations` is true but no `store` was provided: the conversations feature needs a ConversationStore to persist to. Staying in chat-only mode.');
     } else if (props.conversations && props.store && !props.onConversationLoad) {
-      console.error('ChatThread: `conversations` is true but no `onConversationLoad` handler was provided — row-select, "new conversation", and mount auto-restore would have nowhere to deliver the loaded messages, leaving row-tap/new/restore inert (and mount\'s auto-restore would still stamp an active conversation id the save effect could then clobber). Staying in chat-only mode.');
+      console.error('ChatThread: `conversations` is true but no `onConversationLoad` handler was provided: row-select, "new conversation", and mount auto-restore would have nowhere to deliver the loaded messages, leaving row-tap/new/restore inert (and mount\'s auto-restore would still stamp an active conversation id the save effect could then clobber). Staying in chat-only mode.');
     }
   });
 

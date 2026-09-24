@@ -5,7 +5,7 @@ import { Tooltip } from '../tooltip/tooltip';
 import { useVoiceRecorder } from '../../primitives/use-voice-recorder';
 import { useSpeechRecognition } from '../../primitives/use-speech-recognition';
 
-/** Imperative handle exposed via `controllerRef` — surfaces the recorder's latent
+/** Imperative handle exposed via `controllerRef`, surfacing the recorder's latent
  *  start/stop so the `<kai-voice-input>` facade can forward them as instance
  *  methods (push-to-talk). Both run the SAME getUserMedia → blob → transcription
  *  path as clicking the mic, so manual + programmatic emit identically. */

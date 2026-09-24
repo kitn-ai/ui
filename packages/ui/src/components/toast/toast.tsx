@@ -10,7 +10,7 @@ import {
 
 export type { ToastItem, ToastVariant, ToastAppearance };
 
-/** Why a toast went away — surfaced to `onDismiss` (and the facade event). */
+/** Why a toast went away, surfaced to `onDismiss` (and the facade event). */
 export type ToastDismissReason = 'timeout' | 'close' | 'action';
 
 export type ToastPosition = 'top-center' | 'top-right' | 'top-left' | 'bottom-center' | 'bottom-right' | 'bottom-left';
@@ -68,7 +68,7 @@ export interface ToastProps {
 /**
  * A single toast pill. Auto-dismisses after its (action-floored) duration, holds
  * the timer while hovered (this pill) OR while `paused` (the whole stack is
- * hovered), and animates in/out via `createPresence`. Pure + prop-driven — the
+ * hovered), and animates in/out via `createPresence`. Pure and prop-driven: the
  * parent `ToastRegion` owns the list + queue.
  */
 export function Toast(props: ToastProps) {
@@ -287,7 +287,7 @@ interface TargetRect { top: number; left: number; right: number; bottom: number;
  * The fixed-position style pinning a target-anchored stack to the corner named by
  * `position`, computed from the target's rect. The region is `position: fixed`, so
  * we resolve absolute top/left + a transform that grows the stack inward from that
- * edge. (Rect-based, like the popover's anchor math — no collision flipping needed.)
+ * edge. Rect-based, like the popover's anchor math, so no collision flipping is needed.
  */
 function anchorStyle(position: ToastPosition, r: TargetRect): Record<string, string> {
   const cx = r.left + r.width / 2;

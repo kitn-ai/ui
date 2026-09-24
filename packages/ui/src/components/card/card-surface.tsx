@@ -6,7 +6,7 @@ import { X } from 'lucide-solid';
 
 export type CardAppearance = 'outlined' | 'filled' | 'plain' | 'accent';
 /** `vertical` (media on top), `horizontal` (media at the start), or `responsive`
- *  (horizontal when the card's container is at least ~28rem wide, else vertical —
+ *  (horizontal when the card's container is at least ~28rem wide, else vertical:
  *  a CSS container query on the card's own width, NOT the viewport). */
 export type CardOrientation = 'vertical' | 'horizontal' | 'responsive';
 
@@ -21,9 +21,9 @@ const APPEARANCE: Record<CardAppearance, string> = {
 };
 
 export interface CardSurfaceProps extends JSX.HTMLAttributes<HTMLDivElement> {
-  /** Surface treatment: `outlined` | `filled` | `plain` | `accent`. */
+  /** Surface treatment; `outlined` by default. */
   appearance?: CardAppearance;
-  /** `vertical` (media on top) or `horizontal` (media at the start). */
+  /** Whether the media sits on top of the body or beside it. Defaults to `'vertical'`. */
   orientation?: CardOrientation;
   // A CSS length such as `'24rem'`, default `'28rem'`. Container-query breakpoints cannot
   // be CSS variables, so this is baked into a per-card `@container` rule. The rule also
@@ -44,8 +44,9 @@ export interface CardSurfaceProps extends JSX.HTMLAttributes<HTMLDivElement> {
   footer?: JSX.Element;
   /** An actions cluster pinned to the end of the footer row. */
   footerActions?: JSX.Element;
-  /** Whether the default slot (body) has content — the facade computes this so an
-   *  empty body region isn't rendered (an empty `<slot>` is always truthy). */
+  // The facade computes this so an empty body region is not rendered (an empty `<slot>` is always
+  // truthy).
+  /** Whether the default slot (body) has content. */
   hasBody?: boolean;
 
   /** Render a dismiss (×) that hides the card and calls `onDismiss`. Off by default. */
@@ -62,19 +63,19 @@ export interface CardSurfaceProps extends JSX.HTMLAttributes<HTMLDivElement> {
 }
 
 /**
- * `CardSurface` — the kit's presentational card surface (the `<kai-card>`
+ * `CardSurface`: the kit's presentational card surface (the `<kai-card>`
  * primitive), modeled on the WebAwesome card: ONE element whose flexibility comes
  * from a few structural slots (`media`, `header` + actions, `footer` + actions;
  * body is the default slot), `appearance` + `orientation` variants, `::part`
  * styling, and a single `--kai-card-spacing` knob. The title/description are NOT
- * slots — they are body/header content the consumer marks up, because a slot earns
+ * slots. They are body/header content the consumer marks up: a slot earns
  * its place only where the shadow boundary blocks the consumer (a pinned
  * media/footer region), not for a text node.
  *
  * Distinct from the generative-UI contract chrome in `./card.tsx` (which the Card
  * Contract cards compose); this one is purely presentational.
  *
- * a11y: a `clickable`/`href` card MUST NOT also contain action buttons — that
+ * a11y: a `clickable`/`href` card MUST NOT also contain action buttons, since that
  * nests interactive controls inside a button/link.
  */
 export function CardSurface(props: CardSurfaceProps): JSX.Element {

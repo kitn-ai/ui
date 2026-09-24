@@ -44,7 +44,7 @@ export interface WidgetProps {
 
 /**
  * How a GROUP widget names itself: the row's visible label when there is one,
- * `aria-label` only as the fallback. Never both — two accessible names on one element
+ * `aria-label` only as the fallback. Never both: two accessible names on one element
  * is one too many, and `aria-labelledby` would win silently anyway.
  */
 function groupNameProps(p: WidgetProps): { 'aria-labelledby'?: string; 'aria-label'?: string } {
@@ -61,7 +61,7 @@ function ariaProps(p: WidgetProps) {
   };
 }
 
-/** text / email / url / date / datetime / time / password — all <input> variants. */
+/** text / email / url / date / datetime / time / password: all <input> variants. */
 export function TextWidget(
   props: WidgetProps & { variant: 'text' | 'email' | 'url' | 'date' | 'datetime' | 'time' | 'password' },
 ): JSX.Element {
@@ -285,7 +285,7 @@ export function RatingWidget(props: WidgetProps): JSX.Element {
 }
 
 /**
- * The boolean field's switch IS `components/switch/switch.tsx` — it is not a lookalike.
+ * The boolean field's switch IS `components/switch/switch.tsx`: it is not a lookalike.
  *
  * This used to hand-roll its own `<button role="switch">` at 44×24 while
  * `<kai-switch>` shipped the same control at 36×20, so a consumer putting the two
@@ -294,8 +294,8 @@ export function RatingWidget(props: WidgetProps): JSX.Element {
  * `components/switch/switch.tsx:80` carries a comment about having fixed. Delegating removes both.
  * The size convergence (44×24 → 36×20) is visible inside `kai-form` and intended.
  *
- * The four form-only hooks — `id`, `data-control` and the `aria-required` /
- * `aria-invalid` / `aria-describedby` trio — are ordinary props now (plan decision
+ * The four form-only hooks (`id`, `data-control` and the `aria-required` /
+ * `aria-invalid` / `aria-describedby` trio) are ordinary props now (plan decision
  * D-7). They used to be stamped onto the button through `buttonRef` + a
  * `createEffect`, which worked but meant this widget reached into the primitive's
  * DOM to make `form.focusField()` land. `Switch` forwards anything it does not own
@@ -396,7 +396,7 @@ function itemEnum(field: FormField): unknown[] {
  * An array field whose items are an `enum`, as a list of checkboxes.
  *
  * The bordered/divided row chrome, the `role="group"` wrapper and the rows themselves
- * live in `components/checkbox/checkbox-group.tsx` now — this widget only turns a JSON-Schema
+ * live in `components/checkbox/checkbox-group.tsx` now: this widget only turns a JSON-Schema
  * `items.enum` into options and owns the array in and out. It used to hand-roll the
  * identical chrome beside `RadioGroup`, which already owned it.
  *
@@ -433,7 +433,7 @@ export function CheckboxGroupWidget(props: WidgetProps & { class?: string }): JS
  * over the row's `inlineMax`.
  *
  * This was a `<select multiple>` until decision D-3 was ruled. `<select multiple>` is a
- * poor control on every platform — the multi-select affordance is invisible, discovering
+ * poor control on every platform: the multi-select affordance is invisible, discovering
  * it means knowing to ctrl/cmd-click, and there is no touch story at all. It is the same
  * control as `checkbox-group`, so it renders as one, with a scroll cap because the only
  * thing that made a long list bearable in a chat card was the select's fixed-height box.

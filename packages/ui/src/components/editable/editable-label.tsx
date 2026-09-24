@@ -16,7 +16,7 @@ export interface EditableLabelProps {
   placeholder?: string;
   /** Disable entering edit mode. */
   disabled?: boolean;
-  /** Fires on commit (Enter / blur) with the new value — ONLY when it changed. */
+  /** Fires on commit (Enter or blur) with the new value, only when it changed. */
   onRename?: (value: string) => void;
   /** Fires on Esc (cancel); the text is restored. */
   onCancel?: () => void;

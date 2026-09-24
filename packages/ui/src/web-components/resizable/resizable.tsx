@@ -6,7 +6,7 @@ type Orientation = 'horizontal' | 'vertical';
 
 /** Bubbling, composed intent: a descendant asks the nearest enclosing
  *  <kai-resizable> to maximize the item containing it (filling, hiding siblings)
- *  or to restore. Any panel content may emit it — the protocol is zero-config. */
+ *  or to restore. Any panel content may emit it; the protocol is zero-config. */
 export interface KaiMaximizeIntentDetail {
   /** true = maximize the item containing me; false = restore. */
   requested: boolean;
@@ -51,12 +51,12 @@ function boundAttrs(value: string | undefined): { pxAttr?: string; pctAttr?: str
 }
 
 interface GroupProps extends Record<string, unknown> {
-  /** Layout axis: `horizontal` (row, default) or `vertical` (column). */
+  /** Whether the group lays out as a row or a column. */
   orientation?: Orientation;
   /** Which item index is maximized (null = none). Declarative source of truth. */
   maximizedIndex?: number | null;
   // The full grab zone and keyboard/ARIA behavior are identical for all three.
-  /** Divider affordance drawn inside each draggable handle's 8px grab zone: `line` (default), `grip`, or `none`. */
+  /** Divider affordance drawn inside each draggable handle's 8px grab zone. */
   handle?: 'line' | 'grip' | 'none';
 }
 
@@ -541,18 +541,18 @@ defineWebComponent<GroupProps, GroupEvents>('kai-resizable', {
  * Reflect a `<kai-resizable-item>`'s reactive CONFIG props to the ATTRIBUTES the
  * parent `<kai-resizable>` reads (`readItems()` + its `size`/`min`/`max`/`locked`
  * MutationObserver). Framework runtimes (React et al.) assign these as DOM
- * *properties* — `el.size = "280px"` — but component-register only mirrors
+ * *properties* (`el.size = "280px"`), but component-register only mirrors
  * attribute→property, never the reverse, so a property-set size never becomes an
  * attribute and the parent silently falls back to a flexible split. This is the
  * exact class of bug the `collapsed` reflection already fixed; handled here for
- * `size`/`min`/`max` (the STRINGS). The booleans — `collapsed` and `locked` — go
+ * `size`/`min`/`max` (the STRINGS). The booleans, `collapsed` and `locked`, go
  * through `reflectFlag` in the facade body instead, which reflects AND keeps the
  * property readable; see WebComponentContext.reflectFlag.
  *
- * `hidden` is deliberately NOT reflected, and NOT because it is already fine — it is
+ * `hidden` is deliberately NOT reflected, and NOT because it is already fine: it is
  * split exactly like the others, and measurably so: `el.hidden = true` leaves no
  * attribute (a plain `<div>` gets one), and after maximize writes the attribute
- * `el.hidden` reads `undefined`. Declaring `hidden: false` is what does it — it makes
+ * `el.hidden` reads `undefined`. Declaring `hidden: false` is what does it, because it makes
  * `hidden` a component-register prop, whose non-reflecting accessor shadows the native
  * reflecting one. What makes the split HARMLESS here is that both readers take the
  * union, `el.hidden || el.hasAttribute('hidden')`, so neither half can be missed.
@@ -573,7 +573,7 @@ defineWebComponent<GroupProps, GroupEvents>('kai-resizable', {
  * not the consumer, so it is left untouched and is not adopted as the new baseline.
  * Net effect: a dragged size survives re-renders, while an explicit `size` change
  * still applies. `size` prop signals use Solid's DEFAULT (same-value-skipping)
- * equality — this guard is needed on top of that only because of the drag-write
+ * equality; this guard is needed on top of that only because of the drag-write
  * back-propagation, which same-value-skip alone can't see.
  *
  * Exported for unit testing (the live Shadow-DOM element is not jsdom-friendly).

@@ -6,8 +6,9 @@ import { renderIcon } from '../icon/icon';
 export interface PromptSuggestionProps extends JSX.ButtonHTMLAttributes<HTMLButtonElement> {
   children: JSX.Element | string;
   variant?: 'outline' | 'ghost' | 'default';
-  /** Row height for the `list` layout: `'md'` (default) or `'lg'` for taller
-   *  rows (more vertical padding). Chips/block/highlight are unaffected. */
+  // `'lg'` gives taller rows (more vertical padding). Chips, block and highlight are
+  // unaffected.
+  /** Row height for the `list` layout. Defaults to `'md'`. */
   size?: 'md' | 'lg';
   /** Optional leading icon (named icon, image URL/data-URI, or text). */
   icon?: string;

@@ -2,8 +2,7 @@ import { Separator } from '../../components/separator/separator';
 import { defineWebComponent } from '../define/define';
 
 interface Props extends Record<string, unknown> {
-  /** `horizontal` (default, block + full-width) or `vertical` (a rule inside a
-   *  flex/grid row, stretching to the row height). */
+  /** The separator's axis. Defaults to a full-width block; the cross-axis form suits a flex or grid row. */
   orientation?: 'horizontal' | 'vertical';
 }
 // Carries `role="separator"`. A vertical rule is meant for a flex/grid row: it stretches to that

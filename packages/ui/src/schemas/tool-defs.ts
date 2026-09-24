@@ -123,41 +123,24 @@ export type ToolDef = OpenAIToolDef | AnthropicToolDef | JsonSchemaToolDef;
 
 export interface CardToolOptions<P extends ToolProvider = ToolProvider> {
   readonly provider: P;
-  /**
-   * Opt in to the provider's grammar-constrained mode.
-   *
-   * Default `false`, because that is the mode the conformance sweep proved cards in
-   * and because, today, `true` throws for every built-in card on both providers.
-   * When it throws it names the card, the path and the keyword.
-   */
+  // The conformance sweep proved cards in the non-strict mode. With `true` and any provider
+  // but the strict-capable one, `cardToolDef` throws before a schema is built; see the
+  // `strict` guard in this file (the "provider-specific" error).
+  /** Opt in to the provider's grammar-constrained mode. Default `false`, and today `true`
+   *  throws for every built-in card. */
   readonly strict?: boolean;
-  /**
-   * Narrow the DERIVED tool schema per card type, after projection.
-   *
-   * A card's authored schema is deliberately permissive — `files` is optional on an
-   * artifact, its items need only a `path` — because the card CONTRACT must accept
-   * what a host may legitimately render. A model filling the tool in, though, is
-   * often better served by a tighter tool: requiring `code` on every file, or at
-   * least one file at all, moves a class of failures from render time (a card the
-   * registry rejects) to generation time (the model literally cannot emit one).
-   *
-   * This narrows the WIRE projection only — the authored schema and
-   * `registry.validate()` are untouched, so a hand-built envelope still validates.
-   * Applied for every provider, `jsonschema` included, and merged loudly: an
-   * unknown path or a required name the node has no property for is a TypeError
-   * naming the card, the path and the field, because a tool that can never be
-   * satisfied must not ship quietly.
-   *
-   * IT CANNOT REACH A FORM CARD'S FIELDS, and that is a known limitation rather
-   * than an oversight. The form
-   * card's payload IS a JSON Schema, so `form.schema.json` describes `properties`
-   * as a map of field definitions and there is no node at `properties.ticketId`
-   * for a rule to land on — `require: { form: [{ path: 'properties.ticketId' }] }`
-   * raises the TypeError above, correctly. So an app cannot pin
-   * `x-kai-format: 'custom'` onto one field of a form the model authors. The
-   * enum on that hint is what makes a small model pick a valid token; an app that
-   * needs a guarantee checks the envelope when it arrives.
-   */
+  // WHY IT EXISTS. A card's authored schema is deliberately permissive (`files` optional on
+  // an artifact, its items need only a `path`) because the card CONTRACT must accept what a
+  // host may legitimately render, while a model filling the tool in is often better served
+  // by a tighter tool (requiring `code` on every file moves a class of failures from render
+  // time to generation time, where the model simply cannot emit one). Merged LOUDLY: an
+  // unknown path, or a required name the node has no property for, is a TypeError naming
+  // the card, the path and the field, because a tool that can never be satisfied must not
+  // ship quietly. IT CANNOT REACH A FORM CARD'S FIELDS, and that is a known limitation: the
+  // form card's payload IS a JSON Schema, so there is no node at `properties.ticketId` for a
+  // rule to land on and `require: { form: [...] }` raises that TypeError correctly, which
+  // means an app cannot pin `x-kai-format: 'custom'` onto one field of a model-authored form.
+  /** Narrows a card type's projected tool schema for every provider; only the wire projection changes, so a hand-built envelope still validates. */
   readonly require?: Readonly<Record<string, readonly CardRequireRule[]>>;
 }
 
@@ -268,9 +251,9 @@ function formatUnsupported(subset: ProviderSubset, cards: readonly UnsupportedCa
   lines.push(`${cards.length} ${plural} cannot be a STRICT tool definition under ${subset.label}:`);
   for (const card of cards) {
     lines.push('');
-    lines.push(`  ${card.toolName} (card type "${card.cardType}") — ${card.violations.length} problem(s):`);
+    lines.push(`  ${card.toolName} (card type "${card.cardType}"), ${card.violations.length} problem(s):`);
     for (const v of card.violations) {
-      lines.push(`    ${v.path}: \`${v.keyword}\` — ${v.reason}`);
+      lines.push(`    ${v.path}: \`${v.keyword}\`, ${v.reason}`);
     }
   }
   lines.push('');
@@ -290,16 +273,16 @@ const isRecord = (v: unknown): v is Record<string, unknown> =>
 
 /**
  * Root combinators the two largest providers refuse on a tool schema's root node
- * (measured: OpenAI and Anthropic 400 before the model runs — findings F-20;
+ * (measured: OpenAI and Anthropic 400 before the model runs, findings F-20;
  * DeepSeek's OpenAI-compatible route requires the same workaround). The AUTHORED
- * schemas keep them — card validation keeps every constraint. Only the WIRE
+ * schemas keep them; card validation keeps every constraint. Only the WIRE
  * projection relaxes, loudly: the constraint is restated in the description the
  * model reads, a console.warn names the relaxation, and a violating envelope
  * still fails registry.validate() at render time with a hard diagnostic.
  */
 const ROOT_RELAXATIONS: Readonly<Record<string, string>> = {
   artifact:
-    'Provide `src` (a preview URL) or `files` — at least one. An envelope with neither is rejected.',
+    'Provide `src` (a preview URL) or `files`: at least one. An envelope with neither is rejected.',
   embed:
     "For provider 'generic', include `url`. For 'youtube'/'vimeo', include `id` or `url`.",
 };
@@ -309,7 +292,7 @@ const ROOT_RELAXATIONS: Readonly<Record<string, string>> = {
  *  relaxation note to restate in the TOOL description the model reads. Two
  *  distinct no-note return paths: `undefined` when NOTHING was banned (the wire
  *  projection is faithful, nothing was widened), and GENERIC_NOTE when something
- *  WAS banned but no curated copy exists (a custom card) — that path still
+ *  WAS banned but no curated copy exists (a custom card): that path still
  *  restates the relaxation, because deleting a combinator without telling the
  *  model would be a silent widening. */
 const GENERIC_RELAXATION_NOTE =
@@ -323,7 +306,7 @@ const BANNED_ROOT_KEYS = ['anyOf', 'allOf', 'oneOf', 'not', 'enum', 'const'] as 
  * `const: { op: 'ping' }` is a whole-instance constraint, which a provider refuses
  * at the root exactly like a combinator. The instance it admits is an object, so
  * the shape survives the relaxation as `properties: { op: { const: 'ping' } }` with
- * `op` required — nothing widened that the branch did not already allow.
+ * `op` required, so nothing widened that the branch did not already allow.
  */
 function branchFromLiteral(value: unknown): Record<string, unknown> | null {
   if (!isRecord(value)) return null;
@@ -355,14 +338,14 @@ function branchesOfRootKeyword(keyword: string, value: unknown): Record<string, 
  * The two built-ins showed the shape of the rule and this generalises it rather
  * than special-casing them. `artifact`'s root `anyOf` is `[{required:['src']},
  * {required:['files']}]`: a DISJUNCTION guarantees only what EVERY branch
- * guarantees, so the intersection is empty and `required` stays absent — which is
+ * guarantees, so the intersection is empty and `required` stays absent, which is
  * exactly what the artifact projection already did. `embed`'s root `allOf` is two
  * `if`/`then` pairs: a CONJUNCTION guarantees every branch's own top-level
  * `required`, and an `if`/`then` branch declares none, so again nothing is added.
  * A consumer card whose branches carry real `properties` is the case neither
  * built-in reaches, and the one this exists for.
  *
- * Properties are UNIONed (each branch's shape must remain expressible — dropping
+ * Properties are UNIONed (each branch's shape must remain expressible; dropping
  * one is the silent narrowing the whole F-20 fix exists to avoid); a name already
  * on the root keeps the root's definition. `required` is the intersection for
  * `anyOf`/`oneOf`/`enum`/`const` and the union for `allOf`, unioned in turn with
@@ -411,7 +394,7 @@ function mergeBranchesIntoRoot(parameters: Record<string, unknown>, banned: read
  * Make the projected ROOT the object shape every provider demands.
  *
  * Deleting a root combinator is only half of F-20. A schema whose root was NOTHING
- * BUT the combinator projects to `{"title":…,"description":…}` once it is gone —
+ * BUT the combinator projects to `{"title":…,"description":…}` once it is gone,
  * accepted by no provider (measured: OpenAI 400, "schema must be a JSON Schema of
  * type \"object\"") and unfillable by any model. Every built-in declares
  * `type: "object"` at its root, so nothing in the suite reached this until a
@@ -455,7 +438,7 @@ function relaxRootCombinators(parameters: Record<string, unknown>, cardType: str
  * Apply one card's `require` rules to its PROJECTED parameters.
  *
  * Runs after `project()` and `relaxRootCombinators()`, on the copy the projection
- * built — never on the authored schema, which `registry.validate()` keeps reading.
+ * built, never on the authored schema, which `registry.validate()` keeps reading.
  * Merges into whatever `required` already exists rather than replacing it, so a
  * rule can only ever NARROW what the model may emit, never widen it.
  */
@@ -498,7 +481,7 @@ function applyRequire(
       for (const field of rule.required) {
         if (!props || !(field in props)) {
           throw new TypeError(
-            `cardTools: require on '${cardType}' at path '${rule.path}': '${field}' is not a property of that node — ` +
+            `cardTools: require on '${cardType}' at path '${rule.path}': '${field}' is not a property of that node, ` +
               `a required name with no property would make the tool unsatisfiable`,
           );
         }

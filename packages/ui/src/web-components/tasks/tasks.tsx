@@ -25,7 +25,7 @@ interface Props extends Record<string, unknown> {
 }
 
 /** Events fired by `<kai-tasks>`. (Resolution still flows up the bubbling `kai-card`
- *  contract event — `kai-value-change` is the live selection signal, distinct from
+ *  contract event: `kai-value-change` is the live selection signal, distinct from
  *  the terminal submit.) */
 interface Events {
   /** The selection changed on a toggle. Carries the selected ids in input

@@ -54,7 +54,7 @@ export interface ArtifactCardProps {
 /** Chrome + sizing around `<Artifact>` for the `artifact` card type.
  *
  *  WHY A WRAPPER IS REQUIRED, not cosmetic. `<Artifact>`'s root is
- *  `flex h-full w-full flex-col` — it is built to FILL a container that already
+ *  `flex h-full w-full flex-col`: it is built to FILL a container that already
  *  has a height (a resizable panel, a split view). A message thread gives its
  *  parts no height at all, so `h-full` resolves against an auto-height parent,
  *  the frame computes to ZERO, and the card renders as an invisible nothing.
@@ -63,7 +63,7 @@ export interface ArtifactCardProps {
  *
  *  `part`/`data-card-type` are stable handles. `CardRenderer` renders card
  *  components bare, and in the web-component path `cardComponentsFromTags` maps a
- *  non-overridden built-in straight to its Solid component — so there is no
+ *  non-overridden built-in straight to its Solid component, so there is no
  *  `<kai-artifact>` tag in the DOM to point at. This wrapper is the only stable
  *  thing to select, which is what lets a test count rendered artifacts inside
  *  `<kai-thread>`'s shadow root.
@@ -80,10 +80,10 @@ export interface ArtifactCardProps {
  *  overwriting it with a title would make it lie. A heading is also what the four
  *  other chromed cards (form/confirm/tasks/choice) already do with `title`.
  *
- *  `tab`/`activeFile` are SEEDS, never re-asserted — see their notes on
+ *  `tab`/`activeFile` are SEEDS, never re-asserted; see their notes on
  *  `ArtifactCardData`. A revised envelope must not undo what the user did.
  *
- *  The three observation callbacks emit the contract's EXISTING `state` verb —
+ *  The three observation callbacks emit the contract's EXISTING `state` verb:
  *  the contract is frozen, and a new kind would force a CARD_CONTRACT_VERSION
  *  bump. Each patch key mirrors a `data` field name, so a host can merge the
  *  patch straight back into `envelope.data` and re-send it; `addCard` upserts on

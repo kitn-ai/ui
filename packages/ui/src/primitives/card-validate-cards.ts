@@ -90,7 +90,8 @@ export interface CardValidationIssue extends ValidationIssue {
 export interface CardValidationReport {
   /** True when nothing failed. A SOFT-only report is not `ok`. */
   ok: boolean;
-  /** `hard` if any issue is hard, else `soft` if any issue is soft, else `ok`. */
+  // The ladder: hard if any issue is hard, else soft if any issue is soft, else ok.
+  /** How severe the report is. */
   tier: CardValidationTier | 'ok';
   /** Every failure, hard and soft, in the validator's order. */
   issues: CardValidationIssue[];

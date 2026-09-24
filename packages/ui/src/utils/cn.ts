@@ -15,7 +15,7 @@ import { mergeClassList } from './cn-merge';
  * (`text-transparent`, `text-foreground`, …) whenever both appeared in one call,
  * which silently broke TextShimmer inside the web components: the element adds
  * `text-body`, dropping `text-transparent`, so the gradient stayed hidden behind
- * opaque text. `./cn-merge` carries that aliasing natively — its `font-size` key
+ * opaque text. `./cn-merge` carries that aliasing natively: its `font-size` key
  * holds the kit's six names AND Tailwind's ladder, because theme.css re-points
  * the ladder at the same tokens (`text-xs` ≡ `text-meta`, `text-sm` ≡
  * `text-body`, `text-base` ≡ `text-title`), so `cn('text-sm', 'text-body')` must

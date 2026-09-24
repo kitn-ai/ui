@@ -7,28 +7,28 @@ import { renderIcon } from '../icon/icon';
 import type { TriggerDef, TriggerItem } from '../composer/composer';
 
 /**
- * The composer TRIGGERS control group — `/` (commands/skills) and `@`
- * (agents/mentions) — extracted as a standalone module (T-1 build-out,
- * owner addendum) so every template's composer control group can reuse the
+ * The composer TRIGGERS control group: `/` (commands/skills) and `@`
+ * (agents/mentions), extracted as a standalone module so every template's composer
+ * control group can reuse the
  * SAME editor and the SAME real-`TriggerDef` builder, rather than each
  * template inventing its own.
  *
  * THIS WIRES THE KIT'S REAL MECHANISM, NOT A STUB: `components/composer/composer.tsx`
- * (read before building this) ships `ComposerProps.triggers?: TriggerDef[]`
- * — a real, shipped, atomic-pill trigger system (`TriggerDef = { char, kind,
+ * (read before building this) ships `ComposerProps.triggers?: TriggerDef[]`,
+ * a real, shipped, atomic-pill trigger system (`TriggerDef = { char, kind,
  * items?: TriggerItem[] }`) that `ChatThread` already forwards straight
  * through to `DefaultPromptInput`/`Composer` via its own `triggers` prop
  * (confirmed in `chat-thread.tsx` before use). Typing the configured
  * character in a real, mounted `ChatThread` composer opens the REAL trigger
- * menu and inserts a REAL atomic pill on selection — there is no "honest
+ * menu and inserts a REAL atomic pill on selection. There is no "honest
  * stub" fallback needed here, unlike some other preview-only controls in
  * this template family, because the composer this story mounts IS the real
  * component. (`slashCommands`-as-flat-config was deliberately removed from
- * the kit in favor of this trigger system — this control group represents
+ * the kit in favor of this trigger system. This control group represents
  * that real shape, not the retired one.)
  *
  * `buildTriggerDefs` converts this panel's editable rows into the real
- * `TriggerDef[]` shape — the one and only translation point, so a story
+ * `TriggerDef[]` shape: the one and only translation point, so a story
  * wiring this into its `ChatThread` call never hand-assembles `TriggerDef`
  * itself.
  */
@@ -63,7 +63,7 @@ export const DEFAULT_MENTION_ENTRIES: TriggerEntryRow[] = [
 
 /** The one translation point from this panel's editable rows to the real
  *  `TriggerDef[]` a `ChatThread`/`Composer` `triggers` prop takes. `/` maps
- *  to `kind: 'command'`, `@` to `kind: 'agent'` — the two kinds
+ *  to `kind: 'command'`, `@` to `kind: 'agent'`, the two kinds
  *  `composer-highlight.ts`'s built-in glyphs already cover (checked before
  *  choosing them, see that file's `kindGlyph`). */
 export function buildTriggerDefs(slash: TriggerGroupState, mention: TriggerGroupState): TriggerDef[] {
@@ -208,7 +208,7 @@ export function ComposerTriggersSection(props: {
         </>
       )}
       <p class="text-xs text-muted-foreground">
-        Real triggers — wired to ChatThread's own `triggers` prop (components/composer/composer.tsx). Typing the character opens the real menu
+        Real triggers, wired to ChatThread's own `triggers` prop (components/composer/composer.tsx). Typing the character opens the real menu
         and inserts a real pill.
       </p>
     </div>

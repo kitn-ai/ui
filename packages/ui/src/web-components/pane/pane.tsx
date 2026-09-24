@@ -26,7 +26,7 @@ interface Props extends Record<string, unknown> {
   status?: PaneStatus;
 }
 
-/** Events fired by `<kai-pane>`. All non-bubbling — listen on the element. */
+/** Events fired by `<kai-pane>`. All non-bubbling: listen on the element. */
 interface Events {
   /** The maximize/restore control was clicked. `detail.maximized` is the
    *  intended NEXT state. Drive the `maximized` prop yourself from it. */

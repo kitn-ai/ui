@@ -12,14 +12,13 @@ export interface PopoverController { open: Accessor<boolean>; setOpen: (v: boole
 export interface PopoverProps {
   /** The trigger content (e.g. a button). Clicking it toggles the popover. */
   trigger: JSX.Element;
-  /** The popover panel content — arbitrary nodes (rows, toggles, nested groups). */
+  /** The panel content: arbitrary nodes (rows, toggles, nested groups). */
   children: JSX.Element;
   /** Floating placement relative to the trigger. */
   placement?: Placement;
   /** Gap in px between trigger and panel. */
   gutter?: number;
-  /** Controlled open state. When set, the component never changes it itself —
-   *  drive it from `onOpenChange`. Omit for uncontrolled (internal) state. */
+  /** Controlled open state; drive it from `onOpenChange`. Omit for uncontrolled state. */
   open?: boolean;
   /** Initial open state when uncontrolled. */
   defaultOpen?: boolean;
@@ -29,8 +28,7 @@ export interface PopoverProps {
   onOpenChange?: (open: boolean) => void;
   /** Receive the open controller (open accessor + setOpen) once mounted. */
   controllerRef?: (api: PopoverController) => void;
-  /** Extra elements counted as "inside" for outside-click dismissal — e.g. the
-   *  custom-element host, so clicks on slotted panel content don't dismiss. */
+  /** Extra elements counted as inside for outside-click dismissal, e.g. the custom-element host. */
   boundary?: () => HTMLElement | undefined;
   /** Class applied to the floating panel. */
   class?: string;
@@ -39,7 +37,7 @@ export interface PopoverProps {
 /**
  * A general popover: a trigger that toggles a floating panel of arbitrary
  * content. Unlike `Dropdown` (role="menu" + roving focus), the panel is a
- * `role="dialog"` region, so it can hold model rows, toggles, nested groups —
+ * `role="dialog"` region, so it can hold model rows, toggles, nested groups:
  * anything. Positioning, exit animation, and Escape/outside-click dismissal
  * come from the shared overlay primitives.
  */

@@ -189,7 +189,7 @@ interface ViewStackContextValue {
 
 const ViewStackContext = createContext<ViewStackContextValue>();
 
-/** Reach the enclosing `<ViewStack>`'s controller from inside a view — a back
+/** Reach the enclosing `<ViewStack>`'s controller from inside a view: a back
  *  button in a drilled header, or a tab bar reading `drilled()` to hide
  *  itself. Throws outside a `<ViewStack>`. */
 export function useViewStack(): ViewStackController {
@@ -251,7 +251,7 @@ export function ViewStack(props: ViewStackProps): JSX.Element {
 }
 
 export interface ViewProps extends ParentProps {
-  /** The view's name — what `push`/`selectTab`/`navigate` address. */
+  /** The view's name, which `push`/`selectTab`/`navigate` address. */
   name: string;
   /** Marks this view as a tab root: it shows the tab bar and never a back affordance, unlike a drilled view. */
   tabRoot?: boolean;

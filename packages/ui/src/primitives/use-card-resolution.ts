@@ -15,7 +15,7 @@ export interface ResolutionController<R extends CardResolution = CardResolution>
   isResolved: Accessor<boolean>;
   /** A finished resolution the user can't take back here (action | submit | expired). */
   isTerminal: Accessor<boolean>;
-  /** A deferred resolution (`dismissed`) — set aside, still re-openable. */
+  /** A deferred resolution (`dismissed`): set aside, still re-openable. */
   isDeferred: Accessor<boolean>;
   isOptimistic: Accessor<boolean>;
   setLocal: (r: R) => void;

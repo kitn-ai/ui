@@ -7,7 +7,7 @@ interface Props extends Record<string, unknown> {
   keys?: string;
   /** `mac` uses ⌘/⌥, `other` uses Ctrl. `auto` (default) sniffs the OS. */
   platform?: KbdPlatform;
-  /** Cap size: `sm` or `md`. Defaults to `md`. */
+  /** Cap size. Defaults to `md`. */
   size?: 'sm' | 'md';
 }
 

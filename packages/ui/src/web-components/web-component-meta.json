@@ -409,7 +409,7 @@
         "type": "undefined | \"hover\" | \"lightbox\"",
         "optional": true,
         "scalar": true,
-        "description": "How an image tile reveals its full size: `hover` (pointer-only hover card, default) or `lightbox` (modal on click).",
+        "description": "How an image tile reveals its full size: a pointer-only card by default, or a modal on click.",
         "default": "'hover'",
         "displayType": "undefined | \"hover\" | \"lightbox\""
       },
@@ -755,7 +755,7 @@
         "type": "undefined | \"sm\" | \"md\" | \"lg\"",
         "optional": true,
         "scalar": true,
-        "description": "Size token: `sm` | `md` (default) | `lg`.",
+        "description": "Size token.",
         "default": "'md'",
         "displayType": "undefined | \"sm\" | \"md\" | \"lg\""
       }
@@ -791,7 +791,7 @@
         "type": "undefined | \"default\" | \"count\" | \"citation\"",
         "optional": true,
         "scalar": true,
-        "description": "`default` (muted pill) · `count` (compact number badge) · `citation` (filled primary, for inline citation markers). Defaults to `default`.",
+        "description": "Badge style; `default` is the muted pill.",
         "default": "'default'",
         "displayType": "undefined | \"default\" | \"count\" | \"citation\""
       }
@@ -850,7 +850,7 @@
         "type": "undefined | \"sm\" | \"md\" | \"lg\" | \"icon\" | \"icon-sm\"",
         "optional": true,
         "scalar": true,
-        "description": "Size token. `icon` / `icon-sm` are square (for icon-only buttons); `sm` / `md` / `lg` size text buttons. Defaults to `md`.",
+        "description": "Size token: the square glyph-only sizes, or the text-button sizes. Defaults to `md`.",
         "default": "'md'",
         "displayType": "undefined | \"sm\" | \"md\" | \"lg\" | \"icon\" | \"icon-sm\""
       },
@@ -901,7 +901,7 @@
         "type": "undefined | \"start\" | \"center\" | \"end\"",
         "optional": true,
         "scalar": true,
-        "description": "Justify the button's content: `start`, `center` (default), or `end`. Combine with `full` for a full-width, left-aligned button.",
+        "description": "Justify the button's content. Default is centered; combine with `full` for a full-width, left-aligned button.",
         "default": "'center'",
         "displayType": "undefined | \"start\" | \"center\" | \"end\""
       },
@@ -1407,7 +1407,7 @@
         "type": "undefined | \"submit\" | \"fill\"",
         "optional": true,
         "scalar": true,
-        "description": "What clicking a suggestion does: `'submit'` (default) sends it, `'fill'` only fills the input.",
+        "description": "What clicking a suggestion does. Default sends it immediately; `'fill'` places it in the input without sending.",
         "default": "'submit'",
         "displayType": "undefined | \"submit\" | \"fill\""
       },
@@ -1460,7 +1460,7 @@
         "type": "undefined | \"full\" | \"compact\" | \"off\"",
         "optional": true,
         "scalar": true,
-        "description": "How reasoning parts render. `'compact'` streams only a shimmer and `'off'` renders none. Default `'full'`.",
+        "description": "How reasoning parts render. Default is the collapsible disclosure.",
         "displayType": "undefined | \"full\" | \"compact\" | \"off\""
       },
       {
@@ -1641,7 +1641,7 @@
         "type": "undefined | \"always\" | \"hover\"",
         "optional": true,
         "scalar": true,
-        "description": "Whether each message's action bar is always visible or revealed on hover of that row. Default `'always'`.",
+        "description": "Whether each message's action bar is visible at rest or revealed on pointer-over. Visible at rest by default.",
         "default": "'always'",
         "displayType": "undefined | \"always\" | \"hover\""
       },
@@ -2399,7 +2399,7 @@
         "type": "undefined | \"primary\" | \"info\" | \"success\" | \"warning\" | \"error\"",
         "optional": true,
         "scalar": true,
-        "description": "Color tone: `primary` (default, theme accent), `info` (blue), `success` (green), `warning` (amber), or `error` (red), reusing the kit's tool hues.",
+        "description": "Color tone, reusing the kit's tool hues. Defaults to the theme accent.",
         "displayType": "undefined | \"primary\" | \"info\" | \"success\" | \"warning\" | \"error\""
       },
       {
@@ -3515,7 +3515,7 @@
           "id"
         ],
         "text": true,
-        "description": "Parse a single light-DOM `<kai-conversation>` element into a `ConversationSummary`. Attribute mapping: - `id` → ConversationSummary.id - `group-id` → ConversationSummary.groupId (optional) - textContent → ConversationSummary.title Fields not expressible as HTML attributes are NOT fabricated: the optional `scope` and `lastMessageAt` stay absent, and the required `messageCount`/`updatedAt` get honest defaults — zero messages, and an empty `updatedAt` from which no trailing relative time is derived (the epoch it used to fabricate rendered a bogus \"many days ago\" on every declarative row)."
+        "description": "Parse a single light-DOM `<kai-conversation>` element into a `ConversationSummary`. Attribute mapping: - `id` → ConversationSummary.id - `group-id` → ConversationSummary.groupId (optional) - textContent → ConversationSummary.title Fields not expressible as HTML attributes are NOT fabricated: the optional `scope` and `lastMessageAt` stay absent, and the required `messageCount`/`updatedAt` get honest defaults: zero messages, and an empty `updatedAt` from which no trailing relative time is derived (the epoch it used to fabricate rendered a bogus \"many days ago\" on every declarative row)."
       }
     ],
     "slots": [
@@ -4046,7 +4046,7 @@
         "type": "undefined | \"dblclick\" | \"click\"",
         "optional": true,
         "scalar": true,
-        "description": "How the read view enters edit mode: `dblclick` (default) or `click`. Reflects to `edit-trigger`; `edit()` and `editing` are unaffected.",
+        "description": "How the read view enters edit mode. Default is a double click; `edit()` and `editing` are unaffected.",
         "default": "'dblclick'",
         "displayType": "undefined | \"dblclick\" | \"click\""
       },
@@ -4803,7 +4803,7 @@
         "type": "undefined | \"sm\" | \"md\" | \"lg\"",
         "optional": true,
         "scalar": true,
-        "description": "Size token: `sm` | `md` (default) | `lg`.",
+        "description": "Size token.",
         "default": "'md'",
         "displayType": "undefined | \"sm\" | \"md\" | \"lg\""
       }
@@ -5002,7 +5002,7 @@
         "type": "undefined | \"sm\" | \"md\"",
         "optional": true,
         "scalar": true,
-        "description": "Control density: `sm` or `md`. Defaults to `md`.",
+        "description": "Control density. Defaults to `md`.",
         "default": "'md'",
         "displayType": "undefined | \"sm\" | \"md\""
       },
@@ -5235,7 +5235,7 @@
         "type": "undefined | \"sm\" | \"md\"",
         "optional": true,
         "scalar": true,
-        "description": "Cap size: `sm` or `md`. Defaults to `md`.",
+        "description": "Cap size. Defaults to `md`.",
         "default": "'md'",
         "displayType": "undefined | \"sm\" | \"md\""
       }
@@ -5894,7 +5894,7 @@
         "type": "undefined | \"always\" | \"hover\"",
         "optional": true,
         "scalar": true,
-        "description": "Whether the action bar is always visible (`'always'`, default) or only revealed on hover of the message row (`'hover'`).",
+        "description": "Whether the action bar stays visible or appears on pointer-over; visible by default.",
         "default": "'always'",
         "displayType": "undefined | \"always\" | \"hover\""
       },
@@ -6305,7 +6305,7 @@
         "type": "undefined | \"neutral\" | \"info\" | \"warning\" | \"error\" | \"success\"",
         "optional": true,
         "scalar": true,
-        "description": "`neutral` (default) · `info` · `warning` · `error` · `success`. Drives the leading icon's color and the a11y role (`alert` for errors, else `status`).",
+        "description": "Severity. Defaults to `'neutral'`.",
         "default": "'neutral'",
         "displayType": "undefined | \"neutral\" | \"info\" | \"warning\" | \"error\" | \"success\""
       },
@@ -7196,7 +7196,7 @@
         "type": "undefined | \"submit\" | \"fill\"",
         "optional": true,
         "scalar": true,
-        "description": "What clicking a suggestion does: `'submit'` (default) sends it immediately as if typed and submitted; `'fill'` just places it in the input.",
+        "description": "What clicking a suggestion does. Defaults to `'submit'`.",
         "default": "'submit'",
         "displayType": "undefined | \"submit\" | \"fill\""
       },
@@ -7232,7 +7232,7 @@
         "type": "undefined | \"always\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Send-button visibility: `always` (default) or `auto` (only when there is text/attachments).",
+        "description": "Send-button visibility. Defaults to `'always'`.",
         "default": "'always'",
         "displayType": "undefined | \"always\" | \"auto\""
       },
@@ -7678,7 +7678,7 @@
         "type": "undefined | \"horizontal\" | \"vertical\"",
         "optional": true,
         "scalar": true,
-        "description": "Layout axis: `horizontal` (row, default) or `vertical` (column).",
+        "description": "Whether the group lays out as a row or a column.",
         "default": "'horizontal'",
         "displayType": "undefined | \"horizontal\" | \"vertical\""
       },
@@ -7696,7 +7696,7 @@
         "type": "undefined | \"line\" | \"grip\" | \"none\"",
         "optional": true,
         "scalar": true,
-        "description": "Divider affordance drawn inside each draggable handle's 8px grab zone: `line` (default), `grip`, or `none`.",
+        "description": "Divider affordance drawn inside each draggable handle's 8px grab zone.",
         "default": "'line'",
         "displayType": "undefined | \"line\" | \"grip\" | \"none\""
       }
@@ -8417,7 +8417,7 @@
         "type": "undefined | \"outline\" | \"ghost\" | \"default\"",
         "optional": true,
         "scalar": true,
-        "description": "Button visual variant: `'outline' | 'ghost' | 'default'`. Defaults to `'outline'`.",
+        "description": "Button visual variant. Defaults to `outline`.",
         "default": "'outline'",
         "displayType": "undefined | \"outline\" | \"ghost\" | \"default\""
       },
@@ -8641,7 +8641,7 @@
         "type": "undefined | \"sm\" | \"md\"",
         "optional": true,
         "scalar": true,
-        "description": "Control density: `sm` or `md`. Defaults to `md`.",
+        "description": "Control density. Defaults to `md`.",
         "default": "'md'",
         "displayType": "undefined | \"sm\" | \"md\""
       }
@@ -8813,7 +8813,7 @@
         "type": "undefined | \"horizontal\" | \"vertical\"",
         "optional": true,
         "scalar": true,
-        "description": "`horizontal` (default, block + full-width) or `vertical` (a rule inside a flex/grid row, stretching to the row height).",
+        "description": "The separator's axis. Defaults to a full-width block; the cross-axis form suits a flex or grid row.",
         "default": "'horizontal'",
         "displayType": "undefined | \"horizontal\" | \"vertical\""
       }
@@ -9401,7 +9401,7 @@
         "type": "undefined | \"sm\" | \"md\"",
         "optional": true,
         "scalar": true,
-        "description": "`sm` or `md`. Default `sm`.",
+        "description": "Size token. Defaults to `'sm'`.",
         "default": "'sm'",
         "displayType": "undefined | \"sm\" | \"md\""
       }
@@ -9453,7 +9453,7 @@
         "type": "undefined | \"outline\" | \"ghost\" | \"default\"",
         "optional": true,
         "scalar": true,
-        "description": "Chip style: `'outline'` (default), `'ghost'`, or `'default'` (filled).",
+        "description": "Chip style. Defaults to `outline`.",
         "default": "'outline'",
         "displayType": "undefined | \"outline\" | \"ghost\" | \"default\""
       },
@@ -9462,7 +9462,7 @@
         "type": "undefined | \"md\" | \"lg\"",
         "optional": true,
         "scalar": true,
-        "description": "Row height for `layout=\"list\"`: `'md'` (default) or `'lg'` for taller rows. Chips are unaffected.",
+        "description": "Row height for the list layout. Defaults to `md`; chips are unaffected.",
         "default": "'md'",
         "displayType": "undefined | \"md\" | \"lg\""
       },
@@ -9471,7 +9471,7 @@
         "type": "undefined | \"chips\" | \"list\"",
         "optional": true,
         "scalar": true,
-        "description": "Layout: `chips` (default, a wrapping row of pills) or `list` (full-width left-aligned rows with a leading icon).",
+        "description": "A wrapping row of pills (the default), or full-width rows with a leading icon.",
         "default": "'chips'",
         "displayType": "undefined | \"chips\" | \"list\""
       },
@@ -10244,7 +10244,7 @@
         "type": "undefined | \"hover\" | \"lightbox\"",
         "optional": true,
         "scalar": true,
-        "description": "How an image tile reveals its full size: `hover` (pointer-only hover card, default) or `lightbox` (modal on click).",
+        "description": "How an image tile reveals its full size. Default is the pointer-only hover card; the modal on click is the only one keyboard and touch reach.",
         "default": "'hover'",
         "displayType": "undefined | \"hover\" | \"lightbox\""
       },
@@ -10253,7 +10253,7 @@
         "type": "undefined | \"always\" | \"hover\"",
         "optional": true,
         "scalar": true,
-        "description": "Whether each message's action bar is always visible (`'always'`, default) or only revealed on hover of that message row (`'hover'`).",
+        "description": "Whether each message's action bar is visible at rest or only revealed on pointer-over. Visible at rest by default.",
         "default": "'always'",
         "displayType": "undefined | \"always\" | \"hover\""
       },
@@ -10373,7 +10373,7 @@
         "type": "undefined | \"expanded\" | \"collapsed\"",
         "optional": true,
         "scalar": true,
-        "description": "Stacking: 'expanded' (default, full column) | 'collapsed' (Sonner-style pile that expands on hover/focus). Attribute: stack.",
+        "description": "Stacking; the default is the full column. Attribute: `stack`.",
         "default": "'expanded'",
         "displayType": "undefined | \"expanded\" | \"collapsed\""
       },

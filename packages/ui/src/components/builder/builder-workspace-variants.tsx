@@ -117,7 +117,7 @@ const VARIANT_ILLUSTRATIONS: Record<WorkspaceVariantId, () => JSX.Element> = {
 };
 
 /**
- * `WorkspaceVariantPicker` — the Workspace family's second screen: two
+ * `WorkspaceVariantPicker`, the Workspace family's second screen: two
  * function-named variant cards (smaller-scale `CardSurface`s, reusing `Builder
  * Start`'s own pattern) plus a back affordance to the template picker.
  * Selection fires `onSelect` with the variant id the same click-to-advance

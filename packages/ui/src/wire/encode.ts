@@ -32,9 +32,8 @@ export type OpenAIContentPart =
 
 export interface OpenAIWireMessage {
   role: 'system' | 'user' | 'assistant' | 'tool';
-  /** An ARRAY only when the turn carries an encodable `file` part. A text-only
-   *  turn stays a plain string, so adding attachment support changed nothing
-   *  about what an existing thread puts on the wire. */
+  // Adding attachment support changed nothing about what an existing thread puts on the wire.
+  /** An array only when the turn carries an encodable `file` part; a text-only turn stays a string. */
   content: string | OpenAIContentPart[] | null;
   tool_calls?: OpenAIToolCall[];
   tool_call_id?: string;
@@ -48,27 +47,17 @@ export interface OpenAIWireMessage {
  *  `accept` mean the same thing on both wires, and a second declaration of them
  *  here is a second place to forget to update. */
 export interface OpenAIEncodeOptions extends FileEncodeOptions {
-  /**
-   * Whether to send the assistant's own reasoning back with the thread.
-   *
-   * DEFAULT `'omit'`, and that default is a measurement, not caution. Omitting
-   * reasoning is accepted by every configuration tested -- five live omission
-   * trials plus 28 recorded live requests per configuration across the spike's
-   * conformance sweep, zero 400s -- so the path that ships today demonstrably
-   * works, while including reasoning cost about 25% more prompt tokens per round
-   * when measured (665 -> 834 on a two-round loop). A library does not get to
-   * raise every consumer's bill and add a new provider-validation surface as a
-   * side effect of a bug fix.
-   *
-   * `'include'` is for a multi-round TOOL loop, which is where OpenRouter says it
-   * pays: "when you post tool results, including the original reasoning ensures
-   * the model can continue its reasoning from where it left off". Measured
-   * accepted (HTTP 200) for a signed Anthropic block and for an OpenAI encrypted
-   * block, over the OpenAI-compatible wire.
-   *
-   * The Anthropic wire has no such knob because it has no such choice: a filtered
-   * or rebuilt thinking block there is a hard 400.
-   */
+  // The DEFAULT is a measurement, not caution: a conformance sweep recorded five live
+  // omission trials plus 28 recorded requests per configuration, zero 400s, so the path
+  // that ships demonstrably works, while including reasoning cost about 25% more prompt
+  // tokens per round (665 -> 834 on a two-round loop). A library does not get to raise
+  // every consumer's bill and add a provider-validation surface as a side effect of a bug
+  // fix. Including it is for a multi-round TOOL loop, which is where OpenRouter says it
+  // pays: including the original reasoning lets the model continue where it left off.
+  // Measured accepted (HTTP 200) for a signed Anthropic block and an OpenAI encrypted
+  // block. The Anthropic wire has no such knob because a filtered or rebuilt thinking
+  // block there is a hard 400.
+  /** Whether to send the assistant's own reasoning back with the thread. Default omits it. */
   reasoning?: 'omit' | 'include';
 }
 
@@ -89,38 +78,19 @@ export type UnencodableFilePolicy = 'throw' | 'skip';
 
 export interface FileEncodeOptions {
   onUnencodableFile?: UnencodableFilePolicy;
-  /**
-   * Narrow which attachment media types reach the wire, as HTML `accept` syntax
-   * (`'image/*,application/pdf'`) or an array of the same.
-   *
-   * THE SAME STRING the composer takes as `<kai-chat accept="...">`, resolved by
-   * the same function against the same declaration -- so a developer writes the
-   * set once as a constant and hands it to both ends. Omitted means the kit's
-   * full capability set, which is `encodableMediaTypes()`.
-   *
-   * It can only NARROW. Naming a type the encoders cannot represent does not
-   * enable it; that would just move the failure to a provider 400.
-   */
+  // The SAME STRING `<kai-chat accept="...">` takes, resolved by the same function against
+  // the same declaration, so the set is written once as a constant and handed to both ends.
+  // It can only NARROW: naming a type the encoders cannot represent does not enable it, it
+  // moves the failure to a provider 400.
+  /** Which attachment media types reach the wire, in HTML `accept` syntax or as an array. Omitted means everything `encodableMediaTypes()` reports. */
   accept?: MediaTypeFilter;
-  /**
-   * The app's own id for the logical turn this encode belongs to, carried onto
-   * every diagnostic event the encode emits. Purely diagnostic: nothing here
-   * branches on it and it never reaches a provider.
-   *
-   * THE SAME FIELD, THE SAME MEANING, as `ConsumeOptions.traceId` -- and that
-   * symmetry is the whole payoff. Encoding happens BEFORE a read opens, so
-   * there is no stream to attach an encode to and the kit will not invent one.
-   * Pass the same id to both halves:
-   *
-   *   const body = toOpenAIMessages(messages, { traceId: 'turn-42' });
-   *   readOpenAIStream(res, sink, { traceId: 'turn-42' });
-   *
-   * and the request and the response it produced sit together, with a tool loop
-   * or a sub-agent fan-out grouping into one trace. Without it you still see
-   * both halves; they are simply unlinked, which is the honest rendering --
-   * pinning an encode to "the next stream that opens" would be a guess, and an
-   * encode may be followed by no stream at all.
-   */
+  // THE SAME FIELD, THE SAME MEANING as `ConsumeOptions.traceId`: pass the same id to
+  // `toOpenAIMessages` and `readOpenAIStream` and the request and its response sit
+  // together, with a tool loop or a sub-agent fan-out grouping into one trace. Purely
+  // diagnostic; nothing branches on it and it never reaches a provider. Encoding happens
+  // BEFORE a read opens, so there is no stream to attach an encode to, and an encode may
+  // be followed by no stream at all.
+  /** The app's own id for the logical turn, carried onto every diagnostic event this encode emits. */
   traceId?: string;
   /** The app's name for this call inside its trace (`'planner'`, `'retry-2'`).
    *  Same field and same meaning as `ConsumeOptions.label`. Absent when not

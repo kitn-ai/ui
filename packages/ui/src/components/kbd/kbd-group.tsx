@@ -2,7 +2,7 @@ import { splitProps, type JSX } from 'solid-js';
 import { cn } from '../../utils/cn';
 
 /**
- * `KbdGroup` — lays several separate `Kbd`s out as one shortcut hint. Reach for it
+ * `KbdGroup` lays several separate `Kbd`s out as one shortcut hint. Reach for it
  * when the caps come from MORE THAN ONE shortcut or from a typed sequence
  * (`<KbdGroup><Kbd keys="Mod+K" /><Kbd keys="Mod+S" /></KbdGroup>`), because a
  * `keys` token spec is a single shortcut and cannot express where one ends and the
@@ -11,7 +11,7 @@ import { cn } from '../../utils/cn';
  *
  * Composition only: which shortcuts exist and in what order is the caller's
  * business, exactly as `RowGroup` takes children rather than `items`. Nothing here
- * binds keys — `Kbd` is display only.
+ * binds keys: `Kbd` is display only.
  */
 export interface KbdGroupProps extends JSX.HTMLAttributes<HTMLElement> {
   class?: string;

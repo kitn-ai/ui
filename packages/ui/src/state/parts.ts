@@ -154,11 +154,11 @@ type CardPart = Extract<MessagePart, { type: 'card' }>;
  *
  *  WHY THIS REPLACES WHERE `upsertToolPart` MERGES. A tool part is patched
  *  fragment-by-fragment as its arguments stream in, which is why that function
- *  needs carry-forward rules for `raw` and `kind` — a later patch that omits a
+ *  needs carry-forward rules for `raw` and `kind`; a later patch that omits a
  *  field is not asserting the field is gone. A card envelope is the opposite: it
  *  arrives WHOLE, as one complete tool result, so an omitted field IS an
  *  assertion. Last-write-wins is both simpler and the only semantics under which
- *  a host can CLEAR `resolution` to re-open a dismissed card — a field-by-field
+ *  a host can CLEAR `resolution` to re-open a dismissed card; a field-by-field
  *  merge can only ever set that field, never unset it, so `CardPolicy.onReopen`
  *  (see `primitives/card-contract.ts`) would have no way to express its result.
  *

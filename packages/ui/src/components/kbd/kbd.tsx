@@ -4,11 +4,12 @@ import { cn } from '../../utils/cn';
 export type KbdPlatform = 'auto' | 'mac' | 'other';
 
 export interface KbdProps extends JSX.HTMLAttributes<HTMLElement> {
-  /** Shortcut spec — tokens joined by `+` (e.g. `Mod+Shift+K`). When omitted,
-   *  children render verbatim. Display only; `kai-kbd` does not bind keys. */
+  /** Shortcut spec, tokens joined by `+` (e.g. `Mod+Shift+K`). When omitted, children render
+   *  verbatim. Display only; it does not bind the keys. */
   keys?: string;
-  /** Glyph platform. `mac` uses ⌘/⌥; `other` uses Ctrl. `auto` (default for the
-   *  facade) sniffs the OS, SSR-safe (falls back to `other` on the server). */
+  // `mac` shows the Command/Option glyphs, `other` shows Ctrl. `auto` sniffs the OS and is SSR-safe
+  // (it falls back to `other` on the server).
+  /** Which glyph set to render. Omitted draws the non-mac glyphs; the element defaults to sniffing the OS. */
   platform?: KbdPlatform;
   /** Cap size. Defaults to `md`. */
   size?: 'sm' | 'md';
@@ -78,7 +79,7 @@ const SIZE: Record<'sm' | 'md', string> = {
  * `Kbd`: a keyboard-shortcut display. Splits `keys` on `+`, maps each token to a
  * platform glyph (`Mod` → ⌘ on mac else Ctrl, `Shift` → ⇧, `ArrowUp` → ↑, …) and
  * renders each as an inset `part="key"` cap, with an empty `part="separator"` hook
- * between caps. Token-driven, light + dark. Display only — it does not bind keys.
+ * between caps. Token-driven, light + dark. Display only: it does not bind keys.
  *
  * When `keys` is omitted, the children render verbatim (use any custom content).
  */

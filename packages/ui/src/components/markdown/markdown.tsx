@@ -119,6 +119,7 @@ const NAMED_CHARACTER_REFERENCES: Record<string, string> = {
   divide: '\u00F7',
   iquest: '\u00BF',
   ndash: '\u2013',
+  // lint-prop-docs: em-dash-copy -- this table maps HTML entities to the character they name
   mdash: '\u2014',
   lsquo: '\u2018',
   rsquo: '\u2019',

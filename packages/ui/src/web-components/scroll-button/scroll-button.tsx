@@ -9,8 +9,7 @@ interface Props extends Record<string, unknown> {
   // nearest scrollable ancestor. Mirrors the `for` convention of `<label for="...">`.
   /** CSS id of the scroll container to control. */
   for?: string;
-  /** Button visual variant: `'outline' | 'ghost' | 'default'`. Defaults to
-   *  `'outline'`. */
+  /** Button visual variant. Defaults to `outline`. */
   variant?: 'outline' | 'ghost' | 'default';
   /** Button size token. Defaults to `'icon'` (square). */
   size?: 'sm' | 'md' | 'lg' | 'icon' | 'icon-sm';

@@ -9,8 +9,7 @@ interface Props extends Record<string, unknown> {
   // transparent with a hover fill.
   /** Visual style. Defaults to `default` (filled). */
   variant?: 'default' | 'subtle' | 'ghost' | 'outline' | 'destructive';
-  /** Size token. `icon` / `icon-sm` are square (for icon-only buttons); `sm` /
-   *  `md` / `lg` size text buttons. Defaults to `md`. */
+  /** Size token: the square glyph-only sizes, or the text-button sizes. Defaults to `md`. */
   size?: 'sm' | 'md' | 'lg' | 'icon' | 'icon-sm';
   /** Leading icon: a named icon (e.g. `"mic"`, `"plus"`), an image URL/data-URI,
    *  or plain text. Renders before any slotted label. */
@@ -30,8 +29,7 @@ interface Props extends Record<string, unknown> {
   /** Stretch the button to the full width of its container (a block button),
    *  e.g. a card CTA or a stacked action. Attribute: `full`. */
   full?: boolean;
-  /** Justify the button's content: `start`, `center` (default), or `end`.
-   *  Combine with `full` for a full-width, left-aligned button. */
+  /** Justify the button's content. Default is centered; combine with `full` for a full-width, left-aligned button. */
   align?: 'start' | 'center' | 'end';
   /** Native button `type`. Defaults to `button` (so it never submits a form). */
   type?: 'button' | 'submit' | 'reset';

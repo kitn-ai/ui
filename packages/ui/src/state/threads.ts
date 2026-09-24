@@ -9,25 +9,25 @@ import type { ChatMessage } from '../web-components/chat/chat-types';
 import type { SetMessages } from './stream';
 
 /** The minimal thread record the fold needs. The consumer's own record type
- *  (title, timestamps, whatever its storage keeps) extends this — those fields
+ *  (title, timestamps, whatever its storage keeps) extends this; those fields
  *  are policy and stay outside the kit. */
 export interface ThreadLike {
   id: string;
   messages: ChatMessage[];
 }
 
-/** The functional-updater setter over the whole thread LIST — the same
+/** The functional-updater setter over the whole thread LIST, the same
  *  React-setState shape `SetMessages` is, one level up. */
 export type SetThreads<T extends ThreadLike> = (updater: (prev: T[]) => T[]) => void;
 
 export interface BindThreadOptions<T extends ThreadLike> {
-  /** Stamp the changed record (e.g. `updatedAt`). Runs on a hit only. Kept a
-   *  callback because WHAT gets stamped — and with whose clock — is the
-   *  consumer's record shape, not ours. */
+  // A callback because WHAT gets stamped, and with whose clock, is the consumer's record
+  // shape, not ours.
+  /** Stamp the changed record, e.g. its `updatedAt`. Runs on a hit only. */
   touch?: (thread: T) => T;
-  /** A delta arrived for a thread that is no longer in the list (deleted while
-   *  its reply was streaming). The delta is dropped either way — dropping is
-   *  the only correct fold — but the drop is reported, not silent. */
+  // The thread was deleted while its reply was streaming. The delta is dropped either way
+  // (dropping is the only correct fold).
+  /** A delta arrived for a thread no longer in the list; the drop is reported, not silent. */
   onDrop?: (threadId: string) => void;
 }
 
@@ -36,8 +36,8 @@ export interface BindThreadOptions<T extends ThreadLike> {
  *
  * reactivity-two-halves (CLAUDE.md): the hit gets a NEW containing array
  * (which notifies) and a NEW record object (which makes the change visible);
- * every other record keeps its reference. A MISS returns `threads` itself —
- * the same reference — so a late delta for a deleted thread re-renders
+ * every other record keeps its reference. A MISS returns `threads` itself,
+ * the same reference, so a late delta for a deleted thread re-renders
  * nothing and resurrects nothing.
  */
 export function updateThreadMessages<T extends ThreadLike>(
@@ -64,7 +64,7 @@ export function updateThreadMessages<T extends ThreadLike>(
  * A `SetMessages` bound to ONE thread. Capture the id when the user hits send
  * and hand the result to `createAssistantStream`: the reply then lands in the
  * thread that was open at send time, never whichever one is open when the
- * tokens arrive — which is what makes switching away mid-reply (and coming
+ * tokens arrive, which is what makes switching away mid-reply (and coming
  * back to a finished answer) safe.
  */
 export function bindThreadMessages<T extends ThreadLike>(
@@ -80,27 +80,24 @@ export function bindThreadMessages<T extends ThreadLike>(
 /** The in-flight-turn bookkeeping for a multi-thread app: which threads are
  *  streaming, and the AbortController for each. See `createThreadSessions`. */
 export interface ThreadSessions {
-  /** Register a new in-flight turn. One turn per thread: a prior in-flight
-   *  turn for the SAME thread is aborted first. Pass the returned controller's
-   *  `signal` to your fetch — the fetch line itself stays yours. */
+  /** Register a new in-flight turn; a prior one for the same thread is aborted first. Pass the returned `signal` to your fetch. */
   begin(threadId: string): AbortController;
-  /** The turn settled (done or failed) — call from your `finally`. `controller`
-   *  is required so a slow old turn's cleanup cannot clear a newer turn that
-   *  has since begun on the same thread: a stale controller is a no-op. */
+  // `controller` is required so a slow old turn's cleanup cannot clear a newer turn
+  // that has since begun on the same thread.
+  /** The turn settled; call it from your `finally`. A stale controller is a no-op. */
   end(threadId: string, controller: AbortController): void;
-  /** Cancel the in-flight turn (the delete-under-stream story): aborts the
-   *  controller and clears the streaming state. Returns whether anything was
-   *  actually in flight. Pair it with the id-bound sink above, which drops any
-   *  deltas that were already past the abort. */
+  // The delete-under-stream story. Pair it with the id-bound sink above, which drops any
+  // deltas that were already past the abort.
+  /** Cancel the in-flight turn; returns whether anything was actually in flight. */
   abort(threadId: string): boolean;
   isStreaming(threadId: string): boolean;
-  /** A fresh array snapshot each call — safe to hand straight to a setState. */
+  /** A fresh array snapshot each call, safe to hand straight to a setState. */
   streamingIds(): string[];
 }
 
 /**
  * Create the session tracker. `onChange` fires with a fresh `streamingIds()`
- * snapshot after every transition — mirror it into your framework's state to
+ * snapshot after every transition; mirror it into your framework's state to
  * derive `loading` (`sessions.isStreaming(activeId)` is the per-thread flag a
  * single boolean cannot be, because a stream keeps running when you switch
  * away).

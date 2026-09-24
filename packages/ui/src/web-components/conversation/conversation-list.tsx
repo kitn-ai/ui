@@ -71,7 +71,7 @@ interface Events {
  *   - textContent → ConversationSummary.title
  *  Fields not expressible as HTML attributes are NOT fabricated: the
  *  optional `scope` and `lastMessageAt` stay absent, and the required
- *  `messageCount`/`updatedAt` get honest defaults — zero messages, and an empty
+ *  `messageCount`/`updatedAt` get honest defaults: zero messages, and an empty
  *  `updatedAt` from which no trailing relative time is derived (the epoch it
  *  used to fabricate rendered a bogus "many days ago" on every declarative row).
  */

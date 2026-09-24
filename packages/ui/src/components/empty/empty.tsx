@@ -3,7 +3,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 
 /**
- * Empty — a composable empty-state block, modeled on shadcn/ui's `Empty`.
+ * Empty: a composable empty-state block, modeled on shadcn/ui's `Empty`.
  * Structure:
  *   Empty
  *   ├── EmptyHeader

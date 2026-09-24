@@ -37,7 +37,7 @@ describe('AppHeader — promoted from builder-workspace.stories.tsx', () => {
     expect(screen.getByLabelText('Switch to dark mode')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Share' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Deploy' })).toBeInTheDocument();
-    expect(screen.getByLabelText('Ada — Pro account menu')).toBeInTheDocument();
+    expect(screen.getByLabelText('Ada, Pro account menu')).toBeInTheDocument();
   });
 
   it('THE ARRANGEMENT: title LEFT, then search · theme | actions | user — in that document order', () => {
@@ -55,7 +55,7 @@ describe('AppHeader — promoted from builder-workspace.stories.tsx', () => {
       'Switch to dark mode',
       'Share',
       'Deploy',
-      'Ada — Pro account menu',
+      'Ada, Pro account menu',
     ]);
   });
 
@@ -180,13 +180,13 @@ describe('AppHeader — promoted from builder-workspace.stories.tsx', () => {
   it('a user with NO onUserMenuSelect renders no avatar cluster — a menu whose every row is dead is a dead menu', () => {
     render(() => <AppHeader title="Workspace" user={{ name: 'Ada', plan: 'Pro' }} showSearch onSearch={() => {}} />);
     expect(screen.getByLabelText('Search commands')).toBeInTheDocument();
-    expect(screen.queryByLabelText('Ada — Pro account menu')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Ada, Pro account menu')).not.toBeInTheDocument();
   });
 
   it('the same user WITH a handler renders the compact avatar+chevron and reports each menu row', () => {
     const onUserMenuSelect = vi.fn();
     render(() => <AppHeader user={{ name: 'Ada', plan: 'Pro' }} onUserMenuSelect={onUserMenuSelect} />);
-    const trigger = screen.getByLabelText('Ada — Pro account menu');
+    const trigger = screen.getByLabelText('Ada, Pro account menu');
     // COMPACT (owner's own instruction): initials + chevron, no name/plan text.
     expect(trigger).toHaveTextContent('AD');
     expect(trigger).not.toHaveTextContent('Pro');

@@ -1385,7 +1385,7 @@ function emitHeaderEndContentProp(c: Construct): string {
   //    itself.
   if (hasUserMenuChrome(c) && inHeaderEndRow(c)) {
     const m = c.shell!.userMenu!;
-    const menuLabel = JSON.stringify(`${m.name}${m.plan ? ` — ${m.plan}` : ''} account menu`);
+    const menuLabel = JSON.stringify(`${m.name}${m.plan ? `, ${m.plan}` : ''} account menu`);
     const initials = JSON.stringify(m.name.slice(0, 2).toUpperCase());
     const item = (id: string, label: string) =>
       `<DropdownItem onSelect={() => props.host.dispatchEvent(new CustomEvent('kai-user-menu', { detail: { item: '${id}' } }))}>${label}</DropdownItem>`;

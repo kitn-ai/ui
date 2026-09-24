@@ -14,15 +14,15 @@ interface ReasoningContextValue {
   /** ReasoningTrigger registers its button here on mount; the content reads it
    *  when a panel holding focus collapses, so focus has somewhere to land. */
   registerTrigger: (el: HTMLElement | undefined) => void;
-  /** The registered trigger. Deliberately a plain getter over a mutable
-   *  variable, NOT a signal — registration must not re-run the content effect. */
+  /** The registered trigger. A plain getter over a mutable variable, NOT a signal:
+   *  registration must not re-run the content effect. */
   trigger: () => HTMLElement | undefined;
   /** Whether the reasoning is still streaming; the trigger shimmers while it is. */
   isStreaming: () => boolean;
 }
 
 /** Imperative open controller, handed to a parent (the kai-reasoning facade) via
- *  `controllerRef` so it can drive/observe open state — mirrors
+ *  `controllerRef` so it can drive/observe open state; mirrors
  *  CollapsibleController/HoverCardController. */
 export interface ReasoningController { open: Accessor<boolean>; setOpen: (v: boolean) => void; }
 
@@ -46,7 +46,7 @@ export interface ReasoningProps {
   defaultOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
   isStreaming?: boolean;
-  /** Gate the trigger — programmatic control via the controller still works. */
+  /** Gate the trigger; programmatic control via the controller still works. */
   disabled?: boolean;
   /** Receives the open controller (open accessor + setOpen) once mounted. */
   controllerRef?: (api: ReasoningController) => void;

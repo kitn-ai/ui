@@ -27,10 +27,11 @@ interface Props extends Record<string, unknown> {
    *  `<pre>` blocks (lighter, no highlighter load). Default true. */
   codeHighlight?: boolean;
   // Inert for non-image tiles.
-  /** How an image tile reveals its full size: `hover` (pointer-only hover card, default) or `lightbox` (modal on click). */
+  /** How an image tile reveals its full size. Default is the pointer-only hover card; the modal on click
+   *  is the only one keyboard and touch reach. */
   imagePreview?: 'hover' | 'lightbox';
-  /** Whether each message's action bar is always visible (`'always'`, default) or
-   *  only revealed on hover of that message row (`'hover'`). */
+  /** Whether each message's action bar is visible at rest or only revealed on pointer-over.
+   *  Visible at rest by default. */
   actionsReveal?: 'always' | 'hover';
   /** Show the scroll-to-bottom button inside the scroll area. Default true. */
   scrollButton?: boolean;

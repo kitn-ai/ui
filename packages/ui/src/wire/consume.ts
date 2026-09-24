@@ -522,7 +522,7 @@ export async function consumeModelStream(
             code: 'empty-stream',
             message:
               'The model stream produced no chunks. The response was 200 but nothing in its body parsed ' +
-              'as a stream frame — check the endpoint really sent Content-Type: text/event-stream and that ' +
+              'as a stream frame; check the endpoint really sent Content-Type: text/event-stream and that ' +
               'the request set stream: true. A route that forwards a provider error without its status ' +
               'lands here: the body is a JSON error, not SSE.',
           }

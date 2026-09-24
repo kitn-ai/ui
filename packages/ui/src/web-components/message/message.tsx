@@ -79,8 +79,7 @@ interface Props extends Record<string, unknown> {
   codeTheme?: string;
   /** Disable syntax highlighting for code blocks (no Shiki loads). */
   codeHighlight?: boolean;
-  /** Whether the action bar is always visible (`'always'`, default) or only
-   *  revealed on hover of the message row (`'hover'`). */
+  /** Whether the action bar stays visible or appears on pointer-over; visible by default. */
   actionsReveal?: 'always' | 'hover';
   /** Convenience avatar image URL (used when `message.avatar` is not set). */
   avatarSrc?: string;
@@ -114,8 +113,8 @@ interface Props extends Record<string, unknown> {
  * Move a `role` the consumer put on the host into the element's own prop store,
  * and off the DOM.
  *
- * `role` names the SPEAKER here (`'user'` / `'assistant'`) — the correct domain
- * word, and the documented attribute — but it is also the global ARIA `role`
+ * `role` names the SPEAKER here (`'user'` / `'assistant'`), the correct domain
+ * word and the documented attribute, but it is also the global ARIA `role`
  * attribute, and neither speaker is a valid ARIA role. Measured in a real chromium:
  * a host left carrying `role="user"` is a CRITICAL axe `aria-roles` violation
  * ("Role must be one of the valid ARIA roles: user"), and chromium discards the
@@ -131,7 +130,7 @@ interface Props extends Record<string, unknown> {
  * write-back has to come after that, or the scrub destroys the speaker it was
  * meant to preserve.
  *
- * NOTE — this covers every path where the attribute is still on the host by the
+ * NOTE: this covers every path where the attribute is still on the host by the
  * time the facade runs (`setAttribute` before or after connection, and any later
  * change, via the observer below). It does NOT cover an element authored in HTML
  * and upgraded at registration time: `defineWebComponent` installs its

@@ -42,7 +42,7 @@ export { normalizeCandidates, buildSelection, isAnyStreaming, candidateToParts }
 
 export type CompareLayout = 'auto' | 'columns' | 'tabs';
 
-/** Imperative handle exposed via `controllerRef` — surfaces the compare's latent
+/** Imperative handle exposed via `controllerRef`, surfaces the compare's latent
  *  capabilities (commit a pick by candidate id, focus the roving tab stop) so the
  *  `<kai-compare>` facade can forward them as instance methods (Pattern C). */
 export interface ResponseCompareController {
@@ -95,9 +95,10 @@ export interface ResponseCompareProps {
   compareId?: string;
   /** Re-hydrates or controls the selection, rendering the collapsed winner. */
   selection?: CompareSelection;
-  // `'auto'` uses a CONTAINER query, so the breakpoint is about this component's
-  // own width, not the viewport's.
-  /** Side-by-side columns or one candidate at a time; `'auto'` (the default) picks by the component's width, columns at 640px and wider. */
+  // `'auto'` uses a CONTAINER query, so the breakpoint is about this component's own
+  // width, not the viewport's: it forces the side-by-side layout at 640px and wider,
+  // and `'columns'` forces it at any width.
+  /** Side by side or one candidate at a time. `'auto'` (the default) switches at 640px of component width. */
   layout?: CompareLayout;
   class?: string;
   /** Receives the imperative controller once mounted; the `<kai-compare>` facade forwards it as element methods. */
@@ -111,7 +112,7 @@ export interface ResponseCompareProps {
 }
 
 /**
- * `ResponseCompare` — a dual-response comparison. Two assistant candidates for the
+ * `ResponseCompare`, a dual-response comparison. Two assistant candidates for the
  * same prompt render side-by-side (or as tabs), each via `MessageBody` so a
  * candidate reads exactly like an assistant message (reasoning + tools +
  * attachments + markdown). The pick is a COMMIT, not a Submit: clicking "Pick this"
@@ -349,8 +350,7 @@ interface ColumnProps {
   candidate: CompareCandidate;
   tabStop: boolean;
   disabled: boolean;
-  /** Extra (reactive) class controlling tabs/auto visibility — hidden when this
-   *  is the non-active candidate in tabs / auto-narrow mode. */
+  /** Extra class controlling tabs/auto visibility. */
   hiddenClass?: () => string;
   onFocus: () => void;
   onPick: () => void;

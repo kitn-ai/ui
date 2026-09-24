@@ -8,7 +8,8 @@ interface Props extends Record<string, unknown> {
   /** A curated icon name (e.g. `"mic"`, `"globe"`), an image URL/data-URI, or
    *  plain text. */
   name?: string;
-  /** Size token: `sm` | `md` (default) | `lg`. */
+  // sm, md (default) or lg.
+  /** Size token. */
   size?: 'sm' | 'md' | 'lg';
 }
 

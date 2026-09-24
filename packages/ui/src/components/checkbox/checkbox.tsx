@@ -18,7 +18,7 @@ export interface CheckboxProps extends Omit<JSX.InputHTMLAttributes<HTMLInputEle
  *
  * That is the whole design: the native control brings keyboard operation (Space),
  * the `:focus-visible` ring, form participation via `name` / `value`, and correct
- * screen-reader announcement — all of it for free and all of it correct. Every
+ * screen-reader announcement. All of it for free, and all of it correct. Every
  * accessibility defect this kit's control audit found was in a control that had
  * replaced the native element with something hand-rolled.
  *
@@ -27,7 +27,7 @@ export interface CheckboxProps extends Omit<JSX.InputHTMLAttributes<HTMLInputEle
  * exactly as they do on a plain `<input>`.
  *
  * Validation is deliberately absent. `required` is passed through to the native
- * attribute and nothing else — whether an unchecked box is an error is the
+ * attribute and nothing else; whether an unchecked box is an error is the
  * consuming application's call, not the kit's.
  *
  * ```tsx

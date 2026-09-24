@@ -46,7 +46,7 @@ export interface BuilderCapabilities {
 
 export type BuilderWidgetPosition = 'bottom-end' | 'bottom-start' | 'top-end' | 'top-start';
 
-/** `layout: 'widget'`-scoped FAB chrome — mirrors `construct.v1`'s own
+/** `layout: 'widget'`-scoped FAB chrome, mirrors `construct.v1`'s own
  *  `widget` block. Meaningless on any other layout, which is exactly why
  *  the panel section it drives is HIDDEN, not just disabled, on any other
  *  layout (see the Layout section's own doc comment for that distinction). */
@@ -60,11 +60,11 @@ export type BuilderProviderMode = 'mock' | 'endpoint';
 export type BuilderProviderWire = 'openai' | 'anthropic';
 
 /** Mirrors `construct.v1`'s own `provider` discriminated union
- *  (`mcp/construct/schema.ts`'s `ProviderSchema`) — `mock` needs
+ *  (`mcp/construct/schema.ts`'s `ProviderSchema`): `mock` needs
  *  nothing else; `endpoint` needs the consumer's own chat route + wire
  *  format. A DISPLAY/edit stub, not a real one: no dev-server exists for
  *  this design round to actually call, so there's nothing to validate the
- *  URL against — the field exists so a template's panel shows the whole
+ *  URL against: the field exists so a template's panel shows the whole
  *  construct shape, not because this round wires it to anything. */
 export interface BuilderProvider {
   mode: BuilderProviderMode;
@@ -74,10 +74,10 @@ export interface BuilderProvider {
 
 /** Mirrors `construct.v1`'s own `cards` entry shape (`schema.ts`'s
  *  `cards` array): a tool-facing `name` plus the kit's card-schema JSON.
- *  `schema` is `Record<string, unknown>` here too — deep card validation
+ *  `schema` is `Record<string, unknown>` here too: deep card validation
  *  (incl. `x-kai-format` mask hints) is the kit's own card contract at
  *  render time, not this stub panel's job; this stub only ever READS
- *  `schema.title` for a display label (Round A's read-only Cards section —
+ *  `schema.title` for a display label (Round A's read-only Cards section:
  *  see `BuilderPanelSections.cards`). */
 export interface BuilderCard {
   name: string;
@@ -99,20 +99,19 @@ export interface BuilderConstruct {
 /**
  * A template-scoped section configuration (Round W, T-2/T-6): a template
  * FIXES its layout internally (no layout radio) and owns which of the
- * layout-scoped sections apply — a widget template shows Widget chrome
+ * layout-scoped sections apply: a widget template shows Widget chrome
  * unconditionally (it IS the widget template, not merely "currently set to
  * widget"), where the old layout-driven panel showed it only when the
  * layout radio happened to be on "Widget". Omit this prop entirely to get
  * the original, generic, layout-driven panel (every existing test above
- * exercises that default) — a template panel opts INTO the narrower set
+ * exercises that default): a template panel opts INTO the narrower set
  * rather than the generic panel opting out.
  */
 export interface BuilderPanelSections {
   /** Show the Layout radio section. Default `true`; a template panel sets it
    *  `false`. */
   layout?: boolean;
-  /** Widget-chrome section visibility. Default `'auto'` follows the layout;
-   *  `'always'` and `'never'` override it. */
+  /** Widget-chrome section visibility. Default `'auto'` follows the layout; the other two override it. */
   widget?: 'auto' | 'always' | 'never';
   /** Show the Provider section. Default `false`; a template panel opts in. */
   provider?: boolean;
@@ -151,7 +150,7 @@ export interface AcceptChip {
  *
  * Exported (not module-local) because it's exactly the vocabulary a future
  * schema-driven wizard or capability menu (RECOMMENDATION.md's "real build")
- * will also want — one place to widen the common-case list rather than a
+ * will also want, one place to widen the common-case list rather than a
  * second one growing beside it.
  */
 export const ACCEPT_CHIPS: readonly AcceptChip[] = [
@@ -175,7 +174,7 @@ export const ACCEPT_CHIPS: readonly AcceptChip[] = [
   { id: 'video', label: 'Video', patterns: ['video/*'] },
 ];
 
-/** The wizard's stated default (also the kit's own example everywhere else —
+/** The wizard's stated default (also the kit's own example everywhere else,
  *  scaffold.ts, the construct fixtures): Images + PDFs on. Derived from
  *  `ACCEPT_CHIPS` rather than hand-typed again, so widening either chip's
  *  pattern list keeps this in sync automatically. */
@@ -221,7 +220,7 @@ export function Row(props: { label: string; children: JSX.Element; muted?: boole
   );
 }
 
-/** A minimal, reusable string-tag editor — the taglist pattern the spike
+/** A minimal, reusable string-tag editor: the taglist pattern the spike
  *  proved out (`starters`). `capabilities.attachments.accept` moved to
  *  `AcceptTypeEditor` below (owner feedback, design round 2): raw MIME
  *  strings are a bad first surface for this audience. */
@@ -287,14 +286,14 @@ export function TagEditor(props: {
 }
 
 /**
- * `capabilities.attachments.accept` — chips for the common cases
+ * `capabilities.attachments.accept`: chips for the common cases
  * (`ACCEPT_CHIPS`) over a collapsed "Advanced" raw MIME-list editor.
  *
  * A chip lights up (`aria-pressed`) exactly when EVERY one of its patterns is
- * present in `accept` — toggling it adds/removes that whole pattern group.
+ * present in `accept`: toggling it adds/removes that whole pattern group.
  *
  * Owner feedback (design round 5): the raw pattern list is no longer shown
- * under the chips at all — it lives ONLY inside the "Advanced" disclosure,
+ * under the chips at all. It lives ONLY inside the "Advanced" disclosure,
  * as an autosizing textarea (one MIME type/glob per line, not a comma
  * string: each edit adds or removes a LINE rather than reflowing a long
  * wrapped string, and a list copied from a spec or another tool's `accept`
@@ -368,7 +367,7 @@ export function AcceptTypeEditor(props: { accept: string[]; onChange: (next: str
             onBlur={(e) => commitDraft(e.currentTarget.value)}
           />
           <p class="text-xs text-muted-foreground">
-            One media type or glob per line — a chip above stays lit only while all of its patterns are here.
+            One media type or glob per line. A chip above stays lit only while all of its patterns are here.
           </p>
         </div>
       </details>
@@ -376,7 +375,7 @@ export function AcceptTypeEditor(props: { accept: string[]; onChange: (next: str
   );
 }
 
-/** `home.links` — the array-of-objects hard case (RECOMMENDATION.md), as a
+/** `home.links`: the array-of-objects hard case (RECOMMENDATION.md), as a
  *  small labeled-row repeater. Each row explicitly numbered ("Link N") so a
  *  scanning eye always knows which entry it's looking at. */
 export function LinksEditor(props: { links: BuilderHomeLink[]; onChange: (next: BuilderHomeLink[]) => void }): JSX.Element {
@@ -462,14 +461,14 @@ const MODE_OPTIONS = [
 ];
 
 const HISTORY_OPTIONS = [
-  { value: 'none' as const, label: 'None — nothing saved' },
-  { value: 'local' as const, label: 'Local — this browser' },
-  { value: 'endpoint' as const, label: 'Endpoint — your backend' },
+  { value: 'none' as const, label: 'None: nothing saved' },
+  { value: 'local' as const, label: 'Local: this browser' },
+  { value: 'endpoint' as const, label: 'Endpoint: your backend' },
 ];
 
 const PROVIDER_MODE_OPTIONS = [
-  { value: 'mock' as const, label: 'Mock — canned replies, no network calls' },
-  { value: 'endpoint' as const, label: 'Endpoint — your own chat route' },
+  { value: 'mock' as const, label: 'Mock: canned replies, no network calls' },
+  { value: 'endpoint' as const, label: 'Endpoint: your own chat route' },
 ];
 
 const PROVIDER_WIRE_OPTIONS = [
@@ -486,19 +485,19 @@ const DEFAULT_PANEL_SECTIONS: Required<BuilderPanelSections> = {
 };
 
 /**
- * `BuilderPanel` — the visual construct builder's inspector: identity, layout,
+ * `BuilderPanel`, the visual construct builder's inspector: identity, layout,
  * theme, an optional Home tab, and capabilities. Pure props/callbacks, stub-
- * friendly (no dev-server seam, no schema derivation) — a STORY-FIRST design
+ * friendly (no dev-server seam, no schema derivation): a STORY-FIRST design
  * surface for the panel's look, per RECOMMENDATION.md. Composed entirely from
  * the kit's own controls (`Input`/`Textarea`/`Switch`/`RadioGroup`/`Select`/
- * `Button`/`ColorField`/`ToggleChip`); no `part=` attributes — this component is not
+ * `Button`/`ColorField`/`ToggleChip`); no `part=` attributes. This component is not
  * yet wired to a `kai-*` facade.
  *
  * Round W (T-2/T-6) added `sections` (`BuilderPanelSections`): omit it for
  * the original generic, layout-driven panel this doc comment otherwise
  * describes unchanged; pass it to scope the panel to ONE template's control
- * set — no Layout radio, Widget chrome shown unconditionally rather than
- * `layout`-conditionally, a Provider section — the shape `Labs/Builder/
+ * set, no Layout radio, Widget chrome shown unconditionally rather than
+ * `layout`-conditionally, a Provider section: the shape `Labs/Builder/
  * Support widget` (`src/stories/showcase/builder.stories.tsx`) actually uses.
  *
  * Three patterns from the spike (plus the owner's own round-8 ruling) get
@@ -509,14 +508,14 @@ const DEFAULT_PANEL_SECTIONS: Required<BuilderPanelSections> = {
  *    the object it toggles).
  *  - **cross-field visibility, field-level**: `capabilities.conversations`
  *    requires `capabilities.history.persistence` to be `local`/`endpoint`
- *    (the schema's own `superRefine` rule) — shown as a disabled switch with
+ *    (the schema's own `superRefine` rule): shown as a disabled switch with
  *    the reason spelled out in muted text right below it, not a validation
  *    error surfaced after the fact.
  *  - **cross-field visibility, section-level**: the whole "Widget" section
  *    (position/launcher icon/open-by-default) is meaningless outside
  *    `layout: 'widget'`, and unlike the single Conversations toggle above, a
  *    disabled-and-explained SECTION would just be three greyed-out rows for
- *    one sentence's worth of reason — so it's hidden entirely, not disabled,
+ *    one sentence's worth of reason, so it's hidden entirely, not disabled,
  *    whenever `layout` isn't `'widget'` (owner ruling, design round 8; see
  *    that section's own comment for the full distinction).
  */
@@ -722,7 +721,7 @@ export function BuilderPanel(props: BuilderPanelProps): JSX.Element {
             when={v().home}
             fallback={
               <p class="text-xs text-muted-foreground">
-                Off — the widget opens straight into chat, no Home/Messages tab bar.
+                Off: the widget opens straight into chat, no Home/Messages tab bar.
               </p>
             }
           >
@@ -796,7 +795,7 @@ export function BuilderPanel(props: BuilderPanelProps): JSX.Element {
         </Row>
         <Show when={conversationsDisabled()}>
           <p class="text-xs text-muted-foreground">
-            Needs History set to Local or Endpoint — a conversation list needs somewhere to persist conversations.
+            Needs History set to Local or Endpoint: a conversation list needs somewhere to persist conversations.
           </p>
         </Show>
       </Section>
@@ -824,7 +823,7 @@ export function BuilderPanel(props: BuilderPanelProps): JSX.Element {
                 )}
               </For>
             </div>
-            <p class="text-xs text-muted-foreground">Read-only for now — card editing is a later round.</p>
+            <p class="text-xs text-muted-foreground">Read-only for now: card editing is a later round.</p>
           </Show>
         </Section>
       </Show>

@@ -48,7 +48,7 @@ type Phase = 'ask' | 'detail' | 'thanks';
 /**
  * An inline thumbs up/down feedback bar that owns its own flow: it asks, then
  * (optionally, on a not-helpful vote) collects a category + comment, then
- * confirms with a thank-you — all in place, the way ChatGPT/Claude do it. The
+ * confirms with a thank-you, all in place, the way ChatGPT/Claude do it. The
  * vote fires `onFeedback` immediately; the optional detail fires
  * `onSubmitDetail`; `onClose` dismisses the bar.
  */

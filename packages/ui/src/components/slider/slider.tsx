@@ -14,7 +14,7 @@ export interface SliderProps
   max: number;
   /** Granularity. Omitted means the native default (1); `'any'` means continuous. */
   step?: number | 'any';
-  /** The current value. Controlled — drive it from `onInput`. Omit for uncontrolled. */
+  /** Controlled value; omit for uncontrolled state and drive it from `onInput`. */
   value?: number;
   /** Initial value when uncontrolled. */
   defaultValue?: number;
@@ -40,14 +40,14 @@ export interface SliderProps
  *
  * The native control brings the whole keyboard contract (arrows, Home, End,
  * PageUp/PageDown), pointer and touch dragging, form participation via `name`, and
- * the `slider` role with a live value announcement — all of it for free and all of it
+ * the `slider` role with a live value announcement: all of it for free and all of it
  * correct. Every accessibility defect this kit's control audit found was in a control
  * that had replaced the native element with something hand-rolled.
  *
  * What the component adds is the **filled track**. `.kai-range` paints the portion
  * left of the thumb from a `--kai-range-fill` custom property, and until now every
  * caller computed that percentage itself. It is arithmetic over `min`, `max` and the
- * current value — three things this component already has — so no consumer should
+ * current value, three things this component already has, so no consumer should
  * ever write it again.
  *
  * Everything not listed in `SliderProps` is forwarded to the input, so `id`, `name`,

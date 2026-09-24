@@ -19,7 +19,7 @@ interface LightboxCtx {
  * link in a caption, a download button beside the media. A click on one of these must
  * NOT dismiss the modal, or the control it landed on is unreachable.
  *
- * `[tabindex]` is on the list for the same reason — but it is also why the walk that
+ * `[tabindex]` is on the list for the same reason, but it is also why the walk that
  * uses this is bounded at the content wrapper: the dialog panel ABOVE it carries
  * `tabindex="-1"`, so an unbounded `closest(...)` matches the panel and then no click
  * anywhere closes anything.
@@ -31,7 +31,7 @@ const INTERACTIVE_SELECTOR =
  * Elements the platform activates from the keyboard on its own: Enter (and Space
  * for a button, a summary) fires the click that bubbles to `LightboxTrigger`'s
  * `onClick`. When the reader is on one of these, the trigger must step aside
- * instead of answering the same keystroke — a `preventDefault` there CANCELS the
+ * instead of answering the same keystroke: a `preventDefault` there CANCELS the
  * child's own activation, so a slotted `<a href>` would stop navigating and a
  * button would stop being a button.
  */
@@ -50,8 +50,7 @@ const useLightbox = () => {
 
 export interface LightboxProps {
   children: JSX.Element;
-  /** Controlled open state. When set, this component never changes it itself —
-   *  drive it from `onOpenChange`. Omit for uncontrolled (internal) state. */
+  /** Controlled open state; drive it from `onOpenChange`. Omit for uncontrolled state. */
   open?: boolean;
   /** Initial open state (uncontrolled seed). */
   defaultOpen?: boolean;
@@ -96,7 +95,7 @@ export interface LightboxTriggerProps {
  * keyboard way in without one supplied here, so this span carries
  * `role="button"` + `aria-haspopup` + `aria-expanded` and the tab stop.
  *
- * But a consumer may slot their OWN control — a `<button>`, a link — and then
+ * But a consumer may slot their OWN control (a `<button>`, a link), and then
  * that same role is a defect: `role="button"` is a children-presentational role,
  * so `axe` reports `nested-interactive` ("Element has focusable descendants",
  * WCAG 4.1.2) for a control inside a control. Measured on
@@ -184,7 +183,7 @@ export interface LightboxContentProps {
 
 /**
  * The modal itself. Escape, the backdrop click, the focus move and the Tab trap
- * are ALL `Dialog`'s — this composes it and contributes nothing but sizing, so
+ * are ALL `Dialog`'s; this composes it and contributes nothing but sizing, so
  * the two overlays cannot disagree about what "dismissed" or "focus trapped"
  * means.
  *
@@ -198,7 +197,7 @@ export interface LightboxContentProps {
  * so the size clamp has to reach it by descendant selector from here.
  *
  * BOTH dismissals this adds go through the SAME controller as the trigger, Escape
- * and the backdrop — `closeOnContentClick` and the close button — so a controlled
+ * and the backdrop (through `closeOnContentClick` and the close button), so a controlled
  * consumer's `onOpenChange` hears every dismissal from one path. The close button is
  * a real `<button>` inside the panel, which is what keeps it in Dialog's Tab trap
  * and out of the panel's accessible name.
@@ -215,7 +214,7 @@ export function LightboxContent(props: LightboxContentProps) {
    * reasons. `e.target.closest()` alone would keep climbing past the content: the
    * dialog panel above it is a `tabindex="-1"` element, so it both matches the
    * selector and swallows every click. And it cannot see the wrapper at all as
-   * `<kai-lightbox>` — the media there is light-DOM slotted content, whose only link
+   * `<kai-lightbox>`, the media there is light-DOM slotted content, whose only link
    * to the slot is the FLATTENED tree, which `closest()` does not walk, so a link in
    * the slotted content would read as "not interactive" and close the modal.
    */

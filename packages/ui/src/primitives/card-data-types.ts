@@ -148,14 +148,11 @@ export type TasksTask = {
 };
 
 export type TasksCardData = {
-  /**
-   * `select` (default) = checkbox rows + a confirm button that emits the contract
-   * `submit`. `progress` = an onboarding/checklist look: a header `done / total`
-   * count, circular indicators, per-item title + muted description, and NO confirm
-   * button (checking a row is itself the terminal action). Both share the same
-   * selection model (toggle by id, the `max` gate, `kai-value-change`); `progress`
-   * is purely a presentational variant.
-   */
+  // Both modes share one selection model (toggle by id, the `max` gate,
+  // `kai-value-change`), and `progress` is purely a presentational variant: it checks a
+  // row as the terminal action and renders no confirm button, a header `done / total`
+  // count, circular indicators and a per-item title with a muted description.
+  /** Whether the card confirms with a button or completes as rows are checked; confirms by default. */
   mode?: 'select' | 'progress';
   heading?: string;
   tasks: TasksTask[]; // >=1
@@ -207,54 +204,45 @@ export type FormField = {
     | 'switch';
   'x-kai-placeholder'?: string;
   'x-kai-step'?: number;
-  /**
-   * Display format for a string field. `tel` / `ssn` / `credit-card`
-   * apply that type's standard mask and submit digits only; `custom` masks with
-   * `x-kai-mask` and submits the formatted value.
-   *
-   * NOT the JSON Schema `format` keyword, and deliberately not an extension of it:
-   * `format` has a registered vocabulary with assertion semantics, `widgetFor()`
-   * already switches on it to pick a widget, and `toJsonSchema()` turns it into a
-   * validation pattern. This is a UI hint, so it lives in the `x-kai-*` namespace
-   * with the other UI hints — and it selects FORMATTING, never a widget.
-   *
-   * Typed as the semantic-type union for a consumer authoring a form definition by
-   * hand. A value arriving from a MODEL is untrusted and may be anything at all;
-   * `resolveFieldMask()` degrades an unrecognised one to an unmasked text field with
-   * a console warning rather than trusting this declaration.
-   *
-   * SPELLED OUT HERE RATHER THAN IMPORTED, and that is not laziness. `FieldSemanticType`
-   * is declared in `./field-semantics`, which carries the semantics TABLE and its
-   * `console.warn` — and this file's whole reason for existing is that a Node/no-DOM
-   * backend can name a card payload with `lib: ["ESNext"]` and `types: []`, where
-   * `console` does not exist (measured: TS2584, by
-   * `tests/schemas/card-data-types-node-safe.test.ts`, which is what caught the import).
-   * A type import still has to RESOLVE, so importing the union would drag the engine into
-   * the server-safe entry's graph.
-   *
-   * AN APP CANNOT PIN THIS ON THE MODEL TODAY.
-   * `cardTools({ require })` narrows a projected tool schema by dot-path, but there is
-   * no path that reaches a form FIELD: a form card's payload is itself a JSON Schema, so
-   * `form.schema.json` describes `properties` as a map of field definitions rather than
-   * as a node per field, and `require: { form: [{ path: 'properties.ticketId' }] }` is a
-   * TypeError naming a path that does not resolve. "Force the model to mask the ticket
-   * field" is therefore not expressible; the enum above is what makes it LIKELY, and an
-   * app that needs a guarantee validates the arriving envelope itself.
-   *
-   * It is therefore a REGISTERED COPY of `FIELD_SEMANTIC_TYPES`: the two are pinned
-   * mutually assignable at compile time in
-   * `tests/components/form-field-formats.test.tsx`, so adding a fifth token to the enum
-   * without adding it here fails `nx typecheck ui` rather than shipping a form card that
-   * cannot name it.
-   */
+  // NOT the JSON Schema `format` keyword, and deliberately not an extension of it:
+  // `format` has a registered vocabulary with assertion semantics, `widgetFor()` already
+  // switches on it to pick a widget, and `toJsonSchema()` turns it into a validation
+  // pattern. This is a UI hint, so it lives in the `x-kai-*` namespace with the other UI
+  // hints -- and it selects FORMATTING, never a widget.
+  //
+  // Typed as the semantic-type union for a consumer authoring a form definition by hand.
+  // A value arriving from a MODEL is untrusted and may be anything at all;
+  // `resolveFieldMask()` degrades an unrecognised one to an unmasked text field with a
+  // console warning rather than trusting this declaration. `tel` / `ssn` / `credit-card`
+  // apply that type's standard mask and submit digits only; `custom` masks with
+  // `x-kai-mask` and submits the formatted value.
+  //
+  // SPELLED OUT HERE RATHER THAN IMPORTED, and that is not laziness. `FieldSemanticType`
+  // is declared in `./field-semantics`, which carries the semantics TABLE and its
+  // `console.warn` -- and this file's whole reason for existing is that a Node/no-DOM
+  // backend can name a card payload with `lib: ["ESNext"]` and `types: []`, where
+  // `console` does not exist (measured: TS2584, by
+  // `tests/schemas/card-data-types-node-safe.test.ts`, which is what caught the import).
+  // A type import still has to RESOLVE, so importing the union would drag the engine into
+  // the server-safe entry's graph. It is therefore a REGISTERED COPY of
+  // `FIELD_SEMANTIC_TYPES`, and the two are pinned mutually assignable at compile time in
+  // `tests/components/form-field-formats.test.tsx`, so adding a token to the enum without
+  // adding it here fails `nx typecheck ui`.
+  //
+  // AN APP CANNOT PIN THIS ON THE MODEL TODAY: `cardTools({ require })` narrows a
+  // projected tool schema by dot-path, but no path reaches a form FIELD (a form card's
+  // payload is itself a JSON Schema, so `require: { form: [{ path: 'properties.ticketId' }] }`
+  // is a TypeError naming a path that does not resolve). "Force the model to mask the
+  // ticket field" is therefore not expressible; the enum is what makes it LIKELY, and an
+  // app that needs a guarantee validates the arriving envelope itself.
+  /** Display format for a string field. Selects formatting, never a widget; the built-in masking types submit digits only. */
   'x-kai-format'?: 'tel' | 'ssn' | 'credit-card' | 'custom';
-  /** The mask pattern, read only when `x-kai-format` is `custom`: `#` a digit, `@` an
-   *  alphanumeric, `*` an obscurable alphanumeric, everything else a literal
-   *  (`CHG-####`). Capped at the mask engine's own limit; a longer one is refused. */
+  // The pattern engine caps the length, not this field.
+  /** The mask pattern, read only when the format hint is `custom`: `#` digit, `@`
+   *  alphanumeric, `*` obscurable, every other character literal. */
   'x-kai-mask'?: string;
-  /** Placeholder text for the mask's unfilled positions, aligned character for
-   *  character with the pattern (`mm/dd/yyyy`). Derived from the pattern when absent;
-   *  a misaligned one is dropped, loudly, and the mask survives. */
+  /** Aligned with the mask pattern; a misaligned one is dropped with a warning.
+   *  Derives the guide from the pattern when absent. */
   'x-kai-mask-guide'?: string;
 };
 
@@ -282,7 +270,7 @@ export type FormCardEnvelope = CardEnvelope<'form', FormDefinition>;
  * One file behind an artifact card: the Code tab's tree row, plus where the
  * preview loads it.
  *
- * The SAME declaration the `FileTree` primitive uses — `components/file/file-tree.tsx`
+ * The SAME declaration the `FileTree` primitive uses: `components/file/file-tree.tsx`
  * re-exports this as `FileTreeFile` and `components/artifact/artifact.tsx` aliases that to
  * `ArtifactFile`, so there is one shape here and not a copy of one. It is authored
  * in this file rather than in file-tree.tsx for this module's whole reason: it is
@@ -301,16 +289,16 @@ export type ArtifactCardFile = {
   code?: string;
   /** Language id for syntax highlighting (e.g. `html`, `css`, `tsx`). */
   language?: string;
-  /** Kind — drives the icon + whether Code applies. */
+  /** Kind, driving the icon and whether Code applies. */
   type?: 'html' | 'pdf' | 'image' | 'other';
   /** Lines added vs the base. Rendered as a trailing `+N` stat (success hue,
    *  tabular-nums). Only shown when present; omit for a plain file row. */
   additions?: number;
   /** Lines removed vs the base. Rendered as a trailing `-N` stat (error hue). */
   deletions?: number;
-  /** Change status vs the base. Drives a small trailing status letter in the
-   *  conventional VCS hue (added=green, modified=amber, deleted=red,
-   *  renamed=blue, untracked=muted). Only shown when present. */
+  // The conventional VCS hue: added=green, modified=amber, deleted=red, renamed=blue,
+  // untracked=muted.
+  /** Change status vs the base, drawn as a trailing letter. Only shown when present. */
   status?: 'added' | 'modified' | 'deleted' | 'renamed' | 'untracked';
 };
 
@@ -323,38 +311,34 @@ export type ArtifactCardTab = 'preview' | 'code';
  *  the part that describes WHAT to show, not how the viewer behaves. Toolbar
  *  composition (`showNav`/`showTabs`/…), view-state (`maximized`), the iframe
  *  `sandbox` and the imperative `controllerRef` are all host concerns and stay
- *  off the wire — a model must not be able to widen its own sandbox or hide the
+ *  off the wire: a model must not be able to widen its own sandbox or hide the
  *  chrome the user needs to inspect what it built. */
 export type ArtifactCardData = {
   /** URL the preview iframe frames. */
   src?: string;
   /** Files for the Code tab's tree (+ each file's preview `url`). */
   files?: ArtifactCardFile[];
-  /** Which view the card OPENS on: `preview` (default) or `code`.
-   *
-   *  Seed only, and deliberately so. This card exists to be revised — `addCard`
-   *  upserts on `envelope.id` — and a revision hands the same live component a
-   *  new envelope. Were this wired to `Artifact`'s CONTROLLED `tab` prop, every
-   *  revision would re-assert it and yank a user who had switched views back to
-   *  the model's choice. A model cannot move the user between tabs after the
-   *  first render; the user's choice wins. */
+  // Seed only, and deliberately so. This card exists to be revised -- `addCard` upserts on
+  // `envelope.id` -- and a revision hands the same live component a new envelope. Were this
+  // wired to `Artifact`'s CONTROLLED `tab` prop, every revision would re-assert it and yank
+  // a user who had switched views back to the model's choice. A model cannot move the user
+  // between tabs after the first render; the user's choice wins.
+  /** Which view the card opens on. Defaults to `'preview'`. */
   tab?: ArtifactCardTab;
-  /** Path of the file selected in the tree when the card first renders.
-   *
-   *  Seed only, for the same reason as `tab`, but achieved differently:
-   *  `Artifact` has a `defaultTab` prop to seed the tab and no `defaultActiveFile`
-   *  counterpart, so this is read ONCE via `untrack` at setup and handed over as
-   *  a static value. That leaves `Artifact`'s unconditional
-   *  `createEffect(() => setActiveFile(local.activeFile))` with nothing reactive
-   *  to track, so it runs once instead of resetting the user's selection on
-   *  every revision. Keep it static — passing `props.data.activeFile` straight
-   *  through would silently restore that bug. */
+  // Seed only, for the same reason as `tab`, but achieved differently: `Artifact` has a
+  // `defaultTab` prop to seed the tab and no `defaultActiveFile` counterpart, so this is
+  // read ONCE via `untrack` at setup and handed over as a static value. That leaves
+  // `Artifact`'s unconditional `createEffect(() => setActiveFile(local.activeFile))` with
+  // nothing reactive to track, so it runs once instead of resetting the user's selection on
+  // every revision. Keep it static: passing `props.data.activeFile` straight through would
+  // silently restore that bug.
+  /** Path of the file selected in the tree when the card first renders. */
   activeFile?: string;
   /** Friendly address shown INSTEAD of the real url. Use when `src` is not
    *  consumer-facing (e.g. a `data:` blob) so a clean address is shown. */
   displayUrl?: string;
   /** Frame height. A bare number is px; a string is any CSS length. Defaults to
-   *  `DEFAULT_ARTIFACT_CARD_HEIGHT` — see the note on ArtifactCard. */
+   *  `DEFAULT_ARTIFACT_CARD_HEIGHT`. */
   height?: number | string;
 };
 

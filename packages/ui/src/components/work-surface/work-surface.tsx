@@ -66,28 +66,28 @@ const DEVICES: readonly { id: WorkSurfaceDevice; label: string; Icon: typeof Mon
 ];
 
 /** Lovable's own `DEVICE_W` shape: the preview canvas takes a max-width and
- *  centers. ONE definition — the story reads it from here. */
+ *  centers. ONE definition; the story reads it from here. */
 export const WORK_SURFACE_DEVICE_WIDTHS: Record<WorkSurfaceDevice, string> = {
   desktop: '100%',
   tablet: '834px',
   mobile: '390px',
 };
 
-/** The story's own recorded reasoning, carried over: the surrounding viewport —
- *  behind BOTH the preview and the code branch, which share one root — sits on a
+/** The story's own recorded reasoning, carried over: the surrounding viewport (
+ *  behind BOTH the preview and the code branch, which share one root) sits on a
  *  MUTED backdrop, matching `stories/showcase/lovable.stories.tsx`'s real preview surface
  *  (its right `<section>`, read line by line: the muted token at 30% around
  *  toolbar + canvas, the toolbar bar itself lighter, and the previewed content
  *  card bordered ON TOP of the muted backdrop). The literal Tailwind
  *  opacity-modifier class for that is deliberately NOT used even though it is
- *  the token Lovable uses — see this module's STYLING note. (Not spelled out
+ *  the token Lovable uses; see this module's STYLING note. (Not spelled out
  *  here either: `tests/styles/shadow-sheet-scan.test.ts` extracts class tokens
  *  from shipped source as TEXT, so naming one in a comment makes the sheet
  *  compile a utility nothing renders.) */
 const TOOLBAR_BG = 'color-mix(in oklab, var(--color-muted) 20%, transparent)';
 const CANVAS_BG = 'color-mix(in oklab, var(--color-muted) 30%, transparent)';
 
-/** What the Code tab shows when nothing has been pointed at it — the state a
+/** What the Code tab shows when nothing has been pointed at it: the state a
  *  construct reaches with `chrome.codeView: true` and no `codeUrl`, which is
  *  VALID vocabulary (owner ruling, 2026-08-30: the toggle has to be reachable
  *  out of the box, so an unset source is an empty state and not an authoring
@@ -96,9 +96,9 @@ const CANVAS_BG = 'color-mix(in oklab, var(--color-muted) 30%, transparent)';
  *  Deliberately the same shape and voice as the preview placeholder codegen
  *  emits (`emitWorkSurfacePage` in `mcp/construct/codegen.ts`): a
  *  short headline, what the surface is, and the one key that replaces it. The
- *  difference is that this one is a COMPONENT, not an emitted HTML file — it
- *  renders in the host document with the kit's tokens available, and it lives
- *  here so the story and the emitted app share one copy of it. */
+ *  difference is that this one is a COMPONENT, not an emitted HTML file. It renders in
+ *  the host document with the kit's tokens available, and it lives here so the story
+ *  and the emitted app share one copy. */
 function CodeTabEmpty(): JSX.Element {
   return (
     <div
@@ -131,8 +131,7 @@ export interface WorkSurfaceProps {
   /** URL the Code tab frames. The Preview|Code toggle needs `showCodeView`;
    *  what it SHOWS is this, or `code`. */
   codeSrc?: string;
-  /** Code-tab content used when `codeSrc` is absent. With neither, the tab
-   *  renders `CodeTabEmpty` — see its doc comment. */
+  /** Code-tab content used when `codeSrc` is absent; with neither, `CodeTabEmpty` renders. */
   code?: JSX.Element;
   /** Address text shown in the read-only URL bar. Defaults to `src`. */
   urlLabel?: string;
@@ -143,7 +142,7 @@ export interface WorkSurfaceProps {
   /** How the framed document is presented; `'preview'` by default. */
   variant?: 'artifact' | 'preview';
 
-  /** Controlled tab. Reuses `ArtifactTab` — one union, never a second. */
+  /** Controlled tab. Reuses `ArtifactTab`, one union, never a second. */
   tab?: ArtifactTab;
   /** Uncontrolled initial tab. Default `'preview'`. */
   defaultTab?: ArtifactTab;
@@ -153,15 +152,13 @@ export interface WorkSurfaceProps {
   device?: WorkSurfaceDevice;
   onDeviceChange?: (device: WorkSurfaceDevice) => void;
 
-  /** Controlled expand state — this component never owns it; the host wires it
-   *  to `WorkspaceShell`'s `startCollapsed`. */
+  /** Controlled expand state; the host wires it to `WorkspaceShell`'s `startCollapsed`. */
   expanded?: boolean;
   onExpandedChange?: (expanded: boolean) => void;
 
   showDeviceToggle?: boolean;
   showUrlBar?: boolean;
-  /** Asks for the open-in-new-tab button. It renders only when there is also
-   *  a `src` to open — see the Show at its site. */
+  /** Asks for the open-in-new-tab button; it renders only when there is a `src` to open. */
   showOpenInNewTab?: boolean;
   showExpand?: boolean;
   /** `false` REMOVES the Preview|Code toggle entirely (the story's own rule),
@@ -308,7 +305,7 @@ export function WorkSurface(props: WorkSurfaceProps): JSX.Element {
               {(codeSrc) => (
                 <Artifact
                   src={codeSrc()}
-                  iframeTitle={props.iframeTitle ? `${props.iframeTitle} — source` : 'Source'}
+                  iframeTitle={props.iframeTitle ? `${props.iframeTitle}: source` : 'Source'}
                   showNav={false}
                   showReload={false}
                   showHome={false}

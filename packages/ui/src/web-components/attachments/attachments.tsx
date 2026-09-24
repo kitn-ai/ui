@@ -35,7 +35,7 @@ interface Props extends Record<string, unknown> {
   /** Wrap each item in a hover card that previews its details. */
   hoverCard?: boolean;
   // Inert for non-image items, which have no image for a dialog to show.
-  /** How an image tile reveals its full size: `hover` (pointer-only hover card, default) or `lightbox` (modal on click). */
+  /** How an image tile reveals its full size: a pointer-only card by default, or a modal on click. */
   imagePreview?: 'hover' | 'lightbox';
   /** Show a remove button per item; clicking it fires a `kai-remove` event. */
   removable?: boolean;

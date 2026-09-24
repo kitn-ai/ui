@@ -5,16 +5,16 @@ import { Button } from '../button/button';
 import type { ChatMessageAction } from '../../web-components/chat/chat-types';
 
 /**
- * The role-scoped, ordered message-action picker — extracted from
+ * The role-scoped, ordered message-action picker, extracted from
  * `builder-in-app-assistant.stories.tsx` (Round A3) into this standalone
  * module during the T-1 build-out so the Assistant and Research templates
  * (both asked for a "message actions, role-scoped picker, reuse" section)
  * share one definition instead of forking it. `builder-in-app-assistant.
  * stories.tsx` was retrofitted to import from here in the same round; its
- * rendered output and behavior are unchanged — this is a pure extraction.
+ * rendered output and behavior are unchanged; this is a pure extraction.
  *
  * Model: `ChatMessage.actions` (`web-components/chat/chat-types.ts`) is `(ChatMessage
- * Action | CustomAction)[]` — an ORDERED array, not a set — and role-scoped
+ * Action | CustomAction)[]`, an ORDERED array, not a set, and role-scoped
  * only by caller curation (checked against `message.tsx`/`chat-thread.tsx`:
  * neither hard-couples any built-in id to a role). This picker enforces
  * role-appropriateness via two independent catalogs, one per role, each
@@ -31,9 +31,8 @@ export type AssistantActionId = ChatMessageAction;
 export interface ActionRowDef<TId extends string> {
   id: TId;
   label: string;
-  /** A curated icon — same components `ui/action-icons.ts`'s registry maps
-   *  each built-in id to, so the picker's icons match what the real action
-   *  bar renders. */
+  /** A curated icon from the same registry `components/action-icons/action-icons.ts`
+   *  maps each built-in id to, so the picker's icons match the real action bar. */
   icon: Component<{ class?: string }>;
 }
 
@@ -72,10 +71,10 @@ export const DEFAULT_ASSISTANT_ACTION_ROWS: ActionRowState<AssistantActionId>[] 
 ];
 
 /**
- * One role's ordered, toggleable action list — a vertical list of rows
+ * One role's ordered, toggleable action list: a vertical list of rows
  * (icon + label + up/down reorder buttons + an enable switch). Row ORDER
  * is the array order, and doubles
- * as the enabled-action order once filtered — no separate "priority"
+ * as the enabled-action order once filtered: no separate "priority"
  * field, because the component tier has no separate concept either.
  *
  * Up/down buttons over drag-and-drop: keyboard- and screen-reader-operable

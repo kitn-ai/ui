@@ -50,7 +50,7 @@ interface Props extends Record<string, unknown> {
   drilled?: boolean;
 }
 
-/** Events fired by `<kai-view-stack>`. Non-bubbling — listen on the element. */
+/** Events fired by `<kai-view-stack>`. Non-bubbling; listen on the element. */
 interface Events {
   // `detail` is `{ view, root, drilled, stack }`; `root` is what the tab bar should mark
   // active, and it is defined even while drilled.

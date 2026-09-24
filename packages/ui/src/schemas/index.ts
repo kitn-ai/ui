@@ -120,7 +120,7 @@ export type CardSchema = JsonSchema & Readonly<Record<string, unknown>>;
  * DO NOT "TIGHTEN" THIS TO `doc as JsonSchema`, OR DELETE THE CAST.
  *
  * It reads like laziness and is not. `JsonSchema` (src/primitives/card-validate.ts)
- * pins `type` to a literal union — `'string' | 'number' | ... | 'null'` — while
+ * pins `type` to a literal union (`'string' | 'number' | ... | 'null'`) while
  * TypeScript infers plain `string` for the `"type"` member of an imported JSON
  * literal, so a schema document is NOT assignable to `JsonSchema` and no narrowing
  * short of a per-file `as const` would make it so. On top of that the documents
@@ -146,7 +146,7 @@ export type CardSchemaName = 'artifact' | 'choice' | 'confirm' | 'embed' | 'form
 
 /**
  * The contract shapes: the envelope itself, the event a card emits back up, and the
- * two result payloads. Not card data and NOT tool candidates — a model is never
+ * two result payloads. Not card data and NOT tool candidates: a model is never
  * asked to emit one of these, so keeping them out of `cardSchemas` is what stops
  * `cardTools()` offering the model an envelope-shaped tool.
  */

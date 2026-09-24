@@ -50,17 +50,17 @@ export interface ToggleChipProps
 
 /**
  * `ToggleChip`: a small pill button for a two-state, chip-shaped toggle
- * (`aria-pressed`) — the common-case selectors in `builder-panel.tsx`'s
+ * (`aria-pressed`): the common-case selectors in `builder-panel.tsx`'s
  * attachments accept editor, promoted to a named primitive (owner design
  * round 4). Controlled via `pressed`, or uncontrolled from `defaultPressed`,
  * matching `Switch`'s controlled/uncontrolled convention.
  *
  * No `ChipGroup` wrapper: a row of chips is `<div class="flex flex-wrap
- * gap-1.5">` and nothing more — there is no shared selection state, roving
+ * gap-1.5">` and nothing more; there is no shared selection state, roving
  * tabindex, or exclusivity to own (unlike `RadioGroup`/`Segmented`, which
  * DO have real grouping logic: one shared `name`, single-select, arrow-key
  * navigation between options). Wrapping a plain flex row in a component
- * would be a component with nothing to do — YAGNI; see the story for the
+ * would be a component with nothing to do. YAGNI; see the story for the
  * same "just a flex row" idiom used inline.
  */
 export function ToggleChip(props: ToggleChipProps): JSX.Element {

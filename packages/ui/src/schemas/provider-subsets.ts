@@ -41,12 +41,9 @@ export interface KeywordRule {
   readonly status: KeywordStatus;
   /** Why, in the words of the source doc where possible. Surfaced in the error. */
   readonly note: string;
-  /**
-   * A value-level constraint on an otherwise supported keyword. Returns a reason
-   * string when the specific VALUE is out of subset, or null when it is fine.
-   * This is where `minItems: 2` on Anthropic and `format: "uri"` on OpenAI live:
-   * the keyword is supported, the value is not.
-   */
+  // This is where `minItems: 2` on Anthropic and `format: "uri"` on OpenAI live: the keyword is
+  // supported, the value is not.
+  /** A value-level constraint on an otherwise supported keyword; returns a reason string, or null when fine. */
   readonly value?: (value: unknown) => string | null;
 }
 

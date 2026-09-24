@@ -9,12 +9,11 @@ interface Props extends Record<string, unknown> {
   // suggestions come first.
   /** The suggestions: strings, or `{ label, value }` when the displayed text and emitted value differ. JS property (array). */
   suggestions?: Item[];
-  /** Chip style: `'outline'` (default), `'ghost'`, or `'default'` (filled). */
+  /** Chip style. Defaults to `outline`. */
   variant?: 'outline' | 'ghost' | 'default';
-  /** Row height for `layout="list"`: `'md'` (default) or `'lg'` for taller rows.
-   *  Chips are unaffected. */
+  /** Row height for the list layout. Defaults to `md`; chips are unaffected. */
   size?: 'md' | 'lg';
-  /** Layout: `chips` (default, a wrapping row of pills) or `list` (full-width left-aligned rows with a leading icon). */
+  /** A wrapping row of pills (the default), or full-width rows with a leading icon. */
   layout?: 'chips' | 'list';
   /** Full-width left-aligned rows instead of pills. */
   block?: boolean;

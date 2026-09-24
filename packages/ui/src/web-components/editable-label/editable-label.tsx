@@ -9,7 +9,7 @@ interface Props extends Record<string, unknown> {
   /** Controlled edit state. `el.editing = true` opens the field; reflected to the
    *  `editing` attribute. */
   editing?: boolean;
-  /** How the read view enters edit mode: `dblclick` (default) or `click`. Reflects to `edit-trigger`; `edit()` and `editing` are unaffected. */
+  /** How the read view enters edit mode. Default is a double click; `edit()` and `editing` are unaffected. */
   editTrigger?: 'dblclick' | 'click';
   /** Placeholder shown while editing / when the value is empty. */
   placeholder?: string;

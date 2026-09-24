@@ -1,21 +1,21 @@
 import { type JSX, Show } from 'solid-js';
 import { cn } from '../../utils/cn';
 
-/** How the tray frames the input — the SPATIAL axis (padding/inset only).
+/** How the tray frames the input: the SPATIAL axis (padding/inset only).
  *  Orthogonal to {@link PromptDockAppearance}, which controls the surface.
- *  - `inset` (default) — uniform inset frames the input on ALL edges (the classic look).
- *  - `edge` — top/bottom inset only; the input sits FLUSH left/right so the lips span
+ *  - `inset` (default): uniform inset frames the input on ALL edges (the classic look).
+ *  - `edge`: top/bottom inset only; the input sits FLUSH left/right so the lips span
  *    the full width.
- *  - `none` — no inset at all; the lips attach directly to the input as a plain stack. */
+ *  - `none`: no inset at all; the lips attach directly to the input as a plain stack. */
 export type PromptDockFrame = 'inset' | 'edge' | 'none';
 
-/** How the tray surface looks — the VISUAL axis (background / border / radius only).
+/** How the tray surface looks: the VISUAL axis (background / border / radius only).
  *  Orthogonal to {@link PromptDockFrame}, which controls the spatial inset. Works like
  *  a button variant.
- *  - `soft` (default) — sunken surface + border + radius (the classic look).
- *  - `outlined` — transparent surface + border + radius.
- *  - `filled` — sunken surface, no border, + radius.
- *  - `plain` — transparent surface, no border, no radius (truly bare). */
+ *  - `soft` (default): sunken surface + border + radius (the classic look).
+ *  - `outlined`: transparent surface + border + radius.
+ *  - `filled`: sunken surface, no border, + radius.
+ *  - `plain`: transparent surface, no border, no radius (truly bare). */
 export type PromptDockAppearance = 'soft' | 'outlined' | 'filled' | 'plain';
 
 export interface PromptDockProps {

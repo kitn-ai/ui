@@ -30,7 +30,7 @@ export type AttachmentImagePreview = 'hover' | 'lightbox';
 // Types
 // ============================================================================
 
-/** One icon per category, and the categories are the wire's own kinds — so the
+/** One icon per category, and the categories are the wire's own kinds, so the
  *  set is exhaustive by construction and a kind added to `EncodableKind` is a
  *  compile error HERE rather than an `undefined` icon at runtime.
  *
@@ -54,8 +54,8 @@ const mediaCategoryIcons: Record<AttachmentMediaCategory, typeof ImageIcon> = {
  * What to DRAW for this attachment, asked of the one module that knows.
  *
  * ★ NO MEDIA TYPES APPEAR BELOW, and that is the fix. This function used to be
- * a prefix switch — `image/` → image, `video/` → video, `application/` or
- * `text/` → document — a second list of media types in a repo whose media-type
+ * a prefix switch: `image/` → image, `video/` → video, `application/` or
+ * `text/` → document, a second list of media types in a repo whose media-type
  * declaration says, at its own definition, "if you find yourself writing a
  * second list of media types anywhere in this repo, delete it and read this".
  * It had drifted in both directions: `image/svg+xml` came back `image` and drew
@@ -67,7 +67,7 @@ const mediaCategoryIcons: Record<AttachmentMediaCategory, typeof ImageIcon> = {
  * already-staged attachment IS, and narrowing here would redraw a message
  * retroactively when a host changed a prop. The default policy is the kit's
  * full capability set, so `unsupported` against it means exactly "no wire
- * format this kit ships can carry this" — which is the only claim about
+ * format this kit ships can carry this", which is the only claim about
  * sendability the renderer can honestly make without knowing the provider.
  */
 export const getMediaCategory = (data: AttachmentData): AttachmentMediaCategory => {
