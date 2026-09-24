@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { fn } from 'storybook/test';
-import { FeedbackBar } from './feedback-bar';
+import { FeedbackBar, type FeedbackBarProps } from './feedback-bar';
 import { componentDescription } from '../../stories/docs/web-component-controls';
 
 const meta = {
@@ -98,7 +98,10 @@ const SmileyIcon = () => (
 );
 
 export const WithIcon: Story = {
-  args: { title: 'How did I do?', icon: <SmileyIcon /> },
+  // The icon is JSX, so it cannot ride in `args` (Storybook serializes them across
+  // the manager/preview boundary); the render closes over it instead.
+  args: { title: 'How did I do?' },
+  render: (args: FeedbackBarProps) => <FeedbackBar {...args} icon={<SmileyIcon />} />,
   ...src(`<FeedbackBar
   title="How did I do?"
   icon={

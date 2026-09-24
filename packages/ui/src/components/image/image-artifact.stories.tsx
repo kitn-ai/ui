@@ -68,11 +68,9 @@ export const Playground: Story = {
 />`),
 };
 
-/**
- * Raw bytes (`{ uint8Array }` from an AI SDK, say) become a Blob and an object URL,
- * which the component revokes on cleanup. Bytes cannot cross the args boundary, so
- * this story builds them in `render`.
- */
+/** Raw bytes (`{ uint8Array }` from an AI SDK, say) become a Blob and an object URL,
+ *  which the component revokes on cleanup. */
+
 export const RawBytes: Story = {
   render: () => {
     const bytes = Uint8Array.from(atob(TINY_PNG_BASE64), (char) => char.charCodeAt(0));

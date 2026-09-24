@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { fn } from 'storybook/test';
 import { createSignal } from 'solid-js';
-import { Thread } from './thread';
+import { Thread, type ThreadProps } from './thread';
 import { ChatConfig } from '../../primitives/chat-config';
 import { componentDescription } from '../../stories/docs/web-component-controls';
 import { textMessage } from '../../state/index';
@@ -111,16 +111,20 @@ export const EmptyDefault: Story = {
 
 /** Custom zero-state via the `empty` prop (the `<kai-thread>` `slot="empty"`). */
 export const EmptyCustom: Story = {
-  args: {
-    messages: [],
-    empty: (
-      <div class="flex flex-1 flex-col items-center justify-center gap-2 py-16 text-center">
-        <div class="text-2xl">💬</div>
-        <p class="text-sm font-medium text-foreground">Ask me anything</p>
-        <p class="text-xs text-muted-foreground">Your conversation will show up here.</p>
-      </div>
-    ),
-  },
+  args: { messages: [] },
+  // The zero-state is JSX, so it cannot ride in `args`; the render closes over it.
+  render: (args: ThreadProps) => (
+    <Thread
+      {...args}
+      empty={
+        <div class="flex flex-1 flex-col items-center justify-center gap-2 py-16 text-center">
+          <div class="text-2xl">💬</div>
+          <p class="text-sm font-medium text-foreground">Ask me anything</p>
+          <p class="text-xs text-muted-foreground">Your conversation will show up here.</p>
+        </div>
+      }
+    />
+  ),
   ...src(`<Thread messages={[]} empty={<YourZeroState />} />`),
 };
 
