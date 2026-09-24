@@ -3,23 +3,21 @@ import { TAB_BAR_CLASS, tabBarTabClass, tabBarItemAccessibleName, TabBarItemCont
 export interface WidgetTabBarProps {
   active: 'home' | 'messages';
   onChange: (tab: 'home' | 'messages') => void;
-  /** Whether the Messages tab has unread activity. Reaches BOTH the visible
-   *  dot and the tab's accessible name (`aria-label`) — a dot alone is
-   *  invisible to assistive tech, the #336 lesson this test pins. */
+  /** Whether the Messages tab has unread activity; also adds the fact to the tab's accessible name. */
   unread?: boolean;
   homeLabel?: string;
   messagesLabel?: string;
 }
 
 /**
- * The widget's Home/Messages tab bar (Intercom-pattern chrome, H-2/H-6). Real
- * `tablist`/`tab` semantics — this is a persistent view switch within the
+ * The widget's Home/Messages tab bar (Intercom-pattern chrome). Real
+ * `tablist`/`tab` semantics: this is a persistent view switch within the
  * widget, not page navigation, so it is not `<Nav>`'s `role="page"` dialect.
  *
- * A thin two-tab preset over the public tab-bar part (P-2/P-9): the bar and
+ * A thin two-tab preset over the public tab-bar part: the bar and
  * tab chrome are `TAB_BAR_CLASS`/`tabBarTabClass`, each tab's interior is
  * `TabBarItemContent`, and the accessible-name rule is
- * `tabBarItemAccessibleName` — the exact pieces the data-driven `TabBar`
+ * `tabBarItemAccessibleName`, the exact pieces the data-driven `TabBar`
  * renders, so the facade and every composed block paint the same tabs.
  */
 export function WidgetTabBar(props: WidgetTabBarProps) {

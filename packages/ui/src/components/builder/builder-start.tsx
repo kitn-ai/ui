@@ -4,13 +4,11 @@ import { CardSurface } from '../card/card-surface';
 import { TEMPLATES, type TemplateId } from '../../../mcp/construct/templates';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// The template picker's data — T-3/T-4 (docs/superpowers/specs/
-// 2026-08-28-template-builder-design.md): a template is DATA (a starter
-// construct + a control manifest), not schema vocabulary, and its public
-// name is a NEUTRAL one — "Support widget", not "Intercom-style widget". The
-// starter-construct/control-manifest half doesn't exist yet (that's Round W
-// onward, per-template); this round only needs the identity — id, name,
-// one-liner — for the picker to be real.
+// The template picker's data: a template is DATA (a starter construct + a
+// control manifest), not schema vocabulary, and its public name is a NEUTRAL
+// one — "Support widget", not "Intercom-style widget". The starter and
+// control-manifest halves of a template live in `mcp/construct/templates.ts`; this
+// module needs only the identity — id, name, one-liner — for the picker.
 // ─────────────────────────────────────────────────────────────────────────────
 
 // 'scratch' is NOT a template — no illustration, no card, no entry in
@@ -22,7 +20,7 @@ import { TEMPLATES, type TemplateId } from '../../../mcp/construct/templates';
 // 'scratch' is NOT a template — no illustration, no card, no registry entry.
 export type BuilderTemplateId = TemplateId | 'scratch';
 
-/** The template ids that DO have a card — every registry id. */
+/** The template ids that DO have a card: every registry id. */
 export type BuilderCardTemplateId = TemplateId;
 
 export interface BuilderTemplate {
@@ -31,10 +29,10 @@ export interface BuilderTemplate {
   description: string;
 }
 
-/** All six cards, DERIVED from the template registry (B-17b) — id, name and
+/** All six cards, DERIVED from the template registry: id, name and
  *  one-liner are the registry's own; this module adds only the
  *  illustrations, which stay component-side keyed by id (SVGs are not
- *  registry data). The Labs story renders all six (T-1a); a real product
+ *  registry data). The Labs story renders all six; a real product
  *  surface renders BUILDABLE_BUILDER_TEMPLATES instead (menu-honesty). */
 export const BUILDER_TEMPLATES: readonly BuilderTemplate[] = TEMPLATES.map(
   ({ id, name, description }) => ({ id, name, description }),
@@ -45,25 +43,16 @@ export const BUILDABLE_BUILDER_TEMPLATES: readonly BuilderTemplate[] = TEMPLATES
 ).map(({ id, name, description }) => ({ id, name, description }));
 
 export interface BuilderStartProps {
-  /** The currently selected template id, or unset for none yet. Controlled —
-   *  this component holds no selection state of its own. */
+  /** The selected template id, controlled here; unset means none chosen yet. */
   value?: BuilderTemplateId;
-  /**
-   * Fires with a template's id when its card is chosen. Click-to-advance
-   * (design choice, this round): T-7 says "selection advances to that
-   * template's builder", and there is nothing a second "Continue" step
-   * would add here that the click itself doesn't already mean — a
-   * disambiguating confirm step belongs to T-2's SWITCHING-template case
-   * (control set changes, so a re-pick needs a confirm), not to picking a
-   * template for the first time. So `onSelect` fires on the same click that
-   * shows the selected ring; the story's Continue readout below just proves
-   * the callback fired, since there's no template builder screen yet to
-   * navigate to.
-   */
+  // Click-to-advance: the click that shows the selected ring IS the selection, so
+  // there is no second Continue step to add. A confirm step belongs to the
+  // switching-template case, where the control set changes and a re-pick needs one.
+  /** Fires with a template's id when its card is chosen. */
   onSelect: (id: BuilderTemplateId) => void;
-  /** Which cards to render. Defaults to BUILDABLE_BUILDER_TEMPLATES
-   *  (menu-honest by default). The Labs story passes BUILDER_TEMPLATES (all
-   *  six) explicitly to show the full catalog. */
+  // Menu-honest by default: only the buildable templates render as cards. A story
+  // showing the full catalog passes all six explicitly.
+  /** The template cards to render; defaults to the buildable templates. */
   templates?: readonly BuilderTemplate[];
   class?: string;
 }
@@ -78,18 +67,18 @@ export const BLUEPRINT_BG = {
 } as const;
 
 /**
- * `BuilderStart` — the builder's opening screen: six selectable template
- * cards (T-7, grown from four in Round P2). Each card is a real
+ * `BuilderStart`, the builder's opening screen: six selectable template
+ * cards. Each card is a real
  * `components/card/card-surface.tsx` `CardSurface` (`clickable`,
  * `media` for the illustration, `header` for the name), not a hand-rolled
- * button — the kit's own primitive already gives a `role="button"` with
+ * button: the kit's own primitive already gives a `role="button"` with
  * Enter/Space activation, which settles this screen's keyboard-semantics
  * question: a `radiogroup` was the other defensible reading (this IS a
  * single choice among six), but `CardSurface` already implements exactly the
  * button-per-card pattern with no extra wiring, and reusing it beats
  * building a second selection primitive for one screen.
  *
- * Brand alignment (T-7): the kit's own tokens throughout — no new color, no
+ * Brand alignment: the kit's own tokens throughout: no new color, no
  * new radius, no new type stack. The illustrations are the one genuinely new
  * visual element this round adds; see `TEMPLATE_ILLUSTRATIONS` below for
  * their shared style rules.
@@ -111,29 +100,14 @@ export function BuilderStart(props: BuilderStartProps): JSX.Element {
           arbitrary-value `minmax()` class would NOT be, so the responsive
           step-down uses the kit's existing breakpoint scale instead of a
           true fluid minmax track. */}
-      {/* Ring-color fix (owner flag from Round P2): `CardSurface` itself already
-          does the right generic thing — `focus-visible:outline-none
-          focus-visible:ring-2 focus-visible:ring-ring` suppresses the
-          browser's own outline and substitutes ITS OWN visible ring, never
-          removing focus indication. The bug was downstream of that, not in
-          it: a SELECTED card here also carries a permanent `ring-primary`,
-          and `.focus-visible\:ring-ring:focus-visible` (class + pseudo)
-          outranks the plain `.ring-primary` (class only) in specificity,
-          so on `:focus-visible` — which Chromium grants to a `clickable`
-          `CardSurface` (a `div[role=button]`, not a native `<button>`) on BOTH a
-          keyboard Enter/Space AND a script/pointer `.click()`, confirmed
-          live via Playwright — CardSurface's own default `--color-ring` (a
-          neutral blue, unrelated to this story's brand-magenta
-          `--color-primary`) won regardless of selection. `!ring-primary`
-          and `focus-visible:ring-primary` are real Tailwind utilities but
-          NEITHER is in the checked-in compiled.css this live Storybook
-          serves (same constraint as every class-must-already-exist note
-          elsewhere in this file), so raw CSS injected the same way CardSurface
-          injects its own per-instance rules — not a new Tailwind class —
-          is the honest fix here: this rule sits ONLY on `[aria-pressed=
-          "true"]`, so it recolors the ring precisely where selection
-          already claims it and leaves every other card's focus ring
-          (still visible, just the kit's default color) alone. */}
+      {/* Ring color on a SELECTED card. `CardSurface` suppresses the browser outline
+          and substitutes `ring-ring`, but `:focus-visible` (which Chromium grants to
+          a `div[role=button]` on keyboard activation AND on `.click()`) outranks a
+          plain `.ring-primary` in specificity, so the kit's neutral ring replaced the
+          selection's brand ring. Both candidate utilities are absent from the
+          checked-in compiled.css, so raw CSS scoped to `[aria-pressed="true"]` —
+          injected the way CardSurface injects its own rules — recolors the ring where
+          selection already claims it and leaves every other focus ring alone. */}
       <style>{'[data-builder-start] [aria-pressed="true"]{--tw-ring-color:var(--color-primary) !important}'}</style>
       <div class={cn('grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3', props.class)} data-builder-start>
       <For each={props.templates ?? BUILDABLE_BUILDER_TEMPLATES}>
@@ -220,38 +194,21 @@ export function BuilderStart(props: BuilderStartProps): JSX.Element {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Illustrations (T-7's actual deliverable) — blueprint/outline line drawings,
-// one per template, all sharing:
-//  - one consistent 160×100 viewBox and stroke language (1.5px strokes,
-//    rounded joins/caps, rounded rect corners at the kit's own small radius);
-//  - `--color-border`/`--color-muted-foreground` for every generic shape
-//    (page chrome, host content, other UI) — the kit's OWN theme tokens, so
-//    these are theme-aware for free and were checked in both light and dark;
-//  - `--color-primary` used SPARINGLY, reserved for the one shape that IS
-//    this kit's chat surface in each drawing (the floating panel for
-//    Support widget, the centered thread for Assistant, the answer column
-//    for Research, the chat rail for Workspace) — everything ELSE in a
-//    drawing (host page, other app content, a sources list) stays muted on
-//    purpose, so the accent visually answers "which part is the kit's."
-//  - plain `<rect>`/`<line>`/`<circle>` only, no curves/paths — kept
-//    hand-authorable and small, per the brief.
-// All six are `aria-hidden` (decorative; the card's own name/description
-// carry the meaning) and take no props — static drawings, not data-driven.
+// Illustrations — blueprint/outline line drawings, one per template, sharing:
+//  - a 160×100 viewBox and one stroke language (1.5px, round joins, rounded rect
+//    corners at the kit's own small radius);
+//  - `--color-border` / `--color-muted-foreground` for every generic shape (page
+//    chrome, host content, other UI), so they theme for free;
+//  - `--color-primary` used SPARINGLY, on the one shape that IS this kit's chat
+//    surface in each drawing, so the accent answers "which part is the kit's";
+//  - plain `<rect>`/`<line>`/`<circle>`, no curves, kept hand-authorable.
+// All six are `aria-hidden` and take no props: static drawings, not data-driven.
 //
-// STYLED VIA INLINE `style`, NOT Tailwind `stroke-*`/`fill-*` utility
-// classes — deliberately, not a style preference. `stroke-border`/
-// `fill-primary`/etc. are class names that appear NOWHERE ELSE in the tree,
-// so they don't exist in the checked-in `compiled.css` this repo's own
-// CLAUDE.md warns about ("stale compiled.css needs a Storybook restart,
-// say so instead of restarting yourself" — the exact standing instruction
-// on this branch). Confirmed live: the first version of this file used
-// those classes and every shape rendered as a solid black rectangle in the
-// running (not-restarted) Storybook — unstyled `fill`/`stroke` fall back to
-// the SVG default (`fill: black`, `stroke: none`), which reads as "the
-// illustration is just a black box." Inline `style` reading the CSS custom
-// properties directly needs no Tailwind class to exist in advance, so it
-// renders correctly with zero rebuild — the honest fix given the
-// don't-restart constraint, not a workaround around it.
+// Styled through inline `style` reading the custom properties, NOT Tailwind
+// `stroke-*`/`fill-*` classes: those names appear nowhere else in the tree, so they
+// are absent from the checked-in compiled.css this branch must not regenerate, and an
+// unstyled `fill`/`stroke` falls back to the SVG default (`fill: black`), which
+// rendered every shape as a black box. Inline style needs no class to exist first.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const STROKE = 1.5;

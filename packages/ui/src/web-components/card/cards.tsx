@@ -25,49 +25,42 @@ import '../embed/embed';
 interface Props extends Record<string, unknown> {
   /** The stream of card envelopes to render. Set as a JS PROPERTY: `el.cards = [...]`. */
   cards?: CardEnvelope[];
-  /** Optional type→tag overrides/additions (merged over the built-ins). Property: `el.types`.
-   *  Typed as a plain string map (not the `CardTagMap` alias) so the generated React
-   *  wrapper inlines it instead of emitting an unresolved named type. */
+  // Typed as a plain string map (not the `CardTagMap` alias) so the generated React
+  // wrapper inlines it instead of emitting an unresolved named type.
+  /** Card type→element tag overrides/additions, merged over the built-ins. JS property: `el.types`. */
   types?: Record<string, string>;
-  /** JSON Schemas for the card types this app renders, keyed by envelope type. The
-   *  companion of `types`, which says what DRAWS a card while this says what a
-   *  VALID one looks like. An OBJECT, so it is a JS property only: `el.schemas = {
-   *  'pricing-table': pricingSchema }`, never an attribute.
-   *  `createCardRegistry(...).validationSchemas` is exactly this shape.
-   *
-   *  Without it the kit validates its own seven built-ins and leaves your own card
-   *  type, the one your app actually cares about, as the only unchecked thing on
-   *  screen. A schema here WINS over a built-in of the same name, matching
-   *  `mergeCardTags`, where your entry is spread over ours.
-   *
-   *  Typed `Record<string, object>` rather than `Record<string, JsonSchema>`
-   *  deliberately: an imported `.json` schema widens `"type"` to `string`, and an
-   *  authored one carries `$schema`/`title`/`description`/`additionalProperties`,
-   *  so the tighter type would reject both of the normal ways to supply one. See
-   *  `CardSchemaMap` in components/card/card-renderer.tsx. */
+  // The companion of `types`: `types` says what DRAWS a card, this says what a VALID
+  // one looks like. `createCardRegistry(...).validationSchemas` is this shape. Without
+  // it the kit validates its own seven built-ins and leaves the consumer's own card
+  // type -- the one that actually matters -- the only unchecked thing on screen. A
+  // schema here WINS over a built-in of the same name, matching `mergeCardTags`, where
+  // the consumer's entry is spread over ours.
+  //
+  // Typed `Record<string, object>` rather than `Record<string, JsonSchema>`
+  // deliberately: an imported `.json` schema widens `"type"` to `string`, and an
+  // authored one carries `$schema`/`title`/`description`/`additionalProperties`, so
+  // the tighter type would reject both normal ways to supply one. See `CardSchemaMap`
+  // in components/card/card-renderer.tsx.
+  /** Card-type JSON Schemas keyed by envelope type; validates each card's `data`. JS property: `el.schemas`. */
   schemas?: Record<string, object>;
   /** Optional CardPolicy handling child events. Property: `el.policy`. */
   policy?: CardPolicy;
-  /** Validate each envelope's `data` against the schema for its type before
-   *  rendering it, using a built-in's own schema or yours from `schemas`. Default
-   *  `true`; set `validate-cards="false"` (or `el.validateCards = false`) to opt
-   *  out. A hard failure (wrong type, a missing required field) renders a
-   *  diagnostic naming the field instead of the card; a soft failure (bounds)
-   *  renders the card unchanged. Both emit a contract `error` event. On in
-   *  production too: a model emitting a bad shape is a production failure mode,
-   *  so stripping the check there would hide it from exactly the person who needs
-   *  to see it. */
+  // A hard failure (wrong type, missing required field) renders a diagnostic naming
+  // the field instead of the card; a soft failure (bounds) renders the card unchanged.
+  // Both emit a contract `error` event. On in production too -- a model emitting a bad
+  // shape is a production failure mode, so stripping the check there would hide it from
+  // exactly the person who needs to see it.
+  /** Validate each card's `data` against its schema before rendering. Default `true`; opt out with `validate-cards="false"`. */
   validateCards?: boolean;
 }
 
 /** Events fired by `<kai-cards>`. */
 interface Events {
-  /** A child card transitioned to a resolved/deferred state (an action was chosen, a
-   *  form/tasks submission landed, or it was dismissed). Re-emitted off the host as
-   *  a non-bubbling convenience event so a consumer can observe resolution centrally
-   *  without diffing the cards array. `detail` = `{ cardId, resolution }`. (A
-   *  `reopen` un-resolves a card and has no `CardResolution`, so it does NOT fire
-   *  this; observe reopen via the underlying bubbling `kai-card` event.) */
+  // Re-emitted off the host as a non-bubbling convenience event so a consumer can
+  // observe resolution centrally without diffing the cards array. A `reopen`
+  // un-resolves a card and has no `CardResolution`, so it does NOT fire this; observe
+  // reopen via the underlying bubbling `kai-card` event.
+  /** A child card resolved (an action chosen, a form/tasks submission landed, or dismissed). `detail` = `{ cardId, resolution }`. */
   'kai-card-resolved': { cardId: string; resolution: CardResolution };
 }
 
@@ -182,6 +175,13 @@ function CardSlot(props: {
   );
 }
 
+// The web-component list dispatcher for the card envelope contract: it maps a type to a tag,
+// propagates the theme, and routes each child's bubbling `kai-card` event through an optional
+// policy. The raw events keep bubbling past this element (composed), so a document-level listener
+// still sees them. An unknown type renders the fallback inline and emits a contract `error`.
+/**
+ * A list of generative-UI cards, one child element per card type.
+ */
 defineWebComponent<Props, Events>(
   'kai-cards',
   { cards: undefined, types: undefined, schemas: undefined, policy: undefined, validateCards: true },

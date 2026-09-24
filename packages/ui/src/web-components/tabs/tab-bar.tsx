@@ -9,10 +9,8 @@ import {
 import { cn } from '../../utils/cn';
 
 interface Props extends Record<string, unknown> {
-  /** Controlled selected value. Set the property or the `value` attribute and
-   *  drive it from your app in response to `kai-tab-change`. Omit for
-   *  uncontrolled: the bar manages its own selection, seeded from
-   *  `defaultValue`, else the first enabled tab. */
+  // Drive it from your app in response to `kai-tab-change`.
+  /** Controlled selected value. Omit for uncontrolled, seeded from `defaultValue` else the first enabled tab. */
   value?: string;
   /** Initial selected value when uncontrolled (the `default-value` attribute
    *  in plain HTML). */
@@ -29,28 +27,11 @@ interface Events {
    *  the item's `value` attribute, else its host `id`. */
   'kai-tab-change': { value: string };
 }
-
+// Bottom-navigation chrome, not `<kai-tabs>` (a content tab strip / segmented control): the bar
+// owns selection state, real `tablist`/`tab` semantics, roving tabindex and arrow-key traversal
+// over its items, and activation surfaces once, as `kai-tab-change`.
 /**
- * `<kai-tab-bar>`, bottom-navigation chrome: equal-width icon-over-label tabs
- * (or icon-only) with per-tab unread dot / count badge, the shape the widget
- * facade's Home/Messages bar renders. Compose it from `<kai-tab-bar-item>`
- * children; the bar owns selection state, real `tablist`/`tab` semantics,
- * roving tabindex and arrow-key traversal over them, and emits
- * `kai-tab-change` (non-bubbling: listen on this element).
- *
- * This is navigation chrome, a different component from `<kai-tabs>` (a
- * content tab strip / segmented control), per ruling P-2.
- *
- * ```html
- * <kai-tab-bar value="home">
- *   <kai-tab-bar-item value="home" icon="home">Home</kai-tab-bar-item>
- *   <kai-tab-bar-item value="messages" icon="message-square" dot>Messages</kai-tab-bar-item>
- * </kai-tab-bar>
- * <script>
- *   document.querySelector('kai-tab-bar')
- *     .addEventListener('kai-tab-change', (e) => console.log(e.detail.value));
- * </script>
- * ```
+ * A bottom navigation bar of equal-width tabs that owns its own selection.
  */
 defineWebComponent<Props, Events>('kai-tab-bar', {
   value: undefined,

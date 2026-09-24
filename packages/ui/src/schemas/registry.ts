@@ -1,72 +1,24 @@
 // createCardRegistry: the one place an app writes down which cards it renders.
 //
-// WHY THIS EXISTS, AND WHY IT IS NOT "A WAY TO REGISTER CUSTOM CARDS"
-// ------------------------------------------------------------------
-// Registering a custom card already worked: `chat.cardTypes = { 'pricing-table':
-// 'my-pricing-table' }` goes through `mergeCardTags` and has since the card contract
-// landed, and `cardTools({ 'pricing-table': schema }, { provider })` already emitted
-// `kai_pricing-table` before this file existed. Measured on 4b33cd8, both halves of
-// the custom round trip passed already. Nothing here unlocks them.
+// What it fixes, and what it does not. Registering a custom card already worked
+// (`chat.cardTypes` plus `cardTools`), so nothing here unlocks that. Two things did not:
+// nothing tied the client's card types to the tool definitions, so the same list was
+// written twice with nothing making the two agree, and `cardTools({ provider })` told the
+// model about all seven built-ins whether or not the app renders them (so every request
+// paid for five the app would never use, and the model could pick one).
 //
-// Two things did not work, and they are what this file is for.
+// `use` narrows what the MODEL IS TOLD, never what renders: `mergeCardTags` /
+// `mergeCardComponents` union the built-ins unconditionally (consumer overrides win), so
+// an app declaring `use: ['confirm']` still draws a `choice` envelope that arrives.
+// `registry.validate()` likewise covers all seven, because validation is about what
+// ARRIVED, not about what was offered.
+
 //
-// 1. NOTHING TIED THE TWO ENDS TOGETHER. `cardTypes` is a per-web-component PROP, so there
-//    is no ambient registry a backend route could consult. The developer wrote their
-//    card types on the client, wrote them again in the tool definitions, and nothing
-//    made the two agree. This is the fifth-copy problem the emit contract exists to
-//    kill, one layer up from the schema itself.
-//
-// 2. THE MODEL WAS TOLD ABOUT ALL SEVEN BUILT-INS REGARDLESS. `cardTools({ provider })`
-//    has no way to say "this app renders confirm and choice, do not offer the model an
-//    artifact card". Every request paid for seven tool definitions, five of which the
-//    app had no intention of using, and the model could pick one of them.
-//
-// So the goal is not the seam, which existed. It is to make the NORMAL path go through
-// the seam, so it cannot rot the way it did once already: the only end-to-end user of
-// `cardTypes` was a workaround in the conformance spike that registered `spike-artifact`
-// because the kit had no artifact card, and when the kit grew one the workaround was
-// correctly deleted and the coverage went with it. Coverage that exists only because
-// something is missing is coverage on a timer.
-//
-// WHAT `use` DOES AND DOES NOT NARROW
-// -----------------------------------
-// `use` narrows what the MODEL IS TOLD ABOUT. It does not narrow what renders, and it
-// must not be read as if it did. `mergeCardTags`/`mergeCardComponents` union the seven
-// built-ins in unconditionally (consumer overrides win), so an app declaring
-// `use: ['confirm']` still renders a `choice` envelope if one arrives. That is the
-// right behaviour: an envelope that turns up from somewhere else should draw, not
-// degrade to a fallback because it was left off a tool list. Narrowing rendering would
-// be a `primitives/card-registry.tsx` change, and a worse product.
-//
-// Likewise `registry.validate()` covers all seven built-ins regardless of `use`.
-// Validation is about what ARRIVED, not about what was offered.
-//
-// NO `toolPrefix`, DELIBERATELY
-// -----------------------------
-// The plan reserves `createCardRegistry({ toolPrefix })` and this file does not ship
-// it, for the reason tool-defs.ts already gives: the inverse (`cardTypeFromToolName`)
-// hard-codes `kai_`, so a prefix honoured on the emit side alone would generate tools
-// the loop's parser cannot recognise, and the card would vanish into `runTool` with no
-// error anywhere. Worse than not having the option. It lands in both directions in one
-// change, or not at all.
-//
-// SERVER-SAFE
-// -----------
-// This module is imported by a backend route (it is half the point) so it stays free
-// of DOM and of the Solid runtime. `CardComponentMap`/`CardTagMap` are TYPE imports
-// and erase completely; the values in `components` are passed through untouched and
-// never called here. `verify:ssr` imports the built entry under the `node` condition
-// and proves the runtime half.
-//
-// It does NOT prove the compile-time half, and the two imports below are deliberately
-// aimed at `.ts` modules rather than at primitives/card-registry.tsx for a reason no
-// runtime guard can see. A type import still has to RESOLVE, and a Node/no-DOM project
-// (tsconfig.mcp.json: `lib: ["ESNext"]`, no `jsx`) cannot resolve a `.tsx` at all:
-// pointing either of these back at card-registry.tsx puts TS6142 on this exact line on
-// any unbuilt tree. Both types are re-exported from card-registry.tsx, so importing
-// them from there LOOKS equivalent and compiles everywhere else. It is not. The check
-// that tells the difference is `tsc --noEmit -p tsconfig.mcp.json` with no dist/
-// present; see the header of primitives/card-component-types.ts.
+// SERVER-SAFE: a backend route imports this, so it stays free of DOM and of the Solid
+// runtime. The two type imports below aim at `.ts` modules rather than at
+// `primitives/card-registry.tsx` because a type import still has to RESOLVE, and a
+// Node/no-DOM project (tsconfig.mcp.json has no `jsx`) cannot resolve a `.tsx`, so the
+// equivalent-looking swap puts TS6142 on that line on an unbuilt tree.
 
 import type { CardComponentMap } from '../primitives/card-component-types';
 import type { CardTagMap } from '../primitives/card-tags';
@@ -88,32 +40,20 @@ import type { CardToolSource } from './tool-defs';
  * {@link CardRegistrySpec.onIncomplete}.
  */
 export interface CustomCardSpec {
-  /**
-   * The JSON Schema for this card type's `data` payload.
-   *
-   * Used for BOTH ends: `cardTools()` projects it into a tool definition, and
-   * `registry.validate()` checks arriving data against it. Authored form is fine, with
-   * the descriptions left in: the projection strips what a provider cannot take, and
-   * the validator ignores keywords it does not implement.
-   *
-   * That last clause is a real limit, not a formality, and it is the same one the
-   * built-ins carry. `validateAgainstSchema` has no applicators, so `allOf`, `anyOf`,
-   * `oneOf`, `if`/`then`, `$ref` and `additionalProperties` in a custom schema are
-   * carried faithfully to the model and NOT enforced on the way back. See the
-   * NOT_ENFORCED table at the top of primitives/card-validate-schemas.ts.
-   */
+  // Authored form is fine, descriptions left in: the projection strips what a provider
+  // cannot take and the validator ignores keywords it does not implement. That limit is
+  // real and the built-ins share it: `validateAgainstSchema` has no applicators, so
+  // `allOf`/`anyOf`/`oneOf`/`if`/`$ref`/`additionalProperties` reach the model and are
+  // NOT enforced on the way back (NOT_ENFORCED in primitives/card-validate-schemas.ts).
+  /** The JSON Schema for this card type's `data` payload, used at both ends: projected into a tool definition, checked on the way back. */
   readonly schema?: CardSchema | JsonSchema;
   /** The custom element that renders it, e.g. `'my-pricing-table'`. Feeds `mergeCardTags`. */
   readonly tag?: string;
   /** The Solid component that renders it. Feeds `mergeCardComponents`. */
   readonly component?: CardComponentMap[string];
-  /**
-   * One sentence of PURPOSE, addressed to the model: when should it reach for this
-   * card? Not a restatement of the shape, which the schema already carries.
-   *
-   * Falls back to the schema's own `description`, then to a generated stub. See
-   * `describe()` in tool-defs.ts.
-   */
+  // Not a restatement of the shape, which the schema already carries. See `describe()`
+  // in tool-defs.ts for the fallback chain.
+  /** One sentence of purpose, addressed to the model. Falls back to the schema's own `description`, then to a generated stub. */
   readonly description?: string;
 }
 
@@ -121,26 +61,18 @@ export interface CustomCardSpec {
 export type IncompletePolicy = 'warn' | 'throw' | 'silent';
 
 export interface CardRegistrySpec {
-  /**
-   * Which BUILT-IN card types this app renders, and therefore which ones the model is
-   * offered.
-   *
-   * Omitted means all seven, which is what `cardTools({ provider })` already does and
-   * what `<kai-chat>` actually renders, so the default describes reality rather than
-   * quietly shrinking it. `use: []` means none of ours: an app whose generative UI is
-   * entirely its own.
-   */
+  // Omitted means all seven, which is what `cardTools({ provider })` already does and
+  // what `<kai-chat>` renders, so the default describes reality rather than quietly
+  // shrinking it. An empty list means none of ours: generative UI entirely your own.
+  /** Which built-in card types this app renders, and therefore offers the model. */
   readonly use?: readonly CardSchemaName[];
   /** This app's own card types, keyed by `CardEnvelope.type`. */
   readonly custom?: Readonly<Record<string, CustomCardSpec>>;
-  /**
-   * How a schema-less custom type is reported. Default `'warn'`.
-   *
-   * `'throw'` for a build or a CI check that wants the hole to be fatal; `'silent'` for
-   * a card type your own code populates and a model never emits, where the warning is
-   * noise. `'silent'` is deliberately a word you have to type, so the acknowledgement is
-   * greppable instead of implied.
-   */
+  // `'throw'` for a build or a CI check that wants the hole to be fatal; `'silent'` for a
+  // card type your own code populates and a model never emits, where the warning is
+  // noise. That last one is deliberately a word you have to type, so the acknowledgement
+  // is greppable instead of implied.
+  /** How a schema-less custom type is reported. Default `'warn'`; the other two make it fatal or suppress it. */
   readonly onIncomplete?: IncompletePolicy;
 }
 
@@ -171,13 +103,9 @@ export interface CardRegistry extends CardToolSource {
   readonly schemas: Readonly<Record<string, CardSchema>>;
   /** Purpose sentences for custom types (and for any built-in a custom entry overrode). */
   readonly descriptions: Readonly<Record<string, string>>;
-  /**
-   * Custom `type -> tag`, for `chat.cardTypes` / `mergeCardTags`.
-   *
-   * Custom entries ONLY. The built-in tags are not restated here because
-   * `mergeCardTags` adds all seven itself; listing the `use`d ones would read as if the
-   * others had been excluded, which is not what happens.
-   */
+  // Custom entries ONLY: `mergeCardTags` adds all seven built-in tags itself, and
+  // listing the `use`d ones here would read as if the others had been excluded.
+  /** Custom card `type -> tag` entries, for `chat.cardTypes`. */
   readonly tags: CardTagMap;
   /** Custom `type -> Solid component`, for `<CardRenderer types>` / `mergeCardComponents`. */
   readonly components: CardComponentMap;
@@ -189,22 +117,13 @@ export interface CardRegistry extends CardToolSource {
   readonly custom: readonly string[];
   /** Custom types with no schema: registered, renderable, invisible to the model. */
   readonly incomplete: readonly string[];
-  /**
-   * Custom schemas in the shape `validateCardData`'s third argument takes, so a caller
-   * that already has a `validateCardData` call can widen it without going through
-   * {@link CardRegistry.validate}.
-   */
+  /** Custom schemas in `validateCardData`'s third-argument shape, for a caller that already has one of those calls. */
   readonly validationSchemas: Readonly<Record<string, JsonSchema>>;
-  /**
-   * Validate an envelope's `data` against this registry's schema for `type`.
-   *
-   * Custom schemas win over a built-in of the same name, matching `mergeCardTags`'s
-   * consumer-wins rule. `null` means there was nothing to check (a type with no
-   * schema anywhere), which is kept distinguishable from a clean pass so a caller
-   * cannot report the second as the first.
-   *
-   * Covers all seven built-ins regardless of `use`: see the module header.
-   */
+  // Custom schemas win over a built-in of the same name, matching `mergeCardTags`'s
+  // consumer-wins rule. `null` is kept distinguishable from a clean pass on purpose, so a
+  // caller cannot report the second as the first. Covers all seven built-ins regardless
+  // of `use` (see the module header).
+  /** Validate an envelope's `data` against this registry's schema for its type, or `null` when there is no schema to check against. */
   validate(type: string, data: unknown): CardValidationReport | null;
 }
 

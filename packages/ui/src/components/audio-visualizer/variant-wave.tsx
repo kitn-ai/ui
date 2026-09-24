@@ -58,10 +58,10 @@ export default function WaveVisualizer(props: ShaderVariantProps): JSX.Element {
   // loaded main thread the base tween could land AFTER the override,
   // parking a speaking line at the 0.025 baseline until the next volume
   // change; with live audio that self-heals within one ~33ms tick, but
-  // static drive (a pinned `bands`/`volume` override, upstream's #1399 prop
+  // static drive (a pinned `bands`/`volume` override, upstream's own prop
   // mode) never ticks again, so it stalled visibly (measured on the parity
   // harness, 2/2 under load). This is NOT the benign two-effect shape the
-  // Task 12 review ruled acceptable elsewhere -- that ruling covered
+  // Ruled acceptable elsewhere -- that ruling covered
   // effects with DISJOINT writers; these two wrote the same tweens. One
   // effect, one writer, ordering can no longer matter. Same effect-race
   // class as b5795ac's shared() finding.

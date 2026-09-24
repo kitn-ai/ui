@@ -3,15 +3,9 @@ import { defineWebComponent } from '../define/define';
 import { PromptDock, type PromptDockAppearance, type PromptDockFrame } from '../../components/prompt/prompt-dock';
 
 interface Props extends Record<string, unknown> {
-  /** How the tray frames the input, the SPATIAL inset axis: `inset` (default, the
-   *  classic recessed frame on every side) | `edge` (top/bottom inset only; the
-   *  input sits flush left/right so the lips span the full width) | `none` (no
-   *  inset; the lips attach directly as a plain stack). Attribute: `frame`. */
+  /** How the tray frames the input, the SPATIAL axis: `inset` (default, recessed on every side), `edge` (top/bottom only), or `none`. */
   frame?: PromptDockFrame;
-  /** How the tray surface looks, the VISUAL axis orthogonal to `frame`: `soft`
-   *  (default, sunken surface + border + radius) | `outlined` (transparent +
-   *  border + radius) | `filled` (sunken, no border, + radius) | `plain`
-   *  (bare). Attribute: `appearance`. */
+  /** How the tray surface looks, the VISUAL axis: `soft` (default), `outlined`, `filled`, or `plain`. */
   appearance?: PromptDockAppearance;
 }
 
@@ -22,29 +16,8 @@ const SLOT_NAMES = ['top', 'bottom'] as const;
 type SlotName = (typeof SLOT_NAMES)[number];
 
 /**
- * `<kai-prompt-dock>` — a recessed tray that frames a prompt input and can extend
- * with optional "lip" regions above and/or below it. It sits in the page flow and
- * launches nothing; the floating corner launcher is `<kai-dock>`. The input is the raised card
- * that floats on the tray; the lips sit in a slightly darker recessed band sharing
- * the tray's rounding, so the whole thing reads as one cohesive control.
- *
- * Slots: the DEFAULT slot is the prompt input (the raised card). `slot="top"` is a
- * recessed band ABOVE the input (a notice, a hint); `slot="bottom"` is a band BELOW
- * it (a mode / control row). A lip renders only when its slot is filled — an empty
- * dock shows just the input, no stray band.
- *
- * Styling splits into two orthogonal variant attributes: `frame` (the spatial inset)
- * and `appearance` (the surface). `::part(tray)` / `::part(top)` / `::part(bottom)`
- * expose the three regions for outside styling; four `--kai-prompt-dock-*` tokens
- * tune the chrome (surface / border / radius / inset).
- *
- * ```html
- * <kai-prompt-dock frame="edge" appearance="soft">
- *   <div slot="top">Working in the docs branch</div>
- *   <kai-prompt-input></kai-prompt-input>
- *   <div slot="bottom">Claude Opus 4.8 · 200k context</div>
- * </kai-prompt-dock>
- * ```
+ * A recessed in-flow tray that frames a prompt input, with optional bands above and
+ * below it. `kai-dock` is the floating corner launcher instead.
  */
 defineWebComponent<Props>('kai-prompt-dock', {
   frame: 'inset',

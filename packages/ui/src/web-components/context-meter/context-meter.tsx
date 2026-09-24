@@ -45,14 +45,7 @@ interface Events {
 }
 
 /**
- * `<kai-context>` — a token/context-window usage meter with a hover-card
- * breakdown (input/output/reasoning/cache + estimated cost). Data via the
- * `context` property.
- *
- * **Color thresholds** are configurable via `warnThreshold` (default `0.7`)
- * and `dangerThreshold` (default `0.9`). When the computed severity level
- * changes, a `kai-threshold-change` event fires with `detail.level` set to
- * `'ok'`, `'warn'`, or `'danger'`.
+ * A context-window usage meter with a token and cost breakdown.
  */
 defineWebComponent<Props, Events>('kai-context', {
   context: undefined,

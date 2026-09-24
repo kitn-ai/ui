@@ -10,11 +10,11 @@ const meta = {
   tags: ['autodocs'],
   parameters: {
     layout: 'padded',
+    // Why it is a real `<input type="range">`, why `min`/`max` have no defaults and how
+    // the filled track is computed: see the `Slider` docstring in `slider.tsx`.
     docs: {
       description: componentDescription([
-        'A slider. A real `<input type="range">` behind `appearance: none` — never a `<div>` with a drag handler — so arrows, Home, End, PageUp/PageDown, touch dragging, form participation and the `slider` role all come from the browser and are correct by construction.',
-        'What the component adds is the **filled track**. The kit paints the portion left of the thumb from a `--kai-range-fill` custom property, and the percentage is arithmetic over `min`, `max` and the current value — three things the component already has, so no caller ever computes it.',
-        '`min` and `max` are required and have no defaults. A range with no bounds is a slider-shaped guess, and the guess belongs to whoever knows what the number means. Everything else the component does not own is forwarded to the input: `id`, `name`, `disabled`, `required`, `aria-*`, any `data-*` hook and the DOM events.',
+        'A control for picking a value from a numeric range.',
       ]),
     },
   },
@@ -22,16 +22,16 @@ const meta = {
     min: { control: 'number', description: 'Lowest selectable value. Required.' },
     max: { control: 'number', description: 'Highest selectable value. Required.' },
     step: { control: 'number', description: 'Granularity. Omit for the native default of 1. The string `any` is also accepted and means continuous (see "Any range, any step").' },
-    value: { control: 'number', description: 'Current value. Controlled — drive it from `onInput`.' },
+    value: { control: 'number', description: 'Current value. Controlled.' },
     defaultValue: { control: 'number', description: 'Initial value when uncontrolled. Ignored once `value` is set.' },
     disabled: { control: 'boolean', description: 'Disable interaction. Dims the track and blocks the pointer.' },
     valueLabel: {
       control: 'boolean',
-      description: 'Show the current value beside the track. `true` renders the raw number; pass a FUNCTION instead to render `60%`, `3 of 5`, a duration. Off by default. The readout is `aria-hidden`, so the value is announced once, by the input.',
+      description: 'Show the current value beside the track; a function renders custom content. Off by default, and the readout is `aria-hidden`.',
     },
     name: { control: 'text', description: 'Form-control name. This is what a native form submits.' },
     class: { control: 'text', description: 'Extra classes, merged with the kit rule rather than replacing it.' },
-    'aria-label': { control: 'text', description: 'Accessible name. A slider with no visible label needs one, or it announces as an unnamed control.' },
+    'aria-label': { control: 'text', description: 'Accessible name, for a slider with no visible label.' },
     onInput: { action: 'input', description: 'Fires per step while dragging. Read `e.currentTarget.valueAsNumber`.', table: { category: 'Events' } },
     onChange: { action: 'change', description: 'Fires on commit (pointer release). Read `e.currentTarget.valueAsNumber`.', table: { category: 'Events' } },
   },

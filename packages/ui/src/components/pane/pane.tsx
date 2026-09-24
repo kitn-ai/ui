@@ -7,13 +7,12 @@ import { cn } from '../../utils/cn';
 export type PaneStatusTone = 'working' | 'idle' | 'done' | 'error' | 'blocked';
 
 export interface PaneStatus {
-  /** The tone — maps to a semantic status hue (see {@link PANE_STATUS_BG}). */
+  /** Which status hue to show; the mapping lives in {@link PANE_STATUS_BG}. */
   tone: PaneStatusTone;
   /** Optional text beside the dot (e.g. "Running tests…"). Without it the dot is
    *  decorative and only the color carries meaning. */
   label?: string;
-  /** Animate a ping ring on the dot — for the live `working` state. Respects
-   *  prefers-reduced-motion. */
+  /** Animate a ping ring on the dot for the live `working` state; respects prefers-reduced-motion. */
   pulse?: boolean;
 }
 
@@ -35,7 +34,7 @@ export const PANE_STATUS_BG: Record<PaneStatusTone, string> = {
 export interface PaneProps {
   /** A glyph/avatar shown before the title (an agent icon, a model avatar). */
   leading?: JSX.Element;
-  /** The pane title — the agent / window name. */
+  /** The agent or window name shown in the header. */
   title: string;
   /** A role / label shown under the title (e.g. "Reviewer", "claude-sonnet"). */
   subtitle?: string;
@@ -43,7 +42,7 @@ export interface PaneProps {
   status?: PaneStatus;
   /** Extra header controls, placed BEFORE the built-in window controls. */
   actions?: JSX.Element;
-  /** The pane body — scrolls inside a `min-h-0 flex-1 overflow-y-auto` region. */
+  /** The pane body, which scrolls inside the frame. */
   children?: JSX.Element;
   /** A pinned row below the body (e.g. a composer). Stays put while the body scrolls. */
   footer?: JSX.Element;
@@ -55,9 +54,9 @@ export interface PaneProps {
   onMaximize?: () => void;
   /** Close window control. */
   onClose?: () => void;
-  /** Optional split control — the button only renders when this is provided. */
+  /** Split control; the button renders only when this is provided. */
   onSplit?: () => void;
-  /** Optional dock-to-side control — the button only renders when this is provided. */
+  /** Dock-to-side control; the button renders only when this is provided. */
   onDock?: () => void;
   /** Extra classes for the outer frame. */
   class?: string;
@@ -78,29 +77,21 @@ function ControlButton(props: { label: string; onClick?: () => void; children: J
 }
 
 /**
- * Pane — a reusable framed panel for a multi-agent workspace: a header (leading
- * glyph + title/subtitle + status dot + actions + window controls), a scrolling
- * body, and an optional pinned footer (e.g. a composer). It is the "pane frame"
- * every agent tile otherwise re-hand-rolls.
+ * Pane, a reusable framed panel for a multi-agent workspace: a header (glyph, title,
+ * status dot, actions, window controls), a scrolling body and an optional pinned footer.
+ * It is the pane frame every agent tile otherwise hand-rolls.
  *
- * Layout: the outer frame is a column flexbox; the header and footer hold their
- * height (`shrink-0`) while the body takes the rest (`min-h-0 flex-1
- * overflow-y-auto`) so content scrolls INSIDE the pane. Give the pane a bounded
- * height (a fixed parent, or `h-full` inside a grid/flex track) for the scroll to
- * engage; the body imposes no padding so content controls its own.
+ * Layout: the frame is a column flexbox whose header and footer hold their height
+ * (`shrink-0`) while the body takes the rest, so content scrolls INSIDE the pane. Give the
+ * pane a bounded height (a fixed parent, or `h-full` in a grid/flex track) for the scroll
+ * to engage; the body imposes no padding.
  *
- * Window controls (right side of the header): maximize/restore (Maximize2 ↔
- * Minimize2, toggled by `maximized`) and close (X) are always present; split
- * (Columns2) and dock (PanelRight) only render when `onSplit` / `onDock` are
- * passed. Each fires its callback prop.
+ * Window controls: maximize/restore (toggled by `maximized`) and close are always present;
+ * split and dock render only when `onSplit`/`onDock` are passed, and each fires its
+ * callback. `focused` paints a ring plus an accent border to mark the active pane.
  *
- * States: `focused` paints a ring + accent border to mark the active pane;
- * `maximized` swaps the maximize glyph for restore.
- *
- * Colors come entirely from design tokens (surface / border / ring / tool-*),
- * so it reads correctly in light and dark with no hardcoded values. The header,
- * body, footer, and window-control cluster are exposed via
- * `::part(header|body|footer|controls)` for the `kai-pane` facade.
+ * Colours come from design tokens only, and the header, body, footer and control cluster
+ * are exposed as `::part(header|body|footer|controls)` for the `kai-pane` facade.
  */
 export function Pane(props: PaneProps) {
   return (

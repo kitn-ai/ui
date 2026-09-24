@@ -45,13 +45,13 @@ type Props = Omit<ChatThreadProps,
   // reason as `conversations`/`store`); `onUnreadChange` is wired internally
   // (JSX prop on `<ChatThread>` below) as a dispatched `kai-unread-change`
   // event, matching every other ChatThread callback on this element. Both
-  // were EXCLUDED entirely until the 2026-08-31 composition spike: the old
+  // were EXCLUDED entirely before the composed-launcher seam: the old
   // reasoning was that `<kai-chat>` has no sibling chrome of its own to
   // report to — true, but a CONSUMER composing this element beside their own
   // launcher/dock (the spike's hand-composed widget) is exactly such sibling
   // chrome, and without this seam the kit-owned unread computation was
   // unreachable from the public element surface (report: research/
-  // 2026-08-31-composition-spike, "Real gap 1").
+  // composed-launcher seam below).
   | 'hostOpen' | 'onUnreadChange'
   // `headerEndContent`/`emptyContent` are JSX.Element escape hatches for a caller
   // composing `ChatThread` directly as a Solid component (see their doc comments in
@@ -65,99 +65,78 @@ type Props = Omit<ChatThreadProps,
   // (which it stringifies as Solid's internal array-like union — meaningless to a
   // web-component consumer) into `<kai-chat>`'s public prop surface and docs.
   | 'headerEndContent' | 'emptyContent' | 'composerStart' | 'composerEnd'> & Record<string, unknown> & {
-    /** Which attachment media types the user may stage, in HTML `accept` syntax:
-     *  `<kai-chat accept="image/*,application/pdf">`. A plain string, so unlike
-     *  `messages` it DOES work as an attribute. Omitted means no filter.
-     *
-     *  MEDIA TYPES ONLY -- exact (`image/png`) or subtype wildcard (`text/*`).
-     *  HTML allows a file extension here and this does not: `accept=".py"` THROWS
-     *  with the entry named, rather than silently resolving to a picker that
-     *  accepts nothing.
-     *
-     *  It can only NARROW what the kit can already encode: `accept="image/*"`
-     *  resolves to the four image formats both APIs take, not to every image type
-     *  the OS offers. Pass the SAME string to `toOpenAIMessages(msgs, { accept })`
-     *  and the picker and the wire cannot disagree -- both resolve it through
-     *  `resolveMediaPolicy` against one declaration. That declaration is readable
-     *  as `encodableMediaTypes()` from `@kitn.ai/ui/wire`, if you would rather
-     *  build your own picker than use this prop. */
+    // It can only NARROW what the kit can already encode: `accept="image/*"` resolves
+    // to the four image formats both APIs take, not to every image type the OS offers.
+    // Pass the SAME string to `toOpenAIMessages(msgs, { accept })` and the picker and
+    // the wire cannot disagree -- both resolve it through `resolveMediaPolicy` against
+    // one declaration, readable as `encodableMediaTypes()` from `@kitn.ai/ui/wire` if
+    // you would rather build your own picker than use this prop. An extension
+    // (`accept=".py"`) THROWS with the entry named rather than silently resolving to a
+    // picker that accepts nothing.
+    /** Which attachment media types the user may stage, in HTML `accept` syntax. Omitted = no filter; media types only, an extension THROWS. */
     accept?: string;
-    /** The full message thread to render, newest last. Each entry carries its
-     *  role, ordered `parts`, and optional actions/avatar/feedback. Set as a JS
-     *  property (`el.messages = [...]`); a NEW array reference per streaming
-     *  chunk re-renders (mutating in place does not). Omit for an empty thread.
-     *
-     *  Re-declared here (rather than inherited from `ChatThreadProps`) because
-     *  the ELEMENT registers a `[]` default and renders the empty state without
-     *  it, while the SolidJS `<ChatThread>` component still requires it. The
-     *  facade hands it a validated array either way. Matches `<kai-thread>`. */
+    // Re-declared here (rather than inherited from `ChatThreadProps`) because the
+    // ELEMENT registers a `[]` default and renders the empty state without it, while
+    // the SolidJS `<ChatThread>` component still requires it. The facade hands it a
+    // validated array either way. Matches `<kai-thread>`.
+    // Each entry carries its role, ordered `parts`, and optional
+    // actions/avatar/feedback; mutating an entry in place does not re-render.
+    /** The message thread to render, newest last. JS property; pass a NEW array per streaming chunk. Omit for an empty thread. */
     messages?: ChatMessage[];
-    /** Optional card type -> custom-element tag overrides/additions for `card`
-     *  parts (merged over the built-ins). Property: `el.cardTypes`. Typed as a
-     *  plain string map (not the `CardTagMap` alias) so the generated React
-     *  wrapper inlines it instead of emitting an unresolved named type. */
+    // Typed as a plain string map (not the `CardTagMap` alias) so the generated React
+    // wrapper inlines it instead of emitting an unresolved named type.
+    /** Card type → custom-element tag overrides/additions, merged over the built-ins. JS property: `el.cardTypes`. */
     cardTypes?: Record<string, string>;
-    /** JSON Schemas for the card types this app renders, keyed by envelope type. The
-     *  companion of `cardTypes`, which says what DRAWS a card while this says what a
-     *  VALID one looks like. An OBJECT, so it is a JS property only: `el.cardSchemas
-     *  = { 'pricing-table': pricingSchema }`, never an attribute.
-     *  `createCardRegistry(...).validationSchemas` is exactly this shape.
-     *
-     *  Without it the kit validates its own seven built-ins and leaves your own card
-     *  type, the one your app actually cares about, as the only unchecked thing on
-     *  screen. A schema here WINS over a built-in of the same name.
-     *
-     *  Typed `Record<string, object>` rather than `Record<string, JsonSchema>`
-     *  deliberately: an imported `.json` schema widens `"type"` to `string`, and an
-     *  authored one carries `$schema`/`title`/`description`/`additionalProperties`,
-     *  so the tighter type would reject both of the normal ways to supply one. */
+    // The companion of `cardTypes`: `cardTypes` says what DRAWS a card, this says what
+    // a VALID one looks like. `createCardRegistry(...).validationSchemas` is this shape.
+    // Without it the kit validates its own seven built-ins and leaves the consumer's own
+    // card type -- the one that actually matters -- the only unchecked thing on screen.
+    // A schema here WINS over a built-in of the same name.
+    //
+    // Typed `Record<string, object>` rather than `Record<string, JsonSchema>`
+    // deliberately: an imported `.json` schema widens `"type"` to `string`, and an
+    // authored one carries `$schema`/`title`/`description`/`additionalProperties`, so
+    // the tighter type would reject both normal ways to supply one.
+    /** Card-type JSON Schemas keyed by envelope type; validates each card's `data`. JS property: `el.cardSchemas`. */
     cardSchemas?: Record<string, object>;
-    /** Turns on the prior-conversations list (a list-toggle button in the
-     *  header, plus a second list view sharing the panel, C-1). Attribute-
-     *  settable like every other boolean flag on this element:
-     *  `<kai-chat conversations>`. Requires `store`. A row select, "new
-     *  conversation," or the visitor's mount-time auto-restore all deliver
-     *  their messages the same way: listen for `kai-conversation-load` and
-     *  set `el.messages` from `event.detail.messages` (a fresh array): this
-     *  element does not update `messages` for you. Set with no `store`, the
-     *  underlying `ChatThread` decides loudly (one console.error) and stays
-     *  visually off; this facade always supplies its own internal load
-     *  handler (the `kai-conversation-load` dispatch below), so the second
-     *  ChatThread guard, missing `onConversationLoad`, never trips here,
-     *  even for a consumer who never listens for the event. Default false. */
+    // Attribute-settable like every other boolean flag on this element
+    // (`<kai-chat conversations>`). A row select, "new conversation," and the
+    // visitor's mount-time auto-restore all deliver their messages the same way: this
+    // element does not update `messages` for you. Set with no `store`, the underlying
+    // `ChatThread` decides loudly (one console.error) and stays visually off; this
+    // facade always supplies its own internal load handler (the
+    // `kai-conversation-load` dispatch below), so the second ChatThread guard, missing
+    // `onConversationLoad`, never trips here, even for a consumer who never listens for
+    // the event.
+    /** Turns on the prior-conversations list. Requires `store`; default `false`; a load arrives as `kai-conversation-load` -- set `el.messages` yourself. */
     conversations?: boolean;
-    /** The adapter this thread persists conversations through: an object of
-     *  three functions (`list`/`load`/`save`; `ConversationStore`, exported
-     *  from `@kitn.ai/ui`'s `primitives/conversation-store`). A JS PROPERTY
-     *  ONLY: `el.store = myAdapter`. It can never be an attribute, since a
-     *  function-bearing object has no HTML string form, the same reasoning
-     *  that keeps `messages`/`cardSchemas` property-only (the kai- contract:
-     *  array/object props are JS properties, never attributes). Two built-ins
-     *  ship: `localStorageStore(name, userId?)` and `fetchStore(url, userId?)`. */
+    // Function-bearing objects have no HTML string form, which is what keeps this
+    // property-only, the same reasoning that keeps `messages`/`cardSchemas`
+    // property-only (the kai- contract: array/object props are JS properties, never
+    // attributes). Two built-ins ship: `localStorageStore(name, userId?)` and
+    // `fetchStore(url, userId?)`, both exported from `@kitn.ai/ui`'s
+    // `primitives/conversation-store`.
+    /** The persistence adapter: `{ list, load, save }`. JS property only (`el.store = myAdapter`). */
     store?: ConversationStore;
-    /** Turns on the widget home screen (Intercom-pattern): the panel boots into
-     *  a `home` view, with a greeting, most-recent-conversation card, a "new
-     *  conversation" CTA, and host-defined links, plus a Home/Messages tab bar
-     *  for switching back to the thread. An OBJECT, so it is a JS property only:
-     *  `el.home = { greeting: { title: 'Hey' }, links: [...] }`, never an
-     *  attribute (the kai- contract: array/object props are JS properties).
-     *  A `links` entry with no `href` fires `kai-home-link` with that entry when
-     *  tapped, rather than navigating; one WITH `href` opens it directly
-     *  (only when the URL passes the kit's own scheme allowlist). Omit for the
-     *  no-home widget (chat view only, unchanged). */
+    // The Intercom-pattern widget home screen: the panel boots into a `home` view with
+    // a greeting, a most-recent-conversation card, a "new conversation" CTA and
+    // host-defined links, plus a Home/Messages tab bar for switching back to the
+    // thread. An OBJECT, so it is a JS property only: `el.home = { greeting: { title:
+    // 'Hey' }, links: [...] }`, never an attribute. A `links` entry with no `href`
+    // fires `kai-home-link` when tapped rather than navigating; one WITH `href` opens it
+    // directly, and only when the URL passes the kit's own scheme allowlist. Omit for
+    // the no-home widget (chat view only, unchanged).
+    /** Turns on the Home screen (greeting, recent conversation, links, Home/Messages tabs). JS property; omit for the chat-only widget. */
     home?: HomeConfig;
-    /** Whether the chrome that HOSTS this element is currently VISIBLE to the
-     *  visitor, e.g. a composed launcher/dock's open state. Set as a JS
-     *  PROPERTY (`el.hostOpen = open`), never an attribute: the default is
-     *  `true` and an HTML attribute's presence can only ever say "true", so
-     *  there is no attribute form that expresses the one value worth setting
-     *  (`false`). Meaningful only with `conversations` on, where it is the
-     *  third leg of "seen": the active conversation is marked read only while
-     *  it is active AND the chat view is showing AND this is `true`. Leave it
-     *  unset for any layout with no show/hide concept (fullscreen, aside,
-     *  split); that just means unread never distinguishes "closed" from
-     *  "open". The companion of the `kai-unread-change` event: set this from
-     *  your launcher's open state, mirror that event onto its badge. */
+    // The default is `true` and an HTML attribute's presence can only ever say "true",
+    // so no attribute form expresses the one value worth setting (`false`). Meaningful
+    // only with `conversations` on, where it is the third leg of "seen": the active
+    // conversation is marked read only while it is active AND the chat view is showing
+    // AND this is `true`. Leave it unset for any layout with no show/hide concept
+    // (fullscreen, aside, split); that just means unread never distinguishes "closed"
+    // from "open". The companion of the `kai-unread-change` event: set this from your
+    // launcher's open state, mirror that event onto its badge.
+    /** Whether the chrome hosting this element is visible (e.g. a launcher's open state). JS property only; `false` has no attribute form. */
     hostOpen?: boolean;
   };
 
@@ -169,16 +148,12 @@ interface Events {
   /** The staged attachments changed (file added or removed). Carries the full
    *  current list so a consumer can react in real time. */
   'kai-attachments-change': { attachments: AttachmentData[] };
-  /** One or more picked files were refused because `accept` excluded them. The
-   *  element renders NO message of its own: it reports the facts (name, media
-   *  type, whether the kit could have sent it) and what the user should see is
-   *  the application's call. Only ever fires when `accept` is set. */
+  /** One or more picked files were refused because `accept` excluded them. Renders no message of its own; only fires when `accept` is set. */
   'kai-attachments-rejected': { rejected: RejectedAttachment[] };
   /** A suggestion chip was clicked (only in `suggestion-mode="fill"`). */
   'kai-suggestion-click': { value: string };
-  /** An action button on a message was clicked. `action` is the built-in name or
-   *  custom id. `state` is present only for the toggleable feedback votes:
-   *  `'on'` when a like/dislike is set, `'off'` when re-tapped to clear. */
+  // `state` is present only for the toggleable feedback votes.
+  /** An action button on a message was clicked. `action` is the built-in name or a custom id. */
   'kai-message-action': { messageId: string; action: string; state?: 'on' | 'off' };
   /** The header model switcher changed. */
   'kai-model-change': { modelId: string };
@@ -186,31 +161,32 @@ interface Events {
   'kai-web-search': Record<string, never>;
   /** The Mic / voice button was clicked. */
   'kai-voice': Record<string, never>;
-  /** A conversation's history loaded: a row tap in the list, "new
-   *  conversation," or the visitor's own mount-time auto-restore of their
-   *  most recent thread (only fires when `conversations` is on and a `store`
-   *  is set). `detail.id` is that conversation's id, `undefined` for the
-   *  "new conversation" case (no id exists until the first message mints
-   *  one, C-6). Set `el.messages = event.detail.messages` (already a fresh
-   *  array) to actually render it, since this element does not do that for
-   *  you; `messages` stays your own state like everywhere else on this
-   *  element. */
+  // Fires on a row tap in the list, "new conversation," or the visitor's own
+  // mount-time auto-restore of their most recent thread -- only when `conversations` is
+  // on and a `store` is set. `detail.id` is `undefined` for the "new conversation" case
+  // (no id exists until the first message mints one). Set
+  // `el.messages = event.detail.messages` (already a fresh array) to actually render it,
+  // since this element does not do that for you; `messages` stays your own state like
+  // everywhere else on this element.
+  /** A conversation's history loaded. Set `el.messages` from `detail.messages` -- the element does not render it for you. */
   'kai-conversation-load': { id: string | undefined; messages: ChatMessage[] };
   /** A `home.links` entry with no `href` was activated (tapped/clicked/Enter).
    *  Meaningful only when `home` is set. */
   'kai-home-link': { entry: HomeLinkEntry };
-  /** "Is any conversation OTHER than the currently-seen one unread" changed.
-   *  This is the same value this element already renders as the dot on its
-   *  own header list toggle, reported outward so a sibling control with no
-   *  view into the internal conversation-summary state (a composed launcher's
-   *  badge, a `kai-dock`'s `unread` prop) can mirror it: set `dock.unread =
-   *  event.detail.unread`. Fires on every change, including the initial
-   *  `false`. Only meaningful with `conversations` on; pairs with the
-   *  `hostOpen` property, which is what lets "arrived while the widget was
-   *  closed" count as unread for the active conversation too. */
+  // The same value this element already renders as the dot on its own header list
+  // toggle, reported outward so a sibling control with no view into the internal
+  // conversation-summary state (a composed launcher's badge, a `kai-dock`'s `unread`
+  // prop) can mirror it. Fires on every change, including the initial `false`. Only
+  // meaningful with `conversations` on; pairs with the `hostOpen` property, which is
+  // what lets "arrived while the widget was closed" count as unread for the active
+  // conversation too.
+  /** Whether a conversation OTHER than the one on screen is unread. Mirror it onto a launcher badge (`dock.unread = detail.unread`). */
   'kai-unread-change': { unread: boolean };
 }
 
+/**
+ * A complete chat surface: a message thread with its own header and prompt input.
+ */
 defineWebComponent<Props, Events>('kai-chat', {
   messages: [], value: undefined, placeholder: 'Send a message...', loading: false,
   suggestions: undefined, suggestionMode: 'submit', persistSuggestions: false, proseSize: 'sm',
@@ -296,9 +272,9 @@ defineWebComponent<Props, Events>('kai-chat', {
      *  chat view, and delivers `[]` through `kai-conversation-load` (set
      *  `el.messages = event.detail.messages` like every other load; this
      *  element never updates `messages` for you). The seam a composed app's
-     *  own "New conversation" control drives (B-10; the construct shell
+     *  own "New conversation" control drives; the construct shell
      *  palette's entry rides the same controller call). No id is minted until
-     *  the first message (C-6), so calling this on an already-empty new
+     *  the first message, so calling this on an already-empty new
      *  conversation is a harmless no-op. */
     startNewConversation: () => controller?.startNewConversation(),
   });
@@ -326,14 +302,14 @@ defineWebComponent<Props, Events>('kai-chat', {
     conversations={flag('conversations')}
     store={props.store as ConversationStore | undefined}
     onConversationLoad={(messages, id) => dispatch('kai-conversation-load', { id, messages })}
-    /* Composed-launcher seam (composition spike, 2026-08-31): `!== false` so
+    /* Composed-launcher seam: `!== false` so
        an attribute-shaped truthy write-back (a string) still reads open, the
        `scrollButton` pattern — only an explicit `false` closes. */
     hostOpen={props.hostOpen !== false}
     onUnreadChange={(unread) => dispatch('kai-unread-change', { unread })}
     home={props.home as HomeConfig | undefined}
     onHomeLink={(entry) => dispatch('kai-home-link', { entry })}
-    /* F-26: card parts emit off THIS element as the bubbling `kai-card` event,
+    /* Card parts emit off THIS element as the bubbling `kai-card` event,
        so `listenForCardEvents(el)` / addEventListener('kai-card') work. */
     cardHostElement={element}
     onValueChange={(value) => dispatch('kai-value-change', { value })}

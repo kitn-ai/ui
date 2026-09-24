@@ -37,28 +37,21 @@ export interface ConversationSummary {
   /** Fallback for the auto relative time when updatedAt is absent. */
   lastMessageAt?: string;
   updatedAt: string;
-  /** Trailing text describing the row's content, read differently by the two
-   *  built-in list surfaces (both optional, same field — no widened shape):
-   *  the desktop `ConversationList`/`ConversationItem` renders it right-aligned
-   *  as a count/status/"days ago" and auto-derives a short relative time from
-   *  `updatedAt` (fallback `lastMessageAt`) when it's absent; the widget-box
-   *  `ConversationPanel` list view (owner rework, 2026-08-26) renders it as the
-   *  one-line last-message preview under the title instead — that view always
-   *  computes its own right-aligned relative time from `updatedAt` separately,
-   *  since a box that size has no room for a third line. `localStorageStore`
-   *  writes it as the ~80-char truncated last-message preview on every save
-   *  (`primitives/conversation-store.ts`). */
+  // Read differently by the two built-in list surfaces (one field, two renderings): the
+  // desktop `ConversationList`/`ConversationItem` renders it right-aligned as a
+  // count/status/"days ago", and when it is absent derives a short relative time from
+  // `updatedAt` (falling back to `lastMessageAt`); the widget-box panel's list view
+  // renders it as the one-line last-message preview under the title and always computes
+  // its own right-aligned relative time from `updatedAt` separately, since a box that
+  // size has no room for a third line. `localStorageStore` writes it as the ~80-char
+  // truncated last-message preview on every save (`primitives/conversation-store.ts`).
+  /** Trailing text for the row: a count or status on the desktop list, the last-message preview in the widget list. */
   trailing?: string;
-  /** ISO timestamp of when this conversation was last SEEN by the visitor
-   *  (widened additively, 2026-08-26 — unread indicators; no existing field
-   *  fit, since `trailing`/`lastMessageAt`/`updatedAt` are all content-timing
-   *  facts, not viewing-state). Unread = `updatedAt` is later than this.
-   *  Written by `ConversationStore.markRead` (see that doc for exactly when
-   *  and for the decide-loudly default when a store never implements it —
-   *  an absent `lastReadAt` reads as "not unread," never as "definitely
-   *  unread," so a store that doesn't support the concept at all simply
-   *  never shows an indicator rather than guessing). Round-tripped through
-   *  `list()`/`save()`; never author this by hand. */
+  // Unread means `updatedAt` is later than this. Written by `ConversationStore.markRead`,
+  // which documents exactly when and what an absent value means: "not unread", never
+  // "definitely unread", so a store that does not implement the concept shows no indicator
+  // rather than guessing. Round-tripped through `list()`/`save()`; never authored by hand.
+  /** ISO timestamp of when this conversation was last seen by the visitor. */
   lastReadAt?: string;
 }
 
@@ -71,7 +64,7 @@ export interface ConversationGroup {
   createdAt: string;
 }
 
-/** One row in a `HomeConfig.links` list — a "docs" / "talk to sales" style
+/** One row in a `HomeConfig.links` list, a "docs" / "talk to sales" style
  *  entry. `href` is optional: with it, the row renders as a link (subject to
  *  `isSafeUrl`); without it, the row is a button that emits itself via
  *  `HomePanelProps.onLink`. `icon` is either a `renderIcon` name or a safe

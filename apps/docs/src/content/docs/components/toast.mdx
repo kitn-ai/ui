@@ -1,6 +1,6 @@
 ---
 title: Toast
-description: Raise a transient notification with one call — toast('Copied'). An Undo action, stacking, and sticky toasts come for free.
+description: A transient notification raised from code, with no element to place.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -13,7 +13,7 @@ import ToastDemo from '../../../components/ToastDemo.tsx';
 
 <p class="kai-tag-sub">toast() · kai-toast-region</p>
 
-<p class="kai-lede">Raise a transient notification from anywhere with one call — `toast('Copied to clipboard')`. The first toast lazily mounts a single viewport overlay on `document.body`; you never place an element by hand.</p>
+<p class="kai-lede">Stacks up to three and can carry an Undo action, all inside one overlay it mounts itself.</p>
 
 <Facts items={['Imperative API', 'Shadow DOM overlay', 'Undo actions', 'Auto-stack (max 3)', 'Pause on hover']} />
 
@@ -31,7 +31,7 @@ toast.success('Saved');
 The first call creates one `<kai-toast-region>` on `document.body` and binds it to a shared store, so every later `toast()` lands in the same stack. `toast` is also exported from the package root (`@kitn.ai/ui`) if you'd rather import it alongside the SolidJS layer.
 
 <Aside type="tip" title="When to use">
-Confirm an action the user just took — copied text, saved a draft, sent feedback — without interrupting them. Reach for a toast when the message is **transient and non-blocking**. For a decision the user must make, use a [card](/components/cards/) instead.
+Acknowledge something the reader just did: copied text, a saved draft, sent feedback. For a decision they must make, use [Cards](/components/cards/) instead.
 </Aside>
 
 ## The `toast()` API

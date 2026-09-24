@@ -92,22 +92,11 @@ function buildWrappedPolicy(element: HTMLElement, userPolicy: CardPolicy | undef
     maxSendPromptMode: userPolicy?.maxSendPromptMode,
   };
 }
-
+// Required: `provider-origin` (the exact HTTPS origin of the provider, or http://localhost), `src`
+// (which must share that origin), and the `envelope` property. `policy` is optional. Every routed
+// CardEvent is ALSO dispatched as a bubbling and composed `kai-card` CustomEvent off the host.
 /**
- * `<kai-remote>` — mounts a sandboxed cross-origin iframe card.
- *
- * Required props:
- *   - `provider-origin` attribute: the exact HTTPS origin of the card provider
- *     (or http://localhost for local dev).
- *   - `src` attribute: the URL of the card page (must share the provider origin).
- *   - `envelope` JS property: the CardEnvelope to render.
- *
- * Optional:
- *   - `policy` JS property: a CardPolicy for routing card events.
- *   - `theme` attribute (inherited from defineWebComponent): 'light' | 'dark' | 'auto'.
- *
- * Every routed CardEvent is also dispatched as a bubbling+composed `kai-card`
- * CustomEvent off the host element.
+ * A sandboxed cross-origin iframe card.
  */
 defineWebComponent<Props>(
   'kai-remote',

@@ -41,18 +41,15 @@ export interface KaiNavItem {
   /** Trailing icon (a named icon), e.g. an edit/compose affordance. */
   trailing?: string;
   disabled?: boolean;
-  /** Nested items. When present, the row becomes a collapsible group: a parent
-   *  row with a disclosure chevron over an indented child list. Recurses for
-   *  arbitrary depth (primarily 2 levels, e.g. project -> threads). */
+  /** Nested items. The row becomes a collapsible group, to any depth. */
   children?: KaiNavItem[];
   /** A small colored status dot (+ optional label) on the row. */
   status?: NavItemStatus;
   /** Right-aligned muted trailing text (e.g. a relative time, "24d ago").
    *  Distinct from `trailing` (a hover icon). */
   meta?: string;
-  /** An interactive trailing action button (`icon` is a named icon; `label` is
-   *  its accessible name). Activating it fires `onItemAction` and does NOT select
-   *  the row. Distinct from `trailing` (a decorative hover icon, not a button). */
+  /** Interactive trailing action button; activating it fires `onItemAction`
+   *  without selecting the row. `trailing` is the decorative hover icon. */
   action?: { icon: string; label: string };
   /** Render an interactive trailing close (×) button. Activating it fires
    *  `onItemClose` and does NOT select the row. */

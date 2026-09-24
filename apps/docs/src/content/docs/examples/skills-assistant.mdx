@@ -15,7 +15,9 @@ import SkillsAssistantDemo from '../../../components/SkillsAssistantDemo.tsx';
 
 ## How it works
 
-`<kai-chat>` owns the thread and the composer. Pass a `triggers` array as a property — typing `/` opens a menu, and choosing a skill inserts an atomic **pill** into the composer. On `kai-submit` the pill is flattened into the message text (using its `promptText`), so you can route to the matching capability. `<kai-skills>` renders the same capabilities as badges from a separate `skills` property.
+`<kai-chat>` owns the thread and the composer. Pass a `triggers` array as a property — typing `/` opens a menu, and choosing a skill inserts an atomic **pill** into the composer. On `kai-submit` the pill is flattened into the message text (using its `promptText`), so you can route to the matching capability.
+
+`<kai-skills>` renders the same capabilities as badges from a separate `skills` property.
 
 ```html
 <kai-skills id="skills"></kai-skills>

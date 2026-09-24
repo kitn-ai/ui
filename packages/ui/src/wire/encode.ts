@@ -32,9 +32,8 @@ export type OpenAIContentPart =
 
 export interface OpenAIWireMessage {
   role: 'system' | 'user' | 'assistant' | 'tool';
-  /** An ARRAY only when the turn carries an encodable `file` part. A text-only
-   *  turn stays a plain string, so adding attachment support changed nothing
-   *  about what an existing thread puts on the wire. */
+  // Adding attachment support changed nothing about what an existing thread puts on the wire.
+  /** An array only when the turn carries an encodable `file` part; a text-only turn stays a string. */
   content: string | OpenAIContentPart[] | null;
   tool_calls?: OpenAIToolCall[];
   tool_call_id?: string;
@@ -48,27 +47,17 @@ export interface OpenAIWireMessage {
  *  `accept` mean the same thing on both wires, and a second declaration of them
  *  here is a second place to forget to update. */
 export interface OpenAIEncodeOptions extends FileEncodeOptions {
-  /**
-   * Whether to send the assistant's own reasoning back with the thread.
-   *
-   * DEFAULT `'omit'`, and that default is a measurement, not caution. Omitting
-   * reasoning is accepted by every configuration tested -- five live omission
-   * trials plus 28 recorded live requests per configuration across the spike's
-   * conformance sweep, zero 400s -- so the path that ships today demonstrably
-   * works, while including reasoning cost about 25% more prompt tokens per round
-   * when measured (665 -> 834 on a two-round loop). A library does not get to
-   * raise every consumer's bill and add a new provider-validation surface as a
-   * side effect of a bug fix.
-   *
-   * `'include'` is for a multi-round TOOL loop, which is where OpenRouter says it
-   * pays: "when you post tool results, including the original reasoning ensures
-   * the model can continue its reasoning from where it left off". Measured
-   * accepted (HTTP 200) for a signed Anthropic block and for an OpenAI encrypted
-   * block, over the OpenAI-compatible wire.
-   *
-   * The Anthropic wire has no such knob because it has no such choice: a filtered
-   * or rebuilt thinking block there is a hard 400.
-   */
+  // The DEFAULT is a measurement, not caution: a conformance sweep recorded five live
+  // omission trials plus 28 recorded requests per configuration, zero 400s, so the path
+  // that ships demonstrably works, while including reasoning cost about 25% more prompt
+  // tokens per round (665 -> 834 on a two-round loop). A library does not get to raise
+  // every consumer's bill and add a provider-validation surface as a side effect of a bug
+  // fix. Including it is for a multi-round TOOL loop, which is where OpenRouter says it
+  // pays: including the original reasoning lets the model continue where it left off.
+  // Measured accepted (HTTP 200) for a signed Anthropic block and an OpenAI encrypted
+  // block. The Anthropic wire has no such knob because a filtered or rebuilt thinking
+  // block there is a hard 400.
+  /** Whether to send the assistant's own reasoning back with the thread. Default omits it. */
   reasoning?: 'omit' | 'include';
 }
 
@@ -89,38 +78,19 @@ export type UnencodableFilePolicy = 'throw' | 'skip';
 
 export interface FileEncodeOptions {
   onUnencodableFile?: UnencodableFilePolicy;
-  /**
-   * Narrow which attachment media types reach the wire, as HTML `accept` syntax
-   * (`'image/*,application/pdf'`) or an array of the same.
-   *
-   * THE SAME STRING the composer takes as `<kai-chat accept="...">`, resolved by
-   * the same function against the same declaration -- so a developer writes the
-   * set once as a constant and hands it to both ends. Omitted means the kit's
-   * full capability set, which is `encodableMediaTypes()`.
-   *
-   * It can only NARROW. Naming a type the encoders cannot represent does not
-   * enable it; that would just move the failure to a provider 400.
-   */
+  // The SAME STRING `<kai-chat accept="...">` takes, resolved by the same function against
+  // the same declaration, so the set is written once as a constant and handed to both ends.
+  // It can only NARROW: naming a type the encoders cannot represent does not enable it, it
+  // moves the failure to a provider 400.
+  /** Which attachment media types reach the wire, in HTML `accept` syntax or as an array. Omitted means everything `encodableMediaTypes()` reports. */
   accept?: MediaTypeFilter;
-  /**
-   * The app's own id for the logical turn this encode belongs to, carried onto
-   * every diagnostic event the encode emits. Purely diagnostic: nothing here
-   * branches on it and it never reaches a provider.
-   *
-   * THE SAME FIELD, THE SAME MEANING, as `ConsumeOptions.traceId` -- and that
-   * symmetry is the whole payoff. Encoding happens BEFORE a read opens, so
-   * there is no stream to attach an encode to and the kit will not invent one.
-   * Pass the same id to both halves:
-   *
-   *   const body = toOpenAIMessages(messages, { traceId: 'turn-42' });
-   *   readOpenAIStream(res, sink, { traceId: 'turn-42' });
-   *
-   * and the request and the response it produced sit together, with a tool loop
-   * or a sub-agent fan-out grouping into one trace. Without it you still see
-   * both halves; they are simply unlinked, which is the honest rendering --
-   * pinning an encode to "the next stream that opens" would be a guess, and an
-   * encode may be followed by no stream at all.
-   */
+  // THE SAME FIELD, THE SAME MEANING as `ConsumeOptions.traceId`: pass the same id to
+  // `toOpenAIMessages` and `readOpenAIStream` and the request and its response sit
+  // together, with a tool loop or a sub-agent fan-out grouping into one trace. Purely
+  // diagnostic; nothing branches on it and it never reaches a provider. Encoding happens
+  // BEFORE a read opens, so there is no stream to attach an encode to, and an encode may
+  // be followed by no stream at all.
+  /** The app's own id for the logical turn, carried onto every diagnostic event this encode emits. */
   traceId?: string;
   /** The app's name for this call inside its trace (`'planner'`, `'retry-2'`).
    *  Same field and same meaning as `ConsumeOptions.label`. Absent when not
@@ -427,41 +397,22 @@ function detailOf(part: ReasoningPart): Record<string, unknown> | undefined {
 }
 
 /**
- * ONE reasoning part to ONE `reasoning_details` entry, or nothing.
+ * ONE reasoning part to ONE `reasoning_details` entry, or nothing. Three cases, each
+ * recorded in a fixture:
  *
- * Three cases, and every one of them is in a recorded fixture:
+ * 1. OPAQUE (`reasoning.encrypted`): the `data` blob IS the block, with no text or
+ *    signature to rebuild it from, and it arrives whole in one frame, so `raw` goes back
+ *    by reference untouched.
+ * 2. SIGNED (`reasoning.text` plus a signature): REASSEMBLED from text and signature,
+ *    never echoed. Echoing `raw` sends the final frame, which carries the signature and
+ *    no text, and stripping the signature is a hard 400 (`Invalid signature in thinking
+ *    block`) from every provider tried, while mutating the text was accepted.
+ * 3. NEITHER (`format: "unknown"`, and the summaries beside an encrypted block):
+ *    SKIPPED. Omission is proven accepted everywhere, and every measured 400 was a
+ *    provider failing to verify a block it was handed.
  *
- * 1. OPAQUE (`reasoning.encrypted`, `openai/gpt-5.4-mini`). The `data` blob is
- *    the block; there is no text and no signature to rebuild it from, and it
- *    arrives whole in a single frame, so `raw` really is the block here. It goes
- *    back BY REFERENCE, untouched.
- *
- * 2. SIGNED (`reasoning.text` with a signature, an Anthropic model over this
- *    wire). REASSEMBLED from `part.text` and `part.signature`, never echoed.
- *    Echoing `raw` sends the final frame, which carries the signature and NO
- *    text -- measured: of 85 reasoning frames in one turn, only the last has the
- *    signature and it has no text. The signature is the load-bearing field:
- *    stripping it is a hard 400 (`Invalid signature in thinking block`) from all
- *    four providers OpenRouter tried, while mutating the text was accepted.
- *
- * 3. NEITHER (`deepseek` `format: "unknown"`, and the `reasoning.summary`
- *    entries that ride alongside gpt-5.4-mini's encrypted block). SKIPPED.
- *    Nothing measured supports sending these: the two accepted round-trips were
- *    a signed block and an encrypted one, and every measured 400 was a provider
- *    failing to verify a block it was handed. Omission, by contrast, is proven
- *    accepted everywhere. `format: "unknown"` is OpenRouter saying it could not
- *    attribute the block to a round-trippable format, and re-sending a summary
- *    OpenAI itself treats as a display artifact spends tokens on nothing.
- *
- * On the sequence rule -- "the entire sequence of consecutive reasoning blocks
- * must match the outputs generated by the model" -- case 3 is the one place this
- * is READ rather than proven. It holds up because verifiability is a
- * per-configuration property in all 40 recorded reasoning turns, never a
- * per-block one: Haiku signs every block, deepseek signs none, gpt-5.4-mini
- * signs none but carries `data`. So the skip never filters one block out of a
- * run of comparable ones. For gpt-5.4-mini it drops the summary at block index 0
- * and keeps the encrypted carrier at index 1, which is exactly the single-entry
- * payload the live probe sent and got a 200 for.
+ * The skip cannot break the sequence rule, because verifiability is per-configuration:
+ * a provider either signs every block or none, so no run is partly skipped.
  */
 function reasoningDetailOf(part: ReasoningPart): OpenAIReasoningDetail | undefined {
   const detail = detailOf(part);
@@ -485,54 +436,23 @@ function reasoningDetailOf(part: ReasoningPart): OpenAIReasoningDetail | undefin
 /**
  * ChatMessage[] to an OpenAI chat-completions `messages` array.
  *
- * ONE ChatMessage CAN BECOME SEVERAL WIRE MESSAGES. The kit streams a whole
- * assistant turn into a single message, so text, a tool call and the model's
- * answer to that call all live in one `parts` array. The OpenAI wire has no such
- * shape: a `role:'tool'` result must sit between the assistant message that
- * announced the call and whatever the model said afterwards. So the turn is
- * SPLIT at each tool boundary, into
+ * ONE ChatMessage CAN BECOME SEVERAL WIRE MESSAGES. The kit streams a whole assistant turn
+ * into one message, so text, a tool call and the answer to that call share one `parts` array,
+ * while this wire needs a `role:'tool'` result between the assistant message that announced
+ * the call and whatever followed. So the turn is SPLIT at each tool boundary:
  *
  *   assistant(pre-tool text + tool_calls) -> tool(result)... -> assistant(answer)
  *
- * Flattening instead would put the model's answer BEFORE the result it was based
- * on. No endpoint rejects that, which is exactly why it is worth spelling out:
- * it quietly degrades every later round of a tool loop.
+ * Flattening instead would put the answer BEFORE the result it was based on, which quietly
+ * degrades every later round of a tool loop. Consecutive tool parts stay in ONE assistant
+ * message; a turn that encodes to nothing is SKIPPED, never `{ content: null }`.
  *
- * Consecutive tool parts stay in ONE assistant message, because parallel calls
- * are announced together and their results follow together.
+ * REASONING IS OPT-IN: `{ reasoning: 'include' }` sends one `reasoning_details` entry per
+ * measured-accepted everywhere and costs about 25% fewer prompt tokens.
  *
- * A turn that encodes to nothing is SKIPPED, never sent as `{ content: null }`
- * with no `tool_calls`: OpenAI treats `content` as required unless `tool_calls`
- * is present, and strict-compatible endpoints reject it.
- *
- * REASONING IS OPT-IN, and off by default. OpenRouter's OpenAI-compatible
- * endpoint does have a channel on the way back in -- `reasoning_details` on the
- * assistant message -- and `{ reasoning: 'include' }` uses it, one entry per
- * reasoning part, in part order, reassembled by `reasoningDetailOf` rather than
- * echoed out of `part.raw`. Read that function for which blocks make it and why.
- * The default omits, because omitting is measured-accepted everywhere and costs
- * about 25% fewer prompt tokens per round; see `OpenAIEncodeOptions.reasoning`.
- *
- * Reasoning alone still encodes to NOTHING. A block is content the model already
- * produced, not a reason to send a turn, so a message carrying reasoning and no
- * text and no settled tool is skipped exactly as before, rather than becoming
- * `{ content: null }` with no `tool_calls`.
- *
- * `card` and `source` parts are never encoded; they are kit-side.
- *
- * `file` parts ARE encoded, on a USER turn, and a turn carrying nothing but an
- * attachment is now a real message rather than nothing. Images become
- * `image_url` (https URL or `data:` URI alike); a base64 PDF becomes a `file`
- * part whose `file_data` is the data URI. Two cases have no form here and THROW
- * by default: a remote PDF, because this wire's `file` part has no URL variant,
- * and anything that is neither -- see `UnencodableFilePolicy` for why the
- * default is a throw and not a skip.
- *
- * A `file` part on an ASSISTANT turn is still dropped. Neither API accepts image
- * or document content in an assistant message, so there is nothing to encode it
- * to; attachments belong to the user turn that sent them.
+ * `card` and `source` parts are kit-side. `file` parts are encoded on a USER turn, and a remote
+ * PDF THROWS by default while a `file` part on an ASSISTANT turn is dropped.
  */
-// lint-silent-drops: drops card,source -- kit-side parts with no OpenAI wire representation; cards come from tool calls, which ARE encoded, and sources are UI citations.
 export function toOpenAIMessages(
   messages: ChatMessage[],
   options: OpenAIEncodeOptions = {},
@@ -727,53 +647,24 @@ export function toOpenAIMessages(
 }
 
 /**
- * ChatMessage[] to an Anthropic Messages `messages` array. THE ROUND-TRIP
- * ENCODER.
+ * ChatMessage[] to an Anthropic Messages `messages` array. THE ROUND-TRIP ENCODER.
  *
- * A reasoning block is emitted as `part.raw.payload` verbatim and is NEVER
- * rebuilt from `text` plus `signature`: Anthropic returns 400 if a thinking
- * block in the most recent assistant message is modified, reordered, filtered or
- * reconstructed. A reasoning part with no `raw`, or with a `raw` captured from
- * some other format, therefore THROWS rather than silently producing a request
- * that will fail.
+ * A reasoning block is emitted as `part.raw.payload` verbatim, NEVER rebuilt from text plus
+ * signature: Anthropic 400s if a thinking block in the most recent assistant message is
+ * modified, reordered, filtered or reconstructed, so a part with no `raw` THROWS. Order
+ * follows part order, unfiltered, and an empty-text reasoning part is still emitted.
  *
- * Block order follows part order, which follows stream order, with no filtering,
- * because the API validates order too. An empty-text reasoning part (an omitted
- * or redacted block) is still emitted: the docs require sending back every block
- * "including any blocks with empty thinking fields".
- *
- * ONE ChatMessage CAN BECOME SEVERAL WIRE MESSAGES, for the same reason as
- * `toOpenAIMessages`: the kit streams a whole assistant turn into one message, so
- * the tool call and the model's answer to it share a `parts` array, but Anthropic
- * carries the result in a SEPARATE user message that has to sit between them. So
- * the turn is SPLIT at each tool boundary, into
- *
+ * ONE ChatMessage CAN BECOME SEVERAL WIRE MESSAGES, as in `toOpenAIMessages`: the tool result
+ * rides in a SEPARATE user message between the two assistant messages, so the turn is SPLIT at
+ * each tool boundary:
  *   assistant(pre-tool blocks + tool_use) -> user(tool_result)... -> assistant(answer)
  *
- * Flattening instead puts the model's answer BEFORE the result it was based on,
- * and strands every later round's thinking block in the first assistant message.
- * Consecutive tool parts stay in ONE assistant message, because parallel calls are
- * announced together and their results come back together.
+ * Flattening would strand every later round's thinking block in the first assistant message.
+ * Consecutive tool parts stay in ONE assistant message, and adjacent user messages are MERGED.
  *
- * Adjacent user messages are MERGED. The API combines consecutive same-role turns
- * itself rather than rejecting them, so this is not what stands between you and a
- * 400; it is emitted anyway because the tool-result turn and a following user turn
- * are one turn, several OpenAI-compatible Anthropic proxies do enforce strict
- * alternation, and the merged form is what the models are trained on. Ordering is
- * safe by construction: `results` is only non-empty when `blocks` is, so a
- * tool_result message always follows its assistant message and can never be
- * appended after a plain user turn.
- *
- * `file` parts on a USER turn become `image` and `document` blocks, in part
- * order. Both take `source: {type:'base64'}` and `source: {type:'url'}`, so this
- * wire can carry a remote PDF that `toOpenAIMessages` has to refuse. Anything
- * neither API accepts as message content THROWS by default; see
- * `UnencodableFilePolicy`. A `file` part on an ASSISTANT turn is dropped, because
- * an assistant message here carries only text, thinking and tool_use.
- *
- * Asymmetry worth knowing: `tool_use.input` is a parsed OBJECT on this wire, not
- * a string, so it uses `input` and not `rawInput`. Only thinking blocks carry a
- * verbatim requirement.
+ * `file` parts on a USER turn become `image` and `document` blocks, each taking a base64 or url
+ * source, so this wire carries a remote PDF that `toOpenAIMessages` must refuse; on an
+ * ASSISTANT turn a `file` part is dropped. `tool_use.input` is a parsed OBJECT, not a string.
  */
 export function toAnthropicMessages(
   messages: ChatMessage[],

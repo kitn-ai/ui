@@ -62,11 +62,11 @@ function parseStaticLen(v: string): { n: number; unit: 'px' | '%' } | null {
 /**
  * Build a panel's INITIAL `flex-basis`, clamped into its `[min, max]` bounds so
  * it never PAINTS past its max (or below its min). The drag handler already
- * clamps, but only once a drag begins — without this, a percentage default on a
+ * clamps, but only once a drag begins. Without this, a percentage default on a
  * wide container (e.g. `40%` against a `480px` max) renders wider than max and
  * then SNAPS to max on the first resize. Uses CSS `clamp()`/`min()`/`max()` so
  * the bound is enforced at layout time against the live container size, with
- * MIXED units (a `%` default vs a `px` max) resolving correctly — no JS measure.
+ * MIXED units (a `%` default vs a `px` max) resolving correctly, and no JS measure.
  * `basis`/`min`/`max` are already-normalized CSS lengths (see `normalizeSize`);
  * an undefined `basis` stays undefined → the caller falls back to flexible.
  */
@@ -237,12 +237,10 @@ function ResizablePanel(props: ResizablePanelProps) {
 // --- ResizableHandle ---
 
 export interface ResizableHandleProps extends JSX.HTMLAttributes<HTMLDivElement> {
-  /**
-   * Divider affordance drawn inside the 8px grab zone:
-   * - `line` (default) — a 1px hairline, transparent at rest, tinting on hover/drag.
-   * - `grip` — a dotted grip handle.
-   * - `none` — no visible divider (invisible hit-area only).
-   */
+  // Drawn inside the 8px grab zone. `line` is a 1px hairline, transparent at rest and
+  // tinting on hover/drag; `grip` is a dotted grip handle; `none` draws no divider, only
+  // the invisible hit area.
+  /** Divider affordance drawn inside the grab zone; `line` by default. */
   handle?: 'line' | 'grip' | 'none';
   onPanelResize?: (delta: number) => void;
   /** Keyboard nudge step in pixels (default 16). Home/End jump to min/max. */
@@ -588,7 +586,7 @@ export interface ResizableProps {
   orientation?: Orientation;
   /** Fired on drag-end / keyboard resize / visibility change with the current panel sizes (percent). */
   onChange?: (sizes: number[]) => void;
-  /** Divider affordance on each interactive handle: `line` (default), `grip`, or `none`. */
+  /** Divider affordance on each interactive handle; `line` by default. */
   handle?: 'line' | 'grip' | 'none';
   class?: string;
   /** Which panel index is maximized (null = none). Hides the others. */

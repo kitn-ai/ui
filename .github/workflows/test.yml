@@ -378,6 +378,34 @@ jobs:
       - name: Story-convention guard (docs.source.code + argType Events category)
         run: pnpm --filter @kitn.ai/ui run lint:story-conventions
 
+      # A prop doc comment is generated into FIVE artifacts at once: the element
+      # meta, llms-full.txt (what an agent reads), the MCP catalog, the docs prop
+      # table and Storybook. The owner's rule is that it says what the prop does
+      # plus only what the name and type cannot (default, unit, a real trap), in
+      # one sentence: measured on the web-component facades, the long tail ran to
+      # 986 chars and the same 872-char text sat in three of them. The reasoning
+      # belongs in a `//` comment beside the prop, which no generator reads.
+      #
+      # `--self-test` proves the analyzer fires on an over-cap prop, honours a
+      # waiver only when it carries a reason, and refuses to pass on a walk that
+      # read nothing. Source only, no dist/.
+      - name: Prop-doc verbosity guard (one sentence per prop)
+        run: pnpm --filter @kitn.ai/ui run lint:prop-docs
+
+      # A comment citing a plan, a task/round ID, a dated ruling, a section ref or a
+      # path into the dated archive is unreadable the day it is written: the reader
+      # cannot resolve `T-1` or `(owner round, 2026-08-26)`, because the plan was
+      # never in the repo or lives in `docs/handoff/`, which describes an older
+      # tree. The same walk caps a single comment BLOCK at 20 lines, because the
+      # worst module header on this tree was 109 lines and nobody reads it.
+      #
+      # `--self-test` proves the analyzer fires on each citation shape, lets a
+      # LIVING doc path through, does not mistake `GPT-4` for a task ID, does not
+      # read `//` inside a URL as a comment, and honours a waiver only when it
+      # names the rule and carries a reason. Source only, no dist/.
+      - name: Comment-reference and block-length guard
+        run: pnpm --filter @kitn.ai/ui run lint:comment-references
+
       # Does a document that ENUMERATES the merge gate still match this job?
       # A handoff said "every gate is green" over a five-command list while this
       # job was red on `verify:pack`, which was not one of the five --

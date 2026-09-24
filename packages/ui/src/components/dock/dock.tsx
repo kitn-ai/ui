@@ -9,11 +9,11 @@ import { MessageCircle, X } from 'lucide-solid';
 export type DockPosition = 'bottom-end' | 'bottom-start' | 'top-end' | 'top-start';
 
 /** Where focus goes when the panel opens.
- *  - `content` (default) — `focus()` the first element assigned to the panel, falling
+ *  - `content` (default): `focus()` the first element assigned to the panel, falling
  *    back to the panel itself when that element cannot take focus. Content-AGNOSTIC:
  *    the dock never learns what it is holding.
- *  - `panel` — focus the `tabindex="-1"` panel container (what `kai-dialog` does).
- *  - `none` — never move focus. */
+ *  - `panel`: focus the `tabindex="-1"` panel container (what `kai-dialog` does).
+ *  - `none`: never move focus. */
 export type DockFocusOnOpen = 'content' | 'panel' | 'none';
 
 /** Imperative open controller, handed to a parent (the `kai-dock` facade) via
@@ -21,15 +21,13 @@ export type DockFocusOnOpen = 'content' | 'panel' | 'none';
 export interface DockController { open: Accessor<boolean>; setOpen: (v: boolean) => void }
 
 export interface DockProps {
-  /** The panel body. ANY content — the dock never reads or types it. */
+  /** The panel body; the dock never reads or types it. */
   children?: JSX.Element;
-  /** Content inside the built-in button while CLOSED. Defaults to a chat glyph. */
+  /** Content inside the built-in button while closed. Defaults to a chat glyph. */
   launcher?: JSX.Element;
-  /** Content inside the button while OPEN. Defaults to a ✕; when only `launcher` is
-   *  given, that content stays rather than morphing into a clashing built-in. */
+  /** Content inside the button while open; omitted with only `launcher` given, that content stays. */
   launcherOpen?: JSX.Element;
-  /** The widget's NAME. Derives the panel's accessible name and both launcher names
-   *  (`Open ${label}` / `Close ${label}`) — one string instead of three. */
+  /** The widget's name, used for the panel's accessible name and both launcher names. */
   label?: string;
   /** i18n override for the launcher's name while closed. */
   openLabel?: string;
@@ -37,51 +35,41 @@ export interface DockProps {
   closeLabel?: string;
   /** Which corner. Logical, RTL-correct. Defaults to `bottom-end`. */
   position?: DockPosition;
-  /** Render the unread dot. CONSUMER-OWNED: shown only while closed, and never
-   *  written back by the dock (see the component doc). */
+  /** Shows the unread dot while closed; the dock never writes the state back. */
   unread?: boolean;
-  /** Disable the launcher. */
+  /** Disables the launcher. */
   disabled?: boolean;
-  /** Suppress the dock's own built-in mobile `[part="close"]` X. Off (rendered) by
-   *  default — the built-in X is the FALLBACK close route for panel content with no
-   *  header of its own, which is the general case the dock has to cover since it
-   *  never reads what it holds. Set `true` when the slotted/composed content
-   *  supplies its own close affordance in its own header row (e.g. `ChatThread`'s
-   *  `headerEndContent`) — with both present the two X's stack, one floating over
-   *  the other's row, which is exactly the "doesn't look intentional" feedback this
-   *  prop exists to let a caller avoid. TRADEOFF: the mobile panel reserves a
-   *  padding band above its content so the built-in X never paints over it; that
-   *  band stays reserved unless you set `hideClose` true, so only set it once your
-   *  own control is actually in place — otherwise you get the band with no X to
-   *  justify it. */
+  // The built-in X is the FALLBACK close route for panel content with no header
+  // of its own, which is the general case since the dock never reads what it
+  // holds. With a second close affordance in the content the two X's stack, one
+  // floating over the other's row. The mobile panel reserves a padding band so
+  // the built-in X never paints over the content; that band stays reserved unless
+  // this is true.
+  /** Hides the dock's built-in close button; the mobile panel still reserves the band it would occupy. */
   hideClose?: boolean;
   /** Where focus lands on open. Defaults to `content`. */
   focusOnOpen?: DockFocusOnOpen;
-  /** Controlled open state. When set, the component never changes it itself — drive it
-   *  from `onOpenChange`. Omit for uncontrolled (internal) state. */
+  /** Controlled open state; when set, the dock only reports changes through `onOpenChange`. */
   open?: boolean;
-  /** Initial open state when uncontrolled. Does NOT move focus (see the focus contract). */
+  /** Initial open state when uncontrolled; does not move focus. */
   defaultOpen?: boolean;
-  /** Fires whenever the dock wants to open or close (launcher / Escape / a method). */
+  /** Fires whenever the dock wants to open or close (launcher, Escape, a method). */
   onOpenChange?: (open: boolean) => void;
-  /** Receive the open controller once mounted. */
+  /** Receives the open controller once mounted. */
   controllerRef?: (api: DockController) => void;
-  /** Receive the focusable panel node so a facade's `focus()` can target it. */
+  /** Receives the focusable panel node so a facade's `focus()` can target it. */
   panelRef?: (el: HTMLElement) => void;
-  /** Receive the launcher button so a facade's `focus()` can target it. */
+  /** Receives the launcher button so a facade's `focus()` can target it. */
   launcherRef?: (el: HTMLButtonElement) => void;
-  /**
-   * Resolve the element `focusOnOpen: 'content'` should focus.
-   *
-   * A PROP, because the answer is "the first element assigned to the panel slot" and
-   * only the web-component facade can see slot assignments — a Solid caller passes
-   * its own ref instead. Returning nothing falls back to focusing the panel.
-   */
+  // A prop because the answer is "the first element assigned to the panel slot"
+  // and only the web-component facade can see slot assignments; a Solid caller
+  // passes its own ref instead.
+  /** The element `focusOnOpen: 'content'` focuses; returning nothing focuses the panel itself. */
   contentTarget?: () => HTMLElement | null | undefined;
 }
 
 /** The built-in closed glyph. Exported so the facade can use it as its `launcher`
- *  slot's FALLBACK content — one definition, two users, rather than a second copy
+ *  slot's FALLBACK content, one definition, two users, rather than a second copy
  *  of the same icon choice living in the element layer. */
 export function DockLauncherGlyph(): JSX.Element {
   return <MessageCircle size={24} />;
@@ -95,25 +83,23 @@ export function DockCloseGlyph(): JSX.Element {
 export interface DockLauncherImageProps {
   /** The icon URL. */
   src: string;
-  /** Alt text — usually left empty: the launcher BUTTON already carries the
-   *  accessible name (Dock derives it from `label`/`openLabel`/`closeLabel`),
-   *  so a second name on the icon inside it would be redundant, not missing. */
+  /** Alt text for the icon, usually empty: the launcher button already carries the accessible name. */
   alt?: string;
 }
 
 /**
  * A branded launcher icon with a built-in fallback to {@link DockLauncherGlyph}
- * on load failure — a dead link, or a placeholder URL nobody swapped for a
+ * on load failure: a dead link, or a placeholder URL nobody swapped for a
  * real asset yet (exactly what shipped in `kai dev`'s own `owner-widget`
  * fixture: `launcherIcon: "https://example.com/logo.png"`, which never
  * resolves, so the FAB rendered a permanently broken image). Decides loudly
- * with one `console.warn` naming the failing URL, then swaps — never a
+ * with one `console.warn` naming the failing URL, then swaps, never a
  * silent broken-image icon sitting in the corner of someone's page.
  *
  * Lives here, not on {@link Dock} itself: `Dock`'s `launcher` prop is
  * deliberately ANY content (an emoji, a "Support" text pill, this image,
  * whatever a consumer slots in) and the dock never inspects what it's
- * holding — teaching it to specifically understand "this might be an
+ * holding: teaching it to specifically understand "this might be an
  * `<img>` that can 404" would be the one prop where that boundary breaks.
  * This is a plain sibling component a `launcher` value can be built FROM,
  * same relationship `DockLauncherGlyph`/`DockCloseGlyph` already have to
@@ -143,7 +129,7 @@ export function DockLauncherImage(props: DockLauncherImageProps) {
  *
  * IN A `<style>` RATHER THAN INLINE, and that is a decision. `kai-prompt-dock` puts
  * its tokenized chrome in an inline `style={{}}`, which resolves `var()` fallbacks
- * and lets an outside override win — but an inline declaration also beats every rule
+ * and lets an outside override win, but an inline declaration also beats every rule
  * in the cascade, and this element ships TWO rules that have to be able to win: the
  * narrow-viewport full-bleed default and the reduced-motion rule. Both are media
  * queries, which cannot be expressed inline at all. So the geometry lives here and
@@ -232,37 +218,23 @@ const DOCK_CSS = `
 [data-kai-dock] [part="launcher"]:focus-visible { outline: 2px solid var(--color-ring); outline-offset: 2px; }
 [data-kai-dock] [part="launcher"]:disabled { opacity: 0.55; cursor: not-allowed; }
 
-/* The mobile-only close affordance rendered INSIDE the panel. Hidden by default and
-   only switched on inside the <=480px media block below, alongside the rule that
-   hides the launcher while the panel is open at that width — same query drives both,
-   CSS-only, no JS viewport logic. Absolutely positioned against the panel, which is
-   the panel's own containing block once the narrow-viewport rule below sets it to
-   position: fixed.
+/* The mobile-only close affordance rendered INSIDE the panel: hidden by default and only
+   switched on inside the <=480px media block below, alongside the rule that hides the
+   launcher while the panel is open at that width, so one query drives both with no JS
+   viewport logic. It is absolutely positioned against the panel.
 
-   The inset is a CONSUMER-OVERRIDABLE TOKEN, same idiom as every other geometry
-   value in this file (--kai-dock-width and friends). The dock is content-agnostic —
-   it never reads what is slotted into the panel — so it cannot know whether that
-   content renders its own trailing controls (a ChatThread header-end slot with
-   share/settings icons, say) in the same top-right corner.
+   The inset is a CONSUMER-OVERRIDABLE TOKEN, the same idiom as every other geometry value
+   in this file. The dock is content-agnostic and never reads what is slotted, so it cannot
+   know whether that content renders its own trailing controls in the same top-right corner.
 
-   The mobile block below reserves a BAND of the panel's own padding above whatever
-   is slotted, sized to this button's own footprint, so nothing paints under this X
-   by default -- verified fix (round 1) against a real ChatThread header-end slot
-   colliding with it at 375px. Owner feedback on the real widget (round 2): for a
-   construct with only a title in the header, that band read as a dead empty strip
-   with the X floating alone in it -- "that doesn't look like the empty component
-   either, lets do better." The actual fix composes instead of reserving space:
-   ChatThread now has its own headerEndContent escape hatch (see its prop doc) so a
-   caller puts the close control INSIDE the header row, sharing it with the title --
-   zero collision by construction, no band needed. hideClose on this component (see
-   its prop doc) then suppresses this built-in X for exactly that case, and the
-   band above is scoped to :not([data-hide-close]) so it comes off ONLY there --
-   every other consumer (anyone who hasn't opted into hideClose, including a
-   hand-authored dock with real header-end content) keeps the band, same as round 1
-   shipped, so the collision it fixed stays fixed for them. What remains here for
-   that default case is a plain absolute overlay, top-right of the panel, with
-   these consumer-overridable inset tokens for the rare case it should deliberately
-   sit in front of something (e.g. a single small badge). */
+   The mobile block below reserves a BAND of the panel's own padding above whatever is
+   slotted, sized to this button's own footprint, so nothing paints under the X by default
+   (verified at 375px against a real header-end slot). A band alone read as a dead empty area
+   for a header holding only a title, so the better answer is COMPOSITION: a caller can put a
+   close control inside the header row through the headerEndContent escape hatch, sharing the
+   row with the title and colliding by construction. hideClose on this component suppresses
+   this built-in X for exactly that case, and the band is scoped to :not([data-hide-close])
+   so it comes off only there; every other consumer keeps it. */
 [data-kai-dock] [part="close"] {
   display: none;
   position: absolute;
@@ -357,22 +329,20 @@ const DOCK_CSS = `
   }
 
   /* Reserve a band for the built-in [part="close"] X ABOVE whatever is slotted,
-     rather than overlaying it on top of the panel's own content — the fix round 1
-     collision protection (verified against a real ChatThread header-end slot at
+     rather than overlaying it on top of the panel's own content, so the two cannot collide (verified against a real header-end slot at
      375px: without this, the X painted directly over trailing icon buttons).
      DERIVED from the button's own inset + size tokens, not a second hand-typed
      number.
 
-     SCOPED to :not([data-hide-close]) — round 2 (owner feedback: the band read as
-     a dead strip when nothing but the X occupied it) removed this UNCONDITIONALLY
-     and reintroduced the very collision round 1 fixed, for every consumer who
-     never opted into hideClose. hideClose is only true for a caller that supplies
+     SCOPED to :not([data-hide-close]) because the band read as a dead strip when nothing
+     but the X occupied it; removing it unconditionally reintroduces the very collision
+     this band prevents, for every consumer who never opted into hideClose. hideClose is only true for a caller that supplies
      its OWN close control in its own header row (ChatThread's headerEndContent is
      the one that does today) — the built-in X and this band both come off
      together for that case, since there is nothing left for the band to protect.
      Every other consumer -- including a hand-authored kai-dock with real
-     slot="header-end" content and no opinion on hideClose -- keeps the band, the
-     same as round 1 shipped. */
+     slot="header-end" content and no opinion on hideClose -- keeps the band,
+     unchanged. */
   [data-kai-dock]:not([data-hide-close]) [part="panel"] {
     padding-block-start: calc(2 * var(--kai-dock-close-inset-block, 0.75rem) + 2.25rem);
   }
@@ -438,11 +408,11 @@ function isWithin(root: Node, node: Node | null): boolean {
 }
 
 /**
- * Dock — a corner-docked launcher button with a panel that opens above it.
+ * Dock: a corner-docked launcher button with a panel that opens above it.
  *
  * The affordance behind a support widget: a circular button pinned to a corner of the
  * viewport, and a floating panel holding whatever you slot into it. The panel is
- * content-agnostic on purpose — a chat, a form, your own component — and the dock
+ * content-agnostic on purpose, a chat or a form or your own component, and the dock
  * never reads, types or reaches into it.
  *
  * WHAT IT OWNS (all of it non-configurable, because these are facts about the medium
@@ -450,13 +420,13 @@ function isWithin(root: Node, node: Node | null): boolean {
  *
  * - **Hide semantics.** Closed means `visibility: hidden` + `opacity: 0` + `inert`,
  *   and the panel is NEVER unmounted. `display: none` would leave the panel with no
- *   layout box while closed, so anything inside that measures itself — a thread
- *   scroller, a `ResizeObserver` — measures zero and re-measures on every open. The
+ *   layout box while closed, so anything inside that measures itself (a thread
+ *   scroller or a `ResizeObserver`) measures zero and re-measures on every open. The
  *   cost of keeping the box is that a stream keeps rendering into a closed panel,
  *   which is precisely what makes an unread dot honest.
  * - **Focus.** On open, focus moves per `focusOnOpen`; on close it returns to the
  *   launcher, always. `inert` is cleared and visibility restored BEFORE `focus()` runs
- *   — a `focus()` into an inert or hidden subtree is silently dropped, no error — via
+ *   (a `focus()` into an inert or hidden subtree is silently dropped, no error), via
  *   a `queueMicrotask`, the same shape `components/dialog/dialog.tsx` uses. Mount moves no focus.
  * - **Escape.** Closes only while the dock CONTAINS focus, and never stops the event.
  *   A background widget that ate every Escape on the page would break the host page's
@@ -464,17 +434,17 @@ function isWithin(root: Node, node: Node | null): boolean {
  * - **No focus trap**, deliberately, unlike `kai-dialog`. The page staying usable is
  *   the whole point of "docked", which is also why the panel is `aria-modal="false"`.
  * - **Mobile close route.** At <=480px the panel goes full-bleed and the launcher
- *   hides while it is open — a floating launcher over a full-bleed panel is not an
+ *   hides while it is open: a floating launcher over a full-bleed panel is not an
  *   obvious close affordance. The panel gets its own `[part="close"]` X, top-right,
  *   CSS-gated by the SAME media query and `[data-expanded]`, so it needs no viewport
  *   JS. Desktop is unaffected: the launcher keeps toggling and no X ever renders.
  *   This is the FALLBACK route, for panel content with no header of its own to hold
- *   a close control — content that does (a `ChatThread` using `headerEndContent`,
+ *   a close control: content that does (a `ChatThread` using `headerEndContent`,
  *   say) passes `hideClose` to drop this X instead of stacking a second one over
  *   its own header row.
  *
  * WHAT IT REFUSES: it never aborts a request, never persists its own open state, never
- * decides what "unread" means, and never clears `unread` on open — writing over a
+ * decides what "unread" means, and never clears `unread` on open: writing over a
  * consumer's prop is the trap `kai-chat.loading` fell into. Those are the app's calls;
  * `open` + `onOpenChange` is the seam.
  *

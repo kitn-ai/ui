@@ -1,36 +1,22 @@
 // `@kitn.ai/ui/solid` — the COMPLETE SolidJS surface.
 //
-// WHY THIS EXISTS
-// ---------------
-// Solid is this kit's authored layer, so every registered `kai-*` element must be
-// writable as a Solid component (`verify:solid-coverage` enforces 79/79 plus a
-// `<Name>Props` type for every public component). But the root entry "." is what
-// EVERY consumer resolves, including the React/Vue/Svelte/vanilla majority who
-// only ever touch the web components. Growing "." to full Solid coverage cost
-// them 591,359 -> 705,031 bytes (+113,672, +19.2%; +23,160 gzipped) for a surface
-// four of the five supported frameworks cannot even call.
+// Solid is this kit's authored layer, so every registered `kai-*` element must be writable
+// as a Solid component, with a `<Name>Props` type for every public component
+// (`verify:solid-coverage` enforces both). But the root entry "." is what EVERY consumer
+// resolves, including the React/Vue/Svelte/vanilla majority who only touch the web
+// components, and growing "." to full Solid coverage cost them 591,359 -> 705,031 bytes
+// (+19.2%) for a surface four of the five frameworks cannot even call.
 //
-// So the full Solid catalog lives here instead, and this file is compiled as its
-// OWN build target (KAI_BUILD=solid in config/vite/lib.ts -> dist/solid.js, plus
-// the SSR twin KAI_BUILD=solid.server -> dist/solid.server.js, mirroring ".").
-// Nothing
-// below is reachable from dist/index.js, which is the entire point: a React
-// consumer's bundle never sees it.
+// So the full catalog lives here, compiled as its own build target (KAI_BUILD=solid ->
+// dist/solid.js, plus the SSR twin `solid.server`), and nothing below is reachable from
+// dist/index.js: a React consumer's bundle never sees it.
 //
-// WHY IT COMPOSES "." INSTEAD OF RESTATING IT
-// -------------------------------------------
-// `export * from './index'` makes "./solid is a superset of ." a COMPILER
-// invariant rather than a promise two hand-maintained lists have to keep. This
-// repo has been bitten repeatedly by copied lists that no compiler watches; a
-// restated 400-line barrel would be exactly that, and the failure mode is silent
-// (an export lands on "." only, and Solid consumers never learn it exists).
+// `export * from './index'` makes "./solid is a superset of ." a COMPILER invariant rather
+// than a promise two hand-maintained lists keep. A restated barrel would be exactly the
+// copied list no compiler watches, failing silently. It costs nothing at the package
+// boundary: the composition resolves at SOURCE level and bundles away.
 //
-// This costs nothing at the package boundary. The composition is resolved at
-// SOURCE level and bundled away: dist/solid.js is a standalone artifact with no
-// runtime dependency on dist/index.js, so importing "./solid" does not drag in a
-// second entry, and importing "." does not drag in any of this.
-//
-// A Solid consumer therefore needs exactly one import:
+// A Solid consumer needs exactly one import:
 //   import { Thread, Dialog, Message, type ThreadProps } from '@kitn.ai/ui/solid';
 export * from './index';
 
@@ -195,7 +181,7 @@ export type { CaptionsProps, CaptionSegment, CaptionsVariant } from './component
 export { createConversationItemsController, readConversationItemId } from './components/conversation/conversation-list';
 export type { ConversationItemsController, ConversationItemsControllerOptions } from './components/conversation/conversation-list';
 // Panel / PanelHeader / PanelBody / PanelFooter — the widget panel chrome as
-// public parts (blocks-and-parts ruling P-1). Behind `<kai-panel>` /
+// public parts. Behind `<kai-panel>` /
 // `<kai-panel-header>`; exported here for a Solid consumer composing the
 // frame directly.
 export { Panel, PanelHeader, PanelBody, PanelFooter } from './components/panel/panel';

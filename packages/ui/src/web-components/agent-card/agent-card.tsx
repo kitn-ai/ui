@@ -10,11 +10,11 @@ interface Props extends Record<string, unknown> {
    *  is the attention-routing signal that pulls focus to this agent.
    *  Attribute: `needs-attention`. */
   needsAttention?: boolean;
-  /** Run status. A JS PROPERTY (object), not an attribute. Shape: `{ tone,
-   *  label?, pulse? }`, where `tone` is one of `working` | `idle` | `done` |
-   *  `error` | `blocked` (maps to the kit's tool hues), `label` is an optional
-   *  short string beside the dot, and `pulse` animates the dot. Set it with
-   *  `el.status = { tone: 'working', label: 'Working', pulse: true }`. */
+  // Shape: `{ tone, label?, pulse? }`, where `tone` is one of `working` | `idle` |
+  // `done` | `error` | `blocked` (mapped to the kit's tool hues), `label` is an
+  // optional short string beside the dot, and `pulse` animates the dot. Set it with
+  // `el.status = { tone: 'working', label: 'Working', pulse: true }`.
+  /** Run status: `{ tone, label?, pulse? }`. JS property, not an attribute. */
   status?: AgentStatus;
 }
 
@@ -29,26 +29,8 @@ interface Events {
 }
 
 /**
- * `<kai-agent-card>` — the compact glanceable card for one agent in a multi-agent
- * workspace. The agent name with a leading tone-colored status dot, an optional
- * "Needs you" attention treatment, an `active` (selected) state, and a trailing
- * "..." overflow button.
- *
- * Set `status` as a JS property (it's an object); `name` is a string attribute and
- * `active` / `needs-attention` are boolean attributes. Listen for `kai-activate`
- * (promote to focus) and `kai-menu` (open your own per-agent menu).
- *
- * ```html
- * <kai-agent-card name="Refactor bot" active></kai-agent-card>
- * <script type="module">
- *   import '@kitn.ai/ui/web-components';
- *   const card = document.querySelector('kai-agent-card');
- *   card.status = { tone: 'working', label: 'Working', pulse: true };
- *   card.addEventListener('kai-activate', () => focusAgent());
- *   card.addEventListener('kai-menu', () => openMenu());
- * </script>
- * ```
- * Recolor the status dot via `::part(status)` and the kebab via `::part(menu)`.
+ * One agent's state at a glance in a multi-agent workspace; the focused agent belongs
+ * in the thread or the panel.
  */
 defineWebComponent<Props, Events>('kai-agent-card', {
   name: undefined,

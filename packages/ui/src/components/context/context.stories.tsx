@@ -13,12 +13,8 @@ import {
 } from './context';
 import { componentDescription } from '../../stories/docs/web-component-controls';
 
-/**
- * Story for the compound `Context` family. `Context` is the root provider that
- * holds the token-usage values; the trigger/content/usage-row subcomponents read
- * from it. The controllable props all live on the `Context` root, so `Playground`
- * drives the root and composes a full hover-card breakdown.
- */
+// The root holds the token-usage values; trigger, content and usage rows read from it,
+// so `Playground` drives the root.
 const meta = {
   title: 'Components/Context',
   component: Context,
@@ -27,8 +23,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'A context-window usage indicator: a hover-card trigger with a used-percent ring, and a popover breaking down token usage (input, output, reasoning, cache) plus estimated cost.',
-        'Wrap the composition in `Context` and pass `usedTokens` / `maxTokens` (plus optional per-category counts and `estimatedCost`); compose `ContextTrigger`, `ContextContent` (Header/Body/Footer), and the usage rows.',
+        "A meter of how much of the model's context window the conversation has used.",
       ]),
       controls: { exclude: ['use:eventListener'] },
     },

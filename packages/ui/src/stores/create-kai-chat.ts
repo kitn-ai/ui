@@ -8,7 +8,8 @@ import {
 } from '../state/index';
 
 export interface CreateKaiChatOptions {
-  /** Seed messages, read once at creation and copied. Later changes are ignored — drive updates through the returned ops. */
+  /** Seed messages, read once at creation and copied. Later changes are ignored; drive updates
+   *  through the returned ops. */
   initialMessages?: ChatMessage[];
   /** Seed suggestions, read once at creation and copied. Later changes are ignored. */
   initialSuggestions?: string[];

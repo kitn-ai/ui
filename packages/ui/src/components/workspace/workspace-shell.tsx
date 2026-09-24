@@ -67,18 +67,17 @@ export interface WorkspaceShellProps {
   /** End aside maximum width in px during resize (default 480). */
   endMaxWidth?: number;
 
-  /** Auto-collapse both asides when the shell's own width drops below this many
-   *  px, and re-expand when it grows back above. Applies to uncontrolled asides
-   *  only (it never fights an app-driven collapsed prop); omit to disable. */
+  // Uncontrolled asides only: it never fights an app-driven collapsed prop, and
+  // a side with no content has nothing to collapse.
+  /** Auto-collapses both asides below this shell width in px and re-expands them above it; omit to disable. */
   collapseBelow?: number;
-  /** Below this shell width in px, an expanded aside renders as an overlay
-   *  drawer over the main region instead of a column beside it. Escape inside
-   *  the drawer closes it and returns focus to the element focused before it
-   *  opened. Omit to disable. */
+  // Escape inside the drawer closes it and returns focus to the element that had
+  // focus before it opened.
+  /** Renders an expanded aside as an overlay drawer over the main region below this shell width in px; omit to disable. */
   drawerBelow?: number;
-  /** Density hint. Reflected as a `data-compact` hook on the root (and as the
-   *  `compact` attribute on the element) for your CSS and slotted content; the
-   *  shell itself keeps no other opinion about density. */
+  // The shell keeps no opinion about density itself: it reflects the hook for
+  // the consumer's CSS and slotted content, nothing more.
+  /** Density hint, reflected as `data-compact` on the root for your own CSS and slotted content. */
   compact?: boolean;
 
   /** An aside collapsed or expanded (any path: method, breakpoint, drawer Escape). */

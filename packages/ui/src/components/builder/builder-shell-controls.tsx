@@ -9,31 +9,19 @@ import { Switch } from '../switch/switch';
 import { cn } from '../../utils/cn';
 
 /**
- * "App chrome" — the Command palette and User menu shell knobs (owner
- * discovery round), factored as a shared module so every shell-bearing
- * template (`Labs/Builder/Assistant`, `.../Workspace`, `.../Multi-mode`)
- * reuses the same real pieces instead of forking a fourth copy —
- * consistent with `builder-composer-triggers.tsx`'s own rule-of-three
- * extraction earlier this round.
+ * "App chrome", the Command palette and User menu shell knobs, factored as a shared
+ * module so every shell-bearing template (`Labs/Builder/Assistant`, `.../Workspace`,
+ * `.../Multi-mode`) reuses the same real pieces instead of forking a fourth copy.
  *
- * COMMAND PALETTE: composes the kit's real `CommandList` (`components/command/command.tsx`)
- * — a presentational grouped listbox — inside a hand-built overlay
- * (backdrop + centered panel + Escape/backdrop-click to close), the SAME
- * shape `stories/showcase/claude-code.stories.tsx`'s own command-center overlay
- * uses around `kai-command` (read before building this — `CommandList` is
- * that facade's underlying Solid piece; the facade adds the search input's
- * filtering behavior itself, which `CommandList` does not own). A plain
- * `Input` above the list does the filtering here, client-side over a stub
- * catalog, matching claude-code's own placeholder copy style ("Search
- * commands...").
+ * COMMAND PALETTE: composes the kit's real `CommandList` (`components/command/command.tsx`),
+ * a presentational grouped listbox, inside a hand-built overlay (backdrop + centered panel +
+ * Escape/backdrop-click to close). A plain `Input` above the list does the filtering,
+ * client-side over a stub catalog; the facade's own search input is not reused because
+ * `CommandList` does not own filtering.
  *
- * USER MENU: `stories/showcase/user-menu.stories.tsx`'s own doc comment states it
- * plainly — "the user menu is a RECIPE, not an element... kai-menu with a
- * slotted trigger (kai-avatar + name + plan + a chevron + a kai-status
- * dot)". Reused here as the Solid-tier equivalent: `Dropdown`/
- * `DropdownTrigger`/`DropdownContent`/`DropdownItem` (the same primitives
- * `components/model/model-switcher.tsx` and the Workspace composer menu already
- * compose) with an `Avatar` + name/plan trigger.
+ * USER MENU: a RECIPE, not an element (see `stories/showcase/user-menu.stories.tsx`):
+ * `Dropdown`/`DropdownTrigger`/`DropdownContent`/`DropdownItem` with an `Avatar` +
+ * name/plan trigger, the same primitives `components/model/model-switcher.tsx` composes.
  */
 
 export interface ShellControlsState {
@@ -58,7 +46,7 @@ const STUB_COMMANDS: CommandGroup[] = [
   },
 ];
 
-/** The command palette overlay — mounted only while `open`. Filters the
+/** The command palette overlay, mounted only while `open`. Filters the
  *  stub catalog client-side; selecting a row or pressing Escape closes it. */
 export function CommandPaletteOverlay(props: { open: boolean; onClose: () => void }): JSX.Element {
   const [query, setQuery] = createSignal('');
@@ -97,7 +85,7 @@ export function CommandPaletteOverlay(props: { open: boolean; onClose: () => voi
   );
 }
 
-/** The command palette's TRIGGER — a plain search-icon button, matching
+/** The command palette's TRIGGER, a plain search-icon button, matching
  *  claude-code's own rail-header search affordance. Rendering the overlay
  *  itself is the caller's job (`CommandPaletteOverlay`), so a template can
  *  place the trigger inside its own rail/header chrome while the overlay
@@ -110,14 +98,14 @@ export function CommandPaletteTrigger(props: { onOpen: () => void }): JSX.Elemen
   );
 }
 
-/** The user-menu recipe itself — avatar + name/plan trigger, real Dropdown
+/** The user-menu recipe itself, avatar + name/plan trigger, real Dropdown
  *  primitives, a stub items list (Settings/Help/Log out). This is the RAIL
  *  placement: a full-width row that shows the name and plan as text.
  *
  *  The COMPACT header placement (avatar + chevron only, no text) used to be a
  *  `compact` prop here, added for Workspace's app-header rework. It moved out
- *  on 2026-08-30 when that header was promoted into the real component
- *  `components/app-header/app-header.tsx`, which owns its own compact cluster — this prop
+ *  when that header became the real component
+ *  `components/app-header/app-header.tsx`, which owns its own compact cluster; this prop
  *  had exactly one caller and that caller is now the component. Removed rather
  *  than left behind: an option nothing passes is the rot this repo keeps
  *  paying for. */
@@ -158,7 +146,7 @@ export function UserMenu(props: { name: string; plan?: string; class?: string })
 }
 
 /** The panel section every shell-bearing template reuses: two toggles,
- *  "Command palette" and "User menu." Preview-only — see each template's
+ *  "Command palette" and "User menu." Preview-only: see each template's
  *  own module doc comment for how the toggles wire into ITS OWN chrome
  *  (the trigger/overlay/menu placement differs per template's real
  *  anatomy, so this section only owns the on/off state, not the layout). */
@@ -175,7 +163,7 @@ export function ShellSection(props: { state: ShellControlsState; onChange: (v: S
         <Switch checked={props.state.userMenu} label="User menu" onChange={(v) => props.onChange({ ...props.state, userMenu: v })} />
       </div>
       <p class="text-xs text-muted-foreground">
-        Preview-only — construct.v1 has no shell/chrome vocabulary today (T-5). Command palette reuses the kit's real CommandList; User
+        Preview-only: construct.v1 has no shell/chrome vocabulary today (T-5). Command palette reuses the kit's real CommandList; User
         menu is the kit's own real recipe (Dropdown + Avatar), not a new component.
       </p>
     </section>

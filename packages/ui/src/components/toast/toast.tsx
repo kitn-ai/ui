@@ -10,36 +10,29 @@ import {
 
 export type { ToastItem, ToastVariant, ToastAppearance };
 
-/** Why a toast went away — surfaced to `onDismiss` (and the facade event). */
+/** Why a toast went away, surfaced to `onDismiss` (and the facade event). */
 export type ToastDismissReason = 'timeout' | 'close' | 'action';
 
 export type ToastPosition = 'top-center' | 'top-right' | 'top-left' | 'bottom-center' | 'bottom-right' | 'bottom-left';
 
 export interface ToastRegionProps {
-  /** The toasts to render. Newest is shown on top. Set as a JS property on the
-   *  element; mutate by passing a new array reference. */
+  /** The toasts to render, newest on top; a new array reference updates it. */
   toasts: ToastItem[];
   /** Where the stack anchors. Defaults to `'top-center'`. */
   position?: ToastPosition;
-  /** Max simultaneously-visible toasts; the rest queue and promote as slots
-   *  free up. Defaults to `3`. */
+  /** Simultaneously-visible toasts; the rest queue and promote as slots free up. Defaults to `3`. */
   max?: number;
-  /** Stacking: 'expanded' (default, full column) | 'collapsed' (Sonner-style
-   *  pile that expands on hover/focus). Attribute: stack. */
+  /** A full column, or a pile that expands on hover and focus. Defaults to `'expanded'`. */
   stack?: 'expanded' | 'collapsed';
-  /** Region-level default appearance for toasts that don't set their own. A
-   *  per-toast `appearance` always wins. Defaults to `'pill'`. */
+  /** Region default appearance, for toasts that set none of their own; a per-toast `appearance` wins. Defaults to `'pill'`. */
   appearance?: ToastAppearance;
-  /** Region-level default inverse treatment for toasts that don't set their own.
-   *  A per-toast `inverse` always wins. Defaults to `false`. */
+  /** Region default inverse treatment, for toasts that set none of their own; a per-toast `inverse` wins. Defaults to `false`. */
   inverse?: boolean;
-  /** When set, this region renders only the toasts scoped to that element and
-   *  anchors over its bounds (top-center), following it on scroll/resize. Unset =
-   *  the global, viewport-anchored region. */
+  /** Renders only the toasts scoped to this element, anchored over its bounds and following it on scroll and resize; unset anchors to the viewport. */
   target?: HTMLElement;
-  /** Fired when a toast leaves, with the reason. */
+  /** Fires when a toast leaves, with the reason. */
   onDismiss?: (id: string, reason: ToastDismissReason) => void;
-  /** Fired when a toast's action button is pressed. */
+  /** Fires when a toast's action button is pressed. */
   onAction?: (id: string, label: string) => void;
 }
 
@@ -75,7 +68,7 @@ export interface ToastProps {
 /**
  * A single toast pill. Auto-dismisses after its (action-floored) duration, holds
  * the timer while hovered (this pill) OR while `paused` (the whole stack is
- * hovered), and animates in/out via `createPresence`. Pure + prop-driven — the
+ * hovered), and animates in/out via `createPresence`. Pure and prop-driven: the
  * parent `ToastRegion` owns the list + queue.
  */
 export function Toast(props: ToastProps) {
@@ -294,7 +287,7 @@ interface TargetRect { top: number; left: number; right: number; bottom: number;
  * The fixed-position style pinning a target-anchored stack to the corner named by
  * `position`, computed from the target's rect. The region is `position: fixed`, so
  * we resolve absolute top/left + a transform that grows the stack inward from that
- * edge. (Rect-based, like the popover's anchor math — no collision flipping needed.)
+ * edge. Rect-based, like the popover's anchor math, so no collision flipping is needed.
  */
 function anchorStyle(position: ToastPosition, r: TargetRect): Record<string, string> {
   const cx = r.left + r.width / 2;

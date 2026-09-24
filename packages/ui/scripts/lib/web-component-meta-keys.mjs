@@ -21,11 +21,23 @@
 // web component). So the list is not left unattended: catalog-derived.test.ts pins it
 // against the keys of `DerivedWebComponent`'s zod shape in
 // mcp/catalog/catalog-types.ts, an independently authored
-// statement of the same six. Drop one here and that test goes red naming it.
+// statement of the same keys. Drop one here and that test goes red naming it.
 //
 // The PREDICATE is deliberately NOT shared. Each side spells out "at least one
-// web component carries a non-empty array under this key" itself, so the two are
+// web component carries a non-empty value under this key" itself, so the two are
 // redundant detectors of the same fault rather than one point of failure; a
 // predicate broken on either side still leaves the other firing on a real loss.
 // They are the same rule, which is the requirement, not the same code.
-export const WEB_COMPONENT_META_KEYS = ['props', 'events', 'methods', 'parts', 'composedFrom', 'tokens'];
+//
+// SHARING COSTS ONE THING MORE NOW THAT THE LIST IS NOT ALL ARRAYS. The floor both
+// consumers spell out reads "at least one web component carries a NON-EMPTY value under
+// this key". `description` is a single string, so the array test (`Array.isArray(e[key])
+// && e[key].length > 0`) is unsatisfiable for it, and the tempting repair (drop the
+// length test for the whole list) would let `description: ''` on all 100 elements pass
+// as "present", which is precisely the silent-empty the floor exists to refuse. So the
+// list gains a companion: which keys hold a string rather than an array. It is a
+// CLASSIFICATION, not the predicate: each side still spells out its own test (see the
+// module note above on why the predicate is deliberately not shared).
+export const WEB_COMPONENT_META_STRING_KEYS = ['description'];
+
+export const WEB_COMPONENT_META_KEYS = ['description', 'props', 'events', 'methods', 'parts', 'composedFrom', 'tokens'];

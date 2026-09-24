@@ -16,8 +16,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'A collapsible vertical timeline for an agent\'s reasoning, tool calls, or research progress, expandable step by step. `ChainOfThought` wraps `ChainOfThoughtStep` items, each with a `ChainOfThoughtTrigger` (summary) and `ChainOfThoughtContent` / `ChainOfThoughtItem` (detail).',
-        'Mark the final step with `isLast`.',
+        "An agent's reasoning drawn as a timeline of expandable steps, where Reasoning is the single block.",
       ]),
       controls: { exclude: ['use:eventListener'] },
     },

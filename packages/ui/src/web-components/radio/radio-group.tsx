@@ -8,13 +8,9 @@ import type { KaiRadioOption } from '../web-component/web-component-data-types';
 interface Props extends Record<string, unknown> {
   /** The choices, top to bottom. Set as a JS PROPERTY (array), never an attribute. */
   options: KaiRadioOption[];
-  /** Controlled selected `value`. Settable and reflected to the `value` attribute.
-   *  `el.value = 'degraded'` drives it; choosing a row updates it and fires
-   *  `kai-change`. Read `el.value` for live state. */
+  /** Controlled selected `value`, reflected to the `value` attribute. Choosing a row updates it and fires `kai-change`. */
   value?: string;
-  /** Shared form-control name for every radio in the group. Defaults to a generated
-   *  id, so the group is exclusive and keyboard-navigable even when nothing is
-   *  submitted. */
+  /** Shared form-control name for every radio. Defaults to a generated id, so the group stays exclusive unsubmitted. */
   name?: string;
   /** Disable every row. Individual rows carry their own `disabled`. */
   disabled?: boolean;
@@ -27,36 +23,11 @@ interface Events {
   /** A row was chosen. */
   'kai-change': { value: string };
 }
-
+// Real `<input type="radio">`s sharing a `name`, so one tab stop, arrow keys, mutual exclusion
+// and form participation are the browser's rather than a reimplementation. `name` defaults to a
+// generated id, which is what keeps the group exclusive when it is never submitted.
 /**
- * `<kai-radio-group>` — the kit's "pick exactly one" control: a bordered, divided
- * list over real `<input type="radio">`s that share a `name`, so one tab stop, arrow
- * keys, mutual exclusion and form participation are the browser's and not a
- * reimplementation.
- *
- * Feed it `options` (a JS-property array of `{ value, label, description?, disabled? }`),
- * drive/read the selection with the `value` property (settable + reflected to the
- * `value` attribute, so `:host([value])` and `el.value` see live state), and listen
- * for `kai-change`.
- *
- * Re-rendering follows the kit's reactivity contract: hand it a NEW array reference,
- * and a new object for any option whose content changed — the rows are a
- * reference-keyed list, so mutating an option in place changes nothing on screen.
- *
- * ```html
- * <kai-radio-group value="degraded" label="Severity"></kai-radio-group>
- * <script type="module">
- *   import '@kitn.ai/ui/web-components';
- *   const group = document.querySelector('kai-radio-group');
- *   group.options = [
- *     { value: 'blocking', label: 'Blocking', description: 'Pages the on-call' },
- *     { value: 'degraded', label: 'Degraded' },
- *     { value: 'cosmetic', label: 'Cosmetic' },
- *   ];
- *   group.addEventListener('kai-change', (e) => console.log(e.detail.value));
- *   group.value = 'cosmetic'; // drive it (no kai-change — the host already knows)
- * </script>
- * ```
+ * A bordered list of rows that selects exactly one of them.
  */
 defineWebComponent<Props, Events>('kai-radio-group', {
   options: [],

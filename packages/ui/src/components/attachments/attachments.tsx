@@ -15,11 +15,22 @@ import { DEFAULT_MEDIA_POLICY } from '../../wire/media-types';
 import type { AttachmentData, AttachmentMediaCategory, AttachmentVariant } from '../../primitives/attachment-types';
 export type { AttachmentData, AttachmentMediaCategory, AttachmentVariant } from '../../primitives/attachment-types';
 
+/**
+ * How an image tile reveals its full size.
+ *
+ * `hover` is the pointer-only hover card the thread has always shipped;
+ * `lightbox` is a click-to-open modal, which is the only one of the two a
+ * keyboard or touch user can reach. Named here once because the container's
+ * prop and the context it publishes are the same union, and a second spelling
+ * of it is how the two drift.
+ */
+export type AttachmentImagePreview = 'hover' | 'lightbox';
+
 // ============================================================================
 // Types
 // ============================================================================
 
-/** One icon per category, and the categories are the wire's own kinds — so the
+/** One icon per category, and the categories are the wire's own kinds, so the
  *  set is exhaustive by construction and a kind added to `EncodableKind` is a
  *  compile error HERE rather than an `undefined` icon at runtime.
  *
@@ -43,8 +54,8 @@ const mediaCategoryIcons: Record<AttachmentMediaCategory, typeof ImageIcon> = {
  * What to DRAW for this attachment, asked of the one module that knows.
  *
  * ★ NO MEDIA TYPES APPEAR BELOW, and that is the fix. This function used to be
- * a prefix switch — `image/` → image, `video/` → video, `application/` or
- * `text/` → document — a second list of media types in a repo whose media-type
+ * a prefix switch: `image/` → image, `video/` → video, `application/` or
+ * `text/` → document, a second list of media types in a repo whose media-type
  * declaration says, at its own definition, "if you find yourself writing a
  * second list of media types anywhere in this repo, delete it and read this".
  * It had drifted in both directions: `image/svg+xml` came back `image` and drew
@@ -56,7 +67,7 @@ const mediaCategoryIcons: Record<AttachmentMediaCategory, typeof ImageIcon> = {
  * already-staged attachment IS, and narrowing here would redraw a message
  * retroactively when a host changed a prop. The default policy is the kit's
  * full capability set, so `unsupported` against it means exactly "no wire
- * format this kit ships can carry this" — which is the only claim about
+ * format this kit ships can carry this", which is the only claim about
  * sendability the renderer can honestly make without knowing the provider.
  */
 export const getMediaCategory = (data: AttachmentData): AttachmentMediaCategory => {
@@ -116,6 +127,7 @@ export const getAttachmentLabel = (data: AttachmentData): string => {
 
 interface AttachmentsContextValue {
   variant: AttachmentVariant;
+  imagePreview: AttachmentImagePreview;
 }
 
 const AttachmentsContext = createContext<AttachmentsContextValue>();
@@ -133,8 +145,13 @@ const AttachmentContext = createContext<AttachmentContextValue>();
 // Hooks
 // ============================================================================
 
+// The fallback is what a consumer's own tile sees when it composes
+// `<Attachment>` outside an `<Attachments>` container: an unchecked tile is a
+// grid tile, and it previews on hover. Both defaults are spelled here rather
+// than left `undefined` so a consumer reading through the getter never has to
+// branch on the context being missing.
 export const useAttachmentsContext = () =>
-  useContext(AttachmentsContext) ?? { variant: 'grid' as const };
+  useContext(AttachmentsContext) ?? { variant: 'grid' as const, imagePreview: 'hover' as const };
 
 export const useAttachmentContext = () => {
   const ctx = useContext(AttachmentContext);
@@ -150,14 +167,20 @@ export const useAttachmentContext = () => {
 
 export interface AttachmentsProps extends JSX.HTMLAttributes<HTMLDivElement> {
   variant?: AttachmentVariant;
+  /** How an image tile reveals its full size. Default `hover`. */
+  imagePreview?: AttachmentImagePreview;
 }
 
 function Attachments(props: AttachmentsProps) {
-  const [local, rest] = splitProps(props, ['variant', 'class', 'children']);
+  const [local, rest] = splitProps(props, ['variant', 'imagePreview', 'class', 'children']);
   const variant = () => local.variant ?? 'grid';
+  const imagePreview = () => local.imagePreview ?? 'hover';
 
   return (
-    <AttachmentsContext.Provider value={{ get variant() { return variant(); } }}>
+    <AttachmentsContext.Provider value={{
+      get variant() { return variant(); },
+      get imagePreview() { return imagePreview(); },
+    }}>
       <div
         class={cn(
           'flex items-start',

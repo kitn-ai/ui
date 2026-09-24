@@ -3,30 +3,11 @@ import { defineWebComponent } from '../define/define';
 import { KbdGroup } from '../../components/kbd/kbd-group';
 
 type Props = Record<string, unknown>;
-
+// Use it when the caps come from more than one shortcut or from a typed sequence: a `keys` token
+// spec is a single shortcut and cannot say where one ends and the next begins. A lone
+// `<kai-kbd keys="Mod+K">` already renders its own token row, so it needs no group.
 /**
- * `<kai-kbd-group>` — welds several `<kai-kbd>`s into ONE key strip: no gap between
- * the caps, one hairline at each seam, corners only at the strip's ends. Use it when
- * one shortcut is spelled with caps from more than one element or as a typed
- * sequence. Two DIFFERENT shortcuts are two elements (or two groups): the weld is
- * what says they are one key, and a group that merely spaced its children out looked
- * identical to a row of separate `<kai-kbd>`s.
- *
- * Slot your `<kai-kbd>`s in as light-DOM children (the default slot). No props.
- *
- * ```html
- * <kai-kbd-group>
- *   <kai-kbd keys="Mod+B"></kai-kbd>
- *   <kai-kbd keys="Mod+K"></kai-kbd>
- * </kai-kbd-group>
- * <kai-kbd-group>
- *   <kai-kbd>G</kai-kbd>
- *   <kai-kbd>D</kai-kbd>
- * </kai-kbd-group>
- * ```
- *
- * Restyle each cap via `::part(key)` on the `<kai-kbd>` itself; the group adds no
- * part of its own beyond its host (the gap is gone, so there is no frame to style).
+ * A row of keycaps that reads as one shortcut hint.
  */
 defineWebComponent<Props>('kai-kbd-group', {}, (_props, { element }) => {
   // The weld itself lives in `<kai-kbd>`'s own shadow stylesheet, because a group

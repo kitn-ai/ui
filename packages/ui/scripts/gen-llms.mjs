@@ -226,6 +226,13 @@ function renderElement(el) {
 
   const out = [`### \`${el.tag}\` / \`${react}\``, ''];
 
+  // WHAT IT IS, once, above everything else in the section. This is the sentence the
+  // facade's element doc comment carries and no artifact carried: an agent reading
+  // this file to CHOOSE between two elements got a props table and no statement of
+  // what either one is for. Its own paragraph, one line (the generator's collapse),
+  // and not repeated anywhere else in the section.
+  if (el.description) out.push(el.description, '');
+
   out.push(
     propRows
       ? [
@@ -525,6 +532,10 @@ function fromElements(elements) {
   return elements.map((el) => ({
     tag: el.tag,
     reactName: el.displayName ?? tagToReact(el.tag).replace(/^Kai/, ''),
+    // `?? ''` for the facade with no element doc comment (see renderElement): the
+    // key is omitted from the model then, and `undefined` would print the literal
+    // word "undefined" as the element's opening paragraph.
+    description: el.description ?? '',
     props: el.props.map((p) => ({
       name: p.name,
       type: p.type,
@@ -558,6 +569,10 @@ function fromManifest(cem) {
     return {
       tag: d.tagName,
       reactName: tagToReact(d.tagName).replace(/^Kai/, ''),
+      // Keep in step with `fromElements` above: this is the standalone path, and a
+      // field it forgets writes a THINNER llms-full.txt over the full one (see the
+      // header note and CLAUDE.md).
+      description: d.description ?? '',
       props: (d.members || [])
         .filter((m) => m.kind === 'field')
         .map((m) => ({

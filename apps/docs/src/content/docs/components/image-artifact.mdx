@@ -1,0 +1,94 @@
+---
+title: Image artifact
+description: Displays image data a model or a tool produced.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Playground from '../../../components/Playground.tsx';
+import Example from '../../../components/Example.tsx';
+import PropTable from '../../../components/PropTable.astro';
+import ComposedFrom from '../../../components/ComposedFrom.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kai-tag-sub">kai-image-artifact</p>
+
+<p class="kai-lede">Bare base64 cannot say what it is, so the media type is required.</p>
+
+<Facts items={['Shadow DOM', 'Base64 or Uint8Array', 'Skeleton while it resolves', 'Media type required']} />
+
+## Preview
+
+<Playground client:only="solid" tag="kai-image-artifact" />
+
+<Aside type="tip" title="When to use">
+When the image *arrives as data*: a generated chart, a screenshot a tool returned, a frame from an image API. If you already have a URL, [Image](/components/image/) is the shorter road.
+</Aside>
+
+## Usage
+
+```html
+<kai-image-artifact media-type="image/png" alt="A generated chart"></kai-image-artifact>
+
+<script type="module">
+  import '@kitn.ai/ui/web-components';
+
+  const el = document.querySelector('kai-image-artifact');
+
+  // a base64 payload (a string attribute or property):
+  el.data = '<...base64 encoded image data...>';
+
+  // or raw bytes, as a property:
+  // el.data = new Uint8Array([...]);
+</script>
+```
+
+- **`data`** is the payload: a string (BARE base64, the shape the providers hand back) or a `Uint8Array` (set as a property). It is never a URL: for a `data:` URI or an https address, use [Image](/components/image/)'s `src`.
+- **`media-type`** is required: a base64 payload does not describe itself, so a guessed `image/png` labels a JPEG wrong. Everything downstream that trusts the label (your API, a file written to disk, the wire) is told the wrong type.
+- **`alt`** describes the image. Pass a real sentence; it is what a screen reader announces in place of the picture.
+
+<Aside type="caution" title="Missing media type">
+With `data` set and no `media-type`, the component reports once in the console and renders the placeholder rather than an image. That is deliberate: a picture labelled wrong is worse than a visible gap.
+</Aside>
+
+## The AI SDK shape
+
+The SDK hands generated images back as one object that carries both representations (`GeneratedFile`):
+
+```ts
+const { image } = await generateImage({ model, prompt });
+// image: { base64, uint8Array, mediaType } — pick the one you have
+
+el.data = image.base64;      // or image.uint8Array
+el.mediaType = image.mediaType;
+```
+
+One line each, and deliberately not the SDK's object: `data` plus `mediaType` describes the thing, so a change in how the SDK packages it never reaches your markup.
+
+## Examples
+
+### A generated chart
+
+<Example client:visible tag="kai-image-artifact" />
+
+### A second artifact
+
+Swap `data` and `media-type` per artifact; nothing else changes.
+
+<Example client:visible tag="kai-image-artifact" data="circle" />
+
+### With descriptive alt text
+
+Every artifact needs its own sentence, not a shared "generated image".
+
+<Example client:visible tag="kai-image-artifact" data="checkmark" />
+
+## Props
+
+<PropTable tag="kai-image-artifact" />
+
+## Composed from
+
+<ComposedFrom tag="kai-image-artifact" />
+
+<NeedAHand />

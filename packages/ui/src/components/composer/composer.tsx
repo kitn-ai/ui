@@ -63,7 +63,7 @@ export interface ComposerChange {
   text: string;
   entities: EntityRef[];
 }
-/** Imperative handle exposed via `controllerRef` — surfaces the composer's latent
+/** Imperative handle exposed via `controllerRef`: surfaces the composer's latent
  *  capabilities (focus/blur the editable, clear the doc, submit, insert a pill) so
  *  the `<kai-composer>` facade can forward them as instance methods. */
 export interface ComposerController {
@@ -82,12 +82,11 @@ export interface ComposerProps {
   submitOnEnter?: boolean;
   triggers?: TriggerDef[];
   highlights?: HighlightRule[];
-  /** Default icon per entity kind (kind → image URL/data-URI), shown on a pill +
-   *  menu item when the item has no `icon` of its own. Overrides the built-in
-   *  glyphs (agent/plugin). Example: `{ agent: '/icons/bot.svg' }`. */
+  // Shown on a pill and a menu item when the item has no `icon` of its own. Overrides
+  // the built-in agent/plugin glyphs.
+  /** Default icon per entity kind (kind to image URL or data-URI). */
   kindIcons?: Record<string, string>;
-  /** Render WITHOUT the rounded frame/background/padding — just the editable +
-   *  placeholder + menu. For embedding inside another frame (e.g. PromptInput). */
+  /** Render without the rounded frame, background or padding, for embedding inside another frame. */
   bare?: boolean;
   /** Override the editable element's classes (used in `bare` mode to match an
    *  existing input's exact look). The placeholder mirrors these for alignment. */
@@ -106,9 +105,10 @@ export interface ComposerProps {
   onTriggerClose?: () => void;
   onEntityAdd?: (entity: EntityRef) => void;
   onEntityRemove?: (entity: EntityRef) => void;
-  /** The editable gained focus. `focus`/`blur` are NOT composed, so they don't
-   *  escape the shadow root — this re-exposes them. (keydown/paste/focusin/focusout
-   *  are composed and already reach the host as native events; no wrapper needed.) */
+  // `focus`/`blur` are NOT composed, so they do not escape the shadow root; this
+  // re-exposes them. keydown/paste/focusin/focusout are composed and already reach the
+  // host as native events, so they need no wrapper.
+  /** The editable gained focus. */
   onFocus?: (e: FocusEvent) => void;
   /** The editable lost focus. */
   onBlur?: (e: FocusEvent) => void;
@@ -116,8 +116,8 @@ export interface ComposerProps {
 
 /**
  * Shadow-DOM-aware selection. `document.getSelection()` does NOT expose a
- * selection that lives inside an open ShadowRoot in Chromium — it retargets the
- * range to the host — so caret math and node insertion would silently operate
+ * selection that lives inside an open ShadowRoot in Chromium (it retargets the
+ * range to the host), so caret math and node insertion would silently operate
  * OUTSIDE the editable (pills land in the light DOM, the menu never closes).
  * `ShadowRoot.getSelection()` (Chrome) returns the real in-shadow selection. Fall
  * back to the document selection for the light DOM / jsdom (no shadow root).
@@ -851,27 +851,22 @@ export function Composer(props: ComposerProps): JSX.Element {
       <style>{`
         /* MARKED text, not selected text. Reads --color-highlight (overridable via
            --kai-color-highlight), a warm <mark> yellow. It used to be a 22% tint of
-           --color-primary with a #6366f1 indigo fallback — but the kit's
-           --color-primary is a NEUTRAL (near-black in light, near-white in dark),
-           so the indigo the fallback implied never appeared and the highlight
-           rendered plain grey in both themes.
+           --color-primary, whose indigo fallback never appeared because that token is
+           a NEUTRAL here, so the highlight rendered plain grey in both themes.
 
-           NO \`prefers-color-scheme\` here, deliberately — the same trap that put
-           the pill hues below at 2.33:1. The OS scheme and the kit's RESOLVED
-           theme are different questions, and \`theme="light"\` on a dark-OS machine
-           is an ordinary configuration; a scheme-keyed value would paint the dark
-           amber on the light field. The pills answer this by scoping to \`.dark\`,
-           which is NOT available here: \`::highlight()\` names a document-registered
-           highlight, so there is no wrapper to hang a descendant selector on.
+           NO \`prefers-color-scheme\` here, deliberately: the OS scheme and the kit's
+           RESOLVED theme are different questions, and \`theme="light"\` on a dark-OS
+           machine is ordinary, so a scheme-keyed value would paint the dark amber on
+           the light field. The pills below answer this by scoping to \`.dark\`, which is
+           unavailable here: \`::highlight()\` names a document-registered highlight, so
+           there is no wrapper to hang a descendant selector on.
 
-           It does not need one. \`--color-highlight\` reaches this pseudo through
-           highlight inheritance from the ORIGINATING element — the text inside the
-           \`.dark\` wrapper — so the token already answers the resolved theme,
-           verified by rendering the dark amber under \`theme="dark"\` with only the
-           LIGHT literal below as a fallback. The literal is therefore reachable
-           only when no kit stylesheet is loaded at all, and it is deliberately the
-           light one: an unstyled page is a white page, and guessing from the OS is
-           exactly the failure above. */
+           It does not need one: \`--color-highlight\` reaches this pseudo through
+           highlight inheritance from the ORIGINATING element, so the token already
+           answers the resolved theme (rendered dark amber under \`theme="dark"\` with
+           the light literal below as a fallback). The literal below is therefore
+           reachable only when no kit stylesheet is loaded at all, and it is the light
+           one on purpose: an unstyled page is a white page. */
         ::highlight(${highlightName}) { background-color: var(--color-highlight, hsl(45 96% 78%)); }
       `}</style>
       {/* Atomic entity pill styling. Self-contained (currentColor-based) so it

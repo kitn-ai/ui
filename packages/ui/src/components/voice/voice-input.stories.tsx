@@ -18,7 +18,7 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'A microphone button for dictating into the prompt field: click toggles recording (pulse rings), and on stop it runs your STT call and shows a spinner. Wire `onTranscribe(audio)` returning a `Promise<string>` and `onTranscription(text)` to receive the result.',
+        'A microphone button that records speech and hands back the transcription.',
       ]),
     },
   },

@@ -88,7 +88,9 @@ const userMsg = {
 
 Set it to a `data:` URI or an https URL, on every file rather than only images.
 
-Do not use `URL.createObjectURL`. An object URL resolves only inside the tab that minted it, so it renders a flawless thumbnail and is meaningless to any provider — `toOpenAIMessages` and `toAnthropicMessages` reject a `blob:` URL rather than send an address the model cannot fetch. An attachment with no `url` at all is unencodable for the same reason, which is why a document needs one just as much as an image does.
+Do not use `URL.createObjectURL`. An object URL resolves only inside the tab that minted it, so it renders a flawless thumbnail and is meaningless to any provider — `toOpenAIMessages` and `toAnthropicMessages` reject a `blob:` URL rather than send an address the model cannot fetch.
+
+An attachment with no `url` at all is unencodable for the same reason, which is why a document needs one just as much as an image does.
 
 `<kai-prompt-input>`'s built-in paperclip already does this for you; you only need the conversion below when you stage files yourself.
 

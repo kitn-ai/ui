@@ -36,7 +36,7 @@ export type ArtifactTab = 'preview' | 'code';
 /** A file the artifact can preview + show source for. */
 export type ArtifactFile = FileTreeFile;
 
-/** Imperative handle exposed via `controllerRef` — surfaces the artifact's latent
+/** Imperative handle exposed via `controllerRef`: surfaces the artifact's latent
  *  toolbar capabilities (history back/forward/reload/home, programmatic navigate,
  *  file selection, open-in-new-tab, maximize/restore) so the `<kai-artifact>`
  *  facade can forward them as instance methods. Each delegates to the SAME internal
@@ -67,8 +67,7 @@ export interface ArtifactProps extends Omit<JSX.HTMLAttributes<HTMLDivElement>, 
   src?: string;
   /** Files for the Code tab's tree (+ each file's preview `url`). */
   files?: ArtifactFile[];
-  /** Controlled active tab — when set, the artifact follows it (re-asserted on
-   *  every change). When undefined the tab is uncontrolled (see `defaultTab`). */
+  /** Controlled active tab; when undefined the tab is uncontrolled (see `defaultTab`). */
   tab?: ArtifactTab;
   /** Uncontrolled INITIAL tab (used only when `tab` is undefined). The user can
    *  then freely switch tabs; defaults to `preview`. */
@@ -79,11 +78,11 @@ export interface ArtifactProps extends Omit<JSX.HTMLAttributes<HTMLDivElement>, 
   sandbox?: string;
   /** Accessible iframe title. */
   iframeTitle?: string;
-  /** Fired when the preview navigates (back/forward/reload/path-edit/file-click).
-   *  `detail.url` is reported AS IT ARRIVED, including a `javascript:`/`vbscript:` url
-   *  the preview itself refused (the kit must not tell a consumer the model sent
-   *  something else), and it is NOT scheme-validated -- guard it with `isSafeUrl`
-   *  from `@kitn.ai/ui` before you render, store or navigate to it. */
+  // `detail.url` is reported AS IT ARRIVED, including a `javascript:`/`vbscript:` url the
+  // preview itself refused (the kit must not tell a consumer the model sent something
+  // else), and it is NOT scheme-validated: guard it with `isSafeUrl` from `@kitn.ai/ui`
+  // before rendering, storing or navigating to it.
+  /** Fired when the preview navigates (back/forward/reload/path-edit/file-click). */
   onNavigate?: (url: string) => void;
   /** Fired when the Preview|Code tab changes. */
   onTabChange?: (tab: ArtifactTab) => void;
@@ -105,7 +104,7 @@ export interface ArtifactProps extends Omit<JSX.HTMLAttributes<HTMLDivElement>, 
   showPathField?: boolean;
   /** Show the Preview|Code tab toggle. Default `true`. */
   showTabs?: boolean;
-  // new affordances — OPT-IN (default hidden; see resolved decision #2)
+  // New affordances are OPT-IN: hidden by default.
   /** Show the expand-to-fill button. Default `false` (opt-in). */
   expandable?: boolean;
   /** Show the open-in-new-tab button. Default `false` (opt-in). */
@@ -115,14 +114,11 @@ export interface ArtifactProps extends Omit<JSX.HTMLAttributes<HTMLDivElement>, 
   standalone?: boolean;
   /** Make the path field read-only (visible, nav-tracking, non-editable). */
   readonlyPath?: boolean;
-  /** Friendly address shown in the path field INSTEAD of the real current url
-   *  (read-only, non-navigable). Use when the framed url is not consumer-facing
-   *  (e.g. a `data:` blob) so a clean address is shown instead of leaking it.
-   *  Unset = show the real url (editable per `readonlyPath`). */
+  // For a framed url that is not consumer-facing (e.g. a `data:` blob), so a clean address
+  // is shown instead of leaking it. Unset shows the real url (editable per `readonlyPath`).
+  /** Read-only, non-navigable address shown in the path field instead of the current url. */
   displayUrl?: string;
-  /** Receive the imperative controller once mounted. The `<kai-artifact>` facade
-   *  forwards these as element methods (back/forward/reload/home/navigate/
-   *  selectFile/openExternal/maximize/restore). */
+  /** Receive the imperative controller once mounted. */
   controllerRef?: (controller: ArtifactController) => void;
 }
 
@@ -162,7 +158,7 @@ export function isPdfUrl(url: string, files: ArtifactFile[]): boolean {
 }
 
 /**
- * `Artifact` — a framed, switchable generated-artifact viewer. A functional nav
+ * `Artifact`: a framed, switchable generated-artifact viewer. A functional nav
  * toolbar (back · forward · reload · home + editable path field + Preview|Code
  * toggle) over a sandboxed `<iframe>` (Preview) or a file-tree + `<kai-code-block>`
  * (Code). The component self-navigates the iframe and emits `kai-navigate` /
@@ -760,7 +756,7 @@ function ArtifactCode(props: CodeProps): JSX.Element {
             when={props.hasSource()}
             fallback={
               <div class="flex h-full items-center justify-center p-6 text-sm text-muted-foreground">
-                No source — this file ({props.activeFileObj()!.type ?? 'binary'}) has no code view.
+                No source. This file ({props.activeFileObj()!.type ?? 'binary'}) has no code view.
               </div>
             }
           >

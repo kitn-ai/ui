@@ -1,18 +1,12 @@
-// Single entry that registers all kitn custom elements. Importing this file
-// (or the built bundle) defines the web components as a side effect — but ONLY in a
-// browser/DOM context.
+// Single entry that registers all kit custom elements. Importing this file (or the built
+// bundle) defines the web components as a side effect, but ONLY in a browser/DOM context.
 //
-// SSR-safe: the kai-* web-components bundle Solid's client runtime, which touches
-// `window` at module-eval (delegateEvents(events, doc = window.document)). With
-// no `window`, a static import would throw. So the actual component registration
-// lives in ./register-impl and is loaded behind a browser check + dynamic
-// import() — static ESM imports hoist + evaluate unconditionally, so a bare `if`
-// cannot gate them; a dynamic import() can. On the server this module is inert
-// (no DOM → no registration → no throw); in the browser it registers as before.
-//
-// Registration is async (a microtask after this module loads). Consumers that
-// need the upgraded element (e.g. the React runtime) guard with
-// customElements.whenDefined(), which resolves once the impl chunk has run.
+// SSR-safe: the bundle's Solid client runtime touches `window` at module-eval
+// (`delegateEvents(events, doc = window.document)`), so a static import would throw with no
+// `window`. The registration lives in ./register-impl behind a browser check plus a dynamic
+// `import()`: static ESM imports hoist and evaluate unconditionally, so a bare `if` cannot
+// gate them. Registration is async (a microtask after this module loads), so a consumer
+// needing the upgraded element guards with `customElements.whenDefined()`.
 /** Resolves once the kai-* elements are registered (browser); inert on the server.
  *  Await this instead of customElements.whenDefined for a single ready signal.
  *

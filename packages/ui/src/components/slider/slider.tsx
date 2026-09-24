@@ -3,68 +3,55 @@ import { cn } from '../../utils/cn';
 
 export interface SliderProps
   extends Omit<JSX.InputHTMLAttributes<HTMLInputElement>, 'type' | 'children' | 'min' | 'max' | 'step' | 'value'> {
-  /**
-   * Lowest selectable value. REQUIRED, and deliberately so.
-   *
-   * A range with no `min`/`max` is not a slider, it is a slider-shaped guess, and the
-   * guess belongs to whoever knows what the number means. `SliderWidget` reading a
-   * JSON-Schema field still defaults an absent `minimum` to 0 — that is the WIDGET's
-   * decision about a consumer-authored schema, and it stays there rather than being
-   * quietly adopted by every caller of this component.
-   */
+  // Required on purpose. A range with no `min`/`max` is a slider-shaped guess, and the
+  // guess belongs to whoever knows what the number means. `SliderWidget` reading a
+  // JSON-Schema field still defaults an absent `minimum` to 0: that is the WIDGET's
+  // decision about a consumer-authored schema, and it stays there rather than being
+  // quietly adopted by every caller of this component.
+  /** Lowest selectable value. */
   min: number;
-  /** Highest selectable value. REQUIRED for the same reason as `min`. */
+  /** Highest selectable value. */
   max: number;
   /** Granularity. Omitted means the native default (1); `'any'` means continuous. */
   step?: number | 'any';
-  /** The current value. Controlled — drive it from `onInput`. Omit for uncontrolled. */
+  /** Controlled value; omit for uncontrolled state and drive it from `onInput`. */
   value?: number;
   /** Initial value when uncontrolled. */
   defaultValue?: number;
-  /**
-   * Show the current value beside the track. Off by default.
-   *
-   * Two shapes, because one is not enough and three would be too many. `true` renders
-   * the raw number, which is what most sliders want. A FUNCTION renders whatever it
-   * returns, because plenty of sliders are not counting bare numbers: `60%`, `3 of 5`,
-   * `1m 30s`. A boolean alone cannot express those, and a formatter alone would make
-   * the common case read `valueLabel={(v) => v}`.
-   *
-   * The readout is `aria-hidden`. The input already reports the same number through
-   * `aria-valuenow` / `aria-valuetext`, so an exposed copy would be announced twice.
-   *
-   * NOTE ON STRUCTURE: with a readout the component renders a flex row around the
-   * input; without one it is still a bare `<input>` and nothing changes for existing
-   * callers. Toggling this at runtime therefore rebuilds the input element, which is
-   * fine for a control panel and not something a real app does mid-drag.
-   */
+  // A function formats the readout because plenty of sliders are not counting bare
+  // numbers: `60%`, `3 of 5`, `1m 30s`. A formatter alone would make the common case
+  // read `valueLabel={(v) => v}`.
+  //
+  // The readout is `aria-hidden` below: the input already reports the same number
+  // through `aria-valuenow` / `aria-valuetext`, so an exposed copy would be announced
+  // twice.
+  //
+  // STRUCTURE: with a readout the component renders a flex row around the input;
+  // without one it is a bare `<input>` and nothing changes for existing callers.
+  // Toggling this at runtime therefore rebuilds the input element, which is fine for a
+  // control panel and not something a real app does mid-drag.
+  /** Show the current value beside the track, formatted by a function if given. Off by default. */
   valueLabel?: boolean | ((value: number) => JSX.Element);
 }
 
 /**
- * A slider. A REAL `<input type="range">` behind `appearance: none`, styled by the
- * kit's `.kai-range` rule, never a `<div>` with a drag handler.
+ * A slider. A REAL `<input type="range">` behind `appearance: none`, styled by the kit's
+ * `.kai-range` rule, never a `<div>` with a drag handler.
  *
  * The native control brings the whole keyboard contract (arrows, Home, End,
- * PageUp/PageDown), pointer and touch dragging, form participation via `name`, and
- * the `slider` role with a live value announcement — all of it for free and all of it
- * correct. Every accessibility defect this kit's control audit found was in a control
- * that had replaced the native element with something hand-rolled.
+ * PageUp/PageDown), pointer and touch dragging, form participation via `name`, and the
+ * `slider` role with a live value announcement: all of it for free and all of it correct,
+ * where every accessibility defect this kit's control audit found was in a control that
+ * had replaced the native element with something hand-rolled.
  *
- * What the component adds is the **filled track**. `.kai-range` paints the portion
- * left of the thumb from a `--kai-range-fill` custom property, and until now every
- * caller computed that percentage itself. It is arithmetic over `min`, `max` and the
- * current value — three things this component already has — so no consumer should
- * ever write it again.
+ * What the component adds is the **filled track**: `.kai-range` paints the portion left
+ * of the thumb from `--kai-range-fill`, arithmetic over `min`, `max` and the value, which
+ * this component already has.
  *
  * Everything not listed in `SliderProps` is forwarded to the input, so `id`, `name`,
- * `disabled`, `required`, `aria-*` and any `data-*` hook behave exactly as they do on
- * a plain `<input>`. No clamping and no validation is applied: a value outside
- * `min`..`max` is the browser's business, not ours.
- *
- * ```tsx
- * <Slider min={0} max={100} step={5} value={v()} onInput={(e) => setV(e.currentTarget.valueAsNumber)} />
- * ```
+ * `disabled`, `required`, `aria-*` and any `data-*` hook behave as they do on a plain
+ * `<input>`. No clamping and no validation is applied: a value outside `min`..`max` is
+ * the browser's business, not ours.
  */
 export function Slider(props: SliderProps): JSX.Element {
   const [local, rest] = splitProps(props, [

@@ -17,9 +17,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'A live closed-captioning line, driven by `segments` (oldest first — the last entry is the current line). Empty/undefined segments, or a current segment with empty/whitespace text, render nothing.',
-        '`variant` picks the chrome: `lower-third` (a broadcast-style semi-opaque bar), `floating` (a card that floats above a visualizer), `minimal` (bare text, no chrome — the default), or `stacked` (the last two lines of history fade in behind the current line).',
-        'Speaker-aware via a small "You"/"Assistant" label and `data-speaker` — never a color swap, since accent stays reserved for the voice visualizer. Interim (`final: false`) text renders a shade lighter than a finalized line, so a caption visibly settles once committed.',
+        'A live caption line for speech as it is transcribed.',
       ]),
     },
   },
@@ -122,7 +120,7 @@ export const Interim: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'A caption still forming — `final: false` renders a shade lighter than a committed line, so the switch to full contrast reads as the moment ASR/the model settles on the text.',
+        story: 'A caption line still forming, drawn lighter until the model settles on the words.',
       },
       source: {
         code: `${IMPORT}\n\n<Captions segments={[{ speaker: 'user', text: "What's on my calendar to—", final: false }]} />`,
@@ -137,7 +135,7 @@ export const Empty: Story = {
   render: (args: CaptionsProps) => stage(() => <Captions {...args} />),
   parameters: {
     docs: {
-      description: { story: 'Empty segments render nothing — no chrome, no placeholder, no reserved space.' },
+      description: { story: 'Empty segments render nothing: no chrome, no placeholder, no reserved space.' },
       source: { code: `${IMPORT}\n\n<Captions segments={[]} />  {/* renders nothing */}`, language: 'tsx' },
     },
   },

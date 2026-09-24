@@ -3,17 +3,9 @@ import { fn } from 'storybook/test';
 import { Dock } from './dock';
 import { componentDescription } from '../../stories/docs/web-component-controls';
 
-/**
- * The SolidJS story for the Dock primitive — the only story layer this element has,
- * matching its siblings in this directory (`prompt-dock.stories.tsx` is titled the
- * same way; `dialog.tsx` carries no story at all). The `<kai-dock>` facade has no
- * separate Labs story, because neither of the ui-layer components it sits beside does.
- *
- * EVERY STORY IS A DEMO PAGE, not a bare component. A dock is `position: fixed` and
- * corner-pinned, so a story that rendered it alone would put a button in the corner of
- * an empty canvas and tell you nothing about the thing it is for: floating over
- * somebody else's page without taking it over.
- */
+// The Dock primitive. A dock is `position: fixed` and corner-pinned, so every story
+// renders it over a demo page rather than alone: floating over somebody else's page
+// is the thing it is for, and a bare canvas would show none of it.
 const meta = {
   title: 'Components/Dock',
   component: Dock,
@@ -22,9 +14,7 @@ const meta = {
     layout: 'fullscreen',
     docs: {
       description: componentDescription([
-        'A corner-docked launcher button with a floating panel above it — the "chat bubble in the bottom-right" affordance. The panel is content-agnostic: slot a chat, a form, or your own component; the dock owns the button, `aria-expanded`, the focus return, Escape and the hide semantics, and nothing else.',
-        'Closed does not mean gone. The panel keeps its layout box (`visibility: hidden` + `inert`) and is never unmounted, so a thread inside it never re-measures from zero and a reply that arrives while closed is really there — which is what makes the `unread` dot honest. `unread` is yours: the dock renders it while closed and never writes it back.',
-        'Geometry is CSS custom properties, not props: `--kai-dock-width` · `--kai-dock-height` · `--kai-dock-inset` · `--kai-dock-gap` · `--kai-dock-radius` · `--kai-dock-z` · `--kai-dock-launcher-size`. Narrow viewports take the panel full-bleed by default.',
+        'A launcher button in the page corner that opens a floating panel.',
       ]),
     },
   },

@@ -4,9 +4,8 @@ import { useAutoResize } from '../../primitives/use-auto-resize';
 
 export interface TextareaProps extends JSX.TextareaHTMLAttributes<HTMLTextAreaElement> {
   maxHeight?: number;
-  /** Floor the auto-resized height at this many pixels, even when the field
-   *  is empty. Omit to fall back to `useAutoResize`'s own default (one
-   *  visible line, derived from computed line-height + padding/border). */
+  /** Lowest auto-resized height in pixels, even when the field is empty; unset uses
+   *  `useAutoResize`'s default of one visible line. */
   minHeight?: number;
   autoResize?: boolean;
 }
@@ -20,7 +19,7 @@ export function Textarea(props: TextareaProps) {
   // update that isn't the user typing) fires no DOM 'input' event, so the
   // resize-on-'input' listener inside `useAutoResize` never sees it. Without
   // this, a controlled textarea's box only ever grows off USER typing and
-  // silently stays the wrong size after a programmatic update — gap #3 in
+  // silently stays the wrong size after a programmatic update — the third gap in
   // the fix. `defer: true` so this never redoes the mount-time measurement
   // (already covered by the hook's own rAF + ResizeObserver); it only fires
   // on a REAL subsequent change, after Solid has already written the new

@@ -10,50 +10,40 @@ import type { ConversationRowDensity } from '../../components/conversation/conve
 import type { ConversationGroup, ConversationSummary } from '../../types';
 
 interface Props extends Record<string, unknown> {
-  /** The list's section headers (`{ id, name, sortOrder, createdAt }`), rendered
-   *  in array order. A group carries no conversations of its own; it is matched
-   *  against `conversations` by id, so the two props are complementary rather
-   *  than alternatives. Omit for an ungrouped list. Set as a JS property. */
+  // A group carries no conversations of its own; it is matched against `conversations`
+  // by id, so the two props are complementary rather than alternatives.
+  /** The list's section headers (`{ id, name, sortOrder, createdAt }`) in array order. JS property; omit for an ungrouped list. */
   groups?: ConversationGroup[];
-  /** Every conversation the list renders, flat. Each one is filed under the group
-   *  whose `id` equals its `groupId`; one with no `groupId`, or with a `groupId`
-   *  matching no entry in `groups`, falls into a trailing "Ungrouped" section, so
-   *  nothing you pass in is ever dropped. There is no recency bucketing. Set as a
-   *  JS property. Omit to supply them as `<kai-conversation>` light-DOM children
-   *  instead, or for the empty state. A search query that matches nothing shows a
-   *  visible "No conversations match your search" state, distinct from the
-   *  zero-conversations empty state. Slotted `<kai-conversation-item>` children
-   *  switch the list into item mode instead: your own rows win and this array is
-   *  not rendered. */
+  // Each one is filed under the group whose `id` equals its `groupId`; one with no
+  // `groupId`, or with a `groupId` matching no entry in `groups`, falls into a trailing
+  // "Ungrouped" section, so nothing you pass in is ever dropped. There is no recency
+  // bucketing. A search query that matches nothing shows a visible "No conversations
+  // match your search" state, distinct from the zero-conversations empty state. Slotted
+  // `<kai-conversation-item>` children switch the list into item mode instead: your own
+  // rows win and this array is not rendered.
+  /** The conversations to render, flat. JS property; omit to pass `<kai-conversation>` light-DOM children instead, or for the empty state. */
   conversations?: ConversationSummary[];
   /** The id of the currently-open conversation, highlighted in the list. */
   activeId?: string;
-  /** Controlled collapsed state. Set as a JS property (`el.collapsed = true`) to
-   *  drive the rail from your app, updating it in response to `kai-collapse-toggle`.
-   *  Omit for uncontrolled (the element manages it). Collapsed shrinks the rail to
-   *  a floating reopen button. */
+  // Drive the rail from your app, updating it in response to `kai-collapse-toggle`.
+  /** Controlled collapsed state (`el.collapsed = true`). Omit for uncontrolled; collapsed shrinks the rail to a reopen button. */
   collapsed?: boolean;
   /** Initial collapsed state when uncontrolled (default false). Use the
    *  `default-collapsed` attribute to start collapsed in plain HTML. */
   defaultCollapsed?: boolean;
   /** Dense single-line rows (a leading dot + title, no message count). */
   compact?: boolean;
-  /** Row density for the data rows: `default`, `compact` (same as the
-   *  `compact` flag), or `panel`, the widget-panel presentation matching the
-   *  facade panel's measured row box (12px/10px padding, a 40px single-line
-   *  row with a right-aligned relative time and an optional preview line
-   *  carrying the unread dot). An explicit density wins over `compact`. Item
-   *  mode is unaffected: slotted `<kai-conversation-item>` rows carry their
-   *  own `density` attribute. */
+  // `panel` is the widget-panel presentation, matching the facade panel's measured row
+  // box (12px/10px padding, a 40px single-line row with a right-aligned relative time
+  // and an optional preview line carrying the unread dot). An explicit density wins over
+  // `compact`. Item mode is unaffected: slotted `<kai-conversation-item>` rows carry
+  // their own `density` attribute.
+  /** Row density: `default`, `compact` (same as the `compact` flag), or `panel` (the widget-panel row box). */
   density?: ConversationRowDensity;
-  /** Show the built-in search box above the list. Default `true`. Set
-   *  `searchable="false"` (or `el.searchable = false`) to hide it: the
-   *  widget-box case, where the facade's own list view renders no search and
-   *  a fine-grain composition previously had no way to match it (2026-08-31
-   *  composition spike, phase 3 round 2). Same default-true flag convention
-   *  as `<kai-prompt-input attach>`: `<kai-conversations searchable>` and
-   *  omitting it are both ON. Hidden, the `focus()`/`clear()` methods reach
-   *  no input and `kai-search` never fires. */
+  // Default-true flag convention, as `<kai-prompt-input attach>`: `<kai-conversations
+  // searchable>` and omitting it are both ON. Hidden, the `focus()`/`clear()` methods
+  // reach no input and `kai-search` never fires.
+  /** Show the built-in search box above the list. Default `true`; `searchable="false"` hides it. */
   searchable?: boolean;
 }
 
@@ -81,7 +71,7 @@ interface Events {
  *   - textContent → ConversationSummary.title
  *  Fields not expressible as HTML attributes are NOT fabricated: the
  *  optional `scope` and `lastMessageAt` stay absent, and the required
- *  `messageCount`/`updatedAt` get honest defaults — zero messages, and an empty
+ *  `messageCount`/`updatedAt` get honest defaults: zero messages, and an empty
  *  `updatedAt` from which no trailing relative time is derived (the epoch it
  *  used to fabricate rendered a bogus "many days ago" on every declarative row).
  */
@@ -95,6 +85,9 @@ export function parseKaiConversationElement(n: Element): ConversationSummary {
   };
 }
 
+/**
+ * A conversation list or rail.
+ */
 defineWebComponent<Props, Events>('kai-conversations', {
   groups: [],
   conversations: [],

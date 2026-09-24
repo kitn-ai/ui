@@ -2,8 +2,7 @@ import { type JSX, createSignal, splitProps } from 'solid-js';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 
-// Owns its classes rather than delegating to `Button` (owner amendment, design
-// round 4): Button's smallest size (`sm`, `h-8`) reads as a small BUTTON, not
+// Owns its classes rather than delegating to `Button`: Button's smallest size (`sm`, `h-8`) reads as a small BUTTON, not
 // a pill, and pill proportions need finer control than that scale offers —
 // closer to `Badge`'s `min-h-5` than to any Button size. `sm` here (h-7,
 // tight px-3, text-xs) is the default pill; `md` (h-8, text-sm) is the one
@@ -32,12 +31,11 @@ export interface ToggleChipProps
       'type' | 'role' | 'aria-pressed' | 'onChange' | 'onclick' | 'onClick' | 'onKeyDown' | 'onkeydown' | 'children'
     >,
     VariantProps<typeof toggleChipVariants> {
-  /** Controlled pressed state. When set, the component defers state to the
-   *  parent; drive it from `onChange`. Omit for uncontrolled (internal)
-   *  state — same controlled/uncontrolled shape as `Switch`'s
-   *  `checked`/`defaultChecked`, renamed to `pressed` because that's the
-   *  ARIA state a toggle BUTTON carries (`aria-pressed`, not
-   *  `aria-checked` — this is a button, not a switch/checkbox/radio). */
+  // Same controlled/uncontrolled shape as `Switch`'s `checked`/`defaultChecked`, named
+  // `pressed` because that is the ARIA state a toggle BUTTON carries (`aria-pressed`, not
+  // `aria-checked`: this is a button, not a switch, checkbox or radio). When set, the
+  // component defers state to the parent.
+  /** Controlled pressed state. */
   pressed?: boolean;
   /** Initial pressed state when uncontrolled. */
   defaultPressed?: boolean;
@@ -51,17 +49,16 @@ export interface ToggleChipProps
 
 /**
  * `ToggleChip`: a small pill button for a two-state, chip-shaped toggle
- * (`aria-pressed`) — the common-case selectors in `builder-panel.tsx`'s
- * attachments accept editor, promoted to a named primitive (owner design
- * round 4). Controlled via `pressed`, or uncontrolled from `defaultPressed`,
+ * (`aria-pressed`): the common-case selectors in `builder-panel.tsx`'s
+ * attachments accept editor, promoted to a named primitive. Controlled via `pressed`, or uncontrolled from `defaultPressed`,
  * matching `Switch`'s controlled/uncontrolled convention.
  *
  * No `ChipGroup` wrapper: a row of chips is `<div class="flex flex-wrap
- * gap-1.5">` and nothing more — there is no shared selection state, roving
+ * gap-1.5">` and nothing more; there is no shared selection state, roving
  * tabindex, or exclusivity to own (unlike `RadioGroup`/`Segmented`, which
  * DO have real grouping logic: one shared `name`, single-select, arrow-key
  * navigation between options). Wrapping a plain flex row in a component
- * would be a component with nothing to do — YAGNI; see the story for the
+ * would be a component with nothing to do. YAGNI; see the story for the
  * same "just a flex row" idiom used inline.
  */
 export function ToggleChip(props: ToggleChipProps): JSX.Element {

@@ -1,6 +1,6 @@
 ---
 title: Conversations
-description: A sidebar conversation list with grouping, active highlighting, and a "New chat" button — the building block for any chat history panel.
+description: A conversation sidebar for switching between past chats.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -17,7 +17,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kai-tag-sub">kai-conversations</p>
 
-<p class="kai-lede">A self-contained sidebar that renders a grouped, scrollable conversation list with a "New chat" button and collapse toggle — drop it into any framework and wire up three events.</p>
+<p class="kai-lede">Groups the history by whatever you group on, with search built in.</p>
 
 <Facts items={['Shadow DOM', '3 events', 'Flat or grouped lists', 'Built-in search', 'Declarative child elements']} />
 
@@ -26,7 +26,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 <Playground client:only="solid" tag="kai-conversations" />
 
 <Aside type="tip" title="When to use">
-Use `<kai-conversations>` for a conversation switcher outside SolidJS — React, Vue, Svelte, or plain HTML. Shadow DOM keeps styles isolated in both directions. In SolidJS with fine-grained layout needs, compose the `ConversationList` primitive directly.
+On a chat app's left rail, beside the thread it switches between. For a whole chat surface in one element, use [Chat](/components/chat/).
 </Aside>
 
 ## Usage

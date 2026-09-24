@@ -11,7 +11,9 @@ import WorkspaceDemo from '../../../components/WorkspaceDemo.tsx';
 
 ## How it works
 
-`<kai-workspace>` is the layout: it arranges its slots, handles resize and collapse, and nothing else. You slot `<kai-conversations>` into `start` and `<kai-chat>` into the main region, then drive each part directly. The rail gets a flat `conversations` array (add `groups` when you want section headers), the chat gets the active thread's `messages`, and three events drive all the interactivity:
+`<kai-workspace>` is the layout: it arranges its slots, handles resize and collapse, and nothing else. You slot `<kai-conversations>` into `start` and `<kai-chat>` into the main region, then drive each part directly.
+
+The rail gets a flat `conversations` array (add `groups` when you want section headers), the chat gets the active thread's `messages`, and three events drive all the interactivity:
 
 ```html
 <kai-workspace collapse-below="720" drawer-below="640" style="display:block; height:100vh;">

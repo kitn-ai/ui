@@ -12,7 +12,7 @@ export interface ChatScopePickerProps {
   class?: string;
   /** Initial open state of the dropdown (uncontrolled seed). */
   defaultOpen?: boolean;
-  /** Disable the trigger — click/keyboard no longer open the dropdown. */
+  /** Disable the trigger: click and keyboard no longer open the dropdown. */
   disabled?: boolean;
   /** Receive the dropdown's open controller (forwarded from the inner Dropdown). */
   controllerRef?: (api: DropdownController) => void;

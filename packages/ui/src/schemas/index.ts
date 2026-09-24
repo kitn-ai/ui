@@ -1,96 +1,22 @@
-// @kitn.ai/ui/schemas: the card JSON Schemas, reachable.
+// @kitn.ai/ui/schemas: the card JSON Schemas, reachable. The raw JSON subpaths ship
+// too and a non-JS backend should use them; the JS entry is the primary surface for
+// JS/TS consumers because importing JSON breaks differently under Node ESM,
+// `nodenext` and Workers, and this entry breaks under none of them.
 //
-// The 11 schema documents under src/primitives/card-schemas/ have been copied into
-// dist/schemas/ on every build and shipped in every tarball since the card contract
-// landed. Nothing could reach them: package.json "exports" is a CLOSED map with no
-// `./schemas` key, so both `@kitn.ai/ui/schemas` and
-// `@kitn.ai/ui/schemas/confirm.schema.json` resolved to TS2307 /
-// ERR_PACKAGE_PATH_NOT_EXPORTED. This repo's own reference harness gave up and
-// hand-derived the confirm schema in
-// examples/internal/openrouter-spike/src/card-schema.ts, saying so in a comment.
+// SERVER-SAFE, DELIBERATELY: no DOM, no Solid, no `fetch`, and nothing reachable from
+// here resolves to a `.tsx`. `verify:ssr` asserts the runtime half by importing the
+// BUILT entry under the `node` condition, and `tsc --noEmit -p tsconfig.mcp.json` on
+// an unbuilt tree asserts the other.
 //
-// WHY THIS JS ENTRY IS THE PRIMARY SURFACE
-// ----------------------------------------
-// The raw JSON subpaths ship too (`@kitn.ai/ui/schemas/confirm.schema.json`), and
-// they are the right answer for a Python or Go backend, or for `fetch`. They are
-// the SECONDARY surface for JS/TS consumers because importing JSON breaks three
-// different ways across the framework targets the scaffolder supports: Node ESM and
-// TS `nodenext` need `with { type: 'json' }`, types need `resolveJsonModule` in any
-// mode, and Workers need a `wrangler` rule. A JS entry has none of those problems
-// anywhere, and it picks up `verify:ssr` coverage for free, since that guard derives
-// its entry list from the exports map.
+// ★ WHAT `verify:ssr` CANNOT CATCH, measured: it checks the built bundle, so it sees
+// only what survives tree-shaking, and rollup discards the whole Solid component tree
+// when only a tag map is reachable. Pointing a re-export below at a `.tsx` produces a
+// byte-identical bundle that imports clean under `node`. So the `.ts` split is not
+// holding up a runtime guard: it stops server-safety depending on tree-shaking staying
+// perfect, since one module-scope side effect under `components/` makes the discarded
+// tree real. The cost is a SERVER cost only, and every value below is the JSON file
+// itself, which `verify:schemas` asserts byte for byte.
 //
-// SERVER-SAFE, DELIBERATELY
-// -------------------------
-// No DOM, no Solid, no `fetch`. Everything reached from here is data or plain
-// functions, and as of src/primitives/card-component-types.ts that is true of the
-// TYPES too: nothing reachable from this entry resolves to a `.tsx` any more, so a
-// Node/no-DOM project can read the whole graph from source. (`CardComponentMap` used
-// to come from primitives/card-registry.tsx and was the last exception.) This entry
-// is meant to be imported by a backend route that hands tool definitions to a model,
-// so anything that touches a browser global would defeat its purpose. `verify:ssr`
-// asserts the RUNTIME half, by importing the BUILT entry under the `node` condition
-// in its own child process; the compile-time half is `tsc --noEmit -p
-// tsconfig.mcp.json` on a tree with no dist/, and only that one sees a `.tsx` creep
-// back in.
-//
-// WHAT `verify:ssr` DOES NOT CATCH, MEASURED
-// ------------------------------------------
-// It checks the BUILT bundle, so it only sees what survives tree-shaking — and
-// rollup is good enough here that it does not see the mistake you would actually
-// make. Measured, not assumed: pointing the `BUILTIN_CARD_TAGS` re-export below at
-// src/primitives/card-registry.TSX instead of card-tags.ts produces a byte-identical
-// dist/schemas.js with zero `solid-js` references, and imports clean under `node`.
-// Rollup compiles the whole Solid component tree (build time 0.2s -> 3.9s) and then
-// discards all of it, because only the tag map is reachable.
-//
-// So the `.ts` split is NOT holding a runtime guard up, and must not be described as
-// if it were. What it buys is that this entry's server-safety stops depending on
-// tree-shaking staying perfect: one module-scope side effect anywhere under
-// components/ and the discarded tree stops being discardable. Removing the dependency
-// beats relying on it being elided.
-//
-// WHAT IT COSTS, AND WHERE
-// ------------------------
-// dist/schemas.js, measured on this tree, not recalled:
-//
-//   42,658 B min / 11,762 B gzip   before ./registry landed
-//   53,658 B min / 14,669 B gzip   after ./registry  (+11,000 B / +2,907 B gzip)
-//   53,864 B min / 14,739 B gzip   now, with BUILTIN_CARD_TAGS  (+206 B / +70 B gzip)
-//
-// The middle row is this comment's previous "53,656 / 14,667", re-measured rather than
-// carried forward; the 2-byte drift is what a claim costs when it is copied instead of
-// taken again. The last row is the tag map below, measured by building this entry with
-// and without that one export line.
-//
-// The `18,160 B / 5,800 B` this comment used to claim was measured at 0.20.1, before
-// tool-defs and provider-subsets were added to the barrel, and had been stale ever
-// since. Corrected here rather than left, because a size claim nobody re-measures is
-// the same class of thing as a guard nobody watches fail.
-//
-// The delta is ./registry plus what it pulls: primitives/card-validate.ts (the
-// validator) and primitives/card-validate-schemas.ts (the LEAN projection). That last
-// one means the seven card schemas appear TWICE in this bundle, authored and lean.
-// Deliberate, and the alternative is worse: validating built-ins against the authored
-// documents here while the browser validates them against the projection would be two
-// behaviours wearing one name. One function, one answer, 4 KB.
-//
-// All of it is a SERVER cost and does not touch a client bundle. Nothing in the
-// component tree imports this entry, so no consumer pays it unless a route or a
-// build script imports it on purpose. If you are here comparing it against the
-// ~1 KB gzip figure in the emit-contract plan, those are different things: that one
-// is the LEAN projection destined for the browser (descriptions and `$id` stripped,
-// validation keywords only), which is a separate artifact and not this file.
-//
-// NOT RESTATED
-// ------------
-// Every value below is the JSON file itself, imported and inlined by the bundler.
-// There is no hand-copied shape here and there must never be one: `verify:schemas`
-// asserts each exported entry is byte-identical to its file on disk, and that the
-// two maps between them account for every file in the directory and for nothing
-// else. The whole point of this entry is to stop the same shape existing in five
-// places.
-
 import type { JsonSchema } from '../primitives/card-validate';
 
 import artifactSchema from '../primitives/card-schemas/artifact.schema.json';
@@ -120,7 +46,7 @@ export type CardSchema = JsonSchema & Readonly<Record<string, unknown>>;
  * DO NOT "TIGHTEN" THIS TO `doc as JsonSchema`, OR DELETE THE CAST.
  *
  * It reads like laziness and is not. `JsonSchema` (src/primitives/card-validate.ts)
- * pins `type` to a literal union — `'string' | 'number' | ... | 'null'` — while
+ * pins `type` to a literal union (`'string' | 'number' | ... | 'null'`) while
  * TypeScript infers plain `string` for the `"type"` member of an imported JSON
  * literal, so a schema document is NOT assignable to `JsonSchema` and no narrowing
  * short of a per-file `as const` would make it so. On top of that the documents
@@ -146,7 +72,7 @@ export type CardSchemaName = 'artifact' | 'choice' | 'confirm' | 'embed' | 'form
 
 /**
  * The contract shapes: the envelope itself, the event a card emits back up, and the
- * two result payloads. Not card data and NOT tool candidates — a model is never
+ * two result payloads. Not card data and NOT tool candidates: a model is never
  * asked to emit one of these, so keeping them out of `cardSchemas` is what stops
  * `cardTools()` offering the model an envelope-shaped tool.
  */
@@ -228,30 +154,22 @@ export type {
 
 // The remaining two payload types, `link` and `embed`.
 //
-// They are NOT in card-data-types.ts, and that is deliberate rather than an
-// oversight to be tidied later: that file exists to rescue types that were
-// trapped inside a `.tsx`, and these two never were. `LinkPreviewData` and
-// `EmbedCardData` have always been authored beside the pure logic that consumes
-// them — `resolveLinkMetadata`, `resolveEmbed`/`watchUrl` — in modules that carry
-// no DOM and no Solid, so they were already importable from a Node/no-DOM
-// project. Moving them would buy nothing and would split each type from the
+// They are deliberately NOT in card-data-types.ts: that file exists to rescue types trapped
+// inside a `.tsx`, and these two never were. `LinkPreviewData` and `EmbedCardData` have
+// always been authored beside the pure logic that consumes them (`resolveLinkMetadata`,
+// `resolveEmbed`, `watchUrl`), in modules with no DOM and no Solid, so they were already
+// importable from a Node/no-DOM project. Moving them would split each type from the
 // functions written against it.
 //
-// Which is precisely how they got missed. The extraction that created
-// card-data-types.ts swept the `.tsx` files, exported what it found HERE, and
-// the two types that needed no rescuing were never on its list — five of seven
-// payload types landed on this entry and nobody noticed the other two, because
-// both are exported from src/index.ts and every check asked only whether a
-// consumer could reach them from SOME public barrel. A backend cannot import
-// from src/index.ts; that is the Solid-bearing one. See the REACHABILITY note in
-// card-type-parity.test.ts, which now enumerates the payload types from
-// `cardSchemas` and requires each to be reachable from THIS entry specifically.
+// That is also how they were missed: five of seven payload types were exported here and
+// nobody noticed the other two, because both are reachable from src/index.ts, the
+// Solid-bearing barrel a backend cannot import. card-type-parity.test.ts now enumerates the
+// payload types from `cardSchemas` and requires each to be reachable from THIS entry.
 //
-// `EmbedProvider` comes along because `EmbedCardData.provider` names it, and a
-// member type a consumer cannot import leaves them writing `provider: 'youtube'
-// as EmbedCardData['provider']`. `ResolvedEmbed` and `LinkMetadataFetcher` stay
-// off this entry on purpose — they describe how a card RENDERS and how an app
-// resolves metadata in the browser, neither of which a route builds.
+// `EmbedProvider` comes along because `EmbedCardData.provider` names it, and a member type a
+// consumer cannot import leaves them writing `provider: 'youtube' as
+// EmbedCardData['provider']`. `ResolvedEmbed` and `LinkMetadataFetcher` stay off this entry:
+// they describe how a card RENDERS and how an app resolves metadata in a browser.
 export type { EmbedCardData, EmbedCardEnvelope, EmbedProvider } from '../primitives/embed-providers';
 export type { LinkPreviewData, LinkPreviewEnvelope } from '../primitives/link-preview';
 

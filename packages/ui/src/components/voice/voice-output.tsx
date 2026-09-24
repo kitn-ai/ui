@@ -4,7 +4,7 @@ import { Button } from '../button/button';
 import { Tooltip } from '../tooltip/tooltip';
 import { hasSpeechSynthesis, cancelSpeech, speakUtterance, pauseSpeech, resumeSpeech } from '../../primitives/speech';
 
-/** Imperative handle exposed via `controllerRef` — surfaces the playback controls
+/** Imperative handle exposed via `controllerRef`: surfaces the playback controls
  *  so the `<kai-voice-output>` facade can forward them as instance methods. Both
  *  the native (speechSynthesis) and model (synthesize → Audio) paths run through
  *  these, so manual clicks and programmatic calls behave identically. */
@@ -27,14 +27,14 @@ export interface VoiceOutputProps {
   /** TTS model seam: given text, return an audio Blob to play. When set, the
    *  native speechSynthesis path is bypassed. Mirrors VoiceInput's `onTranscribe`. */
   onSynthesize?: (text: string) => Promise<Blob>;
-  /** Fires whenever playback starts or stops. `speaking: true` means audio has
-   *  actually started (utterance.onstart on the native path; audio.play()
-   *  resolving on the model path), not that speak() was called. */
+  // `speaking: true` means audio has actually started (utterance.onstart on the native
+  // path; audio.play() resolving on the model path), not that speak() was called.
+  /** Fires whenever playback starts or stops. */
   onSpeakingChange?: (speaking: boolean) => void;
-  /** Synthesis failed: a native utterance error, a rejecting `onSynthesize`, or
-   *  audio playback failing to start. `error` is the platform error code or the
-   *  exception's name. Deliberate cancellation (stop(), a new speak()) is not a
-   *  failure and does not fire. The facade maps this to kai-voice-error. */
+  // Deliberate cancellation (stop(), a new speak()) is not a failure and does not fire. The
+  // facade maps this to `kai-voice-error`.
+  /** Synthesis failed: a native utterance error, a rejecting `onSynthesize`, or playback
+   *  failing to start. */
   onError?: (detail: { source: 'synthesis'; error: string; message: string }) => void;
   /** Fires once the model path resolves audio (model path only). */
   onSynthesized?: (blob: Blob) => void;

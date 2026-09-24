@@ -506,7 +506,11 @@ describe('the copy control', () => {
     // rather than the docs true to the element, so these strings must stay put —
     // if someone edits the docs instead, this fails and says so.
     const facade = readFileSync(resolve(pkgRoot, 'src/web-components/code-block/code-block.tsx'), 'utf8');
-    expect(facade).toContain('(with a copy button)');
+    // The phrase, not the old parenthetical: the sweep took that doc comment to one sentence,
+    // and the promise it carries is "code block with a copy button" either way. The MECHANISM
+    // is pinned by the two tests above (the button renders, and `copy` defaults on), so this
+    // one only has to keep the promise in the text both files publish.
+    expect(facade).toContain('code block with a copy button');
     const docs = readFileSync(resolve(pkgRoot, '../../docs/web-components.md'), 'utf8');
     expect(docs).toContain('code block with a copy button');
   });

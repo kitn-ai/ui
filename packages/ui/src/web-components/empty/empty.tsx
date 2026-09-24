@@ -5,14 +5,12 @@ import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription, EmptyCont
 interface Props extends Record<string, unknown> {
   /** Title text. Attribute: `empty-title` (`title` is a global HTML attribute). */
   emptyTitle?: string;
-  /** Description text. */
+  /** Line of copy under the title. */
   description?: string;
 }
 
 /**
- * `<kai-empty>` — an empty-state block. `empty-title`/`description` via
- * attributes; slot your own icon into `slot="media"` and actions into the
- * default slot (Route 2 slots).
+ * The empty state of a list or panel: a heading, a line of copy, and room for an action.
  */
 defineWebComponent<Props>('kai-empty', {
   emptyTitle: '',

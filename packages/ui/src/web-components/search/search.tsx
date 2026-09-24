@@ -34,23 +34,8 @@ interface Events {
 }
 
 /**
- * `<kai-search>` — a debounced filter field built on `kai-input`. Type to fire a
- * debounced `kai-search`, press Enter for `kai-submit`. A clear (×) button shows
- * once there's a value; an optional `shortcut` renders a `kai-kbd` hint while the
- * field is empty.
- *
- * ```html
- * <kai-search placeholder="Search docs" shortcut="Mod+K"></kai-search>
- * <script type="module">
- *   import '@kitn.ai/ui/web-components';
- *   const s = document.querySelector('kai-search');
- *   s.addEventListener('kai-search', (e) => filter(e.detail.value));
- *   s.addEventListener('kai-submit', (e) => go(e.detail.value));
- * </script>
- * ```
- *
- * Drive/read the query with the `value` property (reflected to the attribute).
- * Restyle via `::part(field)`, `::part(input)`, and `::part(clear)`.
+ * A debounced search field with a clear button and an optional keyboard-shortcut
+ * hint. `kai-input` is the plain text field.
  */
 defineWebComponent<Props, Events>('kai-search', {
   value: undefined,

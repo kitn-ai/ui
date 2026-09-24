@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { fn } from 'storybook/test';
-import { FeedbackBar } from './feedback-bar';
+import { FeedbackBar, type FeedbackBarProps } from './feedback-bar';
 import { componentDescription } from '../../stories/docs/web-component-controls';
 
 const meta = {
@@ -12,8 +12,7 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'An inline helpful / not-helpful rating bar for an assistant message. It owns the whole flow: it asks, optionally collects a category and comment on a not-helpful vote, then confirms with a thank-you, all in place. It does not disappear on a vote (only the close button dismisses it).',
-        'The vote fires `onFeedback` immediately; set `collectDetail` plus `categories` for the detail step (fires `onSubmitDetail`).',
+        'An inline rating bar for an assistant reply.',
       ]),
     },
   },
@@ -99,7 +98,10 @@ const SmileyIcon = () => (
 );
 
 export const WithIcon: Story = {
-  args: { title: 'How did I do?', icon: <SmileyIcon /> },
+  // The icon is JSX, so it cannot ride in `args` (Storybook serializes them across
+  // the manager/preview boundary); the render closes over it instead.
+  args: { title: 'How did I do?' },
+  render: (args: FeedbackBarProps) => <FeedbackBar {...args} icon={<SmileyIcon />} />,
   ...src(`<FeedbackBar
   title="How did I do?"
   icon={

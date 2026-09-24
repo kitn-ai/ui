@@ -32,7 +32,7 @@ export interface ChatConfigProps {
 
 /**
  * Provides chat-wide appearance settings to all child components.
- * Set once at the top level — MessageContent, Markdown, CodeBlock,
+ * Set once at the top level. MessageContent, Markdown, CodeBlock,
  * ConversationList, and PromptInput all read from this.
  */
 export function ChatConfig(props: ChatConfigProps) {
@@ -65,7 +65,7 @@ export function useChatConfig(): ChatConfigValue {
  * element, keyed to hardcoded rems, and they only do anything alongside `prose`
  * itself. There is no `prose-body` to alias them to, and collapsing them to a
  * bare font-size would throw away the vertical rhythm that is their whole job.
- * The kit's own markdown does not go through them at all — it renders through
+ * The kit's own markdown does not go through them at all. It renders through
  * `.chat-markdown` (theme.css), which is em-relative and therefore already
  * scales off whatever `textClass` sets.
  *
@@ -88,7 +88,7 @@ export function proseClass(size: ProseSize): string {
  * These are the kit's SEMANTIC type-scale utilities, not Tailwind's raw scale:
  * each resolves through a namespaced --kai-text-* token in theme.css, so a
  * consumer setting `--kai-text-body` moves the reading text. The public
- * `proseSize` strings ('xs' | 'sm' | 'base' | 'lg') are unchanged — this is an
+ * `proseSize` strings ('xs' | 'sm' | 'base' | 'lg') are unchanged. This is an
  * internal re-point only. Sizes are byte-identical to the Tailwind classes they
  * replace (text-meta ≡ text-xs, text-body ≡ text-sm, text-title ≡ text-base),
  * so nothing moves until a token is actually overridden.

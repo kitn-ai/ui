@@ -3,44 +3,23 @@ import { cn } from '../../utils/cn';
 import { CardSurface } from '../card/card-surface';
 import { BLUEPRINT_BG, STROKE, LINE, BORDER, ACCENT } from './builder-start';
 
-// The Workspace template's SECOND screen — owner-approved addition (T-1
-// build-out, final round). Ruling: a template family gets a second screen
-// only when it has >=2 GENUINELY different starting points; Workspace
-// qualifies now that its own owner-feedback round (see `elements/
-// builder-workspace.stories.tsx`'s module doc comment) shipped two real,
-// distinct anatomies — an artifact/code pane beside chat (v0's own shape)
-// and a full browser-chrome app preview with a device toggle (Lovable's own
-// shape). Reuses `builder-start.tsx`'s own `CardSurface`-based card pattern and
-// blueprint-illustration language (`BLUEPRINT_BG`/`STROKE`/`LINE`/`BORDER`/
-// `ACCENT`, exported from that module for exactly this reuse) AT THE SAME
-// SCALE as Step 1's own cards — same `h-44` media height, same grid classes
-// (`grid-cols-1 sm:grid-cols-2 lg:grid-cols-3`, the third column simply
-// empty with only two variants). The original brief asked for "a smaller
-// scale"; live review overrode that once the smaller cards sat next to
-// Step 1's and read as too small/elongated by comparison — matching
-// proportions won.
+// The Workspace template's SECOND screen. A template family gets a second screen only when
+// it has at least two genuinely different starting points, and Workspace qualifies: an
+// artifact/code pane beside chat, and a full browser-chrome app preview with a device
+// toggle. It reuses `builder-start.tsx`'s card pattern and its blueprint-illustration
+// language (`BLUEPRINT_BG`/`STROKE`/`LINE`/`BORDER`/`ACCENT`) at the SAME scale as that
+// step's cards, because a smaller scale read as too small beside them in review.
 //
-// "SWITCHABLE VIEWS" (the Multi-mode mechanism) IS NOT A THIRD CARD HERE —
-// decided and recorded, per the assignment's own conditional. Multi-mode's
-// own module doc comment (`stories/showcase/builder-multi-mode.stories.tsx`)
-// concluded two things that both point away from "just a Workspace
-// variant": (1) its mode-swap mechanism generalizes ACROSS template shapes
-// (an `assistant` mode and a `workspace` mode are both first-class
-// supported shapes, not two flavors of Workspace specifically), and (2) T-5
-// flags `modes: [...]` as possibly the construct-vocabulary CEILING itself
-// — a question bigger than "which Workspace starter construct to seed,"
-// which is all a variant is (see the data-model note below). A family
-// member needs to be a DATA-ONLY starting point within one template; Multi-
-// mode is closer to its own template than a data variant of this one. So
-// this screen ships with exactly the two cards the assignment named as the
-// minimum, not three.
+// "Switchable views" (the Multi-mode mechanism) is deliberately NOT a third card: its own
+// module comment concludes that its mode swap generalizes across template shapes, and that
+// `modes: [...]` may be the construct vocabulary's ceiling, which is a bigger question than
+// "a data variant of Workspace". A family member is a data-only starting point within one
+// template, so this screen ships with the two cards the family actually has.
 //
-// DATA MODEL: a variant is a DIFFERENT STARTER CONSTRUCT within the
-// Workspace family — which panel defaults and which stub content
-// `WorkspaceBuilderDemo` seeds itself with — not a schema change.
-// `construct.v1` needs nothing new for this screen to exist: T-3's own
-// rule ("a template is a starter construct, not vocabulary... the picker
-// writes the starting JSON") already covers a variant, one level down.
+// DATA MODEL: a variant is a different STARTER CONSTRUCT within the Workspace family, which
+// panel defaults and stub content the demo seeds itself with, not a schema change.
+// `construct.v1` needs nothing new: a template is a starter construct rather than
+// vocabulary, so the picker writes the starting JSON and a variant is that one level down.
 
 export type WorkspaceVariantId = 'artifactPreview' | 'appPreview';
 
@@ -117,11 +96,11 @@ const VARIANT_ILLUSTRATIONS: Record<WorkspaceVariantId, () => JSX.Element> = {
 };
 
 /**
- * `WorkspaceVariantPicker` — the Workspace family's second screen: two
+ * `WorkspaceVariantPicker`, the Workspace family's second screen: two
  * function-named variant cards (smaller-scale `CardSurface`s, reusing `Builder
  * Start`'s own pattern) plus a back affordance to the template picker.
  * Selection fires `onSelect` with the variant id the same click-to-advance
- * shape `BuilderStart` itself uses (T-7's own reasoning: nothing a second
+ * shape `BuilderStart` itself uses, since nothing a second
  * "Continue" step would add here that the click doesn't already mean).
  */
 export function WorkspaceVariantPicker(props: WorkspaceVariantPickerProps): JSX.Element {

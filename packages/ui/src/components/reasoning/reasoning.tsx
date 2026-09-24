@@ -9,25 +9,20 @@ interface ReasoningContextValue {
   isOpen: () => boolean;
   onOpenChange: (open: boolean) => void;
   disabled: () => boolean;
-  /** Id minted on the root and shared by the trigger's `aria-controls` and the
-   *  content's `id` — the same wiring `Collapsible` uses, so a screen reader can
-   *  name the panel this disclosure toggles. */
+  /** Id shared by the trigger's `aria-controls` and the content element, the wiring `Collapsible` uses. */
   contentId: string;
   /** ReasoningTrigger registers its button here on mount; the content reads it
    *  when a panel holding focus collapses, so focus has somewhere to land. */
   registerTrigger: (el: HTMLElement | undefined) => void;
-  /** The registered trigger. Deliberately a plain getter over a mutable
-   *  variable, NOT a signal — registration must not re-run the content effect. */
+  /** The registered trigger. A plain getter over a mutable variable, NOT a signal:
+   *  registration must not re-run the content effect. */
   trigger: () => HTMLElement | undefined;
-  /** Whether the reasoning is currently streaming — read by `ReasoningTrigger`
-   *  to decide how its own label renders (shimmer while streaming, plain
-   *  neutral text once settled). Kit-decides-HOW: every consumer gets the same
-   *  "Thinking…" shimmer behavior for free, with no prop of their own. */
+  /** Whether the reasoning is still streaming; the trigger shimmers while it is. */
   isStreaming: () => boolean;
 }
 
 /** Imperative open controller, handed to a parent (the kai-reasoning facade) via
- *  `controllerRef` so it can drive/observe open state — mirrors
+ *  `controllerRef` so it can drive/observe open state; mirrors
  *  CollapsibleController/HoverCardController. */
 export interface ReasoningController { open: Accessor<boolean>; setOpen: (v: boolean) => void; }
 
@@ -51,15 +46,13 @@ export interface ReasoningProps {
   defaultOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
   isStreaming?: boolean;
-  /** Gate the trigger — programmatic control via the controller still works. */
+  /** Gate the trigger; programmatic control via the controller still works. */
   disabled?: boolean;
-  /** Receive the open controller (open accessor + setOpen) once mounted. */
+  /** Receives the open controller (open accessor + setOpen) once mounted. */
   controllerRef?: (api: ReasoningController) => void;
-  /** Keep auto-opening while streaming and auto-closing when it settles (the
-   *  pre-Task-19f `full` behavior). Default false: the panel starts per
-   *  `defaultOpen` and stays exactly where the user leaves it — streaming only
-   *  changes the trigger's label (shimmer), never the open state, matching the
-   *  "closed chip, expand on click" default (owner ruling, 2026-08-26). */
+  // The panel otherwise starts per `defaultOpen` and stays where the user leaves
+  // it, so streaming only changes the trigger's label and never the open state.
+  /** Opens and closes with the stream rather than leaving the panel where the user put it. Default false. */
   openOnStream?: boolean;
 }
 

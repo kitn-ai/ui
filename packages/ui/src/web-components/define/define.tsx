@@ -7,7 +7,7 @@ import { createEffect, createSignal, onCleanup, Show, untrack, type JSX } from '
 /**
  * Shared constructable stylesheet, built once and adopted by every web component's
  * shadow root. This avoids duplicating the whole compiled kit sheet as an
- * inline `<style>` in each instance — important now that composing many small
+ * inline `<style>` in each instance: important now that composing many small
  * elements on a page is a supported pattern. Falls back to `null` where
  * Constructable Stylesheets aren't available, in which case the facade renders
  * an inline `<style>` instead (see below).
@@ -44,78 +44,62 @@ function createDarkMode(getTheme: () => string | undefined) {
 }
 
 /**
- * Context handed to every web-component facade. `E` is the element's event map —
- * `{ eventName: detailType }` — which types `dispatch` so a facade can only fire
+ * Context handed to every web-component facade. `E` is the element's event map:
+ * `{ eventName: detailType }`, which types `dispatch` so a facade can only fire
  * its declared events with the right `detail` shape.
  */
 export interface WebComponentContext<E = Record<string, unknown>> {
   /** The custom-element host node. */
   element: HTMLElement;
-  /** Fire a non-bubbling, non-composed CustomEvent off the host. Consumers
-   *  listen directly on the element (`el.addEventListener(...)`). Typed by the
-   *  element's event map `E`. */
+  /** Fire a non-bubbling, non-composed CustomEvent off the host, typed by the element's event map `E`. */
   dispatch: <K extends keyof E & string>(type: K, detail?: E[K]) => void;
-  /**
-   * Resolve a boolean flag from a prop the way HTML authors expect.
-   *
-   * `component-register` parses a *bare* boolean attribute (`<el removable>`) to
-   * `undefined`, not `true` — so a facade can't rely on the prop value alone.
-   * `flag('removable')` returns ON when the property is `true`, OR when the
-   * matching attribute is present and not explicitly `="false"`. So all of
-   * `<el removable>`, `<el removable="true">`, and `el.removable = true` turn it
-   * on; `<el removable="false">`, absent, and `el.removable = false` turn it off.
-   *
-   * `name` is the camelCase prop name; the matching kebab attribute is derived.
-   */
+  // `component-register` parses a *bare* boolean attribute (`<el removable>`) to
+  // `undefined`, not `true`, so a facade cannot rely on the prop value alone.
+  // `flag('removable')` returns ON when the property is `true`, OR when the matching
+  // attribute is present and not explicitly `="false"`. So all of `<el removable>`,
+  // `<el removable="true">` and `el.removable = true` turn it on; `<el removable="false">`,
+  // absent, and `el.removable = false` turn it off. `name` is the camelCase prop name;
+  // the matching kebab attribute is derived.
+  /** Resolve a boolean flag the way HTML authors expect: bare attribute, `="true"` and `prop = true` are ON. */
   flag: (name: string) => boolean;
-  /**
-   * Expose imperative methods on the host element instance — the input half of a
-   * component's interaction surface (`el.focus()`, `el.clear()`, `el.scrollToBottom()`,
-   * …), the counterpart to the events `dispatch` fires. Call once from the facade
-   * with closures over its internal state/refs; each entry is assigned to the host,
-   * so a consumer calls it directly: `document.querySelector('kai-prompt-input').focus()`.
-   * Overriding a native method name (e.g. `focus`) shadows it on the instance so it
-   * can target the right control inside the shadow root (the WebAwesome/Shoelace
-   * convention). Methods are attached when the facade renders (on element upgrade).
-   */
+  // The input half of a component's interaction surface (`el.focus()`, `el.clear()`,
+  // `el.scrollToBottom()`, ...), the counterpart to the events `dispatch` fires. Call
+  // once from the facade with closures over its internal state/refs; each entry is
+  // assigned to the host, so a consumer calls it directly:
+  // `document.querySelector('kai-prompt-input').focus()`. Overriding a native method name
+  // (e.g. `focus`) shadows it on the instance so it can target the right control inside
+  // the shadow root (the WebAwesome/Shoelace convention). Methods are attached when the
+  // facade renders (on element upgrade).
+  /** Expose imperative methods on the host element (`el.focus()`), the input half of the interaction surface. */
   expose: (methods: Record<string, (...args: never[]) => unknown>) => void;
-  /**
-   * Reflect a boolean prop to its host attribute AND make that prop read back what
-   * was set. Use this instead of hand-rolling
-   * `createEffect(() => element.toggleAttribute('x', flag('x')))`.
-   *
-   * WHY IT IS ONE CALL AND NOT TWO. The reflection is what BREAKS the read-back, so
-   * the fix has to be attached to it or it gets forgotten — and it was, three times.
-   * `toggleAttribute(name, true)` sets the attribute to the EMPTY STRING;
-   * component-register's `attributeChangedCallback` then writes the prop back as
-   * `this[name] = parseAttributeValue("")`, and `parseAttributeValue` returns
-   * `undefined` for the empty string. So a reflected flag became write-only:
-   * `el.loading = true` left `el.loading === undefined` while `[loading]` was on the
-   * host. The element kept BEHAVING correctly, because `flag()` reads the attribute —
-   * which is precisely why nobody noticed until a consumer tried to read the property
-   * back (findings G-05).
-   *
-   * What this installs is an instance-level wrapper around the accessor
-   * component-register already created, coercing every incoming value through the
-   * same `flag()` policy (`resolveFlag`) — so the `undefined` write-back resolves to
-   * the attribute that caused it, and the property and the attribute can no longer
-   * disagree. It delegates to the underlying setter, so reactivity is untouched.
-   *
-   * `source` overrides where the ON/OFF value comes from, for an element whose truth
-   * is an internal controller rather than the prop (see `wireDisclosure`). Returning
-   * `undefined` from it means "not ready, leave the attribute alone".
-   */
+  // WHY IT IS ONE CALL AND NOT TWO. The reflection is what BREAKS the read-back, so the
+  // fix has to be attached to it or it gets forgotten -- and it was, three times.
+  // `toggleAttribute(name, true)` sets the attribute to the EMPTY STRING;
+  // component-register's `attributeChangedCallback` then writes the prop back as
+  // `this[name] = parseAttributeValue("")`, and `parseAttributeValue` returns `undefined`
+  // for the empty string. So a reflected flag became write-only: `el.loading = true` left
+  // `el.loading === undefined` while `[loading]` was on the host. The element kept
+  // BEHAVING correctly, because `flag()` reads the attribute -- which is precisely why
+  // nobody noticed until a consumer tried to read the property back.
+  //
+  // What this installs is an instance-level wrapper around the accessor
+  // component-register already created, coercing every incoming value through the same
+  // `flag()` policy (`resolveFlag`) -- so the `undefined` write-back resolves to the
+  // attribute that caused it, and the property and the attribute can no longer disagree.
+  // It delegates to the underlying setter, so reactivity is untouched.
+  //
+  // `source` overrides where the ON/OFF value comes from, for an element whose truth is
+  // an internal controller rather than the prop (see `wireDisclosure`). Returning
+  // `undefined` from it means "not ready, leave the attribute alone".
+  /** Reflect a flag to its host attribute and keep the property readable. Use instead of hand-rolling `toggleAttribute`. */
   reflectFlag: (name: string, source?: () => boolean | undefined) => void;
-  /**
-   * Whether the element should currently render its dark-mode look --
-   * exactly the SAME resolved value that already drives the `.dark` class
-   * every facade's content sits inside (not a second computation of the
-   * `theme='light'|'dark'|'auto'` rule; see `createDarkMode` above). Most
-   * facades never need this directly, since the injected kit CSS already
-   * flips its custom properties under `.dark`. It exists for content that
-   * cannot read CSS at all -- e.g. a WebGL shader baking a colour choice
-   * into a GLSL uniform, which is why `kai-audio-visualizer` reads it.
-   */
+  // Exactly the SAME resolved value that already drives the `.dark` class every facade's
+  // content sits inside (not a second computation of the `theme='light'|'dark'|'auto'`
+  // rule; see `createDarkMode` above). Most facades never need this directly, since the
+  // injected kit CSS already flips its custom properties under `.dark`. It exists for
+  // content that cannot read CSS at all -- e.g. a WebGL shader baking a colour choice
+  // into a GLSL uniform, which is why `kai-audio-visualizer` reads it.
+  /** The resolved dark-mode value that drives the `.dark` class. */
   dark: () => boolean;
 }
 
@@ -126,14 +110,14 @@ function toAttr(name: string): string {
 
 /**
  * Every property name the built-in element prototype chain exposes as an ACCESSOR
- * — `role`, `hidden`, `autofocus`, `dir`, `title`, `className`, … — i.e. the
+ * (`role`, `hidden`, `autofocus`, `dir`, `title`, `className`, …), i.e. the
  * reflected IDL attributes plus the handful of read-only accessors. Methods
  * (`focus`, `append`) are plain data properties and are deliberately not included:
  * assigning over one shadows it on the instance but destroys nothing on the DOM.
  *
  * DERIVED, not listed. A hand-written list is a list someone has to remember to
  * extend: the collision set is (this element's prop names) × (whatever the browser
- * reflects), and both sides move — the kit adds props, and the platform keeps
+ * reflects), and both sides move: the kit adds props, and the platform keeps
  * adding globals (`inert`, `popover`, `writingSuggestions` are all recent). Reading
  * it off the live prototype chain means a prop that starts colliding tomorrow is
  * protected the day it lands, in whichever engines have shipped the accessor,
@@ -141,7 +125,7 @@ function toAttr(name: string): string {
  * given accessor (jsdom has no `autofocus`) the name is simply not a collision
  * there, which is exactly right.
  *
- * Computed once — the chain does not change at runtime.
+ * Computed once; the chain does not change at runtime.
  */
 let globalAccessorNames: Set<string> | undefined;
 export function reflectedGlobalPropNames(): Set<string> {
@@ -162,8 +146,8 @@ export function reflectedGlobalPropNames(): Set<string> {
 /**
  * Replace inherited reflected accessors with plain, non-reflecting per-instance
  * stores on this element class's prototype. Setting the property then only STORES
- * the value — component-register still reads it back to seed the styling prop, and
- * later shadows this with its own (also non-reflecting) instance accessor — and it
+ * the value. component-register still reads it back to seed the styling prop and
+ * later shadows this with its own (also non-reflecting) instance accessor, so it
  * can never touch a host attribute.
  */
 function installNonReflectingProps(proto: object, keys: readonly string[]): void {
@@ -185,14 +169,14 @@ function installNonReflectingProps(proto: object, keys: readonly string[]): void
 /**
  * Run `define` (solid-element's `customElement`, which calls
  * `customElements.define` internally) with `keys` already shadowed on the element
- * class — BEFORE the registry ever sees it.
+ * class. BEFORE the registry ever sees it.
  *
  * THE ORDER IS THE WHOLE POINT. `customElements.define()` synchronously upgrades
  * every matching element the parser has already produced, and component-register's
  * constructor runs `this[prop] = undefined` for every declared prop. If the
  * non-reflecting accessor is installed AFTER the define call, that assignment lands
  * on the NATIVE setter, which for a reflected IDL attribute means the author's
- * markup is destroyed before a line of facade code runs — `undefined` coerces to
+ * markup is destroyed before a line of facade code runs: `undefined` coerces to
  * `null`/`false` and the setter removes the attribute. Measured in chromium from
  * parsed HTML (`node scripts/probe-upgrade-attribute-loss.mjs`):
  *
@@ -203,14 +187,14 @@ function installNonReflectingProps(proto: object, keys: readonly string[]): void
  *   <kai-confirm autofocus>          → autofocus attr gone, nothing focused
  *
  * Two of those are silent: `hidden` and `autofocus` are legitimate global
- * attributes, so no a11y rule and no console warning fires — the value simply
+ * attributes, so no a11y rule and no console warning fires: the value simply
  * evaporates. Only `role` was loud enough to get noticed.
  *
  * WHY A TRANSIENT REGISTRY WRAP and not something tidier: the class does not exist
  * until `register()` builds it, and `register()` defines it in the same statement.
  * component-register can take a `BaseElement` (a prototype we control) or a
- * `customElements`-alike (a registry we control) via its third argument — either
- * would be cleaner — but solid-element's `customElement()` calls `register(tag,
+ * `customElements`-alike (a registry we control) via its third argument, either of
+ * which would be cleaner, but solid-element's `customElement()` calls `register(tag,
  * props)` with no options and forwards nothing, and `component-register` is not a
  * declared dependency of this package, so reaching past solid-element to call
  * `register` ourselves would ship an undeclared import to consumers. Intercepting
@@ -292,15 +276,15 @@ const FLAG_READ_BACK = Symbol('kai-flag-read-back');
 
 /**
  * Wrap the instance accessor component-register created for `name` so every value
- * written to it — a consumer's assignment, or the `undefined` write-back that
- * `attributeChangedCallback` performs after a `toggleAttribute` — is resolved through
+ * written to it, whether a consumer's assignment or the `undefined` write-back that
+ * `attributeChangedCallback` performs after a `toggleAttribute`, is resolved through
  * the same policy `flag()` uses.
  *
  * TIMING. This must run from the facade body, i.e. during `connectedCallback` AFTER
  * `initializeProps`, and that is not a detail: `initializeProps` harvests any value
  * set on the element BEFORE upgrade (`value = element[key]`) and only then installs
  * the accessor. Wrapping earlier (on the prototype, the way `installNonReflectingProps`
- * does) would be shadowed by that accessor and would also sit in front of the harvest —
+ * does) would be shadowed by that accessor and would also sit in front of the harvest:
  * the same class of defect `define-upgrade-ordering.test.tsx` pins for attributes.
  */
 function installFlagReadBack(element: HTMLElement, name: string, attribute: string): void {
@@ -310,7 +294,7 @@ function installFlagReadBack(element: HTMLElement, name: string, attribute: stri
     // facade reflecting something it never declared. Warn rather than no-op silently;
     // a silent skip here would look exactly like a working read-back.
     console.warn(
-      `reflectFlag("${name}"): no such declared prop on <${element.localName}> — ` +
+      `reflectFlag("${name}"): no such declared prop on <${element.localName}>, ` +
       `the attribute will still reflect, but the property will not read back.`,
     );
     return;

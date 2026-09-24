@@ -5,12 +5,11 @@ import { ArrowDown } from 'lucide-solid';
 import { defineWebComponent } from '../define/define';
 
 interface Props extends Record<string, unknown> {
-  /** CSS id of the scroll container to control. When omitted the element
-   *  walks up the DOM (outside its own shadow root) to find the nearest
-   *  scrollable ancestor. Mirrors the `for` convention of `<label for="...">`. */
+  // When omitted the element walks up the DOM (outside its own shadow root) to find the
+  // nearest scrollable ancestor. Mirrors the `for` convention of `<label for="...">`.
+  /** CSS id of the scroll container to control. */
   for?: string;
-  /** Button visual variant: `'outline' | 'ghost' | 'default'`. Defaults to
-   *  `'outline'`. */
+  /** Button visual variant. Defaults to `outline`. */
   variant?: 'outline' | 'ghost' | 'default';
   /** Button size token. Defaults to `'icon'` (square). */
   size?: 'sm' | 'md' | 'lg' | 'icon' | 'icon-sm';
@@ -18,9 +17,8 @@ interface Props extends Record<string, unknown> {
    *  visible, so the text is always localisable. Defaults to
    *  `'Scroll to bottom'`. */
   label?: string;
-  /** Also render `label` visibly beside the icon. Defaults to `false`, which
-   *  is the icon-only button. When the text is visible it IS the accessible
-   *  name, so nothing gets announced twice. */
+  // When the text is visible it IS the accessible name, so nothing gets announced twice.
+  /** Also render `label` visibly beside the icon. Default `false` (icon-only). */
   showLabel?: boolean;
 }
 
@@ -71,22 +69,8 @@ function findScrollableAncestor(startEl: HTMLElement): HTMLElement | null {
 }
 
 /**
- * `<kai-scroll-button>` — a floating "scroll to bottom" button for any
- * scrollable container. It is visible when the container is scrolled up
- * (hidden when at the bottom) and scrolls the container to the bottom on
- * click.
- *
- * **Wiring the scroll target** — use the `for` attribute to point at the
- * container by its DOM `id`:
- * ```html
- * <div id="my-chat" style="overflow:auto; height:400px">...</div>
- * <kai-scroll-button for="my-chat"></kai-scroll-button>
- * ```
- * When `for` is omitted the element walks upward from its host to the nearest
- * scrollable ancestor — useful when it is slotted or nested inside the
- * container.
- *
- * Emits `kai-scroll` (no detail) each time the button is clicked.
+ * A floating button that scrolls a container to its bottom, visible while the
+ * container is scrolled up.
  */
 defineWebComponent<Props, Events>('kai-scroll-button', {
   for: undefined,

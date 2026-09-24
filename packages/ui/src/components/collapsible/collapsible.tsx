@@ -34,7 +34,7 @@ const useCollapsible = () => {
 };
 
 /** Imperative open controller, handed to a parent (e.g. the kai-tool facade)
- *  via `controllerRef` so it can drive/observe open state — mirrors
+ *  via `controllerRef` so it can drive/observe open state, mirrors
  *  HoverCardController. Only available when the Collapsible is UNCONTROLLED
  *  (no `open` prop); in controlled mode the parent already owns the state. */
 export interface CollapsibleController { open: Accessor<boolean>; setOpen: (v: boolean) => void; }

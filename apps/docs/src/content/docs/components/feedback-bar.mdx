@@ -1,6 +1,6 @@
 ---
 title: Feedback Bar
-description: An inline thumbs up/down banner that collects a quick reaction — and optionally a category and comment — then confirms in place.
+description: Collects a quick thumbs up or down.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -14,7 +14,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kai-tag-sub">kai-feedback-bar</p>
 
-<p class="kai-lede">An inline thumbs up/down banner that owns its own flow — asks, optionally collects a category and comment on a thumbs-down vote, then confirms with a thank-you — all in place, no modal.</p>
+<p class="kai-lede">Asks for a reaction in place, then thanks the reader, with no modal in the way.</p>
 
 <Facts items={['Shadow DOM', '3 events', 'Optional detail form', 'Category chips', 'Customisable copy']} />
 
@@ -23,17 +23,15 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 <Playground client:only="solid" tag="kai-feedback-bar" />
 
 <Aside type="tip" title="When to use">
-Place `<kai-feedback-bar>` at the end of an assistant response, a completed task, or an article. Add `collect-detail` when you want an optional reason on a thumbs-down vote — the element handles the multi-step flow itself, so you only listen for `kai-feedback-detail`.
-
-Placement and lifecycle are your call: the bar is designed thread-level (its events carry no message id), and when it appears — say, revealed after a settled turn and hidden again on submit — is app behavior, not something the element decides.
+At the end of an assistant response, a completed task, or an article. Add `collect-detail` for an optional reason on a thumbs-down; the element runs the flow, and you listen for `kai-feedback-detail`.
 </Aside>
 
 ## Usage
 
-Drop `<kai-feedback-bar>` after any response. The element transitions to a thank-you on vote; the × button fires `kai-close` and you control when the element leaves the DOM.
+Drop `<kai-feedback-bar>` after any response. It transitions to a thank-you on vote; the × button fires `kai-close` and you decide when it leaves the DOM.
 
-- **Copy** — override any label via attributes: `bar-title`, `detail-title`, `detail-placeholder`, `submit-label`, `thanks-message`.
-- **Detail form** — add `collect-detail` to open a follow-up form on a thumbs-down vote. Set `categories` in JavaScript (it's an array) to render selectable chips.
+- **Copy**: override any label with attributes: `bar-title`, `detail-title`, `detail-placeholder`, `submit-label`, `thanks-message`.
+- **Detail form**: `collect-detail` opens a follow-up form on a thumbs-down vote. Set `categories` in JavaScript (it's an array) to render selectable chips.
 
 ## Examples
 
@@ -43,25 +41,17 @@ Drop `<kai-feedback-bar>` after any response. The element transitions to a thank
 
 ### Custom Title
 
-Override the question with `bar-title` when "Was this helpful?" doesn't fit the context.
-
 <Example client:visible tag="kai-feedback-bar" config={{ barTitle: 'Did this answer your question?' }} />
 
 ### Collect Detail
-
-Add `collect-detail` for an optional follow-up form on a thumbs-down vote. Listen for `kai-feedback-detail` to receive `{ value, category?, comment? }`.
 
 <Example client:visible tag="kai-feedback-bar" config={{ collectDetail: true }} />
 
 ### Collect Detail with Categories
 
-Set the `categories` property alongside `collect-detail` to render selectable chips — fast tagging without typing.
-
 <Example client:visible tag="kai-feedback-bar" config={{ collectDetail: true }} data="withCategories" />
 
 ### Customising Copy
-
-Every label is overridable — override only what you need; the rest fall back to defaults.
 
 <Example client:visible tag="kai-feedback-bar" config={{ barTitle: 'Was this response useful?', detailTitle: 'What went wrong?', detailPlaceholder: 'Tell us more (optional)…', submitLabel: 'Send feedback', thanksMessage: 'Got it — thanks for the input.' }} />
 

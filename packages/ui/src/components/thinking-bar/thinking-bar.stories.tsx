@@ -12,7 +12,7 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'A live-activity status row with a shimmering `text` label, shown while the assistant generates. `onClick` makes the label a button (adds a chevron) for toggling a reasoning panel; `onStop` (with optional `stopLabel`) renders an interrupt action.',
+        'A status row that shows what the assistant is working on while it generates.',
       ]),
     },
   },

@@ -13,16 +13,7 @@ interface Props extends Record<string, unknown> {
 }
 
 /**
- * `<kai-progress-bar>` — a thin determinate progress bar: a rounded track with a
- * `bg-primary` fill whose width is `value / max` (clamped to 0..100%). Set `tone`
- * for a semantic fill hue. Scalar attributes only.
- *
- * ```html
- * <kai-progress-bar value="66"></kai-progress-bar>
- * <kai-progress-bar value="3" max="5" label="Setup"></kai-progress-bar>
- * <kai-progress-bar value="60" tone="success"></kai-progress-bar>
- * ```
- * Restyle via `::part(track)` / `::part(fill)`.
+ * A thin determinate progress bar for a task whose remaining scope is known.
  */
 defineWebComponent<Props>('kai-progress-bar', {
   value: undefined,

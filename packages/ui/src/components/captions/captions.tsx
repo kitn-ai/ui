@@ -3,52 +3,24 @@ import { createPresence } from '../overlay/overlay';
 import { cn } from '../../utils/cn';
 
 /**
- * `Captions` — live closed-captioning: the text shown WHILE someone (the
- * user or the agent) is speaking, distinct from a scrollback transcript.
- * Built for the Voice template (`stories/showcase/builder-voice.stories.tsx`) but
- * kept generic — any voice surface that wants a caption line can use this
- * directly.
+ * `Captions`, live closed-captioning: the text shown WHILE someone (the user or the
+ * agent) is speaking, distinct from a scrollback transcript. Generic on purpose: any
+ * voice surface that wants a caption line can use it directly.
  *
- * - Driven by `segments`, oldest first — the LAST entry is the current
- *   line. Everything else is history, only rendered by `stacked`.
- * - `variant` picks the chrome: `'lower-third'` (a semi-opaque bar, the
- *   broadcast-caption look), `'floating'` (a card that floats above a
- *   visualizer, `kai-elevation`), `'minimal'` (bare text, no chrome — the
- *   original shape this component shipped with), `'stacked'` (the last two
- *   lines of history fade in behind the current line, which stays full
- *   strength). Default `'minimal'`.
- * - Speaker-aware via `data-speaker` + a small uppercase label ("You" /
- *   "Assistant") — NOT a color swap. Accent stays reserved for the
- *   visualizer per the owner's Voice-round instruction, so the distinction
- *   lives in the label and a subtle weight difference, both drawn from the
- *   muted/foreground tiers, never `text-primary`.
- * - Interim (`final: false`) text renders `text-muted-foreground` / a hair
- *   lighter than a finalized line's `text-foreground`, so a caption visibly
- *   "settles" the moment the model (or the ASR) commits it.
- * - Undefined/empty `segments`, or a current segment whose `text` is empty
- *   or whitespace-only, renders NOTHING — a real `<Show>` around a presence
- *   gate, not a hidden/zero-opacity node left in the DOM.
- * - One `role="status"`/`aria-live="polite"` region, wrapping ONLY the
- *   current line — `stacked`'s history lines sit outside it
- *   (`aria-hidden="true"`) so they don't get re-announced every time the
- *   region's content changes. This mirrors `toast.tsx`'s
- *   `role="region"`/`aria-live="polite"` pattern (the kit's other
- *   speech-adjacent live region) rather than inventing a second policy, and
- *   is the ONLY live region this component renders — it says nothing about
- *   history, so it can't double-announce anything a transcript component
- *   elsewhere on the page is already announcing.
- * - Appear/update reuses the kit's real exit-animation primitive,
- *   `createPresence` (`components/overlay/overlay.tsx`), for the whole component's
- *   mount/unmount, and a keyed `<For>` around the current line so a NEW
- *   segment object (the same "new object per changed item" contract the
- *   rest of the kit's reactive props follow) retriggers its own
- *   `animate-in` rather than being silently patched in place. Both use the
- *   same already-compiled `animate-in ... data-[closed]:animate-out ...`
- *   Tailwind-animate classes `DropdownContent`/`DialogContent`/
- *   `HoverCardContent` use, and both carry `motion-reduce:animate-none` (the
- *   same pattern `screen.tsx`/`dialog.tsx` use) so `prefers-reduced-motion:
- *   reduce` turns the animation off entirely — the text still appears,
- *   updates and disappears, just without motion.
+ * - Driven by `segments`, oldest first: the LAST entry is the current line, everything
+ *   before it is history and only `stacked` renders it.
+ * - `variant` picks the chrome: `lower-third` (a semi-opaque bar), `floating` (a card
+ *   over a visualizer), `minimal` (bare text, the default), `stacked` (history fades in).
+ * - Speaker-aware via `data-speaker` and a small label ("You" / "Assistant"), never a
+ *   color swap: accent stays reserved for the visualizer.
+ * - Interim (`final: false`) text renders a shade lighter, so a caption settles visibly
+ *   when the model or the ASR commits it. Empty `segments`, or a blank current segment,
+ *   renders NOTHING: a real `<Show>` around a presence gate, not a hidden node.
+ * - ONE `role="status"` / `aria-live="polite"` region, wrapping ONLY the current line
+ *   (`stacked`'s history is `aria-hidden`), so it cannot double-announce what a
+ *   transcript elsewhere announces. Same policy as `toast.tsx`.
+ * - `createPresence` plus a keyed `<For>`: a new segment object retriggers its own
+ *   `animate-in`, and both carry `motion-reduce:animate-none`.
  */
 export interface CaptionSegment {
   /** Whose speech this line represents. */
@@ -130,30 +102,17 @@ export function Captions(props: CaptionsProps): JSX.Element {
                 <div
                   data-speaker={seg.speaker}
                   class={cn(
-                    /* The recency fade used to be opacity-70/opacity-40 over
-                       text-muted-foreground, which blends to ~#96969c/#c3c3c7
-                       on white — 2.94:1 and 1.75:1, both under WCAG AA's 4.5:1
-                       for 14px text (axe color-contrast). No opacity fade can
-                       pass here: muted-foreground itself sits at ~5.4:1, so
-                       any blend below ~91% opacity drops under 4.5:1 while
-                       being visually indistinguishable from solid. Instead the
-                       hierarchy is built from colors that each pass on their
-                       own: older lines render solid muted-foreground (the
-                       lightest passing shade the theme has), and the newest
-                       line mixes 35% foreground into it — darker than the
-                       older lines, lighter than the current segment's
-                       text-foreground, so the "newest is closest" gradient
-                       survives in both themes.
+                    /* The recency fade is NOT an opacity blend: muted-foreground sits near 5.4:1 on
+                       white, so any fade under ~91% opacity drops below WCAG AA while
+                       looking identical to solid, and axe color-contrast fails it. The
+                       hierarchy uses shades that each pass on their own: older lines
+                       render solid muted-foreground, the newest mixes 35% foreground
+                       into it.
 
-                       The mix is an inline style rather than a
-                       text-[color-mix(...)] arbitrary class on purpose:
-                       Tailwind's JIT emission of arbitrary classes has been
-                       non-deterministic across builds in this repo (design
-                       round A2), so the class can verify locally and then be
-                       missing from a CI-built compiled.css — the recorded
-                       workaround is inline token styles. The static style
-                       literal is safe in Solid: computed style={{}} keys are
-                       only dropped when the object is rebuilt without them. */
+                       An inline style, not a text-[color-mix(...)] class: Tailwind
+                       JIT emission of arbitrary classes has been non-deterministic
+                       across builds here, so a class can verify locally and be
+                       missing from a CI-built compiled.css. */
                     'text-sm leading-snug text-balance',
                     i() !== historySegments().length - 1 && 'text-muted-foreground',
                   )}

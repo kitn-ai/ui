@@ -4,20 +4,19 @@ import { Panel, PanelHeader, PanelBody, PanelFooter } from './panel';
 import { Button } from '../button/button';
 import { componentDescription } from '../../stories/docs/web-component-controls';
 
-/**
- * The widget panel chrome as public parts (blocks-and-parts ruling P-1).
- * Stub data throughout: these stories exist to iterate the LOOK of the
- * chrome, per the story-first policy.
- */
+// The widget panel chrome as public parts. Stub data: these stories iterate the LOOK
+// of the chrome, not a real message flow.
 const meta = {
   title: 'Components/Panel',
   component: Panel,
   tags: ['autodocs'],
   parameters: {
     layout: 'centered',
+    // Painted from kit tokens, so a `--kai-color-*` override retints the chrome and the web components
+    // inside it. Back and close are slotted content in the header, never props.
     docs: {
       description: componentDescription([
-        'The widget panel frame and chrome, public: surface, optional standalone frame (border, radius, shadow), the header row (leading controls, title, trailing controls), the view container, and a footer strip. Painted entirely from kit tokens, so a `--kai-color-*` override retints the chrome with the web components inside it. Back and close are slotted content in the header, never props.',
+        'The frame an app view sits in.',
       ]),
     },
   },

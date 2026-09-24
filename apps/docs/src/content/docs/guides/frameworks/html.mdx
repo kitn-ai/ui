@@ -30,7 +30,9 @@ Skip npm entirely and load from a CDN. For quick prototypes this works immediate
 </script>
 ```
 
-`kai.es.js` registers every web component in one fetch — the right shape for a `<kai-chat>` page, which pulls most of the kit anyway. A page placing only a web component or two does better with the [autoloader](/guides/loading/#autoloader), which fetches each web component on demand. The streaming helpers work here too: `dist/state.js` and `dist/wire.js` are self-contained ES modules, so `@kitn.ai/ui/state` and `@kitn.ai/ui/wire` load from the same CDN URLs with no bundler.
+`kai.es.js` registers every web component in one fetch — the right shape for a `<kai-chat>` page, which pulls most of the kit anyway. A page placing only a web component or two does better with the [autoloader](/guides/loading/#autoloader), which fetches each web component on demand.
+
+The streaming helpers work here too: `dist/state.js` and `dist/wire.js` are self-contained ES modules, so `@kitn.ai/ui/state` and `@kitn.ai/ui/wire` load from the same CDN URLs with no bundler.
 </Aside>
 
 ## The property / event contract
@@ -51,7 +53,9 @@ el.setAttribute('theme', 'dark');
 el.addEventListener('kai-submit', (e) => console.log(e.detail.value));
 ```
 
-**Reactivity:** assign a **new array**, and replace any item you changed with a **new object**. The new array reference is what tells the element something changed — setting the same array back is a no-op, even if you replaced an item inside it. The new item object is what makes the change visible, because these lists key their rows by item identity. Adding, removing and reordering need only the fresh array; editing an existing item needs both.
+**Reactivity:** assign a **new array**, and replace any item you changed with a **new object**. The new array reference is what tells the element something changed — setting the same array back is a no-op, even if you replaced an item inside it. The new item object is what makes the change visible, because these lists key their rows by item identity.
+
+Adding, removing and reordering need only the fresh array; editing an existing item needs both.
 
 ```js
 // Stale: `title` really did change, but the item object did not, so the row never updates.

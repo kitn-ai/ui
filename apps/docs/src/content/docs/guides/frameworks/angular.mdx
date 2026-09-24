@@ -15,7 +15,9 @@ npm install @kitn.ai/ui
 
 ## Register the web components
 
-The elements register **asynchronously**: `@kitn.ai/ui/web-components` defers the actual `customElements.define` calls behind a browser check, so an import alone does not guarantee the tags exist yet. Angular writes array and object DOM properties the moment it stamps a `<kai-*>` tag; a write that lands before the element upgrades is discarded when the element applies its own empty defaults. Gate `bootstrapApplication` on the `webComponentsReady` promise the entry exports:
+The elements register **asynchronously**: `@kitn.ai/ui/web-components` defers the actual `customElements.define` calls behind a browser check, so an import alone does not guarantee the tags exist yet.
+
+Angular writes array and object DOM properties the moment it stamps a `<kai-*>` tag; a write that lands before the element upgrades is discarded when the element applies its own empty defaults. Gate `bootstrapApplication` on the `webComponentsReady` promise the entry exports:
 
 ```ts
 // main.ts

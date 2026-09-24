@@ -20,50 +20,42 @@ export interface InputProps extends Omit<JSX.InputHTMLAttributes<HTMLInputElemen
   size?: 'sm' | 'md';
   /** Force the invalid (destructive-border) state without an `error` string. */
   invalid?: boolean;
-  /** Leading affix (icon, unit). Rendered inside the field row, before the input. */
+  /** Affix inside the field row before the input, wrapped by the row's focus ring. */
   leading?: JSX.Element;
-  /** Trailing affix (icon, inline button). Rendered inside the field row, after the input. */
+  /** Affix inside the field row after the input, wrapped by the row's focus ring. */
   trailing?: JSX.Element;
-  /** Fires per keystroke with the current value — the CANONICAL value when a mask is
-   *  active (digits for `tel`/`ssn`/`credit-card`, the formatted text for
-   *  `custom`), and the raw text of the field otherwise. */
+  /** Fires per keystroke with the value: canonical when a mask is active, the raw
+   *  field text otherwise. */
   onValueInput?: (value: string) => void;
   /** Fires on commit (blur) with the current value; canonical when a mask is active. */
   onValueChange?: (value: string) => void;
 
-  // --- Form-field formats (spec §7.2). All five are SCALARS, which is what lets them
+  // --- Form-field formats. All five are SCALARS, which is what lets them
   // survive as HTML attributes on the `<kai-input>` facade. Absent `format` AND absent
-  // `semantic` is the behavior of today, byte for byte (owner decision 1 / spec §1.1): no mask,
+  // `semantic` is the no-mask behavior: no mask,
   // no extra attributes, nothing.
 
-  /** Tier-2 mask pattern: `#` a digit, `@` an alphanumeric, `*` an obscurable
-   *  alphanumeric, everything else a positional literal (`@@@-####`).
-   *
-   *  The literal `default` is the OPT-IN sentinel: it resolves to the default format of
-   *  `semantic` (`tel` → `###-###-####`). It cannot collide with a real pattern — `default`
-   *  as a format is eight literals with no fill position, i.e. a field that can hold
-   *  nothing — and an opt-in token is needed because decision 1 forbids a bare semantic
-   *  type from starting to mask on its own. */
+  // The literal `default` is the opt-in sentinel: it resolves to the `semantic` format. A
+  // sentinel is needed because a bare semantic type must never start masking on its
+  // own, and it cannot collide with a real pattern: `default` as a format is eight
+  // literals with no fill position, a field that can hold nothing.
+  /** Mask pattern: `#` digit, `@` alphanumeric, `*` obscurable alphanumeric,
+   *  anything else a literal; the literal `default` selects the `semantic` format. */
   format?: string;
-  /** The placeholder guide shown at unfilled positions, aligned position-for-position
-   *  with `format` (`   -   -    `, `mm/dd/yyyy`). Without it the field shows only up
-   *  to the last typed character. */
+  /** Placeholder shown at unfilled positions, aligned to `format`; without it the
+   *  field shows only up to the last typed character. */
   guide?: string;
-  /** Tier-1 semantic type. On its own it applies `inputmode` / `autocomplete` /
-   *  `spellcheck` / `autocorrect` / `autocapitalize` and decides the canonical value —
-   *  it never starts masking by itself. */
+  /** Field type that decides `inputmode`, `autocomplete`, casing and the canonical
+   *  value. Never masks on its own. */
   semantic?: FieldSemanticType;
   /** Case folding applied to typed and pasted text. Defaults to `preserve`. */
   caseMode?: CaseMode;
   /** What a copy or cut of a masked field puts on the clipboard. Defaults to `canonical`. */
   copyPolicy?: CopyPolicy;
-  /** A mask refused, or partly refused, some content — `full`, `wrong-class`,
-   *  `over-capacity`, or `format-change-clipped`. Not a scalar and therefore not an
-   *  attribute: the facade projects this onto its `kai-input-rejected` event.
-   *
-   *  NOT an error state. `format-change-clipped` in particular fires on a routine
-   *  reactive `format` change, so this widget deliberately does not touch `invalid` —
-   *  validity belongs to the consumer, and stays there. */
+  // Not an error state, and the widget never touches `invalid` for it: a routine
+  // reactive `format` change fires the `format-change-clipped` reason too. Not a
+  // scalar, so the facade projects it onto its `kai-input-rejected` event.
+  /** Fires when the mask refused or partly refused input; not an error state. */
   onMaskReject?: (detail: { reason: InputMaskRejectReason; data: string }) => void;
 }
 
@@ -93,14 +85,14 @@ const ROW_INPUT =
 const SIZE_SM = 'px-2.5 py-1';
 // The invalid-state border, EXPORTED because `src/components/select/select.tsx` renders the same
 // field box and a second hand-typed copy of this string is exactly the kind of
-// restatement that rots (`docs/coupling-map.md` §4). `INVALID` stays as the local
+// restatement that rots (`docs/coupling-map.md` owns that list). `INVALID` stays as the local
 // alias so the three call sites below read unchanged.
 export const FIELD_INVALID = 'border-destructive dark:border-red-400/70';
 const INVALID = FIELD_INVALID;
 
 // Suppress the native search affordances Chrome/WebKit render for `type="search"`.
-// Without this the browser's `::-webkit-search-cancel-button` (×) stacks on top of
-// a custom clear control (e.g. kai-search's `part="clear"`) — a double ×. Applied
+// Without this the browser-native `::-webkit-search-cancel-button` (×) stacks on top of
+// a custom clear control (e.g. the `part="clear"` in kai-search), a double ×. Applied
 // to the inner `<input>` in BOTH layouts (the field can be `type="search"` either
 // way; kai-search uses the affix layout for its leading icon).
 const SEARCH_RESET =
@@ -130,7 +122,7 @@ export function Input(props: InputProps): JSX.Element {
   const hasAffix = () => local.leading != null || local.trailing != null;
 
   // -------------------------------------------------------------------------------
-  // Form-field formats (spec §7.2). Tier 1 is a handful of attributes; tier 2 is one
+  // Form-field formats. Tier 1 is a handful of attributes; tier 2 is one
   // `createInputMask` bound to whichever `<input>` node is currently mounted.
   // -------------------------------------------------------------------------------
 
@@ -203,11 +195,11 @@ export function Input(props: InputProps): JSX.Element {
     };
     // WHICH NODE IS MOUNTED. `Input` caches two `<input>`s and `<Show>` swaps between
     // them when a leading/trailing affix appears or disappears — the one legitimate node
-    // change in this file (spec §8.1). The `ref` of a node fires only when it is BUILT, and
+    // change in this file. The `ref` of a node fires only when it is BUILT, and
     // the cached node is built once, so a toggle back to an existing node notifies
     // nobody. Re-attachment therefore has to be explicit, and this read is what makes it
     // happen. Everything else about this widget is pinned to keeping the SAME node alive
-    // (`tests/ui/input-node-identity.test.tsx`), which is the only reason a long-lived
+    // (`tests/components/input-node-identity.test.tsx`), which is the only reason a long-lived
     // masker on it is safe at all.
     //
     // THE ASSUMPTION THIS RELIES ON, stated: `plainEl`/`rowEl` are plain mutable refs, so
@@ -253,7 +245,7 @@ export function Input(props: InputProps): JSX.Element {
         });
         maskedEl = el;
       } catch (err) {
-        // A bad pattern falls back to a plain text field, loudly (spec §7.3).
+        // A bad pattern falls back to a plain text field, loudly.
         warnBadFormat(format, err, false);
       }
     });
@@ -263,7 +255,7 @@ export function Input(props: InputProps): JSX.Element {
 
   // The class arrives as an ACCESSOR, not a string, and this is load-bearing.
   //
-  // Solid evaluates a `<Show>` `fallback` inside the Show's own memo. When the
+  // Solid evaluates a `<Show>` `fallback` inside the memo of the Show. When the
   // class was computed at the call site — `inputEl(cn(FIELD_BASE, …,
   // isInvalid() && INVALID, local.class), …)` — those reads happened in that
   // memo, so any of them changing re-ran the memo and BUILT A NEW `<input>`
@@ -274,8 +266,8 @@ export function Input(props: InputProps): JSX.Element {
   // Passing a function moves every reactive read inside the element, where
   // Solid compiles it into a nested effect that sets the attribute on the
   // EXISTING node. Same reason the affix branch was always fine: it inserts the
-  // input through a function. Pinned by `tests/ui/input-node-identity.test.tsx`.
-  // Tier-1 attributes (spec §2). Each is a DEFAULT the semantic type supplies: an
+  // input through a function. Pinned by `tests/components/input-node-identity.test.tsx`.
+  // Tier-1 attributes. Each is a DEFAULT the semantic type supplies: an
   // explicit prop always wins, because the consumer knows something the enum does not.
   // With no `semantic` every one of these is `undefined` — the attribute is simply not
   // set, which is what byte-for-byte parity with the behavior of today means here.
@@ -335,7 +327,7 @@ export function Input(props: InputProps): JSX.Element {
 
   // Created on first use and then REUSED, so toggling an affix on or off does
   // not discard a focused input either. The lazy cache also keeps the unused
-  // branch's node (and its effects) from being built at all.
+  // the branch node (and its effects) from being built at all.
   //
   // KEEP PROSE IN THIS FILE FREE OF STRAY QUOTE CHARACTERS. The part-name guard in
   // `src/web-components/slots/slots.test.ts` scans this source with a naive quote regex, so one

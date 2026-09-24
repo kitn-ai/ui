@@ -6,19 +6,19 @@ import { renderIcon } from '../icon/icon';
 export interface PromptSuggestionProps extends JSX.ButtonHTMLAttributes<HTMLButtonElement> {
   children: JSX.Element | string;
   variant?: 'outline' | 'ghost' | 'default';
-  /** Row height for the `list` layout: `'md'` (default) or `'lg'` for taller
-   *  rows (more vertical padding). Chips/block/highlight are unaffected. */
+  // `'lg'` gives taller rows (more vertical padding). Chips, block and highlight are
+  // unaffected.
+  /** Row height for the `list` layout. Defaults to `'md'`. */
   size?: 'md' | 'lg';
   /** Optional leading icon (named icon, image URL/data-URI, or text). */
   icon?: string;
   highlight?: string;
-  /** Render as a full-width, left-aligned list row (the "suggested questions"
-   *  idiom) instead of a rounded pill. Wraps long text. Ignored in highlight
-   *  mode, which is always a list row. */
+  // Full-width and left-aligned, the "suggested questions" idiom, wrapping long text.
+  // Ignored in highlight mode, which is always a list row.
+  /** Render as a list row instead of a rounded pill. */
   block?: boolean;
-  /** Render as a full-width "Ideas for you" list row: a leading icon, a
-   *  left-aligned label, and a hover background. Like `block`, but keeps the
-   *  leading icon. Ignored in highlight mode. */
+  // Like `block` but keeps the leading icon, with a hover background.
+  /** Render as an "Ideas for you" list row. Ignored in highlight mode. */
   list?: boolean;
 }
 

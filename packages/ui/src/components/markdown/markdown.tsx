@@ -8,55 +8,28 @@ import { isSafeUrl } from '../../primitives/card-routing';
 
 // --- Markdown, rendered from the parser's TOKEN STREAM -----------------------
 //
-// This file used to be the kit's one raw-`innerHTML` write: it rendered the
-// model's markdown to an HTML STRING and assigned it, which made THIS the one
-// place where a string the model produced became live DOM in the host page's
-// origin. It is no longer. `marked` tokenizes, and the token stream is rendered
-// to Solid JSX below, so no model-produced string is ever handed to the HTML
+// This used to be the kit's one raw-`innerHTML` write, so a string the model produced
+// became live DOM in the host page's origin. It is not any more: `marked` tokenizes and
+// the tokens render to Solid JSX below, so no model-produced string reaches the HTML
 // parser and the sink does not exist rather than being guarded.
 //
-// The threat model is NOT a hostile provider. An attacker only needs to
-// influence the model's OUTPUT -- a user asking to be shown an `<img onerror>`
-// example, a prompt-injected model, or RAG over an untrusted document all reach
-// this render against a perfectly trusted provider.
+// ESCAPE, not SANITIZE, and no DOMPurify: a sanitizer needs a DOM, and in Node this
+// package's ESM build has no `sanitize` at all, so the SSR path would throw or be
+// "guarded" into returning the payload UNCHANGED, a silent passthrough of the exact string
+// we meant to neutralise. Rendering tokens performs no string-to-markup step, costs no
+// dependency, and it is the better rendering too: raw HTML in model output is either the
+// model quoting markup, which the reader should SEE as text, or an injection. There is
+// deliberately NO opt-in to restore raw HTML.
 //
-// WHY ESCAPE RATHER THAN SANITIZE (no DOMPurify):
-//   - A sanitizer needs a DOM. In Node this package's ESM build has no
-//     `sanitize` at all (`isSupported === false`), so the SSR path either throws
-//     or gets "guarded" into returning the payload UNCHANGED -- a silent
-//     passthrough of exactly the string we were trying to neutralise. Rendering
-//     tokens performs no string-to-markup step at all and behaves identically on
-//     server and client.
-//   - It costs no dependency. DOMPurify is ~35 KB gzipped of ESM in a package
-//     that gates its own footprint.
-//   - For a CHAT UI it is also the better RENDERING, not just the safer one.
-//     Raw HTML in model output is either the model quoting markup -- which the
-//     reader should SEE as text -- or an injection. Showing it as text serves the
-//     first case correctly and defuses the second. Nothing in this repo emits
-//     markdown that relies on inline HTML.
-// There is deliberately NO opt-in to restore raw HTML: nothing needs it today,
-// and an unsafe switch is the hole again for whoever flips it.
-//
-// WHERE THE ESCAPING HAPPENS. A `html` token (block `HTML` and inline `Tag` are
-// the same `type: 'html'`) returns its raw text as a TEXT node, so the DOM escapes
-// it at the boundary and the reader sees `<img src=x onerror=...>` as text --
-// visible, never an element. That is also why no `escapeText`/`escapeAttr` helper
-// survives in this file: every string that used to be concatenated into markup now
-// goes through `createTextNode` / `setAttribute`, which cannot re-enter the HTML
-// parser, and escaping a string on the way INTO a text node would double-escape it
-// and show the reader `&lt;img ...`. The one helper that does touch a string on the
-// way in is the character-reference DECODER below, which runs the opposite
-// direction (it turns `&amp;` back into `&`) and so cannot re-introduce markup: it
-// only ever produces characters for a text node or a display-only attribute.
-//
-// This is a PRIVATE `Marked` instance, and that is load-bearing rather than
-// tidiness -- more so than when it was written, because the kit now reads this
-// instance's TOKEN STREAM. Configuring the shared `marked` singleton would mean a
-// consumer's own `marked.use({ tokenizer })` (or an extension) elsewhere in the
-// same app silently rewrites the tokens rendered here, which is a strictly larger
-// hole than the renderer override it replaced. It also stops the kit mutating
-// global `marked` options out from under a consumer, which it used to do.
+// WHERE IT HAPPENS: an `html` token returns its raw text as a TEXT node, so the DOM
+// escapes at the boundary and the reader sees `<img src=x onerror=...>` as text. That is
+// why no `escapeText`/`escapeAttr` helper survives: every string now goes through
+// `createTextNode` / `setAttribute`, and escaping INTO a text node would double-escape it.
 
+// A PRIVATE instance, not the shared `marked` singleton: this file reads the instance's
+// TOKEN STREAM, so configuring the singleton would let a consumer's own
+// `marked.use({ tokenizer })` elsewhere in the app silently rewrite what renders here,
+// and it keeps the kit from mutating global `marked` options out from under a consumer.
 const md = new Marked({
   gfm: true,
   breaks: true,
@@ -65,25 +38,19 @@ const md = new Marked({
 // --- Character references (`&amp;` and friends) -------------------------------
 //
 // Going token-stream-direct deleted the HTML parser from the path, and with it the
-// free entity decoding that parser did: the old string sink turned `AT&amp;T` into
-// `AT&T` because `innerHTML` runs the character-reference state; a text node does
-// not, so the reader was shown the SOURCE `AT&amp;T`. This restores the decode, by
-// hand, for the markdown spec's character references only.
-//
-// `marked` is no help here: it never decodes. `md.lexer('AT&amp;T')` yields a
-// paragraph whose `text` is the raw `AT&amp;T`, and its one mapping table runs the
+// free entity decoding it did: the old string sink turned `AT&amp;T` into `AT&T`,
+// while a text node shows the reader the SOURCE `AT&amp;T`. This restores the decode
+// by hand, for the markdown spec's character references only. `marked` is no help:
+// `md.lexer('AT&amp;T')` yields the raw text, and its one mapping table runs the
 // OTHER way (`escape()` -> `&amp;` for HTML output).
 //
-// Node-safe by construction: the DOM's own entity table lives on a DOM, and the
-// SSR path has none, so the named table is bounded and written out below rather
-// than looked up.
+// Node-safe by construction: the DOM's entity table lives on a DOM and the SSR path
+// has none, so the named table is bounded and written out below rather than looked up.
 //
-// NEVER APPLIED TO A URL. `href` and `src` go to `isSafeUrl` and the DOM exactly as
-// the model wrote them -- see the comment at the `link` case for why decoding one
-// would open the `javascript:` hole rather than close it. Fenced `code` and
-// `codespan` are not decoded either: inside a code sample the spec says a
-// character reference is literal, and a sample showing `&amp;` has to keep showing
-// `&amp;`.
+// NEVER APPLIED TO A URL: `href` and `src` go to `isSafeUrl` and the DOM exactly as
+// the model wrote them, because decoding one would open the `javascript:` hole
+// rather than close it (see the `link` case). Fenced `code` and `codespan` are not
+// decoded either: inside a code sample a character reference is literal.
 
 /** Named character references this renderer decodes. Bounded on purpose: the few
  *  dozen a chat's model actually emits, not the ~2200 the spec defines. An unknown
@@ -119,6 +86,7 @@ const NAMED_CHARACTER_REFERENCES: Record<string, string> = {
   divide: '\u00F7',
   iquest: '\u00BF',
   ndash: '\u2013',
+  // lint-prop-docs: em-dash-copy -- this table maps HTML entities to the character they name
   mdash: '\u2014',
   lsquo: '\u2018',
   rsquo: '\u2019',

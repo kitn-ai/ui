@@ -1,6 +1,6 @@
 ---
 title: Menu
-description: A cascading action menu driven by a JSON items tree — actions, headings, separators, checkboxes, and submenus.
+description: A dropdown of actions.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -16,7 +16,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kai-tag-sub">kai-menu</p>
 
-<p class="kai-lede">A cascading action menu you describe with data, not markup. Hand it a tree of items — actions, headings, separators, checkboxes, submenus — and it builds the dropdown, handles keyboard nav, and tells you what was picked.</p>
+<p class="kai-lede">Builds the whole menu, keyboard navigation included, from a plain data tree.</p>
 
 <Facts items={['Shadow DOM', 'JSON items tree', 'Submenus + checkboxes', 'Keyboard navigable']} />
 
@@ -25,14 +25,14 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 <Playground client:only="solid" tag="kai-menu" />
 
 <Aside type="tip" title="When to use">
-Reach for it when you have a small set of fixed actions behind a button — the `+` add-content menu next to a composer, a row-level `⋯` overflow, a select-style picker. The item tree carries nesting, shortcuts, and checkbox state, so you don't wire up positioning or roles yourself. For a searchable, type-to-filter list of actions, use [Command](/components/command/). To anchor arbitrary content (not a list of actions) to a trigger, use [Popover](/components/popover/).
+Fixed actions behind a button: the `+` add-content menu, a row `⋯` overflow. For type-to-filter use [Command](/components/command/); to anchor arbitrary content, [Popover](/components/popover/).
 </Aside>
 
 ## Usage
 
-Build the menu from its `items` tree, set in JavaScript — arrays can't be HTML attributes. Each item is an action (`id` + `label`, optional `icon`/`shortcut`), a `heading`, a `separator`, a checkbox (add `checked`), or a submenu (nest more `items`). Selecting a leaf fires `kai-select` with its `id`; checkbox items also report the new `checked` value.
+Build the menu from its `items` tree, set in JavaScript because arrays can't be HTML attributes. Each item is an action (`id` + `label`, optional `icon`/`shortcut`), a `heading`, a `separator`, a checkbox (add `checked`), or a submenu (nest more `items`). Selecting a leaf fires `kai-select` with its `id`.
 
-The trigger is the built-in button — point `trigger-icon` / `trigger-label` at it — or your own element in `slot="trigger"`.
+The trigger is the built-in button (`trigger-icon` / `trigger-label`), or your own element in `slot="trigger"`.
 
 ```html
 <kai-menu trigger-icon="plus" label="Add content"></kai-menu>
@@ -59,25 +59,19 @@ The trigger is the built-in button — point `trigger-icon` / `trigger-label` at
 
 ### The "+" menu
 
-Headings group the list, a submenu nests deeper actions, a separator splits sections, and a checkbox tracks a toggle. This is the composer add-content menu.
-
 <Example client:visible tag="kai-menu" config={{ triggerIcon: 'plus', label: 'Add content' }} data="plus" />
 
 ### Row overflow
-
-A flat set of actions behind a `⋯` button — the default trigger when you set neither `trigger-icon` nor `trigger-label`.
 
 <Example client:visible tag="kai-menu" config={{ label: 'Row actions' }} data="actions" />
 
 ### Select-style trigger
 
-Pair `trigger-label` with `trigger-icon-trailing="chevron-down"` for a control that reads like a select — current value on the left, chevron on the right.
-
 <Example client:visible tag="kai-menu" config={{ triggerLabel: 'Medium', triggerIconTrailing: 'chevron-down', label: 'Reasoning effort' }} data="effort" />
 
 ## Slots
 
-The menu builds its own trigger from the `trigger-*` props. Slot your own element when you need full control of it:
+The menu builds its own trigger from the `trigger-*` props; slot your own element for full control of it:
 
 <SlotTable tag="kai-menu" />
 

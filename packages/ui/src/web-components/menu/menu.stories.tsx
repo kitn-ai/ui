@@ -101,8 +101,7 @@ export const PlusMenu: Story = {
   parameters: {
     docs: {
       description: {
-        story:
-          'Click the + icon to open the cascading menu (submenus on hover, a checkbox item, a disabled item). Watch the Actions panel for `kai-select` and `kai-open-change` events.',
+        story: 'A cascading menu with a submenu, a checkbox item and a disabled item.',
       },
       source: {
         language: 'html',
@@ -183,8 +182,7 @@ export const FilterGroupBy: Story = {
   parameters: {
     docs: {
       description: {
-        story:
-          'Two single-select sections in one menu. Items sharing a `radioGroup` are mutually exclusive; the selected one shows a checkmark and the menu stays open. `kai-select` carries `{ id, radioGroup }` — the consumer moves the checkmark within the group.',
+        story: 'Two single-select groups in one menu, each keeping its own checkmark.',
       },
       source: {
         language: 'html',

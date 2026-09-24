@@ -17,14 +17,11 @@ export interface WidgetProps {
   id: string;
   value: unknown;
   field: FormField;
-  /**
-   * The field's resolved format hints, or an empty resolution.
-   *
-   * RESOLVED IN `FieldRow`, not here. The row already has to resolve them to render
-   * the format hint text and put its id in `aria-describedby`, and resolving the same
-   * untrusted `x-kai-*` keys a second time in the widget would warn twice about the
-   * same bad hint and could disagree with what the row said out loud.
-   */
+  // RESOLVED IN `FieldRow`, not here. The row already has to resolve them to render the
+  // format hint text and put its id in `aria-describedby`, and resolving the same
+  // untrusted `x-kai-*` keys a second time in the widget would warn twice about the same
+  // bad hint and could disagree with what the row said out loud.
+  /** The field's resolved format hints, or an empty resolution. */
   mask?: FieldMaskHint;
   disabled: boolean;
   placeholder?: string;
@@ -32,17 +29,14 @@ export interface WidgetProps {
   invalid: boolean;
   describedBy?: string;
   label: string;
-  /**
-   * The id of the row's VISIBLE label element, for widgets whose control is a group
-   * rather than one labelable input.
-   *
-   * `FieldRow` used to suppress its `<label>` for those kinds and each widget named
-   * itself with `aria-label={props.label}`, which is a name only a screen reader can
-   * reach: "Severity", "Environments" and "Tags" were announced and invisible. The row
-   * now always renders the text and hands its id down here, so one string names the
-   * group and everybody can see it. Absent means the widget is on its own (a bare
-   * widget rendered outside `FieldRow`), so `aria-label` stays the fallback.
-   */
+  // Group widgets (radio, checkbox group, rating) have no single labelable input, so
+  // `FieldRow` names them by the id of its own visible `<label>`, which it always
+  // renders. It used to suppress that label for those kinds and each widget named
+  // itself with `aria-label={props.label}` -- a name only a screen reader could reach,
+  // so "Severity", "Environments" and "Tags" were announced and invisible. Absent
+  // means the widget is on its own (rendered outside `FieldRow`) and `aria-label` is
+  // the fallback.
+  /** The id of the row's visible label element, for widgets whose control is a group. */
   labelledBy?: string;
   onInput: (value: unknown) => void;
   onBlur: () => void;
@@ -50,7 +44,7 @@ export interface WidgetProps {
 
 /**
  * How a GROUP widget names itself: the row's visible label when there is one,
- * `aria-label` only as the fallback. Never both — two accessible names on one element
+ * `aria-label` only as the fallback. Never both: two accessible names on one element
  * is one too many, and `aria-labelledby` would win silently anyway.
  */
 function groupNameProps(p: WidgetProps): { 'aria-labelledby'?: string; 'aria-label'?: string } {
@@ -67,7 +61,7 @@ function ariaProps(p: WidgetProps) {
   };
 }
 
-/** text / email / url / date / datetime / time / password — all <input> variants. */
+/** text / email / url / date / datetime / time / password: all <input> variants. */
 export function TextWidget(
   props: WidgetProps & { variant: 'text' | 'email' | 'url' | 'date' | 'datetime' | 'time' | 'password' },
 ): JSX.Element {
@@ -104,12 +98,12 @@ export function TextWidget(
       disabled={props.disabled}
       minLength={props.field.minLength}
       maxLength={props.field.maxLength}
-      // Masking (spec §7.3). Each is `undefined` for a field with no format hints, so
+      // Masking. Each is `undefined` for a field with no format hints, so
       // an unhinted field renders exactly the input it rendered before. The hint TEXT
       // is deliberately not passed as `Input`'s own `hint`: `FieldRow` renders it and
-      // owns the `aria-describedby` chain, and `Input`'s hint would mint a second one
-      // (spec §6). The submitted value is the CANONICAL one — `Input` emits canonical
-      // through `onValueInput` whenever a mask is active (spec §4), which is what
+      // owns the `aria-describedby` chain, and `Input`'s hint would mint a second one.
+      // The submitted value is the CANONICAL one — `Input` emits canonical
+      // through `onValueInput` whenever a mask is active, which is what
       // makes "exactly one value per field" true without this widget choosing.
       format={props.mask?.format}
       guide={props.mask?.guide}
@@ -178,7 +172,7 @@ export function NumberWidget(props: WidgetProps): JSX.Element {
 }
 
 export function SliderWidget(props: WidgetProps): JSX.Element {
-  // The 0..100 fallback is the WIDGET's, not the primitive's (plan §4). This widget is
+  // The 0..100 fallback is the WIDGET's, not the primitive's. This widget is
   // reading a consumer-authored JSON-Schema field where `minimum`/`maximum` are
   // optional; `Slider` itself requires both, so no other caller inherits this guess.
   const min = () => props.field.minimum ?? 0;
@@ -291,7 +285,7 @@ export function RatingWidget(props: WidgetProps): JSX.Element {
 }
 
 /**
- * The boolean field's switch IS `components/switch/switch.tsx` — it is not a lookalike.
+ * The boolean field's switch IS `components/switch/switch.tsx`: it is not a lookalike.
  *
  * This used to hand-roll its own `<button role="switch">` at 44×24 while
  * `<kai-switch>` shipped the same control at 36×20, so a consumer putting the two
@@ -300,8 +294,8 @@ export function RatingWidget(props: WidgetProps): JSX.Element {
  * `components/switch/switch.tsx:80` carries a comment about having fixed. Delegating removes both.
  * The size convergence (44×24 → 36×20) is visible inside `kai-form` and intended.
  *
- * The four form-only hooks — `id`, `data-control` and the `aria-required` /
- * `aria-invalid` / `aria-describedby` trio — are ordinary props now (plan decision
+ * The four form-only hooks (`id`, `data-control` and the `aria-required` /
+ * `aria-invalid` / `aria-describedby` trio) are ordinary props now (plan decision
  * D-7). They used to be stamped onto the button through `buttonRef` + a
  * `createEffect`, which worked but meant this widget reached into the primitive's
  * DOM to make `form.focusField()` land. `Switch` forwards anything it does not own
@@ -402,7 +396,7 @@ function itemEnum(field: FormField): unknown[] {
  * An array field whose items are an `enum`, as a list of checkboxes.
  *
  * The bordered/divided row chrome, the `role="group"` wrapper and the rows themselves
- * live in `components/checkbox/checkbox-group.tsx` now — this widget only turns a JSON-Schema
+ * live in `components/checkbox/checkbox-group.tsx` now: this widget only turns a JSON-Schema
  * `items.enum` into options and owns the array in and out. It used to hand-roll the
  * identical chrome beside `RadioGroup`, which already owned it.
  *
@@ -439,7 +433,7 @@ export function CheckboxGroupWidget(props: WidgetProps & { class?: string }): JS
  * over the row's `inlineMax`.
  *
  * This was a `<select multiple>` until decision D-3 was ruled. `<select multiple>` is a
- * poor control on every platform — the multi-select affordance is invisible, discovering
+ * poor control on every platform: the multi-select affordance is invisible, discovering
  * it means knowing to ctrl/cmd-click, and there is no touch story at all. It is the same
  * control as `checkbox-group`, so it renders as one, with a scroll cap because the only
  * thing that made a long list bearable in a chat card was the select's fixed-height box.
@@ -458,7 +452,7 @@ export function TagListWidget(props: WidgetProps): JSX.Element {
     const v = draft().trim();
     if (!v) return;
     // No cap on how many tags may be added. How many is too many lands in a policy
-    // document, which makes it the consuming application's call (CLAUDE.md, plan §4).
+    // document, which makes it the consuming application's call.
     props.onInput([...tags(), v]);
     setDraft('');
     props.onBlur();

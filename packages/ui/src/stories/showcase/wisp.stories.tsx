@@ -489,8 +489,7 @@ export const Wisp: Story = {
   parameters: {
     docs: {
       description: {
-        story:
-          'The living demo of construction over configuration. Wisp is an invented product; the point is its rail. Nothing hands the sidebar a conversations array: the app owns the loop and renders one kai-conversation-item per record, slotting a leading icon, a derived timestamp into the meta region, and a working kai-menu kebab into the menu region (Rename, Archive and Delete really mutate the rows). The container detects the slotted items and runs the parent-item contract over them - selection, roving tabindex, the accessible list rows - while the shell, thread, composer and canvas are the same composed kit parts as the sibling apps.',
+        story: 'A working assistant app whose conversation rail is composed by hand: one row per record, with your own icon, timestamp and menu in it.',
       },
       source: {
         language: 'html',
@@ -579,7 +578,7 @@ export const WispInteractions: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'Same composition as the Wisp showcase above, isolated on its own story so the kebab interaction test never runs on the showcase view. See Wisp for the source.',
+        story: "The same Wisp app, with the rail's kebab menu as the subject.",
       },
       // The Code panel needs a snippet for THIS story. The comment above says
       // "see Wisp for the source", which works for a human reading the docs and

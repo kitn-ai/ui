@@ -4,7 +4,7 @@ import { type PaneStatusTone } from './pane';
 import { cn } from '../../utils/cn';
 
 /** The work state of a tab's agent/process, mapped to the kit's tool / status
- *  hues — the SAME vocabulary as {@link './pane'.PaneStatus} and the AgentCard:
+ *  hues: the SAME vocabulary as {@link './pane'.PaneStatus} and the AgentCard:
  *  working = blue, idle = muted, done = green, error = red, blocked = amber. */
 export interface PaneTabStatus {
   /** Which hue the numbered badge takes. */
@@ -12,7 +12,7 @@ export interface PaneTabStatus {
   /** Optional status word shown on the active tab, on hover, and always for a
    *  needs-attention / error tab. Without it only the badge color carries state. */
   label?: string;
-  /** Animate a ping ring around the badge — for the live `working` state.
+  /** Animate a ping ring around the badge, for the live `working` state.
    *  Respects prefers-reduced-motion. */
   pulse?: boolean;
 }
@@ -23,7 +23,7 @@ export interface PaneTab {
   id: string;
   /** The tab name (the agent / window title). */
   name: string;
-  /** Run status — drives the numbered badge color + the status word. Defaults to
+  /** Run status, driving the numbered badge color and the status word. Defaults to
    *  an `idle` (muted) badge with no word. */
   status?: PaneTabStatus;
   /** Raise the attention treatment: an amber ring + the status word always shown.
@@ -49,7 +49,7 @@ export interface PaneGroupProps {
   /** Highlight the frame with a ring/border to mark this as the ACTIVE group in a
    *  multi-group layout. */
   focused?: boolean;
-  /** The active pane's body — the consumer owns it and swaps it on `onTabChange`. */
+  /** The active pane's body. The consumer owns it and swaps it on `onTabChange`. */
   children?: JSX.Element;
   /** Extra classes for the outer frame. */
   class?: string;
@@ -83,29 +83,24 @@ const TONE_TEXT: Record<PaneStatusTone, string> = {
 };
 
 /**
- * PaneGroup — an editor group: a TAB STRIP (numbered-status-badge tabs) over a
- * single CONTENT area showing the active tab's pane body. The reusable "one column
- * = a group of agents shown as tabs" primitive from the Multi-Agent Workspace,
- * extracted from the hand-rolled group in the Split Workspace demo.
+ * PaneGroup: an editor group, a tab strip over a single content area showing the active
+ * tab's pane body. The "one column = a group of agents shown as tabs" primitive.
  *
- * Each tab leads with a small TONE-COLORED NUMBERED BADGE — the color encodes the
- * agent's run status, the digit is its keyboard (⌥-jump) number, unifying status +
- * hint into one element — then the name, then the status WORD (shown on the active
- * tab, on hover, and always for a needs-attention / error tab), an optional "…"
- * overflow, and a close "×". The active tab is highlighted; a needs-attention tab
+ * Each tab leads with a tone-colored numbered badge (color = run status, digit =
+ * its keyboard jump number), then the name, then the status word, an optional
+ * overflow, and a close. The active tab is highlighted; a needs-attention tab
  * carries an amber ring even when inactive.
  *
- * Composition: the group owns the tab UX; the CONSUMER owns the pane content. It
- * renders `children` as the active pane's body and swaps it in response to
- * `onTabChange`. Selection-only — it never routes content itself.
+ * Composition: the group owns the tab UX, the CONSUMER owns the content. It renders
+ * `children` as the active body and swaps it on `onTabChange`; it never routes
+ * content itself.
  *
- * Accessibility: a `role="group"` ("Open panes") strip of real `<button>` tab
- * activators (NOT `role="tab"`, so the strip can legally own the per-tab menu/close
- * buttons) with roving tabindex + Arrow/Home/End navigation; the active activator is
- * marked `aria-current="true"`, and the body is the `role="tabpanel"`. Colors are all
- * token-backed (surface / border / ring / tool-*), so it reads in light and dark.
- * The strip, each tab, and the body are exposed via `::part(tabs|tab|body)` for
- * the `kai-pane-group` facade. Give the group a bounded height for the body scroll.
+ * Accessibility: a `role="group"` strip of real `<button>` activators (not
+ * `role="tab"`, so the strip can legally own the per-tab menu and close buttons)
+ * with roving tabindex and Arrow/Home/End navigation. The active activator is
+ * `aria-current="true"` and the body is the `role="tabpanel"`. Colors are
+ * token-backed, so it reads in light and dark; the strip, each tab and the body are
+ * exposed via `::part(tabs|tab|body)`. Give the group a bounded height for the body.
  */
 export function PaneGroup(props: PaneGroupProps) {
   const tabs = () => props.tabs ?? [];

@@ -14,7 +14,7 @@ export interface TabBarItem {
   /** Visible label under the icon; also the tab's accessible name. */
   label?: string;
   /** Unread dot on the icon's corner. Reaches the accessible name too
-   *  (a dot alone is invisible to assistive tech, the #336 lesson). */
+   *  (a dot alone is invisible to assistive tech). */
   dot?: boolean;
   /** Count badge on the icon's corner; wins over `dot` when both are set.
    *  Reaches the accessible name too. */
@@ -41,7 +41,7 @@ export function tabBarTabClass(active: boolean): string {
 /**
  * Compose a tab's accessible name from its label and its badge/dot state, so
  * the unread signal reaches assistive tech and not only the visible corner
- * mark (the #336 lesson: `aria-label` carries what the dot shows). A count
+ * mark (`aria-label` carries what the dot shows). A count
  * badge appends the count; a dot appends "(unread)".
  */
 export function tabBarItemAccessibleName(
@@ -81,7 +81,7 @@ export function TabBarItemContent(props: TabBarItemContentProps) {
               {/* Both marker names on the one dot: `data-kai-tab-dot` is this
                   part's own hook; `data-kai-tab-unread` is the facade's
                   established name for the same mark (the kai-chat widget tab
-                  bar renders through this component, P-9), kept so existing
+                  bar renders through this component), kept so existing
                   consumers and tests keep resolving it. */}
               <span
                 data-kai-tab-dot
@@ -127,7 +127,7 @@ export interface TabBarProps extends Omit<JSX.HTMLAttributes<HTMLElement>, 'onCh
  * Bottom-navigation tab bar: icon-over-label columns (or icon-only), an
  * optional unread dot or count badge per tab, equal-width tabs filling the
  * row. This is navigation chrome, a different component from the `Tabs`
- * strip (content tabs / segmented control), per ruling P-2: `kai-tabs` could
+ * strip (content tabs / segmented control), `kai-tabs` could
  * not express icon-over-label, icon-only, or a per-item badge.
  *
  * Same a11y idiom as `Tabs`: real `tablist`/`tab` roles, roving tabindex,

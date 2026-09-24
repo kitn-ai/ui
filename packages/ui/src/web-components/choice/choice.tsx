@@ -3,9 +3,8 @@ import { ChoiceCard, type ChoiceCardData, type ChoiceController } from '../../co
 import type { CardResolution } from '../../primitives/card-contract';
 
 interface Props extends Record<string, unknown> {
-  /** The choice definition (the CardEnvelope.data). Set as a JS PROPERTY:
-   *  `el.data = { prompt, options:[…], allowOther?, submitLabel? }`. Import
-   *  `ChoiceCardData` from `@kitn.ai/ui` for the full shape. */
+  // Import `ChoiceCardData` from `@kitn.ai/ui` for the full shape.
+  /** The choice definition (the card's `data`). JS property: `el.data = { prompt, options: [...] }`. */
   data?: ChoiceCardData;
   /** Stable card id correlating every emitted CardEvent. Attribute: `card-id`. */
   cardId?: string;
@@ -25,28 +24,19 @@ interface Props extends Record<string, unknown> {
 }
 
 /** Events fired by `<kai-choice>`. (The terminal submit/dismiss/reopen flow is
- *  emitted via the bubbling `kai-card` contract event — listen for `kai-card`.) */
+ *  emitted via the bubbling `kai-card` contract event: listen for `kai-card`.) */
 interface Events {
   /** The selection changed BEFORE submit (a row click or the `select()` method).
    *  Distinct from the terminal `action` verb on the `kai-card` contract event. */
   'kai-value-change': { value: string };
 }
-
+// Two-stage on purpose: a row click only SELECTS (`kai-value-change`), and Submit commits the
+// Card contract's `action` verb up a bubbling `kai-card` event, which also resolves the card so
+// the same pick cannot double-fire. `allowOther` appends a selectable "Other..." row that
+// reveals an inline input, and Submit then emits `action: '__other__'` with `{ text }`. Routes
+// through a CardProvider when present, else the bubbling `kai-card` event.
 /**
- * `<kai-choice>` — a single-select **"pick one of N rich options"** card (set via the
- * `data` property): a prompt + a radiogroup of list rows. Clicking a row **selects** it
- * (no emit, fires `kai-value-change`); the **Submit** button below then emits the Card
- * contract's **`action`** verb up a bubbling **`kai-card`** CustomEvent (`{ kind:'action',
- * cardId, action: option.id, payload? }`) and resolves the card so the same pick can't
- * double-fire. An optional `allowOther` free-text escape appends a selectable "Other…" row
- * that reveals an inline input; the same Submit emits `action:'__other__'` with `{ text }`.
- * Also emits `ready` on mount and `error` for a malformed definition (inline error). Routes
- * through a `CardProvider` when present, else the bubbling `kai-card` event. Isolated in
- * Shadow DOM; theme-aware via the shared tokens.
- *
- * Supports controlled selection (`value`), an uncontrolled seed (`defaultValue`), a
- * group-level `disabled`, and instance methods `focus()`/`select(id)`/`send()`/
- * `dismiss()`/`reopen()`.
+ * A single-select card of rich options that submits one choice.
  */
 defineWebComponent<Props, Events>(
   'kai-choice',

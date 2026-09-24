@@ -1,30 +1,23 @@
 import { createSignal, onCleanup, type Accessor } from 'solid-js';
 
 /**
- * Fit-to-container scaling: the size tiers are fixed
- * px by design (`sizes.ts`), so a container narrower than a tier's natural
- * footprint used to CLIP the picture at its edges. The dispatcher now scales
- * the WHOLE visualization down proportionally to fit, and renders byte-equal
- * to the designed px metrics whenever the container is at least natural size.
+ * Fit-to-container scaling: the size tiers are fixed px by design (`sizes.ts`),
+ * so a container narrower than a tier's natural footprint used to CLIP the
+ * picture at its edges. The dispatcher now scales the WHOLE visualization down
+ * proportionally, and renders byte-equal to the designed px metrics whenever the
+ * container is at least natural size.
  *
- * Why a transform-scale wrapper rather than relative units or reflow:
- * - The px tiers ARE the design (LiveKit parity); switching the geometry to
- *   relative units would change rendering at every container size, not just
- *   the overflowing ones.
- * - Reflowing (fewer bars, smaller gaps) changes what the animation MEANS;
- *   proportional scale keeps the exact picture, just smaller.
- * - A transform also covers the shader variants for free: their canvases size
- *   their backing store from layout size (`clientWidth`), which a transform
- *   does not change, so the bitmap stays at full natural resolution and only
- *   the composited output shrinks. No variant needs an exception.
+ * A transform scale, not relative units or reflow: the px tiers ARE the design,
+ * reflowing (fewer bars, smaller gaps) changes what the animation MEANS, and a
+ * transform covers the shader variants for free because their canvas backing
+ * store sizes from layout (`clientWidth`), which a transform does not change:
+ * the bitmap stays at natural resolution and only the composited output shrinks.
  *
- * Both sizes are MEASURED (one ResizeObserver watching both wrappers), never
- * restated from `sizes.ts`: the natural footprint depends on variant, size
- * tier, barCount/count/radius and the consumer's own part styling, and a
- * hand-derived width table would rot the day any of those moved.
- *
- * Where ResizeObserver does not exist (SSR, jsdom) this is inert: scale stays
- * 1 and nothing is written, which is exactly the pre-fix rendering.
+ * The scale factor is MEASURED (one ResizeObserver over both wrappers), never
+ * derived from a width table: the natural footprint depends on variant, tier,
+ * barCount/count/radius and the consumer's own part styling. Where
+ * ResizeObserver does not exist (SSR, jsdom) this is inert, which is the
+ * pre-fix rendering.
  */
 export function computeFitScale(
   available: number | undefined,

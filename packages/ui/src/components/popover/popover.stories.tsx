@@ -13,10 +13,11 @@ const meta = {
   tags: ['autodocs'],
   parameters: {
     layout: 'padded',
+    // Reach for `Dropdown` when the panel is a plain list of commands. Uncontrolled unless `open` +
+    // `onOpenChange` are passed; Escape or an outside click closes.
     docs: {
       description: componentDescription([
-        'A `trigger` that toggles a floating `role="dialog"` panel of arbitrary `children` (toggles, rows, nested groups). Use `Dropdown` instead for a plain list of commands.',
-        'Uncontrolled by default; pass `open` + `onOpenChange` to control it. Escape or an outside click closes.',
+        'A floating panel of arbitrary content, opened from the trigger it wraps.',
       ]),
     },
   },

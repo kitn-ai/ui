@@ -11,14 +11,13 @@ import { createPresence } from '../overlay/overlay';
 export interface DialogController { open: Accessor<boolean>; setOpen: (v: boolean) => void; }
 
 export interface DialogProps {
-  /** Dialog body — the default slot / main content. */
+  /** Dialog body: the default slot content. */
   children?: JSX.Element;
   /** Optional header region (e.g. a title). Rendered above the body with a divider. */
   header?: JSX.Element;
   /** Optional footer region (e.g. action buttons). Rendered below the body with a divider. */
   footer?: JSX.Element;
-  /** Controlled open state. When set, the component never changes it itself —
-   *  drive it from `onOpenChange`. Omit for uncontrolled (internal) state. */
+  /** Controlled open state. While it is set the component never changes it itself; omit it for uncontrolled state. */
   open?: boolean;
   /** Initial open state when uncontrolled. */
   defaultOpen?: boolean;
@@ -42,7 +41,7 @@ const FOCUSABLE_SELECTOR = [
   '[tabindex]:not([tabindex="-1"])',
 ].join(',');
 
-/** Roughly "rendered + not visibility:hidden" — skips display:none / hidden nodes. */
+/** Roughly "rendered and not visibility:hidden"; skips display:none / hidden nodes. */
 function isVisible(el: HTMLElement): boolean {
   return !!(el.offsetWidth || el.offsetHeight || el.getClientRects().length)
     && getComputedStyle(el).visibility !== 'hidden';

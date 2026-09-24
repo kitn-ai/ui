@@ -1,30 +1,18 @@
 /**
- * Shared preview-wrapper accenting for the builder's STUB, light-DOM preview
- * shells (`Labs/Builder/<Template>` stories) — root-caused live (Round A,
- * owner report), bitten twice before landing here: the old `Labs/Apps`
- * Builder story's preview never actually recolored, and the same bug then
- * reproduced in `Labs/Builder/Support widget`'s FAB.
+ * Shared preview-wrapper accenting for the builder's STUB, light-DOM preview shells
+ * (`Labs/Builder/<Template>` stories).
  *
- * WHY a nested wrapper setting `--kai-color-primary` alone does nothing:
- * `theme.css` declares the kit's internal token exactly once, at
- * `:root, :host` — `--color-primary: var(--kai-color-primary, <fallback>)`
- * — inside a `@theme` block. CSS custom-property indirection resolves at
- * the element where the CONSUMING declaration lives, not at read time, so
- * `--color-primary`'s value is fixed by `--kai-color-primary`'s value AT
- * THAT `:root`/`:host` element and inherits down as an already-resolved
- * value; setting `--kai-color-primary` on some descendant div never
- * retriggers that resolution, because nothing redeclares `--color-primary`
- * there. A REAL emitted construct's host element doesn't hit this: its
- * shadow root's OWN `:host` rule (the same theme.css, scoped) resolves
- * `--color-primary` fresh at the host, using the host's own
- * `--kai-color-primary` (codegen.ts sets it via
- * `ctx.element.style.setProperty('--kai-color-primary', ...)`) — because
- * `:host` IS that element. Our light-DOM story preview has no such
- * `:host` boundary re-declaring the mapping, so it has to replicate the
- * mapping by hand: set BOTH the public token (`--kai-color-primary`, for
- * parity with what a real construct authors) AND the internal one
- * (`--color-primary`, the one Tailwind utility classes and the kit's own
- * components actually read) directly on the wrapper.
+ * WHY a nested wrapper setting `--kai-color-primary` alone does nothing: `theme.css`
+ * declares the kit's internal token exactly once, at `:root, :host`
+ * (`--color-primary: var(--kai-color-primary, <fallback>)`) inside a `@theme` block.
+ * Custom-property indirection resolves at the element where the CONSUMING declaration
+ * lives, not at read time, so `--color-primary` inherits down as an already-resolved
+ * value and setting `--kai-color-primary` on a descendant never retriggers it. A real
+ * emitted construct's host does not hit this: its shadow root's own `:host` rule
+ * resolves `--color-primary` fresh from the host's `--kai-color-primary` (codegen.ts
+ * sets it there). Our light-DOM preview has no such boundary, so it replicates the
+ * mapping by hand: set BOTH the public token (for parity with what a real construct
+ * authors) AND the internal one (what the utilities and components read) on the wrapper.
  */
 
 import type { BuilderConstruct } from './builder-panel';
@@ -107,7 +95,7 @@ function resolveContrastForeground(accent: string): '#000000' | '#ffffff' | null
  * The inline style object a stub preview's wrapper needs so a construct's
  * `theme.accent` actually retints its descendants: both the public
  * (`--kai-color-primary`) and internal (`--color-primary`) tokens, plus
- * their paired foreground when the accent resolves to concrete RGB — see
+ * their paired foreground when the accent resolves to concrete RGB; see
  * the module doc comment above for why both are required. Returns `{}` for
  * no accent (the kit's own neutral default applies, same as omitting the
  * property entirely).

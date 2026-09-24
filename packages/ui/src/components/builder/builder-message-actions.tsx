@@ -5,25 +5,21 @@ import { Button } from '../button/button';
 import type { ChatMessageAction } from '../../web-components/chat/chat-types';
 
 /**
- * The role-scoped, ordered message-action picker — extracted from
- * `builder-in-app-assistant.stories.tsx` (Round A3) into this standalone
- * module during the T-1 build-out so the Assistant and Research templates
- * (both asked for a "message actions, role-scoped picker, reuse" section)
- * share one definition instead of forking it. `builder-in-app-assistant.
- * stories.tsx` was retrofitted to import from here in the same round; its
- * rendered output and behavior are unchanged — this is a pure extraction.
+ * The role-scoped, ordered message-action picker, in its own module so the
+ * Assistant and Research templates share one definition instead of forking it.
+ * `stories/showcase/builder-assistant.stories.tsx` imports it from here.
  *
  * Model: `ChatMessage.actions` (`web-components/chat/chat-types.ts`) is `(ChatMessage
- * Action | CustomAction)[]` — an ORDERED array, not a set — and role-scoped
+ * Action | CustomAction)[]`, an ORDERED array, not a set, and role-scoped
  * only by caller curation (checked against `message.tsx`/`chat-thread.tsx`:
  * neither hard-couples any built-in id to a role). This picker enforces
  * role-appropriateness via two independent catalogs, one per role, each
  * independently ordered and toggled.
  *
- * `'speak'` (read-aloud) is a real `ChatMessageAction` (elements/
- * chat-actions.ts) backed by the kit's own SpeechSynthesis mechanics
- * (primitives/speech.ts, shared with `kai-voice-output`) via the shared
- * action-bar click router (primitives/message-feedback.ts).
+ * `'speak'` (read-aloud) is a real `ChatMessageAction` (`chat-actions.ts`)
+ * backed by the kit's own SpeechSynthesis mechanics (`primitives/speech.ts`,
+ * shared with `kai-voice-output`) via the shared action-bar click router
+ * (`primitives/message-feedback.ts`).
  */
 export type UserActionId = Extract<ChatMessageAction, 'edit' | 'copy'>;
 export type AssistantActionId = ChatMessageAction;
@@ -31,9 +27,8 @@ export type AssistantActionId = ChatMessageAction;
 export interface ActionRowDef<TId extends string> {
   id: TId;
   label: string;
-  /** A curated icon — same components `ui/action-icons.ts`'s registry maps
-   *  each built-in id to, so the picker's icons match what the real action
-   *  bar renders. */
+  /** A curated icon from the same registry `components/action-icons/action-icons.ts`
+   *  maps each built-in id to, so the picker's icons match the real action bar. */
   icon: Component<{ class?: string }>;
 }
 
@@ -55,9 +50,9 @@ export const ASSISTANT_ACTION_CATALOG: readonly ActionRowDef<AssistantActionId>[
   { id: 'speak', label: 'Read aloud', icon: Volume2 },
 ];
 
-/** Owner defaults (Round A3): "Your messages" starts with only Edit on;
- *  "Assistant messages" starts with Copy/Like/Dislike on, Regenerate and
- *  Speak off. Row ORDER here is also the default enabled-action order. */
+/** Defaults: "Your messages" starts with only Edit on; "Assistant messages"
+ *  starts with Copy/Like/Dislike on, Regenerate and Speak off. Row ORDER here
+ *  is also the default enabled-action order. */
 export const DEFAULT_USER_ACTION_ROWS: ActionRowState<UserActionId>[] = [
   { id: 'edit', enabled: true },
   { id: 'copy', enabled: false },
@@ -72,15 +67,14 @@ export const DEFAULT_ASSISTANT_ACTION_ROWS: ActionRowState<AssistantActionId>[] 
 ];
 
 /**
- * One role's ordered, toggleable action list — a vertical list of rows
+ * One role's ordered, toggleable action list: a vertical list of rows
  * (icon + label + up/down reorder buttons + an enable switch). Row ORDER
  * is the array order, and doubles
- * as the enabled-action order once filtered — no separate "priority"
+ * as the enabled-action order once filtered: no separate "priority"
  * field, because the component tier has no separate concept either.
  *
  * Up/down buttons over drag-and-drop: keyboard- and screen-reader-operable
- * for free, which a bare drag handle is not, without extra work a design
- * round doesn't need to do to prove the model (T-6).
+ * for free, which a bare drag handle is not.
  */
 export function ActionRowPicker<TId extends string>(props: {
   legend: string;

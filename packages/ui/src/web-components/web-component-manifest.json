@@ -24,6 +24,7 @@
     "kai-loader": "loader",
     "kai-text-shimmer": "text-shimmer",
     "kai-image": "image",
+    "kai-image-artifact": "image-artifact",
     "kai-checkpoint": "checkpoint",
     "kai-skills": "message-skills",
     "kai-source": "source",
@@ -83,6 +84,7 @@
     "kai-pane-grid": "pane-grid",
     "kai-agent-card": "agent-card",
     "kai-dialog": "dialog",
+    "kai-lightbox": "lightbox",
     "kai-dock": "dock",
     "kai-input": "input",
     "kai-search": "search",
@@ -170,6 +172,9 @@
     ],
     "image": [
       "kai-image"
+    ],
+    "image-artifact": [
+      "kai-image-artifact"
     ],
     "checkpoint": [
       "kai-checkpoint"
@@ -343,6 +348,9 @@
     ],
     "dialog": [
       "kai-dialog"
+    ],
+    "lightbox": [
+      "kai-lightbox"
     ],
     "dock": [
       "kai-dock"

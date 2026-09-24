@@ -11,8 +11,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'A themed rounded-square swatch (the trigger for the platform color picker) beside a hex text field, kept in sync in both directions. The swatch wraps a real, `sr-only` `<input type="color">` — never a hand-drawn color rectangle — so the native dialog does the actual picking; the visible focus ring lands on the swatch via `has-[:focus-visible]:` even though DOM focus sits on the hidden input.',
-        'An invalid hex typed into the text field never nukes state: it just does not commit, so the swatch and the last valid value stay put until the text becomes valid again or the picker is used.',
+        'A color swatch and a hex field that set the same value.',
       ]),
     },
   },

@@ -11,7 +11,7 @@ export interface ModelSwitcherProps {
   class?: string;
   /** Initial open state of the dropdown (uncontrolled seed). */
   defaultOpen?: boolean;
-  /** Disable the trigger — click/keyboard no longer open the dropdown. */
+  /** Disable the trigger, so click and keyboard no longer open the dropdown. */
   disabled?: boolean;
   /** Receive the dropdown's open controller (forwarded from the inner Dropdown). */
   controllerRef?: (api: DropdownController) => void;
@@ -29,7 +29,7 @@ const Chevron = (props: { class?: string }) => (
  * A single-select list of models IS a radio group, so this routes through
  * `DropdownRadioItem` (`role="menuitemradio"` + `aria-checked`) rather than
  * hand-rolling those attributes onto a plain `DropdownItem`. Being the current
- * model used to render as `font-medium` and nothing else — invisible to a screen
+ * model used to render as `font-medium` and nothing else, invisible to a screen
  * reader. `kai-menu` already renders its radio items this way.
  *
  * `DropdownRadioItem` deliberately does NOT close the menu on activation (it is

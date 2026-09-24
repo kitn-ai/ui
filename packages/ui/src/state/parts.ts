@@ -45,36 +45,22 @@ type ReasoningPart = Extract<MessagePart, { type: 'reasoning' }>;
 
 /** Keyed by `(streamId, index)` so parallel reasoning blocks stay distinct.
  *
- *  WHY THE KEY IS A PAIR. A block index alone is NOT unique inside one `parts`
- *  array. Anthropic numbers content blocks per MESSAGE and restarts at 0 on the
- *  next one, while a tool loop folds every round into a single assistant turn.
- *  Keyed on index alone, round 2's thinking block (index 0) merges into round 1's
- *  part: the text concatenates and `raw: opts.raw ?? cur.raw` OVERWRITES round 1's
- *  verbatim provider payload with round 2's. `toAnthropicMessages` then emits one
- *  thinking block where two belong, carrying round 2's signature in round 1's
- *  position -- a modified-and-filtered thinking block, which is exactly the 400
- *  the verbatim `raw` channel exists to prevent.
+ *  WHY THE KEY IS A PAIR. A block index alone is not unique inside one `parts` array:
+ *  Anthropic numbers content blocks per MESSAGE and restarts at 0 on the next one, while
+ *  a tool loop folds every round into a single assistant turn. Keyed on index alone, the
+ *  second round's thinking block (index 0) merges into the first round's part, and
+ *  `raw: opts.raw ?? cur.raw` OVERWRITES the first round's verbatim provider payload with
+ *  the second's. `toAnthropicMessages` then emits one thinking block where two belong,
+ *  carrying the second round's signature in the first round's position, which is exactly
+ *  the 400 the verbatim `raw` channel exists to prevent.
  *
- *  `streamId` is the namespace: one value per provider response stream, attached
- *  by `consumeModelStream`. Two rounds are two streams, so their index 0s are two
- *  parts. Producers that drive a sink from a single stream can omit it; `undefined`
- *  is its own namespace and behaves exactly as before.
+ *  `streamId` is the namespace, one value per provider stream; a producer driving a single
+ *  sink may omit it, and `undefined` is its own namespace.
  *
- *  Returns the SAME array reference when the merge produces an identical part,
- *  for the same reason `upsertToolPart` does: a new `parts` array is the
- *  re-render signal, so handing one back for a delta that changed nothing is a
- *  spurious render.
- *
- *  An EMPTY delta is not a no-op and must still reach here: it is how a redacted
- *  reasoning block, a `signature_delta` and an assembled `content_block_stop`
- *  block arrive, and how a format opens a block at the right position so block
- *  ORDER survives into `parts`. Those carry a new `raw`/`signature`/index and so
- *  compare unequal and DO rebuild. What the check absorbs is the other empty
- *  frame: one carrying nothing new, which a provider is free to send repeatedly.
- *
- *  `signature` and `raw` resolve with `??`, so an explicit `undefined` from a
- *  later delta never blanks a value an earlier one established. Pass a DEFINED
- *  value to replace either; there is no way to clear them. */
+ *  `signature` and `raw` resolve with `??`, so an explicit `undefined` from a later
+ *  delta never blanks a value an earlier one established; to assert one of them,
+ *  pass a DEFINED value.
+ */
 export function appendReasoningPart(
   parts: MessagePart[],
   delta: string,
@@ -147,28 +133,22 @@ function reasoningEqual(a: ReasoningPart, b: ReasoningPart): boolean {
 type CardPart = Extract<MessagePart, { type: 'card' }>;
 
 /** Creates or REPLACES a card part, keyed on `envelope.id`. Returns the SAME array
- *  reference when the incoming envelope is structurally identical to the current
- *  one, for the same reason `upsertToolPart` does: a new `parts` array is the
- *  re-render signal, so handing one back for a revision that changed nothing is a
- *  spurious render.
+ *  reference when the incoming envelope is structurally identical, for the same reason
+ *  `upsertToolPart` does: a new `parts` array is the re-render signal.
  *
  *  WHY THIS REPLACES WHERE `upsertToolPart` MERGES. A tool part is patched
- *  fragment-by-fragment as its arguments stream in, which is why that function
- *  needs carry-forward rules for `raw` and `kind` — a later patch that omits a
- *  field is not asserting the field is gone. A card envelope is the opposite: it
- *  arrives WHOLE, as one complete tool result, so an omitted field IS an
- *  assertion. Last-write-wins is both simpler and the only semantics under which
- *  a host can CLEAR `resolution` to re-open a dismissed card — a field-by-field
- *  merge can only ever set that field, never unset it, so `CardPolicy.onReopen`
- *  (see `primitives/card-contract.ts`) would have no way to express its result.
+ *  fragment-by-fragment as its arguments stream in, so a later patch that omits a field
+ *  is not asserting the field is gone, which is why that function needs carry-forward
+ *  rules for `raw` and `kind`. A card envelope arrives WHOLE, as one complete tool
+ *  result, so an omitted field IS an assertion. Last-write-wins is simpler and is the
+ *  only semantics under which a host can CLEAR `resolution` to re-open a dismissed card:
+ *  a field-by-field merge could set that field, never unset it, so
+ *  `CardPolicy.onReopen` could not express its result.
  *
- *  The PART-level `raw` is preserved across a revision. It is a different field
- *  from anything inside the envelope: the untranslated provider payload the part
- *  was built from, attached once by the producer, which a fresh envelope carries
- *  no opinion about.
- *
- *  Position is preserved: a revised card stays where it first appeared in the
- *  thread rather than jumping past the text that followed it. */
+ *  The PART-level `raw` is preserved across a revision: it is the untranslated provider
+ *  payload the part was built from, attached once by the producer, which a fresh
+ *  envelope carries no opinion about. Position is preserved too, so a revised card stays
+ *  where it first appeared rather than jumping past the text that followed it. */
 export function upsertCardPart(parts: MessagePart[], envelope: CardEnvelope): MessagePart[] {
   const i = parts.findIndex((p) => p.type === 'card' && p.envelope.id === envelope.id);
   if (i < 0) return [...parts, { type: 'card', envelope }];
@@ -253,31 +233,24 @@ const _toolKeysExhaustive: _ToolKeysExhaustive = true;
 void _toolKeysExhaustive;
 
 /** One comparator per key in `TOOL_KEYS`. The mapped type over
- *  `(typeof TOOL_KEYS)[number]` means a key added to `TOOL_KEYS` with no
- *  comparator here is ALSO a compile error ("Property 'x' is missing"), so the
- *  guard reaches the actual comparison, not just the key list.
+ *  `(typeof TOOL_KEYS)[number]` makes a key with no comparator a compile error, so
+ *  the guard reaches the actual comparison rather than the key list.
  *
- *  Semantics are unchanged from before this table existed:
- *  - `raw` compares by REFERENCE on purpose. It is the untranslated provider
- *    payload; a producer attaches it once and never rebuilds it (upsertToolPart
- *    itself carries `cur.raw` forward when a patch omits it), so reference
- *    equality holds on every real path. Hashing it would walk the accumulated
- *    argument string a second time, which is the cost this table exists to
- *    remove. The worst case is a producer handing over a fresh-but-equal `raw`,
- *    which costs one extra re-render and never a wrong render.
- *  - `input` and `output` are the two fields that are genuinely object-shaped:
- *    reference equality first, then `fingerprint()` as a structural fallback so
- *    a fresh-but-identical object still dedupes.
- *  - everything else, including `rawInput`, compares with `===`. `rawInput`
- *    against `!==` is exactly the test we want (did the accumulated text
- *    change?) and it is cheap: two strings of different lengths are unequal
- *    after the length check, so it never walks the full string.
+ *  - `raw` compares by REFERENCE on purpose: it is the untranslated provider payload,
+ *    attached once and never rebuilt (`upsertToolPart` carries `cur.raw` forward when
+ *    a patch omits it), so reference equality holds on every real path, and hashing it
+ *    would walk the accumulated argument string a second time. The worst case is a
+ *    fresh-but-equal `raw`, one extra re-render and never a wrong one.
+ *  - `input` and `output` are the object-shaped pair: reference equality first, then
+ *    `fingerprint()` so a fresh-but-identical object still dedupes.
+ *  - everything else, `rawInput` included, compares with `===`: two strings of
+ *    different lengths are unequal after the length check, so it never walks the full
+ *    string.
  *
- *  This replaces `fingerprint(merged) === fingerprint(cur)`, which serialized
- *  the ENTIRE ToolPart on every patch. A streaming tool call is patched once
- *  per argument fragment while `rawInput` grows toward the full argument JSON,
- *  so hashing the whole part per fragment is quadratic in the argument size:
- *  fine at 4 KB, not at 200 KB. */
+ *  This replaces `fingerprint(merged) === fingerprint(cur)`, which serialized the
+ *  ENTIRE ToolPart on every patch. A streaming call is patched once per argument
+ *  fragment while `rawInput` grows toward the full JSON, so hashing the whole part per
+ *  fragment is quadratic in argument size: fine at 4 KB, not at 200 KB. */
 const TOOL_COMPARATORS: { [K in (typeof TOOL_KEYS)[number]]: (a: ToolPart, b: ToolPart) => boolean } = {
   type: (a, b) => a.type === b.type,
   state: (a, b) => a.state === b.state,

@@ -1,7 +1,7 @@
-// Regression guard for ten STORY-CONVENTION defects, all of which were
+// Regression guard for thirteen STORY-CONVENTION defects, all of which were
 // hand-authored per story with nothing enforcing them.
 //
-// THE TEN DEFECTS
+// THE TWELVE DEFECTS
 // (a) A STORY with no usage snippet of its own. The house convention is to
 //     author one by hand: either the local
 //     `const src = (code) => ({ parameters: { docs: { source: { code, ... } } } })`
@@ -116,6 +116,47 @@
 //     intrinsic (`div`, `span`), a DOM global and another package's component
 //     are out of scope BY CONSTRUCTION: no such name is a kit export, so
 //     nothing here can demand an import for one.
+// (l) A rendered component DESCRIPTION that describes the DOCUMENTATION
+//     instead of the component: the strings handed to
+//     `componentDescription([...])` / `specDescription(tag, [...])`, and the
+//     object `docs.description.component` renders. That string is not a
+//     comment -- it is the blurb above the props table, and `llms-full.txt`
+//     and the MCP catalog copy it -- so a sentence about the story the reader
+//     is in is documentation about documentation. The owner, on the Lightbox
+//     story: "we know its solidjs, we don't need to talk about the labs story
+//     either. the doc for components should be focus on the component." The
+//     same rule caps a description at `DESCRIPTION_PARAGRAPH_LIMIT`
+//     paragraphs: past three it is an article, and the detail belongs in the
+//     examples and the props table. `sidebar` is deliberately NOT vocabulary
+//     -- the kit renders a real sidebar (the conversation list), so `a
+//     sidebar conversation list` is component behaviour.
+//     SINCE PASS D it reads BOTH description fields: the component description and the
+//     per-STORY one (`docs.description.story`), which renders on that story's own docs
+//     page above the canvas. The bar is the same and for the same reason: the reader is
+//     already on the story page, so naming the story, the Labs tier or the harness tells
+//     them about the documentation rather than about what they are looking at. The em
+//     dash is banned on both, because both are rendered copy.
+// (m) An `argTypes` entry's `description` value: a one-line value, no em dash
+//     and at most `ARG_DESCRIPTION_MAX_CHARS`. These strings are the FIFTH
+//     documentation surface, and they WIN: Storybook renders the argType
+//     description in the props table INSTEAD of the component's own prop doc,
+//     so a story can silently undo a doc-comment trim (the sweep's own
+//     finding on `components/checkbox/checkbox.stories.tsx`). The cap equals
+//     `lint-prop-docs`'s because the two render in the same column; a second
+//     number would just move the verbosity from one file to the other. The em
+//     dash is the character `apps/docs`'s copy guard bans (`STYLE.md`), for
+//     the same reason: the flourish reads as machine prose.
+//     A description this reader cannot evaluate statically -- an identifier, a
+//     call, a template with a hole -- is UNVERIFIED, never a quiet pass: it
+//     renders in the props table like any other.
+// (n) A JSX ELEMENT IN A STORY'S `args`. Storybook serializes `args` across the
+//     manager/preview boundary, so a JSX value arrives as a plain object: the story
+//     renders nothing, or the docs preview blanks. It is the one args value that can
+//     never work, and it cannot be seen by any other rule here (the argTypes rules
+//     read keys and descriptions, and a JSX value type-checks). The fix is a `render`
+//     that closes over the element, which is what every story that needs one does.
+//     A JSX value inside a FUNCTION in args is fine: that value is a function, and
+//     the element is built when it is called.
 //
 // THE INVARIANT
 // (a) is a per-STORY finding: every exported story object must have a snippet
@@ -180,6 +221,14 @@
 // runs, intersected with the kit's public export names read from
 // `src/index.ts` and `src/solid.ts`. A name the snippet's own import line
 // brings is clean, and so is a name the snippet declares for itself.
+// (l) is a per-DESCRIPTION finding: every paragraph of every RENDERED component
+// description -- read from the four authoring shapes the tree writes, all of
+// which land on `docs.description.component` -- must be free of `DOCS_TALK`,
+// and the description must carry at most `DESCRIPTION_PARAGRAPH_LIMIT`
+// paragraphs. A description this reader cannot read statically (a template with
+// a hole, an array with a spread) is UNVERIFIED. A
+// `// lint-story-conventions: docs-talk -- <reason>` waiver on the site's line or
+// the line above covers the whole description.
 //
 // (i) AND (k) ARE THE TWO DIRECTIONS OF ONE FACT. A docs source snippet is the
 // code a reader PASTES, so a name it cannot resolve is broken either way: the
@@ -198,13 +247,17 @@
 // be legitimate.
 //
 // WHY AST, NOT REGEX
-// All ten rules are about a SHAPE in the code or in a file the code names (a
-// property chain, a story's `render` key, a title's segment path, a props type
-// declared in the module a story imports, an element's events, the docgen
-// options, a meta's `component`/`tags` properties, an identifier in expression
-// position), not a token that also legitimately appears in prose --
+// Every rule here but (l) is about a SHAPE in the code or in a file the code
+// names (a property chain, a story's `render` key, a title's segment path, a
+// props type declared in the module a story imports, an element's events, the
+// docgen options, a meta's `component`/`tags` properties, an identifier in
+// expression position), not a token that also legitimately appears in prose --
 // `lint-cdn-pins` justifies regex for exactly that distinction and rejects it
-// for shape-matching. A real parse also means renamed variables, multiline
+// for shape-matching. (l) earns the same exception from the same place: it
+// reads a rendered STRING, and the WORDS in it are the defect. The AST is still
+// what decides WHICH strings those are -- the argument of the right call, the
+// `component` property under `docs.description` -- never a grep for the word.
+// A real parse also means renamed variables, multiline
 // object literals and reordered keys don't produce false negatives the way a
 // line-oriented scan would.
 //
@@ -215,7 +268,8 @@
 // this script being broken. The same rule covers every derivation the new
 // rules depend on: a run that resolved NO component props type, read NO event
 // off the element meta, found NO story meta declaring a `component`, read NO
-// snippet text, read NO rendered text node, or parsed NO kit export name exits
+// snippet text, read NO rendered text node, read NO rendered component
+// description string, or parsed NO kit export name exits
 // 1 instead of reporting a clean tree.
 //
 // UNVERIFIED IS A FAILURE, NOT A PASS. Where a new rule cannot read the fact it
@@ -1776,6 +1830,399 @@ function findGlyphAffordances(sf, text) {
   return { findings, textRegions };
 }
 
+// ---------------------------------------------------------------------------
+// (l) a rendered component description that describes the DOCUMENTATION
+// ---------------------------------------------------------------------------
+
+/** The words that make a description talk about the DOCUMENTATION around the
+ *  component instead of the component: Storybook's own name, the story the
+ *  reader is in, the Labs tier, the page or demo around it. The description is
+ *  rendered ABOVE the props table and copied into `llms-full.txt`, so a reader
+ *  meeting `the story` there learns about Storybook and not about the component.
+ *
+ *  `story` AND `Labs` ARE BARE WORDS, and that is the point: a rendered
+ *  description of a component has no legitimate use for either. An enumeration
+ *  of phrases is always incomplete -- it missed `its own story`, which is what
+ *  `audio-visualizer.stories.tsx` shipped -- while the bare word cannot be.
+ *
+ *  `sidebar` is deliberately NOT here, and do not "complete" this list with
+ *  that word: the kit renders a real sidebar (the conversation list), so `a
+ *  sidebar conversation list` is component behaviour, not docs talk. */
+const DOCS_TALK = /\b(Storybook|story|Labs|this page|this demo|the demo|docs page)\b/i;
+
+/** The most paragraphs a description may carry. Past three it has stopped being
+ *  a description of the component and become an article: the detail belongs in
+ *  the examples and the props table. */
+const DESCRIPTION_PARAGRAPH_LIMIT = 3;
+
+/** The two helpers a story hands its description paragraphs to. */
+const DESCRIPTION_HELPERS = ['componentDescription', 'specDescription'];
+
+/** A line waiver for a description that has to name the documentation -- prose
+ *  quoting the vocabulary, or a component whose own subject IS its docs.
+ *
+ *  A parsed directive for the same reason `GLYPH_WAIVER` is: the text already
+ *  reads as deliberate prose, so a rule honouring a written reason would pass
+ *  the defect it was written about. Covers the line it sits on and the line
+ *  above. */
+const DOCS_TALK_WAIVER = /lint-story-conventions:\s*docs-talk\s*--\s*(.{15,})/;
+
+/** The docs-talk defect in the RENDERED component descriptions: a description
+ *  that names Storybook, the story or the page, or one long enough to be an
+ *  article.
+ *
+ *  Four authoring shapes, one rendered string each:
+ *    componentDescription([p1, p2])        -- `src/components/**`
+ *    specDescription('kai-x', [p1, p2])    -- `src/web-components/**`
+ *    description: { component: <string> }  -- either root, including the `+`
+ *                                             row of literals
+ *                                             (`web-components/lightbox/`) and
+ *                                             the `[...].join('\n\n')`
+ *                                             (`overlay.stories.tsx`)
+ *  All of them land on `docs.description.component`, which is what Storybook
+ *  renders and what the docs page, `llms-full.txt` and the MCP catalog copy. */
+function findDescriptionDocsTalk(sf, text) {
+  const lines = text.split('\n');
+  const findings = [];
+  const unverified = [];
+  let descriptions = 0;
+
+  /** Is the site at `anchor` waived? The waiver sits on that line or the line
+   *  above it, the same window `GLYPH_WAIVER` covers. */
+  const waivedAt = (anchor) =>
+    DOCS_TALK_WAIVER.test(lines[anchor - 1] ?? '') || DOCS_TALK_WAIVER.test(lines[anchor - 2] ?? '');
+
+  /** A string literal -- or the row of literals a `+` joins, which are ONE
+   *  paragraph -- as `{ text, line }` segments. Anything else (a template with
+   *  a hole, an identifier, a call) is not statically readable. */
+  const stringSegments = (node) => {
+    if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) {
+      return [{ text: node.text, line: lineAt(sf, node) }];
+    }
+    if (ts.isBinaryExpression(node) && node.operatorToken.kind === ts.SyntaxKind.PlusToken) {
+      const left = stringSegments(node.left);
+      const right = stringSegments(node.right);
+      if (left && right) return [...left, ...right];
+    }
+    return undefined;
+  };
+
+  /** The paragraph list an expression renders: one paragraph per array entry,
+   *  each entry itself possibly a `+` row. A single string is a one-paragraph
+   *  list. `undefined` is a description this reader cannot read, which the
+   *  caller reports as UNVERIFIED rather than skipping quietly. */
+  const paragraphsOf = (node) => {
+    const single = stringSegments(node);
+    if (single) return [single];
+    if (ts.isArrayLiteralExpression(node)) return arrayParagraphs(node);
+    if (ts.isCallExpression(node)) {
+      if (ts.isIdentifier(node.expression) && DESCRIPTION_HELPERS.includes(node.expression.text)) {
+        const arg = node.arguments[node.arguments.length - 1];
+        return arg && ts.isArrayLiteralExpression(arg) ? arrayParagraphs(arg) : undefined;
+      }
+      const callee = node.expression;
+      if (
+        ts.isPropertyAccessExpression(callee) &&
+        callee.name.text === 'join' &&
+        ts.isArrayLiteralExpression(callee.expression)
+      ) {
+        return arrayParagraphs(callee.expression);
+      }
+    }
+    return undefined;
+  };
+
+  // A function declaration, so `paragraphsOf` can call it above its definition.
+  function arrayParagraphs(array) {
+    const out = [];
+    for (const element of array.elements) {
+      const paragraph = stringSegments(element);
+      if (!paragraph) return undefined;
+      out.push(paragraph);
+    }
+    return out;
+  }
+
+  /** The line a match at `index` of a paragraph's JOINED text sits on -- a
+   *  `+`-split paragraph starts each segment on its own line. */
+  const lineOf = (paragraph, index) => {
+    let at = 0;
+    for (const segment of paragraph) {
+      if (index < at + segment.text.length) {
+        return segment.line + (segment.text.slice(0, index - at).match(/\n/g)?.length ?? 0);
+      }
+      at += segment.text.length;
+    }
+    return paragraph[paragraph.length - 1].line;
+  };
+
+  const record = (paragraphs, anchor, unreadable, surface = 'component') => {
+    if (!paragraphs) {
+      unverified.push({ line: anchor, what: unreadable });
+      return;
+    }
+    const waived = waivedAt(anchor);
+    for (const paragraph of paragraphs) {
+      descriptions++;
+      if (waived) continue;
+      const match = paragraph
+        .map((segment) => segment.text)
+        .join('')
+        .match(DOCS_TALK);
+      if (match) {
+        findings.push({
+          scope: surface,
+          word: match[0],
+          line: lineOf(paragraph, match.index),
+          reason:
+            `the ${surface} description talks about the documentation ('${match[0]}'), ` +
+            `not the ${surface === 'story' ? 'subject it demonstrates' : 'component'}`,
+        });
+      }
+    }
+    // The em dash, on the same surfaces as the docs-talk rule: this text renders above
+    // the canvas or the props table, and STYLE.md bans the flourish in rendered copy.
+    // An argTypes description has its own rule (m); these are the two description
+    // fields, which no other rule reads.
+    if (!waived) {
+      for (const paragraph of paragraphs) {
+        const text = paragraph.map((segment) => segment.text).join('');
+        const at = text.indexOf('\u2014');
+        if (at !== -1) {
+          findings.push({
+            scope: surface,
+            word: 'em dash',
+            line: lineOf(paragraph, at),
+            reason: `the ${surface} description carries an em dash`,
+          });
+        }
+      }
+    }
+    if (!waived && paragraphs.length > DESCRIPTION_PARAGRAPH_LIMIT) {
+      findings.push({
+        word: `${paragraphs.length} paragraphs`,
+        line: anchor,
+        reason:
+          `${paragraphs.length} paragraphs in one description (the limit is ${DESCRIPTION_PARAGRAPH_LIMIT}): ` +
+          `the detail belongs in the examples and the props table`,
+      });
+    }
+  };
+
+  const visit = (node) => {
+    if (
+      ts.isCallExpression(node) &&
+      ts.isIdentifier(node.expression) &&
+      DESCRIPTION_HELPERS.includes(node.expression.text) &&
+      // Read by the `component` property below, which handles the same call --
+      // counting it in both places would report one description twice.
+      !isNamedProp(node.parent, 'component')
+    ) {
+      const anchor = lineAt(sf, node);
+      const arg = node.arguments[node.arguments.length - 1];
+      record(paragraphsOf(arg), anchor, `the ${node.expression.text}(...) argument is not statically readable`);
+    } else if (
+      ts.isPropertyAssignment(node) &&
+      propName(node) === 'component' &&
+      isNamedProp(node.parent?.parent, 'description') &&
+      isNamedProp(node.parent?.parent?.parent?.parent, 'docs')
+    ) {
+      const anchor = lineAt(sf, node);
+      record(
+        paragraphsOf(node.initializer),
+        anchor,
+        'the docs.description.component value is not statically readable',
+      );
+    } else if (
+      // The per-STORY description, rendered on that story's own docs page above the
+      // canvas. It was OUT of rule (l) by decision until PASS D; the decision is that
+      // the same bar applies, for the same reason: the reader is on the story's page,
+      // so naming the story, the Labs tier or the harness tells them about the
+      // documentation rather than about what they are looking at. It is a SEPARATE
+      // field from the component description, so it is reported as its own finding.
+      ts.isPropertyAssignment(node) &&
+      propName(node) === 'story' &&
+      isNamedProp(node.parent?.parent, 'description') &&
+      isNamedProp(node.parent?.parent?.parent?.parent, 'docs')
+    ) {
+      const anchor = lineAt(sf, node);
+      record(
+        paragraphsOf(node.initializer),
+        anchor,
+        'the docs.description.story value is not statically readable',
+        'story',
+      );
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sf);
+  return { findings, unverified, descriptions };
+}
+
+// ---------------------------------------------------------------------------
+// (m) an argTypes description: the cap and the em dash
+// ---------------------------------------------------------------------------
+
+/** The cap, the SAME number `lint-prop-docs.mjs` enforces on the component's own
+ *  prop doc. Both strings render in one props table -- the argType's description
+ *  wins there -- so a second cap would only move the verbosity between files. */
+const ARG_DESCRIPTION_MAX_CHARS = 160;
+
+/** The em dash `apps/docs`'s copy guard bans (STYLE.md). En dash is NOT included:
+ *  a range (`10–20`) is a real thing a description may need, while the flourish
+ *  is what the guard is about. */
+const ARG_DESCRIPTION_EM_DASH = '\u2014';
+
+/** A parsed waiver for one description, on the line of the `description`
+ *  property or the line above it -- the same window the glyph and docs-talk
+ *  waivers cover. Parsed, not text-matched: the value already reads as
+ *  deliberate prose, so a rule honouring written reasons would pass the defect
+ *  the reason was written about. */
+const ARG_DESCRIPTION_WAIVER = /lint-story-conventions:\s*arg-description\s*--\s*(.{15,})/;
+
+/** Every literal `argTypes` entry's `description`, measured for the cap and the
+ *  em dash.
+ *
+ *  Reads the SAME entries rule (b) walks (a literal `argTypes` object literal,
+ *  spread entries skipped because they carry no static key -- `argTypesFor(...)`
+ *  descriptions come from `web-component-meta.json`, already capped by
+ *  `lint:prop-docs`) but for a different property. The em dash is checked on the
+ *  WHITESPACE-COLLAPSED text, so a `+` row split across lines is measured as the
+ *  one string Storybook renders. */
+function findArgTypeDescriptions(sf, text) {
+  const lines = text.split('\n');
+  const findings = [];
+  const unverified = [];
+  let read = 0;
+
+  /** The static text of a string literal, a no-substitution template, or the
+   *  row a `+` joins -- `{ text, line }` per segment so a finding can point at
+   *  the property. Anything else (a hole, an identifier, a call) is undefined. */
+  const segmentsOf = (node) => {
+    if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) {
+      return [{ text: node.text, line: lineAt(sf, node) }];
+    }
+    if (ts.isBinaryExpression(node) && node.operatorToken.kind === ts.SyntaxKind.PlusToken) {
+      const left = segmentsOf(node.left);
+      const right = segmentsOf(node.right);
+      if (left && right) return [...left, ...right];
+    }
+    return undefined;
+  };
+
+  const visit = (node) => {
+    if (
+      ts.isPropertyAssignment(node) &&
+      propName(node) === 'argTypes' &&
+      ts.isObjectLiteralExpression(node.initializer)
+    ) {
+      for (const prop of node.initializer.properties) {
+        if (!ts.isPropertyAssignment(prop) || !ts.isObjectLiteralExpression(prop.initializer)) continue;
+        const key = propName(prop);
+        const desc = prop.initializer.properties.find(
+          (p) => ts.isPropertyAssignment(p) && propName(p) === 'description',
+        );
+        if (!desc) continue;
+        const line = lineAt(sf, desc);
+        const segments = segmentsOf(desc.initializer);
+        if (!segments) {
+          unverified.push({ line, what: `the argTypes '${key}' description is not statically readable` });
+          continue;
+        }
+        read++;
+        if (ARG_DESCRIPTION_WAIVER.test(lines[line - 1] ?? '') || ARG_DESCRIPTION_WAIVER.test(lines[line - 2] ?? '')) {
+          continue;
+        }
+        const collapsed = segments.map((s) => s.text).join('').replace(/\s+/g, ' ').trim();
+        const dashIndex = collapsed.indexOf(ARG_DESCRIPTION_EM_DASH);
+        if (dashIndex !== -1) {
+          findings.push({
+            key,
+            line: lineOfSegment(segments, dashIndex),
+            reason: 'the description carries an em dash',
+          });
+        }
+        if (collapsed.length > ARG_DESCRIPTION_MAX_CHARS) {
+          findings.push({
+            key,
+            line,
+            reason: `${collapsed.length} chars (the cap is ${ARG_DESCRIPTION_MAX_CHARS})`,
+          });
+        }
+      }
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sf);
+  return { findings, unverified, read };
+}
+
+/** The line a match at `index` of a JOINED multi-segment string sits on (a `+`
+ *  row starts each segment on its own line). */
+function lineOfSegment(segments, index) {
+  let at = 0;
+  for (const segment of segments) {
+    if (index < at + segment.text.length) return segment.line;
+    at += segment.text.length;
+  }
+  return segments[segments.length - 1].line;
+}
+
+// ---------------------------------------------------------------------------
+// (n) a JSX element in a story's `args`
+// ---------------------------------------------------------------------------
+
+/** Does this expression CONTAIN a JSX element, without descending into a function
+ *  body? An arrow that returns JSX is a function VALUE in `args`, which Storybook
+ *  serializes as a function reference the preview can call, so it is not this rule's
+ *  subject. */
+function containsJsx(initializer) {
+  if (
+    ts.isArrowFunction(initializer) ||
+    ts.isFunctionExpression(initializer) ||
+    ts.isMethodDeclaration(initializer)
+  ) {
+    return false;
+  }
+  let found = false;
+  const walk = (node) => {
+    if (found) return;
+    if (
+      ts.isJsxElement(node) ||
+      ts.isJsxSelfClosingElement(node) ||
+      ts.isJsxFragment(node)
+    ) {
+      found = true;
+      return;
+    }
+    ts.forEachChild(node, walk);
+  };
+  walk(initializer);
+  return found;
+}
+
+/** Every `args` object (the meta's or a story's) whose literal value contains JSX. */
+function findJsxInArgs(sf) {
+  const findings = [];
+  const visit = (node) => {
+    if (
+      ts.isPropertyAssignment(node) &&
+      propName(node) === 'args' &&
+      ts.isObjectLiteralExpression(node.initializer)
+    ) {
+      for (const prop of node.initializer.properties) {
+        if (!ts.isPropertyAssignment(prop)) continue;
+        if (containsJsx(prop.initializer)) {
+          findings.push({ key: propName(prop) ?? '(computed)', line: lineAt(sf, prop) });
+        }
+      }
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sf);
+  return findings;
+}
+
 function analyzeFile(path, text, ctx) {
   const sf = parse(path, text);
   const findings = {
@@ -1783,6 +2230,7 @@ function analyzeFile(path, text, ctx) {
     eventArgTypes: [],
     componentEventProps: [],
     elementEventProps: [],
+    jsxInArgs: [],
     unverified: [],
   };
   findings.snippetlessStories = findSnippetlessStories(sf);
@@ -1811,6 +2259,15 @@ function analyzeFile(path, text, ctx) {
   const glyphs = findGlyphAffordances(sf, text);
   findings.glyphs = glyphs.findings;
   findings.renderedTextRegions = glyphs.textRegions;
+  const descriptions = findDescriptionDocsTalk(sf, text);
+  findings.descriptionDocsTalk = descriptions.findings;
+  findings.descriptionStrings = descriptions.descriptions;
+  findings.unverified.push(...descriptions.unverified);
+  const argDescriptions = findArgTypeDescriptions(sf, text);
+  findings.argDescriptionIssues = argDescriptions.findings;
+  findings.argDescriptionsRead = argDescriptions.read;
+  findings.unverified.push(...argDescriptions.unverified);
+  findings.jsxInArgs = findJsxInArgs(sf);
   const title = findMetaTitle(sf);
   if (title) {
     if (retiredTier(title.value)) findings.retiredTier = title;
@@ -2625,10 +3082,158 @@ const SELF_TEST_CASES = [
     expectUnimportedExports: ['Switch'],
   },
   {
+    name: "(l) a description naming the story it renders in is flagged (the Solid story for X shape)",
+    code: `const meta = { parameters: { docs: { description: componentDescription([
+      'Renders live audio as bars, a grid, a ring, a wave, or a glowing aurora.',
+      'The Solid story for X is where the shader canvas is driven.',
+    ]) } } };`,
+    expectDocsTalk: ['story'],
+  },
+  {
+    name: "(l) a description naming its own story is flagged (the audio-visualizer sentence worth flagging)",
+    code: `const meta = { parameters: { docs: { description: componentDescription([
+      'Each look gets its own story across all six states, embedded below.',
+    ]) } } };`,
+    expectDocsTalk: ['story'],
+  },
+  {
+    name: '(l) a four-paragraph description is flagged (the blog-article shape)',
+    code: `const meta = { parameters: { docs: { description: componentDescription([
+      'One thing.', 'Two things.', 'Three things.', 'Four things.',
+    ]) } } };`,
+    expectDocsTalk: ['4 paragraphs'],
+  },
+  {
+    name: '(l) a clean two-paragraph description about the component is not flagged',
+    code: `const meta = { parameters: { docs: { description: componentDescription([
+      'A small floating label on hover/focus of its trigger.',
+      'Wrap one interactive child and set content to the hint text.',
+    ]) } } };`,
+    expectDocsTalk: [],
+  },
+  {
+    name: '(l) a docs-talk line waiver on the line above the call silences the finding',
+    code: `const meta = { parameters: { docs: {
+      // lint-story-conventions: docs-talk -- quotes the vocabulary the component copies
+      description: componentDescription(['The story for X is what this mirrors.']),
+    } } };`,
+    expectDocsTalk: [],
+  },
+  {
+    name: '(l) a waiver carrying no reason is not a waiver',
+    code: `const meta = { parameters: { docs: {
+      // lint-story-conventions: docs-talk -- short
+      description: componentDescription(['The story for X is what this mirrors.']),
+    } } };`,
+    expectDocsTalk: ['story'],
+  },
+  {
+    name: "(l) a `+` row of literals is ONE paragraph, and `Labs` is a bare word (the element-story form)",
+    code: `const meta = { parameters: { docs: { description: {
+      component: 'Shows your markup bigger, centered over a dimmed page. '
+        + 'The trigger lives on a Labs/Foundations page.',
+    } } } };`,
+    expectDocsTalk: ['Labs'],
+  },
+  {
+    name: '(l) an array joined into the description is read as paragraphs (the overlay.stories.tsx shape)',
+    code: `const meta = { parameters: { docs: { description: {
+      component: ['First paragraph.', 'Second paragraph.', 'Third.', 'Fourth.'].join('\n\n'),
+    } } } };`,
+    expectDocsTalk: ['4 paragraphs'],
+  },
+  {
+    name: '(l) a PER-STORY description naming its own story is flagged (the wisp shape)',
+    code: `const meta = { parameters: { docs: { description: {
+      story: 'Isolated on its own story so the kebab interaction can be inspected.',
+    } } } };`,
+    expectDocsTalk: ['story'],
+  },
+  {
+    name: '(l) a PER-STORY description with an em dash is flagged',
+    code: `const meta = { parameters: { docs: { description: {
+      story: 'A caption still forming \u2014 renders a shade lighter.',
+    } } } };`,
+    expectDocsTalk: ['em dash'],
+  },
+  {
+    name: '(l) a file with no rendered component description reads nothing (what makes the run vacuous)',
+    code: `export const Playground = { render: () => <Widget /> };`,
+    expectDescriptions: 0,
+  },
+  {
     // Reads the REAL entry points, so a misrooted path or a parser that stopped
     // finding exports fails here rather than making every (k) assertion vacuous.
+    name: '(n) a JSX element in a story\'s args is flagged',
+    code: `const meta = { title: 'X', args: { header: <div>hi</div> } };\nexport const A: Story = { args: { footer: <Footer /> } };`,
+    expectJsxInArgs: ['header', 'footer'],
+  },
+  {
+    name: '(n) a string arg, and JSX kept in render, are not flagged',
+    code: `const meta = { title: 'X', args: { header: 'hi' } };\nexport const A: Story = { render: () => <div>hi</div> };`,
+    expectJsxInArgs: [],
+  },
+  {
+    name: '(n) a FUNCTION-valued arg that returns JSX is a function value, not a JSX arg',
+    code: `const meta = { title: 'X', args: { renderRow: () => <div>hi</div> } };`,
+    expectJsxInArgs: [],
+  },
+  {
     name: "(k) the real entry points still parse to the kit's export names",
     expectKitExports: ['buttonVariants', 'renderIcon', 'Dock'],
+  },
+  {
+    name: '(m) an argTypes description over the cap is flagged and one AT the cap is not',
+    // Built by concatenation, not by a template hole, so the length is real and
+    // the boundary is the thing under test.
+    code:
+      "const meta = { argTypes: { atCap: { description: '" +
+      'y'.repeat(ARG_DESCRIPTION_MAX_CHARS) +
+      "' }, overCap: { description: '" +
+      'x'.repeat(ARG_DESCRIPTION_MAX_CHARS + 1) +
+      "' } } };",
+    expectArgDescriptions: ['overCap'],
+    expectArgDescriptionsRead: 2,
+  },
+  {
+    name: '(m) an em dash in an argTypes description is flagged, and its line is the segment it sits on',
+    code: `const meta = { argTypes: { label: { description: 'A label \u2014 for the field.' } } };`,
+    expectArgDescriptions: ['label'],
+  },
+  {
+    name: '(m) a `+` row is ONE rendered string, so the em dash on its second line is still that description',
+    code: `const meta = { argTypes: { label: { description: 'A label for the field, '
+      + 'and \u2014 unusually \u2014 one that wraps.' } } };`,
+    expectArgDescriptions: ['label'],
+  },
+  {
+    name: '(m) a description the reader cannot evaluate is UNVERIFIED, never a quiet pass',
+    code: `const meta = { argTypes: { label: { description: SOME_SHARED_DOC } } };`,
+    expectArgDescriptions: [],
+    expectArgDescriptionsRead: 0,
+    expectArgUnverified: 1,
+  },
+  {
+    name: '(m) a waiver with a reason silences it and a reason-less one does NOT (parsed, not text-matched)',
+    code:
+      'const meta = { argTypes: {\n' +
+      '  waived: {\n' +
+      '    // lint-story-conventions: arg-description -- the field needs a longer note on purpose\n' +
+      `    description: '${'z'.repeat(ARG_DESCRIPTION_MAX_CHARS + 1)}',\n` +
+      '  },\n' +
+      '  bare: {\n' +
+      '    // lint-story-conventions: arg-description\n' +
+      `    description: '${'w'.repeat(ARG_DESCRIPTION_MAX_CHARS + 1)}',\n` +
+      '  },\n' +
+      '} };',
+    expectArgDescriptions: ['bare'],
+    expectArgDescriptionsRead: 2,
+  },
+  {
+    name: '(m) a fixture object that happens to carry a `description` is NOT an argTypes entry (scope)',
+    code: `const rows = [{ id: 'us-east-1', description: 'N. Virginia \u2014 closest.' }];\nconst meta = { argTypes: { id: { control: 'text' } } };`,
+    expectArgDescriptions: [],
+    expectArgDescriptionsRead: 0,
   },
 ];
 
@@ -2785,6 +3390,51 @@ function runSelfTest() {
         notes.push(`glyphs: expected [${c.expectGlyphs.join(', ')}], got [${got.join(', ')}]`);
       }
     }
+    if ('expectDocsTalk' in c || 'expectDescriptions' in c) {
+      const got = findDescriptionDocsTalk(sf, c.code ?? '');
+      if ('expectDocsTalk' in c) {
+        const words = got.findings.map((f) => f.word);
+        const expected = c.expectDocsTalk;
+        const same = words.length === expected.length && words.every((k, i) => k === expected[i]);
+        if (!same) {
+          ok = false;
+          notes.push(`docs-talk: expected [${expected.join(', ')}], got [${words.join(', ')}]`);
+        }
+      }
+      if ('expectDescriptions' in c && got.descriptions !== c.expectDescriptions) {
+        ok = false;
+        notes.push(`descriptions: expected ${c.expectDescriptions}, got ${got.descriptions}`);
+      }
+    }
+    if ('expectJsxInArgs' in c) {
+      const got = findJsxInArgs(sf).map((f) => f.key);
+      const expected = c.expectJsxInArgs;
+      const same = got.length === expected.length && got.every((k, i) => k === expected[i]);
+      if (!same) {
+        ok = false;
+        notes.push(`jsx-in-args: expected [${expected.join(', ')}], got [${got.join(', ')}]`);
+      }
+    }
+    if ('expectArgDescriptions' in c || 'expectArgDescriptionsRead' in c || 'expectArgUnverified' in c) {
+      const got = findArgTypeDescriptions(sf, c.code ?? '');
+      if ('expectArgDescriptions' in c) {
+        const keys = got.findings.map((f) => f.key);
+        const expected = c.expectArgDescriptions;
+        const same = keys.length === expected.length && keys.every((k, i) => k === expected[i]);
+        if (!same) {
+          ok = false;
+          notes.push(`arg-descriptions: expected [${expected.join(', ')}], got [${keys.join(', ')}]`);
+        }
+      }
+      if ('expectArgDescriptionsRead' in c && got.read !== c.expectArgDescriptionsRead) {
+        ok = false;
+        notes.push(`arg-descriptions-read: expected ${c.expectArgDescriptionsRead}, got ${got.read}`);
+      }
+      if ('expectArgUnverified' in c && got.unverified.length !== c.expectArgUnverified) {
+        ok = false;
+        notes.push(`arg-description-unverified: expected ${c.expectArgUnverified}, got ${got.unverified.length}`);
+      }
+    }
     if ('expectKitExports' in c) {
       const kit = loadKitExports(PKG_ROOT);
       if (kit.names.size === 0) {
@@ -2900,6 +3550,9 @@ const elementEventOffenders = [];
 const autodocsOffenders = [];
 const snippetLocalNameOffenders = [];
 const glyphOffenders = [];
+const docsTalkOffenders = [];
+const argDescriptionOffenders = [];
+const jsxInArgsOffenders = [];
 const unimportedExportOffenders = [];
 const unverified = [];
 let resolvedComponents = 0;
@@ -2910,6 +3563,8 @@ let requiredElementEvents = 0;
 let componentMetas = 0;
 let snippetsScanned = 0;
 let renderedTextRegions = 0;
+let descriptionStrings = 0;
+let argDescriptionsRead = 0;
 for (const path of files) {
   const rel = relative(PKG_ROOT, path);
   const text = readFileSync(path, 'utf8');
@@ -2922,6 +3577,9 @@ for (const path of files) {
   for (const f of findings.snippetLocalNames) snippetLocalNameOffenders.push({ file: rel, ...f });
   for (const f of findings.snippetUnimportedExports) unimportedExportOffenders.push({ file: rel, ...f });
   for (const g of findings.glyphs) glyphOffenders.push({ file: rel, ...g });
+  for (const d of findings.descriptionDocsTalk) docsTalkOffenders.push({ file: rel, ...d });
+  for (const d of findings.argDescriptionIssues) argDescriptionOffenders.push({ file: rel, ...d });
+  for (const j of findings.jsxInArgs) jsxInArgsOffenders.push({ file: rel, ...j });
   for (const u of findings.unverified) unverified.push({ file: rel, ...u });
   if (findings.retiredTier) retiredTierOffenders.push({ file: rel, ...findings.retiredTier });
   if (findings.doubledToken) doubledTokenOffenders.push({ file: rel, ...findings.doubledToken });
@@ -2930,6 +3588,8 @@ for (const path of files) {
   requiredComponentEvents += findings.componentEventsRequired;
   snippetsScanned += findings.snippetsScanned;
   renderedTextRegions += findings.renderedTextRegions;
+  descriptionStrings += findings.descriptionStrings;
+  argDescriptionsRead += findings.argDescriptionsRead;
   if (findings.elementTags.length > 0) {
     elementTagFiles++;
     elementTags += findings.elementTags.length;
@@ -2955,6 +3615,12 @@ if (snippetsScanned === 0) {
 if (renderedTextRegions === 0) {
   vacuous.push('(j) read no rendered string/template/JSX-text region, so no glyph could be found');
 }
+if (descriptionStrings === 0) {
+  vacuous.push('(l) read no rendered component description string, so no docs-talk or over-long description could be found');
+}
+if (argDescriptionsRead === 0) {
+  vacuous.push('(m) read no argTypes description value, so no cap or em dash could be checked');
+}
 
 const total =
   snippetOffenders.length +
@@ -2967,6 +3633,9 @@ const total =
   snippetLocalNameOffenders.length +
   unimportedExportOffenders.length +
   glyphOffenders.length +
+  docsTalkOffenders.length +
+  argDescriptionOffenders.length +
+  jsxInArgsOffenders.length +
   (docgenIssue ? 1 : 0);
 const unverifiedTotal = unverified.length + eventsSkipped.length + kit.starUnfollowed.length;
 if (total === 0 && unverifiedTotal === 0 && vacuous.length === 0) {
@@ -2981,7 +3650,11 @@ if (total === 0 && unverifiedTotal === 0 && vacuous.length === 0) {
       `Every one of the ${componentMetas} meta(s) declaring a \`component\` carries tags: ['autodocs']; every ` +
       `snippet read (${snippetsScanned}) names only what it brings with it or imports, and imports every ` +
       `kit export it uses (${kit.names.size} public name(s) parsed out of ${KIT_ENTRY_FILES.join(' + ')}); and ` +
-      `no story hand-rolls one of ${GLYPH_CHARS.join(' ')} across ${renderedTextRegions} rendered text region(s).`,
+      `no story hand-rolls one of ${GLYPH_CHARS.join(' ')} across ${renderedTextRegions} rendered text region(s); and ` +
+      `every one of the ${descriptionStrings} rendered component description string(s) in those stories describes the ` +
+      `component -- not Storybook, the story or the page -- in ${DESCRIPTION_PARAGRAPH_LIMIT} paragraph(s) or fewer, and ` +
+      `every one of the ${argDescriptionsRead} argTypes description value(s) fits in ${ARG_DESCRIPTION_MAX_CHARS} chars ` +
+      `with no em dash, and no story puts a JSX element in its args.`,
   );
   process.exit(0);
 }
@@ -2998,6 +3671,8 @@ console.error(
     `${componentMetas} meta(s) declare a component, ${snippetsScanned} docs-source snippet(s) were read, ` +
     `${kit.names.size} kit export name(s) were parsed out of ${KIT_ENTRY_FILES.join(' + ')}, ` +
     `${renderedTextRegions} rendered text region(s) were scanned for glyphs; ` +
+    `${descriptionStrings} rendered component description string(s) were read for docs talk and for over-long descriptions; ` +
+    `${argDescriptionsRead} argTypes description value(s) were read for the cap and the em dash; ` +
     `${relative(PKG_ROOT, mainPath)} read for the framework docgen options.\n`,
 );
 
@@ -3137,6 +3812,23 @@ if (glyphOffenders.length > 0) {
   );
 }
 
+if (docsTalkOffenders.length > 0) {
+  const filesAffected = new Set(docsTalkOffenders.map((f) => f.file)).size;
+  console.error(
+    `  (l) ${docsTalkOffenders.length} problem(s) in the rendered component/story descriptions (${filesAffected} file(s)):`,
+  );
+  for (const f of docsTalkOffenders) console.error(`    ${f.file}:${f.line}  ${f.word}  (${f.reason})`);
+  console.error(
+    `    A component description renders ABOVE the props table and is copied into llms-full.txt and\n` +
+      `    the MCP catalog, so it has to describe the COMPONENT. Drop the words about the documentation\n` +
+      `    (Storybook, the story, the page) and, past ${DESCRIPTION_PARAGRAPH_LIMIT} paragraphs, move the detail into\n` +
+      `    the examples and the props table.\n` +
+      `    A description that has to name the documentation waives its site:\n` +
+      `      // lint-story-conventions: docs-talk -- <why it is deliberate, 15+ chars>\n` +
+      `    on the line of the componentDescription(...) call / the \`component:\` key, or the line above.\n`,
+  );
+}
+
 if (unimportedExportOffenders.length > 0) {
   const filesAffected = new Set(unimportedExportOffenders.map((f) => f.file)).size;
   console.error(
@@ -3151,6 +3843,35 @@ if (unimportedExportOffenders.length > 0) {
       `    ${KIT_ENTRY_FILES.join(' + ')}, so a lowercase JSX tag or a DOM global can never be asked for.\n` +
       `    A name the kit shares with another package (\`Switch\` is also a solid-js export) is satisfied by\n` +
       `    an import from that package: what this asks for is the import line, not the specifier.\n`,
+  );
+}
+
+if (argDescriptionOffenders.length > 0) {
+  const filesAffected = new Set(argDescriptionOffenders.map((f) => f.file)).size;
+  console.error(
+    `  (m) ${argDescriptionOffenders.length} problem(s) in an argTypes description (${filesAffected} file(s)):`,
+  );
+  for (const f of argDescriptionOffenders) console.error(`    ${f.file}:${f.line}  ${f.key}  (${f.reason})`);
+  console.error(
+    `    An argTypes description is what Storybook renders in the props table -- it WINS over the\n` +
+      `    component's own prop doc there -- so it is capped at the same ${ARG_DESCRIPTION_MAX_CHARS} chars and\n` +
+      `    carries no em dash (STYLE.md). Keep what the prop name and type cannot say (the default, a\n` +
+      `    unit, a real trap); move rationale to a // comment, which no generator reads.\n` +
+      `    One that genuinely needs to be longer waives its own line:\n` +
+      `      // lint-story-conventions: arg-description -- <why, 15+ chars>\n`,
+  );
+}
+
+if (jsxInArgsOffenders.length > 0) {
+  const filesAffected = new Set(jsxInArgsOffenders.map((f) => f.file)).size;
+  console.error(
+    `  (n) ${jsxInArgsOffenders.length} JSX element(s) inside a story's args (${filesAffected} file(s)):`,
+  );
+  for (const f of jsxInArgsOffenders) console.error(`    ${f.file}:${f.line}  ${f.key}`);
+  console.error(
+    `    Storybook serializes args across the manager/preview boundary, so a JSX value arrives as a\n` +
+      `    plain object and the story renders nothing. Move it into a render that closes over it:\n` +
+      `      render: () => <div>{THE_ELEMENT}</div>\n`,
   );
 }
 

@@ -3,13 +3,13 @@ import { defineWebComponent } from '../define/define';
 import { Checkpoint, CheckpointIcon, CheckpointTrigger } from '../../components/checkpoint/checkpoint';
 
 interface Props extends Record<string, unknown> {
-  /** Optional text beside the icon. */
+  /** Text beside the icon. */
   label?: string;
-  /** Tooltip on hover. */
+  /** Hint shown on hover. */
   tooltip?: string;
-  /** Visual button style. */
+  /** Button style. */
   variant?: 'ghost' | 'default' | 'outline';
-  /** Button size (use an `icon*` size for an icon-only checkpoint). */
+  /** Button size; use an icon size for an icon-only checkpoint. */
   size?: 'sm' | 'md' | 'lg' | 'icon' | 'icon-sm';
 }
 
@@ -20,8 +20,7 @@ interface Events {
 }
 
 /**
- * `<kai-checkpoint>` — a bookmark/checkpoint button (optional tooltip + label).
- * Emits `select`.
+ * A bookmark button that marks a point in a thread.
  */
 defineWebComponent<Props, Events>('kai-checkpoint', {
   label: undefined,

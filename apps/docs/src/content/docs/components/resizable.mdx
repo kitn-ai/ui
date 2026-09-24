@@ -1,6 +1,6 @@
 ---
 title: Resizable
-description: A composable, draggable multi-panel layout container — slot in up to three panels and get interactive dividers with min/max constraints for free.
+description: A multi-panel layout with draggable dividers.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -16,7 +16,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kai-tag-sub">kai-resizable</p>
 
-<p class="kai-lede">Compose a draggable multi-panel shell — sidebar + chat, list + inspector, three-up — by placing `<kai-resizable-item>` children inside; dividers, drag logic, keyboard resize, and expand-to-fill are handled for you.</p>
+<p class="kai-lede">Divides a screen into regions the user can resize, and respects the limits each region sets.</p>
 
 <Facts items={['Shadow DOM', '2 events', 'Up to 3 panels (nest for more)', 'px or % sizing', 'Expand-to-fill protocol']} />
 
@@ -25,7 +25,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 <Playground client:only="solid" tag="kai-resizable" />
 
 <Aside type="tip" title="When to use">
-Use `<kai-resizable>` for any app shell built from regions the user should resize — a conversation list beside a thread, a thread beside an artifact, a stacked code-editor / output split. In SolidJS, use the `Resizable` and `ResizablePanel` components from `@kitn.ai/ui` directly for tighter reactivity integration.
+Any app shell built from regions the user should resize: a conversation list beside a thread, a thread beside an artifact, a stacked code-editor and output split.
 </Aside>
 
 ## Usage
@@ -50,7 +50,7 @@ Use `<kai-resizable>` for any app shell built from regions the user should resiz
 - **`hidden`** — removes the panel and its divider; remaining panels reflow. Toggle at runtime to collapse/restore.
 - **`maximizedIndex`** — set this property to the zero-based panel index to maximize it (`null` to restore). Or call `el.maximize(n)` / `el.restore()` imperatively.
 
-**Expand-to-fill** — when a `<kai-artifact expandable>` fires `kai-maximize-intent` (bubbling, composed), the nearest enclosing `<kai-resizable>` catches it automatically and hides siblings. No wiring needed. **Escape** or **Collapse** restores the layout.
+**Expand-to-fill**: a `<kai-artifact expandable>` fires `kai-maximize-intent` (bubbling, composed) and the nearest enclosing `<kai-resizable>` catches it and hides siblings. No wiring needed; **Escape** or **Collapse** restores the layout.
 
 ## Examples
 
@@ -68,7 +68,7 @@ Use `<kai-resizable>` for any app shell built from regions the user should resiz
 
 ### Expand-to-Fill Protocol
 
-Wire `<kai-artifact expandable>` inside an item — pressing **Expand** maximizes that panel automatically:
+Pressing **Expand** inside an item maximizes that panel automatically:
 
 ```html
 <kai-resizable orientation="horizontal" style="display:block;height:480px">

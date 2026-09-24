@@ -2,44 +2,25 @@ import { Panel, PanelBody, PanelFooter, PanelHeader } from '../../components/pan
 import { defineWebComponent } from '../define/define';
 
 interface PanelElementProps extends Record<string, unknown> {
-  /** Standalone widget-box chrome: border, radius and shadow on the panel
-   *  itself. Off (the default), the panel inherits its container's radius
-   *  and clips to it, the right posture inside an already-framed container
-   *  such as `kai-dock`'s floating panel. */
+  // Off (the default), the panel inherits its container's radius and clips to it, the
+  // right posture inside an already-framed container such as `kai-dock`'s floating panel.
+  /** Standalone widget-box chrome: border, radius and shadow on the panel itself. */
   frame?: boolean;
 }
 
+// The host is the sized box and the panel fills it: a block host with no intrinsic height, so an
+// unsized parent means an invisible panel. Without `frame` the panel inherits its container's
+// radius and clips to it, which is the right posture inside an already-framed container such as
+// `kai-dock`'s floating panel.
 /**
- * `<kai-panel>` is the widget panel frame, public: the surface every
- * widget-family composition sits on, painted from kit tokens so a
- * `--kai-color-*` override retints the chrome together with the web components
- * inside it. Regions: a `header` slot (put a `<kai-panel-header>` there, or
- * anything), the default slot as the view container (fills the remaining
- * height, clips, and anchors floating children), and a `footer` slot that
- * never scrolls away.
- *
- * Size the host; the panel fills it. With `frame` the panel carries its own
- * border, radius and shadow (a standalone widget box); without it, it
- * inherits the container's radius, so it drops into `<kai-dock>`'s panel
- * slot with no extra CSS.
- *
- * ```html
- * <kai-panel frame style="width: 380px; height: 560px">
- *   <kai-panel-header slot="header">Support</kai-panel-header>
- *   <kai-thread></kai-thread>
- *   <div slot="footer">Powered by Aurora</div>
- * </kai-panel>
- * ```
- *
- * Parts: `panel` (the frame) · `header` (the header region) · `body` (the
- * view container) · `footer`.
+ * The frame a widget-panel composition sits on.
  */
 defineWebComponent<PanelElementProps>('kai-panel', {
   frame: false,
 }, (props, { flag, reflectFlag }) => {
   void props;
   // Reflect so `[frame]` is styleable/inspectable on the host and the
-  // property reads back what an attribute write set (define.tsx G-05).
+  // property reads back what an attribute write set.
   reflectFlag('frame');
   return (
     <>
@@ -60,22 +41,10 @@ defineWebComponent<PanelElementProps>('kai-panel', {
   );
 });
 
+// The exact chrome the `kai-chat` facade paints for its own built-in header: a 56px row with a
+// bottom border. Back arrows and close buttons are slotted CONTENT, never props.
 /**
- * `<kai-panel-header>` is the panel's header row, the exact chrome the
- * `kai-chat` facade paints for its own built-in header: a 56px row with a
- * bottom border, a leading cluster, a semibold title, and a trailing
- * cluster. Back arrows and close buttons are slotted CONTENT, never props:
- * put them in the `start` and `end` slots.
- *
- * ```html
- * <kai-panel-header>
- *   <kai-button slot="start" variant="ghost" aria-label="Back">...</kai-button>
- *   Aurora Support
- *   <kai-button slot="end" variant="ghost" aria-label="Close">...</kai-button>
- * </kai-panel-header>
- * ```
- *
- * Parts: `header` (the row) · `start` · `title` · `end`.
+ * The header row of a panel.
  */
 defineWebComponent<Record<string, unknown>>('kai-panel-header', {}, () => (
   <>

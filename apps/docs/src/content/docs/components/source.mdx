@@ -1,6 +1,6 @@
 ---
 title: Source
-description: A single citation chip with a hover-card preview — the building block for inline source references below assistant answers.
+description: A citation chip for a single source behind an answer.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -13,7 +13,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kai-tag-sub">kai-source</p>
 
-<p class="kai-lede">A citation chip that shows a domain label and reveals a hover card with a headline and description — drop it below an assistant message to let users verify where an answer came from.</p>
+<p class="kai-lede">Shows the domain as the label and the headline on hover, so a reader can check where a claim came from.</p>
 
 <Facts items={['Shadow DOM', 'All props are attributes', 'Optional favicon', 'Hover-card preview', 'No events']} />
 
@@ -22,7 +22,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 <Playground client:only="solid" tag="kai-source" />
 
 <Aside type="tip" title="When to use">
-Use `<kai-source>` for a **single citation chip** in isolation — inside a custom message template or a tooltip. For two or more sources, reach for `<kai-sources>` instead: it accepts a `sources` array and lays chips out in a wrapping row.
+For a single citation inside a custom message template or a tooltip. When an answer has two or more, [Sources](/components/sources/) lays the chips out in a row.
 </Aside>
 
 ## Usage

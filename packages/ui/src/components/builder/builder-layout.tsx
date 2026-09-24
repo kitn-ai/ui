@@ -5,7 +5,7 @@ import { Monitor, Tablet, Smartphone, Download } from 'lucide-solid';
 
 export type BuilderViewport = 'desktop' | 'tablet' | 'mobile';
 
-/** Frame widths for the constrained viewports. `desktop` has no entry —
+/** Frame widths for the constrained viewports. `desktop` has no entry,
  *  it fills the preview pane exactly as before (no wrapper width at all),
  *  matching the pre-Round-A4 "stub, does nothing" behavior for that case. */
 const FRAME_WIDTH: Record<Exclude<BuilderViewport, 'desktop'>, string> = {
@@ -16,23 +16,17 @@ const FRAME_WIDTH: Record<Exclude<BuilderViewport, 'desktop'>, string> = {
 export interface BuilderLayoutProps {
   /** The construct's display name, shown in the toolbar. */
   name: string;
-  /** The inspector panel content — typically `<BuilderPanel>`. */
+  /** The inspector panel content, typically `<BuilderPanel>`. */
   panel: JSX.Element;
-  /** The preview content — typically a device frame wrapping `<ChatThread>`.
-   *  Callers that need to reflow their OWN preview at narrower widths (e.g.
-   *  a docked-rail template collapsing to full-bleed on `mobile`, matching
-   *  `components/dock/dock.tsx`'s own <=480px takeover) should read `viewport`/
-   *  `defaultViewport`/`onViewportChange` below and drive their preview's
-   *  shape from the same signal they hand this component — see
-   *  `builder-in-app-assistant.stories.tsx` and `builder.stories.tsx` for
-   *  the pattern. */
+  // A caller that reflows its OWN preview at narrower widths (e.g. a docked-rail template
+  // collapsing to full-bleed on `mobile`, matching `components/dock/dock.tsx`'s <=480px
+  // takeover) drives that from the same signal it hands `viewport`: see
+  // `builder-in-app-assistant.stories.tsx` and `builder.stories.tsx`.
+  /** The preview content, typically a device frame wrapping `<ChatThread>`. */
   preview: JSX.Element;
-  /** Controlled viewport selection. Omit for uncontrolled (internal) state,
-   *  same controlled/uncontrolled convention as `Switch`'s
-   *  `checked`/`defaultChecked` and `ToggleChip`'s `pressed`/
-   *  `defaultPressed`. A caller that needs to reflow its own `preview` JSX
-   *  per viewport (see the doc comment on `preview`) should lift this to a
-   *  signal of its own and pass both this and `onViewportChange`. */
+  // Same controlled/uncontrolled convention as `Switch`'s `checked`/`defaultChecked` and
+  // `ToggleChip`'s `pressed`/`defaultPressed`.
+  /** Controlled viewport selection; omit for internal state. */
   viewport?: BuilderViewport;
   /** Initial viewport when uncontrolled. Defaults to `'desktop'`. */
   defaultViewport?: BuilderViewport;
@@ -51,25 +45,24 @@ const VIEWPORTS: readonly { id: BuilderViewport; label: string; icon: typeof Mon
 ];
 
 /**
- * `BuilderLayout` — the two-pane builder shell: a fixed-width scrollable
+ * `BuilderLayout`, the two-pane builder shell: a fixed-width scrollable
  * inspector on the left, a live preview on the right over a dotted canvas
  * background (a deliberate "this is a design tool" cue, not a real device
  * emulator). A thin toolbar strip carries the construct name, a viewport
  * toggle, and a stub Export action.
  *
- * The viewport toggle (Round A4 — was a round-1 visual stub) constrains the
+ * The viewport toggle constrains the
  * PREVIEW FRAME's width: `desktop` fills the pane exactly as before (no
- * wrapper, no width style — the historical "stub" behavior for that one
+ * wrapper, no width style, the historical "stub" behavior for that one
  * case); `tablet`/`mobile` wrap `preview` in a centered frame sized to
  * `FRAME_WIDTH` above (768px / 390px), letting whatever `preview` renders
- * reflow inside it. This is still not a real device emulator — no bezel,
- * no user-agent spoofing, no touch simulation — just a width constraint,
- * consistent with the doc comment this replaced.
+ * reflow inside it. This is still not a real device emulator: no bezel,
+ * no user-agent spoofing, no touch simulation, just a width constraint.
  *
  * Pure shell: `panel` and `preview` are handed in as JSX so this component
  * carries no opinion about what fills them; reflowing the CONTENT of
  * `preview` at a given width (rather than just its outer box) is the
- * caller's job — see the `preview` prop's own doc comment.
+ * caller's job; see the `preview` prop's own doc comment.
  */
 export function BuilderLayout(props: BuilderLayoutProps): JSX.Element {
   const [internalViewport, setInternalViewport] = createSignal<BuilderViewport>(props.defaultViewport ?? 'desktop');

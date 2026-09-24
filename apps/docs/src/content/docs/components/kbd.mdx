@@ -1,6 +1,6 @@
 ---
 title: Kbd
-description: A keyboard-shortcut display that renders one cap per key, maps each token to a platform-aware glyph, and composes several shortcuts into one group.
+description: Displays a keyboard shortcut as key caps.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -13,7 +13,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kai-tag-sub">kai-kbd</p>
 
-<p class="kai-lede">Shows a keyboard shortcut as key caps. Give it a `keys` spec and it splits the tokens on `+`, maps each to a platform glyph (`Mod` to ⌘ on a Mac, Ctrl elsewhere) and renders one inset cap per key.</p>
+<p class="kai-lede">Mod renders as ⌘ on a Mac and Ctrl everywhere else, so one spec covers both.</p>
 
 <Facts items={['Shadow DOM', 'Display only', 'Platform glyphs', 'Groups with kai-kbd-group']} />
 
@@ -22,7 +22,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 <Playground client:only="solid" tag="kai-kbd" />
 
 <Aside type="tip" title="When to use">
-Show the shortcut next to the control it triggers: a menu row, a toolbar button, an icon button. It displays keys and does not bind them, so keep your own keydown handler and use the element as the hint beside it.
+Show the shortcut next to the control it triggers: a menu row, a toolbar button, an icon button. It never binds the keys, so your own keydown handler still does the work.
 </Aside>
 
 ## Usage

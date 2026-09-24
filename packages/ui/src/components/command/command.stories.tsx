@@ -32,7 +32,7 @@ const meta = {
     docs: {
       controls: { exclude: ['groups', 'id', 'use:eventListener'] },
       description: componentDescription([
-        'A presentational grouped listbox for command / mention palettes. Each `groups` entry is an optional section header plus rows (`id`, `label`, optional `icon`, `description`, and a `shortcut` shown as right-aligned key caps). Rows are `role="option"` buttons; clicking one calls `onSelect(id)`. With no items it renders `emptyLabel`.',
+        'A grouped list of commands to pick from.',
       ]),
     },
   },

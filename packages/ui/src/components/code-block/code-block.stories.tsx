@@ -36,12 +36,8 @@ const cssCode = `:root {
   padding: 0.5rem 1rem;
 }`;
 
-/**
- * Story for the compound `CodeBlock` family. The root `CodeBlock` is a bordered
- * card container; `CodeBlockCode` does the (on-demand, Shiki) syntax
- * highlighting; `CodeBlockGroup` is a flex header/footer row. The controllable
- * props live on `CodeBlockCode`, so `Playground` drives that piece directly.
- */
+// `CodeBlockCode` does the on-demand Shiki highlighting and carries the controllable
+// props, so `Playground` drives that piece directly.
 const meta = {
   title: 'Components/CodeBlock',
   component: CodeBlockCode,
@@ -50,8 +46,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'A bordered code card, typically emitted by the Markdown renderer for fenced blocks. `CodeBlock` is the container, `CodeBlockCode` renders the (Shiki) highlighted source, and `CodeBlockGroup` is a flex row for a filename + copy button.',
-        'Pass the source string and a `language` to `CodeBlockCode`; override `theme` if needed.',
+        'A bordered card for a block of source code.',
       ]),
       controls: { exclude: ['use:eventListener'] },
     },

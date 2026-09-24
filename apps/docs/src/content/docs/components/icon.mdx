@@ -1,6 +1,6 @@
 ---
 title: Icon
-description: One of the kit's curated icons rendered as a standalone, themeable inline glyph.
+description: Displays a single icon from the built-in set.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -15,7 +15,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kai-tag-sub">kai-icon</p>
 
-<p class="kai-lede">One of the kit's curated icons as a standalone inline glyph — pick it by `name`, size it with a token, recolor it with `::part(icon)`. It paints in the theme's foreground so it matches the rest of the kit without you reaching for an icon library.</p>
+<p class="kai-lede">Drops into your own markup so a glyph picks up the page's colour and size.</p>
 
 <Facts items={['Shadow DOM', 'Curated set', '3 sizes', 'Recolor via ::part']} />
 
@@ -24,18 +24,18 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 <Playground client:only="solid" tag="kai-icon" />
 
 <Aside type="tip" title="When to use">
-Reach for `kai-icon` when you need one of the kit's icons in your *own* markup — a glyph next to a heading, in a stat tile, beside a custom button — and want it to match the kit's look without bundling a separate icon library. It's one of three icon tiers: most web components take an `icon` prop that resolves the same curated names (see [Button](/components/button/)); `kai-icon` exposes that resolver as a standalone element; and for anything outside the curated set, drop your own inline `<svg slot="icon">` into an element. Use this tier when the icon stands alone rather than decorating another component.
+When you need one of the kit's glyphs in your own markup: a heading, a stat tile, a custom button. For a glyph outside the curated set, drop your own inline `<svg slot="icon">`.
 </Aside>
 
 ## All icons
 
-The set is deliberately small — these are the glyphs the kit's own web components use, not a general-purpose icon library. Pick any one by `name`:
+Deliberately small: the glyphs the kit's own web components use. Pick one by `name`:
 
 <IconGallery />
 
 ## Usage
 
-Set `name` to one of the curated icons above and `size` to one of `sm` / `md` / `lg`. Pass an unknown name and it renders as literal text (with a dev-time warning), so for any glyph outside the set, drop your own inline SVG into another element's `slot="icon"` rather than forcing it through here.
+Set `name` and a `size` of `sm` / `md` / `lg`. An unknown name renders as literal text, plus a dev-time warning.
 
 ```html
 <kai-icon name="globe"></kai-icon>
@@ -46,13 +46,11 @@ Set `name` to one of the curated icons above and `size` to one of `sm` / `md` / 
 
 ### Sizing
 
-`size` accepts `sm`, `md` (default), or `lg`.
-
 <Example client:visible tag="kai-icon" config={{ name: 'sparkles', size: 'lg' }} />
 
 ### Recolor with ::part(icon)
 
-The glyph inherits `currentColor`, so recolor it from the outside via the `icon` part — no shadow-piercing.
+The glyph inherits `currentColor`, so recolor it from outside through the `icon` part.
 
 ```css
 kai-icon::part(icon) { color: var(--color-primary); }
@@ -62,7 +60,7 @@ kai-icon::part(icon) { color: var(--color-primary); }
 
 ## Styling
 
-The glyph is a single styleable seam — recolor or resize it from outside with `::part(icon)`:
+Resize or recolor it from outside with `::part(icon)`:
 
 <PartTable tag="kai-icon" />
 

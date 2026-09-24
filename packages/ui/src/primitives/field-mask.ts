@@ -2,8 +2,7 @@
 // The pure format engine behind masked form fields: compile a `format` + display guide,
 // normalize arbitrary input to raw, format raw back, and map caret positions between the
 // two. No DOM, no Solid, no state -- the stateful masker (tier 2) and the widgets sit on
-// top of this. Spec: docs/superpowers/specs/2026-08-24-form-field-formats-design.md
-// (§2 tier 2, §3, deltas §5.4 and §5.7).
+// top of this.
 //
 // Token vocabulary (a public contract, deliberately adopted rather than reinvented):
 //   `#` one digit  ·  `@` one alphanumeric  ·  `*` one alphanumeric, obscurable in display

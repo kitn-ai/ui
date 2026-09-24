@@ -9,14 +9,11 @@ interface Props extends Record<string, unknown> {
   /** The link payload (OG metadata). Set as a JS **property** (object). */
   data?: LinkPreviewData;
 }
-
+// It renders from the supplied `data` and NEVER fetches; an app that wants the bare `{ url }` path
+// resolved registers a fetcher through `configureLinkPreview`. Activating the card dispatches the
+// contract `open` verb through the bubbling, composed `kai-card` event.
 /**
- * `<kai-link-preview>` — a themed, accessible rich link / Open-Graph preview card. It
- * renders from the supplied `data` (it never fetches; an app may register a
- * `configureLinkPreview` fetcher for the bare-`{ url }` path). Activating the card
- * dispatches the bubbling, composed **`kai-card`** CustomEvent with the contract
- * `open` verb (`{ kind:'open', url, target:'tab' }`) so a host-level listener
- * routes it through CardPolicy. Set `data` as a JS property; `card-id` via attribute.
+ * A rich link preview card built from Open-Graph metadata.
  */
 defineWebComponent<Props>(
   'kai-link-preview',

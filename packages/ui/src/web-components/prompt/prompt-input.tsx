@@ -7,12 +7,12 @@ import type { TriggerDef, ComposerChange } from '../../components/composer/compo
 import { type ComposerDoc, type EntityRef, normalizeValue, serializeToText, entitiesOf } from '../../primitives/composer-model';
 
 interface Props extends Record<string, unknown> {
-  /** Value of the input, as a JS property. A **string** is the controlled text
-   *  mirror (the host owns it and updates on `kai-value-change`). A **ComposerDoc**
-   *  (array of text/entity segments) is a one-time **seed** that pre-populates
-   *  pills (skills/agents/plugins); the user then edits freely. Leave unset for
-   *  uncontrolled behavior. `kai-submit`/`kai-value-change` always emit `value`
-   *  as the flattened string (back-compat) plus the structured `doc` + `entities`. */
+  // A **string** is the controlled text mirror (the host owns it and updates on
+  // `kai-value-change`). A **ComposerDoc** (array of text/entity segments) is a one-time
+  // **seed** that pre-populates pills (skills/agents/plugins); the user then edits freely.
+  // `kai-submit`/`kai-value-change` always emit `value` as the flattened string
+  // (back-compat) plus the structured `doc` + `entities`.
+  /** Value of the input: a **string** is the controlled text mirror, a **ComposerDoc** is a one-time pill seed. */
   value?: string | ComposerDoc;
   /** Placeholder text shown in the empty input. */
   placeholder?: string;
@@ -24,8 +24,9 @@ interface Props extends Record<string, unknown> {
   /** Starter prompts shown above the input. Clicking one follows
    *  `suggestionMode`. Set as a JS property. */
   suggestions?: string[];
-  /** What clicking a suggestion does: `'submit'` (default) sends it immediately
-   *  as if typed and submitted; `'fill'` just places it in the input. */
+  // `'submit'` sends it immediately, as if typed and submitted; `'fill'` only places it
+  // in the input.
+  /** What clicking a suggestion does. Defaults to `'submit'`. */
   suggestionMode?: 'submit' | 'fill';
   /** Show a web-search (Globe) button in the left toolbar; clicking it fires a
    *  `kai-web-search` event. Attribute: `web-search`. */
@@ -36,28 +37,27 @@ interface Props extends Record<string, unknown> {
   /** When set and `loading` is true, the send button is replaced by a Stop
    *  button (square icon, "Stop" aria-label). Clicking it fires `kai-stop`. */
   stoppable?: boolean;
-  /** Send-button visibility. `'always'` (default) always shows it; `'auto'` shows
-   *  it only when there's text/attachments (an empty composer hides it, though
-   *  Enter still submits). To hide it entirely (Enter-only), it's pure CSS:
-   *  `::part(send){display:none}`, no prop needed. Restyle via `::part(send)`.
-   *  The Stop button (`stoppable` + `loading`) is unaffected. */
+  // To hide it entirely (Enter-only), it's pure CSS: `::part(send){display:none}`, no prop
+  // needed. Restyle via `::part(send)`. The Stop button (`stoppable` + `loading`) is
+  // unaffected.
+  // `'auto'` shows it only when there is text or attachments.
+  /** Send-button visibility. Defaults to `'always'`. */
   submit?: 'always' | 'auto';
-  /** When `false`, hides the built-in paperclip attach button even though the
-   *  element otherwise supports attachments. Use this when a `+` menu in
-   *  `toolbar-start` already exposes "Add files", to avoid a duplicate control.
-   *  Defaults to `true`. */
+  // Use this when a `+` menu in `toolbar-start` already exposes "Add files", to avoid a
+  // duplicate control.
+  /** Show the built-in paperclip attach button. Default `true`. */
   attach?: boolean;
-  /** Attachments to seed the input with (so a consumer can pre-populate staged
-   *  files without an upload). Set as a JS property; the element then manages its
-   *  own attachment state from there (add via the paperclip, remove per chip).
-   *  Each item's `url` must be a `data:` URI or an https URL, never
-   *  `URL.createObjectURL`: a `blob:` URL previews perfectly and is meaningless
-   *  outside this tab, so `toOpenAIMessages`/`toAnthropicMessages` refuse it.
-   *  (The built-in paperclip already stages files as `data:` URIs.) */
+  // So a consumer can pre-populate staged files without an upload; the element then
+  // manages its own attachment state from there (add via the paperclip, remove per chip).
+  // Each item's `url` must be a `data:` URI or an https URL, never
+  // `URL.createObjectURL`: a `blob:` URL previews perfectly and is meaningless outside
+  // this tab, so `toOpenAIMessages`/`toAnthropicMessages` refuse it. (The built-in
+  // paperclip already stages files as `data:` URIs.)
+  /** Attachments to seed the input with. Each `url` must be a `data:` URI or https URL, never `blob:`. */
   attachments?: AttachmentData[];
-  /** Rich entity triggers. Each `{ char, kind, items }` opens a caret-anchored menu
-   *  that inserts an atomic pill. Convention: `/` → skills, `@` → agents (plugins
-   *  are the grouping/provenance of those items). Set as a JS property. */
+  // Convention: `/` -> skills, `@` -> agents (plugins are the grouping/provenance of
+  // those items).
+  /** Rich entity triggers. Each `{ char, kind, items }` opens a caret-anchored menu that inserts an atomic pill. JS property. */
   triggers?: TriggerDef[];
   /** Default icon per entity kind (kind → image URL/data-URI) for pills/menu items
    *  without their own `icon`. Overrides the built-in agent/plugin glyphs. JS property. */
@@ -66,18 +66,16 @@ interface Props extends Record<string, unknown> {
 
 /** Events fired by `<kai-prompt-input>`. */
 interface Events {
-  /** The user submitted the prompt (Enter or send button). `value` is the
-   *  flattened text (back-compat); `doc` is the structured document and
-   *  `entities` the inserted pills (skills/agents) for downstream expansion.
-   *  `<kai-prompt-input>` is the batteries-included composer row (send button,
-   *  toolbar, attachment staging) built on `<kai-composer>`, the bare editor. */
+  // `doc` is the structured document and `entities` the inserted pills
+  // (skills/agents) for downstream expansion. `<kai-prompt-input>` is the
+  // batteries-included composer row (send button, toolbar, attachment staging) built on
+  // `<kai-composer>`, the bare editor.
+  /** The user submitted the prompt (Enter or send button). `value` is the flattened text. */
   'kai-submit': { value: string; doc: ComposerDoc; entities: EntityRef[]; attachments: AttachmentData[] };
   /** The input changed (fires on every edit). Carries the flattened `value`
    *  plus the structured `doc` + `entities`. */
   'kai-value-change': { value: string; doc: ComposerDoc; entities: EntityRef[] };
-  /** The staged attachments changed: a file was added (via the paperclip) or
-   *  removed (per-chip ×). Carries the full current list so a consumer can react
-   *  in real time (validate, show upload progress, toggle the send button). */
+  /** The staged attachments changed (file added or removed). Carries the full current list so a consumer can react in real time. */
   'kai-attachments-change': { attachments: AttachmentData[] };
   /** A suggestion was clicked while `suggestion-mode="fill"`. */
   'kai-suggestion-click': { value: string };
@@ -92,6 +90,12 @@ interface Events {
   'kai-toolbar-action': { action: string };
 }
 
+// The batteries-included composer ROW, built on `<kai-composer>` (the bare editor): it adds the
+// send button, the toolbar and attachment staging, so a consumer who wants those pieces to look
+// different should reach for `<kai-composer>` instead.
+/**
+ * The prompt row: a rich text editor with its send button and toolbar.
+ */
 defineWebComponent<Props, Events>('kai-prompt-input', {
   value: undefined,
   placeholder: 'Send a message...',

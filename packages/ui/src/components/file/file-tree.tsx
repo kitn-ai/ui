@@ -23,7 +23,7 @@ import {
  *  here rather than declared, so there is ONE shape and not a copy of one. It has
  *  to live in that `.ts` because `ArtifactCardData.files` reaches it: a type import
  *  still has to RESOLVE, and a Node/no-DOM project (tsconfig.mcp.json has no `jsx`
- *  on purpose) cannot resolve a `.tsx` at all — so leaving this declaration here
+ *  on purpose) cannot resolve a `.tsx` at all, so leaving this declaration here
  *  would put TS6142 back on any backend that names an artifact card payload. See
  *  that file's header. */
 export type { ArtifactCardFile as FileTreeFile } from '../../primitives/card-data-types';
@@ -118,7 +118,7 @@ function sortTree(nodes: FileTreeNode[]): void {
   for (const n of nodes) if (n.kind === 'folder') sortTree(n.children);
 }
 
-/** Flatten the visible (expanded-aware) leaves in render order — used for keyboard nav. */
+/** Flatten the visible (expanded-aware) leaves in render order, used for keyboard nav. */
 function flattenVisible(
   nodes: FileTreeNode[],
   isOpen: (path: string) => boolean,
@@ -144,7 +144,7 @@ function iconFor(type: FileTreeFile['type']) {
   }
 }
 
-/** Every folder path in the tree (render order) — drives collapse-all/expand-all. */
+/** Every folder path in the tree (render order) drives collapse-all/expand-all. */
 function collectFolderPaths(nodes: FileTreeNode[], out: string[] = []): string[] {
   for (const n of nodes) {
     if (n.kind === 'folder') {
@@ -155,7 +155,7 @@ function collectFolderPaths(nodes: FileTreeNode[], out: string[] = []): string[]
   return out;
 }
 
-/** Every leaf file in the tree — drives the summary header totals. */
+/** Every leaf file in the tree, used for the summary header totals. */
 function collectFiles(nodes: FileTreeNode[], out: FileTreeFile[] = []): FileTreeFile[] {
   for (const n of nodes) {
     if (n.kind === 'folder') collectFiles(n.children, out);
@@ -195,14 +195,12 @@ export interface FileTreeProps extends Omit<JSX.HTMLAttributes<HTMLDivElement>, 
   onSelect?: (path: string, file: FileTreeFile) => void;
   /** Folder paths expanded by default. When omitted, all folders start open. */
   defaultExpanded?: string[];
-  /** Show a summary header above the tree: the changed-file count, the summed
-   *  `+additions / -deletions`, and a Collapse-all/Expand-all toggle wired to the
-   *  folder-expand state. Off by default (no header — unchanged behavior). */
+  /** Shows a summary header above the tree with the changed-file count and a collapse-all toggle. Default off. */
   summary?: boolean;
 }
 
 /**
- * `FileTree` — a collapsible, keyboard-navigable file explorer built from a flat
+ * `FileTree`, a collapsible, keyboard-navigable file explorer built from a flat
  * list of `/`-delimited paths. ARIA `tree`/`treeitem`/`group`. Selecting a file
  * calls `onSelect(path, file)`.
  */

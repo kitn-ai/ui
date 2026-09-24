@@ -2,24 +2,16 @@ import { splitProps, type JSX } from 'solid-js';
 import { cn } from '../../utils/cn';
 
 /**
- * `KbdGroup` — welds several `Kbd`s into ONE key strip: the caps abut (no gap),
- * the facing corners go square, and the two borders at each seam collapse into one
- * hairline. Reach for it when one shortcut is spelled with caps that come from
- * MORE THAN ONE source or as a typed sequence
- * (`<KbdGroup><Kbd>G</Kbd><Kbd>D</Kbd></KbdGroup>`), because a group that merely
- * spaced its children out looked identical to a row of separate `Kbd`s, which is
- * the whole point of having a group. Two DIFFERENT shortcuts are two elements (or
- * two groups), not one group: the weld is what says they are one key.
+ * `KbdGroup` lays several separate `Kbd`s out as one shortcut hint. Reach for it
+ * when the caps come from MORE THAN ONE shortcut or from a typed sequence
+ * (`<KbdGroup><Kbd keys="Mod+K" /><Kbd keys="Mod+S" /></KbdGroup>`), because a
+ * `keys` token spec is a single shortcut and cannot express where one ends and the
+ * next begins. A lone `Kbd` already renders its own token row with the same gap
+ * (`gap-0.5` between caps of one chip), so it needs no group.
  *
- * Composition only: which caps exist and in what order is the caller's business,
- * exactly as `RowGroup` takes children rather than `items`. Nothing here binds
- * keys, and `Kbd` is display only.
- *
- * The web-component layer implements the same geometry from the other side:
- * `<kai-kbd-group>` cannot reach the caps inside a slotted `<kai-kbd>`'s shadow
- * root, so it marks each direct `<kai-kbd>` child with `data-kai-join` and the
- * child's own stylesheet does the same weld. Both are pinned by tests; keep them
- * in step.
+ * Composition only: which shortcuts exist and in what order is the caller's
+ * business, exactly as `RowGroup` takes children rather than `items`. Nothing here
+ * binds keys: `Kbd` is display only.
  */
 export interface KbdGroupProps extends JSX.HTMLAttributes<HTMLElement> {
   class?: string;

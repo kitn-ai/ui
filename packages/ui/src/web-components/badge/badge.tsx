@@ -2,21 +2,12 @@ import { Badge } from '../../components/badge/badge';
 import { defineWebComponent } from '../define/define';
 
 interface Props extends Record<string, unknown> {
-  /** `default` (muted pill) · `count` (compact number badge) · `citation`
-   *  (filled primary, for inline citation markers). Defaults to `default`. */
+  /** Badge style; `default` is the muted pill. */
   variant?: 'default' | 'count' | 'citation';
 }
 
 /**
- * `<kai-badge>` — a small pill for labels, status, counts, or citation markers.
- * Put the content as light-DOM text.
- *
- * ```html
- * <kai-badge>Beta</kai-badge>
- * <kai-badge variant="count">3</kai-badge>
- * <kai-badge variant="citation">1</kai-badge>
- * ```
- * Restyle via `::part(badge)`.
+ * A compact pill for status text, counts, or source citations.
  */
 defineWebComponent<Props>('kai-badge', {
   variant: 'default',

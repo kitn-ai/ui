@@ -11,7 +11,7 @@ export function isEntityEl(node: Node | null): node is HTMLElement {
 
 /**
  * A TreeWalker over the editable's text nodes that SKIPS text inside entity
- * pills. Pills are atomic and contribute nothing to the text model — their inner
+ * pills. Pills are atomic and contribute nothing to the text model: their inner
  * label text must not pollute caret offsets, trigger detection, or highlight
  * ranges. (Without this, the text seen at a caret right after a pill is the
  * pill's label, so `/` reads as glued to the label instead of starting a token.)
@@ -34,7 +34,7 @@ export function createTextWalker(root: HTMLElement): TreeWalker {
  * Skills and agents render as decorated inline text led by their sigil; this is
  * what makes them read like `/my-skill` / `@my-agent` rather than a chip.
  * Returns '' for kinds rendered as a richer CHIP (plugins, and any other/unknown
- * kind) — those carry an icon instead of a sigil. The sigil is visual only: it
+ * kind). Those carry an icon instead of a sigil. The sigil is visual only: it
  * never enters the text model (the entity is read from `entityStore`, and the
  * text walker skips pill-internal nodes).
  */
@@ -52,9 +52,9 @@ export function kindSigil(kind: string): string {
 /**
  * Default monochrome (currentColor) glyph per entity kind, for the richer CHIP
  * kinds shown in the trigger menu / on plugin pills: plugin = plug. (Skills and
- * agents are light sigil-text pills — see `kindSigil` — so they take no glyph on
+ * agents are light sigil-text pills (see `kindSigil`) so they take no glyph on
  * the pill, though the menu may still show one.) Returns inline SVG markup
- * (trusted — no user input), or '' for kinds without a default. An item's own
+ * (trusted, no user input), or '' for kinds without a default. An item's own
  * `icon` always takes precedence over this.
  */
 export function kindGlyph(kind: string): string {

@@ -41,13 +41,13 @@ export function readConversationItemId(el: Element): string {
   return el.getAttribute('conversation-id') ?? el.id;
 }
 
-/** Whether a `<kai-conversation-item>` is STANDALONE — outside the management
- *  of a `<kai-conversations>` container — and therefore activates ITSELF:
+/** Whether a `<kai-conversation-item>` is STANDALONE, outside the management
+ *  of a `<kai-conversations>` container, and therefore activates ITSELF:
  *  the facade makes its row body a
  *  tabbable button and fires `kai-select` on click / Enter / Space. Derived
  *  from the container's own membership rule, not from mere ancestry: item mode
  *  queries `:scope > kai-conversation-item` (direct children only), so an item
- *  wrapped in another element inside a container is standalone too — the
+ *  wrapped in another element inside a container is standalone too; the
  *  container's controller never stamps or activates it. Inside a container
  *  (a direct child), the parent-item contract is the ONLY activation
  *  path: the container dispatches `kai-conversation-select` and owns roving
@@ -78,29 +78,21 @@ export interface ConversationItemsController {
 }
 
 /**
- * The parent-item contract of item mode, as a pure-DOM
- * controller so it is host-agnostic: the `kai-conversations` facade wires it over
- * its slotted `kai-conversation-item` children, and the jsdom contract tests
- * drive it over plain nodes. Solid context cannot cross the element boundary
- * (each facade is its own Solid root), so the channel is DOM traversal by
- * construction:
+ * The parent-item contract of item mode, as a pure-DOM controller so it is host-agnostic:
+ * the `kai-conversations` facade wires it over its slotted `kai-conversation-item`
+ * children, and the jsdom contract tests drive it over plain nodes. Solid context cannot
+ * cross the element boundary, so the channel is DOM traversal by construction:
  *
- * - selection flows container to item — exactly one item's BODY node (the
- *   shadow body of a `kai-conversation-item`, else the node itself; see
- *   `bodyOf`) is `aria-current="true"`, plus the `active` property on the
- *   host for the item's own styling hook;
- * - `role="button"` is ensured on each item's body node (an authored role is
- *   left alone);
- * - roving tabindex — exactly one body node `tabindex="0"` (the active
- *   item's, else the first's), the rest `-1`, re-derived on every `sync()`;
- *   menu content keeps its natural tab order (it is the body's SIBLING, not a
- *   descendant);
- * - activation (click / Enter / Space) calls `onSelect` with the item's id, and
- *   is SUPPRESSED when the composed path crosses the item's `menu` region
- *   (light-DOM `slot="menu"` content or the shadow `data-kai-item-menu`
- *   wrapper), so the consumer's own popover never also selects the row;
- * - ArrowUp/ArrowDown/Home/End move focus item-to-item, tabindex following the
- *   focused item.
+ * - selection flows container to item: exactly one item's BODY node (see `bodyOf`) is
+ *   `aria-current="true"`, plus the `active` property on the host;
+ * - `role="button"` is ensured on each item's body node, leaving an authored role alone;
+ * - roving tabindex: exactly one body node is `tabindex="0"` (the active item's, else the
+ *   first's) and the rest `-1`, re-derived on every `sync()`; menu content keeps its natural
+ *   tab order, being the body's sibling;
+ * - activation (click / Enter / Space) calls `onSelect` with the item's id, and is
+ *   SUPPRESSED when the composed path crosses the item's menu region, so the consumer's
+ *   own popover never also selects the row;
+ * - ArrowUp/ArrowDown/Home/End move focus item-to-item, tabindex following it.
  */
 export function createConversationItemsController(
   opts: ConversationItemsControllerOptions,
@@ -109,7 +101,7 @@ export function createConversationItemsController(
     const items = opts.getItems();
     return e.composedPath().find((n): n is HTMLElement => items.includes(n as HTMLElement));
   };
-  /** The item's ACTIVATION node — the target of role/aria-current/tabindex/
+  /** The item's ACTIVATION node, the target of role/aria-current/tabindex/
    *  focus. For a `kai-conversation-item` host that is its shadow body (the
    *  sibling restructure: the host is the row listitem
    *  wrapping the body AND the consumer's tabbable menu, so the control
@@ -134,7 +126,7 @@ export function createConversationItemsController(
    *  (the item facade defers to an authored role), and axe then sees exactly
    *  the role="button"-host-with-focusable-menu shape the restructure removed.
    *  Measured in the focus-order probe: the container's first sync can run
-   *  before the item elements upgrade. A later sync catches them — the
+   *  before the item elements upgrade. A later sync catches them; the
    *  facade's own mount mutates host attributes, which re-runs sync through
    *  the container's MutationObserver read(). Bare nodes (no dash: the jsdom
    *  stand-ins) are always ready. */
@@ -214,17 +206,14 @@ export interface ConversationListProps {
   empty?: JSX.Element;
   /** Dense single-line rows (a leading dot + title, no message count). */
   compact?: boolean;
-  /** Row density for the data rows: `default`, `compact` (same as the
-   *  `compact` flag), or `panel`, the widget-panel presentation matching the
-   *  facade panel's measured row box (P-7, blocks-and-parts design
-   *  2026-08-31). An explicit density wins over `compact`. Item mode is
-   *  unaffected: slotted rows carry their own density. */
+  // `panel` is the widget-panel presentation, matching the facade panel's measured row
+  // box. An explicit density wins over `compact`; item mode is unaffected, since slotted
+  // rows carry their own density.
+  /** Row density for the data rows. */
   density?: ConversationRowDensity;
-  /** Show the built-in search box (default `true`). Set `false` to hide it,
-   *  e.g. a widget-box list where search earns no room (the facade's own
-   *  `ConversationPanel` renders no search; 2026-08-31 composition spike,
-   *  phase 3 round 2). Hidden, the imperative `focus()`/`clearSearch()`
-   *  still exist but reach no input, and `onSearchChange` never fires. */
+  // Hidden, the imperative `focus()`/`clearSearch()` still exist but reach no input, and
+  // `onSearchChange` never fires.
+  /** Whether the built-in search box renders. On by default. */
   searchable?: boolean;
   /** Fired whenever the built-in search box query changes (typing or a
    *  programmatic `clear()`). Lets the facade surface a `kai-search` event. */
@@ -232,13 +221,12 @@ export interface ConversationListProps {
   /** Receive the imperative controller once mounted. The `kai-conversations`
    *  facade uses it to focus / clear the internal search input. */
   controllerRef?: (controller: ConversationListController) => void;
-  /** Item mode: your OWN rows, rendered inside a list region in place of the
-   *  data rows. When set, the built-in search
-   *  filter, grouping and empty/no-match states do not apply — the consumer's
-   *  loop owns them — while the chrome (header, search box, new-chat, footer)
-   *  still renders and `onSearchChange` still reports queries. The
-   *  `kai-conversations` facade passes its default `<slot>` here when it detects
-   *  `kai-conversation-item` children. */
+  // The built-in search filter, grouping and empty/no-match states do not apply here (the
+  // caller's loop owns them), while the chrome (header, search box, new-chat, footer)
+  // still renders and `onSearchChange` still reports queries. The `kai-conversations`
+  // facade passes its default `<slot>` as this when it detects `kai-conversation-item`
+  // children.
+  /** Rows rendered in place of the data rows. */
   items?: JSX.Element;
   /** Keydown handler for the item-mode list region (the facade wires
    *  `createConversationItemsController.handleKeyDown`). */
@@ -249,7 +237,7 @@ export interface ConversationListProps {
   class?: string;
 }
 
-/** Imperative handle exposed via `controllerRef` — surfaces the internal search
+/** Imperative handle exposed via `controllerRef`, surfaces the internal search
  *  box to the `kai-conversations` facade (the searchQuery signal lives here). */
 export interface ConversationListController {
   /** Focus the built-in search `<input>`. */
@@ -300,7 +288,7 @@ export function ConversationList(props: ConversationListProps) {
    * The second half used to be dropped on the floor. `groups` drives the render
    * loop, so a conversation pointing at a group the consumer had not declared
    * (a stale id, a group removed from the array, a filtered/paginated `groups`
-   * response) vanished from the sidebar with no error and no empty state — the
+   * response) vanished from the sidebar with no error and no empty state; the
    * list just silently held fewer rows than the data it was given. Falling through
    * to "Ungrouped" keeps every conversation the consumer passed in reachable.
    */
@@ -375,7 +363,7 @@ export function ConversationList(props: ConversationListProps) {
           </Show>
         }
       >
-        {/* F-04, decide loudly: a query matching nothing renders a VISIBLE
+        {/* Decide loudly: a query matching nothing renders a VISIBLE
             no-match state, keyed off the FILTERED count — distinct from the
             zero-conversations empty state above, which keys off the unfiltered
             list (and still owns the `empty` override). */}

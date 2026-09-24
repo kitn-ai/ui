@@ -5,33 +5,31 @@ import { defineWebComponent } from '../define/define';
 import { createSlotText } from '../define/slot-text';
 
 interface Props extends Record<string, unknown> {
-  /** Visual style. `default` (filled), `subtle` (muted text, hover tint, the
-   *  toolbar icon look), `ghost` (transparent, hover fill), `outline`, or
-   *  `destructive`. Defaults to `default`. */
+  // `subtle` is the muted toolbar-icon look (muted text, hover tint); `ghost` is
+  // transparent with a hover fill.
+  /** Visual style. Defaults to `default` (filled). */
   variant?: 'default' | 'subtle' | 'ghost' | 'outline' | 'destructive';
-  /** Size token. `icon` / `icon-sm` are square (for icon-only buttons); `sm` /
-   *  `md` / `lg` size text buttons. Defaults to `md`. */
+  /** Size token: the square glyph-only sizes, or the text-button sizes. Defaults to `md`. */
   size?: 'sm' | 'md' | 'lg' | 'icon' | 'icon-sm';
   /** Leading icon: a named icon (e.g. `"mic"`, `"plus"`), an image URL/data-URI,
    *  or plain text. Renders before any slotted label. */
   icon?: string;
   /** Trailing icon, after the label (e.g. `"chevron-down"` for a menu affordance). */
   iconTrailing?: string;
-  /** Accessible name. REQUIRED for icon-only buttons (no visible text); ignored
-   *  when you slot visible text, which already names the button. An `aria-label`
-   *  on top of visible text REPLACES that name rather than adding to it, so a
-   *  button reading "Save" that answers to "Submit" is unusable by speech input
-   *  (WCAG 2.5.3, Label in Name). The visible text wins. An `icon` / `icon-sm`
-   *  size hides the slot, which makes the button icon-only whatever you slotted,
-   *  so `label` is what names it there. */
+  // REQUIRED for icon-only buttons (no visible text); ignored when you slot visible
+  // text, which already names the button. An `aria-label` on top of visible text
+  // REPLACES that name rather than adding to it, so a button reading "Save" that
+  // answers to "Submit" is unusable by speech input (WCAG 2.5.3, Label in Name). The
+  // visible text wins. An `icon` / `icon-sm` SIZE hides the slot, which makes the
+  // button icon-only whatever you slotted, so `label` is what names it there.
+  /** Accessible name for an icon-only button. Ignored when visible text is slotted -- the visible text wins. */
   label?: string;
   /** Disable the button (non-interactive, dimmed). */
   disabled?: boolean;
   /** Stretch the button to the full width of its container (a block button),
    *  e.g. a card CTA or a stacked action. Attribute: `full`. */
   full?: boolean;
-  /** Justify the button's content: `start`, `center` (default), or `end`.
-   *  Combine with `full` for a full-width, left-aligned button. */
+  /** Justify the button's content. Default is centered; combine with `full` for a full-width, left-aligned button. */
   align?: 'start' | 'center' | 'end';
   /** Native button `type`. Defaults to `button` (so it never submits a form). */
   type?: 'button' | 'submit' | 'reset';
@@ -43,23 +41,10 @@ interface Events {
    *  native `click` also bubbles (composed) for consumers who prefer it. */
   'kai-click': void;
 }
-
+// The `icon` prop renders a curated or URL icon; anything else is slotted as inline SVG via
+// `slot="icon"`, which wins over `icon`.
 /**
- * `<kai-button>` — the kit's button as a drop-in element, so consumers compose
- * polished, theme-aware controls instead of hand-rolling `<button>` + inline
- * hover styles. Put the label as light-DOM text; use `icon` for a leading glyph
- * and `label` to name an icon-only button.
- *
- * ```html
- * <kai-button variant="subtle" size="icon" icon="mic" label="Voice input"></kai-button>
- * <kai-button variant="ghost" icon-trailing="chevron-down">High</kai-button>
- * <kai-button>Send</kai-button>
- * <kai-button label="Ship"><svg slot="icon" viewBox="0 0 24 24">…</svg></kai-button>
- * ```
- *
- * The `icon` prop renders a curated/URL icon; for anything else, slot your own
- * inline SVG via `slot="icon"` (it wins over `icon`). Restyle via `::part(button)`.
- * Emits `kai-click`.
+ * A button that triggers an action.
  */
 defineWebComponent<Props, Events>('kai-button', {
   variant: 'default',

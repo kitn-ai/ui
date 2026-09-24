@@ -20,7 +20,15 @@ import {
   AttachmentHoverCardContent,
   getAttachmentLabel,
   getMediaCategory,
+  useAttachmentsContext,
+  type AttachmentData,
+  type AttachmentImagePreview,
 } from "../attachments/attachments";
+import {
+  Lightbox,
+  LightboxTrigger,
+  LightboxContent,
+} from "../lightbox/lightbox";
 import { Source, SourceTrigger, SourceContent, SourceList } from "../source/source";
 import { CardRenderer, type CardSchemaMap } from "../card/card-renderer";
 import type { CardComponentMap } from "../card/card-registry";
@@ -28,7 +36,7 @@ import type { CardComponentMap } from "../card/card-registry";
 // --- Message ---
 
 /** Who is speaking in a message row. This is the SEMANTIC role of the message,
- *  not an ARIA role — see `MessageProps['role']`. */
+ *  not an ARIA role; see `MessageProps['role']`. */
 export type MessageRole = 'user' | 'assistant' | 'system';
 
 /** The accessible name given to a row that declares a speaker. `role="article"`
@@ -42,26 +50,26 @@ const MESSAGE_ROLE_LABEL: Record<MessageRole, string> = {
 
 export interface MessageProps extends Omit<JSX.HTMLAttributes<HTMLDivElement>, 'role'> {
   children: JSX.Element;
-  /** Who is speaking: `'user'`, `'assistant'` or `'system'`.
-   *
-   *  This SHADOWS the inherited ARIA `role` attribute on purpose, and is the
-   *  reason `JSX.HTMLAttributes` is `Omit`ted above. Before this existed, `role`
-   *  resolved to ARIA and was spread straight onto the row, so `<Message
-   *  role="user">` shipped `role="user"` on a div — not a valid ARIA role, and a
-   *  critical axe `aria-roles` violation ("Role must be one of the valid ARIA
-   *  roles: user") on every message that used the prop. Chromium discards the
-   *  unknown token and computes `generic`, so the damage was a failed a11y audit
-   *  and a row with no accessible role or name at all, not a mis-announced one.
-   *
-   *  It is now consumed here and never reaches the DOM. What the row gets
-   *  instead is a VALID ARIA role that can carry a name — `role="article"` plus
-   *  an `aria-label` naming the speaker — and `data-role` for styling and
-   *  querying. Omit the prop and the row stays an unlabelled `<div>`, exactly as
-   *  before, so the many role-less call sites are untouched.
-   *
-   *  The trade-off: the row's ARIA role can no longer be set through this prop.
-   *  Pass `aria-label` (or any other ARIA attribute) to override the default
-   *  naming — the spread below still wins over what this computes. */
+  // WHY `role` SHADOWS ARIA, kept out of the generated prop table on purpose: this
+  // comment is invisible to docgen, while a doc comment here lands in the component
+  // meta, llms-full.txt, the MCP catalog, the docs prop table and Storybook at once.
+  //
+  // The prop shadows the inherited ARIA `role` attribute, which is why
+  // `JSX.HTMLAttributes` is `Omit`ted above. Before it existed, `role` resolved to ARIA
+  // and was spread onto the row, so `<Message role="user">` shipped `role="user"` on a
+  // div: not a valid ARIA role, and a critical axe `aria-roles` violation ("Role must
+  // be one of the valid ARIA roles: user") on every message that used it. Chromium
+  // discards the unknown token and computes `generic`, so the damage was a failed a11y
+  // audit and a row with no accessible role or name, not a mis-announced one.
+  //
+  // It is consumed here and never reaches the DOM. The row gets a valid ARIA role that
+  // can carry a name (`role="article"` plus an `aria-label` naming the speaker) and
+  // `data-role` for styling and querying. Omitted, the row stays an unlabelled `<div>`,
+  // so the many role-less call sites are untouched. The trade-off: the row's ARIA role
+  // cannot be set through this prop, and any other ARIA attribute passed still wins,
+  // because the spread runs after what this computes.
+  /** Who is speaking. NOT an ARIA role: the row gets `role="article"` with a named
+   *  `aria-label`, and the ARIA `role` attribute is shadowed. */
   role?: MessageRole;
 }
 
@@ -84,9 +92,7 @@ function Message(props: MessageProps) {
 // --- MessageAvatar ---
 
 export interface MessageAvatarProps {
-  /** Avatar image URL. Optional: with no `src` the component renders `fallback`
-   *  (initials), which is the whole point of having a fallback — requiring `src`
-   *  forced `<MessageAvatar src="" …/>` at every initials-only call site. */
+  /** Avatar image URL. Without one the component renders `fallback` (initials). */
   src?: string;
   /** Alt text for the image. Only meaningful alongside `src`; defaults to `''`
    *  so an avatar stays decorative rather than announcing a filename. */
@@ -126,9 +132,7 @@ function MessageAvatar(props: MessageAvatarProps) {
 export interface MessageContentProps extends JSX.HTMLAttributes<HTMLDivElement> {
   children: JSX.Element | string;
   markdown?: boolean;
-  /** `::part` name(s) exposed on the content node. The body passes
-   *  `"bubble content"` so consumers can target either the rounded bubble or the
-   *  text region from outside the shadow boundary. */
+  /** `::part` name(s) exposed on the content node. */
   part?: string;
 }
 
@@ -182,14 +186,12 @@ function MessageActions(props: MessageActionsProps) {
 export interface MessageActionBarProps {
   /** Built-in action names and/or custom action descriptors, in order. */
   actions: (ChatMessageAction | CustomAction)[];
-  /** `'always'` (default) keeps the bar visible; `'hover'` reveals it on
-   *  parent `.group` hover. */
+  /** Whether the bar stays visible or appears on pointer-over; defaults to staying visible. */
   reveal?: 'always' | 'hover';
   /** Fired with the built-in name or the custom action id when a button is clicked. */
   onAction: (id: string) => void;
-  /** The active feedback vote. When `'like'`/`'dislike'` is set, that button is
-   *  marked pressed (filled) and the OTHER vote button animates out. `undefined`
-   *  shows both. Pure/prop-driven so the bar survives re-renders. */
+  /** The active feedback vote. That button renders pressed and filled; the other vote
+   *  animates out. `undefined` shows both. */
   activeFeedback?: FeedbackVote;
   /** When true, the `copy` button shows its success check icon instead of the
    *  copy glyph (cleared by the owner after ~2s). */
@@ -211,14 +213,14 @@ function feedbackVoteOf(a: ChatMessageAction | CustomAction): FeedbackVote | und
 }
 
 /**
- * The shared message action toolbar. Renders one ghost icon button per entry —
+ * The shared message action toolbar. Renders one ghost icon button per entry:
  * built-in names pull their label+icon from the curated registry; custom
  * descriptors use their `label` plus `actionIcon(icon)` (label-only when the
  * icon is unknown or absent). `reveal="hover"` makes the bar fade in on the
  * parent `.group`'s hover.
  *
  * Pure/prop-driven: feedback (`activeFeedback`) and copy (`copied`) state are
- * owned by the parent facade and passed in — the bar holds no internal signals,
+ * owned by the parent facade and passed in: the bar holds no internal signals,
  * so it survives the new-array-per-chunk re-renders of a streaming thread. With
  * a vote active, the chosen `like`/`dislike` button is marked `aria-pressed` +
  * filled and the other vote button collapses its width (sliding the active thumb
@@ -313,43 +315,38 @@ function MessageActionBar(props: MessageActionBarProps) {
 // --- MessageBody ---
 
 export interface MessageBodyProps {
-  /** The message's ordered parts (text, reasoning, tool, card, source, file),
-   *  rendered in a single pass in the order they appear. A run of consecutive
-   *  `source` parts renders as ONE citation row (`part="citations"`), placed
-   *  OUTSIDE the message bubble so a citation is never confused with a link the
-   *  model typed into its prose. */
+  // A run of consecutive `source` parts renders as ONE citations row, placed OUTSIDE
+  // the message bubble so a citation is never confused with a link the model typed into
+  // its prose.
+  /** The message's ordered parts, rendered in one pass in the order they appear. */
   parts: MessagePart[];
   /** Add/override card type -> component entries, forwarded to `CardRenderer`
    *  for `card` parts. */
   cardTypes?: CardComponentMap;
-  /** JSON Schemas for the card types this app renders, keyed by envelope type,
-   *  forwarded to `CardRenderer` for `card` parts. The companion of `cardTypes`:
-   *  that says what DRAWS a card, this says what a VALID one looks like.
-   *  `createCardRegistry(...).validationSchemas` is exactly this shape. Without it
-   *  the kit checks its own seven built-ins and leaves your own card type
-   *  unvalidated. A schema here WINS over a built-in of the same name. */
+  // The companion of `cardTypes`: that says what DRAWS a card, this says what a VALID
+  // one looks like. `createCardRegistry(...).validationSchemas` is exactly this shape.
+  // Without it the kit validates its own seven built-ins and leaves the consumer's own
+  // card type the only unchecked thing on screen. A schema here WINS over a built-in of
+  // the same name.
+  /** Card-type JSON Schemas keyed by envelope type; a schema here wins over a built-in of the same name. */
   cardSchemas?: CardSchemaMap;
-  /** The custom-element host node to emit card events off when no `CardProvider`
-   *  is above this body, forwarded to `CardRenderer` as `hostElement`. The
-   *  `<kai-chat>`/`<kai-message>`/`<kai-thread>` facades pass their own element,
-   *  so a `card` part's events leave as the bubbling `kai-card` CustomEvent
-   *  instead of being silently discarded. */
+  // The `<kai-chat>`/`<kai-message>`/`<kai-thread>` facades pass their own element, so
+  // a `card` part's events leave as the bubbling `kai-card` CustomEvent instead of being
+  // silently discarded when no `CardProvider` is above this body.
+  /** Host node to emit card events off when no `CardProvider` is present. */
   cardHostElement?: HTMLElement;
   /** Whether this is a user message (right-aligned bubble) vs an assistant
    *  message (full-width transparent). */
   isUser: boolean;
   /** Whether text parts render as markdown. */
   markdown: boolean;
-  /** Action-bar entries — built-in names and/or custom descriptors. When empty
+  /** Action-bar entries: built-in names and/or custom descriptors. When empty
    *  the bar is not rendered. */
   actions?: (ChatMessageAction | CustomAction)[];
-  /** `'always'` (default) keeps the bar visible; `'hover'` reveals it on parent
-   *  `.group` hover. */
+  /** Whether the bar stays visible or appears on pointer-over; defaults to staying visible. */
   actionsReveal?: 'always' | 'hover';
-  /** Skip the citations row that consecutive `source` parts collapse into
-   *  (`part="citations"`). The parts STAY in `parts` — the wire encoder
-   *  still needs them, in order — only the rendering is skipped. Default
-   *  absent/false: today's rendering, byte-for-byte (B-8). */
+  // The parts STAY in `parts`: the wire encoder still needs them, in order.
+  /** Skip the citations row that consecutive `source` parts collapse into. */
   hideSources?: boolean;
   /** Fired with the built-in name or custom id when an action is clicked. */
   onAction?: (id: string) => void;
@@ -358,37 +355,36 @@ export interface MessageBodyProps {
   activeFeedback?: FeedbackVote;
   /** When true, the copy button shows its "copied" check icon. */
   copied?: boolean;
-  /** Whether this message is the one currently streaming. Forwarded to each
-   *  reasoning part's `<Reasoning>` so the disclosure auto-opens while the
-   *  model is thinking and settles back once the stream ends. Without it the
-   *  user watches a static collapsed "Reasoning" label for the whole thinking
-   *  window. The caller owns the definition of "streaming" — for
-   *  `ChatThread` that is `loading` + being the last assistant message. */
+  // Forwarded to each reasoning part's `<Reasoning>` so the disclosure auto-opens while
+  // the model is thinking and settles back once the stream ends; without it the reader
+  // watches a static collapsed "Reasoning" label for the whole thinking window. The
+  // caller owns the definition of "streaming": for `ChatThread` that is `loading` plus
+  // being the last assistant message.
+  /** Whether this message is the one currently streaming. */
   isStreaming?: boolean;
-  /** How a `reasoning` part renders. `'full'` (default) is the current
-   *  behavior: the collapsible `<Reasoning>` disclosure, with the "Thinking…"
-   *  shimmer on its trigger while `isStreaming`. `'compact'` drops the
-   *  disclosure entirely and shows only a shimmer loader while the part is
-   *  streaming — nothing once it settles, so there is no expandable detail to
-   *  open. `'off'` renders the part not at all, in either state. Kit-decides-
-   *  HOW: this is a display-mode fact about the medium, not a per-message
-   *  toggle, so it applies uniformly to every reasoning part in the body. */
+  // A display-mode fact about the medium, not a per-message toggle, so it applies
+  // uniformly to every reasoning part in the body. `'compact'` drops the disclosure and
+  // shows only a shimmer loader while the part streams, nothing once it settles; `'off'`
+  // renders the part not at all, in either state.
+  /** How a `reasoning` part renders; the `'full'` default is the collapsible disclosure. */
   reasoningMode?: 'full' | 'compact' | 'off';
-  /** Seeds the reasoning disclosure open AND keeps it tracking the stream
-   *  (open while streaming, closes when it settles): the pre-Task-19f `full`
-   *  behavior. Default false/absent: the panel starts closed (just the
-   *  "Thinking" shimmer chip) and only opens on click, the current default
-   *  (owner ruling, 2026-08-26). Meaningless when `reasoningMode` is
-   *  `'compact'`/`'off'` (no disclosure exists to open). */
+  // Meaningless when `reasoningMode` is `'compact'`/`'off'`: there is no disclosure to
+  // open.
+  /** Seeds the reasoning disclosure open and tracks the stream: open while streaming,
+   *  closed once it settles. Closed by default. */
   reasoningDefaultOpen?: boolean;
-  /** INJECT slot projected at the TOP of the body — above the reasoning / tools /
-   *  content. A per-message header: a model-name label, a role + timestamp line.
-   *  In the `<kai-message>` shadow this is `<slot name="before-body" />`. */
+  // In the `<kai-message>` shadow this is `<slot name="before-body" />`. A per-message
+  // header: a model-name label, a role plus timestamp line.
+  /** Slot projected at the top of the body, above the reasoning, tools and content. */
   beforeBody?: JSX.Element;
-  /** INJECT slot projected at the BOTTOM of the body — below the action bar. A
-   *  citation / sources row, a token-cost / latency line. In the `<kai-message>`
-   *  shadow this is `<slot name="after-body" />`. */
+  // In the `<kai-message>` shadow this is `<slot name="after-body" />`. A citation /
+  // sources row, a token-cost / latency line.
+  /** Slot projected at the bottom of the body, below the action bar. */
   afterBody?: JSX.Element;
+  // The choice is published on context by the body's own `<Attachments>` grid, so it is
+  // made in ONE place, the container.
+  /** How an image tile in a message's attachment grid reveals its full size. Defaults to `'hover'`. */
+  imagePreview?: AttachmentImagePreview;
 }
 
 /** One render group over an ordered `parts` array. Two part types collapse runs:
@@ -450,7 +446,7 @@ function citationTitle(s: MessageSource): string {
  *
  *  The render body below reads its group/part through accessors (see the
  *  `<Index>` note in `MessageBody`), and TypeScript cannot narrow a
- *  discriminated union across two separate accessor CALLS —
+ *  discriminated union across two separate accessor CALLS:
  *  `g().kind === 'files' && g()` leaves the second call widened, because as far
  *  as the compiler knows the two calls could return different values. So the
  *  test and the cast happen together, on one already-read value. Returns
@@ -471,6 +467,83 @@ function partAs<T extends MessagePart['type']>(
 }
 
 /**
+ * One file tile in a message's attachment grid.
+ *
+ * ★ A COMPONENT OF ITS OWN, and for one reason: the lightbox is selected by
+ * `AttachmentsContext.imagePreview`, which is provided by the `<Attachments>`
+ * container FURTHER DOWN this same JSX tree. `useContext` reads from the owner
+ * scope, so the read has to happen below that provider: inline in `MessageBody`
+ * it would find no context and take the `'hover'` fallback every time, which is
+ * a lightbox prop that looks wired and never opens.
+ *
+ * The value is read through the context getter rather than destructured, for the
+ * same reason `<Attachment>` does not destructure `variant`: the container's prop
+ * can change after mount and a captured value would freeze the tile at its first
+ * render.
+ *
+ * ★ ONLY AN IMAGE GETS THE LIGHTBOX, and only when the container asked for it.
+ * Every other tile keeps the hover card, which is a real upgrade for them rather
+ * than a redundant one: it carries the filename and media type a grid tile could
+ * not fit. A lightbox around a PDF tile would be a modal that opens onto an icon.
+ */
+function AttachmentTile(props: { data: AttachmentData }) {
+  const ctx = useAttachmentsContext();
+  const isImage = () =>
+    getMediaCategory(props.data) === 'image' && props.data.type === 'file' && !!props.data.url;
+  const label = () => getAttachmentLabel(props.data);
+
+  return (
+    <Attachment data={props.data}>
+      <Show
+        when={isImage() && ctx.imagePreview === 'lightbox'}
+        fallback={
+          <AttachmentHoverCard>
+            <AttachmentHoverCardTrigger class="block size-full">
+              <AttachmentPreview />
+              <AttachmentInfo />
+            </AttachmentHoverCardTrigger>
+            <AttachmentHoverCardContent>
+              {/* An image gets the full preview; everything else
+                  gets the name and type the tile could not fit. */}
+              <Show
+                when={isImage()}
+                fallback={
+                  <>
+                    <div class="text-body font-medium">{label()}</div>
+                    <Show when={props.data.mediaType}>
+                      <div class="text-muted-foreground text-caption">{props.data.mediaType}</div>
+                    </Show>
+                  </>
+                }
+              >
+                <img
+                  alt={label()}
+                  class="block max-h-64 max-w-xs rounded object-contain"
+                  src={props.data.url}
+                />
+              </Show>
+            </AttachmentHoverCardContent>
+          </AttachmentHoverCard>
+        }
+      >
+        <Lightbox>
+          <LightboxTrigger class="block size-full">
+            <AttachmentPreview />
+          </LightboxTrigger>
+          <LightboxContent label={label()}>
+            <img
+              alt={label()}
+              class="block"
+              src={props.data.url}
+            />
+          </LightboxContent>
+        </Lightbox>
+      </Show>
+    </Attachment>
+  );
+}
+
+/**
  * The shared message body: the message's `parts` rendered in a single ordered
  * pass (text, reasoning, tool calls, generative-UI cards, citations and file
  * attachments interleaved exactly as they appear), followed by the action bar.
@@ -488,37 +561,22 @@ function MessageBody(props: MessageBodyProps) {
     <>
       {/* before-body (inject): a per-message header above everything else. */}
       <Show when={props.beforeBody}>{props.beforeBody}</Show>
-      {/* <Index>, NOT <For>, on purpose — this is load-bearing.
+      {/* <Index>, NOT <For>, on purpose: this is load-bearing.
        *
-       *  A streaming message re-renders once per delta with a brand-new `parts`
-       *  array (a new reference IS the re-render signal), and
-       *  `groupMessageParts` allocates fresh wrapper objects on top of that. A
-       *  <For> is REFERENCE-keyed, so every chunk looks like an entirely new
-       *  list and every row is torn down and rebuilt. Everything the user has
-       *  done inside a row dies with it: expanding a tool panel or a reasoning
-       *  block mid-stream silently did nothing, because the disclosure opened
-       *  and was discarded microseconds later by the next token (a live probe
-       *  caught the collapsibles' `createUniqueId()` walking cl-9 -> cl-11 ->
-       *  cl-15 across three deltas).
+       *  A streaming message re-renders once per delta with a brand-new `parts` array (a
+       *  new reference IS the re-render signal), and `groupMessageParts` allocates fresh
+       *  wrapper objects on top of that. <For> is REFERENCE-keyed, so every chunk looks
+       *  like an entirely new list and every row is torn down and rebuilt: expanding a
+       *  tool panel or a reasoning block mid-stream silently did nothing, because the
+       *  disclosure opened and was discarded microseconds later by the next token. <Index>
+       *  keys by POSITION and hands each row its value as a SIGNAL, and that is the shape
+       *  of a stream: the folds behind `parts` only ever append to the end or replace one
+       *  part IN PLACE with the same variant, so a part's position is a stable identity.
+       *  The trade-off is that a part spliced out of the MIDDLE shifts the rows after it,
+       *  and no consumer splices mid-message while every consumer streams.
        *
-       *  <Index> keys by POSITION and hands each row its value as a SIGNAL, so
-       *  a row stays mounted while its content keeps updating. That is exactly
-       *  the shape of a stream: the folds behind `parts`
-       *  (appendTextPart/appendReasoningPart/upsertToolPart) only ever append
-       *  to the end or replace one part IN PLACE with the same variant — never
-       *  reorder, never change a part's type — so a part's position is a stable
-       *  identity, and a growing text/reasoning block or a tool patched from
-       *  `input-streaming` to `output-available` reaches the DOM through the
-       *  accessor instead of through a remount.
-       *
-       *  The trade-off of position-keying: splicing a part out of the MIDDLE of
-       *  a message shifts the rows after it, so their local state (an open
-       *  disclosure) stays with the position rather than following the part.
-       *  <For> got that right for a STATIC array and got streaming wrong every
-       *  single time — no consumer splices mid-message, every consumer streams.
-       *
-       *  This only works while the children read through the accessors below:
-       *  capturing `g().part` once re-freezes the row at its first delta. */}
+       *  This only works while the children read through the accessors below: capturing
+       *  `g().part` once re-freezes the row at its first delta. */}
       <Index each={groups()}>
         {(group) => (
           <Switch fallback={null}>
@@ -544,50 +602,12 @@ function MessageBody(props: MessageBodyProps) {
                    no focus, no tap required — and the hover card is an upgrade
                    to the full name and media type rather than the only way to
                    get either. */
-                <Attachments variant="grid" class={props.isUser ? 'mb-2 ml-auto' : 'mb-2'}>
+                <Attachments variant="grid" imagePreview={props.imagePreview} class={props.isUser ? 'mb-2 ml-auto' : 'mb-2'}>
                   {/* Reference-keyed <For> is right HERE: the run's part objects
                       are carried over untouched by the folds, and an attachment
                       holds no state worth preserving. */}
                   <For each={g().parts}>
-                    {(fp) => (
-                      <Attachment data={fp.attachment}>
-                        <AttachmentHoverCard>
-                          <AttachmentHoverCardTrigger class="block size-full">
-                            <AttachmentPreview />
-                            <AttachmentInfo />
-                          </AttachmentHoverCardTrigger>
-                          <AttachmentHoverCardContent>
-                            {/* An image gets the full preview; everything else
-                                gets the name and type the tile could not fit. */}
-                            <Show
-                              when={
-                                getMediaCategory(fp.attachment) === 'image' &&
-                                fp.attachment.type === 'file' &&
-                                fp.attachment.url
-                              }
-                              fallback={
-                                <>
-                                  <div class="text-body font-medium">
-                                    {getAttachmentLabel(fp.attachment)}
-                                  </div>
-                                  <Show when={fp.attachment.mediaType}>
-                                    <div class="text-muted-foreground text-caption">
-                                      {fp.attachment.mediaType}
-                                    </div>
-                                  </Show>
-                                </>
-                              }
-                            >
-                              <img
-                                alt={getAttachmentLabel(fp.attachment)}
-                                class="block max-h-64 max-w-xs rounded object-contain"
-                                src={fp.attachment.url}
-                              />
-                            </Show>
-                          </AttachmentHoverCardContent>
-                        </AttachmentHoverCard>
-                      </Attachment>
-                    )}
+                    {(fp) => <AttachmentTile data={fp.attachment} />}
                   </For>
                 </Attachments>
               )}
@@ -664,10 +684,9 @@ function MessageBody(props: MessageBodyProps) {
                     <Match when={shownReasoning()}>
                       {(p) => {
                         // Default 'full' is the pre-existing DISPLAY MODE byte
-                        // for byte; the OPEN behavior changed under Task 19f —
-                        // it no longer auto-opens while streaming by default
-                        // (owner ruling 2026-08-26). `reasoningDefaultOpen`
-                        // reproduces the old always-auto-opens behavior when set.
+                        // for byte; the OPEN behavior no longer auto-opens while
+                        // streaming by default. `reasoningDefaultOpen` reproduces
+                        // the old always-auto-opens behavior when set.
                         const mode = () => props.reasoningMode ?? 'full';
                         return (
                           <Switch fallback={null}>

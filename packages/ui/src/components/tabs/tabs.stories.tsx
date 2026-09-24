@@ -18,7 +18,7 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'A selection-only tab strip (you render each tab\'s content). Pass `items` (`id`, `label`, optional `icon` / `disabled`); `value` is the selected id and `onChange` fires with the new id. `variant` is `segmented` or `underline`; `block` stretches it full width. Roving tabindex with Arrow/Home/End keys.',
+        "A tab strip that owns the selection; each panel's content is the caller's to render.",
       ]),
     },
   },

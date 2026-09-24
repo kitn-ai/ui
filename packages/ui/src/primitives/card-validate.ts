@@ -50,11 +50,8 @@ export interface ValidationIssue {
 export interface ValidationResult {
   valid: boolean;
   errors: string[];
-  /**
-   * The same failures as `errors`, one-for-one and in the same order, with the
-   * keyword and path kept as data. Added alongside `errors` rather than replacing
-   * it so no existing caller changes.
-   */
+  // Added alongside `errors` rather than replacing it, so no existing caller changes.
+  /** The same failures as `errors`, one-for-one and in the same order, with the keyword and path kept as data. */
   issues: ValidationIssue[];
 }
 

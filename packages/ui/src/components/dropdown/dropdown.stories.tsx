@@ -20,8 +20,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'A `role="menu"` for a list of actions, with roving arrow-key focus, type-ahead, and Escape/outside-click dismissal.',
-        'Compose `Dropdown` › `DropdownTrigger` + `DropdownContent` › `DropdownItem`. Also exports `DropdownCheckboxItem`, `DropdownSeparator`, `DropdownLabel`, and `DropdownSub*` for nested submenus.',
+        'A menu of actions that opens from a trigger.',
       ]),
     },
   },

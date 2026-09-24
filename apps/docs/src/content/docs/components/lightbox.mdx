@@ -1,0 +1,102 @@
+---
+title: Lightbox
+description: Displays media at full size in a modal.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Playground from '../../../components/Playground.tsx';
+import PropTable from '../../../components/PropTable.astro';
+import SlotTable from '../../../components/SlotTable.astro';
+import EventTable from '../../../components/EventTable.astro';
+import MethodTable from '../../../components/MethodTable.astro';
+import ComposedFrom from '../../../components/ComposedFrom.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kai-tag-sub">kai-lightbox</p>
+
+<p class="kai-lede">Opens the media above the page and restores focus to the trigger when it closes.</p>
+
+<Facts items={['Shadow DOM', 'Click or keyboard', 'Escape + backdrop close', 'Focus trapped']} />
+
+## Preview
+
+<Playground client:only="solid" tag="kai-lightbox" />
+
+<Aside type="tip" title="When to use">
+When the media is the point and the thumbnail is too small: a screenshot, a diagram, a chart. For a pointer preview instead of a click, use [Hover card](/components/hover-card/).
+</Aside>
+
+## Usage
+
+Put the trigger as the default light content and the media in `slot="content"`. A click or Enter/Space on the trigger opens the modal; the element fires `kai-open-change` and exposes `show()`, `hide()` and `toggle()` for a host that drives it from somewhere else.
+
+```html
+<kai-lightbox label="Sunset over the bay">
+  <img src="/thumb.jpg" alt="" width="96" height="96" />
+  <img slot="content" src="/full.jpg" alt="Sunset over the bay" />
+</kai-lightbox>
+```
+
+Set `open` (or `default-open`) to drive it yourself and leave the trigger slot empty. An empty trigger renders no button at all, so a host that owns the open state does not ship a dead tab stop.
+
+```html
+<kai-lightbox open label="Architecture diagram">
+  <img slot="content" src="/diagram.svg" alt="Architecture diagram" />
+</kai-lightbox>
+```
+
+The modal carries its own close (X) button in the panel's top-right corner, on by default — it is the affordance a pointer user looks for first, and it reports through `kai-open-change` like Escape and the backdrop. Pass `show-close="false"` when the trigger or a host control already dismisses the modal, and style it with `kai-lightbox::part(close)`.
+
+A click anywhere inside the content dismisses the modal too, also on by default: every photo viewer closes on a click on the picture. A click that lands on something interactive inside the content — a link in a caption, a download button beside the media — is let through, so those keep working, and the panel's own padding does not close it either. Pass `close-on-content-click="false"` when a click inside the content means something else, such as toggling a zoom level; Escape, a backdrop click and `hide()` still dismiss the modal.
+
+## Examples
+
+### A thumbnail that opens
+
+The tile holds a small image; the modal holds the same image at the size the viewport allows. The media is clamped to `85vh`/`90vw`, so a tall or a wide file fits without scrolling.
+
+<div class="not-content my-4 flex flex-wrap items-center gap-4 rounded-xl border border-line bg-surface px-5 py-4">
+  <kai-lightbox label="Mountain landscape">
+    <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=120&h=120&fit=crop" alt="" width="96" height="96" style="border-radius:0.5rem;cursor:zoom-in" />
+    <img slot="content" src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200" alt="Mountain landscape" />
+  </kai-lightbox>
+</div>
+
+### Driven by the host
+
+`show()` and `hide()` are the imperative pair for a control that lives outside the element, and `kai-open-change` reports every transition.
+
+```html
+<kai-button id="open">Open the diagram</kai-button>
+<kai-lightbox id="box" label="Architecture diagram">
+  <img slot="content" src="/diagram.svg" alt="Architecture diagram" />
+</kai-lightbox>
+<script>
+  const box = document.getElementById('box');
+  document.getElementById('open').addEventListener('click', () => box.show());
+  box.addEventListener('kai-open-change', (e) => console.log(e.detail.open));
+</script>
+```
+
+## Slots
+
+<SlotTable tag="kai-lightbox" />
+
+## Props
+
+<PropTable tag="kai-lightbox" />
+
+## Events
+
+<EventTable tag="kai-lightbox" />
+
+## Methods
+
+<MethodTable tag="kai-lightbox" />
+
+## Composed from
+
+<ComposedFrom tag="kai-lightbox" />
+
+<NeedAHand />

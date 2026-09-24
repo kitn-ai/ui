@@ -20,6 +20,42 @@ describe('component_reference', () => {
     expect(text).toMatch(/set in JavaScript|property/i); // the contract note
   });
 
+  /**
+   * The element's own doc comment is the ONE sentence that says what a tag IS, and this
+   * tool is where an agent chooses between two tags. It arrives through the CEM
+   * declaration's `description`, which `gen-web-component-api.mjs` fills from the
+   * facade's JSDoc above its `defineWebComponent(...)` call. That field was hardcoded
+   * `''` on all 100 declarations while this tool printed it, so nothing was guarded on
+   * this path: the tool could render a header and an element nobody had described.
+   */
+  it('serves the element description, taken from the manifest declaration', async () => {
+    const decl = getElement('kai-button');
+    expect(decl?.description).toBeTruthy();
+
+    const out = await reference.handler({ name: 'kai-button' });
+    const lines = ((out.content as { type: string; text: string }[])[0].text).split('\n');
+    // Its own line, directly under the `## <kai-button>` header: the fact a reader
+    // choosing between two tags needs comes before any API surface.
+    expect(lines[0]).toBe('## <kai-button>');
+    expect(lines[1]).toBe('');
+    expect(lines[2]).toBe(decl!.description!.trim());
+
+    // Whole-manifest floor, so one documented element cannot carry the claim for the
+    // other 99 (six facades genuinely have no element doc comment yet).
+    const described = listWebComponents()
+      .map((tag) => getElement(tag)?.description)
+      .filter((d): d is string => typeof d === 'string' && d.length > 0);
+    expect(described.length).toBeGreaterThan(80);
+
+    // And the un-documented end: the element with no doc comment gets no stray
+    // paragraph, and no `undefined` reaches the reader.
+    const chat = ((await reference.handler({ name: 'kai-chat' })).content as {
+      type: string;
+      text: string;
+    }[])[0].text;
+    expect(chat.split('\n').slice(0, 4).join('\n')).not.toMatch(/undefined/);
+  });
+
   it('opens with how to register the element, before any API surface', async () => {
     const out = await reference.handler({ name: 'kai-chat' });
     const text = (out.content as { type: string; text: string }[])[0].text;

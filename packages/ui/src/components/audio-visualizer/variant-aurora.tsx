@@ -8,55 +8,23 @@ import type { ShaderVariantProps } from './index';
 import auroraShader from './aurora.glsl';
 
 /**
- * Per-state uniform targets, straight from fact sheet section 5's measured
- * table, reconciled against `aurora.glsl.ts`'s own module doc.
+ * Per-state uniform targets, straight from the fact sheet's measured table,
+ * reconciled against `aurora.glsl.ts`'s own module doc.
  *
- * ATTRIBUTION: these same values are upstream's, and upstream's copy is
- * Apache-2.0. They live in `packages/shadcn/hooks/agents-ui/
- * use-agent-audio-visualizer-aura.ts` -- the aura DRIVING hook, which carries
- * no Polyform header and is ordinary Apache-2.0 code, unlike the aura
- * COMPONENT and its inline shader. Every row below matches that hook: the
- * four state rows, the listening spring (1.0s, bounce 0.35), the tween and
- * pulse cadences, and the analyser settings the visualizer feeds from
- * (fftSize 512, smoothingTimeConstant 0.55). Recorded in `packages/ui/NOTICE`
- * as an attribution rather than a port, since no code was copied. This is
- * the BEHAVIOUR layer only -- `aurora.glsl.ts` (the rendering) is original
- * work and owes the hook nothing. See `docs/provenance/aurora-clean-room.md`
- * section 7 for the license map that separates the two upstream files.
+ * ATTRIBUTION: these values are upstream's, and upstream's copy is Apache-2.0. They
+ * live in `packages/shadcn/hooks/agents-ui/use-agent-audio-visualizer-aura.ts`, the
+ * aura DRIVING hook, which carries no Polyform header, unlike the aura COMPONENT and
+ * its inline shader. Every row below matches that hook (the four state rows, the
+ * listening spring, the tween and pulse cadences, the analyser settings), and
+ * `packages/ui/NOTICE` records it as an attribution rather than a port, since no code
+ * was copied. This is the BEHAVIOUR layer only: `aurora.glsl.ts` is original work and
+ * owes the hook nothing.
  *
- * Deliberately NOT `shaderTargets()` (primitives/visualizer-sequences.ts):
- * that helper only carries two axes -- a 0..1 "energy" intensity and a 1..4
- * speed -- built for the OLD custom/aura convention. This shader's real table
- * is non-monotonic across those same two axes (thinking/connecting has LOWER
- * amplitude than idle despite HIGHER brightness) and every value below is a
- * direct fact-sheet pass-through, not a normalized knob, so reusing that
- * helper cannot reproduce it. This shader needs its own mapping, parallel to
- * how `waveTargets()` already exists alongside `shaderTargets()` for the wave
- * shader.
- *
- * `speed` here is fact sheet section 5's `S / 20` (state speed 10..70,
- * divided by 20) -- NOT the raw 10..70 value. `complexity` is `freqParam`
- * directly.
- *
- * `rotation` (deg/s, positive = clockwise ON SCREEN) is NOT from the fact
- * sheet: it is this port's own solid-body trim on top of the wind's
- * emergent angular drift, calibrated offline (a probe replicating
- * `examples/internal/livekit-parity/scripts/aurora-audit.mjs`'s estimator at
- * its capture cadence) so the audit-measured per-state rotation lands on the
- * reference values:
- * speaking ~+17 (their +12.9, Rob's reference ~20 CW), listening ~+4.6,
- * thinking ~+9. The wind supplies most of the apparent motion (post-flip
- * it reads ~+22 CW at speaking, ~0 elsewhere); these trims close the
- * per-state gaps. Like `speed`, rotation is never tweened.
- *
- * Connecting originally carried the probe's -4.7 CCW as a -5.5 trim,
- * flipped to the clockwise equivalent (same magnitude) 2026-08-10
- * (supervisor call, Rob delegated): the direction split came from the
- * screenshot-cadence estimator later shown unreliable (closing-sweep
- * finding: IQR swamps the medians), upstream's hook drives thinking and
- * connecting with identical dynamics, and opposite spins on adjacent
- * transitional states read inconsistent. Single-line revert (connecting's
- * `rotation` below) if the eye test ever disagrees.
+ * Deliberately NOT `shaderTargets()` (primitives/visualizer-sequences.ts): that helper
+ * carries two axes only (a 0..1 energy intensity and a 1..4 speed) for the old
+ * custom/aura convention, while this table is non-monotonic across those same axes
+ * (thinking/connecting has LOWER amplitude and HIGHER brightness than idle) and passes
+ * the fact sheet's columns through unnormalised, so the helper cannot reproduce it.
  */
 function auroraTargets(state: VisualizerState): {
   intensity: number | [number, number];
@@ -80,8 +48,10 @@ function auroraTargets(state: VisualizerState): {
     case 'connecting':
       return {
         intensity: [0.5, 2.5], speed: 1.5, complexity: 1.0, amplitude: 0.5, scale: 0.3,
-        // Clockwise like every other transitional state -- see the doc note
-        // above for the 2026-08-10 direction-unify rationale.
+        // Clockwise like every other transitional state. The direction split came from a
+        // screenshot-cadence estimator later shown unreliable, and thinking/connecting share
+        // upstream's dynamics, so this is the clockwise equivalent at the same magnitude.
+        // Single-line revert if the eye test disagrees.
         rotation: 5.5,
       };
     case 'speaking':
@@ -145,21 +115,16 @@ function usePrefersDark(): Accessor<boolean> {
  * cascade into soft veils. See `aurora.glsl.ts`'s module doc for the shader
  * itself and its provenance.
  *
- * The uniform contract is a direct pass-through of the measured per-state
- * table for LiveKit's public aura (`auroraTargets` above), NOT the 0..1
- * convention `wave` and `custom` use. There is deliberately no `uVolume`
- * uniform: the shader would double-apply voice-driven growth if it read one
- * itself on top of whatever this component also does at the state layer, so
- * the live volume drives the scale TWEEN here, in exactly one place (the
- * volume-override effect below), and nowhere else.
+ * The uniform contract passes the measured per-state table for LiveKit's public
+ * aura (`auroraTargets` above) straight through, NOT the 0..1 convention `wave`
+ * and `custom` use. There is deliberately no `uVolume` uniform: the shader would
+ * double-apply voice-driven growth if it read one on top of what this component
+ * does at the state layer, so live volume drives the scale TWEEN here, in
+ * exactly one place (the volume-override effect below).
  *
- * `dark` is an extra field on top of `ShaderVariantProps`, not yet a member
- * of that shared type: it is meant to carry the FACADE's already-resolved
- * `theme="light"|"dark"|"auto"` decision (see `define.tsx`'s
- * `createDarkMode`), threaded down through the dispatcher, once that wiring
- * lands. Optional, with a live `prefers-color-scheme` fallback, so this
- * component still works correctly when mounted standalone (no facade above
- * it resolving a `theme` attribute at all).
+ * `dark` carries the facade's already-resolved `theme` decision (see
+ * `define.tsx`'s `createDarkMode`); optional, with a live
+ * `prefers-color-scheme` fallback, so a standalone mount is correct too.
  */
 export default function AuroraVisualizer(props: ShaderVariantProps & { dark?: boolean }): JSX.Element {
   const intensity = createTween(1.0);
@@ -181,7 +146,7 @@ export default function AuroraVisualizer(props: ShaderVariantProps & { dark?: bo
 
   createEffect(() => {
     const t = auroraTargets(renderState());
-    // Fact sheet section 5: "0.5 s ease-out unless noted." Frozen (reduced
+    // the fact sheet: "0.5 s ease-out unless noted." Frozen (reduced
     // motion) settles on every target immediately instead.
     const landing = props.frozen ? { duration: 0 } : { duration: 0.5, ease: 'easeOut' as const };
     // Pulses (an array target, see createTween's ping-pong) run at fact
@@ -197,7 +162,7 @@ export default function AuroraVisualizer(props: ShaderVariantProps & { dark?: bo
     amplitude.to(t.amplitude, landing);
 
     // Listening's scale landing is the one springy target -- the Apache
-    // driving hook's "perk up" (fact sheet section 5: spring 1.0 s, bounce
+    // driving hook's "perk up" (the fact sheet: spring 1.0 s, bounce
     // 0.35; audit target 7). Every other state keeps the plain 0.5 s
     // ease-out landing, and frozen collapses the spring like any tween.
     scale.to(
@@ -207,7 +172,7 @@ export default function AuroraVisualizer(props: ShaderVariantProps & { dark?: bo
         : landing,
     );
 
-    // Fact sheet section 5: "Speed is NOT tweened and multiplies absolute
+    // the fact sheet: "Speed is NOT tweened and multiplies absolute
     // time -> every state change teleports the phase." Frozen pins it at 0
     // rather than merely snapping to the state's raw target: uSpeed is the
     // only thing driving the aura's continuous "wind" motion at all (there
@@ -250,7 +215,7 @@ export default function AuroraVisualizer(props: ShaderVariantProps & { dark?: bo
     props.frozen ? 0 : (auroraTargets(renderState()).rotation * Math.PI) / 180;
 
   // uTheme: 0 selects the shader's DARK colour pipeline, 1 selects LIGHT
-  // (aurora.glsl.ts, fact sheet section 4 -- a real branch in the colour
+  // (aurora.glsl.ts, the fact sheet -- a real branch in the colour
   // math, not just a compositing background). Named and isolated here,
   // deliberately not inlined into the uniforms object below: inverting this
   // one line silently swaps the two pipelines, and both render something

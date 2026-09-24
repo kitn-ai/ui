@@ -236,6 +236,8 @@
     "lint:gate-parity": "node scripts/lint-gate-parity.mjs --self-test && node scripts/lint-gate-parity.mjs",
     "lint:thresholds": "node scripts/lint-threshold-derivation.mjs --self-test && node scripts/lint-threshold-derivation.mjs",
     "lint:story-conventions": "node scripts/lint-story-conventions.mjs --self-test && node scripts/lint-story-conventions.mjs",
+    "lint:prop-docs": "node scripts/lint-prop-docs.mjs --self-test && node scripts/lint-prop-docs.mjs",
+    "lint:comment-references": "node scripts/lint-comment-references.mjs --self-test && node scripts/lint-comment-references.mjs",
     "test": "vitest run",
     "test:react": "vitest run --config vitest.react.config.ts",
     "test:storybook": "vitest run --project=storybook",

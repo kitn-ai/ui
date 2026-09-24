@@ -18,14 +18,15 @@ export interface CoachmarkProps {
   children?: JSX.Element;
   /** The bubble body text (the `content` slot). */
   content?: JSX.Element;
-  /** The bold title. NOT `title` — that is a reserved IDL attr (see define.tsx). */
+  /** The bold title. Not `title`, which is a reserved IDL attribute. */
   headline?: JSX.Element;
   /** A small badge pill (e.g. "New"). */
   badge?: JSX.Element;
   /** Floating placement relative to the anchor. Defaults to `'bottom'`. */
   placement?: Placement;
-  /** Color tone: `primary` (default, theme accent), `info` (blue), `success`
-   *  (green), `warning` (amber), or `error` (red) — reusing the kit's tool hues. */
+  // The colour list, for maintainers only: `info` blue, `success` green, `warning`
+  // amber, `error` red, and `primary` the theme accent (off the kit's tool hues).
+  /** Colour tone, from the kit's tool hues. Defaults to `'primary'`. */
   tone?: 'primary' | 'info' | 'success' | 'warning' | 'error';
   /** Controlled open state. When set, the component never changes it itself;
    *  drive it from `onOpenChange`. Omit for uncontrolled (internal) state. */

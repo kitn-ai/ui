@@ -9,27 +9,26 @@ interface Props extends Record<string, unknown> {
   /** The choices, top to bottom. Set as a JS PROPERTY (array), never an attribute.
    *  Rendered in full: the kit never truncates, re-orders or de-duplicates them. */
   options: KaiCheckboxOption[];
-  /** The FIRST selected value. Settable and reflected to the `value` attribute, so
-   *  `:host([value])` and `el.value` see live state, and a seed can be written in
-   *  markup. Writing it makes that the whole selection; to read or drive the rest,
-   *  use `el.values`. */
+  // Settable and reflected to the `value` attribute, so `:host([value])` and `el.value`
+  // see live state and a seed can be written in markup. Writing it makes that the WHOLE
+  // selection; to read or drive the rest, use `el.values`.
+  /** The FIRST selected value. Read or drive the rest with `el.values`. */
   value?: string;
-  /**
-   * The shared form-control name every box carries, so `FormData.getAll(name)` reads
-   * the whole selection back under one key.
-   *
-   * NO DEFAULT, unlike `<kai-radio-group>`. A radio set needs a shared `name` for the
-   * browser to make it exclusive and arrow-navigable, so one is generated when none is
-   * given; checkboxes are independent controls and behave correctly with no name at
-   * all. Generating one here would submit the selection under a random key, which is
-   * worse than submitting nothing.
-   *
-   * The element is NOT form-associated (no `ElementInternals`, no `setFormValue()`),
-   * the same known gap `<kai-input>` records: the boxes live in a shadow root, so a
-   * surrounding `<form>` collects nothing from them whether or not `name` is set. Read
-   * `el.values`. The name still lands on every inner input, so it is right the day form
-   * association arrives.
-   */
+  // The shared form-control name every box carries, so `FormData.getAll(name)` reads the
+  // whole selection back under one key.
+  //
+  // NO DEFAULT, unlike `<kai-radio-group>`. A radio set needs a shared `name` for the
+  // browser to make it exclusive and arrow-navigable, so one is generated when none is
+  // given; checkboxes are independent controls and behave correctly with no name at all.
+  // Generating one here would submit the selection under a random key, which is worse
+  // than submitting nothing.
+  //
+  // The element is NOT form-associated (no `ElementInternals`, no `setFormValue()`), the
+  // same known gap `<kai-input>` records: the boxes live in a shadow root, so a
+  // surrounding `<form>` collects nothing from them whether or not `name` is set. Read
+  // `el.values`. The name still lands on every inner input, so it is right the day form
+  // association arrives.
+  /** Shared name on every box, for `FormData.getAll(name)`. No default: checkboxes are independent controls. */
   name?: string;
   /** Disable every row. Individual rows carry their own `disabled`. */
   disabled?: boolean;
@@ -39,46 +38,17 @@ interface Props extends Record<string, unknown> {
 
 /** Events fired by `<kai-checkbox-group>`. */
 interface Events {
-  /** A row was ticked or unticked. `values` is the whole selection after the change,
-   *  which is what a multi-select control needs; `value` is the first of them (empty
-   *  when nothing is selected). Both are always present, so neither shape silently
-   *  loses the other. This is `<kai-select>`'s detail, deliberately. */
+  // This is `<kai-select>`'s detail, deliberately: `values` is the whole selection after
+  // the change, which is what a multi-select control needs, and `value` is the first of
+  // them (empty when nothing is selected). Both are always present, so neither shape
+  // silently loses the other.
+  /** A row was ticked or unticked. `values` is the whole selection afterwards, `value` its first entry. */
   'kai-change': { value: string; values: string[] };
 }
 
 /**
- * `<kai-checkbox-group>` — the kit's "pick any number" control, and
- * `<kai-radio-group>`'s sibling: the same options shape and the same divided row
- * chrome over real `<input type="checkbox">`es, multi-value instead of exclusive. A
- * box per tab stop, Space to toggle and correct announcement are the browser's, not a
- * reimplementation.
- *
- * Feed it `options` (a JS-property array of `{ value, label, description?, disabled? }`),
- * drive and read the selection with the `values` property, and listen for `kai-change`.
- * `value` is the first selected option and is reflected to the `value` attribute.
- *
- * Re-rendering follows the kit's reactivity contract: hand it a NEW array reference,
- * and a new object for any option whose content changed — the rows are a
- * reference-keyed list, so mutating an option in place changes nothing on screen.
- *
- * No validation and no limits: "at least one", "at most three" and anything else that
- * lands in a policy document is the application's rule, not the kit's.
- *
- * ```html
- * <kai-checkbox-group label="Environments" name="env"></kai-checkbox-group>
- * <script type="module">
- *   import '@kitn.ai/ui/web-components';
- *   const group = document.querySelector('kai-checkbox-group');
- *   // ARRAY prop — a JS property, never an attribute.
- *   group.options = [
- *     { value: 'prod', label: 'Production', description: 'Pages the on-call' },
- *     { value: 'staging', label: 'Staging' },
- *     { value: 'dev', label: 'Development' },
- *   ];
- *   group.addEventListener('kai-change', (e) => console.log(e.detail.values));
- *   group.values = ['prod', 'dev']; // drive it (no kai-change — the host already knows)
- * </script>
- * ```
+ * A list of checkboxes for choosing any number of options; `kai-radio-group` is the
+ * same list limited to one.
  */
 defineWebComponent<Props, Events>('kai-checkbox-group', {
   options: [],

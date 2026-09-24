@@ -2,10 +2,9 @@
 // Tier 1: semantic input types. A semantic type derives the attributes a browser and an
 // assistive technology already know how to use -- `inputmode`, `autocomplete`,
 // `spellcheck`, `autocorrect`, `autocapitalize` -- and the canonical (submitted) form of
-// the field's value. No DOM, no Solid, no state. Spec:
-// docs/superpowers/specs/2026-08-24-form-field-formats-design.md (§2 tier 1, §4).
+// the field's value. No DOM, no Solid, no state.
 //
-// `postal` is DROPPED from the spec's tier-1 table per decided O-2: the enum here is the
+// `postal` is DROPPED from the tier-1 table: the enum here is the
 // binding one, exported ONCE and read by the schema, the web-component facade and the tool
 // projection (CLAUDE.md "derive it, don't type it") -- no second copy of these four
 // strings anywhere else in the tree.
@@ -22,12 +21,11 @@ export interface FieldSemantics {
   readonly spellcheck: false;
   readonly autocorrect: 'off';
   readonly autocapitalize: 'off';
-  /** The default tier-2 mask for this type, resolved only when the consumer opts in
-   *  (`mask="default"` / the form card's `x-kai-format`) -- NOT applied automatically
-   *  by a bare semantic type (decision 1). */
+  // A bare semantic type never masks on its own: this is read only when the consumer
+  // asks, via `mask="default"` or the form card's `x-kai-format`.
+  /** The default tier-2 mask for this type, applied only when the consumer opts in. */
   readonly defaultFormat?: string;
-  /** What the field submits: digit-only types strip separators, `custom`
-   *  keeps its formatted/literal value, `as-typed` is the unmasked fallback. */
+  /** What the field submits: a mask's separators are stripped for the phone, SSN and card semantics, kept for a custom one. */
   readonly canonical: 'digits' | 'formatted' | 'as-typed';
 }
 
@@ -61,7 +59,7 @@ export function fieldSemantics(type: FieldSemanticType): FieldSemantics {
         inputmode: 'numeric',
         // 'off' -- no standard autocomplete token exists for a Social Security number, and
         // an absent attribute invites wrong autofill; 'off' is the defensive marker even
-        // where a browser honors it unevenly (spec §2 tier 1 table).
+        // where a browser honors it unevenly.
         autocomplete: 'off',
         spellcheck: false,
         autocorrect: 'off',

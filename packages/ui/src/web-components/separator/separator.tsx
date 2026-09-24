@@ -2,22 +2,13 @@ import { Separator } from '../../components/separator/separator';
 import { defineWebComponent } from '../define/define';
 
 interface Props extends Record<string, unknown> {
-  /** `horizontal` (default, block + full-width) or `vertical` (a rule inside a
-   *  flex/grid row, stretching to the row height). */
+  /** The separator's axis. Defaults to a full-width block; the cross-axis form suits a flex or grid row. */
   orientation?: 'horizontal' | 'vertical';
 }
-
+// Carries `role="separator"`. A vertical rule is meant for a flex/grid row: it stretches to that
+// row's height rather than taking a length of its own.
 /**
- * `<kai-separator>` — a themed divider between groups of content (toolbar
- * sections, menu groups, header/sidebar splits). Carries `role="separator"`.
- * Restyle via `::part(separator)`.
- *
- * ```html
- * <kai-separator></kai-separator>
- * <div style="display:flex; gap:.5rem">
- *   <span>A</span><kai-separator orientation="vertical"></kai-separator><span>B</span>
- * </div>
- * ```
+ * A divider between groups of content.
  */
 defineWebComponent<Props>('kai-separator', {
   orientation: 'horizontal',

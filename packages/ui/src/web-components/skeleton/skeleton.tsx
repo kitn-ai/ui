@@ -14,18 +14,9 @@ interface Props extends Record<string, unknown> {
   lines?: number;
 }
 
+// Prop-driven, not class-driven: a consumer's utility classes cannot reach inside a shadow root.
 /**
- * `<kai-skeleton>` — a pulsing loading placeholder that preserves layout while
- * content arrives. Responsive by default (fills its container's width). It is
- * prop-driven because utility classes can't cross the shadow boundary: pick a
- * `variant` and optionally set `width` / `height` / `lines`.
- *
- * ```html
- * <kai-skeleton variant="text" lines="3"></kai-skeleton>
- * <kai-skeleton variant="circle" width="2.5rem"></kai-skeleton>
- * <kai-skeleton variant="rect" height="10rem"></kai-skeleton>
- * ```
- * Recolor by overriding the `--color-muted` token.
+ * A pulsing placeholder that holds a layout while content loads.
  */
 defineWebComponent<Props>('kai-skeleton', {
   variant: 'text',

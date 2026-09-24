@@ -2,39 +2,24 @@ import { Show, splitProps, type JSX } from 'solid-js';
 import { cn } from '../../utils/cn';
 
 /**
- * `Panel` / `PanelHeader` / `PanelBody` / `PanelFooter` -- the widget panel
- * chrome as PUBLIC parts (blocks-and-parts ruling P-1, from the composition
- * spike's F-2: "with the facade gone there is no widget frame", and the first
- * fine-grain pass invented a slate palette to fill the hole).
+ * `Panel` / `PanelHeader` / `PanelBody` / `PanelFooter`: the widget panel chrome as PUBLIC
+ * parts, so a consumer can build the widget frame itself.
  *
- * What this family owns is exactly the chrome `ChatThread` paints privately
- * today: the panel surface (background/foreground from kit tokens), the
- * header row (h-14, bottom border, px-5, semibold sm title), the view
- * container region, and an optional standalone frame (border, radius,
- * shadow). Chrome color is a kit decision (HOW it renders, not WHETHER), so
- * every color here is a kit token: `--kai-color-*` overrides retint the
- * panel together with the web components inside it, which the spike measured as
- * the fine grain's win once the chrome used tokens (phase 3, observation 12).
+ * It owns exactly the chrome `ChatThread` paints privately: the panel surface, the header row
+ * (`h-14`, bottom border, `px-5`, semibold small title), the view container region and an
+ * optional standalone frame. Chrome colour is a kit decision, so every colour here is a kit
+ * token: `--kai-color-*` overrides retint the panel together with the components inside it.
  *
  * Two postures, prop-driven:
+ * - **Frameless (default)**: the panel fills its container and inherits its border radius,
+ *   the shape `ChatThread` has inside `<kai-dock>`'s already-framed floating panel.
+ * - **`frame`**: the panel carries its own widget-box border, radius and shadow, for
+ *   standalone use with no dock around it.
  *
- * - **Frameless (default)** -- the panel fills its container and inherits
- *   its border radius, the shape `ChatThread` has inside `<kai-dock>`'s
- *   already-framed floating panel (the dock owns border/radius/shadow; the
- *   fine-grain recipe was `border-radius: inherit; overflow: hidden`).
- * - **`frame`** -- the panel carries its own widget-box border, radius and
- *   shadow, for standalone use with no dock around it.
+ * Composition, not configuration: back arrows and close buttons are slotted CONTENT in the
+ * header's `start`/`end` regions, never props.
  *
- * Composition, not configuration: back arrows and close buttons are slotted
- * CONTENT in the header's `start`/`end` regions, never props (ruling P-1).
- *
- * ```tsx
- * <Panel frame>
- *   <PanelHeader start={<BackButton />} end={<CloseButton />}>Support</PanelHeader>
- *   <PanelBody>{view}</PanelBody>
- *   <PanelFooter>Powered by Aurora</PanelFooter>
- * </Panel>
- * ```
+ * `<Panel frame><PanelHeader start={<BackButton />}>Support</PanelHeader><PanelBody>{view}</PanelBody></Panel>`
  */
 export interface PanelProps extends JSX.HTMLAttributes<HTMLDivElement> {
   /** Standalone widget-box chrome: border, radius, shadow. Off by default,
@@ -54,7 +39,7 @@ export function Panel(props: PanelProps) {
         local.class,
       )}
       // Frameless panels sit inside an already-rounded container (kai-dock's
-      // floating panel) and must clip to ITS radius -- the spike's F-2 recipe.
+      // floating panel) and must clip to ITS radius -- the measured recipe.
       // Tailwind has no non-arbitrary `rounded-inherit`, so it is inline style;
       // a caller-supplied string/object style still wins by coming after.
       style={

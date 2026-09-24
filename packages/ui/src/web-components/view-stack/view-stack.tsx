@@ -38,67 +38,29 @@ export function readViewEntry(el: Element): ViewEntry {
 }
 
 interface Props extends Record<string, unknown> {
-  /** Deep link / initial view name; reflected to the `view` ATTRIBUTE as
-   *  navigation happens, so `kai-view-stack[view="chat"]` selectors follow.
-   *  Setting it later navigates (tab root selects that tab; a drill view
-   *  replaces the top while drilled, or pushes from a root). */
+  // Reflected to the `view` ATTRIBUTE as navigation happens, so
+  // `kai-view-stack[view="chat"]` selectors follow. Setting it later navigates (tab root
+  // selects that tab; a drill view replaces the top while drilled, or pushes from a root).
+  /** Deep link / initial view name. */
   view?: string;
-  /** READ-ONLY reflection of the drilled state, present while a pushed
-   *  (non-root) view is showing. THE rule this element owns: drilled hides
-   *  the tab bar and shows a back affordance, so a sibling tab bar hides
-   *  itself on `kai-view-stack[drilled]` (or from `kai-view-change`), and a
-   *  header shows its back arrow the same way. */
+  // THE rule this element owns: drilled hides the tab bar and shows a back affordance, so
+  // a sibling tab bar hides itself on `kai-view-stack[drilled]` (or from
+  // `kai-view-change`), and a header shows its back arrow the same way.
+  /** READ-ONLY reflection of the drilled state, present while a pushed (non-root) view is showing. */
   drilled?: boolean;
 }
 
-/** Events fired by `<kai-view-stack>`. Non-bubbling — listen on the element. */
+/** Events fired by `<kai-view-stack>`. Non-bubbling; listen on the element. */
 interface Events {
-  /** The visible view or the drilled flag changed (push, back, replace, tab
-   *  switch, or a `view` attribute write). `detail`: `{ view, root, drilled,
-   *  stack }`; `root` is what the tab bar should mark active, defined even
-   *  while drilled. */
+  // `detail` is `{ view, root, drilled, stack }`; `root` is what the tab bar should mark
+  // active, and it is defined even while drilled.
+  /** The visible view or the drilled flag changed (push, back, replace, tab switch, or a `view` attribute write). */
   'kai-view-change': ViewStackState;
 }
 
 /**
- * `<kai-view-stack>` — the mobile-stack view navigator (widget navigation as
- * an element). Declare views as light-DOM `<kai-view>` children: TAB ROOTS
- * (`tab-root`) sit side by side behind a tab bar; the rest are DRILL views,
- * pushed on top with `push()` and left with `back()`. The stack owns the one
- * rule the chat widget is built on: a drilled view hides the tab bar and
- * shows a back affordance; a tab root shows the tab bar and no back arrow.
- * Consumers wire chrome to the exposed state (`drilled` attribute/property,
- * `view` attribute, `kai-view-change`), never to their own copy of that
- * policy.
- *
- * ```html
- * <kai-view-stack view="home">
- *   <kai-view name="home" tab-root>...home...</kai-view>
- *   <kai-view name="messages" tab-root>...list...</kai-view>
- *   <kai-view name="chat">...thread...</kai-view>
- * </kai-view-stack>
- * <script type="module">
- *   const stack = document.querySelector('kai-view-stack');
- *   stack.addEventListener('kai-view-change', (e) => {
- *     tabBar.hidden = e.detail.drilled;   // the rule, consumed not restated
- *     backArrow.hidden = !e.detail.drilled;
- *   });
- *   openButton.onclick = () => stack.push('chat');
- *   backArrow.onclick = () => stack.back();
- *   tabBar.onclick = (e) => stack.selectTab(e.target.dataset.tab);
- * </script>
- * ```
- *
- * Views stay MOUNTED while hidden, so tab switching resets nothing by
- * default. The stack decides only WHICH view shows: it never moves focus or
- * scroll (the kit's idiom is an imperative `focus()` on the element that owns
- * the control).
- *
- * Methods: `push(name)` drills (a tab-root name routes to `selectTab` — a
- * root can never be drilled); `back()` pops one view, a no-op at a root;
- * `replace(name)` swaps the current view without touching history;
- * `selectTab(name)` switches roots and clears any drill; `navigate(name)` is
- * the deep-link form the `view` attribute uses. Unknown names are ignored.
+ * A mobile-style view navigator that shows its child views as tabs or pushes them on
+ * top of one another.
  */
 defineWebComponent<Props, Events>('kai-view-stack', {
   view: undefined,

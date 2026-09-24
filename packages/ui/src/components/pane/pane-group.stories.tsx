@@ -50,12 +50,14 @@ const meta = {
     // so the three events live here too, alongside the props the Playground
     // actually wires up.
     controls: { include: ['active', 'focused', 'class', 'onTabChange', 'onTabClose', 'onTabMenu'] },
+    // Each tab leads with a numbered badge whose colour encodes status (`working` blue, `idle` muted,
+    // `done` green, `error` red, `blocked` amber), and the digit is the keyboard jump number. The group
+    // owns the tab UX; the pane body is the consumer's, swapped on `onTabChange`. Give the group a
+    // bounded height so the body scrolls.
     docs: {
       controls: { exclude: ['children', 'tabs'] },
       description: componentDescription([
-        'An editor group: a tab strip (numbered-status-badge tabs) over a single content area showing the active tab\'s pane body. The reusable "one column = a group of agents shown as tabs" primitive from the Multi-Agent Workspace, extracted from the hand-rolled group in the Split Workspace demo.',
-        'Each tab leads with a tone-colored numbered badge — the color encodes status (`working` blue, `idle` muted, `done` green, `error` red, `blocked` amber), the digit is the keyboard ⌥-jump number. The status word shows on the active tab, on hover, and always for a needs-attention / error tab; a needs-attention tab carries an amber ring even when inactive. Each tab has a close "×" and an optional "…" overflow.',
-        'Composition: the group owns the tab UX, the consumer owns the pane content — it renders `children` as the active body and you swap it on `onTabChange`. Selection-only; it never routes content itself. Give the group a bounded height for the body scroll.',
+        'A tab strip over one pane body, for showing several agents in one column.',
       ]),
     },
   },

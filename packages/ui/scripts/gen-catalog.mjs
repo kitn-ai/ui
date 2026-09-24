@@ -15,7 +15,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import ts from 'typescript';
 import * as esbuild from 'esbuild';
 import { readVariants, MIN_VARIANTS } from './lib/message-part-variants.mjs';
-import { WEB_COMPONENT_META_KEYS } from './lib/web-component-meta-keys.mjs';
+import { WEB_COMPONENT_META_KEYS, WEB_COMPONENT_META_STRING_KEYS } from './lib/web-component-meta-keys.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const DEFAULT_OUT = join(ROOT, 'mcp/catalog/derived.json');
@@ -110,9 +110,20 @@ if (!Array.isArray(meta) || meta.length === 0) fail('web-component-meta.json yie
 // The key LIST is shared with tests/scripts/catalog-derived.test.ts's shape
 // guard (see lib/web-component-meta-keys.mjs for why that one is shared and the
 // predicate below is not); the rule it spells out -- at least one web component
-// carries a non-empty array under this key -- is the same one that guard states,
+// carries a NON-EMPTY value under this key -- is the same one that guard states,
 // so the two cannot disagree about what "present" means.
-const missingKeys = WEB_COMPONENT_META_KEYS.filter((key) => !meta.some((e) => Array.isArray(e?.[key]) && e[key].length > 0));
+//
+// "Non-empty" is spelled per kind, and BOTH halves matter. `description` is a single
+// string (the facade's element doc comment, carried through by gen-web-component-api),
+// so the array test is unsatisfiable for it; relaxing the length test for every key
+// instead would have made the floor true for the wrong reason the first time all 100
+// descriptions came out empty. WEB_COMPONENT_META_STRING_KEYS says WHICH keys are
+// strings; this predicate still decides what counts as data.
+const carriesData = (entry, key) =>
+  WEB_COMPONENT_META_STRING_KEYS.includes(key)
+    ? typeof entry?.[key] === 'string' && entry[key].trim().length > 0
+    : Array.isArray(entry?.[key]) && entry[key].length > 0;
+const missingKeys = WEB_COMPONENT_META_KEYS.filter((key) => !meta.some((e) => carriesData(e, key)));
 if (missingKeys.length > 0) {
   fail(
     `web-component-meta.json carries no non-empty ${missingKeys.map((k) => `"${k}"`).join(', ')} on ANY of its ${meta.length} ` +
@@ -125,6 +136,10 @@ if (missingKeys.length > 0) {
 const webComponents = meta
   .map((e) => ({
     tag: e.tag,
+    // The element's own doc comment, `''` when the facade carries none: the row shape
+    // every consumer reads is `string`, so the absent case is an empty string rather
+    // than a key that disappears per element.
+    description: e.description ?? '',
     props: (e.props ?? []).map((p) => ({
       name: p.name,
       scalar: p.scalar === true,

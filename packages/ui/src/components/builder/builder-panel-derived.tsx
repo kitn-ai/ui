@@ -1,5 +1,5 @@
 /**
- * DerivedBuilderPanel (B-19/B-25) — the REAL builder inspector: controls
+ * DerivedBuilderPanel: the REAL builder inspector: controls
  * DERIVE from ConstructSchema.shape (construct-form-paths' walk), the
  * template registry's `controls` manifest selects and orders the sections,
  * a path-keyed FIELD_OVERRIDES map supplies bespoke editors, and the
@@ -37,11 +37,10 @@ export interface DerivedBuilderPanelProps {
   onChange: (next: Construct) => void; // fires a whole next Construct per edit
   template: BuildableTemplate; // registry entry — controls manifest + starter (section seeds)
   problems?: readonly ConstructProblem[]; // server-side rejections, rendered per path
-  /** Section-header actions, keyed by section id: a small affordance rendered
-   *  to the RIGHT of that section's title (e.g. the Theme section's "Advanced"
-   *  button opening the theme-studio takeover — an App.tsx concern, so the
-   *  CALLER supplies the whole element and this panel only places it). The
-   *  minimal seam: sections had no header-action slot before 2026-08-31. */
+  // A small affordance rendered to the RIGHT of that section's title, e.g. the Theme
+  // section's "Advanced" button opening the theme-studio takeover. An App.tsx concern, so
+  // the CALLER supplies the whole element and this panel only places it.
+  /** Section-header actions, keyed by section id. */
   sectionActions?: Record<string, JSX.Element>;
   class?: string;
 }
@@ -143,9 +142,9 @@ function AttachmentsEditor(props: FieldEditorProps): JSX.Element {
 }
 
 const HISTORY_PERSISTENCE_OPTIONS = [
-  { value: 'none', label: 'None — nothing saved' },
-  { value: 'local', label: 'Local — this browser' },
-  { value: 'endpoint', label: 'Endpoint — your backend' },
+  { value: 'none', label: 'None, nothing saved' },
+  { value: 'local', label: 'Local, this browser' },
+  { value: 'endpoint', label: 'Endpoint, your backend' },
 ];
 
 function HistoryEditor(props: FieldEditorProps): JSX.Element {
@@ -186,11 +185,10 @@ function HistoryEditor(props: FieldEditorProps): JSX.Element {
 }
 
 /**
- * Cards — READ-ONLY (mirrors the legacy stub panel's own Cards section in
- * builder-panel.tsx, wired here for the derived panel as part of the
- * 2026-08-29 design-parity fix wave). A card is declared with a full JSON
+ * Cards. READ-ONLY (mirrors the legacy stub panel's own Cards section in
+ * builder-panel.tsx, wired here for the derived panel too). A card is declared with a full JSON
  * Schema + `x-kai-*` widget/format/mask hints that this panel has no editor
- * for and isn't building one this round — showing nothing here would
+ * for and isn't building one this round: showing nothing here would
  * silently drop a real part of the construct from view, which is worse
  * than an honest "not yet editable" (CLAUDE.md: decide loudly). Each row
  * shows the schema's own `title` when present, falling back to the
@@ -212,7 +210,7 @@ function CardsEditor(props: FieldEditorProps): JSX.Element {
           )}
         </For>
       </div>
-      <p class="mt-1.5 text-xs text-muted-foreground">Read-only for now — card editing is a later round.</p>
+      <p class="mt-1.5 text-xs text-muted-foreground">Read-only for now; card editing is a later round.</p>
     </Show>
   );
 }
@@ -509,8 +507,8 @@ function HomeEditor(props: FieldEditorProps): JSX.Element {
 }
 
 const PROVIDER_MODE_OPTIONS = [
-  { value: 'mock', label: 'Mock — canned replies, no network calls' },
-  { value: 'endpoint', label: 'Endpoint — your own chat route' },
+  { value: 'mock', label: 'Mock, canned replies, no network calls' },
+  { value: 'endpoint', label: 'Endpoint, your own chat route' },
 ];
 
 const PROVIDER_WIRE_OPTIONS = [

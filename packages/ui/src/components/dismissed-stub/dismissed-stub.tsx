@@ -7,7 +7,7 @@ import { RotateCcw } from 'lucide-solid';
 // ─────────────────────────────────────────────────────────────────────────────
 // DismissedStub — the collapsed, re-openable read-only view a card renders once
 // the user has dismissed it (a DEFERRED resolution, not a terminal one). It's a
-// dense `Card` showing "<intent>: <title> — dismissed" + a ghost Reopen button.
+// dense `Card` showing "<intent> <title>, dismissed" plus a ghost Reopen button.
 // Pure/presentational: the owning card wires `onReopen` to emit `{kind:'reopen'}`.
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -43,14 +43,14 @@ export interface DismissedStubProps {
 }
 
 /**
- * `DismissedStub` — the compact stub a card collapses to after it's been dismissed.
+ * `DismissedStub`, the compact stub a card collapses to after it's been dismissed.
  * Group-labelled for a11y; the Reopen affordance is a ghost button.
  */
 export function DismissedStub(props: DismissedStubProps): JSX.Element {
   const intent = (): string => stubIntent(props.type);
   const title = (): string => props.title ?? 'this card';
   const label = (): string => props.reopenLabel ?? 'Reopen';
-  const groupLabel = (): string => `${intent()} ${title()} — dismissed`;
+  const groupLabel = (): string => `${intent()} ${title()}, dismissed`;
 
   return (
     <Card dense class={props.class}>
@@ -62,7 +62,7 @@ export function DismissedStub(props: DismissedStubProps): JSX.Element {
         <span class="min-w-0 text-sm text-muted-foreground">
           <span class="font-medium text-foreground">{intent()}</span>{' '}
           <span class="text-foreground">{title()}</span>
-          <span class="text-muted-foreground"> — dismissed</span>
+          <span class="text-muted-foreground">, dismissed</span>
         </span>
         <Button
           type="button"

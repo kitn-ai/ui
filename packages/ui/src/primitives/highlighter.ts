@@ -21,7 +21,7 @@ import type { HighlighterCore } from 'shiki/core';
 type Loader = () => Promise<unknown>;
 
 /**
- * The languages the kit ships a grammar for — each a separate lazy chunk, loaded
+ * The languages the kit ships a grammar for: each a separate lazy chunk, loaded
  * only on use.
  *
  * NOT A CLOSED SET, and not a statement about what is supported. Shiki ships
@@ -32,8 +32,8 @@ type Loader = () => Promise<unknown>;
  * it, with no rebuild needed (see that fn).
  *
  * `python` is the case that proved it. It is a common enough code block that
- * making every consumer register it would be the worse default — 75.3 kB raw /
- * 9.2 kB gzip — and it costs nothing to an app that never renders one, because
+ * making every consumer register it would be the worse default (75.3 kB raw /
+ * 9.2 kB gzip), and it costs nothing to an app that never renders one, because
  * the loader is a dynamic import: the chunk is fetched when the first Python
  * block appears, and never otherwise.
  */
@@ -108,14 +108,14 @@ function getHighlighter(): Promise<HighlighterCore> {
  *
  * EXACT MATCH FIRST, then a case-insensitive second pass, and both halves are
  * load-bearing. A language id is whatever a fence's author typed or an app's data
- * says, so `Python` and `PY` arrive as readily as `python` — and Shiki's own ids
+ * says, so `Python` and `PY` arrive as readily as `python`, and Shiki's own ids
  * are all lowercase, so before the second pass a capitalised id missed a grammar
  * that plainly existed and the block rendered plain with no signal at all.
  *
  * THE SECOND PASS ONLY EVER RETURNS A KEY THAT IS REALLY REGISTERED, in `aliases`
  * or `langLoaders`. An id nobody registered falls through both passes and comes
  * back AS GIVEN, so an unknown id is reported under its own spelling rather than
- * quietly lowered into the report of a language that is not the one asked for —
+ * quietly lowered into the report of a language that is not the one asked for:
  * folding case must not turn a typo into a hit.
  */
 function resolveLang(lang: string): string {
@@ -173,7 +173,7 @@ function plain(code: string): string {
  * and `unresolved-theme:<theme>`.
  *
  * SCOPE, stated rather than implied: module state, exactly like every registry in
- * this file, so a realm holding two copies of this module warns once per copy —
+ * this file, so a realm holding two copies of this module warns once per copy,
  * and copies of a module are a real shape in this kit (see the shared-state note
  * in `wire/diagnostics.ts`, where one made a whole surface inert). Collapsing
  * that would take a `Symbol.for` global here, deferred on purpose: the cost of
@@ -197,7 +197,7 @@ function shippedLanguages(): string {
 }
 
 /** The kit's own theme roster, read off the live map for the same reason
- *  `shippedLanguages()` reads its own — a theme added above is named in a report
+ *  `shippedLanguages()` reads its own: a theme added above is named in a report
  *  without a second edit here. */
 function shippedThemes(): string {
   return (
@@ -216,7 +216,7 @@ function shippedThemes(): string {
  * telling the truth.
  *
  * KEY AND SUBPATH ARE SPELLED DIFFERENTLY ON PURPOSE. `ensureTheme` matches a theme
- * exactly, so the map KEY keeps the spelling that was asked for — that is the key
+ * exactly, so the map KEY keeps the spelling that was asked for, which is the key the
  * next lookup will hit. The SUBPATH is lowercased because every theme subpath Shiki
  * ships is lowercase, so `Github-Light` as a path is a second failure rather than a
  * fix. Unlike a language there is no case-folding rescue on the way in, so the two
@@ -236,7 +236,7 @@ function themeFixCall(theme: string): string {
  * stream (`@kitn.ai/ui/diagnostics`) is the right home for "the kit made a
  * decision you did not see" and this primitive cannot reach it. Its producer is
  * `emitWireDiagnostic`, which is internal and whose union (`WireDiagnosticEvent`)
- * carries no general warning member — the nearest thing, a `kit.warn`, is still an
+ * carries no general warning member. The nearest thing, a `kit.warn`, is still an
  * inventory item in `wire/diagnostics.ts`. Emitting one would mean widening a
  * versioned, forward-compat, payload-audited contract, which is a decision about
  * the diagnostics surface rather than about highlighting; and importing
@@ -269,7 +269,7 @@ function describeError(err: unknown): string {
 /**
  * Highlight `code` as `lang` with `theme`, returning HTML. Loads only what's
  * needed, on demand. Falls back to escaped plain `<pre><code>` when highlighting
- * is disabled, the language has no registered loader, or anything fails — and the
+ * is disabled, the language has no registered loader, or anything fails, and the
  * last two are REPORTED once per language rather than falling back silently, so a
  * block that came out plain because nobody registered its grammar is
  * distinguishable from one that came out plain because it is disabled.
@@ -277,8 +277,8 @@ function describeError(err: unknown): string {
  * A THEME falls back two ways and BOTH ARE REPORTED, because a theme is where the
  * silent fallback hides best: nothing throws and the block still comes out
  * highlighted, just in colors the app never chose. An unregistered theme is a
- * SUBSTITUTION — `FALLBACK_THEME` renders the block, and the report names the theme
- * asked for, the one used instead, and the one-line call that registers the first —
+ * SUBSTITUTION: `FALLBACK_THEME` renders the block, and the report names the theme
+ * asked for, the one used instead, and the one-line call that registers the first,
  * which is a different fact from a theme that cannot resolve at all, where the
  * block renders plain and the report says so. Neither changes what is returned.
  */
@@ -294,7 +294,7 @@ export async function highlight(code: string, lang: string, theme: string): Prom
       const id = lang.toLowerCase();
       reportOnce(
         `unregistered:${id}`,
-        `[kai-highlighter] no grammar registered for "${lang}" — rendering it as plain text. ` +
+        `[kai-highlighter] no grammar registered for "${lang}": rendering it as plain text. ` +
           `Register it once at app start: ` +
           `configureCodeHighlighting({ languages: { ${id}: () => import('@shikijs/langs/${id}') } }), ` +
           `whose languages option is Record<string, () => Promise<unknown>>. ` +
@@ -317,7 +317,7 @@ export async function highlight(code: string, lang: string, theme: string): Prom
       reportOnce(
         `unresolved-theme:${theme}`,
         `[kai-highlighter] no theme registered for "${theme}", and nothing to fall back to ` +
-          `(the kit's fallback is "${FALLBACK_THEME}") — rendering this block as plain text, ` +
+          `(the kit's fallback is "${FALLBACK_THEME}"), rendering this block as plain text, ` +
           `unhighlighted. The language resolved and the grammar loaded; the THEME is what is ` +
           `missing, which is a different report from an unregistered language. ` +
           `Register it once at app start: ${themeFixCall(theme)}. ` +
@@ -330,7 +330,7 @@ export async function highlight(code: string, lang: string, theme: string): Prom
       // did not configure. Same once-per-theme rule as the language reports.
       reportOnce(
         `unregistered-theme:${theme}`,
-        `[kai-highlighter] no theme registered for "${theme}" — highlighting this block with ` +
+        `[kai-highlighter] no theme registered for "${theme}": highlighting this block with ` +
           `"${useTheme}" instead, so it renders in colors you did not configure. ` +
           `Register it once at app start: ${themeFixCall(theme)}. ` +
           shippedThemes(),
@@ -344,7 +344,7 @@ export async function highlight(code: string, lang: string, theme: string): Prom
     // that separate "Shiki has no such language" from "the network ate the chunk".
     reportOnce(
       `failed:${lang.toLowerCase()}`,
-      `[kai-highlighter] highlighting "${lang}" failed: ${describeError(err)} — ` +
+      `[kai-highlighter] highlighting "${lang}" failed: ${describeError(err)}, ` +
         `rendering it as plain text instead.`,
     );
     return plain(code);
@@ -363,7 +363,7 @@ export function isCodeHighlightingEnabled(): boolean {
   return enabled;
 }
 
-/** Test helper — reset the singleton and registries to defaults. */
+/** Test helper: reset the singleton and registries to defaults. */
 export function __resetCodeHighlightingForTests(): void {
   enabled = true;
   langLoaders = { ...DEFAULT_LANGUAGES };

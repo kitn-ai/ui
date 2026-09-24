@@ -42,15 +42,15 @@ export { normalizeCandidates, buildSelection, isAnyStreaming, candidateToParts }
 
 export type CompareLayout = 'auto' | 'columns' | 'tabs';
 
-/** Imperative handle exposed via `controllerRef` — surfaces the compare's latent
+/** Imperative handle exposed via `controllerRef`, surfaces the compare's latent
  *  capabilities (commit a pick by candidate id, focus the roving tab stop) so the
  *  `<kai-compare>` facade can forward them as instance methods (Pattern C). */
 export interface ResponseCompareController {
-  /** Commit a pick by candidate id — same path as the "Pick this" button: emits
-   *  onSelect + optimistically collapses (single-shot; inert while streaming or
-   *  already resolved). No-op for an unknown id. */
+  // The same path as the "Pick this" button: emits onSelect and optimistically
+  // collapses. Single-shot, inert while streaming or already resolved.
+  /** Picks a candidate by id, as the "Pick this" button does; an unknown id is ignored. */
   select(candidateId: string): void;
-  /** Focus the current roving tab stop (the focused candidate's "Pick this" radio). */
+  /** Focuses the current roving tab stop (the focused candidate's "Pick this" radio). */
   focus(options?: FocusOptions): void;
 }
 
@@ -89,32 +89,30 @@ export function useResolved<T>(opts: {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface ResponseCompareProps {
-  /** The compare definition (prompt + the two candidates). */
+  /** The compare definition (the prompt and the candidates). */
   data?: ResponseCompareData;
   /** Stable id correlating every emitted event. */
   compareId?: string;
-  /** Re-hydrate / control the selection. Renders the collapsed winner. Set as a
-   *  JS property: `el.selection = { chosenId, rejectedIds }`. */
+  /** Re-hydrates or controls the selection, rendering the collapsed winner. */
   selection?: CompareSelection;
-  /** Layout. `'columns'` = side-by-side; `'tabs'` = one candidate at a time with
-   *  pills to switch; `'auto'` (default) uses a CONTAINER query — columns when the
-   *  component is ≥640px wide, tabs when narrower (e.g. on a phone). */
+  // `'auto'` uses a CONTAINER query, so the breakpoint is about this component's own
+  // width, not the viewport's: it forces the side-by-side layout at 640px and wider,
+  // and `'columns'` forces it at any width.
+  /** Side by side or one candidate at a time. `'auto'` (the default) switches at 640px of component width. */
   layout?: CompareLayout;
   class?: string;
-  /** Receive the imperative controller once mounted. The `<kai-compare>` facade
-   *  forwards these as element methods (select/focus). */
+  /** Receives the imperative controller once mounted; the `<kai-compare>` facade forwards it as element methods. */
   controllerRef?: (controller: ResponseCompareController) => void;
-  /** Fired when the user commits a pick. */
+  /** Fires when the user commits a pick. */
   onSelect?: (sel: CompareSelection) => void;
-  /** Fired once both candidates have settled (stopped streaming) and a valid
-   *  definition is shown. */
+  /** Fires once every candidate has settled and a valid definition is shown. */
   onReady?: () => void;
-  /** Fired for an unusable definition (inline error state). */
+  /** Fires for an unusable definition (inline error state). */
   onError?: (message: string) => void;
 }
 
 /**
- * `ResponseCompare` — a dual-response comparison. Two assistant candidates for the
+ * `ResponseCompare`, a dual-response comparison. Two assistant candidates for the
  * same prompt render side-by-side (or as tabs), each via `MessageBody` so a
  * candidate reads exactly like an assistant message (reasoning + tools +
  * attachments + markdown). The pick is a COMMIT, not a Submit: clicking "Pick this"
@@ -352,8 +350,7 @@ interface ColumnProps {
   candidate: CompareCandidate;
   tabStop: boolean;
   disabled: boolean;
-  /** Extra (reactive) class controlling tabs/auto visibility — hidden when this
-   *  is the non-active candidate in tabs / auto-narrow mode. */
+  /** Extra class controlling tabs/auto visibility. */
   hiddenClass?: () => string;
   onFocus: () => void;
   onPick: () => void;

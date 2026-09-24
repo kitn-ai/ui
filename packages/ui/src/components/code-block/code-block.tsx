@@ -8,27 +8,17 @@ import { highlight, isCodeHighlightingEnabled } from '../../primitives/highlight
 
 export interface CodeBlockProps extends JSX.HTMLAttributes<HTMLDivElement> {
   children?: JSX.Element;
-  /**
-   * Render a copy button in a header row above the code.
-   *
-   * DEFAULT OFF, and deliberately. This component is shared by three surfaces —
-   * `markdown.tsx` (every fenced block in every assistant message), `artifact.tsx`
-   * (the code panel), and the `<kai-code-block>` facade — and only the ELEMENT is
-   * documented as shipping a copy button. Defaulting on would add one to every code
-   * block in every message, a kit-wide visible change. The facade opts in; the other
-   * two are untouched, which `tests/web-components/code-block.test.tsx` pins both
-   * behaviourally and at the call sites.
-   */
+  // Default OFF, deliberately: three surfaces share this component (markdown's
+  // fenced blocks, the artifact code panel, and the `<kai-code-block>` facade) and
+  // only the facade is documented as shipping a copy button. Defaulting on would
+  // add one to every code block in every assistant message.
+  /** Renders a copy button in a header row above the code. Default off. */
   copy?: boolean;
-  /**
-   * The exact text the copy button puts on the clipboard.
-   *
-   * Named for what it DOES rather than what it holds, because the distinction is the
-   * whole contract: by the time the button is clicked the source has been through
-   * Shiki, so anything read back out of the DOM is either `<span>`-laden HTML or a
-   * `textContent` reconstruction — and the reconstruction is where tabs, blank lines
-   * and trailing newlines quietly change. This prop never goes near the highlighter.
-   */
+  // By the time the button is pressed the source has been through Shiki, so text
+  // read back out of the DOM is either `<span>`-laden HTML or a `textContent`
+  // reconstruction, and the reconstruction is where tabs, blank lines and trailing
+  // newlines quietly change. This value never goes near the highlighter.
+  /** The text the copy button writes; omitted, it writes nothing. */
   copyText?: string;
 }
 

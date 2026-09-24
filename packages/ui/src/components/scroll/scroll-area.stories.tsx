@@ -29,11 +29,14 @@ const meta = {
     // are actually its API. This has to sit at `parameters.controls`, NOT under
     // `parameters.docs.controls`: the latter filters only the autodocs table and
     // leaves the Controls panel showing every inferred row.
+    //
+    // It sets no height of its own: the caller passes one through `class`, and only
+    // then does content overflow and scroll. The cross axis is clamped to `hidden`,
+    // so content cannot overflow the axis that is not scrolling.
     controls: { include: ['orientation', 'class'] },
     docs: {
       description: componentDescription([
-        'A bounded container with thin, themed scrollbars over native overflow (no scroll hijacking). Set a height via `class`; overflowing content scrolls.',
-        '`orientation` picks the scrolling axis: `vertical` (default), `horizontal`, or `both`. The cross axis is clamped to `hidden` so content cannot overflow it.',
+        'A container that scrolls overflowing content behind thin, themed scrollbars.',
       ]),
     },
   },

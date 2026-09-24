@@ -60,16 +60,16 @@ function CardTagSlot(props: { tag: string; envelope: CardEnvelope; theme: string
 interface Props extends Record<string, unknown> {
   /** The full message object. Set as a JS property. */
   message?: ChatMessage;
-  /** Who is speaking: `'user'` or `'assistant'`. Convenience for simple cases when
-   *  not passing a `message` object.
-   *
-   *  This is the SEMANTIC role of the message, not an ARIA role. The name collides
-   *  with the global ARIA `role` attribute, which is why the facade lifts it off
-   *  the host (see `liftRoleOffHost`). Neither speaker is a valid ARIA role,
-   *  so a `role="user"` left on `<kai-message>` is a CRITICAL axe `aria-roles`
-   *  violation. The accessible role lives on the row inside the shadow root
-   *  instead: `role="article"` plus an `aria-label` naming the speaker, matching
-   *  the SolidJS `<Message>` component. */
+  // Convenience for simple cases when not passing a `message` object.
+  //
+  // This is the SEMANTIC role of the message, not an ARIA role. The name collides with
+  // the global ARIA `role` attribute, which is why the facade lifts it off the host (see
+  // `liftRoleOffHost`). Neither speaker is a valid ARIA role, so a `role="user"` left on
+  // `<kai-message>` is a CRITICAL axe `aria-roles` violation. The accessible role lives on
+  // the row inside the shadow root instead: `role="article"` plus an `aria-label` naming
+  // the speaker, matching the SolidJS `<Message>` component.
+  /** Who is speaking. NOT an ARIA role: it renders role="article" with a named
+   *  aria-label instead, and shadows the ARIA role attribute (see the note above). */
   role?: 'user' | 'assistant';
   /** Force markdown on/off. Defaults to on for assistant, off for user. */
   markdown?: boolean;
@@ -79,71 +79,58 @@ interface Props extends Record<string, unknown> {
   codeTheme?: string;
   /** Disable syntax highlighting for code blocks (no Shiki loads). */
   codeHighlight?: boolean;
-  /** Whether the action bar is always visible (`'always'`, default) or only
-   *  revealed on hover of the message row (`'hover'`). */
+  /** Whether the action bar stays visible or appears on pointer-over; visible by default. */
   actionsReveal?: 'always' | 'hover';
   /** Convenience avatar image URL (used when `message.avatar` is not set). */
   avatarSrc?: string;
   /** Convenience avatar fallback text (used when `message.avatar` is not set). */
   avatarFallback?: string;
-  /** Avatar rail mode. `'none'` omits the avatar rail entirely so the body spans
-   *  the full row (predictable layout when you never show avatars). Any other
-   *  value keeps the default behaviour: the built-in avatar when one resolves, or
-   *  your `slot="avatar"` content when projected (which REPLACES the built-in). */
+  // `'none'` omits the avatar rail entirely so the body spans the full row (predictable
+  // layout when you never show avatars). Any other value keeps the default behaviour: the
+  // built-in avatar when one resolves, or your `slot="avatar"` content when projected
+  // (which REPLACES the built-in).
+  /** Avatar rail mode. `'none'` omits the rail so the body spans the full row; otherwise the built-in avatar or your `slot="avatar"`. */
   avatar?: 'none' | string;
-  /** Optional card type -> custom-element tag overrides/additions for `card`
-   *  parts (merged over the built-ins). Property: `el.cardTypes`. Typed as a
-   *  plain string map (not the `CardTagMap` alias) so the generated React
-   *  wrapper inlines it instead of emitting an unresolved named type. */
+  // Typed as a plain string map (not the `CardTagMap` alias) so the generated React
+  // wrapper inlines it instead of emitting an unresolved named type.
+  /** Card type → custom-element tag overrides/additions, merged over the built-ins. JS property: `el.cardTypes`. */
   cardTypes?: Record<string, string>;
-  /** JSON Schemas for the card types this app renders, keyed by envelope type. The
-   *  companion of `cardTypes`, which says what DRAWS a card while this says what a
-   *  VALID one looks like. An OBJECT, so it is a JS property only: `el.cardSchemas
-   *  = { 'pricing-table': pricingSchema }`, never an attribute.
-   *  `createCardRegistry(...).validationSchemas` is exactly this shape.
-   *
-   *  Without it the kit validates its own seven built-ins and leaves your own card
-   *  type, the one your app actually cares about, as the only unchecked thing on
-   *  screen. A schema here WINS over a built-in of the same name.
-   *
-   *  Typed `Record<string, object>` rather than `Record<string, JsonSchema>`
-   *  deliberately: an imported `.json` schema widens `"type"` to `string`, and an
-   *  authored one carries `$schema`/`title`/`description`/`additionalProperties`,
-   *  so the tighter type would reject both of the normal ways to supply one. */
+  // The companion of `cardTypes`: `cardTypes` says what DRAWS a card, this says what
+  // a VALID one looks like. `createCardRegistry(...).validationSchemas` is this shape.
+  // Without it the kit validates its own seven built-ins and leaves the consumer's own
+  // card type -- the one that actually matters -- the only unchecked thing on screen.
+  // A schema here WINS over a built-in of the same name.
+  //
+  // Typed `Record<string, object>` rather than `Record<string, JsonSchema>`
+  // deliberately: an imported `.json` schema widens `"type"` to `string`, and an
+  // authored one carries `$schema`/`title`/`description`/`additionalProperties`, so
+  // the tighter type would reject both normal ways to supply one.
+  /** Card-type JSON Schemas keyed by envelope type; validates each card's `data`. JS property: `el.cardSchemas`. */
   cardSchemas?: Record<string, object>;
 }
 
+// lint-comment-references: long-block -- the covered/not-covered pair is one contract: the second half is why the observer below exists
 /**
- * Move a `role` the consumer put on the host into the element's own prop store,
- * and off the DOM.
+ * Move a `role` the consumer put on the host into the element's own prop store, and off the
+ * DOM.
  *
- * `role` names the SPEAKER here (`'user'` / `'assistant'`) — the correct domain
- * word, and the documented attribute — but it is also the global ARIA `role`
- * attribute, and neither speaker is a valid ARIA role. Measured in a real chromium:
- * a host left carrying `role="user"` is a CRITICAL axe `aria-roles` violation
- * ("Role must be one of the valid ARIA roles: user"), and chromium discards the
- * unknown token and computes `generic`, so the row is left with no accessible role
- * and no accessible name rather than a mis-announced one.
+ * `role` names the SPEAKER here (`'user'` / `'assistant'`), but it is also the global ARIA
+ * `role` attribute and neither speaker is a valid ARIA role. Measured in a real chromium: a
+ * host left carrying `role="user"` is a CRITICAL axe `aria-roles` violation, and chromium
+ * discards the unknown token and computes `generic`, so the row is left with no accessible
+ * role and no accessible name rather than a mis-announced one.
  *
- * Capture the value, remove the attribute, then write it back as a PROPERTY.
- * component-register's prop accessors do not reflect, so the write cannot put it
- * back on the DOM, and it feeds the same reactive prop the facade already reads.
+ * Capture the value, remove the attribute, then write it back as a PROPERTY:
+ * component-register's prop accessors do not reflect, so the write cannot put it back on the
+ * DOM. The ORDER is load-bearing, because `removeAttribute` fires `attributeChangedCallback`
+ * with `null`; the write-back has to come after that or the scrub destroys the speaker.
  *
- * The ORDER is load-bearing: `removeAttribute` fires component-register's
- * `attributeChangedCallback` with `null`, which sets the property to `null`. The
- * write-back has to come after that, or the scrub destroys the speaker it was
- * meant to preserve.
- *
- * NOTE — this covers every path where the attribute is still on the host by the
- * time the facade runs (`setAttribute` before or after connection, and any later
- * change, via the observer below). It does NOT cover an element authored in HTML
- * and upgraded at registration time: `defineWebComponent` installs its
- * non-reflecting `role` accessor AFTER `customElements.define()`, so for elements
- * already in the document the native ARIAMixin setter runs first in the constructor
- * (`this[prop] = undefined` → `role` is a nullable reflected IDL attribute →
- * `removeAttribute`) and the value is gone before any of this code executes. That
- * is a separate defect in `src/web-components/define/define.tsx`, not something the facade can
- * reach; this function composes correctly with the fix once it lands.
+ * Covered: every path where the attribute is still on the host when the facade runs, and any
+ * later change, via the observer below. NOT covered: an element authored in HTML and upgraded at
+ * registration time, because
+ * `defineWebComponent` installs its non-reflecting `role` accessor after
+ * `customElements.define()`, so the native ARIAMixin setter runs first in the constructor and
+ * the value is gone before this code executes. That is a `define.tsx` defect.
  */
 function liftRoleOffHost(element: HTMLElement): void {
   const attr = element.getAttribute('role');
@@ -154,17 +141,16 @@ function liftRoleOffHost(element: HTMLElement): void {
 
 /** Events fired by `<kai-message>`. */
 interface Events {
-  /** An action button was clicked. `action` is the built-in name or custom id.
-   *  `state` is present only for the toggleable feedback votes: `'on'` when a
-   *  like/dislike is set, `'off'` when re-tapped to clear. */
+  // `state` is present only for the toggleable feedback votes: `'on'` when a like/dislike
+  // is set, `'off'` when re-tapped to clear.
+  /** An action button on a message was clicked. `action` is the built-in name or a custom id. */
   'kai-message-action': { messageId: string; action: string; state?: 'on' | 'off' };
 }
-
+// The keystone of the compose-your-own-message-list pattern: one object per row, the same shape
+// `<kai-chat>` keeps per message, so a consumer can own the list and still get markdown, reasoning,
+// tool calls, attachments and the action row.
 /**
- * `<kai-message>` — a single message row: markdown/plain content, reasoning,
- * tool calls, attachments, and action buttons, rendered from one `message`
- * object (the same shape `<kai-chat>` uses per message). The keystone of the
- * "compose your own message list" pattern. Emits `kai-message-action`.
+ * A single message row of a chat thread.
  */
 defineWebComponent<Props, Events>('kai-message', {
   message: undefined,
@@ -285,7 +271,7 @@ defineWebComponent<Props, Events>('kai-message', {
       parts={msg().parts}
       cardTypes={cardComponentsFromTags(props.cardTypes, (props as { theme?: string }).theme)}
       cardSchemas={props.cardSchemas}
-      /* F-26: card parts emit off THIS element as the bubbling `kai-card` event. */
+      /* Card parts emit off THIS element as the bubbling `kai-card` event. */
       cardHostElement={element}
       isUser={isUser()}
       markdown={useMarkdown()}

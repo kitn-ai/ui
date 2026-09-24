@@ -186,11 +186,12 @@ const meta = {
     // composed in `render` and moving them would do nothing. Hide the dead controls
     // rather than ship a panel where half the rows are inert.
     controls: { exclude: ['data', 'host', 'hostElement', 'class', 'controllerRef', 'values', 'defaultValues'] },
+    // The Solid layer behind `<kai-form>`: pass a `host` (a `CardHost`) to receive emitted
+    // `CardEvent`s directly, or wrap it in a `CardProvider`. The definition's `title` and
+    // `description` fill the card heading and its description, the one built-in card that fills both.
     docs: {
       description: componentDescription([
-        'The SolidJS layer behind `<kai-form>`: a JSON-Schema definition rendered into themed, accessible widgets inside `Card` chrome. Pass a `host` (a `CardHost`) to receive emitted `CardEvent`s directly, or wrap in a `CardProvider`. Typing is local and reported through `onValuesChange`; only a valid submit emits `submit` with the coerced object.',
-        "The definition's `title` and `description` become the card heading and its description — the form card is the one built-in card that fills both.",
-        'The controls flatten the definition root. Edit `properties` as JSON to add or retype a field; stretch `description` to watch the shell wrap it.',
+        'Renders a JSON Schema definition as a form card.',
       ]),
     },
   },
@@ -199,7 +200,7 @@ const meta = {
       control: 'text',
       description: 'Card chrome title. Overrides the definition\'s own `title` when set.',
     },
-    title: { control: 'text', description: "The definition's title — the card heading when `heading` is unset." },
+    title: { control: 'text', description: "The definition's title, used as the card heading when `heading` is unset." },
     description: {
       control: 'text',
       description: 'Rendered under the heading at the body scale. The one place the card shell wraps prose.',
@@ -207,7 +208,7 @@ const meta = {
     properties: {
       control: 'object',
       description:
-        'The JSON Schema field map. Type/format/enum picks the widget; `x-kai-widget` overrides it (`textarea`, `slider`, `rating`, `radio`, `select`, `checkbox`, `password`, `switch`).',
+        'The JSON Schema field map. Type, format and enum pick the widget; `x-kai-widget` overrides it.',
     },
     required: { control: 'object', description: 'Field keys that must be filled. Required fields sort first and get a `*`.' },
     submitLabel: {

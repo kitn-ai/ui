@@ -12,7 +12,9 @@ Solid apps get an extra path the other frameworks don't: the components are auth
 - **`kai-*` web components** (`@kitn.ai/ui/web-components`) — the drop-in shells when you want batteries included or need to share UI across frameworks.
 
 <Aside type="note" title="`@kitn.ai/ui/solid` is the Solid entry point">
-Import Solid components from `@kitn.ai/ui/solid`, not from the root `@kitn.ai/ui`. The root entry is what every consumer resolves, including the React / Vue / Svelte / vanilla majority who only ever touch the web components, so it carries the shared layer: the chat components, the types, the state and card helpers. `@kitn.ai/ui/solid` is that entry plus the rest of the Solid catalog (`ChatThread`, `Dialog`, `Popover`, `Input`, `Nav`, `Tabs`, and the other primitives the web components are built from), compiled as its own bundle so a React consumer never pays for it. It is a superset, so one import covers everything.
+Import Solid components from `@kitn.ai/ui/solid`, not from the root `@kitn.ai/ui`. The root entry is what every consumer resolves, including the React / Vue / Svelte / vanilla majority who only ever touch the web components, so it carries the shared layer: the chat components, the types, the state and card helpers.
+
+`@kitn.ai/ui/solid` is that entry plus the rest of the Solid catalog (`ChatThread`, `Dialog`, `Popover`, `Input`, `Nav`, `Tabs`, and the other primitives the web components are built from), compiled as its own bundle so a React consumer never pays for it. It is a superset, so one import covers everything.
 </Aside>
 
 ## Install
@@ -36,7 +38,11 @@ The native components are Tailwind v4 classes over the kit's `--color-*` tokens,
 @source "../node_modules/@kitn.ai/ui"; /* let Tailwind see the kit's class names */
 ```
 
-`solid.css`, not `theme.css`. The `kai-*` web components carry a compiled stylesheet inside each shadow root; the Solid components ship class names and nothing else, so that sheet has to come out of your Tailwind build instead. `solid.css` imports `theme.css` (the tokens) and adds the rest: the `.kai-radio` / `.kai-checkbox` / `.kai-range` form controls, the focus ring, scrollbars, `::selection`, `tw-animate-css` for every overlay animation, and `@tailwindcss/typography` for `prose-sm` / `prose-lg`. Importing `theme.css` alone compiles, and renders native form controls with no animations. The base rules apply to your whole page; if you only want the tokens, import `theme.css` and opt in yourself. The [Theming guide](/guides/theming/#what-themecss-changes-in-a-tailwind-build) lists what `theme.css` itself adds to a Tailwind build.
+`solid.css`, not `theme.css`. The `kai-*` web components carry a compiled stylesheet inside each shadow root; the Solid components ship class names and nothing else, so that sheet has to come out of your Tailwind build instead.
+
+`solid.css` imports `theme.css` (the tokens) and adds the rest: the `.kai-radio` / `.kai-checkbox` / `.kai-range` form controls, the focus ring, scrollbars, `::selection`, `tw-animate-css` for every overlay animation, and `@tailwindcss/typography` for `prose-sm` / `prose-lg`. Importing `theme.css` alone compiles, and renders native form controls with no animations.
+
+The base rules apply to your whole page; if you only want the tokens, import `theme.css` and opt in yourself. The [Theming guide](/guides/theming/#what-themecss-changes-in-a-tailwind-build) lists what `theme.css` itself adds to a Tailwind build.
 
 Install the two plugins next to Tailwind. They are optional peer dependencies of the kit:
 
@@ -53,7 +59,9 @@ Put `tailwindcss()` alongside `solidPlugin()` in `vite.config.ts`.
 The `kai-*` web components need none of this: they carry their own compiled styles inside Shadow DOM.
 
 <Aside type="note" title="What the Solid entry resolves to">
-The package ships **compiled**. `@kitn.ai/ui/solid` resolves to `dist/solid.js` in the browser and `dist/solid.server.js` under the `node` / `deno` / `worker` conditions; `@kitn.ai/ui` resolves to `dist/index.js` / `dist/index.server.js` the same way. All four are ESM, so your bundler still tree-shakes down to what you import, but it never compiles the kit's TSX. A stock `vite-plugin-solid()` is enough; nothing has to be told to transform `node_modules`.
+The package ships **compiled**. `@kitn.ai/ui/solid` resolves to `dist/solid.js` in the browser and `dist/solid.server.js` under the `node` / `deno` / `worker` conditions; `@kitn.ai/ui` resolves to `dist/index.js` / `dist/index.server.js` the same way. All four are ESM, so your bundler still tree-shakes down to what you import, but it never compiles the kit's TSX.
+
+A stock `vite-plugin-solid()` is enough; nothing has to be told to transform `node_modules`.
 </Aside>
 
 ## Native components
@@ -242,7 +250,9 @@ function Workspace() {
 `ResizablePanel` accepts `defaultSize` (px or `%`) plus optional `minSize` / `maxSize`. `onChange` receives an array of percent sizes; persist it to restore the layout on reload. `ConversationList` requires both `groups` (the buckets: Today, Yesterday, …) and `conversations`. Pass `groups={[]}` and everything lands in one "Ungrouped" section, or bare rows with `compact`.
 
 <Aside type="caution" title="Renaming a conversation needs a new item object">
-`ConversationList` keys its rows with a reference-keyed `<For>`, the same as the message list above. So renaming a conversation means **a new array and a new object for the row that changed** — set the signal to `list.map((c) => (c.id === id ? { ...c, title } : c))`. Mutating `c.title` in place is invisible even if you then set a fresh array, because the row's identity never changed. Adds, removes and reorders need only the fresh array.
+`ConversationList` keys its rows with a reference-keyed `<For>`, the same as the message list above. So renaming a conversation means **a new array and a new object for the row that changed** — set the signal to `list.map((c) => (c.id === id ? { ...c, title } : c))`.
+
+Mutating `c.title` in place is invisible even if you then set a fresh array, because the row's identity never changed. Adds, removes and reorders need only the fresh array.
 </Aside>
 
 Drop `Resizable` when you want the handles placed by hand: `ResizablePanelGroup` + `ResizablePanel` + an explicit `ResizableHandle` between them gives you the same layout with control over each divider (`handle="grip" | "line" | "none"`).

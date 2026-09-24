@@ -3,9 +3,8 @@ import { TasksCard, type TasksCardController, type TasksCardData } from '../../c
 import type { CardResolution } from '../../primitives/card-contract';
 
 interface Props extends Record<string, unknown> {
-  /** The tasks definition (the CardEnvelope.data). Set as a JS PROPERTY:
-   *  `el.data = { tasks:[…], selectAll, confirmLabel, … }`. Import
-   *  `TasksCardData` from `@kitn.ai/ui` for the full shape. */
+  // Import `TasksCardData` from `@kitn.ai/ui` for the full shape.
+  /** The tasks definition (the card's `data`). JS property: `el.data = { tasks: [...], selectAll, confirmLabel }`. */
   data?: TasksCardData;
   /** Stable card id correlating every emitted CardEvent. Attribute: `card-id`. */
   cardId?: string;
@@ -26,7 +25,7 @@ interface Props extends Record<string, unknown> {
 }
 
 /** Events fired by `<kai-tasks>`. (Resolution still flows up the bubbling `kai-card`
- *  contract event — `kai-value-change` is the live selection signal, distinct from
+ *  contract event: `kai-value-change` is the live selection signal, distinct from
  *  the terminal submit.) */
 interface Events {
   /** The selection changed on a toggle. Carries the selected ids in input
@@ -35,21 +34,7 @@ interface Events {
 }
 
 /**
- * `<kai-tasks>` — a **selectable** task/plan list (set via the `data` property):
- * checkbox rows + an optional select-all + a confirm button. Toggling rows is local
- * UI state; only the final confirm emits the Card contract's **`submit`** verb
- * up a bubbling **`kai-card`** CustomEvent (`{ kind:'submit', cardId,
- * data:{ selected } }`) with the checked ids in input order. Also emits `ready` on
- * mount and `error` for a malformed definition (inline error). Routes through a
- * `CardProvider` when present, else the bubbling `kai-card` event. Isolated in
- * Shadow DOM; theme-aware via the shared kit tokens.
- *
- * Two looks, one selection model. Default `mode:'select'` = the approval list above.
- * `mode:'progress'` = the onboarding-checklist look (e.g. "Get started 0 / 2"): a
- * header `done / total` count + circular indicators + per-item title/description,
- * and NO confirm button (checking a row IS the action, so the live
- * `kai-value-change` is the signal). The `max` gate, `toggle`/`select` methods, and
- * events all still apply.
+ * A checklist of tasks the user ticks off and confirms.
  */
 defineWebComponent<Props, Events>(
   'kai-tasks',

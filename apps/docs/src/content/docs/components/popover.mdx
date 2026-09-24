@@ -1,6 +1,6 @@
 ---
 title: Popover
-description: A button-and-popover card web component — a trigger that toggles a floating panel of arbitrary content, isolated in Shadow DOM.
+description: A floating panel of arbitrary content behind a trigger.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -15,7 +15,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kai-tag-sub">kai-popover</p>
 
-<p class="kai-lede">A trigger that toggles a floating card of arbitrary content — a model menu, a settings panel, an account dropdown. The panel is a `role="dialog"` region, not a menu, so it holds anything: rows, toggles, nested groups. Click a position around the trigger below to see each placement.</p>
+<p class="kai-lede">Holds what a dropdown cannot, such as rows, toggles, and nested groups.</p>
 
 <Facts items={['Shadow DOM', '1 event', 'Slotted trigger + panel', 'Escape / outside-click close', '12 placements']} />
 
@@ -24,7 +24,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 <PopoverPlayground client:only="solid" />
 
 <Aside type="tip" title="When to use">
-Reach for `<kai-popover>` for a "button + card" affordance — a header model menu, a settings popover, an account dropdown with mixed controls. For a flat list of commands, a menu is simpler. In SolidJS, the `Popover` primitive does the same without the web-component wrapper.
+For a button-plus-card affordance: a header model menu, a settings popover, an account dropdown with mixed controls. For a flat list of commands, [Menu](/components/menu/) is simpler.
 </Aside>
 
 ## Usage
@@ -54,7 +54,7 @@ Slot the control as `slot="trigger"` and the panel as the default slot:
 - **Dismissal** — Escape or a click outside closes the panel; clicks **inside** it do not.
 - **`placement`** — floating placement relative to the trigger (`bottom-start`, `top`, `right`, …); defaults to `bottom-start`. The panel flips and shifts to stay on screen.
 - **Controlled** — omit `open` for click-to-toggle, or set the `open` property and drive it from `kai-open-change` to control it yourself.
-- **Panel content lives in your light DOM**, so your own styles apply to it directly — no shadow piercing. **Font size, spacing, icons** are all yours: style the slotted content however you like (the panel defaults to a compact `text-sm` and inherits from there). Use your own icon library for chevrons and row icons.
+- **Panel content lives in your light DOM**, so your own styles apply to it directly and no shadow piercing is needed. It defaults to a compact `text-sm`; row icons and chevrons are yours to supply.
 
 ## Slots
 

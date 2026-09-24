@@ -10,37 +10,32 @@ import {
 } from '../../components/workspace/workspace-shell';
 
 interface Props extends Record<string, unknown> {
-  /** Controlled collapsed state of the start aside. Set this as a JS property
-   *  (`el.startCollapsed = true`) to drive the aside from your app, updating it
-   *  in response to the `kai-aside-toggle` event. Omit for uncontrolled (the
-   *  element manages it). */
+  // Drive the aside from your app, updating it in response to the `kai-aside-toggle` event.
+  /** Controlled collapsed state of the start aside. Omit for uncontrolled (the element manages it). */
   startCollapsed?: boolean;
   /** Initial collapsed state of the start aside when uncontrolled (default
    *  false). Use the `default-start-collapsed` attribute to start collapsed in
    *  plain HTML. */
   defaultStartCollapsed?: boolean;
-  /** Controlled collapsed state of the end aside. Set this as a JS property
-   *  (`el.endCollapsed = true`) to drive the aside from your app, updating it
-   *  in response to the `kai-aside-toggle` event. Omit for uncontrolled (the
-   *  element manages it). */
+  // Drive the aside from your app, updating it in response to the `kai-aside-toggle` event.
+  /** Controlled collapsed state of the end aside. Omit for uncontrolled (the element manages it). */
   endCollapsed?: boolean;
   /** Initial collapsed state of the end aside when uncontrolled (default
    *  false). Use the `default-end-collapsed` attribute to start collapsed in
    *  plain HTML. */
   defaultEndCollapsed?: boolean;
-  /** Auto-collapse both asides when the shell's own width drops below this many
-   *  px, and re-expand when it grows back above. Applies to uncontrolled asides
-   *  only (it never fights an app-driven collapsed prop); omit to disable.
-   *  Fires `kai-aside-toggle`. Attribute: `collapse-below`. */
+  // Applies to uncontrolled asides only (it never fights an app-driven collapsed prop);
+  // omit to disable. Fires `kai-aside-toggle`.
+  /** Auto-collapse both asides when the shell's own width drops below this many px, and re-expand above it. */
   collapseBelow?: number;
-  /** Below this shell width in px, an expanded aside renders as an overlay
-   *  drawer over the main region instead of a column beside it. Escape inside
-   *  the drawer closes it and returns focus to the element focused before it
-   *  opened. Omit to disable. Attribute: `drawer-below`. */
+  // Escape inside the drawer closes it and returns focus to the element focused before it
+  // opened. Omit to disable. Attribute: `drawer-below`.
+  /** Below this shell width in px, an expanded aside renders as an overlay drawer over the main region. */
   drawerBelow?: number;
-  /** Density hint. Reflected as a `data-compact` hook on the root (and as the
-   *  `compact` attribute on the element) for your CSS and slotted content; the
-   *  shell itself keeps no other opinion about density. */
+  // Reflected as a `data-compact` hook on the root (and as the `compact` attribute on the
+  // element) for your CSS and slotted content; the shell itself keeps no other opinion
+  // about density.
+  /** Density hint. */
   compact?: boolean;
 }
 
@@ -53,60 +48,19 @@ interface Events {
   'kai-aside-resize': WorkspaceAsideResizeDetail;
 }
 
+// Aside geometry is CSS custom properties read ONCE at upgrade, so setting one later does not
+// resize an already-upgraded shell: --kai-workspace-start-width (280px), -start-min-width
+// (200px), -start-max-width (480px); --kai-workspace-end-width (320px), -end-min-width (200px),
+// -end-max-width (480px).
+// 0.24 turned this element from a chat preset into a layout shell: the chat surface
+// (conversations, messages, composer, models, chat events) moved onto whatever the consumer
+// slots in, and the sidebar* props/methods became the per-aside aside* pair. A full app
+// migrates through the `workspace` block scaffold.
+// The old `kai-sidebar-toggle` event is `kai-aside-toggle` with a `side` now. The old name is
+// named HERE on purpose: guides/use-a-workspace.mdx carries that migration note, and
+// scripts/docs-alignment resolves a kai- token in prose against the ones this tree mentions.
 /**
- * `<kai-workspace>` — the chat-agnostic layout shell: five slots (`header` ·
- * `start` · `main` · `end` · `footer`), resize handles between the columns,
- * per-aside collapse, collapse-below-breakpoint, and a mobile drawer mode for
- * the asides. It knows nothing about chat: a file tree in `start` is as valid
- * as `<kai-conversations>`, and the workspace app slots `<kai-conversations>`
- * and `<kai-chat>` into it.
- *
- * ```html
- * <kai-workspace collapse-below="720" drawer-below="640">
- *   <kai-conversations slot="start"></kai-conversations>
- *   <kai-chat></kai-chat>
- * </kai-workspace>
- * ```
- *
- * Aside geometry is CSS custom properties, not props (the `kai-dock` rule):
- * `--kai-workspace-start-width` (280px) · `--kai-workspace-start-min-width`
- * (200px) · `--kai-workspace-start-max-width` (480px) · `--kai-workspace-end-width`
- * (320px) · `--kai-workspace-end-min-width` (200px) · `--kai-workspace-end-max-width`
- * (480px). Read once at upgrade. Parts: `header` · `start` · `main` · `end` ·
- * `footer` (the asides also match `::part(aside)`).
- *
- * **BREAKING (0.24):** this element was a chat
- * preset; it is now a layout shell, and everything chat-shaped is gone from its
- * surface. Where each removed prop went:
- *
- * - `conversations` / `activeId` / `groups` / `noConversations`: set them on your
- *   own `<kai-conversations slot="start">`.
- * - `messages` / `loading` / `proseSize` / `codeTheme` / `codeHighlight` /
- *   `chatTitle` / `scrollButton` / `cardTypes` / `cardSchemas`: set them on your
- *   own `<kai-chat>` in the main region.
- * - `value` / `placeholder` / `suggestions` / `suggestionMode` / `voice` /
- *   `triggers` / `kindIcons` and the renamed `webSearch` (was `search`): the
- *   composer surface on `<kai-chat>` or `<kai-prompt-input>`.
- * - `models` / `currentModel` / `context`: header chrome you slot (a model
- *   picker is a part in a slot, not three orchestrator props).
- * - `sidebarWidth` / `sidebarMinWidth` / `sidebarMaxWidth`: the
- *   `--kai-workspace-start-*` custom properties above.
- * - `sidebarCollapsed` / `defaultSidebarCollapsed`: `startCollapsed` /
- *   `defaultStartCollapsed` (per-aside; the end aside has its own pair).
- * - `collapseBelow`: kept, now collapsing both asides.
- * - `compact`: kept as a reflected density hint; the rail's row density is
- *   `<kai-conversations>`' own `compact`.
- * - Chat events (`kai-submit`, `kai-conversation-select`, `kai-message-action`,
- *   `kai-model-change`, `kai-search`, `kai-voice`, `kai-value-change`,
- *   `kai-suggestion-click`): listen on the part that fires them.
- *   `kai-sidebar-toggle` is now `kai-aside-toggle` with a `side`.
- * - Methods: `toggleSidebar()` / `collapseSidebar()` / `expandSidebar()` are now
- *   `toggleAside(side)` / `collapseAside(side)` / `expandAside(side)`; the
- *   thread methods (`focus`/`clear`/`send`/`scrollToBottom`) live on your
- *   `<kai-chat>`.
- *
- * The migration path for a full app is the `workspace` block scaffold (the kai
- * MCP `scaffold` tool), which emits this composition wired.
+ * A resizable app layout shell with collapsible side asides.
  */
 defineWebComponent<Props, Events>('kai-workspace', {
   startCollapsed: undefined,
@@ -136,7 +90,7 @@ defineWebComponent<Props, Events>('kai-workspace', {
     onCleanup(() => observer.disconnect());
   });
 
-  // Reflect the read-back flags (the G-05 rule: a bare attribute parses to
+  // Reflect the read-back flags (a bare attribute parses to
   // `undefined`, so without this the property would contradict the attribute).
   reflectFlag('compact');
   reflectFlag('defaultStartCollapsed');

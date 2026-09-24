@@ -19,11 +19,12 @@ const meta = {
   tags: ['autodocs'],
   parameters: {
     layout: 'padded',
+    // A `status` (`{ tone, label?, pulse? }`) draws a coloured dot, and `meta` adds right-aligned
+    // muted trailing text such as a relative time.
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'A vertical sidebar nav. Pass `items` (`id`, `label`, optional `icon` / `badge` / `trailing` / `disabled`); `value` is the active id (drives `aria-current`), and `onItemSelect` fires with the clicked id.',
-        'Items nest via `children` (a collapsible group with a disclosure chevron; `defaultCollapsed` seeds the closed set). A `status` (`{ tone, label?, pulse? }`) draws a colored dot, and `meta` adds right-aligned muted trailing text such as a relative time.',
+        'A vertical sidebar navigation with collapsible groups.',
       ]),
     },
   },

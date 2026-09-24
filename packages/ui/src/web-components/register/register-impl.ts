@@ -12,7 +12,7 @@ import '../chat/chat';
 import '../workspace/chat-workspace';
 // Message-list composable (the scrolling thread slice, sans composer/header)
 import '../thread/thread';
-// Composable leaf elements (spike — see docs/handoff + examples/composable)
+// Composable leaf elements (spike -- see examples/composable)
 import '../thinking-bar/thinking-bar';
 import '../model-switcher/model-switcher';
 import '../attachments/attachments';
@@ -35,6 +35,7 @@ import '../audio-visualizer/audio-visualizer';
 import '../loader/loader';
 import '../text-shimmer/text-shimmer';
 import '../image/image';
+import '../image/image-artifact';
 import '../checkpoint/checkpoint';
 import '../message/message-skills';
 import '../source/source';
@@ -102,6 +103,7 @@ import '../pane/pane-group';
 import '../pane/pane-grid';
 import '../agent-card/agent-card';
 import '../dialog/dialog';
+import '../lightbox/lightbox';
 import '../dock/dock';
 // Input & search field family
 import '../input/input';

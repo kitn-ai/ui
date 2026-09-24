@@ -30,7 +30,7 @@ export interface EmbedProps extends Omit<JSX.HTMLAttributes<HTMLDivElement>, 'on
 }
 
 /**
- * `Embed` — a privacy-first lazy media facade. Initial render is a poster + a play
+ * `Embed`: a privacy-first lazy media facade. Initial render is a poster + a play
  * button: NO provider iframe, NO provider JS, NO cookies until the user opts in.
  * On play it swaps in the provider `<iframe>` (youtube-nocookie / vimeo dnt /
  * allowlisted generic). A persistent "Open on {provider}" affordance routes the

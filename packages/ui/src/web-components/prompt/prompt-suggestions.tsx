@@ -5,20 +5,15 @@ import { PromptSuggestion } from '../../components/prompt/prompt-suggestion';
 type Item = string | { label: string; value?: string; icon?: string };
 
 interface Props extends Record<string, unknown> {
-  /** The suggestions. Strings, or `{ label, value }` when the displayed text
-   *  and the emitted value differ. Set as a JS property. Omit to supply them as
-   *  `<kai-suggestion>` light-DOM children instead; when both are present the
-   *  property's suggestions come first. */
+  // When both this property and light-DOM children are present, the property's
+  // suggestions come first.
+  /** The suggestions: strings, or `{ label, value }` when the displayed text and emitted value differ. JS property (array). */
   suggestions?: Item[];
-  /** Chip style: `'outline'` (default), `'ghost'`, or `'default'` (filled). */
+  /** Chip style. Defaults to `outline`. */
   variant?: 'outline' | 'ghost' | 'default';
-  /** Row height for `layout="list"`: `'md'` (default) or `'lg'` for taller rows.
-   *  Chips are unaffected. */
+  /** Row height for the list layout. Defaults to `md`; chips are unaffected. */
   size?: 'md' | 'lg';
-  /** Layout: `'chips'` (default) renders a wrapping row of rounded pills;
-   *  `'list'` renders a vertical, full-width "Ideas for you" list where each
-   *  row is left-aligned with a leading `icon`, a label, and a hover
-   *  background. */
+  /** A wrapping row of pills (the default), or full-width rows with a leading icon. */
   layout?: 'chips' | 'list';
   /** Full-width left-aligned rows instead of pills. */
   block?: boolean;
@@ -42,22 +37,11 @@ export function parseSuggestionNode(n: Element): Item {
   const value = n.getAttribute('value') ?? text;
   return { label: text, value, icon: n.getAttribute('icon') ?? undefined };
 }
-
+// `layout="list"` renders the vertical list (leading icon, label, hover background) instead of
+// pills. Chips may also arrive as `<kai-suggestion>` light-DOM children, which are hidden data
+// carriers; when both are present the property's suggestions come first.
 /**
- * `<kai-suggestions>` — a row/list of suggestion chips. Data via the
- * `suggestions` property; `variant`/`layout`/`block`/`highlight` attributes;
- * emits `select`. `layout="list"` renders the vertical "Ideas for you" list
- * (leading icon + label + hover background) instead of pills.
- *
- * Alternatively, declare chips as `<kai-suggestion>` child elements
- * (light-DOM data carriers — hidden by the Shadow DOM):
- *
- * ```html
- * <kai-suggestions>
- *   <kai-suggestion value="vue">Use Vue</kai-suggestion>
- *   <kai-suggestion value="react">Use React</kai-suggestion>
- * </kai-suggestions>
- * ```
+ * A row or list of suggestion chips.
  */
 defineWebComponent<Props, Events>('kai-suggestions', {
   suggestions: [],

@@ -17,8 +17,8 @@ import { CardFallback } from './card-fallback';
  * Consumer card schemas by envelope type: `{ 'pricing-table': pricingSchema }`.
  *
  * `object`, NOT `JsonSchema`, and that is measured rather than lazy. A real schema
- * is either imported from a `.json` file — where TypeScript widens `"type": "object"`
- * to `string`, which `JsonSchema`'s literal union rejects — or written out with the
+ * is either imported from a `.json` file (where TypeScript widens `"type": "object"`
+ * to `string`, which `JsonSchema`'s literal union rejects), or written out with the
  * `$schema` / `title` / `description` / `additionalProperties` keywords that
  * `JsonSchema` does not describe at all, which excess-property checking rejects.
  * Both are the ordinary case, so the tighter type would make the normal way of
@@ -34,48 +34,31 @@ export interface CardRendererProps {
   envelope: CardEnvelope;
   /** Add/override type→component entries (merged over the built-ins). */
   types?: CardComponentMap;
-  /**
-   * JSON Schemas for the card types this app renders, keyed by `envelope.type`.
-   * `createCardRegistry(...).validationSchemas` is exactly this shape.
-   *
-   * The companion of `types`, and the half that was missing: `types` says WHAT
-   * draws a `pricing-table`, `schemas` says what a VALID one looks like. Without it
-   * the kit checks its own seven built-ins and leaves the developer's own card —
-   * the one the app actually cares about — as the only unvalidated thing on screen.
-   *
-   * A schema given here WINS over a built-in of the same name, matching
-   * `mergeCardComponents`, where the consumer's entry is spread over ours.
-   */
+  // The companion of `types`: `types` says what DRAWS a `pricing-table`, `schemas` says
+  // what a VALID one looks like. `createCardRegistry(...).validationSchemas` is exactly
+  // this shape. Without it the kit validates its own seven built-ins and leaves the
+  // consumer's own card the only unchecked thing on screen. A schema here WINS over a
+  // built-in of the same name, matching `mergeCardComponents`, where the consumer's
+  // entry is spread over ours.
+  /** Card-type JSON Schemas keyed by `envelope.type`. */
   schemas?: CardSchemaMap;
-  /**
-   * Validate `envelope.data` against the built-in schema for `envelope.type` before
-   * rendering. Default `true`.
-   *
-   * ON IN PRODUCTION TOO, DELIBERATELY. The obvious alternative, stripping the check
-   * from production builds, inverts the point: a model emitting a bad shape is a
-   * production failure mode, so stripping it means the developer's USERS get the
-   * broken card while the developer's laptop looks fine. The cost is the projected
-   * schema data for all seven card types, measured by building this package twice
-   * (once with the projection stubbed to `{}`) rather than estimated: +834 B gzip on
-   * `dist/index.js` and +775 B gzip on the web components register bundle. That is below
-   * the noise floor of a package that already ships a Solid runtime and `marked`.
-   *
-   * Set `false` to opt out. A type with no schema at all — no built-in, and none
-   * supplied through `schemas` — is never validated either way.
-   */
+  // ON IN PRODUCTION TOO, DELIBERATELY. The obvious alternative, stripping the check from
+  // production builds, inverts the point: a model emitting a bad shape is a production
+  // failure mode, so stripping it means the developer's USERS get the broken card while
+  // the developer's laptop looks fine. The cost is the projected schema data for all
+  // seven card types, measured by building this package twice (once with the projection
+  // stubbed to `{}`) rather than estimated: +834 B gzip on `dist/index.js` and +775 B
+  // gzip on the web components register bundle, below the noise floor of a package that
+  // already ships a Solid runtime and `marked`. A type with no schema at all -- no
+  // built-in, and none supplied through `schemas` -- is never validated either way.
+  /** Validate `envelope.data` against the schema for `envelope.type` before rendering. On
+   *  by default. */
   validateCards?: boolean;
-  /**
-   * The custom-element host node to emit off when no `CardProvider` is above this
-   * renderer: events leave as the bubbling, composed `kai-card` CustomEvent
-   * (`emitCardEvent`), so `listenForCardEvents(element)` — or a plain
-   * `addEventListener('kai-card', …)` on the element — receives them.
-   *
-   * This is what makes cards INSIDE `<kai-chat>`/`<kai-message>`/`<kai-thread>`
-   * interactive: those facades pass their own host element down here, and
-   * with neither this nor a `CardProvider` every emit — ready/action/submit/
-   * dismiss/reopen and the contract `error` — used to be silently discarded.
-   * An ambient `CardProvider` still wins when present.
-   */
+  // Makes cards INSIDE `<kai-chat>`/`<kai-message>`/`<kai-thread>` interactive: those
+  // facades pass their own host element, and with neither this nor a `CardProvider`
+  // every emit -- ready/action/submit/dismiss/reopen and the contract `error` -- used to
+  // be silently discarded. An ambient `CardProvider` still wins when present.
+  /** Host node card events bubble off when no `CardProvider` is above this renderer. */
   hostElement?: HTMLElement;
 }
 
@@ -85,7 +68,7 @@ export interface CardRendererProps {
  *
  * The fallback's `context()` mirrors the remote transport's `defaultContext()`
  * (`remote/provider-runtime.ts`): the contract return is non-optional, but no
- * native card reads it today — the web-component facades own theme/locale through
+ * native card reads it today: the web-component facades own theme/locale through
  * `ChatConfig`, not through card context.
  */
 function resolveHost(ctxHost: CardHost | undefined, hostElement: HTMLElement | undefined): CardHost | undefined {
@@ -119,29 +102,25 @@ export function CardRenderer(props: CardRendererProps): JSX.Element {
   const map = createMemo(() => mergeCardComponents(props.types));
   const entry = createMemo(() => map()[props.envelope.type]);
 
-  // MIRRORS src/remote/provider-runtime.ts:139-147. That transport runs
+  // MIRRORS src/remote/provider-runtime.ts. That transport runs
   // `validateAgainstSchema(renderer.schema, envelope.data)` and, on failure, renders
   // a placeholder and emits `{ kind: 'error', cardId, message }`. This is the same
   // behaviour on the native path, split into two tiers so a card that renders
   // acceptably today is reported without being replaced. Keep the two in step.
   //
-  // WHAT AUTHORISES A CHECK IS A SCHEMA THAT DESCRIBES WHAT IS ON SCREEN.
+  // WHAT AUTHORISES A CHECK IS A SCHEMA THAT DESCRIBES WHAT IS ON SCREEN. `types`
+  // lets a consumer replace a built-in type's renderer, and `confirm.schema.json`
+  // describes OUR ConfirmCard's data, not theirs, so validating a replaced renderer
+  // against it would reject shapes correct for the component actually on screen. OUR
+  // schema therefore applies only to OUR component: the identity check is against
+  // BUILTIN_CARD_COMPONENTS, the same object `mergeCardComponents` puts in the map
+  // when nothing overrode the type.
   //
-  // `types` lets a consumer replace a built-in type's renderer with their own
-  // (`types={{ confirm: MyConfirm }}`), and `confirm.schema.json` describes OUR
-  // ConfirmCard's data, not theirs. Validating a replaced renderer's payload against
-  // our schema would reject shapes that are correct for the component actually on
-  // screen. So OUR schema applies only to OUR component: the identity check is
-  // against BUILTIN_CARD_COMPONENTS, the same object `mergeCardComponents` puts in
-  // the map when nothing overrode the type, and the same one web-components/message/message.tsx
-  // reuses for a non-overridden built-in.
-  //
-  // A schema the CONSUMER registered is the other way round: they wrote it about
-  // their own card, and it is the shape their model was told to emit, so it applies
-  // whichever component draws the type. That covers the case the identity check can
-  // never reach — a `pricing-table` that is nobody's built-in — and it re-enables
-  // the check on an overridden built-in, where the objection was our schema and not
-  // the checking.
+  // A schema the CONSUMER registered is the other way round: they wrote it about their
+  // own card and it is the shape their model was told to emit, so it applies whichever
+  // component draws the type. That covers a `pricing-table` that is nobody's built-in,
+  // and it re-enables the check on an overridden built-in, where the objection was our
+  // schema and not the checking.
   const report = createMemo<CardValidationReport | null>(() => {
     if (props.validateCards === false) return null;
     if (

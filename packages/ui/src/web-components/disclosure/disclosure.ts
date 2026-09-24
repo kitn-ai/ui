@@ -9,28 +9,24 @@ export interface OpenController {
 }
 
 /**
- * Wire the standard Shoelace/WebAwesome-style overlay surface onto an internal
- * open controller — the kit's convention for every open/close element (hover-card,
- * tooltip, popover, menu, model-switcher, scope-picker, collapsibles, …). NOT
- * React-controlled: the element keeps self-managing; this layers the host-facing
- * conveniences on top.
+ * Wire the standard overlay surface onto an internal open controller: the kit's
+ * convention for every open/close element. The element stays self-managing and this
+ * layers the host-facing conveniences on top.
  *
- * Given the primitive's `{ open, setOpen }` controller, it provides:
- *  - **`open` reflects** to the host `[open]` attribute (for `:host([open])` CSS),
- *    and is **settable** — `el.open = true` / `<el open>` drives it;
- *  - **`kai-open-change` `{ open }`** fires once per change (a guarded reflect
- *    avoids the attribute⇄prop feedback loop);
- *  - **`show()` / `hide()` / `toggle()`** instance methods, gated by `disabled`.
+ * Given the primitive's `{ open, setOpen }` controller it provides:
+ *  - `open` reflected to the host `[open]` attribute for `:host([open])` CSS, and
+ *    settable (`el.open = true` / `<el open>` drives it);
+ *  - `kai-open-change` `{ open }`, once per change (the guarded reflect avoids the
+ *    attribute-to-prop feedback loop);
+ *  - `show()` / `hide()` / `toggle()`, gated by `disabled`.
  *
- * The facade still:
- *  - declares the `open` / `defaultOpen` / `disabled` props (defaults `undefined`),
- *  - seeds the primitive from `defaultOpen` (e.g. via the primitive's own prop),
- *  - includes `'kai-open-change': { open: boolean }` in its `Events` map.
+ * The facade still declares `open` / `defaultOpen` / `disabled`, seeds the primitive
+ * from `defaultOpen`, and lists `'kai-open-change': { open: boolean }` in its Events.
  *
  * @param ctx      the facade's WebComponentContext (its Events must include kai-open-change).
  * @param getApi   returns the open controller once the primitive has handed it up (may be undefined early).
- * @param openProp reads the raw reactive `open` prop (e.g. `() => props.open`) — used to tell
- *                 "consumer explicitly set open" from "unset" so a `defaultOpen` seed isn't clobbered.
+ * @param openProp reads the raw reactive `open` prop (e.g. `() => props.open`), to tell
+ *                 "consumer set open" from "unset" so a `defaultOpen` seed is not clobbered.
  */
 export function wireDisclosure<E extends { 'kai-open-change': { open: boolean } }>(
   ctx: WebComponentContext<E>,
@@ -69,7 +65,7 @@ export function wireDisclosure<E extends { 'kai-open-change': { open: boolean } 
   // element's truth is its internal open signal, not `props.open`. It also installs
   // the read-back accessor, which this wiring needed and did not have: `el.open = true`
   // used to leave `el.open === undefined`, exactly as `kai-chat`'s `loading` did
-  // (findings G-05). Returning `undefined` before the primitive has handed its
+  // Returning `undefined` before the primitive has handed its
   // controller up leaves the author's `<el open>` attribute alone.
   reflectFlag('open', () => getApi()?.open());
 

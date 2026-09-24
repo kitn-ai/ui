@@ -299,6 +299,7 @@ function TokensDisplay(props: { tokens?: number }) {
   return (
     <span>
       {props.tokens === undefined
+        // lint-prop-docs: em-dash-copy -- a no-value placeholder glyph, not prose
         ? '\u2014'
         : fmtCompact.format(props.tokens)}
     </span>

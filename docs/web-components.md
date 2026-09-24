@@ -3,14 +3,14 @@
 ## Overview
 
 <!-- spec:overview -->
-`@kitn.ai/ui` ships 98 framework-agnostic custom elements built on the SolidJS kit.
+`@kitn.ai/ui` ships 100 framework-agnostic custom elements built on the SolidJS kit.
 
 | Tag | Purpose |
 |-----|---------|
 | `<kai-chat>` | Full chat UI — message list plus prompt input |
 | `<kai-conversations>` | Sidebar conversation browser with group support |
 | `<kai-prompt-input>` | Standalone text-input area with send button |
-| + 95 composable custom elements | See the full roster below |
+| + 97 composable custom elements | See the full roster below |
 <!-- /spec:overview -->
 
 Each web component renders into its own **Shadow DOM** so the host page's CSS cannot leak in, and the kit's Tailwind classes cannot leak out. SolidJS and all kit dependencies are bundled inside the web-components bundle — the host does not need SolidJS.
@@ -139,62 +139,63 @@ Every web component also accepts a `theme` attribute (`'light' | 'dark' | 'auto'
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
-| `value` | — | `undefined | string | ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]` | — | Value of the input. A **string** is controlled (the host owns the text and updates it on `kai-value-change`). A **ComposerDoc** is a one-time seed that pre-populates pills; the user then edits freely. Leave unset for uncontrolled. |
+| `value` | — | `undefined | string | ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]` | — | Value of the input: a string is controlled, a `ComposerDoc` is a one-time seed that pre-populates pills, unset is uncontrolled. |
 | `placeholder` | `placeholder` | `undefined | string` | `'Send a message...'` | Placeholder text shown in the empty input. |
-| `loading` | `loading` | `undefined | false | true` | `false` | When true, shows the loading/streaming state and disables submit (use while awaiting the assistant's reply). |
-| `suggestions` | — | `undefined | string[]` | — | Starter prompts shown above the input when the thread is empty. Clicking one follows `suggestionMode`. Set as a JS property. |
-| `suggestionMode` | `suggestion-mode` | `undefined | "submit" | "fill"` | `'submit'` | What clicking a suggestion does: `'submit'` (default) sends it immediately as if typed and submitted; `'fill'` just places it in the input. |
-| `persistSuggestions` | `persist-suggestions` | `undefined | false | true` | `false` | Keep suggestions visible after the conversation starts. By default suggestions are conversation starters and hide once `messages` is non-empty; set this to keep them always shown. Default false. |
-| `proseSize` | `prose-size` | `undefined | "xs" | "sm" | "base" | "lg"` | `'sm'` | Body/prose font scale for rendered markdown (`'xs' | 'sm' | 'base' | 'lg'`). Defaults to `'sm'`. |
+| `loading` | `loading` | `undefined | false | true` | `false` | Disables submit and shows the streaming state. |
+| `suggestions` | — | `undefined | string[]` | — | Starter prompts shown above the input while the thread is empty. |
+| `suggestionMode` | `suggestion-mode` | `undefined | "submit" | "fill"` | `'submit'` | What clicking a suggestion does. Default sends it immediately; `'fill'` places it in the input without sending. |
+| `persistSuggestions` | `persist-suggestions` | `undefined | false | true` | `false` | Keep suggestions visible after the conversation starts; they otherwise hide once `messages` is non-empty. Default false. |
+| `proseSize` | `prose-size` | `undefined | "xs" | "sm" | "base" | "lg"` | `'sm'` | Body/prose font scale for rendered markdown. Defaults to `'sm'`. |
 | `codeTheme` | `code-theme` | `undefined | string` | `'github-dark-dimmed'` | Shiki theme name for syntax-highlighted code blocks (e.g. `'github-dark-dimmed'`). |
-| `codeHighlight` | `code-highlight` | `undefined | false | true` | `true` | Enable Shiki syntax highlighting in code blocks. Turn off to render plain `<pre>` blocks (lighter, no highlighter load). Default true. |
-| `reasoning` | `reasoning` | `undefined | "full" | "compact" | "off"` | — | How `reasoning` parts render across the thread. `'full'` (default) is the current collapsible-disclosure behavior; `'compact'` shows only a shimmer loader while a reasoning part streams and nothing once it settles (no expandable detail); `'off'` renders reasoning parts not at all. Forwarded to every `MessageBody` as `reasoningMode`. |
-| `reasoningOpen` | `reasoning-open` | `undefined | false | true` | — | Seeds the reasoning disclosure open AND keeps it tracking the stream (open while streaming, closes when it settles): the pre-Task-19f `full` behavior. Default false/absent: the panel starts closed (just the "Thinking" shimmer chip) and only opens on click, the current default (owner ruling, 2026-08-26). Meaningless when `reasoning` is `'compact'` or `'off'`. Forwarded to every `MessageBody` as `reasoningDefaultOpen`. |
-| `chatTitle` | `chat-title` | `undefined | string` | — | Optional header title shown on the left of the header. |
-| `models` | — | `undefined | { id: string; name: string; provider?: undefined | string; description?: undefined | string; group?: undefined | string }[]` | — | Optional model list. When set (>1 model) a ModelSwitcher is shown in the header and a `kai-model-change` event fires on selection. |
+| `imagePreview` | `image-preview` | `undefined | "hover" | "lightbox"` | — | How an image tile reveals full size. `'lightbox'` is the only value keyboard and touch can reach. Default `'hover'`. |
+| `codeHighlight` | `code-highlight` | `undefined | false | true` | `true` | Renders plain `<pre>` blocks with no highlighter load when false. Default true. |
+| `reasoning` | `reasoning` | `undefined | "full" | "compact" | "off"` | — | How reasoning parts render. Default is the collapsible disclosure. |
+| `reasoningOpen` | `reasoning-open` | `undefined | false | true` | — | Seeds the reasoning disclosure open and keeps it tracking the stream. Default false; inert unless `reasoning` is `'full'`. |
+| `chatTitle` | `chat-title` | `undefined | string` | — | Title shown at the start of the header bar. |
+| `models` | — | `undefined | { id: string; name: string; provider?: undefined | string; description?: undefined | string; group?: undefined | string }[]` | — | Model list; more than one renders a switcher in the header. |
 | `currentModel` | `current-model` | `undefined | string` | — | The currently selected model id (pairs with `models`). |
-| `context` | — | `ContextData | undefined` | — | Optional context-window token usage. When set, a Context token meter is shown in the header. |
+| `context` | — | `ContextData | undefined` | — | Token usage, shown as a context meter in the header. |
 | `scrollButton` | `scroll-button` | `undefined | false | true` | `true` | Show the scroll-to-bottom button inside the scroll area. Default true. |
-| `headerStart` | `header-start` | `undefined | false | true` | — | Whether the host has `slot="header-start"` content (left of the title). Set by the `<kai-chat>` facade so a custom control forces the header open. |
+| `headerStart` | `header-start` | `undefined | false | true` | — | Whether `slot="header-start"` content is projected, which forces the header row open. |
 | `headerEnd` | `header-end` | `undefined | false | true` | — | Whether the host has `slot="header-end"` content (right of the controls). |
-| `headerFull` | `header-full` | `undefined | false | true` | — | REPLACE: full custom header in place of the built-in title/model/context bar. |
-| `homeFull` | `home-full` | `undefined | false | true` | — | REPLACE: custom home-tab content in place of the built-in home screen (greeting, recent-conversation card, links). Rendered only while the home view is showing, so it is meaningful only when `home` is set; the tab bar and navigation stay the kit's own. Set by the facade when light-DOM `slot="home"` content is projected (region slots, P-6). |
-| `sidebar` | `sidebar` | `undefined | false | true` | — | INJECT: left sidebar column (e.g. a conversation list / your own nav). |
-| `empty` | `empty` | `undefined | false | true` | — | REPLACE: custom zero-state rendered in the message area while the thread is empty (replaces the empty message list only; the composer and its suggestions still render). |
-| `composer` | `composer` | `undefined | false | true` | — | REPLACE: full custom composer in place of the built-in prompt input. The projected content wires its own submit (the data-flow boundary). |
-| `composerActions` | `composer-actions` | `undefined | false | true` | — | INJECT: accessory row just above the composer (e.g. extra actions). |
-| `footer` | `footer` | `undefined | false | true` | — | INJECT: footer row below the composer (disclaimers, token meter, …). |
-| `attach` | `attach` | `undefined | false | true` | `true` | When `false`, hides the built-in paperclip attach button. Defaults to `true` (undeclared keeps today's behavior: attach visible), matching `DefaultPromptInput`'s own default: only an explicit `false` hides it. |
+| `headerFull` | `header-full` | `undefined | false | true` | — | Replaces the built-in header bar with `slot="header"` content. |
+| `homeFull` | `home-full` | `undefined | false | true` | — | Replaces the built-in home screen with `slot="home"` content, while the home view shows. |
+| `sidebar` | `sidebar` | `undefined | false | true` | — | Whether `slot="sidebar"` content is projected, which shows the left sidebar column. |
+| `empty` | `empty` | `undefined | false | true` | — | Replaces the empty-state message area with `slot="empty"` content. The composer still renders. |
+| `composer` | `composer` | `undefined | false | true` | — | Replaces the built-in composer with `slot="composer"` content, which wires its own submit. |
+| `composerActions` | `composer-actions` | `undefined | false | true` | — | Whether `slot="composer-actions"` content is projected, which shows the row above the composer. |
+| `footer` | `footer` | `undefined | false | true` | — | Whether `slot="footer"` content is projected, which shows the footer row below the composer. |
+| `attach` | `attach` | `undefined | false | true` | `true` | Hides the built-in paperclip attach button; only an explicit `false` hides it. Default true. |
 | `webSearch` | `web-search` | `undefined | false | true` | `false` | Show a web-search (Globe) button in the input toolbar; calls `onWebSearch`. |
-| `voice` | `voice` | `undefined | false | true` | `false` | Show a Voice (Mic) button in the input toolbar; fires a `voice` event. |
-| `triggers` | — | `undefined | { char: string; kind: string; items?: undefined | { id: string; label: string; icon?: undefined | string; description?: undefined | string; group?: undefined | string; kind?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }[]` | — | Rich entity triggers. Each `{ char, kind, items }` opens a caret-anchored menu that inserts an atomic pill (`/` skills, `@` agents/plugins). Set as a JS property; forwarded to the input. |
+| `voice` | `voice` | `undefined | false | true` | `false` | Show a voice-input button in the input toolbar; calls `onVoice`. |
+| `triggers` | — | `undefined | { char: string; kind: string; items?: undefined | { id: string; label: string; icon?: undefined | string; description?: undefined | string; group?: undefined | string; kind?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }[]` | — | Rich entity triggers. Each opens a menu at the caret that inserts an atomic pill. |
 | `kindIcons` | — | `undefined | Record<string, string>` | — | Default icon per entity kind (kind → image src) for pills/menu items. |
-| `actionsReveal` | `actions-reveal` | `undefined | "always" | "hover"` | `'always'` | Whether each message's action bar is always visible (`'always'`, default) or only revealed on hover of that message row (`'hover'`). |
-| `userActions` | — | `undefined | ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]` | — | Role-scoped DEFAULT action bars (B-7b): a user message with no `actions` of its own gets `userActions`; an assistant message, `assistantActions`. A per-message `m.actions` OVERRIDES the role default (replace, not merge), so a message that sets `actions: []` renders NO action bar even when a role default is set. Set as JS properties. |
-| `assistantActions` | — | `undefined | ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]` | — | See `userActions`, the assistant-role default. |
-| `hideSources` | `hide-sources` | `undefined | false | true` | `false` | Hide the citations row consecutive `source` parts collapse into (`part="citations"`, message.tsx). Named as a HIDE, not `sources: boolean`, so absence-means-default stays unambiguous: absent/false is today's rendering, byte-for-byte (B-8). |
-| `accept` | `accept` | `undefined | string` | — | Which attachment media types the user may stage, in HTML `accept` syntax: `<kai-chat accept="image/*,application/pdf">`. A plain string, so unlike `messages` it DOES work as an attribute. Omitted means no filter. MEDIA TYPES ONLY -- exact (`image/png`) or subtype wildcard (`text/*`). HTML allows a file extension here and this does not: `accept=".py"` THROWS with the entry named, rather than silently resolving to a picker that accepts nothing. It can only NARROW what the kit can already encode: `accept="image/*"` resolves to the four image formats both APIs take, not to every image type the OS offers. Pass the SAME string to `toOpenAIMessages(msgs, { accept })` and the picker and the wire cannot disagree -- both resolve it through `resolveMediaPolicy` against one declaration. That declaration is readable as `encodableMediaTypes()` from `@kitn.ai/ui/wire`, if you would rather build your own picker than use this prop. |
-| `messages` | — | `undefined | { id: string; role: "user" | "assistant"; parts: ({ type: "text"; text: string; raw?: undefined | { source: string; payload: unknown } } | { type: "reasoning"; text: string; label?: undefined | string; index?: undefined | number; streamId?: undefined | string; signature?: undefined | string; raw?: undefined | { source: string; payload: unknown } } | { type: "tool"; tool: { type: string; kind?: undefined | "command" | "file-change" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; rawInput?: undefined | string; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string; raw?: undefined | { source: string; payload: unknown } }; raw?: undefined | { source: string; payload: unknown } } | { type: "card"; envelope: { type: string; id: string; data: unknown; title?: undefined | string; resolution?: undefined | { kind: "action"; action: string; payload?: unknown; at?: undefined | string } | { kind: "submit"; data: unknown; at?: undefined | string } | { kind: "dismissed"; at?: undefined | string } | { kind: "expired"; reason?: undefined | string; at?: undefined | string } }; raw?: undefined | { source: string; payload: unknown } } | { type: "source"; source: { id?: undefined | string; url?: undefined | string; title?: undefined | string; snippet?: undefined | string; index?: undefined | number }; raw?: undefined | { source: string; payload: unknown } } | { type: "file"; attachment: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }; raw?: undefined | { source: string; payload: unknown } })[]; actions?: undefined | ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string }; feedback?: undefined | "like" | "dislike" }[]` | `[]` | The full message thread to render, newest last. Each entry carries its role, ordered `parts`, and optional actions/avatar/feedback. Set as a JS property (`el.messages = [...]`); a NEW array reference per streaming chunk re-renders (mutating in place does not). Omit for an empty thread. Re-declared here (rather than inherited from `ChatThreadProps`) because the ELEMENT registers a `[]` default and renders the empty state without it, while the SolidJS `<ChatThread>` component still requires it. The facade hands it a validated array either way. Matches `<kai-thread>`. |
-| `cardTypes` | — | `undefined | Record<string, string>` | — | Optional card type -> custom-element tag overrides/additions for `card` parts (merged over the built-ins). Property: `el.cardTypes`. Typed as a plain string map (not the `CardTagMap` alias) so the generated React wrapper inlines it instead of emitting an unresolved named type. |
-| `cardSchemas` | — | `undefined | Record<string, object>` | — | JSON Schemas for the card types this app renders, keyed by envelope type. The companion of `cardTypes`, which says what DRAWS a card while this says what a VALID one looks like. An OBJECT, so it is a JS property only: `el.cardSchemas = { 'pricing-table': pricingSchema }`, never an attribute. `createCardRegistry(...).validationSchemas` is exactly this shape. Without it the kit validates its own seven built-ins and leaves your own card type, the one your app actually cares about, as the only unchecked thing on screen. A schema here WINS over a built-in of the same name. Typed `Record<string, object>` rather than `Record<string, JsonSchema>` deliberately: an imported `.json` schema widens `"type"` to `string`, and an authored one carries `$schema`/`title`/`description`/`additionalProperties`, so the tighter type would reject both of the normal ways to supply one. |
-| `conversations` | `conversations` | `undefined | false | true` | `false` | Turns on the prior-conversations list (a list-toggle button in the header, plus a second list view sharing the panel, C-1). Attribute- settable like every other boolean flag on this element: `<kai-chat conversations>`. Requires `store`. A row select, "new conversation," or the visitor's mount-time auto-restore all deliver their messages the same way: listen for `kai-conversation-load` and set `el.messages` from `event.detail.messages` (a fresh array): this element does not update `messages` for you. Set with no `store`, the underlying `ChatThread` decides loudly (one console.error) and stays visually off; this facade always supplies its own internal load handler (the `kai-conversation-load` dispatch below), so the second ChatThread guard, missing `onConversationLoad`, never trips here, even for a consumer who never listens for the event. Default false. |
-| `store` | — | `undefined | { list: () => Promise<{ id: string; title: string; groupId?: undefined | string; scope?: undefined | { type: "document" | "collection"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | "transcript" | "markdown"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt?: undefined | string; updatedAt: string; trailing?: undefined | string; lastReadAt?: undefined | string }[]>; load: (id: string) => Promise<{ id: string; role: "user" | "assistant"; parts: ({ type: "text"; text: string; raw?: undefined | { source: string; payload: unknown } } | { type: "reasoning"; text: string; label?: undefined | string; index?: undefined | number; streamId?: undefined | string; signature?: undefined | string; raw?: undefined | { source: string; payload: unknown } } | { type: "tool"; tool: { type: string; kind?: undefined | "command" | "file-change" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; rawInput?: undefined | string; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string; raw?: undefined | { source: string; payload: unknown } }; raw?: undefined | { source: string; payload: unknown } } | { type: "card"; envelope: { type: string; id: string; data: unknown; title?: undefined | string; resolution?: undefined | { kind: "action"; action: string; payload?: unknown; at?: undefined | string } | { kind: "submit"; data: unknown; at?: undefined | string } | { kind: "dismissed"; at?: undefined | string } | { kind: "expired"; reason?: undefined | string; at?: undefined | string } }; raw?: undefined | { source: string; payload: unknown } } | { type: "source"; source: { id?: undefined | string; url?: undefined | string; title?: undefined | string; snippet?: undefined | string; index?: undefined | number }; raw?: undefined | { source: string; payload: unknown } } | { type: "file"; attachment: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }; raw?: undefined | { source: string; payload: unknown } })[]; actions?: undefined | ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string }; feedback?: undefined | "like" | "dislike" }[]>; save: (id: string, messages: { id: string; role: "user" | "assistant"; parts: ({ type: "text"; text: string; raw?: undefined | { source: string; payload: unknown } } | { type: "reasoning"; text: string; label?: undefined | string; index?: undefined | number; streamId?: undefined | string; signature?: undefined | string; raw?: undefined | { source: string; payload: unknown } } | { type: "tool"; tool: { type: string; kind?: undefined | "command" | "file-change" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; rawInput?: undefined | string; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string; raw?: undefined | { source: string; payload: unknown } }; raw?: undefined | { source: string; payload: unknown } } | { type: "card"; envelope: { type: string; id: string; data: unknown; title?: undefined | string; resolution?: undefined | { kind: "action"; action: string; payload?: unknown; at?: undefined | string } | { kind: "submit"; data: unknown; at?: undefined | string } | { kind: "dismissed"; at?: undefined | string } | { kind: "expired"; reason?: undefined | string; at?: undefined | string } }; raw?: undefined | { source: string; payload: unknown } } | { type: "source"; source: { id?: undefined | string; url?: undefined | string; title?: undefined | string; snippet?: undefined | string; index?: undefined | number }; raw?: undefined | { source: string; payload: unknown } } | { type: "file"; attachment: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }; raw?: undefined | { source: string; payload: unknown } })[]; actions?: undefined | ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string }; feedback?: undefined | "like" | "dislike" }[]) => Promise<void>; markRead?: undefined | ((id: string) => Promise<void>) }` | — | The adapter this thread persists conversations through: an object of three functions (`list`/`load`/`save`; `ConversationStore`, exported from `@kitn.ai/ui`'s `primitives/conversation-store`). A JS PROPERTY ONLY: `el.store = myAdapter`. It can never be an attribute, since a function-bearing object has no HTML string form, the same reasoning that keeps `messages`/`cardSchemas` property-only (the kai- contract: array/object props are JS properties, never attributes). Two built-ins ship: `localStorageStore(name, userId?)` and `fetchStore(url, userId?)`. |
-| `home` | — | `undefined | { greeting?: undefined | { title?: undefined | string; subtitle?: undefined | string }; recentConversation?: undefined | false | true; newConversation?: undefined | { label?: undefined | string }; links?: undefined | { label: string; href?: undefined | string; description?: undefined | string; icon?: undefined | string }[] }` | — | Turns on the widget home screen (Intercom-pattern): the panel boots into a `home` view, with a greeting, most-recent-conversation card, a "new conversation" CTA, and host-defined links, plus a Home/Messages tab bar for switching back to the thread. An OBJECT, so it is a JS property only: `el.home = { greeting: { title: 'Hey' }, links: [...] }`, never an attribute (the kai- contract: array/object props are JS properties). A `links` entry with no `href` fires `kai-home-link` with that entry when tapped, rather than navigating; one WITH `href` opens it directly (only when the URL passes the kit's own scheme allowlist). Omit for the no-home widget (chat view only, unchanged). |
-| `hostOpen` | `host-open` | `undefined | false | true` | `true` | Whether the chrome that HOSTS this element is currently VISIBLE to the visitor, e.g. a composed launcher/dock's open state. Set as a JS PROPERTY (`el.hostOpen = open`), never an attribute: the default is `true` and an HTML attribute's presence can only ever say "true", so there is no attribute form that expresses the one value worth setting (`false`). Meaningful only with `conversations` on, where it is the third leg of "seen": the active conversation is marked read only while it is active AND the chat view is showing AND this is `true`. Leave it unset for any layout with no show/hide concept (fullscreen, aside, split); that just means unread never distinguishes "closed" from "open". The companion of the `kai-unread-change` event: set this from your launcher's open state, mirror that event onto its badge. |
+| `actionsReveal` | `actions-reveal` | `undefined | "always" | "hover"` | `'always'` | Whether each message's action bar is visible at rest or revealed on pointer-over. Visible at rest by default. |
+| `userActions` | — | `undefined | ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]` | — | Default action bar for user messages that have no `actions` of their own; a message's own `actions` replaces it. |
+| `assistantActions` | — | `undefined | ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]` | — | Default action bar for assistant messages, as `userActions` is for user ones. |
+| `hideSources` | `hide-sources` | `undefined | false | true` | `false` | Hide the citations row that consecutive `source` parts collapse into; absent or `false` renders it. |
+| `accept` | `accept` | `undefined | string` | — | Which attachment media types the user may stage, in HTML `accept` syntax. Omitted = no filter; media types only, an extension THROWS. |
+| `messages` | — | `undefined | { id: string; role: "user" | "assistant"; parts: ({ type: "text"; text: string; raw?: undefined | { source: string; payload: unknown } } | { type: "reasoning"; text: string; label?: undefined | string; index?: undefined | number; streamId?: undefined | string; signature?: undefined | string; raw?: undefined | { source: string; payload: unknown } } | { type: "tool"; tool: { type: string; kind?: undefined | "command" | "file-change" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; rawInput?: undefined | string; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string; raw?: undefined | { source: string; payload: unknown } }; raw?: undefined | { source: string; payload: unknown } } | { type: "card"; envelope: { type: string; id: string; data: unknown; title?: undefined | string; resolution?: undefined | { kind: "action"; action: string; payload?: unknown; at?: undefined | string } | { kind: "submit"; data: unknown; at?: undefined | string } | { kind: "dismissed"; at?: undefined | string } | { kind: "expired"; reason?: undefined | string; at?: undefined | string } }; raw?: undefined | { source: string; payload: unknown } } | { type: "source"; source: { id?: undefined | string; url?: undefined | string; title?: undefined | string; snippet?: undefined | string; index?: undefined | number }; raw?: undefined | { source: string; payload: unknown } } | { type: "file"; attachment: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }; raw?: undefined | { source: string; payload: unknown } })[]; actions?: undefined | ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string }; feedback?: undefined | "like" | "dislike" }[]` | `[]` | The message thread to render, newest last. JS property; pass a NEW array per streaming chunk. Omit for an empty thread. |
+| `cardTypes` | — | `undefined | Record<string, string>` | — | Card type → custom-element tag overrides/additions, merged over the built-ins. JS property: `el.cardTypes`. |
+| `cardSchemas` | — | `undefined | Record<string, object>` | — | Card-type JSON Schemas keyed by envelope type; validates each card's `data`. JS property: `el.cardSchemas`. |
+| `conversations` | `conversations` | `undefined | false | true` | `false` | Turns on the prior-conversations list. Requires `store`; default `false`; a load arrives as `kai-conversation-load` -- set `el.messages` yourself. |
+| `store` | — | `undefined | { list: () => Promise<{ id: string; title: string; groupId?: undefined | string; scope?: undefined | { type: "document" | "collection"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | "transcript" | "markdown"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt?: undefined | string; updatedAt: string; trailing?: undefined | string; lastReadAt?: undefined | string }[]>; load: (id: string) => Promise<{ id: string; role: "user" | "assistant"; parts: ({ type: "text"; text: string; raw?: undefined | { source: string; payload: unknown } } | { type: "reasoning"; text: string; label?: undefined | string; index?: undefined | number; streamId?: undefined | string; signature?: undefined | string; raw?: undefined | { source: string; payload: unknown } } | { type: "tool"; tool: { type: string; kind?: undefined | "command" | "file-change" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; rawInput?: undefined | string; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string; raw?: undefined | { source: string; payload: unknown } }; raw?: undefined | { source: string; payload: unknown } } | { type: "card"; envelope: { type: string; id: string; data: unknown; title?: undefined | string; resolution?: undefined | { kind: "action"; action: string; payload?: unknown; at?: undefined | string } | { kind: "submit"; data: unknown; at?: undefined | string } | { kind: "dismissed"; at?: undefined | string } | { kind: "expired"; reason?: undefined | string; at?: undefined | string } }; raw?: undefined | { source: string; payload: unknown } } | { type: "source"; source: { id?: undefined | string; url?: undefined | string; title?: undefined | string; snippet?: undefined | string; index?: undefined | number }; raw?: undefined | { source: string; payload: unknown } } | { type: "file"; attachment: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }; raw?: undefined | { source: string; payload: unknown } })[]; actions?: undefined | ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string }; feedback?: undefined | "like" | "dislike" }[]>; save: (id: string, messages: { id: string; role: "user" | "assistant"; parts: ({ type: "text"; text: string; raw?: undefined | { source: string; payload: unknown } } | { type: "reasoning"; text: string; label?: undefined | string; index?: undefined | number; streamId?: undefined | string; signature?: undefined | string; raw?: undefined | { source: string; payload: unknown } } | { type: "tool"; tool: { type: string; kind?: undefined | "command" | "file-change" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; rawInput?: undefined | string; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string; raw?: undefined | { source: string; payload: unknown } }; raw?: undefined | { source: string; payload: unknown } } | { type: "card"; envelope: { type: string; id: string; data: unknown; title?: undefined | string; resolution?: undefined | { kind: "action"; action: string; payload?: unknown; at?: undefined | string } | { kind: "submit"; data: unknown; at?: undefined | string } | { kind: "dismissed"; at?: undefined | string } | { kind: "expired"; reason?: undefined | string; at?: undefined | string } }; raw?: undefined | { source: string; payload: unknown } } | { type: "source"; source: { id?: undefined | string; url?: undefined | string; title?: undefined | string; snippet?: undefined | string; index?: undefined | number }; raw?: undefined | { source: string; payload: unknown } } | { type: "file"; attachment: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }; raw?: undefined | { source: string; payload: unknown } })[]; actions?: undefined | ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string }; feedback?: undefined | "like" | "dislike" }[]) => Promise<void>; markRead?: undefined | ((id: string) => Promise<void>) }` | — | The persistence adapter: `{ list, load, save }`. JS property only (`el.store = myAdapter`). |
+| `home` | — | `undefined | { greeting?: undefined | { title?: undefined | string; subtitle?: undefined | string }; recentConversation?: undefined | false | true; newConversation?: undefined | { label?: undefined | string }; links?: undefined | { label: string; href?: undefined | string; description?: undefined | string; icon?: undefined | string }[] }` | — | Turns on the Home screen (greeting, recent conversation, links, Home/Messages tabs). JS property; omit for the chat-only widget. |
+| `hostOpen` | `host-open` | `undefined | false | true` | `true` | Whether the chrome hosting this element is visible (e.g. a launcher's open state). JS property only; `false` has no attribute form. |
 
 #### Events
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
 | `kai-attachments-change` | `{ attachments: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }` | The staged attachments changed (file added or removed). Carries the full current list so a consumer can react in real time. |
-| `kai-attachments-rejected` | `{ rejected: { filename: string; mediaType: string; reason: "filtered" | "unsupported" }[] }` | One or more picked files were refused because `accept` excluded them. The element renders NO message of its own: it reports the facts (name, media type, whether the kit could have sent it) and what the user should see is the application's call. Only ever fires when `accept` is set. |
-| `kai-conversation-load` | `{ id: string | undefined; messages: { id: string; role: "user" | "assistant"; parts: ({ type: "text"; text: string; raw?: undefined | { source: string; payload: unknown } } | { type: "reasoning"; text: string; label?: undefined | string; index?: undefined | number; streamId?: undefined | string; signature?: undefined | string; raw?: undefined | { source: string; payload: unknown } } | { type: "tool"; tool: { type: string; kind?: undefined | "command" | "file-change" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; rawInput?: undefined | string; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string; raw?: undefined | { source: string; payload: unknown } }; raw?: undefined | { source: string; payload: unknown } } | { type: "card"; envelope: { type: string; id: string; data: unknown; title?: undefined | string; resolution?: undefined | { kind: "action"; action: string; payload?: unknown; at?: undefined | string } | { kind: "submit"; data: unknown; at?: undefined | string } | { kind: "dismissed"; at?: undefined | string } | { kind: "expired"; reason?: undefined | string; at?: undefined | string } }; raw?: undefined | { source: string; payload: unknown } } | { type: "source"; source: { id?: undefined | string; url?: undefined | string; title?: undefined | string; snippet?: undefined | string; index?: undefined | number }; raw?: undefined | { source: string; payload: unknown } } | { type: "file"; attachment: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }; raw?: undefined | { source: string; payload: unknown } })[]; actions?: undefined | ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string }; feedback?: undefined | "like" | "dislike" }[] }` | A conversation's history loaded: a row tap in the list, "new conversation," or the visitor's own mount-time auto-restore of their most recent thread (only fires when `conversations` is on and a `store` is set). `detail.id` is that conversation's id, `undefined` for the "new conversation" case (no id exists until the first message mints one, C-6). Set `el.messages = event.detail.messages` (already a fresh array) to actually render it, since this element does not do that for you; `messages` stays your own state like everywhere else on this element. |
+| `kai-attachments-rejected` | `{ rejected: { filename: string; mediaType: string; reason: "filtered" | "unsupported" }[] }` | One or more picked files were refused because `accept` excluded them. Renders no message of its own; only fires when `accept` is set. |
+| `kai-conversation-load` | `{ id: string | undefined; messages: { id: string; role: "user" | "assistant"; parts: ({ type: "text"; text: string; raw?: undefined | { source: string; payload: unknown } } | { type: "reasoning"; text: string; label?: undefined | string; index?: undefined | number; streamId?: undefined | string; signature?: undefined | string; raw?: undefined | { source: string; payload: unknown } } | { type: "tool"; tool: { type: string; kind?: undefined | "command" | "file-change" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; rawInput?: undefined | string; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string; raw?: undefined | { source: string; payload: unknown } }; raw?: undefined | { source: string; payload: unknown } } | { type: "card"; envelope: { type: string; id: string; data: unknown; title?: undefined | string; resolution?: undefined | { kind: "action"; action: string; payload?: unknown; at?: undefined | string } | { kind: "submit"; data: unknown; at?: undefined | string } | { kind: "dismissed"; at?: undefined | string } | { kind: "expired"; reason?: undefined | string; at?: undefined | string } }; raw?: undefined | { source: string; payload: unknown } } | { type: "source"; source: { id?: undefined | string; url?: undefined | string; title?: undefined | string; snippet?: undefined | string; index?: undefined | number }; raw?: undefined | { source: string; payload: unknown } } | { type: "file"; attachment: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }; raw?: undefined | { source: string; payload: unknown } })[]; actions?: undefined | ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string }; feedback?: undefined | "like" | "dislike" }[] }` | A conversation's history loaded. Set `el.messages` from `detail.messages` -- the element does not render it for you. |
 | `kai-home-link` | `{ entry: { label: string; href?: undefined | string; description?: undefined | string; icon?: undefined | string } }` | A `home.links` entry with no `href` was activated (tapped/clicked/Enter). Meaningful only when `home` is set. |
-| `kai-message-action` | `{ messageId: string; action: string; state?: undefined | "on" | "off" }` | An action button on a message was clicked. `action` is the built-in name or custom id. `state` is present only for the toggleable feedback votes: `'on'` when a like/dislike is set, `'off'` when re-tapped to clear. |
+| `kai-message-action` | `{ messageId: string; action: string; state?: undefined | "on" | "off" }` | An action button on a message was clicked. `action` is the built-in name or a custom id. |
 | `kai-model-change` | `{ modelId: string }` | The header model switcher changed. |
 | `kai-submit` | `{ value: string; attachments: AttachmentData[] }` | User submitted a message. |
 | `kai-suggestion-click` | `{ value: string }` | A suggestion chip was clicked (only in `suggestion-mode="fill"`). |
-| `kai-unread-change` | `{ unread: false | true }` | "Is any conversation OTHER than the currently-seen one unread" changed. This is the same value this element already renders as the dot on its own header list toggle, reported outward so a sibling control with no view into the internal conversation-summary state (a composed launcher's badge, a `kai-dock`'s `unread` prop) can mirror it: set `dock.unread = event.detail.unread`. Fires on every change, including the initial `false`. Only meaningful with `conversations` on; pairs with the `hostOpen` property, which is what lets "arrived while the widget was closed" count as unread for the active conversation too. |
+| `kai-unread-change` | `{ unread: false | true }` | Whether a conversation OTHER than the one on screen is unread. Mirror it onto a launcher badge (`dock.unread = detail.unread`). |
 | `kai-value-change` | `{ value: string }` | Fired on every input change. |
 | `kai-voice` | — | The Mic / voice button was clicked. |
 | `kai-web-search` | — | The web-search (Globe) toolbar button was clicked. |
@@ -211,7 +212,7 @@ Call these on the element instance: `document.querySelector('kai-chat').focus(�
 | `send` | `(): void` | Submit whatever the composer currently holds, on the same path as Enter or the send button: fires `kai-submit` with that value plus the staged attachments, then drops the attachments. It takes no argument, so to send text the user never typed, set `el.value` first. There is no empty-check, so an empty composer still fires. The draft is cleared afterwards only when `value` is uncontrolled; a controlled host owns its value and clears it itself. Named `send`, not `submit`, to match the shared vocabulary. |
 | `scrollToBottom` | `(behavior?: ScrollBehavior): void` | Scroll the message viewport to the newest message. Defaults to `'smooth'`; pass `'instant'` to jump without animating. |
 | `closeConversationsList` | `(): void` | Force the widget back to its default landing view: `'home'` when the `home` property is set, `'chat'` otherwise (a no-op if already there, or if neither `home` nor `conversations` is on). This element has no knowledge of whatever chrome hosts it, so it cannot know when that host closes; a composed launcher/dock calls this on every hide so the NEXT open lands on the default screen rather than wherever the conversations list was left. `kai-dock`'s `kai-open-change` fires on every close path (header X, launcher toggle, Escape), so one listener covers all three. |
-| `startNewConversation` | `(): void` | Start a fresh conversation, on the same path as the list view's "+ New conversation" row: clears the active conversation id, returns to the chat view, and delivers `[]` through `kai-conversation-load` (set `el.messages = event.detail.messages` like every other load; this element never updates `messages` for you). The seam a composed app's own "New conversation" control drives (B-10; the construct shell palette's entry rides the same controller call). No id is minted until the first message (C-6), so calling this on an already-empty new conversation is a harmless no-op. |
+| `startNewConversation` | `(): void` | Start a fresh conversation, on the same path as the list view's "+ New conversation" row: clears the active conversation id, returns to the chat view, and delivers `[]` through `kai-conversation-load` (set `el.messages = event.detail.messages` like every other load; this element never updates `messages` for you). The seam a composed app's own "New conversation" control drives; the construct shell palette's entry rides the same controller call). No id is minted until the first message, so calling this on an already-empty new conversation is a harmless no-op. |
 
 #### Slots
 
@@ -261,13 +262,13 @@ A complete chat interface: a scrolling message list (with Markdown rendering, re
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
-| `startCollapsed` | `start-collapsed` | `undefined | false | true` | — | Controlled collapsed state of the start aside. Set this as a JS property (`el.startCollapsed = true`) to drive the aside from your app, updating it in response to the `kai-aside-toggle` event. Omit for uncontrolled (the element manages it). |
+| `startCollapsed` | `start-collapsed` | `undefined | false | true` | — | Controlled collapsed state of the start aside. Omit for uncontrolled (the element manages it). |
 | `defaultStartCollapsed` | `default-start-collapsed` | `undefined | false | true` | — | Initial collapsed state of the start aside when uncontrolled (default false). Use the `default-start-collapsed` attribute to start collapsed in plain HTML. |
-| `endCollapsed` | `end-collapsed` | `undefined | false | true` | — | Controlled collapsed state of the end aside. Set this as a JS property (`el.endCollapsed = true`) to drive the aside from your app, updating it in response to the `kai-aside-toggle` event. Omit for uncontrolled (the element manages it). |
+| `endCollapsed` | `end-collapsed` | `undefined | false | true` | — | Controlled collapsed state of the end aside. Omit for uncontrolled (the element manages it). |
 | `defaultEndCollapsed` | `default-end-collapsed` | `undefined | false | true` | — | Initial collapsed state of the end aside when uncontrolled (default false). Use the `default-end-collapsed` attribute to start collapsed in plain HTML. |
-| `collapseBelow` | `collapse-below` | `undefined | number` | — | Auto-collapse both asides when the shell's own width drops below this many px, and re-expand when it grows back above. Applies to uncontrolled asides only (it never fights an app-driven collapsed prop); omit to disable. Fires `kai-aside-toggle`. Attribute: `collapse-below`. |
-| `drawerBelow` | `drawer-below` | `undefined | number` | — | Below this shell width in px, an expanded aside renders as an overlay drawer over the main region instead of a column beside it. Escape inside the drawer closes it and returns focus to the element focused before it opened. Omit to disable. Attribute: `drawer-below`. |
-| `compact` | `compact` | `undefined | false | true` | — | Density hint. Reflected as a `data-compact` hook on the root (and as the `compact` attribute on the element) for your CSS and slotted content; the shell itself keeps no other opinion about density. |
+| `collapseBelow` | `collapse-below` | `undefined | number` | — | Auto-collapse both asides when the shell's own width drops below this many px, and re-expand above it. |
+| `drawerBelow` | `drawer-below` | `undefined | number` | — | Below this shell width in px, an expanded aside renders as an overlay drawer over the main region. |
+| `compact` | `compact` | `undefined | false | true` | — | Density hint. |
 
 #### Events
 
@@ -375,14 +376,14 @@ The full app shell in one tag — a collapsible conversation-list sidebar (left)
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
-| `groups` | — | `undefined | { id: string; userId?: undefined | string; teamId?: undefined | string; name: string; sortOrder: number; createdAt: string }[]` | `[]` | The list's section headers (`{ id, name, sortOrder, createdAt }`), rendered in array order. A group carries no conversations of its own; it is matched against `conversations` by id, so the two props are complementary rather than alternatives. Omit for an ungrouped list. Set as a JS property. |
-| `conversations` | — | `undefined | { id: string; title: string; groupId?: undefined | string; scope?: undefined | { type: "document" | "collection"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | "transcript" | "markdown"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt?: undefined | string; updatedAt: string; trailing?: undefined | string; lastReadAt?: undefined | string }[]` | `[]` | Every conversation the list renders, flat. Each one is filed under the group whose `id` equals its `groupId`; one with no `groupId`, or with a `groupId` matching no entry in `groups`, falls into a trailing "Ungrouped" section, so nothing you pass in is ever dropped. There is no recency bucketing. Set as a JS property. Omit to supply them as `<kai-conversation>` light-DOM children instead, or for the empty state. A search query that matches nothing shows a visible "No conversations match your search" state, distinct from the zero-conversations empty state. Slotted `<kai-conversation-item>` children switch the list into item mode instead: your own rows win and this array is not rendered. |
+| `groups` | — | `undefined | { id: string; userId?: undefined | string; teamId?: undefined | string; name: string; sortOrder: number; createdAt: string }[]` | `[]` | The list's section headers (`{ id, name, sortOrder, createdAt }`) in array order. JS property; omit for an ungrouped list. |
+| `conversations` | — | `undefined | { id: string; title: string; groupId?: undefined | string; scope?: undefined | { type: "document" | "collection"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | "transcript" | "markdown"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt?: undefined | string; updatedAt: string; trailing?: undefined | string; lastReadAt?: undefined | string }[]` | `[]` | The conversations to render, flat. JS property; omit to pass `<kai-conversation>` light-DOM children instead, or for the empty state. |
 | `activeId` | `active-id` | `undefined | string` | — | The id of the currently-open conversation, highlighted in the list. |
-| `collapsed` | `collapsed` | `undefined | false | true` | — | Controlled collapsed state. Set as a JS property (`el.collapsed = true`) to drive the rail from your app, updating it in response to `kai-collapse-toggle`. Omit for uncontrolled (the element manages it). Collapsed shrinks the rail to a floating reopen button. |
+| `collapsed` | `collapsed` | `undefined | false | true` | — | Controlled collapsed state (`el.collapsed = true`). Omit for uncontrolled; collapsed shrinks the rail to a reopen button. |
 | `defaultCollapsed` | `default-collapsed` | `undefined | false | true` | — | Initial collapsed state when uncontrolled (default false). Use the `default-collapsed` attribute to start collapsed in plain HTML. |
 | `compact` | `compact` | `undefined | false | true` | — | Dense single-line rows (a leading dot + title, no message count). |
-| `density` | `density` | `undefined | "default" | "compact" | "panel"` | — | Row density for the data rows: `default`, `compact` (same as the `compact` flag), or `panel`, the widget-panel presentation matching the facade panel's measured row box (12px/10px padding, a 40px single-line row with a right-aligned relative time and an optional preview line carrying the unread dot). An explicit density wins over `compact`. Item mode is unaffected: slotted `<kai-conversation-item>` rows carry their own `density` attribute. |
-| `searchable` | `searchable` | `undefined | false | true` | `true` | Show the built-in search box above the list. Default `true`. Set `searchable="false"` (or `el.searchable = false`) to hide it: the widget-box case, where the facade's own list view renders no search and a fine-grain composition previously had no way to match it (2026-08-31 composition spike, phase 3 round 2). Same default-true flag convention as `<kai-prompt-input attach>`: `<kai-conversations searchable>` and omitting it are both ON. Hidden, the `focus()`/`clear()` methods reach no input and `kai-search` never fires. |
+| `density` | `density` | `undefined | "default" | "compact" | "panel"` | — | Row density: `default`, `compact` (same as the `compact` flag), or `panel` (the widget-panel row box). |
+| `searchable` | `searchable` | `undefined | false | true` | `true` | Show the built-in search box above the list. Default `true`; `searchable="false"` hides it. |
 
 #### Events
 
@@ -424,7 +425,7 @@ Compose these in light DOM instead of setting the JS property — the no-JS rout
 
 | Child element | Attributes | Text content | Notes |
 |---------------|------------|--------------|-------|
-| `<kai-conversation>` | `group-id`, `id` | yes | Parse a single light-DOM `<kai-conversation>` element into a `ConversationSummary`. Attribute mapping: - `id` → ConversationSummary.id - `group-id` → ConversationSummary.groupId (optional) - textContent → ConversationSummary.title Fields not expressible as HTML attributes are NOT fabricated: the optional `scope` and `lastMessageAt` stay absent, and the required `messageCount`/`updatedAt` get honest defaults — zero messages, and an empty `updatedAt` from which no trailing relative time is derived (the epoch it used to fabricate rendered a bogus "many days ago" on every declarative row). |
+| `<kai-conversation>` | `group-id`, `id` | yes | Parse a single light-DOM `<kai-conversation>` element into a `ConversationSummary`. Attribute mapping: - `id` → ConversationSummary.id - `group-id` → ConversationSummary.groupId (optional) - textContent → ConversationSummary.title Fields not expressible as HTML attributes are NOT fabricated: the optional `scope` and `lastMessageAt` stay absent, and the required `messageCount`/`updatedAt` get honest defaults: zero messages, and an empty `updatedAt` from which no trailing relative time is derived (the epoch it used to fabricate rendered a bogus "many days ago" on every declarative row). |
 
 #### Styleable parts
 
@@ -456,28 +457,28 @@ Sidebar panel listing conversations, optionally grouped. Emits events for naviga
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
-| `value` | — | `undefined | string | ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]` | — | Value of the input, as a JS property. A **string** is the controlled text mirror (the host owns it and updates on `kai-value-change`). A **ComposerDoc** (array of text/entity segments) is a one-time **seed** that pre-populates pills (skills/agents/plugins); the user then edits freely. Leave unset for uncontrolled behavior. `kai-submit`/`kai-value-change` always emit `value` as the flattened string (back-compat) plus the structured `doc` + `entities`. |
+| `value` | — | `undefined | string | ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]` | — | Value of the input: a **string** is the controlled text mirror, a **ComposerDoc** is a one-time pill seed. |
 | `placeholder` | `placeholder` | `undefined | string` | `'Send a message...'` | Placeholder text shown in the empty input. |
 | `disabled` | `disabled` | `undefined | false | true` | `false` | Disable the input and submit button entirely (non-interactive). |
 | `loading` | `loading` | `undefined | false | true` | `false` | Show the loading/streaming state and block submit (use while awaiting a reply). |
 | `suggestions` | — | `undefined | string[]` | — | Starter prompts shown above the input. Clicking one follows `suggestionMode`. Set as a JS property. |
-| `suggestionMode` | `suggestion-mode` | `undefined | "submit" | "fill"` | `'submit'` | What clicking a suggestion does: `'submit'` (default) sends it immediately as if typed and submitted; `'fill'` just places it in the input. |
+| `suggestionMode` | `suggestion-mode` | `undefined | "submit" | "fill"` | `'submit'` | What clicking a suggestion does. Defaults to `'submit'`. |
 | `webSearch` | `web-search` | `undefined | false | true` | `false` | Show a web-search (Globe) button in the left toolbar; clicking it fires a `kai-web-search` event. Attribute: `web-search`. |
 | `voice` | `voice` | `undefined | false | true` | `false` | Show a Voice (Mic) button in the left toolbar; clicking it fires a `voice` event. |
 | `stoppable` | `stoppable` | `undefined | false | true` | `false` | When set and `loading` is true, the send button is replaced by a Stop button (square icon, "Stop" aria-label). Clicking it fires `kai-stop`. |
-| `submit` | `submit` | `undefined | "always" | "auto"` | `'always'` | Send-button visibility. `'always'` (default) always shows it; `'auto'` shows it only when there's text/attachments (an empty composer hides it, though Enter still submits). To hide it entirely (Enter-only), it's pure CSS: `::part(send){display:none}`, no prop needed. Restyle via `::part(send)`. The Stop button (`stoppable` + `loading`) is unaffected. |
-| `attach` | `attach` | `undefined | false | true` | `true` | When `false`, hides the built-in paperclip attach button even though the element otherwise supports attachments. Use this when a `+` menu in `toolbar-start` already exposes "Add files", to avoid a duplicate control. Defaults to `true`. |
-| `attachments` | — | `AttachmentData[] | undefined` | — | Attachments to seed the input with (so a consumer can pre-populate staged files without an upload). Set as a JS property; the element then manages its own attachment state from there (add via the paperclip, remove per chip). Each item's `url` must be a `data:` URI or an https URL, never `URL.createObjectURL`: a `blob:` URL previews perfectly and is meaningless outside this tab, so `toOpenAIMessages`/`toAnthropicMessages` refuse it. (The built-in paperclip already stages files as `data:` URIs.) |
-| `triggers` | — | `undefined | { char: string; kind: string; items?: undefined | { id: string; label: string; icon?: undefined | string; description?: undefined | string; group?: undefined | string; kind?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }[]` | — | Rich entity triggers. Each `{ char, kind, items }` opens a caret-anchored menu that inserts an atomic pill. Convention: `/` → skills, `@` → agents (plugins are the grouping/provenance of those items). Set as a JS property. |
+| `submit` | `submit` | `undefined | "always" | "auto"` | `'always'` | Send-button visibility. Defaults to `'always'`. |
+| `attach` | `attach` | `undefined | false | true` | `true` | Show the built-in paperclip attach button. Default `true`. |
+| `attachments` | — | `AttachmentData[] | undefined` | — | Attachments to seed the input with. Each `url` must be a `data:` URI or https URL, never `blob:`. |
+| `triggers` | — | `undefined | { char: string; kind: string; items?: undefined | { id: string; label: string; icon?: undefined | string; description?: undefined | string; group?: undefined | string; kind?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }[]` | — | Rich entity triggers. Each `{ char, kind, items }` opens a caret-anchored menu that inserts an atomic pill. JS property. |
 | `kindIcons` | — | `undefined | Record<string, string>` | — | Default icon per entity kind (kind → image URL/data-URI) for pills/menu items without their own `icon`. Overrides the built-in agent/plugin glyphs. JS property. |
 
 #### Events
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
-| `kai-attachments-change` | `{ attachments: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }` | The staged attachments changed: a file was added (via the paperclip) or removed (per-chip ×). Carries the full current list so a consumer can react in real time (validate, show upload progress, toggle the send button). |
+| `kai-attachments-change` | `{ attachments: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }` | The staged attachments changed (file added or removed). Carries the full current list so a consumer can react in real time. |
 | `kai-stop` | — | The Stop button was clicked while `stoppable` and `loading` are both true. |
-| `kai-submit` | `{ value: string; doc: ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]; entities: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[]; attachments: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }` | The user submitted the prompt (Enter or send button). `value` is the flattened text (back-compat); `doc` is the structured document and `entities` the inserted pills (skills/agents) for downstream expansion. `<kai-prompt-input>` is the batteries-included composer row (send button, toolbar, attachment staging) built on `<kai-composer>`, the bare editor. |
+| `kai-submit` | `{ value: string; doc: ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]; entities: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[]; attachments: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }` | The user submitted the prompt (Enter or send button). `value` is the flattened text. |
 | `kai-suggestion-click` | `{ value: string }` | A suggestion was clicked while `suggestion-mode="fill"`. |
 | `kai-toolbar-action` | `{ action: string }` | A custom `<kai-action>` toolbar button was clicked. `action` is the `id` of the `<kai-action>` element that was clicked. |
 | `kai-value-change` | `{ value: string; doc: ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]; entities: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }` | The input changed (fires on every edit). Carries the flattened `value` plus the structured `doc` + `entities`. |
@@ -543,23 +544,23 @@ Standalone prompt input with a send button. Use when you want just the input are
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
 | `message` | — | `undefined | { id: string; role: "user" | "assistant"; parts: ({ type: "text"; text: string; raw?: undefined | { source: string; payload: unknown } } | { type: "reasoning"; text: string; label?: undefined | string; index?: undefined | number; streamId?: undefined | string; signature?: undefined | string; raw?: undefined | { source: string; payload: unknown } } | { type: "tool"; tool: { type: string; kind?: undefined | "command" | "file-change" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; rawInput?: undefined | string; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string; raw?: undefined | { source: string; payload: unknown } }; raw?: undefined | { source: string; payload: unknown } } | { type: "card"; envelope: { type: string; id: string; data: unknown; title?: undefined | string; resolution?: undefined | { kind: "action"; action: string; payload?: unknown; at?: undefined | string } | { kind: "submit"; data: unknown; at?: undefined | string } | { kind: "dismissed"; at?: undefined | string } | { kind: "expired"; reason?: undefined | string; at?: undefined | string } }; raw?: undefined | { source: string; payload: unknown } } | { type: "source"; source: { id?: undefined | string; url?: undefined | string; title?: undefined | string; snippet?: undefined | string; index?: undefined | number }; raw?: undefined | { source: string; payload: unknown } } | { type: "file"; attachment: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }; raw?: undefined | { source: string; payload: unknown } })[]; actions?: undefined | ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string }; feedback?: undefined | "like" | "dislike" }` | — | The full message object. Set as a JS property. |
-| `role` | `role` | `undefined | "user" | "assistant"` | `'assistant'` | Who is speaking: `'user'` or `'assistant'`. Convenience for simple cases when not passing a `message` object. This is the SEMANTIC role of the message, not an ARIA role. The name collides with the global ARIA `role` attribute, which is why the facade lifts it off the host (see `liftRoleOffHost`). Neither speaker is a valid ARIA role, so a `role="user"` left on `<kai-message>` is a CRITICAL axe `aria-roles` violation. The accessible role lives on the row inside the shadow root instead: `role="article"` plus an `aria-label` naming the speaker, matching the SolidJS `<Message>` component. |
+| `role` | `role` | `undefined | "user" | "assistant"` | `'assistant'` | Who is speaking. NOT an ARIA role: it renders role="article" with a named aria-label instead, and shadows the ARIA role attribute (see the note above). |
 | `markdown` | `markdown` | `undefined | false | true` | — | Force markdown on/off. Defaults to on for assistant, off for user. |
 | `proseSize` | `prose-size` | `undefined | "xs" | "sm" | "base" | "lg"` | `'sm'` | Text/markdown sizing for the message body. |
 | `codeTheme` | `code-theme` | `undefined | string` | `'github-dark-dimmed'` | Shiki theme name used for fenced code blocks in the content. |
 | `codeHighlight` | `code-highlight` | `undefined | false | true` | `true` | Disable syntax highlighting for code blocks (no Shiki loads). |
-| `actionsReveal` | `actions-reveal` | `undefined | "always" | "hover"` | `'always'` | Whether the action bar is always visible (`'always'`, default) or only revealed on hover of the message row (`'hover'`). |
+| `actionsReveal` | `actions-reveal` | `undefined | "always" | "hover"` | `'always'` | Whether the action bar stays visible or appears on pointer-over; visible by default. |
 | `avatarSrc` | `avatar-src` | `undefined | string` | — | Convenience avatar image URL (used when `message.avatar` is not set). |
 | `avatarFallback` | `avatar-fallback` | `undefined | string` | — | Convenience avatar fallback text (used when `message.avatar` is not set). |
-| `avatar` | `avatar` | `undefined | string` | — | Avatar rail mode. `'none'` omits the avatar rail entirely so the body spans the full row (predictable layout when you never show avatars). Any other value keeps the default behaviour: the built-in avatar when one resolves, or your `slot="avatar"` content when projected (which REPLACES the built-in). |
-| `cardTypes` | — | `undefined | Record<string, string>` | — | Optional card type -> custom-element tag overrides/additions for `card` parts (merged over the built-ins). Property: `el.cardTypes`. Typed as a plain string map (not the `CardTagMap` alias) so the generated React wrapper inlines it instead of emitting an unresolved named type. |
-| `cardSchemas` | — | `undefined | Record<string, object>` | — | JSON Schemas for the card types this app renders, keyed by envelope type. The companion of `cardTypes`, which says what DRAWS a card while this says what a VALID one looks like. An OBJECT, so it is a JS property only: `el.cardSchemas = { 'pricing-table': pricingSchema }`, never an attribute. `createCardRegistry(...).validationSchemas` is exactly this shape. Without it the kit validates its own seven built-ins and leaves your own card type, the one your app actually cares about, as the only unchecked thing on screen. A schema here WINS over a built-in of the same name. Typed `Record<string, object>` rather than `Record<string, JsonSchema>` deliberately: an imported `.json` schema widens `"type"` to `string`, and an authored one carries `$schema`/`title`/`description`/`additionalProperties`, so the tighter type would reject both of the normal ways to supply one. |
+| `avatar` | `avatar` | `undefined | string` | — | Avatar rail mode. `'none'` omits the rail so the body spans the full row; otherwise the built-in avatar or your `slot="avatar"`. |
+| `cardTypes` | — | `undefined | Record<string, string>` | — | Card type → custom-element tag overrides/additions, merged over the built-ins. JS property: `el.cardTypes`. |
+| `cardSchemas` | — | `undefined | Record<string, object>` | — | Card-type JSON Schemas keyed by envelope type; validates each card's `data`. JS property: `el.cardSchemas`. |
 
 #### Events
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
-| `kai-message-action` | `{ messageId: string; action: string; state?: undefined | "on" | "off" }` | An action button was clicked. `action` is the built-in name or custom id. `state` is present only for the toggleable feedback votes: `'on'` when a like/dislike is set, `'off'` when re-tapped to clear. |
+| `kai-message-action` | `{ messageId: string; action: string; state?: undefined | "on" | "off" }` | An action button on a message was clicked. `action` is the built-in name or a custom id. |
 
 #### Methods
 
@@ -623,10 +624,10 @@ A single message row: renders markdown/plain content, reasoning, tool calls, att
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
-| `content` | `content` | `string` | `''` | The markdown source to render. |
-| `proseSize` | `prose-size` | `undefined | "xs" | "sm" | "base" | "lg"` | `'sm'` | Text/markdown sizing. |
+| `content` | `content` | `string` | `''` | The markdown source. |
+| `proseSize` | `prose-size` | `undefined | "xs" | "sm" | "base" | "lg"` | `'sm'` | Text and markdown sizing. |
 | `codeTheme` | `code-theme` | `undefined | string` | `'github-dark-dimmed'` | Shiki theme for fenced code blocks. |
-| `codeHighlight` | `code-highlight` | `undefined | false | true` | `true` | Disable syntax highlighting (no Shiki loads). |
+| `codeHighlight` | `code-highlight` | `undefined | false | true` | `true` | Set false to render plain `pre` blocks, with no highlighter load. |
 
 #### Composed from
 
@@ -699,7 +700,7 @@ No events.
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
 | `text` | `text` | `string` | `''` | The reasoning text to display. |
 | `label` | `label` | `undefined | string` | `'Reasoning'` | Trigger label. |
-| `open` | `open` | `undefined | false | true` | — | Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages on trigger click + while streaming). Set `el.open = true`; listen for `kai-open-change`. |
+| `open` | `open` | `undefined | false | true` | — | Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. |
 | `defaultOpen` | `default-open` | `undefined | false | true` | — | Initial open state on mount (uncontrolled seed). |
 | `streaming` | `streaming` | `undefined | false | true` | `false` | While true, auto-expands (and re-collapses when it flips false). |
 | `markdown` | `markdown` | `undefined | false | true` | `true` | Render `text` as markdown. |
@@ -743,7 +744,7 @@ Collapsible reasoning/thinking block with optional streaming auto-expand.
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
 | `tool` | — | `undefined | { type: string; kind?: undefined | "command" | "file-change" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; rawInput?: undefined | string; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string; raw?: undefined | { source: string; payload: unknown } }` | — | The tool-call to display. Set as a JS property. |
-| `open` | `open` | `undefined | false | true` | — | Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages on trigger click). Set `el.open = true`, or `<kai-tool open>`; listen for `kai-open-change`. |
+| `open` | `open` | `undefined | false | true` | — | Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. |
 | `defaultOpen` | `default-open` | `undefined | false | true` | — | Initial open state on mount (uncontrolled seed). |
 | `disabled` | `disabled` | `undefined | false | true` | — | Gate the disclosure trigger: programmatic `show()/hide()/toggle()` still work, but the trigger click no longer toggles. |
 
@@ -786,9 +787,10 @@ No events.
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
-| `items` | — | `AttachmentData[] | undefined` | `[]` | The attachments to render. Omit (or pass an empty array) for the empty state, which shows `emptyText` if set and nothing otherwise. Set as a JS property (array). Each item's `url` must be a `data:` URI or an https URL, never `URL.createObjectURL`: a `blob:` URL previews here but the wire encoders (`toOpenAIMessages`/`toAnthropicMessages`) refuse it. |
+| `items` | — | `AttachmentData[] | undefined` | `[]` | The attachments to render (omit or pass `[]` for the empty state). Each `url` must be a `data:` URI or https URL, never `blob:`. |
 | `variant` | `variant` | `undefined | "grid" | "inline" | "list"` | `'grid'` | Layout: `grid` = visual tiles, `inline` = icon + label chips, `list` = rows. |
 | `hoverCard` | `hover-card` | `undefined | false | true` | `false` | Wrap each item in a hover card that previews its details. |
+| `imagePreview` | `image-preview` | `undefined | "hover" | "lightbox"` | `'hover'` | How an image tile reveals its full size: a pointer-only card by default, or a modal on click. |
 | `removable` | `removable` | `undefined | false | true` | `false` | Show a remove button per item; clicking it fires a `kai-remove` event. |
 | `showMediaType` | `show-media-type` | `undefined | false | true` | `false` | Also show the media type beneath the filename (non-grid variants). |
 | `emptyText` | `empty-text` | `undefined | string` | — | Text shown when `items` is empty. |
@@ -811,7 +813,7 @@ Restyle from outside the Shadow DOM via `kai-attachments::part(name)`.
 
 #### Composed from
 
-`Components/Attachments`, `Components/Attachment`, `Components/AttachmentPreview`, `Components/AttachmentInfo`, `Components/AttachmentRemove`, `Components/AttachmentHoverCard`, `Components/AttachmentHoverCardTrigger`, `Components/AttachmentHoverCardContent`, `Components/AttachmentEmpty`
+`Components/Attachments`, `Components/Attachment`, `Components/AttachmentPreview`, `Components/AttachmentInfo`, `Components/AttachmentRemove`, `Components/AttachmentHoverCard`, `Components/AttachmentHoverCardTrigger`, `Components/AttachmentHoverCardContent`, `Components/AttachmentEmpty`, `Components/Lightbox`, `Components/LightboxTrigger`, `Components/LightboxContent`
 
 #### Theming
 
@@ -830,9 +832,9 @@ Renders a list of file/document attachments in grid, inline, or list layouts.
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
-| `models` | — | `undefined | { id: string; name: string; provider?: undefined | string; description?: undefined | string; group?: undefined | string }[]` | `[]` | The selectable models. Set as a JS property (array). Omit to supply them as `<kai-model>` light-DOM children instead; when both are present the property's models come first. |
+| `models` | — | `undefined | { id: string; name: string; provider?: undefined | string; description?: undefined | string; group?: undefined | string }[]` | `[]` | The selectable models. JS property (array); omit to pass `<kai-model>` light-DOM children instead. |
 | `currentModel` | `current-model` | `undefined | string` | — | The currently-selected model id. Defaults to the first model. |
-| `open` | `open` | `undefined | false | true` | — | Drive/observe the dropdown's open state (Shoelace-style: settable + reflected to the `open` attribute, the dropdown still self-manages on click/keyboard). Set `el.open = true`, or `<kai-model-switcher open>`; listen for `kai-open-change`. |
+| `open` | `open` | `undefined | false | true` | — | Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. |
 | `defaultOpen` | `default-open` | `undefined | false | true` | — | Initial open state on mount (uncontrolled seed). |
 | `disabled` | `disabled` | `undefined | false | true` | — | Disable the trigger: click/keyboard and `show()` no longer open the dropdown. |
 
@@ -924,16 +926,16 @@ No events.
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
-| `steps` | — | `undefined | { label: string; content?: undefined | string; id?: undefined | string }[]` | `[]` | The reasoning steps. Set as a JS property. Compound sub-parts collapse to this one data model (Route 1). Each `{ label, content?, id? }`. Omit to supply the steps as `<kai-step>` light-DOM children instead; when both are present the property's steps come first. |
+| `steps` | — | `undefined | { label: string; content?: undefined | string; id?: undefined | string }[]` | `[]` | The reasoning steps. JS property (array); omit to pass `<kai-step>` light-DOM children instead. |
 | `type` | `type` | `undefined | "single" | "multiple"` | — | Open mode: `'multiple'` (default, any number of steps open at once) or `'single'` (at most one open; opening a step closes the others). |
-| `value` | — | `undefined | string | string[]` | — | Controlled open step key(s). When set, it WINS over user interaction (the consumer owns the open set). String in `single` mode, string[] in `multiple` mode. Set as a JS property. |
+| `value` | — | `undefined | string | string[]` | — | Controlled open step key(s): a string in `single` mode, a string array in `multiple`. JS property. |
 | `defaultValue` | — | `undefined | string | string[]` | — | Uncontrolled INITIAL open step key(s), seeding which steps render expanded. Ignored once `value` is provided. Set as a JS property. |
 
 #### Events
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
-| `kai-value-change` | `{ value: string | string[] }` | The open set changed, by user click OR an expand()/collapse()/toggle() call. `value` is a string in `single` mode, a string[] in `multiple` mode. (Maps Radix Accordion's onValueChange.) |
+| `kai-value-change` | `{ value: string | string[] }` | The open set changed, by user click or an `expand()`/`collapse()`/`toggle()` call. |
 
 #### Methods
 
@@ -976,10 +978,10 @@ No events.
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
-| `suggestions` | — | `undefined | (string | { label: string; value?: undefined | string; icon?: undefined | string })[]` | `[]` | The suggestions. Strings, or `{ label, value }` when the displayed text and the emitted value differ. Set as a JS property. Omit to supply them as `<kai-suggestion>` light-DOM children instead; when both are present the property's suggestions come first. |
-| `variant` | `variant` | `undefined | "outline" | "ghost" | "default"` | `'outline'` | Chip style: `'outline'` (default), `'ghost'`, or `'default'` (filled). |
-| `size` | `size` | `undefined | "md" | "lg"` | `'md'` | Row height for `layout="list"`: `'md'` (default) or `'lg'` for taller rows. Chips are unaffected. |
-| `layout` | `layout` | `undefined | "chips" | "list"` | `'chips'` | Layout: `'chips'` (default) renders a wrapping row of rounded pills; `'list'` renders a vertical, full-width "Ideas for you" list where each row is left-aligned with a leading `icon`, a label, and a hover background. |
+| `suggestions` | — | `undefined | (string | { label: string; value?: undefined | string; icon?: undefined | string })[]` | `[]` | The suggestions: strings, or `{ label, value }` when the displayed text and emitted value differ. JS property (array). |
+| `variant` | `variant` | `undefined | "outline" | "ghost" | "default"` | `'outline'` | Chip style. Defaults to `outline`. |
+| `size` | `size` | `undefined | "md" | "lg"` | `'md'` | Row height for the list layout. Defaults to `md`; chips are unaffected. |
+| `layout` | `layout` | `undefined | "chips" | "list"` | `'chips'` | A wrapping row of pills (the default), or full-width rows with a leading icon. |
 | `block` | `block` | `undefined | false | true` | `false` | Full-width left-aligned rows instead of pills. |
 | `highlight` | `highlight` | `undefined | string` | — | Substring to highlight within each suggestion. |
 
@@ -1047,9 +1049,9 @@ No events.
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
-| `sources` | — | `undefined | { href: string; title?: undefined | string; description?: undefined | string; label?: undefined | string; showFavicon?: undefined | false | true }[]` | `[]` | The sources to render. Set as a JS property. Omit to supply them as `<kai-source>` light-DOM children instead; when both are present the property's sources come first. |
+| `sources` | — | `undefined | { href: string; title?: undefined | string; description?: undefined | string; label?: undefined | string; showFavicon?: undefined | false | true }[]` | `[]` | The sources to render. JS property; omit to pass `<kai-source>` light-DOM children instead. |
 | `showFavicon` | `show-favicon` | `undefined | false | true` | `false` | Show favicons on all items (per-item `showFavicon` overrides). |
-| `numbered` | `numbered` | `undefined | false | true` | `false` | When true, each citation chip is labelled with its 1-based index in the merged (prop + declarative-children) list (`[1]`, `[2]`, …) instead of the per-item `label` or domain fallback. HTML attribute: `numbered` (boolean: a bare attribute or `numbered="true"`). JS property: `el.numbered = true`. |
+| `numbered` | `numbered` | `undefined | false | true` | `false` | Label each citation chip with its 1-based index in the merged list (`[1]`, `[2]`) instead of its own `label`. |
 
 #### Declarative children
 
@@ -1119,10 +1121,10 @@ A thumbs-up / thumbs-down banner (e.g. "Was this helpful?").
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
-| `multiple` | `multiple` | `undefined | false | true` | `true` | Allow selecting multiple files (default true). |
-| `accept` | `accept` | `undefined | string` | — | `accept` attribute for the file picker (e.g. `image/*`). |
-| `disabled` | `disabled` | `undefined | false | true` | `false` | Disable the dropzone: no clicking, no drag-and-drop. |
-| `label` | `label` | `undefined | string` | `'Click or drop files to upload'` | Default dropzone label (overridable via the default slot). |
+| `multiple` | `multiple` | `undefined | false | true` | `true` | Allow picking more than one file. Default true. |
+| `accept` | `accept` | `undefined | string` | — | `accept` for the file picker, e.g. `image/*`. |
+| `disabled` | `disabled` | `undefined | false | true` | `false` | No clicking and no drag-and-drop. |
+| `label` | `label` | `undefined | string` | `'Click or drop files to upload'` | Default dropzone label; replace it with your own markup via the default slot. |
 
 #### Events
 
@@ -1159,20 +1161,20 @@ A drag-and-drop / click-to-pick file upload dropzone.
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
-| `transcribe` | — | `undefined | ((audio: Blob) => Promise<string>)` | — | Transcriber the host supplies: records audio, returns the text. This is a **function-valued property** (`el.transcribe = async blob => '...'`) because a value-returning callback can't be modelled as a fire-and-forget event. |
+| `transcribe` | — | `undefined | ((audio: Blob) => Promise<string>)` | — | Transcriber the host supplies: records audio, returns the text. **Function-valued property.** |
 | `disabled` | `disabled` | `undefined | false | true` | `false` | Disable the mic button (non-interactive). |
-| `recognitionLang` | `recognition-lang` | `undefined | string` | — | BCP-47 language tag for the native `SpeechRecognition` path (e.g. `en-US`). Attribute: `recognition-lang` (the plain `lang` attribute is reserved by `HTMLElement` and can't be a custom-element property). No effect when `transcribe` is set or the browser lacks SpeechRecognition. |
+| `recognitionLang` | `recognition-lang` | `undefined | string` | — | BCP-47 language tag for the native `SpeechRecognition` path (e.g. `en-US`). Attribute: `recognition-lang`. |
 | `interim` | `interim` | `undefined | false | true` | `false` | Emit live partial transcripts (`kai-transcript-interim`) during native recognition. Attribute: `interim`. No-op on the transcribe/fallback paths. |
 
 #### Events
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
-| `kai-audio-captured` | `{ blob: Blob }` | Raw audio captured (before transcription), for hosts that prefer to handle transcription themselves instead of via the `transcribe` property. Also the unsupported-fallback signal: no `transcribe`, no SpeechRecognition, so only the blob is produced (no text). |
-| `kai-recording-change` | `{ recording: false | true }` | Recording started or stopped. Lets the host drive its own UI (waveform, push-to-talk indicator) in sync with the mic. Fires on real transitions only (manual click and programmatic start()/stop()), never on mount. |
+| `kai-audio-captured` | `{ blob: Blob }` | Raw audio captured, before transcription. |
+| `kai-recording-change` | `{ recording: false | true }` | Recording started or stopped. |
 | `kai-transcript-interim` | `{ text: string }` | Live partial transcript during native recognition (only when `interim` is set). Fires repeatedly before the final `kai-transcription`. |
 | `kai-transcription` | `{ text: string }` | Final transcript: the `transcribe` property resolved, OR native `SpeechRecognition` produced final text (no `transcribe` set). |
-| `kai-voice-error` | `{ source: "recognition"; error: string; message: string }` | A voice session failed, so no failure is ever silent. `detail.source` names the failing side (`recognition` on `<kai-voice-input>`, `synthesis` on `<kai-voice-output>`), `detail.error` carries the platform error code, the thrown exception's name, or `no-result` when recognition ended with no error and no text (the user said nothing), and `detail.message` is human-readable. Deliberate cancellation does not fire. |
+| `kai-voice-error` | `{ source: "recognition"; error: string; message: string }` | A voice session failed, so no failure is ever silent. `detail.error` is the platform error code or the thrown name. |
 
 #### Methods
 
@@ -1204,8 +1206,8 @@ A mic button that records audio and optionally transcribes it via a host-supplie
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
-| `variant` | `variant` | `LoaderVariant | undefined` | `'circular'` | The animation style: `'circular' | 'classic' | 'pulse' | 'pulse-dot' | 'dots' | 'typing' | 'wave' | 'bars' | 'terminal' | 'text-blink' | 'text-shimmer' | 'loading-dots'`. Defaults to `'circular'`. |
-| `size` | `size` | `undefined | "sm" | "md" | "lg"` | `'md'` | Loader size: `'sm' | 'md' | 'lg'`. Defaults to `'md'`. |
+| `variant` | `variant` | `LoaderVariant | undefined` | `'circular'` | Animation style. Default `circular`. |
+| `size` | `size` | `undefined | "sm" | "md" | "lg"` | `'md'` | Loader size. Default `md`. |
 | `text` | `text` | `undefined | string` | — | Label for the text-based variants. |
 
 #### Composed from
@@ -1263,9 +1265,9 @@ An animated "thinking" shimmer bar with an optional stop affordance.
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
 | `text` | `text` | `undefined | string` | `''` | The text to shimmer. |
-| `as` | `as` | `undefined | string` | `'span'` | Element tag to render as (default `span`). |
+| `as` | `as` | `undefined | string` | `'span'` | Element tag to render as. Default `span`. |
 | `duration` | `duration` | `undefined | number` | `4` | Animation duration in seconds. |
-| `spread` | `spread` | `undefined | number` | `20` | Gradient spread (5–45). |
+| `spread` | `spread` | `undefined | number` | `20` | Gradient spread, 5 to 45. |
 
 #### Composed from
 
@@ -1290,9 +1292,9 @@ No events.
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
-| `text` | — | `undefined | string | AsyncIterable<string>` | `''` | Text to stream. A string, or an `AsyncIterable<string>` (set as a JS property, since async iterables can't be HTML attributes). |
+| `text` | — | `undefined | string | AsyncIterable<string>` | `''` | Text to stream: a string, or an `AsyncIterable<string>` set as a property. |
 | `mode` | `mode` | `undefined | "typewriter" | "fade"` | `'typewriter'` | Reveal animation. |
-| `speed` | `speed` | `undefined | number` | `20` | Characters/segments per tick. |
+| `speed` | `speed` | `undefined | number` | `20` | Characters or segments per tick. |
 | `as` | `as` | `undefined | string` | — | Element tag to render as. |
 
 #### Events
@@ -1322,10 +1324,9 @@ Renders a string or an `AsyncIterable<string>` with a reveal animation.
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
-| `base64` | `base64` | `undefined | string` | — | Base64-encoded image data (pair with `media-type`). |
-| `bytes` | — | `undefined | Uint8Array<ArrayBufferLike>` | — | Raw image bytes (set as a JS property). |
-| `alt` | `alt` | `undefined | string` | `''` | Alt text. |
-| `mediaType` | `media-type` | `undefined | string` | — | MIME type (default `image/png`). |
+| `src` | `src` | `undefined | string` | — | The image URL: an `https:`/`http:` location, a `data:` URI, or a `blob:` object URL you created. |
+| `alt` | `alt` | `undefined | string` | `''` | Alt text. Attribute `alt`. Always give meaningful text: an empty alt marks the image as decorative. |
+| `class` | `class` | `undefined | string` | — | Extra classes for the `<img>`. |
 
 #### Composed from
 
@@ -1350,10 +1351,10 @@ No events.
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
-| `label` | `label` | `undefined | string` | — | Optional text beside the icon. |
-| `tooltip` | `tooltip` | `undefined | string` | — | Tooltip on hover. |
-| `variant` | `variant` | `undefined | "ghost" | "default" | "outline"` | `'ghost'` | Visual button style. |
-| `size` | `size` | `undefined | "sm" | "md" | "lg" | "icon" | "icon-sm"` | `'sm'` | Button size (use an `icon*` size for an icon-only checkpoint). |
+| `label` | `label` | `undefined | string` | — | Text beside the icon. |
+| `tooltip` | `tooltip` | `undefined | string` | — | Hint shown on hover. |
+| `variant` | `variant` | `undefined | "ghost" | "default" | "outline"` | `'ghost'` | Button style. |
+| `size` | `size` | `undefined | "sm" | "md" | "lg" | "icon" | "icon-sm"` | `'sm'` | Button size; use an icon size for an icon-only checkpoint. |
 
 #### Events
 
@@ -1382,19 +1383,19 @@ A small button used to mark or navigate to a conversation checkpoint.
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
-| `availableAuthors` | — | `undefined | string[]` | `[]` | Authors to offer as scope filters. Omit to drop the Authors section (for a tag-only picker). Set as a JS property. |
-| `availableTags` | — | `undefined | string[]` | `[]` | Tags to offer as scope filters. Omit to drop the Tags section (for an author-only picker). Set as a JS property. |
-| `currentLabel` | `current-label` | `undefined | string` | `'All Content'` | The label shown on the trigger for the active scope. |
-| `open` | `open` | `undefined | false | true` | — | Drive/observe the dropdown's open state (Shoelace-style: settable + reflected to the `open` attribute, the dropdown still self-manages on click/keyboard). Set `el.open = true`, or `<kai-scope-picker open>`; listen for `kai-open-change`. |
+| `availableAuthors` | — | `undefined | string[]` | `[]` | Authors to offer as filters. Omit to drop the Authors section. Property only. |
+| `availableTags` | — | `undefined | string[]` | `[]` | Tags to offer as filters. Omit to drop the Tags section. Property only. |
+| `currentLabel` | `current-label` | `undefined | string` | `'All Content'` | Label on the trigger for the active scope. |
+| `open` | `open` | `undefined | false | true` | — | Open state: settable, reflected to `open`, and still self-managed on click. |
 | `defaultOpen` | `default-open` | `undefined | false | true` | — | Initial open state on mount (uncontrolled seed). |
-| `disabled` | `disabled` | `undefined | false | true` | — | Disable the trigger: click/keyboard and `show()` no longer open the dropdown. |
+| `disabled` | `disabled` | `undefined | false | true` | — | Click, keyboard and `show()` no longer open the dropdown. |
 
 #### Events
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
-| `kai-open-change` | `{ open: false | true }` | The scope dropdown opened or closed (by click, keyboard, Escape, outside-click, or a method). |
-| `kai-scope-change` | `{ filters: { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | "transcript" | "markdown"; dateRange?: undefined | { from: string; to: string } } | undefined }` | A scope was chosen (`undefined` filters = "All Content"). |
+| `kai-open-change` | `{ open: false | true }` | The dropdown opened or closed. |
+| `kai-scope-change` | `{ filters: { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | "transcript" | "markdown"; dateRange?: undefined | { from: string; to: string } } | undefined }` | A scope was chosen (`undefined` filters means all content). |
 
 #### Methods
 
@@ -1427,7 +1428,7 @@ A dropdown for filtering the chat to specific authors, tags, content type, or da
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
-| `skills` | — | `undefined | { id: string; name: string }[]` | `[]` | The active skills to badge. Set as a JS property. Omit to supply them as `<kai-skill>` light-DOM children instead; when both are present the property's skills come first. Nothing renders when there are none. |
+| `skills` | — | `undefined | { id: string; name: string }[]` | `[]` | The active skills to badge. JS property (array); omit to pass `<kai-skill>` light-DOM children instead. |
 
 #### Declarative children
 
@@ -1461,7 +1462,7 @@ No events.
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
 | `emptyTitle` | `empty-title` | `undefined | string` | `''` | Title text. Attribute: `empty-title` (`title` is a global HTML attribute). |
-| `description` | `description` | `undefined | string` | `''` | Description text. |
+| `description` | `description` | `undefined | string` | `''` | Line of copy under the title. |
 
 #### Slots
 
@@ -1495,22 +1496,23 @@ No events.
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
-| `messages` | — | `undefined | { id: string; role: "user" | "assistant"; parts: ({ type: "text"; text: string; raw?: undefined | { source: string; payload: unknown } } | { type: "reasoning"; text: string; label?: undefined | string; index?: undefined | number; streamId?: undefined | string; signature?: undefined | string; raw?: undefined | { source: string; payload: unknown } } | { type: "tool"; tool: { type: string; kind?: undefined | "command" | "file-change" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; rawInput?: undefined | string; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string; raw?: undefined | { source: string; payload: unknown } }; raw?: undefined | { source: string; payload: unknown } } | { type: "card"; envelope: { type: string; id: string; data: unknown; title?: undefined | string; resolution?: undefined | { kind: "action"; action: string; payload?: unknown; at?: undefined | string } | { kind: "submit"; data: unknown; at?: undefined | string } | { kind: "dismissed"; at?: undefined | string } | { kind: "expired"; reason?: undefined | string; at?: undefined | string } }; raw?: undefined | { source: string; payload: unknown } } | { type: "source"; source: { id?: undefined | string; url?: undefined | string; title?: undefined | string; snippet?: undefined | string; index?: undefined | number }; raw?: undefined | { source: string; payload: unknown } } | { type: "file"; attachment: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }; raw?: undefined | { source: string; payload: unknown } })[]; actions?: undefined | ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string }; feedback?: undefined | "like" | "dislike" }[]` | — | The full message thread to render, newest last. Each entry carries its role, ordered `parts`, and optional actions/avatar/feedback. Set as a JS property (`el.messages = [...]`); a NEW array reference per streaming chunk re-renders (mutating in place does not). |
+| `messages` | — | `undefined | { id: string; role: "user" | "assistant"; parts: ({ type: "text"; text: string; raw?: undefined | { source: string; payload: unknown } } | { type: "reasoning"; text: string; label?: undefined | string; index?: undefined | number; streamId?: undefined | string; signature?: undefined | string; raw?: undefined | { source: string; payload: unknown } } | { type: "tool"; tool: { type: string; kind?: undefined | "command" | "file-change" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; rawInput?: undefined | string; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string; raw?: undefined | { source: string; payload: unknown } }; raw?: undefined | { source: string; payload: unknown } } | { type: "card"; envelope: { type: string; id: string; data: unknown; title?: undefined | string; resolution?: undefined | { kind: "action"; action: string; payload?: unknown; at?: undefined | string } | { kind: "submit"; data: unknown; at?: undefined | string } | { kind: "dismissed"; at?: undefined | string } | { kind: "expired"; reason?: undefined | string; at?: undefined | string } }; raw?: undefined | { source: string; payload: unknown } } | { type: "source"; source: { id?: undefined | string; url?: undefined | string; title?: undefined | string; snippet?: undefined | string; index?: undefined | number }; raw?: undefined | { source: string; payload: unknown } } | { type: "file"; attachment: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }; raw?: undefined | { source: string; payload: unknown } })[]; actions?: undefined | ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string }; feedback?: undefined | "like" | "dislike" }[]` | — | The message thread to render, newest last. JS property; pass a NEW array per streaming chunk. Omit for an empty thread. |
 | `loading` | `loading` | `undefined | false | true` | `false` | Show a typing indicator on the pending assistant turn. Set it while awaiting the assistant's reply. |
 | `proseSize` | `prose-size` | `undefined | "xs" | "sm" | "base" | "lg"` | `'sm'` | Body/prose font scale for rendered markdown (`'xs' | 'sm' | 'base' | 'lg'`). Defaults to `'sm'`. |
 | `codeTheme` | `code-theme` | `undefined | string` | `'github-dark-dimmed'` | Shiki theme name for syntax-highlighted code blocks (e.g. `'github-dark-dimmed'`). |
 | `codeHighlight` | `code-highlight` | `undefined | false | true` | `true` | Enable Shiki syntax highlighting in code blocks. Turn off to render plain `<pre>` blocks (lighter, no highlighter load). Default true. |
-| `actionsReveal` | `actions-reveal` | `undefined | "always" | "hover"` | `'always'` | Whether each message's action bar is always visible (`'always'`, default) or only revealed on hover of that message row (`'hover'`). |
+| `imagePreview` | `image-preview` | `undefined | "hover" | "lightbox"` | `'hover'` | How an image tile reveals its full size. Default is the pointer-only hover card; the modal on click is the only one keyboard and touch reach. |
+| `actionsReveal` | `actions-reveal` | `undefined | "always" | "hover"` | `'always'` | Whether each message's action bar is visible at rest or only revealed on pointer-over. Visible at rest by default. |
 | `scrollButton` | `scroll-button` | `undefined | false | true` | `true` | Show the scroll-to-bottom button inside the scroll area. Default true. |
 | `class` | `class` | `undefined | string` | — | Extra classes applied to the thread's inner root. |
-| `cardTypes` | — | `undefined | Record<string, string>` | — | Optional card type -> custom-element tag overrides/additions for `card` parts (merged over the built-ins). Property: `el.cardTypes`. Typed as a plain string map (not the `CardTagMap` alias) so the generated React wrapper inlines it instead of emitting an unresolved named type. |
-| `cardSchemas` | — | `undefined | Record<string, object>` | — | JSON Schemas for the card types this app renders, keyed by envelope type. The companion of `cardTypes`, which says what DRAWS a card while this says what a VALID one looks like. An OBJECT, so it is a JS property only: `el.cardSchemas = { 'pricing-table': pricingSchema }`, never an attribute. `createCardRegistry(...).validationSchemas` is exactly this shape. Without it the kit validates its own seven built-ins and leaves your own card type, the one your app actually cares about, as the only unchecked thing on screen. A schema here WINS over a built-in of the same name. Typed `Record<string, object>` rather than `Record<string, JsonSchema>` deliberately: an imported `.json` schema widens `"type"` to `string`, and an authored one carries `$schema`/`title`/`description`/`additionalProperties`, so the tighter type would reject both of the normal ways to supply one. |
+| `cardTypes` | — | `undefined | Record<string, string>` | — | Card type → custom-element tag overrides/additions, merged over the built-ins. JS property: `el.cardTypes`. |
+| `cardSchemas` | — | `undefined | Record<string, object>` | — | Card-type JSON Schemas keyed by envelope type; validates each card's `data`. JS property: `el.cardSchemas`. |
 
 #### Events
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
-| `kai-message-action` | `{ messageId: string; action: string; state?: undefined | "on" | "off" }` | A message's action button was clicked. `action` is the built-in name (`copy` / `like` / `dislike` / `regenerate` / `edit`) or a custom id. `state` is present only for the toggleable feedback votes: `'on'` when a like/dislike is set, `'off'` when re-tapped to clear. |
+| `kai-message-action` | `{ messageId: string; action: string; state?: undefined | "on" | "off" }` | An action button on a message was clicked. `action` is the built-in name or a custom id. |
 
 #### Methods
 
@@ -1550,9 +1552,9 @@ The message list on its own: renders a `messages` array (roles, ordered `parts`,
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
 | `src` | `src` | `undefined | string` | — | URL the preview iframe frames. Consumer-controlled. |
-| `files` | — | `undefined | { path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | "html" | "pdf" | "image" | "other"; additions?: undefined | number; deletions?: undefined | number; status?: undefined | "added" | "modified" | "deleted" | "renamed" | "untracked" }[]` | `[]` | Files for the Code tab tree + each file's preview `url`. Omit for a preview-only artifact (the Code tab then has nothing to show; pair it with `no-tabs` to hide the toggle). Set as a JS property (array). |
+| `files` | — | `undefined | { path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | "html" | "pdf" | "image" | "other"; additions?: undefined | number; deletions?: undefined | number; status?: undefined | "added" | "modified" | "deleted" | "renamed" | "untracked" }[]` | `[]` | Files for the Code tab tree, plus each file's preview `url`. JS property (array); omit for a preview-only artifact. |
 | `tab` | `tab` | `undefined | "preview" | "code"` | — | Controlled active tab: `preview` or `code`. When set, the artifact follows it (re-asserted on change). Leave unset for an uncontrolled tab (see `defaultTab`). |
-| `defaultTab` | `default-tab` | `undefined | "preview" | "code"` | — | Uncontrolled INITIAL tab (used only when `tab` is unset). Default `preview`. Seeds the starting tab; the user can then switch freely without the consumer re-asserting a controlled `tab`. |
+| `defaultTab` | `default-tab` | `undefined | "preview" | "code"` | — | Uncontrolled INITIAL tab, used only when `tab` is unset. Default `preview`. |
 | `activeFile` | `active-file` | `undefined | string` | — | Selected file path. Syncs the tree highlight, Code source, and preview. |
 | `sandbox` | `sandbox` | `undefined | string` | `'allow-scripts allow-forms'` | iframe `sandbox` override. Secure default `allow-scripts allow-forms` (NOT `allow-same-origin`). |
 | `iframeTitle` | `iframe-title` | `undefined | string` | — | Accessible title for the preview iframe. |
@@ -1566,7 +1568,7 @@ The message list on its own: renders a `messages` array (roles, ordered `parts`,
 | `noTabs` | `no-tabs` | `undefined | false | true` | `false` | Hide the Preview|Code toggle. |
 | `standalone` | `standalone` | `undefined | false | true` | `false` | Standalone chrome: rounded corners + border (else square, borderless in-panel). |
 | `readonlyPath` | `readonly-path` | `undefined | false | true` | `false` | Show the address but make it read-only (visible, nav-tracking, non-editable). |
-| `displayUrl` | `display-url` | `undefined | string` | — | Friendly address shown in the path field instead of the real current url (read-only, non-navigable). Use when the framed url is not consumer-facing (e.g. a `data:` blob) so a clean address shows instead of leaking it. Scalar string: set as the `display-url` attribute or the `displayUrl` property. |
+| `displayUrl` | `display-url` | `undefined | string` | — | Friendly read-only address shown in the path field instead of the real url. Attribute: `display-url`. |
 
 #### Events
 
@@ -1574,8 +1576,8 @@ The message list on its own: renders a `messages` array (roles, ordered `parts`,
 |-------|-----------|-------------|
 | `kai-file-select` | `{ path: string }` | Fired when a file is selected. `detail.path`. |
 | `kai-maximize-change` | `{ maximized: false | true }` | Artifact's own maximize button toggled (consumer-observable; non-bubbling). |
-| `kai-maximize-intent` | `{ requested: false | true }` | The maximize PROTOCOL intent, raised as a raw bubbling + composed CustomEvent (not through `dispatch`) so an enclosing `<kai-resizable>` can catch it and maximize the containing panel. Declared here so it is typed and reaches the generated API. Listen for it to drive maximize from your own chrome, or re-emit it to trigger one. |
-| `kai-navigate` | `{ url: string }` | Fired when the preview navigates. `detail.url` = the new location, reported AS IT ARRIVED: a `javascript:`/`vbscript:` url the preview itself refused is still what `detail.url` carries, because a consumer auditing what the model sent must not be told a different story. It is NOT scheme-validated, so validate it with `isSafeUrl` from `@kitn.ai/ui` before rendering, storing or navigating to it. |
+| `kai-maximize-intent` | `{ requested: false | true }` | The maximize PROTOCOL intent, as a raw bubbling + composed CustomEvent. |
+| `kai-navigate` | `{ url: string }` | The preview navigated. `detail.url` is the raw new location. |
 | `kai-tab-change` | `{ tab: "preview" | "code" }` | Fired when the Preview|Code tab changes. `detail.tab`. |
 
 #### Methods
@@ -1616,7 +1618,7 @@ A sandboxed preview panel for generated apps and pages: an iframe with browser c
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
 | `variant` | `variant` | `undefined | string` | `'bar'` | Look to render: `bar` (default), `grid`, `radial`, `wave`, `aurora`, `custom`. `aura` is accepted as a LiveKit-markup alias for `aurora`. Attribute: `variant`. |
-| `state` | `state` | `undefined | string` | `'idle'` | `idle` (default), `connecting`, `listening`, `thinking`, `speaking`, `disconnected` (connection down: the dead, flat look). LiveKit's room-lifecycle state names are accepted as aliases. Attribute: `state`. |
+| `state` | `state` | `undefined | string` | `'idle'` | `idle` (default) or `connecting`/`listening`/`thinking`/`speaking`/`disconnected`; LiveKit's room-lifecycle names are aliases. |
 | `size` | `size` | `undefined | string` | `'md'` | `icon` | `sm` | `md` (default) | `lg` | `xl`. Attribute: `size`. |
 | `barCount` | `bar-count` | `undefined | number` | — | Bars to draw. Bar and radial only. Attribute: `bar-count`. |
 | `count` | `count` | `undefined | number` | — | Grid only: rows and columns of the (always square) grid. Attribute: `count`. |
@@ -1626,12 +1628,12 @@ A sandboxed preview panel for generated apps and pages: an iframe with browser c
 | `color` | `color` | `undefined | string` | — | CSS color for the geometry, overriding the inherited `currentColor`. Attribute: `color`. |
 | `complexity` | `complexity` | `undefined | number` | — | Shader variants only: pattern density, 0..1. Attribute: `complexity`. |
 | `label` | `label` | `undefined | string` | — | Setting this makes the element an announced image (`role="img"`) instead of decorative (`aria-hidden`). Attribute: `label`. |
-| `stream` | — | `undefined | MediaStream` | — | Live microphone or WebRTC audio to analyze. JS property only. NOTE: amplitude renders only while state is "speaking" unless listening-amplitude is set; every other state plays its scripted animation and ignores the audio. |
-| `audioElement` | — | `undefined | HTMLMediaElement` | — | An `<audio>` or `<video>` element to tap for its audio. JS property only. NOTE: amplitude renders only while state is "speaking" unless listening-amplitude is set; every other state plays its scripted animation and ignores the audio. |
-| `bands` | — | `undefined | number[]` | — | Pre-computed levels, 0..1. Set this and no AudioContext is ever built, which is what keeps headless/SSR rendering and browser-speech-synthesis playback (which exposes no audio node) free of Web Audio entirely. JS property only. A new array reference is required for each update; mutating the existing array in place will not re-render. NOTE: amplitude renders only while state is "speaking" unless listening-amplitude is set; every other state plays its scripted animation and ignores the audio. |
-| `listeningAmplitude` | `listening-amplitude` | `undefined | false | true` | — | Render live amplitude during the listening state as well, using the same presentation as speaking. Off by default, which keeps LiveKit parity: amplitude from stream, audio-element or bands renders only while state is "speaking". Set it to show a real mic-level picture while the user is the one talking. Boolean. Attribute: `listening-amplitude` (a bare attribute means true; reflected, so the property reads back what the attribute set). |
+| `stream` | — | `undefined | MediaStream` | — | Live microphone or WebRTC audio to analyze. JS property only; amplitude renders only while `state` is `speaking`. |
+| `audioElement` | — | `undefined | HTMLMediaElement` | — | An `<audio>` or `<video>` element to tap for its audio. JS property only; amplitude renders only while `state` is `speaking`. |
+| `bands` | — | `undefined | number[]` | — | Pre-computed levels, 0..1. JS property only; a NEW array reference per update; amplitude renders only while `state` is `speaking`. |
+| `listeningAmplitude` | `listening-amplitude` | `undefined | false | true` | — | Render live amplitude during the `listening` state too. Off by default. |
 | `shader` | — | `undefined | { fragment: string; uniforms?: undefined | Record<string, { type: "1f" | "1i" | "1fv" | "2f" | "3f" | "3fv" | "4f" | "4fv" | "Matrix2fv" | "Matrix3fv" | "Matrix4fv"; value: number | number[] }> }` | — | Custom fragment shader for `variant="custom"`. JS property only. |
-| `animateWhenNotVisible` | `animate-when-not-visible` | `undefined | false | true` | — | Shader variants only: keep animating while scrolled off screen. Off by default, which stops drawing and releases the WebGL context until the element comes back (browsers ration contexts to roughly 16 a page). Does not override `prefers-reduced-motion`. Attribute: `animate-when-not-visible`. |
+| `animateWhenNotVisible` | `animate-when-not-visible` | `undefined | false | true` | — | Shader variants only: keep animating while scrolled off screen. Off by default; does not override `prefers-reduced-motion`. |
 
 #### Styleable parts
 
@@ -1670,16 +1672,16 @@ Voice-mode visualizer with `bar`, `grid`, `radial`, `wave`, `aurora` and shader 
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
 | `text` | `text` | `undefined | string` | `''` | The utterance to read aloud. |
 | `autoplay` | `autoplay` | `undefined | false | true` | `false` | Speak automatically when `text` is set/changed. |
-| `synthesize` | — | `undefined | ((text: string) => Promise<Blob>)` | — | TTS model seam the host supplies: given text, returns an audio `Blob` to play. This is a **function-valued property** (`el.synthesize = async text => blob`); when set, the native `speechSynthesis` path is bypassed. Mirrors `<kai-voice-input>`'s `transcribe`. A value-returning callback can't be modelled as a fire-and-forget event, hence a property. |
+| `synthesize` | — | `undefined | ((text: string) => Promise<Blob>)` | — | TTS model seam the host supplies: given text, returns an audio `Blob`. **Function-valued property.** |
 | `disabled` | `disabled` | `undefined | false | true` | `false` | Disable the button (non-interactive). |
 
 #### Events
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
-| `kai-speaking-change` | `{ speaking: false | true }` | Playback started or stopped. Drive your own UI in sync. `speaking: true` fires when audio actually starts (utterance.onstart natively; audio playback beginning on the `synthesize` path), not when speak() is called; earlier releases fired it optimistically inside speak() itself. Fires on real transitions only (manual click and programmatic speak()/stop()), never on mount. |
+| `kai-speaking-change` | `{ speaking: false | true }` | Playback started or stopped. |
 | `kai-synthesized` | `{ blob: Blob }` | The model path (`synthesize`) resolved audio: the raw `Blob` before playback. |
-| `kai-voice-error` | `{ source: "synthesis"; error: string; message: string }` | A voice session failed, so no failure is ever silent. `detail.source` names the failing side (`recognition` on `<kai-voice-input>`, `synthesis` on `<kai-voice-output>`), `detail.error` carries the platform error code, the thrown exception's name, or `no-result` when recognition ended with no error and no text (the user said nothing), and `detail.message` is human-readable. Deliberate cancellation does not fire. |
+| `kai-voice-error` | `{ source: "synthesis"; error: string; message: string }` | A voice session failed, so no failure is ever silent. `detail.error` is the platform error code or the thrown name. |
 
 #### Methods
 
@@ -1722,16 +1724,16 @@ A speaker button that reads `text` aloud. Native `speechSynthesis` by default; s
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
 | `cards` | — | `undefined | { type: string; id: string; data: unknown; title?: undefined | string; resolution?: undefined | { kind: "action"; action: string; payload?: unknown; at?: undefined | string } | { kind: "submit"; data: unknown; at?: undefined | string } | { kind: "dismissed"; at?: undefined | string } | { kind: "expired"; reason?: undefined | string; at?: undefined | string } }[]` | — | The stream of card envelopes to render. Set as a JS PROPERTY: `el.cards = [...]`. |
-| `types` | — | `undefined | Record<string, string>` | — | Optional type→tag overrides/additions (merged over the built-ins). Property: `el.types`. Typed as a plain string map (not the `CardTagMap` alias) so the generated React wrapper inlines it instead of emitting an unresolved named type. |
-| `schemas` | — | `undefined | Record<string, object>` | — | JSON Schemas for the card types this app renders, keyed by envelope type. The companion of `types`, which says what DRAWS a card while this says what a VALID one looks like. An OBJECT, so it is a JS property only: `el.schemas = { 'pricing-table': pricingSchema }`, never an attribute. `createCardRegistry(...).validationSchemas` is exactly this shape. Without it the kit validates its own seven built-ins and leaves your own card type, the one your app actually cares about, as the only unchecked thing on screen. A schema here WINS over a built-in of the same name, matching `mergeCardTags`, where your entry is spread over ours. Typed `Record<string, object>` rather than `Record<string, JsonSchema>` deliberately: an imported `.json` schema widens `"type"` to `string`, and an authored one carries `$schema`/`title`/`description`/`additionalProperties`, so the tighter type would reject both of the normal ways to supply one. See `CardSchemaMap` in components/card/card-renderer.tsx. |
+| `types` | — | `undefined | Record<string, string>` | — | Card type→element tag overrides/additions, merged over the built-ins. JS property: `el.types`. |
+| `schemas` | — | `undefined | Record<string, object>` | — | Card-type JSON Schemas keyed by envelope type; validates each card's `data`. JS property: `el.schemas`. |
 | `policy` | — | `undefined | { onSubmit?: undefined | ((cardId: string, data: unknown) => void); onAction?: undefined | ((cardId: string, action: string, payload?: unknown) => void); onSendPrompt?: undefined | ((text: string, opts: { mode: "compose" | "send"; context?: unknown }) => void); onOpen?: undefined | ((url: string, target: "tab" | "artifact") => void); onState?: undefined | ((cardId: string, patch: unknown) => void); onDismiss?: undefined | ((cardId: string) => void); onReopen?: undefined | ((cardId: string) => void); onError?: undefined | ((cardId: string, message: string) => void); maxSendPromptMode?: undefined | "compose" | "send" }` | — | Optional CardPolicy handling child events. Property: `el.policy`. |
-| `validateCards` | `validate-cards` | `undefined | false | true` | `true` | Validate each envelope's `data` against the schema for its type before rendering it, using a built-in's own schema or yours from `schemas`. Default `true`; set `validate-cards="false"` (or `el.validateCards = false`) to opt out. A hard failure (wrong type, a missing required field) renders a diagnostic naming the field instead of the card; a soft failure (bounds) renders the card unchanged. Both emit a contract `error` event. On in production too: a model emitting a bad shape is a production failure mode, so stripping the check there would hide it from exactly the person who needs to see it. |
+| `validateCards` | `validate-cards` | `undefined | false | true` | `true` | Validate each card's `data` against its schema before rendering. Default `true`; opt out with `validate-cards="false"`. |
 
 #### Events
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
-| `kai-card-resolved` | `{ cardId: string; resolution: { kind: "action"; action: string; payload?: unknown; at?: undefined | string } | { kind: "submit"; data: unknown; at?: undefined | string } | { kind: "dismissed"; at?: undefined | string } | { kind: "expired"; reason?: undefined | string; at?: undefined | string } }` | A child card transitioned to a resolved/deferred state (an action was chosen, a form/tasks submission landed, or it was dismissed). Re-emitted off the host as a non-bubbling convenience event so a consumer can observe resolution centrally without diffing the cards array. `detail` = `{ cardId, resolution }`. (A `reopen` un-resolves a card and has no `CardResolution`, so it does NOT fire this; observe reopen via the underlying bubbling `kai-card` event.) |
+| `kai-card-resolved` | `{ cardId: string; resolution: { kind: "action"; action: string; payload?: unknown; at?: undefined | string } | { kind: "submit"; data: unknown; at?: undefined | string } | { kind: "dismissed"; at?: undefined | string } | { kind: "expired"; reason?: undefined | string; at?: undefined | string } }` | A child card resolved (an action chosen, a form/tasks submission landed, or dismissed). `detail` = `{ cardId, resolution }`. |
 
 #### Methods
 
@@ -1764,7 +1766,7 @@ The list dispatcher for generative-UI card envelopes: set `cards` as a JS proper
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
-| `data` | — | `undefined | { heading?: undefined | string; body?: undefined | string; tone?: undefined | "default" | "warning" | "danger"; actions: { id: string; label: string; style?: undefined | "primary" | "default" | "destructive"; payload?: unknown; default?: undefined | false | true }[]; dismissible?: undefined | false | true }` | — | The confirm definition (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { body, tone, actions:[…] }`. Import `ConfirmCardData` from `@kitn.ai/ui` for the full shape. |
+| `data` | — | `undefined | { heading?: undefined | string; body?: undefined | string; tone?: undefined | "default" | "warning" | "danger"; actions: { id: string; label: string; style?: undefined | "primary" | "default" | "destructive"; payload?: unknown; default?: undefined | false | true }[]; dismissible?: undefined | false | true }` | — | The confirm definition (the card's `data`). JS property: `el.data = { body, tone, actions: [...] }`. |
 | `cardId` | `card-id` | `undefined | string` | — | Stable card id correlating every emitted CardEvent. Attribute: `card-id`. |
 | `heading` | `heading` | `undefined | string` | — | Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`. |
 | `autofocus` | `autofocus` | `undefined | false | true` | `false` | Focus the default action on mount (off by default, so nothing steals focus). Attribute: `autofocus`. |
@@ -1802,7 +1804,7 @@ A named-intent approval card: title, body and a small set of action buttons, def
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
-| `data` | — | `undefined | { prompt?: undefined | string; options: { id: string; label: string; description?: undefined | string; media?: undefined | { image?: undefined | string; imageAlt?: undefined | string; icon?: undefined | string }; meta?: undefined | string; recommended?: undefined | false | true; disabled?: undefined | false | true; payload?: unknown }[]; allowOther?: undefined | false | true | { label?: undefined | string; placeholder?: undefined | string }; submitLabel?: undefined | string; dismissible?: undefined | false | true }` | — | The choice definition (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { prompt, options:[…], allowOther?, submitLabel? }`. Import `ChoiceCardData` from `@kitn.ai/ui` for the full shape. |
+| `data` | — | `undefined | { prompt?: undefined | string; options: { id: string; label: string; description?: undefined | string; media?: undefined | { image?: undefined | string; imageAlt?: undefined | string; icon?: undefined | string }; meta?: undefined | string; recommended?: undefined | false | true; disabled?: undefined | false | true; payload?: unknown }[]; allowOther?: undefined | false | true | { label?: undefined | string; placeholder?: undefined | string }; submitLabel?: undefined | string; dismissible?: undefined | false | true }` | — | The choice definition (the card's `data`). JS property: `el.data = { prompt, options: [...] }`. |
 | `cardId` | `card-id` | `undefined | string` | — | Stable card id correlating every emitted CardEvent. Attribute: `card-id`. |
 | `heading` | `heading` | `undefined | string` | — | Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`. |
 | `resolution` | — | `undefined | Record<string, unknown>` | — | Set when the user resolved this card; renders the read-only view. Property: `el.resolution = { kind:'action', action:'…' }`. |
@@ -1849,7 +1851,7 @@ A pick-one-of-N card: a prompt plus a radiogroup of rich option rows, set via th
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
-| `data` | — | `undefined | { type: "object"; title?: undefined | string; description?: undefined | string; required?: undefined | string[]; properties: Record<string, { type: "string" | "number" | "integer" | "boolean" | "array" | "object"; title?: undefined | string; description?: undefined | string; default?: unknown; enum?: undefined | unknown[]; format?: undefined | "email" | "uri" | "url" | "date" | "date-time" | "time"; minimum?: undefined | number; maximum?: undefined | number; minLength?: undefined | number; maxLength?: undefined | number; pattern?: undefined | string; minItems?: undefined | number; maxItems?: undefined | number; items?: undefined | Record<string, unknown> | { enum: unknown[] }; properties?: undefined | Record<string, Record<string, unknown>>; required?: undefined | string[]; readOnly?: undefined | false | true; "x-kai-widget"?: undefined | "textarea" | "slider" | "rating" | "radio" | "select" | "checkbox" | "password" | "switch"; "x-kai-placeholder"?: undefined | string; "x-kai-step"?: undefined | number; "x-kai-format"?: undefined | "tel" | "ssn" | "credit-card" | "custom"; "x-kai-mask"?: undefined | string; "x-kai-mask-guide"?: undefined | string }>; "x-kai-order"?: undefined | string[]; "x-kai-inlineMax"?: undefined | number; "x-kai-submitLabel"?: undefined | string; "x-kai-dismissible"?: undefined | false | true; "x-kai-actions"?: undefined | { id: string; label: string; variant?: undefined | "default" | "ghost" | "outline" }[] }` | — | The form definition: a JSON Schema (`type:'object'`) + `x-kai-*` UI hints (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { type:'object', properties:{…} }`. Import the `FormDefinition` type from `@kitn.ai/ui` for the full shape. It IS self-referential (`FormField.properties` is another `FormField` map), and the generated `web-component-types.d.ts` inlines every named type, so the shipped declaration bottoms out in a `Record<string, unknown>` placeholder one level down rather than carrying the recursion. That is why `FormDefinition` is a `type` alias: an interface gets no implicit index signature, so it would not be assignable to that placeholder. |
+| `data` | — | `undefined | { type: "object"; title?: undefined | string; description?: undefined | string; required?: undefined | string[]; properties: Record<string, { type: "string" | "number" | "integer" | "boolean" | "array" | "object"; title?: undefined | string; description?: undefined | string; default?: unknown; enum?: undefined | unknown[]; format?: undefined | "email" | "uri" | "url" | "date" | "date-time" | "time"; minimum?: undefined | number; maximum?: undefined | number; minLength?: undefined | number; maxLength?: undefined | number; pattern?: undefined | string; minItems?: undefined | number; maxItems?: undefined | number; items?: undefined | Record<string, unknown> | { enum: unknown[] }; properties?: undefined | Record<string, Record<string, unknown>>; required?: undefined | string[]; readOnly?: undefined | false | true; "x-kai-widget"?: undefined | "textarea" | "slider" | "rating" | "radio" | "select" | "checkbox" | "password" | "switch"; "x-kai-placeholder"?: undefined | string; "x-kai-step"?: undefined | number; "x-kai-format"?: undefined | "tel" | "ssn" | "credit-card" | "custom"; "x-kai-mask"?: undefined | string; "x-kai-mask-guide"?: undefined | string }>; "x-kai-order"?: undefined | string[]; "x-kai-inlineMax"?: undefined | number; "x-kai-submitLabel"?: undefined | string; "x-kai-dismissible"?: undefined | false | true; "x-kai-actions"?: undefined | { id: string; label: string; variant?: undefined | "default" | "ghost" | "outline" }[] }` | — | The form definition: a JSON Schema + `x-kai-*` UI hints. JS property: `el.data = { type: 'object', properties: {...} }`. |
 | `cardId` | `card-id` | `undefined | string` | — | Stable card id correlating every emitted CardEvent. Attribute: `card-id`. |
 | `heading` | `heading` | `undefined | string` | — | Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`. |
 | `resolution` | — | `undefined | Record<string, unknown>` | — | Set when the user resolved this card; renders the read-only view. Property: `el.resolution = { kind:'submit', data:{…} }`. |
@@ -1897,7 +1899,7 @@ Renders a JSON-Schema form definition (the `data` property: `type:'object'` plus
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
-| `data` | — | `undefined | { mode?: undefined | "select" | "progress"; heading?: undefined | string; tasks: { id: string; label: string; description?: undefined | string; checked?: undefined | false | true; disabled?: undefined | false | true }[]; selectAll?: undefined | false | true; confirmLabel?: undefined | string; allowEmpty?: undefined | false | true; min?: undefined | number; max?: undefined | number; dismissible?: undefined | false | true }` | — | The tasks definition (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { tasks:[…], selectAll, confirmLabel, … }`. Import `TasksCardData` from `@kitn.ai/ui` for the full shape. |
+| `data` | — | `undefined | { mode?: undefined | "select" | "progress"; heading?: undefined | string; tasks: { id: string; label: string; description?: undefined | string; checked?: undefined | false | true; disabled?: undefined | false | true }[]; selectAll?: undefined | false | true; confirmLabel?: undefined | string; allowEmpty?: undefined | false | true; min?: undefined | number; max?: undefined | number; dismissible?: undefined | false | true }` | — | The tasks definition (the card's `data`). JS property: `el.data = { tasks: [...], selectAll, confirmLabel }`. |
 | `cardId` | `card-id` | `undefined | string` | — | Stable card id correlating every emitted CardEvent. Attribute: `card-id`. |
 | `heading` | `heading` | `undefined | string` | — | Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`. |
 | `resolution` | — | `undefined | Record<string, unknown>` | — | Set when the user resolved this card; renders the read-only view. Property: `el.resolution = { kind:'submit', data:{ selected:[…] } }`. |
@@ -1968,12 +1970,12 @@ Mounts a third-party card in a sandboxed cross-origin iframe and re-emits every 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
-| `open` | `open` | `undefined | false | true` | — | Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages). Set `el.open = true`, or `<kai-coachmark open>`; listen for `kai-open-change`. |
+| `open` | `open` | `undefined | false | true` | — | Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. |
 | `defaultOpen` | `default-open` | `undefined | false | true` | — | Initial open state on mount (uncontrolled seed). |
 | `headline` | `headline` | `undefined | string` | — | The bold title. Named `headline` because `title` collides with the global `HTMLElement.title` attribute (it throws at registration). |
 | `badge` | `badge` | `undefined | string` | — | A small badge pill beside the headline (e.g. "New"). |
 | `placement` | `placement` | `undefined | string` | — | Floating placement relative to the anchor (default `bottom`). |
-| `tone` | `tone` | `undefined | "primary" | "info" | "success" | "warning" | "error"` | — | Color tone: `primary` (default, theme accent), `info` (blue), `success` (green), `warning` (amber), or `error` (red), reusing the kit's tool hues. |
+| `tone` | `tone` | `undefined | "primary" | "info" | "success" | "warning" | "error"` | — | Color tone, reusing the kit's tool hues. Defaults to the theme accent. |
 | `arrow` | `arrow` | `undefined | false | true` | `true` | Render the arrow that points at the anchor (default `true`). Set `arrow="false"` for a plain bubble with no pointer. |
 
 #### Events
@@ -2039,14 +2041,14 @@ The polished building blocks you compose your own chrome from — themed, access
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
-| `variant` | `variant` | `undefined | "default" | "subtle" | "ghost" | "outline" | "destructive"` | `'default'` | Visual style. `default` (filled), `subtle` (muted text, hover tint, the toolbar icon look), `ghost` (transparent, hover fill), `outline`, or `destructive`. Defaults to `default`. |
-| `size` | `size` | `undefined | "sm" | "md" | "lg" | "icon" | "icon-sm"` | `'md'` | Size token. `icon` / `icon-sm` are square (for icon-only buttons); `sm` / `md` / `lg` size text buttons. Defaults to `md`. |
+| `variant` | `variant` | `undefined | "default" | "subtle" | "ghost" | "outline" | "destructive"` | `'default'` | Visual style. Defaults to `default` (filled). |
+| `size` | `size` | `undefined | "sm" | "md" | "lg" | "icon" | "icon-sm"` | `'md'` | Size token: the square glyph-only sizes, or the text-button sizes. Defaults to `md`. |
 | `icon` | `icon` | `undefined | string` | — | Leading icon: a named icon (e.g. `"mic"`, `"plus"`), an image URL/data-URI, or plain text. Renders before any slotted label. |
 | `iconTrailing` | `icon-trailing` | `undefined | string` | — | Trailing icon, after the label (e.g. `"chevron-down"` for a menu affordance). |
-| `label` | `label` | `undefined | string` | — | Accessible name. REQUIRED for icon-only buttons (no visible text); ignored when you slot visible text, which already names the button. An `aria-label` on top of visible text REPLACES that name rather than adding to it, so a button reading "Save" that answers to "Submit" is unusable by speech input (WCAG 2.5.3, Label in Name). The visible text wins. An `icon` / `icon-sm` size hides the slot, which makes the button icon-only whatever you slotted, so `label` is what names it there. |
+| `label` | `label` | `undefined | string` | — | Accessible name for an icon-only button. Ignored when visible text is slotted -- the visible text wins. |
 | `disabled` | `disabled` | `undefined | false | true` | `false` | Disable the button (non-interactive, dimmed). |
 | `full` | `full` | `undefined | false | true` | `false` | Stretch the button to the full width of its container (a block button), e.g. a card CTA or a stacked action. Attribute: `full`. |
-| `align` | `align` | `undefined | "start" | "center" | "end"` | `'center'` | Justify the button's content: `start`, `center` (default), or `end`. Combine with `full` for a full-width, left-aligned button. |
+| `align` | `align` | `undefined | "start" | "center" | "end"` | `'center'` | Justify the button's content. Default is centered; combine with `full` for a full-width, left-aligned button. |
 | `type` | `type` | `undefined | "button" | "submit" | "reset"` | `'button'` | Native button `type`. Defaults to `button` (so it never submits a form). |
 
 #### Events
@@ -2106,7 +2108,7 @@ A themed button — `variant` (incl. `subtle`), `size` (incl. icon-only), leadin
 | `src` | `src` | `undefined | string` | — | Image URL/data-URI. When absent, the `fallback` initials show instead. |
 | `alt` | `alt` | `undefined | string` | — | Alt text for the image. Defaults to `fallback`. |
 | `fallback` | `fallback` | `undefined | string` | `''` | Short text shown when there's no image, usually initials (e.g. "JD", "AI"). |
-| `size` | `size` | `undefined | "sm" | "md" | "lg"` | `'md'` | Size token: `sm` | `md` (default) | `lg`. |
+| `size` | `size` | `undefined | "sm" | "md" | "lg"` | `'md'` | Size token. |
 
 #### Composed from
 
@@ -2129,7 +2131,7 @@ An image avatar with an automatic initials fallback, in three sizes.
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
-| `variant` | `variant` | `undefined | "default" | "count" | "citation"` | `'default'` | `default` (muted pill) · `count` (compact number badge) · `citation` (filled primary, for inline citation markers). Defaults to `default`. |
+| `variant` | `variant` | `undefined | "default" | "count" | "citation"` | `'default'` | Badge style; `default` is the muted pill. |
 
 #### Slots
 
@@ -2169,7 +2171,7 @@ A small pill for labels, status, counts, or inline citation markers. Restyle via
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
 | `name` | `name` | `undefined | string` | `''` | A curated icon name (e.g. `"mic"`, `"globe"`), an image URL/data-URI, or plain text. |
-| `size` | `size` | `undefined | "sm" | "md" | "lg"` | `'md'` | Size token: `sm` | `md` (default) | `lg`. |
+| `size` | `size` | `undefined | "sm" | "md" | "lg"` | `'md'` | Size token. |
 
 #### Styleable parts
 
@@ -2200,7 +2202,7 @@ A curated, theme-aware icon used standalone. Recolor via `::part(icon)` or `curr
 | `openDelay` | `open-delay` | `undefined | number` | — | Delay (ms) before the tooltip appears on hover. Defaults to 600. Focus shows it immediately regardless. |
 | `closeDelay` | `close-delay` | `undefined | number` | — | Delay (ms) before it hides after the pointer leaves. Defaults to 0 (hides immediately). |
 | `placement` | `placement` | `undefined | string` | — | Preferred placement: `'top' | 'bottom' | 'left' | 'right'` (+ optional `-start`/`-end`). Defaults to `'top'`; flips to stay in view. |
-| `open` | `open` | `undefined | false | true` | — | Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute, the element still self-manages on hover/focus). Set `el.open = true`, or `<kai-tooltip open>`; listen for `kai-open-change`. |
+| `open` | `open` | `undefined | false | true` | — | Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. |
 | `defaultOpen` | `default-open` | `undefined | false | true` | — | Initial open state on mount (uncontrolled seed). |
 | `disabled` | `disabled` | `undefined | false | true` | — | Turn the tooltip off while keeping the trigger mounted (hover/focus and `show()` no longer open it). |
 
@@ -2253,7 +2255,7 @@ A text hint shown on hover/focus of a slotted trigger; positioned and portaled i
 | `openDelay` | `open-delay` | `undefined | number` | — | Delay (ms) before the card opens on hover. Defaults to 0 (focus opens it immediately too). |
 | `closeDelay` | `close-delay` | `undefined | number` | — | Delay (ms) before it closes after the pointer leaves. Defaults to 300. |
 | `placement` | `placement` | `undefined | string` | — | Preferred placement: `'top' | 'bottom' | 'left' | 'right'` (+ optional `-start`/`-end`). Defaults to `'bottom'`; flips to stay in view. |
-| `open` | `open` | `undefined | false | true` | — | Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute, the element still self-manages on hover). Set `el.open = true`, or `<kai-hover-card open>`; listen for `kai-open-change`. |
+| `open` | `open` | `undefined | false | true` | — | Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. |
 | `defaultOpen` | `default-open` | `undefined | false | true` | — | Initial open state on mount (uncontrolled seed). |
 | `disabled` | `disabled` | `undefined | false | true` | — | Suppress the hover behavior entirely without unmounting. |
 
@@ -2303,7 +2305,7 @@ Rich content on hover/focus of a trigger — the markup-carrying sibling of `<ka
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
-| `severity` | `severity` | `undefined | "neutral" | "info" | "warning" | "error" | "success"` | `'neutral'` | `neutral` (default) · `info` · `warning` · `error` · `success`. Drives the leading icon's color and the a11y role (`alert` for errors, else `status`). |
+| `severity` | `severity` | `undefined | "neutral" | "info" | "warning" | "error" | "success"` | `'neutral'` | Severity. Defaults to `'neutral'`. |
 | `icon` | `icon` | `undefined | string` | — | Leading icon: omit for the severity default, `"none"` to hide it, or a named icon to override. |
 | `dismissible` | `dismissible` | `undefined | false | true` | `false` | Show a dismiss (×) that hides the notice and emits `kai-dismiss`. |
 
@@ -2344,7 +2346,7 @@ An inline notice/alert carrying a severity icon, the right a11y role, an optiona
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
-| `orientation` | `orientation` | `undefined | "horizontal" | "vertical"` | `'horizontal'` | `horizontal` (default, block + full-width) or `vertical` (a rule inside a flex/grid row, stretching to the row height). |
+| `orientation` | `orientation` | `undefined | "horizontal" | "vertical"` | `'horizontal'` | The separator's axis. Defaults to a full-width block; the cross-axis form suits a flex or grid row. |
 
 #### Styleable parts
 
@@ -2450,12 +2452,12 @@ A pulsing loading placeholder that preserves layout while content arrives. Respo
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
 | `items` | — | `undefined | { id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | Record<string, unknown>[] }[]` | — | Tree of menu items. Set as a JS property, not an HTML attribute. |
 | `placement` | `placement` | `undefined | string` | — | Optional placement hint (unused by the underlying Dropdown which always positions bottom-start, kept for future extension). |
-| `triggerIcon` | `trigger-icon` | `undefined | string` | — | Built-in trigger: leading icon (a named icon like `"plus"`, an image URL/data-URI, or text). Use this instead of slotting `slot="trigger"` for the common case; a slotted trigger overrides it. |
-| `triggerLabel` | `trigger-label` | `undefined | string` | — | Built-in trigger: a text label (e.g. `"High"`). This is the trigger's VISIBLE text, so it is also its accessible name, and `label` does not override it: an accessible name that does not contain the visible text is unreachable by speech input, which is what WCAG 2.5.3 (Label in Name) exists for. A slotted `slot="trigger"` replaces this built-in trigger entirely and is named differently; see `label`. |
+| `triggerIcon` | `trigger-icon` | `undefined | string` | — | Built-in trigger: a leading icon (a named icon, an image URL/data-URI, or text). A slotted trigger overrides it. |
+| `triggerLabel` | `trigger-label` | `undefined | string` | — | Built-in trigger: a text label. |
 | `triggerIconTrailing` | `trigger-icon-trailing` | `undefined | string` | — | Built-in trigger: a trailing icon (e.g. `"chevron-down"` for a select look). |
-| `label` | `label` | `undefined | string` | — | Accessible name for a trigger with no visible label. Ignored when `triggerLabel` is set, which is already the visible name. It DOES name a slotted `slot="trigger"`, and that is a difference in what the two slots MEAN, not a limitation. `<kai-button>`'s slot IS the button's label, so text slotted there is the name and `label` steps aside. This slot is VISUAL content, a `+` or an `<svg>`, with the name supplied separately: decoration beside a name, never a second name competing with one. So `label` names the trigger here by design. Slotting a real WORD rather than a glyph makes that word a visible label, and an accessible name has to contain the visible text. Then either drop `label` or make it contain the word you slotted. |
-| `full` | `full` | `undefined | false | true` | `false` | Stretch the trigger to the full width of the menu's container (a block row), e.g. a sidebar-footer account row. Same affordance as `<kai-button full>`. Attribute: `full`. |
-| `open` | `open` | `undefined | false | true` | — | Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute, the menu still self-manages on click/keyboard). Set `el.open = true`, or `<kai-menu open>`; listen for `kai-open-change`. |
+| `label` | `label` | `undefined | string` | — | Accessible name for a trigger with no visible label. Ignored when `triggerLabel` is set. |
+| `full` | `full` | `undefined | false | true` | `false` | Stretch the trigger to the full width of its container (a block row). Attribute: `full`. |
+| `open` | `open` | `undefined | false | true` | — | Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. |
 | `defaultOpen` | `default-open` | `undefined | false | true` | — | Initial open state on mount (uncontrolled seed). |
 | `disabled` | `disabled` | `undefined | false | true` | — | Disable the trigger: click/keyboard and `show()` no longer open the menu. |
 
@@ -2464,7 +2466,7 @@ A pulsing loading placeholder that preserves layout while content arrives. Respo
 | Event | `detail` | Description |
 |-------|-----------|-------------|
 | `kai-open-change` | `{ open: false | true }` | The menu opened or closed (by click, keyboard, Escape, outside-click, or a method). |
-| `kai-select` | `{ id: string; checked?: undefined | false | true; radioGroup?: undefined | string }` | Fired when the user selects a leaf item. - Plain items: `{ id }`. - Checkbox items: `{ id, checked }` where `checked` is the NEW state. - Radio items: `{ id, radioGroup }`, where the consumer marks `id` as the selected one in `radioGroup` and clears the others. |
+| `kai-select` | `{ id: string; checked?: undefined | false | true; radioGroup?: undefined | string }` | A leaf item was selected. Plain: `{ id }`; checkbox: `{ id, checked }` with the NEW state; radio: `{ id, radioGroup }`. |
 
 #### Methods
 
@@ -2521,7 +2523,7 @@ A cascading action menu built from a JSON items-tree (submenus, separators, chec
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
-| `kai-active-change` | `{ id: string | undefined }` | Fired when the highlighted/active item changes, via Arrow keys or when filtering re-clamps the active row. `id` is the newly active item's id, or `undefined` when no item is active (e.g. the filtered list is empty). Lets a host preview the active item without committing a selection. |
+| `kai-active-change` | `{ id: string | undefined }` | The highlighted item changed. `detail.id` is `undefined` when nothing is active (e.g. the filtered list is empty). |
 | `kai-query-change` | `{ value: string }` | Fired on every keystroke in the search input. |
 | `kai-select` | `{ id: string }` | Fired when the user selects an item (click or Enter). |
 
@@ -2565,12 +2567,12 @@ A grouped, filterable command / mention palette (the `@`-picker pattern).
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
 | `type` | `type` | `undefined | string` | `'text'` | Native input type: `text` (default) · `email` · `url` · `search` · `tel` · `password` · `number`. Single-line only. |
-| `value` | `value` | `undefined | string` | — | Controlled value, and always the CANONICAL one when a mask is active: digits for `tel` / `ssn` / `credit-card`, the formatted text for `custom`. Settable and reflected to the `value` attribute. `el.value = '5551234567'` drives it (no event) and is re-fitted to the mask on the way in, so the field shows `555-123-4567`. Read `el.value` for live state; the formatted text rides along on every `kai-input` / `kai-change` detail as `formattedValue`. |
+| `value` | `value` | `undefined | string` | — | Controlled value, reflected to the `value` attribute. |
 | `placeholder` | `placeholder` | `undefined | string` | — | Placeholder shown when empty. |
 | `label` | `label` | `undefined | string` | — | Field label, linked to the input. |
 | `hint` | `hint` | `undefined | string` | — | Helper text below the control. |
 | `error` | `error` | `undefined | string` | — | Error text; flips the field invalid (`aria-invalid` + destructive border). |
-| `size` | `size` | `undefined | "sm" | "md"` | `'md'` | Control density: `sm` or `md`. Defaults to `md`. |
+| `size` | `size` | `undefined | "sm" | "md"` | `'md'` | Control density. Defaults to `md`. |
 | `disabled` | `disabled` | `undefined | false | true` | — | Disable interaction. |
 | `readonly` | `readonly` | `undefined | false | true` | — | Make the input read-only. |
 | `required` | `required` | `undefined | false | true` | — | Mark the input required. |
@@ -2578,9 +2580,9 @@ A grouped, filterable command / mention palette (the `@`-picker pattern).
 | `name` | `name` | `undefined | string` | — | Form-control name. |
 | `autocomplete` | `autocomplete` | `undefined | string` | — | Autofill hint forwarded to the inner input (e.g. `email`, `current-password`). |
 | `inputmode` | `inputmode` | `undefined | string` | — | Virtual-keyboard hint forwarded to the inner input (e.g. `numeric`, `email`). |
-| `format` | `format` | `undefined | string` | — | Mask pattern: `#` a digit, `@` a letter or digit, `*` an obscurable letter or digit, and every other character a positional literal (`@@@-####` → `CHG-4821`). The literal `default` is the opt-in sentinel: it resolves to the default format of `semantic` (`tel` → `###-###-####`). A bare `semantic` never starts masking on its own, so an opt-in token is what turns tier 2 on. |
-| `guide` | `guide` | `undefined | string` | — | Placeholder guide shown at unfilled positions, aligned position for position with `format`: `mm/dd/yyyy` against `##/##/####`. Spaces are a valid guide character, so a guide of blanks and separators is how a phone field shows its shape without showing letters. Without a guide the field shows only up to the last typed character. A guide is a visual aid, never an accessible name: keep the `hint` text as well. |
-| `semantic` | `semantic` | `undefined | "credit-card" | "custom" | "ssn" | "tel"` | — | Semantic field type: `tel` · `ssn` · `credit-card` · `custom`. On its own it sets `inputmode` / `autocomplete` / `spellcheck` / `autocorrect` / `autocapitalize` and decides the canonical value; it never starts masking by itself. |
+| `format` | `format` | `undefined | string` | — | Mask pattern: `#` a digit, `@` a letter or digit, `*` an obscurable letter or digit, every other character a positional literal. |
+| `guide` | `guide` | `undefined | string` | — | Placeholder guide shown at unfilled positions (e.g. `mm/dd/yyyy`). |
+| `semantic` | `semantic` | `undefined | "credit-card" | "custom" | "ssn" | "tel"` | — | Semantic field type: `tel`, `ssn`, `credit-card` or `custom`. Sets `inputmode`/`autocomplete`; never masks on its own. |
 | `caseMode` | `case-mode` | `undefined | "preserve" | "upper" | "lower"` | — | Case folding applied to typed and pasted text: `preserve` (default) · `upper` · `lower`. Attribute: `case-mode`. |
 | `copyPolicy` | `copy-policy` | `undefined | "formatted" | "canonical" | "obscured" | "blocked"` | — | What a copy or cut of a masked field puts on the clipboard: `canonical` (default) · `formatted` · `obscured` · `blocked`. Attribute: `copy-policy`. |
 
@@ -2590,7 +2592,7 @@ A grouped, filterable command / mention palette (the `@`-picker pattern).
 |-------|-----------|-------------|
 | `kai-change` | `{ value: string; formattedValue: string }` | The value was committed (blur). Same detail shape as `kai-input`. |
 | `kai-input` | `{ value: string; formattedValue: string }` | The value changed per keystroke. `value` is the canonical value (what a backend wants); `formattedValue` is the text on screen. With no mask the two are equal. |
-| `kai-input-rejected` | `{ reason: "full" | "wrong-class" | "over-capacity" | "format-change-clipped"; data: string }` | A mask refused, or partly refused, some content. The reasons are `full` (no free position left), `wrong-class` (a letter into a digit position), `over-capacity` (a paste longer than the mask holds; what fits was kept), and `format-change-clipped` (the `format` changed under a value that no longer fits). `data` is the content that was refused. The first three are USER-INPUT errors, and are the ones worth announcing in a polite live region. `format-change-clipped` is not one: it follows the app changing its own configuration, so it reports and nothing more. None of the four touches validity, so `invalid` and `error` stay the consumer decision. |
+| `kai-input-rejected` | `{ reason: "full" | "wrong-class" | "over-capacity" | "format-change-clipped"; data: string }` | A mask refused, or partly refused, some content. `detail.data` is what was refused. |
 
 #### Methods
 
@@ -2646,7 +2648,7 @@ Single-line text field with a label, hint and error, plus opt-in format masks: `
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
 | `appearance` | `appearance` | `undefined | "outlined" | "filled" | "plain" | "accent"` | `'outlined'` | Surface treatment: `outlined` (default) | `filled` | `plain` | `accent`. Attribute: `appearance`. |
-| `orientation` | `orientation` | `undefined | "vertical" | "horizontal" | "responsive"` | `'vertical'` | `vertical` (default, media on top) | `horizontal` (media at the start) | `responsive` (horizontal when the card's container is wide enough, else vertical, via a container query on the card's own width). Attribute: `orientation`. |
+| `orientation` | `orientation` | `undefined | "vertical" | "horizontal" | "responsive"` | `'vertical'` | `vertical` (default, media on top), `horizontal` (media at the start), or `responsive`. |
 | `collapse` | `collapse` | `undefined | string` | `'28rem'` | The card width below which a `responsive` card collapses to vertical and the footer actions stack. A CSS length; default `28rem`. Attribute: `collapse`. |
 | `dense` | `dense` | `undefined | false | true` | `false` | Tighter spacing for dense lists. Attribute: `dense`. |
 | `dismissible` | `dismissible` | `undefined | false | true` | `false` | Show a close (×) that hides the card and emits `kai-dismiss`. Attribute: `dismissible`. Off by default. |
@@ -2709,9 +2711,9 @@ The presentational card: one web component whose flexibility comes from structur
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
-| `open` | `open` | `undefined | false | true` | — | Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages on Escape/backdrop). Set `el.open = true`, or `<kai-dialog open>`; listen for `kai-open-change`. |
+| `open` | `open` | `undefined | false | true` | — | Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. |
 | `defaultOpen` | `default-open` | `undefined | false | true` | — | Initial open state on mount (uncontrolled seed). |
-| `label` | `label` | `undefined | string` | `DEFAULT_LABEL` | Accessible name for the modal, used when no `header` slot is projected: `<kai-dialog label="Delete workspace">`. A projected `header` WINS over this (it becomes `aria-labelledby`), because ARIA resolves `aria-labelledby` ahead of `aria-label` and the visible heading is the name both a sighted and a screen-reader user can be talked through. Defaults to `Dialog` so a modal is never nameless. |
+| `label` | `label` | `undefined | string` | `DEFAULT_LABEL` | Accessible name for the modal, used when no `header` slot is projected. Defaults to `Dialog`. |
 
 #### Events
 
@@ -2775,7 +2777,7 @@ A modal dialog with `header` and `footer` slots, Escape and backdrop close, and 
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
 | `placement` | `placement` | `undefined | "top" | "right" | "bottom" | "left" | "bottom-end" | "bottom-start" | "left-end" | "left-start" | "right-end" | "right-start" | "top-end" | "top-start"` | `'bottom-start'` | Floating placement relative to the trigger (floating-ui placement). |
 | `gutter` | `gutter` | `undefined | number` | `6` | Gap in px between the trigger and the panel. |
-| `open` | `open` | `undefined | false | true` | — | Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute, the element still self-manages on click). Set `el.open = true`, or `<kai-popover open>`; listen for `kai-open-change`. |
+| `open` | `open` | `undefined | false | true` | — | Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. |
 | `defaultOpen` | `default-open` | `undefined | false | true` | — | Initial open state on mount (uncontrolled seed). |
 | `disabled` | `disabled` | `undefined | false | true` | — | Turn the popover off while keeping the trigger mounted (clicks and `show()` no longer open it). |
 
@@ -2828,11 +2830,11 @@ Popover, dropdown and menu are three corners of one deliberate triangle, not thr
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
 | `triggerIcon` | `trigger-icon` | `undefined | string` | — | Built-in trigger: leading icon (a named icon like `"plus"`, an image URL/data-URI, or text). A slotted `slot="trigger"` overrides it. |
-| `triggerLabel` | `trigger-label` | `undefined | string` | — | Built-in trigger: a text label. This is the trigger's VISIBLE text, so it is also its accessible name, and `label` does not override it: an accessible name that does not contain the visible text is unreachable by speech input (WCAG 2.5.3, Label in Name). Same rule `kai-menu` follows. |
+| `triggerLabel` | `trigger-label` | `undefined | string` | — | Built-in trigger: a text label. |
 | `triggerIconTrailing` | `trigger-icon-trailing` | `undefined | string` | — | Built-in trigger: a trailing icon (e.g. `"chevron-down"` for a select look). |
-| `label` | `label` | `undefined | string` | — | Accessible name for a trigger with no visible label. Ignored when `triggerLabel` is set, which is already the visible name. It DOES name a slotted `slot="trigger"`, which is VISUAL content with the name supplied separately: the same two-slot distinction `kai-menu` documents. |
+| `label` | `label` | `undefined | string` | — | Accessible name for a trigger with no visible label. Ignored when `triggerLabel` is set. |
 | `full` | `full` | `undefined | false | true` | `false` | Stretch the trigger to the full width of its container (a block row). Attribute: `full`. |
-| `open` | `open` | `undefined | false | true` | — | Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute, the menu still self-manages on click/keyboard). Set `el.open = true`, or `<kai-dropdown open>`; listen for `kai-open-change`. |
+| `open` | `open` | `undefined | false | true` | — | Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. |
 | `defaultOpen` | `default-open` | `undefined | false | true` | — | Initial open state on mount (uncontrolled seed). |
 | `disabled` | `disabled` | `undefined | false | true` | — | Disable the trigger: click/keyboard and `show()` no longer open the menu. |
 
@@ -2935,8 +2937,8 @@ An accessible tab strip, selection only: set `items` as a JS property, listen fo
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
 | `options` | — | `{ value: string; label: string; icon?: undefined | string }[]` | `[]` | The selectable segments, left to right. Set as a JS property (array). |
-| `value` | `value` | `undefined | string` | — | Controlled selected `value`. Settable and reflected to the `value` attribute. `el.value = 'preview'` drives it; choosing a segment updates it and fires `kai-change`. Read `el.value` for live state. |
-| `size` | `size` | `undefined | "sm" | "md"` | `'md'` | Control density: `sm` or `md`. Defaults to `md`. |
+| `value` | `value` | `undefined | string` | — | Controlled selected `value`, reflected to the `value` attribute. Choosing a segment updates it and fires `kai-change`. |
+| `size` | `size` | `undefined | "sm" | "md"` | `'md'` | Control density. Defaults to `md`. |
 
 #### Events
 
@@ -2974,10 +2976,10 @@ A single-select pill track (a segmented / toggle group). Set `options` as a JS p
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
-| `status` | `status` | `undefined | "new" | "online" | "busy" | "away" | "offline"` | `'new'` | Presence/notification state → color. `new` (default) maps to the blue hue. |
-| `pulse` | `pulse` | `undefined | false | true` | `false` | Animated ping ring (off by default; respects prefers-reduced-motion). |
-| `label` | `label` | `undefined | string` | — | Accessible name. Without it the dot is decorative. |
-| `size` | `size` | `undefined | "sm" | "md"` | `'sm'` | `sm` (default) or `md`. |
+| `status` | `status` | `undefined | "new" | "online" | "busy" | "away" | "offline"` | `'new'` | Presence state, which sets the colour. Default `new`. |
+| `pulse` | `pulse` | `undefined | false | true` | `false` | Animated ping ring; off by default and never under prefers-reduced-motion. |
+| `label` | `label` | `undefined | string` | — | Accessible name; without it the dot is decorative. |
+| `size` | `size` | `undefined | "sm" | "md"` | `'sm'` | Size token. Defaults to `'sm'`. |
 
 #### Styleable parts
 
@@ -3010,7 +3012,7 @@ A small presence / notification dot: `status` picks the color, `pulse` adds a pi
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
 | `keys` | `keys` | `undefined | string` | — | Shortcut spec: tokens joined by `+` (e.g. `Mod+Shift+K`). Omit it to show default-slot content instead. Display only; the element does not bind keys. |
 | `platform` | `platform` | `undefined | "auto" | "mac" | "other"` | `'auto'` | `mac` uses ⌘/⌥, `other` uses Ctrl. `auto` (default) sniffs the OS. |
-| `size` | `size` | `undefined | "sm" | "md"` | `'md'` | Cap size: `sm` or `md`. Defaults to `md`. |
+| `size` | `size` | `undefined | "sm" | "md"` | `'md'` | Cap size. Defaults to `md`. |
 
 #### Slots
 
@@ -3052,7 +3054,7 @@ A keyboard-shortcut display: feed `keys` tokens joined by `+` (`Mod+Shift+K`) an
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
 | `value` | `value` | `undefined | string` | — | The label text. Settable and reflected to the `value` attribute. Read `el.value` for live state. |
 | `editing` | `editing` | `undefined | false | true` | `false` | Controlled edit state. `el.editing = true` opens the field; reflected to the `editing` attribute. |
-| `editTrigger` | `edit-trigger` | `undefined | "dblclick" | "click"` | `'dblclick'` | How the read view enters edit mode: `'dblclick'` (default) opens the field on a double click, `'click'` on a single click. Reflected to the `edit-trigger` attribute. `edit()` and `editing` are unaffected. |
+| `editTrigger` | `edit-trigger` | `undefined | "dblclick" | "click"` | `'dblclick'` | How the read view enters edit mode. Default is a double click; `edit()` and `editing` are unaffected. |
 | `placeholder` | `placeholder` | `undefined | string` | — | Placeholder shown while editing / when the value is empty. |
 | `disabled` | `disabled` | `undefined | false | true` | `false` | Disable entering edit mode. |
 
@@ -3141,7 +3143,7 @@ A thin determinate progress bar: a rounded track whose fill width is `value / ma
 | `name` | `name` | `undefined | string` | — | The agent's name, the primary label. Attribute: `name`. |
 | `active` | `active` | `undefined | false | true` | — | Selected / focused state: highlighted border + surface. Attribute: `active`. |
 | `needsAttention` | `needs-attention` | `undefined | false | true` | — | Raise a prominent "Needs you" pill plus a glowing amber edge. This is the attention-routing signal that pulls focus to this agent. Attribute: `needs-attention`. |
-| `status` | — | `undefined | { tone: "working" | "idle" | "done" | "error" | "blocked"; label?: undefined | string; pulse?: undefined | false | true }` | — | Run status. A JS PROPERTY (object), not an attribute. Shape: `{ tone, label?, pulse? }`, where `tone` is one of `working` | `idle` | `done` | `error` | `blocked` (maps to the kit's tool hues), `label` is an optional short string beside the dot, and `pulse` animates the dot. Set it with `el.status = { tone: 'working', label: 'Working', pulse: true }`. |
+| `status` | — | `undefined | { tone: "working" | "idle" | "done" | "error" | "blocked"; label?: undefined | string; pulse?: undefined | false | true }` | — | Run status: `{ tone, label?, pulse? }`. JS property, not an attribute. |
 
 #### Events
 
@@ -3240,7 +3242,7 @@ A vertical navigation list driven by a JSON `items` tree set as a JS property: i
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
-| `open` | `open` | `undefined | false | true` | — | Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages). Set `el.open = true`, or `<kai-screen open>`; listen for `kai-open-change`. |
+| `open` | `open` | `undefined | false | true` | — | Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. |
 | `defaultOpen` | `default-open` | `undefined | false | true` | — | Initial open state on mount (uncontrolled seed). |
 | `headline` | `headline` | `undefined | string` | — | Header title text. A projected `title` slot overrides it. (Named `headline` because `title` collides with the global `HTMLElement.title` attribute.) |
 | `back` | `back` | `undefined | false | true` | — | Show the back button (default true). |
@@ -3306,7 +3308,7 @@ A full-bleed overlay destination: the push/drill-in surface that takes over its 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
-| `headline` | `headline` | `undefined | string` | `''` | The pane title (the agent / window name). Named `headline` because `title` collides with the global `HTMLElement.title` attribute (it throws at registration). Attribute: `headline`. |
+| `headline` | `headline` | `undefined | string` | `''` | The pane title (the agent / window name). Named `headline` because `title` collides with the global `HTMLElement.title`. |
 | `subtitle` | `subtitle` | `undefined | string` | — | A role / label shown under the title (e.g. "Reviewer", "claude-sonnet"). Attribute: `subtitle`. |
 | `maximized` | `maximized` | `undefined | false | true` | `false` | Show the restore glyph instead of maximize, and signal the maximized view-state. Drive it yourself in response to `kai-maximize`. Attribute: `maximized`. |
 | `focused` | `focused` | `undefined | false | true` | `false` | Highlight the frame with a ring/border to mark the ACTIVE pane. Attribute: `focused`. |
@@ -3367,7 +3369,7 @@ A framed panel for a multi-agent workspace: a header with title and subtitle, a 
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
 | `tabs` | — | `undefined | { id: string; name: string; status?: undefined | { tone: "working" | "idle" | "done" | "error" | "blocked"; label?: undefined | string; pulse?: undefined | false | true }; needsAttention?: undefined | false | true; number?: undefined | number }[]` | — | The tabs to render. An array of `{ id, name, status?, needsAttention?, number? }` set as a JS PROPERTY (not an HTML attribute). |
-| `active` | `active` | `undefined | string` | — | The active tab id (controlled, and reflected to the `active` ATTRIBUTE so `::part`/`[active]` selectors and the per-tab named slot follow it). Set it as the `active` attribute or drive it from `kai-tab-change`; omit for uncontrolled (the first tab). |
+| `active` | `active` | `undefined | string` | — | The active tab id (controlled). Omit for uncontrolled (the first tab). |
 | `focused` | `focused` | `undefined | false | true` | `false` | Highlight the frame as the ACTIVE group in a multi-group layout. Attribute: `focused`. |
 
 #### Events
@@ -3428,9 +3430,9 @@ An editor group: a tab strip of numbered status-badge tabs over the active tab's
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
-| `orientation` | `orientation` | `undefined | "horizontal" | "vertical"` | `'horizontal'` | Layout axis: `horizontal` (row, default) or `vertical` (column). |
+| `orientation` | `orientation` | `undefined | "horizontal" | "vertical"` | `'horizontal'` | Whether the group lays out as a row or a column. |
 | `maximizedIndex` | — | `undefined | number | null` | `null` | Which item index is maximized (null = none). Declarative source of truth. |
-| `handle` | `handle` | `undefined | "line" | "grip" | "none"` | `'line'` | Divider affordance drawn inside each draggable handle's 8px grab zone: - `line` (default): a 1px hairline, transparent at rest, tinting on hover/drag. - `grip`: a dotted grip handle. - `none`: no visible divider, just the invisible hit-area. The full grab zone and keyboard/ARIA behavior are identical for all three. |
+| `handle` | `handle` | `undefined | "line" | "grip" | "none"` | `'line'` | Divider affordance drawn inside each draggable handle's 8px grab zone. |
 
 #### Events
 
@@ -3438,7 +3440,7 @@ An editor group: a tab strip of numbered status-badge tabs over the active tab's
 |-------|-----------|-------------|
 | `kai-change` | `{ sizes: number[] }` | Fired on drag-end / keyboard resize / visibility change. `detail.sizes` = panel sizes in percent. |
 | `kai-maximize-change` | `{ maximized: false | true; index: number | null }` | Observe layout maximize state. |
-| `kai-maximize-state` | `{ maximized: false | true }` | Authoritative maximize state, dispatched as a raw composed CustomEvent (not through `dispatch`) onto the affected `<kai-resizable-item>` and, on restore, onto the group host. A nested element (e.g. `<kai-artifact>`) listens for it to reconcile its own toggle. |
+| `kai-maximize-state` | `{ maximized: false | true }` | Authoritative maximize state. |
 
 #### Methods
 
@@ -3483,7 +3485,7 @@ A drag-resizable panel group: lays out its `<kai-resizable-item>` children along
 | `max` | `max` | `undefined | string` | — | Maximum size during resize (px or %). |
 | `locked` | `locked` | `undefined | false | true` | `false` | Fix this panel's size; adjacent dividers become non-draggable. |
 | `hidden` | `hidden` | `undefined | false | true` | `false` | Hide this panel; its divider is dropped and the rest reflow. |
-| `collapsed` | `collapsed` | `undefined | false | true` | `false` | Collapse this panel. Same layout effect as `hidden` (divider dropped, the rest reflow), but it WORKS as a bare boolean from framework JSX. A plain `<kai-resizable-item collapsed>` in React/Solid/Vue/Svelte collapses the panel at the first render; `hidden` does not, because a JSX boolean sets neither the `hidden` attribute nor the IDL property on a custom element, so the parent never sees it. The facade reflects `collapsed` to a `collapsed` attribute the parent reads. Prefer this over `hidden` for declarative collapse. |
+| `collapsed` | `collapsed` | `undefined | false | true` | `false` | Collapse this panel. Works as a bare boolean from framework JSX; `hidden` does not. |
 
 #### Events
 
@@ -3522,7 +3524,7 @@ One panel inside `<kai-resizable>`: `size` (the starting share), `min` / `max` b
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
-| `open` | `open` | `undefined | false | true` | — | Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages on the launcher and Escape). Set `el.open = true`, or `<kai-dock open>`; listen for `kai-open-change`. |
+| `open` | `open` | `undefined | false | true` | — | Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. |
 | `defaultOpen` | `default-open` | `undefined | false | true` | — | Initial open state on mount (uncontrolled seed). |
 | `position` | `position` | `undefined | "bottom-end" | "bottom-start" | "top-end" | "top-start"` | `'bottom-end'` | Which corner the dock sits in. Logical, so `-end` follows the writing direction and an RTL page docks on the left. Attribute: `position`. |
 | `label` | `label` | `undefined | string` | `'Chat'` | The widget's NAME. Derives the panel's accessible name and both launcher names (`Open ${label}` / `Close ${label}`). Defaults to `Chat`. |
@@ -3530,7 +3532,7 @@ One panel inside `<kai-resizable>`: `size` (the starting share), `min` / `max` b
 | `closeLabel` | `close-label` | `undefined | string` | — | i18n override for the launcher's name while open (default `Close ${label}`). |
 | `unread` | `unread` | `undefined | false | true` | — | Show the unread dot. YOURS: it renders only while closed, and the dock never writes it back. Clear it in your `kai-open-change` handler. |
 | `disabled` | `disabled` | `undefined | false | true` | — | Disable the launcher; `show()` and `toggle()` are gated on it. |
-| `hideClose` | `hide-close` | `undefined | false | true` | — | Suppress the dock's own built-in mobile close X. Set this when your slotted panel content supplies its own close affordance (e.g. a `<kai-chat slot="header-end">` close button), otherwise the two stack. TRADEOFF: the mobile panel reserves a padding band above its content so the built-in X never paints over slotted content; that band stays reserved unless you set this true, so only set it once your own control is actually in place. Attribute: `hide-close`. |
+| `hideClose` | `hide-close` | `undefined | false | true` | — | Suppress the dock's built-in mobile close X. Attribute: `hide-close`. |
 | `focusOnOpen` | `focus-on-open` | `undefined | "content" | "panel" | "none"` | `'content'` | Where focus lands on open: `content` (default, the first element you slotted), `panel`, or `none`. Attribute: `focus-on-open`. |
 
 #### Events
@@ -3592,8 +3594,8 @@ The corner launcher: a floating button pinned to a viewport corner, with a panel
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
-| `frame` | `frame` | `undefined | "inset" | "edge" | "none"` | `'inset'` | How the tray frames the input, the SPATIAL inset axis: `inset` (default, the classic recessed frame on every side) | `edge` (top/bottom inset only; the input sits flush left/right so the lips span the full width) | `none` (no inset; the lips attach directly as a plain stack). Attribute: `frame`. |
-| `appearance` | `appearance` | `undefined | "soft" | "outlined" | "filled" | "plain"` | `'soft'` | How the tray surface looks, the VISUAL axis orthogonal to `frame`: `soft` (default, sunken surface + border + radius) | `outlined` (transparent + border + radius) | `filled` (sunken, no border, + radius) | `plain` (bare). Attribute: `appearance`. |
+| `frame` | `frame` | `undefined | "inset" | "edge" | "none"` | `'inset'` | How the tray frames the input, the SPATIAL axis: `inset` (default, recessed on every side), `edge` (top/bottom only), or `none`. |
+| `appearance` | `appearance` | `undefined | "soft" | "outlined" | "filled" | "plain"` | `'soft'` | How the tray surface looks, the VISUAL axis: `soft` (default), `outlined`, `filled`, or `plain`. |
 
 #### Slots
 

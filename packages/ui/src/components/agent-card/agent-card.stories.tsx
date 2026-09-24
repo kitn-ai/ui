@@ -12,8 +12,7 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'The compact representation of one agent in a focus + periphery multi-agent workspace. The agents you are not focused on collapse to these glanceable cards, laid out as a narrow rail or a wide list.',
-        'Deliberately minimal: the agent name, a tone-colored status dot (`working` blue, `idle` muted, `done` green, `error` red, `blocked` amber), a `needsAttention` "Needs you" pill with a glowing amber edge for attention routing, and a trailing "..." overflow button (`onMenu`) for per-agent actions. Clicking the card promotes the agent to focus.',
+        "One agent's state in a multi-agent workspace.",
       ]),
     },
   },

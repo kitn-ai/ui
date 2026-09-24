@@ -7,9 +7,8 @@ interface Props extends Record<string, unknown> {
   /** Look to render: `bar` (default), `grid`, `radial`, `wave`, `aurora`, `custom`.
    *  `aura` is accepted as a LiveKit-markup alias for `aurora`. Attribute: `variant`. */
   variant?: string;
-  /** `idle` (default), `connecting`, `listening`, `thinking`, `speaking`,
-   *  `disconnected` (connection down: the dead, flat look). LiveKit's
-   *  room-lifecycle state names are accepted as aliases. Attribute: `state`. */
+  // `disconnected` is the connection-down look (dead and flat).
+  /** `idle` (default) or `connecting`/`listening`/`thinking`/`speaking`/`disconnected`; LiveKit's room-lifecycle names are aliases. */
   state?: string;
   /** `icon` | `sm` | `md` (default) | `lg` | `xl`. Attribute: `size`. */
   size?: string;
@@ -30,35 +29,32 @@ interface Props extends Record<string, unknown> {
   /** Setting this makes the element an announced image (`role="img"`) instead of
    *  decorative (`aria-hidden`). Attribute: `label`. */
   label?: string;
-  /** Live microphone or WebRTC audio to analyze. JS property only. NOTE: amplitude
-   *  renders only while state is "speaking" unless listening-amplitude is set; every
-   *  other state plays its scripted animation and ignores the audio. */
+  // Amplitude renders only while `state` is "speaking" unless `listening-amplitude`
+  // is set; every other state plays its scripted animation and ignores the audio.
+  /** Live microphone or WebRTC audio to analyze. JS property only; amplitude renders only while `state` is `speaking`. */
   stream?: MediaStream;
-  /** An `<audio>` or `<video>` element to tap for its audio. JS property only. NOTE:
-   *  amplitude renders only while state is "speaking" unless listening-amplitude is
-   *  set; every other state plays its scripted animation and ignores the audio. */
+  // Amplitude renders only while `state` is "speaking" unless `listening-amplitude`
+  // is set; every other state plays its scripted animation and ignores the audio.
+  /** An `<audio>` or `<video>` element to tap for its audio. JS property only; amplitude renders only while `state` is `speaking`. */
   audioElement?: HTMLMediaElement;
-  /** Pre-computed levels, 0..1. Set this and no AudioContext is ever built, which is
-   *  what keeps headless/SSR rendering and browser-speech-synthesis playback (which
-   *  exposes no audio node) free of Web Audio entirely. JS property only. A new
-   *  array reference is required for each update; mutating the existing array in
-   *  place will not re-render. NOTE: amplitude renders only while state is "speaking"
-   *  unless listening-amplitude is set; every other state plays its scripted
-   *  animation and ignores the audio. */
+  // Set this and no AudioContext is ever built, which is what keeps headless/SSR
+  // rendering and browser-speech-synthesis playback (which exposes no audio node) free
+  // of Web Audio entirely. A new array reference is required for each update; mutating
+  // the existing array in place will not re-render. Amplitude renders only while
+  // `state` is "speaking" unless `listening-amplitude` is set.
+  /** Pre-computed levels, 0..1. JS property only; a NEW array reference per update; amplitude renders only while `state` is `speaking`. */
   bands?: number[];
-  /** Render live amplitude during the listening state as well, using the same
-   *  presentation as speaking. Off by default, which keeps LiveKit parity: amplitude
-   *  from stream, audio-element or bands renders only while state is "speaking". Set
-   *  it to show a real mic-level picture while the user is the one talking. Boolean.
-   *  Attribute: `listening-amplitude` (a bare attribute means true; reflected, so the
-   *  property reads back what the attribute set). */
+  // Off by default, which keeps LiveKit parity: amplitude from stream, audio-element
+  // or bands renders only while state is "speaking". Set it to show a real mic-level
+  // picture while the user is the one talking. A bare attribute means true;
+  // reflected, so the property reads back what the attribute set.
+  /** Render live amplitude during the `listening` state too. Off by default. */
   listeningAmplitude?: boolean;
   /** Custom fragment shader for `variant="custom"`. JS property only. */
   shader?: ShaderSpec;
-  /** Shader variants only: keep animating while scrolled off screen. Off by default,
-   *  which stops drawing and releases the WebGL context until the element comes back
-   *  (browsers ration contexts to roughly 16 a page). Does not override
-   *  `prefers-reduced-motion`. Attribute: `animate-when-not-visible`. */
+  // Off by default, which stops drawing and releases the WebGL context until the
+  // element comes back (browsers ration contexts to roughly 16 a page).
+  /** Shader variants only: keep animating while scrolled off screen. Off by default; does not override `prefers-reduced-motion`. */
   animateWhenNotVisible?: boolean;
 }
 
@@ -120,7 +116,7 @@ export function AudioVisualizerFacade(
     ? ctx.flag('listeningAmplitude')
     : props.listeningAmplitude === true;
 
-  // Reflected (kai-dock precedent, findings G-05): without this,
+  // Reflected, same as kai-dock: without this,
   // `<kai-audio-visualizer listening-amplitude>` would leave
   // `el.listeningAmplitude === undefined` even while the element honours the
   // attribute, because toggleAttribute's empty-string write-back parses to
@@ -154,51 +150,8 @@ export function AudioVisualizerFacade(
 }
 
 /**
- * `<kai-audio-visualizer>` renders live audio as bars, a grid, a ring, a wave,
- * or a glowing aurora. It also animates from `state` alone with no audio at
- * all, which is what you want when the source cannot be tapped (browser
- * speech synthesis exposes no audio node).
- *
- * ```html
- * <kai-audio-visualizer variant="bar" state="speaking" size="md"></kai-audio-visualizer>
- * <kai-audio-visualizer variant="radial" size="lg" bar-count="24"></kai-audio-visualizer>
- * ```
- *
- * Audio sources and rich data are JS properties, never attributes:
- * ```js
- * el.stream = micStream            // MediaStream
- * el.audioElement = audioRef       // HTMLMediaElement
- * el.bands = [0.2, 0.8, 0.4]       // pre-computed, skips Web Audio; new array each update
- * el.shader = { fragment: glsl }   // variant="custom" only
- * ```
- *
- * Audio drives the geometry only while `state="speaking"`. Every other state
- * plays its scripted animation, so a mic stream attached during `listening`
- * changes nothing by default (LiveKit parity). Set `listening-amplitude` to
- * render real amplitude while the USER is the one talking:
- * ```html
- * <kai-audio-visualizer state="listening" listening-amplitude></kai-audio-visualizer>
- * ```
- *
- * Size tiers are fixed pixel designs, but the element never clips: in a
- * container narrower than the tier's natural footprint the whole picture
- * scales down proportionally to fit, and returns to the exact designed
- * metrics as soon as the space is back. Nothing to configure.
- *
- * The `wave`, `aurora`, and `custom` variants render through WebGL, and a
- * browser only allows about 16 live WebGL contexts per page. So a shader
- * variant scrolled off screen stops drawing and hands its context back,
- * picking up where it left off when it returns. Opt out per element when a
- * visualizer must keep running unseen:
- *
- * ```html
- * <kai-audio-visualizer variant="wave" animate-when-not-visible></kai-audio-visualizer>
- * ```
- *
- * This is a display element: no methods, no events.
- *
- * Restyle from outside via `::part(bar)` / `::part(cell)` / `::part(canvas)`,
- * the bar and cell parts each carrying `data-kai-index` and `data-kai-highlighted`.
+ * An animated visual for live audio, which can also animate on its own when the
+ * source cannot be tapped.
  */
 defineWebComponent<Props>('kai-audio-visualizer', {
   variant: 'bar',

@@ -40,10 +40,12 @@ const meta = {
     layout: 'padded',
     // Panel scope; `parameters.docs.controls` filters the autodocs table only.
     controls: { include: ['frame', 'appearance', 'topClass', 'bottomClass', 'class'] },
+    // Slot a banner or hint into `top` and a mode or control row into `bottom`; with neither, only the
+    // input shows.
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'A recessed tray that frames a prompt input and can extend with optional "lip" regions above and/or below it. The input stays the prominent, fully-rounded raised card; the lips sit in a slightly darker recessed band that shares the tray rounding, so the whole thing reads as one control. Slot a banner or hint into `top`, a mode / control row into `bottom`; with neither, only the input shows.',
+        'A recessed tray that frames a prompt input.',
       ]),
     },
   },
@@ -60,7 +62,7 @@ const meta = {
       control: 'inline-radio',
       options: ['soft', 'outlined', 'filled', 'plain'],
       description:
-        'Tray surface: `soft` (sunken fill + border, default), `outlined` (border only), `filled` (fill only), or `plain` (bare — no fill, border, or radius).',
+        'Tray surface. Defaults to `soft`; the look of each option is in the preview.',
     },
     topClass: { control: 'text', description: 'Extra classes for the TOP lip wrapper, merged over the default band styling.' },
     bottomClass: { control: 'text', description: 'Extra classes for the BOTTOM lip wrapper.' },

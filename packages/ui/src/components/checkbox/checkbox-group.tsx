@@ -23,65 +23,45 @@ export interface CheckboxGroupProps<T = string>
   options: readonly CheckboxOption<T>[];
   /** The selected values. Each option is checked when its `value` is in here (by identity). */
   value?: readonly T[];
-  /**
-   * The shared form-control name every box in the group carries, so a native form
-   * submits the whole selection under one key and `FormData.getAll(name)` reads it back.
-   *
-   * UNLIKE {@link RadioGroup}, this has no default. A radio group needs a shared `name`
-   * for the browser to make the set exclusive and arrow-navigable, so one is generated
-   * when none is given; checkboxes are independent controls and need nothing to behave
-   * correctly. Generating a name here would submit the selection under a random key,
-   * which is worse than submitting nothing.
-   */
+  // No default, UNLIKE {@link RadioGroup}: a radio set needs a shared `name` for the browser
+  // to make it exclusive and arrow-navigable, so one is generated when none is given, but
+  // checkboxes are independent controls and need nothing to behave correctly. Generating one
+  // here would submit the selection under a random key, which is worse than submitting
+  // nothing.
+  /** Shared form-control name every box carries, so a native form submits the set under one key. */
   name?: string;
   /** Disable every row. */
   disabled?: boolean;
   /** Accessible name for the group. Rendered as `aria-label` on the `group`. */
   label?: string;
-  /**
-   * Fires on every toggle with the NEXT selection, plus the option that moved and
-   * which way it went. The next selection is a fresh array — the group holds no state
-   * of its own, so `value` is yours to own.
-   */
+  // The next selection is a fresh array, since the group holds no state of its own.
+  /** Fires on every toggle, with the next selection plus the option that moved. */
   onChange?: (value: T[], option: CheckboxOption<T>, checked: boolean) => void;
-  /** Fires when a box loses focus — the commit point for a form field. */
+  // A blur is the commit point for a form field.
+  /** Fires with no payload when a box loses focus. */
   onOptionBlur?: () => void;
   /** Extra classes for each row. */
   itemClass?: string;
-  /**
-   * Presentation slot. Replaces the default label/description column with whatever
-   * you return, so a row can carry media, a badge or a price without a second
-   * checkbox component existing. The control, the row chrome and the group semantics
-   * stay ours.
-   */
+  // Replaces the default label/description column, so a row can carry media, a badge or
+  // a price without a second checkbox component existing. The control, the row chrome and
+  // the group semantics stay ours.
+  /** Presentation slot for the row's label column. */
   children?: (option: CheckboxOption<T>, state: { checked: boolean; disabled: boolean }) => JSX.Element;
 }
 
 /**
- * A vertical set of checkbox rows in a bordered, divided list — the kit's standard
- * "pick any number" control, and {@link RadioGroup}'s sibling: same options shape,
- * same row chrome, same presentation slot, multi-value instead of single.
+ * A vertical set of checkbox rows in a bordered, divided list: the kit's "pick any
+ * number" control, and {@link RadioGroup}'s sibling -- same options shape, same row
+ * chrome, multi-value instead of single.
  *
- * Every row is a real `<input type="checkbox">` inside a `<label>`, so clicking
- * anywhere on the row toggles it and the keyboard behaviour (a tab stop per box,
- * Space to toggle) is the browser's rather than a reimplementation. The wrapper is
- * `role="group"`, not `role="listbox"`: the boxes are independent controls and
- * nothing here overrides what they already announce.
+ * Every row is a real `<input type="checkbox">` inside a `<label>`, so the browser
+ * owns the click target and the keyboard (a tab stop per box, Space to toggle). The
+ * wrapper is `role="group"`, not `role="listbox"`: the boxes are independent controls
+ * and nothing here overrides what they announce.
  *
- * Everything not listed in `CheckboxGroupProps` is forwarded to the group element, so
- * `id`, `aria-labelledby`, any other `aria-*` and any `data-*` hook land where a form
- * expects them. No validation is applied — "at least one" is your application's rule,
- * not the kit's.
- *
- * ```tsx
- * <CheckboxGroup
- *   label="Environments"
- *   name="env"
- *   options={[{ value: 'prod', label: 'Production' }, { value: 'staging', label: 'Staging' }]}
- *   value={envs()}
- *   onChange={setEnvs}
- * />
- * ```
+ * Everything not in `CheckboxGroupProps` is forwarded to the group element, so `id`,
+ * `aria-labelledby` and any `data-*` hook land where a form expects them. No
+ * validation is applied: "at least one" is the application's rule, not the kit's.
  */
 export function CheckboxGroup<T = string>(props: CheckboxGroupProps<T>): JSX.Element {
   const [local, rest] = splitProps(props, [

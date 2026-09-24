@@ -5,11 +5,11 @@ import { isConversationUnread } from '../../primitives/conversation-store';
 import type { ConversationSummary } from '../../types';
 
 /**
- * Row density, the P-7 public axis (blocks-and-parts design 2026-08-31).
+ * Row density, the public axis.
  * `default` and `compact` are the two boxes this row always had; `panel` is
  * the widget-panel presentation: the exact row box of the facade's
  * `ConversationPanel` (conversation-panel.tsx), whose `px-3 py-2.5` interior
- * class was PRIVATE until now. The composition spike (phase 3, round 3) could
+ * class was PRIVATE until now. That measurement could
  * only match it by smuggling padding through slotted spans around host
  * padding; this axis deletes that contortion.
  */
@@ -18,7 +18,7 @@ export type ConversationRowDensity = 'default' | 'compact' | 'panel';
 /**
  * The row box (padding) per density. `panel` restates conversation-panel.tsx's
  * row class `px-3 py-2.5` (12px/10px; with the single 20px text-sm line that
- * is the measured 40px row of the spike's round 3). It is a copy by necessity:
+ * is the measured 40px row). It is a copy by necessity:
  * Tailwind utilities are compiled from literal class strings, so this cannot
  * be imported from the panel at runtime. `conversation-item-density.test.tsx`
  * derives the expected utilities from conversation-panel.tsx's SOURCE and
@@ -56,17 +56,17 @@ export interface ConversationItemProps {
   onSelect: (id: string) => void;
   /** Dense single-line row: a leading dot + title, no message count. */
   compact?: boolean;
-  /** Row density: `default`, `compact` (same as the `compact` flag), or
-   *  `panel`, the widget-panel presentation matching `ConversationPanel`'s
-   *  measured row box (single semibold title line, right-aligned time,
-   *  optional preview line). An explicit density wins over `compact`. */
+  // `panel` is the widget-panel presentation matching `ConversationPanel`'s measured row
+  // box (single semibold title line, right-aligned time, optional preview line). An explicit
+  // density wins over `compact`.
+  /** Row density. */
   density?: ConversationRowDensity;
   class?: string;
 }
 
 /**
  * Short relative time from an ISO date string: "just now", "5m ago", "3h ago",
- * "2d ago", "24d ago". Pure — it snapshots `now` (defaults to `Date.now()`) at
+ * "2d ago", "24d ago". Pure: it snapshots `now` (defaults to `Date.now()`) at
  * call time, so it re-derives whenever the list re-renders; there is no internal
  * ticking clock. Returns '' for a missing or unparseable date.
  */
@@ -92,7 +92,7 @@ export function relativeTimeShort(iso?: string, now: number = Date.now()): strin
 export { isConversationUnread } from '../../primitives/conversation-store';
 
 /**
- * The slotted-item shape rendered by `<kai-conversation-item>` — the composed
+ * The slotted-item shape rendered by `<kai-conversation-item>`: the composed
  * row of the consumer-owned loop. Distinct from the
  * data-mode `ConversationItem` above, which batteries mode keeps rendering
  * unchanged: this one takes REGIONS, not a `ConversationSummary`.
@@ -103,11 +103,11 @@ export { isConversationUnread } from '../../primitives/conversation-store';
  * provides only the region plus focus and ARIA plumbing, never a declarative
  * actions prop. Activation has two modes: inside `<kai-conversations>` it
  * lives in the CONTAINER (`createConversationItemsController` in
- * conversation-list.tsx — this row renders no handler and the
+ * conversation-list.tsx), which renders no handler on the row; the
  * `data-kai-item-menu` marker on the menu region is what the container's
- * activation guard keys off so a click in the consumer's menu never also
- * selects the row); STANDALONE, `onActivate` makes the row body
- * its own tabbable button-role control — click / Enter / Space — with the menu
+ * activation guard keys off, so a click in the consumer's menu never also
+ * selects the row. STANDALONE, `onActivate` makes the row body
+ * its own tabbable button-role control: click / Enter / Space, with the menu
  * still outside the control as the body's sibling.
  *
  * ARIA contract for direct Solid use: the row renders `role="listitem"` holding
@@ -129,9 +129,8 @@ export interface SlottedConversationItemProps {
   active?: boolean;
   /** Dense single-line row padding. */
   compact?: boolean;
-  /** Row density: `default`, `compact` (same as the `compact` flag), or
-   *  `panel`, the widget-panel row box measured off `ConversationPanel`.
-   *  An explicit density wins over `compact`. */
+  // The explicit prop wins over `compact`.
+  /** Row density. */
   density?: ConversationRowDensity;
   /** Show the unread indicator dot at the row's trailing edge (before the
    *  menu region), with a screen-reader "Unread" label. */
@@ -144,20 +143,18 @@ export interface SlottedConversationItemProps {
   menu?: JSX.Element;
   /** The title (the element's default slot). */
   children?: JSX.Element;
-  /** Set when the element HOST carries the row-group semantics: the inner row
-   *  then renders `role="presentation"` so the accessibility tree sees one
-   *  group (the host), never two. The `kai-conversation-item` facade sets it;
-   *  Solid consumers rendering the component directly leave it off and the row
-   *  itself is the group. */
+  // The inner row then renders `role="presentation"` and the accessibility tree sees ONE
+  // group (the host), never two. The `kai-conversation-item` facade sets it; Solid consumers
+  // rendering the component directly leave it off, and the row itself is the group.
+  /** Whether the element host carries the row-group semantics. */
   hostSemantics?: boolean;
-  /** STANDALONE activation: when set, the row body is itself the
-   *  activation control — `tabindex="0"` on the `role="button"` body, and
-   *  click / Enter / Space call this. The menu region never triggers it (it is
-   *  the body's sibling, outside the control). Inside `<kai-conversations>`
-   *  leave it UNSET: the container's controller owns activation (its delegated
-   *  click/keydown → `kai-conversation-select`) plus roving tabindex, and a
-   *  handler here would double-fire. The `kai-conversation-item` facade passes
-   *  it only when the item is standalone. */
+  // With it set, the row body IS the activation control: `tabindex="0"` on the
+  // `role="button"` body, and click / Enter / Space call this. The menu region never triggers
+  // it, being the body's sibling rather than a descendant. Inside `<kai-conversations>` it
+  // stays UNSET, because the container's controller owns activation (delegated click/keydown
+  // to `kai-conversation-select`) and roving tabindex, and a handler here would double-fire;
+  // the `kai-conversation-item` facade passes it only when the item is standalone.
+  /** Activation handler for a standalone row. */
   onActivate?: () => void;
   class?: string;
 }
@@ -217,7 +214,7 @@ export function SlottedConversationItem(props: SlottedConversationItemProps) {
             <div part="meta" class="mt-0.5 truncate text-xs text-muted-foreground">{local.meta}</div>
           </Show>
         </div>
-        {/* Unread dot (P-7b): trailing edge of the BODY, so it stays inside the
+        {/* Unread dot: trailing edge of the BODY, so it stays inside the
             activation surface and before the menu sibling. */}
         <Show when={local.unread}>
           <UnreadDot />
@@ -233,14 +230,14 @@ export function SlottedConversationItem(props: SlottedConversationItemProps) {
 export function ConversationItem(props: ConversationItemProps) {
   const [local] = splitProps(props, ['conversation', 'isActive', 'onSelect', 'compact', 'density', 'class']);
   const density = () => resolveRowDensity(local.density, local.compact);
-  // Unread dot (P-7b): derived from the same public read primitive the
+  // Unread dot: derived from the same public read primitive the
   // facade's panel and home surfaces use, never a second policy.
   const unread = createMemo(() => isConversationUnread(local.conversation));
   // The trailing text: the consumer's own `trailing` field, else an auto relative
   // time from updatedAt (fallback lastMessageAt). Never an internal clock — it is a
   // render-time snapshot.
   //
-  // REACTIVITY, and the weaker version of this note is what #224 was filed against:
+  // REACTIVITY, and the weaker version of this note is what shipped the stale dot:
   // a new `conversations` array reference is NOT sufficient. `ConversationList` renders
   // these rows through a reference-keyed `<For>` that captures `conv` as a VALUE, so a
   // row whose item object is unchanged is never re-invoked and never re-reads anything
@@ -277,7 +274,7 @@ export function ConversationItem(props: ConversationItemProps) {
       <Show
         when={density() !== 'panel'}
         fallback={
-          // The widget-panel presentation (P-7a): ConversationPanel's row
+          // The widget-panel presentation: ConversationPanel's row
           // anatomy, made public. Baseline row of semibold title + relative
           // time; the consumer's `trailing` field is the one-line preview
           // under it, with the unread dot at the preview line's end

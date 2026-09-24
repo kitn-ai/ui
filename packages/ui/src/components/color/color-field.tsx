@@ -11,7 +11,7 @@ export function isValidHex(text: string): boolean {
 }
 
 /** Expand a valid 3- or 6-digit hex to the strict 6-digit lowercase form
- *  `<input type="color">` requires for its `value` — the native control
+ *  `<input type="color">` requires for its `value`: the native control
  *  silently ignores (resets to black) anything else, so this is what keeps
  *  the swatch/picker in sync with a shorthand or differently-cased hex the
  *  text field accepts. Falls back to `#000000` (the platform's own default)
@@ -29,26 +29,22 @@ function toNativeColorValue(hex: string | undefined): string {
 }
 
 export interface ColorFieldProps {
-  /** Accessible name for the color control — the swatch/native picker's
-   *  `aria-label`. The hex text field gets its own derived label so the two
-   *  controls announce distinctly. */
+  /** Accessible name for the color control, used as the picker's `aria-label`. */
   label: string;
-  /** The committed color as a CSS hex string, or `undefined`/empty for
-   *  unset. Controlled — this component holds no color state of its own,
-   *  only the hex text field's in-progress draft (see `onChange`). */
+  // Controlled: no color state of its own lives here, only the hex text field's
+  // in-progress draft (see `onChange`). The text field derives its own label so
+  // the two controls announce distinctly.
+  /** The committed hex color; unset or empty renders as no color chosen. */
   value?: string;
   /** Placeholder for the hex text field when `value` is unset. */
   placeholder?: string;
   disabled?: boolean;
-  /**
-   * Fires with the next value once it is syntactically valid: immediately
-   * for the native color picker (which only ever emits a valid 6-digit hex),
-   * or on blur/commit of the hex text field when what's typed matches
-   * {@link isValidHex}. An invalid or partial hex in the text field never
-   * fires this — the field just doesn't commit, and keeps whatever was
-   * typed rather than snapping back (owner ruling, design round 3: "invalid
-   * text doesn't nuke state, just doesn't commit").
-   */
+  // Fires with the next value once it is syntactically valid: immediately for the
+  // native color picker (which only ever emits a valid 6-digit hex), or on
+  // blur/commit of the hex text field (`isValidHex` is the test). An invalid or
+  // partial hex never fires it: the field keeps what was typed rather than
+  // snapping back.
+  /** Fires with the next value once it is syntactically valid. */
   onChange: (value: string) => void;
   class?: string;
 }
@@ -59,13 +55,13 @@ export interface ColorFieldProps {
  * directions.
  *
  * The swatch is a `<label>` wrapping a real `<input type="color">` that is
- * `sr-only` (present, focusable, and labeled for assistive tech — never
- * `display:none` or `tabindex="-1"`) rather than rendered — the platform
+ * `sr-only` (present, focusable, and labeled for assistive tech, never
+ * `display:none` or `tabindex="-1"`) rather than rendered; the platform
  * color dialog is what does the actual picking; this component never draws
  * its own color rectangle. Clicking anywhere on the swatch forwards to the
  * native input via ordinary label/input association; keyboard focus lands on
  * that input, and the VISIBLE focus ring is painted on the wrapping label via
- * `has-[:focus-visible]:` — the same "real hidden control, ring on the
+ * `has-[:focus-visible]:`, the same "real hidden control, ring on the
  * decorative wrapper" idiom `tasks-card.tsx` and `choice-card.tsx` already
  * use for their checkbox/radio rows. Enter/Space opening the native color
  * dialog on a focused `<input type="color">` is platform behavior, not

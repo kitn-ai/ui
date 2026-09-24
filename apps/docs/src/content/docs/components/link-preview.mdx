@@ -1,6 +1,6 @@
 ---
 title: Link Preview
-description: A rich Open-Graph preview card that turns a URL and its metadata into a themed, accessible link tile — no fetching required.
+description: A link tile built from a link's metadata.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -13,7 +13,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kai-tag-sub">kai-link-preview</p>
 
-<p class="kai-lede">Turn a URL and its Open-Graph metadata into a rich, themed preview tile — assign one property and the card handles image, title, description, favicon, and domain with graceful fallbacks for anything missing.</p>
+<p class="kai-lede">Turns a bare URL into an image, a title, and a description without fetching anything itself.</p>
 
 <Facts items={['Shadow DOM', 'Pure by default — never fetches', 'Optional backend fetcher', 'Graceful image fallback', 'Card Contract events']} />
 
@@ -22,7 +22,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 <Playground client:only="solid" tag="kai-link-preview" />
 
 <Aside type="tip" title="When to use">
-Use `<kai-link-preview>` when an AI agent surfaces a URL and you want a rich tile instead of a plain hyperlink. It fits inside a `<kai-cards>` stream or as a standalone card in a thread. If you only have the URL at render time, wire `configureLinkPreview` to your own OG-scraping backend — the card shows a skeleton while it waits.
+When an agent surfaces a URL and you want a rich tile instead of a plain hyperlink. With only the URL at render time, wire `configureLinkPreview` to your own OG-scraping backend.
 </Aside>
 
 ## Usage
@@ -55,24 +55,21 @@ Set `data` in JavaScript (it's an object, not an attribute):
 - **`cardId`** — set as `card-id` attribute or `cardId` property; correlates emitted events when multiple cards are in a `<kai-cards>` host.
 - **Pure by default** — the element never makes network calls. For bare `{ url }`, call `configureLinkPreview({ fetchMetadata })` once at startup to point at your backend.
 - **Click** dispatches a bubbling `kai-card` CustomEvent with `{ kind: 'open', url, target: 'tab' }`. A missing or broken image hides the image region silently; an invalid `url` renders a non-clickable "Invalid link" chip.
-
 ## Examples
 
 ### Full Preview
-
-All OG fields supplied — image, title, description, site name, domain, and favicon.
 
 <Example client:visible tag="kai-link-preview" />
 
 ### No Image
 
-When no `image` is provided the card degrades cleanly to the text-and-domain layout.
+With no `image`, the card falls back to the text-and-domain layout.
 
 <Example client:visible tag="kai-link-preview" data="noImage" />
 
 ### Bare URL with Fetcher
 
-Passing only `{ url }` — the card shows a skeleton until `configureLinkPreview` resolves metadata from your backend:
+With only `{ url }`, the card shows a skeleton until `configureLinkPreview` resolves metadata from your backend:
 
 ```ts
 import { configureLinkPreview } from '@kitn.ai/ui';
@@ -87,7 +84,7 @@ configureLinkPreview({
 
 ### Invalid Link
 
-When `url` fails validation the card renders a non-clickable "Invalid link" chip and emits a single `error` event via the `kai-card` envelope.
+An invalid `url` renders a non-clickable "Invalid link" chip and emits one `error` event through the `kai-card` envelope.
 
 <Example client:visible tag="kai-link-preview" data="invalidLink" />
 

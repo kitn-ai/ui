@@ -7,29 +7,12 @@ interface Props extends Record<string, unknown> {
   keys?: string;
   /** `mac` uses ⌘/⌥, `other` uses Ctrl. `auto` (default) sniffs the OS. */
   platform?: KbdPlatform;
-  /** Cap size: `sm` or `md`. Defaults to `md`. */
+  /** Cap size. Defaults to `md`. */
   size?: 'sm' | 'md';
 }
 
 /**
- * `<kai-kbd>` — a keyboard-shortcut display. Feed it `keys` (tokens joined by
- * `+`) and it renders one inset cap per token, mapping each to a platform glyph
- * (`Mod` → ⌘ on mac else Ctrl, `Shift` → ⇧, `ArrowUp` → ↑, `Enter` → ⏎, …).
- * Display only — it does not bind keys.
- *
- * ```html
- * <kai-kbd keys="Mod+K"></kai-kbd>
- * <kai-kbd keys="Mod+Shift+ArrowUp" platform="mac"></kai-kbd>
- * <kai-kbd>Esc</kai-kbd> <!-- omit keys to show your own content -->
- * ```
- *
- * `platform="auto"` (default) sniffs the OS for ⌘ vs Ctrl. Restyle the caps via
- * `::part(key)` and the gaps via `::part(separator)`.
- *
- * Inside `<kai-kbd-group>` this element welds to its siblings: no gap, one hairline
- * at each seam, corners only at the strip's ends. The group marks its direct children
- * with `data-kai-join` (it cannot reach the caps in here), and the rules below read
- * that marker, so a `<kai-kbd>` used anywhere else is untouched.
+ * A keyboard-shortcut display: one inset cap per key, in the platform's own glyphs.
  */
 defineWebComponent<Props>('kai-kbd', {
   keys: undefined,

@@ -1,9 +1,8 @@
 /**
  * Browser SpeechSynthesis mechanics, shared by `VoiceOutput`
  * (components/voice/voice-output.tsx) and the message action bar's built-in
- * 'speak' action (primitives/message-feedback.ts) — ONE implementation, per
- * B-7's "back it with the existing kai-voice-output/SpeechSynthesis
- * mechanics". Free, local, no provider — no invoice concern.
+ * 'speak' action (primitives/message-feedback.ts): ONE implementation, reusing the
+ * existing kai-voice-output/SpeechSynthesis mechanics. Free, local, no provider.
  *
  * Every raw `window.speechSynthesis` access lives HERE, each wrapped in its
  * own `hasSpeechSynthesis()` guard, so `voice-output.tsx` (whose `stop()` is
@@ -49,7 +48,7 @@ export function resumeSpeech(): void {
 
 /** Speak `text` natively: cancel-then-speak so a second call pre-empts the
  *  first (VoiceOutput's own speakNative discipline). No-ops where the API
- *  is absent (jsdom, some webviews) or `text` is empty — the caller's
+ *  is absent (jsdom, some webviews) or `text` is empty: the caller's
  *  `kai-message-action` event still fires, so a host can back the same
  *  action with a model TTS path instead. */
 export function speakText(text: string): void {

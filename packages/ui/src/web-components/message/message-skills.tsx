@@ -6,9 +6,9 @@ import { MessageSkills, type Skill } from '../../components/message/message-skil
 
 
 interface Props extends Record<string, unknown> {
-  /** The active skills to badge. Set as a JS property. Omit to supply them as
-   *  `<kai-skill>` light-DOM children instead; when both are present the
-   *  property's skills come first. Nothing renders when there are none. */
+  // When both this property and light-DOM children are present, the property's skills
+  // come first. Nothing renders when there are none.
+  /** The active skills to badge. JS property (array); omit to pass `<kai-skill>` light-DOM children instead. */
   skills?: Skill[];
 }
 
@@ -28,36 +28,7 @@ export function parseKaiSkillElement(n: Element): Skill {
 }
 
 /**
- * `<kai-skills>` — badges showing which skills were active for a
- * message. Data via the `skills` property **or** declarative `<kai-skill>`
- * children.
- *
- * **Property API** — set a JS array on the element:
- * ```html
- * <kai-skills id="skills"></kai-skills>
- * <script type="module">
- *   import '@kitn.ai/ui/web-components';
- *   document.getElementById('skills').skills = [
- *     { id: 'web-search', name: 'Web Search' },
- *     { id: 'code',       name: 'Code' },
- *   ];
- * </script>
- * ```
- *
- * **Declarative API** — compose `<kai-skill>` children (light-DOM data
- * carriers hidden by Shadow DOM — no visible output of their own):
- * ```html
- * <kai-skills>
- *   <kai-skill id="web-search">Web Search</kai-skill>
- *   <kai-skill id="code">Code</kai-skill>
- * </kai-skills>
- * <script type="module">
- *   import '@kitn.ai/ui/web-components';
- * </script>
- * ```
- *
- * When both are provided, `skills` prop items render first and declarative
- * children are appended after.
+ * Badges showing which skills were active for a message.
  */
 defineWebComponent<Props>('kai-skills', {
   skills: [],

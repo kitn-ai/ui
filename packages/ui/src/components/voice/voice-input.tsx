@@ -5,7 +5,7 @@ import { Tooltip } from '../tooltip/tooltip';
 import { useVoiceRecorder } from '../../primitives/use-voice-recorder';
 import { useSpeechRecognition } from '../../primitives/use-speech-recognition';
 
-/** Imperative handle exposed via `controllerRef` — surfaces the recorder's latent
+/** Imperative handle exposed via `controllerRef`, surfacing the recorder's latent
  *  start/stop so the `<kai-voice-input>` facade can forward them as instance
  *  methods (push-to-talk). Both run the SAME getUserMedia → blob → transcription
  *  path as clicking the mic, so manual + programmatic emit identically. */
@@ -21,9 +21,9 @@ export interface VoiceInputProps {
   onTranscription: (text: string) => void;
   disabled?: boolean;
   class?: string;
-  /** Host supplied a `transcribe` callback. When true the MediaRecorder →
-   *  onTranscribe path runs. When false the component prefers native
-   *  SpeechRecognition (capable browsers), falling back to record-only. */
+  // True when the host supplied the `onTranscribe` callback. When false the component
+  // prefers native SpeechRecognition (capable browsers), falling back to record-only.
+  /** Whether the host supplied a transcription callback. */
   hasTranscribe?: boolean;
   /** BCP-47 language tag for native recognition (e.g. `en-US`). */
   lang?: string;
@@ -31,16 +31,16 @@ export interface VoiceInputProps {
   interim?: boolean;
   /** Live partial transcript from native recognition (when `interim`). */
   onInterim?: (text: string) => void;
-  /** Fires whenever recording starts or stops. Guarded against the spurious
-   *  initial `false` — only true transitions emit (the facade maps this to
-   *  kai-recording-change). */
+  // Guarded against the spurious initial `false`: only true transitions emit. The facade
+  // maps this to `kai-recording-change`.
+  /** Fires whenever recording starts or stops. */
   onRecordingChange?: (recording: boolean) => void;
   /** Receive the imperative controller once mounted. The `<kai-voice-input>`
    *  facade forwards these as element methods (start/stop). */
   controllerRef?: (controller: VoiceInputController) => void;
-  /** A recognition session failed or produced nothing. `error` is the platform
-   *  error code, the thrown exception's name, or `no-result` when the session
-   *  ended with no error and no text. The facade maps this to kai-voice-error. */
+  // `error` is the platform error code, the thrown exception's name, or `no-result` when
+  // the session ended with no error and no text. The facade maps this to `kai-voice-error`.
+  /** A recognition session failed or produced nothing. */
   onError?: (detail: { source: 'recognition'; error: string; message: string }) => void;
 }
 
@@ -50,7 +50,7 @@ export function VoiceInput(props: VoiceInputProps) {
   const speech = useSpeechRecognition({ interim: props.interim });
   const [isProcessing, setIsProcessing] = createSignal(false);
 
-  // Path selection (§6): a `transcribe` callback always wins (MediaRecorder →
+  // Path selection: a `transcribe` callback always wins (MediaRecorder →
   // host transcriber). Otherwise prefer native SpeechRecognition when the browser
   // supports it. The unsupported-no-callback case falls through to recording the
   // blob (→ onTranscribe → kai-audio-captured) with no text.
@@ -121,7 +121,7 @@ export function VoiceInput(props: VoiceInputProps) {
     }
   }
 
-  // Drive whichever path is active (§6: start/stop must follow the live path).
+  // Drive whichever path is active (start/stop must follow the live path).
   function begin() {
     if (useNative()) void beginRecognition();
     else void beginRecording();

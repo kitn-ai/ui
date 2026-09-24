@@ -3,9 +3,9 @@ import { Screen, type ScreenController } from '../../components/screen/screen';
 import { wireDisclosure } from '../disclosure/disclosure';
 
 interface Props extends Record<string, unknown> {
-  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open`
-   *  attribute; the element still self-manages). Set `el.open = true`, or
-   *  `<kai-screen open>`; listen for `kai-open-change`. */
+  // Shoelace-style: settable and reflected to the `open` attribute, while the element
+  // still self-manages.
+  /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
   /** Initial open state on mount (uncontrolled seed). */
   defaultOpen?: boolean;
@@ -28,27 +28,8 @@ interface Events {
 }
 
 /**
- * `<kai-screen>` is a developer-swapped, full-bleed overlay destination: the
- * push/drill-in surface that takes over its mount point under a back-header. The
- * developer owns the swap (their own routing flips `open` in response to their
- * trigger button and the screen's `kai-back`); the screen owns being the takeover.
- *
- * It fills whatever it is mounted in (mount at the app root for a full takeover,
- * in a positioned region for a scoped one), marks sibling elements `inert` while
- * open (the standard modal pattern; opt out with `no-inert`), moves focus in on
- * open and restores it on close, and runs an enter/exit transition that honors
- * `prefers-reduced-motion`. `Escape` fires `kai-back`.
- *
- * ```html
- * <kai-screen headline="Design">
- *   <button slot="actions"><kai-avatar></kai-avatar></button>
- *   <div>…your surface…</div>
- * </kai-screen>
- * ```
- *
- * Open state is the standard disclosure surface: settable+reflecting `open`,
- * `kai-open-change`, and `show()`/`hide()`/`toggle()`; seed with `default-open`.
- * Parts: `header` · `back` · `title` · `body`.
+ * A full-bleed overlay destination that takes over its mount point under a back
+ * header. `kai-dialog` is the centered modal instead.
  */
 defineWebComponent<Props, Events>('kai-screen', {
   open: undefined,

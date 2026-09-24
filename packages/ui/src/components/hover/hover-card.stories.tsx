@@ -9,10 +9,11 @@ const meta = {
   tags: ['autodocs'],
   parameters: {
     layout: 'padded',
+    // A safe bridge keeps it open as the pointer travels onto the card. Reach for `Dropdown`
+    // when the floating surface carries actions, and `Tooltip` for a one-line label.
     docs: {
       description: componentDescription([
-        'A floating card shown on hover/focus of its `trigger`, with a safe bridge so it stays open as the pointer moves onto it. Use for non-essential previews; reach for `Dropdown` if it needs actions, `Tooltip` for a one-line label.',
-        'Pass the trigger as `trigger` and the body as `children`; tune `openDelay` / `closeDelay` (ms).',
+        'A floating card that opens on hover or focus of the element it wraps.',
       ]),
     },
   },
@@ -23,10 +24,6 @@ const meta = {
     closeDelay: { control: 'number', description: 'Delay (ms) before the card closes after the pointer leaves. Default 300.' },
     class: { control: 'text', description: 'Extra classes applied to the card body.' },
   },
-  // `trigger` and `children` are built HERE rather than passed through `args`: a JSX element in
-  // `args` cannot be serialized across Storybook's manager/preview boundary, so the Docs page's
-  // primary preview re-rendered from empty args and showed a blank canvas while the stories
-  // themselves looked right. Everything left in `args` is serializable, which is the rule.
   render: (args) => (
     <HoverCard
       trigger={<Button variant="outline">@ada</Button>}
@@ -37,7 +34,7 @@ const meta = {
       <div class="flex gap-3">
         <div class="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-medium text-primary-foreground">AL</div>
         <div class="space-y-1">
-          <p class="text-sm font-medium text-foreground">Ada Lovelace</p>
+          <p class="text-sm font-medium text-foreground">Demo User</p>
           <p class="text-xs text-muted-foreground">Wrote the first algorithm intended for a machine. Joined in 1843.</p>
         </div>
       </div>
@@ -61,7 +58,7 @@ export const Playground: Story = {
       AL
     </div>
     <div class="space-y-1">
-      <p class="text-sm font-medium">Ada Lovelace</p>
+      <p class="text-sm font-medium">Demo User</p>
       <p class="text-xs text-muted-foreground">Wrote the first algorithm for a machine.</p>
     </div>
   </div>

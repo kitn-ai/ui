@@ -5,8 +5,8 @@ import { type ButtonVariantName } from './button-variant-names';
 
 /** The variant → classes record, extracted from the cva call so (a) the
  *  `Record<ButtonVariantName, string>` type pins it to the leaf const (tsc
- *  drift guard both directions) and (b) the B-6a unit test can read the
- *  real object's keys — cva's returned function does not expose its config. */
+ *  drift guard both directions) and (b) a unit test can read the
+ *  real object's keys; cva's returned function does not expose its config. */
 export const BUTTON_VARIANT_CLASSES: Record<ButtonVariantName, string> = {
   default: 'bg-primary text-primary-foreground hover:bg-primary/90',
   ghost: 'hover:bg-muted text-foreground',

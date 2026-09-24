@@ -33,7 +33,26 @@
 // the web components are real public API and the roster's whole value is being the
 // complete list inline. New headroom is ~2 KiB — deliberately tight, the next
 // batch of web components pays its own toll here again.
-const MAX_LLMS_FULL_BYTES = 344 * 1024; // 352,256
+//
+// 2026-09-22 raise: 344 → 355 KiB. Measured 352,800 bytes at 100 elements /
+// 123 state/wire exports. What grew: the attachment lightbox and the image split, both of them
+// element reference an agent reads HERE. `kai-lightbox` is a new element (open/show/hide/toggle,
+// `show-close`, `close-on-content-click`, three parts); `kai-image-artifact` is a new element while
+// `kai-image` changed meaning (the payload props moved out, `src` moved in); `image-preview` landed
+// on three elements that render attachments; `ImageArtifact` brought its own props. Trimming was
+// not the better fix: the growth is one row per real prop of real public API, and the alternative
+// (pointers into the Custom Elements Manifest) would hide the per-element API from the file an agent
+// reads first. 355 KiB keeps the same ~3% headroom over the measurement that the baseline and the
+// previous raise both used.
+// 2026-09-22 LOWERED: 355 -> 324 KiB. Measured 321,134 bytes at 100 elements / 123
+// state/wire exports. The 355 KiB above was raised IN THE SAME SESSION only to measure what
+// the element docstrings cost before they were trimmed (they added 75,917 bytes, which put
+// the file 29 KB over); the trims then took that whole block to ~7.8 KB and the prop docs from
+// 94,098 to ~54,000 chars, so the height is gone and leaving the raise in place would have
+// been drift with a receipt that no longer describes the tree. 324 KiB is the same ~3%
+// headroom over the measurement that the baseline and the previous raise used. If this file
+// grows again, the note above explains what to measure and what to trim first.
+const MAX_LLMS_FULL_BYTES = 324 * 1024; // 331,776
 
 // THE FLOOR IS A TRUNCATION TRIPWIRE, NOT A TARGET. This repo has already
 // shipped the failure it guards: running gen-llms.mjs standalone silently
