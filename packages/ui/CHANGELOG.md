@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.37.0](https://github.com/kitn-ai/ui/compare/@kitn.ai/ui-v0.36.0...@kitn.ai/ui-v0.37.0) (2026-09-24)
+
+
+### Features
+
+* **image:** split Image into a resource and an ImageArtifact payload ([4656e23](https://github.com/kitn-ai/ui/commit/4656e23c2f7cef10325dce6a6683a0620b30b9da))
+* **kbd:** weld a KbdGroup into one key strip, and let a Kbd live in a tooltip ([94517ef](https://github.com/kitn-ai/ui/commit/94517ef73ddb0164743979f56244fee78e913d83))
+* **kbd:** weld a KbdGroup into one key strip, and let a Kbd live in a tooltip ([0310db2](https://github.com/kitn-ai/ui/commit/0310db22a91d4f4a2a2e9a5422da44677c56dd28))
+* **lightbox:** a standalone Lightbox element, and an attachments image-preview option ([878e099](https://github.com/kitn-ai/ui/commit/878e099935512cb0e3265edcdbea60cfb42b72f1))
+* **lightbox:** a standalone Lightbox element, and an attachments image-preview option ([442a896](https://github.com/kitn-ai/ui/commit/442a89607e98c4091bb008ed6627201de9b7c215))
+* **lightbox:** an optional close control, and the Solid story the Components group was missing ([b3d1577](https://github.com/kitn-ai/ui/commit/b3d1577222367c57916d9dd705a19b90ff38a0b1))
+* **storybook:** the twelve reported items, and the four root causes behind them ([21ff45f](https://github.com/kitn-ai/ui/commit/21ff45f3d77141bc2f6584ffd7bd892769dc8b34))
+* **storybook:** the twelve reported items, and the four root causes behind them ([107397f](https://github.com/kitn-ai/ui/commit/107397f1330d1d2b8477737893132a16a44977ec))
+
+
+### Bug Fixes
+
+* **lightbox:** a slotted control keeps its own role, not a nested one ([9afca7d](https://github.com/kitn-ai/ui/commit/9afca7d7e3edaef3a9235dde3a3442ae69f96b4d))
+
 ## [0.36.0](https://github.com/kitn-ai/ui/compare/@kitn.ai/ui-v0.35.0...@kitn.ai/ui-v0.36.0) (2026-09-22)
 
 
