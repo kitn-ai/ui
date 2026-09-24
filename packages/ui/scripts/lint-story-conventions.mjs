@@ -149,6 +149,14 @@
 //     A description this reader cannot evaluate statically -- an identifier, a
 //     call, a template with a hole -- is UNVERIFIED, never a quiet pass: it
 //     renders in the props table like any other.
+// (n) A JSX ELEMENT IN A STORY'S `args`. Storybook serializes `args` across the
+//     manager/preview boundary, so a JSX value arrives as a plain object: the story
+//     renders nothing, or the docs preview blanks. It is the one args value that can
+//     never work, and it cannot be seen by any other rule here (the argTypes rules
+//     read keys and descriptions, and a JSX value type-checks). The fix is a `render`
+//     that closes over the element, which is what every story that needs one does.
+//     A JSX value inside a FUNCTION in args is fine: that value is a function, and
+//     the element is built when it is called.
 //
 // THE INVARIANT
 // (a) is a per-STORY finding: every exported story object must have a snippet
@@ -2160,6 +2168,61 @@ function lineOfSegment(segments, index) {
   return segments[segments.length - 1].line;
 }
 
+// ---------------------------------------------------------------------------
+// (n) a JSX element in a story's `args`
+// ---------------------------------------------------------------------------
+
+/** Does this expression CONTAIN a JSX element, without descending into a function
+ *  body? An arrow that returns JSX is a function VALUE in `args`, which Storybook
+ *  serializes as a function reference the preview can call, so it is not this rule's
+ *  subject. */
+function containsJsx(initializer) {
+  if (
+    ts.isArrowFunction(initializer) ||
+    ts.isFunctionExpression(initializer) ||
+    ts.isMethodDeclaration(initializer)
+  ) {
+    return false;
+  }
+  let found = false;
+  const walk = (node) => {
+    if (found) return;
+    if (
+      ts.isJsxElement(node) ||
+      ts.isJsxSelfClosingElement(node) ||
+      ts.isJsxFragment(node)
+    ) {
+      found = true;
+      return;
+    }
+    ts.forEachChild(node, walk);
+  };
+  walk(initializer);
+  return found;
+}
+
+/** Every `args` object (the meta's or a story's) whose literal value contains JSX. */
+function findJsxInArgs(sf) {
+  const findings = [];
+  const visit = (node) => {
+    if (
+      ts.isPropertyAssignment(node) &&
+      propName(node) === 'args' &&
+      ts.isObjectLiteralExpression(node.initializer)
+    ) {
+      for (const prop of node.initializer.properties) {
+        if (!ts.isPropertyAssignment(prop)) continue;
+        if (containsJsx(prop.initializer)) {
+          findings.push({ key: propName(prop) ?? '(computed)', line: lineAt(sf, prop) });
+        }
+      }
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sf);
+  return findings;
+}
+
 function analyzeFile(path, text, ctx) {
   const sf = parse(path, text);
   const findings = {
@@ -2167,6 +2230,7 @@ function analyzeFile(path, text, ctx) {
     eventArgTypes: [],
     componentEventProps: [],
     elementEventProps: [],
+    jsxInArgs: [],
     unverified: [],
   };
   findings.snippetlessStories = findSnippetlessStories(sf);
@@ -2203,6 +2267,7 @@ function analyzeFile(path, text, ctx) {
   findings.argDescriptionIssues = argDescriptions.findings;
   findings.argDescriptionsRead = argDescriptions.read;
   findings.unverified.push(...argDescriptions.unverified);
+  findings.jsxInArgs = findJsxInArgs(sf);
   const title = findMetaTitle(sf);
   if (title) {
     if (retiredTier(title.value)) findings.retiredTier = title;
@@ -3099,6 +3164,21 @@ const SELF_TEST_CASES = [
   {
     // Reads the REAL entry points, so a misrooted path or a parser that stopped
     // finding exports fails here rather than making every (k) assertion vacuous.
+    name: '(n) a JSX element in a story\'s args is flagged',
+    code: `const meta = { title: 'X', args: { header: <div>hi</div> } };\nexport const A: Story = { args: { footer: <Footer /> } };`,
+    expectJsxInArgs: ['header', 'footer'],
+  },
+  {
+    name: '(n) a string arg, and JSX kept in render, are not flagged',
+    code: `const meta = { title: 'X', args: { header: 'hi' } };\nexport const A: Story = { render: () => <div>hi</div> };`,
+    expectJsxInArgs: [],
+  },
+  {
+    name: '(n) a FUNCTION-valued arg that returns JSX is a function value, not a JSX arg',
+    code: `const meta = { title: 'X', args: { renderRow: () => <div>hi</div> } };`,
+    expectJsxInArgs: [],
+  },
+  {
     name: "(k) the real entry points still parse to the kit's export names",
     expectKitExports: ['buttonVariants', 'renderIcon', 'Dock'],
   },
@@ -3326,6 +3406,15 @@ function runSelfTest() {
         notes.push(`descriptions: expected ${c.expectDescriptions}, got ${got.descriptions}`);
       }
     }
+    if ('expectJsxInArgs' in c) {
+      const got = findJsxInArgs(sf).map((f) => f.key);
+      const expected = c.expectJsxInArgs;
+      const same = got.length === expected.length && got.every((k, i) => k === expected[i]);
+      if (!same) {
+        ok = false;
+        notes.push(`jsx-in-args: expected [${expected.join(', ')}], got [${got.join(', ')}]`);
+      }
+    }
     if ('expectArgDescriptions' in c || 'expectArgDescriptionsRead' in c || 'expectArgUnverified' in c) {
       const got = findArgTypeDescriptions(sf, c.code ?? '');
       if ('expectArgDescriptions' in c) {
@@ -3463,6 +3552,7 @@ const snippetLocalNameOffenders = [];
 const glyphOffenders = [];
 const docsTalkOffenders = [];
 const argDescriptionOffenders = [];
+const jsxInArgsOffenders = [];
 const unimportedExportOffenders = [];
 const unverified = [];
 let resolvedComponents = 0;
@@ -3489,6 +3579,7 @@ for (const path of files) {
   for (const g of findings.glyphs) glyphOffenders.push({ file: rel, ...g });
   for (const d of findings.descriptionDocsTalk) docsTalkOffenders.push({ file: rel, ...d });
   for (const d of findings.argDescriptionIssues) argDescriptionOffenders.push({ file: rel, ...d });
+  for (const j of findings.jsxInArgs) jsxInArgsOffenders.push({ file: rel, ...j });
   for (const u of findings.unverified) unverified.push({ file: rel, ...u });
   if (findings.retiredTier) retiredTierOffenders.push({ file: rel, ...findings.retiredTier });
   if (findings.doubledToken) doubledTokenOffenders.push({ file: rel, ...findings.doubledToken });
@@ -3544,6 +3635,7 @@ const total =
   glyphOffenders.length +
   docsTalkOffenders.length +
   argDescriptionOffenders.length +
+  jsxInArgsOffenders.length +
   (docgenIssue ? 1 : 0);
 const unverifiedTotal = unverified.length + eventsSkipped.length + kit.starUnfollowed.length;
 if (total === 0 && unverifiedTotal === 0 && vacuous.length === 0) {
@@ -3562,7 +3654,7 @@ if (total === 0 && unverifiedTotal === 0 && vacuous.length === 0) {
       `every one of the ${descriptionStrings} rendered component description string(s) in those stories describes the ` +
       `component -- not Storybook, the story or the page -- in ${DESCRIPTION_PARAGRAPH_LIMIT} paragraph(s) or fewer, and ` +
       `every one of the ${argDescriptionsRead} argTypes description value(s) fits in ${ARG_DESCRIPTION_MAX_CHARS} chars ` +
-      `with no em dash.`,
+      `with no em dash, and no story puts a JSX element in its args.`,
   );
   process.exit(0);
 }
@@ -3767,6 +3859,19 @@ if (argDescriptionOffenders.length > 0) {
       `    unit, a real trap); move rationale to a // comment, which no generator reads.\n` +
       `    One that genuinely needs to be longer waives its own line:\n` +
       `      // lint-story-conventions: arg-description -- <why, 15+ chars>\n`,
+  );
+}
+
+if (jsxInArgsOffenders.length > 0) {
+  const filesAffected = new Set(jsxInArgsOffenders.map((f) => f.file)).size;
+  console.error(
+    `  (n) ${jsxInArgsOffenders.length} JSX element(s) inside a story's args (${filesAffected} file(s)):`,
+  );
+  for (const f of jsxInArgsOffenders) console.error(`    ${f.file}:${f.line}  ${f.key}`);
+  console.error(
+    `    Storybook serializes args across the manager/preview boundary, so a JSX value arrives as a\n` +
+      `    plain object and the story renders nothing. Move it into a render that closes over it:\n` +
+      `      render: () => <div>{THE_ELEMENT}</div>\n`,
   );
 }
 

@@ -1,7 +1,9 @@
 # The verbosity sweep: every component, four surfaces
 
-**Status:** in progress. Rules and the batch list live here; each batch is checked off when its four
-surfaces are measured clean, not when it is edited.
+**Status:** PASSES A THROUGH E ARE DONE and each one is guarded. A surface is done when its counter is
+re-measured clean and, for the wording half, when the copy reviewer has judged it; the per-component batch
+tables below are the ORIGINAL shape of the plan and are superseded by the global passes. What is left is
+in "Follow-ups this sweep must not lose".
 
 ## The rules, per component
 
@@ -90,6 +92,7 @@ surfaces are measured clean, not when it is edited.
 | component page tops (description <= 100, lede <= 140, aside <= 200, no em dash, no instruction, lede not restating) | 0 offenders across 63 pages, 88 docs tests green, verify:docs exit 0 | done |
 | concept pages over cap (guides, patterns, examples) | **0** paragraphs over ~4 lines (was 41 across 24 pages), guarded by `docs-copy-concepts.test.ts` | done |
 | per-STORY descriptions (`docs.description.story`) | **21 judged: 13 FAIL rewritten, 6 WEAK decided; rule (l) now reads both description fields** | done |
+| JSX in a story's `args` | **0** (2 pre-existing offenders fixed), guarded by rule (n) | done |
 | comment blocks over 20 lines | **0** (was 181), guarded by `lint:comment-references` | done |
 | comments citing plans / IDs / dates / sections | **0** (was 156), guarded | done |
 | DOC COMMENTS in `src/**/*.{ts,tsx}`, four rules: member cap, em dash in a doc comment, em dash in a rendered string, type restatement | **2,026 members + 1,166 declaration docs across 351 sources; 0 over the 160 cap, 0 em dash, 0 type restatement, 0 waivers** (`lint-prop-docs`, now the doc-and-copy guard) | done |
@@ -171,6 +174,13 @@ Two blind spots the passes found, both worth keeping:
 
 ## Done so far, kept here so it is not re-litigated
 
+- **PASS E, the last trap that lived only in prose.** `lint-story-conventions` rule (n): a JSX element in
+  a story's `args` (the meta's or a story's). Storybook serializes `args` across the manager/preview
+  boundary, so a JSX value arrives as a plain object and the story renders nothing; the fix is a `render`
+  that closes over it. Three self-test cases (JSX in args fires; a string arg and JSX in `render` do not;
+  a FUNCTION-valued arg that returns JSX is a function value, not a JSX arg). The rule found two
+  pre-existing offenders on the tree (`feedback-bar` `icon`, `thread` `empty`), both moved into `render`,
+  and the fifth hand-written copy of the trap note is deleted: the guard's message is now the only copy.
 - **PASS D, the concept tier and the story blurbs.** A concept page (`guides/`, `patterns/`, `examples/`)
   keeps its prose, so the rule is about SHAPE, not size: no paragraph over ~4 rendered lines, measured as
   characters (`4 x 95 = 380`) so an author cannot pass by never wrapping. 41 paragraphs across 24 pages
