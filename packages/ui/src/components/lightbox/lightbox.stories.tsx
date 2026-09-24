@@ -58,8 +58,8 @@ const meta = {
     },
   },
   args: { defaultOpen: false, showClose: true, closeOnContentClick: true, onOpenChange: fn() },
-  render: (args: LightboxArgs) => (
-    <Lightbox defaultOpen={args.defaultOpen} onOpenChange={args.onOpenChange}>
+  render: (args: LightboxArgs, context: RenderContext) => (
+    <Lightbox defaultOpen={opensHere(context) && args.defaultOpen} onOpenChange={args.onOpenChange}>
       <LightboxTrigger class="block w-56 overflow-hidden rounded-lg ring-1 ring-border">
         <img alt={ALT} src={IMAGE_URL} class="block h-40 w-full object-cover" />
       </LightboxTrigger>
@@ -80,6 +80,17 @@ type Story = StoryObj<typeof meta>;
 /** The args each story's `render` receives. Spelled out because `satisfies Meta<…>`
  *  keeps `typeof meta` a literal type, which Storybook cannot map back to the
  *  component's props for a per-story `render`. */
+/**
+ * Storybook renders the Autodocs page with `viewMode: 'docs'` and the story's own
+ * canvas with `'story'`. A modal SEEDED OPEN in docs covers the documentation behind
+ * it, so the reader has to dismiss it to read the page; the seeded-open story still
+ * opens where it is the subject. Declared structurally rather than imported so this
+ * file does not depend on a Storybook internal path, and a supertype of
+ * `StoryContext` is what the render signature accepts.
+ */
+type RenderContext = { viewMode?: 'story' | 'docs' };
+const opensHere = (context: RenderContext) => context.viewMode === 'story';
+
 type LightboxArgs = {
   defaultOpen?: boolean;
   showClose?: boolean;
@@ -108,8 +119,8 @@ export const ThumbnailTrigger: Story = {
 </Lightbox>`),
 };
 
-/** Seeded open, so the Docs preview shows the modal without a click — `defaultOpen`
- *  is the uncontrolled seed. Note the X in the panel's top-right: `showClose` is on
+/** Seeded open: the story's canvas shows the modal without a click, while the
+ *  Autodocs page renders it closed so the documentation stays readable. Note the X in the panel's top-right: `showClose` is on
  *  unless you pass `false`, and turning the `showClose` control off here leaves the
  *  panel with no X, since Escape, a backdrop click, the picture and the host's own
  *  control still close it. Clicking the picture dismisses the modal; the

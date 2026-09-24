@@ -411,8 +411,11 @@ const item: AttachmentData = {
  *  or a first-run tour. The trio is composed directly here because only the
  *  lightbox owns that state (an `Attachments` grid composes it per tile). */
 export const LightboxOpenAtMount: Story = {
-  render: () => (
-    <Lightbox defaultOpen>
+  // Storybook renders Autodocs with `viewMode: 'docs'` and the story canvas with
+  // `'story'`: a modal seeded open in docs covers the documentation behind it, so the
+  // seed applies in the canvas only. Structural type, a supertype of `StoryContext`.
+  render: (_args: Record<string, unknown>, context: { viewMode?: 'story' | 'docs' }) => (
+    <Lightbox defaultOpen={context.viewMode === 'story'}>
       <LightboxTrigger class="block size-24 overflow-hidden rounded-lg">
         <img
           alt={sampleAttachments[0].filename}
