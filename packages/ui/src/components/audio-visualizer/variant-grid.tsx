@@ -42,7 +42,7 @@ const SILENCE_FLOOR = 0.02;
  *
  * Ported from livekit/components-js
  * `packages/shadcn/components/agents-ui/agent-audio-visualizer-grid.tsx`
- * (Apache License 2.0), except the speaking threshold remap — see the
+ * (Apache License 2.0), except the speaking threshold remap; see the
  * divergence note above.
  */
 export function GridVisualizer(

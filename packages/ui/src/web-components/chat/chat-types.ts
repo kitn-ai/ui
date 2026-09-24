@@ -11,7 +11,7 @@ export type { RawOrigin };
 export { CHAT_MESSAGE_ACTIONS };
 
 /** The built-in action buttons (each carries its own curated icon + label).
- *  Derived from the CHAT_MESSAGE_ACTIONS const in ./chat-actions — a leaf
+ *  Derived from the CHAT_MESSAGE_ACTIONS const in ./chat-actions, a leaf
  *  both this union and the construct schema's zod enum read (B-6/C-2); the
  *  const is re-exported here so existing import sites keep one address. */
 export type ChatMessageAction = (typeof CHAT_MESSAGE_ACTIONS)[number];
@@ -70,20 +70,20 @@ export type MessagePart =
       label?: string;
       /** Provider block index. Keeps parallel reasoning blocks distinct. */
       index?: number;
-      /** Which provider RESPONSE STREAM `index` was counted in. Anthropic restarts
-       *  content-block indices at 0 for every message, and a multi-round tool loop
-       *  folds several of those messages into ONE assistant turn, so `index` alone
-       *  is not unique within `parts`. Set by the wire adapter, one value per
-       *  `consumeModelStream` call. See `appendReasoningPart`. */
+      // Anthropic restarts content-block indices at 0 for every message, and a
+      // multi-round tool loop folds several of those messages into ONE assistant turn,
+      // so `index` alone is not unique within `parts`. One value per
+      // `consumeModelStream` call; see `appendReasoningPart`.
+      /** Which provider RESPONSE STREAM `index` was counted in. Set by the wire adapter. */
       streamId?: string;
-      /** Load-bearing on the OpenAI wire, informational on the Anthropic one.
-       *  `toOpenAIMessages({ reasoning: 'include' })` REBUILDS a signed
-       *  `reasoning_details` entry from `text` plus this, because `raw` after a
-       *  streamed turn is a textless fragment: only the final frame carries the
-       *  signature and it has no text, and `appendReasoningPart` resolves `raw`
-       *  last-write-wins. `toAnthropicMessages` ignores this field and echoes
-       *  `raw.payload` verbatim — a thinking block rebuilt from text plus
-       *  signature is a hard 400. */
+      // Load-bearing on the OpenAI wire, informational on the Anthropic one.
+      // `toOpenAIMessages({ reasoning: 'include' })` REBUILDS a signed
+      // `reasoning_details` entry from `text` plus this, because `raw` after a streamed
+      // turn is a textless fragment: only the final frame carries the signature and it
+      // has no text, and `appendReasoningPart` resolves `raw` last-write-wins.
+      // `toAnthropicMessages` ignores this field and echoes `raw.payload` verbatim: a
+      // thinking block rebuilt from text plus signature is a hard 400.
+      /** Provider signature for the reasoning block, read by the OpenAI encoder and ignored by the Anthropic one. */
       signature?: string;
       raw?: RawOrigin;
     }
@@ -101,8 +101,9 @@ export interface ChatMessage {
   actions?: (ChatMessageAction | CustomAction)[];
   /** Optional speaker avatar shown to the left of the message column. */
   avatar?: AvatarData;
-  /** Controlled feedback vote. When set, it wins over the facade's internal
-   *  optimistic state (`m.feedback ?? feedbackMap[m.id]`), so a host that
-   *  persists votes can re-hydrate them. */
+  // Controlled: when set it wins over the facade's internal optimistic state
+  // (`m.feedback ?? feedbackMap[m.id]`), so a host that persists votes can re-hydrate
+  // them.
+  /** Controlled feedback vote; a set value wins over the facade's optimistic state. */
   feedback?: FeedbackVote;
 }

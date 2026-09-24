@@ -149,7 +149,7 @@ function cleanId(id: string): string | undefined {
 /**
  * Resolve an EmbedCardData to an embeddable player URL + poster + sandbox/allow.
  * Throws (with a human message) on a missing/invalid provider id, a non-https
- * generic URL, or a generic origin not in the app allowlist — the card turns these
+ * generic URL, or a generic origin not in the app allowlist; the card turns these
  * into an inline error + an `error` event.
  */
 export function resolveEmbed(data: EmbedCardData): ResolvedEmbed {
@@ -183,7 +183,7 @@ export function resolveEmbed(data: EmbedCardData): ResolvedEmbed {
       assertHttpsEmbeddable(data.url);
       if (!isGenericOriginAllowed(data.url)) {
         throw new Error(
-          `generic embed: origin not allowlisted — call configureEmbedAllowlist([...]) to permit ${
+          `generic embed: origin not allowlisted; call configureEmbedAllowlist([...]) to permit ${
             originOf(data.url) ?? data.url
           }`,
         );

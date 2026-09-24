@@ -8,7 +8,8 @@ interface Props extends Record<string, unknown> {
   pulse?: boolean;
   /** Accessible name; without it the dot is decorative. */
   label?: string;
-  /** `sm` or `md`. Default `sm`. */
+  // `md` is the larger dot.
+  /** Size token. Defaults to `'sm'`. */
   size?: 'sm' | 'md';
 }
 

@@ -10,7 +10,7 @@ type IconComponent = Component<{ class?: string }>;
 /**
  * Curated `name → lucide-solid Component` registry for message action buttons.
  *
- * Fixed allow-list — NO arbitrary SVG/URL. Covers the five built-in action
+ * Fixed allow-list: NO arbitrary SVG/URL. Covers the five built-in action
  * icons plus the common custom ones a host is likely to want. Reused across
  * `kai-message`/`kai-chat` (and, later, kai-checkpoint/kai-empty).
  */

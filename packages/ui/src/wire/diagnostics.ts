@@ -46,17 +46,11 @@ export interface WireDiagnosticBase {
   t: number;
   /** Correlates every event from one provider response stream. */
   streamId?: string;
-  /**
-   * The APP'S grouping of several reads into one logical turn. Present only
-   * when the app declared it (`ConsumeOptions.traceId`), absent otherwise.
-   *
-   * THE KIT GROUPS NOTHING ON ITS OWN. A tool loop or a set of sub-agents makes
-   * several model calls that belong together, and the kit sees one Response at
-   * a time with no way to know which ones those are. Inferring it -- by
-   * timing, by sink identity, by anything -- would produce a grouping that is
-   * right often enough to be trusted and wrong exactly when a session is
-   * confusing enough to need a panel.
-   */
+  // THE KIT GROUPS NOTHING ON ITS OWN. A tool loop or a set of sub-agents makes several model calls
+  // that belong together, and the kit sees one Response at a time with no way to know which ones
+  // those are. Inferring it, by timing or by sink identity, would produce a grouping that is right
+  // often enough to be trusted and wrong exactly when a session is confusing enough to need a panel.
+  /** The app's grouping of several reads into one logical turn; present only when the app declared it. */
   traceId?: string;
   /** The app's name for THIS read within the trace (`'planner'`,
    *  `'executor'`). Present only when declared; never derived from the format,
@@ -76,16 +70,10 @@ export interface WireOpenEvent extends WireDiagnosticBase {
   /** `opts.format.id`, e.g. `openai.chat-completions`. */
   format: string;
   source: 'response' | 'stream' | 'iterable';
-  /**
-   * ORIGIN AND PATHNAME ONLY. The query string is never reported, on any
-   * switch, and it is not payload either: `?api_key=sk-...` is a CREDENTIAL, a
-   * different class from the conversation content the payload key exists for,
-   * and a credential does not get a switch that turns it on. `hasQuery` carries
-   * the one bit a reader needs from it.
-   *
-   * Absent when the response did not state a URL, or stated one that does not
-   * parse.
-   */
+  // The query string is never reported, on any switch, and it is not payload either: `?api_key=sk-...`
+  // is a CREDENTIAL, a different class from the conversation content the payload key exists for, and
+  // a credential does not get a switch that turns it on. `hasQuery` carries the one bit a reader needs.
+  /** Origin and pathname only; absent when the response stated no URL, or stated one that does not parse. */
   url?: string;
   /** Whether the response URL carried a query string at all. Absent exactly
    *  when `url` is. */
@@ -93,14 +81,10 @@ export interface WireOpenEvent extends WireDiagnosticBase {
   /** The HTTP status. Always 2xx here -- a non-ok response throws and reports
    *  `wire.failed` instead -- but reported verbatim rather than assumed. */
   status?: number;
-  /**
-   * The response's `content-type` header, VERBATIM.
-   *
-   * THE FIELD THAT PAYS FOR THIS EVENT. `text/html` or `application/json` where
-   * `text/event-stream` was expected is the classic proxy or misconfiguration
-   * tell, and from inside the parse it is invisible: the frames simply never
-   * arrive and the turn resolves empty. The response knew all along.
-   */
+  // THE FIELD THAT PAYS FOR THIS EVENT. `text/html` or `application/json` where `text/event-stream`
+  // was expected is the classic proxy or misconfiguration tell, and from inside the parse it is
+  // invisible: the frames never arrive and the turn resolves empty. The response knew all along.
+  /** The response's `content-type` header, verbatim. */
   contentType?: string;
 }
 
@@ -113,12 +97,10 @@ export interface WireFrameEvent extends WireDiagnosticBase {
   bytes: number;
   /** Neutral chunks this frame yielded. */
   chunks: number;
-  /**
-   * The union of `Object.keys` over this frame's chunks. THE field that earns
-   * this design: frames arriving whose chunks never once carry a content key
-   * (`text`, `reasoning`, `toolCalls`, `sources`) is the failure a chunk count
-   * alone cannot separate from a healthy stream.
-   */
+  // THE field that earns this design: frames arriving whose chunks never once carry a content key
+  // (`text`, `reasoning`, `toolCalls`, `sources`) is the failure a chunk count alone cannot separate
+  // from a healthy stream.
+  /** The union of `Object.keys` over this frame's chunks. */
   fields: string[];
   /** Present when this frame stated a model id. */
   model?: string;
@@ -134,9 +116,7 @@ export interface WirePartEvent extends WireDiagnosticBase {
   index: number;
   /** Delta LENGTH, never the delta. Present for text and reasoning only. */
   chars?: number;
-  /** Content-bearing, so opt-in. One key per variant this write can carry:
-   *  `delta` for text and reasoning, `patch` for a tool write (which holds the
-   *  arguments and the output), `source` for a citation. */
+  /** Content-bearing, so opt-in: one key per variant this write can carry. */
   payload?: { delta?: string; patch?: unknown; source?: unknown };
 }
 
@@ -156,14 +136,11 @@ export interface WireCloseEvent extends WireDiagnosticBase {
   errorCode?: string | number;
   usage?: ModelUsage;
   ms: number;
-  /** Content-bearing, so opt-in: the assembled turn, plus the in-band error's
-   *  own message.
-   *
-   *  ALL THREE TERMINAL EVENTS TREAT PROVIDER MESSAGE TEXT IDENTICALLY --
-   *  `wire.close`, `wire.failed` and `wire.interrupted`. Each faces the same
-   *  hazard, that a provider's message can echo request content back, and
-   *  payload is precisely the switch that accepts it. Disagreeing here would
-   *  read as an oversight and be "fixed" later by someone with less context. */
+  // ALL THREE TERMINAL EVENTS TREAT PROVIDER MESSAGE TEXT IDENTICALLY -- `wire.close`, `wire.failed`
+  // and `wire.interrupted`. Each faces the same hazard, that a provider's message can echo request
+  // content back, and payload is precisely the switch that accepts it. Disagreeing here would read as
+  // an oversight and be "fixed" later by someone with less context.
+  /** Content-bearing, so opt-in: the assembled turn, plus the in-band error's own message. */
   payload?: {
     text: string;
     reasoning: string;
@@ -196,16 +173,11 @@ export interface WireInterruptedEvent extends WireDiagnosticBase {
   frames: number;
   /** Neutral chunks yielded before it died. */
   chunks: number;
-  /**
-   * `'abort'` only when the error IDENTIFIES ITSELF as one (`name` of
-   * `AbortError`), which is what a fetch abort produces. Anything else is
-   * `'error'` -- a guess here would turn "the provider dropped the connection"
-   * into "your user navigated away", and those have opposite fixes.
-   */
+  // A guess here would turn "the provider dropped the connection" into "your user navigated away",
+  // and those have opposite fixes.
+  /** `'abort'` only when the thrown error names itself one (`AbortError`). */
   reason: 'error' | 'abort';
-  /** The caught error's `name` (`'AbortError'`, `'TypeError'`). Metadata: a
-   *  closed-ish vocabulary a panel keys an explanation off. The MESSAGE is
-   *  payload. Absent when the thrown value carries no readable name. */
+  /** The thrown value's own name, when it has a readable one; metadata a panel keys an explanation off. */
   errorName?: string;
   /** Content-bearing, so opt-in. The error's own message, which can echo
    *  request content back the way a provider's error text does. */
@@ -222,9 +194,9 @@ export interface WireFailedEvent extends WireDiagnosticBase {
   /** The parsed body's error CODE. Never the message: a provider's error text
    *  can echo request content back. */
   providerCode?: string | number;
-  /** Content-bearing, so opt-in: the raw body and the provider's own error
-   *  message, which is exactly the field that echoes request content back and
-   *  is why the code is the half that travels by default. */
+  // The provider's message is exactly the field that echoes request content back, which is why the
+  // CODE is the half that travels by default.
+  /** Content-bearing, so opt-in: the raw body and the provider's own message. */
   payload?: { bodyText: string; message?: string };
 }
 
@@ -234,38 +206,28 @@ export interface WireFailedEvent extends WireDiagnosticBase {
  *  something the user typed and is payload; the media type and the size are
  *  facts about the shape of what went on the wire. */
 export interface EncodeAttachmentReport {
-  /** As the encoder settled it, which is not always what the host declared: a
-   *  `data:` URI's own media type wins over the field beside it. Absent when
-   *  nothing named the file and classification failed before settling one. */
+  // A `data:` URI's own media type wins over the field beside it. Absent when nothing named the file
+  // and classification failed before settling one.
+  /** As the encoder settled it, which can differ from what the host declared. */
   mediaType?: string;
-  /**
-   * Byte length of the bytes that went on the wire.
-   *
-   * PRESENT ONLY WHEN PAYLOAD CAPTURE IS ON. Counting it exactly is an O(n)
-   * scan of the payload, and the whole thread is re-encoded every turn, so it
-   * is a recurring per-turn cost rather than a one-off -- the same rule
-   * `EncodeRequestEvent.bytes` follows, for the same reason. The fields around
-   * it cost nothing and are always present, so the diagnosis ("this attachment
-   * was skipped") survives without the refinement ("...and it was 240 kB").
-   *
-   * ABSENT for a remote attachment even then: the provider dereferences that
-   * URL itself and the bytes never enter this process, so any number would be
-   * invented -- and `0` beside a 40 MB PDF is the exact confident zero the
-   * forward-compat rule exists to prevent.
-   *
-   * Absent always means NOT REPORTED, and is never backfilled with an estimate.
-   */
+  // PRESENT ONLY WHEN PAYLOAD CAPTURE IS ON. Counting it exactly is an O(n) scan of the payload, and
+  // the whole thread is re-encoded every turn, so it is a recurring per-turn cost rather than a
+  // one-off; `EncodeRequestEvent.bytes` follows the same rule. The fields around it cost nothing and
+  // are always present, so the diagnosis ("this attachment was skipped") survives without the
+  // refinement ("...and it was 240 kB").
+  //
+  // ABSENT for a remote attachment even then: the provider dereferences that URL itself and the bytes
+  // never enter this process, so any number would be invented, and `0` beside a 40 MB PDF is the
+  // exact confident zero the forward-compat rule exists to prevent. Absent always means NOT REPORTED,
+  // and is never backfilled with an estimate.
+  /** Byte length of the bytes that went on the wire, when payload capture is on. */
   bytes?: number;
   /** Whether anything at all reached the wire for this attachment. */
   encoded: boolean;
-  /**
-   * `'encoded'` -- became an image/file/document block.
-   * `'as-text'`  -- a text file, inlined as text CONTENT, because neither API
-   *                 has an arbitrary-file block. Worth distinguishing: it is
-   *                 why an attachment can be "sent" and still not be visible to
-   *                 the model as a file.
-   * `'skipped'`  -- nothing went out for it. See `reason`.
-   */
+  // Worth distinguishing: an as-text file is inlined as CONTENT because neither API has an
+  // arbitrary-file block, so an attachment can be "sent" and still not be visible to the model as a
+  // file. A skipped one sent nothing; see `reason`.
+  /** What became of the attachment: a real block, nothing sent, or inline text. */
   disposition: 'encoded' | 'skipped' | 'as-text';
   /** Why it was skipped, in the encoder's own words -- the same sentence the
    *  throw would have carried. Present on `'skipped'` only. */
@@ -289,20 +251,16 @@ export interface EncodeRequestEvent extends WireDiagnosticBase {
   format: 'openai' | 'anthropic';
   /** `ChatMessage[]` in. */
   threadMessages: number;
-  /** Provider messages out. NOT the same number, by design: one assistant turn
-   *  carrying a tool call splits into three wire messages, and a truncating
-   *  host shrinks it the other way. The delta is the point. */
+  // NOT the same number as `threadMessages`, by design: one assistant turn carrying a tool call
+  // splits into three wire messages, and a truncating host shrinks it the other way.
+  /** Provider messages out; the delta from `threadMessages` is the point. */
   wireMessages: number;
-  /**
-   * System-role messages in the ENCODED OUTPUT.
-   *
-   * ZERO IS THE COMMON ANSWER AND IT IS THE FINDING, which is why it is a
-   * stated 0 rather than an omitted key: `ChatMessage.role` has no system
-   * member at all, so the system prompt is always being added somewhere the kit
-   * cannot see -- a server route, a gateway, a middleware. A developer chasing
-   * "why is the model ignoring its instructions" needs to know the kit is not
-   * the layer holding them.
-   */
+  // ZERO IS THE COMMON ANSWER AND IT IS THE FINDING, which is why it is a stated 0 rather than an
+  // omitted key: `ChatMessage.role` has no system member at all, so the system prompt is always being
+  // added somewhere the kit cannot see -- a server route, a gateway, a middleware. A developer
+  // chasing "why is the model ignoring its instructions" needs to know the kit is not the layer
+  // holding them.
+  /** System-role messages in the encoded output; zero is the common answer, and it is the finding. */
   systemMessages: number;
   /** Role counts over the ENCODED OUTPUT. A role with no messages is absent
    *  rather than 0; `systemMessages` is stated separately for that reason. */
@@ -314,17 +272,11 @@ export interface EncodeRequestEvent extends WireDiagnosticBase {
   partsEncoded: Record<string, number>;
   /** One entry per `file` part the encoder handled, in encounter order. */
   attachments: EncodeAttachmentReport[];
-  /**
-   * UTF-8 byte length of the encoded body as JSON.
-   *
-   * PRESENT ONLY WHEN PAYLOAD CAPTURE IS ON, because producing it means
-   * serializing the whole body -- every inlined attachment included -- and
-   * that is a cost the metadata stream refuses to pay for one number. When the
-   * body is already being materialized for `payload`, it is free and exact.
-   * Absent also when the body could not be stringified at all (a circular
-   * `tool.output`, a BigInt). Absent means NOT REPORTED, never zero, and it is
-   * deliberately not backfilled with an estimate.
-   */
+  // PRESENT ONLY WHEN PAYLOAD CAPTURE IS ON, because producing it means serializing the whole body,
+  // every inlined attachment included, and that is a cost the metadata stream refuses to pay for one
+  // number. When the body is already being materialized for `payload`, it is free and exact. Absent
+  // also when the body could not be stringified at all (a circular `tool.output`, a BigInt).
+  /** UTF-8 byte length of the encoded body as JSON, under payload capture. */
   bytes?: number;
   /** Content-bearing, so opt-in. `attachments` is positionally aligned with the
    *  metadata array above. */
@@ -347,9 +299,9 @@ export interface EncodeDroppedEvent extends WireDiagnosticBase {
   /** The `MessagePart` type, taken from the part itself at the site that
    *  already discriminated it. */
   variant: string;
-  /** Parts this event accounts for. Always 1 today -- every site reports per
-   *  part, because per-part is what carries the indices -- and the field exists
-   *  so a site that ever aggregates can say N without a new event type. */
+  // Always 1 today: every site reports per part, because per-part is what carries the indices. The
+  // field exists so a site that ever aggregates can say N without a new event type.
+  /** Parts this event accounts for. */
   count: number;
   /** Position in the `ChatMessage[]` that was passed in. */
   messageIndex?: number;
@@ -380,79 +332,53 @@ export interface AppRequestEvent extends WireDiagnosticBase {
   /** Length of the body's `messages` array. Absent when there was no array to
    *  count -- which is a different fact from a request carrying none. */
   messages?: number;
-  /**
-   * Role counts over that array, INCLUDING `system`.
-   *
-   * This is the half the kit structurally cannot see: `ChatMessage.role` has no
-   * system member at all, so a system prompt exists only in the body the app
-   * builds. A role nobody sent is absent rather than 0.
-   *
-   * ★ THESE COUNTS NEED NOT SUM TO `messages`, and a consumer must not assume
-   * they do. An entry stating no readable role is counted in `messages` and
-   * contributes to no bucket -- a body of 5 messages where 1 states a role
-   * gives `messages: 5` with `byRole: { user: 1 }`. That is deliberate:
-   * bucketing the rest under `'unknown'` would invent a role nobody sent. A
-   * panel rendering these as a stacked bar should render the difference as
-   * unattributed rather than scaling it away.
-   */
+  // This is the half the kit structurally cannot see: `ChatMessage.role` has no system member at all,
+  // so a system prompt exists only in the body the app builds. A role nobody sent is absent rather
+  // than 0.
+  //
+  // THESE COUNTS NEED NOT SUM TO `messages`, and a consumer must not assume they do. An entry
+  // stating no readable role is counted in `messages` and contributes to no bucket, so a body of 5
+  // messages where 1 states a role gives `messages: 5` with `byRole: { user: 1 }`. Bucketing the rest
+  // under `'unknown'` would invent a role nobody sent, so a panel rendering these as a stacked bar
+  // should show the difference as unattributed rather than scaling it away.
+  /** Role counts over the body's array, including `system`. */
   byRole?: Record<string, number>;
-  /**
-   * System-role messages, stated explicitly whenever the array could be counted.
-   *
-   * ZERO IS A FINDING and must be distinguishable from "not reported": it says
-   * nothing is setting a system prompt at this layer either. Reading it off
-   * `byRole.system` could not tell those apart, which is the whole reason this
-   * field is separate -- and it lines up directly against
-   * `EncodeRequestEvent.systemMessages` for the comparison that answers "are
-   * additional prompts being added?".
-   */
+  // ZERO IS A FINDING and must be distinguishable from "not reported": it says nothing is setting a
+  // system prompt at this layer either. Reading it off `byRole.system` could not tell those apart,
+  // which is the whole reason this field is separate, and it lines up directly against
+  // `EncodeRequestEvent.systemMessages` for the comparison that answers "are additional prompts
+  // being added?".
+  /** System-role messages, stated explicitly whenever the array could be counted. */
   systemMessages?: number;
-  /** Length of the body's `tools` array. A present-but-empty array reports 0,
-   *  which is a real and different state from the key being absent: it says the
-   *  app meant to send tools and sent none. Absent when there is no array. */
+  // A present-but-empty array reports 0, which is a real and different state from the key being
+  // absent: it says the app meant to send tools and sent none.
+  /** Length of the body's `tools` array; absent when there is no array. */
   tools?: number;
-  /**
-   * The REQUESTED model, read verbatim from the body.
-   *
-   * ★ NEVER INFERRED, and absent stays absent. Paired with `WireFrameEvent`'s
-   * SERVED model this is the devtools spec's "selected Claude, served gpt-4o"
-   * finding -- two independent facts a panel COMPARES and never reconciles.
-   * Deriving either half from the other would make them agree in exactly the
-   * mismatch case the pair exists to catch.
-   */
+  // NEVER INFERRED, and absent stays absent. Paired with `WireFrameEvent`'s SERVED model this is the
+  // devtools spec's "selected Claude, served gpt-4o" finding: two independent facts a panel COMPARES
+  // and never reconciles. Deriving either half from the other would make them agree in exactly the
+  // mismatch case the pair exists to catch.
+  /** The requested model, read verbatim from the body. */
   model?: string;
-  /** ORIGIN AND PATHNAME ONLY, on the same terms as `WireOpenEvent.url`: a
-   *  query string can carry a credential, and a credential is not conversation
-   *  content, so it does not travel under any switch. Absent when no URL was
-   *  supplied or it did not parse. */
+  /** Origin and pathname only, on the same terms as `WireOpenEvent.url`; absent when no URL was supplied. */
   url?: string;
   /** Whether that URL carried a query string. Absent exactly when `url` is. */
   hasQuery?: boolean;
-  /**
-   * UTF-8 byte length of the body AS IT WILL BE SENT.
-   *
-   * PRESENT ONLY UNDER PAYLOAD CAPTURE, by the same rule
-   * `EncodeRequestEvent.bytes` follows: measuring means materializing the body,
-   * and a request is made every turn.
-   *
-   * ABSENT WHENEVER IT CANNOT BE KNOWN EXACTLY, which is a larger set than it
-   * looks. A string, a JSON-declaring body, a `Blob`/`File` and an
-   * `ArrayBuffer` or view can all be measured exactly and are. A `FormData`, a
-   * `ReadableStream`, a `URLSearchParams`, a `Map`, or a circular body cannot,
-   * and report nothing -- never the length of the `"{}"` they happen to
-   * stringify to, which is how a 40 MB upload came to report `bytes: 2`.
-   */
+  // PRESENT ONLY UNDER PAYLOAD CAPTURE, by the same rule `EncodeRequestEvent.bytes` follows:
+  // measuring means materializing the body, and a request is made every turn.
+  //
+  // ABSENT WHENEVER IT CANNOT BE KNOWN EXACTLY, which is a larger set than it looks. A string, a
+  // JSON-declaring body, a `Blob`/`File` and an `ArrayBuffer` or view can all be measured exactly
+  // and are. A `FormData`, a `ReadableStream`, a `URLSearchParams`, a `Map`, or a circular body
+  // cannot, and report nothing: never the length of the `"{}"` they happen to stringify to, which is
+  // how a 40 MB upload came to report `bytes: 2`.
+  /** UTF-8 byte length of the body as it will be sent, under payload capture. */
   bytes?: number;
-  /**
-   * Content-bearing, so opt-in: the body itself, exactly as handed over.
-   *
-   * ★ PUBLISHED BY REFERENCE, NOT CLONED. A subscriber that mutates
-   * `payload.body` mutates the object the app is about to send. Deep-cloning
-   * every request would be expensive on exactly the large bodies worth
-   * inspecting, and would defeat the point of handing the real thing over -- so
-   * the contract is that a consumer TREATS THIS AS READ-ONLY. Clone it yourself
-   * if you intend to edit it.
-   */
+  // PUBLISHED BY REFERENCE, NOT CLONED. A subscriber that mutates `payload.body` mutates the object
+  // the app is about to send. Deep-cloning every request would be expensive on exactly the large
+  // bodies worth inspecting, and would defeat the point of handing the real thing over, so the
+  // contract is that a consumer TREATS THIS AS READ-ONLY. Clone it yourself if you intend to edit it.
+  /** Content-bearing, so opt-in: the body as handed over, published by reference, so treat it as read-only. */
   payload?: { body: unknown };
 }
 
@@ -517,7 +443,7 @@ export function wireCorrelation(
 export type KaiDiagnosticEvent = WireDiagnosticEvent | WebComponentDiagnosticEvent;
 
 /**
- * Narrow the shared stream to the element half — and, by negation, to the wire
+ * Narrow the shared stream to the element half, and by negation to the wire
  * half, which is what most callers actually want:
  *
  *   if (isWebComponentDiagnosticEvent(e)) { … } else { e.streamId … }
@@ -576,9 +502,7 @@ const STATE_KEY = Symbol.for('kai.wire.diagnostics.v1');
 interface DiagnosticsState {
   subs: Subscriber[];
   seq: number;
-  /** Whether content-bearing values may ride under the `payload` key. A
-   *  SEPARATE switch from having a subscriber, and it lives here for the same
-   *  reason the subscriber list does: two copies of this module must agree. */
+  /** Whether content-bearing values may ride under the `payload` key; the same switch in every copy. */
   payload: boolean;
 }
 

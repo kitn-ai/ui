@@ -29,8 +29,8 @@ export interface CompareCandidate {
   label?: string;
   /** Optional model name shown as a sub-label. */
   model?: string;
-  /** When true this candidate is still streaming — its pick control is disabled
-   *  and a per-column shimmer shows until it (and its sibling) settle. */
+  /** True while this candidate is still streaming; its pick control is disabled
+   *  and a shimmer shows until it settles. */
   streaming?: boolean;
 }
 
@@ -57,7 +57,7 @@ export interface ResponseCompareData {
 export interface CompareSelection {
   /** The id of the chosen candidate. */
   chosenId: string;
-  /** The id(s) of the rejected candidate(s) — for a pair, the other one. */
+  /** The id(s) of the rejected candidate(s): for a pair, the other one. */
   rejectedIds: string[];
   /** Epoch ms when the pick was made. */
   at?: number;

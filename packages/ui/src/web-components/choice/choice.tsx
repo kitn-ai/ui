@@ -24,7 +24,7 @@ interface Props extends Record<string, unknown> {
 }
 
 /** Events fired by `<kai-choice>`. (The terminal submit/dismiss/reopen flow is
- *  emitted via the bubbling `kai-card` contract event — listen for `kai-card`.) */
+ *  emitted via the bubbling `kai-card` contract event: listen for `kai-card`.) */
 interface Events {
   /** The selection changed BEFORE submit (a row click or the `select()` method).
    *  Distinct from the terminal `action` verb on the `kai-card` contract event. */

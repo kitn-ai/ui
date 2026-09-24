@@ -74,18 +74,11 @@ export interface WebComponentViolationEvent extends WebComponentDiagnosticBase {
   tag: string;
   /** The camelCase prop name, e.g. `messages`. */
   prop: string;
-  /**
-   * SHAPE of the offending value, never its content. `array-prop-as-attribute`
-   * only. A closed vocabulary:
-   *
-   *   `[object Object]`      one object stringified into the attribute
-   *   `[object Object] x N`  an array of N objects stringified — the common case
-   *   `json:number`          the attribute held valid JSON, but a scalar
-   *   `json:boolean`         "
-   *   `json:null`            "
-   *   `string(len=N)`        anything else: the LENGTH of the text, never the text
-   *   `empty-attribute`      a bare attribute on a prop that needs a value
-   */
+  // A closed vocabulary: `[object Object]` one object stringified into the attribute;
+  // `[object Object] x N` an array of N objects (the common case); `json:number`,
+  // `json:boolean`, `json:null` a valid JSON scalar; `string(len=N)` the LENGTH of the
+  // text, never the text; `empty-attribute` a bare attribute on a prop that needs a value.
+  /** A short shape preview of the offending value, never its content. */
   valuePreview?: string;
   /** Element count of the array involved. `same-array-reference` and
    *  `mutated-in-place` only. A length is shape, not content. */

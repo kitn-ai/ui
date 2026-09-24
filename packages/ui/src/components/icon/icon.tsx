@@ -161,7 +161,7 @@ export function renderIcon(
   // through untouched below — only icon-shaped names are guarded.
   if (!isUrl && /^[a-z][a-z0-9-]*$/.test(icon)) {
     console.error(
-      `[kai-icon] unknown icon name "${icon}" — rendering a fallback glyph. ` +
+      `[kai-icon] unknown icon name "${icon}": rendering a fallback glyph. ` +
         'Add it to NAMED_ICONS in src/components/icon/icon.tsx, or pass a URL / an inline SVG via slot="icon". ' +
         'The full roster is exported as ICON_NAMES.',
     );

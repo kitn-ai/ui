@@ -11,7 +11,7 @@ import type { CardComponentMap } from '../card/card-registry';
 import type { CardSchemaMap } from '../card/card-renderer';
 import type { AttachmentImagePreview } from '../attachments/attachments';
 
-/** Imperative handle exposed via `controllerRef` — the thread's scroll control,
+/** Imperative handle exposed via `controllerRef`: the thread's scroll control,
  *  forwarded onto `<kai-thread>` as the `scrollToBottom()` instance method. */
 export interface ThreadController {
   /** Scroll the message list to the bottom (default `'smooth'`). */
@@ -47,7 +47,7 @@ export interface ThreadProps {
   // Inert for non-image tiles, which keep the hover card.
   /** How an image tile in a message's attachment grid reveals its full size; `'lightbox'` is the one a keyboard or touch user can reach. Defaults to `'hover'`. */
   imagePreview?: AttachmentImagePreview;
-  /** Whether each message's action bar is always visible or revealed on hover of that row. Default `'always'`. */
+  /** Whether a message's action bar stays open or appears on pointer-over. Defaults to `'always'`. */
   actionsReveal?: 'always' | 'hover';
   /** Show the scroll-to-bottom button inside the scroll area. Default true. */
   scrollButton?: boolean;
@@ -72,11 +72,11 @@ function DefaultEmpty() {
 }
 
 /**
- * `Thread` — the message-list slice of a chat, as a standalone composable: the
+ * `Thread`, the message-list slice of a chat, as a standalone composable: the
  * scrolling list of messages + per-message rendering (markdown, code highlight,
  * reasoning + tool panels, avatars, and the action row), stick-to-bottom scroll
  * with a scroll-to-bottom button, an optional typing indicator, and an empty
- * state. No composer, header, suggestions, or sidebar — those are sibling/preset
+ * state. No composer, header, suggestions, or sidebar. Those are sibling/preset
  * concerns. This is the source of truth behind the `<kai-thread>` facade; it is
  * composed from the same internal pieces `ChatThread` uses for its message list.
  */

@@ -52,11 +52,11 @@ import { byRecency, isConversationUnread, type ConversationStore } from '../prim
 export type ConversationControllerOp = 'list' | 'load' | 'save' | 'markRead';
 
 export interface ConversationControllerHooks {
-  /** Receives loaded messages whenever the controller changes what the thread
-   *  should show: `select` (row tap), `restore` (auto-restore), and
-   *  `startNew` (an empty array with `id === undefined`). The array is a
-   *  fresh reference every call (the kai- reactivity contract, satisfied at
-   *  this boundary). */
+  // Fires on `select` (a row tap), `restore` (auto-restore) and `startNew` (an empty array
+  // with `id === undefined`). The fresh reference is the kai- reactivity contract,
+  // satisfied at this boundary.
+  /** Receives loaded messages whenever the controller changes what the thread should
+   *  show, with a fresh array reference every call. */
   onMessagesLoad?: (messages: ChatMessage[], id: string | undefined) => void;
   /** Fires after every summary-cache refresh with the fresh, recency-sorted
    *  array - the list panel / recent-card render feed. */
@@ -64,15 +64,13 @@ export interface ConversationControllerHooks {
   /** Fires whenever the derived unread flag CHANGES (edge, not level) - the
    *  launcher-badge feed, mirroring ChatThread's `onUnreadChange`. */
   onUnreadChange?: (anyUnread: boolean) => void;
-  /** Failure tap, replacing the default console reporting. The controller
-   *  has already degraded safely by the time this fires; use it to surface
-   *  the failure in-product. */
+  /** Failure tap, replacing the default console reporting. The controller has already
+   *  degraded safely by the time this fires. */
   onError?: (op: ConversationControllerOp, error: unknown) => void;
   /** Override the C-6 id mint (defaults to `crypto.randomUUID()`). */
   mintId?: () => string;
-  /** The view the controller starts in (default `'chat'`). Only the value
-   *  `'chat'` satisfies the chat-view leg of the seen rule; every other
-   *  string (`'home'`, `'list'`, anything a block invents) does not. */
+  /** The view the controller starts in (default `'chat'`). Only `'chat'` satisfies the
+   *  chat-view leg of the seen rule. */
   initialView?: string;
   /** Whether the host starts open (default `true` - a full-page app has no
    *  closed state, matching ChatThread's `hostOpen !== false` default). */
@@ -100,9 +98,8 @@ export interface ConversationController {
   /** Set the current view; entering `'chat'` while open with an active
    *  conversation marks it read. */
   setView(view: string): Promise<void>;
-  /** Load a conversation and make it active, delivering its messages through
-   *  `onMessagesLoad`, then mark it read if now seen. A failed load reports
-   *  and leaves the current state untouched. */
+  /** Load a conversation and make it active, then mark it read if now seen. A failed load
+   *  leaves the current state untouched. */
   select(id: string): Promise<void>;
   /** Start a fresh conversation: clears the active id and delivers `[]`
    *  through `onMessagesLoad`. No id exists until the first `saveTurn`. */
@@ -111,10 +108,10 @@ export interface ConversationController {
    *  already active or the store is empty. Returns `true` when a
    *  conversation was restored. */
   restore(): Promise<boolean>;
-  /** Persist the thread after a turn: no-op on an empty array (C-6), mints
-   *  the id on the first non-empty save, saves, marks read while seen, and
-   *  refreshes the summary cache. Returns the active id (or `undefined` for
-   *  the empty no-op). */
+  // Mints the id on the first non-empty save, saves, marks read while seen, and
+  // refreshes the summary cache.
+  /** Persist the thread after a turn and return the active id; an empty array is a no-op
+   *  that returns `undefined`. */
   saveTurn(messages: ChatMessage[]): Promise<string | undefined>;
   /** Re-fetch `store.list()` into the summary cache (recency-sorted) and
    *  re-derive the unread flag. A failure reports and keeps the old cache. */

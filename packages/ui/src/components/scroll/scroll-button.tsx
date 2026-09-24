@@ -27,7 +27,7 @@ export interface ScrollButtonProps {
 /**
  * The floating chip surface.
  *
- * The shared `outline` button variant is `bg-muted/50` — half-transparent, so
+ * The shared `outline` button variant is `bg-muted/50`, half-transparent, so
  * message text showed through a control that floats over scrolling content, and
  * its edge measured 1.05:1 against the thread behind it (SC 1.4.11 wants 3:1).
  * `bg-card` is the same opaque surface popovers, dropdowns and hover cards sit

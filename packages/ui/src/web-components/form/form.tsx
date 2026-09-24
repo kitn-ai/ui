@@ -31,7 +31,7 @@ interface Props extends Record<string, unknown> {
 }
 
 /** Events fired by `<kai-form>`. (Resolution still flows up the bubbling `kai-card`
- *  contract event — `kai-values-change` is the live change signal, distinct from the
+ *  contract event: `kai-values-change` is the live change signal, distinct from the
  *  terminal submit.) */
 interface Events {
   /** The form's values changed on input. Carries the current coerced values +

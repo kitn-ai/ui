@@ -74,7 +74,7 @@ export const BUILD_WAIT_STEPS: readonly BuildWaitStep[] = [
 ];
 
 export interface BuildWaitStep {
-  /** Stable id — what `current` names. */
+  /** Stable id that `current` names. */
   id: string;
   /** What the person reads. */
   label: string;
@@ -114,15 +114,16 @@ const BUILD_ORDER = ['frame', 'rail', 'surface', 'detail'] as const;
 type BlueprintGroup = (typeof BUILD_ORDER)[number];
 
 /** One of the four inks from `builder-start.tsx`. A shape is FILLED when its
- *  ink has a fill — filled shapes have no outline to draw, so they pop in
+ *  ink has a fill; filled shapes have no outline to draw, so they pop in
  *  instead of drawing on. */
 type Ink = typeof LINE;
 
 interface ShapeBase {
   group: BlueprintGroup;
   ink: Ink;
-  /** The one shape per drawing that keeps breathing after the draw settles —
-   *  always the shape that is this kit's own surface in that template. */
+  // The one shape per drawing that keeps breathing after the draw settles, always the
+  // shape that is this kit's own surface in that template.
+  /** The one shape that keeps breathing after the drawing settles. */
   hero?: boolean;
 }
 
@@ -161,7 +162,7 @@ const circle = (
 ): BlueprintShape => ({ kind: 'circle', group, ink, cx, cy, r, hero });
 
 /** Voice's waveform, from the same bar heights and the same alternating ink
- *  rule the original drawing uses — derived here rather than nine literals,
+ *  rule the original drawing uses, derived here rather than nine literals,
  *  which is also what makes the bars stagger left to right for free. */
 const VOICE_BARS = [18, 32, 46, 60, 40, 54, 24, 44, 30];
 
@@ -265,7 +266,7 @@ const BREATHE_MS = 5200;
 const SETTLE_MS = 400;
 
 /** Delay per shape, index-aligned with the blueprint. Groups that a drawing
- *  does not use (Voice has no rail) cost nothing — the cursor only advances
+ *  does not use (Voice has no rail) cost nothing; the cursor only advances
  *  for groups that actually have shapes, so an unused group is not dead air. */
 export function drawDelays(shapes: readonly BlueprintShape[]): number[] {
   const delays = new Array<number>(shapes.length).fill(0);
@@ -412,12 +413,12 @@ export function stepStatuses(
 /**
  * The builder's preview-boot wait: the chosen template's blueprint drawing
  * itself, with the real boot phases reported underneath. Non-interactive by
- * design — there is nothing here to click, and nothing here reports progress
+ * design; there is nothing here to click, and nothing here reports progress
  * except `steps`.
  *
  * Dark-first and token-only: every color is a kit custom property, so the
  * blueprint and the step list read correctly in both modes with no per-theme
- * branch. The drawing is `aria-hidden` — it is decoration over a wait, and
+ * branch. The drawing is `aria-hidden`: it is decoration over a wait, and
  * the step list is the part that carries meaning and gets the live region.
  */
 export function BuildWait(props: BuildWaitProps): JSX.Element {

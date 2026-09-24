@@ -37,24 +37,16 @@ import {
 } from '../wire/diagnostics';
 
 export interface ReportRequestOptions {
-  /**
-   * The app's own id for the logical turn, so this request and the read that
-   * answered it sit together. Same field and meaning as `ConsumeOptions.traceId`
-   * and the encode options.
-   *
-   * ★ CORRELATION IS ENTIRELY YOURS, AND NOTHING WARNS. Omit it and the event
-   * is still emitted, still complete, and completely unattached: a panel shows
-   * a request that belongs to no turn, beside a response that belongs to no
-   * request, and nothing in the kit reports that as a problem because it is not
-   * one -- a request legitimately may be followed by no stream, by several, or
-   * by one from a different turn.
-   *
-   * There is NO timing heuristic pairing a request with "the next stream that
-   * opens", and that omission is deliberate: such a heuristic is right often
-   * enough to be trusted and wrong exactly when a session is tangled enough for
-   * someone to have opened the panel. Pass the same id to `reportRequest` and
-   * to the reader, and the halves join up; pass nothing and they do not.
-   */
+  // CORRELATION IS ENTIRELY THE CALLER'S, AND NOTHING WARNS. Omit it and the event is still
+  // emitted, still complete, and completely unattached: a panel shows a request that belongs
+  // to no turn, beside a response that belongs to no request, and nothing reports that as a
+  // problem because it is not one -- a request legitimately may be followed by no stream, by
+  // several, or by one from a different turn. There is NO timing heuristic pairing a request
+  // with "the next stream that opens", deliberately: such a heuristic is right often enough
+  // to be trusted and wrong exactly when a session is tangled enough for someone to have
+  // opened the panel.
+  /** The app's own id for the logical turn, so this request and the read that answered it
+   *  sit together. */
   traceId?: string;
   /** The app's name for this call inside its trace (`'planner'`, `'retry-2'`). */
   label?: string;

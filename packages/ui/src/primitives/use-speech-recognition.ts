@@ -51,13 +51,10 @@ export interface SpeechRecognitionStartOptions {
   lang?: string;
   /** Called with each interim (non-final) transcript when `interim` is enabled. */
   onInterim?: (text: string) => void;
-  /**
-   * Called when the recognition session hits a runtime error (`recognition.onerror`),
-   * with the platform's error code (`network`, `not-allowed`, `no-speech`, ...) and a
-   * human-readable message. The session still ends through `onend`, so `start()` still
-   * resolves (with whatever text was captured before the error). Without this callback
-   * a runtime failure is invisible: the `error` signal is state, not a notification.
-   */
+  // The session still ends through `onend`, so `start()` resolves with whatever text was
+  // captured before the error. Without this callback a runtime failure is invisible: the
+  // `error` signal is state, not a notification.
+  /** Called with the platform's error code and message when the session hits a runtime error. */
   onError?: (error: string, message: string) => void;
 }
 
@@ -67,8 +64,8 @@ export interface SpeechRecognitionStartOptions {
  * and `start`/`stop` controls. `start()` resolves with the final transcript when
  * recognition ends; `stop()` ends the in-progress session (resolving start()).
  *
- * Caveat (documented at the element): in Chrome this is cloud-based — audio is
- * sent to Google — so it is "native to the browser," not on-device/private.
+ * Caveat (documented at the element): in Chrome this is cloud-based (audio is
+ * sent to Google), so it is "native to the browser," not on-device/private.
  */
 export function useSpeechRecognition(options: UseSpeechRecognitionOptions = {}) {
   const [isListening, setIsListening] = createSignal(false);

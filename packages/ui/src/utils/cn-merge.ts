@@ -101,7 +101,7 @@ const SIZES =
 
 /**
  * A length unit, or `%`. `0` is a length in CSS (`[0]`), every other unitless
- * number is not one — tailwind-merge's `isArbitraryLength` accepts `[0]` and
+ * number is not one: tailwind-merge's `isArbitraryLength` accepts `[0]` and
  * `[3px]` and rejects `[550]`, which is why `text-[550]` is a COLOR to it and a
  * length is not free to claim bare numbers.
  */
@@ -118,8 +118,8 @@ const bracketValue = (base: string, prefixLength: number): string | null =>
 /**
  * Does the bracketed arbitrary value on this class name spell a LENGTH? Underscore
  * separates a multi-value length (`[10px_20px]`); `calc`/`min`/`max`/`clamp` and an
- * explicit `length:` marker are lengths too. Everything else — `[#f00]`,
- * `[var(--x)]`, `[family-name:var(--x)]`, `[550]` — is not.
+ * explicit `length:` marker are lengths too. Everything else: `[#f00]`,
+ * `[var(--x)]`, `[family-name:var(--x)]`, `[550]`, is not.
  */
 const isBracketedLength = (base: string, prefixLength: number): boolean => {
   const value = bracketValue(base, prefixLength);
@@ -135,7 +135,7 @@ const isBracketedLength = (base: string, prefixLength: number): boolean => {
 /**
  * A box-shadow shape, as tailwind-merge's `isArbitraryShadow` reads one: several
  * values (`[0_0_1px_red]`) or an explicit `shadow:`/`inset:` marker.
- * `shadow-[3px]` is NOT one, and tailwind-merge leaves it alone — claiming it drops
+ * `shadow-[3px]` is NOT one, and tailwind-merge leaves it alone: claiming it drops
  * a real `shadow` beside it.
  */
 const isShadowShape = (base: string, prefixLength: number): boolean => {
@@ -149,10 +149,10 @@ const BORDER_BLOCK_SIDES = ['bs', 'be'] as const;
 const ROUND_SIDES = ['t', 'r', 'b', 'l', 'tl', 'tr', 'br', 'bl', 's', 'e', 'ss', 'se', 'es', 'ee'] as const;
 const withPrefix = (prefix: string, sides: readonly string[]) => sides.map((side) => `${prefix}${side}`);
 
-/** `border-x` / `borderc-x` ... — width and color are separate families. */
+/** `border-x` / `borderc-x` ... : width and color are separate families. */
 const BORDER_WIDTH_KEYS = withPrefix('borderw-', [...BORDER_SIDES, ...BORDER_BLOCK_SIDES]);
 const BORDER_COLOR_KEYS = withPrefix('borderc-', [...BORDER_SIDES, ...BORDER_BLOCK_SIDES]);
-/** `radius-t`, `radius-tl`, ... — the corner keys the `rounded` group removes. */
+/** `radius-t`, `radius-tl`, ..., the corner keys the `rounded` group removes. */
 const RADIUS_KEYS = withPrefix('radius-', ROUND_SIDES);
 
 /** The five `font-variant-numeric` variants `normal-nums` resets. */
@@ -576,7 +576,7 @@ export const REMOVES: ClassRemoves = {
  * Split the trailing modifier stack off a class name at the LAST `:` that is not
  * inside a bracket or paren, so `text-[color:var(--border)]` is one utility,
  * `[&>svg]:size-4` is a modifier plus `size-4`, and
- * `motion-safe:group-hover:opacity-100` keeps both modifiers in its key — which
+ * `motion-safe:group-hover:opacity-100` keeps both modifiers in its key, which
  * is what stops `hover:p-2` from colliding with `p-2`.
  *
  * Returns `[modifier, base]`; the modifier is `''` for a bare utility.
@@ -634,13 +634,13 @@ const CACHE_CAP = 4096;
  * Build a merger over an explicit table.
  *
  * The table is a parameter so `cn-merge.drift.test.ts` can drive a deliberately broken one and
- * prove the oracle harness reports the divergence it creates — a parity test that cannot fail is
+ * prove the oracle harness reports the divergence it creates: a parity test that cannot fail is
  * the one thing worse than no parity test. The shipped merger is the one bound below.
  *
  * THE CACHES ARE LOAD-BEARING, not a micro-optimisation. This function runs on every render of
  * every component that composes classes, and the table is ~220 regexes scanned per token: the
  * direct implementation measured 93.6µs per call against `tailwind-merge`'s 6.8µs on the same
- * input, and 88.6µs against 0.3µs when the SAME class list is merged again — which is what a
+ * input, and 88.6µs against 0.3µs when the SAME class list is merged again, which is what a
  * re-render does, and `tailwind-merge` memoises the whole call for exactly that reason. Both
  * halves are cached here: the parse (so a token costs one regex scan ever) and the call (so an
  * unchanged component costs one string comparison). Both cache a pure function of arguments that

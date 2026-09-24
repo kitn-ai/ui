@@ -17,8 +17,8 @@ import { CardFallback } from './card-fallback';
  * Consumer card schemas by envelope type: `{ 'pricing-table': pricingSchema }`.
  *
  * `object`, NOT `JsonSchema`, and that is measured rather than lazy. A real schema
- * is either imported from a `.json` file — where TypeScript widens `"type": "object"`
- * to `string`, which `JsonSchema`'s literal union rejects — or written out with the
+ * is either imported from a `.json` file (where TypeScript widens `"type": "object"`
+ * to `string`, which `JsonSchema`'s literal union rejects), or written out with the
  * `$schema` / `title` / `description` / `additionalProperties` keywords that
  * `JsonSchema` does not describe at all, which excess-property checking rejects.
  * Both are the ordinary case, so the tighter type would make the normal way of
@@ -68,7 +68,7 @@ export interface CardRendererProps {
  *
  * The fallback's `context()` mirrors the remote transport's `defaultContext()`
  * (`remote/provider-runtime.ts`): the contract return is non-optional, but no
- * native card reads it today — the web-component facades own theme/locale through
+ * native card reads it today: the web-component facades own theme/locale through
  * `ChatConfig`, not through card context.
  */
 function resolveHost(ctxHost: CardHost | undefined, hostElement: HTMLElement | undefined): CardHost | undefined {

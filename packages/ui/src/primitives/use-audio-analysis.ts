@@ -2,32 +2,21 @@ import { createSignal, createEffect, onCleanup, type Accessor } from 'solid-js';
 import { reduceToBands, reduceToVolume } from './audio-bands';
 
 export interface AudioAnalysisOptions {
-  /**
-   * Number of frequency buckets to produce, or a live accessor for it.
-   * Default 5.
-   *
-   * An accessor is resolved INSIDE the analysis effect, so a change to
-   * whatever signal backs it (e.g. a caller's variant or size switching)
-   * rebuilds the analyser at the new bucket count instead of silently
-   * leaving `bands()` padded or truncated to a stale size.
-   */
+  // Default 5. An accessor is resolved INSIDE the analysis effect, so a change to
+  // whatever signal backs it (a caller's variant or size switching) rebuilds the
+  // analyser at the new bucket count instead of silently leaving `bands()` padded or
+  // truncated to a stale size.
+  /** Number of frequency buckets to produce, or an accessor for a live count. Default 5. */
   bands?: number | (() => number);
-  /**
-   * Low bin index of the pass window. NOT a frequency. Default 100 --
-   * upstream LiveKit's component value (see DEFAULTS below).
-   */
+  /** Low bin index of the pass window. NOT a frequency. Default 100. */
   loPass?: number;
-  /**
-   * High bin index of the pass window. NOT a frequency. Default 200 --
-   * upstream LiveKit's component value (see DEFAULTS below).
-   *
-   * Legitimately input-dependent, unlike `fftSize`/`smoothingTimeConstant`:
-   * the default window expects PROCESSED speech (an agent's TTS track, or a
-   * mic captured with AGC/noise suppression on). For raw, unprocessed input
-   * -- an un-gained recording, music, ambience -- a wide low window such as
-   * `loPass: 4, hiPass: 120` reads energy the default deliberately gates
-   * out; see DEFAULTS below for the trade both ways.
-   */
+  // Legitimately input-dependent, unlike `fftSize`/`smoothingTimeConstant`:
+  // the default window expects PROCESSED speech (an agent's TTS track, or a mic
+  // captured with AGC/noise suppression on). For raw, unprocessed input (an un-gained
+  // recording, music, ambience) a wide low window such as `loPass: 4, hiPass: 120`
+  // reads energy the default deliberately gates out; see DEFAULTS below for the trade
+  // both ways.
+  /** High bin index of the pass window. NOT a frequency. Default 200. */
   hiPass?: number;
   /** Minimum ms between updates. Default 32 (about 30fps). */
   updateInterval?: number;

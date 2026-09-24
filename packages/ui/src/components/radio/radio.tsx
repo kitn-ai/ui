@@ -13,7 +13,7 @@ export interface RadioProps extends Omit<JSX.InputHTMLAttributes<HTMLInputElemen
  * for free, and every hand-rolled radio in this kit's control audit had lost some of it.
  *
  * Use {@link RadioGroup} for a set. Reach for a bare `Radio` when you are laying the
- * group out yourself — give every member the same `name`.
+ * group out yourself: give every member the same `name`.
  *
  * Everything not listed in `RadioProps` is forwarded to the input, so `id`, `name`,
  * `value`, `required`, `disabled`, `aria-*` and any `data-*` hook behave exactly as
@@ -62,7 +62,7 @@ export interface RadioGroupProps<T = string>
 }
 
 /**
- * A vertical set of radio rows in a bordered, divided list — the kit's standard
+ * A vertical set of radio rows in a bordered, divided list: the kit's standard
  * "pick exactly one" control.
  *
  * The group is a `role="radiogroup"` wrapper around real `<input type="radio">`s that

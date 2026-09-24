@@ -22,7 +22,7 @@ import { TEMPLATES, type TemplateId } from '../../../mcp/construct/templates';
 // 'scratch' is NOT a template — no illustration, no card, no registry entry.
 export type BuilderTemplateId = TemplateId | 'scratch';
 
-/** The template ids that DO have a card — every registry id. */
+/** The template ids that DO have a card: every registry id. */
 export type BuilderCardTemplateId = TemplateId;
 
 export interface BuilderTemplate {
@@ -31,7 +31,7 @@ export interface BuilderTemplate {
   description: string;
 }
 
-/** All six cards, DERIVED from the template registry (B-17b) — id, name and
+/** All six cards, DERIVED from the template registry (B-17b): id, name and
  *  one-liner are the registry's own; this module adds only the
  *  illustrations, which stay component-side keyed by id (SVGs are not
  *  registry data). The Labs story renders all six (T-1a); a real product
@@ -69,18 +69,18 @@ export const BLUEPRINT_BG = {
 } as const;
 
 /**
- * `BuilderStart` — the builder's opening screen: six selectable template
+ * `BuilderStart`, the builder's opening screen: six selectable template
  * cards (T-7, grown from four in Round P2). Each card is a real
  * `components/card/card-surface.tsx` `CardSurface` (`clickable`,
  * `media` for the illustration, `header` for the name), not a hand-rolled
- * button — the kit's own primitive already gives a `role="button"` with
+ * button: the kit's own primitive already gives a `role="button"` with
  * Enter/Space activation, which settles this screen's keyboard-semantics
  * question: a `radiogroup` was the other defensible reading (this IS a
  * single choice among six), but `CardSurface` already implements exactly the
  * button-per-card pattern with no extra wiring, and reusing it beats
  * building a second selection primitive for one screen.
  *
- * Brand alignment (T-7): the kit's own tokens throughout — no new color, no
+ * Brand alignment (T-7): the kit's own tokens throughout: no new color, no
  * new radius, no new type stack. The illustrations are the one genuinely new
  * visual element this round adds; see `TEMPLATE_ILLUSTRATIONS` below for
  * their shared style rules.

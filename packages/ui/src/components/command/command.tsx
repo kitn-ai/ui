@@ -30,7 +30,7 @@ export interface CommandListProps {
 }
 
 /**
- * `CommandList` — a presentational grouped listbox for command/mention palettes.
+ * `CommandList`: a presentational grouped listbox for command/mention palettes.
  *
  * Renders a `role="listbox"` container. Groups with a `group` name get a muted
  * section header. Each row is a `role="option"` button with icon, label, and

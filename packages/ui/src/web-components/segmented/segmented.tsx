@@ -11,7 +11,7 @@ interface Props extends Record<string, unknown> {
   options: KaiSegmentedOption[];
   /** Controlled selected `value`, reflected to the `value` attribute. Choosing a segment updates it and fires `kai-change`. */
   value?: string;
-  /** Control density: `sm` or `md`. Defaults to `md`. */
+  /** Control density. Defaults to `md`. */
   size?: 'sm' | 'md';
 }
 

@@ -6,7 +6,7 @@
  */
 
 /** `inject` = additive (the built-in region still renders, your markup is added
- *  in). `replace` = your markup stands in for the whole region — you own that
+ *  in). `replace` = your markup stands in for the whole region: you own that
  *  region's data + events (a slotted light-DOM node can't read the component's
  *  reactive state). */
 export type SlotMode = 'inject' | 'replace';
@@ -35,13 +35,13 @@ export const CHAT_SLOTS: SlotDef[] = [
 ];
 
 /** Slots of `<kai-prompt-input>` (and the default composer inside `<kai-chat>`). Native
- *  shadow slots — an empty slot renders nothing, so no facade flag-gating is required.
+ *  shadow slots: an empty slot renders nothing, so no facade flag-gating is required.
  *
- *  These are ONLY positions inside the card's shadow boundary — places a consumer
+ *  These are ONLY positions inside the card's shadow boundary: places a consumer
  *  cannot reach from their own DOM. Content ABOVE/BELOW the whole card is the
  *  consumer's own light-DOM layout (a sibling element), so there is intentionally
  *  no outer block slot here. (When the input is nested inside `<kai-chat>`'s shadow,
- *  that surrounding hole belongs to `kai-chat` — see `composer-actions`/`footer`.) */
+ *  that surrounding hole belongs to `kai-chat`; see `composer-actions`/`footer`.) */
 export const PROMPT_INPUT_SLOTS: SlotDef[] = [
   { name: 'input-top',     mode: 'inject', doc: 'Inside the card, above the textarea (e.g. an inline status strip). For content above/below the whole card, use your own layout; that is light DOM you control.' },
   { name: 'toolbar-start', mode: 'inject', doc: 'Leading controls in the input toolbar, where a + menu goes.' },
@@ -70,7 +70,7 @@ export const CONVERSATIONS_PARTS: PartDef[] = [
   },
 ];
 
-/** Slots of `<kai-conversation-item>` — one composed row of a consumer-owned
+/** Slots of `<kai-conversation-item>`: one composed row of a consumer-owned
  *  conversation loop (the default slot is the title). */
 export const CONVERSATION_ITEM_SLOTS: SlotDef[] = [
   { name: 'leading', mode: 'inject', part: true, doc: 'Leading region before the title (an icon or avatar).' },
@@ -103,7 +103,7 @@ export const CONVERSATION_ITEM_PARTS: PartDef[] = [
   },
 ];
 
-/** Slots of `<kai-message>` — per-message composition seams. `before-body` and
+/** Slots of `<kai-message>`: per-message composition seams. `before-body` and
  *  `after-body` are INJECT regions inside the message's body column; `avatar`
  *  REPLACES the built-in avatar rail (pair it with `avatar="none"` to omit the
  *  rail entirely). These are the keystone of compose-your-own message lists. */
@@ -134,19 +134,20 @@ export const MENU_SLOTS: SlotDef[] = [
   { name: 'trigger', mode: 'replace', doc: 'Your own trigger element; replaces the built-in button driven by the `trigger-icon` / `trigger-label` props.' },
 ];
 
-/** A styleable `::part` the kit renders (NOT a slot — you don't project into it;
+/** A styleable `::part` the kit renders (NOT a slot: you don't project into it;
  *  you restyle it from outside via `::part(name)`). This registry is the source
  *  of truth so the styling surface is discoverable: docs + the `kai` MCP
  *  component reference are generated from it, the same way slots are. The
- *  `recipe` is a copy-pasteable example — including the "just hide it" case that
+ *  `recipe` is a copy-pasteable example, including the "just hide it" case that
  *  is pure CSS and therefore intentionally NOT a prop. */
 export interface PartDef {
   /** `::part(name)` exposed for consumer styling. */
   name: string;
   /** One-line contract: what the part is. */
   doc: string;
-  /** A copy-pasteable styling example for docs / the MCP reference. Paint with the
-   *  DECLARED `--color-*` names: a `--kai-*` hook is read-with-fallback, never declared, so `var(--kai-…)` here is a silent no-op. */
+  // Paint with the DECLARED `--color-*` names: a `--kai-*` hook is read-with-fallback,
+  // never declared, so a `var(--kai-<name>)` read here is a silent no-op.
+  /** A copy-pasteable styling example for the docs and the MCP reference. */
   recipe?: string;
 }
 
@@ -250,7 +251,7 @@ export const SKELETON_PARTS: PartDef[] = [
 
 /**
  * The parts of ONE attachment item, declared by `components/attachments/attachments.tsx`
- * and therefore surfaced by every web component that renders an attachment — the
+ * and therefore surfaced by every web component that renders an attachment: the
  * standalone `<kai-attachments>` AND the thread inside `<kai-message>` /
  * `<kai-chat>`. Shared rather than duplicated so the two can never document
  * different names for the same node.
@@ -376,7 +377,7 @@ export const SCREEN_PARTS: PartDef[] = [
   },
 ];
 
-/** Slots of `<kai-card>` — structural regions only (the title/description are body
+/** Slots of `<kai-card>`: structural regions only (the title/description are body
  *  or `slot="header"` content you mark up). The body is the default slot. */
 export const CARD_SLOTS: SlotDef[] = [
   { name: 'media', mode: 'inject', doc: 'Full-bleed media (image/video/illustration) at the top (vertical) or start (horizontal). Clipped to the card corners.' },
@@ -506,7 +507,7 @@ export const CONTEXT_PARTS: PartDef[] = [
   { name: 'fill', doc: 'The used-tokens portion of that meter. Its width follows `usedTokens / maxTokens`; its default color is the severity hue picked by `warnThreshold` / `dangerThreshold`, so recoloring it from outside replaces that signal.', recipe: 'kai-context::part(fill) { background: var(--color-tool-blue) }' },
 ];
 
-/** Styleable `::part`s of `<kai-file-tree>` — the changed-files / diff bits, shown
+/** Styleable `::part`s of `<kai-file-tree>`: the changed-files / diff bits, shown
  *  only when a file carries diff metadata (or the `summary` attribute is set). */
 export const FILE_TREE_PARTS: PartDef[] = [
   {
@@ -532,7 +533,7 @@ export const FILE_TREE_PARTS: PartDef[] = [
 ];
 
 /**
- * Per-element composition surface — the SINGLE registry the build extracts
+ * Per-element composition surface: the SINGLE registry the build extracts
  * (`scripts/gen-web-component-api.mjs`) into `web-component-meta.json`, the Custom Elements
  * Manifest (`cssParts`/`slots`), `docs/web-components.md`, and the `kai` MCP
  * `component_reference`. Each entry maps a `kai-*` tag to the slots it projects
@@ -540,28 +541,22 @@ export const FILE_TREE_PARTS: PartDef[] = [
  * styleable parts, so they surface in both places.
  *
  * Adding a `part="…"` in a facade/component without registering it here fails the
- * `slots.test.ts` drift guard — keep this in sync with the source.
+ * `slots.test.ts` drift guard; keep this in sync with the source.
  */
 export interface WebComponentComposition {
   slots?: SlotDef[];
   parts?: PartDef[];
-  /**
-   * CSS custom properties a consumer can set on this element. Same contract as
-   * `slots`/`parts`: hand-maintained here because it is the ONE source every
-   * generator reads, and guarded against rot by `slots.test.ts` (a var that no
-   * longer appears in the shipped source is a fictional doc).
-   */
+  // Same contract as `slots`/`parts`: hand-maintained because this is the ONE source
+  // every generator reads, and guarded against rot by `slots.test.ts` (a var that no
+  // longer appears in the shipped source is a fictional doc).
+  /** CSS custom properties a consumer can set on this element. */
   vars?: VarDef[];
-  /**
-   * What the element's DEFAULT (unnamed) `<slot>` projects — i.e. what a consumer
-   * puts between the tags. Kept OUT of `slots` on purpose: those arrays are also
-   * read at runtime by `readSlots()`, which would query a meaningless `[slot=""]`.
-   * scripts/gen-web-component-api.mjs merges it back in as a slot with the empty name,
-   * which is how the Custom Elements Manifest spells the default slot.
-   *
-   * Every facade that renders a bare `<slot />` needs one; guarded by
-   * tests/web-components/slot-registry-coverage.test.ts.
-   */
+  // Kept OUT of `slots` on purpose: those arrays are also read at runtime by
+  // `readSlots()`, which would query a meaningless `[slot=""]`. The generator merges it
+  // back in as a slot with the empty name, which is how the Custom Elements Manifest
+  // spells the default slot. Every facade that renders a bare `<slot />` needs one;
+  // guarded by tests/web-components/slot-registry-coverage.test.ts.
+  /** Documents the element's default (unnamed) slot: what a consumer puts between the tags. */
   children?: string;
 }
 
@@ -578,7 +573,7 @@ export const PROMPT_DOCK_PARTS: PartDef[] = [
   },
 ];
 
-/** Slots + styleable `::part`s of `<kai-dock>` (the floating corner launcher — not
+/** Slots + styleable `::part`s of `<kai-dock>` (the floating corner launcher, not
  *  `<kai-prompt-dock>`, which is an in-flow tray around a prompt input). */
 export const DOCK_SLOTS: SlotDef[] = [
   { name: 'panel',         mode: 'replace', part: true, doc: 'The panel body. ANY element: a `<kai-chat>`, a form, your own component. The dock never reads or types it, and the default slot is the same region.' },
@@ -629,7 +624,7 @@ export const AGENT_CARD_PARTS: PartDef[] = [
 ];
 
 /** Styleable `::part`s of `<kai-code-block>` (one syntax-highlighted code block).
- *  The code region itself is not a part — it is rebuilt when the highlight lands,
+ *  The code region itself is not a part; it is rebuilt when the highlight lands,
  *  and its look is owned by the Shiki theme (`code-theme`). */
 export const CODE_BLOCK_PARTS: PartDef[] = [
   { name: 'copy', doc: 'The copy-to-clipboard button in the header row. Hide it with `copy="false"` rather than CSS.', recipe: 'kai-code-block::part(copy) { color: var(--color-primary) }' },
@@ -683,7 +678,7 @@ export const LIGHTBOX_PARTS: PartDef[] = [
 
 /** Styleable `::part`s of `<kai-pane-group>` (the editor group: a tab strip over
  *  the active tab's pane). The per-tab content slots are NAMED DYNAMICALLY by tab
- *  id (`slot="<tab id>"`) plus a default slot, so they are not enumerable here —
+ *  id (`slot="<tab id>"`) plus a default slot, so they are not enumerable here;
  *  only the styleable parts are registered. */
 export const PANE_GROUP_PARTS: PartDef[] = [
   { name: 'tabs', doc: 'The tab strip (role="tablist"). Restyle its background, height, padding, or gap from outside.', recipe: 'kai-pane-group::part(tabs) { background: var(--color-card); gap: 0.25rem }' },
@@ -759,7 +754,7 @@ export const POPOVER_SLOTS: SlotDef[] = [
 
 /** Slots of `<kai-dropdown>`. The menu body is the default slot; `trigger` is the
  *  VISUAL content of the built-in trigger button (never your own `<button>`/`<a>`,
- *  which would nest interactive elements — the `kai-menu` rule). */
+ *  which would nest interactive elements: the `kai-menu` rule). */
 export const DROPDOWN_SLOTS: SlotDef[] = [
   { name: 'trigger', mode: 'replace', doc: 'Visual content of the trigger button (an icon, text, an `<svg>`). Replaces the built-in trigger* content; name it with `label`.' },
 ];
@@ -798,7 +793,7 @@ export const AUDIO_VISUALIZER_PARTS: PartDef[] = [
   },
 ];
 
-/** Slots of `<kai-panel>` — the widget panel frame (blocks-and-parts P-1). The
+/** Slots of `<kai-panel>`: the widget panel frame (blocks-and-parts P-1). The
  *  default slot is the view container. */
 export const PANEL_SLOTS: SlotDef[] = [
   { name: 'header', mode: 'inject', part: true, doc: 'The header region above the view container: put a `<kai-panel-header>` there, or anything. Keeps its natural height and never scrolls away.' },
@@ -820,7 +815,7 @@ export const PANEL_PARTS: PartDef[] = [
   },
 ];
 
-/** Slots of `<kai-panel-header>` — the default slot is the title text. */
+/** Slots of `<kai-panel-header>`: the default slot is the title text. */
 export const PANEL_HEADER_SLOTS: SlotDef[] = [
   { name: 'start', mode: 'inject', doc: 'The leading cluster, before the title: a back arrow, an avatar.' },
   { name: 'end', mode: 'inject', doc: 'The trailing cluster, after the title: a close or overflow button.' },
@@ -869,7 +864,7 @@ export const TAB_BAR_ITEM_PARTS: PartDef[] = [
   },
 ];
 
-/** Slots of `<kai-row>` — the generic mobile list row (blocks-and-parts P-4).
+/** Slots of `<kai-row>`: the generic mobile list row (blocks-and-parts P-4).
  *  The default slot is the title; these are the named regions around it. */
 export const ROW_SLOTS: SlotDef[] = [
   { name: 'leading', mode: 'inject', part: true, doc: 'Leading region before the title (an icon or avatar).' },

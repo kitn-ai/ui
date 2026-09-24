@@ -209,14 +209,14 @@ export const EMPTY_MASK_HINT: FieldMaskHint = Object.freeze({ warnings: [] as st
  *
  * Keyed on the field object, not on the row, and that is the fix rather than the
  * convenience. A per-row `Set` looks right and does not work: `FieldRow`'s body runs
- * TWICE for one visible row (measured — the parent rebuilds the `<For>` once at mount),
+ * TWICE for one visible row (measured: the parent rebuilds the `<For>` once at mount),
  * so each build got its own empty Set and every bad hint printed twice. The reviewer
  * caught that because the tests asserted `toHaveBeenCalled()` and never a count; they
  * assert `toHaveBeenCalledTimes` now.
  *
  * A `WeakMap` because the key is model output: it must not pin a discarded card's field
  * definitions in memory, and it must not dedupe across cards either. The repo's
- * reactivity contract makes the identity exactly right — an edited field arrives as a
+ * reactivity contract makes the identity exactly right, an edited field arrives as a
  * NEW object (CLAUDE.md, the `kai-` contract), so a changed hint warns again, while the
  * same definition rendered twice warns once.
  */
@@ -235,7 +235,7 @@ function warnOncePerField(field: FormField, message: string): void {
 }
 
 /** Clip a model-supplied string before it reaches a console warning. Not a security
- *  boundary — the console is not a sink — but a 500-character pattern printing itself
+ *  boundary (the console is not a sink), but a 500-character pattern printing itself
  *  on every render is noise that hides the sentence that matters (M4 precedent). */
 function clipForWarning(text: string): string {
   return text.length <= 32 ? text : `${text.slice(0, 32)}… (${text.length} chars)`;
@@ -248,8 +248,8 @@ const SEMANTIC_TOKENS: readonly string[] = FIELD_SEMANTIC_TYPES;
  * masking props `Input` takes, or into nothing at all.
  *
  * EVERY INPUT HERE IS MODEL OUTPUT and therefore untrusted. The hints are
- * display-only — they produce text and caret positions, never HTML, a URL or an
- * attribute on a navigable element — so this is about denial of service and
+ * display-only (they produce text and caret positions, never HTML, a URL or an
+ * attribute on a navigable element), so this is about denial of service and
  * confusion, not injection: an unknown token, a pattern the engine refuses and a
  * misaligned guide each degrade to the largest thing that still works, and say so.
  * A THROW here would take out the whole card, including the fields that were fine.
@@ -367,7 +367,7 @@ export function resolveFieldMask(field: FormField, fieldKey = ''): FieldMaskHint
  *
  * The store holds one value per field and it is the canonical one: digits for
  * `tel`/`ssn`/`credit-card`. That value is also what flows back into the control as its
- * `value` prop — and writing `5550101234` over a field the masker just wrote
+ * `value` prop, and writing `5550101234` over a field the masker just wrote
  * `555-010-1234` into un-formats it one keystroke behind the user, with the caret
  * jumping to the end. `<kai-input>` hit exactly this and split display from canonical;
  * this is the same split, one layer up, for the Solid `Form`.
@@ -375,7 +375,7 @@ export function resolveFieldMask(field: FormField, fieldKey = ''): FieldMaskHint
  * Re-formatting through the SAME pure engine means the string handed back is the string
  * already in the field, which the HTML value setter treats as a no-op (caret included).
  *
- * THE GUIDE BRANCH IS NOT A CHOICE MADE HERE — it mirrors `display()` in
+ * THE GUIDE BRANCH IS NOT A CHOICE MADE HERE: it mirrors `display()` in
  * `primitives/input-mask.ts`: with an explicit guide the field is always the pattern's
  * full length, without one it shows up to the last typed character. Disagreeing with the
  * masker about that would put the fight straight back.
@@ -508,10 +508,13 @@ export interface FormSummaryRow { key: string; label: string; value: string; }
 /** Format one field's value for the read-only summary. */
 export function formatFieldValue(field: FormField | undefined, raw: unknown): string {
   if (field?.['x-kai-widget'] === 'password') {
+    // lint-prop-docs: em-dash-copy -- the dash IS the glyph this cell renders for an empty value
     return raw == null || raw === '' ? '—' : '••••';
   }
   if (typeof raw === 'boolean') return raw ? 'Yes' : 'No';
+  // lint-prop-docs: em-dash-copy -- the dash IS the glyph this cell renders for an empty value
   if (raw == null || raw === '') return '—';
+  // lint-prop-docs: em-dash-copy -- the dash IS the glyph this cell renders for an empty value
   if (Array.isArray(raw)) return raw.length ? raw.map((v) => String(v)).join(', ') : '—';
   return String(raw);
 }
@@ -550,7 +553,7 @@ export function buildResult(
 // The <Form> component.
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** Imperative handle exposed via `controllerRef` — surfaces the form's latent
+/** Imperative handle exposed via `controllerRef`: surfaces the form's latent
  *  capabilities (focus the first/first-invalid control, validate, programmatic
  *  send, reset to defaults, dismiss/reopen) so the `<kai-form>` facade can forward
  *  them as instance methods. */
@@ -599,7 +602,7 @@ export interface FormProps {
 const DEFAULT_FORM: FormDefinition = { type: 'object', properties: {} };
 
 /**
- * `Form` — renders a JSON-Schema form definition into themed, accessible widgets
+ * `Form` renders a JSON-Schema form definition into themed, accessible widgets
  * inside `Card` chrome, validates input against that schema, and emits the
  * collected, coerced, validated object up the Card contract as `submit`.
  * Reads context/emits via a `CardProvider` when present, else the bubbling
@@ -1059,14 +1062,14 @@ function FieldRow(props: FieldRowProps): JSX.Element {
 }
 
 /**
- * The widget prop bag for one field row. **Internal** — exported only so the
+ * The widget prop bag for one field row. **Internal**: exported only so the
  * subscription contract can be pinned directly
  * (`tests/components/form-field-subscriptions.test.tsx`); it is not re-exported
  * from the package.
  *
  * GETTERS, NOT AN OBJECT FACTORY, and this is the whole point (K-D12b). The
  * factory read `props.value()` alongside everything else and rebuilt the bag on
- * every call, so a reader of ANY prop — `invalid`, say — subscribed to `value`
+ * every call, so a reader of ANY prop (`invalid`, say) subscribed to `value`
  * too and re-ran on every keystroke. Combined with the `<input>` being rebuilt
  * when its class expression re-ran (K-D12a), that is what made typing into a
  * `kai-form` text field lose focus after each character.

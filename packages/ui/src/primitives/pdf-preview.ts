@@ -36,7 +36,7 @@ export interface PdfPreviewOptions {
   workerSrc?: string;
 }
 
-/** Pinned, exact (reproducible) — NOT a range. */
+/** Pinned, exact (reproducible); NOT a range. */
 const PDFJS_VERSION = '6.0.227';
 const CDN = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${PDFJS_VERSION}/build`;
 const DEFAULT_LOAD = (): Promise<PdfjsLike> =>
@@ -88,7 +88,7 @@ function loadPdfjs(): Promise<PdfjsLike> {
  * Render EVERY page of the PDF at `url` into `container` as stacked <canvas>
  * elements fit to `pxWidth` CSS pixels (rendered at devicePixelRatio for
  * crispness). Clears `container` first. Resolves `{ pages }`. THROWS on
- * load / CORS / parse failure — the caller catches and shows the fallback card.
+ * load / CORS / parse failure: the caller catches and shows the fallback card.
  */
 export async function renderPdfInto(
   url: string,

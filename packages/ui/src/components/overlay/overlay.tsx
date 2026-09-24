@@ -103,14 +103,14 @@ function inInertSubtree(node: Node | null): boolean {
  * Watch for the reference element "going away" and fire `onDisconnect` exactly
  * once. The anchor is gone when it is either removed from the document OR hidden
  * behind an `inert` ancestor (`inInertSubtree(reference)`, which crosses shadow
- * boundaries) — the latter is how a modal/takeover (e.g. kai-screen) makes the
+ * boundaries): the latter is how a modal/takeover (e.g. kai-screen) makes the
  * background non-interactive while leaving it in the DOM. Either way the anchor is
  * no longer a valid target and the overlay must close.
  *
  * Uses a MutationObserver on BOTH the document and the anchor's root node: the
  * document catches the anchor's host being removed and any ancestor gaining
- * `inert` (and light-DOM removals), while the anchor's root node — a ShadowRoot
- * for kai-* elements — catches removals INSIDE the shadow tree, which a
+ * `inert` (and light-DOM removals), while the anchor's root node (a ShadowRoot
+ * for kai-* elements) catches removals INSIDE the shadow tree, which a
  * document-level observer can't see through encapsulation. We observe childList
  * (DOM removals) AND the `inert` attribute, then re-check the anchor after any
  * mutation. Guarded for environments without MutationObserver. Returns a teardown
@@ -152,7 +152,7 @@ function watchAnchorGone(ref: HTMLElement, onDisconnect: () => void): () => void
  * so the element tracks the trigger on scroll/resize (fix DD-2). Writes
  * position into the returned `pos` signal; caller applies it as inline style.
  *
- * `options` (placement/gutter) are read at setup time — pass static values;
+ * `options` (placement/gutter) are read at setup time: pass static values;
  * reactive option changes won't reposition until the next autoUpdate tick.
  */
 export function usePosition(
@@ -243,7 +243,7 @@ export interface UseDismissOptions {
  * Escape key + outside-pointerdown dismissal. Does NOT lock page scroll (fix DD-1).
  *
  * `onDismiss` and `refs` are captured at call time (component setup), which is
- * fine in SolidJS since components don't re-run — ensure they close over mutable
+ * fine in SolidJS since components don't re-run. Ensure they close over mutable
  * variables, not stale values.
  */
 export function useDismiss(opts: UseDismissOptions) {

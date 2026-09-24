@@ -147,12 +147,12 @@ function ChainOfThoughtStep(props: ChainOfThoughtStepProps) {
 
 // --- Accordion model (the kai-chain-of-thought interaction surface) ---
 
-/** Open-mode: `multiple` (any number of steps open at once — the historical
+/** Open-mode: `multiple` (any number of steps open at once, the historical
  *  default) or `single` (at most one open; opening a step closes the others). */
 export type ChainOfThoughtType = 'single' | 'multiple';
 
 /**
- * A reasoning step descriptor. `id` is an OPTIONAL stable key — the Accordion's
+ * A reasoning step descriptor. `id` is an OPTIONAL stable key: the Accordion's
  * open-set keys use `step.id` when present, else `String(index)`. So a consumer
  * who wants to drive `value`/`defaultValue` (or read `kai-value-change`) by a
  * meaningful key should set `id`; otherwise the step's position is its key.
@@ -216,11 +216,11 @@ function toKeySet(value: string | string[] | undefined): Set<string> {
  *  - seeded from `defaultValue` (normalised string|string[] → Set);
  *  - when `value` is provided it WINS (controlled);
  *  - a trigger click updates the set respecting `single` vs `multiple` and emits
- *    via `onValueChange` — in single mode opening a step closes the others;
+ *    via `onValueChange`; in single mode opening a step closes the others;
  *  - each step's Collapsible is driven (controlled) by its membership in the set.
  *
  * With NO new props (type defaults to `multiple`, no value/defaultValue), every
- * step starts closed and is independently toggleable — identical to the old
+ * step starts closed and is independently toggleable, identical to the old
  * behaviour, just with the open state lifted here so methods/events can observe
  * and drive it.
  */

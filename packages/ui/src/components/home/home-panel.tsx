@@ -9,8 +9,7 @@ import type { ConversationSummary, HomeLinkEntry } from '../../types';
 
 export interface HomePanelProps {
   greeting?: { title?: string; subtitle?: string };
-  /** The most-recent conversation, host-derived. `undefined` hides the card
-   *  entirely — this component never fetches or picks one itself. */
+  /** The most-recent conversation, host-derived. `undefined` hides the card. */
   recent?: ConversationSummary;
   /** Defaults to `true`. */
   showNewConversation?: boolean;
@@ -19,8 +18,7 @@ export interface HomePanelProps {
   links?: HomeLinkEntry[];
   onSelectRecent?: (id: string) => void;
   onNewChat: () => void;
-  /** Fired only for href-less link entries — an entry with a safe `href`
-   *  navigates as a real anchor instead. */
+  /** Fired only for href-less link entries; an entry with a safe `href` navigates as an anchor. */
   onLink?: (entry: HomeLinkEntry) => void;
   class?: string;
 }
@@ -28,7 +26,7 @@ export interface HomePanelProps {
 /**
  * The widget home screen (Intercom-pattern, H-1): greeting, the most-recent
  * conversation, a "start a new conversation" CTA, and a list of host-defined
- * links. Pure props in, events out — no fetching, no routing; `ChatThread`
+ * links. Pure props in, events out: no fetching, no routing; `ChatThread`
  * wires this behind its Home/Messages tab bar.
  *
  * The rows render THROUGH the public `Row` part (P-4/P-9): the
@@ -36,8 +34,8 @@ export interface HomePanelProps {
  * facade's home tab and a composed block's settings screen share one row
  * anatomy. The unsafe-href rule now lives where the anatomy does: `Row`
  * refuses an `href` that fails `isSafeUrl` (e.g. `javascript:`) by rendering
- * a plain, non-interactive row — label visible, no anchor, no button, no
- * click handler — rather than silently promoting it into an event-emitter.
+ * a plain, non-interactive row (label visible, no anchor, no button, no
+ * click handler) rather than silently promoting it into an event-emitter.
  * (The CTA stays a `Button`: it is a primary action, not a list row.)
  *
  * The recent-conversation card and the link list are both `RowGroup`s of one and

@@ -15,7 +15,7 @@ interface Props extends Record<string, unknown> {
   focused?: boolean;
 }
 
-/** Events fired by `<kai-pane-group>`. All non-bubbling — listen on the element. */
+/** Events fired by `<kai-pane-group>`. All non-bubbling; listen on the element. */
 interface Events {
   /** A tab was selected (click, Enter/Space, or arrow-key move). `detail.id` is
    *  the tab's id. */

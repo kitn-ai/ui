@@ -49,7 +49,7 @@ export function resumeSpeech(): void {
 
 /** Speak `text` natively: cancel-then-speak so a second call pre-empts the
  *  first (VoiceOutput's own speakNative discipline). No-ops where the API
- *  is absent (jsdom, some webviews) or `text` is empty — the caller's
+ *  is absent (jsdom, some webviews) or `text` is empty: the caller's
  *  `kai-message-action` event still fires, so a host can back the same
  *  action with a model TTS path instead. */
 export function speakText(text: string): void {

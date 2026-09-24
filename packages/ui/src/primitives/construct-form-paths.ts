@@ -191,11 +191,11 @@ export type RuleVisibility =
   | { treatment: 'show-requires'; path: string }
   | { treatment: 'reject-only' };
 
-/** Keyed by CROSS_FIELD_RULES ids — the key-set-equality test in
+/** Keyed by CROSS_FIELD_RULES ids: the key-set-equality test in
  *  construct-form-paths.test.ts fails a new superRefine rule until the
  *  builder classifies it here (B-20's drift guard). `reject-only` means the
  *  panel surfaces the rule only through validation problems (duplicates,
- *  URL-scheme rejections — states the panel's own editors cannot produce). */
+ *  URL-scheme rejections: states the panel's own editors cannot produce). */
 export const RULE_VISIBILITY: Record<string, RuleVisibility> = {
   'slots-unique': { treatment: 'reject-only' },
   'custom-layout-needs-slots': { treatment: 'reject-only' },
@@ -208,12 +208,12 @@ export const RULE_VISIBILITY: Record<string, RuleVisibility> = {
   'reasoning-open-scope': {
     treatment: 'disable-with-reason',
     path: 'capabilities.reasoningOpen',
-    reason: 'Only applies while Reasoning is Full — Compact and Off have no disclosure to open.',
+    reason: 'Only applies while Reasoning is Full: Compact and Off have no disclosure to open.',
   },
   'conversations-need-history': {
     treatment: 'disable-with-reason',
     path: 'capabilities.conversations',
-    reason: 'Needs History set to Local or Endpoint — a conversation list needs somewhere to persist conversations.',
+    reason: 'Needs History set to Local or Endpoint: a conversation list needs somewhere to persist conversations.',
   },
   'home-link-urls': { treatment: 'reject-only' },
   'history-endpoint-url': { treatment: 'show-requires', path: 'capabilities.history.url' },

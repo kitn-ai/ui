@@ -6,7 +6,7 @@ import { createSignal, type Accessor } from 'solid-js';
  * one".
  *
  * WHY IT EXISTS. Slotted light-DOM text is part of the flattened tree, so it
- * names the shadow `<button>` all by itself — measured, not assumed:
+ * names the shadow `<button>` all by itself, measured rather than assumed:
  * `scripts/probe-button-accessible-name.mjs` reads chromium's AX tree and
  * `<kai-button>Save</kai-button>` computes the name "Save" from `contents`,
  * with no `aria-label` anywhere. An `aria-label` on top of that does not add a

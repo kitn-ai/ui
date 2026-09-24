@@ -91,6 +91,7 @@ surfaces are measured clean, not when it is edited.
 | concept pages over cap (guides, patterns, examples) | 60 | paragraphs <= 4 lines |
 | comment blocks over 20 lines | 181 | 0 or waived |
 | comments citing plans / IDs / dates / sections | 156 | 0 |
+| DOC COMMENTS in `src/**/*.{ts,tsx}`, four rules: member cap, em dash in a doc comment, em dash in a rendered string, type restatement | **2,026 members + 1,166 declaration docs across 351 sources; 0 over the 160 cap, 0 em dash, 0 type restatement, 0 waivers** (`lint-prop-docs`, now the doc-and-copy guard) | done |
 
 The copy guard `apps/docs/test/docs-copy.test.ts` now measures the page tops on every run (caps, em dashes,
 instructive shapes, a lede that restates its description, anti-vacuity floors on pages, ledes, asides AND
@@ -169,6 +170,27 @@ Two blind spots the passes found, both worth keeping:
 
 ## Done so far, kept here so it is not re-litigated
 
+- **PASS B, the doc comments: 249 member sites + 220 declaration/variable-doc em dashes + 50 rendered-string
+  em dashes, all rewritten, 0 waivers.** Six sweep lanes derived their own slices from the guard and ran in
+  parallel on disjoint files; the guard then went green tree-wide. Four copy reviewers read the result:
+  **28 FAIL, 45 WEAK, the rest PASS**. Three fix lanes applied every FAIL and (43 of 45) WEAK, and a
+  re-check confirmed **28/28 FAIL resolved, 43/45 WEAK addressed, 2 accepted as judgement calls**
+  (`define.tsx:172`, `conversation-store.ts:5`).
+- **Two fact errors the reviewers caught, both real:** `toast-store.duration` had carried `2000`/`4000`
+  as the default and the action floor while the constants are `5000`/`7000`, and `kbd.platform` had lost
+  the Solid `'other'` / facade `'auto'` split. Both now state the value the code has.
+- **Three runtime strings changed with the sweep, so their twins moved too:** the account-menu accessible
+  name (`app-header.tsx` + its 4 test assertions + `mcp/construct/codegen.ts` + its test) and the
+  dismissed-stub label (`dismissed-stub.tsx` + `card-dismiss.test.tsx`). Kit and emitted app announce one
+  string each, and the unit suite is green.
+- **The guard grew from one rule to four** (`lint-prop-docs`): the member cap, the em dash in ANY doc
+  comment (member, declaration, `const`), the em dash in a rendered STRING, and type restatement. Scope is
+  every hand-written `src/**/*.{ts,tsx}`; generated, test, story, testlib, `src/test-utils/**` and
+  `src/stories/**` are out. Self-test 23 -> 24 cases; the two new branches and the em-dash branch are
+  mutation-proven on the tree (a mutant in a clean file turns the run red; reverting turns it green).
+- **Boundary, deliberate:** em dashes in `//` and JSX comments are NOT swept. Nothing renders them, so the
+  flourish ban does not apply; the // comments that hold a ROUND ID, a date or a section ref belong to
+  PASS C's `lint:comment-references`, and the reviewers routed them there.
 - **The component descriptions, judged line by line** (95 of them, the string Storybook renders above the
   props table). Three copy-reviewer batches: 69 PASS, 20 WEAK, 6 FAIL, counted from the verdict ROWS in
   its three reports (each summary's own tally is off by one in batch A, which is why the rows are the

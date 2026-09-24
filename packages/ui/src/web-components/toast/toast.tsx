@@ -13,8 +13,9 @@ interface Props extends Record<string, unknown> {
   position?: ToastPosition;
   /** Max simultaneously-visible toasts; the rest queue. Defaults to `3`. */
   max?: number;
-  /** Stacking: 'expanded' (default, full column) | 'collapsed' (Sonner-style
-   *  pile that expands on hover/focus). Attribute: stack. */
+  // `collapsed` is the Sonner-style pile that expands on hover or focus; `expanded` is the full
+  // column.
+  /** Stacking; the default is the full column. Attribute: `stack`. */
   stack?: 'expanded' | 'collapsed';
   /** Default appearance for this region's toasts: `pill` (default, compact) or `card` (richer). A per-toast `appearance` wins. */
   appearance?: ToastAppearance;

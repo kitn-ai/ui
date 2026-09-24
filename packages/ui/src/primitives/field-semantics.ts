@@ -22,12 +22,11 @@ export interface FieldSemantics {
   readonly spellcheck: false;
   readonly autocorrect: 'off';
   readonly autocapitalize: 'off';
-  /** The default tier-2 mask for this type, resolved only when the consumer opts in
-   *  (`mask="default"` / the form card's `x-kai-format`) -- NOT applied automatically
-   *  by a bare semantic type (decision 1). */
+  // A bare semantic type never masks on its own: this is read only when the consumer
+  // asks, via `mask="default"` or the form card's `x-kai-format`.
+  /** The default tier-2 mask for this type, applied only when the consumer opts in. */
   readonly defaultFormat?: string;
-  /** What the field submits: digit-only types strip separators, `custom`
-   *  keeps its formatted/literal value, `as-typed` is the unmasked fallback. */
+  /** What the field submits: a mask's separators are stripped for the phone, SSN and card semantics, kept for a custom one. */
   readonly canonical: 'digits' | 'formatted' | 'as-typed';
 }
 

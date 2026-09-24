@@ -66,7 +66,7 @@ export interface ConversationItemProps {
 
 /**
  * Short relative time from an ISO date string: "just now", "5m ago", "3h ago",
- * "2d ago", "24d ago". Pure — it snapshots `now` (defaults to `Date.now()`) at
+ * "2d ago", "24d ago". Pure: it snapshots `now` (defaults to `Date.now()`) at
  * call time, so it re-derives whenever the list re-renders; there is no internal
  * ticking clock. Returns '' for a missing or unparseable date.
  */
@@ -92,7 +92,7 @@ export function relativeTimeShort(iso?: string, now: number = Date.now()): strin
 export { isConversationUnread } from '../../primitives/conversation-store';
 
 /**
- * The slotted-item shape rendered by `<kai-conversation-item>` — the composed
+ * The slotted-item shape rendered by `<kai-conversation-item>`: the composed
  * row of the consumer-owned loop. Distinct from the
  * data-mode `ConversationItem` above, which batteries mode keeps rendering
  * unchanged: this one takes REGIONS, not a `ConversationSummary`.
@@ -103,11 +103,11 @@ export { isConversationUnread } from '../../primitives/conversation-store';
  * provides only the region plus focus and ARIA plumbing, never a declarative
  * actions prop. Activation has two modes: inside `<kai-conversations>` it
  * lives in the CONTAINER (`createConversationItemsController` in
- * conversation-list.tsx — this row renders no handler and the
+ * conversation-list.tsx), which renders no handler on the row; the
  * `data-kai-item-menu` marker on the menu region is what the container's
- * activation guard keys off so a click in the consumer's menu never also
- * selects the row); STANDALONE, `onActivate` makes the row body
- * its own tabbable button-role control — click / Enter / Space — with the menu
+ * activation guard keys off, so a click in the consumer's menu never also
+ * selects the row. STANDALONE, `onActivate` makes the row body
+ * its own tabbable button-role control: click / Enter / Space, with the menu
  * still outside the control as the body's sibling.
  *
  * ARIA contract for direct Solid use: the row renders `role="listitem"` holding

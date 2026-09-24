@@ -141,19 +141,19 @@ export function firstEnabledIndex(options: ChoiceOption[]): number {
 // The <ChoiceCard> component.
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** Imperative handle exposed via `controllerRef` — surfaces the choice card's
+/** Imperative handle exposed via `controllerRef`, surfacing the choice card's
  *  latent selection/submit/dismiss capabilities so the `<kai-choice>` facade can
  *  forward them as instance methods (focus/select/send/dismiss/reopen). */
 export interface ChoiceController {
   /** Focus the radiogroup roving tab stop (or the Other input when selected). */
   focus(options?: FocusOptions): void;
-  /** Select an option by id locally (no emit) — same as a row click. */
+  /** Select an option by id locally, without emitting; same as a row click. */
   select(optionId: string): void;
-  /** Submit the current selection — emits the `action` verb + resolves single-shot. */
+  /** Submit the current selection: emits the `action` verb and resolves single-shot. */
   send(): void;
-  /** Dismiss the card — emits `dismiss` + optimistically collapses to the stub. */
+  /** Dismiss the card: emits `dismiss` and optimistically collapses to the stub. */
   dismiss(): void;
-  /** Re-open a dismissed card from its stub — emits `reopen`. */
+  /** Re-open a dismissed card from its stub; emits `reopen`. */
   reopen(): void;
 }
 
@@ -186,7 +186,7 @@ export interface ChoiceCardProps {
 }
 
 /**
- * `ChoiceCard` — a single-select "pick one of N rich options" card (plans, products,
+ * `ChoiceCard`, a single-select "pick one of N rich options" card (plans, products,
  * flights, quick replies) inside `Card` chrome. The options are a WAI-ARIA radiogroup
  * (list rows) with roving tabindex: clicking a row (or Space/Enter on the focused row)
  * **selects** it locally without emitting; a **Submit** button below the list then emits
@@ -623,8 +623,8 @@ function IconBadge(props: { name: string }): JSX.Element {
  *
  * The control is a REAL `<input type="radio">` (the `Radio` primitive over
  * `.kai-radio`), not the `aria-hidden` ring-shaped `<span>` this row used to draw.
- * That is what buys form participation — a `name`, a `value`, and a real entry in a
- * native `FormData` — which a `<div role="radio">` can never have, and it removes the
+ * That is what buys form participation (a `name`, a `value`, and a real entry in a
+ * native `FormData`), which a `<div role="radio">` can never have, and it removes the
  * fourth hand-rolled radio from the kit.
  *
  * WHY `role="radio"` IS ON THE INPUT AND NOT ON THE ROW. `choice-card.tsx`'s own
@@ -633,7 +633,7 @@ function IconBadge(props: { name: string }): JSX.Element {
  * has to be written somewhere. Putting it on the `<label>` wrapper (which the plan
  * suggested) would nest a radio inside a radio and announce the row twice; putting it
  * on the input states the role the input already has. `aria-checked` / `aria-disabled`
- * are likewise redundant with `checked` / `disabled` and kept in lockstep with them —
+ * are likewise redundant with `checked` / `disabled` and kept in lockstep with them:
  * they are the state the element tests read, and a redundant ARIA attribute that never
  * disagrees with the DOM is harmless where a second radio in the a11y tree is not.
  *

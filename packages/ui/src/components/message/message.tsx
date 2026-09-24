@@ -36,7 +36,7 @@ import type { CardComponentMap } from "../card/card-registry";
 // --- Message ---
 
 /** Who is speaking in a message row. This is the SEMANTIC role of the message,
- *  not an ARIA role — see `MessageProps['role']`. */
+ *  not an ARIA role; see `MessageProps['role']`. */
 export type MessageRole = 'user' | 'assistant' | 'system';
 
 /** The accessible name given to a row that declares a speaker. `role="article"`
@@ -186,8 +186,7 @@ function MessageActions(props: MessageActionsProps) {
 export interface MessageActionBarProps {
   /** Built-in action names and/or custom action descriptors, in order. */
   actions: (ChatMessageAction | CustomAction)[];
-  /** `'always'` (default) keeps the bar visible; `'hover'` reveals it on
-   *  parent `.group` hover. */
+  /** Whether the bar stays visible or appears on pointer-over; defaults to staying visible. */
   reveal?: 'always' | 'hover';
   /** Fired with the built-in name or the custom action id when a button is clicked. */
   onAction: (id: string) => void;
@@ -214,14 +213,14 @@ function feedbackVoteOf(a: ChatMessageAction | CustomAction): FeedbackVote | und
 }
 
 /**
- * The shared message action toolbar. Renders one ghost icon button per entry —
+ * The shared message action toolbar. Renders one ghost icon button per entry:
  * built-in names pull their label+icon from the curated registry; custom
  * descriptors use their `label` plus `actionIcon(icon)` (label-only when the
  * icon is unknown or absent). `reveal="hover"` makes the bar fade in on the
  * parent `.group`'s hover.
  *
  * Pure/prop-driven: feedback (`activeFeedback`) and copy (`copied`) state are
- * owned by the parent facade and passed in — the bar holds no internal signals,
+ * owned by the parent facade and passed in: the bar holds no internal signals,
  * so it survives the new-array-per-chunk re-renders of a streaming thread. With
  * a vote active, the chosen `like`/`dislike` button is marked `aria-pressed` +
  * filled and the other vote button collapses its width (sliding the active thumb
@@ -341,11 +340,10 @@ export interface MessageBodyProps {
   isUser: boolean;
   /** Whether text parts render as markdown. */
   markdown: boolean;
-  /** Action-bar entries — built-in names and/or custom descriptors. When empty
+  /** Action-bar entries: built-in names and/or custom descriptors. When empty
    *  the bar is not rendered. */
   actions?: (ChatMessageAction | CustomAction)[];
-  /** `'always'` (default) keeps the bar visible; `'hover'` reveals it on parent
-   *  `.group` hover. */
+  /** Whether the bar stays visible or appears on pointer-over; defaults to staying visible. */
   actionsReveal?: 'always' | 'hover';
   // The parts STAY in `parts`: the wire encoder still needs them, in order.
   /** Skip the citations row that consecutive `source` parts collapse into. */
@@ -448,7 +446,7 @@ function citationTitle(s: MessageSource): string {
  *
  *  The render body below reads its group/part through accessors (see the
  *  `<Index>` note in `MessageBody`), and TypeScript cannot narrow a
- *  discriminated union across two separate accessor CALLS —
+ *  discriminated union across two separate accessor CALLS:
  *  `g().kind === 'files' && g()` leaves the second call widened, because as far
  *  as the compiler knows the two calls could return different values. So the
  *  test and the cast happen together, on one already-read value. Returns
@@ -474,7 +472,7 @@ function partAs<T extends MessagePart['type']>(
  * ★ A COMPONENT OF ITS OWN, and for one reason: the lightbox is selected by
  * `AttachmentsContext.imagePreview`, which is provided by the `<Attachments>`
  * container FURTHER DOWN this same JSX tree. `useContext` reads from the owner
- * scope, so the read has to happen below that provider — inline in `MessageBody`
+ * scope, so the read has to happen below that provider: inline in `MessageBody`
  * it would find no context and take the `'hover'` fallback every time, which is
  * a lightbox prop that looks wired and never opens.
  *

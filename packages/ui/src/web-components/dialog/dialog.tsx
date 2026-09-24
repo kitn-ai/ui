@@ -22,7 +22,7 @@ interface Props extends Record<string, unknown> {
  *
  * DELIBERATELY GENERIC, and a decision rather than a placeholder. A modal with no
  * name at all fails WCAG and axe's `aria-dialog-name`; "Dialog, dialog" is merely
- * redundant, and between the two the redundant one is strictly better — it is also
+ * redundant, and between the two the redundant one is strictly better: it is also
  * what Shoelace and WebAwesome ship. The kit cannot know what a given modal is about,
  * so inventing something specific here would be a worse default than saying nothing
  * extra. Consumers name it properly with `label` or by projecting a `header`.
@@ -30,13 +30,13 @@ interface Props extends Record<string, unknown> {
 const DEFAULT_LABEL = 'Dialog';
 
 /**
- * The consumer's label, or the fallback — with "no label" meaning every way a
+ * The consumer's label, or the fallback, with "no label" meaning every way a
  * consumer can arrive at one.
  *
  * The declared default is a SEED, not a floor: component-register writes the prop
  * back as `null` when the attribute is removed and does NOT restore the declared
  * value, so `props.label` is legitimately `null`/`undefined` at runtime. An empty or
- * whitespace-only string is the same situation wearing a name — `aria-label=""` is a
+ * whitespace-only string is the same situation wearing a name: `aria-label=""` is a
  * `role="dialog"` with no accessible name, i.e. the exact defect this exists to
  * prevent, reached through the attribute that was supposed to prevent it. Each of
  * those routes is a row in tests/web-components/dialog.test.tsx, because a mutation run

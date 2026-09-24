@@ -1,5 +1,5 @@
 /**
- * "Does this subtree already offer the keyboard a way in?" — shared by the two
+ * "Does this subtree already offer the keyboard a way in?" Shared by the two
  * triggers that would otherwise add a SECOND tab stop on top of a focusable child
  * (`HoverCardTrigger`, `LightboxTrigger`).
  *
@@ -14,14 +14,14 @@ export const FOCUSABLE_CHILD =
 /**
  * Direct descendants and slot-assigned light DOM both count. Slotted content is
  * checked through `assignedElements()`, because a `<slot>` in the shadow tree
- * contains none of the light-DOM nodes it projects — the `kai-hover-card` and
+ * contains none of the light-DOM nodes it projects: the `kai-hover-card` and
  * `kai-lightbox` facades wrap a bare `<slot />`, so without this branch every use
  * of those elements would be told its children are inert.
  *
  * WHEN this runs is as load-bearing as what it asks. At ref time the facade's
  * trigger contains `<slot></slot>` with nothing assigned yet, so a single call
  * from the ref answers "inert" for a slot that is about to receive a focusable
- * `<a>` — and the trigger stamps a second tab stop on top of the child's. That is
+ * `<a>`, and the trigger stamps a second tab stop on top of the child's. That is
  * the very regression the `assignedElements()` branch was added to prevent,
  * reintroduced by timing rather than by logic. Measured with a real Tab key: 4
  * stops across a 3-widget fixture. So the caller re-runs this on `slotchange`;

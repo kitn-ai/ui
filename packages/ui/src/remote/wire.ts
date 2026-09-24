@@ -33,7 +33,7 @@ export function createPacker(version: string, nonce: string) {
 }
 
 /** Structural + direction guard. Host calls with 'up', runtime with 'down'.
- *  STRUCTURAL only — nonce/version equality + schema validation happen after. */
+ *  STRUCTURAL only; nonce/version equality + schema validation happen after. */
 export function isCardWireFrame(data: unknown, expectedDir: 'up' | 'down'): data is WireFrame {
   if (typeof data !== 'object' || data === null) return false;
   const d = data as Record<string, unknown>;

@@ -11,11 +11,11 @@ import type { CardEnvelope } from './card-contract';
 export interface LinkPreviewData {
   /** Canonical destination; opened via the contract `open` verb. */
   url: string;
-  /** og:title — falls back to the domain. */
+  /** og:title; falls back to the domain. */
   title?: string;
-  /** og:description — clamped to 3 lines. */
+  /** og:description, clamped to 3 lines. */
   description?: string;
-  /** og:image — degrades gracefully when missing/broken. */
+  /** og:image; degrades gracefully when missing or broken. */
   image?: string;
   /** Alt for the preview image (defaults to title / decorative). */
   imageAlt?: string;

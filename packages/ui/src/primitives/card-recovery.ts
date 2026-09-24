@@ -13,7 +13,7 @@
 import type { CardEnvelope, CardPolicy, CardResolution } from './card-contract';
 
 /** The minimal toast surface this helper needs. Inject a real adapter (e.g. one
- *  backed by `kai-toast-region`) — this module never imports the toast itself. */
+ *  backed by `kai-toast-region`); this module never imports the toast itself. */
 export interface RecoveryToast {
   show(opts: {
     message: string;
@@ -111,10 +111,10 @@ function resolutionOf(cards: CardEnvelope[], cardId: string): CardResolution | u
  * Build the `{ onDismiss, onReopen }` policy handlers for the card dismiss/recovery
  * flow over a host store (`get`/`set`). Both handlers are always returned.
  *
- * - `onDismiss(cardId)` — stamps `{ kind:'dismissed', at }` immutably and, when a
+ * - `onDismiss(cardId)`: stamps `{ kind:'dismissed', at }` immutably and, when a
  *   `toast` is injected, shows "Dismissed" with an Undo that restores the card's
  *   prior resolution (live again when there was none).
- * - `onReopen(cardId)` — clears the resolution (live) when `isReopenable`, else
+ * - `onReopen(cardId)`: clears the resolution (live) when `isReopenable`, else
  *   stamps `{ kind:'expired', at }`.
  */
 export function dismissRecovery(

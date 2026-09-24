@@ -1,14 +1,14 @@
 /**
  * Shared preview-wrapper accenting for the builder's STUB, light-DOM preview
- * shells (`Labs/Builder/<Template>` stories) — root-caused live (Round A,
+ * shells (`Labs/Builder/<Template>` stories), root-caused live (Round A,
  * owner report), bitten twice before landing here: the old `Labs/Apps`
  * Builder story's preview never actually recolored, and the same bug then
  * reproduced in `Labs/Builder/Support widget`'s FAB.
  *
  * WHY a nested wrapper setting `--kai-color-primary` alone does nothing:
- * `theme.css` declares the kit's internal token exactly once, at
- * `:root, :host` — `--color-primary: var(--kai-color-primary, <fallback>)`
- * — inside a `@theme` block. CSS custom-property indirection resolves at
+ * `theme.css` declares the kit's internal token exactly once, at `:root, :host`
+ * (`--color-primary: var(--kai-color-primary, <fallback>)`) inside a `@theme`
+ * block. CSS custom-property indirection resolves at
  * the element where the CONSUMING declaration lives, not at read time, so
  * `--color-primary`'s value is fixed by `--kai-color-primary`'s value AT
  * THAT `:root`/`:host` element and inherits down as an already-resolved
@@ -18,7 +18,7 @@
  * shadow root's OWN `:host` rule (the same theme.css, scoped) resolves
  * `--color-primary` fresh at the host, using the host's own
  * `--kai-color-primary` (codegen.ts sets it via
- * `ctx.element.style.setProperty('--kai-color-primary', ...)`) — because
+ * `ctx.element.style.setProperty('--kai-color-primary', ...)`), because
  * `:host` IS that element. Our light-DOM story preview has no such
  * `:host` boundary re-declaring the mapping, so it has to replicate the
  * mapping by hand: set BOTH the public token (`--kai-color-primary`, for
@@ -107,7 +107,7 @@ function resolveContrastForeground(accent: string): '#000000' | '#ffffff' | null
  * The inline style object a stub preview's wrapper needs so a construct's
  * `theme.accent` actually retints its descendants: both the public
  * (`--kai-color-primary`) and internal (`--color-primary`) tokens, plus
- * their paired foreground when the accent resolves to concrete RGB — see
+ * their paired foreground when the accent resolves to concrete RGB; see
  * the module doc comment above for why both are required. Returns `{}` for
  * no accent (the kit's own neutral default applies, same as omitting the
  * property entirely).

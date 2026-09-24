@@ -14,8 +14,7 @@ import { AlertTriangle, X } from 'lucide-solid';
  * the identical sink disagreeing about this was the defect.
  */
 export interface CardProps extends JSX.HTMLAttributes<HTMLDivElement> {
-  /** Heading rendered in the card chrome (the contract's CardEnvelope.title).
-   *  NB: NOT `title` — `title` is a reserved IDL attr (see define.tsx RESERVED). */
+  /** Heading rendered in the card chrome (the contract's `CardEnvelope.title`), not `title`, a reserved IDL attr (`define.tsx` RESERVED). */
   heading?: string;
   /** Optional supporting text under the heading. */
   description?: string;
@@ -33,9 +32,8 @@ export interface CardProps extends JSX.HTMLAttributes<HTMLDivElement> {
   /** Stable id for the description, for composing cards that point `aria-describedby` at
    *  it; auto-generated when omitted. */
   descriptionId?: string;
-  /** Render a dismiss (×) button that hides the card and calls `onDismiss`.
-   *  Opt-in, OFF by default — the contract cards never set it, so they are
-   *  unaffected. */
+  // The contract cards never set it, so they are unaffected.
+  /** Render a dismiss button that hides the card and calls `onDismiss`; off by default. */
   dismissible?: boolean;
   /** Called after the card is dismissed via its ×. */
   onDismiss?: () => void;
@@ -54,19 +52,19 @@ export interface CardProps extends JSX.HTMLAttributes<HTMLDivElement> {
 }
 
 /**
- * `Card` — the shared presentational chrome every native card composes from:
+ * `Card`, the shared presentational chrome every native card composes from:
  * an optional media region, a heading + description, a body (default slot), an
  * actions footer, and one consistent inline **error** state (the contract's
  * "never a broken/partial card" rule). It is intentionally chrome-only: it reads
- * no `CardContext` and emits no `CardEvent` — the cards that compose it (e.g.
+ * no `CardContext` and emits no `CardEvent`; the cards that compose it (e.g.
  * `kai-form`) own the contract interaction.
  *
  * The optional `dismissible` / `href` / `clickable` behaviors are all OFF by
  * default, so the contract cards (which set none of them) keep their original
  * presentational behavior unchanged.
  *
- * a11y: a `clickable` or `href` card MUST NOT also contain footer action buttons
- * — that nests interactive controls inside a button/link. Use `actions` OR
+ * a11y: a `clickable` or `href` card MUST NOT also contain footer action buttons,
+ * which nests interactive controls inside a button/link. Use `actions` OR
  * make the card clickable, never both.
  */
 export function Card(props: CardProps): JSX.Element {

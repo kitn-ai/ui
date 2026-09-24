@@ -45,7 +45,7 @@ const ITEM_SELECTOR = '[role="menuitem"]:not([aria-disabled="true"]), [role="men
  * returns zero items for any facade whose rows are SLOTTED (`<kai-dropdown>`) and
  * ArrowUp/Down, Home/End and typeahead all reach nothing. The items-tree facades
  * (`kai-menu`, `kai-model-switcher`, `kai-scope-picker`) render their rows INTO the
- * shadow tree, so both spellings agree for them — which is exactly why this went
+ * shadow tree, so both spellings agree for them, which is exactly why this went
  * unnoticed until a slotted menu body existed.
  *
  * Same class as `hasFocusableChild` in ./hover-card.tsx, which asks the boolean
@@ -332,7 +332,7 @@ export function DropdownItem(props: DropdownItemProps) {
 
 /**
  * A thin, non-interactive divider between groups of items.
- * a11y: `role="separator"` — exposed to AT as a group boundary; not in the
+ * a11y: `role="separator"`, exposed to AT as a group boundary; not in the
  * roving-focus tab order (the `[role="menuitem"]` query skips it).
  */
 export function DropdownSeparator(props: DropdownSeparatorProps) {
@@ -341,7 +341,7 @@ export function DropdownSeparator(props: DropdownSeparatorProps) {
 
 /**
  * A non-interactive section header.
- * a11y: a plain muted label — NOT a menuitem and NOT focusable, so roving focus
+ * a11y: a plain muted label: NOT a menuitem and NOT focusable, so roving focus
  * skips it; it labels the items that follow visually only (`select-none`).
  */
 export function DropdownLabel(props: DropdownLabelProps) {
@@ -356,8 +356,8 @@ export function DropdownLabel(props: DropdownLabelProps) {
  * A togglable menu item.
  * a11y: `role="menuitemcheckbox"` + `aria-checked`. Activating fires `onSelect`
  * but KEEPS THE MENU OPEN (the consumer flips `checked`). The Check sits at the
- * TRAILING edge (toggle-style) so the item's leading content — an icon when
- * present — aligns with the plain items above it instead of being pushed in by a
+ * TRAILING edge (toggle-style) so the item's leading content, an icon when
+ * present, aligns with the plain items above it instead of being pushed in by a
  * reserved leading check column.
  */
 export function DropdownCheckboxItem(props: DropdownCheckboxItemProps) {
@@ -391,7 +391,7 @@ export function DropdownCheckboxItem(props: DropdownCheckboxItemProps) {
 
 /**
  * A single-select (radio) menu item.
- * a11y: `role="menuitemradio"` + `aria-checked`. Behaves like the checkbox item —
+ * a11y: `role="menuitemradio"` + `aria-checked`. Behaves like the checkbox item:
  * activating fires `onSelect` but KEEPS THE MENU OPEN (the consumer moves the
  * selection within the group). The Check sits at the TRAILING edge so leading
  * content aligns with plain items. Group membership is the consumer's concern;
@@ -541,7 +541,7 @@ export function DropdownSubTrigger(props: DropdownSubTriggerProps) {
 }
 
 /**
- * The submenu surface — same portal/positioning/roving-focus core as
+ * The submenu surface, same portal/positioning/roving-focus core as
  * DropdownContent, anchored `right-start` off its trigger.
  * a11y: ArrowLeft and Escape close the sub and RETURN FOCUS to the trigger;
  * ArrowUp/Down/Home/End rove within; typeahead included (matches DropdownContent).

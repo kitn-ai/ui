@@ -63,7 +63,7 @@ export interface ComposerChange {
   text: string;
   entities: EntityRef[];
 }
-/** Imperative handle exposed via `controllerRef` — surfaces the composer's latent
+/** Imperative handle exposed via `controllerRef`: surfaces the composer's latent
  *  capabilities (focus/blur the editable, clear the doc, submit, insert a pill) so
  *  the `<kai-composer>` facade can forward them as instance methods. */
 export interface ComposerController {
@@ -86,8 +86,7 @@ export interface ComposerProps {
   // the built-in agent/plugin glyphs.
   /** Default icon per entity kind (kind to image URL or data-URI). */
   kindIcons?: Record<string, string>;
-  /** Render WITHOUT the rounded frame/background/padding — just the editable +
-   *  placeholder + menu. For embedding inside another frame (e.g. PromptInput). */
+  /** Render without the rounded frame, background or padding, for embedding inside another frame. */
   bare?: boolean;
   /** Override the editable element's classes (used in `bare` mode to match an
    *  existing input's exact look). The placeholder mirrors these for alignment. */
@@ -117,8 +116,8 @@ export interface ComposerProps {
 
 /**
  * Shadow-DOM-aware selection. `document.getSelection()` does NOT expose a
- * selection that lives inside an open ShadowRoot in Chromium — it retargets the
- * range to the host — so caret math and node insertion would silently operate
+ * selection that lives inside an open ShadowRoot in Chromium (it retargets the
+ * range to the host), so caret math and node insertion would silently operate
  * OUTSIDE the editable (pills land in the light DOM, the menu never closes).
  * `ShadowRoot.getSelection()` (Chrome) returns the real in-shadow selection. Fall
  * back to the document selection for the light DOM / jsdom (no shadow root).

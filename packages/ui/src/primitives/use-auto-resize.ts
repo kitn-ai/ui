@@ -4,20 +4,17 @@ interface UseAutoResizeOptions {
   /** Cap the grown height; past it the box stops growing and scrolls
    *  internally instead. */
   maxHeight?: number;
-  /**
-   * Floor the resized height at this many pixels, even when the field is
-   * empty. Omit to fall back to ONE visible line, derived from the
-   * textarea's own computed line-height plus its vertical padding/border
-   * (`oneLineHeight` below) — an empty autosizing field should never
-   * collapse to a sliver shorter than a line of text, which is what
-   * `scrollHeight` on an empty `<textarea>` can report.
-   */
+  // Omit to fall back to ONE visible line, derived from the textarea's own computed line-height plus
+  // its vertical padding/border (`oneLineHeight` below): an empty autosizing field should never
+  // collapse to a sliver shorter than a line of text, which is what `scrollHeight` on an empty
+  // `<textarea>` can report.
+  /** Floor the resized height at this many pixels, even when the field is empty; defaults to one line's rendered height. */
   minHeight?: number;
 }
 
 /**
  * One visible line's rendered height, in px: computed `line-height` (falling
- * back to a `normal`-keyword-safe `1.2× font-size` — `getComputedStyle`
+ * back to a `normal`-keyword-safe `1.2× font-size`: `getComputedStyle`
  * resolves `line-height: normal` to the literal string `"normal"`, which
  * `parseFloat` reads as `NaN`, not a length) plus the element's own vertical
  * padding and border. The border-box height this hook writes (`scrollHeight`,

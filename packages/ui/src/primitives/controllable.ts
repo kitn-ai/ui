@@ -6,8 +6,8 @@ import { createSignal, type Accessor } from 'solid-js';
  * `controlled` is an accessor for the controlling prop: when it returns a value,
  * that value wins (controlled mode); when it returns `undefined`, the component
  * manages its own state seeded from `initial` (uncontrolled mode). The returned
- * setter always writes the internal value — harmless (masked) while controlled,
- * authoritative while uncontrolled — so a single call site works in both modes.
+ * setter always writes the internal value: harmless (masked) while controlled,
+ * authoritative while uncontrolled, so a single call site works in both modes.
  *
  * Mirrors `props.value ?? internal()` used elsewhere in the kit, without effects.
  */

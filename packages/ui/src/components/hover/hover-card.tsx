@@ -107,8 +107,8 @@ export interface HoverCardTriggerProps {
  * plainly intended, but the span never set `tabindex`, so the Tab key could not
  * land on it and neither handler could fire on a keyboard. It went unnoticed for
  * as long as it did because `focusin` BUBBLES and every consumer at the time put
- * something focusable inside the trigger — `source.tsx` an `<a>`, `context.tsx`
- * a `<Button>` — so the card opened via the child and the span's own inertness
+ * something focusable inside the trigger (`source.tsx` an `<a>`, `context.tsx`
+ * a `<Button>`), so the card opened via the child and the span's own inertness
  * never showed. The first trigger with inert children (an attachment tile: a
  * div, an img, an svg) had no tab stop anywhere in it.
  *
@@ -123,15 +123,15 @@ export interface HoverCardTriggerProps {
  * component trees; inside these shadow roots that path runs for a PROGRAMMATIC
  * `.focus()` and, in the deeper trees, not for a real Tab. Measured: tabbing to
  * an attachment tile in a mounted `<kai-chat>` left the card shut and
- * `aria-describedby` null while `.focus()` on the same element opened it — so
+ * `aria-describedby` null while `.focus()` on the same element opened it, so
  * every keyboard user got a tab stop that announced nothing and showed nothing,
  * which is worse than no stop at all. `addEventListener` in the ref does not
  * care how focus arrived. Anything in this kit relying on delegated focus
  * events inside a shadow root is suspect for the same reason.
  *
  * `aria-describedby` is what makes the stop worth arriving at: the card is
- * DESCRIPTIVE, not an action, so the trigger gets no `role="button"` — that
- * would promise an activation that does not exist — and instead points at the
+ * DESCRIPTIVE, not an action, so the trigger gets no `role="button"` (that
+ * would promise an activation that does not exist) and instead points at the
  * content it reveals so a screen reader reads it out.
  */
 export function HoverCardTrigger(props: HoverCardTriggerProps) {

@@ -9,11 +9,11 @@ import { MessageCircle, X } from 'lucide-solid';
 export type DockPosition = 'bottom-end' | 'bottom-start' | 'top-end' | 'top-start';
 
 /** Where focus goes when the panel opens.
- *  - `content` (default) — `focus()` the first element assigned to the panel, falling
+ *  - `content` (default): `focus()` the first element assigned to the panel, falling
  *    back to the panel itself when that element cannot take focus. Content-AGNOSTIC:
  *    the dock never learns what it is holding.
- *  - `panel` — focus the `tabindex="-1"` panel container (what `kai-dialog` does).
- *  - `none` — never move focus. */
+ *  - `panel`: focus the `tabindex="-1"` panel container (what `kai-dialog` does).
+ *  - `none`: never move focus. */
 export type DockFocusOnOpen = 'content' | 'panel' | 'none';
 
 /** Imperative open controller, handed to a parent (the `kai-dock` facade) via
@@ -69,7 +69,7 @@ export interface DockProps {
 }
 
 /** The built-in closed glyph. Exported so the facade can use it as its `launcher`
- *  slot's FALLBACK content — one definition, two users, rather than a second copy
+ *  slot's FALLBACK content, one definition, two users, rather than a second copy
  *  of the same icon choice living in the element layer. */
 export function DockLauncherGlyph(): JSX.Element {
   return <MessageCircle size={24} />;
@@ -89,17 +89,17 @@ export interface DockLauncherImageProps {
 
 /**
  * A branded launcher icon with a built-in fallback to {@link DockLauncherGlyph}
- * on load failure — a dead link, or a placeholder URL nobody swapped for a
+ * on load failure: a dead link, or a placeholder URL nobody swapped for a
  * real asset yet (exactly what shipped in `kai dev`'s own `owner-widget`
  * fixture: `launcherIcon: "https://example.com/logo.png"`, which never
  * resolves, so the FAB rendered a permanently broken image). Decides loudly
- * with one `console.warn` naming the failing URL, then swaps — never a
+ * with one `console.warn` naming the failing URL, then swaps, never a
  * silent broken-image icon sitting in the corner of someone's page.
  *
  * Lives here, not on {@link Dock} itself: `Dock`'s `launcher` prop is
  * deliberately ANY content (an emoji, a "Support" text pill, this image,
  * whatever a consumer slots in) and the dock never inspects what it's
- * holding — teaching it to specifically understand "this might be an
+ * holding: teaching it to specifically understand "this might be an
  * `<img>` that can 404" would be the one prop where that boundary breaks.
  * This is a plain sibling component a `launcher` value can be built FROM,
  * same relationship `DockLauncherGlyph`/`DockCloseGlyph` already have to
@@ -129,7 +129,7 @@ export function DockLauncherImage(props: DockLauncherImageProps) {
  *
  * IN A `<style>` RATHER THAN INLINE, and that is a decision. `kai-prompt-dock` puts
  * its tokenized chrome in an inline `style={{}}`, which resolves `var()` fallbacks
- * and lets an outside override win — but an inline declaration also beats every rule
+ * and lets an outside override win, but an inline declaration also beats every rule
  * in the cascade, and this element ships TWO rules that have to be able to win: the
  * narrow-viewport full-bleed default and the reduced-motion rule. Both are media
  * queries, which cannot be expressed inline at all. So the geometry lives here and
@@ -424,11 +424,11 @@ function isWithin(root: Node, node: Node | null): boolean {
 }
 
 /**
- * Dock — a corner-docked launcher button with a panel that opens above it.
+ * Dock: a corner-docked launcher button with a panel that opens above it.
  *
  * The affordance behind a support widget: a circular button pinned to a corner of the
  * viewport, and a floating panel holding whatever you slot into it. The panel is
- * content-agnostic on purpose — a chat, a form, your own component — and the dock
+ * content-agnostic on purpose, a chat or a form or your own component, and the dock
  * never reads, types or reaches into it.
  *
  * WHAT IT OWNS (all of it non-configurable, because these are facts about the medium
@@ -436,13 +436,13 @@ function isWithin(root: Node, node: Node | null): boolean {
  *
  * - **Hide semantics.** Closed means `visibility: hidden` + `opacity: 0` + `inert`,
  *   and the panel is NEVER unmounted. `display: none` would leave the panel with no
- *   layout box while closed, so anything inside that measures itself — a thread
- *   scroller, a `ResizeObserver` — measures zero and re-measures on every open. The
+ *   layout box while closed, so anything inside that measures itself (a thread
+ *   scroller or a `ResizeObserver`) measures zero and re-measures on every open. The
  *   cost of keeping the box is that a stream keeps rendering into a closed panel,
  *   which is precisely what makes an unread dot honest.
  * - **Focus.** On open, focus moves per `focusOnOpen`; on close it returns to the
  *   launcher, always. `inert` is cleared and visibility restored BEFORE `focus()` runs
- *   — a `focus()` into an inert or hidden subtree is silently dropped, no error — via
+ *   (a `focus()` into an inert or hidden subtree is silently dropped, no error), via
  *   a `queueMicrotask`, the same shape `components/dialog/dialog.tsx` uses. Mount moves no focus.
  * - **Escape.** Closes only while the dock CONTAINS focus, and never stops the event.
  *   A background widget that ate every Escape on the page would break the host page's
@@ -450,17 +450,17 @@ function isWithin(root: Node, node: Node | null): boolean {
  * - **No focus trap**, deliberately, unlike `kai-dialog`. The page staying usable is
  *   the whole point of "docked", which is also why the panel is `aria-modal="false"`.
  * - **Mobile close route.** At <=480px the panel goes full-bleed and the launcher
- *   hides while it is open — a floating launcher over a full-bleed panel is not an
+ *   hides while it is open: a floating launcher over a full-bleed panel is not an
  *   obvious close affordance. The panel gets its own `[part="close"]` X, top-right,
  *   CSS-gated by the SAME media query and `[data-expanded]`, so it needs no viewport
  *   JS. Desktop is unaffected: the launcher keeps toggling and no X ever renders.
  *   This is the FALLBACK route, for panel content with no header of its own to hold
- *   a close control — content that does (a `ChatThread` using `headerEndContent`,
+ *   a close control: content that does (a `ChatThread` using `headerEndContent`,
  *   say) passes `hideClose` to drop this X instead of stacking a second one over
  *   its own header row.
  *
  * WHAT IT REFUSES: it never aborts a request, never persists its own open state, never
- * decides what "unread" means, and never clears `unread` on open — writing over a
+ * decides what "unread" means, and never clears `unread` on open: writing over a
  * consumer's prop is the trap `kai-chat.loading` fell into. Those are the app's calls;
  * `open` + `onOpenChange` is the seam.
  *

@@ -27,8 +27,8 @@
 /** A single segment of `<kai-segmented>`.
  *
  *  Distinct from the Solid `SegmentedOption`, whose `icon` is a JSX node: on the
- *  element, `icon` is an icon-NAME string (web-component-friendly) — a curated
- *  name (e.g. `"code"`), a URL/data-URI, or plain text — resolved to a glyph via
+ *  element, `icon` is an icon-NAME string (web-component-friendly): a curated
+ *  name (e.g. `"code"`), a URL/data-URI, or plain text, resolved to a glyph via
  *  the kit's icon renderer (the same path `kai-button`'s `icon` uses). */
 export interface KaiSegmentedOption {
   value: string;
@@ -111,15 +111,15 @@ export interface KaiMenuItem {
   label?: string;
   /** Named icon (e.g. "paperclip"), image URL / data-URI, or plain text. */
   icon?: string;
-  /** e.g. '⌘U' — shown right-aligned, muted. */
+  /** The shortcut to display, e.g. `'⌘U'`; shown right-aligned and muted. */
   shortcut?: string;
   /** Presence ⇒ a checkbox item (role=menuitemcheckbox). With `radioGroup` set,
    *  marks the SELECTED radio item in that group instead. */
   checked?: boolean;
-  /** Membership in a single-select group (role=menuitemradio). Items sharing a
-   *  `radioGroup` are mutually exclusive — the one with `checked: true` shows the
-   *  checkmark; selecting one emits `{ id, radioGroup }` so the consumer moves
-   *  the checkmark (the consumer owns state, like checkbox items). */
+  // The item with `checked: true` shows the checkmark; selecting one emits
+  // `{ id, radioGroup }`, so the consumer moves it (the consumer owns state, like
+  // checkbox items).
+  /** Membership in a single-select group (role=menuitemradio); items sharing a value are mutually exclusive. */
   radioGroup?: string;
   disabled?: boolean;
   /** A divider (ignores other fields). */
@@ -133,7 +133,7 @@ export interface KaiMenuItem {
 /**
  * A single command/mention item for `<kai-command>`.
  *
- * Set `items` as a JS property (array ref) — not an HTML attribute.
+ * Set `items` as a JS property (array ref), not an HTML attribute.
  */
 export interface KaiCommandItem {
   /** Unique identifier emitted in `kai-select`. */

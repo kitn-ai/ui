@@ -1,4 +1,4 @@
-/** A message attachment descriptor. Pure type — kept JSX-free for the
+/** A message attachment descriptor. Pure type, kept JSX-free for the
  *  framework-neutral consumers (state core, React hook typecheck). */
 export interface AttachmentData {
   id: string;
@@ -23,7 +23,7 @@ export interface AttachmentData {
  * be one in disguise (`image | video | audio | document`, decided by a prefix
  * switch in `attachments.tsx`), and it disagreed with `wire/media-types.ts` in
  * both directions: SVG and MP4 drew a convincing preview that then threw at
- * encode time, while PDF and text — the formats the wire handles best — drew
+ * encode time, while PDF and text, the formats the wire handles best, drew
  * the same anonymous icon as a `.zip`. `getMediaCategory` now asks the media
  * policy and returns what it says, so there is one declaration and this is a
  * projection of it.
@@ -43,12 +43,12 @@ export type AttachmentMediaCategory =
   | 'image'
   /** A PDF. Named for the Anthropic `document` block it becomes. */
   | 'document'
-  /** Text content — `text/*`, JSON, XML, YAML. Rides as text on both wires. */
+  /** Text content, `text/*`, JSON, XML, YAML. Rides as text on both wires. */
   | 'text'
   /** A RAG citation chip, not something the user staged. Never encoded. */
   | 'source'
   /**
-   * No wire format this kit ships can carry this type — SVG, BMP, video, audio,
+   * No wire format this kit ships can carry this type: SVG, BMP, video, audio,
    * archives. That is a fact about the kit's encoders, knowable at render time
    * and true of every provider, which is why it is safe to show the user.
    *

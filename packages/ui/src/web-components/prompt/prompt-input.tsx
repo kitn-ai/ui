@@ -24,8 +24,9 @@ interface Props extends Record<string, unknown> {
   /** Starter prompts shown above the input. Clicking one follows
    *  `suggestionMode`. Set as a JS property. */
   suggestions?: string[];
-  /** What clicking a suggestion does: `'submit'` (default) sends it immediately
-   *  as if typed and submitted; `'fill'` just places it in the input. */
+  // `'submit'` sends it immediately, as if typed and submitted; `'fill'` only places it
+  // in the input.
+  /** What clicking a suggestion does. Defaults to `'submit'`. */
   suggestionMode?: 'submit' | 'fill';
   /** Show a web-search (Globe) button in the left toolbar; clicking it fires a
    *  `kai-web-search` event. Attribute: `web-search`. */
@@ -39,7 +40,8 @@ interface Props extends Record<string, unknown> {
   // To hide it entirely (Enter-only), it's pure CSS: `::part(send){display:none}`, no prop
   // needed. Restyle via `::part(send)`. The Stop button (`stoppable` + `loading`) is
   // unaffected.
-  /** Send-button visibility: `always` (default) or `auto` (only when there is text/attachments). */
+  // `'auto'` shows it only when there is text or attachments.
+  /** Send-button visibility. Defaults to `'always'`. */
   submit?: 'always' | 'auto';
   // Use this when a `+` menu in `toolbar-start` already exposes "Add files", to avoid a
   // duplicate control.

@@ -11,7 +11,7 @@ export function isValidHex(text: string): boolean {
 }
 
 /** Expand a valid 3- or 6-digit hex to the strict 6-digit lowercase form
- *  `<input type="color">` requires for its `value` — the native control
+ *  `<input type="color">` requires for its `value`: the native control
  *  silently ignores (resets to black) anything else, so this is what keeps
  *  the swatch/picker in sync with a shorthand or differently-cased hex the
  *  text field accepts. Falls back to `#000000` (the platform's own default)
@@ -55,13 +55,13 @@ export interface ColorFieldProps {
  * directions.
  *
  * The swatch is a `<label>` wrapping a real `<input type="color">` that is
- * `sr-only` (present, focusable, and labeled for assistive tech — never
- * `display:none` or `tabindex="-1"`) rather than rendered — the platform
+ * `sr-only` (present, focusable, and labeled for assistive tech, never
+ * `display:none` or `tabindex="-1"`) rather than rendered; the platform
  * color dialog is what does the actual picking; this component never draws
  * its own color rectangle. Clicking anywhere on the swatch forwards to the
  * native input via ordinary label/input association; keyboard focus lands on
  * that input, and the VISIBLE focus ring is painted on the wrapping label via
- * `has-[:focus-visible]:` — the same "real hidden control, ring on the
+ * `has-[:focus-visible]:`, the same "real hidden control, ring on the
  * decorative wrapper" idiom `tasks-card.tsx` and `choice-card.tsx` already
  * use for their checkbox/radio rows. Enter/Space opening the native color
  * dialog on a focused `<input type="color">` is platform behavior, not

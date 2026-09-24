@@ -49,7 +49,7 @@ export interface NoticeProps {
 /**
  * A self-contained inline notice / alert: a leading severity icon, a message, an
  * optional trailing action, and an optional dismiss. Carries the right a11y role
- * (`alert` for errors, `status` otherwise). Placement is the consumer's — this is
+ * (`alert` for errors, `status` otherwise). Placement is the consumer's call: this is
  * just the notice box.
  */
 export function Notice(props: NoticeProps) {

@@ -147,7 +147,7 @@ export function confirmReason(data: TasksCardData, count: number): string | unde
 // The <TasksCard> component.
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** Imperative handle exposed via `controllerRef` — surfaces the tasks card's latent
+/** Imperative handle exposed via `controllerRef`, surfacing the tasks card's latent
  *  selection model (set the checked ids, toggle one, confirm, focus the group,
  *  dismiss/reopen) so the `<kai-tasks>` facade can forward them as instance methods. */
 export interface TasksCardController {
@@ -155,7 +155,7 @@ export interface TasksCardController {
   select(taskIds?: string[]): void;
   /** Toggle one task by id, honoring the max gate. */
   toggle(taskId: string, checked?: boolean): void;
-  /** Confirm the current selection (only when allowed) — emits `submit` + resolves. */
+  /** Confirm the current selection when allowed; emits `submit` and resolves. */
   send(): void;
   /** Focus the task group (select-all checkbox if shown, else the first row). */
   focus(options?: FocusOptions): void;
@@ -180,7 +180,7 @@ export interface TasksCardProps {
   class?: string;
   /** When set, render the chromed read-only summary instead of the interactive controls. */
   resolution?: CardResolution;
-  /** Controlled selection (task ids) — when set, this wins over internal state. */
+  /** Controlled selection (task ids); when set, it wins over internal state. */
   value?: string[];
   /** Uncontrolled initial selection (task ids), overlaying per-task `checked`. */
   defaultValue?: string[];
@@ -197,7 +197,7 @@ export interface TasksCardProps {
 const DEFAULT_DATA: TasksCardData = { tasks: [] };
 
 /**
- * `TasksCard` — a selectable task/plan list (checkbox rows + optional select-all
+ * `TasksCard`, a selectable task/plan list (checkbox rows + optional select-all
  * + a confirm button) inside `Card` chrome. Row toggling and select-all are local
  * UI state; only the final confirm emits the Card contract's `submit` verb
  * (`{ kind:'submit', cardId, data:{ selected } }`) with the checked ids in

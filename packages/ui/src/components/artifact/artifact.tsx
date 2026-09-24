@@ -36,7 +36,7 @@ export type ArtifactTab = 'preview' | 'code';
 /** A file the artifact can preview + show source for. */
 export type ArtifactFile = FileTreeFile;
 
-/** Imperative handle exposed via `controllerRef` — surfaces the artifact's latent
+/** Imperative handle exposed via `controllerRef`: surfaces the artifact's latent
  *  toolbar capabilities (history back/forward/reload/home, programmatic navigate,
  *  file selection, open-in-new-tab, maximize/restore) so the `<kai-artifact>`
  *  facade can forward them as instance methods. Each delegates to the SAME internal
@@ -67,8 +67,7 @@ export interface ArtifactProps extends Omit<JSX.HTMLAttributes<HTMLDivElement>, 
   src?: string;
   /** Files for the Code tab's tree (+ each file's preview `url`). */
   files?: ArtifactFile[];
-  /** Controlled active tab — when set, the artifact follows it (re-asserted on
-   *  every change). When undefined the tab is uncontrolled (see `defaultTab`). */
+  /** Controlled active tab; when undefined the tab is uncontrolled (see `defaultTab`). */
   tab?: ArtifactTab;
   /** Uncontrolled INITIAL tab (used only when `tab` is undefined). The user can
    *  then freely switch tabs; defaults to `preview`. */
@@ -159,7 +158,7 @@ export function isPdfUrl(url: string, files: ArtifactFile[]): boolean {
 }
 
 /**
- * `Artifact` — a framed, switchable generated-artifact viewer. A functional nav
+ * `Artifact`: a framed, switchable generated-artifact viewer. A functional nav
  * toolbar (back · forward · reload · home + editable path field + Preview|Code
  * toggle) over a sandboxed `<iframe>` (Preview) or a file-tree + `<kai-code-block>`
  * (Code). The component self-navigates the iframe and emits `kai-navigate` /
@@ -757,7 +756,7 @@ function ArtifactCode(props: CodeProps): JSX.Element {
             when={props.hasSource()}
             fallback={
               <div class="flex h-full items-center justify-center p-6 text-sm text-muted-foreground">
-                No source — this file ({props.activeFileObj()!.type ?? 'binary'}) has no code view.
+                No source. This file ({props.activeFileObj()!.type ?? 'binary'}) has no code view.
               </div>
             }
           >

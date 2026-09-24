@@ -2,8 +2,9 @@ import { Notice, noticeIconNode } from '../../components/notice/notice';
 import { defineWebComponent } from '../define/define';
 
 interface Props extends Record<string, unknown> {
-  /** `neutral` (default) · `info` · `warning` · `error` · `success`. Drives the
-   *  leading icon's color and the a11y role (`alert` for errors, else `status`). */
+  // The leading icon follows the severity; the a11y role is `alert` for errors and
+  // `status` otherwise.
+  /** Severity. Defaults to `'neutral'`. */
   severity?: 'neutral' | 'info' | 'warning' | 'error' | 'success';
   /** Leading icon: omit for the severity default, `"none"` to hide it, or a named
    *  icon to override. */

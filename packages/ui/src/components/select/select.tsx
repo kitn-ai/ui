@@ -46,7 +46,7 @@ export interface SelectProps<T = string>
  * OS's own accessibility tree. This kit's control audit found every one of its
  * accessibility defects in a control that had replaced a native element.
  *
- * The trade is that the *dropdown list itself* stays OS chrome — it renders outside the
+ * The trade is that the *dropdown list itself* stays OS chrome: it renders outside the
  * page and no stylesheet reaches it. What the kit can do is make it follow the kit's
  * light/dark mode rather than the OS's, which `color-scheme` on the element host
  * already does (`src/web-components/styles.css`). Styling the closed control and leaving the

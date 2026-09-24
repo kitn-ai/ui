@@ -8,13 +8,13 @@ export interface UseTextStreamOptions {
   segmentDelay?: number;
 }
 
-/** Default fade-in duration for a given speed (ms) — shared with ResponseStream. */
+/** Default fade-in duration for a given speed (ms), shared with ResponseStream. */
 export function defaultFadeDuration(speed: number): number {
   const s = Math.min(100, Math.max(1, speed));
   return Math.round(1000 / Math.sqrt(s));
 }
 
-/** Default per-segment stagger for a given speed (ms) — shared with ResponseStream. */
+/** Default per-segment stagger for a given speed (ms), shared with ResponseStream. */
 export function defaultSegmentDelay(speed: number): number {
   const s = Math.min(100, Math.max(1, speed));
   return Math.max(1, Math.round(100 / Math.sqrt(s)));

@@ -2,8 +2,7 @@ import { Badge } from '../../components/badge/badge';
 import { defineWebComponent } from '../define/define';
 
 interface Props extends Record<string, unknown> {
-  /** `default` (muted pill) · `count` (compact number badge) · `citation`
-   *  (filled primary, for inline citation markers). Defaults to `default`. */
+  /** Badge style; `default` is the muted pill. */
   variant?: 'default' | 'count' | 'citation';
 }
 

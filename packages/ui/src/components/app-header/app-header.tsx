@@ -89,7 +89,7 @@ import { Avatar } from '../avatar/avatar';
 import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem, DropdownSeparator } from '../dropdown/dropdown';
 import type { ButtonVariantName } from '../button/button-variant-names';
 
-/** One header action button. `variant` is the kit Button's OWN variant name —
+/** One header action button. `variant` is the kit Button's OWN variant name:
  *  the construct schema's `header.actions[].variant` enum is built from the
  *  same `BUTTON_VARIANT_NAMES` list, so there is no second vocabulary here to
  *  keep in step. */
@@ -153,7 +153,7 @@ export function AppHeader(props: AppHeaderProps): JSX.Element {
   const userLabel = (): string => {
     const user = props.user;
     if (!user) return 'Account menu';
-    return `${user.name}${user.plan ? ` — ${user.plan}` : ''} account menu`;
+    return `${user.name}${user.plan ? `, ${user.plan}` : ''} account menu`;
   };
 
   return (

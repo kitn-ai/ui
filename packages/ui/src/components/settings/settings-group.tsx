@@ -18,7 +18,7 @@ export interface SettingsGroupProps {
  * Host-agnostic chrome: the SAME group drops into a modal or a full settings page;
  * only the content (the rows) changes per app.
  *
- * The card and its dividers ARE `RowGroup` — one implementation of that frame for
+ * The card and its dividers ARE `RowGroup`: one implementation of that frame for
  * the whole kit, rather than a second copy here. The `body` part name is kept
  * (a settings group documents `header`/`body`, and consumers theme through it), so
  * the frame's own `group` part is replaced rather than added to.
@@ -61,7 +61,7 @@ export interface SettingItemProps {
  * be the CHILD that paints the line: the group cannot reach inside a shadow-root
  * child from the outside, and a direct declaration on the slotted host loses to a
  * document-level preflight. `SettingsGroup` stopped using `divide-y` for exactly
- * this reason — one divider implementation for the whole kit, and it is this one.
+ * this reason: one divider implementation for the whole kit, and it is this one.
  * See the row-list block in `../../kit-base.css`.
  */
 export function SettingItem(props: SettingItemProps): JSX.Element {

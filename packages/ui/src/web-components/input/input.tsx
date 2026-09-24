@@ -30,7 +30,7 @@ interface Props extends Record<string, unknown> {
   hint?: string;
   /** Error text; flips the field invalid (`aria-invalid` + destructive border). */
   error?: string;
-  /** Control density: `sm` or `md`. Defaults to `md`. */
+  /** Control density. Defaults to `md`. */
   size?: 'sm' | 'md';
   /** Disable interaction. */
   disabled?: boolean;
@@ -98,7 +98,7 @@ interface Events {
 
 /** Named slots whose occupancy gates an affix. An empty `<slot>` is always a
  *  truthy node, so the facade tracks which are actually filled and only hands a
- *  `<slot>` to the primitive when content is assigned — otherwise the primitive
+ *  `<slot>` to the primitive when content is assigned; otherwise the primitive
  *  would switch to the affix-row layout for an empty slot. */
 const SLOT_NAMES = ['leading', 'trailing'] as const;
 type SlotName = (typeof SLOT_NAMES)[number];

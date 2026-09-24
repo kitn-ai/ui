@@ -5,8 +5,8 @@ export type ScrollOrientation = 'vertical' | 'horizontal' | 'both';
 
 export interface ScrollAreaProps extends JSX.HTMLAttributes<HTMLDivElement> {
   children: JSX.Element;
-  /** Which axis scrolls. `vertical` (default) · `horizontal` · `both`. The cross
-   *  axis is clamped to `hidden` so content can't overflow it. */
+  /** Which axis scrolls. The cross axis is clamped to `hidden`, so content cannot
+   *  overflow it. Vertical by default. */
   orientation?: ScrollOrientation;
 }
 

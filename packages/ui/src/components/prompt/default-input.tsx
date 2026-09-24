@@ -38,8 +38,7 @@ export interface RejectedAttachment {
   // the `accept` filter left no text type for it to land in.
   /** The browser's media type for the file, or `''` when it could not tell. */
   mediaType: string;
-  /** `'filtered'` = this kit could have sent it, your `accept` excluded it.
-   *  `'unsupported'` = no API takes this as message content at all. */
+  /** Why the file was refused: excluded by your `accept` filter, or a type no API accepts as message content. */
   reason: 'filtered' | 'unsupported';
 }
 
@@ -100,7 +99,7 @@ export interface DefaultPromptInputProps {
  *
  *  NOT `URL.createObjectURL`. An object URL resolves only inside the tab that
  *  minted it, so it renders a perfect thumbnail here and is meaningless to
- *  anything downstream — `toOpenAIMessages` / `toAnthropicMessages` refuse it,
+ *  anything downstream: `toOpenAIMessages` / `toAnthropicMessages` refuse it,
  *  and before they refused it the attachment reached the model as nothing at
  *  all. A data URI previews identically and is the one form both providers
  *  actually take. */

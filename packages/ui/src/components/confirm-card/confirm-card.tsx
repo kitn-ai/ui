@@ -126,18 +126,17 @@ export function defaultActionId(actions: ConfirmAction[]): string | undefined {
 // The <ConfirmCard> component.
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** Imperative handle exposed via `controllerRef` — surfaces the confirm card's
+/** Imperative handle exposed via `controllerRef`, surfacing the confirm card's
  *  latent action/dismiss capabilities so the `<kai-confirm>` facade can forward
  *  them as instance methods (focus/confirm/dismiss/reopen). */
 export interface ConfirmController {
   /** Focus the default action button (or the first action if none default). */
   focus(options?: FocusOptions): void;
-  /** Activate an action by id (or the default action when omitted) — emits the
-   *  `action` verb + resolves single-shot. */
+  /** Activate an action by id, or the default action when omitted; emits the `action` verb and resolves. */
   confirm(actionId?: string): void;
-  /** Dismiss the card — emits `dismiss` + optimistically collapses to the stub. */
+  /** Dismiss the card: emits `dismiss` and optimistically collapses to the stub. */
   dismiss(): void;
-  /** Re-open a dismissed card from its stub — emits `reopen`. */
+  /** Re-open a dismissed card from its stub; emits `reopen`. */
   reopen(): void;
 }
 
@@ -164,7 +163,7 @@ export interface ConfirmCardProps {
 }
 
 /**
- * `ConfirmCard` — a named-intent approval card. Renders a title + body + a small
+ * `ConfirmCard`, a named-intent approval card. Renders a title + body + a small
  * set of action buttons inside `Card` chrome. Activating an action emits the Card
  * contract's `action` verb (`{ kind:'action', cardId, action, payload }`) and
  * resolves the card (other actions disabled, the chosen one marked) so the same

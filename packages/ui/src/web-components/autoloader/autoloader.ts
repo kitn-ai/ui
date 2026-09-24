@@ -56,7 +56,7 @@ function warnOnce(tag: string, err: unknown): void {
   // eslint-disable-next-line no-console
   console.warn(
     `[kai-autoloader] could not load "${tag}" (${msg}). The autoloader is a CDN / ` +
-      `static-file tool — load it from a <script type="module" src=".../@kitn.ai/ui/dist/web-components/autoloader.js">. ` +
+      `static-file tool: load it from a <script type="module" src=".../@kitn.ai/ui/dist/web-components/autoloader.js">. ` +
       `It is NOT importable through a bundler. In a bundled app, register the web components with per-web-component imports ` +
       `(import '@kitn.ai/ui/web-components/<el>') or the register-all bundle (import '@kitn.ai/ui/web-components'). To drive ` +
       `the autoloader from a bundler, host dist/web-components/ and call setAutoloaderBasePath('<url>/') before use.`,

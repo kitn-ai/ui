@@ -93,7 +93,7 @@ export function StubTableRow(): JSX.Element {
 
 /** A wordless skeleton code/text block: a stack of bars at staggered
  *  widths, monospace rhythm (shorter, denser bars) rather than prose
- *  rhythm — for the Workspace template's artifact/code pane. */
+ *  rhythm, for the Workspace template's artifact/code pane. */
 export function StubCodeBlock(props: { lines?: number; class?: string }): JSX.Element {
   const n = props.lines ?? 8;
   const widths = ['85%', '62%', '70%', '40%', '90%', '55%', '30%', '75%'];

@@ -207,7 +207,7 @@ export interface AttachmentsProps extends WebComponentProps {
   variant?: "grid" | "inline" | "list";
   /** Wrap each item in a hover card that previews its details. */
   hoverCard?: boolean;
-  /** How an image tile reveals its full size: `hover` (pointer-only hover card, default) or `lightbox` (modal on click). */
+  /** How an image tile reveals its full size: a pointer-only card by default, or a modal on click. */
   imagePreview?: "hover" | "lightbox";
   /** Show a remove button per item; clicking it fires a `kai-remove` event. */
   removable?: boolean;
@@ -277,7 +277,7 @@ export interface AvatarProps extends WebComponentProps {
   alt?: string;
   /** Short text shown when there's no image, usually initials (e.g. "JD", "AI"). */
   fallback?: string;
-  /** Size token: `sm` | `md` (default) | `lg`. */
+  /** Size token. */
   size?: "sm" | "md" | "lg";
 }
 
@@ -289,7 +289,7 @@ export const Avatar = /*#__PURE__*/ createWebComponent<AvatarProps, KaiAvatarEle
 );
 
 export interface BadgeProps extends WebComponentProps {
-  /** `default` (muted pill) · `count` (compact number badge) · `citation` (filled primary, for inline citation markers). Defaults to `default`. */
+  /** Badge style; `default` is the muted pill. */
   variant?: "default" | "count" | "citation";
 }
 
@@ -303,7 +303,7 @@ export const Badge = /*#__PURE__*/ createWebComponent<BadgeProps, KaiBadgeElemen
 export interface ButtonProps extends WebComponentProps {
   /** Visual style. Defaults to `default` (filled). */
   variant?: "default" | "subtle" | "ghost" | "outline" | "destructive";
-  /** Size token. `icon` / `icon-sm` are square (for icon-only buttons); `sm` / `md` / `lg` size text buttons. Defaults to `md`. */
+  /** Size token: the square glyph-only sizes, or the text-button sizes. Defaults to `md`. */
   size?: "sm" | "md" | "lg" | "icon" | "icon-sm";
   /** Leading icon: a named icon (e.g. `"mic"`, `"plus"`), an image URL/data-URI, or plain text. Renders before any slotted label. */
   icon?: string;
@@ -315,7 +315,7 @@ export interface ButtonProps extends WebComponentProps {
   disabled?: boolean;
   /** Stretch the button to the full width of its container (a block button), e.g. a card CTA or a stacked action. Attribute: `full`. */
   full?: boolean;
-  /** Justify the button's content: `start`, `center` (default), or `end`. Combine with `full` for a full-width, left-aligned button. */
+  /** Justify the button's content. Default is centered; combine with `full` for a full-width, left-aligned button. */
   align?: "start" | "center" | "end";
   /** Native button `type`. Defaults to `button` (so it never submits a form). */
   type?: "button" | "submit" | "reset";
@@ -413,7 +413,7 @@ export interface ChatProps extends WebComponentProps {
   loading?: boolean;
   /** Starter prompts shown above the input while the thread is empty. */
   suggestions?: string[];
-  /** What clicking a suggestion does: `'submit'` (default) sends it, `'fill'` only fills the input. */
+  /** What clicking a suggestion does. Default sends it immediately; `'fill'` places it in the input without sending. */
   suggestionMode?: "submit" | "fill";
   /** Keep suggestions visible after the conversation starts; they otherwise hide once `messages` is non-empty. Default false. */
   persistSuggestions?: boolean;
@@ -425,7 +425,7 @@ export interface ChatProps extends WebComponentProps {
   imagePreview?: "hover" | "lightbox";
   /** Renders plain `<pre>` blocks with no highlighter load when false. Default true. */
   codeHighlight?: boolean;
-  /** How reasoning parts render. `'compact'` streams only a shimmer and `'off'` renders none. Default `'full'`. */
+  /** How reasoning parts render. Default is the collapsible disclosure. */
   reasoning?: "full" | "compact" | "off";
   /** Seeds the reasoning disclosure open and keeps it tracking the stream. Default false; inert unless `reasoning` is `'full'`. */
   reasoningOpen?: boolean;
@@ -467,7 +467,7 @@ export interface ChatProps extends WebComponentProps {
   triggers?: { char: string; kind: string; items?: { id: string; label: string; icon?: string; description?: string; group?: string; kind?: string; promptText?: string; data?: Record<string, unknown> }[] }[];
   /** Default icon per entity kind (kind → image src) for pills/menu items. */
   kindIcons?: Record<string, string>;
-  /** Whether each message's action bar is always visible or revealed on hover of that row. Default `'always'`. */
+  /** Whether each message's action bar is visible at rest or revealed on pointer-over. Visible at rest by default. */
   actionsReveal?: "always" | "hover";
   /** Default action bar for user messages that have no `actions` of their own; a message's own `actions` replaces it. */
   userActions?: ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: string; tooltip?: string })[];
@@ -631,7 +631,7 @@ export interface CoachmarkProps extends WebComponentProps {
   badge?: string;
   /** Floating placement relative to the anchor (default `bottom`). */
   placement?: string;
-  /** Color tone: `primary` (default, theme accent), `info` (blue), `success` (green), `warning` (amber), or `error` (red), reusing the kit's tool hues. */
+  /** Color tone, reusing the kit's tool hues. Defaults to the theme accent. */
   tone?: "primary" | "info" | "success" | "warning" | "error";
   /** Render the arrow that points at the anchor (default `true`). Set `arrow="false"` for a plain bubble with no pointer. */
   arrow?: boolean;
@@ -945,7 +945,7 @@ export interface EditableLabelProps extends WebComponentProps {
   value?: string;
   /** Controlled edit state. `el.editing = true` opens the field; reflected to the `editing` attribute. */
   editing?: boolean;
-  /** How the read view enters edit mode: `dblclick` (default) or `click`. Reflects to `edit-trigger`; `edit()` and `editing` are unaffected. */
+  /** How the read view enters edit mode. Default is a double click; `edit()` and `editing` are unaffected. */
   editTrigger?: "dblclick" | "click";
   /** Placeholder shown while editing / when the value is empty. */
   placeholder?: string;
@@ -1115,7 +1115,7 @@ export const HoverCard = /*#__PURE__*/ createWebComponent<HoverCardProps, KaiHov
 export interface IconProps extends WebComponentProps {
   /** A curated icon name (e.g. `"mic"`, `"globe"`), an image URL/data-URI, or plain text. */
   name?: string;
-  /** Size token: `sm` | `md` (default) | `lg`. */
+  /** Size token. */
   size?: "sm" | "md" | "lg";
 }
 
@@ -1173,7 +1173,7 @@ export interface InputProps extends WebComponentProps {
   hint?: string;
   /** Error text; flips the field invalid (`aria-invalid` + destructive border). */
   error?: string;
-  /** Control density: `sm` or `md`. Defaults to `md`. */
+  /** Control density. Defaults to `md`. */
   size?: "sm" | "md";
   /** Disable interaction. */
   disabled?: boolean;
@@ -1219,7 +1219,7 @@ export interface KbdProps extends WebComponentProps {
   keys?: string;
   /** `mac` uses ⌘/⌥, `other` uses Ctrl. `auto` (default) sniffs the OS. */
   platform?: "auto" | "mac" | "other";
-  /** Cap size: `sm` or `md`. Defaults to `md`. */
+  /** Cap size. Defaults to `md`. */
   size?: "sm" | "md";
 }
 
@@ -1360,7 +1360,7 @@ export interface MessageProps extends WebComponentProps {
   codeTheme?: string;
   /** Disable syntax highlighting for code blocks (no Shiki loads). */
   codeHighlight?: boolean;
-  /** Whether the action bar is always visible (`'always'`, default) or only revealed on hover of the message row (`'hover'`). */
+  /** Whether the action bar stays visible or appears on pointer-over; visible by default. */
   actionsReveal?: "always" | "hover";
   /** Convenience avatar image URL (used when `message.avatar` is not set). */
   avatarSrc?: string;
@@ -1432,7 +1432,7 @@ export const Nav = /*#__PURE__*/ createWebComponent<NavProps, KaiNavElement>(
 );
 
 export interface NoticeProps extends WebComponentProps {
-  /** `neutral` (default) · `info` · `warning` · `error` · `success`. Drives the leading icon's color and the a11y role (`alert` for errors, else `status`). */
+  /** Severity. Defaults to `'neutral'`. */
   severity?: "neutral" | "info" | "warning" | "error" | "success";
   /** Leading icon: omit for the severity default, `"none"` to hide it, or a named icon to override. */
   icon?: string;
@@ -1611,7 +1611,7 @@ export interface PromptInputProps extends WebComponentProps {
   loading?: boolean;
   /** Starter prompts shown above the input. Clicking one follows `suggestionMode`. Set as a JS property. */
   suggestions?: string[];
-  /** What clicking a suggestion does: `'submit'` (default) sends it immediately as if typed and submitted; `'fill'` just places it in the input. */
+  /** What clicking a suggestion does. Defaults to `'submit'`. */
   suggestionMode?: "submit" | "fill";
   /** Show a web-search (Globe) button in the left toolbar; clicking it fires a `kai-web-search` event. Attribute: `web-search`. */
   webSearch?: boolean;
@@ -1619,7 +1619,7 @@ export interface PromptInputProps extends WebComponentProps {
   voice?: boolean;
   /** When set and `loading` is true, the send button is replaced by a Stop button (square icon, "Stop" aria-label). Clicking it fires `kai-stop`. */
   stoppable?: boolean;
-  /** Send-button visibility: `always` (default) or `auto` (only when there is text/attachments). */
+  /** Send-button visibility. Defaults to `'always'`. */
   submit?: "always" | "auto";
   /** Show the built-in paperclip attach button. Default `true`. */
   attach?: boolean;
@@ -1721,11 +1721,11 @@ export const Remote = /*#__PURE__*/ createWebComponent<RemoteProps, KaiRemoteEle
 );
 
 export interface ResizableProps extends WebComponentProps {
-  /** Layout axis: `horizontal` (row, default) or `vertical` (column). */
+  /** Whether the group lays out as a row or a column. */
   orientation?: "horizontal" | "vertical";
   /** Which item index is maximized (null = none). Declarative source of truth. */
   maximizedIndex?: number | null;
-  /** Divider affordance drawn inside each draggable handle's 8px grab zone: `line` (default), `grip`, or `none`. */
+  /** Divider affordance drawn inside each draggable handle's 8px grab zone. */
   handle?: "line" | "grip" | "none";
   /** Fired on drag-end / keyboard resize / visibility change. `detail.sizes` = panel sizes in percent. */
   onChange?: (event: CustomEvent<{ sizes: number[] }>) => void;
@@ -1881,7 +1881,7 @@ export const ScrollArea = /*#__PURE__*/ createWebComponent<ScrollAreaProps, KaiS
 export interface ScrollButtonProps extends WebComponentProps {
   /** CSS id of the scroll container to control. */
   for?: string;
-  /** Button visual variant: `'outline' | 'ghost' | 'default'`. Defaults to `'outline'`. */
+  /** Button visual variant. Defaults to `outline`. */
   variant?: "outline" | "ghost" | "default";
   /** Button size token. Defaults to `'icon'` (square). */
   size?: "sm" | "md" | "lg" | "icon" | "icon-sm";
@@ -1933,7 +1933,7 @@ export interface SegmentedProps extends WebComponentProps {
   options: { value: string; label: string; icon?: undefined | string }[];
   /** Controlled selected `value`, reflected to the `value` attribute. Choosing a segment updates it and fires `kai-change`. */
   value?: string;
-  /** Control density: `sm` or `md`. Defaults to `md`. */
+  /** Control density. Defaults to `md`. */
   size?: "sm" | "md";
   /** A segment was chosen. */
   onChange?: (event: CustomEvent<{ value: string }>) => void;
@@ -1977,7 +1977,7 @@ export const Select = /*#__PURE__*/ createWebComponent<SelectProps, KaiSelectEle
 );
 
 export interface SeparatorProps extends WebComponentProps {
-  /** `horizontal` (default, block + full-width) or `vertical` (a rule inside a flex/grid row, stretching to the row height). */
+  /** The separator's axis. Defaults to a full-width block; the cross-axis form suits a flex or grid row. */
   orientation?: "horizontal" | "vertical";
 }
 
@@ -2119,7 +2119,7 @@ export interface StatusProps extends WebComponentProps {
   pulse?: boolean;
   /** Accessible name; without it the dot is decorative. */
   label?: string;
-  /** `sm` or `md`. Default `sm`. */
+  /** Size token. Defaults to `'sm'`. */
   size?: "sm" | "md";
 }
 
@@ -2133,11 +2133,11 @@ export const Status = /*#__PURE__*/ createWebComponent<StatusProps, KaiStatusEle
 export interface SuggestionsProps extends WebComponentProps {
   /** The suggestions: strings, or `{ label, value }` when the displayed text and emitted value differ. JS property (array). */
   suggestions?: (string | { label: string; value?: string; icon?: string })[];
-  /** Chip style: `'outline'` (default), `'ghost'`, or `'default'` (filled). */
+  /** Chip style. Defaults to `outline`. */
   variant?: "outline" | "ghost" | "default";
-  /** Row height for `layout="list"`: `'md'` (default) or `'lg'` for taller rows. Chips are unaffected. */
+  /** Row height for the list layout. Defaults to `md`; chips are unaffected. */
   size?: "md" | "lg";
-  /** Layout: `chips` (default, a wrapping row of pills) or `list` (full-width left-aligned rows with a leading icon). */
+  /** A wrapping row of pills (the default), or full-width rows with a leading icon. */
   layout?: "chips" | "list";
   /** Full-width left-aligned rows instead of pills. */
   block?: boolean;
@@ -2321,9 +2321,9 @@ export interface ThreadProps extends WebComponentProps {
   codeTheme?: string;
   /** Enable Shiki syntax highlighting in code blocks. Turn off to render plain `<pre>` blocks (lighter, no highlighter load). Default true. */
   codeHighlight?: boolean;
-  /** How an image tile reveals its full size: `hover` (pointer-only hover card, default) or `lightbox` (modal on click). */
+  /** How an image tile reveals its full size. Default is the pointer-only hover card; the modal on click is the only one keyboard and touch reach. */
   imagePreview?: "hover" | "lightbox";
-  /** Whether each message's action bar is always visible (`'always'`, default) or only revealed on hover of that message row (`'hover'`). */
+  /** Whether each message's action bar is visible at rest or only revealed on pointer-over. Visible at rest by default. */
   actionsReveal?: "always" | "hover";
   /** Show the scroll-to-bottom button inside the scroll area. Default true. */
   scrollButton?: boolean;
@@ -2351,7 +2351,7 @@ export interface ToastRegionProps extends WebComponentProps {
   position?: "top-center" | "top-right" | "top-left" | "bottom-center" | "bottom-right" | "bottom-left";
   /** Max simultaneously-visible toasts; the rest queue. Defaults to `3`. */
   max?: number;
-  /** Stacking: 'expanded' (default, full column) | 'collapsed' (Sonner-style pile that expands on hover/focus). Attribute: stack. */
+  /** Stacking; the default is the full column. Attribute: `stack`. */
   stack?: "expanded" | "collapsed";
   /** Default appearance for this region's toasts: `pill` (default, compact) or `card` (richer). A per-toast `appearance` wins. */
   appearance?: "pill" | "card";

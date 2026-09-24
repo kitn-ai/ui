@@ -143,13 +143,13 @@ Every web component also accepts a `theme` attribute (`'light' | 'dark' | 'auto'
 | `placeholder` | `placeholder` | `undefined | string` | `'Send a message...'` | Placeholder text shown in the empty input. |
 | `loading` | `loading` | `undefined | false | true` | `false` | Disables submit and shows the streaming state. |
 | `suggestions` | — | `undefined | string[]` | — | Starter prompts shown above the input while the thread is empty. |
-| `suggestionMode` | `suggestion-mode` | `undefined | "submit" | "fill"` | `'submit'` | What clicking a suggestion does: `'submit'` (default) sends it, `'fill'` only fills the input. |
+| `suggestionMode` | `suggestion-mode` | `undefined | "submit" | "fill"` | `'submit'` | What clicking a suggestion does. Default sends it immediately; `'fill'` places it in the input without sending. |
 | `persistSuggestions` | `persist-suggestions` | `undefined | false | true` | `false` | Keep suggestions visible after the conversation starts; they otherwise hide once `messages` is non-empty. Default false. |
 | `proseSize` | `prose-size` | `undefined | "xs" | "sm" | "base" | "lg"` | `'sm'` | Body/prose font scale for rendered markdown. Defaults to `'sm'`. |
 | `codeTheme` | `code-theme` | `undefined | string` | `'github-dark-dimmed'` | Shiki theme name for syntax-highlighted code blocks (e.g. `'github-dark-dimmed'`). |
 | `imagePreview` | `image-preview` | `undefined | "hover" | "lightbox"` | — | How an image tile reveals full size. `'lightbox'` is the only value keyboard and touch can reach. Default `'hover'`. |
 | `codeHighlight` | `code-highlight` | `undefined | false | true` | `true` | Renders plain `<pre>` blocks with no highlighter load when false. Default true. |
-| `reasoning` | `reasoning` | `undefined | "full" | "compact" | "off"` | — | How reasoning parts render. `'compact'` streams only a shimmer and `'off'` renders none. Default `'full'`. |
+| `reasoning` | `reasoning` | `undefined | "full" | "compact" | "off"` | — | How reasoning parts render. Default is the collapsible disclosure. |
 | `reasoningOpen` | `reasoning-open` | `undefined | false | true` | — | Seeds the reasoning disclosure open and keeps it tracking the stream. Default false; inert unless `reasoning` is `'full'`. |
 | `chatTitle` | `chat-title` | `undefined | string` | — | Title shown at the start of the header bar. |
 | `models` | — | `undefined | { id: string; name: string; provider?: undefined | string; description?: undefined | string; group?: undefined | string }[]` | — | Model list; more than one renders a switcher in the header. |
@@ -170,7 +170,7 @@ Every web component also accepts a `theme` attribute (`'light' | 'dark' | 'auto'
 | `voice` | `voice` | `undefined | false | true` | `false` | Show a voice-input button in the input toolbar; calls `onVoice`. |
 | `triggers` | — | `undefined | { char: string; kind: string; items?: undefined | { id: string; label: string; icon?: undefined | string; description?: undefined | string; group?: undefined | string; kind?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }[]` | — | Rich entity triggers. Each opens a menu at the caret that inserts an atomic pill. |
 | `kindIcons` | — | `undefined | Record<string, string>` | — | Default icon per entity kind (kind → image src) for pills/menu items. |
-| `actionsReveal` | `actions-reveal` | `undefined | "always" | "hover"` | `'always'` | Whether each message's action bar is always visible or revealed on hover of that row. Default `'always'`. |
+| `actionsReveal` | `actions-reveal` | `undefined | "always" | "hover"` | `'always'` | Whether each message's action bar is visible at rest or revealed on pointer-over. Visible at rest by default. |
 | `userActions` | — | `undefined | ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]` | — | Default action bar for user messages that have no `actions` of their own; a message's own `actions` replaces it. |
 | `assistantActions` | — | `undefined | ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]` | — | Default action bar for assistant messages, as `userActions` is for user ones. |
 | `hideSources` | `hide-sources` | `undefined | false | true` | `false` | Hide the citations row that consecutive `source` parts collapse into; absent or `false` renders it. |
@@ -425,7 +425,7 @@ Compose these in light DOM instead of setting the JS property — the no-JS rout
 
 | Child element | Attributes | Text content | Notes |
 |---------------|------------|--------------|-------|
-| `<kai-conversation>` | `group-id`, `id` | yes | Parse a single light-DOM `<kai-conversation>` element into a `ConversationSummary`. Attribute mapping: - `id` → ConversationSummary.id - `group-id` → ConversationSummary.groupId (optional) - textContent → ConversationSummary.title Fields not expressible as HTML attributes are NOT fabricated: the optional `scope` and `lastMessageAt` stay absent, and the required `messageCount`/`updatedAt` get honest defaults — zero messages, and an empty `updatedAt` from which no trailing relative time is derived (the epoch it used to fabricate rendered a bogus "many days ago" on every declarative row). |
+| `<kai-conversation>` | `group-id`, `id` | yes | Parse a single light-DOM `<kai-conversation>` element into a `ConversationSummary`. Attribute mapping: - `id` → ConversationSummary.id - `group-id` → ConversationSummary.groupId (optional) - textContent → ConversationSummary.title Fields not expressible as HTML attributes are NOT fabricated: the optional `scope` and `lastMessageAt` stay absent, and the required `messageCount`/`updatedAt` get honest defaults: zero messages, and an empty `updatedAt` from which no trailing relative time is derived (the epoch it used to fabricate rendered a bogus "many days ago" on every declarative row). |
 
 #### Styleable parts
 
@@ -462,11 +462,11 @@ Sidebar panel listing conversations, optionally grouped. Emits events for naviga
 | `disabled` | `disabled` | `undefined | false | true` | `false` | Disable the input and submit button entirely (non-interactive). |
 | `loading` | `loading` | `undefined | false | true` | `false` | Show the loading/streaming state and block submit (use while awaiting a reply). |
 | `suggestions` | — | `undefined | string[]` | — | Starter prompts shown above the input. Clicking one follows `suggestionMode`. Set as a JS property. |
-| `suggestionMode` | `suggestion-mode` | `undefined | "submit" | "fill"` | `'submit'` | What clicking a suggestion does: `'submit'` (default) sends it immediately as if typed and submitted; `'fill'` just places it in the input. |
+| `suggestionMode` | `suggestion-mode` | `undefined | "submit" | "fill"` | `'submit'` | What clicking a suggestion does. Defaults to `'submit'`. |
 | `webSearch` | `web-search` | `undefined | false | true` | `false` | Show a web-search (Globe) button in the left toolbar; clicking it fires a `kai-web-search` event. Attribute: `web-search`. |
 | `voice` | `voice` | `undefined | false | true` | `false` | Show a Voice (Mic) button in the left toolbar; clicking it fires a `voice` event. |
 | `stoppable` | `stoppable` | `undefined | false | true` | `false` | When set and `loading` is true, the send button is replaced by a Stop button (square icon, "Stop" aria-label). Clicking it fires `kai-stop`. |
-| `submit` | `submit` | `undefined | "always" | "auto"` | `'always'` | Send-button visibility: `always` (default) or `auto` (only when there is text/attachments). |
+| `submit` | `submit` | `undefined | "always" | "auto"` | `'always'` | Send-button visibility. Defaults to `'always'`. |
 | `attach` | `attach` | `undefined | false | true` | `true` | Show the built-in paperclip attach button. Default `true`. |
 | `attachments` | — | `AttachmentData[] | undefined` | — | Attachments to seed the input with. Each `url` must be a `data:` URI or https URL, never `blob:`. |
 | `triggers` | — | `undefined | { char: string; kind: string; items?: undefined | { id: string; label: string; icon?: undefined | string; description?: undefined | string; group?: undefined | string; kind?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }[]` | — | Rich entity triggers. Each `{ char, kind, items }` opens a caret-anchored menu that inserts an atomic pill. JS property. |
@@ -549,7 +549,7 @@ Standalone prompt input with a send button. Use when you want just the input are
 | `proseSize` | `prose-size` | `undefined | "xs" | "sm" | "base" | "lg"` | `'sm'` | Text/markdown sizing for the message body. |
 | `codeTheme` | `code-theme` | `undefined | string` | `'github-dark-dimmed'` | Shiki theme name used for fenced code blocks in the content. |
 | `codeHighlight` | `code-highlight` | `undefined | false | true` | `true` | Disable syntax highlighting for code blocks (no Shiki loads). |
-| `actionsReveal` | `actions-reveal` | `undefined | "always" | "hover"` | `'always'` | Whether the action bar is always visible (`'always'`, default) or only revealed on hover of the message row (`'hover'`). |
+| `actionsReveal` | `actions-reveal` | `undefined | "always" | "hover"` | `'always'` | Whether the action bar stays visible or appears on pointer-over; visible by default. |
 | `avatarSrc` | `avatar-src` | `undefined | string` | — | Convenience avatar image URL (used when `message.avatar` is not set). |
 | `avatarFallback` | `avatar-fallback` | `undefined | string` | — | Convenience avatar fallback text (used when `message.avatar` is not set). |
 | `avatar` | `avatar` | `undefined | string` | — | Avatar rail mode. `'none'` omits the rail so the body spans the full row; otherwise the built-in avatar or your `slot="avatar"`. |
@@ -790,7 +790,7 @@ No events.
 | `items` | — | `AttachmentData[] | undefined` | `[]` | The attachments to render (omit or pass `[]` for the empty state). Each `url` must be a `data:` URI or https URL, never `blob:`. |
 | `variant` | `variant` | `undefined | "grid" | "inline" | "list"` | `'grid'` | Layout: `grid` = visual tiles, `inline` = icon + label chips, `list` = rows. |
 | `hoverCard` | `hover-card` | `undefined | false | true` | `false` | Wrap each item in a hover card that previews its details. |
-| `imagePreview` | `image-preview` | `undefined | "hover" | "lightbox"` | `'hover'` | How an image tile reveals its full size: `hover` (pointer-only hover card, default) or `lightbox` (modal on click). |
+| `imagePreview` | `image-preview` | `undefined | "hover" | "lightbox"` | `'hover'` | How an image tile reveals its full size: a pointer-only card by default, or a modal on click. |
 | `removable` | `removable` | `undefined | false | true` | `false` | Show a remove button per item; clicking it fires a `kai-remove` event. |
 | `showMediaType` | `show-media-type` | `undefined | false | true` | `false` | Also show the media type beneath the filename (non-grid variants). |
 | `emptyText` | `empty-text` | `undefined | string` | — | Text shown when `items` is empty. |
@@ -979,9 +979,9 @@ No events.
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
 | `suggestions` | — | `undefined | (string | { label: string; value?: undefined | string; icon?: undefined | string })[]` | `[]` | The suggestions: strings, or `{ label, value }` when the displayed text and emitted value differ. JS property (array). |
-| `variant` | `variant` | `undefined | "outline" | "ghost" | "default"` | `'outline'` | Chip style: `'outline'` (default), `'ghost'`, or `'default'` (filled). |
-| `size` | `size` | `undefined | "md" | "lg"` | `'md'` | Row height for `layout="list"`: `'md'` (default) or `'lg'` for taller rows. Chips are unaffected. |
-| `layout` | `layout` | `undefined | "chips" | "list"` | `'chips'` | Layout: `chips` (default, a wrapping row of pills) or `list` (full-width left-aligned rows with a leading icon). |
+| `variant` | `variant` | `undefined | "outline" | "ghost" | "default"` | `'outline'` | Chip style. Defaults to `outline`. |
+| `size` | `size` | `undefined | "md" | "lg"` | `'md'` | Row height for the list layout. Defaults to `md`; chips are unaffected. |
+| `layout` | `layout` | `undefined | "chips" | "list"` | `'chips'` | A wrapping row of pills (the default), or full-width rows with a leading icon. |
 | `block` | `block` | `undefined | false | true` | `false` | Full-width left-aligned rows instead of pills. |
 | `highlight` | `highlight` | `undefined | string` | — | Substring to highlight within each suggestion. |
 
@@ -1501,8 +1501,8 @@ No events.
 | `proseSize` | `prose-size` | `undefined | "xs" | "sm" | "base" | "lg"` | `'sm'` | Body/prose font scale for rendered markdown (`'xs' | 'sm' | 'base' | 'lg'`). Defaults to `'sm'`. |
 | `codeTheme` | `code-theme` | `undefined | string` | `'github-dark-dimmed'` | Shiki theme name for syntax-highlighted code blocks (e.g. `'github-dark-dimmed'`). |
 | `codeHighlight` | `code-highlight` | `undefined | false | true` | `true` | Enable Shiki syntax highlighting in code blocks. Turn off to render plain `<pre>` blocks (lighter, no highlighter load). Default true. |
-| `imagePreview` | `image-preview` | `undefined | "hover" | "lightbox"` | `'hover'` | How an image tile reveals its full size: `hover` (pointer-only hover card, default) or `lightbox` (modal on click). |
-| `actionsReveal` | `actions-reveal` | `undefined | "always" | "hover"` | `'always'` | Whether each message's action bar is always visible (`'always'`, default) or only revealed on hover of that message row (`'hover'`). |
+| `imagePreview` | `image-preview` | `undefined | "hover" | "lightbox"` | `'hover'` | How an image tile reveals its full size. Default is the pointer-only hover card; the modal on click is the only one keyboard and touch reach. |
+| `actionsReveal` | `actions-reveal` | `undefined | "always" | "hover"` | `'always'` | Whether each message's action bar is visible at rest or only revealed on pointer-over. Visible at rest by default. |
 | `scrollButton` | `scroll-button` | `undefined | false | true` | `true` | Show the scroll-to-bottom button inside the scroll area. Default true. |
 | `class` | `class` | `undefined | string` | — | Extra classes applied to the thread's inner root. |
 | `cardTypes` | — | `undefined | Record<string, string>` | — | Card type → custom-element tag overrides/additions, merged over the built-ins. JS property: `el.cardTypes`. |
@@ -1975,7 +1975,7 @@ Mounts a third-party card in a sandboxed cross-origin iframe and re-emits every 
 | `headline` | `headline` | `undefined | string` | — | The bold title. Named `headline` because `title` collides with the global `HTMLElement.title` attribute (it throws at registration). |
 | `badge` | `badge` | `undefined | string` | — | A small badge pill beside the headline (e.g. "New"). |
 | `placement` | `placement` | `undefined | string` | — | Floating placement relative to the anchor (default `bottom`). |
-| `tone` | `tone` | `undefined | "primary" | "info" | "success" | "warning" | "error"` | — | Color tone: `primary` (default, theme accent), `info` (blue), `success` (green), `warning` (amber), or `error` (red), reusing the kit's tool hues. |
+| `tone` | `tone` | `undefined | "primary" | "info" | "success" | "warning" | "error"` | — | Color tone, reusing the kit's tool hues. Defaults to the theme accent. |
 | `arrow` | `arrow` | `undefined | false | true` | `true` | Render the arrow that points at the anchor (default `true`). Set `arrow="false"` for a plain bubble with no pointer. |
 
 #### Events
@@ -2042,13 +2042,13 @@ The polished building blocks you compose your own chrome from — themed, access
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
 | `variant` | `variant` | `undefined | "default" | "subtle" | "ghost" | "outline" | "destructive"` | `'default'` | Visual style. Defaults to `default` (filled). |
-| `size` | `size` | `undefined | "sm" | "md" | "lg" | "icon" | "icon-sm"` | `'md'` | Size token. `icon` / `icon-sm` are square (for icon-only buttons); `sm` / `md` / `lg` size text buttons. Defaults to `md`. |
+| `size` | `size` | `undefined | "sm" | "md" | "lg" | "icon" | "icon-sm"` | `'md'` | Size token: the square glyph-only sizes, or the text-button sizes. Defaults to `md`. |
 | `icon` | `icon` | `undefined | string` | — | Leading icon: a named icon (e.g. `"mic"`, `"plus"`), an image URL/data-URI, or plain text. Renders before any slotted label. |
 | `iconTrailing` | `icon-trailing` | `undefined | string` | — | Trailing icon, after the label (e.g. `"chevron-down"` for a menu affordance). |
 | `label` | `label` | `undefined | string` | — | Accessible name for an icon-only button. Ignored when visible text is slotted -- the visible text wins. |
 | `disabled` | `disabled` | `undefined | false | true` | `false` | Disable the button (non-interactive, dimmed). |
 | `full` | `full` | `undefined | false | true` | `false` | Stretch the button to the full width of its container (a block button), e.g. a card CTA or a stacked action. Attribute: `full`. |
-| `align` | `align` | `undefined | "start" | "center" | "end"` | `'center'` | Justify the button's content: `start`, `center` (default), or `end`. Combine with `full` for a full-width, left-aligned button. |
+| `align` | `align` | `undefined | "start" | "center" | "end"` | `'center'` | Justify the button's content. Default is centered; combine with `full` for a full-width, left-aligned button. |
 | `type` | `type` | `undefined | "button" | "submit" | "reset"` | `'button'` | Native button `type`. Defaults to `button` (so it never submits a form). |
 
 #### Events
@@ -2108,7 +2108,7 @@ A themed button — `variant` (incl. `subtle`), `size` (incl. icon-only), leadin
 | `src` | `src` | `undefined | string` | — | Image URL/data-URI. When absent, the `fallback` initials show instead. |
 | `alt` | `alt` | `undefined | string` | — | Alt text for the image. Defaults to `fallback`. |
 | `fallback` | `fallback` | `undefined | string` | `''` | Short text shown when there's no image, usually initials (e.g. "JD", "AI"). |
-| `size` | `size` | `undefined | "sm" | "md" | "lg"` | `'md'` | Size token: `sm` | `md` (default) | `lg`. |
+| `size` | `size` | `undefined | "sm" | "md" | "lg"` | `'md'` | Size token. |
 
 #### Composed from
 
@@ -2131,7 +2131,7 @@ An image avatar with an automatic initials fallback, in three sizes.
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
-| `variant` | `variant` | `undefined | "default" | "count" | "citation"` | `'default'` | `default` (muted pill) · `count` (compact number badge) · `citation` (filled primary, for inline citation markers). Defaults to `default`. |
+| `variant` | `variant` | `undefined | "default" | "count" | "citation"` | `'default'` | Badge style; `default` is the muted pill. |
 
 #### Slots
 
@@ -2171,7 +2171,7 @@ A small pill for labels, status, counts, or inline citation markers. Restyle via
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
 | `name` | `name` | `undefined | string` | `''` | A curated icon name (e.g. `"mic"`, `"globe"`), an image URL/data-URI, or plain text. |
-| `size` | `size` | `undefined | "sm" | "md" | "lg"` | `'md'` | Size token: `sm` | `md` (default) | `lg`. |
+| `size` | `size` | `undefined | "sm" | "md" | "lg"` | `'md'` | Size token. |
 
 #### Styleable parts
 
@@ -2304,7 +2304,7 @@ Rich content on hover/focus of a trigger — the markup-carrying sibling of `<ka
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
-| `severity` | `severity` | `undefined | "neutral" | "info" | "warning" | "error" | "success"` | `'neutral'` | `neutral` (default) · `info` · `warning` · `error` · `success`. Drives the leading icon's color and the a11y role (`alert` for errors, else `status`). |
+| `severity` | `severity` | `undefined | "neutral" | "info" | "warning" | "error" | "success"` | `'neutral'` | Severity. Defaults to `'neutral'`. |
 | `icon` | `icon` | `undefined | string` | — | Leading icon: omit for the severity default, `"none"` to hide it, or a named icon to override. |
 | `dismissible` | `dismissible` | `undefined | false | true` | `false` | Show a dismiss (×) that hides the notice and emits `kai-dismiss`. |
 
@@ -2345,7 +2345,7 @@ An inline notice/alert carrying a severity icon, the right a11y role, an optiona
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
-| `orientation` | `orientation` | `undefined | "horizontal" | "vertical"` | `'horizontal'` | `horizontal` (default, block + full-width) or `vertical` (a rule inside a flex/grid row, stretching to the row height). |
+| `orientation` | `orientation` | `undefined | "horizontal" | "vertical"` | `'horizontal'` | The separator's axis. Defaults to a full-width block; the cross-axis form suits a flex or grid row. |
 
 #### Styleable parts
 
@@ -2571,7 +2571,7 @@ A grouped, filterable command / mention palette (the `@`-picker pattern).
 | `label` | `label` | `undefined | string` | — | Field label, linked to the input. |
 | `hint` | `hint` | `undefined | string` | — | Helper text below the control. |
 | `error` | `error` | `undefined | string` | — | Error text; flips the field invalid (`aria-invalid` + destructive border). |
-| `size` | `size` | `undefined | "sm" | "md"` | `'md'` | Control density: `sm` or `md`. Defaults to `md`. |
+| `size` | `size` | `undefined | "sm" | "md"` | `'md'` | Control density. Defaults to `md`. |
 | `disabled` | `disabled` | `undefined | false | true` | — | Disable interaction. |
 | `readonly` | `readonly` | `undefined | false | true` | — | Make the input read-only. |
 | `required` | `required` | `undefined | false | true` | — | Mark the input required. |
@@ -2937,7 +2937,7 @@ An accessible tab strip, selection only: set `items` as a JS property, listen fo
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
 | `options` | — | `{ value: string; label: string; icon?: undefined | string }[]` | `[]` | The selectable segments, left to right. Set as a JS property (array). |
 | `value` | `value` | `undefined | string` | — | Controlled selected `value`, reflected to the `value` attribute. Choosing a segment updates it and fires `kai-change`. |
-| `size` | `size` | `undefined | "sm" | "md"` | `'md'` | Control density: `sm` or `md`. Defaults to `md`. |
+| `size` | `size` | `undefined | "sm" | "md"` | `'md'` | Control density. Defaults to `md`. |
 
 #### Events
 
@@ -2978,7 +2978,7 @@ A single-select pill track (a segmented / toggle group). Set `options` as a JS p
 | `status` | `status` | `undefined | "new" | "online" | "busy" | "away" | "offline"` | `'new'` | Presence state, which sets the colour. Default `new`. |
 | `pulse` | `pulse` | `undefined | false | true` | `false` | Animated ping ring; off by default and never under prefers-reduced-motion. |
 | `label` | `label` | `undefined | string` | — | Accessible name; without it the dot is decorative. |
-| `size` | `size` | `undefined | "sm" | "md"` | `'sm'` | `sm` or `md`. Default `sm`. |
+| `size` | `size` | `undefined | "sm" | "md"` | `'sm'` | Size token. Defaults to `'sm'`. |
 
 #### Styleable parts
 
@@ -3011,7 +3011,7 @@ A small presence / notification dot: `status` picks the color, `pulse` adds a pi
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
 | `keys` | `keys` | `undefined | string` | — | Shortcut spec: tokens joined by `+` (e.g. `Mod+Shift+K`). Omit it to show default-slot content instead. Display only; the element does not bind keys. |
 | `platform` | `platform` | `undefined | "auto" | "mac" | "other"` | `'auto'` | `mac` uses ⌘/⌥, `other` uses Ctrl. `auto` (default) sniffs the OS. |
-| `size` | `size` | `undefined | "sm" | "md"` | `'md'` | Cap size: `sm` or `md`. Defaults to `md`. |
+| `size` | `size` | `undefined | "sm" | "md"` | `'md'` | Cap size. Defaults to `md`. |
 
 #### Slots
 
@@ -3053,7 +3053,7 @@ A keyboard-shortcut display: feed `keys` tokens joined by `+` (`Mod+Shift+K`) an
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
 | `value` | `value` | `undefined | string` | — | The label text. Settable and reflected to the `value` attribute. Read `el.value` for live state. |
 | `editing` | `editing` | `undefined | false | true` | `false` | Controlled edit state. `el.editing = true` opens the field; reflected to the `editing` attribute. |
-| `editTrigger` | `edit-trigger` | `undefined | "dblclick" | "click"` | `'dblclick'` | How the read view enters edit mode: `dblclick` (default) or `click`. Reflects to `edit-trigger`; `edit()` and `editing` are unaffected. |
+| `editTrigger` | `edit-trigger` | `undefined | "dblclick" | "click"` | `'dblclick'` | How the read view enters edit mode. Default is a double click; `edit()` and `editing` are unaffected. |
 | `placeholder` | `placeholder` | `undefined | string` | — | Placeholder shown while editing / when the value is empty. |
 | `disabled` | `disabled` | `undefined | false | true` | `false` | Disable entering edit mode. |
 
@@ -3429,9 +3429,9 @@ An editor group: a tab strip of numbered status-badge tabs over the active tab's
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
-| `orientation` | `orientation` | `undefined | "horizontal" | "vertical"` | `'horizontal'` | Layout axis: `horizontal` (row, default) or `vertical` (column). |
+| `orientation` | `orientation` | `undefined | "horizontal" | "vertical"` | `'horizontal'` | Whether the group lays out as a row or a column. |
 | `maximizedIndex` | — | `undefined | number | null` | `null` | Which item index is maximized (null = none). Declarative source of truth. |
-| `handle` | `handle` | `undefined | "line" | "grip" | "none"` | `'line'` | Divider affordance drawn inside each draggable handle's 8px grab zone: `line` (default), `grip`, or `none`. |
+| `handle` | `handle` | `undefined | "line" | "grip" | "none"` | `'line'` | Divider affordance drawn inside each draggable handle's 8px grab zone. |
 
 #### Events
 

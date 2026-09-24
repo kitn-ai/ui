@@ -3,22 +3,22 @@ import { createPresence } from '../overlay/overlay';
 import { cn } from '../../utils/cn';
 
 /**
- * `Captions` — live closed-captioning: the text shown WHILE someone (the
+ * `Captions`, live closed-captioning: the text shown WHILE someone (the
  * user or the agent) is speaking, distinct from a scrollback transcript.
  * Built for the Voice template (`stories/showcase/builder-voice.stories.tsx`) but
- * kept generic — any voice surface that wants a caption line can use this
+ * kept generic: any voice surface that wants a caption line can use this
  * directly.
  *
- * - Driven by `segments`, oldest first — the LAST entry is the current
+ * - Driven by `segments`, oldest first: the LAST entry is the current
  *   line. Everything else is history, only rendered by `stacked`.
  * - `variant` picks the chrome: `'lower-third'` (a semi-opaque bar, the
  *   broadcast-caption look), `'floating'` (a card that floats above a
- *   visualizer, `kai-elevation`), `'minimal'` (bare text, no chrome — the
+ *   visualizer, `kai-elevation`), `'minimal'` (bare text, no chrome: the
  *   original shape this component shipped with), `'stacked'` (the last two
  *   lines of history fade in behind the current line, which stays full
  *   strength). Default `'minimal'`.
  * - Speaker-aware via `data-speaker` + a small uppercase label ("You" /
- *   "Assistant") — NOT a color swap. Accent stays reserved for the
+ *   "Assistant"). NOT a color swap. Accent stays reserved for the
  *   visualizer per the owner's Voice-round instruction, so the distinction
  *   lives in the label and a subtle weight difference, both drawn from the
  *   muted/foreground tiers, never `text-primary`.
@@ -26,15 +26,15 @@ import { cn } from '../../utils/cn';
  *   lighter than a finalized line's `text-foreground`, so a caption visibly
  *   "settles" the moment the model (or the ASR) commits it.
  * - Undefined/empty `segments`, or a current segment whose `text` is empty
- *   or whitespace-only, renders NOTHING — a real `<Show>` around a presence
+ *   or whitespace-only, renders NOTHING: a real `<Show>` around a presence
  *   gate, not a hidden/zero-opacity node left in the DOM.
  * - One `role="status"`/`aria-live="polite"` region, wrapping ONLY the
- *   current line — `stacked`'s history lines sit outside it
+ *   current line: `stacked`'s history lines sit outside it
  *   (`aria-hidden="true"`) so they don't get re-announced every time the
  *   region's content changes. This mirrors `toast.tsx`'s
  *   `role="region"`/`aria-live="polite"` pattern (the kit's other
  *   speech-adjacent live region) rather than inventing a second policy, and
- *   is the ONLY live region this component renders — it says nothing about
+ *   is the ONLY live region this component renders. It says nothing about
  *   history, so it can't double-announce anything a transcript component
  *   elsewhere on the page is already announcing.
  * - Appear/update reuses the kit's real exit-animation primitive,
@@ -47,7 +47,7 @@ import { cn } from '../../utils/cn';
  *   Tailwind-animate classes `DropdownContent`/`DialogContent`/
  *   `HoverCardContent` use, and both carry `motion-reduce:animate-none` (the
  *   same pattern `screen.tsx`/`dialog.tsx` use) so `prefers-reduced-motion:
- *   reduce` turns the animation off entirely — the text still appears,
+ *   reduce` turns the animation off entirely: the text still appears,
  *   updates and disappears, just without motion.
  */
 export interface CaptionSegment {

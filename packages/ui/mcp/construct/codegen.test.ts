@@ -1842,7 +1842,7 @@ describe('shell (B-10)', () => {
     expect(app).toContain('<Dropdown>');
     expect(app).toContain(`fallback={${JSON.stringify('AD')}}`);
     expect(app).toMatch(/new CustomEvent\('kai-user-menu'/);
-    expect(app).toContain(JSON.stringify('Ada Lovelace — Pro account menu'));
+    expect(app).toContain(JSON.stringify('Ada Lovelace, Pro account menu'));
   });
 
   it('userMenu-only construct imports NO Button — the userMenu piece uses only Dropdown/Avatar (regression: Button used to be gated on the composed headerEndContent string, not on which piece actually used it)', () => {
