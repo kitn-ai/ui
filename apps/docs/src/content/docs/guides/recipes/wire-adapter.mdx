@@ -114,7 +114,9 @@ await readModelStream(res, stream, { format: acmeEvents });
 The kit never calls your function. `readOpenAIStream` returns the turn, you run the tools, `applyToolOutput` completes the panel and `applyToolFailure` fails it. Every round folds onto the same assistant message, so one stream spans the whole loop.
 
 <Aside type="caution" title="React state can't be read back mid-turn">
-`chat.messages` (or any `useState`) is off-limits inside the loop below. `dispatchSetState` only computes the next value eagerly when the fiber has no pending lanes, and that's never true while a turn is streaming, so the closure would keep reading the pre-submit snapshot every round and miss the tool call and result the turn just wrote. Declare a turn-scoped `thread` instead and route every write through it, as below. A store that already reads back synchronously (a Vue `ref`, a Svelte `let`, a Solid-backed store) doesn't need this: reassign it directly each round, it already is the thread.
+`chat.messages` (or any `useState`) is off-limits inside the loop below. `dispatchSetState` only computes the next value eagerly when the fiber has no pending lanes, and that's never true while a turn is streaming, so the closure would keep reading the pre-submit snapshot every round and miss the tool call and result the turn just wrote.
+
+Declare a turn-scoped `thread` instead and route every write through it, as below. A store that already reads back synchronously (a Vue `ref`, a Svelte `let`, a Solid-backed store) doesn't need this: reassign it directly each round, it already is the thread.
 </Aside>
 
 ```tsx
@@ -208,13 +210,17 @@ The loop runs *inside* the `try`. `stream.done()` settles the message and every 
 
 While the arguments stream, `ToolPart.rawInput` carries the partial JSON, so `<kai-tool>` renders it filling in character by character. You render nothing yourself.
 
-`toOpenAIMessages` splits an assistant turn at each tool boundary: the announcement, then each `role: 'tool'` result, then any text the model produced afterwards. Flattening instead would put the model's answer before the result it was based on, which no endpoint rejects and every later round pays for. A turn that encodes to nothing is skipped rather than sent as `{ content: null }`.
+`toOpenAIMessages` splits an assistant turn at each tool boundary: the announcement, then each `role: 'tool'` result, then any text the model produced afterwards. Flattening instead would put the model's answer before the result it was based on, which no endpoint rejects and every later round pays for.
+
+A turn that encodes to nothing is skipped rather than sent as `{ content: null }`.
 
 ## Extended thinking round-trips
 
 On the Anthropic wire a reasoning part carries the provider's own block on `part.raw`, and `toAnthropicMessages` echoes that payload verbatim.
 
-This is not a nicety. Anthropic returns 400 if a `thinking` block in the most recent assistant message is modified, reordered, filtered or reconstructed, so an encoder cannot rebuild one from `text` plus `signature`. A reasoning part with no `raw` throws a `WireEncodeError` at encode time, naming the message and the part index, rather than sending a request that fails at the provider.
+This is not a nicety. Anthropic returns 400 if a `thinking` block in the most recent assistant message is modified, reordered, filtered or reconstructed, so an encoder cannot rebuild one from `text` plus `signature`.
+
+A reasoning part with no `raw` throws a `WireEncodeError` at encode time, naming the message and the part index, rather than sending a request that fails at the provider.
 
 The practical consequence is in your persistence layer: strip `raw` when you save a message and the next turn will not encode. Keep it.
 
@@ -249,7 +255,9 @@ What goes on the wire, per part:
 
 Signed blocks are **reassembled, not echoed**. Of 85 reasoning frames in a streamed turn only the final one carries the signature, and that frame has no text, so `part.raw` after a stream is a textless fragment. Echoing it the way the Anthropic encoder does would send a block with no reasoning in it.
 
-The encoder emits a block only when the provider can verify it, and verifiability is a property of the model configuration rather than of individual blocks: one model signs every block, another signs none. So the skip never drops one block out of a run of comparable ones, and against a model that does not sign its reasoning the option is inert. That is a limitation to know about, not a bug to file.
+The encoder emits a block only when the provider can verify it, and verifiability is a property of the model configuration rather than of individual blocks: one model signs every block, another signs none. So the skip never drops one block out of a run of comparable ones, and against a model that does not sign its reasoning the option is inert.
+
+That is a limitation to know about, not a bug to file.
 
 Entries land as `reasoning_details` on the assistant message that owns them, in part order, including the split at a tool boundary: a block that follows a tool call rides on the message after the result, exactly where `toAnthropicMessages` puts one. `OpenAIEncodeOptions` and `OpenAIReasoningDetail` are exported if you need the types.
 

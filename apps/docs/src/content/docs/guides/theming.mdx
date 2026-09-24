@@ -8,7 +8,9 @@ import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
 Set the **`--kai-color-*`** tokens on `:root` to rebrand every `kai-*` web component at once. Inherited custom properties pierce the Shadow DOM boundary, so a single CSS rule propagates into all of them with no stylesheet import.
 
 <Aside type="caution" title="`--kai-color-*` is the token that reaches the web components">
-Each element adopts the kit's compiled CSS into its own shadow root, and that sheet declares every `--color-*` on `:host` as `var(--kai-color-<name>, <default>)`. A declaration on the host beats a value inherited from the page, so overriding **`--color-primary` on `:root` does not retheme a `kai-*` element** — importing `theme.css` doesn't change that. `--kai-color-*` is the layer the web components read.
+Each element adopts the kit's compiled CSS into its own shadow root, and that sheet declares every `--color-*` on `:host` as `var(--kai-color-<name>, <default>)`. A declaration on the host beats a value inherited from the page, so overriding **`--color-primary` on `:root` does not retheme a `kai-*` element** — importing `theme.css` doesn't change that.
+
+`--kai-color-*` is the layer the web components read.
 
 The unprefixed `--color-*` names still matter: they are what `theme.css` / `theme.tokens.css` define for **your own host-page chrome and the light-DOM SolidJS components**, which have no shadow root. Both walkthroughs are below.
 </Aside>
@@ -31,7 +33,9 @@ The kit's appearance is driven entirely by **CSS custom properties** defined in 
 | `--color-sidebar` | Conversation sidebar background |
 | `--color-code-foreground` | Inline code text and chip accent |
 
-Border radii are controlled by `--radius` (default `0.6rem`); `--radius-sm`, `--radius-md`, `--radius-lg`, `--radius-xl`, `--radius-2xl` and `--radius-3xl` derive from it, plus `--radius-pill` for the pill family (badges, chips, switch tracks). Those are Tailwind's own radius names, so in a Tailwind build that imports `theme.css` they also become what `rounded-sm` through `rounded-3xl` and `rounded-pill` mean. See [what theme.css changes](#what-themecss-changes-in-a-tailwind-build).
+Border radii are controlled by `--radius` (default `0.6rem`); `--radius-sm`, `--radius-md`, `--radius-lg`, `--radius-xl`, `--radius-2xl` and `--radius-3xl` derive from it, plus `--radius-pill` for the pill family (badges, chips, switch tracks).
+
+Those are Tailwind's own radius names, so in a Tailwind build that imports `theme.css` they also become what `rounded-sm` through `rounded-3xl` and `rounded-pill` mean. See [what theme.css changes](#what-themecss-changes-in-a-tailwind-build).
 
 ## Import the stylesheet
 
@@ -75,7 +79,9 @@ A plain `<link>` can't use `theme.css`: the browser discards its `@theme` block 
 | `@utility bg-surface`, `bg-hover`, `bg-selected`, `bg-*-soft` | New utilities in your build. Additive, they collide with nothing Tailwind ships. |
 | `@keyframes kai-*`, `.kai-scrollbar-thin`, `.chat-markdown` | Global names, listed [below](#global-names-the-kit-owns). |
 
-`theme.tokens.css` skips the first row and the `@utility` row. It still declares the same `--color-*`, `--radius-*`, `--text-*`, `--spacing`, `--shadow*` and `--font-weight-*` names on `:root`, and Tailwind v4 utilities read those variables at runtime, so the radius values above change under it as well. If you want none of the kit's scale, import neither file and theme through `--kai-*`.
+`theme.tokens.css` skips the first row and the `@utility` row. It still declares the same `--color-*`, `--radius-*`, `--text-*`, `--spacing`, `--shadow*` and `--font-weight-*` names on `:root`, and Tailwind v4 utilities read those variables at runtime, so the radius values above change under it as well.
+
+If you want none of the kit's scale, import neither file and theme through `--kai-*`.
 
 Density is the one scale with kit-wide reach, and it costs one declaration:
 
@@ -211,12 +217,16 @@ One scale runs the whole kit. Seven namespaced tokens set it, and every text sur
 }
 ```
 
-The **Tailwind twin** column is what makes that global. Tailwind v4 generates `text-xs` / `text-sm` / `text-base` / `text-lg` from `--text-*` theme variables, and `theme.css` points those at the same `--kai-text-*` tokens. `text-sm` and `text-body` are one declaration under two names, so a token override moves every call site whichever name it spells. Defaults match stock Tailwind exactly — nothing shifts until you set a token.
+The **Tailwind twin** column is what makes that global. Tailwind v4 generates `text-xs` / `text-sm` / `text-base` / `text-lg` from `--text-*` theme variables, and `theme.css` points those at the same `--kai-text-*` tokens. `text-sm` and `text-body` are one declaration under two names, so a token override moves every call site whichever name it spells.
+
+Defaults match stock Tailwind exactly — nothing shifts until you set a token.
 
 Line-heights are unitless ratios. Bump a size and the leading follows it.
 
 <Aside type="caution" title="This reaches your app too">
-If you import `theme.css` into your own Tailwind build, the re-point applies to **your** `text-sm` too. Deliberate: kit and app move together on one scale. It does mean a `--kai-text-*` override is not sandboxed to `kai-*` web components. Import `theme.tokens.css` instead, or neither, if that is not what you want; the full list of what `theme.css` changes is [above](#what-themecss-changes-in-a-tailwind-build).
+If you import `theme.css` into your own Tailwind build, the re-point applies to **your** `text-sm` too. Deliberate: kit and app move together on one scale. It does mean a `--kai-text-*` override is not sandboxed to `kai-*` web components.
+
+Import `theme.tokens.css` instead, or neither, if that is not what you want; the full list of what `theme.css` changes is [above](#what-themecss-changes-in-a-tailwind-build).
 </Aside>
 
 Message and markdown body copy rides the same scale. `proseSize` picks which rung a message renders at (`sm`, the default, is `--kai-text-body`); the token sets how big that rung is. Headings, lists and code inside the markdown block are sized in `em`, so they follow. See [Appearance settings](#appearance-settings) for `proseSize`.

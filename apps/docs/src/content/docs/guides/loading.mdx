@@ -49,7 +49,9 @@ That single import is everything a chat needs. `<kai-chat>` already bundles ever
 
 You only add another import for an **additional standalone web component you place in your own markup** — e.g. a `<kai-artifact>` beside the chat. That's one import per web component *you* write into the HTML.
 
-And it fails loud, not silent: if you place an element but forget its import, that element renders empty (un-upgraded) instead of breaking the rest of the page — and the `kai` MCP's `debug` / `component_reference` tools name the exact import to add. (Generative-UI **cards** — `kai-confirm`, `kai-form`, … — are also standalone web components, so add them only if your assistant renders card payloads.)
+And it fails loud, not silent: if you place an element but forget its import, that element renders empty (un-upgraded) instead of breaking the rest of the page — and the `kai` MCP's `debug` / `component_reference` tools name the exact import to add.
+
+(Generative-UI **cards** — `kai-confirm`, `kai-form`, … — are also standalone web components, so add them only if your assistant renders card payloads.)
 </Aside>
 
 The import path is the web component's filename in `dist/web-components/` — usually the tag minus the `kai-` prefix. You only need a row below for a web component you place in your markup yourself; the message / markdown / reasoning / input parts of a chat are already inside `kai-chat`:
@@ -73,7 +75,9 @@ Per-web-component imports are client-only. In SSR frameworks (Next.js, Nuxt, Sve
 
 The autoloader watches the DOM and registers each web component on demand — only the tags present on a given page are ever loaded.
 
-That on-demand loading is paid in requests: each web component's module and its dependencies arrive as separate fetches. On a page using a few web components — a `<kai-markdown>` here, a `<kai-code-block>` there — that's the cheapest path by far. A `<kai-chat>` page is close to its worst case: the chat transitively pulls most of the kit, so the autoloader downloads nearly the same bytes as the register-all bundle across many more requests. For a no-build chat page, load [`dist/kai.es.js`](#register-all-default) instead — one fetch, everything registered.
+That on-demand loading is paid in requests: each web component's module and its dependencies arrive as separate fetches. On a page using a few web components — a `<kai-markdown>` here, a `<kai-code-block>` there — that's the cheapest path by far.
+
+A `<kai-chat>` page is close to its worst case: the chat transitively pulls most of the kit, so the autoloader downloads nearly the same bytes as the register-all bundle across many more requests. For a no-build chat page, load [`dist/kai.es.js`](#register-all-default) instead — one fetch, everything registered.
 
 It is a **CDN / static-file** tool: load it from a `<script type="module">` tag. It is **not** importable through a bundler — Vite and webpack relocate it away from the web-component files and its on-demand imports 404. In a bundled app, use [per-web-component imports](#per-web-component-imports) instead.
 
@@ -106,7 +110,9 @@ On import it scans for undefined `kai-*` elements and starts a `MutationObserver
 ```
 
 <Aside type="caution" title="CDN / static-file only — not for bundlers">
-The autoloader resolves web-component modules relative to its own URL and uses `document` + `MutationObserver`. Load it from a `<script type="module">` on a CDN or static host. Do **not** `import '@kitn.ai/ui/autoloader'` in a bundled (Vite/webpack/Next) app or a server render — the bundler relocates it and the on-demand imports 404. In a bundled app, use per-web-component imports or the register-all bundle.
+The autoloader resolves web-component modules relative to its own URL and uses `document` + `MutationObserver`. Load it from a `<script type="module">` on a CDN or static host. Do **not** `import '@kitn.ai/ui/autoloader'` in a bundled (Vite/webpack/Next) app or a server render — the bundler relocates it and the on-demand imports 404.
+
+In a bundled app, use per-web-component imports or the register-all bundle.
 </Aside>
 
 <Aside type="tip" title="Pin versions in production">

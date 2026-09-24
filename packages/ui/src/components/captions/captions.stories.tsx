@@ -120,7 +120,7 @@ export const Interim: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'A caption still forming — `final: false` renders a shade lighter than a committed line, so the switch to full contrast reads as the moment ASR/the model settles on the text.',
+        story: 'A caption line still forming, drawn lighter until the model settles on the words.',
       },
       source: {
         code: `${IMPORT}\n\n<Captions segments={[{ speaker: 'user', text: "What's on my calendar to—", final: false }]} />`,
@@ -135,7 +135,7 @@ export const Empty: Story = {
   render: (args: CaptionsProps) => stage(() => <Captions {...args} />),
   parameters: {
     docs: {
-      description: { story: 'Empty segments render nothing — no chrome, no placeholder, no reserved space.' },
+      description: { story: 'Empty segments render nothing: no chrome, no placeholder, no reserved space.' },
       source: { code: `${IMPORT}\n\n<Captions segments={[]} />  {/* renders nothing */}`, language: 'tsx' },
     },
   },

@@ -76,8 +76,7 @@ export const MentionPicker: Story = {
   parameters: {
     docs: {
       description: {
-        story:
-          'Type to filter across all groups. Arrow keys move the selection; Enter picks; Escape clears. Watch the Actions panel for `kai-select`, `kai-query-change`, and `kai-active-change`.',
+        story: 'A mention and slash-command picker over grouped items, filtered as you type.',
       },
       source: {
         language: 'html',

@@ -88,7 +88,8 @@ surfaces are measured clean, not when it is edited.
 | story `argTypes` descriptions (a FIFTH surface: not the component's prop docs, and they WIN in Storybook's props table) | **515 values read, 0 over 160, 0 em dash** (26 findings across 14 files, all rewritten, 0 waived, rule (m) of `lint-story-conventions`) | done |
 | element docstrings | 100 of 100 present, 75,917 -> ~7.8 KB, mean 808 -> 69, longest 161 | done |
 | component page tops (description <= 100, lede <= 140, aside <= 200, no em dash, no instruction, lede not restating) | 0 offenders across 63 pages, 88 docs tests green, verify:docs exit 0 | done |
-| concept pages over cap (guides, patterns, examples) | 60 | paragraphs <= 4 lines |
+| concept pages over cap (guides, patterns, examples) | **0** paragraphs over ~4 lines (was 41 across 24 pages), guarded by `docs-copy-concepts.test.ts` | done |
+| per-STORY descriptions (`docs.description.story`) | **21 judged: 13 FAIL rewritten, 6 WEAK decided; rule (l) now reads both description fields** | done |
 | comment blocks over 20 lines | **0** (was 181), guarded by `lint:comment-references` | done |
 | comments citing plans / IDs / dates / sections | **0** (was 156), guarded | done |
 | DOC COMMENTS in `src/**/*.{ts,tsx}`, four rules: member cap, em dash in a doc comment, em dash in a rendered string, type restatement | **2,026 members + 1,166 declaration docs across 351 sources; 0 over the 160 cap, 0 em dash, 0 type restatement, 0 waivers** (`lint-prop-docs`, now the doc-and-copy guard) | done |
@@ -169,6 +170,22 @@ Two blind spots the passes found, both worth keeping:
   1,586 props, 0 over the cap, 0 waived. The two blind spots below are closed.
 
 ## Done so far, kept here so it is not re-litigated
+
+- **PASS D, the concept tier and the story blurbs.** A concept page (`guides/`, `patterns/`, `examples/`)
+  keeps its prose, so the rule is about SHAPE, not size: no paragraph over ~4 rendered lines, measured as
+  characters (`4 x 95 = 380`) so an author cannot pass by never wrapping. 41 paragraphs across 24 pages
+  were split at sentence boundaries, and **not one word moved**: every file is proved against HEAD on two
+  axes, the flattened prose AND every fenced block, because a split that merges code lines keeps the
+  flattened text identical while destroying a snippet. The guard is
+  `apps/docs/test/docs-copy-concepts.test.ts`, with floors on the pages (40) and paragraphs (400) read, the
+  page-level `copyReview: waived -- <reason>` waiver, and extractor cases (rendered width, not source
+  wrapping; fences, lists, headings, tables and the code-bearing JSX blocks skipped).
+- **Rule (l) now reads the per-STORY description too** (`docs.description.story`), out of scope by decision
+  until PASS D. Same bar and same reason: the reader is on that story's own page, so naming the story, the
+  Labs tier or the harness tells them about the documentation rather than about what they are looking at.
+  It carries the em dash ban as well, which no rule read on those 21 sites. The reviewer judged all 21:
+  **13 FAIL, 6 WEAK, 2 PASS**, every FAIL and WEAK applied (worst was a 1,043-char tutorial in the Custom
+  story; the class was the props table in prose, imperatives, and tag names).
 
 - **PASS C, the comments: 162 plan/ID/date/section citations and 121 blocks over 20 lines, all swept, 9 waivers
   (each with a parsed reason).** The guard `lint:comment-references` is new: it walks every hand-written
