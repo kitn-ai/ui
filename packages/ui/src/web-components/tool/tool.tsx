@@ -59,7 +59,7 @@ defineWebComponent<Props, Events>('kai-tool', {
   // after mount is parsed by component-register to `undefined`, so the prop never
   // changes and nothing re-renders. reflectFlag's coercing setter resolves that
   // `undefined` back through the same `flag()` policy, which is what makes the plain
-  // HTML gesture work at runtime and not only at parse time (findings G-05).
+  // HTML gesture work at runtime and not only at parse time.
   reflectFlag('disabled');
 
   return (

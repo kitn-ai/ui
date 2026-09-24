@@ -30,9 +30,9 @@ export interface InputProps extends Omit<JSX.InputHTMLAttributes<HTMLInputElemen
   /** Fires on commit (blur) with the current value; canonical when a mask is active. */
   onValueChange?: (value: string) => void;
 
-  // --- Form-field formats (spec §7.2). All five are SCALARS, which is what lets them
+  // --- Form-field formats. All five are SCALARS, which is what lets them
   // survive as HTML attributes on the `<kai-input>` facade. Absent `format` AND absent
-  // `semantic` is the behavior of today, byte for byte (owner decision 1 / spec §1.1): no mask,
+  // `semantic` is the no-mask behavior: no mask,
   // no extra attributes, nothing.
 
   // The literal `default` is the opt-in sentinel: it resolves to the `semantic` format. A
@@ -85,7 +85,7 @@ const ROW_INPUT =
 const SIZE_SM = 'px-2.5 py-1';
 // The invalid-state border, EXPORTED because `src/components/select/select.tsx` renders the same
 // field box and a second hand-typed copy of this string is exactly the kind of
-// restatement that rots (`docs/coupling-map.md` §4). `INVALID` stays as the local
+// restatement that rots (`docs/coupling-map.md` owns that list). `INVALID` stays as the local
 // alias so the three call sites below read unchanged.
 export const FIELD_INVALID = 'border-destructive dark:border-red-400/70';
 const INVALID = FIELD_INVALID;
@@ -122,7 +122,7 @@ export function Input(props: InputProps): JSX.Element {
   const hasAffix = () => local.leading != null || local.trailing != null;
 
   // -------------------------------------------------------------------------------
-  // Form-field formats (spec §7.2). Tier 1 is a handful of attributes; tier 2 is one
+  // Form-field formats. Tier 1 is a handful of attributes; tier 2 is one
   // `createInputMask` bound to whichever `<input>` node is currently mounted.
   // -------------------------------------------------------------------------------
 
@@ -195,11 +195,11 @@ export function Input(props: InputProps): JSX.Element {
     };
     // WHICH NODE IS MOUNTED. `Input` caches two `<input>`s and `<Show>` swaps between
     // them when a leading/trailing affix appears or disappears — the one legitimate node
-    // change in this file (spec §8.1). The `ref` of a node fires only when it is BUILT, and
+    // change in this file. The `ref` of a node fires only when it is BUILT, and
     // the cached node is built once, so a toggle back to an existing node notifies
     // nobody. Re-attachment therefore has to be explicit, and this read is what makes it
     // happen. Everything else about this widget is pinned to keeping the SAME node alive
-    // (`tests/ui/input-node-identity.test.tsx`), which is the only reason a long-lived
+    // (`tests/components/input-node-identity.test.tsx`), which is the only reason a long-lived
     // masker on it is safe at all.
     //
     // THE ASSUMPTION THIS RELIES ON, stated: `plainEl`/`rowEl` are plain mutable refs, so
@@ -245,7 +245,7 @@ export function Input(props: InputProps): JSX.Element {
         });
         maskedEl = el;
       } catch (err) {
-        // A bad pattern falls back to a plain text field, loudly (spec §7.3).
+        // A bad pattern falls back to a plain text field, loudly.
         warnBadFormat(format, err, false);
       }
     });
@@ -266,8 +266,8 @@ export function Input(props: InputProps): JSX.Element {
   // Passing a function moves every reactive read inside the element, where
   // Solid compiles it into a nested effect that sets the attribute on the
   // EXISTING node. Same reason the affix branch was always fine: it inserts the
-  // input through a function. Pinned by `tests/ui/input-node-identity.test.tsx`.
-  // Tier-1 attributes (spec §2). Each is a DEFAULT the semantic type supplies: an
+  // input through a function. Pinned by `tests/components/input-node-identity.test.tsx`.
+  // Tier-1 attributes. Each is a DEFAULT the semantic type supplies: an
   // explicit prop always wins, because the consumer knows something the enum does not.
   // With no `semantic` every one of these is `undefined` — the attribute is simply not
   // set, which is what byte-for-byte parity with the behavior of today means here.

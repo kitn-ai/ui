@@ -1,9 +1,9 @@
 // src/state/persistence.ts — the mechanical halves of the persistence story.
 //
-// The boundary (spec §1, CLAUDE.md): persistence POLICY — what is stored,
+// The boundary (CLAUDE.md): persistence POLICY — what is stored,
 // where, for how long, under what quota — is the app's. What lives here is
 // only the mechanics every such app re-derives by hand: validating a stored
-// thread back into `ChatMessage[]` (F-18), and the debounce/flush shape that
+// thread back into `ChatMessage[]`, and the debounce/flush shape that
 // keeps a per-token stream from hitting storage per token. No storage call,
 // no fetch, no DOM; the save fn, the delay, and the reaction to a drop are
 // all the consumer's.

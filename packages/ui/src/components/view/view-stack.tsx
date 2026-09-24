@@ -1,26 +1,21 @@
 /**
- * ViewStack + View — the mobile-stack view navigator (spec P-3).
+ * ViewStack + View — the mobile-stack view navigator.
  *
- * The navigation model the chat widget uses, shipped as its own part so a
- * block cannot rebuild it differently without noticing (the spike drifted on
- * exactly this, twice): TAB-ROOT views sit side by side behind a tab bar;
- * DRILL views are pushed on top of whichever root they were entered from.
- * The one rule that must hold everywhere:
+ * The navigation model the chat widget uses, in its own part so a block cannot
+ * rebuild it differently without noticing. The rule that must hold everywhere:
  *
  *   a DRILLED view hides the tab bar and shows a back affordance;
  *   a TAB ROOT shows the tab bar and no back affordance.
  *
- * The stack OWNS that state and exposes it (`view`, `root`, `drilled`) so a
- * tab bar or header consumes it via the controller / `data-*` hooks instead
- * of reimplementing the policy.
+ * The stack OWNS that state and exposes it (`view`, `root`, `drilled`) so a tab
+ * bar or header consumes it through the controller / `data-*` hooks rather than
+ * reimplementing the policy.
  *
- * Presentation-light by design: this part decides WHICH view renders and
- * nothing else. Non-current views stay MOUNTED and hidden, so per-view state
- * (scroll offsets, half-typed inputs, component state) survives tab switches
- * and drills by construction — "switching resets nothing" is the default and
- * there is no opt-out to get wrong. It never moves focus or scroll: the kit's
- * idiom is an imperative `focus()` on the element that owns the control (see
- * `ChatThread`'s exposed methods), never focus stolen on navigation.
+ * Presentation-light: this part decides WHICH view renders and nothing else.
+ * Non-current views stay MOUNTED and hidden, so per-view state (scroll offsets,
+ * half-typed inputs, component state) survives switches and drills by
+ * construction. It never moves focus or scroll: the kit's idiom is an
+ * imperative `focus()` on the element that owns the control.
  */
 import {
   createContext,

@@ -1,6 +1,6 @@
 /**
- * The conversations data contract (C-3, C-5, C-7): a JS-property interface,
- * never REST/events baked into the format. The kit owns the interface, the
+ * The conversations data contract: a JS-property interface, never REST/events
+ * baked into the format. The kit owns the interface, the
  * payload types (ConversationSummary/ConversationGroup from ../types,
  * ChatMessage from ../web-components/chat/chat-types, reused, never duplicated), and
  * the lifecycle (list() on mount + list-view open, load() on row select,
@@ -53,7 +53,7 @@ export const LEGACY_THREAD_MIGRATED_TITLE = 'Conversation 1';
 /** Newest-first ordering over `updatedAt`; rows with a missing or unparsable
  *  timestamp sort last (stable, so ties keep declaration order). The ONE
  *  recency rule: the list panel, ChatThread's restore pick, and the home
- *  screen's recent card all sort with this (issue #335). */
+ *  screen's recent card all sort with this. */
 export function byRecency(
   a: Pick<ConversationSummary, 'updatedAt'>,
   b: Pick<ConversationSummary, 'updatedAt'>,
@@ -64,25 +64,18 @@ export function byRecency(
 }
 
 /**
- * Whether a conversation should show an unread indicator (owner round,
- * 2026-08-26). `lastReadAt`'s own doc (`types.ts`) has the full contract;
- * this is the one place that reads it, so every surface, the batteries list
- * row (`ConversationItem`), the widget-box `ConversationPanel`, the home
- * screen's recent card, `ChatThread`'s own `anyUnread` badge/`onUnreadChange`
- * report, and any consumer-composed launcher deriving its own badge from
- * `store.list()`, derives it identically rather than each restating the
- * comparison. Lives HERE (beside the `ConversationStore` contract whose
- * `markRead` writes the field it reads) rather than in a component, and is
- * re-exported from the package root: it is headless data logic, not
- * rendering.
+ * Whether a conversation should show an unread indicator. `lastReadAt`'s own doc
+ * (`types.ts`) has the full contract; this is the one place that reads it, so every
+ * surface (the list row, the widget panel, the home screen's recent card, ChatThread's
+ * own badge report, any consumer-composed launcher) derives it identically rather than
+ * each restating the comparison. Headless data logic, so it lives here beside the
+ * `ConversationStore` contract and is re-exported from the package root.
  *
- * Absent `lastReadAt` reads as NOT unread; the decide-loudly default for a
- * store that never implements `ConversationStore.markRead` at all (every
- * summary it returns leaves the field undefined forever, so this always
- * returns `false` for it) rather than guessing "probably unread" from a
- * signal the store never actually provided. Defensive `Date.parse`, same
- * pattern as `byRecency` above: an unparsable date reads as not unread
- * rather than throwing.
+ * Absent `lastReadAt` reads as NOT unread: the decide-loudly default for a store that
+ * never implements `markRead` (every summary it returns leaves the field undefined, so
+ * this always returns `false`) rather than guessing "probably unread" from a signal the
+ * store never provided. Defensive `Date.parse`, same as `byRecency`: an unparsable date
+ * reads as not unread rather than throwing.
  */
 export function isConversationUnread(conv: Pick<ConversationSummary, 'updatedAt' | 'lastReadAt'>): boolean {
   if (!conv.lastReadAt) return false;

@@ -46,7 +46,7 @@ export function useAutoResize(options: UseAutoResizeOptions = {}) {
     // one cheap, reliable "am I actually in the layout" signal (no real
     // layout engine needed to read it, which matters because jsdom doesn't
     // have one). `scrollHeight` on a hidden element reads 0, and WRITING
-    // that as the height is gap #1 this hook used to have — the box
+    // that as the height is the first gap this hook used to have — the box
     // collapsed to nothing and nothing ever re-measured it on reveal,
     // because opening a <details> fires no 'input' event. So: skip the
     // write here and let it stay whatever it last was; the ResizeObserver
@@ -79,7 +79,7 @@ export function useAutoResize(options: UseAutoResizeOptions = {}) {
     requestAnimationFrame(resize);
     // Re-measure on ANY size/visibility change to the element itself — this
     // is what covers "revealed inside a collapsed <details>" GENERICALLY
-    // (gap #2), rather than as a one-off fix for that single call site: any
+    // (the second gap), rather than as a one-off fix for that single call site: any
     // container reflow that changes the textarea's box (a parent's display
     // toggling, a sidebar resizing, a responsive layout breakpoint) re-runs
     // `resize()` the same way. A `ResizeObserver` fires once immediately

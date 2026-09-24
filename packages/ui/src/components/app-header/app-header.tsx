@@ -1,83 +1,22 @@
 /**
- * `AppHeader` — the workspace's app-level top bar, PROMOTED from
- * `src/stories/showcase/builder-workspace.stories.tsx`'s local `AppHeader`/
- * `ThemeToggleButton` (2026-08-30). That story is the APPROVED DESIGN — the
- * owner's own feedback rounds are recorded in its module comment — and the
- * emitted app had drifted off it (a text "Theme" button, no search at all, a
- * bare avatar with no menu, and the whole cluster stuffed into ChatThread's
- * own header row inside the chat rail). The story now renders THIS component
- * instead of its own copy, exactly as `components/work-surface/work-surface.tsx` did for the
- * pane chrome, so design and product cannot drift apart again.
+ * `AppHeader`, the workspace's app-level top bar: a top-level strip ABOVE the split (a
+ * sibling of `WorkspaceShell`, not inside it), so it persists through the work surface's
+ * Expand toggle. It does NOT replace `ChatThread`'s own header row; both ship together.
  *
- * WHERE IT SITS: a top-level strip ABOVE the split entirely (a sibling of
- * `WorkspaceShell`, not inside it), so it persists through the work surface's
- * Expand toggle — mirroring Lovable's own top bar, which lives outside/above
- * its split body. It does NOT replace `ChatThread`'s built-in header row; the
- * story ships both (the app strip across the frame, the rail's own title row
- * inside it) and the emitted app now does too.
+ * The arrangement is NOT configurable, deliberately: title on the left, a utility cluster
+ * (search, theme toggle), a divider, the header actions row, another divider, then the
+ * compact user cluster (initials avatar and chevron only, with the name and plan still
+ * feeding the initials and the accessible name). Dividers render only between two groups
+ * that both have visible content, so switching one off leaves no orphan divider.
  *
- * THE ARRANGEMENT IS NOT CONFIGURABLE — owner ruling, and the reason this is
- * one component rather than a slot bag. Left to right:
+ * MENU HONESTY: an affordance with nothing behind it must not render. `showSearch` without
+ * `onSearch`, `actions` without `onActionSelect`, `user` without `onUserMenuSelect` and
+ * `showThemeToggle` without `onToggleDark` each render NOTHING rather than a control that
+ * swallows its own click.
  *
- *     [ title ]                    [ search · theme ] | [ actions ] | [ user ]
- *
- *  - the TITLE on the LEFT;
- *  - a utility cluster (search, theme toggle) on the right;
- *  - a divider;
- *  - the header actions row (Share/Deploy in the starters, but a real
- *    construct-authored ordered list — `header.actions`);
- *  - a divider;
- *  - the user cluster, COMPACT: initials avatar + chevron only, no name/plan
- *    text (the owner's own instruction), with the name/plan still feeding the
- *    initials and the accessible name so the control never loses its name to
- *    assistive tech just because the text is hidden.
- *
- * Dividers render only between two groups that both actually have visible
- * content, so switching a group off never leaves an orphan divider.
- *
- * SUPERSEDED HISTORY, recorded so nobody re-litigates it. The FIRST round
- * resolved a contradictory brief ("product title on the right" vs "mirror
- * Lovable's placement exactly", and Lovable's real header puts brand LEFT /
- * actions RIGHT) as a MIRROR of Lovable — actions left, title right — which
- * satisfied both halves of the instruction at once. The owner then ruled
- * explicitly, superseding that judgment call: title on the LEFT, and the right
- * side is the full explicit arrangement above rather than a single actions
- * cluster. Do not "fix" this back toward the mirror; it was already fixed.
- *
- * MENU-HONESTY (this repo's standing rule, and the reason every piece is
- * gated on a MECHANISM and not only on a flag): an affordance with nothing
- * behind it must not render. `showSearch` without `onSearch`, `actions`
- * without `onActionSelect`, `user` without `onUserMenuSelect`,
- * `showThemeToggle` without `onToggleDark` — each renders NOTHING rather than
- * a control that swallows its own click. This is the same shape
- * `WorkSurface`'s `showOpenInNewTab && src` gate takes, for the same reason.
- * Both real call sites always supply the mechanism: the story wires search to
- * its command-palette overlay and reports actions/menu selections in its own
- * preview strip; codegen wires search to the `shell.commandPalette` overlay it
- * emits, the theme toggle to the host's `theme` attribute, and
- * actions/user-menu items to the documented `kai-header-action` /
- * `kai-user-menu` CustomEvents on the host.
- *
- * THEME TOGGLE: icon-only, showing the icon for the mode you would switch TO
- * (Sun while dark — "tap for light" — Moon while light), never "dark mode" /
- * "light mode" text and never the plain text button the emitted app used to
- * render. `dark` is CONTROLLED, never owned here: the story flips a class on
- * its preview frame, codegen flips the host element's `theme` attribute, and
- * this component only reports the click.
- *
- * STYLING follows the same rule as every kit component (Tailwind utilities
- * compiled into the shadow sheet), not the emitted project's inline-style
- * convention — that convention governs the JSX CODEGEN WRITES, which is why
- * composing this component there is what keeps the emitted app on the design.
- *
- * ONE DELIBERATE CHANGE FROM THE STORY, decided loudly: the strip PAINTS ITS
- * OWN `bg-background`. The story's copy had none and did not need one — it sits
- * inside a preview frame that already paints that exact token. A promoted
- * component has no such guarantee, and the emitted app proved it in the first
- * live capture: above the split, outside `WorkspaceShell` (which paints
- * `bg-background` itself), the strip was transparent, so dark-theme foreground
- * text landed on the page's white. Same token, so the story's look is
- * unchanged; the component just no longer depends on its host for a floor.
+ * The theme toggle is icon-only, showing the icon for the mode you would switch TO, and
+ * `dark` is CONTROLLED: the host flips it and this component only reports the click. The
+ * strip paints its own `bg-background` so it does not depend on its host for a floor.
  */
 import { type JSX, Show, For } from 'solid-js';
 import { Search, Sun, Moon, ChevronDown, Settings, CircleHelp, LogOut } from 'lucide-solid';

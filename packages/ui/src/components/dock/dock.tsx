@@ -218,37 +218,23 @@ const DOCK_CSS = `
 [data-kai-dock] [part="launcher"]:focus-visible { outline: 2px solid var(--color-ring); outline-offset: 2px; }
 [data-kai-dock] [part="launcher"]:disabled { opacity: 0.55; cursor: not-allowed; }
 
-/* The mobile-only close affordance rendered INSIDE the panel. Hidden by default and
-   only switched on inside the <=480px media block below, alongside the rule that
-   hides the launcher while the panel is open at that width — same query drives both,
-   CSS-only, no JS viewport logic. Absolutely positioned against the panel, which is
-   the panel's own containing block once the narrow-viewport rule below sets it to
-   position: fixed.
+/* The mobile-only close affordance rendered INSIDE the panel: hidden by default and only
+   switched on inside the <=480px media block below, alongside the rule that hides the
+   launcher while the panel is open at that width, so one query drives both with no JS
+   viewport logic. It is absolutely positioned against the panel.
 
-   The inset is a CONSUMER-OVERRIDABLE TOKEN, same idiom as every other geometry
-   value in this file (--kai-dock-width and friends). The dock is content-agnostic —
-   it never reads what is slotted into the panel — so it cannot know whether that
-   content renders its own trailing controls (a ChatThread header-end slot with
-   share/settings icons, say) in the same top-right corner.
+   The inset is a CONSUMER-OVERRIDABLE TOKEN, the same idiom as every other geometry value
+   in this file. The dock is content-agnostic and never reads what is slotted, so it cannot
+   know whether that content renders its own trailing controls in the same top-right corner.
 
-   The mobile block below reserves a BAND of the panel's own padding above whatever
-   is slotted, sized to this button's own footprint, so nothing paints under this X
-   by default -- verified fix (round 1) against a real ChatThread header-end slot
-   colliding with it at 375px. Owner feedback on the real widget (round 2): for a
-   construct with only a title in the header, that band read as a dead empty strip
-   with the X floating alone in it -- "that doesn't look like the empty component
-   either, lets do better." The actual fix composes instead of reserving space:
-   ChatThread now has its own headerEndContent escape hatch (see its prop doc) so a
-   caller puts the close control INSIDE the header row, sharing it with the title --
-   zero collision by construction, no band needed. hideClose on this component (see
-   its prop doc) then suppresses this built-in X for exactly that case, and the
-   band above is scoped to :not([data-hide-close]) so it comes off ONLY there --
-   every other consumer (anyone who hasn't opted into hideClose, including a
-   hand-authored dock with real header-end content) keeps the band, same as round 1
-   shipped, so the collision it fixed stays fixed for them. What remains here for
-   that default case is a plain absolute overlay, top-right of the panel, with
-   these consumer-overridable inset tokens for the rare case it should deliberately
-   sit in front of something (e.g. a single small badge). */
+   The mobile block below reserves a BAND of the panel's own padding above whatever is
+   slotted, sized to this button's own footprint, so nothing paints under the X by default
+   (verified at 375px against a real header-end slot). A band alone read as a dead empty area
+   for a header holding only a title, so the better answer is COMPOSITION: a caller can put a
+   close control inside the header row through the headerEndContent escape hatch, sharing the
+   row with the title and colliding by construction. hideClose on this component suppresses
+   this built-in X for exactly that case, and the band is scoped to :not([data-hide-close])
+   so it comes off only there; every other consumer keeps it. */
 [data-kai-dock] [part="close"] {
   display: none;
   position: absolute;
@@ -343,22 +329,20 @@ const DOCK_CSS = `
   }
 
   /* Reserve a band for the built-in [part="close"] X ABOVE whatever is slotted,
-     rather than overlaying it on top of the panel's own content — the fix round 1
-     collision protection (verified against a real ChatThread header-end slot at
+     rather than overlaying it on top of the panel's own content, so the two cannot collide (verified against a real header-end slot at
      375px: without this, the X painted directly over trailing icon buttons).
      DERIVED from the button's own inset + size tokens, not a second hand-typed
      number.
 
-     SCOPED to :not([data-hide-close]) — round 2 (owner feedback: the band read as
-     a dead strip when nothing but the X occupied it) removed this UNCONDITIONALLY
-     and reintroduced the very collision round 1 fixed, for every consumer who
-     never opted into hideClose. hideClose is only true for a caller that supplies
+     SCOPED to :not([data-hide-close]) because the band read as a dead strip when nothing
+     but the X occupied it; removing it unconditionally reintroduces the very collision
+     this band prevents, for every consumer who never opted into hideClose. hideClose is only true for a caller that supplies
      its OWN close control in its own header row (ChatThread's headerEndContent is
      the one that does today) — the built-in X and this band both come off
      together for that case, since there is nothing left for the band to protect.
      Every other consumer -- including a hand-authored kai-dock with real
-     slot="header-end" content and no opinion on hideClose -- keeps the band, the
-     same as round 1 shipped. */
+     slot="header-end" content and no opinion on hideClose -- keeps the band,
+     unchanged. */
   [data-kai-dock]:not([data-hide-close]) [part="panel"] {
     padding-block-start: calc(2 * var(--kai-dock-close-inset-block, 0.75rem) + 2.25rem);
   }

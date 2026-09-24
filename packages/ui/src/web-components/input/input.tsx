@@ -47,7 +47,7 @@ interface Props extends Record<string, unknown> {
   /** Virtual-keyboard hint forwarded to the inner input (e.g. `numeric`, `email`). */
   inputmode?: string;
 
-  // --- Form-field formats (spec §7.2). Five SCALARS, which is exactly why they work as
+  // --- Form-field formats. Five SCALARS, which is exactly why they work as
   // HTML attributes under the kai- contract. With `format` AND `semantic` both absent the
   // element behaves as it always did: no mask, no extra attributes, nothing.
 
@@ -234,7 +234,7 @@ defineWebComponent<Props, Events>('kai-input', {
    * behind its back leaves it holding a stale string, and the next keystroke reconciles
    * against that stale string rather than against what is on screen. So: put the text in
    * the field, then fire the `input` event the masker already listens for, which is its
-   * documented reconcile path (spec §5.1) and ends in the same normalize-format-commit
+   * documented reconcile path and ends in the same normalize-format-commit
    * every edit takes. The masker calls back with the canonical value and the formatted
    * text is then in the DOM, so both signals come from IT, not from the caller.
    *
@@ -271,34 +271,25 @@ defineWebComponent<Props, Events>('kai-input', {
     enumerable: true,
   });
 
-  // A CONFIGURATION CHANGE AFTER MOUNT re-derives the canonical value.
+  // A CONFIGURATION CHANGE AFTER MOUNT re-derives the canonical value. The masker cannot
+  // report it, in either shape: a `format` ARRIVING attaches a fresh masker, which seeds
+  // with `notify: false` on purpose (the display re-formats, `el.value` does not), and
+  // `update()` notifies only when the FORMATTED text changed, so a reconfiguration that
+  // moves the canonical value without moving the display is silent by design (flipping
+  // `semantic` to `tel` under `###-###-####` turns `555-123-4567` into `5551234567` on
+  // the wire, nothing on screen). `el.value` would then serve a stale canonical value
+  // indefinitely, and an external write does NOT repair it: an edit whose raw value comes
+  // out unchanged commits nothing and notifies nobody. So the facade re-derives.
   //
-  // The masker cannot report this one, in either of the two shapes it takes:
+  // It re-fits from the previous CANONICAL value, not from the text on screen, because
+  // that text can carry GUIDE characters at the unfilled positions, and a guide whose
+  // character fits the position class would be absorbed as content on the way back in.
+  // With no mask there is no canonical form, so the field text is it.
   //
-  //   - `format` ARRIVING on a live field attaches a fresh masker, and attaching seeds
-  //     with `notify: false` on purpose. The display re-formats, `el.value` does not.
-  //   - `update()` notifies only when the FORMATTED text changed, so a reconfiguration
-  //     that moves the canonical value WITHOUT moving the display is silent by design:
-  //     flipping `semantic` from `custom` to `tel` under `###-###-####` turns
-  //     `555-123-4567` into `5551234567` on the wire and changes nothing on screen.
-  //
-  // Either way `el.value` would go on serving a stale canonical value indefinitely -- and
-  // an external write does NOT repair it, because an edit whose raw value comes out
-  // unchanged commits nothing and notifies nobody. Only a keystroke did. So the facade
-  // re-derives, from the text the masker has settled on.
-  //
-  // WHAT IT RE-FITS, and why not simply the text on screen. While a mask is on, the text
-  // on screen can carry GUIDE characters at the unfilled positions, and a guide character
-  // that happens to fit the position class would be absorbed as content on the way back
-  // in. The previous CANONICAL value has no guide in it and is the faithful record of what
-  // the user actually entered, so that is the input -- the same thing `update()` re-fits
-  // from. With no mask there is no canonical form to speak of, so the field text is it.
-  //
-  // WHY A MICROTASK. This effect is created before the JSX below, so on any flush it runs
-  // BEFORE the mask effect inside `Input`: reading or writing here would race the masker
-  // it is trying to agree with. One microtask puts the whole thing after the flush. Where
-  // the masker DID notify (a clipping format change), it has already set the right value
-  // by then and this recomputes the same answer.
+  // WHY A MICROTASK: this effect is created before the JSX below, so on any flush it runs
+  // BEFORE the mask effect inside `Input` and would race the masker it is trying to agree
+  // with. One microtask puts it after the flush, by which point a masker that DID notify
+  // has already set the right value and this recomputes the same answer.
   {
     let first = true;
     createEffect(() => {

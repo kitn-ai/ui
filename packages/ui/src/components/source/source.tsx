@@ -35,25 +35,20 @@ function Source(props: SourceProps) {
 
   /** The url actually put in `href`.
    *
-   *  A citation url is MODEL-SUPPLIED: `wire/formats/openai.ts` (`sourcesOf`)
-   *  and `wire/formats/anthropic.ts` (`citations_delta`) both take it as an
-   *  arbitrary string. `javascript:`/`data:` in an href is script execution one
-   *  click away, and today the only thing stopping it is `target="_blank"` plus
-   *  current Chrome behaviour -- an accident of the browser, not a guard. Anyone
-   *  dropping `target="_blank"` for styling would silently make it live.
+   *  A citation url is MODEL-SUPPLIED: both wire formats take it as an arbitrary
+   *  string. `javascript:`/`data:` in an href is script execution one click away, and
+   *  the only thing stopping it today is `target="_blank"` plus current Chrome
+   *  behaviour, an accident of the browser rather than a guard.
    *
-   *  Filtered HERE, at render, rather than in `wire/`, for two reasons.
-   *  (1) The wire layer is OPTIONAL: a consumer with their own backend adapter
-   *  can set `messages` containing `source` parts directly and never touch
-   *  `wire/`, so a wire-side filter would leave that path exploitable while
-   *  looking fixed. Every path renders through here.
-   *  (2) `parts` should keep reporting what the model actually said, so a
-   *  consumer logging or auditing citations is not lied to. The kit refuses to
-   *  LINK the url; it does not pretend the url was never there.
+   *  Filtered HERE, at render, not in `wire/`: (1) the wire layer is OPTIONAL, so a
+   *  consumer with their own adapter who sets `source` parts directly would leave a
+   *  wire-side filter looking fixed while that path stayed exploitable; (2) `parts`
+   *  should keep reporting what the model actually said, so an audit is not lied to.
+   *  The kit refuses to LINK the url; it does not pretend the url was never there.
    *
-   *  `isRenderableLink` (absolute http(s) only) is the right guard rather than
-   *  `isSafeUrl` from card-routing: a citation is a reference to a page on the
-   *  web, so unlike a markdown body link it has no business being relative. */
+   *  `isRenderableLink` (absolute http(s) only) is the guard rather than `isSafeUrl`: a
+   *  citation is a reference to a page on the web, so unlike a markdown body link it has
+   *  no business being relative. */
   const href = () => (isRenderableLink(raw()) ? raw() : '');
 
   /** Display only, and deliberately derived from the RAW value: a blocked url

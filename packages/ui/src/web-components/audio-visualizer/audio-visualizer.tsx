@@ -116,7 +116,7 @@ export function AudioVisualizerFacade(
     ? ctx.flag('listeningAmplitude')
     : props.listeningAmplitude === true;
 
-  // Reflected (kai-dock precedent, findings G-05): without this,
+  // Reflected, same as kai-dock: without this,
   // `<kai-audio-visualizer listening-amplitude>` would leave
   // `el.listeningAmplitude === undefined` even while the element honours the
   // attribute, because toggleAttribute's empty-string write-back parses to

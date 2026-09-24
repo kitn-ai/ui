@@ -2,12 +2,11 @@
  * Pure reductions from AnalyserNode output to the numbers a visualizer draws.
  *
  * Ported from livekit/components-js `packages/react/src/hooks/useTrackVolume.ts`
- * (Apache License 2.0). Both the dB normalization curve AND the band split
- * are carried over so our output matches theirs frame for frame: the split
- * is upstream's linear-proportional chunking (their PR #1265). An interim
- * revision here spaced the buckets geometrically to serve a wide raw-mic
- * window; both reverted together -- see `reduceToBands` below and the
- * DEFAULTS docstring in use-audio-analysis.ts for the full story.
+ * (Apache License 2.0). Both the dB normalization curve AND the band split are
+ * carried over so our output matches theirs frame for frame: the split is
+ * upstream's linear-proportional chunking. An interim revision here spaced the
+ * buckets geometrically to serve a wide raw-mic window (bins 4-120); the spacing
+ * and that window were reverted together.
  */
 
 /** dB floor of the normalization curve. Below this reads as silence. */
@@ -33,25 +32,19 @@ export function normalizeDb(value: number): number {
  * `loPass` / `hiPass` are BIN INDICES relative to `fftSize`, not frequencies.
  * Upstream's naming is misleading; the behavior is a plain array slice.
  *
- * Bucket edges are LINEAR-PROPORTIONAL across `[loPass, hiPass]` -- upstream
- * LiveKit's own distribution (`useMultibandTrackVolume`, useTrackVolume.ts
- * lines 141-153, rewritten to proportional chunking by their PR #1265): each
- * band averages an equal consecutive run of bins, `floor(i * total / bands)`
- * to `floor((i + 1) * total / bands)`, and a run that comes out empty reads
- * 0 (their `chunkLength === 0` branch). With the default window's 100 bins
- * and 5 bands, that is 20 bins averaged per band -- the averaging itself is
- * part of upstream's idle stillness, diluting any single flickering bin
- * 20:1 (noise-floor diagnosis, table B).
+ * Bucket edges are LINEAR-PROPORTIONAL across `[loPass, hiPass]`, upstream
+ * LiveKit's own distribution (`useMultibandTrackVolume`): each band averages an
+ * equal consecutive run of bins, `floor(i * total / bands)` to
+ * `floor((i + 1) * total / bands)`, and a run that comes out empty reads 0. With
+ * the default window's 100 bins and 5 bands, that is 20 bins averaged per band,
+ * which is part of upstream's idle stillness: any single flickering bin is
+ * diluted 20:1.
  *
  * An interim revision spaced these buckets geometrically so that a wide
- * raw-microphone window (bins 4-120) kept its upper buckets alive. That
- * concentrated the noisiest few low bins into band 0 undiluted, which the
- * centre-out mirror below then promoted to the CENTRE element -- the
- * measured core of the "white noise when the mic is on" defect (diagnosis
- * table B: geometric band 0 idled at 0.52 on real room tone where this
- * split reads 0.32 over the same wide window, and exactly 0 over the
- * default one). Reverted to upstream's split when the default window
- * reverted; the mirror stays, it is orthogonal.
+ * raw-microphone window (bins 4-120) kept its upper buckets alive. That concentrated
+ * the noisiest few low bins into band 0 undiluted, which the centre-out mirror below
+ * then promoted to the CENTRE element: the measured core of the "white noise when the
+ * mic is on" defect. Reverted to upstream's split; the mirror stays, orthogonal.
  */
 export function reduceToBands(
   freq: Float32Array,
@@ -111,19 +104,15 @@ export function normalizeVolumeBands(bands: number[], count: number): number[] {
  * (an even one, both positions sharing band 0), band 1 on the pair either
  * side of that, and so on outward to the two ends.
  *
- * Every scripted state in this component is already centre-oriented
- * (`listening` blinks the centre bar, `connecting` sweeps inward from both
- * ends, `thinking` sweeps the middle row) -- `speaking` ramping left to
- * right, because it fed the analyser's raw band order straight across, was
- * the one state inconsistent with that. This closes that gap.
+ * Every scripted state in this component is already centre-oriented, and
+ * `speaking` fed the analyser's raw band order straight across, which was the
+ * one state inconsistent with that. This closes that gap.
  *
- * `halfBands` should have exactly `Math.ceil(count / 2)` entries -- the
- * caller is responsible for requesting that many bands from
- * `useAudioAnalysis`, matching counts exactly rather than leaning on
- * `normalizeVolumeBands`'s pad-by-repeating-the-last-value, which would
- * produce a subtly wrong (not obviously broken) shape here. A shorter
- * `halfBands` still degrades sanely: the outermost positions repeat the last
- * value available rather than reading `undefined`.
+ * `halfBands` should have exactly `Math.ceil(count / 2)` entries: match the
+ * counts rather than leaning on `normalizeVolumeBands`'s
+ * pad-by-repeating-the-last-value, which would produce a subtly wrong (not
+ * obviously broken) shape here. A shorter input still degrades sanely, the
+ * outermost positions repeating the last value available.
  */
 export function mirrorBandsCenterOut(halfBands: number[], count: number): number[] {
   const center = (count - 1) / 2;
@@ -136,33 +125,21 @@ export function mirrorBandsCenterOut(halfBands: number[], count: number): number
 }
 
 /**
- * Maps a smaller, ordered set of "half" band values onto `count` positions
- * arranged around a RING (radial's spokes), mirrored left-right across a
- * single vertical axis rather than fanned from a linear centre: index 0 and
- * index `count / 2` (for an even `count`; radial warns when `count` is not
- * divisible by 4, so this is the common case) are each their own fixed
- * point of the reflection and both land band 0, and every other index pairs
- * with its mirror partner at `count - i`, sharing a band.
+ * Maps a smaller, ordered set of "half" band values onto `count` positions arranged
+ * around a RING (radial's spokes), mirrored left-right across a single vertical axis
+ * rather than fanned from a linear centre: index 0 and, for an even `count`, index
+ * `count / 2` are each their own fixed point of the reflection and both land band 0, and
+ * every other index pairs with its mirror partner at `count - i` (radial only renders `count`
+ * divisible by 4, so the even case is the common one).
  *
- * Radial's own geometry (`variant-radial.tsx`) places index 0 at the
- * BOTTOM of the ring (`rotate(0) translateY(radius)`, and CSS rotation is
- * clockwise for a positive angle), so band 0 (usually the loudest) reads at
- * the bottom, fading toward the top -- not band 0 at both the top AND the
- * bottom, which would need a second, horizontal mirror axis on top of this
- * one. Chosen over that fuller symmetry because it reuses the exact same
- * `Math.ceil(count / 2)` band request as the linear mirror above (one rule
- * for every variant, not a radial-specific band count), and because the
- * task's request was "spikes vary in length, not moving as one" -- this
- * already delivers that. If bottom-loud/top-quiet reads wrong in practice,
- * swapping to true 4-fold symmetry is a self-contained change here, not
- * elsewhere.
+ * Radial's own geometry (`variant-radial.tsx`) places index 0 at the BOTTOM of the ring,
+ * so band 0 reads at the bottom, fading toward the top. A true 4-fold symmetry would need
+ * a second, horizontal mirror axis; this reuses the same `Math.ceil(count / 2)` band
+ * request as the linear mirror above, one rule for every variant.
  *
- * For an even `count`, the antipodal index (`count / 2`) needs one more
- * distinct band than the linear mirror does (rings run 0..`count / 2`, not
- * 0..`count / 2 - 1`) -- with only `Math.ceil(count / 2)` bands available,
- * that one index clamps to the same value as its nearest neighbour rather
- * than getting a unique band. A minor, deliberate simplification for the
- * same one-rule-for-every-variant reason above.
+ * For an even `count` the antipodal index needs one more distinct band than the linear
+ * mirror does, so with only `Math.ceil(count / 2)` bands available it clamps to the same
+ * value as its nearest neighbour. Deliberate, for the same one-rule reason.
  */
 export function mirrorBandsAroundRing(halfBands: number[], count: number): number[] {
   const out: number[] = new Array(count);

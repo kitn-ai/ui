@@ -35,29 +35,23 @@ export interface SliderProps
 }
 
 /**
- * A slider. A REAL `<input type="range">` behind `appearance: none`, styled by the
- * kit's `.kai-range` rule, never a `<div>` with a drag handler.
+ * A slider. A REAL `<input type="range">` behind `appearance: none`, styled by the kit's
+ * `.kai-range` rule, never a `<div>` with a drag handler.
  *
  * The native control brings the whole keyboard contract (arrows, Home, End,
- * PageUp/PageDown), pointer and touch dragging, form participation via `name`, and
- * the `slider` role with a live value announcement: all of it for free and all of it
- * correct. Every accessibility defect this kit's control audit found was in a control
- * that had replaced the native element with something hand-rolled.
+ * PageUp/PageDown), pointer and touch dragging, form participation via `name`, and the
+ * `slider` role with a live value announcement: all of it for free and all of it correct,
+ * where every accessibility defect this kit's control audit found was in a control that
+ * had replaced the native element with something hand-rolled.
  *
- * What the component adds is the **filled track**. `.kai-range` paints the portion
- * left of the thumb from a `--kai-range-fill` custom property, and until now every
- * caller computed that percentage itself. It is arithmetic over `min`, `max` and the
- * current value, three things this component already has, so no consumer should
- * ever write it again.
+ * What the component adds is the **filled track**: `.kai-range` paints the portion left
+ * of the thumb from `--kai-range-fill`, arithmetic over `min`, `max` and the value, which
+ * this component already has.
  *
  * Everything not listed in `SliderProps` is forwarded to the input, so `id`, `name`,
- * `disabled`, `required`, `aria-*` and any `data-*` hook behave exactly as they do on
- * a plain `<input>`. No clamping and no validation is applied: a value outside
- * `min`..`max` is the browser's business, not ours.
- *
- * ```tsx
- * <Slider min={0} max={100} step={5} value={v()} onInput={(e) => setV(e.currentTarget.valueAsNumber)} />
- * ```
+ * `disabled`, `required`, `aria-*` and any `data-*` hook behave as they do on a plain
+ * `<input>`. No clamping and no validation is applied: a value outside `min`..`max` is
+ * the browser's business, not ours.
  */
 export function Slider(props: SliderProps): JSX.Element {
   const [local, rest] = splitProps(props, [

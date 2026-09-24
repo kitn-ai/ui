@@ -5,7 +5,7 @@
 // composer needs to know what a user is allowed to stage, and the encoders need
 // to know what they can turn into provider content. Those are the same set. When
 // each grows its own copy they drift, and the drift is not theoretical -- it is
-// the exact defect #186 fixed one layer down, where a composer happily staged a
+// the exact defect one layer down, where a composer happily staged a
 // `blob:` URL that the encoder could not represent. So the set is declared ONCE,
 // here, and both layers derive from it rather than restating it.
 //
@@ -26,6 +26,9 @@
 export type EncodableKind = 'image' | 'document' | 'text';
 
 // WHAT A BROWSER ACTUALLY CALLS A FILE -- ONE OBSERVATION, NOT A STANDING FACT.
+//
+// lint-comment-references: reference -- the observation date IS the evidence this table rests on
+// lint-comment-references: long-block -- the probe table is data, read as a whole
 //
 // Observed 2026-08-13 (UTC), Chrome 151.0.7922.137, macOS 26.5 arm64, with the
 // files handed to a real `<input type="file">` so the browser built every `File`
@@ -60,34 +63,23 @@ export type EncodableKind = 'image' | 'document' | 'text';
 // Anything else read off this table is being read too hard.
 
 /**
- * ★ THE DECLARATION. Everything else in this file, and both `accept` surfaces,
- * are derived from this array. Adding a row teaches the encoder AND widens the
- * composer's picker; deleting one narrows both. If you find yourself writing a
- * second list of media types anywhere in this repo, delete it and read this.
+ * ★ THE DECLARATION. Everything else in this file, and both `accept` surfaces, are
+ * derived from this array. Adding a row teaches the encoder AND widens the composer's
+ * picker; deleting one narrows both. A second list of media types anywhere in this repo
+ * is a defect: delete it and read this.
  *
- * Patterns are HTML `accept` syntax: an exact type (`image/png`) or a subtype
- * wildcard (`text/*`). File EXTENSIONS (`.md`) are deliberately not supported --
- * they map to media types only by convention, and guessing is how a `.md` full
- * of base64 becomes a 400. An extension in a developer's `accept` THROWS rather
- * than matching nothing; a file the browser could not name is settled by
- * decoding it. Neither path ever consults a filename.
+ * Patterns are HTML `accept` syntax: an exact type (`image/png`) or a subtype wildcard
+ * (`text/*`). File EXTENSIONS (`.md`) are deliberately not supported, because they map to
+ * media types only by convention and guessing is how a `.md` full of base64 becomes a 400:
+ * an extension in a developer's `accept` THROWS rather than matching nothing, and a file
+ * the browser could not name is settled by decoding it.
  *
- * On the image list: JPEG, PNG, GIF and WebP are the four formats BOTH APIs
- * document. SVG and BMP are the ones people actually try, and both are a 400 at
- * request time, so they are absent on purpose.
- *
- * On the text list: `text/*` is the core, because a media type in that tree is
- * text by definition of the tree. The `application/` rows are the judgement
- * calls -- textual formats that IANA files outside `text/` for historical
- * reasons, and that people genuinely attach. `application/json` and
- * `application/xml` are the two obvious ones.
- *
- * On YAML, since it is two rows for one format: `application/x-yaml` is what
- * Chrome hands back for a `.yaml` on macOS, MEASURED in the table above.
- * `application/yaml` is the IANA-registered type (RFC 9512, 2024) and is what a
- * correctly configured server sends, so it is here on REGISTRY grounds rather
- * than on a measurement. `text/yaml` and `text/x-yaml` are in the wild too and
- * need no row of their own: `text/*` already covers both.
+ * On the image list: JPEG, PNG, GIF and WebP are the formats BOTH APIs document; SVG and
+ * BMP are the ones people try, and both are a 400 at request time. On the text list,
+ * `text/*` is the core and the `application/` rows are textual formats IANA files outside
+ * `text/` for historical reasons. YAML has two rows because `application/x-yaml` is what
+ * Chrome hands back for a `.yaml` on macOS (measured above) while `application/yaml` is
+ * the IANA-registered type (RFC 9512).
  */
 const ENCODABLE: readonly { readonly pattern: string; readonly kind: EncodableKind }[] = [
   { pattern: 'image/jpeg', kind: 'image' },

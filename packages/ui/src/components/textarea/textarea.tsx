@@ -19,7 +19,7 @@ export function Textarea(props: TextareaProps) {
   // update that isn't the user typing) fires no DOM 'input' event, so the
   // resize-on-'input' listener inside `useAutoResize` never sees it. Without
   // this, a controlled textarea's box only ever grows off USER typing and
-  // silently stays the wrong size after a programmatic update — gap #3 in
+  // silently stays the wrong size after a programmatic update — the third gap in
   // the fix. `defer: true` so this never redoes the mount-time measurement
   // (already covered by the hook's own rAF + ResizeObserver); it only fires
   // on a REAL subsequent change, after Solid has already written the new

@@ -25,36 +25,22 @@ export interface PaneGridProps {
 /**
  * PaneGrid - an N-pane responsive tiling grid with a min-size + scroll floor.
  *
- * Lays an arbitrary number of panes out in a CSS grid that fills up to
- * `maxColumns` columns when wide, then DROPS columns (maxColumns -> ... -> 1) as
- * the container narrows - so panes never squish below their minimums. Once even one
- * column can't hold a pane at `minPaneWidth`, the grid SCROLLS instead of shrinking
- * the panes; rows are kept at least `minPaneHeight` tall the same way. Because new
- * rows stack downward, the overflow is preferentially VERTICAL - horizontal scroll
- * only appears when the container is narrower than a single pane's minimum.
+ * It lays panes out in a CSS grid that fills up to `maxColumns` columns when wide, then
+ * DROPS columns as the container narrows, so panes never squish below their minimums.
+ * Once even one column cannot hold a pane at `minPaneWidth` the grid SCROLLS instead of
+ * shrinking, and rows stay at least `minPaneHeight` tall. Because new rows stack
+ * downward the overflow is preferentially VERTICAL.
  *
- * This generalizes the hand-rolled center grid from the Split Workspace demo, where
- * `kai-resizable` (capped at 3 panes) couldn't express an arbitrary-N tiled grid.
+ * Column track: `repeat(auto-fit, minmax(max(<minPaneWidth>px, (100% - <gaps>) /
+ * <maxColumns>), 1fr))`, where `<gaps>` is `(maxColumns - 1) * gap`. The inner `max()`
+ * is the floor: each track is at least `minPaneWidth` and at most `1fr`, while
+ * `(100% - gaps) / maxColumns` is the per-column width when the cap is filled, so
+ * `auto-fit` never packs in more. Below one pane's minimum the `overflow:auto`
+ * container scrolls.
  *
- * Column track (computed from the props):
- *
- *   repeat(auto-fit, minmax(max(<minPaneWidth>px, (100% - <gaps>) / <maxColumns>), 1fr))
- *
- * where `<gaps>` is the total inter-column gap at the cap, `(maxColumns - 1) * gap`.
- * The inner `max()` is the floor: each track is at least `minPaneWidth`, and at most
- * `1fr`; the `(100% - gaps) / maxColumns` term is the per-column width WHEN the cap is
- * filled, so `auto-fit` never packs in more than `maxColumns` columns. As the
- * container shrinks past the point where a column can be `minPaneWidth` wide, a column
- * drops; below one pane's minimum, the `overflow:auto` + `min-w-0`/`min-h-0` container
- * scrolls.
- *
- * Maximize: when `maximizedIndex` points at a child, only that pane renders, in a
- * single `1fr` x `1fr` cell that fills the grid. Restore by clearing the prop.
- *
- * The gap default reads `--kai-pane-grid-gap` (fallback `0.5rem`), so a consumer can
- * retune spacing from outside without passing the prop. Everything is tokenized
- * (surface/border come from whatever the panes use) - no hardcoded colors, so it
- * reads correctly in light and dark.
+ * Maximize: with `maximizedIndex` set, only that pane renders, in one `1fr x 1fr` cell.
+ * The gap default reads `--kai-pane-grid-gap` (fallback `0.5rem`), and everything else
+ * is tokenized, so it reads correctly in light and dark.
  */
 export function PaneGrid(props: PaneGridProps) {
   const minPaneWidth = () => props.minPaneWidth ?? 280;

@@ -109,28 +109,23 @@ export async function* sseDataFrames(source: ByteSource): AsyncGenerator<string>
   if (tail !== undefined) yield tail;
 }
 
-/** Decode an SSE byte stream into JSON payloads, stopping at `[DONE]` and
- *  skipping frames that are not JSON. A provider that emits a stray non-JSON
- *  line should not take the turn down.
+/** Decode an SSE byte stream into JSON payloads, stopping at `[DONE]` and skipping
+ *  frames that are not JSON: a provider that emits a stray non-JSON line should not take
+ *  the turn down.
  *
- *  `[DONE]` stops the YIELDING, not the READING. Returning at the sentinel
- *  unwinds the generator chain while the reader has not yet seen `done: true`,
- *  so `readableToAsyncIterable` treats normal completion as an early exit and
- *  CANCELS the body, and since every OpenAI-format stream ends in `[DONE]`,
- *  that aborts the response on the normal path, one `net::ERR_ABORTED` per
- *  turn. Reading on to EOF instead lets the producer's own close end the
- *  iteration, which is the only thing that makes `drained` mean what it says.
- *  In practice that costs exactly one more `read()`: a server that has sent
- *  `[DONE]` has finished the response body. Frames after the sentinel are
- *  dropped, so what a caller sees is unchanged.
+ *  `[DONE]` stops the YIELDING, not the READING. Returning at the sentinel unwinds the
+ *  generator chain while the reader has not seen `done: true`, so `readableToAsyncIterable`
+ *  treats normal completion as an early exit and CANCELS the body, which on the normal path
+ *  (every OpenAI-format stream ends in `[DONE]`) is one `net::ERR_ABORTED` per turn. Reading
+ *  on to EOF lets the producer's own close end the iteration, which is the only thing that
+ *  makes `drained` mean what it says. It costs one more `read()`, and frames after the
+ *  sentinel are dropped, so what a caller sees is unchanged.
  *
- *  `onRawFrame` is the diagnostics seam: it receives the raw `data:` payload
- *  STRING for each frame that parsed, immediately before that frame is yielded,
- *  because the payload is discarded here and its byte length cannot be recovered
- *  downstream. It is not called for `[DONE]`, for a keep-alive, or for a payload
- *  that failed to parse -- so a caller counting calls counts exactly the frames
- *  it will be handed. Default undefined: with no diagnostics subscriber nothing
- *  passes one in and this is a dead branch. */
+ *  `onRawFrame` is the diagnostics seam: the raw `data:` payload STRING for each frame that
+ *  parsed, immediately before that frame is yielded, because the payload is discarded here
+ *  and its byte length cannot be recovered downstream. Not called for `[DONE]`, a keep-alive,
+ *  or a payload that failed to parse, so a caller counting calls counts exactly the frames
+ *  it will be handed. Default undefined. */
 export async function* sseJson<T>(
   source: ByteSource,
   onRawFrame?: (raw: string) => void,

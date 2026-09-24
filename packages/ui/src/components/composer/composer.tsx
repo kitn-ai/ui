@@ -851,27 +851,22 @@ export function Composer(props: ComposerProps): JSX.Element {
       <style>{`
         /* MARKED text, not selected text. Reads --color-highlight (overridable via
            --kai-color-highlight), a warm <mark> yellow. It used to be a 22% tint of
-           --color-primary with a #6366f1 indigo fallback — but the kit's
-           --color-primary is a NEUTRAL (near-black in light, near-white in dark),
-           so the indigo the fallback implied never appeared and the highlight
-           rendered plain grey in both themes.
+           --color-primary, whose indigo fallback never appeared because that token is
+           a NEUTRAL here, so the highlight rendered plain grey in both themes.
 
-           NO \`prefers-color-scheme\` here, deliberately — the same trap that put
-           the pill hues below at 2.33:1. The OS scheme and the kit's RESOLVED
-           theme are different questions, and \`theme="light"\` on a dark-OS machine
-           is an ordinary configuration; a scheme-keyed value would paint the dark
-           amber on the light field. The pills answer this by scoping to \`.dark\`,
-           which is NOT available here: \`::highlight()\` names a document-registered
-           highlight, so there is no wrapper to hang a descendant selector on.
+           NO \`prefers-color-scheme\` here, deliberately: the OS scheme and the kit's
+           RESOLVED theme are different questions, and \`theme="light"\` on a dark-OS
+           machine is ordinary, so a scheme-keyed value would paint the dark amber on
+           the light field. The pills below answer this by scoping to \`.dark\`, which is
+           unavailable here: \`::highlight()\` names a document-registered highlight, so
+           there is no wrapper to hang a descendant selector on.
 
-           It does not need one. \`--color-highlight\` reaches this pseudo through
-           highlight inheritance from the ORIGINATING element — the text inside the
-           \`.dark\` wrapper — so the token already answers the resolved theme,
-           verified by rendering the dark amber under \`theme="dark"\` with only the
-           LIGHT literal below as a fallback. The literal is therefore reachable
-           only when no kit stylesheet is loaded at all, and it is deliberately the
-           light one: an unstyled page is a white page, and guessing from the OS is
-           exactly the failure above. */
+           It does not need one: \`--color-highlight\` reaches this pseudo through
+           highlight inheritance from the ORIGINATING element, so the token already
+           answers the resolved theme (rendered dark amber under \`theme="dark"\` with
+           the light literal below as a fallback). The literal below is therefore
+           reachable only when no kit stylesheet is loaded at all, and it is the light
+           one on purpose: an unstyled page is a white page. */
         ::highlight(${highlightName}) { background-color: var(--color-highlight, hsl(45 96% 78%)); }
       `}</style>
       {/* Atomic entity pill styling. Self-contained (currentColor-based) so it

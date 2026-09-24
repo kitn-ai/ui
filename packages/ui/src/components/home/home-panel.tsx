@@ -24,25 +24,18 @@ export interface HomePanelProps {
 }
 
 /**
- * The widget home screen (Intercom-pattern, H-1): greeting, the most-recent
- * conversation, a "start a new conversation" CTA, and a list of host-defined
- * links. Pure props in, events out: no fetching, no routing; `ChatThread`
- * wires this behind its Home/Messages tab bar.
+ * The widget home screen: greeting, the most-recent conversation, a "start a new
+ * conversation" CTA, and a list of host-defined links. Pure props in, events out:
+ * no fetching, no routing. `ChatThread` wires it behind its Home/Messages tab bar.
  *
- * The rows render THROUGH the public `Row` part (P-4/P-9): the
- * recent-conversation card and each help link are `Row` compositions, so the
- * facade's home tab and a composed block's settings screen share one row
- * anatomy. The unsafe-href rule now lives where the anatomy does: `Row`
- * refuses an `href` that fails `isSafeUrl` (e.g. `javascript:`) by rendering
- * a plain, non-interactive row (label visible, no anchor, no button, no
- * click handler) rather than silently promoting it into an event-emitter.
- * (The CTA stays a `Button`: it is a primary action, not a list row.)
+ * The rows render THROUGH the public `Row` part, so the facade's home tab and a
+ * composed block's settings screen share one row anatomy. The unsafe-href rule
+ * lives where the anatomy does: `Row` renders a plain, non-interactive row for an
+ * `href` that fails `isSafeUrl` rather than promoting it into an event-emitter. The
+ * CTA stays a `Button`: it is a primary action, not a list row.
  *
- * The recent-conversation card and the link list are both `RowGroup`s of one and
- * of N rows, which is all the frame needs to know: a one-row group is a framed
- * card, an N-row group draws the hairlines between them. Before `RowGroup` the
- * link list faked its dividers with `rounded-none border-b last:border-b-0` on
- * each row, because a row's own radius is a standalone row's radius.
+ * The recent card and the link list are `RowGroup`s of one and of N rows: a
+ * one-row group is a framed card, an N-row group draws the hairlines between them.
  */
 export function HomePanel(props: HomePanelProps) {
   const title = () => props.greeting?.title ?? 'Hi there 👋';

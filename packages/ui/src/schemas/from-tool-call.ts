@@ -1,83 +1,26 @@
-// The inverse of `cardTools()`: a model's tool call back into a renderable card.
+// lint-comment-references: long-block -- the tool-loop example and the two design calls are one contract, and the example is the only place the inverse direction is shown
+// The inverse of `cardTools()`: a model's tool call back into a renderable card. This is the
+// one line a developer adds to their tool loop:
 //
-// This is the one line a developer adds to their tool loop:
+//   const card = cardFromToolCall(call.name, call.input ?? {}, { id: call.id });
+//   if (card) { stream.addCard(card); applyToolOutput(stream, call.id, { status: 'awaiting_user' }); continue; }
+//   applyToolOutput(stream, call.id, await runTool(call.name, call.input ?? {}));
 //
-//   for (const call of pending) {
-//     const card = cardFromToolCall(call.name, call.input ?? {}, { id: call.id });
-//     if (card) {
-//       stream.addCard(card);
-//       applyToolOutput(stream, call.id, { status: 'awaiting_user' });
-//       continue;
-//     }
-//     applyToolOutput(stream, call.id, await runTool(call.name, call.input ?? {}));
-//   }
+// RUNTIME-FREE, DELIBERATELY: one type import that erases, no DOM, no Solid, no validator and no
+// schema data, because a backend route imports this inside a tool loop.
 //
-// It replaces the hand-written mapper this repo's own reference harness carries
-// (examples/internal/openrouter-spike/src/tools.ts:471-500), whose comment says the
-// model cannot emit a CardEnvelope directly because the schemas are unreachable.
-// They are reachable now (./index.ts), so the mapper does not need to exist.
+// TWO DESIGN CALLS. (1) The TOOL NAME carries the card type (`kai_confirm` -> `'confirm'`) and
+// the provider's `tool_call_id` becomes `CardEnvelope.id` unchanged, because that id is already
+// unique per call and already the key `upsertCardPart` matches on, so a revised card replaces the
+// old one in place instead of rendering twice. (2) `kai_` decides "card tool", NOT "renderable":
+// this module never validates and must not grow one, so an unknown type still produces an
+// envelope the dispatcher renders as a fallback, and malformed `data` produces one too, because
+// null would misroute the call to `runTool` while throwing would kill the sibling calls in the
+// batch. The envelope keeps the bad data attributable to its call, so the app can hand the
+// diagnostic back to the model and the retry upserts over the broken card.
 //
-// RUNTIME-FREE, DELIBERATELY
-// --------------------------
-// One type import, which erases. No DOM, no Solid, no validator, no schema data.
-// This is imported by a backend route inside a tool loop, so it must weigh nothing
-// and must not drag `cardSchemas` in behind it.
-//
-//
-// THE TWO DESIGN CALLS, AND WHY
-// =============================
-//
-// 1. THE TOOL NAME CARRIES `type`; THE `tool_call_id` CARRIES `id`.
-//
-// `kai_confirm` produces `{ type: 'confirm' }`, and the provider's `tool_call_id`
-// becomes `CardEnvelope.id` unchanged. The id is not a detail: it is already unique
-// per call, and it is already the key `upsertCardPart` (src/state/parts.ts:172)
-// matches on. So a model that revises a card re-sends the same tool call id, and
-// `AssistantStream.addCard` replaces that card in place instead of rendering a
-// second copy of it. Generating an id here would break that for free, which is what
-// the spike's `card-${++cardSeq}` does today.
-//
-// 2. `kai_` DECIDES "CARD TOOL". IT DOES NOT DECIDE "RENDERABLE".
-//
-// Two questions get asked about a `kai_*` call, and they are answered in two places
-// on purpose:
-//
-//   "is this a card tool at all?"   -> here, from the prefix. Returns null if not,
-//                                      so the loop's `if (card)` falls through to
-//                                      the app's own tools. Never throws: an unknown
-//                                      tool name is ordinary, not exceptional.
-//
-//   "can this card render / is the  -> the DISPATCHER. An unregistered type already
-//    data well-formed?"                renders `CardFallback` and emits
-//                                      `{ kind: 'error', cardId }`
-//                                      (components/card/card-renderer.tsx:33-42), and
-//                                      T1.5 adds the same treatment for data that
-//                                      does not match its schema, mirroring
-//                                      remote/provider-runtime.ts:142.
-//
-// So this module has no validator and must not grow one. Two consequences, both
-// intentional:
-//
-//   - A type the kit does not know (`kai_pricing-table`) still produces an envelope.
-//     Gating on the 7 built-ins instead would send a custom card type, registered
-//     perfectly legally through `cardTypes`/`mergeCardTags`, to
-//     `runTool('kai_pricing-table')` which no app implements, and the card would
-//     vanish with no diagnostic anywhere. The permissive read costs nothing, because
-//     a genuinely unknown type is named on screen by the fallback.
-//
-//   - Malformed `data` still produces an envelope. Returning null would be
-//     indistinguishable from "not a card tool" and would misroute the call to
-//     `runTool`; throwing would kill the whole turn, including the sibling tool calls
-//     in the same batch, for what the plan explicitly treats as a PRODUCTION failure
-//     mode. Keeping the envelope keeps the bad data attributable to the tool call
-//     that produced it, which is what lets the app hand the diagnostic back to the
-//     model, and the model's corrected retry then upserts over the broken card
-//     because it reuses the same tool call id. That healing only works if the
-//     malformed call produced an envelope in the first place.
-//
-// `isCardTool` and `cardFromToolCall` are derived from ONE decision function below,
-// rather than each testing the prefix, so they cannot drift into disagreeing about
-// the same question.
+// `isCardTool` and `cardFromToolCall` derive from ONE decision function, so they cannot drift.
+
 
 import type { CardEnvelope } from '../primitives/card-contract';
 

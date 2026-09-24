@@ -2,35 +2,24 @@ import { splitProps, type JSX } from 'solid-js';
 import { cn } from '../../utils/cn';
 
 /**
- * `RowGroup`, the frame that turns loose rows into a LIST: one bordered, rounded
- * card with a hairline between adjacent rows, the first row rounded at the top
- * only, the last at the bottom only, and every middle row square. It is the shape
- * a settings screen, a link list and a home tab all hand-rolled before it existed
- * (`row.stories.tsx`, `settings-group.tsx`, `home-panel.tsx`: the last two also
- * had to fight `Row`'s own standalone radius with `rounded-none border-b
- * last:border-b-0`).
+ * `RowGroup`, the frame that turns loose rows into a LIST: one bordered, rounded card
+ * with a hairline between adjacent rows, the first row rounded at the top only and the
+ * last at the bottom only.
  *
- * COMPOSITION ONLY. It takes children, not `items`: which rows exist, in what
- * order, keyed how, and what an empty list means are the application's business
- * (a data-driven list would also have to own loading, empty and error states,
- * which is a component library deciding policy it cannot see). Rows are authored
- * by the caller and this only frames them.
+ * COMPOSITION ONLY. It takes children, not `items`: which rows exist and in what order
+ * are the application's business, since a data-driven list would also own loading, empty
+ * and error states. Rows are authored by the caller and this only frames them.
  *
- * It renders NO geometry itself; see the row-list block in `../kit-base.css` for
- * the dividers, the per-position corners and the reasons they are CSS rather
- * than classes. Two consequences worth knowing at the call site:
+ * It renders NO geometry itself; the row-list block in `../kit-base.css` owns the
+ * dividers, the per-position corners and why they are CSS. Two consequences:
  *
  * - Rows must be DIRECT CHILDREN. Both rule sets are direct-child selectors, so a
- *   wrapper element per row (a `<li>`, a slide-in transition container) collects
- *   the divider on its own box and the rows inside it get none.
- * - Rows are MOUNTED AND UNMOUNTED rather than hidden. `hidden` leaves the row in
- *   the sibling chain and the next row's hairline lands under the frame's top
- *   border; that limit is explained where the rule lives.
+ *   wrapper per row (an `<li>`, a transition container) takes the divider for itself.
+ * - Rows are MOUNTED AND UNMOUNTED, not hidden: a `hidden` row stays in the sibling
+ *   chain and the next row's hairline lands under the frame's top border.
  *
- * The frame's own chrome (border, radius, clip) is a plain class, overridable
- * through `class` like any other kit part: a group inside a rounded panel passes
- * `rounded-none border-0` and one that should read as flush sets
- * `[--kai-row-radius:0]`.
+ * The frame's chrome is a plain class, overridable like any other kit part: a group
+ * inside a rounded panel passes `rounded-none border-0`.
  */
 export interface RowGroupProps extends Omit<JSX.HTMLAttributes<HTMLDivElement>, 'ref'> {
   /** The rows, as direct children. */

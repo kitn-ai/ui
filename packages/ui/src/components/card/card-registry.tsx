@@ -1,25 +1,16 @@
-// src/primitives/card-registry.tsx
 // One source of truth mapping a CardEnvelope.type to a renderer, for both layers:
 //   - CardComponentMap drives the Solid <CardRenderer>.
 //   - CardTagMap drives the <kai-cards> web component (child kai-* elements).
 // Built-ins cover the 7 contract card types; consumers extend/override via a `types`
 // prop (merged OVER the built-ins). kai-card (bare shell) is intentionally NOT a target.
 //
-// THE TAG HALF NOW LIVES IN ./card-tags — AND MUST STAY THERE.
-// `BUILTIN_CARD_TAGS` / `mergeCardTags` / `CardTagMap` are plain data with no Solid in
-// them, but while they shared this module with `BUILTIN_CARD_COMPONENTS` no Node/no-DOM
-// project could import them AS SOURCE, and the `kai` MCP re-derived the map by
-// convention as a result. ./card-tags.ts is that data on its own so
-// `@kitn.ai/ui/schemas` can export it; the re-export below keeps every existing
-// importer of this module working unchanged. Do not move them back — see the header
-// of ./card-tags.ts for the measured cost of the alternative (0 -> 1364 tsc errors).
-//
-// THE COMPONENT TYPES NOW LIVE IN ./card-component-types — SAME REASON, SECOND TIME.
-// `CardComponent` / `CardComponentMap` are named in the PUBLIC surface of
-// `@kitn.ai/ui/schemas` (src/schemas/registry.ts), so a Node/no-DOM project resolving
-// that entry's types reached this `.tsx` and hit TS6142. The types went to a `.ts`;
-// `BUILTIN_CARD_COMPONENTS` and `mergeCardComponents` stayed, because they are JSX and
-// have nowhere to go. Re-exported below, so this module's surface is unchanged.
+// The tag half lives in ./card-tags and the component types in ./card-component-types,
+// both re-exported below so every existing importer is unchanged. Neither may move back:
+// the tag data is imported AS SOURCE by a Node/no-DOM project (the `kai` MCP re-derived
+// the map by convention while it could not), and `CardComponent`/`CardComponentMap` are
+// named in `@kitn.ai/ui/schemas`' public surface, whose Node/no-DOM consumer reached this
+// `.tsx` and hit TS6142. `BUILTIN_CARD_COMPONENTS` and `mergeCardComponents` stay here
+// because they are JSX and have nowhere to go.
 import type { CardComponentMap } from '../../primitives/card-component-types';
 import { Form } from '../form/form';
 import { ConfirmCard } from '../confirm-card/confirm-card';

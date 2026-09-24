@@ -1,57 +1,25 @@
 // Element-layer observability: the OTHER half of "why isn't it updating".
 //
-// The wire diagnostics answer "did the data arrive". Everything here answers the
-// question a developer asks NEXT, after they have confirmed in the console that
-// `el.messages` holds exactly what they expect and the screen still shows the
-// old thing. All three causes are contract violations documented in root
-// CLAUDE.md, and all three are silent by construction rather than by oversight.
-// See `./diagnostic-events.ts` for what each one is and why it is detectable.
+// The wire diagnostics answer "did the data arrive". This answers the question a developer
+// asks NEXT, after confirming in the console that `el.messages` holds what they expect
+// while the screen still shows the old thing. All three causes are silent by construction;
+// see `./diagnostic-events.ts` for what each is.
 //
-// WHERE THIS HOOKS, AND WHY THERE. `defineWebComponent` is the single choke
-// point -- every `kai-*` element registers through it, and `web-components/slots/slots.test.ts`
-// already fails the build if a registered tag has no `defineWebComponent` call.
-// So one install site covers all 79 registered web components with no per-web-component
-// work and no list to keep in step.
+// WHERE IT HOOKS: `defineWebComponent` is the single choke point every `kai-*` element
+// registers through (and `slots.test.ts` fails the build if a registered tag has no such
+// call), so one install site covers all of them with no list to keep in step.
 //
-// OBSERVE-ONLY, AND STRUCTURALLY SO. Two of the three hooks are wrappers around
-// prototype methods, which is the risky shape, so the discipline is fixed:
-//
-//   * the inner method is ALWAYS called, exactly once, with the arguments
-//     untouched, and no branch can skip it;
-//   * its return value is passed straight back;
-//   * everything else this file does is a read.
-//
-// The ORDER of the observation relative to the delegation differs between the
-// two, and each site says why. `connectedCallback` observes after, because the
-// channel it registers on does not exist until the inner call has run.
-// `attributeChangedCallback` observes BEFORE, because the inner call is what
-// throws on the very input being reported, and a report after it would go
-// missing in exactly the case it exists to explain.
-//
-// The third hook is not a wrapper at all: `addPropertyChangedCallback` is
-// component-register's own public observation channel -- solid-element itself
-// uses it to bridge props into signals -- so a second listener is purely
-// additive and cannot alter a value or an ordering.
-//
-// EVERY observation is wrapped in a try/catch, for the same reason
-// `emitWireDiagnostic` swallows a subscriber's throw: a diagnostic that breaks
-// the element it is watching is worse than no diagnostic. A bug in this file
-// must cost a missing event, never a dead component.
-//
-// ZERO COST WHEN NOBODY IS SUBSCRIBED. This runs on the hottest path in the kit
-// -- every prop set on every web component, which during streaming is every chunk --
-// so the ordering of the guards is load-bearing:
-//
-//   1. AT REGISTRATION: an element with no non-scalar prop (37 of the 80 in
-//      `web-component-nonscalar.json`) installs NOTHING. No wrapper, no closure, no
-//      per-instance cost, ever.
-//   2. ON EVERY CALL: `wireDiagnosticsActive()` is checked BEFORE constructing
-//      an event, building a string, or touching an attribute -- one symbol read
-//      on `globalThis` plus an array-length compare, allocating nothing.
-//
-// SSR-SAFE: no `window`, `document` or `customElements` at module scope. The
-// registry snapshot touches `customElements` only inside its function body, and
-// returns undefined where there is none.
+// OBSERVE-ONLY, AND STRUCTURALLY SO: the wrapper hooks call the inner method ALWAYS,
+// exactly once, with the arguments untouched, return its value straight back, and read
+// everything else. The observation order differs per site and each says why
+// (`connectedCallback` after, since the channel does not exist until the inner call has
+// run; `attributeChangedCallback` before, since the inner call is what throws on the value
+// being reported). The third hook uses component-register's own public
+// `addPropertyChangedCallback`, so a second listener cannot alter a value or an ordering.
+// Every observation is wrapped in try/catch: a diagnostic that breaks the element it
+// watches is worse than none.
+
+
 import {
   emitWireDiagnostic,
   wireDiagnosticsActive,
@@ -334,42 +302,25 @@ export function installElementDiagnostics(tag: string, proto: object): void {
  *  is the manifest and not `web-component-meta.json`. */
 const MANIFEST_TAGS: string[] = Object.keys(MANIFEST_TAG_MAP as Record<string, string>);
 
-/**
- * Snapshot which `kai-*` elements are defined in THIS realm, and emit it.
+/** Snapshot which `kai-*` elements are defined in THIS realm, and emit it.
  *
- * The question is hydration. An undefined custom element is a perfectly valid,
- * perfectly inert `HTMLElement`: an SSR page whose markup contains `<kai-chat>`
- * but whose element bundle never loaded renders empty boxes, throws nothing and
- * logs nothing. The SSR starters already answer this by hand for a hard-coded
- * handful (`HydrationBadge.tsx` in the nextjs and tanstack-start starters); this
+ * The question is hydration: an undefined custom element is a valid, inert
+ * `HTMLElement`, so an SSR page whose markup contains `<kai-chat>` but whose element
+ * bundle never loaded renders empty boxes, throws nothing and logs nothing. The SSR
+ * starters answer this by hand for a hard-coded handful (`HydrationBadge.tsx`); this
  * is the same answer, derived, over every tag.
  *
- * WHY THE MANIFEST AND NOT `web-component-meta.json`. The two generated artifacts
- * disagree -- 79 tags against 80 entries -- and the manifest is the one that
- * answers THIS question. `kai-remote` is in the meta file because
- * `gen-web-component-api.mjs` scans the `src/web-components` directory listing, and absent
- * from the manifest because `gen-web-components-manifest.mjs` reads the import list in
- * `register-impl.ts`, which does not import `remote.tsx`.
+ * WHY THE MANIFEST AND NOT `web-component-meta.json`, which disagree (79 tags against 80
+ * entries): `kai-remote` is in the meta because the generator scans the
+ * `src/web-components` directory listing, and absent from the manifest because that reads
+ * `register-impl.ts`'s import list, which does not import `remote.tsx`. That is deliberate:
+ * `<kai-remote>` mounts a sandboxed cross-origin iframe and stays out of the register-all
+ * bundle, so the honest universe for "did the bundle load" is the 79 tags it registers,
+ * and adding it to the manifest would hand an opt-in cross-origin iframe to the
+ * autoloader's lazy-load set.
+
  *
- * AND THAT IS DELIBERATE, not a generator bug -- the `remote` entry in
- * `splitConfig()`'s `entry` map in `config/vite/web-components.ts` says so at the site:
- * `<kai-remote>` mounts a sandboxed cross-origin iframe and
- * is opt-in, reachable only through `@kitn.ai/ui/web-components/remote` or the React
- * `Remote` wrapper, and intentionally kept out of the register-all bundle. So
- * the honest universe for "did the element bundle load" is the 79 that bundle
- * registers. Listing `kai-remote` beside them would report a permanent "not
- * defined" against an element almost no app is missing, and adding it to the
- * manifest -- the obvious "fix" -- would hand an opt-in cross-origin iframe
- * element to the autoloader's lazy-load set, which is a behaviour change wearing
- * the costume of a data fix.
- *
- * The cost is stated rather than hidden: a consumer who HAS opted into
- * `kai-remote` sees it in neither list. `web-component-artifact-divergence.test.ts`
- * pins the divergence at exactly this one tag, so it stays a known exception and
- * a NEW one fails.
- *
- * Returns the event it emitted, or `undefined` where there is no custom-element
- * registry (SSR) or nobody is listening.
+ * Returns the event it emitted, or `undefined` where there is no registry (SSR).
  */
 export function emitWebComponentRegistry(): WebComponentRegistryEvent | undefined {
   if (typeof customElements === 'undefined') return undefined;

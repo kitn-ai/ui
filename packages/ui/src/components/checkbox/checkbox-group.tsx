@@ -50,30 +50,18 @@ export interface CheckboxGroupProps<T = string>
 }
 
 /**
- * A vertical set of checkbox rows in a bordered, divided list, the kit's standard
- * "pick any number" control, and {@link RadioGroup}'s sibling: same options shape,
- * same row chrome, same presentation slot, multi-value instead of single.
+ * A vertical set of checkbox rows in a bordered, divided list: the kit's "pick any
+ * number" control, and {@link RadioGroup}'s sibling -- same options shape, same row
+ * chrome, multi-value instead of single.
  *
- * Every row is a real `<input type="checkbox">` inside a `<label>`, so clicking
- * anywhere on the row toggles it and the keyboard behaviour (a tab stop per box,
- * Space to toggle) is the browser's rather than a reimplementation. The wrapper is
- * `role="group"`, not `role="listbox"`: the boxes are independent controls and
- * nothing here overrides what they already announce.
+ * Every row is a real `<input type="checkbox">` inside a `<label>`, so the browser
+ * owns the click target and the keyboard (a tab stop per box, Space to toggle). The
+ * wrapper is `role="group"`, not `role="listbox"`: the boxes are independent controls
+ * and nothing here overrides what they announce.
  *
- * Everything not listed in `CheckboxGroupProps` is forwarded to the group element, so
- * `id`, `aria-labelledby`, any other `aria-*` and any `data-*` hook land where a form
- * expects them. No validation is applied: "at least one" is your application's rule,
- * not the kit's.
- *
- * ```tsx
- * <CheckboxGroup
- *   label="Environments"
- *   name="env"
- *   options={[{ value: 'prod', label: 'Production' }, { value: 'staging', label: 'Staging' }]}
- *   value={envs()}
- *   onChange={setEnvs}
- * />
- * ```
+ * Everything not in `CheckboxGroupProps` is forwarded to the group element, so `id`,
+ * `aria-labelledby` and any `data-*` hook land where a form expects them. No
+ * validation is applied: "at least one" is the application's rule, not the kit's.
  */
 export function CheckboxGroup<T = string>(props: CheckboxGroupProps<T>): JSX.Element {
   const [local, rest] = splitProps(props, [

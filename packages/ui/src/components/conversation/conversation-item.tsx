@@ -5,11 +5,11 @@ import { isConversationUnread } from '../../primitives/conversation-store';
 import type { ConversationSummary } from '../../types';
 
 /**
- * Row density, the P-7 public axis (blocks-and-parts design 2026-08-31).
+ * Row density, the public axis.
  * `default` and `compact` are the two boxes this row always had; `panel` is
  * the widget-panel presentation: the exact row box of the facade's
  * `ConversationPanel` (conversation-panel.tsx), whose `px-3 py-2.5` interior
- * class was PRIVATE until now. The composition spike (phase 3, round 3) could
+ * class was PRIVATE until now. That measurement could
  * only match it by smuggling padding through slotted spans around host
  * padding; this axis deletes that contortion.
  */
@@ -18,7 +18,7 @@ export type ConversationRowDensity = 'default' | 'compact' | 'panel';
 /**
  * The row box (padding) per density. `panel` restates conversation-panel.tsx's
  * row class `px-3 py-2.5` (12px/10px; with the single 20px text-sm line that
- * is the measured 40px row of the spike's round 3). It is a copy by necessity:
+ * is the measured 40px row). It is a copy by necessity:
  * Tailwind utilities are compiled from literal class strings, so this cannot
  * be imported from the panel at runtime. `conversation-item-density.test.tsx`
  * derives the expected utilities from conversation-panel.tsx's SOURCE and
@@ -214,7 +214,7 @@ export function SlottedConversationItem(props: SlottedConversationItemProps) {
             <div part="meta" class="mt-0.5 truncate text-xs text-muted-foreground">{local.meta}</div>
           </Show>
         </div>
-        {/* Unread dot (P-7b): trailing edge of the BODY, so it stays inside the
+        {/* Unread dot: trailing edge of the BODY, so it stays inside the
             activation surface and before the menu sibling. */}
         <Show when={local.unread}>
           <UnreadDot />
@@ -230,14 +230,14 @@ export function SlottedConversationItem(props: SlottedConversationItemProps) {
 export function ConversationItem(props: ConversationItemProps) {
   const [local] = splitProps(props, ['conversation', 'isActive', 'onSelect', 'compact', 'density', 'class']);
   const density = () => resolveRowDensity(local.density, local.compact);
-  // Unread dot (P-7b): derived from the same public read primitive the
+  // Unread dot: derived from the same public read primitive the
   // facade's panel and home surfaces use, never a second policy.
   const unread = createMemo(() => isConversationUnread(local.conversation));
   // The trailing text: the consumer's own `trailing` field, else an auto relative
   // time from updatedAt (fallback lastMessageAt). Never an internal clock — it is a
   // render-time snapshot.
   //
-  // REACTIVITY, and the weaker version of this note is what #224 was filed against:
+  // REACTIVITY, and the weaker version of this note is what shipped the stale dot:
   // a new `conversations` array reference is NOT sufficient. `ConversationList` renders
   // these rows through a reference-keyed `<For>` that captures `conv` as a VALUE, so a
   // row whose item object is unchanged is never re-invoked and never re-reads anything
@@ -274,7 +274,7 @@ export function ConversationItem(props: ConversationItemProps) {
       <Show
         when={density() !== 'panel'}
         fallback={
-          // The widget-panel presentation (P-7a): ConversationPanel's row
+          // The widget-panel presentation: ConversationPanel's row
           // anatomy, made public. Baseline row of semibold title + relative
           // time; the consumer's `trailing` field is the one-line preview
           // under it, with the unread dot at the preview line's end

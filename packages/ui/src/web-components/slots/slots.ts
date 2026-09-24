@@ -793,7 +793,7 @@ export const AUDIO_VISUALIZER_PARTS: PartDef[] = [
   },
 ];
 
-/** Slots of `<kai-panel>`: the widget panel frame (blocks-and-parts P-1). The
+/** Slots of `<kai-panel>`: the widget panel frame. The
  *  default slot is the view container. */
 export const PANEL_SLOTS: SlotDef[] = [
   { name: 'header', mode: 'inject', part: true, doc: 'The header region above the view container: put a `<kai-panel-header>` there, or anything. Keeps its natural height and never scrolls away.' },
@@ -864,7 +864,7 @@ export const TAB_BAR_ITEM_PARTS: PartDef[] = [
   },
 ];
 
-/** Slots of `<kai-row>`: the generic mobile list row (blocks-and-parts P-4).
+/** Slots of `<kai-row>`: the generic mobile list row.
  *  The default slot is the title; these are the named regions around it. */
 export const ROW_SLOTS: SlotDef[] = [
   { name: 'leading', mode: 'inject', part: true, doc: 'Leading region before the title (an icon or avatar).' },
@@ -988,26 +988,22 @@ export const WEB_COMPONENT_COMPOSITION: Record<string, WebComponentComposition> 
 };
 
 /**
- * Which slots have VISIBLE projected light-DOM content: a DIRECT child of
- * `host` carrying the matching `slot` attribute and not `hidden`. Pure and
- * synchronous; safe in jsdom and SSR (returns all-false when `host` has no
- * matching children). The facade calls this on mount and on every childList
- * mutation.
+ * Which slots have VISIBLE projected light-DOM content: a DIRECT child of `host`
+ * carrying the matching `slot` attribute and not `hidden`. Pure and synchronous; safe in
+ * jsdom and SSR (all-false when `host` has no matching children). The facade calls this
+ * on mount and on every childList mutation.
  *
- * `:not([hidden])` is the whole of the visibility test, and it is here rather
- * than at each call site because this function is the ONE definition every
- * facade reads. A hidden assigned node still fills its slot as far as the
- * platform is concerned, so a built-in region wrapped around one reserved real
- * space for nothing anybody can see: measured at 2px on a conversation row
- * whose optional preview line is authored once and toggled with `hidden`,
- * against the same row built by adding and removing the node. That difference
- * is not a corner case under the authored block contract -- declarative markup
- * toggles VISIBILITY, where imperative markup toggled EXISTENCE -- so the two
- * shapes have to agree.
+ * `:not([hidden])` is the whole of the visibility test, and it lives here because this
+ * function is the ONE definition every facade reads. A hidden assigned node still fills
+ * its slot as far as the platform is concerned, so a built-in region wrapped around one
+ * reserved real space for nothing anybody can see (measured at 2px on a conversation row
+ * whose optional preview line is toggled with `hidden`, against the same row built by
+ * adding and removing the node). Declarative markup toggles VISIBILITY where imperative
+ * markup toggled EXISTENCE, so the two shapes have to agree.
  *
- * Deliberately narrow: `hidden` only, not `display: none` or `visibility`.
- * Computed style is neither pure nor available in SSR, and `hidden` is the
- * channel the contract's `:hidden` binding writes.
+ * Deliberately narrow: `hidden` only, not `display: none` or `visibility`. Computed style
+ * is neither pure nor available in SSR, and `hidden` is the channel the contract's
+ * `:hidden` binding writes.
  */
 export function readSlots(host: Element, defs: SlotDef[] = CHAT_SLOTS): Record<string, boolean> {
   const out: Record<string, boolean> = {};

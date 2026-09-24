@@ -7,20 +7,16 @@
 // Keeping them apart leaves a consumer who only parses streams at zero cost.
 //
 // WHO CALLS `installKaiDevtoolsHook()`. The kit calls it for you from
-// `web-components/register/register-impl.ts`, so any app that registers the `kai-*` elements --
-// which is every consumer of `@kitn.ai/ui/web-components`, the React wrappers, or the
-// CDN bundle -- gets the hook with no work.
+// `web-components/register/register-impl.ts`, so any app that registers the `kai-*`
+// elements (every consumer of the web-components entry, the React wrappers, or the CDN
+// bundle) gets the hook with no work.
 //
-// THE ONE CASE THAT DOES NOT: an app importing the SolidJS components directly
-// from `@kitn.ai/ui` never runs `register-impl`, because it never registers a
-// custom element. Nothing is broken there and nothing warns, it simply has no
-// hook, so a panel finds nothing to attach to. Call it yourself at app start:
-//
-//   import { installKaiDevtoolsHook } from '@kitn.ai/ui/diagnostics';
-//   installKaiDevtoolsHook();
-//
-// It is idempotent and SSR-safe, so calling it unconditionally at your entry is
-// correct even if you also register elements elsewhere.
+// THE ONE CASE THAT DOES NOT: an app importing the Solid components directly from
+// `@kitn.ai/ui` never runs `register-impl`, because it never registers a custom element.
+// Nothing is broken and nothing warns, it simply has no hook, so a panel finds nothing to
+// attach to. Call `installKaiDevtoolsHook()` yourself at app start; it is idempotent and
+// SSR-safe, so calling it unconditionally at your entry is correct even if you also
+// register elements elsewhere.
 export { installKaiDevtoolsHook } from './hook';
 export type { KaiDevtoolsHook } from './hook';
 

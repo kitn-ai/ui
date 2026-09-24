@@ -99,36 +99,23 @@ function siblingReasoning(delta: Record<string, unknown>): string | undefined {
 
 /**
  * FINDINGS: OpenRouter frequently puts the SAME text in `reasoning` AND in
- * `reasoning_details` on the same delta. Concatenating both doubles every
- * reasoning token, so `reasoning` wins and details are only a text FALLBACK.
+ * `reasoning_details` on one delta, so concatenating both doubles every reasoning token:
+ * `reasoning` wins and the details are only a text FALLBACK. The details are still read in
+ * BOTH cases for `reasoningRaw`, the block index and the signature, since they are the
+ * provider's own block list, and dropping them is exactly the Anthropic 400 this entry
+ * exists to avoid.
  *
- * `reasoning_details` is still read in BOTH cases, for `reasoningRaw`, the block
- * index and the signature. It is the provider's own block list, and dropping it
- * is exactly the Anthropic 400 this entry exists to avoid.
+ * SIBLING NAMES: chat-completions says nothing about reasoning, so every vendor extended it
+ * on its own. `reasoning` is what OpenRouter normalises to, `reasoning_content` what
+ * DeepSeek's own API emits and what LiteLLM forwards; reading `reasoning` alone loses a
+ * DeepSeek-direct stream's reasoning completely, and silently. Hence the siblings coalesce,
+ * first non-empty wins, both outrank the details text, and `reasoning` is checked first so
+ * a stream that already carried it parses byte for byte as before.
  *
- * SIBLING NAMES. Chat-completions says nothing about reasoning, so every vendor
- * extended it on its own and each parser in the wild reads a different subset:
- * `reasoning` is what OpenRouter normalises to, `reasoning_content` is what
- * DeepSeek's own API emits and what LiteLLM forwards. Nobody is ahead here and
- * there is no canonical spelling. A stream that only ever went through
- * OpenRouter never shows the other name, which is the whole reason this one
- * stayed invisible: reading `reasoning` alone loses a DeepSeek-direct stream's
- * reasoning completely, and silently.
- *
- * PRECEDENCE. The siblings coalesce, first non-empty wins, and both outrank the
- * details text. `reasoning` is checked first, which is what keeps this additive:
- * any stream that already carried `reasoning` parses byte for byte as it did
- * before, so the order is only observable on a provider that disagrees with
- * itself. A gateway that aliases one spelling onto the other sends identical
- * text in both, and summing them would double every token exactly the way
- * summing `reasoning` and `reasoning_details` does.
- *
- * SCOPE, and it is NOT a closed class. This covers the NAMING axis only.
- * Reasoning on this wire is fragmented three ways STRUCTURALLY: a sibling string
- * (here), a block array (`reasoning_details`), and reasoning carried inside a
- * polymorphic `content` array. Aliasing bridges names, not shapes. A fourth
- * spelling is one entry in REASONING_KEYS; a fourth SHAPE is not, and needs its
- * own branch plus its own fixture.
+ * SCOPE, and NOT a closed class: the NAMING axis only. Reasoning on this wire is
+ * fragmented three ways structurally -- a sibling string (here), a block array, and
+ * reasoning inside a polymorphic `content` array. Aliasing bridges names, not shapes: a
+ * fourth spelling is one entry in REASONING_KEYS, a fourth SHAPE needs its own branch.
  */
 function applyReasoning(delta: Record<string, unknown>, out: ModelStreamChunk): void {
   const details = Array.isArray(delta.reasoning_details) ? delta.reasoning_details : undefined;

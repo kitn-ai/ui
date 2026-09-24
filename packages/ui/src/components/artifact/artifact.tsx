@@ -104,7 +104,7 @@ export interface ArtifactProps extends Omit<JSX.HTMLAttributes<HTMLDivElement>, 
   showPathField?: boolean;
   /** Show the Preview|Code tab toggle. Default `true`. */
   showTabs?: boolean;
-  // new affordances — OPT-IN (default hidden; see resolved decision #2)
+  // New affordances are OPT-IN: hidden by default.
   /** Show the expand-to-fill button. Default `false` (opt-in). */
   expandable?: boolean;
   /** Show the open-in-new-tab button. Default `false` (opt-in). */

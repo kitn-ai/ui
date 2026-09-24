@@ -1,9 +1,8 @@
 /**
- * The construct ↔ form translation layer (B-21) plus the schema walk the
- * derived panel builds on (B-19) and the rule-id-keyed visibility registry
- * (B-20). The construct itself IS the form state — the panel is controlled
- * (value/onChange over a whole Construct, the same shape BuilderPanel
- * already uses), and this module supplies the path-based edits:
+ * The construct ↔ form translation layer: the schema walk the derived panel builds
+ * on, and the rule-id-keyed visibility registry. The construct itself IS the form
+ * state — the panel is controlled (value/onChange over a whole Construct), and this
+ * module supplies the path-based edits:
  *
  *  - presence-as-boolean: section on = object present, off = key DELETED —
  *    never `false`, never `{}` left behind;
@@ -12,7 +11,7 @@
  *    pruned too — but deleting an absent key is identity, so a no-op edit
  *    round-trips byte-identical (the test corpus is every registry starter);
  *  - default-anchored booleans: `capabilities.sources.strip` reads ON when
- *    absent (the kit default IS the on state, B-4); writes stay explicit —
+ *    absent (the kit default IS the on state); writes stay explicit —
  *    stating the default is legal and Research does it on purpose.
  *
  * Zod 4 notes: `.superRefine()` returns the schema class itself (no
@@ -118,7 +117,7 @@ export function derivePresenceBooleanPaths(): string[] {
   return out;
 }
 
-// ── default-anchored booleans (B-4) ─────────────────────────────────────────
+// ── default-anchored booleans ───────────────────────────────────────────
 
 export const ANCHORED_BOOLEAN_DEFAULTS: Record<string, boolean> = {
   // Absent = the strip renders (the kit default IS the on state).
@@ -134,7 +133,7 @@ export function writeAnchoredBoolean(c: Construct, path: string, next: boolean):
   return setAtPath(c, path, next);
 }
 
-// ── schema walk (B-19) ──────────────────────────────────────────────────────
+// ── schema walk ───────────────────────────────────────────────────────────
 
 export function unwrapSchema(node: z.ZodType): z.ZodType {
   let cur: z.ZodType = node;
@@ -178,7 +177,7 @@ export function controlKindFor(node: z.ZodType): ControlKind {
   return { kind: 'complex' }; // discriminated unions (provider), records — override territory
 }
 
-// ── visibility registry (B-20) ──────────────────────────────────────────────
+// ── visibility registry ───────────────────────────────────────────────────
 
 export type RuleVisibility =
   // `layout` is EXPLICIT and not inferred from `section`. The panel used to
@@ -191,9 +190,9 @@ export type RuleVisibility =
   | { treatment: 'show-requires'; path: string }
   | { treatment: 'reject-only' };
 
-/** Keyed by CROSS_FIELD_RULES ids: the key-set-equality test in
+/** Keyed by cross-field rule ids: the key-set-equality test in
  *  construct-form-paths.test.ts fails a new superRefine rule until the
- *  builder classifies it here (B-20's drift guard). `reject-only` means the
+ *  builder classifies it here. `reject-only` means the
  *  panel surfaces the rule only through validation problems (duplicates,
  *  URL-scheme rejections: states the panel's own editors cannot produce). */
 export const RULE_VISIBILITY: Record<string, RuleVisibility> = {
@@ -220,10 +219,9 @@ export const RULE_VISIBILITY: Record<string, RuleVisibility> = {
   'work-surface-layout-scope': { treatment: 'hide-section', section: 'workSurface', layout: 'split' },
   'work-surface-url': { treatment: 'reject-only' },
   'work-surface-code-url': { treatment: 'reject-only' },
-  // Still `show-requires` on the SAME path after the 2026-08-30 ruling made
-  // the coupling one-way: `workSurface.codeUrl` is the field with the
-  // precondition (it needs `chrome.codeView` on). What changed is the reverse
-  // — the toggle no longer requires the URL — so the panel can switch
-  // `codeView` on with the URL blank and the Code tab renders its empty state.
+  // `show-requires` on the SAME path: `workSurface.codeUrl` is the field with the
+  // precondition (it needs `chrome.codeView` on), while `codeView` does not require the
+  // URL, so the panel can switch it on with the URL blank and the Code tab renders its
+  // empty state.
   'work-surface-code-view': { treatment: 'show-requires', path: 'workSurface.codeUrl' },
 };

@@ -75,7 +75,7 @@ defineWebComponent<Props, Events>('kai-dock', {
 
   // The other three booleans get the same read-back treatment, for the same reason:
   // `<kai-dock unread>` parses to `undefined`, so without this the property would
-  // contradict the attribute that set it (findings G-05). Reflecting `unread` syncs
+  // contradict the attribute that set it. Reflecting `unread` syncs
   // the ATTRIBUTE to the prop and never changes the VALUE — the dock still never
   // decides that a message has been read.
   reflectFlag('unread');

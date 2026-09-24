@@ -17,7 +17,7 @@ interface Props extends Record<string, unknown> {
   // `panel` is the widget-panel presentation, matching the facade panel's measured row
   // box (12px/10px padding, a 40px single-line row). Previously that box was a private
   // interior class a composition could only approximate by smuggling padding through
-  // slotted spans (2026-08-31 composition spike, phase 3 round 3). An explicit density
+  // slotted spans. An explicit density
   // wins over `compact`.
   /** Row density: `default`, `compact` (same as the `compact` flag), or `panel` (the widget-panel row box). */
   density?: ConversationRowDensity;

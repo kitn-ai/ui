@@ -31,27 +31,19 @@ let encoder: TextEncoder | undefined;
 /**
  * UTF-8 byte length of the encoded body, or undefined when it cannot be one.
  *
- * ★ ONLY CALLED WHEN PAYLOAD CAPTURE IS ON, i.e. when the body is being
- * materialized for a subscriber anyway. `base64Bytes` below refuses to decode a
- * 40 MB attachment to count it, on the grounds that the diagnostic would cost
- * more than the encode it is watching -- and stringifying the whole body to
- * produce one number is that same mistake one level up. With payload off the
- * field is OMITTED, which reads as "not reported" under the absence rule.
+ * ★ ONLY CALLED WHEN PAYLOAD CAPTURE IS ON, i.e. when the body is being materialized for a
+ * subscriber anyway. With payload off the field is OMITTED, which reads as "not reported"
+ * under the absence rule: stringifying the whole body to produce one number is the same
+ * mistake `base64Bytes` refuses one level down. Measured against the built bundle with
+ * payload OFF, on a thread of ten 1 MB attachments whose bare encode is 4.2 ms: ungated
+ * the instrumentation cost +36.6 ms and +0.9 MB of heap, gated +5.8 ms and no measurable
+ * heap. Upper bounds only, the box was not idle: the real cost is lower.
  *
- * Measured against the built bundle, subscribed with payload OFF, on a thread
- * of ten 1 MB attachments whose bare encode is 4.2 ms: ungated the
- * instrumentation cost +36.6 ms and +0.9 MB of heap; gated it costs +5.8 ms and
- * no measurable heap. (Upper bounds -- the box was not idle. `--expose-gc`, 15
- * runs, `scripts/`-adjacent harness in the PR.)
- *
- * NOT REPLACED BY AN ESTIMATE. A number that looks like a measurement and is
- * not is worse than an absent field, and a size threshold would make the
- * field's presence depend on how big the body happened to be -- which is the
- * one thing a reader would then be unable to conclude anything from.
- *
- * `JSON.stringify` is not total either: a circular `tool.output` or a BigInt
- * anywhere in a host's own data throws, and a diagnostic must never be the thing
- * that breaks an encode. That case goes absent for the same reason.
+ * NOT REPLACED BY AN ESTIMATE: a number that looks like a measurement and is not is worse
+ * than an absent field, and a size threshold would make the field's presence depend on how
+ * big the body happened to be. `JSON.stringify` is not total either (a circular
+ * `tool.output` or a BigInt throws), and a diagnostic must never be the thing that breaks
+ * an encode: that case goes absent for the same reason.
  */
 function bodyBytes(body: unknown): number | undefined {
   try {
@@ -63,39 +55,23 @@ function bodyBytes(body: unknown): number | undefined {
 }
 
 /**
- * Bytes a base64 payload stands for, WITHOUT decoding it.
+ * Bytes a base64 payload stands for, WITHOUT decoding it. Four base64 characters carry three
+ * bytes, less the padding; decoding a 40 MB attachment to count it would make the diagnostic
+ * more expensive than the encode it is watching.
  *
- * Four base64 characters carry three bytes, less the padding. Decoding a 40 MB
- * attachment to count it would make the diagnostic more expensive than the
- * encode it is watching.
+ * ★ THIS IS AN O(n) SCAN AND THERE IS NO EXACT WAY AROUND IT, about 0.43 ms per MB of
+ * attachment. That is why its caller is PAYLOAD-GATED (see `bytesOf` in encode.ts): the
+ * thread is re-encoded every turn, so the scan is a recurring per-turn cost rather than a
+ * one-off, and unbounded-per-turn is what fails "cheap enough to leave on".
  *
- * ★ THIS IS AN O(n) SCAN AND THERE IS NO EXACT WAY AROUND IT -- about 0.43 ms
- * per MB of attachment. THAT IS WHY ITS CALLER IS PAYLOAD-GATED (see `bytesOf`
- * in encode.ts): the thread is re-encoded every turn, so the scan is a
- * recurring per-turn cost rather than a one-off, and unbounded-per-turn is what
- * fails "cheap enough to leave on". With payload off this is never called; with
- * payload on it runs and the number is exact.
- *
- * THE ALTERNATIVE WAS NOT TO GUESS, and three candidates were measured before
- * settling on gating instead:
- *
- *   · A charCodeAt counting loop -- 7x SLOWER on the shape that actually occurs
- *     (a `data:` URI, no whitespace): 2.77 ms vs 0.61 ms per 1.4 MB. It avoids
- *     a copy that a whitespace-free `.replace` never makes, because V8 returns
- *     the original string when the pattern does not match. Strictly worse.
- *   · Native whitespace `.test()` then O(1) arithmetic on `.length` -- exact,
- *     and identical in time (0.60 ms), because the test is the same full scan.
- *     No win worth the extra branch.
- *   · Probing only a prefix for whitespace, then O(1) arithmetic -- 170x faster
- *     (0.0036 ms) and REJECTED anyway: it assumes whitespace is periodic line
- *     wrapping, so a payload whose only whitespace sits past the probe window
- *     is silently OVER-counted. That is an estimate wearing a measurement's
- *     clothes, which is the one thing a size field must never be.
- *
- * So the resolution is exact-but-gated rather than always-on-but-approximate. A
- * cheaper counter is welcome; a less truthful one is not, and `base64-bytes.
- * test.ts` pins the arithmetic against a real decode so any replacement has to
- * prove it is the same function rather than merely a plausible one.
+ * THE ALTERNATIVES WERE MEASURED, not guessed, and all three lost: a `charCodeAt` loop is
+ * 7x slower on the shape that actually occurs (2.77 ms vs 0.61 ms per 1.4 MB); a native
+ * whitespace `.test()` then O(1) arithmetic is exact but identical in time (0.60 ms),
+ * because the test is the same full scan; and probing only a prefix for whitespace is 170x
+ * faster yet REJECTED, because it assumes periodic line wrapping, so a payload whose only
+ * whitespace sits past the probe window is silently OVER-counted. So the resolution is
+ * exact-but-gated rather than always-on-but-approximate. `base64-bytes.test.ts` pins the
+ * arithmetic against a real decode, so a replacement has to prove it is the same function.
  */
 export function base64Bytes(data: string): number {
   const clean = data.replace(/\s/g, '');

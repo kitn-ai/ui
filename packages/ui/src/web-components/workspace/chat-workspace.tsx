@@ -90,7 +90,7 @@ defineWebComponent<Props, Events>('kai-workspace', {
     onCleanup(() => observer.disconnect());
   });
 
-  // Reflect the read-back flags (the G-05 rule: a bare attribute parses to
+  // Reflect the read-back flags (a bare attribute parses to
   // `undefined`, so without this the property would contradict the attribute).
   reflectFlag('compact');
   reflectFlag('defaultStartCollapsed');

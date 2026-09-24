@@ -1,38 +1,24 @@
-// The ELEMENT-layer diagnostic events: what the `kai-*` custom elements SAW a
-// consumer do to them.
+// The ELEMENT-layer diagnostic events: what the `kai-*` custom elements SAW a consumer
+// do to them.
 //
-// The wire events answer "did the data arrive". These answer the other half —
-// "the data is right and the UI still is not updating" — which is a different
-// failure with a different cause and, until now, no evidence at all. All three
-// causes are documented in root CLAUDE.md's `kai-` contract section, and every
-// one of them is silent by construction:
+// The wire events answer "did the data arrive". These answer the other half -- "the data
+// is right and the UI still is not updating" -- and all three causes are silent by
+// construction:
 //
-//   1. An array or object prop set as an HTML ATTRIBUTE. `component-register`
-//      parses attributes with a `JSON.parse` whose `catch` returns the raw
-//      string, so `el.setAttribute('messages', arr)` assigns the literal text
-//      `"[object Object],[object Object]"` to the property and pushes THAT into
-//      the Solid signal. Nothing throws, nothing logs, nothing renders.
-//   2. The SAME array reference handed back. solid-element creates one signal
-//      per prop and sets it with `set(() => v)`; Solid's default equality is
-//      `===`, so re-assigning the identical reference notifies nothing.
-//   3. A NEW array whose items are all the previous item objects. The array
-//      notifies, but the lists render through reference-keyed `<For>`s, so no
-//      row is re-invoked and nothing on screen changes.
+//   1. An array or object prop set as an HTML ATTRIBUTE. `component-register` parses
+//      attributes with a `JSON.parse` whose `catch` returns the raw string, so
+//      `el.setAttribute('messages', arr)` assigns the literal text
+//      `"[object Object],[object Object]"` to the property and pushes THAT into the
+//      Solid signal. Nothing throws, nothing logs, nothing renders.
+//   2. The SAME array reference handed back: solid-element sets its per-prop signal with
+//      `set(() => v)`, Solid's default equality is `===`, so nothing notifies.
+//   3. A NEW array whose items are all the previous item objects: the array notifies, but
+//      the lists render through reference-keyed `<For>`s, so no row is re-invoked.
+
 //
-// ZERO IMPORTS, DELIBERATELY. These are type declarations only, so this file is
-// erased at build. That is what lets `wire/diagnostics.ts` name them in its
-// union without `wire/` acquiring a runtime dependency on `elements/` — which
-// would be a real layering inversion, and would drag the element bundle into
-// every consumer that only parses streams.
-//
-// METADATA ONLY, by the same rule the wire events follow: if a value comes from
-// the model, the end user, or the app's data it is PAYLOAD; if it describes the
-// shape, size, timing or identity of that value it is METADATA. A tag name, a
-// prop name, a kind, a count and a length are all identity or shape. A prop's
-// VALUE never appears in any field below — `valuePreview` is a shape
-// description built from a closed vocabulary, never the text itself. Pinned by
-// `web-component-diagnostics-payload.test.ts`, which plants a sentinel inside every
-// prop value it sets and asserts it never reaches a serialized event.
+// METADATA ONLY, the rule the wire events follow: a prop's VALUE never appears below, and
+// `valuePreview` is a shape description from a closed vocabulary, pinned by
+// `web-component-diagnostics-payload.test.ts`.
 
 /** The envelope, structurally identical to `WireDiagnosticBase`. Restated here
  *  rather than imported so this file keeps its zero-import property; the two are

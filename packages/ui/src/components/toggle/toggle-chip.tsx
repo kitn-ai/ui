@@ -2,8 +2,7 @@ import { type JSX, createSignal, splitProps } from 'solid-js';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 
-// Owns its classes rather than delegating to `Button` (owner amendment, design
-// round 4): Button's smallest size (`sm`, `h-8`) reads as a small BUTTON, not
+// Owns its classes rather than delegating to `Button`: Button's smallest size (`sm`, `h-8`) reads as a small BUTTON, not
 // a pill, and pill proportions need finer control than that scale offers —
 // closer to `Badge`'s `min-h-5` than to any Button size. `sm` here (h-7,
 // tight px-3, text-xs) is the default pill; `md` (h-8, text-sm) is the one
@@ -51,8 +50,7 @@ export interface ToggleChipProps
 /**
  * `ToggleChip`: a small pill button for a two-state, chip-shaped toggle
  * (`aria-pressed`): the common-case selectors in `builder-panel.tsx`'s
- * attachments accept editor, promoted to a named primitive (owner design
- * round 4). Controlled via `pressed`, or uncontrolled from `defaultPressed`,
+ * attachments accept editor, promoted to a named primitive. Controlled via `pressed`, or uncontrolled from `defaultPressed`,
  * matching `Switch`'s controlled/uncontrolled convention.
  *
  * No `ChipGroup` wrapper: a row of chips is `<div class="flex flex-wrap

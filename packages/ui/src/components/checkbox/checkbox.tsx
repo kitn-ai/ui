@@ -13,22 +13,20 @@ export interface CheckboxProps extends Omit<JSX.InputHTMLAttributes<HTMLInputEle
 }
 
 /**
- * A checkbox. A REAL `<input type="checkbox">` behind `appearance: none`, styled by
- * the kit's `.kai-checkbox` rule, never a `<div>` wearing `role="checkbox"`.
+ * A checkbox: a REAL `<input type="checkbox">` behind `appearance: none`, styled by the
+ * kit's `.kai-checkbox` rule, never a `<div>` wearing `role="checkbox"`.
  *
- * That is the whole design: the native control brings keyboard operation (Space),
- * the `:focus-visible` ring, form participation via `name` / `value`, and correct
- * screen-reader announcement. All of it for free, and all of it correct. Every
- * accessibility defect this kit's control audit found was in a control that had
- * replaced the native element with something hand-rolled.
+ * That is the whole design. The native control brings keyboard operation (Space), the
+ * `:focus-visible` ring, form participation via `name`/`value` and correct screen-reader
+ * announcement; every accessibility defect the kit's control audit found was in a control
+ * that had replaced the native element with something hand-rolled.
  *
- * Everything not listed in `CheckboxProps` is forwarded to the input, so `id`,
- * `name`, `value`, `required`, `disabled`, `aria-*` and any `data-*` hook behave
- * exactly as they do on a plain `<input>`.
+ * Everything not listed in `CheckboxProps` is forwarded to the input, so `id`, `name`,
+ * `value`, `required`, `disabled`, `aria-*` and any `data-*` hook behave exactly as they do
+ * on a plain `<input>`.
  *
- * Validation is deliberately absent. `required` is passed through to the native
- * attribute and nothing else; whether an unchecked box is an error is the
- * consuming application's call, not the kit's.
+ * Validation is deliberately absent: `required` reaches the native attribute and nothing
+ * more, and whether an unchecked box is an error is the consuming app's call.
  *
  * ```tsx
  * <Checkbox name="notify" checked={on()} onChange={(e) => setOn(e.currentTarget.checked)} />

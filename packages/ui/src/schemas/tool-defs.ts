@@ -1,46 +1,23 @@
 // Card schemas -> provider tool definitions.
 //
-// THE PROBLEM THIS SOLVES
-// -----------------------
-// A developer who wants a model to produce a `confirm` card today hand-writes a tool
-// definition that approximates a schema they cannot import, then hand-writes a mapper
-// from the model's arguments back to a CardEnvelope. This repo's own reference
-// harness does exactly that and says so in a comment
-// (examples/internal/openrouter-spike/src/tools.ts). That is the same shape written
-// in five places. This file removes two of them: the tool definition is GENERATED
-// from the schema the card already validates against, so it cannot drift.
+// THE PROBLEM: producing a card today means hand-writing a tool definition that approximates a
+// schema you cannot import, plus a mapper back to a CardEnvelope. This file removes both: the tool
+// definition is GENERATED from the schema the card already validates against.
+// WHAT THIS FILE IS NOT: a provider client, and it never becomes one. No `openai`, no
+// `@anthropic-ai/sdk`, no `fetch`: the shapes below are plain structural types, which is what lets
+// the kit keep the rule against a provider SDK under `src/`.
 //
-// WHAT THIS FILE IS NOT
-// ---------------------
-// It is not a provider client and it never becomes one. No `openai`, no
-// `@anthropic-ai/sdk`, no `fetch`. The provider envelope shapes below are declared
-// here as plain structural types, which is what lets `@kitn.ai/ui` keep its rule that
-// nothing under `src/` depends on a provider SDK. The kit PARSES and PROJECTS; the
-// consumer FETCHES.
+// THE HEADLINE, MEASURED: `strict: true` throws for EVERY built-in card on BOTH providers, since
+// the authored schemas use `minLength`, `maxLength`, `format: "uri"`, `minimum`, `maxItems`,
+// `pattern`, `if`/`then`, `oneOf`, a free-form object and untyped `payload`/`allowOther`.
+// Non-strict is therefore the default, and it is not a raw pass-through either: a root
+// combinator gets HTTP 400 even non-strict, so the non-strict projection relaxes those LOUDLY,
+// with the constraint restated in the tool description, a console.warn naming the relaxation
+// and `registry.validate` still enforcing at render time. The `jsonschema` projection stays
+// byte-faithful to the authored schema.
 //
-// THE HEADLINE, MEASURED, NOT RECALLED
-// ------------------------------------
-// `strict: true` currently throws for EVERY built-in card on BOTH providers. That is
-// not a bug in this file, it is what the schemas say when you hold them against the
-// two documented subsets (see provider-subsets.ts for the two source docs). The
-// authored schemas use `minLength` (confirm/choice/tasks), `maxLength` +
-// `format: "uri"` (link/embed/artifact), `minimum` (tasks/embed/artifact),
-// `maxItems` (confirm/artifact), `pattern` (embed), `if`/`then` (embed), `oneOf`
-// (artifact), a free-form object (form) and untyped `payload`/`allowOther` members
-// (confirm/choice). Non-strict is therefore the default and the mode the
-// five-configuration conformance spike actually proved cards in — but since F-20 it
-// is no longer a raw pass-through either: a root combinator (`anyOf` on artifact,
-// `allOf` on embed) gets HTTP 400 from OpenAI and Anthropic even non-strict, so the
-// non-strict projection relaxes those root combinators LOUDLY (constraint restated in
-// the description, console.warn names the relaxation, registry.validate still
-// enforces at render time). The jsonschema projection stays byte-faithful to the
-// authored schema.
-//
-// The alternative was to silently drop the offending keywords. That is rejected for
-// the reason the plan gives: a dropped `maxItems: 4` means the model emits six
-// actions and the card renders six buttons, with nothing anywhere saying the contract
-// was quietly loosened. A throw that NAMES the card, the path and the keyword is a
-// signal on the developer's own machine, which is the whole point.
+// Silently dropping the offending keywords is rejected: a dropped `maxItems: 4` means the model
+// emits six actions and the card renders six buttons with nothing saying the contract loosened.
 
 import { toolNameForCardType } from './from-tool-call';
 import { cardSchemas } from './index';
@@ -273,7 +250,7 @@ const isRecord = (v: unknown): v is Record<string, unknown> =>
 
 /**
  * Root combinators the two largest providers refuse on a tool schema's root node
- * (measured: OpenAI and Anthropic 400 before the model runs, findings F-20;
+ * (measured: OpenAI and Anthropic 400 before the model runs;
  * DeepSeek's OpenAI-compatible route requires the same workaround). The AUTHORED
  * schemas keep them; card validation keeps every constraint. Only the WIRE
  * projection relaxes, loudly: the constraint is restated in the description the
@@ -346,7 +323,7 @@ function branchesOfRootKeyword(keyword: string, value: unknown): Record<string, 
  * built-in reaches, and the one this exists for.
  *
  * Properties are UNIONed (each branch's shape must remain expressible; dropping
- * one is the silent narrowing the whole F-20 fix exists to avoid); a name already
+ * one is the silent narrowing this projection exists to avoid); a name already
  * on the root keeps the root's definition. `required` is the intersection for
  * `anyOf`/`oneOf`/`enum`/`const` and the union for `allOf`, unioned in turn with
  * whatever the root already required, and filtered to names the merged
@@ -393,7 +370,7 @@ function mergeBranchesIntoRoot(parameters: Record<string, unknown>, banned: read
 /**
  * Make the projected ROOT the object shape every provider demands.
  *
- * Deleting a root combinator is only half of F-20. A schema whose root was NOTHING
+ * Deleting a root combinator is only half the fix. A schema whose root was NOTHING
  * BUT the combinator projects to `{"title":…,"description":…}` once it is gone,
  * accepted by no provider (measured: OpenAI 400, "schema must be a JSON Schema of
  * type \"object\"") and unfillable by any model. Every built-in declares
@@ -704,7 +681,7 @@ export function cardTools(a: CardToolInput | CardToolOptions, b?: CardToolOption
     const description = describe(cardType, schema, descriptions);
     const parameters = project(schema, projectOptions) as ToolParameters;
 
-    // F-20: non-strict only. Strict mode already refuses these cards with the full
+    // Non-strict only. Strict mode already refuses these cards with the full
     // subset check, so the relaxation must never mask it. The note is restated in the
     // TOOL description — the envelope field the model reads when choosing the tool.
     const relaxedNote =
@@ -713,7 +690,7 @@ export function cardTools(a: CardToolInput | CardToolOptions, b?: CardToolOption
         : undefined;
     const wireDescription = relaxedNote ? `${description} ${relaxedNote}` : description;
 
-    // F-23: every provider, jsonschema included — a consumer handing the bare schema
+    // Every provider, jsonschema included — a consumer handing the bare schema
     // to the Vercel AI SDK narrows their tool the same way. Runs BEFORE the strict
     // subset check so that check judges the schema that actually ships.
     const requireRules = opts.require?.[cardType];

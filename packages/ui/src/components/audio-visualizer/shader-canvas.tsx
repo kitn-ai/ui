@@ -313,27 +313,20 @@ export function ShaderCanvas(props: ShaderCanvasProps): JSX.Element {
   // ------------------------------------------------------------------------
   // Context lifecycle.
   //
-  // Chrome caps LIVE WebGL contexts at about 16 per renderer process and
-  // silently evicts the oldest past that -- a budget shared across
-  // same-origin iframes too, so splitting the page up buys nothing (measured:
-  // the AudioVisualizer docs page wanted 18, got 16, and 2 canvases failed to
-  // compile with no error anywhere). Holding a context for the component's
-  // whole life is what made that page unable to host the shader stories at
-  // all.
-  //
-  // Merely pausing the draw loop off screen -- which is all upstream's
-  // runner does -- does NOT return a slot: an idle context still occupies
-  // one. So an off-screen canvas gives the context BACK, via
+  // Chrome caps LIVE WebGL contexts at about 16 per renderer process and silently
+  // evicts the oldest past that, a budget shared across same-origin iframes too
+  // (measured: the docs page wanted 18, got 16, and 2 canvases failed to compile with
+  // no error anywhere). Holding a context for the component's whole life is what made
+  // that page unable to host the shader stories at all. Merely pausing the draw loop
+  // off screen -- all upstream's runner does -- does NOT return a slot: an idle context
+  // still occupies one. So an off-screen canvas gives the context BACK, via
   // `WEBGL_lose_context`'s `loseContext()`, and asks for it again with
-  // `restoreContext()` on the way in. Consequence worth stating plainly: N
-  // off-screen visualizers now hold ZERO contexts between them, and a page
-  // holds one per canvas actually in the viewport.
+  // `restoreContext()` on the way in. N off-screen visualizers therefore hold ZERO
+  // contexts between them.
   //
-  // All of this state is COMPONENT-scoped rather than living inside the
-  // compile effect, because a context belongs to the CANVAS, which outlives
-  // any one run of that effect. A shader released while off screen must still
-  // be restorable after a recompile (a `size`/band-count change genuinely
-  // rebuilds the shader while a tile is scrolled away).
+  // All of this state is COMPONENT-scoped rather than living inside the compile effect,
+  // because a context belongs to the CANVAS, which outlives any one run of that effect:
+  // a shader released while off screen must still be restorable after a recompile.
   // ------------------------------------------------------------------------
 
   /**
@@ -367,27 +360,20 @@ export function ShaderCanvas(props: ShaderCanvasProps): JSX.Element {
   /**
    * `cancelAnimationFrame`, captured at SETUP.
    *
-   * `stopLoop()` below runs at dispose (via `release()`), and dispose is not
-   * guaranteed to happen while the page that mounted this canvas is still
-   * standing -- `component-register`'s `disconnectedCallback` defers a
-   * microtask, and a test environment tears its DOM globals down in between.
-   * A bare `cancelAnimationFrame` there throws from a promise nobody holds, so
-   * it surfaces as an unhandled rejection that fails a run in which every test
-   * passed. See tests/components/teardown-without-dom-globals.test.tsx.
+   * `stopLoop()` below runs at dispose, and dispose is not guaranteed to happen while
+   * the page that mounted this canvas is still standing: component-register's
+   * `disconnectedCallback` defers a microtask, and a test environment tears its DOM
+   * globals down in between. A bare `cancelAnimationFrame` there throws from a promise
+   * nobody holds, surfacing as an unhandled rejection that fails a run in which every
+   * test passed (pinned by `tests/components/teardown-without-dom-globals.test.tsx`).
+   * The FUNCTION, not the view: `window === globalThis` (measured in jsdom
+   * and in Chromium/WebKit alike) and the teardown deletes the key off that very object,
+   * so a `const win = window` capture only trades the ReferenceError for a TypeError
+   * while `.bind` pins the receiver the WebIDL operation is specified on.
    *
-   * The FUNCTION, not the view. The `const win = window` capture that fixes a
-   * bare `document` does nothing here: `window === globalThis` -- measured, in
-   * jsdom and in real Chromium/WebKit alike -- and the teardown deletes these
-   * keys off that very object, so `win.cancelAnimationFrame` is undefined by
-   * the time cleanup runs. It only trades the ReferenceError for a TypeError.
-   * `.bind` pins the receiver the WebIDL operation is specified on; Chromium
-   * and WebKit both accept a detached call (measured), so the bind is belt and
-   * braces against an engine that does not, at zero cost.
-   *
-   * GUARDED because "setup" for this component is its body, and a server render
-   * executes component bodies. Node has no `cancelAnimationFrame` at all, so an
-   * unguarded capture here would trade the disposal crash for an SSR crash --
-   * measured, not hypothesised. Nothing can be scheduled without
+   * GUARDED because "setup" for this component is its body, and a server render executes
+   * component bodies: Node has no `cancelAnimationFrame` at all, so an unguarded capture
+   * would trade the disposal crash for an SSR crash. Nothing can be scheduled without
    * `requestAnimationFrame` either, so the no-op fallback is exactly right.
    */
   const cancelFrame = typeof cancelAnimationFrame === 'function'

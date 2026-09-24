@@ -1,39 +1,23 @@
 // The recorder hook: `window.__KAI_DEVTOOLS_HOOK__`.
 //
-// The panel floats free of the kit -- it is CDN-delivered, arrives whenever the
-// page gets to it, and is a LATE SUBSCRIBER by design. This is the object it
-// attaches to: drain the history, then stream live.
+// The panel floats free of the kit: CDN-delivered, arriving whenever the page gets to
+// it, and a LATE SUBSCRIBER by design. This is the object it attaches to: drain the
+// history, then stream live. Unlike React's hook, which must install before React loads,
+// ours is inside the kit, so it is present as soon as the kit is -- which is the whole
+// reason the buffer exists.
 //
-// This is React DevTools' shape minus its hardest constraint. React's hook must
-// be installed BEFORE React loads, which is why it ships as an extension running
-// at document_start. Ours does not: the recorder is inside the kit, so it is
-// present as soon as the kit is. That is the whole reason the buffer exists.
+// TWO BRANCHES, decided ONCE, SYNCHRONOUSLY, at install. Synchronous is a hard
+// requirement: an async answer means an interval of "unknown", which forces a permanent
+// ring buffer with a size nobody can choose well.
 //
-// TWO BRANCHES, decided ONCE, SYNCHRONOUSLY, at install.
+//   NOT WANTED -- no buffer, no subscription, so `wireDiagnosticsActive()` stays false and
+//   emission remains a guarded no-op. The hook is still installed: a few bytes carrying
+//   `activate()`, which lets a panel attach later.
 //
-// Synchronous is a hard requirement, not a preference: an async answer means an
-// interval of "unknown", and an interval of unknown is exactly what forces a
-// permanent ring buffer with a size constant nobody can choose well. The events
-// that explain a session are almost always its first ones, so a buffer small
-// enough to be free has usually discarded the answer by the time anyone looks,
-// and a buffer large enough to hold it charges every production user of every
-// app for a panel almost none of them open.
+//   WANTED -- capture from the first event, uncapped, before the panel exists; once it
+//   attaches the panel owns retention.
 //
-//   NOT WANTED -- no buffer is allocated and no subscription is made, so
-//   `wireDiagnosticsActive()` stays false and emission remains a guarded no-op.
-//   The hook is still installed: it is a few bytes, it carries `activate()`, and
-//   it is what lets a panel attach later at all. A dormant panel does not
-//   subscribe, which is what keeps a permanently pasted script tag genuinely
-//   dormant rather than quietly recording.
-//
-//   WANTED -- capture from the first event, uncapped, before the panel exists.
-//   Until the panel attaches nothing bounds the buffer, and that window is the
-//   seconds the panel takes to load; after it attaches the panel owns retention,
-//   because the data lives there rather than here.
-//
-// SSR: no `window`, no `localStorage` and no `location` touched at module scope,
-// and installing is a no-op without a window. Server-side there is no signal to
-// read, so the answer is no and the recorder never starts.
+// SSR: no `window` or `localStorage` at module scope, so it never starts server-side.
 import {
   setWirePayloadCapture,
   subscribeWireDiagnostics,

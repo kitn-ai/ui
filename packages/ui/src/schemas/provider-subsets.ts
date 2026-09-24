@@ -1,26 +1,20 @@
-// What each provider's STRICT mode can actually compile, written down twice.
+// What each provider's STRICT mode can actually compile, written down TWICE.
 //
-// WHY TWO TABLES AND NOT ONE WITH A FLAG
-// --------------------------------------
-// The tempting shape here is one keyword map with `{ openai: true, anthropic: false }`
-// per entry. That is the same defect this repo shipped in the wire adapter: a check
-// keyed on a field name that exists on only one of the two wires, which passed for
-// months while covering one provider. A single table makes the two subsets look like
-// one fact with a discriminator, and the next person to add a keyword fills in one
-// column, guesses the other, and nothing catches it.
+// WHY TWO TABLES AND NOT ONE WITH A FLAG: the tempting shape is one keyword map with
+// `{ openai: true, anthropic: false }` per entry, and that is the defect this repo already
+// shipped in the wire adapter: a check keyed on a field name that exists on only one of the
+// two wires, which passed for months while covering one provider. A single table makes the
+// subsets look like one fact with a discriminator, and the next person to add a keyword fills
+// in one column and guesses the other.
 //
-// So: two independent documents, each with its own source URL and its own reading
-// date, each restating even the entries the other agrees on. `verify:tool-schemas`
-// asserts they DIFFER, so a copy-paste that collapses one into the other fails
-// loudly. `minItems` is the tell and it is not a hypothetical: OpenAI accepts any
-// value, Anthropic accepts 0 or 1 and 400s on 2.
+// So: two independent documents, each with its own source URL and reading date, each
+// restating even the entries the other agrees on. `verify:tool-schemas` asserts they DIFFER,
+// so a copy-paste that collapses one into the other fails loudly. `minItems` is the tell:
+// OpenAI accepts any value, Anthropic accepts 0 or 1 and 400s on 2.
 //
-// WHAT "UNKNOWN" MEANS
-// --------------------
-// A keyword absent from a table is a VIOLATION, never a pass. That is deliberate and
-// it is the whole reason the tables enumerate keywords they will never see (
-// `unevaluatedItems`, `minContains`, ...). A silent skip list defeats the guard: the
-// day someone writes a keyword neither provider documents, the build must say so
+// WHAT "UNKNOWN" MEANS: a keyword absent from a table is a VIOLATION, never a pass, which is
+// why the tables enumerate keywords they will never see. A silent skip list would defeat the
+// guard: the day someone writes a keyword neither provider documents, the build must say so
 // rather than shipping a schema that 400s in production.
 
 /** The providers whose strict subsets are documented here. */
@@ -83,35 +77,20 @@ const keywordTable = (t: Record<string, KeywordRule>): Readonly<Record<string, K
 /**
  * OpenAI strict function calling / structured outputs.
  *
- * SOURCE: https://developers.openai.com/api/docs/guides/structured-outputs
- * (sections "Supported schemas", "Supported properties", "Some type-specific
- * keywords are not yet supported"), read 2026-08-11. The older
- * platform.openai.com/docs/guides/structured-outputs URL 301s here.
+ * SOURCE: https://developers.openai.com/api/docs/guides/structured-outputs (sections
+ * "Supported schemas", "Supported properties", "Some type-specific keywords are not yet
+ * supported"); the older platform.openai.com/docs/guides/structured-outputs URL 301s here. The
+ * keyword list this annotates is the TABLE below, which is what the guard reads.
  *
- * Quoted from that page:
- * - supported types: "String, Number, Boolean, Integer, Object, Array, Enum, anyOf"
- * - "Objects have `additionalProperties: false` must always be set"
- * - "All fields or function parameters must be specified as `required`" (an optional
- *   field is emulated with a union type including `null`)
- * - supported String properties: `pattern`, `format`
- * - supported Number properties: `multipleOf`, `maximum`, `exclusiveMaximum`,
- *   `minimum`, `exclusiveMinimum`
- * - supported Array properties: `minItems`, `maxItems`
- * - not supported, composition: "`allOf`, `not`, `dependentRequired`,
- *   `dependentSchemas`, `if`, `then`, `else`"
- * - "Root level object of a schema must be an object, and not use `anyOf`"
- *
- * ONE JUDGEMENT CALL, RECORDED BECAUSE IT IS A COIN FLIP.
- * `minLength` / `maxLength` are absent from "Supported properties", which lists only
- * `pattern` and `format` for strings. They appear once elsewhere, in the list of what
- * is "additionally" unsupported for FINE-TUNED models, which can be read as implying
- * base models do support them. The docs do not settle it. This table takes the
- * allowlist reading (unsupported) because the two ways of being wrong are not
- * symmetric: a wrong `supported` is a 400 at request time in the developer's
- * production app with nothing local to look at, while a wrong `unsupported` is a
- * throw on their own machine that names the keyword and the source, which they can
- * read and argue with. If OpenAI clarifies, change this entry and the guard's
- * expectations follow automatically.
+ * ONE JUDGEMENT CALL, RECORDED BECAUSE IT IS A COIN FLIP. `minLength` / `maxLength` are absent
+ * from "Supported properties", which lists only `pattern` and `format` for strings, and appear
+ * once in the list of what is additionally unsupported for FINE-TUNED models, which can be read
+ * as implying base models support them. The docs do not settle it, and this table takes the
+ * allowlist reading (unsupported) because the two ways of being wrong are not symmetric: a
+ * wrong `supported` is a 400 in the developer's production app with nothing local to look at,
+ * while a wrong `unsupported` is a throw on their own machine that names the keyword and the
+ * source, which they can read and argue with. If OpenAI clarifies, change the entry and the
+ * guard follows.
  */
 export const OPENAI_STRICT: ProviderSubset = Object.freeze({
   id: 'openai',
@@ -219,7 +198,7 @@ export const OPENAI_STRICT: ProviderSubset = Object.freeze({
  * Anthropic strict tool use (`strict: true` on a tool definition).
  *
  * SOURCE: https://platform.claude.com/docs/en/build-with-claude/structured-outputs
- * ("JSON Schema limitations"), read 2026-08-11. The strict-tool-use page
+ * ("JSON Schema limitations"). The strict-tool-use page
  * (https://platform.claude.com/docs/en/agents-and-tools/tool-use/strict-tool-use)
  * carries the envelope shape and defers the keyword list to that section verbatim:
  * "For the supported JSON Schema subset, see JSON Schema limitations".

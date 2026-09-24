@@ -1,25 +1,18 @@
-// The package root entry ("./index").
+// The package root entry ("./index"). SCOPE, before adding an export here: every
+// consumer of `@kitn.ai/ui` pays for this barrel, including React/Vue/Svelte consumers
+// who never render a Solid component, so it is FROZEN at the surface that shipped.
+// Adding a Solid component here taxes four frameworks to serve one; closing the element
+// coverage gaps on this file grew it 591,359 -> 705,031 bytes, which is what motivated
+// the split (a record of that measurement, not a current reading).
 //
-// SCOPE — read before adding an export here.
-// -----------------------------------------
-// Every consumer of `@kitn.ai/ui` pays for this barrel, INCLUDING React/Vue/
-// Svelte consumers who never render a Solid component. It is therefore frozen at
-// the surface that shipped: adding a Solid component here taxes four frameworks
-// to serve one. Closing the element coverage gaps on this file grew it
-// 591,359 -> 705,031 bytes (+19.2%), which is what motivated the split. (That
-// measurement was taken at the then-79 web components; the catalog grows, the bytes
-// quoted do not — they are a record of the split, not a current reading.)
+// The complete SolidJS surface, a component for every registered element plus a
+// `<Name>Props` type, lives on `@kitn.ai/ui/solid` (src/solid.ts), its own build target
+// so only Solid consumers pay. `npm run verify:solid-coverage` prints the element count
+// and proves that surface n/n, so no count is restated here. `./solid` re-exports this
+// file and is a strict superset of it.
 //
-// The COMPLETE SolidJS surface — a component for EVERY registered element plus a
-// `<Name>Props` type for every public component — lives on `@kitn.ai/ui/solid`
-// (src/solid.ts), which is its own build target so only Solid consumers pay for
-// it. `npm run verify:solid-coverage` prints the element count and proves that
-// surface n/n on every run, which is why no count is restated here. `./solid`
-// re-exports this file, so it is a strict superset: anything here is reachable
-// there too, and a Solid consumer only ever needs the one import.
-//
-// Rule of thumb: a NEW Solid component export belongs in src/solid.ts.
-// Type-only exports are free (fully erased by the build) and may live in either.
+// Rule of thumb: a NEW Solid component export belongs in src/solid.ts. Type-only
+// exports are free (erased by the build) and may live in either.
 
 // Shared types (folded in from @tab-zen/shared)
 export type { ModelOption, SearchFilters, ConversationScope, ConversationSummary, ConversationGroup, HomeConfig, HomeLinkEntry } from './types';

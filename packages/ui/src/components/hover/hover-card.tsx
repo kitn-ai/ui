@@ -56,12 +56,12 @@ export function HoverCardRoot(props: HoverCardRootProps) {
   let timer: number | undefined;
   props.controllerRef?.({ open, setOpen });
 
-  // ONE shared timer drives both trigger and content. Entering either cancels
+  // ONE shared timer drives both trigger and content: entering either cancels
   // any pending close and schedules an open; leaving either cancels any pending
   // open and schedules a close. Because the pointer transit trigger -> content
   // fires leave() then enter() against the SAME timer, the close is cancelled
   // before it can run, so the card never flickers and there are no stale-timer
-  // sporadics (the HC-1 fix).
+  // sporadics.
   const enter = () => {
     if (props.disabled) return;
     clearTimeout(timer);
@@ -103,36 +103,22 @@ export interface HoverCardTriggerProps {
 /**
  * ★ THE TRIGGER IS A TAB STOP WHEN, AND ONLY WHEN, ITS CHILDREN ARE NOT.
  *
- * `onFocusIn`/`onFocusOut` were here from the start and the focus-open path was
- * plainly intended, but the span never set `tabindex`, so the Tab key could not
- * land on it and neither handler could fire on a keyboard. It went unnoticed for
- * as long as it did because `focusin` BUBBLES and every consumer at the time put
- * something focusable inside the trigger (`source.tsx` an `<a>`, `context.tsx`
- * a `<Button>`), so the card opened via the child and the span's own inertness
- * never showed. The first trigger with inert children (an attachment tile: a
- * div, an img, an svg) had no tab stop anywhere in it.
+ * Delegation, not an unconditional `tabindex`: a trigger whose children already offer
+ * the keyboard a way in must not add a second stop for the same card, and one whose
+ * children are inert (an attachment tile: a div, an img, an svg) has no stop anywhere
+ * without one. The check runs in the ref AND on every `slotchange`, because assignment
+ * happens after the ref and a one-shot check calls a not-yet-filled `<slot>` inert (see
+ * `hasFocusableChild`).
  *
- * Hence delegation rather than an unconditional `tabindex`: adding one always
- * would give every existing consumer TWO stops for one card, which is a worse
- * bug than the one being fixed. The check runs in the ref AND again on every
- * `slotchange`, because slot assignment happens after the ref and a one-shot
- * check calls a not-yet-filled `<slot>` inert (see `hasFocusableChild`).
+ * ★ THE FOCUS LISTENERS ARE NATIVE, NOT SOLID'S DELEGATED `onFocusIn`: inside these shadow
+ * roots that path runs for a PROGRAMMATIC `.focus()` and, in the deeper trees, not for a
+ * real Tab. Measured: a real Tab to an attachment tile in a mounted `<kai-chat>` left the
+ * card shut and `aria-describedby` null while `.focus()` opened it. Anything in this kit
+ * relying on delegated focus events inside a shadow root is suspect for the same reason.
  *
- * ★ THE FOCUS LISTENERS ARE NATIVE, NOT SOLID'S DELEGATED `onFocusIn`. Solid
- * delegates a fixed set of events from the document and retargets them into
- * component trees; inside these shadow roots that path runs for a PROGRAMMATIC
- * `.focus()` and, in the deeper trees, not for a real Tab. Measured: tabbing to
- * an attachment tile in a mounted `<kai-chat>` left the card shut and
- * `aria-describedby` null while `.focus()` on the same element opened it, so
- * every keyboard user got a tab stop that announced nothing and showed nothing,
- * which is worse than no stop at all. `addEventListener` in the ref does not
- * care how focus arrived. Anything in this kit relying on delegated focus
- * events inside a shadow root is suspect for the same reason.
- *
- * `aria-describedby` is what makes the stop worth arriving at: the card is
- * DESCRIPTIVE, not an action, so the trigger gets no `role="button"` (that
- * would promise an activation that does not exist) and instead points at the
- * content it reveals so a screen reader reads it out.
+ * `aria-describedby` is what makes the stop worth arriving at: the card is DESCRIPTIVE, so
+ * the trigger gets no `role="button"` (that would promise an activation that does not
+ * exist) and points at what it reveals.
  */
 export function HoverCardTrigger(props: HoverCardTriggerProps) {
   const ctx = useHoverCard();
@@ -150,30 +136,25 @@ export function HoverCardTrigger(props: HoverCardTriggerProps) {
       class={cn(
         'inline-block',
         // A tab stop nobody can SEE is barely an improvement on no tab stop —
-        // WCAG 2.4.7. Only when this element is the stop; a delegating trigger
-        // must not draw a ring around its child's own focus state.
+        // WCAG 2.4.7. Only when this element is the stop; a delegating trigger must not
+        // draw a ring around its child's own focus state.
         //
-        // AN OUTLINE, NOT A RING, and both halves of that were measured rather
-        // than assumed:
+        // AN OUTLINE, NOT A RING, and both halves were measured:
         //
-        //  1. ★ A TAILWIND v4 UTILITY THAT ROUTES THROUGH `@property` IS INERT
-        //     INSIDE THESE SHADOW ROOTS, and that is a trap far wider than this
-        //     line. v4 gives `--tw-*` custom properties their defaults with
-        //     `@property`, and an `@property` rule delivered through a shadow
-        //     root's `adoptedStyleSheets` never registers — so the var resolves
-        //     to nothing, the declaration is invalid, and the property falls
-        //     back to its initial value. Measured in Chrome, twice:
-        //     `ring-2 ring-offset-1` set `--tw-ring-shadow` correctly and
-        //     computed `box-shadow: none`; `inset-ring-2` did the same; and
-        //     `outline-2` alone computed `outline-style: none` while width,
-        //     colour and offset all landed, because only the style goes
-        //     through `var(--tw-outline-style)`. Hence the literal
-        //     `[outline-style:solid]` — the one part that cannot be a var.
-        //  2. The offset is NEGATIVE so the outline lands inside the border
-        //     box. A trigger that fills its container (`block size-full` inside
-        //     the attachment tile's `overflow-hidden rounded-lg`) would
-        //     otherwise have its focus indicator painted straight into the
-        //     clip, and a trigger cannot know whether its container clips.
+        //  1. ★ A TAILWIND v4 UTILITY THAT ROUTES THROUGH `@property` IS INERT INSIDE
+        //     THESE SHADOW ROOTS, a trap far wider than this line: an `@property` rule
+        //     delivered through a shadow root's `adoptedStyleSheets` never registers, so
+        //     the var resolves to nothing, the declaration is invalid and the property
+        //     falls back to its initial value. Measured in Chrome twice: `ring-2
+        //     ring-offset-1` computed `box-shadow: none`, `inset-ring-2` did the same,
+        //     and `outline-2` alone computed `outline-style: none` while width, colour
+        //     and offset all landed, because only the style goes through
+        //     `var(--tw-outline-style)`. Hence the literal `[outline-style:solid]`.
+        //  2. The offset is NEGATIVE so the outline lands inside the border box: a
+        //     trigger that fills its container (`block size-full` inside the attachment
+        //     tile's `overflow-hidden rounded-lg`) would otherwise paint its focus
+        //     indicator into the clip, and a trigger cannot know whether its container
+        //     clips.
         isFocusable() &&
           'rounded-sm focus-visible:[outline-style:solid] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring',
         props.class,

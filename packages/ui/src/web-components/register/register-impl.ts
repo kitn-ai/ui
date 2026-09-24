@@ -12,7 +12,7 @@ import '../chat/chat';
 import '../workspace/chat-workspace';
 // Message-list composable (the scrolling thread slice, sans composer/header)
 import '../thread/thread';
-// Composable leaf elements (spike — see docs/handoff + examples/composable)
+// Composable leaf elements (spike -- see examples/composable)
 import '../thinking-bar/thinking-bar';
 import '../model-switcher/model-switcher';
 import '../attachments/attachments';

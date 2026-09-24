@@ -4,34 +4,24 @@ import { renderIcon } from '../icon/icon';
 import { isSafeUrl } from '../../primitives/url-scheme-policy';
 
 /**
- * The generic mobile list row (P-4, blocks-and-parts design 2026-08-31): a
- * leading region, a title with an optional subtitle, a trailing region, and an
- * optional chevron affordance. It is the one anatomy the widget home tab
- * hand-approximated three separate ways in the composition spike (the
- * recent-conversation row, the full-width CTA with a trailing arrow, and the
- * help link with a leading icon and chevron), and the same anatomy every
- * settings screen a block grows will need. General-purpose: nothing in it is
- * chat-specific.
+ * The generic mobile list row: a leading region, a title with an optional subtitle, a
+ * trailing region, and an optional chevron affordance. General-purpose, nothing in it
+ * chat-specific, and the anatomy every settings screen a block grows needs.
  *
  * Interaction model, one of three, decided by the props:
  * - `href` set and safe: the row is a real anchor (new tab, rel hardened).
- * - `onActivate` set (no href): the row is a `<button>`. Real button element,
- *   so Enter/Space and focus come from the platform, not re-implemented.
+ * - `onActivate` set (no href): the row is a `<button>`, so Enter/Space and focus come
+ *   from the platform rather than being re-implemented.
  * - neither: a plain non-interactive `<div>` row.
  *
- * Unsafe-href rule (the HomePanel precedent, same policy, same sink): an
- * `href` that fails `isSafeUrl` (e.g. `javascript:`) is NOT downgraded into a
- * button that still fires a handler. The row renders as a plain,
- * non-interactive `<div>`: label visible, no anchor, no handler. Escaping into
- * visibility, never silent promotion.
- *
- * Rounds through `--kai-row-radius-top` / `--kai-row-radius-bottom` (falling back
- * to `--kai-row-radius`, then to the `--radius-lg` token `rounded-lg` reads)
- * rather than a `rounded-lg` class, so a `RowGroup` can leave round only the
- * corners a row's position has. See the row-list block in `../../kit-base.css`.
+ * Unsafe-href rule (the HomePanel precedent, same policy, same sink): an `href` that
+ * fails `isSafeUrl` (a `javascript:` URL) is NOT downgraded into a button that still
+ * fires a handler. The row renders as a plain, non-interactive `<div>`: label visible, no
+ * anchor, no handler. Escaping into visibility, never silent promotion.
  */
-// `ref` is omitted because which element renders (div, button, or anchor) is
-// decided by the interaction model, so no single element type is honest.
+// `ref` is omitted: the interaction model decides which element renders (div, button,
+// anchor), so no one element type is honest. (The radius custom properties, and why they
+// cannot be a class, are documented at `rowClass()` below.)
 export interface RowProps extends Omit<JSX.HTMLAttributes<HTMLElement>, 'ref'> {
   /** The title (the element's default slot). */
   children?: JSX.Element;
@@ -55,7 +45,7 @@ export interface RowProps extends Omit<JSX.HTMLAttributes<HTMLElement>, 'ref'> {
 export function Row(props: RowProps) {
   // `rest` (data-* hooks, aria-*, id) forwards onto whichever element the
   // interaction model renders, so a consumer's marker attribute lands on the
-  // real row node (the facade's home rows depend on this, P-4/P-9).
+  // real row node (the facade's home rows depend on this).
   const [local, rest] = splitProps(props, [
     'children', 'subtitle', 'leading', 'trailing', 'chevron', 'onActivate', 'href', 'class',
   ]);

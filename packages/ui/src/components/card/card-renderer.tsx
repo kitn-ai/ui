@@ -102,29 +102,25 @@ export function CardRenderer(props: CardRendererProps): JSX.Element {
   const map = createMemo(() => mergeCardComponents(props.types));
   const entry = createMemo(() => map()[props.envelope.type]);
 
-  // MIRRORS src/remote/provider-runtime.ts:139-147. That transport runs
+  // MIRRORS src/remote/provider-runtime.ts. That transport runs
   // `validateAgainstSchema(renderer.schema, envelope.data)` and, on failure, renders
   // a placeholder and emits `{ kind: 'error', cardId, message }`. This is the same
   // behaviour on the native path, split into two tiers so a card that renders
   // acceptably today is reported without being replaced. Keep the two in step.
   //
-  // WHAT AUTHORISES A CHECK IS A SCHEMA THAT DESCRIBES WHAT IS ON SCREEN.
+  // WHAT AUTHORISES A CHECK IS A SCHEMA THAT DESCRIBES WHAT IS ON SCREEN. `types`
+  // lets a consumer replace a built-in type's renderer, and `confirm.schema.json`
+  // describes OUR ConfirmCard's data, not theirs, so validating a replaced renderer
+  // against it would reject shapes correct for the component actually on screen. OUR
+  // schema therefore applies only to OUR component: the identity check is against
+  // BUILTIN_CARD_COMPONENTS, the same object `mergeCardComponents` puts in the map
+  // when nothing overrode the type.
   //
-  // `types` lets a consumer replace a built-in type's renderer with their own
-  // (`types={{ confirm: MyConfirm }}`), and `confirm.schema.json` describes OUR
-  // ConfirmCard's data, not theirs. Validating a replaced renderer's payload against
-  // our schema would reject shapes that are correct for the component actually on
-  // screen. So OUR schema applies only to OUR component: the identity check is
-  // against BUILTIN_CARD_COMPONENTS, the same object `mergeCardComponents` puts in
-  // the map when nothing overrode the type, and the same one web-components/message/message.tsx
-  // reuses for a non-overridden built-in.
-  //
-  // A schema the CONSUMER registered is the other way round: they wrote it about
-  // their own card, and it is the shape their model was told to emit, so it applies
-  // whichever component draws the type. That covers the case the identity check can
-  // never reach — a `pricing-table` that is nobody's built-in — and it re-enables
-  // the check on an overridden built-in, where the objection was our schema and not
-  // the checking.
+  // A schema the CONSUMER registered is the other way round: they wrote it about their
+  // own card and it is the shape their model was told to emit, so it applies whichever
+  // component draws the type. That covers a `pricing-table` that is nobody's built-in,
+  // and it re-enables the check on an overridden built-in, where the objection was our
+  // schema and not the checking.
   const report = createMemo<CardValidationReport | null>(() => {
     if (props.validateCards === false) return null;
     if (

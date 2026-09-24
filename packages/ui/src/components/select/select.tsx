@@ -37,34 +37,23 @@ export interface SelectProps<T = string>
 }
 
 /**
- * A select. A REAL native `<select>` behind `appearance: none`, in a box consistent
- * with {@link Input}, with the kit's own chevron drawn over it.
+ * A select: a REAL native `<select>` behind `appearance: none`, in a box consistent with
+ * {@link Input}, with the kit's own chevron drawn over it.
  *
- * **Native, not a listbox, and that is the design.** A hand-built popup can be made to
- * look identical and cannot be made to behave identically: the native control brings
- * the platform picker on mobile, type-ahead on desktop, form participation, and the
- * OS's own accessibility tree. This kit's control audit found every one of its
- * accessibility defects in a control that had replaced a native element.
+ * **Native, not a listbox, and that is the design.** A hand-built popup can be made to look
+ * identical and not to behave identically: the native control brings the platform picker on
+ * mobile, type-ahead on desktop, form participation and the OS's own accessibility tree.
+ * Every accessibility defect the kit's control audit found was in a control that had
+ * replaced a native element.
  *
- * The trade is that the *dropdown list itself* stays OS chrome: it renders outside the
- * page and no stylesheet reaches it. What the kit can do is make it follow the kit's
- * light/dark mode rather than the OS's, which `color-scheme` on the element host
- * already does (`src/web-components/styles.css`). Styling the closed control and leaving the
- * open list to the platform is the whole of the bargain.
+ * The trade is that the dropdown LIST stays OS chrome: it renders outside the page and no
+ * stylesheet reaches it. What the kit can do is keep it in the kit's light/dark mode rather
+ * than the OS's, which `color-scheme` on the element host already does.
  *
- * Everything not listed in `SelectProps` is forwarded to the `<select>`, so `id`,
- * `name`, `required`, `disabled`, `multiple`, `size`, `aria-*`, any `data-*` hook and
- * the DOM events behave exactly as they do on a plain select. No validation is
- * applied: `required` reaches the native attribute and stops there.
+ * Everything not listed in `SelectProps` is forwarded to the `<select>`, and no validation
+ * is applied: `required` reaches the native attribute and stops there.
  *
- * ```tsx
- * <Select
- *   options={[{ value: 'low' }, { value: 'high', label: 'High priority' }]}
- *   value={sev()}
- *   placeholder="Choose a severity…"
- *   onChange={(e) => setSev(e.currentTarget.value)}
- * />
- * ```
+ * `<Select options={[{ value: 'low' }, { value: 'high', label: 'High priority' }]} … />`
  */
 export function Select<T = string>(props: SelectProps<T>): JSX.Element {
   const [local, rest] = splitProps(props, [
