@@ -133,7 +133,7 @@ export const WithHighlightedSearch: Story = {
 };
 
 /** The "Ideas for you" idiom: a vertical list of icon + label rows with a
- *  hover background. Used by `<kai-suggestions layout="list">`. */
+ *  hover background. Used by the list layout of the suggestions element. */
 export const List: Story = {
   name: 'List (Ideas for you)',
   render: (args: { onClick?: (e: MouseEvent) => void }) => (

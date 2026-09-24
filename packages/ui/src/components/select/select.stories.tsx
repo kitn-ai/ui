@@ -113,7 +113,7 @@ const [model, setModel] = createSignal('sonnet');
 
 /**
  * The two ways to feed it. `options` is the flat list; `children` is the escape hatch
- * for anything a flat list can't say, such as `<optgroup>`.
+ * for anything a flat list can't say, such as option groups.
  */
 export const OptionsOrChildren: Story = {
   name: 'options, or raw children',
@@ -232,7 +232,7 @@ const [picked, setPicked] = createSignal(['sonnet']);
 };
 
 /**
- * Give it a `name` and a native `<form>` submits it with no JavaScript at all — the
+ * Give it a `name` and a native form submits it with no JavaScript at all — the
  * part a hand-built listbox silently loses.
  */
 export const InAForm: Story = {

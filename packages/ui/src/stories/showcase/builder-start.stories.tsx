@@ -121,9 +121,9 @@ export const Preselected: Story = {
  * `title` together in the sidebar, so a reader on the Start page finds this
  * one story below it for free.
  *
- * Selecting a non-Workspace card advances straight to a stub "Continuing to
- * <template>..." readout, same as every other template already does
- * (T-6: each has its own full `Labs/Builder/<Template>` story to route to,
+ * Selecting a non-Workspace card advances straight to a stub readout naming
+ * the template, same as every other template already does
+ * (T-6: each has its own full story under `Labs/Builder` to route to,
  * out of scope for this flow demo). Selecting "Workspace" advances to
  * `WorkspaceVariantPicker`; picking a variant there shows which family +
  * variant id fired — an honest STUB rather than mounting the real

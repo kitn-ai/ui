@@ -205,7 +205,7 @@ const src = (code: string) => ({
  *
  * What the old, now-superseded `Labs/Apps` Builder story's other layout
  * shells (fullscreen/aside/split) demonstrated moves to EACH of those
- * templates' own `Labs/Builder/<Template>` stories as they land (Rounds A,
+ * templates' own story under `Labs/Builder` as they land (Rounds A,
  * R, S) — this story only ever shows the widget framing, because that's
  * what this template is.
  */

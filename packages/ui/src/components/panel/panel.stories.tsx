@@ -132,7 +132,7 @@ export const DrilledHeader: Story = {
 /**
  * Frameless (the default posture): the panel inherits its container's
  * radius and clips to it, exactly the shape the facade has inside
- * `<kai-dock>`'s already-framed floating panel. The wrapper here stands in
+ * the dock element's already-framed floating panel. The wrapper here stands in
  * for the dock: it owns border, radius and shadow.
  */
 export const FramelessInDock: Story = {

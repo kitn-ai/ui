@@ -932,7 +932,7 @@ export const Microphone: Story = {
  *
  * Same click-to-enable pattern as Microphone above -- one button, one
  * `getUserMedia` call, one `MediaStream` -- but that single stream is set on
- * all six `<AudioVisualizer>` instances at once instead of switching one
+ * all six visualizer instances at once instead of switching one
  * through a control. Six `useAudioAnalysis` instances end up tapping the
  * same stream simultaneously: each calls its own `ctx.createMediaStreamSource
  * (stream)`, which -- unlike `createMediaElementSource` -- has no

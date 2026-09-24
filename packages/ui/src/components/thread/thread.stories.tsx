@@ -109,7 +109,7 @@ export const EmptyDefault: Story = {
   ...src(`<Thread messages={[]} />`),
 };
 
-/** Custom zero-state via the `empty` prop (the `<kai-thread>` `slot="empty"`). */
+/** Custom zero-state via the `empty` prop (the thread element's `slot="empty"`). */
 export const EmptyCustom: Story = {
   args: { messages: [] },
   // The zero-state is JSX, so it cannot ride in `args`; the render closes over it.

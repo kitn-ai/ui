@@ -41,7 +41,7 @@ const src = (code: string) => ({ docs: { source: { language: 'html', code } } })
  * The web-component facade over `PaneGrid` (SolidJS story: Components/Pane Grid).
  * Each direct light child is one tile; the grid fills up to `max-columns`, drops
  * columns as it narrows so no pane squishes below `min-pane-width`, then scrolls.
- * The natural children are `<kai-pane>` — the pane family's own arbitrary-N layout.
+ * The natural children are pane elements, the pane family's own arbitrary-N layout.
  */
 export const FourPanes: Story = {
   render: () => (

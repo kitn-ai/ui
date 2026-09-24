@@ -47,11 +47,11 @@ export const States: StoryObj = {
 };
 
 /**
- * `<kai-kbd-group>` welds several `<kai-kbd>`s into ONE key strip: no gap between the
- * caps, one hairline at each seam, corners only at the strip's ends. Use it when one
- * key is spelled with caps from more than one element, or as a typed sequence; a
- * `keys` token spec is a single `<kai-kbd>` and already renders its own caps. Two
- * DIFFERENT shortcuts are two elements (or two groups), not one group.
+ * The key group element welds several key elements into ONE key strip: no gap
+ * between the caps, one hairline at each seam, corners only at the strip's ends. Use
+ * it when one key is spelled with caps from more than one element, or as a typed
+ * sequence; a `keys` token spec is a single key element and already renders its own
+ * caps. Two DIFFERENT shortcuts are two elements (or two groups), not one group.
  */
 export const Group: StoryObj = {
   render: () => (
@@ -80,7 +80,7 @@ export const Group: StoryObj = {
 };
 
 /** The shortcut inside the button it activates, the shadcn "Button" example.
- *  `<kai-kbd>` is ordinary light-DOM content here, so any element that slots
+ *  The key element is ordinary light-DOM content here, so any element that slots
  *  children can carry one. */
 export const InButton: StoryObj = {
   render: () => (

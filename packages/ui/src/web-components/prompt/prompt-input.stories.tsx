@@ -279,10 +279,10 @@ const CUSTOM_TOOLBAR_SNIPPET = `<kai-prompt-input id="input" voice></kai-prompt-
   input.addEventListener('kai-submit', (e) => console.log('submit:', e.detail.value));
 </script>`;
 
-/** Composition: place **`<kai-action>`** children inside `<kai-prompt-input>` to add
- *  custom ghost icon buttons in the toolbar. Each click fires a `kai-toolbar-action` event
- *  with `detail.action` equal to the action id; the same `<kai-action>` descriptor
- *  element that `<kai-message>` uses for its action bar (composition symmetry). */
+/** Composition: place action element children inside the prompt input element to add
+ *  custom ghost icon buttons in the toolbar. Each click fires a `kai-toolbar-action`
+ *  event with `detail.action` equal to the action id; the same action element the
+ *  message element uses for its action bar (composition symmetry). */
 export const WithCustomToolbarActions: Story = {
   name: 'Custom Toolbar Actions (kai-action)',
   render: () => {

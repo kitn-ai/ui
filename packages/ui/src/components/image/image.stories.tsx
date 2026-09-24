@@ -74,7 +74,7 @@ export const DataUri: Story = {
 />`),
 };
 
-/** `loading="lazy"` is not a prop of its own: every remaining `<img>` attribute passes through. */
+/** `loading="lazy"` is not a prop of its own: every remaining image attribute passes through. */
 export const LazyLoading: Story = {
   args: { loading: 'lazy', class: 'h-48 w-auto' },
   ...src(`<Image

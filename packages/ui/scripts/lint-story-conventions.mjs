@@ -1884,6 +1884,7 @@ const DOCS_TALK_WAIVER = /lint-story-conventions:\s*docs-talk\s*--\s*(.{15,})/;
 function findDescriptionDocsTalk(sf, text) {
   const lines = text.split('\n');
   const findings = [];
+  const hazards = [];
   const unverified = [];
   let descriptions = 0;
 
@@ -1956,6 +1957,45 @@ function findDescriptionDocsTalk(sf, text) {
     return paragraph[paragraph.length - 1].line;
   };
 
+  /** A rendered description is MARKDOWN, and two things in it are not words:
+   *  an angle-bracket tag (parsed as raw HTML, so an unclosed one swallows every block
+   *  after it -- that is how a story's Source panel ended up rendered INSIDE its own
+   *  description) and a fenced code block (rendered as a `<pre>`, which is what the
+   *  snippet surface is for). Both belong in `docs.source.code`.
+   *
+   *  An angle-bracket tag in the doc comment above a story is exactly the first case:
+   *  the docs page rendered the story description, then the tag, then the story's
+   *  Source block nested INSIDE the description element. */
+  const MARKDOWN_HAZARD = [
+    { id: 'tag', re: /<\/?[A-Za-z][^>]*>/ },
+    { id: 'fence', re: /```/ },
+  ];
+
+  /** The markdown-hazard half, on its own so the story DOC COMMENT can be checked
+   *  for it without rule (l)'s wording checks (which are queued for that surface). */
+  const recordHazards = (paragraphs, surface) => {
+    if (!paragraphs) return;
+    for (const paragraph of paragraphs) {
+      const joined = paragraph.map((segment) => segment.text).join('');
+      for (const { id, re } of MARKDOWN_HAZARD) {
+        const hit = re.exec(joined);
+        if (hit) {
+          hazards.push({
+            scope: surface,
+            what: id,
+            word: hit[0].slice(0, 40),
+            line: lineOf(paragraph, hit.index),
+            reason:
+              `the ${surface} description carries ${id === 'tag' ? 'an angle-bracket tag' : 'a code fence'} ` +
+              `('${hit[0].slice(0, 40)}'), which markdown renders as ` +
+              `${id === 'tag' ? 'raw HTML (an unclosed tag swallows the blocks after it)' : 'a code block'}; ` +
+              `put it in docs.source.code instead`,
+          });
+        }
+      }
+    }
+  };
+
   const record = (paragraphs, anchor, unreadable, surface = 'component') => {
     if (!paragraphs) {
       unverified.push({ line: anchor, what: unreadable });
@@ -1984,6 +2024,7 @@ function findDescriptionDocsTalk(sf, text) {
     // the canvas or the props table, and STYLE.md bans the flourish in rendered copy.
     // An argTypes description has its own rule (m); these are the two description
     // fields, which no other rule reads.
+    recordHazards(paragraphs, surface);
     if (!waived) {
       for (const paragraph of paragraphs) {
         const text = paragraph.map((segment) => segment.text).join('');
@@ -2009,7 +2050,41 @@ function findDescriptionDocsTalk(sf, text) {
     }
   };
 
+  /** The doc comment above an exported story is the story's description on its docs
+   *  page -- Storybook renders it, so it is a real surface and rule (l) reads it. It
+   *  was the one that shipped the raw-HTML hazard. */
+  const storyDocComment = (node) => {
+    if (!ts.isVariableStatement(node)) return undefined;
+    if (!node.modifiers?.some((m) => m.kind === ts.SyntaxKind.ExportKeyword)) return undefined;
+    const isStory = node.declarationList.declarations.some((d) => {
+      if (d.type && /^Story/.test(d.type.getText(sf))) return true;
+      let init = d.initializer;
+      while (init && (ts.isSatisfiesExpression(init) || ts.isAsExpression(init) || ts.isParenthesizedExpression(init))) {
+        init = init.expression;
+      }
+      return Boolean(init && ts.isObjectLiteralExpression(init));
+    });
+    if (!isStory || !node.jsDoc || node.jsDoc.length === 0) return undefined;
+    const comment = node.jsDoc
+      .map((doc) => (typeof doc.comment === 'string' ? doc.comment : ts.getTextOfJSDocComment(doc.comment) ?? ''))
+      .join('\n\n')
+      .trim();
+    return comment ? { comment, line: lineAt(sf, node) } : undefined;
+  };
+
   const visit = (node) => {
+    const doc = storyDocComment(node);
+    if (doc) {
+      const paragraphs = doc.comment
+        .split(/\n\s*\n/)
+        .map((p) => [{ text: p, line: doc.line }])
+        .filter((p) => p[0].text.trim().length > 0);
+      // HAZARDS ONLY for now. The wording checks rule (l) applies to the explicit
+      // `docs.description.story` field would also fire on 86 doc comments across 42
+      // files on today's tree, which is a sweep of its own rather than part of the fix
+      // that added this rule. Sized and queued in docs/verbosity-sweep.md.
+      recordHazards(paragraphs, 'story');
+    }
     if (
       ts.isCallExpression(node) &&
       ts.isIdentifier(node.expression) &&
@@ -2056,7 +2131,7 @@ function findDescriptionDocsTalk(sf, text) {
     ts.forEachChild(node, visit);
   };
   visit(sf);
-  return { findings, unverified, descriptions };
+  return { findings, hazards, unverified, descriptions };
 }
 
 // ---------------------------------------------------------------------------
@@ -2261,6 +2336,7 @@ function analyzeFile(path, text, ctx) {
   findings.renderedTextRegions = glyphs.textRegions;
   const descriptions = findDescriptionDocsTalk(sf, text);
   findings.descriptionDocsTalk = descriptions.findings;
+  findings.descriptionHazards = descriptions.hazards;
   findings.descriptionStrings = descriptions.descriptions;
   findings.unverified.push(...descriptions.unverified);
   const argDescriptions = findArgTypeDescriptions(sf, text);
@@ -3164,6 +3240,26 @@ const SELF_TEST_CASES = [
   {
     // Reads the REAL entry points, so a misrooted path or a parser that stopped
     // finding exports fails here rather than making every (k) assertion vacuous.
+    name: '(o) an angle-bracket tag in a rendered description is flagged (the shape that swallowed a Source block)',
+    code: `const meta = { parameters: { docs: { description: { component: 'Wrap a <ChatContainer> around it.' } } } };`,
+    expectHazards: ['tag'],
+  },
+  {
+    name: '(o) an angle-bracket tag in the doc comment above a STORY is flagged too',
+    code: `/** Wrap a <ChatContainer> around it. */\nexport const A: Story = { render: () => <div /> };`,
+    expectHazards: ['tag'],
+  },
+  {
+    name: '(o) a code fence in a rendered description is flagged',
+    code: `const meta = { parameters: { docs: { description: { component: 'Then:\\n\\n\u0060\u0060\u0060ts\\nconst a = 1;\\n\u0060\u0060\u0060' } } } };`,
+    expectHazards: ['fence'],
+  },
+  {
+    name: '(o) prose with a less-than is not a tag, and JSX in a SNIPPET is not a description',
+    code: `const meta = { parameters: { docs: { description: { component: 'Fewer than 3 items.' }, source: { code: '<Thing a={1} />' } } } };`,
+    expectHazards: [],
+  },
+  {
     name: '(n) a JSX element in a story\'s args is flagged',
     code: `const meta = { title: 'X', args: { header: <div>hi</div> } };\nexport const A: Story = { args: { footer: <Footer /> } };`,
     expectJsxInArgs: ['header', 'footer'],
@@ -3406,6 +3502,15 @@ function runSelfTest() {
         notes.push(`descriptions: expected ${c.expectDescriptions}, got ${got.descriptions}`);
       }
     }
+    if ('expectHazards' in c) {
+      const got = findDescriptionDocsTalk(sf, c.code ?? '').hazards.map((h) => h.what);
+      const expected = c.expectHazards;
+      const same = got.length === expected.length && got.every((k, i) => k === expected[i]);
+      if (!same) {
+        ok = false;
+        notes.push(`markdown-hazards: expected [${expected.join(', ')}], got [${got.join(', ')}]`);
+      }
+    }
     if ('expectJsxInArgs' in c) {
       const got = findJsxInArgs(sf).map((f) => f.key);
       const expected = c.expectJsxInArgs;
@@ -3551,6 +3656,7 @@ const autodocsOffenders = [];
 const snippetLocalNameOffenders = [];
 const glyphOffenders = [];
 const docsTalkOffenders = [];
+const descriptionHazardOffenders = [];
 const argDescriptionOffenders = [];
 const jsxInArgsOffenders = [];
 const unimportedExportOffenders = [];
@@ -3578,6 +3684,7 @@ for (const path of files) {
   for (const f of findings.snippetUnimportedExports) unimportedExportOffenders.push({ file: rel, ...f });
   for (const g of findings.glyphs) glyphOffenders.push({ file: rel, ...g });
   for (const d of findings.descriptionDocsTalk) docsTalkOffenders.push({ file: rel, ...d });
+  for (const d of findings.descriptionHazards) descriptionHazardOffenders.push({ file: rel, ...d });
   for (const d of findings.argDescriptionIssues) argDescriptionOffenders.push({ file: rel, ...d });
   for (const j of findings.jsxInArgs) jsxInArgsOffenders.push({ file: rel, ...j });
   for (const u of findings.unverified) unverified.push({ file: rel, ...u });
@@ -3634,6 +3741,7 @@ const total =
   unimportedExportOffenders.length +
   glyphOffenders.length +
   docsTalkOffenders.length +
+  descriptionHazardOffenders.length +
   argDescriptionOffenders.length +
   jsxInArgsOffenders.length +
   (docgenIssue ? 1 : 0);
@@ -3652,7 +3760,8 @@ if (total === 0 && unverifiedTotal === 0 && vacuous.length === 0) {
       `kit export it uses (${kit.names.size} public name(s) parsed out of ${KIT_ENTRY_FILES.join(' + ')}); and ` +
       `no story hand-rolls one of ${GLYPH_CHARS.join(' ')} across ${renderedTextRegions} rendered text region(s); and ` +
       `every one of the ${descriptionStrings} rendered component description string(s) in those stories describes the ` +
-      `component -- not Storybook, the story or the page -- in ${DESCRIPTION_PARAGRAPH_LIMIT} paragraph(s) or fewer, and ` +
+      `component -- not Storybook, the story or the page -- in ${DESCRIPTION_PARAGRAPH_LIMIT} paragraph(s) or fewer, with no ` +
+      `raw markdown hazard (a tag or a fence), and ` +
       `every one of the ${argDescriptionsRead} argTypes description value(s) fits in ${ARG_DESCRIPTION_MAX_CHARS} chars ` +
       `with no em dash, and no story puts a JSX element in its args.`,
   );
@@ -3859,6 +3968,20 @@ if (argDescriptionOffenders.length > 0) {
       `    unit, a real trap); move rationale to a // comment, which no generator reads.\n` +
       `    One that genuinely needs to be longer waives its own line:\n` +
       `      // lint-story-conventions: arg-description -- <why, 15+ chars>\n`,
+  );
+}
+
+if (descriptionHazardOffenders.length > 0) {
+  const filesAffected = new Set(descriptionHazardOffenders.map((f) => f.file)).size;
+  console.error(
+    `  (o) ${descriptionHazardOffenders.length} raw markdown hazard(s) in a rendered description (${filesAffected} file(s)):`,
+  );
+  for (const f of descriptionHazardOffenders) console.error(`    ${f.file}:${f.line}  ${f.what} '${f.word}'  (${f.reason})`);
+  console.error(
+    `    A story or component description is MARKDOWN: an angle-bracket tag is parsed as raw\n` +
+      `    HTML, so an unclosed one nests every block after it inside the description (the\n` +
+      `    story's own Source panel ends up inside its blurb), and a fence becomes a code\n` +
+      `    block. Both belong in docs.source.code, which is not rendered as prose.\n`,
   );
 }
 
