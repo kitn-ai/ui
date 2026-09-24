@@ -616,9 +616,7 @@ export const Grid: Story = {
     docs: {
       source: { code: sourceCode(`<AudioVisualizer variant="grid" state="speaking" size="md" bands={bands} />`), language: 'tsx' },
       description: {
-        story:
-          'A grid of dots that pulses with the audio. The square `count` defaults to the size preset; ' +
-          '`spread` and `interval` only shape the scripted `connecting` sequence, not `speaking`.',
+        story: 'A grid of dots that pulses with the audio.',
       },
     },
   },
@@ -653,10 +651,7 @@ export const Radial: Story = {
     docs: {
       source: { code: sourceCode(`<AudioVisualizer variant="radial" state="speaking" size="md" bands={bands} radius={40} />`), language: 'tsx' },
       description: {
-        story:
-          'Bars around a ring, growing outward with the audio. `thinking` spins the whole ring in CSS instead ' +
-          'of following the scripted highlight groups. A `barCount` not divisible by 4 warns in the console -- ' +
-          'the ring still renders, just asymmetric.',
+        story: 'Bars around a ring, growing outward with the audio.',
       },
     },
   },
@@ -721,14 +716,7 @@ export const Wave: Story = {
     docs: {
       source: { code: sourceCode(`<AudioVisualizer variant="wave" state="speaking" size="md" bands={bands} />`), language: 'tsx' },
       description: {
-        story:
-          '`idle`: flat line, amplitude and frequency both zero -- by design, not a bug. `listening`: the ' +
-          'base wave with a slow mirrored opacity pulse, 750ms. `thinking`/`connecting`: quadruple the speed ' +
-          'and frequency, quarter the amplitude, pulse faster at 400ms -- a tighter, jitterier line, and ' +
-          'near-identical to each other since both share one return in `waveTargets`. `speaking`: doubles the ' +
-          'base speed, holds full opacity, and reads amplitude and frequency straight from live volume with no ' +
-          'easing -- driven by synthetic bands here so it moves. `theme` is not listed: this shader does not ' +
-          'read it yet, and always draws the fixed default color unless `color` overrides it.',
+        story: 'A wave line whose speed, amplitude and opacity follow the state: flat at idle, faster and tighter for thinking and connecting, live volume while speaking.',
       },
     },
   },
@@ -760,11 +748,7 @@ export const Aurora: Story = {
     docs: {
       source: { code: sourceCode(`<AudioVisualizer variant="aurora" state="speaking" size="md" bands={bands} theme="auto" />`), language: 'tsx' },
       description: {
-        story:
-          '`speaking` shows its steady base radius: this canvas has no live microphone to drive the ' +
-          'voice-reactive growth here, since `bands`/`volume` are synthetic, not real audio. `complexity` is ' +
-          'not listed as a control here: this variant\'s pattern density comes from `state` internally ' +
-          '(`auroraTargets`) and does not read the `complexity` prop yet -- see Custom for a variant where it works.',
+        story: 'A drifting aurora veil in the accent color, its brightness and speed following the state.',
       },
     },
   },
@@ -802,19 +786,7 @@ export const Custom: Story = {
   shader={{ fragment: MY_SPECTRUM_SHADER }}
 />`), language: 'tsx' },
       description: {
-        story:
-          'Set `variant="custom"` and a `shader` to render your own GLSL. It receives the ShaderToy built-ins ' +
-          'plus `uColor`, `uIntensity`, `uSpeed`, `uComplexity`, `uVolume`, and `uBands[]` -- never declare ' +
-          'those yourself, the canvas declares them for you. This story\'s shader models the whole state ' +
-          'machine the way a consumer shader would, from the kit\'s own uniforms: `speaking` draws the five ' +
-          '`uBands` as one smoothly interpolated voice ridge; with no band energy it keys off `uSpeed` ' +
-          '(distinct per state) -- a flat dead line for `disconnected`, a calm, barely-moving `idle`, a ' +
-          'rhythmically breathing `listening`, a swell sweeping across for `thinking`, and a mirrored pair ' +
-          'rushing inward for `connecting` -- ' +
-          'while `uIntensity` layers the dim/pulsing/bright state brightness on top. Vertical gradient and ' +
-          'crest glow throughout; `complexity` slices the fill into LED-style segments when raised (solid at ' +
-          'its 0 default); hardcoded for 5 bands, so every tile forces `barCount={5}` to match. `theme` is ' +
-          'not listed: this shader does not read it yet either.',
+        story: "A hand-written GLSL shader drawn from the kit's uniforms instead of a built-in look.",
       },
     },
   },
@@ -897,8 +869,7 @@ export const Microphone: Story = {
 
 <AudioVisualizer variant="bar" state={stream() ? 'speaking' : 'idle'} size="lg" stream={stream()} />`), language: 'tsx' },
       description: {
-        story:
-          'Click to grant the microphone, click again to release it. Switch `variant` in Controls to hear the same stream drive any of the six looks -- `wave` and `aurora` read `volume`, which the dispatcher derives from the live stream, so they react too. Denied or unavailable permission shows the reason instead of failing silently.',
+        story: 'The live microphone driving the selected look, with the permission error shown inline.',
       },
     },
     controls: { include: ['variant'] },
@@ -988,8 +959,7 @@ const variants = ['bar', 'grid', 'radial', 'wave', 'aurora', 'custom'] as const;
   {(v) => <AudioVisualizer variant={v} state={stream() ? 'speaking' : 'idle'} size="lg" stream={stream()} />}
 </For>`), language: 'tsx' },
       description: {
-        story:
-          'One microphone, all six looks at once, so they can be compared on the same live voice instead of one at a time through a control. `custom` reuses the spectrum shader from the Custom story above so it visibly responds to `uBands` too.',
+        story: 'All six looks on one live microphone, side by side.',
       },
     },
     // `include: []` does NOT hide the panel in this Storybook version -- it

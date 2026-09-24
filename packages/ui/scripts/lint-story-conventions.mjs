@@ -130,6 +130,12 @@
 //     examples and the props table. `sidebar` is deliberately NOT vocabulary
 //     -- the kit renders a real sidebar (the conversation list), so `a
 //     sidebar conversation list` is component behaviour.
+//     SINCE PASS D it reads BOTH description fields: the component description and the
+//     per-STORY one (`docs.description.story`), which renders on that story's own docs
+//     page above the canvas. The bar is the same and for the same reason: the reader is
+//     already on the story page, so naming the story, the Labs tier or the harness tells
+//     them about the documentation rather than about what they are looking at. The em
+//     dash is banned on both, because both are rendered copy.
 // (m) An `argTypes` entry's `description` value: a one-line value, no em dash
 //     and at most `ARG_DESCRIPTION_MAX_CHARS`. These strings are the FIFTH
 //     documentation surface, and they WIN: Storybook renders the argType
@@ -1942,7 +1948,7 @@ function findDescriptionDocsTalk(sf, text) {
     return paragraph[paragraph.length - 1].line;
   };
 
-  const record = (paragraphs, anchor, unreadable) => {
+  const record = (paragraphs, anchor, unreadable, surface = 'component') => {
     if (!paragraphs) {
       unverified.push({ line: anchor, what: unreadable });
       return;
@@ -1957,10 +1963,31 @@ function findDescriptionDocsTalk(sf, text) {
         .match(DOCS_TALK);
       if (match) {
         findings.push({
+          scope: surface,
           word: match[0],
           line: lineOf(paragraph, match.index),
-          reason: `the description talks about the documentation ('${match[0]}'), not the component`,
+          reason:
+            `the ${surface} description talks about the documentation ('${match[0]}'), ` +
+            `not the ${surface === 'story' ? 'subject it demonstrates' : 'component'}`,
         });
+      }
+    }
+    // The em dash, on the same surfaces as the docs-talk rule: this text renders above
+    // the canvas or the props table, and STYLE.md bans the flourish in rendered copy.
+    // An argTypes description has its own rule (m); these are the two description
+    // fields, which no other rule reads.
+    if (!waived) {
+      for (const paragraph of paragraphs) {
+        const text = paragraph.map((segment) => segment.text).join('');
+        const at = text.indexOf('\u2014');
+        if (at !== -1) {
+          findings.push({
+            scope: surface,
+            word: 'em dash',
+            line: lineOf(paragraph, at),
+            reason: `the ${surface} description carries an em dash`,
+          });
+        }
       }
     }
     if (!waived && paragraphs.length > DESCRIPTION_PARAGRAPH_LIMIT) {
@@ -1997,6 +2024,25 @@ function findDescriptionDocsTalk(sf, text) {
         paragraphsOf(node.initializer),
         anchor,
         'the docs.description.component value is not statically readable',
+      );
+    } else if (
+      // The per-STORY description, rendered on that story's own docs page above the
+      // canvas. It was OUT of rule (l) by decision until PASS D; the decision is that
+      // the same bar applies, for the same reason: the reader is on the story's page,
+      // so naming the story, the Labs tier or the harness tells them about the
+      // documentation rather than about what they are looking at. It is a SEPARATE
+      // field from the component description, so it is reported as its own finding.
+      ts.isPropertyAssignment(node) &&
+      propName(node) === 'story' &&
+      isNamedProp(node.parent?.parent, 'description') &&
+      isNamedProp(node.parent?.parent?.parent?.parent, 'docs')
+    ) {
+      const anchor = lineAt(sf, node);
+      record(
+        paragraphsOf(node.initializer),
+        anchor,
+        'the docs.description.story value is not statically readable',
+        'story',
       );
     }
     ts.forEachChild(node, visit);
@@ -3032,6 +3078,20 @@ const SELF_TEST_CASES = [
     expectDocsTalk: ['4 paragraphs'],
   },
   {
+    name: '(l) a PER-STORY description naming its own story is flagged (the wisp shape)',
+    code: `const meta = { parameters: { docs: { description: {
+      story: 'Isolated on its own story so the kebab interaction can be inspected.',
+    } } } };`,
+    expectDocsTalk: ['story'],
+  },
+  {
+    name: '(l) a PER-STORY description with an em dash is flagged',
+    code: `const meta = { parameters: { docs: { description: {
+      story: 'A caption still forming \u2014 renders a shade lighter.',
+    } } } };`,
+    expectDocsTalk: ['em dash'],
+  },
+  {
     name: '(l) a file with no rendered component description reads nothing (what makes the run vacuous)',
     code: `export const Playground = { render: () => <Widget /> };`,
     expectDescriptions: 0,
@@ -3663,11 +3723,11 @@ if (glyphOffenders.length > 0) {
 if (docsTalkOffenders.length > 0) {
   const filesAffected = new Set(docsTalkOffenders.map((f) => f.file)).size;
   console.error(
-    `  (l) ${docsTalkOffenders.length} problem(s) in the rendered component descriptions (${filesAffected} file(s)):`,
+    `  (l) ${docsTalkOffenders.length} problem(s) in the rendered component/story descriptions (${filesAffected} file(s)):`,
   );
   for (const f of docsTalkOffenders) console.error(`    ${f.file}:${f.line}  ${f.word}  (${f.reason})`);
   console.error(
-    `    A description renders ABOVE the props table, and the same string is copied into llms-full.txt and\n` +
+    `    A component description renders ABOVE the props table and is copied into llms-full.txt and\n` +
       `    the MCP catalog, so it has to describe the COMPONENT. Drop the words about the documentation\n` +
       `    (Storybook, the story, the page) and, past ${DESCRIPTION_PARAGRAPH_LIMIT} paragraphs, move the detail into\n` +
       `    the examples and the props table.\n` +

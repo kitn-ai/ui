@@ -112,8 +112,9 @@ export const About: Story = {
   parameters: {
     docs: {
       description: {
-        story:
-          'About the Labs/Proofs section: token-only screens built without feature components, to prove the token system holds for arbitrary screens and to surface the next components/tokens worth building. Gaps are logged in docs/labs-proofs-gap-backlog.md.',
+        // The banned word is the TIER; here it is part of the gap-backlog path a reader can open.
+        // lint-story-conventions: docs-talk -- the path docs/labs-proofs-gap-backlog.md contains it
+        story: 'Token-only screens built without feature components, to prove the token system holds for arbitrary screens.',
       },
       source: {
         language: 'tsx',

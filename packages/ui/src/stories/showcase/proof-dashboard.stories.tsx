@@ -298,8 +298,7 @@ export const Dashboard: Story = {
   parameters: {
     docs: {
       description: {
-        story:
-          'PROOF: an Analytics Dashboard built only from --color-* design tokens and raw markup (no kai-* feature components; lucide-solid supplies the glyphs). Demonstrates the surface hierarchy (recessed page / bg-card panels / sunken wells), token-driven deltas + charts, and free light/dark via the toggle. See the source for the GAP notes on components and tokens the kit could add.',
+        story: 'An analytics dashboard built only from design tokens and raw markup, with no feature components.',
       },
       source: {
         language: 'tsx',
