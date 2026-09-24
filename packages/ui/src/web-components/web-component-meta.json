@@ -10524,7 +10524,7 @@
     "tag": "kai-tooltip",
     "className": "KaiTooltipElement",
     "displayName": "Tooltip",
-    "description": "Wraps a trigger and shows a short hint on hover or focus. `kai-hover-card` is the markup-carrying popup instead.",
+    "description": "Wraps a trigger and shows a short hint on hover or focus, as plain text or as markup.",
     "props": [
       {
         "name": "theme",

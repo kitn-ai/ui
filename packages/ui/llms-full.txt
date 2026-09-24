@@ -4218,7 +4218,7 @@ A collapsible panel showing one tool call's input and output.
 
 ### `kai-tooltip` / `Tooltip`
 
-Wraps a trigger and shows a short hint on hover or focus. `kai-hover-card` is the markup-carrying popup instead.
+Wraps a trigger and shows a short hint on hover or focus, as plain text or as markup.
 
 **Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
 
