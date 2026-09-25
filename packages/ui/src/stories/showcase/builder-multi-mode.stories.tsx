@@ -626,20 +626,8 @@ const src = (code: string) => ({
 });
 
 /**
- * "Multi-mode" (T-4: working name, provisional — see the module doc
- * comment): a top-level segmented mode switcher, mirroring perplexity-pro's
- * real Assistant | Computer toggle, where each mode swaps the ENTIRE
- * working surface (rail + main), composed from the existing Assistant and
- * Workspace template previews' own real pieces. Panel: Identity, Provider,
- * Theme, Capabilities, a Modes list editor (add/remove/reorder, each mode
- * picking Assistant or Workspace as its shape), and a Composer section
- * (mic, Context pills, and the shared real Triggers control — on by
- * default here, the agentic/dev-shape default).
- *
- * NOT YET ON `Labs/Builder/Start`: this template's card is gated on the
- * owner naming it and ruling on its construct question — see the module
- * doc comment's T-5 note on why `modes: [...]` may be a genuinely bigger
- * vocabulary question than every other proposal so far.
+ * The multi-mode builder: a segmented switcher where each mode swaps the whole
+ * working surface, rail and main together.
  */
 export const MultiMode: Story = {
   render: () => <MultiModeBuilderDemo />,

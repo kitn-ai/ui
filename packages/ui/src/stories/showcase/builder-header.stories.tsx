@@ -150,9 +150,7 @@ export const Header: Story = {
 />`),
 };
 
-/** The canvas pre-flipped to dark — the state the toggle exists for, shown
- *  without needing to click first. The header shows the Sun ("tap for
- *  light"). */
+/** The header over a canvas that is already dark. */
 export const DarkCanvas: Story = {
   render: () => <HeaderDemo canvasDark />,
   ...src(`<BuilderHeader title="Support workspace" canvasDark onToggleCanvasDark={() => setCanvasDark((d) => !d)} onSave={save} />`),
@@ -164,10 +162,7 @@ export const Saving: Story = {
   ...src(`<BuilderHeader title="Support workspace" saving onSave={save} />`),
 };
 
-/** Everything persisted: Save disabled and labeled "Saved" — the honest
- *  resting state for a page that autosaves (the real builder debounces its
- *  writes; Save only arms while one is pending, and clicking it flushes the
- *  debounce early). */
+/** The page at rest once every write has persisted. */
 export const Saved: Story = {
   render: () => <HeaderDemo saved />,
   ...src(`<BuilderHeader title="Support workspace" saved onSave={save} />`),

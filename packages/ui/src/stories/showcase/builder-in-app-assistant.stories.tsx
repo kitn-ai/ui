@@ -601,30 +601,8 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/**
- * The In-app assistant template's builder: panel on the left scoped to
- * exactly this template's controls (Identity, Provider, Theme, Capabilities
- * — starters/attachments/history/conversations — and a read-only Cards
- * section listing the construct's declared cards, plus — Round A2, reshaped
- * in Round A3 — preview-only knobs below the panel: Composer/Microphone,
- * Messages (two role-scoped, ordered, reorderable action pickers — "Your
- * messages" and "Assistant messages" — plus a Reveal always/hover select),
- * Rail placement; see `PreviewOnlyControls`'s own doc comment, `ActionRow
- * Picker`'s, and the module doc comment's T-5/Round-A3 notes for what each
- * is missing from `construct.v1` today), a live preview on the right
- * showing the chat
- * docked beside a wordless, desktop-app-scale skeleton of the rest of your
- * app. No Home section (this template has no Home/Messages tab concept —
- * `home` is a widget-chrome-lineage field, not one this template's own
- * fixture ever sets) and no Widget-chrome section (that's `layout:
- * 'widget'`-only, and this template is fixed to `layout: 'aside'`, T-2).
- *
- * Edit the accent and watch the whole frame — nav-rail stand-in border,
- * chat rail border, thread accents, send button — retint together (the
- * accent-cascade fix landed the same round this story did: both the public
- * `--kai-color-primary` and internal `--color-primary` tokens are set on
- * this preview's outer wrapper, not just the rail's own subtree).
- */
+/** The In-app assistant template's builder, its chat docked beside a wordless
+ *  skeleton of the rest of the app. */
 export const InAppAssistant: Story = {
   render: () => <InAppAssistantBuilderDemo />,
   ...src(`<BuilderLayout

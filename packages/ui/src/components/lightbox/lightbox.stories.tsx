@@ -119,13 +119,7 @@ export const ThumbnailTrigger: Story = {
 </Lightbox>`),
 };
 
-/** Seeded open: the story's canvas shows the modal without a click, while the
- *  Autodocs page renders it closed so the documentation stays readable. Note the X in the panel's top-right: `showClose` is on
- *  unless you pass `false`, and turning the `showClose` control off here leaves the
- *  panel with no X, since Escape, a backdrop click, the picture and the host's own
- *  control still close it. Clicking the picture dismisses the modal; the
- *  `closeOnContentClick` control turns that off, which is what you want when a
- *  content click means something else. */
+/** The lightbox already open, panel and close button in view. */
 export const OpenAtMount: Story = {
   args: { defaultOpen: true },
   ...src(`// Open at mount: 'defaultOpen' is the uncontrolled seed. Use 'open' with

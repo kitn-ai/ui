@@ -5,6 +5,7 @@
 //
 // Both are computed from the shipped surface, so an element added this morning
 // shows up as undocumented this afternoon without anyone editing a list.
+import { isHistoricalKaiWaived } from './prose.mjs';
 
 /** Every kai-* tag and kit export name a page references, in code or prose. */
 function mentionsOf(doc) {
@@ -69,11 +70,21 @@ export function coverage(docs, surface) {
   // excluded too — those are the web-component-meta gaps, reported separately.
   const staleTags = new Map();
   for (const doc of docs) {
-    const used = new Set();
-    for (const m of doc.src.matchAll(/<(kai-[a-z0-9-]+)[\s/>]/g)) used.add(m[1]);
-    for (const m of doc.src.matchAll(/`<?(kai-[a-z0-9-]+)>?`/g)) used.add(m[1]);
-    for (const t of used) {
+    // Every line the token appears on, because a historical rename note is waived per
+    // LINE (`isHistoricalKaiWaived`): an unwaived occurrence on another line still
+    // reports the token for this page.
+    const linesOf = new Map();
+    const sourceLines = doc.lines ?? doc.src.split('\n');
+    const lineAt = (index) => doc.src.slice(0, index).split('\n').length;
+    const add = (tag, index) => {
+      if (!linesOf.has(tag)) linesOf.set(tag, []);
+      linesOf.get(tag).push(lineAt(index));
+    };
+    for (const m of doc.src.matchAll(/<(kai-[a-z0-9-]+)[\s/>]/g)) add(m[1], m.index);
+    for (const m of doc.src.matchAll(/`<?(kai-[a-z0-9-]+)>?`/g)) add(m[1], m.index);
+    for (const [t, lines] of linesOf) {
       if (surface.tags.has(t) || surface.eventNames.has(t) || surface.knownTokens.has(t)) continue;
+      if (lines.every((line) => isHistoricalKaiWaived({ lines: sourceLines }, line))) continue;
       if (!staleTags.has(t)) staleTags.set(t, new Set());
       staleTags.get(t).add(doc.rel);
     }

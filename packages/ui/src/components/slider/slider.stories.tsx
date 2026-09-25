@@ -227,10 +227,7 @@ export const Disabled: Story = {
   ...src(`<Slider min={0} max={100} value={60} disabled aria-label="Temperature" />`),
 };
 
-/**
- * Give it a `name` and a native form submits it with no JavaScript at all — the
- * part a hand-rolled slider silently loses.
- */
+/** Submitting the form sends the slider's value as ordinary form data. */
 export const InAForm: Story = {
   name: 'Native form participation',
   render: () => {

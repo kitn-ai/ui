@@ -63,6 +63,7 @@ To migrate by hand, move each prop to the part that owns it now:
 
 Events moved with their owners: listen for `kai-conversation-select` and `kai-new-chat` on `<kai-conversations>`, for `kai-submit`, `kai-message-action`, `kai-model-change`, `kai-value-change`, `kai-suggestion-click`, `kai-voice`, and `kai-web-search` (was `kai-search`) on `<kai-chat>`.
 
+{/* docs-alignment: historical-kai-token -- the pre-rename element name, named here so a reader migrating off the old preset can find it */}
 The shell itself fires only `kai-aside-toggle` (was `kai-sidebar-toggle`, now with a `side`) and `kai-aside-resize`. The old sidebar methods `toggleSidebar()` / `collapseSidebar()` / `expandSidebar()` are `toggleAside(side)` / `collapseAside(side)` / `expandAside(side)`, and the thread methods (`focus()`, `clear()`, `send()`, `scrollToBottom()`) live on your `<kai-chat>`.
 
 <Aside type="note" title="Why the preset dissolved">

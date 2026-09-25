@@ -51,9 +51,7 @@ const src = (code: string) => ({
 
 const ICONS = ['sliders-horizontal', 'git-branch', 'file-text'] as const;
 
-/** The everyday shape: a framed list of pressable rows. Hover a middle row to see
- *  why its corners are square — the fill runs to the frame's edge on both sides,
- *  which is only possible with a square corner. */
+/** A framed list of pressable rows. */
 export const Default: Story = {
   render: (args: { class?: string; onActivate: () => void }) => (
     <RowGroup class={args.class} role="group" aria-label="Account settings">

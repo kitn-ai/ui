@@ -115,11 +115,9 @@ export const Controlled: Story = {
 </Reasoning>`),
 };
 
-/**
- * Collapsed content is `inert`: nothing inside it takes focus, and a Tab press
- * skips straight past it. Runs as a browser test — jsdom parses `inert` but does
- * not enforce it, so this is the only place the engine's behaviour is proved.
- */
+// jsdom parses `inert` without enforcing it, so the engine's focus behaviour is only proved
+// in a browser run.
+/** Collapsed reasoning content is inert, so a Tab press skips it. */
 export const KeyboardReachability: Story = {
   render: () => (
     <div class="space-y-4">

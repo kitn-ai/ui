@@ -52,7 +52,7 @@ export const Appearances: Story = {
 <kai-card appearance="accent">…</kai-card>`),
 };
 
-/** Full-bleed media at the top, body text below — a real image and a real video. */
+/** A card with media above the body text: one image, one video. */
 export const Media: Story = {
   render: () => (
     <div class="grid max-w-2xl grid-cols-2 gap-4">
@@ -101,9 +101,7 @@ export const HeaderFooter: Story = {
 </kai-card>`),
 };
 
-/** Footer actions are a right-aligned row when there is room, and stack
- *  vertically (end-aligned) when the card is too narrow — a container query on
- *  the card's own width, built into the footer. Same markup, two widths. */
+/** Footer actions in a row on a wide card, stacked when the card is too narrow. */
 export const FooterActionsResponsive: Story = {
   render: () => (
     <div class="flex flex-col gap-4">

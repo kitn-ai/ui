@@ -195,20 +195,7 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/**
- * The Support widget template's builder: panel on the left scoped to
- * exactly this template's controls (Identity, Provider, Widget chrome —
- * always on, Theme, Home, Capabilities — no Layout radio, T-2), a live
- * widget-framed preview on the right. Edit the accent, header title,
- * starters, or the widget's position/launcher/open-by-default and watch
- * the preview react.
- *
- * What the old, now-superseded `Labs/Apps` Builder story's other layout
- * shells (fullscreen/aside/split) demonstrated moves to EACH of those
- * templates' own story under `Labs/Builder` as they land (Rounds A,
- * R, S) — this story only ever shows the widget framing, because that's
- * what this template is.
- */
+/** The Support widget builder, with the preview in the widget's floating-card framing. */
 export const SupportWidget: Story = {
   render: () => <SupportWidgetBuilderDemo />,
   ...src(`<BuilderLayout

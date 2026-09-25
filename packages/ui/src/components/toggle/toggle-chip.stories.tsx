@@ -64,13 +64,7 @@ export const Disabled: Story = {
   ...src('<ToggleChip disabled>Images</ToggleChip>'),
 };
 
-/**
- * The common shape (`builder-panel.tsx`'s attachments accept editor): a row
- * of chips, each independently toggled — plain flex-wrap, no `ChipGroup`.
- * Also doubles as the size comparison the owner asked for: `sm` (the
- * default pill, h-7) is what a real chip row uses; `md` is shown once below
- * it at the same content so the proportions are easy to judge side by side.
- */
+/** Each chip toggles independently of the others. */
 export const Row: Story = {
   name: 'In a chip row (+ size comparison)',
   render: () => {

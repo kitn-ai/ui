@@ -848,19 +848,11 @@ const MIC_CONSTRAINTS: MediaStreamConstraints = {
   },
 };
 
-/**
- * A real microphone, click-to-enable.
- *
- * Nothing here calls `getUserMedia` on mount -- it renders an idle
- * visualizer and a button, so there is no permission prompt for Storybook's
- * automated a11y run to hang on. Only the click handler asks for the
- * microphone; a second click stops the tracks and returns to idle.
- *
- * `state` is forced to `speaking` while the stream is live: every other
- * state deliberately ignores audio and runs its own scripted sequence
- * instead (see Bar above), so a mic story left on `listening` would just
- * blink and look exactly as broken as the bug this fixes.
- */
+// Nothing asks for the microphone until the click: the story mounts an idle
+// visualizer and a button, so no permission prompt fires on load. `state` is
+// forced to `speaking` while the stream is live, because every other state
+// ignores audio and runs its own scripted sequence.
+/** Live audio from the microphone rather than a scripted sequence. */
 export const Microphone: Story = {
   args: { variant: 'bar' },
   parameters: {
@@ -927,19 +919,12 @@ export const Microphone: Story = {
   },
 };
 
+// Six `useAudioAnalysis` instances tap the one stream at once: each calls its own
+// `ctx.createMediaStreamSource(stream)`, which, unlike `createMediaElementSource`,
+// has no once-per-web-component restriction, and all six were verified in the
+// browser to react independently rather than only the first.
 /**
  * All six variants, one live microphone, side by side.
- *
- * Same click-to-enable pattern as Microphone above -- one button, one
- * `getUserMedia` call, one `MediaStream` -- but that single stream is set on
- * all six visualizer instances at once instead of switching one
- * through a control. Six `useAudioAnalysis` instances end up tapping the
- * same stream simultaneously: each calls its own `ctx.createMediaStreamSource
- * (stream)`, which -- unlike `createMediaElementSource` -- has no
- * once-per-web-component restriction, so this is expected to just work, but it had
- * never actually been exercised with six concurrent consumers before this
- * story. Verified in the browser: all six react independently to the same
- * stream, not just the first.
  */
 export const MicrophoneAll: Story = {
   // Still off the Docs page, but NOT for the WebGL context reason any more

@@ -32,16 +32,9 @@ type Story = StoryObj;
 // Hand-written HTML for the "Show code" panel (real consumer markup, not JSX).
 const src = (code: string) => ({ docs: { source: { language: 'html', code } } });
 
-/**
- * The sibling of `kai-menu`, split by who owns the body. `kai-menu` renders a JSON
- * `items` tree; `kai-dropdown` hands you the surface and projects whatever you slot
- * into it — the shape a framework consumer needs when the rows are their own
- * components rather than data.
- *
- * Rows carry `role="menuitem"`, so the surface is a real menu to assistive tech and
- * they join roving focus: ArrowUp/Down, Home/End and typeahead all reach them even
- * though they are slotted light DOM.
- */
+// Slotted rows must carry role="menuitem" and tabindex="-1" to join the surface's roving
+// focus: ArrowUp/Down, Home/End and typeahead reach only what matches that role.
+/** A dropdown whose rows you author yourself, unlike the data-driven `kai-menu`. */
 export const SlottedRows: Story = {
   render: () => (
     <kai-dropdown
@@ -64,11 +57,10 @@ export const SlottedRows: Story = {
 </kai-dropdown>`),
 };
 
+// `label` is deliberately absent here: the visible `trigger-label` is already the accessible
+// name, and a `label` that does not contain it is unreachable by speech input (WCAG 2.5.3).
 /**
- * A labelled trigger with a trailing chevron — the "select" look. The visible
- * `trigger-label` IS the accessible name, so `label` is deliberately absent here
- * (an accessible name that does not contain the visible text is unreachable by
- * speech input; WCAG 2.5.3).
+ * A trigger label with a trailing chevron, the shape of a select.
  */
 export const LabelledTrigger: Story = {
   render: () => (

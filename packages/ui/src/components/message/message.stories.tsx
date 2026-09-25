@@ -281,14 +281,8 @@ Key benefits:
 };
 
 /**
- * Citations. A run of consecutive `source` parts renders as ONE wrapped row
- * (`part="citations"`) placed OUTSIDE the message bubble — hover a chip for its
- * title and snippet.
- *
- * The answer's prose also contains a link the model typed itself. That inline
- * anchor is NOT a citation; only the chips below the bubble come from `source`
- * parts. Keeping the two visually distinct is the whole reason the row lives
- * outside the content part.
+ * An answer with a link in its own prose and citation chips under the bubble. The
+ * chips are citations; a link the model typed is not one.
  */
 export const Citations: Story = {
   render: () => {

@@ -45,7 +45,7 @@ export const Playground: Story = {
 }`),
 };
 
-/** No value yet — the swatch falls back to a neutral muted fill and the hex
+/** No value yet: the swatch falls back to a neutral muted fill and the hex
  *  field shows its placeholder. */
 export const Unset: Story = {
   render: () => {
@@ -57,9 +57,7 @@ export const Unset: Story = {
 <ColorField label="Accent color" value={value()} placeholder="#e91e63" onChange={setValue} />`),
 };
 
-/** Typing a syntactically invalid hex does not commit — the swatch keeps its
- *  last valid color, and the field keeps whatever was typed rather than
- *  snapping back. Try typing "not-a-color" and tabbing away. */
+/** An invalid hex leaves the swatch unchanged and keeps the typed text. */
 export const InvalidTextDoesNotCommit: Story = {
   render: () => {
     const [value, setValue] = createSignal('#38bdf8');

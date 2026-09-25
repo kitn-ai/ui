@@ -638,18 +638,8 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/**
- * The Voice template's builder, reshaped to a workspace-like layout in an
- * owner design round: a centered `AudioVisualizer` + `Captions` (the new
- * live-caption component) + push-to-talk mic, with a transcript panel
- * (real `ChatThread`, message history + optional text composer) dockable
- * start or end and collapsing completely — a corner button is the only
- * way in while collapsed, which is the default. Panel: Identity, Provider,
- * Theme, Layout (header toggle, dock side, transcript default-open, text-
- * input toggle), Visualizer (variant, demo state, voice in/out). Per T-1a,
- * this template's SHIP gate — a genuine Labs voice-app surface existing
- * first — is unchanged.
- */
+/** The Voice template's builder: a visualizer with live captions, beside a
+ *  transcript panel that docks to either side. */
 export const Voice: Story = {
   render: () => <VoiceBuilderDemo />,
   ...src(`<BuilderLayout

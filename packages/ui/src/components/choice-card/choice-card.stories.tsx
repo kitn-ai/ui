@@ -264,8 +264,7 @@ export const Busy: Story = {
 <ChoiceCard host={host} data={data} heading="Choose a region" cardId="card-region-busy" disabled />`),
 };
 
-/** Resolved state. `resolution` is still a control — clear it to go back to the
- *  live list, or point `action` at another option id. */
+/** Resolved: the chosen option shown read-only, with no live list. */
 export const Chosen: Story = {
   args: {
     heading: 'Pick a plan',

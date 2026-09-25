@@ -979,33 +979,8 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/**
- * The Workspace template's builder: a resizable split, a chat rail
- * (`WorkspaceShell`'s `start`) beside a large work pane (`children`).
- * Modeled on the Lovable and v0 app stories: the work pane carries a
- * browser-chrome toolbar (device toggle, URL bar, open-in-new-tab,
- * Preview|Code with Preview first) plus an Expand control wired through
- * `WorkspaceShell`'s REAL controlled `startCollapsed` prop, and every toolbar
- * affordance is individually optional. The pane's own viewport (behind both
- * the preview and code content) sits on a muted background, distinct from the
- * pane's toolbar and content cards. An app-level header sits above the split:
- * title on the left; on the right, a fixed left-to-right arrangement (search,
- * a real dark-mode toggle scoped to just this preview frame, a divider, the
- * configurable Share/Deploy actions row, a divider, a compact avatar+chevron
- * user menu). Every header element is individually optional via a panel
- * toggle; the arrangement itself is not. The composer gains optional
- * quick-fill chips (wired to `ChatThread`'s real controlled `value`) and a
- * `+` menu (the kit's real `Dropdown` primitives), plus Microphone and an
- * Attachments toggle that really reaches the composer. Panel: Identity,
- * Provider, Theme, Capabilities, Work surface, App header, Composer, and the
- * shared Message actions picker.
- *
- * The split FRAME is construct-expressible (`layout: 'split'` already exists
- * and codegen emits it). The pane content, pane chrome, header actions and
- * composer knobs this story adds are preview-only: they write to local
- * signals, never to `BuilderConstruct`, which is why the Raw JSON section does
- * not reflect them.
- */
+/** The Workspace template's builder: a chat rail beside a work pane with its
+ *  own browser chrome. */
 export const Workspace: Story = {
   render: () => <WorkspaceBuilderDemo />,
   ...src(`<BuilderLayout

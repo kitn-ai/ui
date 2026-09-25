@@ -69,6 +69,16 @@ in "Follow-ups this sweep must not lose".
      preview shows it.
    Do not COPY shadcn/ui's sentences. They are the tone calibration (short, plain, describes the
    thing); the wording has to be ours and about our component.
+   **DECIDED: a page top and its story blurb MAY be the same sentence.** They are rule 7 applied to two
+   surfaces a reader meets in different places (the docs page and the Storybook story), and a reader
+   rarely sees both, so a repeated one-liner is not duplication the reader pays for. Sameness is allowed,
+   not a target, and a page is not reworded just to differ. Two constraints survive: the `kai-lede` must
+   still not restate its OWN frontmatter `description` (guarded by `docs-copy.test.ts`), and when the page
+   has a fact the story cannot carry (the element tag, the one clause that says when to reach for this
+   component over its sibling) the lede should carry THAT rather than repeat the story line. Two pairs are
+   byte-identical to the ELEMENT DOCSTRING on purpose (rule 8: one source, two audiences) and stay so. The
+   cost of a pair is drift, not sameness: it is one fact in two files, so a change to one is a change to
+   check in the other, and `docs/coupling-map.md` registers the pair.
 8. **The element docstring is the agent's one line.** Every facade writes a doc comment above its
    `defineWebComponent` call and the generator was throwing it away, so `llms-full.txt` and the MCP
    catalog carried props, events, methods and parts but not one sentence saying what the element IS.
@@ -92,6 +102,7 @@ in "Follow-ups this sweep must not lose".
 | component page tops (description <= 100, lede <= 140, aside <= 200, no em dash, no instruction, lede not restating) | 0 offenders across 63 pages, 88 docs tests green, verify:docs exit 0 | done |
 | concept pages over cap (guides, patterns, examples) | **0** paragraphs over ~4 lines (was 41 across 24 pages), guarded by `docs-copy-concepts.test.ts` | done |
 | per-STORY descriptions (`docs.description.story`) | **21 judged: 13 FAIL rewritten, 6 WEAK decided; rule (l) now reads both description fields** | done |
+| the story DOC COMMENT (the text Storybook renders above the story canvas), the same three rule-(l) checks | **425 paragraphs read, 0 offenders** (81 findings across 42 files before the sweep); 66 comments judged by 5 reviewer batches (4 FAIL, 32 WEAK, 30 PASS), every FAIL and WEAK rewritten, re-check 0 FAIL | done |
 | JSX in a story's `args` | **0** (2 pre-existing offenders fixed), guarded by rule (n) | done |
 | raw markdown hazard in a rendered description (an angle-bracket tag or a fence) | **0** (was 28 across 17 files), guarded by rule (o) | done |
 | comment blocks over 20 lines | **0** (was 181), guarded by `lint:comment-references` | done |
@@ -136,17 +147,20 @@ Two blind spots the passes found, both worth keeping:
 
 ## Follow-ups this sweep must not lose
 
-- **The story DOC COMMENT is a rendered surface rule (l) does not yet judge.** Rule (o) reads it
-  (that is where the hazard lived), but the docs-talk/paragraph/em-dash half of rule (l) reads only
-  the explicit `docs.description.story` field, which PASS D judged at 21 sites. Judging the doc
-  comments with the same bar fires on **86 comments across 42 files** on today's tree, so the
-  surface is about five times bigger than the pass measured. Sized, not swept: it needs a batch of
-  lanes and the copy reviewer, exactly like PASS A.
-- **A story description and its docs page lede are two files, one fact.** 9 of the 95 component
-  descriptions are near-identical to their page's `description`/`kai-lede`; two (`kai-lightbox`,
-  `kai-prompt-input`) are byte-identical to the element docstring BY DESIGN (rule 8: one source, two
-  audiences). Decide in PASS D whether a page-top and a story blurb may be the same sentence, or the
-  page should add the one fact the story cannot carry.
+- **DONE — the story DOC COMMENT is a rendered surface, and rule (l) now judges it.** Storybook renders
+  the doc comment above a story export as that story's description above the canvas, so the three rule-(l)
+  checks (docs talk, the 3-paragraph cap, the em dash) reach it. It fired on **81 findings across 42 files**
+  (not the 86 the sizing note guessed; the tree had moved). Five lanes derived their own slices from the
+  guard, the copy reviewer judged all 66 comments those findings lived in (**4 FAIL, 32 WEAK, 30 PASS**), a
+  fix pass applied every FAIL and every WEAK, and a re-check confirmed **0 FAIL, 7 WEAK (judgement calls),
+  30 PASS**. Re-measured from the guard: **425 doc-comment paragraphs read, 0 offenders**. Rationale that
+  had to survive moved to a `//` above the comment, which is safe because Storybook's `extractDescription`
+  (`storybook/dist/_node-chunks/chunk-GD4AVVJ6.js`) drops every `//` line and every block that does not
+  start with `*`, so a `//` never joins the rendered description.
+- **DECIDED — a story description and its docs page lede are two files, one fact, and may say the same
+  sentence.** See the decision under rule 7. The pairs are not a backlog: the page top keeps only the two
+  constraints there (it does not restate its own `description`, and it carries the one fact the story
+  cannot), and a later edit to either half is a change to check in the other.
 - **The wording half needs the reviewer, and always will.** `lint-story-conventions` rule (l) can only
   count paragraphs and catch docs-talk; it cannot tell whether a description TEACHES or INVENTORIES. All
   95 rendered component descriptions have now been judged once (3 batches), so the counter starts from a
@@ -154,24 +168,30 @@ Two blind spots the passes found, both worth keeping:
 - **The reviewer's three worst patterns, for the next component that lands:** the top description as the
   props table in prose, a feature inventory where the preview is the copy, and a mechanic kept in prose
   after its prop name was removed ("driven by a plain boolean in JSX").
-- **`verify:docs` has a hole for HISTORICAL `kai-` names in prose.** Its `knownTokens` set is built from
-  quoted `kai-…` literals and JSX tags in `packages/ui/src`, so it can only recognise a token the kit
-  still names. Trimming `chat-workspace.tsx`'s docstring removed the last mention of
-  `kai-sidebar-toggle`, and the guide's rename note (`guides/use-a-workspace.mdx:62`,
-  "kai-sidebar-toggle is now kai-aside-toggle with a side") became an `unknown-kai-token` high finding on
-  a page nobody had touched. The docs text is right and the kit simply stopped naming the old name, so
-  the rule needs an exception for a rename note: either a declared per-line waiver in the checker
-  (`scripts/docs-alignment/prose.mjs`, which today has NO waiver path and no prose self-test, so the
-  waiver needs a prose probe first) or the rename fact kept as a `//` comment in the kit source, which
-  the checker already reads. Do not "fix" it by un-backticking the old name: that dodges the guard
-  silently instead of declaring the exception.
+- **DONE — `verify:docs` now has a declared waiver for a HISTORICAL `kai-` name in prose.** The hole:
+  `knownTokens` is built from quoted `kai-…` literals and JSX tags in `packages/ui/src`, so it can only
+  recognise a token the kit still names, and a rename note (`kai-sidebar-toggle` -> `kai-aside-toggle`)
+  that the current kit has stopped naming was an `unknown-kai-token` high finding on a correct page. The
+  tree happened to stay green only because `chat-workspace.tsx` still mentions the old name in a `//`
+  comment; delete that comment and the guide turns red. Now the page owns its exception with an MDX
+  comment (renders nothing) on the note line or the line above:
+  `{/* docs-alignment: historical-kai-token -- <why the old name is here, 15+ chars> */}`. Parsed, not
+  text-matched; the reason is required; it covers one line, not the page; and it silences this finding kind
+  only. `coverage.mjs`'s stale-token scan is the SAME fact from the other direction, so it honours the same
+  waiver through `isHistoricalKaiWaived` -- one declaration, both reports. Proved by `apps/docs/test/docs-prose.test.ts`
+  (the prose checker's first self-test): the token is reported with no waiver, still reported when the
+  waiver is reason-less or parked two lines away, and the marker alone turns both reports green. Do not
+  "fix" a rename note by un-backticking the old name: that dodges the guard silently instead of declaring
+  the exception.
 - **`verify:docs` is racy against a concurrent generator write.** A run during generation read a
   half-written `dist/web-components.d.ts` and reported 91 elements with 69 high findings; the same tree
   settled reported 1. Run the docs checks after the generators, never alongside them.
 
 - `docs.description.story` (the per-story description, rendered on the story's own docs page) is OUT of
-  scope for the current rule, which reads the component description only. Decide later whether a story
-  description may mention its own story; the tree has no offender today either way.
+  scope for the current rule, which reads the component description only. **Decided:** a story
+  description MAY mention its own story only through a declared `docs-talk` waiver -- the tree has no
+  offender today -- and the DOC COMMENT surface above it is judged by rule (l) outright (see the DONE
+  entry above).
 - The JSX-in-`args` trap becomes a rule in `lint-story-conventions` (a JSX element in a story's `args`
   cannot cross the manager/preview boundary, so the fix is `render`). It is queued behind the lane that
   currently owns that file. Until it lands, the trap lives only in this paragraph and in the handoff,

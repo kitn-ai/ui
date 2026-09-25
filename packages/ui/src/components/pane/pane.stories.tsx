@@ -252,8 +252,7 @@ export const StatusTones: Story = {
 <Pane title="Idle"     status={{ tone: 'idle',    label: 'Idle' }} … />`),
 };
 
-/** `maximized` swaps the maximize glyph for restore — the state a workspace sets
- *  on the one pane it has blown up to fill the view. */
+/** A pane maximized to fill its container. */
 export const Maximized: Story = {
   render: (args: PaneProps) => (
     <div class="h-96 max-w-2xl">

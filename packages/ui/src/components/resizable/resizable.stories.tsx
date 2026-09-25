@@ -151,7 +151,7 @@ export const ThreePanels: Story = {
 </ResizablePanelGroup>`),
 };
 
-/** `handle="none"` — an invisible divider (8px hit-area only) that still reports drag deltas via `onPanelResize` (showcase). */
+/** An invisible divider: no visual handle, but the strip between the panels still drags. */
 export const NoHandle: Story = {
   name: 'Without Handle',
   render: () => (

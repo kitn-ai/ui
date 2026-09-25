@@ -112,8 +112,7 @@ export const DisabledTab: Story = {
 <TabBar items={items} value={tab()} onChange={setTab} />`),
 };
 
-/** The same states on the dark tokens (an explicit `.dark` wrapper, so this
- *  story shows dark regardless of the Storybook toggle). */
+/** The tab bar rendered on the dark tokens. */
 export const DarkPreview: Story = {
   render: () => {
     const [tab, setTab] = createSignal('home');

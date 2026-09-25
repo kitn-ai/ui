@@ -449,20 +449,7 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/**
- * The Research template's builder, reshaped in an owner design round to
- * mirror the REAL Perplexity Labs story's anatomy (see the module doc
- * comment for the full region-by-region mapping). The preview still opens
- * on `ChatThread`'s own centered empty state (unchanged entry point);
- * submitting the composer or a starter swaps in a Perplexity-shaped answer
- * — a sources strip with overflow, an Answer/Sources/Images tab strip,
- * hand-woven prose with inline numbered citation chips, a media strip, an
- * action toolbar, and related follow-up questions — rendered through
- * `ChatThread`'s real `emptyContent` prop, so the SAME composer serves both
- * the initial search and every follow-up. Panel: Identity, Provider,
- * Theme, Capabilities, and an Answer-layout section with one toggle per
- * region.
- */
+/** The Research template's builder, showing a search answer with cited sources. */
 export const Research: Story = {
   render: () => <ResearchBuilderDemo />,
   ...src(`<BuilderLayout

@@ -131,8 +131,7 @@ export const Info: Story = {
 </Coachmark>`),
 };
 
-/** The full semantic set — one bubble per tone, reusing the kit's tool hues
- *  (`success` green, `warning` amber with dark text, `error` red). */
+/** All five tones, each with its own open bubble. */
 export const Tones: Story = {
   render: () => {
     const tones = ['primary', 'info', 'success', 'warning', 'error'] as const;
@@ -179,12 +178,10 @@ export const WithBadge: Story = {
 </Coachmark>`),
 };
 
-/**
- * Recolor purely in CSS via `--kai-coachmark-bg` (bubble + arrow) and
- * `--kai-coachmark-fg` (text). They default to the `tone` palette, so setting them
- * overrides the bubble, arrow, badge, and body in one place — no JS, survives
- * re-mounts. On the element, set them on `kai-coachmark` itself.
- */
+// `--kai-coachmark-bg` (bubble + arrow) and `--kai-coachmark-fg` (text) default to
+// the `tone` palette, so setting them overrides the bubble, arrow, badge and body
+// in one place, with no JS. On `<kai-coachmark>` they are set on the host itself.
+/** A bubble recolored without a tone. */
 export const CustomColor: Story = {
   render: () => {
     // The bubble portals to `config.portalMount` (here, the var-carrying wrapper)
