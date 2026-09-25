@@ -1,6 +1,6 @@
 {
   "name": "@kitn.ai/cli",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "license": "MIT",
   "type": "module",
   "description": "The kai command line for @kitn.ai/ui: scaffold a project or add a block to one, diagnose its wiring, and run the construct dev/eject/compile tooling.",
@@ -56,7 +56,7 @@
     "lint:cli-invocations": "node scripts/lint-cli-invocations.mjs --self-test && node scripts/lint-cli-invocations.mjs"
   },
   "dependencies": {
-    "create-kai": "^0.9.1",
+    "create-kai": "^0.9.2",
     "zod": "^4.4.3"
   },
   "devDependencies": {
