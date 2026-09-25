@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.37.1](https://github.com/kitn-ai/ui/compare/@kitn.ai/ui-v0.37.0...@kitn.ai/ui-v0.37.1) (2026-09-25)
+
+
+### Bug Fixes
+
+* **lint:** express the fence pattern without raw backticks ([57f9914](https://github.com/kitn-ai/ui/commit/57f9914afd17e90e7f74806d6eb7fc743013ceb8))
+* **storybook:** a rendered description may not contain an HTML tag ([d32e16d](https://github.com/kitn-ai/ui/commit/d32e16d2bf842a3833bbc561c96f1713ac61eb29))
+* **storybook:** a seeded-open modal does not cover its own docs page ([e41ebdf](https://github.com/kitn-ai/ui/commit/e41ebdfc046cc317d5330d2925c413efc426bd90))
+* **storybook:** a seeded-open modal does not cover its own docs page ([880cd4a](https://github.com/kitn-ai/ui/commit/880cd4adc053723c059e7782a22268d840f33b4f))
+
 ## [0.37.0](https://github.com/kitn-ai/ui/compare/@kitn.ai/ui-v0.36.0...@kitn.ai/ui-v0.37.0) (2026-09-24)
 
 

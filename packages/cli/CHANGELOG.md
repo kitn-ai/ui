@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.5.2](https://github.com/kitn-ai/ui/compare/@kitn.ai/cli-v0.5.1...@kitn.ai/cli-v0.5.2) (2026-09-25)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * create-kai bumped from ^0.9.1 to ^0.9.2
+  * devDependencies
+    * @kitn.ai/ui bumped to 0.37.1
+
 ## [0.5.1](https://github.com/kitn-ai/ui/compare/@kitn.ai/cli-v0.5.0...@kitn.ai/cli-v0.5.1) (2026-09-24)
 
 
