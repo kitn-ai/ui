@@ -95,7 +95,7 @@ export const States: Story = {
 <Checkbox indeterminate />`),
 };
 
-/** Disabled in both states. The native attribute does the work — no pointer, no tab stop. */
+/** A disabled checkbox, off and on. */
 export const Disabled: Story = {
   render: () => (
     <div style={{ display: 'flex', gap: '2rem', 'align-items': 'center' }}>
@@ -112,8 +112,8 @@ export const Disabled: Story = {
 };
 
 /**
- * Wrap the control in a label and the whole row becomes the click target — the
- * cheapest accessible name you can give a checkbox, and it costs no ARIA.
+ * A checkbox wrapped in a label: the label text is the accessible name and the
+ * whole row is the click target.
  */
 export const WithLabel: Story = {
   name: 'In a label row',
@@ -134,11 +134,10 @@ export const WithLabel: Story = {
 </label>`),
 };
 
-/**
- * What `indeterminate` is FOR: a parent that is neither all-on nor all-off. The mixed
- * state is visual plus an accessibility hint — the input still reports `checked: false`
- * and submits accordingly, so drive the children from your own state, not from the box.
- */
+// `indeterminate` is visual plus an accessibility hint: the input still reports
+// `checked: false` and submits accordingly, so the children have to be driven
+// from the story's own state.
+/** Three children, one on, so the parent box is mixed. */
 export const ParentAndChildren: Story = {
   name: 'Parent with mixed state',
   render: () => {
@@ -186,8 +185,7 @@ const some = () => on().length > 0 && !all();
 };
 
 /**
- * Give the boxes a `name` and a `value` and a native form submits them with no
- * JavaScript at all — the part a hand-rolled control silently loses.
+ * Three checkboxes on one form field, with the submitted values printed underneath.
  */
 export const InAForm: Story = {
   name: 'Native form participation',

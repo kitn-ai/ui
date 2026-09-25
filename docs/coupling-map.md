@@ -436,6 +436,7 @@ naming which command produced it.
 36. Links.
 37. Whether the re-render rule as *worded* still matches the keying it describes. The behaviour is pinned; the prose is not, and a phrasing grep would be theatre.
 39. The field-format docs (`guides/field-formats.mdx`, the `form.mdx` bullet, the hand-written `kai-input` line in `docs/web-components.md`) vs `FIELD_SEMANTIC_TYPES` and the mask token vocabulary they restate. The code-side copies are the best-guarded pair in §4; the prose tables are checked by nothing — `verify:docs` resolves symbols and markup, not enum members or caps in a table. Next free number per the rule at item 38.
+51. A component's page top (frontmatter `description` / `kai-lede`) and its story's rendered description (the doc comment above the story export) are ONE fact in TWO files. Each is guarded on its own — the page top by `apps/docs/test/docs-copy.test.ts`, the story comment by rule (l) of `lint-story-conventions` — and NOTHING relates the two, so a later edit to one leaves the other stale while both gates stay green. The decision in `docs/verbosity-sweep.md` rule 7 is that the pair MAY be the same sentence; the cost is drift, not sameness, so a change to either half is a change to check in the other by hand.
 
 **Blocks vs the facades' private copies (§10 — every item here is closed by the P-9 refactor when it lands, by construction: one component, two call sites)**
 

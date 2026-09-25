@@ -158,25 +158,15 @@ export const FramelessInDock: Story = {
 </div>`),
 };
 
-/**
- * The chrome under an accent override: the CTA retints while the panel
- * surface stays on the neutral tokens, the outcome the spike's accent probe
- * measured once the chrome used kit tokens (phase 3, observation 12). For a
- * light-DOM subtree the documented knob is the `--color-*` value itself
- * (theme.css: "rebrand by overriding the --color-* values, optionally
- * scoped to a subtree"); the `--kai-color-*` spelling re-resolves inside
- * the shadow roots of the `kai-*` web-component facades, which is the phase-2
- * block driver's probe.
- *
- * The accent's LIGHTNESS is measured, not decorative. This story ships a
- * copy-pasteable accent recipe (it IS the Code tab's snippet), so the pair it
- * demonstrates has to be one a consumer can actually adopt. At the original
- * `oklch(0.62 0.25 330)` = #d231cb the near-white foreground declared beside
- * it is 3.99:1 — under WCAG AA's 4.5:1 for normal text, and axe failed the
- * CTA on exactly that. Same hue and chroma, four hundredths darker:
- * `oklch(0.58 0.25 330)` = #c41cbe measures 4.73:1. L=0.59 (4.52:1) is the
- * lightest that clears at all, so do not nudge this back up.
- */
+// The accent pair is measured, not decorative: this panel ships a copy-pasteable recipe, so
+// the pair it demonstrates has to be one a consumer can adopt. `oklch(0.62 0.25 330)`
+// (#d231cb) against the near-white foreground declared beside it is 3.99:1, under the
+// 4.5:1 AA floor for normal text. Same hue and chroma at `oklch(0.58 0.25 330)` (#c41cbe)
+// measures 4.73:1, and L=0.59 (4.52:1) is the lightest that clears at all, so do not nudge
+// this back up.
+// For a light-DOM subtree the knob is the `--color-*` value itself, scoped to the subtree;
+// the `--kai-color-*` spelling re-resolves inside the shadow roots of the `kai-*` facades.
+/** An accent override scoped to a subtree, so the panel surface stays neutral. */
 export const AccentOverride: Story = {
   args: { frame: true },
   render: (args: { frame?: boolean }) => (

@@ -327,8 +327,7 @@ const data: FormDefinition = {
 <Form host={host} data={data} cardId="card-migration" />`),
 };
 
-/** Resolved state. `resolution` stays a control — clear it to get the live form
- *  back, or edit `data` to change what the summary rows report. */
+/** Resolved: the submitted values shown as a read-only summary, not the inputs. */
 export const Submitted: Story = {
   args: {
     cardId: 'card-migration-done',

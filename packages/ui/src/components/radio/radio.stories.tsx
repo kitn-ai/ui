@@ -167,11 +167,7 @@ export const DisabledStates: Story = {
 <RadioGroup label="Plan, locked" value="team" disabled options={[…]} />`),
 };
 
-/**
- * The presentation slot. Return whatever the row should show and the control, the row
- * chrome and the group semantics stay ours — this is how a pricing row, a model card or
- * a row with media gets built without a second radio component existing.
- */
+/** A radio group whose rows render their own content around the same control. */
 export const PresentationSlot: Story = {
   name: 'Custom row content',
   render: () => {
@@ -210,11 +206,9 @@ export const PresentationSlot: Story = {
 </RadioGroup>`),
 };
 
-/**
- * The bare control, for a layout the group does not cover. Give every member the same
- * `name` — that is the whole contract, and forgetting it is what turns one control into
- * three independent ones that all look right.
- */
+// A shared `name` is the whole contract: without it these are three independent controls
+// that all still look right.
+/** Standalone radio controls sharing one name. */
 export const BareRadio: Story = {
   name: 'Radio on its own',
   render: () => (

@@ -204,7 +204,7 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/** Chat view, the default state — the header toggle renders the chat-bubble glyph. */
+/** The default chat view, with the conversation list closed. */
 export const ChatView: Story = {
   args: {
     conversations: true,
@@ -263,11 +263,7 @@ export const ListViewEmpty: Story = {
 <ChatThread conversations store={emptyConversationStore} chatTitle="Support" />`),
 };
 
-/** Unread indicators: a header-toggle badge (any
- *  conversation other than the active one is unread) and, in the list, a
- *  trailing dot on each unread row. `conv-2`/`conv-3` are unread; `conv-1`
- *  is auto-selected as active on mount (most-recently-updated) and marked
- *  read for real via this story's `stubStore().markRead`. */
+/** Unread conversations, flagged in the header and the list. */
 export const ListViewWithUnread: Story = {
   args: {
     conversations: true,
@@ -319,9 +315,7 @@ export const PerRoleActions: Story = {
 />`),
 };
 
-/** `hideSources`: the same assistant turn as `PerRoleActions`, with the
- *  citations row toggled via the Storybook control. The answer text still
- *  renders either way; only the `part="citations"` row is skipped. */
+/** One assistant turn with its citations row hidden. */
 export const HideSources: Story = {
   args: {
     conversations: false,

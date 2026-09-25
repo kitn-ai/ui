@@ -101,28 +101,22 @@ const templateStory = (templateId: BuilderCardTemplateId): Story => ({
   ...src(`<BuildWait templateId="${templateId}" current={currentPhase} />`),
 });
 
-/** Support widget — the floating panel is the accented surface, so it is the
- *  shape that keeps breathing once the drawing has settled. */
+/** The support widget's drawing: the floating panel keeps breathing after the rest of it has settled. */
 export const Widget: Story = templateStory('widget');
 
-/** In-app assistant — the docked rail lands last of the big shapes, after the
- *  host app's own content it attaches to. */
+/** The in-app assistant's drawing: the docked rail lands last, after the host content it docks into. */
 export const InAppAssistant: Story = templateStory('inAppAssistant');
 
-/** Assistant — conversation sidebar first, then the thread it frames. */
+/** The assistant's drawing: the conversation sidebar first, then the thread it frames. */
 export const Assistant: Story = templateStory('assistant');
 
-/** Research — sources rail, then the prompt bar and answer column together,
- *  which are one surface and land as one step. */
+/** The research drawing: the sources rail, then the prompt bar and answer column landing together as one step. */
 export const Research: Story = templateStory('research');
 
-/** Workspace — the work pane goes down as structure, then the chat rail that
- *  is this kit's part of it. */
+/** The workspace drawing: the work pane lands first, then the chat rail. */
 export const Workspace: Story = templateStory('workspace');
 
-/** Voice — the one drawing with no page outline at all (the original
- *  illustration's deliberate departure, kept). The push-to-talk ring is the
- *  anchor and the hero; the waveform assembles left to right. */
+/** The voice drawing, and the only one with no page outline: the push-to-talk ring anchors it while the waveform assembles left to right. */
 export const Voice: Story = templateStory('voice');
 
 /** All six side by side — for judging that they read as one family mid-draw,
@@ -152,15 +146,12 @@ export const AllTemplates: Story = {
   parameters: { layout: 'padded', docs: ALL_TEMPLATES_SRC.parameters.docs },
 };
 
+// `reduceMotion` is a demo affordance, not the mechanism: the component reads
+// `prefers-reduced-motion` itself and ships a media rule that switches every
+// animation off, either of which is enough on its own.
 /**
- * Reduced motion, forced. The completed blueprint is there immediately, with
- * no stroke animation and no heartbeat — and the phases still advance, because
- * the motion was never what was carrying the information.
- *
- * The prop is a story affordance, not the mechanism: the component reads
- * `prefers-reduced-motion` itself AND ships a media rule that switches every
- * animation off, either of which is enough on its own. This story exists so
- * the rendering can be reviewed without changing the reviewer's OS setting.
+ * Reduced motion, forced: the blueprint arrives finished, with no stroke
+ * animation and no heartbeat, and the phases still advance.
  */
 export const ReducedMotion: Story = {
   render: () => <WaitScreen templateId="workspace" reduceMotion />,

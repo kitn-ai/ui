@@ -254,9 +254,7 @@ const data: TasksCardData = {
 <TasksCard host={host} data={data} heading="Pick up to 2 reviewers" cardId="card-bounded" />`),
 };
 
-/** `mode: 'progress'` — the onboarding-checklist look. A `done / total` count in
- *  the header, circular indicators, and no confirm button: checking a row IS the
- *  action, so `onValueChange` is the signal. */
+/** The onboarding checklist shape, with no confirm button. */
 export const Progress: Story = {
   args: {
     heading: undefined,

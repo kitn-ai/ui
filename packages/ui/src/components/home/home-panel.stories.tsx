@@ -95,7 +95,7 @@ export const FullHome: Story = {
 <WidgetTabBar active={tab()} onChange={setTab} unread />`),
 };
 
-/** `home: {}` — defaults only, no config. */
+/** The panel with nothing configured: the default greeting and the new-conversation button. */
 export const MinimalDefaults: Story = {
   render: (args: HomePanelProps) => frame(
     <>
@@ -107,7 +107,7 @@ export const MinimalDefaults: Story = {
 <WidgetTabBar active="home" onChange={setTab} />`),
 };
 
-/** First visit — no recent conversation to show. */
+/** The panel with no recent conversations. */
 export const NoRecent: Story = {
   render: (args: HomePanelProps) => frame(
     <>

@@ -130,8 +130,7 @@ const panes = [1, 2, 3, 4, 5, 6];
   },
 };
 
-/** Forced narrow so the dropped-columns + scroll behavior is visible without dragging
- *  (this is roughly what the wide story looks like once you pull the handle in). */
+/** The grid squeezed into a 360px container. */
 export const Narrow: Story = {
   name: 'Narrow (columns drop + scroll)',
   render: () => (

@@ -157,16 +157,12 @@ export const CustomLabel: Story = {
   ...src(`<ScrollButton show-label label="Jump to latest" />`),
 };
 
+// The two panels are identical apart from the `dark` class, deliberately, and both keep the
+// `border-border` frame: with only the dark panel's frame visible (white on white in light,
+// a dark panel on a white page in dark) the button looked repositioned between them when it
+// was pixel-identical in both.
 /**
- * Both themes side by side, over real content, so the fill and shadow can be
- * judged in situ.
- *
- * The two panels are IDENTICAL apart from the `dark` class, deliberately: this
- * story is a colour comparison and nothing else. Both carry the same
- * `border-border` frame, because when only the dark panel's frame was visible
- * (a white-on-white wrapper in light, a dark panel on a white page in dark) the
- * button looked repositioned between them when it was pixel-identical in both.
- * For placement, see `Positioning`.
+ * The button's fill and shadow on a light and a dark panel, side by side over real content.
  */
 export const LightAndDark: Story = {
   args: { showLabel: true },
@@ -185,29 +181,11 @@ export const LightAndDark: Story = {
   ...src(`<ScrollButton showLabel />`),
 };
 
+// The last panel is what thread.tsx and chat-thread.tsx ship: `relative` on the
+// non-scrolling box, then `absolute bottom-4 left-1/2 w-full max-w-3xl -translate-x-1/2` on
+// the wrapper, which centres the button on the message band instead of the full container.
 /**
- * WHERE the button sits is your layout's call, not a prop.
- *
- * `ScrollButton` has no `placement`: it renders an inline-flex button and
- * nothing else. You position it by wrapping it in your own absolutely
- * positioned box inside the `ChatContainerRoot` (it has to stay inside, because
- * that is the context it reads scroll state from). Every arrangement below is
- * the SAME button with a different wrapper. That split is deliberate: how the
- * button looks and behaves is the kit's business, where your layout puts it is
- * yours.
- *
- * The last panel is what `thread.tsx:216` and `chat-thread.tsx:415` actually
- * ship, and they agree with each other: `relative` on the non-scrolling box
- * around `ChatContainer`, then `absolute bottom-4 left-1/2 w-full max-w-3xl
- * -translate-x-1/2` on the wrapper. Centring on the message band rather than
- * the full container is what stops the button drifting to the middle of a wide
- * window instead of tracking the messages.
- *
- * Anchor the wrapper to a NON-SCROLLING box. Putting `relative` on the
- * `ChatContainerRoot` itself looks right and is wrong: an absolutely positioned
- * child of a scroll container is placed against its padding box and then
- * scrolls away with the content. Wrap the Root in a `relative` box instead, and
- * position against that.
+ * One button in five different wrappers, each placing it over the scroll area.
  */
 export const Positioning: Story = {
   args: { showLabel: false },

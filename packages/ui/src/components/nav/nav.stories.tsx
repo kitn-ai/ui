@@ -199,10 +199,9 @@ const ACTIONS: KaiNavItem[] = [
   { id: 'docs', label: 'API docs', icon: 'file-text', closable: true, action: { icon: 'pencil', label: 'Rename' } },
 ];
 
-/** Per-item trailing controls. `action` ({ icon, label }) renders a hover button
- *  that fires `onItemAction`; `closable` renders a × that fires `onItemClose`.
- *  Both are separate from the row's select — and rendered as siblings of the
- *  item button (never nested), so they pass the a11y nested-interactive check. */
+// Both controls are siblings of the item button, never nested inside it, so the row passes
+// the a11y nested-interactive check, and neither of them selects the row.
+/** A row with its own trailing rename button and close ×, neither of which selects it. */
 export const TrailingActions: Story = {
   render: (args: Pick<NavProps, 'onItemAction' | 'onItemClose'>) => {
     const [value, setValue] = createSignal('auth');

@@ -222,29 +222,7 @@ export const LightAndDark: StoryObj = {
   parameters: src(`<kai-scroll-button for="my-feed" theme="dark" show-label></kai-scroll-button>`),
 };
 
-/**
- * HOW TO FLOAT THE BUTTON OVER THE THREAD. This is the whole technique.
- *
- * There is no `placement` prop and no positioning CSS inside the element. It
- * draws a button; where that button sits is your layout. Three rules make it
- * float over the messages instead of scrolling with them:
- *
- * 1. Put `position: relative` on a box that does NOT scroll, wrapping the
- *    scroll container. Not on the scroll container itself: an absolutely
- *    positioned child of a scrolling element is placed against its padding box
- *    and then scrolls away with the content, which looks correct until you
- *    scroll.
- * 2. Give the button `position: absolute` and an offset from the bottom.
- * 3. Centre it, or anchor it to a corner. Both are shown below.
- *
- * This is the same shape the kit uses on itself: `thread.tsx` and
- * `chat-thread.tsx` both put `relative` on the non-scrolling box around
- * `ChatContainer`, then position the button `absolute bottom-4` inside it. The
- * one refinement worth copying from them is the last panel: centring on a
- * max-width band rather than the full container, so the button tracks the
- * message column on a wide screen instead of drifting to the middle of the
- * window.
- */
+/** The button floated over a feed: the surrounding layout decides where it sits. */
 export const FloatingOverContent: StoryObj = {
   render: () => (
     <div style={{ display: 'flex', gap: '1.5rem', 'flex-wrap': 'wrap' }}>

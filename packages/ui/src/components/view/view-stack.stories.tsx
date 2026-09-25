@@ -157,7 +157,7 @@ function Widget(props: { initialView?: string }) {
   );
 }
 
-/** The default landing: the Home tab root — tab bar showing, no back arrow. */
+/** The default landing: the Home tab root, tab bar showing and no back arrow. */
 export const TabRoots: Story = {
   render: () => <Widget />,
   ...src(`let controller!: ViewStackController;

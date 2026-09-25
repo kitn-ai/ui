@@ -136,6 +136,10 @@
 //     already on the story page, so naming the story, the Labs tier or the harness tells
 //     them about the documentation rather than about what they are looking at. The em
 //     dash is banned on both, because both are rendered copy.
+//     AND THE DOC COMMENT ABOVE A STORY is that story's description on the same page: it
+//     is the text Storybook renders above the canvas, so it is the third rendered surface
+//     and the same three checks -- docs talk, the paragraph cap, the em dash -- reach it.
+//     Rule (o) already read it for the markdown hazard; this closes the wording half.
 // (m) An `argTypes` entry's `description` value: a one-line value, no em dash
 //     and at most `ARG_DESCRIPTION_MAX_CHARS`. These strings are the FIFTH
 //     documentation surface, and they WIN: Storybook renders the argType
@@ -221,12 +225,13 @@
 // runs, intersected with the kit's public export names read from
 // `src/index.ts` and `src/solid.ts`. A name the snippet's own import line
 // brings is clean, and so is a name the snippet declares for itself.
-// (l) is a per-DESCRIPTION finding: every paragraph of every RENDERED component
-// description -- read from the four authoring shapes the tree writes, all of
-// which land on `docs.description.component` -- must be free of `DOCS_TALK`,
-// and the description must carry at most `DESCRIPTION_PARAGRAPH_LIMIT`
-// paragraphs. A description this reader cannot read statically (a template with
-// a hole, an array with a spread) is UNVERIFIED. A
+// (l) is a per-DESCRIPTION finding: every paragraph of every RENDERED description
+// -- read from the four authoring shapes the tree writes, all of which land on
+// `docs.description.component`, plus the two STORY surfaces (`docs.description.story`
+// and the doc comment above the story export) -- must be free of `DOCS_TALK`, and the
+// description must carry at most `DESCRIPTION_PARAGRAPH_LIMIT` paragraphs. A
+// description this reader cannot read statically (a template with a hole, an array with
+// a spread) is UNVERIFIED. A
 // `// lint-story-conventions: docs-talk -- <reason>` waiver on the site's line or
 // the line above covers the whole description.
 //
@@ -1887,6 +1892,7 @@ function findDescriptionDocsTalk(sf, text) {
   const hazards = [];
   const unverified = [];
   let descriptions = 0;
+  let docComments = 0;
 
   /** Is the site at `anchor` waived? The waiver sits on that line or the line
    *  above it, the same window `GLYPH_WAIVER` covers. */
@@ -1973,9 +1979,9 @@ function findDescriptionDocsTalk(sf, text) {
     { id: 'fence', re: /\u0060{3}/ },
   ];
 
-  /** The markdown-hazard half, on its own so the story DOC COMMENT can be checked
-   *  for it without rule (l)'s wording checks (which are queued for that surface). */
-  const recordHazards = (paragraphs, surface) => {
+  /** The markdown-hazard half, on its own so a caller can check a rendered description for
+   *  the hazard without the wording checks (rule (o) and the doc-comment surface share it). */
+  const recordHazards = (paragraphs, surface, site = surface) => {
     if (!paragraphs) return;
     for (const paragraph of paragraphs) {
       const joined = paragraph.map((segment) => segment.text).join('');
@@ -1984,6 +1990,7 @@ function findDescriptionDocsTalk(sf, text) {
         if (hit) {
           hazards.push({
             scope: surface,
+            site,
             what: id,
             word: hit[0].slice(0, 40),
             line: lineOf(paragraph, hit.index),
@@ -1998,14 +2005,15 @@ function findDescriptionDocsTalk(sf, text) {
     }
   };
 
-  const record = (paragraphs, anchor, unreadable, surface = 'component') => {
+  const record = (paragraphs, anchor, unreadable, surface = 'component', site = surface) => {
     if (!paragraphs) {
       unverified.push({ line: anchor, what: unreadable });
       return;
     }
     const waived = waivedAt(anchor);
     for (const paragraph of paragraphs) {
-      descriptions++;
+      if (site === 'story doc comment') docComments++;
+      else descriptions++;
       if (waived) continue;
       const match = paragraph
         .map((segment) => segment.text)
@@ -2014,6 +2022,7 @@ function findDescriptionDocsTalk(sf, text) {
       if (match) {
         findings.push({
           scope: surface,
+          site,
           word: match[0],
           line: lineOf(paragraph, match.index),
           reason:
@@ -2024,9 +2033,9 @@ function findDescriptionDocsTalk(sf, text) {
     }
     // The em dash, on the same surfaces as the docs-talk rule: this text renders above
     // the canvas or the props table, and STYLE.md bans the flourish in rendered copy.
-    // An argTypes description has its own rule (m); these are the two description
-    // fields, which no other rule reads.
-    recordHazards(paragraphs, surface);
+    // An argTypes description has its own rule (m); these are the rendered description
+    // surfaces, which no other rule reads.
+    recordHazards(paragraphs, surface, site);
     if (!waived) {
       for (const paragraph of paragraphs) {
         const text = paragraph.map((segment) => segment.text).join('');
@@ -2034,6 +2043,7 @@ function findDescriptionDocsTalk(sf, text) {
         if (at !== -1) {
           findings.push({
             scope: surface,
+            site,
             word: 'em dash',
             line: lineOf(paragraph, at),
             reason: `the ${surface} description carries an em dash`,
@@ -2043,6 +2053,7 @@ function findDescriptionDocsTalk(sf, text) {
     }
     if (!waived && paragraphs.length > DESCRIPTION_PARAGRAPH_LIMIT) {
       findings.push({
+        site,
         word: `${paragraphs.length} paragraphs`,
         line: anchor,
         reason:
@@ -2071,21 +2082,55 @@ function findDescriptionDocsTalk(sf, text) {
       .map((doc) => (typeof doc.comment === 'string' ? doc.comment : ts.getTextOfJSDocComment(doc.comment) ?? ''))
       .join('\n\n')
       .trim();
-    return comment ? { comment, line: lineAt(sf, node) } : undefined;
+    if (!comment) return undefined;
+    // Two different lines, and conflating them breaks one of the two:
+    //   · `anchor` is the `/**` line, where a waiver written ABOVE the comment is found
+    //     (`waivedAt` looks one and two lines up).
+    //   · `bodyLine` is the line the comment TEXT begins on, so an offset inside a
+    //     paragraph points at the line it is rendered from. TS strips the leading `/**`,
+    //     the `*` prefixes and any blank lines before the first word, so walk the raw
+    //     source to it rather than assuming one offset for every comment shape.
+    const anchor = lineAt(sf, node.jsDoc[0]);
+    const start = node.jsDoc[0].getStart(sf);
+    let bodyLine = anchor;
+    for (let p = start + 3; p < text.length; p++) {
+      const ch = text[p];
+      if (ch === '\n') {
+        bodyLine++;
+        continue;
+      }
+      if (ch === ' ' || ch === '\t' || ch === '\r' || ch === '*') continue;
+      break;
+    }
+    return { comment, anchor, bodyLine };
   };
 
   const visit = (node) => {
     const doc = storyDocComment(node);
     if (doc) {
-      const paragraphs = doc.comment
-        .split(/\n\s*\n/)
-        .map((p) => [{ text: p, line: doc.line }])
-        .filter((p) => p[0].text.trim().length > 0);
-      // HAZARDS ONLY for now. The wording checks rule (l) applies to the explicit
-      // `docs.description.story` field would also fire on 86 doc comments across 42
-      // files on today's tree, which is a sweep of its own rather than part of the fix
-      // that added this rule. Sized and queued in docs/verbosity-sweep.md.
-      recordHazards(paragraphs, 'story');
+      // Each paragraph keeps the line ITS OWN text begins on: a finding in the second or
+      // later paragraph would otherwise be reported at the first paragraph's line plus
+      // whatever newlines sit inside it, which is not the line the reader sees.
+      const paragraphs = [];
+      let searched = 0;
+      for (const part of doc.comment.split(/\n\s*\n/)) {
+        const at = doc.comment.indexOf(part, searched);
+        searched = at + part.length;
+        if (part.trim().length === 0) continue;
+        const line = doc.bodyLine + (doc.comment.slice(0, at).match(/\n/g)?.length ?? 0);
+        paragraphs.push([{ text: part, line }]);
+      }
+      // The doc comment above a story IS that story's description on its docs page, so the
+      // bar rule (l) applies to `docs.description.story` applies here too -- docs talk, no
+      // em dash, at most `DESCRIPTION_PARAGRAPH_LIMIT` paragraphs. Reported as its own site
+      // so the two story surfaces stay countable apart.
+      record(
+        paragraphs,
+        doc.anchor,
+        'the story doc comment is not statically readable',
+        'story',
+        'story doc comment',
+      );
     }
     if (
       ts.isCallExpression(node) &&
@@ -2133,7 +2178,7 @@ function findDescriptionDocsTalk(sf, text) {
     ts.forEachChild(node, visit);
   };
   visit(sf);
-  return { findings, hazards, unverified, descriptions };
+  return { findings, hazards, unverified, descriptions, docComments };
 }
 
 // ---------------------------------------------------------------------------
@@ -2340,6 +2385,7 @@ function analyzeFile(path, text, ctx) {
   findings.descriptionDocsTalk = descriptions.findings;
   findings.descriptionHazards = descriptions.hazards;
   findings.descriptionStrings = descriptions.descriptions;
+  findings.docComments = descriptions.docComments;
   findings.unverified.push(...descriptions.unverified);
   const argDescriptions = findArgTypeDescriptions(sf, text);
   findings.argDescriptionIssues = argDescriptions.findings;
@@ -3240,6 +3286,45 @@ const SELF_TEST_CASES = [
     expectDescriptions: 0,
   },
   {
+    name: '(l) a doc comment above a story naming its own story is flagged (the doc-comment surface)',
+    code: `/**\n * The story for X pins the loading state.\n */\nexport const A: Story = { render: () => <div /> };`,
+    expectDocsTalk: ['story'],
+    expectDocComments: 1,
+  },
+  {
+    name: '(l) an em dash in a doc comment above a story is flagged',
+    code: `/** A caption still forming \u2014 renders a shade lighter. */\nexport const A: Story = { render: () => <div /> };`,
+    expectDocsTalk: ['em dash'],
+  },
+  {
+    name: '(l) a four-paragraph doc comment above a story is flagged (the article shape)',
+    code: `/**\n * One thing.\n *\n * Two things.\n *\n * Three things.\n *\n * Four things.\n */\nexport const A: Story = { render: () => <div /> };`,
+    expectDocsTalk: ['4 paragraphs'],
+  },
+  {
+    name: '(l) a clean doc comment above a story is not flagged, and is counted as read',
+    code: `/**\n * A compact pill for status text, counts, or source citations.\n */\nexport const A: Story = { render: () => <div /> };`,
+    expectDocsTalk: [],
+    expectDocComments: 1,
+  },
+  {
+    name: '(l) a docs-talk waiver above a doc comment silences it (the anchor is the `/**` line)',
+    code: `// lint-story-conventions: docs-talk -- the component's own subject is a story list\n/**\n * The story list is what this renders.\n */\nexport const A: Story = { render: () => <div /> };`,
+    expectDocsTalk: [],
+  },
+  {
+    name: '(l) a finding in the SECOND paragraph of a doc comment points at its own line',
+    code: `/**\n * First paragraph.\n *\n * It is on its own story, above.\n */\nexport const A: Story = { render: () => <div /> };`,
+    expectDocsTalk: ['story'],
+    expectDocsTalkLines: [4],
+  },
+  {
+    name: '(l) a doc comment is NOT counted as a component description (the two counters stay apart)',
+    code: `/**\n * A compact pill for status text.\n */\nexport const A: Story = { render: () => <div /> };`,
+    expectDescriptions: 0,
+    expectDocComments: 1,
+  },
+  {
     // Reads the REAL entry points, so a misrooted path or a parser that stopped
     // finding exports fails here rather than making every (k) assertion vacuous.
     name: '(o) an angle-bracket tag in a rendered description is flagged (the shape that swallowed a Source block)',
@@ -3505,6 +3590,19 @@ function runSelfTest() {
         ok = false;
         notes.push(`descriptions: expected ${c.expectDescriptions}, got ${got.descriptions}`);
       }
+      if ('expectDocsTalkLines' in c) {
+        const lines = got.findings.map((f) => f.line);
+        const expected = c.expectDocsTalkLines;
+        const same = lines.length === expected.length && lines.every((k, i) => k === expected[i]);
+        if (!same) {
+          ok = false;
+          notes.push(`docs-talk-lines: expected [${expected.join(', ')}], got [${lines.join(', ')}]`);
+        }
+      }
+      if ('expectDocComments' in c && got.docComments !== c.expectDocComments) {
+        ok = false;
+        notes.push(`doc-comments: expected ${c.expectDocComments}, got ${got.docComments}`);
+      }
     }
     if ('expectHazards' in c) {
       const got = findDescriptionDocsTalk(sf, c.code ?? '').hazards.map((h) => h.what);
@@ -3674,6 +3772,7 @@ let componentMetas = 0;
 let snippetsScanned = 0;
 let renderedTextRegions = 0;
 let descriptionStrings = 0;
+let docCommentParagraphs = 0;
 let argDescriptionsRead = 0;
 for (const path of files) {
   const rel = relative(PKG_ROOT, path);
@@ -3700,6 +3799,7 @@ for (const path of files) {
   snippetsScanned += findings.snippetsScanned;
   renderedTextRegions += findings.renderedTextRegions;
   descriptionStrings += findings.descriptionStrings;
+  docCommentParagraphs += findings.docComments;
   argDescriptionsRead += findings.argDescriptionsRead;
   if (findings.elementTags.length > 0) {
     elementTagFiles++;
@@ -3728,6 +3828,9 @@ if (renderedTextRegions === 0) {
 }
 if (descriptionStrings === 0) {
   vacuous.push('(l) read no rendered component description string, so no docs-talk or over-long description could be found');
+}
+if (docCommentParagraphs === 0) {
+  vacuous.push('(l) read no story doc comment, so the wording of that rendered surface could not be judged');
 }
 if (argDescriptionsRead === 0) {
   vacuous.push('(m) read no argTypes description value, so no cap or em dash could be checked');
@@ -3764,8 +3867,9 @@ if (total === 0 && unverifiedTotal === 0 && vacuous.length === 0) {
       `kit export it uses (${kit.names.size} public name(s) parsed out of ${KIT_ENTRY_FILES.join(' + ')}); and ` +
       `no story hand-rolls one of ${GLYPH_CHARS.join(' ')} across ${renderedTextRegions} rendered text region(s); and ` +
       `every one of the ${descriptionStrings} rendered component description string(s) in those stories describes the ` +
-      `component -- not Storybook, the story or the page -- in ${DESCRIPTION_PARAGRAPH_LIMIT} paragraph(s) or fewer, with no ` +
-      `raw markdown hazard (a tag or a fence), and ` +
+      `component -- not Storybook, the story or the page -- in ${DESCRIPTION_PARAGRAPH_LIMIT} paragraph(s) or fewer, ` +
+      `every one of the ${docCommentParagraphs} story doc comment paragraph(s) meets the same bar, ` +
+      `with no raw markdown hazard (a tag or a fence), and ` +
       `every one of the ${argDescriptionsRead} argTypes description value(s) fits in ${ARG_DESCRIPTION_MAX_CHARS} chars ` +
       `with no em dash, and no story puts a JSX element in its args.`,
   );
@@ -3784,7 +3888,7 @@ console.error(
     `${componentMetas} meta(s) declare a component, ${snippetsScanned} docs-source snippet(s) were read, ` +
     `${kit.names.size} kit export name(s) were parsed out of ${KIT_ENTRY_FILES.join(' + ')}, ` +
     `${renderedTextRegions} rendered text region(s) were scanned for glyphs; ` +
-    `${descriptionStrings} rendered component description string(s) were read for docs talk and for over-long descriptions; ` +
+    `${descriptionStrings} rendered component description string(s) and ${docCommentParagraphs} story doc comment paragraph(s) were read for docs talk and for over-long descriptions; ` +
     `${argDescriptionsRead} argTypes description value(s) were read for the cap and the em dash; ` +
     `${relative(PKG_ROOT, mainPath)} read for the framework docgen options.\n`,
 );
@@ -3927,8 +4031,10 @@ if (glyphOffenders.length > 0) {
 
 if (docsTalkOffenders.length > 0) {
   const filesAffected = new Set(docsTalkOffenders.map((f) => f.file)).size;
+  const docCommentFindings = docsTalkOffenders.filter((f) => f.site === 'story doc comment').length;
   console.error(
-    `  (l) ${docsTalkOffenders.length} problem(s) in the rendered component/story descriptions (${filesAffected} file(s)):`,
+    `  (l) ${docsTalkOffenders.length} problem(s) in the rendered component/story descriptions (${filesAffected} file(s); ` +
+      `${docCommentFindings} in a story doc comment):`,
   );
   for (const f of docsTalkOffenders) console.error(`    ${f.file}:${f.line}  ${f.word}  (${f.reason})`);
   console.error(

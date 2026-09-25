@@ -144,19 +144,11 @@ export const Sizes: Story = {
 <Input size="md" placeholder="Medium (default)" />`),
 };
 
-/**
- * Four masked fields, four different shapes. Type into them: the literals appear as you
- * reach them, and a character that does not fit the position is refused rather than
- * swallowed silently.
- *
- * The ticket field is the lenient one — typing or pasting `chg4821` lands as `CHG-4821`,
- * because the normalizer consumes a literal run that is already there instead of feeding
- * it back into the first fill position.
- *
- * The date field is a MASK, not a validator. It shapes `##/##/####` and nothing more:
- * `99/99/9999` types perfectly happily. Whether a date is real is the consumer's call,
- * and the kit does not make it.
- */
+// The date field is a mask, not a validator: `99/99/9999` types happily, and whether a
+// date is real stays the consumer's call. The ticket field is the lenient one, because a
+// literal run already in the value is consumed rather than fed back into the first fill
+// position.
+/** Four fields that mask what you type, each in a different format. */
 export const MaskedFormats: Story = {
   render: () => (
     <div class="flex max-w-sm flex-col gap-4">
@@ -198,12 +190,9 @@ export const MaskedFormats: Story = {
 <Input label="Asset serial" format="SN-@@##-####" caseMode="upper" />`),
 };
 
-/**
- * `semantic` on its own is tier 1: it sets `inputmode`, `autocomplete`, `spellcheck`,
- * `autocorrect` and `autocapitalize` for the field and decides what the canonical value
- * looks like. It never starts masking by itself — `format="default"` is the opt-in that
- * does that.
- */
+// A semantic type is tier 1: it sets the input hints and decides the canonical value, but
+// it never starts masking by itself. `format="default"` is the opt-in that does.
+/** A phone field that declares its kind, with no mask. */
 export const SemanticOnly: Story = {
   args: {
     label: 'Phone',
@@ -213,12 +202,9 @@ export const SemanticOnly: Story = {
   ...src(`<Input label="Phone" semantic="tel" />`),
 };
 
-/**
- * A refusal is reported, never swallowed. `onMaskReject` fires with `full`,
- * `wrong-class` or `over-capacity`; wire it to a polite live region so a screen-reader
- * user learns why a keystroke did nothing. It is NOT an error state — the field stays
- * valid, and `invalid` remains the consumer's to set.
- */
+// A rejection is announced, not swallowed, and it is not an error state: the field stays
+// valid and `invalid` stays the consumer's to set.
+/** A blocked keystroke announced in a live region beside the field. */
 export const AnnouncedRejections: Story = {
   render: () => {
     let region: HTMLParagraphElement | undefined;

@@ -193,8 +193,7 @@ export const Destructive: Story = {
 <ConfirmCard host={host} data={data} heading="Delete files?" cardId="card-delete" />`),
 };
 
-/** Resolved state. `resolution` stays a control — clear it to get the live
- *  buttons back, or point `action` at the other id. */
+/** Resolved: the approved action shown read-only, with no live buttons. */
 export const Approved: Story = {
   args: {
     heading: 'Run database migration?',

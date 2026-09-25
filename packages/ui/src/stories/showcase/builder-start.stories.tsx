@@ -90,8 +90,7 @@ export const Start: Story = {
   ...src(`<BuilderStart templates={BUILDER_TEMPLATES} value={selected} onSelect={setSelected} />`),
 };
 
-/** The selected-ring state, shown without needing to click first — useful
- *  for reviewing that state on its own rather than only mid-interaction. */
+/** The template picker with the selected ring already on. */
 export const Preselected: Story = {
   render: () => {
     const [selected, setSelected] = createSignal<BuilderTemplateId | undefined>('research');
@@ -104,34 +103,10 @@ export const Preselected: Story = {
   ...src(`<BuilderStart templates={BUILDER_TEMPLATES} value="research" onSelect={setSelected} />`),
 };
 
-/**
- * The two-step flow for a template family with a real second screen —
- * Workspace, per the owner's ruling this round: a family gets a second
- * screen only once it has >=2 genuinely different starting points, and
- * Workspace's own owner-feedback round shipped exactly two (an artifact/
- * code pane beside chat, v0's shape; a full app preview with device
- * toggles, Lovable's shape — see `components/builder/builder-workspace-variants.tsx`'s
- * own module doc comment for the "why not a third card" reasoning re:
- * Multi-mode's "Switchable views").
- *
- * ADDED HERE, in `Labs/Builder/Start`, rather than as a new top-level Labs
- * sidebar entry — this story is a CONTINUATION of the Start flow (picking
- * "Workspace" advances into it), not an independent screen someone would
- * navigate to directly, and Storybook already groups every export under one
- * `title` together in the sidebar, so a reader on the Start page finds this
- * one story below it for free.
- *
- * Selecting a non-Workspace card advances straight to a stub readout naming
- * the template, same as every other template already does
- * (T-6: each has its own full story under `Labs/Builder` to route to,
- * out of scope for this flow demo). Selecting "Workspace" advances to
- * `WorkspaceVariantPicker`; picking a variant there shows which family +
- * variant id fired — an honest STUB rather than mounting the real
- * `Labs/Builder/Workspace` story's own demo component, which is
- * module-private to that file and not designed to be re-parented into a
- * second story. Back returns to step one with the original selection
- * preserved.
- */
+// The variant picker is an honest stub: it reads back the family and variant id
+// rather than mounting the real Workspace demo, which is module-private to its
+// own file. Back returns to step one with the original selection preserved.
+/** Picking between the two variants a Workspace build starts from. */
 export const TwoStepFlow: Story = {
   render: () => {
     const [step, setStep] = createSignal<'start' | 'workspaceVariants'>('start');

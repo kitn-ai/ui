@@ -231,10 +231,7 @@ const [picked, setPicked] = createSignal(['sonnet']);
 />`),
 };
 
-/**
- * Give it a `name` and a native form submits it with no JavaScript at all — the
- * part a hand-built listbox silently loses.
- */
+/** Submitting the form sends the chosen value as ordinary form data. */
 export const InAForm: Story = {
   name: 'Native form participation',
   render: () => {

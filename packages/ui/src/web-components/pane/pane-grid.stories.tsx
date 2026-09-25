@@ -38,10 +38,8 @@ const body = (text: string) => (
 const src = (code: string) => ({ docs: { source: { language: 'html', code } } });
 
 /**
- * The web-component facade over `PaneGrid` (SolidJS story: Components/Pane Grid).
- * Each direct light child is one tile; the grid fills up to `max-columns`, drops
- * columns as it narrows so no pane squishes below `min-pane-width`, then scrolls.
- * The natural children are pane elements, the pane family's own arbitrary-N layout.
+ * Four panes in one grid, dropping columns as it narrows so no pane squishes below a
+ * minimum width.
  */
 export const FourPanes: Story = {
   render: () => (
@@ -60,11 +58,7 @@ export const FourPanes: Story = {
 </kai-pane-grid>`),
 };
 
-/**
- * Maximize is consumer-driven: point `maximized-index` at a child to show only that
- * pane full-bleed, clear it to restore. Here the panes' own `kai-maximize` events
- * drive the attribute — the wiring a real app would use.
- */
+/** A pane maximized to fill the grid and restored again. */
 export const MaximizeHook: Story = {
   render: () => (
     <kai-pane-grid

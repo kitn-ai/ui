@@ -418,10 +418,8 @@ export const Select: Story = {
 </script>`),
 };
 
-/**
- * `multiple` renders the platform list box and no chevron. Read the whole selection
- * from `el.values` (or `e.detail.values`) — `value` alone would be a silent drop.
- */
+// The whole selection lives in `values`; reading `value` alone would be a silent drop.
+/** A select that takes more than one value. */
 export const SelectMultiple: Story = {
   name: 'Select — multiple',
   render: () => {
