@@ -239,8 +239,13 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
           {/* `order-first` and first in the DOM: the editable below carries the same
               order so it can claim its own line, and without this the chips would be
               lifted BELOW the paragraph they belong above. The band carries no inset
-              of its own — the frame's padding is the box's one left edge. */}
-          <div data-composer-band class="order-first mb-2">
+              of its own — the frame's padding is the box's one left edge.
+
+              `mb-3.5` is 14px, and with the frame's 6px row gap that is the measured
+              20px between the chip band and the text's line box: in the reference the
+              chips' ink ends at 52 and the text's line box starts at about 71.5, with
+              a 21px line advance. A tidier `mb-2` would land 6px tight. */}
+          <div data-composer-band class="order-first mb-3.5">
             <Attachments variant="inline">
               <For each={attachments()}>
                 {(att) => (

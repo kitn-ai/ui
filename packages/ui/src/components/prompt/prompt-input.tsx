@@ -112,9 +112,19 @@ function PromptInput(props: PromptInputProps) {
           // share the text's row; expanded the text claims its own line and they wrap
           // below it. See the body wrapper in `PromptInputTextarea` for how that wrap
           // is produced — it is ordering, not a second markup tree.
+          //
+          // `justify-between` on the EXPANDED layout, because `justify-content` is
+          // resolved PER FLEX LINE: it is inert for the body (a single full-width item
+          // on its own line) and it is what puts a wrapped control row at the box's
+          // trailing edge. Without it, composing this frame by hand — PromptInput plus
+          // a textarea plus PromptInputActions, which the stories and the kit's own
+          // consumers do — lands the actions at the LEADING edge, and `justify-end` on
+          // the actions cannot help because that wrapper is now a content-width flex
+          // item rather than a block. Placing it is the frame's job, not a rule every
+          // caller has to know.
           layout() === 'collapsed'
             ? 'flex flex-row items-center gap-2 py-2.5 pl-4.5 pr-3.5'
-            : 'flex flex-wrap gap-y-1.5 pt-3.5 px-4.5 pb-2.5',
+            : 'flex flex-wrap justify-between gap-y-1.5 pt-3.5 px-4.5 pb-2.5',
           local.disabled && 'cursor-not-allowed opacity-60',
           local.class
         )}

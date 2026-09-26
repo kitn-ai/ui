@@ -87,6 +87,9 @@ describe('DefaultPromptInput geometry', () => {
     expect(frame(container).className).toContain('py-2.5');
     expect(frame(container).className).toContain('pl-4.5');
     expect(frame(container).className).toContain('pr-3.5');
+    // 8px between the row's items, which is what the reference's ink gaps come out to
+    // once the controls' own padding is taken off.
+    expect(frame(container).className).toContain('gap-2');
     // The text carries no inset of its own: the frame's padding is the one edge.
     expect(editable(container).className).not.toMatch(/\bpl-/);
     expect(editable(container).className).not.toMatch(/\bpt-/);
@@ -101,6 +104,14 @@ describe('DefaultPromptInput geometry', () => {
     expect(frame(container).className).toContain('flex-wrap');
     expect(frame(container).className).toContain('pt-3.5');
     expect(frame(container).className).toContain('px-4.5');
+    // 6px between the text block and the control row, and 10px closing the box — the
+    // two numbers a first cut of this layout left out, which is how the rows end up
+    // touching. Pinned because an unpinned number is where the next approximation lands.
+    expect(frame(container).className).toContain('gap-y-1.5');
+    expect(frame(container).className).toContain('pb-2.5');
+    // The frame places a hand-composed trailing edge; `justify-content` is per flex
+    // LINE, so this is inert for the body and load-bearing for the row below it.
+    expect(frame(container).className).toContain('justify-between');
     // The mechanism, and it has to sit on the BODY rather than on the editable: the
     // Composer renders the editable inside a `relative` div of its own, so a
     // flex-child class on the editable lands on a nested block and changes nothing.
@@ -124,6 +135,9 @@ describe('DefaultPromptInput geometry', () => {
     const band = frame(container).querySelector('[data-composer-band]') as HTMLElement;
     expect(band).toBeTruthy();
     expect(band.className).toContain('order-first');
+    // 14px of margin, and 20px in total once the frame's 6px row gap is added — the
+    // measured band-to-text gap.
+    expect(band.className).toContain('mb-3.5');
     expect(band.compareDocumentPosition(editable(container)) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 });

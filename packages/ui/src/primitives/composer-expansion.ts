@@ -94,13 +94,11 @@ export function useComposerExpansion(options: {
   createEffect(() => {
     const el = options.editable();
     if (!el) return;
-    // Without a ResizeObserver there is no content-height reporting, so the composer
-    // derives `collapsed` — the same direction the resolver fails when it cannot read
-    // a line height, and the only one that cannot produce a two-row box under a single
-    // line of text. jsdom has no ResizeObserver, so without this guard EVERY test that
-    // renders a composer throws rather than simply not measuring; `use-auto-resize`
-    // guards identically, with the same platform assumption behind it.
-    if (typeof ResizeObserver === 'undefined') return;
+    // `observeContentHeight` returns a no-op disposer where there is no ResizeObserver
+    // (jsdom, the kit's own unit environment), so this effect simply never hears a
+    // height and the resolver derives `collapsed` — the same direction it fails when it
+    // cannot read a line height, and the only one that cannot put two rows under a
+    // single line of text.
     onCleanup(observeContentHeight(el, setContentHeight));
   });
 
