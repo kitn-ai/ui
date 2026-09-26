@@ -20,7 +20,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-import { buildRegistryItem, unsafeFilePathReason, unsafeNameReason } from '@kitn.ai/blocks';
+import { buildRegistryItem, unsafeFilePathReason, unsafeNameReason, validateBlockManifest } from '@kitn.ai/blocks';
 import type { Axis } from '../src/axes';
 import {
   FRAMEWORK_SIGNALS,
@@ -818,6 +818,217 @@ describe('the data axis: three modes, one spelling each (spec 4)', () => {
       manifest: { ...authoredBlock('broken-mock').manifest, wiring: { mockFiles: ['not-shipped.ts'] } },
     };
     expect(() => declaredMockFiles(broken)).toThrow(/not-shipped\.ts.*not a files\[\] entry/s);
+  });
+});
+
+/**
+ * A block with a DATA-MODE SEAM: its controller imports ONE extensionless
+ * specifier (`./<name>.transport`), and the manifest declares the authored source
+ * for each mode plus the name the chosen one is written at. Synthetic for the
+ * same reason `mockBlock` is - a case about the seam should not also be a case
+ * about whichever authored block happens to carry one.
+ */
+function seamBlock(
+  name: string,
+  opts: { modeFiles?: Record<string, string>; gateway?: string | undefined } = {},
+): Block {
+  const base = authoredBlock(name);
+  const modeFiles = opts.modeFiles ?? {
+    mock: `${name}.transport.mock.ts`,
+    real: `${name}.transport.route.ts`,
+    none: `${name}.transport.none.ts`,
+  };
+  const variant = (mode: string): string => `export const transport = { mode: '${mode}' };\n`;
+  // The controller keeps the contract's declared shape and gains the ONE
+  // extensionless import the seam is about.
+  const withSeamImport = (source: string): string => `import { transport } from './${name}.transport';\n${source}`;
+  const files = new Map(base.files);
+  for (const [mode, path] of Object.entries(modeFiles)) {
+    files.set(path, variant(mode));
+    files.set(path.replace(/\.ts$/, '.js'), variant(mode));
+  }
+  files.set(`${name}.controller.ts`, withSeamImport(files.get(`${name}.controller.ts`) as string));
+  files.set(`${name}.controller.js`, withSeamImport(files.get(`${name}.controller.js`) as string));
+  return {
+    name,
+    files,
+    manifest: {
+      ...base.manifest,
+      files: [
+        { path: `${name}.html`, type: 'registry:page' },
+        { path: `${name}.controller.ts`, type: 'registry:file' },
+        ...Object.values(modeFiles).map((path) => ({ path, type: 'registry:file' as const })),
+      ],
+      wiring: {
+        ...(opts.gateway === undefined ? { gateways: ['openrouter'] } : { gateways: [opts.gateway] }),
+        mockFiles: [modeFiles.mock],
+        modeTarget: `${name}.transport.ts`,
+        modeFiles,
+      },
+    },
+  };
+}
+
+/** The basename of every planned path, so a case can ask which seam file was
+ *  written and whether the other variants leaked in. */
+const basenames = (plan: AddPlan): string[] => plan.files.map((file) => path.posix.basename(file.path));
+const contentOf = (plan: AddPlan, base: string): string =>
+  plan.files.find((file) => path.posix.basename(file.path) === base)?.contents ?? '';
+
+describe('the data-mode seam: one file written, chosen from the manifest', () => {
+  // THE HOLE THIS CLOSES. Every shipped block's controller imported './mock' and
+  // the renderers copied it verbatim, so `--no-mock` and `--gateway` refused for
+  // every block in the registry. The seam makes the choice real: the controller
+  // imports one name, the manifest declares which authored source a mode writes
+  // there, and the other two are not written at all.
+  it('writes exactly one variant, at the manifest name, for every mode and every form', async () => {
+    for (const form of ['html', 'react'] as const) {
+      // The html form ships the stripped `.js`; the react form the `.ts` source.
+      const seam = form === 'html' ? 'seam-block.transport.js' : 'seam-block.transport.ts';
+      for (const [wiring, expected] of [
+        [undefined, 'mock'],
+        [{ mode: 'none' } as AddMode, 'none'],
+        [{ mode: 'real', gateway: 'openrouter' } as AddMode, 'real'],
+      ] as const) {
+        const { plan, error } = await planFor(seamBlock('seam-block'), form, wiring);
+        expect(error, `${form}/${expected}`).toBeUndefined();
+        const names = basenames(plan!);
+        // ONE seam file, and it is the mode's own source.
+        expect(names.filter((name) => name.startsWith('seam-block.transport')), `${form}/${expected}`).toEqual([seam]);
+        expect(contentOf(plan!, seam), `${form}/${expected}`).toContain(`mode: '${expected}'`);
+        // The authored variants are sources, never shipped under their own names.
+        for (const variant of ['seam-block.transport.mock', 'seam-block.transport.route', 'seam-block.transport.none']) {
+          expect(names, `${form}/${expected}`).not.toContain(form === 'html' ? `${variant}.js` : `${variant}.ts`);
+        }
+      }
+    }
+  });
+
+  it('a mode the manifest declares no source for is refused by name', async () => {
+    // The manifest validator already requires every supported mode on a BUNDLED
+    // block; this is the gate the FETCHED item JSON path keeps, because
+    // `blockFromItemJson` never runs the validator (`create-kai add <url>`).
+    const partial = seamBlock('partial-seam', {
+      modeFiles: { mock: 'partial-seam.transport.mock.ts', none: 'partial-seam.transport.none.ts' },
+    });
+    const { plan, error } = await planFor(partial, 'html', { mode: 'real', gateway: 'openrouter' });
+    expect(plan).toBeUndefined();
+    expect(error).toContain('partial-seam');
+    expect(error).toContain('"real"');
+  });
+
+  it('the bundled assistant block installs mock-free: the regression this seam exists for', async () => {
+    // The block's own controller, through the REAL add path, in both mock-free
+    // modes. Before the seam every one of these refused (the controller imported
+    // './mock'), so this is the case that keeps the refusal from coming back.
+    const assistant = blocks.find((b) => b.name === 'assistant');
+    expect(assistant, 'the assistant block is not in the shipped registry').toBeDefined();
+    const noMockDir = await project('assistant-no-mock', { name: 'host', dependencies: { vue: '^3.0.0' } });
+    const noMock = await runInto(noMockDir, ['assistant', '--no-mock']);
+    expect(noMock.code, noMock.err.join('\n')).toBe(0);
+    const noneWritten = await readFile(
+      path.join(noMockDir, fileTarget('html', 'assistant', 'assistant.transport.js')),
+      'utf8',
+    );
+    expect(noneWritten, 'the composition-only install shipped a transport anyway').toContain('--no-mock');
+    expect(
+      existsSync(path.join(noMockDir, fileTarget('html', 'assistant', 'assistant.transport.mock.js'))),
+      'the mock variant was written in a mock-free mode',
+    ).toBe(false);
+
+    const realDir = await project('assistant-real', { name: 'host', dependencies: { react: '^19.0.0' } });
+    const gateway = [...WIRED_GATEWAYS].find((id) => id !== 'mock') as string;
+    const real = await runInto(realDir, ['assistant', '--gateway', gateway]);
+    expect(real.code, real.err.join('\n')).toBe(0);
+    const routeWritten = await readFile(
+      path.join(realDir, fileTarget('react', 'assistant', 'assistant.transport.ts')),
+      'utf8',
+    );
+    expect(routeWritten).toContain('/api/chat');
+    expect(routeWritten).toContain('toOpenAIMessages');
+    expect(
+      existsSync(path.join(realDir, fileTarget('react', 'assistant', 'assistant.transport.mock.ts'))),
+      'the mock variant was written for a --gateway install',
+    ).toBe(false);
+  });
+});
+
+/**
+ * THE MANIFEST RULES THE SEAM ADDS, watched failing one at a time. They live
+ * here rather than in packages/blocks' own suite because the CLI is the other
+ * consumer of the same rule and this is the file this change owns; the message
+ * text is the contract either way.
+ */
+describe('the registry grades the seam it is handed', () => {
+  const errorsFor = (wiring: Record<string, unknown>): string => {
+    const manifest = {
+      name: 'demo',
+      title: 'Demo',
+      description: 'A demo block.',
+      type: 'registry:block',
+      files: [
+        { path: 'demo.html', type: 'registry:page' },
+        { path: 'demo.mock.ts', type: 'registry:file' },
+        { path: 'demo.route.ts', type: 'registry:file' },
+        { path: 'demo.none.ts', type: 'registry:file' },
+      ],
+      wiring,
+    };
+    const files = ['demo.html', 'demo.mock.ts', 'demo.route.ts', 'demo.none.ts'];
+    return validateBlockManifest(manifest, 'demo', files, {
+      blockNames: ['demo'],
+      routeIntegrations: ['openrouter'],
+    }).join(' | ');
+  };
+  const full = {
+    gateways: ['openrouter'],
+    mockFiles: ['demo.mock.ts'],
+    modeTarget: 'demo.transport.ts',
+    modeFiles: { mock: 'demo.mock.ts', real: 'demo.route.ts', none: 'demo.none.ts' },
+  };
+
+  it('accepts the seam as the assistant block declares it', () => {
+    expect(errorsFor(full)).toBe('');
+  });
+
+  it('refuses a modeTarget that is a files[] entry, because it is a generated name', () => {
+    // The two halves point the same way: the variants are authored, the target
+    // is written by `add`. A block shipping a file at the target name has two
+    // contradictory sources for one module.
+    expect(errorsFor({ ...full, modeTarget: 'demo.mock.ts' })).toContain('wiring.modeTarget is "demo.mock.ts"');
+  });
+
+  it('refuses a modeFiles entry the block does not ship', () => {
+    expect(errorsFor({ ...full, modeFiles: { ...full.modeFiles, none: 'not-shipped.ts' } })).toContain(
+      'no files[] entry ships',
+    );
+  });
+
+  it('refuses a missing mode, and says which one', () => {
+    const { none, ...withoutNone } = full.modeFiles;
+    expect(errorsFor({ ...full, modeFiles: withoutNone })).toContain('needs a "none" entry');
+    // `real` is required only of a block that declares a gateway: a block with no
+    // gateway has no route to write, and the CLI refuses `--gateway` for it.
+    const { real, ...withoutReal } = full.modeFiles;
+    expect(errorsFor({ ...full, modeFiles: withoutReal })).toContain('needs a "real" entry');
+    expect(errorsFor({ ...full, gateways: [], modeFiles: withoutReal })).toBe('');
+  });
+
+  it('refuses an unknown mode key rather than ignoring it', () => {
+    expect(errorsFor({ ...full, modeFiles: { ...full.modeFiles, prod: 'demo.mock.ts' } })).toContain(
+      'unknown mode "prod"',
+    );
+  });
+
+  it('refuses half a seam: a target with no sources, or sources with no target', () => {
+    expect(errorsFor({ ...full, modeFiles: undefined })).toContain('wiring.modeFiles must be an object');
+    expect(errorsFor({ ...full, modeTarget: undefined })).toContain('wiring.modeTarget must be a non-empty string');
+  });
+
+  it('refuses two modes pointing at one source, which is not an axis', () => {
+    expect(errorsFor({ ...full, modeFiles: { ...full.modeFiles, none: 'demo.mock.ts' } })).toContain(
+      'each mode is its own file',
+    );
   });
 });
 

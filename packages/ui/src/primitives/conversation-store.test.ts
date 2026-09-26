@@ -1,6 +1,18 @@
 import { describe, expect, it, beforeEach, vi } from 'vitest';
-import { localStorageStore, fetchStore, byRecency, isConversationUnread } from './conversation-store';
+import {
+  localStorageStore,
+  fetchStore,
+  byRecency,
+  orderedSummaries,
+  mostRecentSummary,
+  isConversationUnread,
+} from './conversation-store';
+import type { ConversationSummary } from '../types';
 import type { ChatMessage } from '../web-components/chat/chat-types';
+
+const INDEX_KEY = 'kai:acme-support:threads';
+const storedIndex = (): ConversationSummary[] =>
+  JSON.parse(localStorage.getItem(INDEX_KEY) ?? '[]') as ConversationSummary[];
 
 const msg = (id: string, text: string): ChatMessage => ({
   id,
@@ -201,6 +213,14 @@ describe('fetchStore', () => {
     expect(store.markRead).toBeUndefined();
   });
 
+  it('implements none of rename/setPinned/setArchived/remove — the recast contract has no such endpoints, so the omission surfaces at the controller instead of as a silent no-op', () => {
+    const store = fetchStore('/api/conversations');
+    expect(store.rename).toBeUndefined();
+    expect(store.setPinned).toBeUndefined();
+    expect(store.setArchived).toBeUndefined();
+    expect(store.remove).toBeUndefined();
+  });
+
   it('list() GETs the index endpoint with the x-kai-user-id header when userId is set', async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
@@ -234,6 +254,142 @@ describe('fetchStore', () => {
       expect.objectContaining({ method: 'PUT', body: JSON.stringify({ messages: [msg('u1', 'hi')] }) }),
     );
     vi.unstubAllGlobals();
+  });
+});
+
+describe('localStorageStore — rename / setPinned / setArchived / remove (opt-in conversation ops)', () => {
+  it('rename() retitles the index entry and leaves the messages alone', async () => {
+    const store = localStorageStore('acme-support');
+    await store.save('c1', [msg('u1', 'book a demo')]);
+    await store.rename!('c1', 'Demo booking');
+    const [summary] = await store.list();
+    expect(summary.title).toBe('Demo booking');
+    expect(await store.load('c1')).toEqual([msg('u1', 'book a demo')]);
+  });
+
+  it('rename() survives the next save() — a turn arriving later must not put the derived title back', async () => {
+    const store = localStorageStore('acme-support');
+    await store.save('c1', [msg('u1', 'book a demo')]);
+    await store.rename!('c1', 'Demo booking');
+    await store.save('c1', [msg('u1', 'book a demo'), msg('a1', 'sure')]);
+    const [summary] = await store.list();
+    expect(summary.title).toBe('Demo booking');
+  });
+
+  it('setPinned() round-trips true, and unpinning clears the field rather than storing a false', async () => {
+    const store = localStorageStore('acme-support');
+    await store.save('c1', [msg('u1', 'hi')]);
+    await store.setPinned!('c1', true);
+    expect((await store.list())[0].pinned).toBe(true);
+    await store.setPinned!('c1', false);
+    const [summary] = await store.list();
+    expect(summary.pinned).toBeUndefined();
+    // Absent, not `false`: one spelling per state, so a stored record reads the
+    // same whatever wrote it.
+    expect(storedIndex()[0].pinned).toBeUndefined();
+  });
+
+  it('setArchived() round-trips true, and unarchiving clears the field', async () => {
+    const store = localStorageStore('acme-support');
+    await store.save('c1', [msg('u1', 'hi')]);
+    await store.setArchived!('c1', true);
+    expect((await store.list())[0].archived).toBe(true);
+    await store.setArchived!('c1', false);
+    const [summary] = await store.list();
+    expect(summary.archived).toBeUndefined();
+    expect(storedIndex()[0].archived).toBeUndefined();
+  });
+
+  it('save() carries pinned and archived forward — the same reason it carries lastReadAt: a content event must not undo a decision', async () => {
+    const store = localStorageStore('acme-support');
+    await store.save('c1', [msg('u1', 'hi')]);
+    await store.setPinned!('c1', true);
+    await store.setArchived!('c1', true);
+    await store.save('c1', [msg('u1', 'hi'), msg('a1', 'hello')]);
+    const [summary] = await store.list();
+    expect(summary.pinned).toBe(true);
+    expect(summary.archived).toBe(true);
+  });
+
+  it('remove() drops both the index entry and the stored thread', async () => {
+    const store = localStorageStore('acme-support');
+    await store.save('c1', [msg('u1', 'hi')]);
+    await store.save('c2', [msg('u1', 'other')]);
+    await store.remove!('c1');
+    expect((await store.list()).map((s) => s.id)).toEqual(['c2']);
+    expect(await store.load('c1')).toEqual([]);
+    expect(localStorage.getItem('kai:acme-support:thread:c1')).toBeNull();
+  });
+
+  it('an op on an id with no index entry is a harmless no-op — never throws, never creates a phantom entry', async () => {
+    const store = localStorageStore('acme-support');
+    await expect(store.rename!('never-saved', 'x')).resolves.toBeUndefined();
+    await expect(store.setPinned!('never-saved', true)).resolves.toBeUndefined();
+    await expect(store.setArchived!('never-saved', true)).resolves.toBeUndefined();
+    await expect(store.remove!('never-saved')).resolves.toBeUndefined();
+    expect(await store.list()).toEqual([]);
+  });
+
+  it('a record stored BEFORE these fields existed loads unchanged and reads as unpinned and unarchived', async () => {
+    // The exact data already on users' machines: an index written by the version
+    // that had no pin/archive concept.
+    localStorage.setItem(
+      INDEX_KEY,
+      JSON.stringify([
+        { id: 'c1', title: 'Older conversation', messageCount: 2, updatedAt: '2026-08-01T00:00:00.000Z' },
+      ]),
+    );
+    const [summary] = await localStorageStore('acme-support').list();
+    expect(summary.pinned).toBeUndefined();
+    expect(summary.archived).toBeUndefined();
+    // Which is what the one list-order rule reads as false for both flags.
+    expect(orderedSummaries([summary]).map((s) => s.id)).toEqual(['c1']);
+  });
+});
+
+describe('orderedSummaries / mostRecentSummary (the one list-order rule)', () => {
+  const conv = (
+    id: string,
+    updatedAt: string,
+    flags: { pinned?: boolean; archived?: boolean } = {},
+  ): ConversationSummary => ({ id, title: id, messageCount: 1, updatedAt, ...flags });
+
+  it('excludes archived rows, hoists pinned ones, and keeps recency inside each half', () => {
+    const rows = [
+      conv('newest', '2026-08-05T00:00:00Z'),
+      conv('archived', '2026-08-04T00:00:00Z', { archived: true }),
+      conv('pinned-old', '2026-08-01T00:00:00Z', { pinned: true }),
+      conv('oldest', '2026-08-02T00:00:00Z'),
+      conv('pinned-new', '2026-08-03T00:00:00Z', { pinned: true }),
+    ];
+    expect(orderedSummaries(rows).map((r) => r.id)).toEqual([
+      'pinned-new',
+      'pinned-old',
+      'newest',
+      'oldest',
+    ]);
+  });
+
+  it('returns a fresh array and never reorders the caller\'s', () => {
+    const rows = [conv('a', '2026-08-01T00:00:00Z'), conv('b', '2026-08-05T00:00:00Z', { pinned: true })];
+    const ordered = orderedSummaries(rows);
+    expect(ordered).not.toBe(rows);
+    expect(rows.map((r) => r.id)).toEqual(['a', 'b']);
+  });
+
+  it('a rows set with no flags at all is exactly byRecency (the pre-pin behaviour, unchanged)', () => {
+    const rows = [conv('a', '2026-08-01T00:00:00Z'), conv('b', 'not-a-date'), conv('c', '2026-08-05T00:00:00Z')];
+    expect(orderedSummaries(rows).map((r) => r.id)).toEqual([...rows].sort(byRecency).map((r) => r.id));
+  });
+
+  it('mostRecentSummary() is the newest VISIBLE row — a pin does not win it, an archived row is not eligible', () => {
+    const rows = [
+      conv('pinned-old', '2026-08-01T00:00:00Z', { pinned: true }),
+      conv('newest-archived', '2026-08-09T00:00:00Z', { archived: true }),
+      conv('newest-visible', '2026-08-05T00:00:00Z'),
+    ];
+    expect(mostRecentSummary(rows)?.id).toBe('newest-visible');
+    expect(mostRecentSummary(rows.filter((r) => r.archived))).toBeUndefined();
   });
 });
 

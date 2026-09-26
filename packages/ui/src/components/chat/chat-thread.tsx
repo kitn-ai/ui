@@ -20,7 +20,7 @@ import type { ModelOption } from '../../types';
 import type { CardComponentMap } from '../card/card-registry';
 import type { CardSchemaMap } from '../card/card-renderer';
 import type { JSX } from 'solid-js';
-import type { ConversationStore } from '../../primitives/conversation-store';
+import { mostRecentSummary, type ConversationStore } from '../../primitives/conversation-store';
 import { ConversationPanel } from '../conversation/conversation-panel';
 import type { ConversationSummary } from '../../types';
 import { MessagesSquare, ArrowLeft } from 'lucide-solid';
@@ -488,9 +488,12 @@ export function ChatThread(props: ChatThreadProps) {
   // auto-restored the visitor's thread on mount, so upgrading to
   // `conversations` must not regress that — their most recent conversation
   // (migrated legacy thread included) has to reappear without an extra tap
-  // into the list. The pick + load ride the controller (`refresh` sorts the
-  // cache byRecency; `select` is the same single path as an explicit row
-  // click, fresh-array contract included). The guards stay at this boundary
+  // into the list. The pick + load ride the controller (`refresh` fills the
+  // cache; `select` is the same single path as an explicit row
+  // click, fresh-array contract included); the pick itself is the newest
+  // INCLUDING archived ones excluded, which is NOT the cache's first row: that
+  // row is the pinned-first display order, and a pin is not a claim about when
+  // the visitor last spoke. The guards stay at this boundary
   // because they are about the CALLER's state, which the controller cannot
   // see: only when nothing is active yet (never fights startNew/a prior
   // select); only when `props.messages` is still empty (a parent that
@@ -506,9 +509,9 @@ export function ChatThread(props: ChatThreadProps) {
       if (untrack(activeConversationId) !== undefined) return;
       if (props.messages.length !== 0) return;
       if (untrack(view) !== 'chat') return;
-      const summaries = untrack(conversationSummaries);
-      if (summaries.length === 0) return;
-      await ctrl.select(summaries[0].id); // the controller cache is byRecency-sorted
+      const newest = mostRecentSummary(untrack(conversationSummaries));
+      if (newest === undefined) return;
+      await ctrl.select(newest.id);
     })();
   });
   // A string `value` is controlled; a ComposerDoc `value` is a one-time seed that
@@ -541,11 +544,11 @@ export function ChatThread(props: ChatThreadProps) {
   );
   // Recent-conversation card: only when explicitly opted into
   // (`home.recentConversation === true`), summaries are actually hydrated,
-  // and at least one exists — the newest by the shared recency rule.
+  // and at least one exists — the newest by the shared recency rule, out of the
+  // ones still visible (an archived conversation must not be the card's offer).
   const recentSummary = createMemo(() => {
     if (!homeEnabled() || props.home?.recentConversation !== true || !conversationsReady()) return undefined;
-    const summaries = conversationSummaries();
-    return summaries.length ? summaries[0] : undefined; // controller-sorted, newest first
+    return mostRecentSummary(conversationSummaries());
   });
   // Suggestions are conversation starters: show only on an empty thread unless
   // the host opts into persisting them.

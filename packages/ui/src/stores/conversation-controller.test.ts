@@ -21,10 +21,11 @@ const msg = (text: string): ChatMessage => ({
 
 /** In-memory ConversationStore with call recording. `lastReadAt` semantics
  *  mirror localStorageStore: save() never touches it, markRead() is its only
- *  writer. */
+ *  writer. Same for the two list-shape flags, whose only writers are
+ *  setPinned()/setArchived(). */
 function fakeStore() {
   const threads = new Map<string, ChatMessage[]>();
-  const meta = new Map<string, { updatedAt: string; lastReadAt?: string }>();
+  const meta = new Map<string, { updatedAt: string; lastReadAt?: string; pinned?: boolean; archived?: boolean; title?: string }>();
   let clock = 1000;
   const now = () => new Date((clock += 1000)).toISOString();
   const calls: string[] = [];
@@ -33,10 +34,12 @@ function fakeStore() {
       calls.push('list');
       return [...threads.keys()].map((id) => ({
         id,
-        title: id,
+        title: meta.get(id)!.title ?? id,
         messageCount: threads.get(id)!.length,
         updatedAt: meta.get(id)!.updatedAt,
         lastReadAt: meta.get(id)!.lastReadAt,
+        pinned: meta.get(id)!.pinned,
+        archived: meta.get(id)!.archived,
       })) as ConversationSummary[];
     },
     async load(id) {
@@ -46,12 +49,39 @@ function fakeStore() {
     async save(id, messages) {
       calls.push(`save:${id}:${messages.length}`);
       threads.set(id, [...messages]);
-      meta.set(id, { updatedAt: now(), lastReadAt: meta.get(id)?.lastReadAt });
+      const prev = meta.get(id);
+      meta.set(id, {
+        updatedAt: now(),
+        lastReadAt: prev?.lastReadAt,
+        pinned: prev?.pinned,
+        archived: prev?.archived,
+        title: prev?.title,
+      });
     },
     async markRead(id) {
       calls.push(`markRead:${id}`);
       const m = meta.get(id);
       if (m) m.lastReadAt = now();
+    },
+    async rename(id, title) {
+      calls.push(`rename:${id}:${title}`);
+      const m = meta.get(id);
+      if (m) m.title = title;
+    },
+    async setPinned(id, pinned) {
+      calls.push(`setPinned:${id}:${pinned}`);
+      const m = meta.get(id);
+      if (m) m.pinned = pinned ? true : undefined;
+    },
+    async setArchived(id, archived) {
+      calls.push(`setArchived:${id}:${archived}`);
+      const m = meta.get(id);
+      if (m) m.archived = archived ? true : undefined;
+    },
+    async remove(id) {
+      calls.push(`remove:${id}`);
+      threads.delete(id);
+      meta.delete(id);
     },
   };
   return { store, calls, threads, meta };
@@ -158,6 +188,168 @@ describe('select + auto-restore', () => {
     await c.select('nope');
     expect(c.activeId()).toBeUndefined();
     expect(onError).toHaveBeenCalledWith('load', expect.any(Error));
+  });
+});
+
+describe('conversation operations (rename / pin / archive / delete)', () => {
+  /** Two saved conversations, the later one active, with the recorder cleared. */
+  async function seeded(over: ConversationControllerHooks = {}) {
+    const f = fakeStore();
+    f.threads.set('c1', [msg('first')]);
+    f.meta.set('c1', { updatedAt: new Date(1000).toISOString() });
+    f.threads.set('c2', [msg('second')]);
+    f.meta.set('c2', { updatedAt: new Date(9000).toISOString() });
+    const c = controllerWith(f.store, over);
+    await c.refresh();
+    f.calls.length = 0;
+    return { ...f, c };
+  }
+
+  it('rename() delegates, then refreshes so the cached title is the stored one', async () => {
+    const { c, calls } = await seeded();
+    await c.rename('c1', 'Renamed');
+    expect(calls).toEqual(['rename:c1:Renamed', 'list']);
+    expect(c.summaries().find((s) => s.id === 'c1')?.title).toBe('Renamed');
+  });
+
+  it('setPinned(true) delegates and the row moves to the front of summaries()', async () => {
+    const { c, calls } = await seeded();
+    expect(c.summaries().map((s) => s.id)).toEqual(['c2', 'c1']);
+    await c.setPinned('c1', true);
+    expect(calls).toEqual(['setPinned:c1:true', 'list']);
+    expect(c.summaries().map((s) => s.id)).toEqual(['c1', 'c2']);
+    await c.setPinned('c1', false);
+    expect(c.summaries().map((s) => s.id)).toEqual(['c2', 'c1']);
+  });
+
+  it('setArchived(true) takes the conversation out of summaries() without deleting it', async () => {
+    const { c, threads } = await seeded();
+    await c.setArchived('c1', true);
+    expect(c.summaries().map((s) => s.id)).toEqual(['c2']);
+    expect(threads.get('c1')).toEqual([msg('first')]); // still stored, just unlisted
+  });
+
+  it('restore() skips an archived conversation and never picks a pinned-old one over the newest', async () => {
+    const f = fakeStore();
+    f.threads.set('pinned-old', [msg('old')]);
+    f.meta.set('pinned-old', { updatedAt: new Date(1000).toISOString(), pinned: true });
+    f.threads.set('archived-newest', [msg('archived')]);
+    f.meta.set('archived-newest', { updatedAt: new Date(9000).toISOString(), archived: true });
+    f.threads.set('newest-visible', [msg('recent')]);
+    f.meta.set('newest-visible', { updatedAt: new Date(5000).toISOString() });
+    const c = controllerWith(f.store);
+    expect(await c.restore()).toBe(true);
+    expect(c.activeId()).toBe('newest-visible');
+  });
+
+  it('remove() of the ACTIVE conversation clears the active id and delivers the empty thread', async () => {
+    const loads: Array<[number, string | undefined]> = [];
+    const f = fakeStore();
+    f.threads.set('c1', [msg('first')]);
+    f.meta.set('c1', { updatedAt: new Date(1000).toISOString() });
+    const c = controllerWith(f.store, { onMessagesLoad: (m, id) => loads.push([m.length, id]) });
+    await c.select('c1');
+    loads.length = 0;
+    f.calls.length = 0;
+    await c.remove('c1');
+    expect(c.activeId()).toBeUndefined();
+    expect(loads).toEqual([[0, undefined]]);
+    expect(f.calls).toEqual(['remove:c1', 'list']);
+    expect(c.summaries()).toEqual([]);
+  });
+
+  it('remove() of a BACKGROUND conversation leaves the active thread alone', async () => {
+    const loads: Array<[number, string | undefined]> = [];
+    const { c } = await seeded({ onMessagesLoad: (m, id) => loads.push([m.length, id]) });
+    await c.select('c2');
+    loads.length = 0;
+    await c.remove('c1');
+    expect(c.activeId()).toBe('c2');
+    expect(loads).toEqual([]);
+  });
+
+  it('setArchived(true) on the ACTIVE conversation clears the active id and delivers the empty thread', async () => {
+    const loads: Array<[number, string | undefined]> = [];
+    const { c, threads } = await seeded({ onMessagesLoad: (m, id) => loads.push([m.length, id]) });
+    await c.select('c2');
+    loads.length = 0;
+    await c.setArchived('c2', true);
+    expect(c.activeId()).toBeUndefined();
+    expect(loads).toEqual([[0, undefined]]);
+    expect(c.summaries().map((s) => s.id)).toEqual(['c1']);
+    // Archiving is not deleting: the stored thread is untouched, only the active
+    // pointer and the delivered thread changed.
+    expect(threads.get('c2')).toEqual([msg('second')]);
+  });
+
+  it('setArchived(true) of a BACKGROUND conversation leaves the active thread alone', async () => {
+    const loads: Array<[number, string | undefined]> = [];
+    const { c } = await seeded({ onMessagesLoad: (m, id) => loads.push([m.length, id]) });
+    await c.select('c2');
+    loads.length = 0;
+    await c.setArchived('c1', true);
+    expect(c.activeId()).toBe('c2');
+    expect(loads).toEqual([]);
+  });
+
+  it('unarchiving does not resurrect an active id', async () => {
+    const loads: Array<[number, string | undefined]> = [];
+    const { c } = await seeded({ onMessagesLoad: (m, id) => loads.push([m.length, id]) });
+    await c.select('c2');
+    await c.setArchived('c2', true); // the clearing step
+    loads.length = 0;
+    await c.setArchived('c2', false);
+    expect(c.activeId()).toBeUndefined();
+    expect(loads).toEqual([]);
+    // Back in the list, but not back as the open thread.
+    expect(c.summaries().map((s) => s.id)).toEqual(['c2', 'c1']);
+  });
+
+  it('a store without the op REFUSES LOUDLY for each of the four — a reported error, never a silent no-op', async () => {
+    const onError = vi.fn();
+    const f = fakeStore();
+    f.threads.set('c1', [msg('first')]);
+    f.meta.set('c1', { updatedAt: new Date(1000).toISOString() });
+    delete (f.store as { rename?: unknown }).rename;
+    delete (f.store as { setPinned?: unknown }).setPinned;
+    delete (f.store as { setArchived?: unknown }).setArchived;
+    delete (f.store as { remove?: unknown }).remove;
+    const c = controllerWith(f.store, { onError });
+    await c.rename('c1', 'Renamed');
+    await c.setPinned('c1', true);
+    await c.setArchived('c1', true);
+    await c.remove('c1');
+    expect(onError.mock.calls.map(([op]) => op)).toEqual(['rename', 'setPinned', 'setArchived', 'remove']);
+    // Nothing was written, and the refusal changed no state: the caller keeps a
+    // usable controller and an honest view of what happened.
+    expect(f.calls).toEqual([]);
+    expect(c.activeId()).toBeUndefined();
+  });
+
+  it('a store WITHOUT onError still reports the refusal on the console rather than vanishing', async () => {
+    const f = fakeStore();
+    delete (f.store as { rename?: unknown }).rename;
+    const c = controllerWith(f.store);
+    await c.rename('c1', 'Renamed');
+    expect(errorSpy).toHaveBeenCalledWith(
+      '[conversation-controller] rename failed.',
+      expect.any(Error),
+    );
+  });
+
+  it('a failed write reports its own op and leaves the cache as it was', async () => {
+    const f = fakeStore();
+    f.threads.set('c1', [msg('first')]);
+    f.meta.set('c1', { updatedAt: new Date(1000).toISOString() });
+    f.store.setPinned = async () => {
+      throw new Error('disk on fire');
+    };
+    const onError = vi.fn();
+    const c = controllerWith(f.store, { onError });
+    await c.refresh();
+    await c.setPinned('c1', true);
+    expect(onError).toHaveBeenCalledWith('setPinned', expect.any(Error));
+    expect(c.summaries().map((s) => s.id)).toEqual(['c1']);
   });
 });
 

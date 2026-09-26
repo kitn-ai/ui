@@ -8,13 +8,24 @@
     { "path": "assistant.html", "type": "registry:page" },
     { "path": "assistant.controller.ts", "type": "registry:file" },
     { "path": "assistant.css", "type": "registry:file" },
-    { "path": "mock.ts", "type": "registry:file" }
+    { "path": "assistant.transport.mock.ts", "type": "registry:file" },
+    { "path": "assistant.transport.route.ts", "type": "registry:file" },
+    { "path": "assistant.transport.none.ts", "type": "registry:file" }
   ],
   "dependencies": ["@kitn.ai/ui"],
   "registryDependencies": [],
-  "wiring": { "gateways": ["openrouter", "anthropic"], "mockFiles": ["mock.ts"] },
+  "wiring": {
+    "gateways": ["openrouter", "anthropic"],
+    "mockFiles": ["assistant.transport.mock.ts"],
+    "modeTarget": "assistant.transport.ts",
+    "modeFiles": {
+      "mock": "assistant.transport.mock.ts",
+      "real": "assistant.transport.route.ts",
+      "none": "assistant.transport.none.ts"
+    }
+  },
   "cssVars": { "light": {}, "dark": {} },
   "envVars": {},
-  "docs": "Runs against a scripted local mock out of the box - no endpoint, no key. To go live, replace the mock responder in assistant.controller.ts with a fetch to your chat endpoint (send the selected model id with the request) and keep parsing through the @kitn.ai/ui/wire readers.",
+  "docs": "Runs against a scripted local mock out of the box - no endpoint, no key. The transport is one file, assistant.transport.ts: the scripted mock in the default mode, a POST to /api/chat with --gateway, a loud stub with --no-mock. Replace it with your own to go live, and keep parsing through the @kitn.ai/ui/wire readers.",
   "meta": { "iframeHeight": "800px" }
 }

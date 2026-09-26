@@ -50,6 +50,44 @@ export interface BlockFileEntry {
   target?: string;
 }
 
+/**
+ * THE THREE DATA MODES (spec 4, "three modes, one axis"): the scripted demo,
+ * a backend the block streams through, and the composition alone. ONE list, read
+ * by the manifest validator below, by the seam resolver in `forms/` and by the
+ * CLI's mode resolution - never restated.
+ */
+export const DATA_MODES = ['mock', 'real', 'none'] as const;
+
+export type DataMode = (typeof DATA_MODES)[number];
+
+/**
+ * One swappable SEAM file per data mode, plus the one generated name every mode
+ * is written at.
+ *
+ * WHY A SEAM AND NOT THREE FILES: the controller imports `./assistant.transport`
+ * with no extension, so whichever form renders the block resolves that one
+ * specifier against whichever file the mode put there. The variants are AUTHORED
+ * sources (`files[]` entries, one per mode) and are never shipped under their own
+ * names: `add` writes exactly one of them, at `modeTarget`, and drops the rest -
+ * including the two it did not choose - so a mock-free install carries no mock
+ * and a real install carries the fetch instead of the script.
+ */
+export interface BlockWiring {
+  /** The integrations this block can stream through. */
+  gateways?: string[];
+  /** The scripted-demo files: written in the default mode, and left out by both
+   *  `--no-mock` and `--gateway`. A block whose mock IS its seam file names that
+   *  file here, so the declaration keeps meaning what it says. */
+  mockFiles?: string[];
+  /** The name `add` writes the mode's file at. NOT a `files[]` entry: it is a
+   *  generated name, and the authored sources are the `modeFiles` entries. */
+  modeTarget?: string;
+  /** The authored source for each mode the block supports: `mock` always, `none`
+   *  always, `real` when `gateways` is non-empty. Every value must be a `files[]`
+   *  entry. */
+  modeFiles?: Partial<Record<DataMode, string>>;
+}
+
 /** The per-block manifest (`registry-item.json`) — the adopted shadcn
  *  registry-item vocabulary, adapted where our axes differ (see the spec's
  *  "Registry mechanics"): `registryDependencies` also carries backend-route
@@ -74,6 +112,11 @@ export interface BlockManifest {
    *   gateways   the integrations this block can stream through. `--gateway
    *              <id>` needs the id here, and the CLI builds the `route:<id>`
    *              dependency from it AT INSTALL TIME.
+   *   modeTarget the name the chosen mode's file is written at, and `modeFiles`
+   *              the authored source per mode. Without them a block can only be
+   *              installed as the mock: its controller imports the mock directly,
+   *              and the CLI refuses a mock-free install by name rather than
+   *              shipping a tree that cannot resolve its own imports.
    *
    * DELIBERATELY NOT `registryDependencies`. Those resolve on EVERY install, so
    * a route listed there is emitted by a plain `create-kai add` as well - a
@@ -86,7 +129,7 @@ export interface BlockManifest {
    * no declared gateway cannot be installed keyed, and quietly installing the
    * mock instead is the fallback this axis exists to prevent.
    */
-  wiring?: { gateways?: string[]; mockFiles?: string[] };
+  wiring?: BlockWiring;
   /** Blocks this block composes (bare name), backend routes it streams
    *  through (`route:<integration>`), namespaced (`@ns/name`) or URL items. */
   registryDependencies?: string[];
@@ -238,7 +281,7 @@ export function validateBlockManifest(
   // wiring - the data axis this block can be installed as (spec 4).
   if (m.wiring !== undefined) {
     if (!isRecord(m.wiring)) {
-      errors.push(`${dirName}: "wiring" must be an object with optional "gateways" and "mockFiles" arrays`);
+      errors.push(`${dirName}: "wiring" must be an object (gateways, mockFiles, modeTarget, modeFiles)`);
     } else {
       // Bound to a local because the narrowing above does not survive into the
       // closure below (a property read is re-widened inside a callback).
@@ -252,7 +295,8 @@ export function validateBlockManifest(
         }
         return value as string[];
       };
-      for (const id of readList('gateways') ?? []) {
+      const gateways = readList('gateways') ?? [];
+      for (const id of gateways) {
         if (!ctx.routeIntegrations.includes(id)) {
           errors.push(
             `${dirName}: wiring.gateways entry "${id}" is not a scaffolder integration (known: ${ctx.routeIntegrations.join(', ')})`,
@@ -270,6 +314,75 @@ export function validateBlockManifest(
       for (const file of readList('mockFiles') ?? []) {
         if (!shipped.has(file)) {
           errors.push(`${dirName}: wiring.mockFiles lists "${file}", which no files[] entry ships`);
+        }
+      }
+
+      // THE SEAM. `modeTarget` is a GENERATED name and `modeFiles` are the
+      // authored sources, so the two directions are checked in opposite
+      // directions: the variants must be files[] entries (a variant nobody ships
+      // is a mode with nothing to write), and the target must NOT be one (it
+      // exists only after `add` writes a variant there, so a files[] entry with
+      // that name is a second, contradictory source).
+      const modeTarget = wiring.modeTarget;
+      const modeFiles = wiring.modeFiles;
+      if (modeTarget === undefined && modeFiles === undefined) {
+        // No seam: the block can only be installed as the mock, and the CLI says
+        // so by name when a mock-free mode is asked for.
+      } else {
+        if (typeof modeTarget !== 'string' || modeTarget.length === 0) {
+          errors.push(
+            `${dirName}: wiring.modeTarget must be a non-empty string - it is the file name every data mode's variant is written at, and without it wiring.modeFiles has nowhere to go`,
+          );
+        } else {
+          const targetProblem = unsafeFilePathReason(modeTarget);
+          if (targetProblem) errors.push(`${dirName}: wiring.modeTarget ${targetProblem}`);
+          if (shipped.has(modeTarget)) {
+            errors.push(
+              `${dirName}: wiring.modeTarget is "${modeTarget}", which a files[] entry already ships. The target is a GENERATED name - the authored sources are the wiring.modeFiles entries, and a file shipped under the target name is a second contradictory source for the same module`,
+            );
+          }
+        }
+        if (!isRecord(modeFiles)) {
+          errors.push(
+            `${dirName}: wiring.modeFiles must be an object mapping a data mode (${DATA_MODES.join(', ')}) to the files[] entry that is its source`,
+          );
+        } else {
+          const declared = new Map<string, string>();
+          for (const [mode, path] of Object.entries(modeFiles)) {
+            if (!(DATA_MODES as readonly string[]).includes(mode)) {
+              errors.push(`${dirName}: wiring.modeFiles has unknown mode "${mode}" (one of ${DATA_MODES.join(', ')})`);
+              continue;
+            }
+            if (typeof path !== 'string' || path.length === 0) {
+              errors.push(`${dirName}: wiring.modeFiles.${mode} must name a files[] entry`);
+              continue;
+            }
+            if (!shipped.has(path)) {
+              errors.push(`${dirName}: wiring.modeFiles.${mode} lists "${path}", which no files[] entry ships`);
+            }
+            declared.set(mode, path);
+          }
+          // WHICH MODES ARE REQUIRED is a fact about the block, not a fixed
+          // list: the mock is what an install without flags gets, the
+          // composition alone is always installable, and `real` exists only for
+          // a block that declares a gateway to stream through.
+          for (const mode of DATA_MODES) {
+            if (declared.has(mode)) continue;
+            if (mode === 'real' && gateways.length === 0) continue;
+            errors.push(
+              mode === 'real'
+                ? `${dirName}: wiring.modeFiles needs a "real" entry: this block declares ${gateways.join(', ')}, so \`--gateway\` has to have a file to write`
+                : `${dirName}: wiring.modeFiles needs a "${mode}" entry - every mode an install can ask for needs a source, and the modes the CLI can ask this block for are the ones it declares`,
+            );
+          }
+          // Two modes sharing one source is not a mode axis: the swap would
+          // write the same file twice and one of the two modes would be a lie.
+          const byPath = new Map<string, string>();
+          for (const [mode, path] of declared) {
+            const other = byPath.get(path);
+            if (other) errors.push(`${dirName}: wiring.modeFiles gives "${mode}" and "${other}" the same source ("${path}"); each mode is its own file`);
+            else byPath.set(path, mode);
+          }
         }
       }
     }
@@ -437,6 +550,13 @@ export interface CdnFormOptions {
    * no pins, no annotations.
    */
   base?: string;
+  /**
+   * Which data mode to render the page's seam at. The scripted mock is what a
+   * caller that says nothing means, and the two mock-free modes cannot be
+   * rendered here at all: the paste form is one inlined file with nothing to
+   * leave out, which `create-kai add` refuses by name.
+   */
+  mode?: DataMode;
 }
 
 const IMPORT_RE =

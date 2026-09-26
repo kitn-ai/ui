@@ -276,17 +276,23 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
                   e.currentTarget.value = ''; // allow re-picking the same file
                 }}
               />
-              <Button
-                type="button"
-                variant="outline"
-                size="icon-sm"
-                class="rounded-full"
-                aria-label="Attach files"
-                disabled={props.disabled}
-                onClick={() => fileInput?.click()}
-              >
-                <Paperclip class="size-4" />
-              </Button>
+              {/* The visible hint, and NOT the accessible name: the button keeps its
+                  `aria-label` (that is the name the tooltip must never replace), and the
+                  tooltip's own trigger is the span this component renders around it, so
+                  keyboard focus still reaches the button and opens the tip. */}
+              <Tooltip content="Attach files">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon-sm"
+                  class="rounded-full"
+                  aria-label="Attach files"
+                  disabled={props.disabled}
+                  onClick={() => fileInput?.click()}
+                >
+                  <Paperclip class="size-4" />
+                </Button>
+              </Tooltip>
             </Show>
             <Show when={props.webSearch}>
               <Button

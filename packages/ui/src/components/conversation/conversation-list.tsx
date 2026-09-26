@@ -6,6 +6,7 @@ import { Button } from '../button/button';
 import { Badge } from '../badge/badge';
 import { ScrollArea } from '../scroll/scroll-area';
 import { ConversationItem, type ConversationRowDensity } from './conversation-item';
+import { orderedSummaries } from '../../primitives/conversation-store';
 import type { ConversationSummary, ConversationGroup } from '../../types';
 
 /**
@@ -251,7 +252,12 @@ export function ConversationList(props: ConversationListProps) {
   const [searchQuery, setSearchQuery] = createSignal('');
   // Item mode: the consumer's own rows replace the data rendering wholesale.
   const itemMode = createMemo(() => local.items != null);
-  const isEmpty = createMemo(() => local.conversations.length === 0);
+  // The one list-order rule, applied to the `conversations` prop before the search filter
+  // and the grouping: archived rows are not rendered at all (so an archived-only set is
+  // the empty state, not a list of nothing), pinned rows lead. Item mode is untouched:
+  // the consumer's own rows carry their own fields and their own order.
+  const visible = createMemo(() => orderedSummaries(local.conversations));
+  const isEmpty = createMemo(() => visible().length === 0);
   // The search query is owned here; setQuery is the single mutation point so both
   // typing and the imperative clearSearch() notify the facade (→ kai-search).
   let searchInput: HTMLInputElement | undefined;
@@ -267,8 +273,8 @@ export function ConversationList(props: ConversationListProps) {
 
   const filteredConversations = createMemo(() => {
     const q = searchQuery().toLowerCase();
-    if (!q) return local.conversations;
-    return local.conversations.filter((c) => c.title.toLowerCase().includes(q));
+    if (!q) return visible();
+    return visible().filter((c) => c.title.toLowerCase().includes(q));
   });
 
   const groupedConversations = createMemo(() => {

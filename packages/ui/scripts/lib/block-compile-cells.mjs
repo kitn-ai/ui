@@ -22,6 +22,15 @@
 // The axis is derived twice over -- the block ids and the form ids both come
 // out of the emitted file names, which gen-blocks derives from the registry
 // scan and from FRAMEWORK_BLOCK_FORMS. Neither list is written here.
+//
+// THE DATA MODE IS A THIRD AXIS, same derivation: gen-blocks writes
+// `<id>.<form>.<mode>.json` for every mode a block declares a seam source for
+// beyond the default, and the DEFAULT (mock) tree is the unsuffixed file. So a
+// block that declares `wiring.modeFiles` gets its mock-free trees COMPILED,
+// which is the whole point: `--no-mock` and `--gateway` refused for every block
+// while the trees that would have made them work were never rendered, never
+// mind compiled. A block with no seam has one cell per form, because the CLI
+// refuses the other modes for it by name rather than writing a tree.
 
 import { readFileSync, readdirSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
@@ -36,34 +45,43 @@ import { join, dirname } from 'node:path';
  */
 const TS_LEFTOVER = /^\s*(?:export\s+)?(?:interface|type)\s|:\s*(?:string|number|boolean)\s*[;,)]/m;
 
+/** The mode an emitted tree that says nothing is: gen-blocks writes the default
+ *  (mock) tree under the unsuffixed name the blocks site fetches. */
+export const DEFAULT_MODE = 'mock';
+
 /**
  * Load the emitted per-form trees, grouped by block.
  *
- * Returns the cell axis: `blocks` (each with the forms it emitted), `forms`
- * (the form ids seen, sorted), and `noForms` (blocks in the registry index
- * that emitted none). `noForms` is a FAILURE list rather than a skip list at
- * the call site: every block is on the authored contract and renders every
- * framework form.
+ * Returns the cell axis: `blocks` (each with `forms[form][mode]`, the tree per
+ * data mode), `forms` (the form ids seen, sorted), `modes` (every mode seen,
+ * sorted) and `noForms` (blocks in the registry index that emitted none).
+ * `noForms` is a FAILURE list rather than a skip list at the call site: every
+ * block is on the authored contract and renders every framework form.
  */
 export function loadBlockForms(distBlocksDir) {
   const formsDir = join(distBlocksDir, 'f');
   const indexPath = join(distBlocksDir, 'registry.json');
   if (!existsSync(indexPath) || !existsSync(formsDir)) {
-    return { blocks: [], forms: [], noForms: [], missing: `${formsDir} (or the registry index beside it) does not exist -- build first: the form trees are written by gen-blocks.mjs in postbuild` };
+    return { blocks: [], forms: [], modes: [], noForms: [], missing: `${formsDir} (or the registry index beside it) does not exist -- build first: the form trees are written by gen-blocks.mjs in postbuild` };
   }
   const byBlock = new Map();
   const formIds = new Set();
+  const modes = new Set();
   for (const file of readdirSync(formsDir).sort()) {
     if (!file.endsWith('.json')) continue;
     const parsed = JSON.parse(readFileSync(join(formsDir, file), 'utf8'));
+    const mode = parsed.mode ?? DEFAULT_MODE;
     formIds.add(parsed.form);
+    modes.add(mode);
     if (!byBlock.has(parsed.block)) byBlock.set(parsed.block, { name: parsed.block, forms: {} });
-    byBlock.get(parsed.block).forms[parsed.form] = parsed.files;
+    const forms = byBlock.get(parsed.block).forms;
+    forms[parsed.form] = { ...(forms[parsed.form] ?? {}), [mode]: parsed.files };
   }
   const indexed = JSON.parse(readFileSync(indexPath, 'utf8')).items.map((i) => i.name);
   return {
     blocks: [...byBlock.values()],
     forms: [...formIds].sort(),
+    modes: [...modes].sort(),
     noForms: indexed.filter((name) => !byBlock.has(name)),
     missing: null,
   };
@@ -159,16 +177,33 @@ export async function runBlockCompileCells({ tsc, blocks, forms, esbuild, log })
   }
 
   let cells = 0;
+  let mockFree = 0;
+  const axis = [];
   for (const block of blocks) {
+    const modesSeen = [];
     for (const form of forms) {
-      const files = block.forms[form];
-      if (!files) {
+      const byMode = block.forms[form];
+      if (!byMode || !byMode[DEFAULT_MODE]) {
         failures.push(`${block.name} [${form}]: the block emitted other forms but not this one, so its tree is unchecked.`);
         continue;
       }
-      cells += 1;
-      failures.push(...(await STRATEGIES[form]({ tsc, esbuild, name: block.name, files })));
+      for (const mode of Object.keys(byMode)) {
+        if (!modesSeen.includes(mode)) modesSeen.push(mode);
+        cells += 1;
+        if (mode !== DEFAULT_MODE) mockFree += 1;
+        failures.push(
+          ...(await STRATEGIES[form]({
+            tsc,
+            esbuild,
+            // The sandbox is a DIRECTORY named after this, so the mode rides
+            // as a segment rather than as punctuation.
+            name: mode === DEFAULT_MODE ? block.name : `${block.name}.${mode}`,
+            files: byMode[mode],
+          })),
+        );
+      }
     }
+    axis.push(`${block.name} (${modesSeen.join(', ')})`);
   }
 
   // Anti-vacuity. Zero cells is what a broken walk, an unbuilt tree or a
@@ -180,9 +215,22 @@ export async function runBlockCompileCells({ tsc, blocks, forms, esbuild, log })
         'at least one block is on the authored contract and renders both framework forms.',
     );
   }
+  // AND ZERO MOCK-FREE CELLS IS THE SAME HOLE ONE LEVEL DOWN. The data axis
+  // exists because `--no-mock` and `--gateway` refused for every block while
+  // nobody compiled the trees that would satisfy them; a run where every
+  // emitted tree is the default mode has gone back to exactly that, and the
+  // count alone would not say so.
+  if (mockFree === 0) {
+    failures.push(
+      'every emitted block tree is the default (mock) mode, so no mock-free tree was compiled. ' +
+        'That is the hole the data axis exists to close: a block that declares a wiring.modeFiles seam must ' +
+        'emit one tree per mode (gen-blocks.mjs) and have it compiled here.',
+    );
+  }
 
   log(
-    `  · block forms: ${cells} cell(s) over ${blocks.length} block(s) x ${forms.length} form(s) (${forms.join(', ')})`,
+    `  · block forms: ${cells} cell(s) over ${blocks.length} block(s) x ${forms.length} form(s) (${forms.join(', ')})` +
+      ` x the data modes each block declares (${axis.join('; ')}) -- ${mockFree} mock-free`,
   );
   log(
     '    html is a syntax + strip check only (esbuild parses the emitted .js, and it must carry no TypeScript);\n' +

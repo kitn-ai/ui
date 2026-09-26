@@ -22,6 +22,9 @@ export {
   localStorageStore,
   fetchStore,
   byRecency,
+  byPinnedThenRecency,
+  orderedSummaries,
+  mostRecentSummary,
   isConversationUnread,
   LEGACY_THREAD_MIGRATED_TITLE,
 } from '../primitives/conversation-store';

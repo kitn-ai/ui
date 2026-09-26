@@ -3,7 +3,6 @@
  * rewire by hand around a `ConversationStore` — active-id tracking, mint-id-on-first-turn,
  * save-per-turn, auto-restore, and the three-leg "seen" rule for `markRead` — shipped ONCE,
  * framework-free, so `kai-chat` and every block run the SAME policy instead of copies.
- *
  * Plain JS closures over that contract: no solid, no DOM, no framework, so `dist/stores.js`
  * stays loadable raw off a CDN (`verify:cdn-entries` fails the build on a bare import).
  *
@@ -14,15 +13,28 @@
  * no-op when something is already active; seen only while the host is open, the chat view
  * shows AND it is the active conversation, so any missing leg suppresses `markRead`;
  * `anyUnread()` folding the one public read of `lastReadAt` over the cached summaries,
- * excluding the active conversation only while it is seen; and a failed store call
- * reported rather than swallowed, degrading without throwing into the caller's turn loop.
- */
+ * excluding the active conversation only while it is seen; the four list operations
+ * (rename / pin / archive / delete) delegating to the store or refusing loudly; and a
+ * failed store call reported rather than swallowed. */
 import type { ConversationSummary } from '../types';
 import type { ChatMessage } from '../web-components/chat/chat-types';
-import { byRecency, isConversationUnread, type ConversationStore } from '../primitives/conversation-store';
+import {
+  mostRecentSummary,
+  orderedSummaries,
+  isConversationUnread,
+  type ConversationStore,
+} from '../primitives/conversation-store';
 
 /** The named store operations `onError` reports on. */
-export type ConversationControllerOp = 'list' | 'load' | 'save' | 'markRead';
+export type ConversationControllerOp =
+  | 'list'
+  | 'load'
+  | 'save'
+  | 'markRead'
+  | 'rename'
+  | 'setPinned'
+  | 'setArchived'
+  | 'remove';
 
 export interface ConversationControllerHooks {
   // Fires on `select` (a row tap), `restore` (auto-restore) and `startNew` (an empty array
@@ -31,8 +43,8 @@ export interface ConversationControllerHooks {
   /** Receives loaded messages whenever the controller changes what the thread should
    *  show, with a fresh array reference every call. */
   onMessagesLoad?: (messages: ChatMessage[], id: string | undefined) => void;
-  /** Fires after every summary-cache refresh with the fresh, recency-sorted
-   *  array - the list panel / recent-card render feed. */
+  /** Fires after every summary-cache refresh with the fresh array, in the one
+   *  list order (archived out, pinned first) - the render feed. */
   onSummariesChange?: (summaries: ConversationSummary[]) => void;
   /** Fires whenever the derived unread flag CHANGES (edge, not level) - the
    *  launcher-badge feed, mirroring ChatThread's `onUnreadChange`. */
@@ -58,7 +70,8 @@ export interface ConversationController {
   view(): string;
   /** Whether the host is open (seen rule leg). */
   open(): boolean;
-  /** The cached summaries from the last refresh, recency-sorted. */
+  /** The cached summaries from the last refresh, in the one list order:
+   *  archived excluded, pinned first, then recency. */
   summaries(): readonly ConversationSummary[];
   /** All three seen legs hold right now. */
   seen(): boolean;
@@ -86,9 +99,27 @@ export interface ConversationController {
   /** Persist the thread after a turn and return the active id; an empty array is a no-op
    *  that returns `undefined`. */
   saveTurn(messages: ChatMessage[]): Promise<string | undefined>;
-  /** Re-fetch `store.list()` into the summary cache (recency-sorted) and
+  /** Re-fetch `store.list()` into the summary cache (in the one list order) and
    *  re-derive the unread flag. A failure reports and keeps the old cache. */
   refresh(): Promise<void>;
+  /** Retitle a conversation and refresh the cache; the new title lands on the
+   *  next `refresh()`. Refuses loudly when the store implements no `rename`. */
+  rename(id: string, title: string): Promise<void>;
+  /** Pin or unpin a conversation, then refresh; the row moves in the list order.
+   *  Refuses loudly when the store implements no `setPinned`. */
+  setPinned(id: string, pinned: boolean): Promise<void>;
+  /** Archive or unarchive a conversation, then refresh; archiving unlists it
+   *  without deleting it. Refuses loudly on a store with no `setArchived`. */
+  setArchived(id: string, archived: boolean): Promise<void>;
+  // Archiving is not deleting, so the stored thread is untouched: what changes is the active
+  // pointer and the delivered thread, through the same step `remove()` uses, because an
+  // archived row leaves every list and a thread still claiming to show it cannot be navigated
+  // back to. Unarchiving does not set the pointer back.
+  // Delivers `[]` through `onMessagesLoad` when the deleted conversation was the active
+  // one, so no dangling id outlives the delete.
+  /** Delete a conversation, clear the active id when it was the active one, and
+   *  refresh. Refuses loudly when the store implements no `remove`. */
+  remove(id: string): Promise<void>;
 }
 
 export function createConversationController(
@@ -123,9 +154,34 @@ export function createConversationController(
     }
   };
 
+  /**
+   * Refuse LOUDLY. A store that does not implement `method` is read as not supporting the
+   * concept (the opt-in contract `ConversationStore` documents), and the one thing this
+   * controller must never do is let a surface believe a write landed when nothing was
+   * written. A reported error is the surface's signal to explain itself.
+   */
+  const refuse = (op: ConversationControllerOp, method: string): void => {
+    report(op, new Error(`this ConversationStore does not implement ${method}(); nothing was written`));
+  };
+
+  /**
+   * Drop the active pointer when it points at `id`, delivering the empty thread through the
+   * one load path `startNew()` uses. Both operations that take a conversation out of reach
+   * call it: `remove()` (the thread is gone) and `setArchived(id, true)` (the stored thread is
+   * untouched, but an archived row leaves every list, so a thread still claiming to show it is
+   * a state the reader cannot navigate back to). A dangling id would also let the next
+   * `saveTurn()` write the conversation straight back. Unarchiving does NOT restore the
+   * pointer: this step is one-way, exactly as it is for `remove()`.
+   */
+  const clearActive = (id: string): void => {
+    if (activeId !== id) return;
+    activeId = undefined;
+    hooks.onMessagesLoad?.([], undefined);
+  };
+
   const refresh = async (): Promise<void> => {
     try {
-      summaries = (await store.list()).slice().sort(byRecency);
+      summaries = orderedSummaries(await store.list());
       hooks.onSummariesChange?.(summaries);
     } catch (err) {
       report('list', err);
@@ -197,8 +253,11 @@ export function createConversationController(
     async restore() {
       if (activeId !== undefined) return false;
       await refresh();
-      if (summaries.length === 0) return false;
-      const newest = summaries[0]; // refresh() already sorted byRecency
+      // Not `summaries[0]`: that array is pinned-first (the display order), while
+      // auto-restore means where the visitor LEFT OFF, which a weeks-old pinned
+      // conversation must not win.
+      const newest = mostRecentSummary(summaries);
+      if (newest === undefined) return false;
       await select(newest.id);
       return activeId === newest.id;
     },
@@ -221,5 +280,54 @@ export function createConversationController(
     },
 
     refresh,
+
+    async rename(id, title) {
+      if (!store.rename) return refuse('rename', 'rename');
+      try {
+        await store.rename(id, title);
+      } catch (err) {
+        report('rename', err);
+        return;
+      }
+      await refresh();
+    },
+
+    async setPinned(id, pinned) {
+      if (!store.setPinned) return refuse('setPinned', 'setPinned');
+      try {
+        await store.setPinned(id, pinned);
+      } catch (err) {
+        report('setPinned', err);
+        return;
+      }
+      await refresh();
+    },
+
+    async setArchived(id, archived) {
+      if (!store.setArchived) return refuse('setArchived', 'setArchived');
+      try {
+        await store.setArchived(id, archived);
+      } catch (err) {
+        report('setArchived', err);
+        return;
+      }
+      // Only archiving clears the pointer: unarchiving unlists nothing, so there is no
+      // unreachable state to walk out of, and a visitor who archived a conversation is not
+      // handed it back as their open thread.
+      if (archived) clearActive(id);
+      await refresh();
+    },
+
+    async remove(id) {
+      if (!store.remove) return refuse('remove', 'remove');
+      try {
+        await store.remove(id);
+      } catch (err) {
+        report('remove', err);
+        return;
+      }
+      clearActive(id);
+      await refresh();
+    },
   };
 }

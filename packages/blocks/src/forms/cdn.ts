@@ -15,6 +15,7 @@
 import { generateCdnForm, type Block, type CdnFormOptions } from '../registry';
 import type { FormFile } from '../contract/types';
 import { renderHtmlForm } from './html';
+import { applyDataMode, DEFAULT_DATA_MODE } from './wiring';
 import { README_FILE } from './readme';
 
 /**
@@ -28,7 +29,11 @@ export function renderCdnFormFiles(block: Block, opts: CdnFormOptions): FormFile
       `${block.name} composes other blocks, and the single-file paste form cannot carry them yet; run \`create-kai add\` inside a project instead`,
     );
   }
-  const form = generateCdnForm(renderedPage(block), opts);
+  // The seam resolves ONCE, here, and the resolved block travels into
+  // `renderedPage`: applying a mode inside the html renderer below as well would
+  // be a second resolution of an already-resolved tree.
+  const wired = applyDataMode(block, opts.mode ?? DEFAULT_DATA_MODE);
+  const form = generateCdnForm(renderedPage(wired), opts);
   if (!form.html) throw new Error(`${block.name}: the paste form cannot be generated: ${form.errors.join('; ')}`);
   return [{ path: `${block.name}.html`, content: form.html, target: `${block.name}.html` }];
 }
@@ -41,7 +46,9 @@ export function renderCdnFormFiles(block: Block, opts: CdnFormOptions): FormFile
  */
 function renderedPage(block: Block): Block {
   // `autoloader`, not the default: the register-all rewrite exists for
-  // bundlers, and this form runs off raw CDN URLs in a plain page.
+  // bundlers, and this form runs off raw CDN URLs in a plain page. The block is
+  // already seam-resolved, so the renderer's own default mode is the one it was
+  // handed.
   //
   // The README is dropped here rather than never emitted: the html form is a
   // DIRECTORY and wants one, this form is a single pasted file and has nowhere

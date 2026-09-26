@@ -46,6 +46,23 @@ export interface ConversationStore {
   // field, rather than assuming a mark-read endpoint the contract never defined.
   /** Post the conversation's seen timestamp; omit it and the kit never marks anything read. */
   markRead?(id: string): Promise<void>;
+  // The four conversation operations an app's own list chrome needs (rename / pin /
+  // archive / delete). Same OPT-IN terms as `markRead` above, for the same reason: a store
+  // that does not implement one is read as not supporting the concept, and
+  // `ConversationController` REFUSES LOUDLY (a reported error) rather than pretending the
+  // write landed, so the surface that offered the action can say why it did nothing.
+  // `localStorageStore` implements all four below; `fetchStore` deliberately implements
+  // none (see its own doc) rather than inventing request shapes the contract never
+  // defined, and its summaries pass through whatever `pinned`/`archived` the backend
+  // already sends.
+  /** Retitle `id`, overriding the title `save()` derived from the first message. */
+  rename?(id: string, title: string): Promise<void>;
+  /** Persist `ConversationSummary.pinned` for `id`; the list order moves on the next `list()`. */
+  setPinned?(id: string, pinned: boolean): Promise<void>;
+  /** Persist `ConversationSummary.archived` for `id`; an archived conversation leaves every list, keeping its messages. */
+  setArchived?(id: string, archived: boolean): Promise<void>;
+  /** Delete `id` and everything stored under it. */
+  remove?(id: string): Promise<void>;
 }
 
 export const LEGACY_THREAD_MIGRATED_TITLE = 'Conversation 1';
@@ -61,6 +78,50 @@ export function byRecency(
   const at = Date.parse(a.updatedAt ?? '');
   const bt = Date.parse(b.updatedAt ?? '');
   return (Number.isNaN(bt) ? -Infinity : bt) - (Number.isNaN(at) ? -Infinity : at);
+}
+
+/** Pinned first, then `byRecency`; the comparator half of the one list-order rule.
+ *  Stable, so the recency order is untouched inside each of the two halves. */
+export function byPinnedThenRecency(
+  a: Pick<ConversationSummary, 'pinned' | 'updatedAt'>,
+  b: Pick<ConversationSummary, 'pinned' | 'updatedAt'>,
+): number {
+  const pinned = (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0);
+  return pinned !== 0 ? pinned : byRecency(a, b);
+}
+
+/**
+ * The ONE list-order rule, and the reason it is a function rather than a comparison
+ * each surface repeats: archived conversations are EXCLUDED (not deleted, and not
+ * dimmed: nothing in the kit renders an archived row), pinned ones sort above the
+ * recency order, and `byRecency` keeps its usual place below (missing/unparsable
+ * `updatedAt` last, stable). `ConversationController.summaries()` and both built-in
+ * list surfaces order with this, so a pinned row lands in the same place wherever it is
+ * rendered. Returns a fresh array; never mutates the caller's.
+ *
+ * The two flags default false when absent (see `ConversationSummary`), so a summary
+ * stored before they existed sorts exactly as it did before.
+ */
+export function orderedSummaries(summaries: readonly ConversationSummary[]): ConversationSummary[] {
+  return summaries.filter((c) => !c.archived).sort(byPinnedThenRecency);
+}
+
+/**
+ * The most recent conversation that is still visible (archived ones excluded), or
+ * `undefined`. NOT `orderedSummaries(...)[0]`: that array is pinned-first, so a pinned
+ * conversation the visitor has not touched in weeks would win the auto-restore pick and
+ * the home screen's recent card. Both mean "where they left off", which the pinned-first
+ * LIST order is a display decision and this is not.
+ */
+export function mostRecentSummary(
+  summaries: readonly ConversationSummary[],
+): ConversationSummary | undefined {
+  let newest: ConversationSummary | undefined;
+  for (const summary of summaries) {
+    if (summary.archived) continue;
+    if (newest === undefined || byRecency(summary, newest) < 0) newest = summary;
+  }
+  return newest;
 }
 
 /**
@@ -130,6 +191,23 @@ export function localStorageStore(name: string, userId?: string): ConversationSt
       localStorage.setItem(idxKey, JSON.stringify(entries));
     } catch {
       /* storage unavailable: this browser session runs without persistence */
+    }
+  }
+
+  /** Merge `patch` into the index entry for `id`. A field patched to `undefined` is
+   *  DROPPED by `JSON.stringify`, which is what keeps the stored shape honest with
+   *  "absent means false" for the two list-shape flags. An id with no entry is a
+   *  harmless no-op: a write can race ahead of `save()`'s first index write. */
+  function patchEntry(id: string, patch: Partial<ConversationSummary>): void {
+    try {
+      const entries = readIndex();
+      const idx = entries.findIndex((e) => e.id === id);
+      if (idx === -1) return;
+      const next = [...entries];
+      next[idx] = { ...next[idx], ...patch };
+      writeIndex(next);
+    } catch {
+      /* storage unavailable: run in-memory for this tab's lifetime */
     }
   }
 
@@ -207,6 +285,12 @@ export function localStorageStore(name: string, userId?: string): ConversationSt
           // for: a message landing in a conversation nobody is currently
           // seeing. markRead() below is the only writer of this field.
           lastReadAt: existing?.lastReadAt,
+          // Carried forward for the same reason, one concept over: a pin or an archive
+          // decision is the visitor's, and a turn landing in that conversation (or in
+          // any other one) must not quietly undo it. setPinned()/setArchived() are the
+          // only writers of these two fields.
+          pinned: existing?.pinned,
+          archived: existing?.archived,
         };
         writeIndex([...entries.filter((e) => e.id !== id), next]);
       } catch {
@@ -214,13 +298,23 @@ export function localStorageStore(name: string, userId?: string): ConversationSt
       }
     },
     async markRead(id) {
+      patchEntry(id, { lastReadAt: new Date().toISOString() });
+    },
+    async rename(id, title) {
+      patchEntry(id, { title });
+    },
+    async setPinned(id, pinned) {
+      // `false` clears the field rather than storing it: absent already means false, and
+      // one spelling per state keeps a stored record readable by the type's own doc.
+      patchEntry(id, { pinned: pinned ? true : undefined });
+    },
+    async setArchived(id, archived) {
+      patchEntry(id, { archived: archived ? true : undefined });
+    },
+    async remove(id) {
       try {
-        const entries = readIndex();
-        const idx = entries.findIndex((e) => e.id === id);
-        if (idx === -1) return; // nothing to mark yet (e.g. raced ahead of save()'s first write)
-        const next = [...entries];
-        next[idx] = { ...next[idx], lastReadAt: new Date().toISOString() };
-        writeIndex(next);
+        localStorage.removeItem(threadKey(name, userId, id));
+        writeIndex(readIndex().filter((e) => e.id !== id));
       } catch {
         /* storage unavailable: run in-memory for this tab's lifetime */
       }
@@ -237,14 +331,17 @@ export function localStorageStore(name: string, userId?: string): ConversationSt
  *  rejection, a caller (ChatThread's lifecycle, Task 2) decides how to
  *  degrade, exactly as the spec's degradation section requires.
  *
- *  No `markRead` (unread indicators, 2026-08-26): the recast contract above
- *  has no mark-read endpoint, and inventing a fourth request shape here
- *  would be this adapter deciding a backend behavior rather than passing one
- *  through. `list()`/`load()` already forward whatever `lastReadAt` the
- *  backend's own summaries carry, same as any other `ConversationSummary`
- *  field, a consumer who wants writes needs their own store (or their own
- *  endpoint plus a thin wrapper), same as any other capability this recast
- *  doesn't cover. */
+ *  No `markRead`, and none of `rename`/`setPinned`/`setArchived`/`remove`: the
+ *  recast contract above has no such endpoints, and inventing request shapes
+ *  here would be this adapter deciding a backend behavior rather than passing
+ *  one through. `list()`/`load()` already forward whatever `lastReadAt`,
+ *  `pinned` and `archived` the backend's own summaries carry, same as any other
+ *  `ConversationSummary` field, so a consumer who wants any of these writes
+ *  needs their own store (or their own endpoint plus a thin wrapper), same as
+ *  any other capability this recast doesn't cover. The caller hears about the
+ *  omission rather than discovering it as a silent no-op:
+ *  `ConversationController` reports an error for each of these when the store
+ *  does not implement it. */
 export function fetchStore(url: string, userId?: string): ConversationStore {
   const headers: Record<string, string> = userId ? { 'x-kai-user-id': userId } : {};
   return {

@@ -29,6 +29,16 @@
 //                                             surface and every `add` would
 //                                             then download the trees it will
 //                                             not use.
+//   dist/blocks/f/<name>.<form>.<mode>.json  the same tree rendered in ONE data
+//                                             mode, one file per mode a block
+//                                             declares a seam source for beyond
+//                                             the default (wiring.modeFiles).
+//                                             The compile cells read these: a
+//                                             mock-free tree nothing compiles is
+//                                             the hole the data axis exists to
+//                                             close. The UNSUFFIXED file above
+//                                             is the default (mock) tree, so the
+//                                             site's URL is unchanged.
 //   dist/blocks/r/<name>.cdn.html             the self-contained CDN-paste
 //                                             form, pins stamped from
 //                                             package.json at build - always
@@ -169,20 +179,41 @@ for (const block of withTwins) {
   // verify:blocks [pins] and the driver instead. Every discovered block
   // renders every framework form; a block that cannot is a hard failure in
   // `formFiles` below, never a skip.
+  //
+  // AND THE DATA MODE IS A SECOND AXIS: a block that declares a seam
+  // (`wiring.modeFiles`) emits one tree per mode it declares, so a mock-free
+  // tree is COMPILED rather than only promised. The default mode keeps the
+  // unsuffixed name the blocks site fetches; the others are suffixed with the
+  // mode. A block with no seam emits the one tree it has, and the CLI refuses
+  // the other modes by name - so the axis is derived from the manifest, not
+  // widened over blocks that cannot satisfy it.
   for (const form of blocksForms.FRAMEWORK_BLOCK_FORMS) {
-    const files = formFiles(block, form.id);
     put(
       join(OUT_DIR, 'f', `${block.name}.${form.id}.json`),
-      JSON.stringify({ block: block.name, form: form.id, files }, null, 2) + '\n',
+      JSON.stringify({ block: block.name, form: form.id, files: formFiles(block, form.id) }, null, 2) + '\n',
     );
+    for (const mode of declaredModes(block)) {
+      put(
+        join(OUT_DIR, 'f', `${block.name}.${form.id}.${mode}.json`),
+        JSON.stringify({ block: block.name, form: form.id, mode, files: formFiles(block, form.id, mode) }, null, 2) + '\n',
+      );
+    }
   }
 }
 
-function formFiles(block, formId) {
+/** Every data mode this block declares a seam source for, minus the default one
+ *  (which is the tree the unsuffixed file already holds). Derived from the
+ *  manifest: a block without a seam has one tree, and inventing others for it
+ *  would compile trees `create-kai add` refuses to write. */
+function declaredModes(block) {
+  return Object.keys(block.manifest.wiring?.modeFiles ?? {}).filter((mode) => mode !== 'mock');
+}
+
+function formFiles(block, formId, mode) {
   try {
-    return blocksForms.renderBlockForm(block, formId, { cdn: { version: VERSION } });
+    return blocksForms.renderBlockForm(block, formId, { cdn: { version: VERSION }, mode });
   } catch (err) {
-    console.error(`gen-blocks: ${block.name} ${formId} form:\n  RED ${err instanceof Error ? err.message : String(err)}`);
+    console.error(`gen-blocks: ${block.name} ${formId} form${mode ? ` (${mode} mode)` : ''}:\n  RED ${err instanceof Error ? err.message : String(err)}`);
     process.exit(1);
   }
 }

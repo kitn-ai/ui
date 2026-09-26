@@ -1,8 +1,8 @@
 # Blocks to the product bar — design (2026-09-25)
 
 > **Approved sections:** 1 (exemplar + acceptance line, manual review), 2 (wiring
-> DX), and 3 (the local loop) were presented and approved in session. Sections
-> 4-6 are the sequencing proposal and are open for the owner to cut down.
+> DX), and 3 (the local loop) were presented and approved in session. The
+> sequencing section below is a proposal, open for the owner to cut down.
 
 ## 1. Purpose, and the binding intent
 
@@ -125,6 +125,29 @@ stand behind** — not feature parity with a commercial product.
 7. Machine-checkable is **deferred**: the owner ruled manual review sufficient for
    now. A browser cell + screenshot baseline is a later addition, not a
    precondition.
+8. **Every affordance a reader would try works, on assistant.** The rail row menu
+   (Share, Rename, Pin, Archive, Delete), a profile menu pinned at the bottom of
+   the rail, `/` and `@` triggers in the prompt input, and the voice button wired
+   to `kai-voice-input`. Share is the one exception, and it is **disabled with a
+   tooltip saying so** rather than a live-looking no-op.
+9. **The keyboard hints are real bindings.** F2 rename, `Cmd+Shift+P` pin,
+   `Cmd+Shift+A` archive, registered because the menu shows them. `Cmd+R` and
+   `Cmd+P` are deliberately NOT used: they are the browser's reload and print.
+10. **Identity stays a placeholder.** The profile menu reads Demo User / a plan
+    name, the way the lab's app shell does. The kit owns no auth and the block
+    does not imply one.
+11. **A store that refuses an operation gets no button for it.** The four ops are
+    opt-in on `ConversationStore` (the `markRead` precedent); a consumer on
+    `fetchStore` sees the rows without Rename/Pin/Archive/Delete and no silent
+    no-op.
+
+The kit capability items 8-11 depend on, landed in the same round and guarded on
+its own tests: `ConversationSummary.pinned`/`archived`, the four opt-in store ops,
+the controller methods with a loud refusal, and one `orderedSummaries`
+(pinned first, archived out, recency inside) applied in both built-in list
+surfaces. Numeric-literal props in the react form are a known gap: bind them
+through `State` rather than fixing `literalProp`, whose blanket coercion would
+regress a string-typed prop that happens to hold digits.
 
 The second and third blocks inherit the same line; `in-app-assistant` additionally
 requires the skeleton host from 2.1.

@@ -30,11 +30,14 @@
  * rather than per item, so a block two of them compose is written once.
  *
  * THE DATA AXIS RIDES ON TOP OF IT (spec 4): `mock`, `none` and `real`, one
- * axis with three spellings. It is resolved from what a manifest DECLARES (its
- * `mockFiles` and its `route:` dependencies), never guessed from a file name,
- * and a mode the selection cannot satisfy THROWS naming what is missing. There
- * is no fallback between modes: a mode that quietly became another mode is the
- * one outcome the consumer cannot see and cannot repair.
+ * axis with three spellings. It is resolved from what a manifest DECLARES (the
+ * seam its `wiring.modeFiles`/`wiring.modeTarget` describe, its `mockFiles` and
+ * its `gateways`), never guessed from a file name, and a mode the selection
+ * cannot satisfy THROWS naming what is missing. Each mode's file is chosen by
+ * the RENDERER (`@kitn.ai/blocks/forms` resolves the seam, which is what makes
+ * the same choice in the CLI, in the /blocks trees and in the compile cells).
+ * There is no fallback between modes: a mode that quietly became another mode is
+ * the one outcome the consumer cannot see and cannot repair.
  */
 import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
@@ -413,7 +416,8 @@ function modeFlag(wiring: AddMode): string {
  * `files[]` entry, because the mock-mode composition still ships it, and this
  * list is what says WHICH of those files exist only for the mock. Nothing is
  * derived from a file name: `mock.ts` is a convention, not a rule, so a block
- * whose scripted data lives in `fixtures.ts` declares that instead.
+ * whose scripted data lives in `fixtures.ts` declares that instead, and a block
+ * whose mock IS its seam names that seam file.
  *
  * THE MEMBERSHIP CHECK IS NOT REDUNDANT with `validateBlockManifest`'s. A
  * bundled block is validated on the way in, but a fetched per-block item JSON
@@ -497,6 +501,11 @@ function wiringProblem(resolved: ResolvedAdd, wiring: AddMode, form: BlockForm):
  * it succeeded. The scan is over the emitted files (page, binder, controller,
  * stylesheet) so a page's `<script src="./mock.js">` is caught too, and it
  * names the importer and the specifier so the block's fix is obvious.
+ *
+ * A BLOCK WITH A SEAM NEVER REACHES THIS. Its controller imports
+ * `./<modeTarget>`, which the renderer wrote, so nothing in the tree names the
+ * dropped files. The refusal is what stands in for a seam on a block that has
+ * none (wave 1 of spec section 6 converted none of them).
  */
 function assertMockUnreferenced(block: Block, files: readonly FormFile[], dropped: readonly string[]): void {
   const names = new Set(dropped.map((path) => (path.split('/').pop() ?? path).replace(/\.(js|ts)$/, '')));
@@ -511,7 +520,8 @@ function assertMockUnreferenced(block: Block, files: readonly FormFile[], droppe
         `${block.name} cannot be installed without its scripted mock yet: ${file.path} still imports ` +
         `${found.map((spec) => `"${spec}"`).join(', ')}, and ${block.name} declares that module as a mock file ` +
         `(${declaredMockFiles(block).join(', ')}). The block's controller has to stop importing the mock before ` +
-        `a mock-free install compiles; install it without the flag for the scripted mock.`,
+        `a mock-free install compiles - either declare a wiring.modeFiles seam (one source per data mode, written ` +
+        `at wiring.modeTarget; see packages/blocks/src/registry.ts) or install it without the flag for the scripted mock.`,
       );
     }
   }
@@ -635,10 +645,16 @@ function planFiles(files: readonly FormFile[], plan: AddPlan): void {
  * `@kitn.ai/blocks`.
  */
 function planFormBlock(block: Block, opts: PlanOptions, plan: AddPlan, wiring: AddMode): void {
-  const rendered = renderBlockForm(block, opts.form, { cdn: { version: opts.kitVersion } });
+  // THE MODE RIDES WITH THE RENDER CALL. The renderer resolves the block's seam
+  // for it (`wiring.modeFiles` -> one file at `wiring.modeTarget`) and drops the
+  // files the mode does not ship, so a mock-free tree is never rendered at all -
+  // a block still importing `./mock` refuses below rather than shipping broken.
+  const rendered = renderBlockForm(block, opts.form, { cdn: { version: opts.kitVersion }, mode: wiring.mode });
   // The mock files are dropped BEFORE the plan sees them, so the write list and
   // the refusal below are about the same set of files. `mock` mode passes the
-  // renderer's list through untouched.
+  // renderer's list through untouched. Kept BESIDE the renderer's own drop
+  // rather than replaced by it: a block with no seam (mockFiles and nothing else)
+  // is still resolved here, and this is the list the refusal names.
   const dropped = wiring.mode === 'mock' ? [] : mockPaths(block);
   const files = dropped.length > 0 ? rendered.filter((file) => !dropped.includes(file.path)) : rendered;
   if (dropped.length > 0) assertMockUnreferenced(block, files, dropped);

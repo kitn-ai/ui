@@ -33,9 +33,9 @@
  *    toggle would otherwise fold the rail inside a column the page keeps - and
  *    that call is the second reason this controller declares a ref.
  */
-import { createAssistantStream, createMockResponder } from '@kitn.ai/ui/state';
+import { createAssistantStream } from '@kitn.ai/ui/state';
 import type { ChatMessage } from '@kitn.ai/ui/state';
-import { readOpenAIStream } from '@kitn.ai/ui/wire';
+import { readOpenAIStream, type StreamSource } from '@kitn.ai/ui/wire';
 import {
   localStorageStore,
   createConversationController,
@@ -43,7 +43,16 @@ import {
   type ConversationSummary,
 } from '@kitn.ai/ui/stores';
 import type { KaiPromptInputElement, KaiWorkspaceElement } from '@kitn.ai/ui/web-components';
-import { MOCK_SCRIPT, MOCK_TOOL_OUTPUTS, SUGGESTIONS, MODELS, type ModelOption } from './mock';
+// THE DATA-MODE SEAM. One specifier, resolved by whichever form rendered this
+// block: its manifest declares the scripted mock, the `--gateway` fetch and the
+// `--no-mock` stub as three sources for this one name, and exactly one of them
+// is written here. Nothing below imports the mock, which is what makes a
+// mock-free install compile.
+// The waiver is on the statement itself because that is where the guard reads it,
+// and the target really is generated: wiring.modeTarget names the file `add`
+// writes, and no authored source carries that name (the sources are
+// wiring.modeFiles, one per mode).
+import { transport } from './assistant.transport'; // lint:dangling-imports: allowed -- generated name, written by `create-kai add` from wiring.modeFiles
 
 // KNOWN RESIDUAL: the "2m ago" formatter is internal to the Solid layer and
 // is not exported from @kitn.ai/ui/stores, so the block restates it. Delete
@@ -59,6 +68,39 @@ function relativeTimeShort(iso: string | undefined, now = Date.now()): string {
   const hours = Math.floor(mins / 60);
   if (hours < 24) return `${hours}h ago`;
   return `${Math.floor(hours / 24)}d ago`;
+}
+
+/** One entry of the model switcher's `models` property. Declared here, with the
+ *  list: it types a State field, and the seam's three sources come and go while
+ *  the composition is what every mode ships. */
+export interface ModelOption {
+  id: string;
+  name: string;
+  description?: string;
+}
+
+const SUGGESTIONS = ['Summarize a document', 'Draft the Q3 board update', 'Compare two options'];
+
+// The model switcher recipe's data. Both entries name the SCRIPTED mock, which
+// is the honest option while no provider is contacted either way: a real backend
+// reads the selected id off the request and routes accordingly, so these become
+// real model ids the day the block is installed with a gateway.
+const MODELS: ModelOption[] = [
+  { id: 'kai-mock', name: 'Mock Standard', description: 'The scripted local responder' },
+  { id: 'kai-mock-thinking', name: 'Mock Thinking', description: 'Same script, same mock' },
+];
+
+/** The seam's contract, declared HERE because the controller is the one file
+ *  every data mode ships: the three sources are interchangeable, so the shape
+ *  they have to share belongs with the thing that consumes it. Each source
+ *  imports this type; a source that drifts fails that mode's compile. */
+export interface AssistantTransport {
+  /** The reply to one turn, as a source the wire reader accepts: a Response, a
+   *  ReadableStream, or an async iterable of SSE text. */
+  reply(messages: ChatMessage[]): Promise<StreamSource> | StreamSource;
+  /** What a tool call the stream announced settles to, or undefined to leave it
+   *  announced (the consumer's own loop answers it later). */
+  toolOutput(toolType: string): Record<string, unknown> | undefined;
 }
 
 const ASSISTANT_ACTIONS = ['copy', 'like', 'dislike'] as const;
@@ -224,12 +266,11 @@ export function createController(deps: AssistantDeps): AssistantController {
     return { conversationRows: filterRows(allRows, state.query), activeId: controller.activeId() };
   }
 
-  const respond = createMockResponder({ replies: MOCK_SCRIPT });
-
   const actions: AssistantActions = {
     modelChange(event) {
-      // The mock ignores the selection (it is a script); a real backend reads
-      // state.currentModel inside submit and routes on it.
+      // The scripted mock ignores the selection (it is a script); a real
+      // transport encodes the thread for a backend that routes on the id its
+      // request carries.
       patch({ currentModel: event.detail.modelId });
     },
 
@@ -285,10 +326,16 @@ export function createController(deps: AssistantDeps): AssistantController {
 
       const stream = createAssistantStream((update) => setMessages(update(state.messages)));
       try {
-        await readOpenAIStream(respond(text), stream);
+        // The whole thread, including the turn just added: the scripted mock
+        // ignores it, and a real backend has to be sent it.
+        await readOpenAIStream(await transport.reply(state.messages), stream);
         for (const part of state.messages.find((m) => m.id === stream.id)?.parts ?? []) {
           if (part.type !== 'tool' || part.tool.state !== 'input-available' || !part.tool.toolCallId) continue;
-          const output = MOCK_TOOL_OUTPUTS[part.tool.type];
+          // The wire announces a call; answering it is the host's side of the
+          // seam, so which mode is installed decides what happens here. The
+          // scripted mock settles it, a real backend leaves it to the server's
+          // tool loop, and the composition-only mode throws by name.
+          const output = transport.toolOutput(part.tool.type);
           if (output) stream.upsertTool(part.tool.toolCallId, { state: 'output-available', output });
         }
         stream.done();

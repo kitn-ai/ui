@@ -14,7 +14,8 @@ import { parseTemplate, walkElements } from '../contract/parse-template';
 import { analyzeController, crossCheckBindings } from '../contract/analyze-controller';
 import type { ControllerShape, FormFile, ParsedTemplate, TemplateNode } from '../contract/types';
 import { fileTarget } from '../targets';
-import { pascal, type Block } from '../registry';
+import { pascal, type Block, type DataMode } from '../registry';
+import { applyDataMode, DEFAULT_DATA_MODE } from './wiring';
 import { README_FILE, renderReadme } from './readme';
 
 // NO import from './index': index.ts re-exports this module, so a renderer
@@ -266,65 +267,72 @@ export interface HtmlFormOptions {
    * register-all bundle it never wanted.
    */
   registration?: 'bundler' | 'autoloader';
+  /**
+   * Which data mode this tree is for. The scripted mock is what a caller that
+   * says nothing means; the seam is resolved HERE, once, so every file below
+   * (the page's scripts, the README, the twin lookup) describes the same mode.
+   */
+  mode?: DataMode;
 }
 
 export function renderHtmlForm(block: Block, opts: HtmlFormOptions = {}): FormFile[] {
-  const pageEntry = block.manifest.files.find((f) => f.type === 'registry:page');
-  if (!pageEntry) throw new Error(`${block.name}: no registry:page entry to render the html form from`);
-  const pageHtml = block.files.get(pageEntry.path) as string;
+  const source = applyDataMode(block, opts.mode ?? DEFAULT_DATA_MODE);
+  const pageEntry = source.manifest.files.find((f) => f.type === 'registry:page');
+  if (!pageEntry) throw new Error(`${source.name}: no registry:page entry to render the html form from`);
+  const pageHtml = source.files.get(pageEntry.path) as string;
 
-  const parsed = parseTemplate(pageHtml, `${block.name}/${pageEntry.path}`);
-  if (!parsed.template) throw new Error(`${block.name}: ${parsed.errors.join('; ')}`);
+  const parsed = parseTemplate(pageHtml, `${source.name}/${pageEntry.path}`);
+  if (!parsed.template) throw new Error(`${source.name}: ${parsed.errors.join('; ')}`);
 
-  const name = pascal(block.name);
-  const controllerPath = `${block.name}.controller.ts`;
-  const controllerSource = block.files.get(controllerPath);
+  const name = pascal(source.name);
+  const controllerPath = `${source.name}.controller.ts`;
+  const controllerSource = source.files.get(controllerPath);
   if (controllerSource === undefined) {
-    throw new Error(`${block.name}: the html form needs ${controllerPath} (spec 3.2)`);
+    throw new Error(`${source.name}: the html form needs ${controllerPath} (spec 3.2)`);
   }
-  const analysis = analyzeController(controllerSource, name, `${block.name}/${controllerPath}`);
-  if (!analysis.shape) throw new Error(`${block.name}: ${analysis.errors.join('; ')}`);
+  const analysis = analyzeController(controllerSource, name, `${source.name}/${controllerPath}`);
+  if (!analysis.shape) throw new Error(`${source.name}: ${analysis.errors.join('; ')}`);
   // The gate is not the only caller: `create-kai add` and `kai dev` render
   // without ever running checkBlockContracts, so the cross-check runs HERE too
   // or those two front doors emit a binder that calls a missing action.
-  const crossErrors = crossCheckBindings(parsed.template, analysis.shape, `${block.name}/${pageEntry.path}`);
-  if (crossErrors.length) throw new Error(`${block.name}: ${crossErrors.join('; ')}`);
+  const crossErrors = crossCheckBindings(parsed.template, analysis.shape, `${source.name}/${pageEntry.path}`);
+  if (crossErrors.length) throw new Error(`${source.name}: ${crossErrors.join('; ')}`);
 
   const adaptRegistration =
     (opts.registration ?? 'bundler') === 'autoloader' ? (js: string): string => js : adaptRegistrationForBundler;
 
-  const entryScript = `${block.name}.js`;
+  const entryScript = `${source.name}.js`;
   const files: FormFile[] = [];
   const put = (path: string, content: string): void => {
-    files.push({ path, content, target: fileTarget('html', block.name, path) });
+    files.push({ path, content, target: fileTarget('html', source.name, path) });
   };
 
   put(pageEntry.path, serializeTemplate(parsed.template, { entryScript }));
-  put(entryScript, adaptRegistration(renderBinder({ blockName: block.name, template: parsed.template, shape: analysis.shape })));
+  put(entryScript, adaptRegistration(renderBinder({ blockName: source.name, template: parsed.template, shape: analysis.shape })));
   put(
     README_FILE,
-    renderReadme(block, [
+    renderReadme(source, [
       `Open \`${pageEntry.path}\` through your dev server.`,
       '',
       'The scripts import `@kitn.ai/ui/web-components` by bare specifier, so serve this folder through your bundler rather than opening the file from disk.',
     ]),
   );
 
-  for (const entry of block.manifest.files) {
+  for (const entry of source.manifest.files) {
     if (entry.type === 'registry:page') continue;
     if (entry.path.endsWith('.js')) continue; // a twin; emitted beside its .ts below
     if (entry.path.endsWith('.ts')) {
       const twin = entry.path.replace(/\.ts$/, '.js');
-      const stripped = block.files.get(twin);
+      const stripped = source.files.get(twin);
       if (stripped === undefined) {
         throw new Error(
-          `${block.name}: ${twin} is missing. The html form ships JavaScript, and the stripped twin is written at generation time by packages/ui/scripts/gen-blocks.mjs (esbuild) or packages/create-kai/scripts/build.mjs. Run a build.`,
+          `${source.name}: ${twin} is missing. The html form ships JavaScript, and the stripped twin is written at generation time by packages/ui/scripts/gen-blocks.mjs (esbuild) or packages/create-kai/scripts/build.mjs. Run a build.`,
         );
       }
       put(twin, adaptRegistration(stripped));
       continue;
     }
-    put(entry.path, block.files.get(entry.path) as string);
+    put(entry.path, source.files.get(entry.path) as string);
   }
   return files;
 }

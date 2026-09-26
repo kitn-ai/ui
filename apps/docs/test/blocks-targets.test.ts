@@ -6,6 +6,17 @@
  * It reads the GENERATED artifacts rather than a fixture, because the page
  * reads those exact files: dist/blocks/f/<id>.<form>.json, whose FormFile.target
  * is what BlockCard renders into the tree.
+ *
+ * f/ CARRIES A MODE DIMENSION NOW, and that is why the completeness assertion
+ * below is a NAME SET rather than a file count. The data axis (spec 4) writes
+ * `<id>.<form>.<mode>.json` beside the site's trees for every mode a block
+ * declares a seam source for, so the directory holds more than one file per
+ * block per form and a count would answer a question nobody asked: "how many
+ * files are in here" is not "is the site's family complete". The four-segment
+ * names are neither expected nor forbidden here -- the COMPILE cells
+ * (packages/ui/scripts/lib/block-compile-cells.mjs) are what prove a mock-free
+ * tree exists and compiles, and this guard is only about the two-segment-keyed
+ * trees the page fetches.
  */
 import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync } from 'node:fs';
@@ -27,7 +38,23 @@ describe('the displayed path is the written path', () => {
   it('there is at least one block and one framework -- neither axis may be empty', () => {
     expect(blockIds.length).toBeGreaterThan(0);
     expect(FRAMEWORK_BLOCK_FORMS.length).toBeGreaterThan(0);
-    expect(readdirSync(formsDir).length).toBe(blockIds.length * FRAMEWORK_BLOCK_FORMS.length);
+    // EXPECTED, BUILT FROM THE TWO AXES rather than typed: one site tree per
+    // block per form, `<id>.<form>.json`. The count this replaced (files in the
+    // directory === blocks x forms) went stale the moment the data axis added
+    // `<id>.<form>.<mode>.json` beside them, and a count cannot say WHICH tree
+    // is missing -- it only says the arithmetic is off. A name set can: the
+    // sorted names must be exactly these, so a missing form is named by its
+    // absence from the set and a mode tree cannot stand in for a site tree.
+    const expected = blockIds.flatMap((id) => FRAMEWORK_BLOCK_FORMS.map((form) => `${id}.${form.id}.json`));
+    // The exact shape the page fetches: `<id>.<form>.json`, three dot-separated
+    // segments. A data-mode tree is four (`<id>.<form>.<mode>.json`), so an
+    // exact-segment test is what keeps one from standing in for a missing site
+    // tree -- and a block id or form id containing a dot would fail loudly here
+    // rather than quietly matching the wrong file.
+    const siteTrees = readdirSync(formsDir).filter(
+      (name) => name.endsWith('.json') && name.split('.').length === 3,
+    );
+    expect(siteTrees.sort()).toEqual(expected.sort());
   });
 
   for (const id of blockIds) {

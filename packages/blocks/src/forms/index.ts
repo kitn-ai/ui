@@ -28,7 +28,7 @@
  * as `registry.ts`: this file typechecks under the package's browser tsconfig
  * (the /blocks page imports the form axis directly) and bundles into the CLI.
  */
-import type { Block, CdnFormOptions } from '../registry';
+import type { Block, CdnFormOptions, DataMode } from '../registry';
 import type { FormFile } from '../contract/types';
 import { renderHtmlForm } from './html';
 import { renderReactForm } from './react';
@@ -40,7 +40,13 @@ import { renderCdnFormFiles } from './cdn';
 export { renderHtmlForm, renderBinder, serializeTemplate, adaptRegistrationForBundler } from './html';
 export type { HtmlFormOptions } from './html';
 export { renderReactForm, handlerName } from './react';
+export type { ReactFormOptions } from './react';
 export { renderCdnFormFiles } from './cdn';
+// THE DATA-MODE SEAM, re-exported for the same reason the renderers are: the CLI
+// resolves a mode through the renderers, and the generator asks this package
+// which modes a block declares rather than re-reading the manifest's shape.
+export { applyDataMode, DEFAULT_DATA_MODE } from './wiring';
+export { DATA_MODES, type DataMode } from '../registry';
 export { README_FILE, renderReadme } from './readme';
 export type { FormFile };
 
@@ -120,11 +126,17 @@ export function withStrippedTwins(block: Block, strip: (source: string, fileName
 // ------------------------------------------------------- the form renderers
 
 /** ONE dispatch over the form axis -- `gen-blocks.mjs` and the CLI planner
- *  both call this, so the two can never disagree about what a form contains. */
-export function renderBlockForm(block: Block, form: BlockFormId, opts: { cdn: CdnFormOptions }): FormFile[] {
+ *  both call this, so the two can never disagree about what a form contains. The
+ *  DATA MODE rides along: it is what makes a mock-free tree exist at all, so it
+ *  is an argument here rather than a property of the block. */
+export function renderBlockForm(
+  block: Block,
+  form: BlockFormId,
+  opts: { cdn: CdnFormOptions; mode?: DataMode },
+): FormFile[] {
   switch (form) {
-    case 'html': return renderHtmlForm(block);
-    case 'react': return renderReactForm(block);
-    case 'cdn': return renderCdnFormFiles(block, opts.cdn);
+    case 'html': return renderHtmlForm(block, { mode: opts.mode });
+    case 'react': return renderReactForm(block, { mode: opts.mode });
+    case 'cdn': return renderCdnFormFiles(block, { ...opts.cdn, mode: opts.mode });
   }
 }

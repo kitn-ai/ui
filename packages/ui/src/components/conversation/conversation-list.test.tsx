@@ -29,6 +29,9 @@ const conv = (id: string, title: string): ConversationSummary => ({
   lastMessageAt: '2026-08-01T00:00:00Z', updatedAt: '2026-08-01T00:00:00Z',
 });
 
+const rowIds = (container: HTMLElement): (string | null)[] =>
+  [...container.querySelectorAll('[data-conversation-id]')].map((el) => el.getAttribute('data-conversation-id'));
+
 const noop = () => {};
 const baseProps = { groups: [], onSelect: noop, onNewChat: noop };
 
@@ -94,6 +97,54 @@ describe('children mode wins over the conversations prop', () => {
       <ConversationList {...baseProps} conversations={[conv('c1', 'One')]} />
     ));
     expect(shown.container.querySelector('input[aria-label="Search chats"]')).not.toBeNull();
+  });
+});
+
+describe('the one list-order rule (pinned first, archived out)', () => {
+  const dated = (id: string, updatedAt: string, flags: Partial<ConversationSummary> = {}): ConversationSummary =>
+    ({ ...conv(id, id), updatedAt, ...flags });
+
+  const ROWS = [
+    dated('newest', '2026-08-05T00:00:00Z'),
+    dated('pinned-old', '2026-08-01T00:00:00Z', { pinned: true }),
+    dated('archived', '2026-08-06T00:00:00Z', { archived: true }),
+    dated('older', '2026-08-02T00:00:00Z'),
+  ];
+
+  it('renders pinned rows first, then recency, and never the archived one', () => {
+    const { container } = render(() => (
+      <ConversationList {...baseProps} conversations={ROWS} searchable={false} />
+    ));
+    expect(rowIds(container)).toEqual(['pinned-old', 'newest', 'older']);
+  });
+
+  it('a set that is entirely archived reads as the empty state, not as a list of nothing', () => {
+    const { container } = render(() => (
+      <ConversationList {...baseProps} conversations={[dated('only', '2026-08-05T00:00:00Z', { archived: true })]} searchable={false} />
+    ));
+    expect(rowIds(container)).toEqual([]);
+    expect(container.textContent).toContain('No conversations yet');
+  });
+
+  it('a LEGACY summary (no flags at all) keeps the plain recency order', () => {
+    const { container } = render(() => (
+      <ConversationList
+        {...baseProps}
+        conversations={[conv('a', 'A'), conv('b', 'B'), conv('c', 'C')]}
+        searchable={false}
+      />
+    ));
+    // Same updatedAt on all three: the sort is stable, so declaration order survives.
+    expect(rowIds(container)).toEqual(['a', 'b', 'c']);
+  });
+
+  it('the search box filters the SAME ordered, archived-free set', () => {
+    const { container } = render(() => (
+      <ConversationList {...baseProps} conversations={ROWS} />
+    ));
+    const input = container.querySelector<HTMLInputElement>('input[aria-label="Search chats"]')!;
+    fireEvent.input(input, { target: { value: 'older' } });
+    expect(rowIds(container)).toEqual(['older']);
   });
 });
 
