@@ -7,7 +7,7 @@ import { Fabrication, listFabrications, resolveFabrications, type TFabrication }
 // the `src` typecheck pass has no `allowJs` — importing it from this file would
 // make every call `any` under noImplicitAny, which is worse than the split.
 
-const realTags = new Set(derived.elements.map((e) => e.tag));
+const realTags = new Set(derived.webComponents.map((e) => e.tag));
 
 /** A well-formed row, used as the base every negative case mutates one field of. */
 const base: TFabrication = {

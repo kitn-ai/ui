@@ -2,7 +2,7 @@
 // ingredient layer.
 //
 // Runs inside build:api, which is what lets verify:generated regenerate and diff
-// it — the element-manifest lesson is that a guard must invoke the script that
+// it — the web-component-manifest lesson is that a guard must invoke the script that
 // writes the artifact, or it only ever checks a file nobody rewrote. Listing
 // derived.json in that guard's GENERATED array BEFORE this line was in build:api
 // produced exactly that red, live: the sentinel survived the run.
@@ -15,7 +15,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import ts from 'typescript';
 import * as esbuild from 'esbuild';
 import { readVariants, MIN_VARIANTS } from './lib/message-part-variants.mjs';
-import { ELEMENT_META_KEYS } from './lib/element-meta-keys.mjs';
+import { WEB_COMPONENT_META_KEYS, WEB_COMPONENT_META_STRING_KEYS } from './lib/web-component-meta-keys.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const DEFAULT_OUT = join(ROOT, 'mcp/catalog/derived.json');
@@ -71,7 +71,7 @@ async function importTs(entry) {
 
 // Is this prop a callback the consumer must SUPPLY, as opposed to merely a
 // non-attribute value? `scalar: false` does not answer that: it says "not an
-// attribute", never "this is a function". Read off element-meta.json's printed
+// attribute", never "this is a function". Read off web-component-meta.json's printed
 // type: strip a leading `undefined | `, then function-valued iff the remainder
 // starts with `(` AND contains `=>`.
 //
@@ -89,42 +89,57 @@ function isFunctionValued(type) {
   return bare.startsWith('(') && bare.includes('=>');
 }
 
-// 1. Elements, from the generated meta (build:api runs gen-element-api first).
-const meta = JSON.parse(readFileSync(join(ROOT, 'src/elements/element-meta.json'), 'utf8'));
+// 1. Web components, from the generated meta (build:api runs gen-web-component-api first).
+const meta = JSON.parse(readFileSync(join(ROOT, 'src/web-components/web-component-meta.json'), 'utf8'));
 // Checked before the per-key floor below, which would otherwise report all six
 // keys missing on an empty model and bury the simpler truth.
-if (!Array.isArray(meta) || meta.length === 0) fail('element-meta.json yielded zero elements.');
+if (!Array.isArray(meta) || meta.length === 0) fail('web-component-meta.json yielded zero web components.');
 
-// The `?? []` fallbacks below are per-ELEMENT robustness — most elements really
+// The `?? []` fallbacks below are per-WEB-COMPONENT robustness — most web components really
 // do have no methods or no tokens — but they are also the one silent path left
-// in a script that hard-fails on zero elements, zero integrations, zero
+// in a script that hard-fails on zero web components, zero integrations, zero
 // capability groups, zero theme tokens, zero event exceptions and a degraded
-// union parse. element-meta.json is itself build:api-generated, so renaming a
-// key in gen-element-api.mjs's printer (`events`→`eventz`) would degrade every
-// element to `[]` and this generator would say nothing. Post-Task-4 that
+// union parse. web-component-meta.json is itself build:api-generated, so renaming a
+// key in gen-web-component-api.mjs's printer (`events`→`eventz`) would degrade every
+// web component to `[]` and this generator would say nothing. Post-Task-4 that
 // surfaces as "derived.json is out of date", which is true but points at the
 // artifact instead of at the printer where the change actually happened.
 //
-// The floor is per KEY, not per element: most elements genuinely have no
-// methods and almost none carry tokens, so a per-element floor would be wrong.
+// The floor is per KEY, not per web component: most web components genuinely have no
+// methods and almost none carry tokens, so a per-web-component floor would be wrong.
 // The key LIST is shared with tests/scripts/catalog-derived.test.ts's shape
-// guard (see lib/element-meta-keys.mjs for why that one is shared and the
-// predicate below is not); the rule it spells out -- at least one element
-// carries a non-empty array under this key -- is the same one that guard states,
+// guard (see lib/web-component-meta-keys.mjs for why that one is shared and the
+// predicate below is not); the rule it spells out -- at least one web component
+// carries a NON-EMPTY value under this key -- is the same one that guard states,
 // so the two cannot disagree about what "present" means.
-const missingKeys = ELEMENT_META_KEYS.filter((key) => !meta.some((e) => Array.isArray(e?.[key]) && e[key].length > 0));
+//
+// "Non-empty" is spelled per kind, and BOTH halves matter. `description` is a single
+// string (the facade's element doc comment, carried through by gen-web-component-api),
+// so the array test is unsatisfiable for it; relaxing the length test for every key
+// instead would have made the floor true for the wrong reason the first time all 100
+// descriptions came out empty. WEB_COMPONENT_META_STRING_KEYS says WHICH keys are
+// strings; this predicate still decides what counts as data.
+const carriesData = (entry, key) =>
+  WEB_COMPONENT_META_STRING_KEYS.includes(key)
+    ? typeof entry?.[key] === 'string' && entry[key].trim().length > 0
+    : Array.isArray(entry?.[key]) && entry[key].length > 0;
+const missingKeys = WEB_COMPONENT_META_KEYS.filter((key) => !meta.some((e) => carriesData(e, key)));
 if (missingKeys.length > 0) {
   fail(
-    `element-meta.json carries no non-empty ${missingKeys.map((k) => `"${k}"`).join(', ')} on ANY of its ${meta.length} ` +
-      `elements. This generator reads those keys, so the catalog would be built with them empty everywhere. Either the ` +
-      `key was renamed or dropped in scripts/gen-element-api.mjs's printer, or the model genuinely lost that data — fix ` +
+    `web-component-meta.json carries no non-empty ${missingKeys.map((k) => `"${k}"`).join(', ')} on ANY of its ${meta.length} ` +
+      `web components. This generator reads those keys, so the catalog would be built with them empty everywhere. Either the ` +
+      `key was renamed or dropped in scripts/gen-web-component-api.mjs's printer, or the model genuinely lost that data — fix ` +
       `it there, not here.`,
   );
 }
 
-const elements = meta
+const webComponents = meta
   .map((e) => ({
     tag: e.tag,
+    // The element's own doc comment, `''` when the facade carries none: the row shape
+    // every consumer reads is `string`, so the absent case is an empty string rather
+    // than a key that disappears per element.
+    description: e.description ?? '',
     props: (e.props ?? []).map((p) => ({
       name: p.name,
       scalar: p.scalar === true,
@@ -137,18 +152,18 @@ const elements = meta
     methods: (e.methods ?? []).map((m) => m.name),
     parts: (e.parts ?? []).map((p) => p.name),
     // composedFrom entries are objects ({ name, group, storyId }); tokens are
-    // plain strings. Verified against element-meta.json; do not add defensive
+    // plain strings. Verified against web-component-meta.json; do not add defensive
     // coercion, a shape change should fail loudly here.
     composedFrom: (e.composedFrom ?? []).map((c) => c.name),
     tokens: e.tokens ?? [],
   }))
   .sort((a, b) => a.tag.localeCompare(b.tag));
-// (The zero-element floor moved ABOVE the per-key check — `elements` is 1:1 with
+// (The zero-web-component floor moved ABOVE the per-key check — `webComponents` is 1:1 with
 // `meta`, so a second test here could never fire and would be a check that
 // proves nothing.)
 
 // 2. Part variants, from the union, via the ONE shared derivation.
-const partVariants = readVariants(readFileSync(join(ROOT, 'src/elements/chat-types.ts'), 'utf8'));
+const partVariants = readVariants(readFileSync(join(ROOT, 'src/web-components/chat/chat-types.ts'), 'utf8'));
 if (partVariants.length < MIN_VARIANTS) fail(`union parse degraded: ${partVariants.length} variants.`);
 
 // 3. Integrations and capability groups, esbuild-imported from the TS registries.
@@ -187,7 +202,7 @@ if (themeTokens.length === 0) fail('no --kai-* tokens found in theme.css.');
 //    — its own comment calls it "deliberately different from
 //    defineWebComponent's built-in non-bubbling dispatch", cards.tsx depends on
 //    it crossing shadow boundaries and remote.tsx re-emits it — and it was
-//    missed because (a) the scan only read src/elements, and (b) its first
+//    missed because (a) the scan only read src/web-components, and (b) its first
 //    argument is the IDENTIFIER `CARD_EVENT_NAME`, not a string literal. So the
 //    scan now walks the whole source tree, and resolves a same-file `const` name
 //    to its string. A partial loss here is worse than a total one: the floor
@@ -223,7 +238,7 @@ const SRC = join(ROOT, 'src');
 const NOT_SOURCE = /\.(test|stories)\.[cm]?tsx?$/;
 // define.tsx IS the built-in dispatch (both flags hard-coded false); it is the
 // rule these records are exceptions to, not one of them.
-const NOT_A_SOURCE_OF_EXCEPTIONS = join(SRC, 'elements/define.tsx');
+const NOT_A_SOURCE_OF_EXCEPTIONS = join(SRC, 'web-components/define/define.tsx');
 
 /** Every .ts/.tsx under src/, relative to the package root, POSIX-separated. */
 function sourceFiles(dir) {
@@ -290,9 +305,9 @@ if (eventExceptions.length === 0)
 
 writeFileSync(
   OUT,
-  JSON.stringify({ elements, partVariants, integrations, capabilityGroups, themeTokens, eventExceptions }, null, 2) +
+  JSON.stringify({ webComponents, partVariants, integrations, capabilityGroups, themeTokens, eventExceptions }, null, 2) +
     '\n',
 );
 console.log(
-  `gen-catalog: wrote ${OUT} (${elements.length} elements, ${partVariants.length} part variants, ${integrations.length} integrations, ${eventExceptions.length} event exceptions)`,
+  `gen-catalog: wrote ${OUT} (${webComponents.length} web components, ${partVariants.length} part variants, ${integrations.length} integrations, ${eventExceptions.length} event exceptions)`,
 );

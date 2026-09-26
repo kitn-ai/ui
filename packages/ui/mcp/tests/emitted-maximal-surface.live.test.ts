@@ -61,6 +61,14 @@
  * `verify:scaffold` compiles; the maximal cell is taken from it by size and then
  * checked to cover every capability group. Hard-coding the seven tags would let
  * the axis grow a capability that this file silently stopped composing.
+ *
+ * THE EMITTED IMPORTS ARE RESOLVED PER TAG, and this is the surface where that is
+ * load-bearing: it places several kai-* tags, so the emitted module carries one
+ * `@kitn.ai/ui/web-components/<entry>` specifier per tag it places (plus the
+ * companions those entries define themselves). Every one of them has to reach a
+ * real source module before a single assertion below can hold — a resolution that
+ * quietly missed one would leave that tag inert and read as a composition bug.
+ * See `emitted-source-specifiers.ts`.
  */
 import { describe, it, expect } from 'vitest';
 import { writeFileSync, rmSync, mkdirSync } from 'node:fs';
@@ -68,6 +76,9 @@ import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { scaffold } from '../mcp/tools/scaffold';
 import { listCapabilityGroups, listSurfaceProbes } from '../archetypes';
+// The exports map, applied by hand — shared by the four emitted guards, since
+// every one of them executes the emitted module rather than reading it.
+import { rewriteEmittedSpecifiers } from './emitted-source-specifiers';
 
 const PKG = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 /** Outside `tests/` and outside `src/` — see emitted-card-path.live.test.ts. */
@@ -75,7 +86,7 @@ const TMP_DIR = resolve(PKG, '.tmp-emitted-maximal');
 
 // jsdom gaps this surface walks into, as no-op stubs: the stick-to-bottom primitive
 // calls scrollTo from a rAF (kai-chat), and the disclosures measure with a
-// ResizeObserver (kai-reasoning). Same stubs `element-methods-runtime.test.tsx`
+// ResizeObserver (kai-reasoning). Same stubs `methods-runtime.test.tsx`
 // uses, and nothing here asserts scroll position or height.
 //
 // They are load-bearing for a reason worth naming: the emitted tool loop wraps its
@@ -112,32 +123,6 @@ proto.scrollIntoView ??= () => {};
 (globalThis.URL as unknown as { revokeObjectURL?: unknown }).revokeObjectURL ??= () => {};
 
 const SEP = '// ── src/main.ts ──';
-
-/**
- * The package's own exports map, applied by hand — same rewriter as the other two
- * guards, with ONE difference: `@kitn.ai/ui/elements` resolves to `dist/kai.es.js`,
- * the register-ALL bundle, and this surface needs six tags rather than one. The
- * others point it at `src/elements/chat` because `<kai-chat>` is all they mount;
- * doing that here would leave kai-resizable / kai-artifact / kai-sources /
- * kai-voice-input as unupgraded unknown elements and every assertion below would be
- * testing inert markup. `register-impl` is that bundle's source-tree entry point.
- */
-function rewrite(code: string): string {
-  return code
-    .split('\n')
-    .filter((l) => !l.includes("'@kitn.ai/ui/theme.tokens.css'"))
-    .filter((l) => !l.startsWith('import type '))
-    .map((l) =>
-      l
-        .replace("'@kitn.ai/ui/elements'", `'${PKG}/src/elements/register-impl'`)
-        .replace("'@kitn.ai/ui/state'", `'${PKG}/src/state'`)
-        .replace("'@kitn.ai/ui/wire'", `'${PKG}/src/wire'`)
-        .replace("'@kitn.ai/ui/schemas'", `'${PKG}/src/schemas'`),
-    )
-    // Both KaiChatElement and KaiSourcesElement appear on this surface.
-    .map((l) => l.replace(/\bas Kai\w+Element\b/g, 'as any'))
-    .join('\n');
-}
 
 const sse = (frames: unknown[]) =>
   `${frames.map((f) => `data: ${JSON.stringify(f)}\n\n`).join('')}data: [DONE]\n\n`;
@@ -250,7 +235,7 @@ describe('the EMITTED maximal surface really composes, end to end', () => {
     rmSync(TMP_DIR, { recursive: true, force: true });
     mkdirSync(TMP_DIR, { recursive: true });
     const tmp = resolve(TMP_DIR, `main.${Date.now()}.ts`);
-    writeFileSync(tmp, rewrite(main));
+    writeFileSync(tmp, rewriteEmittedSpecifiers(main));
     try {
       // Importing it RUNS it: the emitted module ends with `void init()`.
       await import(/* @vite-ignore */ tmp);

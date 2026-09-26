@@ -56,6 +56,24 @@ function fixtureRoot(docBody: string, version = '0.25.0'): string {
   return root;
 }
 
+/**
+ * The same fixture, with the pin ALSO written into a generated changelog and a
+ * differently-named markdown file, so the walk's changelog rule can be asserted in both
+ * directions: one file is a record and the other is prose somebody must fix.
+ */
+function fixtureRootWithRecords(pin: string): string {
+  const root = mkdtempSync(join(tmpdir(), 'cdn-pins-records-'));
+  mkdirSync(join(root, 'packages/ui'), { recursive: true });
+  mkdirSync(join(root, 'apps/docs'), { recursive: true });
+  writeFileSync(
+    join(root, 'packages/ui/package.json'),
+    `${JSON.stringify({ name: '@kitn.ai/ui', version: '0.25.0' }, null, 2)}\n`,
+  );
+  writeFileSync(join(root, 'packages/ui/CHANGELOG.md'), `* chore(docs): pin \`${pin}\` in the README\n`);
+  writeFileSync(join(root, 'packages/ui/CHANGELOG-old.md'), `* historically \`${pin}\`\n`);
+  return root;
+}
+
 /** Runs the linter and returns its exit code plus combined output. */
 function runLinter(args: string[]): { code: number; output: string } {
   try {
@@ -320,4 +338,18 @@ describe('a release bump reaches every live CDN pin', () => {
     expect(code, 'a dead extra-files path was accepted').not.toBe(0);
     expect(output).toContain('NOT ON DISK');
   });
+  it('exempts a GENERATED changelog but still reports the same pin in prose', () => {
+    // release-please writes a changelog out of commit SUBJECTS, so a subject carrying a version
+    // literal lands there verbatim, and the `historical` line waiver cannot help: the line is
+    // generated, and a hand edit is undone by the next release. Measured on the real tree: with a
+    // stale pin in packages/cli/CHANGELOG.md both this guard and lint:cli-invocations exit 0, and
+    // with the same text in a sibling .md both exit 1 (the same class that blocked the 0.33.0
+    // release in lint:layer-names, where the exemption named one changelog and the generator
+    // writes all of them).
+    const { code, output } = runLinter(['--repo-root', fixtureRootWithRecords('@kitn.ai/ui@0.1.0')]);
+    expect(code, 'a stale pin inside a generated changelog was reported').not.toBe(0);
+    expect(output, 'the changelog itself must not be named').not.toContain('CHANGELOG.md');
+    expect(output, 'the prose file with the same pin must be named').toContain('CHANGELOG-old.md');
+  });
+
 });

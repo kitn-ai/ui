@@ -16,10 +16,15 @@ import { Invariant, type TInvariant } from './catalog-types';
  * looking.
  *
  * EXAMPLES ARE CONSUMER CODE. Every `right` form must be runnable by someone who
- * has only installed the package: no import that is not in the `exports` map.
- * The kit's own guards (isSafeUrl, isRenderableLink) live in `src/primitives`,
- * which ships compiled and unexported, so they are named as repo-internal
- * guidance and never written as a consumer import.
+ * has only installed the package: no import that is not in the `exports` map. And
+ * the acceptance floor EXECUTES each one, resolving its kit imports against the
+ * modules that actually define the symbols (scripts/lib/kit-imports.mjs) instead of
+ * letting a snippet restate a policy it could have imported. The URL scheme lists
+ * are the case that forced this: the floor used to take every `right` form as a
+ * SCRIPT in a vm, where an import fails with "Cannot use import statement outside a
+ * module", so `isSafeUrl`'s three schemes had to be typed out here as a second copy.
+ * The floor takes a module now, so the copy is gone and `invariants.test.ts` fails
+ * a `right` form that types a scheme the policy module already owns.
  */
 export const invariants: TInvariant[] = [
   {
@@ -27,7 +32,7 @@ export const invariants: TInvariant[] = [
     statement:
       'A new array reference NOTIFIES; a new object for each changed item makes the change VISIBLE. Editing an existing item needs both. Adds and removes need only the fresh array. Setting the same array back is a no-op even if an item inside it was swapped. The test pins how the KIT behaves — it will render stale unless both arrive — but nothing checks CONSUMER code, so this is a rule you apply, not a guarantee you will be warned about. Reorders follow the same rule as adds and removes; the test names reorders in its title but exercises only an add and a remove, so treat that half as reasoned rather than pinned.',
     appliesTo: { tags: ['kai-chat', 'kai-conversations'] },
-    enforcedBy: { kind: 'test', paths: ['packages/ui/src/components/reactivity-contract.test.tsx'] },
+    enforcedBy: { kind: 'test', paths: ['packages/ui/src/components/reactivity-contract/reactivity-contract.test.tsx'] },
     status: 'enforced',
     diagnosis: [
       {
@@ -98,7 +103,7 @@ export const invariants: TInvariant[] = [
     statement:
       'Non-bubbling is the default: public kai-* events are dispatched through the one helper that hard-codes bubbles:false and composed:false, so listen on the element itself, never on a parent or document. The protocol exceptions (kai-maximize-intent, kai-maximize-state and kai-card) bubble or compose deliberately and are listed in the derived layer under eventExceptions — do not generalise from them to the rest.',
     appliesTo: {},
-    enforcedBy: { kind: 'structural', path: 'packages/ui/src/elements/define.tsx' },
+    enforcedBy: { kind: 'structural', path: 'packages/ui/src/web-components/define/define.tsx' },
     status: 'enforced',
     diagnosis: [
       {
@@ -114,7 +119,7 @@ export const invariants: TInvariant[] = [
       {
         wrong: "document.addEventListener('kai-submit', (e) => send(e.detail.value));",
         right: "chat.addEventListener('kai-submit', (e) => send(e.detail.value));",
-        note: 'The dispatch helper in src/elements/define.tsx passes { bubbles: false, composed: false }, so nothing above the host ever sees the event.',
+        note: 'The dispatch helper in src/web-components/define/define.tsx passes { bubbles: false, composed: false }, so nothing above the host ever sees the event.',
       },
       {
         wrong: "wrapper.addEventListener('kai-message-action', handleAction);",
@@ -157,7 +162,7 @@ export const invariants: TInvariant[] = [
   {
     id: 'untrusted-model-output',
     statement:
-      "Everything the model produced is untrusted input: a MessagePart, card envelope or tool argument reaching innerHTML, an href or src, window.open or an iframe is a vulnerability. THE DEFECT IS NEVER A MISSING GUARD, IT IS WHICH PATH GOT IT — every one found so far sat on a path the CONSUMER controls while the model-controlled path beside it had none. So put a policy on the sink, and MATCH THE LIST TO THE SINK rather than reaching for one universal list: http:, https: and mailto: for anything navigable the user may click, resolved against the page so ordinary relative links still work; http: and https: ONLY for a model-supplied citation, which is a reference to a page on the public web and has no business being relative. Those are two lists because there are two sinks — it is the same split the kit makes internally between SAFE_SCHEMES and RENDERABLE_SCHEMES, not a variant invented here. Whichever you use, parse inside a try/catch and RETURN FALSE on an unparseable URL: new URL() throws, and a throw at a sink crashes the render. And render model text as TEXT. Escaping is the correct rendering: the source text must stay VISIBLE as well as inert, because a filter that deleted it would pass the security check and be a worse UI. COVERAGE, and read this before trusting CI here: the three XSS suites are tests and ONLY tests. They run in the required test job, so the vectors they pin cannot come back — but NOTHING structural stops a NEW sink landing unguarded. No lint script in the package is about sinks, and the coupling map's unenforced list has no entry for the class. A new sink is caught in review or not at all.",
+      "Everything the model produced is untrusted input: a MessagePart, card envelope or tool argument reaching innerHTML, an href or src, window.open or an iframe is a vulnerability. THE DEFECT IS NEVER A MISSING GUARD, IT IS WHICH PATH GOT IT — every one found so far sat on a path the CONSUMER controls while the model-controlled path beside it had none. So put a policy on the sink, and MATCH THE LIST TO THE SINK rather than reaching for one universal list: http:, https: and mailto: for anything navigable the user may click, resolved against the page so ordinary relative links still work; http: and https: ONLY for a model-supplied citation, which is a reference to a page on the public web and has no business being relative. Those are two lists because there are two sinks — it is the same split the kit makes internally between SAFE_SCHEMES and RENDERABLE_SCHEMES, not a variant invented here. IMPORT THEM RATHER THAN RE-TYPING EITHER LIST: `isSafeUrl` and `isRenderableLink` are both exported from `@kitn.ai/ui`, and the two examples below import and execute those shipped predicates. If you do hand-roll one, parse inside a try/catch and RETURN FALSE on an unparseable URL: new URL() throws, and a throw at a sink crashes the render. And render model text as TEXT. Escaping is the correct rendering: the source text must stay VISIBLE as well as inert, because a filter that deleted it would pass the security check and be a worse UI. COVERAGE, and read this before trusting CI here: the three XSS suites are tests and ONLY tests. They run in the required test job, so the vectors they pin cannot come back — but NOTHING structural stops a NEW sink landing unguarded. No lint script in the package is about sinks, and the coupling map's unenforced list has no entry for the class. A new sink is caught in review or not at all.",
     appliesTo: {},
     // WHAT THE THREE SUITES DO NOT CATCH: they pin the vectors that were FOUND
     // (#246 markdown innerHTML, #247 the artifact's three URL sinks, and the
@@ -193,19 +198,19 @@ export const invariants: TInvariant[] = [
       {
         wrong: 'el.innerHTML = part.text;',
         right: 'el.textContent = part.text;',
-        note: 'For rich text render the part through <kai-markdown>, which escapes rather than sanitizes (src/components/markdown.tsx) and filters link and image URLs. Never hand-roll a second markdown-to-innerHTML path.',
+        note: 'For rich text render the part through <kai-markdown>, which escapes rather than sanitizes (src/components/markdown/markdown.tsx) and filters link and image URLs. Never hand-roll a second markdown-to-innerHTML path.',
       },
       {
         wrong: "window.open(card.url, '_blank');",
         right:
-          "const isNavigable = (u) => { try { return ['http:', 'https:', 'mailto:'].includes(new URL(u, location.href).protocol); } catch { return false; } };\nif (isNavigable(card.url)) window.open(card.url, '_blank', 'noopener,noreferrer');",
-        note: "THE try/catch IS NOT OPTIONAL: new URL() THROWS on an unparseable input like 'http://[', and an uncaught throw here crashes the render instead of blocking the link — worse than the bug you are fixing. Returning false is the whole contract. Resolving against location.href is deliberate: a relative or fragment href inherits http: and is allowed, which is what makes ordinary links keep working. REPO-INTERNAL ONLY: contributors inside this package use isSafeUrl/SAFE_SCHEMES from src/primitives/url-scheme-policy.ts (re-exported from src/primitives/card-routing.ts for the existing call sites), which has this exact shape — neither is reachable from the published package, so never emit an import for them.",
+          "import { isSafeUrl } from '@kitn.ai/ui';\nif (isSafeUrl(card.url)) window.open(card.url, '_blank', 'noopener,noreferrer');",
+        note: "The predicate owns the try/catch, so there is none in the snippet. `isSafeUrl` resolves against the page's own base, so a relative or fragment link keeps working, and it RETURNS FALSE rather than throwing on an unparseable input like 'http://[' — an uncaught throw at a sink crashes the render instead of blocking the link. The empty string is refused outright, and that is a bypass guard rather than tidiness: `new URL('', base)` inherits `http:`, so a caller that 'neutralises' a url it could not parse by blanking it would otherwise hand this predicate a value it always blessed. THIS SNIPPET USED TO TYPE THE THREE SCHEMES OUT, because the acceptance floor executed every `right` form as a SCRIPT in a vm where an import fails with 'Cannot use import statement outside a module'. The floor resolves kit imports now (scripts/lib/kit-imports.mjs), so the snippet runs the SHIPPED predicate and the copy is gone; `invariants.test.ts` fails a `right` form that restates a scheme from the policy.",
       },
       {
         wrong: '<a href={source.url}>{source.title}</a>',
         right:
-          'const isCitationUrl = (u) => { try { return [\'http:\', \'https:\'].includes(new URL(u).protocol); } catch { return false; } };\n{isCitationUrl(source.url) ? <a href={source.url} rel="noopener noreferrer">{source.title}</a> : <span>{source.title}</span>}',
-        note: "No base here, unlike the navigable case: a model-supplied citation is a reference to a page on the public web, so a relative path is not a citation and returns false. It must RETURN false, not throw — a throw escapes the ternary and the fallback never renders, which is exactly the deleted-text failure this invariant's own statement forbids. The <span> keeps the title VISIBLE. REPO-INTERNAL equivalent: isRenderableLink in src/primitives/link-preview.ts, also not exported.",
+          'import { isRenderableLink } from \'@kitn.ai/ui\';\n{isRenderableLink(source.url) ? <a href={source.url} rel="noopener noreferrer">{source.title}</a> : <span>{source.title}</span>}',
+        note: "No base here, unlike the navigable case, and that difference IS the predicate: `isRenderableLink` takes no base, so a relative path is not a citation and returns false. It must RETURN false, not throw — a throw escapes the ternary and the fallback never renders, which is exactly the deleted-text failure this invariant's own statement forbids. The <span> keeps the title VISIBLE. Imported rather than typed, for the same reason as the case above (scripts/lib/kit-imports.mjs); the base-vs-no-base split between these two snippets is precisely the part worth not restating by hand.",
       },
     ],
   },

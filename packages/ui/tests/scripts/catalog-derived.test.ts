@@ -3,16 +3,33 @@ import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { DerivedCatalog, DerivedElement } from '../../mcp/catalog/catalog-types';
+import { DerivedCatalog, DerivedWebComponent } from '../../mcp/catalog/catalog-types';
 import { listCapabilityGroups, listIntegrations } from '../../mcp/registry';
-import { ELEMENT_META_KEYS } from '../../scripts/lib/element-meta-keys.mjs';
+import {
+  WEB_COMPONENT_META_KEYS,
+  WEB_COMPONENT_META_STRING_KEYS,
+} from '../../scripts/lib/web-component-meta-keys.mjs';
 
 const PKG = join(__dirname, '..', '..');
 const ARTIFACT = join(PKG, 'mcp/catalog/derived.json');
 
 const read = () => DerivedCatalog.parse(JSON.parse(readFileSync(ARTIFACT, 'utf8')));
-const meta = (): { tag: string; [k: string]: unknown }[] =>
-  JSON.parse(readFileSync(join(PKG, 'src/elements/element-meta.json'), 'utf8'));
+const meta = (): { tag: string; description?: string; [k: string]: unknown }[] =>
+  JSON.parse(readFileSync(join(PKG, 'src/web-components/web-component-meta.json'), 'utf8'));
+
+/**
+ * "Present" means A NON-EMPTY VALUE, never "the key exists": a key present-but-empty is
+ * exactly what a broken extraction produces, and it is the shape the `?? []` fallbacks
+ * already hide from the re-derivations below. Spelled out here rather than imported
+ * (see lib/web-component-meta-keys.mjs for why the list is shared and this predicate
+ * deliberately is not), but the KIND is shared, because `description` is a string and
+ * the array test is unsatisfiable for it. Relaxing the length test for every key instead
+ * would report "present" for a model whose descriptions all came out `''`.
+ */
+const carriesData = (entry: { [k: string]: unknown }, key: string): boolean =>
+  WEB_COMPONENT_META_STRING_KEYS.includes(key)
+    ? typeof entry[key] === 'string' && (entry[key] as string).trim().length > 0
+    : Array.isArray(entry[key]) && (entry[key] as unknown[]).length > 0;
 
 /**
  * The function-valued props, as MEASURED against this tree rather than as
@@ -32,11 +49,11 @@ const FUNCTION_VALUED = new Set(['kai-voice-input.transcribe', 'kai-voice-output
  * it checks can only tell you the generator didn't post-process the result. This
  * is not a third production consumer of the variant list, so it does not compete
  * with Task 2's one-shared-derivation rule; it is the cross-check on it, the
- * same way the element assertions re-map element-meta.json rather than calling
+ * same way the web-component assertions re-map web-component-meta.json rather than calling
  * the generator's mapper.
  */
 function unionVariants(): string[] {
-  const src = readFileSync(join(PKG, 'src/elements/chat-types.ts'), 'utf8');
+  const src = readFileSync(join(PKG, 'src/web-components/chat/chat-types.ts'), 'utf8');
   const start = src.indexOf('export type MessagePart =');
   expect(start).toBeGreaterThan(-1);
   const end = src.indexOf('\n\n', start);
@@ -47,30 +64,31 @@ function unionVariants(): string[] {
 describe('derived catalog artifact', () => {
   it('exists, parses against DerivedCatalog, and derives from the tree', () => {
     const derived = read();
-    // Same element set as element-meta.json, no more, no less.
-    expect(derived.elements.map((e) => e.tag).sort()).toEqual(meta().map((m) => m.tag).sort());
-    // Elements carry the spec §3 fields.
-    expect(derived.elements.some((e) => e.composedFrom.length > 0)).toBe(true);
-    expect(derived.elements.some((e) => e.tokens.length > 0)).toBe(true);
+    // Same web-component set as web-component-meta.json, no more, no less.
+    expect(derived.webComponents.map((e) => e.tag).sort()).toEqual(meta().map((m) => m.tag).sort());
+    // Web components carry the spec §3 fields.
+    expect(derived.webComponents.some((e) => e.composedFrom.length > 0)).toBe(true);
+    expect(derived.webComponents.some((e) => e.tokens.length > 0)).toBe(true);
   });
 
   /**
    * Trust the source's SHAPE before re-deriving from it. Both the generator and
    * the re-derivation below read `m.props ?? []`, `m.events ?? []` and so on, so
-   * a renamed or dropped key in element-meta.json degrades BOTH sides to `[]`
+   * a renamed or dropped key in web-component-meta.json degrades BOTH sides to `[]`
    * identically and every comparison still passes — demonstrated: renaming
    * `events`→`eventz` and `parts`→`partz` left the suite green with those fields
-   * empty on all 80 elements. element-meta.json is itself build:api-generated,
+   * empty on all 80 elements. web-component-meta.json is itself build:api-generated,
    * so this is the same printer-drift class the `fn` comment below worries
    * about, and the `?? []` that makes the generator robust is exactly what makes
    * the check blind. Assert the keys carry data somewhere.
    */
-  it('element-meta.json still carries the keys the generator reads', () => {
-    const m = meta() as Record<string, unknown[]>[];
-    for (const key of ELEMENT_META_KEYS) {
-      expect(m.some((e) => Array.isArray(e[key]) && e[key].length > 0), `element-meta.json has no non-empty "${key}"`).toBe(
-        true,
-      );
+  it('web-component-meta.json still carries the keys the generator reads', () => {
+    const m = meta();
+    for (const key of WEB_COMPONENT_META_KEYS) {
+      expect(
+        m.some((e) => carriesData(e, key)),
+        `web-component-meta.json has no non-empty "${key}"`,
+      ).toBe(true);
     }
   });
 
@@ -78,13 +96,13 @@ describe('derived catalog artifact', () => {
    * The key list above is the SAME array `gen-catalog.mjs` runs its own hard
    * failure over — one list, imported by both, so neither can go on checking a
    * key the other stopped reading. That sharing has a cost the hoist would
-   * otherwise leave unattended: deleting a key from `ELEMENT_META_KEYS` switches
+   * otherwise leave unattended: deleting a key from `WEB_COMPONENT_META_KEYS` switches
    * the check off on BOTH sides at once, which is the degrade-together shape
    * that hid the original defect (generator and test both fell back to `?? []`,
    * so `events`→`eventz` left everything green and empty).
    *
    * So the list is pinned against a source authored independently of it —
-   * `DerivedElement`'s zod shape, which is the catalog's OUTPUT contract and
+   * `DerivedWebComponent`'s zod shape, which is the catalog's OUTPUT contract and
    * names the same six fields beside `tag`. Drop `tokens` from the shared list
    * and this fails naming it, while the shape guard above quietly stops
    * checking it. Order is asserted too: `toEqual` on arrays, not set equality,
@@ -92,8 +110,8 @@ describe('derived catalog artifact', () => {
    * list is a diff worth seeing.
    */
   it('the shared key list matches the derived element contract, so it cannot be quietly shortened', () => {
-    const contractKeys = Object.keys(DerivedElement.shape).filter((k) => k !== 'tag');
-    expect(ELEMENT_META_KEYS).toEqual(contractKeys);
+    const contractKeys = Object.keys(DerivedWebComponent.shape).filter((k) => k !== 'tag');
+    expect(WEB_COMPONENT_META_KEYS).toEqual(contractKeys);
   });
 
   /**
@@ -116,17 +134,18 @@ describe('derived catalog artifact', () => {
    * on all 550 props, left the suite green: the schema asks only for arrays of
    * the right type, and the staleness check below cannot see a mutation that
    * both the generator and the artifact share. So re-derive every field from
-   * element-meta.json and compare the whole structure at once.
+   * web-component-meta.json and compare the whole structure at once.
    *
    * This becomes the entire guard after Task 4: once build:api regenerates
    * derived.json, the staleness check is satisfied by construction and stops
    * being a safety net for content at all.
    */
-  it('re-derives every element field from element-meta.json, not merely their shapes', () => {
+  it('re-derives every element field from web-component-meta.json, not merely their shapes', () => {
     const expected = meta()
       .map((m) => {
         const el = m as {
           tag: string;
+          description?: string;
           props?: { name: string; scalar?: boolean; optional?: boolean }[];
           events?: { name: string }[];
           methods?: { name: string }[];
@@ -136,6 +155,9 @@ describe('derived catalog artifact', () => {
         };
         return {
           tag: el.tag,
+          // `?? ''`, byte-identical to gen-catalog.mjs's mapping: a facade with no
+          // element doc comment omits the key, and the row still carries a string.
+          description: el.description ?? '',
           props: (el.props ?? []).map((p) => ({
             name: p.name,
             scalar: p.scalar === true,
@@ -150,7 +172,63 @@ describe('derived catalog artifact', () => {
         };
       })
       .sort((a, b) => a.tag.localeCompare(b.tag));
-    expect(read().elements).toEqual(expected);
+    expect(read().webComponents).toEqual(expected);
+  });
+
+  /**
+   * The element doc comment is the ONE sentence that says what a tag IS, and until the
+   * generic re-derivation above existed it reached nothing: props, events, methods,
+   * parts and composedFrom all did, so an agent choosing between two elements could not
+   * tell them apart. Asserted here per element and BYTE-IDENTICAL to the model: a
+   * truncated or normalised-again description would still be a description, and still
+   * the wrong one.
+   *
+   * The floor is what stops this going vacuous: a model whose descriptions all came out
+   * empty (the failure that motivated the pipe) has nothing left to compare.
+   */
+  it('the element description reaches the catalog row', () => {
+    const derived = read();
+    const documented = meta().filter((e) => typeof e.description === 'string' && e.description.length > 0);
+    expect(documented.length, 'elements carrying an element doc comment').toBeGreaterThan(80);
+    for (const el of documented) {
+      expect(derived.webComponents.find((d) => d.tag === el.tag)?.description, el.tag).toBe(el.description);
+    }
+  });
+
+  /**
+   * The other end of the same pipe: a facade with NO doc comment above its
+   * `defineWebComponent(...)` call. `gen-web-component-api.mjs` omits the key from
+   * web-component-meta.json there (the shape every other optional key on the entry uses),
+   * so a reader that assumes the key exists would produce `undefined`, which reaches an
+   * agent as the literal word, or takes the catalog's zod parse down with it.
+   *
+   * The tree has such facades today, so the loop below runs on real data. It is not given
+   * a floor of its own: the batches documenting those six is the OUTCOME we want, and
+   * asserting "at least one is undocumented" would fire the day they finish. The row
+   * shape is exercised directly as well, so the assertion cannot go vacuous either way.
+   */
+  it('an element with no doc comment does not break the reader', () => {
+    const derived = read();
+    const undocumented = meta().filter((e) => !e.description);
+    for (const el of undocumented) {
+      expect(derived.webComponents.find((d) => d.tag === el.tag)?.description, el.tag).toBe('');
+    }
+    // No row may carry undefined for it, documented or not: that is the shape a reader
+    // would hand to an agent.
+    expect(derived.webComponents.every((d) => typeof d.description === 'string')).toBe(true);
+    // The row an un-documented facade produces, through the schema the MCP reads.
+    expect(() =>
+      DerivedWebComponent.parse({
+        tag: 'kai-undocumented',
+        description: '',
+        props: [],
+        events: [],
+        methods: [],
+        parts: [],
+        composedFrom: [],
+        tokens: [],
+      }),
+    ).not.toThrow();
   });
 
   it('re-derives integrations and theme tokens from their sources, not merely non-empty', () => {
@@ -176,7 +254,7 @@ describe('derived catalog artifact', () => {
   /**
    * THREE records, not two. `emitCardEvent` (src/primitives/card-routing.ts)
    * dispatches `kai-card` bubbling and composed on purpose — cards.tsx relies on
-   * it crossing shadow boundaries — and it lives outside src/elements AND names
+   * it crossing shadow boundaries — and it lives outside src/web-components AND names
    * its event through the `CARD_EVENT_NAME` constant, so it needed both a wider
    * scan and identifier resolution to appear. A harness reading derived.json
    * would otherwise conclude kai-card obeys the non-bubbling contract.
@@ -187,14 +265,19 @@ describe('derived catalog artifact', () => {
    * dispatch these are exceptions TO, leaving these three.
    */
   it('the protocol exceptions are extracted exactly, deduped', () => {
-    expect(read().eventExceptions).toEqual([
-      { file: 'src/elements/artifact.tsx', event: 'kai-maximize-intent', bubbles: true, composed: true },
-      { file: 'src/elements/resizable.tsx', event: 'kai-maximize-state', bubbles: false, composed: true },
-      { file: 'src/primitives/card-routing.ts', event: 'kai-card', bubbles: true, composed: true },
-    ]);
+    // Sorted by file: the artifact's order follows the directory WALK, so a
+    // rename (src/elements -> src/web-components moved these rows) is not drift.
+    const sorted = <T extends { file: string }>(rows: T[]): T[] => [...rows].sort((a, b) => a.file.localeCompare(b.file));
+    expect(sorted(read().eventExceptions)).toEqual(
+      sorted([
+        { file: 'src/web-components/artifact/artifact.tsx', event: 'kai-maximize-intent', bubbles: true, composed: true },
+        { file: 'src/web-components/resizable/resizable.tsx', event: 'kai-maximize-state', bubbles: false, composed: true },
+        { file: 'src/primitives/card-routing.ts', event: 'kai-card', bubbles: true, composed: true },
+      ]),
+    );
   });
 
-  // `fn` is derived by PARSING A FORMATTED TYPE STRING out of element-meta.json,
+  // `fn` is derived by PARSING A FORMATTED TYPE STRING out of web-component-meta.json,
   // so its meaning depends on how `build:api`'s type printer spaces and orders
   // unions. That is exactly the kind of dependency that changes without anyone
   // noticing: a printer that emitted `string | undefined` instead of
@@ -203,14 +286,14 @@ describe('derived catalog artifact', () => {
   // result, not a spot check.
   it('marks exactly the function-valued props, and nothing that merely contains a callback', () => {
     const derived = read();
-    const fnProps = derived.elements.flatMap((e) => e.props.filter((p) => p.fn).map((p) => `${e.tag}.${p.name}`));
+    const fnProps = derived.webComponents.flatMap((e) => e.props.filter((p) => p.fn).map((p) => `${e.tag}.${p.name}`));
     expect(fnProps.sort()).toEqual([...FUNCTION_VALUED].sort());
 
     // The two conjuncts of the rule, each with the case that breaks it alone.
     // `includes('=>')` without `startsWith('(')` would sweep these in: they are
     // an object and an array that CONTAIN callbacks, not callbacks.
     const named = (tag: string, prop: string) =>
-      derived.elements.find((e) => e.tag === tag)?.props.find((p) => p.name === prop);
+      derived.webComponents.find((e) => e.tag === tag)?.props.find((p) => p.name === prop);
     expect(named('kai-cards', 'policy')?.fn).toBe(false);
     expect(named('kai-toast-region', 'toasts')?.fn).toBe(false);
     // `startsWith('(')` without `includes('=>')` would sweep these in: parenthesised
@@ -220,7 +303,7 @@ describe('derived catalog artifact', () => {
 
     // `fn` is non-optional by design: absent and false must not be confusable,
     // so every prop record carries it.
-    expect(derived.elements.every((e) => e.props.every((p) => typeof p.fn === 'boolean'))).toBe(true);
+    expect(derived.webComponents.every((e) => e.props.every((p) => typeof p.fn === 'boolean'))).toBe(true);
   });
 
   /**

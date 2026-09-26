@@ -1,8 +1,8 @@
 ---
-// Advanced: the SolidJS parts this element wraps, from element-meta.json's
+// Advanced: the SolidJS parts this element wraps, from web-component-meta.json's
 // `composedFrom`. The escape hatch when the element's props aren't enough —
 // drop to the Solid layer and compose the pieces yourself.
-import meta from '@kitn.ai/ui/element-meta.json';
+import meta from '@kitn.ai/ui/web-component-meta.json';
 interface Props { tag: string }
 const { tag } = Astro.props;
 const el = (meta as any[]).find((e) => e.tag === tag);

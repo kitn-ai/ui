@@ -1,6 +1,6 @@
 ---
 title: Artifact
-description: A sandboxed preview + code viewer for AI-generated artifacts — the Claude Artifacts / ChatGPT Canvas pattern.
+description: A sandboxed preview of an AI-generated artifact.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -15,7 +15,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kai-tag-sub">kai-artifact</p>
 
-<p class="kai-lede">Show an AI-generated deliverable beside the conversation — a web page, doc, image, or PDF — in a sandboxed iframe with a nav toolbar and a switchable Code view.</p>
+<p class="kai-lede">Shows a generated page, document, or file beside the conversation, with its code a click away.</p>
 
 <Facts items={['Shadow DOM', 'Sandboxed iframe', 'Preview + Code tabs', 'Configurable toolbar', '4 events']} />
 
@@ -24,9 +24,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 <Playground client:only="solid" tag="kai-artifact" />
 
 <Aside type="tip" title="When to use">
-Reach for `<kai-artifact>` when a response produces something runnable or viewable you want to show alongside the chat. Pair it with [`<kai-resizable>`](/components/resizable/) for a draggable split-pane shell. It fills its container — give the parent a height.
-
-A model can also stream one into the thread as an [`artifact` card](/guides/generative-ui/), which sets its own height and reaches a narrower payload than the element takes here.
+When a response produces something runnable or viewable you want beside the chat. Pair it with [`<kai-resizable>`](/components/resizable/) For a split-pane shell and give the parent a height.
 </Aside>
 
 ## Usage
@@ -36,7 +34,7 @@ Point `src` at your hosted artifact and set `files` in JavaScript (it's an array
 ```html
 <kai-artifact src="https://your.app/artifacts/abc/index.html" style="display:block;height:520px"></kai-artifact>
 <script type="module">
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
 
   await customElements.whenDefined('kai-artifact');
 
@@ -61,8 +59,6 @@ Point `src` at your hosted artifact and set `files` in JavaScript (it's an array
 
 ### Preview only
 
-Hide the whole toolbar for a chrome-free embedded tile.
-
 <Example client:visible tag="kai-artifact" config={{ noNav: true, noReload: true, noHome: true, noPathField: true, noTabs: true }} />
 
 ### Open in new tab
@@ -71,13 +67,11 @@ Hide the whole toolbar for a chrome-free embedded tile.
 
 ### Standalone
 
-Rounded, bordered chrome for an artifact rendered outside a panel — a modal or inline tile.
+Chrome for an artifact rendered outside a panel.
 
 <Example client:visible tag="kai-artifact" config={{ standalone: true, readonlyPath: true }} />
 
 ### Expandable
-
-An expand-to-fill button that fires `kai-maximize-change`, plus the open-in-tab control.
 
 <Example client:visible tag="kai-artifact" config={{ expandable: true, openInTab: true }} />
 

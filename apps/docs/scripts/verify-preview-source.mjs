@@ -262,7 +262,7 @@ async function selfTest() {
   const good = [
     {
       path: '/blocks/r/x.cdn.html',
-      content: `<script type="module">import '${CDN_PIN}elements/autoloader.js';\nimport { readModelStream } from '${CDN_PIN}wire.js';</script>`,
+      content: `<script type="module">import '${CDN_PIN}web-components/autoloader.js';\nimport { readModelStream } from '${CDN_PIN}wire.js';</script>`,
     },
     { path: '/_astro/page.js', content: `const f = ${JSON.stringify(CDN_FOOTER)};` },
   ];
@@ -272,7 +272,7 @@ async function selfTest() {
     process.exit(1);
   }
   const planted = [
-    [{ ...good[0], content: '<script type="module">import "/blocks/kit/elements/autoloader.js";</script>' }, good[1]],
+    [{ ...good[0], content: '<script type="module">import "/blocks/kit/web-components/autoloader.js";</script>' }, good[1]],
     [good[0], { path: '/blocks/local/x.html', content: '' }, good[1]],
     [good[0], { path: '/_astro/page.js', content: `const f = ${JSON.stringify(LOCAL_FOOTER)};` }],
     [good[1]],

@@ -150,7 +150,7 @@ describe('generateProject (widget + mock core)', () => {
     // clipped a focus ring (round 4 patched the symptom with inline padding).
     // Owner-ruled root cause: emitApp was re-deriving layout the kit already
     // owns. ChatThread (chat-thread.tsx) — the same composition
-    // src/elements/chat.tsx renders behind <kai-chat> — owns the message
+    // src/web-components/chat/chat.tsx renders behind <kai-chat> — owns the message
     // list AND the composer (padding, focus ring, send button) as one unit,
     // so there is nothing left here to restate.
     const app = file(generateProject(construct()), 'src/App.tsx');
@@ -210,10 +210,10 @@ describe('generateProject (widget + mock core)', () => {
     expect(html).toMatch(/This blank page stands in for your site/);
     expect(html).toMatch(/bottom-right corner/);
     const hintIndex = html.indexOf('This blank page stands in for your site');
-    const elementIndex = html.indexOf('<acme-support>');
+    const webComponentIndex = html.indexOf('<acme-support>');
     expect(hintIndex).toBeGreaterThan(-1);
-    expect(elementIndex).toBeGreaterThan(-1);
-    expect(hintIndex).toBeLessThan(elementIndex);
+    expect(webComponentIndex).toBeGreaterThan(-1);
+    expect(hintIndex).toBeLessThan(webComponentIndex);
   });
 
   it('routes the theme accent onto the HOST only — App.tsx (message content) carries no accent/primary token at all', () => {
@@ -262,7 +262,7 @@ describe('widget chrome (Task 19a)', () => {
 
   // Owner finding, 2026-08-26: a hand-rolled <img> left a permanently broken
   // icon in kai dev's own live FAB when its URL never resolved. DockLauncherImage
-  // (ui/dock.tsx) is the graceful-degradation component — see src/ui/dock.test.tsx
+  // (components/dock/dock.tsx) is the graceful-degradation component — see src/components/dock/dock.test.tsx
   // for its own render-level fallback behavior; this only asserts the WIRE.
   it('launcherIcon renders a DockLauncherImage launcher override, JSON.stringify-escaped, and imports it', () => {
     const app = file(
@@ -1838,15 +1838,15 @@ describe('shell (B-10)', () => {
   });
 
   it('userMenu emits the Dropdown+Avatar recipe dispatching kai-user-menu, name/plan stringified', () => {
-    const app = file(generateProject(construct({ layout: 'fullscreen', shell: { userMenu: { name: 'Ada Lovelace', plan: 'Pro' } } })), 'src/App.tsx');
+    const app = file(generateProject(construct({ layout: 'fullscreen', shell: { userMenu: { name: 'Demo User', plan: 'Pro' } } })), 'src/App.tsx');
     expect(app).toContain('<Dropdown>');
-    expect(app).toContain(`fallback={${JSON.stringify('AD')}}`);
+    expect(app).toContain(`fallback={${JSON.stringify('DE')}}`);
     expect(app).toMatch(/new CustomEvent\('kai-user-menu'/);
-    expect(app).toContain(JSON.stringify('Ada Lovelace — Pro account menu'));
+    expect(app).toContain(JSON.stringify('Demo User, Pro account menu'));
   });
 
   it('userMenu-only construct imports NO Button — the userMenu piece uses only Dropdown/Avatar (regression: Button used to be gated on the composed headerEndContent string, not on which piece actually used it)', () => {
-    const app = file(generateProject(construct({ layout: 'fullscreen', shell: { userMenu: { name: 'Ada Lovelace' } } })), 'src/App.tsx');
+    const app = file(generateProject(construct({ layout: 'fullscreen', shell: { userMenu: { name: 'Demo User' } } })), 'src/App.tsx');
     expect(app).toContain(
       "import { ChatThread, createKaiChat, Dropdown, DropdownTrigger, DropdownContent, DropdownItem, DropdownSeparator, Avatar } from '@kitn.ai/ui/solid';",
     );
@@ -1863,7 +1863,7 @@ describe('the app header strip — `split` composes the promoted AppHeader (2026
   // The owner-reported defect: the emitted Workspace rendered its header chrome
   // as a text "Theme" button, no search at all and a bare avatar, all inside
   // ChatThread's own header row (so, inside the chat rail's width). The story
-  // `src/elements/builder-workspace.stories.tsx` is the binding acceptance
+  // `src/stories/showcase/builder-workspace.stories.tsx` is the binding acceptance
   // surface; its `AppHeader` is now a real component and codegen composes THAT.
   const split = (over: Record<string, unknown> = {}): Construct =>
     construct({
@@ -1876,7 +1876,7 @@ describe('the app header strip — `split` composes the promoted AppHeader (2026
           { label: 'Deploy', variant: 'default' },
         ],
       },
-      shell: { commandPalette: true, userMenu: { name: 'Ada', plan: 'Pro' } },
+      shell: { commandPalette: true, userMenu: { name: 'Demo User', plan: 'Pro' } },
       ...over,
     } as never);
 
@@ -1900,7 +1900,7 @@ describe('the app header strip — `split` composes the promoted AppHeader (2026
     expect(app).toContain('actions={[{"label":"Share","variant":"outline"},{"label":"Deploy","variant":"default"}]}');
     expect(app).toContain('onActionSelect={(action) => dispatchHeaderAction(action.label)}');
     // shell.userMenu (NOT a rejected `header.user` key)
-    expect(app).toContain('user={{"name":"Ada","plan":"Pro"}}');
+    expect(app).toContain('user={{"name":"Demo User","plan":"Pro"}}');
     expect(app).toContain("new CustomEvent('kai-user-menu', { detail: { item } })");
   });
 
@@ -1926,13 +1926,13 @@ describe('the app header strip — `split` composes the promoted AppHeader (2026
   });
 
   it('MENU-HONESTY: no palette, no search prop at all — never a search button with nothing behind it', () => {
-    const app = appOf(split({ shell: { userMenu: { name: 'Ada' } } }));
+    const app = appOf(split({ shell: { userMenu: { name: 'Demo User' } } }));
     expect(app).not.toContain('showSearch');
     expect(app).not.toContain('onSearch');
     // Paired against a vacuous pass: the strip really did render, with the
     // pieces this construct DOES declare.
     expect(app).toContain('<AppHeader');
-    expect(app).toContain('user={{"name":"Ada"}}');
+    expect(app).toContain('user={{"name":"Demo User"}}');
   });
 
   it('each piece is independently optional — a title-only split emits the strip and nothing else in it', () => {
@@ -1970,7 +1970,7 @@ describe('the app header strip — `split` composes the promoted AppHeader (2026
       construct({
         layout: 'fullscreen',
         header: { title: 'Workspace', themeToggle: true, actions: [{ label: 'Share' }] },
-        shell: { userMenu: { name: 'Ada' } },
+        shell: { userMenu: { name: 'Demo User' } },
       } as never),
     );
     expect(app).not.toContain('AppHeader');
@@ -2006,7 +2006,7 @@ it('is deterministic across the full phase-1 vocabulary', () => {
     aside: { position: 'start', width: '320px' },
     header: { title: 'Acme', themeToggle: true, actions: [{ label: 'Docs', variant: 'ghost' }] },
     composer: { triggers: { slash: [{ id: 'help', label: 'Help' }] } },
-    shell: { commandPalette: true, userMenu: { name: 'Ada' } },
+    shell: { commandPalette: true, userMenu: { name: 'Demo User' } },
     capabilities: {
       messageActions: { user: ['edit'], assistant: ['copy', 'speak'] },
       sources: { strip: false },
@@ -2081,7 +2081,7 @@ describe('workSurface — the split pane renders (2026-08-30)', () => {
     expect(app).toContain('codeSrc={"/src.html"}');
   });
 
-  it('codeView with NO codeUrl still emits the toggle and no codeSrc — components/work-surface.tsx owns the empty state (owner ruling, 2026-08-30)', () => {
+  it('codeView with NO codeUrl still emits the toggle and no codeSrc — components/work-surface/work-surface.tsx owns the empty state (owner ruling, 2026-08-30)', () => {
     const app = file(generateProject(ws({ chrome: { codeView: true } })), 'src/App.tsx');
     expect(app).toContain('showCodeView={true}');
     expect(app).not.toContain('codeSrc=');

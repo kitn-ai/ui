@@ -12,7 +12,7 @@
  *
  * WHY FULL IDS, NOT JUST THE SECTION (the bug this guard used to have): the
  * previous version only compared the SECTION prefix (the part before the
- * first `--`, e.g. "components-elements-audiovisualizer") against declared
+ * first `--`, e.g. "components-audiovisualizer") against declared
  * story TITLES, and never looked at the story NAME after `--` at all. A
  * section stays "declared" as long as ANY story in it survives, so deleting
  * one story out of several sharing a section (the StateMatrix story was
@@ -111,7 +111,7 @@ interface DeclaredStories {
  * mock data's title as the section. Storybook's own convention (verified
  * against every meta title in this tree: 100% contain one, zero
  * counter-examples) is a `/`-delimited hierarchical path — "Labs/Chat
- * Slots", "Components/Elements/AudioVisualizer" — which a plain string
+ * Slots", "Components/AudioVisualizer" — which a plain string
  * fixture essentially never is. Requiring a `/` in the matched value is
  * what tells the two apart.
  */

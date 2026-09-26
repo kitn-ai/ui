@@ -12,7 +12,7 @@
 //
 // Attributions are RESOLVED against the catalog, not accepted as prose. Naming
 // an invariant that does not exist, or proposing a "missing" invariant whose id
-// is already taken, or claiming an element has no description when it has one —
+// is already taken, or claiming a web component has no description when it has one —
 // each is a hard error. Without resolution the analysis degrades into free text
 // within two runs, which is the state it is replacing.
 
@@ -43,11 +43,11 @@ export const ATTRIBUTION_KINDS = {
   },
   'underived-contract': {
     requires: ['tag', 'fact'],
-    means: 'the derived layer does not express a contract the agent needed (which event carries which detail, that a prop is function-valued, which parts an element consumes).',
+    means: 'the derived layer does not express a contract the agent needed (which event carries which detail, that a prop is function-valued, which parts a web component consumes).',
   },
   'missing-element-description': {
     requires: ['tag'],
-    means: 'the element has no description anywhere in the tree, so the agent could not tell it apart from its neighbours.',
+    means: 'the web component has no description anywhere in the tree, so the agent could not tell it apart from its neighbours.',
   },
   'fabricated-element': {
     requires: ['invented'],
@@ -146,10 +146,10 @@ export function resolveAttribution(a, catalog) {
       if (!catalog.recipeIds.includes(a.recipe)) problems.push(`recipe "${a.recipe}" does not exist. The ids are: ${catalog.recipeIds.join(', ')}`);
       break;
     case 'underived-contract':
-      if (!known.has(a.tag)) problems.push(`"${a.tag}" is not an element the kit ships, so the derived layer is not what is missing — this is fabricated-element.`);
+      if (!known.has(a.tag)) problems.push(`"${a.tag}" is not a web component the kit ships, so the derived layer is not what is missing — this is fabricated-element.`);
       break;
     case 'missing-element-description':
-      if (!known.has(a.tag)) problems.push(`"${a.tag}" is not an element the kit ships.`);
+      if (!known.has(a.tag)) problems.push(`"${a.tag}" is not a web component the kit ships.`);
       else if (described.has(a.tag)) {
         problems.push(
           `"${a.tag}" DOES have a description in the tree, so "no description" is not the gap. Say what the description failed to convey instead (underived-contract), or attribute elsewhere.`,
@@ -158,7 +158,7 @@ export function resolveAttribution(a, catalog) {
       break;
     case 'fabricated-element':
       if (known.has(a.invented)) {
-        problems.push(`"${a.invented}" is a real element the kit ships; using it is not a fabrication. Check the tag before recording it — a false row in FABRICATED.md tells future agents a real element does not exist.`);
+        problems.push(`"${a.invented}" is a real web component the kit ships; using it is not a fabrication. Check the tag before recording it — a false row in FABRICATED.md tells future agents a real web component does not exist.`);
       }
       if (a.useInstead !== undefined && a.useInstead !== null && !known.has(a.useInstead)) {
         problems.push(`"use instead" names "${a.useInstead}", which the kit does not ship either. Leave it null with a reason rather than pointing at a second tag that does not exist.`);

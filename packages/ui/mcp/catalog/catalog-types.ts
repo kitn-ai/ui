@@ -83,9 +83,9 @@ export const Invariant = z.object({
  * the emitter did the other thing.
  *
  * NOT resolvable by `lint:catalog-drift`. That lint's ground truth is
- * derived.json, which carries props, events, methods, parts, composedFrom and
- * tokens — no slots — so `child`/`parent` resolve as elements and the SLOT NAME
- * resolves against nothing. element-meta.json has the slots; wiring them into
+ * derived.json, which carries the element `description`, props, events, methods, parts,
+ * composedFrom and tokens, but no slots, so `child`/`parent` resolve as elements and the SLOT NAME
+ * resolves against nothing. web-component-meta.json has the slots; wiring them into
  * the derived layer is the way to close it.
  */
 export const CompositionPlacement = z.object({
@@ -123,7 +123,7 @@ export const SurfaceRecipe = z.object({
   wiring: z.array(WiringEdge).min(1),
   /**
    * Optional, and `.min(1)` when present: a recipe whose ingredients nest states
-   * where they nest, and a recipe of one element has nothing to say here. An
+   * where they nest, and a recipe of one web component has nothing to say here. An
    * empty array would be a third thing — a composition claim that claims
    * nothing — so the schema refuses it.
    */
@@ -149,8 +149,21 @@ export const Scenario = z.object({
 });
 
 /** The derived layer's committed artifact. Task 3's generator writes it; Task 3's test parses it. */
-export const DerivedElement = z.object({
+export const DerivedWebComponent = z.object({
   tag: z.string(),
+  /**
+   * WHAT THIS ELEMENT IS, in one sentence: the doc comment above its
+   * `defineWebComponent(...)` call, whitespace-collapsed. `''` when a facade carries
+   * no doc comment, never absent: every row has the same shape.
+   *
+   * The reason this is here at all: an agent choosing between two elements was served
+   * props, events, methods, parts and composedFrom for every one of the 100, and not a
+   * sentence saying what any of them is. Required rather than optional so the field
+   * cannot come back as "some rows have it" without a failure somewhere, and a plain
+   * string because that is what it is: see the string-key handling in
+   * scripts/lib/web-component-meta-keys.mjs for the floor that keeps it non-empty.
+   */
+  description: z.string(),
   props: z.array(
     z.object({
       name: z.string(),
@@ -159,7 +172,7 @@ export const DerivedElement = z.object({
       /**
        * The function-valued-property contract, which `scalar` does NOT encode:
        * `scalar: false` says "not an attribute", never "this is a callback you
-       * must supply". Derived by the generator from element-meta.json's prop
+       * must supply". Derived by the generator from web-component-meta.json's prop
        * type: strip a leading `undefined | `, then true iff the remainder
        * starts with `(` and contains `=>`. Deliberately not a bare
        * `includes('=>')`, which over-matches objects and arrays that merely
@@ -171,13 +184,13 @@ export const DerivedElement = z.object({
   events: z.array(z.string()),
   methods: z.array(z.string()),
   parts: z.array(z.string()),
-  /** Spec §3 names both; element-meta.json already carries them. */
+  /** Spec §3 names both; web-component-meta.json already carries them. */
   composedFrom: z.array(z.string()),
   tokens: z.array(z.string()),
 });
 
 /**
- * Which MessagePart variants an element consumes. NOT derivable from any type
+ * Which MessagePart variants a web component consumes. NOT derivable from any type
  * today, so spec §3's registered-copy rule applies: this is an explicit copy,
  * and Task 7's drift lint fails when the union gains a variant no record
  * accounts for. Registered in "Copies this plan creates" at the end of the plan.
@@ -195,7 +208,7 @@ export const EventException = z.object({
 });
 
 export const DerivedCatalog = z.object({
-  elements: z.array(DerivedElement).min(1),
+  webComponents: z.array(DerivedWebComponent).min(1),
   // REGISTERED COPY: this floor restates MIN_VARIANTS, which lives in
   // scripts/lib/message-part-variants.mjs (Task 2) and cannot be imported into a
   // .ts module that also runs in the browser bundle. The generator asserts the
@@ -216,7 +229,7 @@ export const DerivedCatalog = z.object({
   // this comment's to restate: `npm run build:api` (its gen-catalog.mjs step)
   // prints the count as it writes, and the current set is the `eventExceptions`
   // array in mcp/catalog/derived.json. A hand-typed figure here
-  // would be stale the first time an element opts in or out, on the schema for
+  // would be stale the first time a web component opts in or out, on the schema for
   // the very field whose exception list was wrong before.
   eventExceptions: z.array(EventException).min(1),
 });

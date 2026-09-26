@@ -53,15 +53,15 @@
  * synthetic CPU starvation from 32 spinning processes on 10 cores.
  *
  *   file                         "idle"   "starved"   BOTH SUSPECT — see above
- *   element-types-lib-check       3766ms   6045ms  (blew the 5s budget)
- *   inline-element-types           967ms   1633ms
+ *   types-lib-check       3766ms   6045ms  (blew the 5s budget)
+ *   inline-web-component-types           967ms   1633ms
  *   variant-aurora                 272ms   TIMEOUT
  *   variant-wave                   334ms   TIMEOUT
  *   variant-custom                 246ms   TIMEOUT
  *   highlighter                    277ms    841ms
  *
  * The `because` strings on the entries below quote the same run — the
- * `element-types-lib-check` entry says "3.8s idle" — and carry the same caveat.
+ * `types-lib-check` entry says "3.8s idle" — and carry the same caveat.
  * They are left as recorded rather than silently reworded.
  *
  * EVERYWHERE ELSE THE SAME WINDOW LEAKED, so a reader who lands on one of these
@@ -85,12 +85,12 @@
  * conclusion it supports probably survives. The absolutes do not.
  *
  * WHAT SURVIVES, and why the table still stands: the two causes are structural,
- * not contention artifacts. `element-types-lib-check` runs a real
+ * not contention artifacts. `types-lib-check` runs a real
  * `ts.createProgram`, and the shader-variant files `await import()` the variant
  * module, `shader-canvas` and a `.glsl` asset from inside the test body, so Vite
  * transform cost is charged to the TEST's budget rather than to setup. Those
  * hold at any load. What does NOT survive is the specific claim that
- * `element-types-lib-check` spends 75% of the default budget "on an idle machine
+ * `types-lib-check` spends 75% of the default budget "on an idle machine
  * with zero contention": the machine had contention, so its true idle share is
  * lower than 75% and is currently unknown.
  *
@@ -163,13 +163,13 @@ const SPAWNS_PLAYWRIGHT_LIST = 30_000;
 
 export const TEST_TIMEOUT_BUDGETS: readonly TestTimeoutBudget[] = [
   {
-    file: 'tests/elements/element-types-lib-check.test.ts',
+    file: 'tests/web-components/types-lib-check.test.ts',
     timeout: COMPILES_TYPESCRIPT,
     because:
-      'runs ts.createProgram over element-types.d.ts with skipLibCheck:false and the full DOM lib — a real compile, 3.8s idle',
+      'runs ts.createProgram over web-component-types.d.ts with skipLibCheck:false and the full DOM lib — a real compile, 3.8s idle',
   },
   {
-    file: 'src/elements/inline-element-types.test.ts',
+    file: 'src/web-components/web-component/inline-web-component-types.test.ts',
     timeout: COMPILES_TYPESCRIPT,
     because:
       'compares the generated inline type block against the real sources with tsc, so it pays for a program per assertion',
@@ -193,6 +193,12 @@ export const TEST_TIMEOUT_BUDGETS: readonly TestTimeoutBudget[] = [
     file: 'tests/primitives/highlighter.test.ts',
     timeout: TRANSFORMS_A_MODULE_GRAPH,
     because: 'loads the real Shiki engine and its language grammars rather than a stub',
+  },
+  {
+    file: 'tests/scripts/solid-coverage-guard-wiring.test.ts',
+    timeout: COMPILES_TYPESCRIPT,
+    because:
+      'spawns `node scripts/verify-solid-coverage.mjs` once per case (9 of 12 cases) and the guard loads the TypeScript compiler to resolve every symbol, so each case pays a real program construction. Measured on a BUSY box (load average 6.7), 800ms per spawn; deliberately under 8 concurrent copies of this file (load 19.5) the worst case reached 2558ms, half the strict 5000ms default. That margin is why the file was seen red once in a full parallel run and green 12/12 alone and on every rerun: the budget is below the noise floor of a contended machine, and a 2-core CI runner is more contended than this box ever was. The failure this prevents is a timeout reported as a guard verdict -- see the note in the test file',
   },
   {
     file: 'tests/scripts/playwright-projects-guard-wiring.test.ts',

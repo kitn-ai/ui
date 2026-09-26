@@ -6,7 +6,7 @@
 // byte count, and both degrade quietly: grep precision (more near-duplicate
 // rows means more false hits per query) and whole-file ingestion cost (agents
 // that cannot or do not navigate pay for every byte on every read). The file is
-// generated, so it grows as a SIDE EFFECT of unrelated work — a new element, a
+// generated, so it grows as a SIDE EFFECT of unrelated work — a new web component, a
 // fatter doc comment, a new generated section — and nothing else in the tree
 // prices that growth. This guard makes growth a conscious act: the author who
 // moves the number is the one who read this comment.
@@ -14,7 +14,7 @@
 // THE CEILING, AND THE BASELINE IT WAS SET FROM
 // 2026-08-25 baseline: 294,399 bytes measured (84 elements, 122 state/wire
 // exports, after the index-pointer regeneration + the #320 dist/llms removal).
-// The ceiling is that plus ~14% headroom — enough for normal drift (a handful of new elements, doc
+// The ceiling is that plus ~14% headroom — enough for normal drift (a handful of new web components, doc
 // polish), not enough for a new embedded corpus to ride in unnoticed.
 //
 // Raise it ONLY with a note in the style of verify-pack-weight.mjs: what grew,
@@ -24,16 +24,35 @@
 //
 // 2026-08-31 raise: 328 → 344 KiB. Measured 341,927 bytes at 96 elements /
 // 123 state/wire exports. What grew: blocks-and-parts phase 1 — SEVEN new
-// public elements (kai-panel, kai-panel-header, kai-tab-bar, kai-tab-bar-item,
+// public web components (kai-panel, kai-panel-header, kai-tab-bar, kai-tab-bar-item,
 // kai-view-stack, kai-view, kai-row: ~5 KB of generated element reference) plus
 // the new "Icon roster" section (owner-ruled P-8: the 77 curated names were
 // enumerated NOWHERE an agent could see, so unknown names got guessed and
 // painted as literal text — spike finding F-7; ~2.7 KB, indexed from llms.txt
 // per FULL_ONLY_SECTIONS). Neither is trimmable without unshipping the thing:
-// the elements are real public API and the roster's whole value is being the
+// the web components are real public API and the roster's whole value is being the
 // complete list inline. New headroom is ~2 KiB — deliberately tight, the next
-// batch of elements pays its own toll here again.
-const MAX_LLMS_FULL_BYTES = 344 * 1024; // 352,256
+// batch of web components pays its own toll here again.
+//
+// 2026-09-22 raise: 344 → 355 KiB. Measured 352,800 bytes at 100 elements /
+// 123 state/wire exports. What grew: the attachment lightbox and the image split, both of them
+// element reference an agent reads HERE. `kai-lightbox` is a new element (open/show/hide/toggle,
+// `show-close`, `close-on-content-click`, three parts); `kai-image-artifact` is a new element while
+// `kai-image` changed meaning (the payload props moved out, `src` moved in); `image-preview` landed
+// on three elements that render attachments; `ImageArtifact` brought its own props. Trimming was
+// not the better fix: the growth is one row per real prop of real public API, and the alternative
+// (pointers into the Custom Elements Manifest) would hide the per-element API from the file an agent
+// reads first. 355 KiB keeps the same ~3% headroom over the measurement that the baseline and the
+// previous raise both used.
+// 2026-09-22 LOWERED: 355 -> 324 KiB. Measured 321,134 bytes at 100 elements / 123
+// state/wire exports. The 355 KiB above was raised IN THE SAME SESSION only to measure what
+// the element docstrings cost before they were trimmed (they added 75,917 bytes, which put
+// the file 29 KB over); the trims then took that whole block to ~7.8 KB and the prop docs from
+// 94,098 to ~54,000 chars, so the height is gone and leaving the raise in place would have
+// been drift with a receipt that no longer describes the tree. 324 KiB is the same ~3%
+// headroom over the measurement that the baseline and the previous raise used. If this file
+// grows again, the note above explains what to measure and what to trim first.
+const MAX_LLMS_FULL_BYTES = 324 * 1024; // 331,776
 
 // THE FLOOR IS A TRUNCATION TRIPWIRE, NOT A TARGET. This repo has already
 // shipped the failure it guards: running gen-llms.mjs standalone silently
@@ -172,7 +191,7 @@ if (reason === 'under-floor') {
 console.error(
   `✗ lint-llms-size: llms-full.txt is ${size.toLocaleString()} bytes (${kib(size)}), over the\n` +
     `  ${MAX.toLocaleString()}-byte ceiling (${kib(MAX)}) by ${(size - MAX).toLocaleString()} bytes.\n\n` +
-    `  The file is generated, so it grew as a side effect of something — a new element, fatter\n` +
+    `  The file is generated, so it grew as a side effect of something — a new web component, fatter\n` +
     `  doc comments, a new section. Growth here is paid for on every agent read: grep precision\n` +
     `  and whole-file ingestion cost both degrade with size. Your options, in order:\n\n` +
     `    1. TRIM — find what grew (git diff packages/ui/llms-full.txt, or compare section sizes)\n` +

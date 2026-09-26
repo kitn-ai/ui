@@ -109,7 +109,7 @@ describe('generate (zero-config: react + full-screen + conversations + mock)', (
       gateway: 'mock',
       // `elements` vs `solid` is the field a v2 `add` cannot re-derive without
       // parsing the entry file.
-      registration: 'elements',
+      registration: 'web-components',
     });
     expect(kai.paths.app).toBe('src/App.tsx');
   });
@@ -333,7 +333,7 @@ describe('generate (refusals)', () => {
 });
 
 /**
- * Vue is the representative of the four `registration: 'elements'` +
+ * Vue is the representative of the four `registration: 'web-components'` +
  * `composedWorkspace: true` frameworks (vue · svelte · angular · html). It is
  * asserted separately from React rather than by parameterising the React block,
  * because what matters here is the handful of values that DIFFER — the app file
@@ -395,7 +395,7 @@ describe('generate (vue + full-screen + conversations + mock)', () => {
 
   it('records vue paths in kai.json', async () => {
     const kai = JSON.parse(await readFile(path.join(dir, 'kai.json'), 'utf8'));
-    expect(kai).toMatchObject({ framework: 'vue', registration: 'elements', gateway: 'mock' });
+    expect(kai).toMatchObject({ framework: 'vue', registration: 'web-components', gateway: 'mock' });
     expect(kai.paths.app).toBe('src/App.vue');
     expect(kai.paths.entry).toBe('src/main.ts');
   });
@@ -494,7 +494,7 @@ describe('generate (angular + full-screen + conversations + mock)', () => {
 
   it('records angular paths in kai.json', async () => {
     const kai = JSON.parse(await readFile(path.join(dir, 'kai.json'), 'utf8'));
-    expect(kai).toMatchObject({ framework: 'angular', registration: 'elements', gateway: 'mock' });
+    expect(kai).toMatchObject({ framework: 'angular', registration: 'web-components', gateway: 'mock' });
     expect(kai.paths.app).toBe('src/app/app.ts');
     expect(kai.paths.css).toBe('src/styles.css');
   });
@@ -590,7 +590,7 @@ describe('generate (svelte + full-screen + conversations + mock)', () => {
 
   it('records svelte paths in kai.json', async () => {
     const kai = JSON.parse(await readFile(path.join(dir, 'kai.json'), 'utf8'));
-    expect(kai).toMatchObject({ framework: 'svelte', registration: 'elements', gateway: 'mock' });
+    expect(kai).toMatchObject({ framework: 'svelte', registration: 'web-components', gateway: 'mock' });
     expect(kai.paths.app).toBe('src/App.svelte');
     expect(kai.paths.entry).toBe('src/main.ts');
   });
@@ -685,7 +685,7 @@ describe('generate (solid + full-screen + conversations + mock)', () => {
 
     const entry = await readFile(path.join(dir, 'src/index.tsx'), 'utf8');
     expect(entry).toContain('solid-js/web');
-    expect(entry).not.toContain('@kitn.ai/ui/elements');
+    expect(entry).not.toContain('@kitn.ai/ui/web-components');
   });
 
   it('applies the solid patch — its only one', async () => {
@@ -798,7 +798,7 @@ describe('generate (html + full-screen + conversations + mock)', () => {
 
   it('records html paths in kai.json, where entry and app are the same file', async () => {
     const kai = JSON.parse(await readFile(path.join(dir, 'kai.json'), 'utf8'));
-    expect(kai).toMatchObject({ framework: 'html', registration: 'elements', gateway: 'mock' });
+    expect(kai).toMatchObject({ framework: 'html', registration: 'web-components', gateway: 'mock' });
     // Unique to this row: there is no component tree, so the entry IS the app.
     expect(kai.paths.app).toBe('src/main.ts');
     expect(kai.paths.entry).toBe('src/main.ts');
@@ -915,7 +915,7 @@ describe('generate (tanstack-start + full-screen + conversations + mock)', () =>
     const kai = JSON.parse(await readFile(path.join(dir, 'kai.json'), 'utf8'));
     expect(kai).toMatchObject({
       framework: 'tanstack-start',
-      registration: 'elements',
+      registration: 'web-components',
       gateway: 'mock',
     });
     expect(kai.paths.app).toBe('src/routes/index.tsx');
@@ -1074,7 +1074,7 @@ describe('generate (nextjs + full-screen + conversations + mock)', () => {
 
   it('records next paths in kai.json, with components outside the route files', async () => {
     const kai = JSON.parse(await readFile(path.join(dir, 'kai.json'), 'utf8'));
-    expect(kai).toMatchObject({ framework: 'nextjs', registration: 'elements', gateway: 'mock' });
+    expect(kai).toMatchObject({ framework: 'nextjs', registration: 'web-components', gateway: 'mock' });
     // NOT `app/page.tsx`: the page is the Server Component, and the composed
     // workspace — with the go-live expression in it — is the island.
     expect(kai.paths.app).toBe('app/workspace.tsx');

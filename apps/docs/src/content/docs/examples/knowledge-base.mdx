@@ -23,7 +23,7 @@ Four web components share one piece of state — the active scope:
 
 ### Wire the scope to the data
 
-The picker offers tags; map each tag to a knowledge base, then refresh the dependent elements when it changes.
+The picker offers tags; map each tag to a knowledge base, then refresh the dependent web components when it changes.
 
 ```html
 <kai-resizable orientation="horizontal">
@@ -38,7 +38,7 @@ The picker offers tags; map each tag to a knowledge base, then refresh the depen
 </kai-resizable>
 
 <script type="module">
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
 
   await customElements.whenDefined('kai-scope-picker');
 

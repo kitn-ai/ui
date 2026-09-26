@@ -63,7 +63,7 @@ describe('the vue form', () => {
     const files = byPath(renderVueForm(block()));
     const sfc = files.get('Fixture.vue')!;
     const composable = files.get('useFixture.ts')!;
-    expect(composable).toContain("import '@kitn.ai/ui/elements';");
+    expect(composable).toContain("import '@kitn.ai/ui/web-components';");
     expect(composable).toContain('customElements.whenDefined');
     // Derived from the fixture, not typed: every kai tag inside the block root,
     // sorted. `kai-dock`, `kai-conversations`, `kai-conversation-item`.
@@ -219,7 +219,7 @@ describe('the vue form', () => {
 
   it('takes a ref through useTemplateRef, typed by the element interface the tag names', () => {
     const sfc = byPath(renderVueForm(block())).get('Fixture.vue')!;
-    expect(sfc).toContain("import type { KaiDockElement } from '@kitn.ai/ui/elements';");
+    expect(sfc).toContain("import type { KaiDockElement } from '@kitn.ai/ui/web-components';");
     expect(sfc).toContain(`const dock = useTemplateRef<KaiDockElement>('dock');`);
     expect(sfc).toContain('useFixture(() => ({ dock: dock.value }))');
     expect(sfc).toContain('ref="dock"');

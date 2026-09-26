@@ -1,7 +1,7 @@
 import { useCallback, useRef } from 'react';
 import { PromptInput, useVoiceInput } from '@kitn.ai/ui/react';
 import type { PromptInputProps } from '@kitn.ai/ui/react';
-import type { KaiPromptInputElement } from '@kitn.ai/ui/elements';
+import type { KaiPromptInputElement } from '@kitn.ai/ui/web-components';
 import type { Theme } from '../theme';
 
 interface ComposerProps {

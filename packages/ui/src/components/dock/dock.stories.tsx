@@ -1,0 +1,164 @@
+import type { Meta, StoryObj } from 'storybook-solidjs-vite';
+import { fn } from 'storybook/test';
+import { Dock } from './dock';
+import { componentDescription } from '../../stories/docs/web-component-controls';
+
+// The Dock primitive. A dock is `position: fixed` and corner-pinned, so every story
+// renders it over a demo page rather than alone: floating over somebody else's page
+// is the thing it is for, and a bare canvas would show none of it.
+const meta = {
+  title: 'Components/Dock',
+  component: Dock,
+  tags: ['autodocs'],
+  parameters: {
+    layout: 'fullscreen',
+    docs: {
+      description: componentDescription([
+        'A launcher button in the page corner that opens a floating panel.',
+      ]),
+    },
+  },
+  argTypes: {
+    onOpenChange: {
+      action: 'openChange',
+      description: 'Fires with the next open state whenever the dock opens or closes.',
+      table: { category: 'Events' },
+    },
+  },
+  args: {
+    onOpenChange: fn(),
+  },
+} satisfies Meta<typeof Dock>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+/** The args each story's `render` receives. Spelled out because `satisfies Meta<…>`
+ *  keeps `typeof meta` a literal type, which Storybook cannot map back to the
+ *  component's props for a per-story `render`. */
+type DockArgs = { onOpenChange: (open: boolean) => void };
+
+const IMPORT = "import { Dock } from '@kitn.ai/ui/solid';";
+const src = (code: string) => ({
+  parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
+});
+
+/** A stand-in for the host page the dock floats over. */
+function HostPage(props: { children?: import('solid-js').JSX.Element; note?: string }) {
+  return (
+    <div class="min-h-[32rem] bg-background p-8 text-foreground">
+      <h1 class="text-xl font-semibold">Aurora — Pricing</h1>
+      <p class="mt-2 max-w-prose text-sm text-muted-foreground">
+        The page underneath stays usable: the dock does not trap focus, does not dim
+        anything, and does not swallow the Escape key this page's own controls want.
+      </p>
+      <button type="button" class="mt-4 rounded-md border border-border px-3 py-1.5 text-sm">
+        A control on the host page
+      </button>
+      {props.note ? <p class="mt-6 text-sm text-muted-foreground">{props.note}</p> : null}
+      {props.children}
+    </div>
+  );
+}
+
+/** The panel body — deliberately not a chat, to show the dock knows nothing about it. */
+function PanelBody() {
+  return (
+    <div class="flex h-full flex-col">
+      <header class="border-b border-border px-4 py-3 text-sm font-semibold">Aurora Support</header>
+      <div class="min-h-0 flex-1 overflow-auto px-4 py-3 text-sm text-muted-foreground">
+        Anything goes in here — a `kai-chat`, a form, your own component.
+      </div>
+      <footer class="border-t border-border px-4 py-3">
+        <input
+          class="w-full rounded-md border border-border bg-background px-2 py-1.5 text-sm"
+          placeholder="Ask a question"
+          aria-label="Ask a question"
+        />
+      </footer>
+    </div>
+  );
+}
+
+export const Default: Story = {
+  ...src(`{/* the panel is yours - a chat, a form, or your own component */}
+<Dock label="Aurora support">
+  <div class="flex h-full flex-col">
+    <header class="border-b border-border px-4 py-3 text-sm font-semibold">Aurora Support</header>
+    <div class="min-h-0 flex-1 px-4 py-3 text-sm text-muted-foreground">Anything goes in here: your own component.</div>
+    <input class="m-4 rounded-md border border-border px-2 py-1.5 text-sm" placeholder="Ask a question" aria-label="Ask a question" />
+  </div>
+</Dock>`),
+  render: (args: DockArgs) => (
+    <HostPage>
+      <Dock label="Aurora support" onOpenChange={args.onOpenChange}>
+        <PanelBody />
+      </Dock>
+    </HostPage>
+  ),
+};
+
+export const OpenWithUnread: Story = {
+  ...src(`{/* \`unread\` is the consumer's: the dot shows while closed and the dock never clears it. */}
+<Dock label="Aurora support" unread defaultOpen>
+  <div class="flex h-full flex-col">
+    <header class="border-b border-border px-4 py-3 text-sm font-semibold">Aurora Support</header>
+    <div class="min-h-0 flex-1 px-4 py-3 text-sm text-muted-foreground">Anything goes in here: your own component.</div>
+    <input class="m-4 rounded-md border border-border px-2 py-1.5 text-sm" placeholder="Ask a question" aria-label="Ask a question" />
+  </div>
+</Dock>`),
+  render: (args: DockArgs) => (
+    <HostPage note="Opened at mount via defaultOpen — note that it took no focus doing so.">
+      <Dock label="Aurora support" unread defaultOpen onOpenChange={args.onOpenChange}>
+        <PanelBody />
+      </Dock>
+    </HostPage>
+  ),
+};
+
+export const BottomStart: Story = {
+  ...src(`{/* Logical, so an RTL page docks on the opposite side with no extra work. */}
+<Dock label="Aurora support" position="bottom-start">
+  <div class="flex h-full flex-col">
+    <header class="border-b border-border px-4 py-3 text-sm font-semibold">Aurora Support</header>
+    <div class="min-h-0 flex-1 px-4 py-3 text-sm text-muted-foreground">Anything goes in here: your own component.</div>
+    <input class="m-4 rounded-md border border-border px-2 py-1.5 text-sm" placeholder="Ask a question" aria-label="Ask a question" />
+  </div>
+</Dock>`),
+  render: (args: DockArgs) => (
+    <HostPage note={'position="bottom-start" — logical, so RTL flips it for free.'}>
+      <Dock label="Aurora support" position="bottom-start" onOpenChange={args.onOpenChange}>
+        <PanelBody />
+      </Dock>
+    </HostPage>
+  ),
+};
+
+export const Tokenized: Story = {
+  ...src(`{/* Geometry is CSS custom properties, never props. */}
+<div style={{ '--kai-dock-width': '320px', '--kai-dock-height': '420px', '--kai-dock-radius': '28px' }}>
+  <Dock label="Aurora support">
+    <div class="flex h-full flex-col">
+      <header class="border-b border-border px-4 py-3 text-sm font-semibold">Aurora Support</header>
+      <div class="min-h-0 flex-1 px-4 py-3 text-sm text-muted-foreground">Anything goes in here: your own component.</div>
+      <input class="m-4 rounded-md border border-border px-2 py-1.5 text-sm" placeholder="Ask a question" aria-label="Ask a question" />
+    </div>
+  </Dock>
+</div>`),
+  render: (args: DockArgs) => (
+    <HostPage note="Resized entirely through --kai-dock-* tokens; no prop changed.">
+      <div
+        style={{
+          '--kai-dock-width': '320px',
+          '--kai-dock-height': '420px',
+          '--kai-dock-radius': '28px',
+          '--kai-dock-launcher-size': '48px',
+        }}
+      >
+        <Dock label="Aurora support" onOpenChange={args.onOpenChange}>
+          <PanelBody />
+        </Dock>
+      </div>
+    </HostPage>
+  ),
+};

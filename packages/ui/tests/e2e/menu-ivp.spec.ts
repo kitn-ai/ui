@@ -15,7 +15,7 @@ import { test, expect, type Page } from '@playwright/test';
  * Run: `npm run test:menu-ivp`
  */
 
-const STORY = '/iframe.html?id=components-primitives-dropdown--cascading-menu&viewMode=story';
+const STORY = '/iframe.html?id=components-dropdown--cascading-menu&viewMode=story';
 
 function trigger(page: Page) {
   return page.getByRole('button', { name: 'Add' });

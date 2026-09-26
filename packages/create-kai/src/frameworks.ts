@@ -127,7 +127,7 @@ export const FRAMEWORKS: readonly FrameworkDef[] = [
     label: 'React',
     templateDir: 'react',
     renderer: 'react',
-    registration: 'elements',
+    registration: 'web-components',
     composedWorkspace: true,
     status: 'ready',
     paths: {
@@ -145,7 +145,7 @@ export const FRAMEWORKS: readonly FrameworkDef[] = [
     label: 'Vue',
     templateDir: 'vue',
     renderer: 'vue',
-    registration: 'elements',
+    registration: 'web-components',
     composedWorkspace: true,
     status: 'ready',
     paths: {
@@ -162,7 +162,7 @@ export const FRAMEWORKS: readonly FrameworkDef[] = [
     label: 'Svelte',
     templateDir: 'svelte',
     renderer: 'svelte',
-    registration: 'elements',
+    registration: 'web-components',
     composedWorkspace: true,
     status: 'ready',
     paths: {
@@ -222,7 +222,7 @@ export const FRAMEWORKS: readonly FrameworkDef[] = [
     label: 'Angular',
     templateDir: 'angular',
     renderer: 'angular',
-    registration: 'elements',
+    registration: 'web-components',
     composedWorkspace: true,
     status: 'ready',
     paths: {
@@ -239,7 +239,7 @@ export const FRAMEWORKS: readonly FrameworkDef[] = [
     label: 'HTML (plain, Vite)',
     templateDir: 'vanilla',
     renderer: 'html',
-    registration: 'elements',
+    registration: 'web-components',
     composedWorkspace: true,
     status: 'ready',
     paths: {
@@ -256,7 +256,7 @@ export const FRAMEWORKS: readonly FrameworkDef[] = [
     label: 'Next.js',
     templateDir: 'nextjs',
     renderer: 'next',
-    registration: 'elements',
+    registration: 'web-components',
     // The starter is now the hand-composed workspace, prerendered by the App
     // Router: a `<Resizable>` split, `<Conversations>` in the rail, `<Thread>`
     // fed by `useKaiChat`, `<PromptInput>` below it, and the kit's
@@ -332,7 +332,7 @@ export const FRAMEWORKS: readonly FrameworkDef[] = [
     label: 'TanStack Start',
     templateDir: 'tanstack-start',
     renderer: 'tanstack-start',
-    registration: 'elements',
+    registration: 'web-components',
     // The starter is now the hand-composed workspace, server-rendered: a
     // `<Resizable>` split, `<Conversations>` in the rail, `<Thread>` fed by
     // `useKaiChat`, `<PromptInput>` below it, and the kit's `createMockResponder`

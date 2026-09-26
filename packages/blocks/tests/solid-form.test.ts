@@ -6,7 +6,7 @@
  * (spec 3.6, option (a)) -- and the set is ALL of them, not a subset: the
  * shared controller types its refs as the ELEMENT interfaces
  * (`KaiDockElement`), which a Solid component does not hand back, and the
- * `kai-` events are dispatched by the element facade in `src/elements/`, not
+ * `kai-` events are dispatched by the element facade in `src/web-components/`, not
  * by the Solid component underneath it, so `on:kai-click` on a Solid
  * component would silently never fire.
  */
@@ -71,7 +71,7 @@ describe('the solid form', () => {
 
   it('annotates the ref callback, kept for readability -- the parameterized augmentation infers it either way', () => {
     const tsx = byPath(renderSolidForm(block())).get('Fixture.tsx')!;
-    expect(tsx).toContain("import type { KaiDockElement } from '@kitn.ai/ui/elements';");
+    expect(tsx).toContain("import type { KaiDockElement } from '@kitn.ai/ui/web-components';");
     expect(tsx).toContain('ref={(el: KaiDockElement) => { dock = el; }}');
     expect(tsx).toContain('let dock: KaiDockElement | null = null;');
     expect(tsx).toContain('useFixture(() => ({ dock }))');
@@ -115,7 +115,7 @@ describe('the solid form', () => {
 
   it('emits the adapter as one signal over the controller', () => {
     const adapter = byPath(renderSolidForm(block())).get('useFixture.ts')!;
-    expect(adapter).toContain("import '@kitn.ai/ui/elements';");
+    expect(adapter).toContain("import '@kitn.ai/ui/web-components';");
     expect(adapter).toContain(`const TAGS = ['kai-conversation-item', 'kai-conversations', 'kai-dock'];`);
     expect(adapter).toContain('createSignal<FixtureState>(controller.state())');
     expect(adapter).toContain('onCleanup(controller.subscribe(');

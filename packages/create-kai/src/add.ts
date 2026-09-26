@@ -164,7 +164,7 @@ export async function decideForm(
       detection.fallback.length === 0
         ? undefined
         : `this project uses ${detection.fallback.join(' and ')}, and this release generates no ${detection.fallback.join('/')} tree yet, ` +
-          `so the block lands in the framework-neutral html form (the kai- elements work in every framework). ` +
+          `so the block lands in the framework-neutral html form (the kai- web components work in every framework). ` +
           `The generated ${detection.fallback.join(' and ')} trees arrive with the remaining renderers.`,
   };
 }

@@ -25,7 +25,7 @@ import { describe, it, expect, afterEach, vi } from 'vitest';
 import '@testing-library/jest-dom/vitest';
 import { createRoot, createSignal, createEffect } from 'solid-js';
 import { render, cleanup } from '@solidjs/testing-library';
-import { Form, fieldCommon, type FormDefinition } from '../../src/components/form';
+import { Form, fieldCommon, type FormDefinition } from '../../src/components/form/form';
 
 afterEach(cleanup);
 

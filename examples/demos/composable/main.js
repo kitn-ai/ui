@@ -1,7 +1,7 @@
 // Composable web-components showcase — wiring for the demo page.
 // (The kit itself is registered by ../../../packages/ui/dist/kai.es.js, imported in the HTML.)
 
-// ── boot guard: if the bundle didn't register the elements, show how to run it ──
+// ── boot guard: if the bundle didn't register the web components, show how to run it ──
 setTimeout(() => {
   if (!customElements.get('kai-chat')) {
     const link = document.getElementById('boot-link');
@@ -151,9 +151,13 @@ document.getElementById('att-inline').items = attachments;
 const attGrid = document.getElementById('att-grid');
 attGrid.items = attachments;
 attGrid.addEventListener('kai-remove', (e) => { attGrid.items = attGrid.items.filter((x) => x.id !== e.detail.id); log('remove', e.detail.id); });
-document.getElementById('img').base64 = btoa(unescape(encodeURIComponent(
-  '<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96"><rect width="96" height="96" rx="16" fill="#7c3aed"/><text x="48" y="62" font-size="44" text-anchor="middle" fill="white">★</text></svg>')));
-document.getElementById('img').setAttribute('media-type', 'image/svg+xml');
+const STAR_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96"><rect width="96" height="96" rx="16" fill="#7c3aed"/><text x="48" y="62" font-size="44" text-anchor="middle" fill="white">★</text></svg>';
+// A resource: the address is the input, so a data: URI is enough and the demo stays offline.
+document.getElementById('img').setAttribute('src', `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(STAR_SVG)))}`);
+// A payload: bare base64 plus the media type that labels it (no data: prefix, no URL).
+const artifact = document.getElementById('img-artifact');
+artifact.data = btoa(unescape(encodeURIComponent(STAR_SVG)));
+artifact.setAttribute('media-type', 'image/svg+xml');
 document.getElementById('srcs').sources = [
   { href: 'https://kitn.dev', title: 'kitn — the kit', description: 'Composable SolidJS + web-component chat UI.', showFavicon: true },
   { href: 'https://solidjs.com', title: 'SolidJS', description: 'A reactive UI library.', showFavicon: true },

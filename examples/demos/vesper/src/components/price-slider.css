@@ -1,0 +1,69 @@
+.price { min-width: 232px }
+.price-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.price-band {
+  font-family: var(--display-font);
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+
+.price-track {
+  position: relative;
+  height: 8px;
+  border-radius: 999px;
+}
+.price-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #575c66, var(--cta2));
+}
+
+/* Both inputs cover the track; only their thumbs take pointer events, which
+   is what lets two native sliders share one rail. */
+.price-input {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 100%;
+  height: 26px;
+  margin: 0;
+  background: none;
+  pointer-events: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.price-input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  pointer-events: auto;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--bg);
+  box-shadow: var(--clay-raise);
+  cursor: grab;
+  border: 0;
+}
+.price-input::-webkit-slider-thumb:active { cursor: grabbing }
+.price-input::-moz-range-thumb {
+  pointer-events: auto;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--bg);
+  box-shadow: var(--clay-raise);
+  border: 0;
+  cursor: grab;
+}
+.price-input:focus-visible::-webkit-slider-thumb {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}

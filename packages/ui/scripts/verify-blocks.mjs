@@ -117,7 +117,7 @@ const registry = await importTs(join(BLOCKS_PKG_ROOT, blocksEntry));
 const targets = await importTs(join(BLOCKS_PKG_ROOT, targetsEntry));
 const scaffolder = await importTs(join(ROOT, 'mcp/registry.ts'));
 const routeIntegrations = scaffolder.listIntegrations().map((i) => i.id);
-const nonscalarByTag = JSON.parse(readFileSync(join(ROOT, 'src/elements/element-nonscalar.json'), 'utf8'));
+const nonscalarByTag = JSON.parse(readFileSync(join(ROOT, 'src/web-components/web-component-nonscalar.json'), 'utf8'));
 
 
 // [pins] on the emitted artifact. Exported-style helper so --self-test can
@@ -201,10 +201,10 @@ function reactTreeErrors(name, files) {
   const errors = [];
   for (const file of files) {
     if (file.path.endsWith('.tsx') && /<kai-[\w-]+/.test(file.content)) {
-      errors.push(`${name}/${file.path}: renders a raw <kai-*> tag. The react form imports every element from @kitn.ai/ui/react (spec 5.2); the intrinsic-JSX escape hatch is exactly what this check forbids.`);
+      errors.push(`${name}/${file.path}: renders a raw <kai-*> tag. The react form imports every web component from @kitn.ai/ui/react (spec 5.2); the intrinsic-JSX escape hatch is exactly what this check forbids.`);
     }
-    if (/from '@kitn\.ai\/ui\/elements'/.test(file.content) && !file.path.endsWith('.controller.ts')) {
-      errors.push(`${name}/${file.path}: imports elements from @kitn.ai/ui/elements. Only the controller may name an element INTERFACE; the tree uses the wrappers.`);
+    if (/from '@kitn\.ai\/ui\/web-components'/.test(file.content) && !file.path.endsWith('.controller.ts')) {
+      errors.push(`${name}/${file.path}: imports web components from @kitn.ai/ui/web-components. Only the controller may name an element INTERFACE; the tree uses the wrappers.`);
     }
     const expected = targets.fileTarget('react', name, file.path);
     if (file.target !== expected) {

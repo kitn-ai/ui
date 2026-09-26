@@ -11,7 +11,7 @@
  * than re-scanning theme.css here keeps this module free of `?raw` CSS
  * imports, which scripts/gen-construct-schema.mjs's esbuild bundling of
  * schema.ts cannot resolve — and it also covers the two knobs wired in
- * src/elements/styles.css rather than theme.css (`--kai-font-base`,
+ * src/web-components/styles.css rather than theme.css (`--kai-font-base`,
  * `--kai-tracking`), which a theme.css-only scan would wrongly reject even
  * though the builder's embedded ThemeStudio posts both.
  *

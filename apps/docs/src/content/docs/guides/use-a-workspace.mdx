@@ -14,7 +14,7 @@ import { Aside } from '@astrojs/starlight/components';
 </kai-workspace>
 
 <script type="module">
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
 
   const rail = document.querySelector('kai-conversations');
   const chat = document.querySelector('kai-chat');
@@ -45,7 +45,9 @@ Unnamed children land in the main region; `slot="main"` works too. The `end` asi
 
 ## BREAKING: migrating from the chat preset
 
-Before the 2026-08-20 re-cast, `<kai-workspace>` was a chat preset that took `messages`, `conversations`, and 30 other props. That surface is gone; there is no back-compat alias. The fastest migration is to regenerate the composition: the kai MCP `scaffold` tool's `workspace` archetype emits the shell with the parts wired. To migrate by hand, move each prop to the part that owns it now:
+Before the 2026-08-20 re-cast, `<kai-workspace>` was a chat preset that took `messages`, `conversations`, and 30 other props. That surface is gone; there is no back-compat alias. The fastest migration is to regenerate the composition: the kai MCP `scaffold` tool's `workspace` archetype emits the shell with the parts wired.
+
+To migrate by hand, move each prop to the part that owns it now:
 
 | Old `<kai-workspace>` prop | Where it lives now |
 | --- | --- |
@@ -57,9 +59,12 @@ Before the 2026-08-20 re-cast, `<kai-workspace>` was a chat preset that took `me
 | `sidebarCollapsed`, `defaultSidebarCollapsed` | `startCollapsed` / `defaultStartCollapsed` (the end aside has its own pair) |
 | `collapseBelow` | kept, now collapsing both asides |
 | `compact` | kept as a reflected density hint; the rail's row density is `<kai-conversations>`' own `compact` |
-| `theme` | unchanged, as on every element |
+| `theme` | unchanged, as on every web component |
 
-Events moved with their owners: listen for `kai-conversation-select` and `kai-new-chat` on `<kai-conversations>`, for `kai-submit`, `kai-message-action`, `kai-model-change`, `kai-value-change`, `kai-suggestion-click`, `kai-voice`, and `kai-web-search` (was `kai-search`) on `<kai-chat>`. The shell itself fires only `kai-aside-toggle` (was `kai-sidebar-toggle`, now with a `side`) and `kai-aside-resize`. The old sidebar methods `toggleSidebar()` / `collapseSidebar()` / `expandSidebar()` are `toggleAside(side)` / `collapseAside(side)` / `expandAside(side)`, and the thread methods (`focus()`, `clear()`, `send()`, `scrollToBottom()`) live on your `<kai-chat>`.
+Events moved with their owners: listen for `kai-conversation-select` and `kai-new-chat` on `<kai-conversations>`, for `kai-submit`, `kai-message-action`, `kai-model-change`, `kai-value-change`, `kai-suggestion-click`, `kai-voice`, and `kai-web-search` (was `kai-search`) on `<kai-chat>`.
+
+{/* docs-alignment: historical-kai-token -- the pre-rename element name, named here so a reader migrating off the old preset can find it */}
+The shell itself fires only `kai-aside-toggle` (was `kai-sidebar-toggle`, now with a `side`) and `kai-aside-resize`. The old sidebar methods `toggleSidebar()` / `collapseSidebar()` / `expandSidebar()` are `toggleAside(side)` / `collapseAside(side)` / `expandAside(side)`, and the thread methods (`focus()`, `clear()`, `send()`, `scrollToBottom()`) live on your `<kai-chat>`.
 
 <Aside type="note" title="Why the preset dissolved">
 Every consumer feature had to become a workspace prop, and the surface still misdescribed itself (its `kai-search` was the composer's web-search toggle, not conversation search). You compose the parts now; the shell only arranges them.

@@ -1,7 +1,7 @@
 // Test-only loader for scripts/gen-card-validation-schemas.mjs.
 //
 // The specifier is a runtime variable on purpose, the same way
-// src/elements/inline-element-types.test.ts loads gen-element-types.mjs: the script
+// src/web-components/web-component/inline-web-component-types.test.ts loads gen-web-component-types.mjs: the script
 // is plain ESM outside `include`, and a static import would need `allowJs`.
 //
 // The interface below is a hand-written type for a JavaScript module, which is a

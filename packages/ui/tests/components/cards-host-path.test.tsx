@@ -1,8 +1,8 @@
 // tests/components/cards-host-path.test.tsx
 // Native Solid host path: a `host` prop's emit is called (not the CustomEvent).
 import { render, fireEvent } from '@solidjs/testing-library';
-import { ConfirmCard } from '../../src/components/confirm-card';
-import { TasksCard } from '../../src/components/tasks-card';
+import { ConfirmCard } from '../../src/components/confirm-card/confirm-card';
+import { TasksCard } from '../../src/components/tasks/tasks-card';
 import type { CardEvent, CardHost, CardContext } from '../../src/primitives/card-contract';
 
 afterEach(() => {

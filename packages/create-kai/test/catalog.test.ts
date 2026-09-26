@@ -439,14 +439,14 @@ describe('framework table', () => {
     expect(vue.status).toBe('ready');
     // Vue is the representative of the four `elements` + composed-workspace
     // cells; svelte, angular and html share this shape and are next.
-    expect(vue.registration).toBe('elements');
+    expect(vue.registration).toBe('web-components');
     expect(vue.composedWorkspace).toBe(true);
   });
 
   it('ships angular ready', () => {
     const angular = getFramework('angular')!;
     expect(angular.status).toBe('ready');
-    expect(angular.registration).toBe('elements');
+    expect(angular.registration).toBe('web-components');
     expect(angular.composedWorkspace).toBe(true);
   });
 

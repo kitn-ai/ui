@@ -1,6 +1,9 @@
 import { StrictMode, useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { Block } from './block';
+// The one file this host does NOT ship: scripts/verify-blocks-react.mjs copies this directory
+// into a throwaway app and writes `src/block.ts` there, exporting the block under test as
+// `Block`. So the specifier is real and the target is deliberately absent from the tree.
+import { Block } from './block'; // lint:dangling-imports: allowed -- generated into the host copy by scripts/verify-blocks-react.mjs
 
 declare global {
   interface Window {

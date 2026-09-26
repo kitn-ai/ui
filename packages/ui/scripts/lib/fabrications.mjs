@@ -64,7 +64,7 @@ ${[...header, ...body].join('\n')}
 ## When this table has rows
 
 Check anything you are about to write against it, and against
-[ELEMENTS.md](ELEMENTS.md), which is the authoritative list either way.
+[WEB-COMPONENTS.md](WEB-COMPONENTS.md), which is the authoritative list either way.
 `;
 }
 

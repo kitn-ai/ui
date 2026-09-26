@@ -32,29 +32,21 @@ export function normalizeVariant(input: string | undefined): VisualizerVariant {
 
 /** A consumer-supplied fragment shader, for `variant="custom"`. */
 export interface ShaderSpec {
-  /**
-   * GLSL source defining `mainImage(out vec4 fragColor, in vec2 fragCoord)`.
-   *
-   * MUST output premultiplied colour: `fragColor = vec4(rgb * alpha, alpha);`,
-   * never `vec4(rgb, alpha)`. The canvas composites using the browser's
-   * default `premultipliedAlpha: true`; a translucent edge written the
-   * natural (straight-alpha) way gets a dark fringe where it meets a light
-   * page background.
-   */
+  // MUST output premultiplied colour (`fragColor = vec4(rgb * alpha, alpha);`, never
+  // `vec4(rgb, alpha)`): the canvas composites with the browser default
+  // `premultipliedAlpha: true`, so a translucent edge written the natural (straight-alpha)
+  // way gets a dark fringe where it meets a light page background.
+  /** GLSL source defining `mainImage(out vec4 fragColor, in vec2 fragCoord)`. */
   fragment: string;
-  /**
-   * Custom uniforms. The canvas DECLARES these for you; declaring them in the
-   * shader too is a compile error.
-   *
-   * `type` is narrowed to `UniformType`, not a bare string: an unrecognized
-   * type here is caught by TypeScript for a TS-authored `shader` prop, before
-   * it can produce `uniform undefined <name>;` in the assembled source (a
-   * confusing compile error). A consumer reaching this through the
-   * `<kai-audio-visualizer>` custom element or an attribute-driven wrapper
-   * bypasses this check entirely (it is JS at that boundary, not TS) --
-   * `variant-custom.tsx`'s `customUniforms` re-checks `type` at runtime for
-   * exactly that reason.
-   */
+  // The canvas DECLARES these for you; declaring them in the shader too is a compile error.
+  //
+  // `type` is narrowed to `UniformType` rather than a bare string, so an unrecognized type
+  // is caught by TypeScript for a TS-authored `shader` prop before it can produce
+  // `uniform undefined <name>;` in the assembled source. A consumer reaching this through
+  // the `<kai-audio-visualizer>` element or an attribute-driven wrapper bypasses that check
+  // (the boundary is JS, not TS), which is why `variant-custom.tsx`'s `customUniforms`
+  // re-checks `type` at runtime.
+  /** Custom uniforms for the shader source. */
   uniforms?: Record<string, { type: UniformType; value: number | number[] }>;
 }
 
@@ -76,59 +68,44 @@ export interface AudioVisualizerProps {
   complexity?: number;
   /** Setting this makes the element an announced image instead of decorative. */
   label?: string;
-  /** Live audio to analyze. NOTE: amplitude renders only while
-   *  `state === 'speaking'` unless `listeningAmplitude` is set; every other
-   *  state plays its scripted animation and the analysis output is unused. */
+  // Every other state plays its scripted animation and the analysis output is unused.
+  /** Live audio to analyze; only read while `state === 'speaking'`. */
   stream?: MediaStream;
   /** Same speaking-only amplitude rule as `stream`: see `listeningAmplitude`. */
   audioElement?: HTMLMediaElement;
   /** Pre-computed levels. Set this and no AudioContext is ever constructed.
    *  Same speaking-only amplitude rule as `stream`: see `listeningAmplitude`. */
   bands?: number[];
-  /**
-   * Opt in to rendering live amplitude during `listening` as well, using the
-   * same presentation as `speaking`. Default off, which keeps LiveKit parity:
-   * amplitude (from `stream`, `audioElement` or `bands`) renders only while
-   * `state === 'speaking'`. Set this to show a real mic-level picture while
-   * the USER is the one talking. Forwarded to every variant; see
-   * `amplitudeRenderState` in variant-bar for the single mapping they share.
-   */
+  // Default off keeps LiveKit parity: amplitude (from `stream`, `audioElement` or
+  // `bands`) renders only while `state === 'speaking'`. The point of turning it on is a real
+  // mic-level picture while the USER is the one talking. Forwarded to every variant through
+  // the single mapping in `amplitudeRenderState`.
+  /** Render live amplitude during the `listening` state too. Off by default. */
   listeningAmplitude?: boolean;
-  /**
-   * Custom fragment shader for `variant="custom"`. See `ShaderSpec` for the
-   * full contract -- most importantly, `fragment` MUST output premultiplied
-   * colour (`vec4(rgb * alpha, alpha)`, not `vec4(rgb, alpha)`), or
-   * translucent edges get dark fringes on light backgrounds.
-   */
+  // The whole contract is on `ShaderSpec`; the premultiplied-alpha rule above is the part
+  // that bites in practice.
+  /** Custom fragment shader for `variant="custom"`. */
   shader?: ShaderSpec;
-  /**
-   * Shader variants only (`wave`/`aurora`/`custom`): keep animating while the
-   * element is scrolled off screen. Default `false`, which stops the draw loop
-   * and releases the WebGL context until it comes back -- see `ShaderCanvas`'s
-   * `animateWhenNotVisible` for the context-budget reasoning and the cost of
-   * opting out. Does not override `prefers-reduced-motion`.
-   */
+  // Default `false` stops the draw loop and releases the WebGL context until the element
+  // comes back; `ShaderCanvas`'s own `animateWhenNotVisible` documents the context budget
+  // and the cost of opting out.
+  /** Shader variants only: keep animating while scrolled off screen. Off by default; does
+   *  not override `prefers-reduced-motion`. */
   animateWhenNotVisible?: boolean;
   class?: string;
-  /**
-   * Render each DOM variant's items yourself -- the same render-prop the
-   * underlying bar/grid/radial component takes, imported rather than
-   * redeclared so the two cannot drift. Not used by the shader variants
-   * (`wave`/`aurora`/`custom`): a fragment shader has no per-item DOM for it
-   * to replace.
-   */
+  // The same render-prop the underlying bar/grid/radial component takes, imported rather
+  // than redeclared so the two cannot drift. Unused by the shader variants
+  // (`wave`/`aurora`/`custom`), which have no per-item DOM to replace.
+  /** Render each DOM variant's items yourself. */
   children?: VariantProps['children'];
-  /**
-   * Explicit `'light'` or `'dark'` wins; `'auto'` (the default) follows a
-   * live `prefers-color-scheme` listener -- the same rule
-   * `elements/define.tsx`'s `createDarkMode` applies for every `kai-*`
-   * element. Only the shader variants read this (aurora/wave pick a colour
-   * pipeline with it): the three DOM variants already get dark-mode styling
-   * for free via CSS custom properties, which a shader baking colour into a
-   * GLSL uniform cannot do. `<kai-audio-visualizer>` forwards its own
-   * already-resolved `theme` attribute through this prop; a bare
-   * `<AudioVisualizer>` with no wrapping element needs it set directly.
-   */
+  // `'auto'` follows a live `prefers-color-scheme` listener, the same rule
+  // `web-components/define/define.tsx`'s `createDarkMode` applies for every `kai-*` element.
+  // Only the shader variants read it (aurora picks a colour pipeline with it): the three
+  // DOM variants get dark-mode styling free through CSS custom properties, which a shader
+  // baking colour into a GLSL uniform cannot do. `<kai-audio-visualizer>` forwards its own
+  // already-resolved `theme` through this prop; a bare `<AudioVisualizer>` needs it set
+  // directly.
+  /** Colour pipeline for aurora; follows the OS when unset. */
   theme?: 'light' | 'dark' | 'auto';
 }
 
@@ -150,13 +127,13 @@ export function usePrefersReducedMotion(): Accessor<boolean> {
 
 /**
  * Resolves `theme` (`'light' | 'dark' | 'auto'`) to a boolean, mirroring
- * `elements/define.tsx`'s `createDarkMode` rule exactly: an explicit value
+ * `web-components/define/define.tsx`'s `createDarkMode` rule exactly: an explicit value
  * wins, `'auto'` (the default) follows a live `prefers-color-scheme`
  * listener.
  *
  * This is a SEPARATE implementation of that rule, not an import of it:
  * `components/` is the framework-agnostic layer `elements/` wraps (see the
- * kit's architecture), so it cannot depend on `elements/define.tsx` without
+ * kit's architecture), so it cannot depend on `web-components/define/define.tsx` without
  * inverting that direction. When driven through `<kai-audio-visualizer>`,
  * the facade has already resolved `'auto'` against its OWN listener (the one
  * already wired to the visible `.dark` class) before handing this an
@@ -197,29 +174,19 @@ export interface ShaderVariantProps extends Omit<VariantProps, 'children'> {
   complexity?: number;
   /** Only meaningful for `variant="custom"`. */
   shader?: ShaderSpec;
-  /**
-   * Already-resolved: `true` selects the dark colour pipeline, `false`
-   * selects light -- matching `elements/define.tsx`'s `createDarkMode`
-   * output exactly (`classList={{ dark: isDark() }}`). This is that SAME
-   * resolved value forwarded down, not a re-derivation, so a shader baking
-   * colour into a GLSL uniform never needs its own `prefers-color-scheme`
-   * listener for the common case. Optional: a shader mounted standalone (no
-   * dispatcher resolving `theme` above it) may fall back to reading the
-   * media query itself.
-   */
+  // The SAME resolved value `web-components/define/define.tsx`'s `createDarkMode` produces
+  // (`classList={{ dark: isDark() }}`), forwarded down rather than re-derived, so a shader
+  // baking colour into a GLSL uniform needs no `prefers-color-scheme` listener of its own.
+  // Optional for a shader mounted standalone, with no dispatcher resolving `theme` above it.
+  /** Selects the dark colour pipeline when true. */
   dark?: boolean;
-  /**
-   * Keep animating while off screen instead of releasing the WebGL context.
-   * Relayed straight through to `ShaderCanvas`, which owns the behaviour and
-   * documents the trade-off; the variants are pure conduits for it.
-   */
+  // Relayed straight through to `ShaderCanvas`, which owns the behaviour and documents the
+  // trade-off; the variants are pure conduits for it.
+  /** Shader variants only: keep animating while scrolled off screen. Off by default. */
   animateWhenNotVisible?: boolean;
-  /**
-   * Call this if the shader cannot render at all -- most commonly
-   * `canvas.getContext('webgl')` returning null. Permanent for this mount:
-   * the dispatcher swaps to the bar fallback and will not retry the shader
-   * on any later reactive update, only on switching to a different variant.
-   */
+  // Permanent for this mount: the dispatcher swaps to the bar fallback and will not retry the
+  // shader on a later reactive update, only on switching to a different variant.
+  /** Called when the shader cannot render at all, most commonly a null WebGL context. */
   onUnavailable: () => void;
 }
 
@@ -228,7 +195,7 @@ export interface ShaderVariantProps extends Omit<VariantProps, 'children'> {
  * GLSL strings (about 25 to 30 KB) never reach a consumer who does not ask for
  * them.
  *
- * This MUST stay dynamic. `config/vite/elements.ts` (KAI_BUILD=register) disables
+ * This MUST stay dynamic. `config/vite/web-components.ts` (KAI_BUILD=register) disables
  * tree-shaking on the register-all bundle by design, so a static import here would put the whole
  * shader path into `kai.es.js` for everyone, including a `<kai-chat>`-only
  * user. A dynamic import splits into its own chunk under `treeshake: false`;
@@ -257,7 +224,7 @@ export function AudioVisualizer(props: AudioVisualizerProps): JSX.Element {
   // GridVisualizer), radial off its own bar-count default, everything else
   // off the bar count -- pulled from `sizes.ts` rather than re-derived here,
   // so this stays in sync with what each variant actually renders.
-  const elementCount = () => {
+  const webComponentCount = () => {
     if (variant() === 'grid') return props.count ?? defaultGridCount(size());
     if (variant() === 'radial') return props.barCount ?? defaultRadialBarCount(size());
     return props.barCount ?? defaultBarCount(size());
@@ -265,13 +232,13 @@ export function AudioVisualizer(props: AudioVisualizerProps): JSX.Element {
 
   // Only ceil(n/2) bands are requested from the analyser, not one per
   // element: useAudioAnalysis's output is mirrored back out to the full
-  // elementCount below (centre-out for bar/grid, across the ring's vertical
+  // webComponentCount below (centre-out for bar/grid, across the ring's vertical
   // axis for radial), which is what turns a real voice's natural
   // low-to-high spectral tilt into a shape that grows from the centre
   // outward instead of always ramping in one direction. See
   // mirrorBandsCenterOut / mirrorBandsAroundRing in primitives/audio-bands.ts
   // for the full rationale and the real-clip measurements behind it.
-  const bandCount = () => Math.ceil(elementCount() / 2);
+  const bandCount = () => Math.ceil(webComponentCount() / 2);
 
   // A caller-supplied `bands` array short-circuits Web Audio entirely, which is
   // what keeps the headless and SSR paths free of an AudioContext.
@@ -286,7 +253,7 @@ export function AudioVisualizer(props: AudioVisualizerProps): JSX.Element {
   // has whatever shape the caller intends, mirrored or not, and mirroring it
   // again here would be a second, unwanted transform on data we don't own.
   // The analyser's own output is only ceil(n/2) values (bandCount above);
-  // mirror it back out to the FULL elementCount so it lines up EXACTLY with
+  // mirror it back out to the FULL webComponentCount so it lines up EXACTLY with
   // what each variant's own `normalizeVolumeBands(props.bands, count())`
   // expects. Matching the count exactly here, rather than leaning on that
   // pad-by-repeating-the-last-value, matters specifically because the mirror
@@ -295,8 +262,8 @@ export function AudioVisualizer(props: AudioVisualizerProps): JSX.Element {
   const bands = () => {
     if (props.bands) return props.bands;
     return variant() === 'radial'
-      ? mirrorBandsAroundRing(analysis.bands(), elementCount())
-      : mirrorBandsCenterOut(analysis.bands(), elementCount());
+      ? mirrorBandsAroundRing(analysis.bands(), webComponentCount())
+      : mirrorBandsCenterOut(analysis.bands(), webComponentCount());
   };
 
   // The shader variants read `volume`, a scalar, not `bands`. When
@@ -358,37 +325,22 @@ export function AudioVisualizer(props: AudioVisualizerProps): JSX.Element {
     onCleanup(() => { cancelled = true; });
   });
 
-  // Props every variant shares, MINUS `bands` -- deliberately. Solid compiles
-  // a component spread (`{...shared()}` below) into per-key getters that all
-  // call this SAME function: reading ANY one key re-invokes the whole thing,
-  // so if `bands()` lived in here, reading `state` (or `size`/`frozen`/
-  // `color`) would transitively subscribe the reader to `bands()` too, which
-  // updates ~31 times a second with live or synthetic audio. That is exactly
-  // what caused two real bugs downstream: `use-sequencer.ts`'s effect reading
-  // `frozen`/`state` re-ran at band cadence and called `setTick(0)` on every
-  // run, so the tick could never advance (every scripted animation looked
-  // dead); `shader-canvas.tsx`'s compile effect reading `precision`/`fragment`
-  // re-ran the same way and recompiled the GL program 65-70 times in 4
-  // seconds while restamping its animation clock (`iTime` pinned under 0.33s,
-  // periodically negative). Both were patched locally with memos in those
-  // files (kept -- defence in depth, cheap, and they document the hazard),
-  // but the leak was still here for the next reader: `variant-wave.tsx`,
-  // `variant-aurora.tsx`, and `variant-custom.tsx` each have their OWN
-  // state/frozen-driven tween effect with no local memo at all, so they were
-  // live instances of the identical bug (`.to()` restarts a tween's clock on
-  // every call -- see `create-tween.ts` -- so a 31Hz re-run means a tween
-  // never visibly progresses). Fixing it here, at the one place the bundling
-  // happens, closes all of those at once rather than requiring every current
-  // and future reader to remember to memoize defensively.
+  // Props every variant shares, MINUS `bands`, deliberately. Solid compiles a
+  // component spread (`{...shared()}` below) into per-key getters that all call this
+  // SAME function, so reading ANY one key re-invokes it: with `bands()` in here,
+  // reading `state` (or `size`/`frozen`/`color`) would transitively subscribe the
+  // reader to `bands()`, which updates about 31 times a second with audio. That is
+  // exactly what made `use-sequencer.ts`'s effect re-run at band cadence (the tick
+  // could never advance) and `shader-canvas.tsx`'s compile effect recompile the GL
+  // program 65-70 times in 4 seconds. Both were patched locally with memos, which are
+  // kept as defence in depth, but the variants each have their own state-driven tween
+  // effect with no memo: fixing it at the one place the bundling happens closes all of
+  // them at once.
   //
-  // `bands` GENUINELY must stay reactive -- this split is about not dragging
-  // it into unrelated reads, not about freezing it. It is passed explicitly,
-  // `bands={bands()}`, at every call site below, exactly like `volume`,
-  // `complexity`, etc. already are: an explicit prop gets its OWN getter,
-  // entirely independent of this one.
-  // `listeningAmplitude` is safe inside this bundle (unlike `bands`): it is a
-  // boolean a caller sets once, not a signal driven at audio cadence, so
-  // reading it through the shared getters cannot drag in a hot subscription.
+  // `bands` must stay reactive: it is passed explicitly at every call site below, and
+  // an explicit prop gets its OWN getter, independent of this one. `listeningAmplitude`
+  // is safe inside the bundle, being a boolean a caller sets once rather than a signal
+  // driven at audio cadence.
   const shared = (): Omit<VariantProps, 'bands'> => ({
     state: state(),
     size: size(),

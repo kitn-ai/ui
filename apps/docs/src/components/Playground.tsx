@@ -1,4 +1,4 @@
-/** Generic interactive playground — data-driven from element-meta.json. Controls
+/** Generic interactive playground — data-driven from web-component-meta.json. Controls
  *  are derived from the element's own props (enum → tabs, boolean → toggle,
  *  string → input); they drive BOTH the live <kai-*> preview AND the copyable
  *  per-framework code (lib/codegen). One component for every element — no
@@ -7,8 +7,8 @@ import { createSignal, onMount, createEffect, onCleanup, For, Show, createMemo, 
 import { loadKit } from './example/kit';
 import { Resizer } from './example/Resizer';
 import { CodePanel } from './example/CodePanel';
-import meta from '@kitn.ai/ui/element-meta.json';
-import { generateSnippets, controlsFor, type ElementMeta, type State } from '../lib/codegen';
+import meta from '@kitn.ai/ui/web-component-meta.json';
+import { generateSnippets, controlsFor, type WebComponentMeta, type State } from '../lib/codegen';
 import { sampleFor } from '../lib/sample-data';
 
 const camelToKebab = (s: string) => s.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
@@ -45,7 +45,7 @@ function Toggle(props: { checked: boolean; onChange: (v: boolean) => void; label
 }
 
 export default function Playground(props: { tag: string }) {
-  const el = (meta as ElementMeta[]).find((e) => e.tag === props.tag);
+  const el = (meta as WebComponentMeta[]).find((e) => e.tag === props.tag);
   if (!el) return <div class="text-ink-3">Unknown element: {props.tag}</div>;
   const controls = controlsFor(el);
   const enums = controls.filter((c) => c.kind === 'enum') as Extract<ReturnType<typeof controlsFor>[number], { kind: 'enum' }>[];

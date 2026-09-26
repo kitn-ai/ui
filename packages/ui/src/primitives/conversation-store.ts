@@ -1,24 +1,24 @@
 /**
- * The conversations data contract (C-3, C-5, C-7): a JS-property interface,
- * never REST/events baked into the format. The kit owns the interface, the
+ * The conversations data contract: a JS-property interface, never REST/events
+ * baked into the format. The kit owns the interface, the
  * payload types (ConversationSummary/ConversationGroup from ../types,
- * ChatMessage from ../elements/chat-types — reused, never duplicated), and
+ * ChatMessage from ../web-components/chat/chat-types, reused, never duplicated), and
  * the lifecycle (list() on mount + list-view open, load() on row select,
  * save() on message-array change). The dev owns invocation, retrieval,
  * transport, auth, retention.
  *
  * Two built-ins ship: localStorageStore (auto-wired for history: local) and
- * fetchStore (the recast of codegen.ts's emitHistorySetup endpoint behavior —
+ * fetchStore (the recast of codegen.ts's emitHistorySetup endpoint behavior:
  * same key shapes, same x-kai-user-id header, same decide-loudly failure
  * mode, now reusable instead of inlined per-construct).
  *
  * Reachable two ways, deliberately: the package root (bundler consumers) and
  * the self-contained `@kitn.ai/ui/stores` entry (dist/stores.js, zero bare
  * imports) for no-bundler/CDN pages, which cannot load the solid-importing
- * root bundle — see src/stores/index.ts for the decision record.
+ * root bundle, see src/stores/index.ts for the decision record.
  */
 import type { ConversationSummary } from '../types';
-import type { ChatMessage } from '../elements/chat-types';
+import type { ChatMessage } from '../web-components/chat/chat-types';
 
 export interface ConversationStore {
   // `list()`/`load()` implementations MUST return a fresh array (and, for any
@@ -29,27 +29,22 @@ export interface ConversationStore {
   list(): Promise<ConversationSummary[]>;
   load(id: string): Promise<ChatMessage[]>;
   save(id: string, messages: ChatMessage[]): Promise<void>;
-  /** OPTIONAL — unread indicators (owner round, 2026-08-26). Persist
-   *  `ConversationSummary.lastReadAt` (that field's own doc has the exact
-   *  shape) for `id`, called by `ChatThread` whenever that conversation
-   *  counts as "seen": it's the active conversation, the chat view (not the
-   *  list) is showing, and the host is open — on the select/restore
-   *  transition into that state AND on every new message arriving while it
-   *  holds (see `ChatThread`'s `hostOpen` prop doc for the third leg, which
-   *  `ChatThread` cannot know on its own).
-   *
-   *  This is the concept's OPT-IN switch, not a nice-to-have: omit it and no
-   *  summary this store returns ever gets a `lastReadAt`, so every unread
-   *  computation reads "not unread" (that field's absent-means-not-unread
-   *  default) for every conversation, always. That is a DELIBERATE decide-
-   *  loudly default, not a gap — a store that never implements `markRead`
-   *  is read as never supporting the concept at all, and the UI goes quiet
-   *  about it rather than guessing "probably unread" from a comparison it
-   *  has no real signal for. `localStorageStore` implements it below.
-   *  `fetchStore` deliberately does NOT (see its own doc) — it passes
-   *  through whatever `lastReadAt` the backend's own summaries carry, same
-   *  as every other field on `ConversationSummary`, rather than assuming a
-   *  mark-read endpoint the recast contract never defined. */
+  // Persist `ConversationSummary.lastReadAt` for `id`, called by `ChatThread` whenever that
+  // conversation counts as seen: it is the active conversation, the chat view (not the
+  // list) is showing, and the host is open: on the select/restore transition into that
+  // state AND on every new message arriving while it holds (see `ChatThread`'s `hostOpen`
+  // prop doc for the third leg, which `ChatThread` cannot know on its own).
+  //
+  // OPT-IN, not a nice-to-have: omit it and no summary gets a `lastReadAt`, so every
+  // unread computation reads "not unread" (that field's absent-means-not-unread default)
+  // for every conversation, always. That is a deliberate decide-loudly default, not a
+  // gap: a store that never implements `markRead` is read as not supporting the concept,
+  // and the UI goes quiet about it rather than guessing "probably unread" from a
+  // comparison it has no real signal for. `localStorageStore` implements it below;
+  // `fetchStore` deliberately does not (see its own doc) and passes through whatever
+  // `lastReadAt` the backend's summaries carry, like every other `ConversationSummary`
+  // field, rather than assuming a mark-read endpoint the contract never defined.
+  /** Post the conversation's seen timestamp; omit it and the kit never marks anything read. */
   markRead?(id: string): Promise<void>;
 }
 
@@ -57,8 +52,8 @@ export const LEGACY_THREAD_MIGRATED_TITLE = 'Conversation 1';
 
 /** Newest-first ordering over `updatedAt`; rows with a missing or unparsable
  *  timestamp sort last (stable, so ties keep declaration order). The ONE
- *  recency rule — the list panel, ChatThread's restore pick, and the home
- *  screen's recent card all sort with this (issue #335). */
+ *  recency rule: the list panel, ChatThread's restore pick, and the home
+ *  screen's recent card all sort with this. */
 export function byRecency(
   a: Pick<ConversationSummary, 'updatedAt'>,
   b: Pick<ConversationSummary, 'updatedAt'>,
@@ -69,25 +64,18 @@ export function byRecency(
 }
 
 /**
- * Whether a conversation should show an unread indicator (owner round,
- * 2026-08-26). `lastReadAt`'s own doc (`types.ts`) has the full contract;
- * this is the one place that reads it, so every surface — the batteries list
- * row (`ConversationItem`), the widget-box `ConversationPanel`, the home
- * screen's recent card, `ChatThread`'s own `anyUnread` badge/`onUnreadChange`
- * report, and any consumer-composed launcher deriving its own badge from
- * `store.list()` — derives it identically rather than each restating the
- * comparison. Lives HERE (beside the `ConversationStore` contract whose
- * `markRead` writes the field it reads) rather than in a component, and is
- * re-exported from the package root: it is headless data logic, not
- * rendering.
+ * Whether a conversation should show an unread indicator. `lastReadAt`'s own doc
+ * (`types.ts`) has the full contract; this is the one place that reads it, so every
+ * surface (the list row, the widget panel, the home screen's recent card, ChatThread's
+ * own badge report, any consumer-composed launcher) derives it identically rather than
+ * each restating the comparison. Headless data logic, so it lives here beside the
+ * `ConversationStore` contract and is re-exported from the package root.
  *
- * Absent `lastReadAt` reads as NOT unread — the decide-loudly default for a
- * store that never implements `ConversationStore.markRead` at all (every
- * summary it returns leaves the field undefined forever, so this always
- * returns `false` for it) rather than guessing "probably unread" from a
- * signal the store never actually provided. Defensive `Date.parse`, same
- * pattern as `byRecency` above: an unparsable date reads as not unread
- * rather than throwing.
+ * Absent `lastReadAt` reads as NOT unread: the decide-loudly default for a store that
+ * never implements `markRead` (every summary it returns leaves the field undefined, so
+ * this always returns `false`) rather than guessing "probably unread" from a signal the
+ * store never provided. Defensive `Date.parse`, same as `byRecency`: an unparsable date
+ * reads as not unread rather than throwing.
  */
 export function isConversationUnread(conv: Pick<ConversationSummary, 'updatedAt' | 'lastReadAt'>): boolean {
   if (!conv.lastReadAt) return false;
@@ -112,7 +100,7 @@ function legacyKey(name: string, userId: string | undefined): string {
 
 /** ~80-char truncation for the row preview (`ConversationSummary.trailing`,
  *  widget-box list-view reading), an ellipsis appended only when text was
- *  actually cut. Mask nothing — the preview is the model/user's own text,
+ *  actually cut. Mask nothing: the preview is the model/user's own text,
  *  same trust boundary as the rest of the thread. */
 const PREVIEW_LENGTH = 80;
 function truncatePreview(text: string): string {
@@ -146,7 +134,7 @@ export function localStorageStore(name: string, userId?: string): ConversationSt
   }
 
   /** C-7, one-way: an existing legacy single-thread key becomes conversation
-   *  #1 in the index. Runs at most once — the legacy key is deleted after a
+   *  #1 in the index. Runs at most once, the legacy key is deleted after a
    *  successful migration, so nobody's thread disappears on upgrade and no
    *  second migration can ever fire. */
   function migrateLegacyThread(): void {
@@ -246,7 +234,7 @@ export function localStorageStore(name: string, userId?: string): ConversationSt
  *  x-kai-user-id carries userId on every request, matching the header
  *  codegen.ts already emits for the endpoint provider and the endpoint
  *  history persistence mode. Decide loudly: no request here catches its own
- *  rejection — a caller (ChatThread's lifecycle, Task 2) decides how to
+ *  rejection, a caller (ChatThread's lifecycle, Task 2) decides how to
  *  degrade, exactly as the spec's degradation section requires.
  *
  *  No `markRead` (unread indicators, 2026-08-26): the recast contract above
@@ -254,7 +242,7 @@ export function localStorageStore(name: string, userId?: string): ConversationSt
  *  would be this adapter deciding a backend behavior rather than passing one
  *  through. `list()`/`load()` already forward whatever `lastReadAt` the
  *  backend's own summaries carry, same as any other `ConversationSummary`
- *  field — a consumer who wants writes needs their own store (or their own
+ *  field, a consumer who wants writes needs their own store (or their own
  *  endpoint plus a thin wrapper), same as any other capability this recast
  *  doesn't cover. */
 export function fetchStore(url: string, userId?: string): ConversationStore {

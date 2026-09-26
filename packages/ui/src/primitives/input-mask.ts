@@ -1,40 +1,27 @@
-// src/primitives/input-mask.ts
-// Tier 2, the stateful half: one `HTMLInputElement` driven through the pure format engine
-// in `field-mask.ts`. Framework-agnostic -- no Solid, no DOM beyond the one input and its
-// document. Spec: docs/superpowers/specs/2026-08-24-form-field-formats-design.md
-// (§2 tier 2, §3, and the §5 improvement list, which is binding here).
+// lint-comment-references: long-block -- each of the four invariants carries the shortcut it refuses, so splitting them loses which one is why
+// The stateful half of the mask: one `HTMLInputElement` driven through the pure format
+// engine in `field-mask.ts`, no Solid and no DOM beyond the input. The formatted text IS
+// `input.value`, so the caret, selection, find-in-page and every mobile affordance stay the
+// browser's own; this module adds interception, normalization, a caret that never rests
+// inside a literal run, its own undo stack and a stated clipboard policy.
 //
-// THE FORMATTED TEXT IS `input.value` (spec §2). There is no overlay and no ghost layer,
-// so the caret, selection, find-in-page and every mobile affordance are the browser's own.
-// What this module adds on top is: interception, normalization, a caret that never rests
-// inside a literal run, its own undo stack (a programmatic `.value` write destroys the
-// native one), and a stated clipboard policy.
-//
-// Four rules hold this file together; each is one of the §5 improvements and each is the
-// reason some obvious-looking shortcut is not taken:
+// Four invariants, each the reason an obvious shortcut is not taken:
 //   1. `commit` is the ONLY writer of `el.value`, the selection, the undo stacks and the
-//      callbacks (§5.5). The reference this was derived from repeated that sequence in five
-//      places and they had already drifted apart.
-//   2. `beforeinput` is the interception point WHERE IT IS CANCELABLE; where it is not, the
-//      longest-common-prefix/suffix diff in `input` reconciles whatever the browser did
-//      (§5.1). Both paths end in `applyEdit` -> `commit`, so there is one edit semantics.
-//   3. Between `compositionstart` and `compositionend` this module does NOTHING: no cancel,
-//      no `.value` write, no caret move, no clamp (§5.2). Cancelling mid-composition breaks
-//      the composition outright, and Android word suggestion is far more common in these
-//      fields than CJK input.
-//   4. `.value` is never shadowed with `Object.defineProperty` (§5.8). The canonical value
-//      is read through `getCanonicalValue()`; the element facade will publish it with
-//      `setFormValue()`.
+//      callbacks; the code this came from repeated that in five places and they had drifted.
+//   2. `beforeinput` intercepts WHERE CANCELABLE; where it is not, the longest
+//      common-prefix/suffix diff in `input` reconciles what the browser did, and both paths
+//      end in `applyEdit`, so there is one edit semantics.
+//   3. During a composition this module does NOTHING: no cancel, no `.value` write, no caret
+//      move, no clamp. Cancelling breaks the composition, and Android word suggestion is far
+//      more common than CJK input in these fields.
+//   4. `.value` is never shadowed with `Object.defineProperty`; the canonical value is read
+//      through `getCanonicalValue()` and the facade publishes it with `setFormValue()`.
 //
-// ONE KNOWN IMPRECISION, recorded rather than papered over. An undo entry's selection is
-// read from the element at commit time. On the `beforeinput` path that is exactly right --
-// the event was canceled, so the caret has not moved yet. On the `input` diff fallback the
-// browser has ALREADY moved it, so the entry stores the post-edit caret against the
-// pre-edit text: undoing a browser-driven edit restores the correct text with a caret that
-// is merely plausible. Recovering the true one means caching the selection from
-// `selectionchange` and trusting that it fires before `input`, which is browser-timing
-// dependent and unverifiable in jsdom -- a guess dressed as a fix. The caret is clamped, so
-// it is never out of range. Task 6 can measure the real ordering and decide.
+// ONE IMPRECISION: an undo entry's selection is read at commit time, so the `input` diff
+// fallback stores a post-edit caret against pre-edit text. Recovering the true one means
+// caching the selection from `selectionchange` and trusting it fires before `input`,
+// which is unverifiable in jsdom, so the caret is clamped instead: always in range,
+// not always exactly right.
 import {
   compileMask,
   formatForDisplay,
@@ -71,7 +58,7 @@ export interface InputMaskOptions {
   caseMode?: CaseMode;
   copyPolicy?: CopyPolicy;
   /** Tier 3. Wired -- it selects the default copy policy -- but does NOT yet transform the
-   *  display; that lands with the obscured rendering in tier 3 (task 10). */
+   *  display; that lands with the obscured rendering. */
   obscure?: boolean;
   initialValue?: string;
   onInput?: (detail: { canonical: string; formatted: string }) => void;
@@ -90,7 +77,7 @@ export interface InputMask {
   detach(): void;
 }
 
-/** Undo history is capped (spec §5.6). A long-lived field otherwise grows an unbounded
+/** Undo history is capped. A long-lived field otherwise grows an unbounded
  *  array; dropping from the bottom keeps the recent history, which is the useful end. */
 const UNDO_LIMIT = 200;
 
@@ -98,14 +85,13 @@ const UNDO_LIMIT = 200;
 const BULLET = '•';
 
 /** One undo entry: the state to restore, INCLUDING the selection the user had when the
- *  edit that superseded it began (spec §5.6). Restoring text without the caret is what
+ *  edit that superseded it began. Restoring text without the caret is what
  *  makes a custom undo stack feel broken.
  *
- *  `pattern` is a fourth field beyond the three the spec names, and it is what lets the
+ *  `pattern` is a fourth field beyond the format engine's own three, and it is what lets the
  *  history SURVIVE an `update()`. A formatted string can only be decoded by the pattern
- *  that produced it -- `V-123` under `V-***` is raw `123`, and under `#####` it is raw `123`
- *  read from different positions -- so an entry restored under a pattern that did not write
- *  it is garbage. Carrying the pattern lets `restore` decode with the right one and then
+ *  that produced it: a prefixed value's digits sit at different positions under a bare pattern, so
+ *  an entry restored under a pattern that did not write it is garbage. Carrying the pattern lets `restore` decode with the right one and then
  *  re-fit; without it the only safe thing to do on a format change is throw the whole stack
  *  away, which is itself a silent drop of the user's history. */
 interface UndoEntry {
@@ -150,7 +136,7 @@ const DELETE_TYPES = new Set([
   'deleteByDrag',
 ]);
 
-/** Caret-moving keys break an open typing run (spec §5.6). Pointer-driven moves break it
+/** Caret-moving keys break an open typing run; pointer-driven moves break it
  *  through the `mousedown` listener. */
 const NAV_KEYS = new Set([
   'ArrowLeft',
@@ -198,7 +184,7 @@ export function createInputMask(el: HTMLInputElement, options: InputMaskOptions)
   let pendingWrite: (() => void) | null = null;
 
   /** With a guide the field is always `format.length` long and unfilled positions show the
-   *  guide; without one it shows only up to the last typed character (spec §2). */
+   *  guide; without one it shows only up to the last typed character. */
   const display = (value: string): string =>
     hasGuide ? formatForDisplay(pattern, value) : formatRaw(pattern, value);
 
@@ -226,14 +212,14 @@ export function createInputMask(el: HTMLInputElement, options: InputMaskOptions)
   }
 
   function reject(reason: InputMaskRejectReason, data: string): void {
-    // Loud, always (spec §5.3). The silent `preventDefault` this replaces is the exact
+    // Loud, always. The silent `preventDefault` this replaces is the exact
     // shape CLAUDE.md calls the default-wrong choice: a decision made while withholding
     // the information that it happened.
     opts.onReject?.({ reason, data });
   }
 
   // ---------------------------------------------------------------------------------
-  // The single commit path (§5.5). Nothing else in this file assigns `el.value`, touches
+  // The single commit path. Nothing else in this file assigns `el.value`, touches
   // the selection, touches the undo stacks or calls a consumer callback.
   // ---------------------------------------------------------------------------------
 
@@ -262,7 +248,7 @@ export function createInputMask(el: HTMLInputElement, options: InputMaskOptions)
     formatted = nextFormatted;
     formattedPattern = pattern;
     raw = write.raw;
-    el.value = nextFormatted; // native setter; no descriptor shadowing (§5.8)
+    el.value = nextFormatted; // native setter; no descriptor shadowing
 
     const start = Math.max(0, Math.min(caret, nextFormatted.length));
     const end = Math.max(start, Math.min(write.selectionEnd ?? caret, nextFormatted.length));
@@ -304,9 +290,9 @@ export function createInputMask(el: HTMLInputElement, options: InputMaskOptions)
    *  The whole edit is expressed as ONE normalization over `prefix + inserted + tail`,
    *  which is what keeps typing, pasting, autofill and the diff fallback on identical
    *  semantics. `formatRaw` re-inserts the literals in front of the insertion point so
-   *  `normalizeToRaw` -- which walks the FORMAT, and is the literal-aware normalizer that
-   *  fixes spec §5.7 -- sees a string aligned to the pattern from index 0. That is why
-   *  pasting `V-123` under `V-***` yields `V-123` and not `V-V12`.
+   *  `normalizeToRaw` -- which walks the FORMAT, and is the literal-aware normalizer --
+   *  sees a string aligned to the pattern from index 0. That is why
+   *  pasting a value under a literal prefix never doubles that prefix (pinned in the e2e mask spec).
    *
    *  Returns whether it committed. */
   function applyEdit(rawStart: number, rawEnd: number, inserted: string, kind: 'insert' | 'bulk'): boolean {
@@ -336,7 +322,7 @@ export function createInputMask(el: HTMLInputElement, options: InputMaskOptions)
 
     // Reported AFTER the commit, and deliberately alongside it rather than instead of it.
     // `full` and `wrong-class` refuse the whole edit and leave the text unchanged, which is
-    // the §5.3 contract. `over-capacity` is the clip that `field-mask.ts` documents the
+    // the contract. `over-capacity` is the clip that `field-mask.ts` documents the
     // CALLER as responsible for reporting ("input past the last fill position is clipped --
     // the caller compares lengths"): refusing an entire paste for being one character long
     // is worse than accepting what fits and saying so. `data` is the input that was
@@ -356,7 +342,7 @@ export function createInputMask(el: HTMLInputElement, options: InputMaskOptions)
     return normalizeToRaw(wider, prefixText + inserted, caseMode).length > absorbedTotal;
   }
 
-  /** The §5.1 fallback: the browser already mutated the field, so work out what it did.
+  /** The fallback path: the browser already mutated the field, so work out what it did.
    *  Longest common prefix/suffix, caret-independent, and robust against alphanumeric
    *  literals -- the one idea carried over from the reference unchanged. */
   function reconcile(): void {
@@ -390,7 +376,7 @@ export function createInputMask(el: HTMLInputElement, options: InputMaskOptions)
   }
 
   // ---------------------------------------------------------------------------------
-  // Undo / redo (§5.6)
+  // Undo / redo
   // ---------------------------------------------------------------------------------
 
   function snapshot(): UndoEntry {
@@ -416,9 +402,9 @@ export function createInputMask(el: HTMLInputElement, options: InputMaskOptions)
     // Recorded under an older pattern (an `update()` happened since). Decode with the
     // pattern that wrote it, then re-fit through the current one. The FORMATTED text is
     // what gets re-normalized, never the bare raw: `normalizeToRaw` is not idempotent on
-    // raw when a fill character happens to equal a leading literal -- `V-***` holding
+    // raw when a fill character happens to equal a leading literal -- a prefixed pattern holding
     // `V12` would re-normalize to `12` and lose a character on every undo. With the
-    // literals present (`V-V12`) the positional walk consumes the leading `V` as the
+    // literals present the positional walk consumes the leading literal as the
     // literal it is.
     //
     // Note what this canNOT do: if the new pattern is narrower, the re-fit clips again, so
@@ -445,12 +431,12 @@ export function createInputMask(el: HTMLInputElement, options: InputMaskOptions)
   }
 
   // ---------------------------------------------------------------------------------
-  // Clipboard (§5.10)
+  // Clipboard
   // ---------------------------------------------------------------------------------
 
   /** Bullets at the FILLED `*` positions only. `#` and `@` positions, literals and guide
    *  characters stay revealed -- which is what makes `**** **** **** ####` mean "show the
-   *  last four" with no `showLast` prop (spec §2 tier 3). */
+   *  last four" with no `showLast` prop. */
   function obscured(text: string): string {
     const chars = text.split('');
     for (let i = 0; i < pattern.fillIndexes.length && i < raw.length; i += 1) {
@@ -484,7 +470,7 @@ export function createInputMask(el: HTMLInputElement, options: InputMaskOptions)
     }
   }
 
-  /** Explicit option wins; otherwise `obscure` picks the default (spec §5.10). */
+  /** Explicit option wins; otherwise `obscure` picks the default. */
   function copyPolicy(): CopyPolicy {
     return opts.copyPolicy ?? (obscure ? 'obscured' : 'canonical');
   }
@@ -497,7 +483,7 @@ export function createInputMask(el: HTMLInputElement, options: InputMaskOptions)
     if (detached || composing) return;
     const e = event as InputEvent;
     // Not cancelable -- composition on Android, several IMEs. Do nothing here and let the
-    // diff in `input` absorb whatever the browser does (§5.1).
+    // diff in `input` absorb whatever the browser does.
     if (!e.cancelable) return;
     const inputType = e.inputType;
 
@@ -574,12 +560,12 @@ export function createInputMask(el: HTMLInputElement, options: InputMaskOptions)
       pending();
       return;
     }
-    // Otherwise exactly one reconciliation, here (§5.2). Every `input` that arrived during
+    // Otherwise exactly one reconciliation, here. Every `input` that arrived during
     // the composition was ignored on purpose.
     if (el.value !== formatted) reconcile();
   }
 
-  /** Run a consumer write now, or hold it until the composition ends (§5.2 applied to the
+  /** Run a consumer write now, or hold it until the composition ends (this applies to the
    *  masker's own writes: a framework re-render calling `setValue` mid-composition is the
    *  classic controlled-input IME bug, and rewriting `.value` there kills the composition). */
   function writeOrDefer(apply: () => void): void {
@@ -636,53 +622,17 @@ export function createInputMask(el: HTMLInputElement, options: InputMaskOptions)
     ];
   }
 
-  /** ONE clamp function, idempotent, NO TIMERS (§5.9) -- but four triggers, and the trigger
-   *  list is MEASURED, not assumed. §5.9's objection to the reference was the racing
-   *  `mousedown`+rAF / `mouseup`+`setTimeout` pair and the keyboard-driven selection it
-   *  missed; it is not an objection to listening for more than one event, and an earlier
-   *  version of this comment asserted that `selectionchange` alone covered everything. It
-   *  does not. Measured in real Chromium (tests/e2e/input-mask-ivp.spec.ts, scenarios 9-10),
-   *  logging every candidate event with the offset it saw:
-   *
-   *    Home  -> ["el:keyup@0"]
-   *    click -> ["el:selectionchange@4", "doc:selectionchange@4", "el:mouseup@0", "el:click@0"]
-   *
-   *  Two facts fall out, and both were live defects the owner hit on a guided field:
-   *    - A KEYBOARD caret move fires NO `selectionchange` whatsoever. Home, End and the
-   *      arrows reached the clamp on no engine, which is exactly "I could only go back to
-   *      the start of ####" failing to hold. `keyup` is the event that does fire.
-   *    - A CLICK fires `selectionchange` early, and then the browser applies its own
-   *      pixel-derived offset AFTER it -- note the `@4` from our clamp being replaced by the
-   *      `@0` visible at `mouseup`. Clamping only on `selectionchange` gets overwritten by
-   *      the very gesture it was reacting to. `mouseup` is where the offset is final.
-   *
-   *  So: `selectionchange` (the general case), `keyup` (keyboard), `mouseup` (pointer), and
-   *  `focus` -- the last because a selection that does not CHANGE fires nothing at all, so a
-   *  field entered while its caret is already at 0 would otherwise render with the caret
-   *  inside the literal prefix and never get a chance to be corrected. Every trigger is the
-   *  same idempotent call that early-returns when the selection is already legal, so firing
-   *  several times for one gesture costs a comparison and changes nothing. */
-  /** "Is the caret in THIS field?" -- asked of the element's own root, never of the
-   *  document.
-   *
-   *  `document.activeElement` RETARGETS: for a focused node inside a shadow tree it reports
-   *  the OUTERMOST host, so on any element this kit actually ships the answer is `<kai-chat>`
-   *  and never the input. `el.ownerDocument.activeElement !== el` was therefore true on every
-   *  trigger, and the whole clamp early-returned -- the caret discipline was dead in the
-   *  ops-console app (input at `kai-chat` shadow -> card -> `kai-form` shadow) while passing
-   *  in Storybook, whose story mounts the input into a FLAT document where the two agree.
-   *  Measured in that app on the dist build (m11-diagnose.mjs), focusing the `CHG-####`
-   *  field:
-   *
-   *    el:focus            docActiveIsEl=false  docActive=kai-chat  rootActiveIsEl=true
-   *    el:mouseup          docActiveIsEl=false  docActive=kai-chat  rootActiveIsEl=true
-   *    doc:selectionchange docActiveIsEl=false  docActive=kai-chat  rootActiveIsEl=true
-   *
-   *  All four triggers FIRE at the right offsets through two shadow roots -- the trigger
-   *  table above holds unchanged; it was only this guard that was wrong. `getRootNode()` is
-   *  read per call rather than captured, because the element can be moved between roots, and
-   *  it degrades correctly: in a flat document the root IS the document, and while detached
-   *  the root is a fragment with no `activeElement`, which reads as not focused. */
+  /** ONE clamp, idempotent, no timers, with FOUR triggers, measured rather than assumed
+   *  (tests/e2e/input-mask-ivp.spec.ts, scenarios 9-10): a keyboard caret move fires NO
+   *  `selectionchange` (`keyup` does), and a click fires it BEFORE the browser applies its
+   *  own pixel-derived offset (`mouseup` is where the offset is final). `focus` is the
+   *  fourth because a selection that does not CHANGE fires nothing. Each trigger is the same
+   *  idempotent call, so firing several times per gesture costs a comparison. */
+  /** "Is the caret in THIS field?", asked of the element's own root:
+   *  `document.activeElement` RETARGETS to the outermost host for a focused node in a shadow
+   *  tree, so the answer was `<kai-chat>` and the clamp early-returned on every trigger: dead
+   *  in the nested app, passing in Storybook's flat document. `getRootNode()` is read per
+   *  call, since the element can move between roots. */
   function isFocused(): boolean {
     const root = el.getRootNode() as Document | ShadowRoot;
     return root.activeElement === el;
@@ -737,11 +687,11 @@ export function createInputMask(el: HTMLInputElement, options: InputMaskOptions)
     return canonicalize(pattern, formatRaw(pattern, raw), semantic);
   }
 
-  const elementListeners: Array<[string, EventListener]> = [
+  const webComponentListeners: Array<[string, EventListener]> = [
     ['beforeinput', onBeforeInput],
     ['input', onInputEvent],
     ['compositionstart', onCompositionStart],
-    // `compositionupdate` is deliberately NOT bound, though §5.2 names it: `composing` is
+    // `compositionupdate` is deliberately NOT bound: `composing` is
     // already true for the whole window, so a handler would have nothing to do. Binding one
     // to "keep the set complete" would be an empty listener implying a hook that is not there.
     ['compositionend', onCompositionEnd],
@@ -758,7 +708,7 @@ export function createInputMask(el: HTMLInputElement, options: InputMaskOptions)
   ];
   const doc = el.ownerDocument;
 
-  for (const [kind, handler] of elementListeners) el.addEventListener(kind, handler);
+  for (const [kind, handler] of webComponentListeners) el.addEventListener(kind, handler);
   // `selectionchange` fires on the DOCUMENT for `<input>` in every browser this kit
   // targets; the element-targeted version is newer and not yet universal.
   doc.addEventListener('selectionchange', clampSelection);
@@ -786,7 +736,7 @@ export function createInputMask(el: HTMLInputElement, options: InputMaskOptions)
 
     setObscure(on: boolean): void {
       obscure = on;
-      // Tier 3 (task 10) makes this change the rendered text. Today it selects the default
+      // The obscured rendering will make this change the text. Today it selects the default
       // copy policy and nothing else, which is stated on the option rather than implied.
     },
 
@@ -801,7 +751,7 @@ export function createInputMask(el: HTMLInputElement, options: InputMaskOptions)
       // or a guide that does not align, and the throw must leave this masker exactly as it
       // was. Merging into `opts` first would park the rejected config in state where the
       // NEXT update -- one that says nothing about `format` -- picks it up and applies a
-      // change that was already refused. The element facade hits precisely this shape when
+      // change that was already refused. The web-component facade hits precisely this shape when
       // `format` and `guide` are separate reactive attributes that do not land in the same
       // tick.
       const merged: InputMaskOptions = { ...opts, ...next };
@@ -846,7 +796,7 @@ export function createInputMask(el: HTMLInputElement, options: InputMaskOptions)
       if (detached) return;
       detached = true;
       pendingWrite = null; // a deferred write must not fire into a field we no longer own
-      for (const [kind, handler] of elementListeners) el.removeEventListener(kind, handler);
+      for (const [kind, handler] of webComponentListeners) el.removeEventListener(kind, handler);
       doc.removeEventListener('selectionchange', clampSelection);
     },
   };

@@ -1,6 +1,6 @@
 ---
 title: Skills
-description: A compact badge strip that shows which skills or tools were active for a message.
+description: A strip of badges for the skills a message used.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -14,7 +14,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kai-tag-sub">kai-skills</p>
 
-<p class="kai-lede">A horizontal strip of skill badges — set a JS array or compose declarative `<kai-skill>` children to annotate a message with the tools it used.</p>
+<p class="kai-lede">Wraps onto as many lines as it needs, so a long tool list still fits the row.</p>
 
 <Facts items={['Shadow DOM', 'Property or declarative children', 'Badges wrap automatically', '2 composition paths']} />
 
@@ -23,7 +23,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 <Playground client:only="solid" tag="kai-skills" />
 
 <Aside type="tip" title="When to use">
-Place `<kai-skills>` beneath an assistant message row to annotate which tools were active. Use the `skills` property when skill data comes from app state; use declarative `<kai-skill>` children for server-rendered HTML with no JS wiring.
+Beneath an assistant message, to say which tools were active for that turn. For the calls themselves, use [Tool](/components/tool/).
 </Aside>
 
 ## Usage
@@ -33,7 +33,7 @@ Assign the `skills` property after the element upgrades — arrays can't be HTML
 ```html
 <kai-skills id="skills"></kai-skills>
 <script type="module">
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
   document.getElementById('skills').skills = [
     { id: 'web-search', name: 'Web Search' },
     { id: 'code',       name: 'Code' },

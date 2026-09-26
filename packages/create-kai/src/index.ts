@@ -23,6 +23,8 @@ import * as p from '@clack/prompts';
 import pc from 'picocolors';
 
 import { runAdd } from './add';
+import { runInit } from './init';
+import { runUpgrade } from './upgrade';
 import { ZERO_CONFIG, defaultNameForTarget, normalizeGateway, parseArgs, validateProjectName } from './args';
 import { answerAxis, gatewayAxis, layoutAxis } from './axes';
 import type { AxisIo } from './axes';
@@ -118,6 +120,32 @@ async function main(): Promise<number> {
       kitVersion: __KIT_VERSION__,
       interactive: Boolean(process.stdout.isTTY),
       io: clackAxisIo,
+      out: (line) => console.log(line),
+      error: (line) => console.error(pc.red(line)),
+    });
+  }
+
+  // `init` is the third door, beside the wizard and `add`: the wizard starts a project, `add`
+  // writes a block into one, and this makes an EXISTING project kai-aware (it merges the dependency
+  // and prints the wiring, and it deliberately writes no kai.json -- see its own docblock). Routed
+  // here so it owns its own flags.
+  if (rawArgv[0] === 'init') {
+    return runInit(rawArgv.slice(1), {
+      cwd: process.cwd(),
+      kitRange: DEFAULT_KIT_RANGE,
+      interactive: Boolean(process.stdout.isTTY),
+      io: clackAxisIo,
+      out: (line) => console.log(line),
+      error: (line) => console.error(pc.red(line)),
+    });
+  }
+
+  // `upgrade` is the fourth door: it re-diffs what the scaffolder wrote for a project, using the
+  // baseline recorded in kai.json, and never touches a file its user edited. See src/upgrade.ts.
+  if (rawArgv[0] === 'upgrade') {
+    return runUpgrade(rawArgv.slice(1), {
+      cwd: process.cwd(),
+      kitRange: DEFAULT_KIT_RANGE,
       out: (line) => console.log(line),
       error: (line) => console.error(pc.red(line)),
     });
@@ -492,7 +520,7 @@ async function runConstructFlow(
   // so a plain `myapp` writes `myapp-widget` as the construct's own `name`,
   // even though the directory and the emitted FILENAME both stay `myapp`.
   // Silently rewriting it was the actual bug this guards: the tool's own
-  // printed next step (`npx @kitn.ai/ui dev ...`) used to reject the file it
+  // printed next step (`npx @kitn.ai/cli dev ...`) used to reject the file it
   // had just written, with no explanation anywhere in the output.
   if (result.constructName !== name) {
     stated(

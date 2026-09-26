@@ -28,7 +28,7 @@ const PAGE = /* html */ `<!doctype html>
   </kai-workspace>
   <script type="module">
     let error = null;
-    try { await import('/src/elements/chat-workspace.tsx'); } catch (e) { error = String((e && e.stack) || e); }
+    try { await import('/src/web-components/workspace/chat-workspace.tsx'); } catch (e) { error = String((e && e.stack) || e); }
     window.__toggles = [];
     document.getElementById('ws').addEventListener('kai-aside-toggle', (e) => window.__toggles.push(e.detail));
     await new Promise((r) => setTimeout(r, 500));

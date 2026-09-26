@@ -4,12 +4,13 @@ import { Meta } from '@storybook/addon-docs/blocks';
 
 # Components
 
-The SolidJS layer the `kai-*` web components compose from. Every primitive and feature component, with controls and source. The full element API and framework usage are at [ui.kitn.ai](https://ui.kitn.ai).
+The SolidJS layer the `kai-*` web components compose from. Every component, with controls and source. The full element API and framework usage are at [ui.kitn.ai](https://ui.kitn.ai).
 
-## Two tiers
+## One tier
 
-- **Elements**: feature components (`Message`, `Tool`, `Reasoning`, `Composer`, `Artifact`, …), each mapping to a `kai-*` element.
-- **Primitives**: the accessible base components (`Button`, `Tooltip`, `Dropdown`, `Switch`, …) they're built on. No third-party UI deps.
+Everything under `Components` is a Solid component, from the accessible building blocks (`Button`, `Tooltip`, `Dropdown`, `Switch`, …) to the chat surface (`Message`, `Tool`, `Reasoning`, `Composer`, `Artifact`, …). No third-party UI deps. Which of them have a `kai-*` element is a documented fact per component, not a separate tier here.
+
+The `kai-*` elements themselves, and the compositions built from them, are in **Labs**.
 
 ## Each story
 

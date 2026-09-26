@@ -1,6 +1,6 @@
 ---
 title: Workspace
-description: A chat-agnostic layout shell as a single web component. Five slots, resize handles, per-aside collapse, and a mobile drawer mode, all isolated in Shadow DOM.
+description: A layout shell for a chat app.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -14,7 +14,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kai-tag-sub">kai-workspace</p>
 
-<p class="kai-lede">The layout shell for a full chat app: five slots (header, start, main, end, footer), drag-resizable columns, per-aside collapse, and a mobile drawer mode. It knows nothing about chat. You slot the parts in and drive them directly.</p>
+<p class="kai-lede">Arranges the regions you give it and handles resizing, collapsing, and the mobile drawer.</p>
 
 <Facts items={['Shadow DOM', '5 slots', 'Resize handles', 'Per-aside collapse', 'Mobile drawer']} />
 
@@ -25,7 +25,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 <WorkspaceDemo client:only="solid" />
 
 <Aside type="tip" title="When to use">
-Reach for `<kai-workspace>` when you want the classic app layout, a collapsible rail beside a main surface, without writing the resize, collapse, and drawer plumbing yourself. It arranges whatever you slot in: a file tree in `start` is as valid as `<kai-conversations>`. If you only need the conversation surface, use [`<kai-chat>`](/components/chat/) on its own. The [Use a workspace](/guides/use-a-workspace/) guide walks the full composition.
+When you want a collapsible rail beside a main surface without hand-rolling resize, collapse, and drawer plumbing. For the conversation surface alone, use [`<kai-chat>`](/components/chat/).
 </Aside>
 
 ## Usage
@@ -39,7 +39,7 @@ Slot content into the regions, then drive each part as its own element. The shel
 </kai-workspace>
 
 <script type="module">
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
 
   const ws = document.querySelector('kai-workspace');
   const rail = document.querySelector('kai-conversations');
@@ -60,10 +60,10 @@ Slot content into the regions, then drive each part as its own element. The shel
 </script>
 ```
 
-- **Regions** are the `header`, `start`, `main`, `end`, and `footer` slots. Unnamed children land in `main`. A region renders only when you project content into it, so an empty shell paints nothing. `start` and `end` are logical: on an RTL page, `start` is the right column.
-- **Aside widths** are CSS custom properties, not props: `--kai-workspace-start-width` (280px), `--kai-workspace-start-min-width` (200px), `--kai-workspace-start-max-width` (480px), and the `--kai-workspace-end-*` trio (320px / 200px / 480px). Each drag, keyboard nudge, or handle double-click fires `kai-aside-resize` with `{ side, width }`.
-- **Collapse** is uncontrolled by default: the element manages it and fires `kai-aside-toggle` with `{ side, collapsed }`. Start collapsed with the `default-start-collapsed` or `default-end-collapsed` attribute, or control an aside by setting the `startCollapsed` / `endCollapsed` property and updating it from `kai-aside-toggle`. `collapse-below` auto-collapses both asides when the shell narrows past that width.
-- **Drawer mode.** Below `drawer-below`, an expanded aside paints as an overlay drawer above the main region. Escape closes it and returns focus to the opener.
+- **Regions** are the `header`, `start`, `main`, `end`, and `footer` slots; unnamed children land in `main`. A region renders only when you project content into it, and `start`/`end` are logical, so `start` is the right column on an RTL page.
+- **Aside widths** are CSS custom properties, not props: `--kai-workspace-start-width` (280px), `--kai-workspace-start-min-width` (200px), `--kai-workspace-start-max-width` (480px), and the `--kai-workspace-end-*` trio (320px / 200px / 480px).
+- **Collapse** is uncontrolled by default. Start collapsed with `default-start-collapsed` or `default-end-collapsed`, or control an aside with the `startCollapsed` / `endCollapsed` property and update it from `kai-aside-toggle`. `collapse-below` auto-collapses both asides past that width.
+- **Drawer mode**: below `drawer-below`, an expanded aside paints as an overlay above the main region. Escape closes it and returns focus to the opener.
 
 ## Examples
 
@@ -79,8 +79,6 @@ The rail begins collapsed and the main region takes the full width. Expand it fr
 ```
 
 ### An inspector in the end aside
-
-Any element works in a region. Here the `end` aside holds a preview pane beside the thread:
 
 ```html
 <kai-workspace drawer-below="640" style="display:block; height:100vh;">

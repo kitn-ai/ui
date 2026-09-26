@@ -2,69 +2,43 @@ import { createSignal, createEffect, onCleanup, type Accessor } from 'solid-js';
 import { reduceToBands, reduceToVolume } from './audio-bands';
 
 export interface AudioAnalysisOptions {
-  /**
-   * Number of frequency buckets to produce, or a live accessor for it.
-   * Default 5.
-   *
-   * An accessor is resolved INSIDE the analysis effect, so a change to
-   * whatever signal backs it (e.g. a caller's variant or size switching)
-   * rebuilds the analyser at the new bucket count instead of silently
-   * leaving `bands()` padded or truncated to a stale size.
-   */
+  // Default 5. An accessor is resolved INSIDE the analysis effect, so a change to
+  // whatever signal backs it (a caller's variant or size switching) rebuilds the
+  // analyser at the new bucket count instead of silently leaving `bands()` padded or
+  // truncated to a stale size.
+  /** Number of frequency buckets to produce, or an accessor for a live count. Default 5. */
   bands?: number | (() => number);
-  /**
-   * Low bin index of the pass window. NOT a frequency. Default 100 --
-   * upstream LiveKit's component value (see DEFAULTS below).
-   */
+  /** Low bin index of the pass window. NOT a frequency. Default 100. */
   loPass?: number;
-  /**
-   * High bin index of the pass window. NOT a frequency. Default 200 --
-   * upstream LiveKit's component value (see DEFAULTS below).
-   *
-   * Legitimately input-dependent, unlike `fftSize`/`smoothingTimeConstant`:
-   * the default window expects PROCESSED speech (an agent's TTS track, or a
-   * mic captured with AGC/noise suppression on). For raw, unprocessed input
-   * -- an un-gained recording, music, ambience -- a wide low window such as
-   * `loPass: 4, hiPass: 120` reads energy the default deliberately gates
-   * out; see DEFAULTS below for the trade both ways.
-   */
+  // Legitimately input-dependent, unlike `fftSize`/`smoothingTimeConstant`:
+  // the default window expects PROCESSED speech (an agent's TTS track, or a mic
+  // captured with AGC/noise suppression on). For raw, unprocessed input (an un-gained
+  // recording, music, ambience) a wide low window such as `loPass: 4, hiPass: 120`
+  // reads energy the default deliberately gates out; see DEFAULTS below for the trade
+  // both ways.
+  /** High bin index of the pass window. NOT a frequency. Default 200. */
   hiPass?: number;
   /** Minimum ms between updates. Default 32 (about 30fps). */
   updateInterval?: number;
 }
 
 /**
- * The default window is upstream LiveKit's COMPONENT window, bins 100-200:
- * every shipped agents-ui visualizer passes `{ loPass: 100, hiPass: 200 }`
- * (agent-audio-visualizer-bar.tsx:181-183, grid.tsx:279-281,
- * radial.tsx:142-144 -- radial's loPass was 80 until their PR #1265). Their
- * HOOK's own default is 100-600 (useTrackVolume.ts:95-101), but no shipped
- * component uses it, so parity means matching the components.
+ * The default window is upstream's COMPONENT window, bins 100-200: every shipped
+ * agents-ui visualizer passes `{ loPass: 100, hiPass: 200 }`, while their hook's own
+ * default (100-600) is used by no shipped component, so parity means matching the
+ * components.
  *
- * At fftSize 2048 that is ~2.34-4.69kHz at 48kHz (2.15-4.31kHz at 44.1kHz):
- * the sibilance band, ABOVE where a room's noise floor lives. Everything at
- * or below -100dB normalizes to exactly 0 (see normalizeDb), and a real
- * room's tone measures ~17dB BELOW that floor across this window while
- * sitting ~27dB ABOVE it across 86-258Hz (noise-floor diagnosis, table A).
- * The narrow high window plus the hard -100dB floor IS upstream's noise
- * gate -- there is no explicit gate anywhere in their pipeline -- and it is
- * what keeps their idle bars perfectly still where a wide window shows the
- * room breathing.
+ * At fftSize 2048 that is roughly 2.3-4.7kHz, the sibilance band above where a room's
+ * noise floor lives. Everything at or below -100dB normalizes to 0, and a room's tone
+ * measures well below that floor across this window while sitting well above it lower
+ * down. The narrow window plus the hard floor IS upstream's noise gate, which is what
+ * keeps their idle bars still where a wide window would show the room breathing.
  *
- * The trade, measured on a real un-processed recording ("this is a test,
- * testing one two three, hello world"): through 100-200, quiet
- * natural-volume speech frames read all-zero (54% of that clip's frames;
- * consonants and sibilance still register on the louder ones). Upstream
- * lives with that because their input is conditioned before analysis -- an
- * agent's loud TTS track, or a local mic captured with autoGainControl +
- * noiseSuppression + echoCancellation + voiceIsolation (livekit-client
- * defaults.ts:27-30) that lifts speech toward target level. Ours follows:
- * the mic stories request the same constraint set. For RAW input where that
- * trade reads wrong (un-gained recordings, music), `loPass: 4, hiPass: 120`
- * (86Hz-2.6kHz: fundamental + first two formants) remains the measured
- * opt-in -- it read those same quiet frames at mean 0.234 with only true
- * silence at zero -- at the documented cost of visualizing the room's noise
- * floor on the centre elements (the defect that reverted this default).
+ * The trade, measured on a real un-processed recording: through 100-200, quiet speech
+ * frames read all-zero (54% of that clip's frames). Upstream lives with it because its
+ * input is conditioned first, and the mic stories here request the same constraints. For
+ * RAW input (un-gained recordings, music) `loPass: 4, hiPass: 120` remains the measured
+ * opt-in.
  */
 export const DEFAULTS = {
   bands: 5,
@@ -104,26 +78,17 @@ export const BANDS_ANALYSER = {
 } as const;
 
 /**
- * Matches upstream's `useTrackVolume` as the wave/aura hooks call it:
- * `{ fftSize: 512, smoothingTimeConstant: 0.55 }`
- * (use-agent-audio-visualizer-wave.ts:55-56, aura.ts:62-63). Faster decay
- * (roughly 123ms to 10% of peak) keeps the shaders' reactivity within the
- * ~33ms lag the aurora variant was tuned against; the bands' slower 0.8
- * here would make the shaders visibly sluggish. Upstream reaches the same
- * two-analyser structure differently -- two hooks, each with its own
- * analyser (and its own AudioContext) -- but the constants match ours
- * exactly.
+ * The wave/aura settings, matched to upstream's `useTrackVolume`: a faster decay
+ * (about 123ms to 10% of peak) keeps the shaders' reactivity inside the ~33ms lag the
+ * aurora variant is tuned against, where the bands' slower 0.8 would make them look
+ * sluggish.
  *
- * `minDecibels`/`maxDecibels` are upstream's `createAudioAnalyser` defaults
- * (livekit-client src/room/utils.ts:548-553), NOT the Web Audio spec's
- * -100/-30. They only rescale getByteFrequencyData -- this analyser's whole
- * output -- mapping the byte range over a 20dB window that saturates at
- * -80dB. That is what makes upstream's volume scalar run hot (speech
- * ~0.5-0.9) and their wave/aura feel alive; on the spec scale the same
- * speech read ~3x colder here (0.31 vs 0.80, noise-floor diagnosis,
- * addendum 1), leaving our shaders under-reacting. The BANDS analyser gets
- * no such pair: it is read with getFloatFrequencyData, where these two
- * properties have no effect at all.
+ * `minDecibels`/`maxDecibels` are upstream's defaults, not the Web Audio spec's
+ * -100/-30. They rescale `getByteFrequencyData`, this analyser's whole output, over a
+ * 20dB window saturating at -80dB, which is what makes the volume scalar run hot
+ * (speech ~0.5-0.9). On the spec scale the same speech reads about 3x colder, leaving
+ * the shaders under-reacting. The BANDS analyser gets no such pair: it is read with
+ * `getFloatFrequencyData`, where the two properties do nothing.
  */
 export const VOLUME_ANALYSER = {
   fftSize: 512,
@@ -155,7 +120,7 @@ function getContext(): AudioContext | undefined {
  * there is no API to ask whether an element already has a source node. Cache
  * them. A WeakMap so a removed <audio> can still be collected.
  */
-const elementSources = new WeakMap<HTMLMediaElement, MediaElementAudioSourceNode>();
+const webComponentSources = new WeakMap<HTMLMediaElement, MediaElementAudioSourceNode>();
 
 /**
  * `createMediaStreamSource` does NOT throw on a second call for the same
@@ -203,7 +168,7 @@ function resumeOnGesture(ctx: AudioContext): () => void {
  * silently forced one smoothing behavior onto both and made bars snap back
  * to rest instead of easing like upstream's do. What this still saves over
  * upstream: one shared, cached source node per element/stream (see
- * elementSources/streamSources below) instead of a fresh one per hook
+ * webComponentSources/streamSources below) instead of a fresh one per hook
  * instance, and one requestAnimationFrame loop reading both analysers each
  * tick instead of two independent timers.
  *
@@ -272,7 +237,7 @@ export function useAudioAnalysis(
       // destination, cached or not.
     } else {
       const el = src;
-      let elNode = elementSources.get(el);
+      let elNode = webComponentSources.get(el);
       if (!elNode) {
         elNode = ctx.createMediaElementSource(el);
         // Connect to destination exactly once, right here at creation, so the
@@ -282,7 +247,7 @@ export function useAudioAnalysis(
         // one also connects to destination. If either did, N consumers on
         // one element would sum to N times the amplitude.
         elNode.connect(ctx.destination);
-        elementSources.set(el, elNode);
+        webComponentSources.set(el, elNode);
       }
       node = elNode;
     }

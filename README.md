@@ -58,15 +58,15 @@ Rendering goes three ways, and they are not symmetric.
 
 | Framework | How you render |
 | --- | --- |
-| React, Next.js, TanStack Start | Typed wrappers from `@kitn.ai/ui/react` (`<Thread>`, `<PromptInput>`, `<Conversations>`), or the raw tags. The wrappers are the default and are generated from the same build as the elements, so events arrive as React props (`onSubmit` for `kai-submit`) and each one registers its own element on mount. |
-| Vue, Svelte, Angular, plain HTML | The tags, after `import '@kitn.ai/ui/elements'`. These set DOM properties and listen for DOM events natively, so there's no wrapper layer to add. Vue needs `isCustomElement` in its vite config and Angular needs `CUSTOM_ELEMENTS_SCHEMA`; Svelte and HTML need nothing. |
-| SolidJS | Genuinely different. `@kitn.ai/ui/solid` hands you the SolidJS components themselves, with no custom elements in the picture. Solid is the layer everything else is built from. |
+| React, Next.js, TanStack Start | Typed wrappers from `@kitn.ai/ui/react` (`<Thread>`, `<PromptInput>`, `<Conversations>`), or the raw tags. The wrappers are the default and are generated from the same build as the web components, so events arrive as React props (`onSubmit` for `kai-submit`) and each one registers its own element on mount. |
+| Vue, Svelte, Angular, plain HTML | The tags, after `import '@kitn.ai/ui/web-components'`. These set DOM properties and listen for DOM events natively, so there's no wrapper layer to add. Vue needs `isCustomElement` in its vite config and Angular needs `CUSTOM_ELEMENTS_SCHEMA`; Svelte and HTML need nothing. |
+| SolidJS | Genuinely different. `@kitn.ai/ui/solid` hands you the SolidJS components themselves, with no web components in the picture. Solid is the layer everything else is built from. |
 
-Wiring an element by hand, in any framework:
+Wiring a web component by hand, in any framework:
 
 ```html
 <script type="module">
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
 
   // Registration is async (that's what keeps the import SSR-safe), so wait for
   // the element before setting properties or the upgrade clobbers them.
@@ -87,9 +87,9 @@ The same thing per framework: [Getting started](https://ui.kitn.ai/guides/gettin
 | --- | --- |
 | `@kitn.ai/ui/state` | Pure folds over `ChatMessage[]`: `createAssistantStream`, `appendTextPart`, `upsertToolPart`. No I/O. |
 | `@kitn.ai/ui/wire` | Provider SSE in, message parts out: `readOpenAIStream`, `readAnthropicStream`, `toOpenAIMessages`. |
-| `@kitn.ai/ui/theme.css` | Tailwind v4 token source for your own markup (`theme.tokens.css` is the plain-CSS build). Retheming the elements needs no import: set `--kai-color-*` on `:root`. |
+| `@kitn.ai/ui/theme.css` | Tailwind v4 token source for your own markup (`theme.tokens.css` is the plain-CSS build). Retheming the web components needs no import: set `--kai-color-*` on `:root`. |
 
-Also shipped: `@kitn.ai/ui/elements/<name>` for one element at a time, `@kitn.ai/ui/autoloader` to load each on demand on a static or CDN-served page with no bundler, `@kitn.ai/ui/schemas` for the generative-UI card schemas, and `@kitn.ai/ui/provider` for cards served from another origin. The authoritative list is the `exports` map in [`packages/ui/package.json`](packages/ui/package.json).
+Also shipped: `@kitn.ai/ui/web-components/<name>` for one web component at a time, `@kitn.ai/ui/autoloader` to load each on demand on a static or CDN-served page with no bundler, `@kitn.ai/ui/schemas` for the generative-UI card schemas, and `@kitn.ai/ui/provider` for cards served from another origin. The authoritative list is the `exports` map in [`packages/ui/package.json`](packages/ui/package.json).
 
 The kit parses, your app fetches. There's no HTTP client, no key handling and no provider SDK in here: `wire` reads a stream you opened, which is why your keys never have to come near it.
 
@@ -97,11 +97,11 @@ The kit parses, your app fetches. There's no HTTP client, no key handling and no
 
 They're fair, and mostly historic. Where they still bite, this kit answers them:
 
-- **React interop.** `@kitn.ai/ui/react` is generated from the same build that generates the elements, so props are typed and events are React props. No `ref` plumbing to set an array.
+- **React interop.** `@kitn.ai/ui/react` is generated from the same build that generates the web components, so props are typed and events are React props. No `ref` plumbing to set an array.
 - **SSR.** Registration is client-only by construction, and the React wrappers register in an effect. CI renders every server entry in a DOM-free Node process on each run (`verify:ssr`), and the Next.js and TanStack Start starters are server-rendered.
 - **Types.** The React wrappers are generated, not hand-maintained, and a custom-elements manifest ships for editor tag completion.
-- **Styling.** Shadow DOM keeps your CSS out, which is also why you can't override a selector. Theming runs on `--kai-color-*` custom properties, which cross the boundary by design, and elements expose CSS `part`s for the pieces worth reaching.
-- **No build step.** The elements load from a CDN in a plain `<script>` tag, so they work on a host with no bundler to hook into. `@kitn.ai/ui/autoloader` fetches each one on demand as its tag appears.
+- **Styling.** Shadow DOM keeps your CSS out, which is also why you can't override a selector. Theming runs on `--kai-color-*` custom properties, which cross the boundary by design, and the web components expose CSS `part`s for the pieces worth reaching.
+- **No build step.** The web components load from a CDN in a plain `<script>` tag, so they work on a host with no bundler to hook into. `@kitn.ai/ui/autoloader` fetches each one on demand as its tag appears.
 
 ## Three things every consumer hits
 
@@ -109,17 +109,17 @@ They're fair, and mostly historic. Where they still bite, this kit answers them:
 - **Events are non-bubbling `kai-*` CustomEvents.** Listen on the element itself, never a parent. Submit is `kai-submit` and the text is `event.detail.value`.
 - **Updating needs a new array *and* a new object for each item you changed.** The new array reference is what tells the element something changed; the new item object is what makes the change visible. Adds, removes and reorders need only the fresh array — editing an existing item needs both, and mutating it in place renders nothing even inside a fresh array.
 
-Every property, event and method for every element: [`docs/web-components.md`](docs/web-components.md).
+Every property, event and method for every web component: [`docs/web-components.md`](docs/web-components.md).
 
 ## The kai MCP
 
-The package ships a stdio MCP server, so an AI coding harness can build with this library instead of guessing at it:
+The kit ships a stdio MCP server as its own package, `@kitn.ai/mcp`, so an AI coding harness can build with this library instead of guessing at it:
 
 ```bash
-claude mcp add kai -- npx -y @kitn.ai/ui mcp
+claude mcp add kai -- npx -y @kitn.ai/mcp
 ```
 
-Four tools: `component_reference` (the real API for any `kai-*` element, generated from the build), `scaffold` (a working chat surface wired to your framework and backend), `theme` (brand it from a color or a description), `debug` (the classic mistakes). It runs locally and makes no network calls. Config for other harnesses: [For AI agents](https://ui.kitn.ai/guides/for-ai-agents/).
+Four tools: `component_reference` (the real API for any `kai-*` web component, generated from the build), `scaffold` (a working chat surface wired to your framework and backend), `theme` (brand it from a color or a description), `debug` (the classic mistakes). It runs locally and makes no network calls. Config for other harnesses: [For AI agents](https://ui.kitn.ai/guides/for-ai-agents/).
 
 ## Status
 

@@ -623,7 +623,7 @@ describe('AudioVisualizer bands leak: state/frozen reads must not re-run an unre
 describe('AudioVisualizer relays listeningAmplitude to the variants', () => {
   // The per-variant gate itself is pinned in each variant's own test file;
   // this pins the DISPATCHER wiring: `listeningAmplitude` must travel through
-  // `shared()` to what a variant actually receives, or the element facade's
+  // `shared()` to what a variant actually receives, or the web-component facade's
   // new prop would be connected to nothing.
   it('caller-supplied bands drive bar heights while listening once listeningAmplitude is set', () => {
     const { container } = render(() => (

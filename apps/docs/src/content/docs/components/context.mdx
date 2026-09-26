@@ -1,6 +1,6 @@
 ---
 title: Context
-description: A compact token-usage meter with a hover-card breakdown — drop it into any chat header to keep users aware of how much context window remains.
+description: A token-usage meter for a conversation.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -15,7 +15,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kai-tag-sub">kai-context</p>
 
-<p class="kai-lede">A compact token-usage meter with a hover-card breakdown — shows used vs. available context at a glance, with input, output, reasoning, and cache line items revealed on hover.</p>
+<p class="kai-lede">Keeps the reader aware of how much of the model's context window is left.</p>
 
 <Facts items={['Shadow DOM', '1 event', 'Configurable thresholds', 'Hover-card breakdown', 'Estimated cost display']} />
 
@@ -24,7 +24,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 <Playground client:only="solid" tag="kai-context" />
 
 <Aside type="tip" title="When to use">
-Place `<kai-context>` in a chat header or toolbar alongside a model switcher. The meter is `inline-block` and compact — it fits next to other controls without its own row. Wire `kai-threshold-change` to act when usage reaches `'warn'` or `'danger'` (e.g. prompt the user to start a new conversation).
+A chat header or toolbar, next to a model switcher: the meter is `inline-block` and fits without its own row. Wire `kai-threshold-change` to act at `'warn'` or `'danger'`.
 </Aside>
 
 ## Usage
@@ -32,7 +32,7 @@ Place `<kai-context>` in a chat header or toolbar alongside a model switcher. Th
 Set `context` in JavaScript with a usage object:
 
 ```js
-import '@kitn.ai/ui/elements';
+import '@kitn.ai/ui/web-components';
 
 await customElements.whenDefined('kai-context');
 
@@ -48,32 +48,28 @@ el.context = {
 };
 ```
 
-- **`context`** — the element renders nothing until data arrives, so it's safe to place unconditionally in the header.
-- **`warnThreshold` / `dangerThreshold`** are fractional (0–1) number properties, defaulting to `0.7` and `0.9`. Assign directly: `el.warnThreshold = 0.5`.
+- **`context`**: the element renders nothing until data arrives, so it is safe to place unconditionally in the header.
+- **`warnThreshold` / `dangerThreshold`**: fractional (0–1) properties, defaulting to `0.7` and `0.9`. Assign directly: `el.warnThreshold = 0.5`.
 
 ## Examples
 
 ### Default
 
-Meter at ~24% usage with a full breakdown. Hover to reveal the popover.
-
 <Example client:visible tag="kai-context" />
 
 ### Warning Threshold
 
-At 75% the meter turns yellow — above the default `warnThreshold` of 0.7.
+Above the default `warnThreshold` of 0.7 the meter turns yellow.
 
 <Example client:visible tag="kai-context" data="warn" />
 
 ### Danger Threshold
 
-At 92% the meter turns red — above the default `dangerThreshold` of 0.9.
+Above the default `dangerThreshold` of 0.9 it turns red.
 
 <Example client:visible tag="kai-context" data="danger" />
 
 ### Custom Thresholds
-
-`warnThreshold: 0.5`, `dangerThreshold: 0.75` — the meter warns earlier.
 
 <Example client:visible tag="kai-context" data="customThresholds" />
 

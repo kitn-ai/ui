@@ -1,6 +1,6 @@
 ---
 title: Notice
-description: A self-contained inline notice — severity icon, message, an optional action, and an optional dismiss.
+description: A short inline notice that reports a state or a problem.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -15,7 +15,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kai-tag-sub">kai-notice</p>
 
-<p class="kai-lede">A self-contained inline notice — a severity icon, your message, an optional trailing action, and an optional dismiss. It owns the box; you decide where it sits.</p>
+<p class="kai-lede">Carries the ARIA role that matches its severity, so it announces itself.</p>
 
 <Facts items={['Shadow DOM', '5 severities', 'Self-dismissing', 'role: alert / status']} />
 
@@ -24,7 +24,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 <Playground client:only="solid" tag="kai-notice" />
 
 <Aside type="tip" title="When to use">
-Surface a short, contextual status message — a model that's temporarily unavailable above the composer, a "saved" confirmation at the top of a panel, a rate-limit warning in a settings page. It carries the severity icon and the right ARIA role for you. For transient pop-up feedback, reach for [Toast](/components/toast/) instead.
+Above the composer, at the top of a panel, anywhere a short status belongs. For transient feedback after an action, use [Toast](/components/toast/) instead.
 </Aside>
 
 ## Usage

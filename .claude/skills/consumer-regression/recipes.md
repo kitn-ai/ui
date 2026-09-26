@@ -42,10 +42,10 @@ cd "$PKG" && KAI_BUILD=mcp npx vite build --config config/vite/node.ts
 
 ### Post-build churn
 
-`pnpm exec nx build ui` regenerates five checked-in files: `packages/ui/src/elements/element-meta.json`, `packages/ui/src/elements/element-types.d.ts`, `packages/ui/frameworks/react/index.tsx`, `packages/ui/llms-full.txt`, and `docs/web-components.md`. Check `git status` after the build.
+`pnpm exec nx build ui` regenerates five checked-in files: `packages/ui/src/web-components/web-component-meta.json`, `packages/ui/src/web-components/web-component-types.d.ts`, `packages/ui/frameworks/react/index.tsx`, `packages/ui/llms-full.txt`, and `docs/web-components.md`. Check `git status` after the build.
 
 Two cases:
-- **The shapes genuinely changed on this branch** (new/changed elements, props, or components): the regeneration is real and correct. Commit it as part of the branch's own change, don't discard it.
+- **The shapes genuinely changed on this branch** (new/changed web components, props, or components): the regeneration is real and correct. Commit it as part of the branch's own change, don't discard it.
 - **You're just packing to test, mid-investigation, on a branch where nothing shape-relevant changed:** revert the churn so it doesn't pollute your diff: `git checkout -- <the five paths above>`.
 
 Don't reach for a blanket revert without checking which case you're in.
@@ -64,7 +64,7 @@ const MAIN = dirname(execSync('git rev-parse --path-format=absolute --git-common
 const HARNESS = join(dirname(MAIN), 'consumer-harness');
 const PKG = join(REPO, 'packages/ui');
 mkdirSync(join(HARNESS, 'scaffolds'), { recursive: true });
-const p = spawn('node', [join(PKG, 'bin/mcp.js')], { cwd: PKG, stdio: ['pipe','pipe','pipe'] });
+const p = spawn('node', [join(PKG, 'bin/kai-mcp.js')], { cwd: PKG, stdio: ['pipe','pipe','pipe'] });
 let buf=''; const out=[];
 p.stdout.on('data',d=>{buf+=d;let i;while((i=buf.indexOf('\n'))>=0){const l=buf.slice(0,i);buf=buf.slice(i+1);if(l.trim()){try{out.push(JSON.parse(l))}catch{}}}});
 const s=o=>p.stdin.write(JSON.stringify(o)+'\n');
@@ -82,7 +82,7 @@ setTimeout(()=>{p.kill();cells.forEach(([n],i)=>{const t=out.find(m=>m.id===40+i
 
 The same client calls the other tools: `theme` (brand → token block), `component_reference` (the real API), `debug` (gotcha → fix).
 
-**Sanity:** the bin is `$PKG/bin/mcp.js` (built by `config/vite/node.ts` (`KAI_BUILD=mcp`) → `$PKG/dist/mcp.es.js`). If a generated `.md` comes out empty/tiny, the bin didn't run: `ls "$PKG/bin/mcp.js" "$PKG/dist/mcp.es.js"`, rebuild the bin, re-run. Always eyeball one generated scaffold (it should contain `kai-chat` / `<Chat`, the suggestions, and the backend block) before fanning out probes against it.
+**Sanity:** the bin is `$PKG/bin/kai-mcp.js` (built by `config/vite/node.ts` (`KAI_BUILD=mcp`) → `$PKG/dist/mcp.es.js`). If a generated `.md` comes out empty/tiny, the bin didn't run: `ls "$PKG/bin/kai-mcp.js" "$PKG/dist/mcp.es.js"`, rebuild the bin, re-run. Always eyeball one generated scaffold (it should contain `kai-chat` / `<Chat`, the suggestions, and the backend block) before fanning out probes against it.
 
 ## The test matrix
 
@@ -108,7 +108,7 @@ Exercises the `@kitn.ai/ui/state` public surface end-to-end in a real consumer a
 | react | `npm create vite@latest <n> -- --template react-ts` | `npm run build` (tsc -b && vite build) | Vite SPA, no SSR |
 | vue | `npm create vite@latest <n> -- --template vue-ts` | `npm run build` (vue-tsc) | add `isCustomElement: t=>t.startsWith('kai-')` to vite config (scaffold says so) |
 | svelte | `npm create vite@latest <n> -- --template svelte-ts` | `npm run build` + `npm run check` (svelte-check) | |
-| html | `npm create vite@latest <n> -- --template vanilla-ts` | `npm run build` | Vite resolves the bare `@kitn.ai/ui/elements` import |
+| html | `npm create vite@latest <n> -- --template vanilla-ts` | `npm run build` | Vite resolves the bare `@kitn.ai/ui/web-components` import |
 | next | `npx create-next-app@latest <n> --ts --app --no-tailwind --no-eslint --no-src-dir --import-alias "@/*" --use-npm` | `npm run build` (next build) | scaffold uses `dynamic({ssr:false})` |
 | tanstack-start | the official scaffold (verify current via Context7/docs) | `npm run build` | scaffold uses `createFileRoute({ ssr:false })` |
 
@@ -132,7 +132,7 @@ curl -N -X POST localhost:3000/api/chat -H 'content-type: application/json' \
 
 ## SSR import-safety check
 
-The elements bundle must not throw when imported with no DOM:
+The web-components bundle must not throw when imported with no DOM:
 ```bash
 PKG="$(git rev-parse --show-toplevel)/packages/ui"
 node --input-type=module -e "await import('$PKG/dist/kai.es.js'); console.log('SSR-OK')"   # no throw

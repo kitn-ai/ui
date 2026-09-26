@@ -8,66 +8,48 @@ export type UniformType =
 export interface UniformSpec {
   type: UniformType;
   value: number | number[];
-  /**
-   * For array uniforms (`1fv`, `3fv`, `4fv`, or a matrix type repeated), the
-   * declared length. Optional: when omitted, it is inferred from
-   * `value.length` -- see `inferArraySize`. The inferred length is exactly
-   * what the recompile check uses too (see `effectiveArraySize`), so a
-   * length change recompiles the shader whether `arraySize` was passed
-   * explicitly or left to be inferred -- e.g. a per-band uniform whose
-   * length tracks a reactive `size`/`barCount` prop stays correct across a
-   * band-count change with no extra care from the caller.
-   */
+  // The recompile check uses the same inferred length (`effectiveArraySize`), so a length
+  // change recompiles the shader whether `arraySize` was explicit or inferred: a per-band
+  // uniform whose length tracks a reactive `size`/`barCount` stays correct across a
+  // band-count change with no extra care from the caller.
+  /** For array uniforms, the declared length; inferred from `value.length` when omitted. */
   arraySize?: number;
 }
 
 export interface ShaderCanvasProps {
-  /**
-   * GLSL defining `mainImage(out vec4 fragColor, in vec2 fragCoord)`.
-   *
-   * MUST output PREMULTIPLIED colour: `fragColor = vec4(rgb * alpha, alpha);`,
-   * not `vec4(rgb, alpha)`. The canvas context uses the browser default
-   * `premultipliedAlpha: true` (see `ShaderCanvas`'s doc for why), so a
-   * naturally written soft/anti-aliased edge that returns straight (not
-   * premultiplied) colour composites with a dark fringe or halo -- most
-   * visible on a light page background.
-   */
+  // MUST output PREMULTIPLIED colour (`fragColor = vec4(rgb * alpha, alpha);`, not
+  // `vec4(rgb, alpha)`): the context uses the browser default `premultipliedAlpha: true`
+  // (see `ShaderCanvas`'s doc), so a naturally written soft/anti-aliased edge that
+  // returns straight colour composites with a dark fringe or halo, most visible on a
+  // light page background.
+  /** GLSL defining `mainImage(out vec4 fragColor, in vec2 fragCoord)`. */
   fragment: string;
-  /**
-   * Custom uniforms. THIS CANVAS DECLARES THEM FOR YOU by injecting
-   * `uniform <type> <name>;` into the shader source. Declaring them yourself
-   * in `fragment` too is a GLSL redefinition and fails to compile.
-   */
+  // Injected as `uniform <type> <name>;` into the shader source beside the five
+  // ShaderToy built-ins, so declaring them in `fragment` too is a GLSL redefinition and
+  // fails to compile.
+  /** Extra uniforms for the shader body. */
   uniforms?: Record<string, UniformSpec>;
   precision?: 'lowp' | 'mediump' | 'highp';
-  /**
-   * Called when the shader cannot render at all: no WebGL context, or a
-   * compile/link failure. Not called again for a later value-only uniform
-   * update (see the reactivity note on `ShaderCanvas` below) -- only when
-   * the shader itself is rebuilt and that rebuild fails.
-   */
+  // Not called again for a later value-only uniform update (see the reactivity note on
+  // `ShaderCanvas` below): only when the shader itself is rebuilt and that rebuild fails.
+  /** Called when the shader cannot render at all: no WebGL context, or a compile/link
+   *  failure. */
   onError?: (message: string) => void;
-  /**
-   * Keep animating while the canvas is off screen. Default `false`.
-   *
-   * By default an off-screen canvas stops drawing AND hands its WebGL context
-   * back to the browser (see `ShaderCanvas`'s doc), because contexts are
-   * rationed at roughly 16 per renderer process and a page of visualizers
-   * blows through that. Set this when a canvas must keep running unseen --
-   * capturing frames, or a shader whose state must not visibly jump when it
-   * scrolls back in. The cost is one permanently-held context per canvas, so
-   * it does not scale: a page that sets this on more than a handful of
-   * visualizers is back to the eviction problem the default exists to avoid.
-   *
-   * Named to match upstream's prop of the same name, though ours opts out of
-   * something stronger: theirs only pauses the draw loop, ours also releases
-   * the context.
-   *
-   * This does NOT override `prefers-reduced-motion`. Reduced motion is applied
-   * a layer up, by the variants zeroing their own speed uniforms, so a frozen
-   * shader stays a still image whether or not this is set -- this only decides
-   * whether frames keep being drawn, never what they contain.
-   */
+  // The default stops drawing AND hands the WebGL context back to the browser (see
+  // `ShaderCanvas`'s doc), because contexts are rationed at roughly 16 per renderer
+  // process and a page of visualizers blows through that. Turn it on for a canvas that
+  // must keep running unseen -- capturing frames, or a shader whose state must not
+  // visibly jump when it scrolls back in -- and pay one permanently-held context per
+  // canvas: at more than a handful of visualizers the page is back to the eviction
+  // problem the default exists to avoid. Named after upstream's prop of the same name,
+  // though ours opts out of something stronger: theirs only pauses the draw loop, ours
+  // also releases the context.
+  //
+  // This does NOT override `prefers-reduced-motion`. Reduced motion is applied a layer up,
+  // by the variants zeroing their own speed uniforms, so a frozen shader stays a still
+  // image whether or not this is set: it only decides whether frames keep being drawn,
+  // never what they contain.
+  /** Keep drawing while the canvas is off screen, holding its WebGL context. Off by default. */
   animateWhenNotVisible?: boolean;
   class?: string;
 }
@@ -331,27 +313,20 @@ export function ShaderCanvas(props: ShaderCanvasProps): JSX.Element {
   // ------------------------------------------------------------------------
   // Context lifecycle.
   //
-  // Chrome caps LIVE WebGL contexts at about 16 per renderer process and
-  // silently evicts the oldest past that -- a budget shared across
-  // same-origin iframes too, so splitting the page up buys nothing (measured:
-  // the AudioVisualizer docs page wanted 18, got 16, and 2 canvases failed to
-  // compile with no error anywhere). Holding a context for the component's
-  // whole life is what made that page unable to host the shader stories at
-  // all.
-  //
-  // Merely pausing the draw loop off screen -- which is all upstream's
-  // runner does -- does NOT return a slot: an idle context still occupies
-  // one. So an off-screen canvas gives the context BACK, via
+  // Chrome caps LIVE WebGL contexts at about 16 per renderer process and silently
+  // evicts the oldest past that, a budget shared across same-origin iframes too
+  // (measured: the docs page wanted 18, got 16, and 2 canvases failed to compile with
+  // no error anywhere). Holding a context for the component's whole life is what made
+  // that page unable to host the shader stories at all. Merely pausing the draw loop
+  // off screen -- all upstream's runner does -- does NOT return a slot: an idle context
+  // still occupies one. So an off-screen canvas gives the context BACK, via
   // `WEBGL_lose_context`'s `loseContext()`, and asks for it again with
-  // `restoreContext()` on the way in. Consequence worth stating plainly: N
-  // off-screen visualizers now hold ZERO contexts between them, and a page
-  // holds one per canvas actually in the viewport.
+  // `restoreContext()` on the way in. N off-screen visualizers therefore hold ZERO
+  // contexts between them.
   //
-  // All of this state is COMPONENT-scoped rather than living inside the
-  // compile effect, because a context belongs to the CANVAS, which outlives
-  // any one run of that effect. A shader released while off screen must still
-  // be restorable after a recompile (a `size`/band-count change genuinely
-  // rebuilds the shader while a tile is scrolled away).
+  // All of this state is COMPONENT-scoped rather than living inside the compile effect,
+  // because a context belongs to the CANVAS, which outlives any one run of that effect:
+  // a shader released while off screen must still be restorable after a recompile.
   // ------------------------------------------------------------------------
 
   /**
@@ -385,27 +360,20 @@ export function ShaderCanvas(props: ShaderCanvasProps): JSX.Element {
   /**
    * `cancelAnimationFrame`, captured at SETUP.
    *
-   * `stopLoop()` below runs at dispose (via `release()`), and dispose is not
-   * guaranteed to happen while the page that mounted this canvas is still
-   * standing -- `component-register`'s `disconnectedCallback` defers a
-   * microtask, and a test environment tears its DOM globals down in between.
-   * A bare `cancelAnimationFrame` there throws from a promise nobody holds, so
-   * it surfaces as an unhandled rejection that fails a run in which every test
-   * passed. See tests/components/teardown-without-dom-globals.test.tsx.
+   * `stopLoop()` below runs at dispose, and dispose is not guaranteed to happen while
+   * the page that mounted this canvas is still standing: component-register's
+   * `disconnectedCallback` defers a microtask, and a test environment tears its DOM
+   * globals down in between. A bare `cancelAnimationFrame` there throws from a promise
+   * nobody holds, surfacing as an unhandled rejection that fails a run in which every
+   * test passed (pinned by `tests/components/teardown-without-dom-globals.test.tsx`).
+   * The FUNCTION, not the view: `window === globalThis` (measured in jsdom
+   * and in Chromium/WebKit alike) and the teardown deletes the key off that very object,
+   * so a `const win = window` capture only trades the ReferenceError for a TypeError
+   * while `.bind` pins the receiver the WebIDL operation is specified on.
    *
-   * The FUNCTION, not the view. The `const win = window` capture that fixes a
-   * bare `document` does nothing here: `window === globalThis` -- measured, in
-   * jsdom and in real Chromium/WebKit alike -- and the teardown deletes these
-   * keys off that very object, so `win.cancelAnimationFrame` is undefined by
-   * the time cleanup runs. It only trades the ReferenceError for a TypeError.
-   * `.bind` pins the receiver the WebIDL operation is specified on; Chromium
-   * and WebKit both accept a detached call (measured), so the bind is belt and
-   * braces against an engine that does not, at zero cost.
-   *
-   * GUARDED because "setup" for this component is its body, and a server render
-   * executes component bodies. Node has no `cancelAnimationFrame` at all, so an
-   * unguarded capture here would trade the disposal crash for an SSR crash --
-   * measured, not hypothesised. Nothing can be scheduled without
+   * GUARDED because "setup" for this component is its body, and a server render executes
+   * component bodies: Node has no `cancelAnimationFrame` at all, so an unguarded capture
+   * would trade the disposal crash for an SSR crash. Nothing can be scheduled without
    * `requestAnimationFrame` either, so the no-op fallback is exactly right.
    */
   const cancelFrame = typeof cancelAnimationFrame === 'function'

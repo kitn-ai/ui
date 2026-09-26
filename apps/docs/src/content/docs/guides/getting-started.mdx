@@ -5,7 +5,7 @@ description: Install @kitn.ai/ui, register the web components, and render a work
 
 import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
 
-Drop `<kai-chat>` into a page, wire two things, and you have a live chat UI. This guide goes from install to an element that handles real submissions.
+Drop `<kai-chat>` into a page, wire two things, and you have a live chat UI. This guide goes from install to a web component that handles real submissions.
 
 ## Install
 
@@ -15,12 +15,12 @@ npm install @kitn.ai/ui
 
 That's it for web components — SolidJS ships inside the bundle. (You only add `solid-js` separately if you import the native Solid components; see the [SolidJS guide](/guides/frameworks/solid/).)
 
-## Register the elements
+## Register the web components
 
-One import registers every `kai-*` element in the browser's custom element registry. Run it once — at the top of your entry file, or in a `<script type="module">`:
+One import registers every `kai-*` web component in the browser's custom element registry. Run it once — at the top of your entry file, or in a `<script type="module">`:
 
 ```js
-import '@kitn.ai/ui/elements';
+import '@kitn.ai/ui/web-components';
 ```
 
 <Aside type="tip" title="No bundler? Use the CDN">
@@ -33,12 +33,12 @@ Load the bundle straight from a CDN — no install, no build step:
 ```
 
 {/* x-release-please-start-version */}
-Pin an exact version in production (e.g. `@kitn.ai/ui@0.32.0/dist/...`).
+Pin an exact version in production (e.g. `@kitn.ai/ui@0.37.0/dist/...`).
 {/* x-release-please-end */}
 
 The package is pre-1.0, so a minor release can break things. Pin `0.25.0` or newer: `0.14.1` through `0.24.0` are covered by a [critical security advisory](https://github.com/kitn-ai/ui/security/advisories), and a CDN fetch prints no deprecation warning to tell you.
 
-This bundle registers everything in one fetch — right for a chat page. A page placing only an element or two can load the [autoloader](/guides/loading/#autoloader) instead, which fetches each element on demand.
+This bundle registers everything in one fetch — right for a chat page. A page placing only a web component or two can load the [autoloader](/guides/loading/#autoloader) instead, which fetches each web component on demand.
 </Aside>
 
 ## Your first chat
@@ -49,7 +49,7 @@ You'll lean on two patterns over and over: set rich data on a JavaScript propert
 <kai-chat id="chat" style="display:block; height:100dvh;"></kai-chat>
 
 <script type="module">
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
 
   await customElements.whenDefined('kai-chat');
 
@@ -126,7 +126,7 @@ The element behaves the same everywhere. Only the binding syntax differs.
 <kai-chat id="chat" style="display:block; height:100dvh;"></kai-chat>
 
 <script type="module">
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
 
   await customElements.whenDefined('kai-chat');
 
@@ -166,7 +166,7 @@ export function App() {
 </template>
 
 <script setup>
-import '@kitn.ai/ui/elements';
+import '@kitn.ai/ui/web-components';
 const messages = [{ id: '1', role: 'assistant', parts: [{ type: 'text', text: 'Hello!' }] }];
 const onSubmit = (e) => console.log(e.detail.value);
 </script>
@@ -175,7 +175,7 @@ const onSubmit = (e) => console.log(e.detail.value);
 <TabItem label="Svelte">
 ```svelte
 <script>
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
   const messages = [{ id: '1', role: 'assistant', parts: [{ type: 'text', text: 'Hello!' }] }];
 </script>
 
@@ -241,4 +241,4 @@ Arrays and objects — `messages`, `models`, `context`, `attachments` — must b
 ## What's next
 
 - **[Frameworks](/guides/frameworks/overview/)** — idiomatic wiring for React, Vue, Angular, Svelte, and SolidJS.
-- **[Components](/components/chat/)** — full props, events, and examples for `kai-chat` and every other element.
+- **[Components](/components/chat/)** — full props, events, and examples for `kai-chat` and every other web component.

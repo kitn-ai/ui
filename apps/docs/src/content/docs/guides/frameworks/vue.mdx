@@ -13,18 +13,18 @@ Drop `kai-*` web components directly into Vue 3 templates. Bind arrays and objec
 npm install @kitn.ai/ui
 ```
 
-## Register elements
+## Register web components
 
-Register the elements **before** `createApp().mount()`. Vue stamps tags at mount time, and registration is async, so an import alone is not enough: a `.prop` binding written before the element upgrades is discarded and the UI renders blank. Mount behind `elementsReady`, the promise the entry exports.
+Register the web components **before** `createApp().mount()`. Vue stamps tags at mount time, and registration is async, so an import alone is not enough: a `.prop` binding written before the element upgrades is discarded and the UI renders blank. Mount behind `webComponentsReady`, the promise the entry exports.
 
 ```ts
 // src/main.ts
-import { elementsReady } from '@kitn.ai/ui/elements';
+import { webComponentsReady } from '@kitn.ai/ui/web-components';
 import { createApp } from 'vue';
 import App from './App.vue';
 
 // Resolves once every kai-* element is defined.
-elementsReady.then(() => createApp(App).mount('#app'));
+webComponentsReady.then(() => createApp(App).mount('#app'));
 ```
 
 ## Configure Vite
@@ -51,16 +51,16 @@ export default defineConfig({
 
 ## TypeScript support
 
-Add this reference once to give Volar and the template compiler full type coverage for every `kai-*` element's attributes, properties, and events:
+Add this reference once to give Volar and the template compiler full type coverage for every `kai-*` web component's attributes, properties, and events:
 
 ```ts
 // env.d.ts
-/// <reference types="@kitn.ai/ui/elements" />
+/// <reference types="@kitn.ai/ui/web-components" />
 ```
 
 ## Binding rules
 
-The rule for every element: **rich data (arrays, objects) goes in as DOM properties; interactions come out as CustomEvents.**
+The rule for every web component: **rich data (arrays, objects) goes in as DOM properties; interactions come out as CustomEvents.**
 
 | What you're binding | Vue syntax | Example |
 |---|---|---|
@@ -102,7 +102,7 @@ A message is an **ordered `parts` array**, not a string: text, reasoning, tool c
 
 ```vue
 <script setup lang="ts">
-import '@kitn.ai/ui/elements';
+import '@kitn.ai/ui/web-components';
 import type { ChatMessage } from '@kitn.ai/ui';
 import { appendTextPart } from '@kitn.ai/ui/state';
 import { ref } from 'vue';
@@ -142,16 +142,16 @@ const onSubmit = async (e: CustomEvent<{ value: string }>) => {
 ```
 
 <Aside type="tip" title="Layout tip">
-The elements fill their container. Give the parent `display: flex; flex-direction: column` and set `flex: 1; min-height: 0` on `<kai-chat>` rather than hard-coding a height — this keeps the input pinned to the bottom at any viewport size.
+The web components fill their container. Give the parent `display: flex; flex-direction: column` and set `flex: 1; min-height: 0` on `<kai-chat>` rather than hard-coding a height — this keeps the input pinned to the bottom at any viewport size.
 </Aside>
 
 ## Compose your own layout
 
-`<kai-chat>` is one option, not the only one. Every element composes independently. Here's a sidebar + thread layout:
+`<kai-chat>` is one option, not the only one. Every web component composes independently. Here's a sidebar + thread layout:
 
 ```vue
 <script setup lang="ts">
-import '@kitn.ai/ui/elements';
+import '@kitn.ai/ui/web-components';
 import { ref } from 'vue';
 
 const conversations = ref([
@@ -195,11 +195,11 @@ const onSubmit = (e: CustomEvent<{ value: string }>) => {
 </template>
 ```
 
-You can also drop standalone display elements — `<kai-markdown>`, `<kai-code-block>`, `<kai-artifact>`, `<kai-reasoning>` — anywhere in your own UI to render rich AI content without adopting the full chat shell.
+You can also drop standalone display web components — `<kai-markdown>`, `<kai-code-block>`, `<kai-artifact>`, `<kai-reasoning>` — anywhere in your own UI to render rich AI content without adopting the full chat shell.
 
 ## Theming
 
-Each element is styled inside its own Shadow DOM. No CSS import is required for the elements themselves. Pull in `@kitn.ai/ui/theme.css` only when you want to override design tokens:
+Each element is styled inside its own Shadow DOM. No CSS import is required for the web components themselves. Pull in `@kitn.ai/ui/theme.css` only when you want to override design tokens:
 
 ```ts
 import '@kitn.ai/ui/theme.css';

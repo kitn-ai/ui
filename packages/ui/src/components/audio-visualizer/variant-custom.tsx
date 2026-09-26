@@ -7,26 +7,15 @@ import { amplitudeRenderState } from './variant-bar';
 import type { ShaderVariantProps } from './index';
 
 /**
- * Every `UniformType` shader-canvas.tsx knows how to declare and push to the
- * GPU, duplicated here because that module does not export its `GLSL_TYPE`
- * map. `ShaderSpec.uniforms` narrows `type` to `UniformType` at the TS level
- * (see `index.tsx`), but a consumer can still reach this component through
- * the `<kai-audio-visualizer>` custom element with a plain JS object cast
- * past that check (`el.shader = {...}`), or any attribute-driven wrapper
- * that never touches TypeScript at all -- so an unrecognized `type` string
- * is checked again here, at runtime, against genuinely untrusted input.
+ * Every `UniformType` shader-canvas.tsx knows how to declare and push to the GPU,
+ * duplicated because that module does not export its `GLSL_TYPE` map. The
+ * `<kai-audio-visualizer>` element can be handed a plain JS object with no TypeScript
+ * in the path, so an unrecognized `type` is checked again here.
  *
- * A `Record<UniformType, true>` literal, not a `Set`: if `UniformType` ever
- * grows a member, this object literal fails to typecheck until a matching
- * key is added here too, so the two cannot silently drift apart. Same
- * compiler-enforced-completeness technique as `effectiveArraySize` in
- * shader-canvas.tsx. Membership is checked with a strict `=== true` value
- * comparison (`uniformProblem` below), not `in` or `.hasOwnProperty`: a
- * bracket lookup with an untrusted key can resolve to an INHERITED
- * `Object.prototype` member (e.g. `spec.type === 'toString'`), and `in`
- * would treat that as present. Comparing the looked-up VALUE to `true`
- * rejects that case too, since `Object.prototype.toString` is a function,
- * never `true`.
+ * A `Record<UniformType, true>` literal, not a `Set`: a new union member fails to
+ * typecheck until a key is added here. Membership is a strict `=== true` comparison,
+ * never `in` or a property check, because an untrusted key can resolve to an inherited
+ * `Object.prototype` member (`'toString'`).
  */
 const KNOWN_UNIFORM_TYPES: Record<UniformType, true> = {
   '1f': true, '1i': true, '1fv': true, '2f': true, '3f': true, '3fv': true,
@@ -104,27 +93,17 @@ function uniformProblem(name: string, spec: UniformSpec): string | undefined {
 }
 
 /**
- * Uniforms every custom shader receives without asking: the standard set
- * (`uColor`, `uIntensity`, `uSpeed`, `uComplexity`) plus the audio pair that
- * ONLY this variant gets. Upstream's shader path only ever hands a shader a
- * scalar volume; `uBands` -- a per-band `float` array -- has no equivalent
- * there, so a spectrum-reactive custom shader is possible here and not
- * there. `iTime`/`iResolution`/`iMouse`/`iFrame`/`iDate` are declared by
- * `ShaderCanvas` itself for every shader, custom or not, so they are not
- * repeated here.
+ * The uniforms every custom shader receives: the standard set (`uColor`,
+ * `uIntensity`, `uSpeed`, `uComplexity`) plus the audio pair only this variant gets.
+ * `ShaderCanvas` declares `iTime`, `iResolution`, `iMouse`, `iFrame` and `iDate` for
+ * every shader, so they are not repeated here.
  *
- * `extra` is a consumer's `ShaderSpec.uniforms` -- untrusted input. Every
- * entry is checked with `uniformProblem` before being merged in; a bad
- * `type`/`value` pairing throws rather than being handed to `ShaderCanvas`,
- * where the mismatch would otherwise throw a `TypeError` inside WebGL's
- * `uniform*` setters, called from `ShaderCanvas`'s OWN
- * `requestAnimationFrame` loop, where nothing catches it and the canvas
- * silently stops animating. `CustomVisualizer` below is what turns that
- * throw into the same `onUnavailable` seam every other shader failure uses
- * -- see its own doc for how.
+ * `extra` is a consumer's `ShaderSpec.uniforms`, untrusted. Each entry is checked with
+ * `uniformProblem` first: a bad `type`/`value` pairing throws here rather than inside
+ * WebGL's `uniform*` setters, which run from the canvas's own animation frame where
+ * nothing catches them and the canvas silently stops animating.
  *
- * Pure and synchronous: reads no signals, schedules nothing. Task 15 reuses
- * it as-is.
+ * Pure and synchronous: reads no signals, schedules nothing.
  */
 export function customUniforms(
   values: {
@@ -165,40 +144,22 @@ export function customUniforms(
 /**
  * Renders a consumer-supplied fragment shader.
  *
- * The shader must define `mainImage(out vec4 fragColor, in vec2 fragCoord)`
- * and gets the five ShaderToy built-ins (`iTime`, `iResolution`, `iMouse`,
- * `iFrame`, `iDate`) plus every uniform `customUniforms` above declares.
- * `ShaderCanvas` DECLARES all of them for you -- declaring the SAME name
- * again inside the shader body is a GLSL redefinition and fails to compile.
+ * The shader defines `mainImage(out vec4 fragColor, in vec2 fragCoord)` and gets the
+ * five ShaderToy built-ins plus every uniform `customUniforms` declares. `ShaderCanvas`
+ * declares them all, so declaring the same name again inside the shader is a GLSL
+ * redefinition and fails to compile.
  *
  * `fragColor` MUST be premultiplied: `vec4(rgb * alpha, alpha)`, never
- * `vec4(rgb, alpha)`. The canvas composites using the browser's default
- * `premultipliedAlpha: true`; a translucent edge written the natural
- * (straight-alpha) way gets a dark fringe where it meets a light page. For
- * example, a shader painting a soft circle that fades to transparent at its
- * edge:
+ * `vec4(rgb, alpha)`. The canvas composites with the browser's default
+ * `premultipliedAlpha: true`, so a straight-alpha edge gets a dark fringe.
  *
- * ```glsl
- * void mainImage(out vec4 fragColor, in vec2 fragCoord) {
- *   vec2 uv = fragCoord / iResolution.xy;
- *   float alpha = smoothstep(1.0, 0.0, length(uv - 0.5) * 2.0) * uIntensity;
- *   fragColor = vec4(uColor * alpha, alpha); // premultiplied -- NOT vec4(uColor, alpha)
- * }
- * ```
+ * `uVolume` (scalar) and `uBands` (a `float[N]` array) are what upstream's shader path
+ * cannot express, so a spectrum-reactive custom shader is possible only here.
  *
- * `uVolume` (scalar) and `uBands` (a `float[N]` array, `N` tracking the
- * visualizer's actual band count) are this task's differentiating feature:
- * upstream's shader path only ever hands a shader a scalar, so a
- * spectrum-reactive custom shader is only possible here.
- *
- * A bad `props.shader.uniforms` entry (an unrecognized `type`, or a `value`
- * that does not match it) is logged loudly via `console.error` -- it is a
- * bug in the consumer's shader spec they need to see -- and routed through
- * `props.onUnavailable`, same as a shader compile or link failure. A
- * missing WebGL context logs quietly via `console.warn`: that is an
- * expected environment limitation, not a bug. `props.shader` being absent
- * entirely is neither: it renders an empty placeholder and does not call
- * `onUnavailable` at all, since nothing was ever asked to render.
+ * A bad `props.shader.uniforms` entry is a consumer bug: it logs loudly and routes
+ * through `props.onUnavailable` like a compile failure. A missing WebGL context logs
+ * quietly (the environment, not a bug), and an absent `props.shader` is neither: an
+ * empty placeholder and no `onUnavailable`, since nothing was asked to render.
  */
 export default function CustomVisualizer(props: ShaderVariantProps): JSX.Element {
   const intensity = createTween(0.3);
@@ -220,7 +181,7 @@ export default function CustomVisualizer(props: ShaderVariantProps): JSX.Element
   // never comes under static `bands`/`volume` prop drive. The same
   // two-writer race variant-wave.tsx carried (measured there on the parity
   // harness; latent here). NOT the benign disjoint-writer two-effect shape
-  // the Task 12 review accepted -- these two wrote the SAME tween. See the
+  // accepted here -- these two wrote the SAME tween. See the
   // wave variant's twin comment; same effect-race class as b5795ac.
   createEffect(() => {
     const t = shaderTargets(renderState());

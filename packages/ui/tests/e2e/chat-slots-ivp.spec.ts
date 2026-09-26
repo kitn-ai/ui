@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { CHAT_SLOTS } from '../../src/elements/slots';
+import { CHAT_SLOTS } from '../../src/web-components/slots/slots';
 
 /**
  * IVP (Independent Visual Proof) for the SPIKE slotted-shell composition model

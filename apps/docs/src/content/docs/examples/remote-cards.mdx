@@ -24,7 +24,9 @@ Host app                          Provider (different origin)
             postMessage (WireFrame)
 ```
 
-On mount, `<kai-remote>` validates `provider-origin`, injects a sandboxed `<iframe>` pointing at `src`, completes a version-negotiated handshake, then pushes the `CardEnvelope` + `CardContext` (theme, locale) down the wire. The provider renders the card using its own renderers; user interactions come back as `CardEvent` messages. On the host side every event re-surfaces as a bubbling `kai-card` `CustomEvent` so your existing listeners work unchanged.
+On mount, `<kai-remote>` validates `provider-origin`, injects a sandboxed `<iframe>` pointing at `src`, completes a version-negotiated handshake, then pushes the `CardEnvelope` + `CardContext` (theme, locale) down the wire. The provider renders the card using its own renderers; user interactions come back as `CardEvent` messages.
+
+On the host side every event re-surfaces as a bubbling `kai-card` `CustomEvent` so your existing listeners work unchanged.
 
 Key security properties baked in — no config needed:
 - The iframe runs with `sandbox="allow-scripts allow-forms"` (no `allow-same-origin`).
@@ -33,7 +35,7 @@ Key security properties baked in — no config needed:
 
 ## Host side: wire up `<kai-remote>`
 
-Register the elements and give the component its three required pieces — `provider-origin`, `src`, and the `envelope` property:
+Register the web components and give the component its three required pieces — `provider-origin`, `src`, and the `envelope` property:
 
 ```html
 <kai-remote
@@ -42,7 +44,7 @@ Register the elements and give the component its three required pieces — `prov
 ></kai-remote>
 
 <script type="module">
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
 
   await customElements.whenDefined('kai-remote');
 
@@ -89,7 +91,7 @@ remote.policy = {
 When the model streams a mix of built-in and remote cards, use `<kai-cards>` with a `types` override that maps the remote card type to `'kai-remote'`:
 
 ```js
-import '@kitn.ai/ui/elements';
+import '@kitn.ai/ui/web-components';
 
 await customElements.whenDefined('kai-cards');
 

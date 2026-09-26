@@ -2,7 +2,7 @@
 //
 // kai-icon is scalar-only (name, size) — no light-DOM slots, so the sample set
 // only carries scalar props. `name` selects one of the kit's curated icons (the
-// NAMED_ICONS map in src/ui/icon.tsx); it also accepts a URL/data-URI or plain
+// NAMED_ICONS map in src/components/icon/icon.tsx); it also accepts a URL/data-URI or plain
 // text, but the curated names are what the docs lean on. We seed a real name so
 // the Playground renders a glyph on first paint instead of an empty box.
 //

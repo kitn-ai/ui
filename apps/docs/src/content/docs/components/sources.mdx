@@ -1,6 +1,6 @@
 ---
 title: Sources
-description: A wrapping row of citation chips — one element, any number of links, with optional favicons and hover-card previews.
+description: A row of citation chips for the sources behind an answer.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -14,7 +14,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kai-tag-sub">kai-sources</p>
 
-<p class="kai-lede">A wrapping row of citation chips that renders the sources behind an assistant answer — each chip shows the domain (or a custom label), an optional favicon, and a hover-card with the title and description.</p>
+<p class="kai-lede">Gives a reply its references as tappable chips instead of a wall of links.</p>
 
 <Facts items={['Shadow DOM', 'No events', 'Optional favicons', 'Numbered or domain labels', 'Declarative children']} />
 
@@ -23,9 +23,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 <Playground client:only="solid" tag="kai-sources" />
 
 <Aside type="tip" title="When to use">
-Place `<kai-sources>` directly below an assistant message when the reply cites external references. Use `numbered` when the answer body uses `[1]`, `[2]`, … citation markers. Use the `sources` property for dynamic or streamed lists; use declarative `<kai-source>` children for static or server-rendered markup.
-
-Citations the model streamed as `source` parts already render as a row inside the message. Reach for `<kai-sources>` when the citations are yours to place rather than the model's.
+Below an assistant message that cites external references; sources the model streamed already render inside [Message](/components/message/).
 </Aside>
 
 ## Usage
@@ -35,7 +33,7 @@ Assign the `sources` property — an array can't be an HTML attribute:
 ```html
 <kai-sources id="srcs" show-favicon></kai-sources>
 <script type="module">
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
   document.getElementById('srcs').sources = [
     { href: 'https://kitn.dev', title: 'kitn — the kit', description: 'Composable chat UI.' },
     { href: 'https://solidjs.com', title: 'SolidJS', description: 'A reactive UI library.' },
@@ -45,8 +43,8 @@ Assign the `sources` property — an array can't be an HTML attribute:
 
 - Each item accepts `href` (required), `title`, `description`, `label`, and `showFavicon`.
 - **`show-favicon`** enables favicons globally; a per-item `showFavicon: false` overrides for that chip.
-- **`numbered`** replaces domain labels with `[1]`, `[2]`, … — useful when the response body uses in-line citation markers.
-- **Declarative path** — write `<kai-source>` elements as light-DOM children of `<kai-sources>`. Prop sources render first; declarative children are appended after. The attributes are `href`, `label`, `headline`, `description`, and the bare `show-favicon` — note **`headline`**, not `title`: `title` is a reserved global HTML attribute, so the declarative form spells the item's `title` field `headline`.
+- **`numbered`** replaces domain labels with `[1]`, `[2]`, …
+- **Declarative path**: `<kai-source>` elements as light-DOM children, appended after any prop sources. Attributes are `href`, `label`, `headline`, `description`, and the bare `show-favicon`: the item's `title` field is spelled **`headline`**, because `title` is a reserved global HTML attribute.
 
 ```html
 <kai-sources>

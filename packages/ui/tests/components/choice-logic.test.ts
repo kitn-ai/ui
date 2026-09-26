@@ -7,7 +7,7 @@ import {
   resolveOtherConfig,
   OTHER_ACTION,
   type ChoiceOption,
-} from '../../src/components/choice-card';
+} from '../../src/components/choice-card/choice-card';
 
 test('normalizeOptions keeps valid options in order', () => {
   const r = normalizeOptions([

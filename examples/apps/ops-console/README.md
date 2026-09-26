@@ -635,7 +635,7 @@ straight at the kit elements again.
     characters were typed. The note field, a `<textarea>` rendered directly, kept
     its node and its focus through the identical test, which isolated the layer.
 
-    Two kit sites, both now fixed. `packages/ui/src/ui/input.tsx` — `<Show>`'s
+    Two kit sites, both now fixed. `packages/ui/src/components/input.tsx` — `<Show>`'s
     `fallback` is a getter read inside Solid's memo, and it **called**
     `inputEl(...)` there with a class argument computed from `isInvalid()` /
     `local.size` / `local.class`, so the node was CREATED in the memo's scope and

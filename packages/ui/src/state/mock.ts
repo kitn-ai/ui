@@ -1,52 +1,22 @@
-// The mock responder: the zero-config first win, standardized.
+// lint-comment-references: long-block -- the mock's contract: the five tells and the constraints are what every string below must satisfy
+// The mock responder: the zero-config first win.
 //
-// WHAT IT IS
-// ----------
-// `createMockResponder()` returns a function that produces a STREAM SOURCE —
-// SSE text frames in the OpenAI chat-completions shape — which the caller hands
-// to `readOpenAIStream` from `@kitn.ai/ui/wire` exactly as it would hand over a
-// `fetch()` Response. There is no network, no key and no provider.
+// `createMockResponder()` returns a function producing a STREAM SOURCE (SSE frames in the
+// OpenAI chat-completions shape) that the caller hands to `readOpenAIStream` exactly as it
+// would hand over a `fetch()` Response. No network, no key, no provider.
 //
-// WHY IT PRODUCES A WIRE INSTEAD OF FOLDING PARTS DIRECTLY
-// -------------------------------------------------------
-// The obvious cheaper design is to yield text deltas and let the caller fold
-// them onto `parts` with `appendTextPart`. That is what the scaffolder and all
-// five composed starters used to do, in seven separate copies, and it is worse
-// on every axis that matters:
+// WHY A WIRE RATHER THAN FOLDING PARTS DIRECTLY: folding text deltas onto `parts` (what
+// the scaffolder and all five starters used to do, in seven copies) BYPASSES the kit's own
+// parser on the one code path every new developer runs first, and it makes the mock and
+// real scaffolds structurally different, so swapping in a backend becomes a rewrite rather
+// than `mockResponse(value)` -> `await fetch('/api/chat', …)`. The frames are the OpenAI
+// shape because the mock stands in for the consumer's `/api/chat` ROUTE, not a provider.
 //
-//   · It BYPASSES the kit's own parser. The zero-config default is the code path
-//     every new developer runs first, and under the folding design it exercised
-//     none of `sseDataFrames` / `sseJson` / `openaiChatFormat` /
-//     `consumeModelStream`. Producing a wire makes the first-run path a live
-//     regression test of the thing every real integration depends on.
-//   · It makes the mock scaffold and the real scaffold STRUCTURALLY DIFFERENT,
-//     so "swap the mock for a real backend" is a rewrite of the submit handler
-//     rather than a one-expression change. With a wire, the only difference
-//     between the two emitted scaffolds is `mockResponse(value)` vs
-//     `await fetch('/api/chat', …)`; `createAssistantStream`, `readOpenAIStream`,
-//     the try/catch/finally and the abort handling are byte-identical.
-//   · The hand-rolled folds drifted. One of them replaced `parts` wholesale,
-//     which silently deleted any reasoning/tool parts already on the message.
-//
-// The frames are the OpenAI chat-completions shape because the mock stands in
-// for the consumer's `/api/chat` ROUTE, not for a provider: every integration in
-// the kit's catalog except this one re-frames its provider to that shape
-// server-side (see `readOpenAIStream`), so matching it is what keeps the swap to
-// a real backend a one-line change.
-//
-// WHY YOU CAN TELL IT IS A MOCK — READ THIS BEFORE CHANGING ANY STRING BELOW
-// -------------------------------------------------------------------------
-// A mock that is indistinguishable from a real response is how a fabricated turn
-// gets believed. This repo has already shipped that bug once: a scaffold seeded a
-// tool call from fixture data, the panel rendered "search Completed", and the
-// fabricated turn was POSTed to the provider AHEAD of the user's own message. A
-// human demoing it saw success; only an assertion on the round-2 answer failed.
-//
-// Choosing a real provider's frame SHAPE (above) means shape alone can no longer
-// distinguish the mock, so the tells are deliberate and layered. Each is visible
-// at a different altitude, so whichever one a developer happens to be looking at,
-// something says "no provider was contacted":
-//
+// A MOCK MUST BE DISTINGUISHABLE FROM A REAL RESPONSE. This repo shipped the opposite once:
+// a scaffold seeded a fabricated tool call, the panel rendered it as Completed, and the
+// fabricated turn was POSTed ahead of the user's own message. So the tells below are
+// deliberate and layered, one per altitude: the raw stream, every frame, the field level,
+// and the turn level.
 //   1. RAW STREAM — the first bytes are an SSE comment banner (`: kai-mock …`).
 //      Comment lines are dropped by `sseDataFrames`, so this is free
 //      semantically and unmissable to anyone reading the stream or a capture.
@@ -73,7 +43,7 @@
 // dependency runs one way (a caller pairs them) and `state` keeps its charter of
 // owning no wire format.
 
-/** The `model` every mock frame reports. Not a model any provider serves — see
+/** The `model` every mock frame reports. Not a model any provider serves; see
  *  tell 3 in the header. */
 export const MOCK_MODEL_ID = 'kai-mock';
 
@@ -83,22 +53,22 @@ export const MOCK_MARKER_KEY = '_kai_mock';
 /** The value of that marker: a whole sentence, because it is read by a human
  *  staring at a logged frame and wondering where the reply came from. */
 export const MOCK_MARKER =
-  'no provider was contacted — this reply was generated locally by createMockResponder() from @kitn.ai/ui/state';
+  'no provider was contacted: this reply was generated locally by createMockResponder() from @kitn.ai/ui/state';
 
 /** The SSE comment that opens every mock stream. Tell 1. */
-export const MOCK_BANNER = `: kai-mock — NO PROVIDER WAS CONTACTED. ${MOCK_MARKER}.`;
+export const MOCK_BANNER = `: kai-mock, NO PROVIDER WAS CONTACTED. ${MOCK_MARKER}.`;
 
 /** The default canned replies, cycled per turn so a multi-turn preview stays
  *  coherent instead of repeating one line forever. */
 export const DEFAULT_MOCK_REPLIES: readonly string[] = [
-  "Hi! I'm a local mock — no backend, no API key, no provider was contacted. I'm streaming through the same parser a real model would, so what you're seeing is the real rendering path with a canned reply.",
-  "Still the mock. Swap `createMockResponder()` for a `fetch('/api/chat', …)` and nothing else in this handler changes — that's the whole point of the seam.",
+  "Hi! I'm a local mock: no backend, no API key, no provider was contacted. I'm streaming through the same parser a real model would, so what you're seeing is the real rendering path with a canned reply.",
+  "Still the mock. Swap `createMockResponder()` for a `fetch('/api/chat', …)` and nothing else in this handler changes. That's the whole point of the seam.",
   'Mock again. Every frame I send is tagged `_kai_mock` and my usage reports zero tokens, so nothing here can be mistaken for a real turn.',
 ];
 
 /** One scripted tool call for a mock turn. Framed exactly the way the OpenAI
- *  chat-completions wire frames a real one — an announce fragment carrying
- *  `id`/`function.name`, then the argument JSON streamed in fragments — so the
+ *  chat-completions wire frames a real one: an announce fragment carrying
+ *  `id`/`function.name`, then the argument JSON streamed in fragments, so the
  *  kit's own reader (`readOpenAIStream`) reassembles it through the same path a
  *  real provider's call takes. */
 export interface MockToolCall {
@@ -113,8 +83,8 @@ export interface MockToolCall {
 }
 
 /** One scripted citation for a mock turn. Framed as an OpenAI-wire
- *  `url_citation` annotation — the shape `readOpenAIStream` already parses into
- *  a `source` MessagePart — so a scripted citation takes the exact path a real
+ *  `url_citation` annotation, the shape `readOpenAIStream` already parses into
+ *  a `source` MessagePart, so a scripted citation takes the exact path a real
  *  provider's takes and renders through the same guarded sinks. */
 export interface MockSource {
   /** The cited URL. Scheme policy is enforced at the render sink
@@ -131,42 +101,40 @@ export interface MockSource {
  *  exactly as a real tool-calling turn does; a turn without them finishes
  *  `'stop'`. */
 export interface MockTurn {
-  /** Reasoning streamed (token by token) BEFORE the text, as `delta.reasoning`
-   *  — the OpenRouter-normalized sibling `readOpenAIStream` folds into a
-   *  `reasoning` part. Models think before they answer; the mock does too. */
+  // `delta.reasoning` is the OpenRouter-normalized sibling `readOpenAIStream` folds
+  // into a `reasoning` part. Models think before they answer; the mock does too.
+  /** Reasoning streamed before the text, as `delta.reasoning` frames. */
   reasoning?: string;
   /** Text streamed (token by token) before the tool calls. */
   text?: string;
-  /** Citations announced after the text, one `url_citation` annotation frame
-   *  each, so consecutive `source` parts land the way a real cited answer's
-   *  do (and collapse into the citations strip). */
+  // Consecutive `source` parts land the way a real cited answer's do and collapse into
+  // the citations strip.
+  /** Citations announced after the text, each as one `url_citation` annotation frame. */
   sources?: readonly MockSource[];
   /** Tool calls announced this turn, in order. */
   toolCalls?: readonly MockToolCall[];
 }
 
 /** A canned reply: plain text, or a scripted turn. A string is exactly
- *  `{ text }` — the pre-tool-call API unchanged. */
+ *  `{ text }`, the pre-tool-call API unchanged. */
 export type MockReply = string | MockTurn;
 
 export interface MockResponderOptions {
-  /** Canned replies, cycled one per turn. Plain strings stream as text; a
-   *  `MockTurn` can also script reasoning, citations and tool calls
-   *  (`{ reasoning, text, sources, toolCalls }`), which is what lets the
-   *  zero-config mock exercise the kit's reasoning/source/tool/card paths
-   *  without hand-rolled SSE framing. Defaults to `DEFAULT_MOCK_REPLIES`. */
+  // A plain string streams as text. A `MockTurn` can also script reasoning, citations
+  // and tool calls, which is what lets the zero-config mock exercise the reasoning,
+  // source, tool and card paths without hand-rolled SSE framing.
+  /** Canned replies, cycled one per turn. Defaults to `DEFAULT_MOCK_REPLIES`. */
   replies?: readonly MockReply[];
-  /** Delay between chunks, in ms. Defaults to 24 — fast enough to feel alive,
-   *  slow enough that the streaming is visible. `0` streams as fast as the
-   *  event loop allows, which is what tests want. */
+  // 24 is fast enough to feel alive and slow enough that the streaming is visible; `0`
+  // is what tests want.
+  /** Delay between chunks, in ms. Defaults to 24; `0` streams as fast as the event loop allows. */
   delayMs?: number;
   /** How many whitespace-delimited tokens ride in each frame. Defaults to 1
    *  (token by token). Larger values coarsen the cadence. */
   chunkSize?: number;
-  /** Log a one-time notice on the first turn. Defaults to `true`: the point of
-   *  this module is that a mock reply is hard to mistake for a real one, and a
-   *  console line is the fastest way for a human to notice. Pass `false` in
-   *  tests, or wherever the banner and the frame markers are tell enough. */
+  // The point of this module is that a mock reply is hard to mistake for a real one, and
+  // a console line is the fastest way for a human to notice.
+  /** Log a one-time notice on the first turn. Defaults to `true`. */
   announce?: boolean;
 }
 
@@ -206,7 +174,7 @@ const asTurn = (reply: MockReply): MockTurn => (typeof reply === 'string' ? { te
 
 /** How many characters of argument JSON ride in each tool-call fragment. Small
  *  enough that any realistic argument object spans several frames, so the
- *  reader's fragment-reassembly path — the one a real provider exercises — is
+ *  reader's fragment-reassembly path (the one a real provider exercises) is
  *  exercised here too, rather than a single-frame shortcut it would never see
  *  in production. */
 const TOOL_ARG_FRAGMENT_CHARS = 16;

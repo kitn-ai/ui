@@ -15,7 +15,7 @@ export default defineConfig({
       { find: /^@\/components\/agents-ui\//, replacement: path.resolve(here, 'src/vendor/components/agents-ui/') + '/' },
       { find: /^@\/hooks\/agents-ui\//, replacement: path.resolve(here, 'src/vendor/hooks/agents-ui/') + '/' },
       { find: /^@\/lib\//, replacement: path.resolve(here, 'src/lib/') + '/' },
-      // Our kit: built element bundle (dist) + plain-TS primitives (src).
+      // Our kit: built web-components bundle (dist) + plain-TS primitives (src).
       { find: /^@kit-dist\//, replacement: path.resolve(repoRoot, 'packages/ui/dist/') + '/' },
       { find: /^@kit-src\//, replacement: path.resolve(repoRoot, 'packages/ui/src/') + '/' },
     ],

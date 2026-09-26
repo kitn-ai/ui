@@ -12,7 +12,7 @@
 // (a `data:` URI) or already carries an address the provider can resolve
 // itself. That constraint is what makes a `blob:` URL unencodable rather than
 // merely inconvenient -- resolving one requires the browser tab that minted it.
-import type { AttachmentData } from '../components/attachment-types';
+import type { AttachmentData } from '../primitives/attachment-types';
 import {
   DEFAULT_MEDIA_POLICY,
   UNNAMED_TEXT_MEDIA_TYPE,
@@ -76,27 +76,20 @@ const quotedList = (values: readonly string[]): string => values.map((v) => `"${
 /**
  * Base64 to the bytes it stands for.
  *
- * NOT a violation of this file's no-I/O rule. The bytes are already inline in
- * the `data:` URI the host staged; this decodes what is in hand and reaches for
- * nothing. `atob` yields a binary string (one char per byte), which is then read
- * as UTF-8 -- going straight from `atob` to text would mangle every non-ASCII
- * character in the file.
+ * Not I/O: the bytes are already inline in the `data:` URI the host staged. `atob`
+ * yields a binary string, one char per byte, which is then read as UTF-8 -- going
+ * straight from `atob` to text would mangle every non-ASCII character.
  *
- * ★ WHAT A CLEAN DECODE PROVES, AND WHAT IT DOES NOT. It proves the bytes are
- * well-formed UTF-8. It does not prove they are meaningful text, and the gap is
- * not hypothetical: every byte below 0x80 is valid UTF-8 on its own, so a small
- * binary made of low bytes decodes cleanly. A bare zip header -- `50 4b 03 04`
- * followed by NULs -- is exactly that. This matters most on the path where
- * nothing named the file, because there the decode is the ONLY evidence there is.
+ * ★ A CLEAN DECODE PROVES well-formed UTF-8, NOT meaningful text. Every byte below
+ * 0x80 is valid UTF-8 on its own, so a small binary of low bytes decodes cleanly: a
+ * bare zip header followed by NULs is exactly that. It matters most where nothing
+ * named the file, because there the decode is the only evidence there is.
  *
- * A NUL-byte heuristic (git's rule for "is this binary") would catch most of
- * them, and it is deliberately NOT here. This same function serves the LABELLED
- * text path, where a host that said `text/plain` has asserted something the kit
- * has no business overruling, and a text file that legitimately contains a NUL
- * would start being refused on a rule nobody asked for. Weigh the two failures:
- * being wrong the current way sends a block of gibberish the model can see and
- * describe, and being wrong the other way silently refuses a real text file.
- * Only the first is recoverable by the person it happens to.
+ * A NUL-byte heuristic would catch most of them and is deliberately not here: this
+ * same function serves the LABELLED text path, where a host that said `text/plain`
+ * has asserted something the kit may not overrule. Sending the model a block of
+ * gibberish it can see and describe is recoverable; silently refusing a real text
+ * file is not.
  */
 function decodeBase64Text(data: string): { ok: true; text: string; bytes: number } | { ok: false } {
   try {
@@ -142,32 +135,21 @@ const CLOSING_DELIMITER = /<(\/file\s*)>/gi;
 /**
  * The text content a text attachment contributes to the prompt.
  *
- * ★ THE SWAP POINT for how a text file appears in a message, and the shape is
- * SETTLED: `<file name="..." type="...">…</file>`. Two alternatives were weighed
- * and rejected. A bare `filename:\n` prefix marks where the file BEGINS and not
- * where it ends, so the next part of the turn reads as more file. An Anthropic
- * `document` block would buy citations, but it is Anthropic-specific -- the
- * OpenAI wire has no equivalent, so the two wires would disagree about one
- * attachment -- and it needs a Files API upload round trip, which is I/O, in a
- * layer that by design has none. Changing the envelope is still a change to this
- * function and nothing else; it just is not an open question.
+ * ★ THE SWAP POINT for how a text file appears in a message. The shape is settled:
+ * `<file name="..." type="...">…</file>`. A bare `filename:` prefix was rejected
+ * because it marks where the file begins and not where it ends, so the rest of the
+ * turn reads as more file. An Anthropic `document` block was rejected because it is
+ * Anthropic-specific (the OpenAI wire would disagree about one attachment) and needs
+ * a Files API upload, which is I/O in a layer that has none.
  *
- * ★ WHY THE BODY IS BARELY TOUCHED. Both attributes are escaped in full, as
- * attributes always are. The body is not, and that is deliberate: these are
- * source files, a reader will diff what they attached against what arrived, and
- * XML-escaping every `<` in a TSX file would mangle the exact thing this feature
- * exists to send and pay tokens to do it. So the body transform is the smallest
- * one that makes the delimiter unforgeable -- the end tag, and nothing else.
- *
- * Left alone, that end tag is a way out of the block. A file containing `</file>`
- * closes it early, and everything after that point reads to the model as the turn
- * AROUND the file rather than as file content: user-supplied bytes in instruction
- * position, reachable by anyone who can get a file in front of the composer.
- * Escaped, it stays where it belongs. `&lt;/file&gt;` ends nothing, and it is
- * visible in the output and reversible by eye, which a deletion or a silent
- * substitution would not be -- a reader who spots it can say exactly what the
- * original byte was. The OPENING tag is left untouched on purpose: it cannot end
- * the block, and escaping it would corrupt every HTML file anyone ever attaches.
+ * ★ THE BODY IS BARELY TOUCHED. Both attributes are escaped in full; the body is
+ * not, because these are source files a reader will diff against what arrived, and
+ * XML-escaping every `<` in a TSX file would mangle the thing this exists to send.
+ * The one transform is the end tag, which is otherwise a way out of the block: a
+ * file containing `</file>` closes it early and everything after reads to the model
+ * as instruction rather than content. `&lt;/file&gt;` ends nothing and stays
+ * reversible by eye. The opening tag is left alone on purpose: it cannot end the
+ * block, and escaping it would corrupt every HTML file anyone attaches.
  */
 export function textFileContent(file: Extract<ClassifiedFile, { kind: 'text' }>): string {
   const name = escapeAttribute(file.filename ?? 'attachment');

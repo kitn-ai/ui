@@ -25,7 +25,7 @@ fs.mkdirSync(OUT, { recursive: true });
 
 const DIST_ENTRY = path.resolve(
   import.meta.dirname,
-  '../../../../packages/ui/dist/elements/audio-visualizer.js',
+  '../../../../packages/ui/dist/web-components/audio-visualizer.js',
 );
 const distIdentity = () => {
   const st = fs.statSync(DIST_ENTRY);

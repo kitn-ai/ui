@@ -1,0 +1,259 @@
+import type { Meta, StoryObj } from 'storybook-solidjs-vite';
+import { For } from 'solid-js';
+import { ScrollButton } from './scroll-button';
+import { ChatContainerRoot, ChatContainerContent } from '../chat/chat-container';
+import { componentDescription } from '../../stories/docs/web-component-controls';
+
+/**
+ * `ScrollButton` reads scroll state from the surrounding `ChatContainerRoot`
+ * context, so every story wraps it in a scrollable container of real message
+ * content: that is the only way to judge the opaque fill and the elevation,
+ * since both exist to make the button read as ABOVE the thread. It is hidden
+ * (faded out) while pinned to the bottom and appears once you scroll up.
+ */
+function ScrollDemo(props: {
+  variant?: 'outline' | 'ghost' | 'default';
+  size?: 'sm' | 'md' | 'lg' | 'icon' | 'icon-sm';
+  class?: string;
+  label?: string;
+  showLabel?: boolean;
+  /** Classes on the POSITIONING wrapper, not on the button. See `Positioning`. */
+  holderClass?: string;
+  /** Draw a fake composer under the thread, to show clearance above it. */
+  composer?: boolean;
+}) {
+  return (
+    <div class="relative h-64 w-80 overflow-hidden rounded-lg border bg-background text-foreground">
+      <ChatContainerRoot class="h-full p-4">
+        <ChatContainerContent class="gap-2">
+          <For each={Array.from({ length: 20 })}>
+            {(_, i) => (
+              <div class="rounded-md bg-muted/40 px-3 py-2 text-sm">
+                Message {i() + 1}: a line of thread content for the button to float over.
+              </div>
+            )}
+          </For>
+        </ChatContainerContent>
+        {/* ScrollButton must live INSIDE ChatContainerRoot (it reads that
+            context); it's absolutely positioned relative to the outer .relative
+            box, so it stays pinned and doesn't scroll with the content. */}
+        <div class={props.holderClass ?? 'absolute inset-x-0 bottom-3 flex justify-center'}>
+          <ScrollButton
+            variant={props.variant}
+            size={props.size}
+            class={props.class}
+            label={props.label}
+            showLabel={props.showLabel}
+          />
+        </div>
+      </ChatContainerRoot>
+      {props.composer ? (
+        <div class="absolute inset-x-0 bottom-0 border-t border-border bg-background px-3 py-2 text-sm text-muted-foreground">
+          Send a message...
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+// No `placement` prop: position it with your own absolutely positioned wrapper inside
+// the container, anchored to a non-scrolling parent. It is an opaque rounded square
+// painted with the themeable elevation (`--kai-shadow-color`) so it stays legible over
+// scrolling messages.
+const meta = {
+  title: 'Components/ScrollButton',
+  component: ScrollButton,
+  tags: ['autodocs'],
+  parameters: {
+    layout: 'padded',
+    docs: {
+      description: componentDescription([
+        'A floating button that jumps a chat back to the bottom once the reader has scrolled away from it.',
+      ]),
+      controls: { exclude: ['use:eventListener'] },
+    },
+  },
+  argTypes: {
+    label: {
+      control: 'text',
+      description: 'Accessible name for the button. Announced in both `showLabel` states.',
+      table: { defaultValue: { summary: 'Scroll to bottom' } },
+    },
+    showLabel: {
+      control: 'boolean',
+      description: 'Render `label` visibly beside the arrow.',
+      table: { defaultValue: { summary: 'false' } },
+    },
+    variant: {
+      control: 'select',
+      options: ['default', 'ghost', 'outline'],
+      description: 'Underlying button visual emphasis. `outline` is the opaque floating chip.',
+      table: { defaultValue: { summary: 'outline' } },
+    },
+    size: {
+      control: 'select',
+      options: ['sm', 'md', 'lg', 'icon', 'icon-sm'],
+      description: 'Underlying button size preset.',
+      table: { defaultValue: { summary: 'sm' } },
+    },
+    class: {
+      control: 'text',
+      description: 'Additional classes merged onto the button.',
+    },
+  },
+  args: {
+    variant: 'outline',
+    size: 'sm',
+    label: 'Scroll to bottom',
+    showLabel: false,
+  },
+  render: (args) => (
+    <ScrollDemo
+      variant={args.variant}
+      size={args.size}
+      class={args.class}
+      label={args.label}
+      showLabel={args.showLabel}
+    />
+  ),
+} satisfies Meta<typeof ScrollButton>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+const IMPORT = `import { ScrollButton, ChatContainerRoot, ChatContainerContent } from '@kitn.ai/ui';`;
+const src = (code: string) => ({
+  parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
+});
+
+/** Interactive playground: scroll up to reveal the button; toggle `showLabel`. */
+export const Playground: Story = {
+  ...src(`<div class="relative">
+  <ChatContainerRoot class="h-full overflow-y-auto">
+    <ChatContainerContent>{/* messages */}</ChatContainerContent>
+    {/* inside the Root (reads its context); absolutely positioned to stay pinned */}
+    <div class="absolute inset-x-0 bottom-3 flex justify-center">
+      <ScrollButton />
+    </div>
+  </ChatContainerRoot>
+</div>`),
+};
+
+/** Icon only, the default. Scroll up to reveal it over the messages. */
+export const IconOnly: Story = {
+  args: { showLabel: false },
+  ...src(`<ScrollButton />`),
+};
+
+/** Labelled: the visible text is the accessible name, so it is not announced twice. */
+export const Labelled: Story = {
+  args: { showLabel: true },
+  ...src(`<ScrollButton showLabel />`),
+};
+
+/** A localised name. `label` alone changes what is announced without showing it. */
+export const CustomLabel: Story = {
+  args: { showLabel: true, label: 'Jump to latest' },
+  ...src(`<ScrollButton show-label label="Jump to latest" />`),
+};
+
+// The two panels are identical apart from the `dark` class, deliberately, and both keep the
+// `border-border` frame: with only the dark panel's frame visible (white on white in light,
+// a dark panel on a white page in dark) the button looked repositioned between them when it
+// was pixel-identical in both.
+/**
+ * The button's fill and shadow on a light and a dark panel, side by side over real content.
+ */
+export const LightAndDark: Story = {
+  args: { showLabel: true },
+  render: (args: { label?: string; showLabel?: boolean }) => (
+    <div class="flex flex-wrap gap-6">
+      <div class="rounded-lg border border-border bg-background p-3">
+        <div class="mb-2 text-xs font-medium text-muted-foreground">Light</div>
+        <ScrollDemo label={args.label} showLabel={args.showLabel} />
+      </div>
+      <div class="dark rounded-lg border border-border bg-background p-3">
+        <div class="mb-2 text-xs font-medium text-muted-foreground">Dark</div>
+        <ScrollDemo label={args.label} showLabel={args.showLabel} />
+      </div>
+    </div>
+  ),
+  ...src(`<ScrollButton showLabel />`),
+};
+
+// The last panel is what thread.tsx and chat-thread.tsx ship: `relative` on the
+// non-scrolling box, then `absolute bottom-4 left-1/2 w-full max-w-3xl -translate-x-1/2` on
+// the wrapper, which centres the button on the message band instead of the full container.
+/**
+ * One button in five different wrappers, each placing it over the scroll area.
+ */
+export const Positioning: Story = {
+  args: { showLabel: false },
+  render: () => (
+    <div class="flex flex-wrap gap-6">
+      <div>
+        <div class="mb-2 text-xs font-medium text-muted-foreground">
+          Bottom centre <code>absolute inset-x-0 bottom-3 flex justify-center</code>
+        </div>
+        <ScrollDemo holderClass="absolute inset-x-0 bottom-3 flex justify-center" />
+      </div>
+      <div>
+        <div class="mb-2 text-xs font-medium text-muted-foreground">
+          Bottom right <code>absolute bottom-3 right-3</code>
+        </div>
+        <ScrollDemo holderClass="absolute bottom-3 right-3" />
+      </div>
+      <div>
+        <div class="mb-2 text-xs font-medium text-muted-foreground">
+          Clear of a composer <code>absolute inset-x-0 bottom-14 flex justify-center</code>
+        </div>
+        <ScrollDemo composer holderClass="absolute inset-x-0 bottom-14 flex justify-center" />
+      </div>
+      <div>
+        <div class="mb-2 text-xs font-medium text-muted-foreground">
+          Labelled, bottom right <code>absolute bottom-3 right-3</code>
+        </div>
+        <ScrollDemo showLabel holderClass="absolute bottom-3 right-3" />
+      </div>
+      <div>
+        <div class="mb-2 text-xs font-medium text-muted-foreground">
+          Centred on a max-width band, the way the kit does it{' '}
+          <code>absolute bottom-3 left-1/2 w-full max-w-3xl -translate-x-1/2 flex justify-center</code>
+        </div>
+        <ScrollDemo holderClass="absolute bottom-3 left-1/2 flex w-full max-w-3xl -translate-x-1/2 justify-center" />
+      </div>
+    </div>
+  ),
+  ...src(`{/* The OUTER box is the positioning context. Do not put \`relative\` on
+    ChatContainerRoot: an absolute child of a scroll container scrolls away
+    with the content. */}
+<div class="relative h-96">
+  <ChatContainerRoot class="h-full overflow-y-auto">
+    <ChatContainerContent>{/* messages */}</ChatContainerContent>
+
+    {/* The button must stay INSIDE the Root: that is the context it reads
+        scroll state from. Only the wrapper changes below. */}
+
+    {/* bottom centre */}
+    <div class="absolute inset-x-0 bottom-3 flex justify-center">
+      <ScrollButton />
+    </div>
+
+    {/* bottom right */}
+    <div class="absolute bottom-3 right-3">
+      <ScrollButton />
+    </div>
+
+    {/* lifted clear of a composer docked at the bottom */}
+    <div class="absolute inset-x-0 bottom-14 flex justify-center">
+      <ScrollButton />
+    </div>
+  </ChatContainerRoot>
+</div>`),
+};
+
+/** Ghost variant overlaid in a chat area (showcase): no fill, elevation only. */
+export const Ghost: Story = {
+  args: { variant: 'ghost' },
+  ...src(`<ScrollButton variant="ghost" />`),
+};

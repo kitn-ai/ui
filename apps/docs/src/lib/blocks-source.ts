@@ -50,7 +50,7 @@ export function defaultFramework(): BlockFormId {
  *  detects the host from the project, and with no project emits the single
  *  file form. */
 export function addCommandFor(id: string): string {
-  return `npx create-kai add ${id}`;
+  return `npx @kitn.ai/cli add ${id}`;
 }
 
 export function registryUrl(): string {

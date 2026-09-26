@@ -8,7 +8,7 @@ import * as audioBandsModule from './audio-bands';
  * wired, which is exactly what the footguns are about.
  */
 const created = {
-  elementSources: [] as unknown[],
+  webComponentSources: [] as unknown[],
   streamSources: [] as unknown[],
   connections: [] as string[],
   disconnects: 0,
@@ -84,10 +84,10 @@ class FakeAudioContext {
   }
   createMediaElementSource(el: unknown) {
     // The real API throws on a second call for the same element.
-    if (created.elementSources.includes(el)) {
+    if (created.webComponentSources.includes(el)) {
       throw new Error('HTMLMediaElement already connected to a MediaElementSourceNode');
     }
-    created.elementSources.push(el);
+    created.webComponentSources.push(el);
     const destination = this.destination;
     return {
       // Models the real graph: this node connects to destination exactly
@@ -158,7 +158,7 @@ function advanceFrames(n: number, stepMs = 40) {
 }
 
 beforeEach(() => {
-  created.elementSources = [];
+  created.webComponentSources = [];
   created.streamSources = [];
   created.connections = [];
   created.disconnects = 0;
@@ -200,7 +200,7 @@ describe('useAudioAnalysis', () => {
     createRoot((dispose) => {
       useAudioAnalysis(() => undefined, { bands: 3 });
       expect(created.streamSources).toHaveLength(0);
-      expect(created.elementSources).toHaveLength(0);
+      expect(created.webComponentSources).toHaveLength(0);
       dispose();
     });
   });
@@ -223,7 +223,7 @@ describe('useAudioAnalysis', () => {
     await createRoot(async (dispose) => {
       useAudioAnalysis(() => fakeElement(), { bands: 3 });
       await Promise.resolve();
-      expect(created.elementSources).toHaveLength(1);
+      expect(created.webComponentSources).toHaveLength(1);
       expect(created.connections).toContain('element->analyser');
       // Without this the consumer's audio goes silent with no error.
       expect(created.connections).toContain('element->destination');
@@ -255,7 +255,7 @@ describe('useAudioAnalysis', () => {
       threw = true;
     }
     expect(threw).toBe(false);
-    expect(created.elementSources).toHaveLength(1);
+    expect(created.webComponentSources).toHaveLength(1);
 
     // The element connects to destination exactly once, at creation, no
     // matter how many visualizers attach: two consumers on one <audio> must

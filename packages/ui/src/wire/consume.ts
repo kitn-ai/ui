@@ -4,7 +4,7 @@
 // PROVIDER SDK. The only kit values imported are the three part builders, which
 // are REUSED rather than reimplemented so that `ModelTurn.parts` is produced by
 // exactly the code that drove the sink.
-import type { MessagePart, MessageSource } from '../elements/chat-types';
+import type { MessagePart, MessageSource } from '../web-components/chat/chat-types';
 import { appendReasoningPart, appendTextPart, fingerprint, upsertToolPart } from '../state/parts';
 import {
   normalizeStopReason,
@@ -17,7 +17,7 @@ import {
   type ModelUsage,
   type StopReason,
 } from './chunk';
-import type { RawOrigin } from '../components/tool-types';
+import type { RawOrigin } from '../components/tool/tool-types';
 import {
   emitWireDiagnostic,
   nextStreamId,
@@ -522,7 +522,7 @@ export async function consumeModelStream(
             code: 'empty-stream',
             message:
               'The model stream produced no chunks. The response was 200 but nothing in its body parsed ' +
-              'as a stream frame — check the endpoint really sent Content-Type: text/event-stream and that ' +
+              'as a stream frame; check the endpoint really sent Content-Type: text/event-stream and that ' +
               'the request set stream: true. A route that forwards a provider error without its status ' +
               'lands here: the body is a JSON error, not SSE.',
           }

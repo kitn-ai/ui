@@ -1,5 +1,127 @@
 # Changelog
 
+## [0.37.0](https://github.com/kitn-ai/ui/compare/@kitn.ai/ui-v0.36.0...@kitn.ai/ui-v0.37.0) (2026-09-24)
+
+
+### Features
+
+* **image:** split Image into a resource and an ImageArtifact payload ([4656e23](https://github.com/kitn-ai/ui/commit/4656e23c2f7cef10325dce6a6683a0620b30b9da))
+* **kbd:** weld a KbdGroup into one key strip, and let a Kbd live in a tooltip ([94517ef](https://github.com/kitn-ai/ui/commit/94517ef73ddb0164743979f56244fee78e913d83))
+* **kbd:** weld a KbdGroup into one key strip, and let a Kbd live in a tooltip ([0310db2](https://github.com/kitn-ai/ui/commit/0310db22a91d4f4a2a2e9a5422da44677c56dd28))
+* **lightbox:** a standalone Lightbox element, and an attachments image-preview option ([878e099](https://github.com/kitn-ai/ui/commit/878e099935512cb0e3265edcdbea60cfb42b72f1))
+* **lightbox:** a standalone Lightbox element, and an attachments image-preview option ([442a896](https://github.com/kitn-ai/ui/commit/442a89607e98c4091bb008ed6627201de9b7c215))
+* **lightbox:** an optional close control, and the Solid story the Components group was missing ([b3d1577](https://github.com/kitn-ai/ui/commit/b3d1577222367c57916d9dd705a19b90ff38a0b1))
+* **storybook:** the twelve reported items, and the four root causes behind them ([21ff45f](https://github.com/kitn-ai/ui/commit/21ff45f3d77141bc2f6584ffd7bd892769dc8b34))
+* **storybook:** the twelve reported items, and the four root causes behind them ([107397f](https://github.com/kitn-ai/ui/commit/107397f1330d1d2b8477737893132a16a44977ec))
+
+
+### Bug Fixes
+
+* **lightbox:** a slotted control keeps its own role, not a nested one ([9afca7d](https://github.com/kitn-ai/ui/commit/9afca7d7e3edaef3a9235dde3a3442ae69f96b4d))
+
+## [0.36.0](https://github.com/kitn-ai/ui/compare/@kitn.ai/ui-v0.35.0...@kitn.ai/ui-v0.36.0) (2026-09-22)
+
+
+### Features
+
+* **doctor:** report a kai-* tag nothing registers, and reject one the scaffold cannot place ([5d93f7f](https://github.com/kitn-ai/ui/commit/5d93f7f3e24da6759643dd9f7061dbd115f0b761))
+* **doctor:** report a kai-* tag that nothing registers, and reject one the scaffold cannot place ([0d1ddf4](https://github.com/kitn-ai/ui/commit/0d1ddf4efecb2c8581b047826827da73ce31c644))
+* **scaffold:** register only the kai-* tags a scaffold or starter places ([e772101](https://github.com/kitn-ai/ui/commit/e772101f98f522a4efc258aeaf623efcc2e7b49c))
+* **scaffold:** register only the kai-* tags a scaffold or starter places ([cb89e66](https://github.com/kitn-ai/ui/commit/cb89e667396ff499a45a7681bcbbe3ce3af257c4))
+
+## [0.35.0](https://github.com/kitn-ai/ui/compare/@kitn.ai/ui-v0.34.0...@kitn.ai/ui-v0.35.0) (2026-09-21)
+
+
+### Features
+
+* **cli:** kai doctor runs the MCP debug tool's rule set over your own sources ([f47cf2b](https://github.com/kitn-ai/ui/commit/f47cf2b007868f298904fb41d3fca0363617dc81))
+* **cli:** kai doctor runs the MCP debug tool's rule set over your own sources ([cbae694](https://github.com/kitn-ai/ui/commit/cbae694aa6461fa3e61676f80a79e86ab36829cc))
+
+
+### Bug Fixes
+
+* **lint:** a generated changelog is a record in BOTH prose guards, not in one of them ([7a9fc4f](https://github.com/kitn-ai/ui/commit/7a9fc4f26a23558e043b0e31007ad30aca9cdf9c))
+* **lint:** a generated changelog is a record in BOTH prose guards, not in one of them ([bbd474e](https://github.com/kitn-ai/ui/commit/bbd474e15f94e3b9fd49b12158dba58156c4219a))
+
+## [0.34.0](https://github.com/kitn-ai/ui/compare/@kitn.ai/ui-v0.33.0...@kitn.ai/ui-v0.34.0) (2026-09-21)
+
+
+### ⚠ BREAKING CHANGES
+
+* **cli:** split the dev tooling into @kitn.ai/cli + @kitn.ai/mcp
+
+### Features
+
+* **cli:** the follow-ups after [#382](https://github.com/kitn-ai/ui/issues/382), and the split into [@kitn](https://github.com/kitn).ai/cli + [@kitn](https://github.com/kitn).ai/mcp ([afcca63](https://github.com/kitn-ai/ui/commit/afcca633f08ca9eadf35d198b187eea9e63c5d73))
+* **lint:** a guard for the relative specifier that resolves to nothing ([0d2e589](https://github.com/kitn-ai/ui/commit/0d2e5895b0f1a383ee446bad34dd466077904b11))
+* **mcp:** report the CLI's own version in the MCP instructions ([a5cb2a9](https://github.com/kitn-ai/ui/commit/a5cb2a954714f6750a32e7590bcc527c92c69c7c))
+
+
+### Bug Fixes
+
+* **lint:** a target git ignores is a build product, not a dangling import ([d0d66e7](https://github.com/kitn-ai/ui/commit/d0d66e7dffa59a6fdba85acc785e2ba946512b5b))
+* **lint:** exempt every CHANGELOG.md by basename, not just the kit's ([e4c93af](https://github.com/kitn-ai/ui/commit/e4c93afcc232f4a827e5cd42313a0c2d8f9452bf))
+* **packaging:** the kit declared less npm metadata than the packages beside it ([24270c3](https://github.com/kitn-ai/ui/commit/24270c3da5c32673547be86a76555fb87191b6cd))
+* **packaging:** the kit declared less npm metadata than the packages beside it ([13480f6](https://github.com/kitn-ai/ui/commit/13480f65e843b61f74227e780cd6bdc518dab48b))
+* **release:** unblock the 0.33.0 publish (lockfile link + generated-changelog exemption) ([5ae91a1](https://github.com/kitn-ai/ui/commit/5ae91a1456cad80d8fb9bd54668f5e64afd1094f))
+
+
+### Code Refactoring
+
+* **cli:** split the dev tooling into [@kitn](https://github.com/kitn).ai/cli + [@kitn](https://github.com/kitn).ai/mcp ([05df99a](https://github.com/kitn-ai/ui/commit/05df99ade57d523f0a57c6ece5e789e53b6b1997))
+
+## [0.33.0](https://github.com/kitn-ai/ui/compare/@kitn.ai/ui-v0.32.0...@kitn.ai/ui-v0.33.0) (2026-09-21)
+
+
+### ⚠ BREAKING CHANGES
+
+* finish the rename — symbols, data keys, event types, generated names
+* src/elements -> src/web-components, and `@kitn.ai/ui/elements` -> `@kitn.ai/ui/web-components`
+* **create-kai:** `create-kai add <block>` writes the react form to `src/components/<id>/` instead of `src/blocks/<id>/`.
+* **blocks:** `kai dev --builder` no longer serves /gallery/ or the /kit/ mount its previews imported from, and dist/gallery leaves the published tarball. Browse blocks at https://ui.kitn.ai/blocks.
+
+### Features
+
+* **blocks:** the /blocks section, and the gallery retired ([#375](https://github.com/kitn-ai/ui/issues/375)) ([94f8989](https://github.com/kitn-ai/ui/commit/94f89894969b33c5ee40ae32ff6be071e27407c0))
+* **create-kai:** add writes at the blocks targets table, and detects the host framework ([1528bb7](https://github.com/kitn-ai/ui/commit/1528bb71684948547a2e8490c81c750e1a807b22))
+* **kai:** a guard for the class nothing caught -- a stale CLI invocation in prose ([c1d48ce](https://github.com/kitn-ai/ui/commit/c1d48ce9b5ad6c0b4b7db2798db08d9459cdef48))
+* **kai:** peel the dev tooling into [@kitn](https://github.com/kitn).ai/kai, so a browser consumer stops installing the MCP server ([0406f6c](https://github.com/kitn-ai/ui/commit/0406f6cd588e9ba5e9734f64c1a740f489faffed))
+* **lint:** guard the three release literals nobody read, including the publish order ([abc86ab](https://github.com/kitn-ai/ui/commit/abc86ab6ff9af2a90a388d5999b2dc0368a16ac4))
+* **lint:** lint:layer-direction, and the last upward value edge it found ([b0511f5](https://github.com/kitn-ai/ui/commit/b0511f5283e46df339c6efc8f04ee195b85f51f8))
+* **lint:** the retired layer names cannot come back, and the archive says what happened ([ba6862f](https://github.com/kitn-ai/ui/commit/ba6862f07100c8894a37fcbb3bd399dfe33d843d))
+* **theme-studio:** wire the spacing knob, and make a catalogued-but-unwired knob red ([095d8ca](https://github.com/kitn-ai/ui/commit/095d8cab4ef36af556474a6800bef34b1a9240dd))
+* **theme:** complete the radius ladder, add pill and code shape tokens, and wire them in the studio ([620fd0f](https://github.com/kitn-ai/ui/commit/620fd0f9e14ef1f50d1f42f34ded9f55fcf8e4a9))
+* **theme:** elevation as one knob, a weight ladder, and steps where extremes are not designs ([ed6db94](https://github.com/kitn-ai/ui/commit/ed6db94b4085fcab15687a0d43d896d0cf054d75))
+* **ui:** RowGroup + kai-row-group, and one implementation of the row-list frame ([d55ad57](https://github.com/kitn-ai/ui/commit/d55ad572694c9d6643f29062215afd2666c8ab0c))
+
+
+### Bug Fixes
+
+* **build:** derive the emitted mcp/ dts rewrite from depth, not a literal prefix ([1fad7fa](https://github.com/kitn-ai/ui/commit/1fad7fa44e5c1e84b76bd9490cb4ae62364a9a6e))
+* **ci:** the two failures the first CI run found, both pre-existing on this branch ([b7f8470](https://github.com/kitn-ai/ui/commit/b7f847093b91670adede661b703a94f664edc2ad))
+* **docs,build:** the autoloader demo actually works, and its module map is now checked ([158e456](https://github.com/kitn-ai/ui/commit/158e456a66804c4ab6eb27751cd91608c7acf589))
+* **element-recipes, scaffold:** paint with declared properties, and emit the kit pill ([d9ec6bd](https://github.com/kitn-ai/ui/commit/d9ec6bdaec064a4529b99b1b0a2549f236b9377b))
+* **guards:** verify:fresh covers the mcp/ and scripts/ trees the build writes into ([3201484](https://github.com/kitn-ai/ui/commit/320148454bde238e21bf5f749b3adf2675ae53a2))
+* **lint:** the release-wiring guard's bin check cannot run in the pre-build leg ([4e3c855](https://github.com/kitn-ai/ui/commit/4e3c855b410f1a818c98878db5fc405aaa27fe74))
+* **mcp:** the invariant catalog executes the shipped URL predicates instead of copying them ([c622fae](https://github.com/kitn-ai/ui/commit/c622fae9a909dc1e56eaea57f9c2300206af82c3))
+* **security:** pin F-5's three uncovered sinks, and correct the audit's CSS premise ([1a7029d](https://github.com/kitn-ai/ui/commit/1a7029d69af6c48170b836e74fdbab10436b790a))
+* **security:** the Card href sink takes the policy, and the third URL classifier is gone ([3437cde](https://github.com/kitn-ai/ui/commit/3437cde126ae4159739f1cae864a41cd7a61b302))
+* **solid:** export the two components the facades compose, so verify:solid-coverage passes ([067204b](https://github.com/kitn-ai/ui/commit/067204b5c1388ebeb8e0bf1dfabea5465f921801))
+* **theme-studio:** remove the demo rows that could not move ([b4fcbdb](https://github.com/kitn-ai/ui/commit/b4fcbdb660406a67973e5057bf2eec7558bd316f))
+* **theme:** elevation reaches the hand-written card shadow, and a terser panel ([40683af](https://github.com/kitn-ai/ui/commit/40683af9375f81766172c7e3c0650b41e1e15397))
+* **theme:** the palette's two holes — error text and success marks ([abd0276](https://github.com/kitn-ai/ui/commit/abd0276bd6daf6318359aac5a05192db3881b21b))
+
+
+### Performance Improvements
+
+* **footprint:** per-module output, consumer-cost guards, and a local cn merger ([b22ec5a](https://github.com/kitn-ai/ui/commit/b22ec5a086989f7c5a56ad8bb9e5d35f12351dd7))
+
+
+### Code Refactoring
+
+* finish the rename — symbols, data keys, event types, generated names ([777c4dc](https://github.com/kitn-ai/ui/commit/777c4dcc4e5e6889b24189f9b243264b8d19a2b3))
+* src/elements -&gt; src/web-components, and `[@kitn](https://github.com/kitn).ai/ui/elements` -&gt; `[@kitn](https://github.com/kitn).ai/ui/web-components` ([9629f92](https://github.com/kitn-ai/ui/commit/9629f92463690166028b50eb7dd6f0828d9154c0))
+
 ## [0.32.0](https://github.com/kitn-ai/ui/compare/@kitn.ai/ui-v0.31.0...@kitn.ai/ui-v0.32.0) (2026-09-03)
 
 
@@ -222,7 +344,7 @@
 
 ### ⚠ BREAKING CHANGES
 
-* three published `AssistantStream` signatures narrow — `addSource`, `upsertTool`'s patch and `appendReasoning`'s opts now reject an argument carrying a key owned by a sibling bag. Code passing the correct payload is unaffected; code passing the wrong one stops compiling, which is the point. No data type changed, so `element-meta.json`, `docs/web-components.md`, `llms-full.txt` and `custom-elements.json` are byte-identical after a `--skip-nx-cache` build.
+* three published `AssistantStream` signatures narrow — `addSource`, `upsertTool`'s patch and `appendReasoning`'s opts now reject an argument carrying a key owned by a sibling bag. Code passing the correct payload is unaffected; code passing the wrong one stops compiling, which is the point. No data type changed, so `web-component-meta.json`, `docs/web-components.md`, `llms-full.txt` and `custom-elements.json` are byte-identical after a `--skip-nx-cache` build.
 
 ### Bug Fixes
 
@@ -733,7 +855,7 @@
 * **deps:** move shiki/[@shikijs](https://github.com/shikijs) to devDependencies (-17 MB consumer install) ([7944256](https://github.com/kitn-ai/ui/commit/7944256e1088bd12230cf0ce247947aa1464fcd4))
 * **deps:** upgrade tailwind-merge ^2 → ^3 (Tailwind v4 class groups) ([186302b](https://github.com/kitn-ai/ui/commit/186302b2f786f0a6525e86313888f63fdfc2d6b1))
 * **docs-site:** await element registration before setting props (timing race) ([4797dab](https://github.com/kitn-ai/ui/commit/4797dabcae8017fe25803b57a6f59d803b982ecb))
-* **docs-site:** sync-kit ships the dist/elements/ subtree (chunks moved there in the unified build) ([d0e5fd4](https://github.com/kitn-ai/ui/commit/d0e5fd404af70b56ba6a79d09cd994316e92d32b))
+* **docs-site:** sync-kit ships the dist/web-components/ subtree (chunks moved there in the unified build) ([d0e5fd4](https://github.com/kitn-ai/ui/commit/d0e5fd404af70b56ba6a79d09cd994316e92d32b))
 * **docs:** landing hero — consistent feedback actions on the follow-up message ([0c65b8e](https://github.com/kitn-ai/ui/commit/0c65b8ea9e25d7a3f58f722bd6096c6470037e02))
 * **docs:** toast demo — remove dismissed toasts from the region, not just hide them ([139c9ed](https://github.com/kitn-ai/ui/commit/139c9ede64359770a5f533a1d06a0e0c8ee249fb))
 * **elements:** position the autoloader as CDN/static-only (consumer-regression finding) ([2d05e83](https://github.com/kitn-ai/ui/commit/2d05e83995a7b2a03ba536d790a4c9fac36506b9))
@@ -791,7 +913,7 @@
 * **pkg:** inject elements self-register via build banner (keep React wrapper source typecheck-clean; fixes 1474 react-jsx errors from walking Solid source) ([fc3b05f](https://github.com/kitn-ai/ui/commit/fc3b05fc71b452bc8fea84406999bd9308ed4e9c))
 * **pkg:** remove sideEffects field that hollowed the elements bundle (it tree-shook the registrations out of the lib's own build) ([e3bf7f9](https://github.com/kitn-ai/ui/commit/e3bf7f96989db60a3559308c2b416557df553ff8))
 * **pkg:** self-register elements from /react, SSR-safe registration, consumable theme.css, drop redundant solid-js peer ([6cc5fde](https://github.com/kitn-ai/ui/commit/6cc5fdefc834f7d33b8d1f7208bb7575ecea764a))
-* **pkg:** ship compiled . + ./react + type-only ./elements (stop shipping raw source) ([c6241fe](https://github.com/kitn-ai/ui/commit/c6241fe6be14b7a576f4390e92295072d1c9c84d))
+* **pkg:** ship compiled . + ./react + type-only ./web-components (stop shipping raw source) ([c6241fe](https://github.com/kitn-ai/ui/commit/c6241fe6be14b7a576f4390e92295072d1c9c84d))
 * **pkg:** SSR-import-safe element registration (client-only via gated dynamic import) ([d0907d5](https://github.com/kitn-ai/ui/commit/d0907d57fa178df6038198e572a7409cac3e97e8))
 * **test:** make consumer-regression harness paths portable (resolve repo via git rev-parse --show-toplevel; no hardcoded absolute paths) ([bcd1c69](https://github.com/kitn-ai/ui/commit/bcd1c69f4b7ff391e9ace997b9e0251e8451dcfb))
 
@@ -914,7 +1036,7 @@
 * **examples:** docked, collapsible event console in the showcase ([25923ec](https://github.com/kitn-ai/ui/commit/25923ec2b79b587f774175f5c5d6a519541f5526))
 * full story parity for &lt;kitn-chat&gt; (header, model switcher, context, scroll button, toolbar) ([aae1541](https://github.com/kitn-ai/ui/commit/aae15414bc82a35bb53ce3372947bb7087b926c0))
 * **gen:** add composedFrom links + component tokens to element spec ([04886b8](https://github.com/kitn-ai/ui/commit/04886b87a67b72f8390d391a4413497c2e0fc98b))
-* **gen:** extract prop defaults + always emit element-meta.json ([1463793](https://github.com/kitn-ai/ui/commit/14637936022b9db8ae9954ddd672edc881c02c3d))
+* **gen:** extract prop defaults + always emit web-component-meta.json ([1463793](https://github.com/kitn-ai/ui/commit/14637936022b9db8ae9954ddd672edc881c02c3d))
 * header-composition kit — kc-switch, kc-chat header slots, grouped model-switcher ([0519b57](https://github.com/kitn-ai/ui/commit/0519b57da687af41d967d61bf799b665f535acd5))
 * kc-message/kc-chat actions reveal, avatar payload, custom actions ([3fa7cd6](https://github.com/kitn-ai/ui/commit/3fa7cd673109cc03a522b71b62128af5b9e4a321))
 * **pdf-preview:** config + enable/reset primitive scaffold ([49a0b87](https://github.com/kitn-ai/ui/commit/49a0b870f338df11df4ecef86c73a99ff404dff8))
@@ -1278,7 +1400,7 @@
 * **elements:** add &lt;kitn-conversation-list&gt; ([75ecc23](https://github.com/kitn-ai/chat/commit/75ecc237fb4f4a5d167fc3d38f02cc5cd4a249cd))
 * **elements:** add &lt;kitn-prompt-input&gt; ([a69ec56](https://github.com/kitn-ai/chat/commit/a69ec5639b4ac7186668a66c7fbf77786f9339a9))
 * **elements:** add defineKitnElement shadow-DOM wrapper helper ([80d049f](https://github.com/kitn-ai/chat/commit/80d049f8592fd990ce94f96f191720c4dfab4a11))
-* **elements:** add registration entry, Vite library build, ./elements export ([52ff40f](https://github.com/kitn-ai/chat/commit/52ff40f692681d703ca4c4716f68a301c0f33b50))
+* **elements:** add registration entry, Vite library build, ./web-components export ([52ff40f](https://github.com/kitn-ai/chat/commit/52ff40f692681d703ca4c4716f68a301c0f33b50))
 * **elements:** attachment support in the web-component input ([6cedda3](https://github.com/kitn-ai/chat/commit/6cedda328f783b33ff68a32cbe2717b50c1bec3b))
 * **elements:** bring &lt;kitn-chat&gt; web component to full-chat parity ([dbd1c24](https://github.com/kitn-ai/chat/commit/dbd1c240cebf707a3ce10242a451936b2713c0e0))
 * **elements:** compile kit Tailwind CSS to an injectable string ([ab3acd4](https://github.com/kitn-ai/chat/commit/ab3acd4508bc4bbbb71efa7f2ec00596c8aefc11))
@@ -1303,7 +1425,7 @@
 * full story parity for &lt;kitn-chat&gt; (header, model switcher, context, scroll button, toolbar) ([aae1541](https://github.com/kitn-ai/chat/commit/aae15414bc82a35bb53ce3372947bb7087b926c0))
 * full-screen theme editor (light/dark, presets, live chat preview) ([c656735](https://github.com/kitn-ai/chat/commit/c656735690c5a050e61d414ddfcc73795354e564))
 * **gen:** add composedFrom links + component tokens to element spec ([04886b8](https://github.com/kitn-ai/chat/commit/04886b87a67b72f8390d391a4413497c2e0fc98b))
-* **gen:** extract prop defaults + always emit element-meta.json ([1463793](https://github.com/kitn-ai/chat/commit/14637936022b9db8ae9954ddd672edc881c02c3d))
+* **gen:** extract prop defaults + always emit web-component-meta.json ([1463793](https://github.com/kitn-ai/chat/commit/14637936022b9db8ae9954ddd672edc881c02c3d))
 * **highlighter:** curate default language set (bash, javascript, html, css, json) ([c2c2492](https://github.com/kitn-ai/chat/commit/c2c24928fe55a163fbce5973eb02f6fda33f0bb4))
 * **highlighter:** on-demand, no-WASM Shiki; ESM-only build ([7c121d2](https://github.com/kitn-ai/chat/commit/7c121d25521cfd32bf9d7ac623884b4124393616))
 * **highlighter:** trim default languages to 5 core (js/ts/tsx/json/bash) ([c8c75bd](https://github.com/kitn-ai/chat/commit/c8c75bdd64a775f7830445a8d053eccaf8b13f80))
@@ -1523,7 +1645,7 @@
 * **elements:** declare typed Events maps on flagship facades (typed dispatch + generated detail shapes) ([a1ace5c](https://github.com/kitn-ai/chat/commit/a1ace5c317739af19c0e176893c298ef189983ac))
 * **elements:** typed Events maps on remaining dispatching facades ([fd292ec](https://github.com/kitn-ai/chat/commit/fd292ec3022ca7fb252b1317525d8017487380f4))
 * **gen:** add composedFrom links + component tokens to element spec ([04886b8](https://github.com/kitn-ai/chat/commit/04886b87a67b72f8390d391a4413497c2e0fc98b))
-* **gen:** extract prop defaults + always emit element-meta.json ([1463793](https://github.com/kitn-ai/chat/commit/14637936022b9db8ae9954ddd672edc881c02c3d))
+* **gen:** extract prop defaults + always emit web-component-meta.json ([1463793](https://github.com/kitn-ai/chat/commit/14637936022b9db8ae9954ddd672edc881c02c3d))
 * **storybook:** API spec page + live Controls on flagship element stories ([96c1d8a](https://github.com/kitn-ai/chat/commit/96c1d8a8dcefe066e5ebb3d42afc968b6c638f79))
 * **storybook:** API spec page on attachments/chain-of-thought/chat-scope-picker/checkpoint/code-block/context-meter element stories ([7dbfc0f](https://github.com/kitn-ai/chat/commit/7dbfc0ff97e2a09e5c649faef8300e372b916fd2))
 * **storybook:** API spec page on empty/feedback-bar/file-upload/image/loader/markdown element stories ([9b4dd9f](https://github.com/kitn-ai/chat/commit/9b4dd9f74b272ba4094253e96c03f249ca2af754))
@@ -1657,7 +1779,7 @@
 * **elements:** add &lt;kitn-conversation-list&gt; ([75ecc23](https://github.com/kitn-ai/chat/commit/75ecc237fb4f4a5d167fc3d38f02cc5cd4a249cd))
 * **elements:** add &lt;kitn-prompt-input&gt; ([a69ec56](https://github.com/kitn-ai/chat/commit/a69ec5639b4ac7186668a66c7fbf77786f9339a9))
 * **elements:** add defineKitnElement shadow-DOM wrapper helper ([80d049f](https://github.com/kitn-ai/chat/commit/80d049f8592fd990ce94f96f191720c4dfab4a11))
-* **elements:** add registration entry, Vite library build, ./elements export ([52ff40f](https://github.com/kitn-ai/chat/commit/52ff40f692681d703ca4c4716f68a301c0f33b50))
+* **elements:** add registration entry, Vite library build, ./web-components export ([52ff40f](https://github.com/kitn-ai/chat/commit/52ff40f692681d703ca4c4716f68a301c0f33b50))
 * **elements:** compile kit Tailwind CSS to an injectable string ([ab3acd4](https://github.com/kitn-ai/chat/commit/ab3acd4508bc4bbbb71efa7f2ec00596c8aefc11))
 * **elements:** light/dark/auto theme support for web components ([c8992e4](https://github.com/kitn-ai/chat/commit/c8992e4facb332d94cc83c2aa6751ac365c5d67b))
 * **elements:** render message attachments in &lt;kitn-chat&gt; ([6717222](https://github.com/kitn-ai/chat/commit/6717222b39bc2730acb58c095ce0a908c5f00367))

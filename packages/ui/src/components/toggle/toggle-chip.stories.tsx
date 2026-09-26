@@ -1,0 +1,106 @@
+import type { Meta, StoryObj } from 'storybook-solidjs-vite';
+import { createSignal, For } from 'solid-js';
+import { fn } from 'storybook/test';
+import { ToggleChip } from './toggle-chip';
+import { componentDescription } from '../../stories/docs/web-component-controls';
+
+const meta = {
+  title: 'Components/ToggleChip',
+  component: ToggleChip,
+  tags: ['autodocs'],
+  parameters: {
+    layout: 'padded',
+    // `pressed`/`defaultPressed` mirror `Switch`'s `checked`/`defaultChecked`: a chip is a
+    // button (`aria-pressed`), not a switch, checkbox or radio. There is no `ChipGroup`
+    // wrapper and no grouping logic to own, so a row of chips is a plain flex-wrap div.
+    docs: {
+      description: componentDescription([
+        'A pill-shaped button that toggles between two states.',
+      ]),
+    },
+  },
+  argTypes: {
+    pressed: { control: 'boolean', description: 'Controlled pressed state. Drive it from `onChange`.' },
+    defaultPressed: { control: 'boolean', description: 'Initial state when uncontrolled.' },
+    disabled: { control: 'boolean', description: 'Disable interaction.' },
+    size: {
+      control: 'select',
+      options: ['sm', 'md'],
+      description: 'Pill size. `sm` (h-7, the default) is the common case; `md` (h-8) is for a row that wants more presence.',
+      table: { defaultValue: { summary: 'sm' } },
+    },
+    children: { control: 'text', description: 'Chip label.' },
+    onChange: {
+      action: 'change',
+      description: 'Fires with the next pressed state on toggle.',
+      table: { category: 'Events' },
+    },
+  },
+  args: { children: 'Images', onChange: fn() },
+} satisfies Meta<typeof ToggleChip>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+const IMPORT = `import { ToggleChip } from '@kitn.ai/ui/solid';`;
+const src = (code: string) => ({
+  parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
+});
+
+/** Unpressed by default; click or press Space/Enter to toggle. */
+export const Playground: Story = {
+  ...src('<ToggleChip>Images</ToggleChip>'),
+};
+
+/** Starts pressed via `defaultPressed`. */
+export const Pressed: Story = {
+  args: { defaultPressed: true },
+  ...src('<ToggleChip defaultPressed>Images</ToggleChip>'),
+};
+
+/** Non-interactive. */
+export const Disabled: Story = {
+  args: { disabled: true },
+  ...src('<ToggleChip disabled>Images</ToggleChip>'),
+};
+
+/** Each chip toggles independently of the others. */
+export const Row: Story = {
+  name: 'In a chip row (+ size comparison)',
+  render: () => {
+    const labels = ['Images', 'PDFs', 'Documents', 'Spreadsheets', 'Audio', 'Video'];
+    const [pressedSm, setPressedSm] = createSignal(new Set(['Images', 'PDFs']));
+    const toggleSm = (label: string): void => {
+      const next = new Set(pressedSm());
+      if (next.has(label)) next.delete(label);
+      else next.add(label);
+      setPressedSm(next);
+    };
+    return (
+      <div class="flex flex-col gap-4">
+        <div>
+          <p class="mb-1.5 text-xs font-medium text-muted-foreground">sm (default pill)</p>
+          <div class="flex flex-wrap gap-1.5">
+            <For each={labels}>
+              {(label) => (
+                <ToggleChip pressed={pressedSm().has(label)} onChange={() => toggleSm(label)}>
+                  {label}
+                </ToggleChip>
+              )}
+            </For>
+          </div>
+        </div>
+        <div>
+          <p class="mb-1.5 text-xs font-medium text-muted-foreground">md (larger)</p>
+          <div class="flex flex-wrap gap-1.5">
+            <For each={labels}>{(label) => <ToggleChip size="md">{label}</ToggleChip>}</For>
+          </div>
+        </div>
+      </div>
+    );
+  },
+  ...src(`<div class="flex flex-wrap gap-1.5">
+  <ToggleChip pressed={imagesOn()} onChange={setImagesOn}>Images</ToggleChip>
+  <ToggleChip pressed={pdfsOn()} onChange={setPdfsOn}>PDFs</ToggleChip>
+</div>`),
+};

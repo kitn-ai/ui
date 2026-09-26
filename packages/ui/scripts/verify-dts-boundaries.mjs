@@ -3,7 +3,7 @@
  * Guard: no emitted .d.ts may reference a path outside dist/.
  *
  * The tarball ships `src/` today, so a declaration that type-imports
- * `../../src/elements/chat-types` still resolves for a consumer — by accident.
+ * `../../src/web-components/chat-types` still resolves for a consumer — by accident.
  * The moment raw source stops shipping (a reasonable size win) every such type
  * silently breaks, exactly like `@kitn.ai/ui/provider`, whose declarations
  * reached outside dist/ and therefore never typechecked at all.
@@ -349,9 +349,9 @@ const SELF_TEST_CASES = [
   {
     name: 'ESCAPE: a declaration reaching outside dist/ into src/',
     files: fixtureFiles({
-      'dist/index.d.ts': `export type { ChatMessage } from '../../src/elements/chat-types';\n` + `export * from './state.js';\n`,
+      'dist/index.d.ts': `export type { ChatMessage } from '../../src/web-components/chat-types';\n` + `export * from './state.js';\n`,
     }),
-    expect: ['ESCAPE', "'../../src/elements/chat-types'"],
+    expect: ['ESCAPE', "'../../src/web-components/chat-types'"],
     reject: ['TS7016', 'TS2307'],
   },
   {

@@ -5,7 +5,7 @@ description: Use AI/UI web components in plain HTML and vanilla JavaScript — n
 
 import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
 
-Drop `<kai-*>` web components into any HTML page with a single import. No framework, no build configuration — the elements register themselves globally and work in every modern browser.
+Drop `<kai-*>` web components into any HTML page with a single import. No framework, no build configuration — the web components register themselves globally and work in every modern browser.
 
 ## Install
 
@@ -16,7 +16,7 @@ npm install @kitn.ai/ui
 Register all web components once with a side-effect import near your app entry:
 
 ```js
-import '@kitn.ai/ui/elements';
+import '@kitn.ai/ui/web-components';
 ```
 
 Every `<kai-*>` tag is then available globally — drop them anywhere in your HTML.
@@ -30,7 +30,9 @@ Skip npm entirely and load from a CDN. For quick prototypes this works immediate
 </script>
 ```
 
-`kai.es.js` registers every element in one fetch — the right shape for a `<kai-chat>` page, which pulls most of the kit anyway. A page placing only an element or two does better with the [autoloader](/guides/loading/#autoloader), which fetches each element on demand. The streaming helpers work here too: `dist/state.js` and `dist/wire.js` are self-contained ES modules, so `@kitn.ai/ui/state` and `@kitn.ai/ui/wire` load from the same CDN URLs with no bundler.
+`kai.es.js` registers every web component in one fetch — the right shape for a `<kai-chat>` page, which pulls most of the kit anyway. A page placing only a web component or two does better with the [autoloader](/guides/loading/#autoloader), which fetches each web component on demand.
+
+The streaming helpers work here too: `dist/state.js` and `dist/wire.js` are self-contained ES modules, so `@kitn.ai/ui/state` and `@kitn.ai/ui/wire` load from the same CDN URLs with no bundler.
 </Aside>
 
 ## The property / event contract
@@ -51,7 +53,9 @@ el.setAttribute('theme', 'dark');
 el.addEventListener('kai-submit', (e) => console.log(e.detail.value));
 ```
 
-**Reactivity:** assign a **new array**, and replace any item you changed with a **new object**. The new array reference is what tells the element something changed — setting the same array back is a no-op, even if you replaced an item inside it. The new item object is what makes the change visible, because these lists key their rows by item identity. Adding, removing and reordering need only the fresh array; editing an existing item needs both.
+**Reactivity:** assign a **new array**, and replace any item you changed with a **new object**. The new array reference is what tells the element something changed — setting the same array back is a no-op, even if you replaced an item inside it. The new item object is what makes the change visible, because these lists key their rows by item identity.
+
+Adding, removing and reordering need only the fresh array; editing an existing item needs both.
 
 ```js
 // Stale: `title` really did change, but the item object did not, so the row never updates.
@@ -81,7 +85,7 @@ el.conversations = list.map((c) => (c.id === id ? { ...c, title: 'Renamed' } : c
   </div>
 
   <script type="module">
-    import '@kitn.ai/ui/elements';
+    import '@kitn.ai/ui/web-components';
 
     await customElements.whenDefined('kai-chat');
 
@@ -129,9 +133,9 @@ el.conversations = list.map((c) => (c.id === id ? { ...c, title: 'Renamed' } : c
 </html>
 ```
 
-## Compose individual elements
+## Compose individual web components
 
-`<kai-chat>` is one option, not the only one. Every element can be placed independently. Here's a sidebar + thread layout using `<kai-conversations>` and `<kai-chat>`:
+`<kai-chat>` is one option, not the only one. Every web component can be placed independently. Here's a sidebar + thread layout using `<kai-conversations>` and `<kai-chat>`:
 
 ```html
 <style>
@@ -145,7 +149,7 @@ el.conversations = list.map((c) => (c.id === id ? { ...c, title: 'Renamed' } : c
 </div>
 
 <script type="module">
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
 
   await customElements.whenDefined('kai-conversations');
 
@@ -187,7 +191,7 @@ Wrap panels in `<kai-resizable>` with one `<kai-resizable-item>` each — drag h
 </div>
 
 <script type="module">
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
 
   const resizable = document.querySelector('kai-resizable');
   resizable.addEventListener('kai-change', (e) => {
@@ -196,13 +200,13 @@ Wrap panels in `<kai-resizable>` with one `<kai-resizable-item>` each — drag h
 </script>
 ```
 
-## Standalone display elements
+## Standalone display web components
 
-You can drop any single element into an existing page without adopting the full chat shell. `<kai-markdown>`, `<kai-code-block>`, and `<kai-artifact>` are common standalone picks for rendering AI-generated content:
+You can drop any single web component into an existing page without adopting the full chat shell. `<kai-markdown>`, `<kai-code-block>`, and `<kai-artifact>` are common standalone picks for rendering AI-generated content:
 
 ```html
 <script type="module">
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
 </script>
 
 <kai-markdown content="## Result\n\nHere is your **summary**."></kai-markdown>
@@ -222,11 +226,11 @@ Each element fills its container and is controlled entirely through properties a
 | `kai-conversations` | `kai-toggle-sidebar` | — |
 | `kai-resizable` | `kai-change` | `{ sizes: string[] }` |
 
-For the full API of any element — all properties, events, and their types — see the individual component page in the [Components](/components/attachments/) reference.
+For the full API of any web component — all properties, events, and their types — see the individual component page in the [Components](/components/attachments/) reference.
 
 ## Theming
 
-Each element styles itself inside its own Shadow DOM and needs no external CSS. To retheme the elements, set **`--kai-color-*`** custom properties on `:root` (or a scoping selector) — inherited custom properties cross the shadow boundary, and every element resolves its colors through the `--kai-` names:
+Each element styles itself inside its own Shadow DOM and needs no external CSS. To retheme the web components, set **`--kai-color-*`** custom properties on `:root` (or a scoping selector) — inherited custom properties cross the shadow boundary, and every element resolves its colors through the `--kai-` names:
 
 ```html
 <style>
@@ -237,7 +241,7 @@ Each element styles itself inside its own Shadow DOM and needs no external CSS. 
 </style>
 ```
 
-The unprefixed `--color-*` names do **not** work here: each shadow root declares them on `:host`, which beats anything inherited from your `:root`. No stylesheet link is needed either — the elements carry their own CSS. Load `theme.tokens.css` only when you want the kit's `--color-*` tokens for your **own** page chrome around the elements:
+The unprefixed `--color-*` names do **not** work here: each shadow root declares them on `:host`, which beats anything inherited from your `:root`. No stylesheet link is needed either — the web components carry their own CSS. Load `theme.tokens.css` only when you want the kit's `--color-*` tokens for your **own** page chrome around the web components:
 
 ```html
 <!-- local install -->

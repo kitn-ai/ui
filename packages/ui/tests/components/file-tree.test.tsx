@@ -6,7 +6,7 @@ import {
   type FileTreeFile,
   type FileTreeFolderNode,
   type FileTreeFileNode,
-} from '../../src/components/file-tree';
+} from '../../src/components/file/file-tree';
 
 afterEach(() => {
   document.body.innerHTML = '';

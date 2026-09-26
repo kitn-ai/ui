@@ -27,8 +27,8 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import '@testing-library/jest-dom/vitest';
 import { render, cleanup } from '@solidjs/testing-library';
-import { ScrollButton } from '../../src/components/scroll-button';
-import { ChatContainerRoot, ChatContainerContent } from '../../src/components/chat-container';
+import { ScrollButton } from '../../src/components/scroll/scroll-button';
+import { ChatContainerRoot, ChatContainerContent } from '../../src/components/chat/chat-container';
 
 afterEach(cleanup);
 

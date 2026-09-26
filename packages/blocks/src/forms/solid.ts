@@ -7,7 +7,7 @@
  * for is ALL of them, and the reasons are mechanical: the shared controller
  * types its refs as the ELEMENT interfaces (`KaiDockElement`), which a Solid
  * component does not hand back, and the `kai-` events are dispatched by the
- * element facade in `src/elements/`, not by the Solid component underneath
+ * element facade in `src/web-components/`, not by the Solid component underneath
  * it, so `on:kai-click` on a Solid component would silently never fire. This
  * renderer is over the shared preamble in `./emit`, the same as vue.ts,
  * svelte.ts and angular.ts.
@@ -285,7 +285,7 @@ export function renderSolidForm(block: Block): FormFile[] {
     `// the Solid component underneath it, so \`on:kai-click\` on a Solid component`,
     `// would silently never fire.`,
     `import { ${solidHelpers.join(', ')} } from 'solid-js';`,
-    ...(refImports.length ? [`import type { ${refImports.join(', ')} } from '@kitn.ai/ui/elements';`] : []),
+    ...(refImports.length ? [`import type { ${refImports.join(', ')} } from '@kitn.ai/ui/web-components';`] : []),
     `import { use${name} } from './use${name}';`,
     ...parsed.template.stylesheets.map((css) => `import './${css}';`),
     '',
@@ -325,7 +325,7 @@ export function renderSolidForm(block: Block): FormFile[] {
     `// The add form's registration, not the autoloader's: the autoloader resolves`,
     `// element modules relative to its own URL and 404s every one of them through a`,
     `// bundler.`,
-    `import '@kitn.ai/ui/elements';`,
+    `import '@kitn.ai/ui/web-components';`,
     `import {`,
     `  createController,`,
     `  type ${name}Actions,`,

@@ -10,7 +10,7 @@
 //   --verbose         print the self-test log even when it passes
 //
 // Requires `nx build ui` first: every name it checks against comes from the
-// built dist/*.d.ts and from src/elements/element-meta.json, read at run time.
+// built dist/*.d.ts and from src/web-components/web-component-meta.json, read at run time.
 // Nothing is baked in.
 import { existsSync, writeFileSync, mkdirSync } from 'node:fs';
 import { resolve, dirname, join } from 'node:path';

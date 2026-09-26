@@ -33,7 +33,7 @@ export const CONVERSATIONS: Conversation[] = [
 export const THREADS: Record<string, Msg[]> = {
   c1: [
     { id: 'c1u', role: 'user', parts: [{ type: 'text', text: 'What is @kitn.ai/ui?' }] },
-    { id: 'c1a', role: 'assistant', parts: [{ type: 'text', text: '**@kitn.ai/ui** is a set of framework-agnostic web components for AI chat UIs — message threads, streaming, markdown, tool panels, and more. This demo composes its `<kai-conversations>`, `<kai-message>`, and `<kai-prompt-input>` elements by hand.' }] },
+    { id: 'c1a', role: 'assistant', parts: [{ type: 'text', text: '**@kitn.ai/ui** is a set of framework-agnostic web components for AI chat UIs — message threads, streaming, markdown, tool panels, and more. This demo composes its `<kai-conversations>`, `<kai-message>`, and `<kai-prompt-input>` web components by hand.' }] },
   ],
   c2: [
     { id: 'c2u', role: 'user', parts: [{ type: 'text', text: 'How do I build my own chat instead of dropping in `<kai-chat>`?' }] },

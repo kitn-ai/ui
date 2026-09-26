@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    // jsxImportSource is @solidjs/web, NOT solid-js: Solid 2 moved the JSX
+    // namespace into the renderer package. Pointing it at solid-js makes every
+    // built-in -- Show, For, the router -- fail as "not a valid JSX element".
+    "jsx": "preserve",
+    "jsxImportSource": "@solidjs/web",
+    "target": "ESNext",
+
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "noEmit": true,
+
+    "strict": true,
+    "noUnusedLocals": true,
+    "skipLibCheck": true,
+    "types": ["vite/client"]
+  },
+  "include": ["src", "tools", "vite.config.ts", "file-routes.d.ts"]
+}

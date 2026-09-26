@@ -1,7 +1,8 @@
 {
-  "elements": [
+  "webComponents": [
     {
       "tag": "kai-agent-card",
+      "description": "One agent's state at a glance in a multi-agent workspace; the focused agent belongs in the thread or the panel.",
       "props": [
         {
           "name": "theme",
@@ -50,6 +51,7 @@
     },
     {
       "tag": "kai-artifact",
+      "description": "A framed viewer for a generated artifact: a sandboxed preview beside its source.",
       "props": [
         {
           "name": "theme",
@@ -192,6 +194,7 @@
     },
     {
       "tag": "kai-attachments",
+      "description": "The files attached to a message.",
       "props": [
         {
           "name": "theme",
@@ -213,6 +216,12 @@
         },
         {
           "name": "hoverCard",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "imagePreview",
           "scalar": true,
           "optional": true,
           "fn": false
@@ -254,12 +263,16 @@
         "AttachmentHoverCard",
         "AttachmentHoverCardTrigger",
         "AttachmentHoverCardContent",
-        "AttachmentEmpty"
+        "AttachmentEmpty",
+        "Lightbox",
+        "LightboxTrigger",
+        "LightboxContent"
       ],
       "tokens": []
     },
     {
       "tag": "kai-audio-visualizer",
+      "description": "An animated visual for live audio, which can also animate on its own when the source cannot be tapped.",
       "props": [
         {
           "name": "theme",
@@ -385,6 +398,7 @@
     },
     {
       "tag": "kai-avatar",
+      "description": "A person or entity avatar: a rounded image that falls back to initials.",
       "props": [
         {
           "name": "theme",
@@ -427,6 +441,7 @@
     },
     {
       "tag": "kai-badge",
+      "description": "A compact pill for status text, counts, or source citations.",
       "props": [
         {
           "name": "theme",
@@ -453,6 +468,7 @@
     },
     {
       "tag": "kai-button",
+      "description": "A button that triggers an action.",
       "props": [
         {
           "name": "theme",
@@ -533,6 +549,7 @@
     },
     {
       "tag": "kai-card",
+      "description": "A presentational surface for framing one piece of content, with optional media, header and footer regions.",
       "props": [
         {
           "name": "theme",
@@ -609,12 +626,13 @@
         "dismiss"
       ],
       "composedFrom": [
-        "Card"
+        "CardSurface"
       ],
       "tokens": []
     },
     {
       "tag": "kai-cards",
+      "description": "A list of generative-UI cards, one child element per card type.",
       "props": [
         {
           "name": "theme",
@@ -669,6 +687,7 @@
     },
     {
       "tag": "kai-chain-of-thought",
+      "description": "Step-by-step reasoning drawn as connected steps, each with its own collapsible detail. `kai-reasoning` is the single thinking block instead.",
       "props": [
         {
           "name": "theme",
@@ -717,6 +736,7 @@
     },
     {
       "tag": "kai-chat",
+      "description": "A complete chat surface: a message thread with its own header and prompt input.",
       "props": [
         {
           "name": "theme",
@@ -768,6 +788,12 @@
         },
         {
           "name": "codeTheme",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "imagePreview",
           "scalar": true,
           "optional": true,
           "fn": false
@@ -1013,6 +1039,7 @@
     },
     {
       "tag": "kai-checkbox",
+      "description": "A single checkbox; `kai-checkbox-group` is the list form.",
       "props": [
         {
           "name": "theme",
@@ -1084,6 +1111,7 @@
     },
     {
       "tag": "kai-checkbox-group",
+      "description": "A list of checkboxes for choosing any number of options; `kai-radio-group` is the same list limited to one.",
       "props": [
         {
           "name": "theme",
@@ -1136,6 +1164,7 @@
     },
     {
       "tag": "kai-checkpoint",
+      "description": "A bookmark button that marks a point in a thread.",
       "props": [
         {
           "name": "theme",
@@ -1182,6 +1211,7 @@
     },
     {
       "tag": "kai-choice",
+      "description": "A single-select card of rich options that submits one choice.",
       "props": [
         {
           "name": "theme",
@@ -1250,6 +1280,7 @@
     },
     {
       "tag": "kai-coachmark",
+      "description": "An anchored onboarding bubble with an arrow, pointing at the trigger it wraps. `kai-tooltip` is the one-line hint instead.",
       "props": [
         {
           "name": "theme",
@@ -1323,6 +1354,7 @@
     },
     {
       "tag": "kai-code-block",
+      "description": "One syntax-highlighted code block with a copy button.",
       "props": [
         {
           "name": "theme",
@@ -1382,6 +1414,7 @@
     },
     {
       "tag": "kai-command",
+      "description": "A grouped, filterable command palette. `kai-menu` is the static action menu instead.",
       "props": [
         {
           "name": "theme",
@@ -1428,6 +1461,7 @@
     },
     {
       "tag": "kai-compare",
+      "description": "A dual-response comparison in which the reader picks the better of two answers to one prompt.",
       "props": [
         {
           "name": "theme",
@@ -1495,6 +1529,7 @@
     },
     {
       "tag": "kai-composer",
+      "description": "The bare rich-text editing surface for a prompt.",
       "props": [
         {
           "name": "theme",
@@ -1582,6 +1617,7 @@
     },
     {
       "tag": "kai-confirm",
+      "description": "A card that presents an approval and a small set of actions for it.",
       "props": [
         {
           "name": "theme",
@@ -1635,6 +1671,7 @@
     },
     {
       "tag": "kai-context",
+      "description": "A context-window usage meter with a token and cost breakdown.",
       "props": [
         {
           "name": "theme",
@@ -1685,6 +1722,7 @@
     },
     {
       "tag": "kai-conversation-item",
+      "description": "One selectable row of a conversation list; `kai-conversations` is the container that gives its rows selection and keyboard traversal.",
       "props": [
         {
           "name": "theme",
@@ -1743,6 +1781,7 @@
     },
     {
       "tag": "kai-conversations",
+      "description": "A conversation list or rail.",
       "props": [
         {
           "name": "theme",
@@ -1829,6 +1868,7 @@
     },
     {
       "tag": "kai-dialog",
+      "description": "A centered modal dialog: a panel of your content over a dimmed page. `kai-screen` is the full-bleed takeover instead.",
       "props": [
         {
           "name": "theme",
@@ -1878,6 +1918,7 @@
     },
     {
       "tag": "kai-dock",
+      "description": "A floating corner launcher: a button pinned to the viewport edge that opens a panel of your content. `kai-prompt-dock` is the in-flow tray around a prompt input.",
       "props": [
         {
           "name": "theme",
@@ -1969,6 +2010,7 @@
     },
     {
       "tag": "kai-dropdown",
+      "description": "A trigger with a floating surface you fill with your own markup. `kai-menu` is the same surface driven by an item list.",
       "props": [
         {
           "name": "theme",
@@ -2043,6 +2085,7 @@
     },
     {
       "tag": "kai-editable-label",
+      "description": "A text label that swaps itself for an input field when edited.",
       "props": [
         {
           "name": "theme",
@@ -2058,6 +2101,12 @@
         },
         {
           "name": "editing",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "editTrigger",
           "scalar": true,
           "optional": true,
           "fn": false
@@ -2095,6 +2144,7 @@
     },
     {
       "tag": "kai-embed",
+      "description": "A lazy media embed: a poster and a play button until the reader presses play.",
       "props": [
         {
           "name": "theme",
@@ -2125,6 +2175,7 @@
     },
     {
       "tag": "kai-empty",
+      "description": "The empty state of a list or panel: a heading, a line of copy, and room for an action.",
       "props": [
         {
           "name": "theme",
@@ -2160,6 +2211,7 @@
     },
     {
       "tag": "kai-feedback-bar",
+      "description": "An inline thumbs up / thumbs down bar that asks for feedback and thanks the user.",
       "props": [
         {
           "name": "theme",
@@ -2224,6 +2276,7 @@
     },
     {
       "tag": "kai-file-tree",
+      "description": "A collapsible, keyboard-navigable file explorer built from a flat list of paths.",
       "props": [
         {
           "name": "theme",
@@ -2273,6 +2326,7 @@
     },
     {
       "tag": "kai-file-upload",
+      "description": "A dropzone for picking files or dropping them in.",
       "props": [
         {
           "name": "theme",
@@ -2318,6 +2372,7 @@
     },
     {
       "tag": "kai-form",
+      "description": "A form rendered from a JSON-Schema definition and submitted as one validated object.",
       "props": [
         {
           "name": "theme",
@@ -2387,6 +2442,7 @@
     },
     {
       "tag": "kai-hover-card",
+      "description": "Reveals rich markup on hover or focus of the trigger it wraps. `kai-tooltip` is the text-only hint instead.",
       "props": [
         {
           "name": "theme",
@@ -2449,6 +2505,7 @@
     },
     {
       "tag": "kai-icon",
+      "description": "An inline glyph from a small curated icon set, so surrounding markup can match the components.",
       "props": [
         {
           "name": "theme",
@@ -2479,6 +2536,7 @@
     },
     {
       "tag": "kai-image",
+      "description": "An image at a URL.",
       "props": [
         {
           "name": "theme",
@@ -2487,14 +2545,8 @@
           "fn": false
         },
         {
-          "name": "base64",
+          "name": "src",
           "scalar": true,
-          "optional": true,
-          "fn": false
-        },
-        {
-          "name": "bytes",
-          "scalar": false,
           "optional": true,
           "fn": false
         },
@@ -2505,7 +2557,7 @@
           "fn": false
         },
         {
-          "name": "mediaType",
+          "name": "class",
           "scalar": true,
           "optional": true,
           "fn": false
@@ -2520,7 +2572,51 @@
       "tokens": []
     },
     {
+      "tag": "kai-image-artifact",
+      "description": "An image the model produced, from bare base64 or raw bytes rather than a URL.",
+      "props": [
+        {
+          "name": "theme",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "data",
+          "scalar": false,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "mediaType",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "alt",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "class",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        }
+      ],
+      "events": [],
+      "methods": [],
+      "parts": [],
+      "composedFrom": [
+        "ImageArtifact"
+      ],
+      "tokens": []
+    },
+    {
       "tag": "kai-input",
+      "description": "A single-line text field, optionally masked and reformatted as it is typed.",
       "props": [
         {
           "name": "theme",
@@ -2668,6 +2764,7 @@
     },
     {
       "tag": "kai-kbd",
+      "description": "A keyboard-shortcut display: one inset cap per key, in the platform's own glyphs.",
       "props": [
         {
           "name": "theme",
@@ -2706,7 +2803,97 @@
       "tokens": []
     },
     {
+      "tag": "kai-kbd-group",
+      "description": "A row of keycaps that reads as one shortcut hint.",
+      "props": [
+        {
+          "name": "theme",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        }
+      ],
+      "events": [],
+      "methods": [],
+      "parts": [
+        "group"
+      ],
+      "composedFrom": [
+        "KbdGroup"
+      ],
+      "tokens": []
+    },
+    {
+      "tag": "kai-lightbox",
+      "description": "Enlarges the markup wrapped around it, centered over a dimmed page.",
+      "props": [
+        {
+          "name": "theme",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "open",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "defaultOpen",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "disabled",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "label",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "showClose",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "closeOnContentClick",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        }
+      ],
+      "events": [
+        "kai-open-change"
+      ],
+      "methods": [
+        "show",
+        "hide",
+        "toggle"
+      ],
+      "parts": [
+        "backdrop",
+        "panel",
+        "body",
+        "close"
+      ],
+      "composedFrom": [
+        "Lightbox",
+        "LightboxTrigger",
+        "LightboxContent"
+      ],
+      "tokens": []
+    },
+    {
       "tag": "kai-link-preview",
+      "description": "A rich link preview card built from Open-Graph metadata.",
       "props": [
         {
           "name": "theme",
@@ -2737,6 +2924,7 @@
     },
     {
       "tag": "kai-loader",
+      "description": "An animated loading indicator.",
       "props": [
         {
           "name": "theme",
@@ -2773,6 +2961,7 @@
     },
     {
       "tag": "kai-markdown",
+      "description": "Renders markdown, with syntax-highlighted code blocks.",
       "props": [
         {
           "name": "theme",
@@ -2815,6 +3004,7 @@
     },
     {
       "tag": "kai-menu",
+      "description": "A cascading action menu driven by an items tree.",
       "props": [
         {
           "name": "theme",
@@ -2913,6 +3103,7 @@
     },
     {
       "tag": "kai-message",
+      "description": "A single message row of a chat thread.",
       "props": [
         {
           "name": "theme",
@@ -3018,6 +3209,7 @@
     },
     {
       "tag": "kai-model-switcher",
+      "description": "A model picker that reports the chosen model outward instead of owning the selection.",
       "props": [
         {
           "name": "theme",
@@ -3073,6 +3265,7 @@
     },
     {
       "tag": "kai-nav",
+      "description": "A vertical navigation list built from an item tree, with nested groups, status dots and trailing actions.",
       "props": [
         {
           "name": "theme",
@@ -3129,6 +3322,7 @@
     },
     {
       "tag": "kai-notice",
+      "description": "An inline notice box with a leading status icon.",
       "props": [
         {
           "name": "theme",
@@ -3167,6 +3361,7 @@
     },
     {
       "tag": "kai-pane",
+      "description": "A framed window for one agent or task in a workspace.",
       "props": [
         {
           "name": "theme",
@@ -3237,6 +3432,7 @@
     },
     {
       "tag": "kai-pane-grid",
+      "description": "A responsive grid of panes that drops columns and eventually scrolls rather than squashing them.",
       "props": [
         {
           "name": "theme",
@@ -3285,6 +3481,7 @@
     },
     {
       "tag": "kai-pane-group",
+      "description": "A tabbed group of panes: a tab strip over the active pane's content.",
       "props": [
         {
           "name": "theme",
@@ -3334,6 +3531,7 @@
     },
     {
       "tag": "kai-panel",
+      "description": "The frame a widget-panel composition sits on.",
       "props": [
         {
           "name": "theme",
@@ -3366,6 +3564,7 @@
     },
     {
       "tag": "kai-panel-header",
+      "description": "The header row of a panel.",
       "props": [
         {
           "name": "theme",
@@ -3392,6 +3591,7 @@
     },
     {
       "tag": "kai-popover",
+      "description": "A trigger that opens a floating panel of arbitrary content.",
       "props": [
         {
           "name": "theme",
@@ -3446,6 +3646,7 @@
     },
     {
       "tag": "kai-progress-bar",
+      "description": "A thin determinate progress bar for a task whose remaining scope is known.",
       "props": [
         {
           "name": "theme",
@@ -3491,6 +3692,7 @@
     },
     {
       "tag": "kai-prompt-dock",
+      "description": "A recessed in-flow tray that frames a prompt input, with optional bands above and below it. `kai-dock` is the floating corner launcher instead.",
       "props": [
         {
           "name": "theme",
@@ -3525,6 +3727,7 @@
     },
     {
       "tag": "kai-prompt-input",
+      "description": "The prompt row: a rich text editor with its send button and toolbar.",
       "props": [
         {
           "name": "theme",
@@ -3637,22 +3840,13 @@
         "send"
       ],
       "composedFrom": [
-        "PromptInput",
-        "PromptInputTextarea",
-        "PromptInputActions",
-        "PromptSuggestion",
-        "Button",
-        "Tooltip",
-        "Attachments",
-        "Attachment",
-        "AttachmentPreview",
-        "AttachmentInfo",
-        "AttachmentRemove"
+        "DefaultPromptInput"
       ],
       "tokens": []
     },
     {
       "tag": "kai-radio-group",
+      "description": "A bordered list of rows that selects exactly one of them.",
       "props": [
         {
           "name": "theme",
@@ -3705,6 +3899,7 @@
     },
     {
       "tag": "kai-reasoning",
+      "description": "A collapsible block of the model's reasoning text. `kai-chain-of-thought` is the stepped version.",
       "props": [
         {
           "name": "theme",
@@ -3773,6 +3968,7 @@
     },
     {
       "tag": "kai-remote",
+      "description": "A sandboxed cross-origin iframe card.",
       "props": [
         {
           "name": "theme",
@@ -3813,6 +4009,7 @@
     },
     {
       "tag": "kai-resizable",
+      "description": "A resizable multi-panel layout with draggable dividers.",
       "props": [
         {
           "name": "theme",
@@ -3856,6 +4053,7 @@
     },
     {
       "tag": "kai-resizable-item",
+      "description": "A config carrier inside a resizable group, standing for one panel.",
       "props": [
         {
           "name": "theme",
@@ -3914,6 +4112,7 @@
     },
     {
       "tag": "kai-response-stream",
+      "description": "Reveals streamed text with a typewriter or fade animation.",
       "props": [
         {
           "name": "theme",
@@ -3958,6 +4157,7 @@
     },
     {
       "tag": "kai-row",
+      "description": "A generic list row.",
       "props": [
         {
           "name": "theme",
@@ -4002,7 +4202,29 @@
       "tokens": []
     },
     {
+      "tag": "kai-row-group",
+      "description": "A bordered frame that presents a run of rows as one grouped list.",
+      "props": [
+        {
+          "name": "theme",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        }
+      ],
+      "events": [],
+      "methods": [],
+      "parts": [
+        "group"
+      ],
+      "composedFrom": [
+        "RowGroup"
+      ],
+      "tokens": []
+    },
+    {
       "tag": "kai-scope-picker",
+      "description": "A dropdown that scopes a chat by author or tag.",
       "props": [
         {
           "name": "theme",
@@ -4064,6 +4286,7 @@
     },
     {
       "tag": "kai-screen",
+      "description": "A full-bleed overlay destination that takes over its mount point under a back header. `kai-dialog` is the centered modal instead.",
       "props": [
         {
           "name": "theme",
@@ -4125,6 +4348,7 @@
     },
     {
       "tag": "kai-scroll-area",
+      "description": "A scroll container with a themed, thin, cross-browser scrollbar.",
       "props": [
         {
           "name": "theme",
@@ -4151,6 +4375,7 @@
     },
     {
       "tag": "kai-scroll-button",
+      "description": "A floating button that scrolls a container to its bottom, visible while the container is scrolled up.",
       "props": [
         {
           "name": "theme",
@@ -4201,6 +4426,7 @@
     },
     {
       "tag": "kai-search",
+      "description": "A debounced search field with a clear button and an optional keyboard-shortcut hint. `kai-input` is the plain text field.",
       "props": [
         {
           "name": "theme",
@@ -4268,6 +4494,7 @@
     },
     {
       "tag": "kai-segmented",
+      "description": "A row of mutually exclusive pills for switching between a few options in place.",
       "props": [
         {
           "name": "theme",
@@ -4309,6 +4536,7 @@
     },
     {
       "tag": "kai-select",
+      "description": "A select control built on a real native `<select>` element.",
       "props": [
         {
           "name": "theme",
@@ -4385,6 +4613,7 @@
     },
     {
       "tag": "kai-separator",
+      "description": "A divider between groups of content.",
       "props": [
         {
           "name": "theme",
@@ -4411,6 +4640,7 @@
     },
     {
       "tag": "kai-setting-item",
+      "description": "One labelled row of a settings group, with an optional trailing control.",
       "props": [
         {
           "name": "theme",
@@ -4444,6 +4674,7 @@
     },
     {
       "tag": "kai-settings-group",
+      "description": "A settings section: a heading over a card of setting rows.",
       "props": [
         {
           "name": "theme",
@@ -4477,6 +4708,7 @@
     },
     {
       "tag": "kai-skeleton",
+      "description": "A pulsing placeholder that holds a layout while content loads.",
       "props": [
         {
           "name": "theme",
@@ -4521,6 +4753,7 @@
     },
     {
       "tag": "kai-skills",
+      "description": "Badges showing which skills were active for a message.",
       "props": [
         {
           "name": "theme",
@@ -4545,6 +4778,7 @@
     },
     {
       "tag": "kai-slider",
+      "description": "A slider built on a real `<input type=\"range\">`.",
       "props": [
         {
           "name": "theme",
@@ -4616,6 +4850,7 @@
     },
     {
       "tag": "kai-source",
+      "description": "A citation link that previews the source it points at.",
       "props": [
         {
           "name": "theme",
@@ -4667,6 +4902,7 @@
     },
     {
       "tag": "kai-sources",
+      "description": "A gathered list of citation links.",
       "props": [
         {
           "name": "theme",
@@ -4706,6 +4942,7 @@
     },
     {
       "tag": "kai-status",
+      "description": "A small presence or unread dot.",
       "props": [
         {
           "name": "theme",
@@ -4750,6 +4987,7 @@
     },
     {
       "tag": "kai-suggestions",
+      "description": "A row or list of suggestion chips.",
       "props": [
         {
           "name": "theme",
@@ -4806,6 +5044,7 @@
     },
     {
       "tag": "kai-switch",
+      "description": "A toggle switch.",
       "props": [
         {
           "name": "theme",
@@ -4865,6 +5104,7 @@
     },
     {
       "tag": "kai-tab-bar",
+      "description": "A bottom navigation bar of equal-width tabs that owns its own selection.",
       "props": [
         {
           "name": "theme",
@@ -4912,6 +5152,7 @@
     },
     {
       "tag": "kai-tab-bar-item",
+      "description": "One tab of a tab bar.",
       "props": [
         {
           "name": "theme",
@@ -4974,6 +5215,7 @@
     },
     {
       "tag": "kai-tabs",
+      "description": "An accessible tab strip that reports the selected tab and renders no panels of its own.",
       "props": [
         {
           "name": "theme",
@@ -5036,6 +5278,7 @@
     },
     {
       "tag": "kai-tasks",
+      "description": "A checklist of tasks the user ticks off and confirms.",
       "props": [
         {
           "name": "theme",
@@ -5111,6 +5354,7 @@
     },
     {
       "tag": "kai-text-shimmer",
+      "description": "Animated shimmering text, for a loading placeholder.",
       "props": [
         {
           "name": "theme",
@@ -5153,6 +5397,7 @@
     },
     {
       "tag": "kai-thinking-bar",
+      "description": "An animated indicator that the model is still working.",
       "props": [
         {
           "name": "theme",
@@ -5191,6 +5436,7 @@
     },
     {
       "tag": "kai-thread",
+      "description": "The scrolling message list of a chat.",
       "props": [
         {
           "name": "theme",
@@ -5224,6 +5470,12 @@
         },
         {
           "name": "codeHighlight",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "imagePreview",
           "scalar": true,
           "optional": true,
           "fn": false
@@ -5273,6 +5525,7 @@
     },
     {
       "tag": "kai-toast-region",
+      "description": "The viewport overlay that stacks toasts.",
       "props": [
         {
           "name": "theme",
@@ -5336,6 +5589,7 @@
     },
     {
       "tag": "kai-tool",
+      "description": "A collapsible panel showing one tool call's input and output.",
       "props": [
         {
           "name": "theme",
@@ -5389,6 +5643,7 @@
     },
     {
       "tag": "kai-tooltip",
+      "description": "Wraps a trigger and shows a short hint on hover or focus, as plain text or as markup.",
       "props": [
         {
           "name": "theme",
@@ -5455,6 +5710,7 @@
     },
     {
       "tag": "kai-view",
+      "description": "One named view inside a view stack, shown or hidden by the enclosing stack.",
       "props": [
         {
           "name": "theme",
@@ -5483,6 +5739,7 @@
     },
     {
       "tag": "kai-view-stack",
+      "description": "A mobile-style view navigator that shows its child views as tabs or pushes them on top of one another.",
       "props": [
         {
           "name": "theme",
@@ -5519,6 +5776,7 @@
     },
     {
       "tag": "kai-voice-input",
+      "description": "A microphone button that records and transcribes speech.",
       "props": [
         {
           "name": "theme",
@@ -5570,6 +5828,7 @@
     },
     {
       "tag": "kai-voice-output",
+      "description": "A speaker button that reads text aloud.",
       "props": [
         {
           "name": "theme",
@@ -5623,6 +5882,7 @@
     },
     {
       "tag": "kai-workspace",
+      "description": "A resizable app layout shell with collapsible side asides.",
       "props": [
         {
           "name": "theme",
@@ -5815,6 +6075,7 @@
     }
   ],
   "themeTokens": [
+    "--kai-code-radius",
     "--kai-color-",
     "--kai-color-accent",
     "--kai-color-accent-foreground",
@@ -5826,6 +6087,7 @@
     "--kai-color-destructive",
     "--kai-color-destructive-foreground",
     "--kai-color-destructive-soft",
+    "--kai-color-destructive-text",
     "--kai-color-foreground",
     "--kai-color-highlight",
     "--kai-color-hover",
@@ -5863,9 +6125,12 @@
     "--kai-color-warning",
     "--kai-color-warning-foreground",
     "--kai-color-warning-soft",
+    "--kai-density",
     "--kai-font-code",
     "--kai-radius",
+    "--kai-radius-pill",
     "--kai-shadow-color",
+    "--kai-shadow-strength",
     "--kai-text-",
     "--kai-text-body",
     "--kai-text-caption",
@@ -5873,25 +6138,29 @@
     "--kai-text-lg",
     "--kai-text-meta",
     "--kai-text-micro",
-    "--kai-text-title"
+    "--kai-text-title",
+    "--kai-weight-bold",
+    "--kai-weight-medium",
+    "--kai-weight-normal",
+    "--kai-weight-semibold"
   ],
   "eventExceptions": [
     {
-      "file": "src/elements/artifact.tsx",
+      "file": "src/primitives/card-routing.ts",
+      "event": "kai-card",
+      "bubbles": true,
+      "composed": true
+    },
+    {
+      "file": "src/web-components/artifact/artifact.tsx",
       "event": "kai-maximize-intent",
       "bubbles": true,
       "composed": true
     },
     {
-      "file": "src/elements/resizable.tsx",
+      "file": "src/web-components/resizable/resizable.tsx",
       "event": "kai-maximize-state",
       "bubbles": false,
-      "composed": true
-    },
-    {
-      "file": "src/primitives/card-routing.ts",
-      "event": "kai-card",
-      "bubbles": true,
       "composed": true
     }
   ]

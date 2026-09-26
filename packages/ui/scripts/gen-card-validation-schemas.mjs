@@ -122,7 +122,7 @@ function unwrapInitializer(expr) {
  * workspace root, and would execute `registry.ts`, `tool-defs.ts`, `from-tool-call.ts`
  * and every schema document in the directory to learn a list of keys. `typescript` IS a devDependency
  * here and scripts/lint-silent-drops.mjs already reads the `MessagePart` union out of
- * src/elements/chat-types.ts exactly this way.
+ * src/web-components/chat/chat-types.ts exactly this way.
  *
  * WHY IT CANNOT SILENTLY UNDER-COUNT. A short list is the dangerous outcome: it drops
  * a card type from the browser validator while every keyword check still passes. So

@@ -12,35 +12,26 @@ export interface VariantProps {
   /** Multiband levels, 0..1. Only read while `state === 'speaking'`, or also
    *  while `'listening'` when `listeningAmplitude` is set. */
   bands: number[];
-  /**
-   * Opt in to rendering live amplitude during `listening` as well: the
-   * variant presents `listening` exactly as it presents `speaking` (live
-   * levels, lit geometry) while the host keeps reporting the real state via
-   * `data-kai-state`. Default off, which preserves LiveKit parity: amplitude
-   * renders only while `state === 'speaking'`, and every other state plays
-   * its scripted sequence. See `amplitudeRenderState`.
-   */
+  // Renders `listening` exactly as it renders `speaking` (live levels, lit geometry),
+  // while the host keeps reporting the real state through `data-kai-state` so CSS hooks
+  // and consumers observing the element are never lied to. Off preserves LiveKit parity:
+  // amplitude renders only while `state === 'speaking'`, and every other state plays its
+  // scripted sequence.
+  /** Render live amplitude during `listening` too. Off by default. */
   listeningAmplitude?: boolean;
   /** `prefers-reduced-motion`: pin the sequencer at its first frame. */
   frozen: boolean;
   /** Overrides the inherited `currentColor` the bars are painted with. */
   color?: string;
   class?: string;
-  /**
-   * Render each element yourself. Receives the element's static index plus
-   * `highlighted` and `value` as live accessors, not plain values: the
-   * markup is only mapped once per position (see the `<Index>` note below),
-   * so you must CALL `highlighted()` and `value()` from inside your own JSX
-   * for them to stay live. Destructuring them into a plain variable freezes
-   * them at that moment. `::part(bar)` / `::part(bar highlighted)` (or
-   * `cell`) handle restyling from outside; this render-prop is for replacing
-   * the markup outright.
-   *
-   * In bar and grid, your returned element IS the drawn item. Radial is the
-   * exception: it always wraps whatever you return in its own positioning
-   * element, because each spoke must be absolutely placed around the ring.
-   * You still control the markup inside that wrapper, just not its position.
-   */
+  // The returned element REPLACES the drawn item in bar and grid. Radial is the
+  // exception: it always wraps whatever is returned in its own positioning element,
+  // because each spoke must be absolutely placed around the ring; the markup inside that
+  // wrapper is still the caller's, just not its position. `::part(bar)` /
+  // `::part(bar highlighted)` (or `cell`) restyle the built-in markup from outside, so
+  // this render-prop is for replacing the markup outright.
+  /** Render each item yourself; `highlighted` and `value` are accessors, so a read taken
+   *  once is frozen at that frame. */
   children?: (item: { index: number; highlighted: () => boolean; value: () => number }) => JSX.Element;
 }
 
@@ -138,7 +129,7 @@ export function BarVisualizer(props: VariantProps & { barCount?: number }): JSX.
                 data-kai-index={item.index}
                 data-kai-highlighted={item.highlighted()}
                 class={cn(
-                  'rounded-full bg-current/10',
+                  'rounded-pill bg-current/10',
                   'data-[kai-highlighted=true]:bg-current',
                 )}
                 style={{

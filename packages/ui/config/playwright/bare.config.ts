@@ -2,67 +2,8 @@ import { defineConfig, devices } from '@playwright/test';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-// The four suites that must NOT run under Storybook, one project each.
-//
-// Storybook loads Tailwind at DOCUMENT level, which registers the `--tw-*`
-// custom properties globally and makes shadow-root rings paint. That is the
-// precise condition that hid the focus-ring defect. Each project here serves a
-// bare page that loads only the built `dist/` bundle, which is what a real
-// consumer app looks like.
-//
-// Separate from config/playwright/storybook.config.ts because these servers
-// must not share a port with Storybook, and separate from
-// config/playwright/cross-origin.config.ts because dev:host binds 6006 too.
-// `webServer` is a TestConfig option, not a TestProject one, so a config starts
-// every server it lists on every run; port collision is what draws the file
-// boundaries between the three configs, and it is the only thing that does.
-//
-// A CONSEQUENCE OF THAT, stated because it is a real change: running one
-// project boots all four servers. `--project=focus-ring` now also starts the
-// two other node harnesses and the Vite static serve on 6013. Playwright has no
-// per-project `webServer`, so this is not avoidable within one file, and it is
-// cheap: three of the four are the same ~40-line node http server and the
-// fourth is a Vite static serve. Measured cost is a couple of seconds on a suite
-// whose own ceiling is 180s.
-//
-// WHAT THAT COSTS IN CI, corrected: all FOUR of these projects are required
-// gates, not one. The `browser` leg runs `test:focus-ring`,
-// `test:message-text-token`, `test:content-brand-bleed` and `test:hovercard` as
-// four separate steps (`node scripts/lint-gate-parity.mjs --list` prints the
-// set), so the four-server boot is paid four times, not once. Measured against
-// the times the deleted configs recorded, the added cost is roughly two seconds
-// per step. That is the whole bill and it is not worth restructuring for.
-//
-// THE PART THAT IS WORTH KNOWING is not the seconds, it is that four CI steps
-// now bind the SAME four ports. `reuseExistingServer` is `!process.env.CI`, so
-// on CI it is false and every step starts its own servers rather than attaching
-// to a neighbour's; Playwright tears down the servers it started when the run
-// exits, which is why four sequential steps do not collide. Two consequences:
-//
-//   1. These steps must stay SEQUENTIAL on one runner. Run two of them
-//      concurrently and the second fails to bind. It fails loudly, which is the
-//      right direction, but it fails.
-//   2. `reuseExistingServer: !process.env.CI` must stay false on CI. Flip it to
-//      plain `true` and a server leaked by a hard-killed step would be silently
-//      REUSED by the next one -- and these three paint guards measure the built
-//      bundle, so they would be measuring whatever `dist/` the leaked server was
-//      started against. That is the same stale-bundle failure the globalSetup
-//      below exists to prevent, arriving by a route globalSetup cannot see.
-//
-// globalSetup ENFORCES a fresh dist/ rather than asking politely in a comment.
-// It arrived with the hover-card suite, whose header below records why: a
-// deliberately broken fix produced a GREEN run against a stale bundle. The other
-// three guards here drive dist/ for exactly the same reason and asked for a
-// build in prose ("Needs a build first (`nx build ui`)"). Being config-wide, the
-// enforcement now covers all four. In CI this is free: the browser leg builds
-// the element bundle well before any of these steps.
-//
-// HOW TO READ THE PER-PROJECT COMMENTS BELOW: each one moved here VERBATIM from
-// the config file it came from, so several still say "Standalone config for
-// ..." and one still spells a `Run:` line naming a file that no longer exists.
-// The decoder is mechanical: the deleted `playwright.<name>.config.ts` is the
-// project named `<name>` here. Where a note is newly true after the move it is
-// added as an extra line below the verbatim block, never edited into it.
+// AMENDED 2026-09-18: a fifth project joined (the geometry guard, port 6214). The
+// counts above were measured at four; read the real set from `lint-gate-parity.mjs --list`.
 
 // NOT `__dirname`. The vite configs next door use it and get away with it
 // because Vite transpiles a config to CJS before running it; Playwright's TS
@@ -118,7 +59,7 @@ export default defineConfig({
        * config in this package. Storybook loads Tailwind at DOCUMENT level, which
        * registers the `--tw-*` custom properties globally and makes shadow-root rings
        * paint — the precise condition that hid this defect. This suite runs against a
-       * bare harness that serves only the built element bundle, which is what a real
+       * bare harness that serves only the built web-components bundle, which is what a real
        * consumer app looks like, and the spec asserts that absence before it measures
        * anything.
        *
@@ -147,7 +88,7 @@ export default defineConfig({
        * (`message-text-token.spec.ts`).
        *
        * Reuses `focus-ring-harness-server.mjs` verbatim: a bare page that loads only
-       * the built `dist/kai.es.js` element bundle with NO document-level Tailwind, on
+       * the built `dist/kai.es.js` web-components bundle with NO document-level Tailwind, on
        * its own port. That is exactly the condition this spec needs too — the same
        * reason `focus-ring-paints.spec.ts` cannot run under Storybook applies here:
        * this guard is about what CSS CUSTOM PROPERTIES resolve to inside a shadow
@@ -198,6 +139,23 @@ export default defineConfig({
         trace: 'off',
         // Measured in effect on main: 900x800 @ 1x.
         viewport: { width: 900, height: 800 },
+      },
+    },
+    {
+            /**
+       * Geometry/shape/elevation tokens through the real cascade (does a consumer's
+       * `--kai-density` actually move geometry inside a shadow root?). Bare harness,
+       * built bundle, own port. Needs a build first.
+       * Run: `npm run test:geometry-token`.
+       */
+      name: 'geometry-token',
+      testMatch: /geometry-token\.spec\.ts/,
+      timeout: 60_000,
+      use: {
+        ...CHROMIUM,
+        baseURL: 'http://localhost:6214',
+        trace: 'off',
+        viewport: { width: 900, height: 700 },
       },
     },
     {
@@ -262,6 +220,7 @@ export default defineConfig({
     harness(6210),
     harness(6211),
     harness(6212),
+    harness(6214),
     {
       // The workspace's own vite via pnpm exec, never bare npx, for hermetic
       // CI. pnpm exec rather than a path because pnpm hoists vite to the

@@ -8,7 +8,7 @@
  * even though it erases, so naming one from a Node/no-DOM project was
  *
  *   TS6142: Module '../../components/choice-card' was resolved to
- *           '.../src/components/choice-card.tsx', but '--jsx' is not set.
+ *           '.../src/components/choice-card/choice-card.tsx', but '--jsx' is not set.
  *
  * and `@kitn.ai/ui/schemas` could not re-export them at all without pulling the
  * Solid tree into the server-safe entry's graph. A route building a card envelope
@@ -38,9 +38,10 @@
  */
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { dirname, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
+import { componentSourcePath } from '../helpers/kit-paths';
 
 const PKG = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -107,8 +108,12 @@ describe('card payload types are namable from a Node/no-DOM project', () => {
   it('still reports TS6142 for a payload type reached through a .tsx', () => {
     // The control. If this ever goes quiet, the pass above stopped being about the
     // Node/no-DOM boundary and started being about nothing.
+    // The `.tsx` IS the subject here, so it is derived rather than typed: a family
+    // move would otherwise leave the probe importing a path that does not exist,
+    // which fails as TS2307 and looks like a pass to anyone skimming the regex.
+    const tsx = relative(resolve(PKG, 'src'), componentSourcePath('choice-card.tsx')).replace(/\.tsx$/, '');
     const probe = `
-      import type { ChoiceCardData } from './components/choice-card';
+      import type { ChoiceCardData } from './${tsx}';
       export const choice: ChoiceCardData = { options: [{ id: 'a', label: 'A' }] };
     `;
     expect(format(compileProbe(probe)).join('\n')).toMatch(/TS6142/);

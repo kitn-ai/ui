@@ -5,7 +5,7 @@ description: Install @kitn.ai/ui and register its web components in React, Vue, 
 
 import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
 
-Add `@kitn.ai/ui`, register the `kai-*` elements once, and use them in any framework. SolidJS is bundled in, so the host app needs nothing else.
+Add `@kitn.ai/ui`, register the `kai-*` web components once, and use them in any framework. SolidJS is bundled in, so the host app needs nothing else.
 
 ## Install the package
 
@@ -27,23 +27,23 @@ yarn add @kitn.ai/ui
 </TabItem>
 </Tabs>
 
-## Register the elements
+## Register the web components
 
-Import the bundle once for its side effect. This registers every `kai-*` element globally — put it near your app's entry point:
+Import the bundle once for its side effect. This registers every `kai-*` web component globally — put it near your app's entry point:
 
 ```js
-import '@kitn.ai/ui/elements';
+import '@kitn.ai/ui/web-components';
 ```
 
 The bundle is ESM-only and works with any modern bundler (`vite`, `webpack`, `esbuild`) or directly in a `<script type="module">`. SolidJS is bundled in, so there is no extra peer dependency.
 
-Once registered, the elements behave like any other HTML tag:
+Once registered, the web components behave like any other HTML tag:
 
 ```html
 <kai-chat style="display: block; height: 100vh;"></kai-chat>
 
 <script type="module">
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
 
   await customElements.whenDefined('kai-chat');
 
@@ -76,10 +76,14 @@ Each element injects its own scoped CSS into its Shadow DOM, so the components l
 }
 ```
 
-Inherited custom properties cross the Shadow DOM boundary, so these reach every `kai-*` element automatically. The `--kai-` form is the one that gets there: each element's own shadow CSS declares the unprefixed `--color-*` names on `:host`, which beats anything inherited from your `:root`. Import `@kitn.ai/ui/theme.css` when you want those `--color-*` tokens for your own markup or the light-DOM SolidJS components — see [Theming](/guides/theming/) for the full token list, dark mode, and typography.
+Inherited custom properties cross the Shadow DOM boundary, so these reach every `kai-*` web component automatically. The `--kai-` form is the one that gets there: each element's own shadow CSS declares the unprefixed `--color-*` names on `:host`, which beats anything inherited from your `:root`.
+
+Import `@kitn.ai/ui/theme.css` when you want those `--color-*` tokens for your own markup or the light-DOM SolidJS components — see [Theming](/guides/theming/) for the full token list, dark mode, and typography.
 
 <Aside type="caution" title="Tailwind v4: theme.css edits your theme">
-The components need no CSS import; they are shadow-isolated. `theme.css` is Tailwind source, and importing it into a Tailwind v4 app merges its `--color-*` names into your `@theme` (last import wins), switches your `dark:` variant to the `.dark` class, and re-points Tailwind's radius and text scales. Reach for it when you want the kit's scale in your app; otherwise import `theme.tokens.css`, the plain-CSS build, or theme through `--kai-color-*` with no import at all. Either way import it before your own overrides. The full list is in [Theming](/guides/theming/#what-themecss-changes-in-a-tailwind-build).
+The components need no CSS import; they are shadow-isolated. `theme.css` is Tailwind source, and importing it into a Tailwind v4 app merges its `--color-*` names into your `@theme` (last import wins), switches your `dark:` variant to the `.dark` class, and re-points Tailwind's radius and text scales.
+
+Reach for it when you want the kit's scale in your app; otherwise import `theme.tokens.css`, the plain-CSS build, or theme through `--kai-color-*` with no import at all. Either way import it before your own overrides. The full list is in [Theming](/guides/theming/#what-themecss-changes-in-a-tailwind-build).
 </Aside>
 
 ## Via CDN (no build step)
@@ -94,11 +98,11 @@ Load the bundle as a self-contained ES module — no install, no bundler:
 <kai-chat style="display: block; height: 100vh;"></kai-chat>
 ```
 
-The elements carry their own styles, so this is complete — retheme with `--kai-color-*` as above, no stylesheet needed. Add `<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/theme.tokens.css">` only when you want the kit's `--color-*` tokens for your own page chrome.
+The web components carry their own styles, so this is complete — retheme with `--kai-color-*` as above, no stylesheet needed. Add `<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/theme.tokens.css">` only when you want the kit's `--color-*` tokens for your own page chrome.
 
 <Aside type="tip" title="Pin versions in production">
 {/* x-release-please-start-version */}
-An unpinned CDN URL tracks the latest release — fine for prototyping, risky for production. The package is pre-1.0, so a minor release can break things. Pin an exact version: `https://cdn.jsdelivr.net/npm/@kitn.ai/ui@0.32.0/dist/kai.es.js`.
+An unpinned CDN URL tracks the latest release — fine for prototyping, risky for production. The package is pre-1.0, so a minor release can break things. Pin an exact version: `https://cdn.jsdelivr.net/npm/@kitn.ai/ui@0.37.0/dist/kai.es.js`.
 {/* x-release-please-end */}
 
 Pin a version at or above `0.25.0`. Everything from `0.14.1` to `0.24.0` is covered by a [critical security advisory](https://github.com/kitn-ai/ui/security/advisories) and is deprecated on npm — and a CDN fetch, unlike `npm install`, prints no deprecation warning to tell you.
@@ -133,17 +137,76 @@ import '@kitn.ai/ui/theme.css';
 
 | Import path | What it provides |
 |---|---|
-| `@kitn.ai/ui/elements` | All the web components — registers every `kai-*` element; use in any framework. The simple default. |
-| `@kitn.ai/ui/elements/<module>` | A single element module, tree-shaken. The path is the module's basename, which is usually but not always the tag minus `kai-`. See [Loading](/guides/loading/). |
+| `@kitn.ai/ui/web-components` | All the web components — registers every `kai-*` web component; use in any framework. The simple default. |
+| `@kitn.ai/ui/web-components/<module>` | A single web-component module, tree-shaken. The path is the module's basename, which is usually but not always the tag minus `kai-`. See [Loading](/guides/loading/). |
 | `@kitn.ai/ui/autoloader` | CDN / static auto-loader — loads each `kai-*` on demand, no build. See [Loading](/guides/loading/). |
 | `@kitn.ai/ui/react` | Generated React wrappers with typed props |
 | `@kitn.ai/ui/solid` | The complete SolidJS catalog — compiled, tree-shakeable; Solid projects only |
 | `@kitn.ai/ui` | The shared layer every framework resolves: types, state and card helpers, and the chat components `./solid` builds on |
 | `@kitn.ai/ui/state` | Pure folds over `ChatMessage[]` — `createAssistantStream`, `appendTextPart`, … See [State & hooks](/guides/state-and-hooks/) |
 | `@kitn.ai/ui/wire` | The model-stream adapter — `readOpenAIStream`, `readAnthropicStream`, `toOpenAIMessages`, … See the [wire adapter recipe](/guides/recipes/wire-adapter/) |
-| `@kitn.ai/ui/theme.css` | Tailwind v4 source: the design tokens for your own markup and the Solid components, plus the kit's radius, text scale and `.dark` variant merged into your Tailwind build. Plain-CSS twin: `@kitn.ai/ui/theme.tokens.css`. To retheme the elements, set `--kai-color-*` with no import — see [Theming](/guides/theming/) |
+| `@kitn.ai/ui/schemas` | Card schemas and provider tool definitions: `cardTools()` plus one JSON Schema per card type, and `@kitn.ai/ui/schemas/<name>` for a single one. See [Schemas as tool definitions](/guides/schemas-as-tools/) |
+| `@kitn.ai/ui/stores` | The SolidJS store, `createKaiChat()`. Solid projects only |
+| `@kitn.ai/ui/define` | `defineWebComponent()`, the factory the kit registers its own web components with, for registering your own |
+| `@kitn.ai/ui/diagnostics` | The web-component diagnostics event stream (registration and violated-contract events) |
+| `@kitn.ai/ui/construct` | The construct engine's API: its Zod schema, validation, and template statements. `@kitn.ai/ui/construct/templates` is the template registry alone |
+| `@kitn.ai/ui/theme.css` | Tailwind v4 source: the design tokens for your own markup and the Solid components, plus the kit's radius, text scale and `.dark` variant merged into your Tailwind build. Plain-CSS twin: `@kitn.ai/ui/theme.tokens.css`. To retheme the web components, set `--kai-color-*` with no import — see [Theming](/guides/theming/) |
+| `@kitn.ai/ui/solid.css` | Tailwind source for light-DOM Solid apps: `theme.css` plus the kit's base rules, for the [`@kitn.ai/ui/solid`](/guides/frameworks/solid/) path rather than the web components |
 | `@kitn.ai/ui/provider` | Remote provider bundle for embedding the kit across origins |
+| `@kitn.ai/ui/web-component-meta.json` | Generated API metadata, one record per web component. Read by tooling, not by an app |
+| `@kitn.ai/ui/icon-names.json` | The curated icon-name roster `kai-icon` resolves against |
+
+## The command line
+
+The kit needs no CLI — `npm install @kitn.ai/ui` and importing is the whole requirement. The `kai`
+command line is the convenience layer: a scaffolder, the block registry, a wiring diagnosis, and the
+construct tooling.
+
+```bash
+npm i -g @kitn.ai/cli                      # kai ... anywhere
+npm i -D @kitn.ai/cli                      # pinned per project: npx kai ...
+npx -y @kitn.ai/cli add support-widget     # no install at all
+```
+
+| Command | What it does |
+|---|---|
+| `kai create [dir]` | The scaffolder wizard — the same one `npm create kai` runs |
+| `kai add <block>` | Writes a block from the registry into an existing project. `kai add --list` prints the blocks this release ships |
+| `kai upgrade` | Brings a SCAFFOLDED project up to the template this CLI emits. It re-renders what the scaffolder wrote (from `kai.json`) and compares: files you never touched are replaced with `--write`, files you edited are reported and left exactly as they are, and a project scaffolded before the baseline existed is reported without writing. `--strict` exits non-zero on drift |
+| `kai init` | Makes an EXISTING project kai-aware: detects your framework from its dependencies, adds `@kitn.ai/ui` at the range the CLI pins, and prints the two lines of wiring your stack needs with the file each belongs in. It writes no `kai.json` (that records what the scaffolder emitted) and patches no entry file |
+| `kai doctor` | Diagnoses this project's kit wiring: the declared range against the installed version, `kai.json`, whether anything under `src/` references the kit, whether a stylesheet is referenced, and whether the MCP server is installed. `--json` for a CI job or an agent |
+| `kai mcp` | Runs the MCP server for an AI coding harness, if `@kitn.ai/mcp` is installed |
+| `kai dev` · `kai compile` · `kai eject` · `kai validate` | The construct tooling: live preview, a self-registering `.js`, a generated Solid project you own, and validation. See [Drop-in widget](/guides/drop-in-widget/) |
+
+### Keeping a scaffold current
+
+A project made with `npm create kai` is a **copy** of a template, and the templates move. `kai upgrade`
+brings that copy up to what the current CLI emits, without ever overwriting something you wrote:
+
+| | what it found | `--write` does |
+|---|---|---|
+| `^` | **outdated** — untouched since you scaffolded it, so the template moved | replaces it |
+| `+` | **missing** — the template emits it and your project does not have it | adds it |
+| `!` | **edited** — you changed it | **nothing, ever** |
+| `?` | **unknown** — it differs, and there is no baseline to say whose change it is | nothing |
+| `=` | **same** — already current | nothing |
+
+`kai.json` records a sha256 of every file the scaffolder wrote, and that baseline is what makes the distinction possible: a file that still hashes to what was written is untouched, so replacing it loses nothing, and a file that does not is yours.
+
+A project scaffolded before that was recorded has no baseline, so `kai upgrade` reports the drift and **refuses to write** — nothing can tell your edit from a template change.
+
+It renders into a temporary directory using the same code the scaffolder runs, so what it compares
+against is exactly what `npm create kai` would write today. It **deletes nothing**: a file the
+template no longer emits is reported, not removed, because something you wrote may import it.
+`--strict` makes drift exit non-zero, for CI.
+
+`kai doctor` reads the same recorded hashes and tells you how far your copy has moved without
+rendering anything, which is why it stays instant; `kai upgrade` is the diff, `doctor` is the fact.
+
+`kai create` and `kai add` are implemented by [`create-kai`](https://www.npmjs.com/package/create-kai), the package `npm create kai` resolves, so both spellings run the same code.
+
+`kai mcp` forwards to [`@kitn.ai/mcp`](https://www.npmjs.com/package/@kitn.ai/mcp), which is a separate install on purpose: it is the only piece carrying the MCP SDK, and `kai add` should not download it. To wire a harness up, see [For AI agents](/guides/for-ai-agents/).
 
 ## Next steps
 
-With the elements registered, head to the [framework guide](/guides/frameworks/overview/) for your stack, or render your first chat in [Getting started](/guides/getting-started/). Want a different way to load — per-element or a CDN autoloader? See [Loading](/guides/loading/).
+With the web components registered, head to the [framework guide](/guides/frameworks/overview/) for your stack, or render your first chat in [Getting started](/guides/getting-started/). Want a different way to load — per-web-component or a CDN autoloader? See [Loading](/guides/loading/).

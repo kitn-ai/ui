@@ -2,8 +2,7 @@
 // The pure format engine behind masked form fields: compile a `format` + display guide,
 // normalize arbitrary input to raw, format raw back, and map caret positions between the
 // two. No DOM, no Solid, no state -- the stateful masker (tier 2) and the widgets sit on
-// top of this. Spec: docs/superpowers/specs/2026-08-24-form-field-formats-design.md
-// (§2 tier 2, §3, deltas §5.4 and §5.7).
+// top of this.
 //
 // Token vocabulary (a public contract, deliberately adopted rather than reinvented):
 //   `#` one digit  ·  `@` one alphanumeric  ·  `*` one alphanumeric, obscurable in display
@@ -15,7 +14,7 @@
 export type CaseMode = 'preserve' | 'upper' | 'lower';
 
 /** Why an edit was refused. Rejection decides LOUDLY: the stateful layer
- *  surfaces this on a callback and, on the element facade, as `kai-input-rejected`. */
+ *  surfaces this on a callback and, on the web-component facade, as `kai-input-rejected`. */
 export type RejectReason = 'full' | 'wrong-class' | 'over-capacity';
 
 /** A compiled `format` + aligned display guide. Fill positions are `#` `@` `*`;

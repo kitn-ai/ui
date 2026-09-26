@@ -25,8 +25,8 @@ import {
  *
  * Every `title` is a real Storybook title segment under `Labs/` — the app names
  * are the `Labs/Apps` story FILENAMES, the rest are `title: 'Labs/<x>'` values
- * under src/ (note: NOT all under src/elements/ — Settings lives in src/ui/ and
- * Audio Visualizers under src/components/, so a check scoped to src/elements/
+ * under src/ (note: NOT all under src/web-components/ — Settings lives in src/components/ and
+ * Audio Visualizers under src/components/, so a check scoped to src/web-components/
  * alone would wrongly flag them).
  *
  * WHAT IS ENFORCED TODAY, in the present tense. Every claim below was measured
@@ -108,7 +108,7 @@ export const inventory: TInventoryEntry[] = [
  * scenario before it lands.
  *
  * EVERY `wiring` edge below is EXECUTED in surfaces.test.ts against the real
- * registered elements in jsdom — the event is fired the way a user fires it,
+ * against the real registered web components in jsdom — the event is fired the way a user fires it,
  * the named property is assigned, and the effect is asserted in the shadow DOM.
  * Name resolution against derived.json proves an event and a property EXIST; it
  * does not prove the edge works, and that gap is where a plausible falsehood
@@ -124,7 +124,7 @@ export const surfaceRecipes: TSurfaceRecipe[] = [
     ingredients: ['kai-chat', 'kai-conversations', 'kai-resizable', 'kai-artifact'],
     backend: { endpoint: 'consumer-owned', reader: 'readModelStream' },
     // WHERE the parts go, which the wiring edges below never said. Until this
-    // field existed a builder could read the whole recipe, the whole element
+    // field existed a builder could read the whole recipe, the whole web-component
     // reference and the whole scaffold and still not know whether the rail was a
     // child of the chat or a sibling beside it — and the two answers lay out
     // differently, so it is not a detail anyone can defer. One agent building
@@ -210,8 +210,8 @@ export const surfaceRecipes: TSurfaceRecipe[] = [
     // composes kai-resizable with kai-artifact, and surfaces.test.ts is where
     // the four wiring edges above are actually executed.
     corpus: [
-      'packages/ui/src/elements/chat-slots.stories.tsx',
-      'packages/ui/src/elements/split-workspace.stories.tsx',
+      'packages/ui/src/stories/showcase/chat-slots.stories.tsx',
+      'packages/ui/src/stories/showcase/split-workspace.stories.tsx',
       'packages/ui/mcp/catalog/surfaces.test.ts',
     ],
   },
@@ -260,7 +260,7 @@ export const surfaceRecipes: TSurfaceRecipe[] = [
     // the rail is a real kai-select edge below.)
     id: 'composed-thread',
     intent:
-      'A full chat surface composed by hand from standalone elements — no <kai-chat>. ' +
+      'A full chat surface composed by hand from standalone web components — no <kai-chat>. ' +
       'The host module owns the store, streams through createAssistantStream + the wire ' +
       'reader, stages attachments as data: URIs, and drives the toast region as data.',
     archetypes: ['full-screen'],
@@ -320,7 +320,7 @@ export const surfaceRecipes: TSurfaceRecipe[] = [
 ];
 
 /**
- * REGISTERED COPY (spec §3). Which MessagePart variants an element consumes is
+ * REGISTERED COPY (spec §3). Which MessagePart variants a web component consumes is
  * not derivable from any type today, so it is recorded here as an explicit copy.
  * Task 7's drift lint fails when the union gains a variant no record accounts
  * for, which is what stops this going stale silently.

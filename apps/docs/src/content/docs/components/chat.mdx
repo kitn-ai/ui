@@ -1,6 +1,6 @@
 ---
 title: Chat
-description: A full-featured chat UI — thread, prompt composer, and optional header — packaged as a single Shadow DOM web component that drops into any framework.
+description: A complete chat interface in one element.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -17,7 +17,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kai-tag-sub">kai-chat</p>
 
-<p class="kai-lede">A full-featured chat UI — thread, composer, and optional header — packaged as a single Shadow DOM web component for any framework.</p>
+<p class="kai-lede">Ships the thread, the prompt box, and a header already wired, so a chat surface needs no assembly.</p>
 
 <Facts items={['Shadow DOM', '8 events', 'Markdown + syntax highlighting', 'Model switcher', 'Entity pills (/ skills, @ agents)', 'Starter suggestions']} />
 
@@ -26,7 +26,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 <Playground client:only="solid" tag="kai-chat" />
 
 <Aside type="tip" title="When to use">
-Reach for `<kai-chat>` when you need a **drop-in chat panel in a non-Solid codebase** — React, Vue, a plain HTML page, or an iframe. It isolates all styles in Shadow DOM and bundles its own SolidJS runtime. Give the element an explicit height (e.g. `height: 100vh`) — it fills its block, scroll and all. Add custom header controls through its [header slots](/patterns/custom-chat-header/). Need a built-in **conversation sidebar and history** too? Use [`<kai-workspace>`](/components/workspace/). For fine-grained control in SolidJS, compose `ChatThread`, `Message`, and `PromptInput` directly.
+Drop-in chat panel in a non-Solid app: React, Vue, plain HTML, an iframe. Give it an explicit height. Need a conversation sidebar and history too? Use [`<kai-workspace>`](/components/workspace/).
 </Aside>
 
 ## Usage
@@ -37,7 +37,7 @@ Set rich data (arrays, objects) in JavaScript; scalar props work as attributes o
 <kai-chat id="chat" style="display:block; height:100vh;"></kai-chat>
 
 <script type="module">
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
 
   await customElements.whenDefined('kai-chat');
 
@@ -58,12 +58,12 @@ Set rich data (arrays, objects) in JavaScript; scalar props work as attributes o
 </script>
 ```
 
-- **`messages`** — each entry: `id`, `role` (`'user' | 'assistant'`), an ordered `parts` array (`text` rendered as markdown for assistant, plus `reasoning`, `tool`, `card`, `source`, `file`), and optional `actions`, `avatar`, and `feedback`.
-- **`loading`** — flip to `true` while awaiting a reply; the input disables and a typing indicator appears.
+- **`messages`**: `id`, `role` (`'user' | 'assistant'`), an ordered `parts` array, plus optional `actions`, `avatar`, and `feedback`.
+- **`loading`**: disables the input and shows a typing indicator while you await a reply.
 
 ### Message actions
 
-Add `actions: ['copy', 'like', 'dislike']` to a message and the action row is wired for you. `copy` writes to the clipboard and shows a check; `like` / `dislike` mark the vote, hide the other, and toggle off on a second tap. Each raises a [toast](/components/toast/). See [Message](/components/message/#the-action-row) for the full behavior.
+Add `actions: ['copy', 'like', 'dislike']` and the action row wires itself: `copy` writes to the clipboard and shows a check, a vote hides the other side and toggles off on a second tap, and each raises a [toast](/components/toast/). See [Message](/components/message/#the-action-row).
 
 `kai-message-action` reports votes with a `state` field — `'on'` when set, `'off'` when cleared:
 
@@ -92,37 +92,31 @@ Set `feedback: 'like' | 'dislike'` on a message to re-hydrate a persisted vote; 
 
 ### Starter Suggestions
 
-`suggestions` — clickable prompts above an empty thread; `suggestion-mode="fill"` populates the input instead of submitting.
+`suggestion-mode="fill"` populates the input instead of submitting.
 
 <Example client:visible tag="kai-chat" data="withSuggestions" />
 
 ### Model Switcher and Header
 
-`models` + `chat-title` activates the header bar with a model-switcher dropdown.
-
 <Example client:visible tag="kai-chat" config={{ chatTitle: 'Research Assistant' }} data="withModels" />
 
 ### Context Token Meter
-
-Add `context` to show a live token-usage gauge — yellow near the warning threshold, red near danger.
 
 <Example client:visible tag="kai-chat" config={{ chatTitle: 'Research Assistant' }} data="withContext" />
 
 ### Entity Pills
 
-Set `triggers` so `/` inserts a skill pill and `@` opens a sectioned menu of agents and plugins. `kai-submit` carries the structured `doc` + `entities` for your backend to expand.
+`triggers` turns `/` into a skill pill and `@` into a sectioned menu of agents and plugins; `kai-submit` carries the structured `doc` + `entities`.
 
 <Example client:visible tag="kai-chat" data="withTriggers" />
 
 ## Slots
 
-`<kai-chat>` is a frame: keep the built-in thread and project your own chrome into named slots. An `inject` slot adds to a region; a `replace` slot stands in for it (you own that region's data and events). See [Compose your own shell](/patterns/compose-your-own/) for a worked example.
+A frame: keep the built-in thread and project your own chrome into named slots. `inject` adds to a region, `replace` stands in for it, and you own that region's data and events. See [Compose your own shell](/patterns/compose-your-own/).
 
 <SlotTable tag="kai-chat" />
 
 ## Styling
-
-Restyle the built-in regions from outside via `::part` — no shadow piercing.
 
 <PartTable tag="kai-chat" />
 

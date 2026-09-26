@@ -2,8 +2,8 @@
    consumers are different style paths, which is the whole reason this file
    exists:
 
-     src/elements/styles.css  compiled to compiled.css and adopted into every
-                              kai-* shadow root (the ./elements and ./define
+     src/web-components/styles.css  compiled to compiled.css and adopted into every
+                              kai-* shadow root (the ./web-components and ./define
                               entries). It also sets the :host rules.
      solid.css                Tailwind SOURCE that a light-DOM SolidJS consumer
                               @imports into their own Tailwind build (the . and
@@ -19,7 +19,7 @@
    NEVER copy a rule from here into either consumer, and never add a rule to one
    consumer that both need. Add it here. The one thing that cannot live here is
    :host, which selects nothing in a light DOM; those rules stay in
-   src/elements/styles.css, and .storybook/styles.css re-states them on body.
+   src/web-components/styles.css, and .storybook/styles.css re-states them on body.
 
    This file relies on the --color-* tokens from theme.css and on the classes
    tw-animate-css emits; both consumers import those alongside it. */
@@ -166,7 +166,8 @@
     background-color: var(--color-background);
     display: inline-grid;
     place-content: center;
-    box-shadow: 0 1px 2px rgb(0 0 0 / 0.04);
+    /* Scales with elevation like every other shadow; neutral, not tinted. */
+    box-shadow: 0 calc(1px * var(--kai-shadow-strength, 1)) calc(2px * var(--kai-shadow-strength, 1)) rgb(0 0 0 / 0.04);
     transition: border-color 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease,
       transform 0.1s ease;
   }
@@ -308,4 +309,96 @@
     box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-primary) 14%, transparent);
   }
   .kai-range:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* ROW LIST GEOMETRY — the frame around a list of `Row`s decides, per position,
+     which corners stay round and where the hairline goes. One geometry, TWO
+     selector sets, because the two style paths put the rows in different places:
+
+       Solid path  (`<RowGroup><Row>…`) — the rows are real DOM children of the
+                   frame, so a child selector reaches them. The class is on the
+                   component; a light-DOM Solid consumer gets this rule from
+                   solid.css, a Solid component rendered INSIDE a kai-* shadow
+                   root gets it from the same file via the compiled sheet.
+       Element path (`<kai-row-group><kai-row>…`) — the rows are the HOST's
+                   children assigned to the frame's slot, so they are NOT DOM
+                   children of the frame and no child selector can match them.
+                   `::slotted()` is the only reach in, and it is scoped by the
+                   `data-kai-row` marker the row-shaped facades set on their own
+                   host. NOT by a tag name and NOT by `*`, and both of those are
+                   deliberate: `::slotted(*)` in this file would apply inside
+                   EVERY element's shadow root (this one sheet is shared), so a
+                   `kai-button` label would be forced to `display:block`; and a
+                   tag list (`kai-row`, `kai-setting-item`, …) is a hand-typed
+                   roster that a third row-shaped element would silently miss.
+                   The marker is tag-agnostic, cannot reach anything that did
+                   not ask for it, and is a usable hook of its own: a consumer's
+                   own custom element opts into group geometry by marking
+                   itself `data-kai-row`.
+
+     The mirrored pair below is why the two sets live in ONE file rather than
+     each beside its own consumer — the alternative was two copies of one rule,
+     which this file exists to prevent (see its header). Both are inert on the
+     path they do not belong to: a document-level stylesheet parses and simply
+     never matches `::slotted()`, and the class rule matches nothing in a shadow
+     root that holds no frame.
+
+     WHAT THIS DELIBERATELY DOES NOT DECIDE is the frame itself: the border,
+     radius and `overflow-hidden` are Tailwind classes on the component, so a
+     caller can restyle the container without fighting a stylesheet, and a
+     single-row group (a framed card) is just a group whose only row is both
+     first and last.
+
+     `--kai-row-radius` is the group's knob, read by the first/last rules: set it
+     to `0` on the frame (or on the element) and the whole list goes flush, which
+     is what a group sitting inside an already-rounded panel wants. Its fallback
+     is `--radius-lg`, the same token `rounded-lg` resolves to, so a row inside a
+     group is shaped by the same radius scale as one outside it.
+
+     EVERY DECLARATION BELOW SETS A CUSTOM PROPERTY, and that is a measured
+     requirement rather than a style choice. `Row` rounds its own corners and
+     draws its own divider from these properties, with classes in the utilities
+     layer; the rules here only decide the VALUES. Writing the geometry directly
+     (`::slotted(kai-row:not(:first-child)) { border-top: 1px solid … }`) was the
+     first version and it was wrong in a way nothing here caught: whenever the
+     kit's sheet is ALSO present at document level (Storybook, the docs site, any
+     page that links the compiled sheet beside the elements), Tailwind's
+     preflight (`@layer base { * { border: 0 solid } }`) in that light-DOM sheet
+     won over the shadow sheet's `::slotted` declaration and every divider on the
+     element path vanished, while the corners stayed correct precisely because
+     they travel as custom properties. Measured in `scripts/probe-row-group.mjs`,
+     which injects the sheet at document level deliberately so that case is
+     covered: 0px before this change, 1px after, on both paths.
+
+     KNOWN LIMIT, stated here because there is no way to fix it behind a shadow
+     boundary and it will otherwise be reported as a bug: a row hidden with the
+     `hidden` ATTRIBUTE is still in the sibling chain, so the row after it draws a
+     hairline at the very top of the frame. "Preceded by a VISIBLE sibling" (what
+     Tailwind's `divide-y` gets from `~`, and what makes its hidden handling
+     correct) is inexpressible: `::slotted()` takes a compound selector, never a
+     combinator. Rows that come and go must be MOUNTED AND UNMOUNTED, which is
+     what every framework here already does.
+
+     The rows themselves must DRAW what these properties describe, which is why
+     `Row` and `SettingItem` both carry the radius and divider classes. A plain
+     `<div>` inside a group gets the properties and ignores them, so it has no
+     hairline. That is the trade for touching nothing the consumer did not ask
+     for. */
+  .kai-row-group > * {
+    --kai-row-radius-top: 0;
+    --kai-row-radius-bottom: 0;
+    --kai-row-divide-width: 0px;
+  }
+  .kai-row-group > *:first-child { --kai-row-radius-top: var(--kai-row-radius, var(--radius-lg)); }
+  .kai-row-group > *:last-child { --kai-row-radius-bottom: var(--kai-row-radius, var(--radius-lg)); }
+  .kai-row-group > *:not(:first-child) { --kai-row-divide-width: 1px; }
+
+  ::slotted([data-kai-row]) {
+    display: block;
+    --kai-row-radius-top: 0;
+    --kai-row-radius-bottom: 0;
+    --kai-row-divide-width: 0px;
+  }
+  ::slotted([data-kai-row]:first-child) { --kai-row-radius-top: var(--kai-row-radius, var(--radius-lg)); }
+  ::slotted([data-kai-row]:last-child) { --kai-row-radius-bottom: var(--kai-row-radius, var(--radius-lg)); }
+  ::slotted([data-kai-row]:not(:first-child)) { --kai-row-divide-width: 1px; }
 }

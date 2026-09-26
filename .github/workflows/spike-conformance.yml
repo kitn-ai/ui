@@ -62,8 +62,8 @@ jobs:
 
       # The spike consumes the kit through its published entry points, so the
       # harness needs a real build -- not just for `@kitn.ai/ui/schemas`, which
-      # the seam guard reads, but for the elements bundle the app registers.
-      - name: Build (element bundle + provider subpath)
+      # the seam guard reads, but for the web-components bundle the app registers.
+      - name: Build (web-components bundle + provider subpath)
         run: pnpm exec nx build ui
 
       # `exec` pins SPIKE_MODE=replay, scrubs the credential, and refuses to run

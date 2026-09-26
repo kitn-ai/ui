@@ -10,7 +10,7 @@ import { Composer } from './components/composer/composer';
 import { ThemeToggle } from './components/theme-toggle/theme-toggle';
 
 /**
- * A mini chat workspace COMPOSED BY HAND from @kitn.ai/ui's individual elements —
+ * A mini chat workspace COMPOSED BY HAND from @kitn.ai/ui's individual web components —
  * the Angular mirror of `examples/react` and `examples/vue`. It shows how the raw
  * `kai-*` web components fit together (vs. dropping in one batteries-included
  * `<kai-chat>`/`<kai-workspace>`):

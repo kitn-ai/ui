@@ -8,7 +8,7 @@
  *   node scripts/probe-conversation-item-slotchange.mjs [--headed]
  *
  * WATCH IT FAIL: disable the container's sync effect (the
- * `itemsController.sync()` createEffect in src/elements/conversation-list.tsx)
+ * `itemsController.sync()` createEffect in src/web-components/conversation/conversation-list.tsx)
  * and the exactly-one-tab-stop assertions go red after every mutation. Recorded
  * in the lane report.
  */
@@ -32,8 +32,8 @@ const PAGE = /* html */ `<!doctype html>
   <script type="module">
     let error = null;
     try {
-      await import('/src/elements/conversation-list.tsx');
-      await import('/src/elements/conversation-item.tsx');
+      await import('/src/web-components/conversation/conversation-list.tsx');
+      await import('/src/web-components/conversation/conversation-item.tsx');
     } catch (e) { error = String((e && e.stack) || e); }
     const list = document.getElementById('list');
     list.groups = [];

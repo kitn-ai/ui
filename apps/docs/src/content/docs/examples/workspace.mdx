@@ -5,13 +5,15 @@ description: A ChatGPT-style layout — a collapsible conversation rail beside a
 
 import WorkspaceDemo from '../../../components/WorkspaceDemo.tsx';
 
-<p class="kai-lede">Three elements give you the full workspace: the `<kai-workspace>` layout shell, a resizable, collapsible `<kai-conversations>` rail listing past conversations, and a streaming `<kai-chat>` thread. Select a conversation, start a new one, or send a message below.</p>
+<p class="kai-lede">Three web components give you the full workspace: the `<kai-workspace>` layout shell, a resizable, collapsible `<kai-conversations>` rail listing past conversations, and a streaming `<kai-chat>` thread. Select a conversation, start a new one, or send a message below.</p>
 
 <WorkspaceDemo client:only="solid" />
 
 ## How it works
 
-`<kai-workspace>` is the layout: it arranges its slots, handles resize and collapse, and nothing else. You slot `<kai-conversations>` into `start` and `<kai-chat>` into the main region, then drive each part directly. The rail gets a flat `conversations` array (add `groups` when you want section headers), the chat gets the active thread's `messages`, and three events drive all the interactivity:
+`<kai-workspace>` is the layout: it arranges its slots, handles resize and collapse, and nothing else. You slot `<kai-conversations>` into `start` and `<kai-chat>` into the main region, then drive each part directly.
+
+The rail gets a flat `conversations` array (add `groups` when you want section headers), the chat gets the active thread's `messages`, and three events drive all the interactivity:
 
 ```html
 <kai-workspace collapse-below="720" drawer-below="640" style="display:block; height:100vh;">
@@ -20,7 +22,7 @@ import WorkspaceDemo from '../../../components/WorkspaceDemo.tsx';
 </kai-workspace>
 
 <script type="module">
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
 
   const rail = document.querySelector('kai-conversations');
   const chat = document.querySelector('kai-chat');

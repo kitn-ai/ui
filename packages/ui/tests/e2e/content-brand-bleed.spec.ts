@@ -13,7 +13,7 @@ import type { Page } from '@playwright/test';
  *
  * NOTE on `<kai-source>`'s hover card: `HoverCardContent` portals into a
  * per-element `portalNode` div that `defineWebComponent` renders INSIDE the
- * element's own shadow root (`src/elements/define.tsx`'s default
+ * element's own shadow root (`src/web-components/define/define.tsx`'s default
  * `ChatConfig portalMount`), not into `document.body` — a standalone
  * `<kai-source>` has no `<kai-chat>` ancestor to hand it a different mount.
  * So the domain header has to be queried through `kai-source`'s own

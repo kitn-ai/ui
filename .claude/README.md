@@ -23,4 +23,4 @@ Reusable subagent types the `consumer-regression` skill deploys (you don't norma
 
 ## Prerequisites to actually *run* a regression
 
-The skill is instructions; executing it needs a normal dev environment: **node + npm + network** (it scaffolds + installs real throwaway apps and integration SDKs), **python3 + pip** for the Pydantic/FastAPI path, and the repo's `node_modules` (run `npm install` once — that's where the reused Playwright browser comes from). Phase 0 builds the MCP bin (`npm run build`). You do **not** need to register the `kai` MCP server — the skill drives `bin/mcp.js` directly.
+The skill is instructions; executing it needs a normal dev environment: **node + npm + network** (it scaffolds + installs real throwaway apps and integration SDKs), **python3 + pip** for the Pydantic/FastAPI path, and the repo's `node_modules` (run `npm install` once — that's where the reused Playwright browser comes from). Phase 0 builds the MCP bin (`npm run build`). You do **not** need to register the `kai` MCP server — the skill drives the MCP bin (`packages/mcp/bin/kai-mcp.js`) directly.

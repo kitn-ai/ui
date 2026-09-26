@@ -7,13 +7,13 @@ export type { SetMessages, AssistantStream } from './stream';
 export { appendTextPart, appendReasoningPart, upsertToolPart, upsertCardPart, fingerprint } from './parts';
 export type { ReasoningOpts } from './parts';
 
-// Multi-thread mechanics (the workspace recast, spec §3b): the id-bound
+// Multi-thread mechanics: the id-bound
 // SetMessages fold + the in-flight-turn bookkeeping. The consumer's record
 // shape and every persistence/retention decision stay outside — see ./threads.
 export { updateThreadMessages, bindThreadMessages, createThreadSessions } from './threads';
 export type { ThreadLike, SetThreads, BindThreadOptions, ThreadSessions } from './threads';
 
-// The persistence SEAM, not persistence: the stored-thread validator (F-18,
+// The persistence SEAM, not persistence: the stored-thread validator (its
 // variant list derived from the MessagePart union) and the debounce/flush
 // shape. No storage backend, no default delay — policy is the consumer's.
 export { parseStoredThread, createSaveScheduler } from './persistence';
@@ -32,13 +32,13 @@ export type { MockReply, MockResponder, MockResponderOptions, MockSource, MockTo
 export type {
   ChatMessage, ChatMessageAction, CustomAction, AvatarData, FeedbackVote, MessagePart,
   MessageSource, RawOrigin,
-} from '../elements/chat-types';
-export type { ToolPart } from '../components/tool-types';
-export type { ToolKind } from '../components/tool-classify';
+} from '../web-components/chat/chat-types';
+export type { ToolPart } from '../components/tool/tool-types';
+export type { ToolKind } from '../primitives/tool-classify';
 // upsertToolPart defaults `kind` to classifyTool(type) and reverts it on a type
 // change (see ./parts), and ToolPart.kind's doc comment names the function, so a
 // consumer computing `kind` itself needs the identical classifier — not a
 // hand-rolled copy that drifts from ours.
-export { classifyTool } from '../components/tool-classify';
+export { classifyTool } from '../primitives/tool-classify';
 export type { CardEnvelope } from '../primitives/card-contract';
-export type { AttachmentData } from '../components/attachment-types';
+export type { AttachmentData } from '../primitives/attachment-types';

@@ -1,7 +1,7 @@
 // src/primitives/card-contract.ts
 // The frozen Card Contract: the one typed contract every card speaks across both
 // transports (native <kai-*> + remote iframe). Pure types only — no runtime, no DOM.
-// See docs/superpowers/specs/2026-06-13-card-contract-design.md.
+// See docs/coupling-map.md for what moves with this contract.
 
 /** Bumped on any BREAKING change to the shapes below. Additive/optional fields do not bump it. */
 export const CARD_CONTRACT_VERSION = '1' as const;
@@ -43,13 +43,13 @@ export type CardEvent =
 
 export type CardEventKind = CardEvent['kind'];
 
-/** How a card was resolved by the user — the re-hydration channel for the chromed
+/** How a card was resolved by the user: the re-hydration channel for the chromed
  *  read-only state. The terminal kinds (`action`/`submit`) mirror the two terminal
  *  CardEvents (minus `cardId`): the resolution is just the event that resolved the
- *  card. `dismissed` is a DEFERRED (non-terminal) state — the user set the card
- *  aside; it can be re-opened. `expired` is terminal — a dismissed card the host
+ *  card. `dismissed` is a DEFERRED (non-terminal) state, where the user set the card
+ *  aside; it can be re-opened. `expired` is terminal: a dismissed card the host
  *  decided can no longer be re-opened (e.g. the agent proceeded, or it went stale).
- *  `at` is optional ISO-8601 provenance (data only; never rendered). Additive —
+ *  `at` is optional ISO-8601 provenance (data only; never rendered). Additive:
  *  does not bump the contract version. */
 export type CardResolution =
   | { kind: 'action'; action: string; payload?: unknown; at?: string }
@@ -75,6 +75,6 @@ export interface CardPolicy {
    *  back (clear the resolution → live again) or has expired (stamp `expired`). */
   onReopen?: (cardId: string) => void;
   onError?: (cardId: string, message: string) => void;
-  /** Cap on send-prompt: 'compose' (default) forbids silent sends. 'send' to allow. */
+  /** Cap on send-prompt: `'compose'` by default, which forbids a silent send. */
   maxSendPromptMode?: 'compose' | 'send';
 }

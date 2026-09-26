@@ -28,8 +28,8 @@ describe('the framework dropdown is the renderer list, never a typed one', () =>
 
 describe('addCommandFor', () => {
   it('carries the block id it was given, and no framework', () => {
-    expect(addCommandFor('support-widget')).toBe('npx create-kai add support-widget');
-    expect(addCommandFor('assistant')).toBe('npx create-kai add assistant');
+    expect(addCommandFor('support-widget')).toBe('npx @kitn.ai/cli add support-widget');
+    expect(addCommandFor('assistant')).toBe('npx @kitn.ai/cli add assistant');
   });
 
   it('two different ids give two different commands', () => {

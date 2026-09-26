@@ -16,14 +16,16 @@ import RagAssistantDemo from '../../../components/RagAssistantDemo.tsx';
 
 ## How it works
 
-`<kai-chat>` handles the Q&A thread. `<kai-sources>` is a **separate element** placed below it — pass the citation list as a property and set `numbered` to auto-label each chip `[1]`, `[2]`, `[3]` to match the markers in the reply text. This example keeps the row separate because the retriever, not the model, owns the citations; sources that arrive as `source` parts on a message render their own row inside the thread.
+`<kai-chat>` handles the Q&A thread. `<kai-sources>` is a **separate element** placed below it — pass the citation list as a property and set `numbered` to auto-label each chip `[1]`, `[2]`, `[3]` to match the markers in the reply text.
+
+This example keeps the row separate because the retriever, not the model, owns the citations; sources that arrive as `source` parts on a message render their own row inside the thread.
 
 ```html
 <kai-chat id="chat" chat-title="Docs assistant"></kai-chat>
 <kai-sources id="srcs" numbered show-favicon></kai-sources>
 
 <script type="module">
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
 
   await customElements.whenDefined('kai-chat');
 

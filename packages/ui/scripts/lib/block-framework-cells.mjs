@@ -24,7 +24,7 @@
 //           check, which is what the schema IS.
 //   solid   tsc under the `solid` project. Module and JSX expressions. NOT kai
 //           prop types: the kit's solid-js/jsx-runtime augmentation is generic
-//           (see scripts/gen-element-types.mjs for why).
+//           (see scripts/gen-web-component-types.mjs for why).
 //
 // NONE OF THE FOUR RUNS ANYTHING. React is the only runtime cell
 // (verify:blocks:react) and stays so, per the owner ruling in spec section 9.
@@ -72,7 +72,7 @@ function runTool(bin, args, cwd) {
  * through to @vue/runtime-dom's `[name: string]: any` and the cell type-checks
  * the script block and nothing about the template. What the program needs is
  * REACHABILITY, and the emitted trees already have it: the SFC imports its
- * composable and the composable imports '@kitn.ai/ui/elements'. Measured, all
+ * composable and the composable imports '@kitn.ai/ui/web-components'. Measured, all
  * three shapes: no kit import anywhere is GREEN, the SFC's own script importing
  * it is RED, and a sibling .ts importing it (the emitted shape) is RED.
  *
@@ -81,7 +81,7 @@ function runTool(bin, args, cwd) {
  * The self-test below withholds reachability entirely, not just this file, and
  * watches both plants turn GREEN.
  */
-const SHIM = `import '@kitn.ai/ui/elements';\n`;
+const SHIM = `import '@kitn.ai/ui/web-components';\n`;
 
 /** Write one form's files into a sandbox, under their `path` (not `target`:
  *  the sandbox IS the block directory, and the install root is the consumer
@@ -189,7 +189,7 @@ export function solidCell({ tsc, name, files }) {
   // solid-js` -- the same one the scaffolder's solid front end compiles under,
   // which is what makes "it compiles for a consumer" mean the same thing in
   // both places. No shim: the solid-js/jsx-runtime augmentation reaches the
-  // program through the tree's own `import '@kitn.ai/ui/elements'`.
+  // program through the tree's own `import '@kitn.ai/ui/web-components'`.
   const box = tsc.sandbox('solid', `block-${name}-solid`);
   const guard = guardSandbox(box, name, 'solid');
   if (guard) return [guard];
@@ -255,7 +255,7 @@ function plants() {
     ['vue', 'kai prop type (single-word prop)', [
       f('plant.controller.ts', CONTROLLER),
       f('Plant.vue', `<script setup lang="ts">
-import '@kitn.ai/ui/elements';
+import '@kitn.ai/ui/web-components';
 import { createController } from './plant.controller';
 const c = createController({ refs: () => ({ host: null }) });
 const state = c.state();
@@ -275,7 +275,7 @@ const state = c.state();
     ['vue', 'kai prop type (multi-word prop reaches the declared member)', [
       f('plant.controller.ts', CONTROLLER),
       f('Plant.vue', `<script setup lang="ts">
-import '@kitn.ai/ui/elements';
+import '@kitn.ai/ui/web-components';
 import { createController } from './plant.controller';
 const c = createController({ refs: () => ({ host: null }) });
 const state = c.state();
@@ -294,7 +294,7 @@ const state = c.state();
     ['svelte', 'template expression against the controller', [
       f('plant.controller.ts', CONTROLLER),
       f('Plant.svelte', `<script lang="ts">
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
   import { createController } from './plant.controller';
   const c = createController({ refs: () => ({ host: null }) });
 </script>
@@ -310,7 +310,7 @@ const state = c.state();
       f('plant.controller.ts', CONTROLLER),
       f('plant.component.html', `<kai-dock (kai-click)="store.actions.opne()">{{ store.title }}</kai-dock>\n`),
       f('plant.component.ts', `import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import '@kitn.ai/ui/elements';
+import '@kitn.ai/ui/web-components';
 import { createController } from './plant.controller';
 
 @Component({
@@ -335,7 +335,7 @@ export class PlantComponent {
     // unreachable tree could not.
     ['solid', 'JSX expression against the controller', [
       f('plant.controller.ts', CONTROLLER),
-      f('Plant.tsx', `import '@kitn.ai/ui/elements';
+      f('Plant.tsx', `import '@kitn.ai/ui/web-components';
 import { createController } from './plant.controller';
 
 export function Plant() {
@@ -357,7 +357,7 @@ export function Plant() {
  * the whole point: it proves the augmentation is what is doing the work rather
  * than vue-tsc happening to be strict, which is the ruled requirement (spec
  * section 9, open item 3). Unreachable means BOTH the shim file and the plant's
- * own `import '@kitn.ai/ui/elements'`: either one alone reaches the program and
+ * own `import '@kitn.ai/ui/web-components'`: either one alone reaches the program and
  * turns the plant red, which is why the arm is named for reachability rather
  * than for the shim (ruling R4).
  */
@@ -375,7 +375,7 @@ export function frameworkCellSelfTest({ tsc, log }) {
   const unreachable = plants().filter(([form]) => form === 'vue');
   for (const [, label, files] of unreachable) {
     const stripped = files.map((file) =>
-      file.path.endsWith('.vue') ? { ...file, content: file.content.replace("import '@kitn.ai/ui/elements';\n", '') } : file,
+      file.path.endsWith('.vue') ? { ...file, content: file.content.replace("import '@kitn.ai/ui/web-components';\n", '') } : file,
     );
     const errors = vueCellWithoutAugmentation({ tsc, name: `plant-vue-unreachable-${label.replace(/\W+/g, '-')}`, files: stripped });
     const green = errors.length === 0;

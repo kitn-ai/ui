@@ -32,7 +32,7 @@ frameworks were ready, and it was wrong within a day of each one landing — so
 the list lives in `src/frameworks.ts` and at runtime in `--list --json`, and
 nowhere else.
 
-Vue went first among the `registration: 'elements'` + `composedWorkspace: true`
+Vue went first among the `registration: 'web-components'` + `composedWorkspace: true`
 cells and paid for the shared machinery: a framework could go `ready` with **no
 patches at all** and the build would still print "2 patches verified", shipping
 the kit's own example title and `nx build ui` into a user's project. That hole
@@ -219,7 +219,7 @@ Two sources of truth, neither of them copied:
   of those has a build failure as its failure mode.
 
 The CLI is bundled to one zero-dependency file so `npx` cold start is fast. It
-is **not** the `kai` MCP (`npx @kitn.ai/ui mcp`), and it is not a runtime
+is **not** the `kai` MCP (`npx -y @kitn.ai/mcp`), and it is not a runtime
 dependency of anything it scaffolds.
 
 ## Commands

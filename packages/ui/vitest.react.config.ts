@@ -14,7 +14,7 @@ const dirname =
 // `npm run test:react` (kept out of the default `npm test`).
 //
 // The custom elements themselves are SolidJS — we DON'T compile them here.
-// Instead `@kitn.ai/ui/elements` resolves to the prebuilt bundle (already-
+// Instead `@kitn.ai/ui/web-components` resolves to the prebuilt bundle (already-
 // compiled JS), exactly like a real consumer. Run `npm run build` first so
 // `dist/kai.es.js` and the generated `frameworks/react/index.tsx` exist.
 export default defineConfig({
@@ -27,10 +27,10 @@ export default defineConfig({
     alias: [
       { find: '@kitn.ai/ui/react', replacement: path.resolve(dirname, 'frameworks/react/index.tsx') },
       // The tree-shake wrappers lazy-import per-element subpaths
-      // (`@kitn.ai/ui/elements/<source-module>`), and setup.ts imports the bare
-      // `@kitn.ai/ui/elements`. Every element is already registered from the prebuilt
+      // (`@kitn.ai/ui/web-components/<source-module>`), and setup.ts imports the bare
+      // `@kitn.ai/ui/web-components`. Every element is already registered from the prebuilt
       // bundle for the suite, so resolve BOTH forms to that same register-all bundle.
-      { find: /^@kitn\.ai\/ui\/elements(\/.*)?$/, replacement: path.resolve(dirname, 'dist/kai.es.js') },
+      { find: /^@kitn\.ai\/ui\/web-components(\/.*)?$/, replacement: path.resolve(dirname, 'dist/kai.es.js') },
     ],
   },
   test: {

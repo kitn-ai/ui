@@ -1,6 +1,6 @@
 ---
 title: Switch
-description: A role=switch toggle web component for immediate on/off settings — self-managing, keyboard-operable, isolated in Shadow DOM.
+description: A toggle that applies a setting the moment it flips.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -15,7 +15,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kai-tag-sub">kai-switch</p>
 
-<p class="kai-lede">A toggle switch for a setting that applies the moment it flips — "Temporary chat", notifications, a feature flag. It manages its own on/off state and reports changes with a single event.</p>
+<p class="kai-lede">Manages its own state and reports the change once, so a settings row needs no wiring.</p>
 
 <Facts items={['Shadow DOM', '1 event', 'role="switch"', 'Keyboard operable', 'Self-managing']} />
 
@@ -24,7 +24,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 <Playground client:only="solid" tag="kai-switch" />
 
 <Aside type="tip" title="When to use">
-Use `<kai-switch>` for an immediate on/off setting in a header menu, a settings row, or a preference panel. For a labelled choice submitted with a form, prefer a checkbox. In SolidJS, the `Switch` primitive does the same without the web-component wrapper.
+In a settings row, a header menu, or a preference panel, for a setting that takes effect at once. For a choice collected with a form, use [Form](/components/form/) instead.
 </Aside>
 
 ## Usage
@@ -35,7 +35,7 @@ Set the initial state with the `checked` attribute and read changes from `kai-ch
 <kai-switch checked label="Temporary chat"></kai-switch>
 
 <script type="module">
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
 
   document.querySelector('kai-switch')
     .addEventListener('kai-change', (e) => console.log('checked:', e.detail.checked));

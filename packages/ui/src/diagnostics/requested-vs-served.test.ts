@@ -14,7 +14,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { reportRequest } from './report-request';
 import { readOpenAIStream } from '../wire/read';
-import { subscribeWireDiagnostics, isElementDiagnosticEvent, type KaiDiagnosticEvent } from '../wire/diagnostics';
+import { subscribeWireDiagnostics, isWebComponentDiagnosticEvent, type KaiDiagnosticEvent } from '../wire/diagnostics';
 
 const nullSink = () =>
   ({
@@ -65,7 +65,7 @@ describe('requested vs served model', () => {
     // `traceId` is a WIRE field — the element events share this stream and are
     // not trace-scoped — so the narrowing is explicit, and asserted to be TOTAL
     // rather than assumed: everything this test provokes is a wire event.
-    const wire = events.filter((e) => !isElementDiagnosticEvent(e));
+    const wire = events.filter((e) => !isWebComponentDiagnosticEvent(e));
     expect(wire).toHaveLength(events.length);
     for (const e of wire) expect(e.traceId).toBe('turn-1');
   });

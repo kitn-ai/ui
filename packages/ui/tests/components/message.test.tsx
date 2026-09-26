@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@solidjs/testing-library';
 import axe from 'axe-core';
-import { Message, MessageAvatar, MessageContent } from '../../src/components/message';
+import { Message, MessageAvatar, MessageContent } from '../../src/components/message/message';
 
 /** Run axe's ARIA-role rules over a subtree and return the violating rule ids
  *  plus the messages, so a failure names what broke instead of just a count. */
@@ -96,10 +96,10 @@ describe('Message', () => {
 
     it('lets a caller override the generated accessible name', () => {
       const { container } = render(() => (
-        <Message role="assistant" aria-label="Reply from Ada"><MessageContent>Hi</MessageContent></Message>
+        <Message role="assistant" aria-label="Reply from Demo User"><MessageContent>Hi</MessageContent></Message>
       ));
       const row = container.firstChild as HTMLElement;
-      expect(row.getAttribute('aria-label')).toBe('Reply from Ada');
+      expect(row.getAttribute('aria-label')).toBe('Reply from Demo User');
       expect(row.getAttribute('role')).toBe('article');
     });
   });

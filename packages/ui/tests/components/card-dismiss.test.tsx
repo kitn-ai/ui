@@ -4,10 +4,10 @@
 // re-openable DismissedStub; Reopen emits `{ kind:'reopen', cardId }`.
 import { test, expect, afterEach } from 'vitest';
 import { render, fireEvent } from '@solidjs/testing-library';
-import { ConfirmCard, type ConfirmCardData } from '../../src/components/confirm-card';
-import { ChoiceCard, type ChoiceCardData } from '../../src/components/choice-card';
-import { TasksCard, type TasksCardData } from '../../src/components/tasks-card';
-import { Form, type FormDefinition } from '../../src/components/form';
+import { ConfirmCard, type ConfirmCardData } from '../../src/components/confirm-card/confirm-card';
+import { ChoiceCard, type ChoiceCardData } from '../../src/components/choice-card/choice-card';
+import { TasksCard, type TasksCardData } from '../../src/components/tasks/tasks-card';
+import { Form, type FormDefinition } from '../../src/components/form/form';
 import type { CardEvent, CardHost, CardContext } from '../../src/primitives/card-contract';
 
 afterEach(() => { document.body.innerHTML = ''; });
@@ -39,7 +39,7 @@ test('confirm: × emits dismiss + collapses to a reopenable stub; Reopen emits r
   expect(events.some((e) => e.kind === 'dismiss' && e.cardId === 'c1')).toBe(true);
 
   // Collapsed: a stub group, no action buttons, a Reopen button.
-  const group = getByRole('group', { name: /Proposed: Migrate — dismissed/ });
+  const group = getByRole('group', { name: /Proposed: Migrate, dismissed/ });
   expect(group).toBeTruthy();
   expect(queryByText('Run')).toBeNull();
   const reopen = getByRole('button', { name: 'Reopen' });
@@ -79,7 +79,7 @@ test('choice: × emits dismiss + stub; Reopen emits reopen', () => {
   ));
   fireEvent.click(getByRole('button', { name: 'Dismiss' }));
   expect(events.some((e) => e.kind === 'dismiss' && e.cardId === 'ch1')).toBe(true);
-  expect(getByRole('group', { name: /Choose: Fruit — dismissed/ })).toBeTruthy();
+  expect(getByRole('group', { name: /Choose: Fruit, dismissed/ })).toBeTruthy();
   expect(queryByText('Apple')).toBeNull();
   fireEvent.click(getByRole('button', { name: 'Reopen' }));
   expect(events.some((e) => e.kind === 'reopen' && e.cardId === 'ch1')).toBe(true);
@@ -97,7 +97,7 @@ test('tasks: × emits dismiss + stub; Reopen emits reopen', () => {
   ));
   fireEvent.click(getByRole('button', { name: 'Dismiss' }));
   expect(events.some((e) => e.kind === 'dismiss' && e.cardId === 't1')).toBe(true);
-  expect(getByRole('group', { name: /Tasks: Plan — dismissed/ })).toBeTruthy();
+  expect(getByRole('group', { name: /Tasks: Plan, dismissed/ })).toBeTruthy();
   expect(queryByText('Apple')).toBeNull();
   fireEvent.click(getByRole('button', { name: 'Reopen' }));
   expect(events.some((e) => e.kind === 'reopen' && e.cardId === 't1')).toBe(true);
@@ -117,7 +117,7 @@ test('form: Dismiss emits dismiss + stub; Reopen emits reopen', () => {
   ));
   fireEvent.click(getByRole('button', { name: 'Dismiss' }));
   expect(events.some((e) => e.kind === 'dismiss' && e.cardId === 'f1')).toBe(true);
-  expect(getByRole('group', { name: /Form: Profile — dismissed/ })).toBeTruthy();
+  expect(getByRole('group', { name: /Form: Profile, dismissed/ })).toBeTruthy();
   expect(queryByLabelText('Name')).toBeNull();
   fireEvent.click(getByRole('button', { name: 'Reopen' }));
   expect(events.some((e) => e.kind === 'reopen' && e.cardId === 'f1')).toBe(true);

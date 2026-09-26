@@ -1,0 +1,76 @@
+.look-grid { display: grid; gap: 22px }
+
+/* Editorial: two up, every other card dropped so the eye moves diagonally
+   down the page rather than reading in rows. */
+.look-grid[data-density='editorial'] {
+  grid-template-columns: repeat(2, 1fr);
+  gap: 40px 34px;
+}
+.look-grid[data-density='editorial'] .look-card:nth-child(even) {
+  transform: translateY(46px);
+}
+.look-grid[data-density='editorial'] .photo { aspect-ratio: 4 / 5 }
+
+.look-grid[data-density='grid'] { grid-template-columns: repeat(3, 1fr) }
+.look-grid[data-density='grid'] .photo { aspect-ratio: 4 / 5 }
+
+/* Index: a contact sheet. Captions off, meta off, square crops. */
+.look-grid[data-density='index'] {
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+}
+.look-grid[data-density='index'] .photo { aspect-ratio: 1 }
+.look-grid[data-density='index'] figcaption,
+.look-grid[data-density='index'] .look-card-meta { display: none }
+.look-grid[data-density='index'] .photo .ph { inset: 5px }
+
+.look-card {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  animation: look-in var(--t-mid) var(--ease-out) both;
+  animation-delay: calc(var(--i) * 34ms);
+}
+@keyframes look-in {
+  from { opacity: 0; transform: translateY(10px) }
+  to { opacity: 1 }
+}
+/* The editorial offset must survive the entry animation's transform. */
+.look-grid[data-density='editorial'] .look-card:nth-child(even) {
+  animation-name: look-in-offset;
+}
+@keyframes look-in-offset {
+  from { opacity: 0; transform: translateY(56px) }
+  to { opacity: 1; transform: translateY(46px) }
+}
+
+.look-card .photo {
+  transition: box-shadow var(--t-mid) var(--ease);
+}
+.look-card:hover .photo {
+  box-shadow: 12px 12px 30px var(--sh-d), -12px -12px 30px var(--sh-l);
+}
+.look-card-meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 2px 0;
+}
+.look-card-meta .serif { font-size: 17px }
+.look-card-cat {
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+@media (max-width: 840px) {
+  .look-grid[data-density='grid'] { grid-template-columns: repeat(2, 1fr) }
+  .look-grid[data-density='index'] { grid-template-columns: repeat(4, 1fr) }
+}
+@media (max-width: 560px) {
+  .look-grid[data-density='editorial'] { grid-template-columns: 1fr; gap: 26px }
+  .look-grid[data-density='editorial'] .look-card:nth-child(even) { transform: none }
+  .look-grid[data-density='index'] { grid-template-columns: repeat(3, 1fr) }
+}

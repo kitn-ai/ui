@@ -22,7 +22,7 @@
  *     GENERATED wrapper a React consumer actually imports, not the internal
  *     facade types. Checked by `tsc --noEmit -p tsconfig.react.test.json` (the
  *     third pass of `npm run typecheck`).
- *   - RUNTIME, under `npm run test:react`, where `@kitn.ai/ui/elements` resolves
+ *   - RUNTIME, under `npm run test:react`, where `@kitn.ai/ui/web-components` resolves
  *     to the prebuilt `dist/kai.es.js`. Rendering a widened element with the prop
  *     omitted really upgrades the custom element, so a facade that still reaches
  *     into `props.x.length` throws here instead of shipping.

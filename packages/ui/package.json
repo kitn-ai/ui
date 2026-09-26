@@ -1,6 +1,6 @@
 {
   "name": "@kitn.ai/ui",
-  "version": "0.32.0",
+  "version": "0.37.0",
   "nx": {
     "name": "ui",
     "targets": {
@@ -31,7 +31,7 @@
     "**/*.css",
     "./dist/kai.es.js",
     "./dist/register-impl-*.js",
-    "./dist/elements/*.js"
+    "./dist/web-components/*.js"
   ],
   "description": "Framework-agnostic, Shadow-DOM web components for building AI chat interfaces — works in React, Vue, Angular, Svelte, or plain HTML. Authored in SolidJS.",
   "keywords": [
@@ -53,10 +53,14 @@
     "solid-js"
   ],
   "license": "MIT",
+  "engines": {
+    "node": ">=20.19"
+  },
   "homepage": "https://ui.kitn.ai",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kitn-ai/ui.git"
+    "url": "git+https://github.com/kitn-ai/ui.git",
+    "directory": "packages/ui"
   },
   "bugs": {
     "url": "https://github.com/kitn-ai/ui/issues"
@@ -80,23 +84,23 @@
       "node": "./dist/index.server.js",
       "default": "./dist/index.js"
     },
-    "./elements": {
-      "types": "./dist/elements.d.ts",
+    "./web-components": {
+      "types": "./dist/web-components.d.ts",
       "default": "./dist/kai.es.js"
     },
-    "./elements/*": {
-      "types": "./dist/elements/*.d.ts",
-      "default": "./dist/elements/*.js"
+    "./web-components/*": {
+      "types": "./dist/web-components/*.d.ts",
+      "default": "./dist/web-components/*.js"
     },
     "./autoloader": {
-      "types": "./dist/elements/autoloader.d.ts",
-      "default": "./dist/elements/autoloader.js"
+      "types": "./dist/web-components/autoloader.d.ts",
+      "default": "./dist/web-components/autoloader.js"
     },
     "./theme.css": "./theme.css",
     "./solid.css": "./solid.css",
     "./theme.tokens.css": "./dist/theme.tokens.css",
-    "./element-meta.json": "./src/elements/element-meta.json",
-    "./icon-names.json": "./src/elements/icon-names.json",
+    "./web-component-meta.json": "./src/web-components/web-component-meta.json",
+    "./icon-names.json": "./src/web-components/icon-names.json",
     "./package.json": "./package.json",
     "./react": {
       "types": "./dist/react/index.d.ts",
@@ -164,12 +168,12 @@
   },
   "files": [
     "dist",
-    "src/elements/element-meta.json",
-    "src/elements/icon-names.json",
+    "src/web-components/web-component-meta.json",
+    "src/web-components/icon-names.json",
     "bin",
     "!bin/**/*.test.js",
     "!dist/**/*.testlib.*",
-    "frameworks",
+    "!dist/blocks/**",
     "theme.css",
     "solid.css",
     "kit-base.css",
@@ -180,11 +184,11 @@
   "scripts": {
     "prepublishOnly": "npm run build",
     "prebuild": "npm run build:css && npm run build:card-validation",
-    "build": "KAI_BUILD=register vite build --config config/vite/elements.ts && KAI_BUILD=provider vite build --config config/vite/lib.ts && vite build --config config/vite/react.ts && KAI_BUILD=index vite build --config config/vite/lib.ts && KAI_BUILD=index.server vite build --config config/vite/lib.ts && KAI_BUILD=solid vite build --config config/vite/lib.ts && KAI_BUILD=solid.server vite build --config config/vite/lib.ts && KAI_BUILD=state vite build --config config/vite/lib.ts && KAI_BUILD=wire vite build --config config/vite/lib.ts && KAI_BUILD=stores vite build --config config/vite/lib.ts && KAI_BUILD=define vite build --config config/vite/lib.ts && KAI_BUILD=define.server vite build --config config/vite/lib.ts && KAI_BUILD=diagnostics vite build --config config/vite/lib.ts && KAI_BUILD=schemas vite build --config config/vite/lib.ts && KAI_BUILD=mcp vite build --config config/vite/node.ts && KAI_BUILD=construct-cli vite build --config config/vite/node.ts && KAI_BUILD=construct vite build --config config/vite/lib.ts && KAI_BUILD=construct-templates vite build --config config/vite/lib.ts && KAI_BUILD=builder vite build --config config/vite/page.ts && KAI_BUILD=theme-studio vite build --config config/vite/page.ts && npm run build:elements && npm run dedupe:shiki && npm run verify:elements-bundle && npm run verify:react-wrappers && npm run verify:shader-lazy",
-    "build:elements": "node scripts/gen-elements-manifest.mjs && KAI_BUILD=split vite build --config config/vite/elements.ts && node scripts/gen-element-dts.mjs",
+    "build": "KAI_BUILD=register vite build --config config/vite/web-components.ts && KAI_BUILD=provider vite build --config config/vite/lib.ts && vite build --config config/vite/react.ts && KAI_BUILD=index vite build --config config/vite/lib.ts && KAI_BUILD=index.server vite build --config config/vite/lib.ts && KAI_BUILD=solid vite build --config config/vite/lib.ts && KAI_BUILD=solid.server vite build --config config/vite/lib.ts && KAI_BUILD=state vite build --config config/vite/lib.ts && KAI_BUILD=wire vite build --config config/vite/lib.ts && KAI_BUILD=stores vite build --config config/vite/lib.ts && KAI_BUILD=define vite build --config config/vite/lib.ts && KAI_BUILD=define.server vite build --config config/vite/lib.ts && KAI_BUILD=diagnostics vite build --config config/vite/lib.ts && KAI_BUILD=schemas vite build --config config/vite/lib.ts && KAI_BUILD=construct vite build --config config/vite/lib.ts && KAI_BUILD=construct-templates vite build --config config/vite/lib.ts && npm run build:web-components && npm run dedupe:shiki && npm run verify:web-components-bundle && npm run verify:react-wrappers && npm run verify:shader-lazy",
+    "build:web-components": "node scripts/gen-web-components-manifest.mjs && KAI_BUILD=split vite build --config config/vite/web-components.ts && node scripts/gen-web-component-dts.mjs",
     "postbuild": "npm run build:theme && npm run build:api && npm run build:blocks && npm run build:schemas && npm run build:subpath-dts && npm run verify:dts && npm run verify:cdn-entries",
     "build:theme": "node scripts/build-theme-tokens.mjs",
-    "build:api": "node scripts/gen-elements-manifest.mjs && node scripts/gen-element-api.mjs && node scripts/gen-element-nonscalar.mjs && node scripts/gen-catalog.mjs && node scripts/gen-construct-schema.mjs && node scripts/gen-construct-template-fixtures.mjs",
+    "build:api": "node scripts/gen-web-components-manifest.mjs && node scripts/gen-web-component-api.mjs && node scripts/gen-web-component-nonscalar.mjs && node scripts/gen-catalog.mjs && node scripts/gen-construct-schema.mjs && node scripts/gen-construct-template-fixtures.mjs",
     "build:schemas": "node scripts/copy-card-schemas.mjs",
     "build:blocks": "node scripts/gen-blocks.mjs",
     "build:card-validation": "node scripts/gen-card-validation-schemas.mjs",
@@ -195,7 +199,7 @@
     "verify:consumer": "node scripts/verify-consumer-sideeffects.mjs",
     "verify:construct": "node scripts/verify-construct.mjs --self-test && node scripts/verify-construct.mjs",
     "verify:dts": "node scripts/verify-dts-boundaries.mjs --self-test && node scripts/verify-dts-boundaries.mjs",
-    "verify:elements-bundle": "node scripts/verify-elements-bundle.mjs --self-test && node scripts/verify-elements-bundle.mjs",
+    "verify:web-components-bundle": "node scripts/verify-web-components-bundle.mjs --self-test && node scripts/verify-web-components-bundle.mjs",
     "verify:fresh": "node scripts/verify-artifact-fresh.mjs --self-test && node scripts/verify-artifact-fresh.mjs",
     "verify:dts:consumer": "node scripts/verify-dts-consumer.mjs",
     "verify:generated": "node scripts/verify-generated-sync.mjs --self-test && node scripts/verify-generated-sync.mjs",
@@ -219,6 +223,10 @@
     "verify:playwright-projects": "node scripts/verify-playwright-projects.mjs --self-test && node scripts/verify-playwright-projects.mjs",
     "verify:starters": "node scripts/verify-starters.mjs",
     "lint:attachment-object-urls": "node scripts/lint-attachment-object-urls.mjs --self-test && node scripts/lint-attachment-object-urls.mjs",
+    "lint:layer-direction": "node scripts/lint-layer-direction.mjs --self-test && node scripts/lint-layer-direction.mjs",
+    "lint:dangling-imports": "node scripts/lint-dangling-imports.mjs --self-test && node scripts/lint-dangling-imports.mjs",
+    "lint:release-wiring": "node scripts/lint-release-wiring.mjs --self-test && node scripts/lint-release-wiring.mjs",
+    "lint:layer-names": "node scripts/lint-layer-names.mjs --self-test && node scripts/lint-layer-names.mjs",
     "lint:cdn-pins": "node scripts/lint-cdn-pins.mjs --self-test && node scripts/lint-cdn-pins.mjs --check-release-wiring && node scripts/lint-cdn-pins.mjs",
     "lint:llms-size": "node scripts/lint-llms-size.mjs --self-test && node scripts/lint-llms-size.mjs",
     "lint:pack-parse": "node scripts/lint-pack-json-parse.mjs --self-test && node scripts/lint-pack-json-parse.mjs",
@@ -228,6 +236,8 @@
     "lint:gate-parity": "node scripts/lint-gate-parity.mjs --self-test && node scripts/lint-gate-parity.mjs",
     "lint:thresholds": "node scripts/lint-threshold-derivation.mjs --self-test && node scripts/lint-threshold-derivation.mjs",
     "lint:story-conventions": "node scripts/lint-story-conventions.mjs --self-test && node scripts/lint-story-conventions.mjs",
+    "lint:prop-docs": "node scripts/lint-prop-docs.mjs --self-test && node scripts/lint-prop-docs.mjs",
+    "lint:comment-references": "node scripts/lint-comment-references.mjs --self-test && node scripts/lint-comment-references.mjs",
     "test": "vitest run",
     "test:react": "vitest run --config vitest.react.config.ts",
     "test:storybook": "vitest run --project=storybook",
@@ -238,9 +248,9 @@
     "dev": "npm run build:css && storybook dev -p 6006",
     "storybook": "npm run build:css && storybook dev -p 6006",
     "build-storybook": "npm run build:css && storybook build",
-    "build:css": "tailwindcss -i src/elements/styles.css -o src/elements/compiled.css --minify && npm run postprocess:css",
-    "build:css:watch": "tailwindcss -i src/elements/styles.css -o src/elements/compiled.css --watch",
-    "postprocess:css": "node scripts/postprocess-element-css.mjs --self-test && node scripts/postprocess-element-css.mjs",
+    "build:css": "tailwindcss -i src/web-components/styles.css -o src/web-components/compiled.css --minify && npm run postprocess:css",
+    "build:css:watch": "tailwindcss -i src/web-components/styles.css -o src/web-components/compiled.css --watch",
+    "postprocess:css": "node scripts/postprocess-web-component-css.mjs --self-test && node scripts/postprocess-web-component-css.mjs",
     "dev:provider": "vite ../../examples/internal/remote-provider --port 6007 --strictPort",
     "dev:host": "vite ../../examples/internal/remote-host --port 6006 --strictPort",
     "test:e2e": "playwright test --config config/playwright/cross-origin.config.ts",
@@ -256,18 +266,17 @@
     "test:promptinput": "playwright test --config config/playwright/storybook.config.ts --project=promptinput",
     "test:shot": "playwright test --config config/playwright/storybook.config.ts --project=shot",
     "test:audio-visualizer": "playwright test --config config/playwright/storybook.config.ts --project=audio-visualizer",
-    "test:audio-visualizer-band-shape": "playwright test --config config/playwright/storybook.config.ts --project=audio-visualizer-band-shape"
+    "test:audio-visualizer-band-shape": "playwright test --config config/playwright/storybook.config.ts --project=audio-visualizer-band-shape",
+    "test:geometry-token": "playwright test --config config/playwright/bare.config.ts --project=geometry-token"
   },
   "dependencies": {
     "@floating-ui/dom": "^1.7.6",
-    "@modelcontextprotocol/sdk": "^1.29.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "lucide-solid": "^0.400.0",
     "marked": "^18.0.0",
     "solid-element": "^1.9.1",
     "solid-js": "^1.9.0",
-    "tailwind-merge": "^3.0.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
@@ -283,6 +292,7 @@
     "@langchain/langgraph": "^1.4.9",
     "@langchain/openai": "^1.5.6",
     "@mastra/client-js": "^1.38.0",
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "@playwright/test": "^1.60.0",
     "@shikijs/langs": "^4.2.0",
     "@shikijs/themes": "^4.2.0",
@@ -326,6 +336,7 @@
     "svelte": "^5.56.4",
     "svelte-check": "^4.7.1",
     "tailwindcss": "^4.2.2",
+    "tailwind-merge": "^3.0.0",
     "tw-animate-css": "^1.4.0",
     "typescript": "^5.5.0",
     "vite": "^6.0.0",

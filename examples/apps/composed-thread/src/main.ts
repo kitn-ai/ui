@@ -2,7 +2,7 @@
 // elements. <kai-chat> is deliberately not used — kai-thread renders the
 // transcript, kai-composer takes input, and this module is the host that
 // wires one to the other (the kit has no store: host-coordinates).
-import '@kitn.ai/ui/elements'; // registers every <kai-*>; must come first
+import '@kitn.ai/ui/web-components'; // registers every <kai-*>; must come first
 import '@kitn.ai/ui/theme.tokens.css';
 
 import type {
@@ -16,7 +16,7 @@ import type {
   KaiToastRegionElement,
   MessagePart,
   ToastItem,
-} from '@kitn.ai/ui/elements';
+} from '@kitn.ai/ui/web-components';
 import { createAssistantStream, createMockResponder } from '@kitn.ai/ui/state';
 import { readOpenAIStream } from '@kitn.ai/ui/wire';
 

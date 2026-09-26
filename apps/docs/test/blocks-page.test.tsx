@@ -117,8 +117,8 @@ describe('the add command is per card', () => {
     render(() => <BlocksPage items={items} loadForm={loadForm} />);
     const commands = screen.getAllByTestId('add-command').map((el) => el.textContent?.trim());
     expect(commands).toEqual([
-      'npx create-kai add support-widget',
-      'npx create-kai add assistant',
+      'npx @kitn.ai/cli add support-widget',
+      'npx @kitn.ai/cli add assistant',
     ]);
   });
 

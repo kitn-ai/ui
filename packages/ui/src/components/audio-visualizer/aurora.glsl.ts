@@ -1,126 +1,34 @@
+// lint-comment-references: reference -- docs/provenance/aurora-clean-room.md is this port's audit record
 /**
- * Aurora ("veil") fragment shader.
+ * Aurora ("veil") fragment shader. ORIGINAL WORK for @kitn.ai/ui, from the clean-room
+ * fact sheet for LiveKit's public "aura" look plus the adopted prototype (mode 3, "veil"),
+ * never from LiveKit's agent-audio-visualizer-aura.tsx or its inlined GLSL (Polyform
+ * Non-Resale, never opened). docs/provenance/aurora-clean-room.md records what was checked.
  *
- * ORIGINAL WORK for @kitn.ai/ui. Written for Task 14 of
- * docs/superpowers/plans/2026-08-07-audio-visualizers.md, from two inputs
- * only:
- *   1. .superpowers/sdd/2026-08-07-audio-visualizers/reference/aura-prototype/
- *      lk-aura-factsheet.md -- a two-team clean-room functional spec (facts
- *      and mathematics; no code and no expression, and no identifiers
- *      beyond the public prop names and the uniform inventory, both
- *      disclosed in that document's own preamble) covering LiveKit's
- *      public "aura" visualizer look. What was checked, and how, is in
- *      `docs/provenance/aurora-clean-room.md` section 4.
- *   2. The adopted prototype's own `aura-proto.html` (mode 3, "veil"), which
- *      was itself implemented from that fact sheet by an author who never
- *      saw LiveKit's source.
+ * The construction: 36 phase-offset copies of one ring through the same 4-octave
+ * directional-sine warp cascade, fused into soft veils by an analytic neighbour-distance
+ * blur, written as TRUE premultiplied output where the fact sheet's own final write is
+ * "hotter than premultiplied" and darkens translucent edges over a light page.
  *
- * This file is NOT derived from, and was not written with reference to,
- * LiveKit's `agent-audio-visualizer-aura.tsx` or the aura GLSL inlined in
- * it. That component is Polyform Non-Resale 1.0.0, (c) UNCRN LLC -- a
- * license incompatible with publishing this package -- and was never
- * opened. The fact sheet's numbers and formulas (independently re-derived
- * and checked by hand below, not copied) are what stand in for it.
+ * Four departures from the fact sheet are marked inline: rotation sign (1), dark tonemap
+ * (2), brightness curves (3), edge asymmetry (4), each measured on rendered output.
  *
- * Its sibling `use-agent-audio-visualizer-aura.ts`, the DRIVING hook, is a
- * separate matter: that file is Apache-2.0 (repo license, no Polyform
- * header) and carries only the per-state behaviour, not the shader. It
- * contributes nothing to this file; the state targets it describes live in
- * `variant-aurora.tsx`.
- *
- * The construction: 36 phase-offset copies of one ring, each pushed through
- * the same 4-octave directional-sine warp cascade, fused into soft veils by
- * an analytic neighbour-distance blur -- see `auroraWarp` and the strand
- * loop in `mainImage`.
- *
- * One deliberate deviation from the fact sheet: section 1 states the
- * shipped output is "hotter than premultiplied" (written RGB may exceed
- * written alpha), and section 4 confirms the light-mode branch never
- * multiplies RGB by alpha or brightness at all. That is exactly the pattern
- * that produces dark fringes on translucent edges once composited with a
- * `premultipliedAlpha: true` canvas context over a light page background --
- * see the doc on `ShaderCanvas`'s `fragment` prop. This port keeps every
- * other number and formula but replaces the final write with true
- * premultiplied output, `fragColor = vec4(rgb * alpha, alpha)`.
- *
- * PARITY RE-TUNE (campaign task #6). A pixel-level behavioral audit
- * (examples/internal/livekit-parity scripts/aurora-audit.mjs) measured the
- * rendered output against the reference and this file was re-tuned to the
- * MEASURED targets -- numbers from screenshots and Rob's reference
- * recording, never from restricted source. Four departures from the
- * original fact-sheet pipeline, all clean-room rendering choices:
- *   1. Wind direction + solid-body rotation: the octave phase runs on
- *      NEGATIVE tau (the audit measured our lobes drifting counter-
- *      clockwise where the reference turns clockwise, ~+13..+20 deg/s when
- *      speaking), plus a per-state `uRotation` trim of the coordinate
- *      frame so each state's measured rotation lands on its reference
- *      value (see `auroraTargets` in variant-aurora.tsx).
- *   2. Dark tonemap is chroma-preserving with a steeper knee (11x/(1+11x)
- *      on the max channel, rescaled) plus an HSV shape-up: hue +0.013
- *      turns, saturation scaled by (1.02 + 0.35 * value) capped at 0.98.
- *      Rendered targets: hue ~197.5deg, saturation ~0.95 rising with
- *      brightness, never white (the audit measured the original
- *      per-channel 4x/(1+4x) map desaturating to ~0.72 and dragging hue
- *      toward green).
- *   3. Brightness is applied through strongly compressive curves
- *      ((b/1.5)^0.07 on colour, 0.97*(b/1.5)^0.09 on alpha, with a
- *      smoothstep alpha knee): the thinking/connecting pulse DRIVES
- *      0.5..2.5 but must RENDER inside roughly 0.5..0.65 mean brightness
- *      (the reference holds 0.53..0.65 where the linear map swung
- *      0.16..0.83 and blinked the ring out entirely at pulse minima).
- *   4. Edge falloff tightened (exp(2.3*spacing), was exp(2*spacing)) and
- *      made asymmetric: the OUTER side of the ring renders at 0.66x the
- *      inner width -- the reference's outer edge is consistently sharper
- *      than its inner one at every volume.
- *
- * Uniforms are declared by ShaderCanvas. Do not declare them here.
- *
- * Uniform contract (see the module doc in the Task 14 report for the full
- * per-state table):
- *   uColor       vec3  -- accent RGB, 0..1.
- *   uIntensity   float -- brightness/gain, fact sheet section 5's
- *                         "brightness" column directly (roughly 0.5..2.5,
- *                         NOT the 0..1 convention other variants use).
- *   uSpeed       float -- octave phase rate in rad/s, fact sheet section
- *                         5's `S / 20` directly (roughly 0.5..3.5).
- *   uComplexity  float -- warp spatial-frequency parameter, fact sheet
- *                         section 5's `freqParam` directly (roughly
- *                         0.4..1.25, default 0.5); mapped internally to
- *                         F = 2 + 13 * uComplexity.
- *   uAmplitude   float -- warp displacement amplitude, fact sheet section
- *                         5's `amplitude` column directly (roughly
- *                         0.5..1.2, default 1.0).
- *   uScale       float -- ring radius, fraction of half-canvas, fact sheet
- *                         section 5's `scale` column directly (0.2..0.3).
- *                         The caller is responsible for folding in the
- *                         instant voice-driven growth
- *                         (`0.2 + 0.2 * volume`, speaking state only,
- *                         fact sheet section 5) before setting this --
- *                         the shader does not read a separate volume
- *                         uniform to avoid double-applying it.
- *   uTheme       float -- < 0.5 selects the dark colour pipeline, >= 0.5
- *                         the light one (fact sheet section 4). This is a
- *                         genuine branch in the math, not just a
- *                         compositing background -- set it from the kit's
- *                         active theme, not a fixed constant.
- *   uRotation    float -- solid-body rotation rate of the whole figure,
- *                         rad/s, positive = CLOCKWISE on screen. A
- *                         parity-calibrated per-state trim on top of the
- *                         wind's own drift (see the module doc above and
- *                         `auroraTargets`); the caller pins it to 0 under
- *                         reduced motion, like uSpeed.
+ * Uniforms are declared by ShaderCanvas, never here. The contract (per-state table `auroraTargets`,
+ * variant-aurora.tsx): `uIntensity`, `uSpeed`, `uComplexity`, `uAmplitude` and `uScale` carry the fact
+ * sheet's columns at its ranges; `uTheme` (< 0.5 dark) is a real branch; `uRotation` is a parity-calibrated
+ * trim (positive = clockwise, 0 under reduced motion); `uColor` is accent RGB, 0..1.
  */
 export default `
 const float PI = 3.14159265359;
-// Strand phase span: 0.5 + pi (fact sheet section 2's "sigma", the
+// Strand phase span: 0.5 + pi (the fact sheet's "sigma", the
 // midpoint of the interval [1, 2*pi] with the interpolation knob fixed
 // at 0.5).
 const float STRAND_SIGMA = 0.5 + PI;
 const int STRAND_COUNT = 36;
 
 // 4-octave directional-sine warp cascade. M0 and the per-octave rotation B
-// (cos 0.6, sin 0.8, an exact ~53.13 degree rotation) are fact sheet
-// section 2's stated matrices; M1/M2/M3 = B composed with the previous
+// (cos 0.6, sin 0.8, an exact ~53.13 degree rotation) are the fact sheet's
+// stated matrices; M1/M2/M3 = B composed with the previous
 // octave's matrix, and each v_k is the first row of M_k. Hand-derived and
 // checked against the fact sheet's own listed v_0..v_3 below, not copied
 // from any source.
@@ -136,7 +44,7 @@ const vec2 WARP_V3 = vec2(-0.650, -0.083);
 // Displaces p through all 4 octaves. Octave k's phase carries k*tau, so
 // octave 0 is static in time and octave 3 moves fastest -- fine
 // corrugation slides across coarse folds, which reads as flowing wind
-// (fact sheet section 2, "Mechanism of the fold / wind").
+// (the fact sheet, "Mechanism of the fold / wind").
 vec2 auroraWarp(vec2 p, float phi, float tau, float freq, float amp) {
   vec2 x = p;
   float f = freq;
@@ -182,7 +90,7 @@ vec3 auroraHsv2Rgb(vec3 c) {
 }
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
-  // Fact sheet section 2: u in [0,1]^2, centered point p = u - 0.5, no
+  // Fact sheet: u in [0,1]^2, centered point p = u - 0.5, no
   // aspect correction -- the element is forced square by CSS, so this is
   // only correct on a square canvas (true for every audio-visualizer size).
   vec2 uv = fragCoord / iResolution.xy;
@@ -209,8 +117,8 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
   float ringRadius = uScale;
 
   vec3 hsv = auroraRgb2Hsv(uColor);
-  // Chain-seed strand, phase -1/36 NOT scaled by STRAND_SIGMA (fact sheet
-  // section 2), so inter-strand spacing is defined for strand 1 too.
+  // Chain-seed strand, phase -1/36 NOT scaled by STRAND_SIGMA (fact sheet),
+  // so inter-strand spacing is defined for strand 1 too.
   vec2 prevStrand = auroraWarp(p, -1.0 / float(STRAND_COUNT), tau, freq, amp);
 
   vec3 accum = vec3(0.0);
@@ -227,7 +135,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     // proportional to how far this strand's warp has drifted from its
     // neighbour's. Fanned regions (large spacing) fuse into soft veils;
     // bunched regions (small spacing) stay crisp -- this is what turns 36
-    // discrete rings into an aurora (fact sheet section 2). The 2.3 growth
+    // discrete rings into an aurora (the fact sheet). The 2.3 growth
     // rate (fact sheet's own is 2.0) and the 0.66x outer-side factor are
     // the parity edge calibration: the reference holds a 10-90% rise of
     // ~6-10px(2x) with the OUTER edge always the sharper of the two
@@ -245,13 +153,13 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     prevStrand = strand;
   }
 
-  // Mean soft coverage across all 36 strands (fact sheet section 2's image
+  // Mean soft coverage across all 36 strands (the fact sheet's image
   // accumulator I). The inverse-distance glow accumulator G is omitted: the
   // fact sheet states its gain ships as 0, so it contributes nothing.
   vec3 image = accum / float(STRAND_COUNT);
 
   // Deterministic per-pixel dither, +/- 1/510, identical on all channels
-  // (fact sheet section 3). Kept as a plain vec3 offset, not pre-mixed into
+  // (the fact sheet). Kept as a plain vec3 offset, not pre-mixed into
   // the image accumulator, so each branch can add it at the point the fact
   // sheet actually specifies (see the dark branch below).
   float n = fract(sin(dot(fragCoord, vec2(12.9898, 78.233))) * 43758.5453);
@@ -306,7 +214,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     rgb = clamp(tm * bVal, 0.0, 1.0);
     alpha = clamp(smoothstep(0.0, 0.50, luma) * bAlpha, 0.0, 1.0);
   } else {
-    // Light pipeline (fact sheet section 4): RGB1 = I, then add dither;
+    // Light pipeline (the fact sheet): RGB1 = I, then add dither;
     // brightness curve on vector length, hue direction kept, saturation
     // extrapolated 3x about gray.
     vec3 x1 = image + dither;

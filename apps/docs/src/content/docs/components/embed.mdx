@@ -1,6 +1,6 @@
 ---
 title: Embed
-description: A privacy-first lazy media embed that renders a poster and play button — no iframe, no third-party JS, no cookies — until the user clicks play.
+description: A video player that waits for a click before loading.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -13,7 +13,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kai-tag-sub">kai-embed</p>
 
-<p class="kai-lede">Drop a YouTube, Vimeo, or custom player into any generative-UI response — renders a poster and play button first; no provider iframe, scripts, or cookies load until the user clicks play.</p>
+<p class="kai-lede">Keeps a provider's scripts and cookies off the page until the reader presses play.</p>
 
 <Facts items={['Shadow DOM', 'YouTube · Vimeo · generic', 'Privacy-first lazy facade', 'Allowlist required for generic origins', 'Always-present "Open on provider" fallback']} />
 
@@ -22,7 +22,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 <Playground client:only="solid" tag="kai-embed" />
 
 <Aside type="tip" title="When to use">
-Reach for `<kai-embed>` when an AI response references a video and you want to surface it inline without silently loading third-party scripts. Ideal for YouTube and Vimeo links inside chat messages, cards, or document previews. For arbitrary iframe content use the `generic` provider — but only after allowlisting the origin with `configureEmbedAllowlist`.
+When a response references a video and you want it inline without silently loading third-party scripts. YouTube and Vimeo work as-is; `generic` needs an allowlisted origin.
 </Aside>
 
 ## Usage
@@ -32,7 +32,7 @@ Set `data` in JavaScript (it's an object, not an attribute) on the element:
 ```html
 <kai-embed id="em"></kai-embed>
 <script type="module">
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
 
   await customElements.whenDefined('kai-embed');
 
@@ -41,8 +41,8 @@ Set `data` in JavaScript (it's an object, not an attribute) on the element:
 </script>
 ```
 
-- **`provider`** — required; `'youtube'`, `'vimeo'`, or `'generic'`. YouTube uses `youtube-nocookie.com`; Vimeo appends `dnt=1`. Neither loads provider JS until play.
-- **`generic` embeds are blocked by default** — call `configureEmbedAllowlist(['https://your-player.example.com'])` before setting data. Any unlisted origin is rejected.
+- **`provider`**: required; `'youtube'`, `'vimeo'`, or `'generic'`. YouTube uses `youtube-nocookie.com` and Vimeo appends `dnt=1`; neither loads provider JS until play.
+- **`generic` embeds are blocked by default**: call `configureEmbedAllowlist(['https://your-player.example.com'])` before setting data, or the origin is rejected.
 - **Vimeo** has no static thumbnail URL — supply a `poster` URL or the facade renders without an image.
 - **"Open on provider"** is always visible; on click it fires `kai-card` with `{ kind: 'open', target: 'tab' }` — handle it to open the URL yourself.
 
@@ -64,13 +64,11 @@ An allowlisted `https` URL framed as a generic embed.
 
 ### Custom Aspect Ratio (9:16)
 
-Set `aspectRatio` to `'9:16'` for a vertical short.
-
 <Example client:visible tag="kai-embed" data="aspectRatio916" />
 
 ### Blocked-Embed Fallback
 
-Some providers block framing via `X-Frame-Options` or CSP. The **"Open on provider"** affordance is always visible, so a blocked embed is never a dead end.
+Some providers block framing via `X-Frame-Options` or CSP. The always-visible **"Open on provider"** affordance means a blocked embed is never a dead end.
 
 <Example client:visible tag="kai-embed" data="youtube" />
 

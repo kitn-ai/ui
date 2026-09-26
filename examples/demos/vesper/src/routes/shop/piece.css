@@ -1,0 +1,45 @@
+.piece { padding-top: 24px }
+.piece-crumbs {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 24px;
+}
+.piece-crumbs a { text-decoration: none; color: var(--ink2) }
+.piece-crumbs a:hover { color: var(--ink) }
+
+.piece-guide-link {
+  background: none;
+  border: 0;
+  padding: 0;
+  margin-top: 16px;
+  cursor: pointer;
+  font-family: var(--body-font);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink2);
+  border-bottom: 1px solid var(--line);
+}
+.piece-guide-link:hover { color: var(--ink); border-color: var(--ink) }
+
+.piece-section { margin-top: 60px }
+.piece-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px }
+.piece-strip-card { text-decoration: none; color: inherit }
+.piece-strip-card .photo {
+  aspect-ratio: 4 / 5;
+  transition: transform var(--t-mid) var(--ease);
+}
+.piece-strip-card:hover .photo { transform: translateY(-4px) }
+.piece-strip-name { display: block; font-size: 16px; padding-top: 12px }
+.piece-missing { padding: 80px 30px; text-align: center }
+.piece-missing h1 { font-size: 32px; margin-bottom: 22px }
+
+@media (max-width: 640px) {
+  .piece-strip { grid-template-columns: 1fr 1fr; gap: 14px }
+  .piece-strip-card:nth-child(3) { display: none }
+}

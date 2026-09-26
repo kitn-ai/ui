@@ -1,39 +1,23 @@
 // The recorder hook: `window.__KAI_DEVTOOLS_HOOK__`.
 //
-// The panel floats free of the kit -- it is CDN-delivered, arrives whenever the
-// page gets to it, and is a LATE SUBSCRIBER by design. This is the object it
-// attaches to: drain the history, then stream live.
+// The panel floats free of the kit: CDN-delivered, arriving whenever the page gets to
+// it, and a LATE SUBSCRIBER by design. This is the object it attaches to: drain the
+// history, then stream live. Unlike React's hook, which must install before React loads,
+// ours is inside the kit, so it is present as soon as the kit is -- which is the whole
+// reason the buffer exists.
 //
-// This is React DevTools' shape minus its hardest constraint. React's hook must
-// be installed BEFORE React loads, which is why it ships as an extension running
-// at document_start. Ours does not: the recorder is inside the kit, so it is
-// present as soon as the kit is. That is the whole reason the buffer exists.
+// TWO BRANCHES, decided ONCE, SYNCHRONOUSLY, at install. Synchronous is a hard
+// requirement: an async answer means an interval of "unknown", which forces a permanent
+// ring buffer with a size nobody can choose well.
 //
-// TWO BRANCHES, decided ONCE, SYNCHRONOUSLY, at install.
+//   NOT WANTED -- no buffer, no subscription, so `wireDiagnosticsActive()` stays false and
+//   emission remains a guarded no-op. The hook is still installed: a few bytes carrying
+//   `activate()`, which lets a panel attach later.
 //
-// Synchronous is a hard requirement, not a preference: an async answer means an
-// interval of "unknown", and an interval of unknown is exactly what forces a
-// permanent ring buffer with a size constant nobody can choose well. The events
-// that explain a session are almost always its first ones, so a buffer small
-// enough to be free has usually discarded the answer by the time anyone looks,
-// and a buffer large enough to hold it charges every production user of every
-// app for a panel almost none of them open.
+//   WANTED -- capture from the first event, uncapped, before the panel exists; once it
+//   attaches the panel owns retention.
 //
-//   NOT WANTED -- no buffer is allocated and no subscription is made, so
-//   `wireDiagnosticsActive()` stays false and emission remains a guarded no-op.
-//   The hook is still installed: it is a few bytes, it carries `activate()`, and
-//   it is what lets a panel attach later at all. A dormant panel does not
-//   subscribe, which is what keeps a permanently pasted script tag genuinely
-//   dormant rather than quietly recording.
-//
-//   WANTED -- capture from the first event, uncapped, before the panel exists.
-//   Until the panel attaches nothing bounds the buffer, and that window is the
-//   seconds the panel takes to load; after it attaches the panel owns retention,
-//   because the data lives there rather than here.
-//
-// SSR: no `window`, no `localStorage` and no `location` touched at module scope,
-// and installing is a no-op without a window. Server-side there is no signal to
-// read, so the answer is no and the recorder never starts.
+// SSR: no `window` or `localStorage` at module scope, so it never starts server-side.
 import {
   setWirePayloadCapture,
   subscribeWireDiagnostics,
@@ -68,65 +52,49 @@ export interface KaiDevtoolsHook {
   /** The seam. A panel newer than the kit it attached to has to be able to say
    *  so, which is the whole reason this is on the hook rather than inferred. */
   version: 1;
-  /** True iff the signal was set AT INSTALL. Not reactive: the capture model
-   *  turns on one branch or the other exactly once, and a panel reading `false`
-   *  here is reading "this session has no history", which stays true. */
+  // The capture model turns on one branch or the other exactly once, and a panel reading
+  // `false` here is reading "this session has no history", which stays true.
+  /** True iff the signal was set at install. Not reactive. */
   recording: boolean;
-  /** True iff the PAYLOAD signal was set at install -- a separate switch from
-   *  `recording`, read at the same moment and just as un-reactive.
-   *
-   *  `recording` without this is the default and the safe one: the shape of a
-   *  conversation, and none of its content. A panel renders the difference so a
-   *  developer knows which one they are looking at. */
+  // Read at the same moment as `recording` and just as un-reactive. `recording`
+  // without this is the default and the safe one: the shape of a conversation, and
+  // none of its content. A panel renders the difference so a developer knows which
+  // one they are looking at.
+  /** True iff the payload signal was set at install, a separate switch from `recording`. */
   payload: boolean;
-  /** The buffered history, and CLEARS it. `[]` on the dormant branch, always.
-   *
-   *  Kept for contract compatibility, but `attach` is what a panel should use:
-   *  pairing this with `subscribe` cannot be done without a race (see there). */
+  // Kept for contract compatibility, but `attach` is what a panel should use: pairing
+  // this with `subscribe` cannot be done without a race (see there).
+  /** The buffered history, and clears it. `[]` on the dormant branch, always. */
   drain(): KaiDiagnosticEvent[];
-  /** Live events from now on. Works on both branches -- subscribing is what
-   *  re-arms emission, so a panel can attach mid-session and see events from
-   *  that moment forward, with no history.
-   *
-   *  SUSPENDS BUFFER RETENTION while it is active, exactly as `attach` does:
-   *  any listener means the kit stops retaining and the listener owns the data.
-   *  Deliberate, and worth knowing before you add a passive logger -- one that
-   *  subscribes and never drains stops history accumulating for a panel that
-   *  attaches later, which will then see only the gap forward. */
+  // SUSPENDS BUFFER RETENTION while it is active, exactly as `attach` does: any listener
+  // means the kit stops retaining and the listener owns the data. Worth knowing before you
+  // add a passive logger -- one that subscribes and never drains stops history accumulating
+  // for a panel that attaches later, which will then see only the gap forward.
+  /** Live events from now on. Works on both branches: subscribing is what re-arms emission. */
   subscribe(fn: (e: KaiDiagnosticEvent) => void): () => void;
-  /**
-   * History and live delivery in ONE synchronous step. Returns the unsubscribe.
-   *
-   * THIS IS THE ONE A PANEL WANTS, and the reason is that the obvious pairing
-   * of the two calls above is racy in BOTH orders: `drain()` then `subscribe()`
-   * silently loses an event that lands between them, while `subscribe()` then
-   * `drain()` delivers that event twice. Neither order is fixable from outside,
-   * because the gap is between two calls the caller does not control.
-   *
-   * Here the buffered events are handed over, the buffer cleared and the
-   * subscription installed without an await or a task boundary anywhere
-   * between, so there is no instant at which an event can arrive and find
-   * itself either unowned or owned twice.
-   *
-   * Additive, so `version` stays 1: the forward-compat rules allow new members,
-   * and an older panel that never calls this keeps working unchanged.
-   */
+  // THIS IS THE ONE A PANEL WANTS: pairing the two calls above is racy in BOTH orders --
+  // `drain()` then `subscribe()` silently loses an event that lands between them, while
+  // `subscribe()` then `drain()` delivers that event twice, and neither order is fixable
+  // from outside because the gap is between two calls the caller does not control. Here
+  // the buffered events are handed over, the buffer cleared and the subscription installed
+  // without an await or a task boundary anywhere between, so there is no instant at which
+  // an event can arrive and find itself either unowned or owned twice. Additive, so
+  // `version` stays 1: the forward-compat rules allow new members.
+  /** History and live delivery in one synchronous step. Returns the unsubscribe. */
   attach(fn: (e: KaiDiagnosticEvent) => void): () => void;
-  /** Set the signal and reload, so the next load records from the first event.
-   *  Reload is the primary path because it is the only one that yields HISTORY,
-   *  and the answer is usually near the beginning of a session. */
+  // Reload is the primary path because it is the only one that yields HISTORY, and the
+  // answer is usually near the beginning of a session.
+  /** Set the signal and reload, so the next load records from the first event. */
   activate(): void;
 }
 
 declare global {
   interface Window {
-    /** The app's own opt-in, set before the kit loads. A DIFFERENT name from
-     *  the hook: this is the app talking to us.
-     *
-     *  `true` activates with metadata only. `'payload'` and `{ payload: true }`
-     *  activate AND capture content -- an app that reaches for the object form
-     *  is explicitly asking for both, and having it activate nothing would be a
-     *  footgun with no upside. `{ payload: false }` activates only. */
+    // A DIFFERENT name from the hook: this is the app talking to us. `true` activates with
+    // metadata only; `'payload'` and `{ payload: true }` activate AND capture content, and
+    // an app that reaches for the object form is explicitly asking for both. `{ payload: false }`
+    // activates only.
+    /** The app's own opt-in, set before the kit loads. */
     __KAI_DEVTOOLS__?: boolean | 'payload' | { payload?: boolean };
     __KAI_DEVTOOLS_HOOK__?: KaiDevtoolsHook;
   }
@@ -312,7 +280,7 @@ function createHook(recording: boolean, payload: boolean): KaiDevtoolsHook {
  * server, where there is no signal to read and nothing to record.
  *
  * Importing this module installs NOTHING. The call site decides, and in this kit
- * that call site is `elements/register-impl.ts`, which is already browser-only.
+ * that call site is `web-components/register/register-impl.ts`, which is already browser-only.
  * An app that imports the Solid components directly never runs that file and
  * must call this itself; see the module docblock in `./index.ts`.
  */

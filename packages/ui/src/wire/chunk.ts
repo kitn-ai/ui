@@ -1,19 +1,18 @@
 // The provider-neutral chunk surface. Everything the adapter needs out of one
 // streaming chunk, and nothing else. A WireFormat maps a decoded provider frame
 // onto these; nothing below this line knows a provider exists.
-import type { RawOrigin, ToolPart } from '../components/tool-types';
-import type { MessagePart, MessageSource } from '../elements/chat-types';
+import type { RawOrigin, ToolPart } from '../components/tool/tool-types';
+import type { MessagePart, MessageSource } from '../web-components/chat/chat-types';
 import type { ReasoningOpts } from '../state/parts';
 
 /** One fragment of a tool call. */
 export interface ModelToolCallDelta {
-  /**
-   * The ONLY thing correlating fragments, and its NAMESPACE IS FORMAT-DEFINED.
-   * `openaiChatFormat` uses the position in `delta.tool_calls`;
-   * `anthropicMessagesFormat` uses the content-block index. Both are correct and
-   * both are stable within one stream, but they are not the same number, so a
-   * third-party format must pick one and stay consistent with itself.
-   */
+  // The ONLY thing correlating fragments, and its namespace is FORMAT-DEFINED:
+  // `openaiChatFormat` uses the position in `delta.tool_calls`,
+  // `anthropicMessagesFormat` the content-block index. Both are correct and both are
+  // stable within one stream, but they are not the same number, so a third-party
+  // format picks one and stays consistent with itself.
+  /** Correlates fragments within one stream. Its numbering is defined by the format. */
   index: number;
   id?: string;
   /** Usually whole on the first fragment; a few providers split it. */
@@ -42,38 +41,29 @@ export interface ModelUsage {
 
 export interface ModelStreamChunk {
   text?: string;
-  /**
-   * The model id the RESPONSE stated, verbatim; REPORT, NEVER INFER.
-   *
-   * Read from the response rather than the request, which is what makes it work
-   * at all when the app builds its own fetch and the kit never sees what was
-   * asked for. Providers commonly resolve an alias (ask for `gpt-4o`, get
-   * `gpt-4o-2024-08-06`); through a gateway the value is the gateway's own id.
-   * Both are reasons to pass the string through untouched.
-   *
-   * It is NOT guaranteed. A proxy can strip or rewrite it and a custom endpoint
-   * may omit it, so a consumer renders it as ABSENT when it is absent. Filling
-   * the gap with the requested id would lie in exactly the requested-vs-served
-   * mismatch this field exists to catch.
-   */
+  // REPORT, NEVER INFER, and read from the RESPONSE rather than the request: that is
+  // what makes it work when the app builds its own fetch and the kit never sees what
+  // was asked for. Providers resolve aliases (ask for `gpt-4o`, get
+  // `gpt-4o-2024-08-06`), and through a gateway the value is the gateway's own id.
+  // NOT guaranteed: a proxy can strip or rewrite it and a custom endpoint may omit
+  // it, so a consumer renders it as ABSENT when it is absent. Filling the gap with the
+  // requested id would lie in exactly the requested-vs-served mismatch this catches.
+  /** The model id the RESPONSE stated, verbatim. Absent when the provider omits it. */
   model?: string;
-  /**
-   * Reasoning delta. `''` is MEANINGFUL, not a no-op: a redacted block has no
-   * readable text but still carries a payload that must round-trip, and a format
-   * uses an empty delta to OPEN a reasoning part at the right position in the
-   * stream so block order survives into `parts`.
-   */
+  // `''` is MEANINGFUL, not a no-op: a redacted block has no readable text but still
+  // carries a payload that must round-trip, and a format uses an empty delta to OPEN a
+  // reasoning part at the right position in the stream so block order survives into
+  // `parts`.
+  /** Reasoning delta. An empty string opens a reasoning part at this position. */
   reasoning?: string;
   /** The provider's BLOCK index. Keeps parallel reasoning blocks distinct.
    *  Omitted means block 0, the single-block case every provider degrades to. */
   reasoningIndex?: number;
-  /**
-   * The UNTRANSLATED provider payload for this reasoning block. Valid on a chunk
-   * with NO reasoning text at all, which is the whole point: Anthropic returns
-   * 400 if a `thinking` block is modified, reordered or RECONSTRUCTED, so an
-   * encoder has to echo the original block rather than rebuild one from `text`
-   * plus `signature`.
-   */
+  // Valid on a chunk with NO reasoning text at all, which is the whole point:
+  // Anthropic returns 400 if a `thinking` block is modified, reordered or
+  // RECONSTRUCTED, so an encoder has to echo the original block rather than rebuild
+  // one from `text` plus `signature`.
+  /** The untranslated provider payload for this reasoning block, echoed back on encode. */
   reasoningRaw?: RawOrigin;
   /** Informational. `reasoningRaw` is the round-trip channel, not this. */
   reasoningSignature?: string;
@@ -185,56 +175,41 @@ export interface ModelTurn {
 export interface ConsumeOptions {
   /** Label for the reasoning disclosure. Defaults to 'Thinking'. */
   reasoningLabel?: string;
-  /**
-   * Correlates diagnostics and namespaces reasoning parts for this consume call;
-   * assigned automatically when absent.
-   *
-   * Supply one only to tie a read to an id you already hold. Two reads into the
-   * SAME sink must not share a value: the id is what keeps a second round's
-   * block 0 from merging into the first round's reasoning part.
-   */
+  // Supply one only to tie a read to an id you already hold. Two reads into the SAME
+  // sink must not share a value: the id is what keeps a second round's block 0 from
+  // merging into the first round's reasoning part.
+  /** Correlates diagnostics and namespaces reasoning parts for this read; assigned when absent. */
   streamId?: string;
-  /**
-   * The app's own grouping of several reads into ONE logical turn, carried onto
-   * every diagnostic event this read emits.
-   *
-   * THE KIT REPORTS WHAT THE APP DECLARES AND GROUPS NOTHING ON ITS OWN. A chat
-   * app running a tool loop, or fanning out to sub-agents, makes several model
-   * calls that belong to one turn; the kit sees one Response at a time and has
-   * no way to know which ones those are. So it does not guess:
-   *
-   *   readOpenAIStream(res, sink, { traceId: 'turn-42', label: 'planner' })
-   *
-   * Absent when not supplied -- the key is not present on the events at all,
-   * rather than present and undefined. Purely diagnostic: nothing in the parse
-   * branches on it and it never reaches a provider.
-   */
+  // THE KIT REPORTS WHAT THE APP DECLARES AND GROUPS NOTHING ON ITS OWN. A chat app
+  // running a tool loop, or fanning out to sub-agents, makes several model calls that
+  // belong to one turn; the kit sees one Response at a time and has no way to know
+  // which ones those are, so it does not guess:
+  //
+  //   readOpenAIStream(res, sink, { traceId: 'turn-42', label: 'planner' })
+  //
+  // Absent when not supplied: the key is not present on the events at all rather than
+  // present and undefined. Nothing in the parse branches on it and it never reaches a
+  // provider.
+  /** The app's own grouping of several reads into one logical turn. Diagnostic only. */
   traceId?: string;
-  /** The app's name for THIS read inside its trace (`'planner'`,
-   *  `'executor'`, `'retry-2'`). Carried onto every diagnostic event, and
-   *  absent when not supplied. Never derived from the format or the model.
-   *
-   *  Not to be confused with `reasoningLabel`, which is UI copy for the
-   *  reasoning disclosure; this one is never rendered to an end user. */
+  // Not to be confused with `reasoningLabel`, which is UI copy for the reasoning
+  // disclosure; this one is never rendered to an end user.
+  /** The app's name for THIS read inside its trace (`'planner'`, `'retry-2'`). Never rendered. */
   label?: string;
-  /** Fires once per tool call the moment its arguments parse cleanly. This is
-   *  the hook a host's tool loop waits on. There is deliberately no
-   *  per-fragment callback: `ToolPart.rawInput` is written on every fragment,
-   *  so the streaming text is already on the part. */
+  // Deliberately no per-fragment callback: `ToolPart.rawInput` is written on every
+  // fragment, so the streaming text is already on the part. This is the hook a host's
+  // tool loop waits on.
+  /** Fires once per tool call, the moment its arguments parse cleanly. */
   onToolCallReady?: (call: ModelToolCall) => void;
 }
 
 /** Per-stream state for one format. */
 export interface WireFormatReader {
-  /**
-   * Map one decoded frame onto zero or more neutral chunks. Returns an ARRAY
-   * because the mapping is not one-to-one: an Anthropic `message_start` yields
-   * usage, a `content_block_start` for `tool_use` yields an id-plus-name delta,
-   * a `ping` yields nothing.
-   *
-   * MUST NOT throw on an unrecognized frame. Return `[]` instead: providers add
-   * event types without warning.
-   */
+  // Returns an ARRAY because the mapping is not one-to-one: an Anthropic `message_start`
+  // yields usage, a `content_block_start` for `tool_use` yields an id-plus-name delta,
+  // a `ping` yields nothing. MUST NOT throw on an unrecognized frame: return `[]`,
+  // because providers add event types without warning.
+  /** Maps one decoded frame onto zero or more neutral chunks. */
   push(frame: unknown): ModelStreamChunk[];
 }
 

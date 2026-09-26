@@ -1,6 +1,6 @@
 ---
 title: Chain Of Thought
-description: A connected step list that surfaces an agent's reasoning trace — each step has an always-visible label and optional collapsible detail.
+description: A step-by-step list of an agent's reasoning.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -15,7 +15,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kai-tag-sub">kai-chain-of-thought</p>
 
-<p class="kai-lede">A vertically connected list of reasoning steps — each step shows its label at all times and reveals optional detail on expand.</p>
+<p class="kai-lede">Shows the plan behind an answer, with the detail hidden until the reader asks for it.</p>
 
 <Facts items={['Shadow DOM', 'Property-driven API', 'Declarative kai-step children', 'Expandable detail per step', 'Prop + child steps merge']} />
 
@@ -24,7 +24,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 <Playground client:only="solid" tag="kai-chain-of-thought" />
 
 <Aside type="tip" title="When to use">
-Place `<kai-chain-of-thought>` above or below an assistant message to show the model's step-by-step plan or reasoning trace. It is `display: block` and sizes to content height — no fixed height needed. In SolidJS, compose `ChainOfThought`, `ChainOfThoughtStep`, `ChainOfThoughtTrigger`, and `ChainOfThoughtContent` directly for finer animation control.
+Above or below an assistant message, to show the model's plan or reasoning trace. It is `display: block` and sizes to content height, so it needs no fixed height.
 </Aside>
 
 ## Usage
@@ -35,7 +35,7 @@ Set `steps` in JavaScript — it's an array, so it can't be an HTML attribute:
 <kai-chain-of-thought id="cot"></kai-chain-of-thought>
 
 <script type="module">
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
   document.getElementById('cot').steps = [
     { label: 'Understand the request', content: 'The user wants composable web components.' },
     { label: 'Design the API', content: 'Route 1: variant + flags; rich data via properties.' },
@@ -65,13 +65,11 @@ Set `steps` in JavaScript — it's an array, so it can't be an HTML attribute:
 
 ### Agent Plan
 
-A five-step trace covering a realistic code-review workflow.
-
 <Example client:visible tag="kai-chain-of-thought" data="agentPlan" />
 
 ### Two-Step Query Trace
 
-Every step has expandable detail — no label-only summary.
+Every step has expandable detail, with no label-only summary.
 
 <Example client:visible tag="kai-chain-of-thought" data="short" />
 

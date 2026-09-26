@@ -67,7 +67,7 @@ describe('the svelte form', () => {
 
   it('does the registration await inside onMount, which never runs on the server', () => {
     const adapter = byPath(renderSvelteForm(block())).get('useFixture.svelte.ts')!;
-    expect(adapter).toContain("import '@kitn.ai/ui/elements';");
+    expect(adapter).toContain("import '@kitn.ai/ui/web-components';");
     expect(adapter).toContain(`const TAGS = ['kai-conversation-item', 'kai-conversations', 'kai-dock'];`);
     expect(adapter).toMatch(/onMount\(\(\) => \{[\s\S]*customElements\.whenDefined/);
     // `customElements` does not exist on the server, and a SvelteKit page
@@ -93,7 +93,7 @@ describe('the svelte form', () => {
   it('gates the tree on ready, and takes the ref through bind:this', () => {
     const sfc = byPath(renderSvelteForm(block())).get('Fixture.svelte')!;
     expect(sfc).toContain('{#if fixture.ready}');
-    expect(sfc).toContain("import type { KaiDockElement } from '@kitn.ai/ui/elements';");
+    expect(sfc).toContain("import type { KaiDockElement } from '@kitn.ai/ui/web-components';");
     expect(sfc).toContain('let dock = $state<KaiDockElement | null>(null);');
     expect(sfc).toContain('bind:this={dock}');
     expect(sfc).toContain('useFixture(() => ({ dock }))');

@@ -11,7 +11,9 @@ import ChatHeaderDemo from '../../../components/ChatHeaderDemo.tsx';
 <ChatHeaderDemo client:only="solid" />
 
 <Aside type="note" title="kai-chat vs kai-workspace">
-`<kai-chat>` is the **conversation** — thread, composer, header. It has no sidebar of its own, so here the rail and its toggle are wired by the demo (full control over the layout). If you want a **managed, collapsible conversation sidebar** without wiring it yourself, reach for [`<kai-workspace>`](/components/workspace/) instead — it owns the sidebar (and its collapse is controllable). Use `kai-chat` + header slots when you want to build the shell yourself; use `kai-workspace` when you don't.
+`<kai-chat>` is the **conversation** — thread, composer, header. It has no sidebar of its own, so here the rail and its toggle are wired by the demo (full control over the layout).
+
+If you want a **managed, collapsible conversation sidebar** without wiring it yourself, reach for [`<kai-workspace>`](/components/workspace/) instead — it owns the sidebar (and its collapse is controllable). Use `kai-chat` + header slots when you want to build the shell yourself; use `kai-workspace` when you don't.
 </Aside>
 
 ## How it works

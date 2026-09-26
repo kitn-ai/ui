@@ -4,11 +4,7 @@ import solidPlugin from 'vite-plugin-solid';
 import dts from 'vite-plugin-dts';
 import { relative, resolve } from 'node:path';
 
-// Matches an actual import specifier crossing the mcp/ boundary
-// ('../../mcp/...' or import('../../mcp/...')), not any mention of "/mcp/"
-// -- a TSDoc comment that merely names the mcp/ directory must not trip the
-// rewrite/throw below.
-const MCP_SPECIFIER = /(?:from|import\()\s*['"]\.\.\/\.\.\/mcp\//;
+import { rewriteMcpDtsSpecifiers } from './mcp-dts-rewrite';
 
 // One config for every library subpath bundle. Selected by KAI_BUILD, one value
 // per emitted file, named after the output stem so the mapping needs no lookup.
@@ -36,10 +32,10 @@ const MCP_SPECIFIER = /(?:from|import\()\s*['"]\.\.\/\.\.\/mcp\//;
 // those files exists any more. To read one: `vite.config.<stem>.ts` is the
 // `<stem>` key in the TARGETS table below, except `barrel` (now `index`) and
 // `barrel.server` (now `index.server`). `vite.config.construct-cli.ts` is the
-// `construct-cli` target in config/vite/node.ts. And `vite.config.ts` -- the
+// `construct-cli` target in packages/cli/config/vite/node.ts. And `vite.config.ts` -- the
 // register-all build that runs first and is the only emptyOutDir:true build
 // writing to dist/ root -- is now `KAI_BUILD=register vite build --config
-// config/vite/elements.ts`.
+// config/vite/web-components.ts`.
 
 // This file lives two levels below the package root, so entries resolve from
 // PKG rather than __dirname. Vite's `root` is process.cwd(), always packages/ui
@@ -58,6 +54,63 @@ interface Target {
   /** 'dom' = Solid's client transform, 'ssr' = the server transform, 'none' = no Solid plugin. */
   transform: 'dom' | 'ssr' | 'none';
   external?: (string | RegExp)[];
+  /**
+   * Emit one file per SOURCE module instead of one aggregate module.
+   *
+   * WHY: one 711 kB aggregate module is opaque to a consumer's bundler. Rollup's
+   * statement-level DCE cannot remove a module-scope init it cannot prove pure, so
+   * `import { cn } from '@kitn.ai/ui'` retained ~121 kB of eager code — `marked`,
+   * `lucide-solid` and the rest of the component tree included — no matter what got
+   * imported. Per-module output moves that decision to the MODULE graph, where whole
+   * modules drop the way they do in any normal dependency. Measured on a scratch app
+   * against the packed tarball (Vite 8/Rolldown, minified, eager = statically
+   * reachable only): `cn`-only 125,975 -> 28,575 B, `Button`-only 126,253 ->
+   * 49,143 B, three components 128,392 -> 50,684 B. In the `cn`-only bundle the
+   * remaining modules are `tailwind-merge` (27,922 B), `clsx` (362 B) and
+   * utils/cn.js (144 B); `marked` and `lucide-solid` are gone from the output
+   * entirely, and the twelve lazy highlighter chunks it used to pull in are gone
+   * with them. The `./solid` namespace import (the ceiling) is unchanged, as it
+   * should be.
+   *
+   * WHERE IT IS SET: on all four barrels a consumer resolves — the two client
+   * barrels `index` (".") and `solid` ("./solid"), plus their server twins
+   * `index.server` and `solid.server` (the `node` / `worker` / `deno` halves of
+   * the same exports entries).
+   *
+   * · `state` / `wire` / `stores` stay aggregate because they are promised
+   *   self-contained for a raw CDN URL (see the comment above this table).
+   *   Per-module output would replace that self-containment with relative
+   *   `./x.js` specifiers, so they are out of scope by contract, not by
+   *   measurement.
+   * · THE SERVER TWINS, MEASURED. Until the twins were included here, the
+   *   `node` / `worker` / `deno` conditions resolved to the aggregate
+   *   `dist/index.server.js` (626,182 B) / `dist/solid.server.js`, so an SSR or
+   *   serverless consumer paid the same unpurgeable floor this change removed on
+   *   the client. Measured on the packed tarball in a scratch app, built under
+   *   the `node` condition (Vite 8/Rolldown, minified, eager = entry chunk plus
+   *   its static import closure, one probe per invocation): importing `cn` alone
+   *   from `@kitn.ai/ui` cost 103,311 B eager against the aggregate
+   *   `dist/index.server.js` and 28,353 B against `dist/index.js` under `browser` —
+   *   3.6x the client figure for an import that reaches none of it. On the twins
+   *   the same probe lands at 28,388 B. The current pair is asserted, not restated:
+   *   the `node-cn` probe in EAGER_PROBES
+   *   (scripts/verify-consumer-sideeffects.mjs) is where the figures are kept.
+   * · THE TWINS MUST NOT LAND ON THE CLIENT'S FILE PATHS. Same entry, same
+   *   source modules, different transform: an SSR twin emitting `[name].js` would
+   *   overwrite `dist/components/badge.js` with the server transform and
+   *   `dist/index.js` would then import it — unobservable in a diff, surfacing as
+   *   a client bundle throwing "Client-only API used on the server side". So an
+   *   SSR per-module target emits `[name].server.js`, which is also the filename
+   *   the `exports` map already names for it. See PER_MODULE_OUTPUT below.
+   *
+   * ONE CONSEQUENCE TO KNOW ABOUT: this materialises the kit's inlined dependencies
+   * as real modules under `dist/node_modules/**` (they are what the consumer's
+   * bundler can now drop), which is a nested `node_modules` inside a published
+   * package — a path some tooling special-cases or strips. `npm pack` includes it,
+   * `verify:consumer` bundles it, and renaming it (e.g. `dist/vendor/`) would be a
+   * separate change with its own verification.
+   */
+  perModule?: boolean;
   /** vite-plugin-dts options, for the targets that own a declaration emit. */
   dts?: Parameters<typeof dts>[0];
 }
@@ -118,6 +171,7 @@ const TARGETS: Record<string, Target> = {
     fileName: 'index.js',
     transform: 'dom',
     external: SOLID_ELEMENT,
+    perModule: true,
     dts: {
       include: ['src/**/*.ts', 'src/**/*.tsx'],
       exclude: [
@@ -143,44 +197,28 @@ const TARGETS: Record<string, Target> = {
       // A handful of SHIPPED declarations under dist/components/ (three at the
       // time of writing; read the count off the tree with
       // `grep -rln "\.\./agent-tooling/" dist --include='*.d.ts'`, never off
-      // this comment) import the construct
-      // schema and the template registry across the boundary by a relative
-      // path. That worked for free while the source lived at
-      // src/agent-tooling/: src/components -> ../agent-tooling and
-      // dist/components -> ../agent-tooling are the same string. With the
+      // this comment) import the construct schema and the template registry
+      // across the boundary by a relative path. That worked for free while the
+      // source lived at src/agent-tooling/: src/components -> ../agent-tooling
+      // and dist/components -> ../agent-tooling are the same string. With the
       // source at mcp/, the source specifier is '../../mcp/construct/schema'
       // and tsc emits it verbatim, where from dist/components/ it points
       // outside dist/ at a directory `files` does not ship. A consumer's tsc
-      // then cannot resolve Construct, and the emit itself says nothing: it
-      // succeeds and the bytes look plausible. One thing downstream does say
-      // so -- `verify:dts` (scripts/verify-dts-boundaries.mjs, self-tested)
-      // runs in `postbuild` and fails on any relative specifier resolving
-      // outside dist/. That is a backstop, not the mechanism: it fires after
-      // the whole emit, names the file rather than the depth, and does not
-      // know how to repair it. The rewrite below is what keeps the emit right
-      // in the first place.
+      // then cannot resolve Construct, and the emit itself says nothing. So the
+      // specifier is rewritten onto dist/agent-tooling/**, where the `construct`
+      // target below already emits the declarations.
       //
-      // The declarations for those targets ARE emitted, by the construct target
-      // below, at dist/agent-tooling/construct/. So the fix is to rewrite the
-      // specifier back to the path that already exists.
-      //
-      // It THROWS rather than no-ops on an unexpected shape, because the
-      // rewrite is depth-sensitive: every affected file today sits exactly one
-      // directory under dist/, so '../../mcp/' maps to '../agent-tooling/'. A
-      // future importer at another depth must fail loudly here instead of
-      // silently emitting a path that resolves to nothing.
+      // The rewrite itself is a pure function in ./mcp-dts-rewrite.ts, importing
+      // WHY it derives the upward prefix from the emitted path rather than
+      // matching a literal one -- the depth-baked regex that let the
+      // 2026-09-19 components reorg ship three escaping declarations. It throws
+      // (naming the file) on anything it cannot make resolve inside dist/,
+      // rather than emitting a path that only resolves because raw src/ ships.
+      // `verify:dts` in postbuild is the backstop over the whole tree.
       beforeWriteFile(filePath: string, content: string) {
-        if (!MCP_SPECIFIER.test(content)) return;
-        const rel = relative(resolve(PKG, 'dist'), filePath);
-        const depth = rel.split(/[\\/]/).length - 1;
-        if (depth !== 1) {
-          throw new Error(
-            `config/vite/lib.ts: ${rel} imports across the mcp/ boundary from depth ${depth}. ` +
-              `The rewrite below only knows depth 1 (dist/<dir>/<file>.d.ts). Teach it the new ` +
-              `depth or stop importing mcp/ from that file.`,
-          );
-        }
-        return { content: content.replaceAll("'../../mcp/", "'../agent-tooling/") };
+        const distRelPath = relative(resolve(PKG, 'dist'), filePath);
+        const rewritten = rewriteMcpDtsSpecifiers({ content, distRelPath });
+        return rewritten === content ? undefined : { content: rewritten };
       },
       outDir: 'dist',
       entryRoot: 'src',
@@ -218,20 +256,25 @@ const TARGETS: Record<string, Target> = {
   // that resolves to Solid's server renderer, which is exactly what this output targets.
   //
   // emptyOutDir: false — later build in the chain; do NOT clobber earlier output.
+  //
+  // perModule: true, like the DOM barrel it twins. It emits `[name].server.js`
+  // per source module (see PER_MODULE_OUTPUT); without a distinct name the two
+  // builds would write the same paths, since they cover the same modules.
   'index.server': {
     entry: 'src/index.ts',
     fileName: 'index.server.js',
     transform: 'ssr',
     external: SOLID_ELEMENT,
+    perModule: true,
   },
 
   // dist/solid.js, the "./solid" export.
   //
   // The `@kitn.ai/ui/solid` entry (src/solid.ts → dist/solid.js) — the COMPLETE
-  // SolidJS surface: a writable component for EVERY registered element plus a
+  // SolidJS surface: a writable component for EVERY registered web component plus a
   // `<Name>Props` type for every public component. The catalog is
-  // src/elements/element-meta.json; `npm run verify:solid-coverage` prints the
-  // element count and fails on any gap, so the number is not restated here.
+  // src/web-components/web-component-meta.json; `npm run verify:solid-coverage` prints the
+  // web-component count and fails on any gap, so the number is not restated here.
   //
   // WHY IT IS ITS OWN BUILD TARGET RATHER THAN PART OF THE BARREL
   // ------------------------------------------------------------
@@ -257,6 +300,7 @@ const TARGETS: Record<string, Target> = {
     fileName: 'solid.js',
     transform: 'dom',
     external: SOLID_ELEMENT,
+    perModule: true,
   },
 
   // dist/solid.server.js, the "./solid" server twin.
@@ -280,11 +324,15 @@ const TARGETS: Record<string, Target> = {
   // markup, not so it can hand off to hydrate().
   //
   // emptyOutDir: false — later build in the chain; do NOT clobber earlier output.
+  //
+  // perModule: true, matching the DOM `solid` target it twins, and so emitting
+  // `[name].server.js` per module rather than overwriting its files.
   'solid.server': {
     entry: 'src/solid.ts',
     fileName: 'solid.server.js',
     transform: 'ssr',
     external: SOLID_ELEMENT,
+    perModule: true,
   },
 
   // dist/state.js
@@ -349,13 +397,13 @@ const TARGETS: Record<string, Target> = {
   // populated dist/.
   //
   // The .d.ts is NOT emitted here. The barrel build (vite-plugin-dts over
-  // src/**, entryRoot: 'src') already emits dist/elements/define-entry.d.ts —
+  // src/**, entryRoot: 'src') already emits dist/web-components/define/define-entry.d.ts —
   // but this subpath's declared `types` is the flat dist/define.d.ts, matching
   // the flat dist/define.js this build produces, so scripts/emit-subpath-dts.mjs
   // generates dist/define.d.ts as a shim onto the barrel's real declarations
   // (see REAL_TYPES_SOURCE in that script). This build is JS-only.
   define: {
-    entry: 'src/elements/define-entry.ts',
+    entry: 'src/web-components/define/define-entry.ts',
     fileName: 'define.js',
     transform: 'dom',
     external: SOLID,
@@ -389,7 +437,7 @@ const TARGETS: Record<string, Target> = {
   //
   // emptyOutDir: false — later build in the chain; do NOT clobber earlier output.
   'define.server': {
-    entry: 'src/elements/define-entry.ts',
+    entry: 'src/web-components/define/define-entry.ts',
     fileName: 'define.server.js',
     transform: 'ssr',
     external: SOLID,
@@ -410,9 +458,13 @@ const TARGETS: Record<string, Target> = {
     external: SOLID,
   },
 
-  // dist/schemas.js. MUST build before the mcp target in config/vite/node.ts:
-  // that bundle compiles the MCP against this built file, not against src.
-  // vitest.config.ts records the same dependency from the other side.
+  // dist/schemas.js. This USED to have to build before the mcp target in
+  // config/vite/node.ts (since moved to the CLI package), on the claim that the MCP
+  // bundle compiles against this
+  // built file rather than against src. Two things are true now instead: that
+  // target moved to the CLI package, and the claim was never load-bearing -- every
+  // `@kitn.ai/ui/schemas` in mcp/ sits inside an EMITTED-CODE STRING (codegen
+  // writing a consumer's import), so nothing in the CLI imports this file.
   //
   // The card JSON Schemas as a JS module (@kitn.ai/ui/schemas). Data only: the
   // schema documents are imported from src/primitives/card-schemas/*.json and
@@ -567,6 +619,32 @@ if (!Object.hasOwn(TARGETS, requested)) {
 }
 const target = TARGETS[requested];
 
+/**
+ * Output options for a `perModule` target. `preserveModulesRoot` is `src/`, so a
+ * module keeps its source path under dist/ (src/components/badge/badge.tsx ->
+ * dist/components/badge/badge.js) — which is also the layout the barrel's declaration
+ * emit has always used (`entryRoot: 'src'`), so every emitted .js now has the
+ * .d.ts beside it that a deep import or an editor resolves.
+ *
+ * `.server` ON THE SSR TWINS, AND IT IS LOAD-BEARING. A per-module target rooted
+ * at src/ writes one file per source module, and the SSR twins cover the SAME
+ * source modules as `index` / `solid`, so `[name].js` on both would have the
+ * second build silently overwrite the first one's files and `dist/index.js` would
+ * end up importing modules compiled by the SSR transform. That is unobservable in
+ * a diff and surfaces as a client bundle throwing "Client-only API used on the
+ * server side" — so the suffix belongs on the target the day it is added, not
+ * after the failure. It is keyed on the transform because that is the axis the two
+ * builds differ on, and `[name].server.js` is also the `fileName` the exports map
+ * already names for `index.server` / `solid.server`, so no exports entry moves.
+ * The declaration emit is unaffected: it rides the DOM build alone (`entryRoot:
+ * 'src'`), and those .d.ts keep their unsuffixed names.
+ */
+const PER_MODULE_OUTPUT = {
+  preserveModules: true,
+  preserveModulesRoot: resolve(PKG, 'src'),
+  entryFileNames: `[name]${target.transform === 'ssr' ? '.server' : ''}.js`,
+};
+
 const plugins: PluginOption[] = [];
 if (target.transform === 'dom') plugins.push(solidPlugin());
 // `solid` overrides the preset options the plugin would otherwise pick from
@@ -586,6 +664,9 @@ export default defineConfig({
       formats: ['es'],
       fileName: () => target.fileName,
     },
-    rollupOptions: { external: target.external ?? [] },
+    rollupOptions: {
+      external: target.external ?? [],
+      ...(target.perModule ? { output: PER_MODULE_OUTPUT } : {}),
+    },
   },
 });

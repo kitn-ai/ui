@@ -8,10 +8,10 @@ Adding a component means working down the layers: write the Solid component, giv
 
 ## 1. Write the component
 
-UI primitives go in `src/ui/`. Keep them accessible and token-styled (no hard-coded colors). The real `Switch` is a `role="switch"` button supporting controlled and uncontrolled state:
+Solid components go in `src/components/`. Keep them accessible and token-styled (no hard-coded colors). The real `Switch` is a `role="switch"` button supporting controlled and uncontrolled state:
 
 ```tsx
-// src/ui/switch.tsx
+// src/components/switch/switch.tsx
 import { createSignal } from 'solid-js';
 import { cn } from '../utils/cn';
 
@@ -55,17 +55,17 @@ Support both a controlled `checked` and an uncontrolled `defaultChecked`, and us
 
 ## 2. Give it a story
 
-A primitive's story sits beside it in `src/ui/`:
+A component's story sits beside it in `src/components/`:
 
 ```tsx
-// src/ui/switch.stories.tsx
+// src/components/switch/switch.stories.tsx
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { fn } from 'storybook/test';
 import { Switch } from './switch';
-import { componentDescription } from '../stories/docs/element-controls';
+import { componentDescription } from '../stories/docs/web-component-controls';
 
 const meta = {
-  title: 'Components/Primitives/Switch',
+  title: 'Components/Switch',
   component: Switch,
   tags: ['autodocs'],
   parameters: {
@@ -87,16 +87,16 @@ export const Playground: Story = {};
 export const On: Story = { args: { defaultChecked: true } };
 ```
 
-Wire callbacks with `fn()` so they log to the Actions panel, and give each notable variation its own story. Element stories (in `src/elements/`) pull controls from the generated metadata with `argTypesFor(tag)` and write their blurb with `specDescription`. Copy `src/elements/switch.stories.tsx`.
+Wire callbacks with `fn()` so they log to the Actions panel, and give each notable variation its own story. Element stories (in `src/web-components/`) pull controls from the generated metadata with `argTypesFor(tag)` and write their blurb with `specDescription`. Copy `src/web-components/switch.stories.tsx`.
 
 ## 3. Expose it as a `kai-*` element
 
-Wrap the primitive with `defineWebComponent` in `src/elements/`:
+Wrap the component with `defineWebComponent` in `src/web-components/`:
 
 ```tsx
-// src/elements/switch.tsx
+// src/web-components/switch/switch.tsx
 import { defineWebComponent } from './define';
-import { Switch } from '../ui/switch';
+import { Switch } from '../components/switch';
 
 interface Props extends Record<string, unknown> {
   checked?: boolean;
@@ -131,12 +131,12 @@ defineWebComponent<Props, Events>('kai-switch', {
 ## 4. Register and regenerate
 
 ```ts
-// src/elements/register.ts
+// src/web-components/register/register.ts
 import './switch';
 ```
 
 ```bash
-npm run build:api   # regenerates element-meta.json, types, React wrappers, llms.txt
+npm run build:api   # regenerates web-component-meta.json, types, React wrappers, llms.txt
 ```
 
 ## Verify

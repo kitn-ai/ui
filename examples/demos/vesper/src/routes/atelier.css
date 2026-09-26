@@ -1,0 +1,37 @@
+.atelier-intro { padding: 44px 0 20px }
+.atelier-title {
+  font-weight: 500;
+  font-size: clamp(40px, 6.5vw, 76px);
+  line-height: 0.98;
+  letter-spacing: -0.012em;
+  margin: 16px 0 22px;
+}
+.atelier-title em { font-style: italic }
+.atelier-lede {
+  font-size: 17px;
+  line-height: 1.75;
+  color: var(--ink2);
+  max-width: 46ch;
+}
+
+.materials {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.atelier-cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 26px;
+  flex-wrap: wrap;
+  padding: 34px 38px;
+  border-radius: 22px;
+}
+.atelier-cta-title { font-size: 30px; margin-top: 8px }
+
+@media (max-width: 840px) {
+  .materials { grid-template-columns: 1fr; gap: 18px }
+}

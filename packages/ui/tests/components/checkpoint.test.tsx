@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@solidjs/testing-library';
-import { Checkpoint, CheckpointTrigger } from '../../src/components/checkpoint';
+import { Checkpoint, CheckpointTrigger } from '../../src/components/checkpoint/checkpoint';
 
 describe('CheckpointTrigger', () => {
   it('renders without a tooltip', () => {

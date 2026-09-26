@@ -31,7 +31,7 @@
  * emitted text or the `conversations` property: the property holds the right
  * numbers and the screen holds the old ones. So the load-bearing assertions here
  * are read off the rail's own SHADOW DOM — the count and the title as rendered —
- * never off the array that was assigned to it. `src/components/reactivity-contract.test.tsx`
+ * never off the array that was assigned to it. `src/components/reactivity-contract/reactivity-contract.test.tsx`
  * pins the same invariant for the component; this pins that the emitted code obeys it.
  *
  * WHY `mock`. The turn has to complete for the row to advance, and the mock
@@ -44,6 +44,9 @@ import { writeFileSync, rmSync, mkdirSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { scaffold } from '../mcp/tools/scaffold';
+// The exports map, applied by hand — shared by the four emitted guards, since
+// every one of them executes the emitted module rather than reading it.
+import { rewriteEmittedSpecifiers } from './emitted-source-specifiers';
 
 const PKG = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 /** Outside `tests/` and outside `src/` — see emitted-card-path.live.test.ts. */
@@ -65,28 +68,6 @@ proto.scrollIntoView ??= () => {};
 };
 
 const SEP = '// ── src/main.ts ──';
-
-/**
- * The package's own exports map, applied by hand. Same rewriter as the other
- * guards; `@kitn.ai/ui/elements` resolves to the register-ALL entry point because
- * this surface mounts two tags, and `src/elements/chat` would leave
- * `<kai-conversations>` an unupgraded unknown element with no shadow root — which
- * is precisely where every assertion below reads from.
- */
-function rewrite(code: string): string {
-  return code
-    .split('\n')
-    .filter((l) => !l.includes("'@kitn.ai/ui/theme.tokens.css'"))
-    .filter((l) => !l.startsWith('import type '))
-    .map((l) =>
-      l
-        .replace("'@kitn.ai/ui/elements'", `'${PKG}/src/elements/register-impl'`)
-        .replace("'@kitn.ai/ui/state'", `'${PKG}/src/state'`)
-        .replace("'@kitn.ai/ui/wire'", `'${PKG}/src/wire'`),
-    )
-    .map((l) => l.replace(/\bas Kai\w+Element\b/g, 'as any'))
-    .join('\n');
-}
 
 /** The rail row as the LIVE component drew it, found by the id the emit assigns. */
 function renderedRow(rail: HTMLElement & { shadowRoot: ShadowRoot }, id: string): HTMLElement {
@@ -127,7 +108,7 @@ describe('the EMITTED conversation rail keeps its row in step with the thread', 
     rmSync(TMP_DIR, { recursive: true, force: true });
     mkdirSync(TMP_DIR, { recursive: true });
     const tmp = resolve(TMP_DIR, `main.${Date.now()}.ts`);
-    writeFileSync(tmp, rewrite(main));
+    writeFileSync(tmp, rewriteEmittedSpecifiers(main));
     try {
       // Importing it RUNS it: the emitted module ends with `void init()`.
       await import(/* @vite-ignore */ tmp);

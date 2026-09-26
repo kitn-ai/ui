@@ -1,6 +1,6 @@
 ---
 title: Suggestions
-description: Clickable prompt chips that offer users a quick way to start or continue a conversation — no typing required.
+description: Clickable prompt chips that offer the reader a starting point.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -15,7 +15,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kai-tag-sub">kai-suggestions</p>
 
-<p class="kai-lede">A row (or full-width list) of clickable prompt chips — drop it above an input in the welcome state or below the last assistant message as follow-up shortcuts.</p>
+<p class="kai-lede">Can sit above an empty thread or under a reply, in a row or a full-width stack.</p>
 
 <Facts items={['Shadow DOM', '3 chip styles', 'Block layout mode', 'Substring highlight', '1 event']} />
 
@@ -24,7 +24,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 <Playground client:only="solid" tag="kai-suggestions" />
 
 <Aside type="tip" title="When to use">
-Place `<kai-suggestions>` above the prompt input when the thread is empty to show users what the assistant can do. It also works below the last assistant reply as follow-up chips. Use `block` to stack full-width rows in narrow layouts, and `highlight` for a filtered autocomplete list.
+Above an empty prompt input, or under the last reply as follow-ups. For a list the reader filters by typing, use [Command](/components/command/).
 </Aside>
 
 ## Usage
@@ -34,7 +34,7 @@ Assign the `suggestions` property and listen for `kai-select`:
 ```html
 <kai-suggestions id="suggs" variant="outline"></kai-suggestions>
 <script type="module">
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
 
   await customElements.whenDefined('kai-suggestions');
 

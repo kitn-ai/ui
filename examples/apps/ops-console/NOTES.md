@@ -72,7 +72,7 @@ while `el.providerOrigin` read back correctly a tick later. That is the `upgrade
 invariant with the halves swapped: the element is defined in time, the *props* are late.
 
 **Guess:** `src/RunBoardFrame.tsx` creates the element, sets every prop, and only then
-appends it. Plus a static `import '@kitn.ai/ui/elements/remote'` in `main.tsx` — the MCP
+appends it. Plus a static `import '@kitn.ai/ui/web-components/remote'` in `main.tsx` — the MCP
 *does* say this element is opt-in and excluded from register-all, and `createElement`
 only upgrades an already-defined tag.
 

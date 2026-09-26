@@ -1,6 +1,6 @@
 ---
 title: Badge
-description: A small pill for labels, statuses, counts, and inline citation markers.
+description: A compact pill for status text, counts, or source citations.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -15,7 +15,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kai-tag-sub">kai-badge</p>
 
-<p class="kai-lede">A small pill for labels, statuses, counts, and inline citation markers. Put the content as light-DOM text; `variant` picks the look.</p>
+<p class="kai-lede">Takes its content as plain light-DOM text, so the host page's CSS still reaches it.</p>
 
 <Facts items={['Shadow DOM', '3 variants', 'Light-DOM content', '1 part']} />
 
@@ -24,7 +24,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 <Playground client:only="solid" tag="kai-badge" />
 
 <Aside type="tip" title="When to use">
-Tag a feature as `Beta`, mark a model's status, show an unread count on a panel, or drop a numbered marker beside an inline citation. For the citation chips those markers point at, see [Sources](/components/sources/).
+Tag a feature as `Beta`, mark a model's status, show an unread count, or number an inline citation. For the citation chips those markers lead to, see [Sources](/components/sources/).
 </Aside>
 
 ## Usage

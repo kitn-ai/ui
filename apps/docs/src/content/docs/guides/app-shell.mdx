@@ -5,9 +5,11 @@ description: The chat-agnostic shell family - kai-nav, kai-pane, kai-pane-group,
 
 import { Aside } from '@astrojs/starlight/components';
 
-<p class="kai-lede">Six elements for the frame around the chat: a navigation rail, framed panes, tabbed pane groups, a drill-in screen, a tray for the prompt input, and settings rows. Each is chat-agnostic. Data goes in as JS properties, intents come back out as `kai-*` events on the element, and your app keeps the routing and the state.</p>
+<p class="kai-lede">Six web components for the frame around the chat: a navigation rail, framed panes, tabbed pane groups, a drill-in screen, a tray for the prompt input, and settings rows. Each is chat-agnostic. Data goes in as JS properties, intents come back out as `kai-*` events on the element, and your app keeps the routing and the state.</p>
 
-The shell family follows one division of labor throughout: the element owns the look and the interaction mechanics (focus, keyboard, ARIA, animation), you own every decision. A pane's maximize button does not maximize anything; it fires `kai-maximize` and you flip the attribute. A tab's close button fires `kai-tab-close` and you drop the tab from the array. Nothing in this family stores your app's state for you.
+The shell family follows one division of labor throughout: the element owns the look and the interaction mechanics (focus, keyboard, ARIA, animation), you own every decision. A pane's maximize button does not maximize anything; it fires `kai-maximize` and you flip the attribute. A tab's close button fires `kai-tab-close` and you drop the tab from the array.
+
+Nothing in this family stores your app's state for you.
 
 ## `<kai-nav>`: the navigation list
 
@@ -17,7 +19,7 @@ A vertical navigation list driven by a JSON `items` tree. Items carry an id and 
 <kai-nav default-value="home"></kai-nav>
 
 <script type="module">
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
 
   const nav = document.querySelector('kai-nav');
   // Arrays and objects are JS properties, never HTML attributes.
@@ -51,7 +53,7 @@ To update an item, hand `nav.items` a new array **and** a new object for the cha
 </kai-pane>
 
 <script type="module">
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
 
   const pane = document.querySelector('kai-pane');
   pane.status = { tone: 'working', label: 'Running', pulse: true }; // object: JS property
@@ -68,7 +70,7 @@ To update an item, hand `nav.items` a new array **and** a new object for the cha
 <kai-pane-group active="atlas"></kai-pane-group>
 
 <script type="module">
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
 
   const group = document.querySelector('kai-pane-group');
   group.tabs = [
@@ -112,7 +114,7 @@ A full-bleed overlay destination under a back header: the push navigation patter
 
 ## `<kai-prompt-dock>`: the tray under the input
 
-A recessed tray that frames a prompt input, with optional lip regions above and below the raised input card. It sits in the page flow and launches nothing; the floating corner launcher is `<kai-dock>`, a different element for a different job.
+A recessed tray that frames a prompt input, with optional lip regions above and below the raised input card. It sits in the page flow and launches nothing; the floating corner launcher is `<kai-dock>`, a different web component for a different job.
 
 ```html
 <kai-prompt-dock frame="edge" appearance="soft">
@@ -140,7 +142,7 @@ Omit the control for a plain label row. The control keeps its own events: listen
 
 ## Putting it together
 
-A workspace shell is these elements composed, not configured:
+A workspace shell is these web components composed, not configured:
 
 ```html
 <kai-resizable orientation="horizontal" style="display:block;height:100vh">
@@ -156,5 +158,5 @@ A workspace shell is these elements composed, not configured:
 ```
 
 <Aside type="tip">
-Every element here works standalone, from any framework, with the same contract: scalar props as attributes, arrays and objects as JS properties, non-bubbling `kai-*` events listened for on the element. The full property, event, slot and part tables live in the [element reference](https://github.com/kitn-ai/ui/blob/main/docs/web-components.md).
+Every web component here works standalone, from any framework, with the same contract: scalar props as attributes, arrays and objects as JS properties, non-bubbling `kai-*` events listened for on the element. The full property, event, slot and part tables live in the [web-component reference](https://github.com/kitn-ai/ui/blob/main/docs/web-components.md).
 </Aside>

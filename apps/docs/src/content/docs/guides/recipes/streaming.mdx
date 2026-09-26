@@ -12,7 +12,7 @@ Display each token as it arrives — no buffering, no flash of finished content.
 `kai-chat` streams by appending an empty assistant message, then replacing its `parts` as tokens arrive. Set `loading = true` during the request so the input is disabled and the loading state shows; set it back to `false` when the stream ends.
 
 ```js
-import '@kitn.ai/ui/elements';
+import '@kitn.ai/ui/web-components';
 import '@kitn.ai/ui/theme.css';
 import { createAssistantStream } from '@kitn.ai/ui/state';
 import { readOpenAIStream, toOpenAIMessages } from '@kitn.ai/ui/wire';
@@ -97,7 +97,7 @@ This recipe is the *mechanic*. For connecting a specific provider, gateway, agen
 This element wants plain text deltas, not message parts, so reach past the readers for `sseJson`, the same SSE decoder they use, exported on its own.
 
 ```js
-import '@kitn.ai/ui/elements';
+import '@kitn.ai/ui/web-components';
 import { sseJson } from '@kitn.ai/ui/wire';
 
 await customElements.whenDefined('kai-response-stream');
@@ -137,7 +137,9 @@ el.text = 'The assistant response rendered with the typewriter effect.';
 
 ## Without the adapter
 
-If you would rather not add the import, here is the whole thing by hand. It handles text and nothing else: no tool calls, no reasoning, no citations. It also treats every `data:` line as a complete frame, and the SSE spec joins the several `data:` lines of one frame into a single payload, so parsing them separately drops that frame entirely. And it replaces the message's `parts` wholesale, which deletes any reasoning or tool panel already on the message it is streaming into. `readOpenAIStream` gets all three right, which is why the rest of this page uses it.
+If you would rather not add the import, here is the whole thing by hand. It handles text and nothing else: no tool calls, no reasoning, no citations. It also treats every `data:` line as a complete frame, and the SSE spec joins the several `data:` lines of one frame into a single payload, so parsing them separately drops that frame entirely.
+
+And it replaces the message's `parts` wholesale, which deletes any reasoning or tool panel already on the message it is streaming into. `readOpenAIStream` gets all three right, which is why the rest of this page uses it.
 
 ```js
 // Seed the assistant placeholder yourself, since nothing else will.

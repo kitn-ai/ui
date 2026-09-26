@@ -55,6 +55,7 @@ Out of scope:
 
 - **Your backend.** The kit parses, the consumer fetches. There's no HTTP client, no key handling and no provider SDK in this library, so a leaked key or an unauthenticated route is yours.
 - **Decisions your app owns.** The kit decides how a message renders; it deliberately doesn't decide whether a user may attach a file, how much they may spend, or what is retained. A missing limit is a feature request.
+- **Model-supplied image URLs, and the requests they cause.** `<img src>` values that come from model output (a choice option's media image, a link card's image and favicon, an embed's poster, an attachment's url) are NOT scheme-filtered, and that is deliberate: an `<img>` cannot execute a scheme, so this is not a script sink, and the legitimate case here is a `data:` image, which a navigable-URL allowlist would refuse. The residual is real and is yours to weigh: a model can force the reader's browser to issue an outbound GET (a tracking pixel, a referrer leak) with no user action, and can choose an arbitrarily large image. If that matters to you, handle it where you own the request — a `Content-Security-Policy` with an `img-src` allowlist, an image proxy, or filtering the values before they reach the envelope. The behaviour is pinned by `tests/components/model-image-sinks.test.ts`, so changing it is a visible decision rather than a drive-by one.
 - A model returning wrong, biased or unpleasant output.
 - A dependency advisory with no demonstrated path through this library — take those upstream. Show a path and it's in scope.
 

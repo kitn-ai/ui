@@ -1,14 +1,13 @@
 // tests/components/markdown-xss.test.tsx
 //
-// The markdown sink is the kit's one raw-`innerHTML` write, so it is the one
-// place where a string the MODEL produced becomes live DOM in the host page's
-// origin. Every vector below was confirmed executing in Chromium against the
-// shipped pipeline before the fix (assistant text -> marked -> innerHTML).
+// The markdown path, where model output becomes live DOM in the host origin. The
+// threat model is model OUTPUT, not a hostile server: a pasted example, a
+// prompt-injection, or RAG over an untrusted document.
 //
-// The threat model is NOT "a hostile server". The attacker only has to
-// influence the model's OUTPUT: a user pasting an example, a prompt-injected
-// model, or RAG over an untrusted document all reach this sink against a
-// perfectly trusted provider.
+// The renderer emits a token stream now (e66c004d), so raw HTML is a text node; the
+// kit's remaining raw-`innerHTML` write is code-block.tsx, covered by
+// tests/web-components/code-block.test.tsx and by the fenced group at the bottom of this
+// file.
 //
 // Two properties are asserted for every vector, and BOTH matter:
 //   1. no live element / handler / dangerous scheme lands in the DOM, and
@@ -18,7 +17,7 @@
 // answer. A filter that deleted the text would pass (1) and be a worse UI.
 import { render } from '@solidjs/testing-library';
 import { afterEach, describe, expect, test } from 'vitest';
-import { Markdown } from '../../src/components/markdown';
+import { Markdown } from '../../src/components/markdown/markdown';
 
 afterEach(() => {
   document.body.innerHTML = '';
@@ -168,9 +167,117 @@ describe('markdown sink: dangerous URL schemes never reach an href/src', () => {
     });
   }
 
+  // The vector that makes the "URLs are never decoded" rule visible. Every one of
+  // the schemes above is written LITERALLY in the markdown; this one hides its
+  // colon behind a character reference, so a renderer that decoded `href` before
+  // handing it to the scheme filter would turn a blocked link into a live one.
+  // `isSafeUrl` and the browser both see `&` where a scheme needs `:`, read the
+  // string as a relative path, and resolve it against the base -- which is why
+  // this renders as an ordinary, harmless anchor rather than script.
+  test('an entity-encoded scheme is NOT decoded into a live javascript: URL', () => {
+    const el = mount('[click me](javascript&#58;window.__PWNED__=1)');
+    const a = el.querySelector('a');
+    // Whatever element came out, no URL-bearing attribute decodes into a scheme.
+    for (const u of urls(el)) {
+      expect(u.toLowerCase()).not.toContain('javascript:');
+    }
+    // The resolved URL is the relative path the browser also reads, not `javascript:`.
+    expect(a?.href ?? '').not.toContain('javascript:');
+    // And the source stayed VISIBLE, encoded form and all.
+    expect(el.textContent).toContain('click me');
+  });
+
   test('a blocked link still shows its text, so nothing vanishes silently', () => {
     const el = mount('[click me](javascript:window.__PWNED__=1)');
     expect(el.textContent).toContain('click me');
+  });
+});
+
+describe('markdown sink: a fenced code block, through both fence paths', () => {
+  // Two fence paths, two sinks: a top-level fence goes through CodeBlock's
+  // `innerHTML`, a nested one stays a text node. All three suppliers of that
+  // `innerHTML` escape `<` to `&lt;`, so `pre.shiki` and the span census identify
+  // which ran — the escape form only proves the tag arrived as text.
+  //
+  // (A handoff note claimed the shiki form was `&#x3C;` and that asserting `&lt;`
+  // would fail. The raw `innerHTML` below says otherwise — it is `&lt;` — so that
+  // note was wrong for this pipeline and is not encoded here.)
+  const HOSTILE = '<img src=x onerror="window.__PWNED__=1">\n<script>window.__PWNED__=1</script>';
+
+  /** Shiki's own output, distinguishable from the plain fallback by its class. */
+  const shikiPre = (el: HTMLElement) => el.querySelector('pre.shiki');
+
+  /** Every element the render created, so an injected tag cannot hide. */
+  const tags = (el: HTMLElement) => new Set([...el.querySelectorAll('*')].map((n) => n.tagName.toLowerCase()));
+
+  /** Any live event-handler attribute anywhere under `el`. */
+  const handlerAttrs = (el: HTMLElement) =>
+    [...el.querySelectorAll('*')].flatMap((n) => [...n.attributes].map((a) => a.name)).filter((n) => /^on/i.test(n));
+
+  /**
+   * Poll until `check` holds. The highlight is async because shiki's first call
+   * builds the core and dynamically imports the engine, theme and grammar, so the
+   * latency is real and variable — a fixed sleep would be flaky or slow, and both
+   * would be a worse test than waiting for the fact itself.
+   */
+  async function until(check: () => boolean, what: string, ms = 4000): Promise<void> {
+    const deadline = Date.now() + ms;
+    while (Date.now() < deadline) {
+      if (check()) return;
+      await new Promise((r) => setTimeout(r, 10));
+    }
+    throw new Error(`timed out waiting for: ${what}`);
+  }
+
+  test('a top-level fence: every injected element stays text, source stays visible', async () => {
+    const el = mount('```html\n' + HOSTILE + '\n```');
+
+    // The first paint is the plain fallback and lands synchronously, so it is
+    // asserted before any await rather than after one.
+    expect(el.querySelector('img')).toBeNull();
+    expect(el.textContent).toContain('<img src=x onerror="window.__PWNED__=1">');
+
+    // Then the paint that goes through `innerHTML={highlighted()}`.
+    await until(() => shikiPre(el) !== null, 'the highlight to land on the innerHTML path');
+
+    expect(el.querySelector('img')).toBeNull();
+    expect(el.querySelector('script')).toBeNull();
+    expect(el.querySelector('a')).toBeNull();
+    expect(handlerAttrs(el)).toEqual([]);
+    expect(tags(el).has('span'), 'CONTROL: the census is live, shiki tokens are real elements').toBe(true);
+    expect(el.textContent, 'the source stays readable, escaped not deleted').toContain(
+      '<img src=x onerror="window.__PWNED__=1">',
+    );
+    expect(el.innerHTML, 'the tag arrived as text, in the form the DOM serializes').toContain('&lt;');
+    expect(el.innerHTML, 'and no raw tag survived the write').not.toContain("<img");
+  });
+
+  test('an UNKNOWN language fence: plain() escapes it, and stays visible', async () => {
+    const el = mount('```cobol\n' + HOSTILE + '\n```');
+    expect(el.querySelector('img')).toBeNull();
+
+    // No grammar means no shiki markup, so `shikiPre` never appears and there is no
+    // fact to poll for; the census is what has to hold, and it holds in both paints.
+    await new Promise((r) => setTimeout(r, 300));
+
+    expect(shikiPre(el)).toBeNull();
+    expect(el.querySelector('img')).toBeNull();
+    expect(el.querySelector('script')).toBeNull();
+    expect(handlerAttrs(el)).toEqual([]);
+    expect(el.textContent).toContain('<script>window.__PWNED__=1</script>');
+    expect(el.innerHTML, 'the same escape form, because all three suppliers agree on it').toContain('&lt;script&gt;');
+    expect(el.innerHTML).not.toContain('<img');
+  });
+
+  test('a NESTED fence stays in the token renderer and is text, not markup', () => {
+    // The other path: inside a blockquote this never reaches `CodeBlock` at all, so
+    // it must hold with no highlighter involved and no await needed.
+    const el = mount('> ```html\n> ' + HOSTILE + '\n> ```');
+    expect(el.querySelector('blockquote'), 'the quote itself still renders').not.toBeNull();
+    expect(el.querySelector('img')).toBeNull();
+    expect(el.querySelector('script')).toBeNull();
+    expect(handlerAttrs(el)).toEqual([]);
+    expect(el.textContent).toContain('<img src=x onerror="window.__PWNED__=1">');
   });
 });
 
@@ -253,6 +360,87 @@ describe('markdown sink: legitimate markdown still works', () => {
     const el = mount('Tom & Jerry, 3 < 5');
     expect(el.textContent).toContain('Tom & Jerry');
     expect(el.textContent).toContain('3 < 5');
+  });
+
+  // GFM task lists. Pinned nowhere else: the `[x]` strings elsewhere in this suite
+  // are markdown LINKS, not task items. The checked state is a DOM PROPERTY (which
+  // is what the renderer binds, and what an HTML string could not have carried), so
+  // that is what is asserted -- not `outerHTML`.
+  test('GFM task lists render disabled checkboxes in the right state', () => {
+    const el = mount('- [x] done\n- [ ] todo');
+    const boxes = [...el.querySelectorAll<HTMLInputElement>('input[type="checkbox"]')];
+    expect(boxes).toHaveLength(2);
+    expect(boxes.every((b) => b.disabled)).toBe(true);
+    expect(boxes[0].checked).toBe(true);
+    expect(boxes[1].checked).toBe(false);
+  });
+});
+
+describe('markdown sink: character references read as their characters', () => {
+  // The old string sink got this from the browser's HTML parser for free; the token
+  // stream does not, so the decoder is asserted here rather than assumed. Both
+  // halves matter: what decodes, and what stays byte-for-byte literal.
+  test('named references in prose decode', () => {
+    expect(mount('AT&amp;T').textContent).toBe('AT&T');
+    expect(mount('&copy; 2026').textContent).toBe('© 2026');
+  });
+
+  test('numeric and hexadecimal references decode', () => {
+    expect(mount('&#65;').textContent).toBe('A');
+    expect(mount('&#x41;').textContent).toBe('A');
+    expect(mount('&#X41;').textContent).toBe('A');
+  });
+
+  test('everything that is not a complete reference stays literal', () => {
+    expect(mount('AT&T').textContent).toBe('AT&T');
+    expect(mount('&unknown;').textContent).toBe('&unknown;');
+    expect(mount('&amp').textContent).toBe('&amp');
+    expect(mount('a & b').textContent).toBe('a & b');
+  });
+
+  test('out-of-range and malformed numerics stay literal instead of throwing', () => {
+    expect(mount('&#999999999;').textContent).toBe('&#999999999;');
+    expect(mount('&#xZZ;').textContent).toBe('&#xZZ;');
+  });
+
+  // The spec says a character reference inside code is literal, so a sample
+  // showing `&amp;` has to keep showing `&amp;`.
+  test('an entity inside a code span is not decoded', () => {
+    const el = mount('use `&amp;` here');
+    expect(el.querySelector('code')?.textContent).toBe('&amp;');
+  });
+
+  test('an entity inside a fenced code block is not decoded', () => {
+    const el = mount('```\n&amp;\n```');
+    expect(el.querySelector('pre code')?.textContent).toContain('&amp;');
+  });
+
+  // Display-only attributes: the reader sees these, nothing navigates on them.
+  test('link titles decode', () => {
+    const a = mount('[x](https://example.com "a &amp; b")').querySelector('a');
+    expect(a?.getAttribute('title')).toBe('a & b');
+    expect(a?.getAttribute('href')).toBe('https://example.com');
+  });
+
+  test('image alt and title decode, while src stays verbatim', () => {
+    const img = mount('![a &amp; b](https://example.com/x.png?a=1&amp;b=2 "t &amp; t")').querySelector('img');
+    expect(img?.getAttribute('alt')).toBe('a & b');
+    expect(img?.getAttribute('title')).toBe('t & t');
+    expect(img?.getAttribute('src')).toBe('https://example.com/x.png?a=1&amp;b=2');
+  });
+
+  // Every branch that renders model text into a text node, not just `paragraph`.
+  test('references decode in headings, list items and table cells too', () => {
+    expect(mount('# AT&amp;T').querySelector('h1')?.textContent).toBe('AT&T');
+    expect(mount('- AT&amp;T').querySelector('li')?.textContent).toBe('AT&T');
+    expect(
+      mount('| a |\n| - |\n| AT&amp;T |').querySelector('td')?.textContent,
+    ).toBe('AT&T');
+    expect(mount('> AT&amp;T').querySelector('blockquote')?.textContent).toBe('AT&T');
+    expect(mount('**AT&amp;T**').querySelector('strong')?.textContent).toBe('AT&T');
+    expect(mount('*AT&amp;T*').querySelector('em')?.textContent).toBe('AT&T');
+    expect(mount('~~AT&amp;T~~').querySelector('del')?.textContent).toBe('AT&T');
+    expect(mount('[AT&amp;T](https://example.com)').querySelector('a')?.textContent).toBe('AT&T');
   });
 });
 

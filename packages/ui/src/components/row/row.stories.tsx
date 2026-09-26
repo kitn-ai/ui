@@ -1,0 +1,212 @@
+import type { Meta, StoryObj } from 'storybook-solidjs-vite';
+import { fn } from 'storybook/test';
+import { Row } from './row';
+import { RowGroup } from './row-group';
+import { renderIcon } from '../icon/icon';
+import { componentDescription } from '../../stories/docs/web-component-controls';
+
+// `RowGroup` is the frame and it owns the geometry: a hairline between adjacent rows,
+// the first rounded at the top only and the last at the bottom only. One row in a
+// group is a framed card.
+//
+// Two ways of framing rows: a settings screen is ONE group with N rows; a home tab is
+// ONE GROUP PER ROW with space between them, where rounding every corner is correct.
+const meta = {
+  title: 'Components/Row',
+  component: Row,
+  tags: ['autodocs'],
+  parameters: {
+    layout: 'padded',
+    docs: {
+      description: componentDescription([
+        'A list row: a title, with room before and after it for an icon or a value.',
+      ]),
+      controls: { exclude: ['use:eventListener'] },
+    },
+  },
+  argTypes: {
+    subtitle: { control: 'text', description: 'Secondary line under the title.' },
+    chevron: { control: 'boolean', description: 'Trailing chevron affordance.' },
+    href: { control: 'text', description: 'Navigate on press (safe schemes only).' },
+    onActivate: { action: 'activate', table: { category: 'Events' } },
+  },
+  args: {
+    chevron: false,
+    onActivate: fn(),
+  },
+  render: (args) => (
+    <RowGroup class="w-80">
+      <Row {...args}>Account</Row>
+    </RowGroup>
+  ),
+} satisfies Meta<typeof Row>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+const IMPORT = `import { Row, RowGroup } from '@kitn.ai/ui';`;
+const src = (code: string) => ({
+  parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
+});
+
+/** Interactive playground: a single pressable row inside its frame. A one-row
+ *  group is both first and last, so it rounds on all four corners. */
+export const Playground: Story = {
+  args: { subtitle: 'Profile, security, preferences', chevron: true },
+  ...src(`<RowGroup>
+  <Row subtitle="Profile, security, preferences" chevron onActivate={() => openAccount()}>
+    Account
+  </Row>
+</RowGroup>`),
+};
+
+/**
+ * The three widget home-tab row shapes, stub data (the anatomy the
+ * composition spike hand-built three ways in `fine.html`):
+ * 1. recent conversation, title + unread dot + relative time trailing,
+ *    preview subtitle;
+ * 2. full-width CTA, trailing arrow;
+ * 3. help link, leading icon + chevron.
+ *
+ * Each framed shape is a ONE-ROW group, which is why no shape carries a wrapper
+ * div any more: the frame's border and radius come from the group. The CTA is not
+ * a group at all — it is a filled row, so it takes the same radius its framed
+ * neighbours get (`rounded-xl`) and no border. (In the real widget the CTA is a
+ * `Button`: a primary action, not a list row. It stays a `Row` here to show the
+ * anatomy.)
+ */
+function HomeTabRows(props: { onActivate: () => void }) {
+  return (
+    <div class="flex w-80 flex-col gap-4">
+      {/* 1 · Recent conversation: one-row group, dot + time trailing. */}
+      <RowGroup>
+        <Row
+          onActivate={props.onActivate}
+          subtitle="Order KAI-1042 shipped with DHL"
+          trailing={
+            <>
+              <span aria-hidden="true" class="size-1.5 shrink-0 rounded-full bg-unread" />
+              <span>2m ago</span>
+            </>
+          }
+        >
+          <span class="font-semibold">Where is my order?</span>
+        </Row>
+      </RowGroup>
+      {/* 2 · CTA: a filled row, radius matched to the framed shapes around it. */}
+      <Row
+        onActivate={props.onActivate}
+        class="rounded-xl bg-primary text-primary-foreground hover:bg-primary/90"
+        trailing={renderIcon('arrow-right', { class: 'size-4 shrink-0 text-primary-foreground' })}
+      >
+        <span class="text-primary-foreground">Send us a message</span>
+      </Row>
+      {/* 3 · Help link: one-row group, leading icon, subtitle, chevron. */}
+      <RowGroup>
+        <Row
+          href="https://ui.kitn.ai"
+          leading={renderIcon('book-open', { class: 'size-4 shrink-0' })}
+          subtitle="Guides and FAQs"
+          chevron
+        >
+          Help center
+        </Row>
+      </RowGroup>
+    </div>
+  );
+}
+
+export const HomeTabShapes: Story = {
+  render: (args: { onActivate: () => void }) => <HomeTabRows onActivate={args.onActivate} />,
+  ...src(`{/* recent conversation: a one-row group */}
+<RowGroup>
+  <Row
+    onActivate={() => openRecent()}
+    subtitle="Order KAI-1042 shipped with DHL"
+    trailing={<><span class="size-1.5 rounded-full bg-unread" /><span>2m ago</span></>}
+  >
+    <span class="font-semibold">Where is my order?</span>
+  </Row>
+</RowGroup>
+
+{/* full-width CTA: a filled row, not a group (radius matched to the frames) */}
+<Row
+  class="rounded-xl bg-primary text-primary-foreground"
+  trailing={<ArrowRight />}
+  onActivate={() => startChat()}
+>
+  <span class="text-primary-foreground">Send us a message</span>
+</Row>
+
+{/* help link: a one-row group, leading icon + chevron */}
+<RowGroup>
+  <Row href="https://ui.kitn.ai" leading={<BookOpen />} subtitle="Guides and FAQs" chevron>
+    Help center
+  </Row>
+</RowGroup>`),
+};
+
+/** A settings screen composed of rows: the row must read well outside chat. One
+ *  group of three rows — the shape every settings screen wants, drawn once here
+ *  instead of a hand-rolled `divide-y` container in the story. */
+function SettingsRows(props: { onActivate: () => void }) {
+  return (
+    <RowGroup class="w-80">
+      <Row
+        onActivate={props.onActivate}
+        leading={renderIcon('sliders-horizontal', { class: 'size-4 shrink-0' })}
+        subtitle="Theme, language, density"
+        chevron
+      >
+        Preferences
+      </Row>
+      <Row
+        onActivate={props.onActivate}
+        leading={renderIcon('git-branch', { class: 'size-4 shrink-0' })}
+        trailing={<span>3</span>}
+        chevron
+      >
+        Connected repos
+      </Row>
+      <Row leading={renderIcon('file-text', { class: 'size-4 shrink-0' })} trailing={<span>1.4.2</span>}>
+        Release notes
+      </Row>
+    </RowGroup>
+  );
+}
+
+export const SettingsScreen: Story = {
+  render: (args: { onActivate: () => void }) => <SettingsRows onActivate={args.onActivate} />,
+  ...src(`<RowGroup class="w-80">
+  <Row leading={<Sliders />} subtitle="Theme, language, density" chevron onActivate={openPreferences}>
+    Preferences
+  </Row>
+  <Row leading={<GitBranch />} trailing={<span>3</span>} chevron onActivate={openRepos}>
+    Connected repos
+  </Row>
+  <Row leading={<FileText />} trailing={<span>1.4.2</span>}>Release notes</Row>
+</RowGroup>`),
+};
+
+/**
+ * Both themes side by side (the scroll-button LightAndDark pattern): the two
+ * panels are identical apart from the `dark` class, so this is a color
+ * comparison and nothing else.
+ */
+export const LightAndDark: Story = {
+  render: (args: { onActivate: () => void }) => (
+    <div class="flex flex-wrap gap-6">
+      <div class="rounded-lg border border-border bg-background p-4">
+        <div class="mb-2 text-xs font-medium text-muted-foreground">Light</div>
+        <HomeTabRows onActivate={args.onActivate} />
+      </div>
+      <div class="dark rounded-lg border border-border bg-background p-4">
+        <div class="mb-2 text-xs font-medium text-muted-foreground">Dark</div>
+        <HomeTabRows onActivate={args.onActivate} />
+      </div>
+    </div>
+  ),
+  ...src(`<RowGroup>
+  <Row subtitle="Guides and FAQs" chevron href="https://ui.kitn.ai">Help center</Row>
+</RowGroup>`),
+};

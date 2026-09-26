@@ -1,0 +1,52 @@
+.herosec { padding: 26px 0 44px }
+.hero {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 52px;
+  align-items: center;
+  margin-bottom: 44px;
+}
+.hero h1 {
+  font-weight: 500;
+  font-size: clamp(46px, 7vw, 84px);
+  line-height: 0.96;
+  letter-spacing: -0.012em;
+  margin: 18px 0 22px;
+}
+.hero h1 em { font-style: italic }
+.hero-lede {
+  font-size: 16.5px;
+  color: var(--ink2);
+  max-width: 27rem;
+  margin-bottom: 30px;
+}
+.cta-row { display: flex; align-items: center; gap: 24px; flex-wrap: wrap }
+.hero-hint {
+  margin-top: 26px;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.teaser {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+}
+.teaser-item { text-decoration: none; display: block }
+.teaser-item .photo {
+  aspect-ratio: 4 / 5;
+  transition: transform var(--t-mid) var(--ease), box-shadow var(--t-mid) var(--ease);
+}
+.teaser-item:hover .photo {
+  transform: translateY(-4px);
+  box-shadow: 12px 12px 30px var(--sh-d), -12px -12px 30px var(--sh-l);
+}
+
+@media (max-width: 900px) {
+  .hero { grid-template-columns: 1fr; gap: 34px }
+}
+@media (max-width: 640px) {
+  .teaser { grid-template-columns: 1fr 1fr; gap: 14px }
+}

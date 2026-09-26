@@ -21,7 +21,7 @@ import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { importCatalog, CATALOG_PATHS } from './lib/import-catalog.mjs';
 import { EXECUTION_PATHS, routeModel } from './lib/run-routing.mjs';
-import { gateAuditClean, gateElementsExist, scanJudgeLeak } from './lib/output-scan.mjs';
+import { gateAuditClean, gateWebComponentsExist, scanJudgeLeak } from './lib/output-scan.mjs';
 import { DIMENSIONS, SEVERITIES, dimension, rubricFor, assertRubricCoverage, scoreRun, severity } from './lib/rubric.mjs';
 import { attributeFindings, prioritiseCatalogChanges, tierDelta, ATTRIBUTION_KINDS } from './lib/catalog-attribution.mjs';
 import { proposedFabricationRow } from './lib/fabrications.mjs';
@@ -151,15 +151,15 @@ function validateLedger(info) {
 async function catalogFacts() {
   const catalog = await importCatalog();
   const derived = JSON.parse(readFileSync(CATALOG_PATHS.derived, 'utf8'));
-  const knownTags = derived.elements.map((e) => e.tag);
+  const knownTags = derived.webComponents.map((e) => e.tag);
 
-  // WHICH ELEMENTS HAVE A DESCRIPTION ANYWHERE. Derived, because the answer is
-  // the point: element-meta.json carries no element-level description at all, so
+  // WHICH WEB COMPONENTS HAVE A DESCRIPTION ANYWHERE. Derived, because the answer is
+  // the point: web-component-meta.json carries no web-component-level description at all, so
   // the only curated one-liners in the tree are the handful in llms.txt. An
-  // attribution claiming an element is undescribed is therefore true for almost
+  // attribution claiming a web component is undescribed is therefore true for almost
   // all of them and FALSE for those few — which is exactly the check that stops
   // "no description" becoming the catch-all every finding gets filed under.
-  const meta = JSON.parse(readFileSync(CATALOG_PATHS.elementMeta, 'utf8'));
+  const meta = JSON.parse(readFileSync(CATALOG_PATHS.webComponentMeta, 'utf8'));
   const describedTags = new Set(meta.filter((m) => m.description || m.summary).map((m) => m.tag));
   const llms = join(resolve(CATALOG_PATHS.packageJson, '..'), 'llms.txt');
   if (existsSync(llms)) {
@@ -193,7 +193,7 @@ async function evaluate({ runDir, findingsPath, gatesPath }) {
   // anything — which is the one property that keeps it from swallowing the
   // analysis. Read from the pack, not from a list here, so it is this run's pack.
   // WALKED, not a top-level listing. A flat readdir saw 13 of the pack's 93
-  // pages -- every per-element page lives under `elements/`, and those are the
+  // pages -- every per-web-component page lives under `web-components/`, and those are the
   // ones an agent reads most. So the escape hatch was unusable for exactly the
   // pages a finding is most likely to be about, which forces the mis-filing the
   // resolution exists to prevent.
@@ -209,7 +209,7 @@ async function evaluate({ runDir, findingsPath, gatesPath }) {
     };
     walk(agentPackDir, '');
     // Both spellings resolve: a finding may name `kai-chat.md` or the path
-    // `elements/kai-chat.md`, and refusing one of them would be pedantry that
+    // `web-components/kai-chat.md`, and refusing one of them would be pedantry that
     // costs the analysis a real attribution.
     facts.pages = [...new Set([...pages, ...pages.map((p) => p.split('/').pop())])];
   }
@@ -238,7 +238,7 @@ async function evaluate({ runDir, findingsPath, gatesPath }) {
 
   // The two gates this process can answer for itself.
   const computed = {
-    'elements-exist': gateElementsExist({ files, knownTags: facts.knownTags }),
+    'web-components-exist': gateWebComponentsExist({ files, knownTags: facts.knownTags }),
     'audit-clean': gateAuditClean({ files }),
   };
 
@@ -417,7 +417,7 @@ ${
 
 ${
   e.fabricationProposals.length
-    ? `## Proposed FABRICATED.md rows\n\nPaste into \`mcp/catalog/fabrications.ts\` after checking each tag. **Not written automatically:** a mis-scored run editing the catalog would teach every later agent that a real element is imaginary.\n\n\`\`\`json\n${JSON.stringify(e.fabricationProposals, null, 2)}\n\`\`\`\n`
+    ? `## Proposed FABRICATED.md rows\n\nPaste into \`mcp/catalog/fabrications.ts\` after checking each tag. **Not written automatically:** a mis-scored run editing the catalog would teach every later agent that a real web component is imaginary.\n\n\`\`\`json\n${JSON.stringify(e.fabricationProposals, null, 2)}\n\`\`\`\n`
     : ''
 }
 ## Read this before quoting the score
@@ -514,14 +514,14 @@ async function selfTest() {
   // A mechanical dimension with no gate result is an ERROR, not a pass.
   catch_(
     'a missing gate result is an error, never a skip',
-    () => scoreRun({ scenario: s6, gates: { 'elements-exist': { passed: true } }, judged: Object.fromEntries(rubricFor(s6).dimensions.filter((d) => d.gate === 'judged').map((d) => [d.id, 8])) }),
+    () => scoreRun({ scenario: s6, gates: { 'web-components-exist': { passed: true } }, judged: Object.fromEntries(rubricFor(s6).dimensions.filter((d) => d.gate === 'judged').map((d) => [d.id, 8])) }),
     'has no gate result',
   );
 
   // The mechanical/judged split holds in both directions.
   catch_(
     'a judged score for a mechanical dimension is refused',
-    () => scoreRun({ scenario: s6, gates: {}, judged: { 'elements-exist': 10 } }),
+    () => scoreRun({ scenario: s6, gates: {}, judged: { 'web-components-exist': 10 } }),
     'MECHANICALLY gated',
   );
   catch_(
@@ -543,12 +543,12 @@ async function selfTest() {
     'already exists',
   );
   catch_(
-    'recording a REAL element as fabricated is refused',
+    'recording a REAL web component as fabricated is refused',
     () => attributeFindings({ findings: [{ id: 'f4', attribution: { kind: 'fabricated-element', invented: 'kai-chat', useInstead: 'kai-thread' } }], catalog: facts }),
-    'is a real element',
+    'is a real web component',
   );
   catch_(
-    'claiming a described element is undescribed is refused',
+    'claiming a described web component is undescribed is refused',
     () => attributeFindings({ findings: [{ id: 'f5', attribution: { kind: 'missing-element-description', tag: facts.describedTags[0] } }], catalog: facts }),
     'DOES have a description',
   );
@@ -574,15 +574,15 @@ async function selfTest() {
   checks.push(['ordinary output is not flagged as contamination', noLeak.clean]);
 
   // The elements gate: fabricated kai-* found, a consumer's own element not.
-  const g = gateElementsExist({
+  const g = gateWebComponentsExist({
     files: [{ name: 'main.ts', text: '<kai-datagrid></kai-datagrid><my-grid></my-grid><kai-chat></kai-chat>' }],
     knownTags: facts.knownTags,
   });
   checks.push(['a fabricated kai-* tag is caught', !g.passed && g.fabricated.some((f) => f.tag === 'kai-datagrid')]);
   checks.push(["a consumer's own <my-grid> is NOT called a fabrication", !g.fabricated.some((f) => f.tag === 'my-grid')]);
-  const g2 = gateElementsExist({ files: [{ name: 'main.ts', text: "chat.addEventListener('kai-submit', fn)" }], knownTags: facts.knownTags });
+  const g2 = gateWebComponentsExist({ files: [{ name: 'main.ts', text: "chat.addEventListener('kai-submit', fn)" }], knownTags: facts.knownTags });
   checks.push(['an EVENT name is not mistaken for a tag', g2.passed]);
-  const g3 = gateElementsExist({ files: [{ name: 'notes.md', text: '<kai-datagrid>' }], knownTags: facts.knownTags });
+  const g3 = gateWebComponentsExist({ files: [{ name: 'notes.md', text: '<kai-datagrid>' }], knownTags: facts.knownTags });
   checks.push(['prose is not scanned for tags (the honest refusal must not be punished)', g3.passed && g3.vacuous]);
 
   const a = gateAuditClean({ files: [{ name: 'main.ts', text: 'el.setAttribute("messages", String(messages));' }] });

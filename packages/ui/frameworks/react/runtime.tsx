@@ -89,7 +89,7 @@ function ensureRegistered(tagName: string, register?: () => Promise<unknown>): v
  *  a no-op on the server. */
 export function registerAll(): Promise<unknown> | undefined {
   if (typeof window === 'undefined' || typeof customElements === 'undefined') return undefined;
-  registerAllLoad ??= import('@kitn.ai/ui/elements');
+  registerAllLoad ??= import('@kitn.ai/ui/web-components');
   return registerAllLoad;
 }
 
@@ -107,7 +107,7 @@ export function createWebComponent<
   /** Map of React handler prop → DOM event name. */
   eventMap: Record<string, string>,
   /** Client-only thunk that loads + registers this element (a literal dynamic
-   *  import of its `@kitn.ai/ui/elements/<name>` chunk). */
+   *  import of its `@kitn.ai/ui/web-components/<name>` chunk). */
   register?: () => Promise<unknown>,
 ): ForwardRefExoticComponent<PropsWithoutRef<P> & RefAttributes<E>> {
   const eventEntries = Object.entries(eventMap);
@@ -131,7 +131,7 @@ export function createWebComponent<
     // returns undefined), writes land on a plain HTMLElement and are lost when
     // Solid's solid-element upgrades the tag later. We call whenDefined() so
     // props set before upgrade are re-applied once the definition arrives.
-    // With self-registration (elements/register imported at the top of
+    // With self-registration (web-components/register imported at the top of
     // react/index.tsx) this is belt-and-braces — the element is already defined
     // before React renders — but keeps the runtime safe regardless of import order.
     useLayoutEffect(() => {

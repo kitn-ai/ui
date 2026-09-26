@@ -120,7 +120,7 @@ function main() {
 
   let localForms = 0;
   if (source.mode === 'local') {
-    // The kit itself, so /blocks/kit/elements/autoloader.js resolves the way
+    // The kit itself, so /blocks/kit/web-components/autoloader.js resolves the way
     // the pinned CDN URL does. The whole dist: which chunks the autoloader
     // pulls is not a list worth hand-maintaining.
     // Everything but dist/blocks, which is already copied above and would

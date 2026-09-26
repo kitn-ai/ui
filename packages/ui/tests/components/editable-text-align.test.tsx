@@ -7,7 +7,7 @@
  * Measured in Chromium: editable and placeholder `::before` both computed
  * `center`, typed text sat 149px from each edge. `Composer` (the control
  * `PromptInput` wraps) had the identical hole in its DEFAULT editable class and
- * reproduced the same way on `components-elements-composer--playground`.
+ * reproduced the same way on `components-composer--playground`.
  *
  * THE PIN. An input control's reading direction is a fact about the control, so
  * it states it rather than inheriting it: `text-start` on the editable's class.
@@ -38,9 +38,9 @@
  */
 import { describe, it, expect, afterEach } from 'vitest';
 import { render, cleanup } from '@solidjs/testing-library';
-import compiledCss from '../../src/elements/compiled.css?inline';
-import { PromptInput, PromptInputTextarea } from '../../src/components/prompt-input';
-import { Composer } from '../../src/components/composer';
+import compiledCss from '../../src/web-components/compiled.css?inline';
+import { PromptInput, PromptInputTextarea } from '../../src/components/prompt/prompt-input';
+import { Composer } from '../../src/components/composer/composer';
 
 afterEach(cleanup);
 

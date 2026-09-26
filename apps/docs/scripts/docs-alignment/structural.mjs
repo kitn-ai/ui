@@ -1,4 +1,4 @@
-// The `kai-*` contract, checked structurally against element-meta.json.
+// The `kai-*` contract, checked structurally against web-component-meta.json.
 //
 // WHY NOT tsc
 // -----------
@@ -6,7 +6,7 @@
 // `{ [attr: string]: unknown }`, so tsc cannot reject a misspelled attribute on
 // a <kai-chat>, and 132 of the docs' code blocks are plain `html` that tsc never
 // sees at all. Element names, prop names, event names, slot names, part names
-// and the scalar/non-scalar split all live in element-meta.json, which is
+// and the scalar/non-scalar split all live in web-component-meta.json, which is
 // generated from the source at build time. Checking markup against it directly
 // is both stronger and uniform across html, JSX, Vue, Svelte and Angular.
 //
@@ -15,7 +15,7 @@
 //   scalars work as attributes. Events are non-bubbling `kai-*` CustomEvents.
 import { camelToKebab, kebabToCamel } from './surface.mjs';
 
-/** Attributes valid on any element, so never checked against element-meta. */
+/** Attributes valid on any element, so never checked against web-component-meta. */
 const GLOBAL_ATTRS = new Set([
   'id', 'class', 'classname', 'style', 'slot', 'part', 'exportparts', 'hidden', 'title', 'role',
   'dir', 'lang', 'tabindex', 'is', 'ref', 'key', 'draggable', 'contenteditable', 'spellcheck',
@@ -195,9 +195,9 @@ export function checkMarkup({ code: rawCode, startLine, surface, lang }) {
       push(
         surface.knownTokens.has(tag)
           ? {
-              kind: 'undeclared-in-element-meta',
+              kind: 'undeclared-in-web-component-meta',
               tag,
-              detail: `<${tag}> is used by the kit (a declarative light-DOM child) but is not a registered element, so element-meta.json, the generated types and the MCP catalog all omit it`,
+              detail: `<${tag}> is used by the kit (a declarative light-DOM child) but is not a registered element, so web-component-meta.json, the generated types and the MCP catalog all omit it`,
               line,
               severity: 'advisory',
             }
@@ -309,9 +309,9 @@ export function checkMarkup({ code: rawCode, startLine, surface, lang }) {
     push(
       surface.knownTokens.has(name)
         ? {
-            kind: 'undeclared-in-element-meta',
+            kind: 'undeclared-in-web-component-meta',
             tag: null,
-            detail: `addEventListener('${name}') — the kit dispatches this event, but no element DECLARES it, so it is missing from element-meta.json and the generated event types`,
+            detail: `addEventListener('${name}') — the kit dispatches this event, but no element DECLARES it, so it is missing from web-component-meta.json and the generated event types`,
             line,
             severity: 'advisory',
           }
@@ -326,7 +326,7 @@ export function checkMarkup({ code: rawCode, startLine, surface, lang }) {
   }
 
   // ── slot="…" must be a slot of one of the kai elements in the block ───────
-  // Only when EVERY element in the block actually has slot data. element-meta
+  // Only when EVERY element in the block actually has slot data. web-component-meta
   // records no slots at all for many elements that clearly declare
   // `<slot name="media">` in source (kai-empty is one), so an element with an
   // empty slot list means "unknown", not "has none" — treating it as the latter
@@ -377,7 +377,7 @@ export function checkCss({ code, startLine, surface }) {
 }
 
 /** <Example tag="kai-x" config={{ … }} /> and friends: the tag and every config
- *  key are hand-written in MDX but resolved against element-meta at render time,
+ *  key are hand-written in MDX but resolved against web-component-meta at render time,
  *  so a stale one renders nothing and fails silently in the browser. */
 export function checkMdxComponents(doc, surface) {
   const findings = [];

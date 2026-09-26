@@ -10,7 +10,7 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import '@testing-library/jest-dom/vitest';
 import { render, cleanup, screen } from '@solidjs/testing-library';
-import { BUILTIN_CARD_COMPONENTS } from '../../src/primitives/card-registry';
+import { BUILTIN_CARD_COMPONENTS } from '../../src/components/card/card-registry';
 import type { FormDefinition } from '../../src/primitives/card-data-types';
 import { mergeToolArgsIntoFormDefaults } from './codegen';
 

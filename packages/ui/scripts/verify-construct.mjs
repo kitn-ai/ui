@@ -6,7 +6,7 @@
  * -------------
  * Every other construct-engine test drives the LIBRARY (`generateProject`,
  * `validateConstruct`) in-process. Nothing before this gate drove the CLI a
- * real user runs (`node bin/mcp.js eject …`), installed the ejected project's
+ * real user runs (`node packages/cli/bin/kai.js eject …`), installed the ejected project's
  * dependencies, compiled it under its OWN emitted tsconfig, built it with
  * vite, or bundled the compiled output inside a real consumer app. Any of
  * those four steps can be broken by a codegen change that every unit test
@@ -24,7 +24,7 @@
  * THE EIGHT LEGS PER SYNTHESIZED FIXTURE
  * ---------------------------------------
  *   1. write the fixture JSON
- *   2. `node bin/mcp.js eject <fixture> <cellDir> --ui <tarball>` — the real
+ *   2. `node packages/cli/bin/kai.js eject <fixture> <cellDir> --ui <tarball>` — the real
  *      CLI, pointed at THIS checkout's own packed tarball (never a hand-typed
  *      version — npm's published @kitn.ai/ui may not have caught up)
  *   3. one shared `npm install` (the first cell), node_modules SYMLINKED into
@@ -33,7 +33,7 @@
  *   4. `tsc --noEmit` under the cell's OWN emitted tsconfig.json (strict +
  *      noUnusedLocals are IN that file — the gate compiles exactly what an
  *      ejecting consumer compiles)
- *   5. `npm run build` (the emitted vite lib config) — the element must
+ *   5. `npm run build` (the emitted vite lib config) — the web component must
  *      actually bundle
  *   6. for one cell per LAYOUT (the layout × all-capabilities cell): a
  *      minimal Vite 8 consumer app that imports the COMPILED output and
@@ -95,13 +95,20 @@ const run = (cmd, args, cwd, opts = {}) =>
 // ── build-artifact preamble (the verify-consumer-sideeffects convention) ────
 const DIST_DIR = join(PKG_ROOT, 'dist');
 const KAI_ES = join(DIST_DIR, 'kai.es.js');
-const CONSTRUCT_CLI = join(DIST_DIR, 'construct-cli.es.js');
 const SCHEMA_PATH = join(PKG_ROOT, 'mcp/construct/construct.v1.schema.json');
-const BIN = join(PKG_ROOT, 'bin/mcp.js');
+// The CLI itself moved to `@kitn.ai/cli` (its bins and its build live there; the
+// sources stay in this package, see packages/cli/config/vite/node.ts). This guard
+// drives the REAL CLI end to end, so it has to address the sibling package rather
+// than reach into this package's dist -- and the existence check below is what
+// turns a stale path into a loud failure instead of a green run over nothing.
+const CLI_PKG = join(PKG_ROOT, '..', 'cli');
+const CONSTRUCT_CLI = join(CLI_PKG, 'dist', 'construct-cli.es.js');
+const BIN = join(CLI_PKG, 'bin', 'kai.js');
 
 for (const [path, what] of [
-  [KAI_ES, 'dist/kai.es.js (the built elements entry)'],
-  [CONSTRUCT_CLI, 'dist/construct-cli.es.js (the built construct CLI, what bin/mcp.js loads for eject/dev/compile)'],
+  [KAI_ES, 'dist/kai.es.js (the built web-components entry)'],
+  [CONSTRUCT_CLI, 'packages/cli/dist/construct-cli.es.js (the built construct CLI, what packages/cli/bin/kai.js loads for eject/dev/compile)'],
+  [BIN, 'packages/cli/bin/kai.js (the `kai` bin this guard drives: `node bin/kai.js eject ...`)'],
   [SCHEMA_PATH, 'the drift-guarded construct.v1.schema.json artifact'],
 ]) {
   if (!existsSync(path)) fail(`${what} not found at ${path} — run \`nx build ui\` first.`);
@@ -481,7 +488,7 @@ async function main() {
     const cellsRoot = join(tmp, 'cells');
     mkdirSync(cellsRoot, { recursive: true });
 
-    step(`ejecting ${filtered.length} construct(s) through the real CLI (node bin/mcp.js eject … --ui <tarball>)`);
+    step(`ejecting ${filtered.length} construct(s) through the real CLI (node packages/cli/bin/kai.js eject … --ui <tarball>)`);
     const results = [];
     let templateDir = null;
     for (const c of filtered) {

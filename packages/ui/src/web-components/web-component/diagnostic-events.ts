@@ -1,0 +1,93 @@
+// The ELEMENT-layer diagnostic events: what the `kai-*` custom elements SAW a consumer
+// do to them.
+//
+// The wire events answer "did the data arrive". These answer the other half -- "the data
+// is right and the UI still is not updating" -- and all three causes are silent by
+// construction:
+//
+//   1. An array or object prop set as an HTML ATTRIBUTE. `component-register` parses
+//      attributes with a `JSON.parse` whose `catch` returns the raw string, so
+//      `el.setAttribute('messages', arr)` assigns the literal text
+//      `"[object Object],[object Object]"` to the property and pushes THAT into the
+//      Solid signal. Nothing throws, nothing logs, nothing renders.
+//   2. The SAME array reference handed back: solid-element sets its per-prop signal with
+//      `set(() => v)`, Solid's default equality is `===`, so nothing notifies.
+//   3. A NEW array whose items are all the previous item objects: the array notifies, but
+//      the lists render through reference-keyed `<For>`s, so no row is re-invoked.
+
+//
+// METADATA ONLY, the rule the wire events follow: a prop's VALUE never appears below, and
+// `valuePreview` is a shape description from a closed vocabulary, pinned by
+// `web-component-diagnostics-payload.test.ts`.
+
+/** The envelope, structurally identical to `WireDiagnosticBase`. Restated here
+ *  rather than imported so this file keeps its zero-import property; the two are
+ *  kept in step by `web-component-diagnostics.test.ts`, which asserts every emitted
+ *  element event carries a `type` and a numeric `t`. */
+export interface WebComponentDiagnosticBase {
+  type: string;
+  /** `Date.now()` at emission. */
+  t: number;
+}
+
+/** Which contract was broken. A closed vocabulary, so a panel keys its own
+ *  explanation off the kind and never needs prose from the kit. */
+export type WebComponentViolationKind =
+  /** A non-scalar prop received a value through the ATTRIBUTE channel. The
+   *  attribute cannot carry an array or an object, so the property now holds a
+   *  string and the element renders nothing. */
+  | 'array-prop-as-attribute'
+  /** A list prop was set to the array reference it already held. Solid compares
+   *  with `===`, so this notified nothing — a no-op write. */
+  | 'same-array-reference'
+  /** A list prop received a NEW array of the SAME length whose every item is
+   *  reference-identical to the previous array's. The array notified, but every
+   *  row's identity is unchanged, so a reference-keyed `<For>` re-invokes none
+   *  of them. The classic "I mutated the item and copied the array" case.
+   *
+   *  NOTE what this deliberately does NOT claim: the kit cannot know an item
+   *  "changed" without comparing its CONTENT, and content is payload. So this
+   *  reports the structurally knowable fact — an update that cannot render —
+   *  and leaves the question of whether the consumer meant anything by it to
+   *  the consumer, who is the only one who can answer it. */
+  | 'mutated-in-place';
+
+/** A consumer broke one of the three `kai-` contract rules on a live element. */
+export interface WebComponentViolationEvent extends WebComponentDiagnosticBase {
+  type: 'web-component.violation';
+  kind: WebComponentViolationKind;
+  /** The custom-element tag, e.g. `kai-chat`. */
+  tag: string;
+  /** The camelCase prop name, e.g. `messages`. */
+  prop: string;
+  // A closed vocabulary: `[object Object]` one object stringified into the attribute;
+  // `[object Object] x N` an array of N objects (the common case); `json:number`,
+  // `json:boolean`, `json:null` a valid JSON scalar; `string(len=N)` the LENGTH of the
+  // text, never the text; `empty-attribute` a bare attribute on a prop that needs a value.
+  /** A short shape preview of the offending value, never its content. */
+  valuePreview?: string;
+  /** Element count of the array involved. `same-array-reference` and
+   *  `mutated-in-place` only. A length is shape, not content. */
+  length?: number;
+}
+
+/** Which `kai-*` elements are DEFINED in this realm right now.
+ *
+ *  The question behind it is hydration: an SSR page whose markup contains
+ *  `<kai-chat>` but whose element bundle never loaded shows empty boxes and no
+ *  error, because an undefined custom element is a valid, inert HTMLElement.
+ *  The SSR starters already answer this by hand for a hard-coded handful
+ *  (`HydrationBadge.tsx`); this is the same answer over the whole manifest. */
+export interface WebComponentRegistryEvent extends WebComponentDiagnosticBase {
+  type: 'web-component.registry';
+  /** Tags `customElements.get()` resolved. */
+  defined: string[];
+  /** Tags in the manifest that are NOT defined in this realm. Named for what it
+   *  is rather than `undefined`, which is a miserable key to read in a panel. */
+  notDefined: string[];
+  /** `defined.length + notDefined.length`. Present so a panel can show "62 of
+   *  79" without trusting itself to add up two arrays it may have truncated. */
+  total: number;
+}
+
+export type WebComponentDiagnosticEvent = WebComponentViolationEvent | WebComponentRegistryEvent;

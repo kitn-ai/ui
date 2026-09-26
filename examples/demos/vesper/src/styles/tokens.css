@@ -1,0 +1,141 @@
+/* Vesper's three materials.
+ *
+ * Materials are assigned by ROLE, never by section -- that is the whole
+ * discipline. Neumorphism is structure, glass is anything that floats above
+ * the page, clay is only the controls a hand touches. A section does not get
+ * "its own look"; it gets whatever the thing it contains actually is.
+ *
+ *   NEU    panels, cards, section wells, sliders, accordions
+ *   GLASS  sticky nav, cart drawer, modals, photo captions, hotspot pins, chips
+ *   CLAY   swatches, size pills, quantity steppers
+ */
+
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(/fonts/playfair-display-400.woff2) format('woff2');
+}
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(/fonts/playfair-display-700.woff2) format('woff2');
+}
+
+:root {
+  /* Palette -- carried over unchanged from the static page. */
+  --bg: #e9ebf0;
+  --ink: #1a1d23;
+  --ink2: #565c68;
+  --muted: #8c919d;
+  --line: #d4d8e0;
+  --cta: #23262e;
+  --cta2: #14161b;
+  --cta-ink: #f6f7f9;
+
+  /* NEUMORPHISM -- one light source, top-left. Every raised thing casts the
+     same pair of shadows, which is what makes the surface read as one sheet
+     of material rather than a pile of cards. */
+  --sh-d: #c7cbd4;
+  --sh-l: #ffffff;
+  --raise: 9px 9px 22px var(--sh-d), -9px -9px 22px var(--sh-l);
+  --raise-sm: 5px 5px 13px var(--sh-d), -5px -5px 13px var(--sh-l);
+  --inset: inset 5px 5px 11px var(--sh-d), inset -5px -5px 11px var(--sh-l);
+  --inset-sm: inset 3px 3px 7px var(--sh-d), inset -3px -3px 7px var(--sh-l);
+
+  /* GLASS -- for surfaces that sit ABOVE the page and must let it show
+     through. Never used for something that sits IN the page: a glass panel
+     with nothing behind it is just a grey box with an expensive filter. */
+  --glass-bg: color-mix(in srgb, var(--bg) 72%, transparent);
+  --glass-bg-strong: color-mix(in srgb, var(--bg) 88%, transparent);
+  --glass-blur: 20px;
+  --glass-hair: color-mix(in srgb, #ffffff 62%, transparent);
+  --glass-shadow: 0 18px 48px rgba(20, 24, 40, 0.14);
+  --glass-shadow-sm: 0 8px 24px rgba(20, 24, 40, 0.1);
+
+  /* CLAY -- softer, rounder, puffier than neu, with an inner highlight along
+     the top edge. Reserved for controls, so "clay" reads as "touch this". */
+  --clay-radius: 18px;
+  --clay-raise: 6px 6px 14px var(--sh-d), -6px -6px 14px var(--sh-l),
+    inset 0 2px 6px color-mix(in srgb, #ffffff 70%, transparent);
+  --clay-press: inset 4px 4px 10px var(--sh-d),
+    inset -3px -3px 8px var(--sh-l);
+
+  /* Type */
+  --display-font: 'Playfair Display', Georgia, 'Times New Roman', Times, serif;
+  --body-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
+    Arial, sans-serif;
+
+  /* Motion -- one curve and three durations, so unrelated animations still
+     feel like they came from the same hand. */
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --t-fast: 0.16s;
+  --t-mid: 0.32s;
+  --t-slow: 0.62s;
+
+  --wrap: 1100px;
+}
+
+/* The three materials as classes. Components reach for these rather than
+   re-deriving a shadow, so a change to the light source lands everywhere. */
+
+.neu {
+  background: var(--bg);
+  box-shadow: var(--raise);
+  border-radius: 18px;
+}
+.neu-sm {
+  background: var(--bg);
+  box-shadow: var(--raise-sm);
+  border-radius: 14px;
+}
+.neu-well {
+  background: var(--bg);
+  box-shadow: var(--inset);
+  border-radius: 18px;
+}
+
+.glass {
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.4);
+  backdrop-filter: blur(var(--glass-blur)) saturate(1.4);
+  border: 1px solid var(--glass-hair);
+  box-shadow: var(--glass-shadow);
+}
+.glass-sm {
+  background: var(--glass-bg-strong);
+  -webkit-backdrop-filter: blur(14px) saturate(1.3);
+  backdrop-filter: blur(14px) saturate(1.3);
+  border: 1px solid var(--glass-hair);
+  box-shadow: var(--glass-shadow-sm);
+}
+
+.clay {
+  background: var(--bg);
+  border: 0;
+  border-radius: var(--clay-radius);
+  box-shadow: var(--clay-raise);
+  cursor: pointer;
+  transition: box-shadow var(--t-fast) var(--ease),
+    transform var(--t-fast) var(--ease);
+}
+.clay:active {
+  transform: translateY(1px) scale(0.985);
+}
+.clay[aria-pressed='true'],
+.clay[aria-checked='true'],
+.clay.on {
+  box-shadow: var(--clay-press);
+}
+
+/* Focus is one ring everywhere, drawn outside the shape so it survives the
+   inset shadows the pressed states use. */
+:where(a, button, input, [tabindex]):focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+  border-radius: 4px;
+}

@@ -10,7 +10,7 @@
 // `toAnthropicMessages` now REFUSE a `blob:` URL with a written reason
 // (`src/wire/files.ts`), so the failure is loud rather than silent; this guard
 // is what stops the source of it growing back. The correct pattern is
-// `readAsDataUrl` in `src/elements/default-input.tsx`: a `data:` URI, for EVERY
+// `readAsDataUrl` in `src/web-components/prompt/default-input.tsx`: a `data:` URI, for EVERY
 // file, not just images -- a document with no `url` at all is unencodable for
 // the same reason a blob: URL is.
 //
@@ -37,8 +37,8 @@
 //
 //   LEGITIMATE, and deliberately not matched -- minting an object URL to render
 //   bytes IN-TAB, with revokeObjectURL cleanup, never staged onto a message:
-//     const url = URL.createObjectURL(blob);          // components/image.tsx
-//     objectUrl = URL.createObjectURL(blob);          // components/voice-output.tsx
+//     const url = URL.createObjectURL(blob);          // components/image/image.tsx
+//     objectUrl = URL.createObjectURL(blob);          // components/voice/voice-output.tsx
 //     new Audio(URL.createObjectURL(await res.blob()))
 //   Each binds a VARIABLE (or feeds an argument). None is a `url:` property.
 //
@@ -196,7 +196,7 @@ const isUrlName = (name) =>
  *
  *  Only these two forms. A `const url = URL.createObjectURL(blob)` variable is
  *  NOT a property assignment and so is never reached -- which is exactly how
- *  components/image.tsx and components/voice-output.tsx stay clean without
+ *  components/image/image.tsx and components/voice/voice-output.tsx stay clean without
  *  needing an exemption list. */
 function findInSource(sf) {
   const hits = [];
@@ -302,9 +302,9 @@ const SELF_TEST_CASES = [
   { name: 'url: after another key on a previous line', expect: true,
     code: `const a = {\n  mediaType: f.type,\n  url: URL.createObjectURL(f),\n};` },
   // -- the legitimate in-tab uses, which must stay clean --
-  { name: 'LEGIT const url = ... feeding an <img> (components/image.tsx)', expect: false,
+  { name: 'LEGIT const url = ... feeding an <img> (components/image/image.tsx)', expect: false,
     code: `const url = URL.createObjectURL(blob); setObjectUrl(url); onCleanup(() => URL.revokeObjectURL(url));` },
-  { name: 'LEGIT objectUrl = ... feeding audio.src (components/voice-output.tsx)', expect: false,
+  { name: 'LEGIT objectUrl = ... feeding audio.src (components/voice/voice-output.tsx)', expect: false,
     code: `objectUrl = URL.createObjectURL(blob); audio.src = objectUrl;` },
   { name: 'LEGIT new Audio(URL.createObjectURL(...)) (text-to-speech recipe)', expect: false,
     code: `const audio = new Audio(URL.createObjectURL(await res.blob()));` },
@@ -415,7 +415,7 @@ console.error(
     `      reader.onerror = () => reject(reader.error);\n` +
     `      reader.readAsDataURL(file);\n` +
     `    });\n` +
-    `  The reference implementation is \`readAsDataUrl\` in src/elements/default-input.tsx.\n\n` +
+    `  The reference implementation is \`readAsDataUrl\` in src/web-components/prompt/default-input.tsx.\n\n` +
     `  Minting an object URL to render bytes IN-TAB (an <img>, an <audio>) with\n` +
     `  revokeObjectURL cleanup is CORRECT and is not what this matched -- bind it to a\n` +
     `  variable rather than to an attachment's \`url\`.`,

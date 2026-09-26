@@ -286,7 +286,7 @@ describe('react form (react in the project deps)', () => {
       expect(tsx).toContain('className=');
       expect(tsx).not.toMatch(/<script\b/);
       expect(tsx).not.toContain(' class="');
-      expect(existsSync(path.join(base, 'kai-elements.d.ts'))).toBe(false);
+      expect(existsSync(path.join(base, 'kai-web-components.d.ts'))).toBe(false);
       expect(existsSync(path.join(base, `use${componentName(block.name)}.ts`))).toBe(true);
       expect(existsSync(path.join(base, `${block.name}.controller.ts`))).toBe(true);
       const page = block.manifest.files.find((f) => f.type === 'registry:page')!;

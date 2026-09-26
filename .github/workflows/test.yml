@@ -128,6 +128,18 @@ jobs:
             console.log(`traversal suite reported ${m[1]} tests`);
           '
 
+      # BEFORE THE INSTALL, and that placement is the whole point. On the failure this exists for,
+      # `pnpm install --frozen-lockfile` is what fails -- so a guard sitting with the other lints
+      # (which all run AFTER the install) would never execute. It needs nothing but Node and the
+      # checkout: it READS pnpm-lock.yaml, it does not run pnpm, so the staleness cannot break it.
+      #
+      # WHY: release-please's node-workspace plugin rewrites the internal ranges in the release PR
+      # and does not regenerate the lockfile, so every leg of the merge commit dies ~30s in and the
+      # publish gate refuses on checks that can never go green. That happened on BOTH of the last
+      # two releases; this turns it into one named line with the one command that fixes it.
+      - name: Lockfile-specifier guard (manifests vs pnpm-lock.yaml)
+        run: node scripts/lint-lockfile-specifiers.mjs --self-test && node scripts/lint-lockfile-specifiers.mjs
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
@@ -153,7 +165,7 @@ jobs:
       - name: Silent-drop guard (wire encoders)
         run: pnpm --filter @kitn.ai/ui run lint:silent-drops
 
-      # Every authored catalog claim (element tags, events, properties, invariant
+      # Every authored catalog claim (web-component tags, events, properties, invariant
       # ids, corpus paths, inventory titles, scenario invariant refs) must resolve
       # against the derived layer and the tree. This is what stops the authored
       # surface layer becoming prose about a tree that moved underneath it.
@@ -219,11 +231,93 @@ jobs:
       # Reads source and package.json only, no dist/, so it is a seam anyone can
       # grab to watch it fail (`node packages/ui/scripts/lint-cdn-pins.mjs`).
       # `--fix` rewrites every stale pin when the version bumps.
+      # The kai-* layer is called web components (renamed 2026-09-19). Nothing
+      # else catches a straggler: the CDN guard above checks VERSIONS, not paths,
+      # so a doc or a scaffold copy-pasting the old subpath reintroduces a
+      # specifier that resolves to nothing and no build step complains. Reads
+      # tracked source only, no dist/, so it is a seam anyone can grab:
+      # `node packages/ui/scripts/lint-layer-names.mjs`.
+      - name: Retired layer-name guard (elements -> web-components)
+        run: pnpm --filter @kitn.ai/ui run lint:layer-names
+
+      # Layer direction guard: a VALUE import may target the importing file's own
+      # source layer or one below it, never above. src/web-components/ is a facade
+      # over the Solid components, so a component importing the facade layer is a
+      # real cycle, not a style nit. Type-only imports are erased and stay legal.
+      - name: Layer-direction guard (no upward value import)
+        run: pnpm --filter @kitn.ai/ui run lint:layer-direction
+
+      # Every PUBLISHED package carries the same npm metadata, and repository.directory names its
+      # own folder. npm prints neither a warning nor an error for absent metadata, so this drifted
+      # unnoticed: @kitn.ai/ui was missing repository.directory and engines.node while the three
+      # packages beside it had both. A missing engines.node is the worse half -- npm then prints no
+      # EBADENGINE warning for a Node version the package's own tools refuse.
+      - name: Package-metadata guard (published manifests agree)
+        run: node scripts/lint-package-metadata.mjs --self-test && node scripts/lint-package-metadata.mjs
+
+      # Dangling-specifier guard: every STATEMENT-POSITION relative import in the tree
+      # must resolve to a real file. tsc does NOT report an unresolved SIDE-EFFECT
+      # import in this config, and the unit project excludes *.stories.*, so on
+      # 2026-09-20 a story shipped `import '../web-components/register'` (a path that
+      # lost a `..` in the family-folder reorg) and collected 0 tests where it should
+      # have collected 9. Only the storybook browser job could have seen it, and that
+      # job is documented flaky. The same class bit this branch twice.
+      #
+      # Strings, template literals and comments are masked first, because the tree is
+      # full of `import './x'` inside emitted-code snippets for generated projects:
+      # measured, 157 unresolved specifiers without masking and ONE with it.
+      #
+      # Reads tracked source only and no dist/, so it is a seam anyone can grab:
+      # `node packages/ui/scripts/lint-dangling-imports.mjs`.
+      - name: Dangling-import guard (relative specifiers resolve)
+        run: pnpm --filter @kitn.ai/ui run lint:dangling-imports
+
       - name: CDN version-pin staleness guard (docs, README, examples)
         run: pnpm --filter @kitn.ai/ui run lint:cdn-pins
 
+      # The three release literals are hand-typed and NOTHING else reads them
+      # (docs/coupling-map.md §1): release-please-config.json's packages{}, .release-please-
+      # manifest.json, and the publish loop. A package added to one and forgotten in another
+      # is never released or never published, silently. This derives the published set from
+      # packages/*/package.json, checks all three in both directions, and holds the publish
+      # ORDER (a package depending on another must come after it). No build, no network.
+      - name: Release-wiring guard (published packages vs the three literals)
+        run: pnpm --filter @kitn.ai/ui run lint:release-wiring
+
+      # The one shipped dependency range in this workspace that has been wrong before:
+      # @kitn.ai/mcp depends on @kitn.ai/ui because the MCP resolves the kit's manifest at
+      # runtime, so a stale bound points every agent at an API the app may not have. The
+      # range cannot be a `workspace:` spec -- npm has no such protocol and packs it
+      # verbatim (measured), which a consumer cannot install -- so it is a literal, and
+      # this keeps every such literal honest.
+      #
+      # IT IS DERIVED, NOT PER-PACKAGE: the old form was one guard inside one package,
+      # reading its own manifest by path, which could only ever see one edge. This walks
+      # pnpm-workspace.yaml, reads every member, and checks every shipped internal edge
+      # (@kitn.ai/mcp -> @kitn.ai/ui, @kitn.ai/cli -> create-kai, and whatever lands next).
+      # Private members are exempt: `workspace:` is CORRECT in the docs site and the
+      # examples, which never publish. No build, no network.
+      # A step NAME is a YAML plain scalar until it is quoted, and a `: ` inside one makes libyaml
+      # refuse the entire file: every event then fails at 0 s with "workflow file issue" while
+      # `gh pr checks` says "no checks reported", which reads like checks that have not started.
+      # That happened twice in one session (see the guard's header), and nothing else reads these
+      # files: lint:gate-parity parses them with a narrow line reader on purpose and accepted both.
+      # The rule is grammar-exact, not a heuristic: a plain scalar cannot contain `: `.
+      - name: Workflow-scalar guard (YAML plain scalars)
+        run: node scripts/lint-workflow-scalars.mjs --self-test && node scripts/lint-workflow-scalars.mjs
+
+      - name: Workspace-range guard (every shipped internal range tracks the workspace)
+        run: node scripts/verify-workspace-ranges.mjs --self-test && node scripts/verify-workspace-ranges.mjs
+
+      # Nothing else reads a CLI INVOCATION in prose: the docs suite, verify:docs (it
+      # resolves import specifiers), lint:cdn-pins (it reads `@kitn.ai/ui@<version>` pins)
+      # and lint:gate-parity all stayed green when the old command was put back into a
+      # docs page -- measured. No build, no network.
+      - name: Retired CLI-invocation guard (prose names a retired package)
+        run: pnpm --filter @kitn.ai/cli run lint:cli-invocations
+
       # Size budget for the committed llms-full.txt. The file is generated, so
-      # it grows as a SIDE EFFECT of unrelated work -- a new element, a fatter
+      # it grows as a SIDE EFFECT of unrelated work -- a new web component, a fatter
       # doc comment, a new generated section -- and nothing else prices that
       # growth. Both costs it guards degrade quietly with the byte count: grep
       # precision (more near-duplicate rows per query) and whole-file ingestion
@@ -283,6 +377,34 @@ jobs:
       # it fail (`node packages/ui/scripts/lint-story-conventions.mjs`).
       - name: Story-convention guard (docs.source.code + argType Events category)
         run: pnpm --filter @kitn.ai/ui run lint:story-conventions
+
+      # A prop doc comment is generated into FIVE artifacts at once: the element
+      # meta, llms-full.txt (what an agent reads), the MCP catalog, the docs prop
+      # table and Storybook. The owner's rule is that it says what the prop does
+      # plus only what the name and type cannot (default, unit, a real trap), in
+      # one sentence: measured on the web-component facades, the long tail ran to
+      # 986 chars and the same 872-char text sat in three of them. The reasoning
+      # belongs in a `//` comment beside the prop, which no generator reads.
+      #
+      # `--self-test` proves the analyzer fires on an over-cap prop, honours a
+      # waiver only when it carries a reason, and refuses to pass on a walk that
+      # read nothing. Source only, no dist/.
+      - name: Prop-doc verbosity guard (one sentence per prop)
+        run: pnpm --filter @kitn.ai/ui run lint:prop-docs
+
+      # A comment citing a plan, a task/round ID, a dated ruling, a section ref or a
+      # path into the dated archive is unreadable the day it is written: the reader
+      # cannot resolve `T-1` or `(owner round, 2026-08-26)`, because the plan was
+      # never in the repo or lives in `docs/handoff/`, which describes an older
+      # tree. The same walk caps a single comment BLOCK at 20 lines, because the
+      # worst module header on this tree was 109 lines and nobody reads it.
+      #
+      # `--self-test` proves the analyzer fires on each citation shape, lets a
+      # LIVING doc path through, does not mistake `GPT-4` for a task ID, does not
+      # read `//` inside a URL as a comment, and honours a waiver only when it
+      # names the rule and carries a reason. Source only, no dist/.
+      - name: Comment-reference and block-length guard
+        run: pnpm --filter @kitn.ai/ui run lint:comment-references
 
       # Does a document that ENUMERATES the merge gate still match this job?
       # A handoff said "every gate is green" over a five-command list while this
@@ -383,7 +505,7 @@ jobs:
       - name: Ignored-path snapshot (what is on disk before the build writes)
         run: git status --porcelain --ignored=matching packages/ui > "$RUNNER_TEMP/ignored-before.txt"
 
-      - name: Build (element bundle + provider subpath)
+      - name: Build (web-components bundle + provider subpath)
         run: pnpm exec nx build ui
 
       # THE ARTIFACT GLOB IS THE NEW `outputs:` LIST, and it has the nx list's
@@ -403,7 +525,7 @@ jobs:
       # gitignored-and-build-written set under packages/ui: dist/, the
       # `build:css` prebuild output, and the block driver pages `build:blocks`
       # generates for `verify:blocks`. Everything else the build writes --
-      # element-meta.json, derived.json, llms-full.txt, the React wrappers,
+      # web-component-meta.json, derived.json, llms-full.txt, the React wrappers,
       # docs/web-components.md, the construct template fixtures -- is COMMITTED,
       # so a downstream `checkout` already has it, and `verify:generated` in
       # `dist-guards` proves it is the right version.
@@ -431,14 +553,14 @@ jobs:
           if-no-files-found: error
           path: |
             packages/ui/dist/**
-            packages/ui/src/elements/compiled.css
+            packages/ui/src/web-components/compiled.css
             packages/ui/scripts/block-driver/pages/generated/**
 
   # 30% of the whole gate, sharing nothing with anything else, so it gets its own
   # leg. `verify-construct.mjs` ejects against THIS CHECKOUT'S OWN packed tarball
   # and then runs a real `npm install` per cell, which is where the time goes.
   #
-  # NO PATH FILTER, deliberately. A PR touching only src/elements/ changes what
+  # NO PATH FILTER, deliberately. A PR touching only src/web-components/ changes what
   # every cell installs while matching nothing a construct-scoped filter would
   # look at -- "the tree is not the tarball, and the tarball is not what npx
   # runs", in its most literal form. A filter safe enough to use would have to
@@ -469,7 +591,7 @@ jobs:
 
       # `actions/upload-artifact` does not preserve mtimes: every file in the
       # tarball is stamped at EXTRACTION time, in the order the zip holds them.
-      # `dist/**` comes out before `src/elements/compiled.css`, so the source ends
+      # `dist/**` comes out before `src/web-components/compiled.css`, so the source ends
       # up looking NEWER than the bundle built from it -- and the mtime-based
       # stale-bundle guard in tests/e2e/hover-card-global-setup.ts reads exactly
       # that shape as "you edited src and forgot to rebuild" and refuses to run.
@@ -501,14 +623,47 @@ jobs:
           key: construct-npm-${{ hashFiles('packages/ui/mcp/construct/construct.v1.schema.json', 'packages/ui/mcp/construct/templates.ts', 'packages/ui/package.json') }}
           restore-keys: construct-npm-
 
-      # The construct engine's real emit chain: node bin/mcp.js eject (the CLI,
-      # not the library) -> a real npm install -> tsc --noEmit under the cell's
+      # The construct engine's real emit chain: node packages/cli/bin/kai.js eject
+      # (the CLI, not the library; it lives in @kitn.ai/cli) -> a real npm install -> tsc --noEmit under the cell's
       # OWN emitted tsconfig -> npm run build -> for one cell per layout, a real
       # Vite 8 consumer bundle asserting the registration survives. Axes (layout,
       # capability) are derived from the drift-guarded construct.v1.schema.json
       # artifact, never typed here -- the script prints what it actually ran.
       # --self-test runs first and proves the harness detects a spliced type
       # error and a hand-stripped registration before the real cells are trusted.
+      # @kitn.ai/cli owns the CLI this leg drives (`node packages/cli/bin/kai.js eject`),
+      # and the kit-dist artifact this leg downloads carries packages/ui only. kai's build
+      # reads ui's SOURCES, not its dist, so it declares `dependsOn: []` and takes those
+      # trees as inputs -- building ui first would be wasted work on top of the download.
+      - name: Build the kai CLI (this leg runs its bin)
+        run: pnpm exec nx build cli
+
+      # The MCP package's own bundle, built here because this leg is the one that runs the
+      # pack guard over its tarball. It has no bearing on the construct chain itself.
+      - name: Build the MCP server (its tarball is graded below)
+        run: pnpm exec nx build mcp
+
+      # Runs here because this is the one leg with the CLI's bundles on disk.
+      - name: Bundle-shape guard (both CLI bundles present, not empty, SDK external)
+        run: pnpm --filter @kitn.ai/cli run verify:bundle-shape
+
+      # One step per package: they are separate tarballs with separate shapes, and a compound
+      # command reads as one gate in the workflow graph (lint:gate-parity refuses the shape).
+      - name: Bundle-shape guard (MCP bundle present, SDK external, define substituted)
+        run: pnpm --filter @kitn.ai/mcp run verify:bundle-shape
+
+      # The tarball's own shape, which the guard above does not look at: the four built outputs
+      # and both bins are IN it, nothing from node_modules is, and it has not changed size by a
+      # STEP. Until this existed, kai's 367,527 B pack had a ceiling only by inspection, and the
+      # failure it is aimed at (a dependency copied into dist/, or a dev page that started
+      # bundling the kit's dist) is invisible to a guard that reads the two Node bundles. Needs
+      # the build above, so it lives here rather than in the pre-build lint leg.
+      - name: Pack-weight guard (kai tarball, required outputs in, no node_modules, no step)
+        run: pnpm --filter @kitn.ai/cli run verify:pack
+
+      - name: Pack-weight guard (MCP tarball, bundle and bin in, no node_modules, no step)
+        run: pnpm --filter @kitn.ai/mcp run verify:pack
+
       - name: Construct engine emit chain (real eject + install + tsc + build + consumer bundle)
         run: pnpm --filter @kitn.ai/ui run verify:construct
 
@@ -548,6 +703,13 @@ jobs:
       - name: Unit tests (jsdom)
         run: pnpm --filter @kitn.ai/ui exec vitest run --project=unit
 
+      # @kitn.ai/cli's own suite: bin/route.test.js + the doctor tests moved out of the ui project with
+      # the CLI, so without this step it would stop running entirely (it was picked up
+      # by the ui project's default include, and this package has no project of its own).
+      # No build needed: the unknown-command cases exit before any dist import.
+      - name: CLI tests (dispatch + doctor, no build)
+        run: pnpm --filter @kitn.ai/cli exec vitest run
+
       # The blocks package: pure functions over injected data plus the authored
       # block sources. Node-environment, no build input of any kind, so it sits
       # here rather than behind the kit artifact. The block CELLS -- contracts,
@@ -578,7 +740,7 @@ jobs:
       # project owns them, not about whether
       # they gate a merge: they must stay inside the one required context, next to the
       # build they depend on, or splitting them out would have traded a slow check for
-      # no check. Needs the `build` leg's artifact (src/elements/compiled.css). ~10s, which
+      # no check. Needs the `build` leg's artifact (src/web-components/compiled.css). ~10s, which
       # restates the same invalidated local "idle" reading and is not a figure from
       # this runner; treat it as an order of magnitude, not a budget.
       # (The required context is now the `test` GRAPH rather than one job, and
@@ -760,12 +922,12 @@ jobs:
         run: find packages/ui/dist -exec touch {} +
 
       # Re-runs the generators and fails if any checked-in derived artifact
-      # differs -- element-meta.json, element-types.d.ts, icon-names.json, the
+      # differs -- web-component-meta.json, web-component-types.d.ts, icon-names.json, the
       # React wrappers, llms.txt / llms-full.txt and docs/web-components.md.
       # fc40a10 registered a new ::part(citations) and regenerated none of them;
       # nothing went red, and because the `kai` MCP's component_reference and the
       # docs site's PartTable.astro read those files, a part that existed in the
-      # SHIPPED element was invisible to every tool a developer would use to find
+      # SHIPPED web component was invisible to every tool a developer would use to find
       # it. A human noticing does not scale.
       #
       # This deliberately does NOT lean on the build step above. `nx build ui`
@@ -808,6 +970,14 @@ jobs:
 
       - name: Typecheck
         run: pnpm exec nx typecheck ui
+
+      # @kitn.ai/cli's and @kitn.ai/mcp's own typecheck: their build configs are .ts and live in
+      # package the ui project's tsc pass cannot see. No build needed.
+      - name: CLI typecheck (its build configs and doctor source)
+        run: pnpm --filter @kitn.ai/cli run typecheck
+
+      - name: MCP typecheck (its build config)
+        run: pnpm --filter @kitn.ai/mcp run typecheck
 
       # Compiles the `kai` MCP scaffolder's EMITTED code with real `tsc --strict
       # --noUnusedLocals`, resolving @kitn.ai/ui through the shipped exports map
@@ -898,7 +1068,7 @@ jobs:
       - name: Server guard (every entry imports AND every component renders under `node`)
         run: pnpm --filter @kitn.ai/ui run verify:ssr
 
-      # Diffs the registered-element catalog (src/elements/element-meta.json)
+      # Diffs the registered-web-component catalog (src/web-components/web-component-meta.json)
       # against the public SolidJS surface, derived from the TS checker and
       # cross-checked against the BUILT entry's runtime keys. The catalog size is
       # not restated here -- the script prints `elements <n>` and the n/n verdict
@@ -907,12 +1077,12 @@ jobs:
       # Solid is the authored layer, and the framework docs promise the same
       # catalog everywhere -- but src/index.ts was grown by hand and nobody ever
       # diffed it against the registry, so when this guard was introduced 33 of
-      # the then-79 elements had no writable Solid equivalent (kai-chat,
+      # the then-79 web components had no writable Solid equivalent (kai-chat,
       # kai-thread and kai-workspace among them). Those gaps are closed: it
       # reports GAP 0 today. Also asserts every public component ships a
       # <Name>Props type. Needs the `build` leg's artifact; a missing build fails the check
       # rather than skipping it.
-      - name: Solid coverage guard (every element writable in SolidJS)
+      - name: Solid coverage guard (every web component writable in SolidJS)
         run: pnpm --filter @kitn.ai/ui run verify:solid-coverage
 
       # Packs the tarball and weighs what a consumer actually downloads. `files`
@@ -1043,14 +1213,14 @@ jobs:
         run: pnpm --filter @kitn.ai/ui run verify:tool-schemas
 
       # Compiles every fenced code block in apps/docs against the SHIPPED API --
-      # the built dist/*.d.ts and element-meta.json, read at run time, nothing
+      # the built dist/*.d.ts and web-component-meta.json, read at run time, nothing
       # baked in -- and checks kai-* markup, events, ::part() names and prose
       # symbols against the same source. Docs are the one consumer surface with
       # no compiler behind it, so a renamed prop or a symbol that moved entries
       # stays wrong on the site indefinitely.
       #
       # BLOCKING, and it earned that: an adversarial pass planted 12 defects --
-      # camelCased attributes, a real kit prop on the wrong element, a typo'd
+      # camelCased attributes, a real kit prop on the wrong web component, a typo'd
       # component prop, a wrong property on a kit type inside an UNTYPED js
       # fence, four real symbols imported from the wrong entry point, a
       # misspelled event, a bad ::part(), an array set as an attribute -- and it
@@ -1178,7 +1348,7 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       # Small, focused, retried-internally cross-origin postMessage SECURITY
-      # matrix (remote-element.spec.ts) -- proves the host<>provider handshake
+      # matrix (remote-web-component.spec.ts) -- proves the host<>provider handshake
       # across two real origins, which jsdom and same-origin storybook can't.
       - name: Cross-origin e2e matrix
         run: pnpm --filter @kitn.ai/ui test:e2e
@@ -1259,6 +1429,18 @@ jobs:
       # positive-control shape.
       - name: Content brand-bleed guard (accent must not color content/chrome, built bundle)
         run: pnpm --filter @kitn.ai/ui run test:content-brand-bleed
+
+      # Geometry was the half of the theme surface that never worked, and it
+      # failed silently: the compiled sheet declares `--spacing` on the host, so a
+      # consumer setting Tailwind's own variable on :root saw nothing move in any
+      # shadow root. The kit now re-points each geometry family at a `--kai-*`
+      # token, and this step is what proves the plumbing actually resolves -- the
+      # jsdom test (tests/styles/geometry-tokens.test.ts) can only read the
+      # declarations out of the source and compiled sheets. Same bare,
+      # Tailwind-free, built-bundle harness; asserts the NEGATIVE too (a bare
+      # `--spacing` still must NOT work), so neither half can pass vacuously.
+      - name: Geometry token guard (spacing override must reach the shadow root, built bundle)
+        run: pnpm --filter @kitn.ai/ui run test:geometry-token
 
       # Keyboard tab-stop behaviour for the hover-card, same shape as above:
       # Storybook-free, own port, drives the BUILT bundle. Added by PR #284;
@@ -1413,7 +1595,7 @@ jobs:
         timeout-minutes: 5
         run: npx playwright install --with-deps chromium
 
-      - name: Build (element bundle + provider subpath)
+      - name: Build (web-components bundle + provider subpath)
         run: pnpm exec nx build ui
 
       - name: Storybook tests (a11y + interaction) -- shard ${{ matrix.shard }}/4

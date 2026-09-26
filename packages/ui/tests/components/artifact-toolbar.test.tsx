@@ -1,5 +1,5 @@
 import { render, fireEvent } from '@solidjs/testing-library';
-import { Artifact } from '../../src/components/artifact';
+import { Artifact } from '../../src/components/artifact/artifact';
 
 afterEach(() => {
   document.body.innerHTML = '';

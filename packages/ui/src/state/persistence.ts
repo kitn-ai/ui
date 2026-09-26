@@ -1,13 +1,13 @@
 // src/state/persistence.ts — the mechanical halves of the persistence story.
 //
-// The boundary (spec §1, CLAUDE.md): persistence POLICY — what is stored,
+// The boundary (CLAUDE.md): persistence POLICY — what is stored,
 // where, for how long, under what quota — is the app's. What lives here is
 // only the mechanics every such app re-derives by hand: validating a stored
-// thread back into `ChatMessage[]` (F-18), and the debounce/flush shape that
+// thread back into `ChatMessage[]`, and the debounce/flush shape that
 // keeps a per-token stream from hitting storage per token. No storage call,
 // no fetch, no DOM; the save fn, the delay, and the reaction to a drop are
 // all the consumer's.
-import type { ChatMessage, FeedbackVote, MessagePart } from '../elements/chat-types';
+import type { ChatMessage, FeedbackVote, MessagePart } from '../web-components/chat/chat-types';
 
 /** One record the parse refused, and why. Deciding loudly is the caller's
  *  verb (warn, reject the whole record, count it); this is the information
@@ -30,16 +30,16 @@ function isRecord(v: unknown): v is Record<string, unknown> {
 
 /**
  * One payload check per `MessagePart` variant. The key set is DERIVED from the
- * union in `src/elements/chat-types.ts` at compile time: `satisfies
+ * union in `src/web-components/chat/chat-types.ts` at compile time: `satisfies
  * Record<MessagePart['type'], …>` makes a missing key (a 7th variant landed)
- * and a stale key (a variant renamed away) each a type error in THIS file —
+ * and a stale key (a variant renamed away) each a type error in THIS file;
  * the same union `lint:silent-drops` and `verify:scaffold` read, so the lists
  * cannot disagree. The behavioral cross-check lives in ./persistence.test.ts,
  * which re-reads the union by a deliberately different method.
  *
  * These are shape checks, not a trust boundary for rendering: a rehydrated
  * part is model output twice over (it was model output before it was
- * hand-editable storage), and it stays safe to draw because the elements are
+ * hand-editable storage), and it stays safe to draw because the web components are
  * what draw it. What this buys is that a truncated or half-written record
  * reaches the element as a well-formed thread minus the broken piece, instead
  * of as `parts: undefined` taking the whole app down on first render.
@@ -97,8 +97,8 @@ function parseMessage(v: unknown, dropped: DroppedStored[]): ChatMessage | null 
 }
 
 /**
- * Validate a stored thread — the JSON-parsed value of one thread's messages
- * array — back into `ChatMessage[]`. Never throws: unreadable records are
+ * Validate a stored thread (the JSON-parsed value of one thread's messages
+ * array) back into `ChatMessage[]`. Never throws: unreadable records are
  * DROPPED and reported in `dropped`, so a truncated write loses one record,
  * not every conversation. What to DO about a drop (warn, discard the whole
  * record, telemetry) is the caller's policy.
@@ -115,8 +115,8 @@ export function parseStoredThread(value: unknown): ParsedThread {
 }
 
 export interface SaveSchedulerOptions {
-  /** The quiet period before a scheduled snapshot is written. This is policy
-   *  and therefore REQUIRED — the kit ships no default debounce. */
+  /** The quiet period before a scheduled snapshot is written. Required policy: the kit
+   *  ships no default debounce. */
   delayMs: number;
   /** The scheduler the seam runs on. Defaults to the global timers; inject
    *  your own for tests or a non-timer scheduler. */
@@ -125,13 +125,10 @@ export interface SaveSchedulerOptions {
 }
 
 export interface SaveScheduler<T> {
-  /** Remember `snapshot` as the latest state and (re)start the quiet-period
-   *  timer. Call it on every state change; only the last snapshot inside the
-   *  quiet period is written. */
+  /** Remember `snapshot` as the latest state and (re)start the quiet-period timer.
+   *  Only the last snapshot in the period is written. */
   schedule(snapshot: T): void;
-  /** Write the pending snapshot NOW and disarm the timer — the
-   *  `beforeunload`/`visibilitychange` story, so a tab closed mid-stream still
-   *  persists. No-op when nothing is pending: the last write already happened. */
+  /** Write the pending snapshot now and disarm the timer: the `beforeunload`/`visibilitychange` case. No-op when nothing is pending. */
   flush(): void;
   /** Drop the pending write unsaved (e.g. unmount-without-persist). */
   cancel(): void;

@@ -1,7 +1,7 @@
 # Labs/Apps gap backlog
 
 The `Labs/Apps` dogfood stories (Claude Code, T3 Code, Codex, ChatGPT, Perplexity,
-Perplexity Pro, v0) were built by composing real `kai-*` elements the way a consumer
+Perplexity Pro, v0) were built by composing real `kai-*` web components the way a consumer
 would. Building real apps with the kit surfaced a handful of places where it cannot
 yet express something faithfully. Those gap callouts used to render as labeled boxes
 inside the examples; they have been removed so the apps read as finished showcases,
@@ -59,7 +59,7 @@ Each item is one line: what it is, and which app surfaced it.
   toolbar. `kai-context` is a context-window meter (used/max tokens + breakdown),
   not a single running count. Surfaced by T3 Code.
 - **Media / image gallery** — a thumbnailed media grid/gallery for an images strip or
-  tab. `kai-image` renders a single image; there is no gallery element, so image
+  tab. `kai-image` renders a single image; there is no gallery web component, so image
   strips are hand-built grids (real `kai-image` tiles in Perplexity Pro, placeholder
   tiles in Perplexity web). Surfaced by Perplexity and Perplexity Pro.
 

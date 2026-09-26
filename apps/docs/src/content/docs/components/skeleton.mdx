@@ -1,6 +1,6 @@
 ---
 title: Skeleton
-description: A pulsing loading placeholder you size to your own layout — text lines, a block, or a circle.
+description: A placeholder that holds space while content loads.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -14,7 +14,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kai-tag-sub">kai-skeleton</p>
 
-<p class="kai-lede">A pulsing placeholder that holds layout while content loads. It's a low-level primitive — pick a `variant` and size it to match what's coming, then compose several to mirror your own UI.</p>
+<p class="kai-lede">Mirrors the shape of what is coming, so the layout does not jump when it arrives.</p>
 
 <Facts items={['Shadow DOM', '3 variants', 'Responsive width', 'Recolor via ::part']} />
 
@@ -23,12 +23,12 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 <Playground client:only="solid" tag="kai-skeleton" />
 
 <Aside type="tip" title="When to use">
-Reach for `<kai-skeleton>` when you know the shape of what's loading and want to reserve its space — an avatar, a few lines of body copy, a card. It's a building block, not a preset: you place and size the shapes to your layout rather than picking a ready-made "comment skeleton". For a busy indicator with no known shape, use [Loader](/components/loader/) instead; to shimmer text that's already on screen, use [Text Shimmer](/components/text-shimmer/).
+When you know the shape of what's loading and want to reserve its space: an avatar, a few lines of copy, a card. For a busy indicator with no shape, use [Loader](/components/loader/) instead.
 </Aside>
 
 ## Usage
 
-Set `variant` to `text`, `rect`, or `circle`. Width is responsive by default (it fills its container); pass `width` / `height` to pin a size. For `text`, `lines` stacks multiple rows and shortens the last one so it reads like a paragraph.
+Set `variant` to `text`, `rect`, or `circle`. Width fills its container by default; pass `width` / `height` to pin a size. `lines` stacks rows for `text` and shortens the last one.
 
 ```html
 <kai-skeleton variant="text" lines="3"></kai-skeleton>
@@ -36,31 +36,29 @@ Set `variant` to `text`, `rect`, or `circle`. Width is responsive by default (it
 <kai-skeleton variant="rect" height="10rem"></kai-skeleton>
 ```
 
-The default shimmer is a low-contrast foreground tint that reads in both light and dark; recolor it or change its opacity via `::part(skeleton)`.
+The shimmer is a low-contrast foreground tint, so it reads in both light and dark; recolor it or change its opacity via `::part(skeleton)`.
 
 ## Examples
 
 ### Text lines
 
-`lines` stacks rows for body copy; the last line is shorter so it doesn't look like a solid block.
-
 <Example client:visible tag="kai-skeleton" config={{ variant: 'text', lines: 3 }} />
 
 ### Rectangle
 
-A block for images, cards, or media. Set `height` (and `width`, if you don't want it full-bleed).
+A block for images, cards, or media.
 
 <Example client:visible tag="kai-skeleton" config={{ variant: 'rect', height: '8rem' }} />
 
 ### Circle
 
-A round placeholder for avatars and icons. `width` is the diameter.
+A round placeholder for avatars and icons; `width` is the diameter.
 
 <Example client:visible tag="kai-skeleton" config={{ variant: 'circle', width: '3rem' }} />
 
 ## Styling
 
-The shimmer block is a single `::part` — recolor it or change its opacity from your own stylesheet, without piercing the shadow root.
+The shimmer block is a single `::part`, so recolor it or change its opacity from your own stylesheet.
 
 <PartTable tag="kai-skeleton" />
 

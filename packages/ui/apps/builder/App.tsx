@@ -10,19 +10,19 @@
  */
 import { createSignal, onMount, onCleanup, Show, For } from 'solid-js';
 import { SlidersHorizontal } from 'lucide-solid';
-import { BuilderStart, BUILDABLE_BUILDER_TEMPLATES, type BuilderTemplateId } from '../../src/components/builder-start';
-import { WorkspaceVariantPicker, type WorkspaceVariantId } from '../../src/components/builder-workspace-variants';
-import { DerivedBuilderPanel } from '../../src/components/builder-panel-derived';
-import { BuilderHeader } from '../../src/components/builder-header';
+import { BuilderStart, BUILDABLE_BUILDER_TEMPLATES, type BuilderTemplateId } from '../../src/components/builder/builder-start';
+import { WorkspaceVariantPicker, type WorkspaceVariantId } from '../../src/components/builder/builder-workspace-variants';
+import { DerivedBuilderPanel } from '../../src/components/builder/builder-panel-derived';
+import { BuilderHeader } from '../../src/components/builder/builder-header';
 import { buildableTemplates, templateById, inferTemplateId, type BuildableTemplate } from '../../mcp/construct/templates';
 import type { Construct, ConstructProblem } from '../../mcp/construct/schema';
 import { HomeScreen, type ConstructListing } from './HomeScreen';
 import { createEditGuard, type EditOutcome } from './edit-guard';
 import type { ThemePayload } from '../../src/themes/theme-payload';
-import { ToastRegion, type ToastItem, type ToastVariant } from '../../src/components/toast';
-import { Input } from '../../src/ui/input';
-import { Button } from '../../src/ui/button';
-import { Dialog } from '../../src/ui/dialog';
+import { ToastRegion, type ToastItem, type ToastVariant } from '../../src/components/toast/toast';
+import { Input } from '../../src/components/input/input';
+import { Button } from '../../src/components/button/button';
+import { Dialog } from '../../src/components/dialog/dialog';
 
 // The AI/UI brand magenta — matches builder-start.stories.tsx's own
 // BRAND_STYLE exactly (design-parity fix wave, 2026-08-29 audit item 3a).

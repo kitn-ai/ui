@@ -1,0 +1,149 @@
+---
+title: Kbd
+description: Displays a keyboard shortcut as key caps.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Playground from '../../../components/Playground.tsx';
+import PropTable from '../../../components/PropTable.astro';
+import PartTable from '../../../components/PartTable.astro';
+import ComposedFrom from '../../../components/ComposedFrom.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kai-tag-sub">kai-kbd</p>
+
+<p class="kai-lede">Mod renders as ⌘ on a Mac and Ctrl everywhere else, so one spec covers both.</p>
+
+<Facts items={['Shadow DOM', 'Display only', 'Platform glyphs', 'Groups with kai-kbd-group']} />
+
+## Preview
+
+<Playground client:only="solid" tag="kai-kbd" />
+
+<Aside type="tip" title="When to use">
+Show the shortcut next to the control it triggers: a menu row, a toolbar button, an icon button. It never binds the keys, so your own keydown handler still does the work.
+</Aside>
+
+## Usage
+
+Set `keys` to the tokens joined by `+` and you get one cap per token, in the order you wrote them. `platform` defaults to `auto`, which sniffs the OS so `Mod` renders as ⌘ on a Mac and Ctrl everywhere else; pass `mac` or `other` when you need a fixed glyph set (a screenshot, a comparison). `size` defaults to `md`, with `sm` for tight rows.
+
+```html
+<kai-kbd keys="Mod+K"></kai-kbd>
+<kai-kbd keys="Mod+Shift+ArrowUp" platform="mac"></kai-kbd>
+<kai-kbd keys="Esc" size="sm"></kai-kbd>
+```
+
+Omit `keys` to render your own content in the default slot. That covers a key the token map does not, or a cap you want to label yourself.
+
+```html
+<kai-kbd>Esc</kai-kbd>
+```
+
+### Next to a label
+
+The menu-row shape, the shortcut at the trailing edge of the thing it triggers.
+
+<div class="not-content my-4 flex items-center gap-2 rounded-xl border border-line bg-surface px-5 py-3 text-sm text-ink">
+  <span>Command palette</span>
+  <kai-kbd keys="Mod+K" platform="other" style="margin-left:auto"></kai-kbd>
+</div>
+
+### Inside a button
+
+The label carries its own shortcut, so the hint travels with the action. Any element that slots children can hold a `<kai-kbd>`.
+
+<div class="not-content my-4 flex flex-wrap items-center gap-3 rounded-xl border border-line bg-surface px-5 py-4">
+  <kai-button variant="outline">Accept <kai-kbd keys="Enter" platform="other"></kai-kbd></kai-button>
+  <kai-button variant="ghost">Search <kai-kbd keys="Mod+K" platform="other"></kai-kbd></kai-button>
+</div>
+
+```html
+<kai-button variant="outline">
+  Accept
+  <kai-kbd keys="Enter"></kai-kbd>
+</kai-button>
+```
+
+### One key, welded from several elements
+
+`<kai-kbd-group>` welds its `<kai-kbd>` children into ONE key strip: no gap between the caps, a single hairline at each seam, and rounded corners only at the strip's ends. Reach for it when one key is spelled with caps that come from more than one element, or as a sequence you press in order, because a single `keys` spec cannot express either.
+
+<div class="not-content my-4 flex flex-wrap items-center gap-8 rounded-xl border border-line bg-surface px-5 py-4 text-sm text-ink">
+  <span class="flex items-center gap-2">one key from two kbd elements <kai-kbd-group><kai-kbd keys="Mod" platform="other"></kai-kbd><kai-kbd keys="K" platform="other"></kai-kbd></kai-kbd-group></span>
+  <span class="flex items-center gap-2">a sequence <kai-kbd-group><kai-kbd keys="G"></kai-kbd><kai-kbd keys="D"></kai-kbd></kai-kbd-group></span>
+</div>
+
+```html
+<!-- one key: the group welds its caps into one strip -->
+<kai-kbd-group>
+  <kai-kbd keys="Mod"></kai-kbd>
+  <kai-kbd keys="K"></kai-kbd>
+</kai-kbd-group>
+
+<!-- one sequence: G then D -->
+<kai-kbd-group>
+  <kai-kbd keys="G"></kai-kbd>
+  <kai-kbd keys="D"></kai-kbd>
+</kai-kbd-group>
+```
+
+Two DIFFERENT shortcuts are not a group: write them as two `<kai-kbd>` elements, or two groups, and let your own layout space them. The weld is what says the caps are one key, so a group used for two shortcuts says the wrong thing. A single `<kai-kbd>` with a `+`-joined spec renders its own caps as one chord, with the 2px gap the `separator` part sits in.
+
+<Aside type="note" title="Group props">
+`<kai-kbd-group>` declares no props of its own beyond the universal `theme`. Which caps exist and in what order is your markup's business.
+</Aside>
+
+### In a tooltip
+
+A shortcut often belongs in the tip of the control it triggers. The tooltip bubble takes markup through its `content` slot, so the cap rides along:
+
+<div class="not-content my-4 flex flex-wrap items-center gap-4 rounded-xl border border-line bg-surface px-5 py-4">
+  <kai-tooltip default-open>
+    <kai-button variant="outline">Save</kai-button>
+    <span slot="content">Save changes <kai-kbd keys="Mod+S"></kai-kbd></span>
+  </kai-tooltip>
+</div>
+
+```html
+<kai-tooltip>
+  <kai-button variant="outline">Save</kai-button>
+  <span slot="content">Save changes <kai-kbd keys="Mod+S"></kai-kbd></span>
+</kai-tooltip>
+```
+
+The bubble is an inverted surface, and it re-expresses the muted, border and foreground tokens on itself, so the cap adapts to the bubble rather than carrying the page's light-surface colours into it. Any kit component can live there for the same reason; see [Tooltip](/components/tooltip/).
+
+### Glyphs per platform
+
+`platform="auto"` is right for most apps. These are the glyphs `mac` and `other` resolve to, so you can pick a fixed one when it matters.
+
+| Token | `platform="mac"` | `platform="other"` |
+| --- | --- | --- |
+| `Mod` | ⌘ | Ctrl |
+| `Shift` | ⇧ | ⇧ |
+| `Alt` | ⌥ | Alt |
+| `ArrowUp` | ↑ | ↑ |
+| `Enter` | ⏎ | Enter |
+| `Esc` | Esc | Esc |
+
+A token with no mapping renders uppercased, so `k` becomes `K`.
+
+## Styling
+
+Every cap is one part and the gap between caps is another, so you can restyle the surface, border, radius or font without touching the shadow root.
+
+<PartTable tag="kai-kbd" />
+
+The group's frame is a single part (`part="group"`); each cap inside it keeps its own `key` part.
+
+## Props
+
+<PropTable tag="kai-kbd" />
+
+## Composed from
+
+<ComposedFrom tag="kai-kbd" />
+
+<NeedAHand />

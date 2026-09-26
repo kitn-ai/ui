@@ -1,8 +1,8 @@
 /**
  * GUARD — `verify-react-wrappers` still DETECTS, and `build` still runs it.
  *
- * The guard itself asserts that every `@kitn.ai/ui/elements/<X>` specifier in
- * dist/react.js resolves to a real emitted element file, and that the bundle opens
+ * The guard itself asserts that every `@kitn.ai/ui/web-components/<X>` specifier in
+ * dist/react.js resolves to a real emitted web-component file, and that the bundle opens
  * with 'use client'. Both failures are silent in production: a 404 on the lazy import
  * means `<Chat>` never registers, and a missing banner means RSC rejects the hooks.
  * It runs in `build`, and `prepublishOnly` runs `build`, so it gates every publish.
@@ -67,10 +67,10 @@ function runGuard(args: string[]): { code: number; output: string } {
 const ELS = ['kai-chat', 'kai-message', 'kai-thread'];
 const bundle = (useClient = true) =>
   (useClient ? "'use client';\n" : '') +
-  ELS.map((el) => `const load_${el.replace(/-/g, '_')} = () => import('@kitn.ai/ui/elements/${el}');`).join('\n');
+  ELS.map((el) => `const load_${el.replace(/-/g, '_')} = () => import('@kitn.ai/ui/web-components/${el}');`).join('\n');
 const tree = (over: Record<string, string | null> = {}) => ({
   'dist/react.js': bundle(),
-  ...Object.fromEntries(ELS.map((el) => [`dist/elements/${el}.js`, 'export const x = 1;\n'])),
+  ...Object.fromEntries(ELS.map((el) => [`dist/web-components/${el}.js`, 'export const x = 1;\n'])),
   ...over,
 });
 
@@ -102,14 +102,14 @@ describe('the react-wrappers guard detects, and build runs it', () => {
   it('draws ZERO findings on a healthy tree (the false-positive shape in its header)', () => {
     const { code, output } = runGuard(['--package-root', fixtureRoot(tree())]);
     expect(code, `the guard failed a healthy tree: ${output}`).toBe(0);
-    expect(output).toContain('all 3 element specifiers resolve');
+    expect(output).toContain('all 3 web-component specifiers resolve');
   });
 
   it('fires on a specifier whose element file was never emitted, and NAMES it', () => {
-    const root = fixtureRoot(tree({ 'dist/elements/kai-thread.js': null }));
+    const root = fixtureRoot(tree({ 'dist/web-components/kai-thread.js': null }));
     const { code, output } = runGuard(['--package-root', root]);
     expect(code, `the guard exited ${code} on a specifier pointing at a missing file`).not.toBe(0);
-    expect(output).toContain('non-existent element files');
+    expect(output).toContain('non-existent web-component files');
     expect(output, 'the offender is not named, so nobody can act on this').toContain('kai-thread');
     expect(output).not.toContain("missing its 'use client' banner");
   });
@@ -119,7 +119,7 @@ describe('the react-wrappers guard detects, and build runs it', () => {
     const { code, output } = runGuard(['--package-root', root]);
     expect(code, `the guard exited ${code} on a bundle with no 'use client'`).not.toBe(0);
     expect(output).toContain("missing its 'use client' banner");
-    expect(output).not.toContain('non-existent element files');
+    expect(output).not.toContain('non-existent web-component files');
   });
 
   it('treats a bundle it found no specifier in as a failure, not a pass', () => {
@@ -129,6 +129,6 @@ describe('the react-wrappers guard detects, and build runs it', () => {
     const root = fixtureRoot(tree({ 'dist/react.js': "'use client';\nexport const Chat = () => null;\n" }));
     const { code, output } = runGuard(['--package-root', root]);
     expect(code, 'a zero-specifier run exited 0, which reads as "all of them resolve"').not.toBe(0);
-    expect(output).toContain('NO `@kitn.ai/ui/elements/<X>` specifier');
+    expect(output).toContain('NO `@kitn.ai/ui/web-components/<X>` specifier');
   });
 });

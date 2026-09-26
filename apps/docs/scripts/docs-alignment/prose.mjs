@@ -85,6 +85,37 @@ function pageElement(doc, surface) {
   return null;
 }
 
+// A per-line waiver for a HISTORICAL kai-* name in prose.
+//
+// The docs deliberately name an element the kit renamed AWAY from
+// (`kai-sidebar-toggle` -> `kai-aside-toggle` with a `side`), and `knownTokens`
+// is built from names the kit still writes down, so it can never know an old
+// one. Without a waiver that correct rename note is an `unknown-kai-token`
+// high finding, and the only thing keeping the current run green is an
+// unrelated `//` comment in `chat-workspace.tsx` that happens to mention the old
+// name: delete the comment and the docs page becomes a finding again.
+//
+// The declaration is an MDX comment (renders nothing) on the line of the note or
+// the line above it:
+//
+//   {/* docs-alignment: historical-kai-token -- <why this old name is here> */}
+//
+// Parsed, not text-matched, and the reason is REQUIRED: a directive with no
+// reason is prose that reads like a decision, and a rule honouring written words
+// would pass the defect the words were written about. It covers the line it sits
+// on and the line below, nothing further, and it waives THIS finding kind only --
+// a token the kit never named on an unwaived line is still an unknown token.
+const HISTORICAL_KAI_WAIVER =
+  /\{\/\*\s*docs-alignment:\s*historical-kai-token\s*--\s*([^*]{15,}?)\s*\*\/\}/;
+
+/** True when `doc` declares, on `line` or the line above it, that a historical
+ *  kai-* name there is deliberate. Shared with `coverage.mjs`, whose stale-token
+ *  scan reports the same fact from the other direction. */
+export function isHistoricalKaiWaived(doc, line) {
+  const lines = doc.lines ?? (doc.src ? doc.src.split('\n') : []);
+  return HISTORICAL_KAI_WAIVER.test(lines[line - 1] ?? '') || HISTORICAL_KAI_WAIVER.test(lines[line - 2] ?? '');
+}
+
 export function checkProse(doc, surface) {
   const findings = [];
   const local = pageLocalNames(doc);
@@ -106,23 +137,25 @@ export function checkProse(doc, surface) {
     // Some prose names a part or slot with a kai- prefix, or a CSS class.
     const anyPart = [...surface.byTag.values()].some((e) => e.partNames.has(t) || e.slotNames.has(t));
     if (anyPart) continue;
-    findings.push(
-      surface.knownTokens.has(t)
-        ? {
-            kind: 'undeclared-in-element-meta',
-            detail: `\`${t}\` exists in the kit (a declarative child element or a dispatched event) but is not a registered element or a declared event, so element-meta.json omits it`,
-            line,
-            context: context.slice(0, 160),
-            severity: 'advisory',
-          }
-        : {
-            kind: 'unknown-kai-token',
-            detail: `\`${t}\` is neither a registered element nor a declared event, and the kit's source never mentions it`,
-            line,
-            context: context.slice(0, 160),
-            severity: 'high',
-          },
-    );
+    if (surface.knownTokens.has(t)) {
+      findings.push({
+        kind: 'undeclared-in-web-component-meta',
+        detail: `\`${t}\` exists in the kit (a declarative child element or a dispatched event) but is not a registered element or a declared event, so web-component-meta.json omits it`,
+        line,
+        context: context.slice(0, 160),
+        severity: 'advisory',
+      });
+    } else {
+      // A rename note declares its own exception; see HISTORICAL_KAI_WAIVER.
+      if (isHistoricalKaiWaived(doc, line)) continue;
+      findings.push({
+        kind: 'unknown-kai-token',
+        detail: `\`${t}\` is neither a registered element nor a declared event, and the kit's source never mentions it`,
+        line,
+        context: context.slice(0, 160),
+        severity: 'high',
+      });
+    }
   }
 
   // ── 2. prop: / on: bindings named in prose ───────────────────────────────
@@ -277,7 +310,7 @@ const CLAIM_PATTERNS = [
 /** Only claims that are ABOUT the kit — otherwise every "by default" in every
  *  sentence lands on the list and nobody reads it. */
 const ABOUT_KIT =
-  /@kitn\.ai\/ui|\bkai-[a-z]|\bthe kit\b|\bthe package\b|\bentry point\b|\bthe library\b|\bthis package\b|\belements bundle\b|\bthe elements\b/i;
+  /@kitn\.ai\/ui|\bkai-[a-z]|\bthe kit\b|\bthe package\b|\bentry point\b|\bthe library\b|\bthis package\b|\bweb-components bundle\b|\bthe web components\b/i;
 
 export function flagForHuman(doc) {
   const flags = [];

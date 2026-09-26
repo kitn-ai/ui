@@ -1,0 +1,171 @@
+import { type JSX, createSignal, createMemo, Show } from 'solid-js';
+import { Search, ChevronDown, Settings, CircleHelp, LogOut } from 'lucide-solid';
+import { CommandList, type CommandGroup } from '../command/command';
+import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem, DropdownSeparator } from '../dropdown/dropdown';
+import { Avatar } from '../avatar/avatar';
+import { Input } from '../input/input';
+import { Button } from '../button/button';
+import { Switch } from '../switch/switch';
+import { cn } from '../../utils/cn';
+
+/**
+ * "App chrome", the Command palette and User menu shell knobs, factored as a shared
+ * module so every shell-bearing template (`Labs/Builder/Assistant`, `.../Workspace`,
+ * `.../Multi-mode`) reuses the same real pieces instead of forking a fourth copy.
+ *
+ * COMMAND PALETTE: composes the kit's real `CommandList` (`components/command/command.tsx`),
+ * a presentational grouped listbox, inside a hand-built overlay (backdrop + centered panel +
+ * Escape/backdrop-click to close). A plain `Input` above the list does the filtering,
+ * client-side over a stub catalog; the facade's own search input is not reused because
+ * `CommandList` does not own filtering.
+ *
+ * USER MENU: a RECIPE, not an element (see `stories/showcase/user-menu.stories.tsx`):
+ * `Dropdown`/`DropdownTrigger`/`DropdownContent`/`DropdownItem` with an `Avatar` +
+ * name/plan trigger, the same primitives `components/model/model-switcher.tsx` composes.
+ */
+
+export interface ShellControlsState {
+  commandPalette: boolean;
+  userMenu: boolean;
+}
+
+const STUB_COMMANDS: CommandGroup[] = [
+  {
+    group: 'Actions',
+    items: [
+      { id: 'new-chat', label: 'New chat', icon: 'square-pen', shortcut: 'Mod+K' },
+      { id: 'search', label: 'Search chats', icon: 'search' },
+    ],
+  },
+  {
+    group: 'Settings',
+    items: [
+      { id: 'theme', label: 'Toggle theme', icon: 'sun' },
+      { id: 'settings', label: 'Open settings', icon: 'settings', shortcut: 'Mod+,' },
+    ],
+  },
+];
+
+/** The command palette overlay, mounted only while `open`. Filters the
+ *  stub catalog client-side; selecting a row or pressing Escape closes it. */
+export function CommandPaletteOverlay(props: { open: boolean; onClose: () => void }): JSX.Element {
+  const [query, setQuery] = createSignal('');
+  const filtered = createMemo<CommandGroup[]>(() => {
+    const q = query().trim().toLowerCase();
+    if (!q) return STUB_COMMANDS;
+    return STUB_COMMANDS.map((g) => ({ ...g, items: g.items.filter((i) => i.label.toLowerCase().includes(q)) })).filter(
+      (g) => g.items.length > 0,
+    );
+  });
+
+  return (
+    <Show when={props.open}>
+      <div
+        class="fixed inset-0 z-50 flex items-start justify-center bg-black/50 pt-[14vh]"
+        onClick={props.onClose}
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') props.onClose();
+        }}
+        data-builder-command-palette
+      >
+        <div class="w-full max-w-lg overflow-hidden rounded-xl border border-border bg-card shadow-lg" onClick={(e) => e.stopPropagation()}>
+          <div class="border-b border-border p-2">
+            <Input
+              value={query()}
+              onValueInput={setQuery}
+              placeholder="Search commands..."
+              leading={<Search size={14} class="text-muted-foreground" aria-hidden="true" />}
+              autofocus
+            />
+          </div>
+          <CommandList groups={filtered()} onSelect={() => props.onClose()} />
+        </div>
+      </div>
+    </Show>
+  );
+}
+
+/** The command palette's TRIGGER, a plain search-icon button, matching
+ *  claude-code's own rail-header search affordance. Rendering the overlay
+ *  itself is the caller's job (`CommandPaletteOverlay`), so a template can
+ *  place the trigger inside its own rail/header chrome while the overlay
+ *  mounts at the frame root. */
+export function CommandPaletteTrigger(props: { onOpen: () => void }): JSX.Element {
+  return (
+    <Button type="button" variant="ghost" size="icon-sm" aria-label="Search commands" onClick={props.onOpen}>
+      <Search size={14} aria-hidden="true" />
+    </Button>
+  );
+}
+
+/** The user-menu recipe itself, avatar + name/plan trigger, real Dropdown
+ *  primitives, a stub items list (Settings/Help/Log out). This is the RAIL
+ *  placement: a full-width row that shows the name and plan as text.
+ *
+ *  The COMPACT header placement (avatar + chevron only, no text) used to be a
+ *  `compact` prop here, added for Workspace's app-header rework. It moved out
+ *  when that header became the real component
+ *  `components/app-header/app-header.tsx`, which owns its own compact cluster; this prop
+ *  had exactly one caller and that caller is now the component. Removed rather
+ *  than left behind: an option nothing passes is the rot this repo keeps
+ *  paying for. */
+export function UserMenu(props: { name: string; plan?: string; class?: string }): JSX.Element {
+  return (
+    <Dropdown>
+      <DropdownTrigger
+        as={(triggerProps: JSX.ButtonHTMLAttributes<HTMLButtonElement>) => (
+          <button
+            type="button"
+            class={cn('flex w-full min-w-0 items-center gap-2 rounded-md px-2 py-1.5 text-left hover:bg-muted', props.class)}
+            {...triggerProps}
+          >
+            <Avatar fallback={props.name.slice(0, 2).toUpperCase()} size="sm" />
+            <span class="min-w-0 flex-1 truncate text-sm font-medium text-foreground">{props.name}</span>
+            {props.plan && <span class="shrink-0 text-xs text-muted-foreground">{props.plan}</span>}
+            <ChevronDown size={13} class="shrink-0 text-muted-foreground" aria-hidden="true" />
+          </button>
+        )}
+      />
+      <DropdownContent>
+        <DropdownItem>
+          <Settings size={14} class="mr-2 size-3.5 shrink-0" aria-hidden="true" />
+          Settings
+        </DropdownItem>
+        <DropdownItem>
+          <CircleHelp size={14} class="mr-2 size-3.5 shrink-0" aria-hidden="true" />
+          Get help
+        </DropdownItem>
+        <DropdownSeparator />
+        <DropdownItem>
+          <LogOut size={14} class="mr-2 size-3.5 shrink-0" aria-hidden="true" />
+          Log out
+        </DropdownItem>
+      </DropdownContent>
+    </Dropdown>
+  );
+}
+
+/** The panel section every shell-bearing template reuses: two toggles,
+ *  "Command palette" and "User menu." Preview-only: see each template's
+ *  own module doc comment for how the toggles wire into ITS OWN chrome
+ *  (the trigger/overlay/menu placement differs per template's real
+ *  anatomy, so this section only owns the on/off state, not the layout). */
+export function ShellSection(props: { state: ShellControlsState; onChange: (v: ShellControlsState) => void }): JSX.Element {
+  return (
+    <section class="flex flex-col gap-3 border-b border-border p-4" data-builder-preview-only-controls>
+      <h3 class="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">App chrome</h3>
+      <div class="flex items-center justify-between gap-3">
+        <span class="text-xs font-medium text-foreground">Command palette</span>
+        <Switch checked={props.state.commandPalette} label="Command palette" onChange={(v) => props.onChange({ ...props.state, commandPalette: v })} />
+      </div>
+      <div class="flex items-center justify-between gap-3">
+        <span class="text-xs font-medium text-foreground">User menu</span>
+        <Switch checked={props.state.userMenu} label="User menu" onChange={(v) => props.onChange({ ...props.state, userMenu: v })} />
+      </div>
+      <p class="text-xs text-muted-foreground">
+        Preview-only: construct.v1 has no shell/chrome vocabulary today (T-5). Command palette reuses the kit's real CommandList; User
+        menu is the kit's own real recipe (Dropdown + Avatar), not a new component.
+      </p>
+    </section>
+  );
+}

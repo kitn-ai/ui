@@ -1,6 +1,6 @@
 // Registers every <kai-*> element. MUST come first: a property set on an
 // element that has not upgraded is silently lost, with no error logged.
-import '@kitn.ai/ui/elements';
+import '@kitn.ai/ui/web-components';
 // This app's own generative-UI card, registered the same way and just as early.
 import './page-version-card';
 

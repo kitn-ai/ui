@@ -14,13 +14,30 @@
      - `@custom-variant dark` below switches their `dark:` utilities from
        prefers-color-scheme to the `.dark` class.
      - the `--color-*` names merge into their @theme (last import wins).
-     - `--radius-sm/md/lg/xl` re-point Tailwind's stock radius scale at --radius.
+     - `--radius-sm/md/lg/xl/2xl/3xl` re-point Tailwind's stock radius scale at
+       --radius. The ladder must be COMPLETE: Tailwind's `--radius-2xl`/`-3xl` are
+       separate stock values that read no kit token, so a component using
+       `rounded-2xl` ignores the radius knob entirely and looks like a bug in the
+       knob. `rounded-full` is the one radius Tailwind hardcodes
+       (`3.40282e38px`), so it can never follow it -- which is why the kit adds
+       its own `--radius-pill` rung for the shapes that are rounded RECTANGLES
+       with round caps (badges, chips, switch tracks). See the note above the
+       radius block.
+     - `--code-radius` is the code surface's own corner, deliberately separate
+       from the ladder: a code block wants its own value, not the card's.
+     - `--spacing` re-points Tailwind's whole spacing scale at --kai-density
+       (stock Tailwind's 0.25rem is the fallback, so nothing moves until a
+       --kai-density token is set). Every numeric spacing utility is
+       `calc(var(--spacing) * N)`, so this ONE line moves p-*, m-*, gap-*, h-*,
+       size-*, space-y-* and the offsets (top-*, -mt-*, translate-*) together:
+       density, not merely padding. size-* is the one to think about — icons
+       follow it, so a much denser theme needs them re-sized per call site.
      - `--text-xs/sm/base/lg` are aliased onto the kit's type scale (defaults
        equal stock Tailwind, so nothing moves until a --kai-text-* token is set).
    Everything else global carries a `kai-` prefix so it cannot clash by name:
    every @keyframes is `kai-<name>`, the scrollbar utility is `.kai-scrollbar-thin`.
    The one unprefixed global class is `.chat-markdown` (public; renaming it is a
-   breaking change). tests/elements/theme-globals.test.ts pins the prefix rule
+   breaking change). tests/web-components/theme-globals.test.ts pins the prefix rule
    and that every animation reference in src/ resolves to a keyframe here. */
 
 @custom-variant dark (&:is(.dark *));
@@ -56,6 +73,18 @@
   --color-accent-foreground: var(--kai-color-accent-foreground, hsl(240 5.9% 10%));
   --color-destructive: var(--kai-color-destructive, hsl(0 72% 45%));
   --color-destructive-foreground: var(--kai-color-destructive-foreground, hsl(0 0% 98%));
+  /* Error TEXT. Its own token rather than a reuse of --color-destructive, because
+     a FILL and TEXT need different values in dark: the dark fill is deliberately
+     low-lightness so a light foreground reads on it, which leaves it 1.79:1 as
+     text on the dark background and 1.64:1 on a dark card — unreadable, and the
+     reason eight call sites reached past the palette for `dark:text-red-400`.
+     This is the text member of the destructive family: light is the destructive
+     value exactly (5.81:1 on white, 4.94:1 on the `destructive/10` callout tint,
+     5.60:1 on --color-surface), dark is the bright red --color-tool-red already
+     flips to (6.36:1 on the dark background, 5.84:1 on a dark card, 5.52:1 on the
+     `destructive/20` tint). Use text-destructive-text for error copy — never
+     text-destructive, which is the fill. Override via --kai-color-destructive-text. */
+  --color-destructive-text: var(--kai-color-destructive-text, hsl(0 72% 45%));
   /* Semantic status colors - solid fills with a legible foreground, matched to
      the kit's tool-green / -amber / -blue hues so they read on-brand. Use
      bg-success / bg-warning / bg-info with the matching -foreground for badges,
@@ -126,7 +155,7 @@
      dark: near-white text over it is 6.7:1 — both well clear of WCAG AA. */
   --color-highlight: var(--kai-color-highlight, hsl(45 96% 78%));
   /* SELECTED text — the kit's own ::selection fill, applied inside every kai-*
-     shadow root (see src/elements/styles.css for the scoping rationale). The kit
+     shadow root (see src/web-components/styles.css for the scoping rationale). The kit
      owns this because leaving it to the UA meant the browser's blue outranked the
      kit's own deliberate emphasis: a marked keyword was LESS prominent than an
      incidental drag-select. Stays in the cool/blue family the UA trained everyone
@@ -177,11 +206,54 @@
   --color-tool-green: var(--kai-color-tool-green, hsl(142 71% 26%));
   --color-tool-red: var(--kai-color-tool-red, hsl(0 72% 42%));
 
+  /* Every rung derives from --radius. A rung left at Tailwind's stock value is a
+     component that silently ignores the knob (`rounded-2xl` did, before these).
+     `rounded-full` cannot be here: it compiles to a literal 3.40282e38px. */
+  /* Elevation is ONE multiplier, not seven tokens: "flat" is one value, and seven
+     knobs for one decision invite incoherent themes. Defaults are copied from
+     tailwindcss/theme.css, so at strength 1 nothing moves. */
+  --shadow-2xs: 0 calc(1px * var(--kai-shadow-strength, 1)) rgb(0 0 0 / 0.05);
+  --shadow-xs: 0 calc(1px * var(--kai-shadow-strength, 1)) calc(2px * var(--kai-shadow-strength, 1)) 0 rgb(0 0 0 / 0.05);
+  --shadow-sm: 0 calc(1px * var(--kai-shadow-strength, 1)) calc(3px * var(--kai-shadow-strength, 1)) 0 rgb(0 0 0 / 0.1), 0 calc(1px * var(--kai-shadow-strength, 1)) calc(2px * var(--kai-shadow-strength, 1)) -1px rgb(0 0 0 / 0.1);
+  /* Bare `shadow` reads this key, not `--shadow-sm` — 82 call sites, so it is
+     declared separately even though the values are equal. */
+  --shadow: 0 calc(1px * var(--kai-shadow-strength, 1)) calc(3px * var(--kai-shadow-strength, 1)) 0 rgb(0 0 0 / 0.1), 0 calc(1px * var(--kai-shadow-strength, 1)) calc(2px * var(--kai-shadow-strength, 1)) -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 calc(4px * var(--kai-shadow-strength, 1)) calc(6px * var(--kai-shadow-strength, 1)) -1px rgb(0 0 0 / 0.1), 0 calc(2px * var(--kai-shadow-strength, 1)) calc(4px * var(--kai-shadow-strength, 1)) -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 calc(10px * var(--kai-shadow-strength, 1)) calc(15px * var(--kai-shadow-strength, 1)) -3px rgb(0 0 0 / 0.1), 0 calc(4px * var(--kai-shadow-strength, 1)) calc(6px * var(--kai-shadow-strength, 1)) -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 calc(20px * var(--kai-shadow-strength, 1)) calc(25px * var(--kai-shadow-strength, 1)) -5px rgb(0 0 0 / 0.1), 0 calc(8px * var(--kai-shadow-strength, 1)) calc(10px * var(--kai-shadow-strength, 1)) -6px rgb(0 0 0 / 0.1);
+  --shadow-2xl: 0 calc(25px * var(--kai-shadow-strength, 1)) calc(50px * var(--kai-shadow-strength, 1)) -12px rgb(0 0 0 / 0.25);
+
+  /* One knob per weight rung: wanting a heavier semibold rarely means wanting a
+     heavier normal. Defaults are Tailwind's. */
+  --font-weight-normal: var(--kai-weight-normal, 400);
+  --font-weight-medium: var(--kai-weight-medium, 500);
+  --font-weight-semibold: var(--kai-weight-semibold, 600);
+  --font-weight-bold: var(--kai-weight-bold, 700);
+
   --radius: var(--kai-radius, 0.6rem);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+
+  /* `rounded-full` cannot read a token, so badges/chips/tracks read this rung and
+     Tailwind generates `rounded-pill` from the namespace. 4rem not Tailwind's
+     3.4e38: radius clamps to half the box, so 4rem is fully round to 8rem tall
+     (covers caller-sized pills), and the editor needs a rem literal it can drag. */
+  --radius-pill: var(--kai-radius-pill, 4rem);
+
+  /* Its own corner rather than a rung: a code block inside a card wants a value of
+     its own. The token existed but theme.css never named it, so nothing could set it. */
+  --code-radius: var(--kai-code-radius, 0.75rem);
+
+  /* Every padding, margin, gap and size utility is `calc(var(--spacing) * N)`, so
+     this one token moves the whole kit's density. Declared here because Tailwind
+     emits the @theme block as `:root,:host{...}` — a consumer's own
+     `:root{--spacing}` loses to the sheet's `:host` declaration in a shadow root.
+     Fallback is Tailwind's default, so nothing moves unless it is set. */
+  --spacing: var(--kai-density, 0.25rem);
 
   /* Typography scale — ONE scale for the whole kit. Each semantic name
      (text-micro / text-caption / text-meta / text-compact / text-body /
@@ -258,6 +330,9 @@
   --color-accent-foreground: var(--kai-color-accent-foreground, hsl(0 0% 98%));
   --color-destructive: var(--kai-color-destructive, hsl(0 62.8% 30.6%));
   --color-destructive-foreground: var(--kai-color-destructive-foreground, hsl(0 0% 98%));
+  /* Error TEXT — dark. The brighter red for the reason in the light block: the
+     dark --color-destructive fill is a fill, and 1.79:1 as text. */
+  --color-destructive-text: var(--kai-color-destructive-text, hsl(0 84% 70%));
   /* Semantic status colors - dark mode flips to the brighter tool-* dark hues
      (matching the chip values) carried over a near-black foreground, so the color
      both reads as text on a dark soft tint AND backs a legible foreground. See
@@ -340,24 +415,22 @@
 .chat-markdown th, .chat-markdown td { border: 1px solid var(--color-border); padding: 0.4em 0.6em; text-align: left; }
 .chat-markdown th { font-weight: 600; background: color-mix(in oklab, var(--color-muted-foreground) 8%, transparent); }
 
-/* Themeable elevation. The kit is mostly flat (borders), but a few surfaces lift
-   off the page — popovers, dropdowns, hover cards, cards. The shadow COLOR is a
-   token (--kai-shadow-color, default near-black); set it transparent for a fully
-   flat look, or tint it to match a theme. Defined here (not as a Tailwind shadow
-   utility) so the color stays overridable and works in both the web-component and
-   SolidJS layers. */
+/* Lifted surfaces (cards, popovers, dropdowns). Hand-written so the shadow COLOR
+   stays a token; geometry scaled by --kai-shadow-strength like the rungs, or the
+   Elevation control would do nothing here. Focus rings are deliberately not scaled:
+   a flat theme still has to show where focus is. */
 .kai-elevation {
   box-shadow:
-    0 4px 12px -2px color-mix(in oklab, var(--kai-shadow-color, oklch(0 0 0)) 14%, transparent),
-    0 2px 6px -2px color-mix(in oklab, var(--kai-shadow-color, oklch(0 0 0)) 10%, transparent);
+    0 calc(4px * var(--kai-shadow-strength, 1)) calc(12px * var(--kai-shadow-strength, 1)) -2px color-mix(in oklab, var(--kai-shadow-color, oklch(0 0 0)) 14%, transparent),
+    0 calc(2px * var(--kai-shadow-strength, 1)) calc(6px * var(--kai-shadow-strength, 1)) -2px color-mix(in oklab, var(--kai-shadow-color, oklch(0 0 0)) 10%, transparent);
 }
 .kai-elevation-sm {
-  box-shadow: 0 1px 2px 0 color-mix(in oklab, var(--kai-shadow-color, oklch(0 0 0)) 8%, transparent);
+  box-shadow: 0 calc(1px * var(--kai-shadow-strength, 1)) calc(2px * var(--kai-shadow-strength, 1)) 0 color-mix(in oklab, var(--kai-shadow-color, oklch(0 0 0)) 8%, transparent);
 }
 
 /* Cross-platform thin scrollbar utility (Firefox + WebKit). Used by ScrollArea
    and any scroll region in the SolidJS-component build (web components also get
-   this globally inside their shadow root — see src/elements/styles.css).
+   this globally inside their shadow root — see src/web-components/styles.css).
    `kai-` prefixed because this file is merged into a consumer's Tailwind build
    and `.scrollbar-thin` is a name they may well own (no consumer-facing doc ever
    named the old unprefixed class, so no alias is kept). */

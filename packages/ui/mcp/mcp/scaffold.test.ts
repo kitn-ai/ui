@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest';
+import { z } from 'zod';
 import {
-  cardEmitPlan, scaffold, renderSurface, NO_PROXY_CLAIM, PROXY_REQUIRED_CLAIM, ATTACHMENT_WIRE_NOTE,
+  cardEmitPlan, emittedTags, scaffold, renderSurface, WEB_COMPONENT_TAGS,
+  NO_PROXY_CLAIM, PROXY_REQUIRED_CLAIM, ATTACHMENT_WIRE_NOTE,
 } from './tools/scaffold';
 // The route seam a second emitter consumes, graded at the bottom of this file.
 // It lives in its own leaf module rather than in `tools/scaffold` — that file
@@ -18,13 +20,46 @@ import type { Integration } from '../types';
 // The real encoders, used to prove WHY the fabricated sample seed had to go:
 // one of them throws on it, the other quietly sends it.
 import { toAnthropicMessages, toOpenAIMessages, WireEncodeError } from '../../src/wire/encode';
-import type { ChatMessage } from '../../src/elements/chat-types';
+import type { ChatMessage } from '../../src/web-components/chat/chat-types';
 // The declaration itself, so the accept guard below compares the emitted
 // attribute against the source of truth rather than against a copy of it.
 import { encodableMediaTypes } from '../../src/wire/media-types';
+// The tag -> per-tag-entry map the emitted register lines are built from, READ rather
+// than restated: a basename is NOT `kai-` stripped (`kai-conversations` is
+// `conversation-list`), so an expectation derived here from the tag would assert a
+// specifier that does not resolve.
+import { tags as WEB_COMPONENT_ENTRY_TAGS } from '../../src/web-components/web-component-manifest.json';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
+
+/**
+ * The register-all barrel as a VALUE import, or `undefined`.
+ *
+ * Split from `kitImportsOf` (which sits with the specifier assertions below) for one
+ * reason: `kitImportsOf` reports the specifier of a TYPE import too, and the
+ * html/svelte/angular front ends import `KaiChatElement` from this exact specifier.
+ * That line erases at compile time and registers nothing, so a guard that counted it
+ * would report every one of those surfaces as shipping the barrel — a red on correct
+ * output. What DOES register something is the side-effect line
+ * (`import '@kitn.ai/ui/web-components'`), a named binding (`import { toast } from
+ * '…'`) and the dynamic call (`import('…')`).
+ *
+ * Returns the matched text rather than a boolean so a failure can print the line it
+ * found.
+ */
+function barrelValueImport(code: string): string | undefined {
+  return (
+    // One whole line: `(?!type\b)` is what exempts `import type { … } from '…'`, and
+    // `[^'"\n]*` keeps the match on its own line so a type-only import further down
+    // cannot be read as this statement's target.
+    /^[ \t]*import\s+(?!type\b)(?:[^'"\n]*\bfrom\s+)?['"]@kitn\.ai\/ui\/web-components['"]/m.exec(
+      code,
+    )?.[0] ??
+    // The dynamic form, which no line anchor can see.
+    /(?<![@\w])import\s*\(\s*['"]@kitn\.ai\/ui\/web-components['"]/.exec(code)?.[0]
+  );
+}
 
 /**
  * scaffold composes a working chat surface from four axes:
@@ -354,6 +389,77 @@ describe('scaffold', () => {
     expect(text).toMatch(/unknown use ?case|valid use ?cases|valid archetypes/i);
     // names a real archetype id so the harness can self-correct
     expect(text).toMatch(/drop-in-chat/);
+  });
+
+  /**
+   * An unknown TAG is the same class of failure as an unknown `useCase` or
+   * `integration`, and it used to be the one of the three that arrived as a protocol
+   * error instead of an answer: `components` was `z.array(z.string())`, so the tag
+   * reached `entryBasenames`, which THROWS, and server.ts returns the handler's result
+   * bare, so the throw escapes the tool call. There are two guards now, and they cover
+   * different callers: the advertised enum (for whoever validates first) and this
+   * rejection in the handler (for everyone else, including the tests that call the
+   * handler directly and `create-kai`).
+   */
+  it('rejects an unknown component tag by name without throwing', async () => {
+    const out = await scaffold.handler({
+      components: ['kai-chat', 'kai-nope'],
+      integration: 'openrouter',
+      placement: 'full-page',
+      framework: 'react',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    // the offending tag, so the caller knows exactly which entry to delete
+    expect(text).toMatch(/kai-nope/);
+    expect(text).toMatch(/unknown component/i);
+    // the register-all barrel, named as the import that registers every tag in the list
+    expect(text).toMatch(/@kitn\.ai\/ui\/web-components'/);
+    // the valid list, READ from the manifest (kai-conversations proves it is the map
+    // and not a `kai-`-stripped guess), so a bad tag still teaches the real set
+    expect(text).toMatch(/kai-conversations/);
+    expect(text).toMatch(/kai-chat/);
+    // a validation error, not a surface with a hole in it: nothing was composed
+    expect(text).not.toMatch(/=== \(1\)/);
+  });
+
+  it('advertises the whole tag set in its JSON Schema', () => {
+    // The discoverability half of the same fix, and the reason the enum is on the
+    // schema at all: server.ts runs `z.toJSONSchema` over every tool on every
+    // ListTools, so a harness can read the valid tags before it calls.
+    const schema = z.toJSONSchema(scaffold.inputSchema) as unknown as {
+      properties: { components: { items?: { enum?: string[] }; description?: string } };
+    };
+    const components = schema.properties.components;
+    expect([...(components.items?.enum ?? [])].sort()).toEqual([...WEB_COMPONENT_TAGS].sort());
+    // ...and the description says the list is there, or a reader never looks.
+    expect(components.description ?? '').toMatch(/enumerates/i);
+  });
+
+  it('admits every tag the catalog asks for, so the tag set is not narrower than a preset', () => {
+    // The enum is the manifest's map; the presets and probes are catalog data. If one
+    // named a tag the map does not carry, the schema would reject a request this
+    // project's own UI can compose. Asserted as a set difference rather than by
+    // calling the handler once per surface, so it stays cheap and names the tag.
+    const asked = new Set<string>([
+      ...listArchetypes().flatMap((a) => a.components),
+      ...listSurfaceProbes().flatMap((p) => p.components),
+    ]);
+    expect(asked.size).toBeGreaterThan(0);
+    expect([...asked].filter((tag) => !WEB_COMPONENT_TAGS.includes(tag))).toEqual([]);
+  });
+
+  it('stays loud for a caller that skips the handler', () => {
+    // The belt, kept on purpose: `renderSurface` is also called directly (by
+    // create-kai and by these tests' renderer assertions), so a tag with no entry has
+    // to fail somewhere, and the emitted app would otherwise place a <kai-*> nothing
+    // ever defines: an element that stays inert with no failure to explain it.
+    expect(() =>
+      renderSurface({
+        framework: 'html',
+        components: ['kai-chat', 'kai-nope'],
+        integration: getIntegration('mock')!,
+      }),
+    ).toThrow(/no web-component entry for kai-nope/);
   });
 
   it('docked-widget placement produces a fixed, sized container', async () => {
@@ -819,8 +925,11 @@ describe('scaffold', () => {
     }
   });
 
-  // Issue 1 / Issue 4 — react/next MUST register elements before the wrappers.
-  it("react output imports '@kitn.ai/ui/elements' BEFORE '@kitn.ai/ui/react'", async () => {
+  // Issue 1 / Issue 4 — react/next MUST register elements before the wrappers. The
+  // register lines are the per-tag ENTRIES now (one per tag the app places), not the
+  // register-all barrel, so the ordering is asserted between the app's own
+  // registration block and the wrapper import that renders through it.
+  it("react output imports its per-tag entries BEFORE '@kitn.ai/ui/react'", async () => {
     const out = await scaffold.handler({
       useCase: 'drop-in-chat',
       integration: 'openrouter',
@@ -828,14 +937,22 @@ describe('scaffold', () => {
       framework: 'react',
     });
     const text = (out.content as { type: string; text: string }[])[0].text;
-    const elementsIdx = text.indexOf("import '@kitn.ai/ui/elements'");
+    // `kai-chat` is the tag every surface emits (ALWAYS_EMITTED_TAG), so its entry is
+    // the one register line that must be there whatever the caller asked for. The
+    // trailing `;` keeps the LOADING OPTIONS note's example line, which has none, out
+    // of this lookup.
+    const chatEntry = (WEB_COMPONENT_ENTRY_TAGS as Record<string, string>)['kai-chat'];
+    // Form-agnostic on purpose: the entry is loaded with `void import(...)` now (a static
+    // import would pull it into the entry chunk), and what this test is about is the
+    // ORDER of the registration block against the wrapper import below it.
+    const webComponentsIdx = text.indexOf(`'@kitn.ai/ui/web-components/${String(chatEntry)}'`);
     const reactIdx = text.indexOf("from '@kitn.ai/ui/react'");
-    expect(elementsIdx).toBeGreaterThanOrEqual(0);
+    expect(webComponentsIdx).toBeGreaterThanOrEqual(0);
     expect(reactIdx).toBeGreaterThanOrEqual(0);
-    expect(elementsIdx).toBeLessThan(reactIdx);
+    expect(webComponentsIdx).toBeLessThan(reactIdx);
   });
 
-  // SCAF-6: next uses next/dynamic { ssr: false } — no top-level @kitn.ai/ui/elements or
+  // SCAF-6: next uses next/dynamic { ssr: false } — no top-level @kitn.ai/ui/web-components or
   // @kitn.ai/ui/react import. NOT because importing them on the server crashes (both
   // entries are SSR-import-safe): <kai-*> are client-only custom elements, so a
   // server-rendered tag never upgrades and mismatches on hydration.
@@ -853,8 +970,8 @@ describe('scaffold', () => {
     expect(text).toContain('ssr: false');
     // @kitn.ai/ui/react must appear only inside dynamic() — not as a standalone top-level import
     expect(text).not.toMatch(/^import\s+\{[^}]*\}\s+from\s+'@kitn\.ai\/ui\/react'/m);
-    // No top-level @kitn.ai/ui/elements (the dynamic import of /react self-registers on client)
-    expect(text).not.toMatch(/^import\s+'@kitn\.ai\/ui\/elements'/m);
+    // No top-level @kitn.ai/ui/web-components (the dynamic import of /react self-registers on client)
+    expect(text).not.toMatch(/^import\s+'@kitn\.ai\/ui\/web-components'/m);
   });
 
   // SCAF-6 (contrast): plain react (Vite) STILL uses top-level imports — unchanged.
@@ -934,7 +1051,7 @@ describe('scaffold', () => {
     });
     const text = (out.content as { type: string; text: string }[])[0].text;
     // Must import the typed element interface from the library
-    expect(text).toContain("import type { KaiChatElement } from '@kitn.ai/ui/elements'");
+    expect(text).toContain("import type { KaiChatElement } from '@kitn.ai/ui/web-components'");
     // Must use KaiChatElement, not bare HTMLElement, so property access is typed
     // Runes: `bind:this` writes to the binding, so it must be $state — but it still
     // has to be the kit's ELEMENT type, not a bare HTMLElement, or `chatEl.messages`
@@ -1470,7 +1587,7 @@ describe('scaffold', () => {
       framework: 'svelte',
     });
     const text = (out.content as { type: string; text: string }[])[0].text;
-    expect(text).toContain("import type { KaiChatElement, KaiSourcesElement } from '@kitn.ai/ui/elements'");
+    expect(text).toContain("import type { KaiChatElement, KaiSourcesElement } from '@kitn.ai/ui/web-components'");
     expect(text).toContain('let sourcesEl = $state<KaiSourcesElement | undefined>(undefined)');
     expect(text).not.toContain('$state<HTMLElement | undefined>');
   });
@@ -1486,7 +1603,7 @@ describe('scaffold', () => {
       framework: 'svelte',
     });
     const text = (out.content as { type: string; text: string }[])[0].text;
-    expect(text).toContain("import type { KaiChatElement } from '@kitn.ai/ui/elements'");
+    expect(text).toContain("import type { KaiChatElement } from '@kitn.ai/ui/web-components'");
     expect(text).not.toContain('KaiSourcesElement');
   });
 
@@ -1780,11 +1897,12 @@ describe('scaffold', () => {
   });
 
   // ── SCAF-15: raw-DOM frameworks must gate property-setting on element upgrade ──
-  // The elements bundle registers kai-* via an async dynamic import (SSR-safety),
-  // so the element may not be upgraded when the consumer sets array/object props.
-  // Values set on a not-yet-upgraded element are dropped on upgrade — so the
-  // raw-DOM frameworks (html/vue/svelte) must await customElements.whenDefined.
-  // The React family is unaffected (its wrappers guard with whenDefined internally).
+  // Registration is not synchronous with the render everywhere: on the SSR-capable
+  // targets the per-tag entries load behind a browser guard, so they land a microtask
+  // after the module runs. Values set on a not-yet-upgraded element are dropped on
+  // upgrade — so the raw-DOM frameworks (html/vue/svelte) must await
+  // customElements.whenDefined. The React family is unaffected (its wrappers guard
+  // with whenDefined internally).
 
   it('SCAF-15: html output awaits customElements.whenDefined before setting props', async () => {
     const out = await scaffold.handler({
@@ -1870,16 +1988,18 @@ describe('scaffold', () => {
     });
     const text = (out.content as { type: string; text: string }[])[0].text;
     // per-element import path
-    expect(text).toMatch(/@kitn\.ai\/ui\/elements\/chat/);
-    // autoloader — positioned as a CDN/<script> tool (dist/elements/autoloader.js), NOT a bundler import
+    expect(text).toMatch(/@kitn\.ai\/ui\/web-components\/chat/);
+    // autoloader — positioned as a CDN/<script> tool (dist/web-components/autoloader.js), NOT a bundler import
     expect(text).toMatch(/autoloader\.js/);
     expect(text).toMatch(/CDN|not importable through a bundler/i);
   });
 
-  // SCAF-16: the note must describe what the scaffold ACTUALLY emits. `next` emits no
-  // `import '@kitn.ai/ui/elements'` (the dynamic-imported wrappers self-register), so
-  // claiming "the scaffold uses import '@kitn.ai/ui/elements'" there is simply false.
-  it('SCAF-16: loading-options note matches the elements import the output really emits', async () => {
+  // SCAF-16: the note must describe what the scaffold ACTUALLY emits. No front end
+  // emits a register-all line any more: the tags a surface places each get an entry of
+  // their own, statically on the client-only targets and behind a browser guard on the
+  // SSR-capable ones. So the old "the scaffold uses the register-all import, and that
+  // is the right default" sentence was advice about output no cell produces.
+  it('SCAF-16: loading-options note describes the per-tag entries the output really emits', async () => {
     for (const framework of ['html', 'react', 'next', 'vue', 'svelte', 'tanstack-start'] as const) {
       const out = await scaffold.handler({
         useCase: 'drop-in-chat',
@@ -1888,18 +2008,25 @@ describe('scaffold', () => {
         framework,
       });
       const text = (out.content as { type: string; text: string }[])[0].text;
-      const frontend = text.split('=== LOADING OPTIONS ===')[0];
-      const note = text.split('=== LOADING OPTIONS ===')[1] ?? '';
-      const emitsRegisterAll = /import '@kitn\.ai\/ui\/elements';/.test(frontend);
-      if (emitsRegisterAll) {
-        expect(note, `${framework}: emits register-all but the note denies it`).toContain(
-          "The scaffold uses `import '@kitn.ai/ui/elements'` (register-all)",
-        );
-      } else {
-        expect(note, `${framework}: emits no register-all but the note claims it`).toContain(
-          "The scaffold emits NO `import '@kitn.ai/ui/elements'`",
-        );
-      }
+      // The LOADING OPTIONS block only. The interaction patterns below it import
+      // `toast` from the barrel, so a slice that ran to the end of the response would
+      // read that snippet's import as this note's advice.
+      const note = (text.split('=== LOADING OPTIONS ===')[1] ?? '').split(
+        '=== INTERACTION PATTERNS ===',
+      )[0];
+      expect(
+        note,
+        `${framework}: the note still claims the scaffold uses register-all`,
+      ).not.toContain("The scaffold uses `import '@kitn.ai/ui/web-components'` (register-all)");
+      // What it must carry instead: the per-tag entry form the front end imports.
+      expect(note, `${framework}: the note never names the per-tag entry form`).toMatch(
+        /@kitn\.ai\/ui\/web-components\//,
+      );
+      // ...and the barrel survives as the all-tags / import-safe escape hatch it still
+      // is, named either as the import or as the register-all bundle.
+      expect(note, `${framework}: the note no longer offers the barrel as an escape hatch`).toMatch(
+        /@kitn\.ai\/ui\/web-components'|register-all/,
+      );
     }
   });
 
@@ -1933,7 +2060,7 @@ describe('scaffold', () => {
     }
   });
 
-  it('SCAF-16: loading-options note does NOT change the default elements import line in the front-end block', async () => {
+  it('SCAF-16: the front-end block registers the tags it places, never through the barrel', async () => {
     const out = await scaffold.handler({
       useCase: 'drop-in-chat',
       integration: 'openrouter',
@@ -1941,11 +2068,17 @@ describe('scaffold', () => {
       framework: 'react',
     });
     const text = (out.content as { type: string; text: string }[])[0].text;
-    // The default import must still be present in the front-end block
-    expect(text).toContain("import '@kitn.ai/ui/elements'");
-    // The per-element import must ONLY appear in the loading-options note, not in the front-end block
+    // The registration the app needs lives in the emitted block, as one import per tag
+    // it places; the note below documents the modes and supplies nothing.
     const frontendBlock = text.split('=== LOADING OPTIONS ===')[0];
-    expect(frontendBlock).not.toContain("@kitn.ai/ui/elements/chat");
+    const chatEntry = (WEB_COMPONENT_ENTRY_TAGS as Record<string, string>)['kai-chat'];
+    expect(frontendBlock).toContain(`'@kitn.ai/ui/web-components/${String(chatEntry)}'`);
+    // And never the barrel: the note recommends the per-tag form because the barrel is
+    // the bundle that carries every kai-* element.
+    expect(
+      barrelValueImport(frontendBlock),
+      'the react front end still imports the register-all barrel as a value',
+    ).toBeUndefined();
   });
 
   // ── SCAF-17: interaction-pattern snippets (toast / dismissRecovery / kai-compare) ──
@@ -1969,8 +2102,8 @@ describe('scaffold', () => {
       framework: 'html',
     });
     const text = (out.content as { type: string; text: string }[])[0].text;
-    // imperative toast, exported from the elements bundle
-    expect(text).toMatch(/import \{ toast \} from '@kitn\.ai\/ui\/elements'/);
+    // imperative toast, exported from the web-components bundle
+    expect(text).toMatch(/import \{ toast \} from '@kitn\.ai\/ui\/web-components'/);
     expect(text).toContain("toast('Copied to clipboard')");
     expect(text).toContain('toast.success');
     // an Undo action wired through onAction
@@ -2031,7 +2164,7 @@ describe('scaffold', () => {
       });
       const text = (out.content as { type: string; text: string }[])[0].text;
       expect(text, `${framework}: missing INTERACTION PATTERNS`).toContain('=== INTERACTION PATTERNS ===');
-      expect(text, `${framework}: missing toast pattern`).toContain("import { toast } from '@kitn.ai/ui/elements'");
+      expect(text, `${framework}: missing toast pattern`).toContain("import { toast } from '@kitn.ai/ui/web-components'");
       expect(text, `${framework}: missing dismissRecovery pattern`).toContain('dismissRecovery');
       expect(text, `${framework}: missing kai-compare pattern`).toContain('kai-compare-select');
     }
@@ -2145,7 +2278,7 @@ describe('scaffold', () => {
     );
 
     // The module is the TypeScript half: typed element handle, typed message type.
-    expect(mod).toContain("import type { KaiChatElement } from '@kitn.ai/ui/elements'");
+    expect(mod).toContain("import type { KaiChatElement } from '@kitn.ai/ui/web-components'");
     expect(mod).toContain("document.getElementById('chat') as KaiChatElement");
     // ChatMessage comes from the package, not from a local alias off the element.
     // The alias existed because the mock imported nothing; it streams through
@@ -3343,13 +3476,13 @@ describe('scaffold — solid', () => {
     // assertion fail for the very sentence that documents it.
     const code = f.replace(/^[ \t]*\/\/.*$/gm, '');
     expect(code).not.toMatch(/<kai-[a-z-]+/);
-    expect(code).not.toContain("import '@kitn.ai/ui/elements'");
+    expect(code).not.toContain("import '@kitn.ai/ui/web-components'");
   });
 
   it('and the LOADING OPTIONS note says so rather than claiming a register-all import', async () => {
     const text = await emit();
     const note = text.split('=== LOADING OPTIONS ===')[1] ?? '';
-    expect(note).toContain("The scaffold emits NO `import '@kitn.ai/ui/elements'`");
+    expect(note).toContain("The scaffold emits NO `import '@kitn.ai/ui/web-components'`");
   });
 
   /**
@@ -3395,7 +3528,7 @@ describe('scaffold — solid', () => {
    * The two part kinds that render as a RUN, and the one placement fact that is
    * load-bearing rather than cosmetic.
    *
-   * `components/message.tsx` collapses consecutive `source` parts into ONE
+   * `components/message/message.tsx` collapses consecutive `source` parts into ONE
    * citation row and puts it OUTSIDE the message bubble on purpose: a citation
    * nested in `MessageContent` is indistinguishable from a link the model typed
    * into its own prose. The emitted scaffold has to do the same, or a Solid
@@ -3480,6 +3613,19 @@ describe('scaffold — solid', () => {
     expect(f).not.toContain('@import "@kitn.ai/ui/theme.css"');
     expect(f).toContain('tw-animate-css @tailwindcss/typography');
     expect(f).toContain('@source "../node_modules/@kitn.ai/ui"');
+  });
+
+  it('spells the Send button as the kit pill, not Tailwind\'s hardcoded full round', async () => {
+    const f = front(await emit());
+    const send = f.split('\n').find((l) => l.includes('<Button size="sm"'));
+    expect(send, 'no Send button in the emitted solid front end').toBeDefined();
+    expect(send).toContain('class="rounded-pill"');
+    expect(send).not.toContain('rounded-full');
+    // `rounded-pill` resolves in the emitted app because the setup block above
+    // installs the kit's solid.css -> theme.css, where the rung is declared. The
+    // rung is READ rather than restated, so renaming it in theme.css fails here.
+    const sheet = await readFile(join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'theme.css'), 'utf8');
+    expect(sheet, 'theme.css declares no --radius-pill, so the emitted class is dead').toMatch(/--radius-pill\s*:/);
   });
 
   it('takes the submitted text from the controlled input signal, not a kai-submit event', async () => {
@@ -4178,13 +4324,13 @@ describe('the emitted surface imports its framework\'s kit entry', () => {
    * `html` does.
    */
   const COMPONENT_ENTRY: Record<string, string> = {
-    html: '@kitn.ai/ui/elements',
-    vue: '@kitn.ai/ui/elements',
-    svelte: '@kitn.ai/ui/elements',
-    angular: '@kitn.ai/ui/elements',
-    fastapi: '@kitn.ai/ui/elements',
-    express: '@kitn.ai/ui/elements',
-    worker: '@kitn.ai/ui/elements',
+    html: '@kitn.ai/ui/web-components',
+    vue: '@kitn.ai/ui/web-components',
+    svelte: '@kitn.ai/ui/web-components',
+    angular: '@kitn.ai/ui/web-components',
+    fastapi: '@kitn.ai/ui/web-components',
+    express: '@kitn.ai/ui/web-components',
+    worker: '@kitn.ai/ui/web-components',
     react: '@kitn.ai/ui/react',
     next: '@kitn.ai/ui/react',
     'tanstack-start': '@kitn.ai/ui/react',
@@ -4210,6 +4356,18 @@ describe('the emitted surface imports its framework\'s kit entry', () => {
    */
   const kitImportsOf = (code: string): string[] =>
     [...code.matchAll(/(?<![@\w])(?:from|import)\s*\(?\s*['"](@kitn\.ai\/ui[^'"]*)['"]/g)].map((m) => m[1]);
+
+  /**
+   * Whether the emitted code imports from `entry` — the entry itself, or a subpath of
+   * it.
+   *
+   * The subpath half is new and it is not a relaxation: the web-component frameworks
+   * import one per-tag ENTRY (`@kitn.ai/ui/web-components/chat`) instead of the
+   * register-all barrel, and every one of those is a subpath of the entry this map
+   * names. Exact equality reports them all as importing nothing.
+   */
+  const importsFrom = (specifiers: readonly string[], entry: string): boolean =>
+    specifiers.some((s) => s === entry || s.startsWith(`${entry}/`));
 
   /** Every framework the scaffolder accepts, from the enum rather than a list. */
   const FRAMEWORKS = Framework.options;
@@ -4264,10 +4422,11 @@ describe('the emitted surface imports its framework\'s kit entry', () => {
       for (const { probe, integration } of surfaces()) {
         const code = renderSurface({ framework, components: probe.components, integration });
         expect(
-          kitImportsOf(code),
+          importsFrom(kitImportsOf(code), expected),
           `${framework} × ${probe.id} × ${integration.id}: the emitted surface never imports ` +
-            `${expected}, which is where this framework's components come from`,
-        ).toContain(expected);
+            `${expected} (nor one of its per-tag entries), which is where this framework's ` +
+            `components come from`,
+        ).toBe(true);
       }
     }
   });
@@ -4275,7 +4434,7 @@ describe('the emitted surface imports its framework\'s kit entry', () => {
   /**
    * The general form of the Solid bug: an emitted import must NAME the entry it
    * wants. The bare root is never the right answer for a generated app — the three
-   * web-component frameworks want `./elements`, the three React ones want
+   * web-component frameworks want `./web-components`, the three React ones want
    * `./react`, and Solid wants `./solid` — so a bare `@kitn.ai/ui` anywhere in an
    * emitted surface means some branch fell back to the default entry.
    *
@@ -4296,6 +4455,69 @@ describe('the emitted surface imports its framework\'s kit entry', () => {
         ).not.toContain('@kitn.ai/ui');
       }
     }
+  });
+
+  /**
+   * The shape all of the above was re-pointed at: a scaffolded app registers the tags
+   * it PLACES, one per-tag entry each, instead of importing the register-all barrel —
+   * the bundle that ships every kai-* element (dist/register-impl-<hash>.js, and its
+   * size is the reason this change exists) to an app that places two of them.
+   *
+   * Both sides of the expectation are READ rather than restated. `emittedTags()` is
+   * the emitter's own answer to which tags a surface places: `kai-chat` always,
+   * `kai-tool`/`kai-reasoning` never (they ride inside a message and the thread draws
+   * them), `kai-resizable-item` with the artifact split. The manifest's `tags` map is
+   * the tag -> entry basename. Re-deriving either here would make this a second copy
+   * of the rule — and a stripped `kai-` prefix would assert `conversation`, not
+   * `conversation-list`, for `kai-conversations`.
+   */
+  it('registers every placed tag through that tag\'s own entry, and never through the barrel', () => {
+    /** The frameworks that emit a per-tag block at all. Deliberately not a required
+     *  list: `next` loads the React wrappers through next/dynamic and `solid` renders
+     *  Solid components from the root entry, so neither registers an element by hand
+     *  and neither has a block. The two exemptions are asserted below so they cannot
+     *  quietly widen. */
+    const perTag = new Set<string>();
+
+    for (const framework of FRAMEWORKS) {
+      for (const { probe, integration } of surfaces()) {
+        const cell = `${framework} × ${probe.id} × ${integration.id}`;
+        const code = renderSurface({ framework, components: probe.components, integration });
+
+        const barrel = barrelValueImport(code);
+        expect(
+          barrel,
+          `${cell}: the emitted surface imports the register-all barrel as a value ` +
+            `(${String(barrel)}). It places ${emittedTags(probe.components).length} tag(s), each with ` +
+            `an entry of its own; the barrel is every other tag as well.`,
+        ).toBeUndefined();
+
+        // A framework with no per-tag block has nothing to cover (next/solid, above).
+        if (!code.includes('@kitn.ai/ui/web-components/')) continue;
+        perTag.add(framework);
+
+        for (const tag of emittedTags(probe.components)) {
+          const entry = (WEB_COMPONENT_ENTRY_TAGS as Record<string, string>)[tag];
+          expect(
+            entry,
+            `${cell}: ${tag} has no entry in web-component-manifest.json, so the emitter throws ` +
+              `on this surface rather than registering anything for it`,
+          ).toBeDefined();
+          expect(
+            code,
+            `${cell}: this surface places <${tag}> but never imports ` +
+              `'@kitn.ai/ui/web-components/${String(entry)}' — the element would never upgrade`,
+          ).toContain(`@kitn.ai/ui/web-components/${String(entry)}`);
+        }
+      }
+    }
+
+    // Anti-vacuity in both directions. The loop body above IS the test, and it is
+    // skipped for any framework whose code carries no per-tag specifier — so a tree
+    // where every framework stopped registering would pass it with nothing checked.
+    expect([...perTag].length, 'no framework emitted a per-tag entry at all').toBeGreaterThan(0);
+    expect([...perTag], 'next registers through next/dynamic instead').not.toContain('next');
+    expect([...perTag], 'solid renders Solid components, not elements').not.toContain('solid');
   });
 });
 

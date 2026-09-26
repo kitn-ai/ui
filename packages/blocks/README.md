@@ -51,7 +51,7 @@ callers that have a filesystem:
 | Injected input | Read from |
 |---|---|
 | `routeIntegrations` | `listIntegrations()` in `packages/ui/mcp/registry.ts` |
-| `nonscalarByTag` | `packages/ui/src/elements/element-nonscalar.json` |
+| `nonscalarByTag` | `packages/ui/src/web-components/web-component-nonscalar.json` |
 | `version` | `packages/ui/package.json` |
 
 `tsconfig.json` declares no ambient type packages, which is what enforces the
@@ -68,7 +68,7 @@ between this package and the ui build and buy nothing.
 ## The authored block sources are in no tsconfig here
 
 `blocks/<id>/<id>.controller.ts` imports `@kitn.ai/ui/state`, `/wire`,
-`/stores` and `/elements`, and this package must not depend on the kit. That is
+`/stores` and `/web-components`, and this package must not depend on the kit. That is
 the direction the package move established, and a path mapping would put a
 build ordering back between the two. So `tsconfig.json` covers `src/**` and not
 `blocks/**`, and the controllers are checked where a CONSUMER checks them: the

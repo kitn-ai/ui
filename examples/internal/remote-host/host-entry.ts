@@ -3,7 +3,7 @@
  * ===================================
  * Reference HOST page for the remote (iframe) Card transport — the cross-origin
  * counterpart to examples/remote-provider/. Used as the host side of the
- * standalone Playwright matrix (tests/e2e/remote-element.spec.ts).
+ * standalone Playwright matrix (tests/e2e/remote-web-component.spec.ts).
  *
  * Served by Vite on http://localhost:6006 (see
  * packages/ui/config/playwright/cross-origin.config.ts); the provider

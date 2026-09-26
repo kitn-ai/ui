@@ -1,7 +1,7 @@
 // Generates `llms.txt` (curated orientation, llmstxt.org convention) and
-// `llms-full.txt` (full per-element API reference) for AI coding agents.
+// `llms-full.txt` (full per-web-component API reference) for AI coding agents.
 //
-// Source of truth = the same `elements` model that `gen-element-api.mjs` uses
+// Source of truth = the same `elements` model that `gen-web-component-api.mjs` uses
 // to write dist/custom-elements.json, so these files can never drift from the
 // shipped API. When run standalone (no in-memory import) it falls back to
 // reading dist/custom-elements.json.
@@ -26,7 +26,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 // A separate module because it parses declarations with the TypeScript API,
 // which nothing else in this file needs.
 import { buildProgrammaticSection } from './gen-llms-programmatic.mjs';
-// The icon roster, derived from the NAMED_ICONS map in src/ui/icon.tsx — the
+// The icon roster, derived from the NAMED_ICONS map in src/components/icon/icon.tsx — the
 // SAME extraction docs/web-components.md's icon-roster region uses (P-8), so
 // the two artifacts cannot disagree about what resolves.
 import { iconNames } from './gen-web-components-md.mjs';
@@ -79,15 +79,15 @@ Only scalar values (string/number/boolean) work as attributes (e.g. \`placeholde
 
 ## Two layers
 
-**Layer 1 — batteries-included web components** (\`import '@kitn.ai/ui/elements'\`):
+**Layer 1 — batteries-included web components** (\`import '@kitn.ai/ui/web-components'\`):
 Drop an element into any framework (React, Vue, plain HTML). Data in via JS properties; interactions out via non-bubbling CustomEvents.
 
 - \`<kai-chat>\` — full chat UI (message list + prompt input). The primary starting point.
 - \`<kai-conversations>\` — sidebar conversation browser with group support.
 - \`<kai-prompt-input>\` — standalone composer with send button.
 
-**Layer 2 — composable primitives** (\`import { … } from '@kitn.ai/ui'\`):
-All ${count} elements are also exported individually. Use them for custom layouts or features \`<kai-chat>\` does not expose (ChainOfThought, FeedbackBar, ThinkingBar, VoiceInput, …). Your bundler tree-shakes the rest.
+**Layer 2 — composable custom elements** (\`import { … } from '@kitn.ai/ui'\`):
+All ${count} web components are also exported individually. Use them for custom layouts or features \`<kai-chat>\` does not expose (ChainOfThought, FeedbackBar, ThinkingBar, VoiceInput, …). Your bundler tree-shakes the rest.
 
 ## Key rules for the web components
 
@@ -167,7 +167,7 @@ Types are importable: \`import type { ChatMessage, MessagePart, MessageSource } 
 
 **Plain HTML / CDN**
 \`\`\`html
-<script type="module" src="https://unpkg.com/@kitn.ai/ui/elements"></script>
+<script type="module" src="https://unpkg.com/@kitn.ai/ui/web-components"></script>
 <kai-chat style="display:block;height:100vh"></kai-chat>
 <script type="module">
   const chat = document.querySelector('kai-chat');
@@ -209,7 +209,7 @@ ${fullOnlyPointers.join('\n')}
 }
 
 // ---------------------------------------------------------------------------
-// Per-element reference (the generated body of llms-full.txt).
+// Per-web-component reference (the generated body of llms-full.txt).
 // ---------------------------------------------------------------------------
 function renderElement(el) {
   const react = el.reactName;
@@ -225,6 +225,13 @@ function renderElement(el) {
     .join('\n');
 
   const out = [`### \`${el.tag}\` / \`${react}\``, ''];
+
+  // WHAT IT IS, once, above everything else in the section. This is the sentence the
+  // facade's element doc comment carries and no artifact carried: an agent reading
+  // this file to CHOOSE between two elements got a props table and no statement of
+  // what either one is for. Its own paragraph, one line (the generator's collapse),
+  // and not repeated anywhere else in the section.
+  if (el.description) out.push(el.description, '');
 
   out.push(
     propRows
@@ -284,8 +291,8 @@ function renderElement(el) {
     );
   }
 
-  // "Route 2": the light-DOM child elements this element parses. The only way to
-  // drive some elements from plain HTML with no JS, and previously in no generated
+  // "Route 2": the light-DOM child elements this web component parses. The only way to
+  // drive some web components from plain HTML with no JS, and previously in no generated
   // artifact at all — so an agent reading this file could not know they exist.
   if (el.declarativeChildren?.length) {
     out.push('');
@@ -317,6 +324,21 @@ function renderElement(el) {
     );
   }
 
+  if (el.vars?.length) {
+    out.push('');
+    out.push(
+      [
+        '**CSS custom properties** (set them on the element to change how it looks):',
+        '',
+        '| Property | Default | Description |',
+        '|---|---|---|',
+        el.vars
+          .map((v) => `| \`${v.name}\` | ${v.default ? `\`${v.default}\`` : '—'} | ${escapeCell(v.doc)}${v.recipe ? ` — \`${escapeCell(v.recipe)}\`` : ''} |`)
+          .join('\n'),
+      ].join('\n'),
+    );
+  }
+
   out.push('');
   out.push('---');
   return out.join('\n');
@@ -330,12 +352,12 @@ npm install @kitn.ai/ui
 \`\`\`
 
 ### 2 — Pick your layer
-Drop-in: use \`<kai-chat>\` for a full chat UI in one tag (\`import '@kitn.ai/ui/elements'\`).
+Drop-in: use \`<kai-chat>\` for a full chat UI in one tag (\`import '@kitn.ai/ui/web-components'\`).
 Composable: combine \`<kai-message>\`, \`<kai-prompt-input>\`, \`<kai-reasoning>\`, … in your own markup.
 
 ### 3 — Handle \`submit\` and stream
 \`\`\`js
-import '@kitn.ai/ui/elements';
+import '@kitn.ai/ui/web-components';
 // The streaming fold. It is 5 lines if you would rather inline it: see the
 // Streaming recipe below.
 import { appendTextPart } from '@kitn.ai/ui/state';
@@ -424,16 +446,16 @@ The same reassign rule applies to every array/object property (\`models\`, \`con
 // ---------------------------------------------------------------------------
 export const FULL_ONLY_SECTIONS = [
   {
-    key: 'Element reference',
+    key: 'Web component reference',
     pointer: (count) =>
-      `- Element reference (all ${count} elements, every prop/event/method/slot/part): the "Element reference" section of ./llms-full.txt — https://kitn.dev/llms-full.txt`,
-    render: ({ count, elementSection }) =>
+      `- Web component reference (all ${count} web components, every prop/event/method/slot/part): the "Web component reference" section of ./llms-full.txt — https://kitn.dev/llms-full.txt`,
+    render: ({ count, webComponentSection }) =>
       [
-        `## Element reference (${count} elements, generated from custom-elements.json)`,
+        `## Web component reference (${count} web components, generated from custom-elements.json)`,
         '',
         'Every element also accepts the `theme` attribute. Array/object properties are marked with a `—` attribute: they must be set as JS properties.',
         '',
-        elementSection,
+        webComponentSection,
       ].join('\n'),
   },
   {
@@ -460,10 +482,10 @@ export const FULL_ONLY_SECTIONS = [
       '- Icon roster (every name `kai-icon` and the elements\' `icon` props resolve; anything else fails loud): the "Icon roster" section of llms-full.txt',
     render: ({ icons }) =>
       [
-        `## Icon roster (${icons.length} names, derived from NAMED_ICONS in src/ui/icon.tsx)`,
+        `## Icon roster (${icons.length} names, derived from NAMED_ICONS in src/components/icon/icon.tsx)`,
         '',
         'Every name `kai-icon` (and every `icon` prop/attribute across the elements) resolves — ' +
-          'derived from the `NAMED_ICONS` map in `src/ui/icon.tsx` (also exported at runtime as ' +
+          'derived from the `NAMED_ICONS` map in `src/components/icon/icon.tsx` (also exported at runtime as ' +
           '`ICON_NAMES`). An icon-shaped name outside this roster renders a fallback glyph and ' +
           'logs a console error, in dev and prod alike; URLs render an `<img>`, and ' +
           'emoji/arbitrary text passes through as text.',
@@ -481,7 +503,7 @@ const FULL_BODY_ORDER = [
   'Streaming recipe',
   'Programmatic layer',
   'Icon roster',
-  'Element reference',
+  'Web component reference',
 ];
 
 /**
@@ -504,12 +526,16 @@ export function topLevelHeadings(markdown) {
 
 // ---------------------------------------------------------------------------
 // Normalize the data model: accept either the in-memory `elements` array from
-// gen-element-api.mjs OR the dist/custom-elements.json declarations.
+// gen-web-component-api.mjs OR the dist/custom-elements.json declarations.
 // ---------------------------------------------------------------------------
 function fromElements(elements) {
   return elements.map((el) => ({
     tag: el.tag,
     reactName: el.displayName ?? tagToReact(el.tag).replace(/^Kai/, ''),
+    // `?? ''` for the facade with no element doc comment (see renderElement): the
+    // key is omitted from the model then, and `undefined` would print the literal
+    // word "undefined" as the element's opening paragraph.
+    description: el.description ?? '',
     props: el.props.map((p) => ({
       name: p.name,
       type: p.type,
@@ -529,6 +555,7 @@ function fromElements(elements) {
     })),
     slots: el.slots,
     parts: el.parts,
+    vars: el.vars,
     declarativeChildren: el.declarativeChildren,
   }));
 }
@@ -542,6 +569,10 @@ function fromManifest(cem) {
     return {
       tag: d.tagName,
       reactName: tagToReact(d.tagName).replace(/^Kai/, ''),
+      // Keep in step with `fromElements` above: this is the standalone path, and a
+      // field it forgets writes a THINNER llms-full.txt over the full one (see the
+      // header note and CLAUDE.md).
+      description: d.description ?? '',
       props: (d.members || [])
         .filter((m) => m.kind === 'field')
         .map((m) => ({
@@ -569,6 +600,14 @@ function fromManifest(cem) {
         })),
       slots: (d.slots || []).map((s) => ({ name: s.name, doc: s.description ?? '' })),
       parts: (d.cssParts || []).map((p) => ({ name: p.name, doc: p.description ?? '', recipe: p.recipe })),
+      // Consumer-settable custom properties. Tokens land in the same CEM array as
+      // `{ name }` with no description (they are palette entries, not knobs), so a
+      // DESCRIPTION is what marks a var. Keep this filter in step with
+      // gen-web-component-api's emission or this path silently drops the vars — the
+      // failure mode the note above describes, on the field added for them.
+      vars: (d.cssProperties || [])
+        .filter((p) => p.description)
+        .map((p) => ({ name: p.name, doc: p.description, default: p.default, recipe: p.recipe })),
       declarativeChildren: (d.declarativeChildren || []).map((c) => ({
         tag: c.tagName,
         attributes: (c.attributes || []).map((a) => a.name),
@@ -579,20 +618,20 @@ function fromManifest(cem) {
   });
 }
 
-export function generate(elementsInput) {
-  const els = elementsInput ? fromElements(elementsInput) : fromManifest(
+export function generate(webComponentsInput) {
+  const els = webComponentsInput ? fromElements(webComponentsInput) : fromManifest(
     JSON.parse(readFileSync(resolve(root, 'dist/custom-elements.json'), 'utf8')),
   );
   els.sort((a, b) => a.tag.localeCompare(b.tag));
   const count = els.length;
 
-  const elementSection = els.map(renderElement).join('\n\n');
+  const webComponentSection = els.map(renderElement).join('\n\n');
   // Derived from dist/state/*.d.ts + dist/wire/*.d.ts — the layer a builder
   // that leaves <kai-chat> writes against, previously on no surface (F-46).
   const programmatic = buildProgrammaticSection();
   const ctx = {
     count,
-    elementSection,
+    webComponentSection,
     programmaticMarkdown: programmatic.markdown,
     icons: iconNames(root),
   };
@@ -651,7 +690,7 @@ export function generate(elementsInput) {
   rmSync(resolve(root, 'dist/llms'), { recursive: true, force: true });
 
   console.log(
-    `✓ llms.txt + llms-full.txt written (${count} elements, ${programmatic.exportCount} state/wire exports)`,
+    `✓ llms.txt + llms-full.txt written (${count} web components, ${programmatic.exportCount} state/wire exports)`,
   );
   return count;
 }

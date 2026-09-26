@@ -1,0 +1,149 @@
+import { Show, splitProps, type JSX } from 'solid-js';
+import { cn } from '../../utils/cn';
+import { renderIcon } from '../icon/icon';
+import { isSafeUrl } from '../../primitives/url-scheme-policy';
+
+/**
+ * The generic mobile list row: a leading region, a title with an optional subtitle, a
+ * trailing region, and an optional chevron affordance. General-purpose, nothing in it
+ * chat-specific, and the anatomy every settings screen a block grows needs.
+ *
+ * Interaction model, one of three, decided by the props:
+ * - `href` set and safe: the row is a real anchor (new tab, rel hardened).
+ * - `onActivate` set (no href): the row is a `<button>`, so Enter/Space and focus come
+ *   from the platform rather than being re-implemented.
+ * - neither: a plain non-interactive `<div>` row.
+ *
+ * Unsafe-href rule (the HomePanel precedent, same policy, same sink): an `href` that
+ * fails `isSafeUrl` (a `javascript:` URL) is NOT downgraded into a button that still
+ * fires a handler. The row renders as a plain, non-interactive `<div>`: label visible, no
+ * anchor, no handler. Escaping into visibility, never silent promotion.
+ */
+// `ref` is omitted: the interaction model decides which element renders (div, button,
+// anchor), so no one element type is honest. (The radius custom properties, and why they
+// cannot be a class, are documented at `rowClass()` below.)
+export interface RowProps extends Omit<JSX.HTMLAttributes<HTMLElement>, 'ref'> {
+  /** The title (the element's default slot). */
+  children?: JSX.Element;
+  /** Secondary line under the title. */
+  subtitle?: JSX.Element;
+  /** Leading region before the title (an icon or avatar). */
+  leading?: JSX.Element;
+  /** Right-aligned trailing region (a timestamp, value, or badge). */
+  trailing?: JSX.Element;
+  /** Show a trailing chevron affordance after the trailing region. */
+  chevron?: boolean;
+  /** Pressable row: renders button semantics and calls this on activation
+   *  (click, Enter, Space via the native button). Ignored when `href` is set. */
+  onActivate?: () => void;
+  /** Navigate on press: the row renders as an anchor (new tab). An href that
+   *  fails the kit's URL scheme policy renders a non-interactive row instead. */
+  href?: string;
+  class?: string;
+}
+
+export function Row(props: RowProps) {
+  // `rest` (data-* hooks, aria-*, id) forwards onto whichever element the
+  // interaction model renders, so a consumer's marker attribute lands on the
+  // real row node (the facade's home rows depend on this).
+  const [local, rest] = splitProps(props, [
+    'children', 'subtitle', 'leading', 'trailing', 'chevron', 'onActivate', 'href', 'class',
+  ]);
+
+  const safeHref = () => (local.href && isSafeUrl(local.href) ? local.href : undefined);
+  // `href` present but unsafe forces the inert branch even if onActivate is
+  // also set: a hostile href must not silently become an event-emitter.
+  const interactive = () => (local.href ? !!safeHref() : !!local.onActivate);
+
+  const rowClass = () =>
+    cn(
+      'flex w-full items-center gap-3 p-3 text-left text-foreground',
+      // Radius comes from custom properties so a `RowGroup` can round only the
+      // CORNERS a row's position in the list actually has (first: top, last:
+      // bottom, middle: none) and so a fill that wants a different radius sets
+      // `--kai-row-radius` once instead of fighting a class. Standalone, nothing
+      // sets them and the chain lands on `--radius-lg` — the very token
+      // `rounded-lg` reads — so this changed no standalone row's shape. The
+      // geometry, and why it cannot be a class, is in kit-base.css's row-list
+      // block. A caller's own `rounded-*` still wins: tailwind-merge drops both
+      // of these in favour of it (see `cn`).
+      'rounded-t-[var(--kai-row-radius-top,var(--kai-row-radius,var(--radius-lg)))]',
+      'rounded-b-[var(--kai-row-radius-bottom,var(--kai-row-radius,var(--radius-lg)))]',
+      // The hairline between rows is OURS, drawn here rather than by the group,
+      // and the width arrives as a custom property for the same reason the radius
+      // does: a declaration written on the slotted host loses to a document-level
+      // preflight's `* { border: 0 solid }`, while a class in the utilities layer
+      // is the last word on the element it styles. Only the WIDTH is a var: a
+      // consumer wanting a different hairline color sets `--color-border` (or
+      // scopes the token), rather than learning a second knob that does the same
+      // thing. Full comment: kit-base.css.
+      'border-t-[length:var(--kai-row-divide-width,0px)]',
+      'border-t-[color:var(--color-border)]',
+      interactive() &&
+        'cursor-pointer transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+      local.class,
+    );
+
+  const inner = (
+    <>
+      <Show when={local.leading}>
+        <span part="leading" class="flex shrink-0 items-center text-muted-foreground">
+          {local.leading}
+        </span>
+      </Show>
+      <span class="flex min-w-0 flex-1 flex-col">
+        <span part="title" class="truncate text-sm font-medium text-foreground">
+          {local.children}
+        </span>
+        <Show when={local.subtitle}>
+          <span part="subtitle" class="truncate text-xs text-muted-foreground">
+            {local.subtitle}
+          </span>
+        </Show>
+      </span>
+      <Show when={local.trailing}>
+        <span part="trailing" class="flex shrink-0 items-center gap-2 text-xs text-muted-foreground">
+          {local.trailing}
+        </span>
+      </Show>
+      <Show when={local.chevron}>
+        <span part="chevron" class="flex shrink-0 items-center text-muted-foreground" aria-hidden="true">
+          {renderIcon('chevron-right', { class: 'size-4 shrink-0' })}
+        </span>
+      </Show>
+    </>
+  );
+
+  return (
+    <Show
+      when={safeHref()}
+      fallback={
+        <Show
+          when={local.href == null && local.onActivate}
+          fallback={
+            // Non-interactive: a plain row (including the unsafe-href case,
+            // where the label stays visible but nothing is clickable).
+            <div part="row" {...rest} class={rowClass()}>
+              {inner}
+            </div>
+          }
+        >
+          <button type="button" part="row" {...rest} onClick={() => local.onActivate?.()} class={rowClass()}>
+            {inner}
+          </button>
+        </Show>
+      }
+    >
+      <a
+        part="row"
+        {...rest}
+        href={safeHref()}
+        target="_blank"
+        rel="noreferrer noopener"
+        class={cn(rowClass(), 'no-underline')}
+      >
+        {inner}
+      </a>
+    </Show>
+  );
+}

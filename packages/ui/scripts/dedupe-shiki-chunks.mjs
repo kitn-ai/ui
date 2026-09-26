@@ -1,7 +1,7 @@
 // Post-build dedupe for the shiki `core-*.js` / `engine-javascript-*.js` lazy
 // chunks. 8b3970ac (dedupe shared lazy chunks between dist/ and
-// dist/elements/chunks/) made the elements build (KAI_BUILD=split,
-// config/vite/elements.ts) write its lazy chunks to the SAME directory as the other four lib builds
+// dist/web-components/chunks/) made the web-components build (KAI_BUILD=split,
+// config/vite/web-components.ts) write its lazy chunks to the SAME directory as the other four lib builds
 // (register-all / barrel / barrel.server / solid / solid.server) so that
 // Rollup's content-hash chunk naming could collide them onto one file. That
 // works whenever the two builds render a shared module to byte-identical
@@ -9,7 +9,7 @@
 // targeted, but NOT for `createHighlighterCore` (shiki's `core-*.js`) or the
 // JS regex engine (`engine-javascript-*.js`): each `vite build` invocation is
 // a separate Rollup process with a different whole-graph module scope (the
-// register-all build's single-entry graph pulls in every element; the
+// register-all build's single-entry graph pulls in every web component; the
 // barrel/index/solid builds don't), so Rollup's cross-chunk deconfliction
 // picks different local variable names for the SAME source module before
 // esbuild's minifier ever runs. The minifier is deterministic given its
@@ -20,7 +20,7 @@
 //
 // Fix: after all builds finish, find each near-duplicate family, keep the
 // copy with the most importers (the barrel/index/solid builds all share one;
-// only the elements build renders its own), and rewrite every OTHER copy in
+// only the web-components build renders its own), and rewrite every OTHER copy in
 // the family to a same-directory `export *` re-export shim pointing at the
 // keeper. Every importer keeps importing its ORIGINAL hashed filename — nothing
 // about their code changes — so this needs no importer-rewriting and cannot
@@ -46,8 +46,8 @@
 // if shiki's public API changes.
 //
 // listJsFiles only reads dist/ itself, non-recursively — it does not walk
-// dist/elements/chunks/ or any other subdirectory. That's fine as long as
-// the split elements build (KAI_BUILD=split, config/vite/elements.ts) keeps
+// dist/web-components/chunks/ or any other subdirectory. That's fine as long as
+// the split web-components build (KAI_BUILD=split, config/vite/web-components.ts) keeps
 // writing its lazy chunks into the shared
 // dist/ root (the 8b3970ac fix this script builds on); if a future change
 // reverts that and chunks fork back into a nested directory, duplicates

@@ -2,32 +2,19 @@
 //
 // ★ THE ONE THING IN THIS STREAM THE KIT DOES NOT OBSERVE FOR ITSELF.
 //
-// Everything else here is the kit reporting on its own work: it parsed those
-// frames, it encoded that thread, so it can describe them without being told.
-// The request that leaves the app is different in kind. In the normal shape the
-// app's SERVER ROUTE adds the system prompt, chooses the model, and performs any
-// RAG or guardrail injection, and none of that passes through the kit at all --
-// which is exactly why `encode.request.systemMessages` is always 0. That 0 is
-// the kit saying "the system prompt is being added somewhere I cannot see".
+// Everything else here is the kit reporting its own work: it parsed those frames, it
+// encoded that thread. The request that leaves the app is different: the app's server
+// route adds the system prompt, chooses the model and does any RAG or guardrail
+// injection, none of which passes through the kit. That is why
+// `encode.request.systemMessages` is always 0, the kit saying the prompt is added
+// somewhere it cannot see.
 //
-// This is the seam for making that somewhere visible, and it is DELIBERATE
-// DISCLOSURE rather than collection. The kit does not wrap fetch, does not
-// monkey-patch anything, and never reads a request the app did not hand over.
-// That is not caution, it is the scope rule: what a request contains, and
-// whether an observer may see it, is a decision that lands in the app's own
-// policy document. The kit decides HOW a disclosure is shaped -- metadata by
-// default, content behind the payload switch, credentials never -- and the app
-// decides WHETHER to make one.
-//
-// It is also why this producer is public while `emitWireDiagnostic` stays
-// internal, which otherwise looks inconsistent. A general emitter lets a
-// consumer forge any event and make a panel lie about a stream that never
-// happened. This one emits a single type whose entire content is "what the app
-// says it sent" -- and on that subject the app is the authority, so there is
-// nothing here to forge.
-//
-// SSR-safe: no `window`, no `document`, nothing global at module scope. An app
-// that reports from a server route is a normal caller, not an edge case.
+// This is the seam for making that visible, and it is DISCLOSURE, not collection: the
+// kit wraps no fetch and reads no request the app did not hand over. What a request
+// contains is the app's policy call; the kit decides only HOW a disclosure is shaped.
+// Hence this producer is public while `emitWireDiagnostic` stays internal: a general
+// emitter could make a panel lie about a stream that never happened, while this one
+// emits what the app says it sent. SSR-safe: nothing global at module scope.
 import {
   emitWireDiagnostic,
   wireDiagnosticsActive,
@@ -37,24 +24,16 @@ import {
 } from '../wire/diagnostics';
 
 export interface ReportRequestOptions {
-  /**
-   * The app's own id for the logical turn, so this request and the read that
-   * answered it sit together. Same field and meaning as `ConsumeOptions.traceId`
-   * and the encode options.
-   *
-   * ★ CORRELATION IS ENTIRELY YOURS, AND NOTHING WARNS. Omit it and the event
-   * is still emitted, still complete, and completely unattached: a panel shows
-   * a request that belongs to no turn, beside a response that belongs to no
-   * request, and nothing in the kit reports that as a problem because it is not
-   * one -- a request legitimately may be followed by no stream, by several, or
-   * by one from a different turn.
-   *
-   * There is NO timing heuristic pairing a request with "the next stream that
-   * opens", and that omission is deliberate: such a heuristic is right often
-   * enough to be trusted and wrong exactly when a session is tangled enough for
-   * someone to have opened the panel. Pass the same id to `reportRequest` and
-   * to the reader, and the halves join up; pass nothing and they do not.
-   */
+  // CORRELATION IS ENTIRELY THE CALLER'S, AND NOTHING WARNS. Omit it and the event is still
+  // emitted, still complete, and completely unattached: a panel shows a request that belongs
+  // to no turn, beside a response that belongs to no request, and nothing reports that as a
+  // problem because it is not one -- a request legitimately may be followed by no stream, by
+  // several, or by one from a different turn. There is NO timing heuristic pairing a request
+  // with "the next stream that opens", deliberately: such a heuristic is right often enough
+  // to be trusted and wrong exactly when a session is tangled enough for someone to have
+  // opened the panel.
+  /** The app's own id for the logical turn, so this request and the read that answered it
+   *  sit together. */
   traceId?: string;
   /** The app's name for this call inside its trace (`'planner'`, `'retry-2'`). */
   label?: string;

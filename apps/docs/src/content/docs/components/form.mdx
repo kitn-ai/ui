@@ -1,6 +1,6 @@
 ---
 title: Form
-description: Renders a JSON Schema as a themed, validated form card — the agent supplies the schema, the user fills it in, and a typed submission event bubbles back.
+description: Renders a form from a schema.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -14,7 +14,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kai-tag-sub">kai-form</p>
 
-<p class="kai-lede">Point a JSON Schema at `<kai-form>` and get a fully themed, accessible, client-validated form — labels, widgets, submit button, and a read-only resolved state — without writing a single input element.</p>
+<p class="kai-lede">Lets an agent ask for structured input and validates it before sending it back.</p>
 
 <Facts items={['Shadow DOM', 'JSON Schema driven', 'Client-side validation', 'Read-only resolved state', 'Card contract events']} />
 
@@ -23,7 +23,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 <Playground client:only="solid" tag="kai-form" />
 
 <Aside type="tip" title="When to use">
-Use `<kai-form>` when an agent needs structured input before continuing — onboarding questionnaires, task parameters, feedback forms, or any agentic step that gates on user data. The schema is the single source of truth for both UI layout and validation.
+When an agent needs structured input before continuing: onboarding questionnaires, task parameters, feedback forms. The schema is the single source of truth for both layout and validation.
 </Aside>
 
 ## Usage
@@ -34,7 +34,7 @@ Assign the form definition in JavaScript — it's an object, not an HTML attribu
 <kai-form id="my-form"></kai-form>
 
 <script type="module">
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
 
   await customElements.whenDefined('kai-form');
 
@@ -58,41 +58,39 @@ Assign the form definition in JavaScript — it's an object, not an HTML attribu
 </script>
 ```
 
-- **Schema → widgets** deterministically: `string` → text; `string + enum` → radio/select; `integer + x-kai-widget: 'rating'` → stars; `boolean` → switch; `array` → repeater/checkbox group; nested `object` → fieldset. See the **Every widget** example for the full mapping.
-- **`x-kai-*` hints** in the schema control field order (`x-kai-order`), submit label (`x-kai-submitLabel`), secondary buttons (`x-kai-actions`), placeholder (`x-kai-placeholder`), and dismissibility (`x-kai-dismissible`).
+- **Schema → widgets** is deterministic: `string` → text; `string + enum` → radio/select; `integer + x-kai-widget: 'rating'` → stars; `boolean` → switch; `array` → repeater/checkbox group; nested `object` → fieldset. The **Every widget** example shows the full mapping.
+- **`x-kai-*` hints** control field order (`x-kai-order`), submit label (`x-kai-submitLabel`), secondary buttons (`x-kai-actions`), placeholder (`x-kai-placeholder`), and dismissibility (`x-kai-dismissible`).
 - **Field formats** — `x-kai-format`, `x-kai-mask`, and `x-kai-mask-guide` mask a string field as the user types and decide its canonical submitted value. See [Field formats & masks](/guides/field-formats/).
-- **Events use the Card contract** — `kai-form` fires no events of its own; it emits a single bubbling `kai-card` CustomEvent. Relevant kinds: `submit` (`detail.data` is the validated object), `action`, `ready`, `dismiss`, and `error`.
+- **Events use the Card contract**: `kai-form` fires no events of its own, only a bubbling `kai-card` CustomEvent. Relevant kinds: `submit` (`detail.data` is the validated object), `action`, `ready`, `dismiss`, and `error`.
 - **`resolution`** — set `el.resolution = { kind: 'submit', data: { … } }` to swap the form for a read-only `<dl>` summary.
 
 ## Examples
 
 ### Feedback Form
 
-Star rating, free-text textarea, enum radio group, boolean switch, and a secondary Skip action.
-
 <Example client:visible tag="kai-form" />
 
 ### Every Widget
 
-Exercises the full schema-to-widget mapping: text, email, URL, date, password, select, number, slider, rating, switch, checkbox, tag list, checkbox group, repeater, and nested fieldset.
+Every schema-to-widget mapping in one form.
 
 <Example client:visible tag="kai-form" data="allWidgets" />
 
 ### Validation
 
-Required fields, `minLength`/`maxLength`, `minimum`/`maximum`, and `format: 'email'` — submit empty to see inline errors.
+Required fields, `minLength`/`maxLength`, `minimum`/`maximum`, and `format: 'email'`; submit empty to see the inline errors.
 
 <Example client:visible tag="kai-form" data="validation" />
 
 ### Resolved (Read-only)
 
-After a successful submission, set `el.resolution` to render a read-only `<dl>` summary with a "Submitted" badge.
+Set `el.resolution` after a submission to render a read-only `<dl>` summary with a "Submitted" badge.
 
 <Example client:visible tag="kai-form" data="resolved" />
 
 ### Invalid Envelope
 
-Pass a non-object schema to see the inline error state; the element also emits `kai-card` with `kind: 'error'`.
+A non-object schema renders the inline error state and emits `kai-card` with `kind: 'error'`.
 
 <Example client:visible tag="kai-form" data="invalidEnvelope" />
 

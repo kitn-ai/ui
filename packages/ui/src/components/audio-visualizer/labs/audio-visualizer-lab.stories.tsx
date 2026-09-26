@@ -59,9 +59,7 @@ const meta = {
     layout: 'centered',
     docs: {
       description: {
-        component:
-          'Experimental visualizer looks on the shipped ShaderCanvas. ' +
-          'Pick a state to run the agent choreography; tune the rest live.',
+        component: 'Prototype visualizer looks that are not component variants yet.',
       },
     },
   },
@@ -120,11 +118,7 @@ export const SmokeOrb: Story = {
     docs: {
       source: { code: NO_CONSUMER_API, language: 'tsx' },
       description: {
-        story:
-          'Luminous smoke sealed in a stationary glass vessel. The smoke is the presence: ' +
-          'it settles at idle, materializes for listening, takes on the accent color and ' +
-          'fires lightning while thinking, and shreds with the voice while speaking. ' +
-          'The vessel itself never changes size.',
+        story: 'Luminous smoke held in a stationary glass vessel, taking the accent color while thinking.',
       },
     },
   },
@@ -140,9 +134,7 @@ export const StormyPlanet: Story = {
     docs: {
       source: { code: NO_CONSUMER_API, language: 'tsx' },
       description: {
-        story:
-          'Dense churning cloud cover on the same stationary vessel. Same choreography as ' +
-          'the smoke orb with a heavier, planetary character.',
+        story: "Dense churning cloud cover on a stationary vessel, the smoke orb's choreography at planetary scale.",
       },
     },
   },
@@ -158,10 +150,7 @@ export const Braid: Story = {
     docs: {
       source: { code: NO_CONSUMER_API, language: 'tsx' },
       description: {
-        story:
-          'Three woven strands sharing one wave family. Crossings brighten but are ' +
-          'soft-compressed so the weave stays readable. While thinking it braids ' +
-          'tighter and finer.',
+        story: 'Three woven strands sharing one wave family, braiding tighter while thinking.',
       },
     },
   },

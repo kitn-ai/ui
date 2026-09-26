@@ -74,7 +74,7 @@ describe('the angular form', () => {
 
   it('takes its refs through viewChild, typed by the element interface the tag names', () => {
     const ts = byPath(renderAngularForm(block())).get('fixture.component.ts')!;
-    expect(ts).toContain("import type { KaiDockElement } from '@kitn.ai/ui/elements';");
+    expect(ts).toContain("import type { KaiDockElement } from '@kitn.ai/ui/web-components';");
     expect(ts).toContain(`private readonly dock = viewChild<ElementRef<KaiDockElement>>('dock');`);
     expect(ts).toContain('ngAfterViewInit');
     expect(ts).toContain('dock: this.dock()?.nativeElement ?? null');
@@ -166,7 +166,7 @@ describe('the angular form', () => {
     const store = byPath(renderAngularForm(block())).get('fixture.store.ts')!;
     expect(store).toContain('@Injectable()');
     expect(store).toContain('signal<FixtureState>(');
-    expect(store).toContain("import '@kitn.ai/ui/elements';");
+    expect(store).toContain("import '@kitn.ai/ui/web-components';");
     expect(store).toContain(`const TAGS = ['kai-conversation-item', 'kai-conversations', 'kai-dock'];`);
     expect(store).toContain('{ dock: null }');
     // boot() is NOT called here: it is scheduled from the component's

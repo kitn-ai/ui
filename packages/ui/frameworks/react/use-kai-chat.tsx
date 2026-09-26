@@ -1,22 +1,22 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
-import type { ChatMessage } from '../../src/elements/chat-types';
+import type { ChatMessage } from '../../src/web-components/chat/chat-types';
 // The whole content model, not just the envelope: a React consumer typing a
 // `parts` array or an `addSource` argument needs these too, and re-exporting
 // only `ChatMessage` is the same missing-annotation gap one layer up.
 export type {
   ChatMessage, ChatMessageAction, CustomAction, AvatarData, FeedbackVote, MessagePart,
   MessageSource, RawOrigin,
-} from '../../src/elements/chat-types';
-export type { ToolPart } from '../../src/components/tool-types';
-export type { ToolKind } from '../../src/components/tool-classify';
+} from '../../src/web-components/chat/chat-types';
+export type { ToolPart } from '../../src/components/tool/tool-types';
+export type { ToolKind } from '../../src/primitives/tool-classify';
 export type { CardEnvelope } from '../../src/primitives/card-contract';
-export type { AttachmentData } from '../../src/components/attachment-types';
-import type { AttachmentData } from '../../src/components/attachment-types';
+export type { AttachmentData } from '../../src/primitives/attachment-types';
+import type { AttachmentData } from '../../src/primitives/attachment-types';
 import {
   appendMessage, updateMessage, removeMessage, addSuggestion, removeSuggestion,
   createAssistantStream, onStreamSettled, type AssistantStream, type SetMessages,
-} from '../../src/state';
+} from '../../src/state/index';
 
 export interface UseKaiChatOptions {
   /** Seed messages, read once at mount and copied. Later changes are ignored — drive updates through the returned ops. */

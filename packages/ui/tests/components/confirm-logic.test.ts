@@ -4,7 +4,7 @@ import {
   buttonVariantForStyle,
   normalizeActions,
   defaultActionId,
-} from '../../src/components/confirm-card';
+} from '../../src/components/confirm-card/confirm-card';
 
 describe('buttonVariantForStyle', () => {
   test('maps styles to Button variants', () => {

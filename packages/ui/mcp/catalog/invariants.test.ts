@@ -123,4 +123,47 @@ describe('invariant records', () => {
     }
     expect(checked).toBeGreaterThan(parsed.length - 1);
   });
+
+  // DERIVE, DON'T TYPE, applied to a security policy. The two URL predicates are
+  // exported and the acceptance floor RESOLVES an import in a `right` form against
+  // the module that defines the symbol (scripts/lib/kit-imports.mjs), so a snippet
+  // can import the shipped one. What it must not do is spell the list out again: two
+  // copies of a policy with nothing keeping them in step is the defect the floor was
+  // taught to import in order to delete.
+  //
+  // The lists are READ from the policy modules rather than restated here, so adding a
+  // scheme to the policy, renaming a case, or swapping a list's direction does not
+  // silently widen the hole this closes.
+  it('no right form re-types a scheme the policy modules own', () => {
+    const schemes = new Set<string>();
+    for (const source of [
+      readFileSync(join(PKG, 'src/primitives/url-scheme-policy.ts'), 'utf8'),
+      readFileSync(join(PKG, 'src/primitives/link-preview.ts'), 'utf8'),
+    ]) {
+      // `IMAGE_SCHEMES` is deliberately EXCLUDED: that list is about an `<img src>`,
+      // is not imported by any example, and `data:image/` is a legitimate image
+      // spelling a snippet may need to talk about.
+      for (const list of source.matchAll(/^const (?:SAFE|SCRIPT|RENDERABLE)_SCHEMES = \[([^\]]*)\]/gm)) {
+        for (const literal of list[1].matchAll(/'([^']+)'/g)) schemes.add(literal[1]);
+      }
+    }
+    expect(schemes.size, 'no scheme list was read out of the policy modules; this check would be vacuous').toBeGreaterThan(2);
+    expect(schemes, 'the policy no longer refuses javascript:, so the check is aimed at nothing').toContain('javascript:');
+
+    const parsed = listInvariants();
+    let checked = 0;
+    for (const inv of parsed) {
+      for (const ex of inv.examples) {
+        checked++;
+        for (const scheme of schemes) {
+          expect(
+            ex.right.includes(`'${scheme}'`) || ex.right.includes(`"${scheme}"`),
+            `${inv.id}: the right form spells out the scheme ${scheme}, which the policy module owns. Import isSafeUrl / isRenderableLink from '@kitn.ai/ui' and execute the shipped list instead of a copy of it.`,
+          ).toBe(false);
+        }
+      }
+    }
+    expect(checked).toBe(parsed.flatMap((i) => i.examples).length);
+    expect(checked).toBeGreaterThan(0);
+  });
 });

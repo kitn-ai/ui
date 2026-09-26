@@ -98,7 +98,7 @@
 //   node packages/ui/scripts/lint-cdn-pins.mjs --self-test    # prove it still detects
 //   node packages/ui/scripts/lint-cdn-pins.mjs --check-release-wiring
 import { readFileSync, writeFileSync, readdirSync, existsSync, statSync } from 'node:fs';
-import { dirname, join, resolve, relative, extname } from 'node:path';
+import { basename, dirname, extname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 // Anchored to THIS FILE, not the cwd: CLAUDE.md tells everyone to run from the
@@ -176,6 +176,18 @@ const SKIP_PATHS = ['apps/docs/public/kitn', 'apps/docs/public/blocks', 'apps/do
 //
 // Cost, stated rather than hidden: a genuine CDN pin written into either file is
 // not checked by this guard.
+/**
+ * A generated release changelog is a RECORD, never a thing to fix. release-please writes it out of
+ * commit SUBJECTS, so it quotes whatever version literal those commits carried -- a subject like
+ * "chore(docs): pin @kitn.ai/ui@0.33.0 in the README" lands in the changelog verbatim -- and the
+ * `historical` line waiver cannot help there, because the line is GENERATED: a hand edit is undone
+ * by the next release. This is the same class as the layer-name failure that blocked the 0.33.0
+ * release, where the exemption existed for one changelog and the generator writes all of them.
+ *
+ * Restricted to that exact basename: a different .md inside a package is still scanned.
+ */
+export const isGeneratedRecord = (file) => basename(file) === 'CHANGELOG.md';
+
 const SKIP_FILES = [
   'packages/ui/scripts/lint-cdn-pins.mjs',
   'packages/ui/tests/scripts/cdn-pins-guard-wiring.test.ts',
@@ -274,6 +286,7 @@ function walk(dir, out) {
       walk(full, out);
     } else if (e.isFile() && EXT.has(extname(e.name))) {
       if (SKIP_FILES.includes(relative(REPO_ROOT, full))) continue;
+      if (isGeneratedRecord(full)) continue;
       out.push(full);
     }
   }
@@ -337,12 +350,27 @@ function fixText(text, current) {
 // self-test: proves the analyzer still DETECTS a stale pin and still lets a
 // current one through. Without this, "0 findings" is unfalsifiable.
 // ---------------------------------------------------------------------------
+/**
+ * Path-level probes, because the changelog rule lives in the WALK rather than in the analyzer: the
+ * rule is a basename test, and these pin it in both directions (every package's changelog is out,
+ * a differently-named markdown file is still in).
+ */
+const RECORD_SELF_TEST_CASES = [
+  { name: "the kit's changelog is a generated record", file: 'packages/ui/CHANGELOG.md', expect: true },
+  { name: "create-kai's changelog is one too (the same generator)", file: 'packages/create-kai/CHANGELOG.md', expect: true },
+  { name: 'a newly split package is covered by the rule, not by a list', file: 'packages/mcp/CHANGELOG.md', expect: true },
+  { name: 'the root changelog counts', file: 'CHANGELOG.md', expect: true },
+  { name: 'a differently-named markdown file in a package is NOT exempt', file: 'packages/cli/notes.md', expect: false },
+  { name: 'nor is markdown with a different basename', file: 'packages/ui/CHANGELOG-old.md', expect: false },
+  { name: 'nor is a source file that merely mentions one', file: 'packages/ui/scripts/gen-llms.mjs', expect: false },
+];
+
 const SELF_TEST_CASES = [
   // -- the four literals that were actually live, all must be caught --
   { name: 'installation.mdx as it shipped (0.20.1, in the advisory range)', expect: true, vuln: true,
     text: 'Pin an exact version: `https://cdn.jsdelivr.net/npm/@kitn.ai/ui@0.20.1/dist/kai.es.js`.' },
   { name: 'loading.mdx as it shipped (0.20.1 autoloader)', expect: true, vuln: true,
-    text: 'Pin an exact version: `https://cdn.jsdelivr.net/npm/@kitn.ai/ui@0.20.1/dist/elements/autoloader.js`.' },
+    text: 'Pin an exact version: `https://cdn.jsdelivr.net/npm/@kitn.ai/ui@0.20.1/dist/web-components/autoloader.js`.' },
   { name: 'getting-started.mdx as it shipped (bare specifier, no host)', expect: true, vuln: true,
     text: 'Pin an exact version in production (e.g. `@kitn.ai/ui@0.20.1/dist/...`).' },
   { name: 'README.md as it shipped (0.16.0, the npm landing page)', expect: true, vuln: true,
@@ -359,7 +387,7 @@ const SELF_TEST_CASES = [
     text: 'import "https://cdn.jsdelivr.net/npm/@kitn.ai/ui@0.26.0/dist/kai.es.js";' },
   // -- placeholders are honest and must not be rewritten into a false pin --
   { name: 'the MCP debug tool placeholder @<version>', expect: false,
-    text: '<script type="module" src="https://cdn.jsdelivr.net/npm/@kitn.ai/ui@<version>/dist/elements/autoloader.js"></script>' },
+    text: '<script type="module" src="https://cdn.jsdelivr.net/npm/@kitn.ai/ui@<version>/dist/web-components/autoloader.js"></script>' },
   { name: 'the create-kai README placeholder @<pinned>', expect: false,
     text: 'npm pack @kitn.ai/ui@<pinned> && tar -xzf kitn.ai-ui-<pinned>.tgz' },
   { name: 'an unpinned CDN URL is a different question and not this rule', expect: false,
@@ -414,7 +442,7 @@ const ORDER_SELF_TEST_CASES = [
   { name: 'a FROZEN advisory floor before the pin would be rewritten instead of it', ok: false,
     text: 'Pin `0.14.1` or newer, e.g. `@kitn.ai/ui@0.25.0/dist/kai.es.js`.' },
   { name: 'two pins on one line: the second is unreachable, only the first moves', ok: false,
-    text: '`@kitn.ai/ui@0.25.0/dist/kai.es.js` or `@kitn.ai/ui@0.25.0/dist/elements/autoloader.js`',
+    text: '`@kitn.ai/ui@0.25.0/dist/kai.es.js` or `@kitn.ai/ui@0.25.0/dist/web-components/autoloader.js`',
     which: 1 },
 ];
 
@@ -438,6 +466,16 @@ if (SELF_TEST) {
       `${ok ? '✓' : '✗'} ${c.name} (expected ${c.expect ? 'a finding' : 'clean'}, got ${got ? 'a finding' : 'clean'})${note}`,
     );
   }
+  // The changelog rule lives in the WALK, not in the analyzer, so it is asserted at the path level.
+  for (const c of RECORD_SELF_TEST_CASES) {
+    const got = isGeneratedRecord(c.file);
+    const ok = got === c.expect;
+    if (!ok) failed++;
+    console.log(
+      `${ok ? '✓' : '✗'} [record] ${c.name} (expected ${c.expect ? 'exempt' : 'scanned'}, got ${got ? 'exempt' : 'scanned'})`,
+    );
+  }
+
   // The --fix path is part of the contract, so it is asserted too.
   const before = 'see `@kitn.ai/ui@0.20.1/dist/kai.es.js` and `@kitn.ai/ui@0.16.0/dist/kai.es.js`';
   const { text: after, count } = fixText(before, CURRENT);

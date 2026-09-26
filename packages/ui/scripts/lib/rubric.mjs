@@ -78,8 +78,8 @@ export const severity = (id) => SEVERITIES.find((s) => s.id === id);
  */
 export const DIMENSIONS = [
   {
-    id: 'elements-exist',
-    title: 'Correct elements — nothing fabricated',
+    id: 'web-components-exist',
+    title: 'Correct web components — nothing fabricated',
     gate: 'mechanical',
     runner: 'evaluator',
     weight: 3,
@@ -118,15 +118,15 @@ export const DIMENSIONS = [
   },
   {
     id: 'registers',
-    title: 'The elements actually register and render',
+    title: 'The web components actually register and render',
     gate: 'mechanical',
     runner: 'external',
     weight: 2,
     alwaysApplies: false,
     claims: [/\bregisters?\b/i, /\bregistration\b/i],
     anchors: {
-      10: 'every element the output uses is defined in customElements and renders non-empty in a real browser.',
-      0: 'an element never upgrades, or renders empty.',
+      10: 'every web component the output uses is defined in customElements and renders non-empty in a real browser.',
+      0: 'a web component never upgrades, or renders empty.',
     },
   },
   {
@@ -150,7 +150,7 @@ export const DIMENSIONS = [
     alwaysApplies: true,
     claims: [/propert/i, /attribute/i, /\bwired\b/i, /contract/i, /script-tag/i, /bundler/i],
     anchors: {
-      10: 'arrays, objects and functions set as JS properties; every event name exists on the element it is listened on; listeners on the element itself; the delivery target respected end to end.',
+      10: 'arrays, objects and functions set as JS properties; every event name exists on the web component it is listened on; listeners on the web component itself; the delivery target respected end to end.',
       7: 'the contract is honoured everywhere it matters, with one cosmetic slip (a scalar set as a property, an unnecessary cast).',
       3: 'one real contract breach: an object through an attribute, a listener on a parent, an event name that does not exist.',
       0: 'the contract is not in evidence — attributes and properties used interchangeably, invented event names.',
@@ -178,10 +178,10 @@ export const DIMENSIONS = [
     alwaysApplies: false,
     claims: [/wiring/i, /\bwired\b/i],
     anchors: {
-      10: 'every edge the task needs exists, on the correct elements in the correct direction, wired by the host.',
+      10: 'every edge the task needs exists, on the correct web components in the correct direction, wired by the host.',
       7: 'the edges are right; one is wired more indirectly than it needs to be.',
-      3: 'an edge is inverted or attached to the wrong element — the classic being a listener on the element that displays the data rather than the one that owns the list.',
-      0: 'the elements are placed in one subtree and expected to coordinate themselves.',
+      3: 'an edge is inverted or attached to the wrong web component — the classic being a listener on the web component that displays the data rather than the one that owns the list.',
+      0: 'the web components are placed in one subtree and expected to coordinate themselves.',
     },
   },
   {
@@ -195,7 +195,7 @@ export const DIMENSIONS = [
       10: 'nothing is invented, and where the kit cannot do what was asked the output SAYS SO and names what is missing. TWO SHAPES BOTH SCORE 10: refusing outright, and composing an honest answer out of what exists — registering your own element and routing it through kai-chat.cardTypes is a correct answer, not a failed refusal, because it fabricates no kai-* tag and states plainly what the kit does not provide.',
       7: 'nothing invented; the gap is worked around without being named clearly.',
       3: 'a prop, event or import path is invented rather than a tag — smaller blast radius, same failure of honesty.',
-      0: 'a kai-* element that does not exist is presented as if it does.',
+      0: 'a kai-* web component that does not exist is presented as if it does.',
     },
   },
   {
@@ -398,7 +398,7 @@ export function scoreRun({ scenario, gates = {}, judged = {}, findings = [] }) {
       } else if (g.vacuous && d.runner !== 'evaluator') {
         // AN EXTERNAL GATE CANNOT BE VACUOUS. It does not scan anything, so it
         // has no way to discover an absence of subject: tsc either ran or it did
-        // not, a browser either registered the elements or it did not. Honouring
+        // not, a browser either registered the web components or it did not. Honouring
         // `vacuous` on `compiles`/`registers`/`streams` reopened exactly the hole
         // this branch keeps closing -- measured, a real S1 run with real code in
         // it scored 10.00/10 and exit 0 on three external gates marked
@@ -452,13 +452,13 @@ export function scoreRun({ scenario, gates = {}, judged = {}, findings = [] }) {
         // THE FIRST FIX made it score 0, and that INVERTED THE BIAS ONTO THE
         // DECK'S BEST ANSWER. S6's textbook reply is a pure-prose honest
         // refusal -- no code, because writing code would mean inventing the
-        // element. That answer scored 6.53 and `gated-fail`, on two gates
+        // web component. That answer scored 6.53 and `gated-fail`, on two gates
         // reporting "0 kai-* tag(s) used, all of which the kit ships". The
         // module's own comment says flagging that answer "would punish exactly
         // the behaviour the deck exists to reward"; the code was doing it.
         //
-        // The honest reading is that there is NO SUBJECT. "Every element it uses
-        // exists" over an answer that uses no elements is not a claim that can
+        // The honest reading is that there is NO SUBJECT. "Every web component it uses
+        // exists" over an answer that uses no web components is not a claim that can
         // be true or false. That is absence of subject, not absence of merit, so
         // the dimension leaves the score entirely -- out of the numerator AND
         // the denominator -- and the remaining weights renormalise. A correct

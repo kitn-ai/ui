@@ -60,7 +60,7 @@ function serveRemoteProvider(): Plugin {
 // `treeshake: false` and `emptyOutDir: true`. None of that was ever intended
 // for Storybook; it was inherited by accident of filename.
 //
-// That file is now config/vite/elements.ts behind KAI_BUILD, so there is
+// That file is now config/vite/web-components.ts behind KAI_BUILD, so there is
 // nothing at the root for Storybook to pick up and everything this config
 // needs is set explicitly in `viteFinal` below (the Solid plugin comes from the
 // `storybook-solidjs-vite` framework). Do NOT reintroduce a vite.config.ts at
@@ -69,7 +69,44 @@ function serveRemoteProvider(): Plugin {
 
 const config: StorybookConfig = {
   stories: ['../src/**/*.mdx', '../src/**/*.stories.@(ts|tsx)'],
-  framework: 'storybook-solidjs-vite',
+  // The framework takes the OBJECT form here for exactly one reason: `options.docgen`.
+  // Do not collapse it back to the bare string 'storybook-solidjs-vite'.
+  //
+  // 1. shouldRemoveUndefinedFromOptional. Storybook picks a control by matching an
+  //    EXACT STRING against the docgen type name -- node_modules/storybook/dist/
+  //    _browser-chunks/chunk-SZQXB3JV.js:975 is `switch (type.name)`, with
+  //    `case "boolean"` returning the boolean control and `default` returning
+  //    `{ control: { type: options ? "select" : "object" } }`. The docgen plugin
+  //    types an OPTIONAL boolean as `boolean | undefined`, and only strips the
+  //    ` | undefined` when this option is on (react-docgen-typescript/lib/
+  //    parser.d.ts:65 declares it; parser.js:449, 463 and 478 apply it).
+  //    `boolean | undefined` matches no case, so every optional boolean falls to
+  //    the default and renders an OBJECT control. This option is a docgen /
+  //    Storybook contract, not cosmetics: drop it and every optional boolean on
+  //    every component silently goes back to an object control.
+  //
+  // 2. propFilter. Passing it REPLACES the preset's own rather than extending it:
+  //    storybook-solidjs-vite/dist/framework/preset.js:23 spreads the preset
+  //    defaults first and `framework.options.docgen` over the top, so our key wins
+  //    whole and the preset's node_modules exclusion is re-stated below verbatim.
+  //    On top of it we drop keys out of a Solid directive namespace. docgen reads
+  //    the global `declare module 'solid-js'` augmentation at src/components/
+  //    collapsible/collapsible.tsx:13 as a prop of EVERY component, and its
+  //    generated name carries a ':' (`bool:inert`, listed 66 times in a built
+  //    storybook-static). No such name is addressable as a component prop, so it
+  //    is pure noise in every arg table. Do not simplify this back to the default
+  //    filter: the leak returns with it.
+  framework: {
+    name: 'storybook-solidjs-vite',
+    options: {
+      docgen: {
+        shouldRemoveUndefinedFromOptional: true,
+        propFilter: (prop) =>
+          (prop.parent ? !/node_modules/.test(prop.parent.fileName) : true) &&
+          !prop.name.includes(':'),
+      },
+    },
+  },
   // Serve the generated agent files so the docs can link to them directly.
   staticDirs: [
     { from: '../llms.txt', to: '/llms.txt' },

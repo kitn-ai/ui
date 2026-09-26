@@ -1,12 +1,12 @@
 // Generated-artifact drift guard: the checked-in files that are DERIVED from
-// src/elements must match what their generator produces right now.
+// src/web-components must match what their generator produces right now.
 //
 // WHY IT EXISTS
 // -------------
-// fc40a10 registered a new `::part(citations)` in src/elements/slots.ts and did
+// fc40a10 registered a new `::part(citations)` in src/web-components/slots/slots.ts and did
 // not regenerate the artifacts derived from it. Nothing went red. The `kai`
 // MCP's `component_reference` and the docs site's PartTable.astro both read from
-// those artifacts, so a part that existed in the SHIPPED element was invisible
+// those artifacts, so a part that existed in the SHIPPED web component was invisible
 // to every tool a developer would use to discover it. That is a
 // developer-experience defect, not untidy files, and it was found by a human
 // noticing — which does not scale.
@@ -101,19 +101,19 @@ const FIXTURE_CONFIG = argOf('--fixture-config');
 const FIX = 'pnpm --filter @kitn.ai/ui run build:api';
 
 // Every tracked file written by the generators `build:api` runs — that is
-// scripts/gen-elements-manifest.mjs, plus scripts/gen-element-api.mjs and the
+// scripts/gen-web-components-manifest.mjs, plus scripts/gen-web-component-api.mjs and the
 // sibling generators it invokes. Paths are repo-relative so failure output
 // matches what you would `git add`.
 //
-// element-manifest.json is in `build:api` for THIS guard's sake and it is worth
-// knowing why, because it looks redundant: `build:elements` already runs the
-// same generator, ahead of the elements vite build that needs the entry points.
+// web-component-manifest.json is in `build:api` for THIS guard's sake and it is worth
+// knowing why, because it looks redundant: `build:web-components` already runs the
+// same generator, ahead of the web-components vite build that needs the entry points.
 // But this guard only ever runs `build:api`, so while the manifest was reachable
-// only through `build:elements` it could not be covered here at all — the
+// only through `build:web-components` it could not be covered here at all — the
 // sentinel would survive the run and the guard would fail on every clean tree.
 // Adding it to the list without adding it to `build:api` produces a check that
 // is red always, which is the same as no check. The generator is a pure scan of
-// register-impl.ts and src/elements/*.ts[x] — no build, no network, idempotent —
+// register-impl.ts and src/web-components/*.ts[x] — no build, no network, idempotent —
 // so running it in both places costs milliseconds and cannot diverge.
 //
 // `probe` says how to plant the sentinel:
@@ -125,15 +125,15 @@ const FIX = 'pnpm --filter @kitn.ai/ui run build:api';
 //                 the first generated block instead, which is exactly the region
 //                 that must be rewritten.
 const GENERATED = [
-  { file: 'packages/ui/src/elements/element-meta.json', probe: 'overwrite' },
-  { file: 'packages/ui/src/elements/element-manifest.json', probe: 'overwrite' },
-  // The ~2 KB of element-meta.json that SHIPS: tag -> its non-scalar prop names,
-  // read at runtime by src/elements/element-diagnostics.ts. Stale bytes here mean
+  { file: 'packages/ui/src/web-components/web-component-meta.json', probe: 'overwrite' },
+  { file: 'packages/ui/src/web-components/web-component-manifest.json', probe: 'overwrite' },
+  // The ~2 KB of web-component-meta.json that SHIPS: tag -> its non-scalar prop names,
+  // read at runtime by src/web-components/web-component/web-component-diagnostics.ts. Stale bytes here mean
   // a prop that silently stopped being watched, which is invisible by nature —
   // the check for it is a check that does not fire.
-  { file: 'packages/ui/src/elements/element-nonscalar.json', probe: 'overwrite' },
-  { file: 'packages/ui/src/elements/icon-names.json', probe: 'overwrite' },
-  { file: 'packages/ui/src/elements/element-types.d.ts', probe: 'overwrite' },
+  { file: 'packages/ui/src/web-components/web-component-nonscalar.json', probe: 'overwrite' },
+  { file: 'packages/ui/src/web-components/icon-names.json', probe: 'overwrite' },
+  { file: 'packages/ui/src/web-components/web-component-types.d.ts', probe: 'overwrite' },
   { file: 'packages/ui/frameworks/react/index.tsx', probe: 'overwrite' },
   { file: 'packages/ui/llms.txt', probe: 'overwrite' },
   { file: 'packages/ui/llms-full.txt', probe: 'overwrite' },
@@ -169,7 +169,7 @@ const REAL = {
   genCommand: { cmd: 'npm', args: ['run', 'build:api'] },
   // The artifact whose STRUCTURE is sanity-checked: a generator that writes
   // valid-but-empty output clears the sentinel and would otherwise pass.
-  metaFile: 'packages/ui/src/elements/element-meta.json',
+  metaFile: 'packages/ui/src/web-components/web-component-meta.json',
   fix: FIX,
   // §4 of docs/coupling-map.md's templates row used to say the fixture-JSON
   // copy was guarded only in the REMOVE direction — a listed file going
@@ -361,12 +361,12 @@ function runGuard(cfg, { log = () => {} } = {}) {
       const tags = Array.isArray(meta) ? meta.filter((el) => typeof el?.tag === 'string' && el.tag.startsWith('kai-')) : [];
       if (tags.length === 0) {
         return p(
-          `the regenerated ${cfg.metaFile} describes no kai-* elements.\n` +
+          `the regenerated ${cfg.metaFile} describes no kai-* web components.\n` +
             '  The generator produced a structurally empty model, so comparing against it\n' +
-            '  would prove nothing about any element.',
+            '  would prove nothing about any web component.',
         );
       }
-      log(`  · model parsed: ${tags.length} kai-* elements\n`);
+      log(`  · model parsed: ${tags.length} kai-* web components\n`);
     }
 
     // ------------------------------------------------------------------- diff
@@ -398,13 +398,13 @@ function runGuard(cfg, { log = () => {} } = {}) {
       return p(
         `${drifted.length} generated artifact(s) are STALE — they do not match what the generator produces from the current source:\n` +
           drifted.map((x) => `    ${x}`).join('\n') +
-          '\n\n  These are derived from src/elements/ by the generators `build:api` runs. The\n' +
+          '\n\n  These are derived from src/web-components/ by the generators `build:api` runs. The\n' +
           "  `kai` MCP's component_reference and the docs site's PartTable.astro read them,\n" +
           '  so a prop, event or ::part you added to the source is invisible to every tool a\n' +
           '  developer would use to discover it until these are regenerated.\n\n' +
-          '  element-manifest.json is worse than invisible: src/elements/autoloader.ts\n' +
+          '  web-component-manifest.json is worse than invisible: src/web-components/autoloader/autoloader.ts\n' +
           '  imports it AT RUNTIME to map a tag to the chunk that registers it. A tag\n' +
-          '  missing from the committed manifest hits `if (!file) return` and the element\n' +
+          '  missing from the committed manifest hits `if (!file) return` and the web component\n' +
           '  never upgrades — silently, since the warnOnce path below it only fires when a\n' +
           '  dynamic import throws, which a missing key never reaches.\n\n' +
           '  Fix — run, then commit the files listed above:\n' +
@@ -427,7 +427,7 @@ function runGuard(cfg, { log = () => {} } = {}) {
 // self-test: synthesized repos with a STUB generator, so the sentinel clears
 // normally and each planted defect has to be found by the check that owns it.
 // ---------------------------------------------------------------------------
-const META_REL = 'packages/ui/src/elements/element-meta.json';
+const META_REL = 'packages/ui/src/web-components/web-component-meta.json';
 const DOC_REL = 'docs/web-components.md';
 const META_CONTENT = JSON.stringify([{ tag: 'kai-chat', displayName: 'Chat' }], null, 2) + '\n';
 const DOC_CONTENT = `# Web components\n\nHand-written prose.\n\n<!-- spec:kai-chat -->\nGENERATED BLOCK\n<!-- /spec:kai-chat -->\n`;
@@ -537,7 +537,7 @@ const SELF_TEST_CASES = [
   {
     name: 'the generator produces a structurally empty model',
     build: () => fixtureConfig(fixtureRepo({ mode: 'empty-meta' })),
-    expect: ['describes no kai-* elements'],
+    expect: ['describes no kai-* web components'],
   },
   {
     name: 'the generator itself fails',

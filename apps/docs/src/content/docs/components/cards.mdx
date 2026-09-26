@@ -1,6 +1,6 @@
 ---
 title: Cards
-description: A dispatcher that renders a stream of generative-UI card envelopes — confirm, choice, tasks, link previews, and more — routing user actions through an optional policy.
+description: Renders generative-UI cards from a stream.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -15,7 +15,7 @@ import CardDismissDemo from '../../../components/CardDismissDemo.tsx';
 
 <p class="kai-tag-sub">kai-cards</p>
 
-<p class="kai-lede">Drop in `<kai-cards>` to render a live stream of AI-generated card envelopes — confirmations, task lists, choice pickers, link previews, and custom types — while a single `policy` object routes every user action back to your app.</p>
+<p class="kai-lede">Turns server-sent interactions into live cards and routes what the user does with them back to your app.</p>
 
 <Facts items={['Shadow DOM', 'Property-driven API', 'Built-in card types', 'Extensible type registry', 'CardFallback for unknown types']} />
 
@@ -24,7 +24,7 @@ import CardDismissDemo from '../../../components/CardDismissDemo.tsx';
 <Playground client:only="solid" tag="kai-cards" />
 
 <Aside type="tip" title="When to use">
-Reach for `<kai-cards>` whenever your AI response includes structured interactions — a deployment confirmation, a multi-step plan, a list of options. Pass server envelopes into `el.cards`, wire `el.policy` to handle results, and the element takes care of rendering, routing, and resolved (read-only) states.
+When the response carries structured interactions: a deployment confirmation, a multi-step plan, a list of options. Pass envelopes into `el.cards` and wire `el.policy`.
 </Aside>
 
 ## Usage
@@ -35,7 +35,7 @@ Set all three in JavaScript — they're arrays and objects, so none work as HTML
 <kai-cards id="cards"></kai-cards>
 
 <script type="module">
-  import '@kitn.ai/ui/elements';
+  import '@kitn.ai/ui/web-components';
 
   await customElements.whenDefined('kai-cards');
 
@@ -58,15 +58,15 @@ Set all three in JavaScript — they're arrays and objects, so none work as HTML
 ```
 
 - **`cards`** — array of `CardEnvelope` objects: `{ type, id, data, title?, resolution? }`. The `type` string selects which built-in child element renders the envelope.
-- **`policy`** — `{ onAction, onSubmit, onOpen, onDismiss, … }`. Provide only the handlers your app needs; the rest are silently ignored. Swap it after mount — it is read at event time.
+- **`policy`**: `{ onAction, onSubmit, onOpen, onDismiss, … }`. Provide only the handlers you need; swap it after mount, since it is read at event time.
 - **`types`** — `{ 'my-type': 'my-card-element' }` merges over the built-in registry; override a built-in by reusing its key.
-- **Resolved cards** — set `resolution` on an envelope to render it in its read-only state after the user has acted. The kinds: terminal `{ kind: 'action', action, payload? }` and `{ kind: 'submit', data }`, the deferred `{ kind: 'dismissed' }`, and the terminal `{ kind: 'expired', reason? }`.
+- **Resolved cards**: set `resolution` on an envelope to render it read-only after the user has acted: terminal `{ kind: 'action', action, payload? }` and `{ kind: 'submit', data }`, deferred `{ kind: 'dismissed' }`, and `{ kind: 'expired', reason? }`.
 
 ## Dismiss and recover
 
 Add `dismissible: true` to a `confirm`, `choice`, `form`, or `tasks` card's `data` to show a × on it. Dismissing a card **defers** it rather than deleting it: the card collapses to a compact, re-openable stub — *"Proposed: Deploy to production? — dismissed · Reopen"* — and `onDismiss(cardId)` fires.
 
-Defer, don't delete. A user who waves a card away may want it back; keep the option open until your app decides the card is truly done.
+Defer, don't delete: a user who waves a card away may want it back, and only your app knows when the moment has passed.
 
 <CardDismissDemo client:only="solid" />
 
@@ -77,7 +77,7 @@ cards.policy = {
 };
 ```
 
-When the user taps **Reopen** on the stub, `onReopen(cardId)` fires. Your handler decides what happens — bring the card back live, or mark it `expired` if the moment has passed (the agent already proceeded, or too much time elapsed). "Already proceeded" is a fact only your app knows, so the decision is yours.
+When the user taps **Reopen** on the stub, `onReopen(cardId)` fires and your handler decides: bring the card back live, or mark it `expired` to end it there.
 
 ### `dismissRecovery()` — the wiring, done for you
 
@@ -105,10 +105,10 @@ const recovery = dismissRecovery({
 cards.policy = { ...recovery, onAction, onSubmit };
 ```
 
-- **`onDismiss`** stamps `{ kind: 'dismissed', at }` on the card (a new array reference, so a Solid/React host re-renders) and shows the Undo toast. Undo restores whatever resolution the card had before.
-- **`onReopen`** clears the resolution (card live again) when the card is re-openable, otherwise stamps `{ kind: 'expired' }`. Override the rule with `isReopenable`, or cap it with `staleAfterMs`.
+- **`onDismiss`** stamps `{ kind: 'dismissed', at }` on the card (a new array reference, so a Solid/React host re-renders) and shows the Undo toast, which restores whatever resolution the card had before.
+- **`onReopen`** clears the resolution when the card is re-openable, otherwise stamps `{ kind: 'expired' }`. Override the rule with `isReopenable`, or cap it with `staleAfterMs`.
 
-The toast is **injected, never imported** — cards stay decoupled from the toast module. Pass any adapter with a `show()` method, or omit `toast` to skip the Undo affordance entirely.
+The toast is injected, never imported, so cards stay decoupled from the toast module: pass any adapter with a `show()` method, or omit `toast` to skip the Undo affordance.
 
 ## Examples
 
@@ -122,7 +122,7 @@ The toast is **injected, never imported** — cards stay decoupled from the toas
 
 ### Resolved Card
 
-Pass `resolution` on an envelope to lock it in its read-only view — useful when rehydrating conversation history.
+Pass `resolution` to lock an envelope in its read-only view, which is what rehydrating conversation history needs.
 
 <Example client:visible tag="kai-cards" data="resolved" />
 

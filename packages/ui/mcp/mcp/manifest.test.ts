@@ -9,15 +9,16 @@
  * seventeen tests in reference.test.ts PASSING against a tree nobody was working in.
  *
  * A test that reads whatever artifact it can find proves nothing about the tree it
- * is running on, so the assertions below are chosen to be ones a walk-up cannot
+ * is running on, so the assertions below are chosen to be ones a search cannot
  * satisfy:
  *
- *   • the DECOY test puts a manifest exactly where the old loop would have found it
- *     and requires a throw. Old code returns the decoy; there is no way to pass it
- *     by searching.
- *   • the IMPOSTOR test puts a manifest at the right depth under the wrong package
- *     and requires a throw — "found a file" and "found the right file" are different
- *     facts, and only an identity check separates them.
+ *   • the DECOY test puts a manifest exactly where a search would find it (beside the
+ *     origin, and again above the package) and requires the resolution to ignore both
+ *     and return the installed package's own file. That is the regression case for the
+ *     sibling hop the bundled bin used to rely on.
+ *   • the IMPOSTOR test resolves a directory NAMED `@kitn.ai/ui` whose package.json
+ *     calls itself something else, and requires a throw — "found a file" and "found the
+ *     right file" are different facts, and only an identity check separates them.
  *   • the live test pins the real answer INSIDE this package, proving its own anchor
  *     first so the comparison is not two copies of the same arithmetic.
  *
@@ -25,7 +26,7 @@
  * succeeded there, which is the one outcome that must never happen again.
  */
 import { describe, it, expect } from 'vitest';
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, existsSync, readFileSync, realpathSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -46,9 +47,13 @@ function writeAt(root: string, relative: string, content: string): string {
   return target;
 }
 
-/** A scratch tree, cleaned up whether the body throws or not. */
+/** A scratch tree, cleaned up whether the body throws or not.
+ *
+ * `realpathSync` because macOS hands out `/var/folders/...` while Node's resolver and
+ * every path it returns use the `/private/var/...` realpath: comparing the two spellings
+ * of one directory fails for a reason that has nothing to do with the code under test. */
 function inTempTree(body: (root: string) => void): void {
-  const root = mkdtempSync(join(tmpdir(), 'kai-manifest-'));
+  const root = realpathSync(mkdtempSync(join(tmpdir(), 'kai-manifest-')));
   try {
     body(root);
   } finally {
@@ -57,6 +62,32 @@ function inTempTree(body: (root: string) => void): void {
 }
 
 const MANIFEST_JSON = JSON.stringify({ modules: [] });
+
+/**
+ * An installed `@kitn.ai/ui` under `root/node_modules`, the way a consumer has it:
+ * its own package.json (with the `exports` key the address goes through) and a built
+ * `dist/custom-elements.json`.
+ */
+function installPackage(
+  root: string,
+  over: { name?: string } = {},
+): { packageRoot: string; manifest: string } {
+  const packageRoot = join(root, 'node_modules', '@kitn.ai', 'ui');
+  writeAt(
+    packageRoot,
+    'package.json',
+    JSON.stringify({ name: over.name ?? '@kitn.ai/ui', exports: { './package.json': './package.json' } }),
+  );
+  const manifest = writeAt(packageRoot, join('dist', 'custom-elements.json'), MANIFEST_JSON);
+  return { packageRoot, manifest };
+}
+
+/** A directory to resolve FROM: inside `root`, so Node's walk finds `root/node_modules`. */
+function originIn(root: string): string {
+  const origin = join(root, 'mine', 'mcp', 'mcp');
+  mkdirSync(origin, { recursive: true });
+  return origin;
+}
 
 describe('resolveManifestPath — the manifest is addressed, not searched for', () => {
   it('is anchored to a directory that really is the @kitn.ai/ui package root', () => {
@@ -69,84 +100,115 @@ describe('resolveManifestPath — the manifest is addressed, not searched for', 
   });
 
   // ── THE REGRESSION TEST ────────────────────────────────────────────────────
-  // The decoy sits where the old ten-deep loop would have found it: above the
-  // package, with nothing in between. Old code returns it. There is no ordering,
-  // depth limit or marker that lets a walk-up return a throw instead, which is why
-  // this is the test that pins the fix rather than describing it.
-  it('THROWS rather than binding to a manifest above the package root', () => {
+  // Two decoys, both where a search looks: beside the origin (the bundled-bin sibling
+  // the resolution used to prefer) and above the package (the ten-deep walk-up). A
+  // resolver that reintroduces either returns a decoy here; the only way to pass is to
+  // address the installed package.
+  it('ignores a decoy manifest beside the origin and above the package', () => {
     inTempTree((root) => {
-      // The neighbour's artifact — the primary checkout, in the real defect.
-      writeAt(root, join('dist', 'custom-elements.json'), MANIFEST_JSON);
+      const { manifest } = installPackage(root);
+      const origin = originIn(root);
 
-      // Our package, correctly shaped, simply not built.
-      writeAt(root, join('pkg', 'package.json'), JSON.stringify({ name: '@kitn.ai/ui' }));
-      const origin = join(root, 'pkg', 'mcp', 'mcp');
-      mkdirSync(origin, { recursive: true });
-
-      const expected = join(root, 'pkg', 'dist', 'custom-elements.json');
-      const decoy = join(root, 'dist', 'custom-elements.json');
-
-      expect(() => resolveManifestPath(origin)).toThrowError(
-        new RegExp(`Missing build artifact: ${escapeRegExp(expected)}`),
-      );
-      // And it names the path it wanted, not merely "not found somewhere".
-      let message = '';
-      try {
-        resolveManifestPath(origin);
-      } catch (error) {
-        message = (error as Error).message;
-      }
-      expect(message).toContain(expected);
-      expect(message, 'must not point anyone at the neighbouring artifact').not.toContain(decoy);
-      expect(message, 'must say how to fix it').toMatch(/nx build ui|build:api/);
-    });
-  });
-
-  // ── "FOUND A FILE" IS NOT "FOUND THE RIGHT FILE" ───────────────────────────
-  // Right depth, real manifest on disk, wrong package. Existence alone would accept
-  // this; only reading the package.json identity rejects it.
-  it('THROWS when the derived root is some other package, even with a manifest present', () => {
-    inTempTree((root) => {
-      writeAt(root, join('other', 'package.json'), JSON.stringify({ name: 'not-our-package' }));
-      writeAt(root, join('other', 'dist', 'custom-elements.json'), MANIFEST_JSON);
-      const origin = join(root, 'other', 'mcp', 'mcp');
-      mkdirSync(origin, { recursive: true });
-
-      expect(() => resolveManifestPath(origin)).toThrowError(
-        /is not the @kitn\.ai\/ui package root/,
-      );
-    });
-  });
-
-  it('THROWS naming the derived root when there is no package.json at all', () => {
-    inTempTree((root) => {
-      const origin = join(root, 'nowhere', 'mcp', 'mcp');
-      mkdirSync(origin, { recursive: true });
-      expect(() => resolveManifestPath(origin)).toThrowError(
-        new RegExp(escapeRegExp(join(root, 'nowhere'))),
-      );
-    });
-  });
-
-  // The positive control. Without this the three throws above would also pass if
-  // resolveManifestPath threw unconditionally.
-  it('resolves the manifest of a correctly shaped package at the exact expected path', () => {
-    inTempTree((root) => {
-      writeAt(root, join('pkg', 'package.json'), JSON.stringify({ name: '@kitn.ai/ui' }));
-      const manifest = writeAt(root, join('pkg', 'dist', 'custom-elements.json'), MANIFEST_JSON);
-      const origin = join(root, 'pkg', 'mcp', 'mcp');
-      mkdirSync(origin, { recursive: true });
+      const siblingDecoy = writeAt(origin, 'custom-elements.json', MANIFEST_JSON);
+      const aboveDecoy = writeAt(root, join('dist', 'custom-elements.json'), MANIFEST_JSON);
+      // Anti-vacuity: both decoys exist on disk, so "returned the real one" cannot be
+      // satisfied by the files simply being absent.
+      expect(existsSync(siblingDecoy) && existsSync(aboveDecoy)).toBe(true);
 
       expect(resolveManifestPath(origin)).toBe(manifest);
     });
   });
 
-  // The bundled bin: dist/mcp.es.js and dist/custom-elements.json are siblings. A
-  // sibling is unambiguous by construction, so it wins before any derivation.
-  it('prefers a sibling manifest, the bundled-bin layout', () => {
+  // ── "FOUND A FILE" IS NOT "FOUND THE RIGHT FILE" ───────────────────────────
+  // Right directory name, real manifest on disk, wrong package. Node resolves the
+  // specifier by DIRECTORY, so this resolves; only the package.json identity rejects it.
+  it('THROWS when the resolved directory is some other package, even with a manifest present', () => {
     inTempTree((root) => {
-      const sibling = writeAt(root, join('pkg', 'dist', 'custom-elements.json'), MANIFEST_JSON);
-      expect(resolveManifestPath(join(root, 'pkg', 'dist'))).toBe(sibling);
+      const { packageRoot: impostorRoot } = installPackage(root, { name: 'not-our-package' });
+      writeAt(impostorRoot, join('dist', 'custom-elements.json'), MANIFEST_JSON);
+
+      expect(() => resolveManifestPath(originIn(root))).toThrowError(
+        new RegExp(`resolved to ${escapeRegExp(impostorRoot)}`),
+      );
+      let message = '';
+      try {
+        resolveManifestPath(originIn(root));
+      } catch (error) {
+        message = (error as Error).message;
+      }
+      expect(message, 'the message must say why that directory is not this package').toMatch(
+        /not @kitn\.ai\/ui/,
+      );
+    });
+  });
+
+  // The unbuilt tree, which is the case the old code got WRONG rather than missed.
+  it('THROWS naming the missing artifact when the package is installed but not built', () => {
+    inTempTree((root) => {
+      const packageRoot_ = join(root, 'node_modules', '@kitn.ai', 'ui');
+      writeAt(
+        packageRoot_,
+        'package.json',
+        JSON.stringify({ name: '@kitn.ai/ui', exports: { './package.json': './package.json' } }),
+      );
+      const expected = join(packageRoot_, 'dist', 'custom-elements.json');
+
+      expect(() => resolveManifestPath(originIn(root))).toThrowError(
+        new RegExp(`Missing build artifact: ${escapeRegExp(expected)}`),
+      );
+      let message = '';
+      try {
+        resolveManifestPath(originIn(root));
+      } catch (error) {
+        message = (error as Error).message;
+      }
+      expect(message, 'must say how to fix it').toMatch(/nx build ui|build:api/);
+      expect(message, 'must not point anyone at a searched path').not.toContain('node_modules walk');
+    });
+  });
+
+  // Nothing to address at all. ASSUMES the temp dir has no `@kitn.ai/ui` ancestor, which
+  // is what makes the fixture hermetic: if that ever stops being true, this fails and
+  // the message names the specifier, so the reader sees which assumption broke.
+  it('THROWS naming the specifier when no such package is installed', () => {
+    inTempTree((root) => {
+      const origin = originIn(root);
+      let message = '';
+      try {
+        resolveManifestPath(origin);
+        throw new Error('resolveManifestPath returned a path with no package installed');
+      } catch (error) {
+        message = (error as Error).message;
+      }
+      expect(message).toContain('@kitn.ai/ui/package.json');
+      expect(message, 'must say the package has to be installed').toMatch(/INSTALLED/);
+      expect(message, 'must state that nothing is searched').toMatch(/NOT search/);
+    });
+  });
+
+  // The positive control. Without this the throws above would also pass if
+  // resolveManifestPath threw unconditionally.
+  it('resolves the manifest of a correctly shaped installed package', () => {
+    inTempTree((root) => {
+      const { manifest } = installPackage(root);
+      expect(resolveManifestPath(originIn(root))).toBe(manifest);
+    });
+  });
+
+  // ── THE LAYOUT THIS CHANGE EXISTS FOR ───────────────────────────────────────
+  // The server bundle lives in `@kitn.ai/mcp` and the manifest stays in `@kitn.ai/ui`,
+  // so the resolving anchor is inside a DIFFERENT package's dist/. A resolution that
+  // derived "my package root" or looked beside itself cannot pass this: the kit is
+  // reachable only as an installed dependency.
+  it("resolves the kit's manifest from another package's dist, the bundled-bin layout", () => {
+    inTempTree((root) => {
+      const { manifest } = installPackage(root);
+      const mcp = join(root, 'node_modules', '@kitn.ai', 'mcp');
+      writeAt(mcp, 'package.json', JSON.stringify({ name: '@kitn.ai/mcp' }));
+      const bundleDir = join(mcp, 'dist');
+      mkdirSync(bundleDir, { recursive: true });
+
+      expect(resolveManifestPath(bundleDir)).toBe(manifest);
     });
   });
 });

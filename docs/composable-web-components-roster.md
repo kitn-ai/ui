@@ -7,18 +7,18 @@ planning map for the element spike; the plan shipped, kept shipping, and the doc
 Its rulings are preserved below as **history** — a record is waived, not rewritten into a
 falsehood — but nothing in it should be read as a description of the current tree.
 
-What this file IS for: the ruling + reasoning per element family — which pieces are elements,
-which stay SolidJS-only, and why. What it is NOT for: element lists, counts, or per-element
-APIs. Those rot the moment the tree moves, so they are named by artifact here, never restated:
+What this file IS for: the ruling + reasoning per web-component family — which pieces are web
+components, which stay SolidJS-only, and why. What it is NOT for: web-component lists, counts, or
+per-web-component APIs. Those rot the moment the tree moves, so they are named by artifact here, never restated:
 
-- **The roster** = the `tag` keys of `packages/ui/src/elements/element-meta.json` (generated
+- **The roster** = the `tag` keys of `packages/ui/src/web-components/web-component-meta.json` (generated
   by `build:api`; the audit counted 83 on 2026-08-25, and `kai-pane-grid` landed immediately
   after it — read the file, not this sentence).
-- **Per-element APIs** = `docs/web-components.md` (generated) and the docs site.
-- **Entry points** = `packages/ui/src/elements/element-manifest.json` (generated from
+- **Per-web-component APIs** = `docs/web-components.md` (generated) and the docs site.
+- **Entry points** = `packages/ui/src/web-components/web-component-manifest.json` (generated from
   `register-impl.ts` imports).
 
-## 1. The mapping rules (how a Solid primitive becomes an element)
+## 1. The mapping rules (how a Solid primitive becomes a web component)
 
 These are contract, not measurement, and they held from the spike through today:
 
@@ -33,16 +33,16 @@ These are contract, not measurement, and they held from the spike through today:
 
 Two corrections to the spike-era phrasing, both shipped: events are **`kai-`-prefixed**
 (`kai-submit`, `kai-tab-change`), not bare names; and `defineKitnElement` became
-`defineWebComponent` (`src/elements/define.tsx`) when the `kitn-` prefix era ended.
+`defineWebComponent` (`src/web-components/define/define.tsx`) when the `kitn-` prefix era ended.
 
 ## 2. What shipped (the parts of the old plan that are now just the tree)
 
-- **Every element is standalone by construction.** Each facade is its own Solid root with its
-  own `ChatConfig` and shadow-root portal mount (`elements/define.tsx`). The audit verified
-  this structurally for the whole roster: there is no elements-tier internal glue.
-- **The per-element bundle split is merged and shipped** — not "measured and never merged" as
-  the roadmap once said. `config/vite/elements.ts` (KAI_BUILD=split) builds a self-registering module per tag;
-  the package exports `"./elements/*"` and `"./autoloader"` alongside the register-all bundle;
+- **Every web component is standalone by construction.** Each facade is its own Solid root with its
+  own `ChatConfig` and shadow-root portal mount (`web-components/define/define.tsx`). The audit verified
+  this structurally for the whole roster: there is no web-component-tier internal glue.
+- **The per-web-component bundle split is merged and shipped** — not "measured and never merged" as
+  the roadmap once said. `config/vite/web-components.ts` (KAI_BUILD=split) builds a self-registering module per tag;
+  the package exports `"./web-components/*"` and `"./autoloader"` alongside the register-all bundle;
   `sideEffects` protects the registration modules; `apps/docs` documents all three loading
   strategies (`guides/loading.mdx`). The live footprint question is no longer the JS split but
   the **shared CSS floor** (one compiled sheet adopted whole into every shadow root) — audit
@@ -50,32 +50,32 @@ Two corrections to the spike-era phrasing, both shipped: events are **`kai-`-pre
 - **No store; the host coordinates.** The v1 ruling held: data in via properties, out via
   non-bubbling events, host wires A→B. Nothing since has needed a `<kai-provider>`.
 - **Cross-element protocols exist where wiring wasn't enough** — e.g. the composed
-  `kai-maximize-intent` / `kai-maximize-state` pair in `src/elements/resizable.tsx` — but they
+  `kai-maximize-intent` / `kai-maximize-state` pair in `src/web-components/resizable/resizable.tsx` — but they
   are opt-in events, not shared state.
 
 ## 3. Evidence tiers (from the 2026-08-25 audit — the current honest picture)
 
 Strict derivation (tag literal or wrapper import in `examples/apps/`): **25 driven /
 14 rendered-inside-`kai-chat`-only / 44 never touched by any app** at audit time. Structural
-standalone-ness is NOT the blocker anywhere; evidence and docs are. The per-element lists,
-the 17 zero-docs elements, and the backlog live in the audit doc — this file only records the
+standalone-ness is NOT the blocker anywhere; evidence and docs are. The per-web-component lists,
+the 17 zero-docs web components, and the backlog live in the audit doc — this file only records the
 rulings that came out of it (§5).
 
 ## 4. Stays SolidJS-only (the current ruling, family by family)
 
 The blanket spike-era rule — "generic UI primitives stay Solid-only; a host framework already
 has these" — is **overturned as a blanket rule** (history in §6). The replacement test, from
-the Dropdown lesson: *is it kit composition surface a consumer can only reach through an
-element (themed, composed, wrapper-generated), or a widget their framework already has?* Under
-that test, the `src/ui/` atoms still without facades ruled 2026-08-25:
+the Dropdown lesson: *is it kit composition surface a consumer can only reach through a
+web component (themed, composed, wrapper-generated), or a widget their framework already has?* Under
+that test, the atoms then in `src/ui/` (now `src/components/`) still without facades ruled 2026-08-25:
 
 | Atom | Ruling | Why |
 |---|---|---|
-| `PaneGrid` | **Element-ized** as `kai-pane-grid` (2026-08-25, audit item 7) | Tier-3 layout with real behavior; its siblings `kai-pane`/`kai-pane-group` already had facades, so a framework consumer composing the pane family hit the exact alias-cast wall that overturned the Dropdown ruling. |
+| `PaneGrid` | **Promoted to a web component** as `kai-pane-grid` (2026-08-25, audit item 7) | Tier-3 layout with real behavior; its siblings `kai-pane`/`kai-pane-group` already had facades, so a framework consumer composing the pane family hit the exact alias-cast wall that overturned the Dropdown ruling. |
 | `Stat` | **Deleted** (owner-ruled 2026-08-25, audit item 9) | Was built + tested but exported NOWHERE — reachable at no layer. Widget territory (a KPI tile is three spans in any framework; the one app that wanted one hand-rolled it in six lines). The deletion completes the 2026-06-27 ruling that un-shipped `kai-stat` as demo-only (commit b91fa2eb) but left the Solid primitive behind with no internal consumer. Resurrection path: git history (shipped in commit 735791d3), if the devtools feed work ever wants a kit-styled stat tile. |
 | `Collapsible` | Stays Solid-only | Interior mechanism of `kai-reasoning`/`kai-tool`; exported on the root barrel; `<details>` is the host widget. |
-| `Textarea` | Stays Solid-only | `kai-input` / `kai-prompt-input` are the element-tier surface. |
-| `overlay.tsx` hooks | Cannot be elements | Hooks, not components; the documented `./solid` escape hatch for custom popovers. |
+| `Textarea` | Stays Solid-only | `kai-input` / `kai-prompt-input` are the web-component-tier surface. |
+| `overlay.tsx` hooks | Cannot be web components | Hooks, not components; the documented `./solid` escape hatch for custom popovers. |
 | `action-icons.ts` | Stays internal | `kai-icon` is the surface. |
 
 Hooks/config (`useAutoResize`, `useStickToBottom`, `ChatConfig`, …) stay Solid-only exactly as
@@ -87,16 +87,16 @@ The 2026-08-24 annotation (kept in §6) left an open question: was the real gap 
 element-izing Dropdown *menu semantics* — and should `kai-popover` and `kai-dropdown`
 therefore converge? Read against the source, the hypothesized gap does not exist:
 
-- `ui/dropdown.tsx` already ships full menu semantics: `role="menu"`, roving focus whose item
+- `src/components/dropdown.tsx` already ships full menu semantics: `role="menu"`, roving focus whose item
   set includes `menuitem`, `menuitemcheckbox`, `menuitemradio` (disabled skipped, slotted
   light-DOM rows included via a flat-tree walk), typeahead, Home/End, `role="separator"`
   dividers, non-focusable labels, and submenus with `aria-haspopup`/`aria-expanded`.
-- `ui/popover.tsx` is deliberately the *other* WAI-ARIA pattern: its own comment contrasts it
+- `src/components/popover.tsx` is deliberately the *other* WAI-ARIA pattern: its own comment contrasts it
   with Dropdown, and its panel is `role="dialog"` for arbitrary content.
 
 So popover and dropdown are the two distinct ARIA patterns, not duplicates; merging them would
 un-decide a decision the code already made correctly. The actual near-pair is
-**`kai-dropdown` vs `kai-menu`** — both facades over the same `ui/Dropdown`, split by
+**`kai-dropdown` vs `kai-menu`** — both facades over the same `src/components/dropdown.tsx`, split by
 authoring model: `kai-dropdown` is slot-composed (you write the rows in markup), `kai-menu` is
 data-driven (`items: KaiMenuItem[]`). That split is legitimate and matches the kit's
 construction-over-configuration direction (slot form for construction, property form for

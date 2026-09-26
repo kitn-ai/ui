@@ -1,11 +1,11 @@
 ---
-// Imperative methods for an element, from the generated element-meta.json.
+// Imperative methods for an element, from the generated web-component-meta.json.
 // These are the input half of the interaction API: `expose({ … })` in the facade
 // attaches them to the host, so a consumer calls them straight off the element
 // (`document.querySelector('kai-resizable').maximize(0)`). Signatures are the
 // AUTHORED text — the shipped .d.ts carries a self-contained expansion of the
 // same call, which is right for a compiler and unreadable in a table.
-import meta from '@kitn.ai/ui/element-meta.json';
+import meta from '@kitn.ai/ui/web-component-meta.json';
 interface Props { tag: string }
 const { tag } = Astro.props;
 const el = (meta as any[]).find((e) => e.tag === tag);

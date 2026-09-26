@@ -100,10 +100,35 @@ async function collectImports(): Promise<TemplateImport[]> {
 function resolveTypes(exportsMap: Record<string, unknown>, specifier: string): string | null {
   const subpath = specifier === '@kitn.ai/ui' ? '.' : `.${specifier.slice('@kitn.ai/ui'.length)}`;
   const entry = exportsMap[subpath];
-  if (entry === undefined) return null;
-  if (typeof entry === 'string') return entry;
-  const types = (entry as Record<string, string>).types;
-  return types ?? null;
+  if (entry !== undefined) {
+    if (typeof entry === 'string') return entry;
+    const types = (entry as Record<string, string>).types;
+    return types ?? null;
+  }
+  // A KEY MAY BE A WILDCARD, and for the web components it is the only form there
+  // is: `./web-components/*` declares one subpath per element rather than a hundred
+  // literal keys. The per-tag entries the templates now import
+  // (`@kitn.ai/ui/web-components/chat`) resolve through it, so an exact-key-only
+  // lookup reports every one of them as an export the kit does not have: twenty
+  // false findings on a correct template.
+  //
+  // The wildcard branch REQUIRES the substituted `types` file to exist, which the
+  // exact branch deliberately does not. The pattern matches any name at all, so
+  // without that the pattern added to fix the false red would also wave through a
+  // typo (`.../web-componets`). A literal key keeps the old behaviour, where the
+  // key's presence was the whole claim.
+  for (const [key, value] of Object.entries(exportsMap)) {
+    const star = key.indexOf('*');
+    if (star === -1) continue;
+    const prefix = key.slice(0, star);
+    const suffix = key.slice(star + 1);
+    if (!subpath.startsWith(prefix) || !subpath.endsWith(suffix)) continue;
+    const types = typeof value === 'string' ? value : (value as Record<string, string>)?.types;
+    if (typeof types !== 'string' || !types.includes('*')) continue;
+    const resolved = types.replace('*', subpath.slice(prefix.length, subpath.length - suffix.length));
+    if (existsSync(path.resolve(KIT_ROOT, resolved))) return resolved;
+  }
+  return null;
 }
 
 /** Names declared or re-exported BY NAME in one `.d.ts`'s own text. */

@@ -1,6 +1,6 @@
 // tests/react/use-kai-chat.test.tsx
 // Run with `npm run test:react` (needs a prior `npm run build` — setup.ts imports
-// the prebuilt @kitn.ai/ui/elements bundle and the test renders the real <Chat>).
+// the prebuilt @kitn.ai/ui/web-components bundle and the test renders the real <Chat>).
 import { render, renderHook, act, cleanup } from '@testing-library/react';
 import { afterEach, expect, test } from 'vitest';
 import { createElement, type ComponentProps } from 'react';
