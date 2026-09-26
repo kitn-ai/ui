@@ -1,5 +1,6 @@
 import { createEffect, createSignal, onCleanup } from 'solid-js';
 import { observeContentHeight } from './use-resize-observer';
+import { resolveLineHeight } from './text-metrics';
 
 /** Which of the composer's two layouts applies. */
 export type ComposerLayout = 'collapsed' | 'expanded';
@@ -38,10 +39,12 @@ export interface ComposerExpansionInput {
 export function resolveComposerLayout(input: ComposerExpansionInput): ComposerLayout {
   if (input.pinned !== undefined) return input.pinned ? 'expanded' : 'collapsed';
   if (input.attachmentCount > 0) return 'expanded';
-  // Never expand on a line height we could not measure. `<= 0` would make the
-  // comparison below true for ANY content, so the collapse would fail open on the
-  // one value that means "unknown" — and failing open is the visible direction:
-  // a two-row box under a single line of text.
+  // A non-positive line height means the threshold is unknown, and failing closed is
+  // the safe direction when it is: zero answers `expanded` for ANY content, which is
+  // a two-row box under a single line of text. An unstyled editable no longer arrives
+  // here — `resolveLineHeight` recovers the `normal` keyword as a multiple of the
+  // font size — so this catches a caller that supplied the number directly, and an
+  // element that explicitly computed a zero line height.
   if (!(input.lineHeight > 0)) return 'collapsed';
   return input.contentHeight > input.lineHeight * WRAPPED_LINE_MULTIPLE ? 'expanded' : 'collapsed';
 }
@@ -86,10 +89,10 @@ export function useComposerExpansion(options: {
   createEffect(() => {
     const el = options.editable();
     if (!el) return;
-    // `line-height: normal` is a keyword, and `parseFloat` reads it as NaN rather
-    // than a length — hence the explicit finite check before storing it.
-    const measured = Number.parseFloat(getComputedStyle(el).lineHeight);
-    setLineHeight(Number.isFinite(measured) && measured > 0 ? measured : 0);
+    // Shared with `use-auto-resize`, which asks the same question about an editable
+    // of its own: the `normal` keyword is recovered there, so this cannot read a
+    // perfectly ordinary line height as zero and stop responding to text.
+    setLineHeight(resolveLineHeight(el));
     onCleanup(observeContentHeight(el, setContentHeight));
   });
 
