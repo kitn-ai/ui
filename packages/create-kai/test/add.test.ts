@@ -13,8 +13,9 @@
  * refusal, per-block item JSON URL resolution through an injected fetch, and
  * the react transforms' own refusals.
  */
-import { mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -23,15 +24,18 @@ import { buildRegistryItem, unsafeFilePathReason, unsafeNameReason } from '@kitn
 import type { Axis } from '../src/axes';
 import {
   FRAMEWORK_SIGNALS,
+  declaredMockFiles,
   detectForm,
+  loadBlocks,
   planAdd,
   resolveAdd,
 } from '../src/blocks';
-import type { Block } from '../src/blocks';
+import type { AddMode, AddPlan, Block } from '../src/blocks';
+import { WIRED_GATEWAYS, listIntegrations } from '../src/catalog';
 import { componentName } from '../src/react-form';
 import { BLOCK_FORMS, FRAMEWORK_BLOCK_FORMS, README_FILE, withStrippedTwins } from '@kitn.ai/blocks/forms';
 import { fileTarget, installRoot, isTargetFramework } from '@kitn.ai/blocks/targets';
-import { decideForm, mergeDependencies, parseAddArgs, runAdd } from '../src/add';
+import { ADD_HELP, decideForm, mergeDependencies, parseAddArgs, runAdd } from '../src/add';
 import type { AddEnv } from '../src/add';
 import { BLOCKS_ROOT, KIT_RANGE, KIT_VERSION, authoredBlock, loadBundledBlocks } from './helpers';
 
@@ -86,10 +90,93 @@ async function runInto(
 async function project(id: string, pkg: object | null): Promise<string> {
   const dir = path.join(root, id);
   await rm(dir, { recursive: true, force: true });
-  await (await import('node:fs/promises')).mkdir(dir, { recursive: true });
+  await mkdir(dir, { recursive: true });
   if (pkg !== null) await writeFile(path.join(dir, 'package.json'), JSON.stringify(pkg, null, 2));
   return dir;
 }
+
+/**
+ * A block authored ON the contract that also ships a scripted mock, so the data
+ * axis has something real to resolve. `importsMock` writes the controller the
+ * shipped blocks write today (`from './mock'`); the default writes the
+ * mock-free controller a block needs before `--no-mock` can install it.
+ *
+ * Synthetic on purpose, the same reason `authoredBlock` is: a case about the
+ * data axis should not also be a case about whichever authored block happens to
+ * declare a mock, and the bundled tree is a BUILD artifact - the authored
+ * manifest edits below reach it only after a build.
+ */
+function mockBlock(
+  name: string,
+  opts: { importsMock?: boolean; manifest?: Partial<Block['manifest']> } = {},
+): Block {
+  const base = authoredBlock(name, opts.manifest);
+  const mock = 'export const MOCK_SCRIPT = [];\n';
+  const importer = opts.importsMock ? `import { MOCK_SCRIPT } from './mock';\n` : '';
+  const files = new Map(base.files);
+  files.set('mock.ts', mock);
+  files.set('mock.js', mock);
+  for (const twin of [`${name}.controller.ts`, `${name}.controller.js`]) {
+    files.set(twin, importer + (files.get(twin) ?? ''));
+  }
+  return {
+    name,
+    files,
+    manifest: {
+      ...base.manifest,
+      // `mock.ts` is a files[] entry AND declared mock-only: the first half is
+      // what ships it in mock mode, the second is what a mock-free mode drops.
+      files: [...base.manifest.files, { path: 'mock.ts', type: 'registry:file' }],
+      // The data axis, declared rather than resolved: the file the default mode
+      // ships and the one integration `--gateway` may name.
+      wiring: { gateways: ['openrouter'], mockFiles: ['mock.ts'] },
+      ...opts.manifest,
+    },
+  };
+}
+
+/** The resolve + plan pair `runAdd` performs, without a filesystem. */
+async function planFor(
+  spec: Block,
+  form: 'html' | 'react' | 'cdn',
+  wiring?: AddMode,
+): Promise<{ plan?: AddPlan; error?: string }> {
+  try {
+    const resolved = await resolveAdd(
+      [spec.name],
+      {
+        local: (name) => (name === spec.name ? spec : undefined),
+        fetchItem: async () => { throw new Error('no fetch expected'); },
+      },
+      wiring,
+    );
+    return { plan: planAdd(resolved, { form, kitRange: KIT_RANGE, kitVersion: KIT_VERSION, wiring }) };
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : String(error) };
+  }
+}
+
+/** A working `blocks/<id>/` directory for one authored block, for `loadBlocks`.
+ *  The `.js` twin is written beside every `.ts` the manifest lists, which is
+ *  what the real build does (and what the html form reads). */
+async function writeBlockTree(dir: string, specs: readonly Block[]): Promise<string> {
+  for (const block of specs) {
+    const blockDir = path.join(dir, block.name);
+    await mkdir(blockDir, { recursive: true });
+    for (const entry of block.manifest.files) {
+      await writeFile(path.join(blockDir, entry.path), block.files.get(entry.path) as string, 'utf8');
+      if (!entry.path.endsWith('.ts')) continue;
+      const twin = entry.path.replace(/\.ts$/, '.js');
+      if (block.files.has(twin)) await writeFile(path.join(blockDir, twin), block.files.get(twin) as string, 'utf8');
+    }
+    await writeFile(path.join(blockDir, 'registry-item.json'), JSON.stringify(block.manifest, null, 2), 'utf8');
+  }
+  return dir;
+}
+
+/** The basename of every planned path, so a case can ask "is a mock in here". */
+const mockPathsIn = (paths: readonly string[]): string[] =>
+  paths.filter((file) => /(^|\/)mock\.[jt]s$/.test(file));
 
 describe('the registry the CLI ships is the directory scan, derived not typed', () => {
   it('lists exactly the dist/blocks directories', async () => {
@@ -511,7 +598,7 @@ describe('per-block item JSON URLs resolve through the same path (the integratio
       ],
     };
     const fetched: string[] = [];
-    const resolved = await resolveAdd('https://registry.example/r/composed.json', {
+    const resolved = await resolveAdd(['https://registry.example/r/composed.json'], {
       local: () => undefined,
       fetchItem: async (url) => {
         fetched.push(url);
@@ -532,34 +619,59 @@ describe('per-block item JSON URLs resolve through the same path (the integratio
 });
 
 describe('route:<integration> dependencies, resolved against the scaffolder catalog', () => {
-  // A synthetic block (the shared fixture) rather than a real one, because
-  // this describe's subject is route resolution: no authored block declares a
-  // `route:` dependency, and a case about routes should not also be a case
-  // about whichever block happens to have one.
-  const routed = (): Block => authoredBlock('routed-block', { registryDependencies: ['route:openrouter'] });
+  // A synthetic block (the shared fixture) rather than a real one, because this
+  // describe's subject is route resolution: a case about routes should not also
+  // be a case about whichever block happens to declare one, and the authored
+  // blocks do declare routes now (`route:openrouter`, `route:anthropic` - the
+  // data-axis cases below drive those).
+  const routed = (): Block =>
+    authoredBlock('routed-block', { wiring: { gateways: ['openrouter'] } });
 
   it('the react form emits the route the way the scaffolder does', async () => {
-    const resolved = await resolveAdd('routed-block', {
-      local: (name) => (name === 'routed-block' ? { ...routed(), manifest: { ...routed().manifest } } : undefined),
-      fetchItem: async () => { throw new Error('no fetch expected'); },
-    });
+    const resolved = await resolveAdd(
+      ['routed-block'],
+      {
+        local: (name) => (name === 'routed-block' ? { ...routed(), manifest: { ...routed().manifest } } : undefined),
+        fetchItem: async () => { throw new Error('no fetch expected'); },
+      },
+      { mode: 'real', gateway: 'openrouter' },
+    );
     expect(resolved.routes.map((r) => r.id)).toEqual(['openrouter']);
-    const plan = planAdd(resolved, { form: 'react', kitRange: KIT_RANGE, kitVersion: KIT_VERSION });
+    const plan = planAdd(resolved, {
+      form: 'react',
+      kitRange: KIT_RANGE,
+      kitVersion: KIT_VERSION,
+      wiring: { mode: 'real', gateway: 'openrouter' },
+    });
     const paths = plan.files.map((f) => f.path);
     expect(paths).toContain('server/chat.ts');
     expect(paths).toContain('vite-chat-api.ts');
     const route = plan.files.find((f) => f.path === 'server/chat.ts')!;
     expect(route.contents).toContain('openrouter.ai');
     expect(plan.notes.join('\n')).toContain('OPENROUTER_API_KEY');
+    // The env file the route reads, at the path the framework table declares.
+    expect(plan.env?.path).toBe('.env.local');
+    expect(plan.env?.contents).toContain('OPENROUTER_API_KEY=replace-me');
   });
 
   it('the web-component form states the gap loudly instead of writing nothing silently', async () => {
-    const resolved = await resolveAdd('routed-block', {
-      local: (name) => (name === 'routed-block' ? routed() : undefined),
-      fetchItem: async () => { throw new Error('no fetch expected'); },
+    const resolved = await resolveAdd(
+      ['routed-block'],
+      {
+        local: (name) => (name === 'routed-block' ? routed() : undefined),
+        fetchItem: async () => { throw new Error('no fetch expected'); },
+      },
+      { mode: 'real', gateway: 'openrouter' },
+    );
+    const plan = planAdd(resolved, {
+      form: 'html',
+      kitRange: KIT_RANGE,
+      kitVersion: KIT_VERSION,
+      wiring: { mode: 'real', gateway: 'openrouter' },
     });
-    const plan = planAdd(resolved, { form: 'html', kitRange: KIT_RANGE, kitVersion: KIT_VERSION });
     expect(plan.files.map((f) => f.path)).not.toContain('server/chat.ts');
+    // No route host for this form, so nothing to write an env file for either.
+    expect(plan.env).toBeUndefined();
     const notes = plan.notes.join('\n');
     expect(notes).toContain('openrouter');
     expect(notes).toContain('OPENROUTER_API_KEY');
@@ -567,8 +679,326 @@ describe('route:<integration> dependencies, resolved against the scaffolder cata
 
   it('an unknown route integration is refused with the known ids named', async () => {
     await expect(
-      resolveAdd('route:not-a-gateway', { local: () => undefined, fetchItem: async () => { throw new Error('x'); } }),
+      resolveAdd(['route:not-a-gateway'], { local: () => undefined, fetchItem: async () => { throw new Error('x'); } }),
     ).rejects.toThrow(/names no scaffolder integration.*mock/s);
+  });
+
+  it('the real mode builds the route dependency itself; the other two add none', async () => {
+    // The manifest CANNOT declare it: `registryDependencies` resolve on every
+    // install, so a route listed there would be emitted by a plain `kai add` -
+    // a backend nobody asked for. So the CLI adds the dep the mode asked for.
+    const resolvers = {
+      local: () => routed(),
+      fetchItem: async () => { throw new Error('no fetch expected'); },
+    };
+    const real = await resolveAdd(['routed-block'], resolvers, { mode: 'real', gateway: 'openrouter' });
+    expect(real.routes.map((route) => route.id)).toEqual(['openrouter']);
+    for (const mode of [{ mode: 'mock' }, { mode: 'none' }] as AddMode[]) {
+      const quiet = await resolveAdd(['routed-block'], resolvers, mode);
+      expect(quiet.routes, mode.mode).toEqual([]);
+      expect(quiet.blocks.map((block) => block.name)).toEqual(['routed-block']);
+    }
+  });
+});
+
+describe('the data axis: three modes, one spelling each (spec 4)', () => {
+  // The manifest declares the axis, so a mock-free mode has something to drop
+  // and `--gateway` has something to satisfy. Both forms are driven, because
+  // which mock file a form ships is not the same in the two: the html form
+  // writes the stripped `.js` twin and the react form the `.ts` source.
+  const routed = (name = 'mock-block', importsMock = false): Block =>
+    mockBlock(name, { importsMock, manifest: { registryDependencies: ['route:openrouter'] } });
+
+  it('mock (the default) ships the scripted mock and writes no route, loudly', async () => {
+    for (const [form, mock] of [
+      ['react', fileTarget('react', 'mock-block', 'mock.ts')],
+      ['html', fileTarget('html', 'mock-block', 'mock.js')],
+    ] as const) {
+      const { plan, error } = await planFor(routed(), form);
+      expect(error, form).toBeUndefined();
+      expect(plan!.files.map((f) => f.path), form).toContain(mock);
+      expect(plan!.files.map((f) => f.path), form).not.toContain('server/chat.ts');
+      expect(plan!.env, form).toBeUndefined();
+      // DECIDED LOUDLY: the block declares a backend route and this mode wrote
+      // none, which is a decision the consumer has to be able to see.
+      expect(plan!.notes.join('\n'), form).toContain('no backend route was written');
+    }
+  });
+
+  it('--no-mock leaves the scripted mock out and writes no route either', async () => {
+    for (const form of ['react', 'html'] as const) {
+      const { plan, error } = await planFor(routed(), form, { mode: 'none' });
+      expect(error, form).toBeUndefined();
+      expect(mockPathsIn(plan!.files.map((f) => f.path)), form).toEqual([]);
+      expect(plan!.files.map((f) => f.path), form).not.toContain('server/chat.ts');
+      expect(plan!.notes.join('\n'), form).toContain('no backend route was written');
+      expect(plan!.notes.join('\n'), form).toContain('leaves the transport to you');
+    }
+  });
+
+  it('--gateway writes the route the scaffolder emits, its env file, and no mock', async () => {
+    const { plan, error } = await planFor(routed(), 'react', { mode: 'real', gateway: 'openrouter' });
+    expect(error).toBeUndefined();
+    expect(mockPathsIn(plan!.files.map((f) => f.path))).toEqual([]);
+    expect(plan!.files.map((f) => f.path)).toContain('server/chat.ts');
+    // The env file is NOT part of the plan's files: an existing `.env.local` is
+    // the consumer's own key file, so it is created-if-absent rather than a
+    // collision that refuses the whole install.
+    expect(plan!.env?.path).toBe('.env.local');
+    expect(plan!.env?.vars).toContain('OPENROUTER_API_KEY');
+    expect(plan!.env?.contents).toContain('OPENROUTER_API_KEY=replace-me');
+    expect(plan!.files.map((f) => f.path)).not.toContain('.env.local');
+  });
+
+  it('--gateway for a form with no route host keeps the loud gap sentence', async () => {
+    const { plan, error } = await planFor(routed(), 'html', { mode: 'real', gateway: 'openrouter' });
+    expect(error).toBeUndefined();
+    expect(mockPathsIn(plan!.files.map((f) => f.path))).toEqual([]);
+    expect(plan!.files.map((f) => f.path)).not.toContain('server/chat.ts');
+    expect(plan!.env).toBeUndefined();
+    expect(plan!.notes.join('\n')).toContain('OPENROUTER_API_KEY');
+  });
+
+  it('a gateway the selection declares no route for is refused, naming the ones it does', async () => {
+    const declared = await planFor(routed(), 'react', { mode: 'real', gateway: 'anthropic' });
+    expect(declared.plan).toBeUndefined();
+    expect(declared.error).toContain('--gateway anthropic');
+    expect(declared.error).toContain('mock-block');
+    expect(declared.error).toContain('openrouter');
+
+    // A block that declares no route at all says `none` rather than showing an
+    // empty list, and still points at the way out.
+    const silent = await planFor(
+      mockBlock('no-route', { manifest: { wiring: { mockFiles: ['mock.ts'] } } }),
+      'react',
+      { mode: 'real', gateway: 'openrouter' },
+    );
+    expect(silent.plan).toBeUndefined();
+    expect(silent.error).toContain('declares none');
+    expect(silent.error).toContain('--no-mock');
+  });
+
+  it('a file still importing the dropped mock is refused by name, never shipped broken', async () => {
+    // The shipped blocks' controllers import `./mock` and the renderers copy
+    // them verbatim, so dropping the file alone would emit a project that
+    // cannot resolve the import - a failure the consumer meets at build time,
+    // long after `add` said it succeeded.
+    for (const wiring of [{ mode: 'none' }, { mode: 'real', gateway: 'openrouter' }] as AddMode[]) {
+      const { plan, error } = await planFor(routed('imports-mock', true), 'html', wiring);
+      expect(plan, JSON.stringify(wiring)).toBeUndefined();
+      expect(error).toContain('cannot be installed without its scripted mock yet');
+      expect(error).toContain('imports-mock.controller.js');
+      expect(error).toContain('"./mock"');
+      expect(error).toContain('mock.ts');
+    }
+  });
+
+  it('the single-file CDN paste form cannot leave a file out, and says why', async () => {
+    for (const wiring of [{ mode: 'none' }, { mode: 'real', gateway: 'openrouter' }] as AddMode[]) {
+      const { plan, error } = await planFor(routed(), 'cdn', wiring);
+      expect(plan, JSON.stringify(wiring)).toBeUndefined();
+      expect(error).toContain('ONE self-contained file');
+      // The refusal names the mode the consumer asked for, not a generic one.
+      expect(error).toContain(wiring.mode === 'real' ? '--gateway openrouter' : '--no-mock');
+    }
+  });
+
+  it('a block with no declared mock changes nothing, and says that out loud', async () => {
+    const { plan, error } = await planFor(authoredBlock('no-mock-declared'), 'html', { mode: 'none' });
+    expect(error).toBeUndefined();
+    expect(plan!.notes.join('\n')).toContain('there was nothing to leave out');
+  });
+
+  it('a mockFiles entry the block does not ship is a refusal, not a silent no-op', () => {
+    // The manifest validator grades the bundled registry; this is the gate the
+    // FETCHED item JSON path keeps, because `blockFromItemJson` never runs the
+    // validator (create-kai add <url>).
+    const broken: Block = {
+      ...authoredBlock('broken-mock'),
+      manifest: { ...authoredBlock('broken-mock').manifest, wiring: { mockFiles: ['not-shipped.ts'] } },
+    };
+    expect(() => declaredMockFiles(broken)).toThrow(/not-shipped\.ts.*not a files\[\] entry/s);
+  });
+});
+
+describe('multi-select: one command, registryDependencies deduped across the selection', () => {
+  // A selection composes SHARED dependencies, and the point of resolving them
+  // once is that the second write would be the collision refusal a consumer
+  // cannot get past. Driven through the real `runAdd` against a real tree.
+  const tree = async (id: string): Promise<string> => {
+    const dir = path.join(root, `tree-${id}`);
+    await rm(dir, { recursive: true, force: true });
+    return writeBlockTree(dir, [
+      authoredBlock('shared'),
+      authoredBlock('composed-a', { registryDependencies: ['shared'] }),
+      authoredBlock('composed-b', { registryDependencies: ['shared'] }),
+      authoredBlock('routed-a', { wiring: { gateways: ['openrouter'] } }),
+      authoredBlock('routed-b', { wiring: { gateways: ['openrouter'] } }),
+    ]);
+  };
+
+  it('resolution takes the list, and a dependency two items compose lands once', async () => {
+    const fixtures = new Map(
+      [authoredBlock('shared'), authoredBlock('composed-a', { registryDependencies: ['shared'] }), authoredBlock('composed-b', { registryDependencies: ['shared'] })].map(
+        (block) => [block.name, block],
+      ),
+    );
+    const resolved = await resolveAdd(['composed-a', 'composed-b'], {
+      local: (name) => fixtures.get(name),
+      fetchItem: async () => { throw new Error('no fetch expected'); },
+    });
+    expect(resolved.blocks.map((b) => b.name)).toEqual(['shared', 'composed-a', 'composed-b']);
+  });
+
+  it('writes every item and the shared dependency once each', async () => {
+    const blocksRoot = await tree('files');
+    const dir = await project('multi-files', { name: 'host' });
+    const run = await runInto(dir, ['composed-a', 'composed-b'], { blocksRoot });
+    expect(run.code, run.err.join('\n')).toBe(0);
+    const writes = run.out.filter((line) => line.startsWith('  write ')).map((line) => line.trim().slice('write '.length));
+    expect(new Set(writes).size, `a path was written twice:\n${writes.join('\n')}`).toBe(writes.length);
+    for (const block of ['composed-a', 'composed-b', 'shared']) {
+      const page = fileTarget('html', block, `${block}.html`);
+      expect(writes.filter((path) => path === page), `${block}: ${page}`).toHaveLength(1);
+      expect(existsSync(path.join(dir, page)), page).toBe(true);
+    }
+  });
+
+  it('emits a route two items declare once, and one env file', async () => {
+    const blocksRoot = await tree('routes');
+    const dir = await project('multi-routes', { name: 'host', dependencies: { react: '^19.0.0' } });
+    const run = await runInto(dir, ['routed-a', 'routed-b', '--gateway', 'openrouter'], { blocksRoot });
+    expect(run.code, run.err.join('\n')).toBe(0);
+    const writes = run.out.filter((line) => line.startsWith('  write '));
+    expect(writes.filter((line) => line.includes('server/chat.ts'))).toHaveLength(1);
+    expect(run.out.filter((line) => line.includes('env   .env.local'))).toHaveLength(1);
+    expect(existsSync(path.join(dir, '.env.local'))).toBe(true);
+  });
+
+  it('an existing .env.local is the consumer\'s own file: reported, never a refusal', async () => {
+    const blocksRoot = await tree('env');
+    const dir = await project('multi-env', { name: 'host', dependencies: { react: '^19.0.0' } });
+    await writeFile(path.join(dir, '.env.local'), 'MY_OWN_KEY=1\n', 'utf8');
+    const run = await runInto(dir, ['routed-a', '--gateway', 'openrouter'], { blocksRoot });
+    expect(run.code, run.err.join('\n')).toBe(0);
+    expect(run.out.join('\n')).toContain('.env.local already exists; add OPENROUTER_API_KEY');
+    expect(await readFile(path.join(dir, '.env.local'), 'utf8')).toBe('MY_OWN_KEY=1\n');
+  });
+});
+
+describe('the add flag surface names every mode it accepts', () => {
+  // Derived from `WIRED_GATEWAYS`, exactly as `add.ts` derives it: a gateways
+  // flag whose accepted set is hand-typed in the test would pass while the flag
+  // refused the gateway the CLI gained.
+  const REAL_GATEWAY_IDS = [...WIRED_GATEWAYS].filter((id) => id !== 'mock');
+
+  it('takes every positional item, so one command installs a selection', () => {
+    expect(parseAddArgs(['assistant', 'support-widget']).items).toEqual(['assistant', 'support-widget']);
+    expect(parseAddArgs(['assistant']).items).toEqual(['assistant']);
+    expect(parseAddArgs(['assistant', 'support-widget']).errors).toEqual([]);
+  });
+
+  it('accepts every wired gateway, and mock (and none) as the default mode', () => {
+    for (const id of REAL_GATEWAY_IDS) expect(parseAddArgs(['assistant', '--gateway', id]).errors, id).toEqual([]);
+    expect(parseAddArgs(['assistant', '--gateway', 'mock']).errors).toEqual([]);
+    expect(parseAddArgs(['assistant', '--gateway', 'none']).errors).toEqual([]);
+  });
+
+  it('refuses an unwired gateway by name, listing the ones it can wire', () => {
+    // An id the CATALOG has but this release cannot wire end to end: the case
+    // the flag has to refuse (a route the emitted front end cannot read is not
+    // a mode). Derived, so catalog growth moves this case with it.
+    const unwired = listIntegrations()
+      .map((i) => i.id)
+      .find((id) => id !== 'mock' && !REAL_GATEWAY_IDS.includes(id));
+    expect(unwired, 'the catalog has no unwired integration left; pick another subject').toBeDefined();
+    const refused = parseAddArgs(['assistant', '--gateway', unwired!]);
+    expect(refused.errors.join(' ')).toContain('--gateway must be');
+    for (const id of REAL_GATEWAY_IDS) expect(refused.errors.join(' '), id).toContain(id);
+    expect(refused.errors.join(' ')).toContain(`got '${unwired}'`);
+  });
+
+  it('refuses --gateway together with --no-mock: one axis, one spelling', () => {
+    const both = parseAddArgs(['assistant', '--gateway', REAL_GATEWAY_IDS[0], '--no-mock']);
+    expect(both.errors.join(' ')).toContain('two data modes');
+  });
+
+  it('the help text prints every flag the parser accepts', () => {
+    // Menu honesty for help text: a flag nobody can discover is a flag this
+    // release does not really have.
+    for (const flag of ['--form', '--gateway', '--no-mock', '--dir', '--list', '--yes']) {
+      expect(ADD_HELP, flag).toContain(flag);
+    }
+  });
+
+  it('a mock-free composition installs without the mock file, end to end', async () => {
+    // The positive path the axis exists for: a block whose controller does not
+    // import its mock installs with the composition and no scripted file.
+    const blocksRoot = path.join(root, 'tree-no-mock-e2e');
+    await rm(blocksRoot, { recursive: true, force: true });
+    await writeBlockTree(blocksRoot, [mockBlock('demo', { manifest: { registryDependencies: ['route:openrouter'] } })]);
+    const dir = await project('no-mock-e2e', { name: 'host' });
+    const run = await runInto(dir, ['demo', '--no-mock'], { blocksRoot });
+    expect(run.code, run.err.join('\n')).toBe(0);
+    expect(existsSync(path.join(dir, fileTarget('html', 'demo', 'demo.html')))).toBe(true);
+    expect(existsSync(path.join(dir, fileTarget('html', 'demo', 'mock.js')))).toBe(false);
+    expect(run.out.join('\n')).toContain('no backend route was written');
+  });
+
+  it('a mode that cannot be satisfied is refused end to end, and nothing is written', async () => {
+    // A block whose controller still imports its mock, which is what the
+    // shipped blocks' controllers do today. What must NOT happen is a partial
+    // tree on disk with a success exit code.
+    const blocksRoot = path.join(root, 'tree-unsatisfiable');
+    await rm(blocksRoot, { recursive: true, force: true });
+    await writeBlockTree(blocksRoot, [mockBlock('demo', { importsMock: true })]);
+    const dir = await project('unsatisfiable', { name: 'host' });
+    const run = await runInto(dir, ['demo', '--no-mock'], { blocksRoot });
+    expect(run.code).toBe(1);
+    expect(run.err.join('\n')).toContain('cannot be installed without its scripted mock yet');
+    expect(run.out.filter((line) => line.startsWith('  write '))).toEqual([]);
+    expect(existsSync(path.join(dir, 'blocks'))).toBe(false);
+  });
+});
+
+describe('the authored manifests declare the data axis the CLI resolves', () => {
+  // Read from the SOURCE registry through the same loader the CLI uses, never
+  // from `dist/blocks`: that copy is a build artifact, so a manifest assertion
+  // against it would assert whatever the last build wrote.
+  const BLOCKS_SOURCE = path.join(
+    path.dirname(createRequire(import.meta.url).resolve('@kitn.ai/blocks/package.json')),
+    'blocks',
+  );
+
+  it('every declared mock file is a file the block actually ships', async () => {
+    const source = await loadBlocks(BLOCKS_SOURCE);
+    expect(source.length, 'the authored registry is empty').toBeGreaterThan(0);
+    for (const block of source) expect(() => declaredMockFiles(block), block.name).not.toThrow();
+  });
+
+  it('the two blocks this change wires declare their mock and their gateways', async () => {
+    const byName = new Map((await loadBlocks(BLOCKS_SOURCE)).map((block) => [block.name, block]));
+    const ids = new Set(listIntegrations().map((integration) => integration.id));
+    for (const name of ['support-widget', 'in-app-assistant']) {
+      const block = byName.get(name);
+      expect(block, `${name} is not in the authored registry`).toBeDefined();
+      expect(declaredMockFiles(block!), name).toContain('mock.ts');
+      const gateways = block!.manifest.wiring?.gateways ?? [];
+      expect(gateways.length, `${name} declares no gateway, so --gateway can never satisfy it`).toBeGreaterThan(0);
+      // The declared ids are the CATALOG's, checked where the real catalog is:
+      // the registry's own validator grades them against an injected list, and
+      // the fixture list it injects in the blocks package is a fixture.
+      for (const id of gateways) expect(ids.has(id), `${name} declares ${id}`).toBe(true);
+    }
+  });
+
+  it('no manifest carries an unconditional route dependency, which every install would resolve', async () => {
+    // `wiring.gateways` is the capability list; a `route:` dep is a route that
+    // resolves on EVERY install, including the default mock one.
+    for (const block of await loadBlocks(BLOCKS_SOURCE)) {
+      const routes = (block.manifest.registryDependencies ?? []).filter((dep) => dep.startsWith('route:'));
+      expect(routes, `${block.name}: ${routes.join(', ')}`).toEqual([]);
+    }
   });
 });
 

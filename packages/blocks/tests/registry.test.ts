@@ -56,7 +56,16 @@ const BLOCKS_DIR = resolve(__dirname, '../blocks');
  * package that has them. Neither half is lost; each is asserted where its
  * inputs are.
  */
-const ROUTES = ['fixture-route-a', 'fixture-route-b'];
+// The last two ids are REAL integrations, and they are here because the real
+// blocks declare them in `wiring.gateways` (src/registry.ts validates that
+// field against this injected list, exactly as it validates `route:` deps) -
+// `discoverBlocks` DROPS a source whose manifest fails validation, so a
+// fixture without them turns the real blocks invisible rather than red. The
+// fixture stays a fixture: it is NOT derived from the blocks, because a list
+// derived from the thing under test cannot catch that thing being wrong. The
+// real-catalog claim lives in `verify:blocks`'s contracts cell and
+// packages/ui/mcp/tests/blocks-artifacts.test.ts, which have the real catalog.
+const ROUTES = ['fixture-route-a', 'fixture-route-b', 'openrouter', 'anthropic'];
 const NONSCALAR: Record<string, string[]> = { 'kai-thread': ['messages'] };
 const VERSION = '9.9.9-fixture';
 
@@ -187,6 +196,27 @@ describe('manifest validation (each rule watched failing)', () => {
   });
   it('a real route dependency and a sibling block are accepted', () => {
     expect(bad((m) => { m.registryDependencies = [`route:${ROUTES[0]}`, 'demo']; })).toEqual([]);
+  });
+  it('wiring.gateways must name scaffolder integrations, like a route dep does', () => {
+    // THE RULE WATCHED FAILING, which is why the fixture carries real ids: an
+    // unknown one is REFUSED rather than discovered at install time, when the
+    // consumer has already chosen it.
+    expect(bad((m) => { m.wiring = { gateways: ['not-a-thing'] }; }).join()).toMatch(/not a scaffolder integration/);
+  });
+  it('wiring.gateways accepts an injected integration id', () => {
+    expect(bad((m) => { m.wiring = { gateways: [ROUTES[0], ROUTES[2]] }; })).toEqual([]);
+  });
+  it('wiring.mockFiles must name files the block actually ships', () => {
+    // DERIVED from files[], never trusted: a mock file the block does not ship
+    // is a declaration the CLI can only discover by silently dropping nothing.
+    expect(bad((m) => { m.wiring = { mockFiles: ['not-shipped.ts'] }; }).join()).toMatch(/no files\[\] entry ships/);
+  });
+  it('wiring.mockFiles accepts a shipped file', () => {
+    expect(bad((m) => { m.wiring = { mockFiles: ['demo.js'] }; })).toEqual([]);
+  });
+  it('wiring must be an object carrying string arrays', () => {
+    expect(bad((m) => { m.wiring = ['openrouter']; }).join()).toMatch(/must be an object/);
+    expect(bad((m) => { m.wiring = { gateways: 'openrouter' }; }).join()).toMatch(/must be an array of strings/);
   });
   it('rendered copy refuses em dashes and emoji (house voice)', () => {
     expect(bad((m) => { m.description = 'nice — dashy'; }).join()).toMatch(/em dash/);

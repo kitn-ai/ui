@@ -25,6 +25,13 @@
  * 2. `.prop` on a LEAF element with no navigation. `models` and
  *    `currentModel` drive kai-model-switcher; there is no view stack on this
  *    page and no ref for one.
+ * 3. THE SHELL IS SOMEBODY ELSE'S STATE, MIRRORED. kai-workspace owns the
+ *    aside's collapse (its breakpoint, its drawer, its methods), so the block
+ *    does not keep a second opinion: `asideToggle` is fed by kai-aside-toggle
+ *    and the value it reports is what the rail's controlled `collapsed` and the
+ *    top bar's reopen button read. The way IN is a method call - the rail's own
+ *    toggle would otherwise fold the rail inside a column the page keeps - and
+ *    that call is the second reason this controller declares a ref.
  */
 import { createAssistantStream, createMockResponder } from '@kitn.ai/ui/state';
 import type { ChatMessage } from '@kitn.ai/ui/state';
@@ -35,7 +42,7 @@ import {
   isConversationUnread,
   type ConversationSummary,
 } from '@kitn.ai/ui/stores';
-import type { KaiPromptInputElement } from '@kitn.ai/ui/web-components';
+import type { KaiPromptInputElement, KaiWorkspaceElement } from '@kitn.ai/ui/web-components';
 import { MOCK_SCRIPT, MOCK_TOOL_OUTPUTS, SUGGESTIONS, MODELS, type ModelOption } from './mock';
 
 // KNOWN RESIDUAL: the "2m ago" formatter is internal to the Solid layer and
@@ -85,6 +92,22 @@ export interface AssistantState {
   /** The rows the rail renders: the summaries, projected and then FILTERED
    *  by `query`. The old script rendered them all and hid the misses. */
   conversationRows: ConversationRow[];
+  // the shell. Its two breakpoints are FIELDS rather than literal attributes
+  // for one reason: a binding holds a field name and never an expression, and a
+  // literal numeric attribute does not survive the react form (it is emitted as
+  // a string on a prop typed number).
+  /** Auto-collapse the rail below this shell width in px. */
+  collapseBelow: number;
+  /** Paint the rail as an overlay drawer below this shell width in px. */
+  drawerBelow: number;
+  /** The shell's start aside, mirrored from `kai-aside-toggle`. The SHELL holds
+   *  the truth (its breakpoint moves it without this block asking); this is the
+   *  copy the parts bind to. */
+  railCollapsed: boolean;
+  /** Hide the top bar's reopen button. The shell does not paint a collapsed
+   *  aside at all, so the page supplies the way back - and shows it only while
+   *  there is something to come back from. */
+  railReopenHidden: boolean;
 }
 
 /** The element handles the controller calls methods on. Nullable because no
@@ -92,6 +115,7 @@ export interface AssistantState {
  *  render, Vue's until mount. */
 export interface AssistantRefs {
   prompt: KaiPromptInputElement | null;
+  workspace: KaiWorkspaceElement | null;
 }
 
 export interface AssistantDeps {
@@ -103,6 +127,15 @@ export interface AssistantDeps {
 export interface AssistantActions {
   /** `@kai-model-change` on the switcher. */
   modelChange(event: CustomEvent<{ modelId: string }>): void;
+  /** `@kai-aside-toggle` on the shell: the one source of the rail's collapsed
+   *  state, however it happened (the rail's toggle, the breakpoint, the
+   *  drawer's Escape). */
+  asideToggle(event: CustomEvent<{ collapsed: boolean }>): void;
+  /** `@kai-toggle-sidebar` on the rail's built-in header toggle: collapses the
+   *  SHELL, so the column goes and main reflows. */
+  collapseRail(): void;
+  /** `@kai-click` on the top bar's reopen button: expands the SHELL. */
+  expandRail(): void;
   /** `@kai-conversation-select` on the rail. */
   openConversation(event: CustomEvent<{ id: string }>): Promise<void>;
   /** `@kai-new-chat` on the rail. */
@@ -133,6 +166,12 @@ export function createController(deps: AssistantDeps): AssistantController {
     activeId: undefined,
     query: '',
     conversationRows: [],
+    // The shell's documented pair, one page's worth: below 720 the rail goes,
+    // below 640 an expanded rail is an overlay drawer.
+    collapseBelow: 720,
+    drawerBelow: 640,
+    railCollapsed: false,
+    railReopenHidden: true,
   };
 
   // A NEW state object every patch: the snapshot getter is compared by
@@ -192,6 +231,20 @@ export function createController(deps: AssistantDeps): AssistantController {
       // The mock ignores the selection (it is a script); a real backend reads
       // state.currentModel inside submit and routes on it.
       patch({ currentModel: event.detail.modelId });
+    },
+
+    // One aside is projected (start), so the value the shell reports IS the
+    // rail's; a second aside would have to filter on `detail.side` here.
+    asideToggle(event) {
+      patch({ railCollapsed: event.detail.collapsed, railReopenHidden: !event.detail.collapsed });
+    },
+
+    collapseRail() {
+      deps.refs().workspace?.collapseAside('start');
+    },
+
+    expandRail() {
+      deps.refs().workspace?.expandAside('start');
     },
 
     async openConversation(event) {

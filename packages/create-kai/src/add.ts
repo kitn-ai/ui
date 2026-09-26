@@ -1,14 +1,23 @@
 /**
- * The `add` subcommand: `create-kai add <block | item-json-url>`.
+ * The `add` subcommand: `create-kai add <block> [<block>...]`.
  *
  * The wizard is the from-scratch door; this is the into-an-existing-project
  * door. The flow is the spec's simplified shadcn flow and nothing more:
- * resolve the item and its registryDependencies (blocks recurse, routes come
- * from the scaffolder catalog), merge npm deps, write files to targets, print
- * the manifest's `docs`. Detection reads the host project instead of asking
- * what it can see; the one question it may ask is the ambiguous case, and it
- * goes through the same `AxisIo` seam as every other create-kai question so
- * the menu-honesty tests can drive it with spies.
+ * resolve the items and their registryDependencies (blocks recurse, routes come
+ * from the scaffolder catalog, and a dependency two items compose is written
+ * ONCE), merge npm deps, write files to targets, print the manifest's `docs`.
+ * Detection reads the host project instead of asking what it can see; the one
+ * question it may ask is the ambiguous case, and it goes through the same
+ * `AxisIo` seam as every other create-kai question so the menu-honesty tests
+ * can drive it with spies.
+ *
+ * THE DATA AXIS IS THE FLAG SURFACE (spec 4, "three modes, one axis"): the
+ * default is the block's scripted mock, `--no-mock` is the composition alone,
+ * and `--gateway <integration>` is the block without a mock plus the backend
+ * route that integration needs and the env file it reads. All three are
+ * resolved from what the block's manifest declares, and a mode the selection
+ * cannot satisfy is refused whole, naming what is missing - never silently
+ * swapped for another mode.
  *
  * Importable by tests on purpose (`index.ts` is not): everything effectful is
  * injected through `AddEnv`, and `index.ts` passes the real terminal, the real
@@ -21,7 +30,9 @@ import path from 'node:path';
 import { BLOCK_FORMS, README_FILE } from '@kitn.ai/blocks/forms';
 
 import type { AxisIo } from './axes';
+import { normalizeGateway } from './args';
 import {
+  MOCK_MODE,
   blockFormAxis,
   blockFromItemJson,
   detectForm,
@@ -29,7 +40,8 @@ import {
   planAdd,
   resolveAdd,
 } from './blocks';
-import type { AddPlan, Block, BlockForm } from './blocks';
+import type { AddMode, AddPlan, Block, BlockForm } from './blocks';
+import { WIRED_GATEWAYS } from './catalog';
 
 export interface AddEnv {
   cwd: string;
@@ -49,12 +61,17 @@ export interface AddEnv {
 }
 
 interface AddArgs {
-  item?: string;
+  /** every positional item, in the order given: `add a b c` is one install */
+  items: string[];
   list: boolean;
   json: boolean;
   yes: boolean;
   dir?: string;
   form?: string;
+  /** `--gateway <integration>`: the real-backend spelling of the data axis */
+  gateway?: string;
+  /** `--no-mock`: the composition-only spelling of the data axis */
+  noMock: boolean;
   errors: string[];
 }
 
@@ -62,46 +79,97 @@ interface AddArgs {
 // delivery form joins `BLOCK_FORMS` and this flag accepts it, help text and
 // refusal message included, with nothing here to update.
 const FORM_IDS: readonly string[] = BLOCK_FORMS.map((form) => form.id);
+
+/**
+ * The ids `--gateway` accepts as a REAL backend: the gateways this release can
+ * wire end to end, minus the local mock, which is the DEFAULT mode rather than
+ * a gateway anybody asks for. Derived from `WIRED_GATEWAYS` for the reason
+ * `--form` is derived from `BLOCK_FORMS`: a hand-typed list is how the flag
+ * comes to accept a gateway the CLI cannot wire, or refuse one it gained.
+ */
+const REAL_GATEWAY_IDS: readonly string[] = [...WIRED_GATEWAYS].filter((id) => id !== 'mock');
+
+/** `a, b or c` -- one prose list for every refusal and help line that needs one. */
+function proseList(ids: readonly string[]): string {
+  return ids.length > 1 ? `${ids.slice(0, -1).join(', ')} or ${ids[ids.length - 1]}` : (ids[0] ?? 'none');
+}
+
 /** `html, react or cdn` -- the refusal message's list, in the axis's order. */
-const FORM_PROSE = `${FORM_IDS.slice(0, -1).join(', ')} or ${FORM_IDS[FORM_IDS.length - 1]}`;
+const FORM_PROSE = proseList(FORM_IDS);
+
+/** `openrouter or anthropic` -- the gateways a `--gateway` run can name today. */
+const GATEWAY_PROSE = proseList(REAL_GATEWAY_IDS);
 
 export const ADD_HELP = `
-create-kai add <block>       write a block from the registry into this project
-create-kai add <url>         resolve a per-block item JSON URL the same way
+create-kai add <block> [<block>...]  write blocks from the registry into this project
+create-kai add <url> [<url>...]      resolve per-block item JSON URLs the same way
 
   --list [--json]            print the blocks this release ships and exit
   --form <${FORM_IDS.join('|')}>    override framework detection
+  --gateway <id>             ship no scripted mock: emit that integration's backend
+                             route and the env file it reads (${REAL_GATEWAY_IDS.join(', ')})
+  --no-mock                  ship the composition only: no scripted mock, no route
   --dir <path>               target project directory (default: cwd)
   -y, --yes                  non-interactive; an ambiguous detection fails instead of asking
 `;
 
 export function parseAddArgs(argv: readonly string[]): AddArgs {
-  const out: AddArgs = { list: false, json: false, yes: false, errors: [] };
+  const out: AddArgs = { items: [], list: false, json: false, yes: false, noMock: false, errors: [] };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     switch (arg) {
       case '--list': out.list = true; break;
       case '--json': out.json = true; break;
       case '-y': case '--yes': out.yes = true; break;
+      case '--no-mock': out.noMock = true; break;
       case '--dir':
-      case '--form': {
+      case '--form':
+      case '--gateway': {
         const value = argv[++i];
         if (value === undefined) out.errors.push(`${arg} needs a value`);
         else if (arg === '--dir') out.dir = value;
-        else out.form = value;
+        else if (arg === '--form') out.form = value;
+        else out.gateway = value;
         break;
       }
       case '-h': case '--help': break; // the caller prints ADD_HELP on no item
       default:
         if (arg.startsWith('-')) out.errors.push(`unknown flag ${arg}`);
-        else if (out.item === undefined) out.item = arg;
-        else out.errors.push(`unexpected argument ${arg}`);
+        else out.items.push(arg);
     }
   }
   if (out.form !== undefined && !FORM_IDS.includes(out.form)) {
     out.errors.push(`--form must be ${FORM_PROSE}, got '${out.form}'`);
   }
+  // THE MODE IS AN AXIS WITH THREE SPELLINGS, so two of them at once is a
+  // contradiction rather than a precedence rule: which one won would be
+  // invisible in the output either way.
+  if (out.gateway !== undefined && out.noMock) {
+    out.errors.push(
+      '--gateway and --no-mock are two data modes: pass one (--gateway ships a real backend route, --no-mock ships the composition alone)',
+    );
+  }
+  if (out.gateway !== undefined) {
+    // `mock` is the DEFAULT mode, so it is accepted here rather than refused as
+    // a gateway nobody can ask for; `none` is the prompt's word for it.
+    const gateway = normalizeGateway(out.gateway);
+    if (gateway !== 'mock' && !REAL_GATEWAY_IDS.includes(gateway as string)) {
+      out.errors.push(`--gateway must be ${GATEWAY_PROSE}, or mock for the default scripted mock; got '${out.gateway}'`);
+    }
+  }
   return out;
+}
+
+/**
+ * The data mode the flags asked for. `--gateway mock` (and `none`, the wizard
+ * prompt's word for the same integration) IS the default mode, which is why it
+ * resolves to it instead of to a route called mock.
+ */
+function addMode(args: Pick<AddArgs, 'gateway' | 'noMock'>): AddMode {
+  if (args.noMock) return { mode: 'none' };
+  const gateway = normalizeGateway(args.gateway);
+  if (gateway !== undefined && gateway !== 'mock') return { mode: 'real', gateway };
+  return MOCK_MODE;
 }
 
 /** The nearest package.json walking up from `dir`, parsed, or null. */
@@ -223,10 +291,12 @@ export async function runAdd(argv: readonly string[], env: AddEnv): Promise<numb
     return 0;
   }
 
-  if (!args.item) {
+  if (!args.items.length) {
     env.error(ADD_HELP);
     return 1;
   }
+
+  const wiring = addMode(args);
 
   const targetDir = path.resolve(env.cwd, args.dir ?? '.');
   const near = await nearestPackageJson(targetDir);
@@ -251,7 +321,7 @@ export async function runAdd(argv: readonly string[], env: AddEnv): Promise<numb
 
   let plan: AddPlan;
   try {
-    const resolved = await resolveAdd(args.item, {
+    const resolved = await resolveAdd(args.items, {
       local: (name) => blocks.find((b) => b.name === name),
       fetchItem: async (url) => {
         const json = env.fetchJson
@@ -261,8 +331,8 @@ export async function runAdd(argv: readonly string[], env: AddEnv): Promise<numb
         if (!parsed.block) throw new Error(parsed.errors.join('; '));
         return parsed.block;
       },
-    });
-    plan = planAdd(resolved, { form, kitRange: env.kitRange, kitVersion: env.kitVersion });
+    }, wiring);
+    plan = planAdd(resolved, { form, kitRange: env.kitRange, kitVersion: env.kitVersion, wiring });
   } catch (error) {
     env.error(`create-kai add: ${error instanceof Error ? error.message : String(error)}`);
     return 1;
@@ -286,6 +356,22 @@ export async function runAdd(argv: readonly string[], env: AddEnv): Promise<numb
     await mkdir(path.dirname(absolute), { recursive: true });
     await writeFile(absolute, file.contents, 'utf8');
     env.out(`  write ${file.path}`);
+  }
+
+  // THE ENV THE ROUTE READS, created only when absent - deliberately outside
+  // `plan.files` and its whole-plan collision refusal. A block file that exists
+  // is an edited block and refusing is right; `.env.local` is a file the
+  // consumer very likely already has, and refusing the install over their own
+  // key file would be the collision rule eating the feature. Either way the
+  // variable names are printed, so "no env file was written" is never silent.
+  if (plan.env) {
+    const envPath = path.join(root, plan.env.path);
+    if (existsSync(envPath)) {
+      env.out(`  env   ${plan.env.path} already exists; add ${plan.env.vars.join(', ')} to it yourself`);
+    } else {
+      await writeFile(envPath, plan.env.contents, 'utf8');
+      env.out(`  env   ${plan.env.path} written with ${plan.env.vars.join(', ')} (placeholder values)`);
+    }
   }
 
   if (near && form !== 'cdn' && Object.keys(plan.dependencies).length) {

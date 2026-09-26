@@ -101,8 +101,10 @@ Options
   -v, --version        print version
 
 Blocks
-  add <block>          write a block from the registry into an existing project
-  add --list           print the blocks this release ships
+  add <block> [<block>...]  write one or more blocks from the registry into an existing project
+  add --list                print the blocks this release ships
+  add --gateway <id>        install with a real backend route instead of the scripted mock
+  add --no-mock             install the composition alone: no scripted mock, no route
 `;
 
 async function main(): Promise<number> {

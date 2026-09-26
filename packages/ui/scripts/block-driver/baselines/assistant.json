@@ -1,6 +1,6 @@
 {
   "scenario": "assistant",
-  "base": "http://localhost:8961",
+  "base": "http://localhost:8952",
   "runs": [
     {
       "page": "block",
@@ -18,7 +18,7 @@
             "topbarTitle": {
               "fontSize": "16px",
               "fontWeight": "600",
-              "color": "rgb(0, 0, 0)"
+              "color": "rgb(9, 9, 11)"
             }
           }
         },
@@ -94,7 +94,7 @@
             "topbarTitle": {
               "fontSize": "16px",
               "fontWeight": "600",
-              "color": "rgb(226, 232, 240)"
+              "color": "rgb(250, 250, 250)"
             }
           }
         },

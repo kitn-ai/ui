@@ -1,7 +1,7 @@
 {
   "name": "assistant",
   "title": "Assistant",
-  "description": "Full-page assistant with a conversations rail: kai-conversations (built-in header, search and New chat), a kai-model-switcher recipe in the top bar, kai-thread plus kai-prompt-input, and the headless conversation controller over local storage. Ships with a scripted mock so the thread demos reasoning, a settled tool call and citations on first paint.",
+  "description": "Full-page assistant laid out by the kai-workspace shell: the kai-conversations rail (built-in header, search and New chat) in the start aside, with the resize handle between the columns, a collapse the shell performs so main reflows, and an overlay drawer below the breakpoint. Main carries the kai-model-switcher recipe in its top bar, kai-thread and kai-prompt-input, and the headless conversation controller over local storage. Ships with a scripted mock so the thread demos reasoning, a settled tool call and citations on first paint.",
   "type": "registry:block",
   "categories": ["assistant", "full-page"],
   "files": [
@@ -12,6 +12,7 @@
   ],
   "dependencies": ["@kitn.ai/ui"],
   "registryDependencies": [],
+  "wiring": { "gateways": ["openrouter", "anthropic"], "mockFiles": ["mock.ts"] },
   "cssVars": { "light": {}, "dark": {} },
   "envVars": {},
   "docs": "Runs against a scripted local mock out of the box - no endpoint, no key. To go live, replace the mock responder in assistant.controller.ts with a fetch to your chat endpoint (send the selected model id with the request) and keep parsing through the @kitn.ai/ui/wire readers.",

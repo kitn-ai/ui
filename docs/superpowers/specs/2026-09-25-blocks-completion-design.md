@@ -69,13 +69,38 @@ three blocks declare no `route:<integration>` dependency. The model supports it
 resolves against the scaffolder catalog and emits the backend route); nothing
 exposes it.
 
-**2.4 B2 is parked, not lost.** `feat/blocks-b2-renderers` (worktree
-`.claude/worktrees/blocks-b2`) holds the four remaining delivery forms — vue,
-svelte, angular, solid — plus 6 tests, the contract changes and 3 kit fixes: 15
-commits, pushed, **no PR**, last commit 2026-09-03. `main` is ~199 commits ahead
-and the merge conflicts. Its blocks-side work is path-agnostic and intact; the 19
-`packages/ui/src/elements/*` files it touches are all gone from main after the
-`web-components` rename, so the rebase is real but bounded.
+**2.4 B2 is parked, rebased, and still unverified.** `feat/blocks-b2-renderers`
+(worktree `.claude/worktrees/blocks-b2`) holds the four remaining delivery forms —
+vue, svelte, angular, solid — plus 6 tests, the contract changes and 3 kit fixes:
+15 commits from 2026-09-03. It was **merged with main on 2026-09-25** (`f5584069`,
+`5901bc5f` as the main side; a merge rather than a rebase, because a rebase would
+replay 15 commits across 199 main-side commits and re-conflict the same 19 renamed
+files each time) and **pushed** so the work is not trapped in a worktree.
+
+What that merge did and did not establish:
+
+- Resolved 18 conflicts. The `src/elements/*` hunks were re-homed to
+  `src/web-components/*` (the layer rename); the solid block of
+  `web-component-types.d.ts` was regenerated from its own `HTMLElementTagNameMap`
+  (96 → 100 tags, main having added four); two hunks were dropped as genuinely
+  gone (`verify-pack-weight.mjs`'s unpacked-bytes ceiling, replaced on main by a
+  packed-tarball ceiling; three `perplexity-pro` casts main had re-added).
+- **Green:** `@kitn.ai/blocks` 218 tests, its typecheck, the re-homed solid
+  augmentation and react JSX guards, `lint-layer-names` and six other lints.
+- **NOT established, and this is the whole remaining cost:** 7 `create-kai` tests
+  fail against **stale dist artifacts** (built 2026-09-03, still emitting
+  `@kitn.ai/ui/elements` and `^0.32.0`), so they need `nx build ui` +
+  `pnpm --filter create-kai run build` to confirm; `pnpm-lock.yaml` was resolved by
+  hand and **no `pnpm install` was run**, so the four new toolchains
+  (`vue`, `vue-tsc`, `svelte`, `svelte-check`, `@angular/*`) may not be resolvable;
+  and **`verify:scaffold`'s four compile cells were never executed** — the
+  highest-value unrun gate, since that is what proves the renderers compile in
+  their own toolchains.
+
+So B2 is a **verified-nothing-but-blocks-tests** branch with a paid-off rebase, not
+an unreviewed one. It lands in wave 3, after wave 1 has settled the composition it
+renders; its verification job is `pnpm install` → `nx build ui` →
+`pnpm --filter create-kai run build` → `pnpm --filter @kitn.ai/ui run verify:scaffold`.
 
 ## 3. The bar: what "complete" means for a block
 
@@ -106,14 +131,41 @@ requires the skeleton host from 2.1.
 
 ## 4. Wiring: three modes, one axis
 
+**CORRECTED after the wiring lane hit the wall this section caused.** The first
+wording said "the manifest declares the mock files and the `route:` dependency",
+which implies `registryDependencies: ["route:openrouter", "route:anthropic"]`.
+That is wrong: `registryDependencies` are resolved **unconditionally**, so a plain
+`kai add` would emit a route despite mock being the default, and a manifest listing
+two gateways claims both routes at once. The route is an install-time choice, so it
+is a **capability the CLI reads when a mode is asked for**, never an unconditional dep.
+
 | mode | `kai add` spelling | what is written | when |
 |---|---|---|---|
-| **mock** (default) | `kai add assistant` | composition + scripted `mock.ts` | runs instantly, no key; what the gallery previews |
-| **real** | `kai add assistant --gateway openrouter` | composition, **no** mock, plus the `route:<integration>` backend route and its `.env` | live against a provider |
+| **mock** (default) | `kai add assistant` | composition + the manifest's `wiring.mockFiles` | runs instantly, no key; what the gallery previews |
+| **real** | `kai add assistant --gateway openrouter` | composition, **no** mock files, plus the `route:openrouter` dependency **the CLI builds itself** and resolves against the scaffolder catalog | live against a provider |
 | **none** | `kai add assistant --no-mock` | composition only | the consumer wires their own store/transport, or the MCP composes |
 
-- The **manifest** declares the mock files and the `route:` dependency, so `add`
-  resolves the requested mode. A mode that cannot be satisfied is a loud failure.
+The manifest capability, validated by `packages/blocks/src/registry.ts`:
+
+```json
+"wiring": {
+  "gateways": ["openrouter", "anthropic"],
+  "mockFiles": ["mock.ts"]
+}
+```
+
+- An id in `gateways` that is not in the injected `routeIntegrations` is a loud
+  manifest error. An absent or empty `gateways` means `--gateway` on that block
+  **fails loudly** rather than quietly doing nothing.
+- `mockFiles` must name entries in `files[]`; an unknown name is an error.
+- The route itself is never in `registryDependencies`, so a third-party item JSON
+  with a `route:` dep still resolves the old way and nothing silently drops.
+- **The fixture.** `packages/blocks/tests/registry.test.ts`'s `ROUTES` list gains
+  `'openrouter'` and `'anthropic'`. The id check stays in `registry.ts` (it already
+  validates `route:` deps that way), and the fixture gains the two real ids because
+  real manifests declare them; deriving `ROUTES` from the blocks would make the
+  walk-equality assertion vacuous for the one class it now has to cover. The
+  unknown-id failure is watched by a synthetic-source test instead.
 - **Multi-select**: `kai add assistant settings` — one command, registry
   dependencies deduped across the selection. This is the "select one or more and
   `npx` install them" requirement.

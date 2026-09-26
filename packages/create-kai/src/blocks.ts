@@ -24,6 +24,17 @@
  * the scaffolder does) -> npm deps -> write files to targets -> print `docs`.
  * No components.json, no alias map, no import rewriting for the html targets;
  * the react form imports the published `@kitn.ai/ui/react` entry.
+ *
+ * RESOLUTION TAKES A LIST (spec 4, "select one or more"). One command may name
+ * several items, and the registryDependencies are deduped ACROSS the selection
+ * rather than per item, so a block two of them compose is written once.
+ *
+ * THE DATA AXIS RIDES ON TOP OF IT (spec 4): `mock`, `none` and `real`, one
+ * axis with three spellings. It is resolved from what a manifest DECLARES (its
+ * `mockFiles` and its `route:` dependencies), never guessed from a file name,
+ * and a mode the selection cannot satisfy THROWS naming what is missing. There
+ * is no fallback between modes: a mode that quietly became another mode is the
+ * one outcome the consumer cannot see and cannot repair.
  */
 import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
@@ -53,6 +64,10 @@ import { getIntegration, listIntegrations } from './catalog';
 import type { Integration } from './catalog';
 import type { Axis } from './axes';
 import { getFramework } from './frameworks';
+// The env file a keyed route needs is the GENERATOR's, not a second writer of
+// one: the wizard writes the same file through the same function, so a route
+// and its variables cannot disagree about their names.
+import { renderEnvFile } from './generate';
 import { emitRoute } from './routes';
 import type { EmittedFile } from './routes';
 
@@ -160,13 +175,33 @@ export interface BlockResolvers {
 const isUrl = (spec: string) => /^https?:\/\//.test(spec);
 
 /**
- * Resolve one requested item and its `registryDependencies`, recursively.
- * Bare names inside a URL-sourced item resolve as sibling `<name>.json` URLs
- * (the shadcn registry grammar); bare names inside a bundled block resolve
- * against the bundled registry. `route:<integration>` resolves against the
- * scaffolder catalog. Failures THROW with every known alternative named.
+ * Resolve every requested item (one command may name several) and their
+ * `registryDependencies`, recursively. Bare names inside a URL-sourced item
+ * resolve as sibling `<name>.json` URLs (the shadcn registry grammar); bare
+ * names inside a bundled block resolve against the bundled registry.
+ * `route:<integration>` resolves against the scaffolder catalog. Failures
+ * THROW with every known alternative named.
+ *
+ * THE FIRST ITEM IS NOT SPECIAL and neither is the last: the `done` and
+ * `routes` maps are shared by the whole selection, which is what dedupes a
+ * dependency two items compose (its files are planned once, its route emitted
+ * once). Resolving each item in its own call would plan that dependency twice,
+ * and the second write is the collision refusal the consumer cannot get past.
+ *
+ * THE MODE IS A PARAMETER because one of the three modes has a dependency of
+ * its own. `real` mode builds `route:<gateway>` HERE, from the gateway the
+ * consumer asked for, and resolves it against the scaffolder catalog exactly
+ * the way a declared `route:` dep resolves - the manifest cannot declare it
+ * for `add` (see `BlockManifest.wiring`: a route dependency resolves on every
+ * install, which is the backend nobody asked for) and the CLI can, because the
+ * CLI knows which mode is being installed. The other two modes add nothing.
  */
-export async function resolveAdd(spec: string, resolvers: BlockResolvers): Promise<ResolvedAdd> {
+export async function resolveAdd(
+  specs: readonly string[],
+  resolvers: BlockResolvers,
+  wiring: AddMode = MOCK_MODE,
+): Promise<ResolvedAdd> {
+  if (specs.length === 0) throw new Error('no block was named');
   const blocks: Block[] = [];
   const routes = new Map<string, Integration>();
   const visiting = new Set<string>();
@@ -215,7 +250,11 @@ export async function resolveAdd(spec: string, resolvers: BlockResolvers): Promi
     blocks.push(block);
   }
 
-  await visit(spec, null);
+  for (const spec of specs) await visit(spec, null);
+  // The one dependency a MODE contributes: the backend route `--gateway`
+  // asked for. Added after the selection so it is resolved once, however many
+  // items the selection holds.
+  if (wiring.mode === 'real') await visit(`route:${wiring.gateway}`, null);
   return { blocks, routes: [...routes.values()] };
 }
 
@@ -333,6 +372,151 @@ export function blockFormAxis(found: readonly string[], forms: readonly (Project
   };
 }
 
+// --------------------------------------------------------------- data axis
+
+/**
+ * WHERE A BLOCK'S TRANSPORT COMES FROM - the one axis spec section 4 ("Wiring:
+ * three modes, one axis") names, with the three spellings the CLI exposes:
+ *
+ *   mock (default)      the composition PLUS the block's scripted mock
+ *   none (`--no-mock`)  the composition only: the consumer wires their own
+ *                       store or transport, or the MCP composes it
+ *   real (`--gateway`)  no scripted mock, plus the `route:<integration>` the
+ *                       block declares, emitted the way the scaffolder emits
+ *                       it, and the env file that route reads
+ *
+ * A mode is resolved from what the MANIFEST declares and never guessed from a
+ * file name: `wiring.mockFiles` says which files exist only for the scripted
+ * demo, and `wiring.gateways` says which backends the block can stream from. A
+ * mode the selection cannot satisfy is a THROW naming what is missing (see
+ * `wiringProblem` and `assertMockUnreferenced`) - never a quiet fallback,
+ * because a fallback is a decision made while withholding that it happened.
+ */
+export type AddMode =
+  | { mode: 'mock' }
+  | { mode: 'none' }
+  | { mode: 'real'; gateway: string };
+
+/** The mode a caller that does not say gets: the scripted mock, unchanged. */
+export const MOCK_MODE: AddMode = { mode: 'mock' };
+
+/** How a refusal names the mode the consumer asked for. */
+function modeFlag(wiring: AddMode): string {
+  return wiring.mode === 'real' ? `--gateway ${wiring.gateway}` : '--no-mock';
+}
+
+/**
+ * The mock files a block DECLARES (`wiring.mockFiles` in its
+ * `registry-item.json`).
+ *
+ * A block that ships a scripted demo declares it here; the file is also a
+ * `files[]` entry, because the mock-mode composition still ships it, and this
+ * list is what says WHICH of those files exist only for the mock. Nothing is
+ * derived from a file name: `mock.ts` is a convention, not a rule, so a block
+ * whose scripted data lives in `fixtures.ts` declares that instead.
+ *
+ * THE MEMBERSHIP CHECK IS NOT REDUNDANT with `validateBlockManifest`'s. A
+ * bundled block is validated on the way in, but a fetched per-block item JSON
+ * (`create-kai add <url>`) is parsed by `blockFromItemJson`, which grades the
+ * name and the paths and nothing else - so this is the one gate that item
+ * passes, and dropping nothing while the consumer asked for a mock-free
+ * install is exactly the silent outcome this axis exists to prevent.
+ */
+export function declaredMockFiles(block: Block): string[] {
+  const declared = block.manifest.wiring?.mockFiles ?? [];
+  for (const file of declared) {
+    if (!block.manifest.files.some((entry) => entry.path === file)) {
+      throw new Error(
+        `${block.name}: wiring.mockFiles lists "${file}", which is not a files[] entry; a mock file is also a file the block ships`,
+      );
+    }
+  }
+  return declared;
+}
+
+/** The integrations a block declares it can stream through (`wiring.gateways`). */
+function declaredGateways(block: Block): string[] {
+  return block.manifest.wiring?.gateways ?? [];
+}
+
+/**
+ * The PLANNED paths a mode that excludes the mock excludes.
+ *
+ * The declared path AND its stripped twin, because which of the two a form
+ * ships depends on the form: the html form writes `<name>.js` (the twin the
+ * bundled block carries) while the react form writes the `<name>.ts` source.
+ * Dropping only the declared one would leave the html form's mock in place.
+ */
+function mockPaths(block: Block): string[] {
+  const paths: string[] = [];
+  for (const declared of declaredMockFiles(block)) {
+    paths.push(declared, declared.replace(/\.ts$/, '.js'), declared.replace(/\.js$/, '.ts'));
+  }
+  return paths;
+}
+
+/**
+ * Can this selection satisfy this mode at all?
+ *
+ * Asked BEFORE anything is planned or printed, so an unsatisfiable mode
+ * refuses whole (the way a collision does) instead of writing the part of the
+ * composition it could and calling that a result. Each refusal names the mode
+ * and the way out; the gateway one names the gateways the selection DOES
+ * declare, which is the only list a consumer can act on.
+ */
+function wiringProblem(resolved: ResolvedAdd, wiring: AddMode, form: BlockForm): string | null {
+  if (wiring.mode === 'mock') return null;
+  if (form === 'cdn') {
+    return (
+      `${modeFlag(wiring)}: the cdn paste form is ONE self-contained file - its scripts are inlined into the page - ` +
+      `so there is no separate mock to leave out. Run \`create-kai add\` inside a project for a mock-free install.`
+    );
+  }
+  if (wiring.mode === 'real') {
+    const missing = resolved.blocks.filter((block) => !declaredGateways(block).includes(wiring.gateway));
+    if (missing.length > 0) {
+      const valid = [...new Set(resolved.blocks.flatMap(declaredGateways))];
+      return (
+        `--gateway ${wiring.gateway}: ${missing.map((block) => block.name).join(', ')} ` +
+        `${missing.length === 1 ? 'declares' : 'declare'} no route for it. ` +
+        `This selection declares ${valid.length > 0 ? valid.join(', ') : 'none'}; ` +
+        `pass one of those, or --no-mock and wire the transport yourself.`
+      );
+    }
+  }
+  return null;
+}
+
+/**
+ * A planned file that still imports a module the requested mode leaves out.
+ *
+ * THIS is what makes a mock-free mode honest rather than optimistic. A block's
+ * controller imports its mock (`from './mock'`) and the renderers copy it
+ * verbatim, so dropping the file alone emits a project that cannot resolve the
+ * import - a failure the consumer meets at build time, long after `add` said
+ * it succeeded. The scan is over the emitted files (page, binder, controller,
+ * stylesheet) so a page's `<script src="./mock.js">` is caught too, and it
+ * names the importer and the specifier so the block's fix is obvious.
+ */
+function assertMockUnreferenced(block: Block, files: readonly FormFile[], dropped: readonly string[]): void {
+  const names = new Set(dropped.map((path) => (path.split('/').pop() ?? path).replace(/\.(js|ts)$/, '')));
+  for (const file of files) {
+    const found: string[] = [];
+    for (const match of file.content.matchAll(/['"(](\.{1,2}\/[^'")]+)['")]/g)) {
+      const base = (match[1].split('/').pop() ?? match[1]).replace(/\.(js|jsx|ts|tsx|mjs)$/, '');
+      if (names.has(base) && !found.includes(match[1])) found.push(match[1]);
+    }
+    if (found.length > 0) {
+      throw new Error(
+        `${block.name} cannot be installed without its scripted mock yet: ${file.path} still imports ` +
+        `${found.map((spec) => `"${spec}"`).join(', ')}, and ${block.name} declares that module as a mock file ` +
+        `(${declaredMockFiles(block).join(', ')}). The block's controller has to stop importing the mock before ` +
+        `a mock-free install compiles; install it without the flag for the scripted mock.`,
+      );
+    }
+  }
+}
+
 // ------------------------------------------------------------ write planning
 
 export interface AddPlan {
@@ -344,6 +528,17 @@ export interface AddPlan {
   docs: string[];
   /** decided-loudly lines: what was chosen or skipped, and why */
   notes: string[];
+  /**
+   * The env file a keyed route reads, created ONLY WHEN ABSENT.
+   *
+   * Deliberately not a `files[]` entry: a block file that already exists
+   * refuses the whole install (add never overwrites), and `.env.local` is a
+   * file consumers already have - refusing an install over the consumer's own
+   * key file would be the collision rule eating the feature. So this one is
+   * created when missing and REPORTED either way, which keeps the key names in
+   * front of the consumer instead of the file silently not being written.
+   */
+  env?: { path: string; contents: string; vars: readonly string[] };
 }
 
 export interface PlanOptions {
@@ -352,18 +547,32 @@ export interface PlanOptions {
   kitRange: string;
   /** the exact kit version, for the cdn form's pinned URLs */
   kitVersion: string;
+  /**
+   * The data mode the consumer asked for (spec 4). Optional, defaulting to the
+   * scripted mock, because that is what every caller that says nothing means:
+   * `add` with no flag, and the `/blocks` preview itself.
+   */
+  wiring?: AddMode;
 }
 
 /**
  * Plan every write for a resolved add. Pure: the caller owns collision
  * checking and the filesystem. Throws when a block cannot be rendered in the
- * requested form - a refusal that names the reason, never a partial block.
+ * requested form - a refusal that names the reason, never a partial block -
+ * and when the requested DATA MODE cannot be satisfied (spec 4): a gateway no
+ * block declares a route for, a file still importing the dropped mock, the
+ * single-file paste form asked to leave a file out.
  */
 export function planAdd(resolved: ResolvedAdd, opts: PlanOptions): AddPlan {
+  const wiring = opts.wiring ?? MOCK_MODE;
   const plan: AddPlan = { files: [], dependencies: {}, docs: [], notes: [] };
 
+  // The mode is decided before a file is planned or a note is printed.
+  const unsatisfiable = wiringProblem(resolved, wiring, opts.form);
+  if (unsatisfiable) throw new Error(unsatisfiable);
+
   for (const block of resolved.blocks) {
-    planFormBlock(block, opts, plan);
+    planFormBlock(block, opts, plan, wiring);
     for (const dep of block.manifest.dependencies ?? []) {
       // The kit rides the CLI's own pin; anything else a block declares is
       // installed at latest, and the note says so out loud.
@@ -378,7 +587,16 @@ export function planAdd(resolved: ResolvedAdd, opts: PlanOptions): AddPlan {
     for (const [name, note] of envVars) plan.notes.push(`${block.name} needs ${name}: ${note}`);
   }
 
-  planRoutes(resolved, opts, plan);
+  // A mock-free mode that removed nothing says so. "It did something" is not a
+  // safe assumption for a consumer to make; "there was nothing to leave out" is
+  // a fact they can act on.
+  if (wiring.mode !== 'mock' && resolved.blocks.every((block) => declaredMockFiles(block).length === 0)) {
+    plan.notes.push(
+      `${modeFlag(wiring)}: no block in this selection declares a scripted mock (wiring.mockFiles in its registry-item.json), so there was nothing to leave out.`,
+    );
+  }
+
+  planRoutes(resolved, opts, plan, wiring);
   return plan;
 }
 
@@ -416,8 +634,14 @@ function planFiles(files: readonly FormFile[], plan: AddPlan): void {
  * renderer produces if the caller decides by hand instead of asking
  * `@kitn.ai/blocks`.
  */
-function planFormBlock(block: Block, opts: PlanOptions, plan: AddPlan): void {
-  const files = renderBlockForm(block, opts.form, { cdn: { version: opts.kitVersion } });
+function planFormBlock(block: Block, opts: PlanOptions, plan: AddPlan, wiring: AddMode): void {
+  const rendered = renderBlockForm(block, opts.form, { cdn: { version: opts.kitVersion } });
+  // The mock files are dropped BEFORE the plan sees them, so the write list and
+  // the refusal below are about the same set of files. `mock` mode passes the
+  // renderer's list through untouched.
+  const dropped = wiring.mode === 'mock' ? [] : mockPaths(block);
+  const files = dropped.length > 0 ? rendered.filter((file) => !dropped.includes(file.path)) : rendered;
+  if (dropped.length > 0) assertMockUnreferenced(block, files, dropped);
   planFiles(files, plan);
 
   if (opts.form === 'cdn') {
@@ -450,7 +674,32 @@ function planFormBlock(block: Block, opts: PlanOptions, plan: AddPlan): void {
   );
 }
 
-function planRoutes(resolved: ResolvedAdd, opts: PlanOptions, plan: AddPlan): void {
+/**
+ * The backend routes a mode writes, or the sentence saying why it wrote none.
+ *
+ * ONLY `real` WRITES A ROUTE, and the two other modes SAY SO rather than
+ * omitting it quietly: a block that declares a backend route ships without one
+ * under the mock or the composition-only mode, and a consumer who cannot see
+ * that decision reads the missing route as a bug in the block.
+ */
+function planRoutes(resolved: ResolvedAdd, opts: PlanOptions, plan: AddPlan, wiring: AddMode): void {
+  if (wiring.mode !== 'real') {
+    // The declaration is the mock-free modes' way of saying what this block
+    // COULD be installed against, so the note names the gateways to pass.
+    for (const gateway of [...new Set(resolved.blocks.flatMap(declaredGateways))]) {
+      plan.notes.push(
+        `${modeFlag(wiring)}: no backend route was written; this block declares ${gateway}. ` +
+          (wiring.mode === 'none'
+            ? 'The composition-only form leaves the transport to you.'
+            : `Pass \`--gateway ${gateway}\` for the route the scaffolder emits, or --no-mock to wire your own.`),
+      );
+    }
+    return;
+  }
+
+  // `--gateway <id>` is validated in `wiringProblem` against every block's own
+  // declarations, and `resolveAdd` resolved the ONE route the consumer asked
+  // for, so what is left here is emitting it.
   for (const integration of resolved.routes) {
     if (opts.form === 'react') {
       // The same emission the scaffolder uses: the catalog's webRoute fragment
@@ -465,6 +714,16 @@ function planRoutes(resolved: ResolvedAdd, opts: PlanOptions, plan: AddPlan): vo
       plan.notes.push(
         `route ${integration.id}: ${files.map((f) => f.path).join(', ')} written; wire the plugin from vite-chat-api.ts into vite.config.ts plugins, and see https://ui.kitn.ai/${integration.docsSlug}`,
       );
+      // The env file the route reads, at the path the react framework declares
+      // (`paths.env`), with the names the catalog declares. Only when there is
+      // a key to set: a gateway with no env vars has no env file to write.
+      if (framework && integration.envVars.length > 0) {
+        plan.env = {
+          path: framework.paths.env,
+          contents: renderEnvFile(integration.envVars, integration.runNote),
+          vars: integration.envVars,
+        };
+      }
     } else {
       plan.notes.push(
         `route ${integration.id}: this block streams through a ${integration.title} backend, and only the react form emits one today. ` +

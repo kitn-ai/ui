@@ -7,11 +7,20 @@
     <link rel="stylesheet" href="./assistant.css" />
   </head>
   <body>
-    <!-- The full-page assistant on the kit's own parts: a kai-conversations
-         rail (its built-in header, search and New chat), a top bar carrying
-         the kai-model-switcher recipe, and the thread + composer column.
-         The whole page IS the block here, so data-block-root sits on the app
-         grid; there is no host stand-in to leave behind.
+    <!-- The full-page assistant as a composition of the kit's own parts. The
+         kai-workspace SHELL owns the layout - the start aside for the rail, the
+         resize handle between the columns, the collapse breakpoint and the
+         drawer below it - and the chat parts ride in its slots: a
+         kai-conversations rail, and a top bar + kai-thread + kai-prompt-input
+         column in main. The whole page IS the block, so data-block-root sits on
+         the shell; there is no host stand-in to leave behind.
+
+         THE SHELL IS UNCONTROLLED ON PURPOSE. `startCollapsed` is exactly what
+         `collapse-below` will not fight (the shell skips a controlled aside),
+         so the breakpoint keeps working and the block mirrors the shell's own
+         kai-aside-toggle into State instead: the rail's controlled `collapsed`
+         and the top bar's reopen button both read that one field, which is what
+         keeps them from disagreeing with the shell.
 
          The wiring is DECLARED here and applied by the generated binder (spec
          3.1): .prop sets a JS property, :attr a runtime scalar attribute,
@@ -21,16 +30,29 @@
          every derivation, the rail's search filter included, is a field of
          State. The ids are for the block driver's state script, which is
          authored rather than generated. -->
-    <div class="app" data-block-root>
-      <!-- The rail in ITEM mode (the documented consumer-owned loop): the
-           rows are the block's own, so the built-in search box filters
-           nothing by itself and the block does the filtering in State. -->
+    <kai-workspace
+      id="workspace"
+      class="app"
+      data-block-root
+      #ref="workspace"
+      :collapse-below="collapseBelow"
+      :drawer-below="drawerBelow"
+      @kai-aside-toggle="asideToggle"
+    >
+      <!-- The rail in ITEM mode (the documented consumer-owned loop): the rows
+           are the block's own, so the built-in search box filters nothing by
+           itself and the block does the filtering in State. Its built-in header
+           toggle fires kai-toggle-sidebar, and collapseRail answers it with the
+           SHELL's collapse: the column goes and main reflows, rather than the
+           rail folding itself inside a column the page keeps. -->
       <kai-conversations
         id="conversations"
-        class="rail"
+        slot="start"
+        .collapsed="railCollapsed"
         .activeId="activeId"
         @kai-conversation-select="openConversation"
         @kai-new-chat="newChat"
+        @kai-toggle-sidebar="collapseRail"
         @kai-search="search"
       >
         <kai-conversation-item
@@ -45,9 +67,23 @@
         </kai-conversation-item>
       </kai-conversations>
 
-      <main class="main">
+      <main slot="main" class="main">
         <header class="topbar">
-          <h1>Assistant</h1>
+          <div class="topbar-start">
+            <!-- A collapsed aside is not painted at all (the shell's own call),
+                 so the way back is the page's, not the rail's. -->
+            <kai-button
+              id="rail-reopen"
+              variant="ghost"
+              size="icon-sm"
+              icon="panel-left"
+              label="Open sidebar"
+              hidden
+              :hidden="railReopenHidden"
+              @kai-click="expandRail"
+            ></kai-button>
+            <h1>Assistant</h1>
+          </div>
           <!-- The model switcher recipe: a standalone leaf element with no
                navigation anywhere near it. Models in as a JS property,
                selection out via kai-model-change. -->
@@ -75,6 +111,6 @@
           @kai-submit="submit"
         ></kai-prompt-input>
       </main>
-    </div>
+    </kai-workspace>
   </body>
 </html>

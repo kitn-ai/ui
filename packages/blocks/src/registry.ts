@@ -64,6 +64,29 @@ export interface BlockManifest {
   files: BlockFileEntry[];
   /** npm dependencies the `add` form needs (the CDN form needs none). */
   dependencies?: string[];
+  /**
+   * WHAT THIS BLOCK CAN BE INSTALLED AS (spec 4, "three modes, one axis"). The
+   * data mode is the CONSUMER's choice, not a property of the composition, so a
+   * manifest declares the choices rather than resolving one:
+   *
+   *   mockFiles  the scripted-demo files. Written in the default mode, and left
+   *              out by both `--no-mock` and `--gateway`.
+   *   gateways   the integrations this block can stream through. `--gateway
+   *              <id>` needs the id here, and the CLI builds the `route:<id>`
+   *              dependency from it AT INSTALL TIME.
+   *
+   * DELIBERATELY NOT `registryDependencies`. Those resolve on EVERY install, so
+   * a route listed there is emitted by a plain `create-kai add` as well - a
+   * backend nobody asked for, with the block installed against a key the
+   * consumer does not have. A capability list is resolved only by the mode that
+   * asks for it.
+   *
+   * An absent or empty `gateways` means `--gateway` on this block FAILS
+   * LOUDLY (the CLI names the gateways it does declare, or `none`): a block with
+   * no declared gateway cannot be installed keyed, and quietly installing the
+   * mock instead is the fallback this axis exists to prevent.
+   */
+  wiring?: { gateways?: string[]; mockFiles?: string[] };
   /** Blocks this block composes (bare name), backend routes it streams
    *  through (`route:<integration>`), namespaced (`@ns/name`) or URL items. */
   registryDependencies?: string[];
@@ -210,6 +233,46 @@ export function validateBlockManifest(
       }
     }
     if (pages !== 1) errors.push(`${dirName}: exactly one files[] entry must be type "registry:page" (the CDN form's source), found ${pages}`);
+  }
+
+  // wiring - the data axis this block can be installed as (spec 4).
+  if (m.wiring !== undefined) {
+    if (!isRecord(m.wiring)) {
+      errors.push(`${dirName}: "wiring" must be an object with optional "gateways" and "mockFiles" arrays`);
+    } else {
+      // Bound to a local because the narrowing above does not survive into the
+      // closure below (a property read is re-widened inside a callback).
+      const wiring = m.wiring;
+      const readList = (key: 'gateways' | 'mockFiles'): string[] | null => {
+        const value = wiring[key];
+        if (value === undefined) return [];
+        if (!Array.isArray(value) || value.some((entry) => typeof entry !== 'string')) {
+          errors.push(`${dirName}: wiring.${key} must be an array of strings`);
+          return null;
+        }
+        return value as string[];
+      };
+      for (const id of readList('gateways') ?? []) {
+        if (!ctx.routeIntegrations.includes(id)) {
+          errors.push(
+            `${dirName}: wiring.gateways entry "${id}" is not a scaffolder integration (known: ${ctx.routeIntegrations.join(', ')})`,
+          );
+        }
+      }
+      // DERIVED, not trusted: the files[] list is what the block actually ships,
+      // so a mockFiles entry naming anything else is a declaration the CLI can
+      // only discover by dropping nothing.
+      const shipped = new Set(
+        (Array.isArray(m.files) ? m.files : [])
+          .map((entry) => (isRecord(entry) && typeof entry.path === 'string' ? entry.path : null))
+          .filter((entry): entry is string => entry !== null),
+      );
+      for (const file of readList('mockFiles') ?? []) {
+        if (!shipped.has(file)) {
+          errors.push(`${dirName}: wiring.mockFiles lists "${file}", which no files[] entry ships`);
+        }
+      }
+    }
   }
 
   // registryDependencies — bare block names, route:<integration>, @ns/name, URL.

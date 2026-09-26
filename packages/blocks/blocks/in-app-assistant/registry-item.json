@@ -10,6 +10,7 @@
     { "path": "in-app-assistant.css", "type": "registry:file" },
     { "path": "mock.ts", "type": "registry:file" }
   ],
+  "wiring": { "gateways": ["openrouter", "anthropic"], "mockFiles": ["mock.ts"] },
   "dependencies": ["@kitn.ai/ui"],
   "registryDependencies": [],
   "cssVars": { "light": {}, "dark": {} },
