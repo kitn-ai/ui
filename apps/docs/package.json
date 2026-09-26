@@ -18,7 +18,9 @@
     "pretest": "node scripts/copy-blocks.mjs",
     "test": "vitest run",
     "pretypecheck:blocks": "node scripts/copy-blocks.mjs",
-    "typecheck:blocks": "tsc --noEmit -p tsconfig.blocks.json"
+    "typecheck:blocks": "tsc --noEmit -p tsconfig.blocks.json",
+    "dev:blocks": "KAI_BLOCKS_KIT=local astro dev",
+    "predev:blocks": "node scripts/copy-kit-assets.mjs && KAI_BLOCKS_KIT=local node scripts/copy-blocks.mjs"
   },
   "dependencies": {
     "@astrojs/solid-js": "^6.0.1",

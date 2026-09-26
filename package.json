@@ -16,7 +16,8 @@
     "test": "nx run-many -t test",
     "typecheck": "nx run-many -t typecheck",
     "build:ui": "nx build ui",
-    "build:docs": "nx build docs"
+    "build:docs": "nx build docs",
+    "dev:blocks": "node scripts/dev-blocks.mjs"
   },
   "devDependencies": {
     "nx": "^23.0.1"
