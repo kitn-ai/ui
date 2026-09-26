@@ -72,11 +72,17 @@ export function resolveExpandedProp(
 /**
  * Feeds the resolver from a live editable.
  *
- * The line height is read from the element's OWN computed style, so a theme that
- * changes the prose size moves the threshold with it rather than leaving a
- * hand-typed number behind that agrees today. The observer's disposer is
- * registered on the effect, not on mount, so swapping the editable re-observes the
- * new one instead of leaving a ResizeObserver on a detached node.
+ * The line height is read from the element's own computed style ON EVERY
+ * EVALUATION rather than captured once per element, so a theme that changes the
+ * prose size moves the threshold with it instead of leaving a hand-typed number
+ * behind that agrees today. Reading it in the observer callback instead would miss a
+ * font-size DECREASE on a short editable: the content box stays pinned at its
+ * min-height, no resize arrives, and a stale and now too-large threshold goes on
+ * classifying two lines as one.
+ *
+ * The observer watches the CONTENT HEIGHT alone. Its disposer is registered on the
+ * effect rather than on mount, so swapping the editable re-observes the new one
+ * instead of leaving a ResizeObserver on a detached node.
  */
 export function useComposerExpansion(options: {
   editable: () => HTMLElement | undefined;
@@ -84,23 +90,25 @@ export function useComposerExpansion(options: {
   attachmentCount: () => number;
 }): () => ComposerLayout {
   const [contentHeight, setContentHeight] = createSignal(0);
-  const [lineHeight, setLineHeight] = createSignal(0);
 
   createEffect(() => {
     const el = options.editable();
     if (!el) return;
-    // Shared with `use-auto-resize`, which asks the same question about an editable
-    // of its own: the `normal` keyword is recovered there, so this cannot read a
-    // perfectly ordinary line height as zero and stop responding to text.
-    setLineHeight(resolveLineHeight(el));
     onCleanup(observeContentHeight(el, setContentHeight));
   });
 
-  return () =>
-    resolveComposerLayout({
+  return () => {
+    const el = options.editable();
+    return resolveComposerLayout({
       pinned: options.pinned(),
       contentHeight: contentHeight(),
-      lineHeight: lineHeight(),
+      // Shared with `use-auto-resize`, which asks the same question about an editable
+      // of its own: the `normal` keyword is recovered there, so this cannot read a
+      // perfectly ordinary line height as zero and stop responding to text. Read
+      // here, not beside the observer, so it cannot go stale against the content it
+      // is compared with.
+      lineHeight: el ? resolveLineHeight(el) : 0,
       attachmentCount: options.attachmentCount(),
     });
+  };
 }

@@ -23,8 +23,8 @@ interface UseAutoResizeOptions {
  */
 function oneLineHeight(el: HTMLTextAreaElement): number {
   const cs = getComputedStyle(el);
-  const paddingY = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
-  const borderY = (parseFloat(cs.borderTopWidth) || 0) + (parseFloat(cs.borderBottomWidth) || 0);
+  const paddingY = (Number.parseFloat(cs.paddingTop) || 0) + (Number.parseFloat(cs.paddingBottom) || 0);
+  const borderY = (Number.parseFloat(cs.borderTopWidth) || 0) + (Number.parseFloat(cs.borderBottomWidth) || 0);
   return resolveLineHeight(el) + paddingY + borderY;
 }
 

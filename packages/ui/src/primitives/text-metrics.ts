@@ -20,7 +20,10 @@
  *  the same line height. */
 const FALLBACK_FONT_SIZE_PX = 14;
 
-/** CSS's own ratio for `line-height: normal`: the used value is `font-size × 1.2`. */
+/** The ratio assumed for `line-height: normal` when the environment will not
+ *  resolve it. Not a CSS constant: the used value comes from the FONT's own metrics
+ *  (ascent + descent + line gap), which lands near 1.2 for common fonts and differs
+ *  between them, so this is a convention rather than a fact about the keyword. */
 const NORMAL_LINE_HEIGHT_FACTOR = 1.2;
 
 /**

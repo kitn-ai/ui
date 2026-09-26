@@ -53,7 +53,18 @@ describe('resolveExpandedProp', () => {
   });
 });
 
-describe('the line height the hook feeds the resolver', () => {
+/**
+ * The line height the expansion rule READS — the regression for the defect that
+ * left the composer unable to expand at all.
+ *
+ * This block calls `resolveLineHeight` and composes it with `resolveComposerLayout`
+ * by hand, so it covers those two functions and NOT the hook that wires them
+ * together. That half is only observable where there is real layout — a live
+ * font-size change has to be shown NOT to change the classification — and jsdom
+ * neither lays out nor resolves a line height, so the hook's wiring belongs in a
+ * real browser and not here.
+ */
+describe('the line height the expansion rule reads', () => {
   afterEach(() => vi.unstubAllGlobals());
 
   it('expands for a wrapped line when the editable reports the `normal` keyword', () => {
