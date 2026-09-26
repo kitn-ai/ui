@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@solidjs/testing-library';
 import { createSignal } from 'solid-js';
-import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem, DropdownRadioItem, DropdownCheckboxItem, DropdownNote } from '../../src/components/dropdown/dropdown';
+import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem, DropdownRadioItem, DropdownCheckboxItem, DropdownNote, DropdownSub, DropdownSubTrigger, DropdownSubContent } from '../../src/components/dropdown/dropdown';
 
 // jsdom (v24) does not implement the PointerEvent constructor. useDismiss
 // listens for `pointerdown`; copy the shim from overlay.test.tsx.
@@ -388,6 +388,7 @@ describe('Dropdown item length and state', () => {
         <DropdownContent>
           <DropdownCheckboxItem checked>Web search</DropdownCheckboxItem>
           <DropdownCheckboxItem checked control="switch">Google Drive</DropdownCheckboxItem>
+          <DropdownCheckboxItem checked={false} control="switch">Figma</DropdownCheckboxItem>
         </DropdownContent>
       </Dropdown>
     ));
@@ -403,6 +404,43 @@ describe('Dropdown item length and state', () => {
     const knob = rows[1].querySelector('[role="switch"]');
     expect(knob).toHaveAttribute('aria-hidden', 'true');
     expect(knob).toHaveAttribute('tabindex', '-1');
+
+    // The column's geometry belongs to the CONTROL. The themed Switch is 36x20 and
+    // `shrink-0`, so a column sized for the 16px checkmark has it overflow by ~20px
+    // across and 2px above and below. jsdom measures nothing, so this is the honest
+    // unit-level guard — the class list — and NOT proof of fit: the measurement is in
+    // a real browser, scripts/probe-composer-states.mjs check 9.
+    const columnOf = (row: HTMLElement) => row.lastElementChild as HTMLElement;
+    expect(columnOf(rows[0]).className).toContain('w-8');
+    expect(columnOf(rows[0]).className).toContain('pl-4');
+    expect(columnOf(rows[1]).className).toContain('w-11');
+    expect(columnOf(rows[1]).className).toContain('pl-2');
+    expect(columnOf(rows[1]).className).toContain('h-5');
+    // A checked switch and an unchecked one reserve the SAME column, so the column
+    // does not move when the state flips.
+    expect(columnOf(rows[2]).className).toBe(columnOf(rows[1]).className);
+  });
+
+  it('renders a description on a submenu trigger instead of dropping it', () => {
+    render(() => (
+      <Dropdown>
+        <DropdownTrigger as={(p: any) => <button {...p} data-testid="trg">Menu</button>} />
+        <DropdownContent>
+          <DropdownSub>
+            <DropdownSubTrigger description="Where your tools live">Skills</DropdownSubTrigger>
+            <DropdownSubContent>
+              <DropdownItem>skill-creator</DropdownItem>
+            </DropdownSubContent>
+          </DropdownSub>
+        </DropdownContent>
+      </Dropdown>
+    ));
+    fireEvent.click(screen.getByTestId('trg'));
+    // `description` promises a muted second line with no exception, so an item that
+    // carries children renders it rather than swallowing it.
+    expect(screen.getByText('Where your tools live')).toBeInTheDocument();
+    // And the row is still a submenu, not a leaf that happens to have text under it.
+    expect(screen.getByRole('menuitem')).toHaveAttribute('aria-haspopup', 'menu');
   });
 
   it('a note is not a menu item', () => {

@@ -158,6 +158,9 @@ describe('kai-menu item tree', () => {
       { id: 'image', label: 'Create image', description: 'Visualize anything' },
       { id: 'drive', label: 'Google Drive', checked: true, control: 'switch' },
       { id: 'web', label: 'Web search', checked: true },
+      // A parent carries children AND a description. It must render as the submenu
+      // it is, with its second line, rather than losing one or becoming the other.
+      { id: 'skills', label: 'Skills', description: 'Where your tools live', items: [{ id: 'sc', label: 'skill-creator' }] },
     ]);
     el.show();
     await flush();
@@ -165,6 +168,7 @@ describe('kai-menu item tree', () => {
     const menu = menuOf(el)!;
     expect(menu.textContent).toContain('Visualize anything');
     expect(menu.textContent).toContain("Design systems aren't available on your plan.");
+    expect(menu.textContent).toContain('Where your tools live');
 
     // The note is NOT one of the toggles: two checked rows, not three.
     expect(menu.querySelectorAll('[role="menuitemcheckbox"]').length).toBe(2);
@@ -173,6 +177,11 @@ describe('kai-menu item tree', () => {
     const knob = menu.querySelector('[role="switch"]');
     expect(knob?.getAttribute('aria-hidden')).toBe('true');
     expect(knob?.getAttribute('tabindex')).toBe('-1');
+
+    // The described parent is a submenu row, not a leaf: the ladder decides by the
+    // fields present, and a description is not one of the structural ones.
+    const sub = menu.querySelector('[role="menuitem"][aria-haspopup="menu"]');
+    expect(sub?.textContent).toContain('Skills');
   });
 
   test('a note is checked BEFORE a submenu, so it never renders as one', async () => {

@@ -164,7 +164,13 @@ export interface DropdownRadioItemProps extends DropdownItemProps { checked?: bo
 
 export interface DropdownSubProps { children: JSX.Element }
 
-export interface DropdownSubTriggerProps { children: JSX.Element; class?: string }
+export interface DropdownSubTriggerProps {
+  children: JSX.Element;
+  /** A muted second line under the label, stacked exactly as the leaf items stack
+   *  theirs. A submenu parent renders its description; it is not dropped. */
+  description?: string;
+  class?: string;
+}
 
 export interface DropdownSubContentProps { children: JSX.Element; class?: string }
 
@@ -445,6 +451,29 @@ function ItemLabel(props: { children: JSX.Element; description?: string }) {
   );
 }
 
+/** The trailing column's geometry, per control.
+ *
+ *  ONE place, because two copies that agree today are two copies that drift: the
+ *  radio item and the checkbox item must reserve the IDENTICAL column so their rows
+ *  line up, and that is asserted.
+ *
+ *  The geometry is the CONTROL's, not one size for both: the checkmark needs a 16px
+ *  box behind the same 16px of reserved separation the menu facade's shortcut slot
+ *  uses (`w-8 pl-4`), while the themed Switch is 36x20 (`h-5 w-9`) and `shrink-0`, so
+ *  a column sized for the checkmark has it overflow by ~20px across and 2px above
+ *  and below. In the switch column `w-11 pl-2` is exactly the switch's 36px of
+ *  content and `h-5` is its 20px.
+ *
+ *  The width is fixed in both variants, so a checked row and an unchecked one reserve
+ *  the same space rather than leaving the gap to whatever slack the surface happens
+ *  to have. `ml-auto` means only the span's LEFT edge moves with the width, so every
+ *  trailing glyph in a menu that mixes checks and switches still ends flush against
+ *  the row's trailing edge. */
+const TRAILING_COLUMN = {
+  check: 'ml-auto flex h-4 w-8 shrink-0 items-center justify-center pl-4 text-muted-foreground',
+  switch: 'ml-auto flex h-5 w-11 shrink-0 items-center justify-center pl-2 text-muted-foreground',
+} as const;
+
 /**
  * A togglable menu item.
  * a11y: `role="menuitemcheckbox"` + `aria-checked`. Activating fires `onSelect`
@@ -475,11 +504,8 @@ export function DropdownCheckboxItem(props: DropdownCheckboxItemProps) {
       )}
     >
       <ItemLabel description={props.description}>{props.children}</ItemLabel>
-      {/* Trailing check column: 16px of reserved separation — the same `pl-4` the menu
-          facade's shortcut slot reserves — plus a 16px icon box. The width is fixed
-          (`w-8`, 16 + 16), so the column is the same checked or unchecked and the gap
-          does not depend on the surface happening to have slack. */}
-      <span class="ml-auto flex h-4 w-8 shrink-0 items-center justify-center pl-4 text-muted-foreground">
+      {/* Trailing column; see TRAILING_COLUMN for why the switch variant differs. */}
+      <span class={TRAILING_COLUMN[props.control === 'switch' ? 'switch' : 'check']}>
         <Show when={props.checked}>
           <Show when={props.control === 'switch'} fallback={<Check class="size-4" aria-hidden="true" />}>
             {/* DECORATION. The row owns role="menuitemcheckbox" and aria-checked; a
@@ -525,8 +551,9 @@ export function DropdownRadioItem(props: DropdownRadioItemProps) {
       )}
     >
       <ItemLabel description={props.description}>{props.children}</ItemLabel>
-      {/* Same reserved trailing column as the checkbox item above. */}
-      <span class="ml-auto flex h-4 w-8 shrink-0 items-center justify-center pl-4 text-muted-foreground">
+      {/* The check column: a radio item has no `control`, so it takes the checkmark's
+          geometry — the SAME constant the checkbox item uses, so the two line up. */}
+      <span class={TRAILING_COLUMN.check}>
         <Show when={props.checked}><Check class="size-4" aria-hidden="true" /></Show>
       </span>
     </div>
@@ -641,7 +668,7 @@ export function DropdownSubTrigger(props: DropdownSubTriggerProps) {
       )}
       data-expanded={sub.open() ? '' : undefined}
     >
-      {props.children}
+      <ItemLabel description={props.description}>{props.children}</ItemLabel>
       <ChevronRight class="ml-auto size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
     </div>
   );

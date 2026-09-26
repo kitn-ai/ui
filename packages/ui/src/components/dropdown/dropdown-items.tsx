@@ -49,7 +49,7 @@ export function DropdownItems(props: DropdownItemsProps): JSX.Element {
         if (item.items && item.items.length > 0) {
           return (
             <DropdownSub>
-              <DropdownSubTrigger>
+              <DropdownSubTrigger description={item.description}>
                 <Show when={item.icon}>{renderIcon(item.icon, ICON_OPTS)}</Show>
                 {item.label}
               </DropdownSubTrigger>

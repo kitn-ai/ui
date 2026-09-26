@@ -116,7 +116,8 @@ export interface KaiMenuItem {
   description?: string;
   /** The trailing glyph for a togglable item. Defaults to `check`. */
   control?: 'check' | 'switch';
-  /** A non-interactive muted text row (uses `label`), for a disabled group's reason. */
+  /** A non-interactive muted text row (uses `label`), for a disabled group's
+   *  reason. `label` is required; without it the row is empty. */
   note?: true;
   /** A divider (ignores other fields). */
   separator?: boolean;
