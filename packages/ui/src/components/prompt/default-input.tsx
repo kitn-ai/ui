@@ -273,8 +273,14 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
             these controls share the text's row and belong to its left, and expanded the
             editable's own `order-first` is what moves the text onto the line above
             them. Deliberately no order of its own — the ordering lives in one place,
-            on the body wrapper, rather than in three class strings that have to agree. */}
-        <PromptInputActions data-cluster="leading" class="shrink-0">
+            on the body wrapper, rather than in three class strings that have to agree.
+            No width or shrink of its own either: the wrapper is `contents`, so what the
+            frame actually lays out is the group div below, and that div is what keeps
+            this cluster ONE item on whichever row it lands on. Nothing here has to state
+            which layout it is in — collapsed the body's `flex-1` absorbs the free space
+            ahead of it, expanded the frame's `justify-between` places it at the start of
+            the wrapped row. */}
+        <PromptInputActions data-cluster="leading">
           <div class="flex items-center gap-2">
             {/* Consumer-injected leading toolbar controls (e.g. a + menu). display:contents
                 ensures an empty slot adds no stray gap; projected nodes lay out as toolbar
@@ -370,10 +376,12 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
           </div>
         </PromptInputActions>
         <PromptInputTextarea placeholder={props.placeholder} aria-label={props.placeholder || 'Message'} triggers={props.triggers} kindIcons={props.kindIcons} onComposerChange={props.onComposerChange} />
-        {/* The TRAILING cluster, `ml-auto` so it pins to the far edge of whichever row
-            it lands on. The `toolbar-end` slot and the send button live together so
-            they stay adjacent at that edge. Native slot; projected by the element. */}
-        <PromptInputActions data-cluster="trailing" class="ml-auto shrink-0">
+        {/* The TRAILING cluster. It reaches the far edge of whichever row it lands on
+            without asking for one: collapsed the body's `flex-1` absorbs the free space
+            ahead of it, expanded the frame's `justify-between` puts it last. The
+            `toolbar-end` slot and the send button live together so they stay adjacent
+            at that edge. Native slot; projected by the element. */}
+        <PromptInputActions data-cluster="trailing">
           <div class="flex items-center gap-2">
             <slot name="toolbar-end" />
             <Show

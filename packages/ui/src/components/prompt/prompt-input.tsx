@@ -223,7 +223,21 @@ export interface PromptInputActionsProps extends JSX.HTMLAttributes<HTMLDivEleme
 function PromptInputActions(props: PromptInputActionsProps) {
   const [local, rest] = splitProps(props, ['children', 'class']);
   return (
-    <div class={cn('flex items-center gap-2', local.class)} {...rest}>
+    // `contents`, NOT a flex box, and that is what lets ONE DOM order serve both
+    // layouts. As a box this wrapper is a layout participant whose width means
+    // something different in each: content-width beside the body when collapsed, a
+    // full-width row of its own when the controls wrap below. Every hand-composed
+    // `PromptInput` + textarea + actions would then have to know which layout it was
+    // in — which is exactly what a `justify-end` on the wrapper was doing, and going
+    // inert is the point of this rather than a loss. With no box, its children ARE the
+    // frame's flex items: the frame's `gap` packs them and its `justify-between`
+    // distributes the wrapped row, so a caller stays ignorant of the layout and the
+    // layout stays in one place.
+    //
+    // The slots already solve the same problem the same way (`toolbar-start`). A
+    // caller that genuinely wants a box can still have one by passing a `display`
+    // utility — the class merge is last-wins, so `flex` here would win.
+    <div class={cn('contents', local.class)} {...rest}>
       {local.children}
     </div>
   );

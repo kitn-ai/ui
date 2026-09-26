@@ -79,6 +79,21 @@ describe('DefaultPromptInput geometry', () => {
   const body = (c: HTMLElement) => c.querySelector('[data-composer-body]') as HTMLElement;
   const editable = (c: HTMLElement) => c.querySelector('[data-kai-composer-editable]') as HTMLElement;
 
+  it('renders the control clusters as `contents`, so one DOM order serves both layouts', () => {
+    // The load-bearing fact about the wrapper, and why it is not a flex box: as a box
+    // it is a layout participant whose width means something different in each layout,
+    // so every hand-composed PromptInput + textarea + actions would have to know which
+    // one it was in. With no box its children ARE the frame's flex items, which the
+    // frame's `gap` packs and its `justify-between` distributes. A later reader turning
+    // this back into `flex items-center gap-2` reintroduces that, and leaves the frame
+    // with nothing to place.
+    const { container } = render(() => <DefaultPromptInput {...baseProps} />);
+    for (const cluster of ['leading', 'trailing'] as const) {
+      const el = frame(container).querySelector(`[data-cluster="${cluster}"]`) as HTMLElement;
+      expect(el.className).toContain('contents');
+    }
+  });
+
   it('collapsed: one row, on the measured padding, with the frame owning the insets', () => {
     const { container } = render(() => <DefaultPromptInput {...baseProps} />);
     expect(frame(container).className).toContain('flex-row');
