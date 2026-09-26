@@ -256,7 +256,13 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
         </Show>
         {/* Consumer-injected content inside the card, above the textarea (e.g. an
             inline status strip). A shadow-internal hole — unreachable from outside.
-            Native slot; inert outside a shadow root, projected by the custom element. */}
+            Native slot; inert outside a shadow root, projected by the custom element.
+            KNOW THIS: in the EXPANDED layout this content renders on the control row,
+            below the text, because the editable claims its own line with an `order`
+            the slot's assigned nodes cannot join — `order` is not inherited and does
+            not reach a slot's projected nodes, and wrapping the slot would cost the
+            collapsed row an empty box and its 8px gap. Pin `expanded` on the frame if
+            a host needs this content above the text in both layouts. */}
         <slot name="input-top" />
         {/* The LEADING cluster, and it sits BEFORE the editable in the DOM: collapsed
             these controls share the text's row and belong to its left, and expanded the
