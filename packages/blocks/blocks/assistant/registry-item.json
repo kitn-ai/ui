@@ -1,7 +1,7 @@
 {
   "name": "assistant",
   "title": "Assistant",
-  "description": "Full-page assistant laid out by the kai-workspace shell: the kai-conversations rail (built-in header, search and New chat) in the start aside, with the resize handle between the columns, a collapse the shell performs so main reflows, and an overlay drawer below the breakpoint. Main carries the kai-model-switcher recipe in its top bar, kai-thread and kai-prompt-input, and the headless conversation controller over local storage. Ships with a scripted mock so the thread demos reasoning, a settled tool call and citations on first paint.",
+  "description": "Full-page assistant laid out by the kai-workspace shell: the kai-conversations rail (built-in header, search and New chat) in the start aside, with the resize handle between the columns, a collapse the shell performs so main reflows, and an overlay drawer below the breakpoint. Every rail row carries its own menu, opened from the kebab where the timestamp sits, and the rail's footer holds a placeholder identity row with a menu of its own. Main carries the kai-model-switcher recipe in its top bar, kai-thread, and a kai-prompt-input with slash and at entity triggers and a voice path into kai-voice-input. Ships with a scripted mock so the thread demos reasoning, a settled tool call and citations on first paint.",
   "type": "registry:block",
   "categories": ["assistant", "full-page"],
   "files": [
@@ -26,6 +26,6 @@
   },
   "cssVars": { "light": {}, "dark": {} },
   "envVars": {},
-  "docs": "Runs against a scripted local mock out of the box - no endpoint, no key. The transport is one file, assistant.transport.ts: the scripted mock in the default mode, a POST to /api/chat with --gateway, a loud stub with --no-mock. Replace it with your own to go live, and keep parsing through the @kitn.ai/ui/wire readers.",
+  "docs": "Runs against a scripted local mock out of the box - no endpoint, no key. The transport is one file, assistant.transport.ts: the scripted mock in the default mode, a POST to /api/chat with --gateway, a loud stub with --no-mock. Replace it with your own to go live, and keep parsing through the @kitn.ai/ui/wire readers. A rail row's menu opens from the kebab beside its timestamp. Share is inert on purpose: it needs a share endpoint you own, so it is disabled with the reason in a tooltip rather than a live-looking no-op. The identity row at the foot of the rail is a placeholder (Demo User, Demo plan) with one item that works and one that says why it cannot: account screens belong to your app, not to this block. Keyboard: F2 renames the open conversation, Cmd+Shift+P (Ctrl+Shift+P elsewhere) pins it, Cmd+Shift+A archives it; Cmd+R and Cmd+P are left to the browser. The composer takes slash and at entity triggers from sample lists you delete, and its mic drives kai-voice-input, whose transcript lands in the prompt.",
   "meta": { "iframeHeight": "800px" }
 }

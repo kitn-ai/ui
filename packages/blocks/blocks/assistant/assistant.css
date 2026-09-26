@@ -23,8 +23,64 @@ body { margin: 0; background: var(--kai-color-background, hsl(0 0% 100%)); font:
 kai-workspace.app { display: block; height: 100dvh; }
 
 /* The right-aligned relative time slotted into each row's menu region:
- * type scale only; the muted tint comes from currentColor. */
+ * type scale only; the muted tint comes from currentColor. It sits BESIDE the
+ * row menu's kebab, both in that same region: the region is the item's
+ * non-activation trailing edge, so a click on either never selects the
+ * conversation. */
 kai-conversation-item .row-time { font-size: 0.75rem; color: color-mix(in srgb, currentColor 60%, transparent); }
+
+/* The inline rename field replaces the title while its row is the one being
+ * renamed (the title span hides, this shows). The element's shared base sheet
+ * sets :host{display:inline-flex} as an author rule, so it outranks the UA's
+ * [hidden] rule: the attribute needs an author-level rule to hide at all (the
+ * same fix kai-button[hidden] below carries). It sits INSIDE the row's title
+ * box, which truncates, so it may not push that box wider. */
+kai-editable-label[hidden] { display: none; }
+kai-editable-label.row-rename { min-width: 0; max-width: 100%; }
+
+/* The plain (non-activating) menu row's box, and it is spelled here for one
+ * reason: the rows that DO act are kai-buttons, whose box the kit paints inside
+ * their shadow root from its own size="sm" variant - 32px tall, 12px of inline
+ * padding, text-xs, rounded-md - and nothing out here can borrow that. Spelling
+ * it makes the two kinds of row read as one list: same height, same padding, so
+ * icon and label start at the same x. */
+.menu-row {
+  display: flex; align-items: center; gap: 0.5rem;
+  box-sizing: border-box; height: 2rem; padding: 0 0.75rem;
+  border-radius: 6px; font-size: 0.75rem;
+}
+/* Dimmed, and nothing else: the row keeps its pointer events, because the
+ * reason it is disabled is a tooltip and a tooltip needs a hover. Its BOX is
+ * its own content rather than the menu's width - the tooltip wraps its trigger
+ * in a shrink-wrapping box of its own, inside the tooltip's shadow root, which
+ * no stylesheet out here can stretch. The measured facts are the ones that
+ * matter for it to read as a row: 32px tall with 12px of inline padding, so its
+ * icon and label start at the same x as a kai-button row's. */
+.menu-row-disabled { color: color-mix(in srgb, currentColor 55%, transparent); }
+.menu-row-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* A row's key chip sits at the row's trailing edge. The chip is a flex item of
+ * the button's own flex container (assigned nodes lay out as the slot's
+ * children), so one auto margin is the whole rule. */
+.menu-kbd { margin-left: auto; }
+/* Delete is the one destructive item, so it takes the kit's destructive TEXT
+ * token: --color-destructive is calibrated as a FILL and is unreadable as text
+ * in dark mode, which the token's own doc says. `::part(button)` is how a host
+ * reaches inside kai-button's shadow root. */
+kai-button.menu-delete::part(button) { color: var(--color-destructive-text); }
+/* The menu's own heading line (the demo plan): not an item, so the roving focus
+ * walks past it, and not focusable, so it cannot be pressed. */
+.menu-heading {
+  display: block; padding: 0.375rem 0.5rem; font-size: 0.75rem;
+  color: color-mix(in srgb, currentColor 60%, transparent);
+}
+
+/* The identity row in the rail's footer slot. The footer region itself carries
+ * no padding (the rail's own rule is a hairline above it), so the row brings
+ * its own. */
+kai-dropdown.profile { padding: 0.5rem; }
+.profile-trigger { display: flex; align-items: center; gap: 0.5rem; width: 100%; min-width: 0; }
+.profile-name { font-size: 0.8125rem; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.profile-caret { margin-left: auto; opacity: 0.6; }
 
 /* Main column: top bar, thread flexes, composer sits below. The shell's main
  * panel is a grid cell on both axes, so this fills it without a height rule. */
@@ -39,6 +95,12 @@ kai-conversation-item .row-time { font-size: 0.75rem; color: color-mix(in srgb, 
 
 kai-thread { flex: 1; min-height: 0; display: block; }
 kai-prompt-input { display: block; padding: 0 1rem 1rem; max-width: 48rem; width: 100%; margin: 0 auto; box-sizing: border-box; }
+
+/* The voice status strip, in the composer's own input-top region (inside the
+ * card, above the editor). It carries what the kit's mic button cannot: that a
+ * recording is running, or that a session failed, or that audio was captured
+ * with no transcription available. Hidden when there is nothing to say. */
+.voice-strip { display: block; padding-bottom: 0.25rem; font-size: 0.75rem; color: color-mix(in srgb, currentColor 65%, transparent); }
 
 /* The elements' shared base sheet sets :host{display:block}, which outranks
  * the UA's [hidden] rule, so the reopen button this block toggles with

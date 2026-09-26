@@ -8,8 +8,10 @@
  * Everything the imperative `assistant.js` did to the DOM is now either a
  * field of `State` (bound onto an element with `.prop=` / `:attr=`) or an
  * `actions` entry (bound with `@kai-event=`). The ONLY DOM this file touches
- * is through `deps.refs()`, and only to call an element METHOD that has no
- * declarative equivalent: the composer's clear().
+ * is through `deps.refs()`, and only for the two facts the page's grammar has
+ * no declarative equivalent for: the composer's clear()/focus() methods, and
+ * the row-menu SHORTCUTS, a keydown listener on the document that stands down
+ * for any key aimed outside this block (see `onShortcut`).
  *
  * WHAT THIS BLOCK ADDED TO THE CONTRACT'S EVIDENCE, over support-widget's
  * conversion:
@@ -25,7 +27,21 @@
  * 2. `.prop` on a LEAF element with no navigation. `models` and
  *    `currentModel` drive kai-model-switcher; there is no view stack on this
  *    page and no ref for one.
- * 3. THE SHELL IS SOMEBODY ELSE'S STATE, MIRRORED. kai-workspace owns the
+ * 3. THE ROW MENU IS THE CONSUMER'S OWN MARKUP, WITH ITS FOCUS CONTRACT HONOURED.
+ *    `kai-dropdown` renders no items of its own; the page's rows carry
+ *    `role="menuitem"` and `tabindex="-1"` so they join its roving focus, and
+ *    the ones that act are kai-buttons because a binding event only exists on a
+ *    kai element. A row that cannot act is plain markup with aria-disabled and a
+ *    tooltip saying why: a disabled row with no handler cannot be mistaken for
+ *    one that did something.
+ * 4. AND THE ROW'S IDENTITY REACHES THE ACTION THROUGH THE ELEMENT THE PAGE
+ *    BOUND. Inside a `*for`, a bound prop is the only per-row channel the
+ *    grammar has (a literal is cloned identically into every row), and an action
+ *    is handed an event rather than an argument - so the row's id rides on the
+ *    item as a bound attribute and the action reads it off `event.currentTarget`,
+ *    which is exactly that element because kai-* events do not bubble. The op is
+ *    a literal, because the op IS fixed per row.
+ * 5. THE SHELL IS SOMEBODY ELSE'S STATE, MIRRORED. kai-workspace owns the
  *    aside's collapse (its breakpoint, its drawer, its methods), so the block
  *    does not keep a second opinion: `asideToggle` is fed by kai-aside-toggle
  *    and the value it reports is what the rail's controlled `collapsed` and the
@@ -42,7 +58,11 @@ import {
   isConversationUnread,
   type ConversationSummary,
 } from '@kitn.ai/ui/stores';
-import type { KaiPromptInputElement, KaiWorkspaceElement } from '@kitn.ai/ui/web-components';
+import type {
+  KaiPromptInputElement,
+  KaiVoiceInputElement,
+  KaiWorkspaceElement,
+} from '@kitn.ai/ui/web-components';
 // THE DATA-MODE SEAM. One specifier, resolved by whichever form rendered this
 // block: its manifest declares the scripted mock, the `--gateway` fetch and the
 // `--no-mock` stub as three sources for this one name, and exactly one of them
@@ -81,6 +101,71 @@ export interface ModelOption {
 
 const SUGGESTIONS = ['Summarize a document', 'Draft the Q3 board update', 'Compare two options'];
 
+/** The placeholder the composer shows at rest, and the one it shows while the
+ *  mic is open. The composer's own mic has no recording affordance of its own
+ *  (the kit paints no state on it), so the block says it in the one place a
+ *  reader is already looking. */
+const PROMPT_PLACEHOLDER = 'Ask anything';
+const LISTENING_PLACEHOLDER = 'Listening. Click the mic again to stop';
+
+/** What the record-only voice path says, and it is the honest version of the
+ *  kit's documented fallback: with no `transcribe` property and a browser
+ *  without speech recognition, kai-voice-input records and emits
+ *  `kai-audio-captured` with no text at all. The block has no transcription
+ *  service to offer, so it reports the capture rather than pretending the
+ *  silence was a transcript. */
+const VOICE_NO_TRANSCRIPT =
+  'Voice was captured but not transcribed: this browser has no speech recognition, and this block ships no transcription service.';
+
+/** One entry of an entity trigger's menu. Mirrors the kit's TriggerItem
+ *  (`@kitn.ai/ui`'s composer) structurally, declared here as the block's own
+ *  shape: State carries it, and the kit's composer prop is typed structurally,
+ *  so the two agree without the block reaching into the kit's internals. */
+export interface EntityTriggerItem {
+  id: string;
+  label: string;
+  /** A curated icon name, image URL or data-URI. */
+  icon?: string;
+  /** Muted second line in the trigger menu. */
+  description?: string;
+  /** What the pill EXPANDS to on submit, when that differs from the label. */
+  promptText?: string;
+}
+
+/** A `char`-triggered entity menu in the composer: `/` for skills, `@` for
+ *  mentions (the kit's own convention). */
+export interface EntityTrigger {
+  char: string;
+  kind: string;
+  items?: EntityTriggerItem[];
+}
+
+// SAMPLE DATA, THREE OF EACH, AND DELETE THEM: a consumer's real skills and
+// mentions come from their own registry, and these exist so the trigger menus
+// have something to demonstrate. The `promptText` on a skill is the interesting
+// half: the pill reads `/summarize` in the composer and the SENT message carries
+// the expansion (the composer flattens an entity to `promptText ?? label`).
+const TRIGGERS: EntityTrigger[] = [
+  {
+    char: '/',
+    kind: 'skill',
+    items: [
+      { id: 'sample-summarize', label: 'summarize', description: 'Summarize the open document', promptText: 'Summarize the document we are reading.' },
+      { id: 'sample-outline', label: 'outline', description: 'Outline a document', promptText: 'Outline the main sections of the document.' },
+      { id: 'sample-answer', label: 'answer', description: 'Answer from the attached files', promptText: 'Answer using only the attached files.' },
+    ],
+  },
+  {
+    char: '@',
+    kind: 'mention',
+    items: [
+      { id: 'sample-metrics', label: 'q3-metrics.pdf', icon: 'file-text', description: 'Sample file, three pages' },
+      { id: 'sample-board-deck', label: 'board-deck.md', icon: 'file-text', description: 'Sample file' },
+      { id: 'sample-handbook', label: 'team-handbook.md', icon: 'file-text', description: 'Sample file' },
+    ],
+  },
+];
+
 // The model switcher recipe's data. Both entries name the SCRIPTED mock, which
 // is the honest option while no provider is contacted either way: a real backend
 // reads the selected id off the request and routes accordingly, so these become
@@ -106,6 +191,27 @@ export interface AssistantTransport {
 const ASSISTANT_ACTIONS = ['copy', 'like', 'dislike'] as const;
 const USER_ACTIONS = ['edit'] as const;
 
+/** The operations a rail row's menu can perform, in the order the menu renders
+ *  them (Share is not here: it has no handler to name). */
+type RowMenuOp = 'rename' | 'pin' | 'archive' | 'delete';
+const ROW_MENU_OPS: readonly string[] = ['rename', 'pin', 'archive', 'delete'];
+
+/** `{ op, conversationId }` for a row-menu item, read off the element the page
+ *  bound. The op is a `data-op` LITERAL on the item (the op is fixed per row, so
+ *  the same literal in every cloned row is the correct value); the conversation
+ *  id is a BOUND attribute, because inside a `*for` a binding is the only
+ *  per-row channel the page grammar has. kai-* events do not bubble, so
+ *  `event.currentTarget` is exactly that element - and the react form hands the
+ *  real event through and writes data-* to the host, so one action reads both the
+ *  same way in every delivery form. */
+function rowMenuTarget(event: Event): { op: RowMenuOp; conversationId: string } | undefined {
+  const element = event.currentTarget as HTMLElement | null;
+  const op = element?.dataset.op;
+  const conversationId = element?.dataset.conversationId;
+  if (!op || !conversationId || !ROW_MENU_OPS.includes(op)) return undefined;
+  return { op: op as RowMenuOp, conversationId };
+}
+
 /** One rendered row of the rail. Every field is already a string or a
  *  boolean, because `*for` bodies get bindings, not expressions. */
 export interface ConversationRow {
@@ -115,6 +221,26 @@ export interface ConversationRow {
   previewHidden: boolean;
   time: string;
   unread: boolean;
+  /** The row's own menu trigger, named for the row it belongs to: every row has
+   *  one, so one shared label would make five identical accessible names. */
+  menuLabel: string;
+  /** This row is the one being renamed, so its title is a field and not text. */
+  renaming: boolean;
+  /** The rename field's own `hidden`. Both flags read the same fact, spelled the
+   *  way each binding needs it (the title hides while the field shows). */
+  renameFieldHidden: boolean;
+  /** The pin item's label: the same item offers Pin or Unpin, and which one is
+   *  the row's own state. */
+  pinLabel: string;
+  /** The four items that act, per row: an operation the store does not implement
+   *  gets no row at all, rather than a button that does nothing. */
+  renameItemHidden: boolean;
+  pinItemHidden: boolean;
+  archiveItemHidden: boolean;
+  deleteItemHidden: boolean;
+  /** Whether the conversation is pinned: read by the pin shortcut, and by the pin
+   *  item's label. */
+  pinned: boolean;
 }
 
 export interface AssistantState {
@@ -134,6 +260,25 @@ export interface AssistantState {
   /** The rows the rail renders: the summaries, projected and then FILTERED
    *  by `query`. The old script rendered them all and hid the misses. */
   conversationRows: ConversationRow[];
+  // The composer
+  /** The composer's controlled text mirror. It is a field rather than a DOM read
+   *  because the voice transcript has to WRITE into the composer, and the kit's
+   *  only channel for that is the `value` prop. */
+  promptValue: string;
+  /** The composer's placeholder: it carries the one recording signal the kit's
+   *  own mic does not paint. */
+  promptPlaceholder: string;
+  /** Entity triggers: `/` for skills, `@` for mentions. */
+  triggers: EntityTrigger[];
+  /** The `tabindex` every menu row carries, and it is a FIELD rather than a
+   *  literal attribute for the reason the shell's breakpoints are: a numeric
+   *  literal does not survive the react form, which can only take a number on a
+   *  prop typed number. Row markup reads `:tabIndex="menuItemTabIndex"`. */
+  menuItemTabIndex: number;
+  /** What the voice path last had to say (a failure, or a capture with no
+   *  transcript). Empty means nothing to say. */
+  voiceStatus: string;
+  voiceStatusHidden: boolean;
   // the shell. Its two breakpoints are FIELDS rather than literal attributes
   // for one reason: a binding holds a field name and never an expression, and a
   // literal numeric attribute does not survive the react form (it is emitted as
@@ -158,6 +303,8 @@ export interface AssistantState {
 export interface AssistantRefs {
   prompt: KaiPromptInputElement | null;
   workspace: KaiWorkspaceElement | null;
+  /** The recorder the composer's own mic drives (see `voiceToggle`). */
+  voice: KaiVoiceInputElement | null;
 }
 
 export interface AssistantDeps {
@@ -186,6 +333,33 @@ export interface AssistantActions {
   search(event: CustomEvent<{ query: string }>): void;
   /** `@kai-submit` on the prompt input. */
   submit(event: CustomEvent<{ value: string; attachments?: unknown[] }>): Promise<void>;
+  /** `@kai-value-change` on the prompt input: the composer's text mirror. */
+  valueChange(event: CustomEvent<{ value: string }>): void;
+  // VOICE. The composer's own mic fires kai-voice with no detail (it is one
+  // button, not a state machine), so this block owns the start/stop decision and
+  // the kit's kai-voice-input does the recording.
+  /** `@kai-voice` on the prompt input: start recording, or stop it when one is
+   *  already running. */
+  voiceToggle(): void;
+  /** `@kai-recording-change` on the recorder. */
+  voiceRecording(event: CustomEvent<{ recording: boolean }>): void;
+  /** `@kai-transcription` on the recorder: the transcript, into the composer. */
+  voiceTranscript(event: CustomEvent<{ text: string }>): void;
+  /** `@kai-voice-error` on the recorder. */
+  voiceError(event: CustomEvent<{ message: string }>): void;
+  /** `@kai-audio-captured` on the recorder: the record-only path, which is the
+   *  one case where audio arrives with no transcript coming at all. */
+  voiceCaptured(): void;
+  /** `@kai-rename` on a row's inline editor. The row is `renamingId`, which F2
+   *  and the row menu are the only writers of, so the event carries the new
+   *  title and nothing else. */
+  renameCommit(event: CustomEvent<{ value: string }>): Promise<void>;
+  /** `@kai-cancel` on a row's inline editor. */
+  renameCancel(): void;
+  /** `@kai-click` on any row-menu item that acts: Rename, Pin or Unpin, Archive,
+   *  Delete. The item carries its op and its row (see `rowMenuTarget`), because
+   *  `@event` binds one action name and hands it the event. */
+  rowMenuAction(event: Event): Promise<void>;
   /** Mount hook: hydrate from storage. Not a binding - the host calls it. */
   boot(): Promise<void>;
 }
@@ -208,6 +382,12 @@ export function createController(deps: AssistantDeps): AssistantController {
     activeId: undefined,
     query: '',
     conversationRows: [],
+    promptValue: '',
+    promptPlaceholder: PROMPT_PLACEHOLDER,
+    triggers: TRIGGERS,
+    menuItemTabIndex: -1,
+    voiceStatus: '',
+    voiceStatusHidden: true,
     // The shell's documented pair, one page's worth: below 720 the rail goes,
     // below 640 an expanded rail is an overlay drawer.
     collapseBelow: 720,
@@ -230,6 +410,21 @@ export function createController(deps: AssistantDeps): AssistantController {
   // The UNFILTERED projection, kept beside State rather than in it: nothing
   // binds it, and a field nothing binds is not part of the view model.
   let allRows: ConversationRow[] = [];
+  // The last summaries the store handed up, kept for the same reason as
+  // `allRows`: the row projection is re-run when the RENAME state moves, not
+  // only when the summaries do.
+  let lastSummaries: ConversationSummary[] = [];
+  /** The conversation whose inline rename field is open, or undefined. Beside
+   *  State for the same reason as `allRows`: nothing binds it directly; the rows
+   *  carry it, projected. */
+  let renamingId: string | undefined;
+  /** Whether the recorder is running. Beside State because nothing binds it:
+   *  the placeholder is what a reader sees. */
+  let recording = false;
+  /** `boot()` is called once per host by contract, and react's StrictMode runs
+   *  the effect that calls it TWICE. A second keydown listener would fire every
+   *  shortcut twice, which for a toggle is a silent no-op (pin, unpin). */
+  let booted = false;
 
   /** The old script matched the row's whole `textContent`: the title, the
    *  preview line and the relative time, concatenated with NO separator. Same
@@ -244,16 +439,31 @@ export function createController(deps: AssistantDeps): AssistantController {
 
   const store = localStorageStore(deps.storageKey ?? 'assistant');
 
+  // WHAT THE STORE CAN DO, read off the store itself. The four operations are
+  // OPT-IN on ConversationStore, and ConversationController refuses LOUDLY when
+  // one is missing - but a report is not an affordance: a menu row for an
+  // operation the store cannot perform is a button that does nothing, so the
+  // block asks first and offers nothing. These flags gate the rows AND the two
+  // shortcuts, so a store without them shows no row and binds no key.
+  const storeOps = {
+    rename: typeof store.rename === 'function',
+    pin: typeof store.setPinned === 'function',
+    archive: typeof store.setArchived === 'function',
+    remove: typeof store.remove === 'function',
+  };
+
   const controller = createConversationController(store, {
     onMessagesLoad: (msgs) => setMessages(msgs),
     onSummariesChange: (summaries) => patch(projectSummaries(summaries)),
   });
 
   function projectSummaries(summaries: ConversationSummary[]): Partial<AssistantState> {
+    lastSummaries = summaries;
     allRows = summaries.map((s) => {
       // Display dedupe: the store titles a conversation from message text, so
       // the title and the trailing preview can be the same string.
       const preview = s.trailing && s.trailing !== s.title ? s.trailing : '';
+      const renaming = renamingId === s.id;
       return {
         id: s.id,
         title: s.title,
@@ -261,10 +471,101 @@ export function createController(deps: AssistantDeps): AssistantController {
         previewHidden: preview === '',
         time: relativeTimeShort(s.updatedAt ?? s.lastMessageAt),
         unread: isConversationUnread(s),
+        menuLabel: `Actions for ${s.title}`,
+        renaming,
+        renameFieldHidden: !renaming,
+        pinLabel: s.pinned ? 'Unpin' : 'Pin',
+        renameItemHidden: !storeOps.rename,
+        pinItemHidden: !storeOps.pin,
+        archiveItemHidden: !storeOps.archive,
+        deleteItemHidden: !storeOps.remove,
+        pinned: s.pinned === true,
       };
     });
     return { conversationRows: filterRows(allRows, state.query), activeId: controller.activeId() };
   }
+
+  /** Open (id) or close (undefined) the one inline rename field. Re-projects
+   *  every row, because the edit flags are per row and the kai- reactivity
+   *  contract is reference-keyed: patching the rows in place would hand every
+   *  renderer the same objects it already had, which reads as "nothing
+   *  changed". */
+  const applyRenaming = (id: string | undefined): void => {
+    renamingId = id;
+    patch(projectSummaries(lastSummaries));
+  };
+
+  /** Close the inline field when its row is the one leaving the list (archived or
+   *  deleted): the field is keyed by conversation id, and its row is gone. */
+  const closeRenaming = (id: string): void => {
+    if (renamingId === id) applyRenaming(undefined);
+  };
+
+  /** The row model for the ACTIVE conversation, or undefined when there is none:
+   *  an empty thread, or a conversation whose row left the one list order (an
+   *  archived one, which `orderedSummaries` excludes). */
+  const activeRow = (): ConversationRow | undefined =>
+    allRows.find((row) => row.id === state.activeId);
+
+  /**
+   * The three row shortcuts, and the facts that decide their shape.
+   *
+   * WHERE THEY LISTEN: the document, guarded to this block's own keys. A block
+   * that IS the page owns its document, and the keys have to work when nothing
+   * inside the app holds focus - which is the ordinary case here, because the
+   * suggestion list unmounts on the first turn and hands focus back to the body.
+   * A listener on the block element alone (tried first, and measured failing
+   * exactly that way) works only while some control inside the block is focused.
+   * The guard is what keeps the document listener a citizen: the key must be
+   * aimed at this block (its retargeted target is inside the shell) or at the
+   * body itself (nothing focused). A key aimed at another part of the page is
+   * somebody else's. Two copies of the block on one page would both answer the
+   * nothing-focused case; that is the composition's problem to scope, and the
+   * block says so rather than guessing.
+   *
+   * WHAT THEY ACT ON: `state.activeId`, the conversation that is open. The menu's
+   * rows act on the row they were opened from; a key has no row, so the block
+   * answers with the one conversation that is unambiguous, and with none it does
+   * nothing rather than guessing a neighbour. The menu's chips are exactly these
+   * keys: F2, Mod+Shift+P, Mod+Shift+A. Cmd+R and Cmd+P are NOT bound (reload,
+   * print), and Cmd+P is why the pin is Mod+SHIFT+P.
+   *
+   * A key whose operation the store does not implement is not handled at all:
+   * the same rule the menu follows (no row, no key), rather than a shortcut that
+   * reports a refusal the reader can see no reason for.
+   */
+  const onShortcut = (event: KeyboardEvent): void => {
+    const target = event.target as Node | null;
+    const owner = deps.refs().workspace;
+    if (target && target !== document.body && target !== document.documentElement
+      && !(owner?.contains(target) ?? false)) return;
+
+    const mod = event.metaKey || event.ctrlKey;
+    if (!mod && !event.shiftKey && event.key === 'F2') {
+      const id = state.activeId;
+      if (id === undefined || !storeOps.rename) return;
+      event.preventDefault();
+      applyRenaming(id);
+      return;
+    }
+    if (!mod || !event.shiftKey) return;
+    const key = event.key.toLowerCase();
+    if (key === 'p') {
+      const row = activeRow();
+      if (!row || !storeOps.pin) return;
+      event.preventDefault();
+      void controller.setPinned(row.id, !row.pinned);
+    } else if (key === 'a') {
+      const row = activeRow();
+      if (!row || !storeOps.archive) return;
+      event.preventDefault();
+      closeRenaming(row.id);
+      // Always `true`: an archived conversation is in no list this block renders,
+      // so there is no row to unarchive from and no state to read. The controller
+      // is what unlists it and clears the active pointer.
+      void controller.setArchived(row.id, true);
+    }
+  };
 
   const actions: AssistantActions = {
     modelChange(event) {
@@ -301,12 +602,114 @@ export function createController(deps: AssistantDeps): AssistantController {
       patch({ query, conversationRows: filterRows(allRows, query) });
     },
 
+    valueChange(event) {
+      patch({ promptValue: event.detail.value });
+    },
+
+    // The composer's mic and the recorder are two elements on purpose: the mic is
+    // a button in the composer's own toolbar (the kit paints it, the block cannot
+    // reach inside), and <kai-voice-input> is the element that owns
+    // getUserMedia/SpeechRecognition. `kai-voice` carries no detail, so the block
+    // keeps the one bit that decides what the click means.
+    voiceToggle() {
+      const voice = deps.refs().voice;
+      if (!voice) return;
+      if (recording) voice.stop();
+      else voice.start();
+    },
+
+    voiceRecording(event) {
+      recording = event.detail.recording;
+      patch({ promptPlaceholder: recording ? LISTENING_PLACEHOLDER : PROMPT_PLACEHOLDER });
+    },
+
+    voiceTranscript(event) {
+      const text = event.detail.text.trim();
+      // An empty transcript is not an error: the kit reports that case through
+      // kai-voice-error (`no-result`), and this action only ever adds text.
+      if (text === '') return;
+      const draft = state.promptValue.trim();
+      patch({
+        promptValue: draft === '' ? text : `${draft} ${text}`,
+        promptPlaceholder: PROMPT_PLACEHOLDER,
+        voiceStatus: '',
+        voiceStatusHidden: true,
+      });
+      // The transcript is the reader's to edit, so the caret goes where the text
+      // landed: the composer does not take focus when its value changes.
+      deps.refs().prompt?.focus();
+    },
+
+    voiceError(event) {
+      patch({ voiceStatus: `Voice failed: ${event.detail.message}`, voiceStatusHidden: false });
+    },
+
+    voiceCaptured() {
+      patch({ voiceStatus: VOICE_NO_TRANSCRIPT, voiceStatusHidden: false });
+    },
+
+    async renameCommit(event) {
+      const title = event.detail.value.trim();
+      const id = renamingId;
+      applyRenaming(undefined);
+      // An emptied field is a cancel, not a request for a blank title: the
+      // store's own title policy (the latest message text) is the fallback. The
+      // field is already closed either way, which is what the page shows.
+      if (id === undefined || title === '') return;
+      await controller.rename(id, title);
+    },
+
+    renameCancel() {
+      applyRenaming(undefined);
+    },
+
+    // One action for the four items that act, because the binding grammar binds
+    // one action name per element and hands it the event: the op is a literal on
+    // the item and the row is the item's bound conversation id (see
+    // `rowMenuTarget`). Each op then takes the same road the shortcut takes, so
+    // a menu click and a key press cannot drift apart.
+    async rowMenuAction(event) {
+      const target = rowMenuTarget(event);
+      if (!target) return;
+      switch (target.op) {
+        case 'rename':
+          if (storeOps.rename) applyRenaming(target.conversationId);
+          return;
+        case 'pin': {
+          if (!storeOps.pin) return;
+          const row = allRows.find((r) => r.id === target.conversationId);
+          await controller.setPinned(target.conversationId, !(row?.pinned ?? false));
+          return;
+        }
+        case 'archive':
+          if (!storeOps.archive) return;
+          closeRenaming(target.conversationId);
+          await controller.setArchived(target.conversationId, true);
+          return;
+        case 'delete':
+          if (!storeOps.remove) return;
+          closeRenaming(target.conversationId);
+          await controller.remove(target.conversationId);
+          return;
+      }
+    },
+
     async submit(event) {
       const text = event.detail.value.trim();
       if (!text || state.loading) return;
+      patch({ voiceStatus: '', voiceStatusHidden: true });
+      // THE MENTION PILL SURVIVES AS TEXT, and this is where the kit decides it:
+      // kai-prompt-input flattens its document with the composer model's
+      // serializeToText, which writes `promptText ?? label` for every entity, so
+      // `detail.value` already contains the pill (and the skill's expansion, when
+      // the trigger item declares one). The structured `entities` array is NOT
+      // carried past this line: ChatMessage has no metadata field and MessagePart
+      // has no entity variant, so a mention is text in the sent message, exactly
+      // as it is text in the composer's own serialization.
       // The composer does not clear itself on submit - clearing is the host's
-      // call, made through the element's public clear() method. That call is
-      // the one DOM leak this controller has, and it is why it declares a ref.
+      // call, made through the element's public clear() method. That method, and
+      // the document keydown listener in boot(), are the two DOM touches this
+      // controller has, and they are why it declares its refs.
       deps.refs().prompt?.clear();
 
       const userMessage: ChatMessage = {
@@ -352,6 +755,12 @@ export function createController(deps: AssistantDeps): AssistantController {
     },
 
     async boot() {
+      if (!booted) {
+        booted = true;
+        // Never removed: the controller contract has no teardown hook, and the
+        // host owns the document for as long as the block is on it.
+        document.addEventListener('keydown', onShortcut);
+      }
       setMessages([]);
       await controller.refresh();
       await controller.restore();

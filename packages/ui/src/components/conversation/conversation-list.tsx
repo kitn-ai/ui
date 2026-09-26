@@ -7,6 +7,7 @@ import { Badge } from '../badge/badge';
 import { ScrollArea } from '../scroll/scroll-area';
 import { ConversationItem, type ConversationRowDensity } from './conversation-item';
 import { orderedSummaries } from '../../primitives/conversation-store';
+import { interactiveInside } from '../../primitives/focusable-child';
 import type { ConversationSummary, ConversationGroup } from '../../types';
 
 /**
@@ -93,6 +94,8 @@ export interface ConversationItemsController {
  * - activation (click / Enter / Space) calls `onSelect` with the item's id, and is
  *   SUPPRESSED when the composed path crosses the item's menu region, so the consumer's
  *   own popover never also selects the row;
+ * - activation and roving yield to a nested keyboard-reachable control (`interactiveInside` over
+ *   the row's shadow body), so an inline editor in the default slot keeps its own SPACE and arrows;
  * - ArrowUp/ArrowDown/Home/End move focus item-to-item, tabindex following it.
  */
 export function createConversationItemsController(
@@ -116,6 +119,21 @@ export function createConversationItemsController(
         n instanceof Element &&
         (n.hasAttribute('data-kai-item-menu') || n.getAttribute('slot') === 'menu'),
     );
+  /**
+   * The guard that makes the row yield: `interactiveInside` over the row's SHADOW BODY as the
+   * boundary (the composed path, so a control in a nested shadow root is seen too). The
+   * boundary is the BODY, not the host the controller was handed, and not anything wider: the
+   * scan must stop at the row, because a `tabindex` ABOVE it (the ScrollArea viewport carries
+   * `tabindex="0"`) is not a control the user is in — measured, a plain click on the item
+   * stopped selecting it.
+   *
+   * Without this guard `itemFromEvent` matched on ANY node inside the row, so an inline editor
+   * in the default slot lost every SPACE (preventDefault ate it) and Enter committed nothing.
+   * Capture-phase stopPropagation was never an option: it would kill the editor's own keydown
+   * too.
+   */
+  const yieldsToNestedControl = (item: HTMLElement, e: Event): boolean =>
+    interactiveInside(e.composedPath(), bodyOf(item)) !== undefined;
   // Write-on-change only. `setAttribute` records a mutation even when the value
   // is identical, and the facade re-syncs from a MutationObserver over these very
   // nodes — unconditional writes would feed the observer forever.
@@ -165,15 +183,25 @@ export function createConversationItemsController(
     sync,
     handleClick(e) {
       const item = itemFromEvent(e);
-      if (!item || menuInPath(e)) return;
+      if (!item || menuInPath(e) || yieldsToNestedControl(item, e)) return;
       opts.onSelect(readConversationItemId(item));
     },
     handleKeyDown(e) {
       const items = opts.getItems();
       if (items.length === 0) return;
       const item = itemFromEvent(e);
+      // The key belongs to the control the user is in — a control nested in the row body, or
+      // the consumer's own menu region beside it. No preventDefault, no onSelect, no rove;
+      // this covers Enter/Space AND the Arrow/Home/End branch below.
+      //
+      // The menu check reaches this branch rather than the Enter/Space one it used to sit in
+      // because the guard now stops at the BODY boundary, and the menu is the body's SIBLING
+      // (the sibling restructure), so it is outside that boundary: a focusable control in the
+      // menu is no longer what `interactiveInside` reports, and its keys must not start roving
+      // the rows either.
+      if (item && (yieldsToNestedControl(item, e) || menuInPath(e))) return;
       if (e.key === 'Enter' || e.key === ' ') {
-        if (!item || menuInPath(e)) return;
+        if (!item) return;
         e.preventDefault();
         opts.onSelect(readConversationItemId(item));
         return;

@@ -2,6 +2,7 @@ import { Show, splitProps, createMemo, type JSX } from 'solid-js';
 import { MessageSquare } from 'lucide-solid';
 import { cn } from '../../utils/cn';
 import { isConversationUnread } from '../../primitives/conversation-store';
+import { interactiveInside } from '../../primitives/focusable-child';
 import type { ConversationSummary } from '../../types';
 
 /**
@@ -108,7 +109,10 @@ export { isConversationUnread } from '../../primitives/conversation-store';
  * activation guard keys off, so a click in the consumer's menu never also
  * selects the row. STANDALONE, `onActivate` makes the row body
  * its own tabbable button-role control: click / Enter / Space, with the menu
- * still outside the control as the body's sibling.
+ * still outside the control as the body's sibling. That control yields to any
+ * keyboard-reachable control inside it: an inline editor in the title region
+ * keeps its own SPACE, Enter and clicks, via the same `interactiveInside` rule
+ * the container applies.
  *
  * ARIA contract for direct Solid use: the row renders `role="listitem"` holding
  * a `role="button"` body (`aria-current` marks the active row, the same dialect
@@ -162,6 +166,14 @@ export interface SlottedConversationItemProps {
 export function SlottedConversationItem(props: SlottedConversationItemProps) {
   const [local] = splitProps(props, ['conversationId', 'active', 'compact', 'density', 'unread', 'leading', 'meta', 'menu', 'children', 'hostSemantics', 'onActivate', 'class']);
   const density = () => resolveRowDensity(local.density, local.compact);
+  // The activation body, the boundary both handlers below are judged against: a
+  // click or key that happened INSIDE a control in the title region is that
+  // control's, not the row's (see `interactiveInside`). The element ref is used
+  // rather than `event.currentTarget` because event delegation is not something
+  // this handler should depend on for its own identity.
+  let bodyEl: HTMLDivElement | undefined;
+  const startedInsideControl = (e: Event): boolean =>
+    bodyEl !== undefined && interactiveInside(e.composedPath(), bodyEl) !== undefined;
   return (
     // The sibling restructure: axe nested-interactive
     // bans focusable descendants of an activation control, so the control role
@@ -186,17 +198,29 @@ export function SlottedConversationItem(props: SlottedConversationItemProps) {
     >
       <div
         part="body"
+        ref={bodyEl}
         role="button"
         data-kai-item-body
         aria-current={local.active ? 'true' : 'false'}
         // Standalone activation only: with `onActivate` unset —
         // the inside-a-container case — no tabindex and no handlers render, so
         // the container's delegated activation stays the single path.
+        //
+        // Both handlers yield to a control inside the body, the same rule the
+        // container applies over the same helper: an inline editor in the title
+        // region (the documented place for it) keeps every SPACE — no
+        // preventDefault — and a click in it does not select the row. Not a
+        // capture-phase stopPropagation, which would kill that editor's own
+        // keydown too.
         tabindex={local.onActivate ? 0 : undefined}
-        onClick={() => local.onActivate?.()}
+        onClick={(e: MouseEvent) => {
+          if (startedInsideControl(e)) return;
+          local.onActivate?.();
+        }}
         onKeyDown={(e: KeyboardEvent) => {
           if (!local.onActivate) return;
           if (e.key === 'Enter' || e.key === ' ') {
+            if (startedInsideControl(e)) return;
             e.preventDefault(); // Space must not scroll the page
             local.onActivate();
           }

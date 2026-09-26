@@ -73,6 +73,85 @@
             "restored": true
           },
           "styles": {}
+        },
+        {
+          "name": "8-row-menu",
+          "probes": {
+            "menuOpen": true,
+            "triggerHaspopup": "menu",
+            "triggerExpanded": "true",
+            "shareDisabled": true,
+            "actionsListed": true,
+            "renameChip": true,
+            "keyChips": true,
+            "rowTime": true
+          },
+          "styles": {
+            "menuRowShare": {
+              "height": "32px",
+              "fontSize": "12px",
+              "paddingInline": "12px"
+            }
+          }
+        },
+        {
+          "name": "9-row-shortcuts",
+          "probes": {
+            "renameField": true,
+            "pinned": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "10-row-rename-commit",
+          "probes": {
+            "storeTitle": "Renamed by keyboard",
+            "renamedInRail": true,
+            "fieldClosed": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "11-row-menu-pin",
+          "probes": {
+            "pinItemLabel": true,
+            "storePinnedCleared": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "12-row-menu-archive",
+          "probes": {
+            "rowsGone": true,
+            "storeArchived": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "13-row-pin-reorder",
+          "probes": {
+            "twoRows": true,
+            "pinnedRowFirst": true,
+            "pinnedInStore": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "14-rail-collapsed",
+          "probes": {
+            "reopenVisible": true,
+            "asideGone": true,
+            "mainReflow": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "15-narrow-drawer",
+          "probes": {
+            "drawer": true,
+            "railVisible": true
+          },
+          "styles": {}
         }
       ],
       "consoleErrors": [],
@@ -147,6 +226,85 @@
           "name": "7-reloaded",
           "probes": {
             "restored": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "8-row-menu",
+          "probes": {
+            "menuOpen": true,
+            "triggerHaspopup": "menu",
+            "triggerExpanded": "true",
+            "shareDisabled": true,
+            "actionsListed": true,
+            "renameChip": true,
+            "keyChips": true,
+            "rowTime": true
+          },
+          "styles": {
+            "menuRowShare": {
+              "height": "32px",
+              "fontSize": "12px",
+              "paddingInline": "12px"
+            }
+          }
+        },
+        {
+          "name": "9-row-shortcuts",
+          "probes": {
+            "renameField": true,
+            "pinned": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "10-row-rename-commit",
+          "probes": {
+            "storeTitle": "Renamed by keyboard",
+            "renamedInRail": true,
+            "fieldClosed": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "11-row-menu-pin",
+          "probes": {
+            "pinItemLabel": true,
+            "storePinnedCleared": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "12-row-menu-archive",
+          "probes": {
+            "rowsGone": true,
+            "storeArchived": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "13-row-pin-reorder",
+          "probes": {
+            "twoRows": true,
+            "pinnedRowFirst": true,
+            "pinnedInStore": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "14-rail-collapsed",
+          "probes": {
+            "reopenVisible": true,
+            "asideGone": true,
+            "mainReflow": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "15-narrow-drawer",
+          "probes": {
+            "drawer": true,
+            "railVisible": true
           },
           "styles": {}
         }

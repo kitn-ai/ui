@@ -44,7 +44,12 @@
            itself and the block does the filtering in State. Its built-in header
            toggle fires kai-toggle-sidebar, and collapseRail answers it with the
            SHELL's collapse: the column goes and main reflows, rather than the
-           rail folding itself inside a column the page keeps. -->
+           rail folding itself inside a column the page keeps.
+
+           The footer slot holds the identity row. It is a PLACEHOLDER identity
+           by rule ("Demo User", a demo plan): the kit owns no auth, no account
+           and no settings screen, so the block shows one and says so in every
+           item it cannot wire. -->
       <kai-conversations
         id="conversations"
         slot="start"
@@ -61,10 +66,213 @@
           :conversation-id="row.id"
           :unread="row.unread"
         >
-          <span .textContent="row.title"></span>
+          <!-- The title, and - only while that row is the one being renamed -
+               an inline field in its place. kai-editable-label is driven as a
+               CONTROLLED editor (`.editing` follows State), which is what lets
+               F2 and the row menu's Rename open it without the controller
+               reaching into a row it cannot hold a ref to: `#ref` names one
+               element, and a row inside a *for is many. The element autofocuses
+               and selects its field when `editing` flips true. -->
+          <span .textContent="row.title" :hidden="row.renaming"></span>
+          <kai-editable-label
+            class="row-rename"
+            :hidden="row.renameFieldHidden"
+            .value="row.title"
+            .editing="row.renaming"
+            placeholder="Conversation name"
+            @kai-rename="renameCommit"
+            @kai-cancel="renameCancel"
+          ></kai-editable-label>
           <span slot="meta" .textContent="row.preview" :hidden="row.previewHidden"></span>
+          <!-- The row's trailing edge: the relative time, then its own menu.
+               Both sit in the item's `menu` region, which the item renders
+               OUTSIDE its activation surface - that is what keeps a click on
+               the kebab, or on the menu behind it, from also selecting the
+               conversation.
+
+               kai-dropdown is the surface because the menu is authored markup:
+               the kit's dropdown renders no items of its own, so a row can carry
+               its own icon, a key chip and, when it cannot act, its reason in a
+               tooltip. Its own doc sets the rule that makes the rows work: a
+               slotted row carries role="menuitem" and tabindex="-1" to join the
+               roving focus (and a row that cannot act carries aria-disabled,
+               which takes it back out again). -->
           <span slot="menu" class="row-time" .textContent="row.time"></span>
+          <kai-dropdown
+            slot="menu"
+            class="row-menu"
+            triggerIcon="more-horizontal"
+            :label="row.menuLabel"
+          >
+            <!-- SHARE IS DISABLED AND SAYS WHY. It is the one affordance on this
+                 page that needs something the block does not have (a share
+                 endpoint you own), so it is inert with aria-disabled (out of the
+                 roving focus, and announced as disabled) and its reason is a
+                 tooltip rather than a label nobody can read. There is no handler
+                 on it at all, which is what the row's behaviour comes from.
+
+                 One kit behaviour to know about: the dropdown closes on any
+                 pointer press inside its own surface (its outside-click test
+                 compares the pressed node against the trigger and the menu in the
+                 light DOM, and a press inside the surface is retargeted to the
+                 host). A press on this row therefore closes the menu, and the row
+                 itself still does nothing: there is no handler on it. -->
+            <kai-tooltip
+              placement="left"
+              content="Sharing needs a share endpoint you own. This block ships none, so the item is inert on purpose."
+            >
+              <span
+                class="menu-row menu-row-disabled"
+                role="menuitem"
+                :tabIndex="menuItemTabIndex"
+                aria-disabled="true"
+              >
+                <kai-icon name="share"></kai-icon>
+                <span class="menu-row-label">Share</span>
+              </span>
+            </kai-tooltip>
+
+            <!-- The four items that ACT, in the order the menu reads, and the
+                 shape of all four is the same three facts.
+
+                 `data-op` is a LITERAL: the op is fixed per row, so the same
+                 string in every cloned copy of this row is the correct value.
+                 `:data-conversation-id` is BOUND, because inside a `*for` a
+                 binding is the only per-row channel the page grammar has (a
+                 literal attribute is cloned identically into every row). And
+                 `@kai-click` names ONE action for all four: the binding hands it
+                 the event, the event does not bubble, so `event.currentTarget`
+                 is exactly the item that was clicked and the action reads the op
+                 and the row off it. That is the whole reason an item carries
+                 both.
+
+                 The key chips show exactly the keys the block registers, and
+                 they use kai-kbd's own token syntax: Mod is Cmd on a Mac and
+                 Ctrl elsewhere, which is what the handler accepts too. Delete
+                 has no chip because no key is bound for it. Each item is hidden
+                 (not disabled) when its store lacks the operation, so a button
+                 that cannot do anything is never offered. -->
+            <kai-button
+              role="menuitem"
+              :tabIndex="menuItemTabIndex"
+              :hidden="row.renameItemHidden"
+              data-op="rename"
+              :data-conversation-id="row.id"
+              variant="ghost"
+              size="sm"
+              full
+              align="start"
+              icon="pencil"
+              @kai-click="rowMenuAction"
+            >
+              Rename
+              <kai-kbd class="menu-kbd" keys="F2" size="sm"></kai-kbd>
+            </kai-button>
+            <kai-button
+              role="menuitem"
+              :tabIndex="menuItemTabIndex"
+              :hidden="row.pinItemHidden"
+              data-op="pin"
+              :data-conversation-id="row.id"
+              variant="ghost"
+              size="sm"
+              full
+              align="start"
+              icon="bookmark"
+              @kai-click="rowMenuAction"
+            >
+              <span .textContent="row.pinLabel"></span>
+              <kai-kbd class="menu-kbd" keys="Mod+Shift+P" size="sm"></kai-kbd>
+            </kai-button>
+            <kai-button
+              role="menuitem"
+              :tabIndex="menuItemTabIndex"
+              :hidden="row.archiveItemHidden"
+              data-op="archive"
+              :data-conversation-id="row.id"
+              variant="ghost"
+              size="sm"
+              full
+              align="start"
+              icon="archive"
+              @kai-click="rowMenuAction"
+            >
+              Archive
+              <kai-kbd class="menu-kbd" keys="Mod+Shift+A" size="sm"></kai-kbd>
+            </kai-button>
+            <kai-button
+              role="menuitem"
+              :tabIndex="menuItemTabIndex"
+              :hidden="row.deleteItemHidden"
+              data-op="delete"
+              :data-conversation-id="row.id"
+              class="menu-delete"
+              variant="ghost"
+              size="sm"
+              full
+              align="start"
+              icon="trash"
+              @kai-click="rowMenuAction"
+            >
+              Delete
+            </kai-button>
+          </kai-dropdown>
         </kai-conversation-item>
+
+        <!-- The identity row, at the foot of the rail. The whole row is the
+             trigger (avatar, name, caret) so the placeholder reads as one thing,
+             and `label` names it: a slotted trigger is VISUAL content by the
+             element's own contract, with the name supplied beside it. -->
+        <kai-dropdown
+          slot="footer"
+          class="profile"
+          full
+          label="Account menu, Demo User"
+        >
+          <span slot="trigger" class="profile-trigger">
+            <kai-avatar fallback="DU" size="sm" alt="Demo User"></kai-avatar>
+            <span class="profile-name">Demo User</span>
+            <kai-icon name="chevron-up" class="profile-caret"></kai-icon>
+          </span>
+          <!-- The plan line sits in the MENU as a plain heading, not on the
+               trigger: the trigger's name has to contain its visible text, and a
+               second line of text in a button is one more word for the name to
+               carry. It is not a menu item - a heading is not focusable and the
+               roving focus walks straight past it.
+
+               Two items follow, and both are honest about what they are: one
+               thing this block really can do, and one it cannot, disabled with
+               the reason in a tooltip. No sign-out, no billing, no settings
+               screen: the kit owns none of that, and a block that drew them
+               would be implying an account that does not exist. -->
+          <span class="menu-heading">Demo plan</span>
+          <kai-button
+            role="menuitem"
+            :tabIndex="menuItemTabIndex"
+            variant="ghost"
+            size="sm"
+            full
+            align="start"
+            icon="plus"
+            @kai-click="newChat"
+          >
+            Start a new chat
+          </kai-button>
+          <kai-tooltip
+            placement="left"
+            content="Account screens are your app's, not the kit's. This block ships none."
+          >
+            <span
+              class="menu-row menu-row-disabled"
+              role="menuitem"
+              :tabIndex="menuItemTabIndex"
+              aria-disabled="true"
+            >
+              <kai-icon name="settings"></kai-icon>
+              <span class="menu-row-label">Account settings</span>
+            </span>
+          </kai-tooltip>
+        </kai-dropdown>
       </kai-conversations>
 
       <main slot="main" class="main">
@@ -102,14 +310,43 @@
             description="Ask anything, or start from a suggestion below."
           ></kai-empty>
         </kai-thread>
+        <!-- VOICE, and the shape of it. The mic in the composer's own left
+             toolbar is the affordance (the kit paints it; a block cannot reach
+             inside that toolbar), and it fires kai-voice with NO detail, so this
+             block keeps the one bit that decides what a click means: start, or
+             stop. kai-voice-input is the element that owns the recording, and it
+             rides here as an unnamed child, which the kit's own docs describe as
+             an invisible data carrier - the composer reads its named regions and
+             projects nothing else. The transcript lands in the composer's
+             `value`, the only channel a block has for writing into it.
+
+             The strip above the textarea is where the block says what the kit's
+             mic cannot: that it is listening, that recognition failed, or that
+             the browser captured audio and has no speech recognition to turn it
+             into words (the kit's documented record-only fallback). -->
         <kai-prompt-input
           id="prompt"
           #ref="prompt"
-          placeholder="Ask anything"
+          voice
+          .placeholder="promptPlaceholder"
           .suggestions="suggestions"
           .loading="loading"
+          .triggers="triggers"
+          .value="promptValue"
           @kai-submit="submit"
-        ></kai-prompt-input>
+          @kai-value-change="valueChange"
+          @kai-voice="voiceToggle"
+        >
+          <span slot="input-top" class="voice-strip" :hidden="voiceStatusHidden" .textContent="voiceStatus"></span>
+          <kai-voice-input
+            id="voice"
+            #ref="voice"
+            @kai-recording-change="voiceRecording"
+            @kai-transcription="voiceTranscript"
+            @kai-voice-error="voiceError"
+            @kai-audio-captured="voiceCaptured"
+          ></kai-voice-input>
+        </kai-prompt-input>
       </main>
     </kai-workspace>
   </body>

@@ -43,6 +43,34 @@ function makeItem(id: string): HTMLElement {
   return el;
 }
 
+/**
+ * The REAL item shape: a host (the row listitem) whose SHADOW body holds the
+ * activation semantics and a `<slot>` for the consumer's default-slot content.
+ * A bare stand-in cannot tell body and host apart, and the controller's guard
+ * compares the two, so at least one case has to use the split shape.
+ */
+function makeShadowItem(id: string): { host: HTMLElement; body: HTMLElement } {
+  const host = makeItem(id);
+  const shadow = host.attachShadow({ mode: 'open' });
+  shadow.innerHTML = '<div data-kai-item-body role="button"><slot></slot></div>';
+  return { host, body: shadow.querySelector('[data-kai-item-body]') as HTMLElement };
+}
+
+/**
+ * A real key press. jsdom implements NO text insertion, so the platform's own
+ * default is applied here — and applied ONLY when the keydown was not
+ * default-prevented, which is the exact contract the swallowed-space defect
+ * broke (preventDefault() ate the character before the field ever saw it).
+ * Without this line a swallowed space and a typed space would both leave the
+ * value empty and the test could not tell them apart.
+ */
+function pressKey(el: HTMLElement, key: string): KeyboardEvent {
+  const e = new KeyboardEvent('keydown', { key, bubbles: true, composed: true, cancelable: true });
+  el.dispatchEvent(e);
+  if (!e.defaultPrevented && key.length === 1 && el instanceof HTMLInputElement) el.value += key;
+  return e;
+}
+
 describe('children mode wins over the conversations prop', () => {
   it('renders NO data rows when items are provided, even with conversations set', () => {
     const { container } = render(() => (
@@ -287,6 +315,229 @@ describe('createConversationItemsController', () => {
     expect(document.activeElement).toBe(items[2]);
     items[2].dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true, composed: true, cancelable: true }));
     expect(document.activeElement).toBe(items[0]);
+  });
+});
+
+/**
+ * The ROW YIELDS to a control inside it.
+ *
+ * Repro behind these: an inline editor in the row's default slot — the documented
+ * place for the title — typed `Renamed by keyboard`, and the store received
+ * `Renamedbykeyboard`: the controller's Enter/Space branch matched ANY node in the
+ * row, so it ran `preventDefault()` on every SPACE (the character never reached the
+ * field) and re-selected the conversation. Enter committed nothing. The
+ * Arrow/Home/End branch had the same hole and `handleClick` the same shape.
+ *
+ * The rule is one sentence: the key and the click belong to the control the user is
+ * in. Every negative assertion below is paired with the row's own body doing the
+ * same thing, so it cannot pass by the row simply going inert.
+ */
+describe('a nested control keeps its own keys and clicks', () => {
+  /** Rows in the shape the documented usage produces: a title AND an inline
+   *  editor (`<input>`) inside the row, the editor being the keyboard-reachable
+   *  control. */
+  function setupWithEditor(ids: string[] = ['a', 'b']) {
+    const wrapper = document.createElement('div');
+    document.body.appendChild(wrapper);
+    const inputs: HTMLInputElement[] = [];
+    const titles: HTMLElement[] = [];
+    const items = ids.map((id) => {
+      const el = makeItem(id);
+      wrapper.appendChild(el);
+      const title = document.createElement('span');
+      title.textContent = id;
+      el.appendChild(title);
+      const input = document.createElement('input');
+      input.setAttribute('aria-label', 'Rename');
+      el.appendChild(input);
+      titles.push(title);
+      inputs.push(input);
+      return el;
+    });
+    const selected: string[] = [];
+    const controller = createConversationItemsController({
+      getItems: () => items.filter((i) => i.isConnected),
+      getActiveId: () => undefined,
+      onSelect: (id) => selected.push(id),
+    });
+    wrapper.addEventListener('click', (e) => controller.handleClick(e));
+    wrapper.addEventListener('keydown', (e) => controller.handleKeyDown(e));
+    controller.sync();
+    return { items, titles, inputs, selected, controller };
+  }
+
+  afterEach(() => { document.body.innerHTML = ''; });
+
+  it('a typed title keeps every SPACE and selects nothing', () => {
+    const { inputs, selected } = setupWithEditor();
+    inputs[0].focus();
+    for (const ch of 'Renamed by keyboard') pressKey(inputs[0], ch);
+    expect(inputs[0].value).toBe('Renamed by keyboard');
+    expect(selected).toEqual([]);
+  });
+
+  it('Enter inside the editor does not select the row (and is not prevented)', () => {
+    const { inputs, selected } = setupWithEditor();
+    expect(pressKey(inputs[0], 'Enter').defaultPrevented).toBe(false);
+    expect(selected).toEqual([]);
+  });
+
+  it('ArrowDown / ArrowUp inside the editor move the caret, not the roving tabindex', () => {
+    const { items, inputs } = setupWithEditor();
+    inputs[0].focus();
+    const before = items.map((i) => i.getAttribute('tabindex'));
+    expect(pressKey(inputs[0], 'ArrowDown').defaultPrevented).toBe(false);
+    expect(pressKey(inputs[0], 'ArrowUp').defaultPrevented).toBe(false);
+    expect(document.activeElement).toBe(inputs[0]);
+    expect(items.map((i) => i.getAttribute('tabindex'))).toEqual(before);
+  });
+
+  it('Home / End inside the editor do not jump to the ends of the list', () => {
+    const { inputs } = setupWithEditor();
+    inputs[1].focus();
+    expect(pressKey(inputs[1], 'End').defaultPrevented).toBe(false);
+    expect(pressKey(inputs[1], 'Home').defaultPrevented).toBe(false);
+    expect(document.activeElement).toBe(inputs[1]);
+  });
+
+  it('a click inside the editor does not select the row', () => {
+    const { inputs, selected } = setupWithEditor();
+    inputs[1].dispatchEvent(new MouseEvent('click', { bubbles: true, composed: true }));
+    expect(selected).toEqual([]);
+  });
+
+  it('the row itself still activates: Enter/Space on the body, and a click on the title', () => {
+    const { items, titles, selected } = setupWithEditor(['a']);
+    expect(pressKey(items[0], 'Enter').defaultPrevented).toBe(true);
+    expect(pressKey(items[0], ' ').defaultPrevented).toBe(true);
+    expect(selected).toEqual(['a', 'a']);
+    // A click on the row's own inert content (the title span, no control in its
+    // path but the body) is still the row speaking.
+    titles[0].dispatchEvent(new MouseEvent('click', { bubbles: true, composed: true }));
+    expect(selected).toEqual(['a', 'a', 'a']);
+  });
+
+  it('the row itself still roves: arrows from the body walk the sibling rows', () => {
+    const { items } = setupWithEditor();
+    pressKey(items[0], 'ArrowDown');
+    expect(document.activeElement).toBe(items[1]);
+    expect(items.map((i) => i.getAttribute('tabindex'))).toEqual(['-1', '0']);
+    pressKey(items[1], 'ArrowUp');
+    expect(document.activeElement).toBe(items[0]);
+  });
+
+  it('the menu path still activates as before', () => {
+    const { items, selected } = setupWithEditor(['a']);
+    // Non-vacuity: a plain click on the row does select.
+    items[0].dispatchEvent(new MouseEvent('click', { bubbles: true, composed: true }));
+    expect(selected).toEqual(['a']);
+    // A click on the NON-focusable menu wrapper is suppressed by menuInPath alone
+    // (no control in that path for the nested-control guard to see)...
+    const menu = document.createElement('span');
+    menu.setAttribute('data-kai-item-menu', '');
+    items[0].appendChild(menu);
+    menu.dispatchEvent(new MouseEvent('click', { bubbles: true, composed: true }));
+    expect(selected).toEqual(['a']);
+    // ...and a click / key on the tabbable control inside it by the guard.
+    const button = document.createElement('button');
+    menu.appendChild(button);
+    button.dispatchEvent(new MouseEvent('click', { bubbles: true, composed: true }));
+    expect(pressKey(button, 'Enter').defaultPrevented).toBe(false);
+    expect(selected).toEqual(['a']);
+  });
+
+  it('a tabindex ABOVE the row does not silence it (the scan stops at the row)', () => {
+    // The region the rows live in is itself keyboard-reachable — `ScrollArea`
+    // renders its viewport with `tabindex="0"`. Matching that as "the control the
+    // user is in" turns row activation off entirely; measured on the first version
+    // of this guard, a plain click on the item stopped selecting it.
+    const wrapper = document.createElement('div');
+    wrapper.setAttribute('tabindex', '0');
+    document.body.appendChild(wrapper);
+    const item = makeItem('a');
+    wrapper.appendChild(item);
+    const selected: string[] = [];
+    const controller = createConversationItemsController({
+      getItems: () => [item], getActiveId: () => undefined, onSelect: (id) => selected.push(id),
+    });
+    wrapper.addEventListener('click', (e) => controller.handleClick(e));
+    wrapper.addEventListener('keydown', (e) => controller.handleKeyDown(e));
+    controller.sync();
+    item.dispatchEvent(new MouseEvent('click', { bubbles: true, composed: true }));
+    expect(selected).toEqual(['a']);
+    expect(pressKey(item, 'Enter').defaultPrevented).toBe(true);
+    expect(selected).toEqual(['a', 'a']);
+  });
+
+  it('the guard compares against the SHADOW body, not the host it was handed', () => {
+    const wrapper = document.createElement('div');
+    document.body.appendChild(wrapper);
+    const { host, body } = makeShadowItem('s1');
+    wrapper.appendChild(host);
+    const title = document.createElement('span');
+    title.textContent = 'Renamed';
+    const input = document.createElement('input');
+    input.setAttribute('aria-label', 'Rename');
+    host.append(title, input);
+    const selected: string[] = [];
+    const controller = createConversationItemsController({
+      getItems: () => [host], getActiveId: () => undefined, onSelect: (id) => selected.push(id),
+    });
+    wrapper.addEventListener('click', (e) => controller.handleClick(e));
+    wrapper.addEventListener('keydown', (e) => controller.handleKeyDown(e));
+    controller.sync();
+    expect(body.getAttribute('tabindex')).toBe('0');
+    // The slotted editor keeps its keys...
+    for (const ch of 'a b') pressKey(input, ch);
+    expect(input.value).toBe('a b');
+    expect(selected).toEqual([]);
+    // ...and the slotted TITLE still resolves to the shadow body, i.e. the row is
+    // not inert — the body is a different node from the host the guard was handed.
+    title.dispatchEvent(new MouseEvent('click', { bubbles: true, composed: true }));
+    expect(selected).toEqual(['s1']);
+    expect(pressKey(title, 'Enter').defaultPrevented).toBe(true);
+    expect(selected).toEqual(['s1', 's1']);
+  });
+
+  it('a control in the consumer\'s menu region keeps its own keys — the arrows included', () => {
+    // The menu is the body's SIBLING (the sibling restructure), so it sits OUTSIDE the
+    // boundary the nested-control guard stops at; the region check is what suppresses its
+    // keys instead. Without that, ArrowDown inside a consumer's popover starts roving the
+    // rows — which is why the region check covers the Arrow/Home/End branch too.
+    const wrapper = document.createElement('div');
+    document.body.appendChild(wrapper);
+    const a = makeShadowItem('a');
+    const b = makeShadowItem('b');
+    wrapper.append(a.host, b.host);
+    const menuBtn = document.createElement('button');
+    menuBtn.textContent = 'Actions';
+    menuBtn.setAttribute('slot', 'menu'); // the element-mode spelling of a menu control
+    a.host.appendChild(menuBtn);
+    const selected: string[] = [];
+    const controller = createConversationItemsController({
+      getItems: () => [a.host, b.host], getActiveId: () => undefined, onSelect: (id) => selected.push(id),
+    });
+    wrapper.addEventListener('click', (e) => controller.handleClick(e));
+    wrapper.addEventListener('keydown', (e) => controller.handleKeyDown(e));
+    controller.sync();
+    // Non-vacuity: the row BODY still roves and still selects. jsdom does not
+    // report a shadow child as `document.activeElement` (the HOST is what it names),
+    // so the rove is read off the tabindex the controller re-derives.
+    const tabindexes = () => [a.body.getAttribute('tabindex'), b.body.getAttribute('tabindex')];
+    pressKey(a.body, 'ArrowDown');
+    expect(tabindexes()).toEqual(['-1', '0']);
+    pressKey(b.body, 'ArrowUp');
+    expect(tabindexes()).toEqual(['0', '-1']);
+    pressKey(a.body, 'Enter');
+    expect(selected).toEqual(['a']);
+    // ...the menu control does neither: no rove on an arrow, no select on Enter or click.
+    menuBtn.focus();
+    expect(pressKey(menuBtn, 'ArrowDown').defaultPrevented).toBe(false);
+    expect(document.activeElement).toBe(menuBtn);
+    expect(tabindexes()).toEqual(['0', '-1']);
+    expect(pressKey(menuBtn, 'Enter').defaultPrevented).toBe(false);
+    menuBtn.dispatchEvent(new MouseEvent('click', { bubbles: true, composed: true }));
+    expect(selected).toEqual(['a']);
   });
 });
 

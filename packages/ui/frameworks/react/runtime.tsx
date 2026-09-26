@@ -6,12 +6,22 @@
 //
 // PROP RULE, in one sentence: a prop passed as `undefined` restores the element's
 // declared default, and a prop absent from props leaves the element alone.
+//
+// ATTRIBUTES ARE A SEPARATE CHANNEL from that. `role`, `tabIndex`, every `aria-*`
+// and every `data-*` are written to the host as ATTRIBUTES (`setAttribute`), never
+// as declared properties, so they cannot disturb the declared-prop rule above or
+// the element's own accessors. `data-`/`aria-` are also the one part of the React
+// surface a slotted child legitimately carries (`<Dropdown role="menuitem"
+// data-op="pin">`); without this channel React drops every one of them, because
+// they are not in the element's declared prop list.
 import {
   createElement,
   forwardRef,
   useImperativeHandle,
   useLayoutEffect,
   useRef,
+  type AriaAttributes,
+  type AriaRole,
   type CSSProperties,
   type ForwardRefExoticComponent,
   type PropsWithoutRef,
@@ -24,13 +34,24 @@ import {
  *  Prop semantics: passing a prop as `undefined` restores the element's DECLARED
  *  default (the value the element itself declares, captured off the instance on
  *  the first post-upgrade apply); omitting the key entirely leaves whatever is on
- *  the element alone. */
-export interface WebComponentProps {
+ *  the element alone. The attribute half below is the same rule with the DOM's
+ *  default as the target: `undefined` omits the attribute, absent leaves it alone. */
+export interface WebComponentProps extends AriaAttributes {
+  /** Any `data-*` attribute, written to the host verbatim. A template-keyed member
+   *  rather than an index signature, so a typo'd prop is still a tsc error. */
+  [key: `data-${string}`]: string | number | boolean | undefined;
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
   className?: string;
   style?: CSSProperties;
   id?: string;
+  /** ARIA role for the host element, written as the `role` ATTRIBUTE. An element
+   *  that declares a `role` prop of its own (`kai-message`, where `role` names the
+   *  SPEAKER) keeps that name: a declared prop is applied first and this channel
+   *  skips declared props. */
+  role?: AriaRole;
+  /** Tab order for the host element, written as the `tabindex` attribute. */
+  tabIndex?: number;
   /** Slot assignment when this element is a child of another kai element
    *  (`<Panel slot="panel">`). Forwarded to the DOM, never assigned as a
    *  property: slotting is an attribute contract and the parent's
@@ -41,6 +62,36 @@ export interface WebComponentProps {
   hidden?: boolean;
   /** Light-DOM children passed through to the element (slots). */
   children?: ReactNode;
+}
+
+/** The DOM attribute name for a prop on the ATTRIBUTE channel, or undefined when
+ *  the key is not one. `tabIndex` is the only prop whose attribute spelling
+ *  differs (the DOM attribute is `tabindex`). */
+function attributeNameFor(key: string): string | undefined {
+  if (key === 'tabIndex') return 'tabindex';
+  if (key === 'role' || key.startsWith('aria-') || key.startsWith('data-')) return key;
+  return undefined;
+}
+
+/** A prop value as an ATTRIBUTE value, or undefined to OMIT the attribute.
+ *
+ *  · `undefined`/`null` omit.
+ *  · a function is never an attribute (a handler stays a prop).
+ *  · an `aria-*` boolean becomes `"true"`/`"false"`: ARIA is a string contract
+ *    and a present-but-false `aria-*` is meaningful.
+ *  · a `false` `data-*` flag OMITS rather than writing `data-x="false"`, the
+ *    same reasoning the `hidden` prop below uses: on a flag attribute a present
+ *    value is the signal, so `"false"` would still read as set.
+ *  · anything else stringifies; arrays/objects have no attribute form and omit. */
+function attributeValueFor(name: string, value: unknown): string | undefined {
+  if (value === undefined || value === null) return undefined;
+  if (typeof value === 'function') return undefined;
+  if (typeof value === 'boolean') {
+    if (name.startsWith('data-')) return value ? 'true' : undefined;
+    return value ? 'true' : 'false';
+  }
+  if (typeof value === 'string' || typeof value === 'number') return String(value);
+  return undefined;
 }
 
 /** Per-INSTANCE snapshot of each managed prop's value as the element declared it,
@@ -111,6 +162,9 @@ export function createWebComponent<
   register?: () => Promise<unknown>,
 ): ForwardRefExoticComponent<PropsWithoutRef<P> & RefAttributes<E>> {
   const eventEntries = Object.entries(eventMap);
+  // Membership set for the attribute channel's guard: a DECLARED prop is applied
+  // through the property path above, never also written as an attribute.
+  const declared = new Set(propNames);
 
   const Component = forwardRef<E, P>((props, ref) => {
     const elRef = useRef<E | null>(null);
@@ -174,6 +228,23 @@ export function createWebComponent<
           const value = p[name];
           (el as unknown as Record<string, unknown>)[name] =
             value === undefined ? defaults?.[name] : value;
+        }
+
+        // THE ATTRIBUTE CHANNEL. `role`, `tabIndex`, `aria-*` and `data-*` are
+        // written to the HOST as attributes, a different channel from the
+        // declared-prop assignment above: they never touch a property, so they
+        // cannot disturb an element's own accessors or the declared-default
+        // capture, and a name the element DECLARES (kai-message's speaker
+        // `role`) stays on the property path and is skipped here. Same shape of
+        // rule as the props above -- present-with-undefined OMITS (removes),
+        // absent leaves the attribute alone -- so a caller who stops passing
+        // `aria-label` clears it and one who never passed it is untouched.
+        for (const name of Object.keys(p)) {
+          const attr = attributeNameFor(name);
+          if (attr === undefined || declared.has(name)) continue;
+          const text = attributeValueFor(name, p[name]);
+          if (text === undefined) el.removeAttribute(attr);
+          else el.setAttribute(attr, text);
         }
       };
       applyProps();
