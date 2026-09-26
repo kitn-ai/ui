@@ -745,6 +745,12 @@
           "fn": false
         },
         {
+          "name": "density",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
           "name": "value",
           "scalar": false,
           "optional": true,
@@ -5488,6 +5494,12 @@
         },
         {
           "name": "scrollButton",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "density",
           "scalar": true,
           "optional": true,
           "fn": false

@@ -84,6 +84,11 @@
             "actionsListed": true,
             "renameChip": true,
             "keyChips": true,
+            "kbdWelded": true,
+            "dividers": true,
+            "dividerSkipsKeyboard": true,
+            "menuFocusWalk": true,
+            "rowsWide": true,
             "rowTime": true
           },
           "styles": {
@@ -150,6 +155,33 @@
           "probes": {
             "drawer": true,
             "railVisible": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "16-voice-transcript",
+          "probes": {
+            "composerValue": "Voice first half. And the second.",
+            "composerFocused": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "17-settings-theme",
+          "probes": {
+            "workspaceTheme": "dark",
+            "promptTheme": "dark",
+            "railDarkScope": true,
+            "railColorScheme": "dark"
+          },
+          "styles": {}
+        },
+        {
+          "name": "18-scroll-to-bottom",
+          "probes": {
+            "threadIsScroller": true,
+            "buttonWhenScrolledUp": true,
+            "atBottom": true
           },
           "styles": {}
         }
@@ -239,6 +271,11 @@
             "actionsListed": true,
             "renameChip": true,
             "keyChips": true,
+            "kbdWelded": true,
+            "dividers": true,
+            "dividerSkipsKeyboard": true,
+            "menuFocusWalk": true,
+            "rowsWide": true,
             "rowTime": true
           },
           "styles": {
@@ -305,6 +342,33 @@
           "probes": {
             "drawer": true,
             "railVisible": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "16-voice-transcript",
+          "probes": {
+            "composerValue": "Voice first half. And the second.",
+            "composerFocused": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "17-settings-theme",
+          "probes": {
+            "workspaceTheme": "dark",
+            "promptTheme": "dark",
+            "railDarkScope": true,
+            "railColorScheme": "dark"
+          },
+          "styles": {}
+        },
+        {
+          "name": "18-scroll-to-bottom",
+          "probes": {
+            "threadIsScroller": true,
+            "buttonWhenScrolledUp": true,
+            "atBottom": true
           },
           "styles": {}
         }

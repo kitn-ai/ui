@@ -139,6 +139,7 @@ Every web component also accepts a `theme` attribute (`'light' | 'dark' | 'auto'
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `density` | `density` | `undefined | "default" | "compact"` | `'default'` | How much air the thread has: `'default'` (the shipped look) or `'compact'` (a desktop-panel rhythm: 8px between turns, a tighter band). |
 | `value` | — | `undefined | string | ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]` | — | Value of the input: a string is controlled, a `ComposerDoc` is a one-time seed that pre-populates pills, unset is uncontrolled. |
 | `placeholder` | `placeholder` | `undefined | string` | `'Send a message...'` | Placeholder text shown in the empty input. |
 | `loading` | `loading` | `undefined | false | true` | `false` | Disables submit and shows the streaming state. |
@@ -1504,6 +1505,7 @@ No events.
 | `imagePreview` | `image-preview` | `undefined | "hover" | "lightbox"` | `'hover'` | How an image tile reveals its full size. Default is the pointer-only hover card; the modal on click is the only one keyboard and touch reach. |
 | `actionsReveal` | `actions-reveal` | `undefined | "always" | "hover"` | `'always'` | Whether each message's action bar is visible at rest or only revealed on pointer-over. Visible at rest by default. |
 | `scrollButton` | `scroll-button` | `undefined | false | true` | `true` | Show the scroll-to-bottom button inside the scroll area. Default true. |
+| `density` | `density` | `undefined | "default" | "compact"` | `'default'` | How much air the message list has: `'default'` (shipped) or `'compact'` (a desktop-panel rhythm: 8px between turns, a tighter band). |
 | `class` | `class` | `undefined | string` | — | Extra classes applied to the thread's inner root. |
 | `cardTypes` | — | `undefined | Record<string, string>` | — | Card type → custom-element tag overrides/additions, merged over the built-ins. JS property: `el.cardTypes`. |
 | `cardSchemas` | — | `undefined | Record<string, object>` | — | Card-type JSON Schemas keyed by envelope type; validates each card's `data`. JS property: `el.cardSchemas`. |
@@ -2456,7 +2458,7 @@ A pulsing loading placeholder that preserves layout while content arrives. Respo
 | `triggerLabel` | `trigger-label` | `undefined | string` | — | Built-in trigger: a text label. |
 | `triggerIconTrailing` | `trigger-icon-trailing` | `undefined | string` | — | Built-in trigger: a trailing icon (e.g. `"chevron-down"` for a select look). |
 | `label` | `label` | `undefined | string` | — | Accessible name for a trigger with no visible label. Ignored when `triggerLabel` is set. |
-| `full` | `full` | `undefined | false | true` | `false` | Stretch the trigger to the full width of its container (a block row). Attribute: `full`. |
+| `full` | `full` | `undefined | false | true` | `false` | Stretch the trigger to the full width of its container (a block row), and open the surface at that same measured width. Attribute: `full`. |
 | `open` | `open` | `undefined | false | true` | — | Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. |
 | `defaultOpen` | `default-open` | `undefined | false | true` | — | Initial open state on mount (uncontrolled seed). |
 | `disabled` | `disabled` | `undefined | false | true` | — | Disable the trigger: click/keyboard and `show()` no longer open the menu. |
@@ -2833,7 +2835,7 @@ Popover, dropdown and menu are three corners of one deliberate triangle, not thr
 | `triggerLabel` | `trigger-label` | `undefined | string` | — | Built-in trigger: a text label. |
 | `triggerIconTrailing` | `trigger-icon-trailing` | `undefined | string` | — | Built-in trigger: a trailing icon (e.g. `"chevron-down"` for a select look). |
 | `label` | `label` | `undefined | string` | — | Accessible name for a trigger with no visible label. Ignored when `triggerLabel` is set. |
-| `full` | `full` | `undefined | false | true` | `false` | Stretch the trigger to the full width of its container (a block row). Attribute: `full`. |
+| `full` | `full` | `undefined | false | true` | `false` | Stretch the trigger to the full width of its container (a block row), and open the surface at that same measured width. Attribute: `full`. |
 | `open` | `open` | `undefined | false | true` | — | Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. |
 | `defaultOpen` | `default-open` | `undefined | false | true` | — | Initial open state on mount (uncontrolled seed). |
 | `disabled` | `disabled` | `undefined | false | true` | — | Disable the trigger: click/keyboard and `show()` no longer open the menu. |

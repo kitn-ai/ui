@@ -10,6 +10,7 @@ import type { ProseSize } from '../../primitives/chat-config';
 import type { CardComponentMap } from '../card/card-registry';
 import type { CardSchemaMap } from '../card/card-renderer';
 import type { AttachmentImagePreview } from '../attachments/attachments';
+import { resolveThreadDensity, THREAD_DENSITY_CLASSES, type ThreadDensity } from '../chat/thread-density';
 
 /** Imperative handle exposed via `controllerRef`: the thread's scroll control,
  *  forwarded onto `<kai-thread>` as the `scrollToBottom()` instance method. */
@@ -21,6 +22,12 @@ export interface ThreadController {
 export interface ThreadProps {
   /** Extra classes for the thread root (e.g. `rounded-xl`). */
   class?: string;
+  // ONE axis, mirroring `ChatThread`'s (see `thread-density.ts`): the between-turn
+  // gap and the message band's padding move together. This slice has no composer
+  // band, so only those two of the four apply here.
+  /** How much air the message list has: `'default'` (the shipped look) or
+   *  `'compact'` (a desktop-panel rhythm: 8px between turns, a tighter band). */
+  density?: ThreadDensity;
   /** The messages to render, newest last; a new array reference per streaming chunk is what re-renders. */
   messages: ChatMessage[];
   /** Add/override card type -> component entries, forwarded to `CardRenderer`
@@ -83,6 +90,7 @@ function DefaultEmpty() {
 export function Thread(props: ThreadProps) {
   const outer = useChatConfig();
   const reveal = () => (props.actionsReveal === 'hover' ? 'hover' : 'always');
+  const density = () => THREAD_DENSITY_CLASSES[resolveThreadDensity(props.density, 'Thread')];
   // Feedback (copy + vote) state lives ABOVE the per-message <For>, so streaming
   // re-renders (a fresh `messages` array ref per chunk) don't wipe it. The
   // copy/feedback toasts scope to this thread's root so they appear in-thread
@@ -121,8 +129,8 @@ export function Thread(props: ThreadProps) {
         ref={(e) => (rootEl = e as HTMLElement)}
         class={`relative flex h-full min-h-0 flex-col bg-background ${props.class ?? ''}`}
       >
-        <ChatContainer class="h-full px-4 py-3">
-          <ChatContainerContent class="mx-auto w-full max-w-3xl space-y-4">
+        <ChatContainer class={`h-full ${density().band}`}>
+          <ChatContainerContent class={`mx-auto w-full max-w-3xl ${density().gap}`}>
             {/* Zero-state: the consumer owns WHAT it looks like (`empty`); the
                 component owns WHEN it shows (empty + not loading). */}
             <Show when={showEmpty()}>

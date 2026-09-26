@@ -14,7 +14,7 @@
  */
 import { describe, it, expect, afterEach } from 'vitest';
 import '@testing-library/jest-dom/vitest';
-import { render, cleanup, fireEvent } from '@solidjs/testing-library';
+import { render, cleanup, fireEvent, within } from '@solidjs/testing-library';
 import {
   ConversationList,
   createConversationItemsController,
@@ -542,6 +542,36 @@ describe('a nested control keeps its own keys and clicks', () => {
 });
 
 // C2 / F-04 — the no-match state (decide loudly), routed to this lane per the plan.
+// The built-in title bar's "New chat" affordance is an ICON in the element's
+// shadow root, so its hint has to come from the kit: a consumer cannot reach the
+// button to put a `title` on it, and a `title` would be a NAME rather than a
+// description anyway. What the tip must never do is replace the button's own
+// accessible name supplied by `aria-label`.
+describe('the built-in header tooltip (New chat)', () => {
+  const renderHeader = () => render(() => <ConversationList {...baseProps} conversations={[]} />);
+
+  it('opens on focus and is a description, not the button\'s accessible name', () => {
+    const { container } = renderHeader();
+    const button = container.querySelector<HTMLButtonElement>('button[aria-label="New chat"]')!;
+    // Still a real, focusable button element -- the tip wraps it, it does not replace it.
+    expect(button).toBeInstanceOf(HTMLButtonElement);
+    expect(button).not.toHaveAttribute('title');
+
+    // No pointer in jsdom: focus is the observable alias for keyboard focus, and
+    // this is the requirement that the tip opens on focus as well as hover.
+    fireEvent.focusIn(button);
+    // The bubble portals onto document.body (a sibling of the render container).
+    const tip = within(document.body).queryByRole('tooltip');
+    expect(tip).not.toBeNull();
+    expect(tip).toHaveTextContent('New chat');
+
+    // The name is unchanged with the tip OPEN: `aria-describedby` lives on the
+    // trigger wrapper, so the label is still what names the button.
+    expect(button).toHaveAccessibleName('New chat');
+    expect(container.querySelector('[title]')).toBeNull();
+  });
+});
+
 describe('search no-match state (F-04)', () => {
   it('conversations present + a query matching none renders a visible no-match state', () => {
     const { container } = render(() => (

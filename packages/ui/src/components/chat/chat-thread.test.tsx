@@ -3,6 +3,7 @@ import '@testing-library/jest-dom/vitest';
 import { createSignal } from 'solid-js';
 import { render, cleanup, fireEvent } from '@solidjs/testing-library';
 import { ChatThread, type ChatThreadController } from './chat-thread';
+import type { ThreadDensity } from './thread-density';
 import type { ChatMessage } from '../../web-components/chat/chat-types';
 import { localStorageStore } from '../../primitives/conversation-store';
 
@@ -1275,6 +1276,71 @@ describe('composerStart/composerEnd (B-9)', () => {
     const start = getByTestId('cs');
     const end = getByTestId('ce');
     expect(start.compareDocumentPosition(end) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+});
+
+describe('ChatThread density axis', () => {
+  // The RENDERED attributes, not the map: a map entry that no call site reads would
+  // pass a test over `THREAD_DENSITY_CLASSES` and change nothing on screen. Every
+  // string below is byte-for-byte what this thread painted before the axis existed
+  // — which is the whole "`default` changes nothing" claim, checked here rather than
+  // asserted.
+  const log = (c: HTMLElement) => c.querySelector('[role="log"]') as HTMLElement;
+  const content = (c: HTMLElement) => log(c).firstElementChild as HTMLElement;
+  // The composer band is the nearest `shrink-0` ancestor of the editable: it is the
+  // only `shrink-0` in that chain (the composer's own `shrink-0` spans live INSIDE the
+  // editable, where `closest` cannot reach them).
+  const composerBand = (c: HTMLElement) =>
+    (c.querySelector('[data-kai-composer-editable]') as HTMLElement | null)?.closest('.shrink-0') as HTMLElement;
+
+  it('renders the shipped box with no `density` given', () => {
+    const { container } = render(() => <ChatThread messages={[]} />);
+    expect(log(container).getAttribute('class')).toBe('flex flex-col overflow-y-auto kai-focus-inset h-full px-4 py-3');
+    expect(content(container).getAttribute('class')).toBe('flex flex-col mx-auto w-full max-w-3xl space-y-4');
+    expect(composerBand(container).getAttribute('class')).toBe('shrink-0 px-4 pb-4');
+  });
+
+  it("renders the same box for an explicit `'default'`", () => {
+    const { container } = render(() => <ChatThread messages={[]} density="default" />);
+    expect(log(container).getAttribute('class')).toBe('flex flex-col overflow-y-auto kai-focus-inset h-full px-4 py-3');
+    expect(content(container).getAttribute('class')).toBe('flex flex-col mx-auto w-full max-w-3xl space-y-4');
+    expect(composerBand(container).getAttribute('class')).toBe('shrink-0 px-4 pb-4');
+  });
+
+  it("renders the tighter band, gap and composer padding for `'compact'`", () => {
+    const { container } = render(() => <ChatThread messages={[]} density="compact" />);
+    expect(log(container).getAttribute('class')).toBe('flex flex-col overflow-y-auto kai-focus-inset h-full px-3 py-2');
+    expect(content(container).getAttribute('class')).toBe('flex flex-col mx-auto w-full max-w-3xl space-y-2');
+    expect(composerBand(container).getAttribute('class')).toBe('shrink-0 px-3 pb-3');
+  });
+
+  it('moves the accessory row above the composer with the composer band, so the edges line up', () => {
+    const { container } = render(() => <ChatThread messages={[]} composerActions density="compact" />);
+    const actions = composerBand(container).previousElementSibling as HTMLElement;
+    expect(actions.getAttribute('class')).toBe('shrink-0 px-3');
+  });
+
+  it('falls back to `default` and says so for an unknown value arriving as a string', () => {
+    // The prop's TYPE rejects this; a value a runtime consumer can still produce (an
+    // attribute, a JS caller with `any`) has to land somewhere safe AND loud.
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const { container } = render(() => <ChatThread messages={[]} density={'cosy' as unknown as ThreadDensity} />);
+    expect(log(container).getAttribute('class')).toBe('flex flex-col overflow-y-auto kai-focus-inset h-full px-4 py-3');
+    expect(content(container).getAttribute('class')).toBe('flex flex-col mx-auto w-full max-w-3xl space-y-4');
+    expect(error).toHaveBeenCalledTimes(1);
+    expect(String(error.mock.calls[0][0])).toContain('ChatThread');
+    error.mockRestore();
+  });
+
+  it('leaves the column width and the message internals alone', () => {
+    // Two things this axis deliberately does NOT own: the column width is its own axis,
+    // and a message's internal padding belongs to `components/message`. One density
+    // value must not reach into another component's box.
+    const { container } = render(() => (
+      <ChatThread messages={[{ id: 'u1', role: 'user', parts: [{ type: 'text', text: 'hi' }] }]} density="compact" />
+    ));
+    expect(content(container).getAttribute('class')).toContain('max-w-3xl');
+    expect(container.querySelector('[data-kai-composer-editable]')).toBeTruthy();
   });
 });
 

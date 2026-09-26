@@ -1,5 +1,5 @@
 import {
-  createContext, useContext, createSignal, createUniqueId, Show, onCleanup, splitProps,
+  createContext, useContext, createSignal, createEffect, createUniqueId, Show, onCleanup, splitProps,
   type JSX, type Accessor,
 } from 'solid-js';
 import { Portal } from 'solid-js/web';
@@ -117,7 +117,23 @@ export interface DropdownTriggerProps {
   [k: string]: unknown;
 }
 
-export interface DropdownContentProps { children: JSX.Element; class?: string }
+export interface DropdownContentProps {
+  children: JSX.Element;
+  class?: string;
+  // The width comes from the TRIGGER, never from a container the caller names: the
+  // trigger is what the surface is anchored to, so any other box could silently
+  // disagree with it. Measured when the surface opens, and re-measured on every
+  // trigger resize — the surface is PORTALED out of the trigger's container (the
+  // mount is the element's shadow root), so a width set on that container cannot
+  // inherit down to it; it has to cross in JS.
+  //
+  // The surface's own CSS `min-width` is the FLOOR, and CSS resolves it (a used width
+  // is `max(width, min-width)`), which is why this is a boolean and not a number: a
+  // narrow trigger must not shrink a menu below usable, and the floor stays declared
+  // once, where the surface is built.
+  /** Match the surface width to the trigger's measured width, above the surface's own `min-width` floor. */
+  matchTriggerWidth?: boolean;
+}
 
 export interface DropdownItemProps {
   children: JSX.Element;
@@ -236,6 +252,32 @@ export function DropdownContent(props: DropdownContentProps) {
     refs: () => [ctx.trigger(), ctx.menu(), ...ctx.subMenus()],
   });
 
+  // `matchTriggerWidth`: the surface is PORTALED out of the trigger's container
+  // (the mount is the element's shadow root itself), so a width set on that
+  // container — a custom property, a `width: 100%` — cannot reach it. The width
+  // crosses in JS, measured off the trigger when the surface opens and again
+  // whenever the trigger resizes; that re-measure is what carries an OPEN menu
+  // along when the user drags a rail wider.
+  const [triggerWidth, setTriggerWidth] = createSignal<number>();
+
+  createEffect(() => {
+    const ref = props.matchTriggerWidth && presence.present() ? ctx.trigger() : undefined;
+    if (!ref) { setTriggerWidth(undefined); return; }
+    const measure = () => {
+      const w = ref.getBoundingClientRect().width;
+      // 0 means "no layout" (jsdom, `display: none`), never a 0px-wide menu: leave
+      // the width unset so the surface falls back to its own `min-width` floor.
+      setTriggerWidth(w > 0 ? w : undefined);
+    };
+    measure();
+    // Guarded: jsdom has no ResizeObserver, and there the open-time measurement IS
+    // the mechanism. In a browser the observer is what tracks the resize.
+    if (typeof ResizeObserver !== 'function') return;
+    const ro = new ResizeObserver(measure);
+    ro.observe(ref);
+    onCleanup(() => ro.disconnect());
+  });
+
   const items = () => menuItems(ctx.menu());
   const focusIndex = (i: number) => {
     const list = items();
@@ -286,12 +328,22 @@ export function DropdownContent(props: DropdownContentProps) {
           onKeyDown={onKeyDown}
           style={{
             position: 'fixed', left: `${position.pos().x}px`, top: `${position.pos().y}px`,
+            // The trigger's measured width, when tracking is on; the caller's
+            // `min-w-*` class still floors it (used width = max(width, min-width)).
+            width: triggerWidth() === undefined ? undefined : `${triggerWidth()}px`,
             // hide (without unmounting) when the trigger scrolls out of view
             visibility: position.hidden() ? 'hidden' : 'visible',
             'pointer-events': position.hidden() ? 'none' : undefined,
           }}
           class={cn(
-            'z-50 min-w-[8rem] rounded-lg bg-card p-1 kai-elevation',
+            // A usable floor belongs HERE, not at each call site: a menu is content-sized,
+            // so without a floor a consumer that renders <DropdownContent> directly (the
+            // model switcher is the live case) gets rows with no slack — the trailing
+            // check collapses onto its label. 15rem is the kit's menu width, the value
+            // kai-menu used to declare at its own call site, now declared once, here. A
+            // caller can still OVERRIDE it with its own `min-w-*` class; `cn` resolves the
+            // conflict last-wins, so exactly one floor survives on any surface.
+            'z-50 min-w-[15rem] rounded-lg bg-card p-1 kai-elevation',
             'animate-in fade-in-0 zoom-in-95 data-[closed]:animate-out data-[closed]:fade-out-0 data-[closed]:zoom-out-95',
             props.class,
           )}
@@ -382,7 +434,11 @@ export function DropdownCheckboxItem(props: DropdownCheckboxItemProps) {
       )}
     >
       {props.children}
-      <span class="ml-auto flex size-4 shrink-0 items-center justify-center text-muted-foreground">
+      {/* Trailing check column: 16px of reserved separation — the same `pl-4` the menu
+          facade's shortcut slot reserves — plus a 16px icon box. The width is fixed
+          (`w-8`, 16 + 16), so the column is the same checked or unchecked and the gap
+          does not depend on the surface happening to have slack. */}
+      <span class="ml-auto flex h-4 w-8 shrink-0 items-center justify-center pl-4 text-muted-foreground">
         <Show when={props.checked}><Check class="size-4" aria-hidden="true" /></Show>
       </span>
     </div>
@@ -419,7 +475,8 @@ export function DropdownRadioItem(props: DropdownRadioItemProps) {
       )}
     >
       {props.children}
-      <span class="ml-auto flex size-4 shrink-0 items-center justify-center text-muted-foreground">
+      {/* Same reserved trailing column as the checkbox item above. */}
+      <span class="ml-auto flex h-4 w-8 shrink-0 items-center justify-center pl-4 text-muted-foreground">
         <Show when={props.checked}><Check class="size-4" aria-hidden="true" /></Show>
       </span>
     </div>

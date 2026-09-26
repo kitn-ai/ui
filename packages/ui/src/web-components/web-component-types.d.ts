@@ -368,6 +368,8 @@ export interface KaiChainOfThoughtElement extends HTMLElement {
 export interface KaiChatElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
+  /** How much air the thread has: `'default'` (the shipped look) or `'compact'` (a desktop-panel rhythm: 8px between turns, a tighter band). */
+  density?: "default" | "compact";
   /** Value of the input: a string is controlled, a `ComposerDoc` is a one-time seed that pre-populates pills, unset is uncontrolled. */
   value?: string | ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: string; promptText?: string; data?: Record<string, unknown> } })[];
   /** Placeholder text shown in the empty input. */
@@ -814,7 +816,7 @@ export interface KaiDropdownElement extends HTMLElement {
   triggerIconTrailing?: string;
   /** Accessible name for a trigger with no visible label. Ignored when `triggerLabel` is set. */
   label?: string;
-  /** Stretch the trigger to the full width of its container (a block row). Attribute: `full`. */
+  /** Stretch the trigger to the full width of its container (a block row), and open the surface at that same measured width. Attribute: `full`. */
   full?: boolean;
   /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
@@ -1141,7 +1143,7 @@ export interface KaiMenuElement extends HTMLElement {
   triggerIconTrailing?: string;
   /** Accessible name for a trigger with no visible label. Ignored when `triggerLabel` is set. */
   label?: string;
-  /** Stretch the trigger to the full width of its container (a block row). Attribute: `full`. */
+  /** Stretch the trigger to the full width of its container (a block row), and open the surface at that same measured width. Attribute: `full`. */
   full?: boolean;
   /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
@@ -1899,6 +1901,8 @@ export interface KaiThreadElement extends HTMLElement {
   actionsReveal?: "always" | "hover";
   /** Show the scroll-to-bottom button inside the scroll area. Default true. */
   scrollButton?: boolean;
+  /** How much air the message list has: `'default'` (shipped) or `'compact'` (a desktop-panel rhythm: 8px between turns, a tighter band). */
+  density?: "default" | "compact";
   /** Extra classes applied to the thread's inner root. */
   class?: string;
   /** Card type → custom-element tag overrides/additions, merged over the built-ins. JS property: `el.cardTypes`. */
@@ -2496,6 +2500,8 @@ export interface KaiChainOfThoughtElementProps {
 export interface KaiChatElementProps {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
+  /** How much air the thread has: `'default'` (the shipped look) or `'compact'` (a desktop-panel rhythm: 8px between turns, a tighter band). */
+  density?: "default" | "compact";
   /** Value of the input: a string is controlled, a `ComposerDoc` is a one-time seed that pre-populates pills, unset is uncontrolled. */
   value?: string | ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: string; promptText?: string; data?: Record<string, unknown> } })[];
   /** Placeholder text shown in the empty input. */
@@ -2850,7 +2856,7 @@ export interface KaiDropdownElementProps {
   triggerIconTrailing?: string;
   /** Accessible name for a trigger with no visible label. Ignored when `triggerLabel` is set. */
   label?: string;
-  /** Stretch the trigger to the full width of its container (a block row). Attribute: `full`. */
+  /** Stretch the trigger to the full width of its container (a block row), and open the surface at that same measured width. Attribute: `full`. */
   full?: boolean;
   /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
@@ -3131,7 +3137,7 @@ export interface KaiMenuElementProps {
   triggerIconTrailing?: string;
   /** Accessible name for a trigger with no visible label. Ignored when `triggerLabel` is set. */
   label?: string;
-  /** Stretch the trigger to the full width of its container (a block row). Attribute: `full`. */
+  /** Stretch the trigger to the full width of its container (a block row), and open the surface at that same measured width. Attribute: `full`. */
   full?: boolean;
   /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
@@ -3797,6 +3803,8 @@ export interface KaiThreadElementProps {
   actionsReveal?: "always" | "hover";
   /** Show the scroll-to-bottom button inside the scroll area. Default true. */
   scrollButton?: boolean;
+  /** How much air the message list has: `'default'` (shipped) or `'compact'` (a desktop-panel rhythm: 8px between turns, a tighter band). */
+  density?: "default" | "compact";
   /** Extra classes applied to the thread's inner root. */
   class?: string;
   /** Card type → custom-element tag overrides/additions, merged over the built-ins. JS property: `el.cardTypes`. */

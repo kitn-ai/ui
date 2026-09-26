@@ -48,6 +48,13 @@
  *    top bar's reopen button read. The way IN is a method call - the rail's own
  *    toggle would otherwise fold the rail inside a column the page keeps - and
  *    that call is the second reason this controller declares a ref.
+ * 6. THE COLOR SCHEME IS PER ELEMENT, AND THE BLOCK SAYS SO ON EVERY ONE. The
+ *    kit's `theme` prop (`light` | `dark` | `auto`) is on every kai element and
+ *    the tokens live inside each shadow root, so nothing about the scheme
+ *    inherits: a page that owns the choice has to set it on every element it
+ *    renders (the kit's own theming doc says the same). `theme` is the choice in
+ *    the menu's vocabulary and `themeMode` is the same choice in the kit's, one
+ *    field each because a binding holds a field and never an expression.
  */
 import { createAssistantStream } from '@kitn.ai/ui/state';
 import type { ChatMessage } from '@kitn.ai/ui/state';
@@ -124,7 +131,9 @@ const VOICE_NO_TRANSCRIPT =
 export interface EntityTriggerItem {
   id: string;
   label: string;
-  /** A curated icon name, image URL or data-URI. */
+  /** An IMAGE SOURCE for a chip-kind item: a URL or data URI, because the kit
+   *  renders it as `<img src>`. A skill or agent needs none -- those pills carry
+   *  their kind's sigil and the menu row its kind's glyph. */
   icon?: string;
   /** Muted second line in the trigger menu. */
   description?: string;
@@ -133,7 +142,8 @@ export interface EntityTriggerItem {
 }
 
 /** A `char`-triggered entity menu in the composer: `/` for skills, `@` for
- *  mentions (the kit's own convention). */
+ *  agents (the kit's own convention: `kindSigil` maps `skill` to `/` and
+ *  `agent` to `@`). */
 export interface EntityTrigger {
   char: string;
   kind: string;
@@ -141,10 +151,19 @@ export interface EntityTrigger {
 }
 
 // SAMPLE DATA, THREE OF EACH, AND DELETE THEM: a consumer's real skills and
-// mentions come from their own registry, and these exist so the trigger menus
+// agents come from their own registry, and these exist so the trigger menus
 // have something to demonstrate. The `promptText` on a skill is the interesting
 // half: the pill reads `/summarize` in the composer and the SENT message carries
 // the expansion (the composer flattens an entity to `promptText ?? label`).
+//
+// THE TWO KINDS ARE THE KIT'S, and that is what makes the pills read: `skill`
+// is the `/` kind and `agent` is the `@` kind, and each has a "light" pill with
+// its own sigil and a built-in glyph in the trigger menu (composer-dom.ts's
+// `kindSigil` / `kindGlyph`). A kind outside that vocabulary gets the richer
+// CHIP branch instead, which resolves an icon: the item's own `icon` first,
+// and that prop is an IMAGE SOURCE (an <img src>), never an icon name. So the
+// items below carry no `icon` at all -- a Lucide name there renders a broken
+// image, and the kind's own glyph is the better signal anyway.
 const TRIGGERS: EntityTrigger[] = [
   {
     char: '/',
@@ -157,11 +176,11 @@ const TRIGGERS: EntityTrigger[] = [
   },
   {
     char: '@',
-    kind: 'mention',
+    kind: 'agent',
     items: [
-      { id: 'sample-metrics', label: 'q3-metrics.pdf', icon: 'file-text', description: 'Sample file, three pages' },
-      { id: 'sample-board-deck', label: 'board-deck.md', icon: 'file-text', description: 'Sample file' },
-      { id: 'sample-handbook', label: 'team-handbook.md', icon: 'file-text', description: 'Sample file' },
+      { id: 'sample-metrics', label: 'q3-metrics.pdf', description: 'Sample file, three pages' },
+      { id: 'sample-board-deck', label: 'board-deck.md', description: 'Sample file' },
+      { id: 'sample-handbook', label: 'team-handbook.md', description: 'Sample file' },
     ],
   },
 ];
@@ -195,6 +214,89 @@ const USER_ACTIONS = ['edit'] as const;
  *  them (Share is not here: it has no handler to name). */
 type RowMenuOp = 'rename' | 'pin' | 'archive' | 'delete';
 const ROW_MENU_OPS: readonly string[] = ['rename', 'pin', 'archive', 'delete'];
+
+/** The color scheme the reader picked in the settings menu. `system` is a real
+ *  choice rather than a spelling of the kit's `auto`: the block keeps the CHOICE
+ *  and hands each binding the value ITS attribute accepts (see `themeMode`). */
+export type ThemeChoice = 'light' | 'dark' | 'system';
+
+/** One entry of a footer menu. Mirrors the kit's `KaiMenuItem` structurally and
+ *  deliberately: the block never imports the kit's internals, and the kit types
+ *  this prop structurally, so the two agree by shape. Items are DATA, which is
+ *  what the delivery forms carry best (a prop, not authored rows), and it is
+ *  why `kai-menu` is the element these menus use. */
+export interface MenuItem {
+  /** Emitted back in `kai-select`. */
+  id?: string;
+  label?: string;
+  /** A named icon (`'sun'`), an image URL/data-URI, or plain text. */
+  icon?: string;
+  /** The right-aligned muted shortcut chip, in the kit's `keys` syntax. */
+  shortcut?: string;
+  /** With `radioGroup`, marks the SELECTED row of that single-choice group. */
+  checked?: boolean;
+  /** Membership in a single-choice group (`role="menuitemradio"`). */
+  radioGroup?: string;
+  disabled?: boolean;
+  /** A divider. */
+  separator?: boolean;
+  /** A non-interactive section label. */
+  heading?: boolean;
+}
+
+/** The three choices, in the order the menu reads them, with the glyph each row
+ *  leads with. */
+const THEME_CHOICES: readonly { id: ThemeChoice; label: string; icon: string }[] = [
+  { id: 'light', label: 'Light', icon: 'sun' },
+  { id: 'dark', label: 'Dark', icon: 'moon' },
+  { id: 'system', label: 'System', icon: 'monitor' },
+];
+
+/** Which theme a settings-menu id names, or undefined for an id this menu does
+ *  not own. The choice IS the id, so there is no second vocabulary to drift. */
+function themeOf(id: string | undefined): ThemeChoice | undefined {
+  const match = THEME_CHOICES.find((c) => c.id === id);
+  return match?.id;
+}
+
+/**
+ * The footer's two menus, projected from State. Both are `kai-menu` ITEMS rather
+ * than authored rows, for the reason the kit's own lab puts them there: the
+ * identity trigger is slotted content, and an items array is one prop the
+ * delivery forms can carry, with no per-row bindings to keep in step.
+ */
+function projectMenus(choice: ThemeChoice): Pick<AssistantState, 'theme' | 'themeMode' | 'accountItems' | 'settingsItems'> {
+  return {
+    theme: choice,
+    // `system` in the kit's vocabulary is `auto`: the element then watches
+    // prefers-color-scheme itself, which is exactly what "follow the system"
+    // means and is why this is not a fourth mode.
+    themeMode: choice === 'system' ? 'auto' : choice,
+    // The identity menu: the plan line this placeholder pretends to have, one
+    // item the block can really do, and the one it cannot - and the reason is
+    // IN the label, because a `kai-menu` item has no tooltip field and a
+    // disabled row with nothing to say would be a mystery. (The row menu's
+    // authored Share row is where the reason-in-a-tooltip pattern lives.)
+    accountItems: [
+      { heading: true, label: 'Demo plan' },
+      { id: 'new-chat', label: 'Start a new chat', icon: 'plus' },
+      { id: 'account-settings', label: "Account settings (your app's)", icon: 'settings', disabled: true },
+    ],
+    // The settings menu, and the whole of what this block owns: the scheme. The
+    // heading names the group so the rows read as one choice; the kit's radio
+    // items carry the checked state and the checkmark.
+    settingsItems: [
+      { heading: true, label: 'Theme' },
+      ...THEME_CHOICES.map((c) => ({
+        id: c.id as string,
+        label: c.label,
+        icon: c.icon,
+        radioGroup: 'theme',
+        checked: c.id === choice,
+      })),
+    ],
+  };
+}
 
 /** `{ op, conversationId }` for a row-menu item, read off the element the page
  *  bound. The op is a `data-op` LITERAL on the item (the op is fixed per row, so
@@ -268,7 +370,7 @@ export interface AssistantState {
   /** The composer's placeholder: it carries the one recording signal the kit's
    *  own mic does not paint. */
   promptPlaceholder: string;
-  /** Entity triggers: `/` for skills, `@` for mentions. */
+  /** Entity triggers: `/` for skills, `@` for agents. */
   triggers: EntityTrigger[];
   /** The `tabindex` every menu row carries, and it is a FIELD rather than a
    *  literal attribute for the reason the shell's breakpoints are: a numeric
@@ -295,6 +397,19 @@ export interface AssistantState {
    *  aside at all, so the page supplies the way back - and shows it only while
    *  there is something to come back from. */
   railReopenHidden: boolean;
+  // The settings menu (the gear beside the identity row). Both spellings of the
+  // one fact are fields for the reason the row projection carries both `renaming`
+  // and `renameFieldHidden`: a binding holds a field, never an expression, and
+  // each attribute has to be handed the value IT accepts.
+  /** The scheme the reader picked. */
+  theme: ThemeChoice;
+  /** That choice in the kit's vocabulary, which is what every kai element's
+   *  `theme` attribute takes. */
+  themeMode: 'light' | 'dark' | 'auto';
+  /** The identity menu's items (the plan line, new chat, the account row). */
+  accountItems: MenuItem[];
+  /** The settings menu's items (the theme group). */
+  settingsItems: MenuItem[];
 }
 
 /** The element handles the controller calls methods on. Nullable because no
@@ -360,6 +475,11 @@ export interface AssistantActions {
    *  Delete. The item carries its op and its row (see `rowMenuTarget`), because
    *  `@event` binds one action name and hands it the event. */
   rowMenuAction(event: Event): Promise<void>;
+  /** `@kai-select` on the identity menu (the placeholder account row's menu). */
+  accountMenuSelect(event: CustomEvent<{ id: string }>): void;
+  /** `@kai-select` on the settings menu: the theme group's Light, Dark or
+   *  System. The item's id IS the choice. */
+  settingsMenuSelect(event: CustomEvent<{ id: string; radioGroup?: string }>): void;
   /** Mount hook: hydrate from storage. Not a binding - the host calls it. */
   boot(): Promise<void>;
 }
@@ -394,6 +514,9 @@ export function createController(deps: AssistantDeps): AssistantController {
     drawerBelow: 640,
     railCollapsed: false,
     railReopenHidden: true,
+    // The block starts on the system's scheme, which is what the kit's own
+    // `auto` default does and what the page did before the menu existed.
+    ...projectMenus('system'),
   };
 
   // A NEW state object every patch: the snapshot getter is compared by
@@ -661,6 +784,21 @@ export function createController(deps: AssistantDeps): AssistantController {
 
     renameCancel() {
       applyRenaming(undefined);
+    },
+
+    // The settings menu's theme group: the item's id IS the choice, so nothing
+    // here re-reads an attribute - `kai-select` carries the id the kit emitted.
+    settingsMenuSelect(event) {
+      const choice = themeOf(event.detail.id);
+      if (choice === undefined) return;
+      patch(projectMenus(choice));
+    },
+
+    // The identity menu: one item that acts. The account row is disabled, so the
+    // kit never emits it - `account-settings` is matched here only to say so out
+    // loud if that ever changes.
+    accountMenuSelect(event) {
+      if (event.detail.id === 'new-chat') controller.startNew();
     },
 
     // One action for the four items that act, because the binding grammar binds

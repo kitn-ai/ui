@@ -65,3 +65,30 @@ describe('DefaultPromptInput attach button', () => {
     expect(queryByRole('button', { name: 'Attach files' })).not.toBeInTheDocument();
   });
 });
+
+/**
+ * The box's horizontal insets. jsdom cannot measure a rendered inset, so this
+ * asserts the CLASSES — honest here because the defect WAS two different values
+ * typed into one box: the text sat at `pl-4` (16px) while the toolbar row and the
+ * attachment row under/above it were `px-3` (12px), so the paragraph and the
+ * buttons beneath it started on different edges. Pinning the equality is what
+ * stops the next edit from reintroducing a second left inset.
+ */
+describe('DefaultPromptInput horizontal inset', () => {
+  /** The class list of the row the toolbar buttons live in. The send button is
+   *  the one stable hook inside it (`data-testid`), two levels down: its right
+   *  cluster, then the row. */
+  function toolbarRowClass(container: HTMLElement): string {
+    const send = container.querySelector('[data-testid="send"]') as HTMLElement;
+    return send.parentElement!.parentElement!.className;
+  }
+
+  it('starts the text on the same left edge as the toolbar row', () => {
+    const { container } = render(() => <DefaultPromptInput {...baseProps} />);
+    const text = container.querySelector('[data-kai-composer-editable]') as HTMLElement;
+
+    expect(text.className).toContain('pl-3');
+    expect(text.className).not.toContain('pl-4');
+    expect(toolbarRowClass(container)).toContain('px-3');
+  });
+});

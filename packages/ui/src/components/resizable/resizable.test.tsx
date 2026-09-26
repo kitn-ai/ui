@@ -1,5 +1,6 @@
 import { describe, it, expect, afterEach, beforeAll } from 'vitest';
 import '@testing-library/jest-dom/vitest';
+import { createSignal, Show } from 'solid-js';
 import { render, cleanup } from '@solidjs/testing-library';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle, clampBasis } from './resizable';
 
@@ -16,9 +17,11 @@ import { ResizablePanelGroup, ResizablePanel, ResizableHandle, clampBasis } from
 // are NOT meaningfully testable here. We test the *state logic* that is layout-
 // independent: (a) the panel reflects its default size to a data-* attribute, and
 // (b) dblclick on a handle restores adjacent panels' flex-basis from those
-// defaults, even after their inline basis has been mutated (simulating a drag).
-// The element test asserts that a content-only mutation does NOT clobber a panel's
-// dragged inline flex-basis.
+// defaults, even after their inline basis has been mutated (simulating a drag),
+// and (c) a panel drops a dragged basis when its NEIGHBOUR leaves the group (the
+// shell's collapse; the real geometry for that sequence is asserted in
+// scripts/probe-workspace-shell-resize.mjs). The element test asserts that a
+// content-only mutation does NOT clobber a panel's dragged inline flex-basis.
 
 afterEach(cleanup);
 
@@ -176,6 +179,119 @@ describe('ResizableHandle dblclick resets adjacent panels to defaults', () => {
     handle.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
 
     expect(prev.style.flexBasis).toBe('120px');
+  });
+});
+
+// The shell collapses an aside by REMOVING its panel and handle from the group
+// (`WorkspaceShell`'s `<Show>`), and a drag leaves an inline basis on the panels it
+// recomputed — so the main region kept the resized basis and never filled the shell
+// again. jsdom has no layout, so a drag cannot be DRIVEN here: the fixture writes the
+// inline basis a SETTLED drag leaves behind (the same stub the dblclick tests above
+// use, and what a browser probe measured: flex-basis 61.2%, grow 0, shrink 0 on the
+// main panel) and what is asserted is the reaction to the panel set changing. The real
+// drag → collapse geometry is scripts/probe-workspace-shell-resize.mjs.
+describe('a panel re-derives its declared size when a neighbour leaves the group', () => {
+  const flush = async () => { await Promise.resolve(); await new Promise((r) => setTimeout(r, 0)); };
+
+  /** The inline geometry a settled drag leaves on a panel. */
+  const stubDragged = (panel: HTMLElement, basis: string) => {
+    panel.style.flexBasis = basis;
+    panel.style.flexGrow = '0';
+    panel.style.flexShrink = '0';
+  };
+
+  /** The group's PANEL divs in order (a handle carries role="separator"). */
+  const panelsIn = (container: HTMLElement) => {
+    const group = container.firstElementChild as HTMLElement;
+    return Array.from(group.children).filter((el) => !el.hasAttribute('role')) as HTMLElement[];
+  };
+
+  it('a flexible panel fills the space the aside it was sized against leaves behind', async () => {
+    const [asideShown, setAsideShown] = createSignal(true);
+    const { container } = render(() => (
+      <ResizablePanelGroup orientation="horizontal">
+        <Show when={asideShown()}>
+          <ResizablePanel defaultSize="280px">aside</ResizablePanel>
+          <ResizableHandle />
+        </Show>
+        <ResizablePanel>main</ResizablePanel>
+      </ResizablePanelGroup>
+    ));
+    const main = panelsIn(container).at(-1)!;
+    stubDragged(main, '61.2%');
+
+    setAsideShown(false);
+    await flush();
+
+    expect(panelsIn(container)).toHaveLength(1);
+    expect(main.style.flexBasis).toBe('0%');
+    expect(main.style.flexGrow).toBe('1');
+  });
+
+  it('a panel with a DECLARED size returns to that size, not the dragged one', async () => {
+    const [asideShown, setAsideShown] = createSignal(true);
+    const { container } = render(() => (
+      <ResizablePanelGroup orientation="horizontal">
+        <Show when={asideShown()}>
+          <ResizablePanel defaultSize="280px">aside</ResizablePanel>
+          <ResizableHandle />
+        </Show>
+        <ResizablePanel defaultSize="50%">main</ResizablePanel>
+      </ResizablePanelGroup>
+    ));
+    const main = panelsIn(container).at(-1)!;
+    stubDragged(main, '61.2%');
+
+    setAsideShown(false);
+    await flush();
+
+    expect(main.style.flexBasis).toBe('50%');
+    expect(main.style.flexGrow).toBe('0');
+  });
+
+  it('leaves a pair whose two panels are still adjacent exactly where the user dragged it', async () => {
+    // [start · handle · main · handle · end]: removing the first pair's two nodes
+    // re-derives `main`, while the end aside — whose own pair is untouched — keeps
+    // the width the user dragged it to. Pair-scoped on purpose: re-deriving every
+    // panel would silently undo a drag on a pair that never moved.
+    const [startShown, setStartShown] = createSignal(true);
+    const { container } = render(() => (
+      <ResizablePanelGroup orientation="horizontal">
+        <Show when={startShown()}>
+          <ResizablePanel defaultSize="280px">start</ResizablePanel>
+          <ResizableHandle />
+        </Show>
+        <ResizablePanel>main</ResizablePanel>
+        <ResizableHandle />
+        <ResizablePanel defaultSize="320px">end</ResizablePanel>
+      </ResizablePanelGroup>
+    ));
+    const [main, end] = panelsIn(container).slice(-2);
+    stubDragged(main, '32.4%');
+    stubDragged(end, '38%');
+
+    setStartShown(false);
+    await flush();
+
+    expect(end.style.flexBasis).toBe('38%');
+    expect(main.style.flexBasis).toBe('0%');
+  });
+
+  it('a content-only change INSIDE a panel leaves the dragged basis alone', async () => {
+    const { container } = render(() => (
+      <ResizablePanelGroup orientation="horizontal">
+        <ResizablePanel defaultSize="280px">a</ResizablePanel>
+        <ResizableHandle />
+        <ResizablePanel>b</ResizablePanel>
+      </ResizablePanelGroup>
+    ));
+    const [first] = panelsIn(container);
+    stubDragged(first, '55%');
+
+    first.appendChild(document.createElement('span'));
+    await flush();
+
+    expect(first.style.flexBasis).toBe('55%');
   });
 });
 

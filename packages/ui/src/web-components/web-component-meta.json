@@ -1369,6 +1369,15 @@
         "displayType": "\"light\" | \"dark\" | \"auto\""
       },
       {
+        "name": "density",
+        "type": "undefined | \"default\" | \"compact\"",
+        "optional": true,
+        "scalar": true,
+        "description": "How much air the thread has: `'default'` (the shipped look) or `'compact'` (a desktop-panel rhythm: 8px between turns, a tighter band).",
+        "default": "'default'",
+        "displayType": "undefined | \"default\" | \"compact\""
+      },
+      {
         "name": "value",
         "type": "undefined | string | ({ type: \"text\"; text: string } | { type: \"entity\"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]",
         "optional": true,
@@ -3923,7 +3932,7 @@
         "type": "undefined | false | true",
         "optional": true,
         "scalar": true,
-        "description": "Stretch the trigger to the full width of its container (a block row). Attribute: `full`.",
+        "description": "Stretch the trigger to the full width of its container (a block row), and open the surface at that same measured width. Attribute: `full`.",
         "default": "false",
         "displayType": "undefined | false | true"
       },
@@ -5689,7 +5698,7 @@
         "type": "undefined | false | true",
         "optional": true,
         "scalar": true,
-        "description": "Stretch the trigger to the full width of its container (a block row). Attribute: `full`.",
+        "description": "Stretch the trigger to the full width of its container (a block row), and open the surface at that same measured width. Attribute: `full`.",
         "default": "false",
         "displayType": "undefined | false | true"
       },
@@ -10265,6 +10274,15 @@
         "description": "Show the scroll-to-bottom button inside the scroll area. Default true.",
         "default": "true",
         "displayType": "undefined | false | true"
+      },
+      {
+        "name": "density",
+        "type": "undefined | \"default\" | \"compact\"",
+        "optional": true,
+        "scalar": true,
+        "description": "How much air the message list has: `'default'` (shipped) or `'compact'` (a desktop-panel rhythm: 8px between turns, a tighter band).",
+        "default": "'default'",
+        "displayType": "undefined | \"default\" | \"compact\""
       },
       {
         "name": "class",

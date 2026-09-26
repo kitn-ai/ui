@@ -29,12 +29,25 @@
          a mandatory :key. A binding holds a field name, never an expression:
          every derivation, the rail's search filter included, is a field of
          State. The ids are for the block driver's state script, which is
-         authored rather than generated. -->
+         authored rather than generated.
+
+         EVERY kai element here carries `:theme="themeMode"`, and it is the same
+         field on all of them because the kit's scheme is PER ELEMENT: `theme`
+         (light / dark / auto) is a prop on every kai element, its tokens live
+         inside that element's own shadow root, and nothing about the scheme
+         inherits. So the settings menu's choice has to be said on each element
+         the page renders, or an element left at its `auto` default keeps
+         following the OS while the rest of the page follows the reader.
+         The three kai-kbd-group elements are the only kai elements WITHOUT it,
+         and that is not an oversight: a group paints nothing of its own (it is a
+         frame around its kai-kbd children, and each of those carries the
+         binding), so there is no token inside it to flip. -->
     <kai-workspace
       id="workspace"
       class="app"
       data-block-root
       #ref="workspace"
+      :theme="themeMode"
       :collapse-below="collapseBelow"
       :drawer-below="drawerBelow"
       @kai-aside-toggle="asideToggle"
@@ -53,6 +66,7 @@
       <kai-conversations
         id="conversations"
         slot="start"
+        :theme="themeMode"
         .collapsed="railCollapsed"
         .activeId="activeId"
         @kai-conversation-select="openConversation"
@@ -63,6 +77,7 @@
         <kai-conversation-item
           *for="row of conversationRows"
           :key="row.id"
+          :theme="themeMode"
           :conversation-id="row.id"
           :unread="row.unread"
         >
@@ -77,6 +92,7 @@
           <kai-editable-label
             class="row-rename"
             :hidden="row.renameFieldHidden"
+            :theme="themeMode"
             .value="row.title"
             .editing="row.renaming"
             placeholder="Conversation name"
@@ -101,6 +117,7 @@
           <kai-dropdown
             slot="menu"
             class="row-menu"
+            :theme="themeMode"
             triggerIcon="more-horizontal"
             :label="row.menuLabel"
           >
@@ -118,6 +135,7 @@
                  host). A press on this row therefore closes the menu, and the row
                  itself still does nothing: there is no handler on it. -->
             <kai-tooltip
+              :theme="themeMode"
               placement="left"
               content="Sharing needs a share endpoint you own. This block ships none, so the item is inert on purpose."
             >
@@ -127,10 +145,34 @@
                 :tabIndex="menuItemTabIndex"
                 aria-disabled="true"
               >
-                <kai-icon name="share"></kai-icon>
+                <kai-icon :theme="themeMode" name="share"></kai-icon>
                 <span class="menu-row-label">Share</span>
               </span>
             </kai-tooltip>
+
+            <!-- THE MENU READS IN THREE GROUPS: what needs something you own
+                 (Share), what this block really does (Rename, Pin, Archive), and
+                 what it cannot undo (Delete). The divider is the kit's own
+                 treatment - `role="separator"` on a presentational row (see
+                 DropdownSeparator in components/dropdown/dropdown.tsx) - spelled
+                 here because this page authors its menu markup.
+
+                 HOW IT STAYS OUT OF THE KEYBOARD'S WAY: the divider is a plain
+                 span with NO tabindex, so it is not focusable, and the dropdown's
+                 roving focus walks `role="menuitem"` / `menuitemcheckbox` /
+                 `menuitemradio` only - `role="separator"` matches none of them, so
+                 ArrowUp and ArrowDown step straight over it, exactly as the kit's
+                 own separator behaves. It is also not a kai- element: there is
+                 nothing in it that could take a key. -->
+            <span class="menu-separator" role="separator"></span>
+
+            <!-- Each hint is one shortcut, so each is ONE kai-kbd inside a
+                 kai-kbd-group. The token spec already splits the shortcut into a
+                 cap per key (Mod+Shift+P is three caps in one element), and the
+                 group is what welds them into a single key strip: it marks its
+                 direct kai-kbd children `data-kai-join`, which zeroes the chord
+                 gap between those caps and squares the corners they share. See
+                 assistant.css for what the two renderings measure. -->
 
             <!-- The four items that ACT, in the order the menu reads, and the
                  shape of all four is the same three facts.
@@ -156,6 +198,7 @@
               role="menuitem"
               :tabIndex="menuItemTabIndex"
               :hidden="row.renameItemHidden"
+              :theme="themeMode"
               data-op="rename"
               :data-conversation-id="row.id"
               variant="ghost"
@@ -166,12 +209,13 @@
               @kai-click="rowMenuAction"
             >
               Rename
-              <kai-kbd class="menu-kbd" keys="F2" size="sm"></kai-kbd>
+              <kai-kbd-group class="menu-kbd"><kai-kbd :theme="themeMode" keys="F2" size="sm"></kai-kbd></kai-kbd-group>
             </kai-button>
             <kai-button
               role="menuitem"
               :tabIndex="menuItemTabIndex"
               :hidden="row.pinItemHidden"
+              :theme="themeMode"
               data-op="pin"
               :data-conversation-id="row.id"
               variant="ghost"
@@ -182,12 +226,13 @@
               @kai-click="rowMenuAction"
             >
               <span .textContent="row.pinLabel"></span>
-              <kai-kbd class="menu-kbd" keys="Mod+Shift+P" size="sm"></kai-kbd>
+              <kai-kbd-group class="menu-kbd"><kai-kbd :theme="themeMode" keys="Mod+Shift+P" size="sm"></kai-kbd></kai-kbd-group>
             </kai-button>
             <kai-button
               role="menuitem"
               :tabIndex="menuItemTabIndex"
               :hidden="row.archiveItemHidden"
+              :theme="themeMode"
               data-op="archive"
               :data-conversation-id="row.id"
               variant="ghost"
@@ -198,12 +243,16 @@
               @kai-click="rowMenuAction"
             >
               Archive
-              <kai-kbd class="menu-kbd" keys="Mod+Shift+A" size="sm"></kai-kbd>
+              <kai-kbd-group class="menu-kbd"><kai-kbd :theme="themeMode" keys="Mod+Shift+A" size="sm"></kai-kbd></kai-kbd-group>
             </kai-button>
+
+            <span class="menu-separator" role="separator"></span>
+
             <kai-button
               role="menuitem"
               :tabIndex="menuItemTabIndex"
               :hidden="row.deleteItemHidden"
+              :theme="themeMode"
               data-op="delete"
               :data-conversation-id="row.id"
               class="menu-delete"
@@ -219,60 +268,58 @@
           </kai-dropdown>
         </kai-conversation-item>
 
-        <!-- The identity row, at the foot of the rail. The whole row is the
-             trigger (avatar, name, caret) so the placeholder reads as one thing,
-             and `label` names it: a slotted trigger is VISUAL content by the
-             element's own contract, with the name supplied beside it. -->
-        <kai-dropdown
-          slot="footer"
-          class="profile"
-          full
-          label="Account menu, Demo User"
-        >
-          <span slot="trigger" class="profile-trigger">
-            <kai-avatar fallback="DU" size="sm" alt="Demo User"></kai-avatar>
-            <span class="profile-name">Demo User</span>
-            <kai-icon name="chevron-up" class="profile-caret"></kai-icon>
-          </span>
-          <!-- The plan line sits in the MENU as a plain heading, not on the
-               trigger: the trigger's name has to contain its visible text, and a
-               second line of text in a button is one more word for the name to
-               carry. It is not a menu item - a heading is not focusable and the
-               roving focus walks straight past it.
+        <!-- The foot of the rail: a ROW of two menus, the identity trigger and the
+             settings gear beside it (the shape of the kit's own perplexity lab).
+             The identity row is a PLACEHOLDER by rule ("Demo User", a demo plan):
+             the kit owns no auth, no account and no settings screen, so the block
+             shows one and says so in every item it cannot wire.
 
-               Two items follow, and both are honest about what they are: one
-               thing this block really can do, and one it cannot, disabled with
-               the reason in a tooltip. No sign-out, no billing, no settings
-               screen: the kit owns none of that, and a block that drew them
-               would be implying an account that does not exist. -->
-          <span class="menu-heading">Demo plan</span>
-          <kai-button
-            role="menuitem"
-            :tabIndex="menuItemTabIndex"
-            variant="ghost"
-            size="sm"
+             BOTH ARE kai-menu WITH AN ITEMS ARRAY, not authored rows. The trigger
+             is SLOTTED content (an avatar, a name, a caret) and it is VISUAL ONLY:
+             kai-menu supplies the button, aria-haspopup, aria-expanded and the
+             roving focus, so the trigger slot carries no control of its own. The
+             items are a prop, which is what the delivery forms carry best - and
+             the settings menu's theme group is where that pays off, because a
+             single-choice group is an item FIELD (`radioGroup` + `checked`)
+             rather than three hand-authored rows with three bound attributes.
+
+             The identity menu keeps `full`, which is what makes its trigger button
+             fill the width of the ROW: `full` stretches the trigger to the box it
+             is given, and what gives it the box is the flex row below. So the
+             dropdown no longer owns the slot - the row decides who gets how much
+             of it, with the identity side flexible and the gear fixed. -->
+        <div slot="footer" class="rail-footer">
+          <kai-menu
+            class="profile"
+            :theme="themeMode"
+            .items="accountItems"
             full
-            align="start"
-            icon="plus"
-            @kai-click="newChat"
+            label="Account menu, Demo User"
+            @kai-select="accountMenuSelect"
           >
-            Start a new chat
-          </kai-button>
-          <kai-tooltip
-            placement="left"
-            content="Account screens are your app's, not the kit's. This block ships none."
-          >
-            <span
-              class="menu-row menu-row-disabled"
-              role="menuitem"
-              :tabIndex="menuItemTabIndex"
-              aria-disabled="true"
-            >
-              <kai-icon name="settings"></kai-icon>
-              <span class="menu-row-label">Account settings</span>
+            <span slot="trigger" class="profile-trigger">
+              <kai-avatar :theme="themeMode" fallback="DU" size="sm" alt="Demo User"></kai-avatar>
+              <span class="profile-name">Demo User</span>
+              <kai-icon :theme="themeMode" name="chevron-up" class="profile-caret"></kai-icon>
             </span>
-          </kai-tooltip>
-        </kai-dropdown>
+          </kai-menu>
+
+          <!-- THE GEAR, and it is a real settings menu rather than a dead button:
+               its theme group flips the WHOLE page (see the html header for why
+               every kai element carries `:theme`). An icon-only TRIGGER, built
+               from the element's own props: `triggerIcon` paints the glyph and
+               `label` supplies the accessible name, because an icon is not text
+               (the same rule the rail's built-in header buttons follow), and the
+               kit then renders the button, not the block. -->
+          <kai-menu
+            class="settings"
+            :theme="themeMode"
+            .items="settingsItems"
+            triggerIcon="settings"
+            label="Settings"
+            @kai-select="settingsMenuSelect"
+          ></kai-menu>
+        </div>
       </kai-conversations>
 
       <main slot="main" class="main">
@@ -286,6 +333,7 @@
               size="icon-sm"
               icon="panel-left"
               label="Open sidebar"
+              :theme="themeMode"
               hidden
               :hidden="railReopenHidden"
               @kai-click="expandRail"
@@ -297,15 +345,24 @@
                selection out via kai-model-change. -->
           <kai-model-switcher
             id="models"
+            :theme="themeMode"
             .models="models"
             .currentModel="currentModel"
             @kai-model-change="modelChange"
           ></kai-model-switcher>
         </header>
 
-        <kai-thread id="thread" .messages="messages" .loading="loading">
+        <!-- `density="compact"` is a LITERAL attribute on a kai-* element, which
+             the grammar allows and the prop's own string union accepts: the thread
+             is the one region of this page that is a REPEATED, uniform block of
+             content, and the tighter set (8px between turns instead of the
+             default's spacing) is what a full-page assistant reads like. It is
+             set here rather than in the block's CSS because the spacing is a kit
+             decision the element owns. -->
+        <kai-thread id="thread" :theme="themeMode" density="compact" .messages="messages" .loading="loading">
           <kai-empty
             slot="empty"
+            :theme="themeMode"
             empty-title="What can I help with?"
             description="Ask anything, or start from a suggestion below."
           ></kai-empty>
@@ -328,6 +385,7 @@
           id="prompt"
           #ref="prompt"
           voice
+          :theme="themeMode"
           .placeholder="promptPlaceholder"
           .suggestions="suggestions"
           .loading="loading"
@@ -341,6 +399,7 @@
           <kai-voice-input
             id="voice"
             #ref="voice"
+            :theme="themeMode"
             @kai-recording-change="voiceRecording"
             @kai-transcription="voiceTranscript"
             @kai-voice-error="voiceError"

@@ -3,6 +3,7 @@ import '@testing-library/jest-dom/vitest';
 import { createSignal } from 'solid-js';
 import { render, cleanup, fireEvent } from '@solidjs/testing-library';
 import { Thread, type ThreadController } from './thread';
+import type { ThreadDensity } from '../chat/thread-density';
 import type { ChatMessage } from '../../web-components/chat/chat-types';
 
 // Spy on the imperative toast() the feedback controller raises.
@@ -236,5 +237,37 @@ describe('Thread reasoning parts', () => {
     ];
     const { container } = render(() => <Thread messages={messages} />);
     expect(container.textContent ?? '').toContain('Second block.');
+  });
+});
+
+// The `<kai-thread>` facade's axis, on the component that element renders. The
+// element's own pass-through is pinned in
+// `src/web-components/thread/thread-density.declarative.test.tsx`.
+describe('Thread density axis', () => {
+  const log = (c: HTMLElement) => c.querySelector('[role="log"]') as HTMLElement;
+  const content = (c: HTMLElement) => log(c).firstElementChild as HTMLElement;
+
+  it('renders the shipped box with no `density` given, and for an explicit `default`', () => {
+    const unset = render(() => <Thread messages={[]} />).container;
+    const explicit = render(() => <Thread messages={[]} density="default" />).container;
+    for (const c of [unset, explicit]) {
+      expect(log(c).getAttribute('class')).toBe('flex flex-col overflow-y-auto kai-focus-inset h-full px-4 py-3');
+      expect(content(c).getAttribute('class')).toBe('flex flex-col mx-auto w-full max-w-3xl space-y-4');
+    }
+  });
+
+  it("renders the tighter band and between-turn gap for `'compact'`", () => {
+    const { container } = render(() => <Thread messages={[]} density="compact" />);
+    expect(log(container).getAttribute('class')).toBe('flex flex-col overflow-y-auto kai-focus-inset h-full px-3 py-2');
+    expect(content(container).getAttribute('class')).toBe('flex flex-col mx-auto w-full max-w-3xl space-y-2');
+  });
+
+  it('falls back to `default` and says so for an unknown value arriving as a string', () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const { container } = render(() => <Thread messages={[]} density={'cosy' as unknown as ThreadDensity} />);
+    expect(log(container).getAttribute('class')).toBe('flex flex-col overflow-y-auto kai-focus-inset h-full px-4 py-3');
+    expect(error).toHaveBeenCalledTimes(1);
+    expect(String(error.mock.calls[0][0])).toContain('Thread');
+    error.mockRestore();
   });
 });

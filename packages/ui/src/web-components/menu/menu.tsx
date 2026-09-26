@@ -46,7 +46,11 @@ interface Props extends Record<string, unknown> {
   // contain the word you slotted.
   /** Accessible name for a trigger with no visible label. Ignored when `triggerLabel` is set. */
   label?: string;
-  /** Stretch the trigger to the full width of its container (a block row). Attribute: `full`. */
+  // `full` stretches the trigger to its container, and the surface follows it: the
+  // ROW is the trigger's width, so a menu opened from a full trigger is as wide as the
+  // row instead of only as wide as its own items. The surface's `min-width` stays the
+  // floor — at a 240px rail the row is narrower than 15rem and the menu stays at 15rem.
+  /** Stretch the trigger to the full width of its container (a block row), and open the surface at that same measured width. Attribute: `full`. */
   full?: boolean;
   // Shoelace-style: settable and reflected to the `open` attribute, while the menu
   // still self-manages on click/keyboard.
@@ -204,7 +208,13 @@ defineWebComponent<Props, Events>('kai-menu', {
           <Show when={!props.triggerIcon && !props.triggerLabel}><MoreHorizontal class="size-4" /></Show>
         </slot>
       </DropdownTrigger>
-      <DropdownContent class="min-w-[15rem]">
+      {/* `full` stretches the trigger to its container, so the ROW is the trigger's
+          width and the surface follows it (see `DropdownContent.matchTriggerWidth`):
+          the menu is as wide as the row it came from instead of the floor.
+          No `min-w-*` here: `DropdownContent` ships the kit's menu width as its own
+          default floor, and at a 240px rail the row is narrower than that floor, so
+          CSS keeps the menu at the floor exactly as before. */}
+      <DropdownContent matchTriggerWidth={flag('full')}>
         {renderItems((props.items as KaiMenuItem[] | undefined) ?? [])}
       </DropdownContent>
     </Dropdown>

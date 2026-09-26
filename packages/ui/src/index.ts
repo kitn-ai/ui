@@ -246,6 +246,9 @@ export {
 export type {
   ChatContainerProps, ChatContainerRootProps, ChatContainerContentProps, ChatContainerScrollAnchorProps,
 } from './components/chat/chat-container';
+// The name of the thread density axis, exportable like `ConversationRowDensity` (the
+// row's own axis) so a consumer can type a wrapper prop without inlining the union.
+export type { ThreadDensity } from './components/chat/thread-density';
 export { Message, MessageAvatar, MessageContent, MessageActions, MessageAction, MessageCopyButton, MessageBody } from './components/message/message';
 export type {
   MessageProps, MessageAvatarProps, MessageContentProps, MessageActionsProps,

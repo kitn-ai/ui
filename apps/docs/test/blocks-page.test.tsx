@@ -294,6 +294,85 @@ describe('the preview', () => {
   });
 });
 
+describe('the two modes are the same height', () => {
+  // A rendered height is not measurable here: jsdom lays nothing out, so
+  // `getBoundingClientRect()` is all zeros and a test asserting "800px tall"
+  // would be theatre. What IS real in jsdom is the DERIVATION -- which value
+  // the card writes where -- and the structure that makes the panes scroll
+  // instead of the card growing. Both are asserted below; the heights
+  // themselves are measured in Chromium and quoted in the task report.
+  const bodyHeightOf = (card: HTMLElement, testid: string): string => {
+    const el = within(card).getByTestId(testid) as HTMLElement;
+    return el.style.height;
+  };
+
+  it('bounds the code panes with the SAME manifest value the preview frame uses', async () => {
+    render(() => <BlocksPage items={items} loadForm={loadForm} />);
+    for (const item of items) {
+      const card = screen.getByTestId(`block-card-${item.name}`);
+      const frame = within(card).getByTestId('preview-frame') as HTMLIFrameElement;
+      setMode(card, 'code');
+      await waitFor(() => expect(within(card).queryByTestId('code-panes')).not.toBeNull());
+      // One source, read twice: the manifest. The two cannot disagree later,
+      // because a code pane with a number of its own is the defect that
+      // shipped -- the card grew to the length of assistant.controller.ts.
+      expect(bodyHeightOf(card, 'code-panes')).toBe(frame.style.height);
+      expect(bodyHeightOf(card, 'code-panes')).toBe(item.meta?.iframeHeight);
+    }
+  });
+
+  it('falls back to ONE default when a manifest omits the height', async () => {
+    // Not a per-mode default: a manifest that says nothing still gets both
+    // modes at one height, which is what a fallback per mode would break.
+    render(() => <BlocksPage items={[{ ...items[0], meta: undefined }]} loadForm={loadForm} />);
+    const card = screen.getByTestId(`block-card-${items[0].name}`);
+    const frame = within(card).getByTestId('preview-frame') as HTMLIFrameElement;
+    expect(frame.style.height).not.toBe('');
+    setMode(card, 'code');
+    await waitFor(() => expect(within(card).queryByTestId('code-panes')).not.toBeNull());
+    expect(bodyHeightOf(card, 'code-panes')).toBe(frame.style.height);
+  });
+
+  it('insets both bodies identically, so the totals cannot drift either', async () => {
+    // The frame and the panes are the same height; the padding around them is
+    // the other half of "the same total height". One class, used by both.
+    render(() => <BlocksPage items={items} loadForm={loadForm} />);
+    const card = screen.getByTestId('block-card-support-widget');
+    const insetOf = (el: HTMLElement): string =>
+      (el.className.match(/\bp[xytrbl]?-\S+/g) ?? []).sort().join(' ');
+    const previewInset = insetOf(within(card).getByTestId('preview-body'));
+    expect(previewInset).not.toBe('');
+    setMode(card, 'code');
+    await waitFor(() => expect(within(card).queryByTestId('code-body')).not.toBeNull());
+    expect(insetOf(within(card).getByTestId('code-body'))).toBe(previewInset);
+  });
+
+  it('scrolls the panes, never the card', async () => {
+    render(() => <BlocksPage items={items} loadForm={loadForm} />);
+    const card = screen.getByTestId('block-card-support-widget');
+    setMode(card, 'code');
+    await waitFor(() => expect(within(card).queryByTestId('code-panes')).not.toBeNull());
+    const panes = within(card).getByTestId('code-panes');
+    const pane = within(card).getByTestId('code-pane');
+    const treePane = within(card).getByTestId('file-tree-pane');
+
+    // The bound lives on the panes frame; the card itself carries no height
+    // and no max-height, so a long file cannot grow it.
+    expect(panes.style.height).not.toBe('');
+    expect(card.style.height).toBe('');
+    expect(card.style.maxHeight).toBe('');
+    expect(card.className).not.toMatch(/max-h/);
+
+    // Each pane scrolls ITSELF, in the stacked layout and in the side-by-side
+    // one: the mode the card is in is a container query, so the same card is
+    // 40% -capped here and a stretched column there.
+    expect(pane.className).toContain('overflow-auto');
+    expect(treePane.className).toContain('overflow-y-auto');
+    expect(treePane.className).toContain('md:max-h-none');
+    expect(panes.className).toContain('overflow-hidden');
+  });
+});
+
 describe('the category strip', () => {
   it('is derived from the items and filters them in place', async () => {
     render(() => <BlocksPage items={items} loadForm={loadForm} />);

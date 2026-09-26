@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@solidjs/testing-library';
 import { createSignal } from 'solid-js';
-import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem, DropdownRadioItem } from '../../src/components/dropdown/dropdown';
+import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem, DropdownRadioItem, DropdownCheckboxItem } from '../../src/components/dropdown/dropdown';
 
 // jsdom (v24) does not implement the PointerEvent constructor. useDismiss
 // listens for `pointerdown`; copy the shim from overlay.test.tsx.
@@ -157,5 +157,186 @@ describe('DropdownRadioItem (single-select group)', () => {
     const item = screen.getByRole('menuitemradio');
     fireEvent.click(item);
     expect(onSelect).not.toHaveBeenCalled();
+  });
+});
+
+/**
+ * The surface's WIDTH, and the trailing column that depends on it.
+ *
+ * STRUCTURAL, NOT PIXEL-BASED, on purpose: jsdom lays nothing out, so
+ * `getBoundingClientRect()` answers all zeros and a pixel assertion here would be
+ * theatre. What jsdom CAN pin is the mechanism — the surface takes its inline width
+ * FROM the trigger's measured rect, a missing or zero measurement falls back to the
+ * CSS floor instead of writing `0px`, and a trigger resize re-measures while the
+ * surface is open. The real geometry is measured in a browser by
+ * `scripts/probe-menu-surface-width.mjs`.
+ *
+ * WHY THE FLOOR AND THE TRAILING COLUMN ARE THE SAME SUBJECT: a menu is
+ * content-sized, so both defects are the same defect — something that needs slack
+ * (the checkmark's separation) or a floor (any trailing separation at all) was left
+ * to a width no surface guaranteed. A width that arrives at open time from the
+ * trigger can be narrow, so the reserved separation has to hold on its own.
+ */
+
+/** A rect with only the field the surface reads. jsdom's own is all zeros. */
+const rect = (width: number): DOMRect => ({
+  width, height: 32, top: 0, left: 0, right: width, bottom: 32, x: 0, y: 0,
+  toJSON: () => ({}),
+}) as DOMRect;
+
+/** Records the callbacks so a test can fire a resize without a layout engine. */
+class FakeResizeObserver {
+  static seen: FakeResizeObserver[] = [];
+  private cb: ResizeObserverCallback;
+  constructor(cb: ResizeObserverCallback) {
+    this.cb = cb;
+    FakeResizeObserver.seen.push(this);
+  }
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+  fire() { this.cb([], this as unknown as ResizeObserver); }
+}
+
+function setupSurface(props: { matchTriggerWidth?: boolean; class?: string } = {}) {
+  const utils = render(() => (
+    <Dropdown>
+      <DropdownTrigger as={(p: any) => <button {...p} data-testid="trg">Menu</button>} />
+      <DropdownContent matchTriggerWidth={props.matchTriggerWidth} class={props.class}>
+        <DropdownItem>Alpha</DropdownItem>
+      </DropdownContent>
+    </Dropdown>
+  ));
+  return { ...utils, trg: screen.getByTestId('trg'), menu: () => screen.getByRole('menu') };
+}
+
+describe('DropdownContent width', () => {
+  it('tracks the trigger: matchTriggerWidth writes the measured rect as the surface width', () => {
+    const { trg, menu } = setupSurface({ matchTriggerWidth: true });
+    vi.spyOn(trg, 'getBoundingClientRect').mockReturnValue(rect(364));
+
+    fireEvent.click(trg);
+
+    expect(menu().style.width).toBe('364px');
+  });
+
+  it('and writes NOTHING without it — the same harness, so "no width" cannot pass vacuously', () => {
+    const { trg, menu } = setupSurface();
+    vi.spyOn(trg, 'getBoundingClientRect').mockReturnValue(rect(364));
+
+    fireEvent.click(trg);
+
+    expect(
+      menu().style.width,
+      'the surface is content-sized unless it is asked to track; that is what left it '
+      + 'narrow for a direct consumer of <DropdownContent>',
+    ).toBe('');
+  });
+
+  it('a zero measurement (jsdom, a display:none trigger) falls back to the CSS floor, never `0px`', () => {
+    const { trg, menu } = setupSurface({ matchTriggerWidth: true });
+    vi.spyOn(trg, 'getBoundingClientRect').mockReturnValue(rect(0));
+
+    fireEvent.click(trg);
+
+    expect(menu().style.width).toBe('');
+    expect(menu().classList.contains('min-w-[15rem]'), 'the floor is still declared on the surface').toBe(true);
+  });
+
+  it('a trigger resize while the surface is OPEN re-measures (the rail the user drags wider)', () => {
+    const original = (globalThis as any).ResizeObserver;
+    (globalThis as any).ResizeObserver = FakeResizeObserver;
+    FakeResizeObserver.seen = [];
+    try {
+      const { trg, menu } = setupSurface({ matchTriggerWidth: true });
+      const spy = vi.spyOn(trg, 'getBoundingClientRect').mockReturnValue(rect(280));
+      fireEvent.click(trg);
+      expect(menu().style.width).toBe('280px');
+
+      expect(
+        FakeResizeObserver.seen.length,
+        'the effect must have observed the trigger, or nothing re-measures',
+      ).toBeGreaterThan(0);
+
+      spy.mockReturnValue(rect(420));
+      for (const ro of FakeResizeObserver.seen) ro.fire();
+
+      expect(menu().style.width).toBe('420px');
+    } finally {
+      (globalThis as any).ResizeObserver = original;
+      FakeResizeObserver.seen = [];
+    }
+  });
+
+  it('ships a usable floor of its own, so a direct consumer needs no class to get one', () => {
+    // The model switcher is the live consumer: <DropdownContent> with no class and
+    // DropdownRadioItem rows. Its floor has to come from the component or the rows
+    // have nowhere for the trailing check to sit.
+    const { trg, menu } = setupSurface();
+    fireEvent.click(trg);
+
+    expect(menu().classList.contains('min-w-[15rem]')).toBe(true);
+    expect(menu().classList.contains('min-w-[8rem]'), 'one floor, not two').toBe(false);
+  });
+
+  it("a caller's own min-width REPLACES the default floor rather than adding to it", () => {
+    const { trg, menu } = setupSurface({ class: 'min-w-[10rem]' });
+    fireEvent.click(trg);
+
+    expect(menu().classList.contains('min-w-[10rem]')).toBe(true);
+    expect(menu().classList.contains('min-w-[15rem]')).toBe(false);
+  });
+});
+
+describe('the trailing check column', () => {
+  /** A freshly opened menu with one checked and one unchecked row of each kind. */
+  function setupTrailing() {
+    render(() => (
+      <Dropdown defaultOpen>
+        <DropdownTrigger as={(p: any) => <button {...p}>Menu</button>} />
+        <DropdownContent>
+          <DropdownRadioItem checked onSelect={() => {}}>Checked radio</DropdownRadioItem>
+          <DropdownRadioItem onSelect={() => {}}>Unchecked radio</DropdownRadioItem>
+          <DropdownCheckboxItem checked onSelect={() => {}}>Checked box</DropdownCheckboxItem>
+          <DropdownCheckboxItem onSelect={() => {}}>Unchecked box</DropdownCheckboxItem>
+        </DropdownContent>
+      </Dropdown>
+    ));
+  }
+
+  /** The trailing column is the item's LAST child, whatever is checked. */
+  const trailing = (item: HTMLElement) => item.lastElementChild as HTMLElement;
+
+  it('a checked item RESERVES the separation, so the check cannot touch its label', () => {
+    setupTrailing();
+    const [checkedRadio, checkedBox] = [
+      screen.getAllByRole('menuitemradio')[0],
+      screen.getAllByRole('menuitemcheckbox')[0],
+    ];
+
+    for (const [item, label] of [[checkedRadio, 'radio'], [checkedBox, 'checkbox']] as const) {
+      const box = trailing(item);
+      expect(
+        box.classList.contains('pl-4'),
+        `${label}: 16px of reserved separation — the same pl-4 the menu facade's shortcut slot uses`,
+      ).toBe(true);
+      expect(
+        box.classList.contains('w-8'),
+        `${label}: a fixed 32px column (16px gap + the 16px icon), so the gap is not left to whatever width the surface happens to have`,
+      ).toBe(true);
+      expect(item.querySelector('svg'), `${label}: the check really is rendered`).toBeTruthy();
+    }
+  });
+
+  it('an unchecked item keeps the IDENTICAL column, so rows do not shift as the check moves', () => {
+    setupTrailing();
+    const items = [
+      ...screen.getAllByRole('menuitemradio'),
+      ...screen.getAllByRole('menuitemcheckbox'),
+    ];
+    const classes = items.map((item) => trailing(item).className);
+
+    expect(new Set(classes).size, `all four columns share one class list: ${classes[0]}`).toBe(1);
+    expect(trailing(items[1]).querySelector('svg'), 'unchecked renders no check').toBe(null);
   });
 });

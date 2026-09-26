@@ -405,6 +405,8 @@ export const ChainOfThought = /*#__PURE__*/ createWebComponent<ChainOfThoughtPro
 );
 
 export interface ChatProps extends WebComponentProps {
+  /** How much air the thread has: `'default'` (the shipped look) or `'compact'` (a desktop-panel rhythm: 8px between turns, a tighter band). */
+  density?: "default" | "compact";
   /** Value of the input: a string is controlled, a `ComposerDoc` is a one-time seed that pre-populates pills, unset is uncontrolled. */
   value?: string | ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: string; promptText?: string; data?: Record<string, unknown> } })[];
   /** Placeholder text shown in the empty input. */
@@ -519,7 +521,7 @@ export interface ChatProps extends WebComponentProps {
 
 export const Chat = /*#__PURE__*/ createWebComponent<ChatProps, KaiChatElement>(
   'kai-chat',
-  ["theme","value","placeholder","loading","suggestions","suggestionMode","persistSuggestions","proseSize","codeTheme","imagePreview","codeHighlight","reasoning","reasoningOpen","chatTitle","models","currentModel","context","scrollButton","headerStart","headerEnd","headerFull","homeFull","sidebar","empty","composer","composerActions","footer","attach","webSearch","voice","triggers","kindIcons","actionsReveal","userActions","assistantActions","hideSources","accept","messages","cardTypes","cardSchemas","conversations","store","home","hostOpen"],
+  ["theme","density","value","placeholder","loading","suggestions","suggestionMode","persistSuggestions","proseSize","codeTheme","imagePreview","codeHighlight","reasoning","reasoningOpen","chatTitle","models","currentModel","context","scrollButton","headerStart","headerEnd","headerFull","homeFull","sidebar","empty","composer","composerActions","footer","attach","webSearch","voice","triggers","kindIcons","actionsReveal","userActions","assistantActions","hideSources","accept","messages","cardTypes","cardSchemas","conversations","store","home","hostOpen"],
   { onAttachmentsChange: 'kai-attachments-change', onAttachmentsRejected: 'kai-attachments-rejected', onConversationLoad: 'kai-conversation-load', onHomeLink: 'kai-home-link', onMessageAction: 'kai-message-action', onModelChange: 'kai-model-change', onSubmit: 'kai-submit', onSuggestionClick: 'kai-suggestion-click', onUnreadChange: 'kai-unread-change', onValueChange: 'kai-value-change', onVoice: 'kai-voice', onWebSearch: 'kai-web-search' },
   () => import('@kitn.ai/ui/web-components/chat'),
 );
@@ -921,7 +923,7 @@ export interface DropdownProps extends WebComponentProps {
   triggerIconTrailing?: string;
   /** Accessible name for a trigger with no visible label. Ignored when `triggerLabel` is set. */
   label?: string;
-  /** Stretch the trigger to the full width of its container (a block row). Attribute: `full`. */
+  /** Stretch the trigger to the full width of its container (a block row), and open the surface at that same measured width. Attribute: `full`. */
   full?: boolean;
   /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
@@ -1326,7 +1328,7 @@ export interface MenuProps extends WebComponentProps {
   triggerIconTrailing?: string;
   /** Accessible name for a trigger with no visible label. Ignored when `triggerLabel` is set. */
   label?: string;
-  /** Stretch the trigger to the full width of its container (a block row). Attribute: `full`. */
+  /** Stretch the trigger to the full width of its container (a block row), and open the surface at that same measured width. Attribute: `full`. */
   full?: boolean;
   /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
@@ -2327,6 +2329,8 @@ export interface ThreadProps extends WebComponentProps {
   actionsReveal?: "always" | "hover";
   /** Show the scroll-to-bottom button inside the scroll area. Default true. */
   scrollButton?: boolean;
+  /** How much air the message list has: `'default'` (shipped) or `'compact'` (a desktop-panel rhythm: 8px between turns, a tighter band). */
+  density?: "default" | "compact";
   /** Extra classes applied to the thread's inner root. */
   class?: string;
   /** Card type → custom-element tag overrides/additions, merged over the built-ins. JS property: `el.cardTypes`. */
@@ -2339,7 +2343,7 @@ export interface ThreadProps extends WebComponentProps {
 
 export const Thread = /*#__PURE__*/ createWebComponent<ThreadProps, KaiThreadElement>(
   'kai-thread',
-  ["theme","messages","loading","proseSize","codeTheme","codeHighlight","imagePreview","actionsReveal","scrollButton","class","cardTypes","cardSchemas"],
+  ["theme","messages","loading","proseSize","codeTheme","codeHighlight","imagePreview","actionsReveal","scrollButton","density","class","cardTypes","cardSchemas"],
   { onMessageAction: 'kai-message-action' },
   () => import('@kitn.ai/ui/web-components/thread'),
 );

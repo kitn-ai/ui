@@ -2,6 +2,7 @@ import { createSignal, onCleanup, onMount } from 'solid-js';
 import { defineWebComponent } from '../define/define';
 import { CHAT_SLOTS, readSlots } from '../slots/slots';
 import { ChatThread, type ChatThreadProps, type ChatThreadContextUsage, type ChatThreadController } from '../../components/chat/chat-thread';
+import type { ThreadDensity } from '../../components/chat/thread-density';
 import { cardComponentsFromTags } from '../message/message';
 import { createMessagesGuard } from '../message/validate-messages';
 import type { AttachmentData } from '../../components/attachments/attachments';
@@ -197,6 +198,10 @@ defineWebComponent<Props, Events>('kai-chat', {
   reasoning: undefined, reasoningOpen: undefined, conversations: false, store: undefined,
   home: undefined, userActions: undefined, assistantActions: undefined, hideSources: false,
   hostOpen: true,
+  // Inherited from `ChatThreadProps` (not re-declared above, so the prop table carries
+  // one doc comment rather than two concatenated ones); declared HERE so the element
+  // observes the `density` attribute and reads back `'default'` rather than `undefined`.
+  density: 'default' as ThreadDensity,
 }, (props, { dispatch, flag, reflectFlag, element, expose }) => {
   // `messages` is an untyped boundary: a consumer can hand it anything at
   // runtime (a pre-0.20.0 `{ id, role, content }` array, in particular). Skip
@@ -294,6 +299,7 @@ defineWebComponent<Props, Events>('kai-chat', {
     triggers={props.triggers as TriggerDef[] | undefined}
     kindIcons={props.kindIcons as Record<string, string> | undefined}
     actionsReveal={props.actionsReveal as 'always' | 'hover'}
+    density={props.density as ThreadDensity}
     userActions={props.userActions as (ChatMessageAction | CustomAction)[] | undefined}
     assistantActions={props.assistantActions as (ChatMessageAction | CustomAction)[] | undefined}
     hideSources={flag('hideSources')}

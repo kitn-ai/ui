@@ -334,6 +334,27 @@ export const HideSources: Story = {
   ...src(`<ChatThread messages={messages} hideSources />`),
 };
 
+/** The `compact` end of the density axis: the desktop-panel rhythm (8px between
+ *  turns, a 12px/8px band) instead of the shipped 16px gap and 16px/12px band.
+ *  Same messages as a default thread: the ONLY difference is `density`. */
+export const CompactDensity: Story = {
+  args: {
+    conversations: false,
+    density: 'compact',
+    messages: [
+      { id: 'cd-1', role: 'user', parts: [{ type: 'text', text: 'How do I reset my password?' }] },
+      { id: 'cd-2', role: 'assistant', parts: [{ type: 'text', text: 'Head to Settings → Security and click "Send reset link".' }] },
+      { id: 'cd-3', role: 'user', parts: [{ type: 'text', text: 'How long does the link last?' }] },
+      { id: 'cd-4', role: 'assistant', parts: [{ type: 'text', text: 'An hour. Ask for a new one if it expires.' }] },
+    ],
+  },
+  ...src(`<ChatThread
+  density="compact"
+  messages={messages}
+  onSubmit={(text) => sendMessage(text)}
+/>`),
+};
+
 /** Interactive playground: click the header toggle to swap between the chat
  *  view (bubble icon) and the list view (back arrow) freely. */
 export const Playground: Story = {

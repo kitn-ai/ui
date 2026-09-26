@@ -250,7 +250,16 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
             inline status strip). A shadow-internal hole — unreachable from outside.
             Native slot; inert outside a shadow root, projected by the custom element. */}
         <slot name="input-top" />
-        <PromptInputTextarea placeholder={props.placeholder} aria-label={props.placeholder || 'Message'} class="min-h-[44px] pt-3 pl-4" triggers={props.triggers} kindIcons={props.kindIcons} onComposerChange={props.onComposerChange} />
+        {/* ONE left inset for the box: `pl-3` is the same inset the attachment
+            chips (`px-3`) and the toolbar row below (`px-3`) use, so the
+            paragraph and the buttons under it start on the same edge. `pl-4` put
+            the text 4px further in than the buttons — two insets in one box, the
+            extra one on the text, which is what the owner saw as horizontal
+            padding out of proportion with the vertical. The text keeps NO right
+            inset of its own: it wraps at the frame's `p-2`, 12px closer to the
+            border than the toolbar's right edge (8px + `px-3`). Reported, not
+            changed — wrap width is a separate decision from this left edge. */}
+        <PromptInputTextarea placeholder={props.placeholder} aria-label={props.placeholder || 'Message'} class="min-h-[44px] pt-3 pl-3" triggers={props.triggers} kindIcons={props.kindIcons} onComposerChange={props.onComposerChange} />
         <PromptInputActions class="mt-2 flex w-full items-center justify-between gap-2 px-3 pb-0">
           <div class="flex items-center gap-2">
             {/* Consumer-injected leading toolbar controls (e.g. a + menu). display:contents

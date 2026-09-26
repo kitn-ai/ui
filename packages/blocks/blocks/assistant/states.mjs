@@ -6,7 +6,9 @@
 // and ONE ACTION PROOF PER ROW OP - a rename committed through the inline
 // field, a pin through the row's own menu that moves that row to the top of
 // the list, an archive that unlists the row - then the collapsed rail and the
-// drawer it becomes below the shell's breakpoint.
+// drawer it becomes below the shell's breakpoint, and finally the three
+// controls this page owns at its edges: the voice transcript path, the settings
+// menu's theme choice, and the scroll-to-bottom button.
 // One page (the generated /kit/ rendering of the CDN form), so record/check are
 // the modes; there is no facade parity reference for this composition.
 //
@@ -29,6 +31,22 @@ const RENAMED_TITLE = 'Renamed by keyboard';
 // test. A probe that found the second row now would compare the new order
 // against itself and pass whatever happened.
 let pinnedRowId = null;
+
+// The roles the row menu's ARROW WALK lands on, captured in state 8's act for
+// the same reason: the walk is the evidence that the dividers stayed out of the
+// roving focus, and the position it ends at cannot be reconstructed afterwards.
+let menuFocusRoles = null;
+
+// State 18's two facts, one gesture apart: what the scroll button was doing
+// while the thread was scrolled up, and whether the thread is a scroller at all.
+// The button HIDES ITSELF at the bottom of the thread, so "it works" is only
+// observable in the moment before the click.
+let scrollButtonUp = null;
+let threadIsScroller = null;
+
+// State 16's premise: the thread has to be taller than its viewport, and that is
+// a fact about the page rather than about the recorder, so it is measured.
+let threadOverflows = null;
 
 const firstIndexRow = (page, spec) => page.evaluate(
   (key) => { try { return JSON.parse(localStorage.getItem(key) ?? '[]')[0] ?? null; } catch { return null; } },
@@ -193,6 +211,22 @@ export default {
         // name is per row rather than one shared string.
         await page.getByRole('button', { name: /^Actions for/ }).first().click();
         await settle(400)(page);
+        // AND THEN THE ARROW WALK, which is the half of the dividers a DOM probe
+        // cannot show: ArrowDown on the trigger opens the menu onto its first ITEM
+        // (the kit's own trigger key), and each press after that steps one item.
+        // The roles it lands on are recorded because "the divider is not focusable"
+        // is only worth asserting if the walk that skips it is real. The disabled
+        // Share row is skipped by the kit's own roving selector (it excludes
+        // aria-disabled), so it is absent from the sequence too.
+        await page.keyboard.press('ArrowDown');
+        await settle(200)(page);
+        const roles = [];
+        for (let i = 0; i < 6; i += 1) {
+          roles.push(await page.evaluate(() => document.activeElement?.getAttribute('role') ?? document.activeElement?.localName ?? null));
+          await page.keyboard.press('ArrowDown');
+          await settle(120)(page);
+        }
+        menuFocusRoles = roles;
       },
       probes: {
         menuOpen: (page) => page.locator('[role="menu"]').first().isVisible().catch(() => false),
@@ -218,16 +252,21 @@ export default {
           page.getByRole('menuitem', { name: /^Archive/ }).first().isVisible(),
           page.getByRole('menuitem', { name: /^Delete/ }).first().isVisible(),
         ]).then((seen) => seen.every(Boolean)).catch(() => false),
-        // The Rename row's key chip is a kai-kbd: its caps render inside its own
-        // shadow root, and F2 is spelled the same on every platform.
+        // The Rename row's key chip is a kai-kbd inside a kai-kbd-group: its caps
+        // render inside the kai-kbd's own shadow root, and F2 is spelled the same on
+        // every platform.
         renameChip: (page) => page.locator('.menu-kbd').first()
-          .evaluate((el) => (el.shadowRoot?.textContent ?? '').includes('F2')).catch(() => false),
+          .evaluate((el) => (el.querySelector('kai-kbd')?.shadowRoot?.textContent ?? '').includes('F2')).catch(() => false),
         // AND ALL THREE CHIPS, against the keys the controller binds: F2, Mod+Shift+P,
         // Mod+Shift+A (state 9 presses two of them for real). The expectation is
         // DERIVED in the page rather than typed here, because the chip paints the
         // platform's own glyph set (\u2318 on a Mac, Ctrl elsewhere) and the handler
         // accepts either; the painted array comes back in a failure message so a
         // mismatch names what the reader actually sees.
+        //
+        // The caps are read THROUGH the group: each hint is one kai-kbd inside a
+        // kai-kbd-group, and the caps live in the kai-kbd's shadow root, not in the
+        // group's.
         keyChips: (page) => page.locator('kai-conversation-item').first().locator('.menu-kbd')
           .evaluateAll((els) => {
             const nav = navigator;
@@ -237,17 +276,96 @@ export default {
             // The caps, not the host's textContent: the element injects its own
             // <style> into the shadow root, and that stylesheet's text would be
             // counted as keys by a plain textContent read.
-            const got = els.map((el) => Array.from(el.shadowRoot?.querySelectorAll('[part="key"]') ?? [])
+            const got = els.map((el) => Array.from(el.querySelectorAll('kai-kbd'))
+              .flatMap((kbd) => Array.from(kbd.shadowRoot?.querySelectorAll('[part="key"]') ?? []))
               .map((cap) => cap.textContent ?? '')
               .join(''));
             return JSON.stringify(got) === JSON.stringify(want) ? true : got;
+          }),
+        // THE WELD ITSELF, which is what the group is for and what a screenshot
+        // cannot decide: inside a group the caps of one chip abut (the chord gap is
+        // zeroed) and only the OUTER ends stay rounded, so the three caps read as one
+        // key strip rather than three chips in a row. Measured in Chromium: the
+        // chord gap goes 2px to 0px and the chip's box goes 69px to 59px.
+        kbdWelded: (page) => page.locator('kai-conversation-item').first().locator('.menu-kbd kai-kbd')
+          .evaluateAll((els) => {
+            const bad = [];
+            for (const el of els) {
+              const keys = el.getAttribute('keys');
+              const caps = [...(el.shadowRoot?.querySelectorAll('[part="key"]') ?? [])];
+              const inner = el.shadowRoot?.querySelector('kbd');
+              const gap = inner ? getComputedStyle(inner).gap : '';
+              if (gap !== '0px') bad.push(`${keys}: chord gap ${gap}`);
+              caps.forEach((cap, i) => {
+                // The shorthand comes back in whichever form is shortest, so one
+                // value means all four corners: expand it before reading a corner.
+                const parts = getComputedStyle(cap).borderRadius.split(' ').map((v) => parseFloat(v));
+                const [tl, tr, br] = parts.length === 1 ? [parts[0], parts[0], parts[0]]
+                  : parts.length === 2 ? [parts[0], parts[1], parts[0]]
+                  : parts.length === 3 ? [parts[0], parts[1], parts[2]]
+                  : parts;
+                const startSquared = tl === 0;
+                const endSquared = tr === 0;
+                void br;
+                const middle = i > 0 && i < caps.length - 1;
+                if (middle && !(startSquared && endSquared)) bad.push(`${keys}: cap ${i} keeps its corners`);
+                if (i === 0 && startSquared) bad.push(`${keys}: first cap is squared`);
+                if (i === caps.length - 1 && endSquared) bad.push(`${keys}: last cap is squared`);
+              });
+            }
+            return bad.length === 0 ? true : bad.join(' | ');
+          }),
+        // THE MENU READS IN THREE GROUPS: Share | Rename, Pin, Archive | Delete.
+        // The dividers live in the row's LIGHT DOM (they are slotted into the
+        // dropdown's menu), so they are queried on the host and then filtered to the
+        // ones with a REAL BOX - the other rows' menus are the same markup with no
+        // box, and a divider that is inline collapses to zero WIDTH while still
+        // reporting a line box, so both dimensions are checked. That is not
+        // hypothetical: the first version of this rule was `align-self: stretch` on a
+        // span, which measured 0px wide and read as two dividers to a height-only
+        // check.
+        dividers: (page) => page.locator('kai-conversation-item').first().locator('.row-menu [role="separator"]')
+          .evaluateAll((els) => {
+            const boxed = (el) => { const b = el.getBoundingClientRect(); return b.height >= 1 && b.width > 100; };
+            const rendered = els.filter(boxed);
+            if (rendered.length !== 2) return `${rendered.length} boxed of ${els.length} present: ${JSON.stringify(els.map((el) => Math.round(el.getBoundingClientRect().width)))}`;
+            return true;
+          }),
+        // ...and the walk above never landed on one: a divider that took a key would
+        // be in this list. It is also not a tab stop and does not match the kit's own
+        // roving selector, so both halves of "not in the keyboard's way" are here.
+        dividerSkipsKeyboard: (page) => page.locator('kai-conversation-item').first().locator('.row-menu [role="separator"]')
+          .evaluateAll((els) => {
+            const rendered = els.filter((el) => { const b = el.getBoundingClientRect(); return b.height >= 1 && b.width > 100; });
+            if (rendered.length === 0) return 'no boxed divider to check';
+            const bad = [];
+            for (const el of rendered) {
+              if (el.hasAttribute('tabindex')) bad.push('divider carries tabindex');
+              if (el.tabIndex >= 0) bad.push(`divider is a tab stop (${el.tabIndex})`);
+              if (el.matches('[role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"]')) bad.push('divider matches the roving selector');
+            }
+            return bad.length === 0 ? true : bad.join(' | ');
+          }),
+        menuFocusWalk: () => (menuFocusRoles && menuFocusRoles.length
+          ? (menuFocusRoles.every((r) => r === 'menuitem' || r === 'menuitemradio') ? true : menuFocusRoles.join(','))
+          : 'no roles recorded'),
+        // The menu has room: every acting row is at least 11.5rem wide (the block's
+        // min-width, which is what makes the surface 192px) and no row grew past its
+        // single-line 32px box, which is what "cramped" looked like.
+        rowsWide: (page) => page.locator('kai-conversation-item').first().locator('.row-menu kai-button[role="menuitem"]')
+          .evaluateAll((els) => {
+            const widths = els.map((el) => Math.round(el.getBoundingClientRect().width));
+            const heights = els.map((el) => Math.round(el.getBoundingClientRect().height));
+            const narrow = widths.filter((w) => w < 184);
+            const wrapped = heights.filter((h) => h > 34);
+            return narrow.length === 0 && wrapped.length === 0 ? true : JSON.stringify({ widths, heights });
           }),
         // The relative time is still on the row, in the same region as the
         // kebab: the item renders that region outside its activation surface,
         // so the time did not have to move to the title to make room.
         rowTime: (page) => page.locator('kai-conversations .row-time').first().isVisible().catch(() => false),
       },
-      expect: { menuOpen: true, triggerHaspopup: 'menu', triggerExpanded: 'true', shareDisabled: true, actionsListed: true, renameChip: true, keyChips: true, rowTime: true },
+      expect: { menuOpen: true, triggerHaspopup: 'menu', triggerExpanded: 'true', shareDisabled: true, actionsListed: true, renameChip: true, keyChips: true, rowTime: true, kbdWelded: true, dividers: true, dividerSkipsKeyboard: true, menuFocusWalk: true, rowsWide: true },
       styleProbes: [
         style('menuRowShare', (page) => page.getByRole('menuitem', { name: 'Share' }).first(),
           ['height', 'fontSize', 'paddingInline']),
@@ -445,6 +563,149 @@ export default {
         railVisible: (page) => page.getByRole('button', { name: 'New chat' }).first().isVisible().catch(() => false),
       },
       expect: { drawer: true, railVisible: true },
+    },
+    {
+      name: '16-voice-transcript',
+      act: async (page) => {
+        // State 15 left a NARROW document, and the states below are about controls
+        // the wide layout shows (the rail's footer, the thread's scroll button), so
+        // the viewport comes back first. That is the only reason this is here rather
+        // than in state 15: a narrower document was that state's whole point.
+        await page.setViewportSize({ width: 1280, height: 800 });
+        await settle(500)(page);
+        // The microphone cannot be driven, so this fires what the recorder itself
+        // fires when a browser without speech recognition hands text back: the
+        // element's own kai-transcription event, dispatched ON the element (kai-*
+        // events do not bubble, so this is exactly the channel the block listens on).
+        // Twice, because the two facts are different: the first lands in an EMPTY
+        // composer, the second APPENDS to what is already there.
+        for (const text of ['Voice first half.', 'And the second.']) {
+          await page.evaluate((t) => {
+            document.getElementById('voice').dispatchEvent(new CustomEvent('kai-transcription', { detail: { text: t } }));
+          }, text);
+          await settle(400)(page);
+        }
+      },
+      probes: {
+        // The append rule, exactly: the draft plus ONE space plus the transcript, and
+        // no leading space when the composer was empty (a leading space is the first
+        // character here, and it is not trimmed away - only TRAILING whitespace is,
+        // which is a contenteditable rendering artefact rather than a character the
+        // block put in the text).
+        composerValue: (page) => page.locator('kai-prompt-input').getByRole('textbox').first()
+          .innerText().then((t) => t.replace(/\s+$/, '')),
+        // The block's half of the caret story: the composer HOLDS FOCUS, so the next
+        // keystroke continues in it. Where the caret sits inside the text is the kit's
+        // half - the block places no caret, which is what keeps one caret path.
+        composerFocused: (page) => page.evaluate(() => document.activeElement?.localName === 'kai-prompt-input'),
+      },
+      expect: { composerValue: 'Voice first half. And the second.', composerFocused: true },
+    },
+    {
+      name: '17-settings-theme',
+      act: async (page) => {
+        // The gear in the rail's footer, then the Dark row of its theme group. Both
+        // are kai-menu, so the trigger is the element's own button and the rows are
+        // its items; the accessible names are the block's.
+        await page.getByRole('button', { name: 'Settings' }).click();
+        await settle(350)(page);
+        await page.getByRole('menuitemradio', { name: 'Dark' }).click();
+        await settle(600)(page);
+      },
+      probes: {
+        // The kit's own attribute, on the shell: this IS the mechanism (the scheme is
+        // per element, so the block binds it on every element it renders), not a
+        // marker the block made up.
+        workspaceTheme: (page) => page.locator('#workspace').getAttribute('theme'),
+        // A SECOND element, bound the same way - the element that would keep
+        // following the OS if the choice were not per element.
+        promptTheme: (page) => page.locator('#prompt').getAttribute('theme'),
+        // And the scope that attribute produces INSIDE an element's shadow root: the
+        // kit paints its dark tokens under an inner wrapper carrying `.dark`.
+        railDarkScope: (page) => page.evaluate(() => {
+          const root = document.getElementById('conversations')?.shadowRoot;
+          return !!root && [...root.children].some((el) => el.style.display === 'contents' && el.classList.contains('dark'));
+        }),
+        // A computed style that actually changes with that scope, and it is not the
+        // menu's own label: the kit's `.dark` block declares `color-scheme: dark`, so
+        // the wrapper resolves dark here and `light` (the shadow root's own value)
+        // everywhere else. The measured value comes back on failure.
+        railColorScheme: (page) => page.evaluate(() => {
+          const root = document.getElementById('conversations')?.shadowRoot;
+          const scope = root ? [...root.children].find((el) => el.style.display === 'contents') : undefined;
+          return scope ? getComputedStyle(scope).colorScheme : 'no scope found';
+        }),
+      },
+      expect: { workspaceTheme: 'dark', promptTheme: 'dark', railDarkScope: true, railColorScheme: 'dark' },
+    },
+    {
+      name: '18-scroll-to-bottom',
+      act: async (page) => {
+        // THE PREMISE, BUILT FIRST: the button hides itself at the bottom of the
+        // thread, and a thread shorter than its viewport never shows it at all, so
+        // this sends two more turns (the mock answers each) before the gesture. The
+        // last conversation was a single turn, which is not enough to scroll.
+        for (const text of ['Scroll probe one', 'Scroll probe two']) {
+          const box = page.locator('kai-prompt-input').getByRole('textbox').first();
+          await box.click();
+          await box.fill(text);
+          await box.press('Enter');
+          await settle(3500)(page);
+        }
+        // Then the gesture the owner described: scroll UP and the button appears.
+        // The two facts are one gesture apart - what the button was doing while the
+        // thread was scrolled up, and where the thread is after pressing it - so both
+        // are captured in this one act: the button HIDES ITSELF at the bottom, and
+        // its state before the click is unrecoverable afterwards.
+        const scroller = await page.evaluate(() => {
+          const box = document.getElementById('thread')?.shadowRoot?.querySelector('.overflow-y-auto');
+          if (!box) return null;
+          box.scrollTop = 0;
+          return { scrollTop: box.scrollTop, scrollHeight: box.scrollHeight, clientHeight: box.clientHeight };
+        });
+        threadIsScroller = scroller;
+        if (!scroller || scroller.scrollHeight <= scroller.clientHeight) {
+          throw new Error(`the thread does not overflow, so this state cannot be about the scroll button: ${JSON.stringify(scroller)}`);
+        }
+        await settle(500)(page);
+        scrollButtonUp = await page.evaluate(() => {
+          const btn = document.getElementById('thread')?.shadowRoot?.querySelector('button[aria-label="Scroll to bottom"]');
+          if (!btn) return null;
+          const cs = getComputedStyle(btn);
+          const box = btn.getBoundingClientRect();
+          return {
+            present: true, opacity: cs.opacity, pointerEvents: cs.pointerEvents,
+            tabindex: btn.getAttribute('tabindex'), ariaHidden: btn.getAttribute('aria-hidden'),
+            box: { x: Math.round(box.x), y: Math.round(box.y), w: Math.round(box.width), h: Math.round(box.height) },
+          };
+        });
+        await page.getByRole('button', { name: 'Scroll to bottom' }).click();
+        await settle(900)(page);
+      },
+      probes: {
+        // The premise, measured rather than assumed: the thread's own shadow viewport
+        // is the scroller, and it really has more to scroll than it shows (a thread
+        // that does not overflow hides the button whatever the code does).
+        threadIsScroller: () => (threadIsScroller && threadIsScroller.scrollHeight > threadIsScroller.clientHeight
+          ? true
+          : JSON.stringify(threadIsScroller)),
+        // Scrolled up, the button is FULLY PRESENT: opaque, clickable, back in the tab
+        // order and no longer hidden from assistive tech. Anything less comes back as
+        // the measured object.
+        buttonWhenScrolledUp: () => (scrollButtonUp && scrollButtonUp.present
+          && scrollButtonUp.opacity === '1' && scrollButtonUp.pointerEvents === 'auto'
+          && scrollButtonUp.tabindex === '0' && scrollButtonUp.ariaHidden === null
+          ? true
+          : JSON.stringify(scrollButtonUp)),
+        // ...and pressing it returns the thread to the bottom.
+        atBottom: (page) => page.evaluate(() => {
+          const box = document.getElementById('thread')?.shadowRoot?.querySelector('.overflow-y-auto');
+          if (!box) return 'no scroller';
+          const gap = box.scrollHeight - box.scrollTop - box.clientHeight;
+          return gap < 4 ? true : `${gap}px short of the bottom`;
+        }),
+      },
+      expect: { threadIsScroller: true, buttonWhenScrolledUp: true, atBottom: true },
     },
   ],
 };

@@ -60,24 +60,50 @@ kai-editable-label.row-rename { min-width: 0; max-width: 100%; }
 .menu-row-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 /* A row's key chip sits at the row's trailing edge. The chip is a flex item of
  * the button's own flex container (assigned nodes lay out as the slot's
- * children), so one auto margin is the whole rule. */
+ * children), so one auto margin is the whole rule. The class sits on the
+ * kai-kbd-group, which is the element that is a flex item here: the kai-kbd
+ * inside it is a child of the group's own inline-flex frame, where an auto
+ * margin would move nothing. */
 .menu-kbd { margin-left: auto; }
+/* THE ROW MENU'S ROOM, and it is set on the ROWS rather than on the dropdown -
+ * measured, not assumed. A kai-dropdown's menu surface is portaled into its own
+ * shadow root and positioned `fixed`, so it is a shrink-to-fit box OUTSIDE the
+ * host's box: a min-width on `kai-dropdown.row-menu` widens the HOST (28px to
+ * 184px in the measurement) and shifts the kebab left by 156px inside the row,
+ * while the menu itself stays 177px. What the surface does size to is its
+ * CONTENT, and the tick rows are light-DOM children however deep they are
+ * slotted, so sizing the rows is what gives the menu room - no shadow piercing.
+ *
+ * 11.5rem, and the arithmetic is measured: the widest row (Archive beside its
+ * Mod+Shift+A chip) needs 169px of box today, and the surface ends up 192px
+ * (11.5rem + the menu's own 4px of padding a side), which leaves that row about
+ * 15px of slack so the chip is not glued to its label. It also keeps the menu
+ * inside the 280px rail with room to spare, which 12rem starts to spend. */
+.row-menu kai-button[role="menuitem"] { min-width: 11.5rem; box-sizing: border-box; }
+/* The divider between the row menu's three groups. It is the kit's own treatment
+ * (role="separator" over a hairline: components/dropdown/dropdown.tsx - a DIV, not
+ * a span), spelled out here because this page authors its menu markup. `display:
+ * block` is load-bearing and was MISSED on the first pass: a span is inline, so it
+ * collapsed to a zero-width box that measured 0px wide while still reporting a
+ * 17px line box - an invisible divider that a `height >= 1` check happily counted.
+ * The negative inline margin bleeds it to the menu's padding edges, as the kit's
+ * own -mx-1 does. */
+.menu-separator { display: block; margin: 0.25rem -0.25rem; height: 1px; background: var(--color-border, color-mix(in srgb, currentColor 12%, transparent)); }
 /* Delete is the one destructive item, so it takes the kit's destructive TEXT
  * token: --color-destructive is calibrated as a FILL and is unreadable as text
  * in dark mode, which the token's own doc says. `::part(button)` is how a host
  * reaches inside kai-button's shadow root. */
 kai-button.menu-delete::part(button) { color: var(--color-destructive-text); }
-/* The menu's own heading line (the demo plan): not an item, so the roving focus
- * walks past it, and not focusable, so it cannot be pressed. */
-.menu-heading {
-  display: block; padding: 0.375rem 0.5rem; font-size: 0.75rem;
-  color: color-mix(in srgb, currentColor 60%, transparent);
-}
 
-/* The identity row in the rail's footer slot. The footer region itself carries
- * no padding (the rail's own rule is a hairline above it), so the row brings
- * its own. */
-kai-dropdown.profile { padding: 0.5rem; }
+/* The foot of the rail: the identity trigger and the settings gear in ONE row.
+ * The slot's own box (in the rail's shadow root) is a plain block, so the row
+ * rule lives here, on the block's own two elements. Flexible identity, fixed
+ * gear: the identity menu's `full` makes its trigger button fill whatever the
+ * row hands it, and the row hands it everything but the gear. min-width: 0 is
+ * what lets the name truncate instead of pushing the gear off the edge. */
+.rail-footer { display: flex; align-items: center; gap: 0.25rem; padding: 0.5rem; }
+.rail-footer .profile { flex: 1 1 auto; min-width: 0; }
+.rail-footer .settings { flex: 0 0 auto; }
 .profile-trigger { display: flex; align-items: center; gap: 0.5rem; width: 100%; min-width: 0; }
 .profile-name { font-size: 0.8125rem; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .profile-caret { margin-left: auto; opacity: 0.6; }

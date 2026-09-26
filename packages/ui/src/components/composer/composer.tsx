@@ -29,7 +29,9 @@ import {
   createTextWalker,
   entityStore,
   isEntityEl,
-  kindGlyph,
+  resolveGlyph,
+  type GlyphContext,
+  type GlyphSpec,
 } from './composer-dom';
 import { activeTriggerFor } from '../../primitives/composer-triggers';
 import { usePosition, useDismiss, createPresence } from '../overlay/overlay';
@@ -132,6 +134,23 @@ function getActiveSelection(node: Node): Selection | null {
     return (root as unknown as { getSelection: () => Selection | null }).getSelection();
   }
   return node.ownerDocument?.getSelection() ?? null;
+}
+
+/**
+ * True when the live caret/selection is anchored INSIDE `root`, i.e. the caret
+ * the user is holding is this editable's. False when there is no selection, or
+ * it lives somewhere else (another field's caret, a text selection out in the
+ * page), so a caller may move the caret in `root` without stealing one.
+ *
+ * A blur does NOT move the selection out of a contenteditable, so this stays
+ * true across the whole voice flow: the user clicks the mic button (focus leaves
+ * the editable, the caret does not), speech lands seconds later, and the caret is
+ * still here, measured in Chromium, light DOM and shadow-root alike.
+ */
+function caretIsInside(root: HTMLElement): boolean {
+  const sel = getActiveSelection(root);
+  if (!sel || sel.rangeCount === 0) return false;
+  return root.contains(sel.getRangeAt(0).startContainer);
 }
 
 /** Compute the full ZWSP-stripped text of all text nodes in the editable. */
@@ -243,6 +262,52 @@ function setCaretToOffset(root: HTMLElement, offset: number): void {
   sel.addRange(range);
 }
 
+/**
+ * Collapse the caret at the very end of the content, past a trailing pill.
+ *
+ * Deliberately NOT `setCaretToOffset(root, getFullText(root).length)`: a pill is
+ * zero-width in that offset space (its label is skipped and its trailing ZWSP
+ * contributes nothing), so the total length resolves to the position BEFORE a
+ * trailing pill. Targeting the LAST text node instead (a pill's zero-width
+ * filler text node included) lands after it, which is where the next keystroke
+ * belongs. Same shadow-aware selection resolution as every other caret move here.
+ */
+function setCaretToEnd(root: HTMLElement): void {
+  const sel = getActiveSelection(root);
+  if (!sel) return;
+  const range = root.ownerDocument.createRange();
+  const walker = createTextWalker(root);
+  let last: Text | null = null;
+  let node = walker.nextNode() as Text | null;
+  while (node) {
+    last = node;
+    node = walker.nextNode() as Text | null;
+  }
+  if (last) range.setStart(last, (last.textContent ?? '').length);
+  else range.selectNodeContents(root); // empty content: (root, 0)
+  range.collapse(true);
+  sel.removeAllRanges();
+  sel.addRange(range);
+}
+
+/**
+ * Draw one resolved glyph (`resolveGlyph`) as JSX, the trigger menu row's leading
+ * slot. The pill draws the same three shapes as DOM nodes in `composer-dom`, since
+ * it is built outside the renderer; both take their decision from the one chain, so
+ * a kind cannot be glyphed one way on the pill and another way in the menu.
+ * Nothing is drawn for a `null` spec: no empty box that reads as a space.
+ */
+function glyphSlot(spec: GlyphSpec | null, size: string): JSX.Element {
+  if (!spec) return null;
+  if (spec.type === 'image') {
+    return <img src={spec.src} alt="" class={cn(size, 'rounded object-cover shrink-0')} />;
+  }
+  if (spec.type === 'svg') {
+    return <span class={cn('kai-composer-pill-glyph shrink-0', size)} aria-hidden="true" innerHTML={spec.markup} />;
+  }
+  return <span class={cn('kai-composer-pill-sigil shrink-0', size)} aria-hidden="true">{spec.text}</span>;
+}
+
 export function Composer(props: ComposerProps): JSX.Element {
   const config = useChatConfig();
   let editable!: HTMLDivElement;
@@ -319,10 +384,24 @@ export function Composer(props: ComposerProps): JSX.Element {
   // fires regardless, so consumers driving a custom menu aren't affected.
   const menuOpen = createMemo(() => filteredItems().length > 0);
 
-  // Icon resolution for a menu item: its own icon → the per-kind default.
-  // (When neither, the menu renders the built-in kind glyph as a fallback.)
+  // Glyph resolution for a menu item, and for a pill: ONE chain (`resolveGlyph`),
+  // so the two surfaces cannot disagree. It is the item's own icon → the per-kind
+  // default → the kind's built-in glyph → the kind's trigger char, and it never
+  // falls through to nothing unless the kind has no built-in glyph AND no trigger.
   const itemKind = (item: TriggerItem) => item.kind ?? activeTrigger()?.def.kind ?? '';
-  const itemIconSrc = (item: TriggerItem) => item.icon ?? props.kindIcons?.[itemKind(item)];
+
+  /** The trigger char per kind (`{ skill: '/', mention: '@' }`), derived from the
+   *  same `triggers` prop the trigger detection reads, so one definition answers
+   *  both. It is the chain's last step: a consumer's kind is reachable only by its
+   *  trigger, so that character is the honest glyph for it. First definition wins
+   *  for a kind named twice. */
+  const sigilsByKind = (): Record<string, string> => {
+    const map: Record<string, string> = {};
+    for (const t of props.triggers ?? []) if (!(t.kind in map)) map[t.kind] = t.char;
+    return map;
+  };
+
+  const glyphCtx = (): GlyphContext => ({ kindIcons: props.kindIcons, sigils: sigilsByKind() });
 
   // Keep selectedIndex in bounds when filteredItems changes
   createEffect(() => {
@@ -373,7 +452,7 @@ export function Composer(props: ComposerProps): JSX.Element {
   }
 
   onMount(() => {
-    renderDoc(editable, normalizeValue(props.value), editable.ownerDocument, props.kindIcons);
+    renderDoc(editable, normalizeValue(props.value), editable.ownerDocument, glyphCtx());
     setEmpty(docIsEmpty(parseDom(editable)));
     recomputeHighlights();
     history.reset({ doc: parseDom(editable), caret: 0 });
@@ -383,16 +462,28 @@ export function Composer(props: ComposerProps): JSX.Element {
   // editable is NOT focused (don't stomp the caret while the user is typing).
   createEffect(on(() => props.value, (v) => {
     // Re-render only when the incoming value actually differs from what the DOM
-    // already shows. This skips the echo of our own onChange (so the caret isn't
-    // stomped while typing) while still honoring genuine external changes —
-    // including a clear-after-submit that fires while the editable is focused.
+    // already shows. This comparison IS the external-set / typing-echo test: the
+    // controlled mirror re-applies the very text the editable already holds, so
+    // the echo returns here and never reaches the re-render (which is also what
+    // keeps a pill from being flattened back into its label text). Every line
+    // below is therefore a value this editable did not produce.
     const incoming = serializeToText(normalizeValue(v));
     if (incoming === serializeToText(parseDom(editable))) return;
+    // Sample the caret BEFORE the re-render, while it still describes intent, and
+    // only when it was already this editable's — a consumer setting `value` must
+    // never move a caret the user is holding in another field.
+    const caretWasInside = caretIsInside(editable);
     clearPillSelection(); // selected pill node is about to be replaced
-    renderDoc(editable, normalizeValue(v), editable.ownerDocument, props.kindIcons);
+    renderDoc(editable, normalizeValue(v), editable.ownerDocument, glyphCtx());
     setEmpty(docIsEmpty(parseDom(editable)));
     recomputeHighlights();
-    history.reset({ doc: parseDom(editable), caret: 0 }); // external value = new baseline
+    // An external value lands where typing would have left the caret: at the END.
+    // `renderDoc` clears the editable's children, which retargets the live caret
+    // to (editable, 0) — leaving the next keystroke IN FRONT of the new text, e.g.
+    // in front of a microphone transcript appended to a sentence already typed.
+    if (caretWasInside) setCaretToEnd(editable);
+    // external value = new baseline; its caret is wherever the line above left it
+    history.reset({ doc: parseDom(editable), caret: caretWasInside ? getCaretTextOffset(editable) : 0 });
   }, { defer: true }));
 
   // Re-decorate when `highlights` changes on its own — e.g. a consumer (or the
@@ -455,7 +546,7 @@ export function Composer(props: ComposerProps): JSX.Element {
   // syncs derived state, but does NOT push a new history entry.
   const applySnapshot = (snap: { doc: ComposerDoc; caret: number }) => {
     clearPillSelection(); // the selected pill node is about to be replaced
-    renderDoc(editable, snap.doc, editable.ownerDocument, props.kindIcons);
+    renderDoc(editable, snap.doc, editable.ownerDocument, glyphCtx());
     setCaretToOffset(editable, snap.caret);
     syncState(snapshot());
     lastEditAt = 0;
@@ -502,7 +593,7 @@ export function Composer(props: ComposerProps): JSX.Element {
       // (which the facade turns into kai-value-change).
       clear: () => {
         clearPillSelection();
-        renderDoc(editable, [], editable.ownerDocument, props.kindIcons);
+        renderDoc(editable, [], editable.ownerDocument, glyphCtx());
         syncState(snapshot());
         history.reset({ doc: parseDom(editable), caret: 0 });
         lastEditAt = 0;
@@ -576,7 +667,7 @@ export function Composer(props: ComposerProps): JSX.Element {
     // Insert at the live caret (re-collapsed at the deletion point by the browser).
     const range = sel.getRangeAt(0);
     if (!range.collapsed) range.deleteContents();
-    const pill = createEntityEl(ownerDoc, entity, props.kindIcons);
+    const pill = createEntityEl(ownerDoc, entity, glyphCtx());
     const zwspNode = ownerDoc.createTextNode(ZWSP);
     range.insertNode(zwspNode);
     range.insertNode(pill); // inserted before the zwsp → DOM order [pill][zwsp]
@@ -1040,18 +1131,7 @@ export function Composer(props: ComposerProps): JSX.Element {
                         onMouseDown={(e) => e.preventDefault()}
                         onClick={(e) => { e.preventDefault(); selectItem(entry.item); }}
                       >
-                        <Show
-                          when={itemIconSrc(entry.item)}
-                          fallback={
-                            <Show when={kindGlyph(itemKind(entry.item))}>
-                              {(glyph) => (
-                                <span class="kai-composer-pill-glyph w-4 h-4 shrink-0" aria-hidden="true" innerHTML={glyph()} />
-                              )}
-                            </Show>
-                          }
-                        >
-                          {(src) => <img src={src()} alt="" class="w-4 h-4 rounded object-cover shrink-0" />}
-                        </Show>
+                        {glyphSlot(resolveGlyph(itemKind(entry.item), entry.item.icon, glyphCtx()), 'w-4 h-4')}
                         <span class="font-medium whitespace-nowrap shrink-0">{entry.item.label}</span>
                         <Show when={entry.item.description}>
                           <span class="text-muted-foreground truncate min-w-0">{entry.item.description}</span>

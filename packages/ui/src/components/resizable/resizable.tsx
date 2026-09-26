@@ -1,4 +1,4 @@
-import { type JSX, splitProps, createSignal, createEffect, createContext, useContext, For, Show, children as resolveChildren } from 'solid-js';
+import { type JSX, type Accessor, splitProps, createSignal, createEffect, createContext, useContext, For, Show, on, onMount, onCleanup, children as resolveChildren } from 'solid-js';
 import { cn } from '../../utils/cn';
 
 // --- Types ---
@@ -10,9 +10,36 @@ export type SizeValue = number | string;
 
 interface ResizableContextValue {
   orientation: Orientation;
+  /** The group's panel set as a revision counter (see `createPanelSetRevision`);
+   *  undefined outside a group, where a panel has no siblings to re-derive against. */
+  panelSet?: Accessor<number>;
 }
 
 export const ResizableContext = createContext<ResizableContextValue>();
+
+/**
+ * A group's DIRECT element children as a revision counter, bumped once per change.
+ *
+ * This is what carries "my panel set moved" to the panels. A drag writes an inline
+ * `flex-basis` onto the panels it recomputes, and that geometry is only valid for the
+ * panel set it was computed against. When a sibling (and its handle) leaves the tree,
+ * the space it occupied has to come back to whoever is left, and nothing else in the
+ * component re-derives it. The children getter is NOT a substitute: a `<Show>`/`<For>`
+ * inside the group updates its own DOM without re-running it, so the change is only
+ * observable on the node. `childList` without `subtree` on purpose: content re-rendering
+ * INSIDE a panel is not a layout change and must leave a dragged size alone.
+ */
+function createPanelSetRevision(): { revision: Accessor<number>; setElement: (el: HTMLElement) => void } {
+  const [revision, setRevision] = createSignal(0);
+  let groupEl: HTMLElement | undefined;
+  onMount(() => {
+    if (!groupEl || typeof MutationObserver === 'undefined') return;
+    const observer = new MutationObserver(() => setRevision((n) => n + 1));
+    observer.observe(groupEl, { childList: true });
+    onCleanup(() => observer.disconnect());
+  });
+  return { revision, setElement: (el) => { groupEl = el; } };
+}
 
 /**
  * Normalize a px-or-% size into a CSS length string usable as `flex-basis`.
@@ -108,9 +135,18 @@ export interface ResizablePanelGroupProps extends JSX.HTMLAttributes<HTMLDivElem
 function ResizablePanelGroup(props: ResizablePanelGroupProps) {
   const [local, rest] = splitProps(props, ['orientation', 'children', 'class']);
   const orientation = () => local.orientation ?? 'horizontal';
+  const panelSet = createPanelSetRevision();
+  // The group node comes from this ref (`createPanelSetRevision` observes it) and a
+  // consumer's own `ref` — a function ref, the only kind Solid applies to an element —
+  // is forwarded by hand: `{...rest}` is spread first, so a consumer ref would
+  // otherwise be shadowed and silently stop being called.
+  const groupRef = (el: HTMLDivElement) => {
+    panelSet.setElement(el);
+    if (typeof rest.ref === 'function') (rest.ref as (el: HTMLDivElement) => void)(el);
+  };
 
   return (
-    <ResizableContext.Provider value={{ orientation: orientation() }}>
+    <ResizableContext.Provider value={{ orientation: orientation(), panelSet: panelSet.revision }}>
       <div
         class={cn(
           'flex h-full w-full',
@@ -119,6 +155,7 @@ function ResizablePanelGroup(props: ResizablePanelGroupProps) {
         )}
         data-orientation={orientation()}
         {...rest}
+        ref={groupRef}
       >
         {local.children}
       </div>
@@ -146,6 +183,7 @@ function ResizablePanel(props: ResizablePanelProps) {
   const [local, rest] = splitProps(props, [
     'defaultSize', 'minSize', 'maxSize', 'locked', 'hidden', 'children', 'class', 'style',
   ]);
+  const ctx = useContext(ResizableContext);
   // GRID-FILL model: the panel sizes itself on the MAIN axis via flex-basis (or
   // flex:1 when flexible) as a flex item of the group — the handle rewrites that
   // basis, so the drag math is plain flex. For the FILL it is itself a
@@ -177,11 +215,16 @@ function ResizablePanel(props: ResizablePanelProps) {
     return undefined;
   };
 
-  const sizeStyle = (): Record<string, string> => {
+  /** This panel's DECLARED main-axis geometry, as the initial style computes it. */
+  const declared = () => {
     const r = rest as Record<string, unknown>;
     const minB = effectiveBound(local.minSize, r['data-min-size'], r['data-min-size-pct']);
     const maxB = effectiveBound(local.maxSize, r['data-max-size'], r['data-max-size-pct']);
-    const basis = clampBasis(normalizeSize(local.defaultSize), minB, maxB);
+    return { basis: clampBasis(normalizeSize(local.defaultSize), minB, maxB) };
+  };
+
+  const sizeStyle = (): Record<string, string> => {
+    const { basis } = declared();
     const base: Record<string, string> = basis !== undefined
       ? { 'flex-basis': basis, 'flex-grow': '0', 'flex-shrink': '0' }
       : { flex: '1 1 0%' };
@@ -220,8 +263,54 @@ function ResizablePanel(props: ResizablePanelProps) {
     return out;
   };
 
+  let panelEl!: HTMLDivElement;
+  // The neighbours this panel's geometry was last derived against. Captured at mount,
+  // before any drag can write an inline basis (a drag needs a pointer first).
+  let seenPrev: Element | null = null;
+  let seenNext: Element | null = null;
+  onMount(() => {
+    seenPrev = panelEl.previousElementSibling;
+    seenNext = panelEl.nextElementSibling;
+  });
+
+  /**
+   * Overwrite whatever a drag left on this panel with its DECLARED geometry —
+   * the same three longhands `sizeStyle` writes, so a panel no drag ever touched
+   * is left byte-identical.
+   */
+  const applyDeclaredSize = () => {
+    const { basis } = declared();
+    if (basis !== undefined) {
+      panelEl.style.flexBasis = basis;
+      panelEl.style.flexGrow = '0';
+      panelEl.style.flexShrink = '0';
+    } else {
+      // No declared size → the flexible default (`flex: 1 1 0%`), written as the
+      // longhands it expands to: a bare `flex-basis` reset would leave the panel
+      // sizing to content instead of filling the group.
+      panelEl.style.flexBasis = '0%';
+      panelEl.style.flexGrow = '1';
+      panelEl.style.flexShrink = '1';
+    }
+  };
+
+  // A drag's inline basis is valid only for the panel set it was computed against:
+  // when a NEIGHBOUR leaves the group (the shell collapses an aside, `Resizable`
+  // maximizes a panel) the freed space has to come back to this panel, so re-derive
+  // its declared size over the leftover. Neighbour-scoped on purpose — a pair whose
+  // two members are both still adjacent keeps exactly where the user dragged it.
+  createEffect(on(() => ctx?.panelSet?.(), () => {
+    const prev = panelEl.previousElementSibling;
+    const next = panelEl.nextElementSibling;
+    if (prev === seenPrev && next === seenNext) return;
+    seenPrev = prev;
+    seenNext = next;
+    applyDeclaredSize();
+  }, { defer: true }));
+
   return (
     <div
+      ref={panelEl}
       class={cn('overflow-hidden', local.class)}
       style={{ ...sizeStyle(), ...(typeof local.style === 'object' ? local.style : {}) }}
       data-locked={local.locked ? '' : undefined}
@@ -609,6 +698,7 @@ function Resizable(props: ResizableProps) {
     'orientation', 'onChange', 'handle', 'class', 'children', 'maximizedIndex', 'onMaximizeChange',
   ]);
   const orientation = () => local.orientation ?? 'horizontal';
+  const panelSet = createPanelSetRevision();
 
   // Resolve children to the actual panel elements so we can read their props.
   const resolved = resolveChildren(() => local.children);
@@ -660,8 +750,9 @@ function Resizable(props: ResizableProps) {
   }
 
   return (
-    <ResizableContext.Provider value={{ orientation: orientation() }}>
+    <ResizableContext.Provider value={{ orientation: orientation(), panelSet: panelSet.revision }}>
       <div
+        ref={panelSet.setElement}
         class={cn(
           'flex h-full w-full',
           orientation() === 'vertical' ? 'flex-col' : 'flex-row',

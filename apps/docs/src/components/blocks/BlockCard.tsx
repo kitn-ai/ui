@@ -19,6 +19,15 @@
  * Code must move nothing: the row keeps one min-height and only its middle
  * group changes.
  *
+ * BOTH MODES ARE THE SAME HEIGHT, and the code pane scrolls inside it. The
+ * height comes from ONE place -- the block's own `meta.iframeHeight`, read by
+ * the preview frame and by the code panes alike -- because a code view sized
+ * by its own number grew the card to the length of the longest file (a
+ * measured 15x the preview on the assistant block) and would drift the day a
+ * manifest changed. The panes are bounded, so the FILE scrolls and the card
+ * does not. Both bodies also share one inset class, which is the other half of
+ * that equality.
+ *
  * The file view is highlighted but NOT line-numbered. kai-code-block has no
  * line-number prop (theme, code, language, codeTheme, codeHighlight, copy,
  * proseSize) and a CSS-counter gutter faked around the element would paint
@@ -44,6 +53,18 @@ import {
 } from "../../lib/blocks-source";
 import { storeZip, zipFileName } from "./zip";
 import type { SiteTheme } from "./site-theme";
+
+/** The card body's inset, in EITHER mode. The preview frame and the code panes
+ *  sit in the same padding, which is half of why the two heights are equal by
+ *  construction: the frame height below is the other half. One class, used
+ *  twice, so a mode cannot quietly pad differently from the other. */
+const BODY_INSET = "p-4";
+
+/** The frame height for a block whose manifest omits `meta.iframeHeight`.
+ *  Every shipped block declares one, and packages/blocks/src/registry.ts
+ *  rejects anything that is not a CSS length, so this only covers a manifest
+ *  that says nothing -- and it is the ONE default, not a fallback per mode. */
+const DEFAULT_BODY_HEIGHT = "720px";
 
 const VIEWPORTS = [
   { value: "desktop", label: "Desktop", icon: "monitor", width: "100%" },
@@ -185,6 +206,13 @@ export function BlockCard(props: BlockCardProps): JSX.Element {
 
   const iframeWidth = createMemo(
     () => VIEWPORTS.find((v) => v.value === viewport())?.width ?? "100%",
+  );
+
+  // THE height of the card's body, read once and used by both modes: the
+  // preview frame's `height` and the code panes' bound. A second number here
+  // is the bug this replaced.
+  const bodyHeight = createMemo(
+    () => props.item.meta?.iframeHeight ?? DEFAULT_BODY_HEIGHT,
   );
 
   return (
@@ -354,7 +382,10 @@ export function BlockCard(props: BlockCardProps): JSX.Element {
       </div>
 
       <Show when={mode() === "preview"}>
-        <div class="flex justify-center bg-surface-2 p-4">
+        <div
+          data-testid="preview-body"
+          class={`flex justify-center bg-surface-2 ${BODY_INSET}`}
+        >
           {/* R11: scripts and same-origin, because the block needs both;
               top-level navigation, popups, forms, modals and downloads stay
               withheld. */}
@@ -364,10 +395,7 @@ export function BlockCard(props: BlockCardProps): JSX.Element {
             src={`${previewUrl(props.item.name)}${reloadKey() > 0 ? `?r=${reloadKey()}` : ""}`}
             loading="lazy"
             sandbox="allow-scripts allow-same-origin"
-            style={{
-              width: iframeWidth(),
-              height: props.item.meta?.iframeHeight ?? "720px",
-            }}
+            style={{ width: iframeWidth(), height: bodyHeight() }}
             class="max-w-full rounded-lg border border-line bg-surface"
           />
         </div>
@@ -382,39 +410,61 @@ export function BlockCard(props: BlockCardProps): JSX.Element {
             </p>
           }
         >
-          <div class="flex min-h-0 flex-col md:flex-row">
-            <div class="w-full shrink-0 overflow-y-auto border-b border-line p-2 md:w-72 md:border-b-0 md:border-r">
-              <kai-file-tree
-                ref={setTreeEl}
-                attr:theme={props.theme}
-                data-testid="file-tree"
-                on:kai-select={(e) => setActivePath(e.detail.path)}
-              />
-            </div>
-            <div class="min-w-0 flex-1 overflow-auto p-3">
-              <div class="mb-2 flex items-center gap-2">
-                <span
-                  data-testid="active-path"
-                  class="min-w-0 truncate font-mono text-xs text-ink-2"
-                >
-                  {activeFile()?.target ?? ""}
-                </span>
-                <kai-button
+          {/* The code body: the preview's inset and the preview's height, so
+              swapping mode moves nothing and a long file cannot grow the card.
+              The panes are one bordered frame with `overflow-hidden`; the
+              SCROLLING happens inside the panes, never on the card. */}
+          <div data-testid="code-body" class={`bg-surface-2 ${BODY_INSET}`}>
+            <div
+              data-testid="code-panes"
+              class="flex flex-col overflow-hidden rounded-lg border border-line bg-surface md:flex-row"
+              style={{ height: bodyHeight() }}
+            >
+              {/* Bounded in BOTH layouts, because the card is not. Stacked it
+                  is capped at a share of the SAME manifest height (a
+                  percentage, so it scales with the frame rather than pinning a
+                  pixel count of its own); side by side it is a fixed column
+                  that stretches to the frame. Either way the tree scrolls
+                  itself. */}
+              <div
+                data-testid="file-tree-pane"
+                class="max-h-[40%] w-full shrink-0 overflow-y-auto border-b border-line p-2 md:max-h-none md:w-72 md:border-b-0 md:border-r"
+              >
+                <kai-file-tree
+                  ref={setTreeEl}
                   attr:theme={props.theme}
-                  data-testid="file-copy"
-                  class="ml-auto"
-                  variant="ghost"
-                  size="icon-sm"
-                  icon="copy"
-                  label="Copy this file"
-                  on:kai-click={() => copyText(activeFile()?.content ?? "")}
+                  data-testid="file-tree"
+                  on:kai-select={(e) => setActivePath(e.detail.path)}
                 />
               </div>
-              <kai-code-block
-                ref={setCodeEl}
-                attr:theme={props.theme}
-                data-testid="code-block"
-              />
+              <div
+                data-testid="code-pane"
+                class="min-h-0 min-w-0 flex-1 overflow-auto p-3"
+              >
+                <div class="mb-2 flex items-center gap-2">
+                  <span
+                    data-testid="active-path"
+                    class="min-w-0 truncate font-mono text-xs text-ink-2"
+                  >
+                    {activeFile()?.target ?? ""}
+                  </span>
+                  <kai-button
+                    attr:theme={props.theme}
+                    data-testid="file-copy"
+                    class="ml-auto"
+                    variant="ghost"
+                    size="icon-sm"
+                    icon="copy"
+                    label="Copy this file"
+                    on:kai-click={() => copyText(activeFile()?.content ?? "")}
+                  />
+                </div>
+                <kai-code-block
+                  ref={setCodeEl}
+                  attr:theme={props.theme}
+                  data-testid="code-block"
+                />
+              </div>
             </div>
           </div>
         </Show>

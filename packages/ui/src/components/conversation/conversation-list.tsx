@@ -3,6 +3,7 @@ import { PanelLeftOpen } from 'lucide-solid';
 import { cn } from '../../utils/cn';
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '../collapsible/collapsible';
 import { Button } from '../button/button';
+import { Tooltip } from '../tooltip/tooltip';
 import { Badge } from '../badge/badge';
 import { ScrollArea } from '../scroll/scroll-area';
 import { ConversationItem, type ConversationRowDensity } from './conversation-item';
@@ -344,9 +345,16 @@ export function ConversationList(props: ConversationListProps) {
               </Button>
               <span class="text-sm font-semibold text-foreground">Chats</span>
             </div>
-            <Button variant="ghost" size="icon-sm" aria-label="New chat" onClick={local.onNewChat}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            </Button>
+            {/* The icon says nothing on its own, and this button lives in the
+                element's SHADOW root, so the hint has to come from the kit rather
+                than from a consumer's `title`. The tooltip is the DESCRIPTION and
+                the `aria-label` stays the NAME -- same split as the composer's
+                attach button (`prompt/default-input.tsx`). */}
+            <Tooltip content="New chat">
+              <Button variant="ghost" size="icon-sm" aria-label="New chat" onClick={local.onNewChat}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              </Button>
+            </Tooltip>
           </div>
         }
       >

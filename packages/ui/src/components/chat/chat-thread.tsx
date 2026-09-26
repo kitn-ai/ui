@@ -29,6 +29,7 @@ import { HomePanel } from '../home/home-panel';
 import { WidgetTabBar } from '../widget-tab-bar/widget-tab-bar';
 import { Panel, PanelHeader, PanelBody, PanelFooter } from '../panel/panel';
 import { createViewStack, type ViewEntry } from '../view/view-stack';
+import { resolveThreadDensity, THREAD_DENSITY_CLASSES, type ThreadDensity } from './thread-density';
 import { createConversationController, type ConversationController } from '../../stores/conversation-controller';
 import type { HomeConfig, HomeLinkEntry } from '../../types';
 
@@ -43,6 +44,13 @@ export interface ChatThreadContextUsage {
 export interface ChatThreadProps {
   /** Extra classes for the thread root (e.g. `h-full`). */
   class?: string;
+  // ONE axis, not three props: the between-turn gap, the message band's padding and
+  // the composer band's padding move together, because a consumer has no other way to
+  // reach any of them (they are inside this shadow tree). See `thread-density.ts` for
+  // what each value is and where its numbers come from.
+  /** How much air the thread has: `'default'` (the shipped look) or `'compact'`
+   *  (a desktop-panel rhythm: 8px between turns, a tighter band). */
+  density?: ThreadDensity;
   /** The message thread to render, newest last. A new array reference is what
    *  re-renders. */
   messages: ChatMessage[];
@@ -269,6 +277,7 @@ const ASSISTANT_ALIGN = 'items-stretch';
 export function ChatThread(props: ChatThreadProps) {
   const outer = useChatConfig();
   const reveal = () => (props.actionsReveal === 'hover' ? 'hover' : 'always');
+  const density = () => THREAD_DENSITY_CLASSES[resolveThreadDensity(props.density, 'ChatThread')];
   const messageKeys = createMemo(() => props.messages.map((m) => m.id));
   // Feedback (copy + vote) state lives ABOVE the per-message <For>, so streaming
   // re-renders (a fresh `messages` array ref per chunk) don't wipe it.
@@ -708,8 +717,8 @@ export function ChatThread(props: ChatThreadProps) {
           <PanelBody>
             <Switch
               fallback={
-                <ChatContainer class="h-full px-4 py-3">
-              <ChatContainerContent class="mx-auto w-full max-w-3xl space-y-4">
+                <ChatContainer class={`h-full ${density().band}`}>
+              <ChatContainerContent class={`mx-auto w-full max-w-3xl ${density().gap}`}>
                 {/* REPLACE — custom empty-state content, shown only while the thread is
                     empty. The component still owns WHEN it shows (data state); the
                     consumer owns WHAT it looks like. `emptyContent` (JSX, rendered
@@ -841,11 +850,11 @@ export function ChatThread(props: ChatThreadProps) {
           <Show when={chatShowing()}>
             {/* INJECT — accessory row above the composer (extra actions/toolbar). */}
             <Show when={props.composerActions}>
-              <div class="shrink-0 px-4">
+              <div class={`shrink-0 ${density().composerActions}`}>
                 <div class="mx-auto flex max-w-3xl items-center gap-2 pb-2"><slot name="composer-actions" /></div>
               </div>
             </Show>
-            <div class="shrink-0 px-4 pb-4">
+            <div class={`shrink-0 ${density().composer}`}>
               <div class="mx-auto max-w-3xl">
                 {/* JSX escape hatch, rendered immediately before the composer region
                     (built-in or `slot="composer"` replacement) — see the prop doc. */}
