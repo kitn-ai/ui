@@ -1,13 +1,11 @@
-import { For, Show } from 'solid-js';
+import { Show } from 'solid-js';
 import { MoreHorizontal } from 'lucide-solid';
 import {
-  Dropdown, DropdownTrigger, DropdownContent, DropdownItem,
-  DropdownSeparator, DropdownLabel, DropdownCheckboxItem, DropdownRadioItem,
-  DropdownSub, DropdownSubTrigger, DropdownSubContent,
+  Dropdown, DropdownTrigger, DropdownContent,
   type DropdownController,
 } from '../../components/dropdown/dropdown';
+import { DropdownItems } from '../../components/dropdown/dropdown-items';
 import { renderIcon } from '../../components/icon/icon';
-import { Kbd } from '../../components/kbd/kbd';
 import { cn } from '../../utils/cn';
 import { defineWebComponent } from '../define/define';
 import { wireDisclosure } from '../disclosure/disclosure';
@@ -97,76 +95,6 @@ defineWebComponent<Props, Events>('kai-menu', {
   // show/hide/toggle, disabled-gating. See ./disclosure.
   wireDisclosure(ctx, () => api, () => props.open);
 
-  function renderItems(items: KaiMenuItem[]) {
-    return (
-      <For each={items}>
-        {(item) => {
-          if (item.separator) {
-            return <DropdownSeparator />;
-          }
-          if (item.heading) {
-            return <DropdownLabel>{item.label}</DropdownLabel>;
-          }
-          if (item.items && item.items.length > 0) {
-            return (
-              <DropdownSub>
-                <DropdownSubTrigger>
-                  <Show when={item.icon}>{renderIcon(item.icon, { imgClass: 'mr-2 size-4 shrink-0', spanClass: 'mr-2 flex h-4 w-4 shrink-0 items-center justify-center text-sm' })}</Show>
-                  {item.label}
-                </DropdownSubTrigger>
-                <DropdownSubContent>
-                  {renderItems(item.items)}
-                </DropdownSubContent>
-              </DropdownSub>
-            );
-          }
-          if (item.radioGroup !== undefined) {
-            return (
-              <DropdownRadioItem
-                checked={item.checked}
-                disabled={item.disabled}
-                onSelect={() => {
-                  if (item.id) dispatch('kai-select', { id: item.id, radioGroup: item.radioGroup });
-                }}
-              >
-                <Show when={item.icon}>{renderIcon(item.icon, { imgClass: 'mr-2 size-4 shrink-0', spanClass: 'mr-2 flex h-4 w-4 shrink-0 items-center justify-center text-sm' })}</Show>
-                {item.label}
-              </DropdownRadioItem>
-            );
-          }
-          if (item.checked !== undefined) {
-            return (
-              <DropdownCheckboxItem
-                checked={item.checked}
-                disabled={item.disabled}
-                onSelect={() => {
-                  if (item.id) dispatch('kai-select', { id: item.id, checked: !item.checked });
-                }}
-              >
-                <Show when={item.icon}>{renderIcon(item.icon, { imgClass: 'mr-2 size-4 shrink-0', spanClass: 'mr-2 flex h-4 w-4 shrink-0 items-center justify-center text-sm' })}</Show>
-                {item.label}
-              </DropdownCheckboxItem>
-            );
-          }
-          return (
-            <DropdownItem
-              disabled={item.disabled}
-              onSelect={() => { if (item.id) dispatch('kai-select', { id: item.id }); }}
-            >
-              <Show when={item.icon}>{renderIcon(item.icon, { imgClass: 'mr-2 size-4 shrink-0', spanClass: 'mr-2 flex h-4 w-4 shrink-0 items-center justify-center text-sm' })}</Show>
-              {item.label}
-              <Show when={item.shortcut}>
-                <span part="shortcut" class="ml-auto pl-4 text-muted-foreground">
-                  <Kbd keys={item.shortcut!} platform="auto" size="sm" />
-                </span>
-              </Show>
-            </DropdownItem>
-          );
-        }}
-      </For>
-    );
-  }
-
   return (
     <>
       {/* The host shrinks to the trigger by default (UA inline); `full` makes it
@@ -215,7 +143,13 @@ defineWebComponent<Props, Events>('kai-menu', {
           default floor, and at a 240px rail the row is narrower than that floor, so
           CSS keeps the menu at the floor exactly as before. */}
       <DropdownContent matchTriggerWidth={flag('full')}>
-        {renderItems((props.items as KaiMenuItem[] | undefined) ?? [])}
+        {/* The item ladder itself lives in DropdownItems so the composer's tools menu
+            renders the same tree from the same code. This facade keeps only the
+            element half: the trigger, the surface, and the event. */}
+        <DropdownItems
+          items={(props.items as KaiMenuItem[] | undefined) ?? []}
+          onSelect={(detail) => dispatch('kai-select', detail)}
+        />
       </DropdownContent>
     </Dropdown>
     </>

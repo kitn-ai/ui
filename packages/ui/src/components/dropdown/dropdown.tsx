@@ -7,6 +7,7 @@ import { ChevronRight, Check } from 'lucide-solid';
 import { cn } from '../../utils/cn';
 import { useChatConfig } from '../../primitives/chat-config';
 import { createPresence, usePosition, useDismiss, As, type AsTag } from '../overlay/overlay';
+import { Switch } from '../switch/switch';
 
 interface DropdownCtx {
   open: Accessor<boolean>;
@@ -140,13 +141,24 @@ export interface DropdownItemProps {
   class?: string;
   onSelect?: () => void;
   disabled?: boolean;
+  // A second line under the label, muted. Present only when the caller passes one:
+  // with no description the children render UNWRAPPED, so every menu that does not
+  // use this is byte-identical to before it existed.
+  /** Muted second line under the label. */
+  description?: string;
 }
 
 export interface DropdownSeparatorProps { class?: string }
 
 export interface DropdownLabelProps { children: JSX.Element; class?: string }
 
-export interface DropdownCheckboxItemProps extends DropdownItemProps { checked?: boolean }
+export interface DropdownCheckboxItemProps extends DropdownItemProps {
+  checked?: boolean;
+  // The GLYPH only. The row stays role="menuitemcheckbox" + aria-checked either way,
+  // so a switch is how a toggle looks and never a second control for one state.
+  /** Trailing glyph for a togglable item: a checkmark (default) or a switch. */
+  control?: 'check' | 'switch';
+}
 
 export interface DropdownRadioItemProps extends DropdownItemProps { checked?: boolean }
 
@@ -377,7 +389,7 @@ export function DropdownItem(props: DropdownItemProps) {
         props.class,
       )}
     >
-      {props.children}
+      <ItemLabel description={props.description}>{props.children}</ItemLabel>
     </div>
   );
 }
@@ -401,6 +413,35 @@ export function DropdownLabel(props: DropdownLabelProps) {
     <div class={cn('select-none px-2 py-1.5 text-xs font-medium text-muted-foreground', props.class)}>
       {props.children}
     </div>
+  );
+}
+
+/**
+ * A non-interactive muted text row: a disabled group's REASON, not a command.
+ * a11y: deliberately role-less, so it is not a menu item and the roving-focus
+ * `[role="menuitem"]` query skips it, the same reason a separator sits outside it.
+ */
+export function DropdownNote(props: { children: JSX.Element; class?: string }) {
+  return (
+    <div class={cn('text-muted-foreground px-2 py-1.5 text-xs', props.class)}>{props.children}</div>
+  );
+}
+
+/**
+ * A row's label, with an optional muted second line.
+ *
+ * Shared so every item kind stacks label and description identically. With no
+ * `description` the children render UNWRAPPED (the fallback branch), which is what
+ * keeps the DOM of every existing menu exactly as it was.
+ */
+function ItemLabel(props: { children: JSX.Element; description?: string }) {
+  return (
+    <Show when={props.description} fallback={<>{props.children}</>}>
+      <span class="flex min-w-0 flex-col items-start">
+        <span class="flex min-w-0 items-center">{props.children}</span>
+        <span class="text-muted-foreground mt-0.5 text-xs">{props.description}</span>
+      </span>
+    </Show>
   );
 }
 
@@ -433,13 +474,22 @@ export function DropdownCheckboxItem(props: DropdownCheckboxItemProps) {
         props.class,
       )}
     >
-      {props.children}
+      <ItemLabel description={props.description}>{props.children}</ItemLabel>
       {/* Trailing check column: 16px of reserved separation — the same `pl-4` the menu
           facade's shortcut slot reserves — plus a 16px icon box. The width is fixed
           (`w-8`, 16 + 16), so the column is the same checked or unchecked and the gap
           does not depend on the surface happening to have slack. */}
       <span class="ml-auto flex h-4 w-8 shrink-0 items-center justify-center pl-4 text-muted-foreground">
-        <Show when={props.checked}><Check class="size-4" aria-hidden="true" /></Show>
+        <Show when={props.checked}>
+          <Show when={props.control === 'switch'} fallback={<Check class="size-4" aria-hidden="true" />}>
+            {/* DECORATION. The row owns role="menuitemcheckbox" and aria-checked; a
+                real focusable switch in here would be nested interactive content and
+                would give AT two controls for one state. So it is hidden from the
+                accessibility tree and removed from the tab order, and the row is
+                what activates. */}
+            <Switch checked aria-hidden="true" tabindex="-1" class="pointer-events-none" />
+          </Show>
+        </Show>
       </span>
     </div>
   );
@@ -474,7 +524,7 @@ export function DropdownRadioItem(props: DropdownRadioItemProps) {
         props.class,
       )}
     >
-      {props.children}
+      <ItemLabel description={props.description}>{props.children}</ItemLabel>
       {/* Same reserved trailing column as the checkbox item above. */}
       <span class="ml-auto flex h-4 w-8 shrink-0 items-center justify-center pl-4 text-muted-foreground">
         <Show when={props.checked}><Check class="size-4" aria-hidden="true" /></Show>

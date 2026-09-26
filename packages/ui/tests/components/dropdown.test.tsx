@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@solidjs/testing-library';
 import { createSignal } from 'solid-js';
-import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem, DropdownRadioItem, DropdownCheckboxItem } from '../../src/components/dropdown/dropdown';
+import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem, DropdownRadioItem, DropdownCheckboxItem, DropdownNote } from '../../src/components/dropdown/dropdown';
 
 // jsdom (v24) does not implement the PointerEvent constructor. useDismiss
 // listens for `pointerdown`; copy the shim from overlay.test.tsx.
@@ -338,5 +338,85 @@ describe('the trailing check column', () => {
 
     expect(new Set(classes).size, `all four columns share one class list: ${classes[0]}`).toBe(1);
     expect(trailing(items[1]).querySelector('svg'), 'unchecked renders no check').toBe(null);
+  });
+});
+
+/**
+ * A row's LENGTH, and the trailing glyph's identity.
+ *
+ * The second line and the switch are both additions to an item that already has a
+ * leading icon, a label and a trailing column, and both are opt-in: an item without
+ * a `description` renders its children UNWRAPPED, which is what keeps every existing
+ * menu's DOM (and therefore its layout) exactly as it was. That is asserted here
+ * rather than assumed, because "the new field is off by default" is the kind of
+ * claim that quietly stops being true.
+ */
+describe('Dropdown item length and state', () => {
+  it('renders a muted second line when an item has a description', () => {
+    render(() => (
+      <Dropdown>
+        <DropdownTrigger as={(p: any) => <button {...p} data-testid="trg">Menu</button>} />
+        <DropdownContent>
+          <DropdownItem description="Visualize anything">Create image</DropdownItem>
+        </DropdownContent>
+      </Dropdown>
+    ));
+    fireEvent.click(screen.getByTestId('trg'));
+    expect(screen.getByText('Visualize anything')).toBeInTheDocument();
+  });
+
+  it('leaves the DOM unwrapped when an item has no description', () => {
+    render(() => (
+      <Dropdown>
+        <DropdownTrigger as={(p: any) => <button {...p} data-testid="trg">Menu</button>} />
+        <DropdownContent>
+          <DropdownItem>Plain</DropdownItem>
+        </DropdownContent>
+      </Dropdown>
+    ));
+    fireEvent.click(screen.getByTestId('trg'));
+    // The label is the item's own text node: no wrapper element was introduced for
+    // a description that does not exist. This is what keeps every existing menu
+    // byte-identical.
+    expect(screen.getByText('Plain').tagName).toBe('DIV');
+  });
+
+  it('draws a check by default and a switch when asked', () => {
+    render(() => (
+      <Dropdown>
+        <DropdownTrigger as={(p: any) => <button {...p} data-testid="trg">Menu</button>} />
+        <DropdownContent>
+          <DropdownCheckboxItem checked>Web search</DropdownCheckboxItem>
+          <DropdownCheckboxItem checked control="switch">Google Drive</DropdownCheckboxItem>
+        </DropdownContent>
+      </Dropdown>
+    ));
+    fireEvent.click(screen.getByTestId('trg'));
+
+    const rows = screen.getAllByRole('menuitemcheckbox');
+    // The ROW is the control in both cases; the glyph is what differs.
+    expect(rows[0]).toHaveAttribute('aria-checked', 'true');
+    expect(rows[1]).toHaveAttribute('aria-checked', 'true');
+    // Nothing focusable is nested in a menu item: the switch is decoration. It is
+    // found by a raw query because aria-hidden keeps it out of the a11y tree, which
+    // is the point — AT sees the row's aria-checked, not a second control.
+    const knob = rows[1].querySelector('[role="switch"]');
+    expect(knob).toHaveAttribute('aria-hidden', 'true');
+    expect(knob).toHaveAttribute('tabindex', '-1');
+  });
+
+  it('a note is not a menu item', () => {
+    render(() => (
+      <Dropdown>
+        <DropdownTrigger as={(p: any) => <button {...p} data-testid="trg">Menu</button>} />
+        <DropdownContent>
+          <DropdownNote>Design systems aren't available on your plan.</DropdownNote>
+          <DropdownItem>New design system</DropdownItem>
+        </DropdownContent>
+      </Dropdown>
+    ));
+    fireEvent.click(screen.getByTestId('trg'));
+    expect(screen.getByText(/aren't available/)).not.toHaveAttribute('role');
+    expect(screen.getAllByRole('menuitem')).toHaveLength(1);
   });
 });

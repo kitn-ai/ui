@@ -131,3 +131,59 @@ describe('kai-menu surface width', () => {
     expect(menuOf(el)!.style.width).toBe('420px');
   });
 });
+
+/**
+ * The item tree, through the ELEMENT.
+ *
+ * The item ladder now lives in `DropdownItems` so the composer's tools menu can
+ * render the same tree from the same code. These cases are the control that the
+ * extraction carries the item fields through the FACADE, not only through the
+ * component: a facade that silently stopped mapping a field would leave the
+ * component-level tests green.
+ *
+ * Plain DOM assertions, no jest-dom matchers: this file does not import them.
+ */
+describe('kai-menu item tree', () => {
+  async function mountTree(items: unknown[]): Promise<Menu> {
+    const el = document.createElement('kai-menu') as Menu;
+    el.items = items;
+    document.body.appendChild(el);
+    await flush();
+    return el;
+  }
+
+  test('renders a description, a switch control and a note row', async () => {
+    const el = await mountTree([
+      { note: true, label: "Design systems aren't available on your plan." },
+      { id: 'image', label: 'Create image', description: 'Visualize anything' },
+      { id: 'drive', label: 'Google Drive', checked: true, control: 'switch' },
+      { id: 'web', label: 'Web search', checked: true },
+    ]);
+    el.show();
+    await flush();
+
+    const menu = menuOf(el)!;
+    expect(menu.textContent).toContain('Visualize anything');
+    expect(menu.textContent).toContain("Design systems aren't available on your plan.");
+
+    // The note is NOT one of the toggles: two checked rows, not three.
+    expect(menu.querySelectorAll('[role="menuitemcheckbox"]').length).toBe(2);
+
+    // The switch is decoration inside its row, hidden from AT and unfocusable.
+    const knob = menu.querySelector('[role="switch"]');
+    expect(knob?.getAttribute('aria-hidden')).toBe('true');
+    expect(knob?.getAttribute('tabindex')).toBe('-1');
+  });
+
+  test('a note is checked BEFORE a submenu, so it never renders as one', async () => {
+    // Both fields set. A row with children is a submenu; a note is a sentence with
+    // nothing under it, and the ladder's order is what decides.
+    const el = await mountTree([{ note: true, label: 'Nothing available yet', items: [{ id: 'x', label: 'X' }] }]);
+    el.show();
+    await flush();
+
+    const menu = menuOf(el)!;
+    expect(menu.textContent).toContain('Nothing available yet');
+    expect(menu.querySelector('[role="menuitem"]'), 'no submenu row was rendered').toBeNull();
+  });
+});
