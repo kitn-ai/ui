@@ -244,6 +244,13 @@
      (covers caller-sized pills), and the editor needs a rem literal it can drag. */
   --radius-pill: var(--kai-radius-pill, 4rem);
 
+  /* The composer's own corner: a FIXED rung, deliberately not `--radius-pill`.
+     That rung is 4rem and radius clamps to half the box, so it stays fully round as
+     the composer grows; this one is half the COLLAPSED composer row (48px), which is
+     what makes the collapsed box read as a pill and the expanded one as a card
+     without any state switching between them. */
+  --radius-composer: var(--kai-composer-radius, 1.5rem);
+
   /* Its own corner rather than a rung: a code block inside a card wants a value of
      its own. The token existed but theme.css never named it, so nothing could set it. */
   --code-radius: var(--kai-code-radius, 0.75rem);

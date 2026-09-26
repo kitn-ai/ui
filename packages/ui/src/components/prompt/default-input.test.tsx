@@ -67,28 +67,63 @@ describe('DefaultPromptInput attach button', () => {
 });
 
 /**
- * The box's horizontal insets. jsdom cannot measure a rendered inset, so this
- * asserts the CLASSES — honest here because the defect WAS two different values
- * typed into one box: the text sat at `pl-4` (16px) while the toolbar row and the
- * attachment row under/above it were `px-3` (12px), so the paragraph and the
- * buttons beneath it started on different edges. Pinning the equality is what
- * stops the next edit from reintroducing a second left inset.
+ * The box's two layouts, by their classes. jsdom measures nothing, so this cannot
+ * assert a rendered pixel — which is exactly why the CLASSES are the contract here:
+ * the numbers were measured from the reference screenshots (the send button is 28px
+ * in each, so they are 1x and real CSS pixels), and "approximately padded" is what
+ * the previous attempt at this look shipped. The two layouts are pinned separately
+ * because they reach the one shared left edge by different means.
  */
-describe('DefaultPromptInput horizontal inset', () => {
-  /** The class list of the row the toolbar buttons live in. The send button is
-   *  the one stable hook inside it (`data-testid`), two levels down: its right
-   *  cluster, then the row. */
-  function toolbarRowClass(container: HTMLElement): string {
-    const send = container.querySelector('[data-testid="send"]') as HTMLElement;
-    return send.parentElement!.parentElement!.className;
-  }
+describe('DefaultPromptInput geometry', () => {
+  const frame = (c: HTMLElement) => c.querySelector('[data-prompt-input]') as HTMLElement;
+  const body = (c: HTMLElement) => c.querySelector('[data-composer-body]') as HTMLElement;
+  const editable = (c: HTMLElement) => c.querySelector('[data-kai-composer-editable]') as HTMLElement;
 
-  it('starts the text on the same left edge as the toolbar row', () => {
+  it('collapsed: one row, on the measured padding, with the frame owning the insets', () => {
     const { container } = render(() => <DefaultPromptInput {...baseProps} />);
-    const text = container.querySelector('[data-kai-composer-editable]') as HTMLElement;
+    expect(frame(container).className).toContain('flex-row');
+    // 10px above and below a 28px control is the measured 48px row; 18px leading,
+    // 14px trailing. These are the numbers, not a guess at them.
+    expect(frame(container).className).toContain('py-2.5');
+    expect(frame(container).className).toContain('pl-4.5');
+    expect(frame(container).className).toContain('pr-3.5');
+    // The text carries no inset of its own: the frame's padding is the one edge.
+    expect(editable(container).className).not.toMatch(/\bpl-/);
+    expect(editable(container).className).not.toMatch(/\bpt-/);
+    // Collapsed the text shares the row, so it takes the room that is left.
+    expect(body(container).className).toContain('flex-1');
+  });
 
-    expect(text.className).toContain('pl-3');
-    expect(text.className).not.toContain('pl-4');
-    expect(toolbarRowClass(container)).toContain('px-3');
+  it('expanded: the text takes the whole line and the controls wrap below it', () => {
+    const { container } = render(() => (
+      <DefaultPromptInput {...baseProps} attachments={[{ id: 'a', type: 'file', filename: 'a.pdf' }]} />
+    ));
+    expect(frame(container).className).toContain('flex-wrap');
+    expect(frame(container).className).toContain('pt-3.5');
+    expect(frame(container).className).toContain('px-4.5');
+    // The mechanism, and it has to sit on the BODY rather than on the editable: the
+    // Composer renders the editable inside a `relative` div of its own, so a
+    // flex-child class on the editable lands on a nested block and changes nothing.
+    // `order-first` lifts the text above the clusters, `basis-full` claims the line.
+    expect(body(container).className).toContain('order-first');
+    expect(body(container).className).toContain('basis-full');
+    // The clusters stay dumb wrappers: they carry no order, so the whole layout
+    // decision lives with the resolver rather than being split across three places.
+    expect((frame(container).querySelector('[data-cluster="leading"]') as HTMLElement).className).not.toMatch(/\border-/);
+    expect((frame(container).querySelector('[data-cluster="trailing"]') as HTMLElement).className).not.toMatch(/\border-/);
+  });
+
+  it('keeps the attachment band above the text', () => {
+    // The regression this guards: the body's `order-first` is what puts the text on
+    // its own line, and it would equally lift the paragraph ABOVE the chips — the
+    // opposite of the reference, which puts them on top. The band carries the same
+    // order, and comes first in the DOM, so it stays first.
+    const { container } = render(() => (
+      <DefaultPromptInput {...baseProps} attachments={[{ id: 'a', type: 'file', filename: 'a.pdf' }]} />
+    ));
+    const band = frame(container).querySelector('[data-composer-band]') as HTMLElement;
+    expect(band).toBeTruthy();
+    expect(band.className).toContain('order-first');
+    expect(band.compareDocumentPosition(editable(container)) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 });

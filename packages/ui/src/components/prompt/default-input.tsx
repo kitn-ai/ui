@@ -48,6 +48,8 @@ export interface DefaultPromptInputProps {
   placeholder?: string;
   disabled?: boolean;
   loading?: boolean;
+  /** Pins the box's layout: `true` two rows, `false` one row, omitted derives it. */
+  expanded?: boolean;
   suggestions?: string[];
   /** Attachments staged in the input. Provide `onAttachmentsChange` to enable
    *  the attach button + removable previews. */
@@ -229,10 +231,16 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
         onSubmit={props.onSubmit}
         isLoading={props.loading}
         disabled={props.disabled}
+        expanded={props.expanded}
+        attachmentCount={attachments().length}
         class="relative"
       >
         <Show when={canAttach() && attachments().length}>
-          <div class="px-3 pt-3">
+          {/* `order-first` and first in the DOM: the editable below carries the same
+              order so it can claim its own line, and without this the chips would be
+              lifted BELOW the paragraph they belong above. The band carries no inset
+              of its own — the frame's padding is the box's one left edge. */}
+          <div data-composer-band class="order-first mb-2">
             <Attachments variant="inline">
               <For each={attachments()}>
                 {(att) => (
@@ -250,17 +258,12 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
             inline status strip). A shadow-internal hole — unreachable from outside.
             Native slot; inert outside a shadow root, projected by the custom element. */}
         <slot name="input-top" />
-        {/* ONE left inset for the box: `pl-3` is the same inset the attachment
-            chips (`px-3`) and the toolbar row below (`px-3`) use, so the
-            paragraph and the buttons under it start on the same edge. `pl-4` put
-            the text 4px further in than the buttons — two insets in one box, the
-            extra one on the text, which is what the owner saw as horizontal
-            padding out of proportion with the vertical. The text keeps NO right
-            inset of its own: it wraps at the frame's `p-2`, 12px closer to the
-            border than the toolbar's right edge (8px + `px-3`). Reported, not
-            changed — wrap width is a separate decision from this left edge. */}
-        <PromptInputTextarea placeholder={props.placeholder} aria-label={props.placeholder || 'Message'} class="min-h-[44px] pt-3 pl-3" triggers={props.triggers} kindIcons={props.kindIcons} onComposerChange={props.onComposerChange} />
-        <PromptInputActions class="mt-2 flex w-full items-center justify-between gap-2 px-3 pb-0">
+        {/* The LEADING cluster, and it sits BEFORE the editable in the DOM: collapsed
+            these controls share the text's row and belong to its left, and expanded the
+            editable's own `order-first` is what moves the text onto the line above
+            them. Deliberately no order of its own — the ordering lives in one place,
+            on the body wrapper, rather than in three class strings that have to agree. */}
+        <PromptInputActions data-cluster="leading" class="shrink-0">
           <div class="flex items-center gap-2">
             {/* Consumer-injected leading toolbar controls (e.g. a + menu). display:contents
                 ensures an empty slot adds no stray gap; projected nodes lay out as toolbar
@@ -354,10 +357,12 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
               }}
             </For>
           </div>
-          {/* Right cluster — consumer trailing controls (model/effort/voice…)
-              hug the send button, right-aligned. The `toolbar-end` slot and the send
-              button live together so justify-between pins them to the right edge
-              (left group stays left). Native slot; projected by the element. */}
+        </PromptInputActions>
+        <PromptInputTextarea placeholder={props.placeholder} aria-label={props.placeholder || 'Message'} triggers={props.triggers} kindIcons={props.kindIcons} onComposerChange={props.onComposerChange} />
+        {/* The TRAILING cluster, `ml-auto` so it pins to the far edge of whichever row
+            it lands on. The `toolbar-end` slot and the send button live together so
+            they stay adjacent at that edge. Native slot; projected by the element. */}
+        <PromptInputActions data-cluster="trailing" class="ml-auto shrink-0">
           <div class="flex items-center gap-2">
             <slot name="toolbar-end" />
             <Show
