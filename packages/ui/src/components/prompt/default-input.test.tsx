@@ -126,8 +126,22 @@ describe('buildComposerTools', () => {
       tools: [{ id: 'github', label: 'Add from GitHub' }],
     });
     expect(items[0]).toMatchObject({ id: 'files', label: 'Add files or photos' });
-    // The separator is DERIVED from there being more than one item, so a host
-    // tree cannot begin with a divider that has nothing above it.
+    // The separator is DERIVED from the tree, so a host cannot be left with a
+    // divider that has nothing above it.
+    expect(items[1]).toMatchObject({ separator: true });
+    expect(items[2]).toMatchObject({ id: 'github' });
+  });
+
+  it('derives no second divider when the host tree already opens with one', () => {
+    const items = buildComposerTools({
+      attach: true,
+      tools: [{ separator: true }, { id: 'github', label: 'Add from GitHub' }],
+    });
+    // A host that asks for a divider after the file item must not get the derived one
+    // as well: two dividers in a row is the same defect as a divider with nothing
+    // above it, for exactly the input the derivation exists to guard.
+    expect(items.filter((i) => i.separator === true)).toHaveLength(1);
+    expect(items[0]).toMatchObject({ id: 'files' });
     expect(items[1]).toMatchObject({ separator: true });
     expect(items[2]).toMatchObject({ id: 'github' });
   });

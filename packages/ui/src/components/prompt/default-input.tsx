@@ -46,9 +46,10 @@ export interface RejectedAttachment {
 }
 
 /** A tool the host declares for the composer's `+` menu. `chip` is the ONE field
- *  `<kai-menu>` does not read: it asks the composer to also show this item's state as a
- *  chip in the control row. It lives here rather than on `KaiMenuItem` so the menu's own
- *  item type does not carry a field that only one caller reads. */
+ *  `<kai-menu>` does not read: the composer's chip row reads it to decide whether an
+ *  active item also shows as a chip in the control row, and the menu ignores it. It lives
+ *  here rather than on `KaiMenuItem` so the menu's own item type does not carry a field
+ *  that only one caller reads. */
 export type ComposerToolItem = KaiMenuItem & { chip?: boolean };
 
 /** The id of the built-in file item, so a host can recognise it in its own tree. */
@@ -67,9 +68,12 @@ export function buildComposerTools(options: {
     label: 'Add files or photos',
     icon: 'paperclip',
   };
-  // The separator is DERIVED from the tree rather than declared by the host: a host tree
-  // that starts with one would otherwise render a divider with nothing above it.
-  return host.length > 0 ? [fileItem, { separator: true }, ...host] : [fileItem];
+  // The separator is DERIVED from the tree rather than declared by the host, and derived
+  // only when the host's own tree does not already open with one. Two dividers in a row is
+  // the same defect as a divider with nothing above it, for exactly the input this rule
+  // exists to guard.
+  const needsDerivedSeparator = host.length > 0 && host[0].separator !== true;
+  return needsDerivedSeparator ? [fileItem, { separator: true }, ...host] : [fileItem, ...host];
 }
 
 export interface DefaultPromptInputProps {
