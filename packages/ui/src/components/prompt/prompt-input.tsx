@@ -206,6 +206,7 @@ function PromptInputTextarea(props: PromptInputTextareaProps) {
     <div
       data-composer-body
       class={cn(
+        // lint-comment-references: long-block -- one paragraph per class, five of them; splitting them from the class list they justify is how a reason loses its subject.
         // Collapsed, the text shares the row with the controls and takes the room left.
         // Expanded, `order-first` lifts it above the clusters and `basis-full` claims the
         // line, so the control row wraps beneath it. `order-first` rather than a plain
@@ -225,9 +226,17 @@ function PromptInputTextarea(props: PromptInputTextareaProps) {
         // `mb-1.5` is the frame's old row gap moved here: a gap is charged between every pair
         // of lines and an empty `input-top` band is a line, so the 6px below the paragraph
         // has to belong to the paragraph.
+        //
+        // `min-w-0` is in BOTH branches, and it is load-bearing in both. A flex item's
+        // automatic minimum size is its MIN-CONTENT, so without it a long unbreakable token
+        // (a pasted URL) sets a floor wider than the frame and the row overflows instead of
+        // the token wrapping. Collapsed that floor is the row's; expanded `basis-full` makes
+        // the body the line's only item, and the floor then beats the basis outright — which
+        // is why it only failed intermittently: the measurement landed in whichever layout
+        // the token had settled into.
         ctx.layout() === 'collapsed'
           ? 'flex min-h-7 min-w-0 flex-1 items-center'
-          : 'order-first basis-full mb-1.5 px-1.5',
+          : 'order-first basis-full min-w-0 mb-1.5 px-1.5',
       )}
     >
       <Composer

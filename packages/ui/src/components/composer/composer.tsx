@@ -1062,17 +1062,23 @@ export function Composer(props: ComposerProps): JSX.Element {
           at the text origin automatically (respecting the editable's padding/font),
           and, like a native <textarea> placeholder, is exempt from axe color-contrast
           (a real text node would fail it at the muted color). */}
-      {/* `w-full` is LOAD-BEARING, not tidiness — do not remove it as redundant.
-          This wrapper declares no width of its own, so inside a FLEX parent (the bare
-          consumer's body, which centres the one-line text) it is a flex item whose
-          automatic basis takes its width from its content — and an empty composer HAS
-          no content width, because the placeholder is the absolute `::before` below,
-          out of flow by design so the caret starts at the field's start. The wrapper
-          was 0px wide and the editable's own `overflow: auto` clipped the placeholder
-          away: typed text showed, the placeholder never did. `width: 100%` resolves
-          against the parent's definite width instead; a block child of a block parent
-          (the standalone shell) is unaffected either way. */}
-      <div class="relative w-full">
+      {/* `w-full` and `min-w-0` are BOTH LOAD-BEARING — do not remove either as the
+          redundant one: they fail in opposite directions.
+
+          `w-full`: this wrapper declares no width, so inside a FLEX parent (the bare
+          consumer's body) it is a flex item whose basis comes from its content — and an
+          empty composer HAS no content width, because the placeholder is the absolute
+          `::before` below, out of flow by design so the caret starts at the field's
+          start. It was 0px wide and the editable's `overflow: auto` clipped the
+          placeholder away: typed text showed, the placeholder never did.
+
+          `min-w-0`: `width: 100%` leaves the automatic minimum size in force, and a flex
+          item's automatic minimum is its MIN-CONTENT, so a long unbreakable token (a
+          pasted URL) refused to shrink and the row overflowed — and only sometimes,
+          depending on which layout the browser settled into. `break-words` breaks the
+          token at the line boundary, but not until the item may shrink below its
+          content: that is the half `min-w-0` supplies. */}
+      <div class="relative w-full min-w-0">
         <div
           ref={(el) => { editable = el; props.editableRef?.(el); }}
           data-kai-composer-editable

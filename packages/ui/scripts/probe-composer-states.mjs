@@ -25,11 +25,11 @@
  *
  *   node scripts/probe-composer-states.mjs [--headed]
  *
- * KNOWN GAP, printed but not asserted: a long unbreakable token can widen the editable
- * past its frame, because a flex item's automatic minimum size is its min-content and
- * nothing on that wrapper lets it shrink below. The outcome races run to run, so it is
- * reported by name with its fix (`min-w-0` on the Composer's inner wrapper) instead of
- * being turned into a flaky check. See the last block.
+ * KNOWN GAP, now CLOSED and asserted: a long unbreakable token used to widen the editable
+ * past its frame, because a flex item's automatic minimum size is its min-content. It was
+ * reported rather than asserted while it RACED; the fix (`min-w-0` on the Composer's inner
+ * wrapper AND on the expanded layout's body, one class in each) made it deterministic, and
+ * the check now runs in BOTH layouts. See the last block.
  *
  * Watch it fail: drop the `w-full` from the Composer's inner wrapper
  * (`src/components/composer/composer.tsx`) and the empty-width check reports a 0px
@@ -427,12 +427,21 @@ console.log('\n== the projected input-top band ==');
     s.style.cssText = 'display:block;height:16px;line-height:16px';
     el.appendChild(s);
   });
-  await settle();
+  // Wait for the projection, not a fixed delay: the first assertion below is "nothing
+  // moved", which a measurement taken BEFORE the band landed satisfies perfectly.
+  await page.waitForFunction(() => {
+    const b = document.querySelector('#c').querySelector('[slot="input-top"]');
+    return !!b && b.getBoundingClientRect().height > 0;
+  }, null, { timeout: 5000 }).catch(() => {});   // bounded: the PRECONDITION below reports, not a throw
   const after = await rowMetrics();
-  const bandH = await page.evaluate(() => document.querySelector('#c').querySelector('[slot="input-top"]').getBoundingClientRect().height);
-  check('the band does NOT move the leading control', Math.abs(after.plusInset - before.plusInset) <= 1,
+  const bandH = await page.evaluate(() => document.querySelector('#c').querySelector('[slot="input-top"]')?.getBoundingClientRect().height ?? 0);
+  // Asserted, not assumed. "The leading control did not move" is exactly what a run that
+  // never projected a band reports, so without this the check can pass with the feature
+  // absent — the same shape as a wrapping assertion whose text fit one line.
+  check('PRECONDITION: the band really is projected', bandH > 0, `band ${n1(bandH)}px tall`);
+  check('the band does NOT move the leading control', bandH > 0 && Math.abs(after.plusInset - before.plusInset) <= 1,
     `+ inset ${n1(before.plusInset)}px without the band, ${n1(after.plusInset)}px with it`);
-  check('the frame grows by the band height and nothing else', Math.abs((after.height - before.height) - bandH) <= 1,
+  check('the frame grows by the band height and nothing else', bandH > 0 && Math.abs((after.height - before.height) - bandH) <= 1,
     `frame ${n1(before.height)} -> ${n1(after.height)}px for a ${n1(bandH)}px band`);
   await page.evaluate(() => document.querySelector('#c').querySelector('[slot="input-top"]').remove());
   await settle();
@@ -452,6 +461,12 @@ console.log('\n== a live prose-size change ==');
   await setValue('one line');
   await grow();
   await settle();
+  // Asserted, not assumed: BOTH checks in this block pass trivially if the font never
+  // grew — one line is one row at any size, and a long value wraps at any size — so the
+  // growth is what they are testing and it belongs on the record.
+  const grownLine = await page.evaluate(() => parseFloat(getComputedStyle(
+    document.querySelector('#c').shadowRoot.querySelector('[data-kai-composer-editable]')).lineHeight));
+  check('PRECONDITION: the font really did grow', grownLine >= 40, `line-height ${n1(grownLine)}px`);
   const one = await oneRow();
   check('ONE line stays ONE row after the font grows', one.sharesRow,
     `editable ${n1(one.editable.height)}px tall in a ${n1(one.height)}px frame, controls below: ${one.controlsBelow}`);
@@ -524,34 +539,42 @@ console.log('\n== hand-composed PromptInput ==');
 // --- 17. one long unbreakable token does not overflow the row -------------------
 console.log('\n== a long unbreakable token ==');
 {
-  await setValue('x'.repeat(300));
-  const over = await page.evaluate(() => {
-    const sr = document.querySelector('#c').shadowRoot;
-    const ed = sr.querySelector('[data-kai-composer-editable]');
-    const f = sr.querySelector('[data-prompt-input]');
-    const body = sr.querySelector('[data-composer-body]');
-    return {
-      editableW: ed.getBoundingClientRect().width, scrollW: ed.scrollWidth, clientW: ed.clientWidth,
-      frameW: f.getBoundingClientRect().width, bodyW: body.getBoundingClientRect().width,
-      stageW: document.getElementById('stage').clientWidth,
-    };
-  });
-  // The frame must not be widened by its content. This half is deterministic.
-  check('a long unbreakable token does not widen the frame', over.frameW <= over.stageW + 1,
-    `frame ${n1(over.frameW)}px in a ${over.stageW}px stage`);
-  // KNOWN GAP, reported rather than asserted. The editable itself CAN be widened past
-  // its frame by a token with no break opportunities: measured on four identical fresh
-  // pages, the same 300-character value gave a 668px editable three times and a 2157px
-  // one once, because a flex item's automatic minimum size is its min-content and
-  // nothing on the editable's wrapper lets it shrink below that. The cause is
-  // `min-w-0` missing from the Composer's inner wrapper; the outcome RACES today, so
-  // asserting it here would make this probe flaky — which is worse than a failing
-  // check, because a flaky one teaches you to ignore it. Add the assertion with the
-  // fix; the numbers are printed meanwhile.
-  const widened = over.editableW > over.frameW + 1;
-  console.log(`${widened ? 'KNOWN-GAP' : 'ok'}: the editable fits its frame (${n1(over.editableW)}px inside ${n1(over.frameW)}px${widened ? ' — min-w-0 missing from the Composer wrapper' : ''})`);
-  await clear();
-  await settle();
+  // BOTH layouts, because the fix is one class in EACH: the wrapper's `min-w-0` and the
+  // expanded body's. The old failure looked intermittent precisely because the check
+  // landed in whichever layout the token had settled into — collapsed fitted, expanded
+  // did not, since `basis-full` makes the body the line's only item and its automatic
+  // minimum (min-content) then beats the basis outright.
+  const measureToken = async (label, props) => {
+    await setValue('x'.repeat(300));
+    if (props) { await set(props); await settle(); }
+    const over = await page.evaluate(() => {
+      const sr = document.querySelector('#c').shadowRoot;
+      const ed = sr.querySelector('[data-kai-composer-editable]');
+      const f = sr.querySelector('[data-prompt-input]');
+      const body = sr.querySelector('[data-composer-body]');
+      return {
+        editableW: ed.getBoundingClientRect().width, scrollW: ed.scrollWidth, clientW: ed.clientWidth,
+        frameW: f.getBoundingClientRect().width, bodyW: body.getBoundingClientRect().width,
+        stageW: document.getElementById('stage').clientWidth,
+      };
+    });
+    check(`a long token does not widen the frame (${label})`, over.frameW <= over.stageW + 1,
+      `frame ${n1(over.frameW)}px in a ${n1(over.stageW)}px stage`);
+    check(`a long token does not widen the editable past its frame (${label})`,
+      over.editableW <= over.frameW + 1,
+      `editable ${n1(over.editableW)}px inside a ${n1(over.frameW)}px frame`);
+    // The sharp half, and the reason the width check alone is not enough: a box that
+    // fits its frame by clipping the token satisfies the width and fails this. Scroll
+    // width equal to client width is what `overflow-wrap: break-word` engaging looks
+    // like — the token broke at the line boundary instead of running off sideways.
+    check(`a long token WRAPS rather than scrolling sideways (${label})`,
+      over.scrollW <= over.clientW + 1,
+      `scrollWidth ${n1(over.scrollW)}px vs clientWidth ${n1(over.clientW)}px`);
+    await clear();
+    await settle();
+  };
+  await measureToken('default layout', undefined);
+  await measureToken('pinned one row', { expanded: false });
 }
 
 await browser.close();
