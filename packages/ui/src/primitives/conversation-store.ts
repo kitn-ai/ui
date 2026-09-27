@@ -291,6 +291,16 @@ export function localStorageStore(name: string, userId?: string): ConversationSt
           // only writers of these two fields.
           pinned: existing?.pinned,
           archived: existing?.archived,
+          // The same argument once more, and the reason neither of these is a field
+          // save() may rebuild: which group a conversation is filed under and what it
+          // was scoped to are filing decisions the visitor made, exactly like a pin,
+          // and a turn arriving later must not quietly ungroup it or drop it back to
+          // unscoped (the absent-means-unscoped reading `ConversationSummary.scope`
+          // documents). No method on this store writes either one — a consumer that
+          // owns its own filing seeds them in the index it hands over, and this carry
+          // is what keeps that seed alive across the first save().
+          groupId: existing?.groupId,
+          scope: existing?.scope,
         };
         writeIndex([...entries.filter((e) => e.id !== id), next]);
       } catch {

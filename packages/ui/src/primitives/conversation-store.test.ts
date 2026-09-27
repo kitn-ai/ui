@@ -347,6 +347,55 @@ describe('localStorageStore — rename / setPinned / setArchived / remove (opt-i
   });
 });
 
+// One seam, every field a save() must not decide on the visitor's behalf: the
+// read state, the two list-shape flags, and where the conversation is filed.
+describe('localStorageStore — save() carries the visitor\'s own fields forward', () => {
+  it('save() carries groupId and scope forward — where a conversation is filed is the visitor\'s decision, same as a pin', async () => {
+    // The index is the only door for these two: nothing on this store writes
+    // them, so a summary that carries them was seeded by the consumer that owns
+    // the filing.
+    localStorage.setItem(
+      INDEX_KEY,
+      JSON.stringify([
+        {
+          id: 'c1',
+          title: 'Filing',
+          groupId: 'today',
+          scope: { type: 'document', documentId: 'doc-1' },
+          messageCount: 1,
+          updatedAt: '2026-08-01T00:00:00.000Z',
+        },
+      ]),
+    );
+    const store = localStorageStore('acme-support');
+    await store.save('c1', [msg('u1', 'hi there'), msg('a1', 'a reply')]);
+    const [summary] = await store.list();
+    expect(summary.groupId).toBe('today');
+    expect(summary.scope).toEqual({ type: 'document', documentId: 'doc-1' });
+  });
+
+  it('the carries do not compete — a filed, scoped, pinned, archived, marked-read conversation survives the same save()', async () => {
+    localStorage.setItem(
+      INDEX_KEY,
+      JSON.stringify([
+        { id: 'c1', title: 'Filing', groupId: 'today', scope: { type: 'document' }, messageCount: 1, updatedAt: '2026-08-01T00:00:00.000Z' },
+      ]),
+    );
+    const store = localStorageStore('acme-support');
+    await store.setPinned!('c1', true);
+    await store.setArchived!('c1', true);
+    await store.markRead!('c1');
+    const [{ lastReadAt: markedAt }] = await store.list();
+    await store.save('c1', [msg('u1', 'hi there'), msg('a1', 'a reply')]);
+    const [summary] = await store.list();
+    expect(summary.groupId).toBe('today');
+    expect(summary.scope).toEqual({ type: 'document' });
+    expect(summary.pinned).toBe(true);
+    expect(summary.archived).toBe(true);
+    expect(summary.lastReadAt).toBe(markedAt);
+  });
+});
+
 describe('orderedSummaries / mostRecentSummary (the one list-order rule)', () => {
   const conv = (
     id: string,
