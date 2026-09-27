@@ -397,7 +397,14 @@ function MarkdownBlock(props: { content: string }) {
     }
   });
 
-  return <div>{body()}</div>;
+  // NO WRAPPER ELEMENT, and that is the point rather than an economy. `.chat-markdown`
+  // owns the gap between the blocks it contains (theme.css), and it can only own the
+  // gap for a child it can SEE: a wrapper per token puts one element between the
+  // container and every block, which made `p:last-child` true inside each of them and
+  // rendered a two-paragraph message flush. A fragment keeps the memo's read reactive
+  // without putting that element back. A whitespace token renders nothing at all, so
+  // it contributes no child either.
+  return <>{body()}</>;
 }
 
 function Markdown(props: MarkdownProps) {
@@ -407,12 +414,15 @@ function Markdown(props: MarkdownProps) {
   const blocks = createMemo(() => parseMarkdownIntoBlocks(local.content));
 
   return (
-    <div part={local.part} class={cn('chat-markdown max-w-none break-words whitespace-normal [&>div:first-child>p:first-child]:mt-0 [&>div:last-child>p:last-child]:mb-0', textClass(config.proseSize()), local.class)}>
+    <div part={local.part} class={cn('chat-markdown max-w-none break-words whitespace-normal', textClass(config.proseSize()), local.class)}>
       <For each={blocks()}>
         {(block) => (
           <Switch>
             <Match when={block.type === 'code'}>
-              <CodeBlock class="my-4">
+              {/* No margin here: the block's spacing is the container's, never its
+                  own, which is what keeps a message ending in a fence from stacking
+                  the fence's margin on whatever follows the content (theme.css). */}
+              <CodeBlock>
                 <CodeBlockCode
                   code={block.content}
                   language={block.language}
