@@ -415,7 +415,7 @@ export interface ChatProps extends WebComponentProps {
   loading?: boolean;
   /** Starter prompts shown above the input while the thread is empty. */
   suggestions?: string[];
-  /** How `suggestions` render: `'pill'` (default) or the `PromptSuggestion` `block` variant, a full-width list row. */
+  /** How `suggestions` render. `'pill'` is the default; the alternative renders each suggestion as a full-width list row. */
   suggestionsLayout?: "pill" | "block";
   /** What clicking a suggestion does. Default sends it immediately; `'fill'` places it in the input without sending. */
   suggestionMode?: "submit" | "fill";
@@ -1617,7 +1617,7 @@ export interface PromptInputProps extends WebComponentProps {
   loading?: boolean;
   /** Starter prompts shown above the input. Clicking one follows `suggestionMode`. Set as a JS property. */
   suggestions?: string[];
-  /** How `suggestions` render: `'pill'` (default) or the `PromptSuggestion` `block` variant, a full-width list row. Attribute: `suggestions-layout`. */
+  /** How `suggestions` render. `'pill'` is the default; the alternative is a full-width list row. Attribute: `suggestions-layout`. */
   suggestionsLayout?: "pill" | "block";
   /** What clicking a suggestion does. Defaults to `'submit'`. */
   suggestionMode?: "submit" | "fill";

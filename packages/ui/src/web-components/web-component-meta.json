@@ -1416,7 +1416,7 @@
         "type": "undefined | \"pill\" | \"block\"",
         "optional": true,
         "scalar": true,
-        "description": "How `suggestions` render: `'pill'` (default) or the `PromptSuggestion` `block` variant, a full-width list row.",
+        "description": "How `suggestions` render. `'pill'` is the default; the alternative renders each suggestion as a full-width list row.",
         "default": "'pill'",
         "displayType": "undefined | \"pill\" | \"block\""
       },
@@ -7192,7 +7192,7 @@
         "type": "undefined | \"pill\" | \"block\"",
         "optional": true,
         "scalar": true,
-        "description": "How `suggestions` render: `'pill'` (default) or the `PromptSuggestion` `block` variant, a full-width list row. Attribute: `suggestions-layout`.",
+        "description": "How `suggestions` render. `'pill'` is the default; the alternative is a full-width list row. Attribute: `suggestions-layout`.",
         "default": "'pill'",
         "displayType": "undefined | \"pill\" | \"block\""
       },
