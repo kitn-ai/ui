@@ -253,8 +253,8 @@
      `py-2.5` = twelve units, and every one of those scales with `--spacing`, so six units
      is half the row at EVERY density. A literal 24px would be half of it only at the
      default, which is the drift this token exists to avoid. A theme can still override it
-     outright with an absolute `--kai-composer-radius`. */
-  --radius-composer: var(--kai-composer-radius, calc(var(--spacing) * 6));
+     outright with an absolute `--kai-radius-composer`. */
+  --radius-composer: var(--kai-radius-composer, calc(var(--spacing) * 6));
 
   /* Its own corner rather than a rung: a code block inside a card wants a value of
      its own. The token existed but theme.css never named it, so nothing could set it. */

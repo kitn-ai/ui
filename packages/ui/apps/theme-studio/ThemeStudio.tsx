@@ -50,7 +50,7 @@ import {
 import { THEME_PRESETS, SHADCN_TO_KAI } from './theme-presets';
 import { sampleFor } from './sample-data';
 import kitCss from '../../theme.css?raw';
-import { GROUPS, ALL_TOKENS, TEXT_RUNGS, parseKitDefaults, remValue, type TextRung } from '../../src/themes/theme-tokens';
+import { GROUPS, ALL_TOKENS, TEXT_RUNGS, parseKitDefaults, remValue, spacingMultiple, type TextRung } from '../../src/themes/theme-tokens';
 
 // The showroom writes ONE kai-* tag directly in Solid JSX (<kai-chat> below);
 // every other element mounts via document.createElement in mountSample. Solid's
@@ -147,6 +147,11 @@ const DEFAULT_DENSITY = remValue(kitDefault('--kai-density', 'light')); // rem
 const DEFAULT_PILL = remValue(kitDefault('--kai-radius-pill', 'light')); // rem
 /** The code surface's own corner. Separate from the radius ladder by design. */
 const DEFAULT_CODE_RADIUS = remValue(kitDefault('--kai-code-radius', 'light')); // rem
+/** The composer's corner, resolved from theme.css's spacing multiplier against the
+ *  density default. It is the one knob whose default is not a rem literal: half the
+ *  collapsed row, and that row is built from spacing steps, so neither the multiplier
+ *  nor the base is typed here. */
+const DEFAULT_COMPOSER_RADIUS = spacingMultiple(kitDefault('--kai-radius-composer', 'light')) * DEFAULT_DENSITY; // rem
 /** Elevation multiplier — unitless, so parsed as a number rather than rem. */
 const DEFAULT_ELEVATION = Number.parseFloat(kitDefault('--kai-shadow-strength', 'light'));
 
@@ -434,7 +439,7 @@ const isEmbedded = (): boolean =>
 const isRail = (): boolean =>
   typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('embed');
 
-interface ThemeExtras { radius: number; density: number; pill: number; codeRadius: number; elevation: number; weights: WeightScale; fontBase: string; fontCode: string; tracking: number; shadow: string; text: TextScale }
+interface ThemeExtras { radius: number; density: number; pill: number; codeRadius: number; composerRadius: number; elevation: number; weights: WeightScale; fontBase: string; fontCode: string; tracking: number; shadow: string; text: TextScale }
 
 /** Paste-ready CSS: the light set on :root, the dark set on .dark. */
 function buildCss(light: Palette, dark: Palette, x: ThemeExtras): string {
@@ -443,6 +448,7 @@ function buildCss(light: Palette, dark: Palette, x: ThemeExtras): string {
     `  --kai-density: ${x.density}rem;`,
     `  --kai-radius-pill: ${x.pill}rem;`,
     `  --kai-code-radius: ${x.codeRadius}rem;`,
+    `  --kai-radius-composer: ${x.composerRadius}rem;`,
     `  --kai-shadow-strength: ${x.elevation};`,
     ...WEIGHT_RUNGS.map((r) => `  ${r.token}: ${x.weights[r.name]};`),
     ...TEXT_RUNGS.map((r) => `  ${r.token}: ${x.text[r.token] ?? rungDef(r)}rem;`),
@@ -458,7 +464,7 @@ function buildCss(light: Palette, dark: Palette, x: ThemeExtras): string {
 
 /** Tolerant parse of pasted CSS: pull --kai-* declarations from the :root block
  *  (light) and the .dark block (dark). Unknown tokens are ignored. */
-function parseCss(css: string): { light: Palette; dark: Palette; radius?: number; density?: number; pill?: number; codeRadius?: number; elevation?: number; weights?: Partial<WeightScale>; text: TextScale } | null {
+function parseCss(css: string): { light: Palette; dark: Palette; radius?: number; density?: number; pill?: number; codeRadius?: number; composerRadius?: number; elevation?: number; weights?: Partial<WeightScale>; text: TextScale } | null {
   const grab = (selector: string): Palette => {
     const re = new RegExp(`${selector}\\s*\\{([^}]*)\\}`);
     const block = css.match(re)?.[1] ?? '';
@@ -470,7 +476,7 @@ function parseCss(css: string): { light: Palette; dark: Palette; radius?: number
   const dark = grab('\\.dark');
   // A rem knob alone counts as a paste. `--kai-radius` stays out: a radius-only
   // paste is still rejected, which is a separate decision from wiring tokens.
-  const hasRemKnob = /--kai-(?:text-[a-z-]+|density|radius-pill|code-radius|weight-[a-z]+|shadow-strength)\s*:\s*[\d.]+/.test(css);
+  const hasRemKnob = /--kai-(?:text-[a-z-]+|density|radius-pill|code-radius|composer-radius|weight-[a-z]+|shadow-strength)\s*:\s*[\d.]+/.test(css);
   if (!Object.keys(light).length && !Object.keys(dark).length && !hasRemKnob) return null;
   const radiusMatch = css.match(/--kai-radius\s*:\s*([\d.]+)rem/);
   // Density is a rem value too, so `buildCss` output pasted back in round-trips.
@@ -478,6 +484,9 @@ function parseCss(css: string): { light: Palette; dark: Palette; radius?: number
   // The two shape knobs are rem values too, so one export/import round-trips whole.
   const pillMatch = css.match(/--kai-radius-pill\s*:\s*([\d.]+)rem/);
   const codeRadiusMatch = css.match(/--kai-code-radius\s*:\s*([\d.]+)rem/);
+  // Fixed rem on the way back in, even though the default is a spacing multiple: an
+  // exported theme PINS the corner, which is exactly what overriding the derivation means.
+  const composerRadiusMatch = css.match(/--kai-radius-composer\s*:\s*([\d.]+)rem/);
   // Elevation is a unitless multiplier; the weight rungs are unitless numbers too,
   // so neither goes through the `rem` matches above.
   const elevationMatch = css.match(/--kai-shadow-strength\s*:\s*([\d.]+)/);
@@ -491,7 +500,7 @@ function parseCss(css: string): { light: Palette; dark: Palette; radius?: number
   for (const m of css.matchAll(/(--kai-text-[a-z-]+)\s*:\s*([\d.]+)rem/g)) {
     if (TEXT_RUNGS.some((r) => r.token === m[1])) text[m[1]] = parseFloat(m[2]);
   }
-  return { light, dark, radius: radiusMatch ? parseFloat(radiusMatch[1]) : undefined, density: densityMatch ? parseFloat(densityMatch[1]) : undefined, pill: pillMatch ? parseFloat(pillMatch[1]) : undefined, codeRadius: codeRadiusMatch ? parseFloat(codeRadiusMatch[1]) : undefined, elevation: elevationMatch ? parseFloat(elevationMatch[1]) : undefined, weights: Object.keys(weights).length ? weights : undefined, text };
+  return { light, dark, radius: radiusMatch ? parseFloat(radiusMatch[1]) : undefined, density: densityMatch ? parseFloat(densityMatch[1]) : undefined, pill: pillMatch ? parseFloat(pillMatch[1]) : undefined, codeRadius: codeRadiusMatch ? parseFloat(codeRadiusMatch[1]) : undefined, composerRadius: composerRadiusMatch ? parseFloat(composerRadiusMatch[1]) : undefined, elevation: elevationMatch ? parseFloat(elevationMatch[1]) : undefined, weights: Object.keys(weights).length ? weights : undefined, text };
 }
 
 export default function ThemeStudio() {
@@ -510,6 +519,7 @@ export default function ThemeStudio() {
   const [density, setDensity] = createSignal(DEFAULT_DENSITY); // rem — the base of every Tailwind spacing utility
   const [pill, setPill] = createSignal(DEFAULT_PILL); // rem — the pill family's cap radius
   const [codeRadius, setCodeRadius] = createSignal(DEFAULT_CODE_RADIUS); // rem — the code surface's corner
+  const [composerRadius, setComposerRadius] = createSignal(DEFAULT_COMPOSER_RADIUS); // rem — the composer's corner
   const [elevation, setElevation] = createSignal(DEFAULT_ELEVATION); // multiplier over every shadow rung
   const [weights, setWeights] = createSignal<WeightScale>(seedWeights()); // --kai-weight-*, unitless
   const [fontBase, setFontBase] = createSignal('');
@@ -521,7 +531,7 @@ export default function ThemeStudio() {
   const [hsl, setHsl] = createSignal<Hsl>({ ...HSL_IDENTITY });
   const [preset, setPreset] = createSignal('Default');
   // Custom presets the user saves (persisted to localStorage).
-  type SavedPreset = { name: string; light: Palette; dark: Palette; radius: number; density?: number; pill?: number; codeRadius?: number; elevation?: number; weights?: Partial<WeightScale>; fontBase: string; fontCode: string; tracking: number; shadow: string; text?: TextScale };
+  type SavedPreset = { name: string; light: Palette; dark: Palette; radius: number; density?: number; pill?: number; codeRadius?: number; composerRadius?: number; elevation?: number; weights?: Partial<WeightScale>; fontBase: string; fontCode: string; tracking: number; shadow: string; text?: TextScale };
   const PRESET_KEY = 'kai-theme-studio-presets';
   const [saved, setSaved] = createSignal<SavedPreset[]>([]);
   const persistSaved = (list: SavedPreset[]) => { setSaved(list); try { localStorage.setItem(PRESET_KEY, JSON.stringify(list)); } catch { /* storage blocked */ } };
@@ -547,7 +557,7 @@ export default function ThemeStudio() {
   const toggleGroup = (name: string) => setOpenGroups((o) => ({ ...o, [name]: !o[name] }));
 
   const active = () => (mode() === 'light' ? light() : dark());
-  const extras = (): ThemeExtras => ({ radius: radius(), density: density(), pill: pill(), codeRadius: codeRadius(), elevation: elevation(), weights: weights(), fontBase: fontBase(), fontCode: fontCode(), tracking: tracking(), shadow: shadowColor(), text: textScale() });
+  const extras = (): ThemeExtras => ({ radius: radius(), density: density(), pill: pill(), codeRadius: codeRadius(), composerRadius: composerRadius(), elevation: elevation(), weights: weights(), fontBase: fontBase(), fontCode: fontCode(), tracking: tracking(), shadow: shadowColor(), text: textScale() });
   // The palette as the canvas/export actually see it: base colors + the HSL nudge.
   const effLight = () => shiftPalette(light(), hsl());
   const effDark = () => shiftPalette(dark(), hsl());
@@ -573,6 +583,7 @@ export default function ThemeStudio() {
     rootExtras['--kai-density'] = `${density()}rem`;
     rootExtras['--kai-radius-pill'] = `${pill()}rem`;
     rootExtras['--kai-code-radius'] = `${codeRadius()}rem`;
+    rootExtras['--kai-radius-composer'] = `${composerRadius()}rem`;
     rootExtras['--kai-shadow-strength'] = String(elevation());
     const w = weights();
     for (const r of WEIGHT_RUNGS) rootExtras[r.token] = String(w[r.name]);
@@ -670,6 +681,7 @@ export default function ThemeStudio() {
     canvasEl.style.setProperty('--kai-density', `${density()}rem`);
     canvasEl.style.setProperty('--kai-radius-pill', `${pill()}rem`);
     canvasEl.style.setProperty('--kai-code-radius', `${codeRadius()}rem`);
+    canvasEl.style.setProperty('--kai-radius-composer', `${composerRadius()}rem`);
     canvasEl.style.setProperty('--kai-shadow-strength', String(elevation()));
     const wScale = weights();
     for (const r of WEIGHT_RUNGS) canvasEl.style.setProperty(r.token, String(wScale[r.name]));
@@ -708,6 +720,7 @@ export default function ThemeStudio() {
       setDensity(typeof s.density === 'number' && Number.isFinite(s.density) ? s.density : DEFAULT_DENSITY);
       setPill(typeof s.pill === 'number' && Number.isFinite(s.pill) ? s.pill : DEFAULT_PILL);
       setCodeRadius(typeof s.codeRadius === 'number' && Number.isFinite(s.codeRadius) ? s.codeRadius : DEFAULT_CODE_RADIUS);
+      setComposerRadius(typeof s.composerRadius === 'number' && Number.isFinite(s.composerRadius) ? s.composerRadius : DEFAULT_COMPOSER_RADIUS);
       // Same for elevation and the weight ladder: a preset saved before them carries
       // their theme.css defaults, so the default is what it meant.
       setElevation(typeof s.elevation === 'number' && Number.isFinite(s.elevation) ? s.elevation : DEFAULT_ELEVATION);
@@ -731,6 +744,7 @@ export default function ThemeStudio() {
     setDensity(DEFAULT_DENSITY); // no built-in preset ships a density either — back to Tailwind's 0.25rem
     setPill(DEFAULT_PILL); // and both shape knobs go back to their theme.css defaults
     setCodeRadius(DEFAULT_CODE_RADIUS);
+    setComposerRadius(DEFAULT_COMPOSER_RADIUS);
     setElevation(DEFAULT_ELEVATION);
     setWeights(seedWeights());
     const t = THEME_PRESETS.find((x) => x.name === name);
@@ -772,7 +786,7 @@ export default function ThemeStudio() {
   const commitSave = () => {
     const name = saveName().trim();
     if (!name) { setSaveError('Give the theme a name.'); return; }
-    const p: SavedPreset = { name, light: effLight(), dark: effDark(), radius: radius(), density: density(), pill: pill(), codeRadius: codeRadius(), elevation: elevation(), weights: weights(), fontBase: fontBase(), fontCode: fontCode(), tracking: tracking(), shadow: shadowColor(), text: textScale() };
+    const p: SavedPreset = { name, light: effLight(), dark: effDark(), radius: radius(), density: density(), pill: pill(), codeRadius: codeRadius(), composerRadius: composerRadius(), elevation: elevation(), weights: weights(), fontBase: fontBase(), fontCode: fontCode(), tracking: tracking(), shadow: shadowColor(), text: textScale() };
     persistSaved([...saved().filter((x) => x.name !== name), p]);
     setPreset(name);
     setSaveOpen(false);
@@ -799,7 +813,7 @@ export default function ThemeStudio() {
   const applyImport = () => {
     const parsed = parseCss(importText());
     if (!parsed) {
-      setImportError('No --kai-color-*, --kai-text-*, --kai-density, --kai-radius-pill, --kai-code-radius, --kai-shadow-strength or --kai-weight-* token found. Paste a :root / .dark block.');
+      setImportError('No --kai-color-*, --kai-text-*, --kai-density, --kai-radius-pill, --kai-code-radius, --kai-radius-composer, --kai-shadow-strength or --kai-weight-* token found. Paste a :root / .dark block.');
       return;
     }
     setLight((v) => ({ ...v, ...parsed.light }));
@@ -808,6 +822,7 @@ export default function ThemeStudio() {
     if (parsed.density !== undefined) setDensity(parsed.density);
     if (parsed.pill !== undefined) setPill(parsed.pill);
     if (parsed.codeRadius !== undefined) setCodeRadius(parsed.codeRadius);
+    if (parsed.composerRadius !== undefined) setComposerRadius(parsed.composerRadius);
     if (parsed.elevation !== undefined) setElevation(parsed.elevation);
     if (parsed.weights) setWeights((v) => ({ ...v, ...parsed.weights }));
     if (Object.keys(parsed.text).length) setTextScale((v) => ({ ...v, ...parsed.text }));
@@ -1293,6 +1308,11 @@ export default function ThemeStudio() {
               {/* Pill: `rounded-full` is a literal. Code: its own corner. */}
               <SliderRow label="Pill" value={pill()} min={0} max={4} step={0.0625} unit="rem" onInput={(n) => { setPill(n); setPreset('Custom'); }} />
               <SliderRow label="Code" value={codeRadius()} min={0} max={1.4} step={0.05} unit="rem" onInput={(n) => { setCodeRadius(n); setPreset('Custom'); }} />
+              {/* The composer's corner. Bounds are the studio's own taste call, as the
+                  others are: 1.5rem is the derived default — half the collapsed row, so
+                  beyond it CSS clamps the radius to a pill and the control would move
+                  without changing anything. */}
+              <SliderRow label="Composer" value={composerRadius()} min={0} max={1.5} step={0.0625} unit="rem" onInput={(n) => { setComposerRadius(n); setPreset('Custom'); }} />
             </div>
           </div>
           <div class="border-t border-line/60 px-3 py-3">
