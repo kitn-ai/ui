@@ -138,8 +138,12 @@ defineWebComponent<Props, Events>('kai-scroll-button', {
         'rounded-lg transition-all duration-150 ease-out',
         surfaceClasses(props.variant),
         showLabel() ? 'h-9 w-auto gap-1.5 px-3 text-sm' : '',
+        // Mirrors `components/scroll/scroll-button.tsx`: the wrapper a consumer
+        // positions this element in has to be `pointer-events-none` so it does
+        // not swallow the pointer over the messages, and this is what takes the
+        // pointer back for the button alone.
         !isAtBottom()
-          ? 'translate-y-0 scale-100 opacity-100'
+          ? 'pointer-events-auto translate-y-0 scale-100 opacity-100'
           : 'pointer-events-none translate-y-4 scale-95 opacity-0',
       )}
       onClick={() => {

@@ -226,7 +226,18 @@ export function Thread(props: ThreadProps) {
             <ChatContainerScrollAnchor />
           </ChatContainerContent>
           <Show when={showScrollButton()}>
-            <div class="absolute bottom-4 left-1/2 flex w-full max-w-3xl -translate-x-1/2 justify-center px-5">
+            {/* The `pointer-events-none` on this wrapper and the
+                `pointer-events-auto` on the button are ONE fix, not two style
+                choices, and the wrapper is the half that gets deleted as
+                redundant. This box is `w-full max-w-3xl` across the bottom
+                band of the message list, so it is a 768px-wide strip painted
+                OVER the messages: with the pointer live on it, a wheel over
+                the strip scrolled nothing, a drag starting on it selected
+                nothing, and clicks landed on a positioning box. It exists only
+                to place the control, so it is a hole for the pointer and the
+                control is the one thing that takes it back.
+                `scripts/probe-scroll-overlay.mjs` measures all three. */}
+            <div class="pointer-events-none absolute bottom-4 left-1/2 flex w-full max-w-3xl -translate-x-1/2 justify-center px-5">
               {/* The button now owns its elevation (kai-elevation); a `shadow-sm`
                   here would set box-shadow a second time and the winner would
                   be stylesheet order, not this call site. */}

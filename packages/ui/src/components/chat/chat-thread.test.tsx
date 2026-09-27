@@ -1359,6 +1359,28 @@ describe('ChatThread density axis', () => {
   });
 });
 
+describe('ChatThread scroll overlay', () => {
+  // The other half of `thread.test.tsx`'s "Thread scroll overlay": this component ships its
+  // own copy of the same wrapper over the same message band, so the pair has to hold here
+  // too. jsdom cannot hit-test the strip — `scripts/probe-scroll-overlay.mjs` does.
+  it('makes the band a hole for the pointer, and gives the pointer back to the button', () => {
+    const { container } = render(() => (
+      <ChatThread messages={[{ id: 'u1', role: 'user', parts: [{ type: 'text', text: 'hi' }] }]} />
+    ));
+    const log = container.querySelector('[role="log"]') as HTMLElement;
+    Object.defineProperty(log, 'scrollHeight', { value: 2000, configurable: true });
+    Object.defineProperty(log, 'clientHeight', { value: 400, configurable: true });
+    log.scrollTop = 0;
+    log.dispatchEvent(new Event('scroll'));
+
+    const button = container.querySelector('button[aria-label="Scroll to bottom"]') as HTMLElement;
+    const wrapper = button.parentElement as HTMLElement;
+    expect(button.className).toContain('pointer-events-auto');
+    expect(wrapper.className).toContain('pointer-events-none');
+    expect(wrapper.className).toContain('absolute');
+  });
+});
+
 describe('controller.startNewConversation (B-10 seam)', () => {
   it('clears the active conversation and delivers [] through onConversationLoad', async () => {
     localStorage.clear();

@@ -240,6 +240,37 @@ describe('Thread reasoning parts', () => {
   });
 });
 
+describe('Thread scroll overlay', () => {
+  // The wrapper that places the scroll button spans the whole message band, so it must be
+  // pointer-inert and the button must ask for the pointer back. jsdom cannot hit-test, so
+  // this CLASS PAIR is the entire contract it can see; the wheel, drag-selection and click
+  // behaviour is measured in `scripts/probe-scroll-overlay.mjs`. Pinned here because the
+  // wrapper's half reads as redundant styling and is the half a later reader deletes —
+  // which is precisely how the strip came to swallow the pointer over the messages.
+  const scrolledUp = (container: HTMLElement) => {
+    const log = container.querySelector('[role="log"]') as HTMLElement;
+    // The scrolled-up state the primitive reads off real layout, faked the way
+    // `scroll-button-label.test.tsx` fakes it.
+    Object.defineProperty(log, 'scrollHeight', { value: 2000, configurable: true });
+    Object.defineProperty(log, 'clientHeight', { value: 400, configurable: true });
+    log.scrollTop = 0;
+    log.dispatchEvent(new Event('scroll'));
+    return log;
+  };
+
+  it('makes the band a hole for the pointer, and gives the pointer back to the button', () => {
+    const { container } = render(() => <Thread messages={[{ id: 'u1', role: 'user', parts: [{ type: 'text', text: 'hi' }] }]} />);
+    const log = scrolledUp(container);
+    const button = log.querySelector('button[aria-label="Scroll to bottom"]') as HTMLElement;
+    const wrapper = button.parentElement as HTMLElement;
+
+    expect(button.className).toContain('pointer-events-auto');
+    expect(wrapper.className).toContain('pointer-events-none');
+    // The pair only means anything on the box that actually spans the band.
+    expect(wrapper.className).toContain('absolute');
+  });
+});
+
 // The `<kai-thread>` facade's axis, on the component that element renders. The
 // element's own pass-through is pinned in
 // `src/web-components/thread/thread-density.declarative.test.tsx`.

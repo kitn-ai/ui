@@ -36,8 +36,15 @@ function ScrollDemo(props: {
         </ChatContainerContent>
         {/* ScrollButton must live INSIDE ChatContainerRoot (it reads that
             context); it's absolutely positioned relative to the outer .relative
-            box, so it stays pinned and doesn't scroll with the content. */}
-        <div class={props.holderClass ?? 'absolute inset-x-0 bottom-3 flex justify-center'}>
+            box, so it stays pinned and doesn't scroll with the content.
+
+            `pointer-events-none` belongs on this wrapper whenever it spans more
+            than the button (any full-width placement): it is a positioning box
+            over the messages, and without it the strip swallows the wheel,
+            drag-selection and clicks meant for the content under it. The button
+            carries the matching `pointer-events-auto`; see `thread.tsx` and
+            `scripts/probe-scroll-overlay.mjs`. */}
+        <div class={props.holderClass ?? 'pointer-events-none absolute inset-x-0 bottom-3 flex justify-center'}>
           <ScrollButton
             variant={props.variant}
             size={props.size}
@@ -131,8 +138,10 @@ export const Playground: Story = {
   ...src(`<div class="relative">
   <ChatContainerRoot class="h-full overflow-y-auto">
     <ChatContainerContent>{/* messages */}</ChatContainerContent>
-    {/* inside the Root (reads its context); absolutely positioned to stay pinned */}
-    <div class="absolute inset-x-0 bottom-3 flex justify-center">
+    {/* inside the Root (reads its context); absolutely positioned to stay pinned.
+        \`pointer-events-none\` on the wrapper, because it spans the whole band and
+        only places the button: the button takes the pointer back for itself. */}
+    <div class="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center">
       <ScrollButton />
     </div>
   </ChatContainerRoot>
@@ -184,6 +193,12 @@ export const LightAndDark: Story = {
 // The last panel is what thread.tsx and chat-thread.tsx ship: `relative` on the
 // non-scrolling box, then `absolute bottom-4 left-1/2 w-full max-w-3xl -translate-x-1/2` on
 // the wrapper, which centres the button on the message band instead of the full container.
+//
+// The wrappers that HUG the button (`absolute bottom-3 right-3`) need nothing extra. Every
+// wrapper that spans more than the button carries `pointer-events-none` with the button's
+// own `pointer-events-auto` completing the pair: a full-width positioning box left
+// pointer-live is a strip over the messages that swallows the wheel, drag-selection and
+// clicks meant for the content under it (measured in `scripts/probe-scroll-overlay.mjs`).
 /**
  * One button in five different wrappers, each placing it over the scroll area.
  */
@@ -193,21 +208,23 @@ export const Positioning: Story = {
     <div class="flex flex-wrap gap-6">
       <div>
         <div class="mb-2 text-xs font-medium text-muted-foreground">
-          Bottom centre <code>absolute inset-x-0 bottom-3 flex justify-center</code>
+          Bottom centre <code>pointer-events-none absolute inset-x-0 bottom-3 flex justify-center</code>
         </div>
-        <ScrollDemo holderClass="absolute inset-x-0 bottom-3 flex justify-center" />
+        <ScrollDemo holderClass="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center" />
       </div>
       <div>
         <div class="mb-2 text-xs font-medium text-muted-foreground">
-          Bottom right <code>absolute bottom-3 right-3</code>
+          Bottom right <code>absolute bottom-3 right-3</code> (hugs the button, so no
+          `pointer-events-none` needed)
         </div>
         <ScrollDemo holderClass="absolute bottom-3 right-3" />
       </div>
       <div>
         <div class="mb-2 text-xs font-medium text-muted-foreground">
-          Clear of a composer <code>absolute inset-x-0 bottom-14 flex justify-center</code>
+          Clear of a composer{' '}
+          <code>pointer-events-none absolute inset-x-0 bottom-14 flex justify-center</code>
         </div>
-        <ScrollDemo composer holderClass="absolute inset-x-0 bottom-14 flex justify-center" />
+        <ScrollDemo composer holderClass="pointer-events-none absolute inset-x-0 bottom-14 flex justify-center" />
       </div>
       <div>
         <div class="mb-2 text-xs font-medium text-muted-foreground">
@@ -218,9 +235,9 @@ export const Positioning: Story = {
       <div>
         <div class="mb-2 text-xs font-medium text-muted-foreground">
           Centred on a max-width band, the way the kit does it{' '}
-          <code>absolute bottom-3 left-1/2 w-full max-w-3xl -translate-x-1/2 flex justify-center</code>
+          <code>pointer-events-none absolute bottom-3 left-1/2 w-full max-w-3xl -translate-x-1/2 flex justify-center</code>
         </div>
-        <ScrollDemo holderClass="absolute bottom-3 left-1/2 flex w-full max-w-3xl -translate-x-1/2 justify-center" />
+        <ScrollDemo holderClass="pointer-events-none absolute bottom-3 left-1/2 flex w-full max-w-3xl -translate-x-1/2 justify-center" />
       </div>
     </div>
   ),
@@ -234,18 +251,22 @@ export const Positioning: Story = {
     {/* The button must stay INSIDE the Root: that is the context it reads
         scroll state from. Only the wrapper changes below. */}
 
-    {/* bottom centre */}
-    <div class="absolute inset-x-0 bottom-3 flex justify-center">
-      <ScrollButton />
-    </div>
-
+    {/* The wrapper HUGS the button here, so it only needs positioning. */}
     {/* bottom right */}
     <div class="absolute bottom-3 right-3">
       <ScrollButton />
     </div>
 
+    {/* Bottom centre: the wrapper spans the thread, so it is
+        \`pointer-events-none\` and the button's own \`pointer-events-auto\` is what
+        takes the pointer back. Without the pair, the strip over the messages
+        swallows the wheel, drag-selection and clicks aimed under it. */}
+    <div class="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center">
+      <ScrollButton />
+    </div>
+
     {/* lifted clear of a composer docked at the bottom */}
-    <div class="absolute inset-x-0 bottom-14 flex justify-center">
+    <div class="pointer-events-none absolute inset-x-0 bottom-14 flex justify-center">
       <ScrollButton />
     </div>
   </ChatContainerRoot>

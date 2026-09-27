@@ -813,7 +813,11 @@ export function ChatThread(props: ChatThreadProps) {
                 <ChatContainerScrollAnchor />
               </ChatContainerContent>
               <Show when={showScrollButton()}>
-                <div class="absolute bottom-4 left-1/2 flex w-full max-w-3xl -translate-x-1/2 justify-center px-5">
+                {/* Same pair as `thread.tsx`: this wrapper spans the whole
+                    message band and only exists to place the button, so it must
+                    let the pointer through to the messages under it while the
+                    button takes it back. */}
+                <div class="pointer-events-none absolute bottom-4 left-1/2 flex w-full max-w-3xl -translate-x-1/2 justify-center px-5">
                   {/* The button now owns its elevation (kai-elevation); a `shadow-sm`
                       here would set box-shadow a second time and the winner would
                       be stylesheet order, not this call site. */}

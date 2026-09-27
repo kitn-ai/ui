@@ -98,8 +98,11 @@ function ScrollButtonUI(props: {
       aria-label="Scroll to bottom"
       class={cn(
         'rounded-full transition-all duration-150 ease-out',
+        // Kept in step with `components/scroll/scroll-button.tsx`: the wrapper a consumer
+        // places this element in is `pointer-events-none` so it does not swallow the
+        // pointer over the content, and this is what takes the pointer back.
         !props.isAtBottom()
-          ? 'translate-y-0 scale-100 opacity-100'
+          ? 'pointer-events-auto translate-y-0 scale-100 opacity-100'
           : 'pointer-events-none translate-y-4 scale-95 opacity-0',
       )}
       onClick={props.onClick}
@@ -124,6 +127,9 @@ describe('scroll button visibility logic', () => {
     ));
     const btn = getByRole('button', { name: /scroll to bottom/i });
     expect(btn.className).toMatch(/opacity-100/);
+    // Visible also means clickable: the positioning wrapper a consumer puts around this
+    // element is `pointer-events-none`, so the visible state has to claim the pointer.
+    expect(btn.className).toMatch(/pointer-events-auto/);
   });
 
   it('calls onClick when the button is clicked', () => {
