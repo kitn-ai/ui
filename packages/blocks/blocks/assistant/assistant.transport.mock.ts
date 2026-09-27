@@ -539,7 +539,12 @@ export const transport: AssistantTransport = {
     // arc would watch that arc restart, tool call and all, while the labels under
     // it (indexed by turns that landed) have nothing left to offer. The generic
     // script is the honest answer to a turn no script covers.
-    if (script === undefined || conversation.turn >= script.length) return respond();
+    //
+    // The three checks are one `if` and not nested ternaries because a real
+    // backend's compile is the gate that caught the version that was not: the
+    // emitted react tree failed `tsc --strict` with "'conversation' is possibly
+    // 'undefined'" on the two lines below.
+    if (conversation === undefined || script === undefined || conversation.turn >= script.length) return respond();
     return scripted(conversation.key, script, conversation.turn);
   },
   // The wire only ever ANNOUNCES a tool call - running it and answering is the

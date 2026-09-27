@@ -377,8 +377,9 @@ try {
       `\nverify-blocks-react: ${failed ? 'FAIL' : 'PASS'} -- ${ran.length} block(s) run in a real browser: ${ran.join(', ') || '(none)'}\n` +
         `  react is the one framework form this repo tests AT RUNTIME. Every other framework form is COMPILE-ONLY\n` +
         '  (the block compile cells inside verify:scaffold), so a green here says nothing about them.\n' +
-        '  LAYOUT PROBES ARE NOT RUN on the react page: the geometry expectations were measured in the block\'s\n' +
-        "  own document, and this host is a different one, so they stay on the driver's `block` page.\n" +
+        "  A STATE'S `layoutProbes` DO NOT RUN on the react page: a probe that measures a position in the\n" +
+        '  document was measured in the block\'s own one, and this host is a different one. A probe that is\n' +
+        '  SELF-relative (a row against its own container) names nothing in `layoutProbes` and runs here too.\n' +
         `  Host: ${resolved.join(', ')}`,
     );
   }
