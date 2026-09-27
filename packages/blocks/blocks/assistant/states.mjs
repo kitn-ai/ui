@@ -31,6 +31,26 @@
 const settle = (ms) => (page) => page.waitForTimeout(ms);
 const style = (name, target, props) => ({ name, target, props });
 
+// Read a `:attr` binding off whichever channel the RUNNING renderer wrote it to.
+// The two delivery forms disagree here BY CONSTRUCTION: the generated HTML binder
+// writes the value as an ATTRIBUTE, while the React wrapper assigns the DECLARED
+// PROP as a DOM property (frameworks/react/runtime.tsx: every `aria-*`/`data-*`
+// is an attribute, a declared prop is a property). A probe that reads only the
+// attribute therefore measures the renderer rather than the block: the react cell
+// read `null` for a `theme` and a `conversation-id` whose values were sitting in
+// the property the whole time. Property first, attribute second -- the rule
+// `readConversationItemId` already follows
+// (src/components/conversation/conversation-list.tsx) -- and a kai element
+// reflects its attribute into the property, so the HTML leg reads the same value
+// through the first branch rather than falling back.
+const readBoundValue = (locator, prop, attr) => locator.evaluate(
+  (el, [p, a]) => {
+    const value = el[p];
+    return typeof value === 'string' && value ? value : el.getAttribute(a);
+  },
+  [prop, attr],
+);
+
 // The title the inline rename commits in state 10, spelled once so the act and
 // the two probes cannot drift apart: a probe that retyped the string would be
 // asserting its own copy rather than what the store holds.
@@ -521,7 +541,10 @@ export default {
           .evaluateAll((els) => {
             const bad = [];
             for (const el of els) {
-              const keys = el.getAttribute('keys');
+              // Property first for the same reason readBoundValue exists: a literal
+              // `keys` is an attribute in the html form and a declared prop in the
+              // react one, and this string names the chip in the failure message.
+              const keys = el.keys ?? el.getAttribute('keys');
               const caps = [...(el.shadowRoot?.querySelectorAll('[part="key"]') ?? [])];
               const inner = el.shadowRoot?.querySelector('kbd');
               const gap = inner ? getComputedStyle(inner).gap : '';
@@ -721,8 +744,10 @@ export default {
           await settle(3500)(page);
         }
         // The row that must move, by identity, before anything moves: the item's
-        // bound conversation-id, read off the second row.
-        pinnedRowId = await page.locator('kai-conversation-item').nth(1).getAttribute('conversation-id');
+        // bound conversation id, read off the second row (see readBoundValue: the
+        // property is where the react form binds it, the attribute is where the
+        // html form does).
+        pinnedRowId = await readBoundValue(page.locator('kai-conversation-item').nth(1), 'conversationId', 'conversation-id');
         // The row's OWN menu, not the first row's: the menu acts on the row it was
         // opened from, which is the whole reason each row carries one.
         await page.getByRole('button', { name: /^Actions for/ }).nth(1).click();
@@ -735,8 +760,8 @@ export default {
         // probe below could not tell a reorder from a single row sitting still.
         twoRows: (page) => page.locator('kai-conversation-item').count().then((n) => n === 2),
         // The row that was second is now first.
-        pinnedRowFirst: (page) => page.locator('kai-conversation-item').first()
-          .getAttribute('conversation-id').then((id) => id !== null && id === pinnedRowId),
+        pinnedRowFirst: (page) => readBoundValue(page.locator('kai-conversation-item').first(), 'conversationId', 'conversation-id')
+          .then((id) => id !== null && id === pinnedRowId),
         // And the store agrees about which row it was: the pin landed on the row
         // the menu belonged to, not on the active one.
         pinnedInStore: (page, { spec }) => page.evaluate(
@@ -844,13 +869,14 @@ export default {
         await settle(600)(page);
       },
       probes: {
-        // The kit's own attribute, on the shell: this IS the mechanism (the scheme is
+        // The kit's own binding, on the shell: this IS the mechanism (the scheme is
         // per element, so the block binds it on every element it renders), not a
-        // marker the block made up.
-        workspaceTheme: (page) => page.locator('#workspace').getAttribute('theme'),
+        // marker the block made up. Read through readBoundValue because the two
+        // forms write that binding to different channels.
+        workspaceTheme: (page) => readBoundValue(page.locator('#workspace'), 'theme', 'theme'),
         // A SECOND element, bound the same way - the element that would keep
         // following the OS if the choice were not per element.
-        promptTheme: (page) => page.locator('#prompt').getAttribute('theme'),
+        promptTheme: (page) => readBoundValue(page.locator('#prompt'), 'theme', 'theme'),
         // And the scope that attribute produces INSIDE an element's shadow root: the
         // kit paints its dark tokens under an inner wrapper carrying `.dark`.
         railDarkScope: (page) => page.evaluate(() => {
