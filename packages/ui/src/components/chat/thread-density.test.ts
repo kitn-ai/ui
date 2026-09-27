@@ -2,12 +2,14 @@
  * The density axis itself: the class sets and the resolver.
  *
  * The class strings are pinned HERE as literals so the "`default` changes nothing"
- * claim is checked rather than asserted. `default`'s four entries are exactly the
+ * claim is checked rather than asserted. `default`'s entries are exactly the
  * classes the thread carried before the axis existed
  * (`components/chat/chat-thread.tsx`: `h-full px-4 py-3` / `space-y-4` /
  * `shrink-0 px-4 pb-4` / `shrink-0 px-4`), and the two component tests
  * (`chat-thread.test.tsx`, `thread.test.tsx`) pin the RENDERED class attributes, so a
- * change to either the strings or the call sites fails somewhere.
+ * change to either the strings or the call sites fails somewhere. `messageGap` joined
+ * the table when the owner asked for a row's own gap to follow the thread's density;
+ * its `default` is the `gap-3` the row already painted.
  *
  * `compact` is pinned for the same reason, and its numbers are the measured
  * desktop-panel ones — 8px between turns (`space-y-2`), a 12px/8px band
@@ -25,6 +27,7 @@ describe('THREAD_DENSITY_CLASSES', () => {
       gap: 'space-y-4',
       composer: 'px-4 pb-4',
       composerActions: 'px-4',
+      messageGap: 'gap-3',
     });
   });
 
@@ -34,6 +37,7 @@ describe('THREAD_DENSITY_CLASSES', () => {
       gap: 'space-y-2',
       composer: 'px-3 pb-3',
       composerActions: 'px-3',
+      messageGap: 'gap-0',
     });
   });
 

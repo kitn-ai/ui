@@ -262,6 +262,19 @@ describe('Thread density axis', () => {
     expect(content(container).getAttribute('class')).toBe('flex flex-col mx-auto w-full max-w-3xl space-y-2');
   });
 
+  it('hands its RESOLVED density down to every row, so the avatar gap follows the thread', () => {
+    // The row gap is the one message internal this axis owns (see `thread-density.ts`):
+    // a compact thread whose rows still held their avatar 12px off is the defect this
+    // closes. The row is the `part="row"` node, which is the same node the standalone
+    // `<Message>` renders, so `gap-3` here is byte-for-byte the shipped attribute.
+    const convo: ChatMessage[] = [
+      { id: 'a1', role: 'assistant', parts: [{ type: 'text', text: 'hi' }], avatar: { fallback: 'AI' } },
+    ];
+    const rowClasses = (c: HTMLElement) => [...c.querySelectorAll('[part="row"]')].map((r) => r.getAttribute('class'));
+    expect(rowClasses(render(() => <Thread messages={convo} />).container)).toEqual(['flex items-start gap-3']);
+    expect(rowClasses(render(() => <Thread messages={convo} density="compact" />).container)).toEqual(['flex items-start gap-0']);
+  });
+
   it('falls back to `default` and says so for an unknown value arriving as a string', () => {
     const error = vi.spyOn(console, 'error').mockImplementation(() => {});
     const { container } = render(() => <Thread messages={[]} density={'cosy' as unknown as ThreadDensity} />);

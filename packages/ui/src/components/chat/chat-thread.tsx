@@ -277,7 +277,11 @@ const ASSISTANT_ALIGN = 'items-stretch';
 export function ChatThread(props: ChatThreadProps) {
   const outer = useChatConfig();
   const reveal = () => (props.actionsReveal === 'hover' ? 'hover' : 'always');
-  const density = () => THREAD_DENSITY_CLASSES[resolveThreadDensity(props.density, 'ChatThread')];
+  // Resolved ONCE per render and used twice, for the same reason `thread.tsx` does it:
+  // the band/gap classes here, and the value handed down to every row, so the rows agree
+  // with the list they sit in.
+  const resolvedDensity = () => resolveThreadDensity(props.density, 'ChatThread');
+  const density = () => THREAD_DENSITY_CLASSES[resolvedDensity()];
   const messageKeys = createMemo(() => props.messages.map((m) => m.id));
   // Feedback (copy + vote) state lives ABOVE the per-message <For>, so streaming
   // re-renders (a fresh `messages` array ref per chunk) don't wipe it.
@@ -778,13 +782,13 @@ export function ChatThread(props: ChatThreadProps) {
                           <Show
                             when={m().avatar}
                             fallback={
-                              <Message role={m().role} class={`${rowGroup()}${m().role === 'user' ? 'flex-col items-end' : `flex-col ${ASSISTANT_ALIGN}`}`}>
+                              <Message role={m().role} density={resolvedDensity()} class={`${rowGroup()}${m().role === 'user' ? 'flex-col items-end' : `flex-col ${ASSISTANT_ALIGN}`}`}>
                                 {body}
                               </Message>
                             }
                           >
                             {(av) => (
-                              <Message role={m().role} class={rowGroup()}>
+                              <Message role={m().role} density={resolvedDensity()} class={rowGroup()}>
                                 <MessageAvatar src={av().src ?? ''} alt={av().alt ?? ''} fallback={av().fallback} />
                                 <div class={`flex min-w-0 flex-1 flex-col ${m().role === 'user' ? 'items-end' : ASSISTANT_ALIGN}`}>
                                   {body}

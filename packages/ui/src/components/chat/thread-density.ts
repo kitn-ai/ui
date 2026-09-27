@@ -13,9 +13,9 @@
  * turns with a 16px band (`gap-8 p-4`); Joplin's native chat panel puts 8px and 8px
  * (`padding: 8px; gap: 8px`). This thread's own default sits between them at 16px
  * between turns and a 16px/12px band. `compact` takes the native panel's between-turn
- * gap and a 12px/8px band. What reads airy at desktop width is the SUM (a 768px column,
- * plus a generous gap and band on each side), so the column width stays: it is a
- * separate axis, as are the message's own internals (`components/message`).
+ * gap and a 12px/8px band. The airy read at desktop width is the SUM, so the column
+ * width stays a separate axis; the message's internals are another, with one cell here:
+ * `messageGap`, the row's avatar-to-content gap, which follows this density.
  */
 export type ThreadDensity = 'default' | 'compact';
 
@@ -33,6 +33,8 @@ export interface ThreadDensityClasses {
   gap: string;
   /** The composer band: the same side padding as the list, plus its own bottom. */
   composer: string;
+  /** A message row's own gap, between the avatar (or role marker) and the content. */
+  messageGap: string;
   // Not a fourth thing to tune so much as the composer band's side padding reaching the
   // row above it: with a `slot="composer-actions"` row projected, a band at `px-3` above
   // a composer at `px-4` would show as two edges that do not line up.
@@ -41,8 +43,8 @@ export interface ThreadDensityClasses {
 }
 
 export const THREAD_DENSITY_CLASSES: Record<ThreadDensity, ThreadDensityClasses> = {
-  default: { band: 'px-4 py-3', gap: 'space-y-4', composer: 'px-4 pb-4', composerActions: 'px-4' },
-  compact: { band: 'px-3 py-2', gap: 'space-y-2', composer: 'px-3 pb-3', composerActions: 'px-3' },
+  default: { band: 'px-4 py-3', gap: 'space-y-4', composer: 'px-4 pb-4', composerActions: 'px-4', messageGap: 'gap-3' },
+  compact: { band: 'px-3 py-2', gap: 'space-y-2', composer: 'px-3 pb-3', composerActions: 'px-3', messageGap: 'gap-0' },
 };
 
 /** Unknown values already reported, so one is loud once per value per caller: a thread

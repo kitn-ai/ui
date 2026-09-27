@@ -90,7 +90,12 @@ function DefaultEmpty() {
 export function Thread(props: ThreadProps) {
   const outer = useChatConfig();
   const reveal = () => (props.actionsReveal === 'hover' ? 'hover' : 'always');
-  const density = () => THREAD_DENSITY_CLASSES[resolveThreadDensity(props.density, 'Thread')];
+  // Resolved ONCE per render and used twice: for the band/gap classes here, and as the
+  // value handed to every row below, so the rows agree with the list they sit in rather
+  // than resolving the raw prop again (which would also report an unknown value under
+  // 'Message' instead of 'Thread', the caller whose prop it actually is).
+  const resolvedDensity = () => resolveThreadDensity(props.density, 'Thread');
+  const density = () => THREAD_DENSITY_CLASSES[resolvedDensity()];
   // Feedback (copy + vote) state lives ABOVE the per-message <For>, so streaming
   // re-renders (a fresh `messages` array ref per chunk) don't wipe it. The
   // copy/feedback toasts scope to this thread's root so they appear in-thread
@@ -176,13 +181,13 @@ export function Thread(props: ThreadProps) {
                       <Show
                         when={m().avatar}
                         fallback={
-                          <Message role={m().role} class={`${rowGroup()}${m().role === 'user' ? 'flex-col items-end' : 'flex-col items-start'}`}>
+                          <Message role={m().role} density={resolvedDensity()} class={`${rowGroup()}${m().role === 'user' ? 'flex-col items-end' : 'flex-col items-start'}`}>
                             {body}
                           </Message>
                         }
                       >
                         {(av) => (
-                          <Message role={m().role} class={rowGroup()}>
+                          <Message role={m().role} density={resolvedDensity()} class={rowGroup()}>
                             <MessageAvatar src={av().src ?? ''} alt={av().alt ?? ''} fallback={av().fallback} />
                             <div class={`flex min-w-0 flex-1 flex-col ${m().role === 'user' ? 'items-end' : 'items-start'}`}>
                               {body}
@@ -206,7 +211,7 @@ export function Thread(props: ThreadProps) {
                 `role="status"` / aria-live wrapper around it. A real but
                 SEPARATE gap, and it lives in loader.tsx. Filed, not fixed here. */}
             <Show when={props.loading}>
-              <Message class="flex-col items-start">
+              <Message density={resolvedDensity()} class="flex-col items-start">
                 <div class="rounded-lg px-1 py-2">
                   <Loader variant="typing" />
                 </div>

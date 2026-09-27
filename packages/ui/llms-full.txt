@@ -514,19 +514,22 @@ export interface MockSource {
     /** Quoted snippet; rides the wire as the annotation's `content` field. */
     snippet?: string;
 }
-/** A scripted mock turn: optional reasoning, then text, then citations, then
- *  tool calls. A turn with tool calls finishes `finish_reason: 'tool_calls'`,
- *  exactly as a real tool-calling turn does; a turn without them finishes
- *  `'stop'`. */
+/** A scripted mock turn, declared in the order the responder emits it:
+ *  optional reasoning, then the tool calls, then the text, then the citations.
+ *  The tool call comes before the text because the call is what PRODUCES the
+ *  answer (see the emission site in `createMockResponder`). A turn with tool
+ *  calls finishes `finish_reason: 'tool_calls'`, exactly as a real tool-calling
+ *  turn does; a turn without them finishes `'stop'`. */
 export interface MockTurn {
-    /** Reasoning streamed before the text, as `delta.reasoning` frames. */
+    /** Reasoning streamed first, before the tool calls and the text, as
+     *  `delta.reasoning` frames. */
     reasoning?: string;
-    /** Text streamed (token by token) before the tool calls. */
+    /** Tool calls announced this turn, in order, before the text. */
+    toolCalls?: readonly MockToolCall[];
+    /** Text streamed (token by token) after the tool calls. */
     text?: string;
     /** Citations announced after the text, each as one `url_citation` annotation frame. */
     sources?: readonly MockSource[];
-    /** Tool calls announced this turn, in order. */
-    toolCalls?: readonly MockToolCall[];
 }
 /** A canned reply: plain text, or a scripted turn. A string is exactly
  *  `{ text }`, the pre-tool-call API unchanged. */
