@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { fn } from 'storybook/test';
-import { onMount, onCleanup } from 'solid-js';
+import { onMount, onCleanup, createSignal } from 'solid-js';
 import '../register/register'; // side effect: registers <kai-chat>, <kai-conversations>, <kai-prompt-input>
 import { attachKaiActions } from '../../stories/docs/story-actions';
 import type { AttachmentData } from '../../components/attachments/attachments';
@@ -13,11 +13,13 @@ declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
-      'kai-prompt-input': JSX.HTMLAttributes<HTMLElement> & { theme?: string; placeholder?: string; loading?: boolean; disabled?: boolean; voice?: boolean; 'web-search'?: boolean; attach?: boolean; submit?: string; 'suggestion-mode'?: string };
+      'kai-prompt-input': JSX.HTMLAttributes<HTMLElement> & { theme?: string; placeholder?: string; loading?: boolean; disabled?: boolean; voice?: boolean; attach?: boolean; submit?: string; 'suggestion-mode'?: string };
       'kai-action': JSX.HTMLAttributes<HTMLElement> & { icon?: string; tooltip?: string };
     }
   }
 }
+
+const WEB_SEARCH_ITEM = { id: 'web-search', label: 'Web search', icon: 'globe', checked: false, chip: true };
 
 const sampleSuggestions: string[] = [
   'Summarize this thread',
@@ -41,35 +43,39 @@ interface PromptInputEl extends HTMLElement {
   disabled?: boolean;
   loading?: boolean;
   suggestions?: string[];
-  webSearch?: boolean;
   voice?: boolean;
+  tools?: unknown[];
   attachments?: AttachmentData[];
   triggers?: TriggerDef[];
 }
 
 /** Live demo of the actual `<kai-prompt-input>` custom element (Shadow DOM and all). */
-function PromptInputElement(props: { webSearch?: boolean; voice?: boolean; attachments?: AttachmentData[]; args?: Record<string, unknown> }) {
+function PromptInputElement(props: { voice?: boolean; tools?: unknown[]; attachments?: AttachmentData[]; args?: Record<string, unknown>; onSelect?: (detail: { id: string; checked?: boolean }) => void }) {
   let el: PromptInputEl | undefined;
   onMount(() => {
     if (!el) return;
     // Default fixed data
     el.placeholder = 'Ask anything...';
     el.suggestions = sampleSuggestions;
-    if (props.webSearch) el.setAttribute('web-search', '');
     if (props.voice) el.setAttribute('voice', '');
+    if (props.tools) el.tools = props.tools;
+    // `kai-select` is the menu's own event: the item's id plus, for a toggle, its NEW state.
+    if (props.onSelect) {
+      el.addEventListener('kai-select', (e) => props.onSelect?.((e as CustomEvent).detail));
+    }
     if (props.attachments) el.attachments = props.attachments;
     // Scalar args from Controls
     const args = props.args;
     if (args) {
       const scalarNames = [
         'value', 'placeholder', 'disabled', 'loading', 'suggestionMode',
-        'webSearch', 'voice',
+        'voice',
       ];
       for (const name of scalarNames) {
         if (name in args) (el as unknown as Record<string, unknown>)[name] = args[name];
       }
     }
-    // Log every declared CustomEvent (kai-submit, kai-value-change, kai-web-search,
+    // Log every declared CustomEvent (kai-submit, kai-value-change, kai-select,
     // kai-voice, kai-suggestion-click, …) to the Actions panel.
     onCleanup(attachKaiActions(el));
   });
@@ -167,11 +173,6 @@ const meta = {
       description: 'The Voice (Mic) toolbar button was clicked.',
       table: { category: 'Events' },
     },
-    onWebSearch: {
-      action: 'web-search',
-      description: 'The web-search (Globe) toolbar button was clicked.',
-      table: { category: 'Events' },
-    },
     onSelect: {
       action: 'select',
       description: 'A `+` menu item was chosen. `checked` is present only for a toggle, carrying its NEW state.',
@@ -186,7 +187,6 @@ const meta = {
     onToolbarAction: fn(),
     onValueChange: fn(),
     onVoice: fn(),
-    onWebSearch: fn(),
   },
   parameters: {
     layout: 'fullscreen',
@@ -208,7 +208,6 @@ export const Default: Story = {
     disabled: false,
     loading: false,
     suggestionMode: 'submit',
-    webSearch: false,
     voice: false,
   },
   render: (args: Record<string, unknown>) => <PromptInputElement args={args} />,
@@ -222,21 +221,45 @@ export const InSolidJS: Story = {
   parameters: { docs: { source: { code: SOLID_SNIPPET, language: 'tsx' } } },
 };
 
-const TOOLBAR_SNIPPET = `<!-- show the Search (Globe) + Voice (Mic) toolbar buttons -->
-<kai-prompt-input id="input" web-search voice></kai-prompt-input>
+const TOOLBAR_SNIPPET = `<!-- the Mic is built in; a search CAPABILITY is an item you declare -->
+<kai-prompt-input id="input" voice></kai-prompt-input>
 
 <script type="module">
   import '@kitn.ai/ui/web-components';
   const input = document.getElementById('input');
-  input.addEventListener('kai-web-search', () => console.log('web search clicked'));
+
+  // \`tools\` is a JS property, never an attribute. A checked item renders as a checkbox
+  // in the menu, and \`chip: true\` also shows it in the row while it is on.
+  input.tools = [{ id: 'web-search', label: 'Web search', icon: 'globe', checked: false, chip: true }];
+
+  // You own the state. The event carries the item's NEW value, and you hand back a fresh
+  // array with a fresh object for the item that changed.
+  input.addEventListener('kai-select', (e) => {
+    if (e.detail.id !== 'web-search') return;
+    input.tools = input.tools.map((tool) =>
+      tool.id === 'web-search' ? { ...tool, checked: e.detail.checked } : tool);
+  });
   input.addEventListener('kai-voice', () => console.log('voice clicked'));
 </script>`;
 
-/** With the **microphone** (and web-search) toolbar buttons enabled via the `voice`
- *  and `webSearch` flags. Clicking them fires `kai-voice` / `kai-web-search` CustomEvents. */
+/** The **microphone** is built in (`voice`); a capability like web search is an ITEM the
+ *  host declares in `tools`. Choosing it fires `kai-select` carrying the item's new state,
+ *  and the chip beside the `+` is that same field rendered a second way. */
 export const WithVoiceAndSearch: Story = {
   name: 'With Voice & Search',
-  render: () => <PromptInputElement webSearch voice />,
+  render: () => {
+    const [tools, setTools] = createSignal<Record<string, unknown>[]>([WEB_SEARCH_ITEM]);
+    return (
+      <PromptInputElement
+        voice
+        tools={tools()}
+        onSelect={(d) => {
+          if (d.id !== 'web-search' || d.checked === undefined) return;
+          setTools(tools().map((tool) => (tool.id === 'web-search' ? { ...tool, checked: d.checked } : tool)));
+        }}
+      />
+    );
+  },
   parameters: { docs: { source: { code: TOOLBAR_SNIPPET, language: 'html' } } },
 };
 
@@ -465,3 +488,39 @@ export const Prefilled: Story = {
   parameters: { docs: { source: { code: PREFILLED_SNIPPET, language: 'html' } } },
 };
 
+const SQUARED_SNIPPET = `<!-- a squared composer: set the token, leave the component alone -->
+<kai-prompt-input id="input" style="--kai-radius-composer: 0.75rem"></kai-prompt-input>
+
+<script type="module">
+  import '@kitn.ai/ui/web-components';
+  document.getElementById('input').placeholder = 'Ask anything...';
+</script>`;
+
+/**
+ * The same composer with `--kai-radius-composer` set, which is how the pill is replaced by
+ * the rounded square the kit used before it.
+ *
+ *  The default is a DERIVED pill: `--radius-composer` is `calc(var(--spacing) * 6)`, which
+ *  is half the collapsed row, and that half-height relationship is the entire reason the
+ *  short box reads as a pill and the tall one as a card. A fixed value gives up the
+ *  relationship deliberately (at 0.75rem the corners are the same in both layouts), and
+ *  nothing else about the frame changes, because every other dimension is a spacing step.
+ *
+ *  It is set on the HOST rather than in a theme, which also makes the token's shadow-boundary
+ *  crossing visible: custom properties inherit into a shadow root, so a value a consumer sets
+ *  on the element reaches the frame inside it.
+ */
+export const SquaredCorners: Story = {
+  name: 'Squared Corners',
+  render: () => (
+    <div style={{ padding: '16px', width: '100%' }}>
+      <kai-prompt-input
+        ref={(e: HTMLElement) => {
+          (e as PromptInputEl).placeholder = 'Ask anything...';
+        }}
+        style={{ display: 'block', width: '100%', '--kai-radius-composer': '0.75rem' }}
+      />
+    </div>
+  ),
+  parameters: { docs: { source: { code: SQUARED_SNIPPET, language: 'html' } } },
+};

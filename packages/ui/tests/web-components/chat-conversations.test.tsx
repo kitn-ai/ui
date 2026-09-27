@@ -35,7 +35,7 @@ test('conversations=true forwards; store is a property-only prop that reaches th
   expect(el.getAttribute('store')).toBeNull();
 
   // The `conversations` boolean IS attribute-settable, matching every other
-  // flag() prop (attach/webSearch/voice/reasoningOpen).
+  // flag() prop (attach/voice/reasoningOpen).
   const el2 = document.createElement('kai-chat') as HTMLElement & { store: unknown };
   el2.setAttribute('conversations', '');
   el2.store = store;

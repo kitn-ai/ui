@@ -167,7 +167,7 @@ describe('generateProject (widget + mock core)', () => {
     expect(app).not.toContain('<Button');
   });
 
-  it('gates undeclared-capability affordances OFF: no-capability-vocabulary construct explicitly disables webSearch, voice and attach', () => {
+  it('gates undeclared-capability affordances OFF: no-capability-vocabulary construct disables voice and attach, and emits no web-search item', () => {
     // Format rule: an undeclared capability's affordance must be OFF. The v1
     // construct schema carries no capability vocabulary at all yet (lands
     // Task 9), so every construct today is "no capabilities declared" — these
@@ -176,10 +176,15 @@ describe('generateProject (widget + mock core)', () => {
     //
     // `attach` was a real kit gap as of the previous round (ChatThread had no
     // passthrough to DefaultPromptInput's disabling prop) — closed upstream
-    // (ChatThreadProps now forwards `attach`, mirroring webSearch/voice), so
-    // this is a real functional assertion now, not a documented-gap stand-in.
+    // (ChatThreadProps now forwards `attach`, mirroring voice), so this is a
+    // real functional assertion now, not a documented-gap stand-in.
+    //
+    // Web search is asserted as an ABSENCE rather than a `false`: it stopped
+    // being a prop when the composer's capabilities became items a host
+    // declares, so "undeclared" now means no item exists — not an item that is
+    // off. A `false` here would be a prop that no longer typechecks.
     const app = file(generateProject(construct()), 'src/App.tsx');
-    expect(app).toContain('webSearch={false}');
+    expect(app).not.toMatch(/\bwebSearch\b/);
     expect(app).toContain('voice={false}');
     expect(app).toContain('attach={false}');
     // No starter prompts, no model switcher: omitted entirely (undefined has

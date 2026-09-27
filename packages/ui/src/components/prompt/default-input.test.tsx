@@ -606,3 +606,28 @@ describe('DefaultPromptInput capability chips', () => {
     expect(frame.className).toContain('py-2.5');
   });
 });
+
+/**
+ * The send button's SHAPE, pinned here because a story pinned it wrongly for a while: the
+ * kit's own fixtures hand-composed ten `rounded-md` squares reading "Send", so the shape a
+ * reader met was not the shape the component ships. Three facts together are the shape —
+ * a circle, the row's own control height, and no visible text — and each is what makes the
+ * button read as belonging to the frame rather than sitting inside it.
+ */
+describe('DefaultPromptInput send button', () => {
+  it('is a row-sized circle with an accessible name and no visible label', () => {
+    const { container, getByRole } = render(() => <DefaultPromptInput {...baseProps} />);
+    const send = container.querySelector('[data-testid="send"]') as HTMLElement;
+
+    expect(send).toBeTruthy();
+    // The row's control height (icon-sm is h-7), so it matches every other control in it.
+    expect(send.className).toContain('h-7');
+    // A circle, not the rounded square a `size="sm"` button would be.
+    expect(send.className).toContain('rounded-full');
+    // Icon-only: the name comes from `aria-label`, so the button announces and shows the
+    // same thing rather than the name and the label disagreeing.
+    expect(send.textContent?.trim()).toBe('');
+    expect(getByRole('button', { name: 'Send message' })).toBe(send);
+    expect(send.querySelector('svg')).toBeTruthy();
+  });
+});
