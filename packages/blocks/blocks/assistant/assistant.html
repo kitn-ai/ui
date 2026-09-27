@@ -369,6 +369,21 @@
             empty-title="What can I help with?"
             description="Open a guide, or start from a suggestion below."
           >
+            <!-- THE MARK IN THE MEDIA SLOT, and the slot is the whole of it:
+                 the kit draws no glyph of its own, and it draws the tile only
+                 while something sits in this slot - so the box and what fills
+                 it are both the page's, and deleting this one element takes
+                 the tile with it.
+
+                 What goes in is yours: an icon name from the kit's roster
+                 (this one), your own logo as a URL in the same element, an
+                 inline svg, or an img. The kit's named-icon surface rather than
+                 a glyph drawn here, so the page ships no second icon system.
+                 `size="lg"` is the largest glyph kai-icon offers, and the size
+                 has to be said on THIS element: EmptyMedia's own svg rule is
+                 shadow-scoped and cannot reach an element you project. -->
+            <kai-icon slot="media" :theme="themeMode" name="sparkles" size="lg"></kai-icon>
+
             <!-- THE GUIDE CARDS. Four entry points for the developer reading
                  this block, in the order they meet them: get it running, point
                  it at a model, add voice, send a card. A card is a kai-button

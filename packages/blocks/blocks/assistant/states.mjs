@@ -348,8 +348,31 @@ export default {
         // The switcher renders only with more than one model - its presence IS
         // the recipe working.
         modelTrigger: (page) => page.getByText('Mock Standard').count().then((n) => n > 0),
+        // ONE mark, inside its tile, and the tile drawn at all. The empty state
+        // PROJECTS its own glyph into the media slot, and the kit draws the tile
+        // only while that slot holds something - so "there is a mark" and "there
+        // is exactly ONE" are two different claims, and the second is the one a
+        // screenshot cannot separate from a slightly larger glyph: a merge that
+        // leaves two copies renders them side by side in a 40px box. Boxes
+        // rather than a class name, and every failure names the numbers it read.
+        mediaMark: (page) => page.evaluate(() => {
+          const empty = document.querySelector('kai-empty');
+          if (!empty) return 'no kai-empty on the page';
+          const marks = [...empty.querySelectorAll('[slot="media"]')];
+          if (marks.length !== 1) return `${marks.length} elements in the media slot`;
+          const tile = empty.shadowRoot?.querySelector('[data-slot="empty-media"]');
+          if (!tile) return 'media is projected but no tile was drawn';
+          const t = tile.getBoundingClientRect();
+          const m = marks[0].getBoundingClientRect();
+          if (m.width <= 0 || m.height <= 0) return 'the mark has no box';
+          if (m.width >= t.width || m.height >= t.height) {
+            return `mark ${Math.round(m.width)}x${Math.round(m.height)} does not fit in its tile ${Math.round(t.width)}x${Math.round(t.height)}`;
+          }
+          if (m.left < t.left || m.top < t.top || m.right > t.right || m.bottom > t.bottom) return 'the mark overflows its tile';
+          return true;
+        }),
       },
-      expect: { emptyTitle: true, suggestion: true, railNewChat: true, modelTrigger: true },
+      expect: { emptyTitle: true, suggestion: true, railNewChat: true, modelTrigger: true, mediaMark: true },
       styleProbes: [
         style('topbarTitle', (page) => page.getByRole('heading', { name: 'Assistant' }),
           ['fontSize', 'fontWeight', 'color']),

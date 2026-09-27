@@ -12,7 +12,8 @@
             "emptyTitle": true,
             "suggestion": true,
             "railNewChat": true,
-            "modelTrigger": true
+            "modelTrigger": true,
+            "mediaMark": true
           },
           "styles": {
             "topbarTitle": {
@@ -385,7 +386,8 @@
             "emptyTitle": true,
             "suggestion": true,
             "railNewChat": true,
-            "modelTrigger": true
+            "modelTrigger": true,
+            "mediaMark": true
           },
           "styles": {
             "topbarTitle": {
