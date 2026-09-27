@@ -194,22 +194,31 @@ describe('DefaultPromptInput geometry', () => {
   it('collapsed: one row, with the frame owning the insets', () => {
     const { container } = render(() => <DefaultPromptInput {...baseProps} />);
     expect(frame(container).className).toContain('flex-row');
-    // 10px above and below a 28px control is the 48px row. The horizontal value is
-    // DERIVED, not measured: `(rowHeight − controlHeight) / 2` is `(48 − 28) / 2`, so the
-    // control sits centred on the pill's arc. Pinned as one value for BOTH ends, because
-    // a pair of different ones is what pushed the controls inside the curve and made the
-    // row read as inset boxes.
+    // 10px above and below a 28px control is the 48px row.
+    //
+    // The horizontal value is DERIVED and SYMMETRIC — `(48 − 28) / 2`, a control centred
+    // on the pill's own arc — so it is pinned as the single `px-` both ends share. A pair
+    // of different values per end is what a reader reaches for when a control LOOKS too
+    // far in, and it is the wrong lever: a bare glyph's ink sits further in than a filled
+    // button's edge by the glyph's own inset, which is a fact about ink rather than a
+    // reason to move the box. The negative pins that correction so it cannot come back.
     expect(frame(container).className).toContain('py-2.5');
     expect(frame(container).className).toContain('px-2.5');
+    expect(frame(container).className).not.toContain('pl-1');
     expect(frame(container).className).not.toContain('pl-4.5');
     // 8px between the row's items, which is what the reference's ink gaps come out to
     // once the controls' own padding is taken off.
     expect(frame(container).className).toContain('gap-2');
-    // The text carries no inset of its own: the frame's padding is the one edge.
+    // The text carries no inset of its own: the frame's padding is the row's edge.
     expect(editable(container).className).not.toMatch(/\bpl-/);
     expect(editable(container).className).not.toMatch(/\bpt-/);
     // Collapsed the text shares the row, so it takes the room that is left.
     expect(body(container).className).toContain('flex-1');
+    // And the body adds NOTHING horizontally here — the extra 6px belongs to the expanded
+    // layout, where the paragraph is prose in a card. Asserted as a negative because the
+    // presence assertion lives in the expanded case: without this, the same class could
+    // creep into both layouts and each case would still pass.
+    expect(body(container).className).not.toContain('px-1.5');
   });
 
   it('expanded: the text takes the whole line and the controls wrap below it', () => {
@@ -218,12 +227,20 @@ describe('DefaultPromptInput geometry', () => {
     ));
     expect(frame(container).className).toContain('flex-wrap');
     expect(frame(container).className).toContain('pt-3.5');
-    // The SAME horizontal value as the collapsed row. A different one would make the `+`
-    // jump sideways the moment the composer expands, which is worse than any padding it
-    // might buy — so the two are pinned against each other rather than each against a
-    // literal.
+    // The frame's horizontal value is the SAME as the collapsed row's, so the control row
+    // does not jump sideways the moment the composer expands — pinned against the other
+    // layout's value rather than against a literal.
     expect(frame(container).className).toContain('px-2.5');
     expect(frame(container).className).not.toContain('px-4.5');
+    // The PARAGRAPH, however, sits 6px inside the controls' edge: the body carries
+    // `px-1.5` in this layout only, so the prose lands at `10 + 6 = 16px` while the control
+    // row below it — and the attachment band above it — stay on the frame's 10px. This
+    // pair is the one the owner asked for by eye: the text felt too flush when the
+    // composer was expanded, and the attach button in the same state was right where it
+    // was. Pinned on the body AND negatively on the frame, so an edit that moved the
+    // controls in with the text cannot pass.
+    expect(body(container).className).toContain('px-1.5');
+    expect(frame(container).className).not.toContain('px-4');
     // 6px between the text block and the control row, and 10px closing the box — the
     // two numbers a first cut of this layout left out, which is how the rows end up
     // touching. Pinned because an unpinned number is where the next approximation lands.
@@ -378,6 +395,12 @@ describe('DefaultPromptInput geometry', () => {
     // 14px of margin, and 20px in total once the frame's 6px row gap is added — the
     // measured band-to-text gap.
     expect(band.className).toContain('mb-3.5');
+    // The chips sit on the CONTENT column's edge, 6px inside the controls': the band and
+    // the body each carry `px-1.5`, so the chips and the paragraph below them start on one
+    // edge at 16px. Pinned on the band as well as the body because the two are one column,
+    // and an assertion on one side only is the shape that reads as covered while half of
+    // it can be dropped.
+    expect(band.className).toContain('px-1.5');
     expect(band.compareDocumentPosition(editable(container)) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 });

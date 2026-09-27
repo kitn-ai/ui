@@ -121,22 +121,25 @@ function PromptInput(props: PromptInputProps) {
           'focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-0',
           'rounded-composer',
           // 10px above and below a 28px control is the 48px row; expanded the box opens
-          // 14px above the text, separates the control row by 6px, and closes with the
-          // same 10px. See the body wrapper below for how the text wraps — ordering, not
-          // a second markup tree.
+          // 14px above the text, separates the control row by 6px, and closes with 10px.
           //
-          // The horizontal 10px is DERIVED: `(rowHeight − controlHeight) / 2` is
-          // `(48 − 28) / 2`, so the controls sit centred on the pill's own arc. One value
-          // at BOTH ends and in BOTH layouts, so the `+` does not jump sideways when the
-          // composer expands. It replaced 18/14 measured from a reference's glyph INK,
-          // which does not transfer while glyph sizes differ: matching ink pushed our
-          // larger glyphs further in and the row read as inset boxes.
+          // The horizontal 10px is DERIVED: `(rowHeight − controlHeight) / 2`, so a
+          // control sits centred on the pill's own arc. ONE value at BOTH ends and in BOTH
+          // layouts, which is also what keeps the `+` from jumping sideways the moment the
+          // composer expands.
+          //
+          // A bare glyph's INK therefore sits further in than a filled control's edge — by
+          // the glyph's own inset, `(28 − 16) / 2 = 6px` — because a filled button's
+          // visible edge IS its box while a glyph's mark is inside it. That is a fact about
+          // ink, not a reason to move the box. Compensating one end for its glyph is how
+          // the row stops being symmetric, and it treats a symptom: if a control ever sits
+          // too far in, the cause is upstream of this padding, not in it.
+          // It replaced 18/14 measured from a reference's glyph ink, which does not
+          // transfer while glyph sizes differ.
           //
           // `justify-between` on the EXPANDED layout: `justify-content` resolves PER FLEX
-          // LINE, so it is inert for the body and load-bearing for the row below it.
-          // Without it a hand-composed frame lands its actions at the LEADING edge, and
-          // the caller's own `justify-end` cannot help because that wrapper is a
-          // content-width flex item rather than a block.
+          // LINE, so it is inert for the body and load-bearing for the row below it; a
+          // hand-composed frame would otherwise land its actions at the LEADING edge.
           layout() === 'collapsed'
             ? 'flex flex-row items-center gap-2 py-2.5 px-2.5'
             : 'flex flex-wrap justify-between gap-y-1.5 pt-3.5 px-2.5 pb-2.5',
@@ -168,10 +171,12 @@ function PromptInputTextarea(props: PromptInputTextareaProps) {
   const ctx = usePromptInput();
   const config = useChatConfig();
 
-  // The frame (PromptInput root) still owns radius/bg/padding/focus-ring, and now
-  // EVERY inset as well, so this editable carries none of its own: the paragraph and
-  // the buttons beside or under it start on one edge BY CONSTRUCTION rather than by
-  // two values that have to agree.
+  // The frame (PromptInput root) owns radius/bg/padding/focus-ring, and this editable
+  // carries NO inset of its own. WHICH edge that leaves it on depends on the layout:
+  // collapsed it shares the control row, so the frame's padding is the edge the row's
+  // first item starts from; expanded the frame still pads the CONTROL row at 10px while
+  // the body adds 6px of its own, putting the paragraph at 16px — prose in a card, inside
+  // the controls' edge rather than on it. One frame padding in both; no second value.
   //
   // NO min-height here, and that is a fix rather than an omission. It carried
   // `min-h-6` (24px) against this size's ~20px line box, and a line box sits at the
@@ -202,27 +207,28 @@ function PromptInputTextarea(props: PromptInputTextareaProps) {
     <div
       data-composer-body
       class={cn(
-        // Collapsed, the text shares the row with the controls, so it takes the room
-        // that is left and may shrink below its content width. Expanded, `order-first`
-        // lifts it above the clusters and `basis-full` claims the whole line, so the
-        // control row wraps beneath it. `order-first` rather than a plain order: the
-        // clusters carry NO order of their own, which is what keeps the entire layout
-        // decision here instead of split across three class strings that have to
-        // agree. Anything else meant to sit ABOVE the text must carry the same order
-        // and come first in the DOM — the attachment band does exactly that.
+        // Collapsed, the text shares the row with the controls, so it takes the room that
+        // is left. Expanded, `order-first` lifts it above the clusters and `basis-full`
+        // claims the whole line, so the control row wraps beneath it. `order-first` rather
+        // than a plain order: the clusters carry NO order of their own, which keeps the
+        // whole layout decision here instead of split across three class strings that have
+        // to agree. Anything meant to sit ABOVE the text carries the same order and comes
+        // first in the DOM — the attachment band does.
         //
         // `min-h-7` (the same 28px every control in this row is) plus `items-center`,
-        // COLLAPSED ONLY, is what puts the text on the row's centreline. The editable
-        // is one ~20px line box; centring a 20px box inside 28px puts its centre at 14,
-        // and 28px is what the frame's `py-2.5` adds up to around either one — so the
-        // paragraph and the buttons land on one line rather than 2-3px apart. Derived,
-        // not typed: it is the row's control height, and it scales with density the way
-        // the rest of this geometry does. Expanded it would be wrong: the frame's own
-        // top padding governs where the paragraph starts, and an extra 28px box under a
-        // 20px line would push the control row down by 8px.
+        // COLLAPSED ONLY, is what puts the text on the row's centreline: the editable is
+        // one ~20px line box, and centring it inside 28px lands its centre at 14, which is
+        // where the frame's `py-2.5` puts the buttons. Derived, not typed, and it scales
+        // with density. Expanded it would be wrong — an extra 28px box under a 20px line
+        // pushes the control row down by 8px, and the frame's own padding governs there.
+        //
+        // `px-1.5` (6px) is the EXPANDED branch's own horizontal inset, paired with the
+        // attachment band above it: expanded, this paragraph is prose in a card, so it sits
+        // 6px INSIDE the controls' 10px edge — `10 + 6 = 16px`. Collapsed it carries
+        // nothing: there it shares the control row and the frame's padding is the edge.
         ctx.layout() === 'collapsed'
           ? 'flex min-h-7 min-w-0 flex-1 items-center'
-          : 'order-first basis-full',
+          : 'order-first basis-full px-1.5',
       )}
     >
       <Composer
