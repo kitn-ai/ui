@@ -22,11 +22,14 @@ describe('chipItems', () => {
   it('needs something to say AND something to turn off', () => {
     // `id` and `label` are not optional on the type, so this is the untyped-JS or JSON
     // path. A chip without a label reads "undefined, turn off" to a screen reader; one
-    // without an id does nothing when clicked. Neither is a chip worth drawing.
+    // without an id does nothing when clicked. Neither is a chip worth drawing. A label
+    // of WHITESPACE is the same defect wearing a disguise: it is truthy, so `!!item.label`
+    // let it through and the chip drew with no visible text and the name "   , turn off".
     const tools = [
       { checked: true, chip: true },
       { id: '', label: 'Blank id', checked: true, chip: true },
       { id: 'no-label', checked: true, chip: true },
+      { id: 'blank-label', label: '   ', checked: true, chip: true },
       { label: 'No id', checked: true, chip: true },
       { id: 'ok', label: 'Web search', checked: true, chip: true },
     ];
