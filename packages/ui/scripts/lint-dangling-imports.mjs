@@ -34,7 +34,9 @@
  * real (the waived `./block` below). So the masker runs the real scan and the findings stay the
  * signal. It is a scanner rather than a regex because a template literal's `${}` carries CODE
  * that can nest another template literal, and a quote inside that interpolation would otherwise
- * look like the opening of a string in the template's body.
+ * look like the opening of a string in the template's body. The scanner itself now lives in
+ * `scripts/lib/mask-code.mjs`, beside its second consumer (`block-compile-cells.mjs`, which needs
+ * the same answer for a different question: is this a TypeScript type, or a type inside prose).
  *
  * OUT OF SCOPE, stated rather than implied:
  *   - dynamic `import('./x')` and `require('./x')`: tsc reports an unresolved one, and the three
@@ -90,6 +92,7 @@ import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync, wr
 import { dirname, extname, join, relative, resolve, sep } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
+import { maskCode } from './lib/mask-code.mjs';
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const argv = process.argv.slice(2);
@@ -156,117 +159,6 @@ const LINE_WAIVER_RE = /lint:dangling-imports: allowed -- \S/;
 const IMPORT_FROM_RE = /\bimport\s+([^;'"]*?)\bfrom\s*['"]([^'"]+)['"]/g;
 const BARE_IMPORT_RE = /\bimport\s*['"]([^'"]+)['"]/g;
 const EXPORT_FROM_RE = /\bexport\s+([^;'"]*?)\bfrom\s*['"]([^'"]+)['"]/g;
-
-/**
- * Mask everything that is not code: comment bodies and string/template literal bodies. Returns a
- * Uint8Array where 1 = masked. A match whose `import`/`export` keyword starts in a masked region
- * is emitted code or expected text, not a statement.
- *
- * `stack` holds the MODE to return to, innermost last: `${` pushes `'template'` (the enclosing
- * template's body is where the interpolation ends, at its matching `}`), and a backtick starting
- * a template pushes `'code'`. That is what makes a nested template inside an interpolation work,
- * and it makes "the innermost frame is `'template'`" exactly the test for "this `}` closes an
- * interpolation".
- */
-function maskCode(text) {
-  const mask = new Uint8Array(text.length);
-  const n = text.length;
-  const stack = [];
-  let mode = 'code';
-  let brace = 0;
-  let i = 0;
-  const pop = () => {
-    mode = stack.pop() ?? 'code';
-  };
-  while (i < n) {
-    const c = text[i];
-    if (mode === 'template') {
-      if (c === '\\') {
-        mask[i] = 1;
-        if (i + 1 < n) mask[i + 1] = 1;
-        i += 2;
-        continue;
-      }
-      if (c === '`') {
-        mask[i] = 1;
-        pop();
-        i += 1;
-        continue;
-      }
-      if (c === '$' && text[i + 1] === '{') {
-        mask[i] = 1;
-        mask[i + 1] = 1;
-        stack.push('template');
-        mode = 'code';
-        brace = 0;
-        i += 2;
-        continue;
-      }
-      mask[i] = 1;
-      i += 1;
-      continue;
-    }
-    // mode === 'code'
-    if (c === '{') {
-      brace += 1;
-      i += 1;
-      continue;
-    }
-    if (c === '}') {
-      if (brace > 0) {
-        brace -= 1;
-        i += 1;
-        continue;
-      }
-      if (stack[stack.length - 1] === 'template') {
-        mask[i] = 1;
-        pop();
-        i += 1;
-        continue;
-      }
-      i += 1;
-      continue;
-    }
-    if (c === '`') {
-      mask[i] = 1;
-      stack.push('code');
-      mode = 'template';
-      i += 1;
-      continue;
-    }
-    if (c === '/' && text[i + 1] === '/') {
-      const end = text.indexOf('\n', i);
-      const stop = end === -1 ? n : end;
-      for (let k = i; k < stop; k += 1) mask[k] = 1;
-      i = stop;
-      continue;
-    }
-    if (c === '/' && text[i + 1] === '*') {
-      const end = text.indexOf('*/', i + 2);
-      const stop = end === -1 ? n : end + 2;
-      for (let k = i; k < stop; k += 1) mask[k] = 1;
-      i = stop;
-      continue;
-    }
-    if (c === "'" || c === '"') {
-      let k = i + 1;
-      while (k < n) {
-        if (text[k] === '\\') {
-          k += 2;
-          continue;
-        }
-        if (text[k] === c || text[k] === '\n') break;
-        k += 1;
-      }
-      const stop = Math.min(k + 1, n);
-      for (let j = i; j < stop; j += 1) mask[j] = 1;
-      i = stop;
-      continue;
-    }
-    i += 1;
-  }
-  return mask;
-}
 
 /** Every statement-position relative specifier in one file's text, with its offsets. */
 function specifiersIn(text) {

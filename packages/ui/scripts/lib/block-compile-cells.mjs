@@ -34,6 +34,7 @@
 
 import { readFileSync, readdirSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
+import { maskedCode } from './mask-code.mjs';
 
 /**
  * TypeScript that survived the strip.
@@ -42,6 +43,16 @@ import { join, dirname } from 'node:path';
  * esbuild at generation time. A twin that still carries types is a file that
  * throws in the browser on the first line the engine cannot parse, and every
  * check upstream of the strip stays green when it happens.
+ *
+ * IT RUNS OVER `maskedCode(content)`, NEVER THE RAW TEXT, and that is not a
+tidiness: this is a LINE PATTERN over a whole file, so it has no idea whether
+it is looking at code. The mocked assistant's guide prose carries a TypeScript
+snippet INSIDE A QUOTED STRING -- `toolOutput(toolType: string): …` -- and the
+raw text matched the `: string)` half of this pattern, reding the html cell
+while esbuild parsed the very same file as a legal ES module. A detector that
+scans a string body is reporting on prose; masking (scripts/lib/mask-code.mjs)
+leaves every code character in place, so a genuine `const x: string;` at file
+scope still fires and `: string)` inside a quote cannot.
  */
 const TS_LEFTOVER = /^\s*(?:export\s+)?(?:interface|type)\s|:\s*(?:string|number|boolean)\s*[;,)]/m;
 
@@ -140,7 +151,7 @@ function htmlCell({ esbuild, name, files }) {
     } catch (err) {
       errors.push(`${name} [html]: ${file.path} is not a parseable ES module:\n    ${err instanceof Error ? err.message : String(err)}`);
     }
-    if (TS_LEFTOVER.test(file.content)) {
+    if (TS_LEFTOVER.test(maskedCode(file.content))) {
       errors.push(
         `${name} [html]: ${file.path} still carries TypeScript syntax. The .js twin is stripped once by esbuild in gen-blocks.mjs; a twin with types in it throws in the browser at parse time.`,
       );
