@@ -1,15 +1,20 @@
 /**
- * The composer's attach button: its visible HINT is a tooltip and its accessible
- * NAME is still its `aria-label`. Those are two different things, and the failure
- * mode this file exists for is the tooltip becoming the name (a `title` attribute,
- * or a tooltip wrapper that swallows the button's label) — a screen reader then
- * announces the tip instead of the control. The button must also stay keyboard
- * reachable and keep opening the tip on focus, or the hint exists for pointers only.
+ * The composer's `+` trigger is the file input's only entry point now, and it is the
+ * one control whose visible HINT is a tooltip while its accessible NAME is its
+ * `aria-label`. Those are two different things, and the failure mode this file exists
+ * for is the tooltip becoming the name (a `title` attribute, or a tooltip wrapper that
+ * swallows the button's label) — a screen reader then announces the tip instead of the
+ * control. The trigger must also stay keyboard reachable and keep opening the tip on
+ * focus, or the hint exists for pointers only.
+ *
+ * These cases were the PAPERCLIP's until the file item replaced it, and they were
+ * re-pointed rather than deleted: a tooltip becoming the accessible name is a class of
+ * defect rather than one button's, and the kit has shipped it once already.
  */
-import { describe, it, expect, afterEach } from 'vitest';
+import { describe, it, expect, afterEach, vi } from 'vitest';
 import '@testing-library/jest-dom/vitest';
-import { render, cleanup, fireEvent, within } from '@solidjs/testing-library';
-import { DefaultPromptInput } from './default-input';
+import { render, cleanup, fireEvent, within, screen } from '@solidjs/testing-library';
+import { DefaultPromptInput, buildComposerTools } from './default-input';
 import { PromptInput, PromptInputTextarea, PromptInputActions } from './prompt-input';
 
 afterEach(cleanup);
@@ -29,28 +34,28 @@ const baseProps = {
 // container.
 const tooltip = () => within(document.body).queryByRole('tooltip');
 
-describe('DefaultPromptInput attach button', () => {
+describe('DefaultPromptInput tools menu trigger', () => {
   it('carries the tooltip as its hint without the name changing', () => {
     const { getByRole, getByLabelText } = render(() => <DefaultPromptInput {...baseProps} />);
     // The accessible name is the aria-label, unchanged.
-    const button = getByRole('button', { name: 'Attach files' });
-    expect(button).toHaveAttribute('aria-label', 'Attach files');
+    const button = getByRole('button', { name: 'More tools' });
+    expect(button).toHaveAttribute('aria-label', 'More tools');
     // And it is not hidden behind a title attribute, the hand-rolled version the
     // tooltip replaces.
     expect(button).not.toHaveAttribute('title');
-    expect(getByLabelText('Attach files')).toBe(button);
+    expect(getByLabelText('More tools')).toBe(button);
 
     // Nothing is announced twice: the tip is not in the tree until it is opened.
     expect(tooltip()).not.toBeInTheDocument();
     fireEvent.focusIn(button);
-    expect(tooltip()).toHaveTextContent('Attach files');
+    expect(tooltip()).toHaveTextContent('More tools');
     // The name is STILL the label with the tip open (the tip is a description).
-    expect(getByRole('button', { name: 'Attach files' })).toBe(button);
+    expect(getByRole('button', { name: 'More tools' })).toBe(button);
   });
 
   it('stays keyboard reachable and opens the tip on focus, not on hover only', () => {
     const { getByRole } = render(() => <DefaultPromptInput {...baseProps} />);
-    const button = getByRole('button', { name: 'Attach files' }) as HTMLButtonElement;
+    const button = getByRole('button', { name: 'More tools' }) as HTMLButtonElement;
     expect(button.tagName).toBe('BUTTON');
     expect(button).not.toHaveAttribute('tabindex', '-1');
     expect(button).not.toBeDisabled();
@@ -58,12 +63,81 @@ describe('DefaultPromptInput attach button', () => {
 
     button.focus();
     expect(document.activeElement).toBe(button);
-    expect(tooltip()).toHaveTextContent('Attach files');
+    expect(tooltip()).toHaveTextContent('More tools');
   });
 
-  it('is still absent when the composer cannot attach at all, wrapper and all', () => {
+  it('is absent when the composer can neither attach nor offer anything', () => {
+    // The tree is DERIVED, so the file item goes with `attach` and an empty tree renders
+    // NO trigger: a control that opens nothing is worse than no control.
     const { queryByRole } = render(() => <DefaultPromptInput {...baseProps} attach={false} />);
-    expect(queryByRole('button', { name: 'Attach files' })).not.toBeInTheDocument();
+    expect(queryByRole('button', { name: 'More tools' })).not.toBeInTheDocument();
+  });
+
+  it('is present for the host items even when the built-in file item is off', () => {
+    const { getByRole, queryByRole } = render(() => (
+      <DefaultPromptInput
+        {...baseProps}
+        attach={false}
+        tools={[{ id: 'github', label: 'Add from GitHub' }]}
+      />
+    ));
+    fireEvent.click(getByRole('button', { name: 'More tools' }));
+    // `attach` gates the BUILT-IN item, not the menu: the host's tree renders on its own.
+    expect(screen.getByRole('menuitem', { name: 'Add from GitHub' })).toBeInTheDocument();
+    expect(queryByRole('menuitem', { name: 'Add files or photos' })).not.toBeInTheDocument();
+  });
+
+  it('reports a chosen toggle with its NEW state, so the host can store the event alone', async () => {
+    const onToolSelect = vi.fn();
+    const { getByRole } = render(() => (
+      <DefaultPromptInput
+        {...baseProps}
+        tools={[{ id: 'web-search', label: 'Web search', checked: false }]}
+        onToolSelect={onToolSelect}
+      />
+    ));
+    fireEvent.click(getByRole('button', { name: 'More tools' }));
+    fireEvent.click(await screen.findByRole('menuitemcheckbox', { name: 'Web search' }));
+    expect(onToolSelect).toHaveBeenCalledWith({ id: 'web-search', checked: true });
+  });
+
+  it('does not report the built-in file item as a host tool', () => {
+    const onToolSelect = vi.fn();
+    const { getByRole } = render(() => (
+      <DefaultPromptInput {...baseProps} onToolSelect={onToolSelect} />
+    ));
+    fireEvent.click(getByRole('button', { name: 'More tools' }));
+    // The file item opens the picker, which is the composer's own business: reporting it
+    // as a tool would make every host handle an id it never declared.
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Add files or photos' }));
+    expect(onToolSelect).not.toHaveBeenCalled();
+  });
+
+  it('forwards the disabled state to the trigger', () => {
+    const { getByRole } = render(() => <DefaultPromptInput {...baseProps} disabled />);
+    expect(getByRole('button', { name: 'More tools' })).toBeDisabled();
+  });
+});
+
+describe('buildComposerTools', () => {
+  it('puts the built-in file item first and the host tree after it', () => {
+    const items = buildComposerTools({
+      attach: true,
+      tools: [{ id: 'github', label: 'Add from GitHub' }],
+    });
+    expect(items[0]).toMatchObject({ id: 'files', label: 'Add files or photos' });
+    // The separator is DERIVED from there being more than one item, so a host
+    // tree cannot begin with a divider that has nothing above it.
+    expect(items[1]).toMatchObject({ separator: true });
+    expect(items[2]).toMatchObject({ id: 'github' });
+  });
+
+  it('is empty when attachments are off and the host declared nothing', () => {
+    expect(buildComposerTools({ attach: false })).toEqual([]);
+  });
+
+  it('adds no trailing separator after the file item alone', () => {
+    expect(buildComposerTools({ attach: true }).map((i) => i.id)).toEqual(['files']);
   });
 });
 

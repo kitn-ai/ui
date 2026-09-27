@@ -3,9 +3,13 @@ import { PromptInput, PromptInputTextarea } from './prompt-input';
 import type { TriggerDef, ComposerChange } from '../composer/composer';
 import { type ComposerDoc, normalizeValue, serializeToText } from '../../primitives/composer-model';
 import { PromptSuggestion } from './prompt-suggestion';
-import { Button } from '../button/button';
+import { Button, buttonVariants } from '../button/button';
 import { Tooltip } from '../tooltip/tooltip';
-import { Paperclip, Globe, Mic, Square } from 'lucide-solid';
+import { Globe, Mic, Plus, Square } from 'lucide-solid';
+import { Dropdown, DropdownTrigger, DropdownContent } from '../dropdown/dropdown';
+import { DropdownItems } from '../dropdown/dropdown-items';
+import { cn } from '../../utils/cn';
+import type { KaiMenuItem } from '../../web-components/web-component/web-component-data-types';
 import {
   Attachments,
   Attachment,
@@ -40,6 +44,33 @@ export interface RejectedAttachment {
   mediaType: string;
   /** Why the file was refused: excluded by your `accept` filter, or a type no API accepts as message content. */
   reason: 'filtered' | 'unsupported';
+}
+
+/** A tool the host declares for the composer's `+` menu. `chip` is the ONE field
+ *  `<kai-menu>` does not read: it asks the composer to also show this item's state as a
+ *  chip in the control row. It lives here rather than on `KaiMenuItem` so the menu's own
+ *  item type does not carry a field that only one caller reads. */
+export type ComposerToolItem = KaiMenuItem & { chip?: boolean };
+
+/** The id of the built-in file item, so a host can recognise it in its own tree. */
+export const COMPOSER_FILE_ITEM_ID = 'files';
+
+/** The `+` menu's tree: the built-in file item, then the host's items verbatim. Exported
+ *  so the assembly is tested without rendering anything. */
+export function buildComposerTools(options: {
+  attach: boolean;
+  tools?: ComposerToolItem[];
+}): KaiMenuItem[] {
+  const host = options.tools ?? [];
+  if (!options.attach) return host;
+  const fileItem: KaiMenuItem = {
+    id: COMPOSER_FILE_ITEM_ID,
+    label: 'Add files or photos',
+    icon: 'paperclip',
+  };
+  // The separator is DERIVED from the tree rather than declared by the host: a host tree
+  // that starts with one would otherwise render a divider with nothing above it.
+  return host.length > 0 ? [fileItem, { separator: true }, ...host] : [fileItem];
 }
 
 export interface DefaultPromptInputProps {
@@ -89,6 +120,10 @@ export interface DefaultPromptInputProps {
   toolbarActions?: CustomAction[];
   /** Called when a custom toolbar action button is clicked, with the action id. */
   onAction?: (id: string) => void;
+  /** Extra items for the `+` menu, appended after the built-in file item. */
+  tools?: ComposerToolItem[];
+  /** A chosen menu item, carrying its new state when the item is a toggle. */
+  onToolSelect?: (detail: { id: string; checked?: boolean }) => void;
   /** Rich entity triggers (`/` skills, `@` agents) passed to the composer. */
   triggers?: TriggerDef[];
   /** Default icon per entity kind (kind → image src) passed to the composer. */
@@ -214,6 +249,12 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
     return mode === 'always' || (mode === 'auto' && hasContent());
   };
 
+  // The file item and the picker it opens are ONE feature, so the condition that admits
+  // them is stated once. `buildComposerTools` takes the same value the `<input>`'s own
+  // gate uses, which is what keeps a menu item from existing without a picker behind it.
+  const canOfferFiles = () => canAttach() && props.attach !== false;
+  const toolItems = () => buildComposerTools({ attach: canOfferFiles(), tools: props.tools });
+
   return (
     <>
       <Show when={props.suggestions?.length}>
@@ -288,7 +329,7 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
                 ensures an empty slot adds no stray gap; projected nodes lay out as toolbar
                 items. Native slot; projected by the custom element. */}
             <slot name="toolbar-start" style={{ display: 'contents' }} />
-            <Show when={canAttach() && props.attach !== false}>
+            <Show when={canOfferFiles()}>
               <input
                 ref={fileInput}
                 type="file"
@@ -307,23 +348,44 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
                   e.currentTarget.value = ''; // allow re-picking the same file
                 }}
               />
-              {/* The visible hint, and NOT the accessible name: the button keeps its
-                  `aria-label` (that is the name the tooltip must never replace), and the
-                  tooltip's own trigger is the span this component renders around it, so
-                  keyboard focus still reaches the button and opens the tip. */}
-              <Tooltip content="Attach files">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon-sm"
-                  class="rounded-full"
-                  aria-label="Attach files"
-                  disabled={props.disabled}
-                  onClick={() => fileInput?.click()}
-                >
-                  <Paperclip class="size-4" />
-                </Button>
-              </Tooltip>
+            </Show>
+            {/* The `+` menu replaced the paperclip that used to sit here, and the tooltip
+                cases in this file moved onto it. The tip is a DESCRIPTION: the name stays
+                `More tools`, because a tip that becomes the accessible name is a defect the
+                kit has already shipped once.
+
+                The trigger is a plain button carrying the Button's own variant classes
+                rather than `as={<Button>}`, which would put the surface's trigger ref on a
+                component that then has to forward it a second time. Nothing in jsdom can
+                tell us whether that second hop happened, and the surface's position is
+                what depends on it. */}
+            <Show when={toolItems().length > 0}>
+              <Dropdown disabled={props.disabled}>
+                <Tooltip content="More tools">
+                  <DropdownTrigger
+                    class={cn(buttonVariants({ variant: 'outline', size: 'icon-sm' }), 'rounded-full')}
+                    aria-label="More tools"
+                    disabled={props.disabled}
+                  >
+                    <Plus class="size-4" />
+                  </DropdownTrigger>
+                </Tooltip>
+                <DropdownContent>
+                  <DropdownItems
+                    items={toolItems()}
+                    onSelect={(detail) => {
+                      // The built-in file item is the composer's own, so it opens the
+                      // picker here rather than being reported as a tool the host never
+                      // declared and would have to handle.
+                      if (detail.id === COMPOSER_FILE_ITEM_ID) {
+                        fileInput?.click();
+                        return;
+                      }
+                      props.onToolSelect?.(detail);
+                    }}
+                  />
+                </DropdownContent>
+              </Dropdown>
             </Show>
             <Show when={props.webSearch}>
               <Button

@@ -122,22 +122,29 @@ describe('ChatThread emptyContent (JSX empty-state escape hatch)', () => {
 // === true`); attach must default ON when undeclared, so kit consumers who never
 // heard of this prop keep today's behavior (attach visible) and only an explicit
 // `attach={false}` hides it — forwarded as `props.attach` unchanged, not coerced.
+//
+// The observable moved from the paperclip to the `+` trigger when the file item
+// replaced that button, and this guard was re-pointed rather than left alone: its
+// "false hides it" case passed VACUOUSLY against the old selector, because a query for
+// a button that no longer exists finds nothing whether the prop works or not. With no
+// host tools declared, the tree is the file item ALONE, so the trigger's presence is
+// still an exact proxy for `attach`.
 describe('ChatThread attach passthrough', () => {
-  const attachButton = (container: HTMLElement) => container.querySelector('button[aria-label="Attach files"]');
+  const toolsTrigger = (container: HTMLElement) => container.querySelector('button[aria-label="More tools"]');
 
-  it('shows the attach button when attach is undeclared (default)', () => {
+  it('shows the tools trigger when attach is undeclared (default)', () => {
     const { container } = render(() => <ChatThread messages={[]} />);
-    expect(attachButton(container)).toBeTruthy();
+    expect(toolsTrigger(container)).toBeTruthy();
   });
 
-  it('shows the attach button when attach is explicitly true', () => {
+  it('shows the tools trigger when attach is explicitly true', () => {
     const { container } = render(() => <ChatThread messages={[]} attach={true} />);
-    expect(attachButton(container)).toBeTruthy();
+    expect(toolsTrigger(container)).toBeTruthy();
   });
 
-  it('removes the attach button when attach is explicitly false', () => {
+  it('removes the file item, and with it the trigger, when attach is explicitly false', () => {
     const { container } = render(() => <ChatThread messages={[]} attach={false} />);
-    expect(attachButton(container)).toBeNull();
+    expect(toolsTrigger(container)).toBeNull();
   });
 });
 
@@ -1332,15 +1339,23 @@ describe('ChatThread density axis', () => {
     error.mockRestore();
   });
 
-  it('leaves the column width and the message internals alone', () => {
-    // Two things this axis deliberately does NOT own: the column width is its own axis,
-    // and a message's internal padding belongs to `components/message`. One density
-    // value must not reach into another component's box.
-    const { container } = render(() => (
-      <ChatThread messages={[{ id: 'u1', role: 'user', parts: [{ type: 'text', text: 'hi' }] }]} density="compact" />
-    ));
-    expect(content(container).getAttribute('class')).toContain('max-w-3xl');
-    expect(container.querySelector('[data-kai-composer-editable]')).toBeTruthy();
+  it('leaves the column width alone, and moves the ROW gap with the density', () => {
+    // What this axis does NOT own is the column width, which is its own axis. What it
+    // DOES own, beyond the three bands, is one message internal: the row's avatar gap
+    // (`messageGap` in `thread-density.ts`). The row is the `part="row"` node, so the
+    // `default` attribute below is byte-for-byte what the row painted before this axis.
+    const rows = (c: HTMLElement) => [...c.querySelectorAll('[part="row"]')].map((r) => r.getAttribute('class'));
+    const message = { id: 'u1', role: 'user' as const, parts: [{ type: 'text' as const, text: 'hi' }] };
+    const shipped = render(() => <ChatThread messages={[message]} />).container;
+    expect(shipped.querySelector('[role="log"]')!.firstElementChild!.getAttribute('class')).toContain('max-w-3xl');
+    // (The user row's own `flex-col items-end` wins over `items-start` inside `cn`,
+    // which is why the shipped class reads as it does: same string before and after
+    // this change, which is the point.)
+    expect(rows(shipped)).toEqual(['flex gap-3 flex-col items-end']);
+
+    const compact = render(() => <ChatThread messages={[message]} density="compact" />).container;
+    expect(rows(compact)).toEqual(['flex gap-0 flex-col items-end']);
+    expect(compact.querySelector('[data-kai-composer-editable]')).toBeTruthy();
   });
 });
 
