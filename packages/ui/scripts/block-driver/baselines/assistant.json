@@ -27,7 +27,7 @@
           "probes": {
             "reading": true,
             "tool": true,
-            "suggestionsGone": false
+            "crossLinksNotYet": false
           },
           "styles": {
             "assistantReplyText": {
@@ -243,6 +243,34 @@
             "railUnchanged": true
           },
           "styles": {}
+        },
+        {
+          "name": "24-labels-mid-arc",
+          "probes": {
+            "openersDontSurviveTheTurn": true,
+            "oneOwnStep": true,
+            "rendered": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "25-labels-end-of-arc",
+          "probes": {
+            "ownOpenerRetires": true,
+            "offersAnotherOpener": true,
+            "moreThanOne": true,
+            "rendered": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "26-labels-from-a-card",
+          "probes": {
+            "oneOwnStep": true,
+            "ownStepIsNotAnOpener": true,
+            "rendered": true
+          },
+          "styles": {}
         }
       ],
       "consoleErrors": [],
@@ -273,7 +301,7 @@
           "probes": {
             "reading": true,
             "tool": true,
-            "suggestionsGone": false
+            "crossLinksNotYet": false
           },
           "styles": {
             "assistantReplyText": {
@@ -487,6 +515,34 @@
             "answerIsSubstantial": true,
             "cardsGone": true,
             "railUnchanged": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "24-labels-mid-arc",
+          "probes": {
+            "openersDontSurviveTheTurn": true,
+            "oneOwnStep": true,
+            "rendered": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "25-labels-end-of-arc",
+          "probes": {
+            "ownOpenerRetires": true,
+            "offersAnotherOpener": true,
+            "moreThanOne": true,
+            "rendered": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "26-labels-from-a-card",
+          "probes": {
+            "oneOwnStep": true,
+            "ownStepIsNotAnOpener": true,
+            "rendered": true
           },
           "styles": {}
         }

@@ -182,6 +182,124 @@ function projectGuides(): GuideCard[] {
   return GUIDES.map((g) => ({ id: g.id, title: g.title, summary: g.summary }));
 }
 
+/** The labels under the composer after each assistant turn, per conversation,
+ *  verbatim from the reviewed storyboard.
+ *
+ *  KEYED BY THE MESSAGE THAT OPENED THE CONVERSATION and indexed by how many
+ *  assistant turns have landed since — so one entry per TURN, not one per
+ *  conversation, which makes a turn nobody wrote a line for a visible hole in
+ *  this table rather than a silence on screen. A thread the reader typed
+ *  themselves matches no key and gets no labels, which is right: there is no
+ *  script for it to follow.
+ *
+ *  The last entry of each conversation is the cross-links — the other openers —
+ *  and they are last deliberately: offering a different topic mid-thread breaks
+ *  the thread the reader is in, and offering one when a topic has finished is
+ *  the natural moment. `Send a card` ends on `Get it running` rather than
+ *  dead-ending, so the four guides are walkable as a loop.
+ *
+ *  A card's own answers are labels here too (`Use Postgres`), which is how a
+ *  scripted conversation handles the fact that it cannot branch: the card asks,
+ *  the answer is offered, and the next turn plays either way. */
+const NEXT_LINE: Record<string, readonly (readonly string[])[]> = {
+  // the guides, opened from a card
+  'How do I get this talking to my own backend?': [
+    ['Show the real transport'],
+    ['Where does it get parsed?'],
+    ['Wire a model', 'Add voice', 'Send a card'],
+  ],
+  'Which provider does this use? I want to point it at OpenRouter.': [
+    ['Show the OpenRouter route'],
+    ['What changes for Anthropic?'],
+    ['What about the model ids?'],
+    ['Add voice', 'Send a card', 'Get it running'],
+  ],
+  'Can users talk to this instead of typing?': [
+    ['Use my own transcriber'],
+    ['What events does it fire?'],
+    ['Send a card', 'Get it running', 'Wire a model'],
+  ],
+  'Can the model send a form instead of another paragraph?': [
+    ['How does the model know?'],
+    ['Show me the tool loop'],
+    ['What about citations?'],
+    ['Get it running', 'Wire a model', 'Add voice'],
+  ],
+  // the suggestions, opened by clicking one
+  'Summarize a document': [
+    ['What changed since Q2?'],
+    ['Post it to #metrics', 'Make a task list', 'Compare two options'],
+  ],
+  'Make a task list': [
+    ['Mark the first one done'],
+    ['Summarize a document', 'Compare two options', 'Draft a short brief'],
+  ],
+  'Compare two options': [
+    ['Use Postgres', 'Use SQLite'],
+    ['Summarize a document', 'Make a task list', 'Draft a short brief'],
+  ],
+  'Draft a short brief': [
+    ['Why do you need those?'],
+    ['Summarize a document', 'Make a task list', 'Compare two options'],
+  ],
+};
+
+/** Case and spacing cannot make two spellings of one label miss each other. */
+const foldOpening = (text: string): string => text.trim().toLowerCase().replace(/\s+/g, ' ');
+
+/** The table the LOOKUP reads, folded once here.
+ *
+ *  The literal keys above are there to be read, and a thread's opening text is
+ *  folded before it is looked up — which is how the first version of this missed
+ *  every conversation: the literals are mixed case and the key was lowercase, so
+ *  `NEXT_LINE[key]` was always undefined. THE CHECK BELOW READS THIS MAP TOO, so
+ *  what it verifies is what the lookup does; checking a different table is how a
+ *  guard passes over a lookup that never matches. */
+const NEXT_LINE_BY_OPENING: Record<string, readonly (readonly string[])[]> = Object.fromEntries(
+  Object.entries(NEXT_LINE).map(([key, line]) => [foldOpening(key), line]),
+);
+
+/** Every key must be something the page can actually send: a card's question, or
+ *  one of the openers. A key nobody can send is a conversation whose follow-ups
+ *  never appear, and nothing else would say so — so it is checked here rather
+ *  than left for a reader to notice. */
+{
+  const sendable = new Set([...GUIDES.map((guide) => foldOpening(guide.question)), ...SUGGESTIONS.map(foldOpening)]);
+  for (const key of Object.keys(NEXT_LINE_BY_OPENING)) {
+    if (!sendable.has(key)) {
+      throw new Error(
+        `assistant: nothing opens a conversation with ${JSON.stringify(key)}, so its follow-ups could never be shown`,
+      );
+    }
+  }
+}
+
+/** Which conversation a thread is: the first thing the reader sent. */
+const openingText = (messages: ChatMessage[]): string | undefined => {
+  const first = messages.find((message) => message.role === 'user');
+  const part = first?.parts.find((candidate) => candidate.type === 'text');
+  return part?.type === 'text' ? foldOpening(part.text) : undefined;
+};
+
+/** The labels a thread offers right now.
+ *
+ *  READ OFF THE MESSAGES rather than stored beside them, so one derivation
+ *  covers every way a thread changes — a card opening a guide, a submit, a
+ *  streamed chunk, a loaded conversation, a new chat. Three answers, and the
+ *  middle one is the case worth naming: a trailing USER turn means the answer is
+ *  still coming, so there is nothing to click yet. */
+const suggestionsFor = (messages: ChatMessage[], streaming: boolean): string[] | undefined => {
+  if (streaming) return undefined;
+  if (messages.length === 0) return [...SUGGESTIONS];
+  if (messages[messages.length - 1]?.role !== 'assistant') return undefined;
+  const key = openingText(messages);
+  const turns = messages.filter((message) => message.role === 'assistant').length;
+  const line = key === undefined ? undefined : NEXT_LINE_BY_OPENING[key]?.[turns - 1];
+  // A fresh array every time: the lists are reference-keyed, and handing back the
+  // table's own row would make a second render of the same turn a no-op.
+  return line === undefined ? undefined : [...line];
+};
+
 /** The placeholder the composer shows at rest, and the one it shows while the
  *  mic is open. The composer's own mic has no recording affordance of its own
  *  (the kit paints no state on it), so the block says it in the one place a
@@ -552,9 +670,12 @@ export interface ConversationRow {
 export interface AssistantState {
   // thread
   messages: ChatMessage[];
-  /** The assistant's labels under the composer. Set while the thread is empty
-   *  and cleared once it has messages; the per-turn follow-ups a conversation
-   *  earns are not wired yet. */
+  /** The assistant's labels under the composer: the four openers while the
+   *  thread is empty, and a conversation's own next line after each of its
+   *  assistant turns. A FIELD rather than a getter because the renderers bind
+   *  it, but read off the messages on every change (`suggestionsFor`) rather
+   *  than tracked beside them, so a turn boundary cannot leave a stale pair
+   *  behind. */
   suggestions: string[] | undefined;
   /** The EMPTY state's cards: a developer's entry points into the guides. They
    *  render only while the thread has no messages, because a card that seeded a
@@ -758,7 +879,7 @@ export function createController(deps: AssistantDeps): AssistantController {
   };
 
   const setMessages = (messages: ChatMessage[]): void =>
-    patch({ messages, suggestions: messages.length === 0 ? SUGGESTIONS : undefined });
+    patch({ messages, suggestions: suggestionsFor(messages, state.loading) });
 
   // The UNFILTERED projection, kept beside State rather than in it: nothing
   // binds it, and a field nothing binds is not part of the view model.
@@ -1151,6 +1272,9 @@ export function createController(deps: AssistantDeps): AssistantController {
       patch({ loading: true });
 
       const stream = createAssistantStream((update) => setMessages(update(state.messages)));
+      // Set once the turn has landed, so the `finally` can tell a finished turn
+      // from an aborted one without reading the error.
+      let landed = false;
       try {
         // The whole thread, including the turn just added: the scripted mock
         // ignores it, and a real backend has to be sent it.
@@ -1191,12 +1315,19 @@ export function createController(deps: AssistantDeps): AssistantController {
         setMessages(
           state.messages.map((m) => (m.id === stream.id ? { ...m, actions: [...ASSISTANT_ACTIONS] } : m)),
         );
+        landed = true;
         // Mints the id on the first turn, saves, marks read while seen.
         await controller.saveTurn(state.messages);
       } catch (err) {
         stream.abort(err instanceof Error ? err.message : String(err));
       } finally {
-        patch({ loading: false });
+        // The labels belong to the turn that just LANDED, so they are recomputed
+        // with the flag that says it has — and only then, which is why this is
+        // here rather than in `setMessages`: that runs on every streamed chunk,
+        // where the trailing assistant message is one the reader has not
+        // finished reading. An aborted turn earns nothing, because a scripted
+        // next step is not an answer to a failure.
+        patch({ loading: false, suggestions: landed ? suggestionsFor(state.messages, false) : undefined });
       }
     },
 

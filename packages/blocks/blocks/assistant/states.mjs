@@ -63,6 +63,33 @@ let guideThread = null;
 const GUIDE_CARDS = ['Get it running', 'Wire a model', 'Add voice', 'Send a card'];
 const GUIDE_SLUGS = ['get-it-running', 'wire-a-model', 'add-voice', 'send-a-card'];
 
+// The labels a conversation offers are read off the ELEMENT the block binds
+// them to (`.suggestions="suggestions"` on the composer), so nothing here
+// retypes what the controller decided. Captured in an ACT rather than derived in
+// a probe: the probes run once the state has settled, and by then the labels
+// shown mid-conversation are gone.
+const suggestionLabels = (page) =>
+  page.evaluate(() => document.getElementById('prompt')?.suggestions ?? []);
+
+/** Every captured label is really on screen, not merely in the array. The
+ *  locator pierces the element's shadow root, which `querySelectorAll` inside
+ *  the page would not. */
+const allRendered = (page, labels) =>
+  Promise.all(
+    labels.map((label) =>
+      page.getByRole('button', { name: label, exact: true }).first().isVisible().catch(() => false),
+    ),
+  ).then((each) => each.every(Boolean));
+
+/** The four openers, an empty thread's labels, and the arc's own label: all
+ *  captured from the app in state 24 so the probes below compare against a set
+ *  the page produced instead of a list retyped here. */
+let emptyOpeners = [];
+let arcLabel = '';
+let labelsMidArc = [];
+let labelsEndOfArc = [];
+let labelsFromCard = [];
+
 // State 18's two facts, one gesture apart: what the scroll button was doing
 // while the thread was scrolled up, and whether the thread is a scroller at all.
 // The button HIDES ITSELF at the bottom of the thread, so "it works" is only
@@ -142,9 +169,13 @@ export default {
       probes: {
         reading: (page) => page.getByText('Reading q3-metrics.pdf').count().then((n) => n > 0),
         tool: (page) => page.getByText(/read[_-]?document/i).count().then((n) => n > 0),
-        suggestionsGone: (page) => page.getByRole('button', { name: 'Draft a short brief' }).isVisible().catch(() => false),
+        crossLinksNotYet: (page) => page.getByRole('button', { name: 'Draft a short brief' }).isVisible().catch(() => false),
       },
-      expect: { reading: true, tool: true, suggestionsGone: false },
+      // WAS `suggestionsGone`, and the name lied as soon as follow-ups landed: it
+      // asks about ONE label, and that label belongs to the arc's END, so it
+      // passed while the arc's own next step was on screen. What it actually
+      // pins is that a cross-link does not appear mid-conversation.
+      expect: { reading: true, tool: true, crossLinksNotYet: false },
       styleProbes: [
         style('assistantReplyText', (page) => page.getByText('Reading q3-metrics.pdf').first(),
           ['color', 'fontSize']),
@@ -816,5 +847,74 @@ export default {
         answerIsSubstantial: true, cardsGone: true, railUnchanged: true,
       },
     })),
+    {
+      name: '24-labels-mid-arc',
+      act: async (page) => {
+        await page.getByRole('button', { name: 'New chat' }).click();
+        await settle(400)(page);
+        emptyOpeners = await suggestionLabels(page);
+        // The arc's label comes OUT of the captured set rather than being typed
+        // here, so a reworded opener moves this state with it instead of
+        // silently clicking nothing.
+        arcLabel = emptyOpeners[0];
+        await page.getByRole('button', { name: arcLabel, exact: true }).click();
+        await settle(3500)(page);
+        labelsMidArc = await suggestionLabels(page);
+      },
+      probes: {
+        // An opener on a thread that has messages is a cross-link offered too
+        // early: the arc the reader is in has not finished.
+        openersDontSurviveTheTurn: () => !labelsMidArc.some((label) => emptyOpeners.includes(label)),
+        oneOwnStep: () => labelsMidArc.length === 1,
+        rendered: (page) => allRendered(page, labelsMidArc),
+      },
+      expect: { openersDontSurviveTheTurn: true, oneOwnStep: true, rendered: true },
+    },
+    {
+      name: '25-labels-end-of-arc',
+      act: async (page) => {
+        // Clicking the arc's own next step is what advances its turn index. The
+        // script for that turn is the arcs task's; what this state pins is that
+        // the labels move with the turn.
+        await page.getByRole('button', { name: labelsMidArc[0], exact: true }).click();
+        await settle(3500)(page);
+        labelsEndOfArc = await suggestionLabels(page);
+      },
+      probes: {
+        // The opener the arc STARTED from retires when it finishes, and at least
+        // one of the others arrives with it - the cross-links ARE openers, which
+        // is why they are compared against the set the empty state produced.
+        ownOpenerRetires: () => !labelsEndOfArc.includes(arcLabel),
+        offersAnotherOpener: () =>
+          labelsEndOfArc.some((label) => emptyOpeners.includes(label) && label !== arcLabel),
+        moreThanOne: () => labelsEndOfArc.length >= 2,
+        rendered: (page) => allRendered(page, labelsEndOfArc),
+      },
+      expect: { ownOpenerRetires: true, offersAnotherOpener: true, moreThanOne: true, rendered: true },
+    },
+    {
+      name: '26-labels-from-a-card',
+      act: async (page) => {
+        // A card is the OTHER way a conversation starts, and the two do not go
+        // through the same act: a card SEEDS a pair of turns, a suggestion is
+        // submitted as a message. Both have to earn their labels.
+        await page.getByRole('button', { name: 'New chat' }).click();
+        await settle(400)(page);
+        // NOT `exact`: a card's accessible name is its title plus its summary,
+        // which is what tells a reader which guide they want. The exact form
+        // matches no card at all.
+        await page.getByRole('button', { name: GUIDE_CARDS[0] }).click();
+        await settle(400)(page);
+        labelsFromCard = await suggestionLabels(page);
+      },
+      probes: {
+        // The guide's OWN first next step: one label, and not one of the
+        // openers, which belong to an empty thread rather than to a guide.
+        oneOwnStep: () => labelsFromCard.length === 1,
+        ownStepIsNotAnOpener: () => !labelsFromCard.some((label) => emptyOpeners.includes(label)),
+        rendered: (page) => allRendered(page, labelsFromCard),
+      },
+      expect: { oneOwnStep: true, ownStepIsNotAnOpener: true, rendered: true },
+    },
   ],
 };
