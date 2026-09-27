@@ -63,6 +63,34 @@ const suggestionLabels = (source: string): string[] => {
   return [...scope.matchAll(/'([^']+)'/g)].map((match) => match[1] as string);
 };
 
+/** The top-level TURN count of every script, keyed the way `scriptKeys` reads the
+ *  keys: a turn is the only thing sitting at four-space indent inside a script's
+ *  array (`toolCalls` opens at six, and its own entries deeper still). */
+const scriptTurnCounts = (source: string, declaration: string): Map<string, number> => {
+  const at = source.indexOf(declaration);
+  expect(at, `${declaration} not found — did the declaration move?`).toBeGreaterThan(-1);
+  const scope = source.slice(at, source.indexOf('\n};', at));
+  const out = new Map<string, number>();
+  for (const [, key, body] of scope.matchAll(/^ {2}'([^']+)': \[\n([\s\S]*?)^ {2}\],$/gm)) {
+    out.set(key as string, [...(body as string).matchAll(/^ {4}\{/gm)].length);
+  }
+  return out;
+};
+
+/** How many rows of next-step labels the controller writes per conversation: the
+ *  single-quoted array literals at four-space indent under each key. Folded, so
+ *  the two tables compare as the lookup compares them. */
+const labelRowCounts = (source: string): Map<string, number> => {
+  const at = source.indexOf('const NEXT_LINE: Record<string, readonly (readonly string[])[]> = {');
+  expect(at, 'the NEXT_LINE table not found — did it move?').toBeGreaterThan(-1);
+  const scope = source.slice(at, source.indexOf('\n};', at));
+  const out = new Map<string, number>();
+  for (const [, key, body] of scope.matchAll(/^ {2}'([^']+)': \[\n([\s\S]*?)^ {2}\],$/gm)) {
+    out.set(fold(key as string), [...(body as string).matchAll(/^ {4}\[/gm)].length);
+  }
+  return out;
+};
+
 describe('the mock scripts the guides a card can open', () => {
   const mock = read('assistant.transport.mock.ts');
   const controller = read('assistant.controller.ts');
@@ -94,5 +122,46 @@ describe('the mock scripts the arcs a suggestion can start', () => {
 
   it('keys every suggestion label to an arc', () => {
     expect([...scripted].sort()).toEqual(labels.map(fold).sort());
+  });
+});
+
+/**
+ * EVERY SCRIPTED TURN HAS A ROW OF LABELS, and the count is what says so — the
+ * claim `assistant.controller.ts` makes about its own table ("one entry per
+ * TURN, not one per conversation, which makes a turn nobody wrote a line for a
+ * visible hole in this table rather than a silence on screen").
+ *
+ * WHAT BREAKS WITHOUT THIS. Add a fifth turn to the OpenRouter guide and every
+ * unit test stays green: the transport answers turn 5 happily, and the
+ * controller's table simply has no entry for it, so the thread offers NOTHING to
+ * click after it — the one failure the table's own comment says it was shaped to
+ * make loud, and nothing was reading it. The reverse is the same hole from the
+ * other side: a row nobody can reach, whose label never appears because no script
+ * ever gets that far.
+ *
+ * A DERIVED COMPARISON, not a typed list: both counts come out of the two files'
+ * own source, and the keys are the ones the two tests above already prove agree,
+ * so this compares row-for-row rather than by index.
+ */
+describe('every scripted turn has a row of labels', () => {
+  const mock = read('assistant.transport.mock.ts');
+  const controller = read('assistant.controller.ts');
+
+  const turns = new Map([
+    ...scriptTurnCounts(mock, 'const GUIDE_SCRIPTS: Record<string, Script> = {'),
+    ...scriptTurnCounts(mock, 'const ARC_SCRIPTS: Record<string, Script> = {'),
+  ]);
+  const rows = labelRowCounts(controller);
+
+  it('parses all eight conversations on both sides, so a parse that matched nothing cannot pass', () => {
+    expect(turns.size, 'scripts found in the mock').toBe(8);
+    expect(rows.size, 'conversations in the controller table').toBe(8);
+  });
+
+  it('writes exactly one row per turn, so a turn nobody wrote a line for is a failure and not a silence', () => {
+    const mismatched = [...turns]
+      .filter(([key, count]) => rows.get(key) !== count)
+      .map(([key, count]) => `${key}: ${count} turn(s), ${rows.get(key) ?? 0} label row(s)`);
+    expect(mismatched).toEqual([]);
   });
 });

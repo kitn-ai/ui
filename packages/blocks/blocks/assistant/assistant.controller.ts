@@ -148,12 +148,18 @@ function projectGuides(): GuideCard[] {
 /** The labels under the composer after each assistant turn, per conversation,
  *  verbatim from the reviewed storyboard.
  *
- *  KEYED BY THE MESSAGE THAT OPENED THE CONVERSATION and indexed by how many
- *  assistant turns have landed since — so one entry per TURN, not one per
- *  conversation, which makes a turn nobody wrote a line for a visible hole in
- *  this table rather than a silence on screen. A thread the reader typed
- *  themselves matches no key and gets no labels, which is right: there is no
- *  script for it to follow.
+ *  KEYED BY THE CONVERSATION'S MOST RECENT OPENING — the last user turn whose
+ *  text is itself one of these keys — and indexed by how many assistant turns
+ *  have landed since that turn, so one entry per TURN, not one per
+ *  conversation. That makes a turn nobody wrote a line for a visible hole in
+ *  this table rather than a silence on screen, and it is what makes a
+ *  CROSS-LINK work: the labels at the end of an arc are the other openers, and
+ *  clicking one sends it as a user turn, which is the new conversation's key.
+ *  Keying on the THREAD's first user turn instead would leave the click reading
+ *  the arc it just finished (`NEXT_LINE_BY_OPENING[key][2]` is past the end of a
+ *  two-turn row) and the thread would offer nothing to click ever again. A
+ *  thread the reader typed themselves matches no key and gets no labels, which
+ *  is right: there is no script for it to follow.
  *
  *  The last entry of each conversation is the cross-links — the other openers —
  *  and they are last deliberately: offering a different topic mid-thread breaks
@@ -241,11 +247,32 @@ const NEXT_LINE_BY_OPENING: Record<string, readonly (readonly string[])[]> = Obj
   }
 }
 
-/** Which conversation a thread is: the first thing the reader sent. */
-const openingText = (messages: ChatMessage[]): string | undefined => {
-  const first = messages.find((message) => message.role === 'user');
-  const part = first?.parts.find((candidate) => candidate.type === 'text');
-  return part?.type === 'text' ? foldOpening(part.text) : undefined;
+/** Which conversation a thread is, and how many of that conversation's answers
+ *  have landed: the LAST user turn whose text is a key of the table above, and
+ *  the assistant turns after it.
+ *
+ *  THE LAST KEY, NOT THE FIRST. Both ways into a conversation write a user turn
+ *  (`openGuide` asks the card's question, `submit` sends one the reader typed),
+ *  and a cross-link is a submit whose text IS another conversation's key — so
+ *  "the last key-bearing user turn" is the conversation the thread is in now,
+ *  whether it was opened at the top or twenty turns in. Everything a
+ *  conversation says in between (`Post it to #metrics`, a card's own answer) is
+ *  not a key, so a mid-arc turn keeps the opening it belongs to. */
+const conversationOf = (messages: ChatMessage[]): { key: string; answers: number } | undefined => {
+  let key: string | undefined;
+  let at = -1;
+  messages.forEach((message, index) => {
+    if (message.role !== 'user') return;
+    const part = message.parts.find((candidate) => candidate.type === 'text');
+    if (part?.type !== 'text') return;
+    const text = foldOpening(part.text);
+    if (NEXT_LINE_BY_OPENING[text] !== undefined) {
+      key = text;
+      at = index;
+    }
+  });
+  if (key === undefined) return undefined;
+  return { key, answers: messages.slice(at + 1).filter((message) => message.role === 'assistant').length };
 };
 
 /** The labels a thread offers right now.
@@ -254,14 +281,21 @@ const openingText = (messages: ChatMessage[]): string | undefined => {
  *  covers every way a thread changes — a card opening a guide, a submit, a
  *  streamed chunk, a loaded conversation, a new chat. Three answers, and the
  *  middle one is the case worth naming: a trailing USER turn means the answer is
- *  still coming, so there is nothing to click yet. */
+ *  still coming, so there is nothing to click yet.
+ *
+ *  AND ONE SILENCE, stated rather than implied: a conversation whose script has
+ *  run out — a reader typing on after a finished arc — has no row at
+ *  `answers - 1` and so offers nothing. The claim is narrower than "every
+ *  assistant turn": every SCRIPTED turn offers its next step, and a thread no
+ *  script covers offers none (see spec 2026-09-26-empty-state-and-guides §5). */
 const suggestionsFor = (messages: ChatMessage[], streaming: boolean): string[] | undefined => {
   if (streaming) return undefined;
   if (messages.length === 0) return [...SUGGESTIONS];
   if (messages[messages.length - 1]?.role !== 'assistant') return undefined;
-  const key = openingText(messages);
-  const turns = messages.filter((message) => message.role === 'assistant').length;
-  const line = key === undefined ? undefined : NEXT_LINE_BY_OPENING[key]?.[turns - 1];
+  const conversation = conversationOf(messages);
+  const line = conversation === undefined
+    ? undefined
+    : NEXT_LINE_BY_OPENING[conversation.key]?.[conversation.answers - 1];
   // A fresh array every time: the lists are reference-keyed, and handing back the
   // table's own row would make a second render of the same turn a no-op.
   return line === undefined ? undefined : [...line];

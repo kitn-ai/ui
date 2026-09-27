@@ -280,6 +280,20 @@ let threadIsScroller = null;
 // a fact about the page rather than about the recorder, so it is measured.
 let threadOverflows = null;
 
+let crossLink = null;
+
+/** The turn a typed message produced AFTER the task-list arc ran out, and the
+ *  labels under it. Captured in state 31's act for the same reason as the rest:
+ *  what the mock answers depends on how far the thread has run, and that is not
+ *  reconstructable afterwards. */
+let pastTheScript = null;
+
+/** The turn the FIRST typed message produced — the arc's last scripted turn,
+ *  captured separately from `pastTheScript` because the two claims are different
+ *  turns of the same arc: one says the script carries on after a cross-link, the
+ *  other says a turn past its end does not replay it. */
+let typedTurn = null;
+
 const firstIndexRow = (page, spec) => page.evaluate(
   (key) => { try { return JSON.parse(localStorage.getItem(key) ?? '[]')[0] ?? null; } catch { return null; } },
   spec.indexKey,
@@ -359,13 +373,19 @@ export default {
       probes: {
         reading: (page) => page.getByText('Reading q3-metrics.pdf').count().then((n) => n > 0),
         tool: (page) => page.getByText(/read[_-]?document/i).count().then((n) => n > 0),
-        crossLinksNotYet: (page) => page.getByRole('button', { name: 'Draft a short brief' }).isVisible().catch(() => false),
+        // WAS `crossLinksNotYet`, and it was VACUOUS — the same defect the rename
+        // above was performed to remove, one state later. It asked whether ONE
+        // arc's end-label was visible on a thread that has NO labels at all, so a
+        // block that offered a cross-link here would have failed it for a
+        // different reason than the one it named, and a block that offered
+        // nothing passed without saying so. What this thread really shows is the
+        // block's answer for a conversation nothing scripts: NO labels, and
+        // therefore no cross-link either. "A link is withheld mid-arc" is
+        // asserted where it can be, over a thread that HAS labels: state 24.
+        noLabelsOnATypedThread: async (page) => (await suggestionLabels(page)).length === 0,
+        crossLinkNotVisible: (page) => page.getByRole('button', { name: 'Draft a short brief' }).isVisible().catch(() => false),
       },
-      // WAS `suggestionsGone`, and the name lied as soon as follow-ups landed: it
-      // asks about ONE label, and that label belongs to an arc's END, so it
-      // passed while the arc's own next step was on screen. What it actually
-      // pins is that a cross-link does not appear mid-conversation.
-      expect: { reading: true, tool: true, crossLinksNotYet: false },
+      expect: { reading: true, tool: true, noLabelsOnATypedThread: true, crossLinkNotVisible: false },
       styleProbes: [
         style('assistantReplyText', (page) => page.getByText('Reading q3-metrics.pdf').first(),
           ['color', 'fontSize']),
@@ -1203,7 +1223,11 @@ export default {
         // click whose turn the label promised.
         await page.getByRole('button', { name: arcs.taskList.labels[0], exact: true }).click();
         await waitForTurns(page, 4);
-        arcs.taskList.turn2 = lastTurn(await threadShape(page));
+        const turn2Shape = await threadShape(page);
+        arcs.taskList.turn2 = lastTurn(turn2Shape);
+        // EVERY card the thread carries, not just the last message's: see
+        // `oneCardPerTurn` below for why the difference is the point.
+        arcs.taskList.allCards = turn2Shape.flatMap((message) => message.cards);
         arcs.taskList.endLabels = await suggestionLabels(page);
       },
       probes: {
@@ -1215,14 +1239,25 @@ export default {
           return cards.length === 1 && cards[0].type === 'tasks' && cards[0].rows === 4
             && cards[0].firstNoted && !cards[0].firstChecked;
         },
-        // ...and for turn 2: the SAME call id, whose first row is now done. The
-        // cards sit in different messages either way, so the id is what says this
-        // turn REVISED that call rather than announcing a second one - the
-        // failure this arc is about.
-        turn2RevisesTheSameCard: () => {
+        // WAS `turn2RevisesTheSameCard`, and the name was the STORYBOARD's claim
+        // rather than the architecture's: each turn's card lives in its own
+        // message (`stream.addCard` upserts into the stream's OWN message), so
+        // turn 2 does not revise turn 1's card in place. What is true, and worth
+        // asserting, is the half the storyboard sentence is reaching for: the two
+        // cards carry ONE envelope id — the provider's own call id — and the
+        // second one's first row is done.
+        turn2SharesTheCallsId: () => {
           const before = arcs.taskList?.turn1?.cards?.[0];
           const after = arcs.taskList?.turn2?.cards?.[0];
           return !!before && !!after && after.id === before.id && after.firstChecked;
+        },
+        // ...AND IT IS A SECOND CARD, one per turn, each in the message that
+        // carried it. The storyboard's "the card writes back to its own tool
+        // call" is not what this renders, and the driver says so rather than
+        // naming a behaviour the block does not have.
+        oneCardPerTurn: () => {
+          const all = arcs.taskList?.allCards ?? [];
+          return all.length === 2 && all.every((card) => card.type === 'tasks' && card.id === all[0].id);
         },
         turn2CarriesOneCard: () => (arcs.taskList?.turn2?.cards ?? []).length === 1,
         // One step offered mid-arc, and the cross-links at the end: the other
@@ -1235,8 +1270,8 @@ export default {
         rendered: (page) => allRendered(page, arcs.taskList?.endLabels ?? []),
       },
       expect: {
-        turn1IsATaskList: true, turn2RevisesTheSameCard: true, turn2CarriesOneCard: true,
-        ownStepOffered: true, crossLinksAtTheEnd: true, rendered: true,
+        turn1IsATaskList: true, turn2SharesTheCallsId: true, oneCardPerTurn: true,
+        turn2CarriesOneCard: true, ownStepOffered: true, crossLinksAtTheEnd: true, rendered: true,
       },
     },
     {
@@ -1361,13 +1396,14 @@ export default {
         fourRows: true, rowsAreTheOfferedLabels: true, rowsFillTheirContainer: true,
         rowsStack: true, rendered: true,
       },
-      // The two that are GEOMETRY, named so the react page skips them: they
-      // compare a row's box against its own container's, which is a measurement
-      // of the document it was taken in, and the react host is a different one.
-      // What survives the translation is what the react cell still asserts: four
-      // boxes exist, they are the labels the element offered, and all four are on
-      // screen.
-      layoutProbes: ['rowsFillTheirContainer', 'rowsStack'],
+      // The two that are GEOMETRY, and they run on BOTH pages: each compares a
+      // row's box against its OWN container's content box, and the four tops
+      // against each other, so there is no document-relative pixel in either. (An
+      // earlier version listed them in `layoutProbes` and skips them on the react
+      // host, justified by "a measurement of the document it was taken in" — which
+      // is not what these two are.) `skipLayout` on that page still skips the style
+      // probes below, which ARE document measurements: a computed font-size or
+      // padding belongs to the sheet the host loaded.
       styleProbes: [
         // The row's own surface, measured where it renders: the row variant is
         // `h-auto w-full ... rounded-xl px-4 py-2.5`, and a pill would differ in
@@ -1375,6 +1411,117 @@ export default {
         style('suggestionRow', (page) => page.getByRole('button', { name: ARC_LABELS[0], exact: true }).first(),
           ['height', 'paddingInline', 'borderRadius', 'textAlign']),
       ],
+    },
+    {
+      name: '31-cross-link-clicks-through',
+      act: async (page) => {
+        // THE INTERACTION THE WHOLE PLAN EXISTS FOR, clicked rather than
+        // compared. Every other state reads the labels the block OFFERED; this
+        // is the only one that CLICKS one of the cross-links at the END of a
+        // conversation — and a cross-link is a submit into the SAME thread, so
+        // the conversation's stored key (its first user turn) never changes.
+        // That is what the labels and the transport both have to key on the LAST
+        // key-bearing user turn for: with a lookup on the first turn, clicking
+        // `Make a task list` here replayed the finished Summarize arc and left the
+        // label table indexed past the end of its row, so the thread offered
+        // nothing to click again for the rest of its life.
+        await page.getByRole('button', { name: 'New chat' }).click();
+        await settle(400)(page);
+        // The Summarize arc, played to its end: two turns, then the cross-links.
+        await page.getByRole('button', { name: ARC_LABELS[0], exact: true }).click();
+        await waitForTurns(page, 2);
+        await page.getByRole('button', { name: (await suggestionLabels(page))[0], exact: true }).click();
+        await waitForTurns(page, 4);
+        const offered = await suggestionLabels(page);
+        // The cross-link comes OUT of the offered set, so a reworded opener moves
+        // this state with it instead of clicking nothing.
+        const clicked = offered.find((label) => label !== ARC_LABELS[0]) ?? '';
+        await page.getByRole('button', { name: clicked, exact: true }).click();
+        await waitForTurns(page, 6);
+        const labels = await suggestionLabels(page);
+        crossLink = {
+          offered,
+          clicked,
+          // THE USER TURN THE CLICK ACTUALLY SENT, read off the thread rather
+          // than assumed: the answer below is only this conversation's answer if
+          // the thread's last user turn is the label that was clicked.
+          userText: await page.evaluate(() => {
+            const messages = document.getElementById('thread')?.messages ?? [];
+            const last = messages.filter((message) => message.role === 'user').pop();
+            return (last?.parts ?? []).filter((p) => p.type === 'text').map((p) => p.text).join('');
+          }),
+          turn: lastTurn(await threadShape(page)),
+          labels,
+          rendered: await allRendered(page, labels),
+        };
+        // AND THEN THE ARC KEEPS GOING, which is the other half of the same fix.
+        // The task-list arc has two turns, so one typed message asks for turn 2
+        // (the revision) and a second asks for a turn the script does not have.
+        // The mock's responder CYCLES (`pool[turn % pool.length]`), so a transport
+        // that did not fall back to the generic script would replay turn 1's card
+        // a third time.
+        const type = async (text, count) => {
+          const box = page.locator('kai-prompt-input').getByRole('textbox').first();
+          await box.click();
+          await box.fill(text);
+          await box.press('Enter');
+          await waitForTurns(page, count);
+        };
+        await type('Any more?', 8);
+        typedTurn = lastTurn(await threadShape(page));
+        await type('And one more?', 10);
+        pastTheScript = { turn: lastTurn(await threadShape(page)), labels: await suggestionLabels(page) };
+      },
+      probes: {
+        // A cross-link was offered at the end of the arc, and it is not the arc's
+        // own opener: the set came from the app.
+        aCrossLinkWasOffered: () => (crossLink?.offered ?? []).some((label) => label !== ARC_LABELS[0]),
+        // ...and clicking it sent the label the reader clicked.
+        theClickSentTheLabel: () => crossLink?.userText === crossLink?.clicked,
+        // AND THE LINKED CONVERSATION ANSWERED IT. The click was
+        // `Make a task list`, so the answer is THAT arc's turn 1: a four-row task
+        // card with its first row in progress. Neither the summarise arc's own
+        // next turn (a confirm card) nor a replay of its turn 1 (a read_document
+        // call and prose) looks like this.
+        answeredByTheLinkedConversation: () => {
+          const cards = crossLink?.turn?.cards ?? [];
+          return cards.length === 1 && cards[0].type === 'tasks' && cards[0].rows === 4
+            && cards[0].firstNoted && !cards[0].firstChecked;
+        },
+        // ...and a card means that turn is not the fallback script's either.
+        notTheGenericScript: () => (crossLink?.turn?.cards ?? []).length === 1,
+        // THE LABELS SURVIVE THE CROSS-LINK, which is the assertion whose absence
+        // let this ship broken: before the fix the thread had NO labels from here
+        // on, so `labelsMovedOn`-style checks over an empty array passed and every
+        // probe that asked "which label is offered" was asking about nothing. One
+        // label, it is the new conversation's own step, and it is on screen.
+        labelsSurviveTheCrossLink: () => crossLink?.labels?.length === 1,
+        labelsAreTheLinkedConversations: () => (crossLink?.labels ?? [])
+          .every((label) => !crossLink.offered.includes(label) && !ARC_LABELS.includes(label)),
+        crossLinkLabelsRendered: () => crossLink?.rendered === true,
+        // The arc itself carries on: one more turn of it, the revision card.
+        typedTurnContinuesTheArc: () => {
+          const cards = typedTurn?.cards ?? [];
+          return cards.length === 1 && cards[0].type === 'tasks' && cards[0].firstChecked === true;
+        },
+        // PAST THE END OF THE SCRIPT THE GENERIC SCRIPT ANSWERS — the second
+        // typed message asks for a turn no script has, and the tell is that the
+        // answer is NOT the arc's turn 1 card again (which is what cycling
+        // produced). The generic script has no `tasks` card at all, so this is
+        // stable wherever the generic responder happens to be in its cycle.
+        pastTheScriptIsNotAReplay: () =>
+          (pastTheScript?.turn?.cards ?? []).every((card) => card.type !== 'tasks'),
+        // ...and the labels under it are the documented silence: the task-list row
+        // has no third entry, so a thread past its script offers nothing.
+        noLabelsPastTheScript: () => (pastTheScript?.labels ?? []).length === 0,
+      },
+      expect: {
+        aCrossLinkWasOffered: true, theClickSentTheLabel: true,
+        answeredByTheLinkedConversation: true, notTheGenericScript: true,
+        labelsSurviveTheCrossLink: true, labelsAreTheLinkedConversations: true,
+        crossLinkLabelsRendered: true, typedTurnContinuesTheArc: true,
+        pastTheScriptIsNotAReplay: true, noLabelsPastTheScript: true,
+      },
     },
   ],
 };

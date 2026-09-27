@@ -443,39 +443,60 @@ const STREAM = { chunkSize: 6 } as const;
 
 const respond = createMockResponder({ replies: MOCK_SCRIPT, ...STREAM });
 
-/** Which conversation a thread is: the first thing the reader sent, folded the
- *  way the controller folds it.
+/** Case and spacing cannot make two spellings of one key miss each other.
  *
- *  A COPY, and it says so. The controller's table of labels keys on exactly this
- *  string, and the transport cannot import that helper: this module is a LEAF
- *  (the paste form inlines it and refuses relative imports), and a real backend
- *  replaces this file wholesale, so it may depend on nothing but the kit. A guard
- *  test beside this block compares the two key sets, which is what keeps two
- *  copies of one rule honest rather than merely equal today. */
+ *  A COPY of the controller's `foldOpening`, and it says so. The controller's
+ *  table of labels keys on exactly this string, and the transport cannot import
+ *  that helper: this module is a LEAF (the paste form inlines it and refuses
+ *  relative imports), and a real backend replaces this file wholesale, so it may
+ *  depend on nothing but the kit. A guard test beside this block compares the two
+ *  key sets, which is what keeps two copies of one rule honest rather than merely
+ *  equal today. */
 const fold = (text: string): string => text.trim().toLowerCase().replace(/\s+/g, ' ');
 
-const openingOf = (messages: readonly ChatMessage[]): string => {
-  const first = messages.find((message) => message.role === 'user');
-  const part = first?.parts.find((candidate) => candidate.type === 'text');
-  return part?.type === 'text' ? fold(part.text) : '';
-};
+/** The script a thread's conversation is. One lookup covers both vocabularies: a
+ *  guide is keyed by the question its card asks, an arc by the one-line label a
+ *  reader clicks. */
+const scriptFor = (key: string): Script | undefined => GUIDE_SCRIPTS[key] ?? ARC_SCRIPTS[key];
 
-/** How many assistant turns a thread already has: the index of the turn the
- *  reader is waiting for. Read off the MESSAGES rather than kept here, so a
- *  reloaded thread, a restored conversation and a card's asked question all
- *  arrive at the same turn the thread is actually on.
+/** Which conversation a thread is, and how far into its script it has run: the
+ *  LAST user turn whose text is itself a script key, and the answers that landed
+ *  after it.
  *
- *  A TURN HAS PARTS, AND THE EMPTY ONE IS NOT A TURN. The host builds its
- *  assistant stream - which appends the message it is about to fill - BEFORE it
- *  calls `reply`, so the thread that arrives here ends with an empty assistant
- *  message for EVERY turn, including the first. Counting it would answer every
- *  question with the NEXT turn's script: the first click would play the second
- *  turn and the labels under it (which the controller indexes by turns that
- *  LANDED) would name a turn nobody had seen. `parts.length` is that distinction,
- *  and it is the only one the message carries: the host's placeholder has none,
- *  and every scripted turn emits at least one. */
-const turnsSoFar = (messages: readonly ChatMessage[]): number =>
-  messages.filter((message) => message.role === 'assistant' && (message.parts?.length ?? 0) > 0).length;
+ *  THE LAST KEY, NOT THE FIRST, and this is the half that makes a CROSS-LINK
+ *  work. A cross-link is a submit into the SAME thread — the conversation's
+ *  stored key never changes, because the store keys a conversation by its first
+ *  turn — so a lookup on that first turn would run the finished arc's next turn
+ *  instead of the conversation the reader picked. Every label a script offers in
+ *  between (`Post it to #metrics`) is not a key, so a mid-arc turn still keeps
+ *  the opening it belongs to. The controller's label table makes the same
+ *  ruling over the same turns, and a guard test compares the two key sets. */
+const scriptedConversation = (messages: readonly ChatMessage[]): { key: string; turn: number } | undefined => {
+  let key: string | undefined;
+  let at = -1;
+  messages.forEach((message, index) => {
+    if (message.role !== 'user') return;
+    const part = message.parts.find((candidate) => candidate.type === 'text');
+    if (part?.type !== 'text') return;
+    const text = fold(part.text);
+    if (scriptFor(text) !== undefined) {
+      key = text;
+      at = index;
+    }
+  });
+  if (key === undefined) return undefined;
+  // A TURN HAS PARTS, AND THE EMPTY ONE IS NOT A TURN: the host builds its
+  // assistant stream — which appends the message it is about to fill — BEFORE it
+  // calls `reply`, so the thread that arrives here ends with an empty assistant
+  // message for EVERY turn, including the first. Counting one would answer every
+  // question with the NEXT turn's script.
+  return {
+    key,
+    turn: messages
+      .slice(at + 1)
+      .filter((message) => message.role === 'assistant' && (message.parts?.length ?? 0) > 0).length,
+  };
+};
 
 /** One responder per conversation, and how far its script has run.
  *
@@ -503,15 +524,23 @@ const scripted = (key: string, script: Script, wantTurn: number): StreamSource =
 };
 
 export const transport: AssistantTransport = {
-  // The thread decides which script answers and which turn of it: a guide card's
-  // question and an arc's label are both the thread's first user turn, so one
-  // lookup covers both, and anything else plays the generic script above. A real
-  // backend reads the messages for a different reason (the conversation IS the
-  // request) - the shape of the call is the same.
+  // The thread decides which script answers and which turn of it, and the two
+  // vocabularies are one lookup: a guide card's question and an arc's label are
+  // both a script key on a user turn, and a cross-link is the later of the two.
+  // Anything that matches no key plays the generic script above. A real backend
+  // reads the messages for a different reason (the conversation IS the request) -
+  // the shape of the call is the same.
   reply(messages: ChatMessage[] = []): StreamSource {
-    const key = openingOf(messages);
-    const script = GUIDE_SCRIPTS[key] ?? ARC_SCRIPTS[key];
-    return script ? scripted(key, script, turnsSoFar(messages)) : respond();
+    const conversation = scriptedConversation(messages);
+    const script = conversation === undefined ? undefined : scriptFor(conversation.key);
+    // PAST THE END MEANS THE GENERIC SCRIPT, NEVER A REPLAY. `createMockResponder`
+    // CYCLES (`pool[turn % pool.length]`), so asking it for a turn its script does
+    // not have answers with turn 1 again: a reader who types on after a finished
+    // arc would watch that arc restart, tool call and all, while the labels under
+    // it (indexed by turns that landed) have nothing left to offer. The generic
+    // script is the honest answer to a turn no script covers.
+    if (script === undefined || conversation.turn >= script.length) return respond();
+    return scripted(conversation.key, script, conversation.turn);
   },
   // The wire only ever ANNOUNCES a tool call - running it and answering is the
   // host's side of the seam. The mock's host is this map: settle the call so its
