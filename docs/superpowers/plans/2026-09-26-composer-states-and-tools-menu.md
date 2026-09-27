@@ -23,6 +23,7 @@
 - After touching props or comments, from `packages/ui`: `node scripts/lint-prop-docs.mjs` and `node scripts/lint-comment-references.mjs`.
 - **A comment in `src/**` must not cite a spec section, a task/round/finding ID, or a dated ruling** — `scripts/lint-comment-references.mjs` enforces it, and its rationale is that a reader meeting "(spec §6)" has no way to resolve it. State the fact instead. One comment token over 20 lines also needs a reason. (Found the hard way: a lane copied this plan's `(spec §3.5)` into a doc comment and the lint failed.)
 - **A new `--kai-*` theme token or `--radius-*` rung has FOUR dependents, and this plan adds one.** Missing any of them is a red suite, and the narrower a run's file count the longer it stays invisible: the theme editor's catalog (`src/themes/theme-tokens.ts`), the Token Reference's table (`src/stories/docs/theme-tokens.tsx`), the generated catalog (`node scripts/gen-catalog.mjs`, part of `build:api`), and the class-merger oracle's config (`src/utils/cn-merge.drift.test.ts`) — a new `rounded-*` utility is in the merger's conflict group and the oracle has to be told. Prove a token change against the FULL unit suite; a sweep of a few hundred files is what hid these.
+- **Before a task's rounds begin, the worktree must be clean of other change sets.** `git add <file>` stages the WHOLE file, so a file another change set has already dirtied commits that work under your message: that is exactly how the message-density change's test hunk ended up inside a commit about the `+` menu (`380e8cc9`), undisclosed and unreviewable by `git log -S`. Commit or stash prior work first; if a round must share a tree, stage with `git add -p` and check `git status` per file before committing.
 - **Commits are approved** (owner, 2026-09-26: "commits are fine to do now … free to move forward and orchestrate the agents"). Every commit step below runs as written. Nothing is pushed; this is the feature branch only.
 
 ---
@@ -949,8 +950,10 @@ git commit -m "feat(composer): a + menu built from the host's item tree"
 **Interfaces:**
 - Consumes: `ComposerToolItem` (Task 4).
 - Produces:
-  - `chipItems(tools?: ComposerToolItem[]): ComposerToolItem[]` — the items that are `chip === true` and `checked === true`, in declaration order, flattening submenus.
+  - `chipItems(tools?: ComposerToolItem[]): ComposerToolItem[]` — the items that are ELEGIBLE for a chip, in declaration order, flattening submenus: `chip === true`, `checked === true`, AND a non-blank `id` and `label`. The last two are an eligibility rule, not a silent drop — a chip needs something to say and something to turn off, while the menu renders such an item exactly as before. (The brief's Step 1 tests were written against the first two conditions only; the shipped predicate is the four.)
   - `<ComposerChips items={ComposerToolItem[]} disabled?={boolean} onRemove={(id: string) => void} />`.
+  - The chip row reads `props.tools` DIRECTLY, never the tree from `buildComposerTools`, which returns `KaiMenuItem[]` and drops `chip`.
+  - **`shrink-0` on the leading and trailing GROUP divs, for the narrow case only.** The `data-cluster` wrappers are `contents` — no box — so the frame's flex items are the inner group divs. What the class is FOR is the case where the groups ALONE exceed the frame: without it they shrink and clip their chips, with it the row overflows and the chips stay legible. It is NOT what makes the composer expand — the collapsed body is `min-w-0 flex-1`, i.e. `flex-basis: 0%`, so the body takes whatever the groups leave and the text wraps on that width regardless. An earlier note in this plan claimed the class was "the entire mechanism the chip overflow boundary rests on"; it is not, and the comment at the site now says which case it serves.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -1030,8 +1033,13 @@ export function ComposerChips(props: {
         <Button
           type="button"
           variant="outline"
+          // `size="sm"` is `h-8` (32px), TALLER than the 28px controls this row is built
+          // from. The frame's height is `py-2.5` plus its tallest child, so a 32px chip
+          // takes the collapsed composer from the measured 48px to 52px — and the radius,
+          // which is half that row, stops describing it. `h-7` is the row's own control
+          // height; it wins over the size's `h-8` because `cn` is last-wins.
           size="sm"
-          class="rounded-pill gap-1"
+          class="rounded-pill h-7 gap-1"
           disabled={props.disabled}
           aria-label={`${item.label}, turn off`}
           onClick={() => item.id && props.onRemove(item.id)}
@@ -1240,6 +1248,8 @@ Every remaining `webSearch` / `web-search` hit is one of three things: the prop 
 - Modify: `packages/ui/mcp/construct/codegen.ts` and `codegen.test.ts` — the emitted templates
 - Modify: `packages/ui/.kai/acme-support/src/App.tsx`
 - Modify: `packages/ui/src/web-components/prompt/prompt-input.stories.tsx`, `packages/ui/src/components/chat/chat-thread.stories.tsx`, `packages/ui/src/components/dropdown/dropdown.stories.tsx`, `packages/ui/src/web-components/menu/menu.stories.tsx`
+- **The stories are their own job, and this list is a starting point rather than the set.** Derive it, do not trust it: `grep -rln "PromptInput" packages/ui/src --include=*.stories.tsx` plus the docs under `apps/docs` and the example starters. Known members the list above omits: `components/empty/empty.stories.tsx`, `components/prompt/prompt-dock.stories.tsx`, `stories/prompt-input-variants.stories.tsx`, `stories/showcase/builder-voice.stories.tsx`, and `web-components/prompt/prompt-input-slots.stories.tsx` — that last one is the only place that projects `input-top`, whose expanded-layout placement is parked and documented at the slot.
+- **Why this is a look-at-each and not a sweep:** stories are not screenshot-gated. Nothing in CI renders them and nothing diffs them, so a story that now shows the wrong shape is a documentation defect no gate can catch — and these stories are what a developer reads instead of the source. Three of them are also the fixtures the `promptinput-*.spec.ts` suites drive, so a story edit and an e2e expectation can disagree without either failing.
 - Modify: `packages/ui/scripts/lint-story-conventions.mjs` (only if it names the prop as a required story axis)
 - Regenerate: `packages/ui/frameworks/react/index.tsx`, `packages/ui/src/web-components/web-component-types.d.ts`, `packages/ui/src/web-components/web-component-meta.json`, `packages/ui/llms-full.txt`, `packages/ui/mcp/catalog/derived.json`
 
@@ -1326,6 +1336,22 @@ What this step actually adds:
    `--kai-radius-composer` on the story's host and render the same composer. Name it for what
    it is, not as an alternative default.
 3. A line in the input's docs page, where a developer looks for "can I change this".
+
+- [ ] **Step 2d: The stories checklist**
+
+Four things the other tasks asked for and did not own, plus the sweep above:
+
+1. **The send button (owner request).** `prompt-input.stories.tsx` hand-composes `<Button variant="default" size="sm">Send</Button>` ten times; that `rounded-md` square is why the owner believed the component's send button was a square, when `DefaultPromptInput` already ships a 28px circle with an up arrow. Replace those ten with the component's own shape, and add a **dedicated send-button story** showing three reachable cases side by side: the default circle with an icon; the custom labelled square a host can build instead; and a circle with a DIFFERENT glyph, because the arrow is where the references landed rather than something pinned.
+   - **That file also still documents the REMOVED `webSearch` prop in seven specific places**, found by Task 6 and confirmed inert at runtime: the prop declaration, the control, an attribute write, the scalar list, the JSX augmentation, the `argTypes` entry, and the docs snippet plus prose. Nothing flags them — the story lint does not check for a prop that no longer exists — so a reader of that story learns about an API that was deleted. Remove all seven as part of this step.
+   - **Two MORE places Task 6's own report missed, found by its review, both in files that commit touched:** `src/components/chat/chat-thread.stories.tsx:164-170` still carries an `onWebSearch: { action: 'web-search', ... }` argTypes entry sitting beside the newly added `onToolSelect`, so that story's Events group documents an event the element no longer fires; and `src/components/chat/chat-thread.test.tsx:119-121` has a comment opening "mirrors the existing webSearch/voice pattern" that quotes a prop which no longer exists (the test body is correct — only the sentence is stale). Sweep with a scoped grep for all three removed names across `src/`, `apps/docs` and the examples rather than trusting this list either: `grep -rn "webSearch\|web-search\|onWebSearch" packages apps examples --exclude-dir=node_modules`.
+   - **And a third group the fix round's own grep surfaced, which NO task's brief names — this is the one to actually sweep, because it is documentation a consumer reads:**
+     - **Eleven showcase story files** carry a `'web-search'?: boolean` JSX augmentation for an attribute that no longer exists.
+     - **Four docs pages** still teach the removed API: `apps/docs/src/content/docs/components/prompt-input.mdx` lists it among the scalars, documents the Globe button and the `kai-web-search` event, and its `<Example config={{ webSearch: true, voice: true }}>` **now renders a composer with no Globe button at all** — a live example that is simply wrong. Plus `guides/use-a-workspace.mdx`, `guides/use-the-chat-app.mdx` and `guides/build-a-composer.mdx`.
+     - A JSX augmentation and a prose mention are inert; the `<Example config={{…}}>` is not, because a reader copies it and gets a composer without the affordance the page promised. Treat that one as the priority.
+   - **The docs suites are runnable, and the trap that has stopped them has a recovery.** `apps/docs`' `pretest` runs `copy-blocks.mjs` **without** `KAI_BLOCKS_KIT`, which rewrites `apps/docs/src/generated/blocks-preview.ts` to `"mode": "cdn"` and makes every block preview load the PUBLISHED kit — that is what once made four conversation-menu items vanish. Run the docs checks (including `verify:docs`, which is where a stale `config={{…}}` is most likely to be caught), then re-run the local copy (`KAI_BLOCKS_KIT=local node apps/docs/scripts/copy-blocks.mjs`) and confirm `"mode": "local"` before handing anything back. Unrunnable is not an option here; restoring the mode is one command.
+2. **The squared composer (owner request).** One story rendering the composer with `--kai-radius-composer` set to a fixed value, so the pill/rounded choice is visible rather than described, named for what it is and not as an alternative default.
+3. **The chips' overflow boundary.** Both clusters are `shrink-0`, so as chips multiply the text gives first, wraps, and expands the composer — the system self-corrects and the resolver needs no chip input. The case that does not self-correct is chips alone wider than the row, whose documented answer is pinning `expanded`. Put that where a host would look for it.
+4. **Redundant wrapper padding.** The frame owns the box's padding now, so insets that used to do that job are dead: `empty.stories.tsx:341`'s `px-2 pb-2` is the clear one. Remove them as you meet them, not in a bulk pass.
 
 - [ ] **Step 3: Regenerate the derived artifacts**
 
@@ -1451,6 +1477,12 @@ Follow the reference script's structure exactly. The page mounts a real `<kai-pr
 //    NOT half the row — i.e. the override replaces the derivation rather than losing to it.
 //    The pill/rounded choice is a supported path, so it gets the same measurement the
 //    derived default does.
+// 15. a chip is no taller than the row's controls. This is the invariant that protects the
+//    measured 48px collapsed row, and until this check existed NOTHING measured it — no unit
+//    test asserted the chip's height and no probe check mentioned a chip, so a Button restyle
+//    or a size tidy-up would take the row to 52px with every unit test green (the radius,
+//    which is half that row, would silently stop describing it).
+//    assert chipRect.height <= triggerRect.height      // the trigger is the row's own h-7
 ```
 
 Print each check with its measured numbers, so a failure shows the pixels rather than a boolean.
@@ -1490,25 +1522,71 @@ git commit -m "test(composer): a real-chromium probe for the one-row/two-row geo
 **Interfaces:**
 - Consumes: the surface from Task 6.
 - Produces: the template's own `tools` tree, with the chip on web search.
+- **Also fixes the block's own stale comment:** `assistant.html:370-372` says the mic "in the composer's own left toolbar is the affordance", which the chrome round makes false — the mic renders in the trailing cluster beside Send now. The comment is the block explaining the kit to its reader, so it has to move with the kit.
 
-- [ ] **Step 1: Declare the template's tools**
+- [ ] **Step 1: Declare the template's tools — and make it a MENU, not a placeholder**
 
-In the block's controller, replace the web-search boolean with the tree (the block owns its own state, so the toggle round-trips through the event):
+The owner's words after seeing it built: *"why do we have so few options in the menu? it doesnt even have the basics. I would like it to have a well fleshed out menu like the ones i already provided you for claude code."*
+
+He is right, and the reason is structural rather than an oversight: **the kit's default menu can only offer what the kit itself can do — the file picker — and every other entry is a capability the HOST declares.** Web search was a kit prop until Task 6 removed it precisely so it could be a declared item. So richness lives here, in the template, and an empty `tools` array is what produced a one-item menu.
+
+**Build it from the block's REAL capabilities, not invented ones.** The controller already carries both: `TRIGGERS` (entity triggers, `/` skills and `@` agents) and `MODELS`. A tree that mirrors Claude Code's shape without importing its features:
 
 ```ts
-const tools = () => [
+const tools = (): ComposerToolItem[] => [
+  // the built-in "Add files or photos" arrives from `attach`; do not declare it
   { id: 'web-search', label: 'Web search', icon: 'globe', checked: store.webSearch(), chip: true },
-  { id: 'skills', label: 'Skills', icon: 'sparkles', items: [/* the block's skills */] },
+  { separator: true },
+  { heading: true, label: 'Insert' },
+  { id: 'skills', label: 'Skills', icon: 'sparkles', description: 'Reusable prompts for this assistant',
+    items: SKILLS.map(s => ({ id: `skill:${s.id}`, label: s.label, description: s.description })) },
+  { id: 'agents', label: 'Agents', icon: 'bot', description: 'Hand the turn to a specialist',
+    items: AGENTS.map(a => ({ id: `agent:${a.id}`, label: a.label })) },
+  { separator: true },
+  { id: 'scoped', label: 'Applies to your next message', note: true },
 ];
 ```
 
-and the handler:
+Adapt the ids and labels to what the block actually has; the SHAPE is the requirement. **Between them these entries exercise every part of the vocabulary Task 1 built** — a built-in item, a derived separator, a section heading, a toggle with a chip, two submenus with descriptions, and a note row — which is the point of a template: a developer copies it and sees what the menu can do rather than reading a prop table.
+
+**A template is a JUMPSTART, not a finished product — the owner's words: "we dont have to have all the features those menus offer, but if it looks like those screens from claude code, it allows the dev to remove/update/add and understand how to do those things with the menu … it doesnt have to be a fully working, never touch the assistant again approach."**
+
+So the goal is that a developer can SEE every affordance and edit any of them, which means the demonstration is worth more than the feature list. Show all of it, and hold one line: **every entry must be honest — either it does something, or it is visibly disabled with a stated reason** (which is Claude's own pattern: a disabled row plus a note saying why). What is forbidden is an entry that looks live and does nothing, because a developer will copy that and ship it.
+
+Concretely, use the block's real capabilities for the affordances it can carry, and where a shape has nothing real behind it, carry it as a disabled entry WITH its reason rather than either dropping the shape or faking the behaviour:
+
+- `control: 'switch'` on an entry the block actually toggles, so the switch glyph appears on something true;
+- a `disabled: true` leaf beside a `note` row saying what it would need — the pair Claude shows for an unavailable plan feature;
+- a `shortcut` on the file item only if that shortcut actually works; a shortcut hint that does nothing is the same lie as a live-looking item.
+
+**If a submenu has nothing real to list, drop the submenu rather than filling it with invented entries** — an invented "Connectors" that opens onto nothing is a lie of the same kind. A shorter honest menu beats a longer dishonest one, and the ownership note below is where the developer learns to add their own.
+
+Then the handler, which is also where the state round-trip is demonstrated:
 
 ```ts
-onToolSelect={(d) => { if (d.id === 'web-search') store.setWebSearch(d.checked ?? false); }}
+onToolSelect={(d) => {
+  if (d.id === 'web-search') store.setWebSearch(d.checked ?? false);
+  else if (d.id.startsWith('skill:')) insertSkill(d.id.slice(6));
+  else if (d.id.startsWith('agent:')) insertAgent(d.id.slice(6));
+}}
 ```
 
-This is the `chip: true` the spec's §8 names as the template's own choice — the kit's default stays quiet.
+The `chip: true` is the template's own choice, and the reason the kit's default stays quiet.
+
+- [ ] **Step 1b: The mock conversation shows every shape the message model has**
+
+The owner: *"we can even have mock conversations in place if we want. that way they can see the shape of data, etc. unless of course they choose to wire it up initially and then the mock data won't display. but that is up to them."*
+
+The mechanism already exists and is not this step's work: the block ships `assistant.transport.mock.ts`, `.route.ts` and `.none.ts`, and `registry-item.json` names `modeTarget: assistant.transport.ts` with `mock` as the mode a fresh install gets. So a developer who wires a gateway replaces the mock by switching the mode, and the mock data stops displaying — exactly the behaviour described, and it is the block seam from the blocks spec rather than something to invent here.
+
+**What this step adds is coverage of the vocabulary.** `MessagePart` has SIX variants — `text`, `reasoning`, `tool`, `card`, `source`, `file` — and the mock conversation demonstrates four of them (text, reasoning, tool, sources). The two missing are the two a developer is least likely to guess at:
+
+- **`card`** — a generative-UI card, which is why `cardTypes`/`cardSchemas` exist on the element at all. Without one in the mock, a developer never sees what a card envelope looks like arriving in a turn.
+- **`file`** — an attachment as a MESSAGE part, which is a different thing from a staged attachment in the composer. Without one, the two uses of the same shape are indistinguishable in the demo.
+
+Add both to the mock conversation, in a turn that reads naturally rather than as a fixture dump. **Derive the list from the union** (`chat-types.ts`, the `MessagePart` type) rather than trusting this sentence: a seventh variant added later should make this step visibly incomplete rather than quietly so.
+
+**The same rule Step 1 carries for the menu applies here**: a template demonstrates the vocabulary and the developer edits it. Nothing here is a placeholder pretending to work — the parts render for real, and the mode switch is what removes the mock.
 
 - [ ] **Step 2: Verify the block renders**
 

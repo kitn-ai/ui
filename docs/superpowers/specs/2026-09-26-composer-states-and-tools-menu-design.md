@@ -121,6 +121,32 @@ boxes holding 12–16px glyphs is 8px of gap plus the boxes' own padding.
 These are the numbers the implementation uses. They are NOT free parameters — a
 hand-typed padding is exactly what produced the previous near-miss.
 
+#### 3.0.1 The insets are derived from the ARC, not from measured ink
+
+The first pass matched the references' measured **ink** positions — 18px leading, 14px
+trailing, taken from Claude Code's `+` glyph. That failed the owner's eye, and themeasurement
+explains why: **ink position does not transfer when the glyph sizes differ.** The references'
+icon ink measures ~12px wide; ours is `size-4`, 16px. Matching the ink put our larger boxes
+further in, so the row read as three filled circles inset inside a pill rather than glyphs
+belonging to it.
+
+The rule that does transfer is geometric and needs no reference: **the leading and trailing
+controls sit centred on the pill's arc.** A 48px row has a 24px arc centre and a 28px control
+has a 14px half-height, so the inset is `24 − 14 = 10px` — one value for both ends, in both
+layouts, so nothing shifts when the composer expands. It should land within a pixel or two of
+ChatGPT's measured leading ink (11px) once the glyph's own inset is counted, which is the
+cross-check that the rule is right.
+
+**Two chrome decisions that come with it:**
+
+- **The composer's icon controls are bare glyphs, not filled boxes.** `Button`'s `outline`
+variant is `bg-muted/50`, a visible fill, and three of those inside a pill is the "too much
+padding" the owner saw. They take `subtle` — muted ink with a hover fill — which is what both
+references use. Only Send stays filled.
+- **The microphone moves to the trailing cluster, immediately before Send** (§6.5). It shipped
+in the leading cluster because no task carried the step; both references put voice beside
+submit, and it is the same `voice` prop's rendering that moves.
+
 ### 3.1 Collapsed — one line, nothing staged
 
 A single row: the `+` tools trigger at the leading edge, the editable beside it,
@@ -198,10 +224,18 @@ The derived rule is the default, not the only option. `expanded?: boolean` pins 
 |---|---|
 | omitted | The derived rule (§3.3) — collapsed whenever the content fits one line |
 | `true` | Always two rows, whatever the content — the shape the composer has today |
-| `false` | Always one row, whatever the content; the editable scrolls inside the box instead of the box growing |
+| `false` | Always one row, whatever the content. The editable still grows with its content up to `maxHeight`, and scrolls past it — the pin chooses the ARRANGEMENT, not the height |
 
 When the layout is pinned the derived rule does not run at all, which is what makes
-it predictable: nothing a user types moves the box.
+it predictable: nothing a user types moves the box's ARRANGEMENT — one row stays one row.
+
+**The height is a separate axis and stays content-driven.** The first version of this
+section said a pinned `false` meant "the editable scrolls inside the box instead of the box
+growing", and the browser probe measured that as false: three lines in a pinned-one-row
+composer gave an 80px frame, not 48. What the pin fixes is which of the two arrangements is
+in force; how tall the box is still follows the content, up to the editable's `maxHeight`,
+and only past that does it scroll. That is true in both layouts, which is why the table
+above states an arrangement and not a height.
 
 This is the owner's ruling (§12.6), taken against the alternative of a
 mount-time seed. The seed was rejected because it would have needed a second rule
@@ -480,3 +514,4 @@ Everything below asserts on the old shape and must move with it:
 | 12.5 | The two references are targets, not specifications: where they differ, the kit's own conventions decide. |
 | 12.6 | **The dev chooses the layout and it stays chosen** (owner, after seed-versus-pin was put to them as §3.5). `expanded` pins two rows or one row; omitted derives. The mount-time seed was rejected because it needed a second rule for when it stops applying. Default — omitted — is collapsed whenever the content fits one line, which the owner called the cleaner look. |
 | 12.7 | **The geometry comes from the references, measured, and Claude Code's wins where they disagree** (owner: "replicate what Claude Code looks like … the padding around the text input"). The kit has no 32px icon size, so the 48px row is carried by the existing `icon-sm` with 10px of padding rather than Claude's 8px around a 32px control. Cost if wrong: our controls read slightly smaller inside a correctly-sized row; one class fixes it. |
+| 12.8 | **The `expanded` pin fixes the ARRANGEMENT, not the height** (probe-measured, 2026-09-26). A pinned-one-row composer with three lines measured 80px, not the 48 that a "scrolls instead of growing" reading predicts. Cost if wrong: a host expecting a fixed-height one-row composer must cap `maxHeight` themselves — the same lever they already have. |
