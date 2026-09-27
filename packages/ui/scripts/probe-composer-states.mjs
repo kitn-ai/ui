@@ -34,14 +34,48 @@
  * Watch it fail: drop the `w-full` from the Composer's inner wrapper
  * (`src/components/composer/composer.tsx`) and the empty-width check reports a 0px
  * editable with the placeholder box outside it.
+ *
+ * THE PAGE MUST BE STYLED, and this file learned that the hard way. It used to boot its
+ * page with no stylesheet at all: the `kai-prompt-input` element injects the kit's CSS into
+ * its OWN shadow root, so the element's checks were real, but the hand-composed tree below
+ * renders into the LIGHT DOM and had no Tailwind whatsoever. Its "expanded" frame measured
+ * 57px against the real 94px, its precondition (`height > 48`) passed on the unstyled box,
+ * and its trailing-edge check passed by comparing two edges of a layout that does not
+ * exist. A probe that measures an unstyled page reports pixels the browser never paints.
  */
 import { createServer } from 'vite';
 import solidPlugin from 'vite-plugin-solid';
 import { chromium } from 'playwright';
+import { readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
+
+/**
+ * The compiled sheet, read from disk and inlined into the page.
+ *
+ * INLINED rather than linked through vite, deliberately: vite serves a `.css` request as a
+ * JS module that injects the styles itself, so a `<link rel="stylesheet" href="/src/...css">`
+ * is not the stylesheet and silently yields the same unstyled page this file was fixed to
+ * stop measuring. `npm run build:css` renders the sheet into `node_modules/.vite`; reading
+ * the file is the exact bytes the browser gets.
+ *
+ * A missing sheet EXITS, naming the command. That silence is what hid the original defect:
+ * an unstyled page does not fail, it merely reports different numbers.
+ */
+const SHEET_PATH = path.join(root, 'src/web-components/compiled.css');
+if (!existsSync(SHEET_PATH)) {
+  console.error(
+    `probe-composer-states: no compiled sheet at ${SHEET_PATH}.\n`
+    + 'Run `npm run build:css` from packages/ui: without it this page is unstyled, and every\n'
+    + 'geometry check below would measure a layout the browser never renders.',
+  );
+  process.exit(1);
+}
+// `</style` inside the text would close the tag early; the escape is what keeps an inline
+// sheet safe to embed.
+const SHEET_CSS = readFileSync(SHEET_PATH, 'utf8').replace(/<\/style/gi, '<\\/style');
 
 /**
  * One page hosting two composers: the real `<kai-prompt-input>` every kit consumer
@@ -54,7 +88,10 @@ const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const PAGE = /* html */ `<!doctype html>
 <html><head><meta charset="utf-8"><title>composer geometry</title>
 <style>html,body{margin:0;background:#181818;color:#eee;font-family:system-ui,sans-serif}
-#stage{width:760px;padding:24px}#hand-host{width:760px;padding:24px}</style></head>
+#stage{width:760px;padding:24px}#hand-host{width:760px;padding:24px}</style>
+<!-- The kit's own sheet. The ELEMENT path gets it through its shadow root; the
+     hand-composed tree renders in the light DOM and gets it from here. -->
+<style>${SHEET_CSS}</style></head>
 <body>
   <div id="stage"><kai-prompt-input id="c" placeholder="Ask anything"></kai-prompt-input></div>
   <div id="hand-host"></div>
@@ -590,11 +627,23 @@ console.log('\n== hand-composed PromptInput ==');
     const ed = document.querySelector('#hand-host [data-kai-composer-editable]');
     void ed;
   });
-  check('PRECONDITION: the hand-composed frame is expanded', frame.height > 48,
+  // The precondition has to be strong enough to FAIL on an unstyled box: `height > 48`
+  // passed at 57px for an unstyled frame, where an expanded row with a wrapped line and
+  // a control row under it is about 94px. The editable is the honest signal, because a
+  // wrapped line is what makes this composition expanded at all.
+  check('PRECONDITION: the hand-composed frame is expanded', frame.height > 70 && editable.height > 24,
     `frame ${n1(frame.height)}px, editable ${n1(editable.height)}px`);
+  // The controls sit INSIDE the frame's padding, so their trailing edge is the frame's
+  // CONTENT-box edge — comparing it against the border-box edge is a 10px false failure
+  // (measured `726 vs 736`), and that mismatch is what the unstyled page was hiding.
+  const framePadRight = await page.evaluate(() => {
+    const f = document.querySelector('#hand-host [data-prompt-input]');
+    return parseFloat(getComputedStyle(f).paddingRight) || 0;
+  });
+  const contentRight = frame.x + frame.width - framePadRight;
   check('the hand-composed controls reach the trailing edge',
-    Math.abs((actions.x + actions.width) - (frame.x + frame.width)) < 3,
-    `actions right ${n1(actions.x + actions.width)} vs frame right ${n1(frame.x + frame.width)}`);
+    Math.abs((actions.x + actions.width) - contentRight) < 3,
+    `actions right ${n1(actions.x + actions.width)} vs frame content-box right ${n1(contentRight)} (border box ${n1(frame.x + frame.width)}, padding ${n1(framePadRight)}px)`);
 }
 
 // --- 17. one long unbreakable token does not overflow the row -------------------
