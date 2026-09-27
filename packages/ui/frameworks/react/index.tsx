@@ -461,8 +461,10 @@ export interface ChatProps extends WebComponentProps {
   footer?: boolean;
   /** Hides the built-in paperclip attach button; only an explicit `false` hides it. Default true. */
   attach?: boolean;
-  /** Show a web-search (Globe) button in the input toolbar; calls `onWebSearch`. */
-  webSearch?: boolean;
+  /** The composer's `+` menu tree: the built-in file row first (when `attach`), then these verbatim. An array, so it is a JS property and never an attribute. */
+  tools?: { chip?: boolean; id?: string; label?: string; icon?: string; shortcut?: string; checked?: boolean; radioGroup?: string; disabled?: boolean; description?: string; control?: "check" | "switch"; note?: true; separator?: boolean; heading?: boolean; items?: { id?: string; label?: string; icon?: string; shortcut?: string; checked?: boolean; radioGroup?: string; disabled?: boolean; description?: string; control?: "check" | "switch"; note?: true; separator?: boolean; heading?: boolean; items?: Record<string, unknown>[] }[] }[];
+  /** Pins the composer's layout: `true` is two rows, `false` is one, omitted derives it from the content. */
+  expanded?: boolean;
   /** Show a voice-input button in the input toolbar; calls `onVoice`. */
   voice?: boolean;
   /** Rich entity triggers. Each opens a menu at the caret that inserts an atomic pill. */
@@ -505,6 +507,8 @@ export interface ChatProps extends WebComponentProps {
   onMessageAction?: (event: CustomEvent<{ messageId: string; action: string; state?: undefined | "on" | "off" }>) => void;
   /** The header model switcher changed. */
   onModelChange?: (event: CustomEvent<{ modelId: string }>) => void;
+  /** A `+` menu item was chosen. `checked` is present only for a toggle, with its NEW state. The same name and shape `<kai-menu>` fires, so one handler serves both. */
+  onSelect?: (event: CustomEvent<{ id: string; checked?: undefined | boolean }>) => void;
   /** User submitted a message. */
   onSubmit?: (event: CustomEvent<{ value: string; attachments: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }>) => void;
   /** A suggestion chip was clicked (only in `suggestion-mode="fill"`). */
@@ -515,14 +519,12 @@ export interface ChatProps extends WebComponentProps {
   onValueChange?: (event: CustomEvent<{ value: string }>) => void;
   /** The Mic / voice button was clicked. */
   onVoice?: (event: CustomEvent<Record<string, never>>) => void;
-  /** The web-search (Globe) toolbar button was clicked. */
-  onWebSearch?: (event: CustomEvent<Record<string, never>>) => void;
 }
 
 export const Chat = /*#__PURE__*/ createWebComponent<ChatProps, KaiChatElement>(
   'kai-chat',
-  ["theme","density","value","placeholder","loading","suggestions","suggestionMode","persistSuggestions","proseSize","codeTheme","imagePreview","codeHighlight","reasoning","reasoningOpen","chatTitle","models","currentModel","context","scrollButton","headerStart","headerEnd","headerFull","homeFull","sidebar","empty","composer","composerActions","footer","attach","webSearch","voice","triggers","kindIcons","actionsReveal","userActions","assistantActions","hideSources","accept","messages","cardTypes","cardSchemas","conversations","store","home","hostOpen"],
-  { onAttachmentsChange: 'kai-attachments-change', onAttachmentsRejected: 'kai-attachments-rejected', onConversationLoad: 'kai-conversation-load', onHomeLink: 'kai-home-link', onMessageAction: 'kai-message-action', onModelChange: 'kai-model-change', onSubmit: 'kai-submit', onSuggestionClick: 'kai-suggestion-click', onUnreadChange: 'kai-unread-change', onValueChange: 'kai-value-change', onVoice: 'kai-voice', onWebSearch: 'kai-web-search' },
+  ["theme","density","value","placeholder","loading","suggestions","suggestionMode","persistSuggestions","proseSize","codeTheme","imagePreview","codeHighlight","reasoning","reasoningOpen","chatTitle","models","currentModel","context","scrollButton","headerStart","headerEnd","headerFull","homeFull","sidebar","empty","composer","composerActions","footer","attach","tools","expanded","voice","triggers","kindIcons","actionsReveal","userActions","assistantActions","hideSources","accept","messages","cardTypes","cardSchemas","conversations","store","home","hostOpen"],
+  { onAttachmentsChange: 'kai-attachments-change', onAttachmentsRejected: 'kai-attachments-rejected', onConversationLoad: 'kai-conversation-load', onHomeLink: 'kai-home-link', onMessageAction: 'kai-message-action', onModelChange: 'kai-model-change', onSelect: 'kai-select', onSubmit: 'kai-submit', onSuggestionClick: 'kai-suggestion-click', onUnreadChange: 'kai-unread-change', onValueChange: 'kai-value-change', onVoice: 'kai-voice' },
   () => import('@kitn.ai/ui/web-components/chat'),
 );
 
@@ -1317,7 +1319,7 @@ export const Markdown = /*#__PURE__*/ createWebComponent<MarkdownProps, KaiMarkd
 
 export interface MenuProps extends WebComponentProps {
   /** Tree of menu items. Set as a JS property, not an HTML attribute. */
-  items?: { id?: string; label?: string; icon?: string; shortcut?: string; checked?: boolean; radioGroup?: string; disabled?: boolean; separator?: boolean; heading?: boolean; items?: Record<string, unknown>[] }[];
+  items?: { id?: string; label?: string; icon?: string; shortcut?: string; checked?: boolean; radioGroup?: string; disabled?: boolean; description?: string; control?: "check" | "switch"; note?: true; separator?: boolean; heading?: boolean; items?: Record<string, unknown>[] }[];
   /** Optional placement hint (unused by the underlying Dropdown which always positions bottom-start, kept for future extension). */
   placement?: string;
   /** Built-in trigger: a leading icon (a named icon, an image URL/data-URI, or text). A slotted trigger overrides it. */
@@ -1615,8 +1617,10 @@ export interface PromptInputProps extends WebComponentProps {
   suggestions?: string[];
   /** What clicking a suggestion does. Defaults to `'submit'`. */
   suggestionMode?: "submit" | "fill";
-  /** Show a web-search (Globe) button in the left toolbar; clicking it fires a `kai-web-search` event. Attribute: `web-search`. */
-  webSearch?: boolean;
+  /** The composer's `+` menu tree: the built-in file row first (when `attach`), then these verbatim. JS property; an array cannot be an attribute. */
+  tools?: { chip?: boolean; id?: string; label?: string; icon?: string; shortcut?: string; checked?: boolean; radioGroup?: string; disabled?: boolean; description?: string; control?: "check" | "switch"; note?: true; separator?: boolean; heading?: boolean; items?: { id?: string; label?: string; icon?: string; shortcut?: string; checked?: boolean; radioGroup?: string; disabled?: boolean; description?: string; control?: "check" | "switch"; note?: true; separator?: boolean; heading?: boolean; items?: Record<string, unknown>[] }[] }[];
+  /** Pins the composer's layout: `true` is two rows, `false` is one, omitted derives it from the content. Attribute `expanded`; `="false"` pins one row. */
+  expanded?: boolean;
   /** Show a Voice (Mic) button in the left toolbar; clicking it fires a `voice` event. */
   voice?: boolean;
   /** When set and `loading` is true, the send button is replaced by a Stop button (square icon, "Stop" aria-label). Clicking it fires `kai-stop`. */
@@ -1633,6 +1637,8 @@ export interface PromptInputProps extends WebComponentProps {
   kindIcons?: Record<string, string>;
   /** The staged attachments changed (file added or removed). Carries the full current list so a consumer can react in real time. */
   onAttachmentsChange?: (event: CustomEvent<{ attachments: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }>) => void;
+  /** A `+` menu item was chosen. `checked` is present only for a toggle, carrying its NEW state. Shares `<kai-menu>`'s event name. */
+  onSelect?: (event: CustomEvent<{ id: string; checked?: undefined | boolean }>) => void;
   /** The Stop button was clicked while `stoppable` and `loading` are both true. */
   onStop?: (event: CustomEvent<Record<string, never>>) => void;
   /** The user submitted the prompt (Enter or send button). `value` is the flattened text. */
@@ -1645,14 +1651,12 @@ export interface PromptInputProps extends WebComponentProps {
   onValueChange?: (event: CustomEvent<{ value: string; doc: ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]; entities: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }>) => void;
   /** The Voice (Mic) toolbar button was clicked. */
   onVoice?: (event: CustomEvent<Record<string, never>>) => void;
-  /** The web-search (Globe) toolbar button was clicked. */
-  onWebSearch?: (event: CustomEvent<Record<string, never>>) => void;
 }
 
 export const PromptInput = /*#__PURE__*/ createWebComponent<PromptInputProps, KaiPromptInputElement>(
   'kai-prompt-input',
-  ["theme","value","placeholder","disabled","loading","suggestions","suggestionMode","webSearch","voice","stoppable","submit","attach","attachments","triggers","kindIcons"],
-  { onAttachmentsChange: 'kai-attachments-change', onStop: 'kai-stop', onSubmit: 'kai-submit', onSuggestionClick: 'kai-suggestion-click', onToolbarAction: 'kai-toolbar-action', onValueChange: 'kai-value-change', onVoice: 'kai-voice', onWebSearch: 'kai-web-search' },
+  ["theme","value","placeholder","disabled","loading","suggestions","suggestionMode","tools","expanded","voice","stoppable","submit","attach","attachments","triggers","kindIcons"],
+  { onAttachmentsChange: 'kai-attachments-change', onSelect: 'kai-select', onStop: 'kai-stop', onSubmit: 'kai-submit', onSuggestionClick: 'kai-suggestion-click', onToolbarAction: 'kai-toolbar-action', onValueChange: 'kai-value-change', onVoice: 'kai-voice' },
   () => import('@kitn.ai/ui/web-components/prompt-input'),
 );
 

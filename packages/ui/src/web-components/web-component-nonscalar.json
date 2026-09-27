@@ -36,6 +36,7 @@
     "models",
     "store",
     "suggestions",
+    "tools",
     "triggers",
     "userActions",
     "value"
@@ -121,6 +122,7 @@
     "attachments",
     "kindIcons",
     "suggestions",
+    "tools",
     "triggers",
     "value"
   ],

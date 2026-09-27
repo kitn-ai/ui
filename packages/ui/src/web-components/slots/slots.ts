@@ -198,6 +198,11 @@ export const PROMPT_INPUT_PARTS: PartDef[] = [
     doc: 'The send button. Restyle from outside, or hide it entirely (Enter-only). Hiding is pure CSS, which is why there is no `submit="never"`.',
     recipe: 'kai-prompt-input::part(send) { display: none } /* Enter-only; or restyle: background, border-radius, … */',
   },
+  {
+    name: 'tools',
+    doc: 'The `+` tools trigger, the leading control of the composer row. Restyle it from outside, or hide it to offer no menu at all.',
+    recipe: 'kai-prompt-input::part(tools) { display: none } /* or restyle: background, border-radius, … */',
+  },
 ];
 
 /** Styleable `::part`s of `<kai-button>`. */

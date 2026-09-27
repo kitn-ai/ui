@@ -424,8 +424,10 @@ export interface KaiChatElement extends HTMLElement {
   footer?: boolean;
   /** Hides the built-in paperclip attach button; only an explicit `false` hides it. Default true. */
   attach?: boolean;
-  /** Show a web-search (Globe) button in the input toolbar; calls `onWebSearch`. */
-  webSearch?: boolean;
+  /** The composer's `+` menu tree: the built-in file row first (when `attach`), then these verbatim. An array, so it is a JS property and never an attribute. */
+  tools?: { chip?: boolean; id?: string; label?: string; icon?: string; shortcut?: string; checked?: boolean; radioGroup?: string; disabled?: boolean; description?: string; control?: "check" | "switch"; note?: true; separator?: boolean; heading?: boolean; items?: { id?: string; label?: string; icon?: string; shortcut?: string; checked?: boolean; radioGroup?: string; disabled?: boolean; description?: string; control?: "check" | "switch"; note?: true; separator?: boolean; heading?: boolean; items?: Record<string, unknown>[] }[] }[];
+  /** Pins the composer's layout: `true` is two rows, `false` is one, omitted derives it from the content. */
+  expanded?: boolean;
   /** Show a voice-input button in the input toolbar; calls `onVoice`. */
   voice?: boolean;
   /** Rich entity triggers. Each opens a menu at the caret that inserts an atomic pill. */
@@ -1132,7 +1134,7 @@ export interface KaiMenuElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
   /** Tree of menu items. Set as a JS property, not an HTML attribute. */
-  items?: { id?: string; label?: string; icon?: string; shortcut?: string; checked?: boolean; radioGroup?: string; disabled?: boolean; separator?: boolean; heading?: boolean; items?: Record<string, unknown>[] }[];
+  items?: { id?: string; label?: string; icon?: string; shortcut?: string; checked?: boolean; radioGroup?: string; disabled?: boolean; description?: string; control?: "check" | "switch"; note?: true; separator?: boolean; heading?: boolean; items?: Record<string, unknown>[] }[];
   /** Optional placement hint (unused by the underlying Dropdown which always positions bottom-start, kept for future extension). */
   placement?: string;
   /** Built-in trigger: a leading icon (a named icon, an image URL/data-URI, or text). A slotted trigger overrides it. */
@@ -1356,8 +1358,10 @@ export interface KaiPromptInputElement extends HTMLElement {
   suggestions?: string[];
   /** What clicking a suggestion does. Defaults to `'submit'`. */
   suggestionMode?: "submit" | "fill";
-  /** Show a web-search (Globe) button in the left toolbar; clicking it fires a `kai-web-search` event. Attribute: `web-search`. */
-  webSearch?: boolean;
+  /** The composer's `+` menu tree: the built-in file row first (when `attach`), then these verbatim. JS property; an array cannot be an attribute. */
+  tools?: { chip?: boolean; id?: string; label?: string; icon?: string; shortcut?: string; checked?: boolean; radioGroup?: string; disabled?: boolean; description?: string; control?: "check" | "switch"; note?: true; separator?: boolean; heading?: boolean; items?: { id?: string; label?: string; icon?: string; shortcut?: string; checked?: boolean; radioGroup?: string; disabled?: boolean; description?: string; control?: "check" | "switch"; note?: true; separator?: boolean; heading?: boolean; items?: Record<string, unknown>[] }[] }[];
+  /** Pins the composer's layout: `true` is two rows, `false` is one, omitted derives it from the content. Attribute `expanded`; `="false"` pins one row. */
+  expanded?: boolean;
   /** Show a Voice (Mic) button in the left toolbar; clicking it fires a `voice` event. */
   voice?: boolean;
   /** When set and `loading` is true, the send button is replaced by a Stop button (square icon, "Stop" aria-label). Clicking it fires `kai-stop`. */
@@ -2556,8 +2560,10 @@ export interface KaiChatElementProps {
   footer?: boolean;
   /** Hides the built-in paperclip attach button; only an explicit `false` hides it. Default true. */
   attach?: boolean;
-  /** Show a web-search (Globe) button in the input toolbar; calls `onWebSearch`. */
-  webSearch?: boolean;
+  /** The composer's `+` menu tree: the built-in file row first (when `attach`), then these verbatim. An array, so it is a JS property and never an attribute. */
+  tools?: { chip?: boolean; id?: string; label?: string; icon?: string; shortcut?: string; checked?: boolean; radioGroup?: string; disabled?: boolean; description?: string; control?: "check" | "switch"; note?: true; separator?: boolean; heading?: boolean; items?: { id?: string; label?: string; icon?: string; shortcut?: string; checked?: boolean; radioGroup?: string; disabled?: boolean; description?: string; control?: "check" | "switch"; note?: true; separator?: boolean; heading?: boolean; items?: Record<string, unknown>[] }[] }[];
+  /** Pins the composer's layout: `true` is two rows, `false` is one, omitted derives it from the content. */
+  expanded?: boolean;
   /** Show a voice-input button in the input toolbar; calls `onVoice`. */
   voice?: boolean;
   /** Rich entity triggers. Each opens a menu at the caret that inserts an atomic pill. */
@@ -3126,7 +3132,7 @@ export interface KaiMenuElementProps {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
   /** Tree of menu items. Set as a JS property, not an HTML attribute. */
-  items?: { id?: string; label?: string; icon?: string; shortcut?: string; checked?: boolean; radioGroup?: string; disabled?: boolean; separator?: boolean; heading?: boolean; items?: Record<string, unknown>[] }[];
+  items?: { id?: string; label?: string; icon?: string; shortcut?: string; checked?: boolean; radioGroup?: string; disabled?: boolean; description?: string; control?: "check" | "switch"; note?: true; separator?: boolean; heading?: boolean; items?: Record<string, unknown>[] }[];
   /** Optional placement hint (unused by the underlying Dropdown which always positions bottom-start, kept for future extension). */
   placement?: string;
   /** Built-in trigger: a leading icon (a named icon, an image URL/data-URI, or text). A slotted trigger overrides it. */
@@ -3324,8 +3330,10 @@ export interface KaiPromptInputElementProps {
   suggestions?: string[];
   /** What clicking a suggestion does. Defaults to `'submit'`. */
   suggestionMode?: "submit" | "fill";
-  /** Show a web-search (Globe) button in the left toolbar; clicking it fires a `kai-web-search` event. Attribute: `web-search`. */
-  webSearch?: boolean;
+  /** The composer's `+` menu tree: the built-in file row first (when `attach`), then these verbatim. JS property; an array cannot be an attribute. */
+  tools?: { chip?: boolean; id?: string; label?: string; icon?: string; shortcut?: string; checked?: boolean; radioGroup?: string; disabled?: boolean; description?: string; control?: "check" | "switch"; note?: true; separator?: boolean; heading?: boolean; items?: { id?: string; label?: string; icon?: string; shortcut?: string; checked?: boolean; radioGroup?: string; disabled?: boolean; description?: string; control?: "check" | "switch"; note?: true; separator?: boolean; heading?: boolean; items?: Record<string, unknown>[] }[] }[];
+  /** Pins the composer's layout: `true` is two rows, `false` is one, omitted derives it from the content. Attribute `expanded`; `="false"` pins one row. */
+  expanded?: boolean;
   /** Show a Voice (Mic) button in the left toolbar; clicking it fires a `voice` event. */
   voice?: boolean;
   /** When set and `loading` is true, the send button is replaced by a Stop button (square icon, "Stop" aria-label). Clicking it fires `kai-stop`. */
@@ -3999,6 +4007,8 @@ export interface KaiChatElementEvents {
   onKaiMessageAction?: (event: CustomEvent<{ messageId: string; action: string; state?: undefined | "on" | "off" }>) => void;
   /** The header model switcher changed. */
   onKaiModelChange?: (event: CustomEvent<{ modelId: string }>) => void;
+  /** A `+` menu item was chosen. `checked` is present only for a toggle, with its NEW state. The same name and shape `<kai-menu>` fires, so one handler serves both. */
+  onKaiSelect?: (event: CustomEvent<{ id: string; checked?: undefined | boolean }>) => void;
   /** User submitted a message. */
   onKaiSubmit?: (event: CustomEvent<{ value: string; attachments: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }>) => void;
   /** A suggestion chip was clicked (only in `suggestion-mode="fill"`). */
@@ -4009,8 +4019,6 @@ export interface KaiChatElementEvents {
   onKaiValueChange?: (event: CustomEvent<{ value: string }>) => void;
   /** The Mic / voice button was clicked. */
   onKaiVoice?: (event: CustomEvent<Record<string, never>>) => void;
-  /** The web-search (Globe) toolbar button was clicked. */
-  onKaiWebSearch?: (event: CustomEvent<Record<string, never>>) => void;
 }
 
 export interface KaiCheckboxElementEvents {
@@ -4294,6 +4302,8 @@ export interface KaiPromptDockElementEvents {
 export interface KaiPromptInputElementEvents {
   /** The staged attachments changed (file added or removed). Carries the full current list so a consumer can react in real time. */
   onKaiAttachmentsChange?: (event: CustomEvent<{ attachments: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }>) => void;
+  /** A `+` menu item was chosen. `checked` is present only for a toggle, carrying its NEW state. Shares `<kai-menu>`'s event name. */
+  onKaiSelect?: (event: CustomEvent<{ id: string; checked?: undefined | boolean }>) => void;
   /** The Stop button was clicked while `stoppable` and `loading` are both true. */
   onKaiStop?: (event: CustomEvent<Record<string, never>>) => void;
   /** The user submitted the prompt (Enter or send button). `value` is the flattened text. */
@@ -4306,8 +4316,6 @@ export interface KaiPromptInputElementEvents {
   onKaiValueChange?: (event: CustomEvent<{ value: string; doc: ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]; entities: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }>) => void;
   /** The Voice (Mic) toolbar button was clicked. */
   onKaiVoice?: (event: CustomEvent<Record<string, never>>) => void;
-  /** The web-search (Globe) toolbar button was clicked. */
-  onKaiWebSearch?: (event: CustomEvent<Record<string, never>>) => void;
 }
 
 export interface KaiRadioGroupElementEvents {

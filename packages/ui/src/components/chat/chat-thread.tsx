@@ -11,7 +11,7 @@ import {
   Context, ContextTrigger, ContextContent, ContextContentHeader,
   ContextContentBody, ContextContentFooter, ContextInputUsage, ContextOutputUsage,
 } from '../context/context';
-import { DefaultPromptInput, type RejectedAttachment } from '../prompt/default-input';
+import { DefaultPromptInput, type RejectedAttachment, type ComposerToolItem } from '../prompt/default-input';
 import type { MediaTypeFilter } from '../../wire/media-types';
 import type { TriggerDef } from '../composer/composer';
 import type { ChatMessage, ChatMessageAction, CustomAction } from '../../web-components/chat/chat-types';
@@ -196,8 +196,12 @@ export interface ChatThreadProps {
   /** Hides the built-in paperclip attach button; only an explicit `false` hides it.
    *  Default true. */
   attach?: boolean;
-  /** Show a web-search (Globe) button in the input toolbar; calls `onWebSearch`. */
-  webSearch?: boolean;
+  /** The composer's `+` menu tree: the built-in file row first (when `attach`), then
+   *  these verbatim. An array, so it is a JS property and never an attribute. */
+  tools?: ComposerToolItem[];
+  /** Pins the composer's layout: `true` is two rows, `false` is one, omitted derives it
+   *  from the content. */
+  expanded?: boolean;
   /** Show a voice-input button in the input toolbar; calls `onVoice`. */
   voice?: boolean;
   /** Rich entity triggers. Each opens a menu at the caret that inserts an atomic pill. */
@@ -227,7 +231,9 @@ export interface ChatThreadProps {
   onSuggestionClick?: (value: string) => void;
   onModelChange?: (modelId: string) => void;
   onMessageAction?: (detail: MessageActionDetail) => void;
-  onWebSearch?: () => void;
+  /** A `+` menu item was chosen. `checked` is present exactly when the item is a
+   *  toggle, and carries its NEW state. */
+  onToolSelect?: (detail: { id: string; checked?: boolean }) => void;
   onVoice?: () => void;
   /** Receive the imperative controller once mounted. */
   controllerRef?: (controller: ChatThreadController) => void;
@@ -872,11 +878,11 @@ export function ChatThread(props: ChatThreadProps) {
                       value={current()} placeholder={props.placeholder} loading={props.loading === true}
                       suggestions={visibleSuggestions()} attachments={attachments()}
                       accept={props.accept} onAttachmentsRejected={props.onAttachmentsRejected}
-                      attach={props.attach} webSearch={props.webSearch === true} voice={props.voice === true}
+                      attach={props.attach} tools={props.tools} expanded={props.expanded} voice={props.voice === true}
                       triggers={props.triggers} kindIcons={props.kindIcons}
                       onValueChange={handleChange} onSubmit={handleSubmit} onSuggestionClick={handleSuggestionClick}
                       onAttachmentsChange={(a) => { setAttachments(a); props.onAttachmentsChange?.(a); }}
-                      onWebSearch={() => props.onWebSearch?.()} onVoice={() => props.onVoice?.()}
+                      onToolSelect={(detail) => props.onToolSelect?.(detail)} onVoice={() => props.onVoice?.()}
                     />
                   }
                 >

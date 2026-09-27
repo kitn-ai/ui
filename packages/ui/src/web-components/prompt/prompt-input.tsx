@@ -1,6 +1,7 @@
 import { createEffect, createSignal, onMount, onCleanup } from 'solid-js';
 import { defineWebComponent } from '../define/define';
-import { DefaultPromptInput } from '../../components/prompt/default-input';
+import { DefaultPromptInput, type ComposerToolItem } from '../../components/prompt/default-input';
+import { resolveExpandedProp } from '../../primitives/composer-expansion';
 import type { AttachmentData } from '../../components/attachments/attachments';
 import type { CustomAction } from '../chat/chat-types';
 import type { TriggerDef, ComposerChange } from '../../components/composer/composer';
@@ -28,9 +29,14 @@ interface Props extends Record<string, unknown> {
   // in the input.
   /** What clicking a suggestion does. Defaults to `'submit'`. */
   suggestionMode?: 'submit' | 'fill';
-  /** Show a web-search (Globe) button in the left toolbar; clicking it fires a
-   *  `kai-web-search` event. Attribute: `web-search`. */
-  webSearch?: boolean;
+  // The built-in file row is the composer's own, so a host declaring its own "Add
+  // files" would get two — the same reason `attach` exists.
+  /** The composer's `+` menu tree: the built-in file row first (when `attach`), then
+   *  these verbatim. JS property; an array cannot be an attribute. */
+  tools?: ComposerToolItem[];
+  /** Pins the composer's layout: `true` is two rows, `false` is one, omitted derives it
+   *  from the content. Attribute `expanded`; `="false"` pins one row. */
+  expanded?: boolean;
   /** Show a Voice (Mic) button in the left toolbar; clicking it fires a `voice`
    *  event. */
   voice?: boolean;
@@ -79,8 +85,9 @@ interface Events {
   'kai-attachments-change': { attachments: AttachmentData[] };
   /** A suggestion was clicked while `suggestion-mode="fill"`. */
   'kai-suggestion-click': { value: string };
-  /** The web-search (Globe) toolbar button was clicked. */
-  'kai-web-search': Record<string, never>;
+  /** A `+` menu item was chosen. `checked` is present only for a toggle, carrying its
+   *  NEW state. Shares `<kai-menu>`'s event name. */
+  'kai-select': { id: string; checked?: boolean };
   /** The Voice (Mic) toolbar button was clicked. */
   'kai-voice': Record<string, never>;
   /** The Stop button was clicked while `stoppable` and `loading` are both true. */
@@ -103,7 +110,8 @@ defineWebComponent<Props, Events>('kai-prompt-input', {
   loading: false,
   suggestions: undefined,
   suggestionMode: 'submit',
-  webSearch: false,
+  tools: undefined,
+  expanded: undefined,
   voice: false,
   stoppable: false,
   submit: 'always',
@@ -225,7 +233,8 @@ defineWebComponent<Props, Events>('kai-prompt-input', {
       attach={flag('attach')}
       suggestions={props.suggestions}
       attachments={attachments()}
-      webSearch={flag('webSearch')}
+      tools={props.tools as ComposerToolItem[] | undefined}
+      expanded={resolveExpandedProp(props.expanded, element.hasAttribute('expanded'), element.getAttribute('expanded'))}
       voice={flag('voice')}
       toolbarActions={toolbarActions()}
       triggers={props.triggers}
@@ -235,7 +244,7 @@ defineWebComponent<Props, Events>('kai-prompt-input', {
       onSubmit={handleSubmit}
       onSuggestionClick={handleSuggestionClick}
       onAttachmentsChange={(a) => { setAttachments(a); dispatch('kai-attachments-change', { attachments: a }); }}
-      onWebSearch={() => dispatch('kai-web-search')}
+      onToolSelect={(detail) => dispatch('kai-select', detail)}
       onVoice={() => dispatch('kai-voice')}
       onStop={() => dispatch('kai-stop')}
       onAction={(id) => dispatch('kai-toolbar-action', { action: id })}

@@ -6,7 +6,8 @@ import type { ThreadDensity } from '../../components/chat/thread-density';
 import { cardComponentsFromTags } from '../message/message';
 import { createMessagesGuard } from '../message/validate-messages';
 import type { AttachmentData } from '../../components/attachments/attachments';
-import type { RejectedAttachment } from '../../components/prompt/default-input';
+import type { RejectedAttachment, ComposerToolItem } from '../../components/prompt/default-input';
+import { resolveExpandedProp } from '../../primitives/composer-expansion';
 import type { ChatMessage, ChatMessageAction, CustomAction } from './chat-types';
 import type { TriggerDef } from '../../components/composer/composer';
 import type { ComposerDoc } from '../../primitives/composer-model';
@@ -16,7 +17,7 @@ import type { ConversationStore } from '../../primitives/conversation-store';
 
 type Props = Omit<ChatThreadProps,
   'class' | 'onValueChange' | 'onSubmit' | 'onAttachmentsChange' | 'onSuggestionClick' | 'onModelChange'
-  | 'onMessageAction' | 'onWebSearch' | 'onVoice' | 'controllerRef' | 'cardTypes' | 'cardSchemas' | 'cardHostElement' | 'messages'
+  | 'onMessageAction' | 'onToolSelect' | 'onVoice' | 'controllerRef' | 'cardTypes' | 'cardSchemas' | 'cardHostElement' | 'messages'
   | 'accept' | 'onAttachmentsRejected'
   // `conversations`/`store` are re-declared below (own doc comments, matching
   // this element's own attribute/property conventions) rather than left to
@@ -158,10 +159,11 @@ interface Events {
   'kai-message-action': { messageId: string; action: string; state?: 'on' | 'off' };
   /** The header model switcher changed. */
   'kai-model-change': { modelId: string };
-  /** The web-search (Globe) toolbar button was clicked. */
-  'kai-web-search': Record<string, never>;
   /** The Mic / voice button was clicked. */
   'kai-voice': Record<string, never>;
+  /** A `+` menu item was chosen. `checked` is present only for a toggle, with its NEW
+   *  state. The same name and shape `<kai-menu>` fires, so one handler serves both. */
+  'kai-select': { id: string; checked?: boolean };
   // Fires on a row tap in the list, "new conversation," or the visitor's own
   // mount-time auto-restore of their most recent thread -- only when `conversations` is
   // on and a `store` is set. `detail.id` is `undefined` for the "new conversation" case
@@ -193,7 +195,7 @@ defineWebComponent<Props, Events>('kai-chat', {
   suggestions: undefined, suggestionMode: 'submit', persistSuggestions: false, proseSize: 'sm',
   codeTheme: 'github-dark-dimmed', codeHighlight: true, chatTitle: undefined,
   models: undefined, currentModel: undefined, context: undefined, scrollButton: true,
-  attach: true, webSearch: false, voice: false, triggers: undefined, kindIcons: undefined,
+  attach: true, tools: undefined, expanded: undefined, voice: false, triggers: undefined, kindIcons: undefined,
   actionsReveal: 'always', cardTypes: undefined, cardSchemas: undefined, accept: undefined,
   reasoning: undefined, reasoningOpen: undefined, conversations: false, store: undefined,
   home: undefined, userActions: undefined, assistantActions: undefined, hideSources: false,
@@ -293,7 +295,9 @@ defineWebComponent<Props, Events>('kai-chat', {
     codeTheme={props.codeTheme as string} codeHighlight={flag('codeHighlight')}
     chatTitle={props.chatTitle as string | undefined} models={props.models as ModelOption[] | undefined}
     currentModel={props.currentModel as string | undefined} context={props.context as ChatThreadContextUsage | undefined}
-    scrollButton={props.scrollButton !== false} attach={flag('attach')} webSearch={flag('webSearch')} voice={flag('voice')}
+    scrollButton={props.scrollButton !== false} attach={flag('attach')} voice={flag('voice')}
+    tools={props.tools as ComposerToolItem[] | undefined}
+    expanded={resolveExpandedProp(props.expanded, element.hasAttribute('expanded'), element.getAttribute('expanded'))}
     reasoning={props.reasoning as 'full' | 'compact' | 'off' | undefined}
     reasoningOpen={flag('reasoningOpen')}
     triggers={props.triggers as TriggerDef[] | undefined}
@@ -326,7 +330,7 @@ defineWebComponent<Props, Events>('kai-chat', {
     onSuggestionClick={(value) => dispatch('kai-suggestion-click', { value })}
     onModelChange={(modelId) => dispatch('kai-model-change', { modelId })}
     onMessageAction={(detail) => dispatch('kai-message-action', detail)}
-    onWebSearch={() => dispatch('kai-web-search', {})}
+    onToolSelect={(detail) => dispatch('kai-select', detail)}
     onVoice={() => dispatch('kai-voice', {})}
     controllerRef={(c) => (controller = c)}
     headerStart={slot('header-start')}

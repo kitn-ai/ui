@@ -913,7 +913,13 @@
           "fn": false
         },
         {
-          "name": "webSearch",
+          "name": "tools",
+          "scalar": false,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "expanded",
           "scalar": true,
           "optional": true,
           "fn": false
@@ -1016,12 +1022,12 @@
         "kai-home-link",
         "kai-message-action",
         "kai-model-change",
+        "kai-select",
         "kai-submit",
         "kai-suggestion-click",
         "kai-unread-change",
         "kai-value-change",
-        "kai-voice",
-        "kai-web-search"
+        "kai-voice"
       ],
       "methods": [
         "focus",
@@ -3095,15 +3101,7 @@
         "Dropdown",
         "DropdownTrigger",
         "DropdownContent",
-        "DropdownItem",
-        "DropdownSeparator",
-        "DropdownLabel",
-        "DropdownCheckboxItem",
-        "DropdownRadioItem",
-        "DropdownSub",
-        "DropdownSubTrigger",
-        "DropdownSubContent",
-        "Kbd"
+        "DropdownItems"
       ],
       "tokens": []
     },
@@ -3778,7 +3776,13 @@
           "fn": false
         },
         {
-          "name": "webSearch",
+          "name": "tools",
+          "scalar": false,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "expanded",
           "scalar": true,
           "optional": true,
           "fn": false
@@ -3828,13 +3832,13 @@
       ],
       "events": [
         "kai-attachments-change",
+        "kai-select",
         "kai-stop",
         "kai-submit",
         "kai-suggestion-click",
         "kai-toolbar-action",
         "kai-value-change",
-        "kai-voice",
-        "kai-web-search"
+        "kai-voice"
       ],
       "methods": [
         "focus",
@@ -3843,7 +3847,8 @@
         "send"
       ],
       "parts": [
-        "send"
+        "send",
+        "tools"
       ],
       "composedFrom": [
         "DefaultPromptInput"

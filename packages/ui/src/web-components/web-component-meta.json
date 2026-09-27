@@ -1609,12 +1609,22 @@
         "displayType": "undefined | false | true"
       },
       {
-        "name": "webSearch",
+        "name": "tools",
+        "type": "undefined | { chip?: undefined | false | true; id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; description?: undefined | string; control?: undefined | \"check\" | \"switch\"; note?: undefined | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | { id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; description?: undefined | string; control?: undefined | \"check\" | \"switch\"; note?: undefined | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | Record<string, unknown>[] }[] }[]",
+        "optional": true,
+        "scalar": false,
+        "description": "The composer's `+` menu tree: the built-in file row first (when `attach`), then these verbatim. An array, so it is a JS property and never an attribute.",
+        "typeName": "ComposerToolItem[]",
+        "typeShape": "{ chip?: undefined | false | true; id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; description?: undefined | string; control?: undefined | \"check\" | \"switch\"; note?: undefined | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | { id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; description?: undefined | string; control?: undefined | \"check\" | \"switch\"; note?: undefined | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | Record<string, unknown>[] }[] }[]",
+        "typeImport": "ComposerToolItem",
+        "displayType": "undefined | { chip?: undefined | false | true; id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; description?: undefined | string; control?: undefined | \"check\" | \"switch\"; note?: undefined | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | { id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; description?: undefined | string; control?: undefined | \"check\" | \"switch\"; note?: undefined | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | Record<string, unknown>[] }[] }[]"
+      },
+      {
+        "name": "expanded",
         "type": "undefined | false | true",
         "optional": true,
         "scalar": true,
-        "description": "Show a web-search (Globe) button in the input toolbar; calls `onWebSearch`.",
-        "default": "false",
+        "description": "Pins the composer's layout: `true` is two rows, `false` is one, omitted derives it from the content.",
         "displayType": "undefined | false | true"
       },
       {
@@ -1794,6 +1804,12 @@
         "displayDetail": "{ modelId: string }"
       },
       {
+        "name": "kai-select",
+        "detail": "{ id: string; checked?: undefined | false | true }",
+        "description": "A `+` menu item was chosen. `checked` is present only for a toggle, with its NEW state. The same name and shape `<kai-menu>` fires, so one handler serves both.",
+        "displayDetail": "{ id: string; checked?: undefined | false | true }"
+      },
+      {
         "name": "kai-submit",
         "detail": "{ value: string; attachments: { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }",
         "description": "User submitted a message.",
@@ -1821,12 +1837,6 @@
         "name": "kai-voice",
         "detail": "Record<string, never>",
         "description": "The Mic / voice button was clicked.",
-        "displayDetail": "Record<string, never>"
-      },
-      {
-        "name": "kai-web-search",
-        "detail": "Record<string, never>",
-        "description": "The web-search (Globe) toolbar button was clicked.",
         "displayDetail": "Record<string, never>"
       }
     ],
@@ -5644,14 +5654,14 @@
       },
       {
         "name": "items",
-        "type": "undefined | { id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | Record<string, unknown>[] }[]",
+        "type": "undefined | { id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; description?: undefined | string; control?: undefined | \"check\" | \"switch\"; note?: undefined | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | Record<string, unknown>[] }[]",
         "optional": true,
         "scalar": false,
         "description": "Tree of menu items. Set as a JS property, not an HTML attribute.",
         "typeName": "KaiMenuItem[]",
-        "typeShape": "{ id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | { id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | Record<string, unknown>[] }[] }[]",
+        "typeShape": "{ id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; description?: undefined | string; control?: undefined | \"check\" | \"switch\"; note?: undefined | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | { id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; description?: undefined | string; control?: undefined | \"check\" | \"switch\"; note?: undefined | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | Record<string, unknown>[] }[] }[]",
         "typeImport": "KaiMenuItem",
-        "displayType": "undefined | { id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | Record<string, unknown>[] }[]"
+        "displayType": "undefined | { id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; description?: undefined | string; control?: undefined | \"check\" | \"switch\"; note?: undefined | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | Record<string, unknown>[] }[]"
       },
       {
         "name": "placement",
@@ -5775,39 +5785,7 @@
         "group": "Components"
       },
       {
-        "name": "DropdownItem",
-        "group": "Components"
-      },
-      {
-        "name": "DropdownSeparator",
-        "group": "Components"
-      },
-      {
-        "name": "DropdownLabel",
-        "group": "Components"
-      },
-      {
-        "name": "DropdownCheckboxItem",
-        "group": "Components"
-      },
-      {
-        "name": "DropdownRadioItem",
-        "group": "Components"
-      },
-      {
-        "name": "DropdownSub",
-        "group": "Components"
-      },
-      {
-        "name": "DropdownSubTrigger",
-        "group": "Components"
-      },
-      {
-        "name": "DropdownSubContent",
-        "group": "Components"
-      },
-      {
-        "name": "Kbd",
+        "name": "DropdownItems",
         "group": "Components"
       }
     ],
@@ -7210,12 +7188,22 @@
         "displayType": "undefined | \"submit\" | \"fill\""
       },
       {
-        "name": "webSearch",
+        "name": "tools",
+        "type": "undefined | { chip?: undefined | false | true; id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; description?: undefined | string; control?: undefined | \"check\" | \"switch\"; note?: undefined | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | { id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; description?: undefined | string; control?: undefined | \"check\" | \"switch\"; note?: undefined | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | Record<string, unknown>[] }[] }[]",
+        "optional": true,
+        "scalar": false,
+        "description": "The composer's `+` menu tree: the built-in file row first (when `attach`), then these verbatim. JS property; an array cannot be an attribute.",
+        "typeName": "ComposerToolItem[]",
+        "typeShape": "{ chip?: undefined | false | true; id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; description?: undefined | string; control?: undefined | \"check\" | \"switch\"; note?: undefined | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | { id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; description?: undefined | string; control?: undefined | \"check\" | \"switch\"; note?: undefined | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | Record<string, unknown>[] }[] }[]",
+        "typeImport": "ComposerToolItem",
+        "displayType": "undefined | { chip?: undefined | false | true; id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; description?: undefined | string; control?: undefined | \"check\" | \"switch\"; note?: undefined | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | { id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; description?: undefined | string; control?: undefined | \"check\" | \"switch\"; note?: undefined | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | Record<string, unknown>[] }[] }[]"
+      },
+      {
+        "name": "expanded",
         "type": "undefined | false | true",
         "optional": true,
         "scalar": true,
-        "description": "Show a web-search (Globe) button in the left toolbar; clicking it fires a `kai-web-search` event. Attribute: `web-search`.",
-        "default": "false",
+        "description": "Pins the composer's layout: `true` is two rows, `false` is one, omitted derives it from the content. Attribute `expanded`; `=\"false\"` pins one row.",
         "displayType": "undefined | false | true"
       },
       {
@@ -7293,6 +7281,12 @@
         "displayDetail": "{ attachments: { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }"
       },
       {
+        "name": "kai-select",
+        "detail": "{ id: string; checked?: undefined | false | true }",
+        "description": "A `+` menu item was chosen. `checked` is present only for a toggle, carrying its NEW state. Shares `<kai-menu>`'s event name.",
+        "displayDetail": "{ id: string; checked?: undefined | false | true }"
+      },
+      {
         "name": "kai-stop",
         "detail": "Record<string, never>",
         "description": "The Stop button was clicked while `stoppable` and `loading` are both true.",
@@ -7326,12 +7320,6 @@
         "name": "kai-voice",
         "detail": "Record<string, never>",
         "description": "The Voice (Mic) toolbar button was clicked.",
-        "displayDetail": "Record<string, never>"
-      },
-      {
-        "name": "kai-web-search",
-        "detail": "Record<string, never>",
-        "description": "The web-search (Globe) toolbar button was clicked.",
         "displayDetail": "Record<string, never>"
       }
     ],
@@ -7403,6 +7391,11 @@
         "name": "send",
         "doc": "The send button. Restyle from outside, or hide it entirely (Enter-only). Hiding is pure CSS, which is why there is no `submit=\"never\"`.",
         "recipe": "kai-prompt-input::part(send) { display: none } /* Enter-only; or restyle: background, border-radius, … */"
+      },
+      {
+        "name": "tools",
+        "doc": "The `+` tools trigger, the leading control of the composer row. Restyle it from outside, or hide it to offer no menu at all.",
+        "recipe": "kai-prompt-input::part(tools) { display: none } /* or restyle: background, border-radius, … */"
       }
     ]
   },

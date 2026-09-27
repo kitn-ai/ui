@@ -172,6 +172,11 @@ const meta = {
       description: 'The web-search (Globe) toolbar button was clicked.',
       table: { category: 'Events' },
     },
+    onSelect: {
+      action: 'select',
+      description: 'A `+` menu item was chosen. `checked` is present only for a toggle, carrying its NEW state.',
+      table: { category: 'Events' },
+    },
   },
   args: {
     onAttachmentsChange: fn(),

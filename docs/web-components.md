@@ -167,7 +167,8 @@ Every web component also accepts a `theme` attribute (`'light' | 'dark' | 'auto'
 | `composerActions` | `composer-actions` | `undefined | false | true` | — | Whether `slot="composer-actions"` content is projected, which shows the row above the composer. |
 | `footer` | `footer` | `undefined | false | true` | — | Whether `slot="footer"` content is projected, which shows the footer row below the composer. |
 | `attach` | `attach` | `undefined | false | true` | `true` | Hides the built-in paperclip attach button; only an explicit `false` hides it. Default true. |
-| `webSearch` | `web-search` | `undefined | false | true` | `false` | Show a web-search (Globe) button in the input toolbar; calls `onWebSearch`. |
+| `tools` | — | `undefined | { chip?: undefined | false | true; id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; description?: undefined | string; control?: undefined | "check" | "switch"; note?: undefined | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | { id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; description?: undefined | string; control?: undefined | "check" | "switch"; note?: undefined | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | Record<string, unknown>[] }[] }[]` | — | The composer's `+` menu tree: the built-in file row first (when `attach`), then these verbatim. An array, so it is a JS property and never an attribute. |
+| `expanded` | `expanded` | `undefined | false | true` | — | Pins the composer's layout: `true` is two rows, `false` is one, omitted derives it from the content. |
 | `voice` | `voice` | `undefined | false | true` | `false` | Show a voice-input button in the input toolbar; calls `onVoice`. |
 | `triggers` | — | `undefined | { char: string; kind: string; items?: undefined | { id: string; label: string; icon?: undefined | string; description?: undefined | string; group?: undefined | string; kind?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }[]` | — | Rich entity triggers. Each opens a menu at the caret that inserts an atomic pill. |
 | `kindIcons` | — | `undefined | Record<string, string>` | — | Default icon per entity kind (kind → image src) for pills/menu items. |
@@ -194,12 +195,12 @@ Every web component also accepts a `theme` attribute (`'light' | 'dark' | 'auto'
 | `kai-home-link` | `{ entry: { label: string; href?: undefined | string; description?: undefined | string; icon?: undefined | string } }` | A `home.links` entry with no `href` was activated (tapped/clicked/Enter). Meaningful only when `home` is set. |
 | `kai-message-action` | `{ messageId: string; action: string; state?: undefined | "on" | "off" }` | An action button on a message was clicked. `action` is the built-in name or a custom id. |
 | `kai-model-change` | `{ modelId: string }` | The header model switcher changed. |
+| `kai-select` | `{ id: string; checked?: undefined | false | true }` | A `+` menu item was chosen. `checked` is present only for a toggle, with its NEW state. The same name and shape `<kai-menu>` fires, so one handler serves both. |
 | `kai-submit` | `{ value: string; attachments: AttachmentData[] }` | User submitted a message. |
 | `kai-suggestion-click` | `{ value: string }` | A suggestion chip was clicked (only in `suggestion-mode="fill"`). |
 | `kai-unread-change` | `{ unread: false | true }` | Whether a conversation OTHER than the one on screen is unread. Mirror it onto a launcher badge (`dock.unread = detail.unread`). |
 | `kai-value-change` | `{ value: string }` | Fired on every input change. |
 | `kai-voice` | — | The Mic / voice button was clicked. |
-| `kai-web-search` | — | The web-search (Globe) toolbar button was clicked. |
 
 #### Methods
 
@@ -464,7 +465,8 @@ Sidebar panel listing conversations, optionally grouped. Emits events for naviga
 | `loading` | `loading` | `undefined | false | true` | `false` | Show the loading/streaming state and block submit (use while awaiting a reply). |
 | `suggestions` | — | `undefined | string[]` | — | Starter prompts shown above the input. Clicking one follows `suggestionMode`. Set as a JS property. |
 | `suggestionMode` | `suggestion-mode` | `undefined | "submit" | "fill"` | `'submit'` | What clicking a suggestion does. Defaults to `'submit'`. |
-| `webSearch` | `web-search` | `undefined | false | true` | `false` | Show a web-search (Globe) button in the left toolbar; clicking it fires a `kai-web-search` event. Attribute: `web-search`. |
+| `tools` | — | `undefined | { chip?: undefined | false | true; id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; description?: undefined | string; control?: undefined | "check" | "switch"; note?: undefined | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | { id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; description?: undefined | string; control?: undefined | "check" | "switch"; note?: undefined | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | Record<string, unknown>[] }[] }[]` | — | The composer's `+` menu tree: the built-in file row first (when `attach`), then these verbatim. JS property; an array cannot be an attribute. |
+| `expanded` | `expanded` | `undefined | false | true` | — | Pins the composer's layout: `true` is two rows, `false` is one, omitted derives it from the content. Attribute `expanded`; `="false"` pins one row. |
 | `voice` | `voice` | `undefined | false | true` | `false` | Show a Voice (Mic) button in the left toolbar; clicking it fires a `voice` event. |
 | `stoppable` | `stoppable` | `undefined | false | true` | `false` | When set and `loading` is true, the send button is replaced by a Stop button (square icon, "Stop" aria-label). Clicking it fires `kai-stop`. |
 | `submit` | `submit` | `undefined | "always" | "auto"` | `'always'` | Send-button visibility. Defaults to `'always'`. |
@@ -478,13 +480,13 @@ Sidebar panel listing conversations, optionally grouped. Emits events for naviga
 | Event | `detail` | Description |
 |-------|-----------|-------------|
 | `kai-attachments-change` | `{ attachments: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }` | The staged attachments changed (file added or removed). Carries the full current list so a consumer can react in real time. |
+| `kai-select` | `{ id: string; checked?: undefined | false | true }` | A `+` menu item was chosen. `checked` is present only for a toggle, carrying its NEW state. Shares `<kai-menu>`'s event name. |
 | `kai-stop` | — | The Stop button was clicked while `stoppable` and `loading` are both true. |
 | `kai-submit` | `{ value: string; doc: ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]; entities: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[]; attachments: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }` | The user submitted the prompt (Enter or send button). `value` is the flattened text. |
 | `kai-suggestion-click` | `{ value: string }` | A suggestion was clicked while `suggestion-mode="fill"`. |
 | `kai-toolbar-action` | `{ action: string }` | A custom `<kai-action>` toolbar button was clicked. `action` is the `id` of the `<kai-action>` element that was clicked. |
 | `kai-value-change` | `{ value: string; doc: ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]; entities: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }` | The input changed (fires on every edit). Carries the flattened `value` plus the structured `doc` + `entities`. |
 | `kai-voice` | — | The Voice (Mic) toolbar button was clicked. |
-| `kai-web-search` | — | The web-search (Globe) toolbar button was clicked. |
 
 #### Methods
 
@@ -522,6 +524,7 @@ Restyle from outside the Shadow DOM via `kai-prompt-input::part(name)`.
 | Part | Description |
 |------|-------------|
 | `::part(send)` | The send button. Restyle from outside, or hide it entirely (Enter-only). Hiding is pure CSS, which is why there is no `submit="never"`. <br>`kai-prompt-input::part(send) { display: none } /* Enter-only; or restyle: background, border-radius, … */` |
+| `::part(tools)` | The `+` tools trigger, the leading control of the composer row. Restyle it from outside, or hide it to offer no menu at all. <br>`kai-prompt-input::part(tools) { display: none } /* or restyle: background, border-radius, … */` |
 
 #### Composed from
 
@@ -2452,7 +2455,7 @@ A pulsing loading placeholder that preserves layout while content arrives. Respo
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
-| `items` | — | `undefined | { id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | Record<string, unknown>[] }[]` | — | Tree of menu items. Set as a JS property, not an HTML attribute. |
+| `items` | — | `undefined | { id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; description?: undefined | string; control?: undefined | "check" | "switch"; note?: undefined | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | Record<string, unknown>[] }[]` | — | Tree of menu items. Set as a JS property, not an HTML attribute. |
 | `placement` | `placement` | `undefined | string` | — | Optional placement hint (unused by the underlying Dropdown which always positions bottom-start, kept for future extension). |
 | `triggerIcon` | `trigger-icon` | `undefined | string` | — | Built-in trigger: a leading icon (a named icon, an image URL/data-URI, or text). A slotted trigger overrides it. |
 | `triggerLabel` | `trigger-label` | `undefined | string` | — | Built-in trigger: a text label. |
@@ -2498,7 +2501,7 @@ Restyle from outside the Shadow DOM via `kai-menu::part(name)`.
 
 #### Composed from
 
-`Components/Dropdown`, `Components/DropdownTrigger`, `Components/DropdownContent`, `Components/DropdownItem`, `Components/DropdownSeparator`, `Components/DropdownLabel`, `Components/DropdownCheckboxItem`, `Components/DropdownRadioItem`, `Components/DropdownSub`, `Components/DropdownSubTrigger`, `Components/DropdownSubContent`, `Components/Kbd`
+`Components/Dropdown`, `Components/DropdownTrigger`, `Components/DropdownContent`, `Components/DropdownItems`
 
 #### Theming
 

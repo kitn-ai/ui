@@ -171,6 +171,11 @@ const meta = {
       description: 'The Mic / voice button was clicked.',
       table: { category: 'Events' },
     },
+    onToolSelect: {
+      action: 'tool-select',
+      description: 'A `+` menu item was chosen. `checked` is present only for a toggle, carrying its NEW state.',
+      table: { category: 'Events' },
+    },
   },
   args: {
     messages: [],

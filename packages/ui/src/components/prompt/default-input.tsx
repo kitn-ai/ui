@@ -51,7 +51,36 @@ export interface RejectedAttachment {
  *  active item also shows as a chip in the control row, and the menu ignores it. It lives
  *  here rather than on `KaiMenuItem` so the menu's own item type does not carry a field
  *  that only one caller reads. */
-export type ComposerToolItem = KaiMenuItem & { chip?: boolean };
+export interface ComposerToolItem extends KaiMenuItem {
+  /** Ask the composer to also show this item's state as a removable chip in the
+   *  control row. Ignored by `<kai-menu>`. */
+  chip?: boolean;
+}
+
+// Reported once per process, like `resolveThreadDensity`'s latch: the mistake is a static
+// authoring one, and a component that re-renders per keystroke must not repeat itself.
+const reportedTools = new Set<string>();
+
+/** The `tools` tree, with the untyped boundary handled the way the kit handles its other
+ *  array props.
+ *
+ *  WHY THIS EXISTS AT ALL. `tools` is declared on the elements so it is observable, and
+ *  that declaration is what lets an ATTRIBUTE reach it, where an array cannot travel, so
+ *  what arrives is a string. Nothing downstream would notice: `buildComposerTools` would
+ *  spread that string's characters into the menu, and `chipItems` would walk them. The
+ *  result is a nonsense menu rather than a missing one, which is exactly the silent
+ *  wrong-ness a boundary check is for. Not an array means reported once, then absent. */
+function resolveTools(value: unknown): ComposerToolItem[] | undefined {
+  if (value === undefined || value === null) return undefined;
+  if (Array.isArray(value)) return value as ComposerToolItem[];
+  if (!reportedTools.has('tools')) {
+    reportedTools.add('tools');
+    console.error(
+      'tools: expected an array of items; rendering the built-in rows only. An array cannot travel as an attribute, so set the property instead (`el.tools = [...]`).',
+    );
+  }
+  return undefined;
+}
 
 /** The id of the built-in file item, so a host can recognise it in its own tree. */
 export const COMPOSER_FILE_ITEM_ID = 'files';
@@ -257,11 +286,13 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
   // them is stated once. `buildComposerTools` takes the same value the `<input>`'s own
   // gate uses, which is what keeps a menu item from existing without a picker behind it.
   const canOfferFiles = () => canAttach() && props.attach !== false;
-  const toolItems = () => buildComposerTools({ attach: canOfferFiles(), tools: props.tools });
-  // Read from `props.tools`, NOT from the assembled tree: `buildComposerTools` returns
-  // `KaiMenuItem[]`, which is the menu's own vocabulary and does not carry `chip`. The
-  // menu renders the tree; the chip row renders the host's declaration.
-  const chips = () => chipItems(props.tools);
+  const tools = () => resolveTools(props.tools);
+  const toolItems = () => buildComposerTools({ attach: canOfferFiles(), tools: tools() });
+  // Read from the host's own declaration, NOT from the assembled tree:
+  // `buildComposerTools` returns `KaiMenuItem[]`, which is the menu's own vocabulary and
+  // does not carry `chip`. The menu renders the tree; the chip row renders the
+  // declaration — and both go through `tools()`, so one boundary check covers each.
+  const chips = () => chipItems(tools());
 
   return (
     <>
@@ -387,7 +418,7 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
                 <Tooltip content="More tools">
                   <DropdownTrigger
                     as={(p) => (
-                      <Button {...p} type="button" variant="outline" size="icon-sm" class="rounded-full" aria-label="More tools" disabled={props.disabled}>
+                      <Button {...p} type="button" variant="outline" size="icon-sm" class="rounded-full" part="tools" aria-label="More tools" disabled={props.disabled}>
                         <Plus class="size-4" />
                       </Button>
                     )}

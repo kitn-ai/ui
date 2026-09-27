@@ -310,6 +310,16 @@ export { Source, SourceTrigger, SourceContent, SourceList } from './components/s
 export type { SourceProps, SourceTriggerProps, SourceContentProps, SourceListProps } from './components/source/source';
 export { PromptSuggestion } from './components/prompt/prompt-suggestion';
 export type { PromptSuggestionProps } from './components/prompt/prompt-suggestion';
+// The composer's active-capability chips. Exported so a host can render the row itself
+// (or its own equivalent) against the SAME `checked` field the `+` menu renders, which
+// is what stops the two disagreeing about what is on. `chipItems` stays internal: where
+// a chip comes from is the composer's business, not a host's.
+export { ComposerChips } from './components/prompt/composer-chips';
+export type { ComposerChipsProps } from './components/prompt/composer-chips';
+// The `+` menu's item type, exportable for the same reason `<kai-menu>`'s `KaiMenuItem` is:
+// a named type reaching a `kai-*` element's props has to be importable from the root entry,
+// and the shipped element declarations reference it by name.
+export type { ComposerToolItem } from './components/prompt/default-input';
 export {
   Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription, EmptyContent, emptyMediaVariants,
 } from './components/empty/empty';
