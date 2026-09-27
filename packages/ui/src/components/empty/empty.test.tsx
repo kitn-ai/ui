@@ -45,7 +45,19 @@ describe('Empty centring', () => {
     // `my-auto` on EVERY child would put free space between them too, so a header would
     // drift away from the content it belongs to. Only the outer pair takes a margin, and
     // the gaps stay `gap-*`'s job.
-    expect(el.className).not.toContain('[&>*]:my-auto');
+    //
+    // The assertions NAME that pair rather than asserting the absence of a string the
+    // component has never contained: `[&>*]:my-auto` does not appear in any version of
+    // this class list, so a `not.toContain` on it passed whatever the code said. Shape is
+    // what makes it falsifiable — swapping the pair for a per-child margin yields ONE
+    // arbitrary child selector that names no child, and both assertions below fail.
+    const childSelectors = [...el.className.matchAll(/\[&>\*[^\]]*\]/g)].map((m) => m[0]);
+    expect(childSelectors, 'the outer pair, and nothing per-child').toHaveLength(2);
+    for (const sel of childSelectors) {
+      expect(sel, 'each margin names an OUTER child, so the group stays together').toMatch(
+        /^\[&>\*:(first|last)-child\]$/,
+      );
+    }
     expect(el.className).toContain('gap-6');
     expect(el.querySelectorAll('[data-testid]')).toHaveLength(2);
   });
