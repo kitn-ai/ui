@@ -182,6 +182,12 @@ describe('DefaultPromptInput geometry', () => {
       const el = frame(container).querySelector(`[data-cluster="${cluster}"]`) as HTMLElement;
       expect(el.tagName).toBe('DIV');
       expect(el.className).toContain('contents');
+      // And the GROUP div each cluster holds — the item the frame actually lays out —
+      // holds its own width, on BOTH sides. Pinned per cluster rather than once: an
+      // invariant asserted on one side only is the shape that reads as covered while
+      // half of it can be dropped unnoticed. What the hold is for is the narrow case,
+      // not the expansion rule, and the site comment says which.
+      expect((el.querySelector(':scope > div') as HTMLElement).className).toContain('shrink-0');
     }
   });
 
@@ -439,10 +445,9 @@ describe('DefaultPromptInput capability chips', () => {
     // One group div and nothing else: the frame lays out the GROUP, and a second item
     // here would change what its `justify-between` distributes on the wrapped row.
     expect(leading.querySelectorAll(':scope > div')).toHaveLength(1);
-    // And that group holds its width. The cluster above contributes no box, so THIS is
-    // the item the frame would squeeze as the leading edge fills; without the hold the
-    // chips overflow the box the row was measured around, and the text never wraps to
-    // expand the composer the way the overflow rule depends on.
+    // And that group holds its width, on both sides: the cluster above contributes no
+    // box, so the group IS the item the frame squeezes when the groups alone outgrow the
+    // row. See the group's own comment for what the hold is and is not for.
     expect((leading.querySelector(':scope > div') as HTMLElement).className).toContain('shrink-0');
   });
 

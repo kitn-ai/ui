@@ -334,10 +334,14 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
         <div data-cluster="leading" class="contents">
           {/* `shrink-0` belongs HERE, not on the cluster above: a `contents` wrapper has
               no box, so the frame's flex items are these group divs and they are what
-              would be squeezed as the leading edge fills. Holding their width is what
-              makes the text the thing that gives — it wraps, the composer expands, and
-              the chips get their own row. Without it the groups shrink instead and
-              their contents overflow the box they were measured to fit in. */}
+              would be squeezed.
+
+              It holds the width for ONE case — when the groups ALONE exceed the frame.
+              Then, without it, they shrink and clip their chips; with it, the row
+              overflows and the chips stay legible. It is NOT what makes the text wrap:
+              the collapsed body is `flex-1`, i.e. `flex-basis: 0%`, so the base sizes
+              sum to the groups' widths, free space is positive, and the body takes
+              whatever they leave — wrapping on that width whatever they do. */}
           <div class="flex shrink-0 items-center gap-2">
             {/* Consumer-injected leading toolbar controls (e.g. a + menu). display:contents
                 ensures an empty slot adds no stray gap; projected nodes lay out as toolbar
@@ -483,9 +487,9 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
             the group div, not this wrapper, and the frame's own distribution is what
             spreads the two clusters. */}
         <div data-cluster="trailing" class="contents">
-          {/* `shrink-0` here for the same reason as the leading group: the cluster has
-              no box, so this div is the item the frame lays out and `justify-between`
-              places. */}
+          {/* `shrink-0` here for the same reason as the leading group — see that site
+              for what it is and is not for. The cluster has no box, so this div is the
+              item the frame lays out and `justify-between` places. */}
           <div class="flex shrink-0 items-center gap-2">
             <slot name="toolbar-end" />
             <Show

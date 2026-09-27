@@ -13,19 +13,27 @@ const CHIP_ICON = {
   spanClass: 'flex size-3.5 items-center justify-center',
 };
 
+/** Whether an item can BE a chip. All four are properties of the CHIP, not of a menu row:
+ *  `chip` because the chip row is opt-in, `checked` because a chip's whole job is showing
+ *  what is ON, and an `id` plus a `label` because a chip needs something to say and
+ *  something to turn off. `id` and `label` are not optional on the type, so the pair is a
+ *  guard for a tree built in untyped JS or from JSON, where an item missing a label
+ *  would render `"undefined, turn off"` at a screen reader and one missing an id would do
+ *  nothing when clicked. */
+const canChip = (item: ComposerToolItem): boolean =>
+  item.chip === true && item.checked === true && !!item.id && !!item.label;
+
 /** The items that are ON and opted in for a chip, in declaration order.
  *
  *  Recurses, because a capability is allowed to live in a submenu. The depth is a
  *  host's organisational choice, not something that changes what a switch means.
- *  `chip` and `checked` are both required: an item without `chip` shows its state in
- *  the menu alone, which is the quiet default the kit ships. */
+ *
+ *  An item that fails `canChip` is ELIGIBILITY-rejected, not dropped: the menu still
+ *  renders it exactly as it did, so nothing a host declared disappears from the UI. The
+ *  chip row's contract is simply stricter than a menu row's. */
 export function chipItems(tools: ComposerToolItem[] = []): ComposerToolItem[] {
   return tools.flatMap((item) =>
-    item.items?.length
-      ? chipItems(item.items)
-      : item.chip === true && item.checked === true
-        ? [item]
-        : [],
+    item.items?.length ? chipItems(item.items) : canChip(item) ? [item] : [],
   );
 }
 
