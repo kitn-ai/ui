@@ -9,7 +9,11 @@
 // shell's breakpoint, and finally the controls this page owns at its edges: the
 // voice transcript path, the settings menu's theme choice, the scroll-to-bottom
 // button, and the four suggestion ARCS, whose promise is that clicking a label
-// plays the turn that label names rather than the fallback script.
+// plays the turn that label names rather than the fallback script, plus the
+// empty state's own rendering as four full-width suggestion ROWS - the one
+// shape no other state can see, because every other state reads the labels off
+// the element's `suggestions` property, which says what the block offered and
+// nothing about how the kit laid it out.
 // One page (the generated /kit/ rendering of the CDN form), so record/check are
 // the modes; there is no facade parity reference for this composition.
 //
@@ -19,7 +23,10 @@
 // the driver fails with ERR_MODULE_NOT_FOUND before it runs anything.
 //   record:  node scripts/block-driver/driver.mjs ../blocks/blocks/assistant/states.mjs \
 //              --serve scripts/block-driver/pages --pages block \
-//              --record scripts/block-driver/baselines/assistant.json --shots <dir>
+//              --record scripts/block-driver/baselines/assistant.json \
+//              --shots scripts/block-driver/baselines/screenshots-assistant
+// `--shots` is REQUIRED and takes no default: the driver's old default wrote
+// into this block's source directory, which was deleted as debris twice.
 
 const settle = (ms) => (page) => page.waitForTimeout(ms);
 const style = (name, target, props) => ({ name, target, props });
@@ -185,6 +192,52 @@ let arcLabel = '';
 let labelsMidArc = [];
 let labelsEndOfArc = [];
 let labelsFromCard = [];
+
+// The empty state's rows, measured in state 30: the labels the element offered
+// and the box each of them rendered into. Two captures rather than one, because
+// the probes make two different claims - that the measured boxes ARE the offered
+// labels, and that those labels render as rows.
+let offeredRows = [];
+let rowBoxes = null;
+
+/** The boxes the empty state's labels rendered into, read through the element's
+ *  shadow root.
+ *
+ *  WHY A MEASUREMENT AND NOT A CLASS NAME. The rendering IS the decision
+ *  (`suggestions-layout="block"`), and the two variants differ in a way a box
+ *  can see: a row carries `w-full`, so it fills its container's content box and
+ *  four rows stack at four different tops, while a pill is intrinsic-width and
+ *  wraps along one line. A probe that asserted a class would be asserting the
+ *  kit's markup rather than the shape a reader sees, and this file asserts the
+ *  shape everywhere else.
+ *
+ *  The reference the width claim is made against is the row's OWN container's
+ *  content box, computed from that container's box and padding - a typed pixel
+ *  count would rot with the theme. */
+const measureRows = (page, labels) => page.evaluate((wanted) => {
+  const root = document.getElementById('prompt')?.shadowRoot;
+  if (!root) return { error: 'no shadow root on #prompt' };
+  const buttons = [...root.querySelectorAll('button')];
+  const rows = wanted.map((label) => {
+    const el = buttons.find((b) => (b.textContent ?? '').trim() === label);
+    if (!el) return { label, missing: true };
+    const parent = el.parentElement;
+    const box = el.getBoundingClientRect();
+    const style = parent ? getComputedStyle(parent) : null;
+    return {
+      label,
+      left: Math.round(box.left),
+      top: Math.round(box.top),
+      width: Math.round(box.width),
+      height: Math.round(box.height),
+      containerWidth: parent && style
+        ? Math.round(parent.getBoundingClientRect().width
+          - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight))
+        : null,
+    };
+  });
+  return { rows };
+}, labels);
 
 // The arcs' own captures, one entry per arc, written by that arc's state: what
 // its first turn carried, what its SECOND turn carried (the turn its own label
@@ -1236,6 +1289,66 @@ export default {
         turn1IsAForm: true, ownStepOffered: true, turn2IsTheBrief: true,
         crossLinksAtTheEnd: true, rendered: true,
       },
+    },
+    {
+      name: '30-suggestion-rows',
+      act: async (page) => {
+        // Back to the empty state: the rows are what it offers BEFORE a
+        // conversation exists, and the arc states above left one open.
+        await page.getByRole('button', { name: 'New chat' }).click();
+        await settle(400)(page);
+        offeredRows = await suggestionLabels(page);
+        rowBoxes = await measureRows(page, offeredRows);
+      },
+      probes: {
+        // FOUR, and each of them found: a row that did not render is reported
+        // as `missing` rather than counted away.
+        fourRows: () => (rowBoxes?.rows ?? []).length === 4
+          && rowBoxes.rows.every((r) => !r.missing),
+        // ...and the four boxes ARE the four labels the element offered, in
+        // order. Without this the width claim below could be measuring any
+        // four buttons that happen to be in the element.
+        rowsAreTheOfferedLabels: () => (rowBoxes?.rows ?? []).map((r) => r.label).join(' | ')
+          === offeredRows.join(' | '),
+        // THE ROW CLAIM, and the measurement that discriminates it from the pill
+        // variant: a row fills its container's content box (`w-full`), a pill is
+        // intrinsic-width. The measurements come back on failure, so a wrapped
+        // box names its own numbers instead of only that it differed.
+        rowsFillTheirContainer: () => {
+          const rows = rowBoxes?.rows ?? [];
+          if (rows.length === 0) return 'no rows measured';
+          const bad = rows.filter((r) => r.containerWidth === null || r.width < r.containerWidth - 1);
+          return bad.length === 0 ? true : JSON.stringify(bad);
+        },
+        // ...and four rows STACK: four distinct tops, ascending. Pills share a
+        // line, so this is the half that pins the column rather than the width.
+        rowsStack: () => {
+          const tops = (rowBoxes?.rows ?? []).map((r) => r.top);
+          if (tops.length !== 4) return `measured ${tops.length} rows`;
+          const ascending = tops.every((top, i) => i === 0 || top > tops[i - 1]);
+          return ascending ? true : JSON.stringify(tops);
+        },
+        // And every one of them is on screen, not merely in the array.
+        rendered: (page) => allRendered(page, offeredRows),
+      },
+      expect: {
+        fourRows: true, rowsAreTheOfferedLabels: true, rowsFillTheirContainer: true,
+        rowsStack: true, rendered: true,
+      },
+      // The two that are GEOMETRY, named so the react page skips them: they
+      // compare a row's box against its own container's, which is a measurement
+      // of the document it was taken in, and the react host is a different one.
+      // What survives the translation is what the react cell still asserts: four
+      // boxes exist, they are the labels the element offered, and all four are on
+      // screen.
+      layoutProbes: ['rowsFillTheirContainer', 'rowsStack'],
+      styleProbes: [
+        // The row's own surface, measured where it renders: the row variant is
+        // `h-auto w-full ... rounded-xl px-4 py-2.5`, and a pill would differ in
+        // every one of these.
+        style('suggestionRow', (page) => page.getByRole('button', { name: ARC_LABELS[0], exact: true }).first(),
+          ['height', 'paddingInline', 'borderRadius', 'textAlign']),
+      ],
     },
   ],
 };

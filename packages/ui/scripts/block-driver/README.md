@@ -27,7 +27,11 @@ red.
 - `baselines/kai-chat-facade.json` — the recorded pre-refactor verdict
   (probe + computed-style values, per scheme per state).
 - `baselines/screenshots/` — the pre-refactor screenshot set (committed, per
-  the spike-shots precedent).
+  the spike-shots precedent). `--shots <dir>` is REQUIRED and has no default:
+  the driver used to write `./shots` beside the scenario, which for a block is
+  inside the authored source tree and left ~60 PNGs of debris there. A block's
+  committed set lives at `baselines/screenshots-<block>/`, the facade's at
+  `baselines/screenshots/`; a gate passes a scratch dir.
 
 ## Modes
 

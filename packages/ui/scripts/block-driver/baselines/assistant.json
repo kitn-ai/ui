@@ -334,6 +334,24 @@
             "rendered": true
           },
           "styles": {}
+        },
+        {
+          "name": "30-suggestion-rows",
+          "probes": {
+            "fourRows": true,
+            "rowsAreTheOfferedLabels": true,
+            "rowsFillTheirContainer": true,
+            "rowsStack": true,
+            "rendered": true
+          },
+          "styles": {
+            "suggestionRow": {
+              "height": "39.25px",
+              "paddingInline": "16px",
+              "borderRadius": "13.6px",
+              "textAlign": "left"
+            }
+          }
         }
       ],
       "consoleErrors": [],
@@ -671,6 +689,24 @@
             "rendered": true
           },
           "styles": {}
+        },
+        {
+          "name": "30-suggestion-rows",
+          "probes": {
+            "fourRows": true,
+            "rowsAreTheOfferedLabels": true,
+            "rowsFillTheirContainer": true,
+            "rowsStack": true,
+            "rendered": true
+          },
+          "styles": {
+            "suggestionRow": {
+              "height": "39.25px",
+              "paddingInline": "16px",
+              "borderRadius": "13.6px",
+              "textAlign": "left"
+            }
+          }
         }
       ],
       "consoleErrors": [],

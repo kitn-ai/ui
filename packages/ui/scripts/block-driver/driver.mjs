@@ -25,7 +25,12 @@
 //                         --kit (default ../../dist relative to this file)
 //     --port <n>          with --serve (default 8952; NEVER 4400/4401/8931)
 //     --kit <dir>         with --serve: what /kit/ serves (the built dist)
-//     --shots <dir>       screenshot dir (default ./shots next to scenario)
+//     --shots <dir>       screenshot dir — REQUIRED, no default. The old default
+//                         was ./shots beside the scenario, which for a block is
+//                         inside the authored source tree (packages/blocks/blocks/
+//                         <block>/shots/), so a bare run left ~60 PNGs of debris
+//                         there — deleted twice before this. The house path for a
+//                         block is scripts/block-driver/baselines/screenshots-<block>/.
 //     --record <file>     write the verdict JSON here
 //     --baseline <file>   diff this run against a recorded verdict
 //     --out <file>        also write the (non-baseline) verdict here
@@ -47,8 +52,8 @@
 // is CLOSED, where no user path exists by construction) declares it on the
 // page spec and says why in a comment there.
 import { chromium } from 'playwright';
-import { mkdirSync, writeFileSync, readFileSync } from 'node:fs';
-import { dirname, resolve, join } from 'node:path';
+import { existsSync, mkdirSync, writeFileSync, readFileSync } from 'node:fs';
+import { dirname, relative, resolve, join } from 'node:path';
 import { pathToFileURL, fileURLToPath } from 'node:url';
 import { spawn } from 'node:child_process';
 
@@ -58,7 +63,7 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const argv = process.argv.slice(2);
 const scenarioPath = argv.find((a) => !a.startsWith('--'));
 if (!scenarioPath) {
-  console.error('usage: node driver.mjs <scenario.mjs> [--pages k,k] [--schemes light,dark] [--base url] [--serve dir] [--port n] [--kit dir] [--shots dir] [--record f] [--baseline f] [--out f]');
+  console.error('usage: node driver.mjs <scenario.mjs> --shots <dir> [--pages k,k] [--schemes light,dark] [--base url] [--serve dir] [--port n] [--kit dir] [--record f] [--baseline f] [--out f]');
   process.exit(2);
 }
 const flag = (name) => {
@@ -71,7 +76,26 @@ const pageKeys = (flag('pages') ?? Object.keys(scenario.pages).join(',')).split(
 const schemes = (flag('schemes') ?? (scenario.schemes ?? ['light', 'dark']).join(',')).split(',');
 const PORT = Number(flag('port') ?? 8952);
 const BASE = flag('base') ?? `http://localhost:${PORT}`;
-const SHOTS = resolve(flag('shots') ?? join(dirname(resolve(scenarioPath)), 'shots'));
+// --shots is REQUIRED and has no default. The default used to be `./shots` beside
+// the scenario, which for a block lands in the authored SOURCE tree
+// (packages/blocks/blocks/<block>/shots/) — a bare record run filled it with ~60
+// PNGs and it was deleted as debris twice. An explicit flag also means no run
+// rewrites a committed screenshot set by accident: the block sets live under
+// baselines/, which is a review artifact a person names on purpose.
+const shotsFlag = flag('shots');
+if (!shotsFlag) {
+  // The path is looked up rather than typed: the facade's committed set is
+  // `baselines/screenshots/`, a block's is `baselines/screenshots-<scenario>/`.
+  const house = ['screenshots-' + scenario.name, 'screenshots']
+    .map((d) => join(HERE, 'baselines', d))
+    .find((d) => existsSync(d)) ?? join(HERE, 'baselines', `screenshots-${scenario.name}`);
+  console.error(
+    `--shots <dir> is required: the driver writes one screenshot per state per scheme, and it has no default.\n` +
+    `The house path for "${scenario.name}" is ${relative(process.cwd(), house)} — or any scratch dir.`,
+  );
+  process.exit(2);
+}
+const SHOTS = resolve(shotsFlag);
 mkdirSync(SHOTS, { recursive: true });
 
 for (const k of pageKeys) {
