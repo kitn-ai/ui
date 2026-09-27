@@ -385,3 +385,87 @@ describe('DefaultPromptInput tools trigger wiring', () => {
     await waitFor(() => expect(document.activeElement).toBe(trigger));
   });
 });
+
+/**
+ * The chips are one view of the same `checked` field the menu renders, so these pin
+ * the two facts that keep the two from disagreeing: WHICH items earn a chip, and that
+ * removing one leaves through the SAME event a menu selection uses. Anything else
+ * would be a second code path that has to agree with the first by luck.
+ */
+describe('DefaultPromptInput capability chips', () => {
+  const chipFor = (name: string) => screen.queryByRole('button', { name });
+
+  it('chips a checked item that opted in, and removes it through the menu\u2019s own event', () => {
+    const onToolSelect = vi.fn();
+    render(() => (
+      <DefaultPromptInput
+        {...baseProps}
+        tools={[{ id: 'web', label: 'Web search', icon: 'globe', checked: true, chip: true }]}
+        onToolSelect={onToolSelect}
+      />
+    ));
+
+    const button = screen.getByRole('button', { name: 'Web search, turn off' });
+    expect(button).toHaveTextContent('Web search');
+    fireEvent.click(button);
+    // `checked: false` is the NEW state, which is exactly what the menu reports for the
+    // same item — so a host's toggle handler serves both.
+    expect(onToolSelect).toHaveBeenCalledWith({ id: 'web', checked: false });
+  });
+
+  it('leaves a checked item without `chip` to the menu', () => {
+    render(() => (
+      <DefaultPromptInput {...baseProps} tools={[{ id: 'web', label: 'Web search', checked: true }]} />
+    ));
+    // The quiet default: the menu shows the state, the control row stays clean.
+    expect(chipFor('Web search, turn off')).not.toBeInTheDocument();
+  });
+
+  it('does not chip an item that opted in while it is OFF', () => {
+    render(() => (
+      <DefaultPromptInput {...baseProps} tools={[{ id: 'web', label: 'Web search', checked: false, chip: true }]} />
+    ));
+    expect(chipFor('Web search, turn off')).not.toBeInTheDocument();
+  });
+
+  it('renders the chip inside the leading cluster, which stays ONE item', () => {
+    const { container } = render(() => (
+      <DefaultPromptInput {...baseProps} tools={[{ id: 'web', label: 'Web search', checked: true, chip: true }]} />
+    ));
+    const leading = container.querySelector('[data-cluster="leading"]') as HTMLElement;
+    const button = screen.getByRole('button', { name: 'Web search, turn off' });
+
+    expect(leading.contains(button)).toBe(true);
+    // One group div and nothing else: the frame lays out the GROUP, and a second item
+    // here would change what its `justify-between` distributes on the wrapped row.
+    expect(leading.querySelectorAll(':scope > div')).toHaveLength(1);
+    // And that group holds its width. The cluster above contributes no box, so THIS is
+    // the item the frame would squeeze as the leading edge fills; without the hold the
+    // chips overflow the box the row was measured around, and the text never wraps to
+    // expand the composer the way the overflow rule depends on.
+    expect((leading.querySelector(':scope > div') as HTMLElement).className).toContain('shrink-0');
+  });
+
+  it('does not force the composer open: a chip competes for width like any control', () => {
+    // The overflow boundary, stated where it can be read today: both clusters are
+    // controls for this purpose, so as chips multiply the text is what gives. It wraps,
+    // the composer expands, and the chips move onto the control row below. Nothing
+    // clamps and nothing hides, because a hidden capability is worse than a crowded
+    // edge. The remaining case is a row whose chips alone are wider than the composer,
+    // and the answer there is to pin `expanded` rather than to have the kit choose
+    // which capabilities to hide.
+    const { container } = render(() => (
+      <DefaultPromptInput {...baseProps} tools={[{ id: 'web', label: 'Web search', checked: true, chip: true }]} />
+    ));
+    // Assert the chip is THERE first. Without this the case passes for the wrong reason:
+    // a composer with no chip is trivially collapsed, so it would stay green if the chip
+    // never rendered at all — the vacuous-pass shape this file's other cases avoid.
+    expect(screen.getByRole('button', { name: 'Web search, turn off' })).toBeInTheDocument();
+
+    const frame = container.querySelector('[data-prompt-input]') as HTMLElement;
+    // Still the collapsed row, on the measured padding. A chip that expanded the
+    // composer would be a chip the resolver knew about, and it deliberately does not.
+    expect(frame.className).toContain('flex-row');
+    expect(frame.className).toContain('py-2.5');
+  });
+});

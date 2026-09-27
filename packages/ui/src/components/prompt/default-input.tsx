@@ -1,5 +1,6 @@
 import { For, Show } from 'solid-js';
 import { PromptInput, PromptInputTextarea } from './prompt-input';
+import { ComposerChips, chipItems } from './composer-chips';
 import type { TriggerDef, ComposerChange } from '../composer/composer';
 import { type ComposerDoc, normalizeValue, serializeToText } from '../../primitives/composer-model';
 import { PromptSuggestion } from './prompt-suggestion';
@@ -257,6 +258,10 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
   // gate uses, which is what keeps a menu item from existing without a picker behind it.
   const canOfferFiles = () => canAttach() && props.attach !== false;
   const toolItems = () => buildComposerTools({ attach: canOfferFiles(), tools: props.tools });
+  // Read from `props.tools`, NOT from the assembled tree: `buildComposerTools` returns
+  // `KaiMenuItem[]`, which is the menu's own vocabulary and does not carry `chip`. The
+  // menu renders the tree; the chip row renders the host's declaration.
+  const chips = () => chipItems(props.tools);
 
   return (
     <>
@@ -327,7 +332,13 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
             contributes no box, so the item the frame actually lays out is the group div
             below — which is what keeps this cluster ONE item on whichever row it lands. */}
         <div data-cluster="leading" class="contents">
-          <div class="flex items-center gap-2">
+          {/* `shrink-0` belongs HERE, not on the cluster above: a `contents` wrapper has
+              no box, so the frame's flex items are these group divs and they are what
+              would be squeezed as the leading edge fills. Holding their width is what
+              makes the text the thing that gives — it wraps, the composer expands, and
+              the chips get their own row. Without it the groups shrink instead and
+              their contents overflow the box they were measured to fit in. */}
+          <div class="flex shrink-0 items-center gap-2">
             {/* Consumer-injected leading toolbar controls (e.g. a + menu). display:contents
                 ensures an empty slot adds no stray gap; projected nodes lay out as toolbar
                 items. Native slot; projected by the custom element. */}
@@ -395,6 +406,20 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
                 </DropdownContent>
               </Dropdown>
             </Show>
+            {/* Active capabilities, one view of the same `checked` field the menu
+                renders. Inside the leading group so the cluster stays ONE item on
+                whichever row it lands — a sibling would make it two and the frame's
+                `justify-between` would spread the wrong things. */}
+            <Show when={chips().length > 0}>
+              <span class="bg-border h-4 w-px shrink-0" aria-hidden="true" />
+              <ComposerChips
+                items={chips()}
+                disabled={props.disabled}
+                // The SAME event the menu fires when the item is chosen, so a chip and a
+                // menu row are one code path rather than two that have to agree.
+                onRemove={(id) => props.onToolSelect?.({ id, checked: false })}
+              />
+            </Show>
             <Show when={props.webSearch}>
               <Button
                 type="button"
@@ -458,7 +483,10 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
             the group div, not this wrapper, and the frame's own distribution is what
             spreads the two clusters. */}
         <div data-cluster="trailing" class="contents">
-          <div class="flex items-center gap-2">
+          {/* `shrink-0` here for the same reason as the leading group: the cluster has
+              no box, so this div is the item the frame lays out and `justify-between`
+              places. */}
+          <div class="flex shrink-0 items-center gap-2">
             <slot name="toolbar-end" />
             <Show
               when={showStop()}
