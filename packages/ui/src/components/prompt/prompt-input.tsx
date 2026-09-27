@@ -4,6 +4,12 @@ import { useChatConfig, textClass } from '../../primitives/chat-config';
 import { Composer, type TriggerDef, type ComposerChange } from '../composer/composer';
 import type { ComposerDoc } from '../../primitives/composer-model';
 import { useComposerExpansion, type ComposerLayout } from '../../primitives/composer-expansion';
+// The kit's ONE copy of "is this event happening inside a control": it scans the
+// composed path and cuts it at the boundary, so a control in a nested shadow root
+// counts and an ancestor `tabindex` above the boundary does not. The conversation
+// rows use it for the same reason — a container must not take an event a control
+// inside it owns.
+import { interactiveInside } from '../../primitives/focusable-child';
 
 // --- Context ---
 
@@ -74,7 +80,16 @@ function PromptInput(props: PromptInputProps) {
   };
 
   const handleClick: JSX.EventHandler<HTMLDivElement, MouseEvent> = (e) => {
-    if (!local.disabled) textareaRef()?.focus();
+    // Focus the editable only when the click did NOT land on a control inside this
+    // frame. Clicking the `+` trigger otherwise opens the menu WITH the caret in
+    // the composer, so the arrow keys a user reaches for next TYPE into the text
+    // instead of walking the menu. The paperclip did the same and it was harmless
+    // because it opened a file dialog; a menu makes it visible.
+    // A click on the editable itself is a control (it matches the focusable-child
+    // rule), so this skips the redundant call and lets the click focus it natively.
+    if (!local.disabled && !interactiveInside(e.composedPath(), e.currentTarget)) {
+      textareaRef()?.focus();
+    }
     if (typeof local.onClick === 'function') {
       (local.onClick as (e: MouseEvent & { currentTarget: HTMLDivElement }) => void)(e);
     }

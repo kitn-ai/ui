@@ -3,12 +3,11 @@ import { PromptInput, PromptInputTextarea } from './prompt-input';
 import type { TriggerDef, ComposerChange } from '../composer/composer';
 import { type ComposerDoc, normalizeValue, serializeToText } from '../../primitives/composer-model';
 import { PromptSuggestion } from './prompt-suggestion';
-import { Button, buttonVariants } from '../button/button';
+import { Button } from '../button/button';
 import { Tooltip } from '../tooltip/tooltip';
 import { Globe, Mic, Plus, Square } from 'lucide-solid';
 import { Dropdown, DropdownTrigger, DropdownContent } from '../dropdown/dropdown';
 import { DropdownItems } from '../dropdown/dropdown-items';
-import { cn } from '../../utils/cn';
 import type { KaiMenuItem } from '../../web-components/web-component/web-component-data-types';
 import {
   Attachments,
@@ -354,21 +353,26 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
                 `More tools`, because a tip that becomes the accessible name is a defect the
                 kit has already shipped once.
 
-                The trigger is a plain button carrying the Button's own variant classes
-                rather than `as={<Button>}`, which would put the surface's trigger ref on a
-                component that then has to forward it a second time. Nothing in jsdom can
-                tell us whether that second hop happened, and the surface's position is
-                what depends on it. */}
+                The trigger goes through `as` so it IS the kit's `Button` rather than a
+                native button carrying a copy of its variant classes — a copy silently stops
+                matching every other control in this row the day Button is restyled. The
+                ref hop this costs (the surface's trigger ref travels `As` -> the function's
+                props -> Button's `rest` -> the real `<button>`) is asserted rather than
+                assumed: `the surface's trigger ref reaches the real button` in the test
+                file fails if it lands on a wrapper or on nothing, because the close path
+                focuses `ctx.trigger()` and the assertion reads `document.activeElement`.
+                `type` is supplied here because the surface only stamps it when it renders
+                the button itself. */}
             <Show when={toolItems().length > 0}>
               <Dropdown disabled={props.disabled}>
                 <Tooltip content="More tools">
                   <DropdownTrigger
-                    class={cn(buttonVariants({ variant: 'outline', size: 'icon-sm' }), 'rounded-full')}
-                    aria-label="More tools"
-                    disabled={props.disabled}
-                  >
-                    <Plus class="size-4" />
-                  </DropdownTrigger>
+                    as={(p) => (
+                      <Button {...p} type="button" variant="outline" size="icon-sm" class="rounded-full" aria-label="More tools" disabled={props.disabled}>
+                        <Plus class="size-4" />
+                      </Button>
+                    )}
+                  />
                 </Tooltip>
                 <DropdownContent>
                   <DropdownItems

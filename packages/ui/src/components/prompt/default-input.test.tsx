@@ -13,7 +13,7 @@
  */
 import { describe, it, expect, afterEach, vi } from 'vitest';
 import '@testing-library/jest-dom/vitest';
-import { render, cleanup, fireEvent, within, screen } from '@solidjs/testing-library';
+import { render, cleanup, fireEvent, within, screen, waitFor } from '@solidjs/testing-library';
 import { DefaultPromptInput, buildComposerTools } from './default-input';
 import { PromptInput, PromptInputTextarea, PromptInputActions } from './prompt-input';
 
@@ -307,5 +307,67 @@ describe('DefaultPromptInput geometry', () => {
     // measured band-to-text gap.
     expect(band.className).toContain('mb-3.5');
     expect(band.compareDocumentPosition(editable(container)) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+});
+
+/**
+ * A click inside the frame focuses the editable — that is the composer's whole point
+ * — but NOT when it lands on a control inside it. The `+` trigger opens a menu, and
+ * focusing the text on the way in leaves the caret in the composer, so the arrow keys
+ * the user reaches for next TYPE into the text instead of walking the menu. (The
+ * paperclip did the same and it was harmless: it opened a file dialog.)
+ *
+ * These assertions discriminate in jsdom because the frame calls `.focus()`
+ * EXPLICITLY, and jsdom honours that even though it does not focus on click — so
+ * without the fix the second case fails rather than passing vacuously.
+ */
+describe('DefaultPromptInput click-to-focus', () => {
+  const editableEl = (c: HTMLElement) => c.querySelector('[data-kai-composer-editable]') as HTMLElement;
+  const frameEl = (c: HTMLElement) => c.querySelector('[data-prompt-input]') as HTMLElement;
+
+  it('focuses the editable when the click lands on the frame itself', () => {
+    const { container } = render(() => <DefaultPromptInput {...baseProps} />);
+    fireEvent.click(frameEl(container));
+    expect(document.activeElement).toBe(editableEl(container));
+  });
+
+  it('leaves the caret alone when the click lands on a control inside it', () => {
+    const { container, getByRole } = render(() => (
+      <DefaultPromptInput {...baseProps} tools={[{ id: 'x', label: 'X' }]} onToolSelect={noop} />
+    ));
+    editableEl(container).blur();
+    fireEvent.click(getByRole('button', { name: 'More tools' }));
+    expect(document.activeElement).not.toBe(editableEl(container));
+  });
+});
+
+/**
+ * The surface's trigger ref reaches the real `<button>`.
+ *
+ * The trigger renders through `as`, so the ref travels `As` -> the function's props ->
+ * `Button`'s `rest` -> the inner element. If that hop landed on a wrapper, or on
+ * nothing, the surface would have no trigger to position against or to return focus
+ * to — and no other gate in this repo can see it, because jsdom has no layout.
+ *
+ * So the assertion is `document.activeElement` after a selection: the close path
+ * focuses `ctx.trigger()`, which only the ref sets. Reading `aria-haspopup` instead
+ * would prove nothing, since the spread puts that on the inner element either way.
+ */
+describe('DefaultPromptInput tools trigger wiring', () => {
+  it("the surface's trigger ref reaches the real button", async () => {
+    const { getByRole } = render(() => (
+      <DefaultPromptInput {...baseProps} tools={[{ id: 'x', label: 'X' }]} onToolSelect={noop} />
+    ));
+    const trigger = getByRole('button', { name: 'More tools' }) as HTMLButtonElement;
+    expect(trigger.tagName).toBe('BUTTON');
+
+    // Toggle it open and closed again. Closing runs the surface's return-focus path,
+    // which reads `ctx.trigger()` — the value ONLY the trigger ref ever sets. Nothing
+    // else the spread does is ref-dependent in a DOM with no layout, which is why
+    // this is the assertion and `aria-haspopup` (which lands either way) is not.
+    fireEvent.click(trigger);
+    fireEvent.click(trigger);
+
+    await waitFor(() => expect(document.activeElement).toBe(trigger));
   });
 });
