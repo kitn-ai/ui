@@ -358,24 +358,114 @@ export function writeTypes(root, elements, _toAttr, IMPORTS, { domMembers = new 
       ])
       .join('\n');
 
+  // ---- event maps --------------------------------------------------------------
+  // `el.addEventListener('kai-…', e => e.detail.…)` is the pattern every guide in this
+  // repo teaches, and it was TS2339 on `Event` for EVERY kai-* event: the .d.ts declared
+  // the payload types (`KaiChatElementEvents`, `KaiVoiceInputElementEvents`) for the Vue
+  // template layer and nothing `addEventListener` resolves against. Consumer code that
+  // followed the docs needed a cast, which is the one thing the docs said it did not need.
+  //
+  // TWO shapes, because one cannot be correct alone:
+  //
+  //   • a per-element `<ClassName>EventMap extends HTMLElementEventMap` carrying the
+  //     events THAT element declares, plus the four add/removeEventListener overloads
+  //     lib.dom gives HTMLVideoElement for the same reason (HTMLVideoElementEventMap).
+  //     Per element is what lets one event name carry a different payload on different
+  //     elements: `kai-change` is `{ checked: boolean }` on kai-checkbox and
+  //     `{ sizes: number[] }` on kai-resizable, and a single key in a single global
+  //     interface cannot be both (TS2717). Extending HTMLElementEventMap rather than
+  //     fresh-declaring is what keeps the DOM's own events (`click`, `input`) typed on an
+  //     upgraded element instead of shadowed by the listener overloads.
+  //
+  //   • a global HTMLElementEventMap augmentation for the event names whose payload type
+  //     is identical everywhere it is DECLARED — most of them. That half is what reaches
+  //     `document.getElementById('voice')`, still a plain HTMLElement, and it is the shape
+  //     the hand-authored src/web-components/resizable/resizable.globals.d.ts used for the
+  //     cross-element maximize pair before this generator covered them.
+  //
+  // A name declared on more than one element with DIFFERENT payloads is emitted per
+  // element only and left out of the global block: a global entry would have to pick one
+  // element's payload and be wrong for the rest (`kai-submit` is `{ value, attachments }`
+  // on kai-chat, `{ value }` on kai-search), or print a union no consumer can read through.
+  // The generator prints what it left out, so the gap is visible in the build log rather
+  // than a silent hole in the types.
+  //
+  // `detail === 'unknown'` is not a declaration: the name was inferred from a file-scoped
+  // `dispatch(…)` literal (kai-resizable-item inherits its parent's that way), so it is not
+  // emitted onto that element and the element that DID declare it is the source.
+  const declares = (el) => el.events.filter((e) => e.detail !== 'unknown');
+  const detailOf = (e) => clean(e.detail, false);
+  const eventMember = (e) =>
+    `  '${e.name}': CustomEvent${e.detail ? `<${detailOf(e)}>` : ''};`;
+
+  const listenerOverloads = (el) =>
+    declares(el).length
+      ? [
+          `  addEventListener<K extends keyof ${el.className}EventMap>(type: K, listener: (this: ${el.className}, ev: ${el.className}EventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;`,
+          `  addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;`,
+          `  removeEventListener<K extends keyof ${el.className}EventMap>(type: K, listener: (this: ${el.className}, ev: ${el.className}EventMap[K]) => any, options?: boolean | EventListenerOptions): void;`,
+          `  removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;`,
+        ].join('\n')
+      : '';
+
   const interfaces = elements
     .map((el) => {
-      const body = [propBody(el, true), methodBody(el)].filter(Boolean).join('\n');
+      const body = [propBody(el, true), methodBody(el), listenerOverloads(el)].filter(Boolean).join('\n');
       return `export interface ${el.className} extends HTMLElement {\n${body}\n}`;
     })
     .join('\n\n');
+
+  const eventMapInterfaces = elements
+    .filter((el) => declares(el).length)
+    .map((el) => {
+      const body = declares(el)
+        .flatMap((e) => [...(e.description ? [`  /** ${e.description} */`] : []), eventMember(e)])
+        .join('\n');
+      return `export interface ${el.className}EventMap extends HTMLElementEventMap {\n${body}\n}`;
+    })
+    .join('\n\n');
+
+  // name -> the set of distinct declared payloads for it ('' for a detail-less event).
+  // More than one means the name means something different on different elements.
+  const byEventName = new Map();
+  for (const el of elements) {
+    for (const e of declares(el)) {
+      if (!byEventName.has(e.name)) byEventName.set(e.name, new Set());
+      byEventName.get(e.name).add(e.detail ? detailOf(e) : '');
+    }
+  }
+  const globalEventNames = [...byEventName.keys()].filter((n) => byEventName.get(n).size === 1).sort();
+  const perElementOnly = [...byEventName.keys()].filter((n) => byEventName.get(n).size > 1).sort();
 
   const tagMap = elements.map((el) => `    '${el.tag}': ${el.className};`).join('\n');
 
   const banner = `// AUTO-GENERATED by scripts/gen-web-component-api.mjs — do not edit by hand.
 // Typed custom-element interfaces + HTMLElementTagNameMap augmentation, so
 // \`document.querySelector('kai-message')\` is typed and gets prop autocomplete.
+// Plus the event maps \`el.addEventListener('kai-…', e => e.detail.…)\` resolves against:
+// a per-element \`<ClassName>EventMap\` on the element, and an HTMLElementEventMap
+// entry for every event name whose payload is the same on every element that declares it.
 // Also augments React's JSX.IntrinsicElements (see below) so a raw <kai-chat>
 // written directly in TSX type-checks.`;
 
   const tagMapBlock = `declare global {
   interface HTMLElementTagNameMap {
 ${tagMap}
+  }
+}`;
+
+  // The single declared payload for a name, or '' when the event carries no detail
+  // (`CustomEvent`).
+  const solePayload = (name) => [...byEventName.get(name)][0];
+
+  const globalEventBlock = `declare global {
+  interface HTMLElementEventMap {
+${globalEventNames
+    .map((n) => {
+      const payload = solePayload(n);
+      return `    '${n}': CustomEvent${payload ? `<${payload}>` : ''};`;
+    })
+    .join('\n')}
   }
 }`;
 
@@ -544,7 +634,11 @@ ${TOAST_TYPES}
 
 ${interfaces}
 
+${eventMapInterfaces}
+
 ${tagMapBlock}
+
+${globalEventBlock}
 
 ${jsxIntrinsicBlock}
 
@@ -572,7 +666,11 @@ ${TOAST_TYPES}
 
 ${interfaces}
 
+${eventMapInterfaces}
+
 ${tagMapBlock}
+
+${globalEventBlock}
 
 ${jsxIntrinsicBlock}
 
@@ -586,4 +684,14 @@ ${vueBlock}
   if (!existsSync(distDir)) mkdirSync(distDir, { recursive: true });
   writeFileSync(resolve(distDir, 'web-components.d.ts'), distOut);
   console.log(`✓ dist/web-components.d.ts — ${elements.length} web components (self-contained)`);
+  console.log(
+    `  · event maps: ${elements.filter((el) => declares(el).length).length} elements, ` +
+      `${globalEventNames.length} names on HTMLElementEventMap`,
+  );
+  if (perElementOnly.length) {
+    console.log(
+      `  · ${perElementOnly.length} name(s) per-element only, because their payload differs by element: ` +
+        `${perElementOnly.join(', ')}`,
+    );
+  }
 }
