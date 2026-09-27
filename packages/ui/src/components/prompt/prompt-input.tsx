@@ -153,27 +153,27 @@ function PromptInputTextarea(props: PromptInputTextareaProps) {
   const ctx = usePromptInput();
   const config = useChatConfig();
 
-  // The frame (PromptInput root) still owns radius/bg/padding/focus-ring — and now
+  // The frame (PromptInput root) still owns radius/bg/padding/focus-ring, and now
   // EVERY inset as well, so this editable carries none of its own: the paragraph and
   // the buttons beside or under it start on one edge BY CONSTRUCTION rather than by
   // two values that have to agree.
   //
   // NO min-height here, and that is a fix rather than an omission. It carried
   // `min-h-6` (24px) against this size's ~20px line box, and a line box sits at the
-  // TOP of a taller content box — so the text rendered 2-3px above the centreline the
-  // 28px controls are on. Visible in the collapsed row, and invisible to every test,
-  // because nothing here can measure. The height that centres the text belongs one
-  // level up, on the wrapper, where it can be the CONTROL height instead of a number
-  // someone picked. An empty editable still has a line box: the placeholder is a
-  // `::before` carrying `content: attr(data-placeholder)`.
-  // `text-start` is a PIN, not a style choice: `text-align` inherits, so any
-  // centered ancestor (`Empty`'s root did exactly this) reached in and centered
-  // the placeholder AND the typed text. An input control's text alignment is a
-  // fact about the control, so it states it rather than inheriting it. LOGICAL
-  // (`start`), not `text-left` — in RTL the correct edge is the right one, and
-  // pinning the physical value would be a worse bug than the one it fixes.
+  // TOP of a taller content box, so the text rendered 2-3px above the centreline the
+  // 28px controls are on. The height that centres the text lives one level up, on the
+  // wrapper, as the CONTROL height. The empty case's one-line floor is `min-height:
+  // 1lh` in the composer's own style block, without which an empty editable is 0px
+  // tall and the placeholder lands half a line low. Both are invisible to a test
+  // here, because nothing here can measure.
   const editableClass = () =>
     cn(
+      // `text-start` is a PIN, not a style choice: `text-align` inherits, so any
+      // centered ancestor (`Empty`'s root did exactly this) reached in and centered
+      // the placeholder AND the typed text. An input control's text alignment is a
+      // fact about the control, so it states it rather than inheriting it. LOGICAL
+      // (`start`), not `text-left`: in RTL the correct edge is the right one, and
+      // pinning the physical value would be a worse bug than the one it fixes.
       'text-foreground w-full bg-transparent text-start shadow-none outline-none focus-visible:ring-0 focus-visible:ring-offset-0 overflow-y-auto whitespace-pre-wrap break-words',
       textClass(config.proseSize()),
       local.class,

@@ -352,3 +352,33 @@ describe('Composer focus events', () => {
     expect(onBlur).toHaveBeenCalledTimes(1);
   });
 });
+
+/**
+ * The editable's one-line floor.
+ *
+ * jsdom computes no layout, so this asserts the RULE rather than its effect: the floor
+ * and its fallback are both in the injected sheet, in that order. The effect — the
+ * placeholder sitting ON the row's centreline rather than half a line below it — is
+ * measured in a real browser by `scripts/probe-composer-states.mjs`, because a computed
+ * height here would be the jsdom default and prove nothing.
+ *
+ * DELETION is the risk this guards. An empty doc leaves no in-flow content and the
+ * placeholder pseudo-element is absolute, so without the floor the editable is 0px tall:
+ * centred by `items-center` its top lands at the body's middle and the placeholder renders
+ * about 10px low. That is a defect no computed-style assertion can see, which is how it
+ * reached the owner's eyes in the first place.
+ */
+describe('Composer editable floor', () => {
+  it('declares a one-line min-height on the editable, with its fallback first', () => {
+    const { container } = render(() => <Composer />);
+    const css = Array.from(container.querySelectorAll('style'))
+      .map((s) => s.textContent ?? '')
+      .join('\n');
+
+    expect(css).toContain('min-height: 1lh');
+    expect(css).toContain('min-height: 1.25rem');
+    // Ordered, not merely present: a fallback declared AFTER the unit it backs would
+    // override it wherever both are supported, which is the opposite of a fallback.
+    expect(css.indexOf('min-height: 1.25rem')).toBeLessThan(css.indexOf('min-height: 1lh'));
+  });
+});

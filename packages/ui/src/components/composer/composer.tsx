@@ -1026,13 +1026,28 @@ export function Composer(props: ComposerProps): JSX.Element {
         img.kai-composer-pill-icon { border-radius: 9999px; object-fit: cover; }
         .kai-composer-pill-glyph { display: inline-flex; align-items: center; justify-content: center; opacity: 0.8; }
         .kai-composer-pill-glyph svg { width: 1em; height: 1em; display: block; }
-        /* The editable is the containing block for the placeholder pseudo-element. */
-        [data-kai-composer-editable] { position: relative; }
+        /* The editable is the containing block for the placeholder pseudo-element, and it
+           carries a ONE-LINE FLOOR. An empty doc leaves no in-flow content, and the
+           placeholder rule below is absolute, so without the floor an empty composer is
+           0px tall: centred by the composing frame's items-center body its TOP lands at
+           the body's middle, and the placeholder's static position IS that top, so it
+           renders half a line BELOW the row's centre. At the default prose size: row 48 =
+           10 + 28 + 10, body 28 at top 10, editable 20 at top 14, placeholder 14->34,
+           centre 24 = the row's centre. 1lh is the element's OWN line-height, so the
+           floor follows the prose size instead of being a number that has to agree with
+           it; the rem value is the fallback for an engine without the unit and is exact
+           only at the default size. (No backticks in this block: it is a template
+           literal, so a backtick would end the string.) */
+        [data-kai-composer-editable] {
+          position: relative;
+          min-height: 1.25rem;
+          min-height: 1lh;
+        }
         /* While a pill is arrow-selected the pill IS the selection, so hide the text
            caret so a blinking cursor doesn't sit beside the highlight box. Returns
            the moment the pill selection clears (arrow off, type, click, backspace). */
         [data-kai-composer-editable][data-pill-selected] { caret-color: transparent; }
-        /* Placeholder via pseudo-element — exempt from axe color-contrast like a
+        /* Placeholder via pseudo-element, exempt from axe color-contrast like a
            native <textarea> placeholder. position:absolute (with auto offsets =
            its static text-origin spot) takes it OUT of flow, so the caret sits at
            the START of the field instead of after the placeholder text. */
