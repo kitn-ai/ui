@@ -36,7 +36,9 @@ Two completed plans, one written and unstarted, and a fix wave on top:
 2. The **react-tree gate's false positive**: `verify:blocks` greps `/<kai-[\w-]+/` over emitted `.tsx` and cannot tell a JSX comment from a tag. One round worked around it by rewording a comment; the next comment naming an element trips it identically.
 3. The **`kai-icon` size question**: the empty-state tile declares `[&_svg]:size-6` (24px) but `size="lg"` yields 20px, and a 24px mark is unreachable from the block. A kit icon-scale decision, owner's look.
 4. The **voice spec** (spec 2 of 4) — planned nowhere yet.
-5. The final review's **one content question for the owner**: the task-list arc renders a *second* card where the storyboard promises a revision. Either the approved sentence changes or the arc cannot demonstrate a revision.
+5. **The starter's stale `shadow-sm`** (`examples/starters/solid/src/components/ThreadView.tsx`) — the kit deleted that class when the scroll button took over `kai-elevation`, so two box-shadows are decided by stylesheet order. One line.
+6. **The markdown block-spacing model** — the four holes (flush paragraphs worst) are being closed by one spacing model rather than a fifth patch; check whether that round landed.
+7. The final review's **one content question for the owner**: the task-list arc renders a *second* card where the storyboard promises a revision. Either the approved sentence changes or the arc cannot demonstrate a revision.
 
 ## 3. The gates, and how to run them
 
