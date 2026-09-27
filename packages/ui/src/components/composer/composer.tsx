@@ -1062,7 +1062,17 @@ export function Composer(props: ComposerProps): JSX.Element {
           at the text origin automatically (respecting the editable's padding/font),
           and, like a native <textarea> placeholder, is exempt from axe color-contrast
           (a real text node would fail it at the muted color). */}
-      <div class="relative">
+      {/* `w-full` is LOAD-BEARING, not tidiness — do not remove it as redundant.
+          This wrapper declares no width of its own, so inside a FLEX parent (the bare
+          consumer's body, which centres the one-line text) it is a flex item whose
+          automatic basis takes its width from its content — and an empty composer HAS
+          no content width, because the placeholder is the absolute `::before` below,
+          out of flow by design so the caret starts at the field's start. The wrapper
+          was 0px wide and the editable's own `overflow: auto` clipped the placeholder
+          away: typed text showed, the placeholder never did. `width: 100%` resolves
+          against the parent's definite width instead; a block child of a block parent
+          (the standalone shell) is unaffected either way. */}
+      <div class="relative w-full">
         <div
           ref={(el) => { editable = el; props.editableRef?.(el); }}
           data-kai-composer-editable

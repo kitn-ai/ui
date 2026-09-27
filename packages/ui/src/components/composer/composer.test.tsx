@@ -382,3 +382,55 @@ describe('Composer editable floor', () => {
     expect(css.indexOf('min-height: 1.25rem')).toBeLessThan(css.indexOf('min-height: 1lh'));
   });
 });
+
+/**
+ * An EMPTY composer must still have a definite width.
+ *
+ * `Composer` renders the editable inside its own `div.relative`, and that wrapper
+ * declares no width of its own: it is a shrink-to-fit box. Two facts together make
+ * that fatal once the composer is empty, and neither is visible in this file:
+ *
+ *  1. The `bare` consumer's body is a flex container (`prompt-input.tsx` centres the
+ *     one-line text in it), so the wrapper is a flex ITEM whose automatic basis takes
+ *     its width from its content.
+ *  2. The placeholder is a `::before` with `position: absolute` — deliberately, so the
+ *     caret sits at the start of the field instead of after the placeholder text — so
+ *     it is out of flow and contributes no content width.
+ *
+ * The wrapper was therefore 0px wide while the composer was empty, and because the
+ * editable also carries `overflow: auto` (which computes the other axis to `auto`
+ * too) the absolutely-positioned placeholder was CLIPPED and invisible. Measured live
+ * in Chromium: empty editable 0px wide inside a 608px body, 68px after typing one
+ * phrase — which is why typed text was always visible and only the placeholder was
+ * not.
+ *
+ * These assert the CLASS, not geometry: jsdom lays nothing out, so a width assertion
+ * here would pass on the broken tree. The pixel claim belongs to
+ * `scripts/probe-composer-states.mjs`, and the class is what stops it regressing.
+ */
+describe('Composer: the editable wrapper carries a definite width', () => {
+  const wrapperOf = (container: HTMLElement) => editable(container).parentElement as HTMLElement;
+
+  it('inside a flex parent with an empty value — the case that was broken', () => {
+    const { container } = render(() => (
+      <div class="flex">
+        <Composer bare placeholder="Ask anything" value="" />
+      </div>
+    ));
+    expect(wrapperOf(container).className).toContain('w-full');
+  });
+
+  it('standalone, where the parent is the shell rather than a flex body', () => {
+    const { container } = render(() => <Composer placeholder="Ask anything" value="" />);
+    expect(wrapperOf(container).className).toContain('w-full');
+  });
+
+  it('with content, so the class is not conditional on emptiness', () => {
+    const { container } = render(() => (
+      <div class="flex">
+        <Composer bare placeholder="Ask anything" value="hello" />
+      </div>
+    ));
+    expect(wrapperOf(container).className).toContain('w-full');
+  });
+});
