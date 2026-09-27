@@ -100,3 +100,16 @@ tree's vocabulary is the wrong one for a conversation.
 | 8.3 | **Grouping is derived from the rows**, one ordering, never two. |
 | 8.4 | **Pinning stays per-folder**; `Recents` is recency. |
 | 8.5 | **Search reveals its matches** by opening the folder it found them in. |
+
+## CORRECTION — how the folders are composed (task 2's shape)
+
+An earlier draft of this spec, and the plan's task 2, said the folders would be "the kit's collapsible around the conversation rows". **That shape is not expressible, and the implementing round was right to stop rather than build it.** Two measured reasons:
+
+1. **There is no page-level disclosure.** The collapsible is a Solid component with no element facade, so a folder in the block's page grammar could only be a native `details`/`summary` — not the kit's control.
+2. **Wrapping a row re-homes it.** The conversations element takes its rows as direct children, and an item wrapped in anything becomes *standalone* by its own documented rule: it renders its own `tabindex`, fires its own select event, and gets no active state from the container. Every row would become its own tab stop and arrow traversal would be gone. That contradicts this spec's own §8.5 decision of record.
+
+**The correct shape, and it needs no kit change:** the element **already renders collapsible groups itself.** It takes a `groups` array, buckets the conversations it is given by their `groupId`, and uses the collapsible inside its own shadow root. So the folder never wraps a page-level row — the element loops its own rows, the direct-child rule holds, and every row keeps the roving focus and activation it has today.
+
+**What the block therefore does:** pass the projects as `groups`, stamp `groupId` onto each row at the page boundary (a mapping, not a kit change), and drive the selection the way the element already expects.
+
+**Open residue, to be reported before any further shape is chosen:** whether a per-group display limit exists for `Show more`; what the bucket of conversations with no group is labelled and where it sorts; and whether a group's open state can be driven and observed from the page — the two cases that need it being the active conversation's folder open on arrival, and a search opening the folder it matched in.
