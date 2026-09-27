@@ -13,7 +13,11 @@
 // empty state's own rendering as four full-width suggestion ROWS - the one
 // shape no other state can see, because every other state reads the labels off
 // the element's `suggestions` property, which says what the block offered and
-// nothing about how the kit laid it out.
+// nothing about how the kit laid it out. Last of all the rail's TOP ACTIONS: the
+// four rows in its header region, three of them inert with their reason on them,
+// and the one that acts firing the same new-chat path the rail's built-in button
+// used to. The keyboard walk over the rail's rows runs BEFORE those two, and its
+// recorded values do not move: the rows are outside the list by construction.
 // One page (the generated /kit/ rendering of the CDN form), so record/check are
 // the modes; there is no facade parity reference for this composition.
 //
@@ -328,6 +332,170 @@ let searchOpen = null;
 let keyboardWalk = null;
 let activeArrival = null;
 let unknownGroup = null;
+
+// The rail's top actions: what the four rows ARE and where they sit (state 43),
+// and what the three inert ones left alone (state 44). Both are read off the page
+// rather than restated here, and state 44's before/after pair is captured in its
+// act because "nothing changed" is only a fact about two moments.
+let railTopRows = null;
+let railTopActions = null;
+
+// A COPY, and it says so: the four rows' labels, the action each carries and the
+// curated icon name it draws. The driver is plain JS and cannot import the
+// block's markup, so state 43 compares what the page rendered against this list -
+// a reworded label, or a glyph name the kit's roster does not resolve, goes red
+// there rather than rendering an empty row nobody looks at.
+const RAIL_TOP_ACTIONS = [
+  { action: 'new-chat', label: 'New chat', icon: 'square-pen' },
+  { action: 'images', label: 'Images', icon: 'image' },
+  { action: 'scheduled', label: 'Scheduled', icon: 'clock' },
+  { action: 'plugins', label: 'Plugins', icon: 'box' },
+];
+
+/** The rail's top action rows, read off the page: the region they live in, and per
+ *  row the label, the action, the icon name it declares, the GLYPH it actually
+ *  painted (an unknown name paints nothing), the two boxes the group's homogeneity
+ *  is measured on, and what a row that cannot act says.
+ *
+ *  The glyph is reached through whichever element the row is: the one row that acts
+ *  is a kai-button and paints its icon inside its own shadow root, the three plain
+ *  rows carry a kai-icon child. Both are kai elements, so each value is read
+ *  property-then-attribute (`readBoundValue`'s rule): the html binder writes a
+ *  bound attribute while the react tree assigns the declared prop. */
+const railTopRowFacts = (page) => page.evaluate(() => {
+  const bound = (el, prop, attr) => {
+    if (!el) return null;
+    const value = el[prop];
+    return typeof value === 'string' && value ? value : el.getAttribute(attr);
+  };
+  const region = document.querySelector('kai-conversations > [slot="header"]');
+  const rows = [...document.querySelectorAll('kai-conversations [data-action]')];
+  return {
+    rows: rows.map((row) => {
+      const iconEl = row.shadowRoot ? row : row.querySelector('kai-icon');
+      const glyph = (row.shadowRoot ?? iconEl?.shadowRoot)?.querySelector('svg') ?? null;
+      const tooltip = row.closest('kai-tooltip');
+      const box = row.getBoundingClientRect();
+      const glyphBox = glyph?.getBoundingClientRect() ?? null;
+      return {
+        action: row.getAttribute('data-action'),
+        label: (row.querySelector('.rail-action-label')?.textContent ?? row.textContent ?? '').trim(),
+        icon: bound(iconEl, 'name', 'name') ?? bound(row, 'icon', 'icon'),
+        glyphPainted: glyphBox !== null && glyphBox.width > 0 && glyphBox.height > 0,
+        glyphLeft: glyphBox === null ? null : Math.round(glyphBox.left),
+        rowHeight: Math.round(box.height),
+        rowTop: Math.round(box.top),
+        rowBottom: Math.round(box.bottom),
+        rowLeft: Math.round(box.left),
+        inHeaderRegion: region !== null && region.contains(row),
+        // The container's own membership rule is `:scope > kai-conversation-item`,
+        // so these two facts are what says the list cannot collect a row: it is
+        // not an item, and it is not the rail's child.
+        conversationItem: row.localName === 'kai-conversation-item',
+        railsChild: row.parentElement?.localName === 'kai-conversations',
+        role: row.getAttribute('role'),
+        ariaDisabled: row.getAttribute('aria-disabled'),
+        reason: bound(tooltip, 'content', 'content') ?? '',
+      };
+    }),
+    // The rail's own rows, for the claim that the four sit ABOVE the tree: its
+    // first row is a folder heading by construction.
+    firstRailRowTop: Math.round(
+      (document.querySelector('kai-conversations > kai-conversation-item')?.getBoundingClientRect().top ?? NaN),
+    ),
+    // The step inside the group against the gap after it, read as boxes rather
+    // than as a class: the group's own row step is 2px and what follows it is the
+    // search box, so "a visible gap" is a number this can compare.
+    searchBoxTop: Math.round(
+      (document.getElementById('conversations')?.shadowRoot
+        ?.querySelector('input[aria-label="Search chats"]')?.getBoundingClientRect().top ?? NaN),
+    ),
+  };
+});
+
+/** Every rail row as the TREE it makes: the kind, the title the page renders, the
+ *  box each row came to, whether it carries a second line at all, the two margins
+ *  the CSS decides, and the register its title is painted in (the count of a
+ *  section's rows is the whole of what state 45 asserts about the tree's shape).
+ *
+ *  OFF THE ROW ELEMENTS, never off the state array: the claim is about what the
+ *  rail LAYS OUT, and the array beside it says nothing about a line count or a
+ *  margin. The title is read from the row's own slotted span - the row's body
+ *  lives in its shadow root, and the span is what the page can see. */
+const railSectionFacts = (page) => page.evaluate(() => {
+  const rootSize = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+  const toPx = (value) => {
+    const n = parseFloat(value);
+    if (!Number.isFinite(n)) return 0;
+    return value.trim().endsWith('px') ? n : n * rootSize;
+  };
+  /** A #rrggbb token as the rgb() string a computed colour comes back in, or null
+   *  when the theme expresses it as something else - which is reported rather than
+   *  guessed at, so a theme this cannot read is a named failure. */
+  const normalize = (value) => {
+    const hex = /^#([0-9a-f]{6})$/i.exec(value.trim());
+    if (!hex) return null;
+    const n = parseInt(hex[1], 16);
+    return `rgb(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255})`;
+  };
+  const items = [...document.querySelectorAll('kai-conversations > kai-conversation-item')];
+  const titleOf = (el) => el.querySelector(':scope > span');
+  // THE THEME'S MUTED REGISTER, read off a row's TITLE SPAN - and the span rather
+  // than the rail's host is the measured answer: the kit sets its colour tokens on
+  // hosts AND scopes the dark scheme inside each shadow root, so a custom property
+  // read on a host outside that scope reports the light value while the very same
+  // span the reader sees resolves the scheme's own (measured dark: host #696972,
+  // span #a7a5a0). Read from a CONVERSATION row: it carries no muted rule of this
+  // block's, so what it resolves is the theme's.
+  const source = [...items].reverse().find((el) => (el.getAttribute('data-rail') ?? 'conversation') === 'conversation') ?? items[items.length - 1];
+  const sourceSpan = source ? titleOf(source) : null;
+  const mutedToken = sourceSpan ? getComputedStyle(sourceSpan).getPropertyValue('--color-muted-foreground').trim() : '';
+  return {
+    // The kit's own spacing knob, as the page resolves it: empty when the page
+    // does not set one, in which case the block's CSS falls back to the kit's
+    // default unit and the rule is measured against THAT.
+    density: getComputedStyle(document.documentElement).getPropertyValue('--kai-density').trim(),
+    mutedToken,
+    mutedTokenAsRgb: normalize(mutedToken),
+    rows: items.map((el) => {
+      const span = titleOf(el);
+      const cs = span ? getComputedStyle(span) : null;
+      const box = el.getBoundingClientRect();
+      const own = getComputedStyle(el);
+      const caret = el.querySelector('.row-caret');
+      const caretStyle = caret ? getComputedStyle(caret) : null;
+      return {
+        id: el.conversationId ?? el.getAttribute('conversation-id') ?? el.id,
+        kind: el.getAttribute('data-rail') ?? 'conversation',
+        folder: el.getAttribute('data-folder') ?? '',
+        title: (span?.textContent ?? '').trim(),
+        height: Math.round(box.height),
+        top: Math.round(box.top),
+        metaSlots: el.querySelectorAll('[slot="meta"]').length,
+        marginBlockStart: toPx(own.marginBlockStart),
+        register: cs === null ? null : { fontSize: cs.fontSize, fontWeight: cs.fontWeight, color: cs.color },
+        caret: caret === null || caretStyle === null ? null : {
+          // AFTER the title: the title FOLLOWS the caret, so a tree that still led
+          // the label with the caret reports itself here rather than in a
+          // screenshot nobody diffs.
+          trailsTheTitle: span !== null
+            && (span.compareDocumentPosition(caret) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0,
+          // Every row carries the element (one repeat renders one element kind);
+          // only a heading SHOWS one, and the hidden ones are not a caret a
+          // reader could see.
+          hidden: caret.hasAttribute('hidden'),
+          tabindex: caret.getAttribute('tabindex'),
+          tabIndex: caret.tabIndex,
+          opacity: caretStyle.opacity,
+          color: caretStyle.color,
+        },
+      };
+    }),
+  };
+});
+
+// State 45's one reading, captured in its act.
+let railSections = null;
 
 const firstIndexRow = (page, spec) => page.evaluate(
   (key) => { try { return JSON.parse(localStorage.getItem(key) ?? '[]')[0] ?? null; } catch { return null; } },
@@ -2506,6 +2674,378 @@ export default {
         clickingItOpensItsThread: true,
         folderIndent: true,
       },
+    },
+    {
+      // THE RAIL'S TOP ACTIONS, which are the sidebar's own furniture rather than
+      // a kit surface: four rows above the search box, with the tree below them.
+      // Three claims, and the third is the one a screenshot cannot make: the rows
+      // are THERE in the order and with the glyphs the block declares; they sit
+      // OUTSIDE the list - not a conversation item, not the rail's own child, so
+      // the container's membership rule cannot collect them and its roving focus is
+      // untouched; and the three that cannot act SAY WHY.
+      //
+      // That the walk itself still holds is the state BEFORE this one (40), and its
+      // recorded values do not move: the rows are outside the list by construction,
+      // not by a measurement taken here.
+      name: '43-rail-actions',
+      layoutProbes: ['theRowsAgreeOnTheirBox', 'theGroupIsSeparatedFromWhatFollows', 'theRowsSitAboveTheTree'],
+      act: async (page) => {
+        // THE RAIL'S OWN SCROLLER, brought to the top first. The states before this
+        // one left it down the tree (activating a row scrolls it into view), and
+        // this state's claim includes an ORDER - the four rows above the tree -
+        // which a row parked above the viewport would turn into a claim about a
+        // scroll position instead of about the layout. The thread's scroller is
+        // set the same way in the scroll-button state, for the same reason.
+        await page.evaluate(() => {
+          const box = document.getElementById('conversations')?.shadowRoot?.querySelector('.overflow-y-auto');
+          if (box) box.scrollTop = 0;
+        });
+        await settle(200)(page);
+        railTopRows = await railTopRowFacts(page);
+      },
+      probes: {
+        // The four rows, their order, their labels and the curated glyph each
+        // declares, against the copy above. The return value is what was read, so
+        // a reworded label names itself instead of only failing.
+        theRowsAreTheSidebarsTopActions: () => {
+          const got = (railTopRows?.rows ?? []).map(({ action, label, icon }) => ({ action, label, icon }));
+          const want = RAIL_TOP_ACTIONS.map(({ action, label, icon }) => ({ action, label, icon }));
+          return JSON.stringify(got) === JSON.stringify(want) ? true : JSON.stringify(got);
+        },
+        // THE KEYBOARD CLAIM, made where it can be: a row the container could
+        // collect would join the roving focus and take a tab stop with it. The two
+        // facts that say it cannot are the container's own membership test -
+        // `:scope > kai-conversation-item` - plus the region they really live in.
+        theRowsAreNotListRows: () => {
+          const rows = railTopRows?.rows ?? [];
+          if (rows.length !== RAIL_TOP_ACTIONS.length) return `${rows.length} rows carry an action`;
+          const bad = rows.filter((row) => !row.inHeaderRegion || row.conversationItem || row.railsChild);
+          return bad.length === 0
+            ? true
+            : bad.map((row) => `${row.action}: region=${row.inHeaderRegion} item=${row.conversationItem} railsChild=${row.railsChild}`).join(' | ');
+        },
+        // A CURATED NAME OR NOTHING AT ALL: the kit paints no glyph for a name its
+        // roster does not carry, so the box IS the check that each name resolved.
+        everyRowPaintedItsGlyph: () => {
+          const rows = railTopRows?.rows ?? [];
+          const empty = rows.filter((row) => row.glyphPainted !== true).map((row) => `${row.action}:${row.icon}`);
+          return rows.length > 0 && empty.length === 0
+            ? true
+            : (rows.length === 0 ? 'no action rows were found' : `no glyph painted for ${empty.join(', ')}`);
+        },
+        // ONE LIST OF ROWS: same height, and the leading glyph at the same x, which
+        // is what makes a row that acts and three that cannot read as one group.
+        // Measured, because the acting row's box is painted inside a kit button's
+        // shadow root and the others are plain markup matched to it by hand.
+        theRowsAgreeOnTheirBox: () => {
+          const rows = railTopRows?.rows ?? [];
+          if (rows.length !== RAIL_TOP_ACTIONS.length) return `${rows.length} rows carry an action`;
+          const heights = [...new Set(rows.map((row) => row.rowHeight))];
+          const lefts = [...new Set(rows.map((row) => row.glyphLeft))];
+          if (heights.length !== 1) return `the rows disagree on height: ${JSON.stringify(heights)}`;
+          if (lefts.length !== 1) return `the glyphs disagree on their left edge: ${JSON.stringify(lefts)}`;
+          return heights[0] > 0 && lefts[0] !== null;
+        },
+        // THE GAP AFTER THE FOUR, as a number beside the step inside them: a group
+        // whose following gap is only its own row step reads as the head of
+        // whatever comes next, which is what the four-row region is not.
+        theGroupIsSeparatedFromWhatFollows: () => {
+          const rows = railTopRows?.rows ?? [];
+          if (rows.length !== RAIL_TOP_ACTIONS.length) return `${rows.length} rows carry an action`;
+          const step = rows[1].rowTop - rows[0].rowBottom;
+          const after = railTopRows.searchBoxTop - rows[rows.length - 1].rowBottom;
+          if (!Number.isFinite(after)) return 'the search box was not found to measure against';
+          return after > step ? true : `the gap after the group (${after}px) is not bigger than the step inside it (${step}px)`;
+        },
+        // ...AND ABOVE THE TREE, in the order the reference reads: the four rows,
+        // then the folders, of which the first row on the rail is one by
+        // construction (a folder's heading leads its own run).
+        theRowsSitAboveTheTree: () => {
+          const rows = railTopRows?.rows ?? [];
+          if (rows.length !== RAIL_TOP_ACTIONS.length) return `${rows.length} rows carry an action`;
+          const inOrder = rows.every((row, index) => index === 0 || row.rowTop > rows[index - 1].rowTop);
+          if (!inOrder) return `the rows are not stacked in order: ${JSON.stringify(rows.map((row) => row.rowTop))}`;
+          const below = rows[rows.length - 1].rowBottom;
+          if (!Number.isFinite(railTopRows.firstRailRowTop)) return 'the rail holds no row to sit above';
+          return below < railTopRows.firstRailRowTop
+            ? true
+            : `the first rail row starts at ${railTopRows.firstRailRowTop}px, the last action row ends at ${below}px`;
+        },
+        // THE THREE THAT CANNOT ACT SAY SO, twice: announced disabled, and carrying
+        // a reason. The row that DOES act carries neither, so "inert" is a fact about
+        // the row rather than about the group.
+        theInertRowsSayWhyTheyCannotAct: () => {
+          const rows = railTopRows?.rows ?? [];
+          const inert = rows.filter((row) => row.action !== 'new-chat');
+          const live = rows.filter((row) => row.action === 'new-chat');
+          if (inert.length !== 3 || live.length !== 1) return `${inert.length} inert rows and ${live.length} live ones`;
+          const bad = inert.filter((row) => row.role !== 'button' || row.ariaDisabled !== 'true' || row.reason.length === 0);
+          if (bad.length) {
+            return bad.map((row) => `${row.action}: role=${row.role} disabled=${row.ariaDisabled} reason=${JSON.stringify(row.reason)}`).join(' | ');
+          }
+          return live[0].ariaDisabled === null
+            ? true
+            : `the acting row is announced disabled (${live[0].ariaDisabled})`;
+        },
+        // ONE CONTROL NAMED "New chat" ON THE PAGE. The rail's built-in bar used to
+        // hold the other one; the header region replaces that bar, so the row IS the
+        // affordance and every path through it is the one `newChat` action.
+        oneNewChatOnThePage: (page) => page.getByRole('button', { name: 'New chat', exact: true })
+          .count().then((n) => n === 1 || `${n} controls are named New chat`),
+        // ...and the collapse control the built-in bar also carried survived the
+        // swap. That it really collapses the shell is the rail-collapsed state's,
+        // twenty-nine states earlier.
+        theCollapseControlIsStillThere: (page) => page.getByRole('button', { name: 'Toggle sidebar', exact: true })
+          .count().then((n) => n === 1 || `${n} controls are named Toggle sidebar`),
+      },
+      expect: {
+        theRowsAreTheSidebarsTopActions: true,
+        theRowsAreNotListRows: true,
+        everyRowPaintedItsGlyph: true,
+        theRowsAgreeOnTheirBox: true,
+        theGroupIsSeparatedFromWhatFollows: true,
+        theRowsSitAboveTheTree: true,
+        theInertRowsSayWhyTheyCannotAct: true,
+        oneNewChatOnThePage: true,
+        theCollapseControlIsStillThere: true,
+      },
+      styleProbes: [
+        style('railActionInertRow', (page) => page.getByRole('button', { name: 'Images', exact: true }),
+          ['height', 'fontSize', 'paddingInline', 'color']),
+        style('railActionLiveRow', (page) => page.locator('#rail-new-chat'), ['height']),
+      ],
+    },
+    {
+      // AND WHAT EACH ROW DOES. The three demo rows have nothing behind them, so
+      // the honest pair of claims is that the page says so (state 43) AND that a
+      // click really changes nothing - which is a fact about a before and an after,
+      // both read here. The fourth row is the block's one new-chat path, exercised
+      // from the top of the rail rather than from the message area, and the tree it
+      // does not disturb is what separates "a new chat" from "a new conversation
+      // list".
+      name: '44-rail-actions-behaviour',
+      act: async (page) => {
+        const read = () => page.evaluate(() => ({
+          rows: document.querySelectorAll('kai-conversations > kai-conversation-item').length,
+          activeId: document.getElementById('conversations')?.activeId ?? '',
+          messages: (document.getElementById('thread')?.messages ?? []).length,
+        }));
+        const before = await read();
+        for (const label of ['Images', 'Scheduled', 'Plugins']) {
+          // FORCED, and this is the one programmatic step in the file. The rows are
+          // announced `aria-disabled`, which is exactly what makes the gesture worth
+          // making: a driver that refuses to click a disabled control would be
+          // asserting the announcement rather than the behaviour, and what has to be
+          // true is that a pointer landing on the row anyway - which is what
+          // `force` is - still changes nothing. Playwright's own actionability
+          // refuses an `aria-disabled` element as "not enabled", so the two facts
+          // (announced disabled, and inert when clicked regardless) cannot both be
+          // read without it.
+          await page.getByRole('button', { name: label, exact: true }).click({ force: true });
+          await settle(250)(page);
+        }
+        const afterInert = await read();
+        await page.getByRole('button', { name: 'New chat', exact: true }).click();
+        await settle(500)(page);
+        const afterNewChat = await read();
+        const emptyVisible = await page.getByText('What can I help with?').count().then((n) => n > 0);
+        railTopActions = { before, afterInert, afterNewChat, emptyVisible };
+      },
+      probes: {
+        // NOTHING, and the thread's length is checked FIRST so a page that had
+        // already emptied it cannot pass this by having nothing to disturb.
+        theInertRowsChangedNothing: () => {
+          const { before, afterInert } = railTopActions ?? {};
+          if (!before || !afterInert) return 'the click pair was not captured';
+          if (before.messages === 0) return 'the thread was already empty, so nothing was there to disturb';
+          return JSON.stringify(before) === JSON.stringify(afterInert)
+            ? true
+            : JSON.stringify({ before, afterInert });
+        },
+        // AND THE ONE THAT ACTS: a fresh chat is the empty thread and the empty
+        // state back, which is what the block's own new-chat path produces.
+        theNewChatRowStartsAFreshChat: () => {
+          const { afterNewChat, emptyVisible } = railTopActions ?? {};
+          if (!afterNewChat) return 'the state was not captured';
+          if (afterNewChat.messages !== 0) return `the thread still holds ${afterNewChat.messages} turns`;
+          return emptyVisible === true || 'the empty state did not come back';
+        },
+        // ...while the rail keeps every row it had: a new chat is a new THREAD, not
+        // a clearing of the tree the four rows sit above.
+        theNewChatRowKeptTheTree: () => {
+          const { before, afterNewChat } = railTopActions ?? {};
+          if (!before || !afterNewChat) return 'the state was not captured';
+          if (before.rows === 0) return 'the rail held no rows, so keeping them proves nothing';
+          return afterNewChat.rows === before.rows || `${afterNewChat.rows} rows after ${before.rows} before`;
+        },
+      },
+      expect: {
+        theInertRowsChangedNothing: true,
+        theNewChatRowStartsAFreshChat: true,
+        theNewChatRowKeptTheTree: true,
+      },
+    },
+    {
+      // THE RAIL AS A TREE, which is what a reader sees before they read a single
+      // label: a Projects LABEL over the folders, rows ONE line tall, and air where
+      // a section ends and the next begins. The three were the owner's own reading
+      // of a live page, so each is measured here rather than described.
+      //
+      // This state runs LAST and touches nothing: it reads the rail the run has
+      // built, so what it measures is the same tree the states above pinned.
+      name: '45-rail-sections',
+      layoutProbes: ['theSectionStartsCarryTheAir', 'theRowsAreOneLine'],
+      act: async (page) => {
+        // NO POINTER ON THE RAIL FIRST. The caret is revealed on hover, so "what
+        // the row shows" is only a fact once the mouse is somewhere else - and
+        // the states before this one left it wherever they last clicked.
+        await page.mouse.move(1000, 700);
+        await settle(250)(page);
+        railSections = await railSectionFacts(page);
+        // AND THEN THE HOVER, the other half of that claim: the caret a reader
+        // sees when they point at the row. Read on the first folder's heading,
+        // and the pointer is moved off again so the state's own screenshot is of
+        // a rail nobody is hovering.
+        const heading = page.locator('kai-conversations > kai-conversation-item[data-rail="folder"]').first();
+        await heading.hover();
+        await settle(300)(page);
+        railSections.caretOnHover = await heading.evaluate((el) => {
+          const caret = el.querySelector('.row-caret');
+          return caret === null ? null : getComputedStyle(caret).opacity;
+        });
+        await page.mouse.move(1000, 700);
+        await settle(250)(page);
+      },
+      probes: {
+        // THE LABEL, where a section heading belongs: one row, reading `Projects`,
+        // and the row directly under it is a folder - not the Recents heading, and
+        // not a conversation.
+        theProjectsLabelHeadsTheFolders: () => {
+          const rows = railSections?.rows ?? [];
+          const at = rows.findIndex((row) => row.kind === 'section');
+          if (at === -1) return 'no section row on the rail';
+          if (rows.filter((row) => row.kind === 'section').length !== 1) return 'more than one section row';
+          if (rows[at].title !== 'Projects') return `the label reads ${JSON.stringify(rows[at].title)}`;
+          return rows[at + 1]?.kind === 'folder'
+            ? true
+            : `the row under the label is a ${JSON.stringify(rows[at + 1]?.kind ?? 'nothing')}`;
+        },
+        // ...IN THE REGISTER THE OTHER HEADING ALREADY USES. Recents is the rail's
+        // own heading, so the two are compared as computed styles rather than
+        // against a size typed here: the label is a new row, and a row that did not
+        // match would read as a title rather than as a heading.
+        theLabelReadsLikeRecents: () => {
+          const rows = railSections?.rows ?? [];
+          const label = rows.find((row) => row.kind === 'section');
+          const recents = rows.find((row) => row.kind === 'folder' && row.folder === '');
+          if (!label || !recents) return 'the label or the Recents heading is missing';
+          return JSON.stringify(label.register) === JSON.stringify(recents.register)
+            ? true
+            : JSON.stringify({ label: label.register, recents: recents.register });
+        },
+        // ONE LINE PER ROW: the second line was the row's `meta` region, so the
+        // claim is that no row carries one - and that every conversation row came
+        // to the SAME height, which is what "one line" looks like measured. The
+        // number itself is pinned by this state's style probe.
+        theRowsAreOneLine: () => {
+          const rows = railSections?.rows ?? [];
+          const conversations = rows.filter((row) => row.kind === 'conversation');
+          if (conversations.length === 0) return 'the rail holds no conversation to measure';
+          const withMeta = rows.filter((row) => row.metaSlots > 0).map((row) => row.id);
+          if (withMeta.length) return `rows carry a meta line: ${withMeta.join(', ')}`;
+          const heights = [...new Set(conversations.map((row) => row.height))];
+          return heights.length === 1
+            ? true
+            : `conversation rows disagree on height: ${JSON.stringify(heights)}`;
+        },
+        // THE AIR BETWEEN SECTIONS, DERIVED RATHER THAN TYPED: both rows that START
+        // a section carry the same block-start margin, that margin is TWO DENSITY
+        // UNITS of the kit's own spacing knob (the page sets none, so the kit's
+        // default is what the rule falls back to), and the folder headings INSIDE
+        // Projects carry none - a folder heads a folder, not a section.
+        theSectionStartsCarryTheAir: () => {
+          const rows = railSections?.rows ?? [];
+          const unit = railSections?.density === '' ? 4 : parseFloat(railSections?.density ?? '') * 16;
+          const starts = rows.filter((row) => row.kind === 'section' || (row.kind === 'folder' && row.folder === ''));
+          const inside = rows.filter((row) => row.kind === 'folder' && row.folder !== '');
+          if (starts.length !== 2) return `${starts.length} rows start a section`;
+          if (inside.length === 0) return 'no folder heading sits inside Projects';
+          const margins = [...new Set(starts.map((row) => row.marginBlockStart))];
+          if (margins.length !== 1) return `the two section starts disagree: ${JSON.stringify(margins)}`;
+          if (margins[0] !== unit * 2) return `a section start carries ${margins[0]}px, two density units are ${unit * 2}px`;
+          const tight = inside.filter((row) => row.marginBlockStart !== 0);
+          return tight.length === 0 ? true : `a folder heading inside Projects carries air: ${JSON.stringify(tight.map((row) => row.marginBlockStart))}`;
+        },
+        // THE SECTION LABELS TAKE THE THEME'S MUTED REGISTER, and the check is
+        // against the TOKEN rather than against a shade: the label's colour has to
+        // BE what the kit's --color-muted-foreground resolves to on the rail, the
+        // two labels have to agree, and the rows under them have to be something
+        // else - which together are the hierarchy, measured.
+        theSectionLabelsTakeTheMutedToken: () => {
+          const rows = railSections?.rows ?? [];
+          const token = railSections?.mutedTokenAsRgb ?? null;
+          if (token === null) return `the theme's muted-foreground token is ${JSON.stringify(railSections?.mutedToken)}, which this check cannot normalise`;
+          const labels = rows.filter((row) => row.kind === 'section' || (row.kind === 'folder' && row.folder === ''));
+          if (labels.length !== 2) return `${labels.length} rows are section labels`;
+          const wrong = labels.filter((row) => row.register?.color !== token);
+          if (wrong.length) {
+            return wrong.map((row) => `${row.title} reads ${row.register?.color}, the token is ${token}`).join(' | ');
+          }
+          const content = rows.filter((row) => row.kind === 'conversation').map((row) => row.register?.color);
+          const heading = rows.find((row) => row.kind === 'folder' && row.folder !== '');
+          if (content.length === 0 || !heading) return 'no content row to compare the labels against';
+          const same = [...content, heading.register?.color].filter((color) => color === token);
+          return same.length === 0
+            ? true
+            : `${same.length} content rows are painted in the label register`;
+        },
+        // THE CARET TRAILS THE TITLE, REVEALS ON HOVER, AND IS NOT A CONTROL: it
+        // comes after the title in the row, it is invisible until the row is
+        // hovered and visible while it is, and it carries no tabindex - so the row
+        // that is already a tab stop does not gain a second one. The keyboard walk
+        // over the same rows is the state before this one's neighbours, and it
+        // measures the tab stop count directly.
+        theCaretTrailsTheTitleAndReveals: () => {
+          const rows = railSections?.rows ?? [];
+          const caretRows = rows.filter((row) => row.caret !== null && row.caret.hidden !== true);
+          if (caretRows.length === 0) return 'no row shows a caret to measure';
+          const leading = caretRows.filter((row) => row.caret.trailsTheTitle !== true).map((row) => row.title);
+          if (leading.length) return `the caret leads the title on ${JSON.stringify(leading)}`;
+          const focusable = caretRows.filter((row) => row.caret.tabindex !== null || row.caret.tabIndex >= 0).map((row) => row.title);
+          if (focusable.length) return `a caret is a second tab stop on ${JSON.stringify(focusable)}`;
+          const shown = caretRows.filter((row) => row.caret.opacity !== '0').map((row) => `${row.title}:${row.caret.opacity}`);
+          if (shown.length) return `a caret is visible with no pointer on the rail: ${shown.join(', ')}`;
+          return railSections?.caretOnHover === '1'
+            ? true
+            : `hovering the heading left the caret at opacity ${JSON.stringify(railSections?.caretOnHover)}`;
+        },
+      },
+      expect: {
+        theProjectsLabelHeadsTheFolders: true,
+        theLabelReadsLikeRecents: true,
+        theRowsAreOneLine: true,
+        theSectionStartsCarryTheAir: true,
+        theSectionLabelsTakeTheMutedToken: true,
+        theCaretTrailsTheTitleAndReveals: true,
+      },
+      styleProbes: [
+        // THE REGISTERS, pinned by this state rather than described: three rows'
+        // title spans, so a theme change and a rule change are both visible in the
+        // diff. The span, not the row: the row's own colour is whatever it inherits,
+        // and the rule this state is about is on the page's own slotted title.
+        style('railConversationRowTitle', (page) => page.locator('kai-conversations > kai-conversation-item[data-rail="conversation"] > span').first(),
+          ['fontSize', 'color']),
+        style('railProjectsLabelTitle', (page) => page.locator('kai-conversations > kai-conversation-item[data-rail="section"] > span'),
+          ['fontSize', 'color']),
+        style('railRecentsHeadingTitle', (page) => page.locator('kai-conversations > kai-conversation-item[data-rail="folder"][data-folder=""] > span'),
+          ['fontSize', 'color']),
+        style('railFolderHeadingTitle', (page) => page.locator('kai-conversations > kai-conversation-item[data-rail="folder"]:not([data-folder=""]) > span').first(),
+          ['fontSize', 'color']),
+        style('railProjectsLabelRow', (page) => page.locator('kai-conversations > kai-conversation-item[data-rail="section"]'),
+          ['height', 'marginBlockStart']),
+        style('railCaret', (page) => page.locator('kai-conversations > kai-conversation-item[data-rail="folder"] .row-caret').first(),
+          ['color', 'opacity']),
+      ],
     },
   ],
 };

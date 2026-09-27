@@ -62,8 +62,6 @@ kai-editable-label.row-rename { min-width: 0; max-width: 100%; }
  * the foot of this sheet carries. */
 kai-icon[hidden] { display: none; }
 kai-dropdown[hidden] { display: none; }
-/* The caret leads the row and leaves a little air before the label. */
-kai-conversation-item .row-caret { margin-right: 0.25rem; opacity: 0.7; }
 
 /* A conversation filed in a folder sits one step in from its heading, which is
  * how the tree reads: the heading is a rail row and its conversations are under
@@ -78,26 +76,40 @@ kai-conversation-item .row-caret { margin-right: 0.25rem; opacity: 0.7; }
  * remainder - so the first two agreeing is asserted rather than assumed. */
 kai-conversation-item[data-rail="conversation"]:not([data-folder=""]) { margin-inline-start: 1rem; }
 
-/* The plain (non-activating) menu row's box, and it is spelled here for one
- * reason: the rows that DO act are kai-buttons, whose box the kit paints inside
- * their shadow root from its own size="sm" variant - 32px tall, 12px of inline
- * padding, text-xs, rounded-md - and nothing out here can borrow that. Spelling
- * it makes the two kinds of row read as one list: same height, same padding, so
- * icon and label start at the same x. */
-.menu-row {
+/* THE PLAIN ROW'S BOX, and it is spelled here for one reason: the rows that DO
+ * act are kai-buttons, whose box the kit paints inside their shadow root from
+ * its own size="sm" variant - 32px tall, 12px of inline padding, text-xs,
+ * rounded-md - and nothing out here can borrow that. Spelling it makes the two
+ * kinds of row read as one list: same height, same padding, so icon and label
+ * start at the same x. TWO lists carry it, and both are a row that acts beside
+ * rows that cannot: the row menu's Share item beside its three live items, and
+ * the rail's top actions, where the one live row sits above three inert ones. */
+.menu-row, .rail-action {
   display: flex; align-items: center; gap: 0.5rem;
   box-sizing: border-box; height: 2rem; padding: 0 0.75rem;
   border-radius: 6px; font-size: 0.75rem;
 }
 /* Dimmed, and nothing else: the row keeps its pointer events, because the
  * reason it is disabled is a tooltip and a tooltip needs a hover. Its BOX is
- * its own content rather than the menu's width - the tooltip wraps its trigger
+ * its own content rather than the region's width - the tooltip wraps its trigger
  * in a shrink-wrapping box of its own, inside the tooltip's shadow root, which
  * no stylesheet out here can stretch. The measured facts are the ones that
  * matter for it to read as a row: 32px tall with 12px of inline padding, so its
  * icon and label start at the same x as a kai-button row's. */
-.menu-row-disabled { color: color-mix(in srgb, currentColor 55%, transparent); }
-.menu-row-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.menu-row-disabled, .rail-action-inert { color: color-mix(in srgb, currentColor 55%, transparent); }
+.menu-row-label, .rail-action-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* THE RAIL'S TOP REGION, which lives in the list's header slot. That slot's own
+ * box is inside the rail's shadow root and is a plain block with no padding, so
+ * the region's box is this rule: the rail's own inline padding, one step between
+ * the collapse control and the action rows, and a LOOSER bottom edge than the
+ * step between the rows themselves - which is what makes the four read as a
+ * group of their own rather than as the head of the search box below them. The
+ * step is measured in the driver, against the rows' own step. */
+.rail-header { display: flex; flex-direction: column; gap: 0.5rem; padding: 0.75rem 0.75rem 1rem; }
+/* The four rows are one list, so the step inside it is the rail's own row step
+ * (the kit's space-y-0.5), not the region's lonelier one. */
+.rail-actions { display: flex; flex-direction: column; gap: 0.125rem; }
 /* A row's key chip sits at the row's trailing edge. The chip is a flex item of
  * the button's own flex container (assigned nodes lay out as the slot's
  * children), so one auto margin is the whole rule. The class sits on the
@@ -148,6 +160,61 @@ kai-button.menu-delete::part(button) { color: var(--color-destructive-text); }
 .profile-name { font-size: 0.8125rem; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .profile-caret { margin-left: auto; opacity: 0.6; }
 
+/* The caret TRAILS the row's title, which is where the reference puts it, and it
+ * is revealed like the row menu is: zero opacity until the row is hovered or holds
+ * focus. ONE difference from the menu's rule above, and it is why this one is
+ * written out rather than folded into that one: a heading is a CONTROL, so its
+ * caret is the row's open state and the only sign of it - a reader on a device with
+ * no hover gets it always, and inside the hover query the hidden state is what a
+ * mouse gets. The three constraints on the menu's reveal (opacity rather than
+ * display, the hidden state INSIDE the hover query, focus-within as well as hover)
+ * are the same, for the same reasons; read that rule before changing this one.
+ *
+ * NO COLOUR HERE, and that is the measured answer rather than an omission: the
+ * caret is a kai icon, and an icon is a nested custom element that resolves its own
+ * theme scope inside its own shadow root - a colour set on its host from out here
+ * is not what the reader sees (measured dark: the host and the glyph disagreed by a
+ * whole scheme). The glyph follows the kit's own tokens, which is what the kit is
+ * for. It also paints nothing focusable - no tabindex - so a row that is already a
+ * tab stop does not gain a second one. */
+kai-conversation-item .row-caret { margin-left: 0.25rem; }
+@media (hover: hover) {
+  kai-conversation-item .row-caret { opacity: 0; transition: opacity 120ms ease; }
+  kai-conversation-item:hover .row-caret,
+  kai-conversation-item:focus-within .row-caret { opacity: 1; }
+}
+
+/* THE RAIL'S SECTION LABELS SIT IN THE THEME'S MUTED REGISTER, and the token is
+ * the theme's own rather than a colour mixed here: the kit sets its colour tokens on
+ * the host of every kai element, so they are inherited into the rows this page slots
+ * into the rail - which is exactly the case they are for. The rows UNDER a label are
+ * content and keep the foreground the kit paints them in, and that is what makes the
+ * rail read as structure and conversations rather than as one long list of equally
+ * loud rows. (The muted-at-65% idiom the block's own chrome uses - the composer note,
+ * which is light DOM outside any kai element - is the other side of this: it is for
+ * the places a kit element does not colour.)
+ *
+ * The rule is on the TITLE SPAN rather than on the row, because a row's title is the
+ * page's own slotted element and the colour a kit row paints its content in is
+ * inherited: a rule on the span wins, and a rule on the host would not. */
+kai-conversation-item[data-rail="section"] > span,
+kai-conversation-item[data-rail="folder"][data-folder=""] > span {
+  color: var(--color-muted-foreground);
+}
+
+/* THE SECTIONS GET AIR. A section starts at a heading: the Projects label over
+ * the folders, and the Recents heading over the unfiled remainder. The space above
+ * one is what makes the two read as sections rather than as one long list, and it
+ * is TWO DENSITY UNITS - the kit's own mb-2 - taken from the kit's spacing knob
+ * with the kit's default as the fallback, the same shape the body rule at the top
+ * of this sheet uses for its colour, so a page that re-points --kai-density moves
+ * these gaps with the kit's own. The FOLDER headings inside Projects stay on the
+ * rail's row step: they head a folder, not a section. */
+kai-conversation-item[data-rail="section"],
+kai-conversation-item[data-rail="folder"][data-folder=""] {
+  margin-block-start: calc(var(--kai-density, 0.25rem) * 2);
+}
+
 /* Main column: top bar, thread flexes, composer sits below. The shell's main
  * panel is a grid cell on both axes, so this fills it without a height rule. */
 .main { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
@@ -168,9 +235,12 @@ kai-prompt-input { display: block; padding: 0 1rem 1rem; max-width: 48rem; width
  * register is spelled by hand: max-width, width and the inline padding are the
  * composer's own numbers, so the two line up as one column; text-align,
  * font-size, line-height and the muted colour are the footer row's. Muted is
- * `currentColor` at 65% for the reason every muted line in this block is - the
- * kit's `--color-muted-foreground` token lives inside an element's shadow root
- * and this row is light DOM. DELETE this rule with the paragraph it styles. */
+ * `currentColor` at 65% here and not the kit's `--color-muted-foreground`, for a
+ * reason that is about this row's PLACE and not about its colour: the token is
+ * set on every kai element's host and inherited by what the page slots into one,
+ * and this row is the composer's sibling - outside every element, so no token is
+ * in scope. The rail's section labels, which ARE inside one, take the token.
+ * DELETE this rule with the paragraph it styles. */
 .composer-note {
   margin: 0 auto;
   max-width: 48rem;

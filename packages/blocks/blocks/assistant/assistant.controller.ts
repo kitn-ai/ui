@@ -738,11 +738,15 @@ function orderByProject(summaries: readonly ConversationSummary[]): Conversation
 
 /** The rows a query leaves, in the one order. The search is the only narrowing
  *  the rail has, and it runs in the same pass that derives the sections, so a
- *  folder whose rows all missed is not a folder the rail still offers. */
+ *  folder whose rows all missed is not a folder the rail still offers.
+ *
+ *  THE QUERY IS MATCHED AGAINST THE TITLE ALONE, which is all a rail row shows:
+ *  a match on text nobody can see is a row the reader cannot tell apart from one
+ *  that should never have matched, and the row IS one line (see `projectSummaries`). */
 function narrow(rows: readonly ConversationRow[], query: string): readonly ConversationRow[] {
   return query === ''
     ? rows
-    : rows.filter((row) => `${row.title} ${row.preview}`.toLowerCase().includes(query));
+    : rows.filter((row) => row.title.toLowerCase().includes(query));
 }
 
 /** The projects the surviving rows make, read off them rather than declared
@@ -774,6 +778,34 @@ function sectionLabel(group: string, groupName: string): string {
   return groupName !== '' ? groupName : group;
 }
 
+/** The shape every row that is NOT a conversation starts from: the conversation
+ *  parts off, and the four a control row can have (a caret, a menu, a rename
+ *  field, the items that act) off too. The three builders below turn on the ones
+ *  their own kind needs, so a field added to the row cannot be forgotten in one
+ *  of them. */
+function controlNode(id: string, kind: ConversationRow['kind'], title: string, group: string, groupName: string): ConversationRow {
+  return {
+    id,
+    kind,
+    title,
+    unread: false,
+    menuLabel: '',
+    renaming: false,
+    renameFieldHidden: true,
+    pinLabel: 'Pin',
+    renameItemHidden: true,
+    pinItemHidden: true,
+    archiveItemHidden: true,
+    deleteItemHidden: true,
+    pinned: false,
+    group,
+    groupName,
+    caretHidden: true,
+    caretName: '',
+    menuHidden: true,
+  };
+}
+
 /** A rail row that is not a conversation: a folder's heading, or the Show more
  *  row. Both are rendered by the SAME repeat the conversations are, because the
  *  page grammar clones one element per repeat and has no way to interleave a
@@ -788,27 +820,27 @@ function folderNode(
 ): ConversationRow {
   const heading = kind === 'folder';
   return {
-    id: `${heading ? FOLDER_HEADING_NODE : FOLDER_MORE_NODE}${group}`,
-    title: heading ? (group === '' ? RECENTS_LABEL : sectionLabel(group, groupName)) : SHOW_MORE_LABEL,
-    preview: '',
-    previewHidden: true,
-    unread: false,
-    menuLabel: '',
-    renaming: false,
-    renameFieldHidden: true,
-    pinLabel: 'Pin',
-    renameItemHidden: true,
-    pinItemHidden: true,
-    archiveItemHidden: true,
-    deleteItemHidden: true,
-    pinned: false,
-    group,
-    groupName,
-    kind,
+    ...controlNode(
+      `${heading ? FOLDER_HEADING_NODE : FOLDER_MORE_NODE}${group}`,
+      kind,
+      heading ? (group === '' ? RECENTS_LABEL : sectionLabel(group, groupName)) : SHOW_MORE_LABEL,
+      group,
+      groupName,
+    ),
+    // A folder's heading leads its own run with a caret that IS its open state;
+    // the Show more row that ends a run has none.
     caretHidden: !heading,
     caretName: heading ? (open ? 'chevron-down' : 'chevron-right') : '',
-    menuHidden: true,
   };
+}
+
+/** THE LABEL OVER THE FOLDERS: one row, the Projects heading, emitted ahead of
+ *  the first folder. It is a rail row for the same reason a folder's heading is
+ *  (the repeat renders one element kind), and it is a LABEL rather than a
+ *  control: no caret, no menu, and activation does nothing - what is under it is
+ *  the folders, and they are already each their own control. */
+function sectionNode(label: string): ConversationRow {
+  return controlNode(`${SECTION_NODE}${label.toLowerCase()}`, 'section', label, '', '');
 }
 
 /** The rail's ONE flat repeat, expanded from the ordered conversations into the
@@ -829,6 +861,7 @@ function railNodes(
   const shut = new Set(closed);
   const grown = new Set(expanded);
   const out: ConversationRow[] = [];
+  let labelled = false;
   let at = 0;
   while (at < rows.length) {
     const group = rows[at].group;
@@ -837,6 +870,14 @@ function railNodes(
     const run = rows.slice(at, end);
     const groupName = run[0].groupName;
     const open = query !== '' || !shut.has(group);
+    // THE PROJECTS LABEL, once, over the first folder - and the ungrouped
+    // remainder is not one, so a rail holding only Recents has no label over
+    // nothing. Emitted here rather than declared beside the rows, so a query that
+    // leaves no folder also leaves no label.
+    if (group !== '' && !labelled) {
+      out.push(sectionNode(PROJECTS_LABEL));
+      labelled = true;
+    }
     out.push(folderNode('folder', group, groupName, open));
     if (open) {
       const shown = grown.has(group) ? run : run.slice(0, FOLDER_LIMIT);
@@ -877,19 +918,18 @@ export interface ConversationSection {
 /** One rendered row of the rail. Every field is already a string or a
  *  boolean, because `*for` bodies get bindings, not expressions.
  *
- *  A row is not always a conversation: a folder's heading and its Show more row
- *  are rail rows too, so `kind` says which of the three it is and the fields
- *  decide what it shows. That is why the control rows carry the whole shape with
- *  the conversation parts hidden rather than a shape of their own - the repeat
- *  renders one element. */
+ *  A row is not always a conversation: a folder's heading, its Show more row and
+ *  the Projects label over the folders are rail rows too, so `kind` says which of
+ *  the four it is and the fields decide what it shows. That is why the control
+ *  rows carry the whole shape with the conversation parts hidden rather than a
+ *  shape of their own - the repeat renders one element. */
 export interface ConversationRow {
   id: string;
-  /** Which of the three rows this is. A conversation is activated by loading it;
-   *  a heading and a Show more row are activated as the folder control they are. */
-  kind: 'conversation' | 'folder' | 'more';
+  /** Which of the four rows this is. A conversation is activated by loading it; a
+   *  heading and a Show more row are activated as the folder control they are;
+   *  the section label heads the folders and is activated as nothing. */
+  kind: 'conversation' | 'folder' | 'more' | 'section';
   title: string;
-  preview: string;
-  previewHidden: boolean;
   unread: boolean;
   /** The row's own menu trigger, named for the row it belongs to: every
    *  conversation row has one, so one shared label would make five identical
@@ -944,6 +984,16 @@ const FOLDER_MORE_NODE = 'folder-more:';
  *  element has no label of its own for either. */
 const RECENTS_LABEL = 'Recents';
 const SHOW_MORE_LABEL = 'Show more';
+
+/** The label over the folders, in the register the Recents heading already uses:
+ *  the muted heading over a group of rows. The folders below it are the projects
+ *  the conversations are filed into, and this says so. */
+const PROJECTS_LABEL = 'Projects';
+
+/** The id the Projects label's rail row carries. A conversation id is a uuid and
+ *  the two folder node prefixes are `folder:`/`folder-more:`, so none can
+ *  collide with it. */
+const SECTION_NODE = 'section:';
 
 export interface AssistantState {
   // thread
@@ -1225,17 +1275,18 @@ export function createController(deps: AssistantDeps): AssistantController {
     // writes, round-trips and hands back: one source of truth, and the same one
     // `orderByProject` reads its order from.
     const projected = orderByProject(summaries).map((s) => {
-      // Display dedupe: the store titles a conversation from message text, so
-      // the title and the trailing preview can be the same string.
-      const preview = s.trailing && s.trailing !== s.title ? s.trailing : '';
+      // ONE LINE PER ROW, and that is a decision about the rail rather than about
+      // the data: the kit paints a row's `meta` slot as a second line, and a
+      // sidebar row that carries its own last message reads as a feed rather than
+      // as a list of conversations. The summary still carries its trailing text -
+      // the store's field, and what the demo titles a conversation from - and the
+      // row simply does not render it.
       const renaming = renamingId === s.id;
       const group = s.groupId ?? '';
       return {
         id: s.id,
         kind: 'conversation' as const,
         title: s.title,
-        preview,
-        previewHidden: preview === '',
         unread: isConversationUnread(s),
         menuLabel: `Actions for ${s.title}`,
         renaming,
@@ -1465,6 +1516,9 @@ export function createController(deps: AssistantDeps): AssistantController {
 
     async openConversation(event) {
       const id = event.detail.id;
+      // The label over the folders heads them; it is not a control of its own, so
+      // activating it does nothing - the folders under it are each their own.
+      if (id.startsWith(SECTION_NODE)) return;
       // A heading is not a conversation: it names the folder it heads, so
       // activation opens or closes that folder rather than loading anything.
       if (id.startsWith(FOLDER_HEADING_NODE)) {

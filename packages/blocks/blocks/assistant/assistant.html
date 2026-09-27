@@ -54,10 +54,12 @@
     >
       <!-- The rail in ITEM mode (the documented consumer-owned loop): the rows
            are the block's own, so the built-in search box filters nothing by
-           itself and the block does the filtering in State. Its built-in header
-           toggle fires kai-toggle-sidebar, and collapseRail answers it with the
+           itself and the block does the filtering in State. It also fills the
+           header slot, which REPLACES the element's built-in title bar, so the
+           rail's collapse control is this page's own markup and answers with the
            SHELL's collapse: the column goes and main reflows, rather than the
-           rail folding itself inside a column the page keeps.
+           rail folding itself inside a column the page keeps. The header region
+           itself says what that replacement carries and what it drops.
 
            The footer slot holds the identity row. It is a PLACEHOLDER identity
            by rule ("Demo User", a demo plan): the kit owns no auth, no account
@@ -74,6 +76,111 @@
         @kai-toggle-sidebar="collapseRail"
         @kai-search="search"
       >
+        <!-- THE RAIL'S OWN TITLE BAR, in the header slot, which is a REPLACE
+             seam: filling it takes the element's built-in bar away, so this
+             region carries what the block still needs from that bar, drops what
+             it does not, and adds the sidebar's top actions.
+
+             THE COLLAPSE CONTROL STAYS, because it was the only way to fold the
+             rail from the expanded state. It calls `collapseRail`, which is the
+             same place the built-in toggle's kai-toggle-sidebar event ended: the
+             SHELL's own collapseAside('start'), so the column goes and main
+             reflows. The binding to kai-toggle-sidebar is left on the element
+             beside it, because a consumer who puts the built-in bar back gets a
+             working toggle rather than a dead one.
+
+             THE NEW CHAT ROW IS THE BUILT-IN BUTTON'S REPLACEMENT, not a second
+             affordance beside it: the page holds exactly one control named "New
+             chat" (the driver counts them), and it fires the block's one
+             new-chat action, `newChat` - the action the element's kai-new-chat
+             event was already answered with. Two ways to a fresh chat existed
+             while the bar was there; there is one now.
+
+             THE "Chats" LABEL IS DROPPED: the rail's own rows are headed by what
+             they hold (the project folders, then Recents), and a page-level title
+             above them is not the shape this sidebar is.
+
+             THE FOUR ROWS BELOW are the sidebar's top actions, in a plain
+             register because they ARE the sidebar's own rows. Three of them are
+             DEMO rows: this block ships no image library, no scheduler and no
+             plugin registry, so each is plain markup carrying aria-disabled and
+             a tooltip with its reason - the treatment the row menu's Share item
+             already gets, and for the same reason. A row that cannot act and
+             says nothing is the failure mode; these say it twice, once to a
+             screen reader and once to the hovered eye. A real app points each
+             row at the screen it owns. -->
+        <div slot="header" class="rail-header">
+          <kai-button
+            id="rail-collapse"
+            :theme="themeMode"
+            variant="ghost"
+            size="icon-sm"
+            icon="panel-left"
+            label="Toggle sidebar"
+            @kai-click="collapseRail"
+          ></kai-button>
+
+          <div class="rail-actions">
+            <!-- THE ONE ROW THAT ACTS, and it is a kai-button for the one reason
+                 a binding needs: an event exists on a kai element and nowhere
+                 else. `full` and `align="start"` are what make it a ROW rather
+                 than a centred button - the host stops shrinking to its label and
+                 the box is the region's width, which is the box the three plain
+                 rows below are matched to (see assistant.css). -->
+            <kai-button
+              id="rail-new-chat"
+              data-action="new-chat"
+              :theme="themeMode"
+              variant="ghost"
+              size="sm"
+              full
+              align="start"
+              icon="square-pen"
+              @kai-click="newChat"
+            >
+              New chat
+            </kai-button>
+
+            <!-- THE THREE DEMO ROWS, each plain markup with a leading glyph and
+                 a label, and each INERT BY RULE rather than by omission: there is
+                 no handler on any of them, so there is nothing that could fire,
+                 and the tooltip is where the reason lives. `role="button"` with
+                 aria-disabled is what a reader is told (the icon is not a name,
+                 so the label is the name); no tabindex, so a row that cannot act
+                 is not a tab stop either. -->
+            <kai-tooltip
+              :theme="themeMode"
+              placement="right"
+              content="This block ships no image library, so the row is inert on purpose. Point it at the screen you keep images on."
+            >
+              <span class="rail-action rail-action-inert" data-action="images" role="button" aria-disabled="true">
+                <kai-icon :theme="themeMode" name="image" size="sm"></kai-icon>
+                <span class="rail-action-label">Images</span>
+              </span>
+            </kai-tooltip>
+            <kai-tooltip
+              :theme="themeMode"
+              placement="right"
+              content="This block schedules nothing, so the row is inert on purpose. Point it at your own scheduled tasks."
+            >
+              <span class="rail-action rail-action-inert" data-action="scheduled" role="button" aria-disabled="true">
+                <kai-icon :theme="themeMode" name="clock" size="sm"></kai-icon>
+                <span class="rail-action-label">Scheduled</span>
+              </span>
+            </kai-tooltip>
+            <kai-tooltip
+              :theme="themeMode"
+              placement="right"
+              content="This block ships no plugin registry, so the row is inert on purpose. Point it at the plugins you install."
+            >
+              <span class="rail-action rail-action-inert" data-action="plugins" role="button" aria-disabled="true">
+                <kai-icon :theme="themeMode" name="box" size="sm"></kai-icon>
+                <span class="rail-action-label">Plugins</span>
+              </span>
+            </kai-tooltip>
+          </div>
+        </div>
+
         <!-- THE FOLDER EACH ROW IS FILED UNDER, bound so the rail SAYS it
              rather than implying it through the order. Two attributes spell the
              two facts apart, so a rule can read the one it needs: `data-group`
@@ -100,16 +207,6 @@
           :data-rail="row.kind"
           :data-folder="row.group"
         >
-          <!-- The folder's open state, and the one part of a heading that is not
-               a word: the caret leads the title and points down while the folder
-               is open. Hidden on a conversation row, which has none. -->
-          <kai-icon
-            class="row-caret"
-            :theme="themeMode"
-            :name="row.caretName"
-            :hidden="row.caretHidden"
-            size="sm"
-          ></kai-icon>
           <!-- The title, and - only while that row is the one being renamed -
                an inline field in its place. kai-editable-label is driven as a
                CONTROLLED editor (`.editing` follows State), which is what lets
@@ -118,6 +215,22 @@
                element, and a row inside a *for is many. The element autofocuses
                and selects its field when `editing` flips true. -->
           <span .textContent="row.title" :hidden="row.renaming"></span>
+          <!-- The folder's open state, and the one part of a heading that is not
+               a word: the caret TRAILS the title and points down while the folder
+               is open, which is where the reference puts it. It trails rather
+               than leads so the heading's title starts at the row's own inline
+               padding - flush with the section label above it - instead of being
+               pushed one glyph to the right. Hidden on a conversation row, which
+               has none. The element paints an icon and nothing focusable: no
+               tabindex, so it is never a second tab stop inside a row that is
+               already one. -->
+          <kai-icon
+            class="row-caret"
+            :theme="themeMode"
+            :name="row.caretName"
+            :hidden="row.caretHidden"
+            size="md"
+          ></kai-icon>
           <kai-editable-label
             class="row-rename"
             :hidden="row.renameFieldHidden"
@@ -128,7 +241,12 @@
             @kai-rename="renameCommit"
             @kai-cancel="renameCancel"
           ></kai-editable-label>
-          <span slot="meta" .textContent="row.preview" :hidden="row.previewHidden"></span>
+          <!-- ONE LINE PER ROW, and the line is the title. kai-conversation-item
+               paints its `meta` region as a SECOND line under the title, so this
+               row leaves the region empty: a sidebar of rows each carrying its
+               own last message reads as a feed, not as a list of conversations.
+               The summary's trailing text is still there in the store (see the
+               projection in the controller); the rail simply does not show it. -->
           <!-- The row's trailing edge: its own menu, and nothing else. It sits
                in the item's `menu` region, which the item renders
                OUTSIDE its activation surface - that is what keeps a click on
