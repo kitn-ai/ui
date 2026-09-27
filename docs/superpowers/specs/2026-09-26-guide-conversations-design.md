@@ -104,9 +104,9 @@ conversation and which line.
 
 Consequences worth stating, because they constrain how the guides are written:
 
-- **A fence must be real code, not pseudocode.** If it cannot compile, it cannot be shown.
-  Where a snippet is genuinely illustrative (a transport shape, a card envelope), it is
-  typed against the kit's own types rather than written as loose JSON.
+- **A fence must be real code, not pseudocode, and "compiles" has to mean something a guide can actually satisfy.** The first version of this rule said a fence must compile as written, and the guides disproved it: **every one of the fourteen names something from its host** (`messages`, `transport`, `voice`, `pendingCalls`, `stream`, or a relative import of the block's own controller). A rule no fence can meet is not a strict rule, it is an unmet one.
+  What replaces it: **each guide compiles inside a declared context.** A short prelude per guide declares the host names that guide's fences reference — marked as the block's own variables, so the prelude is visibly not the kit's API — and the fences are then compiled **in order**, so a turn may use what an earlier turn in the same guide declared. Everything a fence claims about the KIT is checked by that; nothing is checked about names the prelude declares, which is the honest boundary: those are the host's, and the guide says so.
+  A fragment still carries its excerpt marker, and its API still repeats in a compiled fence in the same guide. **One exception is accepted and named rather than forced:** `createAssistantStream` in *Get it running* has no second mention in that guide, so its claim is verified by the prelude-compiled fence it already sits in rather than by a repetition.
 - **The guides may not promise behaviour the kit does not have.** The gate covers types; the
   prose is checked the way every other doc in this repo is (`verify:docs`, the copy style in
   `STYLE.md`), and a claim about a mode or a default that is wrong is a defect like any

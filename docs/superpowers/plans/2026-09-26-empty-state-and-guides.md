@@ -20,7 +20,8 @@
 - Comments in `src/**` may not cite a spec section, task/round ID, or dated ruling; one comment token over 20 lines needs a stated reason.
 - **Stage only the files you touch**, and check `git diff --cached --name-only` before committing. The repo's spec/plan documents are dirty on purpose.
 - Search with a path, never from the repo root.
-- **A BLOCK change needs `gen-blocks` then `copy-blocks`; a KIT change needs `nx build ui` then `copy-kit-assets`.** A stale copy has already produced a false measurement once.
+- **Never wrap a command in a heredoc, and never pipe a long-running command into `tail`.** Write files with the edit/write tool. Capture output as its own step — `cmd > /tmp/out.txt 2>&1`, then read the file — so a command that hangs shows its output instead of buffering it. **This has hung two rounds in this plan for four minutes each**, and the second time it was a genuinely stuck process hidden behind a pipe rather than a quoting bug, which is worse: the pipe turned a diagnosable hang into silence.
+- **A KIT change reaches a BLOCK PAGE through `nx build ui` → `gen-blocks` → `copy-blocks`, or a `dev:blocks` restart.** `copy-kit-assets` copies THREE RAW ASSETS and NO kit chunks, so a kit change alone leaves the page on the old bundle — measured, after this rule was written down wrong. A stale copy has now produced a false measurement twice.
 
 ---
 
@@ -119,8 +120,9 @@
 - Consumes: the `ts` fences inside the guides' scripts, and an excerpt marker for fragments.
 - Produces: a gate that fails naming the guide and the line.
 
-- [ ] **Step 1:** Extract every fence's body and write it to a real module; compile against the kit's published types. Model it on `verify:scaffold`, which already compiles emitted strings with real tsc.
-- [ ] **Step 2:** Handle the two forms the storyboard uses: whole units, and fragments marked as excerpts whose API repeats inside a compiled fence **in the same guide**. An unmarked fragment, or one whose API is never compiled, is a failure — that is the point of the gate.
+- [ ] **Step 1:** For each guide, emit a small module: **a prelude declaring that guide's host context** (the block's own names its fences reference — `messages`, `transport`, `voice`, `pendingCalls`, `stream`), then the guide's fences **in order**, so a turn may use what an earlier turn declared. Compile against the kit's published types. Model the build on `verify:scaffold`, which already compiles emitted strings with real tsc.
+  **Why the prelude and not a bare fence:** a review found that **every one of the fourteen fences names something from its host**, so "compile each fence as written" was a rule no fence could meet — an unmet rule, not a strict one. The prelude must be visibly the BLOCK's variables, not the kit's API, so a reader can tell which half is being checked. Everything a fence claims about the kit is verified; nothing is verified about the prelude's names, which is the honest boundary.
+- [ ] **Step 2:** Handle the two forms the storyboard uses: whole units, and fragments marked as excerpts whose API repeats inside a compiled fence **in the same guide**. An unmarked fragment, or one whose API is never compiled, is a failure — that is the point of the gate. **One exception is accepted and named rather than forced:** `createAssistantStream` in *Get it running* is mentioned once, so its claim rests on the prelude-compiled fence it sits in.
 - [ ] **Step 3: Watch it fail.** Rename a prop inside one fence and confirm the gate names that guide and that line. Restore.
 - [ ] **Step 4:** Run it in the repo's verification path. Commit.
 
