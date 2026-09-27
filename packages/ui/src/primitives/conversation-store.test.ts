@@ -213,11 +213,12 @@ describe('fetchStore', () => {
     expect(store.markRead).toBeUndefined();
   });
 
-  it('implements none of rename/setPinned/setArchived/remove — the recast contract has no such endpoints, so the omission surfaces at the controller instead of as a silent no-op', () => {
+  it('implements none of rename/setPinned/setArchived/setGroup/remove — the recast contract has no such endpoints, so the omission surfaces at the controller instead of as a silent no-op', () => {
     const store = fetchStore('/api/conversations');
     expect(store.rename).toBeUndefined();
     expect(store.setPinned).toBeUndefined();
     expect(store.setArchived).toBeUndefined();
+    expect(store.setGroup).toBeUndefined();
     expect(store.remove).toBeUndefined();
   });
 
@@ -257,7 +258,7 @@ describe('fetchStore', () => {
   });
 });
 
-describe('localStorageStore — rename / setPinned / setArchived / remove (opt-in conversation ops)', () => {
+describe('localStorageStore — rename / setPinned / setArchived / setGroup / remove (opt-in conversation ops)', () => {
   it('rename() retitles the index entry and leaves the messages alone', async () => {
     const store = localStorageStore('acme-support');
     await store.save('c1', [msg('u1', 'book a demo')]);
@@ -300,6 +301,26 @@ describe('localStorageStore — rename / setPinned / setArchived / remove (opt-i
     expect(storedIndex()[0].archived).toBeUndefined();
   });
 
+  it('setGroup() files the row under a group, and clearing it drops the field rather than storing an empty one', async () => {
+    const store = localStorageStore('acme-support');
+    await store.save('c1', [msg('u1', 'hi')]);
+    await store.setGroup!('c1', 'today');
+    expect((await store.list())[0].groupId).toBe('today');
+    await store.setGroup!('c1', undefined);
+    const [summary] = await store.list();
+    expect(summary.groupId).toBeUndefined();
+    // Absent, not '': one spelling per state, the same rule setPinned() follows.
+    expect(storedIndex()[0].groupId).toBeUndefined();
+  });
+
+  it('a group survives a save() — the consumer story: file a conversation, send it a message, it is still filed', async () => {
+    const store = localStorageStore('acme-support');
+    await store.save('c1', [msg('u1', 'book a demo')]);
+    await store.setGroup!('c1', 'today');
+    await store.save('c1', [msg('u1', 'book a demo'), msg('a1', 'sure')]);
+    expect((await store.list())[0].groupId).toBe('today');
+  });
+
   it('save() carries pinned and archived forward — the same reason it carries lastReadAt: a content event must not undo a decision', async () => {
     const store = localStorageStore('acme-support');
     await store.save('c1', [msg('u1', 'hi')]);
@@ -326,6 +347,7 @@ describe('localStorageStore — rename / setPinned / setArchived / remove (opt-i
     await expect(store.rename!('never-saved', 'x')).resolves.toBeUndefined();
     await expect(store.setPinned!('never-saved', true)).resolves.toBeUndefined();
     await expect(store.setArchived!('never-saved', true)).resolves.toBeUndefined();
+    await expect(store.setGroup!('never-saved', 'today')).resolves.toBeUndefined();
     await expect(store.remove!('never-saved')).resolves.toBeUndefined();
     expect(await store.list()).toEqual([]);
   });

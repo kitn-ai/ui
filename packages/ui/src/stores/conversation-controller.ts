@@ -13,8 +13,8 @@
  * no-op when something is already active; seen only while the host is open, the chat view
  * shows AND it is the active conversation, so any missing leg suppresses `markRead`;
  * `anyUnread()` folding the one public read of `lastReadAt` over the cached summaries,
- * excluding the active conversation only while it is seen; the four list operations
- * (rename / pin / archive / delete) delegating to the store or refusing loudly; and a
+ * excluding the active conversation only while it is seen; the five list operations
+ * (rename / pin / archive / group / delete) delegating to the store or refusing loudly; and a
  * failed store call reported rather than swallowed. */
 import type { ConversationSummary } from '../types';
 import type { ChatMessage } from '../web-components/chat/chat-types';
@@ -34,6 +34,7 @@ export type ConversationControllerOp =
   | 'rename'
   | 'setPinned'
   | 'setArchived'
+  | 'setGroup'
   | 'remove';
 
 export interface ConversationControllerHooks {
@@ -111,6 +112,10 @@ export interface ConversationController {
   /** Archive or unarchive a conversation, then refresh; archiving unlists it
    *  without deleting it. Refuses loudly on a store with no `setArchived`. */
   setArchived(id: string, archived: boolean): Promise<void>;
+  /** File a conversation under the group whose `id` is `groupId` (`undefined`
+   *  unfiles it), then refresh; the list's grouping reflects the stored one.
+   *  Refuses loudly when the store implements no `setGroup`. */
+  setGroup(id: string, groupId: string | undefined): Promise<void>;
   // Archiving is not deleting, so the stored thread is untouched: what changes is the active
   // pointer and the delivered thread, through the same step `remove()` uses, because an
   // archived row leaves every list and a thread still claiming to show it cannot be navigated
@@ -315,6 +320,19 @@ export function createConversationController(
       // unreachable state to walk out of, and a visitor who archived a conversation is not
       // handed it back as their open thread.
       if (archived) clearActive(id);
+      await refresh();
+    },
+
+    async setGroup(id, groupId) {
+      if (!store.setGroup) return refuse('setGroup', 'setGroup');
+      try {
+        await store.setGroup(id, groupId);
+      } catch (err) {
+        report('setGroup', err);
+        return;
+      }
+      // No pointer work, unlike archiving: refiling a row leaves it in the list, so
+      // there is no unreachable state to walk out of and nothing to hand back.
       await refresh();
     },
 

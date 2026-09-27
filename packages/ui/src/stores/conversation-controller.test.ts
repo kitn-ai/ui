@@ -21,11 +21,11 @@ const msg = (text: string): ChatMessage => ({
 
 /** In-memory ConversationStore with call recording. `lastReadAt` semantics
  *  mirror localStorageStore: save() never touches it, markRead() is its only
- *  writer. Same for the two list-shape flags, whose only writers are
- *  setPinned()/setArchived(). */
+ *  writer. Same for the two list-shape flags and for `groupId`, whose only
+ *  writers are setPinned()/setArchived()/setGroup(). */
 function fakeStore() {
   const threads = new Map<string, ChatMessage[]>();
-  const meta = new Map<string, { updatedAt: string; lastReadAt?: string; pinned?: boolean; archived?: boolean; title?: string }>();
+  const meta = new Map<string, { updatedAt: string; lastReadAt?: string; pinned?: boolean; archived?: boolean; groupId?: string; title?: string }>();
   let clock = 1000;
   const now = () => new Date((clock += 1000)).toISOString();
   const calls: string[] = [];
@@ -40,6 +40,7 @@ function fakeStore() {
         lastReadAt: meta.get(id)!.lastReadAt,
         pinned: meta.get(id)!.pinned,
         archived: meta.get(id)!.archived,
+        groupId: meta.get(id)!.groupId,
       })) as ConversationSummary[];
     },
     async load(id) {
@@ -55,6 +56,7 @@ function fakeStore() {
         lastReadAt: prev?.lastReadAt,
         pinned: prev?.pinned,
         archived: prev?.archived,
+        groupId: prev?.groupId,
         title: prev?.title,
       });
     },
@@ -77,6 +79,11 @@ function fakeStore() {
       calls.push(`setArchived:${id}:${archived}`);
       const m = meta.get(id);
       if (m) m.archived = archived ? true : undefined;
+    },
+    async setGroup(id, groupId) {
+      calls.push(`setGroup:${id}:${groupId}`);
+      const m = meta.get(id);
+      if (m) m.groupId = groupId;
     },
     async remove(id) {
       calls.push(`remove:${id}`);
@@ -229,6 +236,20 @@ describe('conversation operations (rename / pin / archive / delete)', () => {
     expect(threads.get('c1')).toEqual([msg('first')]); // still stored, just unlisted
   });
 
+  it('setGroup() delegates, refreshes with the stored groupId, and leaves the active pointer alone', async () => {
+    const { c, calls } = await seeded();
+    await c.select('c1');
+    calls.length = 0;
+    await c.setGroup('c1', 'today');
+    expect(calls).toEqual(['setGroup:c1:today', 'list']);
+    expect(c.summaries().find((s) => s.id === 'c1')?.groupId).toBe('today');
+    expect(c.activeId()).toBe('c1');
+    // Clearing files it back out; the row stays in the list and stays open either way.
+    await c.setGroup('c1', undefined);
+    expect(c.summaries().find((s) => s.id === 'c1')?.groupId).toBeUndefined();
+    expect(c.activeId()).toBe('c1');
+  });
+
   it('restore() skips an archived conversation and never picks a pinned-old one over the newest', async () => {
     const f = fakeStore();
     f.threads.set('pinned-old', [msg('old')]);
@@ -305,7 +326,7 @@ describe('conversation operations (rename / pin / archive / delete)', () => {
     expect(c.summaries().map((s) => s.id)).toEqual(['c2', 'c1']);
   });
 
-  it('a store without the op REFUSES LOUDLY for each of the four — a reported error, never a silent no-op', async () => {
+  it('a store without the op REFUSES LOUDLY for each of the five — a reported error, never a silent no-op', async () => {
     const onError = vi.fn();
     const f = fakeStore();
     f.threads.set('c1', [msg('first')]);
@@ -313,13 +334,15 @@ describe('conversation operations (rename / pin / archive / delete)', () => {
     delete (f.store as { rename?: unknown }).rename;
     delete (f.store as { setPinned?: unknown }).setPinned;
     delete (f.store as { setArchived?: unknown }).setArchived;
+    delete (f.store as { setGroup?: unknown }).setGroup;
     delete (f.store as { remove?: unknown }).remove;
     const c = controllerWith(f.store, { onError });
     await c.rename('c1', 'Renamed');
     await c.setPinned('c1', true);
     await c.setArchived('c1', true);
+    await c.setGroup('c1', 'today');
     await c.remove('c1');
-    expect(onError.mock.calls.map(([op]) => op)).toEqual(['rename', 'setPinned', 'setArchived', 'remove']);
+    expect(onError.mock.calls.map(([op]) => op)).toEqual(['rename', 'setPinned', 'setArchived', 'setGroup', 'remove']);
     // Nothing was written, and the refusal changed no state: the caller keeps a
     // usable controller and an honest view of what happened.
     expect(f.calls).toEqual([]);

@@ -46,21 +46,30 @@ export interface ConversationStore {
   // field, rather than assuming a mark-read endpoint the contract never defined.
   /** Post the conversation's seen timestamp; omit it and the kit never marks anything read. */
   markRead?(id: string): Promise<void>;
-  // The four conversation operations an app's own list chrome needs (rename / pin /
-  // archive / delete). Same OPT-IN terms as `markRead` above, for the same reason: a store
+  // The five conversation operations an app's own list chrome needs (rename / pin /
+  // archive / group / delete). Same OPT-IN terms as `markRead` above, for the same reason: a store
   // that does not implement one is read as not supporting the concept, and
   // `ConversationController` REFUSES LOUDLY (a reported error) rather than pretending the
   // write landed, so the surface that offered the action can say why it did nothing.
-  // `localStorageStore` implements all four below; `fetchStore` deliberately implements
+  // `localStorageStore` implements all five below; `fetchStore` deliberately implements
   // none (see its own doc) rather than inventing request shapes the contract never
-  // defined, and its summaries pass through whatever `pinned`/`archived` the backend
-  // already sends.
+  // defined, and its summaries pass through whatever `pinned`/`archived`/`groupId` the
+  // backend already sends.
   /** Retitle `id`, overriding the title `save()` derived from the first message. */
   rename?(id: string, title: string): Promise<void>;
   /** Persist `ConversationSummary.pinned` for `id`; the list order moves on the next `list()`. */
   setPinned?(id: string, pinned: boolean): Promise<void>;
   /** Persist `ConversationSummary.archived` for `id`; an archived conversation leaves every list, keeping its messages. */
   setArchived?(id: string, archived: boolean): Promise<void>;
+  // `setGroup` joins them on the same terms, and its optionality is doing real work here:
+  // a store that cannot group — one whose summaries it does not own, like `fetchStore` —
+  // says so with the method's ABSENCE rather than accepting the call and dropping it, and
+  // a consumer who already implemented this interface keeps compiling. What the absent
+  // case should do is the CALLER's to handle, never a silent success: the controller
+  // refuses loudly with the missing method named (its `refuse` step), and a consumer who
+  // calls the store directly has to check for it first, exactly as for `rename`.
+  /** File `id` under the group whose `id` is `groupId`; `undefined` unfiles it. */
+  setGroup?(id: string, groupId: string | undefined): Promise<void>;
   /** Delete `id` and everything stored under it. */
   remove?(id: string): Promise<void>;
 }
@@ -196,8 +205,9 @@ export function localStorageStore(name: string, userId?: string): ConversationSt
 
   /** Merge `patch` into the index entry for `id`. A field patched to `undefined` is
    *  DROPPED by `JSON.stringify`, which is what keeps the stored shape honest with
-   *  "absent means false" for the two list-shape flags. An id with no entry is a
-   *  harmless no-op: a write can race ahead of `save()`'s first index write. */
+   *  "absent means false" for the two list-shape flags and "absent means unfiled" for
+   *  `groupId`. An id with no entry is a harmless no-op: a write can race ahead of
+   *  `save()`'s first index write. */
   function patchEntry(id: string, patch: Partial<ConversationSummary>): void {
     try {
       const entries = readIndex();
@@ -296,9 +306,10 @@ export function localStorageStore(name: string, userId?: string): ConversationSt
           // was scoped to are filing decisions the visitor made, exactly like a pin,
           // and a turn arriving later must not quietly ungroup it or drop it back to
           // unscoped (the absent-means-unscoped reading `ConversationSummary.scope`
-          // documents). No method on this store writes either one — a consumer that
-          // owns its own filing seeds them in the index it hands over, and this carry
-          // is what keeps that seed alive across the first save().
+          // documents). setGroup() is the only writer of groupId; nothing on this store
+          // writes scope — a consumer that owns its own scoping seeds it in the index it
+          // hands over, and this carry is what keeps that seed alive across the first
+          // save().
           groupId: existing?.groupId,
           scope: existing?.scope,
         };
@@ -321,6 +332,14 @@ export function localStorageStore(name: string, userId?: string): ConversationSt
     async setArchived(id, archived) {
       patchEntry(id, { archived: archived ? true : undefined });
     },
+    async setGroup(id, groupId) {
+      // `undefined` clears the field, the rule setPinned() states one field over: absent
+      // already means unfiled (which is the bucket `ConversationList` gives a row with no
+      // `groupId`), and one spelling per state keeps a stored record readable by the type's
+      // own doc. Any other value is stored verbatim — deciding that `''` means unfiled is
+      // not this step's call to make quietly.
+      patchEntry(id, { groupId });
+    },
     async remove(id) {
       try {
         localStorage.removeItem(threadKey(name, userId, id));
@@ -341,17 +360,18 @@ export function localStorageStore(name: string, userId?: string): ConversationSt
  *  rejection, a caller (ChatThread's lifecycle, Task 2) decides how to
  *  degrade, exactly as the spec's degradation section requires.
  *
- *  No `markRead`, and none of `rename`/`setPinned`/`setArchived`/`remove`: the
+ *  No `markRead`, and none of `rename`/`setPinned`/`setArchived`/`setGroup`/`remove`: the
  *  recast contract above has no such endpoints, and inventing request shapes
  *  here would be this adapter deciding a backend behavior rather than passing
  *  one through. `list()`/`load()` already forward whatever `lastReadAt`,
- *  `pinned` and `archived` the backend's own summaries carry, same as any other
+ *  `pinned`, `archived` and `groupId` the backend's own summaries carry, same as any other
  *  `ConversationSummary` field, so a consumer who wants any of these writes
  *  needs their own store (or their own endpoint plus a thin wrapper), same as
  *  any other capability this recast doesn't cover. The caller hears about the
  *  omission rather than discovering it as a silent no-op:
  *  `ConversationController` reports an error for each of these when the store
- *  does not implement it. */
+ *  does not implement it, `setGroup` included — a PUT of `{ messages }` cannot
+ *  refile a row whose summary the server owns. */
 export function fetchStore(url: string, userId?: string): ConversationStore {
   const headers: Record<string, string> = userId ? { 'x-kai-user-id': userId } : {};
   return {
