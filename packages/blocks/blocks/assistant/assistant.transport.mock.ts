@@ -189,7 +189,7 @@ const GUIDE_SCRIPTS: Record<string, Script> = {
         "import { cardTools, createCardRegistry } from '@kitn.ai/ui/schemas';\n" +
         '\n' +
         "const cards = createCardRegistry({ use: ['confirm', 'tasks'] });\n" +
-        'const tools = cardTools(cards); // the route hands these to the model\n' +
+        "const tools = cardTools(cards, { provider: 'openai' }); // the route hands these to the model\n" +
         'chat.cardTypes = cards.tags;    // the client renders these tags\n' +
         '```',
     },

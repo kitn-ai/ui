@@ -220,7 +220,7 @@ ends: the route advertises the tools, the client says which card types it can re
 import { cardTools, createCardRegistry } from '@kitn.ai/ui/schemas';
 
 const cards = createCardRegistry({ use: ['confirm', 'tasks'] });
-const tools = cardTools(cards); // the route hands these to the model
+const tools = cardTools(cards, { provider: 'openai' }); // the route hands these to the model
 chat.cardTypes = cards.tags;    // the client renders these tags
 ```
 
