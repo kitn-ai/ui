@@ -317,13 +317,39 @@ let openInFolder = null;
 // it was typed.
 let railSearch = null;
 
+// State 37's folder toggle, state 38's Show more row, state 39's search into a
+// closed folder, state 40's keyboard walk and state 41's arrival. Captured in
+// each act for the same reason as the rest: what the rail did is only knowable
+// before and after the interaction, never from the end state alone.
+let folderToggle = null;
+let showMore = null;
+let searchOpen = null;
+let keyboardWalk = null;
+let activeArrival = null;
+
 const firstIndexRow = (page, spec) => page.evaluate(
   (key) => { try { return JSON.parse(localStorage.getItem(key) ?? '[]')[0] ?? null; } catch { return null; } },
   spec.indexKey,
 );
 
-/** The rail's rows as the page renders them: each one's conversation, and the
- *  project it is filed under ('' for the ungrouped remainder).
+/** Every rail row the page rendered, with the kind of row it is: a folder's
+ *  heading, one of its conversations (with the folder it is filed under), or the
+ *  Show more row that says a folder holds more than it shows. The rail is ONE
+ *  flat repeat, so all three are items of the same list and only this attribute
+ *  tells them apart. */
+const railNodes = (page) => page.evaluate(() =>
+  [...document.querySelectorAll('kai-conversations > kai-conversation-item')].map((el) => ({
+    id: el.conversationId ?? el.getAttribute('conversation-id') ?? el.id,
+    kind: el.getAttribute('data-rail') ?? 'conversation',
+    group: el.getAttribute('data-group') ?? '',
+    folder: el.getAttribute('data-folder') ?? '',
+  })),
+);
+
+/** The rail's CONVERSATION rows as the page renders them: each one's
+ *  conversation, and the project it is filed under ('' for the ungrouped
+ *  remainder). The headings and the Show more rows are not conversations and are
+ *  not here - every claim in states 32-36 is about conversations.
  *
  *  OFF THE ROW ELEMENTS, because every claim in states 32-36 is about the order
  *  the rail actually lays out, and the page also holds an array of the same rows
@@ -332,12 +358,7 @@ const firstIndexRow = (page, spec) => page.evaluate(
  *  value as an ATTRIBUTE, while the react tree writes a DECLARED prop as a
  *  property - `data-group` is not declared, so both forms write it as the
  *  attribute, and the fallbacks here are for the row's identity. */
-const railRows = (page) => page.evaluate(() =>
-  [...document.querySelectorAll('kai-conversations > kai-conversation-item')].map((el) => ({
-    id: el.conversationId ?? el.getAttribute('conversation-id') ?? el.id,
-    group: el.getAttribute('data-group') ?? '',
-  })),
-);
+const railRows = async (page) => (await railNodes(page)).filter((node) => node.kind === 'conversation');
 
 /** Those rows as the groups they make: one entry per RUN, which is what the
  *  rail renders as one folder. Derived from the rows the page rendered, never
@@ -355,6 +376,44 @@ const groupRuns = (rows) => {
 /** The runs' groups and widths as strings, so a probe can compare the shape
  *  BEFORE against the shape after in one expression. */
 const runShape = (runs) => runs.map((run) => `${run.group}:${run.rows.length}`);
+
+/** Where the keyboard is in the rail right now, and how many rows are tab stops.
+ *  The rows' bodies live inside their shadow roots, so this reaches one only
+ *  through the host: a focused body retargets to its HOST in
+ *  `document.activeElement`, which is why the focused row is found by identity.
+ *  `rovingStops` is the container's whole contract in one number - exactly ONE
+ *  body carries `tabindex="0"` and the arrows move which one. */
+const rowWalk = (page) => page.evaluate(() => {
+  const items = [...document.querySelectorAll('kai-conversations > kai-conversation-item')];
+  const bodies = items.map((el) => el.shadowRoot?.querySelector('[data-kai-item-body]') ?? null);
+  return {
+    count: items.length,
+    // The focused row, and it is found BOTH ways on purpose: the row's body lives
+    // in its shadow root, so focus on it retargets to the host at document level -
+    // and a renderer that reports the inner body instead still names the same row.
+    focused: items.findIndex((el) => el === document.activeElement || el.shadowRoot?.activeElement != null),
+    focusedKind: document.activeElement?.getAttribute('data-rail') ?? '',
+    rovingStops: bodies.filter((body) => body?.getAttribute('tabindex') === '0').length,
+    kinds: items.map((el) => el.getAttribute('data-rail') ?? 'conversation'),
+  };
+});
+
+/** A rail row's title text, read out of the host's own default slot (the row's
+ *  body is in its shadow root, so the slot content is what the page can see). */
+const rowTitle = (page, id) => page.evaluate((wanted) => {
+  const el = [...document.querySelectorAll('kai-conversations > kai-conversation-item')]
+    .find((item) => (item.conversationId ?? item.getAttribute('conversation-id') ?? item.id) === wanted);
+  return el?.querySelector(':scope > span')?.textContent ?? '';
+}, id);
+
+/** Hand the rail back UNFILTERED. State 36 leaves a query in the search box, and
+ *  a query is a narrowing the states after it have to measure around: it drops
+ *  rows, and it opens every folder it has a match in - which is the point of it,
+ *  and why a folder toggle looks like a no-op while one is typed. */
+const clearRailSearch = async (page) => {
+  await page.locator('kai-conversations').getByRole('textbox').first().fill('');
+  await settle(400)(page);
+};
 
 export default {
   name: 'assistant',
@@ -617,7 +676,7 @@ export default {
         // The caps are read THROUGH the group: each hint is one kai-kbd inside a
         // kai-kbd-group, and the caps live in the kai-kbd's shadow root, not in the
         // group's.
-        keyChips: (page) => page.locator('kai-conversation-item').first().locator('.menu-kbd')
+        keyChips: (page) => page.locator('kai-conversation-item[data-rail="conversation"]').first().locator('.menu-kbd')
           .evaluateAll((els) => {
             const nav = navigator;
             const mac = /mac/i.test(nav.userAgentData?.platform ?? nav.platform ?? '');
@@ -637,7 +696,7 @@ export default {
         // zeroed) and only the OUTER ends stay rounded, so the three caps read as one
         // key strip rather than three chips in a row. Measured in Chromium: the
         // chord gap goes 2px to 0px and the chip's box goes 69px to 59px.
-        kbdWelded: (page) => page.locator('kai-conversation-item').first().locator('.menu-kbd kai-kbd')
+        kbdWelded: (page) => page.locator('kai-conversation-item[data-rail="conversation"]').first().locator('.menu-kbd kai-kbd')
           .evaluateAll((els) => {
             const bad = [];
             for (const el of els) {
@@ -677,7 +736,7 @@ export default {
         // hypothetical: the first version of this rule was `align-self: stretch` on a
         // span, which measured 0px wide and read as two dividers to a height-only
         // check.
-        dividers: (page) => page.locator('kai-conversation-item').first().locator('.row-menu [role="separator"]')
+        dividers: (page) => page.locator('kai-conversation-item[data-rail="conversation"]').first().locator('.row-menu [role="separator"]')
           .evaluateAll((els) => {
             const boxed = (el) => { const b = el.getBoundingClientRect(); return b.height >= 1 && b.width > 100; };
             const rendered = els.filter(boxed);
@@ -687,7 +746,7 @@ export default {
         // ...and the walk above never landed on one: a divider that took a key would
         // be in this list. It is also not a tab stop and does not match the kit's own
         // roving selector, so both halves of "not in the keyboard's way" are here.
-        dividerSkipsKeyboard: (page) => page.locator('kai-conversation-item').first().locator('.row-menu [role="separator"]')
+        dividerSkipsKeyboard: (page) => page.locator('kai-conversation-item[data-rail="conversation"]').first().locator('.row-menu [role="separator"]')
           .evaluateAll((els) => {
             const rendered = els.filter((el) => { const b = el.getBoundingClientRect(); return b.height >= 1 && b.width > 100; });
             if (rendered.length === 0) return 'no boxed divider to check';
@@ -705,7 +764,7 @@ export default {
         // The menu has room: every acting row is at least 11.5rem wide (the block's
         // min-width, which is what makes the surface 192px) and no row grew past its
         // single-line 32px box, which is what "cramped" looked like.
-        rowsWide: (page) => page.locator('kai-conversation-item').first().locator('.row-menu kai-button[role="menuitem"]')
+        rowsWide: (page) => page.locator('kai-conversation-item[data-rail="conversation"]').first().locator('.row-menu kai-button[role="menuitem"]')
           .evaluateAll((els) => {
             const widths = els.map((el) => Math.round(el.getBoundingClientRect().width));
             const heights = els.map((el) => Math.round(el.getBoundingClientRect().height));
@@ -847,7 +906,7 @@ export default {
         // bound conversation id, read off the second row (see readBoundValue: the
         // property is where the react form binds it, the attribute is where the
         // html form does).
-        pinnedRowId = await readBoundValue(page.locator('kai-conversation-item').nth(1), 'conversationId', 'conversation-id');
+        pinnedRowId = await readBoundValue(page.locator('kai-conversation-item[data-rail="conversation"]').nth(1), 'conversationId', 'conversation-id');
         // The row's OWN menu, not the first row's: the menu acts on the row it was
         // opened from, which is the whole reason each row carries one.
         await page.getByRole('button', { name: /^Actions for/ }).nth(1).click();
@@ -858,9 +917,9 @@ export default {
       probes: {
         // The premise, asserted rather than assumed: without two rows the order
         // probe below could not tell a reorder from a single row sitting still.
-        twoRows: (page) => page.locator('kai-conversation-item').count().then((n) => n === 2),
+        twoRows: (page) => page.locator('kai-conversation-item[data-rail="conversation"]').count().then((n) => n === 2),
         // The row that was second is now first.
-        pinnedRowFirst: (page) => readBoundValue(page.locator('kai-conversation-item').first(), 'conversationId', 'conversation-id')
+        pinnedRowFirst: (page) => readBoundValue(page.locator('kai-conversation-item[data-rail="conversation"]').first(), 'conversationId', 'conversation-id')
           .then((id) => id !== null && id === pinnedRowId),
         // And the store agrees about which row it was: the pin landed on the row
         // the menu belonged to, not on the active one.
@@ -1612,6 +1671,7 @@ export default {
         // The only conversation this state sends is the one that proves a NEW
         // row lands in a folder.
         const before = groupRuns(await railRows(page));
+        const beforeIds = before.flatMap((run) => run.rows.map((row) => row.id));
         const biggest = before.reduce((a, b) => (b.rows.length > a.rows.length ? b : a), { group: '', rows: [] });
         await page.getByRole('button', { name: 'New chat' }).click();
         await settle(300)(page);
@@ -1620,11 +1680,21 @@ export default {
         await box.fill('Point the mock transport at my own backend');
         await box.press('Enter');
         await waitForTurns(page, 2);
+        // Read as NODES, not only as conversation rows: which folders offer a
+        // Show more row is the rail's display limit, and it is a fact about the
+        // page rather than about the conversations the array still holds.
+        const afterNodes = await railNodes(page);
+        const afterRows = afterNodes.filter((node) => node.kind === 'conversation');
         railFiling = {
           before: runShape(before),
           groups: before.map((run) => run.group),
           biggest: biggest.group,
-          after: groupRuns(await railRows(page)),
+          after: groupRuns(afterRows),
+          // The conversation the turn just made: the rendered row the rail did
+          // not have before it, which is the only row this state can point at.
+          appeared: afterRows.map((row) => row.id).filter((id) => !beforeIds.includes(id)),
+          appearedGroup: (afterRows.find((row) => !beforeIds.includes(row.id)) ?? { group: '' }).group,
+          moreFolders: afterNodes.filter((node) => node.kind === 'more').map((node) => node.group),
         };
       },
       probes: {
@@ -1641,33 +1711,28 @@ export default {
           return at === -1
             || (at === runs.length - 1 && runs.filter((run) => run.group === '').length === 1);
         },
-        // A FOLDER HOLDING ONE CONVERSATION, and one outrunning a folder's
-        // screenful: the two counts the rail's shape has to be readable at. The
-        // second is RECORDED as a number (below) rather than typed into the
-        // probe, because the limit it has to outrun is the block's own.
+        // ...AND A FOLDER HOLDING ONE CONVERSATION, and a folder that outruns the
+        // rows the rail shows: the two counts the rail's shape has to be
+        // readable at. The second is proved by the Show more row the folder
+        // carries, which is the visible fact - the rows past the limit are not
+        // rendered at all, so no count of them exists on the page. The number
+        // itself is RECORDED below rather than typed into the probe, because the
+        // limit it has to outrun is the block's own.
         aFolderHoldsOneConversation: () =>
           (railFiling?.after ?? []).filter((run) => run.group !== '' && run.rows.length === 1).length === 1,
         biggestFolderCount: () => Math.max(
           0,
           ...(railFiling?.after ?? []).map((run) => (run.group === '' ? 0 : run.rows.length)),
         ),
-        aFolderOutrunsAFoldersScreenful: () => Math.max(
-          0,
-          ...(railFiling?.after ?? []).map((run) => (run.group === '' ? 0 : run.rows.length)),
-        ) >= 5,
+        aFolderOutrunsAFoldersScreenful: () =>
+          (railFiling?.moreFolders ?? []).includes(railFiling?.biggest ?? ''),
         // THE OPENING FILED IT, and this is the demo's whole filing rule under
-        // test: the row just saved is in the folder the act measured as the
-        // biggest one, that folder is one row wider, and the rail holds exactly
-        // one more row than it did - so nothing moved between folders to make
-        // the arithmetic come out.
-        theOpeningFiledTheConversation: () => {
-          const width = (shape) => Number(shape.slice(shape.indexOf(':') + 1));
-          const was = (railFiling?.before ?? []).find((shape) => shape.startsWith(`${railFiling?.biggest}:`));
-          const is = (railFiling?.after ?? []).find((run) => run.group === railFiling?.biggest);
-          return !!was && !!is && is.rows.length === width(was) + 1
-            && (railFiling?.after ?? []).reduce((n, run) => n + run.rows.length, 0)
-              === (railFiling?.before ?? []).reduce((n, shape) => n + width(shape), 0) + 1;
-        },
+        // test: the row the turn just made is RENDERED, in the folder the act
+        // measured as the biggest one - so a conversation saved while that folder
+        // was showing its screenful still landed where a reader looks.
+        theOpeningFiledTheConversation: () => (railFiling?.appeared ?? []).length === 1
+          && railFiling?.appearedGroup === railFiling?.biggest
+          && railFiling?.biggest !== '',
         // ...AND NO FOLDER APPEARED OR LEFT: the run order is the one the act
         // measured, so the saved row joined a folder rather than making one.
         theFoldersAreTheOnesThereWere: () =>
@@ -1793,7 +1858,7 @@ export default {
           .reduce((a, b) => (b.rows.length > a.rows.length ? b : a));
         const target = folder.rows[1] ?? folder.rows[0];
         openInFolder = { id: target.id, group: folder.group };
-        await page.locator('kai-conversations > kai-conversation-item')
+        await page.locator('kai-conversations > kai-conversation-item[data-rail="conversation"]')
           .nth(rows.findIndex((row) => row.id === target.id)).click();
         await settle(900)(page);
       },
@@ -1808,7 +1873,7 @@ export default {
         theActiveRowIsInAFolder: async (page) => {
           const seen = await page.evaluate(() => {
             const rail = document.getElementById('conversations');
-            const items = [...document.querySelectorAll('kai-conversations > kai-conversation-item')];
+            const items = [...document.querySelectorAll('kai-conversations > kai-conversation-item[data-rail="conversation"]')];
             const row = items.find((el) => (el.conversationId ?? el.getAttribute('conversation-id') ?? el.id)
               === rail?.activeId);
             if (!row) return null;
@@ -1846,7 +1911,7 @@ export default {
         // really NARROWS: a query that matched everything would make every probe
         // below true whatever the filter did.
         const title = await page.evaluate((id) => {
-          const el = [...document.querySelectorAll('kai-conversations > kai-conversation-item')]
+          const el = [...document.querySelectorAll('kai-conversations > kai-conversation-item[data-rail="conversation"]')]
             .find((item) => (item.conversationId ?? item.getAttribute('conversation-id') ?? item.id) === id);
           return el?.querySelector(':scope > span')?.textContent ?? '';
         }, target.id);
@@ -1893,6 +1958,342 @@ export default {
         theMatchSurvived: true,
         theRowKeptItsFolder: true,
         theFolderSurvivedAsOneRun: true,
+      },
+    },
+    {
+      name: '37-rail-folder-collapse',
+      act: async (page) => {
+        await clearRailSearch(page);
+        const count = (nodes, kind) => nodes.filter((node) => node.kind === kind).length;
+        const runs = groupRuns(await railRows(page));
+        // The WIDEST folder, so closing it has to take more than one row off the
+        // rail: a folder drawn as a single row would barely move the count.
+        const folder = runs.filter((run) => run.group !== '')
+          .reduce((a, b) => (b.rows.length > a.rows.length ? b : a));
+        // The heading and its caret are this folder's OWN rows, found by the
+        // label the rows of that folder carry.
+        const heading = page.locator(`kai-conversations > kai-conversation-item[data-rail="folder"][data-group="${folder.group}"]`);
+        const caret = page.locator(`kai-conversations > kai-conversation-item[data-rail="folder"][data-group="${folder.group}"] > kai-icon`);
+        const before = await railNodes(page);
+        await heading.click();
+        await settle(350)(page);
+        const shut = await railNodes(page);
+        const caretShut = await readBoundValue(caret, 'name', 'name');
+        await heading.click();
+        await settle(350)(page);
+        const open = await railNodes(page);
+        folderToggle = {
+          group: folder.group,
+          width: folder.rows.length,
+          before: count(before, 'conversation'),
+          shut: count(shut, 'conversation'),
+          open: count(open, 'conversation'),
+          shutRowsInFolder: shut.filter(
+            (node) => node.kind === 'conversation' && node.group === folder.group,
+          ).length,
+          shutHeadings: shut.filter((node) => node.kind === 'folder').length,
+          headings: count(before, 'folder'),
+          caretShut,
+          caretOpen: await readBoundValue(caret, 'name', 'name'),
+        };
+      },
+      probes: {
+        // There IS a heading, it heads the widest folder, and it is the folder's
+        // own row rather than a control beside them.
+        theFolderHadAHeading: () => folderToggle?.shutHeadings === folderToggle?.headings
+          && folderToggle?.width > 1,
+        // CLOSING IT TAKES THAT FOLDER'S ROWS OFF THE RAIL, all of them and
+        // nothing else: the count falls by exactly the folder's width, so no
+        // other folder's conversation came with them.
+        closingHidesTheFoldersRows: () => folderToggle?.shutRowsInFolder === 0
+          && folderToggle?.shut === (folderToggle?.before ?? 0) - (folderToggle?.width ?? 0),
+        // ...AND OPENING IT AGAIN PUTS THEM BACK: one heading click reads both
+        // ways, because open and closed are which rows the state emits.
+        reopeningRestoresTheRows: () => folderToggle?.open === folderToggle?.before,
+        // The caret is how the row says which way round it is, and the two states
+        // are different icons.
+        theCaretSaysTheState: () => (folderToggle?.caretShut ?? '') !== ''
+          && (folderToggle?.caretOpen ?? '') !== ''
+          && folderToggle.caretShut !== folderToggle.caretOpen,
+      },
+      expect: {
+        theFolderHadAHeading: true,
+        closingHidesTheFoldersRows: true,
+        reopeningRestoresTheRows: true,
+        theCaretSaysTheState: true,
+      },
+    },
+    {
+      name: '38-rail-show-more',
+      act: async (page) => {
+        await clearRailSearch(page);
+        const before = await railNodes(page);
+        const moreNode = before.find((node) => node.kind === 'more');
+        // The label the folder's own rows carry, read off its heading rather than
+        // derived from the folder id: the rows and the heading say it the same way.
+        const group = before
+          .find((node) => node.kind === 'folder' && node.folder === (moreNode?.folder ?? ''))?.group ?? '';
+        const rowsOf = (nodes) => nodes.filter((node) => node.kind === 'conversation');
+        const inFolder = (nodes) => rowsOf(nodes).filter((node) => node.group === group).length;
+        const elsewhere = (nodes) => rowsOf(nodes).filter((node) => node.group !== group).length;
+        await page.locator(`kai-conversations > kai-conversation-item[data-rail="more"][data-folder="${moreNode?.folder ?? ''}"]`).click();
+        await settle(350)(page);
+        const after = await railNodes(page);
+        showMore = {
+          group,
+          offered: before.filter((node) => node.kind === 'more').length,
+          shownBefore: inFolder(before),
+          shownAfter: inFolder(after),
+          moreGone: after.filter((node) => node.kind === 'more' && node.folder === (moreNode?.folder ?? '')).length,
+          headingsBefore: before.filter((node) => node.kind === 'folder').length,
+          headingsAfter: after.filter((node) => node.kind === 'folder').length,
+          elsewhereBefore: elsewhere(before),
+          elsewhereAfter: elsewhere(after),
+        };
+      },
+      probes: {
+        aFolderOffersShowMore: () => (showMore?.offered ?? 0) >= 1,
+        // The row is real and the folder's rest is behind it: using it renders
+        // MORE of that folder than the rail showed, and the row itself is gone
+        // because there is nothing left for it to reveal.
+        usingItRevealsTheFoldersRest: () => (showMore?.shownAfter ?? 0) > (showMore?.shownBefore ?? 0)
+          && showMore?.moreGone === 0,
+        // ...and the limit it outran is RECORDED, not typed here: the number the
+        // rail showed before the row is used is the block's own.
+        theLimitWasTheFoldersScreenful: () => (showMore?.shownBefore ?? 0) > 0
+          && showMore?.shownBefore === showMore?.shownAfter - 1,
+        // NO OTHER FOLDER MOVED: the reveal is that folder's rows, not a reshuffle.
+        noOtherFolderMoved: () => showMore?.elsewhereAfter === showMore?.elsewhereBefore
+          && showMore?.headingsAfter === showMore?.headingsBefore,
+      },
+      expect: {
+        aFolderOffersShowMore: true,
+        usingItRevealsTheFoldersRest: true,
+        theLimitWasTheFoldersScreenful: true,
+        noOtherFolderMoved: true,
+      },
+    },
+    {
+      name: '39-rail-search-opens-a-folder',
+      act: async (page) => {
+        await clearRailSearch(page);
+        const runs = groupRuns(await railRows(page));
+        const folder = runs.filter((run) => run.group !== '' && run.rows.length > 1)
+          .reduce((a, b) => (b.rows.length > a.rows.length ? b : a));
+        // A row that is NOT its folder's first: a rail that opened the folder
+        // only far enough to show its head would not pass.
+        const target = folder.rows[folder.rows.length - 1];
+        const title = await rowTitle(page, target.id);
+        const heading = page.locator(`kai-conversations > kai-conversation-item[data-rail="folder"][data-group="${folder.group}"]`);
+        const box = page.locator('kai-conversations').getByRole('textbox').first();
+        const before = (await railNodes(page)).filter((node) => node.kind === 'conversation').length;
+        // SHUT IT FIRST: the match has to start behind a closed heading, which is
+        // the only version of this claim with anything to prove.
+        await heading.click();
+        await settle(350)(page);
+        const shut = await railNodes(page);
+        const words = [...new Set(title.toLowerCase().split(/[^a-z0-9]+/).filter((word) => word.length >= 5))]
+          .sort((a, b) => b.length - a.length);
+        let query = '';
+        for (const word of words) {
+          await box.fill(word);
+          await settle(400)(page);
+          if ((await railRows(page)).some((row) => row.id === target.id)) {
+            query = word;
+            break;
+          }
+        }
+        const found = await railNodes(page);
+        searchOpen = {
+          group: folder.group,
+          id: target.id,
+          query,
+          shutRowsInFolder: shut.filter(
+            (node) => node.kind === 'conversation' && node.group === folder.group,
+          ).length,
+          headingFound: found.filter((node) => node.kind === 'folder' && node.group === folder.group).length,
+          matchShown: found.some((node) => node.kind === 'conversation' && node.id === target.id),
+          folderRuns: groupRuns(found.filter((node) => node.kind === 'conversation'))
+            .filter((run) => run.group === folder.group).length,
+          before,
+        };
+        // Leave the rail as it was found - the query cleared and the folder open
+        // again - so the states after this one walk a rail they can describe.
+        await box.fill('');
+        await settle(400)(page);
+        await heading.click();
+        await settle(350)(page);
+        searchOpen.after = (await railNodes(page)).filter((node) => node.kind === 'conversation').length;
+      },
+      probes: {
+        // The match really started out of sight: its folder was shut and none of
+        // its rows were on the rail.
+        theMatchStartedBehindAShutFolder: () => searchOpen?.shutRowsInFolder === 0,
+        theSearchFoundIt: () => (searchOpen?.query ?? '') !== '' && searchOpen?.matchShown === true,
+        // THE QUERY OPENED THE FOLDER rather than leaving the match behind the
+        // heading the reader had shut, and the folder is still ONE run - so the
+        // heading the match is under is the folder's own.
+        theSearchOpenedTheFolder: () => searchOpen?.headingFound === 1 && searchOpen?.folderRuns === 1,
+        // And the rail was handed back as it was found: the same rows, with the
+        // folder shut again, because the reader shut it.
+        theRailWasLeftAsItWasFound: () => searchOpen?.after === searchOpen?.before,
+      },
+      expect: {
+        theMatchStartedBehindAShutFolder: true,
+        theSearchFoundIt: true,
+        theSearchOpenedTheFolder: true,
+        theRailWasLeftAsItWasFound: true,
+      },
+    },
+    {
+      name: '40-rail-keyboard-walk',
+      act: async (page) => {
+        // THE ASSERTION THE FOLDER SHAPE WAS CHOSEN FOR. A heading is a row in the
+        // ONE flat repeat precisely so the container's roving focus still covers
+        // every row: a heading wrapped in anything of its own would go standalone,
+        // take its own tab stop and leave the arrow keys walking nothing. So: tab
+        // out of the rail's search box INTO the rail, then walk the whole list and
+        // watch which row holds the one tab stop.
+        await clearRailSearch(page);
+        // Read AFTER the search is cleared: the walk is over the rows the rail
+        // really holds, and a filter would have taken some of them off it.
+        const before = await rowWalk(page);
+        const box = page.locator('kai-conversations').getByRole('textbox').first();
+        await box.click();
+        let arrived = null;
+        // `page.keyboard`, not `box.press`: a locator's press focuses the box
+        // first, so six of them are six presses from the SAME place and the walk
+        // never advances.
+        for (let step = 0; step < 8 && arrived === null; step += 1) {
+          await page.keyboard.press('Tab');
+          await settle(150)(page);
+          const at = await rowWalk(page);
+          if (at.focused >= 0) arrived = at;
+        }
+        await page.keyboard.press('Home');
+        await settle(150)(page);
+        const walked = [await rowWalk(page)];
+        for (let step = 0; step < before.count + 1; step += 1) {
+          await page.keyboard.press('ArrowDown');
+          await settle(120)(page);
+          const at = await rowWalk(page);
+          // The list's END: the arrows stop moving, which is where the walk ends.
+          if (at.focused === walked[walked.length - 1].focused) break;
+          walked.push(at);
+        }
+        const end = walked[walked.length - 1];
+        await page.keyboard.press('ArrowUp');
+        await settle(120)(page);
+        const up = await rowWalk(page);
+        keyboardWalk = {
+          rows: before.count,
+          kinds: before.kinds,
+          arrived: arrived === null ? -1 : arrived.focused,
+          stops: (arrived ?? before).rovingStops,
+          walked: walked.map((at) => at.focused),
+          walkedKinds: walked.map((at) => at.focusedKind),
+          stopsPerStep: walked.map((at) => at.rovingStops),
+          end: end.focused,
+          up: up.focused,
+        };
+      },
+      probes: {
+        // A tab out of the rail's own search box lands on a ROW and stops there:
+        // the whole list is one stop in the page's tab order.
+        tabbingReachedARailRow: () => (keyboardWalk?.arrived ?? -1) >= 0,
+        // ONE tab stop for the list, at every step of the walk: that number IS
+        // the container's roving contract, and a heading with a control of its own
+        // would make it two.
+        theRailHasOneTabStop: () => keyboardWalk?.stops === 1
+          && (keyboardWalk?.stopsPerStep ?? []).length > 0
+          && (keyboardWalk?.stopsPerStep ?? []).every((count) => count === 1),
+        // Home starts at the first row and ArrowDown walks EVERY row in order, one
+        // per press: a row the repeat emitted but the container never collected
+        // shows up here as a gap.
+        theArrowsWalkEveryRowInOrder: () => {
+          const walked = keyboardWalk?.walked ?? [];
+          return walked.length === keyboardWalk?.rows && walked.every((at, index) => at === index);
+        },
+        // ...and the walk covers a heading AND a conversation, which is the whole
+        // reason the heading is a rail row rather than a control beside the rows.
+        theWalkCoveredAHeadingAndAConversation: () => {
+          const kinds = keyboardWalk?.walkedKinds ?? [];
+          return kinds.includes('folder') && kinds.includes('conversation');
+        },
+        // ArrowUp walks back: the last row is not a dead end, and the tab stop
+        // went with the walk.
+        arrowUpWalksBack: () => keyboardWalk?.up === (keyboardWalk?.end ?? 0) - 1,
+      },
+      expect: {
+        tabbingReachedARailRow: true,
+        theRailHasOneTabStop: true,
+        theArrowsWalkEveryRowInOrder: true,
+        theWalkCoveredAHeadingAndAConversation: true,
+        arrowUpWalksBack: true,
+      },
+    },
+    {
+      name: '41-rail-arrival-files-and-opens',
+      act: async (page) => {
+        await clearRailSearch(page);
+        // The opening this state sends is the one state 32's act measured the
+        // filing of, so the folder it lands in is a fact this run recorded rather
+        // than a copy of the block's own filing rule kept here.
+        const group = railFiling?.appearedGroup ?? '';
+        const heading = page.locator(`kai-conversations > kai-conversation-item[data-rail="folder"][data-group="${group}"]`);
+        const before = await railRows(page);
+        const beforeIds = before.map((row) => row.id);
+        const groups = groupRuns(before).map((run) => run.group);
+        // SHUT the folder the new conversation will be filed into, so the row's
+        // arrival has to be what opens it.
+        await heading.click();
+        await settle(350)(page);
+        const shut = await railNodes(page);
+        await page.getByRole('button', { name: 'New chat' }).click();
+        await settle(300)(page);
+        const box = page.locator('kai-prompt-input').getByRole('textbox').first();
+        await box.click();
+        await box.fill('Point the mock transport at my own backend');
+        await box.press('Enter');
+        await waitForTurns(page, 2);
+        const after = await railNodes(page);
+        const appeared = after.filter(
+          (node) => node.kind === 'conversation' && !beforeIds.includes(node.id),
+        );
+        activeArrival = {
+          group,
+          shutRowsInFolder: shut.filter(
+            (node) => node.kind === 'conversation' && node.group === group,
+          ).length,
+          appeared: appeared.map((node) => node.id),
+          appearedGroup: appeared[0]?.group ?? '',
+          rowShown: appeared.some((node) => node.group === group),
+          headingOpen: after.filter((node) => node.kind === 'folder' && node.group === group).length === 1,
+          groupsBefore: groups,
+          groupsAfter: groupRuns(after.filter((node) => node.kind === 'conversation')).map((run) => run.group),
+        };
+      },
+      probes: {
+        theFolderWasShutFirst: () => activeArrival?.shutRowsInFolder === 0,
+        // The turn filed the row through the store, so the rail's own group came
+        // back off the summary rather than out of a second store beside it.
+        theNewConversationFiledItself: () => (activeArrival?.appeared ?? []).length === 1
+          && activeArrival?.group !== ''
+          && activeArrival?.appearedGroup === activeArrival?.group,
+        // ...AND ITS FOLDER IS OPEN: the one arrival the block knows the reader is
+        // looking at has to be a row they can see, not one filed behind a heading
+        // they had shut.
+        itsFolderWasOpenedForIt: () => activeArrival?.headingOpen === true
+          && activeArrival?.rowShown === true,
+        // ...and it joined a folder rather than making one.
+        noFolderAppeared: () => (activeArrival?.groupsAfter ?? []).join('|')
+          === (activeArrival?.groupsBefore ?? []).join('|'),
+      },
+      expect: {
+        theFolderWasShutFirst: true,
+        theNewConversationFiledItself: true,
+        itsFolderWasOpenedForIt: true,
+        noFolderAppeared: true,
       },
     },
   ],

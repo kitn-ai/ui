@@ -378,7 +378,7 @@
             "projectsAreContiguous": true,
             "recentsIsLast": true,
             "aFolderHoldsOneConversation": true,
-            "biggestFolderCount": 5,
+            "biggestFolderCount": 4,
             "aFolderOutrunsAFoldersScreenful": true,
             "theOpeningFiledTheConversation": true,
             "theFoldersAreTheOnesThereWere": true
@@ -420,6 +420,57 @@
             "theMatchSurvived": true,
             "theRowKeptItsFolder": true,
             "theFolderSurvivedAsOneRun": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "37-rail-folder-collapse",
+          "probes": {
+            "theFolderHadAHeading": true,
+            "closingHidesTheFoldersRows": true,
+            "reopeningRestoresTheRows": true,
+            "theCaretSaysTheState": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "38-rail-show-more",
+          "probes": {
+            "aFolderOffersShowMore": true,
+            "usingItRevealsTheFoldersRest": true,
+            "theLimitWasTheFoldersScreenful": true,
+            "noOtherFolderMoved": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "39-rail-search-opens-a-folder",
+          "probes": {
+            "theMatchStartedBehindAShutFolder": true,
+            "theSearchFoundIt": true,
+            "theSearchOpenedTheFolder": true,
+            "theRailWasLeftAsItWasFound": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "40-rail-keyboard-walk",
+          "probes": {
+            "tabbingReachedARailRow": true,
+            "theRailHasOneTabStop": true,
+            "theArrowsWalkEveryRowInOrder": true,
+            "theWalkCoveredAHeadingAndAConversation": true,
+            "arrowUpWalksBack": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "41-rail-arrival-files-and-opens",
+          "probes": {
+            "theFolderWasShutFirst": true,
+            "theNewConversationFiledItself": true,
+            "itsFolderWasOpenedForIt": true,
+            "noFolderAppeared": true
           },
           "styles": {}
         }
@@ -803,7 +854,7 @@
             "projectsAreContiguous": true,
             "recentsIsLast": true,
             "aFolderHoldsOneConversation": true,
-            "biggestFolderCount": 5,
+            "biggestFolderCount": 4,
             "aFolderOutrunsAFoldersScreenful": true,
             "theOpeningFiledTheConversation": true,
             "theFoldersAreTheOnesThereWere": true
@@ -845,6 +896,57 @@
             "theMatchSurvived": true,
             "theRowKeptItsFolder": true,
             "theFolderSurvivedAsOneRun": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "37-rail-folder-collapse",
+          "probes": {
+            "theFolderHadAHeading": true,
+            "closingHidesTheFoldersRows": true,
+            "reopeningRestoresTheRows": true,
+            "theCaretSaysTheState": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "38-rail-show-more",
+          "probes": {
+            "aFolderOffersShowMore": true,
+            "usingItRevealsTheFoldersRest": true,
+            "theLimitWasTheFoldersScreenful": true,
+            "noOtherFolderMoved": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "39-rail-search-opens-a-folder",
+          "probes": {
+            "theMatchStartedBehindAShutFolder": true,
+            "theSearchFoundIt": true,
+            "theSearchOpenedTheFolder": true,
+            "theRailWasLeftAsItWasFound": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "40-rail-keyboard-walk",
+          "probes": {
+            "tabbingReachedARailRow": true,
+            "theRailHasOneTabStop": true,
+            "theArrowsWalkEveryRowInOrder": true,
+            "theWalkCoveredAHeadingAndAConversation": true,
+            "arrowUpWalksBack": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "41-rail-arrival-files-and-opens",
+          "probes": {
+            "theFolderWasShutFirst": true,
+            "theNewConversationFiledItself": true,
+            "itsFolderWasOpenedForIt": true,
+            "noFolderAppeared": true
           },
           "styles": {}
         }

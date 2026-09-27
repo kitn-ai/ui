@@ -77,8 +77,13 @@
         <!-- THE PROJECT EACH ROW IS FILED UNDER, bound so the rail SAYS it
              rather than implying it through the order: the folder the Projects
              section groups the row into, and empty for the ungrouped remainder.
-             The folder heading itself rides on the row below, because the page
-             grammar clones one element per repeat and cannot nest a second list. -->
+
+             The rail is ONE flat repeat, so a folder's heading and its Show more
+             row are rows in it too: `kind` says which of the three a row is, and
+             the fields below decide what it shows. Nothing wraps anything, which
+             is what keeps every row a direct child of the list - an item nested
+             in another element would go standalone by the container's own rule
+             and lose the roving focus and the container's active state. -->
         <kai-conversation-item
           *for="row of conversationRows"
           :key="row.id"
@@ -86,7 +91,19 @@
           :conversation-id="row.id"
           :unread="row.unread"
           :data-group="row.groupName"
+          :data-rail="row.kind"
+          :data-folder="row.folderId"
         >
+          <!-- The folder's open state, and the one part of a heading that is not
+               a word: the caret leads the title and points down while the folder
+               is open. Hidden on a conversation row, which has none. -->
+          <kai-icon
+            class="row-caret"
+            :theme="themeMode"
+            :name="row.caretName"
+            :hidden="row.caretHidden"
+            size="sm"
+          ></kai-icon>
           <!-- The title, and - only while that row is the one being renamed -
                an inline field in its place. kai-editable-label is driven as a
                CONTROLLED editor (`.editing` follows State), which is what lets
@@ -127,6 +144,7 @@
             slot="menu"
             class="row-menu"
             :theme="themeMode"
+            :hidden="row.menuHidden"
             triggerIcon="more-horizontal"
             :label="row.menuLabel"
           >

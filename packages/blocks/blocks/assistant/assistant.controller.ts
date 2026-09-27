@@ -655,13 +655,19 @@ function guideTarget(event: Event): string | undefined {
  *
  *  HOW A CONVERSATION IS FILED, which is the demo's stand-in for a real app's:
  *  a real one files the conversation when the reader creates it inside a
- *  project, or its store returns the project on the summary. This one reads
- *  `topics` off the conversation's OPENING turn at the moment that turn is
- *  saved (`projectOfOpening`, called from the save path), and keeps the answer
- *  in the block's own storage (`filingStore`), so a later turn, a rename or a
- *  reload never re-files a row. An opening that names no project's subject
- *  stays ungrouped and lands in Recents, which is where a reader's own typed
- *  conversations mostly go. */
+ *  project. This one reads `topics` off the conversation's OPENING turn at the
+ *  moment that turn is saved (`projectOfOpening`, called from the save path)
+ *  and files it through the store's own `groupId` (`controller.setGroup`), so
+ *  there is ONE place a filing lives and the store round-trips it like a pin.
+ *  An already-filed conversation is left where it is, which keeps a later turn,
+ *  a rename and a reload from moving a row. An opening that names no project's
+ *  subject stays ungrouped and lands in Recents, which is where a reader's own
+ *  typed conversations mostly go.
+ *
+ *  A group the catalogue cannot name is NOT dropped: it gets a folder of its
+ *  own, labelled with the id it carries (see `sectionLabel`), because where a
+ *  conversation is filed is the reader's own decision and a row this block
+ *  cannot name is still a row the reader put somewhere. */
 interface DemoProject {
   id: string;
   name: string;
@@ -703,50 +709,6 @@ function openingOf(messages: readonly ChatMessage[]): string {
   return '';
 }
 
-/** Where a conversation's project is kept: the block's own storage, beside the
- *  store's index and keyed the same way.
- *
- *  ITS OWN KEY RATHER THAN A FIELD ON THE STORED SUMMARY, and this is the one
- *  decision here worth the words: the store rebuilds a summary from scratch on
- *  every save, so a field it does not know is dropped the moment the reader
- *  sends another message - the row would leave its folder mid-conversation and
- *  nothing on screen would say why. DELETE WITH `PROJECTS`. */
-function filingStore(name: string) {
-  const key = `kai:${name}:projects`;
-  let map: Record<string, string> | undefined;
-  const all = (): Record<string, string> => {
-    if (map !== undefined) return map;
-    let parsed: unknown;
-    try {
-      parsed = JSON.parse(localStorage.getItem(key) ?? '{}');
-    } catch {
-      // A corrupt map costs the folders, never a thread.
-      parsed = {};
-    }
-    map = parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed)
-      ? (parsed as Record<string, string>)
-      : {};
-    return map;
-  };
-  return {
-    /** The project the conversation is filed in, or undefined for Recents. */
-    get(id: string): string | undefined {
-      return all()[id];
-    },
-    /** File it. A storage that refuses the write costs the reader their folders
-     *  on the next reload and nothing else, which is why it is swallowed here
-     *  rather than thrown at a thread that is otherwise fine. */
-    set(id: string, project: string): void {
-      map = { ...all(), [id]: project };
-      try {
-        localStorage.setItem(key, JSON.stringify(map));
-      } catch {
-        /* storage unavailable: this tab keeps its folders, a reload will not */
-      }
-    },
-  };
-}
-
 /** The rail's ONE row order: the projects in the catalogue's order, the
  *  ungrouped remainder last, and inside each of those the kit's own
  *  `byPinnedThenRecency`. So a pinned conversation sorts first WITHIN its
@@ -755,49 +717,151 @@ function filingStore(name: string) {
 function orderByProject(summaries: readonly ConversationSummary[]): ConversationSummary[] {
   const rank = (groupId: string | undefined): number => {
     const at = PROJECTS.findIndex((project) => project.id === groupId);
-    // A group the catalogue does not know is the remainder: a consumer's own
-    // store can carry its own groups and the rail still renders every row.
-    return at === -1 ? PROJECTS.length : at;
+    if (at !== -1) return at;
+    // A group the catalogue does not know still gets a folder of its own, ahead
+    // of the remainder: a consumer's own store can carry its own groups, and a
+    // row the catalogue cannot name is reachable rather than filed in Recents.
+    // The conversations with no group at all sort last.
+    return groupId === undefined ? PROJECTS.length + 1 : PROJECTS.length;
   };
   return [...summaries].sort((a, b) => {
     const byProject = rank(a.groupId) - rank(b.groupId);
-    return byProject !== 0 ? byProject : byPinnedThenRecency(a, b);
+    if (byProject !== 0) return byProject;
+    // The subgroup's id is the last tiebreak, and it is what makes every folder
+    // ONE run: two groups the catalogue does not know would otherwise interleave
+    // by recency, and a folder split around another folder's rows renders as two
+    // folders with one label.
+    const byGroup = (a.groupId ?? '').localeCompare(b.groupId ?? '');
+    return byGroup !== 0 ? byGroup : byPinnedThenRecency(a, b);
   });
 }
 
-/** The rail's rows and the projects those rows make, from the ONE ordered list
- *  and at most one narrowing: the search. The sections are read off the rows
- *  that survived, never declared beside them, so a row can never be in a section
- *  the rail does not show and the two cannot disagree.
- *
- *  `groupFirst` is marked on the rows that SURVIVED, which is the whole of what
- *  a query has to leave behind: a folder whose first rows a query dropped still
- *  says where it would begin, and a project whose every row was dropped is a
- *  section that is simply not there. */
-function railFrom(
-  rows: readonly ConversationRow[],
-  query: string,
-): Pick<AssistantState, 'conversationRows' | 'conversationSections'> {
-  const matched = query === ''
+/** The rows a query leaves, in the one order. The search is the only narrowing
+ *  the rail has, and it runs in the same pass that derives the sections, so a
+ *  folder whose rows all missed is not a folder the rail still offers. */
+function narrow(rows: readonly ConversationRow[], query: string): readonly ConversationRow[] {
+  return query === ''
     ? rows
     : rows.filter((row) => `${row.title} ${row.preview}`.toLowerCase().includes(query));
+}
+
+/** The projects the surviving rows make, read off them rather than declared
+ *  beside them, so a row can never be in a section the rail does not show. */
+function sectionsFrom(rows: readonly ConversationRow[]): ConversationSection[] {
   const counts = new Map<string, number>();
-  for (const row of matched) {
+  for (const row of rows) {
     if (row.group !== '') counts.set(row.group, (counts.get(row.group) ?? 0) + 1);
   }
   const conversationSections: ConversationSection[] = [];
   let inGroup = '';
-  const conversationRows = matched.map((row, index) => {
+  for (const row of rows) {
     if (row.group !== '' && row.group !== inGroup) {
-      conversationSections.push({ id: row.group, name: row.groupName, count: counts.get(row.group) ?? 0 });
+      conversationSections.push({
+        id: row.group,
+        name: sectionLabel(row.group, row.groupName),
+        count: counts.get(row.group) ?? 0,
+      });
     }
     inGroup = row.group;
-    const groupFirst = index === 0 || matched[index - 1].group !== row.group;
-    // A new object only where the mark actually moved: a row the reader is
-    // already looking at stays the row they were handed.
-    return groupFirst === row.groupFirst ? row : { ...row, groupFirst };
-  });
-  return { conversationRows, conversationSections };
+  }
+  return conversationSections;
+}
+
+/** What a folder heading reads: the project's own name, or - for a group the
+ *  catalogue does not name - the id the row carries, so a consumer's own group
+ *  is a folder with a label rather than a blank row. */
+function sectionLabel(group: string, groupName: string): string {
+  return groupName !== '' ? groupName : group;
+}
+
+/** A rail row that is not a conversation: a folder's heading, or the Show more
+ *  row. Both are rendered by the SAME repeat the conversations are, because the
+ *  page grammar clones one element per repeat and has no way to interleave a
+ *  second kind of row between them - so the heading is a rail row, and its
+ *  `conversation-id` names the folder rather than a conversation, which is how
+ *  activation tells the two apart. */
+function folderNode(
+  kind: 'folder' | 'more',
+  group: string,
+  groupName: string,
+  open: boolean,
+): ConversationRow {
+  const heading = kind === 'folder';
+  return {
+    id: `${heading ? FOLDER_HEADING_NODE : FOLDER_MORE_NODE}${group}`,
+    title: heading ? (group === '' ? RECENTS_LABEL : sectionLabel(group, groupName)) : SHOW_MORE_LABEL,
+    preview: '',
+    previewHidden: true,
+    unread: false,
+    menuLabel: '',
+    renaming: false,
+    renameFieldHidden: true,
+    pinLabel: 'Pin',
+    renameItemHidden: true,
+    pinItemHidden: true,
+    archiveItemHidden: true,
+    deleteItemHidden: true,
+    pinned: false,
+    group,
+    groupName,
+    folderId: group,
+    kind,
+    caretHidden: !heading,
+    caretName: heading ? (open ? 'chevron-down' : 'chevron-right') : '',
+    menuHidden: true,
+  };
+}
+
+/** The rail's ONE flat repeat, expanded from the ordered conversations into the
+ *  rows the rail renders: for every folder, its heading and - while it is open -
+ *  its conversations, then the Show more row when the folder holds more than the
+ *  rail shows. Nothing wraps anything, so every row is a direct child of the
+ *  list and the container's roving focus and activation cover the headings too.
+ *
+ *  Open/closed is therefore which rows this emits at all: a closed folder is its
+ *  heading and nothing else. A search opens every folder it has a match in,
+ *  because a match the reader cannot see is a match that does not exist. */
+function railNodes(
+  rows: readonly ConversationRow[],
+  closed: readonly string[],
+  expanded: readonly string[],
+  query: string,
+): ConversationRow[] {
+  const shut = new Set(closed);
+  const grown = new Set(expanded);
+  const out: ConversationRow[] = [];
+  let at = 0;
+  while (at < rows.length) {
+    const group = rows[at].group;
+    let end = at;
+    while (end < rows.length && rows[end].group === group) end += 1;
+    const run = rows.slice(at, end);
+    const groupName = run[0].groupName;
+    const open = query !== '' || !shut.has(group);
+    out.push(folderNode('folder', group, groupName, open));
+    if (open) {
+      const shown = grown.has(group) ? run : run.slice(0, FOLDER_LIMIT);
+      out.push(...shown);
+      if (shown.length < run.length) out.push(folderNode('more', group, groupName, false));
+    }
+    at = end;
+  }
+  return out;
+}
+
+/** The rail's rows and the projects those rows make, from the ONE ordered list
+ *  and at most one narrowing: the search. */
+function railFrom(
+  rows: readonly ConversationRow[],
+  query: string,
+  closed: readonly string[],
+  expanded: readonly string[],
+): Pick<AssistantState, 'conversationRows' | 'conversationSections'> {
+  const matched = narrow(rows, query);
+  return {
+    conversationRows: railNodes(matched, closed, expanded, query),
+    conversationSections: sectionsFrom(matched),
+  };
 }
 
 /** One project the rail shows, with what the rows in it come to right now.
@@ -812,15 +876,25 @@ export interface ConversationSection {
 }
 
 /** One rendered row of the rail. Every field is already a string or a
- *  boolean, because `*for` bodies get bindings, not expressions. */
+ *  boolean, because `*for` bodies get bindings, not expressions.
+ *
+ *  A row is not always a conversation: a folder's heading and its Show more row
+ *  are rail rows too, so `kind` says which of the three it is and the fields
+ *  decide what it shows. That is why the control rows carry the whole shape with
+ *  the conversation parts hidden rather than a shape of their own - the repeat
+ *  renders one element. */
 export interface ConversationRow {
   id: string;
+  /** Which of the three rows this is. A conversation is activated by loading it;
+   *  a heading and a Show more row are activated as the folder control they are. */
+  kind: 'conversation' | 'folder' | 'more';
   title: string;
   preview: string;
   previewHidden: boolean;
   unread: boolean;
-  /** The row's own menu trigger, named for the row it belongs to: every row has
-   *  one, so one shared label would make five identical accessible names. */
+  /** The row's own menu trigger, named for the row it belongs to: every
+   *  conversation row has one, so one shared label would make five identical
+   *  accessible names. Empty on a control row, whose menu is hidden. */
   menuLabel: string;
   /** This row is the one being renamed, so its title is a field and not text. */
   renaming: boolean;
@@ -842,15 +916,38 @@ export interface ConversationRow {
   /** The project this row is filed under, or '' for the ungrouped remainder.
    *  The id the section carries, so the two are the same fact spelled once. */
   group: string;
-  /** That project's label, or ''. The row carries it because a folder's heading
-   *  rides on the first row of the folder: a `*for` body is one cloned element
-   *  and the grammar has no nested repeat, so a section's label has to be said
-   *  on a row rather than in a list beside the rows. */
+  /** That project's label, or ''. Empty for a group the catalogue cannot name,
+   *  which a heading then labels with the id instead (`sectionLabel`). */
   groupName: string;
-  /** This row is where its group begins in the list being rendered, so a
-   *  renderer knows a folder starts here without a second list to read. */
-  groupFirst: boolean;
+  /** A control row's own folder id, so a driver can name the folder a heading
+   *  heads. Empty on a conversation row, whose folder is its `group`. */
+  folderId: string;
+  /** Whether the leading caret is hidden: only a folder heading shows one. */
+  caretHidden: boolean;
+  /** The caret's icon name, which is the folder's open state. Empty where the
+   *  caret is hidden; a binding holds a field, never an expression. */
+  caretName: string;
+  /** Whether the row menu is hidden: a control row carries no kebab, and the
+   *  heading's own activation is the folder control. */
+  menuHidden: boolean;
 }
+
+/** How many of a folder's conversations the rail shows before it offers the
+ *  `Show more` row. A folder's screenful is small on purpose - the reference
+ *  sidebar shows three or four - and the demo's biggest folder holds one more
+ *  than this, so the row has something to reveal. */
+const FOLDER_LIMIT = 4;
+
+/** The id a folder heading's and a Show more row's rail row carries. A
+ *  conversation id is a uuid, so neither prefix can collide with one. */
+const FOLDER_HEADING_NODE = 'folder:';
+const FOLDER_MORE_NODE = 'folder-more:';
+
+/** The ungrouped remainder's heading, and a folder's reveal control. Both are
+ *  the block's own words, which is the point of the heading being a row: the
+ *  element has no label of its own for either. */
+const RECENTS_LABEL = 'Recents';
+const SHOW_MORE_LABEL = 'Show more';
 
 export interface AssistantState {
   // thread
@@ -876,8 +973,9 @@ export interface AssistantState {
    *  read of the input, because the controller owns no DOM: the rows below
    *  are already filtered by it. */
   query: string;
-  /** The rows the rail renders: the summaries, projected and then FILTERED
-   *  by `query`. The old script rendered them all and hid the misses. */
+  /** The rows the rail renders: the summaries, projected, narrowed by `query`,
+   *  and expanded into the folder headings and Show more rows the rail draws.
+   *  The old script rendered them all and hid the misses. */
   conversationRows: ConversationRow[];
   /** The projects those rows make, in the order the rail renders them: one per
    *  project that holds a row, derived in the same pass as the rows themselves
@@ -1074,10 +1172,25 @@ export function createController(deps: AssistantDeps): AssistantController {
   // The UNFILTERED projection, kept beside State rather than in it: nothing
   // binds it, and a field nothing binds is not part of the view model.
   let allRows: ConversationRow[] = [];
+  // The folders the reader has closed, and the ones whose Show more row has been
+  // used. Both are beside State for the reason `renamingId` is: nothing binds
+  // them, and the rows the rail renders are their projection. Empty means every
+  // folder is open and none of them has grown, which is how a fresh rail reads.
+  let closedGroups: string[] = [];
+  let expandedGroups: string[] = [];
   // The last summaries the store handed up, kept for the same reason as
   // `allRows`: the row projection is re-run when the RENAME state moves, not
   // only when the summaries do.
   let lastSummaries: ConversationSummary[] = [];
+  /** Open a conversation's folder however the reader left it, and re-project:
+   *  the row that just became active has to be reachable, and a row filed into a
+   *  closed folder would sit where the reader cannot see it. */
+  const revealGroup = (group: string): void => {
+    if (group === '' || !closedGroups.includes(group)) return;
+    closedGroups = closedGroups.filter((id) => id !== group);
+    patch(projectSummaries(lastSummaries));
+  };
+
   /** The conversation whose inline rename field is open, or undefined. Beside
    *  State for the same reason as `allRows`: nothing binds it directly; the rows
    *  carry it, projected. */
@@ -1091,10 +1204,6 @@ export function createController(deps: AssistantDeps): AssistantController {
   let booted = false;
 
   const store = localStorageStore(deps.storageKey ?? 'assistant');
-  // Where the demo's filing lives (see `PROJECTS`). One per controller, so a
-  // second block instance on the page reads the same map off localStorage and
-  // keeps its own parsed copy of it.
-  const filing = filingStore(deps.storageKey ?? 'assistant');
 
   // WHAT THE STORE CAN DO, read off the store itself. The four operations are
   // OPT-IN on ConversationStore, and ConversationController refuses LOUDLY when
@@ -1114,11 +1223,12 @@ export function createController(deps: AssistantDeps): AssistantController {
     onSummariesChange: (summaries) => patch(projectSummaries(summaries)),
   });
 
-  function projectSummaries(summaries: ConversationSummary[]): Partial<AssistantState> {
+  function projectSummaries(summaries: ConversationSummary[], query: string = state.query): Partial<AssistantState> {
     lastSummaries = summaries;
-    // The demo's filing is stamped on as the summary's own `groupId`, which is
-    // the kit's field for exactly this and the field `orderByProject` sorts by.
-    const projected = orderByProject(summaries.map((s) => ({ ...s, groupId: filing.get(s.id) }))).map((s) => {
+    // Where a row is filed is the summary's OWN `groupId`, the field the store
+    // writes, round-trips and hands back: one source of truth, and the same one
+    // `orderByProject` reads its order from.
+    const projected = orderByProject(summaries).map((s) => {
       // Display dedupe: the store titles a conversation from message text, so
       // the title and the trailing preview can be the same string.
       const preview = s.trailing && s.trailing !== s.title ? s.trailing : '';
@@ -1126,6 +1236,7 @@ export function createController(deps: AssistantDeps): AssistantController {
       const group = s.groupId ?? '';
       return {
         id: s.id,
+        kind: 'conversation' as const,
         title: s.title,
         preview,
         previewHidden: preview === '',
@@ -1141,15 +1252,17 @@ export function createController(deps: AssistantDeps): AssistantController {
         pinned: s.pinned === true,
         group,
         groupName: PROJECTS.find((project) => project.id === group)?.name ?? '',
-        // Marked by `railFrom`, on the list this row is actually rendered in.
-        groupFirst: false,
+        folderId: '',
+        caretHidden: true,
+        caretName: '',
+        menuHidden: false,
       };
     });
-    // The unfiltered list, marked: what the search narrows, and what the row
-    // menu and the two shortcuts act on. The two fields below are what the rail
-    // renders, which the filter narrows in the same pass as the sections.
-    allRows = railFrom(projected, '').conversationRows;
-    return { ...railFrom(allRows, state.query), activeId: controller.activeId() };
+    // The unfiltered conversation rows, which is what the row menu and the two
+    // shortcuts act on. What the rail renders is the projection below, which
+    // narrows and expands them in the same pass as the sections.
+    allRows = projected;
+    return { ...railFrom(projected, query, closedGroups, expandedGroups), activeId: controller.activeId() };
   }
 
   /** Open (id) or close (undefined) the one inline rename field. Re-projects
@@ -1310,18 +1423,20 @@ export function createController(deps: AssistantDeps): AssistantController {
       if (save) {
         await controller.saveTurn(state.messages);
         // THE ONE MOMENT THE DEMO CAN FILE A CONVERSATION: the save has just
-        // minted its id and the thread still carries its opening turn. One
-        // already filed is left where it is, which is what keeps a second turn,
-        // a rename or a reload from moving a row between projects.
+        // minted its id and the thread still carries its opening turn. The
+        // filing is read back off the summary the store just handed up, so a
+        // conversation already filed is left where it is - which is what keeps a
+        // second turn, a rename or a reload from moving a row between projects.
         const id = controller.activeId();
-        if (id !== undefined && filing.get(id) === undefined) {
+        if (id !== undefined && lastSummaries.find((summary) => summary.id === id)?.groupId === undefined) {
           const project = projectOfOpening(openingOf(state.messages));
           if (project !== undefined) {
-            filing.set(id, project);
-            // The summaries the save just refreshed were projected BEFORE the
-            // filing existed, so the rail is projected once more: the row lands
-            // in its folder on the turn that created it, not on the next one.
-            patch(projectSummaries(lastSummaries));
+            // The reader is looking at the conversation they have just made, so
+            // its folder is opened however they left it: the row lands where they
+            // can see it. `setGroup` refreshes the summaries, which re-projects
+            // the rail, so the row reaches its folder on the turn that made it.
+            revealGroup(project);
+            await controller.setGroup(id, project);
           }
         }
       }
@@ -1354,7 +1469,29 @@ export function createController(deps: AssistantDeps): AssistantController {
     },
 
     async openConversation(event) {
-      await controller.select(event.detail.id);
+      const id = event.detail.id;
+      // A heading is not a conversation: it names the folder it heads, so
+      // activation opens or closes that folder rather than loading anything.
+      if (id.startsWith(FOLDER_HEADING_NODE)) {
+        const group = id.slice(FOLDER_HEADING_NODE.length);
+        closedGroups = closedGroups.includes(group)
+          ? closedGroups.filter((candidate) => candidate !== group)
+          : [...closedGroups, group];
+        patch(projectSummaries(lastSummaries));
+        return;
+      }
+      // The Show more row names the folder that has to grow, which is the same
+      // mechanic read the other way: the rows past the limit are emitted.
+      if (id.startsWith(FOLDER_MORE_NODE)) {
+        const group = id.slice(FOLDER_MORE_NODE.length);
+        if (!expandedGroups.includes(group)) expandedGroups = [...expandedGroups, group];
+        patch(projectSummaries(lastSummaries));
+        return;
+      }
+      // The conversation's own folder is opened before the load, so the row the
+      // reader just activated is on screen while its thread arrives.
+      revealGroup(allRows.find((row) => row.id === id)?.group ?? '');
+      await controller.select(id);
     },
 
     newChat() {
@@ -1364,8 +1501,10 @@ export function createController(deps: AssistantDeps): AssistantController {
     search(event) {
       const query = event.detail.query.trim().toLowerCase();
       // The rows AND the sections, from the same pass: a query narrows both, so
-      // a group whose rows all missed is not a folder the rail still offers.
-      patch({ query, ...railFrom(allRows, query) });
+      // a group whose rows all missed is not a folder the rail still offers - and
+      // it opens every folder it has a match in (`railNodes`), because a match
+      // behind a closed heading is a match the reader cannot see.
+      patch({ query, ...projectSummaries(lastSummaries, query) });
     },
 
     valueChange(event) {

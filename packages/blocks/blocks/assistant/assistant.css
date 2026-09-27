@@ -55,6 +55,24 @@ kai-workspace.app { display: block; height: 100dvh; }
 kai-editable-label[hidden] { display: none; }
 kai-editable-label.row-rename { min-width: 0; max-width: 100%; }
 
+/* A folder heading's caret, and the row menu a heading does not have. Both
+ * elements paint their host from their own shadow sheet as an AUTHOR rule, which
+ * outranks the UA's [hidden] one, so the attribute needs an author-level rule
+ * here or a hidden control stays laid out - the same fix kai-button[hidden] at
+ * the foot of this sheet carries. */
+kai-icon[hidden] { display: none; }
+kai-dropdown[hidden] { display: none; }
+/* The caret leads the row and leaves a little air before the label. */
+kai-conversation-item .row-caret { margin-right: 0.25rem; opacity: 0.7; }
+
+/* A conversation filed in a folder sits one step in from its heading, which is
+ * how the tree reads: the heading is a rail row and its conversations are under
+ * it. The ungrouped remainder (data-group empty) stays flush, because Recents is
+ * a flat list. The step is on the row's own box, so nothing is pierced: the row
+ * is the page's element, its body lives in its shadow root. Measured in the
+ * driver (`folderIndent`). */
+kai-conversation-item[data-rail="conversation"]:not([data-group=""]) { margin-inline-start: 1rem; }
+
 /* The plain (non-activating) menu row's box, and it is spelled here for one
  * reason: the rows that DO act are kai-buttons, whose box the kit paints inside
  * their shadow root from its own size="sm" variant - 32px tall, 12px of inline
