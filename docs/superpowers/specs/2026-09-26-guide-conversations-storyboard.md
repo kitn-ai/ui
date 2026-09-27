@@ -265,7 +265,9 @@ shape does rather than waiting on it.
 
 ### `Summarize a document`
 
-**User:** Summarize q3-metrics.pdf
+**User:** Summarize a document          *(the label IS the first turn — clicking it sends this text)*
+
+*The arc then behaves as though they had named q3-metrics.pdf: the mock chooses the document, so the reply can be about one.*
 
 **Assistant** — *(a tool call that settles, then the answer)* "Reading it now" plus a
 `read_document` call, then three bullets: revenue up 12%, churn flat, the enterprise tier
@@ -281,7 +283,9 @@ announced, so the arc ends with a settled tool rather than a dangling one.
 
 ### `Make a task list`
 
-**User:** Turn the migration plan into a task list
+**User:** Make a task list          *(the label IS the first turn)*
+
+*The arc behaves as though they had named the migration plan.*
 
 **Assistant** — *(a request becomes a card)* "Broke it into four." Plus a `kai_tasks` call: four
 items, the first marked in progress. The card is the task list the thread renders — an ordinary
@@ -296,7 +300,9 @@ writing back to its own tool call rather than a static picture.
 
 ### `Compare two options`
 
-**User:** Compare Postgres and SQLite for this
+**User:** Compare two options          *(the label IS the first turn)*
+
+*The arc behaves as though they had named Postgres and SQLite.*
 
 **Assistant** — *(two weighed, briefly)* Two sentences each, in the answer's own terms —
 Postgres costs you a service and buys concurrency; SQLite costs you nothing and serializes
@@ -311,7 +317,9 @@ which is the point: a comparison that never lands is not a recommendation.
 
 ### `Draft a short brief`
 
-**User:** Draft a short brief for the launch
+**User:** Draft a short brief          *(the label IS the first turn)*
+
+*The arc behaves as though they had named the launch.*
 
 **Assistant** — *(it asks for what it is missing)* "Two things I do not have: who this is for,
 and when." Then a `kai_form` card with just those two fields, rather than a paragraph
