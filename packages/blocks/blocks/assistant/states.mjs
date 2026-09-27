@@ -37,6 +37,29 @@ let pinnedRowId = null;
 // roving focus, and the position it ends at cannot be reconstructed afterwards.
 let menuFocusRoles = null;
 
+// The rail's row count BEFORE a card click, captured in that click's act for
+// the same reason as the two above: the claim is that seeding a guide changes
+// no row, and the only way to assert a change that did not happen is to have
+// the number from before it. A probe that counted rows afterwards would pass
+// whether or not the click had added one.
+let guideRowsBefore = null;
+
+// The thread a card click produced, captured in that click's act for the same
+// reason: the shapes asserted below are read from what the app built, never
+// retyped here.
+let guideThread = null;
+
+// The four cards, in the order they must render: the path a developer meets
+// them. Spelled once so the state that lists them and the four that click them
+// cannot drift apart.
+// A COPY, and it says so: the labels below are the block's own approved card
+// titles, which live in `assistant.controller.ts`. The driver is plain JS and
+// cannot import that module, so a probe has to name them - but the copy is
+// recorded here rather than left to be discovered, and it is the only place in
+// this file that restates content on purpose.
+const GUIDE_CARDS = ['Get it running', 'Wire a model', 'Add voice', 'Send a card'];
+const GUIDE_SLUGS = ['get-it-running', 'wire-a-model', 'add-voice', 'send-a-card'];
+
 // State 18's two facts, one gesture apart: what the scroll button was doing
 // while the thread was scrolled up, and whether the thread is a scroller at all.
 // The button HIDES ITSELF at the bottom of the thread, so "it works" is only
@@ -708,5 +731,87 @@ export default {
       },
       expect: { threadIsScroller: true, buttonWhenScrolledUp: true, atBottom: true },
     },
+    {
+      name: '19-guide-cards',
+      act: async (page) => {
+        await page.getByRole('button', { name: 'New chat' }).click();
+        await settle(400)(page);
+      },
+      probes: {
+        // All four by their own accessible name - which is the card's own text,
+        // so this also proves the name is not a second label disagreeing with it.
+        ...Object.fromEntries(GUIDE_CARDS.map((label, i) => [
+          `card${i}`,
+          (page) => page.getByRole('button', { name: label }).isVisible().catch(() => false),
+        ])),
+        // Their ORDER, read off the DOM rather than asserted one at a time: the
+        // four are a path, and a path in the wrong order is a different menu.
+        cardOrder: (page) => page.locator('.guide-cards kai-button').evaluateAll(
+          (els, labels) => els.map((el) => labels.find((l) => el.textContent?.includes(l))).join(' > '),
+          GUIDE_CARDS,
+        ),
+        // A card carries a summary, not only a title: the summary is what tells
+        // a reader which guide they want.
+        summariesPresent: (page) => page.locator('.guide-card-summary').evaluateAll(
+          (els) => els.length === 4 && els.every((el) => (el.textContent ?? '').length > 20),
+        ),
+      },
+      expect: {
+        card0: true, card1: true, card2: true, card3: true,
+        cardOrder: GUIDE_CARDS.join(' > '), summariesPresent: true,
+      },
+    },
+    ...GUIDE_CARDS.map((cardLabel, i) => ({
+      name: `${19 + i + 1}-guide-${GUIDE_SLUGS[i]}`,
+      act: async (page) => {
+        await page.getByRole('button', { name: 'New chat' }).click();
+        await settle(400)(page);
+        guideRowsBefore = await page.locator('kai-conversation-item').count();
+        await page.getByRole('button', { name: cardLabel }).click();
+        await settle(400)(page);
+        // CAPTURED, not restated: the guide's own sentences are approved content
+        // that lives in the controller, and a probe that retyped them would be
+        // asserting its own copy instead of what the click produced. What is
+        // worth checking here is the SHAPE - one user turn, one answer, and an
+        // answer long enough to be an answer - while the wording is reviewed
+        // where it is written and its code is compiled by the fence gate.
+        guideThread = await page.evaluate(() => {
+          const thread = document.getElementById('thread');
+          const messages = thread?.messages ?? [];
+          const textOf = (m) => (m?.parts ?? []).filter((p) => p.type === 'text').map((p) => p.text).join('');
+          return {
+            count: messages.length,
+            roles: messages.map((m) => m.role).join(','),
+            // CONTAINS a question mark, not ends with one: a guide's opening
+            // line is often two sentences ("Which provider does this use? I want
+            // to point it at OpenRouter."), so requiring the mark at the end
+            // asserts the punctuation rather than that the reader asked
+            // something.
+            askedIsAQuestion: textOf(messages[0]).includes('?'),
+            answerLength: textOf(messages[messages.length - 1]).length,
+          };
+        });
+      },
+      probes: {
+        twoTurns: () => guideThread?.count === 2,
+        userThenAssistant: () => guideThread?.roles === 'user,assistant',
+        // The developer's turn reads as a question, which is what the card
+        // promised a reader they were starting.
+        askedIsAQuestion: () => guideThread?.askedIsAQuestion === true,
+        answerIsSubstantial: () => (guideThread?.answerLength ?? 0) > 60,
+        // The cards belong to the EMPTY state: once a guide is open they are gone.
+        cardsGone: (page) => page.getByRole('button', { name: 'Wire a model' }).count().then((n) => n === 0),
+        // AND THE RAIL DID NOT CHANGE - the regression the boot-time seeding hit,
+        // where a seed became the rail's first row and took the subject away from
+        // the state running. A click is the reader's own act: it seeds the thread
+        // and writes nothing, and the row appears when they send their next
+        // message, which `submit` already does.
+        railUnchanged: (page) => page.locator('kai-conversation-item').count().then((n) => n === guideRowsBefore),
+      },
+      expect: {
+        twoTurns: true, userThenAssistant: true, askedIsAQuestion: true,
+        answerIsSubstantial: true, cardsGone: true, railUnchanged: true,
+      },
+    })),
   ],
 };

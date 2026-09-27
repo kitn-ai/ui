@@ -93,6 +93,95 @@ export interface ModelOption {
 
 const SUGGESTIONS = ['Summarize a document', 'Draft the Q3 board update', 'Compare two options'];
 
+/** One card on the empty state, and the conversation it opens. The four are a
+ *  PATH in the order a developer meets them: get it running, point it at a
+ *  model, add voice, then send a card. Each guide's own last turn offers the
+ *  next one, which is why the order is here rather than in the markup. */
+export interface GuideCard {
+  id: string;
+  title: string;
+  summary: string;
+}
+
+/** What a card click puts in the thread, as a pair of turns. The question is
+ *  the developer's own; `opening` is the assistant's first answer, verbatim
+ *  from the reviewed storyboard. The later turns of each guide are not here
+ *  yet - the scripted transport carries them - so this is the OPENING exchange
+ *  and nothing more. */
+interface Guide extends GuideCard {
+  question: string;
+  opening: string;
+}
+
+const GUIDES: readonly Guide[] = [
+  {
+    id: 'get-it-running',
+    title: 'Get it running',
+    summary: 'Replace the scripted mock with your backend by swapping one file.',
+    question: 'How do I get this talking to my own backend?',
+    opening:
+      'One file decides where replies come from: `assistant.transport.ts`. The ' +
+      'controller imports that name and nothing else, the three modes ship as three ' +
+      'versions of it, and the contract that type must satisfy is two methods, not a ' +
+      'file you add:\n\n' +
+      '```ts\n' +
+      "import type { ChatMessage } from '@kitn.ai/ui/state';\n" +
+      "import type { StreamSource } from '@kitn.ai/ui/wire';\n" +
+      '\n' +
+      'export interface AssistantTransport {\n' +
+      '  reply(messages: ChatMessage[]): Promise<StreamSource> | StreamSource;\n' +
+      '  toolOutput(toolType: string): Record<string, unknown> | undefined;\n' +
+      '}\n' +
+      '```',
+  },
+  {
+    id: 'wire-a-model',
+    title: 'Wire a model',
+    summary: 'Point the thread at OpenRouter, Anthropic, or your own route.',
+    question: 'Which provider does this use? I want to point it at OpenRouter.',
+    opening:
+      'None, and that is deliberate: the kit parses provider streams and never calls ' +
+      'one. Your route holds the key, sends it a thread, and streams back what the ' +
+      'provider says. The four functions you need come from one entry:\n\n' +
+      '```ts\n' +
+      'import {\n' +
+      '  readOpenAIStream, readAnthropicStream,\n' +
+      '  toOpenAIMessages, toAnthropicMessages,\n' +
+      "} from '@kitn.ai/ui/wire';\n" +
+      '```',
+  },
+  {
+    id: 'add-voice',
+    title: 'Add voice',
+    summary: 'Record and transcribe speech, and the events that drive your UI.',
+    question: 'Can users talk to this instead of typing?',
+    opening:
+      '`<kai-voice-input>` records and transcribes. Dropped on a page it uses the ' +
+      "browser's own speech recognition, which Chrome and Safari have and Firefox " +
+      'does not:\n\n' +
+      '```html\n' +
+      '<kai-voice-input recognition-lang="en-US" interim></kai-voice-input>\n' +
+      '```',
+  },
+  {
+    id: 'send-a-card',
+    title: 'Send a card',
+    summary: 'Let a tool return a card the thread renders and reads back.',
+    question: 'Can the model send a form instead of another paragraph?',
+    opening:
+      'Name a tool with the `kai_` prefix and the call renders as a card: ' +
+      '`kai_confirm` renders the confirm card, `kai_tasks` the task list. The part ' +
+      "after the prefix is the card type, and the call's arguments ARE the card's " +
+      'data - nothing is renamed or defaulted.',
+  },
+];
+
+/** The cards the empty state renders. Projected rather than handed the GUIDES
+ *  array so the view model carries what the markup binds and nothing else. */
+function projectGuides(): GuideCard[] {
+  return GUIDES.map((g) => ({ id: g.id, title: g.title, summary: g.summary }));
+}
+
 /** The placeholder the composer shows at rest, and the one it shows while the
  *  mic is open. The composer's own mic has no recording affordance of its own
  *  (the kit paints no state on it), so the block says it in the one place a
@@ -421,6 +510,15 @@ function rowMenuTarget(event: Event): { op: RowMenuOp; conversationId: string } 
   return { op: op as RowMenuOp, conversationId };
 }
 
+/** The guide a clicked card names. Same shape as `rowMenuTarget`, and for the
+ *  same reason: the binding grammar hands the action one event, so which card it
+ *  was has to travel on the element. */
+function guideTarget(event: Event): string | undefined {
+  const element = event.currentTarget as HTMLElement | null;
+  const id = element?.dataset.guide;
+  return id && GUIDES.some((g) => g.id === id) ? id : undefined;
+}
+
 /** One rendered row of the rail. Every field is already a string or a
  *  boolean, because `*for` bodies get bindings, not expressions. */
 export interface ConversationRow {
@@ -454,7 +552,14 @@ export interface ConversationRow {
 export interface AssistantState {
   // thread
   messages: ChatMessage[];
+  /** The assistant's labels under the composer. Set while the thread is empty
+   *  and cleared once it has messages; the per-turn follow-ups a conversation
+   *  earns are not wired yet. */
   suggestions: string[] | undefined;
+  /** The EMPTY state's cards: a developer's entry points into the guides. They
+   *  render only while the thread has no messages, because a card that seeded a
+   *  conversation has done its job once. */
+  guides: GuideCard[];
   loading: boolean;
   // the model switcher recipe
   models: ModelOption[];
@@ -561,6 +666,9 @@ export interface AssistantActions {
   newChat(): void;
   /** `@kai-search` on the rail's built-in search box. */
   search(event: CustomEvent<{ query: string }>): void;
+  /** `@kai-click` on an empty-state card. The card carries its guide id, which
+   *  is the only thing this needs to know. */
+  openGuide(event: Event): void;
   /** `@kai-submit` on the prompt input. */
   submit(event: CustomEvent<{ value: string; attachments?: unknown[] }>): Promise<void>;
   /** `@kai-value-change` on the prompt input: the composer's text mirror. */
@@ -614,6 +722,7 @@ export function createController(deps: AssistantDeps): AssistantController {
   let state: AssistantState = {
     messages: [],
     suggestions: SUGGESTIONS,
+    guides: projectGuides(),
     loading: false,
     models: MODELS,
     currentModel: MODELS[0].id,
@@ -979,6 +1088,33 @@ export function createController(deps: AssistantDeps): AssistantController {
           await controller.remove(target.conversationId);
           return;
       }
+    },
+
+    // A CARD CLICK SEEDS THE THREAD, AND DOES NOT SAVE. The two turns land in
+    // `messages` the way a submitted turn does, so the thread renders them
+    // through the same path; nothing is written to the store, so the rail is
+    // untouched. That is the whole difference from the boot-time seeding this
+    // block tried and reverted: a seed written at BOOT becomes the rail's first
+    // row and takes the subject away from whatever state is running, while a
+    // seed written by a CLICK is one the reader asked for. The row appears when
+    // they send their own next message, exactly as it does for anything else.
+    openGuide(event) {
+      const id = guideTarget(event);
+      const guide = GUIDES.find((g) => g.id === id);
+      if (!guide || state.loading) return;
+      const userMessage: ChatMessage = {
+        id: crypto.randomUUID(),
+        role: 'user',
+        actions: [...USER_ACTIONS],
+        parts: [{ type: 'text', text: guide.question }],
+      };
+      const reply: ChatMessage = {
+        id: crypto.randomUUID(),
+        role: 'assistant',
+        actions: [...ASSISTANT_ACTIONS],
+        parts: [{ type: 'text', text: guide.opening }],
+      };
+      setMessages([...state.messages, userMessage, reply]);
     },
 
     async submit(event) {

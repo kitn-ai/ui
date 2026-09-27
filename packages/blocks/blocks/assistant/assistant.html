@@ -367,8 +367,34 @@
             slot="empty"
             :theme="themeMode"
             empty-title="What can I help with?"
-            description="Ask anything, or start from a suggestion below."
-          ></kai-empty>
+            description="Open a guide, or start from a suggestion below."
+          >
+            <!-- THE GUIDE CARDS. Four entry points for the developer reading
+                 this block, in the order they meet them: get it running, point
+                 it at a model, add voice, send a card. A card is a kai-button
+                 because a click binding lives on a kai element; the kit's own
+                 Card would be a component written for one screen's worth of
+                 content. Its accessible NAME is its own text - the title and
+                 the summary together - so a screen reader hears what the card
+                 says instead of a second label able to disagree with it. -->
+            <div class="guide-cards">
+              <kai-button
+                *for="guide of guides"
+                :key="guide.id"
+                :theme="themeMode"
+                variant="outline"
+                align="start"
+                full
+                :data-guide="guide.id"
+                @kai-click="openGuide"
+              >
+                <span class="guide-card-text">
+                  <span class="guide-card-title" .textContent="guide.title"></span>
+                  <span class="guide-card-summary" .textContent="guide.summary"></span>
+                </span>
+              </kai-button>
+            </div>
+          </kai-empty>
         </kai-thread>
         <!-- VOICE, and the shape of it. The mic in the composer's TRAILING
              cluster, beside Send, is the affordance (the kit paints it; a block

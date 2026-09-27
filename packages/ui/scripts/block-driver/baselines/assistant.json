@@ -183,6 +183,66 @@
             "atBottom": true
           },
           "styles": {}
+        },
+        {
+          "name": "19-guide-cards",
+          "probes": {
+            "card0": true,
+            "card1": true,
+            "card2": true,
+            "card3": true,
+            "cardOrder": "Get it running > Wire a model > Add voice > Send a card",
+            "summariesPresent": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "20-guide-get-it-running",
+          "probes": {
+            "twoTurns": true,
+            "userThenAssistant": true,
+            "askedIsAQuestion": true,
+            "answerIsSubstantial": true,
+            "cardsGone": true,
+            "railUnchanged": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "21-guide-wire-a-model",
+          "probes": {
+            "twoTurns": true,
+            "userThenAssistant": true,
+            "askedIsAQuestion": true,
+            "answerIsSubstantial": true,
+            "cardsGone": true,
+            "railUnchanged": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "22-guide-add-voice",
+          "probes": {
+            "twoTurns": true,
+            "userThenAssistant": true,
+            "askedIsAQuestion": true,
+            "answerIsSubstantial": true,
+            "cardsGone": true,
+            "railUnchanged": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "23-guide-send-a-card",
+          "probes": {
+            "twoTurns": true,
+            "userThenAssistant": true,
+            "askedIsAQuestion": true,
+            "answerIsSubstantial": true,
+            "cardsGone": true,
+            "railUnchanged": true
+          },
+          "styles": {}
         }
       ],
       "consoleErrors": [],
@@ -367,6 +427,66 @@
             "threadIsScroller": true,
             "buttonWhenScrolledUp": true,
             "atBottom": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "19-guide-cards",
+          "probes": {
+            "card0": true,
+            "card1": true,
+            "card2": true,
+            "card3": true,
+            "cardOrder": "Get it running > Wire a model > Add voice > Send a card",
+            "summariesPresent": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "20-guide-get-it-running",
+          "probes": {
+            "twoTurns": true,
+            "userThenAssistant": true,
+            "askedIsAQuestion": true,
+            "answerIsSubstantial": true,
+            "cardsGone": true,
+            "railUnchanged": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "21-guide-wire-a-model",
+          "probes": {
+            "twoTurns": true,
+            "userThenAssistant": true,
+            "askedIsAQuestion": true,
+            "answerIsSubstantial": true,
+            "cardsGone": true,
+            "railUnchanged": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "22-guide-add-voice",
+          "probes": {
+            "twoTurns": true,
+            "userThenAssistant": true,
+            "askedIsAQuestion": true,
+            "answerIsSubstantial": true,
+            "cardsGone": true,
+            "railUnchanged": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "23-guide-send-a-card",
+          "probes": {
+            "twoTurns": true,
+            "userThenAssistant": true,
+            "askedIsAQuestion": true,
+            "answerIsSubstantial": true,
+            "cardsGone": true,
+            "railUnchanged": true
           },
           "styles": {}
         }

@@ -161,3 +161,45 @@ kai-prompt-input { display: block; padding: 0 1rem 1rem; max-width: 48rem; width
  * mode), never `display: none`: hiding it would take the conversation list out
  * of a page that still has room for it as an overlay. */
 kai-button[hidden] { display: none; }
+
+/* THE GUIDE CARDS on the empty state. Two columns while there is room, one
+   below the narrow breakpoint, because a summary that wraps to three lines is
+   harder to scan than a card with the width to say it in two. `max-width` keeps
+   the pair from stretching across a wide page: four cards are a small menu, not
+   a dashboard. */
+.guide-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 34rem;
+  margin-top: 0.25rem;
+}
+
+@media (max-width: 640px) {
+  .guide-cards { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* The button's BOX is inside kai-button's shadow root, so its height, padding
+   and wrapping are set through `::part(button)` - the same reach the menu's
+   delete row already uses. A kit button is one line tall by default and does
+   not wrap, which is right for a label and wrong for a card. */
+.guide-cards kai-button::part(button) {
+  height: auto;
+  padding: 0.75rem 0.875rem;
+  white-space: normal;
+  align-items: flex-start;
+}
+
+/* ONE slotted child, stacked here rather than by the button: the button lays
+   its content out in a row, so two spans would sit side by side. The wrapper
+   keeps that layout decision in the block, where the card is composed. */
+.guide-card-text { display: flex; flex-direction: column; gap: 0.125rem; text-align: start; }
+
+.guide-card-title { font-size: 0.875rem; font-weight: 500; }
+
+.guide-card-summary {
+  font-size: 0.75rem;
+  line-height: 1.35;
+  color: color-mix(in srgb, currentColor 65%, transparent);
+}
