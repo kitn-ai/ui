@@ -150,3 +150,21 @@ Recorded because the pattern is mine and it keeps costing a round: the stale `pl
 3. **`pnpm --filter @kitn.ai/ui run verify:blocks` including the react leg** — the indent round could not run `verify:blocks:react` because it `npm pack`s and fires a full build.
 
 **These rebuild `packages/ui/dist/`, which any in-flight `verify:blocks` reads — so run them at the ladder, with nothing else live.**
+
+
+## Sidebar workstream — against the owner's reference screenshots
+
+The owner supplied ChatGPT's sidebar and command palette as a **layout blueprint** (not a colour source) and is working through the sidebar one item at a time. His standing ruling: *"regardless of the colors, we have our theme and we just need to apply different styles to those using the theme and tokens that we currently have."*
+
+**Landed:**
+- **`72182f4d`** — the rail's six fixes: four top action rows (New chat · Images · Scheduled · Plugins, four resolved curated icons), a **Projects** label above the folders, one-line rows, **muted labels via theme tokens with no literal colour added**, section air derived from the density token, and the **caret trailing, `size="md"`, hover-only, not a tab stop**. **`40-rail-keyboard-walk` unchanged** (one tab stop, full traversal, headings included), and **`verify:blocks:react` passed for the first time** (66.9s, packed tarball).
+- **`2b3e1a3b`** + **`f1bc7768`** — `showTrailing` on the row/list and exposed as `show-trailing` on `kai-conversations`.
+- **`883d70f1`** — cleared the two `lint:prop-docs` findings (one was ours from the `setGroup` doc), so that gate is now green.
+
+**The tokens, measured in a browser (corrects an earlier steer of mine):** `:root` and `body` carry **none** of the theme's colour tokens; **each kit element's host carries them all** (`--color-muted-foreground: #696972`, `--color-foreground: #09090b`, `--color-accent: #f4f4f5`, `--color-border`, `--color-sidebar`, `--color-muted`) and they **inherit into the rows the block slots into it**. So inside the rail use the tokens; the block's older `currentColor`-at-65% idiom is only correct for chrome **outside** a kit element (the footer line).
+
+**A correction worth keeping, because I got it wrong first:** the row's "second line" and the "number on the right" are **not** a kit default in this rail. The rail is **item mode**, where the row derives no time at all, and the block's row template **deliberately empties the `meta` region** (its comment: a sidebar where every row carries its last message *"reads as a feed, not as a list of conversations"*). `showTrailing` is real and useful for **data-mode** consumers; it changes nothing here. Diagnosis by reading one code path and assuming it was the one in use is what produced the wrong dispatch.
+
+**Queued:** (a) the **hover trio + kebab menus** on section labels and the **search button replacing the built-in filter box**, opening `kai-command` as the palette (search chats on top, `Chats` from the rail's own rows, `Quick actions`, `Settings`, `⌘K`); (b) `ConversationPanel` and `HomePanel`'s recent card derive an **unstoppable timestamp** — the same class as the row was — needing a chat-level prop and a naming ruling; (c) a README note that a **stale recorded baseline versus source is unguarded**; (d) **the rail primitive** — see `docs/superpowers/specs/2026-09-27-rail-primitive-design.md`, approved and queued after the palette.
+
+**Ladder, restated for the sidebar work:** the five generated artifacts (`docs/web-components.md`, `packages/ui/llms-full.txt`, `packages/ui/frameworks/react/index.tsx`, `web-component-meta.json`, `web-component-types.d.ts`) are **uncommitted on purpose** and belong to the ladder's build step, which regenerates and commits them before `verify:generated` can be trusted.
