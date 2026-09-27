@@ -27,7 +27,8 @@
           "probes": {
             "reading": true,
             "tool": true,
-            "crossLinksNotYet": false
+            "noLabelsOnATypedThread": true,
+            "crossLinkNotVisible": false
           },
           "styles": {
             "assistantReplyText": {
@@ -305,7 +306,8 @@
           "name": "27-arc-task-list",
           "probes": {
             "turn1IsATaskList": true,
-            "turn2RevisesTheSameCard": true,
+            "turn2SharesTheCallsId": true,
+            "oneCardPerTurn": true,
             "turn2CarriesOneCard": true,
             "ownStepOffered": true,
             "crossLinksAtTheEnd": true,
@@ -352,6 +354,22 @@
               "textAlign": "left"
             }
           }
+        },
+        {
+          "name": "31-cross-link-clicks-through",
+          "probes": {
+            "aCrossLinkWasOffered": true,
+            "theClickSentTheLabel": true,
+            "answeredByTheLinkedConversation": true,
+            "notTheGenericScript": true,
+            "labelsSurviveTheCrossLink": true,
+            "labelsAreTheLinkedConversations": true,
+            "crossLinkLabelsRendered": true,
+            "typedTurnContinuesTheArc": true,
+            "pastTheScriptIsNotAReplay": true,
+            "noLabelsPastTheScript": true
+          },
+          "styles": {}
         }
       ],
       "consoleErrors": [],
@@ -382,7 +400,8 @@
           "probes": {
             "reading": true,
             "tool": true,
-            "crossLinksNotYet": false
+            "noLabelsOnATypedThread": true,
+            "crossLinkNotVisible": false
           },
           "styles": {
             "assistantReplyText": {
@@ -660,7 +679,8 @@
           "name": "27-arc-task-list",
           "probes": {
             "turn1IsATaskList": true,
-            "turn2RevisesTheSameCard": true,
+            "turn2SharesTheCallsId": true,
+            "oneCardPerTurn": true,
             "turn2CarriesOneCard": true,
             "ownStepOffered": true,
             "crossLinksAtTheEnd": true,
@@ -707,6 +727,22 @@
               "textAlign": "left"
             }
           }
+        },
+        {
+          "name": "31-cross-link-clicks-through",
+          "probes": {
+            "aCrossLinkWasOffered": true,
+            "theClickSentTheLabel": true,
+            "answeredByTheLinkedConversation": true,
+            "notTheGenericScript": true,
+            "labelsSurviveTheCrossLink": true,
+            "labelsAreTheLinkedConversations": true,
+            "crossLinkLabelsRendered": true,
+            "typedTurnContinuesTheArc": true,
+            "pastTheScriptIsNotAReplay": true,
+            "noLabelsPastTheScript": true
+          },
+          "styles": {}
         }
       ],
       "consoleErrors": [],
