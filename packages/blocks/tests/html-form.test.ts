@@ -5,7 +5,7 @@
  * it anywhere.
  */
 import { describe, expect, it } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { transformSync } from 'esbuild';
 import { renderHtmlForm, withStrippedTwins } from '../src/forms';
@@ -55,11 +55,62 @@ const block = (): Block => ({
 // was stripped. `esbuild` is a DEVDEPENDENCY of packages/blocks (added in this
 // task), never a dependency: it is used by this suite only, so it never
 // reaches the CLI bundle that `bundleGraphProblem` grades.
-const stripped = () =>
-  withStrippedTwins(block(), (source, fileName) =>
-    transformSync(source, { loader: 'ts', format: 'esm', target: 'es2022', sourcefile: fileName }).code,
-  );
+const stripped = () => withStrippedTwins(block(), stripTwins);
 const byPath = (files: { path: string; content: string }[]) => new Map(files.map((f) => [f.path, f.content]));
+
+// The strip is esbuild's, the same transform gen-blocks runs, so the binder
+// under test in the block-wide case is the one a consumer is handed rather than
+// a fixture shaped like it.
+const stripTwins = (source: string, fileName: string): string =>
+  transformSync(source, { loader: 'ts', format: 'esm', target: 'es2022', sourcefile: fileName }).code;
+
+const BLOCKS_DIR = resolve(__dirname, '..', 'blocks');
+
+/** Every authored block, loaded off its directory the way the registry's own
+ *  walk loads it, with its emitted binder. Derived from the directories: a new
+ *  block is covered the moment it exists, and a block this walk fails to read is
+ *  a RED here rather than a quiet narrowing of what this test covers. */
+function emittedBlockBinders(): { block: string; binder: string }[] {
+  const dirs = readdirSync(BLOCKS_DIR, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && existsSync(join(BLOCKS_DIR, entry.name, 'registry-item.json')))
+    .map((entry) => entry.name);
+  const out: { block: string; binder: string }[] = [];
+  for (const dirName of dirs) {
+    const dir = join(BLOCKS_DIR, dirName);
+    const files = new Map(
+      readdirSync(dir, { withFileTypes: true })
+        .filter((f) => f.isFile() && f.name !== 'registry-item.json')
+        .map((f) => [f.name, readFileSync(join(dir, f.name), 'utf8')]),
+    );
+    const manifest = JSON.parse(readFileSync(join(dir, 'registry-item.json'), 'utf8')) as Block['manifest'];
+    const binder = byPath(renderHtmlForm(withStrippedTwins({ name: dirName, manifest, files }, stripTwins))).get(
+      `${dirName}.js`,
+    );
+    expect(binder, `${dirName}: the walk found no emitted binder to check`).toBeTruthy();
+    out.push({ block: dirName, binder: binder! });
+  }
+  expect(out.length, 'a directory with a manifest that yields no binder is a block this test stops covering').toBe(dirs.length);
+  return out;
+}
+
+/** The body of every emitted `applyRows<N>`, brace-matched. */
+function rowFunctions(binder: string): string[] {
+  const out: string[] = [];
+  for (const match of binder.matchAll(/function applyRows\d+\(rows, state\) \{/g)) {
+    const start = match.index! + match[0].length - 1;
+    let depth = 0;
+    let i = start;
+    for (; i < binder.length; i++) {
+      if (binder[i] === '{') depth++;
+      else if (binder[i] === '}') {
+        depth--;
+        if (depth === 0) break;
+      }
+    }
+    out.push(binder.slice(start, i + 1));
+  }
+  return out;
+}
 
 describe('withStrippedTwins', () => {
   it('lists the twin in the MANIFEST even when the file is already on disk', () => {
@@ -162,6 +213,84 @@ describe('the html form', () => {
     expect(applyBody).toContain('applyRows');
     expect(rowBody).toContain('row.title');
     expect(rowBody).toContain('inRow(node,');
+  });
+
+  it('upgrades a cloned row BEFORE its bindings, so a row a LATER patch creates keeps them', () => {
+    // THE DEFECT THIS ASSERTS, and it is the same one the binder's own header
+    // names for the FIRST apply: an element that has not upgraded takes a
+    // property assignment as a plain own property, and the facade installs its
+    // own props on upgrade, so the assigned value is gone. The header guards the
+    // first apply with `whenDefined`; applyRows is the OTHER path, and it sets a
+    // row's bindings BEFORE `prev.after(node)` connects it. A clone of a
+    // template's content is never upgraded until it is connected, so every
+    // property binding a row carries was lost on the render that CREATED it -
+    // harmless for a row the next patch re-applies, and visible for the one
+    // nothing patches again. Measured on the assistant block: a menu inside the
+    // row repeat came up with an empty items array right after the single-patch
+    // transition that creates a row, which a reader reaches. The browser fact
+    // behind the whole fix -- a clone of a template's CONTENT lives in the
+    // template's own owner document, where `upgrade()` finds no definition and
+    // is therefore a no-op -- was measured in jsdom, which reproduces it: with
+    // the upgrade line alone a row's `kai-*` element stays unupgraded through
+    // its own bindings and the component's install on upgrade loses them.
+    const binder = byPath(renderHtmlForm(stripped())).get('fixture.js')!;
+    const rowBody = binder.slice(binder.indexOf('function applyRows'), binder.indexOf('function apply('));
+    // BOTH lines, in this order, and the ADOPT is not boilerplate: `upgrade()`
+    // alone is a no-op on the clone of a template's content, so the element
+    // stays unupgraded until it is connected, i.e. after the bindings. Dropping
+    // the adopt is therefore a silent revert of this fix, which is what this
+    // half of the assertion is for.
+    const adoptAt = rowBody.indexOf('document.adoptNode(node)');
+    const upgradeAt = rowBody.indexOf('customElements.upgrade(node)');
+    // The FIRST binding applied to the row, whichever kind it is: both helpers
+    // write properties, and both are emitted at one indent level inside the loop.
+    const firstSetter = rowBody.search(/^ {4}(setAttr|inRow)\(/m);
+    expect(adoptAt).toBeGreaterThan(-1);
+    expect(upgradeAt).toBeGreaterThan(-1);
+    expect(firstSetter).toBeGreaterThan(-1);
+    expect(adoptAt).toBeLessThan(upgradeAt);
+    expect(upgradeAt).toBeLessThan(firstSetter);
+  });
+
+  it('puts the upgrade before EVERY row binding of EVERY block, property writes included', () => {
+    // THE CLASS, not the fixture's own symptom. A `.prop` binding on a row and
+    // on anything inside one is the same victim: `kai-editable-label`'s `.value`
+    // and `.editing` sit on this block's rows and survive today only because a
+    // second patch happens to follow every patch that creates a row. So the
+    // subject here is DERIVED from the authored block directories rather than
+    // restated, because the rows a reader can reach are the ones the blocks
+    // ship, and a fixture shaped like them would go on passing after the blocks
+    // moved. THE FIXTURE above only exercises the first kind of binding; the
+    // anti-vacuity assertions below therefore count the property writes too,
+    // which is the half of the class the fixture cannot reach.
+    const binders = emittedBlockBinders();
+    expect(binders.length).toBeGreaterThan(0);
+    let repeats = 0;
+    let propWrites = 0;
+    for (const { block, binder } of binders) {
+      const bodies = rowFunctions(binder);
+      expect(bodies.length, `${block} emits no applyRows function: a zero-repeat binder is a broken walk, not a block without rows`).toBeGreaterThan(0);
+      for (const body of bodies) {
+        repeats++;
+        const adoptAt = body.indexOf('document.adoptNode(node)');
+        const upgradeAt = body.indexOf('customElements.upgrade(node)');
+        expect(adoptAt, `${block}: no adopt before the row bindings`).toBeGreaterThan(-1);
+        expect(upgradeAt, `${block}: no upgrade before the row bindings`).toBeGreaterThan(-1);
+        expect(adoptAt, `${block}: the upgrade runs before the element is adopted, so it is a no-op`).toBeLessThan(upgradeAt);
+        // Every write the row loop makes to a row or to anything inside it, of
+        // BOTH kinds: property assignments (`inRow(node, N).prop = ...`) and
+        // attribute writes (`setAttr(inRow(node, N), ...)`). Both are emitted at
+        // one indent level inside the loop.
+        const writes = [...body.matchAll(/^ {4}(?:inRow\(node, \d+\)\.|setAttr\(inRow\(node, \d+\))/gm)];
+        expect(writes.length, `${block}: a row repeat with no bindings proves nothing about the order`).toBeGreaterThan(0);
+        for (const write of writes) {
+          expect(write.index!, `${block}: a binding is applied to a row created in this patch before that row is upgraded`).toBeGreaterThan(upgradeAt);
+        }
+        propWrites += [...body.matchAll(/^ {4}inRow\(node, \d+\)\.\w/gm)].length;
+      }
+    }
+    expect(repeats, 'the walk must find more than the one repeat a fixture has').toBeGreaterThan(1);
+    expect(propWrites, 'no property write was seen: the half of the class the fixture cannot reach is untested').toBeGreaterThan(0);
   });
 
   it('hands the row function the document state a plain-identifier binding needs', () => {
