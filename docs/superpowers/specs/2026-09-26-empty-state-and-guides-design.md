@@ -92,8 +92,12 @@ which is what makes the demo a demo rather than a fixture dump.
 
 ## 5. Follow-ups after every turn
 
-**Every assistant turn offers the next thing to click** — the owner's YouTube-style pattern,
-and the rule the storyboard encodes as a `*Next:*` line per turn. Three properties make it
+**Every SCRIPTED assistant turn offers the next thing to click** — the owner's YouTube-style pattern,
+and the rule the storyboard encodes as a `*Next:*` line per turn. Two silences are worth stating
+because the sentence above is narrower than "every turn": a thread whose opening matches no script
+(nothing the reader typed) has no row in the table and offers no labels at all, and a turn past the
+end of a script offers none either. A cross-link click starts a NEW conversation, so its turn is
+turn 1 of the conversation it names and the labels resume there. The properties that make it
 work rather than annoy:
 
 - **The first entry is the conversation's own next step** (an arc's natural follow-on; a
@@ -148,7 +152,7 @@ the default. A slot nobody can see replaced is a slot nobody uses.
 | 9.2 | **The four cards are approved as listed, and they are a PATH** — each guide's last turn offers the next. |
 | 9.3 | **`Add voice` is scoped to what is built** (owner approved the corrected summary). Device selection arrives with spec 2, and the guide grows then. |
 | 9.4 | **Suggestions render as the `block` list variant** (owner picked it from `Components/Empty > Suggestions: List (block)`). |
-| 9.5 | **Every turn offers the next thing to click**, with cross-links only at the end (owner's YouTube pattern; the storyboard encodes it per turn). |
+| 9.5 | **Every scripted turn offers the next thing to click**, with cross-links only at the end (owner's YouTube pattern; the storyboard encodes it per turn). A thread no script covers, and a turn past the end of one, offer nothing — the table has no row for them. |
 | 9.6 | **The follow-up lookup lives in the block's transport, not the kit** — a script cycled per turn is what a zero-config mock is for. |
 | 9.7 | **The centring is an auto margin, not `justify-center`** — the second passes the short-content case and clips the tall one, and the owner asked for exactly the degrading behaviour in one sentence. |
 | 9.8 | **A story must show the empty state replaced** (owner: *"the dev … how they can slot in their own custom empty state"*). |

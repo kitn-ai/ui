@@ -359,5 +359,8 @@ Two limits worth knowing before you approve, because both shaped what is written
 - **A scripted turn cannot produce a `file` part.** The stream can (`addFile` is right beside
   `addCard`), but the mock's turn type has no field for one, so it is unreachable from a script
   — which is why no arc mentions attachments. The one real file part in the block comes from the
-  submit path, when a user stages an attachment. Adding a `files` field to the turn type is the
-  small fix that closes it.
+  submit path, when a user stages an attachment. Adding a `files` field to the turn type does NOT
+  close it, which is worth saying because it looks like the small fix: nothing in the wire produces a
+  file part — `wire/consume.ts` drives the sink with the text, reasoning and tool builders only, and
+  a file part reaches a thread through the HOST's own `addFile` call — so a turn emitting those
+  frames would have them ignored and the part would still never appear.

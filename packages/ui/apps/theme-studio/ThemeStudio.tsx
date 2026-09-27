@@ -476,7 +476,7 @@ function parseCss(css: string): { light: Palette; dark: Palette; radius?: number
   const dark = grab('\\.dark');
   // A rem knob alone counts as a paste. `--kai-radius` stays out: a radius-only
   // paste is still rejected, which is a separate decision from wiring tokens.
-  const hasRemKnob = /--kai-(?:text-[a-z-]+|density|radius-pill|code-radius|composer-radius|weight-[a-z]+|shadow-strength)\s*:\s*[\d.]+/.test(css);
+  const hasRemKnob = /--kai-(?:text-[a-z-]+|density|radius-pill|code-radius|radius-composer|weight-[a-z]+|shadow-strength)\s*:\s*[\d.]+/.test(css);
   if (!Object.keys(light).length && !Object.keys(dark).length && !hasRemKnob) return null;
   const radiusMatch = css.match(/--kai-radius\s*:\s*([\d.]+)rem/);
   // Density is a rem value too, so `buildCss` output pasted back in round-trips.

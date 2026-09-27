@@ -55,14 +55,13 @@ const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 /**
  * The compiled sheet, read from disk and inlined into the page.
  *
- * INLINED rather than linked through vite, deliberately: vite serves a `.css` request as a
- * JS module that injects the styles itself, so a `<link rel="stylesheet" href="/src/...css">`
- * is not the stylesheet and silently yields the same unstyled page this file was fixed to
- * stop measuring. `npm run build:css` renders the sheet into `node_modules/.vite`; reading
- * the file is the exact bytes the browser gets.
- *
- * A missing sheet EXITS, naming the command. That silence is what hid the original defect:
- * an unstyled page does not fail, it merely reports different numbers.
+ * INLINED rather than linked, and NOT because a link would be broken: a
+ * `<link rel="stylesheet" href="/src/web-components/compiled.css">` IS the stylesheet — vite
+ * serves a request carrying the `text/css` accept header raw (it injects `?direct` for exactly
+ * this case), which is what `probe-empty-state.mjs` relies on. The reason to read the file here
+ * is the FAILURE mode: this probe needs a built sheet, and a missing one has to EXIT naming
+ * `build:css`. A link that 404s is silent, and silence is what hid the original defect — an
+ * unstyled page does not fail, it merely reports different numbers.
  */
 const SHEET_PATH = path.join(root, 'src/web-components/compiled.css');
 if (!existsSync(SHEET_PATH)) {

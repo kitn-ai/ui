@@ -109,7 +109,10 @@ export const EmptyDefault: Story = {
   ...src(`<Thread messages={[]} />`),
 };
 
-/** Custom zero-state via the `empty` prop (the thread element's `slot="empty"`). */
+/** Custom zero-state via the `empty` prop. The ELEMENT's equivalent is projected
+ *  content — `<kai-thread><div slot="empty">…</div></kai-thread>`, which the same
+ *  story illustrates for the components under `components/empty/` — and this prop
+ *  is the Solid spelling of the same seam. */
 export const EmptyCustom: Story = {
   args: { messages: [] },
   // The zero-state is JSX, so it cannot ride in `args`; the render closes over it.

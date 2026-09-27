@@ -19,9 +19,11 @@ const CHIP_ICON = {
  *  something to turn off. `id` and `label` are not optional on the type, so the pair is a
  *  guard for a tree built in untyped JS or from JSON, where an item missing a label
  *  would render `"undefined, turn off"` at a screen reader and one missing an id would do
- *  nothing when clicked. */
+ *  nothing when clicked. A label of WHITESPACE is the same defect wearing a disguise:
+ *  it is truthy, so `!!item.label` let it through and the chip rendered with no visible
+ *  text and the name `"   , turn off"`, which is the failure this guard exists to stop. */
 const canChip = (item: ComposerToolItem): boolean =>
-  item.chip === true && item.checked === true && !!item.id && !!item.label;
+  item.chip === true && item.checked === true && !!item.id && (item.label ?? '').trim() !== '';
 
 /** The items that are ON and opted in for a chip, in declaration order.
  *
