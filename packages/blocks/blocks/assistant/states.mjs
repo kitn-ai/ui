@@ -12,8 +12,11 @@
 // One page (the generated /kit/ rendering of the CDN form), so record/check are
 // the modes; there is no facade parity reference for this composition.
 //
-// Runs (from packages/ui, after a real build + gen-blocks):
-//   record:  node scripts/block-driver/driver.mjs blocks/assistant/states.mjs \
+// Runs (from packages/ui, after a real build + gen-blocks). The scenario path
+// reaches OUT of this package: the authored blocks moved to packages/blocks, so
+// a bare `blocks/assistant/...` resolves to a directory that no longer exists and
+// the driver fails with ERR_MODULE_NOT_FOUND before it runs anything.
+//   record:  node scripts/block-driver/driver.mjs ../blocks/blocks/assistant/states.mjs \
 //              --serve scripts/block-driver/pages --pages block \
 //              --record scripts/block-driver/baselines/assistant.json --shots <dir>
 
