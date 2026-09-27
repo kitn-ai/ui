@@ -145,6 +145,15 @@ kai-prompt-input { display: block; padding: 0 1rem 1rem; max-width: 48rem; width
  * with no transcription available. Hidden when there is nothing to say. */
 .voice-strip { display: block; padding-bottom: 0.25rem; font-size: 0.75rem; color: color-mix(in srgb, currentColor 65%, transparent); }
 
+/* This rule's `display` outranks the UA's [hidden] one, so without the guard
+ * below the strip the block hides with `:hidden` stays LAID OUT. Inside the
+ * composer's one-row layout that made it a flex item, and the row's gap then
+ * pushed the `+` control 8px further in than the frame's own padding puts it —
+ * an indent you can see beside the Send button and that no test could see.
+ * The same author-level fix the two element selectors at the end of this sheet
+ * carry, for the same reason. */
+.voice-strip[hidden] { display: none; }
+
 /* The elements' shared base sheet sets :host{display:block}, which outranks
  * the UA's [hidden] rule, so the reopen button this block toggles with
  * `.hidden` needs the author-level rule (the same fix support-widget carries).
