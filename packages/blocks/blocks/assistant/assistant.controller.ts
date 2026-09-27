@@ -194,6 +194,15 @@ export interface AssistantTransport {
 const ASSISTANT_ACTIONS = ['copy', 'like', 'dislike'] as const;
 const USER_ACTIONS = ['edit'] as const;
 
+/** The kit's card-tool convention: a tool named `kai_<type>` produces a card of
+ *  that type, and the CALL'S OWN ARGUMENTS are the card's data. The kit implements
+ *  this once, as `cardFromToolCall` in its `schemas` entry - which a block cannot
+ *  import: a paste form may only name the entries its self-contained CDN bundle
+ *  proves, and `schemas` is not one of them (the block generator refuses it by
+ *  name). So the three lines are restated here rather than a fourth path
+ *  invented. There is nothing to decide in them: a prefix and a field copy. */
+const KAI_CARD_TOOL_PREFIX = 'kai_';
+
 /** The operations a rail row's menu can perform, in the order the menu renders
  *  them (Share is not here: it has no handler to name). */
 type RowMenuOp = 'rename' | 'pin' | 'archive' | 'delete';
@@ -226,6 +235,36 @@ export interface MenuItem {
   separator?: boolean;
   /** A non-interactive section label. */
   heading?: boolean;
+}
+
+/** One entry of the composer's `+` menu. Declared here for the reason `MenuItem`
+ *  is: the block hands the kit its own object and the kit types the prop by
+ *  shape, so the two agree without the block importing anything the paste form
+ *  cannot inline.
+ *
+ *  The fields below are the composer menu's whole vocabulary, which is what makes
+ *  this list worth reading: `items` makes a submenu, `checked` makes a toggle
+ *  (`control: 'switch'` draws it as a switch rather than a checkmark), `heading`
+ *  and `separator` are the section label and the divider, `note` is a
+ *  non-interactive sentence (a disabled row's reason), `description` is the muted
+ *  second line, and `disabled` marks a row that is visibly unavailable. */
+export interface ComposerTool {
+  id?: string;
+  label?: string;
+  icon?: string;
+  description?: string;
+  shortcut?: string;
+  checked?: boolean;
+  control?: 'check' | 'switch';
+  disabled?: boolean;
+  separator?: boolean;
+  heading?: boolean;
+  note?: true;
+  items?: ComposerTool[];
+  /** Also show this entry's ON state as a removable chip in the composer's row,
+   *  so a capability is visible without opening the menu. Off unless asked for,
+   *  which is why the kit's default stays quiet. */
+  chip?: boolean;
 }
 
 /** The three choices, in the order the menu reads them, with the glyph each row
@@ -280,6 +319,98 @@ function projectMenus(choice: ThemeChoice): Pick<AssistantState, 'theme' | 'them
       })),
     ],
   };
+}
+
+/** What a menu row writes into the composer. The id is `skill:<item id>` or
+ *  `file:<item id>`, and the payload comes from the SAME `TRIGGERS` list the `/`
+ *  and `@` pickers use, so the two cannot drift: a skill expands to its
+ *  `promptText` exactly as submitting a `/` pill would, and a file becomes the
+ *  `@` mention the agent trigger would have written. */
+function toolInsertText(id: string): string | undefined {
+  const at = id.indexOf(':');
+  if (at < 0) return undefined;
+  const kind = id.slice(0, at);
+  if (kind !== 'skill' && kind !== 'file') return undefined;
+  const trigger = TRIGGERS.find((t) => t.kind === (kind === 'file' ? 'agent' : 'skill'));
+  const item = trigger?.items?.find((i) => i.id === id.slice(at + 1));
+  if (!item) return undefined;
+  return kind === 'file' ? `@${item.label}` : item.promptText;
+}
+
+/** The composer's `+` menu. Tree-shaped rather than a flag per capability,
+ *  because the menu is the one surface that can hold sections, submenus and a
+ *  toggle's own state together - and this list is meant to be read as much as
+ *  used: between them the entries are the menu's whole vocabulary, so a reader
+ *  can see each shape, delete what they do not need and add their own.
+ *
+ *  EVERY ENTRY EITHER DOES SOMETHING OR IS VISIBLY DISABLED WITH ITS REASON. A
+ *  row that looked live and did nothing is the one thing a template must never
+ *  teach, because a reader copies it. `shortcut` is deliberately absent for the
+ *  same reason: nothing here has a key to press, and a shortcut chip that does
+ *  nothing is that same lie in smaller type. */
+function projectTools(state: Pick<AssistantState, 'density' | 'codeHighlight'>): ComposerTool[] {
+  const skills = TRIGGERS.find((t) => t.kind === 'skill')?.items ?? [];
+  const files = TRIGGERS.find((t) => t.kind === 'agent')?.items ?? [];
+  return [
+    // "Add files or photos" is NOT declared here: the composer prepends its own
+    // file item whenever attachments are enabled, so a second one would be a
+    // picker wired to nothing.
+    {
+      id: 'highlighting',
+      label: 'Highlighting',
+      icon: 'code',
+      description: 'Colour code blocks in replies',
+      checked: state.codeHighlight,
+      chip: true,
+    },
+    {
+      id: 'density',
+      label: 'Compact spacing',
+      icon: 'sliders-horizontal',
+      description: 'Tighter rhythm between turns',
+      checked: state.density === 'compact',
+      control: 'switch',
+    },
+    { separator: true },
+    { heading: true, label: 'Insert' },
+    {
+      id: 'skills',
+      label: 'Skills',
+      icon: 'sparkles',
+      description: 'Reusable prompts for this assistant',
+      items: skills.map((s) => ({
+        id: `skill:${s.id}`,
+        label: s.label,
+        description: s.description,
+      })),
+    },
+    {
+      id: 'files',
+      label: 'Files',
+      icon: 'file-text',
+      description: 'Mention a document in the thread',
+      items: files.map((f) => ({
+        id: `file:${f.id}`,
+        label: f.label,
+        description: f.description,
+      })),
+    },
+    { separator: true },
+    // The shape for a capability this app does not have yet: a row that cannot
+    // act, with its reason in the sentence beneath it rather than in a tooltip.
+    {
+      id: 'add-url',
+      label: 'Add from a URL',
+      icon: 'link',
+      description: 'Fetch a page into the turn',
+      disabled: true,
+    },
+    {
+      id: 'add-url-why',
+      note: true,
+      label: 'Not in this template: add a fetch step to your transport',
+    },
+  ];
 }
 
 /** `{ op, conversationId }` for a row-menu item, read off the element the page
@@ -355,6 +486,15 @@ export interface AssistantState {
   promptPlaceholder: string;
   /** Entity triggers: `/` for skills, `@` for agents. */
   triggers: EntityTrigger[];
+  /** The composer's `+` menu. A tree rather than a flag per capability, because
+   *  the menu is the only surface that can hold sections, submenus and a
+   *  capability's state at once. */
+  tools: ComposerTool[];
+  /** How much air the message list has. A FIELD rather than the literal this
+   *  block used to carry, because the menu can now change it. */
+  density: 'default' | 'compact';
+  /** Whether replies highlight their code blocks. */
+  codeHighlight: boolean;
   /** The `tabindex` every menu row carries, and it is a FIELD rather than a
    *  literal attribute for the reason the shell's breakpoints are: a numeric
    *  literal does not survive the react form, which can only take a number on a
@@ -433,6 +573,9 @@ export interface AssistantActions {
   submit(event: CustomEvent<{ value: string; attachments?: unknown[] }>): Promise<void>;
   /** `@kai-value-change` on the prompt input: the composer's text mirror. */
   valueChange(event: CustomEvent<{ value: string }>): void;
+  /** `@kai-select` on the prompt input: a `+` menu row was chosen. `checked` is
+   *  present only when the row is a toggle, and it carries the NEW state. */
+  toolSelect(event: CustomEvent<{ id: string; checked?: boolean }>): void;
   // VOICE. The composer's own mic fires kai-voice with no detail (it is one
   // button, not a state machine), so this block owns the start/stop decision and
   // the kit's kai-voice-input does the recording.
@@ -488,6 +631,9 @@ export function createController(deps: AssistantDeps): AssistantController {
     promptValue: '',
     promptPlaceholder: PROMPT_PLACEHOLDER,
     triggers: TRIGGERS,
+    tools: projectTools({ density: 'compact', codeHighlight: true }),
+    density: 'compact',
+    codeHighlight: true,
     menuItemTabIndex: -1,
     voiceStatus: '',
     voiceStatusHidden: true,
@@ -670,9 +816,19 @@ export function createController(deps: AssistantDeps): AssistantController {
     }
   };
 
+  /** Write text into the composer. `promptValue` is the block's controlled mirror
+   *  of the composer's text, so it is the only channel a block has into it — and
+   *  APPENDING is the honest behaviour: the caret lives inside the element's shadow
+   *  root and the block cannot ask where it is, so anything cleverer would be
+   *  guessing at a position it cannot read. */
+  function insertIntoPrompt(text: string): void {
+    const current = state.promptValue;
+    const gap = current && !/\s$/.test(current) ? ' ' : '';
+    patch({ promptValue: `${current}${gap}${text}` });
+  }
+
   const actions: AssistantActions = {
-    modelChange(event) {
-      // The scripted mock ignores the selection (it is a script); a real
+    modelChange(event) {      // The scripted mock ignores the selection (it is a script); a real
       // transport encodes the thread for a backend that routes on the id its
       // request carries.
       patch({ currentModel: event.detail.modelId });
@@ -707,6 +863,27 @@ export function createController(deps: AssistantDeps): AssistantController {
 
     valueChange(event) {
       patch({ promptValue: event.detail.value });
+    },
+
+    // The composer's `+` menu, one handler for every row: the id says both what
+    // was chosen and what to do about it, so there is no second table of ids to
+    // keep in step with the tree above.
+    toolSelect(event) {
+      const { id, checked } = event.detail;
+      if (id === 'highlighting' || id === 'density') {
+        const next =
+          id === 'highlighting'
+            ? { codeHighlight: checked ?? false }
+            : { density: (checked ?? false) ? ('compact' as const) : ('default' as const) };
+        // The tree is rebuilt with the new state rather than patched beside it,
+        // because the menu row and the chip are two views of ONE field: leaving
+        // them to be updated separately is how they come to disagree.
+        const merged = { density: state.density, codeHighlight: state.codeHighlight, ...next };
+        patch({ ...merged, tools: projectTools(merged) });
+        return;
+      }
+      const text = toolInsertText(id);
+      if (text) insertIntoPrompt(text);
     },
 
     // The composer's mic and the recorder are two elements on purpose: the mic is
@@ -857,6 +1034,32 @@ export function createController(deps: AssistantDeps): AssistantController {
           // scripted mock settles it, a real backend leaves it to the server's
           // tool loop, and the composition-only mode throws by name.
           const output = transport.toolOutput(part.tool.type);
+          // A CARD TOOL IS NOT A TOOL RESULT: `kai_<type>` names a card, and the
+          // envelope comes from the call's own arguments (see the prefix's note
+          // above). It is deliberately the ONLY card path here, because a card
+          // built this way replaces itself in place when the same call is
+          // revised: `upsertCardPart` keys on the envelope id, which is the
+          // provider's own call id.
+          const card = part.tool.type.startsWith(KAI_CARD_TOOL_PREFIX)
+            ? {
+                type: part.tool.type.slice(KAI_CARD_TOOL_PREFIX.length),
+                id: part.tool.toolCallId ?? part.tool.type,
+                data: part.tool.input ?? {},
+              }
+            : undefined;
+          if (card && part.tool.toolCallId) {
+            stream.addCard(card);
+            // The call PRODUCED the card, so it settles - what is still pending
+            // is the USER's answer, and that is recorded in the output rather
+            // than in the state: the kit's own example for this path carries
+            // `{ status: 'awaiting_user' }`, and `output` is where a value the
+            // app reads belongs. The tool row stays a real, settled call.
+            stream.upsertTool(part.tool.toolCallId, {
+              state: 'output-available',
+              output: { status: 'awaiting_user', card: card.id },
+            });
+            continue;
+          }
           if (output) stream.upsertTool(part.tool.toolCallId, { state: 'output-available', output });
         }
         stream.done();

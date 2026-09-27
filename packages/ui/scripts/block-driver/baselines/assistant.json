@@ -88,8 +88,7 @@
             "dividers": true,
             "dividerSkipsKeyboard": true,
             "menuFocusWalk": true,
-            "rowsWide": true,
-            "rowTime": true
+            "rowsWide": true
           },
           "styles": {
             "menuRowShare": {
@@ -275,8 +274,7 @@
             "dividers": true,
             "dividerSkipsKeyboard": true,
             "menuFocusWalk": true,
-            "rowsWide": true,
-            "rowTime": true
+            "rowsWide": true
           },
           "styles": {
             "menuRowShare": {

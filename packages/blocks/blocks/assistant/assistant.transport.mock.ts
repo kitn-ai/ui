@@ -41,7 +41,28 @@ export const MOCK_SCRIPT = [
     ],
   },
   {
-    text: 'Anything else? Still the mock: swap the provider seam for your endpoint and this handler keeps its exact shape.',
+    reasoning:
+      'A destructive step comes next, so ask for it rather than taking it.',
+    text: 'Before that goes to the channel:',
+    toolCalls: [
+      {
+        // A CARD TOOL. `kai_` is the kit's prefix for one, and the call's
+        // ARGUMENTS ARE THE CARD'S DATA - the controller hands this to
+        // `cardFromToolCall`, which builds the envelope. The name is the card
+        // type, so `kai_confirm` renders the confirm card and a hand-written
+        // envelope is never needed (or wanted: it would demo a shape the app
+        // never takes).
+        name: 'kai_confirm',
+        arguments: {
+          heading: 'Post the summary to #team?',
+          body: '#team sees the numbers above, with the deck attached. One post.',
+          actions: [
+            { id: 'post', label: 'Post it', default: true },
+            { id: 'edit', label: 'Let me edit first' },
+          ],
+        },
+      },
+    ],
   },
 ];
 

@@ -355,14 +355,14 @@
           ></kai-model-switcher>
         </header>
 
-        <!-- `density="compact"` is a LITERAL attribute on a kai-* element, which
-             the grammar allows and the prop's own string union accepts: the thread
-             is the one region of this page that is a REPEATED, uniform block of
-             content, and the tighter set (8px between turns instead of the
-             default's spacing) is what a full-page assistant reads like. It is
-             set here rather than in the block's CSS because the spacing is a kit
-             decision the element owns. -->
-        <kai-thread id="thread" :theme="themeMode" density="compact" .messages="messages" .loading="loading">
+        <!-- The message list's two display choices are FIELDS rather than the
+             literal this block used to carry, because the composer's + menu can
+             now change both: a binding holds a field name and never an
+             expression, so each needs a field of its own. The tighter rhythm
+             (8px between turns instead of the default's spacing) is what a
+             full-page assistant reads like, which is why the block starts on
+             `compact`. -->
+        <kai-thread id="thread" :theme="themeMode" :density="density" .codeHighlight="codeHighlight" .messages="messages" .loading="loading">
           <kai-empty
             slot="empty"
             :theme="themeMode"
@@ -370,11 +370,11 @@
             description="Ask anything, or start from a suggestion below."
           ></kai-empty>
         </kai-thread>
-        <!-- VOICE, and the shape of it. The mic in the composer's own left
-             toolbar is the affordance (the kit paints it; a block cannot reach
-             inside that toolbar), and it fires kai-voice with NO detail, so this
-             block keeps the one bit that decides what a click means: start, or
-             stop. kai-voice-input is the element that owns the recording, and it
+        <!-- VOICE, and the shape of it. The mic in the composer's TRAILING
+             cluster, beside Send, is the affordance (the kit paints it; a block
+             cannot reach inside that toolbar), and it fires kai-voice with NO
+             detail, so this block keeps the one bit that decides what a click
+             means: start, or stop. kai-voice-input is the element that owns the recording, and it
              rides here as an unnamed child, which the kit's own docs describe as
              an invisible data carrier - the composer reads its named regions and
              projects nothing else. The transcript lands in the composer's
@@ -384,6 +384,9 @@
              mic cannot: that it is listening, that recognition failed, or that
              the browser captured audio and has no speech recognition to turn it
              into words (the kit's documented record-only fallback). -->
+        <!-- `.tools` is the composer's `+` menu, and `@kai-select` is every row
+             in it: the kit renders the rows and this block decides what they do,
+             so one handler reads the id and acts on it. -->
         <kai-prompt-input
           id="prompt"
           #ref="prompt"
@@ -393,8 +396,10 @@
           .suggestions="suggestions"
           .loading="loading"
           .triggers="triggers"
+          .tools="tools"
           .value="promptValue"
           @kai-submit="submit"
+          @kai-select="toolSelect"
           @kai-value-change="valueChange"
           @kai-voice="voiceToggle"
         >
