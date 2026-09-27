@@ -1613,7 +1613,7 @@
         "type": "undefined | { chip?: undefined | false | true; id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; description?: undefined | string; control?: undefined | \"check\" | \"switch\"; note?: undefined | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | { id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; description?: undefined | string; control?: undefined | \"check\" | \"switch\"; note?: undefined | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | Record<string, unknown>[] }[] }[]",
         "optional": true,
         "scalar": false,
-        "description": "The composer's `+` menu tree: the built-in file row first (when `attach`), then these verbatim. An array, so it is a JS property and never an attribute.",
+        "description": "The composer's `+` menu tree: the built-in file row first (when `attach`), then these verbatim. An array, so it is a JS property and never an attribute. An attribute is JSON-parsed; a malformed one is refused loudly.",
         "typeName": "ComposerToolItem[]",
         "typeShape": "{ chip?: undefined | false | true; id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; description?: undefined | string; control?: undefined | \"check\" | \"switch\"; note?: undefined | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | { id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; description?: undefined | string; control?: undefined | \"check\" | \"switch\"; note?: undefined | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | Record<string, unknown>[] }[] }[]",
         "typeImport": "ComposerToolItem",
@@ -1624,7 +1624,7 @@
         "type": "undefined | false | true",
         "optional": true,
         "scalar": true,
-        "description": "Pins the composer's layout: `true` is two rows, `false` is one, omitted derives it from the content.",
+        "description": "Pins the composer's layout: `true` is two rows, `false` is one, omitted derives it from the content. As an attribute: present pins two rows, `=\"false\"` pins one, absent derives.",
         "displayType": "undefined | false | true"
       },
       {

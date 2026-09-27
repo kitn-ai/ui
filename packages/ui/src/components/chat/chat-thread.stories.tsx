@@ -161,11 +161,6 @@ const meta = {
         'An action button on a message was clicked; `action` is the built-in name or a custom id, and `state` is present only for the toggleable like/dislike votes.',
       table: { category: 'Events' },
     },
-    onWebSearch: {
-      action: 'web-search',
-      description: 'The web-search (Globe) toolbar button was clicked.',
-      table: { category: 'Events' },
-    },
     onVoice: {
       action: 'voice',
       description: 'The Mic / voice button was clicked.',
@@ -189,7 +184,7 @@ const meta = {
     onSuggestionClick: fn(),
     onModelChange: fn(),
     onMessageAction: fn(),
-    onWebSearch: fn(),
+    onToolSelect: fn(),
     onVoice: fn(),
     chatTitle: 'Support',
     placeholder: 'Message support…',

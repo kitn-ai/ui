@@ -140,6 +140,20 @@ type Props = Omit<ChatThreadProps,
     // launcher's open state, mirror that event onto its badge.
     /** Whether the chrome hosting this element is visible (e.g. a launcher's open state). JS property only; `false` has no attribute form. */
     hostOpen?: boolean;
+    // The element-specific half of this prop's story, because the generator CONCATENATES
+    // a facade's doc with the underlying component's: a restatement here renders twice in
+    // the published tables. So this adds only what `ChatThreadProps.tools` cannot say —
+    // that an attribute IS parsed, and what a bad one does. The alternative, a raw string
+    // reaching the tree, is spread into the menu character by character while the chip row
+    // walks it: a nonsense menu rather than a missing one.
+    /** An attribute is JSON-parsed; a malformed one is refused loudly. */
+    tools?: ComposerToolItem[];
+    // Likewise only the element-specific half. Tri-state, where the third state carries
+    // the weight, which is also why this cannot be read with the kit's `flag()` helper:
+    // that answers `false` for an absent attribute AND for an explicit `="false"`,
+    // collapsing "derive" into "pinned shut". Hence `resolveExpandedProp`.
+    /** As an attribute: present pins two rows, `="false"` pins one, absent derives. */
+    expanded?: boolean;
   };
 
 interface Events {

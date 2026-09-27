@@ -112,6 +112,24 @@ describe('kai-prompt-input: the tools menu', () => {
     expect(seen).toEqual([]);
   });
 
+  it('takes a VALID JSON `tools` attribute, which is the path the guard exists to keep safe', async () => {
+    const el = document.createElement('kai-prompt-input');
+    el.setAttribute('attach', 'false');
+    // The POSITIVE half of the boundary check below. Without it only the malformed
+    // branch is pinned, so a later tightening (requiring objects, say) could break the
+    // very path the guard's rationale rests on, and nothing would say so.
+    el.setAttribute('tools', '[{"id":"github","label":"Add from GitHub"}]');
+    document.body.appendChild(el);
+    await flush();
+
+    const seen: unknown[] = [];
+    el.addEventListener('kai-select', (e) => seen.push((e as CustomEvent).detail));
+    const [row] = await openMenu(el);
+    expect(row.textContent).toContain('Add from GitHub');
+    row.click();
+    expect(seen).toEqual([{ id: 'github' }]);
+  });
+
   it('reports a malformed `tools` attribute instead of rendering nonsense', async () => {
     const error = vi.spyOn(console, 'error').mockImplementation(() => {});
     try {

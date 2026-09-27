@@ -116,12 +116,12 @@ describe('ChatThread emptyContent (JSX empty-state escape hatch)', () => {
   });
 });
 
-// `attach` passthrough: mirrors the existing webSearch/voice pattern (ChatThreadProps
-// -> the composer fallback branch -> DefaultPromptInput), but with the OPPOSITE
-// default direction. webSearch/voice default OFF when undeclared (`props.webSearch
-// === true`); attach must default ON when undeclared, so kit consumers who never
-// heard of this prop keep today's behavior (attach visible) and only an explicit
-// `attach={false}` hides it — forwarded as `props.attach` unchanged, not coerced.
+// `attach` passthrough: mirrors the `voice` pattern (ChatThreadProps -> the composer
+// fallback branch -> DefaultPromptInput), but with the OPPOSITE default direction.
+// `voice` defaults OFF when undeclared (`props.voice === true`); attach must default
+// ON when undeclared, so kit consumers who never heard of this prop keep today's
+// behavior (attach visible) and only an explicit `attach={false}` hides it —
+// forwarded as `props.attach` unchanged, not coerced.
 //
 // The observable moved from the paperclip to the `+` trigger when the file item
 // replaced that button, and this guard was re-pointed rather than left alone: its

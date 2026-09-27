@@ -6,7 +6,7 @@ import { type ComposerDoc, normalizeValue, serializeToText } from '../../primiti
 import { PromptSuggestion } from './prompt-suggestion';
 import { Button } from '../button/button';
 import { Tooltip } from '../tooltip/tooltip';
-import { Globe, Mic, Plus, Square } from 'lucide-solid';
+import { Mic, Plus, Square } from 'lucide-solid';
 import { Dropdown, DropdownTrigger, DropdownContent } from '../dropdown/dropdown';
 import { DropdownItems } from '../dropdown/dropdown-items';
 import type { KaiMenuItem } from '../../web-components/web-component/web-component-data-types';
@@ -130,8 +130,6 @@ export interface DefaultPromptInputProps {
   /** Fired with the files `accept` excluded, as facts (name, media type, reason); it
    *  renders nothing itself. */
   onAttachmentsRejected?: (rejected: RejectedAttachment[]) => void;
-  /** Show a web-search (Globe) button in the left toolbar; calls `onWebSearch`. */
-  webSearch?: boolean;
   /** Show a Voice (Mic) button in the left toolbar; calls `onVoice`. */
   voice?: boolean;
   // Hiding it entirely (Enter-only) is pure CSS: `::part(send){display:none}`, no prop
@@ -142,7 +140,6 @@ export interface DefaultPromptInputProps {
   onSubmit: () => void;
   onSuggestionClick: (v: string) => void;
   onAttachmentsChange?: (attachments: AttachmentData[]) => void;
-  onWebSearch?: () => void;
   onVoice?: () => void;
   /** When `true` and `loading` is also `true`, the send button is replaced by
    *  a Stop button that calls `onStop`. */
@@ -454,20 +451,6 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
                 // menu row are one code path rather than two that have to agree.
                 onRemove={(id) => props.onToolSelect?.({ id, checked: false })}
               />
-            </Show>
-            <Show when={props.webSearch}>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                class="rounded-pill gap-1"
-                aria-label="Search the web"
-                disabled={props.disabled}
-                onClick={() => props.onWebSearch?.()}
-              >
-                <Globe class="size-4" />
-                Search
-              </Button>
             </Show>
             <Show when={props.voice}>
               <Button

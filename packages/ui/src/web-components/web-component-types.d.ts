@@ -424,9 +424,9 @@ export interface KaiChatElement extends HTMLElement {
   footer?: boolean;
   /** Hides the built-in paperclip attach button; only an explicit `false` hides it. Default true. */
   attach?: boolean;
-  /** The composer's `+` menu tree: the built-in file row first (when `attach`), then these verbatim. An array, so it is a JS property and never an attribute. */
+  /** The composer's `+` menu tree: the built-in file row first (when `attach`), then these verbatim. An array, so it is a JS property and never an attribute. An attribute is JSON-parsed; a malformed one is refused loudly. */
   tools?: { chip?: boolean; id?: string; label?: string; icon?: string; shortcut?: string; checked?: boolean; radioGroup?: string; disabled?: boolean; description?: string; control?: "check" | "switch"; note?: true; separator?: boolean; heading?: boolean; items?: { id?: string; label?: string; icon?: string; shortcut?: string; checked?: boolean; radioGroup?: string; disabled?: boolean; description?: string; control?: "check" | "switch"; note?: true; separator?: boolean; heading?: boolean; items?: Record<string, unknown>[] }[] }[];
-  /** Pins the composer's layout: `true` is two rows, `false` is one, omitted derives it from the content. */
+  /** Pins the composer's layout: `true` is two rows, `false` is one, omitted derives it from the content. As an attribute: present pins two rows, `="false"` pins one, absent derives. */
   expanded?: boolean;
   /** Show a voice-input button in the input toolbar; calls `onVoice`. */
   voice?: boolean;
@@ -2560,9 +2560,9 @@ export interface KaiChatElementProps {
   footer?: boolean;
   /** Hides the built-in paperclip attach button; only an explicit `false` hides it. Default true. */
   attach?: boolean;
-  /** The composer's `+` menu tree: the built-in file row first (when `attach`), then these verbatim. An array, so it is a JS property and never an attribute. */
+  /** The composer's `+` menu tree: the built-in file row first (when `attach`), then these verbatim. An array, so it is a JS property and never an attribute. An attribute is JSON-parsed; a malformed one is refused loudly. */
   tools?: { chip?: boolean; id?: string; label?: string; icon?: string; shortcut?: string; checked?: boolean; radioGroup?: string; disabled?: boolean; description?: string; control?: "check" | "switch"; note?: true; separator?: boolean; heading?: boolean; items?: { id?: string; label?: string; icon?: string; shortcut?: string; checked?: boolean; radioGroup?: string; disabled?: boolean; description?: string; control?: "check" | "switch"; note?: true; separator?: boolean; heading?: boolean; items?: Record<string, unknown>[] }[] }[];
-  /** Pins the composer's layout: `true` is two rows, `false` is one, omitted derives it from the content. */
+  /** Pins the composer's layout: `true` is two rows, `false` is one, omitted derives it from the content. As an attribute: present pins two rows, `="false"` pins one, absent derives. */
   expanded?: boolean;
   /** Show a voice-input button in the input toolbar; calls `onVoice`. */
   voice?: boolean;
