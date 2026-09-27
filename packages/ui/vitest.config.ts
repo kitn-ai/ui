@@ -1,4 +1,4 @@
-import { defineConfig } from 'vitest/config';
+import { configDefaults, defineConfig } from 'vitest/config';
 import solidPlugin from 'vite-plugin-solid';
 import path from 'node:path';
 import { readFileSync } from 'node:fs';
@@ -261,7 +261,26 @@ export default defineConfig({
         // `emitted` project below. Same constant on both sides, used in opposite
         // directions, so the include and the exclude cannot drift into a file that
         // runs twice or a file that runs nowhere.
-        exclude: ['**/node_modules/**', '**/.claude/**', 'tests/react/**', '**/tests/react/**', 'tests/e2e/**', '**/tests/e2e/**', ...EMITTED_CODE_TESTS_EXCLUDE]
+        //
+        // THE DEFAULT IS SPREAD IN, AND `**/dist/**` IS NAMED BESIDE IT.
+        // `dist/` sits BESIDE the sources in this package and, from an older
+        // tsc-emitted layout, can hold a COPY of this suite: a `dist/src/**`
+        // whose `.test.js` copies are collected and fail on inputs their tree no
+        // longer contains -- a run that is red for anyone with a stale build
+        // rather than red when the code is wrong. vitest 4 does NOT exclude dist
+        // by default; its own `exclude` `@default`, off the installed
+        // declarations, is `['**/node_modules/**', '**/.git/**']` only. So the
+        // list below is a SUPERSET of the default -- one the default is spread
+        // into, so a later vitest that adds an entry still gets it -- rather than
+        // a replacement that could silently drop one.
+        exclude: [
+          ...configDefaults.exclude,
+          '**/dist/**',
+          '**/.claude/**',
+          'tests/react/**', '**/tests/react/**',
+          'tests/e2e/**', '**/tests/e2e/**',
+          ...EMITTED_CODE_TESTS_EXCLUDE,
+        ]
       }
     }, {
       extends: true,
