@@ -804,7 +804,6 @@ function folderNode(
     pinned: false,
     group,
     groupName,
-    folderId: group,
     kind,
     caretHidden: !heading,
     caretName: heading ? (open ? 'chevron-down' : 'chevron-right') : '',
@@ -919,9 +918,6 @@ export interface ConversationRow {
   /** That project's label, or ''. Empty for a group the catalogue cannot name,
    *  which a heading then labels with the id instead (`sectionLabel`). */
   groupName: string;
-  /** A control row's own folder id, so a driver can name the folder a heading
-   *  heads. Empty on a conversation row, whose folder is its `group`. */
-  folderId: string;
   /** Whether the leading caret is hidden: only a folder heading shows one. */
   caretHidden: boolean;
   /** The caret's icon name, which is the folder's open state. Empty where the
@@ -1252,7 +1248,6 @@ export function createController(deps: AssistantDeps): AssistantController {
         pinned: s.pinned === true,
         group,
         groupName: PROJECTS.find((project) => project.id === group)?.name ?? '',
-        folderId: '',
         caretHidden: true,
         caretName: '',
         menuHidden: false,

@@ -481,7 +481,8 @@
             "theGroupGotOneFolder": true,
             "theHeadingsRawIdIsItsLabel": true,
             "itSitsAboveRecents": true,
-            "clickingItOpensItsThread": true
+            "clickingItOpensItsThread": true,
+            "folderIndent": true
           },
           "styles": {}
         }
@@ -968,7 +969,8 @@
             "theGroupGotOneFolder": true,
             "theHeadingsRawIdIsItsLabel": true,
             "itSitsAboveRecents": true,
-            "clickingItOpensItsThread": true
+            "clickingItOpensItsThread": true,
+            "folderIndent": true
           },
           "styles": {}
         }

@@ -74,9 +74,15 @@
         @kai-toggle-sidebar="collapseRail"
         @kai-search="search"
       >
-        <!-- THE PROJECT EACH ROW IS FILED UNDER, bound so the rail SAYS it
-             rather than implying it through the order: the folder the Projects
-             section groups the row into, and empty for the ungrouped remainder.
+        <!-- THE FOLDER EACH ROW IS FILED UNDER, bound so the rail SAYS it
+             rather than implying it through the order. Two attributes spell the
+             two facts apart, so a rule can read the one it needs: `data-group`
+             carries the folder's LABEL, the catalogue's own name for it, empty
+             on a group the catalogue cannot name and on the ungrouped
+             remainder; `data-folder` carries the folder's ID, the group the row
+             is filed under, empty only on the remainder. A rule about WHICH
+             folder a row is in reads `data-folder`; a rule about what the
+             folder is CALLED reads `data-group`.
 
              The rail is ONE flat repeat, so a folder's heading and its Show more
              row are rows in it too: `kind` says which of the three a row is, and
@@ -92,7 +98,7 @@
           :unread="row.unread"
           :data-group="row.groupName"
           :data-rail="row.kind"
-          :data-folder="row.folderId"
+          :data-folder="row.group"
         >
           <!-- The folder's open state, and the one part of a heading that is not
                a word: the caret leads the title and points down while the folder

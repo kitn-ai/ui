@@ -362,6 +362,21 @@ const railNodes = (page) => page.evaluate(() =>
  *  attribute, and the fallbacks here are for the row's identity. */
 const railRows = async (page) => (await railNodes(page)).filter((node) => node.kind === 'conversation');
 
+/** Each CONVERSATION row's inline start step, with the folder ID the row is
+ *  scanned by. The step belongs to the stylesheet, so asserting it means reading
+ *  what the page computed - and `data-folder` is the folder's ID, the fact the
+ *  rule keys on: a row in a folder the catalogue cannot name is therefore
+ *  tellable from one in the ungrouped remainder, which its label could never do,
+ *  because both labels are empty. */
+const rowIndents = (page) => page.evaluate(() =>
+  [...document.querySelectorAll('kai-conversations > kai-conversation-item[data-rail="conversation"]')]
+    .map((el) => ({
+      id: el.conversationId ?? el.getAttribute('conversation-id') ?? el.id,
+      folder: el.getAttribute('data-folder') ?? '',
+      indent: getComputedStyle(el).marginInlineStart,
+    }))
+);
+
 /** Those rows as the groups they make: one entry per RUN, which is what the
  *  rail renders as one folder. Derived from the rows the page rendered, never
  *  from a list this file would have to keep in step with the block's own. */
@@ -2352,22 +2367,24 @@ export default {
         });
         await page.reload({ waitUntil: 'load' });
         await sctx.scenario.ready(page, sctx);
-        // WHICH FOLDER A ROW IS UNDER, read off the RENDERED ORDER. A row's own
-        // `data-group` is the folder's LABEL, and the label of a group the
-        // catalogue cannot name is empty - the same spelling the ungrouped
-        // remainder has - so the row attributes alone cannot tell the two apart.
-        // The heading above it carries the folder's ID, and that is the fact this
-        // state is about.
+        // WHICH FOLDER A ROW IS UNDER, read off the ROW itself: a row carries
+        // the id of the group it is filed under in `data-folder`, so a
+        // conversation whose group the catalogue cannot name is told apart from
+        // one in the ungrouped remainder. Its LABEL cannot do that - the label
+        // of every such row is empty, and so is the remainder's - which is why
+        // the heading above it is not what this state reads it from either.
         const nodes = await railNodes(page);
-        const filed = [];
-        let folder = '';
-        for (const node of nodes) {
-          if (node.kind === 'folder') folder = node.folder;
-          else if (node.kind === 'conversation') filed.push({ id: node.id, folder });
-        }
+        const filed = nodes.filter((node) => node.kind === 'conversation');
         const headings = nodes.filter((node) => node.kind === 'folder');
         const heading = headings.find((node) => node.folder === group) ?? null;
         const onRail = filed.some((candidate) => candidate.id === id);
+        // The three rows the indent is read on, each chosen from what the rail
+        // RENDERED: one in a folder the catalogue names, the seeded one in the
+        // folder it cannot, and one in the ungrouped remainder.
+        const indents = await rowIndents(page);
+        const named = indents.find((row) => row.folder !== '' && row.folder !== group) ?? null;
+        const seeded = indents.find((row) => row.id === id) ?? null;
+        const remainder = indents.find((row) => row.folder === '') ?? null;
         const activeBefore = await page.evaluate(
           () => document.getElementById('conversations')?.activeId ?? '',
         );
@@ -2398,6 +2415,11 @@ export default {
           activeBefore,
           activeAfter: opened.activeId,
           threadText: opened.text,
+          indents: {
+            named: named === null ? null : named.indent,
+            unknown: seeded === null ? null : seeded.indent,
+            remainder: remainder === null ? null : remainder.indent,
+          },
         };
       },
       probes: {
@@ -2454,6 +2476,27 @@ export default {
           return (unknownGroup?.threadText ?? '').includes(unknownGroup?.answer ?? '')
             || `the thread reads ${JSON.stringify(unknownGroup?.threadText)}`;
         },
+        // THE INDENT FOLLOWS THE FOLDER, NOT THE LABEL, and a row filed under a
+        // group the catalogue cannot name is the only place the two differ: its
+        // label is empty, so a rule keyed on the label leaves it flush, level
+        // with the heading it sits under. The step is read as computed style on
+        // three rows - one in a named folder, the seeded one, and one in the
+        // remainder - and the claim is that the two FILED rows agree and the
+        // remainder is the flat one.
+        folderIndent: () => {
+          const rows = unknownGroup?.indents ?? null;
+          const step = (value) => parseFloat(value ?? '') || 0;
+          if (rows === null) return 'the rail rows were not measured';
+          if (rows.named === null) return 'no conversation sits in a folder the catalogue names';
+          if (rows.unknown === null) return 'the unknown group renders no conversation row';
+          if (rows.remainder === null) return 'no conversation is in the remainder to compare against';
+          if (step(rows.named) === 0) return `a row in a named folder renders flush (${rows.named})`;
+          if (rows.unknown !== rows.named) {
+            return `a filed row and the unknown group's row disagree: ${rows.named} vs ${rows.unknown}`;
+          }
+          return step(rows.remainder) === 0
+            || `the ungrouped remainder is not flush (${rows.remainder})`;
+        },
       },
       expect: {
         theRowIsStillInItsOwnFolder: true,
@@ -2461,6 +2504,7 @@ export default {
         theHeadingsRawIdIsItsLabel: true,
         itSitsAboveRecents: true,
         clickingItOpensItsThread: true,
+        folderIndent: true,
       },
     },
   ],
