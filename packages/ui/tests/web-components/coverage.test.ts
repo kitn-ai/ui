@@ -437,10 +437,6 @@ const EXEMPT: Record<string, { kind: 'story-only' | 'nothing'; reason: string }>
     kind: 'story-only',
     reason: 'rendered by seven showcase stories; no test asserts fallback initials, image failure, or size. Grep hits on "avatar" in the thread/message suites are a DIFFERENT component.',
   },
-  'kai-empty': {
-    kind: 'story-only',
-    reason: 'story-only (chat-slots); no behavioural test. It read as covered until this analyzer learned to strip comments — its only test-file hits are a `<kai-empty>` in a doc comment in slot-registry-coverage.test.ts and a registry fixture string in slots.test.ts.',
-  },
   'kai-icon': {
     kind: 'story-only',
     reason: 'story-only; no behavioural test. Also the one facade that renders through renderIcon() rather than JSX, so a future ../ui/icon unit test would NOT clear this entry on its own — it needs a test that mounts the element.',

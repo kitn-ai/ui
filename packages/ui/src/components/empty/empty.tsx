@@ -35,7 +35,19 @@ function Empty(props: EmptyProps) {
       // children as BOXES via `items-center`, which is what it actually wants.
       data-slot="empty"
       class={cn(
-        'flex min-w-0 flex-1 flex-col items-center justify-center gap-6 rounded-lg p-6',
+        'flex min-w-0 flex-1 flex-col items-center gap-6 rounded-lg p-6',
+        // NOT `justify-center`, and the difference only shows when content is TALLER
+        // than the box: `justify-center` splits that overflow in both directions, so
+        // the first child sits above the box and no amount of scrolling reaches it.
+        // A centred auto margin instead collapses to zero on the overflow side, which
+        // leaves tall content top-aligned and scrollable — centred while there is room,
+        // ordinary when there is not.
+        //
+        // The OUTER pair, not `my-auto` on every child: auto margins on each child
+        // would put free space BETWEEN them as well, spreading a header away from the
+        // content it belongs to. Two margins keep the group centred and leave the gaps
+        // to `gap-*`, which is what declares them.
+        '[&>*:first-child]:mt-auto [&>*:last-child]:mb-auto',
         local.class,
       )}
       {...rest}

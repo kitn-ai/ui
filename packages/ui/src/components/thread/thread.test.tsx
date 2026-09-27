@@ -252,14 +252,17 @@ describe('Thread density axis', () => {
     const explicit = render(() => <Thread messages={[]} density="default" />).container;
     for (const c of [unset, explicit]) {
       expect(log(c).getAttribute('class')).toBe('flex flex-col overflow-y-auto kai-focus-inset h-full px-4 py-3');
-      expect(content(c).getAttribute('class')).toBe('flex flex-col mx-auto w-full max-w-3xl space-y-4');
+      // `min-h-full` is the empty state's room to centre in: this column is the scroller's
+      // only child, and at content height it left the empty surface resolved to its own
+      // content and sitting at the top.
+      expect(content(c).getAttribute('class')).toBe('flex flex-col mx-auto w-full max-w-3xl min-h-full space-y-4');
     }
   });
 
   it("renders the tighter band and between-turn gap for `'compact'`", () => {
     const { container } = render(() => <Thread messages={[]} density="compact" />);
     expect(log(container).getAttribute('class')).toBe('flex flex-col overflow-y-auto kai-focus-inset h-full px-3 py-2');
-    expect(content(container).getAttribute('class')).toBe('flex flex-col mx-auto w-full max-w-3xl space-y-2');
+    expect(content(container).getAttribute('class')).toBe('flex flex-col mx-auto w-full max-w-3xl min-h-full space-y-2');
   });
 
   it('hands its RESOLVED density down to every row, so the avatar gap follows the thread', () => {

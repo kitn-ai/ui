@@ -46,7 +46,7 @@ describe('<kai-thread> density axis', () => {
   it('defaults to the shipped box', async () => {
     const t = await mount(() => {});
     expect(t.band()).toBe('flex flex-col overflow-y-auto kai-focus-inset h-full px-4 py-3');
-    expect(t.column()).toBe('flex flex-col mx-auto w-full max-w-3xl space-y-4');
+    expect(t.column()).toBe('flex flex-col mx-auto w-full max-w-3xl min-h-full space-y-4');
     // The property reads back the registered default rather than `undefined` (an
     // attribute-declared prop has to be readable as well as settable).
     expect(t.el.density).toBe('default');
@@ -56,20 +56,20 @@ describe('<kai-thread> density axis', () => {
     // The HTML-author path: a scalar string, so `density="compact"` is legal markup.
     const t = await mount((el) => el.setAttribute('density', 'compact'));
     expect(t.band()).toBe('flex flex-col overflow-y-auto kai-focus-inset h-full px-3 py-2');
-    expect(t.column()).toBe('flex flex-col mx-auto w-full max-w-3xl space-y-2');
+    expect(t.column()).toBe('flex flex-col mx-auto w-full max-w-3xl min-h-full space-y-2');
   });
 
   it('takes the tighter set from the JS PROPERTY', async () => {
     const t = await mount((el) => (el.density = 'compact'));
     expect(t.band()).toBe('flex flex-col overflow-y-auto kai-focus-inset h-full px-3 py-2');
-    expect(t.column()).toBe('flex flex-col mx-auto w-full max-w-3xl space-y-2');
+    expect(t.column()).toBe('flex flex-col mx-auto w-full max-w-3xl min-h-full space-y-2');
   });
 
   it('falls back to `default`, loudly, for an unknown attribute value', async () => {
     const error = vi.spyOn(console, 'error').mockImplementation(() => {});
     const t = await mount((el) => el.setAttribute('density', 'cosy'));
     expect(t.band()).toBe('flex flex-col overflow-y-auto kai-focus-inset h-full px-4 py-3');
-    expect(t.column()).toBe('flex flex-col mx-auto w-full max-w-3xl space-y-4');
+    expect(t.column()).toBe('flex flex-col mx-auto w-full max-w-3xl min-h-full space-y-4');
     expect(error).toHaveBeenCalledTimes(1);
     expect(String(error.mock.calls[0][0])).toContain('cosy');
   });

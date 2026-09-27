@@ -135,7 +135,13 @@ export function Thread(props: ThreadProps) {
         class={`relative flex h-full min-h-0 flex-col bg-background ${props.class ?? ''}`}
       >
         <ChatContainer class={`h-full ${density().band}`}>
-          <ChatContainerContent class={`mx-auto w-full max-w-3xl ${density().gap}`}>
+          {/* `min-h-full` is what makes the empty state's `flex-1` mean anything: this
+              column is the scroller's only child and, with a content-driven height, the
+              empty surface resolved to its own content height (measured 180px inside a
+              633px region) and sat at the top. At least the viewport, so a short empty
+              state has room to be centred in — and free to grow past it, which is what
+              keeps tall content scrollable rather than clipped. */}
+          <ChatContainerContent class={`mx-auto w-full max-w-3xl min-h-full ${density().gap}`}>
             {/* Zero-state: the consumer owns WHAT it looks like (`empty`); the
                 component owns WHEN it shows (empty + not loading). */}
             <Show when={showEmpty()}>
