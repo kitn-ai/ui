@@ -120,3 +120,12 @@ Collected from both ledgers. Each was made without asking, and each is reversibl
 ## 6. The five times I relayed a mechanism without reading the file
 
 Recorded because the pattern is mine and it keeps costing a round: the stale `pl-2.5` marker, the "dead" `test:slots-ivp` script, vitest's "replaced" default exclude, the `footer` slot that belongs to a facade this block does not use, and the `file-tree` the Lab apps supposedly use. **Every one was caught by an agent reading the artefact rather than the claim.** A claim in a report is not a fact until the file is read.
+
+## Dispatch traps (learned the hard way — four rounds' worth)
+
+- **A dirty file in the shared tree may be an unfinished diff, not a peer.** A round should ask itself whether *it* wrote those lines before standing down. Three rounds today stopped work on this; the second asked at the right moment and still got the wrong answer.
+- **Never assert exclusivity in a dispatch brief.** "Nothing else is running" is prose, not a measurement. Put a `ps` and `git status` check in the brief instead.
+- **Ask the children who wrote the file.** One determinate question beats three proxies — a `replyTo` id, a self-naming pid, a third-person sentence in a status message. All three were used to the wrong conclusion today.
+- **`replyTo` addresses a request, not a run.** With two children alive, a ruling can be consumed by the wrong one.
+- **When two children are live, steer both with complementary instructions** — "you own this, continue" to the likely owner and "stand down, write nothing" to the other. That guarantees one writer no matter who is who, and it should have been the first move, not the recovery.
+- **A stopped round's work survives only if it did not revert.** Today's 323-line task-2 diff was recovered from an uncommitted tree; every round's discipline on that point is the only reason it exists.
