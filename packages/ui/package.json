@@ -206,6 +206,7 @@
     "verify:quarantine": "node scripts/verify-quarantine.mjs --self-test && node scripts/verify-quarantine.mjs",
     "verify:react-wrappers": "node scripts/verify-react-wrappers.mjs --self-test && node scripts/verify-react-wrappers.mjs",
     "verify:scaffold": "node scripts/verify-scaffold-compiles.mjs",
+    "verify:guide-fences": "node scripts/verify-guide-fences.mjs",
     "verify:blocks": "node scripts/verify-blocks.mjs --self-test && node scripts/verify-blocks.mjs",
     "verify:blocks:react": "node scripts/verify-blocks-react.mjs --self-test && node scripts/verify-blocks-react.mjs",
     "gate:compiles": "node scripts/acceptance-gate-compiles.mjs",

@@ -201,6 +201,12 @@ export const TEST_TIMEOUT_BUDGETS: readonly TestTimeoutBudget[] = [
       'spawns `node scripts/verify-solid-coverage.mjs` once per case (9 of 12 cases) and the guard loads the TypeScript compiler to resolve every symbol, so each case pays a real program construction. Measured on a BUSY box (load average 6.7), 800ms per spawn; deliberately under 8 concurrent copies of this file (load 19.5) the worst case reached 2558ms, half the strict 5000ms default. That margin is why the file was seen red once in a full parallel run and green 12/12 alone and on every rerun: the budget is below the noise floor of a contended machine, and a 2-core CI runner is more contended than this box ever was. The failure this prevents is a timeout reported as a guard verdict -- see the note in the test file',
   },
   {
+    file: 'tests/scripts/guide-fences-guard-wiring.test.ts',
+    timeout: COMPILES_TYPESCRIPT,
+    because:
+      "spawns `node scripts/verify-guide-fences.mjs` once per case (3 of 6 cases), and each spawn stands up a consumer tsc sandbox and builds TWO `ts.createProgram`s — one over the guides' emitted fences, one over the origin classifier's planted probes. Measured 1.75/1.85/1.85s per spawn, and NOT on an idle box: the load average was 18.95 with WindowServer and Spotlight resident, so the readings are the contended ones. The per-test margin is therefore under 2.5x the strict 5000ms default before CI's own runner contention, which is the same arithmetic that put `solid-coverage-guard-wiring` here",
+  },
+  {
     file: 'tests/scripts/playwright-projects-guard-wiring.test.ts',
     timeout: SPAWNS_PLAYWRIGHT_LIST,
     because:

@@ -1018,6 +1018,27 @@ jobs:
       - name: Scaffolder output compiles (tsc --strict over emitted code)
         run: pnpm --filter @kitn.ai/ui run verify:scaffold
 
+      # The assistant block's SEED GUIDES are documentation a developer copies out
+      # of the rail, and they live in `assistant.transport.mock.ts` as string
+      # literals -- so this gate is the only thing in the repo that sees them.
+      # It pulls every `ts` fence out of `GUIDE_SCRIPTS`, writes them to real
+      # modules on top of a per-guide declaration of the block's own names, and
+      # type-checks them against the SHIPPED declarations through the same
+      # consumer harness the step above uses. A fence that names a prop the kit
+      # removed, or an export it never had, fails naming the guide and the line.
+      #
+      # It found a real defect on its first run: `Send a card` taught
+      # `cardTools(cards)`, which the kit's types reject and which THROWS at
+      # runtime. Nothing else could have: the fence is a string literal, and every
+      # docs example passes the provider. A diagnostic whose types are NOT the
+      # kit's (a gap in our published event typings, say) is reported and does not
+      # fail -- this gate judges the guides, not the kit. Needs the `build` leg's
+      # artifact, like every other step in this job. Reads the mock transport, the
+      # controller it imports, and two tsc programs over ~10 tiny modules: measured
+      # 1.7-1.9s on an idle box, no network, no browser.
+      - name: Guide fences compile (the block's seed guides vs the shipped API)
+        run: pnpm --filter @kitn.ai/ui run verify:guide-fences
+
       # Packs the built package, installs it into a throwaway app OUTSIDE the
       # repo, and bundles it with Vite 8 (Rolldown -- what `npm create vite`
       # gives consumers today, and the strictest `sideEffects` consumer we know
