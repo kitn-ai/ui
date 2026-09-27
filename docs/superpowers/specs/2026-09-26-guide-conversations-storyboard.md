@@ -12,7 +12,11 @@ card they are explaining — if a turn runs longer than the thing it teaches, it
 real exports and no pseudocode. Most are whole units. Where a fence is a fragment, it says
 what surrounds it.
 
-**On the `*Next:*` lines.** Every assistant turn ends with the labels that would appear under
+**On the `*Next:*` lines.** Three of the arc labels were corrected after this file was
+first written, and the reasons are recorded here because the corrections are the whole point
+of the rule: an arc's first entry must be the user's next INTENT, not a question whose answer
+is already on screen and not a line a form cannot echo; and a conversation's last turn offers
+the cross-links, so an arc that offers two where the others offer three has displaced one. Every assistant turn ends with the labels that would appear under
 the composer at that moment, so a reader can walk a conversation by clicking rather than by
 typing. The first entry is that conversation's own next step — or, at the end of a guide, the
 next guide in the path. The cross-links to the other conversations come last and only once a
@@ -267,13 +271,13 @@ shape does rather than waiting on it.
 `read_document` call, then three bullets: revenue up 12%, churn flat, the enterprise tier
 carrying the quarter.
 
-*Next:* `What changed since Q2?`
+*Next:* `Post it to #metrics`
 
 **Assistant** — *(a card asking for permission)* The `kai_confirm` card — *Post this summary to
 #metrics?* with **Post** and **Edit first**. Its two buttons answer the tool call the first turn
 announced, so the arc ends with a settled tool rather than a dangling one.
 
-*Next:* `Post it to #metrics` · `Make a task list` · `Compare two options`
+*Next:* `Make a task list` · `Compare two options` · `Draft a short brief`
 
 ### `Make a task list`
 
@@ -313,7 +317,7 @@ which is the point: a comparison that never lands is not a recommendation.
 and when." Then a `kai_form` card with just those two fields, rather than a paragraph
 explaining that it needs them.
 
-*Next:* `Why do you need those?`
+*Next:* `Use what I typed`
 
 **Assistant** — *(then it writes)* A four-sentence brief using the two answers, and one line
 naming what it assumed.
