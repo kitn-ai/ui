@@ -123,7 +123,9 @@ export function ThreadView(props: ThreadViewProps) {
             only to place the control, so it is a hole for the pointer and the
             button is the one thing that takes the pointer back. */}
         <div class="pointer-events-none absolute bottom-4 left-1/2 flex w-full max-w-3xl -translate-x-1/2 justify-center px-5">
-          <ScrollButton class="shadow-sm" />
+          {/* The button carries the kit's own elevation. A shadow class here
+              would be a second one, decided by stylesheet order. */}
+          <ScrollButton />
         </div>
       </ChatContainer>
     </div>
