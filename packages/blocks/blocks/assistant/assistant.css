@@ -22,12 +22,29 @@ body { margin: 0; background: var(--kai-color-background, hsl(0 0% 100%)); font:
  * viewport below the app. */
 kai-workspace.app { display: block; height: 100dvh; }
 
-/* The right-aligned relative time slotted into each row's menu region:
- * type scale only; the muted tint comes from currentColor. It sits BESIDE the
- * row menu's kebab, both in that same region: the region is the item's
- * non-activation trailing edge, so a click on either never selects the
- * conversation. */
-kai-conversation-item .row-time { font-size: 0.75rem; color: color-mix(in srgb, currentColor 60%, transparent); }
+/* The row menu reveals on hover, or once anything in its row has focus. THREE
+ * constraints, and two of them are the difference between a nicer hover state and
+ * an accessibility regression - do not "simplify" this back to a bare hover rule:
+ *
+ *  - `opacity`, never `display` or `visibility`: both of those take the control
+ *    OUT of the accessibility tree, so the row menu would disappear for a screen
+ *    reader rather than for the eye. Opacity is visual only: the trigger stays
+ *    focusable and announced at every moment.
+ *  - the HIDDEN state lives inside the `hover: hover` query. A bare
+ *    `opacity: 0` would leave the menu permanently invisible on a touch device,
+ *    where no hover ever arrives to reveal it. On such a device the row simply
+ *    shows its menu, which is the only reachable answer there.
+ *  - `:focus-within`, not only `:hover`. The row body is a tab stop, so keyboard
+ *    focus lands on the row BEFORE the kebab and reveals the button before focus
+ *    reaches it; hover alone would let a keyboard user tab onto an invisible
+ *    control (WCAG 2.4.7, Focus Visible). It also covers focus inside the row's
+ *    shadow root, because the host is an ancestor in the flat tree, and it keeps
+ *    the trigger visible while the menu it opened has focus. */
+@media (hover: hover) {
+  kai-conversation-item .row-menu { opacity: 0; transition: opacity 120ms ease; }
+  kai-conversation-item:hover .row-menu,
+  kai-conversation-item:focus-within .row-menu { opacity: 1; }
+}
 
 /* The inline rename field replaces the title while its row is the one being
  * renamed (the title span hides, this shows). The element's shared base sheet

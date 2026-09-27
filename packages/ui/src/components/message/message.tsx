@@ -244,7 +244,23 @@ function MessageActionBar(props: MessageActionBarProps) {
       part="actions"
       class={cn(
         'mt-1 flex gap-0',
-        props.reveal === 'hover' && 'opacity-0 transition-opacity group-hover:opacity-100',
+        // The hover reveal, and three constraints a later reader will otherwise
+        // simplify back into two accessibility failures:
+        //  - `opacity`, never `display` or `visibility`: both of those take the
+        //    control OUT of the accessibility tree, so the actions would vanish
+        //    for a screen reader rather than for the eye.
+        //  - the hidden state sits INSIDE the `hover: hover` media query (which is
+        //    what `[@media(hover:hover)]` compiles to). A bare `opacity-0` leaves
+        //    the bar permanently invisible on a touch device, where no hover ever
+        //    arrives to reveal it.
+        //  - `group-focus-within:opacity-100` is not decoration: without it a
+        //    keyboard user tabs onto a control they cannot see (WCAG 2.4.7, Focus
+        //    Visible). The row carrying the `group` is `chat-thread`'s rowGroup,
+        //    and the action bar is inside it, so focusing an action reveals it.
+        // `group-hover:` is already hover-scoped by Tailwind, so only the base
+        // state needs the query.
+        props.reveal === 'hover' &&
+          'transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:hover)]:opacity-0',
         props.class,
       )}
     >

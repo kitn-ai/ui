@@ -360,12 +360,13 @@ export default {
             const wrapped = heights.filter((h) => h > 34);
             return narrow.length === 0 && wrapped.length === 0 ? true : JSON.stringify({ widths, heights });
           }),
-        // The relative time is still on the row, in the same region as the
-        // kebab: the item renders that region outside its activation surface,
-        // so the time did not have to move to the title to make room.
-        rowTime: (page) => page.locator('kai-conversations .row-time').first().isVisible().catch(() => false),
+        // The row menu is the item's non-activation trailing edge - the item
+        // renders that region outside its activation surface, so a click on the
+        // kebab never selects the conversation. It reveals on hover or on focus;
+        // the stylesheet carries the three constraints that make that reveal
+        // accessible rather than merely tidy.
       },
-      expect: { menuOpen: true, triggerHaspopup: 'menu', triggerExpanded: 'true', shareDisabled: true, actionsListed: true, renameChip: true, keyChips: true, rowTime: true, kbdWelded: true, dividers: true, dividerSkipsKeyboard: true, menuFocusWalk: true, rowsWide: true },
+      expect: { menuOpen: true, triggerHaspopup: 'menu', triggerExpanded: 'true', shareDisabled: true, actionsListed: true, renameChip: true, keyChips: true, kbdWelded: true, dividers: true, dividerSkipsKeyboard: true, menuFocusWalk: true, rowsWide: true },
       styleProbes: [
         style('menuRowShare', (page) => page.getByRole('menuitem', { name: 'Share' }).first(),
           ['height', 'fontSize', 'paddingInline']),

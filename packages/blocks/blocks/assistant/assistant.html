@@ -100,11 +100,15 @@
             @kai-cancel="renameCancel"
           ></kai-editable-label>
           <span slot="meta" .textContent="row.preview" :hidden="row.previewHidden"></span>
-          <!-- The row's trailing edge: the relative time, then its own menu.
-               Both sit in the item's `menu` region, which the item renders
+          <!-- The row's trailing edge: its own menu, and nothing else. It sits
+               in the item's `menu` region, which the item renders
                OUTSIDE its activation surface - that is what keeps a click on
                the kebab, or on the menu behind it, from also selecting the
                conversation.
+
+               The menu reveals on hover or focus, in this block's stylesheet
+               rather than in the kit: whether a row's menu is always visible is
+               the row's presentation, and the kit's own default is to show it.
 
                kai-dropdown is the surface because the menu is authored markup:
                the kit's dropdown renders no items of its own, so a row can carry
@@ -113,7 +117,6 @@
                slotted row carries role="menuitem" and tabindex="-1" to join the
                roving focus (and a row that cannot act carries aria-disabled,
                which takes it back out again). -->
-          <span slot="menu" class="row-time" .textContent="row.time"></span>
           <kai-dropdown
             slot="menu"
             class="row-menu"

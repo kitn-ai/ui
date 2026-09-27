@@ -81,22 +81,6 @@ import type {
 // wiring.modeFiles, one per mode).
 import { transport } from './assistant.transport'; // lint:dangling-imports: allowed -- generated name, written by `create-kai add` from wiring.modeFiles
 
-// KNOWN RESIDUAL: the "2m ago" formatter is internal to the Solid layer and
-// is not exported from @kitn.ai/ui/stores, so the block restates it. Delete
-// this when the kit ships it beside byRecency.
-function relativeTimeShort(iso: string | undefined, now = Date.now()): string {
-  if (!iso) return '';
-  const then = Date.parse(iso);
-  if (Number.isNaN(then)) return '';
-  const secs = Math.max(0, Math.round((now - then) / 1000));
-  if (secs < 60) return 'just now';
-  const mins = Math.floor(secs / 60);
-  if (mins < 60) return `${mins}m ago`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
-  return `${Math.floor(hours / 24)}d ago`;
-}
-
 /** One entry of the model switcher's `models` property. Declared here, with the
  *  list: it types a State field, and the seam's three sources come and go while
  *  the composition is what every mode ships. */
@@ -321,7 +305,6 @@ export interface ConversationRow {
   title: string;
   preview: string;
   previewHidden: boolean;
-  time: string;
   unread: boolean;
   /** The row's own menu trigger, named for the row it belongs to: every row has
    *  one, so one shared label would make five identical accessible names. */
@@ -549,16 +532,14 @@ export function createController(deps: AssistantDeps): AssistantController {
    *  shortcut twice, which for a toggle is a silent no-op (pin, unpin). */
   let booted = false;
 
-  /** The old script matched the row's whole `textContent`: the title, the
-   *  preview line and the relative time, concatenated with NO separator. Same
-   *  three fields here, read off the row model instead of off the DOM, and
-   *  joined with spaces -- so a query is no longer able to match across a
-   *  boundary the reader never sees ("just now" against a title ending in
-   *  "ju"). That is a deliberate difference and the better behaviour. */
+  /** The old script matched the row's whole `textContent`: the title and the
+   *  preview line, concatenated with NO separator. The same fields here, read off
+   *  the row model instead of off the DOM, and joined with spaces -- so a query is
+   *  no longer able to match across a boundary the reader never sees. */
   const filterRows = (rows: ConversationRow[], query: string): ConversationRow[] =>
     query === ''
       ? rows
-      : rows.filter((row) => `${row.title} ${row.preview} ${row.time}`.toLowerCase().includes(query));
+      : rows.filter((row) => `${row.title} ${row.preview}`.toLowerCase().includes(query));
 
   const store = localStorageStore(deps.storageKey ?? 'assistant');
 
@@ -592,7 +573,6 @@ export function createController(deps: AssistantDeps): AssistantController {
         title: s.title,
         preview,
         previewHidden: preview === '',
-        time: relativeTimeShort(s.updatedAt ?? s.lastMessageAt),
         unread: isConversationUnread(s),
         menuLabel: `Actions for ${s.title}`,
         renaming,
