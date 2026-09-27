@@ -206,7 +206,7 @@ interface Events {
  */
 defineWebComponent<Props, Events>('kai-chat', {
   messages: [], value: undefined, placeholder: 'Send a message...', loading: false,
-  suggestions: undefined, suggestionMode: 'submit', persistSuggestions: false, proseSize: 'sm',
+  suggestions: undefined, suggestionsLayout: 'pill', suggestionMode: 'submit', persistSuggestions: false, proseSize: 'sm',
   codeTheme: 'github-dark-dimmed', codeHighlight: true, chatTitle: undefined,
   models: undefined, currentModel: undefined, context: undefined, scrollButton: true,
   attach: true, tools: undefined, expanded: undefined, voice: false, triggers: undefined, kindIcons: undefined,
@@ -304,6 +304,7 @@ defineWebComponent<Props, Events>('kai-chat', {
   <ChatThread
     messages={validMessages(props.messages)} value={props.value as string | ComposerDoc | undefined} placeholder={props.placeholder as string}
     loading={flag('loading')} suggestions={props.suggestions as string[] | undefined}
+    suggestionsLayout={props.suggestionsLayout as 'pill' | 'block' | undefined}
     suggestionMode={props.suggestionMode as 'submit' | 'fill'} persistSuggestions={flag('persistSuggestions')}
     proseSize={props.proseSize as ProseSize}
     codeTheme={props.codeTheme as string} codeHighlight={flag('codeHighlight')}

@@ -415,6 +415,8 @@ export interface ChatProps extends WebComponentProps {
   loading?: boolean;
   /** Starter prompts shown above the input while the thread is empty. */
   suggestions?: string[];
+  /** How `suggestions` render: `'pill'` (default) or the `PromptSuggestion` `block` variant, a full-width list row. */
+  suggestionsLayout?: "pill" | "block";
   /** What clicking a suggestion does. Default sends it immediately; `'fill'` places it in the input without sending. */
   suggestionMode?: "submit" | "fill";
   /** Keep suggestions visible after the conversation starts; they otherwise hide once `messages` is non-empty. Default false. */
@@ -523,7 +525,7 @@ export interface ChatProps extends WebComponentProps {
 
 export const Chat = /*#__PURE__*/ createWebComponent<ChatProps, KaiChatElement>(
   'kai-chat',
-  ["theme","density","value","placeholder","loading","suggestions","suggestionMode","persistSuggestions","proseSize","codeTheme","imagePreview","codeHighlight","reasoning","reasoningOpen","chatTitle","models","currentModel","context","scrollButton","headerStart","headerEnd","headerFull","homeFull","sidebar","empty","composer","composerActions","footer","attach","tools","expanded","voice","triggers","kindIcons","actionsReveal","userActions","assistantActions","hideSources","accept","messages","cardTypes","cardSchemas","conversations","store","home","hostOpen"],
+  ["theme","density","value","placeholder","loading","suggestions","suggestionsLayout","suggestionMode","persistSuggestions","proseSize","codeTheme","imagePreview","codeHighlight","reasoning","reasoningOpen","chatTitle","models","currentModel","context","scrollButton","headerStart","headerEnd","headerFull","homeFull","sidebar","empty","composer","composerActions","footer","attach","tools","expanded","voice","triggers","kindIcons","actionsReveal","userActions","assistantActions","hideSources","accept","messages","cardTypes","cardSchemas","conversations","store","home","hostOpen"],
   { onAttachmentsChange: 'kai-attachments-change', onAttachmentsRejected: 'kai-attachments-rejected', onConversationLoad: 'kai-conversation-load', onHomeLink: 'kai-home-link', onMessageAction: 'kai-message-action', onModelChange: 'kai-model-change', onSelect: 'kai-select', onSubmit: 'kai-submit', onSuggestionClick: 'kai-suggestion-click', onUnreadChange: 'kai-unread-change', onValueChange: 'kai-value-change', onVoice: 'kai-voice' },
   () => import('@kitn.ai/ui/web-components/chat'),
 );
@@ -1615,6 +1617,8 @@ export interface PromptInputProps extends WebComponentProps {
   loading?: boolean;
   /** Starter prompts shown above the input. Clicking one follows `suggestionMode`. Set as a JS property. */
   suggestions?: string[];
+  /** How `suggestions` render: `'pill'` (default) or the `PromptSuggestion` `block` variant, a full-width list row. Attribute: `suggestions-layout`. */
+  suggestionsLayout?: "pill" | "block";
   /** What clicking a suggestion does. Defaults to `'submit'`. */
   suggestionMode?: "submit" | "fill";
   /** The composer's `+` menu tree: the built-in file row first (when `attach`), then these verbatim. JS property; an array cannot be an attribute. */
@@ -1655,7 +1659,7 @@ export interface PromptInputProps extends WebComponentProps {
 
 export const PromptInput = /*#__PURE__*/ createWebComponent<PromptInputProps, KaiPromptInputElement>(
   'kai-prompt-input',
-  ["theme","value","placeholder","disabled","loading","suggestions","suggestionMode","tools","expanded","voice","stoppable","submit","attach","attachments","triggers","kindIcons"],
+  ["theme","value","placeholder","disabled","loading","suggestions","suggestionsLayout","suggestionMode","tools","expanded","voice","stoppable","submit","attach","attachments","triggers","kindIcons"],
   { onAttachmentsChange: 'kai-attachments-change', onSelect: 'kai-select', onStop: 'kai-stop', onSubmit: 'kai-submit', onSuggestionClick: 'kai-suggestion-click', onToolbarAction: 'kai-toolbar-action', onValueChange: 'kai-value-change', onVoice: 'kai-voice' },
   () => import('@kitn.ai/ui/web-components/prompt-input'),
 );

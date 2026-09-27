@@ -631,3 +631,40 @@ describe('DefaultPromptInput send button', () => {
     expect(send.querySelector('svg')).toBeTruthy();
   });
 });
+
+/**
+ * How the suggestions render. Two layouts exist because the two kinds of suggestion
+ * are different lengths: a short label reads as a pill, a sentence reads as a row.
+ * jsdom measures nothing, so these assert the VARIANT'S classes rather than a width,
+ * which is honest here because the choice IS a class change on one component.
+ */
+describe('DefaultPromptInput suggestions layout', () => {
+  const suggestions = ['Summarize a document', 'Make a task list'];
+  const buttonFor = (container: HTMLElement, label: string) =>
+    within(container).getByRole('button', { name: label });
+
+  it('renders pills by default, wrapping side by side', () => {
+    const { container } = render(() => <DefaultPromptInput {...baseProps} suggestions={suggestions} />);
+    const row = buttonFor(container, suggestions[0]).parentElement as HTMLElement;
+
+    expect(row.className).toContain('flex-wrap');
+    expect(row.className).not.toContain('flex-col');
+    // The pill variant: a shrink-to-fit capsule.
+    expect(buttonFor(container, suggestions[0]).className).toContain('rounded-pill');
+  });
+
+  it('stacks full-width rows when asked for the list layout', () => {
+    const { container } = render(() => (
+      <DefaultPromptInput {...baseProps} suggestions={suggestions} suggestionsLayout="block" />
+    ));
+    const row = buttonFor(container, suggestions[0]).parentElement as HTMLElement;
+
+    expect(row.className).toContain('flex-col');
+    expect(row.className).not.toContain('flex-wrap');
+    // The block variant: full width, left aligned, and NOT a capsule.
+    const button = buttonFor(container, suggestions[0]);
+    expect(button.className).toContain('w-full');
+    expect(button.className).toContain('justify-start');
+    expect(button.className).not.toContain('rounded-pill');
+  });
+});

@@ -73,6 +73,9 @@ export interface ChatThreadProps {
   loading?: boolean;
   /** Starter prompts shown above the input while the thread is empty. */
   suggestions?: string[];
+  /** How `suggestions` render. `'pill'` is the default; the alternative renders
+   *  each suggestion as a full-width list row. */
+  suggestionsLayout?: 'pill' | 'block';
   /** What clicking a suggestion does. Default sends it immediately; `'fill'`
    *  places it in the input without sending. */
   suggestionMode?: 'submit' | 'fill';
@@ -876,7 +879,7 @@ export function ChatThread(props: ChatThreadProps) {
                   fallback={
                     <DefaultPromptInput
                       value={current()} placeholder={props.placeholder} loading={props.loading === true}
-                      suggestions={visibleSuggestions()} attachments={attachments()}
+                      suggestions={visibleSuggestions()} suggestionsLayout={props.suggestionsLayout} attachments={attachments()}
                       accept={props.accept} onAttachmentsRejected={props.onAttachmentsRejected}
                       attach={props.attach} tools={props.tools} expanded={props.expanded} voice={props.voice === true}
                       triggers={props.triggers} kindIcons={props.kindIcons}

@@ -775,6 +775,12 @@
           "fn": false
         },
         {
+          "name": "suggestionsLayout",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
           "name": "suggestionMode",
           "scalar": true,
           "optional": true,
@@ -3766,6 +3772,12 @@
         {
           "name": "suggestions",
           "scalar": false,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "suggestionsLayout",
+          "scalar": true,
           "optional": true,
           "fn": false
         },

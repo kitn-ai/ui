@@ -239,3 +239,45 @@ describe('kai-chat: the same surface', () => {
     expect(seen).toEqual([{ id: 'web', checked: false }]);
   });
 });
+
+/**
+ * The suggestions' layout, on the element. The block sets it as an ATTRIBUTE, so
+ * this pins the one hop nothing else covers: a kebab attribute has to arrive as the
+ * camelCase property the renderer reads. `suggestionMode` and the array props are
+ * passed as properties by every in-repo consumer, so a broken attribute hop would
+ * otherwise only show up as "the layout silently stayed a pill".
+ */
+describe('kai-prompt-input: the suggestions layout', () => {
+  const suggestionsOf = (el: HTMLElement): HTMLElement[] =>
+    [...root(el).querySelectorAll<HTMLElement>('button')].filter((b) =>
+      ['Summarize a document', 'Make a task list'].includes(b.textContent?.trim() ?? ''),
+    );
+
+  it('renders rows when the attribute asks for them', async () => {
+    const el = document.createElement('kai-prompt-input') as KaiPromptInput & { suggestions?: string[] };
+    el.setAttribute('suggestions-layout', 'block');
+    document.body.appendChild(el);
+    await flush();
+    el.suggestions = ['Summarize a document', 'Make a task list'];
+    await flush();
+
+    const found = suggestionsOf(el);
+    expect(found, 'the suggestions did not render').toHaveLength(2);
+    // The block variant, reached through the attribute: full width, left aligned.
+    expect(found[0].className).toContain('w-full');
+    expect(found[0].className).toContain('justify-start');
+    expect(found[0].className).not.toContain('rounded-pill');
+  });
+
+  it('stays pills without it, so the default is unchanged for every existing consumer', async () => {
+    const el = document.createElement('kai-prompt-input') as KaiPromptInput & { suggestions?: string[] };
+    document.body.appendChild(el);
+    await flush();
+    el.suggestions = ['Summarize a document'];
+    await flush();
+
+    const found = suggestionsOf(el);
+    expect(found).toHaveLength(1);
+    expect(found[0].className).toContain('rounded-pill');
+  });
+});

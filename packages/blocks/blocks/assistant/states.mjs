@@ -142,7 +142,7 @@ export default {
       probes: {
         reading: (page) => page.getByText('Reading q3-metrics.pdf').count().then((n) => n > 0),
         tool: (page) => page.getByText(/read[_-]?document/i).count().then((n) => n > 0),
-        suggestionsGone: (page) => page.getByRole('button', { name: 'Draft the Q3 board update' }).isVisible().catch(() => false),
+        suggestionsGone: (page) => page.getByRole('button', { name: 'Draft a short brief' }).isVisible().catch(() => false),
       },
       expect: { reading: true, tool: true, suggestionsGone: false },
       styleProbes: [

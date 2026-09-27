@@ -1,4 +1,5 @@
 import { For, Show } from 'solid-js';
+import { cn } from '../../utils/cn';
 import { PromptInput, PromptInputTextarea, PromptInputBand } from './prompt-input';
 import { ComposerChips, chipItems } from './composer-chips';
 import type { TriggerDef, ComposerChange } from '../composer/composer';
@@ -115,6 +116,9 @@ export interface DefaultPromptInputProps {
   /** Pins the box's layout: `true` two rows, `false` one row, omitted derives it. */
   expanded?: boolean;
   suggestions?: string[];
+  /** How `suggestions` render. `'pill'` is the default; the alternative renders
+   *  each suggestion as a full-width list row. */
+  suggestionsLayout?: 'pill' | 'block';
   /** Attachments staged in the input. Provide `onAttachmentsChange` to enable
    *  the attach button + removable previews. */
   attachments?: AttachmentData[];
@@ -294,10 +298,16 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
   return (
     <>
       <Show when={props.suggestions?.length}>
-        <div class="mb-2 flex flex-wrap gap-2">
+        <div
+          class={cn(
+            'mb-2',
+            // The container follows the variant: pills wrap side by side, rows stack.
+            props.suggestionsLayout === 'block' ? 'flex flex-col gap-1.5' : 'flex flex-wrap gap-2',
+          )}
+        >
           <For each={props.suggestions}>
             {(s) => (
-              <PromptSuggestion onClick={() => props.onSuggestionClick(s)}>{s}</PromptSuggestion>
+              <PromptSuggestion block={props.suggestionsLayout === 'block'} onClick={() => props.onSuggestionClick(s)}>{s}</PromptSuggestion>
             )}
           </For>
         </div>

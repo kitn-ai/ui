@@ -1412,6 +1412,15 @@
         "displayType": "undefined | string[]"
       },
       {
+        "name": "suggestionsLayout",
+        "type": "undefined | \"pill\" | \"block\"",
+        "optional": true,
+        "scalar": true,
+        "description": "How `suggestions` render: `'pill'` (default) or the `PromptSuggestion` `block` variant, a full-width list row.",
+        "default": "'pill'",
+        "displayType": "undefined | \"pill\" | \"block\""
+      },
+      {
         "name": "suggestionMode",
         "type": "undefined | \"submit\" | \"fill\"",
         "optional": true,
@@ -7177,6 +7186,15 @@
         "scalar": false,
         "description": "Starter prompts shown above the input. Clicking one follows `suggestionMode`. Set as a JS property.",
         "displayType": "undefined | string[]"
+      },
+      {
+        "name": "suggestionsLayout",
+        "type": "undefined | \"pill\" | \"block\"",
+        "optional": true,
+        "scalar": true,
+        "description": "How `suggestions` render: `'pill'` (default) or the `PromptSuggestion` `block` variant, a full-width list row. Attribute: `suggestions-layout`.",
+        "default": "'pill'",
+        "displayType": "undefined | \"pill\" | \"block\""
       },
       {
         "name": "suggestionMode",

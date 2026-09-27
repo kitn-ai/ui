@@ -25,6 +25,9 @@ interface Props extends Record<string, unknown> {
   /** Starter prompts shown above the input. Clicking one follows
    *  `suggestionMode`. Set as a JS property. */
   suggestions?: string[];
+  /** How `suggestions` render. `'pill'` is the default; the alternative is a
+   *  full-width list row. Attribute: `suggestions-layout`. */
+  suggestionsLayout?: 'pill' | 'block';
   // `'submit'` sends it immediately, as if typed and submitted; `'fill'` only places it
   // in the input.
   /** What clicking a suggestion does. Defaults to `'submit'`. */
@@ -109,6 +112,7 @@ defineWebComponent<Props, Events>('kai-prompt-input', {
   disabled: false,
   loading: false,
   suggestions: undefined,
+  suggestionsLayout: 'pill',
   suggestionMode: 'submit',
   tools: undefined,
   expanded: undefined,
@@ -232,6 +236,7 @@ defineWebComponent<Props, Events>('kai-prompt-input', {
       submit={props.submit as 'always' | 'auto'}
       attach={flag('attach')}
       suggestions={props.suggestions}
+      suggestionsLayout={props.suggestionsLayout as 'pill' | 'block' | undefined}
       attachments={attachments()}
       tools={props.tools as ComposerToolItem[] | undefined}
       expanded={resolveExpandedProp(props.expanded, element.hasAttribute('expanded'), element.getAttribute('expanded'))}

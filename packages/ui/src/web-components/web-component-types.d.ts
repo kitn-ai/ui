@@ -378,6 +378,8 @@ export interface KaiChatElement extends HTMLElement {
   loading?: boolean;
   /** Starter prompts shown above the input while the thread is empty. */
   suggestions?: string[];
+  /** How `suggestions` render: `'pill'` (default) or the `PromptSuggestion` `block` variant, a full-width list row. */
+  suggestionsLayout?: "pill" | "block";
   /** What clicking a suggestion does. Default sends it immediately; `'fill'` places it in the input without sending. */
   suggestionMode?: "submit" | "fill";
   /** Keep suggestions visible after the conversation starts; they otherwise hide once `messages` is non-empty. Default false. */
@@ -1356,6 +1358,8 @@ export interface KaiPromptInputElement extends HTMLElement {
   loading?: boolean;
   /** Starter prompts shown above the input. Clicking one follows `suggestionMode`. Set as a JS property. */
   suggestions?: string[];
+  /** How `suggestions` render: `'pill'` (default) or the `PromptSuggestion` `block` variant, a full-width list row. Attribute: `suggestions-layout`. */
+  suggestionsLayout?: "pill" | "block";
   /** What clicking a suggestion does. Defaults to `'submit'`. */
   suggestionMode?: "submit" | "fill";
   /** The composer's `+` menu tree: the built-in file row first (when `attach`), then these verbatim. JS property; an array cannot be an attribute. */
@@ -2514,6 +2518,8 @@ export interface KaiChatElementProps {
   loading?: boolean;
   /** Starter prompts shown above the input while the thread is empty. */
   suggestions?: string[];
+  /** How `suggestions` render: `'pill'` (default) or the `PromptSuggestion` `block` variant, a full-width list row. */
+  suggestionsLayout?: "pill" | "block";
   /** What clicking a suggestion does. Default sends it immediately; `'fill'` places it in the input without sending. */
   suggestionMode?: "submit" | "fill";
   /** Keep suggestions visible after the conversation starts; they otherwise hide once `messages` is non-empty. Default false. */
@@ -3328,6 +3334,8 @@ export interface KaiPromptInputElementProps {
   loading?: boolean;
   /** Starter prompts shown above the input. Clicking one follows `suggestionMode`. Set as a JS property. */
   suggestions?: string[];
+  /** How `suggestions` render: `'pill'` (default) or the `PromptSuggestion` `block` variant, a full-width list row. Attribute: `suggestions-layout`. */
+  suggestionsLayout?: "pill" | "block";
   /** What clicking a suggestion does. Defaults to `'submit'`. */
   suggestionMode?: "submit" | "fill";
   /** The composer's `+` menu tree: the built-in file row first (when `attach`), then these verbatim. JS property; an array cannot be an attribute. */

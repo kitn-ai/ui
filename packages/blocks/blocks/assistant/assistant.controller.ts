@@ -91,7 +91,7 @@ export interface ModelOption {
   description?: string;
 }
 
-const SUGGESTIONS = ['Summarize a document', 'Draft the Q3 board update', 'Compare two options'];
+const SUGGESTIONS = ['Summarize a document', 'Make a task list', 'Compare two options', 'Draft a short brief'];
 
 /** One card on the empty state, and the conversation it opens. The four are a
  *  PATH in the order a developer meets them: get it running, point it at a
