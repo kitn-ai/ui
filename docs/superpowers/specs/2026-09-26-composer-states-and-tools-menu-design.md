@@ -177,7 +177,11 @@ starts collapsed — which is the default the owner asked for.
 ### 3.4 The radius
 
 One token, fixed, defaulting to **24px**, following the theme's existing knob
-convention (`--kai-radius-composer`, resolved like `--kai-radius`):
+convention (`--kai-radius-composer`, resolved like `--kai-radius`). **The knob's name is not
+free**: a rung must wire the knob *of its own name* — `--radius-pill` wires
+`--kai-radius-pill`, and this one wires `--kai-radius-composer` — because that pairing is
+what the Token Reference's derivation keys off to decide a rung exists. A rung whose knob is
+named anything else drops silently out of the table.
 
 - 24px is **half the measured collapsed row** (§3.0: 48px), which is the whole
   reason the collapsed box reads as a pill — and it is derived from that row height
@@ -382,6 +386,21 @@ moves (§6.5).
 additions that cannot be derived — `tools` on `kai-chat` in
 `web-component-nonscalar.json`, and the new radius token in the theme — are
 hand-written and are named here so they are not forgotten.
+
+**A new theme token is not one edit.** It has four dependents, and missing any of them is a
+red suite that a narrow test run will not show:
+
+1. the theme editor's catalog (`src/themes/theme-tokens.ts`), **and** the studio's own
+   wiring — a catalogued knob with nothing behind it fails its own test, and a default that
+   is not a plain rem literal needs the studio to be able to parse it at all;
+2. the Token Reference's table (`src/stories/docs/theme-tokens.tsx`), which admits a rung
+   only when it wires a knob of its own name (§3.4);
+3. the generated catalog (`node scripts/gen-catalog.mjs`) — regenerated, never hand-edited;
+4. the class-merger oracle (`src/utils/cn-merge.drift.test.ts`): a new `rounded-*` utility is
+   in that conflict group, and the oracle is a different implementation that has to be told.
+
+Prove a token change against the **full** unit suite. The narrower sweep is how these stayed
+invisible: they were found only when the file count went from 212 to 443.
 
 ### 6.5 The mic, for now
 

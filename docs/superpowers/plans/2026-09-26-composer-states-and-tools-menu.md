@@ -1093,6 +1093,7 @@ git commit -m "feat(composer): opt-in capability chips, sharing the menu's own s
 - Produces:
   - Both `<kai-prompt-input>` and `<kai-chat>` accept `tools` (JS property) and `expanded` (boolean), and fire `kai-select { id, checked? }`.
   - `webSearch`, `onWebSearch` and `kai-web-search` no longer exist on either element or on `ChatThread`/`DefaultPromptInput`.
+  - **A `part` for the `+` trigger**, which Task 4 left out. Every other control in the composer's clusters is reachable by a host through a `::part` (or is inside a cluster that is); the trigger is the one control with no hook of its own, so a host restyling the composer has the clusters and not this button. While the element layer is being finished, give it the same convention its neighbours use.
 
 - [ ] **Step 1: Write the failing test**
 
