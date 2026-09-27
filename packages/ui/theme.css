@@ -398,6 +398,15 @@
    Keyed on --color-* tokens so it themes with the rest of the kit. */
 .chat-markdown { color: var(--color-foreground); line-height: 1.6; }
 .chat-markdown > div:first-child > :first-child { margin-top: 0; }
+/* End-of-content reset, and BOTH selectors are load-bearing. The first is the
+   container's own last child, which is what a fenced code block is: the Markdown
+   renderer splits fences out of the markdown blocks and hands each one `my-4`, so
+   that margin sits ON the container's child and the second selector cannot reach it.
+   Without the first, a message ENDING in a code block stacks the block's 16px on
+   whatever follows the content — the action bar's own `mt-1` — while every other
+   last block gives the action bar's margin alone. The second reaches a block whose
+   content sits a level deeper (a paragraph, list, table, quote, heading). */
+.chat-markdown > :last-child { margin-bottom: 0; }
 .chat-markdown > div:last-child > :last-child { margin-bottom: 0; }
 .chat-markdown p { margin: 0 0 0.75em; }
 .chat-markdown p:last-child { margin-bottom: 0; }
