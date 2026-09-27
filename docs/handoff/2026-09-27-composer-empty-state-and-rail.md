@@ -129,3 +129,15 @@ Recorded because the pattern is mine and it keeps costing a round: the stale `pl
 - **`replyTo` addresses a request, not a run.** With two children alive, a ruling can be consumed by the wrong one.
 - **When two children are live, steer both with complementary instructions** — "you own this, continue" to the likely owner and "stand down, write nothing" to the other. That guarantees one writer no matter who is who, and it should have been the first move, not the recovery.
 - **A stopped round's work survives only if it did not revert.** Today's 323-line task-2 diff was recovered from an uncommitted tree; every round's discipline on that point is the only reason it exists.
+
+
+## The rail tree is built (state as of task 3)
+
+- **Task 1 (`815719fb`)** — sections derive from the rows; pinning stays per-folder; `Recents` is recency-ordered; search narrows rows and sections in one pass.
+- **Task 2 (`9d1ba035`)** — the folders, on the settled shape (**a folder is a state decision, not a container**: one flat repeat, header rows inside it, open/closed = which rows the state emits). **The keyboard walk is pinned by measurement**: `40-rail-keyboard-walk` walks all sixteen rows in order with exactly one roving tab stop at every step. **The filing debt is paid** — the block's own second storage key is gone, filing goes through the store's `groupId` via `setGroup`.
+- **Task 3 (`5cf14917`)** — `42-rail-unknown-group` pins the undeclared-group branch, watched failing first with two plants.
+- **In flight (`847b9f80`)** — the indent rule keys on a row's *label* rather than its folder identity, so an unknown-group row renders flush; a comment also advertises a `folderIndent` probe that does not exist. Both in one round.
+
+**Spec corrections 1–3** at the end of `docs/superpowers/specs/2026-09-27-rail-tree-design.md` supersede the earlier sections: the folder shape, and `Show more`/headings being inside the roving contract.
+
+**Declined:** renaming `data-group`/`data-folder` (13 sites of churn for a confusion one comment settles).
