@@ -1,14 +1,15 @@
 // assistant's state script for the block driver (V-1): the full-page
-// assistant walked through its named states - empty, a reply with reasoning
-// plus a settled tool call, a cited follow-up, the model switcher recipe, the
-// rail, a fresh chat, the controller's restore-on-reload, and the affordances a
-// reader would try next: the row menu, the row shortcuts the menu advertises,
-// and ONE ACTION PROOF PER ROW OP - a rename committed through the inline
-// field, a pin through the row's own menu that moves that row to the top of
-// the list, an archive that unlists the row - then the collapsed rail and the
-// drawer it becomes below the shell's breakpoint, and finally the three
-// controls this page owns at its edges: the voice transcript path, the settings
-// menu's theme choice, and the scroll-to-bottom button.
+// assistant walked through its named states - empty, a reply whose tool call
+// settles, a cited follow-up, the model switcher recipe, the rail, a fresh
+// chat, the controller's restore-on-reload, and the affordances a reader would
+// try next: the row menu, the row shortcuts the menu advertises, and ONE ACTION
+// PROOF PER ROW OP - a rename committed through the inline field, a pin through
+// the row's own menu that moves that row to the top of the list, an archive that
+// unlists the row - then the collapsed rail and the drawer it becomes below the
+// shell's breakpoint, and finally the controls this page owns at its edges: the
+// voice transcript path, the settings menu's theme choice, the scroll-to-bottom
+// button, and the four suggestion ARCS, whose promise is that clicking a label
+// plays the turn that label names rather than the fallback script.
 // One page (the generated /kit/ rendering of the CDN form), so record/check are
 // the modes; there is no facade parity reference for this composition.
 //
@@ -99,6 +100,83 @@ const allRendered = (page, labels) =>
     ),
   ).then((each) => each.every(Boolean));
 
+/** The four openers, in the order the block offers them, and the ARC each one
+ *  starts.
+ *
+ *  A COPY, and it says so, for the same reason as GUIDE_CARDS below: the driver
+ *  is plain JS and cannot import the controller. The state that captures the
+ *  openers COMPARES the app's own array against this one, so a reworded label
+ *  goes red there rather than clicking nothing in the arc states. */
+const ARC_LABELS = [
+  'Summarize a document',
+  'Make a task list',
+  'Compare two options',
+  'Draft a short brief',
+];
+
+/** Wait for the thread to hold `count` messages AND for the turn to have LANDED.
+ *
+ *  Both halves are load-bearing, and the reason is that a click STREAMS its
+ *  answer: the reader's own message lands synchronously, so a count alone is
+ *  satisfied by the first chunk of a reply nobody has finished, and `loading`
+ *  alone is false both before the click and after the turn. Together they say
+ *  "this many turns, and the last one is done arriving", which is what every
+ *  capture below needs to be a fact rather than a snapshot mid-stream. */
+const waitForTurns = (page, count) =>
+  page.waitForFunction(
+    (n) => (document.getElementById('thread')?.messages ?? []).length >= n
+      && document.getElementById('prompt')?.loading === false,
+    count,
+    { timeout: 20000 },
+  );
+
+/** The shapes a thread's messages carry, read off the element the block bound.
+ *
+ *  COUNTS AND IDS, NEVER THE CONTENT. The words and the card data are approved
+ *  content that lives in the mock, so a probe that retyped them would assert its
+ *  own copy; what a label PROMISES is a shape - a task list of four rows, two
+ *  options, two form fields, a card revised rather than repeated - and that is
+ *  what comes back here. */
+const threadShape = (page) =>
+  page.evaluate(() => {
+    const messages = document.getElementById('thread')?.messages ?? [];
+    const rowsOf = (data) => data?.tasks ?? data?.options ?? [];
+    return messages.map((message) => {
+      const parts = message?.parts ?? [];
+      return {
+        role: message?.role ?? null,
+        textLength: parts
+          .filter((p) => p.type === 'text')
+          .map((p) => p.text ?? '')
+          .join('').length,
+        tools: parts
+          .filter((p) => p.type === 'tool')
+          .map((p) => ({ type: p.tool?.type ?? null, state: p.tool?.state ?? null })),
+        cards: parts
+          .filter((p) => p.type === 'card')
+          .map((p) => {
+            const data = p.envelope?.data ?? {};
+            const rows = rowsOf(data);
+            return {
+              type: p.envelope?.type ?? null,
+              id: p.envelope?.id ?? null,
+              rows: rows.length,
+              fields: data.properties ? Object.keys(data.properties).length : 0,
+              firstChecked: rows[0]?.checked === true,
+              firstNoted: typeof rows[0]?.description === 'string',
+            };
+          }),
+      };
+    });
+  });
+
+/** The cards on the LAST message of a captured thread, and the text it carries:
+ *  the two halves of "the turn this label promised arrived". */
+const lastTurn = (shape) => {
+  const last = shape[shape.length - 1] ?? {};
+  return { cards: last.cards ?? [], textLength: last.textLength ?? 0, tools: last.tools ?? [] };
+};
+
 /** The four openers, an empty thread's labels, and the arc's own label: all
  *  captured from the app in state 24 so the probes below compare against a set
  *  the page produced instead of a list retyped here. */
@@ -107,6 +185,16 @@ let arcLabel = '';
 let labelsMidArc = [];
 let labelsEndOfArc = [];
 let labelsFromCard = [];
+
+// The arcs' own captures, one entry per arc, written by that arc's state: what
+// its first turn carried, what its SECOND turn carried (the turn its own label
+// asked for), and the labels at each end. Captured in the act because the shapes
+// are what the labels promise and they cannot be reconstructed afterwards.
+const arcs = {};
+// The arc state 24/25 walks, kept beside `arcs` because those two states capture
+// it through a different route (the opener comes out of the empty set).
+let arcMidShape = [];
+let arcEndShape = [];
 
 // State 18's two facts, one gesture apart: what the scroll button was doing
 // while the thread was scrolled up, and whether the thread is a scroller at all.
@@ -138,9 +226,11 @@ export default {
     block: {
       path: '/generated/assistant/index.html',
       indexKey: 'kai:assistant:threads',
-      // localStorageStore titles from the latest message text at first save:
-      // the assistant's first reply (a recorded spike observation about the
-      // store, not this block).
+      // localStorageStore titles a conversation from the latest message text at
+      // its first save (a recorded spike observation about the store, not this
+      // block). The first conversation the run saves is state 2's typed prompt,
+      // answered by the generic script's first turn - whose text is shorter than
+      // the 60 characters `save()` slices to.
       expectedFirstTitle: 'Reading q3-metrics.pdf now.',
     },
     // The REACT form, mounted at the root of a throwaway Vite app by
@@ -181,8 +271,17 @@ export default {
     {
       name: '2-reply-tool',
       act: async (page) => {
-        await page.getByRole('button', { name: 'Summarize a document' }).click();
-        await settle(3500)(page);
+        // TYPED rather than clicked: a suggestion label IS an arc's key, so the
+        // click would open that arc's scripted conversation. This state is about
+        // the GENERIC script - a settled tool call, reasoning, and citations on
+        // the turn after - which is what a prompt matching no script gets, and it
+        // has to be the run's FIRST conversation or the row states below would be
+        // looking at a second one.
+        const box = page.locator('kai-prompt-input').getByRole('textbox').first();
+        await box.click();
+        await box.fill('Summarize the key numbers');
+        await box.press('Enter');
+        await waitForTurns(page, 2);
       },
       probes: {
         reading: (page) => page.getByText('Reading q3-metrics.pdf').count().then((n) => n > 0),
@@ -190,7 +289,7 @@ export default {
         crossLinksNotYet: (page) => page.getByRole('button', { name: 'Draft a short brief' }).isVisible().catch(() => false),
       },
       // WAS `suggestionsGone`, and the name lied as soon as follow-ups landed: it
-      // asks about ONE label, and that label belongs to the arc's END, so it
+      // asks about ONE label, and that label belongs to an arc's END, so it
       // passed while the arc's own next step was on screen. What it actually
       // pins is that a cross-link does not appear mid-conversation.
       expect: { reading: true, tool: true, crossLinksNotYet: false },
@@ -202,12 +301,15 @@ export default {
     {
       name: '3-cited-followup',
       act: async (page) => {
-        // Scoped to the composer: the rail's search box is a textbox too.
+        // The follow-up in the SAME conversation, because that is how a
+        // conversation stays one conversation: its script is chosen by the first
+        // thing the reader sent. Scoped to the composer, since the rail's search
+        // box is a textbox too.
         const box = page.locator('kai-prompt-input').getByRole('textbox').first();
         await box.click();
-        await box.fill('Summarize the key numbers');
+        await box.fill('and the retention numbers');
         await box.press('Enter');
-        await settle(3500)(page);
+        await waitForTurns(page, 4);
       },
       probes: {
         summary: (page) => page.getByText('revenue up 12%', { exact: false }).count().then((n) => n > 0),
@@ -788,6 +890,7 @@ export default {
       act: async (page) => {
         await page.getByRole('button', { name: 'New chat' }).click();
         await settle(400)(page);
+        emptyOpeners = await suggestionLabels(page);
       },
       probes: {
         // All four by their own accessible name - which is the card's own text,
@@ -807,10 +910,15 @@ export default {
         summariesPresent: (page) => page.locator('.guide-card-summary').evaluateAll(
           (els) => els.length === 4 && els.every((el) => (el.textContent ?? '').length > 20),
         ),
+        // AND THE FOUR OPENERS, in their order. This is the one place the labels
+        // are pinned: every arc state below clicks one of them, and a label that
+        // drifted would have those states click nothing (or, worse, a different
+        // arc) while still passing their own shape probes.
+        openersAsApproved: () => emptyOpeners.join(' | ') === ARC_LABELS.join(' | '),
       },
       expect: {
         card0: true, card1: true, card2: true, card3: true,
-        cardOrder: GUIDE_CARDS.join(' > '), summariesPresent: true,
+        cardOrder: GUIDE_CARDS.join(' > '), summariesPresent: true, openersAsApproved: true,
       },
     },
     ...GUIDE_CARDS.map((cardLabel, i) => ({
@@ -819,8 +927,11 @@ export default {
         await page.getByRole('button', { name: 'New chat' }).click();
         await settle(400)(page);
         guideRowsBefore = await page.locator('kai-conversation-item').count();
+        // A card click asks the question and STREAMS the transport's answer (the
+        // guide's own turn 1), which is why this waits for the turn rather than
+        // for a fixed slice of time.
         await page.getByRole('button', { name: cardLabel }).click();
-        await settle(400)(page);
+        await waitForTurns(page, 2);
         guideRowsAfterCard = await page.locator('kai-conversation-item').count();
         // CAPTURED, not restated: the guide's own sentences are approved content
         // that lives in the controller, and a probe that retyped them would be
@@ -849,7 +960,7 @@ export default {
         // with it instead of silently clicking nothing.
         const offered = await suggestionLabels(page);
         await page.getByRole('button', { name: offered[0], exact: true }).click();
-        await settle(4000)(page);
+        await waitForTurns(page, 4);
         guideFollowUp = await page.evaluate(() => {
           const thread = document.getElementById('thread');
           const messages = thread?.messages ?? [];
@@ -919,8 +1030,9 @@ export default {
         // silently clicking nothing.
         arcLabel = emptyOpeners[0];
         await page.getByRole('button', { name: arcLabel, exact: true }).click();
-        await settle(3500)(page);
+        await waitForTurns(page, 2);
         labelsMidArc = await suggestionLabels(page);
+        arcMidShape = await threadShape(page);
       },
       probes: {
         // An opener on a thread that has messages is a cross-link offered too
@@ -928,18 +1040,24 @@ export default {
         openersDontSurviveTheTurn: () => !labelsMidArc.some((label) => emptyOpeners.includes(label)),
         oneOwnStep: () => labelsMidArc.length === 1,
         rendered: (page) => allRendered(page, labelsMidArc),
+        // AND THE FIRST TURN IS THE ARC'S, not the fallback script's: the label
+        // said `Summarize a document`, so the answer starts by reading the
+        // document it was given rather than by narrating a different one.
+        toolSettled: () => lastTurn(arcMidShape).tools.some((t) => t.state === 'output-available'),
       },
-      expect: { openersDontSurviveTheTurn: true, oneOwnStep: true, rendered: true },
+      expect: { openersDontSurviveTheTurn: true, oneOwnStep: true, rendered: true, toolSettled: true },
     },
     {
       name: '25-labels-end-of-arc',
       act: async (page) => {
-        // Clicking the arc's own next step is what advances its turn index. The
-        // script for that turn is the arcs task's; what this state pins is that
-        // the labels move with the turn.
+        // Clicking the arc's own next step is what advances its turn index, so
+        // this is the click whose turn the label PROMISED. The arc cannot branch
+        // on what the card asks, which is why the turn after it says which
+        // answer it took.
         await page.getByRole('button', { name: labelsMidArc[0], exact: true }).click();
-        await settle(3500)(page);
+        await waitForTurns(page, 4);
         labelsEndOfArc = await suggestionLabels(page);
+        arcEndShape = await threadShape(page);
       },
       probes: {
         // The opener the arc STARTED from retires when it finishes, and at least
@@ -950,22 +1068,36 @@ export default {
           labelsEndOfArc.some((label) => emptyOpeners.includes(label) && label !== arcLabel),
         moreThanOne: () => labelsEndOfArc.length >= 2,
         rendered: (page) => allRendered(page, labelsEndOfArc),
+        // THE TURN THE LABEL PROMISED IS THE CARD, and one card, not a stack: a
+        // second turn that announced a NEW call would leave two cards on screen.
+        promisedCard: () => {
+          const cards = lastTurn(arcEndShape).cards;
+          return cards.length === 1 && cards[0].type === 'confirm';
+        },
+        // ...and the call behind it is SETTLED, not left spinning: the card
+        // answers the tool call, and the answer is the reader's to give.
+        cardCallSettled: () => lastTurn(arcEndShape).tools.some((t) => t.state === 'output-available'),
+        fourTurns: () => arcEndShape.length === 4,
       },
-      expect: { ownOpenerRetires: true, offersAnotherOpener: true, moreThanOne: true, rendered: true },
+      expect: {
+        ownOpenerRetires: true, offersAnotherOpener: true, moreThanOne: true, rendered: true,
+        promisedCard: true, cardCallSettled: true, fourTurns: true,
+      },
     },
     {
       name: '26-labels-from-a-card',
       act: async (page) => {
         // A card is the OTHER way a conversation starts, and the two do not go
-        // through the same act: a card SEEDS a pair of turns, a suggestion is
-        // submitted as a message. Both have to earn their labels.
+        // through the same act: a card ASKS its question and the transport
+        // answers it, while a suggestion is submitted as a message. Both have to
+        // earn their labels.
         await page.getByRole('button', { name: 'New chat' }).click();
         await settle(400)(page);
         // NOT `exact`: a card's accessible name is its title plus its summary,
         // which is what tells a reader which guide they want. The exact form
         // matches no card at all.
         await page.getByRole('button', { name: GUIDE_CARDS[0] }).click();
-        await settle(400)(page);
+        await waitForTurns(page, 2);
         labelsFromCard = await suggestionLabels(page);
       },
       probes: {
@@ -976,6 +1108,134 @@ export default {
         rendered: (page) => allRendered(page, labelsFromCard),
       },
       expect: { oneOwnStep: true, ownStepIsNotAnOpener: true, rendered: true },
+    },
+    {
+      name: '27-arc-task-list',
+      act: async (page) => {
+        await page.getByRole('button', { name: 'New chat' }).click();
+        await settle(400)(page);
+        // BY NAME, and the name is state 19's business: it compares the app's own
+        // four openers against ARC_LABELS, so this clicks a label the empty state
+        // was already shown to offer.
+        await page.getByRole('button', { name: ARC_LABELS[1], exact: true }).click();
+        await waitForTurns(page, 2);
+        arcs.taskList = { turn1: lastTurn(await threadShape(page)), labels: await suggestionLabels(page) };
+        // The arc's OWN next step, clicked rather than typed, so this is the
+        // click whose turn the label promised.
+        await page.getByRole('button', { name: arcs.taskList.labels[0], exact: true }).click();
+        await waitForTurns(page, 4);
+        arcs.taskList.turn2 = lastTurn(await threadShape(page));
+        arcs.taskList.endLabels = await suggestionLabels(page);
+      },
+      probes: {
+        // What the label promised for turn 1: the request becomes a CARD, four
+        // rows, the first one marked as the one being worked on (noted) rather
+        // than done (checked).
+        turn1IsATaskList: () => {
+          const cards = arcs.taskList?.turn1?.cards ?? [];
+          return cards.length === 1 && cards[0].type === 'tasks' && cards[0].rows === 4
+            && cards[0].firstNoted && !cards[0].firstChecked;
+        },
+        // ...and for turn 2: the SAME call id, whose first row is now done. The
+        // cards sit in different messages either way, so the id is what says this
+        // turn REVISED that call rather than announcing a second one - the
+        // failure this arc is about.
+        turn2RevisesTheSameCard: () => {
+          const before = arcs.taskList?.turn1?.cards?.[0];
+          const after = arcs.taskList?.turn2?.cards?.[0];
+          return !!before && !!after && after.id === before.id && after.firstChecked;
+        },
+        turn2CarriesOneCard: () => (arcs.taskList?.turn2?.cards ?? []).length === 1,
+        // One step offered mid-arc, and the cross-links at the end: the other
+        // three openers, its own no longer among them.
+        ownStepOffered: () => (arcs.taskList?.labels ?? []).length === 1,
+        crossLinksAtTheEnd: () => {
+          const end = arcs.taskList?.endLabels ?? [];
+          return end.length === 3 && end.every((l) => ARC_LABELS.includes(l) && l !== ARC_LABELS[1]);
+        },
+        rendered: (page) => allRendered(page, arcs.taskList?.endLabels ?? []),
+      },
+      expect: {
+        turn1IsATaskList: true, turn2RevisesTheSameCard: true, turn2CarriesOneCard: true,
+        ownStepOffered: true, crossLinksAtTheEnd: true, rendered: true,
+      },
+    },
+    {
+      name: '28-arc-compare',
+      act: async (page) => {
+        await page.getByRole('button', { name: 'New chat' }).click();
+        await settle(400)(page);
+        await page.getByRole('button', { name: ARC_LABELS[2], exact: true }).click();
+        await waitForTurns(page, 2);
+        arcs.compare = { turn1: lastTurn(await threadShape(page)), labels: await suggestionLabels(page) };
+        await page.getByRole('button', { name: arcs.compare.labels[0], exact: true }).click();
+        await waitForTurns(page, 4);
+        arcs.compare.turn2 = lastTurn(await threadShape(page));
+        arcs.compare.endLabels = await suggestionLabels(page);
+      },
+      probes: {
+        // Two options weighed, then a `choice` card offering both.
+        turn1IsAChoice: () => {
+          const cards = arcs.compare?.turn1?.cards ?? [];
+          return cards.length === 1 && cards[0].type === 'choice' && cards[0].rows === 2;
+        },
+        // AND ITS ANSWERS ARE THE LABELS offered next: one per option, so the
+        // reader clicks a pick rather than typing one. Compared against the
+        // card's own row count instead of a typed pair.
+        picksAreTheLabels: () => (arcs.compare?.labels ?? []).length === arcs.compare?.turn1?.cards?.[0]?.rows,
+        // The follow-up is PROSE and no card at all: the comparison lands in a
+        // sentence, which is the point of the arc.
+        turn2IsTheCommitment: () => (arcs.compare?.turn2?.cards ?? []).length === 0
+          && (arcs.compare?.turn2?.textLength ?? 0) > 0,
+        crossLinksAtTheEnd: () => {
+          const end = arcs.compare?.endLabels ?? [];
+          return end.length === 3 && end.every((l) => ARC_LABELS.includes(l) && l !== ARC_LABELS[2]);
+        },
+        rendered: (page) => allRendered(page, arcs.compare?.endLabels ?? []),
+      },
+      expect: {
+        turn1IsAChoice: true, picksAreTheLabels: true, turn2IsTheCommitment: true,
+        crossLinksAtTheEnd: true, rendered: true,
+      },
+    },
+    {
+      name: '29-arc-brief',
+      act: async (page) => {
+        await page.getByRole('button', { name: 'New chat' }).click();
+        await settle(400)(page);
+        await page.getByRole('button', { name: ARC_LABELS[3], exact: true }).click();
+        await waitForTurns(page, 2);
+        arcs.brief = { turn1: lastTurn(await threadShape(page)), labels: await suggestionLabels(page) };
+        await page.getByRole('button', { name: arcs.brief.labels[0], exact: true }).click();
+        await waitForTurns(page, 4);
+        arcs.brief.turn2 = lastTurn(await threadShape(page));
+        arcs.brief.endLabels = await suggestionLabels(page);
+      },
+      probes: {
+        // It asks for what it is missing: a `form` card with the two fields,
+        // rather than a paragraph saying that it needs them.
+        turn1IsAForm: () => {
+          const cards = arcs.brief?.turn1?.cards ?? [];
+          return cards.length === 1 && cards[0].type === 'form' && cards[0].fields === 2;
+        },
+        // One label, which is the reader's next step rather than a field's
+        // answer: a form's answers cannot be labels.
+        ownStepOffered: () => (arcs.brief?.labels ?? []).length === 1,
+        // Then it writes: prose, no second card. The form was never answered -
+        // an arc cannot branch - so the turn uses the two answers it assumed and
+        // names them, which is a shape this probe can see.
+        turn2IsTheBrief: () => (arcs.brief?.turn2?.cards ?? []).length === 0
+          && (arcs.brief?.turn2?.textLength ?? 0) > 0,
+        crossLinksAtTheEnd: () => {
+          const end = arcs.brief?.endLabels ?? [];
+          return end.length === 3 && end.every((l) => ARC_LABELS.includes(l) && l !== ARC_LABELS[3]);
+        },
+        rendered: (page) => allRendered(page, arcs.brief?.endLabels ?? []),
+      },
+      expect: {
+        turn1IsAForm: true, ownStepOffered: true, turn2IsTheBrief: true,
+        crossLinksAtTheEnd: true, rendered: true,
+      },
     },
   ],
 };

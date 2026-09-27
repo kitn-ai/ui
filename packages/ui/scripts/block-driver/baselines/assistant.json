@@ -192,7 +192,8 @@
             "card2": true,
             "card3": true,
             "cardOrder": "Get it running > Wire a model > Add voice > Send a card",
-            "summariesPresent": true
+            "summariesPresent": true,
+            "openersAsApproved": true
           },
           "styles": {}
         },
@@ -273,7 +274,8 @@
           "probes": {
             "openersDontSurviveTheTurn": true,
             "oneOwnStep": true,
-            "rendered": true
+            "rendered": true,
+            "toolSettled": true
           },
           "styles": {}
         },
@@ -283,7 +285,10 @@
             "ownOpenerRetires": true,
             "offersAnotherOpener": true,
             "moreThanOne": true,
-            "rendered": true
+            "rendered": true,
+            "promisedCard": true,
+            "cardCallSettled": true,
+            "fourTurns": true
           },
           "styles": {}
         },
@@ -292,6 +297,40 @@
           "probes": {
             "oneOwnStep": true,
             "ownStepIsNotAnOpener": true,
+            "rendered": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "27-arc-task-list",
+          "probes": {
+            "turn1IsATaskList": true,
+            "turn2RevisesTheSameCard": true,
+            "turn2CarriesOneCard": true,
+            "ownStepOffered": true,
+            "crossLinksAtTheEnd": true,
+            "rendered": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "28-arc-compare",
+          "probes": {
+            "turn1IsAChoice": true,
+            "picksAreTheLabels": true,
+            "turn2IsTheCommitment": true,
+            "crossLinksAtTheEnd": true,
+            "rendered": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "29-arc-brief",
+          "probes": {
+            "turn1IsAForm": true,
+            "ownStepOffered": true,
+            "turn2IsTheBrief": true,
+            "crossLinksAtTheEnd": true,
             "rendered": true
           },
           "styles": {}
@@ -490,7 +529,8 @@
             "card2": true,
             "card3": true,
             "cardOrder": "Get it running > Wire a model > Add voice > Send a card",
-            "summariesPresent": true
+            "summariesPresent": true,
+            "openersAsApproved": true
           },
           "styles": {}
         },
@@ -571,7 +611,8 @@
           "probes": {
             "openersDontSurviveTheTurn": true,
             "oneOwnStep": true,
-            "rendered": true
+            "rendered": true,
+            "toolSettled": true
           },
           "styles": {}
         },
@@ -581,7 +622,10 @@
             "ownOpenerRetires": true,
             "offersAnotherOpener": true,
             "moreThanOne": true,
-            "rendered": true
+            "rendered": true,
+            "promisedCard": true,
+            "cardCallSettled": true,
+            "fourTurns": true
           },
           "styles": {}
         },
@@ -590,6 +634,40 @@
           "probes": {
             "oneOwnStep": true,
             "ownStepIsNotAnOpener": true,
+            "rendered": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "27-arc-task-list",
+          "probes": {
+            "turn1IsATaskList": true,
+            "turn2RevisesTheSameCard": true,
+            "turn2CarriesOneCard": true,
+            "ownStepOffered": true,
+            "crossLinksAtTheEnd": true,
+            "rendered": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "28-arc-compare",
+          "probes": {
+            "turn1IsAChoice": true,
+            "picksAreTheLabels": true,
+            "turn2IsTheCommitment": true,
+            "crossLinksAtTheEnd": true,
+            "rendered": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "29-arc-brief",
+          "probes": {
+            "turn1IsAForm": true,
+            "ownStepOffered": true,
+            "turn2IsTheBrief": true,
+            "crossLinksAtTheEnd": true,
             "rendered": true
           },
           "styles": {}

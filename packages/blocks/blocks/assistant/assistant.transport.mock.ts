@@ -21,12 +21,11 @@ type Script = readonly MockTurn[];
 
 /** The four guides, each keyed by the question that opens it.
  *
- *  WHY THE OPENING IS HERE AS WELL AS IN THE CONTROLLER. The empty state's cards
- *  seed their opening exchange directly so a click shows an answer immediately.
- *  A reader who TYPES the same question instead gets it from turn 1 of this
- *  script, so the two paths must agree - and the guard test beside this block
- *  compares them rather than trusting that they do. The controller's copy is the
- *  seed; this one is what the transport answers with. */
+ *  THIS IS THE ONE COPY OF A GUIDE'S OPENING SENTENCE. A card click seeds the
+ *  question and then asks the transport for the answer, exactly as a typed
+ *  question does, so turn 1 below is what both paths show. The card's own map of
+ *  questions is the key set this one has to match, which is what the guard test
+ *  beside this block compares. */
 const GUIDE_SCRIPTS: Record<string, Script> = {
   'how do i get this talking to my own backend?': [
     {
@@ -224,11 +223,157 @@ const GUIDE_SCRIPTS: Record<string, Script> = {
   ],
 };
 
+/** The task list's call id, spelled once because two turns name it: the second
+ *  turn REVISES the first turn's call rather than announcing a new one, which is
+ *  what makes a card that writes back to its own tool call (see the turn below). */
+const TASKS_CALL_ID = 'call_kai-mock-tasklist';
+
+/** The four suggestion arcs, each keyed by the label a reader clicks.
+ *
+ *  TWO TURNS EACH, AND THAT COUNT IS LOAD-BEARING: the controller indexes its
+ *  table of next-step labels by how many answers a thread already has, so a
+ *  third turn here would play with no labels offered over it. The arc cannot
+ *  branch on what a card asks - the reader's answer is one of the offered labels,
+ *  and the next turn plays either way - so a turn that follows a card's question
+ *  says which answer it took.
+ *
+ *  SEPARATE FROM THE GUIDES because the keys are a different vocabulary: a guide
+ *  is keyed by the question its card asks, an arc by the one-line label the
+ *  reader clicks, which is the thread's first user turn. `reply` reads both. */
+const ARC_SCRIPTS: Record<string, Script> = {
+  'summarize a document': [
+    {
+      // The call the answer comes out of, announced before the answer itself:
+      // `read_document` is settled by the host's tool output below, so the turn
+      // ends with a real result rather than a spinner.
+      toolCalls: [{ name: 'read_document', arguments: { name: 'q3-metrics.pdf' } }],
+      text:
+        'Reading it now.\n\n' +
+        '- Revenue up 12%\n' +
+        '- Churn flat\n' +
+        '- The enterprise tier carrying the quarter',
+    },
+    {
+      // The card IS the turn: permission is the next step, and the confirm card
+      // is how it is asked for. The call settles as `awaiting_user` (the
+      // controller's card path), so nothing here spins waiting for a click the
+      // block cannot receive.
+      toolCalls: [
+        {
+          name: 'kai_confirm',
+          arguments: {
+            heading: 'Post this summary to #metrics?',
+            actions: [
+              { id: 'post', label: 'Post', default: true },
+              { id: 'edit', label: 'Edit first' },
+            ],
+          },
+        },
+      ],
+    },
+  ],
+  'make a task list': [
+    {
+      text: 'Broke it into four.',
+      toolCalls: [
+        {
+          name: 'kai_tasks',
+          id: TASKS_CALL_ID,
+          arguments: {
+            heading: 'Migration plan',
+            tasks: [
+              { id: 'inventory', label: 'Inventory the existing tables', description: 'In progress' },
+              { id: 'script', label: 'Write the migration script' },
+              { id: 'dry-run', label: 'Run it against a copy' },
+              { id: 'cutover', label: 'Cut over and verify' },
+            ],
+          },
+        },
+      ],
+    },
+    {
+      // The SAME call id, patched: the revision names the call it revises rather
+      // than announcing a new one, and the first row is done. The card parts sit
+      // in different messages - one per turn - so what the shared id buys is that
+      // this IS that card (see `upsertCardPart`, keyed on the envelope id) rather
+      // than a second one to anything that keeps cards by id.
+      toolCalls: [
+        {
+          name: 'kai_tasks',
+          id: TASKS_CALL_ID,
+          arguments: {
+            heading: 'Migration plan',
+            tasks: [
+              { id: 'inventory', label: 'Inventory the existing tables', checked: true },
+              { id: 'script', label: 'Write the migration script' },
+              { id: 'dry-run', label: 'Run it against a copy' },
+              { id: 'cutover', label: 'Cut over and verify' },
+            ],
+          },
+        },
+      ],
+    },
+  ],
+  'compare two options': [
+    {
+      text:
+        'Postgres costs you a service and buys concurrency. One server to run, and many writers at once.\n' +
+        'SQLite costs you nothing and serializes writes. No service, and one writer at a time.',
+      toolCalls: [
+        {
+          name: 'kai_choice',
+          arguments: {
+            options: [
+              { id: 'postgres', label: 'Postgres' },
+              { id: 'sqlite', label: 'SQLite' },
+            ],
+          },
+        },
+      ],
+    },
+    {
+      // ONE LINE, AND IT SAYS WHICH PICK IT ASSUMED: the arc cannot branch, so
+      // the label offered above ('Use Postgres' or 'Use SQLite') lands here
+      // either way and the turn that commits has to name the pick it took.
+      text: 'Taking the Postgres pick: concurrency is the part you cannot add later.',
+    },
+  ],
+  'draft a short brief': [
+    {
+      text: 'Two things I do not have: who this is for, and when.',
+      toolCalls: [
+        {
+          name: 'kai_form',
+          // A form card's data IS the JSON Schema of its fields.
+          arguments: {
+            type: 'object',
+            required: ['audience', 'when'],
+            properties: {
+              audience: { type: 'string', title: 'Who is this for' },
+              when: { type: 'string', title: 'When' },
+            },
+          },
+        },
+      ],
+    },
+    {
+      // The form above was never answered - a scripted arc cannot wait - so the
+      // brief uses the two answers it assumes and names them in its first line.
+      text:
+        'Assuming the launch team and a Friday send:\n\n' +
+        'The launch team gets a new metrics view this Friday. It replaces the sheet the team ' +
+        'keeps by hand, so the numbers come from one place. Nothing else changes for readers, ' +
+        'and no data moves. If Friday slips, the sheet stays the source of truth until the ' +
+        'view is live.',
+    },
+  ],
+};
+
 /** The generic script every OTHER conversation falls back to: one rich turn set
  *  (reasoning, a settled tool call, citations) so the block demos what the
- *  components render rather than two plain text bubbles. The suggestion arcs are
- *  their own task; until they land, a label plays this. Edit it freely - it is
- *  data, not wiring. */
+ *  components render rather than two plain text bubbles. A thread that matches
+ *  no guide and no arc plays this - a typed prompt, or a conversation carried on
+ *  past the end of its script. Edit it freely - it is data, not wiring. */
 export const MOCK_SCRIPT = [
   {
     reasoning:
@@ -317,10 +462,20 @@ const openingOf = (messages: readonly ChatMessage[]): string => {
 
 /** How many assistant turns a thread already has: the index of the turn the
  *  reader is waiting for. Read off the MESSAGES rather than kept here, so a
- *  reloaded thread, a restored conversation and a card's seeded opening all
- *  arrive at the same turn the thread is actually on. */
+ *  reloaded thread, a restored conversation and a card's asked question all
+ *  arrive at the same turn the thread is actually on.
+ *
+ *  A TURN HAS PARTS, AND THE EMPTY ONE IS NOT A TURN. The host builds its
+ *  assistant stream - which appends the message it is about to fill - BEFORE it
+ *  calls `reply`, so the thread that arrives here ends with an empty assistant
+ *  message for EVERY turn, including the first. Counting it would answer every
+ *  question with the NEXT turn's script: the first click would play the second
+ *  turn and the labels under it (which the controller indexes by turns that
+ *  LANDED) would name a turn nobody had seen. `parts.length` is that distinction,
+ *  and it is the only one the message carries: the host's placeholder has none,
+ *  and every scripted turn emits at least one. */
 const turnsSoFar = (messages: readonly ChatMessage[]): number =>
-  messages.filter((message) => message.role === 'assistant').length;
+  messages.filter((message) => message.role === 'assistant' && (message.parts?.length ?? 0) > 0).length;
 
 /** One responder per conversation, and how far its script has run.
  *
@@ -348,13 +503,14 @@ const scripted = (key: string, script: Script, wantTurn: number): StreamSource =
 };
 
 export const transport: AssistantTransport = {
-  // The thread decides which script answers and which turn of it: the four
-  // guides are keyed by their opening question, and anything else plays the
-  // generic script above. A real backend reads the messages for a different
-  // reason (the conversation IS the request) - the shape of the call is the same.
+  // The thread decides which script answers and which turn of it: a guide card's
+  // question and an arc's label are both the thread's first user turn, so one
+  // lookup covers both, and anything else plays the generic script above. A real
+  // backend reads the messages for a different reason (the conversation IS the
+  // request) - the shape of the call is the same.
   reply(messages: ChatMessage[] = []): StreamSource {
     const key = openingOf(messages);
-    const script = GUIDE_SCRIPTS[key];
+    const script = GUIDE_SCRIPTS[key] ?? ARC_SCRIPTS[key];
     return script ? scripted(key, script, turnsSoFar(messages)) : respond();
   },
   // The wire only ever ANNOUNCES a tool call - running it and answering is the

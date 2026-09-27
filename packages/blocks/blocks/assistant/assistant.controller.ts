@@ -103,14 +103,13 @@ export interface GuideCard {
   summary: string;
 }
 
-/** What a card click puts in the thread, as a pair of turns. The question is
- *  the developer's own; `opening` is the assistant's first answer, verbatim
- *  from the reviewed storyboard. The later turns of each guide are not here
- *  yet - the scripted transport carries them - so this is the OPENING exchange
- *  and nothing more. */
+/** What a card click puts in the thread: the question the card ASKS. The answer
+ *  is not here, and deliberately - a click sends the question through the same
+ *  reply path a typed message takes, so the guide's opening sentence exists once,
+ *  in the transport that scripts it. A card that carried its own copy of the
+ *  answer would be a second place for that sentence to drift. */
 interface Guide extends GuideCard {
   question: string;
-  opening: string;
 }
 
 const GUIDES: readonly Guide[] = [
@@ -119,60 +118,24 @@ const GUIDES: readonly Guide[] = [
     title: 'Get it running',
     summary: 'Replace the scripted mock with your backend by swapping one file.',
     question: 'How do I get this talking to my own backend?',
-    opening:
-      'One file decides where replies come from: `assistant.transport.ts`. The ' +
-      'controller imports that name and nothing else, the three modes ship as three ' +
-      'versions of it, and the contract that type must satisfy is two methods, not a ' +
-      'file you add:\n\n' +
-      '```ts\n' +
-      "import type { ChatMessage } from '@kitn.ai/ui/state';\n" +
-      "import type { StreamSource } from '@kitn.ai/ui/wire';\n" +
-      '\n' +
-      'export interface AssistantTransport {\n' +
-      '  reply(messages: ChatMessage[]): Promise<StreamSource> | StreamSource;\n' +
-      '  toolOutput(toolType: string): Record<string, unknown> | undefined;\n' +
-      '}\n' +
-      '```',
   },
   {
     id: 'wire-a-model',
     title: 'Wire a model',
     summary: 'Point the thread at OpenRouter, Anthropic, or your own route.',
     question: 'Which provider does this use? I want to point it at OpenRouter.',
-    opening:
-      'None, and that is deliberate: the kit parses provider streams and never calls ' +
-      'one. Your route holds the key, sends it a thread, and streams back what the ' +
-      'provider says. The four functions you need come from one entry:\n\n' +
-      '```ts\n' +
-      'import {\n' +
-      '  readOpenAIStream, readAnthropicStream,\n' +
-      '  toOpenAIMessages, toAnthropicMessages,\n' +
-      "} from '@kitn.ai/ui/wire';\n" +
-      '```',
   },
   {
     id: 'add-voice',
     title: 'Add voice',
     summary: 'Record and transcribe speech, and the events that drive your UI.',
     question: 'Can users talk to this instead of typing?',
-    opening:
-      '`<kai-voice-input>` records and transcribes. Dropped on a page it uses the ' +
-      "browser's own speech recognition, which Chrome and Safari have and Firefox " +
-      'does not:\n\n' +
-      '```html\n' +
-      '<kai-voice-input recognition-lang="en-US" interim></kai-voice-input>\n' +
-      '```',
   },
   {
     id: 'send-a-card',
     title: 'Send a card',
     summary: 'Let a tool return a card the thread renders and reads back.',
     question: 'Can the model send a form instead of another paragraph?',
-    opening:
-      'Name a tool with the `kai_` prefix and the call renders as a card: ' +
-      '`kai_confirm` renders the confirm card, `kai_tasks` the task list. The part ' +
-      "after the prefix is the card type, and the call's arguments ARE the card's " +
-      'data - nothing is renamed or defaulted.',
   },
 ];
 
@@ -200,7 +163,11 @@ function projectGuides(): GuideCard[] {
  *
  *  A card's own answers are labels here too (`Use Postgres`), which is how a
  *  scripted conversation handles the fact that it cannot branch: the card asks,
- *  the answer is offered, and the next turn plays either way. */
+ *  the answer is offered, and the next turn plays either way.
+ *
+ *  AN ARC'S FIRST LABEL IS THE READER'S INTENT, never the question the arc's next
+ *  turn leaves unanswered: `Post it to #metrics` is what the confirm card is for,
+ *  and `Use what I typed` is the one line a form can echo back. */
 const NEXT_LINE: Record<string, readonly (readonly string[])[]> = {
   // the guides, opened from a card
   'How do I get this talking to my own backend?': [
@@ -227,8 +194,8 @@ const NEXT_LINE: Record<string, readonly (readonly string[])[]> = {
   ],
   // the suggestions, opened by clicking one
   'Summarize a document': [
-    ['What changed since Q2?'],
-    ['Post it to #metrics', 'Make a task list', 'Compare two options'],
+    ['Post it to #metrics'],
+    ['Make a task list', 'Compare two options', 'Draft a short brief'],
   ],
   'Make a task list': [
     ['Mark the first one done'],
@@ -239,7 +206,7 @@ const NEXT_LINE: Record<string, readonly (readonly string[])[]> = {
     ['Summarize a document', 'Make a task list', 'Draft a short brief'],
   ],
   'Draft a short brief': [
-    ['Why do you need those?'],
+    ['Use what I typed'],
     ['Summarize a document', 'Make a task list', 'Compare two options'],
   ],
 };
@@ -789,7 +756,7 @@ export interface AssistantActions {
   search(event: CustomEvent<{ query: string }>): void;
   /** `@kai-click` on an empty-state card. The card carries its guide id, which
    *  is the only thing this needs to know. */
-  openGuide(event: Event): void;
+  openGuide(event: Event): Promise<void>;
   /** `@kai-submit` on the prompt input. */
   submit(event: CustomEvent<{ value: string; attachments?: unknown[] }>): Promise<void>;
   /** `@kai-value-change` on the prompt input: the composer's text mirror. */
@@ -1049,6 +1016,76 @@ export function createController(deps: AssistantDeps): AssistantController {
     patch({ promptValue: `${current}${gap}${text}` });
   }
 
+  /**
+   * One turn's reply, from the transport to the thread: the reader folds the
+   * transport's frames in, every announced call is answered, and the labels
+   * belong to the turn that LANDED.
+   *
+   * ONE PIPELINE FOR BOTH WAYS IN. `submit` sends a message the reader wrote and
+   * `openGuide` asks the question a card names; the only two differences between
+   * them are where their user turn came from and whether the turn is SAVED
+   * (`save`), so the answer path itself exists once. The labels are patched here
+   * rather than in `setMessages` because that runs on every streamed chunk, where
+   * the trailing assistant message is one the reader has not finished reading.
+   * An aborted turn earns nothing: a scripted next step is not an answer to a
+   * failure.
+   */
+  async function replyToTurn(save: boolean): Promise<void> {
+    const stream = createAssistantStream((update) => setMessages(update(state.messages)));
+    // Set once the turn has landed, so the `finally` can tell a finished turn
+    // from an aborted one without reading the error.
+    let landed = false;
+    try {
+      // The whole thread, including the turn just added: the scripted mock
+      // ignores it, and a real backend has to be sent it.
+      await readOpenAIStream(await transport.reply(state.messages), stream);
+      for (const part of state.messages.find((m) => m.id === stream.id)?.parts ?? []) {
+        if (part.type !== 'tool' || part.tool.state !== 'input-available' || !part.tool.toolCallId) continue;
+        // The wire announces a call; answering it is the host's side of the
+        // seam, so which mode is installed decides what happens here. The
+        // scripted mock settles it, a real backend leaves it to the server's
+        // tool loop, and the composition-only mode throws by name.
+        const output = transport.toolOutput(part.tool.type);
+        // A CARD TOOL IS NOT A TOOL RESULT: `kai_<type>` names a card, and the
+        // envelope comes from the call's own arguments. `cardFromToolCall` is the
+        // kit's one implementation of that mapping, imported rather than restated,
+        // and it returns null for a name that is not a card tool. It is
+        // deliberately the ONLY card path here, because a card built this way
+        // replaces itself in place when the same call is revised: `upsertCardPart`
+        // keys on the envelope id, which is the provider's own call id.
+        const card = cardFromToolCall(part.tool.type, part.tool.input, {
+          id: part.tool.toolCallId ?? part.tool.type,
+        });
+        if (card && part.tool.toolCallId) {
+          stream.addCard(card);
+          // The call PRODUCED the card, so it settles - what is still pending
+          // is the USER's answer, and that is recorded in the output rather
+          // than in the state: the kit's own example for this path carries
+          // `{ status: 'awaiting_user' }`, and `output` is where a value the
+          // app reads belongs. The tool row stays a real, settled call.
+          stream.upsertTool(part.tool.toolCallId, {
+            state: 'output-available',
+            output: { status: 'awaiting_user', card: card.id },
+          });
+          continue;
+        }
+        if (output) stream.upsertTool(part.tool.toolCallId, { state: 'output-available', output });
+      }
+      stream.done();
+      setMessages(
+        state.messages.map((m) => (m.id === stream.id ? { ...m, actions: [...ASSISTANT_ACTIONS] } : m)),
+      );
+      landed = true;
+      // Mints the id on the first turn, saves, marks read while seen. A turn a
+      // card asked for writes nothing: the rail is the reader's own threads.
+      if (save) await controller.saveTurn(state.messages);
+    } catch (err) {
+      stream.abort(err instanceof Error ? err.message : String(err));
+    } finally {
+      patch({ loading: false, suggestions: landed ? suggestionsFor(state.messages, false) : undefined });
+    }
+  }
+
   const actions: AssistantActions = {
     modelChange(event) {      // The scripted mock ignores the selection (it is a script); a real
       // transport encodes the thread for a backend that routes on the id its
@@ -1211,15 +1248,18 @@ export function createController(deps: AssistantDeps): AssistantController {
       }
     },
 
-    // A CARD CLICK SEEDS THE THREAD, AND DOES NOT SAVE. The two turns land in
-    // `messages` the way a submitted turn does, so the thread renders them
-    // through the same path; nothing is written to the store, so the rail is
-    // untouched. That is the whole difference from the boot-time seeding this
-    // block tried and reverted: a seed written at BOOT becomes the rail's first
-    // row and takes the subject away from whatever state is running, while a
-    // seed written by a CLICK is one the reader asked for. The row appears when
-    // they send their own next message, exactly as it does for anything else.
-    openGuide(event) {
+    // A CARD CLICK ASKS THE QUESTION AND TAKES THE ANSWER FROM THE TRANSPORT.
+    // The turn lands in `messages` the way a submitted one does, so the thread
+    // renders it through the same path - and the guide's opening sentence comes
+    // from the one place that has it, turn 1 of the guide's own script, rather
+    // than from a copy carried here that had to be kept in step by hand. What a
+    // click does NOT do is SAVE (see `replyToTurn`): that is the whole
+    // difference from the boot-time seeding this block tried and reverted, where
+    // a seed written at BOOT became the rail's first row and took the subject
+    // away from whatever state was running. A question asked by a CLICK is one
+    // the reader asked; the row appears when they send their own next message,
+    // exactly as it does for anything else.
+    async openGuide(event) {
       const id = guideTarget(event);
       const guide = GUIDES.find((g) => g.id === id);
       if (!guide || state.loading) return;
@@ -1229,13 +1269,9 @@ export function createController(deps: AssistantDeps): AssistantController {
         actions: [...USER_ACTIONS],
         parts: [{ type: 'text', text: guide.question }],
       };
-      const reply: ChatMessage = {
-        id: crypto.randomUUID(),
-        role: 'assistant',
-        actions: [...ASSISTANT_ACTIONS],
-        parts: [{ type: 'text', text: guide.opening }],
-      };
-      setMessages([...state.messages, userMessage, reply]);
+      setMessages([...state.messages, userMessage]);
+      patch({ loading: true });
+      await replyToTurn(false);
     },
 
     async submit(event) {
@@ -1270,65 +1306,7 @@ export function createController(deps: AssistantDeps): AssistantController {
       };
       setMessages([...state.messages, userMessage]);
       patch({ loading: true });
-
-      const stream = createAssistantStream((update) => setMessages(update(state.messages)));
-      // Set once the turn has landed, so the `finally` can tell a finished turn
-      // from an aborted one without reading the error.
-      let landed = false;
-      try {
-        // The whole thread, including the turn just added: the scripted mock
-        // ignores it, and a real backend has to be sent it.
-        await readOpenAIStream(await transport.reply(state.messages), stream);
-        for (const part of state.messages.find((m) => m.id === stream.id)?.parts ?? []) {
-          if (part.type !== 'tool' || part.tool.state !== 'input-available' || !part.tool.toolCallId) continue;
-          // The wire announces a call; answering it is the host's side of the
-          // seam, so which mode is installed decides what happens here. The
-          // scripted mock settles it, a real backend leaves it to the server's
-          // tool loop, and the composition-only mode throws by name.
-          const output = transport.toolOutput(part.tool.type);
-          // A CARD TOOL IS NOT A TOOL RESULT: `kai_<type>` names a card, and the
-          // envelope comes from the call's own arguments. `cardFromToolCall` is the
-          // kit's one implementation of that mapping, imported rather than restated,
-          // and it returns null for a name that is not a card tool. It is
-          // deliberately the ONLY card path here, because a card built this way
-          // replaces itself in place when the same call is revised: `upsertCardPart`
-          // keys on the envelope id, which is the provider's own call id.
-          const card = cardFromToolCall(part.tool.type, part.tool.input, {
-            id: part.tool.toolCallId ?? part.tool.type,
-          });
-          if (card && part.tool.toolCallId) {
-            stream.addCard(card);
-            // The call PRODUCED the card, so it settles - what is still pending
-            // is the USER's answer, and that is recorded in the output rather
-            // than in the state: the kit's own example for this path carries
-            // `{ status: 'awaiting_user' }`, and `output` is where a value the
-            // app reads belongs. The tool row stays a real, settled call.
-            stream.upsertTool(part.tool.toolCallId, {
-              state: 'output-available',
-              output: { status: 'awaiting_user', card: card.id },
-            });
-            continue;
-          }
-          if (output) stream.upsertTool(part.tool.toolCallId, { state: 'output-available', output });
-        }
-        stream.done();
-        setMessages(
-          state.messages.map((m) => (m.id === stream.id ? { ...m, actions: [...ASSISTANT_ACTIONS] } : m)),
-        );
-        landed = true;
-        // Mints the id on the first turn, saves, marks read while seen.
-        await controller.saveTurn(state.messages);
-      } catch (err) {
-        stream.abort(err instanceof Error ? err.message : String(err));
-      } finally {
-        // The labels belong to the turn that just LANDED, so they are recomputed
-        // with the flag that says it has — and only then, which is why this is
-        // here rather than in `setMessages`: that runs on every streamed chunk,
-        // where the trailing assistant message is one the reader has not
-        // finished reading. An aborted turn earns nothing, because a scripted
-        // next step is not an answer to a failure.
-        patch({ loading: false, suggestions: landed ? suggestionsFor(state.messages, false) : undefined });
-      }
+      await replyToTurn(true);
     },
 
     async boot() {
