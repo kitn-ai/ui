@@ -302,6 +302,78 @@ test('item mode: an inline editor in a row default slot keeps its SPACE, Enter a
   el.remove();
 });
 
+// ── the trailing edge (showTrailing) ───────────────────────────────────────
+//
+// Every DATA row paints something on its trailing edge by construction: the
+// summary's own `trailing` field, else an auto relative time derived from its
+// timestamps. `show-trailing="false"` is the element spelling of "nothing
+// there". Default ON, the row's existing behaviour, the same default-true flag
+// shape `searchable` above it uses.
+
+type TrailEl = ConvEl & { showTrailing?: boolean };
+
+/** Every shape `relativeTimeShort` can return for a real timestamp. */
+const derivedTime = /just now|\d+m ago|\d+h ago|\d+d ago/;
+
+const trailingNodes = (el: TrailEl) => [...el.shadowRoot!.querySelectorAll('[part="trailing"]')];
+
+/** An unfiled conversation, so the UNGROUPED producer gets a row of its own. */
+const unfiled: ConversationSummary = {
+  id: 'c2', title: 'Unfiled chat', messageCount: 1,
+  updatedAt: new Date(Date.now() - 3600_000).toISOString(), lastMessageAt: '',
+};
+
+test('the trailing edge is there by default, on both row producers', async () => {
+  const el = mountConversations() as TrailEl;
+  el.conversations = [conversations[0], unfiled];
+  await Promise.resolve();
+
+  expect(el.showTrailing, 'absent means ON').toBe(true);
+  expect(trailingNodes(el)).toHaveLength(2);
+  for (const node of trailingNodes(el)) expect(node.textContent).toMatch(derivedTime);
+  el.remove();
+});
+
+test('show-trailing="false" in markup leaves both row producers with no trailing edge', async () => {
+  document.body.innerHTML = '<kai-conversations show-trailing="false"></kai-conversations>';
+  const el = document.body.querySelector('kai-conversations') as TrailEl;
+  el.groups = groups;
+  el.conversations = [conversations[0], unfiled];
+  await Promise.resolve();
+
+  // Non-vacuity: both rows rendered, so an empty edge means the option worked
+  // rather than the list having failed to render.
+  const rowIds = [...el.shadowRoot!.querySelectorAll('[data-conversation-id]')]
+    .map((n) => n.getAttribute('data-conversation-id'));
+  expect(rowIds).toEqual(['c1', 'c2']);
+  expect(trailingNodes(el)).toHaveLength(0);
+  for (const id of rowIds) {
+    expect(el.shadowRoot!.querySelector(`[data-conversation-id="${id}"]`)!.textContent).not.toMatch(derivedTime);
+  }
+  document.body.innerHTML = '';
+});
+
+test('a bare `show-trailing` attribute keeps the edge, and `el.showTrailing = false` takes it away', async () => {
+  document.body.innerHTML = '<kai-conversations show-trailing></kai-conversations>';
+  const bare = document.body.querySelector('kai-conversations') as TrailEl;
+  bare.groups = groups;
+  bare.conversations = conversations;
+  await Promise.resolve();
+  expect(trailingNodes(bare), 'a bare attribute means ON').toHaveLength(1);
+
+  const el = mountConversations() as TrailEl;
+  await Promise.resolve();
+  expect(trailingNodes(el)).toHaveLength(1);
+  el.showTrailing = false;
+  await Promise.resolve();
+  expect(trailingNodes(el)).toHaveLength(0);
+  // The property reads back what was set.
+  expect(el.showTrailing).toBe(false);
+
+  el.remove();
+  document.body.innerHTML = '';
+});
+
 test('item mode: the row body still activates and roves (the guard is not a blanket mute)', async () => {
   const { el, items, selected } = mountItemModeWithEditors(['x1', 'x2']);
   await tick();

@@ -40,6 +40,14 @@ interface Props extends Record<string, unknown> {
   // their own `density` attribute.
   /** Row density: `default`, `compact` (same as the `compact` flag), or `panel` (the widget-panel row box). */
   density?: ConversationRowDensity;
+  // Default-true flag convention, as `<kai-prompt-input attach>` and `searchable`
+  // below: `show-trailing`, `show-trailing="true"` and `el.showTrailing = true` are
+  // all ON, and only `"false"`/`false` turn it off. What the edge holds is the
+  // summary's own `trailing` field, else the relative time derived from its
+  // timestamps. It reaches the DATA rows, so item mode is unaffected: a slotted
+  // `<kai-conversation-item>` renders its own regions and derives no time.
+  /** Paint each data row's trailing edge. Default `true`; `show-trailing="false"` leaves the edge empty. */
+  showTrailing?: boolean;
   // Default-true flag convention, as `<kai-prompt-input attach>`: `<kai-conversations
   // searchable>` and omitting it are both ON. Hidden, the `focus()`/`clear()` methods
   // reach no input and `kai-search` never fires.
@@ -96,6 +104,7 @@ defineWebComponent<Props, Events>('kai-conversations', {
   defaultCollapsed: undefined,
   compact: undefined,
   density: undefined,
+  showTrailing: true,
   searchable: true,
 }, (props, { dispatch, element, expose, flag }) => {
   // Read declarative <kai-conversation> children from light DOM.
@@ -203,6 +212,7 @@ defineWebComponent<Props, Events>('kai-conversations', {
         onToggleSidebar={() => { dispatch('kai-toggle-sidebar'); setCollapsedTo(true); }}
         compact={flag('compact')}
         density={props.density as ConversationRowDensity | undefined}
+        showTrailing={flag('showTrailing')}
         searchable={flag('searchable')}
         onSearchChange={(query) => dispatch('kai-search', { query })}
         controllerRef={(c) => (controller = c)}
