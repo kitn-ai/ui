@@ -139,6 +139,29 @@ kai-button.menu-delete::part(button) { color: var(--color-destructive-text); }
 kai-thread { flex: 1; min-height: 0; display: block; }
 kai-prompt-input { display: block; padding: 0 1rem 1rem; max-width: 48rem; width: 100%; margin: 0 auto; box-sizing: border-box; }
 
+/* The block's own line under the composer. The kit's footer row paints its
+ * content centred, muted and text-xs, and there is no slot to inherit that
+ * from here (the composer's regions are all inside its card), so the same
+ * register is spelled by hand: max-width, width and the inline padding are the
+ * composer's own numbers, so the two line up as one column; text-align,
+ * font-size, line-height and the muted colour are the footer row's. Muted is
+ * `currentColor` at 65% for the reason every muted line in this block is - the
+ * kit's `--color-muted-foreground` token lives inside an element's shadow root
+ * and this row is light DOM. DELETE this rule with the paragraph it styles. */
+.composer-note {
+  margin: 0 auto;
+  max-width: 48rem;
+  width: 100%;
+  box-sizing: border-box;
+  /* 0.75rem is the kit footer row's own bottom padding (pb-3), after the 1rem
+   * the composer's box already leaves between the card and this line. */
+  padding: 0 1rem 0.75rem;
+  text-align: center;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  color: color-mix(in srgb, currentColor 65%, transparent);
+}
+
 /* The voice status strip, in the composer's own input-top region (inside the
  * card, above the editor). It carries what the kit's mic button cannot: that a
  * recording is running, or that a session failed, or that audio was captured

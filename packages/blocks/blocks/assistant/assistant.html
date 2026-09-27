@@ -456,6 +456,19 @@
             @kai-audio-captured="voiceCaptured"
           ></kai-voice-input>
         </kai-prompt-input>
+
+        <!-- THE LINE UNDER THE COMPOSER, and it is YOURS: put your own wording
+             here, link your own policy page, or delete the row entirely.
+             Nothing binds to it and nothing else on the page reads it, which
+             is what makes it safe to remove.
+
+             It is markup rather than a projected slot because in THIS
+             composition there is no slot to project into: every named region
+             the composer opens is inside its own card (the strip above the
+             editor, the toolbar at its end), and a row below the whole card is
+             the page's own layout by the kit's contract. So the register is
+             matched in the stylesheet instead - see .composer-note. -->
+        <p class="composer-note">The assistant is AI and can make mistakes. Please double-check responses.</p>
       </main>
     </kai-workspace>
   </body>
