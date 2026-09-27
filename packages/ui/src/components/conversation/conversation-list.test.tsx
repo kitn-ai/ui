@@ -572,6 +572,38 @@ describe('the built-in header tooltip (New chat)', () => {
   });
 });
 
+/**
+ * The list forwards the row's trailing-edge option, through BOTH row producers:
+ * the ungrouped loop and `GroupSection` build their own `<ConversationItem>`,
+ * so a prop that only reached one of them would look like it worked on the
+ * fixture everyone tests and fail on the consumer's grouped rail.
+ */
+describe('showTrailing reaches every data row', () => {
+  const GROUPS = [{ id: 'g1', name: 'Projects', sortOrder: 0, createdAt: '2026-08-01T00:00:00Z' }];
+  const groups = () => GROUPS.map((g) => ({ ...g }));
+
+  it('showTrailing={false} leaves both the ungrouped and the grouped rows with no trailing edge', () => {
+    const grouped = render(() => (
+      <ConversationList
+        {...baseProps}
+        groups={groups()}
+        conversations={[{ ...conv('c1', 'Filed'), groupId: 'g1' }, conv('c2', 'Unfiled')]}
+        searchable={false}
+        showTrailing={false}
+      />
+    ));
+    expect(rowIds(grouped.container)).toEqual(['c1', 'c2']);
+    expect(grouped.container.querySelector('[part="trailing"]')).toBeNull();
+  });
+
+  it('unset keeps what every row shows today: the derived relative time', () => {
+    const shown = render(() => (
+      <ConversationList {...baseProps} conversations={[conv('c1', 'One')]} searchable={false} />
+    ));
+    expect(shown.container.querySelector('[part="trailing"]')!.textContent).not.toBe('');
+  });
+});
+
 describe('search no-match state (F-04)', () => {
   it('conversations present + a query matching none renders a visible no-match state', () => {
     const { container } = render(() => (

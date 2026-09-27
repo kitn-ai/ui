@@ -55,13 +55,28 @@ export interface ConversationItemProps {
   conversation: ConversationSummary;
   isActive: boolean;
   onSelect: (id: string) => void;
-  /** Dense single-line row: a leading dot + title, no message count. */
+  // What compact drops, precisely: one line instead of two, so the message-count subline
+  // goes and the title gains a leading icon. The trailing edge and the unread dot STAY on
+  // that line, so a consumer who wanted the timestamp gone would get a one-line row with a
+  // timestamp still on it: that is `showTrailing`'s job, not this flag's.
+  /** Dense single-line row: a leading icon + title, no message count. */
   compact?: boolean;
   // `panel` is the widget-panel presentation matching `ConversationPanel`'s measured row
   // box (single semibold title line, right-aligned time, optional preview line). An explicit
   // density wins over `compact`.
   /** Row density. */
   density?: ConversationRowDensity;
+  // Why a render prop rather than a sentinel value: "paint nothing here" is a fact about
+  // this row's presentation, not about the conversation, and `ConversationSummary.trailing`
+  // already means two different things by density (the field's own doc) while the store
+  // writes one on every save, so gating only the DERIVED time would leave those summaries
+  // showing something on the edge anyway. The part name is the generic `Row`'s, so `false`
+  // paints no node for a `::part(trailing)` rule to hit. In the `panel` density this
+  // empties the right-aligned time and leaves the field's other rendering, the preview line
+  // under the title: that line is the row's preview rather than its trailing edge, and
+  // omitting the field already removes it.
+  /** Paint the row's trailing edge, `part="trailing"`, or leave the edge empty. Default `true`. */
+  showTrailing?: boolean;
   class?: string;
 }
 
@@ -252,14 +267,18 @@ export function SlottedConversationItem(props: SlottedConversationItemProps) {
 }
 
 export function ConversationItem(props: ConversationItemProps) {
-  const [local] = splitProps(props, ['conversation', 'isActive', 'onSelect', 'compact', 'density', 'class']);
+  const [local] = splitProps(props, ['conversation', 'isActive', 'onSelect', 'compact', 'density', 'showTrailing', 'class']);
   const density = () => resolveRowDensity(local.density, local.compact);
+  // Whether this row paints its trailing edge at all. Default-true, so the
+  // written form is the opt-OUT (`showTrailing={false}`); every value other
+  // than `false` leaves the row exactly as it was.
+  const showTrailing = () => local.showTrailing !== false;
   // Unread dot: derived from the same public read primitive the
   // facade's panel and home surfaces use, never a second policy.
   const unread = createMemo(() => isConversationUnread(local.conversation));
-  // The trailing text: the consumer's own `trailing` field, else an auto relative
-  // time from updatedAt (fallback lastMessageAt). Never an internal clock — it is a
-  // render-time snapshot.
+  // The trailing edge's TEXT: the consumer's own `trailing` field, else an auto relative
+  // time from updatedAt (fallback lastMessageAt); '' when the edge is opted out of. Never an
+  // internal clock — it is a render-time snapshot.
   //
   // REACTIVITY, and the weaker version of this note is what shipped the stale dot:
   // a new `conversations` array reference is NOT sufficient. `ConversationList` renders
@@ -270,12 +289,17 @@ export function ConversationItem(props: ConversationItemProps) {
   // removes and reorders are fine on a fresh array alone, since those rows' identities
   // already differ. Pinned by `src/components/reactivity-contract/reactivity-contract.test.tsx`.
   const trailing = createMemo(
-    () => local.conversation.trailing ?? relativeTimeShort(local.conversation.updatedAt ?? local.conversation.lastMessageAt),
+    () => (showTrailing()
+      ? local.conversation.trailing ?? relativeTimeShort(local.conversation.updatedAt ?? local.conversation.lastMessageAt)
+      : ''),
   );
   // The panel anatomy renders the time directly (never the consumer's
   // `trailing` field, which is the PREVIEW line there), same as
-  // ConversationPanel.
-  const panelTime = () => relativeTimeShort(local.conversation.updatedAt ?? local.conversation.lastMessageAt);
+  // ConversationPanel. The same option empties THIS edge in this density: the
+  // preview line under the title is not the trailing edge, so it stays.
+  const panelTime = () => (showTrailing()
+    ? relativeTimeShort(local.conversation.updatedAt ?? local.conversation.lastMessageAt)
+    : '');
   return (
     <button
       data-conversation-id={local.conversation.id}

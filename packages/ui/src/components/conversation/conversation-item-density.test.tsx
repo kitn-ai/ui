@@ -158,6 +158,99 @@ describe('panel anatomy (the widget-box presentation)', () => {
   });
 });
 
+/**
+ * The trailing EDGE as a rendering decision.
+ *
+ * Every row painted something there by construction: the consumer's `trailing`
+ * field, else an auto relative time derived from the conversation's timestamps.
+ * The field's own doc says what it is for on the desktop list (a count or a
+ * status) and `localStorageStore` writes one on every save, so a consumer whose
+ * row menu already owns that edge — "its own menu, and nothing else" — had no
+ * prop that reached "nothing": omitting the field only re-armed the fallback.
+ * `showTrailing={false}` is that state.
+ */
+describe('the trailing edge is optional (showTrailing)', () => {
+  /** Every shape `relativeTimeShort` can return for a real timestamp. */
+  const derived = /just now|\d+m ago|\d+h ago|\d+d ago/;
+
+  it('showTrailing={false}: neither the trailing field nor a derived time renders', () => {
+    const { container } = render(() => (
+      <ConversationItem
+        conversation={conv({ trailing: 'KAI-1042 shipped with DHL' })}
+        isActive={false}
+        onSelect={() => {}}
+        showTrailing={false}
+      />
+    ));
+    const row = container.querySelector('button')!;
+    // The region itself is gone, so a ::part(trailing) rule has no node to hit either.
+    expect(row.querySelector('[part="trailing"]')).toBeNull();
+    expect(row.textContent).not.toContain('KAI-1042 shipped with DHL');
+    expect(row.textContent).not.toMatch(derived);
+  });
+
+  it('unset: both halves still render exactly what they rendered before', () => {
+    // The derived half...
+    const noField = render(() => (
+      <ConversationItem conversation={conv()} isActive={false} onSelect={() => {}} />
+    ));
+    expect(noField.container.querySelector('[part="trailing"]')!.textContent).toMatch(derived);
+    // ...and the consumer's own value, which the option must not take away by default.
+    const withField = render(() => (
+      <ConversationItem conversation={conv({ trailing: 'KAI-1042 shipped with DHL' })} isActive={false} onSelect={() => {}} />
+    ));
+    expect(withField.container.querySelector('[part="trailing"]')!.textContent).toBe('KAI-1042 shipped with DHL');
+  });
+
+  it('compact drops the count line and keeps the edge — so the option is the only way off there too', () => {
+    const { container } = render(() => (
+      <ConversationItem conversation={conv()} isActive={false} onSelect={() => {}} compact />
+    ));
+    const row = container.querySelector('button')!;
+    expect(row.textContent).not.toContain('messages');
+    expect(row.querySelector('[part="trailing"]')!.textContent).toMatch(derived);
+
+    const off = render(() => (
+      <ConversationItem conversation={conv()} isActive={false} onSelect={() => {}} compact showTrailing={false} />
+    ));
+    const compactOff = off.container.querySelector('button')!;
+    expect(compactOff.querySelector('[part="trailing"]')).toBeNull();
+    expect(compactOff.textContent).not.toMatch(derived);
+  });
+
+  it('panel density: the option empties the right-aligned time, and the preview LINE stays', () => {
+    // Non-vacuity: the panel row really does paint a right-aligned time today.
+    const shown = render(() => (
+      <ConversationItem
+        conversation={conv({ trailing: 'KAI-1042 shipped with DHL' })}
+        isActive={false}
+        onSelect={() => {}}
+        density="panel"
+      />
+    ));
+    const times = shown.container.querySelectorAll('[part="trailing"]');
+    expect(times).toHaveLength(1);
+    expect(times[0].textContent).toMatch(derived);
+
+    const off = render(() => (
+      <ConversationItem
+        conversation={conv({ trailing: 'KAI-1042 shipped with DHL' })}
+        isActive={false}
+        onSelect={() => {}}
+        density="panel"
+        showTrailing={false}
+      />
+    ));
+    const row = off.container.querySelector('button')!;
+    expect(row.querySelector('[part="trailing"]')).toBeNull();
+    expect(row.textContent).not.toMatch(derived);
+    // In this density the field is the row's second LINE (the panel's preview),
+    // not its trailing edge: the option does not reach it, and a consumer who
+    // wants no preview omits the field, which renders nothing today.
+    expect(row.textContent).toContain('KAI-1042 shipped with DHL');
+  });
+});
+
 describe('unread dot (P-7b)', () => {
   it('ConversationItem: dot + sr-only label when isConversationUnread says so, in every density', () => {
     for (const density of ['default', 'compact', 'panel'] as const) {
