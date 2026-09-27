@@ -96,23 +96,26 @@ export interface MockSource {
   snippet?: string;
 }
 
-/** A scripted mock turn: optional reasoning, then text, then citations, then
- *  tool calls. A turn with tool calls finishes `finish_reason: 'tool_calls'`,
- *  exactly as a real tool-calling turn does; a turn without them finishes
- *  `'stop'`. */
+/** A scripted mock turn, declared in the order the responder emits it:
+ *  optional reasoning, then the tool calls, then the text, then the citations.
+ *  The tool call comes before the text because the call is what PRODUCES the
+ *  answer (see the emission site in `createMockResponder`). A turn with tool
+ *  calls finishes `finish_reason: 'tool_calls'`, exactly as a real tool-calling
+ *  turn does; a turn without them finishes `'stop'`. */
 export interface MockTurn {
   // `delta.reasoning` is the OpenRouter-normalized sibling `readOpenAIStream` folds
   // into a `reasoning` part. Models think before they answer; the mock does too.
-  /** Reasoning streamed before the text, as `delta.reasoning` frames. */
+  /** Reasoning streamed first, before the tool calls and the text, as
+   *  `delta.reasoning` frames. */
   reasoning?: string;
-  /** Text streamed (token by token) before the tool calls. */
+  /** Tool calls announced this turn, in order, before the text. */
+  toolCalls?: readonly MockToolCall[];
+  /** Text streamed (token by token) after the tool calls. */
   text?: string;
   // Consecutive `source` parts land the way a real cited answer's do and collapse into
   // the citations strip.
   /** Citations announced after the text, each as one `url_citation` annotation frame. */
   sources?: readonly MockSource[];
-  /** Tool calls announced this turn, in order. */
-  toolCalls?: readonly MockToolCall[];
 }
 
 /** A canned reply: plain text, or a scripted turn. A string is exactly
@@ -248,39 +251,15 @@ export function createMockResponder(options: MockResponderOptions = {}): MockRes
           yield frame(id, { choices: [{ index: 0, delta: { reasoning: token }, finish_reason: null }] });
         }
 
-        for (const token of tokenize(scripted.text ?? '', chunkSize)) {
-          await delay(delayMs);
-          yield frame(id, { choices: [{ index: 0, delta: { content: token }, finish_reason: null }] });
-        }
-
-        // Scripted citations, one `url_citation` annotation frame each — the
-        // OpenAI-wire shape `readOpenAIStream` parses into `source` parts, so
-        // consecutive citations collapse into the strip the way real ones do.
-        // `snippet` rides as `content`: the annotation's own field name.
-        for (const source of scripted.sources ?? []) {
-          await delay(delayMs);
-          yield frame(id, {
-            choices: [{
-              index: 0,
-              delta: {
-                annotations: [{
-                  type: 'url_citation',
-                  url_citation: {
-                    url: source.url,
-                    ...(source.title !== undefined ? { title: source.title } : {}),
-                    ...(source.snippet !== undefined ? { content: source.snippet } : {}),
-                  },
-                }],
-              },
-              finish_reason: null,
-            }],
-          });
-        }
-
         // Scripted tool calls, framed the way the OpenAI wire frames real ones:
         // one announce fragment per call (`index`/`id`/`function.name` + empty
         // arguments), then the argument JSON in fragments. The kit's reader
         // reassembles them through the exact path a real provider's call takes.
+        //
+        // BEFORE the text, deliberately: the call is what PRODUCES the answer, so
+        // the call reads above the sentence it results in. `readOpenAIStream`
+        // folds parts in stream order and the renderer draws parts in array
+        // order, so this emission order IS the reading order a consumer sees.
         const toolCalls = scripted.toolCalls ?? [];
         for (let index = 0; index < toolCalls.length; index += 1) {
           const call = toolCalls[index];
@@ -304,6 +283,39 @@ export function createMockResponder(options: MockResponderOptions = {}): MockRes
               }],
             });
           }
+        }
+
+        // The ANSWER, after the calls that produced it. `delta.content` frames
+        // the reader folds onto one text part.
+        for (const token of tokenize(scripted.text ?? '', chunkSize)) {
+          await delay(delayMs);
+          yield frame(id, { choices: [{ index: 0, delta: { content: token }, finish_reason: null }] });
+        }
+
+        // Scripted citations, one `url_citation` annotation frame each — the
+        // OpenAI-wire shape `readOpenAIStream` parses into `source` parts, so
+        // consecutive citations collapse into the strip the way real ones do.
+        // `snippet` rides as `content`: the annotation's own field name. They
+        // STAY after the text: a citation annotates the answer, so it has
+        // nothing to point at until the answer exists.
+        for (const source of scripted.sources ?? []) {
+          await delay(delayMs);
+          yield frame(id, {
+            choices: [{
+              index: 0,
+              delta: {
+                annotations: [{
+                  type: 'url_citation',
+                  url_citation: {
+                    url: source.url,
+                    ...(source.title !== undefined ? { title: source.title } : {}),
+                    ...(source.snippet !== undefined ? { content: source.snippet } : {}),
+                  },
+                }],
+              },
+              finish_reason: null,
+            }],
+          });
         }
 
         // Tell 4: zero usage. A real turn that produced this much text cannot
