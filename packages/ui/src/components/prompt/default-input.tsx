@@ -415,7 +415,7 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
                 <Tooltip content="More tools">
                   <DropdownTrigger
                     as={(p) => (
-                      <Button {...p} type="button" variant="outline" size="icon-sm" class="rounded-full" part="tools" aria-label="More tools" disabled={props.disabled}>
+                      <Button {...p} type="button" variant="subtle" size="icon-sm" class="rounded-full" part="tools" aria-label="More tools" disabled={props.disabled}>
                         <Plus class="size-4" />
                       </Button>
                     )}
@@ -452,19 +452,6 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
                 onRemove={(id) => props.onToolSelect?.({ id, checked: false })}
               />
             </Show>
-            <Show when={props.voice}>
-              <Button
-                type="button"
-                variant="outline"
-                size="icon-sm"
-                class="rounded-full"
-                aria-label="Voice input"
-                disabled={props.disabled}
-                onClick={() => props.onVoice?.()}
-              >
-                <Mic class="size-4" />
-              </Button>
-            </Show>
             <For each={props.toolbarActions ?? []}>
               {(action) => {
                 const Icon = actionIcon(action.icon);
@@ -472,7 +459,7 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
                 const btn = (
                   <Button
                     type="button"
-                    variant="outline"
+                    variant="subtle"
                     size="icon-sm"
                     class="rounded-full"
                     aria-label={action.label}
@@ -506,6 +493,24 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
               item the frame lays out and `justify-between` places. */}
           <div class="flex shrink-0 items-center gap-2">
             <slot name="toolbar-end" />
+            {/* VOICE sits beside SUBMIT, not beside the input affordances. Both
+                references put it here, and the reason is what it produces: a microphone
+                makes a message, like the send button, rather than adding something to
+                one. Same `voice` prop, rendered at the other end of the row — this is a
+                placement change and nothing else. */}
+            <Show when={props.voice}>
+              <Button
+                type="button"
+                variant="subtle"
+                size="icon-sm"
+                class="rounded-full"
+                aria-label="Voice input"
+                disabled={props.disabled}
+                onClick={() => props.onVoice?.()}
+              >
+                <Mic class="size-4" />
+              </Button>
+            </Show>
             <Show
               when={showStop()}
               fallback={

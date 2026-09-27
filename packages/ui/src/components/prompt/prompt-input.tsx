@@ -120,26 +120,26 @@ function PromptInput(props: PromptInputProps) {
           'bg-surface cursor-text shadow-xs',
           'focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-0',
           'rounded-composer',
-          // MEASURED from the reference screenshots, not guessed: 10px above and below
-          // a 28px control is the 48px collapsed row, leading 18px and trailing 14px;
-          // expanded the box opens 14px above the text, separates the control row by
-          // 6px and closes with the same 10px the row uses. Collapsed the controls
-          // share the text's row; expanded the text claims its own line and they wrap
-          // below it. See the body wrapper in `PromptInputTextarea` for how that wrap
-          // is produced — it is ordering, not a second markup tree.
+          // 10px above and below a 28px control is the 48px row; expanded the box opens
+          // 14px above the text, separates the control row by 6px, and closes with the
+          // same 10px. See the body wrapper below for how the text wraps — ordering, not
+          // a second markup tree.
           //
-          // `justify-between` on the EXPANDED layout, because `justify-content` is
-          // resolved PER FLEX LINE: it is inert for the body (a single full-width item
-          // on its own line) and it is what puts a wrapped control row at the box's
-          // trailing edge. Without it, composing this frame by hand — PromptInput plus
-          // a textarea plus PromptInputActions, which the stories and the kit's own
-          // consumers do — lands the actions at the LEADING edge, and `justify-end` on
-          // the actions cannot help because that wrapper is now a content-width flex
-          // item rather than a block. Placing it is the frame's job, not a rule every
-          // caller has to know.
+          // The horizontal 10px is DERIVED: `(rowHeight − controlHeight) / 2` is
+          // `(48 − 28) / 2`, so the controls sit centred on the pill's own arc. One value
+          // at BOTH ends and in BOTH layouts, so the `+` does not jump sideways when the
+          // composer expands. It replaced 18/14 measured from a reference's glyph INK,
+          // which does not transfer while glyph sizes differ: matching ink pushed our
+          // larger glyphs further in and the row read as inset boxes.
+          //
+          // `justify-between` on the EXPANDED layout: `justify-content` resolves PER FLEX
+          // LINE, so it is inert for the body and load-bearing for the row below it.
+          // Without it a hand-composed frame lands its actions at the LEADING edge, and
+          // the caller's own `justify-end` cannot help because that wrapper is a
+          // content-width flex item rather than a block.
           layout() === 'collapsed'
-            ? 'flex flex-row items-center gap-2 py-2.5 pl-4.5 pr-3.5'
-            : 'flex flex-wrap justify-between gap-y-1.5 pt-3.5 px-4.5 pb-2.5',
+            ? 'flex flex-row items-center gap-2 py-2.5 px-2.5'
+            : 'flex flex-wrap justify-between gap-y-1.5 pt-3.5 px-2.5 pb-2.5',
           local.disabled && 'cursor-not-allowed opacity-60',
           local.class
         )}

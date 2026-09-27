@@ -191,14 +191,17 @@ describe('DefaultPromptInput geometry', () => {
     }
   });
 
-  it('collapsed: one row, on the measured padding, with the frame owning the insets', () => {
+  it('collapsed: one row, with the frame owning the insets', () => {
     const { container } = render(() => <DefaultPromptInput {...baseProps} />);
     expect(frame(container).className).toContain('flex-row');
-    // 10px above and below a 28px control is the measured 48px row; 18px leading,
-    // 14px trailing. These are the numbers, not a guess at them.
+    // 10px above and below a 28px control is the 48px row. The horizontal value is
+    // DERIVED, not measured: `(rowHeight − controlHeight) / 2` is `(48 − 28) / 2`, so the
+    // control sits centred on the pill's arc. Pinned as one value for BOTH ends, because
+    // a pair of different ones is what pushed the controls inside the curve and made the
+    // row read as inset boxes.
     expect(frame(container).className).toContain('py-2.5');
-    expect(frame(container).className).toContain('pl-4.5');
-    expect(frame(container).className).toContain('pr-3.5');
+    expect(frame(container).className).toContain('px-2.5');
+    expect(frame(container).className).not.toContain('pl-4.5');
     // 8px between the row's items, which is what the reference's ink gaps come out to
     // once the controls' own padding is taken off.
     expect(frame(container).className).toContain('gap-2');
@@ -215,7 +218,12 @@ describe('DefaultPromptInput geometry', () => {
     ));
     expect(frame(container).className).toContain('flex-wrap');
     expect(frame(container).className).toContain('pt-3.5');
-    expect(frame(container).className).toContain('px-4.5');
+    // The SAME horizontal value as the collapsed row. A different one would make the `+`
+    // jump sideways the moment the composer expands, which is worse than any padding it
+    // might buy — so the two are pinned against each other rather than each against a
+    // literal.
+    expect(frame(container).className).toContain('px-2.5');
+    expect(frame(container).className).not.toContain('px-4.5');
     // 6px between the text block and the control row, and 10px closing the box — the
     // two numbers a first cut of this layout left out, which is how the rows end up
     // touching. Pinned because an unpinned number is where the next approximation lands.
@@ -234,6 +242,50 @@ describe('DefaultPromptInput geometry', () => {
     // decision lives with the resolver rather than being split across three places.
     expect((frame(container).querySelector('[data-cluster="leading"]') as HTMLElement).className).not.toMatch(/\border-/);
     expect((frame(container).querySelector('[data-cluster="trailing"]') as HTMLElement).className).not.toMatch(/\border-/);
+  });
+
+  it('puts the microphone beside SUBMIT, not beside the input affordances', () => {
+    // A placement rule with a reason rather than a preference: a microphone MAKES a
+    // message the way the send button does, instead of adding something to one, which is
+    // why both references put it at the trailing edge. It shipped in the leading cluster
+    // because no task carried the move — it is the same `voice` prop either way, so this
+    // case pins WHICH cluster renders it rather than that it exists.
+    const { container } = render(() => <DefaultPromptInput {...baseProps} voice />);
+    const mic = container.querySelector('[aria-label="Voice input"]') as HTMLElement;
+    expect(mic).not.toBeNull();
+    expect(mic.closest('[data-cluster="trailing"]')).not.toBeNull();
+    expect(mic.closest('[data-cluster="leading"]')).toBeNull();
+    // And before Send inside that cluster, so the row reads `… mic send` rather than the
+    // other way round. A position assertion, because "in the trailing cluster" is
+    // satisfied by either order and only one of them matches the references.
+    const send = container.querySelector('[data-testid="send"]') as HTMLElement;
+    expect(mic.compareDocumentPosition(send) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('keeps Send the only FILLED control in the row', () => {
+    // The composer's icon controls are bare glyphs — `subtle`: muted ink with a hover
+    // fill — because a resting fill turns each one into a box inside the pill, and three
+    // of those is what reads as too much padding. Send keeps `default`'s `bg-primary`,
+    // the one filled control both references show.
+    //
+    // Asserted as a PAIR: `bg-muted/50` is what the wrong variant adds, `hover:bg-accent`
+    // is what the right one carries. Checking only the first would pass on any variant
+    // that happens not to use that fill, including one that invents a new one.
+    const { container } = render(() => (
+      <DefaultPromptInput {...baseProps} voice toolbarActions={[{ id: 'a', label: 'Action' }]} />
+    ));
+    const controls = [
+      container.querySelector('[part="tools"]'),
+      container.querySelector('[aria-label="Voice input"]'),
+      container.querySelector('[data-action="a"]'),
+    ] as HTMLElement[];
+    for (const control of controls) {
+      expect(control).not.toBeNull();
+      expect(control.className).not.toContain('bg-muted/50');
+      expect(control.className).toContain('hover:bg-accent');
+    }
+    const send = container.querySelector('[data-testid="send"]') as HTMLElement;
+    expect(send.className).toContain('bg-primary');
   });
 
   describe('PromptInputActions is a box, and the caller owns its distribution', () => {
