@@ -125,3 +125,9 @@ An earlier draft of this spec, and the plan's task 2, said the folders would be 
 **What the block therefore does:** pass the projects as `groups`, stamp `groupId` onto each row at the page boundary (a mapping, not a kit change), and drive the selection the way the element already expects.
 
 **Open residue, to be reported before any further shape is chosen:** whether a per-group display limit exists for `Show more`; what the bucket of conversations with no group is labelled and where it sorts; and whether a group's open state can be driven and observed from the page — the two cases that need it being the active conversation's folder open on arrival, and a search opening the folder it matched in.
+
+## CORRECTION 3 — `Show more` and the headings are inside the roving contract
+
+An earlier section decided `Show more` should sit **outside** the rail's roving focus. **CORRECTION 2 supersedes that**: there is one flat repeat and one element kind, so everything in the rail is a row, and the roving walk therefore visits the headings and `Show more` along with the conversations. That was measured rather than assumed — the keyboard state walks all sixteen rows in order with exactly one tab stop at every step, headings included.
+
+**This is the better arrangement, not a concession.** A heading that the arrow keys can reach is a folder a keyboard user can open without leaving the rail, which is the opposite of the problem the earlier note was guarding against. What the note was actually protecting — that a folder affordance must not become an accidental *focus trap* mid-list — is satisfied: the walk is one tab stop wide at every step and Home/End/Arrow all behave.
