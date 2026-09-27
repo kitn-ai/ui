@@ -473,6 +473,17 @@
             "noFolderAppeared": true
           },
           "styles": {}
+        },
+        {
+          "name": "42-rail-unknown-group",
+          "probes": {
+            "theRowIsStillInItsOwnFolder": true,
+            "theGroupGotOneFolder": true,
+            "theHeadingsRawIdIsItsLabel": true,
+            "itSitsAboveRecents": true,
+            "clickingItOpensItsThread": true
+          },
+          "styles": {}
         }
       ],
       "consoleErrors": [],
@@ -947,6 +958,17 @@
             "theNewConversationFiledItself": true,
             "itsFolderWasOpenedForIt": true,
             "noFolderAppeared": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "42-rail-unknown-group",
+          "probes": {
+            "theRowIsStillInItsOwnFolder": true,
+            "theGroupGotOneFolder": true,
+            "theHeadingsRawIdIsItsLabel": true,
+            "itSitsAboveRecents": true,
+            "clickingItOpensItsThread": true
           },
           "styles": {}
         }

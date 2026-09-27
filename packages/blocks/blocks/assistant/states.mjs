@@ -318,14 +318,16 @@ let openInFolder = null;
 let railSearch = null;
 
 // State 37's folder toggle, state 38's Show more row, state 39's search into a
-// closed folder, state 40's keyboard walk and state 41's arrival. Captured in
-// each act for the same reason as the rest: what the rail did is only knowable
-// before and after the interaction, never from the end state alone.
+// closed folder, state 40's keyboard walk, state 41's arrival and state 42's
+// group the catalogue cannot name. Captured in each act for the same reason as
+// the rest: what the rail did is only knowable before and after the
+// interaction, never from the end state alone.
 let folderToggle = null;
 let showMore = null;
 let searchOpen = null;
 let keyboardWalk = null;
 let activeArrival = null;
+let unknownGroup = null;
 
 const firstIndexRow = (page, spec) => page.evaluate(
   (key) => { try { return JSON.parse(localStorage.getItem(key) ?? '[]')[0] ?? null; } catch { return null; } },
@@ -2294,6 +2296,171 @@ export default {
         theNewConversationFiledItself: true,
         itsFolderWasOpenedForIt: true,
         noFolderAppeared: true,
+      },
+    },
+    {
+      name: '42-rail-unknown-group',
+      act: async (page, sctx) => {
+        // NO USER PATH MAKES THIS ROW, and that is why the act seeds the store
+        // rather than clicking anything: the demo files a conversation only by
+        // the words of its opening turn, so every group it has ever written is
+        // one of the three it knows. A group the catalogue cannot name arrives
+        // the way a consumer's own store writes one. So the index is seeded in
+        // the store's OWN shape - one entry in the threads index, its messages
+        // under the thread key - and the page is reloaded, which is the one way
+        // the controller re-reads the store (state 7's reload, one reason over).
+        // Nothing here is a second mechanism: the keys are the ones the page
+        // spec already carries and the store itself reads, and the reload is the
+        // state script's own.
+        const group = 'sprint-planning';
+        const id = 'seeded-unknown-group';
+        const question = 'What is left in the sprint?';
+        const answer = 'Two cards, both in review.';
+        // The store's two keys share their stem - `kai:<name>:threads` for the
+        // index and `kai:<name>:thread:<id>` for one conversation - so the thread
+        // key is derived from the index key this page's spec carries rather than
+        // typed out a second time.
+        const threadKey = `${sctx.spec.indexKey.slice(0, -1)}:${id}`;
+        // The seed's timestamp is OLDER than every summary already stored, so the
+        // reload's auto-restore picks someone else and the click below is what
+        // opens THIS row. A seed stamped "now" would be the active conversation
+        // before the click, and the activation probe would pass on its own.
+        const stored = await page.evaluate(
+          (key) => { try { return JSON.parse(localStorage.getItem(key) ?? '[]'); } catch { return []; } },
+          sctx.spec.indexKey,
+        );
+        const newest = stored.reduce((at, row) => Math.max(at, Date.parse(row.updatedAt) || 0), 0);
+        await page.evaluate((seed) => {
+          const index = JSON.parse(localStorage.getItem(seed.indexKey) ?? '[]');
+          localStorage.setItem(seed.indexKey, JSON.stringify([
+            ...index.filter((row) => row.id !== seed.id),
+            { id: seed.id, title: seed.title, messageCount: 2, updatedAt: seed.updatedAt, groupId: seed.group },
+          ]));
+          localStorage.setItem(seed.threadKey, JSON.stringify([
+            { id: `${seed.id}-q`, role: 'user', parts: [{ type: 'text', text: seed.question }] },
+            { id: `${seed.id}-a`, role: 'assistant', parts: [{ type: 'text', text: seed.answer }] },
+          ]));
+        }, {
+          indexKey: sctx.spec.indexKey,
+          threadKey,
+          id,
+          group,
+          question,
+          answer,
+          title: 'Sprint planning notes',
+          updatedAt: new Date(newest - 60000).toISOString(),
+        });
+        await page.reload({ waitUntil: 'load' });
+        await sctx.scenario.ready(page, sctx);
+        // WHICH FOLDER A ROW IS UNDER, read off the RENDERED ORDER. A row's own
+        // `data-group` is the folder's LABEL, and the label of a group the
+        // catalogue cannot name is empty - the same spelling the ungrouped
+        // remainder has - so the row attributes alone cannot tell the two apart.
+        // The heading above it carries the folder's ID, and that is the fact this
+        // state is about.
+        const nodes = await railNodes(page);
+        const filed = [];
+        let folder = '';
+        for (const node of nodes) {
+          if (node.kind === 'folder') folder = node.folder;
+          else if (node.kind === 'conversation') filed.push({ id: node.id, folder });
+        }
+        const headings = nodes.filter((node) => node.kind === 'folder');
+        const heading = headings.find((node) => node.folder === group) ?? null;
+        const onRail = filed.some((candidate) => candidate.id === id);
+        const activeBefore = await page.evaluate(
+          () => document.getElementById('conversations')?.activeId ?? '',
+        );
+        if (onRail) {
+          const rows = nodes.filter((node) => node.kind === 'conversation');
+          await page.locator('kai-conversations > kai-conversation-item[data-rail="conversation"]')
+            .nth(rows.findIndex((candidate) => candidate.id === id)).click();
+          await settle(900)(page);
+        }
+        const opened = await page.evaluate(() => {
+          const thread = document.getElementById('thread');
+          const messages = thread?.messages ?? [];
+          const last = messages[messages.length - 1];
+          return {
+            activeId: document.getElementById('conversations')?.activeId ?? '',
+            text: (last?.parts ?? []).filter((part) => part.type === 'text').map((part) => part.text).join(''),
+          };
+        });
+        unknownGroup = {
+          group,
+          id,
+          answer,
+          onRail,
+          rowsInFolder: filed.filter((candidate) => candidate.folder === group).map((candidate) => candidate.id),
+          headings: headings.map((node) => node.folder),
+          headingLabel: heading === null ? null : heading.group,
+          headingTitle: heading === null ? null : await rowTitle(page, `folder:${group}`),
+          activeBefore,
+          activeAfter: opened.activeId,
+          threadText: opened.text,
+        };
+      },
+      probes: {
+        // The seeded conversation is ON the rail, exactly once, and the heading
+        // above it is the folder the store filed it under: a row this catalogue
+        // cannot name is reachable rather than dropped into the remainder.
+        theRowIsStillInItsOwnFolder: () => {
+          if (unknownGroup?.onRail !== true) return 'the row is not on the rail at all';
+          const found = unknownGroup?.rowsInFolder ?? [];
+          if (!found.includes(unknownGroup?.id ?? '')) {
+            return `the ${unknownGroup?.group} heading holds ${JSON.stringify(found)}`;
+          }
+          return found.length === 1 || `its folder holds ${found.length} rows`;
+        },
+        // ONE heading for it, not one per row or one per reading of the index: the
+        // folder is derived from the rows and is never emitted twice.
+        theGroupGotOneFolder: () => {
+          const headings = unknownGroup?.headings ?? [];
+          const at = headings.filter((candidate) => candidate === unknownGroup?.group).length;
+          return at === 1 || `${at} headings carry the group: ${JSON.stringify(headings)}`;
+        },
+        // The heading says the RAW ID, because there is no catalogue name to say
+        // instead - and nothing it was not given.
+        theHeadingsRawIdIsItsLabel: () => {
+          if (unknownGroup?.headingTitle !== unknownGroup?.group) {
+            return `the heading reads ${JSON.stringify(unknownGroup?.headingTitle)}`;
+          }
+          return unknownGroup?.headingLabel === ''
+            || `the heading carries the label ${JSON.stringify(unknownGroup?.headingLabel)}`;
+        },
+        // ABOVE Recents, with Recents still last: a folder the reader's own store
+        // named sorts with the other folders, and the unfiled remainder stays
+        // where a reader looks for a conversation they have just started.
+        itSitsAboveRecents: () => {
+          const headings = unknownGroup?.headings ?? [];
+          const at = headings.indexOf(unknownGroup?.group ?? '');
+          if (at === -1) return 'no heading carries the group';
+          const recents = headings.indexOf('');
+          if (recents === -1) return 'there is no Recents heading to sit above';
+          if (recents !== headings.length - 1) return `Recents is not last: ${JSON.stringify(headings)}`;
+          return at === recents - 1 || `the group is not directly above Recents: ${JSON.stringify(headings)}`;
+        },
+        // AND THE ROW STILL OPENS: it was not the conversation the reload
+        // restored, so the click is what makes it active, and its own seeded
+        // thread is what loads.
+        clickingItOpensItsThread: () => {
+          if (unknownGroup?.activeBefore === unknownGroup?.id) {
+            return 'the row was already active before the click, so the click proved nothing';
+          }
+          if (unknownGroup?.onRail !== true) return 'the row was not on the rail to click';
+          if (unknownGroup?.activeAfter !== unknownGroup?.id) {
+            return `the active conversation is ${JSON.stringify(unknownGroup?.activeAfter)}`;
+          }
+          return (unknownGroup?.threadText ?? '').includes(unknownGroup?.answer ?? '')
+            || `the thread reads ${JSON.stringify(unknownGroup?.threadText)}`;
+        },
+      },
+      expect: {
+        theRowIsStillInItsOwnFolder: true,
+        theGroupGotOneFolder: true,
+        theHeadingsRawIdIsItsLabel: true,
+        itSitsAboveRecents: true,
+        clickingItOpensItsThread: true,
       },
     },
   ],
