@@ -39,7 +39,8 @@ Two completed plans, one written and unstarted, and a fix wave on top:
 5. **The starter's stale `shadow-sm`** (`examples/starters/solid/src/components/ThreadView.tsx`) — the kit deleted that class when the scroll button took over `kai-elevation`, so two box-shadows are decided by stylesheet order. One line.
 6. **The markdown block-spacing model** — the four holes (flush paragraphs worst) are being closed by one spacing model rather than a fifth patch; check whether that round landed.
 7. **The disclaimer's geometry probe** — the footer row landed (`077833c1`) with no gate pinning it: `verify:blocks` diffs probes and styles and never compares a screenshot, so "the footer pushes or overlaps the composer" could have shipped unseen. Two assertions fix it (note top ≥ composer host bottom; card still 48px) and need a `baselines/assistant.json` re-record, which the ladder does anyway.
-8. The final review's **one content question for the owner**: the task-list arc renders a *second* card where the storyboard promises a revision. Either the approved sentence changes or the arc cannot demonstrate a revision.
+8. **A look decision on heading air** — the markdown spacing model made the gap uniform and em-relative, so a heading's space above went 21px → 13.13px. The model should stand; a heading-specific bump is one extra rule on top of it, if it reads cramped.
+9. The final review's **one content question for the owner**: the task-list arc renders a *second* card where the storyboard promises a revision. Either the approved sentence changes or the arc cannot demonstrate a revision.
 
 ## 3. The gates, and how to run them
 
