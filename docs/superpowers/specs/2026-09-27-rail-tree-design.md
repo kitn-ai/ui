@@ -101,7 +101,19 @@ tree's vocabulary is the wrong one for a conversation.
 | 8.4 | **Pinning stays per-folder**; `Recents` is recency. |
 | 8.5 | **Search reveals its matches** by opening the folder it found them in. |
 
-## CORRECTION — how the folders are composed (task 2's shape)
+## CORRECTION 2 — the folder is a state decision (supersedes CORRECTION 1)
+
+**CORRECTION 1 below was also wrong, and its error is worth naming: it established that the element takes a `groups` array and uses the collapsible, and stopped there — without reading the `<Show when={!itemMode() && !isEmpty()}>` that gates the grouped branch.** Item mode and groups are exclusive by construction, so the two cannot both be used. That is the same mistake as the original draft, one layer in: a fact read without its condition.
+
+**The settled shape, and it needs no kit change:** a folder is **a state decision, not a container.** The rail renders one flat repeat of rows. A group header is **a row in that same repeat**; open and closed is **which rows the state emits at all**. No element wraps another, so every conversation row stays a direct child of its container, and the roving focus, activation and row markup the rail already has survive untouched.
+
+Consequences that follow from the same mechanic rather than from separate features: `Show more` is "the state does not emit the rows past the limit"; the ungrouped section is the block's own header, so its label and position are ours; and a search opening the folder it matched in is a state field, never the element's internal collapsed signal — which has no prop, no event and no controller, and does not open on a match.
+
+**Why the alternatives were refused.** Composing it with a native disclosure and keeping the rows inside would re-home them: an item wrapped in anything becomes *standalone* by its own documented rule, taking its own tab stop and killing arrow traversal. Switching to the element's data mode to get its grouping drops the row markup entirely — no rename editor, no unread dot, no menu region — and loses the roving focus too, which is item-mode-only. Both were answers to "which container", and the question was whether a container is needed.
+
+**SUPERSEDED — CORRECTION 1, kept so the reasoning trail is readable: it concluded the element already renders the folders. It does, but only in the mode the rail cannot use.**
+
+### CORRECTION — how the folders are composed (task 2's shape)
 
 An earlier draft of this spec, and the plan's task 2, said the folders would be "the kit's collapsible around the conversation rows". **That shape is not expressible, and the implementing round was right to stop rather than build it.** Two measured reasons:
 
