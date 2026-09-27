@@ -207,8 +207,19 @@ describe('DefaultPromptInput geometry', () => {
     expect(frame(container).className).not.toContain('pl-1');
     expect(frame(container).className).not.toContain('pl-4.5');
     // 8px between the row's items, which is what the reference's ink gaps come out to
-    // once the controls' own padding is taken off.
-    expect(frame(container).className).toContain('gap-2');
+    // once the controls' own padding is taken off — HORIZONTALLY only. The row gap is
+    // gone deliberately: the `input-top` band always renders, so it always owns a line,
+    // and a row gap is charged between every pair of lines, which would add its value to
+    // every composer that projects nothing. The vertical spacing that gap used to provide
+    // belongs to the things that need it: the body's `mb-1.5` expanded, the attachment
+    // band's `mb-5`.
+    expect(frame(container).className).toContain('gap-x-2');
+    expect(frame(container).className).not.toContain('gap-y');
+    // And the frame WRAPS here too, which is the other half of that: a projected
+    // `input-top` band is `basis-full`, so without wrapping the row it would be squeezed
+    // into the one-row layout instead of taking the line above it. Pinned in both branches
+    // because either one alone looks like coverage.
+    expect(frame(container).className).toContain('flex-wrap');
     // The text carries no inset of its own: the frame's padding is the row's edge.
     expect(editable(container).className).not.toMatch(/\bpl-/);
     expect(editable(container).className).not.toMatch(/\bpt-/);
@@ -243,8 +254,13 @@ describe('DefaultPromptInput geometry', () => {
     expect(frame(container).className).not.toContain('px-4');
     // 6px between the text block and the control row, and 10px closing the box — the
     // two numbers a first cut of this layout left out, which is how the rows end up
-    // touching. Pinned because an unpinned number is where the next approximation lands.
-    expect(frame(container).className).toContain('gap-y-1.5');
+    // touching. The 6px is the BODY's margin rather than a frame row gap, and that
+    // difference is load-bearing: the `input-top` band always renders and always owns a
+    // line, so a row gap would be charged to every expanded composer even when nothing is
+    // projected into it. Pinned on the body AND negatively on the frame, so the gap cannot
+    // ride back in unnoticed.
+    expect(body(container).className).toContain('mb-1.5');
+    expect(frame(container).className).not.toContain('gap-y');
     expect(frame(container).className).toContain('pb-2.5');
     // The frame places a hand-composed trailing edge; `justify-content` is per flex
     // LINE, so this is inert for the body and load-bearing for the row below it.
@@ -392,9 +408,13 @@ describe('DefaultPromptInput geometry', () => {
     const band = frame(container).querySelector('[data-composer-band]') as HTMLElement;
     expect(band).toBeTruthy();
     expect(band.className).toContain('order-first');
-    // 14px of margin, and 20px in total once the frame's 6px row gap is added — the
-    // measured band-to-text gap.
-    expect(band.className).toContain('mb-3.5');
+    // The measured band-to-text gap is 20px, and now that the frame carries no row gap
+    // the whole of it is the band's own margin.
+    expect(band.className).toContain('mb-5');
+    // It claims its own line rather than relying on the body's `basis-full` to force a
+    // break after it — which is also what makes the always-rendered `input-top` band free
+    // when it is empty.
+    expect(band.className).toContain('basis-full');
     // The chips sit on the CONTENT column's edge, 6px inside the controls': the band and
     // the body each carry `px-1.5`, so the chips and the paragraph below them start on one
     // edge at 16px. Pinned on the band as well as the body because the two are one column,
@@ -402,6 +422,43 @@ describe('DefaultPromptInput geometry', () => {
     // it can be dropped.
     expect(band.className).toContain('px-1.5');
     expect(band.compareDocumentPosition(editable(container)) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('gives the projected `input-top` band its own line, and costs nothing when empty', () => {
+    // The `input-top` slot used to BE the band, so its assigned node became a ROW ITEM: it
+    // consumed the frame's horizontal gap and pushed the leading cluster sideways —
+    // measured in Chromium at 18px against the trailing edge's 10px. The wrapper fixes
+    // that only while three things hold together, and each is pinned because dropping any
+    // one of them restores the shift or a stray 8px: `basis-full` claims the line,
+    // `order-first` puts the band above the text, and NO MARGIN keeps it free — it renders
+    // whether or not a host projected anything, so a margin would be charged to every
+    // composer in the kit.
+    const { container } = render(() => <DefaultPromptInput {...baseProps} />);
+    // With nothing attached, the projected band is the only band in the frame.
+    const band = frame(container).querySelector('[data-composer-band]') as HTMLElement;
+    expect(band).toBeTruthy();
+    expect(band.className).toContain('basis-full');
+    expect(band.className).toContain('order-first');
+    expect(band.className).not.toContain('mb-');
+    expect(band.className).not.toContain('mt-');
+    // Collapsed it carries no inset: the content column's 6px belongs to the expanded
+    // layout, where the band and the paragraph are one column inside the controls' edge.
+    expect(band.className).not.toContain('px-1.5');
+    // And it sits above the text, the way the attachment band does.
+    expect(band.compareDocumentPosition(body(container)) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('expanded: the projected band joins the content column at the paragraph’s edge', () => {
+    const { container } = render(() => (
+      <DefaultPromptInput {...baseProps} attachments={[{ id: 'a', type: 'file', filename: 'a.pdf' }]} />
+    ));
+    const bands = frame(container).querySelectorAll('[data-composer-band]');
+    // The attachment band is first in the DOM, the projected one last.
+    const projected = bands[bands.length - 1] as HTMLElement;
+    expect(projected.className).toContain('px-1.5');
+    // Asserted against the paragraph's rather than as a literal, because they are one
+    // column: an edit that moved one and missed the other is the defect this pins.
+    expect(body(container).className).toContain('px-1.5');
   });
 });
 

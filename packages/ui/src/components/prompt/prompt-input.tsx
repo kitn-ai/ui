@@ -120,29 +120,28 @@ function PromptInput(props: PromptInputProps) {
           'bg-surface cursor-text shadow-xs',
           'focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-0',
           'rounded-composer',
-          // 10px above and below a 28px control is the 48px row; expanded the box opens
-          // 14px above the text, separates the control row by 6px, and closes with 10px.
+          // 10px above/below a 28px control is the 48px row; expanded the box opens 14px
+          // above the text, separates the control row by 6px, and closes with 10px. The
+          // horizontal 10px is DERIVED — `(rowHeight − controlHeight) / 2`, a control
+          // centred on the pill's own arc — and SYMMETRIC, which is what keeps the `+` from
+          // jumping sideways when the composer expands. A bare glyph's ink sits 6px further
+          // in than a filled control's edge, `(28 − 16) / 2`: a fact about ink, not a reason
+          // to move the box. Compensating one end for its glyph is how the row stops being
+          // symmetric, and it treats a symptom. It replaced 18/14 measured from a
+          // reference's glyph ink, which does not transfer when glyph sizes differ.
           //
-          // The horizontal 10px is DERIVED: `(rowHeight − controlHeight) / 2`, so a
-          // control sits centred on the pill's own arc. ONE value at BOTH ends and in BOTH
-          // layouts, which is also what keeps the `+` from jumping sideways the moment the
-          // composer expands.
+          // NO ROW GAP IN EITHER LAYOUT: the `input-top` band always renders and is always
+          // `basis-full`, so it owns a line even when nothing was projected, and a row gap
+          // is charged between EVERY pair of lines. The 6px above the control row is the
+          // body's `mb-1.5`; the attachment band's 20px is its own `mb-5`.
           //
-          // A bare glyph's INK therefore sits further in than a filled control's edge — by
-          // the glyph's own inset, `(28 − 16) / 2 = 6px` — because a filled button's
-          // visible edge IS its box while a glyph's mark is inside it. That is a fact about
-          // ink, not a reason to move the box. Compensating one end for its glyph is how
-          // the row stops being symmetric, and it treats a symptom: if a control ever sits
-          // too far in, the cause is upstream of this padding, not in it.
-          // It replaced 18/14 measured from a reference's glyph ink, which does not
-          // transfer while glyph sizes differ.
-          //
-          // `justify-between` on the EXPANDED layout: `justify-content` resolves PER FLEX
-          // LINE, so it is inert for the body and load-bearing for the row below it; a
-          // hand-composed frame would otherwise land its actions at the LEADING edge.
+          // `flex-wrap` COLLAPSED gives a projected band its own line instead of letting it
+          // crowd the row. Nothing wraps ordinarily — the body is `min-w-0 flex-1` and the
+          // clusters are `shrink-0` — and `justify-between` EXPANDED is inert for the body
+          // and load-bearing for the row beneath it, which a hand-composed frame relies on.
           layout() === 'collapsed'
-            ? 'flex flex-row items-center gap-2 py-2.5 px-2.5'
-            : 'flex flex-wrap justify-between gap-y-1.5 pt-3.5 px-2.5 pb-2.5',
+            ? 'flex flex-wrap flex-row items-center gap-x-2 py-2.5 px-2.5'
+            : 'flex flex-wrap justify-between pt-3.5 px-2.5 pb-2.5',
           local.disabled && 'cursor-not-allowed opacity-60',
           local.class
         )}
@@ -207,28 +206,28 @@ function PromptInputTextarea(props: PromptInputTextareaProps) {
     <div
       data-composer-body
       class={cn(
-        // Collapsed, the text shares the row with the controls, so it takes the room that
-        // is left. Expanded, `order-first` lifts it above the clusters and `basis-full`
-        // claims the whole line, so the control row wraps beneath it. `order-first` rather
-        // than a plain order: the clusters carry NO order of their own, which keeps the
-        // whole layout decision here instead of split across three class strings that have
-        // to agree. Anything meant to sit ABOVE the text carries the same order and comes
-        // first in the DOM — the attachment band does.
+        // Collapsed, the text shares the row with the controls and takes the room left.
+        // Expanded, `order-first` lifts it above the clusters and `basis-full` claims the
+        // line, so the control row wraps beneath it. `order-first` rather than a plain
+        // order: the clusters carry NONE of their own, which keeps the layout decision here
+        // rather than split across three class strings that must agree. Anything meant to
+        // sit above the text carries the same order and comes first in the DOM.
         //
-        // `min-h-7` (the same 28px every control in this row is) plus `items-center`,
-        // COLLAPSED ONLY, is what puts the text on the row's centreline: the editable is
-        // one ~20px line box, and centring it inside 28px lands its centre at 14, which is
-        // where the frame's `py-2.5` puts the buttons. Derived, not typed, and it scales
-        // with density. Expanded it would be wrong — an extra 28px box under a 20px line
-        // pushes the control row down by 8px, and the frame's own padding governs there.
+        // `min-h-7` (the same 28px every control here is) plus `items-center`, COLLAPSED
+        // ONLY, puts the text on the row's centreline: one ~20px line box centred inside
+        // 28px lands at 14, where the frame's `py-2.5` puts the buttons. Derived, not typed,
+        // and it scales with density. Expanded it would add 8px under the line and push the
+        // control row down, so the frame's padding governs there.
         //
-        // `px-1.5` (6px) is the EXPANDED branch's own horizontal inset, paired with the
-        // attachment band above it: expanded, this paragraph is prose in a card, so it sits
-        // 6px INSIDE the controls' 10px edge — `10 + 6 = 16px`. Collapsed it carries
-        // nothing: there it shares the control row and the frame's padding is the edge.
+        // `px-1.5` (6px) is the EXPANDED branch's inset, paired with the band above it: this
+        // paragraph is prose in a card, so it sits 6px INSIDE the controls' 10px edge —
+        // `10 + 6 = 16px`. Collapsed it carries nothing, sharing the control row.
+        // `mb-1.5` is the frame's old row gap moved here: a gap is charged between every pair
+        // of lines and an empty `input-top` band is a line, so the 6px below the paragraph
+        // has to belong to the paragraph.
         ctx.layout() === 'collapsed'
           ? 'flex min-h-7 min-w-0 flex-1 items-center'
-          : 'order-first basis-full px-1.5',
+          : 'order-first basis-full mb-1.5 px-1.5',
       )}
     >
       <Composer
@@ -250,6 +249,48 @@ function PromptInputTextarea(props: PromptInputTextareaProps) {
         onChange={(c) => { local.onComposerChange?.(c); ctx.setValue(c.text.replace(/^\s+/, '')); }}
         onSubmit={() => { if (!ctx.disabled) ctx.onSubmit?.(); }}
       />
+    </div>
+  );
+}
+
+// --- PromptInputBand ---
+
+export interface PromptInputBandProps extends JSX.HTMLAttributes<HTMLDivElement> {
+  children: JSX.Element;
+}
+
+/**
+ * A band INSIDE the frame, claiming its own line above the text.
+ *
+ * It exists so a projected band cannot become a ROW ITEM: an `input-top` slot's
+ * assigned node would otherwise be laid out beside the controls when collapsed,
+ * consuming the frame's horizontal gap and pushing the leading cluster sideways.
+ * With `basis-full` the band owns a line, and the frame wraps around it.
+ *
+ * It reads the layout instead of taking a prop because the inset differs by layout,
+ * and padding cannot go on the slot itself: padding on a `<slot>` never reaches the
+ * nodes assigned to it, so the wrapper is the only place that can carry it.
+ *
+ * It carries NO margin, and that is what keeps it free: it renders whether or not a
+ * host projected anything, so a margin would be charged on every composer. The space
+ * between a band and the text below it belongs to the host's own content.
+ */
+function PromptInputBand(props: PromptInputBandProps) {
+  const [local, rest] = splitProps(props, ['children', 'class']);
+  const ctx = usePromptInput();
+  return (
+    <div
+      data-composer-band
+      class={cn(
+        'order-first basis-full',
+        // The content column's inset, expanded only: the band and the paragraph under it
+        // are one column at 16px, while the control row stays on the frame's 10px.
+        ctx.layout() === 'expanded' && 'px-1.5',
+        local.class,
+      )}
+      {...rest}
+    >
+      {local.children}
     </div>
   );
 }
@@ -310,5 +351,6 @@ export {
   PromptInputTextarea,
   PromptInputActions,
   PromptInputAction,
+  PromptInputBand,
   usePromptInput,
 };

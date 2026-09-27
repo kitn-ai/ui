@@ -1,5 +1,5 @@
 import { For, Show } from 'solid-js';
-import { PromptInput, PromptInputTextarea } from './prompt-input';
+import { PromptInput, PromptInputTextarea, PromptInputBand } from './prompt-input';
 import { ComposerChips, chipItems } from './composer-chips';
 import type { TriggerDef, ComposerChange } from '../composer/composer';
 import { type ComposerDoc, normalizeValue, serializeToText } from '../../primitives/composer-model';
@@ -313,18 +313,19 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
         class="relative"
       >
         <Show when={canAttach() && attachments().length}>
-          {/* `order-first` and first in the DOM: the editable below carries the same
-              order so it can claim its own line, and without this the chips would be
-              lifted BELOW the paragraph they belong above. The band shares the CONTENT
-              column's edge with that paragraph: the frame pads the control row at 10px,
-              and the band and the body each add 6px, so the chips and the prose start on
-              one edge at 16px while the controls ride the frame's.
+          {/* First in the DOM: the editable below carries the same `order-first` so it can
+              claim its own line, and without this the chips would be lifted BELOW the
+              paragraph they belong above. `PromptInputBand` gives the band its own line and
+              the content column's 6px inset in the expanded layout, so the chips and the
+              prose under them start on one edge at 16px while the controls ride the
+              frame's 10px.
 
-              `mb-3.5` is 14px, and with the frame's 6px row gap that is the measured
-              20px between the chip band and the text's line box: in the reference the
-              chips' ink ends at 52 and the text's line box starts at about 71.5, with
-              a 21px line advance. A tidier `mb-2` would land 6px tight. */}
-          <div data-composer-band class="order-first mb-3.5 px-1.5">
+              `mb-5` is the measured 20px between the chip band and the text's line box: in
+              the reference the chips' ink ends at 52 and the text's line box starts at
+              about 71.5 with a 21px line advance. It used to be `mb-3.5` plus the frame's
+              6px row gap; the row gap is gone, because it would be charged to every
+              composer that projects nothing. A tidier `mb-2` would land 6px tight. */}
+          <PromptInputBand class="mb-5">
             <Attachments variant="inline">
               <For each={attachments()}>
                 {(att) => (
@@ -336,18 +337,21 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
                 )}
               </For>
             </Attachments>
-          </div>
+          </PromptInputBand>
         </Show>
-        {/* Consumer-injected content inside the card, above the textarea (e.g. an
-            inline status strip). A shadow-internal hole — unreachable from outside.
-            Native slot; inert outside a shadow root, projected by the custom element.
-            KNOW THIS: in the EXPANDED layout this content renders on the control row,
-            below the text, because the editable claims its own line with an `order`
-            the slot's assigned nodes cannot join — `order` is not inherited and does
-            not reach a slot's projected nodes, and wrapping the slot would cost the
-            collapsed row an empty box and its 8px gap. Pin `expanded` on the frame if
-            a host needs this content above the text in both layouts. */}
-        <slot name="input-top" />
+        {/* Consumer-injected content inside the card, above the textarea (e.g. an inline
+            status strip). A shadow-internal hole — unreachable from outside. Native slot;
+            inert outside a shadow root, projected by the custom element.
+
+            It rides in a BAND, so it takes its own line above the text in both layouts
+            rather than becoming a row item that shoves the leading cluster sideways — which
+            is what it did while it sat here as a bare slot, and it showed as an 8px indent
+            on the `+`. The band carries no margin of its own: it renders even when nothing
+            is projected, so a margin would be charged to every composer, and the space
+            between a band and the text belongs to the host's own content. */}
+        <PromptInputBand>
+          <slot name="input-top" />
+        </PromptInputBand>
         {/* The LEADING cluster, and it sits BEFORE the editable in the DOM: collapsed
             these controls share the text's row and belong to its left, and expanded the
             editable's own `order-first` is what moves the text onto the line above
