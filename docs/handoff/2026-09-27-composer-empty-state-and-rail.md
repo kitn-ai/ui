@@ -141,3 +141,12 @@ Recorded because the pattern is mine and it keeps costing a round: the stale `pl
 **Spec corrections 1–3** at the end of `docs/superpowers/specs/2026-09-27-rail-tree-design.md` supersede the earlier sections: the folder shape, and `Show more`/headings being inside the roving contract.
 
 **Declined:** renaming `data-group`/`data-folder` (13 sites of churn for a confusion one comment settles).
+
+
+## LADDER — the three things a partial build cannot answer
+
+1. **A full `nx build ui`** — `dist/` predates the store fix, so `setGroup` is missing from the shipped declarations and a controller typecheck against them reports one TS2339.
+2. **`npm run build:api` in `packages/ui`**, then commit the regenerated artifacts — the React wrappers and `web-component-types.d.ts` inline the store contract, so `verify:generated` compares stale text against source.
+3. **`pnpm --filter @kitn.ai/ui run verify:blocks` including the react leg** — the indent round could not run `verify:blocks:react` because it `npm pack`s and fires a full build.
+
+**These rebuild `packages/ui/dist/`, which any in-flight `verify:blocks` reads — so run them at the ladder, with nothing else live.**
