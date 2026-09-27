@@ -1850,6 +1850,12 @@
           "fn": false
         },
         {
+          "name": "showTrailing",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
           "name": "searchable",
           "scalar": true,
           "optional": true,
