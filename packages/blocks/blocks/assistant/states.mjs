@@ -294,10 +294,67 @@ let pastTheScript = null;
  *  other says a turn past its end does not replay it. */
 let typedTurn = null;
 
+// The rail's filing, captured in state 32's act: what the rows came to BEFORE
+// the conversation that state sends and after, plus the name of the biggest
+// folder. Captured rather than restated, because the counts are the app's own
+// arithmetic - and because "the folder that has to grow" is only knowable
+// before the turn that grows it.
+let railFiling = null;
+
+// The folder state 33 read: the one the demo's own tour left holding a single
+// conversation.
+let railSingle = null;
+
+// The row state 34 pins, and the folder it was in, captured in that state's act
+// for the same reason as `pinnedRowId`: which row has to move is a fact about
+// the order BEFORE the pin, and by probe time the order is the thing under test.
+let pinInFolder = null;
+
+// The conversation state 35 opens, captured in its act.
+let openInFolder = null;
+
+// State 36's search: the query, the row it was read from, and the filing before
+// it was typed.
+let railSearch = null;
+
 const firstIndexRow = (page, spec) => page.evaluate(
   (key) => { try { return JSON.parse(localStorage.getItem(key) ?? '[]')[0] ?? null; } catch { return null; } },
   spec.indexKey,
 );
+
+/** The rail's rows as the page renders them: each one's conversation, and the
+ *  project it is filed under ('' for the ungrouped remainder).
+ *
+ *  OFF THE ROW ELEMENTS, because every claim in states 32-36 is about the order
+ *  the rail actually lays out, and the page also holds an array of the same rows
+ *  that says nothing about what was rendered. The property-then-attribute read
+ *  is `readBoundValue`'s rule for its reason: the html binder writes a bound
+ *  value as an ATTRIBUTE, while the react tree writes a DECLARED prop as a
+ *  property - `data-group` is not declared, so both forms write it as the
+ *  attribute, and the fallbacks here are for the row's identity. */
+const railRows = (page) => page.evaluate(() =>
+  [...document.querySelectorAll('kai-conversations > kai-conversation-item')].map((el) => ({
+    id: el.conversationId ?? el.getAttribute('conversation-id') ?? el.id,
+    group: el.getAttribute('data-group') ?? '',
+  })),
+);
+
+/** Those rows as the groups they make: one entry per RUN, which is what the
+ *  rail renders as one folder. Derived from the rows the page rendered, never
+ *  from a list this file would have to keep in step with the block's own. */
+const groupRuns = (rows) => {
+  const runs = [];
+  for (const row of rows) {
+    const last = runs[runs.length - 1];
+    if (!last || last.group !== row.group) runs.push({ group: row.group, rows: [row] });
+    else last.rows.push(row);
+  }
+  return runs;
+};
+
+/** The runs' groups and widths as strings, so a probe can compare the shape
+ *  BEFORE against the shape after in one expression. */
+const runShape = (runs) => runs.map((run) => `${run.group}:${run.rows.length}`);
 
 export default {
   name: 'assistant',
@@ -1544,6 +1601,298 @@ export default {
         labelsSurviveTheCrossLink: true, labelsAreTheLinkedConversations: true,
         crossLinkLabelsRendered: true, typedTurnContinuesTheArc: true,
         pastTheScriptIsNotAReplay: true, noLabelsPastTheScript: true,
+      },
+    },
+    {
+      name: '32-rail-projects',
+      act: async (page) => {
+        // WHAT THE DEMO'S OWN TOUR LEFT, read before anything is sent: the guide
+        // states opened one conversation per guide and the arc states opened the
+        // rest, so the folders are the reader's own tour rather than fixtures.
+        // The only conversation this state sends is the one that proves a NEW
+        // row lands in a folder.
+        const before = groupRuns(await railRows(page));
+        const biggest = before.reduce((a, b) => (b.rows.length > a.rows.length ? b : a), { group: '', rows: [] });
+        await page.getByRole('button', { name: 'New chat' }).click();
+        await settle(300)(page);
+        const box = page.locator('kai-prompt-input').getByRole('textbox').first();
+        await box.click();
+        await box.fill('Point the mock transport at my own backend');
+        await box.press('Enter');
+        await waitForTurns(page, 2);
+        railFiling = {
+          before: runShape(before),
+          groups: before.map((run) => run.group),
+          biggest: biggest.group,
+          after: groupRuns(await railRows(page)),
+        };
+      },
+      probes: {
+        // Every project is ONE run: a group whose rows were interrupted by
+        // another group's would render as two folders, which is what "the
+        // sections are derived from the rows" has to mean on screen.
+        projectsAreContiguous: () =>
+          (railFiling?.after ?? []).length === new Set((railFiling?.after ?? []).map((run) => run.group)).size,
+        // ...and the ungrouped remainder is LAST, which is where a reader looks
+        // for the conversation they have just started.
+        recentsIsLast: () => {
+          const runs = railFiling?.after ?? [];
+          const at = runs.findIndex((run) => run.group === '');
+          return at === -1
+            || (at === runs.length - 1 && runs.filter((run) => run.group === '').length === 1);
+        },
+        // A FOLDER HOLDING ONE CONVERSATION, and one outrunning a folder's
+        // screenful: the two counts the rail's shape has to be readable at. The
+        // second is RECORDED as a number (below) rather than typed into the
+        // probe, because the limit it has to outrun is the block's own.
+        aFolderHoldsOneConversation: () =>
+          (railFiling?.after ?? []).filter((run) => run.group !== '' && run.rows.length === 1).length === 1,
+        biggestFolderCount: () => Math.max(
+          0,
+          ...(railFiling?.after ?? []).map((run) => (run.group === '' ? 0 : run.rows.length)),
+        ),
+        aFolderOutrunsAFoldersScreenful: () => Math.max(
+          0,
+          ...(railFiling?.after ?? []).map((run) => (run.group === '' ? 0 : run.rows.length)),
+        ) >= 5,
+        // THE OPENING FILED IT, and this is the demo's whole filing rule under
+        // test: the row just saved is in the folder the act measured as the
+        // biggest one, that folder is one row wider, and the rail holds exactly
+        // one more row than it did - so nothing moved between folders to make
+        // the arithmetic come out.
+        theOpeningFiledTheConversation: () => {
+          const width = (shape) => Number(shape.slice(shape.indexOf(':') + 1));
+          const was = (railFiling?.before ?? []).find((shape) => shape.startsWith(`${railFiling?.biggest}:`));
+          const is = (railFiling?.after ?? []).find((run) => run.group === railFiling?.biggest);
+          return !!was && !!is && is.rows.length === width(was) + 1
+            && (railFiling?.after ?? []).reduce((n, run) => n + run.rows.length, 0)
+              === (railFiling?.before ?? []).reduce((n, shape) => n + width(shape), 0) + 1;
+        },
+        // ...AND NO FOLDER APPEARED OR LEFT: the run order is the one the act
+        // measured, so the saved row joined a folder rather than making one.
+        theFoldersAreTheOnesThereWere: () =>
+          (railFiling?.after ?? []).map((run) => run.group).join('|')
+            === (railFiling?.groups ?? []).join('|'),
+      },
+      expect: {
+        projectsAreContiguous: true,
+        recentsIsLast: true,
+        aFolderHoldsOneConversation: true,
+        aFolderOutrunsAFoldersScreenful: true,
+        theOpeningFiledTheConversation: true,
+        theFoldersAreTheOnesThereWere: true,
+      },
+    },
+    {
+      name: '33-rail-one-conversation',
+      act: async (page) => {
+        // READ, not created: the demo's own tour leaves exactly one project
+        // holding a single conversation, which is the case a rail that renders a
+        // folder only when it looks worth it gets wrong - the shape is the
+        // reader's information architecture and not a count.
+        const runs = groupRuns(await railRows(page));
+        const single = runs.find((run) => run.group !== '' && run.rows.length === 1) ?? null;
+        railSingle = single && {
+          group: single.group,
+          id: single.rows[0].id,
+          runs: runs.filter((run) => run.group === single.group).length,
+        };
+      },
+      probes: {
+        aFolderHoldsOneConversation: () => railSingle !== null,
+        // Its one row is FILED, rather than the folder being a heading the row
+        // below it does not belong to: read off the row's own attribute, not off
+        // the run it was found in.
+        itsLoneRowIsNotInRecents: async (page) => {
+          const row = (await railRows(page)).find((candidate) => candidate.id === railSingle?.id);
+          return row !== undefined && row.group !== '';
+        },
+        // And that folder is ONE run, so it is not split around another group's
+        // rows.
+        theFolderIsNotSplit: () => railSingle?.runs === 1,
+      },
+      expect: { aFolderHoldsOneConversation: true, itsLoneRowIsNotInRecents: true, theFolderIsNotSplit: true },
+    },
+    {
+      name: '34-rail-pin-inside-a-folder',
+      act: async (page) => {
+        const runs = groupRuns(await railRows(page));
+        const rows = runs.flatMap((run) => run.rows);
+        // The BIGGEST folder, and its LAST row: "pinned first within its folder"
+        // is a claim with somewhere to be true only where the row was not
+        // already first.
+        const folder = runs.filter((run) => run.group !== '')
+          .reduce((a, b) => (b.rows.length > a.rows.length ? b : a));
+        const target = folder.rows[folder.rows.length - 1];
+        pinInFolder = {
+          group: folder.group,
+          id: target.id,
+          at: runs.findIndex((run) => run.group === folder.group),
+          width: folder.rows.length,
+          groups: runs.map((run) => run.group),
+          rows: rows.map((row) => row.id),
+          // The ungrouped remainder before the pin: the other half of the rule is
+          // that one folder's pin does not reshuffle it.
+          recents: runs.filter((run) => run.group === '')
+            .flatMap((run) => run.rows.map((row) => row.id)),
+        };
+        // The row's OWN menu, found by its place in the rail: the kebabs are one
+        // per row, in the rows' own order.
+        await page.getByRole('button', { name: /^Actions for/ })
+          .nth(rows.findIndex((row) => row.id === target.id)).click();
+        await settle(300)(page);
+        await page.getByRole('menuitem', { name: /^Pin/ }).first().click();
+        await settle(700)(page);
+        pinInFolder.after = groupRuns(await railRows(page));
+      },
+      probes: {
+        // The pinned row leads the folder it is in...
+        thePinnedRowLeadsItsFolder: () => {
+          const folder = (pinInFolder?.after ?? []).find((run) => run.group === pinInFolder?.group);
+          return (folder?.rows ?? [])[0]?.id === pinInFolder?.id;
+        },
+        // ...still in it, at the width it had: pinning does not lift a
+        // conversation out of its project.
+        theFolderKeptItsRows: () =>
+          (pinInFolder?.after ?? []).find((run) => run.group === pinInFolder?.group)?.rows.length
+            === pinInFolder?.width,
+        // ...and NO folder moved: the run order is the one the act measured.
+        theFoldersStayedPut: () =>
+          (pinInFolder?.after ?? []).map((run) => run.group).join('|')
+            === (pinInFolder?.groups ?? []).join('|'),
+        // ...AND RECENTS IS UNTOUCHED, which is the other half of the ordering
+        // rule: the remainder is recency, so a pin inside one folder does not
+        // reorder the conversations the reader has not filed.
+        recentsUntouched: () =>
+          (pinInFolder?.after ?? []).filter((run) => run.group === '')
+            .flatMap((run) => run.rows.map((row) => row.id)).join('|')
+            === (pinInFolder?.recents ?? []).join('|'),
+        // The rail still holds the SAME rows, one pin later: no row appeared or
+        // disappeared while the order changed.
+        theRowsAreTheSameRows: () =>
+          (pinInFolder?.after ?? []).flatMap((run) => run.rows.map((row) => row.id)).sort().join('|')
+            === [...(pinInFolder?.rows ?? [])].sort().join('|'),
+      },
+      expect: {
+        thePinnedRowLeadsItsFolder: true,
+        theFolderKeptItsRows: true,
+        theFoldersStayedPut: true,
+        recentsUntouched: true,
+        theRowsAreTheSameRows: true,
+      },
+    },
+    {
+      name: '35-rail-active-inside-a-folder',
+      act: async (page) => {
+        const runs = groupRuns(await railRows(page));
+        const rows = runs.flatMap((run) => run.rows);
+        // A row INSIDE a folder and not the one the last state pinned, so the
+        // claim is about an ordinary row: clicking it opens it, and it stays
+        // filed where it was.
+        const folder = runs.filter((run) => run.group !== '')
+          .reduce((a, b) => (b.rows.length > a.rows.length ? b : a));
+        const target = folder.rows[1] ?? folder.rows[0];
+        openInFolder = { id: target.id, group: folder.group };
+        await page.locator('kai-conversations > kai-conversation-item')
+          .nth(rows.findIndex((row) => row.id === target.id)).click();
+        await settle(900)(page);
+      },
+      probes: {
+        // The block's own active pointer IS the conversation that was clicked...
+        theActiveConversationIsTheRowClicked: (page) => page
+          .evaluate((id) => document.getElementById('conversations')?.activeId === id, openInFolder?.id),
+        // ...and it is filed in a folder, which is this state's whole claim: the
+        // active conversation is inside a group, so the row that lights up is a
+        // row inside the folder that holds it. The facts come back as WORDS, so a
+        // failure names which one moved.
+        theActiveRowIsInAFolder: async (page) => {
+          const seen = await page.evaluate(() => {
+            const rail = document.getElementById('conversations');
+            const items = [...document.querySelectorAll('kai-conversations > kai-conversation-item')];
+            const row = items.find((el) => (el.conversationId ?? el.getAttribute('conversation-id') ?? el.id)
+              === rail?.activeId);
+            if (!row) return null;
+            return {
+              id: rail?.activeId ?? '',
+              group: row.getAttribute('data-group') ?? '',
+              // The CONTAINER stamps the active property on the row it selects
+              // (`createConversationItemsController.sync`), and that property is
+              // what the row paints its highlight from.
+              highlighted: row.active === true,
+            };
+          });
+          if (seen === null) return 'no row in the rail carries the active id';
+          if (seen.id !== openInFolder?.id) return `active is ${seen.id}, not the row that was clicked`;
+          if (seen.group === '') return 'the active row is in the ungrouped remainder';
+          if (seen.group !== openInFolder?.group) return `the active row is filed under ${seen.group}`;
+          if (!seen.highlighted) return 'the row was selected but carries no highlight';
+          return true;
+        },
+      },
+      expect: { theActiveConversationIsTheRowClicked: true, theActiveRowIsInAFolder: true },
+    },
+    {
+      name: '36-rail-search-inside-a-folder',
+      act: async (page) => {
+        const runs = groupRuns(await railRows(page));
+        const before = runs.flatMap((run) => run.rows);
+        const folder = runs.filter((run) => run.group !== '')
+          .reduce((a, b) => (b.rows.length > a.rows.length ? b : a));
+        // A row that is NOT its folder's first: what the filter has to keep is
+        // the FOLDER the row was in, and a row that already began the folder
+        // would let a rail that dropped the group entirely pass.
+        const target = folder.rows[folder.rows.length - 1];
+        // The word comes out of the row's OWN title, longest first, and one that
+        // really NARROWS: a query that matched everything would make every probe
+        // below true whatever the filter did.
+        const title = await page.evaluate((id) => {
+          const el = [...document.querySelectorAll('kai-conversations > kai-conversation-item')]
+            .find((item) => (item.conversationId ?? item.getAttribute('conversation-id') ?? item.id) === id);
+          return el?.querySelector(':scope > span')?.textContent ?? '';
+        }, target.id);
+        const box = page.locator('kai-conversations').getByRole('textbox').first();
+        const words = [...new Set(title.toLowerCase().split(/[^a-z0-9]+/).filter((word) => word.length >= 5))]
+          .sort((a, b) => b.length - a.length);
+        let query = '';
+        for (const word of words) {
+          await box.fill(word);
+          await settle(400)(page);
+          if ((await railRows(page)).length < before.length) {
+            query = word;
+            break;
+          }
+        }
+        railSearch = {
+          query,
+          id: target.id,
+          group: folder.group,
+          was: before.length,
+          after: groupRuns(await railRows(page)),
+        };
+      },
+      probes: {
+        // A query really narrowed the rail...
+        theFilterNarrowed: () => railSearch?.query !== ''
+          && (railSearch?.after ?? []).flatMap((run) => run.rows).length < (railSearch?.was ?? 0),
+        // ...the row it was read from is still in it...
+        theMatchSurvived: () => (railSearch?.after ?? [])
+          .flatMap((run) => run.rows).some((row) => row.id === railSearch?.id),
+        // ...and that row is still filed where it was, which is what lets the
+        // folder be opened on the match instead of the match lying loose in the
+        // rail. Read off the row's own attribute.
+        theRowKeptItsFolder: async (page) => {
+          const row = (await railRows(page)).find((candidate) => candidate.id === railSearch?.id);
+          return row !== undefined && row.group !== '' && row.group === railSearch?.group;
+        },
+        // And the folder is still ONE run, so its heading has somewhere to go.
+        theFolderSurvivedAsOneRun: () =>
+          (railSearch?.after ?? []).filter((run) => run.group === railSearch?.group).length === 1,
+      },
+      expect: {
+        theFilterNarrowed: true,
+        theMatchSurvived: true,
+        theRowKeptItsFolder: true,
+        theFolderSurvivedAsOneRun: true,
       },
     },
   ],

@@ -371,6 +371,57 @@
             "noLabelsPastTheScript": true
           },
           "styles": {}
+        },
+        {
+          "name": "32-rail-projects",
+          "probes": {
+            "projectsAreContiguous": true,
+            "recentsIsLast": true,
+            "aFolderHoldsOneConversation": true,
+            "biggestFolderCount": 5,
+            "aFolderOutrunsAFoldersScreenful": true,
+            "theOpeningFiledTheConversation": true,
+            "theFoldersAreTheOnesThereWere": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "33-rail-one-conversation",
+          "probes": {
+            "aFolderHoldsOneConversation": true,
+            "itsLoneRowIsNotInRecents": true,
+            "theFolderIsNotSplit": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "34-rail-pin-inside-a-folder",
+          "probes": {
+            "thePinnedRowLeadsItsFolder": true,
+            "theFolderKeptItsRows": true,
+            "theFoldersStayedPut": true,
+            "recentsUntouched": true,
+            "theRowsAreTheSameRows": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "35-rail-active-inside-a-folder",
+          "probes": {
+            "theActiveConversationIsTheRowClicked": true,
+            "theActiveRowIsInAFolder": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "36-rail-search-inside-a-folder",
+          "probes": {
+            "theFilterNarrowed": true,
+            "theMatchSurvived": true,
+            "theRowKeptItsFolder": true,
+            "theFolderSurvivedAsOneRun": true
+          },
+          "styles": {}
         }
       ],
       "consoleErrors": [],
@@ -743,6 +794,57 @@
             "typedTurnContinuesTheArc": true,
             "pastTheScriptIsNotAReplay": true,
             "noLabelsPastTheScript": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "32-rail-projects",
+          "probes": {
+            "projectsAreContiguous": true,
+            "recentsIsLast": true,
+            "aFolderHoldsOneConversation": true,
+            "biggestFolderCount": 5,
+            "aFolderOutrunsAFoldersScreenful": true,
+            "theOpeningFiledTheConversation": true,
+            "theFoldersAreTheOnesThereWere": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "33-rail-one-conversation",
+          "probes": {
+            "aFolderHoldsOneConversation": true,
+            "itsLoneRowIsNotInRecents": true,
+            "theFolderIsNotSplit": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "34-rail-pin-inside-a-folder",
+          "probes": {
+            "thePinnedRowLeadsItsFolder": true,
+            "theFolderKeptItsRows": true,
+            "theFoldersStayedPut": true,
+            "recentsUntouched": true,
+            "theRowsAreTheSameRows": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "35-rail-active-inside-a-folder",
+          "probes": {
+            "theActiveConversationIsTheRowClicked": true,
+            "theActiveRowIsInAFolder": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "36-rail-search-inside-a-folder",
+          "probes": {
+            "theFilterNarrowed": true,
+            "theMatchSurvived": true,
+            "theRowKeptItsFolder": true,
+            "theFolderSurvivedAsOneRun": true
           },
           "styles": {}
         }

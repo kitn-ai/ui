@@ -74,12 +74,18 @@
         @kai-toggle-sidebar="collapseRail"
         @kai-search="search"
       >
+        <!-- THE PROJECT EACH ROW IS FILED UNDER, bound so the rail SAYS it
+             rather than implying it through the order: the folder the Projects
+             section groups the row into, and empty for the ungrouped remainder.
+             The folder heading itself rides on the row below, because the page
+             grammar clones one element per repeat and cannot nest a second list. -->
         <kai-conversation-item
           *for="row of conversationRows"
           :key="row.id"
           :theme="themeMode"
           :conversation-id="row.id"
           :unread="row.unread"
+          :data-group="row.groupName"
         >
           <!-- The title, and - only while that row is the one being renamed -
                an inline field in its place. kai-editable-label is driven as a
