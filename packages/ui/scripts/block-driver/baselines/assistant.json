@@ -204,7 +204,13 @@
             "askedIsAQuestion": true,
             "answerIsSubstantial": true,
             "cardsGone": true,
-            "railUnchanged": true
+            "railUnchanged": true,
+            "followUpTurnArrived": true,
+            "followUpAlternates": true,
+            "followUpIsSubstantial": true,
+            "followUpHasAFence": true,
+            "aNextStepWasOffered": true,
+            "labelsMovedOn": true
           },
           "styles": {}
         },
@@ -216,7 +222,13 @@
             "askedIsAQuestion": true,
             "answerIsSubstantial": true,
             "cardsGone": true,
-            "railUnchanged": true
+            "railUnchanged": true,
+            "followUpTurnArrived": true,
+            "followUpAlternates": true,
+            "followUpIsSubstantial": true,
+            "followUpHasAFence": true,
+            "aNextStepWasOffered": true,
+            "labelsMovedOn": true
           },
           "styles": {}
         },
@@ -228,7 +240,13 @@
             "askedIsAQuestion": true,
             "answerIsSubstantial": true,
             "cardsGone": true,
-            "railUnchanged": true
+            "railUnchanged": true,
+            "followUpTurnArrived": true,
+            "followUpAlternates": true,
+            "followUpIsSubstantial": true,
+            "followUpHasAFence": true,
+            "aNextStepWasOffered": true,
+            "labelsMovedOn": true
           },
           "styles": {}
         },
@@ -240,7 +258,13 @@
             "askedIsAQuestion": true,
             "answerIsSubstantial": true,
             "cardsGone": true,
-            "railUnchanged": true
+            "railUnchanged": true,
+            "followUpTurnArrived": true,
+            "followUpAlternates": true,
+            "followUpIsSubstantial": true,
+            "followUpHasAFence": true,
+            "aNextStepWasOffered": true,
+            "labelsMovedOn": true
           },
           "styles": {}
         },
@@ -478,7 +502,13 @@
             "askedIsAQuestion": true,
             "answerIsSubstantial": true,
             "cardsGone": true,
-            "railUnchanged": true
+            "railUnchanged": true,
+            "followUpTurnArrived": true,
+            "followUpAlternates": true,
+            "followUpIsSubstantial": true,
+            "followUpHasAFence": true,
+            "aNextStepWasOffered": true,
+            "labelsMovedOn": true
           },
           "styles": {}
         },
@@ -490,7 +520,13 @@
             "askedIsAQuestion": true,
             "answerIsSubstantial": true,
             "cardsGone": true,
-            "railUnchanged": true
+            "railUnchanged": true,
+            "followUpTurnArrived": true,
+            "followUpAlternates": true,
+            "followUpIsSubstantial": true,
+            "followUpHasAFence": true,
+            "aNextStepWasOffered": true,
+            "labelsMovedOn": true
           },
           "styles": {}
         },
@@ -502,7 +538,13 @@
             "askedIsAQuestion": true,
             "answerIsSubstantial": true,
             "cardsGone": true,
-            "railUnchanged": true
+            "railUnchanged": true,
+            "followUpTurnArrived": true,
+            "followUpAlternates": true,
+            "followUpIsSubstantial": true,
+            "followUpHasAFence": true,
+            "aNextStepWasOffered": true,
+            "labelsMovedOn": true
           },
           "styles": {}
         },
@@ -514,7 +556,13 @@
             "askedIsAQuestion": true,
             "answerIsSubstantial": true,
             "cardsGone": true,
-            "railUnchanged": true
+            "railUnchanged": true,
+            "followUpTurnArrived": true,
+            "followUpAlternates": true,
+            "followUpIsSubstantial": true,
+            "followUpHasAFence": true,
+            "aNextStepWasOffered": true,
+            "labelsMovedOn": true
           },
           "styles": {}
         },

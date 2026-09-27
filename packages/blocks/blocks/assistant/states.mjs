@@ -47,10 +47,28 @@ let menuFocusRoles = null;
 // whether or not the click had added one.
 let guideRowsBefore = null;
 
+// And the count immediately AFTER that click, because the guide's own next step
+// is clicked later in the same act and a SUGGESTION CLICK IS A SUBMIT: it goes
+// through the same path a typed message does, so it writes the thread the reader
+// now has and the rail legitimately gains its row. Comparing the end of the act
+// against `guideRowsBefore` would therefore assert the wrong thing and fail - the
+// claim under test is about the CARD click, so the number has to be taken where
+// that claim lives.
+let guideRowsAfterCard = null;
+
 // The thread a card click produced, captured in that click's act for the same
 // reason: the shapes asserted below are read from what the app built, never
 // retyped here.
 let guideThread = null;
+
+// The guide's SECOND answer: the one its own `*Next:*` label asks for, captured
+// in that click's act. Two things are being checked and they are different: that
+// a clicked label produced a turn at all, and that the turn belongs to THIS
+// guide's script rather than to the fallback one. The mock keys a conversation by
+// the question that opened it and the turn by how many answers the thread has, so
+// a key that drifted in one file and not the other would answer with the wrong
+// script - visibly, and with every unit test green without this state.
+let guideFollowUp = null;
 
 // The four cards, in the order they must render: the path a developer meets
 // them. Spelled once so the state that lists them and the four that click them
@@ -803,6 +821,7 @@ export default {
         guideRowsBefore = await page.locator('kai-conversation-item').count();
         await page.getByRole('button', { name: cardLabel }).click();
         await settle(400)(page);
+        guideRowsAfterCard = await page.locator('kai-conversation-item').count();
         // CAPTURED, not restated: the guide's own sentences are approved content
         // that lives in the controller, and a probe that retyped them would be
         // asserting its own copy instead of what the click produced. What is
@@ -825,6 +844,28 @@ export default {
             answerLength: textOf(messages[messages.length - 1]).length,
           };
         });
+        // THE GUIDE'S OWN NEXT STEP, clicked rather than typed. The label comes
+        // OUT of the captured set, so a reworded `*Next:*` line moves this state
+        // with it instead of silently clicking nothing.
+        const offered = await suggestionLabels(page);
+        await page.getByRole('button', { name: offered[0], exact: true }).click();
+        await settle(4000)(page);
+        guideFollowUp = await page.evaluate(() => {
+          const thread = document.getElementById('thread');
+          const messages = thread?.messages ?? [];
+          const textOf = (m) => (m?.parts ?? []).filter((p) => p.type === 'text').map((p) => p.text).join('');
+          const last = textOf(messages[messages.length - 1]);
+          return {
+            count: messages.length,
+            roles: messages.map((m) => m.role).join(','),
+            answerLength: last.length,
+            // A SHAPE, not the wording: every guide's second step answers with a
+            // code fence, which is what makes the guide a guide.
+            hasFence: last.includes('```'),
+          };
+        });
+        guideFollowUp.offered = offered;
+        guideFollowUp.later = await suggestionLabels(page);
       },
       probes: {
         twoTurns: () => guideThread?.count === 2,
@@ -835,16 +876,36 @@ export default {
         answerIsSubstantial: () => (guideThread?.answerLength ?? 0) > 60,
         // The cards belong to the EMPTY state: once a guide is open they are gone.
         cardsGone: (page) => page.getByRole('button', { name: 'Wire a model' }).count().then((n) => n === 0),
-        // AND THE RAIL DID NOT CHANGE - the regression the boot-time seeding hit,
-        // where a seed became the rail's first row and took the subject away from
-        // the state running. A click is the reader's own act: it seeds the thread
-        // and writes nothing, and the row appears when they send their next
-        // message, which `submit` already does.
-        railUnchanged: (page) => page.locator('kai-conversation-item').count().then((n) => n === guideRowsBefore),
+        // AND THE CARD CLICK DID NOT CHANGE THE RAIL - the regression the
+        // boot-time seeding hit, where a seed became the rail's first row and
+        // took the subject away from the state running. A click is the reader's
+        // own act: it seeds the thread and writes nothing, and the row appears
+        // when they send their next message, which `submit` already does - and
+        // which the follow-up click below IS, so the count is compared across the
+        // CARD click alone rather than across the whole act.
+        railUnchanged: () => guideRowsAfterCard === guideRowsBefore,
+        // THE SECOND ANSWER IS THIS GUIDE'S. Four turns rather than two, the
+        // alternation intact, and an answer that carries a fence - none of which
+        // the fallback script would produce for the question that opened this
+        // thread.
+        followUpTurnArrived: () => guideFollowUp?.count === 4,
+        followUpAlternates: () => guideFollowUp?.roles === 'user,assistant,user,assistant',
+        followUpIsSubstantial: () => (guideFollowUp?.answerLength ?? 0) > 60,
+        followUpHasAFence: () => guideFollowUp?.hasFence === true,
+        // A label was offered for that step, and after it the labels MOVED: the
+        // step the reader just took is no longer on offer.
+        aNextStepWasOffered: () => (guideFollowUp?.offered ?? []).length >= 1,
+        labelsMovedOn: () => {
+          const before = guideFollowUp?.offered ?? [];
+          const after = guideFollowUp?.later ?? [];
+          return after.length > 0 && !before.includes(after[0]);
+        },
       },
       expect: {
         twoTurns: true, userThenAssistant: true, askedIsAQuestion: true,
         answerIsSubstantial: true, cardsGone: true, railUnchanged: true,
+        followUpTurnArrived: true, followUpAlternates: true, followUpIsSubstantial: true,
+        followUpHasAFence: true, aNextStepWasOffered: true, labelsMovedOn: true,
       },
     })),
     {
