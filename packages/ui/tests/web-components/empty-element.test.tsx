@@ -62,17 +62,20 @@ describe('kai-empty: the host carries the box the layout needs', () => {
     expect(css, 'the host is a column').toMatch(/:host\s*\{[^}]*flex-direction\s*:\s*column/);
   });
 
-  it('states the host box in one rule, not scattered across its children', async () => {
+  it('states the host box, not one of its children\'s', async () => {
     const host = await mount('<kai-empty></kai-empty>');
     // The shadow root carries OTHER `:host` blocks — the theme's own variable set is one
-    // of them — so pick the rule that declares the box rather than the first `:host{`.
-    const hostRules = [...stylesOf(host).matchAll(/:host\s*\{([^}]*)\}/g)].map((m) => m[1]);
-    const boxRule = hostRules.find((r) => /display\s*:\s*flex/.test(r));
-    expect(boxRule, 'a :host rule declares the host box').toBeTruthy();
-    // The three properties live in the SAME block, which is what makes this a statement
-    // about the box rather than three coincidences: three separate rules would satisfy the
-    // assertions above and still leave whichever one a child could have expressed.
-    expect(boxRule).toMatch(/flex\s*:\s*1/);
-    expect(boxRule).toMatch(/flex-direction\s*:\s*column/);
+    // of them, so a naive first-`:host{` search finds the wrong rule, and the compiled
+    // sheet is in here whole — so each property is matched against a single `:host` block
+    // rather than against the text at large.
+    //
+    // Deliberately NOT asserted: that the three live in the SAME block. Three `:host`
+    // rules would behave identically, so requiring one rule would fail a refactor that
+    // changed nothing — and a test that fails for a reason nobody can act on is how a
+    // suite teaches people to reroute around it.
+    const css = stylesOf(host);
+    for (const decl of ['display\\s*:\\s*flex', 'flex\\s*:\\s*1', 'flex-direction\\s*:\\s*column']) {
+      expect(css, `a :host block declares ${decl}`).toMatch(new RegExp(`:host\\s*\\{[^}]*${decl}`));
+    }
   });
 });
