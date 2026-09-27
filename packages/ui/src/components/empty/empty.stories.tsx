@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
-import { createSignal, For } from 'solid-js';
+import { createSignal, For, onCleanup, onMount } from 'solid-js';
+import '../../web-components/register/register'; // side effect: registers the kai-* elements
 import {
   Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription, EmptyContent,
 } from './empty';
@@ -11,6 +12,20 @@ import {
   FolderPlus, MessageCircleQuestion, Inbox, Search, Sparkles, FileText, ArrowUp, Plus, Upload,
 } from 'lucide-solid';
 import { componentDescription } from '../../stories/docs/web-component-controls';
+
+// The `kai-thread` and `kai-empty` elements below are registered by `register.ts` and
+// typed by `web-component-types.d.ts`, which augments React's JSX rather than Solid's.
+// Declared here the way `chat-slots.stories.tsx` does it. `slot` rides along so the
+// projection reads as the platform attribute it is.
+declare module 'solid-js' {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace JSX {
+    interface IntrinsicElements {
+      'kai-thread': JSX.HTMLAttributes<HTMLElement> & { messages?: unknown };
+      'kai-empty': JSX.HTMLAttributes<HTMLElement> & { 'empty-title'?: string; description?: string };
+    }
+  }
+}
 
 // `EmptyMedia`'s `variant` is the only enum prop, so the controls cover the composition
 // and the variation stories are compositional.
@@ -239,8 +254,10 @@ export const SuggestionPills: Story = {
 </Empty>`),
 };
 
-/** Suggestions as a full-width list (PromptSuggestion `block`), best for
- *  longer, sentence-length prompts. This is the report chat dock's pattern. */
+/** Suggestions as full-width, left-aligned list rows (`PromptSuggestion block`),
+ *  stacked in a single column. Sentence-length questions read better this way than
+ *  as wrapped pills, and a row wraps its own long text down the row instead of
+ *  clipping it. */
 export const SuggestionList: Story = {
   name: 'Suggestions: List (block)',
   render: () => (
@@ -253,11 +270,11 @@ export const SuggestionList: Story = {
         </EmptyHeader>
         <EmptyContent class="max-w-none">
           <For each={[
-            'What does being a Catalyst mean for how I work with others?',
-            'How do my Dominance and Influence styles play off each other?',
-            'Where might my lower Conscientiousness trip me up?',
+            'Summarize the last quarter',
+            'What changed in the release notes?',
+            'Draft a short brief from these threads',
           ]}>
-            {(s) => <PromptSuggestion block>{s}</PromptSuggestion>}
+            {(s) => <PromptSuggestion block class="w-full">{s}</PromptSuggestion>}
           </For>
         </EmptyContent>
       </Empty>
@@ -270,9 +287,89 @@ export const SuggestionList: Story = {
     <EmptyDescription>Ask me anything about your report.</EmptyDescription>
   </EmptyHeader>
   <EmptyContent class="max-w-none">
-    <For each={prompts}>{(s) => <PromptSuggestion block>{s}</PromptSuggestion>}</For>
+    <For each={questions}>{(q) => <PromptSuggestion block class="w-full">{q}</PromptSuggestion>}</For>
   </EmptyContent>
 </Empty>`),
+};
+
+/** The `empty` slot replaced. Two `kai-thread` elements render the same
+ *  `slot="empty"` projection: the kit's default (an icon tile, a title, a
+ *  description, a primary action) and a host's own empty state built from a
+ *  different icon, its own title copy, and a form below instead of a button.
+ *  Only the content inside the slot changes, so the centring, the token-driven
+ *  colors, and the degrading behaviour under a short or a tall parent all stay
+ *  the component's. */
+export const CustomEmptyState: Story = {
+  name: 'Your own empty state (slot replaced)',
+  render: () => {
+    let def: (HTMLElement & { messages?: unknown }) | undefined;
+    let own: (HTMLElement & { messages?: unknown }) | undefined;
+    onMount(() => {
+      // An empty thread renders the zero-state: the built-in one on the left, the
+      // projected `slot="empty"` content on the right.
+      if (def) def.messages = [];
+      if (own) own.messages = [];
+    });
+    return (
+      <div class="grid w-full max-w-3xl grid-cols-1 gap-6 md:grid-cols-2">
+        <div class="flex flex-col gap-2">
+          <span class="text-xs font-medium text-muted-foreground">The kit's default empty state</span>
+          <div class="flex min-h-[320px] flex-col overflow-hidden rounded-lg border border-border">
+            <kai-thread ref={(e) => (def = e as HTMLElement & { messages?: unknown })} />
+          </div>
+        </div>
+        <div class="flex flex-col gap-2">
+          <span class="text-xs font-medium text-muted-foreground">Your own, via slot=&quot;empty&quot;</span>
+          <div class="flex min-h-[320px] flex-col overflow-hidden rounded-lg border border-border">
+            <kai-thread ref={(e) => (own = e as HTMLElement & { messages?: unknown })}>
+              <div slot="empty" class="flex h-full w-full">
+                <kai-empty
+                  empty-title="Sign in to your workspace"
+                  description="We'll email a one-time link. No password to remember."
+                >
+                  <svg slot="media" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-6"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" /><path d="m10 17 5-5-5-5" /><path d="M15 12H3" /></svg>
+                  <input
+                    type="email"
+                    placeholder="you@example.com"
+                    class="h-9 w-full rounded-md border border-input bg-background px-3 text-sm outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
+                  />
+                  <button
+                    type="button"
+                    class="h-9 w-full rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground"
+                  >Email me a link</button>
+                </kai-empty>
+              </div>
+            </kai-thread>
+          </div>
+        </div>
+      </div>
+    );
+  },
+  ...src(`<!-- the thread's built-in empty state, shown while messages is empty -->
+<kai-thread id="thread"></kai-thread>
+
+<!-- replace it: your own markup, projected into slot="empty" -->
+<kai-thread id="thread">
+  <div slot="empty" style="display:flex;height:100%">
+    <div style="
+      display:flex; flex-direction:column; align-items:center; gap:1.5rem;
+      padding:1.5rem; margin:auto; text-align:center;
+    ">
+      <svg style="width:1.5rem;height:1.5rem"><!-- your icon --></svg>
+      <h2 style="margin:0; font-weight:500">Sign in to your workspace</h2>
+      <p style="margin:0; color:var(--color-muted-foreground)">
+        We'll email a one-time link. No password to remember.
+      </p>
+      <input type="email" placeholder="you@example.com" style="width:100%" />
+      <button style="width:100%">Email me a link</button>
+    </div>
+  </div>
+</kai-thread>
+
+<script type="module">
+  import '@kitn.ai/ui/web-components';
+  document.querySelectorAll('kai-thread').forEach((t) => { t.messages = []; });
+</script>`),
 };
 
 /** Suggestions organized into labeled groups (mirrors the Prompt Input
