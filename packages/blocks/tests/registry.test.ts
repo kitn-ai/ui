@@ -302,11 +302,14 @@ describe('the CDN-form generator', () => {
     expect(html).not.toMatch(/x-release-please/);
   });
 
-  it('maps ONLY the phase-2-proven entries, refusing the root export loudly', () => {
+  it('maps ONLY the proven self-contained entries, refusing the root export loudly', () => {
     // Sorted, so the list is checked as a SET: the subpath rename moved
     // @kitn.ai/ui/web-components' position and that is not a behaviour change.
+    // `schemas` is here because `verify:cdn-entries` covers `schemas.js` — an
+    // entry earns its place by that gate, not by being wanted.
     expect(Object.keys(CDN_IMPORT_ENTRIES).sort()).toEqual([
       '@kitn.ai/ui/autoloader',
+      '@kitn.ai/ui/schemas',
       '@kitn.ai/ui/state',
       '@kitn.ai/ui/stores',
       '@kitn.ai/ui/web-components',
@@ -316,6 +319,9 @@ describe('the CDN-form generator', () => {
     expect(rewriteBareImport('@kitn.ai/ui/react', 'B/').error).toMatch(/not in the proven/);
     expect(rewriteBareImport('lodash', 'B/').error).toMatch(/cannot resolve/);
     expect(rewriteBareImport('@kitn.ai/ui/wire', 'B/').url).toBe('B/wire.js');
+    // The MAPPING, not just membership: an entry in the set that rewrote to the wrong
+    // dist file would satisfy the list assertion above and still fail in a browser.
+    expect(rewriteBareImport('@kitn.ai/ui/schemas', 'B/').url).toBe('B/schemas.js');
   });
 
   it('a block importing the root export fails generation with the phase-2 reason', () => {

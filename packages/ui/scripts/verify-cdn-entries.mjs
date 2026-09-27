@@ -41,7 +41,7 @@ const SELF_TEST = argv.includes('--self-test');
 
 /** The self-contained contract: dist files a no-build page may import by raw
  *  URL. Relative paths from dist/. See the header — enrollment is deliberate. */
-const SELF_CONTAINED_ENTRIES = ['state.js', 'wire.js', 'stores.js'];
+const SELF_CONTAINED_ENTRIES = ['state.js', 'wire.js', 'stores.js', 'schemas.js'];
 
 /** Every static/dynamic import specifier in an ES module's text. Rollup lib
  *  output keeps statics at top-level statements, so text-level extraction is

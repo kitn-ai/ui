@@ -512,14 +512,18 @@ export function buildRegistryItem(block: Block): BlockManifest & {
 
 // ------------------------------------------------------- the CDN-form pass
 
-/** Bare specifier → dist path, ONLY for the entries phase 2 of the
- *  composition spike proved self-contained over a raw URL (state.js /
- *  wire.js / stores.js / the elements autoloader / the register-all bundle).
+/** Bare specifier → dist path, ONLY for the entries proven self-contained over a
+ *  raw URL: state.js / wire.js / stores.js / the elements autoloader / the
+ *  register-all bundle from phase 2 of the composition spike, plus `schemas.js`
+ *  (added 2026-09-26), which carries zero import specifiers and is now enrolled
+ *  in `verify:cdn-entries` — that gate is what proves the promise, so an entry
+ *  belongs here only once it covers it.
  *  The root export is deliberately absent: phase 2 captured it failing live
  *  on a bare `solid-js` import (`index-root-import.html`). */
 export const CDN_IMPORT_ENTRIES: Readonly<Record<string, string>> = {
   '@kitn.ai/ui/autoloader': 'web-components/autoloader.js',
   '@kitn.ai/ui/web-components': 'kai.es.js',
+  '@kitn.ai/ui/schemas': 'schemas.js',
   '@kitn.ai/ui/state': 'state.js',
   '@kitn.ai/ui/wire': 'wire.js',
   '@kitn.ai/ui/stores': 'stores.js',

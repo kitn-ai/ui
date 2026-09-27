@@ -59,6 +59,7 @@
 import { createAssistantStream } from '@kitn.ai/ui/state';
 import type { ChatMessage } from '@kitn.ai/ui/state';
 import { readOpenAIStream, type StreamSource } from '@kitn.ai/ui/wire';
+import { cardFromToolCall } from '@kitn.ai/ui/schemas';
 import {
   localStorageStore,
   createConversationController,
@@ -193,15 +194,6 @@ export interface AssistantTransport {
 
 const ASSISTANT_ACTIONS = ['copy', 'like', 'dislike'] as const;
 const USER_ACTIONS = ['edit'] as const;
-
-/** The kit's card-tool convention: a tool named `kai_<type>` produces a card of
- *  that type, and the CALL'S OWN ARGUMENTS are the card's data. The kit implements
- *  this once, as `cardFromToolCall` in its `schemas` entry - which a block cannot
- *  import: a paste form may only name the entries its self-contained CDN bundle
- *  proves, and `schemas` is not one of them (the block generator refuses it by
- *  name). So the three lines are restated here rather than a fourth path
- *  invented. There is nothing to decide in them: a prefix and a field copy. */
-const KAI_CARD_TOOL_PREFIX = 'kai_';
 
 /** The operations a rail row's menu can perform, in the order the menu renders
  *  them (Share is not here: it has no handler to name). */
@@ -1035,18 +1027,15 @@ export function createController(deps: AssistantDeps): AssistantController {
           // tool loop, and the composition-only mode throws by name.
           const output = transport.toolOutput(part.tool.type);
           // A CARD TOOL IS NOT A TOOL RESULT: `kai_<type>` names a card, and the
-          // envelope comes from the call's own arguments (see the prefix's note
-          // above). It is deliberately the ONLY card path here, because a card
-          // built this way replaces itself in place when the same call is
-          // revised: `upsertCardPart` keys on the envelope id, which is the
-          // provider's own call id.
-          const card = part.tool.type.startsWith(KAI_CARD_TOOL_PREFIX)
-            ? {
-                type: part.tool.type.slice(KAI_CARD_TOOL_PREFIX.length),
-                id: part.tool.toolCallId ?? part.tool.type,
-                data: part.tool.input ?? {},
-              }
-            : undefined;
+          // envelope comes from the call's own arguments. `cardFromToolCall` is the
+          // kit's one implementation of that mapping, imported rather than restated,
+          // and it returns null for a name that is not a card tool. It is
+          // deliberately the ONLY card path here, because a card built this way
+          // replaces itself in place when the same call is revised: `upsertCardPart`
+          // keys on the envelope id, which is the provider's own call id.
+          const card = cardFromToolCall(part.tool.type, part.tool.input, {
+            id: part.tool.toolCallId ?? part.tool.type,
+          });
           if (card && part.tool.toolCallId) {
             stream.addCard(card);
             // The call PRODUCED the card, so it settles - what is still pending

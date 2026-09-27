@@ -140,7 +140,68 @@ const set = (props) => page.evaluate((p) => {
   for (const [k, v] of Object.entries(p)) el[k] = v;
   return true;
 }, props);
-const settle = () => page.waitForTimeout(120);
+/**
+ * Wait until the composer's geometry STOPS CHANGING, instead of for a fixed delay.
+ *
+ * This probe is the project's only geometry evidence, and a bare 120ms delay was its only
+ * waiting mechanism: on a loaded machine a layout that had not landed yet made a check
+ * measure the PREVIOUS state, which reads as a pass rather than as a failure. So this reads
+ * a fingerprint of the boxes every check can assert — the frame, its body, the editable and
+ * the controls — and returns once that fingerprint has been unchanged for
+ * `STABLE_READS` consecutive reads.
+ *
+ * THREE identical reads, not two, and the margin is the point: a property write updates the
+ * DOM synchronously, then the ResizeObserver fires on the NEXT animation frame and only
+ * then does the layout flip, so two adjacent reads can agree on a state that is about to
+ * change. Two intervals (about 32ms) covers a frame at any refresh rate, which is what
+ * makes the agreement mean "landed" rather than "not yet started".
+ *
+ * Bounded, and it THROWS by name: a composer that never stops moving is a defect to report,
+ * not a wait to extend. (Menu surfaces are portaled, so they do not move these boxes; where
+ * a check needs the menu itself it waits for that surface, as the call sites do.)
+ */
+const GEOMETRY_POLL_MS = 16;
+const GEOMETRY_MAX_READS = 125; // about two seconds
+const STABLE_READS = 3;
+const geometry = () => page.evaluate(() => {
+  const el = document.getElementById('c');
+  const root = el?.shadowRoot;
+  if (!root) return 'no-shadow-root';
+  const box = (n) => {
+    if (!n) return 'none';
+    const r = n.getBoundingClientRect();
+    return `${r.x.toFixed(2)},${r.y.toFixed(2)},${r.width.toFixed(2)},${r.height.toFixed(2)}`;
+  };
+  const frame = root.querySelector('[data-prompt-input]');
+  return [
+    box(frame),
+    box(root.querySelector('[data-composer-body]')),
+    box(root.querySelector('[data-kai-composer-editable]')),
+    box(root.querySelector('button[part="tools"]')),
+    box(root.querySelector('[data-testid="send"]')),
+    frame ? frame.className : 'no-frame',
+  ].join('|');
+});
+const settle = async () => {
+  let previous;
+  let unchanged = 0;
+  for (let read = 0; read < GEOMETRY_MAX_READS; read += 1) {
+    const now = await geometry();
+    if (now === previous) {
+      unchanged += 1;
+      if (unchanged >= STABLE_READS) return;
+    } else {
+      unchanged = 0;
+      previous = now;
+    }
+    await page.waitForTimeout(GEOMETRY_POLL_MS);
+  }
+  throw new Error(
+    `probe: the composer's geometry never settled after ${GEOMETRY_MAX_READS} reads (~${Math.round(
+      (GEOMETRY_MAX_READS * GEOMETRY_POLL_MS) / 1000,
+    )}s). Last read: ${previous}`,
+  );
+};
 
 /**
  * Set the value and WAIT until the editable shows it. A fixed delay is not enough:
