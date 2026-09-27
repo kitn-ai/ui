@@ -1,5 +1,5 @@
 import { For, Show } from 'solid-js';
-import { PromptInput, PromptInputTextarea, PromptInputActions } from './prompt-input';
+import { PromptInput, PromptInputTextarea } from './prompt-input';
 import type { TriggerDef, ComposerChange } from '../composer/composer';
 import { type ComposerDoc, normalizeValue, serializeToText } from '../../primitives/composer-model';
 import { PromptSuggestion } from './prompt-suggestion';
@@ -274,13 +274,15 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
             editable's own `order-first` is what moves the text onto the line above
             them. Deliberately no order of its own — the ordering lives in one place,
             on the body wrapper, rather than in three class strings that have to agree.
-            No width or shrink of its own either: the wrapper is `contents`, so what the
-            frame actually lays out is the group div below, and that div is what keeps
-            this cluster ONE item on whichever row it lands on. Nothing here has to state
-            which layout it is in — collapsed the body's `flex-1` absorbs the free space
-            ahead of it, expanded the frame's `justify-between` places it at the start of
-            the wrapped row. */}
-        <PromptInputActions data-cluster="leading">
+
+            A plain `div` carrying `contents`, NOT `PromptInputActions`: that component is
+            the BOX form, for a caller whose own `justify-*` needs a width to distribute
+            across. Nothing here has to state which layout it is in — collapsed the
+            body's `flex-1` absorbs the free space ahead of it, expanded the frame's
+            `justify-between` places it at the start of the wrapped row. `contents`
+            contributes no box, so the item the frame actually lays out is the group div
+            below — which is what keeps this cluster ONE item on whichever row it lands. */}
+        <div data-cluster="leading" class="contents">
           <div class="flex items-center gap-2">
             {/* Consumer-injected leading toolbar controls (e.g. a + menu). display:contents
                 ensures an empty slot adds no stray gap; projected nodes lay out as toolbar
@@ -374,14 +376,18 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
               }}
             </For>
           </div>
-        </PromptInputActions>
+        </div>
         <PromptInputTextarea placeholder={props.placeholder} aria-label={props.placeholder || 'Message'} triggers={props.triggers} kindIcons={props.kindIcons} onComposerChange={props.onComposerChange} />
         {/* The TRAILING cluster. It reaches the far edge of whichever row it lands on
             without asking for one: collapsed the body's `flex-1` absorbs the free space
             ahead of it, expanded the frame's `justify-between` puts it last. The
             `toolbar-end` slot and the send button live together so they stay adjacent
-            at that edge. Native slot; projected by the element. */}
-        <PromptInputActions data-cluster="trailing">
+            at that edge. Native slot; projected by the element.
+
+            `contents` for the same reason as the leading cluster: the frame lays out
+            the group div, not this wrapper, and the frame's own distribution is what
+            spreads the two clusters. */}
+        <div data-cluster="trailing" class="contents">
           <div class="flex items-center gap-2">
             <slot name="toolbar-end" />
             <Show
@@ -416,7 +422,7 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
               </Button>
             </Show>
           </div>
-        </PromptInputActions>
+        </div>
       </PromptInput>
     </>
   );

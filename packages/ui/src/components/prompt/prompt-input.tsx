@@ -156,9 +156,16 @@ function PromptInputTextarea(props: PromptInputTextareaProps) {
   // The frame (PromptInput root) still owns radius/bg/padding/focus-ring — and now
   // EVERY inset as well, so this editable carries none of its own: the paragraph and
   // the buttons beside or under it start on one edge BY CONSTRUCTION rather than by
-  // two values that have to agree. `min-h-6` is one line, which is also what makes
-  // the expansion rule read correctly — an empty composer is exactly one line tall
-  // and therefore collapsed.
+  // two values that have to agree.
+  //
+  // NO min-height here, and that is a fix rather than an omission. It carried
+  // `min-h-6` (24px) against this size's ~20px line box, and a line box sits at the
+  // TOP of a taller content box — so the text rendered 2-3px above the centreline the
+  // 28px controls are on. Visible in the collapsed row, and invisible to every test,
+  // because nothing here can measure. The height that centres the text belongs one
+  // level up, on the wrapper, where it can be the CONTROL height instead of a number
+  // someone picked. An empty editable still has a line box: the placeholder is a
+  // `::before` carrying `content: attr(data-placeholder)`.
   // `text-start` is a PIN, not a style choice: `text-align` inherits, so any
   // centered ancestor (`Empty`'s root did exactly this) reached in and centered
   // the placeholder AND the typed text. An input control's text alignment is a
@@ -167,7 +174,7 @@ function PromptInputTextarea(props: PromptInputTextareaProps) {
   // pinning the physical value would be a worse bug than the one it fixes.
   const editableClass = () =>
     cn(
-      'text-foreground min-h-6 w-full bg-transparent text-start shadow-none outline-none focus-visible:ring-0 focus-visible:ring-offset-0 overflow-y-auto whitespace-pre-wrap break-words',
+      'text-foreground w-full bg-transparent text-start shadow-none outline-none focus-visible:ring-0 focus-visible:ring-offset-0 overflow-y-auto whitespace-pre-wrap break-words',
       textClass(config.proseSize()),
       local.class,
     );
@@ -188,7 +195,19 @@ function PromptInputTextarea(props: PromptInputTextareaProps) {
         // decision here instead of split across three class strings that have to
         // agree. Anything else meant to sit ABOVE the text must carry the same order
         // and come first in the DOM — the attachment band does exactly that.
-        ctx.layout() === 'collapsed' ? 'min-w-0 flex-1' : 'order-first basis-full',
+        //
+        // `min-h-7` (the same 28px every control in this row is) plus `items-center`,
+        // COLLAPSED ONLY, is what puts the text on the row's centreline. The editable
+        // is one ~20px line box; centring a 20px box inside 28px puts its centre at 14,
+        // and 28px is what the frame's `py-2.5` adds up to around either one — so the
+        // paragraph and the buttons land on one line rather than 2-3px apart. Derived,
+        // not typed: it is the row's control height, and it scales with density the way
+        // the rest of this geometry does. Expanded it would be wrong: the frame's own
+        // top padding governs where the paragraph starts, and an extra 28px box under a
+        // 20px line would push the control row down by 8px.
+        ctx.layout() === 'collapsed'
+          ? 'flex min-h-7 min-w-0 flex-1 items-center'
+          : 'order-first basis-full',
       )}
     >
       <Composer
@@ -222,22 +241,31 @@ export interface PromptInputActionsProps extends JSX.HTMLAttributes<HTMLDivEleme
 
 function PromptInputActions(props: PromptInputActionsProps) {
   const [local, rest] = splitProps(props, ['children', 'class']);
+  const ctx = usePromptInput();
   return (
-    // `contents`, NOT a flex box, and that is what lets ONE DOM order serve both
-    // layouts. As a box this wrapper is a layout participant whose width means
-    // something different in each: content-width beside the body when collapsed, a
-    // full-width row of its own when the controls wrap below. Every hand-composed
-    // `PromptInput` + textarea + actions would then have to know which layout it was
-    // in — which is exactly what a `justify-end` on the wrapper was doing, and going
-    // inert is the point of this rather than a loss. With no box, its children ARE the
-    // frame's flex items: the frame's `gap` packs them and its `justify-between`
-    // distributes the wrapped row, so a caller stays ignorant of the layout and the
-    // layout stays in one place.
+    // A BOX, on purpose, and the reason is the caller's own distribution. A hand-composed
+    // `PromptInput` + textarea + actions wants `justify-end` or `justify-between` to mean
+    // something, and that needs a box to distribute in. Collapsed the box is
+    // content-width, so it sits after the `flex-1` body at the trailing edge; expanded it
+    // fills the wrapped line, which is what gives the caller's `justify-*` a width to
+    // work across.
     //
-    // The slots already solve the same problem the same way (`toolbar-start`). A
-    // caller that genuinely wants a box can still have one by passing a `display`
-    // utility — the class merge is last-wins, so `flex` here would win.
-    <div class={cn('contents', local.class)} {...rest}>
+    // The kit's own `justify-between` comes BEFORE `local.class` because the class merge
+    // is last-wins, so a caller's `justify-end` overrides it rather than fighting an
+    // equal-specificity rule for whichever the generated sheet happens to emit last.
+    //
+    // The composer's two control clusters are NOT this component: they carry `contents`
+    // because the frame's own `justify-between` is what spreads them, and a box would
+    // make each of them claim a whole wrapped line.
+    <div
+      data-prompt-input-actions
+      class={cn(
+        'flex items-center gap-2',
+        ctx.layout() === 'collapsed' ? 'shrink-0' : 'w-full justify-between',
+        local.class,
+      )}
+      {...rest}
+    >
       {local.children}
     </div>
   );

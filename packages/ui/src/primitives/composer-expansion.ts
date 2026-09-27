@@ -99,7 +99,14 @@ export function useComposerExpansion(options: {
     // height and the resolver derives `collapsed` — the same direction it fails when it
     // cannot read a line height, and the only one that cannot put two rows under a
     // single line of text.
-    onCleanup(observeContentHeight(el, setContentHeight));
+    //
+    // The disposer is named and called from an arrow rather than handed straight to
+    // `onCleanup`, so the teardown is a body a reader (and the repo's teardown scan) can
+    // inspect. Its other form is an opaque call result: the guard that keeps a
+    // post-DOM-teardown callback from reaching for a global cannot see inside one, so it
+    // has to be reviewed by hand, and a hand review is a blind spot with a filename.
+    const dispose = observeContentHeight(el, setContentHeight);
+    onCleanup(() => dispose());
   });
 
   return () => {

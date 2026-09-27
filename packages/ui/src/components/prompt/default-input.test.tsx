@@ -10,6 +10,7 @@ import { describe, it, expect, afterEach } from 'vitest';
 import '@testing-library/jest-dom/vitest';
 import { render, cleanup, fireEvent, within } from '@solidjs/testing-library';
 import { DefaultPromptInput } from './default-input';
+import { PromptInput, PromptInputTextarea, PromptInputActions } from './prompt-input';
 
 afterEach(cleanup);
 
@@ -80,16 +81,18 @@ describe('DefaultPromptInput geometry', () => {
   const editable = (c: HTMLElement) => c.querySelector('[data-kai-composer-editable]') as HTMLElement;
 
   it('renders the control clusters as `contents`, so one DOM order serves both layouts', () => {
-    // The load-bearing fact about the wrapper, and why it is not a flex box: as a box
-    // it is a layout participant whose width means something different in each layout,
-    // so every hand-composed PromptInput + textarea + actions would have to know which
-    // one it was in. With no box its children ARE the frame's flex items, which the
-    // frame's `gap` packs and its `justify-between` distributes. A later reader turning
-    // this back into `flex items-center gap-2` reintroduces that, and leaves the frame
-    // with nothing to place.
+    // The load-bearing fact about the composer's clusters, and it is why they are plain
+    // divs rather than `PromptInputActions`: as a box a wrapper is a layout participant
+    // whose width means something different in each layout, so every hand-composed
+    // PromptInput + textarea + actions would have to know which one it was in. With no
+    // box its children ARE the frame's flex items, which the frame's `gap` packs and its
+    // `justify-between` distributes. A later reader turning these back into
+    // `flex items-center gap-2` reintroduces that, and leaves the frame with nothing to
+    // place. `data-cluster` is the hook the rest of these cases read.
     const { container } = render(() => <DefaultPromptInput {...baseProps} />);
     for (const cluster of ['leading', 'trailing'] as const) {
       const el = frame(container).querySelector(`[data-cluster="${cluster}"]`) as HTMLElement;
+      expect(el.tagName).toBe('DIV');
       expect(el.className).toContain('contents');
     }
   });
@@ -137,6 +140,82 @@ describe('DefaultPromptInput geometry', () => {
     // decision lives with the resolver rather than being split across three places.
     expect((frame(container).querySelector('[data-cluster="leading"]') as HTMLElement).className).not.toMatch(/\border-/);
     expect((frame(container).querySelector('[data-cluster="trailing"]') as HTMLElement).className).not.toMatch(/\border-/);
+  });
+
+  describe('PromptInputActions is a box, and the caller owns its distribution', () => {
+    // The counterpart to the clusters above, and they are two different answers on
+    // purpose. A hand-composed PromptInput wants its own `justify-end` to MEAN something,
+    // and that needs a box with a width to distribute across: content-width collapsed so
+    // it sits after the `flex-1` body at the trailing edge, the full wrapped line
+    // expanded. `contents` here would leave a lone control as the only item on the line,
+    // and `space-between` resolves to flex-START for one item — the opposite of the
+    // `justify-end` all fifteen of those stories asked for.
+    const compose = (expanded: boolean, actionsClass?: string) =>
+      render(() => (
+        <PromptInput onSubmit={noop} expanded={expanded}>
+          <PromptInputTextarea placeholder="Message" />
+          <PromptInputActions class={actionsClass}>
+            <button type="button">Send</button>
+          </PromptInputActions>
+        </PromptInput>
+      ));
+
+    it('collapsed: content-width, so it rides the row just after the text', () => {
+      const { container } = compose(false);
+      const wrapper = container.querySelector('[data-prompt-input-actions]') as HTMLElement;
+      expect(wrapper.className).toContain('flex');
+      expect(wrapper.className).toContain('shrink-0');
+      expect(wrapper.className).not.toContain('w-full');
+    });
+
+    it('expanded: the whole wrapped line, which is what gives the caller a width', () => {
+      const { container } = compose(true);
+      const wrapper = container.querySelector('[data-prompt-input-actions]') as HTMLElement;
+      expect(wrapper.className).toContain('w-full');
+      // The kit's own distribution fills the line, and the merge is last-wins so a
+      // caller's class overrides it rather than fighting it.
+      expect(wrapper.className).toContain('justify-between');
+    });
+
+    it("expanded: the caller's `justify-end` WINS, and the default is dropped", () => {
+      const { container } = compose(true, 'justify-end');
+      const wrapper = container.querySelector('[data-prompt-input-actions]') as HTMLElement;
+      expect(wrapper.className).toContain('justify-end');
+      // Not just 'the class is present' — the kit's default must be GONE, or which one
+      // applies is decided by the order the generated sheet emits them in. That is why
+      // the default is written before `local.class` in the `cn` call.
+      expect(wrapper.className).not.toContain('justify-between');
+    });
+  });
+
+  it('collapsed: the text is centred on the row, not on a taller box of its own', () => {
+    // Reported by the owner: with one line, the text rendered closer to the top than to
+    // the centre. The cause is arithmetic and it is exact — the editable carried
+    // `min-h-6` (24px) against this prose size's ~20px line box, and a line box sits at
+    // the TOP of a taller content box, so the spare 4px all landed underneath and lifted
+    // the text by half of it. Its centre then sat 2-3px above the centreline the 28px
+    // controls are on.
+    //
+    // The fix moves the height onto the WRAPPER, where it can be the control height
+    // rather than a number someone picked: 28px centred around one 20px line puts the
+    // text's centre on the row's centre, alongside the buttons. jsdom measures nothing,
+    // so these are the classes and the geometry probe owns the pixels.
+    const { container } = render(() => <DefaultPromptInput {...baseProps} />);
+    expect(body(container).className).toContain('min-h-7');
+    expect(body(container).className).toContain('items-center');
+    // And the text itself carries no min-height any more: that is what was removed.
+    expect(editable(container).className).not.toMatch(/\bmin-h-/);
+  });
+
+  it('expanded: the body takes no centring height, so the paragraph starts where the frame puts it', () => {
+    // The mirror of the case above: a 28px box under a 20px line would add 8px before
+    // the control row and push it below the measured position. Expanded, the frame's
+    // `pt-3.5` is the only thing deciding where the paragraph starts.
+    const { container } = render(() => (
+      <DefaultPromptInput {...baseProps} attachments={[{ id: 'a', type: 'file', filename: 'a.pdf' }]} />
+    ));
+    expect(body(container).className).not.toContain('min-h-7');
+    expect(body(container).className).not.toContain('items-center');
   });
 
   it('keeps the attachment band above the text', () => {
