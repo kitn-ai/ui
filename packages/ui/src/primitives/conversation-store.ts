@@ -370,7 +370,7 @@ export function localStorageStore(name: string, userId?: string): ConversationSt
  *  any other capability this recast doesn't cover. The caller hears about the
  *  omission rather than discovering it as a silent no-op:
  *  `ConversationController` reports an error for each of these when the store
- *  does not implement it, `setGroup` included — a PUT of `{ messages }` cannot
+ *  does not implement it, `setGroup` included: a PUT of `{ messages }` cannot
  *  refile a row whose summary the server owns. */
 export function fetchStore(url: string, userId?: string): ConversationStore {
   const headers: Record<string, string> = userId ? { 'x-kai-user-id': userId } : {};

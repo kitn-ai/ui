@@ -112,9 +112,8 @@ export interface ConversationController {
   /** Archive or unarchive a conversation, then refresh; archiving unlists it
    *  without deleting it. Refuses loudly on a store with no `setArchived`. */
   setArchived(id: string, archived: boolean): Promise<void>;
-  /** File a conversation under the group whose `id` is `groupId` (`undefined`
-   *  unfiles it), then refresh; the list's grouping reflects the stored one.
-   *  Refuses loudly when the store implements no `setGroup`. */
+  /** File a conversation under `groupId` (`undefined` unfiles it), then
+   *  refresh; refuses loudly when the store implements no `setGroup`. */
   setGroup(id: string, groupId: string | undefined): Promise<void>;
   // Archiving is not deleting, so the stored thread is untouched: what changes is the active
   // pointer and the delivered thread, through the same step `remove()` uses, because an
