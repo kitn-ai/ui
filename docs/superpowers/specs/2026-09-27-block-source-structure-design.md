@@ -59,3 +59,13 @@ So **the JSON does not need changing**; the assistant block already ships six fi
 **A block module may import nothing from another block module at RUNTIME.** The paste form refuses a relative import at the second level: the first attempt imported a helper and `gen-blocks` refused it **by name**. So `assistant.rail.ts` imports controller **types only** — erased by esbuild before the inliner reads them — and the fixture it needs is handed to `railNodes` as a **builder parameter** rather than reached for. A TDZ read from a moved constant is exactly the failure that shape avoids.
 
 **What this means for every remaining split:** a module must be **self-contained**, taking its dependencies as parameters, or the shared state stays in the controller. **A split that cannot satisfy that is not a split — it is a module that will not paste**, and the way to find out is the way this one found out: extract it, declare it, and let the generator refuse it by name if it cannot work. **The generator refusing is the design working, not a setback**, and it is the reason this document asked for one proven split before three.
+
+## Why the entry stays large, and what the size budget is actually for
+
+Two splits are done (`cac13ec7`, `2191e38b`): the rail (469 lines) and the composer's chrome (209), controller 2973 → 2391. The second round measured the trade honestly and recommended stopping, and its measurement is the reason.
+
+**About 1065 of the remaining 2391 lines are `createController` itself** — the entry that assembles the block's state. The other extractable seams (the palette, ~120; the demo catalogue and rail fixture, ~265) **read `assistant.rail`'s values at runtime**, which the level-2 rule refuses, so they can only leave by **taking those values as parameters**. That trade bought 7% of the file in the second split and would buy less in the third.
+
+**Ruling: stop splitting for size.** A split that needs a new parameter surface per extraction is not modularisation; it is moving the coupling into the API and paying for it in every call site.
+
+**So the size budget's purpose changes, and this document's acceptance changes with it.** It is not a tool for forcing the entry down — **the entry's size is a consequence of the platform constraint**, not a defect in it: the state assembly cannot be shared across files, so it lives where it is. The budget protects **the modules** from growing past what a reader can hold — and its threshold is derived from **the modules that exist** (the largest is 469 lines) rather than from the entry. **A lint enforcing it should name the entry's exception in the rule itself**, with this reason, rather than waiving it silently at the file.
