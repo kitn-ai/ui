@@ -65,3 +65,8 @@ packages/ui/.kai-local-kit/
 
 # Block-driver debug scratch (a scratch file in a lint-walked directory is a trap)
 .dbg*.mjs
+
+# Browser-test artifacts: a failing run leaves these behind, and an
+# unignored artifact in a lint-walked tree is a trap for the next round.
+.vitest-attachments/
+tests/browser/__screenshots__/
