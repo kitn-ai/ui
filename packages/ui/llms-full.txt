@@ -989,11 +989,11 @@ any integration with the `kai` MCP `scaffold` tool to get the full preamble.
 
 ---
 
-## Icon roster (77 names, derived from NAMED_ICONS in src/components/icon/icon.tsx)
+## Icon roster (79 names, derived from NAMED_ICONS in src/components/icon/icon.tsx)
 
 Every name `kai-icon` (and every `icon` prop/attribute across the elements) resolves — derived from the `NAMED_ICONS` map in `src/components/icon/icon.tsx` (also exported at runtime as `ICON_NAMES`). An icon-shaped name outside this roster renders a fallback glyph and logs a console error, in dev and prod alike; URLs render an `<img>`, and emoji/arbitrary text passes through as text.
 
-`archive` · `arrow-down` · `arrow-left` · `arrow-right` · `arrow-up` · `audio-lines` · `bell` · `book-open` · `bookmark` · `box` · `briefcase` · `check` · `chevron-down` · `chevron-left` · `chevron-right` · `chevron-up` · `circle` · `circle-alert` · `circle-check` · `circle-x` · `clock` · `code` · `copy` · `desktop` · `download` · `ellipsis` · `external-link` · `eye` · `eye-off` · `file-text` · `flag` · `folder` · `git-branch` · `git-pull-request` · `github` · `globe` · `home` · `image` · `info` · `laptop` · `link` · `list-filter` · `lock` · `maximize-2` · `message-circle` · `message-square` · `mic` · `minimize-2` · `minus` · `mobile` · `monitor` · `moon` · `more-horizontal` · `panel-left` · `panel-right` · `paperclip` · `pencil` · `play` · `plus` · `rotate-ccw` · `rotate-cw` · `search` · `settings` · `share` · `sliders-horizontal` · `smartphone` · `smile` · `sparkles` · `square` · `square-pen` · `sun` · `tablet` · `trash` · `triangle-alert` · `upload` · `workflow` · `x`
+`archive` · `arrow-down` · `arrow-left` · `arrow-right` · `arrow-up` · `audio-lines` · `bell` · `book-open` · `bookmark` · `box` · `briefcase` · `check` · `chevron-down` · `chevron-left` · `chevron-right` · `chevron-up` · `circle` · `circle-alert` · `circle-check` · `circle-x` · `clock` · `code` · `copy` · `desktop` · `download` · `ellipsis` · `external-link` · `eye` · `eye-off` · `file-text` · `flag` · `folder` · `folder-closed` · `folder-open` · `git-branch` · `git-pull-request` · `github` · `globe` · `home` · `image` · `info` · `laptop` · `link` · `list-filter` · `lock` · `maximize-2` · `message-circle` · `message-square` · `mic` · `minimize-2` · `minus` · `mobile` · `monitor` · `moon` · `more-horizontal` · `panel-left` · `panel-right` · `paperclip` · `pencil` · `play` · `plus` · `rotate-ccw` · `rotate-cw` · `search` · `settings` · `share` · `sliders-horizontal` · `smartphone` · `smile` · `sparkles` · `square` · `square-pen` · `sun` · `tablet` · `trash` · `triangle-alert` · `upload` · `workflow` · `x`
 
 ---
 
