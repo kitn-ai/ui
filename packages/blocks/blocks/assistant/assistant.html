@@ -579,9 +579,10 @@
 
            IT SELF-MANAGES ITS OPEN STATE, and that is the kit's own shape for this
            surface rather than a shortcut: `kai-dialog` reports Escape and a backdrop
-           press through `kai-open-change` only while it owns that state, and binding
-           `open` would make it controlled - which routes the request to close through
-           a callback the facade does not wire, so Escape would be swallowed. The block
+           press through `kai-open-change` while it owns that state, and binding `open`
+           would not suppress them - the facade does not forward the prop to the
+           primitive, so the element keeps self-managing and the events keep arriving.
+           The binding would control nothing while reading as control. The block
            opens it through the element's method (`#ref`) and listens for the close, so
            Escape, the backdrop and the Cancel button all take the same road. The kit
            owns the modal part: it moves focus into the panel on open, cycles Tab

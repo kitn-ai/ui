@@ -1453,13 +1453,12 @@ export interface AssistantRefs {
   conversations: KaiConversationsElement | null;
   /** The create-project dialog, and the ONE reason this block drives a surface by
    *  method rather than by a bound prop: `kai-dialog` reports Escape and a
-   *  backdrop press through `kai-open-change` only when it owns its own open
-   *  state. Its `open` prop makes the element CONTROLLED, and a controlled one
-   *  routes the request to close through `onOpenChange` - which the facade does
-   *  not wire - so a bound `open` would swallow Escape and strand the reader in a
-   *  modal no key can leave (measured, both schemes in states 50). The element
-   *  self-managing is the kit's documented shape for this surface, so the block
-   *  uses it and mirrors nothing. */
+   *  backdrop press through `kai-open-change` while it owns its own open state,
+   *  and binding `open` would not take those away - the facade does not forward
+   *  the prop to the primitive, so the element keeps self-managing and the events
+   *  keep arriving. The binding would control nothing while reading as control,
+   *  which is worse than useless. The element self-managing is the kit's
+   *  documented shape for this surface, so the block uses it and mirrors nothing. */
   projectDialog: KaiDialogElement | null;
 }
 
