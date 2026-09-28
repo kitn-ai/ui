@@ -38,6 +38,56 @@ const useDropdown = () => {
 // a parent's querySelectorAll scoped to its own menu never reaches sub items.
 const ITEM_SELECTOR = '[role="menuitem"]:not([aria-disabled="true"]), [role="menuitemcheckbox"]:not([aria-disabled="true"]), [role="menuitemradio"]:not([aria-disabled="true"])';
 
+// The two placement gaps, named once: the positioner's `offset(gutter)` and the room
+// maths below are the SAME gap seen twice, and a second literal is how they drift.
+const SURFACE_GUTTER = 6;
+const SUB_GUTTER = 2;
+/** The breathing gap kept at the viewport edge, so a capped surface is not flush against
+ *  the window and still reads as a floating panel. */
+const VIEWPORT_MARGIN = 8;
+
+/**
+ * The surface's height ceiling, in CSS, spelled once.
+ *
+ * `min(...)` in an inline style cannot hold a class, so this is the one place the
+ * expression lives and both surfaces and the docs entry name it by its value. The VAR
+ * carries the DEFAULT inside itself (`var(--x, <default>)`), which is what makes it a
+ * seam: a consumer sets `--kai-dropdown-max-height` on `kai-menu`/`kai-dropdown` and needs
+ * no reach into the shadow root the panel is portaled into. `100dvh` is the window the
+ * user actually has, mobile URL bars included -- never a typed pixel count.
+ */
+const MENU_MAX_HEIGHT = 'var(--kai-dropdown-max-height,calc(100dvh - 2rem))';
+
+/**
+ * How many px tall a surface may be before it would leave the viewport.
+ *
+ * Measured from the ANCHOR's rect, never from the surface's own height: a cap derived
+ * from the box it constrains is a feedback loop that can oscillate between placements.
+ *
+ * `sides` is which sides the positioner may actually put the surface on, because the two
+ * surfaces are not symmetrical -- and neither answer is CSS's to give, which is why this
+ * is JavaScript: `shift({ padding })` engages Floating UI's MAIN axis, and the main axis
+ * of a `bottom` placement is X, so nothing was keeping a tall menu on screen vertically.
+ * `flip()` moves on Y, so it is the only middleware that can act on this room, and it
+ * only considers the sides in its fallback list:
+ *
+ * - a menu flips `bottom-start` <-> `top-start`, so both rooms count and the larger wins;
+ * - a submenu is `right-start` and its fallback list is `left-start`/`right-end`/`left-end`
+ *   -- it never flips vertically, and its top is pinned to the anchor's top, so the only
+ *   room it has is the space below the anchor.
+ */
+function viewportRoom(
+  ref: HTMLElement | undefined,
+  gutter: number,
+  sides: 'below-or-above' | 'below',
+): number | undefined {
+  if (!ref) return undefined;
+  const rect = ref.getBoundingClientRect();
+  const edge = gutter + VIEWPORT_MARGIN;
+  if (sides === 'below') return window.innerHeight - rect.top - edge;
+  return Math.max(window.innerHeight - rect.bottom - edge, rect.top - edge);
+}
+
 /**
  * The roving-focus set, in FLAT-TREE order.
  *
@@ -257,7 +307,7 @@ export function DropdownContent(props: DropdownContentProps) {
   const presence = createPresence(ctx.open);
   const position = usePosition(ctx.trigger, ctx.menu, {
     placement: 'bottom-start',
-    gutter: 6,
+    gutter: SURFACE_GUTTER,
     // Trigger removed from the DOM -> close (no focus return; it's gone) so the
     // menu portal doesn't orphan.
     onDisconnect: () => ctx.setOpen(false, { returnFocus: false }),
@@ -297,6 +347,17 @@ export function DropdownContent(props: DropdownContentProps) {
   });
 
   const items = () => menuItems(ctx.menu());
+  // The surface's height ceiling, in two parts: the viewport-derived one the consumer can
+  // theme (`MENU_MAX_HEIGHT`) and the room this surface actually has beside its anchor.
+  // Both, so the panel can neither exceed the window nor hang off the edge it opened
+  // toward. See `viewportRoom` for why the second half cannot be CSS.
+  const maxHeight = () => {
+    // Read the resolved position so the room is re-measured whenever the positioner
+    // recomputes — scroll, window resize, anchor resize — which is the only time it moves.
+    position.pos();
+    const room = viewportRoom(ctx.trigger(), SURFACE_GUTTER, 'below-or-above');
+    return room === undefined ? MENU_MAX_HEIGHT : `min(${MENU_MAX_HEIGHT}, ${room}px)`;
+  };
   const focusIndex = (i: number) => {
     const list = items();
     if (!list.length) return;
@@ -352,6 +413,10 @@ export function DropdownContent(props: DropdownContentProps) {
             // hide (without unmounting) when the trigger scrolls out of view
             visibility: position.hidden() ? 'hidden' : 'visible',
             'pointer-events': position.hidden() ? 'none' : undefined,
+            // Inline rather than a class because the ceiling is the MINIMUM of the
+            // themeable default and the room measured off the anchor; a class can only
+            // hold one of the two. See `MENU_MAX_HEIGHT` and `viewportRoom`.
+            'max-height': maxHeight(),
           }}
           class={cn(
             // A usable floor belongs HERE, not at each call site: a menu is content-sized,
@@ -387,7 +452,34 @@ export function DropdownContent(props: DropdownContentProps) {
             // so setting it on `kai-menu` / `kai-dropdown` reaches the panel; a consumer
             // who overrode `portalMount` to `document.body` sets it on `:root` instead).
             // A caller can also override it per surface with its own `max-w-*` class.
-            'z-50 max-w-[var(--kai-dropdown-max-width,24rem)] min-w-[15rem] rounded-lg bg-card p-1 kai-elevation',
+            //
+            // THE HEIGHT, the axis that was left unbounded. A width cap on a shrink-to-fit
+            // box does not remove the box's freedom, it moves it: a wrapped row makes the
+            // panel TALLER, and the panel was still free to be taller than the window. A
+            // menu of the consumer's own data (the rail's chat list is one per conversation)
+            // then runs off the bottom of the viewport with its own last rows below the
+            // fold and no way to reach them — measured at 911px on a 33-row menu in a 560px
+            // window, with the last row 386px past the bottom edge and nothing to scroll.
+            //
+            // So the ceiling is the VIEWPORT, never a typed pixel count: `100dvh` is the
+            // window as the user actually has it (mobile URL bars included), so the same
+            // declaration behaves on a laptop and on a short window. 2rem is the breathing
+            // gap at the two edges, and it is a DEFAULT the consumer replaces whole —
+            // `--kai-dropdown-max-height` takes any length or `calc()`, so a surface that
+            // wants 60vh says so, and one that wants the old unbounded behavior sets
+            // `none`. The custom property is the SAME seam as the width's for the same
+            // reason (the panel is portaled into the element's shadow root and has no
+            // `part`, so a consumer stylesheet cannot reach it any other way) — but NOT the
+            // same property: a `max-width` in rem and a `max-height` derived from the
+            // viewport are two different measurements, and one number for both axes would
+            // mean a square surface.
+            //
+            // And it SCROLLS rather than clips: a menu whose last row is unreachable is
+            // worse than a tall one, so the overflow is the surface's own, the same rows at
+            // the same widths, reached by scrolling the box. A menu that fits is untouched —
+            // `overflow-y: auto` shows no bar over content that does not overflow. The
+            // ceiling itself is the inline `max-height` (see `MENU_MAX_HEIGHT`), not a class.
+            'z-50 max-w-[var(--kai-dropdown-max-width,24rem)] min-w-[15rem] overflow-y-auto rounded-lg bg-card p-1 kai-elevation',
             'animate-in fade-in-0 zoom-in-95 data-[closed]:animate-out data-[closed]:fade-out-0 data-[closed]:zoom-out-95',
             props.class,
           )}
@@ -720,7 +812,7 @@ export function DropdownSubContent(props: DropdownSubContentProps) {
   const presence = createPresence(sub.open);
   const position = usePosition(sub.trigger, sub.menu, {
     placement: 'right-start',
-    gutter: 2,
+    gutter: SUB_GUTTER,
     // Sub trigger removed from the DOM -> close so the submenu portal doesn't orphan.
     onDisconnect: () => sub.setOpen(false, { returnFocus: false }),
   });
@@ -731,6 +823,14 @@ export function DropdownSubContent(props: DropdownSubContentProps) {
   // after stopPropagation on the element, not on the document.
 
   const items = () => menuItems(sub.menu());
+  // The same two-part ceiling with the submenu's own geometry: its top is pinned to the
+  // row's top and it does not flip vertically, so only the room BELOW the anchor is real to
+  // it. See `viewportRoom`.
+  const maxHeight = () => {
+    position.pos();
+    const room = viewportRoom(sub.trigger(), SUB_GUTTER, 'below');
+    return room === undefined ? MENU_MAX_HEIGHT : `min(${MENU_MAX_HEIGHT}, ${room}px)`;
+  };
   const focusIndex = (i: number) => {
     const list = items();
     if (!list.length) return;
@@ -787,14 +887,17 @@ export function DropdownSubContent(props: DropdownSubContentProps) {
             position: 'fixed', left: `${position.pos().x}px`, top: `${position.pos().y}px`,
             visibility: position.hidden() ? 'hidden' : 'visible',
             'pointer-events': position.hidden() ? 'none' : undefined,
+            // Two-part ceiling; see the call in `DropdownContent` for why it is inline.
+            'max-height': maxHeight(),
           }}
           class={cn(
-            // Same ceiling as the parent surface, and the same custom property: a submenu
+            // Same ceiling as the parent surface, and the same custom properties: a submenu
             // is the same kind of box (fixed, shrink-to-fit, portaled out of its host's
             // box) rendered from the same item ladder, so a long `note` row or an
             // unbreakable label widens it exactly the way it widened the parent before the
-            // cap existed. 8rem stays the floor.
-            'z-50 max-w-[var(--kai-dropdown-max-width,24rem)] min-w-[8rem] rounded-lg bg-card p-1 kai-elevation',
+            // cap existed, and a long item list makes it taller than the window the same
+            // way. 8rem stays the floor, and the ceiling is the same two-part one.
+            'z-50 max-w-[var(--kai-dropdown-max-width,24rem)] min-w-[8rem] overflow-y-auto rounded-lg bg-card p-1 kai-elevation',
             'animate-in fade-in-0 zoom-in-95 data-[closed]:animate-out data-[closed]:fade-out-0 data-[closed]:zoom-out-95',
             props.class,
           )}

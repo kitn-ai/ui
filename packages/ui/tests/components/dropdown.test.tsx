@@ -354,6 +354,79 @@ describe('DropdownContent width', () => {
   });
 });
 
+describe('DropdownContent height', () => {
+  // The ceiling is `min(<themeable default>, <the room off the anchor>)`, so the assertion
+  // is on the SHAPE of that value rather than a number: jsdom has no layout, so a typed
+  // pixel expectation here would be a promise about jsdom, not about the surface. The
+  // numbers the shape produces are measured in Chromium (911px -> 513.5px on a 33-row
+  // menu in a 560px window, scrollHeight 911 vs clientHeight 514).
+  const CEILING = 'var(--kai-dropdown-max-height,calc(100dvh - 2rem))';
+
+  it('caps the height at the viewport, and never above the room its own anchor leaves', () => {
+    const { trg, menu } = setupSurface();
+    fireEvent.click(trg);
+
+    const value = (menu() as HTMLElement).style.maxHeight;
+    expect(value.startsWith(`min(${CEILING}, `), `unexpected ceiling: ${value}`).toBe(true);
+    expect(value.endsWith('px)'), 'the anchor room is measured in px, at open time').toBe(true);
+    // The viewport is the ceiling, never a typed pixel count: `100dvh` is the window the
+    // user actually has, so the same declaration covers a laptop and a short window.
+    expect(value).toContain('100dvh');
+  });
+
+  it('keeps the ceiling themeable from outside the shadow root the panel is portaled into', () => {
+    // Same seam as the width's, and one var per axis: the inline value names the custom
+    // property, so a consumer page-level rule on the host moves the ceiling without a
+    // `part` and without piercing. `min()` means a consumer can lower it and can never
+    // raise it above the room beside the trigger, which is the part that keeps a long menu
+    // on screen.
+    const { trg, menu } = setupSurface();
+    fireEvent.click(trg);
+
+    expect((menu() as HTMLElement).style.maxHeight).toContain('--kai-dropdown-max-height');
+  });
+
+  it('SCROLLS the surface rather than clipping it, so the last row stays reachable', () => {
+    // A menu whose last row is unreachable is worse than a tall one. `overflow-y: auto`
+    // shows no bar over content that does not overflow, so a menu that fits is unchanged.
+    const { trg, menu } = setupSurface();
+    fireEvent.click(trg);
+
+    expect(menu().classList.contains('overflow-y-auto')).toBe(true);
+  });
+
+  it('leaves the height ceiling to the anchor, not to a class, on a SHORT menu either', () => {
+    // Additive in the only way that can be checked without layout: the surface carries no
+    // typed max-height class, so nothing clamps a menu that already fits.
+    const { trg, menu } = setupSurface();
+    fireEvent.click(trg);
+
+    expect([...menu().classList].some((c) => c.startsWith('max-h-')), 'no class-level height cap').toBe(false);
+  });
+
+  it('caps the SUBMENU surface too, from the room below its own row', () => {
+    render(() => (
+      <Dropdown defaultOpen>
+        <DropdownTrigger as={(p: any) => <button {...p}>Menu</button>} />
+        <DropdownContent>
+          <DropdownSub>
+            <DropdownSubTrigger>Skills</DropdownSubTrigger>
+            <DropdownSubContent>
+              <DropdownItem>skill-creator</DropdownItem>
+            </DropdownSubContent>
+          </DropdownSub>
+        </DropdownContent>
+      </Dropdown>
+    ));
+    fireEvent.pointerEnter(screen.getByRole('menuitem'));
+    const sub = screen.getAllByRole('menu').find((m) => m.classList.contains('min-w-[8rem]'));
+    expect(sub, 'the submenu surface rendered').toBeTruthy();
+
+    expect(sub!.classList.contains('overflow-y-auto')).toBe(true);
+    expect((sub as HTMLElement).style.maxHeight.startsWith(`min(${CEILING}, `)).toBe(true);
+  });
+});
+
 describe('the trailing check column', () => {
   /** A freshly opened menu with one checked and one unchecked row of each kind. */
   function setupTrailing() {
