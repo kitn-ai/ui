@@ -89,3 +89,31 @@ Each is a sentence from the owner, not a round. **My recommendation is a recomme
 - **Commit the regenerated artifacts in the same breath.**
 
 The preview is `http://localhost:4321/blocks/`, served in local mode.
+
+
+## The prompt to paste back after clearing the session
+
+```
+Repo /Users/home/Projects/kitn-ai/kitn-chat, branch feat/blocks-exemplar-and-wiring.
+I cleared my session; you have no memory of what was done.
+
+Read first, in this order:
+1. docs/handoff/2026-09-28-block-tuning-and-open-questions.md - the state, my five
+   open questions, and the recommendation on each.
+2. Only if you need the detail: docs/handoff/2026-09-27-composer-empty-state-and-rail.md
+   and the ledgers under .superpowers/sdd/.
+
+Then, before trusting anything written down, check the tree yourself:
+  git status --porcelain
+  git log --oneline -8
+  ps -A -o command= | grep async-cfg
+
+Then:
+- My preview is http://localhost:4321/blocks/ in local mode. RUN THE SYNC CHAIN BEFORE
+  TELLING ME TO LOOK - the rule is in the handoff. A kit change is invisible until
+  `nx build ui` runs.
+- Present the five open questions tersely, with your recommendation on each, and I
+  will answer them.
+
+My answers: [leave blank to answer in chat, or fill in any you want to settle now]
+```
