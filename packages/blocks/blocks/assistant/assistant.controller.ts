@@ -1137,6 +1137,7 @@ function controlNode(id: string, kind: ConversationRow['kind'], title: string, g
     group,
     groupName,
     folderIconHidden: true,
+    folderIconName: 'folder-closed',
     menuHidden: true,
     trioHidden: true,
     trioMenuLabel: '',
@@ -1175,6 +1176,7 @@ function folderNode(
   group: string,
   groupName: string,
   menu: FolderMenu,
+  open: boolean,
 ): ConversationRow {
   const heading = kind === 'folder';
   const node = `${heading ? FOLDER_HEADING_NODE : FOLDER_MORE_NODE}${group}`;
@@ -1202,6 +1204,11 @@ function folderNode(
     // rather than a project, and a heading for a group the catalogue cannot name
     // is still a project - it has a group id, which is what this reads.
     folderIconHidden: !(heading && group !== ''),
+    // ...AND IT READS THE FOLDER'S OWN STATE: an open folder paints the open
+    // glyph, a closed one the closed glyph. `open` is the same fact this node's
+    // caller emitted rows from (see `railNodes`), so the glyph and the rows
+    // cannot disagree about whether the folder is showing anything.
+    folderIconName: open ? 'folder-open' : 'folder-closed',
     // THE RECENTS HEADING IS THE RAIL'S SECOND SECTION LABEL, so it carries the
     // same trailing actions the Projects label does; a folder INSIDE Projects
     // heads a folder rather than a section and carries none.
@@ -1273,6 +1280,12 @@ function railNodes(
   if (fixture && rows.length === 0 && query === '') return fixtureRail(created, menu);
   const shut = new Set(closed);
   const grown = new Set(expanded);
+  // WHETHER A FOLDER SHOWS ITS ROWS, and the one predicate the glyph and the rows
+  // both read - so a heading cannot paint the open folder over a hidden run. A
+  // search opens every folder: a match the reader cannot see is a match that does
+  // not exist. A project the reader named and filed nothing into is a heading with
+  // no rows to reveal, and its glyph reads the reader's own choice like any other.
+  const isOpen = (group: string): boolean => query !== '' || !shut.has(group);
   const out: ConversationRow[] = [];
   // THE READER'S OWN PROJECTS LEAD, and they are on the rail whether or not they
   // hold a row: a project the reader named exists from the moment they named it,
@@ -1283,7 +1296,9 @@ function railNodes(
   const empty = created.filter((project) => !rows.some((row) => row.group === project.id));
   let labelled = empty.length > 0;
   if (labelled) out.push(sectionNode(PROJECTS_LABEL));
-  for (const project of empty) out.push(folderNode('folder', project.id, project.name, menu));
+  for (const project of empty) {
+    out.push(folderNode('folder', project.id, project.name, menu, isOpen(project.id)));
+  }
   let at = 0;
   while (at < rows.length) {
     const group = rows[at].group;
@@ -1291,7 +1306,7 @@ function railNodes(
     while (end < rows.length && rows[end].group === group) end += 1;
     const run = rows.slice(at, end);
     const groupName = run[0].groupName;
-    const open = query !== '' || !shut.has(group);
+    const open = isOpen(group);
     // THE PROJECTS LABEL, once, over the first folder - and the ungrouped
     // remainder is not one, so a rail holding only Recents has no label over
     // nothing. Emitted here rather than declared beside the rows, so a query that
@@ -1300,11 +1315,11 @@ function railNodes(
       out.push(sectionNode(PROJECTS_LABEL));
       labelled = true;
     }
-    out.push(folderNode('folder', group, groupName, menu));
+    out.push(folderNode('folder', group, groupName, menu, open));
     if (open) {
       const shown = grown.has(group) ? run : run.slice(0, FOLDER_LIMIT);
       out.push(...shown);
-      if (shown.length < run.length) out.push(folderNode('more', group, groupName, menu));
+      if (shown.length < run.length) out.push(folderNode('more', group, groupName, menu, true));
     }
     at = end;
   }
@@ -1358,7 +1373,7 @@ function fixtureRail(created: readonly DemoProject[], menu: FolderMenu): Convers
     // A folder holds its rows, so its heading leads the run they are; a project
     // with no sample under it (every project a reader made)
     // is a heading and nothing else.
-    nodes.push(folderNode('folder', project.id, project.name, menu));
+    nodes.push(folderNode('folder', project.id, project.name, menu, true));
     nodes.push(...filed.map((sample) => sampleNode(sample, project.id, project.name)));
   }
   // The remainder's heading and its rows, so the section a reader's own typed
@@ -1367,7 +1382,7 @@ function fixtureRail(created: readonly DemoProject[], menu: FolderMenu): Convers
   const ungrouped = SAMPLE_CONVERSATIONS.filter(
     (sample) => projectOfOpening(sample.opening, catalogue) === undefined,
   );
-  nodes.push(folderNode('folder', '', '', menu));
+  nodes.push(folderNode('folder', '', '', menu, true));
   nodes.push(...ungrouped.map((sample) => sampleNode(sample, '', '')));
   return nodes;
 }
@@ -1528,6 +1543,16 @@ export interface ConversationRow {
    *  project rather than being another conversation, and the Recents heading heads
    *  the unfiled remainder rather than a project. */
   folderIconHidden: boolean;
+  /** WHICH OF THE TWO FOLDER GLYPHS A HEADING PAINTS, and it is the heading's own
+   *  OPEN STATE rather than a decoration: the caret that used to say open/closed
+   *  beside the glyph is gone, so the folder itself has to carry it - `folder-open`
+   *  while the folder shows its rows, `folder-closed` while it does not. The two
+   *  are the kit roster's own names, one glyph per state.
+   *
+   *  Read on every row and only painted on a heading (see `folderIconHidden`): the
+   *  repeat renders ONE element, so a field the heading needs is a field every row
+   *  carries. */
+    folderIconName: FolderIconName;
   /** Whether the row menu is hidden: a control row carries no kebab, and the
    *  heading's own activation is the folder control. */
   menuHidden: boolean;
@@ -1553,6 +1578,11 @@ const FOLDER_LIMIT = 4;
  *  conversation id is a uuid, so neither prefix can collide with one. */
 const FOLDER_HEADING_NODE = 'folder:';
 const FOLDER_MORE_NODE = 'folder-more:';
+
+/** The two glyphs a folder heading paints, one per state, and they are the kit
+ *  roster's own names (`folder-open` / `folder-closed`): the heading's caret is
+ *  gone, so the folder is what says whether it is showing its rows. */
+type FolderIconName = 'folder-open' | 'folder-closed';
 
 /** The folder a row node names, or undefined for a row that is not a heading.
  *  The heading's node id is how the two row kinds travel through ONE activation
@@ -2136,7 +2166,13 @@ export function createController(deps: AssistantDeps): AssistantController {
     // Where a row is filed is the summary's OWN `groupId`, the field the store
     // writes, round-trips and hands back: one source of truth, and the same one
     // `orderRows` reads its order from.
-    const projected = orderRows(summaries, organizer, sort, catalogue()).map((s) => {
+    // THE CALLBACK'S RETURN TYPE IS SPELLED OUT, and it is load-bearing rather
+    // than decorative: `folderIconName` is a two-name union, and a bare object
+    // literal inferred here widens its literal to `string` - which compiles in
+    // this file but not in the emitted react tree, where the same literal is
+    // assigned to `ConversationRow[]` and a widened pair is a type error. The
+    // contextual type is what keeps the two names the two names.
+    const projected = orderRows(summaries, organizer, sort, catalogue()).map((s): ConversationRow => {
       // ONE LINE PER ROW, and that is a decision about the rail rather than about
       // the data: the kit paints a row's `meta` slot as a second line, and a
       // sidebar row that carries its own last message reads as a feed rather than
@@ -2168,8 +2204,11 @@ export function createController(deps: AssistantDeps): AssistantController {
         // A conversation is not a folder, so it paints no project glyph. This is
         // the one row literal the two builders above do not produce, and it is
         // the reason the field is required rather than optional: a projection
-        // that forgot it would paint a folder on every row in the rail.
+        // that forgot it would paint a folder on every row in the rail. The name
+        // below it is the closed half of the pair for the same reason: a
+        // conversation heads nothing, so it has no state to read one from.
         folderIconHidden: true,
+        folderIconName: 'folder-closed',
         menuHidden: false,
         // A conversation's trailing edge is its own menu and nothing else, so the
         // section labels' actions are off here; they are on the controlNode's

@@ -125,12 +125,12 @@ kai-conversations {
  * A heading used to carry a SECOND glyph beside it - a caret painting the
  * folder's open state, which a reveal hid until the row was hovered or held
  * focus - and that caret is gone: a disclosure arrow beside a folder arrow was
- * one affordance too many, and the folder carries the heading's meaning on its
- * own. The glyph's reveal was NOT carried over from the caret's rule: the glyph
- * is information, not a control worth keeping out of sight, so every heading
- * shows it from the first paint. (The open/closed state a reader could still
- * want is a NAMED FOLLOW-UP: it needs a kit icon this block's curated roster
- * does not carry yet.) */
+ * one affordance too many. The state it carried did not go with it: the heading
+ * paints `folder-open` while it is showing its rows and `folder-closed` while it
+ * is not (bound, from the one predicate the rows themselves are emitted from),
+ * so the folder says whether it is open. The glyph's reveal was NOT carried over
+ * from the caret's rule: the glyph is information, not a control worth keeping
+ * out of sight, so every heading shows it from the first paint. */
 .row-folder-icon {
   flex: 0 0 auto;
   width: var(--rail-folder-icon);

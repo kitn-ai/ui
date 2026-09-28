@@ -441,7 +441,8 @@
           "probes": {
             "theFolderHadAHeading": true,
             "closingHidesTheFoldersRows": true,
-            "reopeningRestoresTheRows": true
+            "reopeningRestoresTheRows": true,
+            "theGlyphReadsTheFoldersState": true
           },
           "styles": {}
         },
@@ -1170,7 +1171,8 @@
           "probes": {
             "theFolderHadAHeading": true,
             "closingHidesTheFoldersRows": true,
-            "reopeningRestoresTheRows": true
+            "reopeningRestoresTheRows": true,
+            "theGlyphReadsTheFoldersState": true
           },
           "styles": {}
         },

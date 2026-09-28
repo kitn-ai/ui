@@ -2676,13 +2676,37 @@ export default {
         // caret painted the folder's open state; the click is what this state is
         // about, and the heading is what takes it.
         const heading = page.locator(`kai-conversations > kai-conversation-item[data-rail="folder"][data-group="${folder.group}"]`);
+        // THE GLYPH'S OWN STATE, read off the element - name AND drawing. The name
+        // is a PROPERTY with no attribute reflection (the react form assigns it as
+        // a property rather than writing the attribute), so it is read the same way
+        // state 54's heading probe reads it; the drawing is here because the name
+        // alone cannot tell a wired glyph from an unrostered one: an icon-shaped
+        // name the roster does not carry paints the kit's CircleAlert warning AND
+        // logs, so a heading that painted the fallback would still show a name.
+        const glyphOf = (group) => page.evaluate((selector) => {
+          const el = document.querySelector(selector);
+          const icon = el?.querySelector('.row-folder-icon') ?? null;
+          const svg = icon?.shadowRoot?.querySelector('svg') ?? null;
+          const box = svg?.getBoundingClientRect() ?? null;
+          return {
+            name: icon?.name ?? icon?.getAttribute('name') ?? '',
+            painted: box !== null && box.width > 0 && box.height > 0,
+            drawing: svg?.querySelector('path')?.getAttribute('d') ?? '',
+          };
+        }, `kai-conversations > kai-conversation-item[data-rail="folder"][data-group="${group}"]`);
         const before = await railNodes(page);
+        // A FOLDER THAT IS OPEN WHILE THE CHOSEN ONE IS SHUT, so the two states are
+        // compared inside ONE run of the page rather than across states.
+        const other = runs.find((run) => run.group !== '' && run.group !== folder.group);
+        const glyphOpen = other ? await glyphOf(other.group) : null;
         await heading.click();
         await settle(350)(page);
         const shut = await railNodes(page);
+        const glyphShut = await glyphOf(folder.group);
         await heading.click();
         await settle(350)(page);
         const open = await railNodes(page);
+        const glyphReopened = await glyphOf(folder.group);
         folderToggle = {
           group: folder.group,
           width: folder.rows.length,
@@ -2694,6 +2718,9 @@ export default {
           ).length,
           shutHeadings: shut.filter((node) => node.kind === 'folder').length,
           headings: count(before, 'folder'),
+          glyphShut,
+          glyphOpen,
+          glyphReopened,
         };
       },
       probes: {
@@ -2709,11 +2736,33 @@ export default {
         // ...AND OPENING IT AGAIN PUTS THEM BACK: one heading click reads both
         // ways, because open and closed are which rows the state emits.
         reopeningRestoresTheRows: () => folderToggle?.open === folderToggle?.before,
+        // THE GLYPH IS THE AFFORDANCE NOW, so the closed folder has to WEAR the
+        // closed half of the pair and the open one the open half - and the claim is
+        // made against the DRAWING as well as the name, because a name is not proof
+        // the roster carries it (see the read above): both states are also required
+        // to paint the same glyph BOX, which is what keeps the rows under a heading
+        // aligned to a label rather than to a state.
+        theGlyphReadsTheFoldersState: () => {
+          const shut = folderToggle?.glyphShut;
+          const open = folderToggle?.glyphOpen;
+          const reopened = folderToggle?.glyphReopened;
+          if (!shut || !open || !reopened) return 'a heading glyph was not read';
+          if (!shut.painted || !open.painted) {
+            return `a heading painted no folder glyph: ${JSON.stringify([shut, open].map((glyph) => glyph.name))}`;
+          }
+          if (shut.name !== 'folder-closed') return `the shut folder paints ${JSON.stringify(shut.name)}`;
+          if (open.name !== 'folder-open') return `the open folder paints ${JSON.stringify(open.name)}`;
+          if (reopened.name !== 'folder-open') return `the reopened folder paints ${JSON.stringify(reopened.name)}`;
+          if (shut.drawing === open.drawing) return 'the two states paint the same drawing';
+          if (shut.drawing === '' || open.drawing === '') return 'a state painted no path to compare';
+          return true;
+        },
       },
       expect: {
         theFolderHadAHeading: true,
         closingHidesTheFoldersRows: true,
         reopeningRestoresTheRows: true,
+        theGlyphReadsTheFoldersState: true,
       },
     },
     {
@@ -4613,9 +4662,10 @@ export default {
                 && (item.textContent ?? '').trim().startsWith(label)).length === 1;
               const title = el.querySelector('.row-title-text');
               // THE PROJECT GLYPH, read as a PAINTED BOX and not as a name in the
-              // markup: the kit renders nothing for a name its roster does not
-              // carry, so a heading whose icon resolved is a heading with an svg of
-              // a real size inside it, and the name is recorded beside it.
+              // markup: a name the kit's roster does not carry paints the kit's
+              // CircleAlert fallback and logs, so the box is only part of the
+              // evidence - the NAME is asserted against the roster's own pair by the
+              // probe below, and the two states' DRAWINGS are compared in state 37.
               //
               // THE NAME IS READ OFF THE ELEMENT FIRST, the same shape `railShape`
               // reads a conversation row's id in. `kai-icon`'s `name` is a PROPERTY
@@ -4674,16 +4724,17 @@ export default {
             ? true
             : `${acting.length} of ${demos.length} of the demo's own headings act`;
         },
-        // A PROJECT HEADING PAINTS THE CURATED FOLDER GLYPH. A heading the reader
-        // cannot tell from a conversation row is the shape this item exists to
-        // remove, and the glyph is a curated name: the kit paints nothing for one
-        // its roster does not carry, so the PAINTED BOX is the check. The Recents
-        // heading is exempt by design - it heads the unfiled remainder rather than a
-        // project - so the claim is over every heading that carries a group id.
+        // A PROJECT HEADING PAINTS THE CURATED FOLDER GLYPH, and it paints the half
+        // of the pair its own state calls for: the Recents heading is exempt by
+        // design - it heads the unfiled remainder rather than a project, so it shows
+        // none - and the claim is over every heading that carries a group id.
         everyProjectHeadingPaintsItsFolderGlyph: () => {
           const projects = (folderMenus ?? []).filter((row) => row.group !== '');
           if (projects.length === 0) return 'the rail rendered no project heading';
-          const bad = projects.filter((row) => row.iconPainted !== true || row.iconName !== 'folder');
+          const bad = projects.filter(
+            (row) => row.iconPainted !== true
+              || (row.iconName !== 'folder-open' && row.iconName !== 'folder-closed'),
+          );
           return bad.length === 0 ? true : JSON.stringify(bad.map((row) => `${row.label}:${row.iconName}`));
         },
         // DECIDING LOUDLY, the other way: a heading's Rename shows no F2 chip.
