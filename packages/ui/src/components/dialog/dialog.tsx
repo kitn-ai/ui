@@ -1,5 +1,5 @@
 import {
-  createEffect, createSignal, createUniqueId, Show, type Accessor, type JSX,
+  createEffect, createSignal, createUniqueId, onCleanup, Show, type Accessor, type JSX,
 } from 'solid-js';
 import { Portal } from 'solid-js/web';
 import { cn } from '../../utils/cn';
@@ -83,13 +83,42 @@ function deepActiveElement(): HTMLElement | null {
 }
 
 /**
+ * The element, then the contexts it sits in, nearest first, crossing shadow
+ * boundaries. Recorded while the element is still connected, because a removed
+ * element has no parent left to walk: a close that finds the remembered element
+ * gone has to look for the nearest SURVIVING context instead, and a detached node
+ * cannot tell it what that was.
+ */
+function focusChain(el: HTMLElement | null): HTMLElement[] {
+  const chain: HTMLElement[] = [];
+  let node: HTMLElement | null = el;
+  while (node) {
+    chain.push(node);
+    const parent: HTMLElement | null = node.parentElement;
+    const root = node.getRootNode();
+    node = parent ?? (root instanceof ShadowRoot && root.host instanceof HTMLElement ? root.host : null);
+  }
+  return chain;
+}
+
+/** Focus `ctx`, or the first focusable thing inside it. Best effort by design: a
+ *  fallback that cannot take focus leaves focus where it is rather than throwing. */
+function focusFirstIn(ctx: HTMLElement): void {
+  const target = ctx.matches(FOCUSABLE_SELECTOR) ? ctx : ctx.querySelector<HTMLElement>(FOCUSABLE_SELECTOR);
+  target?.focus();
+}
+
+/**
  * Dialog is the presentational centered modal surface. It renders through a Portal
  * (so it escapes any clipping/stacking ancestor), dims the page with a backdrop,
  * and centers a panel with a sensible max width/height and internal scroll. It
- * closes on Escape and on a backdrop click (never on a panel click), moves focus
- * into the panel on open and restores it on close, and runs a basic Tab focus
- * trap so keyboard focus cycles within the panel while open. The developer owns
- * when it opens (drive `open` / `defaultOpen`); this owns being the modal.
+ * closes on Escape (from inside the panel and, since focus can leave the panel while
+ * it is open, from anywhere on the page) and on a backdrop click (never on a panel
+ * click), moves focus into the panel on open and restores it on close - to the
+ * nearest surviving context when the element that had it is gone by then - and runs
+ * a basic Tab focus trap so keyboard focus cycles within the panel while open. The
+ * developer owns when it opens (drive `open` / `defaultOpen`); this owns being the
+ * modal.
  *
  * Styleable parts: `backdrop` · `panel` · `header` · `body` · `footer`.
  */
@@ -113,23 +142,65 @@ export function Dialog(props: DialogProps) {
 
   let backdrop: HTMLElement | undefined;
   let panel: HTMLElement | undefined;
-  // The element that had focus before we opened, restored on close.
+  // The element that had focus before we opened, restored on close, and the contexts
+  // it sat in, for the case where that element is gone by then.
   let restoreFocus: HTMLElement | null = null;
+  let restoreContext: HTMLElement[] = [];
   // Track where a click started so a drag that ends on the backdrop (e.g. a text
   // selection begun inside the panel) does not falsely dismiss.
   let pointerDownOnBackdrop = false;
+
+  /** Is `node` inside this dialog's own panel: either the shadow content, or the
+   *  light-DOM content assigned to its slots (which `panel.contains` cannot see). */
+  const insidePanel = (node: HTMLElement | null): boolean => {
+    if (!node || !panel) return false;
+    if (node === panel || panel.contains(node)) return true;
+    const root = panel.getRootNode();
+    return root instanceof ShadowRoot && root.host instanceof HTMLElement && root.host.contains(node);
+  };
+
+  // Escape while we are open, at the DOCUMENT. The backdrop's own keydown is reached
+  // through the event's composed path, so it only ever sees a press that started
+  // inside this panel - and focus can leave the panel through no fault of the reader's,
+  // most ordinarily because whatever opened the modal returns focus to its own trigger
+  // in a microtask. An `aria-modal="true"` surface owns Escape for the whole page, so
+  // the press that lands elsewhere still belongs to us. Scoped to exactly that case:
+  // while the panel IS in the path the backdrop handler owns the key, which is also
+  // what keeps a nested modal's Escape from closing the modal it sits in.
+  const onDocumentKeyDown = (e: KeyboardEvent) => {
+    if (e.key !== 'Escape' || !panel || e.composedPath().includes(panel)) return;
+    setOpen(false);
+  };
 
   // Move focus into the panel on open; restore it on close. Seeded prev=false so a
   // `defaultOpen` (open-at-mount) still runs the open branch.
   createEffect((wasOpen: boolean) => {
     const open = isOpen();
     if (open && !wasOpen) {
-      restoreFocus = deepActiveElement();
+      document.addEventListener('keydown', onDocumentKeyDown);
+      onCleanup(() => document.removeEventListener('keydown', onDocumentKeyDown));
+      const active = deepActiveElement();
+      // A target already inside the panel is not a place to come BACK to: the panel is
+      // removed when we close, so remembering it would restore focus into a node that
+      // is going away (i.e. drop it on `<body>`) rather than return the reader anywhere.
+      restoreFocus = insidePanel(active) ? null : active;
+      restoreContext = focusChain(restoreFocus);
       queueMicrotask(() => panel?.focus());
     } else if (!open && wasOpen) {
       const target = restoreFocus;
+      const chain = restoreContext;
       restoreFocus = null;
-      if (target && target.isConnected) queueMicrotask(() => target.focus());
+      restoreContext = [];
+      if (target?.isConnected) {
+        queueMicrotask(() => target.focus());
+      } else if (target && insidePanel(deepActiveElement())) {
+        // The element is gone (a menu item that closed behind the modal is the
+        // ordinary case) and focus is still ours, so without a fallback the browser
+        // drops it on `<body>` and the reader loses their place on the page. Return it
+        // to the nearest context that SURVIVED, which is where they came from.
+        const survivor = chain.find((ctx) => ctx !== target && ctx.isConnected);
+        if (survivor) queueMicrotask(() => focusFirstIn(survivor));
+      }
     }
     return open;
   }, false);

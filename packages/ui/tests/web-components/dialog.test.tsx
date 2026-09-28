@@ -450,20 +450,31 @@ describe('Escape, per this element\'s own semantics', () => {
     expect(isOpen(el)).toBe(false);
   });
 
-  test('Escape from OUTSIDE the dialog does not close it', async () => {
-    // Not a modal-scope claim: the handler is bound to the backdrop subtree, so an
-    // Escape whose target is elsewhere on the page never reaches it. Paired with the
-    // positive case over the same harness.
+  test('Escape from outside the panel closes it TOO, and announces it once', async () => {
+    // WIDENED DELIBERATELY, and this pair is the record of it. The handler used to be
+    // reachable only through the backdrop's own keydown, so an Escape whose target was
+    // anywhere else on the page never arrived - and that is not a state a keyboard user
+    // can avoid: whatever opened the modal can take focus back (a menu item returning to
+    // its trigger does it in a microtask), leaving an `aria-modal` dialog open that no
+    // key can leave. A modal owns Escape for the whole page; this is that.
     const el = await mount('<p>body</p>');
     const outside = document.createElement('button');
     document.body.appendChild(outside);
     el.show();
     await flush();
 
+    const seen: unknown[] = [];
+    el.addEventListener('kai-open-change', (e) => seen.push((e as CustomEvent).detail));
+    outside.focus();
     key(outside, 'Escape');
     await flush();
-    expect(isOpen(el)).toBe(true);
+    expect(seen, 'once, from the document listener').toEqual([{ open: false }]);
+    expect(isOpen(el)).toBe(false);
 
+    // Paired over the same harness, so "it closed" cannot be a dialog that never opened.
+    el.show();
+    await flush();
+    expect(isOpen(el)).toBe(true);
     key(panel(el)!, 'Escape');
     await flush();
     expect(isOpen(el)).toBe(false);
@@ -488,6 +499,149 @@ describe('Escape, per this element\'s own semantics', () => {
 
     expect(onDocument).toHaveBeenCalledTimes(1);
     expect(e.defaultPrevented).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// A modal is dismissible by keyboard even when focus is not in it
+// ---------------------------------------------------------------------------
+
+describe('Escape while focus is OUTSIDE the panel', () => {
+  // WHY THIS GROUP EXISTS. The backdrop's own keydown is reached through the event's
+  // composed path, so an Escape from anywhere else on the page never arrives - and a
+  // modal whose focus has drifted out is exactly the state a keyboard user gets stuck
+  // in. It is not a hypothetical: a wrapper that returns focus to its own trigger after
+  // opening a modal (a menu item that closes behind it is the ordinary case) leaves the
+  // dialog open with focus on the trigger, and the modal then swallows every later
+  // press. An `aria-modal="true"` surface owns Escape for the whole page, so this is
+  // the element's job rather than the consumer's.
+
+  test('Escape from OUTSIDE closes it, and reaches the consumer in one kai-open-change', async () => {
+    const el = await mount('<button id="a">a</button>');
+    const trigger = document.createElement('button');
+    document.body.appendChild(trigger);
+    el.show();
+    await flush();
+    trigger.focus();
+    // Precondition: this is the state under test, and not a dialog that still has focus.
+    expect(shadow(el).activeElement).not.toBe(panel(el));
+
+    const seen: unknown[] = [];
+    el.addEventListener('kai-open-change', (e) => seen.push((e as CustomEvent).detail));
+    key(trigger, 'Escape');
+    await flush();
+
+    expect(seen, 'the close request must reach the consumer').toEqual([{ open: false }]);
+    expect(isOpen(el)).toBe(false);
+  });
+
+  test('a consumer-OWNED dialog hears Escape through the same channel', async () => {
+    // The shape the reporting round tried first: the consumer binds `open` and mirrors
+    // its own state from the event. The element must not have to close itself for the
+    // consumer to be told, because it is the consumer's state that is authoritative -
+    // with focus on the opener, though, nothing was announced at all and the binding
+    // left the modal uncloseable by any key.
+    const el = await mount('<button id="a">a</button>');
+    const trigger = document.createElement('button');
+    document.body.appendChild(trigger);
+
+    let consumerOpen = false;
+    el.addEventListener('kai-open-change', (e) => {
+      consumerOpen = (e as CustomEvent).detail.open as boolean;
+      el.open = consumerOpen;
+    });
+    el.open = true;
+    await flush();
+    expect(isOpen(el), 'precondition: the bound `open` opened it').toBe(true);
+
+    trigger.focus();
+    key(trigger, 'Escape');
+    await flush();
+    expect(consumerOpen, 'the consumer owns the state and must hear the request').toBe(false);
+    expect(isOpen(el)).toBe(false);
+  });
+
+  test('Escape from INSIDE still closes, and only once', async () => {
+    // The pair for the two above: widening the scope must not turn one keypress into
+    // two closes (the document listener and the backdrop handler both seeing it).
+    const el = await mount('<button id="a">a</button>');
+    el.show();
+    await flush();
+    const seen: unknown[] = [];
+    el.addEventListener('kai-open-change', (e) => seen.push((e as CustomEvent).detail));
+
+    key(el.querySelector('#a')!, 'Escape');
+    await flush();
+    expect(seen).toEqual([{ open: false }]);
+    expect(isOpen(el)).toBe(false);
+  });
+
+  test('a NESTED dialog keeps its own Escape — the outer one does not close with it', async () => {
+    // The hazard the document listener introduces, and the reason it is scoped to an
+    // Escape whose path does NOT include the panel: a modal opened from inside this one
+    // is in this panel's subtree, so its Escape is this panel's too, and closing both is
+    // the failure. Paired so "the outer is still open" cannot pass vacuously.
+    const outer = await mount('<p>outer body</p><kai-dialog id="inner"><p>inner body</p></kai-dialog>');
+    outer.show();
+    await flush();
+    const inner = outer.querySelector('#inner') as Dialog;
+    inner.show();
+    await flush();
+    expect(isOpen(outer) && isOpen(inner)).toBe(true);
+
+    key(panel(inner)!, 'Escape');
+    await flush();
+    expect(isOpen(inner), 'the inner modal owns the key').toBe(false);
+    expect(isOpen(outer), 'and the outer one is untouched').toBe(true);
+
+    key(panel(outer)!, 'Escape');
+    await flush();
+    expect(isOpen(outer)).toBe(false);
+  });
+});
+
+describe('focus restoration when the opener is GONE', () => {
+  // The reporting round opened the dialog from a menu item that closed behind it, so
+  // the element the dialog remembers was detached by the time Escape arrived, the
+  // restore was skipped - correctly - and focus fell to <body>: the reader lost their
+  // place on the page they were still looking at. Skipping a detached target is right;
+  // leaving focus nowhere is not. When the remembered element is gone, the dialog
+  // restores to the nearest SURVIVING context it was in.
+
+  test('focus lands in the surviving context, not on BODY', async () => {
+    const region = document.createElement('div');
+    region.innerHTML = '<button id="trigger">New project</button><div id="items"><button id="item">New project</button></div>';
+    document.body.appendChild(region);
+    const item = region.querySelector('#item') as HTMLElement;
+    const trigger = region.querySelector('#trigger') as HTMLElement;
+
+    const el = await mount('<p>body</p>');
+    item.focus();
+    el.show();
+    await flush();
+    expect(shadow(el).activeElement, 'precondition: focus went into the dialog').toBe(panel(el));
+
+    // The menu that held the item closes behind the dialog, taking the item with it.
+    item.parentElement!.remove();
+    el.hide();
+    await flush();
+
+    expect(document.activeElement, 'a keyboard user must not be dropped on the page').not.toBe(document.body);
+    expect(document.activeElement).toBe(trigger);
+  });
+
+  test('a target that survives is still restored to EXACTLY, not to its region', async () => {
+    // The pair: the fallback must not take over from an ordinary restore, which lands on
+    // the remembered element itself.
+    const el = await mount('<p>body</p>');
+    const trigger = document.createElement('button');
+    document.body.appendChild(trigger);
+    trigger.focus();
+    el.show();
+    await flush();
+    el.hide();
+    await flush();
+    expect(document.activeElement).toBe(trigger);
   });
 });
 
