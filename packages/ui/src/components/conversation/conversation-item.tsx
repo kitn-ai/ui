@@ -17,30 +17,23 @@ import type { ConversationSummary } from '../../types';
 export type ConversationRowDensity = 'default' | 'compact' | 'panel';
 
 /**
- * The row box (padding) per density. `panel` restates conversation-panel.tsx's
- * row class `px-3 py-2.5` (12px/10px; with the single 20px text-sm line that
- * is the measured 40px row). It is a copy by necessity:
- * Tailwind utilities are compiled from literal class strings, so this cannot
- * be imported from the panel at runtime. `conversation-item-density.test.tsx`
- * derives the expected utilities from conversation-panel.tsx's SOURCE and
- * fails if the two drift.
+ * The row box (padding) per density, all three on the one density scale
+ * (`--spacing` re-points at `--kai-density`, theme.css). `panel` restates
+ * conversation-panel.tsx's row class `px-3 py-2.5` (12px/10px; with the 20px
+ * text-sm line, the measured 40px row). A copy by necessity: Tailwind utilities
+ * compile from literal class strings, so it cannot be imported from the panel at
+ * runtime. `conversation-item-density.test.tsx` derives the expected utilities
+ * from conversation-panel.tsx's SOURCE and fails if the two drift.
  *
- * `default` is the box this axis has always called non-compact, and it is the
- * one EVERY consumer gets with no density set: `px-2.5 py-1.5`, 10px inline and
- * 6px block. Its inline half is deliberately the same `px-2.5` the axis has
- * always carried, so a consumer that moved to `compact` and back keeps its
- * rows' leading edge where it was; what the owner's read-back moved is the
- * block half, from `py-2` (8px) down ONE step to `py-1.5` (6px).
+ * `default` is what every consumer gets with no density set, `px-2.5 py-1.5`
+ * (10px inline, 6px block). Its inline half is the `px-2.5` this axis has always
+ * carried, so a consumer that moved to `compact` and back keeps its rows'
+ * leading edge; only the block half moved, one step down from `py-2` (8px).
  *
- * `compact` is the DENSE single-line box - `px-2 py-0.5`, 8px inline and 2px
- * block - and it is deliberately the tightest box on the axis rather than one
- * step below `default`: a rail row is furniture listed one under another, and
- * the consumer that asked for it (the assistant block) wanted the row's own
- * height to come from its padding rather than from a fixed box. The pixel
- * value follows the same scale as every other box here: `--spacing` is
- * re-pointed at `--kai-density` (theme.css), so `px-2` is two density units and
- * `py-0.5` half of one. Read as pixels at the default unit: 8px and 2px, which
- * with the 20px text-sm line is a 24px row.
+ * `compact` is the dense single-line box, `px-2 py-0.5` (8px/2px, a 24px row),
+ * deliberately the tightest box on the axis rather than one step below
+ * `default`: a rail row is furniture listed one under another, so its height
+ * comes from its padding rather than a fixed box.
  */
 export const DENSITY_ROW_BOX: Record<ConversationRowDensity, string> = {
   default: 'px-2.5 py-1.5',
