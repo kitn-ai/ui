@@ -1111,8 +1111,8 @@ function sectionLabel(group: string, groupName: string): string {
 }
 
 /** The shape every row that is NOT a conversation starts from: the conversation
- *  parts off, and the four a control row can have (a caret, a menu, a rename
- *  field, the items that act) off too, plus the trailing ACTIONS, which only the
+ *  parts off, and the five a control row can have (a caret, the project glyph, a
+ *  menu, a rename field, the items that act) off too, plus the trailing ACTIONS, which only the
  *  two section labels show. The three builders below turn on the ones their own
  *  kind needs, so a field added to the row cannot be forgotten in one of them. */
 function controlNode(id: string, kind: ConversationRow['kind'], title: string, group: string, groupName: string): ConversationRow {
@@ -1138,6 +1138,7 @@ function controlNode(id: string, kind: ConversationRow['kind'], title: string, g
     groupName,
     caretHidden: true,
     caretName: '',
+    folderIconHidden: true,
     menuHidden: true,
     trioHidden: true,
     trioMenuLabel: '',
@@ -1210,6 +1211,11 @@ function folderNode(
     // conversation.
     caretHidden: !heading || empty,
     caretName: heading && !empty ? (open ? 'chevron-down' : 'chevron-right') : '',
+    // ...AND THE GLYPH AHEAD OF THE TITLE, on a PROJECT's heading and on nothing
+    // else. The Recents heading is a section label over the unfiled remainder
+    // rather than a project, and a heading for a group the catalogue cannot name
+    // is still a project - it has a group id, which is what this reads.
+    folderIconHidden: !(heading && group !== ''),
     // THE RECENTS HEADING IS THE RAIL'S SECOND SECTION LABEL, so it carries the
     // same trailing actions the Projects label does; a folder INSIDE Projects
     // heads a folder rather than a section and carries none.
@@ -1531,11 +1537,16 @@ export interface ConversationRow {
   /** That project's label, or ''. Empty for a group the catalogue cannot name,
    *  which a heading then labels with the id instead (`sectionLabel`). */
   groupName: string;
-  /** Whether the leading caret is hidden: only a folder heading shows one. */
+  /** Whether the leading CARET is hidden: only a folder heading shows one. */
   caretHidden: boolean;
   /** The caret's icon name, which is the folder's open state. Empty where the
    *  caret is hidden; a binding holds a field, never an expression. */
   caretName: string;
+  /** Whether the project glyph ahead of the title is hidden. Only a folder heading
+   *  for a project the store keeps shows one: it is what says the row heads a
+   *  project rather than being another conversation, and the Recents heading heads
+   *  the unfiled remainder rather than a project. */
+  folderIconHidden: boolean;
   /** Whether the row menu is hidden: a control row carries no kebab, and the
    *  heading's own activation is the folder control. */
   menuHidden: boolean;

@@ -1,6 +1,6 @@
 {
   "scenario": "assistant",
-  "base": "http://localhost:8952",
+  "base": "http://localhost:8959",
   "runs": [
     {
       "page": "block",
@@ -515,7 +515,7 @@
           "styles": {
             "railActionInertRow": {
               "height": "32px",
-              "fontSize": "12px",
+              "fontSize": "14px",
               "paddingInline": "12px",
               "color": "color(srgb 0.0352941 0.0352941 0.0431373 / 0.55)"
             },
@@ -637,7 +637,7 @@
               "marginBlockStart": "8px"
             },
             "freshRailRecentsHeading": {
-              "height": "40px",
+              "height": "53px",
               "marginInlineStart": "0px"
             }
           }
@@ -656,7 +656,7 @@
           },
           "styles": {
             "createdProjectFolder": {
-              "height": "40px",
+              "height": "53px",
               "marginInlineStart": "0px"
             }
           }
@@ -664,7 +664,7 @@
         {
           "name": "51-palette-open",
           "probes": {
-            "theSearchButtonSitsAtTheHeadersRightEnd": true,
+            "theHeaderReadsTitleSearchThenCollapse": true,
             "theElementsOwnSearchBoxIsOff": true,
             "theButtonOpensItAndTheCaretIsInTheBox": true,
             "theGroupsReadInTheReferencesOrder": true,
@@ -710,6 +710,7 @@
             "theRailShowsTheDemosFolders": true,
             "everyHeadingCarriesTheMenu": true,
             "theDemoFoldersCarryItToo": true,
+            "everyProjectHeadingPaintsItsFolderGlyph": true,
             "theHeadingsRenameAdvertisesNoKey": true,
             "noHeadingOffersShare": true
           },
@@ -1248,7 +1249,7 @@
           "styles": {
             "railActionInertRow": {
               "height": "32px",
-              "fontSize": "12px",
+              "fontSize": "14px",
               "paddingInline": "12px",
               "color": "color(srgb 0.980392 0.980392 0.980392 / 0.55)"
             },
@@ -1370,7 +1371,7 @@
               "marginBlockStart": "8px"
             },
             "freshRailRecentsHeading": {
-              "height": "40px",
+              "height": "53px",
               "marginInlineStart": "0px"
             }
           }
@@ -1389,7 +1390,7 @@
           },
           "styles": {
             "createdProjectFolder": {
-              "height": "40px",
+              "height": "53px",
               "marginInlineStart": "0px"
             }
           }
@@ -1397,7 +1398,7 @@
         {
           "name": "51-palette-open",
           "probes": {
-            "theSearchButtonSitsAtTheHeadersRightEnd": true,
+            "theHeaderReadsTitleSearchThenCollapse": true,
             "theElementsOwnSearchBoxIsOff": true,
             "theButtonOpensItAndTheCaretIsInTheBox": true,
             "theGroupsReadInTheReferencesOrder": true,
@@ -1443,6 +1444,7 @@
             "theRailShowsTheDemosFolders": true,
             "everyHeadingCarriesTheMenu": true,
             "theDemoFoldersCarryItToo": true,
+            "everyProjectHeadingPaintsItsFolderGlyph": true,
             "theHeadingsRenameAdvertisesNoKey": true,
             "noHeadingOffersShare": true
           },

@@ -79,32 +79,84 @@ kai-dropdown[hidden] { display: none; }
  * above it. */
 kai-tooltip[hidden], kai-kbd-group[hidden], .menu-separator[hidden] { display: none; }
 
-/* EVERY RAIL ROW IS FLUSH LEFT, filing and all, and the joining is said by the
- * heading's CARET instead: the rail is the page's narrowest column, and an inline
- * step spends it on a nesting the caret has already stated. What survives of the
- * tree is the GAP - the first conversation row under a heading is one density
- * step below it, so the heading reads as a heading and its rows as the group
- * under it, while the rows themselves keep the rail's own row step. The gap keys
- * on the SIBLING a heading precedes, read off the row's own box, so a folder the
- * catalogue cannot name gets it too and nothing is pierced: the row is the
- * page's element and its body lives in its shadow root. Measured in the driver
- * (`folderRowStep`), which reads every conversation row's inline step and the
- * left-and-vertical step from each heading to its first row. */
+/* THE SECTION LABELS STAY FLUSH LEFT, AND A PROJECT'S ROWS ALIGN TO THE PROJECT'S
+ * LABEL. That is the whole of the tree this block draws: the Projects label and
+ * the Recents heading take the rail's own inline edge, and every row filed under
+ * a PROJECT takes ONE inline step - the folder glyph's box plus the gap after
+ * it, declared on the rail above so the two rules cannot drift - which puts a
+ * filed row's title under its project's label rather than under the glyph. The
+ * rows of the ungrouped remainder keep the flush edge, because there is no
+ * project for them to align to.
+ *
+ * The GAP is the other half: the first conversation row under a heading is one
+ * density step below it, so the heading reads as a heading and its rows as the
+ * group under it. It keys on the SIBLING a heading precedes, read off the row's
+ * own box, so a folder the catalogue cannot name gets it too and nothing is
+ * pierced: the row is the page's element and its body lives in its shadow root.
+ * Both facts are measured in the driver (`folderRowStep`), which reads every
+ * conversation row's inline step and the left-and-vertical step from each
+ * heading to its first row. */
+kai-conversations {
+  --rail-folder-icon: 1rem;
+  --rail-folder-icon-gap: 0.5rem;
+  --rail-folder-step: calc(var(--rail-folder-icon) + var(--rail-folder-icon-gap));
+}
+/* The glyph and the title are ONE GROUP so that the step between them is a gap
+ * rather than the whitespace between two slotted nodes - see the template for
+ * why that whitespace cannot be relied on. The title's own box is the group's
+ * flexible half, so the row still truncates where it did. */
+.row-title-group {
+  display: flex;
+  align-items: center;
+  gap: var(--rail-folder-icon-gap);
+  min-width: 0;
+}
+/* The group's `display` is an author rule, so it outranks the UA's `[hidden]` and
+ * the attribute would hide nothing without this - the same trap kai-icon[hidden]
+ * above carries. It is what takes the glyph and the title off the row while the
+ * rename field is in their place. */
+.row-title-group[hidden] { display: none; }
+/* The glyph's BOX is set here rather than left to the kit's `size`, because the
+ * box is what the rows under the folder step by: a size the kit could re-point
+ * would move the labels without moving the rows. */
+.row-folder-icon {
+  flex: 0 0 auto;
+  width: var(--rail-folder-icon);
+  height: var(--rail-folder-icon);
+}
+.row-title-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* The step, on every row a PROJECT holds - the conversations and, with them, the
+ * Show more row, which is the tail of the same run - and only while the rail is
+ * organized BY PROJECT: one list is a flat list, so a row that kept the step
+ * would read as filed under a heading that is not there. A row in the remainder
+ * has an empty `data-folder`, which is what the `:not` reads. */
+kai-conversations[data-organizer="project"] kai-conversation-item[data-rail="conversation"]:not([data-folder=""]),
+kai-conversations[data-organizer="project"] kai-conversation-item[data-rail="more"] { margin-inline-start: var(--rail-folder-step); }
 kai-conversation-item[data-rail="folder"] + kai-conversation-item { margin-block-start: var(--kai-density, 0.25rem); }
 
 /* THE PLAIN ROW'S BOX, and it is spelled here for one reason: the rows that DO
  * act are kai-buttons, whose box the kit paints inside their shadow root from
- * its own size="sm" variant - 32px tall, 12px of inline padding, text-xs,
- * rounded-md - and nothing out here can borrow that. Spelling it makes the two
- * kinds of row read as one list: same height, same padding, so icon and label
- * start at the same x. TWO lists carry it, and both are a row that acts beside
- * rows that cannot: the row menu's Share item beside its three live items, and
- * the rail's top actions, where the one live row sits above three inert ones. */
+ * its own size="sm" variant - 32px tall, 12px of inline padding, rounded-md -
+ * and nothing out here can borrow that. Spelling it makes the two kinds of row
+ * read as one list: same height, same padding, so icon and label start at the
+ * same x. TWO lists carry it, and both are a row that acts beside rows that
+ * cannot: the row menu's Share item beside its three live items, and the rail's
+ * top actions, where the one live row sits above three inert ones. */
 .menu-row, .rail-action {
   display: flex; align-items: center; gap: 0.5rem;
   box-sizing: border-box; height: 2rem; padding: 0 0.75rem;
-  border-radius: 6px; font-size: 0.75rem;
+  border-radius: 6px;
 }
+/* THE ONE SIZE THE TWO LISTS DO NOT SHARE, and it is a measurement rather than a
+ * preference: the row menu's Share item stands beside the menu's four live rows,
+ * which the kit paints at text-xs (12px) inside kai-button's shadow root, so the
+ * plain row beside them takes the same 12px. The rail's top actions stand above
+ * the RAIL'S OWN ROWS, which the kit paints at text-sm (14px), so those four
+ * take 14px - the live one through the button part the kit documents, the three
+ * inert ones through this rule. Read off the page: the four were 12px beside
+ * 14px rows, which is a step the reader sees and no rule ever decided. */
+.menu-row { font-size: 0.75rem; }
+.rail-action, #rail-new-chat::part(button) { font-size: 0.875rem; }
 /* Dimmed, and nothing else: the row keeps its pointer events, because the
  * reason it is disabled is a tooltip and a tooltip needs a hover. Its BOX is
  * its own content rather than the region's width - the tooltip wraps its trigger
@@ -118,17 +170,19 @@ kai-conversation-item[data-rail="folder"] + kai-conversation-item { margin-block
 /* THE RAIL'S TOP REGION, which lives in the list's header slot. That slot's own
  * box is inside the rail's shadow root and is a plain block with no padding, so
  * the region's box is this rule: the rail's own inline padding, one step between
- * the collapse control and the action rows, and a LOOSER bottom edge than the
- * step between the rows themselves - which is what makes the four read as a
- * group of their own rather than as the head of the search box below them. The
- * step is measured in the driver, against the rows' own step. */
-.rail-header { display: flex; flex-direction: column; gap: 0.5rem; padding: 0.75rem 0.75rem 1rem; }
-/* THE HEADER'S OWN ROW: the collapse control and the search button, one at each
- * end of the same line. `space-between` rather than a gap, because the search
- * button belongs to the rail's top RIGHT corner - the side of the aside the
- * reference puts it on - and a gap would leave it floating beside the collapse
- * control instead. */
-.rail-head-row { display: flex; align-items: center; justify-content: space-between; }
+ * the head row and the action rows, and a bottom edge of ONE density unit. That
+ * bottom edge was a full 1rem while the element's own search box followed the
+ * region; the box is switched off, so the edge now lands against the Projects
+ * label, which carries the section's own two-density-unit margin. Both are
+ * measured in the driver, against the rows' own step. */
+.rail-header { display: flex; flex-direction: column; gap: 0.5rem; padding: 0.75rem 0.75rem var(--kai-density, 0.25rem); }
+/* THE HEADER'S OWN ROW: the rail's title at the start, then the search button,
+ * then the collapse control at the END, which is the rail's top right corner -
+ * the side of the aside the reference puts it on. The title takes the room the
+ * other two do not, so the two controls stay together at the trailing edge
+ * instead of being spread apart. */
+.rail-head-row { display: flex; align-items: center; gap: 0.25rem; }
+.rail-title { margin-inline-end: auto; font-size: 0.875rem; font-weight: 600; }
 /* The palette rides in the kit's modal, and the panel is in ITS shadow root -
  * so its width is the one box this page has to ask for by name. The kit's own
  * `part="panel"` is the documented hook for exactly that; the width is a

@@ -501,7 +501,7 @@ const railSectionFacts = (page) => page.evaluate(() => {
     return `rgb(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255})`;
   };
   const items = [...document.querySelectorAll('kai-conversations > kai-conversation-item')];
-  const titleOf = (el) => el.querySelector(':scope > span');
+  const titleOf = (el) => el.querySelector('.row-title-text');
   // THE THEME'S MUTED REGISTER, read off a row's TITLE SPAN - and the span rather
   // than the rail's host is the measured answer: the kit sets its colour tokens on
   // hosts AND scopes the dark scheme inside each shadow root, so a custom property
@@ -583,8 +583,9 @@ let paletteKeys = null;
  *  region, the box each control came to, the glyph each actually painted (a
  *  curated name the kit does not carry paints nothing) and the name it declares.
  *
- *  The row's title is the FIRST slotted span, which is why the actions are the
- *  markup AFTER the title rather than beside it.
+ *  The row's title IS the `.row-title-text` span - the glyph ahead of it and the
+ *  row's trailing chrome are its siblings rather than its contents - which is why
+ *  a read of a row's label names that span instead of taking the first one.
  *
  *  `rovingStops` is the rail's whole roving contract in one number, the same one
  *  the keyboard walk measures: exactly one row body carries `tabindex="0"`, so a
@@ -608,7 +609,7 @@ const railTrioFacts = (page) => page.evaluate(() => {
     return {
       id: row.conversationId ?? row.getAttribute('conversation-id') ?? row.id,
       kind,
-      title: (row.querySelector(':scope > span')?.textContent ?? '').trim(),
+      title: (row.querySelector('.row-title-text')?.textContent ?? '').trim(),
       sectionLabel: kind === 'section'
         || (kind === 'folder' && (row.getAttribute('data-folder') ?? '') === ''),
       hidden: trio === null ? true : trio.hasAttribute('hidden'),
@@ -711,7 +712,7 @@ const railShape = (page) => page.evaluate(() =>
   [...document.querySelectorAll('kai-conversations > kai-conversation-item')].map((el) => ({
     id: el.conversationId ?? el.getAttribute('conversation-id') ?? el.id,
     kind: el.getAttribute('data-rail') ?? 'conversation',
-    title: (el.querySelector(':scope > span')?.textContent ?? '').trim(),
+    title: (el.querySelector('.row-title-text')?.textContent ?? '').trim(),
     indent: getComputedStyle(el).marginInlineStart,
     // THE FOLDER a row is filed under, by ID. It is the fact the tree is read
     // from now that no row carries an inline step: `data-folder` is empty on the
@@ -738,7 +739,7 @@ const rowBindingFacts = (page) => page.evaluate(() => {
       const editor = el.querySelector('.row-rename');
       return {
         kind: el.getAttribute('data-rail') ?? 'conversation',
-        title: (el.querySelector(':scope > span')?.textContent ?? '').trim(),
+        title: (el.querySelector('.row-title-text')?.textContent ?? '').trim(),
         menuItems: Array.isArray(menu?.items) ? menu.items.length : null,
         editorValue: editor?.value ?? null,
       };
@@ -831,6 +832,23 @@ const railSteps = (page) => page.evaluate(() => {
       folder: el.getAttribute('data-folder') ?? '',
       inline: getComputedStyle(el).marginInlineStart,
     }));
+  // THE STEP A HEADING'S OWN LABEL TAKES PAST THE GLYPH AHEAD OF IT, read off the
+  // two boxes rather than typed here. The glyph and the title are slotted children
+  // of the row, so the one number the rows under a project have to match is the
+  // difference between their two left edges - and whether the glyph PAINTED is the
+  // only way to know the curated name resolved, because the kit paints nothing for
+  // a name its roster does not carry.
+  const glyphStep = (heading) => {
+    const icon = heading.querySelector('.row-folder-icon');
+    const label = heading.querySelector('.row-title-text') ?? null;
+    if (icon === null || label === null) return { labelStep: null, iconPainted: false };
+    const glyph = icon.shadowRoot?.querySelector('svg') ?? null;
+    const box = glyph?.getBoundingClientRect() ?? null;
+    return {
+      labelStep: Math.round((label.getBoundingClientRect().left - icon.getBoundingClientRect().left) * 10) / 10,
+      iconPainted: box !== null && box.width > 0 && box.height > 0,
+    };
+  };
   const pairs = [];
   for (let i = 0; i < items.length; i++) {
     if (items[i].getAttribute('data-rail') !== 'folder') continue;
@@ -842,6 +860,7 @@ const railSteps = (page) => page.evaluate(() => {
       folder: items[i].getAttribute('data-folder') ?? '',
       left: Math.round((row.left - heading.left) * 10) / 10,
       gap: Math.round((row.top - heading.bottom) * 10) / 10,
+      ...glyphStep(items[i]),
     });
   }
   return { rows, pairs };
@@ -890,7 +909,7 @@ const rowWalk = (page) => page.evaluate(() => {
 const rowTitle = (page, id) => page.evaluate((wanted) => {
   const el = [...document.querySelectorAll('kai-conversations > kai-conversation-item')]
     .find((item) => (item.conversationId ?? item.getAttribute('conversation-id') ?? item.id) === wanted);
-  return el?.querySelector(':scope > span')?.textContent ?? '';
+  return el?.querySelector('.row-title-text')?.textContent ?? '';
 }, id);
 
 /** Open the palette the way a reader does: the rail header's search button. */
@@ -943,7 +962,7 @@ const paletteFacts = (page) => page.evaluate(() => {
     // The rail's own conversation rows, so a probe can hold the palette's Chats
     // section against the list it claims to come from.
     railTitles: [...document.querySelectorAll('kai-conversations > kai-conversation-item[data-rail="conversation"]')]
-      .map((el) => el.querySelector(':scope > span')?.textContent?.trim() ?? ''),
+      .map((el) => el.querySelector('.row-title-text')?.textContent?.trim() ?? ''),
     // Whether the element's own search box is still in the rail. It is the OTHER
     // search affordance the owner asked to be gone, and the reading that says "off"
     // is that no input is in the rail's shadow root at all.
@@ -2606,7 +2625,7 @@ export default {
         const title = await page.evaluate((id) => {
           const el = [...document.querySelectorAll('kai-conversations > kai-conversation-item[data-rail="conversation"]')]
             .find((item) => (item.conversationId ?? item.getAttribute('conversation-id') ?? item.id) === id);
-          return el?.querySelector(':scope > span')?.textContent ?? '';
+          return el?.querySelector('.row-title-text')?.textContent ?? '';
         }, target.id);
         await openPalette(page);
         const box = paletteBox(page);
@@ -2668,9 +2687,11 @@ export default {
         const folder = runs.filter((run) => run.group !== '')
           .reduce((a, b) => (b.rows.length > a.rows.length ? b : a));
         // The heading and its caret are this folder's OWN rows, found by the
-        // label the rows of that folder carry.
+        // label the rows of that folder carry. The caret is named by its CLASS,
+        // because a heading carries two glyphs now: the project's folder icon
+        // ahead of the label, and the caret that is the folder's open state.
         const heading = page.locator(`kai-conversations > kai-conversation-item[data-rail="folder"][data-group="${folder.group}"]`);
-        const caret = page.locator(`kai-conversations > kai-conversation-item[data-rail="folder"][data-group="${folder.group}"] > kai-icon`);
+        const caret = page.locator(`kai-conversations > kai-conversation-item[data-rail="folder"][data-group="${folder.group}"] > kai-icon.row-caret`);
         const before = await railNodes(page);
         await heading.click();
         await settle(350)(page);
@@ -2859,20 +2880,37 @@ export default {
         // Read AFTER the search is cleared: the walk is over the rows the rail
         // really holds, and a filter would have taken some of them off it.
         const before = await rowWalk(page);
-        // THE WALK STARTS AT THE RAIL'S OWN HEADER, at the first control in it. The
-        // rail's built-in search box used to be where this started and it is switched
-        // off now - so the start is the header's leading button, FOCUSED rather than
-        // clicked: a click on the collapse control folds the column away, and this
-        // state is about where Tab goes, not about folding.
+        // THE WALK STARTS AT THE RAIL'S OWN HEADER, at its trailing control -
+        // the collapse button, which the title, the search and the top action rows
+        // now sit ahead of. It is FOCUSED rather than clicked: a click on the
+        // collapse control folds the column away, and this state is about where Tab
+        // goes, not about folding. The kit's dialog hands the caret back to whatever
+        // opened it when it closes, so the walk records where focus really was
+        // rather than assuming this call won.
         await page.locator('#rail-collapse').focus();
         let arrived = null;
+        // WHAT THE WALK SAW, kept for the failure message: which element held focus
+        // at the start, whether the palette was still open over the rail, and where
+        // each tab stopped. A walk that never arrives says nothing about which of
+        // the two moved without them.
+        const walkStart = await page.evaluate(() => ({
+          active: `${document.activeElement?.localName ?? ''}#${document.activeElement?.id ?? ''}`,
+          paletteOpen: document.getElementById('palette-dialog')?.getAttribute('open') !== null,
+        }));
+        const tabStops = [];
+        // THE BUDGET SCALES WITH THE LIST, and it is not a budget for the header:
+        // the container's roving tab stop belongs to the ACTIVE row, and between the
+        // header and that row sit the section label's three trailing actions plus a
+        // menu trigger in every row ahead of it. A fixed eight was a budget for a
+        // rail whose active row happened to be the first one.
         // `page.keyboard`, not `box.press`: a locator's press focuses the box
         // first, so six of them are six presses from the SAME place and the walk
         // never advances.
-        for (let step = 0; step < 8 && arrived === null; step += 1) {
+        for (let step = 0; step < before.count + 6 && arrived === null; step += 1) {
           await page.keyboard.press('Tab');
           await settle(150)(page);
           const at = await rowWalk(page);
+          tabStops.push(`${at.focused}:${at.focusedKind}:${await page.evaluate(() => `${document.activeElement?.localName ?? ''}#${document.activeElement?.id ?? ''}`)}`);
           if (at.focused >= 0) arrived = at;
         }
         await page.keyboard.press('Home');
@@ -2900,12 +2938,17 @@ export default {
           stopsPerStep: walked.map((at) => at.rovingStops),
           end: end.focused,
           up: up.focused,
+          walkStart,
+          tabStops,
         };
       },
       probes: {
-        // A tab out of the rail's own search box lands on a ROW and stops there:
-        // the whole list is one stop in the page's tab order.
-        tabbingReachedARailRow: () => (keyboardWalk?.arrived ?? -1) >= 0,
+        // A tab out of the rail's own header reaches a ROW and stops there: the
+        // whole list is one stop in the page's tab order. The failure names what
+        // the walk saw, because "it never arrived" on its own says nothing about
+        // which of the two - the tab order or the rows - moved.
+        tabbingReachedARailRow: () => (keyboardWalk?.arrived ?? -1) >= 0
+          || `the walk never reached a row in 8 tab stops: from ${keyboardWalk?.walkStart?.active} (palette open: ${keyboardWalk?.walkStart?.paletteOpen}), tabs ${JSON.stringify(keyboardWalk?.tabStops ?? [])}, ${keyboardWalk?.rows ?? 0} rows, ${keyboardWalk?.stops ?? 0} tab stop(s) on the list`,
         // ONE tab stop for the list, at every step of the walk: that number IS
         // the container's roving contract, and a heading with a control of its own
         // would make it two.
@@ -3156,26 +3199,42 @@ export default {
           return (unknownGroup?.threadText ?? '').includes(unknownGroup?.answer ?? '')
             || `the thread reads ${JSON.stringify(unknownGroup?.threadText)}`;
         },
-        // FLUSH LEFT, WITH ONE STEP OF GAP UNDER EACH HEADING. The rail is the
-        // page's narrowest column, so the nesting a filed row sits in is said by
-        // the heading's caret and the gap, not by an inline step - and both halves
-        // are read as computed style and box geometry, on every conversation row
-        // the rail rendered and on every heading that is followed by one, so the
-        // claim covers a row in a folder the catalogue cannot name as much as one
-        // in a folder it can.
+        // FLUSH LEFT AT THE SECTION LABELS, ONE STEP UNDER EACH PROJECT'S. The
+        // rail is the page's narrowest column, so the nesting a filed row sits in
+        // is said by ONE inline step - the project glyph's box plus the gap after
+        // it - which is what puts a filed row's title under its project's label.
+        //
+        // A PROJECT'S ROWS LINE UP UNDER ITS LABEL, and the section labels stay
+        // flush left. The step is DERIVED rather than typed: a row filed under a
+        // project takes the same inline step its heading's own label takes past the
+        // folder glyph, so the two left edges agree - and a heading that painted no
+        // glyph has no step to match, which is why the glyph's box is read here too.
+        // A row in the ungrouped remainder takes none: it is the rail's own list
+        // and there is no project over it to line up with. What survives of the
+        // old tree is the GAP - the first conversation row under a heading is one
+        // density step below it, so the heading reads as a heading and its rows as
+        // the group under it - and that too is read off the boxes.
         folderRowStep: () => {
           const steps = unknownGroup?.steps ?? null;
           if (steps === null) return 'the rail rows were not measured';
           const rows = steps.rows ?? [];
           if (rows.length === 0) return 'no conversation row was rendered to measure';
-          const indented = rows.filter((row) => (parseFloat(row.inline) || 0) !== 0);
-          if (indented.length > 0) {
-            return `${indented.length} conversation row(s) still carry an inline step (${indented.map((row) => row.inline).join(', ')})`;
+          const flush = rows.filter((row) => row.folder === '' && (parseFloat(row.inline) || 0) !== 0);
+          if (flush.length > 0) {
+            return `a row in the remainder carries an inline step (${flush[0].inline})`;
           }
-          const pairs = steps.pairs ?? [];
-          if (pairs.length === 0) return 'no heading was followed by a conversation row, so the gap was not measured';
-          const off = pairs.filter((pair) => pair.left !== 0);
-          if (off.length > 0) return `a heading's first row starts ${off[0].left}px off the heading`;
+          const pairs = (steps.pairs ?? []).filter((pair) => pair.folder !== '');
+          if (pairs.length === 0) return 'no project heading was followed by a conversation row, so the step was not measured';
+          const unpainted = pairs.filter((pair) => pair.iconPainted !== true);
+          if (unpainted.length > 0) return `a project heading painted no folder glyph (${unpainted[0].folder})`;
+          const off = pairs.filter((pair) => pair.left !== pair.labelStep);
+          if (off.length > 0) {
+            return `a project's first row starts ${off[0].left}px off its heading, whose label is ${off[0].labelStep}px past the glyph`;
+          }
+          if (!(pairs[0].labelStep > 0)) return `the label step is ${pairs[0].labelStep}px, which aligns nothing`;
+          const indents = [...new Set(rows.filter((row) => row.folder !== '')
+            .map((row) => Math.round(parseFloat(row.inline) || 0)))];
+          if (indents.length !== 1) return `the filed rows disagree on their step: ${indents.join(', ')}`;
           const gaps = [...new Set(pairs.map((pair) => pair.gap))];
           if (gaps.length !== 1) return `the headings do not share one gap: ${gaps.join(', ')}`;
           return gaps[0] > 0 || `the step under a heading is ${gaps[0]}px, which separates nothing`;
@@ -4034,7 +4093,7 @@ export default {
             id: el.conversationId ?? el.getAttribute('conversation-id') ?? el.id,
             kind: el.getAttribute('data-rail') ?? 'conversation',
             folder: el.getAttribute('data-folder') ?? '',
-            title: el.querySelector(':scope > span')?.textContent ?? '',
+            title: el.querySelector('.row-title-text')?.textContent ?? '',
           })));
         freshRail = {
           titles: titled.map((row) => `${row.kind}:${row.title}`),
@@ -4152,7 +4211,7 @@ export default {
         const afterReload = await page.evaluate((id) => {
             const rows = [...document.querySelectorAll('kai-conversations > kai-conversation-item')];
             const row = rows.find((el) => el.getAttribute('data-folder') === id && el.getAttribute('data-rail') === 'folder');
-            return { present: row !== undefined, label: row?.querySelector(':scope > span')?.textContent ?? '' };
+            return { present: row !== undefined, label: row?.querySelector('.row-title-text')?.textContent ?? '' };
         }, projectCreate.id);
         projectCreate.idAfterReload = afterReload.present ? projectCreate.id : '';
         projectCreate.labelAfterReload = afterReload.label;
@@ -4253,20 +4312,25 @@ export default {
         paletteOpen = await paletteFacts(page);
       },
       probes: {
-        // THE RAIL'S OWN HEADER CARRIES IT, at the row's trailing end: the search
-        // button's left edge is past the collapse control's, and both are inside the
-        // region the block fills in the header slot.
-        theSearchButtonSitsAtTheHeadersRightEnd: async (page) => {
+        // THE RAIL'S OWN HEADER CARRIES IT, and the row reads left to right: the
+        // title, the search button, then the collapse control at the header's
+        // trailing end. All three inside the region the block fills in the header
+        // slot, so "at the end" is a box rather than a class name.
+        theHeaderReadsTitleSearchThenCollapse: async (page) => {
           const boxes = await page.evaluate(() => {
             const collapse = document.getElementById('rail-collapse')?.getBoundingClientRect() ?? null;
             const search = document.getElementById('rail-search')?.getBoundingClientRect() ?? null;
+            const title = document.querySelector('.rail-head-row .rail-title')?.getBoundingClientRect() ?? null;
             const header = document.querySelector('.rail-header')?.getBoundingClientRect() ?? null;
-            return { collapse, search, header };
+            return { collapse, search, title, header };
           });
-          const { collapse, search, header } = boxes;
-          if (collapse === null || search === null || header === null) return 'the header, the collapse control or the search button is missing';
-          if (search.left <= collapse.left) return `the search button is left of the collapse control (${search.left} vs ${collapse.left})`;
-          if (search.right > header.right) return `the search button runs past the header (${search.right} vs ${header.right})`;
+          const { collapse, search, title, header } = boxes;
+          if (collapse === null || search === null || title === null || header === null) {
+            return 'the header, its title, the collapse control or the search button is missing';
+          }
+          if (title.left >= search.left) return `the title is not left of the search button (${title.left} vs ${search.left})`;
+          if (search.right > collapse.left) return `the collapse control is not right of the search button (${collapse.left} vs ${search.right})`;
+          if (collapse.right > header.right) return `the collapse control runs past the header (${collapse.right} vs ${header.right})`;
           return true;
         },
         // THE ELEMENT'S OWN BOX IS OFF: no input in the rail's shadow root, which is
@@ -4319,7 +4383,7 @@ export default {
         },
       },
       expect: {
-        theSearchButtonSitsAtTheHeadersRightEnd: true,
+        theHeaderReadsTitleSearchThenCollapse: true,
         theElementsOwnSearchBoxIsOff: true,
         theButtonOpensItAndTheCaretIsInTheBox: true,
         theGroupsReadInTheReferencesOrder: true,
@@ -4581,10 +4645,19 @@ export default {
               const items = dropdown ? [...dropdown.querySelectorAll('[role="menuitem"]')] : [];
               const named = (label) => items.filter((item) => exposed(item, dropdown)
                 && (item.textContent ?? '').trim().startsWith(label)).length === 1;
-              const title = [...el.children].find((child) => child.localName === 'span' && !hidden(child));
+              const title = el.querySelector('.row-title-text');
+              // THE PROJECT GLYPH, read as a PAINTED BOX and not as a name in the
+              // markup: the kit renders nothing for a name its roster does not
+              // carry, so a heading whose icon resolved is a heading with an svg of
+              // a real size inside it, and the name is recorded beside it.
+              const icon = el.querySelector('.row-folder-icon');
+              const glyph = icon !== null && !hidden(icon) ? icon.shadowRoot?.querySelector('svg') ?? null : null;
+              const glyphBox = glyph?.getBoundingClientRect() ?? null;
               return {
                 group: el.getAttribute('data-folder') ?? '',
                 label: title?.textContent ?? '',
+                iconName: icon?.getAttribute('name') ?? '',
+                iconPainted: glyphBox !== null && glyphBox.width > 0 && glyphBox.height > 0,
                 menu: dropdown !== null && !hidden(dropdown),
                 rename: dropdown !== null && named('Rename'),
                 delete: dropdown !== null && named('Delete'),
@@ -4627,6 +4700,18 @@ export default {
             ? true
             : `${acting.length} of ${demos.length} of the demo's own headings act`;
         },
+        // A PROJECT HEADING PAINTS THE CURATED FOLDER GLYPH. A heading the reader
+        // cannot tell from a conversation row is the shape this item exists to
+        // remove, and the glyph is a curated name: the kit paints nothing for one
+        // its roster does not carry, so the PAINTED BOX is the check. The Recents
+        // heading is exempt by design - it heads the unfiled remainder rather than a
+        // project - so the claim is over every heading that carries a group id.
+        everyProjectHeadingPaintsItsFolderGlyph: () => {
+          const projects = (folderMenus ?? []).filter((row) => row.group !== '');
+          if (projects.length === 0) return 'the rail rendered no project heading';
+          const bad = projects.filter((row) => row.iconPainted !== true || row.iconName !== 'folder');
+          return bad.length === 0 ? true : JSON.stringify(bad.map((row) => `${row.label}:${row.iconName}`));
+        },
         // DECIDING LOUDLY, the other way: a heading's Rename shows no F2 chip.
         theHeadingsRenameAdvertisesNoKey: () => (folderMenus ?? []).every((row) => row.renameChip === false),
         // ...and no Share, which is a conversation's affordance rather than a
@@ -4638,6 +4723,7 @@ export default {
         theRailShowsTheDemosFolders: true,
         everyHeadingCarriesTheMenu: true,
         theDemoFoldersCarryItToo: true,
+        everyProjectHeadingPaintsItsFolderGlyph: true,
         theHeadingsRenameAdvertisesNoKey: true,
         noHeadingOffersShare: true,
       },
@@ -4701,8 +4787,7 @@ export default {
         const labelOf = async () => page.evaluate((id) => {
           const row = [...document.querySelectorAll('kai-conversations > kai-conversation-item')]
             .find((el) => el.getAttribute('data-folder') === id && el.getAttribute('data-rail') === 'folder');
-          const title = row ? [...row.children].find((child) => child.localName === 'span'
-            && !(child.hidden === true || child.hasAttribute('hidden'))) : null;
+          const title = row ? row.querySelector('.row-title-text') : null;
           return title?.textContent ?? '';
         }, group);
         folderEdit = {

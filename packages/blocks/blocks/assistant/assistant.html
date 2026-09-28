@@ -82,6 +82,7 @@
         .collapsed="railCollapsed"
         .activeId="activeId"
         searchable="false"
+        :data-organizer="railOrganizer"
         @kai-conversation-select="openConversation"
         @kai-new-chat="newChat"
         @kai-toggle-sidebar="collapseRail"
@@ -109,9 +110,11 @@
              for that reason: the name belongs to the control, the action to the
              page.
 
-             THE "Chats" LABEL IS DROPPED: the rail's own rows are headed by what
-             they hold (the project folders, then Recents), and a page-level title
-             above them is not the shape this sidebar is.
+             THE RAIL'S TITLE IS THE BLOCK'S OWN NAME, in the header row above the
+             rows headed by what they hold (the project folders, then Recents). It
+             is the same string the main column's own h1 carries, because the block
+             has one name and a second one invented for the rail would be copy this
+             block does not have.
 
              THE FOUR ROWS BELOW are the sidebar's top actions, in a plain
              register because they ARE the sidebar's own rows. Three of them are
@@ -123,26 +126,19 @@
              screen reader and once to the hovered eye. A real app points each
              row at the screen it owns. -->
         <div slot="header" class="rail-header">
-          <!-- THE HEADER'S OWN ROW: the collapse control at its start, the search
-               button at its END - the top right of the aside, which is where the
-               reference puts it. The search button OPENS THE PALETTE, and it is the
-               only search affordance the page offers: the element's own filter box
-               is switched off above (`searchable="false"`), so the rail does not
+          <!-- THE HEADER'S OWN ROW, and it reads left to right: the rail's TITLE
+               at its start, then the search button, then the collapse control at
+               the END - the top right of the aside, which is where the reference
+               puts it. The search button OPENS THE PALETTE, and it is the only
+               search affordance the page offers: the element's own filter box is
+               switched off above (`searchable="false"`), so the rail does not
                offer two ways to search the same rows.
 
                IT REPLACES THE BUILT-IN FILTER rather than sitting beside it: the
                section label's own filter control fires the same `openPalette`
                action, so the two are one surface reached from two places. -->
           <div class="rail-head-row">
-            <kai-button
-              id="rail-collapse"
-              :theme="themeMode"
-              variant="ghost"
-              size="icon-sm"
-              icon="panel-left"
-              label="Toggle sidebar"
-              @kai-click="collapseRail"
-            ></kai-button>
+            <span class="rail-title">Assistant</span>
             <kai-button
               id="rail-search"
               :theme="themeMode"
@@ -151,6 +147,15 @@
               icon="search"
               label="Search chats"
               @kai-click="openPalette"
+            ></kai-button>
+            <kai-button
+              id="rail-collapse"
+              :theme="themeMode"
+              variant="ghost"
+              size="icon-sm"
+              icon="panel-left"
+              label="Toggle sidebar"
+              @kai-click="collapseRail"
             ></kai-button>
           </div>
 
@@ -255,7 +260,39 @@
                reaching into a row it cannot hold a ref to: `#ref` names one
                element, and a row inside a *for is many. The element autofocuses
                and selects its field when `editing` flips true. -->
-          <span .textContent="row.title" :hidden="row.renaming"></span>
+          <!-- A PROJECT HEADING'S OWN GLYPH, ahead of its label: without one a
+               heading is a row of text the same shape as a conversation row's, and
+               the reader has to read the word to know which is which. The kit
+               paints nothing for a name its roster does not carry, so the name is
+               the curated `folder` and the painted box is what says it resolved.
+               Hidden on every row that is not a project's heading: the Recents
+               label heads the unfiled remainder rather than a project, and a
+               conversation is not a folder.
+
+               IT ALSO DECIDES THE STEP THE ROWS UNDER A PROJECT TAKE - their
+               titles align to this heading's LABEL, so the step is this glyph's box
+               plus the gap after it (see assistant.css, where both rules read the
+               one pair of properties). -->
+          <!-- THE GLYPH AND THE TITLE ARE ONE GROUP, and the step between them is
+               the flex row's gap. The row's slotted children otherwise lay out
+               INLINE - the item's title region is a block, and the kit's own gap
+               sits between those REGIONS rather than between the nodes slotted
+               into one - so a newline between two of them renders as a real space
+               (3.8px at this row's type size) and the step would be a fact about
+               the markup's whitespace. The emitted form is re-serialized from this
+               template and re-inserts that newline, so the step is spelled as a
+               GAP here: the rows under a project align to this heading's LABEL,
+               and the driver (`folderRowStep`) compares the two left edges. -->
+          <span class="row-title-group" :hidden="row.renaming">
+            <kai-icon
+              class="row-folder-icon"
+              :theme="themeMode"
+              name="folder"
+              size="sm"
+              :hidden="row.folderIconHidden"
+            ></kai-icon>
+            <span class="row-title-text" .textContent="row.title"></span>
+          </span>
           <!-- The folder's open state, and the one part of a heading that is not
                a word: the caret TRAILS the title and points down while the folder
                is open, which is where the reference puts it. It trails rather
