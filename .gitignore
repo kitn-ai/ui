@@ -62,3 +62,6 @@ packages/ui/.kai-local-kit/
 # TypeScript scratch dirs left by ad-hoc typechecks (a stale copy inside one
 # makes lint:dangling-imports report a specifier that never existed)
 .tc-tmp/
+
+# Block-driver debug scratch (a scratch file in a lint-walked directory is a trap)
+.dbg*.mjs
