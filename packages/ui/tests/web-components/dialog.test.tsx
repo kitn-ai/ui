@@ -677,6 +677,83 @@ describe('focus restoration when the opener is GONE', () => {
   });
 });
 
+describe('the dialog says so when the browser refuses to focus the panel', () => {
+  // SEE THE FILE HEADER. jsdom models neither `inert` nor a top-layer native modal, so a
+  // subtree every browser refuses to focus is still focusable to jsdom's `focus()`: the
+  // one fact missing here is the refusal itself, and this stub supplies it for this
+  // describe only, delegating every other call. The arrangement it stands in for is the
+  // consumer's - an open native modal, or an `inert` region, covering the portal target -
+  // and `scripts/probe-dialog-focus-refusal.mjs --shape=modal-outside` measures it in
+  // Chromium, where the browser does the refusing with nothing on the page to mark it.
+  //
+  // WHY THIS IS PINNED AS A PAIR. A warning on the refusal is worth nothing if it also
+  // fires on the ordinary open, and the ordinary open is what every other test in this
+  // file performs. An always-warning dialog is noise a consumer learns to filter, which
+  // is the silence again with extra steps, so both halves run over one harness.
+  const real = HTMLElement.prototype.focus;
+  /** Is `node` in a subtree the browser would refuse to focus: it, or an ancestor of it,
+   *  is `inert` - crossing shadow boundaries, the way the browser's own check does, so a
+   *  `<slot>`-less shadow tree inside an inert region is caught as well. `closest()`
+   *  alone stops at the shadow root and would call the panel focusable. */
+  const behindInert = (node: HTMLElement): boolean => {
+    let el: HTMLElement | null = node;
+    while (el) {
+      if (el.hasAttribute('inert')) return true;
+      const root = el.getRootNode();
+      el = el.parentElement ?? (root instanceof ShadowRoot && root.host instanceof HTMLElement ? root.host : null);
+    }
+    return false;
+  };
+  beforeAll(() => {
+    HTMLElement.prototype.focus = function (this: HTMLElement, options?: FocusOptions) {
+      if (behindInert(this)) return;
+      real.call(this, options);
+    };
+  });
+  afterAll(() => { HTMLElement.prototype.focus = real; });
+  afterEach(() => { document.body.removeAttribute('inert'); });
+
+  test('a refused open warns, naming what happened', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const el = await mount('<p>body</p>');
+    const outside = document.createElement('button');
+    document.body.appendChild(outside);
+    outside.focus();
+
+    el.show();
+    // The consumer's native modal opens in the same turn, making everything outside it
+    // unfocusable - which is where this dialog's portal target sits. The panel's own
+    // `focus()` is already queued by then, so it lands on a page that refuses it.
+    document.body.setAttribute('inert', '');
+    await flush();
+
+    // The precondition is what makes the warning non-vacuous: the panel really did not
+    // take focus, and the reader really is still outside the dialog.
+    expect(shadow(el).activeElement, 'precondition: the panel did NOT take focus').toBeNull();
+    expect(document.activeElement, 'precondition: the reader is still where they were').toBe(outside);
+    expect(warn, 'a dialog that could not take focus must say so').toHaveBeenCalledTimes(1);
+    const said = warn.mock.calls[0].join(' ');
+    expect(said).toContain('kai-dialog');
+    expect(said, 'and it must say WHAT happened, not merely that something did').toContain('opened without taking focus');
+    warn.mockRestore();
+  });
+
+  test('an ordinary open stays quiet', async () => {
+    // The other half of the pair, over the same harness with the surround left focusable:
+    // silence is the correct output here, and the precondition is that the warning had
+    // every chance to fire - the panel did take focus, so a dialog that warned regardless
+    // would be caught by this test rather than by a consumer.
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const el = await mount('<p>body</p>');
+    el.show();
+    await flush();
+
+    expect(shadow(el).activeElement, 'precondition: the panel took focus').toBe(panel(el));
+    expect(warn, 'the ordinary path must not be noisy').not.toHaveBeenCalled();
+    warn.mockRestore();
+  });
+});
+
 describe('backdrop dismissal', () => {
   test('a press-and-release on the backdrop closes', async () => {
     const el = await mount('<p>body</p>');

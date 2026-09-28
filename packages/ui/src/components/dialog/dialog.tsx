@@ -136,6 +136,24 @@ function focusFirstIn(ctx: HTMLElement, goingAway: (el: HTMLElement) => boolean)
 }
 
 /**
+ * The panel was asked for focus and did not get it, and nothing else here would notice:
+ * the browser refuses `focus()` on an unfocusable node silently. The cause is the
+ * consumer's arrangement rather than this component's - a native modal, or an `inert`
+ * region, covering the portal target makes everything inside it unfocusable, and no
+ * retry changes that - so this cannot fix it. What it can do is not pretend the reader
+ * was moved: a dialog that opens without focus is a keyboard reader's dead end, and
+ * opening quietly is the failure. Said on every open that was refused, because each one
+ * is that reader's dead end rather than a condition to report once for the session.
+ */
+function warnOpenedWithoutFocus(): void {
+  console.warn(
+    '[kai-dialog] opened without taking focus: the browser refused to focus the panel, so a '
+    + 'keyboard reader is left where they were. The usual cause is a native modal, or an inert '
+    + 'region, covering this dialog\'s portal target.',
+  );
+}
+
+/**
  * Dialog is the presentational centered modal surface. It renders through a Portal
  * (so it escapes any clipping/stacking ancestor), dims the page with a backdrop,
  * and centers a panel with a sensible max width/height and internal scroll. It
@@ -144,6 +162,9 @@ function focusFirstIn(ctx: HTMLElement, goingAway: (el: HTMLElement) => boolean)
  * click), moves focus into the panel on open and restores it on close - to the nearest
  * surviving context that can take focus when the element that had it is gone by then -
  * and runs a basic Tab focus trap so keyboard focus cycles within the panel while open.
+ * It cannot make an unfocusable panel focusable - a native modal or an `inert` region over
+ * the portal target is the consumer's arrangement - so when the browser refuses that focus
+ * move it warns on the console rather than opening silently.
  * The developer owns when it opens (drive `open` / `defaultOpen`); this owns being the
  * modal.
  *
@@ -212,7 +233,15 @@ export function Dialog(props: DialogProps) {
       // is going away (i.e. drop it on `<body>`) rather than return the reader anywhere.
       restoreFocus = insidePanel(active) ? null : active;
       restoreContext = focusChain(restoreFocus);
-      queueMicrotask(() => panel?.focus());
+      queueMicrotask(() => {
+        panel?.focus();
+        // Ask the DOCUMENT, as the close walk does: `focus()` on a node the browser will
+        // not focus is silent, so "the call was made" is not "the reader is somewhere".
+        // A detached panel is a dialog that already closed (the close raced this
+        // microtask), not one that opened without focus, so only a connected panel that
+        // did not end up holding focus is the case worth saying out loud.
+        if (panel?.isConnected && !insidePanel(deepActiveElement())) warnOpenedWithoutFocus();
+      });
     } else if (!open && wasOpen) {
       const target = restoreFocus;
       const chain = restoreContext;

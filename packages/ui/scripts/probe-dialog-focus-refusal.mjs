@@ -10,6 +10,7 @@
  *   node scripts/probe-dialog-focus-refusal.mjs --variant=assume-took
  *   node scripts/probe-dialog-focus-refusal.mjs --variant=drop-check
  *   node scripts/probe-dialog-focus-refusal.mjs --shape=details|hidden|inert|modal|modal-outside
+ *   node scripts/probe-dialog-focus-refusal.mjs --shape=modal-outside --variant=no-notice
  *
  * `--shape=modal` is the one refusal nothing on the page authors: the walk's candidates
  * sit outside a native `<dialog>` the page opened with `showModal()`, and the browser
@@ -18,8 +19,9 @@
  * `showModal()` under `src/` - so the shape is the consumer's own native modal with a
  * kai-dialog nested inside it, which is the arrangement where the kit's panel can still
  * take focus at all. `--shape=modal-outside` is the same page with the panel beside the
- * modal instead of inside it; there the browser refuses the panel's own `focus()` on
- * open, so the walk is never reached and the probe's precondition check fails.
+ * modal instead of inside it; there the browser refuses the PANEL's own `focus()` on
+ * open, so the walk is never reached and that run measures the kit's notification
+ * instead (`N1`/`N2` below).
  *
  * WHAT IS MEASURED, and how the page is built:
  *
@@ -54,9 +56,29 @@
  * BODY and only the nearest-first policy is lost. A variant that changes nothing would
  * be the finding; C3 is what tells those two edits apart.
  *
+ * WHAT `--shape=modal-outside` IS FOR: the notification. A dialog the browser refuses to
+ * focus must not open silently, so the component warns on the console when its own
+ * `focus()` on open did not move focus (see `warnOpenedWithoutFocus`). This shape is the
+ * one arrangement that reaches it, and the run asserts three things about it:
+ *
+ *   N1  the panel's own `focus()` on open was REFUSED - so the notification is not
+ *       vacuous, the refusal is measured and not assumed
+ *   N2  the kit SAID SO: exactly one notification in the console, typed `warning`
+ *       <- `--variant=no-notice` fails this, and is its negative control
+ *   N1  (every OTHER shape) the whole run stayed QUIET: no notification at all
+ *
+ * The quiet check is the other half of the pair, and it is the one that matters most: a
+ * notification that also fires on the ordinary open is noise, and noise is what a
+ * consumer learns to filter. Both halves are measured here, in the browser.
+ *
+ * C1-C3 do not apply to `--shape=modal-outside` and are not run there: the panel never
+ * took focus, so the close fallback's walk is never reached and there is no focus
+ * position to assert. The probe says so on the line where the checks would be instead of
+ * passing them vacuously.
+ *
  * The variants are a Vite source transform held in this file. Nothing on disk under
- * `src/` is touched, and the transform throws if it does not find exactly one
- * verification line — so a later edit to the dialog makes this probe say so instead of
+ * `src/` is touched, and a transform throws if it does not find exactly one of its
+ * target lines — so a later edit to the dialog makes this probe say so instead of
  * measuring something else.
  *
  * COST: a Vite dev server over `src/` plus one Chromium launch, seconds per variant. It
@@ -76,14 +98,34 @@ const arg = (name, fallback) => {
 };
 const variant = arg('variant', 'real');
 const shape = arg('shape', 'inert');
-if (!['real', 'assume-took', 'drop-check'].includes(variant)) throw new Error(`unknown --variant=${variant}`);
+if (!['real', 'assume-took', 'drop-check', 'no-notice'].includes(variant)) throw new Error(`unknown --variant=${variant}`);
 if (!['inert', 'details', 'hidden', 'modal', 'modal-outside'].includes(shape)) throw new Error(`unknown --shape=${shape}`);
 /** Both modal shapes put the page's own `showModal()` on the page and differ only in
  *  where the panel sits relative to it. */
 const modalShape = shape === 'modal' || shape === 'modal-outside';
+/** The shape where the browser refuses the panel's OWN `focus()` on open, so the walk is
+ *  never reached and the thing under test is the notification rather than the walk. */
+const refusingOpen = shape === 'modal-outside';
+
+/** Both halves of the pair have to be run where they mean something. An unrun axis is a
+ *  green that proves nothing, so the combination says so instead of passing. */
+if (refusingOpen && variant !== 'real' && variant !== 'no-notice') {
+  throw new Error(`--shape=${shape} never reaches the walk, so --variant=${variant} would measure nothing; its control is --variant=no-notice`);
+}
+if (!refusingOpen && variant === 'no-notice') {
+  throw new Error(`--variant=no-notice only means something with --shape=modal-outside, where the open is what gets refused; use --variant=assume-took or --variant=drop-check here`);
+}
 
 /** The verification line, spelled exactly as it is in src. */
 const VERIFY_LINE = 'if (deepActiveElement() === el) return true;';
+
+/** The notification's call site, spelled exactly as it is in src. Removing it is the
+ *  negative control for the notification checks, and the exact-match rule means a
+ *  reworded dialog makes this probe fail rather than pass without measuring. */
+const NOTICE_CALL = 'if (panel?.isConnected && !insidePanel(deepActiveElement())) warnOpenedWithoutFocus();';
+/** What a consumer sees in the console when the open was refused, matched on the phrase
+ *  the source states. */
+const NOTICE_FRAGMENT = '[kai-dialog] opened without taking focus';
 
 /** The shapes under test, wrapped around the decoy. `inert` and a closed `<details>`
  *  both REFUSE focus while still painting a normal-size box; `hidden` is the plain
@@ -108,9 +150,9 @@ const SHAPES = {
  *  can be focused once it is) and removed while the dialog is open.
  *
  *  `modal` nests the panel INSIDE the modal, which is the only arrangement the walk can
- *  run in: `modal-outside` puts it beside the modal instead, where the browser refuses
- *  the panel's own `focus()` on open, the walk is never reached, and the run says so
- *  through its own precondition check rather than a green one. */
+ *  run in: `modal-outside` puts it beside the modal instead, where the browser refuses the
+ *  panel's own `focus()` on open, the walk is never reached, and the run measures the
+ *  KIT'S NOTIFICATION there instead of an outcome of the walk. */
 const HOST_INNER = (s) => {
   if (s === 'modal') {
     return `${SHAPES.modal}
@@ -298,11 +340,14 @@ function variantPlugin() {
     enforce: 'pre',
     transform(code, id) {
       if (!id.endsWith('src/components/dialog/dialog.tsx')) return null;
-      const hits = code.split(VERIFY_LINE).length - 1;
+      const [line, replacement] = variant === 'no-notice'
+        ? [NOTICE_CALL, '/* probe: no-notice */']
+        : [VERIFY_LINE, variant === 'assume-took' ? 'return true;' : ''];
+      const hits = code.split(line).length - 1;
       if (hits !== 1) {
-        throw new Error(`probe: expected exactly one "${VERIFY_LINE}" in ${id}, found ${hits} - the dialog moved, re-read it before trusting this probe`);
+        throw new Error(`probe: expected exactly one "${line}" in ${id}, found ${hits} - the dialog moved, re-read it before trusting this probe`);
       }
-      return code.replace(VERIFY_LINE, variant === 'assume-took' ? 'return true;' : '');
+      return code.replace(line, replacement);
     },
   };
 }
@@ -325,6 +370,12 @@ const browser = await chromium.launch();
 const page = await browser.newPage();
 const pageErrors = [];
 page.on('pageerror', (e) => pageErrors.push(String(e)));
+// What a CONSUMER sees: the console, as the browser hands it over. Captured for the
+// whole run, so "the ordinary path stays quiet" is a measurement over both the open and
+// the close rather than over the one call the probe happened to look at.
+const consoleMessages = [];
+page.on('console', (m) => consoleMessages.push({ type: m.type(), text: m.text() }));
+const notices = () => consoleMessages.filter((m) => m.text.includes(NOTICE_FRAGMENT));
 await page.goto(url, { waitUntil: 'load' });
 await page.waitForFunction(() => !!window.__probe, null, { timeout: 60_000 });
 const boot = await page.evaluate(() => window.__probe);
@@ -362,7 +413,16 @@ if (modalShape) {
 //    remembered as the opener (the precondition pair jsdom needs stubbed visibility
 //    for; here it is real).
 const opened = await page.evaluate(() => window.__open());
-check('precondition: focus went INTO the panel on open', opened.id === 'panel' && !opened.panelGone, `active=${opened.id} panelGone=${opened.panelGone} trail=${JSON.stringify(opened.trail)}`);
+const panelAttempt = opened.trail.find((t) => t.node === 'panel');
+if (refusingOpen) {
+  // This shape measures the notification, not the walk: the browser refused the panel's
+  // own focus() on open, so nothing about the close fallback is reached here.
+  check('precondition: focus did NOT go into the panel on open (the walk is never reached)', opened.id !== 'panel' && !opened.panelGone, `active=${opened.id} panelGone=${opened.panelGone} trail=${JSON.stringify(opened.trail)}`);
+  check('N1  the panel\'s own focus() on open was REFUSED by the browser', panelAttempt?.took === false && panelAttempt.threw === null, `panelAttempt=${JSON.stringify(panelAttempt)}`);
+  check('N2  the kit SAID SO: exactly one notification, and it is a warning', notices().length === 1 && notices()[0].type === 'warning', `notices=${JSON.stringify(notices())}`);
+} else {
+  check('precondition: focus went INTO the panel on open', opened.id === 'panel' && !opened.panelGone, `active=${opened.id} panelGone=${opened.panelGone} trail=${JSON.stringify(opened.trail)}`);
+}
 
 // 3. Remove the opener behind the modal and close: the fallback walk runs.
 const closed = await page.evaluate(() => window.__close());
@@ -371,11 +431,17 @@ const decoyAttempt = trail.find((t) => t.node === 'decoy');
 const nearAttempt = trail.find((t) => t.node === 'near');
 
 check('precondition: the opener is gone and the panel unmounted', closed.openerGone && closed.panelGone, JSON.stringify({ openerGone: closed.openerGone, panelGone: closed.panelGone, unmountedAfterMs: closed.panelGoneAfterMs }));
-check('C1  focus is not BODY/HTML after the walk', !closed.isBody && !closed.isHtml, `active=${closed.id} <${closed.tag}>`);
-check('C2  focus is on a node the trail recorded TAKING focus (not the refusing decoy)', decoyAttempt?.took === false && trail.some((t) => t.took && t.node === closed.id), `active=${closed.id} decoyAttempt=${JSON.stringify(decoyAttempt)}`);
-check('C3  focus is the NEAREST context\'s destination (#near), not one further out', closed.id === 'near', `active=${closed.id} nearAttempt=${JSON.stringify(nearAttempt)}`);
+if (refusingOpen) {
+  console.log('  --    C1-C3 skipped: this shape never reaches the walk (the panel never took focus), so there is no position to assert');
+} else {
+  check('C1  focus is not BODY/HTML after the walk', !closed.isBody && !closed.isHtml, `active=${closed.id} <${closed.tag}>`);
+  check('C2  focus is on a node the trail recorded TAKING focus (not the refusing decoy)', decoyAttempt?.took === false && trail.some((t) => t.took && t.node === closed.id), `active=${closed.id} decoyAttempt=${JSON.stringify(decoyAttempt)}`);
+  check('C3  focus is the NEAREST context\'s destination (#near), not one further out', closed.id === 'near', `active=${closed.id} nearAttempt=${JSON.stringify(nearAttempt)}`);
+  check('N1  the ordinary path stayed QUIET: no notification over the whole run', notices().length === 0, `notices=${JSON.stringify(notices())}`);
+}
 
 console.log(`\n  focus trail: ${trail.map((t) => `${t.node}${t.took ? '(took)' : '(refused)'}`).join(' -> ')}`);
+if (notices().length) console.log(`  notification: ${notices().map((m) => `${m.type}: ${m.text}`).join(' | ')}`);
 if (pageErrors.length) { console.log('\npage errors:\n  ' + pageErrors.join('\n  ')); failed++; }
 await browser.close();
 await server.close();
