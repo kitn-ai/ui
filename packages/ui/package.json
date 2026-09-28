@@ -256,7 +256,7 @@
     "dev:provider": "vite ../../examples/internal/remote-provider --port 6007 --strictPort",
     "dev:host": "vite ../../examples/internal/remote-host --port 6006 --strictPort",
     "test:e2e": "playwright test --config config/playwright/cross-origin.config.ts",
-    "test:browser-suites": "node scripts/run-browser-suites.mjs",
+    "test:browser-suites": "node scripts/run-browser-suites.mjs --self-test && node scripts/run-browser-suites.mjs",
     "test:browser-suites:advisory": "node scripts/run-browser-suites.mjs --advisory-only",
     "test:composer-ivp": "playwright test --config config/playwright/storybook.config.ts --project=composer",
     "test:slots-ivp": "playwright test --config config/playwright/storybook.config.ts --project=slots",
