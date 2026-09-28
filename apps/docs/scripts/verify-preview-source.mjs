@@ -14,6 +14,16 @@
 // dist is a hard failure, because "no build to check" is how a guard that
 // proves nothing looks from the outside.
 //
+// IT PUTS THE OWNER'S PREVIEW BACK ON THE WAY OUT. The build this guard reads
+// ran in CDN mode, and copy-blocks.mjs deletes public/blocks/local when it
+// does -- which is the directory the dev server serves the /blocks previews
+// from. So every run used to leave the preview 404ing until somebody
+// remembered the restore line copy-blocks.mjs prints, and that cost the owner
+// two interruptions before it was fixed here. A gate that can fail must still
+// put the preview back, so the restore is wired rather than remembered: it runs
+// from the `finally` AND from an `exit` hook, because main() exits through
+// process.exit and a process.exit does not unwind a finally.
+//
 // TWO MODES, AND WHY. The structural checks below are facts about THIS
 // checkout and are always fatal. The PUBLISHED-ENTRY probe is a fact about
 // npm and jsDelivr at this moment: it HEADs every kit entry the built
@@ -32,6 +42,7 @@
 // The footer wording is IMPORTED from copy-blocks.mjs rather than restated
 // here: that script is where the preview source is decided, so a guard with
 // its own copy of the sentence could go green over a footer nobody writes.
+import { spawnSync } from 'node:child_process';
 import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
@@ -445,4 +456,38 @@ async function main() {
   );
 }
 
-await main();
+// See the header: run over a CDN build, leave the tree in LOCAL mode.
+//
+// The restore is unconditional rather than conditioned on "was local already
+// there": that condition would be a second thing to keep true about which mode
+// ran last, and the case it would skip -- a preview that is already fine --
+// costs one copy. A run that leaves the preview missing is the failure this
+// wrapper exists to remove.
+let previewRestored = false;
+
+/** Rebuild the local preview with the one command copy-blocks.mjs names. */
+function restoreLocalPreview() {
+  if (previewRestored) return;
+  // --self-test plants virtual trees and reads no build at all, and it must
+  // keep working on a tree where the kit was never built -- restoring there
+  // would need dist/blocks and would fail for a reason that is not a defect.
+  if (SELF_TEST) return;
+  previewRestored = true;
+  const result = spawnSync(process.execPath, [join(HERE, 'copy-blocks.mjs')], {
+    env: { ...process.env, KAI_BLOCKS_KIT: 'local' },
+    stdio: 'inherit',
+  });
+  if (result.status !== 0) {
+    console.error(
+      `\nx preview source: the local preview was NOT restored (copy-blocks.mjs exited ${result.status}). The dev server's /blocks/local pages 404 until it is: KAI_BLOCKS_KIT=local node apps/docs/scripts/copy-blocks.mjs\n`,
+    );
+    process.exitCode = 1;
+  }
+}
+
+process.on('exit', restoreLocalPreview);
+try {
+  await main();
+} finally {
+  restoreLocalPreview();
+}
