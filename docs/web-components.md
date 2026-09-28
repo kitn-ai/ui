@@ -174,7 +174,7 @@ Every web component also accepts a `theme` attribute (`'light' | 'dark' | 'auto'
 | `voice` | `voice` | `undefined | false | true` | `false` | Show a voice-input button in the input toolbar; calls `onVoice`. |
 | `triggers` | — | `undefined | { char: string; kind: string; items?: undefined | { id: string; label: string; icon?: undefined | string; description?: undefined | string; group?: undefined | string; kind?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }[]` | — | Rich entity triggers. Each opens a menu at the caret that inserts an atomic pill. |
 | `kindIcons` | — | `undefined | Record<string, string>` | — | Default icon per entity kind (kind → image src) for pills/menu items. |
-| `actionsReveal` | `actions-reveal` | `undefined | "always" | "hover"` | `'always'` | Whether each message's action bar is visible at rest or revealed on pointer-over. Visible at rest by default. |
+| `actionsReveal` | `actions-reveal` | `undefined | "always" | "hover"` | — | Whether each row's action bar is visible at rest or on pointer-over; omitted keys it to the turn, so a user row reveals and an assistant row does not. |
 | `userActions` | — | `undefined | ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]` | — | Default action bar for user messages that have no `actions` of their own; a message's own `actions` replaces it. |
 | `assistantActions` | — | `undefined | ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]` | — | Default action bar for assistant messages, as `userActions` is for user ones. |
 | `hideSources` | `hide-sources` | `undefined | false | true` | `false` | Hide the citations row that consecutive `source` parts collapse into; absent or `false` renders it. |
@@ -557,7 +557,7 @@ Standalone prompt input with a send button. Use when you want just the input are
 | `proseSize` | `prose-size` | `undefined | "xs" | "sm" | "base" | "lg"` | `'sm'` | Text/markdown sizing for the message body. |
 | `codeTheme` | `code-theme` | `undefined | string` | `'github-dark-dimmed'` | Shiki theme name used for fenced code blocks in the content. |
 | `codeHighlight` | `code-highlight` | `undefined | false | true` | `true` | Disable syntax highlighting for code blocks (no Shiki loads). |
-| `actionsReveal` | `actions-reveal` | `undefined | "always" | "hover"` | `'always'` | Whether the action bar stays visible or appears on pointer-over; visible by default. |
+| `actionsReveal` | `actions-reveal` | `undefined | "always" | "hover"` | — | Whether the action bar stays visible or appears on pointer-over; omitted keys the default to the turn, so a user row reveals and an assistant row stays visible. |
 | `avatarSrc` | `avatar-src` | `undefined | string` | — | Convenience avatar image URL (used when `message.avatar` is not set). |
 | `avatarFallback` | `avatar-fallback` | `undefined | string` | — | Convenience avatar fallback text (used when `message.avatar` is not set). |
 | `avatar` | `avatar` | `undefined | string` | — | Avatar rail mode. `'none'` omits the rail so the body spans the full row; otherwise the built-in avatar or your `slot="avatar"`. |
@@ -1518,7 +1518,7 @@ No events.
 | `codeTheme` | `code-theme` | `undefined | string` | `'github-dark-dimmed'` | Shiki theme name for syntax-highlighted code blocks (e.g. `'github-dark-dimmed'`). |
 | `codeHighlight` | `code-highlight` | `undefined | false | true` | `true` | Enable Shiki syntax highlighting in code blocks. Turn off to render plain `<pre>` blocks (lighter, no highlighter load). Default true. |
 | `imagePreview` | `image-preview` | `undefined | "hover" | "lightbox"` | `'hover'` | How an image tile reveals its full size. Default is the pointer-only hover card; the modal on click is the only one keyboard and touch reach. |
-| `actionsReveal` | `actions-reveal` | `undefined | "always" | "hover"` | `'always'` | Whether each message's action bar is visible at rest or only revealed on pointer-over. Visible at rest by default. |
+| `actionsReveal` | `actions-reveal` | `undefined | "always" | "hover"` | — | Whether each row's action bar is visible at rest or on pointer-over; omitted keys it to the turn, so a user row reveals and an assistant row does not. |
 | `scrollButton` | `scroll-button` | `undefined | false | true` | `true` | Show the scroll-to-bottom button inside the scroll area. Default true. |
 | `density` | `density` | `undefined | "default" | "compact"` | `'default'` | How much air the message list has: `'default'` (shipped) or `'compact'` (a desktop-panel rhythm: 8px between turns, a tighter band). |
 | `class` | `class` | `undefined | string` | — | Extra classes applied to the thread's inner root. |

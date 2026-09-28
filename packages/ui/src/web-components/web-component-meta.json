@@ -1678,8 +1678,7 @@
         "type": "undefined | \"always\" | \"hover\"",
         "optional": true,
         "scalar": true,
-        "description": "Whether each message's action bar is visible at rest or revealed on pointer-over. Visible at rest by default.",
-        "default": "'always'",
+        "description": "Whether each row's action bar is visible at rest or on pointer-over; omitted keys it to the turn, so a user row reveals and an assistant row does not.",
         "displayType": "undefined | \"always\" | \"hover\""
       },
       {
@@ -5952,8 +5951,7 @@
         "type": "undefined | \"always\" | \"hover\"",
         "optional": true,
         "scalar": true,
-        "description": "Whether the action bar stays visible or appears on pointer-over; visible by default.",
-        "default": "'always'",
+        "description": "Whether the action bar stays visible or appears on pointer-over; omitted keys the default to the turn, so a user row reveals and an assistant row stays visible.",
         "displayType": "undefined | \"always\" | \"hover\""
       },
       {
@@ -10343,8 +10341,7 @@
         "type": "undefined | \"always\" | \"hover\"",
         "optional": true,
         "scalar": true,
-        "description": "Whether each message's action bar is visible at rest or only revealed on pointer-over. Visible at rest by default.",
-        "default": "'always'",
+        "description": "Whether each row's action bar is visible at rest or on pointer-over; omitted keys it to the turn, so a user row reveals and an assistant row does not.",
         "displayType": "undefined | \"always\" | \"hover\""
       },
       {

@@ -474,7 +474,7 @@ export interface KaiChatElement extends HTMLElement {
   triggers?: { char: string; kind: string; items?: { id: string; label: string; icon?: string; description?: string; group?: string; kind?: string; promptText?: string; data?: Record<string, unknown> }[] }[];
   /** Default icon per entity kind (kind → image src) for pills/menu items. */
   kindIcons?: Record<string, string>;
-  /** Whether each message's action bar is visible at rest or revealed on pointer-over. Visible at rest by default. */
+  /** Whether each row's action bar is visible at rest or on pointer-over; omitted keys it to the turn, so a user row reveals and an assistant row does not. */
   actionsReveal?: "always" | "hover";
   /** Default action bar for user messages that have no `actions` of their own; a message's own `actions` replaces it. */
   userActions?: ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: string; tooltip?: string })[];
@@ -1316,7 +1316,7 @@ export interface KaiMessageElement extends HTMLElement {
   codeTheme?: string;
   /** Disable syntax highlighting for code blocks (no Shiki loads). */
   codeHighlight?: boolean;
-  /** Whether the action bar stays visible or appears on pointer-over; visible by default. */
+  /** Whether the action bar stays visible or appears on pointer-over; omitted keys the default to the turn, so a user row reveals and an assistant row stays visible. */
   actionsReveal?: "always" | "hover";
   /** Convenience avatar image URL (used when `message.avatar` is not set). */
   avatarSrc?: string;
@@ -2149,7 +2149,7 @@ export interface KaiThreadElement extends HTMLElement {
   codeHighlight?: boolean;
   /** How an image tile reveals its full size. Default is the pointer-only hover card; the modal on click is the only one keyboard and touch reach. */
   imagePreview?: "hover" | "lightbox";
-  /** Whether each message's action bar is visible at rest or only revealed on pointer-over. Visible at rest by default. */
+  /** Whether each row's action bar is visible at rest or on pointer-over; omitted keys it to the turn, so a user row reveals and an assistant row does not. */
   actionsReveal?: "always" | "hover";
   /** Show the scroll-to-bottom button inside the scroll area. Default true. */
   scrollButton?: boolean;
@@ -3389,7 +3389,7 @@ export interface KaiChatElementProps {
   triggers?: { char: string; kind: string; items?: { id: string; label: string; icon?: string; description?: string; group?: string; kind?: string; promptText?: string; data?: Record<string, unknown> }[] }[];
   /** Default icon per entity kind (kind → image src) for pills/menu items. */
   kindIcons?: Record<string, string>;
-  /** Whether each message's action bar is visible at rest or revealed on pointer-over. Visible at rest by default. */
+  /** Whether each row's action bar is visible at rest or on pointer-over; omitted keys it to the turn, so a user row reveals and an assistant row does not. */
   actionsReveal?: "always" | "hover";
   /** Default action bar for user messages that have no `actions` of their own; a message's own `actions` replaces it. */
   userActions?: ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: string; tooltip?: string })[];
@@ -3991,7 +3991,7 @@ export interface KaiMessageElementProps {
   codeTheme?: string;
   /** Disable syntax highlighting for code blocks (no Shiki loads). */
   codeHighlight?: boolean;
-  /** Whether the action bar stays visible or appears on pointer-over; visible by default. */
+  /** Whether the action bar stays visible or appears on pointer-over; omitted keys the default to the turn, so a user row reveals and an assistant row stays visible. */
   actionsReveal?: "always" | "hover";
   /** Convenience avatar image URL (used when `message.avatar` is not set). */
   avatarSrc?: string;
@@ -4634,7 +4634,7 @@ export interface KaiThreadElementProps {
   codeHighlight?: boolean;
   /** How an image tile reveals its full size. Default is the pointer-only hover card; the modal on click is the only one keyboard and touch reach. */
   imagePreview?: "hover" | "lightbox";
-  /** Whether each message's action bar is visible at rest or only revealed on pointer-over. Visible at rest by default. */
+  /** Whether each row's action bar is visible at rest or on pointer-over; omitted keys it to the turn, so a user row reveals and an assistant row does not. */
   actionsReveal?: "always" | "hover";
   /** Show the scroll-to-bottom button inside the scroll area. Default true. */
   scrollButton?: boolean;
