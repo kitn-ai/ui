@@ -752,8 +752,8 @@ function projectMenus(choice: ThemeChoice): Pick<AssistantState, 'theme' | 'them
  *  same way in every delivery form. */
 function rowMenuTarget(event: Event): { op: RowMenuOp; conversationId: string } | undefined {
   const element = event.currentTarget as HTMLElement | null;
-  const op = element?.dataset.op;
-  const conversationId = element?.dataset.conversationId;
+  const op = element?.dataset['op'];
+  const conversationId = element?.dataset['conversationId'];
   if (!op || !conversationId || !ROW_MENU_OPS.includes(op)) return undefined;
   return { op: op as RowMenuOp, conversationId };
 }
@@ -763,7 +763,7 @@ function rowMenuTarget(event: Event): { op: RowMenuOp; conversationId: string } 
  *  was has to travel on the element. */
 function guideTarget(event: Event): string | undefined {
   const element = event.currentTarget as HTMLElement | null;
-  const id = element?.dataset.guide;
+  const id = element?.dataset['guide'];
   return id && GUIDES.some((g) => g.id === id) ? id : undefined;
 }
 

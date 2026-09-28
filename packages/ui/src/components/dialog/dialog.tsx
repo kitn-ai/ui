@@ -225,8 +225,14 @@ export function Dialog(props: DialogProps) {
   createEffect((wasOpen: boolean) => {
     const open = isOpen();
     if (open && !wasOpen) {
-      document.addEventListener('keydown', onDocumentKeyDown);
-      onCleanup(() => document.removeEventListener('keydown', onDocumentKeyDown));
+      // Capture the document at SETUP and close over the capture, as `useDismiss`
+      // and the composer's selection listener do: dispose is not guaranteed to run
+      // while the DOM globals still exist (`component-register` releases a root a
+      // microtask after detach), and a bare `document` read from the cleanup throws
+      // `ReferenceError` there.
+      const doc = document;
+      doc.addEventListener('keydown', onDocumentKeyDown);
+      onCleanup(() => doc.removeEventListener('keydown', onDocumentKeyDown));
       const active = deepActiveElement();
       // A target already inside the panel is not a place to come BACK to: the panel is
       // removed when we close, so remembering it would restore focus into a node that
