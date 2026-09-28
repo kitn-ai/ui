@@ -5,8 +5,8 @@ import {
   Dropdown, DropdownContent, DropdownItem, DropdownTrigger,
 } from '../../src/components/dropdown/dropdown';
 import {
-  describeBox, expectInsideWindow, menuBox, mount, outsideWindow, reset, settle,
-  type Box,
+  describeBox, expectInsideWindow, installKitStyles, menuBox, mount, outsideWindow,
+  panelFloorPx, reset, settle, type Box,
 } from './containment-helpers';
 
 /**
@@ -30,6 +30,13 @@ import {
  *
  * `page.viewport` sizes the test iframe, and it is the same `innerHeight`/`dvh` the
  * surface is bounded by — so a height change here is a window change there.
+ *
+ * AND THE WIDTH. The panel's horizontal half is only a claim if the panel has width, so the
+ * fixture installs the kit's compiled sheet at document level (the portal's root here is
+ * `<body>`, so a document-level sheet is the one that reaches it): `min-w-[15rem]` is a class, and
+ * with no sheet the panel was content-sized at ~50px and `left`/`right` were trivially inside a
+ * 900px window. `panelFloorPx` reads the resolved floor back from the engine in `openMenu` below,
+ * so a fixture that loses the sheet fails instead of measuring a box too small to be wrong.
  */
 
 const WIDTH = 900;
@@ -60,9 +67,21 @@ function Harness(props: { rows: Accessor<number>; anchorTop: number }) {
 
 const openMenu = async (rows: Accessor<number>, anchorTop: number, height: number): Promise<Box> => {
   await page.viewport(WIDTH, height);
+  installKitStyles();
   mount(() => <Harness rows={rows} anchorTop={anchorTop} />);
   await settle();
-  return menuBox();
+  const floor = panelFloorPx();
+  expect(
+    Number.isNaN(floor),
+    `the panel has no width floor: the kit's compiled sheet is not installed, so the panel is ` +
+      `content-sized and the horizontal half of the invariant cannot fail`,
+  ).toBe(false);
+  const box = menuBox();
+  expect(
+    box.right - box.left,
+    `the panel is narrower than the floor CSS resolved (${floor}px)`,
+  ).toBeGreaterThanOrEqual(floor);
+  return box;
 };
 
 const fixedRows = (n: number): Accessor<number> => () => n;
@@ -93,13 +112,25 @@ describe('a menu never exceeds the window', () => {
     // a coarser sweep can step over the failing positions, which is how the 10.5px
     // survived a round that measured everything else.
     const height = 560;
+    // The sheet, once for the whole loop: every mount below needs it for the reason `openMenu`
+    // does, and a bare panel would make every position trivially inside.
+    installKitStyles();
     const failures: string[] = [];
     for (let anchorTop = 40; anchorTop <= height - 20; anchorTop += 4) {
       await page.viewport(WIDTH, height);
       mount(() => <Harness rows={fixedRows(ROWS)} anchorTop={anchorTop} />);
       await settle();
+      const floor = panelFloorPx();
       const box = menuBox();
       const where = `anchor ${anchorTop}px from the top`;
+      // Read the floor inside the sweep too: this loop mounts its own trees (it does not go
+      // through `openMenu`), so the sheet has to be there for the SAME reason, and a bare box
+      // would make every position trivially inside.
+      expect(
+        Number.isNaN(floor) ? -1 : box.right - box.left,
+        `${where}: the panel is content-sized or narrower than the floor CSS resolved ` +
+          `(${floor}px), so the horizontal half cannot fail`,
+      ).toBeGreaterThanOrEqual(Math.max(floor, 1));
       if (outsideWindow(box, WIDTH, height)) {
         failures.push(describeBox(box, WIDTH, height, where));
       }
