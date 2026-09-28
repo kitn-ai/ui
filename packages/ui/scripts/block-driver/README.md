@@ -14,6 +14,7 @@ red.
 - `driver.mjs` — the runner. Flag reference in its header comment.
 - `serve.mjs` — static page server; mounts the built `dist/` at `/kit/` the
   way a CDN serves `@kitn.ai/ui@<version>/dist/`.
+- `port-holder.mjs` — who is listening on a port, shared by the two above.
 - `scenarios/kai-chat-facade.mjs` — the facade's eight-state story (plus a
   reload-restore state), restated from `fine-drive.mjs` as data.
 - `pages/kai-chat-facade/` — the harness page: the spike's facade widget page
@@ -65,6 +66,29 @@ which serves its own throwaway Vite app rather than `serve.mjs`) takes 8961
 and 8962. This guard has been watched failing (a planted wrong expectation and
 a planted page defect each went red with named states before the recorded
 green). Re-plant one before trusting structural changes to the driver itself.
+
+## Lifecycle, and a port that is already held
+
+A run owns two child processes: `serve.mjs` (with `--serve`) and Chromium. Three
+things end them now, and they cover different failures rather than restating each
+other: a `finally` around the whole run (every throw and every rejected await in
+this process), a `SIGINT`/`SIGTERM` guard (a signal ends the process without
+unwinding it, so no `finally` runs — `kill <pid>` on the driver is the case Ctrl-C
+does not reach, because the shell delivers that to the whole process group), and a
+synchronous `process.on('exit')` kill as the belt for an exit that skips both
+(`process.exit()` does not unwind the stack, so a `finally` never runs for it).
+Cleanup used to be two bare statements AFTER the run, so a scenario whose `ready`
+threw left `serve.mjs` alive holding the port, and the next run then died on
+EADDRINUSE instead of on its own defect.
+
+With `--serve`, the driver now refuses to start when the port it is about to bind
+is already held: it names the pid and the command line holding it, and says
+whether that looks like a stale run. The lookup is `port-holder.mjs`, shared with
+`serve.mjs`, which reports the same holder when its own bind fails — two messages
+that would otherwise drift apart. The refusal fires only for `--serve`, because
+with `--base` the port belongs to somebody else's server and a busy port there is
+the normal case. Where `lsof` is unavailable, both say what they can instead of
+naming a pid they guessed.
 
 Two page-spec keys change what a run asserts, and both exist for a page that
 mounts the same block in a DIFFERENT document. `skipLayout: true` drops every

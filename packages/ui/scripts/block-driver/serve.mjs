@@ -7,6 +7,7 @@
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { extname, join, normalize, resolve } from 'node:path';
+import { portHolders, formatPortHolders } from './port-holder.mjs';
 
 const ROOT = resolve(process.env.ROOT ?? '.');
 const KIT = resolve(process.env.KIT ?? '../../dist');
@@ -23,7 +24,7 @@ const TYPES = {
   '.wasm': 'application/wasm',
 };
 
-createServer(async (req, res) => {
+const server = createServer(async (req, res) => {
   const url = new URL(req.url, 'http://x');
   let path = normalize(decodeURIComponent(url.pathname));
   if (path.endsWith('/')) path += 'index.html';
@@ -46,4 +47,25 @@ createServer(async (req, res) => {
     res.writeHead(404, { 'content-type': 'text/plain' });
     res.end('not found');
   }
-}).listen(PORT, () => console.log(`block-driver pages listening on http://localhost:${PORT}/ root=${ROOT} kit=${KIT}`));
+});
+
+// The bind failure the driver's pre-flight exists to make rare, handled anyway
+// because a pre-flight can only check the port it saw and the two are not atomic.
+// A bare EADDRINUSE stack says nothing about WHO holds the port, which is the
+// whole question when the answer might be a stale run of this same server — so
+// this names the holder the same way driver.mjs does, from the same lookup, and
+// exits 3 (distinct from a generic failure) for the driver's wait to reject on.
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(
+      `serve.mjs cannot bind port ${PORT} — it is already held by:\n` +
+      `${formatPortHolders(portHolders(PORT))}\n` +
+      `If that is a serve.mjs or driver.mjs you do not recognise as yours, it is a stale block-driver run — kill it, or pass a free --port.`,
+    );
+    process.exit(3);
+  }
+  console.error(`serve.mjs failed to listen on ${PORT}: ${err.stack ?? err}`);
+  process.exit(1);
+});
+
+server.listen(PORT, () => console.log(`block-driver pages listening on http://localhost:${PORT}/ root=${ROOT} kit=${KIT}`));
