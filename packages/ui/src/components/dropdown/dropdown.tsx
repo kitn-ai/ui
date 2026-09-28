@@ -361,7 +361,33 @@ export function DropdownContent(props: DropdownContentProps) {
             // kai-menu used to declare at its own call site, now declared once, here. A
             // caller can still OVERRIDE it with its own `min-w-*` class; `cn` resolves the
             // conflict last-wins, so exactly one floor survives on any surface.
-            'z-50 min-w-[15rem] rounded-lg bg-card p-1 kai-elevation',
+            //
+            // And the CEILING beside it, because a floor with no ceiling is not
+            // "content-sized", it is UNBOUNDED. This box is `position: fixed` with no
+            // `width`, so it is shrink-to-fit: its used width is its content's
+            // max-content, and max-content of a menu is the widest row's longest
+            // unwrapped line. One long `note` row therefore sizes the WHOLE surface, and
+            // every other row — block-level flex boxes — stretches to it. Measured on the
+            // assistant block's section-label menu inside a 280px rail: a note row's
+            // sentence hit 1208.9px of max-content, so the panel opened 1216.9 x 401px
+            // with 1208.9px rows, 4.3x the rail it came from, with no `part` and no
+            // custom property — the portaled box is in the element's shadow root, so a
+            // consumer's stylesheet could not reach it at all.
+            //
+            // The cap binds THIS box and not the rows, because the rows are not the
+            // driver in the direction that matters: they stretch to the panel, and what
+            // set the panel was one row's max-content. Capping the rows would leave the
+            // panel free to keep growing with the next long row.
+            //
+            // 24rem is 1.6x the floor: room for a label and its description line, the
+            // same measure the empty-state content seam uses, and short of the width at
+            // which a menu stops reading as a menu. It is a DEFAULT, not a policy — a
+            // consumer with a different surface sets `--kai-dropdown-max-width` (a custom
+            // property inherits, and the panel is portaled INTO the element's shadow root,
+            // so setting it on `kai-menu` / `kai-dropdown` reaches the panel; a consumer
+            // who overrode `portalMount` to `document.body` sets it on `:root` instead).
+            // A caller can also override it per surface with its own `max-w-*` class.
+            'z-50 max-w-[var(--kai-dropdown-max-width,24rem)] min-w-[15rem] rounded-lg bg-card p-1 kai-elevation',
             'animate-in fade-in-0 zoom-in-95 data-[closed]:animate-out data-[closed]:fade-out-0 data-[closed]:zoom-out-95',
             props.class,
           )}
@@ -389,7 +415,7 @@ export function DropdownItem(props: DropdownItemProps) {
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(); } }}
       onPointerMove={(e) => { if (!props.disabled) (e.currentTarget as HTMLElement).focus(); }}
       class={cn(
-        'flex cursor-pointer items-center rounded-md px-2 py-1.5 text-sm outline-none transition-colors',
+        'flex cursor-pointer items-center rounded-md px-2 py-1.5 text-sm outline-none transition-colors break-words',
         'hover:bg-muted focus:bg-muted',
         props.disabled && 'opacity-50 pointer-events-none',
         props.class,
@@ -416,7 +442,7 @@ export function DropdownSeparator(props: DropdownSeparatorProps) {
  */
 export function DropdownLabel(props: DropdownLabelProps) {
   return (
-    <div class={cn('select-none px-2 py-1.5 text-xs font-medium text-muted-foreground', props.class)}>
+    <div class={cn('select-none px-2 py-1.5 text-xs font-medium text-muted-foreground break-words', props.class)}>
       {props.children}
     </div>
   );
@@ -429,7 +455,7 @@ export function DropdownLabel(props: DropdownLabelProps) {
  */
 export function DropdownNote(props: { children: JSX.Element; class?: string }) {
   return (
-    <div class={cn('text-muted-foreground px-2 py-1.5 text-xs', props.class)}>{props.children}</div>
+    <div class={cn('text-muted-foreground px-2 py-1.5 text-xs break-words', props.class)}>{props.children}</div>
   );
 }
 
@@ -439,6 +465,12 @@ export function DropdownNote(props: { children: JSX.Element; class?: string }) {
  * Shared so every item kind stacks label and description identically. With no
  * `description` the children render UNWRAPPED (the fallback branch), which is what
  * keeps the DOM of every existing menu exactly as it was.
+ *
+ * Wrapping is the row's, not this span's: `break-words` on the row covers the label,
+ * the description and an unbreakable token alike (overflow-wrap inherits), so a label
+ * too long for the surface's capped width WRAPS: it is never truncated, never
+ * ellipsised and never scrolls out of reach. A word longer than the cap breaks inside
+ * the word rather than overflowing the panel.
  */
 function ItemLabel(props: { children: JSX.Element; description?: string }) {
   return (
@@ -497,7 +529,7 @@ export function DropdownCheckboxItem(props: DropdownCheckboxItemProps) {
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(); } }}
       onPointerMove={(e) => { if (!props.disabled) (e.currentTarget as HTMLElement).focus(); }}
       class={cn(
-        'flex cursor-pointer items-center rounded-md px-2 py-1.5 text-sm outline-none transition-colors',
+        'flex cursor-pointer items-center rounded-md px-2 py-1.5 text-sm outline-none transition-colors break-words',
         'hover:bg-muted focus:bg-muted',
         props.disabled && 'opacity-50 pointer-events-none',
         props.class,
@@ -544,7 +576,7 @@ export function DropdownRadioItem(props: DropdownRadioItemProps) {
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(); } }}
       onPointerMove={(e) => { if (!props.disabled) (e.currentTarget as HTMLElement).focus(); }}
       class={cn(
-        'flex cursor-pointer items-center rounded-md px-2 py-1.5 text-sm outline-none transition-colors',
+        'flex cursor-pointer items-center rounded-md px-2 py-1.5 text-sm outline-none transition-colors break-words',
         'hover:bg-muted focus:bg-muted',
         props.disabled && 'opacity-50 pointer-events-none',
         props.class,
@@ -662,7 +694,7 @@ export function DropdownSubTrigger(props: DropdownSubTriggerProps) {
       onPointerLeave={() => sub.scheduleClose()}
       onPointerMove={(e) => (e.currentTarget as HTMLElement).focus()}
       class={cn(
-        'flex cursor-pointer items-center rounded-md px-2 py-1.5 text-sm outline-none transition-colors',
+        'flex cursor-pointer items-center rounded-md px-2 py-1.5 text-sm outline-none transition-colors break-words',
         'hover:bg-muted focus:bg-muted data-[expanded]:bg-muted',
         props.class,
       )}
@@ -757,7 +789,12 @@ export function DropdownSubContent(props: DropdownSubContentProps) {
             'pointer-events': position.hidden() ? 'none' : undefined,
           }}
           class={cn(
-            'z-50 min-w-[8rem] rounded-lg bg-card p-1 kai-elevation',
+            // Same ceiling as the parent surface, and the same custom property: a submenu
+            // is the same kind of box (fixed, shrink-to-fit, portaled out of its host's
+            // box) rendered from the same item ladder, so a long `note` row or an
+            // unbreakable label widens it exactly the way it widened the parent before the
+            // cap existed. 8rem stays the floor.
+            'z-50 max-w-[var(--kai-dropdown-max-width,24rem)] min-w-[8rem] rounded-lg bg-card p-1 kai-elevation',
             'animate-in fade-in-0 zoom-in-95 data-[closed]:animate-out data-[closed]:fade-out-0 data-[closed]:zoom-out-95',
             props.class,
           )}

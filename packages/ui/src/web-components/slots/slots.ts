@@ -745,6 +745,18 @@ export const MENU_PARTS: PartDef[] = [
   { name: 'shortcut', doc: 'The right-aligned per-item keyboard shortcut, rendered as kai-kbd key caps. Shown only when an item carries a `shortcut`.', recipe: 'kai-menu::part(shortcut) { opacity: 0.8 }' },
 ];
 
+/** CSS custom properties of the MENU SURFACE: `<DropdownContent>`, the portaled box
+ *  behind `<kai-menu>`, `<kai-dropdown>` and any component that renders one. Declared
+ *  once here because there is one surface: see `DROPDOWN_VARS`. */
+export const DROPDOWN_VARS: VarDef[] = [
+  {
+    name: '--kai-dropdown-max-width',
+    doc: 'How wide the menu surface may get. The `24rem` default is a CEILING forced by how the surface is laid out: it is `position: fixed` with no `width`, so it shrink-wraps to its content, and the widest row decides how wide EVERY row is: a panel inside a 280px rail opened 1216.9px wide (with 1208.9px rows) because one sentence-shaped note row was that long. Under the ceiling a long label and its description WRAP instead, so nothing is truncated and nothing is clipped; the panel gets taller rather than wider. Raise it for a surface whose rows are genuinely wide, lower it for a narrow rail.',
+    default: '24rem',
+    recipe: 'kai-menu { --kai-dropdown-max-width: 20rem }',
+  },
+];
+
 /** Slots of `<kai-thread>` (the standalone scrolling message list; messages come
  *  from the `messages` prop). */
 export const THREAD_SLOTS: SlotDef[] = [
@@ -959,7 +971,7 @@ export const WEB_COMPONENT_COMPOSITION: Record<string, WebComponentComposition> 
   'kai-scroll-area': { parts: SCROLL_AREA_PARTS, children: 'The scrollable content.' },
   'kai-notice': { slots: NOTICE_SLOTS, children: 'The notice message. `icon` and `action` are the named seams around it.' },
   'kai-hover-card': { slots: HOVER_CARD_SLOTS, children: 'The TRIGGER the card hovers off. The card body is the `card` slot.' },
-  'kai-menu': { slots: MENU_SLOTS, parts: MENU_PARTS },
+  'kai-menu': { slots: MENU_SLOTS, parts: MENU_PARTS, vars: DROPDOWN_VARS },
   'kai-skeleton': { parts: SKELETON_PARTS },
   'kai-attachments': { parts: ATTACHMENTS_PARTS },
   'kai-status': { parts: STATUS_PARTS },
@@ -991,7 +1003,7 @@ export const WEB_COMPONENT_COMPOSITION: Record<string, WebComponentComposition> 
   'kai-empty': { slots: EMPTY_SLOTS, vars: EMPTY_VARS, children: 'The empty-state body below the title/description, usually the call to action. It is capped at a prose measure by default -- see `--kai-empty-content-width`.' },
   'kai-file-upload': { children: 'Custom dropzone content, replacing the default label (the `label` prop is the fallback).' },
   'kai-popover': { slots: POPOVER_SLOTS, children: 'The popover panel body. The control that opens it is the `trigger` slot.' },
-  'kai-dropdown': { slots: DROPDOWN_SLOTS, children: 'The menu body: your own rows. Give each `role="menuitem"`. The control that opens it is the `trigger` slot.' },
+  'kai-dropdown': { slots: DROPDOWN_SLOTS, vars: DROPDOWN_VARS, children: 'The menu body: your own rows. Give each `role="menuitem"`. The control that opens it is the `trigger` slot.' },
   'kai-resizable': { children: 'The `<kai-resizable-item>` panels, in order. Dividers are inserted between them.' },
   'kai-resizable-item': { children: 'This panel\'s content.' },
   'kai-tooltip': { slots: TOOLTIP_SLOTS, children: 'The TRIGGER the tooltip describes. The tip text is the `content` prop, or the `content` slot when it carries markup.' },

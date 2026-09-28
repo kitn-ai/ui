@@ -4060,6 +4060,14 @@
         "mode": "replace",
         "doc": "Visual content of the trigger button (an icon, text, an `<svg>`). Replaces the built-in trigger* content; name it with `label`."
       }
+    ],
+    "vars": [
+      {
+        "name": "--kai-dropdown-max-width",
+        "doc": "How wide the menu surface may get. The `24rem` default is a CEILING forced by how the surface is laid out: it is `position: fixed` with no `width`, so it shrink-wraps to its content, and the widest row decides how wide EVERY row is: a panel inside a 280px rail opened 1216.9px wide (with 1208.9px rows) because one sentence-shaped note row was that long. Under the ceiling a long label and its description WRAP instead, so nothing is truncated and nothing is clipped; the panel gets taller rather than wider. Raise it for a surface whose rows are genuinely wide, lower it for a narrow rail.",
+        "default": "24rem",
+        "recipe": "kai-menu { --kai-dropdown-max-width: 20rem }"
+      }
     ]
   },
   {
@@ -5845,6 +5853,14 @@
         "name": "shortcut",
         "doc": "The right-aligned per-item keyboard shortcut, rendered as kai-kbd key caps. Shown only when an item carries a `shortcut`.",
         "recipe": "kai-menu::part(shortcut) { opacity: 0.8 }"
+      }
+    ],
+    "vars": [
+      {
+        "name": "--kai-dropdown-max-width",
+        "doc": "How wide the menu surface may get. The `24rem` default is a CEILING forced by how the surface is laid out: it is `position: fixed` with no `width`, so it shrink-wraps to its content, and the widest row decides how wide EVERY row is: a panel inside a 280px rail opened 1216.9px wide (with 1208.9px rows) because one sentence-shaped note row was that long. Under the ceiling a long label and its description WRAP instead, so nothing is truncated and nothing is clipped; the panel gets taller rather than wider. Raise it for a surface whose rows are genuinely wide, lower it for a narrow rail.",
+        "default": "24rem",
+        "recipe": "kai-menu { --kai-dropdown-max-width: 20rem }"
       }
     ]
   },

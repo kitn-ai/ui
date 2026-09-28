@@ -2102,6 +2102,12 @@ A trigger with a floating surface you fill with your own markup. `kai-menu` is t
 | _(default)_ | inject | The menu body: your own rows. Give each `role="menuitem"`. The control that opens it is the `trigger` slot. |
 | `trigger` | replace | Visual content of the trigger button (an icon, text, an `<svg>`). Replaces the built-in trigger* content; name it with `label`. |
 
+**CSS custom properties** (set them on the element to change how it looks):
+
+| Property | Default | Description |
+|---|---|---|
+| `--kai-dropdown-max-width` | `24rem` | How wide the menu surface may get. The `24rem` default is a CEILING forced by how the surface is laid out: it is `position: fixed` with no `width`, so it shrink-wraps to its content, and the widest row decides how wide EVERY row is: a panel inside a 280px rail opened 1216.9px wide (with 1208.9px rows) because one sentence-shaped note row was that long. Under the ceiling a long label and its description WRAP instead, so nothing is truncated and nothing is clipped; the panel gets taller rather than wider. Raise it for a surface whose rows are genuinely wide, lower it for a narrow rail. — `kai-menu { --kai-dropdown-max-width: 20rem }` |
+
 ---
 
 ### `kai-editable-label` / `EditableLabel`
@@ -2672,6 +2678,12 @@ A cascading action menu driven by an items tree.
 | Part | Description |
 |---|---|
 | `::part(shortcut)` | The right-aligned per-item keyboard shortcut, rendered as kai-kbd key caps. Shown only when an item carries a `shortcut`. — `kai-menu::part(shortcut) { opacity: 0.8 }` |
+
+**CSS custom properties** (set them on the element to change how it looks):
+
+| Property | Default | Description |
+|---|---|---|
+| `--kai-dropdown-max-width` | `24rem` | How wide the menu surface may get. The `24rem` default is a CEILING forced by how the surface is laid out: it is `position: fixed` with no `width`, so it shrink-wraps to its content, and the widest row decides how wide EVERY row is: a panel inside a 280px rail opened 1216.9px wide (with 1208.9px rows) because one sentence-shaped note row was that long. Under the ceiling a long label and its description WRAP instead, so nothing is truncated and nothing is clipped; the panel gets taller rather than wider. Raise it for a surface whose rows are genuinely wide, lower it for a narrow rail. — `kai-menu { --kai-dropdown-max-width: 20rem }` |
 
 ---
 

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@solidjs/testing-library';
 import { createSignal } from 'solid-js';
-import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem, DropdownRadioItem, DropdownCheckboxItem, DropdownNote, DropdownSub, DropdownSubTrigger, DropdownSubContent } from '../../src/components/dropdown/dropdown';
+import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem, DropdownRadioItem, DropdownCheckboxItem, DropdownNote, DropdownLabel, DropdownSub, DropdownSubTrigger, DropdownSubContent } from '../../src/components/dropdown/dropdown';
 
 // jsdom (v24) does not implement the PointerEvent constructor. useDismiss
 // listens for `pointerdown`; copy the shim from overlay.test.tsx.
@@ -285,6 +285,72 @@ describe('DropdownContent width', () => {
 
     expect(menu().classList.contains('min-w-[10rem]')).toBe(true);
     expect(menu().classList.contains('min-w-[15rem]')).toBe(false);
+  });
+
+  it('also ships a CEILING, because a floor with no ceiling is an unbounded box', () => {
+    // jsdom has no layout, so this pins the DECLARATION the surface carries, not the
+    // used width: the surface is `position: fixed` with no `width`, so it shrink-wraps
+    // and its widest row decides the width of EVERY row (measured in Chromium at
+    // 1216.9 x 401px, rows 1208.9px, inside a 280px rail). The cap is what turns that
+    // shrinking-to-fit box into `min(max-content, max-width)`.
+    const { trg, menu } = setupSurface();
+    fireEvent.click(trg);
+
+    expect(menu().classList.contains('max-w-[var(--kai-dropdown-max-width,24rem)]')).toBe(true);
+  });
+
+  it('takes the ceiling from a custom property, so a consumer can set it without a new class', () => {
+    // The var carries the DEFAULT in its own class (`var(--x,24rem)`), which is the
+    // whole seam: a consumer sets `--kai-dropdown-max-width` on `kai-menu` / the
+    // element that renders the surface and needs no reach into the shadow root.
+    const { trg, menu } = setupSurface();
+    fireEvent.click(trg);
+
+    const cls = menu().className;
+    expect(cls).toContain('max-w-[var(--kai-dropdown-max-width,24rem)]');
+    expect(cls, 'the ceiling is not a second floor').toContain('min-w-[15rem]');
+  });
+
+  it('caps the SUBMENU surface with the same property, one ceiling for the family', () => {
+    render(() => (
+      <Dropdown defaultOpen>
+        <DropdownTrigger as={(p: any) => <button {...p}>Menu</button>} />
+        <DropdownContent>
+          <DropdownSub>
+            <DropdownSubTrigger>Skills</DropdownSubTrigger>
+            <DropdownSubContent>
+              <DropdownItem>skill-creator</DropdownItem>
+            </DropdownSubContent>
+          </DropdownSub>
+        </DropdownContent>
+      </Dropdown>
+    ));
+    // A submenu opens on pointerenter (see DropdownSubTrigger), so hover the row rather
+    // than passing an open flag the primitive does not have.
+    fireEvent.pointerEnter(screen.getByRole('menuitem'));
+    // Two menus are mounted: the parent and the sub. The sub is the one with the 8rem floor.
+    const sub = screen.getAllByRole('menu').find((m) => m.classList.contains('min-w-[8rem]'));
+    expect(sub, 'the submenu surface rendered').toBeTruthy();
+    expect(sub!.classList.contains('max-w-[var(--kai-dropdown-max-width,24rem)]')).toBe(true);
+  });
+
+  it('lets a long label WRAP: the rows that can overflow carry break-words', () => {
+    render(() => (
+      <Dropdown defaultOpen>
+        <DropdownTrigger as={(p: any) => <button {...p}>Menu</button>} />
+        <DropdownContent>
+          <DropdownItem>Alpha</DropdownItem>
+          <DropdownItem description="Group the rail by the project each chat is filed under">Beta</DropdownItem>
+          <DropdownNote>Because of that it is not a menu item.</DropdownNote>
+          <DropdownLabel>Organizer</DropdownLabel>
+        </DropdownContent>
+      </Dropdown>
+    ));
+    for (const row of screen.getAllByRole('menuitem')) {
+      expect(row.classList.contains('break-words'), 'row wraps rather than clipping').toBe(true);
+    }
+    expect(screen.getByText(/not a menu item/).classList.contains('break-words')).toBe(true);
+    expect(screen.getByText('Organizer').classList.contains('break-words')).toBe(true);
   });
 });
 

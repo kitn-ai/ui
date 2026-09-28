@@ -2515,6 +2515,14 @@ Restyle from outside the Shadow DOM via `kai-menu::part(name)`.
 
 `Components/Dropdown`, `Components/DropdownTrigger`, `Components/DropdownContent`, `Components/DropdownItems`
 
+#### CSS custom properties
+
+Set these on the element to change how it looks.
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--kai-dropdown-max-width` | `24rem` | How wide the menu surface may get. The `24rem` default is a CEILING forced by how the surface is laid out: it is `position: fixed` with no `width`, so it shrink-wraps to its content, and the widest row decides how wide EVERY row is: a panel inside a 280px rail opened 1216.9px wide (with 1208.9px rows) because one sentence-shaped note row was that long. Under the ceiling a long label and its description WRAP instead, so nothing is truncated and nothing is clipped; the panel gets taller rather than wider. Raise it for a surface whose rows are genuinely wide, lower it for a narrow rail. <br>`kai-menu { --kai-dropdown-max-width: 20rem }` |
+
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`).
@@ -2883,6 +2891,14 @@ Project your own markup with `slot="name"` on a light-DOM child.
 #### Composed from
 
 `Components/Dropdown`, `Components/DropdownTrigger`, `Components/DropdownContent`
+
+#### CSS custom properties
+
+Set these on the element to change how it looks.
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--kai-dropdown-max-width` | `24rem` | How wide the menu surface may get. The `24rem` default is a CEILING forced by how the surface is laid out: it is `position: fixed` with no `width`, so it shrink-wraps to its content, and the widest row decides how wide EVERY row is: a panel inside a 280px rail opened 1216.9px wide (with 1208.9px rows) because one sentence-shaped note row was that long. Under the ceiling a long label and its description WRAP instead, so nothing is truncated and nothing is clipped; the panel gets taller rather than wider. Raise it for a surface whose rows are genuinely wide, lower it for a narrow rail. <br>`kai-menu { --kai-dropdown-max-width: 20rem }` |
 
 #### Theming
 
