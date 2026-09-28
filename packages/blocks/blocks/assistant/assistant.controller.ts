@@ -1175,7 +1175,6 @@ function folderNode(
   group: string,
   groupName: string,
   menu: FolderMenu,
-  empty = false,
 ): ConversationRow {
   const heading = kind === 'folder';
   const node = `${heading ? FOLDER_HEADING_NODE : FOLDER_MORE_NODE}${group}`;
@@ -1284,7 +1283,7 @@ function railNodes(
   const empty = created.filter((project) => !rows.some((row) => row.group === project.id));
   let labelled = empty.length > 0;
   if (labelled) out.push(sectionNode(PROJECTS_LABEL));
-  for (const project of empty) out.push(folderNode('folder', project.id, project.name, menu, true));
+  for (const project of empty) out.push(folderNode('folder', project.id, project.name, menu));
   let at = 0;
   while (at < rows.length) {
     const group = rows[at].group;
@@ -1358,8 +1357,8 @@ function fixtureRail(created: readonly DemoProject[], menu: FolderMenu): Convers
     );
     // A folder holds its rows, so its heading leads the run they are; a project
     // with no sample under it (every project a reader made)
-    // is a heading and nothing else (`folderNode`'s `empty`).
-    nodes.push(folderNode('folder', project.id, project.name, menu, filed.length === 0));
+    // is a heading and nothing else.
+    nodes.push(folderNode('folder', project.id, project.name, menu));
     nodes.push(...filed.map((sample) => sampleNode(sample, project.id, project.name)));
   }
   // The remainder's heading and its rows, so the section a reader's own typed
@@ -1368,7 +1367,7 @@ function fixtureRail(created: readonly DemoProject[], menu: FolderMenu): Convers
   const ungrouped = SAMPLE_CONVERSATIONS.filter(
     (sample) => projectOfOpening(sample.opening, catalogue) === undefined,
   );
-  nodes.push(folderNode('folder', '', '', menu, ungrouped.length === 0));
+  nodes.push(folderNode('folder', '', '', menu));
   nodes.push(...ungrouped.map((sample) => sampleNode(sample, '', '')));
   return nodes;
 }
