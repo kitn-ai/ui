@@ -571,6 +571,8 @@ let railWiring = null;
 // screenshot has to be taken, and the values under test do not survive it.
 let freshRail = null;
 let projectCreate = null;
+let folderMenus = null;
+let folderEdit = null;
 let paletteOpen = null;
 let paletteFiltered = null;
 let paletteKeys = null;
@@ -698,7 +700,7 @@ const RAIL_MENU_ROWS = [
   // project is kept rather than why the row is inert. Both are copies, for the
   // reason above: a reworded row goes red against this list.
   { role: 'menuitem', label: 'New project' },
-  { role: '', label: 'This block keeps the projects you make in its own demo key' },
+  { role: '', label: 'A project you make is a group record in the same store your conversations are in' },
 ];
 
 /** Every rail row as the shape the ORGANIZER produced: its id, the kind of row it
@@ -800,6 +802,17 @@ const railNodes = (page) => page.evaluate(() =>
  *  property - `data-group` is not declared, so both forms write it as the
  *  attribute, and the fallbacks here are for the row's identity. */
 const railRows = async (page) => (await railNodes(page)).filter((node) => node.kind === 'conversation');
+
+/** ONE ROW'S OWN MENU, and why a menu query has to say which row it means: the
+ *  rail's folder headings carry the same row menu the conversations do - that is
+ *  the point of the round that added it - and they come FIRST in the rail, while a
+ *  role query matches in document order. So the row a menu state acts on is named
+ *  here rather than taken as the first `Actions for` in the rail. The menu surface
+ *  is portaled inside the row's own dropdown, so scoping through the row reaches
+ *  it. The index is a CONVERSATION row's own position, which is what state 13's
+ *  "the second row's menu" always meant. */
+const conversationRow = (page, index = 0) => page.locator('kai-conversation-item[data-rail="conversation"]').nth(index);
+const conversationRowMenuTrigger = (page, index = 0) => conversationRow(page, index).getByRole('button', { name: /^Actions for/ });
 
 /** The rail's row geometry, which is a stylesheet fact and can therefore only be
  *  asserted by reading what the page COMPUTED: every conversation row's inline
@@ -1181,7 +1194,7 @@ export default {
         // Playwright's role queries pierce the element shadow roots, and the
         // trigger's accessible name is the ROW's, so this also pins that the
         // name is per row rather than one shared string.
-        await page.getByRole('button', { name: /^Actions for/ }).first().click();
+        await conversationRowMenuTrigger(page).click();
         await settle(400)(page);
         // AND THEN THE ARROW WALK, which is the half of the dividers a DOM probe
         // cannot show: ArrowDown on the trigger opens the menu onto its first ITEM
@@ -1209,9 +1222,9 @@ export default {
         // state (it was "false" before the act, so "true" here is the binding
         // and not a constant). The locator resolves the button inside the
         // element's shadow root, which is where both attributes are written.
-        triggerHaspopup: (page) => page.getByRole('button', { name: /^Actions for/ }).first()
+        triggerHaspopup: (page) => conversationRowMenuTrigger(page)
           .getAttribute('aria-haspopup'),
-        triggerExpanded: (page) => page.getByRole('button', { name: /^Actions for/ }).first()
+        triggerExpanded: (page) => conversationRowMenuTrigger(page)
           .getAttribute('aria-expanded'),
         // The menu reads Share, Rename, Pin, Archive, Delete, in that order.
         // Share is the one item that cannot act, and both halves are asserted:
@@ -1227,7 +1240,7 @@ export default {
         // The Rename row's key chip is a kai-kbd inside a kai-kbd-group: its caps
         // render inside the kai-kbd's own shadow root, and F2 is spelled the same on
         // every platform.
-        renameChip: (page) => page.locator('.menu-kbd').first()
+        renameChip: (page) => conversationRow(page).locator('.menu-kbd').first()
           .evaluate((el) => (el.querySelector('kai-kbd')?.shadowRoot?.textContent ?? '').includes('F2')).catch(() => false),
         // AND ALL THREE CHIPS, against the keys the controller binds: F2, Mod+Shift+P,
         // Mod+Shift+A (state 9 presses two of them for real). The expectation is
@@ -1415,11 +1428,11 @@ export default {
         // field, so there is no field left to dismiss here.
         await page.keyboard.press('Escape');
         await settle(300)(page);
-        await page.getByRole('button', { name: /^Actions for/ }).first().click();
+        await conversationRowMenuTrigger(page).click();
         await settle(300)(page);
         await page.getByRole('menuitem', { name: /^Unpin/ }).first().click();
         await settle(500)(page);
-        await page.getByRole('button', { name: /^Actions for/ }).first().click();
+        await conversationRowMenuTrigger(page).click();
         await settle(400)(page);
       },
       probes: {
@@ -1472,7 +1485,7 @@ export default {
         pinnedRowId = await readBoundValue(page.locator('kai-conversation-item[data-rail="conversation"]').nth(1), 'conversationId', 'conversation-id');
         // The row's OWN menu, not the first row's: the menu acts on the row it was
         // opened from, which is the whole reason each row carries one.
-        await page.getByRole('button', { name: /^Actions for/ }).nth(1).click();
+        await conversationRowMenuTrigger(page, 1).click();
         await settle(300)(page);
         await page.getByRole('menuitem', { name: /^Pin/ }).first().click();
         await settle(600)(page);
@@ -2484,8 +2497,7 @@ export default {
         };
         // The row's OWN menu, found by its place in the rail: the kebabs are one
         // per row, in the rows' own order.
-        await page.getByRole('button', { name: /^Actions for/ })
-          .nth(rows.findIndex((row) => row.id === target.id)).click();
+        await conversationRowMenuTrigger(page, rows.findIndex((row) => row.id === target.id)).click();
         await settle(300)(page);
         await page.getByRole('menuitem', { name: /^Pin/ }).first().click();
         await settle(700)(page);
@@ -3772,15 +3784,14 @@ export default {
         // row whose text is only its label is a mystery, which is what this reads
         // for. `Manual order` is the only one left - the plus row USED to be
         // disabled with a reason and is now the way a project gets made - and the
-        // sentence under it is where the block says what it keeps and what the kit
-        // does not have.
+        // sentence under it is where the block says where a project is kept.
         theUnavailableRowsSayWhy: () => {
           const rows = railMenu?.rows ?? [];
           const disabled = rows.filter((row) => row.disabled === 'true');
           if (disabled.length !== 1) return `${disabled.length} rows are announced disabled`;
           const wordless = disabled.filter((row) => row.text.split(' ').length < 4).map((row) => row.text);
           if (wordless.length) return `a disabled row carries no reason: ${JSON.stringify(wordless)}`;
-          const note = rows.find((row) => row.role === '' && row.text.startsWith('This block keeps the projects you make'));
+          const note = rows.find((row) => row.role === '' && row.text.startsWith('A project you make is a group record'));
           return note === undefined ? 'no sentence under the plus row says why' : true;
         },
         // THE DIVIDER, where the owner put it: one separator, and the plus section
@@ -4115,7 +4126,7 @@ export default {
         );
         const stored = await page.evaluate((key) => {
           try { return JSON.parse(localStorage.getItem(key) ?? '[]'); } catch { return []; }
-        }, 'kai:assistant:projects');
+        }, 'kai:assistant:groups');
         const created = (stored ?? []).find((project) => project.name === authored) ?? null;
         projectCreate = {
           dialogOpened,
@@ -4134,7 +4145,7 @@ export default {
           labelAfterReload: '',
           filedUnderTheCreatedFolder: false,
         };
-        // A SECOND VISIT: the name is kept in the block's own key, so a reload
+        // A SECOND VISIT: the name is a group record in the store, so a reload
         // brings the folder back.
         await page.reload({ waitUntil: 'load' });
         await sctx.scenario.ready(page, sctx);
@@ -4195,9 +4206,11 @@ export default {
       probes: {
         thePlusOpensTheDialog: () => projectCreate?.dialogOpened === true,
         creatingClosesIt: () => projectCreate?.closed === true,
-        // STORED, LOUDLY, IN THE BLOCK'S OWN KEY: the name is in the block's demo
-        // key with an id, which is the one thing the kit has no API for.
-        theProjectIsInTheBlocksOwnKey: () => (projectCreate?.storedNames ?? []).includes('Release notes')
+        // STORED, LOUDLY, IN THE STORE'S OWN GROUP LIST: the name is a group record
+        // with an id, in the same store the conversations are in - and the block's
+        // demo key is where the projects a reader made BEFORE the store had a group
+        // list are migrated FROM, not where they live.
+        theProjectIsAGroupRecord: () => (projectCreate?.storedNames ?? []).includes('Release notes')
           && (projectCreate?.id ?? '') !== '',
         itIsInTheRailImmediately: () => projectCreate?.inRailAfterCreate === true,
         itSurvivesAReload: () => projectCreate?.idAfterReload === projectCreate?.id
@@ -4211,7 +4224,7 @@ export default {
       expect: {
         thePlusOpensTheDialog: true,
         creatingClosesIt: true,
-        theProjectIsInTheBlocksOwnKey: true,
+        theProjectIsAGroupRecord: true,
         itIsInTheRailImmediately: true,
         itSurvivesAReload: true,
         itTakesAConversation: true,
@@ -4530,6 +4543,263 @@ export default {
         theNumberActivatesTheFirstVisibleRow: true,
         theArrowsMoveTheActiveRow: true,
         escapeLeavesItAndTheCaretIsOut: true,
+      },
+      styleProbes: [],
+    },
+    {
+      name: '54-folder-headings-offer-their-menu',
+      act: async (page, sctx) => {
+        // A PROFILE THAT OWNS NOTHING, for state 49's reason and one more: the rail
+        // draws a folder from the rows inside it, so a run WITH history shows only
+        // the folders its conversations are filed under. The demo's three are on the
+        // rail exactly when the reader has none of their own, which is where the
+        // claim that they carry the menu too has to be read.
+        await page.evaluate(() => localStorage.clear());
+        await page.reload({ waitUntil: 'load' });
+        await sctx.scenario.ready(page, sctx);
+        // EVERY HEADING ON THE RAIL, whatever it is: the reader's own project (the
+        // one state 50 made) and the demo's three. The claim is deliberately about
+        // ALL of them rather than about a chosen one - a heading with a menu on one
+        // folder and not its neighbour is the inconsistency this round exists for,
+        // so a probe over a single folder could not see the defect it guards.
+        folderMenus = await page.evaluate(() => {
+          const hidden = (el) => el.hidden === true || el.hasAttribute('hidden');
+          // Exposed means the node AND everything up to the menu: an item is
+          // `[hidden]`, its wrapper (a tooltip or a kbd group) may be, and the
+          // author-level rules that make that hide real live in the stylesheet.
+          const exposed = (node, root) => {
+            let at = node;
+            while (at && at !== root) {
+              if (hidden(at)) return false;
+              at = at.parentElement;
+            }
+            return true;
+          };
+          return [...document.querySelectorAll('kai-conversations > kai-conversation-item[data-rail="folder"]')]
+            .map((el) => {
+              const dropdown = el.querySelector(':scope > kai-dropdown.row-menu');
+              const items = dropdown ? [...dropdown.querySelectorAll('[role="menuitem"]')] : [];
+              const named = (label) => items.filter((item) => exposed(item, dropdown)
+                && (item.textContent ?? '').trim().startsWith(label)).length === 1;
+              const title = [...el.children].find((child) => child.localName === 'span' && !hidden(child));
+              return {
+                group: el.getAttribute('data-folder') ?? '',
+                label: title?.textContent ?? '',
+                menu: dropdown !== null && !hidden(dropdown),
+                rename: dropdown !== null && named('Rename'),
+                delete: dropdown !== null && named('Delete'),
+                // THE F2 CHIP IS OFF on a heading's Rename: F2 acts on the ACTIVE
+                // conversation and a heading is never active, so a chip here would
+                // advertise a key that does nothing on this row.
+                renameChip: dropdown !== null && [...dropdown.querySelectorAll('.menu-kbd')]
+                  .some((chip) => exposed(chip, dropdown)
+                    && (chip.querySelector('kai-kbd')?.shadowRoot?.textContent ?? '').includes('F2')),
+                // ...and the two items a folder cannot act on are off it, so the
+                // menu is exactly what the store's group API can do.
+                share: dropdown !== null && named('Share'),
+              };
+            });
+        });
+      },
+      probes: {
+        // The premise: the folders read here are the DEMO's, because the reader owns
+        // nothing on this profile. A rail that rendered fewer is a different rail
+        // than the one this state is claiming something about.
+        theRailShowsTheDemosFolders: () => (folderMenus ?? []).length >= 3
+          || `the rail rendered ${(folderMenus ?? []).length} headings`,
+        // EACH ONE HAS A MENU THAT IS NOT HIDDEN, and the two items the store's
+        // group API can really do. Every heading, not a sample.
+        everyHeadingCarriesTheMenu: () => {
+          const rows = folderMenus ?? [];
+          const missing = rows.filter((row) => !row.menu || !row.rename || !row.delete);
+          return missing.length === 0
+            ? true
+            : `no rename/delete menu on ${JSON.stringify(missing.map((row) => row.label || row.group))}`;
+        },
+        // AND THE DEMO'S OWN FOLDERS ARE THE ONES ON THIS RAIL: the reader owns no
+        // project here, so every heading with a group id IS a demo folder - and one
+        // of them carrying nothing while its neighbour carries a menu is exactly the
+        // inconsistency this round exists for.
+        theDemoFoldersCarryItToo: () => {
+          const demos = (folderMenus ?? []).filter((row) => row.group !== '');
+          const acting = demos.filter((row) => row.menu && row.rename && row.delete);
+          return demos.length > 0 && acting.length === demos.length
+            ? true
+            : `${acting.length} of ${demos.length} of the demo's own headings act`;
+        },
+        // DECIDING LOUDLY, the other way: a heading's Rename shows no F2 chip.
+        theHeadingsRenameAdvertisesNoKey: () => (folderMenus ?? []).every((row) => row.renameChip === false),
+        // ...and no Share, which is a conversation's affordance rather than a
+        // folder's, and which would be a disabled row on a row that cannot be
+        // shared at all.
+        noHeadingOffersShare: () => (folderMenus ?? []).every((row) => row.share === false),
+      },
+      expect: {
+        theRailShowsTheDemosFolders: true,
+        everyHeadingCarriesTheMenu: true,
+        theDemoFoldersCarryItToo: true,
+        theHeadingsRenameAdvertisesNoKey: true,
+        noHeadingOffersShare: true,
+      },
+      styleProbes: [],
+    },
+    {
+      name: '55-folder-rename-and-delete',
+      act: async (page, sctx) => {
+        await page.keyboard.press('Escape');
+        await settle(300)(page);
+        const readGroups = (target) => target.evaluate((key) => {
+          try { return JSON.parse(localStorage.getItem(key) ?? '[]'); } catch { return []; }
+        }, 'kai:assistant:groups');
+        const readIndex = (target) => target.evaluate((key) => {
+          try { return JSON.parse(localStorage.getItem(key) ?? '[]'); } catch { return []; }
+        }, sctx.spec.indexKey);
+        // THE PROJECT IS MADE THE WAY THE DIALOG MAKES IT, because this state is
+        // about what happens to a project afterwards rather than about creating one
+        // (state 50 owns that), and a project written straight into storage would be
+        // a shape the block never writes.
+        const authored = 'Folder under test';
+        await page.locator('kai-conversations > kai-conversation-item[data-rail="section"] kai-menu[data-trio="menu"]').first().click();
+        await settle(300)(page);
+        await page.getByRole('menuitem', { name: 'New project' }).click();
+        await settle(400)(page);
+        const nameField = page.locator('#project-name input').first();
+        await nameField.click();
+        await nameField.fill(authored);
+        await page.getByRole('button', { name: 'Create project' }).click();
+        await settle(600)(page);
+        const group = ((await readGroups(page)).find((record) => record.name === authored) ?? {}).id ?? '';
+        // ...AND A CONVERSATION IN IT, filed through the store's own field: a
+        // summary's `groupId` is the whole of what `setGroup` writes, so seeding it
+        // is seeding that write (state 50's reason, one state over).
+        const filedId = 'filed-in-folder';
+        await page.evaluate((seed) => {
+          const index = JSON.parse(localStorage.getItem(seed.indexKey) ?? '[]');
+          localStorage.setItem(seed.indexKey, JSON.stringify([
+            ...index.filter((row) => row.id !== seed.id),
+            {
+              id: seed.id,
+              title: 'Release note draft',
+              messageCount: 2,
+              updatedAt: new Date().toISOString(),
+              groupId: seed.group,
+            },
+          ]));
+          localStorage.setItem(seed.threadKey, JSON.stringify([
+            { id: `${seed.id}-q`, role: 'user', parts: [{ type: 'text', text: 'Draft the release note' }] },
+            { id: `${seed.id}-a`, role: 'assistant', parts: [{ type: 'text', text: 'Here is the draft.' }] },
+          ]));
+        }, {
+          indexKey: sctx.spec.indexKey,
+          threadKey: `${sctx.spec.indexKey.slice(0, -1)}:${filedId}`,
+          id: filedId,
+          group,
+        });
+        await page.reload({ waitUntil: 'load' });
+        await sctx.scenario.ready(page, sctx);
+        const heading = () => page.locator(`kai-conversations > kai-conversation-item[data-rail="folder"][data-folder="${group}"]`);
+        const labelOf = async () => page.evaluate((id) => {
+          const row = [...document.querySelectorAll('kai-conversations > kai-conversation-item')]
+            .find((el) => el.getAttribute('data-folder') === id && el.getAttribute('data-rail') === 'folder');
+          const title = row ? [...row.children].find((child) => child.localName === 'span'
+            && !(child.hidden === true || child.hasAttribute('hidden'))) : null;
+          return title?.textContent ?? '';
+        }, group);
+        folderEdit = {
+          group,
+          beforeLabel: await labelOf(),
+          filedBefore: (await railNodes(page)).some((node) => node.id === filedId),
+          fieldOpened: false,
+          afterRenameLabel: '',
+          storedNameAfterRename: '',
+          headingGoneAfterDelete: false,
+          groupGoneAfterDelete: false,
+          rowSurvivedInStore: false,
+          rowStillOnRail: false,
+          rowUnfiled: false,
+          threadStillOpenable: 0,
+          groupAfterReload: '',
+          headingBackAfterReload: false,
+        };
+        // RENAME, IN PLACE, through the heading's own menu - the same two rows and
+        // the same inline field a conversation row uses, reached from the same
+        // kebab in the same `menu` region.
+        await heading().getByRole('button', { name: /^Actions for/ }).click();
+        await settle(300)(page);
+        await page.getByRole('menuitem', { name: /^Rename/ }).first().click();
+        await settle(400)(page);
+        folderEdit.fieldOpened = await page.evaluate(() => document.activeElement?.localName === 'kai-editable-label');
+        await page.keyboard.press('ControlOrMeta+a');
+        await page.keyboard.type('Renamed project');
+        await page.keyboard.press('Enter');
+        await settle(700)(page);
+        folderEdit.afterRenameLabel = await labelOf();
+        folderEdit.storedNameAfterRename = ((await readGroups(page)).find((record) => record.id === group) ?? {}).name ?? '';
+        // DELETE, through the same menu. The store's own answer is what the probes
+        // read: the group record goes, and every conversation filed under it comes
+        // back UNFILED - never deleted.
+        await heading().getByRole('button', { name: /^Actions for/ }).click();
+        await settle(300)(page);
+        await page.getByRole('menuitem', { name: /^Delete/ }).first().click();
+        await settle(900)(page);
+        folderEdit.headingGoneAfterDelete = await heading().count().then((n) => n === 0);
+        folderEdit.groupGoneAfterDelete = !(await readGroups(page)).some((record) => record.id === group);
+        const survivor = (await readIndex(page)).find((row) => row.id === filedId) ?? null;
+        folderEdit.rowSurvivedInStore = survivor !== null;
+        const rail = await railNodes(page);
+        const at = rail.filter((node) => node.kind === 'conversation').findIndex((node) => node.id === filedId);
+        folderEdit.rowStillOnRail = at >= 0;
+        folderEdit.rowUnfiled = at >= 0 && rail.filter((node) => node.kind === 'conversation')[at].group === '';
+        // AND REACHABLE: a row that survived but cannot be opened is not the claim
+        // this round is making, so the unfiled conversation is opened and its
+        // thread read.
+        if (at >= 0) {
+          await conversationRow(page, at).click();
+          await settle(800)(page);
+          folderEdit.threadStillOpenable = await page.evaluate(() => (document.getElementById('thread')?.messages ?? []).length);
+        }
+        // A SECOND VISIT: the reader's own project does NOT come back, because the
+        // record is gone from the store rather than only off the rail.
+        await page.reload({ waitUntil: 'load' });
+        await sctx.scenario.ready(page, sctx);
+        folderEdit.groupAfterReload = ((await readGroups(page)).find((record) => record.id === group) ?? {}).name ?? '';
+        folderEdit.headingBackAfterReload = await heading().count().then((n) => n > 0);
+      },
+      probes: {
+        theFolderAndItsRowAreThereToStartWith: () => folderEdit?.beforeLabel === 'Folder under test'
+          && folderEdit?.filedBefore === true,
+        // THE RENAME FIELD IS THE ROW'S OWN, opened in place rather than in a
+        // dialog: the element autofocuses when `editing` flips true.
+        renamingOpensTheInlineField: () => folderEdit?.fieldOpened === true,
+        // ...AND IT TAKES EFFECT, in both places that matter: the heading the
+        // reader is looking at, and the group record the store holds.
+        theRenameTookEffect: () => folderEdit?.afterRenameLabel === 'Renamed project'
+          && folderEdit?.storedNameAfterRename === 'Renamed project',
+        // DELETE UNFILES, IT NEVER DELETES: the folder goes, and the conversation
+        // filed under it is still in the store...
+        deletingTheFolderRemovesIt: () => folderEdit?.headingGoneAfterDelete === true
+          && folderEdit?.groupGoneAfterDelete === true,
+        theConversationSurvivedTheDelete: () => folderEdit?.rowSurvivedInStore === true,
+        // ...it is still ON the rail, under the ungrouped remainder rather than
+        // under a folder that no longer exists,
+        theRowCameBackUnfiled: () => folderEdit?.rowStillOnRail === true && folderEdit?.rowUnfiled === true,
+        // ...and it is still OPENABLE, with its thread, which is what "reachable"
+        // means rather than merely "present in storage".
+        theRowIsStillReachable: () => (folderEdit?.threadStillOpenable ?? 0) > 0,
+        // AND THE DELETE IS A STORE FACT rather than a rail one: a reload does not
+        // bring the reader's own project back.
+        theDeleteSurvivedAReload: () => folderEdit?.groupAfterReload === ''
+          && folderEdit?.headingBackAfterReload === false,
+      },
+      expect: {
+        theFolderAndItsRowAreThereToStartWith: true,
+        renamingOpensTheInlineField: true,
+        theRenameTookEffect: true,
+        deletingTheFolderRemovesIt: true,
+        theConversationSurvivedTheDelete: true,
+        theRowCameBackUnfiled: true,
+        theRowIsStillReachable: true,
+        theDeleteSurvivedAReload: true,
       },
       styleProbes: [],
     },

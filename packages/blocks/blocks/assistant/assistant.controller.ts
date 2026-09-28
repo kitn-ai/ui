@@ -2028,14 +2028,24 @@ export function createController(deps: AssistantDeps): AssistantController {
       const record = storeGroups.find((group) => group.id === project.id);
       return record ? { ...project, name: record.name } : project;
     };
-    const own = storeGroups
-      .filter((group) => !PROJECTS.some((project) => project.id === group.id))
-      .map((group) => ({ id: group.id, name: group.name, topics: [] }));
     return [
-      ...own,
+      ...ownProjects(),
       ...PROJECTS.filter((project) => !droppedFolders.includes(project.id)).map(override),
     ];
   };
+
+  /** THE READER'S OWN PROJECTS, and only theirs: the store's group records minus
+   *  the demo's three, which are a table here rather than the reader's history.
+   *  `railNodes` wants exactly this list and not the whole catalogue - it is the
+   *  list of folders that exist with no row in them, and handing it the catalogue
+   *  would make every demo folder a heading twice over, once as an empty project
+   *  and once over its own rows. */
+  const ownProjects = (): readonly DemoProject[] =>
+    storeOps.groups
+      ? storeGroups
+        .filter((group) => !PROJECTS.some((project) => project.id === group.id))
+        .map((group) => ({ id: group.id, name: group.name, topics: [] }))
+      : legacyProjects;
 
   /** Read the store's group records into the cache the rail's projection reads.
    *  A failed read KEEPS the last answer rather than flashing a rail with no
@@ -2182,7 +2192,7 @@ export function createController(deps: AssistantDeps): AssistantController {
     // palette cannot offer.
     const railChats = narrow(projected, query).filter((row) => row.kind === 'conversation');
     return {
-      ...railFrom(projected, query, closedGroups, expandedGroups, organizer, catalogue(), storeIsEmpty, {
+      ...railFrom(projected, query, closedGroups, expandedGroups, organizer, ownProjects(), storeIsEmpty, {
         canManage: storeOps.groups,
         renamingId,
       }),
