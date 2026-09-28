@@ -162,6 +162,15 @@ function main() {
     ].join('\n'),
   );
 
+  if (source.mode !== 'local') {
+    // A CDN copy deletes the local preview the dev server serves. Say so: the
+    // failure this prevents is a 404 inside the docs page's own frame, which
+    // reads as a broken build rather than as a switched mode.
+    console.log(
+      '[copy-blocks] the LOCAL preview is now absent. Restore it with ' +
+        '`KAI_BLOCKS_KIT=local node scripts/copy-blocks.mjs`, or restart `dev:blocks`.',
+    );
+  }
   console.log(
     `[copy-blocks] ${source.mode} preview: ${source.footer}` +
       (localForms > 0 ? ` (${localForms} local form(s) rewritten)` : ''),

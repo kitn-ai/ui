@@ -3,7 +3,9 @@
   "type": "module",
   "version": "0.0.1",
   "private": true,
-  "nx": { "name": "docs" },
+  "nx": {
+    "name": "docs"
+  },
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
@@ -20,7 +22,9 @@
     "pretypecheck:blocks": "node scripts/copy-blocks.mjs",
     "typecheck:blocks": "tsc --noEmit -p tsconfig.blocks.json",
     "dev:blocks": "KAI_BLOCKS_KIT=local astro dev",
-    "predev:blocks": "node scripts/copy-kit-assets.mjs && KAI_BLOCKS_KIT=local node scripts/copy-blocks.mjs"
+    "predev:blocks": "node scripts/copy-kit-assets.mjs && KAI_BLOCKS_KIT=local node scripts/copy-blocks.mjs",
+    "posttest": "KAI_BLOCKS_KIT=local node scripts/copy-blocks.mjs",
+    "posttypecheck:blocks": "KAI_BLOCKS_KIT=local node scripts/copy-blocks.mjs"
   },
   "dependencies": {
     "@astrojs/solid-js": "^6.0.1",
