@@ -42,8 +42,8 @@ export function resolveComposerLayout(input: ComposerExpansionInput): ComposerLa
   // A non-positive line height means the threshold is unknown, and failing closed is
   // the safe direction when it is: zero answers `expanded` for ANY content, which is
   // a two-row box under a single line of text. An unstyled editable no longer arrives
-  // here — `resolveLineHeight` recovers the `normal` keyword as a multiple of the
-  // font size — so this catches a caller that supplied the number directly, and an
+  // here, since `resolveLineHeight` recovers the `normal` keyword as a multiple of the
+  // font size, so this catches a caller that supplied the number directly, and an
   // element that explicitly computed a zero line height.
   if (!(input.lineHeight > 0)) return 'collapsed';
   return input.contentHeight > input.lineHeight * WRAPPED_LINE_MULTIPLE ? 'expanded' : 'collapsed';
@@ -96,7 +96,7 @@ export function useComposerExpansion(options: {
     if (!el) return;
     // `observeContentHeight` returns a no-op disposer where there is no ResizeObserver
     // (jsdom, the kit's own unit environment), so this effect simply never hears a
-    // height and the resolver derives `collapsed` — the same direction it fails when it
+    // height and the resolver derives `collapsed`, the same direction it fails when it
     // cannot read a line height, and the only one that cannot put two rows under a
     // single line of text.
     //

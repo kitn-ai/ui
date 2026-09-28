@@ -21,8 +21,8 @@
  * - ArrowUp/ArrowDown move one row and Home/End jump to the ends; only those four keys are
  *   claimed, so a horizontal arrow keeps whatever meaning the caller's rows give it;
  * - Enter and Space activate the row the event happened in, and Space does not scroll;
- * - an event whose composed path crosses a control inside the row (`yieldsToRow`) — a nested
- *   editor, the row's own menu — activates nothing and moves nothing, and a node that is not
+ * - an event whose composed path crosses a control inside the row (`yieldsToRow`: a nested
+ *   editor, the row's own menu) activates nothing and moves nothing, and a node that is not
  *   a row is never stamped, focused or activated, so non-row children are inert.
  */
 export interface RovingTabListOptions {
@@ -31,20 +31,19 @@ export interface RovingTabListOptions {
   /** The row that owns the single tab stop; `undefined` and a row outside `getRows()`
    *  both fall back to the first rendered row. Called on every `sync()`. */
   getActiveRow?: () => HTMLElement | undefined;
-  /** The node carrying `tabindex` / focus / activation for a row — a facade's rendered
+  /** The node carrying `tabindex` / focus / activation for a row: a facade's rendered
    *  shadow body, else the row itself. Default: the row. */
   targetOf?: (row: HTMLElement) => HTMLElement;
-  /** Rows `sync()` must leave alone until they render. A row whose target has not painted
-   *  is not ready; stamping it in the meantime writes onto the row host, where the writes
-   *  stick and are read back as authored. Default: every row is ready. */
+  /** Rows `sync()` must leave alone until they render; stamping an unpainted one writes
+   *  onto its host. Default: every row is ready. */
   isReady?: (row: HTMLElement) => boolean;
-  /** The row's own bookkeeping, called once per ready row with its resolved active state
-   *  after the tab stop has been placed. Roles, `aria-current`, an `active` property. */
+  /** The row's bookkeeping, once per ready row, after the tab stop is placed: roles,
+   *  `aria-current`, an `active` property. */
   onRowSynced?: (row: HTMLElement, active: boolean) => void;
-  /** Activation — click, Enter or Space on a row. */
+  /** Activation on a row: click, Enter or Space. */
   onActivate: (row: HTMLElement) => void;
-  /** Whether the event belongs to something inside the row that must keep it — a nested
-   *  editor, the row's own menu. `true` means the row yields: no activation, no rove. */
+  /** Whether the event belongs to something in the row that must keep it, such as a
+   *  nested editor or the row's own menu. `true` yields. */
   yieldsToRow?: (row: HTMLElement, e: Event) => boolean;
 }
 
