@@ -2,7 +2,7 @@
  *  THRESHOLD px (hysteresis kills sub-pixel oscillation). Returns a disposer. */
 const THRESHOLD = 1;
 export function observeContentHeight(el: Element, onHeight: (height: number) => void): () => void {
-  // No ResizeObserver — jsdom, and therefore the kit's own unit environment — means no
+  // No ResizeObserver -- jsdom, and therefore the kit's own unit environment -- means no
   // content-height reporting at all. Returning a NO-OP rather than throwing is what keeps
   // the platform assumption in the one module that makes it: a caller that does not know
   // would otherwise throw on render, which is how a composer became unrenderable in the

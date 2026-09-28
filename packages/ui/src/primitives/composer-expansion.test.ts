@@ -46,7 +46,7 @@ describe('resolveExpandedProp', () => {
     expect(resolveExpandedProp(undefined, true, 'false')).toBe(false);
   });
 
-  it('is undefined when nothing was set — that is the derive state', () => {
+  it('is undefined when nothing was set -- that is the derive state', () => {
     // `flag()` cannot answer this: resolveFlag returns false for an absent
     // attribute AND for an explicit ="false", collapsing the third state the
     // composer needs.
@@ -55,7 +55,7 @@ describe('resolveExpandedProp', () => {
 });
 
 /**
- * The line height the expansion rule READS — the regression for the defect that
+ * The line height the expansion rule READS -- the regression for the defect that
  * left the composer unable to expand at all.
  *
  * This block calls `resolveLineHeight` and composes it with `resolveComposerLayout`
@@ -74,7 +74,7 @@ describe('the line height the expansion rule reads', () => {
 
   it('expands for a wrapped line when the editable reports the `normal` keyword', () => {
     // The whole defect, end to end. A `line-height` left at its default reached the
-    // resolver as 0, and a zero threshold answers `collapsed` for any content — so
+    // resolver as 0, and a zero threshold answers `collapsed` for any content -- so
     // the composer could not expand, in any browser, and said nothing about why.
     // jsdom does not resolve the keyword itself, so the computed style is stubbed.
     vi.stubGlobal('getComputedStyle', () => ({ lineHeight: 'normal', fontSize: '20px' }) as unknown as CSSStyleDeclaration);
@@ -121,15 +121,22 @@ describe('useComposerExpansion', () => {
       'ResizeObserver',
       class {
         cb: (entries: unknown) => void;
+        /** THIS instance's record, so each method drives the observer it belongs to.
+         *  Recording through `observers[observers.length - 1]` instead made every
+         *  instance share the newest one: two live observers in a test would both
+         *  report against the second, so a `disconnect` assertion could pass on
+         *  cleanup order rather than on the observer it names. */
+        record: { cb: (entries: unknown) => void; observe: Mock; disconnect: Mock };
         constructor(cb: (entries: unknown) => void) {
           this.cb = cb;
-          observers.push({ cb, observe: vi.fn(), disconnect: vi.fn() });
+          this.record = { cb, observe: vi.fn(), disconnect: vi.fn() };
+          observers.push(this.record);
         }
         observe(el: Element) {
-          observers[observers.length - 1]!.observe(el);
+          this.record.observe(el);
         }
         disconnect() {
-          observers[observers.length - 1]!.disconnect();
+          this.record.disconnect();
         }
       },
     );
