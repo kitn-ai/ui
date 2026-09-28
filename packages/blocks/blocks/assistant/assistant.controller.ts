@@ -85,6 +85,7 @@ import {
   byRecency,
   isConversationUnread,
   type ConversationSummary,
+  type ConversationGroup,
 } from '@kitn.ai/ui/stores';
 import type {
   KaiCommandElement,
@@ -695,7 +696,6 @@ const RAIL_NEW_PROJECT_ID = 'new-project';
 function projectRailMenu(
   organizer: RailOrganizer,
   sort: RailSort,
-  projectsKey: string,
 ): Pick<AssistantState, 'railOrganizer' | 'railSort' | 'railItems'> {
   return {
     railOrganizer: organizer,
@@ -754,10 +754,11 @@ function projectRailMenu(
       // is a fact about this block rather than about the row, and the kit renders
       // it as the muted non-interactive line the composer's own disabled
       // capability already uses. It says the whole truth rather than the
-      // reassuring half: the kit stores which group a conversation is in and
-      // nothing about the groups themselves, so these names live in the block's
-      // own demo key and a real app points this row at its own endpoint.
-      { note: true, label: `This block keeps the projects you make in its own demo key (${projectsKey}). The kit stores a conversation's group, not the groups themselves, so a real app points this row at the endpoint that owns them.` },
+      // reassuring half: the project IS a group record, so it lives in the same
+      // store the conversations do, under that store's own group list, and a
+      // consumer whose store implements no group list gets the block's demo key
+      // instead (see `catalogue`).
+      { note: true, label: 'A project you make is a group record in the same store your conversations are in. A store that keeps no group list — a conversation-endpoint adapter, say — falls back to this block\'s own demo key for the names, which is the one part of this page a real app replaces.' },
     ],
   };
 }
@@ -963,6 +964,15 @@ interface DemoProject {
   topics: readonly string[];
 }
 
+/** THE THREE SAMPLE PROJECTS, and they stay a table here rather than becoming
+ *  store records: they are the demo's own fixtures, and which words file a
+ *  conversation into which one is a fact about this demo rather than about the
+ *  reader. Renaming or deleting one still goes through the store's group API
+ *  like every other folder — a rename writes a record that overrides the name
+ *  here, and a delete unfiles the rows the same way it does for any folder and
+ *  is remembered for the session besides, because a const cannot be removed.
+ *  That is what makes a heading's menu the same control on every folder rather
+ *  than on the ones the store happens to hold a record for. */
 const PROJECTS: readonly DemoProject[] = [
   {
     id: 'assistant-ui',
@@ -977,23 +987,13 @@ const PROJECTS: readonly DemoProject[] = [
   { id: 'kanban', name: 'Kanban board', topics: ['kanban', 'sprint', 'task'] },
 ];
 
-/** THE PROJECTS A READER CREATED, kept beside `PROJECTS` and for the same
- *  reason: a project is a NAME over the group ids the store already carries, so
- *  the block keeps the names and nothing else. They live under the block's own
- *  demo key (`kai:<storageKey>:projects`, see `projectKey`), which is a DEMO
- *  decision and is said out loud in the dialog that writes it: THE KIT HAS NO
- *  GROUP-PERSISTENCE API. `ConversationStore` persists a conversation's
- *  `groupId` and nothing about the groups themselves, so a project exists
- *  nowhere a consumer's backend could hand back; this key is a stand-in for the
- *  endpoint a real app owns, and it is why a created project is the reader's for
- *  this browser and no other.
- *
- *  A project created here carries NO TOPICS, so the demo's opening-turn filing
- *  rule can never file into it. That is the honest shape: nothing on this page
- *  asks which project a new chat belongs to, and topics inferred from a name
- *  would file conversations for a reason nobody could see. A conversation
- *  reaches such a project the way the store already supports - `setGroup` writes
- *  its id onto a row - and the folder is then labelled with the name kept here. */
+/** THE KEY THE PROJECTS USED TO LIVE UNDER, and the ONE thing still read from
+ *  it: the projects a reader made before the store grew a group list of its own.
+ *  `createController` reads it at construction and `loadGroups` moves every
+ *  entry into the store on the first boot that finds the store holding none, so
+ *  from then on it is empty. A store that keeps no group list keeps writing and
+ *  reading it, which is the honest degradation rather than a create dialog that
+ *  silently stores nowhere. */
 const projectKey = (storageKey: string): string => `kai:${storageKey}:projects`;
 
 /** What the block can read back from its own key: entries that carry both a name
@@ -1124,6 +1124,10 @@ function controlNode(id: string, kind: ConversationRow['kind'], title: string, g
     menuLabel: '',
     renaming: false,
     renameFieldHidden: true,
+    renamePlaceholder: '',
+    renameShortcutHidden: true,
+    shareItemHidden: true,
+    shareDividerHidden: true,
     pinLabel: 'Pin',
     renameItemHidden: true,
     pinItemHidden: true,
@@ -1151,6 +1155,16 @@ function sampleNode(sample: FixtureConversation, group: string, groupName: strin
   return controlNode(sample.id, 'conversation', sample.title, group, groupName);
 }
 
+/** What a folder heading's menu needs from where the store is, not from the row:
+ *  whether the store keeps a group list AT ALL (no list, no menu - a row that
+ *  cannot act is not offered), and which heading is the one being renamed in
+ *  place. Injected because `folderNode` is a module-level function while the
+ *  store is per-controller. */
+interface FolderMenu {
+  canManage: boolean;
+  renamingId: string | undefined;
+}
+
 /** A rail row that is not a conversation: a folder's heading, or the Show more
  *  row. Both are rendered by the SAME repeat the conversations are, because the
  *  page grammar clones one element per repeat and has no way to interleave a
@@ -1162,12 +1176,30 @@ function folderNode(
   group: string,
   groupName: string,
   open: boolean,
+  menu: FolderMenu,
   empty = false,
 ): ConversationRow {
   const heading = kind === 'folder';
+  const node = `${heading ? FOLDER_HEADING_NODE : FOLDER_MORE_NODE}${group}`;
   const title = heading ? (group === '' ? RECENTS_LABEL : sectionLabel(group, groupName)) : SHOW_MORE_LABEL;
+  const renaming = heading && menu.renamingId === node;
   return {
-    ...controlNode(`${heading ? FOLDER_HEADING_NODE : FOLDER_MORE_NODE}${group}`, kind, title, group, groupName),
+    ...controlNode(node, kind, title, group, groupName),
+    // THE HEADING CARRIES THE RUN MENU THE CONVERSATION ROWS CARRY, through the
+    // same authored markup and the same action: a project the reader cannot
+    // rename or delete is the defect this round exists for. Its two items are
+    // RENAME and DELETE, and neither is the conversation row's pair - a folder
+    // is not shared, not pinned and not archived, so those items are off here and
+    // the F2 chip is off too, because F2 acts on the ACTIVE conversation and a
+    // heading is never active. What is left is exactly what the store's own
+    // group API can do, which is the same rule the conversation menu follows.
+    renaming,
+    renameFieldHidden: !renaming,
+    renamePlaceholder: 'Project name',
+    renameItemHidden: !(heading && menu.canManage),
+    deleteItemHidden: !(heading && menu.canManage),
+    menuHidden: !heading,
+    menuLabel: heading ? `Actions for ${title}` : '',
     // A folder's heading leads its own run with a caret that IS its open state;
     // the Show more row that ends a run has none.
     //
@@ -1226,6 +1258,7 @@ function railNodes(
   organizer: RailOrganizer,
   created: readonly DemoProject[],
   fixture: boolean,
+  menu: FolderMenu,
 ): ConversationRow[] {
   // ONE LIST IS THE ROWS UNDER ONE LABEL AND NOTHING ELSE: no folder headings, no
   // Show more, and the closed/expanded sets unread, because there is no folder for
@@ -1245,7 +1278,7 @@ function railNodes(
   // projects back in front of someone who still has their chat, with the same
   // headings a brand-new reader sees. Read here rather than in the state script,
   // because the rail a reader gets on their first visit is the rail's own shape.
-  if (fixture && rows.length === 0 && query === '') return fixtureRail(created);
+  if (fixture && rows.length === 0 && query === '') return fixtureRail(created, menu);
   const shut = new Set(closed);
   const grown = new Set(expanded);
   const out: ConversationRow[] = [];
@@ -1258,7 +1291,7 @@ function railNodes(
   const empty = created.filter((project) => !rows.some((row) => row.group === project.id));
   let labelled = empty.length > 0;
   if (labelled) out.push(sectionNode(PROJECTS_LABEL));
-  for (const project of empty) out.push(folderNode('folder', project.id, project.name, false, true));
+  for (const project of empty) out.push(folderNode('folder', project.id, project.name, false, menu, true));
   let at = 0;
   while (at < rows.length) {
     const group = rows[at].group;
@@ -1275,11 +1308,11 @@ function railNodes(
       out.push(sectionNode(PROJECTS_LABEL));
       labelled = true;
     }
-    out.push(folderNode('folder', group, groupName, open));
+    out.push(folderNode('folder', group, groupName, open, menu));
     if (open) {
       const shown = grown.has(group) ? run : run.slice(0, FOLDER_LIMIT);
       out.push(...shown);
-      if (shown.length < run.length) out.push(folderNode('more', group, groupName, false));
+      if (shown.length < run.length) out.push(folderNode('more', group, groupName, false, menu));
     }
     at = end;
   }
@@ -1321,7 +1354,7 @@ function railNodes(
  *  The `Projects` label is here for the same reason it is over real folders: the
  *  rail's own settings live in the actions it carries, and one of them is the way
  *  to make a project. */
-function fixtureRail(created: readonly DemoProject[]): ConversationRow[] {
+function fixtureRail(created: readonly DemoProject[], menu: FolderMenu): ConversationRow[] {
   // The same catalogue the filing rule and the folder labels read, so a sample
   // lands where the reader's own conversation with that opening would land.
   const catalogue = [...created, ...PROJECTS];
@@ -1333,7 +1366,7 @@ function fixtureRail(created: readonly DemoProject[]): ConversationRow[] {
     // A folder holds its rows, so its heading is OPEN and carries the caret that
     // says so; a project with no sample under it (every project a reader made)
     // is a heading and nothing else (`folderNode`'s `empty`).
-    nodes.push(folderNode('folder', project.id, project.name, true, filed.length === 0));
+    nodes.push(folderNode('folder', project.id, project.name, true, menu, filed.length === 0));
     nodes.push(...filed.map((sample) => sampleNode(sample, project.id, project.name)));
   }
   // The remainder's heading and its rows, so the section a reader's own typed
@@ -1342,7 +1375,7 @@ function fixtureRail(created: readonly DemoProject[]): ConversationRow[] {
   const ungrouped = SAMPLE_CONVERSATIONS.filter(
     (sample) => projectOfOpening(sample.opening, catalogue) === undefined,
   );
-  nodes.push(folderNode('folder', '', '', true, ungrouped.length === 0));
+  nodes.push(folderNode('folder', '', '', true, menu, ungrouped.length === 0));
   nodes.push(...ungrouped.map((sample) => sampleNode(sample, '', '')));
   return nodes;
 }
@@ -1411,9 +1444,10 @@ function railFrom(
   organizer: RailOrganizer,
   created: readonly DemoProject[],
   fixture: boolean,
+  menu: FolderMenu,
 ): Pick<AssistantState, 'conversationRows' | 'conversationSections'> {
   const matched = narrow(rows, query);
-  const nodes = railNodes(matched, closed, expanded, query, organizer, created, fixture);
+  const nodes = railNodes(matched, closed, expanded, query, organizer, created, fixture, menu);
   return {
     conversationRows: nodes,
     // The sections describe the folders the rail RENDERS, so the fixture's empty
@@ -1465,6 +1499,20 @@ export interface ConversationRow {
   /** The rename field's own `hidden`. Both flags read the same fact, spelled the
    *  way each binding needs it (the title hides while the field shows). */
   renameFieldHidden: boolean;
+  /** What that field's placeholder says: a conversation is not a project, and the
+   *  placeholder is the one piece of text the field carries that the row cannot
+   *  otherwise tell apart. */
+  renamePlaceholder: string;
+  /** Whether the Rename item hides the F2 chip. F2 acts on the ACTIVE
+   *  conversation, and a folder heading is never active (its activation opens the
+   *  folder), so a chip on a heading's item would advertise a key that does
+   *  nothing there. */
+  renameShortcutHidden: boolean;
+  /** Whether the Share item is hidden, and whether the divider under it is -
+   *  one fact about a row (a folder is not shareable) spelled the way each of
+   *  the two bindings needs it, exactly as `renaming`/`renameFieldHidden` are. */
+  shareItemHidden: boolean;
+  shareDividerHidden: boolean;
   /** The pin item's label: the same item offers Pin or Unpin, and which one is
    *  the row's own state. */
   pinLabel: string;
@@ -1513,6 +1561,14 @@ const FOLDER_LIMIT = 4;
  *  conversation id is a uuid, so neither prefix can collide with one. */
 const FOLDER_HEADING_NODE = 'folder:';
 const FOLDER_MORE_NODE = 'folder-more:';
+
+/** The folder a row node names, or undefined for a row that is not a heading.
+ *  The heading's node id is how the two row kinds travel through ONE activation
+ *  and ONE menu action: a conversation id is a uuid, so the prefix is
+ *  unambiguous. */
+function folderOf(nodeId: string): string | undefined {
+  return nodeId.startsWith(FOLDER_HEADING_NODE) ? nodeId.slice(FOLDER_HEADING_NODE.length) : undefined;
+}
 
 /** The ungrouped remainder's heading, and a folder's reveal control. Both are
  *  the block's own words, which is the point of the heading being a row: the
@@ -1803,14 +1859,10 @@ export interface AssistantController {
 export function createController(deps: AssistantDeps): AssistantController {
   const listeners = new Set<() => void>();
 
-  // The reader's own projects, read once here and written on every create. Read
-  // at construction rather than in `boot()` because a name has to be resolvable
-  // the first time the rail projects a row: a conversation filed under a created
-  // project on a LATER visit would otherwise show up under the id it carries
-  // (`sectionLabel`) until the next boot - a folder named `release-notes` where
-  // the reader named it "Release notes".
+  // THE KEY THE PROJECTS USED TO LIVE UNDER, read once here and handed to the
+  // store on the first boot that finds it holding no groups (`loadGroups`).
   const createdKey = projectKey(deps.storageKey ?? 'assistant');
-  let createdProjects: DemoProject[] = storedProjects(createdKey);
+  let legacyProjects: DemoProject[] = storedProjects(createdKey);
   // WHETHER THE STORE HOLDS ANYTHING AT ALL, which is not the same question as
   // whether the rail has rows: an ARCHIVED conversation leaves the rows and stays
   // in the store. Seeded `true` because a controller is constructed before its
@@ -1850,7 +1902,7 @@ export function createController(deps: AssistantDeps): AssistantController {
     ...projectMenus('system'),
     // And on the rail's own defaults: the projects the demo files its
     // conversations into, in the kit's own pinned-first order.
-    ...projectRailMenu('project', 'priority', createdKey),
+    ...projectRailMenu('project', 'priority'),
     // The palette starts empty and closed: its rows arrive with the rail's first
     // projection (`projectSummaries`), and the element owns its open state.
     paletteItems: [],
@@ -1877,6 +1929,22 @@ export function createController(deps: AssistantDeps): AssistantController {
   // folder is open and none of them has grown, which is how a fresh rail reads.
   let closedGroups: string[] = [];
   let expandedGroups: string[] = [];
+  // The store's own group records, which ARE the rail's projects, and the
+  // headings this session has removed. Both are beside State for the reason
+  // `allRows` is: nothing binds them, and the rows the rail renders are their
+  // projection. The cache is what lets the projection name a folder
+  // SYNCHRONOUSLY - the binding grammar holds a field, never a promise - and it
+  // is re-read after every write rather than patched, so the store stays the one
+  // place a project's name lives.
+  //
+  // `droppedFolders` exists for the demo's three: they are a TABLE in this file
+  // rather than store records, so a delete has to be remembered somewhere. It is
+  // what makes deleting one honest rather than magic - the store really did
+  // unfile its conversations, and the name comes back on the next boot, which a
+  // table cannot avoid and which this demo says out loud rather than hiding by
+  // leaving a folder nobody can remove.
+  let storeGroups: ConversationGroup[] = [];
+  let droppedFolders: string[] = [];
   // The last summaries the store handed up, kept for the same reason as
   // `allRows`: the row projection is re-run when the RENAME state moves, not
   // only when the summaries do.
@@ -1923,12 +1991,6 @@ export function createController(deps: AssistantDeps): AssistantController {
 
   const store = localStorageStore(deps.storageKey ?? 'assistant');
 
-  /** The projects this rail can NAME, the reader's own first: they are read by
-   *  the filing rule (`projectOfOpening`), the row order (`orderRows`) and every
-   *  folder label, so one list keeps a created project from being a folder of its
-   *  own in one place and an unknown id in another. */
-  const catalogue = (): readonly DemoProject[] => [...createdProjects, ...PROJECTS];
-
   // WHAT THE STORE CAN DO, read off the store itself. The four operations are
   // OPT-IN on ConversationStore, and ConversationController refuses LOUDLY when
   // one is missing - but a report is not an affordance: a menu row for an
@@ -1940,6 +2002,121 @@ export function createController(deps: AssistantDeps): AssistantController {
     pin: typeof store.setPinned === 'function',
     archive: typeof store.setArchived === 'function',
     remove: typeof store.remove === 'function',
+    // THE GROUP LIST, the three the rail's folders are made of. All three or
+    // none: reading the list without the two writes would offer a heading a
+    // menu whose items change nothing, and a write without the read would move a
+    // project the rail could not name.
+    groups: typeof store.listGroups === 'function' && typeof store.saveGroup === 'function'
+      && typeof store.removeGroup === 'function',
+  };
+
+  /** The projects this rail can NAME: the store's own group records, then the
+   *  demo's three behind them. One list, read by the filing rule
+   *  (`projectOfOpening`), the row order (`orderRows`) and every folder label, so
+   *  a created project cannot be a folder of its own in one place and an unknown
+   *  id in another.
+   *
+   *  A RECORD WINS OVER THE TABLE: the demo's ids stay a table of names and
+   *  filing words, and a rename writes a record whose name overrides the table's,
+   *  so a renamed demo folder is a store fact like any other. A store that keeps
+   *  no group list falls back to the block's demo key, which is the same shape the
+   *  block shipped with and the honest degradation for a store that cannot hold a
+   *  group at all. */
+  const catalogue = (): readonly DemoProject[] => {
+    if (!storeOps.groups) return [...legacyProjects, ...PROJECTS];
+    const override = (project: DemoProject): DemoProject => {
+      const record = storeGroups.find((group) => group.id === project.id);
+      return record ? { ...project, name: record.name } : project;
+    };
+    const own = storeGroups
+      .filter((group) => !PROJECTS.some((project) => project.id === group.id))
+      .map((group) => ({ id: group.id, name: group.name, topics: [] }));
+    return [
+      ...own,
+      ...PROJECTS.filter((project) => !droppedFolders.includes(project.id)).map(override),
+    ];
+  };
+
+  /** Read the store's group records into the cache the rail's projection reads.
+   *  A failed read KEEPS the last answer rather than flashing a rail with no
+   *  folders, the same rule `refreshStoreEmptiness` follows. */
+  const refreshGroups = async (): Promise<void> => {
+    if (!storeOps.groups) return;
+    try {
+      storeGroups = await controller.listGroups();
+    } catch {
+      return;
+    }
+    patch(projectSummaries(lastSummaries));
+  };
+
+  /** Bring the projects the reader made under the OLD demo key across, on the one
+   *  boot that finds the store holding no groups, and read the list either way.
+   *  The migration is deliberately one-way and one-time: the key is cleared once
+   *  its entries are in the store, so a project the reader deletes does not come
+   *  back from a second copy the block forgot it had. */
+  const loadGroups = async (): Promise<void> => {
+    if (!storeOps.groups) return;
+    let groups: ConversationGroup[];
+    try {
+      groups = await controller.listGroups();
+    } catch {
+      return;
+    }
+    if (groups.length === 0 && legacyProjects.length > 0) {
+      for (const project of legacyProjects) {
+        await controller.saveGroup({
+          id: project.id,
+          name: project.name,
+          sortOrder: 0,
+          createdAt: new Date().toISOString(),
+        });
+      }
+      legacyProjects = [];
+      try {
+        localStorage.removeItem(createdKey);
+      } catch {
+        // Storage unavailable: the store is the home now either way.
+      }
+      try {
+        groups = await controller.listGroups();
+      } catch {
+        return;
+      }
+    }
+    storeGroups = groups;
+    patch(projectSummaries(lastSummaries));
+  };
+
+  /** Rename a folder in place, through the store's own group write: the record IS
+   *  the project, so a name written here is the name every surface reads. The
+   *  store carries `createdAt` forward on an update; it is passed anyway so the
+   *  create case states it rather than relying on the carry. */
+  const renameFolder = async (group: string, name: string): Promise<void> => {
+    const record = storeGroups.find((candidate) => candidate.id === group);
+    await controller.saveGroup({
+      id: group,
+      name,
+      sortOrder: record?.sortOrder ?? 0,
+      createdAt: record?.createdAt ?? new Date().toISOString(),
+    });
+    await refreshGroups();
+  };
+
+  /** Delete a folder: the group record goes and every conversation filed under it
+   *  comes back UNFILED - kept, with its messages, title, pin and read state, and
+   *  reachable in the ungrouped remainder. That is the store's own answer
+   *  (`removeGroup`), adopted here rather than restated: a folder is a filing, not
+   *  a container, and a block that deleted the conversations with it would be a
+   *  second answer to a question the store already settled. */
+  const deleteFolder = async (group: string): Promise<void> => {
+    await controller.removeGroup(group);
+    droppedFolders = [...droppedFolders, group];
+    await refreshGroups();
+    // The rail may be empty now, and the emptiness is the store's own answer
+    // rather than the row count's (an archived conversation leaves the rows and
+    // stays in the store).
+    await refreshStoreEmptiness();
   };
 
   const controller = createConversationController(store, {
@@ -1974,6 +2151,10 @@ export function createController(deps: AssistantDeps): AssistantController {
         menuLabel: `Actions for ${s.title}`,
         renaming,
         renameFieldHidden: !renaming,
+        renamePlaceholder: 'Conversation name',
+        renameShortcutHidden: false,
+        shareItemHidden: false,
+        shareDividerHidden: false,
         pinLabel: s.pinned ? 'Unpin' : 'Pin',
         renameItemHidden: !storeOps.rename,
         pinItemHidden: !storeOps.pin,
@@ -2001,7 +2182,10 @@ export function createController(deps: AssistantDeps): AssistantController {
     // palette cannot offer.
     const railChats = narrow(projected, query).filter((row) => row.kind === 'conversation');
     return {
-      ...railFrom(projected, query, closedGroups, expandedGroups, organizer, createdProjects, storeIsEmpty),
+      ...railFrom(projected, query, closedGroups, expandedGroups, organizer, catalogue(), storeIsEmpty, {
+        canManage: storeOps.groups,
+        renamingId,
+      }),
       paletteItems: projectPalette(railChats, query),
       activeId: controller.activeId(),
     };
@@ -2442,24 +2626,37 @@ export function createController(deps: AssistantDeps): AssistantController {
     // A BLANK NAME IS REFUSED IN THE FIELD RATHER THAN SILENTLY DROPPED: the
     // dialog stays open with the input marked invalid, because a press that
     // closed it would be a project the reader believes they made.
-    createProject() {
+    async createProject() {
       const name = state.projectDraft.trim();
       if (name === '') {
         patch({ projectNameError: 'Name the project first' });
         return;
       }
-      createdProjects = [...createdProjects, { id: projectId(name, catalogue()), name, topics: [] }];
-      try {
-        localStorage.setItem(createdKey, JSON.stringify(createdProjects));
-      } catch {
-        // Storage unavailable: the project lives for this tab, the same
-        // degradation the store's own `save()` takes rather than a dialog that
-        // refuses a name the reader can see on screen.
+      // The id is derived from the name the reader typed, before anything is
+      // written: it is the label a folder falls back to when the catalogue
+      // cannot name it, and a rename must not move it.
+      const id = projectId(name, catalogue());
+      if (storeOps.groups) {
+        // THE PROJECT IS A GROUP RECORD, in the same store the conversations are
+        // in. `sortOrder` 0 keeps the reader's own projects ahead of the demo's
+        // three, which is the order the rail has always shown them in.
+        await controller.saveGroup({ id, name, sortOrder: 0, createdAt: new Date().toISOString() });
+        await refreshGroups();
+      } else {
+        legacyProjects = [...legacyProjects, { id, name, topics: [] }];
+        try {
+          localStorage.setItem(createdKey, JSON.stringify(legacyProjects));
+        } catch {
+          // Storage unavailable: the project lives for this tab, the same
+          // degradation the store's own `save()` takes rather than a dialog that
+          // refuses a name the reader can see on screen.
+        }
+        // The new project is on the rail BEFORE the dialog goes: the re-projection
+        // is what puts the folder there, and closing first would be two paints of
+        // a rail that had not changed.
+        patch(projectSummaries(lastSummaries));
       }
-      // The new project is on the rail BEFORE the dialog goes: the re-projection is
-      // what puts the folder there, and closing first would be two paints of a rail
-      // that had not changed.
-      patch({ ...projectSummaries(lastSummaries), projectDraft: '', projectNameError: '' });
+      patch({ projectDraft: '', projectNameError: '' });
       deps.refs().projectDialog?.hide();
     },
 
@@ -2538,6 +2735,14 @@ export function createController(deps: AssistantDeps): AssistantController {
       // store's own title policy (the latest message text) is the fallback. The
       // field is already closed either way, which is what the page shows.
       if (id === undefined || title === '') return;
+      // ONE COMMIT ACTION FOR BOTH ROW KINDS, because both rows carry the SAME
+      // field: the node id says which kind it was, and a heading's rename is the
+      // store's group write rather than a conversation's title.
+      const folder = folderOf(id);
+      if (folder !== undefined) {
+        if (storeOps.groups) await renameFolder(folder, title);
+        return;
+      }
       await controller.rename(id, title);
     },
 
@@ -2568,6 +2773,19 @@ export function createController(deps: AssistantDeps): AssistantController {
     async rowMenuAction(event) {
       const target = rowMenuTarget(event);
       if (!target) return;
+      // A HEADING'S MENU READS THE SAME EVENT as a conversation's, and the node id
+      // says which. Its two items are the ones the store's group API can really
+      // do; the ops a folder does not have (pin, archive) are off the row, so an
+      // op that arrives for a heading is one the menu never offered.
+      const folder = folderOf(target.conversationId);
+      if (folder !== undefined) {
+        if (target.op === 'rename' && storeOps.groups) applyRenaming(target.conversationId);
+        if (target.op === 'delete' && storeOps.groups) {
+          closeRenaming(target.conversationId);
+          await deleteFolder(folder);
+        }
+        return;
+      }
       switch (target.op) {
         case 'rename':
           if (storeOps.rename) applyRenaming(target.conversationId);
@@ -2662,6 +2880,7 @@ export function createController(deps: AssistantDeps): AssistantController {
         document.addEventListener('keydown', onShortcut);
       }
       setMessages([]);
+      await loadGroups();
       await controller.refresh();
       await controller.restore();
       // THE STORE'S OWN ANSWER for whether the rail is looking at a profile that

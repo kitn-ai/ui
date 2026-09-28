@@ -278,7 +278,7 @@
             :theme="themeMode"
             .value="row.title"
             .editing="row.renaming"
-            placeholder="Conversation name"
+            :placeholder="row.renamePlaceholder"
             @kai-rename="renameCommit"
             @kai-cancel="renameCancel"
           ></kai-editable-label>
@@ -330,6 +330,7 @@
                  itself still does nothing: there is no handler on it. -->
             <kai-tooltip
               :theme="themeMode"
+              :hidden="row.shareItemHidden"
               placement="left"
               content="Sharing needs a share endpoint you own. This block ships none, so the item is inert on purpose."
             >
@@ -358,7 +359,7 @@
                  ArrowUp and ArrowDown step straight over it, exactly as the kit's
                  own separator behaves. It is also not a kai- element: there is
                  nothing in it that could take a key. -->
-            <span class="menu-separator" role="separator"></span>
+            <span class="menu-separator" role="separator" :hidden="row.shareDividerHidden"></span>
 
             <!-- Each hint is one shortcut, so each is ONE kai-kbd inside a
                  kai-kbd-group. The token spec already splits the shortcut into a
@@ -403,7 +404,7 @@
               @kai-click="rowMenuAction"
             >
               Rename
-              <kai-kbd-group class="menu-kbd"><kai-kbd :theme="themeMode" keys="F2" size="sm"></kai-kbd></kai-kbd-group>
+              <kai-kbd-group class="menu-kbd" :hidden="row.renameShortcutHidden"><kai-kbd :theme="themeMode" keys="F2" size="sm"></kai-kbd></kai-kbd-group>
             </kai-button>
             <kai-button
               role="menuitem"

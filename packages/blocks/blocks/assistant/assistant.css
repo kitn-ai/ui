@@ -68,6 +68,17 @@ kai-editable-label.row-rename { min-width: 0; max-width: 100%; }
 kai-icon[hidden] { display: none; }
 kai-dropdown[hidden] { display: none; }
 
+/* WHAT A HEADING'S MENU KEEPS OUT: the Share row and the divider under it, the
+ * F2 chip on Rename, and the menu itself on a row that has none. All three the
+ * same trap as the two rules above - each is an author-level `display` that
+ * outranks the UA's `[hidden]`, so the attribute hides nothing without a rule
+ * here. `kai-kbd-group` is `inline-flex`, `kai-tooltip` wraps its trigger in a
+ * box of its own, and `.menu-separator` is a `display: block` hairline of its
+ * own height. The divider goes with Share because the divider is its group's
+ * divider: a heading's menu would otherwise open on a leading rule with nothing
+ * above it. */
+kai-tooltip[hidden], kai-kbd-group[hidden], .menu-separator[hidden] { display: none; }
+
 /* EVERY RAIL ROW IS FLUSH LEFT, filing and all, and the joining is said by the
  * heading's CARET instead: the rail is the page's narrowest column, and an inline
  * step spends it on a nesting the caret has already stated. What survives of the
