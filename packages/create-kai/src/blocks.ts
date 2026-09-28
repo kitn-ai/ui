@@ -331,8 +331,8 @@ export function detectForm(packageJson: unknown | null): Detection {
   const forms = [...new Set(found.map((signal) => landingForm(signal.framework)))];
 
   // AMBIGUITY IS ABOUT THE ANSWER, NOT THE SIGNAL COUNT. Two signals landing
-  // on the same tree is not a question: today vue and svelte both land on the
-  // html form and asking which of two identical outcomes the user wants is
+  // on the same tree is not a question: two frameworks whose forms are the same
+  // share an outcome, and asking which of two identical outcomes the user wants is
   // noise, not loudness. When PR B2 emits both trees they start deciding
   // different forms and this begins asking on its own.
   if (forms.length > 1) return { kind: 'ambiguous', found: found.map((s) => s.dep), forms };
