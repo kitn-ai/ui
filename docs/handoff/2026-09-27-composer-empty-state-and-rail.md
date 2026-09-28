@@ -243,3 +243,11 @@ The owner supplied ChatGPT's sidebar and command palette as a **layout blueprint
 - A stale status line in `2026-08-10-docs-code-alignment.md` ("NOT wired in yet" while CI runs it as blocking).
 
 **Adopted as a rule: do not trust any spec's status line in this repo.** Both stale ones were stale in the direction that matters.
+
+
+## Two more dispatch traps, both from rounds sharing global state
+
+1. **A commit message must never come from a shared scratch path.** `/tmp/commit-msg.txt` caused a commit to land under another round's message; the round caught it and amended.
+2. **Every round shares one git index, so a plain `git commit` commits whatever any peer has staged.** A plan round's commit swept in a live round's staged `mock.ts` deletion; it caught it and amended. A `git diff --cached` check does not close this, because a peer can stage between the check and the commit. **Commit with explicit paths: `git commit -m "…" -- <paths>`.**
+
+**Also landed:** `722d21d1` — all three previously-red gates green (`lint:prop-docs` with **zero waivers**, comment-references, cdn-pins). And the voice plan (`75bc6a28`, 8 tasks), which **corrected the spec in three places** and caught that §8.3's claim that `web-component-non-scalar.json` is hand-written is false — it is generated.
