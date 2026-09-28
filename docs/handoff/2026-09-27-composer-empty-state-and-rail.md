@@ -267,3 +267,13 @@ The owner supplied ChatGPT's sidebar and command palette as a **layout blueprint
 3. **The source split** (the 2067-line controller), then **the palette** — both wait on the block files, and the split goes first so the palette lands in a small file.
 4. `90/90` in `create-kai` once `dist/` is whole.
 5. The three remaining renderer costs (angular, solid) once svelte is proven; the group-persistence API designed from the block's real need; a coupling-map row for the block-manifest/`create-kai` coupling that a rename broke silently; and the **final ladder**.
+
+
+## Two rounds that corrected their predecessors (tip `c5a199fa`)
+
+- **`de47a53c`** typed `kai-*` tags in svelte markup, from the **generator** beside vue's. Wrong attributes now error (verified with a deliberate plant in an emitted tree, since the block's own bad line is fixed), the cell ends 9 trees / 0 diagnostics, and a **drift guard** keeps the augmentation from disappearing. **It corrected the handover's mechanism**: the starter's permissive declarations do **not** collide as TS2717 — measured, the permissive declaration **wins silently**, which is why dropping it is what makes the starter typed.
+- **`c5a199fa`** pinned the lightbox's Escape reach and focus return **without changing code**, because the lightbox holds no second policy: it renders the dialog and inherits both. **It corrected the dialog round's claim** that the lightbox still had the narrow scope — unverified speculation, measured false.
+
+**Dispatched `b4c01b42`:** the dialog's focus fallback is a **single-link chain walk** — when the remembered opener is removed while open and the nearest surviving context has no focusable descendant, focus drops to `BODY`. Walk further; one focus memory, not two.
+
+**Dist restored (~19:28):** `state.js`, `wire.js`, `schemas.js`, `stores.js` are back, so `verify:blocks` runs again; `1356e827` continues with the light-and-dark re-record.
