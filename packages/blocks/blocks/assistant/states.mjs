@@ -861,11 +861,13 @@ export default {
       path: '/',
       indexKey: 'kai:assistant:threads',
       expectedFirstTitle: 'Reading q3-metrics.pdf now.',
-      // Computed style is a measurement of the document it was taken in, and
-      // the react host is a Vite index.html with a mounted subtree rather
-      // than this block's own page. This page asserts state, navigation and
-      // console-cleanliness; the style probes stay where they were measured.
-      skipLayout: true,
+      // NO `skipLayout` HERE. Every probe this page would have skipped is a
+      // comparison among the block's OWN boxes - row heights against each
+      // other, a glyph's left edge, one row's bottom against another's top, a
+      // gap against the kit's density token - and the emitted react tree
+      // imports the block's stylesheet, so the react form's geometry is
+      // measurable and IS measured here. A skip on this page withheld those
+      // claims from the one surface nothing else in the repo reads.
     },
   },
 
@@ -1953,11 +1955,11 @@ export default {
       // The two that are GEOMETRY, and they run on BOTH pages: each compares a
       // row's box against its OWN container's content box, and the four tops
       // against each other, so there is no document-relative pixel in either. (An
-      // earlier version listed them in `layoutProbes` and skips them on the react
+      // earlier version listed them in `layoutProbes` and skipped them on the react
       // host, justified by "a measurement of the document it was taken in" — which
-      // is not what these two are.) `skipLayout` on that page still skips the style
-      // probes below, which ARE document measurements: a computed font-size or
-      // padding belongs to the sheet the host loaded.
+      // is not what these two are.) There is no `skipLayout` on either page now, so
+      // this state's style probe is measured on the react host too, against the
+      // block's own stylesheet, which the emitted tree imports.
       styleProbes: [
         // The row's own surface, measured where it renders: the row variant is
         // `h-auto w-full ... rounded-xl px-4 py-2.5`, and a pill would differ in

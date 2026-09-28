@@ -75,11 +75,14 @@ export default {
       messagesElementId: 'thread',
       expectedFirstTitle: 'Let me pull up that order.',
       expectRestore: true,
-      // Layout probes are measured in the BLOCK's own page and do not
-      // transfer to a mounted subtree in a Vite index.html. This page asserts
-      // state, navigation and console-cleanliness; geometry stays where it
-      // was measured.
-      skipLayout: true,
+      // NO `skipLayout` HERE, and that is a measurement rather than a
+      // preference. The probes this page would skip are differences between
+      // two boxes of the block's OWN elements (and one computed margin derived
+      // from the density token), and the emitted tree imports the block's
+      // stylesheet, so they measure here exactly as they do in the block's own
+      // page: the four geometry values come back 16 / 4 / 20 / true, identical
+      // to the block page's. `skipLayout` would withhold those claims from the
+      // react form, which is the one geometry nothing else in this repo reads.
       // No `consoleIgnore` here on purpose. The driver supports a per-page
       // list (merged with the scenario's, so widening one page never relaxes
       // another), and a pre-emptive list would be a filter over failures

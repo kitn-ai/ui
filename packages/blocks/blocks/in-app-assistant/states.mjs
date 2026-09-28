@@ -56,11 +56,12 @@ export default {
       // The component-framework forms emit the data-block-root subtree only,
       // so the stand-in app around the aside is deliberately absent here.
       hostChrome: false,
-      // Computed style is a measurement of the document it was taken in, and
-      // the react host is a Vite index.html with a mounted subtree rather
-      // than this block's own page. This page asserts state, navigation and
-      // console-cleanliness; the style probes stay where they were measured.
-      skipLayout: true,
+      // NO `skipLayout` HERE. The emitted react tree imports the block's own
+      // stylesheet, so a computed style read off an element INSIDE the block
+      // resolves here too (the host's own chrome is the only part this page
+      // does not have, and no probe reads it - `hostChrome: false` above is how
+      // a probe says so). This block declares no `layoutProbes` today, so what
+      // the skip withheld on this page was its two style probes.
     },
   },
 

@@ -78,7 +78,10 @@ it is NOT a statement that such a probe is unmeasurable there -- support-widget'
 four geometry probes, run against the react host with the flag off, came back at
 the block page's own numbers (16 / 4 / 20 and a clear CTA), because each is a
 difference between two boxes of the block's OWN elements and the emitted tree
-imports the block's stylesheet. `consoleIgnore` on a page spec is MERGED with the
+imports the block's stylesheet. **No page declares it today**, so the react
+runtime cell measures every probe its three blocks name and prints no SKIP line;
+the key stays supported for a page that genuinely cannot carry one.
+`consoleIgnore` on a page spec is MERGED with the
 scenario's, so a page can tolerate its own host noise without relaxing the
 zero-console rule everywhere else.
 

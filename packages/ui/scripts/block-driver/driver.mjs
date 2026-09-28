@@ -54,7 +54,9 @@
 //                          every probe it skipped (verdict `skippedProbes` /
 //                          `skippedStyles`, plus a SKIP line on stderr) so the
 //                          claim is visible on every run instead of only in a
-//                          comment.
+//                          comment. NO PAGE DECLARES IT TODAY: all three blocks'
+//                          `react` specs measure their geometry, which is why the
+//                          react runtime cell prints no SKIP line.
 //   consoleIgnore: [re]    merged with the scenario's list rather than replacing
 //                          it, so a page can tolerate its own host noise without
 //                          relaxing the zero-console rule on every other page.
@@ -158,13 +160,15 @@ async function runStory(pageKey, colorScheme) {
   if (scenario.ready) await scenario.ready(page, sctx);
 
   // LAYOUT SKIP (spec 5.3 ruling, amended in execution): a page that mounts the
-  // same block in a different document (the react host is a Vite index.html with
-  // a mounted subtree, not the block's own page) declares `skipLayout: true` on
-  // its spec, and each state names the probes that are geometry in
-  // `layoutProbes`. Such a page skips those probes, their `expect` entries, and
-  // every styleProbe, and asserts state, navigation and console-cleanliness
-  // instead. The SKIP is recorded rather than dropped: see the SKIPPED SKIPS
-  // report below, which names every probe this run did not measure.
+  // same block in a different document MAY declare `skipLayout: true` on its
+  // spec, and each state names the probes that are geometry in `layoutProbes`.
+  // Such a page skips those probes, their `expect` entries, and every
+  // styleProbe, and asserts state, navigation and console-cleanliness instead.
+  // It is supported and never inferred, but no page declares it today: the
+  // react host carries the probes, because each is a comparison among the
+  // block's own boxes and the emitted tree imports the block's stylesheet. The
+  // SKIP is recorded rather than dropped: see the SKIPPED SKIPS report below,
+  // which names every probe a run that DOES declare it did not measure.
   const skipLayout = spec.skipLayout === true;
 
   for (const state of scenario.states) {

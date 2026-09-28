@@ -19,14 +19,17 @@
 // resolve to. The resolved versions are printed on every run so a future red
 // can be read against them.
 //
-// WHAT IT DOES NOT COVER, stated so nobody reads its green as more than it is.
-// Every OTHER framework form is compile-only (the cells inside verify:scaffold),
-// and NOTHING measures the react form's LAYOUT: the `react` page spec declares
-// `skipLayout: true`, which drops every probe the block's states named in
-// `layoutProbes`, the `expect` entries over them, and every styleProbe. This cell
-// prints each skipped probe BY NAME, per block, on every run -- and the summary at
-// the end of the run says why that is a line in the block's own page spec rather
-// than a limit of the host. The gate's own output states both.
+// LAYOUT IS MEASURED HERE, and that number is the cell's: every probe a block's
+// states name in `layoutProbes`, and every styleProbe, runs on the react page
+// against the real packed tarball. No `react` page spec declares `skipLayout`
+// any more -- each probe is a comparison among the block's OWN boxes (a row's
+// height against its neighbour's, a glyph's left edge, a gap derived from the
+// kit's density token) and the emitted tree imports the block's stylesheet, so
+// the react document carries them. The driver still reports and names every
+// probe it did NOT measure, and this cell reads those names off the run rather
+// than restating them: a block that re-declares the skip prints a SKIP line
+// here, so a green over a page that withheld its geometry cannot read like one
+// that measured it.
 //
 //   node scripts/verify-blocks-react.mjs             # the gate
 //   node scripts/verify-blocks-react.mjs --self-test # plant, watch, revert
@@ -372,6 +375,7 @@ try {
     failed = !(await selfTest(app, plantBlock, shotsRoot));
   } else {
     const ran = [];
+    const skippedBlocks = [];
     for (const block of blocks) {
       const t0 = Date.now();
       const res = await runBlock({ app, block, files: renderReact(block), port: GATE_PORT, shots: join(shotsRoot, block.name) });
@@ -380,13 +384,15 @@ try {
         ran.push(block.name);
         console.log(`OK  ${block.name} [react runtime] (grep + tsc --strict + the driver's react page, light, ${secs}s)`);
         // DECIDED LOUDLY: what this page did NOT measure. The names come from the
-        // driver's verdict, so they follow the block's own `layoutProbes`.
+        // driver's verdict, so they follow the block's own `layoutProbes`, and the
+        // summary below is read off this list rather than typed.
         const sk = res.skipped ?? { probes: [], styles: [] };
         const bits = [
           sk.probes.length ? `${sk.probes.length} layout probe(s) (${sk.probes.join(', ')})` : '',
           sk.styles.length ? `${sk.styles.length} style probe(s) (${sk.styles.join(', ')})` : '',
         ].filter(Boolean);
         if (bits.length) {
+          skippedBlocks.push(`${block.name} (${bits.join('; ')})`);
           console.log(`SKIP ${block.name} [react layout] NOT measured, skipLayout is declared on the react page: ${bits.join('; ')}`);
         }
       } else {
@@ -397,21 +403,26 @@ try {
     // Anti-vacuity: a run over zero blocks is a broken walk, not a clean tree.
     if (ran.length === 0) failed = true;
 
+    // The layout paragraph is DERIVED from what the runs reported, not typed: a
+    // block that re-declares `skipLayout` moves it back to the warning, and the
+    // block that removes it moves it back to the measured form.
+    const layout =
+      skippedBlocks.length === 0
+        ? `  LAYOUT: MEASURED HERE. Every probe each block names in \`layoutProbes\`, and every styleProbe, ran on\n` +
+          "  the react page against the packed tarball -- no `react` page spec declares `skipLayout` any more.\n" +
+          "  Each such probe compares the block's OWN boxes (a row's height against its neighbour's, a glyph's\n" +
+          "  left edge, a gap derived from the kit's density token), and the emitted tree imports the block's\n" +
+          '  stylesheet, so the react document carries the same claims as the block page and reports its own\n' +
+          '  numbers. Every OTHER framework form is compile-only, so a green here still says nothing about them.\n'
+        : `  LAYOUT: ${skippedBlocks.length} of ${ran.length} block(s) declared \`skipLayout\` on the react page, so\n` +
+          '  the geometry named by the SKIP line(s) above is NOT measured here: ' +
+          `${skippedBlocks.join(' | ')}\n`;
+
     console.log(
       `\nverify-blocks-react: ${failed ? 'FAIL' : 'PASS'} -- ${ran.length} block(s) run in a real browser: ${ran.join(', ') || '(none)'}\n` +
         `  react is the one framework form this repo tests AT RUNTIME. Every other framework form is COMPILE-ONLY\n` +
         '  (the block compile cells inside verify:scaffold), so a green here says nothing about them.\n' +
-        "  LAYOUT: NOTHING MEASURES THE REACT FORM'S GEOMETRY TODAY. Every probe the block's states name in\n" +
-        '  `layoutProbes`, and every styleProbe, is skipped here because the block\'s `react` page spec declares\n' +
-        '  `skipLayout: true`; the SKIP line per block above names each one.\n' +
-        '  IT IS NOT A LIMIT OF THE HOST. Measured 2026-09-27 by running the block driver against this react\n' +
-        "  host with that flag off: support-widget's four geometry probes returned the BLOCK page's own numbers\n" +
-        '  (homeSubtitleToCtaGap 16, homeTitleToSubtitleGap 4, homeSubtitleLineBox 20, homeCtaClearOfSubtitle\n' +
-        "  true) and its styleProbes resolved real computed values, because each probe is a difference between two\n" +
-        "  boxes of the block's OWN elements while the emitted tree imports the block's stylesheet. So the react\n" +
-        '  page CAN carry them; the one thing between it and the other surfaces is that `skipLayout: true` line\n' +
-        "  in the block's own states.mjs (packages/blocks/blocks/<block>/states.mjs), which is a block author's to\n" +
-        '  remove -- do it and this cell asserts their geometry too, with no change here.\n' +
+        layout +
         `  Host: ${resolved.join(', ')}`,
     );
   }
