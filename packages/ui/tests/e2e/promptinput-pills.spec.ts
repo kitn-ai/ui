@@ -10,7 +10,13 @@ import { captureBaseline, reportBaselineCaptures } from './screenshot-baselines'
 const STORY = '/iframe.html?id=test-fixtures-prompt-input--with-entity-pills&viewMode=story';
 // The captures ride along with real assertions, so this file runs on every
 // platform and only the capture-and-compare moves off the tracked path.
-const SHOTS = 'tests/e2e/__screenshots__/promptinput/after';
+//
+// `baseline/` and NOT the old `after/`: these four pill captures shared that
+// directory with the story suite's eight, duplicated byte for byte under the
+// other name, and `after` read as "after the textarea→composer swap" — a phase
+// that landed, so no directory is a phase any more. One directory, one meaning:
+// the committed baseline each capture is compared against.
+const SHOTS = 'tests/e2e/__screenshots__/promptinput/baseline';
 
 test.afterAll(() => reportBaselineCaptures('promptinput-pills'));
 

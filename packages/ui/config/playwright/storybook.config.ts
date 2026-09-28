@@ -167,10 +167,12 @@ export default defineConfig({
     },
     {
       /*
-       * Run (current): `SHOT=baseline|after npm run test:promptinput`
+       * Run (current): `SHOT=<dir> npm run test:promptinput`
        *
-       * Screenshot harness for the kai-prompt-input swap (textarea → composer).
-       * Run: SHOT=baseline|after npx playwright test --config playwright.promptinput.config.ts
+       * Screenshot harness for kai-prompt-input. SHOT overrides the output directory
+       * only (the textarea → composer swap landed, so it no longer picks a variant),
+       * and the default is `baseline`.
+       * Run: `npx playwright test --config config/playwright/storybook.config.ts --project=promptinput`
        */
       name: 'promptinput',
       testMatch: /promptinput-(shot|behavior|pills)\.spec\.ts/,

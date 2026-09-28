@@ -7,9 +7,10 @@ import {
 } from './screenshot-baselines';
 
 /**
- * Captures kai-prompt-input in key states for before/after visual comparison of
- * the textarea→composer swap. SHOT env var selects the subdir.
- *   SHOT=baseline → current textarea ; SHOT=after → composer-backed
+ * Captures kai-prompt-input in key states. SHOT names the OUTPUT directory under
+ * `__screenshots__/promptinput/` and nothing else — it does NOT select a variant.
+ * The textarea→composer swap it was built for has landed, so there is one render,
+ * and the default `baseline` is the only directory the suite writes to.
  *
  * CAPTURE-ONLY: nothing here asserts an image, so the captures are artifacts.
  * A plain run writes them beside the evidence tree and compares them against the
