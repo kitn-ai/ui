@@ -1478,12 +1478,20 @@ Project your own markup with `slot="name"` on a light-DOM child.
 
 | Slot | Mode | Description |
 |------|------|-------------|
-| _(default)_ | inject | The empty-state body below the title/description, usually the call to action. |
+| _(default)_ | inject | The empty-state body below the title/description, usually the call to action. It is capped at a prose measure by default -- see `--kai-empty-content-width`. |
 | `media` | replace | The leading illustration or icon above the title (any inline SVG or <img>). Replaces the built-in media box. |
 
 #### Composed from
 
 `Components/Empty`, `Components/EmptyHeader`, `Components/EmptyMedia`, `Components/EmptyTitle`, `Components/EmptyDescription`, `Components/EmptyContent`
+
+#### CSS custom properties
+
+Set these on the element to change how it looks.
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--kai-empty-content-width` | `24rem` | How wide the content in the default slot may be. The `24rem` default is a PROSE measure, right for a sentence and its action; content that is not prose (a two-up card grid) sets this to the measure its own column has, and the slotted content then stays inside the box instead of painting past it. <br>`kai-empty { --kai-empty-content-width: 48rem }` |
 
 #### Theming
 

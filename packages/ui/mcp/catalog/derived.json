@@ -2205,7 +2205,7 @@
     },
     {
       "tag": "kai-empty",
-      "description": "The empty state of a list or panel: a heading, a line of copy, and room for an action.",
+      "description": "The empty state of a list or panel: a heading, a line of copy, and room for an action. HOW WIDE THAT ROOM MAY BE is the consumer's call: `--kai-empty-content-width` on the host (or any ancestor) widens the box the default slot is laid out in, so content that is not prose - a two-up card grid - fits INSIDE it instead of having to paint past its parent. It inherits through the shadow boundary, which is why setting it on the element reaches the component's own `EmptyContent` (`src/components/empty/empty.tsx`), and where a label like `--kai-workspace-start-width` belongs: the host is the slot the consumer holds. Unset, the prose default (24rem) applies and nothing moves.",
       "props": [
         {
           "name": "theme",

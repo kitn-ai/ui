@@ -2160,7 +2160,7 @@ _No events._
 
 ### `kai-empty` / `Empty`
 
-The empty state of a list or panel: a heading, a line of copy, and room for an action.
+The empty state of a list or panel: a heading, a line of copy, and room for an action. HOW WIDE THAT ROOM MAY BE is the consumer's call: `--kai-empty-content-width` on the host (or any ancestor) widens the box the default slot is laid out in, so content that is not prose - a two-up card grid - fits INSIDE it instead of having to paint past its parent. It inherits through the shadow boundary, which is why setting it on the element reaches the component's own `EmptyContent` (`src/components/empty/empty.tsx`), and where a label like `--kai-workspace-start-width` belongs: the host is the slot the consumer holds. Unset, the prose default (24rem) applies and nothing moves.
 
 **Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
 
@@ -2176,8 +2176,14 @@ _No events._
 
 | Slot | Mode | Description |
 |---|---|---|
-| _(default)_ | inject | The empty-state body below the title/description, usually the call to action. |
+| _(default)_ | inject | The empty-state body below the title/description, usually the call to action. It is capped at a prose measure by default -- see `--kai-empty-content-width`. |
 | `media` | replace | The leading illustration or icon above the title (any inline SVG or <img>). Replaces the built-in media box. |
+
+**CSS custom properties** (set them on the element to change how it looks):
+
+| Property | Default | Description |
+|---|---|---|
+| `--kai-empty-content-width` | `24rem` | How wide the content in the default slot may be. The `24rem` default is a PROSE measure, right for a sentence and its action; content that is not prose (a two-up card grid) sets this to the measure its own column has, and the slotted content then stays inside the box instead of painting past it. — `kai-empty { --kai-empty-content-width: 48rem }` |
 
 ---
 
