@@ -51,3 +51,11 @@ So **the JSON does not need changing**; the assistant block already ships six fi
 - No change to the registry's schema: paths and types already exist.
 - No splitting for its own sake: a 60-line module that exists only to make a number smaller is worse than the file it came from.
 - No touching the generated forms.
+
+## What the first split proved, and the constraint it found
+
+`cac13ec7` extracted the rail concern into `assistant.rail.ts` (469 lines; the controller went 2973 → 2568), declared it in the registry's `files[]`, and passed every gate — including the react cell, which typechecks those sources and nothing else — with the driver unchanged at 212.2s against the committed baseline and the guide fences still compiling. **One split, proven end to end, is what the acceptance in this document asked for, and it is what makes the constraint below trustworthy.**
+
+**A block module may import nothing from another block module at RUNTIME.** The paste form refuses a relative import at the second level: the first attempt imported a helper and `gen-blocks` refused it **by name**. So `assistant.rail.ts` imports controller **types only** — erased by esbuild before the inliner reads them — and the fixture it needs is handed to `railNodes` as a **builder parameter** rather than reached for. A TDZ read from a moved constant is exactly the failure that shape avoids.
+
+**What this means for every remaining split:** a module must be **self-contained**, taking its dependencies as parameters, or the shared state stays in the controller. **A split that cannot satisfy that is not a split — it is a module that will not paste**, and the way to find out is the way this one found out: extract it, declare it, and let the generator refuse it by name if it cannot work. **The generator refusing is the design working, not a setback**, and it is the reason this document asked for one proven split before three.
