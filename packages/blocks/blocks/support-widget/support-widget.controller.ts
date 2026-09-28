@@ -26,9 +26,10 @@
  * renderers to agree about, and it is worth paying, but it means the field
  * count is presentation-shaped rather than minimal.
  */
-import { createAssistantStream, createMockResponder } from '@kitn.ai/ui/state';
+import { createAssistantStream } from '@kitn.ai/ui/state';
 import type { ChatMessage } from '@kitn.ai/ui/state';
 import { readOpenAIStream } from '@kitn.ai/ui/wire';
+import type { StreamSource } from '@kitn.ai/ui/wire';
 import {
   localStorageStore,
   createConversationController,
@@ -36,7 +37,34 @@ import {
   type ConversationSummary,
 } from '@kitn.ai/ui/stores';
 import type { KaiDockElement, KaiViewStackElement } from '@kitn.ai/ui/web-components';
-import { MOCK_SCRIPT, MOCK_TOOL_OUTPUTS, SUGGESTIONS } from './mock';
+// THE SEAM. One extensionless specifier, and one authored source per data mode
+// written at that name by `create-kai add` (wiring.modeTarget / wiring.modeFiles
+// in registry-item.json). The mock form is what an install without flags gets;
+// `--gateway` writes the route form and `--no-mock` the one that throws with the
+// file to write named. This import is what makes all three real, so it must not
+// name a file any mode leaves out.
+import { transport } from './support-widget.transport'; // lint:dangling-imports: allowed -- generated name, written by `create-kai add` from wiring.modeFiles
+
+/** The suggestion chips the empty thread offers. IN THE CONTROLLER, not in the
+ *  mock: the chips are chrome rather than scripted data, and the two mock-free
+ *  modes ship no mock file at all. */
+const SUGGESTIONS = ["Where's my order?", 'Request a refund'];
+
+/**
+ * The transport contract, and the ONE thing a block's data axis changes.
+ *
+ * `reply` answers a turn with whatever the kit's reader folds: a `Response`, a
+ * stream, or an async iterable of SSE text. `toolOutput` settles a tool call the
+ * stream only ever ANNOUNCES, which is the host's side of the wire's seam.
+ *
+ * It lives on the CONTROLLER because the controller owns the thread's shape: the
+ * three mode files import this type, so a mode that answers differently still
+ * answers the same question.
+ */
+export interface SupportWidgetTransport {
+  reply(messages: ChatMessage[]): Promise<StreamSource> | StreamSource;
+  toolOutput(toolType: string): Record<string, unknown> | undefined;
+}
 
 // KNOWN RESIDUAL: the "2m ago" formatter is internal to the Solid layer and
 // is not exported from @kitn.ai/ui/stores, so the block restates it. Delete
@@ -202,8 +230,6 @@ export function createController(deps: SupportWidgetDeps): SupportWidgetControll
     };
   }
 
-  const respond = createMockResponder({ replies: MOCK_SCRIPT });
-
   const actions: SupportWidgetActions = {
     viewChange(event) {
       const { view, root, drilled } = event.detail;
@@ -271,10 +297,10 @@ export function createController(deps: SupportWidgetDeps): SupportWidgetControll
 
       const stream = createAssistantStream((update) => setMessages(update(state.messages)));
       try {
-        await readOpenAIStream(respond(text), stream);
+        await readOpenAIStream(await transport.reply(state.messages), stream);
         for (const part of state.messages.find((m) => m.id === stream.id)?.parts ?? []) {
           if (part.type !== 'tool' || part.tool.state !== 'input-available' || !part.tool.toolCallId) continue;
-          const output = MOCK_TOOL_OUTPUTS[part.tool.type];
+          const output = transport.toolOutput(part.tool.type);
           if (output) stream.upsertTool(part.tool.toolCallId, { state: 'output-available', output });
         }
         stream.done();

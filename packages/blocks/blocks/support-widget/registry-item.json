@@ -8,13 +8,24 @@
     { "path": "support-widget.html", "type": "registry:page" },
     { "path": "support-widget.controller.ts", "type": "registry:file" },
     { "path": "support-widget.css", "type": "registry:file" },
-    { "path": "mock.ts", "type": "registry:file" }
+    { "path": "support-widget.transport.mock.ts", "type": "registry:file" },
+    { "path": "support-widget.transport.route.ts", "type": "registry:file" },
+    { "path": "support-widget.transport.none.ts", "type": "registry:file" }
   ],
-  "wiring": { "gateways": ["openrouter", "anthropic"], "mockFiles": ["mock.ts"] },
+  "wiring": {
+    "gateways": ["openrouter", "anthropic"],
+    "mockFiles": ["support-widget.transport.mock.ts"],
+    "modeTarget": "support-widget.transport.ts",
+    "modeFiles": {
+      "mock": "support-widget.transport.mock.ts",
+      "real": "support-widget.transport.route.ts",
+      "none": "support-widget.transport.none.ts"
+    }
+  },
   "dependencies": ["@kitn.ai/ui"],
   "registryDependencies": [],
   "cssVars": { "light": {}, "dark": {} },
   "envVars": {},
-  "docs": "Runs against a scripted local mock out of the box - no endpoint, no key. To go live, replace the mock responder in support-widget.controller.ts with a fetch to your chat endpoint and keep parsing through the @kitn.ai/ui/wire readers.",
+  "docs": "Runs against a scripted local mock out of the box - no endpoint, no key. The transport is one file, support-widget.transport.ts: the scripted mock in the default mode, a POST to /api/chat with --gateway, a loud stub with --no-mock. Replace it with your own to go live, and keep parsing through the @kitn.ai/ui/wire readers. The host page content is a stand-in: keep the docked panel, and the surrounding page is yours.",
   "meta": { "iframeHeight": "760px" }
 }

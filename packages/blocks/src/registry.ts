@@ -328,6 +328,21 @@ export function validateBlockManifest(
       if (modeTarget === undefined && modeFiles === undefined) {
         // No seam: the block can only be installed as the mock, and the CLI says
         // so by name when a mock-free mode is asked for.
+        //
+        // AND IT MAY NOT ADVERTISE A GATEWAY. `gateways` is the list
+        // `--gateway <id>` is checked against, so a block declaring one without
+        // a seam tells the CLI a keyed install is possible and then has no file
+        // to write at the controller's one import: the flag either refuses for a
+        // reason that names the mock import (the block's own defect reported as a
+        // request problem) or, on a controller that does not import the mock,
+        // ships the scripted responder behind a backend the consumer asked for.
+        // A capability with nothing behind it fails here, at the block that
+        // declared it, with the field to add named.
+        if (gateways.length > 0) {
+          errors.push(
+            `${dirName}: wiring.gateways declares ${gateways.join(', ')}, but the manifest has no seam, so \`--gateway\` has nothing to write. A block that advertises a gateway must declare wiring.modeTarget and a wiring.modeFiles "real" entry (one authored source per data mode); either add the seam the gateways need, or drop the declaration and the CLI will refuse \`--gateway\` for this block by name.`,
+          );
+        }
       } else {
         if (typeof modeTarget !== 'string' || modeTarget.length === 0) {
           errors.push(

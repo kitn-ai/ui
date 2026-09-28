@@ -203,8 +203,45 @@ describe('manifest validation (each rule watched failing)', () => {
     // consumer has already chosen it.
     expect(bad((m) => { m.wiring = { gateways: ['not-a-thing'] }; }).join()).toMatch(/not a scaffolder integration/);
   });
-  it('wiring.gateways accepts an injected integration id', () => {
-    expect(bad((m) => { m.wiring = { gateways: [ROUTES[0], ROUTES[2]] }; })).toEqual([]);
+  it('wiring.gateways accepts an injected integration id, once the declaration is backed by a seam', () => {
+    // A GATEWAY IS A PROMISE THE SEAM KEEPS. `gateways` is the list `--gateway`
+    // checks against, so the same manifest that advertises one has to say which
+    // file the keyed install is written from; the rule below watches the
+    // mismatched half failing.
+    const variants = [
+      { name: 'demo.transport.mock.ts', content: '' },
+      { name: 'demo.transport.route.ts', content: '' },
+      { name: 'demo.transport.none.ts', content: '' },
+    ];
+    expect(
+      bad((m) => {
+        m.files = [
+          { path: 'demo.html', type: 'registry:page' },
+          ...variants.map((f) => ({ path: f.name, type: 'registry:file' })),
+        ];
+        m.wiring = {
+          gateways: [ROUTES[0], ROUTES[2]],
+          mockFiles: ['demo.transport.mock.ts'],
+          modeTarget: 'demo.transport.ts',
+          modeFiles: {
+            mock: 'demo.transport.mock.ts',
+            real: 'demo.transport.route.ts',
+            none: 'demo.transport.none.ts',
+          },
+        };
+      }, [...variants, { name: 'demo.html', content: '' }]),
+    ).toEqual([]);
+  });
+  it('refuses wiring.gateways declared with no seam, because the advertisement has nothing behind it', () => {
+    // THE CAPABILITY WITH NOTHING BEHIND IT (spec 4). Without this the manifest
+    // tells the CLI a keyed install is possible and the block has no file to
+    // write at its one import, so `--gateway` fails for a reason that names the
+    // mock import rather than the missing field, and a controller that does not
+    // import the mock would ship the scripted responder behind a real route.
+    const errors = bad((m) => { m.wiring = { gateways: [ROUTES[2]], mockFiles: ['demo.js'] }; }).join(' ');
+    expect(errors).toMatch(/no seam/);
+    expect(errors).toMatch(/wiring\.modeTarget/);
+    expect(errors).toMatch(/wiring\.modeFiles "real" entry/);
   });
   it('wiring.mockFiles must name files the block actually ships', () => {
     // DERIVED from files[], never trusted: a mock file the block does not ship
@@ -276,9 +313,9 @@ describe('the CDN-form generator', () => {
     expect(html).not.toMatch(/href="\.\/(?!.*#)/);
     expect(html).toContain('inlined from ./support-widget.css');
     // Two levels: the generated binder imports the controller, the controller
-    // imports the mock, and both bodies land in the one file.
+    // imports its transport, and both bodies land in the one file.
     expect(html).toContain('inlined from ./support-widget.controller.js');
-    expect(html).toContain('inlined from ./mock.js');
+    expect(html).toContain('inlined from ./support-widget.transport.js');
     expect(html).toContain('JS PROPERTIES'); // the baked-in contract banner
     expect(html).toContain('kai-* events do not bubble');
   });
