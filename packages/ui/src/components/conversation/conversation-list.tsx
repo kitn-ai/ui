@@ -81,6 +81,7 @@ export interface ConversationItemsController {
   handleKeyDown(e: KeyboardEvent): void;
 }
 
+// lint-prop-docs: long -- the parent-item contract below is this member's whole value
 /**
  * The parent-item contract of item mode: the `kai-conversations` facade wires it over its
  * slotted `kai-conversation-item` children, and the jsdom contract tests drive it over
