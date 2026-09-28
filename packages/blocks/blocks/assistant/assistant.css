@@ -416,7 +416,26 @@ kai-conversation-item[data-rail="folder"][data-folder=""] {
 .topbar h1 { margin: 0; font-size: 1rem; font-weight: 600; }
 
 kai-thread { flex: 1; min-height: 0; display: block; }
-kai-prompt-input { display: block; padding: 0 1rem 1rem; max-width: 48rem; width: 100%; margin: 0 auto; box-sizing: border-box; }
+/* THE COMPOSER REGION GIVES THE THREAD ITS AIR. The thread flexes above this box
+ * and the region's top edge IS the thread's bottom edge, so a top padding here
+ * lifts that line off the suggestion row the element paints first - the pills
+ * sit where the flex column put them and the thread gives up the space, rather
+ * than the region growing down and pushing the card toward the page's foot.
+ *
+ * FOUR DENSITY UNITS - the kit's own `p-4` - because it is the air the box
+ * already leaves BELOW the card: the row and the card's foot read as one region
+ * rather than as a card with a menu above it. Written as the multiple so a page
+ * that moves --kai-density moves this with the section gaps and the guide cards
+ * (see the section-air rule and the card padding above), and measured in the
+ * driver (`composerAir`, state 30) rather than described. */
+kai-prompt-input {
+  display: block;
+  padding: calc(var(--kai-density, 0.25rem) * 4) 1rem 1rem;
+  max-width: 48rem;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
 
 /* The block's own line under the composer. The kit's footer row paints its
  * content centred, muted and text-xs, and there is no slot to inherit that

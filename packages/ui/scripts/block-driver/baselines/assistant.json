@@ -350,12 +350,36 @@
             "theCardsCarryTheKitsOwnAir": true,
             "theGridFillsTheEmptyContentsBox": true,
             "theGridStaysInsideThreadColumn": true,
-            "rendered": true
+            "rendered": true,
+            "theSuggestionsHaveAirAboveThem": true,
+            "theAirIsAboveTheRowAndNotInsideTheCard": true,
+            "composerAirAtRest": {
+              "unit": 4,
+              "labels": 4,
+              "rowOffered": true,
+              "hostPaddingTop": 16,
+              "hostPaddingBottom": 16,
+              "threadBottom": 652,
+              "hostTop": 652,
+              "rowTop": 668,
+              "rowBottom": 700,
+              "cardTop": 708,
+              "airAbove": 16,
+              "rowToCard": 8,
+              "scroller": {
+                "scrollHeight": 599,
+                "clientHeight": 599,
+                "bottomGap": 0,
+                "paddingBottom": 8
+              },
+              "lastSpeakerBottom": null,
+              "lastSpeakerToRow": null
+            }
           },
           "styles": {
             "suggestionPill": {
-              "height": "40px",
-              "paddingInline": "24px",
+              "height": "32px",
+              "paddingInline": "12px",
               "borderRadius": "64px"
             },
             "guideCardsGrid": {
@@ -366,6 +390,10 @@
             },
             "guideCardText": {
               "rowGap": "8px"
+            },
+            "composerRegion": {
+              "paddingTop": "16px",
+              "paddingBottom": "16px"
             }
           }
         },
@@ -766,6 +794,37 @@
             "darkKeepsTheKitsOwnDarkerSidebar": true
           },
           "styles": {}
+        },
+        {
+          "name": "58-last-turn-clears-the-suggestions",
+          "probes": {
+            "theThreadOverflows": true,
+            "aLabelIsStillOffered": true,
+            "theLastTurnClearsTheSuggestions": true,
+            "composerAirAtTheBottom": {
+              "unit": 4,
+              "labels": 1,
+              "rowOffered": true,
+              "hostPaddingTop": 16,
+              "hostPaddingBottom": 16,
+              "threadBottom": 652,
+              "hostTop": 652,
+              "rowTop": 668,
+              "rowBottom": 700,
+              "cardTop": 708,
+              "airAbove": 16,
+              "rowToCard": 8,
+              "scroller": {
+                "scrollHeight": 943,
+                "clientHeight": 599,
+                "bottomGap": 0,
+                "paddingBottom": 8
+              },
+              "lastSpeakerBottom": 643,
+              "lastSpeakerToRow": 25
+            }
+          },
+          "styles": {}
         }
       ],
       "consoleErrors": [],
@@ -1121,12 +1180,36 @@
             "theCardsCarryTheKitsOwnAir": true,
             "theGridFillsTheEmptyContentsBox": true,
             "theGridStaysInsideThreadColumn": true,
-            "rendered": true
+            "rendered": true,
+            "theSuggestionsHaveAirAboveThem": true,
+            "theAirIsAboveTheRowAndNotInsideTheCard": true,
+            "composerAirAtRest": {
+              "unit": 4,
+              "labels": 4,
+              "rowOffered": true,
+              "hostPaddingTop": 16,
+              "hostPaddingBottom": 16,
+              "threadBottom": 652,
+              "hostTop": 652,
+              "rowTop": 668,
+              "rowBottom": 700,
+              "cardTop": 708,
+              "airAbove": 16,
+              "rowToCard": 8,
+              "scroller": {
+                "scrollHeight": 599,
+                "clientHeight": 599,
+                "bottomGap": 0,
+                "paddingBottom": 8
+              },
+              "lastSpeakerBottom": null,
+              "lastSpeakerToRow": null
+            }
           },
           "styles": {
             "suggestionPill": {
-              "height": "40px",
-              "paddingInline": "24px",
+              "height": "32px",
+              "paddingInline": "12px",
               "borderRadius": "64px"
             },
             "guideCardsGrid": {
@@ -1137,6 +1220,10 @@
             },
             "guideCardText": {
               "rowGap": "8px"
+            },
+            "composerRegion": {
+              "paddingTop": "16px",
+              "paddingBottom": "16px"
             }
           }
         },
@@ -1329,11 +1416,11 @@
             },
             "railProjectsLabelTitle": {
               "fontSize": "14px",
-              "color": "rgb(167, 165, 160)"
+              "color": "rgb(147, 145, 138)"
             },
             "railRecentsHeadingTitle": {
               "fontSize": "14px",
-              "color": "rgb(167, 165, 160)"
+              "color": "rgb(147, 145, 138)"
             },
             "railFolderHeadingTitle": {
               "fontSize": "14px",
@@ -1468,7 +1555,7 @@
             },
             "paletteGroupHeader": {
               "fontSize": "12px",
-              "color": "rgb(167, 165, 160)"
+              "color": "rgb(147, 145, 138)"
             }
           }
         },
@@ -1535,6 +1622,37 @@
             "theRailTakesTheComposersShade": true,
             "whicheverWayLightIsReachedGivesTheSameShade": true,
             "darkKeepsTheKitsOwnDarkerSidebar": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "58-last-turn-clears-the-suggestions",
+          "probes": {
+            "theThreadOverflows": true,
+            "aLabelIsStillOffered": true,
+            "theLastTurnClearsTheSuggestions": true,
+            "composerAirAtTheBottom": {
+              "unit": 4,
+              "labels": 1,
+              "rowOffered": true,
+              "hostPaddingTop": 16,
+              "hostPaddingBottom": 16,
+              "threadBottom": 652,
+              "hostTop": 652,
+              "rowTop": 668,
+              "rowBottom": 700,
+              "cardTop": 708,
+              "airAbove": 16,
+              "rowToCard": 8,
+              "scroller": {
+                "scrollHeight": 943,
+                "clientHeight": 599,
+                "bottomGap": 0,
+                "paddingBottom": 8
+              },
+              "lastSpeakerBottom": 643,
+              "lastSpeakerToRow": 25
+            }
           },
           "styles": {}
         }

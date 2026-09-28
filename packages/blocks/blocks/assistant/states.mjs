@@ -237,6 +237,12 @@ let labelsFromCard = [];
 // the offered labels, and that those labels render as one wrapping row.
 let offeredRows = [];
 let emptyStateBoxes = null;
+// The composer region's own air, measured with the labels in front of it (state
+// 30) and again at the bottom of a long thread that still offers a label (state
+// 58). One capture per state, because the two states make two claims about the
+// same boxes: at rest the air IS the block's declared step, and scrolled the
+// thread's own band padding rides on top of it.
+let composerAir = {};
 
 /** The boxes the empty state's labels rendered into, read through the element's
  *  shadow root.
@@ -275,6 +281,81 @@ const measureSuggestions = (page, labels) => page.evaluate((wanted) => {
     };
   });
   return { pills };
+}, labels);
+
+/** THE AIR ABOVE THE COMPOSER'S FIRST ROW, as boxes rather than as the number
+ *  the stylesheet declares.
+ *
+ *  WHY THE REGION'S OWN EDGE IS THE MEASURE. The main column is top bar, thread
+ *  (flexes), composer, so the thread's bottom edge and the region's top edge are
+ *  the same line: padding above the region moves that line UP and leaves what the
+ *  region paints where the flex column put it. What a reader sees is therefore
+ *  `first row top - thread bottom`, and that is the number here.
+ *
+ *  WHAT THE REGION PAINTS FIRST is the suggestion row when the element offers
+ *  labels and the card when it does not - the card found by `data-prompt-input`,
+ *  the frame the rail's shade probe already reads - so the claim holds on a
+ *  thread offering nothing to click.
+ *
+ *  THE LAST SPEAKER, when there is one, is a turn as `Message` renders it
+ *  (`role="article"`), read in the thread's own scroller: its bottom is the last
+ *  line a reader sees at the bottom of a long thread. The scroller's own block
+ *  padding comes back too, because the thread band already leaves air of its own
+ *  and the states below say which air is whose.
+ *
+ *  --kai-density IS THE RULER, never a typed 8: every claim made from this goes
+ *  back through the knob, so a page that moves it moves the claim. */
+const measureComposerAir = (page, labels) => page.evaluate((wanted) => {
+  const host = document.getElementById('prompt');
+  const thread = document.getElementById('thread');
+  const root = host?.shadowRoot;
+  if (!host || !thread) return { error: 'no #prompt or #thread on the page' };
+  if (!root) return { error: 'no shadow root on #prompt' };
+  const card = root.querySelector('[data-prompt-input]');
+  if (!card) return { error: 'no [data-prompt-input] frame in the element shadow root' };
+  const buttons = [...root.querySelectorAll('button')];
+  const pill = wanted
+    .map((label) => buttons.find((b) => (b.textContent ?? '').trim() === label))
+    .find(Boolean);
+  const row = pill ? pill.parentElement : null;
+  const rowBox = row ? row.getBoundingClientRect() : null;
+  const cardBox = card.getBoundingClientRect();
+  const threadBox = thread.getBoundingClientRect();
+  const hostStyle = getComputedStyle(host);
+  const scroller = thread.shadowRoot?.querySelector('.overflow-y-auto') ?? null;
+  const speakers = scroller ? [...scroller.querySelectorAll('[role="article"]')] : [];
+  const last = speakers.length ? speakers[speakers.length - 1].getBoundingClientRect() : null;
+  const density = hostStyle.getPropertyValue('--kai-density').trim();
+  // The kit's own unit in px, the way the guide cards read it: `--kai-density` is
+  // stated in rem, and a page that never set the knob resolves the fallback.
+  const unit = density === '' ? 4 : parseFloat(density) * 16;
+  return {
+    unit: Math.round(unit * 100) / 100,
+    labels: wanted.length,
+    rowOffered: rowBox !== null,
+    hostPaddingTop: Math.round(parseFloat(hostStyle.paddingTop)),
+    hostPaddingBottom: Math.round(parseFloat(hostStyle.paddingBottom)),
+    threadBottom: Math.round(threadBox.bottom),
+    hostTop: Math.round(host.getBoundingClientRect().top),
+    rowTop: rowBox ? Math.round(rowBox.top) : null,
+    rowBottom: rowBox ? Math.round(rowBox.bottom) : null,
+    cardTop: Math.round(cardBox.top),
+    // THE TWO DISTANCES: the air above whatever the region paints first, and the
+    // step from the suggestion row to the card inside it (the kit's own margin,
+    // which this block's rule does not touch).
+    airAbove: Math.round((rowBox ?? cardBox).top - threadBox.bottom),
+    rowToCard: rowBox ? Math.round(cardBox.top - rowBox.bottom) : null,
+    scroller: scroller
+      ? {
+        scrollHeight: scroller.scrollHeight,
+        clientHeight: scroller.clientHeight,
+        bottomGap: Math.round(scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight),
+        paddingBottom: Math.round(parseFloat(getComputedStyle(scroller).paddingBottom)),
+      }
+      : null,
+    lastSpeakerBottom: last ? Math.round(last.bottom) : null,
+    lastSpeakerToRow: last && rowBox ? Math.round(rowBox.top - last.bottom) : null,
+  };
 }, labels);
 
 /** The guide cards' grid and one card's box, plus the two measures the card's
@@ -2126,6 +2207,10 @@ export default {
         await page.getByRole('button', { name: 'New chat' }).click();
         await settle(400)(page);
         offeredRows = await suggestionLabels(page);
+        // THE COMPOSER'S OWN AIR, captured BEFORE the viewport flips: this is the
+        // run's own document size, and the gap is read against the thread's edge
+        // rather than against a typed number.
+        composerAir.atRest = await measureComposerAir(page, offeredRows);
         emptyStateBoxes = {
           wide: {
             suggestions: await measureSuggestions(page, offeredRows),
@@ -2264,12 +2349,45 @@ export default {
         },
         // And every one of them is on screen, not merely in the array.
         rendered: (page) => allRendered(page, offeredRows),
+        // THE COMPOSER'S AIR ABOVE THE SUGGESTION ROW: the owner's complaint is
+        // that the thread's last line ran down onto the pills, and this is that
+        // distance read off the boxes. It is the block's own step, derived from
+        // the density token rather than typed, so a page that moves the knob moves
+        // the claim with it - and the failure names every number it read.
+        theSuggestionsHaveAirAboveThem: () => {
+          const air = composerAir?.atRest;
+          if (!air || air.error) return air?.error ?? 'the composer was not measured';
+          if (!air.rowOffered) return 'the element offered no suggestion row, so there is nothing to clear';
+          const want = air.unit * 4;
+          return Math.abs(air.airAbove - want) <= 1
+            ? true
+            : `the row sits ${air.airAbove}px under the thread's edge, and the block's step is ${want}px (${air.unit}px x 4)`;
+        },
+        // ...AND THE AIR IS THE ONLY THING THAT MOVED: the step from the row down
+        // to the card is the kit's own margin, which this block's rule does not
+        // touch. Measured rather than assumed, because a top padding applied
+        // inside the card would take the air from the row and give it to the card
+        // while leaving the row itself flush.
+        theAirIsAboveTheRowAndNotInsideTheCard: () => {
+          const air = composerAir?.atRest;
+          if (!air || air.error) return air?.error ?? 'the composer was not measured';
+          if (air.rowToCard === null) return 'the row and the card were not both measured';
+          const want = air.unit * 2;
+          return Math.abs(air.rowToCard - want) <= 1
+            ? true
+            : `the row to card step is ${air.rowToCard}px, and the kit's own margin for it is ${want}px`;
+        },
+        // RECORDED, not asserted: the region's own geometry, so a future change to
+        // any of it is a baseline diff with the numbers in it rather than a
+        // screenshot nobody diffs.
+        composerAirAtRest: () => composerAir.atRest,
       },
       expect: {
         fourLabels: true, theBoxesAreTheOfferedLabels: true, theLabelsShareOneLine: true,
         theLabelsAreIntrinsicWidth: true, theLabelsWrapWhenThereIsNoRoom: true,
         theCardsFoldToOneColumnWhenThereIsNoRoom: true, theCardsCarryTheKitsOwnAir: true,
         theGridFillsTheEmptyContentsBox: true, theGridStaysInsideThreadColumn: true, rendered: true,
+        theSuggestionsHaveAirAboveThem: true, theAirIsAboveTheRowAndNotInsideTheCard: true,
       },
       // Every probe above is a comparison among the block's own boxes or against
       // the kit's own token, so none of them is skipped on the react host: the
@@ -2289,6 +2407,11 @@ export default {
           ['width', 'gridTemplateColumns', 'gap', 'minWidth']),
         style('guideCardText', (page) => page.locator('.guide-card-text').first(),
           ['rowGap']),
+        // AND THE REGION THAT CARRIES THE AIR, recorded as the box the reader sees:
+        // the top padding is the step, and the bottom one says the change landed
+        // above the card rather than moving it.
+        style('composerRegion', (page) => page.locator('#prompt'),
+          ['paddingTop', 'paddingBottom']),
       ],
     },
     {
@@ -5275,6 +5398,86 @@ export default {
         darkKeepsTheKitsOwnDarkerSidebar: true,
       },
       styleProbes: [],
+    },
+    {
+      // THE OWNER'S SCROLL COMPLAINT, as a distance: at the bottom of a long
+      // thread the last turn must not run down onto the suggestion row.
+      //
+      // WHY THIS IS ITS OWN STATE. The other scroll state (18) is about the
+      // scroll-to-bottom button, and the turns it sends are TYPED - which is
+      // exactly the case the controller answers with no labels at all, so the row
+      // the complaint is about is not on the page there and the claim would be
+      // empty. This state walks a SCRIPTED arc by its own labels instead, which is
+      // how a reader opens one: every click is a suggestion submitted as a user
+      // turn, the mock answers with the arc's next turn, and the thread both grows
+      // and keeps offering something to click.
+      name: '58-last-turn-clears-the-suggestions',
+      act: async (page) => {
+        await page.getByRole('button', { name: 'New chat' }).click();
+        await settle(400)(page);
+        // The tallest arc of the four guides, opened by its card: turn 1 answers
+        // with prose and a card, turn 2 with the arc's second step, and the arc's
+        // own cross-links are the last labels. Two more turns ride on top so the
+        // thread is taller than its viewport, which the state asserts rather than
+        // assumes.
+        await page.getByRole('button', { name: GUIDE_CARDS[3] }).click();
+        await waitForTurns(page, 2);
+        for (let turn = 4; turn <= 6; turn += 2) {
+          const offered = await suggestionLabels(page);
+          if (!offered.length) break;
+          await page.locator('#prompt').getByRole('button', { name: offered[0], exact: true }).first().click();
+          await waitForTurns(page, turn);
+        }
+        // THE GESTURE THE COMPLAINT IS ABOUT, read at the bottom rather than
+        // assumed to be there: a thread that fits its viewport never reaches this.
+        await page.evaluate(() => {
+          const scroller = document.getElementById('thread')?.shadowRoot?.querySelector('.overflow-y-auto');
+          if (scroller) scroller.scrollTop = scroller.scrollHeight;
+        });
+        await settle(500)(page);
+        composerAir.atTheBottom = await measureComposerAir(page, await suggestionLabels(page));
+      },
+      probes: {
+        // THE PREMISE, measured: a thread that fits its viewport cannot show a last
+        // line against the composer, so the claim below would pass on nothing.
+        theThreadOverflows: () => {
+          const s = composerAir?.atTheBottom?.scroller;
+          if (!s) return 'the thread has no scroller';
+          return s.scrollHeight > s.clientHeight
+            ? true
+            : `the thread holds ${s.scrollHeight}px in a ${s.clientHeight}px viewport, so nothing is scrolled`;
+        },
+        // ...and the row the claim is about is really on the page: this state walks
+        // an arc precisely so that it is.
+        aLabelIsStillOffered: () => (composerAir?.atTheBottom?.rowOffered
+          ? true
+          : 'the element offered no suggestion row at the bottom of the thread'),
+        // THE CLAIM: the last turn's own box clears the row, and by MORE than the
+        // region's air - the thread's band leaves block padding of its own, so the
+        // distance a reader sees is that padding plus this block's step. Asserting
+        // the step alone would let a kit change that removed the band's padding
+        // read as if this block still left air.
+        theLastTurnClearsTheSuggestions: () => {
+          const air = composerAir?.atTheBottom;
+          if (!air || air.error) return air?.error ?? 'the composer was not measured';
+          if (air.lastSpeakerToRow === null) return 'no turn was measured at the bottom of the thread';
+          const want = air.unit * 4;
+          if (air.lastSpeakerToRow < want) {
+            return `the last turn ends ${air.lastSpeakerToRow}px above the row, and the block's step alone is ${want}px`;
+          }
+          return air.lastSpeakerToRow > air.airAbove
+            ? true
+            : `the last turn clears the row by ${air.lastSpeakerToRow}px, the same as the region's own air (${air.airAbove}px) - the thread's band padding is gone`;
+        },
+        // RECORDED, not asserted: every box the two claims above read, so a future
+        // move of any of them is a baseline diff naming the number.
+        composerAirAtTheBottom: () => composerAir.atTheBottom,
+      },
+      expect: {
+        theThreadOverflows: true,
+        aLabelIsStillOffered: true,
+        theLastTurnClearsTheSuggestions: true,
+      },
     },
   ],
 };
