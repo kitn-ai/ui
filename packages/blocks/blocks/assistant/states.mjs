@@ -876,7 +876,14 @@ export default {
       name: '1-empty',
       probes: {
         emptyTitle: (page) => page.getByText('What can I help with?').count().then((n) => n > 0),
-        suggestion: (page) => page.getByRole('button', { name: 'Summarize a document' }).isVisible().catch(() => false),
+        // SCOPE TO THE COMPOSER, because the label alone is no longer unique: a
+        // fresh profile's rail holds a sample conversation whose row carries this
+        // suggestion's own words as its title (the demo's conversation for that
+        // suggestion), so an unscoped role query matches two elements and answers
+        // nothing. The claim is about the SUGGESTION the composer offers, so the
+        // composer is where it is read - the surface, not the string.
+        suggestion: (page) => page.locator('kai-prompt-input')
+          .getByRole('button', { name: 'Summarize a document' }).isVisible().catch(() => false),
         railNewChat: (page) => page.getByRole('button', { name: 'New chat' }).isVisible().catch(() => false),
         // The switcher renders only with more than one model - its presence IS
         // the recipe working.
@@ -3733,8 +3740,9 @@ export default {
         await sctx.scenario.ready(page, sctx);
         const nodes = await railNodes(page);
         // Read as TEXT off the rows, because the claim is what a reader can see:
-        // the section label over the folders, the folders themselves, and the
-        // heading the reader's own typed chats land under.
+        // the section label over the folders, the folders themselves, the rows
+        // each folder holds, and the heading the reader's own typed chats land
+        // under.
         const titled = await page.evaluate(() =>
           [...document.querySelectorAll('kai-conversations > kai-conversation-item')].map((el) => ({
             id: el.conversationId ?? el.getAttribute('conversation-id') ?? el.id,
@@ -3748,6 +3756,14 @@ export default {
           sectionLabel: titled.find((row) => row.kind === 'section')?.title ?? '',
           folders: titled.filter((row) => row.kind === 'folder').map((row) => row.title),
           recents: titled.filter((row) => row.kind === 'folder' && row.folder === '').map((row) => row.title),
+          // WHAT EACH HEADING ACTUALLY HOLDS, read the way the rail files a row:
+          // `data-folder` carries the folder's ID on a heading and on a
+          // conversation row alike, so a heading's count is the rows that share
+          // its id. Keyed by the heading's own title so a probe reads names.
+          rowsByFolder: Object.fromEntries(titled
+            .filter((row) => row.kind === 'folder')
+            .map((heading) => [heading.title, titled.filter((row) => row.kind === 'conversation'
+              && row.folder === heading.folder).length])),
         };
       },
       probes: {
@@ -3764,17 +3780,28 @@ export default {
         theDemoProjectsAreNamed: () => ['Assistant UI', 'Docs and briefs', 'Kanban board']
           .every((name) => (freshRail?.folders ?? []).includes(name)),
         recentsIsThere: () => (freshRail?.recents ?? []).join('') === 'Recents',
-        // ...AND IT INVENTED NO THREADS: the fixture is the rail's SHAPE, so every
-        // row it adds is a heading. A sample conversation row here would be a row
-        // with no thread behind it - a click that loads nothing.
-        noSampleConversationRows: () => freshRail?.conversationRows === 0,
+        // THE ROWS UNDER A FOLDER ARE THE ASSERTION, and the rest of this state
+        // is not it. An EMPTY rail satisfies every claim above - that is exactly
+        // how the previous round certified a rail of folders with nothing in them
+        // - so the count beneath each heading is what a fresh profile has to
+        // show. Every heading that is on the rail has to hold at least one
+        // conversation row, and the rail has to hold rows at all: the first
+        // branch is what makes the empty rail red, the second what makes a rail
+        // that only ever drew headings red.
+        everyFolderHoldsItsConversations: () => {
+          const under = freshRail?.rowsByFolder ?? {};
+          const bare = (freshRail?.folders ?? []).filter((name) => (under[name] ?? 0) === 0);
+          if (bare.length > 0) return `no conversation row under ${bare.join(', ')}`;
+          return (freshRail?.conversationRows ?? 0) > 0
+            || 'the rail holds folder headings and not one conversation row';
+        },
       },
       expect: {
         theProjectsSectionIsThere: true,
         itsFoldersAreThere: true,
         theDemoProjectsAreNamed: true,
         recentsIsThere: true,
-        noSampleConversationRows: true,
+        everyFolderHoldsItsConversations: true,
       },
       styleProbes: [
         style('freshRailProjectsLabel', (page) => page.locator('kai-conversations > kai-conversation-item[data-rail="section"]'),

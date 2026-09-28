@@ -1017,6 +1017,17 @@ function controlNode(id: string, kind: ConversationRow['kind'], title: string, g
   };
 }
 
+/** A rail row for a SAMPLE conversation: the conversation parts of a row with the
+ *  row's own menu OFF, and the reason is the failure this block treats as its
+ *  worst - a control that looks live and does nothing. Every op that menu offers
+ *  writes through the STORE, and a sample row is in no store: Rename would open
+ *  no field, Pin and Archive would move no row, Delete would remove nothing. The
+ *  row's one affordance is its activation, which is the store's own honest answer
+ *  for an id it does not hold (see `fixtureRail`). */
+function sampleNode(sample: FixtureConversation, group: string, groupName: string): ConversationRow {
+  return controlNode(sample.id, 'conversation', sample.title, group, groupName);
+}
+
 /** A rail row that is not a conversation: a folder's heading, or the Show more
  *  row. Both are rendered by the SAME repeat the conversations are, because the
  *  page grammar clones one element per repeat and has no way to interleave a
@@ -1168,24 +1179,102 @@ function railNodes(
  *  moment the store holds ONE conversation the fixture is gone and the real rows
  *  rule, which is what makes it honest rather than a lie about history.
  *
- *  WHAT IT SHOWS IS STRUCTURE AND NOT THREADS: the reader's own projects, the
- *  demo's three, and the `Recents` heading. A sample CONVERSATION row would be a
- *  row with no thread behind it - clicking it could load nothing - and this block
- *  will not invent chats the reader did not have. So the folders are empty and
- *  their headings carry no caret (see `folderNode`).
+ *  WHAT IT SHOWS IS STRUCTURE AND THE DEMO'S OWN SAMPLES: the reader's own
+ *  projects, the demo's three, the `Recents` heading, and under each folder the
+ *  sample conversations `SAMPLE_CONVERSATIONS` derives from the two lists this
+ *  page already opens from. Structure ALONE was the earlier shape and it was
+ *  wrong on its own terms: a rail of folders with nothing in them is not the
+ *  concept either, and the owner said so from the preview. A folder name with its
+ *  conversations under it is what a sidebar is, and the samples are the demo's
+ *  own - the openings of the guides and the suggestions the empty state offers -
+ *  so the rows read as the conversations that page would really make.
+ *
+ *  A SAMPLE ROW IS A SUMMARY AND NOT A THREAD, stated rather than hidden: the
+ *  store holds nothing, so activating one takes the store's own path for an id it
+ *  does not hold - it loads an empty thread and marks the row. That is the
+ *  honest failure mode of a rail row with no history behind it, and its row menu
+ *  is off for exactly that reason (see `sampleNode`).
  *
  *  The `Projects` label is here for the same reason it is over real folders: the
  *  rail's own settings live in the actions it carries, and one of them is the way
  *  to make a project. */
 function fixtureRail(created: readonly DemoProject[]): ConversationRow[] {
-  return [
-    sectionNode(PROJECTS_LABEL),
-    ...[...created, ...PROJECTS].map((project) => folderNode('folder', project.id, project.name, false, true)),
-    // The remainder's heading, so the section a reader's own typed chats land in
-    // is on screen before the first of them exists.
-    folderNode('folder', '', '', false, true),
-  ];
+  // The same catalogue the filing rule and the folder labels read, so a sample
+  // lands where the reader's own conversation with that opening would land.
+  const catalogue = [...created, ...PROJECTS];
+  const nodes: ConversationRow[] = [sectionNode(PROJECTS_LABEL)];
+  for (const project of catalogue) {
+    const filed = SAMPLE_CONVERSATIONS.filter(
+      (sample) => projectOfOpening(sample.opening, catalogue) === project.id,
+    );
+    // A folder holds its rows, so its heading is OPEN and carries the caret that
+    // says so; a project with no sample under it (every project a reader made)
+    // is a heading and nothing else (`folderNode`'s `empty`).
+    nodes.push(folderNode('folder', project.id, project.name, true, filed.length === 0));
+    nodes.push(...filed.map((sample) => sampleNode(sample, project.id, project.name)));
+  }
+  // The remainder's heading and its rows, so the section a reader's own typed
+  // chats land in is on screen - and holds the samples no project's subjects
+  // claim - before the first of the reader's own exists.
+  const ungrouped = SAMPLE_CONVERSATIONS.filter(
+    (sample) => projectOfOpening(sample.opening, catalogue) === undefined,
+  );
+  nodes.push(folderNode('folder', '', '', true, ungrouped.length === 0));
+  nodes.push(...ungrouped.map((sample) => sampleNode(sample, '', '')));
+  return nodes;
 }
+
+/** ONE SAMPLE CONVERSATION PER THING THIS PAGE CAN OPEN, and never one the
+ *  reader already has: the four guide cards and the four suggestions, which are
+ *  the demo's own conversations by construction - clicking either sends its
+ *  opening turn through the block's own reply path (`openGuide`, `submit`). The
+ *  rail draws them as the conversations the folders hold, so a profile with no
+ *  history reads like the reference sidebar instead of like a set of empty
+ *  folders.
+ *
+ *  THE OPENING TURN IS THE FILING KEY, exactly as it is for a stored row: the
+ *  fixture projects these with `projectOfOpening`, the same rule the reader's own
+ *  saved turns go through, so a sample cannot land in a project the demo would
+ *  not have filed it into - and a created project, which carries no topics, can
+ *  never claim one.
+ *
+ *  THE TITLE IS THE OPENING TURN, cut at `SAMPLE_TITLE_LENGTH`: that is the text
+ *  the filing rule reads, and it is what a real row of that conversation would
+ *  carry - one sample, one rule, so nothing here is a name invented beside the
+ *  data. A suggestion's opening IS the suggestion's own words, which is why the
+ *  rail can show a row labelled like the suggestion row in the composer: they are
+ *  the same conversation, and the composer's row is the way to open it.
+ *
+ *  THE LIST IS A CONSTANT AND ITS BIGGEST FOLDER (Assistant UI, the four guides)
+ *  HOLDS EXACTLY `FOLDER_LIMIT` ROWS, which is why this fixture emits no `Show
+ *  more` row: there is nothing under a sample folder that the rail is holding
+ *  back. */
+interface FixtureConversation {
+  id: string;
+  title: string;
+  opening: string;
+}
+
+const SAMPLE_NODE = 'sample:';
+
+/** The store's own title policy for the first save: the message text, cut at 60
+ *  characters (`conversation-store.ts`'s `save`). No ellipsis - the store appends
+ *  none, and a sample row should read exactly like a row it wrote. */
+const SAMPLE_TITLE_LENGTH = 60;
+const sampleTitle = (opening: string): string => opening.slice(0, SAMPLE_TITLE_LENGTH);
+
+const SAMPLE_CONVERSATIONS: readonly FixtureConversation[] = [
+  ...GUIDES.map((guide) => ({
+    id: `${SAMPLE_NODE}guide-${guide.id}`,
+    title: sampleTitle(guide.question),
+    opening: guide.question,
+  })),
+  ...SUGGESTIONS.map((suggestion) => ({
+    id: `${SAMPLE_NODE}${foldOpening(suggestion).replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')}`,
+    title: sampleTitle(suggestion),
+    opening: suggestion,
+  })),
+];
 
 /** The rail's rows and the projects those rows make, from the ONE ordered list
  *  and at most one narrowing: the search. One list has no sections at all, so the

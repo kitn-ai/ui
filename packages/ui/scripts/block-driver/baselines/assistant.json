@@ -1,6 +1,6 @@
 {
   "scenario": "assistant",
-  "base": "http://localhost:8957",
+  "base": "http://localhost:8952",
   "runs": [
     {
       "page": "block",
@@ -616,7 +616,7 @@
             "itsFoldersAreThere": true,
             "theDemoProjectsAreNamed": true,
             "recentsIsThere": true,
-            "noSampleConversationRows": true
+            "everyFolderHoldsItsConversations": true
           },
           "styles": {
             "freshRailProjectsLabel": {
@@ -1268,7 +1268,7 @@
             "itsFoldersAreThere": true,
             "theDemoProjectsAreNamed": true,
             "recentsIsThere": true,
-            "noSampleConversationRows": true
+            "everyFolderHoldsItsConversations": true
           },
           "styles": {
             "freshRailProjectsLabel": {
