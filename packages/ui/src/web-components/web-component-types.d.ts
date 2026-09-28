@@ -5,7 +5,10 @@
 // a per-element `<ClassName>EventMap` on the element, and an HTMLElementEventMap
 // entry for every event name whose payload is the same on every element that declares it.
 // Also augments React's JSX.IntrinsicElements (see below) so a raw <kai-chat>
-// written directly in TSX type-checks.
+// written directly in TSX type-checks, vue's GlobalComponents so a <kai-chat> in a
+// Vue template is checked, and svelte's svelteHTML.IntrinsicElements so a <kai-chat>
+// in a Svelte markup is too. The svelte block's registry drift is guarded by
+// src/web-components/web-component/svelte-html-elements.test.ts.
 
 
 // Local bindings for the two names the DECLARATIONS below reference
@@ -5571,5 +5574,731 @@ declare module 'vue' {
     KaiVoiceOutput: KaiVueElement<KaiVoiceOutputElementProps, KaiVoiceOutputElementEvents>;
     'kai-workspace': KaiVueElement<KaiWorkspaceElementProps, KaiWorkspaceElementEvents>;
     KaiWorkspace: KaiVueElement<KaiWorkspaceElementProps, KaiWorkspaceElementEvents>;
+  }
+}
+
+export interface KaiAgentCardElementSvelteEvents {
+  /** The card was activated by a click, or by Enter / Space while focused. Promote this agent back to focus. */
+  'onkai-activate'?: (event: CustomEvent) => void;
+  /** The trailing "..." kebab was clicked. The consumer opens its own menu; the card only surfaces the affordance (the click does not also activate the card). */
+  'onkai-menu'?: (event: CustomEvent) => void;
+}
+
+export interface KaiArtifactElementSvelteEvents {
+  /** Fired when a file is selected. `detail.path`. */
+  'onkai-file-select'?: (event: CustomEvent<{ path: string }>) => void;
+  /** Artifact's own maximize button toggled (consumer-observable; non-bubbling). */
+  'onkai-maximize-change'?: (event: CustomEvent<{ maximized: boolean }>) => void;
+  /** The maximize PROTOCOL intent, as a raw bubbling + composed CustomEvent. */
+  'onkai-maximize-intent'?: (event: CustomEvent<{ requested: boolean }>) => void;
+  /** The preview navigated. `detail.url` is the raw new location. */
+  'onkai-navigate'?: (event: CustomEvent<{ url: string }>) => void;
+  /** Fired when the Preview|Code tab changes. `detail.tab`. */
+  'onkai-tab-change'?: (event: CustomEvent<{ tab: "preview" | "code" }>) => void;
+}
+
+export interface KaiAttachmentsElementSvelteEvents {
+  /** A remove button was clicked. */
+  'onkai-remove'?: (event: CustomEvent<{ id: string }>) => void;
+}
+
+export interface KaiAudioVisualizerElementSvelteEvents {
+
+}
+
+export interface KaiAvatarElementSvelteEvents {
+
+}
+
+export interface KaiBadgeElementSvelteEvents {
+
+}
+
+export interface KaiButtonElementSvelteEvents {
+  /** The button was activated (pointer or keyboard). Carries no detail. The native `click` also bubbles (composed) for consumers who prefer it. */
+  'onkai-click'?: (event: CustomEvent) => void;
+}
+
+export interface KaiCardElementSvelteEvents {
+  /** A `clickable`/`href` card was activated (click, or Enter/Space). */
+  'onkai-card-click'?: (event: CustomEvent) => void;
+  /** The card was dismissed via its × (it also hides itself). */
+  'onkai-dismiss'?: (event: CustomEvent) => void;
+}
+
+export interface KaiCardsElementSvelteEvents {
+  /** A child card resolved (an action chosen, a form/tasks submission landed, or dismissed). `detail` = `{ cardId, resolution }`. */
+  'onkai-card-resolved'?: (event: CustomEvent<{ cardId: string; resolution: { kind: "action"; action: string; payload?: unknown; at?: undefined | string } | { kind: "submit"; data: unknown; at?: undefined | string } | { kind: "dismissed"; at?: undefined | string } | { kind: "expired"; reason?: undefined | string; at?: undefined | string } }>) => void;
+}
+
+export interface KaiChainOfThoughtElementSvelteEvents {
+  /** The open set changed, by user click or an `expand()`/`collapse()`/`toggle()` call. */
+  'onkai-value-change'?: (event: CustomEvent<{ value: string | string[] }>) => void;
+}
+
+export interface KaiChatElementSvelteEvents {
+  /** The staged attachments changed (file added or removed). Carries the full current list so a consumer can react in real time. */
+  'onkai-attachments-change'?: (event: CustomEvent<{ attachments: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }>) => void;
+  /** One or more picked files were refused because `accept` excluded them. Renders no message of its own; only fires when `accept` is set. */
+  'onkai-attachments-rejected'?: (event: CustomEvent<{ rejected: { filename: string; mediaType: string; reason: "filtered" | "unsupported" }[] }>) => void;
+  /** A conversation's history loaded. Set `el.messages` from `detail.messages` -- the element does not render it for you. */
+  'onkai-conversation-load'?: (event: CustomEvent<{ id: string | undefined; messages: { id: string; role: "user" | "assistant"; parts: ({ type: "text"; text: string; raw?: undefined | { source: string; payload: unknown } } | { type: "reasoning"; text: string; label?: undefined | string; index?: undefined | number; streamId?: undefined | string; signature?: undefined | string; raw?: undefined | { source: string; payload: unknown } } | { type: "tool"; tool: { type: string; kind?: undefined | "command" | "file-change" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; rawInput?: undefined | string; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string; raw?: undefined | { source: string; payload: unknown } }; raw?: undefined | { source: string; payload: unknown } } | { type: "card"; envelope: { type: string; id: string; data: unknown; title?: undefined | string; resolution?: undefined | { kind: "action"; action: string; payload?: unknown; at?: undefined | string } | { kind: "submit"; data: unknown; at?: undefined | string } | { kind: "dismissed"; at?: undefined | string } | { kind: "expired"; reason?: undefined | string; at?: undefined | string } }; raw?: undefined | { source: string; payload: unknown } } | { type: "source"; source: { id?: undefined | string; url?: undefined | string; title?: undefined | string; snippet?: undefined | string; index?: undefined | number }; raw?: undefined | { source: string; payload: unknown } } | { type: "file"; attachment: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }; raw?: undefined | { source: string; payload: unknown } })[]; actions?: undefined | ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string }; feedback?: undefined | "like" | "dislike" }[] }>) => void;
+  /** A `home.links` entry with no `href` was activated (tapped/clicked/Enter). Meaningful only when `home` is set. */
+  'onkai-home-link'?: (event: CustomEvent<{ entry: { label: string; href?: undefined | string; description?: undefined | string; icon?: undefined | string } }>) => void;
+  /** An action button on a message was clicked. `action` is the built-in name or a custom id. */
+  'onkai-message-action'?: (event: CustomEvent<{ messageId: string; action: string; state?: undefined | "on" | "off" }>) => void;
+  /** The header model switcher changed. */
+  'onkai-model-change'?: (event: CustomEvent<{ modelId: string }>) => void;
+  /** A `+` menu item was chosen. `checked` is present only for a toggle, with its NEW state. The same name and shape `<kai-menu>` fires, so one handler serves both. */
+  'onkai-select'?: (event: CustomEvent<{ id: string; checked?: undefined | boolean }>) => void;
+  /** User submitted a message. */
+  'onkai-submit'?: (event: CustomEvent<{ value: string; attachments: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }>) => void;
+  /** A suggestion chip was clicked (only in `suggestion-mode="fill"`). */
+  'onkai-suggestion-click'?: (event: CustomEvent<{ value: string }>) => void;
+  /** Whether a conversation OTHER than the one on screen is unread. Mirror it onto a launcher badge (`dock.unread = detail.unread`). */
+  'onkai-unread-change'?: (event: CustomEvent<{ unread: boolean }>) => void;
+  /** Fired on every input change. */
+  'onkai-value-change'?: (event: CustomEvent<{ value: string }>) => void;
+  /** The Mic / voice button was clicked. */
+  'onkai-voice'?: (event: CustomEvent<Record<string, never>>) => void;
+}
+
+export interface KaiCheckboxElementSvelteEvents {
+  /** The box was ticked or unticked. */
+  'onkai-change'?: (event: CustomEvent<{ checked: boolean }>) => void;
+}
+
+export interface KaiCheckboxGroupElementSvelteEvents {
+  /** A row was ticked or unticked. `values` is the whole selection afterwards, `value` its first entry. */
+  'onkai-change'?: (event: CustomEvent<{ value: string; values: string[] }>) => void;
+}
+
+export interface KaiCheckpointElementSvelteEvents {
+  /** The checkpoint was clicked. */
+  'onkai-select'?: (event: CustomEvent) => void;
+}
+
+export interface KaiChoiceElementSvelteEvents {
+  /** The selection changed BEFORE submit (a row click or the `select()` method). Distinct from the terminal `action` verb on the `kai-card` contract event. */
+  'onkai-value-change'?: (event: CustomEvent<{ value: string }>) => void;
+}
+
+export interface KaiCoachmarkElementSvelteEvents {
+  /** The × dismiss button was pressed. The consumer records that this hint was seen so it won't show again. */
+  'onkai-dismiss'?: (event: CustomEvent<Record<string, never>>) => void;
+  /** The coachmark opened or closed (a method, the ×, or a driven `open`). */
+  'onkai-open-change'?: (event: CustomEvent<{ open: boolean }>) => void;
+}
+
+export interface KaiCodeBlockElementSvelteEvents {
+
+}
+
+export interface KaiCommandElementSvelteEvents {
+  /** The highlighted item changed. `detail.id` is `undefined` when nothing is active (e.g. the filtered list is empty). */
+  'onkai-active-change'?: (event: CustomEvent<{ id: string | undefined }>) => void;
+  /** Fired on every keystroke in the search input. */
+  'onkai-query-change'?: (event: CustomEvent<{ value: string }>) => void;
+  /** Fired when the user selects an item (click or Enter). */
+  'onkai-select'?: (event: CustomEvent<{ id: string }>) => void;
+}
+
+export interface KaiCompareElementSvelteEvents {
+  /** The user committed a pick. `detail` = `{ chosenId, rejectedIds, at }`. */
+  'onkai-compare-select'?: (event: CustomEvent<{ chosenId: string; rejectedIds: string[]; at?: undefined | number }>) => void;
+  /** The definition was unusable. */
+  'onkai-error'?: (event: CustomEvent<{ compareId: string; message: string }>) => void;
+  /** Both candidates have settled and the pick is live. */
+  'onkai-ready'?: (event: CustomEvent<{ compareId: string }>) => void;
+}
+
+export interface KaiComposerElementSvelteEvents {
+  /** The composer lost focus. */
+  'onkai-blur'?: (event: CustomEvent<{ originalEvent: FocusEvent }>) => void;
+  /** An entity pill was inserted into the composer. */
+  'onkai-entity-add'?: (event: CustomEvent<{ entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } }>) => void;
+  /** An entity pill was deleted from the composer. */
+  'onkai-entity-remove'?: (event: CustomEvent<{ entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } }>) => void;
+  /** The composer gained focus. */
+  'onkai-focus'?: (event: CustomEvent<{ originalEvent: FocusEvent }>) => void;
+  /** The user submitted (Enter or programmatic submit). */
+  'onkai-submit'?: (event: CustomEvent<{ doc: ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]; text: string; entities: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }>) => void;
+  /** A trigger character was detected at the caret (e.g. `/` or `@`). */
+  'onkai-trigger'?: (event: CustomEvent<{ char: string; query: string; rect: DOMRect }>) => void;
+  /** The active trigger was dismissed (Escape, space, or outside click). */
+  'onkai-trigger-close'?: (event: CustomEvent<Record<string, never>>) => void;
+  /** The content changed (fires on every input event). */
+  'onkai-value-change'?: (event: CustomEvent<{ doc: ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]; text: string; entities: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }>) => void;
+}
+
+export interface KaiConfirmElementSvelteEvents {
+
+}
+
+export interface KaiContextElementSvelteEvents {
+  /** Fires when the computed severity level changes (ok → warn → danger or back). `detail.level` is `'ok'`, `'warn'`, or `'danger'`. */
+  'onkai-threshold-change'?: (event: CustomEvent<{ level: "ok" | "warn" | "danger" }>) => void;
+}
+
+export interface KaiConversationItemElementSvelteEvents {
+  /** STANDALONE activation of the row (click, Enter or Space on its body). Never fires inside `<kai-conversations>`. */
+  'onkai-select'?: (event: CustomEvent<{ id: string }>) => void;
+}
+
+export interface KaiConversationsElementSvelteEvents {
+  /** The rail was collapsed or expanded (via the toggle, the reopen button, or a `collapse()`/`expand()`/`toggle()` call). */
+  'onkai-collapse-toggle'?: (event: CustomEvent<{ collapsed: boolean }>) => void;
+  /** A conversation was selected. The selection event in BOTH modes: a batteries data row, or an activated `<kai-conversation-item>` child (click, Enter or Space). */
+  'onkai-conversation-select'?: (event: CustomEvent<{ id: string }>) => void;
+  /** The "New chat" button was clicked. */
+  'onkai-new-chat'?: (event: CustomEvent<Record<string, never>>) => void;
+  /** The built-in search box query changed (typing, or a programmatic `clear()` which fires it with `''`). Lets a consumer mirror or server-side the filter. */
+  'onkai-search'?: (event: CustomEvent<{ query: string }>) => void;
+  /** The sidebar toggle was clicked. */
+  'onkai-toggle-sidebar'?: (event: CustomEvent<Record<string, never>>) => void;
+}
+
+export interface KaiDialogElementSvelteEvents {
+  /** The dialog opened or closed (Escape, backdrop click, a driven `open`, or a method). */
+  'onkai-open-change'?: (event: CustomEvent<{ open: boolean }>) => void;
+}
+
+export interface KaiDockElementSvelteEvents {
+  /** The dock opened or closed (the launcher, Escape, a driven `open`, or a method). */
+  'onkai-open-change'?: (event: CustomEvent<{ open: boolean }>) => void;
+}
+
+export interface KaiDropdownElementSvelteEvents {
+  /** The menu opened or closed (click, keyboard, Escape, outside-click, or a method). */
+  'onkai-open-change'?: (event: CustomEvent<{ open: boolean }>) => void;
+}
+
+export interface KaiEditableLabelElementSvelteEvents {
+  /** Edit was cancelled (Esc); the text is restored. */
+  'onkai-cancel'?: (event: CustomEvent<Record<string, never>>) => void;
+  /** Committed a changed value (Enter / blur). */
+  'onkai-rename'?: (event: CustomEvent<{ value: string }>) => void;
+}
+
+export interface KaiEmbedElementSvelteEvents {
+
+}
+
+export interface KaiEmptyElementSvelteEvents {
+
+}
+
+export interface KaiFeedbackBarElementSvelteEvents {
+  /** The user dismissed the banner. */
+  'onkai-close'?: (event: CustomEvent) => void;
+  /** The user rated the response. `value` is `'helpful'` or `'not-helpful'`. */
+  'onkai-feedback'?: (event: CustomEvent<{ value: "helpful" | "not-helpful" }>) => void;
+  /** The user submitted the optional detail form (`collect-detail`). */
+  'onkai-feedback-detail'?: (event: CustomEvent<{ value: "helpful" | "not-helpful"; category?: undefined | string; comment?: undefined | string }>) => void;
+}
+
+export interface KaiFileTreeElementSvelteEvents {
+  /** Fired when a file is selected. `detail.path` = the file's path. */
+  'onkai-select'?: (event: CustomEvent<{ path: string }>) => void;
+}
+
+export interface KaiFileUploadElementSvelteEvents {
+  /** Files were picked or dropped. */
+  'onkai-files-added'?: (event: CustomEvent<{ files: File[] }>) => void;
+}
+
+export interface KaiFormElementSvelteEvents {
+  /** The form's values changed on input. Carries the current coerced values + validity. */
+  'onkai-values-change'?: (event: CustomEvent<{ values: Record<string, unknown>; valid: boolean }>) => void;
+}
+
+export interface KaiHoverCardElementSvelteEvents {
+  /** The card opened or closed (by hover/focus, outside-click, or a method). */
+  'onkai-open-change'?: (event: CustomEvent<{ open: boolean }>) => void;
+}
+
+export interface KaiIconElementSvelteEvents {
+
+}
+
+export interface KaiImageElementSvelteEvents {
+
+}
+
+export interface KaiImageArtifactElementSvelteEvents {
+
+}
+
+export interface KaiInputElementSvelteEvents {
+  /** The value was committed (blur). Same detail shape as `kai-input`. */
+  'onkai-change'?: (event: CustomEvent<{ value: string; formattedValue: string }>) => void;
+  /** The value changed per keystroke. `value` is the canonical value (what a backend wants); `formattedValue` is the text on screen. With no mask the two are equal. */
+  'onkai-input'?: (event: CustomEvent<{ value: string; formattedValue: string }>) => void;
+  /** A mask refused, or partly refused, some content. `detail.data` is what was refused. */
+  'onkai-input-rejected'?: (event: CustomEvent<{ reason: "full" | "wrong-class" | "over-capacity" | "format-change-clipped"; data: string }>) => void;
+}
+
+export interface KaiKbdElementSvelteEvents {
+
+}
+
+export interface KaiKbdGroupElementSvelteEvents {
+
+}
+
+export interface KaiLightboxElementSvelteEvents {
+  /** The modal opened or closed (trigger click, Escape, backdrop click, or a method). */
+  'onkai-open-change'?: (event: CustomEvent<{ open: boolean }>) => void;
+}
+
+export interface KaiLinkPreviewElementSvelteEvents {
+
+}
+
+export interface KaiLoaderElementSvelteEvents {
+
+}
+
+export interface KaiMarkdownElementSvelteEvents {
+
+}
+
+export interface KaiMenuElementSvelteEvents {
+  /** The menu opened or closed (by click, keyboard, Escape, outside-click, or a method). */
+  'onkai-open-change'?: (event: CustomEvent<{ open: boolean }>) => void;
+  /** A leaf item was selected. Plain: `{ id }`; checkbox: `{ id, checked }` with the NEW state; radio: `{ id, radioGroup }`. */
+  'onkai-select'?: (event: CustomEvent<{ id: string; checked?: undefined | boolean; radioGroup?: undefined | string }>) => void;
+}
+
+export interface KaiMessageElementSvelteEvents {
+  /** An action button on a message was clicked. `action` is the built-in name or a custom id. */
+  'onkai-message-action'?: (event: CustomEvent<{ messageId: string; action: string; state?: undefined | "on" | "off" }>) => void;
+}
+
+export interface KaiModelSwitcherElementSvelteEvents {
+  /** A model was selected. */
+  'onkai-model-change'?: (event: CustomEvent<{ modelId: string }>) => void;
+  /** The model dropdown opened or closed (by click, keyboard, Escape, outside-click, or a method). */
+  'onkai-open-change'?: (event: CustomEvent<{ open: boolean }>) => void;
+}
+
+export interface KaiNavElementSvelteEvents {
+  /** A row's trailing `action` button was activated (not a select). `value` is the item id; `action` echoes the item's `{ icon, label }`. */
+  'onkai-nav-item-action'?: (event: CustomEvent<{ value: string; action?: undefined | { icon: string; label: string } }>) => void;
+  /** A `closable` row's trailing close button was activated (not a select). `value` is the item id. */
+  'onkai-nav-item-close'?: (event: CustomEvent<{ value: string }>) => void;
+  /** A nav item was activated. */
+  'onkai-nav-select'?: (event: CustomEvent<{ id: string }>) => void;
+}
+
+export interface KaiNoticeElementSvelteEvents {
+  /** The notice was dismissed via its × (it also hides itself). */
+  'onkai-dismiss'?: (event: CustomEvent) => void;
+}
+
+export interface KaiPaneElementSvelteEvents {
+  /** The close (×) control was clicked. */
+  'onkai-close'?: (event: CustomEvent) => void;
+  /** The dock control was clicked (only present when `show-dock`). */
+  'onkai-dock'?: (event: CustomEvent) => void;
+  /** The maximize/restore control was clicked. `detail.maximized` is the intended NEXT state. Drive the `maximized` prop yourself from it. */
+  'onkai-maximize'?: (event: CustomEvent<{ maximized: boolean }>) => void;
+  /** The split control was clicked (only present when `show-split`). */
+  'onkai-split'?: (event: CustomEvent) => void;
+}
+
+export interface KaiPaneGridElementSvelteEvents {
+
+}
+
+export interface KaiPaneGroupElementSvelteEvents {
+  /** A tab was selected (click, Enter/Space, or arrow-key move). `detail.id` is the tab's id. */
+  'onkai-tab-change'?: (event: CustomEvent<{ id: string }>) => void;
+  /** A tab's close (×) was clicked. Drop the tab from `tabs` yourself. */
+  'onkai-tab-close'?: (event: CustomEvent<{ id: string }>) => void;
+  /** A tab's "…" overflow was clicked. Open your own menu from `detail.id`. */
+  'onkai-tab-menu'?: (event: CustomEvent<{ id: string }>) => void;
+}
+
+export interface KaiPanelElementSvelteEvents {
+
+}
+
+export interface KaiPanelHeaderElementSvelteEvents {
+
+}
+
+export interface KaiPopoverElementSvelteEvents {
+  /** The popover opened or closed (click, Escape, outside-click, or a method). */
+  'onkai-open-change'?: (event: CustomEvent<{ open: boolean }>) => void;
+}
+
+export interface KaiProgressBarElementSvelteEvents {
+
+}
+
+export interface KaiPromptDockElementSvelteEvents {
+
+}
+
+export interface KaiPromptInputElementSvelteEvents {
+  /** The staged attachments changed (file added or removed). Carries the full current list so a consumer can react in real time. */
+  'onkai-attachments-change'?: (event: CustomEvent<{ attachments: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }>) => void;
+  /** A `+` menu item was chosen. `checked` is present only for a toggle, carrying its NEW state. Shares `<kai-menu>`'s event name. */
+  'onkai-select'?: (event: CustomEvent<{ id: string; checked?: undefined | boolean }>) => void;
+  /** The Stop button was clicked while `stoppable` and `loading` are both true. */
+  'onkai-stop'?: (event: CustomEvent<Record<string, never>>) => void;
+  /** The user submitted the prompt (Enter or send button). `value` is the flattened text. */
+  'onkai-submit'?: (event: CustomEvent<{ value: string; doc: ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]; entities: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[]; attachments: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }>) => void;
+  /** A suggestion was clicked while `suggestion-mode="fill"`. */
+  'onkai-suggestion-click'?: (event: CustomEvent<{ value: string }>) => void;
+  /** A custom `<kai-action>` toolbar button was clicked. `action` is the `id` of the `<kai-action>` element that was clicked. */
+  'onkai-toolbar-action'?: (event: CustomEvent<{ action: string }>) => void;
+  /** The input changed (fires on every edit). Carries the flattened `value` plus the structured `doc` + `entities`. */
+  'onkai-value-change'?: (event: CustomEvent<{ value: string; doc: ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]; entities: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }>) => void;
+  /** The Voice (Mic) toolbar button was clicked. */
+  'onkai-voice'?: (event: CustomEvent<Record<string, never>>) => void;
+}
+
+export interface KaiRadioGroupElementSvelteEvents {
+  /** A row was chosen. */
+  'onkai-change'?: (event: CustomEvent<{ value: string }>) => void;
+}
+
+export interface KaiReasoningElementSvelteEvents {
+  /** The reasoning block expanded or collapsed (via the trigger, streaming auto-open, or a method). */
+  'onkai-open-change'?: (event: CustomEvent<{ open: boolean }>) => void;
+}
+
+export interface KaiRemoteElementSvelteEvents {
+
+}
+
+export interface KaiResizableElementSvelteEvents {
+  /** Fired on drag-end / keyboard resize / visibility change. `detail.sizes` = panel sizes in percent. */
+  'onkai-change'?: (event: CustomEvent<{ sizes: number[] }>) => void;
+  /** Observe layout maximize state. */
+  'onkai-maximize-change'?: (event: CustomEvent<{ maximized: boolean; index: number | null }>) => void;
+  /** Authoritative maximize state. */
+  'onkai-maximize-state'?: (event: CustomEvent<{ maximized: boolean }>) => void;
+}
+
+export interface KaiResizableItemElementSvelteEvents {
+  'onkai-change'?: (event: CustomEvent<unknown>) => void;
+  'onkai-maximize-change'?: (event: CustomEvent<unknown>) => void;
+  'onkai-maximize-state'?: (event: CustomEvent<unknown>) => void;
+}
+
+export interface KaiResponseStreamElementSvelteEvents {
+  /** Streaming finished. */
+  'onkai-complete'?: (event: CustomEvent) => void;
+}
+
+export interface KaiRowElementSvelteEvents {
+  /** The row was activated (click, Enter or Space) while `interactive` is set and no `href` is present. Non-bubbling: listen on the element itself. */
+  'onkai-click'?: (event: CustomEvent) => void;
+}
+
+export interface KaiRowGroupElementSvelteEvents {
+
+}
+
+export interface KaiScopePickerElementSvelteEvents {
+  /** The dropdown opened or closed. */
+  'onkai-open-change'?: (event: CustomEvent<{ open: boolean }>) => void;
+  /** A scope was chosen (`undefined` filters means all content). */
+  'onkai-scope-change'?: (event: CustomEvent<{ filters: { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | "transcript" | "markdown"; dateRange?: undefined | { from: string; to: string } } | undefined }>) => void;
+}
+
+export interface KaiScreenElementSvelteEvents {
+  /** Back navigation intent: the back button or Escape. The consumer flips their own routing in response (the screen knows nothing about the trigger). */
+  'onkai-back'?: (event: CustomEvent<Record<string, never>>) => void;
+  /** The screen opened or closed (a method, `Escape` close, or driven `open`). */
+  'onkai-open-change'?: (event: CustomEvent<{ open: boolean }>) => void;
+}
+
+export interface KaiScrollAreaElementSvelteEvents {
+
+}
+
+export interface KaiScrollButtonElementSvelteEvents {
+  /** Emitted when the user clicks the button and `scrollToBottom()` is called. Carries no detail; consumers use it to know a manual scroll occurred. */
+  'onkai-scroll'?: (event: CustomEvent) => void;
+}
+
+export interface KaiSearchElementSvelteEvents {
+  /** The field committed (blur). */
+  'onkai-change'?: (event: CustomEvent<{ value: string }>) => void;
+  /** The query changed (debounced live, and on clear). */
+  'onkai-search'?: (event: CustomEvent<{ value: string }>) => void;
+  /** Enter was pressed. */
+  'onkai-submit'?: (event: CustomEvent<{ value: string }>) => void;
+}
+
+export interface KaiSegmentedElementSvelteEvents {
+  /** A segment was chosen. */
+  'onkai-change'?: (event: CustomEvent<{ value: string }>) => void;
+}
+
+export interface KaiSelectElementSvelteEvents {
+  /** A choice was made. `value` is the first selected option, empty when nothing is selected. */
+  'onkai-change'?: (event: CustomEvent<{ value: string; values: string[] }>) => void;
+}
+
+export interface KaiSeparatorElementSvelteEvents {
+
+}
+
+export interface KaiSettingItemElementSvelteEvents {
+
+}
+
+export interface KaiSettingsGroupElementSvelteEvents {
+
+}
+
+export interface KaiSkeletonElementSvelteEvents {
+
+}
+
+export interface KaiSkillsElementSvelteEvents {
+
+}
+
+export interface KaiSliderElementSvelteEvents {
+  /** The value was committed: pointer released, or a key press finished. */
+  'onkai-change'?: (event: CustomEvent<{ value: number }>) => void;
+  /** The thumb moved. Fires per step during a drag or a key press. */
+  'onkai-input'?: (event: CustomEvent<{ value: number }>) => void;
+}
+
+export interface KaiSourceElementSvelteEvents {
+
+}
+
+export interface KaiSourcesElementSvelteEvents {
+
+}
+
+export interface KaiStatusElementSvelteEvents {
+
+}
+
+export interface KaiSuggestionsElementSvelteEvents {
+  /** A suggestion was clicked. */
+  'onkai-select'?: (event: CustomEvent<{ value: string }>) => void;
+}
+
+export interface KaiSwitchElementSvelteEvents {
+  /** The toggle changed. */
+  'onkai-change'?: (event: CustomEvent<{ checked: boolean }>) => void;
+}
+
+export interface KaiTabBarElementSvelteEvents {
+  /** A tab was selected (click, Enter/Space, or arrow-key move). `value` is the item's `value` attribute, else its host `id`. */
+  'onkai-tab-change'?: (event: CustomEvent<{ value: string }>) => void;
+}
+
+export interface KaiTabBarItemElementSvelteEvents {
+
+}
+
+export interface KaiTabsElementSvelteEvents {
+  /** A tab was selected (click, Enter/Space, or arrow-key move). `value` is the item's id. */
+  'onkai-tab-change'?: (event: CustomEvent<{ value: string }>) => void;
+}
+
+export interface KaiTasksElementSvelteEvents {
+  /** The selection changed on a toggle. Carries the selected ids in input order. */
+  'onkai-value-change'?: (event: CustomEvent<{ value: string[] }>) => void;
+}
+
+export interface KaiTextShimmerElementSvelteEvents {
+
+}
+
+export interface KaiThinkingBarElementSvelteEvents {
+  /** The "stop / answer now" affordance was clicked. */
+  'onkai-stop'?: (event: CustomEvent) => void;
+}
+
+export interface KaiThreadElementSvelteEvents {
+  /** An action button on a message was clicked. `action` is the built-in name or a custom id. */
+  'onkai-message-action'?: (event: CustomEvent<{ messageId: string; action: string; state?: undefined | "on" | "off" }>) => void;
+}
+
+export interface KaiToastRegionElementSvelteEvents {
+  /** A toast's action button was pressed. */
+  'onkai-action'?: (event: CustomEvent<{ id: string; label: string }>) => void;
+  /** A toast left the stack. `reason` is `'timeout' | 'close' | 'action'`. */
+  'onkai-dismiss'?: (event: CustomEvent<{ id: string; reason: "timeout" | "close" | "action" }>) => void;
+}
+
+export interface KaiToolElementSvelteEvents {
+  /** The panel expanded or collapsed (by trigger click or a method). */
+  'onkai-open-change'?: (event: CustomEvent<{ open: boolean }>) => void;
+}
+
+export interface KaiTooltipElementSvelteEvents {
+  /** The tooltip opened or closed (by hover/focus, outside-click, or a method). */
+  'onkai-open-change'?: (event: CustomEvent<{ open: boolean }>) => void;
+}
+
+export interface KaiViewElementSvelteEvents {
+
+}
+
+export interface KaiViewStackElementSvelteEvents {
+  /** The visible view or the drilled flag changed (push, back, replace, tab switch, or a `view` attribute write). */
+  'onkai-view-change'?: (event: CustomEvent<{ view: string | undefined; root: string | undefined; drilled: boolean; stack: string[] }>) => void;
+}
+
+export interface KaiVoiceInputElementSvelteEvents {
+  /** Raw audio captured, before transcription. */
+  'onkai-audio-captured'?: (event: CustomEvent<{ blob: Blob }>) => void;
+  /** Recording started or stopped. */
+  'onkai-recording-change'?: (event: CustomEvent<{ recording: boolean }>) => void;
+  /** Live partial transcript during native recognition (only when `interim` is set). Fires repeatedly before the final `kai-transcription`. */
+  'onkai-transcript-interim'?: (event: CustomEvent<{ text: string }>) => void;
+  /** Final transcript: the `transcribe` property resolved, OR native `SpeechRecognition` produced final text (no `transcribe` set). */
+  'onkai-transcription'?: (event: CustomEvent<{ text: string }>) => void;
+  /** A voice session failed, so no failure is ever silent. `detail.error` is the platform error code or the thrown name. */
+  'onkai-voice-error'?: (event: CustomEvent<{ source: "recognition"; error: string; message: string }>) => void;
+}
+
+export interface KaiVoiceOutputElementSvelteEvents {
+  /** Playback started or stopped. */
+  'onkai-speaking-change'?: (event: CustomEvent<{ speaking: boolean }>) => void;
+  /** The model path (`synthesize`) resolved audio: the raw `Blob` before playback. */
+  'onkai-synthesized'?: (event: CustomEvent<{ blob: Blob }>) => void;
+  /** A voice session failed, so no failure is ever silent. `detail.error` is the platform error code or the thrown name. */
+  'onkai-voice-error'?: (event: CustomEvent<{ source: "synthesis"; error: string; message: string }>) => void;
+}
+
+export interface KaiWorkspaceElementSvelteEvents {
+  /** The aside was resized (fires per drag step, keyboard nudge, or a handle double-click reset), width in px. */
+  'onkai-aside-resize'?: (event: CustomEvent<{ side: "start" | "end"; width: number }>) => void;
+  /** An aside collapsed or expanded (a method, the breakpoint, the drawer's Escape). */
+  'onkai-aside-toggle'?: (event: CustomEvent<{ side: "start" | "end"; collapsed: boolean }>) => void;
+}
+
+/** Attributes every kai-* element tolerates in a Svelte markup on top of its own
+ *  props: `id`, `data-*`, `aria-*`, and the attributes Svelte's own directives
+ *  compile to. The index signature keeps those legal on a tag this file types
+ *  WITHOUT weakening the declared props — an explicit member always wins over an
+ *  index signature. */
+export interface KaiElementSvelteProps {
+  [attr: string]: unknown;
+}
+
+/** A kai-* custom element as Svelte's markup type-checker sees it. Props are
+ *  `Partial` because the kai- contract allows setting any of them imperatively
+ *  through a ref instead of in the markup. */
+export type KaiSvelteElement<Props, Events> = Partial<Props> & Events & KaiElementSvelteProps;
+
+declare global {
+  namespace svelteHTML {
+    interface IntrinsicElements {
+      'kai-agent-card': KaiSvelteElement<KaiAgentCardElementProps, KaiAgentCardElementSvelteEvents>;
+      'kai-artifact': KaiSvelteElement<KaiArtifactElementProps, KaiArtifactElementSvelteEvents>;
+      'kai-attachments': KaiSvelteElement<KaiAttachmentsElementProps, KaiAttachmentsElementSvelteEvents>;
+      'kai-audio-visualizer': KaiSvelteElement<KaiAudioVisualizerElementProps, KaiAudioVisualizerElementSvelteEvents>;
+      'kai-avatar': KaiSvelteElement<KaiAvatarElementProps, KaiAvatarElementSvelteEvents>;
+      'kai-badge': KaiSvelteElement<KaiBadgeElementProps, KaiBadgeElementSvelteEvents>;
+      'kai-button': KaiSvelteElement<KaiButtonElementProps, KaiButtonElementSvelteEvents>;
+      'kai-card': KaiSvelteElement<KaiCardElementProps, KaiCardElementSvelteEvents>;
+      'kai-cards': KaiSvelteElement<KaiCardsElementProps, KaiCardsElementSvelteEvents>;
+      'kai-chain-of-thought': KaiSvelteElement<KaiChainOfThoughtElementProps, KaiChainOfThoughtElementSvelteEvents>;
+      'kai-chat': KaiSvelteElement<KaiChatElementProps, KaiChatElementSvelteEvents>;
+      'kai-checkbox': KaiSvelteElement<KaiCheckboxElementProps, KaiCheckboxElementSvelteEvents>;
+      'kai-checkbox-group': KaiSvelteElement<KaiCheckboxGroupElementProps, KaiCheckboxGroupElementSvelteEvents>;
+      'kai-checkpoint': KaiSvelteElement<KaiCheckpointElementProps, KaiCheckpointElementSvelteEvents>;
+      'kai-choice': KaiSvelteElement<KaiChoiceElementProps, KaiChoiceElementSvelteEvents>;
+      'kai-coachmark': KaiSvelteElement<KaiCoachmarkElementProps, KaiCoachmarkElementSvelteEvents>;
+      'kai-code-block': KaiSvelteElement<KaiCodeBlockElementProps, KaiCodeBlockElementSvelteEvents>;
+      'kai-command': KaiSvelteElement<KaiCommandElementProps, KaiCommandElementSvelteEvents>;
+      'kai-compare': KaiSvelteElement<KaiCompareElementProps, KaiCompareElementSvelteEvents>;
+      'kai-composer': KaiSvelteElement<KaiComposerElementProps, KaiComposerElementSvelteEvents>;
+      'kai-confirm': KaiSvelteElement<KaiConfirmElementProps, KaiConfirmElementSvelteEvents>;
+      'kai-context': KaiSvelteElement<KaiContextElementProps, KaiContextElementSvelteEvents>;
+      'kai-conversation-item': KaiSvelteElement<KaiConversationItemElementProps, KaiConversationItemElementSvelteEvents>;
+      'kai-conversations': KaiSvelteElement<KaiConversationsElementProps, KaiConversationsElementSvelteEvents>;
+      'kai-dialog': KaiSvelteElement<KaiDialogElementProps, KaiDialogElementSvelteEvents>;
+      'kai-dock': KaiSvelteElement<KaiDockElementProps, KaiDockElementSvelteEvents>;
+      'kai-dropdown': KaiSvelteElement<KaiDropdownElementProps, KaiDropdownElementSvelteEvents>;
+      'kai-editable-label': KaiSvelteElement<KaiEditableLabelElementProps, KaiEditableLabelElementSvelteEvents>;
+      'kai-embed': KaiSvelteElement<KaiEmbedElementProps, KaiEmbedElementSvelteEvents>;
+      'kai-empty': KaiSvelteElement<KaiEmptyElementProps, KaiEmptyElementSvelteEvents>;
+      'kai-feedback-bar': KaiSvelteElement<KaiFeedbackBarElementProps, KaiFeedbackBarElementSvelteEvents>;
+      'kai-file-tree': KaiSvelteElement<KaiFileTreeElementProps, KaiFileTreeElementSvelteEvents>;
+      'kai-file-upload': KaiSvelteElement<KaiFileUploadElementProps, KaiFileUploadElementSvelteEvents>;
+      'kai-form': KaiSvelteElement<KaiFormElementProps, KaiFormElementSvelteEvents>;
+      'kai-hover-card': KaiSvelteElement<KaiHoverCardElementProps, KaiHoverCardElementSvelteEvents>;
+      'kai-icon': KaiSvelteElement<KaiIconElementProps, KaiIconElementSvelteEvents>;
+      'kai-image': KaiSvelteElement<KaiImageElementProps, KaiImageElementSvelteEvents>;
+      'kai-image-artifact': KaiSvelteElement<KaiImageArtifactElementProps, KaiImageArtifactElementSvelteEvents>;
+      'kai-input': KaiSvelteElement<KaiInputElementProps, KaiInputElementSvelteEvents>;
+      'kai-kbd': KaiSvelteElement<KaiKbdElementProps, KaiKbdElementSvelteEvents>;
+      'kai-kbd-group': KaiSvelteElement<KaiKbdGroupElementProps, KaiKbdGroupElementSvelteEvents>;
+      'kai-lightbox': KaiSvelteElement<KaiLightboxElementProps, KaiLightboxElementSvelteEvents>;
+      'kai-link-preview': KaiSvelteElement<KaiLinkPreviewElementProps, KaiLinkPreviewElementSvelteEvents>;
+      'kai-loader': KaiSvelteElement<KaiLoaderElementProps, KaiLoaderElementSvelteEvents>;
+      'kai-markdown': KaiSvelteElement<KaiMarkdownElementProps, KaiMarkdownElementSvelteEvents>;
+      'kai-menu': KaiSvelteElement<KaiMenuElementProps, KaiMenuElementSvelteEvents>;
+      'kai-message': KaiSvelteElement<KaiMessageElementProps, KaiMessageElementSvelteEvents>;
+      'kai-model-switcher': KaiSvelteElement<KaiModelSwitcherElementProps, KaiModelSwitcherElementSvelteEvents>;
+      'kai-nav': KaiSvelteElement<KaiNavElementProps, KaiNavElementSvelteEvents>;
+      'kai-notice': KaiSvelteElement<KaiNoticeElementProps, KaiNoticeElementSvelteEvents>;
+      'kai-pane': KaiSvelteElement<KaiPaneElementProps, KaiPaneElementSvelteEvents>;
+      'kai-pane-grid': KaiSvelteElement<KaiPaneGridElementProps, KaiPaneGridElementSvelteEvents>;
+      'kai-pane-group': KaiSvelteElement<KaiPaneGroupElementProps, KaiPaneGroupElementSvelteEvents>;
+      'kai-panel': KaiSvelteElement<KaiPanelElementProps, KaiPanelElementSvelteEvents>;
+      'kai-panel-header': KaiSvelteElement<KaiPanelHeaderElementProps, KaiPanelHeaderElementSvelteEvents>;
+      'kai-popover': KaiSvelteElement<KaiPopoverElementProps, KaiPopoverElementSvelteEvents>;
+      'kai-progress-bar': KaiSvelteElement<KaiProgressBarElementProps, KaiProgressBarElementSvelteEvents>;
+      'kai-prompt-dock': KaiSvelteElement<KaiPromptDockElementProps, KaiPromptDockElementSvelteEvents>;
+      'kai-prompt-input': KaiSvelteElement<KaiPromptInputElementProps, KaiPromptInputElementSvelteEvents>;
+      'kai-radio-group': KaiSvelteElement<KaiRadioGroupElementProps, KaiRadioGroupElementSvelteEvents>;
+      'kai-reasoning': KaiSvelteElement<KaiReasoningElementProps, KaiReasoningElementSvelteEvents>;
+      'kai-remote': KaiSvelteElement<KaiRemoteElementProps, KaiRemoteElementSvelteEvents>;
+      'kai-resizable': KaiSvelteElement<KaiResizableElementProps, KaiResizableElementSvelteEvents>;
+      'kai-resizable-item': KaiSvelteElement<KaiResizableItemElementProps, KaiResizableItemElementSvelteEvents>;
+      'kai-response-stream': KaiSvelteElement<KaiResponseStreamElementProps, KaiResponseStreamElementSvelteEvents>;
+      'kai-row': KaiSvelteElement<KaiRowElementProps, KaiRowElementSvelteEvents>;
+      'kai-row-group': KaiSvelteElement<KaiRowGroupElementProps, KaiRowGroupElementSvelteEvents>;
+      'kai-scope-picker': KaiSvelteElement<KaiScopePickerElementProps, KaiScopePickerElementSvelteEvents>;
+      'kai-screen': KaiSvelteElement<KaiScreenElementProps, KaiScreenElementSvelteEvents>;
+      'kai-scroll-area': KaiSvelteElement<KaiScrollAreaElementProps, KaiScrollAreaElementSvelteEvents>;
+      'kai-scroll-button': KaiSvelteElement<KaiScrollButtonElementProps, KaiScrollButtonElementSvelteEvents>;
+      'kai-search': KaiSvelteElement<KaiSearchElementProps, KaiSearchElementSvelteEvents>;
+      'kai-segmented': KaiSvelteElement<KaiSegmentedElementProps, KaiSegmentedElementSvelteEvents>;
+      'kai-select': KaiSvelteElement<KaiSelectElementProps, KaiSelectElementSvelteEvents>;
+      'kai-separator': KaiSvelteElement<KaiSeparatorElementProps, KaiSeparatorElementSvelteEvents>;
+      'kai-setting-item': KaiSvelteElement<KaiSettingItemElementProps, KaiSettingItemElementSvelteEvents>;
+      'kai-settings-group': KaiSvelteElement<KaiSettingsGroupElementProps, KaiSettingsGroupElementSvelteEvents>;
+      'kai-skeleton': KaiSvelteElement<KaiSkeletonElementProps, KaiSkeletonElementSvelteEvents>;
+      'kai-skills': KaiSvelteElement<KaiSkillsElementProps, KaiSkillsElementSvelteEvents>;
+      'kai-slider': KaiSvelteElement<KaiSliderElementProps, KaiSliderElementSvelteEvents>;
+      'kai-source': KaiSvelteElement<KaiSourceElementProps, KaiSourceElementSvelteEvents>;
+      'kai-sources': KaiSvelteElement<KaiSourcesElementProps, KaiSourcesElementSvelteEvents>;
+      'kai-status': KaiSvelteElement<KaiStatusElementProps, KaiStatusElementSvelteEvents>;
+      'kai-suggestions': KaiSvelteElement<KaiSuggestionsElementProps, KaiSuggestionsElementSvelteEvents>;
+      'kai-switch': KaiSvelteElement<KaiSwitchElementProps, KaiSwitchElementSvelteEvents>;
+      'kai-tab-bar': KaiSvelteElement<KaiTabBarElementProps, KaiTabBarElementSvelteEvents>;
+      'kai-tab-bar-item': KaiSvelteElement<KaiTabBarItemElementProps, KaiTabBarItemElementSvelteEvents>;
+      'kai-tabs': KaiSvelteElement<KaiTabsElementProps, KaiTabsElementSvelteEvents>;
+      'kai-tasks': KaiSvelteElement<KaiTasksElementProps, KaiTasksElementSvelteEvents>;
+      'kai-text-shimmer': KaiSvelteElement<KaiTextShimmerElementProps, KaiTextShimmerElementSvelteEvents>;
+      'kai-thinking-bar': KaiSvelteElement<KaiThinkingBarElementProps, KaiThinkingBarElementSvelteEvents>;
+      'kai-thread': KaiSvelteElement<KaiThreadElementProps, KaiThreadElementSvelteEvents>;
+      'kai-toast-region': KaiSvelteElement<KaiToastRegionElementProps, KaiToastRegionElementSvelteEvents>;
+      'kai-tool': KaiSvelteElement<KaiToolElementProps, KaiToolElementSvelteEvents>;
+      'kai-tooltip': KaiSvelteElement<KaiTooltipElementProps, KaiTooltipElementSvelteEvents>;
+      'kai-view': KaiSvelteElement<KaiViewElementProps, KaiViewElementSvelteEvents>;
+      'kai-view-stack': KaiSvelteElement<KaiViewStackElementProps, KaiViewStackElementSvelteEvents>;
+      'kai-voice-input': KaiSvelteElement<KaiVoiceInputElementProps, KaiVoiceInputElementSvelteEvents>;
+      'kai-voice-output': KaiSvelteElement<KaiVoiceOutputElementProps, KaiVoiceOutputElementSvelteEvents>;
+      'kai-workspace': KaiSvelteElement<KaiWorkspaceElementProps, KaiWorkspaceElementSvelteEvents>;
+    }
   }
 }

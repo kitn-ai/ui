@@ -264,8 +264,9 @@ export function writeTypes(root, elements, _toAttr, IMPORTS, { domMembers = new 
     .join('\n');
 
   // The declared (non-DOM) member list for one web component. Shared by the
-  // HTMLElement interfaces below and the Vue GlobalComponents props interfaces,
-  // so the two can never disagree about WHICH props a kai-* web component accepts.
+  // HTMLElement interfaces below and the Vue GlobalComponents / Svelte
+  // svelteHTML props interfaces, so the three can never disagree about WHICH
+  // props a kai-* web component accepts.
   //
   // `domSafe` is the one axis on which the two copies differ, and only for a prop
   // whose NAME re-declares a member HTMLElement already has (today: kai-confirm's
@@ -283,16 +284,17 @@ export function writeTypes(root, elements, _toAttr, IMPORTS, { domMembers = new 
   // consumer who turns it off. So in the ELEMENT interfaces a colliding prop is
   // emitted required, with `undefined` stripped — which is also what the runtime
   // does: `defineWebComponent` registers every prop with a default, so the
-  // property always exists on an upgraded element. The Vue props interfaces below
-  // don't extend HTMLElement and keep the prop optional (a Vue template legitimately
-  // omits it). Guarded by tests/web-components/types-lib-check.test.ts, which
+  // property always exists on an upgraded element. The Vue GlobalComponents and
+  // Svelte svelteHTML props interfaces below don't extend HTMLElement and keep the
+  // prop optional (a template legitimately omits it). Guarded by
+  // tests/web-components/types-lib-check.test.ts, which
   // compiles this file with `skipLibCheck: false`.
   //
   // `defaulted` generalises that same runtime fact to a second case. PASSING a
   // prop and READING one back are different contracts, and only the element
   // interfaces are the read side:
-  //   - KaiChatElementProps (Vue, and the React wrapper in gen-web-component-react.mjs)
-  //     is what a consumer CONSTRUCTS with. `messages` there is optional, because
+  //   - KaiChatElementProps (Vue, Svelte, and the React wrapper in
+  //     gen-web-component-react.mjs) is what a consumer CONSTRUCTS with. `messages` there is optional, because
   //     the element supplies `[]` — that is the whole point of the widening.
   //   - KaiChatElement is what `document.querySelector` hands back. The element
   //     registered a non-`undefined` default, and the React wrapper skips
@@ -446,7 +448,10 @@ export function writeTypes(root, elements, _toAttr, IMPORTS, { domMembers = new 
 // a per-element \`<ClassName>EventMap\` on the element, and an HTMLElementEventMap
 // entry for every event name whose payload is the same on every element that declares it.
 // Also augments React's JSX.IntrinsicElements (see below) so a raw <kai-chat>
-// written directly in TSX type-checks.`;
+// written directly in TSX type-checks, vue's GlobalComponents so a <kai-chat> in a
+// Vue template is checked, and svelte's svelteHTML.IntrinsicElements so a <kai-chat>
+// in a Svelte markup is too. The svelte block's registry drift is guarded by
+// src/web-components/web-component/svelte-html-elements.test.ts.`;
 
   const tagMapBlock = `declare global {
   interface HTMLElementTagNameMap {
@@ -563,7 +568,6 @@ ${jsxTagMap}
       return [`    '${el.tag}': ${t};`, `    ${pascal(el.tag)}: ${t};`];
     })
     .join('\n');
-
   const vueBlock = `/** Attributes every kai-* element tolerates in a Vue template on top of its own
  *  props: \`id\`, \`data-*\`, \`aria-*\`, directives. The index signature keeps those
  *  legal under \`strictTemplates\` WITHOUT weakening the declared props — an
@@ -582,6 +586,91 @@ export type KaiVueElement<Props, Events> = new () => {
 declare module 'vue' {
   interface GlobalComponents {
 ${vueTagMap}
+  }
+}`;
+
+  // Svelte resolves a markup tag against `svelteHTML.IntrinsicElements` — the
+  // namespace svelte's own svelte-html.d.ts declares globally and svelte-check
+  // loads — and WHOSE LAST MEMBER is an index signature,
+  // `[name: string]: { [name: string]: any }`. So an unregistered kai-* tag and
+  // every attribute on it is `any`, and svelte-check checks NOTHING about a kai
+  // markup: vue has the GlobalComponents block above, react the JSX one above
+  // that, and svelte had nothing. MEASURED, by the block compile cell that owns
+  // the svelte form (scripts/lib/block-compile-cells.mjs): `<kai-button
+  // variant="solid">` — a value kai-button's own prop union does not contain — is
+  // a hard error in the vue and react cells and passed silently in the svelte one
+  // until this block. This closes that gap from the same `elements` model as the
+  // two blocks above, so a prop reaches all three template type spaces or none.
+  //
+  // Shape notes, each established against svelte-check on the svelte starter's own
+  // pinned svelte (the cell runs the real `svelte-check`, not tsc):
+  //  - AUGMENTED INSIDE `declare global`, unlike the vue and react blocks, because
+  //    `svelteHTML` is a GLOBAL namespace and THIS FILE IS A MODULE (it exports,
+  //    so every top-level declaration in it is module-scoped). A bare
+  //    `declare namespace svelteHTML` here would merge with nothing and type no
+  //    tag. Measured both ways: inside `declare global` the wrong attribute is an
+  //    error; at file scope it passes exactly as before.
+  //  - KEBAB KEYS ONLY. Svelte reads a capitalised tag as an imported component
+  //    rather than an intrinsic element, so the PascalCase twin Volar wants has no
+  //    svelte meaning and is not emitted.
+  //  - Event handlers are keyed `on` + the event name VERBATIM (`onkai-submit`),
+  //    which is what the svelte form emits (`on${b.name}`, the same literal the
+  //    starter writes by hand) and what svelte-check looks up — where vue
+  //    camelizes to `onKaiSubmit` and the React wrappers strip the prefix. Keyed
+  //    per element for vue's reason: one attribute name means a different payload
+  //    on different elements (`kai-change`), and a single shared key could only be
+  //    one of them. Measured: a handler whose CustomEvent detail disagrees with
+  //    the declared one is an error, so these are checked and not merely accepted.
+  //  - Props are `Partial<>` for vue's reason: the kai- contract lets a consumer
+  //    set any prop imperatively through a ref, so flagging an absent prop in a
+  //    template would be a false positive.
+  //  - `KaiElementSvelteProps`'s index signature keeps arbitrary attributes and
+  //    svelte's own directive-generated attributes legal (id, data-*, aria-*,
+  //    `class:`/`style:`/`use:`/`bind:this`) on an explicitly typed tag, and an
+  //    explicitly declared member still WINS over it — which is what makes the
+  //    wrong-attribute error above a real error rather than a signature that
+  //    swallowed it. It is a second name for what `KaiElementVueProps` is, not a
+  //    second constraint: both are exported per framework, and the body is the
+  //    same because the tolerance is the same.
+  //
+  // Declared locally, with no reference to any identifier that only exists inside
+  // the real 'svelte' module — same constraint as the vue and react blocks, since
+  // this file loads for every framework via `import '@kitn.ai/ui/web-components'`.
+  const svelteEventKey = (name) => `on${name}`;
+
+  const svelteEventInterfaces = elements
+    .map((el) => {
+      const body = el.events.flatMap((e) => [
+        ...(e.description ? [`  /** ${e.description} */`] : []),
+        `  '${svelteEventKey(e.name)}'?: (event: CustomEvent${e.detail ? `<${clean(e.detail, false)}>` : ''}) => void;`,
+      ]);
+      return `export interface ${el.className}SvelteEvents {\n${body.join('\n')}\n}`;
+    })
+    .join('\n\n');
+
+  const svelteTagMap = elements
+    .map((el) => `      '${el.tag}': KaiSvelteElement<${el.className}Props, ${el.className}SvelteEvents>;`)
+    .join('\n');
+
+  const svelteBlock = `/** Attributes every kai-* element tolerates in a Svelte markup on top of its own
+ *  props: \`id\`, \`data-*\`, \`aria-*\`, and the attributes Svelte's own directives
+ *  compile to. The index signature keeps those legal on a tag this file types
+ *  WITHOUT weakening the declared props — an explicit member always wins over an
+ *  index signature. */
+export interface KaiElementSvelteProps {
+  [attr: string]: unknown;
+}
+
+/** A kai-* custom element as Svelte's markup type-checker sees it. Props are
+ *  \`Partial\` because the kai- contract allows setting any of them imperatively
+ *  through a ref instead of in the markup. */
+export type KaiSvelteElement<Props, Events> = Partial<Props> & Events & KaiElementSvelteProps;
+
+declare global {
+  namespace svelteHTML {
+    interface IntrinsicElements {
+${svelteTagMap}
+    }
   }
 }`;
 
@@ -647,6 +736,10 @@ ${vuePropsInterfaces}
 ${vueEventInterfaces}
 
 ${vueBlock}
+
+${svelteEventInterfaces}
+
+${svelteBlock}
 `;
   writeFileSync(resolve(root, 'src/web-components/web-component-types.d.ts'), srcOut);
   console.log(`✓ src/web-components/web-component-types.d.ts — ${elements.length} web components`);
@@ -679,6 +772,10 @@ ${vuePropsInterfaces}
 ${vueEventInterfaces}
 
 ${vueBlock}
+
+${svelteEventInterfaces}
+
+${svelteBlock}
 `;
   const distDir = resolve(root, 'dist');
   if (!existsSync(distDir)) mkdirSync(distDir, { recursive: true });
