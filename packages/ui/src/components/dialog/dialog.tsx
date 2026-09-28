@@ -101,11 +101,38 @@ function focusChain(el: HTMLElement | null): HTMLElement[] {
   return chain;
 }
 
-/** Focus `ctx`, or the first focusable thing inside it. Best effort by design: a
- *  fallback that cannot take focus leaves focus where it is rather than throwing. */
-function focusFirstIn(ctx: HTMLElement): void {
-  const target = ctx.matches(FOCUSABLE_SELECTOR) ? ctx : ctx.querySelector<HTMLElement>(FOCUSABLE_SELECTOR);
-  target?.focus();
+/**
+ * The close fallback's ONE walk, so every host composing this dialog inherits the
+ * policy instead of re-deciding it. Its rule:
+ *
+ *   Outward from the remembered opener, over the contexts it sat in, nearest first,
+ *   take the first context that yields a focusable destination.
+ *
+ * Two things it does not do, both measured. It does not stop at the first context that
+ * merely SURVIVED: surviving and being able to take focus are different questions, and
+ * answering only the first is what dropped focus on `body` when the opener was a host's
+ * own slotted trigger and its only focusable - the host survived EMPTY, and the walk
+ * ended on it. And it never lands inside this dialog's own panel, or the light DOM
+ * assigned into it, because that subtree goes in the same breath as the walk: a
+ * destination there is the focus drop again. `goingAway` is how the caller says so.
+ *
+ * It stops at the END OF THE RECORDED CHAIN - `body`/`html`, the outermost contexts a
+ * remembered opener can have - so an emptied page leaves focus where the browser put it
+ * once the panel went. Nothing further out is invented: a second guess at where the
+ * reader "really" was is the quiet fallback this component should not make.
+ */
+function focusFirstIn(ctx: HTMLElement, goingAway: (el: HTMLElement) => boolean): boolean {
+  const candidates = ctx.matches(FOCUSABLE_SELECTOR) ? [ctx] : [];
+  for (const el of [...candidates, ...ctx.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)]) {
+    if (goingAway(el)) continue;
+    el.focus();
+    // Ask the DOCUMENT, not the candidate list: `focus()` on a node the browser will not
+    // focus (hidden, inert, `display:none`) is silent, and "a candidate was found" is not
+    // the same answer as "the reader is somewhere". A silent no-op is what the walk has
+    // to keep walking past.
+    if (deepActiveElement() === el) return true;
+  }
+  return false;
 }
 
 /**
@@ -114,10 +141,10 @@ function focusFirstIn(ctx: HTMLElement): void {
  * and centers a panel with a sensible max width/height and internal scroll. It
  * closes on Escape (from inside the panel and, since focus can leave the panel while
  * it is open, from anywhere on the page) and on a backdrop click (never on a panel
- * click), moves focus into the panel on open and restores it on close - to the
- * nearest surviving context when the element that had it is gone by then - and runs
- * a basic Tab focus trap so keyboard focus cycles within the panel while open. The
- * developer owns when it opens (drive `open` / `defaultOpen`); this owns being the
+ * click), moves focus into the panel on open and restores it on close - to the nearest
+ * surviving context that can take focus when the element that had it is gone by then -
+ * and runs a basic Tab focus trap so keyboard focus cycles within the panel while open.
+ * The developer owns when it opens (drive `open` / `defaultOpen`); this owns being the
  * modal.
  *
  * Styleable parts: `backdrop` · `panel` · `header` · `body` · `footer`.
@@ -197,9 +224,18 @@ export function Dialog(props: DialogProps) {
         // The element is gone (a menu item that closed behind the modal is the
         // ordinary case) and focus is still ours, so without a fallback the browser
         // drops it on `<body>` and the reader loses their place on the page. Return it
-        // to the nearest context that SURVIVED, which is where they came from.
-        const survivor = chain.find((ctx) => ctx !== target && ctx.isConnected);
-        if (survivor) queueMicrotask(() => focusFirstIn(survivor));
+        // to the nearest surviving context that can actually TAKE focus - the walk's
+        // rule and where it stops are stated on `focusFirstIn`.
+        //
+        // Deferred like every other focus move here, and the walk runs inside the
+        // microtask rather than being resolved ahead of it because the panel can still
+        // be mounted at this instant: `insidePanel` has to read it then, so the panel
+        // subtree is skipped for what it is (a destination about to disappear) and not
+        // for what it happens to be right now.
+        const survivors = chain.filter((ctx) => ctx !== target && ctx.isConnected);
+        queueMicrotask(() => {
+          for (const ctx of survivors) if (focusFirstIn(ctx, insidePanel)) return;
+        });
       }
     }
     return open;

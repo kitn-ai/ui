@@ -630,6 +630,38 @@ describe('focus restoration when the opener is GONE', () => {
     expect(document.activeElement).toBe(trigger);
   });
 
+  test('the walk keeps going when the nearest surviving context has nothing left in it', async () => {
+    // The residual the single-link walk left behind. The ancestor chain is [opener,
+    // host, body, html], and the FIRST surviving context is not necessarily able to
+    // take focus: here the host survives with its only focusable inside it removed, so
+    // `focusFirstIn(host)` found nothing, the walk ended there, and focus fell to
+    // `<body>` - the same lost place, one step further out. Surviving and being able to
+    // take focus are different questions, so the walk asks the second one and continues
+    // outward to the next control on the page.
+    const host = document.createElement('div');
+    host.innerHTML = '<button id="opener">New project</button>';
+    document.body.appendChild(host);
+    const elsewhere = document.createElement('button');
+    elsewhere.id = 'elsewhere';
+    document.body.appendChild(elsewhere);
+
+    const el = await mount('<p>body</p>');
+    const opener = host.querySelector('#opener') as HTMLElement;
+    opener.focus();
+    el.show();
+    await flush();
+    expect(shadow(el).activeElement, 'precondition: focus went into the dialog').toBe(panel(el));
+
+    // The menu that held the item closes behind the dialog, taking the item with it and
+    // leaving the host it sat in with nothing focusable of its own.
+    opener.remove();
+    el.hide();
+    await flush();
+
+    expect(host.querySelector('button'), 'precondition: the host is EMPTY, not gone').toBeNull();
+    expect(document.activeElement, 'the walk must not stop at the emptied host').toBe(elsewhere);
+  });
+
   test('a target that survives is still restored to EXACTLY, not to its region', async () => {
     // The pair: the fallback must not take over from an ordinary restore, which lands on
     // the remembered element itself.

@@ -500,4 +500,39 @@ describe('Lightbox Escape reach and focus return', () => {
 
     expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Other photo' }));
   });
+
+  it('walks past a host that survived with nothing focusable in it', async () => {
+    // The shape measured on the FACADE, reproduced here where the ancestors are plain
+    // DOM: the wrapper around the trigger is the nearest surviving context and the
+    // trigger was its only focusable, so the walk ended on an empty host and focus fell
+    // to <body>. One step too early - the page still has controls on it.
+    render(() => (
+      <div>
+        <div id="host">
+          <Lightbox>
+            <LightboxTrigger>
+              <img alt="Thumbnail" src={IMAGE} />
+            </LightboxTrigger>
+            <LightboxContent label="Photo preview">
+              <img alt="Full size" src={IMAGE} />
+            </LightboxContent>
+          </Lightbox>
+        </div>
+        <button type="button">Other photo</button>
+      </div>
+    ));
+    const t = trigger();
+    t.focus();
+    fireEvent.click(t);
+    await tick();
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+
+    t.remove();
+    const host = document.getElementById('host')!;
+    expect(host.querySelector('button, [tabindex]'), 'precondition: the host is EMPTY, not gone').toBeNull();
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
+    await tick();
+
+    expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Other photo' }));
+  });
 });

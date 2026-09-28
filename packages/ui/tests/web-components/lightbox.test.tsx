@@ -500,4 +500,28 @@ describe('Escape and focus, the policy Dialog owns', () => {
 
     expect(document.activeElement).toBe(shutter);
   });
+
+  test('walks past the host when its trigger was removed and it had nothing else', async () => {
+    // The measured shape: this host's only focusable was the consumer's own slotted
+    // trigger, and it is removed while the modal is open. The host survives EMPTY, so a
+    // walk that stops at the first surviving context finds nothing to focus and the
+    // reader is dropped on `<body>` - one step too early, with the page's next control
+    // still sitting right there.
+    const el = await mount(`${TRIGGER}${CONTENT}`);
+    const next = document.createElement('button');
+    next.id = 'next';
+    document.body.appendChild(next);
+    const shutter = el.querySelector('#shutter') as HTMLElement;
+    shutter.focus();
+    el.show();
+    await flush();
+    expect(shadow(el).activeElement, 'precondition: focus went into the panel').toBe(panel(el));
+
+    shutter.remove();
+    el.hide();
+    await flush();
+
+    expect(el.querySelector('button'), 'precondition: the host kept no focusable of its own').toBeNull();
+    expect(document.activeElement, 'the walk must not stop at the emptied host').toBe(next);
+  });
 });
