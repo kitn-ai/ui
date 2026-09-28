@@ -146,19 +146,54 @@ kai-conversations[data-organizer="project"] kai-conversation-item[data-rail="con
 kai-conversations[data-organizer="project"] kai-conversation-item[data-rail="more"] { margin-inline-start: var(--rail-folder-step); }
 kai-conversation-item[data-rail="folder"] + kai-conversation-item { margin-block-start: var(--kai-density, 0.25rem); }
 
-/* THE PLAIN ROW'S BOX, and it is spelled here for one reason: the rows that DO
- * act are kai-buttons, whose box the kit paints inside their shadow root from
- * its own size="sm" variant - 32px tall, 12px of inline padding, rounded-md -
- * and nothing out here can borrow that. Spelling it makes the two kinds of row
- * read as one list: same height, same padding, so icon and label start at the
- * same x. TWO lists carry it, and both are a row that acts beside rows that
- * cannot: the row menu's Share item beside its three live items, and the rail's
- * top actions, where the one live row sits above three inert ones. */
+/* THE PLAIN ROW'S BOX. The rows that DO act are kai-buttons, whose box the kit
+ * paints inside their shadow root from its own size="sm" variant - 2rem tall,
+ * 12px of inline padding, rounded-md - and nothing out here can borrow that, so
+ * the box is spelled. Spelling it makes the two kinds of row read as one list:
+ * same height, same leading edge, so an icon and a label start at the same x.
+ * The 2rem height is the kit's own h-8 and is shared by both lists; the PADDING
+ * is per list, because the two lists stand among different rows (see the two
+ * rules below). */
 .menu-row, .rail-action {
   display: flex; align-items: center; gap: 0.5rem;
-  box-sizing: border-box; height: 2rem; padding: 0 0.75rem;
+  box-sizing: border-box; height: 2rem;
   border-radius: 6px;
 }
+/* THE MENU'S SHARE ROW keeps the kit's own box: it stands among the row menu's
+ * four live rows, which kai-button paints at px-3 with its `h-8`, so its inline
+ * padding is the 12px those rows carry. Nothing about the rail's row box reaches
+ * into a menu. */
+.menu-row { padding: 0 0.75rem; }
+/* THE RAIL'S FOUR TOP ACTION ROWS take the RAIL'S ROW BOX - the same 8px inline
+ * and 2px block every row in the rail carries - and the value is stated ONCE,
+ * here on the region that holds them, so the four rows cannot drift from each
+ * other and one number is not written four times. The three kinds of row that
+ * live BELOW this region (conversation rows, the Projects label, the folder
+ * headings) are kai-conversation-items, so they take the identical box from the
+ * kit's own `compact` density instead (DENSITY_ROW_BOX in
+ * components/conversation/conversation-item.tsx), which this pair is a
+ * deliberate COPY of: the four rows are this page's own markup and cannot
+ * inherit a shadow root's class.
+ *
+ * IT IS THE KIT'S SPACING SCALE, NOT A PAIR OF PIXELS. `theme.css` re-points
+ * Tailwind's `--spacing` at `--kai-density`, so one density unit IS one step of
+ * that scale: 8px inline is `px-2` (two units) and 2px block is `py-0.5` (half a
+ * unit), the same spelling the kit's density map uses. A page that moves the
+ * density knob moves these rows with the rows below them.
+ *
+ * THE COPY IS CHECKED RATHER THAN TRUSTED: `theActionRowsCarryTheRailRowBox` in
+ * states.mjs compares the action row's computed padding against a conversation
+ * row's own, so a change to one and not the other is a red run rather than a rail
+ * whose rows stop agreeing.
+ *
+ * The four rows are one list, so the step inside it is the rail's own row step
+ * (the kit's space-y-0.5), not the region's lonelier one. */
+.rail-actions {
+  --rail-row-pad-block: calc(var(--kai-density, 0.25rem) / 2);
+  --rail-row-pad-inline: calc(var(--kai-density, 0.25rem) * 2);
+  display: flex; flex-direction: column; gap: 0.125rem;
+}
+.rail-action { padding: var(--rail-row-pad-block) var(--rail-row-pad-inline); }
 /* THE ONE SIZE THE TWO LISTS DO NOT SHARE, and it is a measurement rather than a
  * preference: the row menu's Share item stands beside the menu's four live rows,
  * which the kit paints at text-xs (12px) inside kai-button's shadow root, so the
@@ -169,13 +204,21 @@ kai-conversation-item[data-rail="folder"] + kai-conversation-item { margin-block
  * 14px rows, which is a step the reader sees and no rule ever decided. */
 .menu-row { font-size: 0.75rem; }
 .rail-action, #rail-new-chat::part(button) { font-size: 0.875rem; }
+/* THE LIVE ROW'S BOX IS THE KIT'S, WITH THE RAIL'S PADDING IN IT. Its height stays
+ * the kit's own h-8 (2rem) - the same height the three plain rows beside it and
+ * the conversation rows below it measure - and only its inline padding is the
+ * rail's, so its glyph starts at the same x as the rail's own rows. `::part(button)`
+ * is the reach the kit documents for a button's box, the same one the guide cards'
+ * `height: auto` rule uses; nothing here pierces the shadow root. */
+#rail-new-chat::part(button) { padding: var(--rail-row-pad-block) var(--rail-row-pad-inline); }
 /* Dimmed, and nothing else: the row keeps its pointer events, because the
  * reason it is disabled is a tooltip and a tooltip needs a hover. Its BOX is
  * its own content rather than the region's width - the tooltip wraps its trigger
  * in a shrink-wrapping box of its own, inside the tooltip's shadow root, which
  * no stylesheet out here can stretch. The measured facts are the ones that
- * matter for it to read as a row: 32px tall with 12px of inline padding, so its
- * icon and label start at the same x as a kai-button row's. */
+ * matter for it to read as a row: 2rem tall, the rail's own 8px of inline
+ * padding, so its icon and label start at the same x as a kai-button row's and
+ * as the rail's own conversation rows'. */
 .menu-row-disabled, .rail-action-inert { color: color-mix(in srgb, currentColor 55%, transparent); }
 .menu-row-label, .rail-action-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
@@ -200,9 +243,7 @@ kai-conversation-item[data-rail="folder"] + kai-conversation-item { margin-block
  * `part="panel"` is the documented hook for exactly that; the width is a
  * reading measure, and nothing else about the panel is restated here. */
 .palette-dialog::part(panel) { width: min(36rem, calc(100vw - 2rem)); }
-/* The four rows are one list, so the step inside it is the rail's own row step
- * (the kit's space-y-0.5), not the region's lonelier one. */
-.rail-actions { display: flex; flex-direction: column; gap: 0.125rem; }
+/* (the four action rows' own list rule is above, with the row box they take.) */
 /* THE SECTION LABEL'S THREE TRAILING ACTIONS, in one row at the row's right end.
  * The region's own span lives in the row's shadow root and lays its slotted
  * children out as flex items, so these three decide their own box and the gap

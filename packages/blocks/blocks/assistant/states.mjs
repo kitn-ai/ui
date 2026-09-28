@@ -3399,6 +3399,31 @@ export default {
             ? true
             : `the acting row is announced disabled (${live[0].ariaDisabled})`;
         },
+        // ONE ROW BOX FOR THE FOUR, and the claim is a COMPARISON OF THE TWO
+        // SOURCES rather than a number typed here: the four action rows are the
+        // page's own markup, so the block's stylesheet states their box, while
+        // every row BELOW them is a kai-conversation-item taking the kit's
+        // `compact` density box. The two are a copy of one value, so this reads
+        // both off the page and fails when they part - which is what a copy this
+        // size needs, because a change to one and not the other is invisible.
+        theActionRowsCarryTheRailRowBox: (page) => page.evaluate(() => {
+          const pad = (el) => {
+            if (el === null || el === undefined) return null;
+            const cs = getComputedStyle(el);
+            return `${cs.paddingBlock} ${cs.paddingInline}`;
+          };
+          const item = document.querySelector('kai-conversations > kai-conversation-item[data-rail="conversation"]');
+          const row = item?.shadowRoot?.querySelector('[part="row"]') ?? null;
+          const inert = document.querySelector('.rail-action');
+          const live = document.getElementById('rail-new-chat');
+          const button = live?.shadowRoot?.querySelector('[part="button"]') ?? null;
+          const wants = pad(row);
+          if (wants === null) return 'the rail holds no conversation row to read the box off';
+          if (button === null) return 'the live action row painted no button box';
+          const got = { inertActionRow: pad(inert), liveActionRow: pad(button) };
+          const off = Object.entries(got).filter(([, value]) => value !== wants);
+          return off.length === 0 ? true : JSON.stringify({ conversationRow: wants, ...got });
+        }),
         // ONE CONTROL NAMED "New chat" ON THE PAGE. The rail's built-in bar used to
         // hold the other one; the header region replaces that bar, so the row IS the
         // affordance and every path through it is the one `newChat` action. (The
@@ -3420,13 +3445,18 @@ export default {
         theGroupIsSeparatedFromWhatFollows: true,
         theRowsSitAboveTheTree: true,
         theInertRowsSayWhyTheyCannotAct: true,
+        theActionRowsCarryTheRailRowBox: true,
         oneNewChatOnThePage: true,
         theCollapseControlIsStillThere: true,
       },
       styleProbes: [
         style('railActionInertRow', (page) => page.getByRole('button', { name: 'Images', exact: true }),
-          ['height', 'fontSize', 'paddingInline', 'color']),
+          ['height', 'fontSize', 'paddingBlock', 'paddingInline', 'color']),
         style('railActionLiveRow', (page) => page.locator('#rail-new-chat'), ['height']),
+        // The live row's BOX lives in kai-button's shadow root, so the padding the
+        // block sets through `::part(button)` is only observable there.
+        style('railActionLiveRowPart', (page) => page.locator('#rail-new-chat').locator('[part="button"]'),
+          ['height', 'paddingBlock', 'paddingInline']),
       ],
     },
     {
@@ -3626,6 +3656,54 @@ export default {
             ? true
             : `${same.length} content rows are painted in the label register`;
         },
+        // NOTHING IS CLIPPED BY THE TIGHTER BOX. 2px of block padding is small
+        // enough that a glyph, the trailing control or a focus ring could be cut
+        // by the row it sits in, and a clipped row paints no error - so this reads
+        // the BOXES rather than trusting the number: every row kind's own box
+        // against the boxes inside it, and the four action rows against the region
+        // that holds them. Read on every row the rail renders, so a row kind that
+        // appears later is measured rather than assumed.
+        nothingInARowIsClipped: (page) => page.evaluate(() => {
+          const bad = [];
+          let checked = 0;
+          const check = (label, rowEl, kids) => {
+            const row = rowEl.getBoundingClientRect();
+            checked += 1;
+            for (const [name, child] of kids) {
+              if (child === null || child === undefined) continue;
+              const box = child.getBoundingClientRect();
+              if (box.width <= 0 || box.height <= 0) continue;
+              const over = Math.max(row.top - box.top, box.bottom - row.bottom);
+              if (over > 0.5) {
+                bad.push(`${label}/${name} overflows its ${Math.round(row.height)}px row by ${Math.round(over)}px`);
+              }
+            }
+          };
+          for (const item of document.querySelectorAll('kai-conversations > kai-conversation-item')) {
+            const kind = item.getAttribute('data-rail') ?? 'unknown';
+            const row = item.shadowRoot?.querySelector('[part="row"]') ?? null;
+            if (row === null) {
+              bad.push(`the ${kind} row painted no row box`);
+              continue;
+            }
+            check(kind, row, [
+              ['glyph', item.querySelector('.row-folder-icon')],
+              ['title', item.querySelector('.row-title-text')],
+              ['menu', item.querySelector('.row-menu')],
+            ]);
+          }
+          const rows = [...document.querySelectorAll('.rail-action'), document.getElementById('rail-new-chat')];
+          for (const action of rows) {
+            if (action === null) continue;
+            const button = action.shadowRoot?.querySelector('[part="button"]') ?? null;
+            check('action', action, [
+              ['glyph', button?.querySelector('svg') ?? action.querySelector('kai-icon')],
+              ['label', action.querySelector('.rail-action-label')],
+            ]);
+          }
+          if (checked < 5) return `${checked} rows were measurable, which is fewer than the rail renders`;
+          return bad.length === 0 ? true : bad.join(' | ');
+        }),
       },
       expect: {
         theProjectsLabelHeadsTheFolders: true,
@@ -3634,6 +3712,7 @@ export default {
         headingIsOneLine: true,
         theSectionStartsCarryTheAir: true,
         theSectionLabelsTakeTheMutedToken: true,
+        nothingInARowIsClipped: true,
       },
       styleProbes: [
         // THE REGISTERS, pinned by this state rather than described: three rows'
@@ -3649,7 +3728,14 @@ export default {
         style('railFolderHeadingTitle', (page) => page.locator('kai-conversations > kai-conversation-item[data-rail="folder"]:not([data-folder=""]) > span').first(),
           ['fontSize', 'color']),
         style('railProjectsLabelRow', (page) => page.locator('kai-conversations > kai-conversation-item[data-rail="section"]'),
-          ['height', 'marginBlockStart']),
+          ['height', 'marginBlockStart', 'paddingBlock', 'paddingInline']),
+        // THE ROW BOX OF THE THREE KINDS THAT ARE THIS ELEMENT, registered so the
+        // recorded baseline carries the number the padding change produced: the
+        // kit's `compact` box is what sets it (DENSITY_ROW_BOX).
+        style('railConversationRow', (page) => page.locator('kai-conversations > kai-conversation-item[data-rail="conversation"]').first().locator('[part="row"]'),
+          ['height', 'paddingBlock', 'paddingInline']),
+        style('railFolderHeadingRow', (page) => page.locator('kai-conversations > kai-conversation-item[data-rail="folder"]:not([data-folder=""])').first().locator('[part="row"]'),
+          ['height', 'paddingBlock', 'paddingInline']),
       ],
     },
     {

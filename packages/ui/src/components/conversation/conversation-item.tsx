@@ -24,10 +24,20 @@ export type ConversationRowDensity = 'default' | 'compact' | 'panel';
  * be imported from the panel at runtime. `conversation-item-density.test.tsx`
  * derives the expected utilities from conversation-panel.tsx's SOURCE and
  * fails if the two drift.
+ *
+ * `compact` is the DENSE single-line box - `px-2 py-0.5`, 8px inline and 2px
+ * block - and it is deliberately the tightest box on the axis rather than one
+ * step below `default`: a rail row is furniture listed one under another, and
+ * the consumer that asked for it (the assistant block) wanted the row's own
+ * height to come from its padding rather than from a fixed box. The pixel
+ * value follows the same scale as every other box here: `--spacing` is
+ * re-pointed at `--kai-density` (theme.css), so `px-2` is two density units and
+ * `py-0.5` half of one. Read as pixels at the default unit: 8px and 2px, which
+ * with the 20px text-sm line is a 24px row.
  */
 export const DENSITY_ROW_BOX: Record<ConversationRowDensity, string> = {
   default: 'px-2.5 py-2',
-  compact: 'px-2.5 py-1.5',
+  compact: 'px-2 py-0.5',
   panel: 'px-3 py-2.5',
 };
 

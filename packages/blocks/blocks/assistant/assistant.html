@@ -237,11 +237,14 @@
              in another element would go standalone by the container's own rule
              and lose the roving focus and the container's active state. -->
         <!-- The row's own density, from the kit's axis rather than a padding
-             spelled here: `default` is px-2.5 py-2 (a 44px rail row beside the
-             32px kai-button rows above it), and `compact` is the same box one
-             step tighter top and bottom (px-2.5 py-1.5), which is what makes a
-             rail row carry its label rather than float in it. Every row of the
-             rail is this one element, so the headings tighten with the rows. -->
+             spelled here. `compact` is the kit's DENSE box: px-2 py-0.5 (8px
+             inline, 2px block, both on the density scale), which makes a rail row
+             carry its label rather than float in it - the same box the four top
+             action rows above take from this block's stylesheet, so every row in
+             the rail is 2rem tall and its label starts at the same x. `default` is
+             px-2.5 py-2, a taller row for the two-line anatomy this rail does not
+             show. Every row of the rail is this one element, so the headings
+             tighten with the rows. -->
         <kai-conversation-item
           *for="row of conversationRows"
           :key="row.id"
