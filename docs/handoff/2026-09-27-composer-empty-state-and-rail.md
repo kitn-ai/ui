@@ -251,3 +251,19 @@ The owner supplied ChatGPT's sidebar and command palette as a **layout blueprint
 2. **Every round shares one git index, so a plain `git commit` commits whatever any peer has staged.** A plan round's commit swept in a live round's staged `mock.ts` deletion; it caught it and amended. A `git diff --cached` check does not close this, because a peer can stage between the check and the commit. **Commit with explicit paths: `git commit -m "…" -- <paths>`.**
 
 **Also landed:** `722d21d1` — all three previously-red gates green (`lint:prop-docs` with **zero waivers**, comment-references, cdn-pins). And the voice plan (`75bc6a28`, 8 tasks), which **corrected the spec in three places** and caught that §8.3's claim that `web-component-non-scalar.json` is hand-written is false — it is generated.
+
+
+## Late session, tip after `7e7c61e1` — what is left
+
+**Landed since the sidebar section above:** `68673770` the fresh-profile rail (Projects, four named folders and Recents on a **cleared store**, plus a `+` dialog that creates a project which persists; failing-first pasted, all 50 states green in light, **state 40's five probes byte-identical**; the owner's two rulings visible: hover icons **28→24px**, section-label row back to **36px**) · `0bd3b4ac` the react layout gap recorded **where the gate is read** (`SKIP … NOT measured` per block) after **disproving its premise**: the probes work on react, the obstacle is `skipLayout: true` in each block's `states.mjs` · `d5c71e55` the shot suites **compare instead of overwriting** (temp captures, `KAI_SCREENSHOT_UPDATE=1` as the deliberate re-record in no CI step; a **platform guard** rather than the advisory map, so the ten real promptinput assertions stay in the gate) · `8ba3495a` **seven** orphaned Playwright suites wired, five blocking, list derived from scripts · `ce4a0549` the **vue** form with all four consumers proven to derive from `BLOCK_FORMS` · `84a5a893` `in-app-assistant` ported and its `gateways` **restored and backed** · `e187cc4e` + `7e7c61e1` the routed fixtures made true, and one stale filename assertion turned into a comparison between two declarations.
+
+**BLOCKING, in flight (`1356e827`):** `packages/ui/dist/` is **incomplete** — a peer's build left it without `state.js`, `wire.js`, `schemas.js`, `stores.js` — so the block driver cannot boot for anyone, the assistant's baselines for states 43–50 are unrecorded, and dark is unmeasured. Full rebuild with the cache off, entry points confirmed, re-record both schemes, then `verify:blocks`.
+
+**Also in flight:** `6b98cedc` the **svelte** renderer (the second, following the vue pattern) · `cf84314f` the **`kai-dialog` keyboard defect** (a controlled dialog cannot be closed by keyboard; focus lands on `BODY`) — the fix must surface the close intent, not close a controlled dialog itself.
+
+**Queued, and none of it needs a design decision:**
+1. **With a quiet tree:** flip `skipLayout` off in all three blocks and re-record the react baseline — that closes the react-layout gap.
+2. Re-record the **stale `promptinput` baselines** (8 of 8 differ), as a deliberate act.
+3. **The source split** (the 2067-line controller), then **the palette** — both wait on the block files, and the split goes first so the palette lands in a small file.
+4. `90/90` in `create-kai` once `dist/` is whole.
+5. The three remaining renderer costs (angular, solid) once svelte is proven; the group-persistence API designed from the block's real need; a coupling-map row for the block-manifest/`create-kai` coupling that a rename broke silently; and the **final ladder**.
