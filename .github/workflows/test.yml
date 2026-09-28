@@ -336,6 +336,30 @@ jobs:
       - name: llms-full.txt size budget
         run: pnpm --filter @kitn.ai/ui run lint:llms-size
 
+      # The AUTHORED block sources' size budget. The block splits paid twice and
+      # then stopped (docs/superpowers/specs/2026-09-27-block-source-structure-design.md):
+      # a block module may import nothing from another at runtime, so every
+      # further split of the entry would buy a few percent for a new parameter
+      # surface. The entry's size is a consequence of that constraint, and the
+      # rule exempts `*.controller.ts` by NAME for that reason. What is left to
+      # guard is the modules, and nothing else priced their growth.
+      #
+      # Ceilings are RATCHETS derived from the tree -- the largest module (557)
+      # and the largest markup/style file (893) that exist -- not round numbers
+      # and not the entry. The walk is derived too: every directory holding a
+      # registry-item.json, every file in it, so a new block or a new file needs
+      # no edit here; the dev-only `states.mjs` is exempt by name with its
+      # reason in the rule, and a file of no recognised kind is a hard failure
+      # rather than a skip. Zero measured files is a hard failure, like the CDN
+      # pin guard: a size check that finds nothing has failed to look.
+      #
+      # Reads block sources and line counts only -- no build, no dist, ~1s
+      # (`node packages/ui/scripts/lint-block-file-size.mjs`). --self-test
+      # plants an oversized module, an oversized page, an undeclared file and an
+      # unclassifiable one and watches each go red, then removes them.
+      - name: block source size budget
+        run: pnpm --filter @kitn.ai/ui run lint:block-file-size
+
       # Every script reading `npm pack --json` must go through the one parser
       # that knows both container shapes. npm 12 made the top level an object
       # keyed by package name; `JSON.parse(raw)[0]` is `undefined` under it, and
