@@ -249,6 +249,11 @@ async function runBlock({ app, block, files, port, shots }) {
   child.stdout.on('data', (d) => { serverLog += d; });
   child.stderr.on('data', (d) => { serverLog += d; });
   child.on('exit', (code) => { exited.code = code ?? 0; });
+  // The skipped names are read AFTER the finally below, so the binding is declared
+  // here rather than inside the `try` that fills it: a block-scoped `const` there is
+  // invisible at the `return`, and the throw it produced killed the whole cell on the
+  // first passing block instead of reporting a red.
+  let skipped = { probes: [], styles: [] };
   try {
     if (!(await waitForServer(child, port, exited))) {
       return { stage: 'server', ok: false, output: `${block.name}: the vite dev server never came up on port ${port}:\n${serverLog}` };
@@ -271,7 +276,7 @@ async function runBlock({ app, block, files, port, shots }) {
       const lines = ((err.stdout || '') + (err.stderr || '')).split('\n').filter((l) => /RED |FAIL /.test(l));
       return { stage: 'driver', ok: false, output: `${block.name}: the block driver went red on the react page:\n${lines.join('\n') || err.message}` };
     }
-    const skipped = existsSync(verdictPath)
+    skipped = existsSync(verdictPath)
       ? JSON.parse(readFileSync(verdictPath, 'utf8')).runs.reduce(
           (acc, r) => ({ probes: [...acc.probes, ...(r.skippedProbes ?? [])], styles: [...acc.styles, ...(r.skippedStyles ?? [])] }),
           { probes: [], styles: [] },

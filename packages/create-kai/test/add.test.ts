@@ -26,6 +26,7 @@ import {
   FRAMEWORK_SIGNALS,
   declaredMockFiles,
   detectForm,
+  landingForm,
   loadBlocks,
   planAdd,
   resolveAdd,
@@ -84,6 +85,25 @@ async function runInto(
     ...over,
   });
   return { code, out, err, asked };
+}
+
+/**
+ * A package.json for THIS file's html-form fixtures: a project whose framework
+ * signal lands on the elements form.
+ *
+ * Derived from `FRAMEWORK_SIGNALS` rather than typed as `vue`, because the fixture
+ * is a claim about which form the add path chooses and a hand-typed dependency
+ * silently stops making it: `vue` landed on `html` while the vue tree did not
+ * exist, and once it did these four cases drove a vue project and then asserted
+ * the html form's files, so they failed on `blocks/assistant/assistant.html not
+ * written` - a message that reads like a missing build artifact and is not.
+ */
+function htmlFormProject(): { name: string; dependencies: Record<string, string> } {
+  const signal = FRAMEWORK_SIGNALS.find((s) => s.framework === null);
+  if (!signal || landingForm(signal.framework) !== 'html') {
+    throw new Error('no framework signal lands on the html form any more: pick the fixture this file should drive');
+  }
+  return { name: 'host', dependencies: { [signal.dep]: '^1.0.0' } };
 }
 
 /** A fresh project directory with the given package.json, or none. */
@@ -254,7 +274,7 @@ describe('web-component form (any non-react project)', () => {
 
   it('writes every manifest file and pins the kit', async () => {
     for (const block of all()) {
-      const dir = await project(`wc-${block.name}`, { name: 'host', dependencies: { vue: '^3.0.0' } });
+      const dir = await project(`wc-${block.name}`, htmlFormProject());
       const run = await runInto(dir, [block.name]);
       expect(run.code, run.err.join('\n')).toBe(0);
       // The html form's OWN file list, not the manifest's: the authored
@@ -362,7 +382,7 @@ describe('web-component form (any non-react project)', () => {
     // The README is what a consumer reads to find out what the block needs.
     // Writing it and not printing it makes the terminal end on a file list.
     for (const block of all()) {
-      const dir = await project(`readme-${block.name}`, { name: 'host', dependencies: { vue: '^3.0.0' } });
+      const dir = await project(`readme-${block.name}`, htmlFormProject());
       const run = await runInto(dir, [block.name]);
       expect(run.code, run.err.join('\n')).toBe(0);
       const written = await readFile(path.join(dir, fileTarget('html', block.name, README_FILE)), 'utf8');
@@ -588,7 +608,7 @@ describe('per-block item JSON URLs resolve through the same path (the integratio
     // the manifest a consumer fetches. The bundled copy already has them on
     // disk, so nothing is re-stripped here.
     const item = buildRegistryItem(withStrippedTwins(block, (source) => source));
-    const dir = await project('url-case', { name: 'host', dependencies: { vue: '3' } });
+    const dir = await project('url-case', htmlFormProject());
     let fetched: string | undefined;
     const run = await runInto(dir, [`https://registry.example/r/${block.name}.json`], {
       fetchJson: async (url) => {
@@ -954,7 +974,7 @@ describe('the data-mode seam: one file written, chosen from the manifest', () =>
     // './mock'), so this is the case that keeps the refusal from coming back.
     const assistant = blocks.find((b) => b.name === 'assistant');
     expect(assistant, 'the assistant block is not in the shipped registry').toBeDefined();
-    const noMockDir = await project('assistant-no-mock', { name: 'host', dependencies: { vue: '^3.0.0' } });
+    const noMockDir = await project('assistant-no-mock', htmlFormProject());
     const noMock = await runInto(noMockDir, ['assistant', '--no-mock']);
     expect(noMock.code, noMock.err.join('\n')).toBe(0);
     const noneWritten = await readFile(
