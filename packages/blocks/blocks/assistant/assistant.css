@@ -126,6 +126,23 @@ kai-conversation-item[data-rail="folder"] + kai-conversation-item { margin-block
  * their sizes are the kit's own and land within a couple of pixels of each
  * other. */
 .row-trio { display: flex; align-items: center; gap: 0.125rem; }
+/* THE THREE CONTROLS ARE 24px, and this is a box the OWNER set rather than a
+ * density the block picked. At the kit's own `icon-sm` (28px) the trio was the
+ * tallest thing in a section-label row, which pushed those rows to 40px and made
+ * a LABEL read taller than the conversation rows under it. 24px is the
+ * accessibility floor for a pointer target and keeps the label's row at whatever
+ * the row's own density gives it - the row height is NOT adjusted to compensate,
+ * on purpose: the fix is the control, not the row.
+ *
+ * The two kai-buttons are reached through `::part(button)`, the same reach the
+ * guide cards use. The MENU's trigger is a button inside the element's own
+ * shadow root and kai-menu exposes no part for it, so what is set there is the
+ * HOST's box - a host is a page's own element and this block pierces nothing.
+ * The row reads the host, which is what makes the label's height move; the
+ * button inside keeps the kit's 28px box and a press anywhere in the host still
+ * opens the menu, so nothing was traded for the two pixels. */
+.row-trio > * { width: 1.5rem; height: 1.5rem; }
+.row-trio kai-button::part(button) { width: 1.5rem; height: 1.5rem; padding: 0; }
 /* The wrapper needs an author-level rule to hide at all: the elements' shared
  * base sheet sets :host{display:block} on the controls inside it and this rule
  * sets flex on the wrapper, either of which outranks the UA's [hidden] one - the
@@ -342,3 +359,26 @@ kai-button[hidden] { display: none; }
   line-height: 1.35;
   color: color-mix(in srgb, currentColor 65%, transparent);
 }
+
+/* THE CREATE-PROJECT DIALOG's slotted content. The dialog paints its own panel,
+ * header, body and footer regions (they are `part`s of its shadow root); what is
+ * here is what sits INSIDE those regions, which is the page's to lay out. No
+ * colour is spelled: the panel and its borders are the kit's tokens, and the one
+ * muted line takes the same `currentColor` mix the voice strip and the guide
+ * cards' summaries use. */
+.project-dialog-title { font-size: 0.875rem; font-weight: 500; }
+
+.project-dialog-body { display: flex; flex-direction: column; gap: 0.75rem; min-width: 20rem; }
+
+/* The disclosure under the field: what this block keeps and what a real app
+ * replaces. Muted because it is a note ABOUT the form rather than an instruction
+ * in it, and wrapped to a measure rather than to the dialog's width. */
+.project-dialog-note {
+  margin: 0;
+  max-width: 24rem;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: color-mix(in srgb, currentColor 65%, transparent);
+}
+
+.project-dialog-footer { display: flex; justify-content: flex-end; gap: 0.5rem; }

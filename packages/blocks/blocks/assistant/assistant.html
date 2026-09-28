@@ -563,6 +563,85 @@
         </div>
       </kai-conversations>
 
+      <!-- THE ONE THING A RAIL CANNOT DO FOR ITSELF: make a project. Every folder
+           the rail renders is derived from the conversations the store holds, so
+           a reader with no history had no folders, no `Projects` label and no way
+           to make either - and the kebab's `New project` row was inert with the
+           reason "this block ships no project picker". This is that picker: the
+           kit's dialog and the kit's input, driving the block's own action.
+
+           WHY A DIALOG AND NOT A FIELD IN THE LABEL ROW: naming a project is a
+           commitment that outlives the click (it is written to the block's key),
+           and a rail row is a control the reader activates by moving through the
+           list with arrows. A modal is the kit's own answer for a commitment,
+           and it is the one surface here that does not add a stop to the rail's
+           roving walk.
+
+           IT SELF-MANAGES ITS OPEN STATE, and that is the kit's own shape for this
+           surface rather than a shortcut: `kai-dialog` reports Escape and a backdrop
+           press through `kai-open-change` only while it owns that state, and binding
+           `open` would make it controlled - which routes the request to close through
+           a callback the facade does not wire, so Escape would be swallowed. The block
+           opens it through the element's method (`#ref`) and listens for the close, so
+           Escape, the backdrop and the Cancel button all take the same road. The kit
+           owns the modal part: it moves focus into the panel on open, cycles Tab
+           inside it, closes on Escape, and restores focus to what had it - so the rail
+           is behind the dialog and never stranded by it.
+
+           WHERE A CREATED PROJECT IS KEPT is said INSIDE the dialog rather than
+           only in this file: the dialog is where a consumer reads what this
+           block really does, and a key nobody is told about is a key that
+           surprises them on their second browser. The note row in the organizer
+           menu says the same thing one screen over. -->
+      <kai-dialog
+        id="project-dialog"
+        #ref="projectDialog"
+        :theme="themeMode"
+        label="New project"
+        @kai-open-change="projectDialogToggle"
+      >
+        <span slot="header" class="project-dialog-title">New project</span>
+        <div class="project-dialog-body">
+          <kai-input
+            id="project-name"
+            :theme="themeMode"
+            label="Project name"
+            placeholder="e.g. Release notes"
+            .value="projectDraft"
+            :error="projectNameError"
+            @kai-input="projectNameInput"
+          ></kai-input>
+          <!-- The disclosure, in the register the block's other demo seams use:
+               what this is, and what a real app replaces. -->
+          <p class="project-dialog-note">
+            The project appears in the sidebar straight away and its name is kept
+            in this block's own demo key. The kit stores which group a
+            conversation is in, not the groups themselves, so point this dialog
+            at the endpoint that owns yours.
+          </p>
+        </div>
+        <div slot="footer" class="project-dialog-footer">
+          <kai-button
+            id="project-cancel"
+            :theme="themeMode"
+            variant="ghost"
+            size="sm"
+            @kai-click="cancelProject"
+          >
+            Cancel
+          </kai-button>
+          <kai-button
+            id="project-create"
+            :theme="themeMode"
+            variant="default"
+            size="sm"
+            @kai-click="createProject"
+          >
+            Create project
+          </kai-button>
+        </div>
+      </kai-dialog>
+
       <main slot="main" class="main">
         <header class="topbar">
           <div class="topbar-start">

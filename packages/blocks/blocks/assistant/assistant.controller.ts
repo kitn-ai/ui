@@ -88,6 +88,7 @@ import {
 } from '@kitn.ai/ui/stores';
 import type {
   KaiConversationsElement,
+  KaiDialogElement,
   KaiPromptInputElement,
   KaiVoiceInputElement,
   KaiWorkspaceElement,
@@ -558,10 +559,11 @@ const RAIL_NEW_PROJECT_ID = 'new-project';
  *    its last write, and the one `sortOrder` the data carries orders conversation
  *    GROUPS, not chats - so a live row here would reorder nothing and report
  *    nothing, which is the failure this block treats as its worst.
- *  - the plus row has nothing behind it either, since the block ships no project
- *    picker and a group is the consumer's own data, so it is disabled and the
- *    sentence under it says so rather than leaving a live-looking no-op. A real
- *    app points it at the screen that creates a project.
+ *  - the plus row MAKES A PROJECT: it opens the block's own create dialog, which
+ *    names a project, writes it under the block's demo key and re-projects the
+ *    rail. Where it is kept is said in the row's note, because that is the part a
+ *    consumer has to replace - the kit has no group-persistence API, so the key
+ *    stands in for the endpoint a real app owns.
  *
  * The rows that DO act are the same rows the rail is already made of: the two
  * organizers and the two sorts are a state change and a comparator, and both are
@@ -570,6 +572,7 @@ const RAIL_NEW_PROJECT_ID = 'new-project';
 function projectRailMenu(
   organizer: RailOrganizer,
   sort: RailSort,
+  projectsKey: string,
 ): Pick<AssistantState, 'railOrganizer' | 'railSort' | 'railItems'> {
   return {
     railOrganizer: organizer,
@@ -622,13 +625,16 @@ function projectRailMenu(
         id: RAIL_NEW_PROJECT_ID,
         label: 'New project',
         icon: 'plus',
-        disabled: true,
-        description: 'This block ships no project picker',
+        description: 'Name a project, and the rail grows a folder for it',
       },
-      // A note, not a disabled row's second line: the reason is a sentence about
-      // the app rather than about this row, and the kit renders it as the muted
-      // non-interactive line the composer's own disabled capability already uses.
-      { note: true, label: "Not in this template: a project is your app's own data, so point this row at the screen that creates one." },
+      // A note, not a disabled row's second line: where a created project is KEPT
+      // is a fact about this block rather than about the row, and the kit renders
+      // it as the muted non-interactive line the composer's own disabled
+      // capability already uses. It says the whole truth rather than the
+      // reassuring half: the kit stores which group a conversation is in and
+      // nothing about the groups themselves, so these names live in the block's
+      // own demo key and a real app points this row at its own endpoint.
+      { note: true, label: `This block keeps the projects you make in its own demo key (${projectsKey}). The kit stores a conversation's group, not the groups themselves, so a real app points this row at the endpoint that owns them.` },
     ],
   };
 }
@@ -848,12 +854,64 @@ const PROJECTS: readonly DemoProject[] = [
   { id: 'kanban', name: 'Kanban board', topics: ['kanban', 'sprint', 'task'] },
 ];
 
+/** THE PROJECTS A READER CREATED, kept beside `PROJECTS` and for the same
+ *  reason: a project is a NAME over the group ids the store already carries, so
+ *  the block keeps the names and nothing else. They live under the block's own
+ *  demo key (`kai:<storageKey>:projects`, see `projectKey`), which is a DEMO
+ *  decision and is said out loud in the dialog that writes it: THE KIT HAS NO
+ *  GROUP-PERSISTENCE API. `ConversationStore` persists a conversation's
+ *  `groupId` and nothing about the groups themselves, so a project exists
+ *  nowhere a consumer's backend could hand back; this key is a stand-in for the
+ *  endpoint a real app owns, and it is why a created project is the reader's for
+ *  this browser and no other.
+ *
+ *  A project created here carries NO TOPICS, so the demo's opening-turn filing
+ *  rule can never file into it. That is the honest shape: nothing on this page
+ *  asks which project a new chat belongs to, and topics inferred from a name
+ *  would file conversations for a reason nobody could see. A conversation
+ *  reaches such a project the way the store already supports - `setGroup` writes
+ *  its id onto a row - and the folder is then labelled with the name kept here. */
+const projectKey = (storageKey: string): string => `kai:${storageKey}:projects`;
+
+/** What the block can read back from its own key: entries that carry both a name
+ *  and an id. Anything else is dropped rather than trusted, because this key is
+ *  plain storage a reader (or a half-finished write) can leave in any shape, and
+ *  a project with no name would be a folder with no label. */
+function storedProjects(key: string): DemoProject[] {
+  try {
+    const raw = localStorage.getItem(key);
+    if (raw === null) return [];
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.flatMap((entry) => {
+      const candidate = entry as Partial<DemoProject> | null;
+      return typeof candidate?.id === 'string' && typeof candidate?.name === 'string' && candidate.id !== ''
+        ? [{ id: candidate.id, name: candidate.name, topics: [] }]
+        : [];
+    });
+  } catch {
+    return [];
+  }
+}
+
+/** The id a project's name gets: the name folded to a slug, and a numeric
+ *  suffix while that slug is taken. Derived from the name rather than minted at
+ *  random because the id is the label a folder falls back to (see `sectionLabel`)
+ *  when the catalogue cannot name it - a uuid there is a folder named after
+ *  nothing. */
+function projectId(name: string, taken: readonly DemoProject[]): string {
+  const slug = foldOpening(name).replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'project';
+  let id = slug;
+  for (let n = 2; taken.some((project) => project.id === id); n += 1) id = `${slug}-${n}`;
+  return id;
+}
+
 /** The project whose subject the opening names, or undefined for a subject the
  *  catalogue does not know (Recents). The catalogue's own order is the
  *  tie-break: the first project that claims a word keeps it. */
-function projectOfOpening(opening: string): string | undefined {
+function projectOfOpening(opening: string, catalogue: readonly DemoProject[]): string | undefined {
   const words = new Set(foldOpening(opening).split(/[^a-z0-9]+/));
-  return PROJECTS.find((project) => project.topics.some((topic) => words.has(topic)))?.id;
+  return catalogue.find((project) => project.topics.some((topic) => words.has(topic)))?.id;
 }
 
 /** The text of the conversation's FIRST user turn: what the demo files by.
@@ -884,17 +942,18 @@ function orderRows(
   summaries: readonly ConversationSummary[],
   organizer: RailOrganizer,
   sort: RailSort,
+  catalogue: readonly DemoProject[],
 ): ConversationSummary[] {
   const compare = RAIL_SORT_COMPARATORS[sort];
   if (organizer === 'list') return [...summaries].sort(compare);
   const rank = (groupId: string | undefined): number => {
-    const at = PROJECTS.findIndex((project) => project.id === groupId);
+    const at = catalogue.findIndex((project) => project.id === groupId);
     if (at !== -1) return at;
     // A group the catalogue does not know still gets a folder of its own, ahead
     // of the remainder: a consumer's own store can carry its own groups, and a
     // row the catalogue cannot name is reachable rather than filed in Recents.
     // The conversations with no group at all sort last.
-    return groupId === undefined ? PROJECTS.length + 1 : PROJECTS.length;
+    return groupId === undefined ? catalogue.length + 1 : catalogue.length;
   };
   return [...summaries].sort((a, b) => {
     const byProject = rank(a.groupId) - rank(b.groupId);
@@ -919,28 +978,6 @@ function narrow(rows: readonly ConversationRow[], query: string): readonly Conve
   return query === ''
     ? rows
     : rows.filter((row) => row.title.toLowerCase().includes(query));
-}
-
-/** The projects the surviving rows make, read off them rather than declared
- *  beside them, so a row can never be in a section the rail does not show. */
-function sectionsFrom(rows: readonly ConversationRow[]): ConversationSection[] {
-  const counts = new Map<string, number>();
-  for (const row of rows) {
-    if (row.group !== '') counts.set(row.group, (counts.get(row.group) ?? 0) + 1);
-  }
-  const conversationSections: ConversationSection[] = [];
-  let inGroup = '';
-  for (const row of rows) {
-    if (row.group !== '' && row.group !== inGroup) {
-      conversationSections.push({
-        id: row.group,
-        name: sectionLabel(row.group, row.groupName),
-        count: counts.get(row.group) ?? 0,
-      });
-    }
-    inGroup = row.group;
-  }
-  return conversationSections;
 }
 
 /** What a folder heading reads: the project's own name, or - for a group the
@@ -991,6 +1028,7 @@ function folderNode(
   group: string,
   groupName: string,
   open: boolean,
+  empty = false,
 ): ConversationRow {
   const heading = kind === 'folder';
   const title = heading ? (group === '' ? RECENTS_LABEL : sectionLabel(group, groupName)) : SHOW_MORE_LABEL;
@@ -998,8 +1036,14 @@ function folderNode(
     ...controlNode(`${heading ? FOLDER_HEADING_NODE : FOLDER_MORE_NODE}${group}`, kind, title, group, groupName),
     // A folder's heading leads its own run with a caret that IS its open state;
     // the Show more row that ends a run has none.
-    caretHidden: !heading,
-    caretName: heading ? (open ? 'chevron-down' : 'chevron-right') : '',
+    //
+    // AN EMPTY FOLDER HAS NONE EITHER (`empty`): a heading over no rows would
+    // carry a caret that reveals nothing, which is a control that lies about
+    // what is under it. A folder grows its caret in the same pass that emits the
+    // rows, so a project starts without one the moment it holds its first
+    // conversation.
+    caretHidden: !heading || empty,
+    caretName: heading && !empty ? (open ? 'chevron-down' : 'chevron-right') : '',
     // THE RECENTS HEADING IS THE RAIL'S SECOND SECTION LABEL, so it carries the
     // same trailing actions the Projects label does; a folder INSIDE Projects
     // heads a folder rather than a section and carries none.
@@ -1036,13 +1080,18 @@ function sectionNode(label: string): ConversationRow {
  *  ONE LIST EMITS THE ROWS AND NOTHING ELSE - no section label, no folder
  *  heading, no Show more, and the closed/expanded sets unread. There is no folder
  *  for a heading to head, and a row the reader cannot file has nothing to reveal
- *  from, so the flat branch is the whole of what "one list" means here. */
+ *  from, so the flat branch is the whole of what "one list" means here.
+ *
+ *  A RAIL WITH NO ROWS AT ALL IS THE FIXTURE (`fixtureRail`), and the reader's
+ *  own projects that hold nothing lead the folders either way. */
 function railNodes(
   rows: readonly ConversationRow[],
   closed: readonly string[],
   expanded: readonly string[],
   query: string,
   organizer: RailOrganizer,
+  created: readonly DemoProject[],
+  fixture: boolean,
 ): ConversationRow[] {
   // ONE LIST IS THE ROWS UNDER ONE LABEL AND NOTHING ELSE: no folder headings, no
   // Show more, and the closed/expanded sets unread, because there is no folder for
@@ -1054,10 +1103,28 @@ function railNodes(
   // a state the reader can enter and not leave. Its heading is the flat list's
   // own name rather than a project's, which is what makes it honest.
   if (organizer === 'list') return [sectionNode(ONE_LIST_LABEL), ...rows];
+  // THE SHAPE BEFORE THE HISTORY: with an empty STORE and no search, this is what
+  // a profile that has never stored anything sees. Gated on the STORE rather than
+  // on the rows, and that is the difference a reader meets by archiving: an
+  // archived conversation leaves the rows (which is what archiving means) while
+  // staying in the store - so a fixture gated on rows would put the demo's sample
+  // projects back in front of someone who still has their chat, with the same
+  // headings a brand-new reader sees. Read here rather than in the state script,
+  // because the rail a reader gets on their first visit is the rail's own shape.
+  if (fixture && rows.length === 0 && query === '') return fixtureRail(created);
   const shut = new Set(closed);
   const grown = new Set(expanded);
   const out: ConversationRow[] = [];
-  let labelled = false;
+  // THE READER'S OWN PROJECTS LEAD, and they are on the rail whether or not they
+  // hold a row: a project the reader named exists from the moment they named it,
+  // which is the whole point of the dialog that makes one. An empty one is headed
+  // and nothing else (see `folderNode`). The demo's three sample projects are NOT
+  // here - they are data, and data with no conversation in it is not a folder this
+  // rail claims holds something.
+  const empty = created.filter((project) => !rows.some((row) => row.group === project.id));
+  let labelled = empty.length > 0;
+  if (labelled) out.push(sectionNode(PROJECTS_LABEL));
+  for (const project of empty) out.push(folderNode('folder', project.id, project.name, false, true));
   let at = 0;
   while (at < rows.length) {
     const group = rows[at].group;
@@ -1085,6 +1152,41 @@ function railNodes(
   return out;
 }
 
+/** A RAIL THAT HAS NEVER STORED ANYTHING STILL SHOWS THE SHAPE IT IS A RAIL
+ *  OF, which is the whole of what this fixture is for. The rail's folders are
+ *  read off the conversation ROWS, so a profile with no history had no folders,
+ *  no `Projects` label and no `Recents` - and the only way to meet the demo's
+ *  projects was to have already had the conversations it files. A DEMO THAT
+ *  SHOWS ITS CONCEPT ONLY TO PEOPLE WHO ALREADY HAVE CHAT HISTORY SHOWS
+ *  NOTHING.
+ *
+ *  WHY A FIXTURE AND NOT A SEED IN THE STORE. A seed written at boot was tried
+ *  and reverted: it became the rail's FIRST row and took the subject away from
+ *  whatever state was running (see `openGuide`). Fixture nodes avoid that by
+ *  construction - they never touch storage, so they cannot become the active
+ *  conversation, cannot be saved, and cannot be renamed, pinned or deleted. The
+ *  moment the store holds ONE conversation the fixture is gone and the real rows
+ *  rule, which is what makes it honest rather than a lie about history.
+ *
+ *  WHAT IT SHOWS IS STRUCTURE AND NOT THREADS: the reader's own projects, the
+ *  demo's three, and the `Recents` heading. A sample CONVERSATION row would be a
+ *  row with no thread behind it - clicking it could load nothing - and this block
+ *  will not invent chats the reader did not have. So the folders are empty and
+ *  their headings carry no caret (see `folderNode`).
+ *
+ *  The `Projects` label is here for the same reason it is over real folders: the
+ *  rail's own settings live in the actions it carries, and one of them is the way
+ *  to make a project. */
+function fixtureRail(created: readonly DemoProject[]): ConversationRow[] {
+  return [
+    sectionNode(PROJECTS_LABEL),
+    ...[...created, ...PROJECTS].map((project) => folderNode('folder', project.id, project.name, false, true)),
+    // The remainder's heading, so the section a reader's own typed chats land in
+    // is on screen before the first of them exists.
+    folderNode('folder', '', '', false, true),
+  ];
+}
+
 /** The rail's rows and the projects those rows make, from the ONE ordered list
  *  and at most one narrowing: the search. One list has no sections at all, so the
  *  section list is empty there rather than describing folders the rail does not
@@ -1095,11 +1197,23 @@ function railFrom(
   closed: readonly string[],
   expanded: readonly string[],
   organizer: RailOrganizer,
+  created: readonly DemoProject[],
+  fixture: boolean,
 ): Pick<AssistantState, 'conversationRows' | 'conversationSections'> {
   const matched = narrow(rows, query);
+  const nodes = railNodes(matched, closed, expanded, query, organizer, created, fixture);
   return {
-    conversationRows: railNodes(matched, closed, expanded, query, organizer),
-    conversationSections: organizer === 'list' ? [] : sectionsFrom(matched),
+    conversationRows: nodes,
+    // The sections describe the folders the rail RENDERS, so the fixture's empty
+    // ones are in here too rather than the two disagreeing about what is on
+    // screen - and in one list there is nothing to describe.
+    conversationSections: organizer === 'list'
+      ? []
+      : nodes.filter((node) => node.kind === 'folder').flatMap((node) => (node.group === '' ? [] : [{
+        id: node.group,
+        name: node.title,
+        count: matched.filter((row) => row.group === node.group).length,
+      }])),
   };
 }
 
@@ -1255,6 +1369,17 @@ export interface AssistantState {
    *  every row this menu has (a section label, a single-choice row, a divider, a
    *  disabled row and a note). */
   railItems: MenuItem[];
+  // The create-project dialog, which is the whole of what this block owns beyond
+  // the store: the name being typed, and the one thing that can be wrong with it.
+  // The dialog's OPEN state is not here on purpose - the element owns it (see
+  // `AssistantRefs.projectDialog`), and a field nothing binds is not part of the
+  // view model.
+  /** The name being typed in it. */
+  projectDraft: string;
+  /** What is wrong with that name, empty when nothing is. Non-empty flips the
+   *  field invalid through the input's own `error`, which is the kit's treatment
+   *  for a rejected value rather than a sentence this page paints itself. */
+  projectNameError: string;
   // The composer
   /** The composer's controlled text mirror. It is a field rather than a DOM read
    *  because the voice transcript has to WRITE into the composer, and the kit's
@@ -1326,6 +1451,16 @@ export interface AssistantRefs {
    *  the focus method that reaches it: the box lives in the rail's shadow root,
    *  which is why the block asks the element rather than the DOM. */
   conversations: KaiConversationsElement | null;
+  /** The create-project dialog, and the ONE reason this block drives a surface by
+   *  method rather than by a bound prop: `kai-dialog` reports Escape and a
+   *  backdrop press through `kai-open-change` only when it owns its own open
+   *  state. Its `open` prop makes the element CONTROLLED, and a controlled one
+   *  routes the request to close through `onOpenChange` - which the facade does
+   *  not wire - so a bound `open` would swallow Escape and strand the reader in a
+   *  modal no key can leave (measured, both schemes in states 50). The element
+   *  self-managing is the kit's documented shape for this surface, so the block
+   *  uses it and mirrors nothing. */
+  projectDialog: KaiDialogElement | null;
 }
 
 export interface AssistantDeps {
@@ -1356,6 +1491,18 @@ export interface AssistantActions {
    *  The item's id CARRIES its choice, so nothing here re-reads an attribute, and
    *  a row this action does not own is ignored rather than half-applied. */
   railMenuSelect(event: CustomEvent<{ id: string; radioGroup?: string }>): void;
+  /** `@kai-open-change` on the create-project dialog: the kit's own ways out of a
+   *  modal - Escape, a backdrop press - arrive here. The element owns whether it is
+   *  open; what this clears is the DRAFT, so the next open starts on an empty field
+   *  and a clean validation state. */
+  projectDialogToggle(event: CustomEvent<{ open: boolean }>): void;
+  /** `@kai-input` on the dialog's name field. */
+  projectNameInput(event: CustomEvent<{ value: string }>): void;
+  /** `@kai-click` on the dialog's Cancel button: close it, through the element's
+   *  own method, so the close path is the same one Escape takes. */
+  cancelProject(): void;
+  /** `@kai-click` on the dialog's Create button: name it, keep it, show it. */
+  createProject(): void;
   /** `@kai-click` on a section label's filter control. The rail's filter IS its
    *  own search box, so the honest thing this control can do is hand that box the
    *  caret - through the element's public focus method, because the box lives in
@@ -1414,6 +1561,20 @@ export interface AssistantController {
 export function createController(deps: AssistantDeps): AssistantController {
   const listeners = new Set<() => void>();
 
+  // The reader's own projects, read once here and written on every create. Read
+  // at construction rather than in `boot()` because a name has to be resolvable
+  // the first time the rail projects a row: a conversation filed under a created
+  // project on a LATER visit would otherwise show up under the id it carries
+  // (`sectionLabel`) until the next boot - a folder named `release-notes` where
+  // the reader named it "Release notes".
+  const createdKey = projectKey(deps.storageKey ?? 'assistant');
+  let createdProjects: DemoProject[] = storedProjects(createdKey);
+  // WHETHER THE STORE HOLDS ANYTHING AT ALL, which is not the same question as
+  // whether the rail has rows: an ARCHIVED conversation leaves the rows and stays
+  // in the store. Seeded `true` because a controller is constructed before its
+  // first read, and `boot()` settles it from the store itself.
+  let storeIsEmpty = true;
+
   let state: AssistantState = {
     messages: [],
     suggestions: SUGGESTIONS,
@@ -1425,6 +1586,8 @@ export function createController(deps: AssistantDeps): AssistantController {
     query: '',
     conversationRows: [],
     conversationSections: [],
+    projectDraft: '',
+    projectNameError: '',
     promptValue: '',
     promptPlaceholder: PROMPT_PLACEHOLDER,
     triggers: TRIGGERS,
@@ -1445,7 +1608,7 @@ export function createController(deps: AssistantDeps): AssistantController {
     ...projectMenus('system'),
     // And on the rail's own defaults: the projects the demo files its
     // conversations into, in the kit's own pinned-first order.
-    ...projectRailMenu('project', 'priority'),
+    ...projectRailMenu('project', 'priority', createdKey),
   };
 
   // A NEW state object every patch: the snapshot getter is compared by
@@ -1472,6 +1635,25 @@ export function createController(deps: AssistantDeps): AssistantController {
   // `allRows`: the row projection is re-run when the RENAME state moves, not
   // only when the summaries do.
   let lastSummaries: ConversationSummary[] = [];
+  /** Re-read what the store holds and re-project if the answer moved. Asked after
+   *  the two operations that can empty the rail while leaving the store alone (an
+   *  ARCHIVE) or empty both (a DELETE): the fixture is gated on the store rather
+   *  than on the rows, so the rail has to be told what the store now holds rather
+   *  than inferring it from an empty row list. A store that cannot list is not an
+   *  empty one, which is why the failure keeps the last answer instead of
+   *  flashing the demo's projects at a reader whose store just refused a read. */
+  const refreshStoreEmptiness = async (): Promise<void> => {
+    let empty: boolean;
+    try {
+      empty = (await store.list()).length === 0;
+    } catch {
+      return;
+    }
+    if (empty === storeIsEmpty) return;
+    storeIsEmpty = empty;
+    patch(projectSummaries(lastSummaries));
+  };
+
   /** Open a conversation's folder however the reader left it, and re-project:
    *  the row that just became active has to be reachable, and a row filed into a
    *  closed folder would sit where the reader cannot see it. */
@@ -1494,6 +1676,12 @@ export function createController(deps: AssistantDeps): AssistantController {
   let booted = false;
 
   const store = localStorageStore(deps.storageKey ?? 'assistant');
+
+  /** The projects this rail can NAME, the reader's own first: they are read by
+   *  the filing rule (`projectOfOpening`), the row order (`orderRows`) and every
+   *  folder label, so one list keeps a created project from being a folder of its
+   *  own in one place and an unknown id in another. */
+  const catalogue = (): readonly DemoProject[] => [...createdProjects, ...PROJECTS];
 
   // WHAT THE STORE CAN DO, read off the store itself. The four operations are
   // OPT-IN on ConversationStore, and ConversationController refuses LOUDLY when
@@ -1523,7 +1711,7 @@ export function createController(deps: AssistantDeps): AssistantController {
     // Where a row is filed is the summary's OWN `groupId`, the field the store
     // writes, round-trips and hands back: one source of truth, and the same one
     // `orderRows` reads its order from.
-    const projected = orderRows(summaries, organizer, sort).map((s) => {
+    const projected = orderRows(summaries, organizer, sort, catalogue()).map((s) => {
       // ONE LINE PER ROW, and that is a decision about the rail rather than about
       // the data: the kit paints a row's `meta` slot as a second line, and a
       // sidebar row that carries its own last message reads as a feed rather than
@@ -1547,7 +1735,7 @@ export function createController(deps: AssistantDeps): AssistantController {
         deleteItemHidden: !storeOps.remove,
         pinned: s.pinned === true,
         group,
-        groupName: PROJECTS.find((project) => project.id === group)?.name ?? '',
+        groupName: catalogue().find((project) => project.id === group)?.name ?? '',
         caretHidden: true,
         caretName: '',
         menuHidden: false,
@@ -1562,7 +1750,7 @@ export function createController(deps: AssistantDeps): AssistantController {
     // shortcuts act on. What the rail renders is the projection below, which
     // narrows and expands them in the same pass as the sections.
     allRows = projected;
-    return { ...railFrom(projected, query, closedGroups, expandedGroups, organizer), activeId: controller.activeId() };
+    return { ...railFrom(projected, query, closedGroups, expandedGroups, organizer, createdProjects, storeIsEmpty), activeId: controller.activeId() };
   }
 
   /** One reader choice from the organizer menu, applied in ONE patch: the choice
@@ -1576,7 +1764,7 @@ export function createController(deps: AssistantDeps): AssistantController {
     const organizer = next.organizer ?? state.railOrganizer;
     const sort = next.sort ?? state.railSort;
     patch({
-      ...projectRailMenu(organizer, sort),
+      ...projectRailMenu(organizer, sort, createdKey),
       ...projectSummaries(lastSummaries, state.query, organizer, sort),
     });
   };
@@ -1745,7 +1933,7 @@ export function createController(deps: AssistantDeps): AssistantController {
         // second turn, a rename or a reload from moving a row between projects.
         const id = controller.activeId();
         if (id !== undefined && lastSummaries.find((summary) => summary.id === id)?.groupId === undefined) {
-          const project = projectOfOpening(openingOf(state.messages));
+          const project = projectOfOpening(openingOf(state.messages), catalogue());
           if (project !== undefined) {
             // The reader is looking at the conversation they have just made, so
             // its folder is opened however they left it: the row lands where they
@@ -1833,6 +2021,24 @@ export function createController(deps: AssistantDeps): AssistantController {
     // the menu grew a row nobody wired rather than a reader asking for something.
     railMenuSelect(event) {
       const { id } = event.detail;
+      if (id === RAIL_NEW_PROJECT_ID) {
+        // A stale draft or a stale error from a dialog the reader left by Escape is
+        // cleared BEFORE the field is shown, not after: the field must never show a
+        // rejected name from the last visit.
+        patch({ projectDraft: '', projectNameError: '' });
+        deps.refs().projectDialog?.show();
+        // AND THE CARET GOES IN, on a MACROTASK rather than in the kit's own
+        // queued microtask. The dialog moves focus into its panel on open, but a
+        // menu item ALSO restores focus to its trigger on close - the dropdown does
+        // that in a microtask queued after the dialog's (measured: focus stayed on
+        // `kai-menu`, so Escape never reached the dialog's own key handler and the
+        // modal could not be left by keyboard). The dialog's panel keydown is what
+        // reads Escape, so the caret has to be inside the panel for the modal to be
+        // closable at all; a timeout is the one turn that lands after every
+        // microtask the menu queued.
+        setTimeout(() => deps.refs().projectDialog?.focus(), 0);
+        return;
+      }
       const organizerOf = (choice: string): RailOrganizer | undefined =>
         RAIL_ORGANIZERS.find((candidate) => candidate === choice);
       const sortOf = (choice: string): RailSort | undefined =>
@@ -1846,6 +2052,47 @@ export function createController(deps: AssistantDeps): AssistantController {
         const sort = sortOf(id.slice('sort-'.length));
         if (sort !== undefined) applyRailMenu({ sort });
       }
+    },
+
+    // The dialog is self-managing (see `AssistantRefs.projectDialog`), so every way
+    // it closes arrives here as `open: false` - Escape, a backdrop press, or a method
+    // this block called. What is cleared is the DRAFT. An "open" report is not acted
+    // on: nothing else opens it, and re-patching would re-render for no reason.
+    projectDialogToggle(event) {
+      if (event.detail.open) return;
+      patch({ projectDraft: '', projectNameError: '' });
+    },
+
+    projectNameInput(event) {
+      patch({ projectDraft: event.detail.value, projectNameError: '' });
+    },
+
+    cancelProject() {
+      deps.refs().projectDialog?.hide();
+    },
+
+    // A BLANK NAME IS REFUSED IN THE FIELD RATHER THAN SILENTLY DROPPED: the
+    // dialog stays open with the input marked invalid, because a press that
+    // closed it would be a project the reader believes they made.
+    createProject() {
+      const name = state.projectDraft.trim();
+      if (name === '') {
+        patch({ projectNameError: 'Name the project first' });
+        return;
+      }
+      createdProjects = [...createdProjects, { id: projectId(name, catalogue()), name, topics: [] }];
+      try {
+        localStorage.setItem(createdKey, JSON.stringify(createdProjects));
+      } catch {
+        // Storage unavailable: the project lives for this tab, the same
+        // degradation the store's own `save()` takes rather than a dialog that
+        // refuses a name the reader can see on screen.
+      }
+      // The new project is on the rail BEFORE the dialog goes: the re-projection is
+      // what puts the folder there, and closing first would be two paints of a rail
+      // that had not changed.
+      patch({ ...projectSummaries(lastSummaries), projectDraft: '', projectNameError: '' });
+      deps.refs().projectDialog?.hide();
     },
 
     filterChats() {
@@ -1971,11 +2218,13 @@ export function createController(deps: AssistantDeps): AssistantController {
           if (!storeOps.archive) return;
           closeRenaming(target.conversationId);
           await controller.setArchived(target.conversationId, true);
+          await refreshStoreEmptiness();
           return;
         case 'delete':
           if (!storeOps.remove) return;
           closeRenaming(target.conversationId);
           await controller.remove(target.conversationId);
+          await refreshStoreEmptiness();
           return;
       }
     },
@@ -2051,6 +2300,9 @@ export function createController(deps: AssistantDeps): AssistantController {
       setMessages([]);
       await controller.refresh();
       await controller.restore();
+      // THE STORE'S OWN ANSWER for whether the rail is looking at a profile that
+      // has ever stored anything, which is what decides the fixture.
+      await refreshStoreEmptiness();
     },
   };
 

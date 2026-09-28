@@ -509,6 +509,12 @@ let railSections = null;
 let railTrio = null;
 let railMenu = null;
 let railWiring = null;
+// State 49's reading of a rail that has never stored anything, and state 50's
+// reading of the project it makes. Captured in their acts for the reason the
+// three globals above are captured in theirs: both states end where their
+// screenshot has to be taken, and the values under test do not survive it.
+let freshRail = null;
+let projectCreate = null;
 
 /** The rail's two SECTION LABELS and the trailing actions each carries, read off
  *  the ROW ELEMENTS: which rows are section labels, whether their actions are
@@ -628,8 +634,12 @@ const RAIL_MENU_ROWS = [
   { role: 'menuitemradio', label: 'Last updated' },
   { role: 'menuitemradio', label: 'Manual order' },
   { role: 'separator', label: '' },
+  // The plus row is LIVE now (it is the way a project gets made), so it is a
+  // menuitem like the others and the sentence under it says where a created
+  // project is kept rather than why the row is inert. Both are copies, for the
+  // reason above: a reworded row goes red against this list.
   { role: 'menuitem', label: 'New project' },
-  { role: '', label: 'Not in this template' },
+  { role: '', label: 'This block keeps the projects you make in its own demo key' },
 ];
 
 /** Every rail row as the shape the ORGANIZER produced: its id, the kind of row it
@@ -3480,16 +3490,19 @@ export default {
             ? true
             : `the checked rows are ${JSON.stringify(checked)}`;
         },
-        // AND THE TWO ROWS THAT CANNOT ACT SAY WHY, on the row itself: a disabled
+        // AND THE ONE ROW THAT CANNOT ACT SAYS WHY, on the row itself: a disabled
         // row whose text is only its label is a mystery, which is what this reads
-        // for. The plus section's reason is the sentence under it.
+        // for. `Manual order` is the only one left - the plus row USED to be
+        // disabled with a reason and is now the way a project gets made - and the
+        // sentence under it is where the block says what it keeps and what the kit
+        // does not have.
         theUnavailableRowsSayWhy: () => {
           const rows = railMenu?.rows ?? [];
           const disabled = rows.filter((row) => row.disabled === 'true');
-          if (disabled.length !== 2) return `${disabled.length} rows are announced disabled`;
+          if (disabled.length !== 1) return `${disabled.length} rows are announced disabled`;
           const wordless = disabled.filter((row) => row.text.split(' ').length < 4).map((row) => row.text);
           if (wordless.length) return `a disabled row carries no reason: ${JSON.stringify(wordless)}`;
-          const note = rows.find((row) => row.role === '' && row.text.startsWith('Not in this template'));
+          const note = rows.find((row) => row.role === '' && row.text.startsWith('This block keeps the projects you make'));
           return note === undefined ? 'no sentence under the plus row says why' : true;
         },
         // THE DIVIDER, where the owner put it: one separator, and the plus section
@@ -3701,6 +3714,210 @@ export default {
           ['height', 'marginBlockStart']),
         style('railOneListRow', (page) => page.locator('kai-conversations > kai-conversation-item[data-rail="conversation"]').first(),
           ['marginInlineStart']),
+      ],
+    },
+    {
+      name: '49-fresh-profile-rail',
+      act: async (page, sctx) => {
+        // A PROFILE THAT HAS NEVER STORED ANYTHING, which is the state a reader
+        // meets this block in and the one no other state in this run can be: the
+        // run's own history is what states 2 onwards leave behind, so the rail's
+        // empty case has to be REACHED by taking the storage away and reloading.
+        // Every key goes, not just the threads index: the block's own project key
+        // is part of a fresh profile, and a run that kept it would be measuring a
+        // returning reader.
+        await page.evaluate(() => localStorage.clear());
+        await page.reload({ waitUntil: 'load' });
+        await sctx.scenario.ready(page, sctx);
+        const nodes = await railNodes(page);
+        // Read as TEXT off the rows, because the claim is what a reader can see:
+        // the section label over the folders, the folders themselves, and the
+        // heading the reader's own typed chats land under.
+        const titled = await page.evaluate(() =>
+          [...document.querySelectorAll('kai-conversations > kai-conversation-item')].map((el) => ({
+            id: el.conversationId ?? el.getAttribute('conversation-id') ?? el.id,
+            kind: el.getAttribute('data-rail') ?? 'conversation',
+            folder: el.getAttribute('data-folder') ?? '',
+            title: el.querySelector(':scope > span')?.textContent ?? '',
+          })));
+        freshRail = {
+          titles: titled.map((row) => `${row.kind}:${row.title}`),
+          conversationRows: nodes.filter((node) => node.kind === 'conversation').length,
+          sectionLabel: titled.find((row) => row.kind === 'section')?.title ?? '',
+          folders: titled.filter((row) => row.kind === 'folder').map((row) => row.title),
+          recents: titled.filter((row) => row.kind === 'folder' && row.folder === '').map((row) => row.title),
+        };
+      },
+      probes: {
+        // THE OWNER'S COMPLAINT AS A PROBE: on a profile with no history the rail
+        // showed the element's "No conversations yet" and nothing else - no
+        // Projects section, no folders, no Recents - because every one of them
+        // was derived from rows that did not exist.
+        theProjectsSectionIsThere: () => freshRail?.sectionLabel === 'Projects',
+        itsFoldersAreThere: () => (freshRail?.folders ?? []).length >= 3,
+        // The demo's three projects by name, so "there are folders" cannot pass
+        // on a rail that invented labels of its own. A COPY of the block's own
+        // catalogue names, and recorded as one: this file is plain JS and cannot
+        // import the controller.
+        theDemoProjectsAreNamed: () => ['Assistant UI', 'Docs and briefs', 'Kanban board']
+          .every((name) => (freshRail?.folders ?? []).includes(name)),
+        recentsIsThere: () => (freshRail?.recents ?? []).join('') === 'Recents',
+        // ...AND IT INVENTED NO THREADS: the fixture is the rail's SHAPE, so every
+        // row it adds is a heading. A sample conversation row here would be a row
+        // with no thread behind it - a click that loads nothing.
+        noSampleConversationRows: () => freshRail?.conversationRows === 0,
+      },
+      expect: {
+        theProjectsSectionIsThere: true,
+        itsFoldersAreThere: true,
+        theDemoProjectsAreNamed: true,
+        recentsIsThere: true,
+        noSampleConversationRows: true,
+      },
+      styleProbes: [
+        style('freshRailProjectsLabel', (page) => page.locator('kai-conversations > kai-conversation-item[data-rail="section"]'),
+          ['height', 'marginBlockStart']),
+        style('freshRailRecentsHeading', (page) => page.locator('kai-conversations > kai-conversation-item[data-rail="folder"][data-folder=""]'),
+          ['height', 'marginInlineStart']),
+      ],
+    },
+    {
+      name: '50-create-a-project',
+      act: async (page, sctx) => {
+        // FROM THE FRESH PROFILE STATE 49 LEFT BEHIND, which is the state the
+        // dialog has to work in: the reader who has no projects is the one who
+        // needs to make one. The id the block derives is not typed here - it is
+        // read back out of the block's own key after the create, so the folder
+        // label, the stored record and the probe all read the SAME write.
+        const authored = 'Release notes';
+        // WHICH ROW CARRIES THE RAIL'S ACTIONS: the Projects label does, and it is
+        // the row the `+` lives behind. Found by its kind rather than by
+        // position, because the fixture's own order is the block's business.
+        const kebab = page.locator('kai-conversations > kai-conversation-item[data-rail="section"] kai-menu[data-trio="menu"]').first();
+        await kebab.click();
+        await settle(300)(page);
+        await page.getByRole('menuitem', { name: 'New project' }).click();
+        await settle(400)(page);
+        const dialogOpened = await page.locator('kai-dialog').evaluate(
+          (el) => el.open === true || el.hasAttribute('open'),
+        );
+        const field = page.locator('#project-name input').first();
+        await field.click();
+        await field.fill(authored);
+        await page.getByRole('button', { name: 'Create project' }).click();
+        await settle(400)(page);
+        const closed = await page.locator('kai-dialog').evaluate(
+          (el) => !(el.open === true || el.hasAttribute('open')),
+        );
+        const stored = await page.evaluate((key) => {
+          try { return JSON.parse(localStorage.getItem(key) ?? '[]'); } catch { return []; }
+        }, 'kai:assistant:projects');
+        const created = (stored ?? []).find((project) => project.name === authored) ?? null;
+        projectCreate = {
+          dialogOpened,
+          closed,
+          storedNames: (stored ?? []).map((project) => project.name),
+          id: created?.id ?? '',
+          // The folder the rail renders for it, read by the id the block STORED.
+          inRailAfterCreate: created === null ? false : await page.evaluate((id) =>
+            [...document.querySelectorAll('kai-conversations > kai-conversation-item')]
+              .some((el) => el.getAttribute('data-folder') === id), created.id),
+          // ...AND THE KEYBOARD: the dialog opens from the menu by keyboard too, and
+          // Escape closes it without stranding the rail.
+          escapeClosed: false,
+          railReachableAfterEscape: false,
+          idAfterReload: '',
+          labelAfterReload: '',
+          filedUnderTheCreatedFolder: false,
+        };
+        // A SECOND VISIT: the name is kept in the block's own key, so a reload
+        // brings the folder back.
+        await page.reload({ waitUntil: 'load' });
+        await sctx.scenario.ready(page, sctx);
+        const afterReload = await page.evaluate((id) => {
+            const rows = [...document.querySelectorAll('kai-conversations > kai-conversation-item')];
+            const row = rows.find((el) => el.getAttribute('data-folder') === id && el.getAttribute('data-rail') === 'folder');
+            return { present: row !== undefined, label: row?.querySelector(':scope > span')?.textContent ?? '' };
+        }, projectCreate.id);
+        projectCreate.idAfterReload = afterReload.present ? projectCreate.id : '';
+        projectCreate.labelAfterReload = afterReload.label;
+        // ...AND A CONVERSATION REACHES IT THROUGH THE STORE'S OWN GROUP: the
+        // block's dialog names a folder, and a conversation is filed into it by
+        // `setGroup`, whose whole effect is the `groupId` on the stored summary.
+        // Seeding that field is seeding what `setGroup` writes (state 42's reason
+        // for seeding the index rather than clicking, one mechanism over).
+        const threadKey = `${sctx.spec.indexKey.slice(0, -1)}:filed-by-setgroup`;
+        await page.evaluate((seed) => {
+          const index = JSON.parse(localStorage.getItem(seed.indexKey) ?? '[]');
+          localStorage.setItem(seed.indexKey, JSON.stringify([
+            ...index.filter((row) => row.id !== seed.id),
+            { id: seed.id, title: 'Release note draft', messageCount: 2, updatedAt: new Date().toISOString(), groupId: seed.group },
+          ]));
+          localStorage.setItem(seed.threadKey, JSON.stringify([
+            { id: `${seed.id}-q`, role: 'user', parts: [{ type: 'text', text: 'Draft the release note' }] },
+            { id: `${seed.id}-a`, role: 'assistant', parts: [{ type: 'text', text: 'Here is the draft.' }] },
+          ]));
+        }, { indexKey: sctx.spec.indexKey, threadKey, id: 'filed-by-setgroup', group: projectCreate.id });
+        await page.reload({ waitUntil: 'load' });
+        await sctx.scenario.ready(page, sctx);
+        projectCreate.filedUnderTheCreatedFolder = await page.evaluate((id) =>
+          [...document.querySelectorAll('kai-conversations > kai-conversation-item')]
+            .some((el) => el.getAttribute('data-rail') === 'conversation' && el.getAttribute('data-folder') === id), projectCreate.id);
+        // THE KEYBOARD PASS, last, because it opens and closes the dialog again.
+        // The trigger is the Projects label's own menu, the same row the `+` lives
+        // on: a folder HEADING does not carry the rail's actions.
+        await kebab.click();
+        await settle(300)(page);
+        await page.getByRole('menuitem', { name: 'New project' }).click();
+        await settle(400)(page);
+        const openedByMenu = await page.locator('kai-dialog').evaluate(
+          (el) => el.open === true || el.hasAttribute('open'),
+        );
+        await page.keyboard.press('Escape');
+        await settle(400)(page);
+        projectCreate.escapeClosed = openedByMenu && await page.locator('kai-dialog').evaluate(
+          (el) => !(el.open === true || el.hasAttribute('open')),
+        );
+        // The rail is walkable again: a tab out of the rail's search box reaches a
+        // row, which is the state 40 contract one dialog later.
+        await clearRailSearch(page);
+        const box = page.locator('kai-conversations').getByRole('textbox').first();
+        await box.click();
+        for (let step = 0; step < 8 && !projectCreate.railReachableAfterEscape; step += 1) {
+          await page.keyboard.press('Tab');
+          await settle(150)(page);
+          if ((await rowWalk(page)).focused >= 0) projectCreate.railReachableAfterEscape = true;
+        }
+      },
+      probes: {
+        thePlusOpensTheDialog: () => projectCreate?.dialogOpened === true,
+        creatingClosesIt: () => projectCreate?.closed === true,
+        // STORED, LOUDLY, IN THE BLOCK'S OWN KEY: the name is in the block's demo
+        // key with an id, which is the one thing the kit has no API for.
+        theProjectIsInTheBlocksOwnKey: () => (projectCreate?.storedNames ?? []).includes('Release notes')
+          && (projectCreate?.id ?? '') !== '',
+        itIsInTheRailImmediately: () => projectCreate?.inRailAfterCreate === true,
+        itSurvivesAReload: () => projectCreate?.idAfterReload === projectCreate?.id
+          && projectCreate?.labelAfterReload === 'Release notes',
+        // ...AND IT TAKES A CONVERSATION: the row filed under the created id renders
+        // in the folder labelled with the reader's own name for it.
+        itTakesAConversation: () => projectCreate?.filedUnderTheCreatedFolder === true,
+        escapeClosesIt: () => projectCreate?.escapeClosed === true,
+        theRailIsNotStranded: () => projectCreate?.railReachableAfterEscape === true,
+      },
+      expect: {
+        thePlusOpensTheDialog: true,
+        creatingClosesIt: true,
+        theProjectIsInTheBlocksOwnKey: true,
+        itIsInTheRailImmediately: true,
+        itSurvivesAReload: true,
+        itTakesAConversation: true,
+        escapeClosesIt: true,
+        theRailIsNotStranded: true,
+      },
+      styleProbes: [
+        style('createdProjectFolder', (page) => page.locator('kai-conversations > kai-conversation-item[data-rail="folder"]').first(),
+          ['height', 'marginInlineStart']),
       ],
     },
   ],
