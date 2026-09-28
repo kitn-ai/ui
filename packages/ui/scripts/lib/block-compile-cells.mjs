@@ -32,8 +32,10 @@
 // mind compiled. A block with no seam has one cell per form, because the CLI
 // refuses the other modes for it by name rather than writing a tree.
 
-import { readFileSync, readdirSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
-import { join, dirname } from 'node:path';
+import { readFileSync, readdirSync, existsSync, mkdirSync, writeFileSync, symlinkSync, rmSync } from 'node:fs';
+import { join, dirname, relative } from 'node:path';
+import { execFileSync } from 'node:child_process';
+import { ANTI_THEATRE_PROBES, BASE_OPTIONS, pkgDir } from './consumer-tsc-projects.mjs';
 import { maskedCode } from './mask-code.mjs';
 
 /**
@@ -164,11 +166,122 @@ function htmlCell({ esbuild, name, files }) {
 }
 
 /**
+ * The vue form is a `.vue` SFC, and NO tsconfig can read one: `tsc` reports
+ * TS1136 on the first tag in the template. `vue-tsc` is the only compiler that
+ * checks the script AND the template, so the cell runs it instead of lifting
+ * the script out of the SFC -- `liftScript` (which the scaffolder's own vue
+ * cells use, because a scaffolder front end is a code block rather than a
+ * file a consumer ships) would check the script and leave the template
+ * unread, which is where this form's real defects live: an authored literal
+ * is typechecked against the element's declared prop union here and nowhere
+ * else.
+ *
+ * THE HARNESS ITSELF NEEDED NOTHING: `vue` is already symlinked by
+ * `createConsumerTsc`, and `vue-tsc` is a real devDependency of
+ * examples/starters/vue, so this cell links that one package into the temp
+ * tree and runs it. The compilerOptions are `BASE_OPTIONS` plus the two lines
+ * `npm create vue` writes (`jsx: preserve` + `jsxImportSource: vue`), never a
+ * retyped tsconfig.
+ *
+ * A `.vue`-aware compiler also needs vue's own SFC types: the kit declares
+ * `GlobalComponents` (web-component-types.d.ts), and without that
+ * augmentation vue-tsc treats every `kai-*` tag as an unknown element and
+ * checks nothing about it.
+ */
+export async function vueCell({ tsc, name, files }) {
+  const vueDir = pkgDir('vue-tsc');
+  const nm = join(tsc.tmp, 'node_modules');
+  if (!vueDir) {
+    return [
+      `${name} [vue]: vue-tsc is not installed, so the emitted .vue cannot be compiled. It is a ` +
+        'devDependency of examples/starters/vue; `pnpm install` at the repo root is what puts it here.',
+    ];
+  }
+  const linked = join(nm, 'vue-tsc');
+  if (!existsSync(linked)) symlinkSync(vueDir, linked, 'dir');
+
+  const dir = join(tsc.tmp, 'vue', name);
+  mkdirSync(dir, { recursive: true });
+  const clear = () => {
+    for (const f of readdirSync(dir)) {
+      // The tsconfig is this cell's own harness and outlives every file it
+      // writes; deleting it made the second vue-tsc run exit on TS5058, which
+      // reads as a compiler failure rather than a missing file.
+      if (f === 'tsconfig.json') continue;
+      rmSync(join(dir, f), { recursive: true, force: true });
+    }
+  };
+  const tsconfig = join(dir, 'tsconfig.json');
+  writeFileSync(
+    tsconfig,
+    JSON.stringify(
+      {
+        compilerOptions: { ...BASE_OPTIONS, jsx: 'preserve', jsxImportSource: 'vue' },
+        include: ['**/*.ts', '**/*.vue'],
+      },
+      null,
+      2,
+    ),
+  );
+  // The anti-theatre controls FIRST, in this directory: a `.vue` that resolved
+  // `@knit.ai/ui` to `any` (or a project whose strict flags never took) would
+  // pass every assertion below while checking nothing.
+  for (const probe of ANTI_THEATRE_PROBES) writeFileSync(join(dir, probe.file), probe.code);
+  const controls = vueTsc(dir);
+  const missed = ANTI_THEATRE_PROBES.filter(
+    (probe) => !new RegExp(`${probe.file.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}.*${probe.expect.source}`, 's').test(controls),
+  );
+  clear();
+  if (missed.length) {
+    return [
+      `${name} [vue]: the sandbox self-test did NOT fire (${missed.map((p) => p.file).join(', ')}).\n` +
+        `    ${missed.map((p) => p.why).join('\n    ')}\n` +
+        `    Every cell under it would pass vacuously. vue-tsc said:\n${controls || '    (nothing)'}`,
+    ];
+  }
+
+  for (const file of files) {
+    const dest = join(dir, file.path);
+    mkdirSync(dirname(dest), { recursive: true });
+    writeFileSync(dest, file.content);
+  }
+  // ANTI-VACUITY, and it is not hypothetical: this cell's include matches
+  // `**/*.vue`, so a tree that emitted none (a renderer that stopped, a tree
+  // read from the wrong form's file) leaves vue-tsc with nothing to read and
+  // exits clean. That is exactly how the first version of this cell passed.
+  const sfcs = files.filter((file) => file.path.endsWith('.vue'));
+  if (sfcs.length === 0) {
+    clear();
+    return [
+      `${name} [vue]: the form emitted no .vue file at all, so this cell checked nothing. ` +
+        'Every vue tree is one SFC plus the composable it imports.',
+    ];
+  }
+  const diagnostics = vueTsc(dir);
+  clear();
+  if (!diagnostics.trim()) return [];
+  return [`${name} [vue]: does not compile under a stock vue-ts consumer project:\n${diagnostics.trimEnd()}`];
+
+  /** `vue-tsc` over one directory holding a tsconfig.json; raw diagnostics ('' when clean). */
+  function vueTsc(runDir) {
+    try {
+      execFileSync(process.execPath, [join(vueDir, 'bin/vue-tsc.js'), '--noEmit', '-p', join(runDir, 'tsconfig.json')], {
+        encoding: 'utf8',
+        stdio: ['ignore', 'pipe', 'pipe'],
+      });
+      return '';
+    } catch (e) {
+      return `${e.stdout ?? ''}${e.stderr ?? ''}`;
+    }
+  }
+}
+
+/**
  * One strategy per form id. A form with no strategy is a HARD failure rather
  * than a skip: a cell that quietly stops running is the exact shape of check
  * this repo keeps paying for.
  */
-const STRATEGIES = { react: reactCell, html: htmlCell };
+const STRATEGIES = { react: reactCell, html: htmlCell, vue: vueCell };
 
 /**
  * Run every block x form cell. Prints the axis and the cell count it actually

@@ -12,6 +12,9 @@
  *   - `react`- the react form: the block root as a tree of the typed
  *              wrappers from `@kitn.ai/ui/react`, plus a `useSyncExternalStore`
  *              adapter over the controller (see `./react`).
+ *   - `vue`  - the vue form: a `<script setup lang="ts">` SFC over the custom
+ *              elements, plus a composable holding one `shallowRef` over the
+ *              controller's snapshot (see `./vue`).
  *   - `cdn`  : the single-file CDN paste form: the HTML form above, inlined
  *              and pinned onto the published entries by `registry.ts`'s
  *              `generateCdnForm` (see `./cdn`).
@@ -32,6 +35,7 @@ import type { Block, CdnFormOptions, DataMode } from '../registry';
 import type { FormFile } from '../contract/types';
 import { renderHtmlForm } from './html';
 import { renderReactForm } from './react';
+import { renderVueForm } from './vue';
 import { renderCdnFormFiles } from './cdn';
 
 // The renderers live in their own modules and are re-exported HERE, so every
@@ -41,6 +45,8 @@ export { renderHtmlForm, renderBinder, serializeTemplate, adaptRegistrationForBu
 export type { HtmlFormOptions } from './html';
 export { renderReactForm, handlerName } from './react';
 export type { ReactFormOptions } from './react';
+export { renderVueForm } from './vue';
+export type { VueFormOptions } from './vue';
 export { renderCdnFormFiles } from './cdn';
 // THE DATA-MODE SEAM, re-exported for the same reason the renderers are: the CLI
 // resolves a mode through the renderers, and the generator asks this package
@@ -64,6 +70,7 @@ export { pascal as componentName } from '../registry';
 export const BLOCK_FORMS = [
   { id: 'html', label: 'HTML' },
   { id: 'react', label: 'React' },
+  { id: 'vue', label: 'Vue' },
   { id: 'cdn', label: 'CDN single file' },
 ] as const;
 
@@ -137,6 +144,7 @@ export function renderBlockForm(
   switch (form) {
     case 'html': return renderHtmlForm(block, { mode: opts.mode });
     case 'react': return renderReactForm(block, { mode: opts.mode });
+    case 'vue': return renderVueForm(block, { mode: opts.mode });
     case 'cdn': return renderCdnFormFiles(block, { ...opts.cdn, mode: opts.mode });
   }
 }
