@@ -509,6 +509,7 @@
             "theGroupIsSeparatedFromWhatFollows": true,
             "theRowsSitAboveTheTree": true,
             "theInertRowsSayWhyTheyCannotAct": true,
+            "theActionRowsCarryTheRailRowBox": true,
             "oneNewChatOnThePage": true,
             "theCollapseControlIsStillThere": true
           },
@@ -516,11 +517,17 @@
             "railActionInertRow": {
               "height": "32px",
               "fontSize": "14px",
-              "paddingInline": "12px",
+              "paddingBlock": "2px",
+              "paddingInline": "8px",
               "color": "color(srgb 0.0352941 0.0352941 0.0431373 / 0.55)"
             },
             "railActionLiveRow": {
               "height": "32px"
+            },
+            "railActionLiveRowPart": {
+              "height": "32px",
+              "paddingBlock": "2px",
+              "paddingInline": "8px"
             }
           }
         },
@@ -541,7 +548,8 @@
             "theRowsAreOneLine": true,
             "headingIsOneLine": true,
             "theSectionStartsCarryTheAir": true,
-            "theSectionLabelsTakeTheMutedToken": true
+            "theSectionLabelsTakeTheMutedToken": true,
+            "nothingInARowIsClipped": true
           },
           "styles": {
             "railConversationRowTitle": {
@@ -561,8 +569,20 @@
               "color": "oklab(0.140764 0.00120224 -0.00421676 / 0.8)"
             },
             "railProjectsLabelRow": {
-              "height": "36px",
-              "marginBlockStart": "8px"
+              "height": "28px",
+              "marginBlockStart": "8px",
+              "paddingBlock": "0px",
+              "paddingInline": "0px"
+            },
+            "railConversationRow": {
+              "height": "32px",
+              "paddingBlock": "2px",
+              "paddingInline": "8px"
+            },
+            "railFolderHeadingRow": {
+              "height": "32px",
+              "paddingBlock": "2px",
+              "paddingInline": "8px"
             }
           }
         },
@@ -610,7 +630,7 @@
           },
           "styles": {
             "railOneListLabelRow": {
-              "height": "36px",
+              "height": "28px",
               "marginBlockStart": "8px"
             },
             "railOneListRow": {
@@ -631,11 +651,11 @@
           },
           "styles": {
             "freshRailProjectsLabel": {
-              "height": "36px",
+              "height": "28px",
               "marginBlockStart": "8px"
             },
             "freshRailRecentsHeading": {
-              "height": "40px",
+              "height": "32px",
               "marginInlineStart": "0px"
             }
           }
@@ -654,7 +674,7 @@
           },
           "styles": {
             "createdProjectFolder": {
-              "height": "40px",
+              "height": "32px",
               "marginInlineStart": "0px"
             }
           }
@@ -1241,6 +1261,7 @@
             "theGroupIsSeparatedFromWhatFollows": true,
             "theRowsSitAboveTheTree": true,
             "theInertRowsSayWhyTheyCannotAct": true,
+            "theActionRowsCarryTheRailRowBox": true,
             "oneNewChatOnThePage": true,
             "theCollapseControlIsStillThere": true
           },
@@ -1248,11 +1269,17 @@
             "railActionInertRow": {
               "height": "32px",
               "fontSize": "14px",
-              "paddingInline": "12px",
+              "paddingBlock": "2px",
+              "paddingInline": "8px",
               "color": "color(srgb 0.980392 0.980392 0.980392 / 0.55)"
             },
             "railActionLiveRow": {
               "height": "32px"
+            },
+            "railActionLiveRowPart": {
+              "height": "32px",
+              "paddingBlock": "2px",
+              "paddingInline": "8px"
             }
           }
         },
@@ -1273,7 +1300,8 @@
             "theRowsAreOneLine": true,
             "headingIsOneLine": true,
             "theSectionStartsCarryTheAir": true,
-            "theSectionLabelsTakeTheMutedToken": true
+            "theSectionLabelsTakeTheMutedToken": true,
+            "nothingInARowIsClipped": true
           },
           "styles": {
             "railConversationRowTitle": {
@@ -1293,8 +1321,20 @@
               "color": "oklab(0.985098 0.0000447631 0.0000197291 / 0.8)"
             },
             "railProjectsLabelRow": {
-              "height": "36px",
-              "marginBlockStart": "8px"
+              "height": "28px",
+              "marginBlockStart": "8px",
+              "paddingBlock": "0px",
+              "paddingInline": "0px"
+            },
+            "railConversationRow": {
+              "height": "32px",
+              "paddingBlock": "2px",
+              "paddingInline": "8px"
+            },
+            "railFolderHeadingRow": {
+              "height": "32px",
+              "paddingBlock": "2px",
+              "paddingInline": "8px"
             }
           }
         },
@@ -1342,7 +1382,7 @@
           },
           "styles": {
             "railOneListLabelRow": {
-              "height": "36px",
+              "height": "28px",
               "marginBlockStart": "8px"
             },
             "railOneListRow": {
@@ -1363,11 +1403,11 @@
           },
           "styles": {
             "freshRailProjectsLabel": {
-              "height": "36px",
+              "height": "28px",
               "marginBlockStart": "8px"
             },
             "freshRailRecentsHeading": {
-              "height": "40px",
+              "height": "32px",
               "marginInlineStart": "0px"
             }
           }
@@ -1386,7 +1426,7 @@
           },
           "styles": {
             "createdProjectFolder": {
-              "height": "40px",
+              "height": "32px",
               "marginInlineStart": "0px"
             }
           }
