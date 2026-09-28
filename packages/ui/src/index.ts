@@ -276,12 +276,18 @@ export type {
 } from './components/response/response-compare';
 export { MessageSkills } from './components/message/message-skills';
 export type { MessageSkillsProps, Skill as MessageSkill } from './components/message/message-skills';
+// `PromptInputBand` is exported for `ComposerChips`' reason one line down: a host
+// hand-wiring the composer primitives has to put a row above the editable, and the
+// band is the only thing that keeps that row on its own line instead of becoming a
+// flex ROW ITEM beside the text (where it clips the placeholder). Un-exported, the
+// only way to get it was a deep path into `components/prompt/prompt-input`.
 export {
   PromptInput, PromptInputTextarea, PromptInputActions, PromptInputAction,
-  usePromptInput,
+  PromptInputBand, usePromptInput,
 } from './components/prompt/prompt-input';
 export type {
   PromptInputProps, PromptInputTextareaProps, PromptInputActionsProps, PromptInputActionProps,
+  PromptInputBandProps,
 } from './components/prompt/prompt-input';
 export { ResponseStream } from './components/response/response-stream';
 export type { ResponseStreamProps } from './components/response/response-stream';

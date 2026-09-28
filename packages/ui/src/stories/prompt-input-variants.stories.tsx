@@ -1,15 +1,10 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal, For, Show } from 'solid-js';
 import {
-  PromptInput, PromptInputTextarea, PromptInputActions,
+  PromptInput, PromptInputTextarea, PromptInputActions, PromptInputBand,
   PromptSuggestion, ModelSwitcher, Loader, Button,
   Attachments, Attachment, AttachmentPreview, AttachmentInfo, AttachmentRemove,
 } from '../index';
-// Deep import, and the ONLY one in this file: `PromptInputBand` is the kit's own
-// band wrapper (see its docblock) but is not exported from '../index' yet. Using
-// the band rather than re-spelling its classes is the point — a hand-copied
-// `order-first basis-full` would be a second, silently diverging answer.
-import { PromptInputBand } from '../components/prompt/prompt-input';
 import type { ModelOption } from '../types';
 import type { AttachmentData } from '../index';
 import { ArrowUp, Paperclip, Globe, Mic, Square, Sparkles } from 'lucide-solid';
@@ -514,8 +509,7 @@ let fileInput: HTMLInputElement | undefined;
     </Button>
   </PromptInputActions>
 </PromptInput>`,
-    `import { PromptInput, PromptInputTextarea, PromptInputActions, Attachments, Attachment, AttachmentPreview, AttachmentInfo, AttachmentRemove, Button } from '@kitn.ai/ui';
-import { PromptInputBand } from '../components/prompt/prompt-input'; // not exported from '@kitn.ai/ui' yet
+    `import { PromptInput, PromptInputTextarea, PromptInputActions, PromptInputBand, Attachments, Attachment, AttachmentPreview, AttachmentInfo, AttachmentRemove, Button } from '@kitn.ai/ui';
 import type { AttachmentData } from '@kitn.ai/ui';
 import { createSignal, Show, For } from 'solid-js';
 import { ArrowUp, Paperclip } from 'lucide-solid';`,
