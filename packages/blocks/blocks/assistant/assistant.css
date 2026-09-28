@@ -244,16 +244,25 @@ kai-conversation-item[data-rail="folder"] + kai-conversation-item { margin-block
  * element on dark). Setting it unconditionally would paint the light shade under
  * a dark rail.
  *
+ * THE SELECTOR READS `data-theme`, NOT THE `theme` ATTRIBUTE THE ELEMENT TAKES,
+ * and that is a measured difference between the two delivery forms rather than a
+ * preference: the html binder writes `theme` as an attribute, the React wrapper
+ * assigns it as a DOM property, and a property does not reflect back (measured:
+ * setting `.theme = 'light'` leaves the attribute on `auto`), so a rule keyed on
+ * `[theme='light']` never matched the react page and the rail stayed white there.
+ * The rail's `data-organizer` rules above read a data attribute for the same
+ * reason.
+ *
  * DARK MODE IS THEREFORE UNTOUCHED, and that is the measured answer rather than
  * an omission: the rail keeps the kit's `--color-sidebar` (`hsl(50 2% 7%)`,
  * measured rgb(18 18 17) against the canvas's rgb(23 23 22)), so it stays the
  * darker of the two in dark mode, while the composer's surface beside it is
  * rgb(32 31 30). The relationship between the two regions is what light mode
  * changed, not the rail's colour in general. */
-kai-conversations[theme='light'] { --kai-color-sidebar: var(--color-surface); }
+kai-conversations[data-theme='light'] { --kai-color-sidebar: var(--color-surface); }
 
 @media (prefers-color-scheme: light) {
-  kai-conversations[theme='auto'] { --kai-color-sidebar: var(--color-surface); }
+  kai-conversations[data-theme='auto'] { --kai-color-sidebar: var(--color-surface); }
 }
 
 /* THE RAIL'S TOP REGION, which lives in the list's header slot. That slot's own

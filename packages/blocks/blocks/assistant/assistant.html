@@ -71,14 +71,25 @@
            the top of the aside: a rail with two boxes filtering the same rows is
            two places to look for the same thing. The `@kai-search` binding stays
            beside it, so a consumer who turns the box back on gets a working filter
-           rather than a dead one. Nothing else about the rail's state rides an
-           attribute the stylesheet reads - what the rows look like is the same
-           under either organizer. -->
+           rather than a dead one.
+
+           TWO OF THE RAIL'S OWN FACTS RIDE DATA ATTRIBUTES, and the stylesheet
+           reads them: `data-organizer` picks the folder rules, and `data-theme`
+           picks the light-mode shade below. `data-*` rather than the `theme`
+           attribute, because `theme` does not arrive the same way in the two
+           delivery forms: the html binder writes it as an ATTRIBUTE, while the
+           React wrapper assigns the declared prop as a DOM property, and a
+           property does not reflect back into the attribute (measured: setting
+           `.theme = 'light'` leaves `getAttribute('theme')` on `auto`, so a rule
+           keyed on `[theme='light']` never matched the react page). A `data-*`
+           binding is an attribute in both - the same reason `data-organizer` is
+           spelled this way. -->
       <kai-conversations
         id="conversations"
         slot="start"
         #ref="conversations"
         :theme="themeMode"
+        :data-theme="themeMode"
         .collapsed="railCollapsed"
         .activeId="activeId"
         searchable="false"
