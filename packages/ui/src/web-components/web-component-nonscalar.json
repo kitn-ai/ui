@@ -42,7 +42,8 @@
     "value"
   ],
   "kai-checkbox-group": [
-    "options"
+    "options",
+    "values"
   ],
   "kai-choice": [
     "data",
@@ -147,7 +148,8 @@
     "options"
   ],
   "kai-select": [
-    "options"
+    "options",
+    "values"
   ],
   "kai-skills": [
     "skills"

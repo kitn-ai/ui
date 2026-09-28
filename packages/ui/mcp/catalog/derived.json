@@ -1156,6 +1156,12 @@
           "fn": false
         },
         {
+          "name": "values",
+          "scalar": false,
+          "optional": true,
+          "fn": false
+        },
+        {
           "name": "name",
           "scalar": true,
           "optional": true,
@@ -4588,6 +4594,12 @@
         {
           "name": "value",
           "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "values",
+          "scalar": false,
           "optional": true,
           "fn": false
         },

@@ -565,6 +565,8 @@ export interface CheckboxGroupProps extends WebComponentProps {
   options: { value: string; label: string; description?: undefined | string; disabled?: undefined | boolean }[];
   /** The FIRST selected value. Read or drive the rest with `el.values`. */
   value?: string;
+  /** The whole selection in order; `value` is only its first entry and setting this replaces it. */
+  values?: string[];
   /** Shared name on every box, for `FormData.getAll(name)`. No default: checkboxes are independent controls. */
   name?: string;
   /** Disable every row. Individual rows carry their own `disabled`. */
@@ -577,7 +579,7 @@ export interface CheckboxGroupProps extends WebComponentProps {
 
 export const CheckboxGroup = /*#__PURE__*/ createWebComponent<CheckboxGroupProps, KaiCheckboxGroupElement>(
   'kai-checkbox-group',
-  ["theme","options","value","name","disabled","label"],
+  ["theme","options","value","values","name","disabled","label"],
   { onChange: 'kai-change' },
   () => import('@kitn.ai/ui/web-components/checkbox-group'),
 );
@@ -1965,6 +1967,8 @@ export interface SelectProps extends WebComponentProps {
   options: { value: string; label?: undefined | string; disabled?: undefined | boolean }[];
   /** Controlled selected value, reflected to the `value` attribute. For a `multiple` select read `el.values`. */
   value?: string;
+  /** The whole selection in order; `value` is only its first entry and setting this replaces it. */
+  values?: string[];
   /** Text for a leading, disabled, empty option (the "nothing chosen yet" row). */
   placeholder?: string;
   /** Allow more than one selection. Turns the control into the platform's list box, so the kit's chevron is not drawn. */
@@ -1985,7 +1989,7 @@ export interface SelectProps extends WebComponentProps {
 
 export const Select = /*#__PURE__*/ createWebComponent<SelectProps, KaiSelectElement>(
   'kai-select',
-  ["theme","options","value","placeholder","multiple","invalid","disabled","required","label","name"],
+  ["theme","options","value","values","placeholder","multiple","invalid","disabled","required","label","name"],
   { onChange: 'kai-change' },
   () => import('@kitn.ai/ui/web-components/select'),
 );

@@ -2127,6 +2127,14 @@
         "displayType": "undefined | string"
       },
       {
+        "name": "values",
+        "type": "undefined | string[]",
+        "optional": true,
+        "scalar": false,
+        "description": "The whole selection in order; `value` is only its first entry and setting this replaces it.",
+        "displayType": "undefined | string[]"
+      },
+      {
         "name": "name",
         "type": "undefined | string",
         "optional": true,
@@ -8756,6 +8764,14 @@
         "scalar": true,
         "description": "Controlled selected value, reflected to the `value` attribute. For a `multiple` select read `el.values`.",
         "displayType": "undefined | string"
+      },
+      {
+        "name": "values",
+        "type": "undefined | string[]",
+        "optional": true,
+        "scalar": false,
+        "description": "The whole selection in order; `value` is only its first entry and setting this replaces it.",
+        "displayType": "undefined | string[]"
       },
       {
         "name": "placeholder",
