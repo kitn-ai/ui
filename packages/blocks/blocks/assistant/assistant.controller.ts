@@ -2331,7 +2331,7 @@ export function createController(deps: AssistantDeps): AssistantController {
     const organizer = next.organizer ?? state.railOrganizer;
     const sort = next.sort ?? state.railSort;
     patch({
-      ...projectRailMenu(organizer, sort, createdKey),
+      ...projectRailMenu(organizer, sort),
       ...projectSummaries(lastSummaries, state.query, organizer, sort),
     });
   };
