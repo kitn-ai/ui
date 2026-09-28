@@ -441,6 +441,8 @@ export interface KaiChatElement extends HTMLElement {
   headerStart?: boolean;
   /** Whether the host has `slot="header-end"` content (right of the controls). */
   headerEnd?: boolean;
+  /** Paint the panel rows' and home recent card's derived trailing edge, or leave it empty. Default true. */
+  showTrailing?: boolean;
   /** Replaces the built-in header bar with `slot="header"` content. */
   headerFull?: boolean;
   /** Replaces the built-in home screen with `slot="home"` content, while the home view shows. */
@@ -3350,6 +3352,8 @@ export interface KaiChatElementProps {
   headerStart?: boolean;
   /** Whether the host has `slot="header-end"` content (right of the controls). */
   headerEnd?: boolean;
+  /** Paint the panel rows' and home recent card's derived trailing edge, or leave it empty. Default true. */
+  showTrailing?: boolean;
   /** Replaces the built-in header bar with `slot="header"` content. */
   headerFull?: boolean;
   /** Replaces the built-in home screen with `slot="home"` content, while the home view shows. */

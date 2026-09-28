@@ -214,6 +214,13 @@ defineWebComponent<Props, Events>('kai-chat', {
   reasoning: undefined, reasoningOpen: undefined, conversations: false, store: undefined,
   home: undefined, userActions: undefined, assistantActions: undefined, hideSources: false,
   hostOpen: true,
+  // Default-true flag convention, as `<kai-conversations show-trailing="false">`: the
+  // attribute form is the only way an HTML author says `false`, so the option reaches
+  // the host through `flag()` rather than a raw prop read. Inherited from
+  // `ChatThreadProps` (not re-declared above, so the prop table carries one doc comment
+  // rather than two concatenated ones), declared HERE so the element reads back `true`
+  // rather than `undefined` before any consumer writes it. Same reason as `density`.
+  showTrailing: true,
   // Inherited from `ChatThreadProps` (not re-declared above, so the prop table carries
   // one doc comment rather than two concatenated ones); declared HERE so the element
   // observes the `density` attribute and reads back `'default'` rather than `undefined`.
@@ -334,6 +341,7 @@ defineWebComponent<Props, Events>('kai-chat', {
     onUnreadChange={(unread) => dispatch('kai-unread-change', { unread })}
     home={props.home as HomeConfig | undefined}
     onHomeLink={(entry) => dispatch('kai-home-link', { entry })}
+    showTrailing={flag('showTrailing')}
     /* Card parts emit off THIS element as the bubbling `kai-card` event,
        so `listenForCardEvents(el)` / addEventListener('kai-card') work. */
     cardHostElement={element}

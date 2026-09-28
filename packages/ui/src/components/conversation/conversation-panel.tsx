@@ -12,6 +12,15 @@ export interface ConversationPanelProps {
   onNewChat: () => void;
   /** Wording for the floating new-conversation pill. Defaults to "New conversation". */
   newChatLabel?: string;
+  // The row's trailing edge holds a relative time this component DERIVES from the
+  // summary's timestamps, so a consumer whose own chrome owns that edge had no way to
+  // reach "nothing": omitting the timestamps in the data only changed which fallback
+  // ran. Same option, same name and same default as the data row's
+  // (`ConversationItem.showTrailing`) and the list's (`ConversationList.showTrailing`),
+  // because it is one concept on one class of surface. The preview line under the
+  // title is not this edge, so it and its unread dot stay either way.
+  /** Paint each row's trailing edge, or leave the edge empty. Default `true`. */
+  showTrailing?: boolean;
   class?: string;
 }
 
@@ -56,7 +65,12 @@ export function ConversationPanel(props: ConversationPanelProps) {
             <For each={ordered()}>
               {(conv) => {
                 const isActive = () => conv.id === props.activeId;
-                const time = () => relativeTimeShort(conv.updatedAt ?? conv.lastMessageAt);
+                // The edge is opted OUT of rather than into, because the written form of
+                // a default-true prop is `showTrailing={false}`; every other value leaves
+                // the row exactly as it was.
+                const time = () => (props.showTrailing === false
+                  ? ''
+                  : relativeTimeShort(conv.updatedAt ?? conv.lastMessageAt));
                 const unread = () => isConversationUnread(conv);
                 return (
                   // The row is a listitem WRAPPER holding a native <button>, not a

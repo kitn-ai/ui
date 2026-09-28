@@ -117,3 +117,96 @@ test('missing store (element level): decides loudly, toggle stays absent', async
   err.mockRestore();
   el.remove();
 });
+
+// ── the derived trailing edge reaches the element (showTrailing) ────────────
+// `ConversationPanel` and the home recent card (`HomePanel`) each derive a
+// relative time of their own for the trailing edge, and `<kai-chat>` is the only
+// handle an element consumer has on either. One option, both surfaces: the point
+// of a single name is that a consumer who owns that edge turns it off once.
+//
+// Default ON, so both tests below have a companion that shows the edge the
+// default state paints — an empty edge with nothing rendered beside it would
+// pass just as well if the surface had failed to render at all.
+
+type TrailChat = HTMLElement & {
+  conversations?: boolean;
+  store?: unknown;
+  home?: unknown;
+  showTrailing?: boolean;
+  messages: ChatMessage[];
+};
+
+/** Every shape `relativeTimeShort` can return for a real timestamp. */
+const derivedTime = /just now|\d+m ago|\d+h ago|\d+d ago/;
+
+const mountTrailChat = async (attr?: string) => {
+  localStorage.clear();
+  const store = localStorageStore('acme-trailing');
+  await store.save('c1', [{ id: 'm1', role: 'user', parts: [{ type: 'text', text: 'hi' }] }] satisfies ChatMessage[]);
+  const el = document.createElement('kai-chat') as TrailChat;
+  if (attr) el.setAttribute('show-trailing', attr);
+  el.conversations = true;
+  el.store = store;
+  el.messages = [];
+  document.body.appendChild(el);
+  await flush();
+  return { el, store };
+};
+
+test('the panel row derives a relative time by default; show-trailing="false" leaves it empty', async () => {
+  const { el } = await mountTrailChat();
+  expect(el.showTrailing, 'absent means ON').toBe(true);
+
+  el.shadowRoot!.querySelector<HTMLButtonElement>('[data-kai-conversations-toggle]')!.click();
+  await flush();
+  const row = el.shadowRoot!.querySelector<HTMLElement>('[data-conversation-id="c1"]')!;
+  expect(row.textContent).toMatch(derivedTime);
+
+  const off = await mountTrailChat('false');
+  off.el.shadowRoot!.querySelector<HTMLButtonElement>('[data-kai-conversations-toggle]')!.click();
+  await flush();
+  // Non-vacuity: the row rendered, so an empty edge means the option worked
+  // rather than the panel having failed to render.
+  const offRow = off.el.shadowRoot!.querySelector<HTMLElement>('[data-conversation-id="c1"]')!;
+  expect(offRow).toBeTruthy();
+  expect(offRow.textContent).not.toMatch(derivedTime);
+  // The preview line is not the trailing edge and stays.
+  expect(offRow.textContent).toContain('hi');
+
+  el.remove();
+  off.el.remove();
+});
+
+test('the home recent card derives a relative time by default; show-trailing="false" leaves it empty', async () => {
+  localStorage.clear();
+  const store = localStorageStore('acme-trailing-home');
+  await store.save('c1', [{ id: 'm1', role: 'user', parts: [{ type: 'text', text: 'hi' }] }] satisfies ChatMessage[]);
+
+  const home = async (attr?: string) => {
+    const el = document.createElement('kai-chat') as TrailChat;
+    if (attr) el.setAttribute('show-trailing', attr);
+    el.conversations = true;
+    el.store = store;
+    el.home = { recentConversation: true };
+    el.messages = [];
+    document.body.appendChild(el);
+    await flush();
+    return el;
+  };
+
+  const on = await home();
+  const onCard = on.shadowRoot!.querySelector<HTMLElement>('[data-kai-home-recent]')!;
+  expect(onCard.textContent).toMatch(derivedTime);
+
+  const off = await home('false');
+  const offCard = off.shadowRoot!.querySelector<HTMLElement>('[data-kai-home-recent]')!;
+  expect(offCard).toBeTruthy();
+  expect(offCard.textContent).not.toMatch(derivedTime);
+  // The card's own content is untouched: the store titles a conversation from its
+  // first message, so the title (and the summary's `trailing` preview, which is the
+  // card's SUBTITLE rather than this edge) both stay.
+  expect(offCard.textContent).toContain('hi');
+
+  on.remove();
+  off.remove();
+});

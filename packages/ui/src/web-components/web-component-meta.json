@@ -1553,6 +1553,15 @@
         "displayType": "undefined | false | true"
       },
       {
+        "name": "showTrailing",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Paint the panel rows' and home recent card's derived trailing edge, or leave it empty. Default true.",
+        "default": "true",
+        "displayType": "undefined | false | true"
+      },
+      {
         "name": "headerFull",
         "type": "undefined | false | true",
         "optional": true,

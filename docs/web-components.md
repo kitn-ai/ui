@@ -160,6 +160,7 @@ Every web component also accepts a `theme` attribute (`'light' | 'dark' | 'auto'
 | `scrollButton` | `scroll-button` | `undefined | false | true` | `true` | Show the scroll-to-bottom button inside the scroll area. Default true. |
 | `headerStart` | `header-start` | `undefined | false | true` | — | Whether `slot="header-start"` content is projected, which forces the header row open. |
 | `headerEnd` | `header-end` | `undefined | false | true` | — | Whether the host has `slot="header-end"` content (right of the controls). |
+| `showTrailing` | `show-trailing` | `undefined | false | true` | `true` | Paint the panel rows' and home recent card's derived trailing edge, or leave it empty. Default true. |
 | `headerFull` | `header-full` | `undefined | false | true` | — | Replaces the built-in header bar with `slot="header"` content. |
 | `homeFull` | `home-full` | `undefined | false | true` | — | Replaces the built-in home screen with `slot="home"` content, while the home view shows. |
 | `sidebar` | `sidebar` | `undefined | false | true` | — | Whether `slot="sidebar"` content is projected, which shows the left sidebar column. |

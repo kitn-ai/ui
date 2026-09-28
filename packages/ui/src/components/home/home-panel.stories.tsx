@@ -29,6 +29,10 @@ const meta = {
   // interface in `home-panel.tsx`, so their entries name the action and carry
   // no invented sentence; `onLink`'s sentence is its own prop doc.
   argTypes: {
+    showTrailing: {
+      control: 'boolean',
+      description: 'Paint the recent card\'s trailing edge (the derived relative time), or leave the edge empty. On by default.',
+    },
     onSelectRecent: {
       action: 'select-recent',
       description: 'A recent-conversation row was activated; carries that conversation\'s id.',
@@ -55,6 +59,9 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const IMPORT = `import { HomePanel, WidgetTabBar } from '@kitn.ai/ui/solid';`;
+// `showTrailing={false}` cannot be written as JSX text (the braces are an
+// expression), so the label is a string.
+const OFF_LABEL = 'showTrailing={false}: the edge left empty';
 const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
@@ -125,4 +132,28 @@ export const NoRecent: Story = {
   onNewChat={() => startNewChat()}
 />
 <WidgetTabBar active="home" onChange={setTab} />`),
+};
+
+/** The recent card's trailing edge, both ways, side by side. The right-hand panel
+ *  sets `showTrailing={false}`: the card keeps its title and its subtitle (the
+ *  summary's own `trailing` field), while the edge, which holds a relative time
+ *  and the unread dot this component derives, is left empty. */
+export const RecentCardTrailing: Story = {
+  render: (args: HomePanelProps) => (
+    <div class="flex flex-wrap items-start gap-6">
+      <div class="flex flex-col gap-2">
+        <div class="text-xs font-medium text-muted-foreground">default: the derived time on the trailing edge</div>
+        {frame(<HomePanel {...args} greeting={{ title: 'Hi there 👋' }} recent={recent} />)}
+      </div>
+      <div class="flex flex-col gap-2">
+        <div class="text-xs font-medium text-muted-foreground">{OFF_LABEL}</div>
+        {frame(<HomePanel {...args} greeting={{ title: 'Hi there 👋' }} recent={recent} showTrailing={false} />)}
+      </div>
+    </div>
+  ),
+  ...src(`{/* default: the recent card derives a relative time for its trailing edge */}
+<HomePanel recent={recentConversation} onSelectRecent={openConversation} ... />
+
+{/* showTrailing={false}: the edge is empty; title and subtitle stay */}
+<HomePanel recent={recentConversation} showTrailing={false} onSelectRecent={openConversation} ... />`),
 };

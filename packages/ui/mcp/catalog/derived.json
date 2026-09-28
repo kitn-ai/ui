@@ -871,6 +871,12 @@
           "fn": false
         },
         {
+          "name": "showTrailing",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
           "name": "headerFull",
           "scalar": true,
           "optional": true,

@@ -76,4 +76,31 @@ describe('ConversationPanel — the one list-order rule', () => {
     // the whole controller cache).
     expect(conversations.map((c) => c.id)).toEqual(['a', 'b']);
   });
+
+  // The row's trailing edge derives its own relative time, so a consumer who owns
+  // that edge had no way to reach "nothing": omitting the summary's timestamps only
+  // changed which fallback ran. Same option, same name and same default as the data
+  // row's (`ConversationItem.showTrailing`).
+  it('showTrailing defaults on: the row derives a relative time on its trailing edge', () => {
+    const { container } = render(() => (
+      <ConversationPanel
+        conversations={[conv('a', new Date(Date.now() - 5 * 60_000).toISOString())]}
+        onSelect={noop}
+        onNewChat={noop}
+      />
+    ));
+    expect(container.textContent).toContain('5m ago');
+  });
+
+  it('showTrailing={false} leaves the trailing edge empty', () => {
+    const { container } = render(() => (
+      <ConversationPanel
+        conversations={[conv('a', new Date(Date.now() - 5 * 60_000).toISOString())]}
+        onSelect={noop}
+        onNewChat={noop}
+        showTrailing={false}
+      />
+    ));
+    expect(container.textContent).not.toContain('ago');
+  });
 });

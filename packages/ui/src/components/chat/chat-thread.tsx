@@ -157,6 +157,14 @@ export interface ChatThreadProps {
   /** Fires when a `home.links` entry with no `href` is activated; one with an `href`
    *  navigates instead. Only meaningful when `home` is set. */
   onHomeLink?: (entry: HomeLinkEntry) => void;
+  // Both widget surfaces that DERIVE a trailing edge of their own read this one option:
+  // the panel's row time (`ConversationPanel`) and the home recent card's (`HomePanel`).
+  // Default-true, matching the data row's own option of the same name
+  // (`ConversationItem.showTrailing`), so a consumer who owns that edge (their own menu,
+  // their own timestamp) turns it off once for the whole thread instead of per surface.
+  /** Paint the panel rows' and home recent card's derived trailing edge, or leave it
+   *  empty. Default true. */
+  showTrailing?: boolean;
   // ── Composition slots ─────────────────────────────────────────────────────
   // Each flag below is set by the `<kai-chat>` facade when matching light-DOM
   // `slot="…"` content is projected, and gates one composition slot. Two kinds:
@@ -839,6 +847,7 @@ export function ChatThread(props: ChatThreadProps) {
                       recent={recentSummary()}
                       newChatLabel={props.home?.newConversation?.label}
                       links={props.home?.links}
+                      showTrailing={props.showTrailing}
                       onSelectRecent={(id) => void controller()?.select(id)}
                       onNewChat={() => startNewConversation()}
                       onLink={(entry) => props.onHomeLink?.(entry)}
@@ -854,6 +863,7 @@ export function ChatThread(props: ChatThreadProps) {
                   activeId={activeConversationId()}
                   onSelect={(id) => void controller()?.select(id)}
                   onNewChat={() => startNewConversation()}
+                  showTrailing={props.showTrailing}
                 />
               </Match>
             </Switch>

@@ -447,6 +447,8 @@ export interface ChatProps extends WebComponentProps {
   headerStart?: boolean;
   /** Whether the host has `slot="header-end"` content (right of the controls). */
   headerEnd?: boolean;
+  /** Paint the panel rows' and home recent card's derived trailing edge, or leave it empty. Default true. */
+  showTrailing?: boolean;
   /** Replaces the built-in header bar with `slot="header"` content. */
   headerFull?: boolean;
   /** Replaces the built-in home screen with `slot="home"` content, while the home view shows. */
@@ -525,7 +527,7 @@ export interface ChatProps extends WebComponentProps {
 
 export const Chat = /*#__PURE__*/ createWebComponent<ChatProps, KaiChatElement>(
   'kai-chat',
-  ["theme","density","value","placeholder","loading","suggestions","suggestionsLayout","suggestionMode","persistSuggestions","proseSize","codeTheme","imagePreview","codeHighlight","reasoning","reasoningOpen","chatTitle","models","currentModel","context","scrollButton","headerStart","headerEnd","headerFull","homeFull","sidebar","empty","composer","composerActions","footer","attach","tools","expanded","voice","triggers","kindIcons","actionsReveal","userActions","assistantActions","hideSources","accept","messages","cardTypes","cardSchemas","conversations","store","home","hostOpen"],
+  ["theme","density","value","placeholder","loading","suggestions","suggestionsLayout","suggestionMode","persistSuggestions","proseSize","codeTheme","imagePreview","codeHighlight","reasoning","reasoningOpen","chatTitle","models","currentModel","context","scrollButton","headerStart","headerEnd","showTrailing","headerFull","homeFull","sidebar","empty","composer","composerActions","footer","attach","tools","expanded","voice","triggers","kindIcons","actionsReveal","userActions","assistantActions","hideSources","accept","messages","cardTypes","cardSchemas","conversations","store","home","hostOpen"],
   { onAttachmentsChange: 'kai-attachments-change', onAttachmentsRejected: 'kai-attachments-rejected', onConversationLoad: 'kai-conversation-load', onHomeLink: 'kai-home-link', onMessageAction: 'kai-message-action', onModelChange: 'kai-model-change', onSelect: 'kai-select', onSubmit: 'kai-submit', onSuggestionClick: 'kai-suggestion-click', onUnreadChange: 'kai-unread-change', onValueChange: 'kai-value-change', onVoice: 'kai-voice' },
   () => import('@kitn.ai/ui/web-components/chat'),
 );
