@@ -142,6 +142,45 @@ export const Default: Story = {
 </Empty>`),
 };
 
+/** The content-width seam. `EmptyContent` caps what you slot into it at a prose
+ *  measure (24rem) by default. Content that is not prose - a two-up card grid -
+ *  declares the width it needs with `--kai-empty-content-width`, and it is the
+ *  BOX that widens, so the slotted content stays inside the box it was slotted
+ *  into: no width on the children, no `min-width`, nothing painting past its
+ *  parent. Set the variable anywhere above the content (here on the `Empty`
+ *  root); it inherits. */
+export const ContentWidth: Story = {
+  name: 'Content Width (a grid takes the column)',
+  render: () => (
+    <div class="w-[640px]">
+      <Empty class="[--kai-empty-content-width:100%]">
+        <EmptyHeader>
+          <EmptyMedia variant="icon"><FolderPlus /></EmptyMedia>
+          <EmptyTitle>No projects yet</EmptyTitle>
+          <EmptyDescription>Start from one of these, or create your own.</EmptyDescription>
+        </EmptyHeader>
+        <EmptyContent class="grid grid-cols-2 gap-2">
+          <For each={['Starter', 'Docs site', 'CLI tool', 'API service']}>{(name) => (
+            <Button variant="outline" class="w-full justify-start">{name}</Button>
+          )}</For>
+        </EmptyContent>
+      </Empty>
+    </div>
+  ),
+  ...src(`<Empty style="--kai-empty-content-width: 100%">
+  <EmptyHeader>
+    <EmptyMedia variant="icon"><FolderPlus /></EmptyMedia>
+    <EmptyTitle>No projects yet</EmptyTitle>
+    <EmptyDescription>Start from one of these, or create your own.</EmptyDescription>
+  </EmptyHeader>
+  <!-- the grid may be as wide as the box it is slotted into -->
+  <EmptyContent class="grid grid-cols-2 gap-2">
+    <Button variant="outline" class="w-full justify-start">Starter</Button>
+    <Button variant="outline" class="w-full justify-start">Docs site</Button>
+  </EmptyContent>
+</Empty>`),
+};
+
 /** Two actions: a primary plus a secondary (outline). */
 export const WithActions: Story = {
   name: 'With Multiple Actions',

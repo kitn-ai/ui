@@ -310,6 +310,16 @@ const measureCards = (page) => page.evaluate(() => {
     // knob, which is the fallback the block's own rules carry.
     density: getComputedStyle(grid).getPropertyValue('--kai-density').trim(),
     composerWidth: Math.round(document.getElementById('prompt')?.getBoundingClientRect().width ?? 0),
+    // THE BOX THE GRID IS SLOTTED INTO, read through the host's shadow root. The
+    // slotted div's own `parentElement` is the HOST (it is light DOM), which is the
+    // 48rem column - the box that declares the cap is the kit's `EmptyContent`, one
+    // shadow boundary in.
+    containerWidth: (() => {
+      const content = document
+        .querySelector('kai-empty')
+        ?.shadowRoot?.querySelector('[data-slot="empty-content"]');
+      return content ? Math.round(content.getBoundingClientRect().width) : null;
+    })(),
   };
 });
 
@@ -2082,18 +2092,31 @@ export default {
             .map(([edge, value]) => `${edge} ${cards[edge]}px, ${value}px wanted`);
           return wrong.length === 0 ? true : wrong.join(' | ');
         },
-        // ...AND THE GRID TAKES THE COLUMN THE PAGE HAS rather than the prose box
-        // it is slotted into: the cards' two columns are the WIDE fact the owner
-        // asked for, and the column they may use is the composer's own 48rem box
-        // below them - the same measure, so the two line up. Equality within a
-        // pixel, read at the run's viewport, where both are capped at 48rem.
-        theGridTakesTheComposersColumn: () => {
+        // ...AND THE GRID FILLS THE BOX ITS CONTAINER DECLARES, rather than the prose
+        // box it used to escape. The block says how wide that content may be with
+        // `--kai-empty-content-width` (see assistant.css): the empty state's own box
+        // is what widens, and the grid is exactly that box - no wider (the escape
+        // hatch this replaced was measured at 768px against a 384px parent) and no
+        // narrower.
+        theGridFillsTheEmptyContentsBox: () => {
           const cards = emptyStateBoxes?.wide?.cards;
-          if (!cards || cards.composerWidth === 0) return 'the grid or the composer was not measured';
-          const off = Math.abs(cards.gridWidth - cards.composerWidth);
+          if (!cards || !cards.containerWidth) return 'the grid or the box it is slotted into was not measured';
+          const off = Math.abs(cards.gridWidth - cards.containerWidth);
           return off <= 1
             ? true
-            : `the grid is ${cards.gridWidth}px against the composer's ${cards.composerWidth}px`;
+            : `the grid is ${cards.gridWidth}px against the ${cards.containerWidth}px box it is slotted into`;
+        },
+        // ...AND THAT BOX NEVER OUTGROWS THE COLUMN ITS HOST PUTS IT IN: the same
+        // 48rem measure the composer below is capped to. This is where the old
+        // expression's bound lives now - it belongs to the thread's own `max-w-3xl`
+        // column, which caps the empty state's box for every host that mounts it,
+        // so the block no longer restates it and cannot drift from it.
+        theGridStaysInsideThreadColumn: () => {
+          const cards = emptyStateBoxes?.wide?.cards;
+          if (!cards || cards.composerWidth === 0) return 'the grid or the composer was not measured';
+          return cards.gridWidth <= cards.composerWidth
+            ? true
+            : `the grid is ${cards.gridWidth}px against the composer's ${cards.composerWidth}px column`;
         },
         // And every one of them is on screen, not merely in the array.
         rendered: (page) => allRendered(page, offeredRows),
@@ -2102,7 +2125,7 @@ export default {
         fourLabels: true, theBoxesAreTheOfferedLabels: true, theLabelsShareOneLine: true,
         theLabelsAreIntrinsicWidth: true, theLabelsWrapWhenThereIsNoRoom: true,
         theCardsFoldToOneColumnWhenThereIsNoRoom: true, theCardsCarryTheKitsOwnAir: true,
-        theGridTakesTheComposersColumn: true, rendered: true,
+        theGridFillsTheEmptyContentsBox: true, theGridStaysInsideThreadColumn: true, rendered: true,
       },
       // Every probe above is a comparison among the block's own boxes or against
       // the kit's own token, so none of them is skipped on the react host: the

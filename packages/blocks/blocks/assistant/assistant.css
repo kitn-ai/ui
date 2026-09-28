@@ -322,37 +322,40 @@ kai-button[hidden] { display: none; }
    below the narrow breakpoint, because a summary that wraps to three lines is
    harder to scan than a card with the width to say it in two.
 
-   THE GRID IS WIDER THAN THE BOX IT IS SLOTTED INTO, on purpose, and this is the
-   one rule here that has to be read before it is changed. The cards are slotted
-   into the kit's `EmptyContent`, which caps its content at `max-w-sm` (24rem) -
-   a PROSE measure, for the one sentence an ordinary empty state carries - so
-   `width: 100%` out here is 384px and four cards two-up get 188px each. Those
-   two columns are what the owner read as "quite narrow", and the cap lives in
-   kai-empty's shadow root where nothing out here can reach it.
+   THE WIDTH COMES THROUGH THE KIT'S OWN SEAM, NOT AROUND IT. The cards are
+   slotted into the kit's `EmptyContent`, which caps its content at `max-w-sm`
+   (24rem) - a PROSE measure, for the one sentence an ordinary empty state
+   carries - so `width: 100%` out here was 384px and four cards two-up got 188px
+   each. That cap lived in kai-empty's shadow root where nothing out here could
+   reach it, so this rule used to make the grid WIDER THAN THE BOX IT IS SLOTTED
+   INTO (`min(48rem, calc(100vw - ...))` + `min-width: 100%`) - bounded so it
+   stayed inside the thread column, and still the component's contract being
+   fought from outside.
 
-   What the grid takes instead is the measure of the column it sits in: the
-   thread's own `max-w-3xl` (48rem) - the same 48rem the composer below is capped
-   to, so the card menu and the composer are one column. It renders centred
-   because EmptyContent centres its children, and it paints past that box rather
-   than inside it, which is safe here for a measurable reason rather than a hoped
-   one: the grid never exceeds the thread's own column, because the expression
-   below can only be smaller than the room main has.
+   `--kai-empty-content-width` is the seam: the empty state's own box widens to
+   what the consumer declares, the grid fills 100% of it, and nothing here paints
+   past a parent any more. The 48rem bound the old expression carried is NOT
+   restated, because it was never this block's: it belongs to the thread's own
+   `max-w-3xl` column - the same column the composer below is capped to - which
+   caps the empty state's box for every host that mounts it. Where the grid is a
+   share of a narrower column it is 100% of that, and the single-column media
+   query below is the whole layout.
 
-   THAT EXPRESSION is the room a page actually has: the viewport, less the shell's
-   own start-aside width - read from `--kai-workspace-start-width`, the very
-   variable the shell itself reads for that column, so a page that widens its rail
-   moves this with it - less 2rem of breathing room. `min-width: 100%` is what
-   keeps a narrow page at the prose box instead of shrinking the cards below it:
-   where the viewport cannot pay for the wider grid, this is today's 384px and the
-   single-column media query below is the whole layout. */
+   `width: 100%` rather than auto: EmptyContent is a centred flex column, so an
+   auto-width grid would shrink to its contents' max-content width and overflow
+   the box instead of taking it. */
 .guide-cards {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.5rem;
-  width: min(48rem, calc(100vw - var(--kai-workspace-start-width, 280px) - 2rem));
-  min-width: 100%;
+  width: 100%;
   margin-top: 0.25rem;
 }
+
+/* The measure this page's empty state may use. `100%` and not a number: the bound
+   is the CONTAINER's (the thread's 48rem column), so a measure typed here would
+   be a second copy of a fact the shell already owns. */
+kai-empty { --kai-empty-content-width: 100%; }
 
 @media (max-width: 640px) {
   .guide-cards { grid-template-columns: minmax(0, 1fr); }

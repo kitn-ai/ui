@@ -168,7 +168,25 @@ function EmptyContent(props: EmptyContentProps) {
     <div
       data-slot="empty-content"
       class={cn(
-        'flex w-full max-w-sm min-w-0 flex-col items-center gap-2 text-sm text-balance',
+        // HOW WIDE THE SLOTTED CONTENT MAY BE is a fact about the CONSUMER's
+        // content, so it is theirs to declare: `--kai-empty-content-width`
+        // (default `24rem`, the prose measure `max-w-sm` is; the same shape as
+        // `--kai-dock-launcher-size, 56px` and `--kai-kbd-cap-gap, 0.125rem`).
+        //
+        // THAT SEAM EXISTS BECAUSE ITS ABSENCE WAS BEING WORKED AROUND. The
+        // assistant block slots a two-up guide-card grid in here, and the prose
+        // cap left each card 188px. With no way to say "this content may be
+        // wider", the block had to make the grid WIDER THAN THE BOX IT IS
+        // SLOTTED INTO (`min(48rem, ...)` + `min-width: 100%`). A child that
+        // paints outside the box its parent declares is a landmine: an
+        // `overflow: hidden` ancestor clips it, anything measuring the parent
+        // gets a number that is wrong, and nothing in the kit said the width was
+        // negotiable. The variable inherits - set it on `<kai-empty>` (or any
+        // ancestor) and this box widens, the slotted content stays INSIDE it.
+        //
+        // The default is unchanged, so nothing moves until it is set; and
+        // `class="max-w-none"` still wins for a one-off (`cn` is last-wins).
+        'flex w-full max-w-[var(--kai-empty-content-width,24rem)] min-w-0 flex-col items-center gap-2 text-sm text-balance',
         local.class,
       )}
       {...rest}

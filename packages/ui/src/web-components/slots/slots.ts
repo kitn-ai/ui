@@ -756,6 +756,16 @@ export const EMPTY_SLOTS: SlotDef[] = [
   { name: 'media', mode: 'replace', doc: 'The leading illustration or icon above the title (any inline SVG or <img>). Replaces the built-in media box.' },
 ];
 
+/** CSS custom properties of `<kai-empty>`. */
+export const EMPTY_VARS: VarDef[] = [
+  {
+    name: '--kai-empty-content-width',
+    doc: 'How wide the content in the default slot may be. The `24rem` default is a PROSE measure, right for a sentence and its action; content that is not prose (a two-up card grid) sets this to the measure its own column has, and the slotted content then stays inside the box instead of painting past it.',
+    default: '24rem',
+    recipe: 'kai-empty { --kai-empty-content-width: 48rem }',
+  },
+];
+
 /** Slots of `<kai-popover>`. The panel body is the default slot; `trigger` is the
  *  control the panel anchors to and opens from. */
 export const POPOVER_SLOTS: SlotDef[] = [
@@ -978,7 +988,7 @@ export const WEB_COMPONENT_COMPOSITION: Record<string, WebComponentComposition> 
   'kai-kbd': { parts: KBD_PARTS, children: 'Literal key text, when you are not using the `keys` prop to render key caps.' },
   'kai-kbd-group': { parts: KBD_GROUP_PARTS, children: 'The `<kai-kbd>` elements to weld into one key strip, in order.' },
   'kai-editable-label': { parts: EDITABLE_LABEL_PARTS },
-  'kai-empty': { slots: EMPTY_SLOTS, children: 'The empty-state body below the title/description, usually the call to action.' },
+  'kai-empty': { slots: EMPTY_SLOTS, vars: EMPTY_VARS, children: 'The empty-state body below the title/description, usually the call to action. It is capped at a prose measure by default -- see `--kai-empty-content-width`.' },
   'kai-file-upload': { children: 'Custom dropzone content, replacing the default label (the `label` prop is the fallback).' },
   'kai-popover': { slots: POPOVER_SLOTS, children: 'The popover panel body. The control that opens it is the `trigger` slot.' },
   'kai-dropdown': { slots: DROPDOWN_SLOTS, children: 'The menu body: your own rows. Give each `role="menuitem"`. The control that opens it is the `trigger` slot.' },
