@@ -1,6 +1,6 @@
 {
   "scenario": "assistant",
-  "base": "http://localhost:8952",
+  "base": "http://localhost:8957",
   "runs": [
     {
       "page": "block",
@@ -548,7 +548,7 @@
               "color": "oklab(0.140764 0.00120224 -0.00421676 / 0.8)"
             },
             "railProjectsLabelRow": {
-              "height": "40px",
+              "height": "36px",
               "marginBlockStart": "8px"
             },
             "railCaret": {
@@ -574,8 +574,8 @@
               "alignItems": "center"
             },
             "railTrioControl": {
-              "height": "28px",
-              "width": "28px"
+              "height": "24px",
+              "width": "24px"
             }
           }
         },
@@ -601,17 +601,58 @@
           },
           "styles": {
             "railOneListLabelRow": {
-              "height": "40px",
+              "height": "36px",
               "marginBlockStart": "8px"
             },
             "railOneListRow": {
               "marginInlineStart": "0px"
             }
           }
+        },
+        {
+          "name": "49-fresh-profile-rail",
+          "probes": {
+            "theProjectsSectionIsThere": true,
+            "itsFoldersAreThere": true,
+            "theDemoProjectsAreNamed": true,
+            "recentsIsThere": true,
+            "noSampleConversationRows": true
+          },
+          "styles": {
+            "freshRailProjectsLabel": {
+              "height": "36px",
+              "marginBlockStart": "8px"
+            },
+            "freshRailRecentsHeading": {
+              "height": "36px",
+              "marginInlineStart": "0px"
+            }
+          }
+        },
+        {
+          "name": "50-create-a-project",
+          "probes": {
+            "thePlusOpensTheDialog": true,
+            "creatingClosesIt": true,
+            "theProjectIsInTheBlocksOwnKey": true,
+            "itIsInTheRailImmediately": true,
+            "itSurvivesAReload": true,
+            "itTakesAConversation": true,
+            "escapeClosesIt": true,
+            "theRailIsNotStranded": true
+          },
+          "styles": {
+            "createdProjectFolder": {
+              "height": "33px",
+              "marginInlineStart": "0px"
+            }
+          }
         }
       ],
       "consoleErrors": [],
-      "failures": []
+      "failures": [],
+      "skippedProbes": [],
+      "skippedStyles": []
     },
     {
       "page": "block",
@@ -1159,7 +1200,7 @@
               "color": "oklab(0.985098 0.0000447631 0.0000197291 / 0.8)"
             },
             "railProjectsLabelRow": {
-              "height": "40px",
+              "height": "36px",
               "marginBlockStart": "8px"
             },
             "railCaret": {
@@ -1185,8 +1226,8 @@
               "alignItems": "center"
             },
             "railTrioControl": {
-              "height": "28px",
-              "width": "28px"
+              "height": "24px",
+              "width": "24px"
             }
           }
         },
@@ -1212,17 +1253,58 @@
           },
           "styles": {
             "railOneListLabelRow": {
-              "height": "40px",
+              "height": "36px",
               "marginBlockStart": "8px"
             },
             "railOneListRow": {
               "marginInlineStart": "0px"
             }
           }
+        },
+        {
+          "name": "49-fresh-profile-rail",
+          "probes": {
+            "theProjectsSectionIsThere": true,
+            "itsFoldersAreThere": true,
+            "theDemoProjectsAreNamed": true,
+            "recentsIsThere": true,
+            "noSampleConversationRows": true
+          },
+          "styles": {
+            "freshRailProjectsLabel": {
+              "height": "36px",
+              "marginBlockStart": "8px"
+            },
+            "freshRailRecentsHeading": {
+              "height": "36px",
+              "marginInlineStart": "0px"
+            }
+          }
+        },
+        {
+          "name": "50-create-a-project",
+          "probes": {
+            "thePlusOpensTheDialog": true,
+            "creatingClosesIt": true,
+            "theProjectIsInTheBlocksOwnKey": true,
+            "itIsInTheRailImmediately": true,
+            "itSurvivesAReload": true,
+            "itTakesAConversation": true,
+            "escapeClosesIt": true,
+            "theRailIsNotStranded": true
+          },
+          "styles": {
+            "createdProjectFolder": {
+              "height": "33px",
+              "marginInlineStart": "0px"
+            }
+          }
         }
       ],
       "consoleErrors": [],
-      "failures": []
+      "failures": [],
+      "skippedProbes": [],
+      "skippedStyles": []
     }
   ],
   "failures": [],
