@@ -6,10 +6,14 @@
 //
 // THE ONE CLASS THAT HAS TO BE ABLE TO PASS. A HISTORICAL `kai-` name. The docs deliberately name an
 // element the kit renamed away from (`kai-sidebar-toggle` -> `kai-aside-toggle` with a `side`), and
-// `knownTokens` is built from what the kit STILL writes down, so it cannot know the old name. Today the
-// run is green only because `src/web-components/workspace/chat-workspace.tsx` still carries the old name
-// in a `//` comment; delete that comment and a correct docs page turns into a high finding. The fix is a
-// declared waiver so the page owns its own exception instead of depending on an unrelated comment.
+// `knownTokens` is built from what the kit STILL writes down, so it cannot know the old name. The fix
+// is a declared waiver so the page owns its own exception instead of depending on an unrelated comment.
+//
+// THE WAIVER IS TESTED BEFORE THE FINDING KIND IS CHOSEN. It used to sit inside the branch for names
+// the kit never mentions, which made it unreachable for `kai-sidebar-toggle` itself -- the kit still
+// writes that name down in a `//` comment, so the page took the advisory branch and its waiver could
+// never fire. The three probes at the bottom pin both halves of that: the advisory is real, the waiver
+// silences it, and the widening is still one line wide.
 //
 // THE WAIVER IS PARSED, NOT TEXT-MATCHED, and covers the line it sits on plus the line below, nothing
 // further. A reason is required: a directive without one is prose that reads like a decision, which is
@@ -27,6 +31,10 @@ import { coverage } from '../scripts/docs-alignment/coverage.mjs';
 import { parseDoc } from '../scripts/docs-alignment/extract.mjs';
 
 const HISTORICAL = 'kai-sidebar-toggle';
+/** A name the kit's own source still writes down, so it is NOT an unknown token — it
+takes the advisory `undeclared-in-web-component-meta` branch instead. This is the token
+the waiver used to be unable to reach. */
+const KNOWN_TO_THE_KIT = 'kai-maximize-intent';
 const WAIVER = '{/* docs-alignment: historical-kai-token -- the pre-rename name, kept in this note */}';
 const NO_REASON = '{/* docs-alignment: historical-kai-token -- short */}';
 
@@ -38,7 +46,7 @@ function surface() {
     globalNames: new Set(),
     tags: new Set(['kai-aside-toggle', 'kai-chat']),
     eventNames: new Set(['kai-aside-toggle']),
-    knownTokens: new Set(['kai-aside-toggle']),
+    knownTokens: new Set(['kai-aside-toggle', KNOWN_TO_THE_KIT]),
     byTag: new Map([
       [
         'kai-chat',
@@ -93,6 +101,26 @@ describe('the historical kai- name waiver', () => {
   it('MUST PASS: a name the kit still declares is never reported (what makes the rule non-vacuous)', () => {
     const doc = docFrom(['The shell fires `kai-aside-toggle`.']);
     expect(kinds(doc)).not.toContain('unknown-kai-token');
+  });
+
+  // The waiver used to be tested INSIDE the branch for names the kit never mentions, so a
+  // historical name the kit DOES still write down somewhere -- `kai-sidebar-toggle` does, in
+  // chat-workspace.tsx -- took the other branch and could not be waived at all. That is what
+  // these three pin: the advisory is real without a waiver, the same waiver silences it, and
+  // the widening is still per-line rather than per-page.
+  it('MUST FAIL: a kai- name the kit writes down but web-component-meta.json omits is an advisory', () => {
+    const doc = docFrom([`The shell also fires \`${KNOWN_TO_THE_KIT}\`.`]);
+    expect(kinds(doc)).toContain('undeclared-in-web-component-meta');
+  });
+
+  it('MUST PASS: the waiver reaches that advisory too, not only the unknown-token kind', () => {
+    const doc = docFrom([WAIVER, `The shell also fires \`${KNOWN_TO_THE_KIT}\`.`]);
+    expect(kinds(doc)).toEqual([]);
+  });
+
+  it('MUST FAIL: the widened waiver still covers one line, not the rest of the page', () => {
+    const doc = docFrom([WAIVER, 'A line in between.', `The shell also fires \`${KNOWN_TO_THE_KIT}\`.`]);
+    expect(kinds(doc)).toContain('undeclared-in-web-component-meta');
   });
 
   it('MUST PASS: the waiver also keeps the name out of reverse coverage\'s stale-token list', () => {

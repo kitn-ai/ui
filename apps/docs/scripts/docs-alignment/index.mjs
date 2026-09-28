@@ -12,7 +12,7 @@
 // Requires `nx build ui` first: every name it checks against comes from the
 // built dist/*.d.ts and from src/web-components/web-component-meta.json, read at run time.
 // Nothing is baked in.
-import { existsSync, writeFileSync, mkdirSync } from 'node:fs';
+import { writeFileSync, mkdirSync } from 'node:fs';
 import { resolve, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
@@ -126,17 +126,24 @@ function pickProject(code, lang, doc) {
 }
 
 async function main() {
-  if (!existsSync(join(UI_ROOT, 'dist/index.d.ts'))) {
-    die('packages/ui/dist/index.d.ts not found. Run `pnpm exec nx build ui` first — this checks the SHIPPED API.');
-  }
-
   let commit = 'unknown';
   try {
     commit = execFileSync('git', ['rev-parse', '--short', 'HEAD'], { cwd: REPO, encoding: 'utf8' }).trim();
   } catch { /* not a git checkout */ }
 
   console.log('  · reading the shipped API surface');
-  const surface = loadSurface(UI_ROOT);
+  // The one place the harness can still be lied to. `loadSurface` reads the BUILT types,
+  // and a build caught mid-write looks exactly like a small package: one tree here
+  // reported 70 then 85 advisories four minutes apart, the only tell being the entry-point
+  // count on the line below. So it answers for itself — it throws when the surface it can
+  // see falls short of what `packages/ui/package.json` declares, and the refusal names
+  // every file it expected and did not find. Nothing below this line runs on that surface.
+  let surface;
+  try {
+    surface = loadSurface(UI_ROOT);
+  } catch (e) {
+    die(e instanceof Error ? e.message : String(e));
+  }
   console.log(
     `    ${surface.entries.size} entry points, ${[...surface.entries.values()].reduce((n, m) => n + m.size, 0)} exported names, ` +
       `${surface.elements.length} kai-* elements, ${surface.eventNames.size} events`,

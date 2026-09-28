@@ -91,9 +91,7 @@ function pageElement(doc, surface) {
 // (`kai-sidebar-toggle` -> `kai-aside-toggle` with a `side`), and `knownTokens`
 // is built from names the kit still writes down, so it can never know an old
 // one. Without a waiver that correct rename note is an `unknown-kai-token`
-// high finding, and the only thing keeping the current run green is an
-// unrelated `//` comment in `chat-workspace.tsx` that happens to mention the old
-// name: delete the comment and the docs page becomes a finding again.
+// high finding.
 //
 // The declaration is an MDX comment (renders nothing) on the line of the note or
 // the line above it:
@@ -103,8 +101,17 @@ function pageElement(doc, surface) {
 // Parsed, not text-matched, and the reason is REQUIRED: a directive with no
 // reason is prose that reads like a decision, and a rule honouring written words
 // would pass the defect the words were written about. It covers the line it sits
-// on and the line below, nothing further, and it waives THIS finding kind only --
-// a token the kit never named on an unwaived line is still an unknown token.
+// on and the line below, nothing further.
+//
+// IT COVERS EVERY FINDING ABOUT THE TOKEN ON THOSE LINES, which is a WIDENING the
+// ordering forced. The test used to sit INSIDE the "the kit never named this" branch,
+// so a historical name the kit still writes down somewhere -- `kai-sidebar-toggle` does,
+// in `workspace/chat-workspace.tsx` -- took the `knownTokens` branch instead and its
+// waiver was unreachable for exactly the page it was written for. A waiver that cannot
+// reach the finding it waives is scope missing its own purpose. What the widening costs:
+// those lines also lose the `undeclared-in-web-component-meta` advisory, a real but
+// advisory-only signal about web-component-meta.json. See `checkProse`, where the test
+// now runs before the branch that picks the kind.
 const HISTORICAL_KAI_WAIVER =
   /\{\/\*\s*docs-alignment:\s*historical-kai-token\s*--\s*([^*]{15,}?)\s*\*\/\}/;
 
@@ -137,6 +144,11 @@ export function checkProse(doc, surface) {
     // Some prose names a part or slot with a kai- prefix, or a CSS class.
     const anyPart = [...surface.byTag.values()].some((e) => e.partNames.has(t) || e.slotNames.has(t));
     if (anyPart) continue;
+    // Tested BEFORE the kind is chosen, and that order is the whole fix: a historical
+    // name the kit still writes down in a comment falls into the `knownTokens` branch
+    // below, so testing the waiver only in the other branch left it unreachable for
+    // exactly the page it was written for. See HISTORICAL_KAI_WAIVER for the cost.
+    if (isHistoricalKaiWaived(doc, line)) continue;
     if (surface.knownTokens.has(t)) {
       findings.push({
         kind: 'undeclared-in-web-component-meta',
@@ -146,8 +158,6 @@ export function checkProse(doc, surface) {
         severity: 'advisory',
       });
     } else {
-      // A rename note declares its own exception; see HISTORICAL_KAI_WAIVER.
-      if (isHistoricalKaiWaived(doc, line)) continue;
       findings.push({
         kind: 'unknown-kai-token',
         detail: `\`${t}\` is neither a registered element nor a declared event, and the kit's source never mentions it`,
