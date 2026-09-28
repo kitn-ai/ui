@@ -432,3 +432,72 @@ describe('Lightbox trigger delegation', () => {
     expect(delegated.defaultPrevented).toBe(false);
   });
 });
+
+/**
+ * Escape and the focus return trip, which are `Dialog`'s policy and not a second
+ * opinion of this component's. Both are pointer-invisible, so the trio's tests are the
+ * only place they are visible at all: the modal owns Escape for the whole page while it
+ * is open, so an Escape whose target is outside the panel closes it too, and closing
+ * hands focus back to the element that opened it, or to the nearest surviving context
+ * when that element is gone.
+ */
+describe('Lightbox Escape reach and focus return', () => {
+  it('closes on an Escape whose target is outside the panel', async () => {
+    const onOpenChange = vi.fn();
+    renderLightbox({ onOpenChange });
+    fireEvent.click(trigger());
+    const outside = document.createElement('button');
+    document.body.appendChild(outside);
+    outside.focus();
+
+    fireEvent.keyDown(outside, { key: 'Escape' });
+    await tick();
+
+    expect(onOpenChange).toHaveBeenLastCalledWith(false);
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    outside.remove();
+  });
+
+  it('returns focus to the trigger that opened it', async () => {
+    renderLightbox();
+    const t = trigger();
+    t.focus();
+    fireEvent.click(t);
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
+    await tick();
+
+    expect(document.activeElement).toBe(t);
+  });
+
+  it('lands focus in the surviving context when the trigger is gone', async () => {
+    // The trigger is removed while the modal is open, so the remembered element cannot
+    // take focus back. Landing on the nearest surviving context is what keeps the reader
+    // on the page; without it focus falls to <body> and their place is lost.
+    render(() => (
+      <div>
+        <Lightbox>
+          <LightboxTrigger>
+            <img alt="Thumbnail" src={IMAGE} />
+          </LightboxTrigger>
+          <LightboxContent label="Photo preview">
+            <img alt="Full size" src={IMAGE} />
+          </LightboxContent>
+        </Lightbox>
+        <button type="button">Other photo</button>
+      </div>
+    ));
+    const t = trigger();
+    t.focus();
+    fireEvent.click(t);
+    await tick();
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+
+    t.remove();
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
+    await tick();
+
+    expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Other photo' }));
+  });
+});

@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { fn } from 'storybook/test';
-import { Lightbox, LightboxTrigger, LightboxContent } from './lightbox';
+import { createSignal } from 'solid-js';
+import { Lightbox, LightboxTrigger, LightboxContent, type LightboxController } from './lightbox';
 import { componentDescription } from '../../stories/docs/web-component-controls';
 
 const IMAGE_URL = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1600&fit=crop';
@@ -132,4 +133,65 @@ export const OpenAtMount: Story = {
     <img src="https://…/mountain.jpg" alt="A mountain at dusk" class="block object-contain" />
   </LightboxContent>
 </Lightbox>`),
+};
+
+/**
+ * Escape owns the whole surface while the modal is open, and the return trip is part
+ * of the same policy. Both halves are pointer-invisible: press "Return focus to the
+ * opener" to put keyboard focus back on the button outside the modal while it is still
+ * open, then press Escape. The modal closes and focus is left on that button rather
+ * than dropped on document.body. The same state arrives on its own when whatever
+ * opened the modal returns focus to its trigger, as a menu item closing behind it does.
+ */
+export const EscapeFromAnywhere: Story = {
+  render: () => {
+    const [status, setStatus] = createSignal('Open the modal, then press Escape, from the panel or from the page.');
+    let api: LightboxController | undefined;
+    let opener: HTMLButtonElement | undefined;
+    return (
+      <div class="grid justify-items-start gap-3">
+        <div class="flex items-center gap-2">
+          <button
+            type="button"
+            ref={opener}
+            class="rounded-md border border-border bg-card px-3 py-2 text-sm font-medium"
+            onClick={() => api?.setOpen(true)}
+          >
+            Zoom the photo
+          </button>
+          <button
+            type="button"
+            class="rounded-md border border-border bg-card px-3 py-2 text-sm"
+            onClick={() => opener?.focus()}
+          >
+            Return focus to the opener
+          </button>
+        </div>
+        <p class="text-sm text-muted-foreground">{status()}</p>
+        <Lightbox
+          controllerRef={(a) => (api = a)}
+          onOpenChange={(open) =>
+            setStatus(
+              open
+                ? 'Open: focus moves into the panel.'
+                : 'Closed: Escape arrived even with focus on the button outside, and focus came back to the opener.',
+            )}
+        >
+          <LightboxContent label={ALT}>
+            <img alt={ALT} src={IMAGE_URL} class="block object-contain" />
+          </LightboxContent>
+        </Lightbox>
+      </div>
+    );
+  },
+  ...src(`const [open, setOpen] = createSignal(false);
+
+<Lightbox open={open()} onOpenChange={setOpen}>
+  <LightboxContent label="A mountain at dusk">
+    <img src="https://…/mountain.jpg" alt="A mountain at dusk" class="block object-contain" />
+  </LightboxContent>
+</Lightbox>
+
+// Escape, the backdrop and the X all arrive here; Escape arrives wherever focus is,
+// and closing returns focus to the element that had it before the modal opened.`),
 };

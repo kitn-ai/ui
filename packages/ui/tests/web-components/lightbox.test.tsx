@@ -469,3 +469,35 @@ test('a slot that swaps an inert child for a control moves the role with it', as
   await flush();
   expect(trigger(el), 'and the wrapper took it back').not.toBeNull();
 });
+
+describe('Escape and focus, the policy Dialog owns', () => {
+  test('Escape from OUTSIDE the panel closes it and reaches the consumer', async () => {
+    const el = await mount(`${TRIGGER}${CONTENT}`);
+    const outside = document.createElement('button');
+    document.body.appendChild(outside);
+    el.show();
+    await flush();
+    outside.focus();
+
+    const seen: unknown[] = [];
+    el.addEventListener('kai-open-change', (e) => seen.push((e as CustomEvent).detail));
+    key(outside, 'Escape');
+    await flush();
+
+    expect(seen).toEqual([{ open: false }]);
+    expect(isOpen(el)).toBe(false);
+  });
+
+  test('focus returns to the consumer trigger, not to BODY', async () => {
+    const el = await mount(`${TRIGGER}${CONTENT}`);
+    const shutter = el.querySelector('#shutter') as HTMLElement;
+    shutter.focus();
+    el.show();
+    await flush();
+
+    el.hide();
+    await flush();
+
+    expect(document.activeElement).toBe(shutter);
+  });
+});
