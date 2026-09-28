@@ -3501,10 +3501,15 @@ export default {
         // compared against is DERIVED - the height the conversation rows already
         // agree on in `theRowsAreOneLine` - so the assertion survives a density
         // change, which a typed pixel value would not. This is the probe that
-        // would have caught the caret: the disclosure icon beside the folder
-        // glyph wrapped, which took a heading to two lines while every
-        // conversation row under it stayed on one. Read on the FOLDER comments
-        // (heading and Recents), which is what the caret row was.
+        // would have caught the caret, and it was watched catching it: a folder's
+        // heading stood 53px against the 40px rows under it while the caret was in
+        // the row, and stands at 40px with it gone.
+        //
+        // THE FOLDER's heading is what this reads, which is the row the caret was
+        // on. The two SECTION labels are deliberately not in it: they are their own
+        // register and stand at their own height (36px measured) by design, then
+        // and now, so folding them in would assert a fact about a row the caret
+        // never touched.
         headingIsOneLine: () => {
           const rows = railSections?.rows ?? [];
           const headings = rows.filter((row) => row.kind === 'folder');
