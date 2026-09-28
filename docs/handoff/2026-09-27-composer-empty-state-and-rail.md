@@ -296,3 +296,22 @@ Focus now returns to the nearest recorded context **that verifiably took focus**
 **Every implementing brief names the two comment lints alongside typecheck** — `lint:comment-references` and `lint:prop-docs`. A round grows a comment past the 20-line cap, CI catches it in the ladder hours later, and the round was never told to run it. **Three times today "pre-existing" meant "before my round" when the file had been edited hours earlier**; the gate that would have said so was one line away from every brief.
 
 **The heredoc rule is about duration, not syntax.** The hazard is a heredoc around a **long-running** command, or a long-running command piped into `tail` — that is what hid a stuck process for thirty minutes. Short stdin for a fast command (`python3 - <<'PY'` in an edit, a commit message) is not the failure the rule exists for; the rule as written generated violations nobody's purpose covered, including mine.
+
+
+## Keeping the local preview in sync — the rule, because forgetting it cost the owner twice
+
+**The lag was never a worktree.** This session works in the main checkout (`/Users/home/Projects/kitn-ai/kitn-chat`, branch `feat/blocks-exemplar-and-wiring`) and the served page is a real file in that same tree. Thirteen other worktrees exist from earlier work; none is in play here.
+
+**What actually causes a lag, in order of how often it has bitten:**
+
+1. **A KIT change is invisible until `nx build ui` runs.** The pages load the kit from `packages/ui/dist`, so a source change to the kit reaches nobody until it is built — and a round that was correctly told not to build will queue that step rather than take it. **Somebody has to come back for it, and twice today nobody did.**
+2. **A BLOCK change needs the two copies** — `gen-blocks` then `copy-blocks` in local mode — because the served page is generated output.
+3. **A freshly copied file 404s for about two seconds** (static-middleware race) and a **CDN docs build deletes `public/blocks/local` entirely**.
+4. **The browser cache** hides all of it.
+
+**So the rule, to be run before telling the owner to look — not after he says it is stale:**
+
+- **Block change** → `gen-blocks` → `copy-blocks` (local) → `copy-kit-assets`.
+- **Kit change** → `nx build ui --skip-nx-cache` **first**, then `build:api` if derived artifacts move, then the block chain, **then restart `dev:blocks`**.
+- **Then verify the served copy**, not the source: a 200 on `/blocks/local/assistant.html` **and** a grep for the thing that changed.
+- **Commit the regenerated artifacts in the same breath**, because they derive from `dist` and will otherwise describe the previous values.
