@@ -39,9 +39,22 @@
 // facts a scenario's probes read:
 //   skipLayout: true       skip every probe this state named in `layoutProbes`,
 //                          the `expect` entries over those probes, and every
-//                          styleProbe. For a page that mounts the same block in
-//                          a DIFFERENT document, where a pixel measurement taken
-//                          somewhere else is not a fact about this one.
+//                          styleProbe. This is a PAGE'S DECLARATION, honoured as
+//                          written and never inferred here: the driver cannot
+//                          tell a document-relative probe from a self-relative
+//                          one, so nothing but the page spec can say which is
+//                          which. WHAT IT DOES NOT MEAN is that such a probe is
+//                          unmeasurable there -- measured 2026-09-27 by running
+//                          the react page with the skip off, support-widget's
+//                          four geometry probes came back at the block page's own
+//                          numbers, because each is a difference between two
+//                          boxes of the block's OWN elements while the block's
+//                          stylesheet is imported by the emitted tree. So a skip
+//                          here is a claim the scenario makes; this driver reports
+//                          every probe it skipped (verdict `skippedProbes` /
+//                          `skippedStyles`, plus a SKIP line on stderr) so the
+//                          claim is visible on every run instead of only in a
+//                          comment.
 //   consoleIgnore: [re]    merged with the scenario's list rather than replacing
 //                          it, so a page can tolerate its own host noise without
 //                          relaxing the zero-console rule on every other page.
@@ -138,19 +151,20 @@ async function runStory(pageKey, colorScheme) {
   page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') consoleErrors.push(`[${m.type()}] ${m.text()}`); });
   page.on('pageerror', (e) => consoleErrors.push(`[pageerror] ${e.message}`));
 
-  const run = { page: pageKey, colorScheme, states: [], consoleErrors, failures: [] };
+  const run = { page: pageKey, colorScheme, states: [], consoleErrors, failures: [], skippedProbes: [], skippedStyles: [] };
   const sctx = { pageKey, spec, colorScheme, scenario };
 
   await page.goto(`${BASE}${spec.path}`, { waitUntil: 'load' });
   if (scenario.ready) await scenario.ready(page, sctx);
 
-  // LAYOUT SKIP (spec 5.3 ruling, amended in execution): a geometry probe is
-  // a measurement of the document it was taken in. A page that mounts the same
-  // block somewhere else (the react host is a Vite index.html with a mounted
-  // subtree, not the block's own page) declares `skipLayout: true` on its
-  // spec, and each state names the probes that are geometry in `layoutProbes`.
-  // Such a page skips those probes, their `expect` entries, and every
-  // styleProbe, and asserts state, navigation and console-cleanliness instead.
+  // LAYOUT SKIP (spec 5.3 ruling, amended in execution): a page that mounts the
+  // same block in a different document (the react host is a Vite index.html with
+  // a mounted subtree, not the block's own page) declares `skipLayout: true` on
+  // its spec, and each state names the probes that are geometry in
+  // `layoutProbes`. Such a page skips those probes, their `expect` entries, and
+  // every styleProbe, and asserts state, navigation and console-cleanliness
+  // instead. The SKIP is recorded rather than dropped: see the SKIPPED SKIPS
+  // report below, which names every probe this run did not measure.
   const skipLayout = spec.skipLayout === true;
 
   for (const state of scenario.states) {
@@ -160,8 +174,14 @@ async function runStory(pageKey, colorScheme) {
       if (state.act) await state.act(page, sctx);
       await page.screenshot({ path: join(SHOTS, `${pageKey}-${colorScheme}-${state.name}.png`) });
       for (const [key, probe] of Object.entries(state.probes ?? {})) {
-        if (skipLayout && layout.has(key)) continue;
+        if (skipLayout && layout.has(key)) { run.skippedProbes.push(`${state.name}/${key}`); continue; }
         rec.probes[key] = await probe(page, sctx);
+      }
+      if (skipLayout) {
+        // Named as well as counted: a count says a measurement is missing, a name
+        // says WHICH claim is not being made, which is what a reader needs to
+        // decide whether the page spec is still telling the truth.
+        for (const sp of state.styleProbes ?? []) run.skippedStyles.push(`${state.name}/${sp.name}`);
       }
       for (const sp of skipLayout ? [] : state.styleProbes ?? []) {
         const values = await sp.target(page, sctx).evaluate(
@@ -257,6 +277,20 @@ if (baselinePath) {
     if (!ref) { verdict.failures.push(`baseline has no run for ${run.page}/${run.colorScheme}`); continue; }
     verdict.failures.push(...diffStates('baseline', ref.states, 'current', run.states, `baseline/${run.page}/${run.colorScheme}`));
   }
+}
+
+// ------------------------------------------------------------- skipped skips
+// DECIDED LOUDLY. A probe this run did not take a measurement for is a claim the
+// page spec withheld, and the one thing such an omission must never be is quiet:
+// a green run over a page that skipped its geometry reads exactly like a green
+// run that measured it. Every skip is named here and in the verdict JSON, so a
+// reader of the gate's output learns it from the tool rather than from history.
+for (const run of verdict.runs) {
+  const skips = [
+    ...(run.skippedProbes.length ? [`${run.skippedProbes.length} layout probe(s) NOT measured (${run.skippedProbes.join(', ')})`] : []),
+    ...(run.skippedStyles.length ? [`${run.skippedStyles.length} style probe(s) NOT measured (${run.skippedStyles.join(', ')})`] : []),
+  ];
+  if (skips.length) console.error(`SKIP ${run.page}/${run.colorScheme} -- skipLayout is declared on this page: ${skips.join('; ')}`);
 }
 
 // --------------------------------------------------------------------- output

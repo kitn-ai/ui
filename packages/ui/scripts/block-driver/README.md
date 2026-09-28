@@ -69,10 +69,18 @@ green). Re-plant one before trusting structural changes to the driver itself.
 Two page-spec keys change what a run asserts, and both exist for a page that
 mounts the same block in a DIFFERENT document. `skipLayout: true` drops every
 probe the state named in `layoutProbes`, the `expect` entries over them, and
-every `styleProbe`: a pixel measurement taken in one document is not a fact
-about another. `consoleIgnore` on a page spec is MERGED with the scenario's,
-so a page can tolerate its own host noise without relaxing the zero-console
-rule everywhere else.
+every `styleProbe`. It is a PAGE'S DECLARATION and it is never quiet: the driver
+records every probe it skipped in the verdict (`skippedProbes` / `skippedStyles`)
+and prints a `SKIP <page> -- skipLayout is declared on this page: …` line naming
+them, so a green run over a page that skipped its geometry cannot read like a
+green run that measured it. `skipLayout` is what the page's own author decides;
+it is NOT a statement that such a probe is unmeasurable there -- support-widget's
+four geometry probes, run against the react host with the flag off, came back at
+the block page's own numbers (16 / 4 / 20 and a clear CTA), because each is a
+difference between two boxes of the block's OWN elements and the emitted tree
+imports the block's stylesheet. `consoleIgnore` on a page spec is MERGED with the
+scenario's, so a page can tolerate its own host noise without relaxing the
+zero-console rule everywhere else.
 
 `react-host/` is the checked-in Vite app the react runtime cell copies into a
 temp dir and installs the packed tarball into. Its dependency ranges are the

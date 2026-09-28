@@ -21,9 +21,12 @@
 //
 // WHAT IT DOES NOT COVER, stated so nobody reads its green as more than it is.
 // Every OTHER framework form is compile-only (the cells inside verify:scaffold),
-// and the LAYOUT probes are skipped on the react page: geometry was measured
-// in the block's own document, and the host is a different one. The gate's own
-// output repeats both.
+// and NOTHING measures the react form's LAYOUT: the `react` page spec declares
+// `skipLayout: true`, which drops every probe the block's states named in
+// `layoutProbes`, the `expect` entries over them, and every styleProbe. This cell
+// prints each skipped probe BY NAME, per block, on every run -- and the summary at
+// the end of the run says why that is a line in the block's own page spec rather
+// than a limit of the host. The gate's own output states both.
 //
 //   node scripts/verify-blocks-react.mjs             # the gate
 //   node scripts/verify-blocks-react.mjs --self-test # plant, watch, revert
@@ -237,6 +240,7 @@ async function runBlock({ app, block, files, port, shots }) {
 
   // Stage 3: the block's own states.mjs, in a real Chromium, against the app.
   const exited = { code: null };
+  const verdictPath = join(shots, 'verdict.json');
   const child = spawn('npx', ['vite', '--port', String(port), '--strictPort'], { cwd: app, stdio: ['ignore', 'pipe', 'pipe'] });
   let serverLog = '';
   child.stdout.on('data', (d) => { serverLog += d; });
@@ -253,6 +257,10 @@ async function runBlock({ app, block, files, port, shots }) {
       '--schemes', 'light',
       '--base', `http://127.0.0.1:${port}`,
       '--shots', shots,
+      // The verdict is what names the probes this page does NOT measure, so the
+      // report below is read off the run rather than restated from the block's
+      // states.mjs -- add a probe to `layoutProbes` and the line follows.
+      '--out', verdictPath,
     ];
     try {
       run(process.execPath, args, ROOT);
@@ -260,10 +268,16 @@ async function runBlock({ app, block, files, port, shots }) {
       const lines = ((err.stdout || '') + (err.stderr || '')).split('\n').filter((l) => /RED |FAIL /.test(l));
       return { stage: 'driver', ok: false, output: `${block.name}: the block driver went red on the react page:\n${lines.join('\n') || err.message}` };
     }
+    const skipped = existsSync(verdictPath)
+      ? JSON.parse(readFileSync(verdictPath, 'utf8')).runs.reduce(
+          (acc, r) => ({ probes: [...acc.probes, ...(r.skippedProbes ?? [])], styles: [...acc.styles, ...(r.skippedStyles ?? [])] }),
+          { probes: [], styles: [] },
+        )
+      : { probes: [], styles: [] };
   } finally {
     child.kill();
   }
-  return { stage: 'driver', ok: true, output: '' };
+  return { stage: 'driver', ok: true, output: '', skipped };
 }
 
 // ------------------------------------------------------------------ self-test
@@ -365,6 +379,16 @@ try {
       if (res.ok) {
         ran.push(block.name);
         console.log(`OK  ${block.name} [react runtime] (grep + tsc --strict + the driver's react page, light, ${secs}s)`);
+        // DECIDED LOUDLY: what this page did NOT measure. The names come from the
+        // driver's verdict, so they follow the block's own `layoutProbes`.
+        const sk = res.skipped ?? { probes: [], styles: [] };
+        const bits = [
+          sk.probes.length ? `${sk.probes.length} layout probe(s) (${sk.probes.join(', ')})` : '',
+          sk.styles.length ? `${sk.styles.length} style probe(s) (${sk.styles.join(', ')})` : '',
+        ].filter(Boolean);
+        if (bits.length) {
+          console.log(`SKIP ${block.name} [react layout] NOT measured, skipLayout is declared on the react page: ${bits.join('; ')}`);
+        }
       } else {
         failed = true;
         console.error(`RED ${res.output}`);
@@ -377,9 +401,17 @@ try {
       `\nverify-blocks-react: ${failed ? 'FAIL' : 'PASS'} -- ${ran.length} block(s) run in a real browser: ${ran.join(', ') || '(none)'}\n` +
         `  react is the one framework form this repo tests AT RUNTIME. Every other framework form is COMPILE-ONLY\n` +
         '  (the block compile cells inside verify:scaffold), so a green here says nothing about them.\n' +
-        "  A STATE'S `layoutProbes` DO NOT RUN on the react page: a probe that measures a position in the\n" +
-        '  document was measured in the block\'s own one, and this host is a different one. A probe that is\n' +
-        '  SELF-relative (a row against its own container) names nothing in `layoutProbes` and runs here too.\n' +
+        "  LAYOUT: NOTHING MEASURES THE REACT FORM'S GEOMETRY TODAY. Every probe the block's states name in\n" +
+        '  `layoutProbes`, and every styleProbe, is skipped here because the block\'s `react` page spec declares\n' +
+        '  `skipLayout: true`; the SKIP line per block above names each one.\n' +
+        '  IT IS NOT A LIMIT OF THE HOST. Measured 2026-09-27 by running the block driver against this react\n' +
+        "  host with that flag off: support-widget's four geometry probes returned the BLOCK page's own numbers\n" +
+        '  (homeSubtitleToCtaGap 16, homeTitleToSubtitleGap 4, homeSubtitleLineBox 20, homeCtaClearOfSubtitle\n' +
+        "  true) and its styleProbes resolved real computed values, because each probe is a difference between two\n" +
+        "  boxes of the block's OWN elements while the emitted tree imports the block's stylesheet. So the react\n" +
+        '  page CAN carry them; the one thing between it and the other surfaces is that `skipLayout: true` line\n' +
+        "  in the block's own states.mjs (packages/blocks/blocks/<block>/states.mjs), which is a block author's to\n" +
+        '  remove -- do it and this cell asserts their geometry too, with no change here.\n' +
         `  Host: ${resolved.join(', ')}`,
     );
   }
