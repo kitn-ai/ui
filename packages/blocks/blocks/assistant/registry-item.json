@@ -8,6 +8,7 @@
     { "path": "assistant.html", "type": "registry:page" },
     { "path": "assistant.controller.ts", "type": "registry:file" },
     { "path": "assistant.rail.ts", "type": "registry:file" },
+    { "path": "assistant.composer.ts", "type": "registry:file" },
     { "path": "assistant.css", "type": "registry:file" },
     { "path": "assistant.transport.mock.ts", "type": "registry:file" },
     { "path": "assistant.transport.route.ts", "type": "registry:file" },
