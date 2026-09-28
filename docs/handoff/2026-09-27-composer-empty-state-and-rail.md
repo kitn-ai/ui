@@ -289,3 +289,10 @@ Focus now returns to the nearest recorded context **that verifiably took focus**
 **He caught the machine sitting idle**: I had been dispatching one round per completion, so the pipeline drained to empty between turns and waited for the next notification. **Serial dispatch reads as a full queue in a report and is an idle machine in practice.**
 
 **The rule: keep several disjoint rounds in flight, dispatch in batches, and dispatch the successor in the same turn a round lands.** A round landing into an empty fleet is a machine nobody is driving.
+
+
+## Two rules from the last rounds of the session
+
+**Every implementing brief names the two comment lints alongside typecheck** — `lint:comment-references` and `lint:prop-docs`. A round grows a comment past the 20-line cap, CI catches it in the ladder hours later, and the round was never told to run it. **Three times today "pre-existing" meant "before my round" when the file had been edited hours earlier**; the gate that would have said so was one line away from every brief.
+
+**The heredoc rule is about duration, not syntax.** The hazard is a heredoc around a **long-running** command, or a long-running command piped into `tail` — that is what hid a stuck process for thirty minutes. Short stdin for a fast command (`python3 - <<'PY'` in an edit, a commit message) is not the failure the rule exists for; the rule as written generated violations nobody's purpose covered, including mine.
