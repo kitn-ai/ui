@@ -111,6 +111,7 @@ import {
   narrow,
   sectionLabel,
   railNodes,
+  sectionNode,
   folderNode,
   sampleNode,
   folderOf,
@@ -1164,7 +1165,7 @@ function fixtureRail(
  *  HOLDS EXACTLY `FOLDER_LIMIT` ROWS, which is why this fixture emits no `Show
  *  more` row: there is nothing under a sample folder that the rail is holding
  *  back. */
-interface FixtureConversation {
+export interface FixtureConversation {
   id: string;
   title: string;
   opening: string;

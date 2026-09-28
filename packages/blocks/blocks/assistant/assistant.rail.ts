@@ -25,7 +25,7 @@
  */
 import { byPinnedThenRecency, byRecency } from '@kitn.ai/ui/stores';
 import type { ConversationSummary } from '@kitn.ai/ui/stores';
-import type { DemoProject, RailOrganizer, RailSort } from './assistant.controller';
+import type { DemoProject, FixtureConversation, RailOrganizer, RailSort } from './assistant.controller';
 
 /** The comparator each sort choice reads. The kit's own two, imported rather
  *  than restated, so a rail ordered by this menu and a list ordered by the kit
@@ -210,7 +210,7 @@ export function folderNode(
  *  and they are already each their own control. It DOES carry the trailing
  *  actions, because the rail's own two settings belong to the rail rather than to
  *  any one folder. */
-function sectionNode(label: string): ConversationRow {
+export function sectionNode(label: string): ConversationRow {
   return {
     ...controlNode(`${SECTION_NODE}${label.toLowerCase()}`, 'section', label, '', ''),
     trioHidden: false,
