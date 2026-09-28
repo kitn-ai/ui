@@ -555,6 +555,11 @@ let railWiring = null;
 // three globals above are captured in theirs: both states end where their
 // screenshot has to be taken, and the values under test do not survive it.
 let freshRail = null;
+// The fixture folder state 49 collapses and reopens: the glyph at both ends and
+// the row count under it, read in that state's act for the same reason - the
+// reopen leaves the rail as its screenshot needs it, so the values under test
+// have to be captured before it.
+let fixtureFolder = null;
 let projectCreate = null;
 let folderMenus = null;
 let folderEdit = null;
@@ -760,6 +765,30 @@ const firstIndexRow = (page, spec) => page.evaluate(
   (key) => { try { return JSON.parse(localStorage.getItem(key) ?? '[]')[0] ?? null; } catch { return null; } },
   spec.indexKey,
 );
+
+const folderHeadingSelector = (key, value) => `kai-conversations > kai-conversation-item[data-rail="folder"][data-${key}="${value}"]`;
+
+/** A FOLDER HEADING'S OWN GLYPH, read off the element - NAME and DRAWING, the two
+ *  facts a folder's open/closed state is: the name is a PROPERTY with no
+ *  attribute reflection (the react form assigns a declared prop as a property
+ *  rather than writing the attribute), so it is read the way state 54's heading
+ *  probe reads it, and the drawing is here because a name alone cannot tell a
+ *  wired glyph from an unrostered one: an icon-shaped name the roster does not
+ *  carry paints the kit's CircleAlert fallback AND logs, so a heading painting
+ *  the fallback would still show a name. ONE READER for both states that assert
+ *  it (37's real-page folder and 49's fixture folder), so the two cannot drift
+ *  about what "the glyph reads its state" means. */
+const folderGlyph = (page, selector) => page.evaluate((sel) => {
+  const el = document.querySelector(sel);
+  const icon = el?.querySelector('.row-folder-icon') ?? null;
+  const svg = icon?.shadowRoot?.querySelector('svg') ?? null;
+  const box = svg?.getBoundingClientRect() ?? null;
+  return {
+    name: icon?.name ?? icon?.getAttribute('name') ?? '',
+    painted: box !== null && box.width > 0 && box.height > 0,
+    drawing: svg?.querySelector('path')?.getAttribute('d') ?? '',
+  };
+}, selector);
 
 /** Every rail row the page rendered, with the kind of row it is: a folder's
  *  heading, one of its conversations (with the folder it is filed under), or the
@@ -2675,25 +2704,10 @@ export default {
         // carry. The heading's own GLYPH was the second locator here while a
         // caret painted the folder's open state; the click is what this state is
         // about, and the heading is what takes it.
-        const heading = page.locator(`kai-conversations > kai-conversation-item[data-rail="folder"][data-group="${folder.group}"]`);
-        // THE GLYPH'S OWN STATE, read off the element - name AND drawing. The name
-        // is a PROPERTY with no attribute reflection (the react form assigns it as
-        // a property rather than writing the attribute), so it is read the same way
-        // state 54's heading probe reads it; the drawing is here because the name
-        // alone cannot tell a wired glyph from an unrostered one: an icon-shaped
-        // name the roster does not carry paints the kit's CircleAlert warning AND
-        // logs, so a heading that painted the fallback would still show a name.
-        const glyphOf = (group) => page.evaluate((selector) => {
-          const el = document.querySelector(selector);
-          const icon = el?.querySelector('.row-folder-icon') ?? null;
-          const svg = icon?.shadowRoot?.querySelector('svg') ?? null;
-          const box = svg?.getBoundingClientRect() ?? null;
-          return {
-            name: icon?.name ?? icon?.getAttribute('name') ?? '',
-            painted: box !== null && box.width > 0 && box.height > 0,
-            drawing: svg?.querySelector('path')?.getAttribute('d') ?? '',
-          };
-        }, `kai-conversations > kai-conversation-item[data-rail="folder"][data-group="${group}"]`);
+        const heading = page.locator(folderHeadingSelector('group', folder.group));
+        // THE GLYPH'S OWN STATE, read off the element - name AND drawing, through
+        // the shared reader the fixture state uses too.
+        const glyphOf = (group) => folderGlyph(page, folderHeadingSelector('group', group));
         const before = await railNodes(page);
         // A FOLDER THAT IS OPEN WHILE THE CHOSEN ONE IS SHUT, so the two states are
         // compared inside ONE run of the page rather than across states.
@@ -4125,6 +4139,60 @@ export default {
             .map((heading) => [heading.title, titled.filter((row) => row.kind === 'conversation'
               && row.folder === heading.folder).length])),
         };
+        // A FIXTURE FOLDER CLOSES, and this is the state it meets a reader in: a
+        // blank profile folded one of the demo's folders and watched the glyph
+        // stay OPEN while the rows stayed on screen, because the fixture was
+        // emitted with every row and passed `true` for every heading - so the
+        // only rail most people ever touch was the one rail a collapse did not
+        // change. The widest PROJECT folder is chosen (never the `Recents`
+        // heading, which carries no glyph by design and would make the read an
+        // empty string), its glyph is read while OPEN, then the heading is
+        // clicked, and the same two facts are read again while SHUT - the glyph
+        // and the rows under it, which one predicate now drives together.
+        const headingFacts = await page.evaluate(() => {
+          const items = [...document.querySelectorAll('kai-conversations > kai-conversation-item')];
+          return items
+            .filter((el) => el.getAttribute('data-rail') === 'folder'
+              && (el.getAttribute('data-folder') ?? '') !== '')
+            .map((el) => {
+              const folder = el.getAttribute('data-folder') ?? '';
+              return {
+                folder,
+                label: el.querySelector('.row-title-text')?.textContent ?? '',
+                rows: items.filter((row) => row.getAttribute('data-rail') === 'conversation'
+                  && (row.getAttribute('data-folder') ?? '') === folder).length,
+              };
+            });
+        });
+        const widest = headingFacts.reduce((a, b) => (b.rows > a.rows ? b : a));
+        const fixtureHeading = page.locator(folderHeadingSelector('folder', widest.folder));
+        const rowsInFixtureFolder = async () => (await railRows(page))
+          .filter((row) => row.folder === widest.folder).length;
+        const openBefore = await folderGlyph(page, folderHeadingSelector('folder', widest.folder));
+        const rowsBefore = await rowsInFixtureFolder();
+        await fixtureHeading.click();
+        await settle(350)(page);
+        const glyphShut = await folderGlyph(page, folderHeadingSelector('folder', widest.folder));
+        const rowsShut = await rowsInFixtureFolder();
+        await fixtureHeading.click();
+        await settle(350)(page);
+        const glyphReopened = await folderGlyph(page, folderHeadingSelector('folder', widest.folder));
+        // NO POINTER LEFT ON THE HEADING, for state 45's reason: a Playwright
+        // click leaves the mouse over what it clicked, and a heading under the
+        // pointer reveals its hover chrome - so the state's own screenshot would
+        // be of a hovered folder rather than of the rail a fresh profile meets.
+        await page.mouse.move(1000, 700);
+        await settle(250)(page);
+        fixtureFolder = {
+          group: widest.folder,
+          label: widest.label,
+          rows: rowsBefore,
+          rowsShut,
+          rowsReopened: await rowsInFixtureFolder(),
+          glyphOpen: openBefore,
+          glyphShut,
+          glyphReopened,
+        };
       },
       probes: {
         // THE OWNER'S COMPLAINT AS A PROBE: on a profile with no history the rail
@@ -4155,6 +4223,43 @@ export default {
           return (freshRail?.conversationRows ?? 0) > 0
             || 'the rail holds folder headings and not one conversation row';
         },
+        // THE FIXTURE HONOURS A COLLAPSE, which is the path a first-visit reader
+        // takes and the one the fixture did not read: with the widest demo folder
+        // shut, its heading wears the CLOSED half of the roster's pair, it is
+        // painted (an unrostered icon-shaped name paints the kit's CircleAlert
+        // fallback AND logs, so the name alone is not proof), and the drawing it
+        // paints is not the one it painted while open - so a constant glyph fails
+        // here even though a name is present. Read against the SAME heading's open
+        // state inside one run, rather than across states, so the comparison cannot
+        // pass on two different folders.
+        aCollapsedFixtureFolderPaintsTheClosedGlyph: () => {
+          const shut = fixtureFolder?.glyphShut;
+          const open = fixtureFolder?.glyphOpen;
+          const reopened = fixtureFolder?.glyphReopened;
+          if (!shut || !open || !reopened) return 'a fixture heading glyph was not read';
+          if (!shut.painted || !open.painted) {
+            return `a fixture heading painted no folder glyph: ${JSON.stringify([open, shut].map((glyph) => glyph.name))}`;
+          }
+          if (shut.name !== 'folder-closed') return `the shut fixture folder paints ${JSON.stringify(shut.name)}`;
+          if (open.name !== 'folder-open') return `the open fixture folder paints ${JSON.stringify(open.name)}`;
+          if (reopened.name !== 'folder-open') return `the reopened fixture folder paints ${JSON.stringify(reopened.name)}`;
+          if (shut.drawing === open.drawing) return 'the fixture folder paints the same drawing open and shut';
+          if (shut.drawing === '' || open.drawing === '') return 'a fixture state painted no path to compare';
+          return true;
+        },
+        // ...AND ITS ROWS GO WITH IT, because ONE predicate drives both: a heading
+        // painting `folder-closed` over a run that is still on screen is the same
+        // disagreement in the other direction, and the fixture now emits its rows
+        // from the read the real rail emits from. Reopening restores them, so the
+        // click is read both ways rather than the rows merely being gone after it.
+        aCollapsedFixtureFolderHidesItsRows: () => {
+          const folder = fixtureFolder;
+          if (!folder) return 'the fixture folder was not read';
+          if (!(folder.rows > 0)) return `${folder.label} held no rows to collapse`;
+          if (folder.rowsShut !== 0) return `${folder.rowsShut} row(s) stayed under the shut ${folder.label}`;
+          return folder.rowsReopened === folder.rows
+            || `reopening ${folder.label} restored ${folder.rowsReopened} of ${folder.rows} row(s)`;
+        },
       },
       expect: {
         theProjectsSectionIsThere: true,
@@ -4162,6 +4267,8 @@ export default {
         theDemoProjectsAreNamed: true,
         recentsIsThere: true,
         everyFolderHoldsItsConversations: true,
+        aCollapsedFixtureFolderPaintsTheClosedGlyph: true,
+        aCollapsedFixtureFolderHidesItsRows: true,
       },
       styleProbes: [
         style('freshRailProjectsLabel', (page) => page.locator('kai-conversations > kai-conversation-item[data-rail="section"]'),

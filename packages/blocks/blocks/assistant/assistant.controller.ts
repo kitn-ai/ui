@@ -1277,7 +1277,6 @@ function railNodes(
   // projects back in front of someone who still has their chat, with the same
   // headings a brand-new reader sees. Read here rather than in the state script,
   // because the rail a reader gets on their first visit is the rail's own shape.
-  if (fixture && rows.length === 0 && query === '') return fixtureRail(created, menu);
   const shut = new Set(closed);
   const grown = new Set(expanded);
   // WHETHER A FOLDER SHOWS ITS ROWS, and the one predicate the glyph and the rows
@@ -1285,7 +1284,15 @@ function railNodes(
   // search opens every folder: a match the reader cannot see is a match that does
   // not exist. A project the reader named and filed nothing into is a heading with
   // no rows to reveal, and its glyph reads the reader's own choice like any other.
+  //
+  // THE FIXTURE READS IT TOO, through this same closure rather than a second
+  // notion of shut: the rail a first-visit reader meets is the rail they are
+  // most likely to click a folder on, and a blank profile closing a demo folder
+  // only for its rows to stay and its glyph to stay open is the design turned
+  // over. The fixture branch therefore comes AFTER this predicate and is handed
+  // it, so "is this folder shut" is spelled once for both paths.
   const isOpen = (group: string): boolean => query !== '' || !shut.has(group);
+  if (fixture && rows.length === 0 && query === '') return fixtureRail(created, menu, isOpen);
   const out: ConversationRow[] = [];
   // THE READER'S OWN PROJECTS LEAD, and they are on the rail whether or not they
   // hold a row: a project the reader named exists from the moment they named it,
@@ -1342,6 +1349,14 @@ function railNodes(
  *  moment the store holds ONE conversation the fixture is gone and the real rows
  *  rule, which is what makes it honest rather than a lie about history.
  *
+ *  A FOLDER CLOSES HERE TOO, through `railNodes`' own `isOpen` rather than a
+ *  second notion of shut: this fixture used to pass `true` for every heading and
+ *  emit every row, so clicking one of the demo's folders toggled the closed set
+ *  and re-rendered the identical rail - the one path a reader meets on their
+ *  first visit was the one path where a collapsed folder stayed open. The
+ *  fixture has no rows to grow (`Show more` is absent by construction), so the
+ *  closure is the whole of the state it reads.
+ *
  *  WHAT IT SHOWS IS STRUCTURE AND THE DEMO'S OWN SAMPLES: the reader's own
  *  projects, the demo's three, the `Recents` heading, and under each folder the
  *  sample conversations `SAMPLE_CONVERSATIONS` derives from the two lists this
@@ -1361,7 +1376,11 @@ function railNodes(
  *  The `Projects` label is here for the same reason it is over real folders: the
  *  rail's own settings live in the actions it carries, and one of them is the way
  *  to make a project. */
-function fixtureRail(created: readonly DemoProject[], menu: FolderMenu): ConversationRow[] {
+function fixtureRail(
+  created: readonly DemoProject[],
+  menu: FolderMenu,
+  isOpen: (group: string) => boolean,
+): ConversationRow[] {
   // The same catalogue the filing rule and the folder labels read, so a sample
   // lands where the reader's own conversation with that opening would land.
   const catalogue = [...created, ...PROJECTS];
@@ -1373,17 +1392,25 @@ function fixtureRail(created: readonly DemoProject[], menu: FolderMenu): Convers
     // A folder holds its rows, so its heading leads the run they are; a project
     // with no sample under it (every project a reader made)
     // is a heading and nothing else.
-    nodes.push(folderNode('folder', project.id, project.name, menu, true));
-    nodes.push(...filed.map((sample) => sampleNode(sample, project.id, project.name)));
+    //
+    // AND A SHUT ONE IS ITS HEADING AND NOTHING ELSE, the reader's own choice
+    // read through `railNodes`' predicate rather than this fixture deciding for
+    // itself: the glyph and the rows are emitted from ONE boolean, so a demo
+    // folder cannot paint `folder-closed` over a run that is still on screen.
+    const open = isOpen(project.id);
+    nodes.push(folderNode('folder', project.id, project.name, menu, open));
+    if (open) nodes.push(...filed.map((sample) => sampleNode(sample, project.id, project.name)));
   }
   // The remainder's heading and its rows, so the section a reader's own typed
   // chats land in is on screen - and holds the samples no project's subjects
-  // claim - before the first of the reader's own exists.
+  // claim - before the first of the reader's own exists. It carries no glyph
+  // (see `folderNode`), and it is still closable, so it reads the same predicate.
   const ungrouped = SAMPLE_CONVERSATIONS.filter(
     (sample) => projectOfOpening(sample.opening, catalogue) === undefined,
   );
-  nodes.push(folderNode('folder', '', '', menu, true));
-  nodes.push(...ungrouped.map((sample) => sampleNode(sample, '', '')));
+  const recentsOpen = isOpen('');
+  nodes.push(folderNode('folder', '', '', menu, recentsOpen));
+  if (recentsOpen) nodes.push(...ungrouped.map((sample) => sampleNode(sample, '', '')));
   return nodes;
 }
 
