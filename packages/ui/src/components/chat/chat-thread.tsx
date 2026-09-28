@@ -2,7 +2,7 @@ import { createSignal, createEffect, createComputed, createMemo, For, Show, Swit
 import { ChatConfig, useChatConfig } from '../../primitives/chat-config';
 import { type ComposerDoc, normalizeValue, serializeToText } from '../../primitives/composer-model';
 import { ChatContainer, ChatContainerContent, ChatContainerScrollAnchor } from './chat-container';
-import { Message, MessageAvatar, MessageBody } from '../message/message';
+import { Message, MessageAvatar, MessageBody, resolveActionsReveal } from '../message/message';
 import { type AttachmentData, type AttachmentImagePreview } from '../attachments/attachments';
 import { createMessageFeedback, type MessageActionDetail } from '../../primitives/message-feedback';
 import { ModelSwitcher } from '../model/model-switcher';
@@ -219,8 +219,8 @@ export interface ChatThreadProps {
   triggers?: TriggerDef[];
   /** Default icon per entity kind (kind → image src) for pills/menu items. */
   kindIcons?: Record<string, string>;
-  /** Whether each message's action bar is visible at rest or revealed on pointer-over.
-   *  Visible at rest by default. */
+  /** Whether each row's action bar is visible at rest or on pointer-over; omitted keys it to
+   *  the turn, so a user row reveals and an assistant row does not. */
   actionsReveal?: 'always' | 'hover';
   /** Default action bar for user messages that have no `actions` of their own; a
    *  message's own `actions` replaces it. */
@@ -293,7 +293,11 @@ const ASSISTANT_ALIGN = 'items-stretch';
 
 export function ChatThread(props: ChatThreadProps) {
   const outer = useChatConfig();
-  const reveal = () => (props.actionsReveal === 'hover' ? 'hover' : 'always');
+  // The reveal mode is resolved PER ROW, from that row's own speaker, so one thread can hold
+  // a hover-revealed user turn and a pinned assistant turn at once. The rule itself lives in
+  // `resolveActionsReveal`: the row's `group` class and the bar's own opacity have to agree,
+  // so both read that one function rather than restating it.
+  const revealFor = (isUser: boolean) => resolveActionsReveal(props.actionsReveal, isUser);
   // Resolved ONCE per render and used twice, for the same reason `thread.tsx` does it:
   // the band/gap classes here, and the value handed down to every row, so the rows agree
   // with the list they sit in.
@@ -783,13 +787,13 @@ export function ChatThread(props: ChatThreadProps) {
                             markdown={m().role === 'assistant'}
                             actions={m().actions ?? (m().role === 'user' ? props.userActions : props.assistantActions)}
                             hideSources={props.hideSources}
-                            actionsReveal={reveal()}
+                            actionsReveal={revealFor(m().role === 'user')}
                             activeFeedback={feedback.resolveFeedback(m())}
                             copied={feedback.isCopied(m().id)}
                             onAction={(action) => feedback.handleAction(m(), action)}
                           />
                         );
-                        const rowGroup = () => (reveal() === 'hover' ? 'group ' : '');
+                        const rowGroup = () => (revealFor(m().role === 'user') === 'hover' ? 'group ' : '');
                         return (
                           // `role` is the SPEAKER, forwarded on BOTH branches —
                           // see the same note in thread.tsx. `Message` turns it

@@ -228,7 +228,7 @@ function feedbackVoteOf(a: ChatMessageAction | CustomAction): FeedbackVote | und
  * built-in names pull their label+icon from the curated registry; custom
  * descriptors use their `label` plus `actionIcon(icon)` (label-only when the
  * icon is unknown or absent). `reveal="hover"` makes the bar fade in on the
- * parent `.group`'s hover.
+ * parent `.group`'s hover or focus-within.
  *
  * Pure/prop-driven: feedback (`activeFeedback`) and copy (`copied`) state are
  * owned by the parent facade and passed in: the bar holds no internal signals,
@@ -370,7 +370,8 @@ export interface MessageBodyProps {
   /** Action-bar entries: built-in names and/or custom descriptors. When empty
    *  the bar is not rendered. */
   actions?: (ChatMessageAction | CustomAction)[];
-  /** Whether the bar stays visible or appears on pointer-over; defaults to staying visible. */
+  /** Whether the bar is visible at rest or on pointer-over; omitted keys the default to the
+   *  turn, so a user row reveals and an assistant row stays visible. */
   actionsReveal?: 'always' | 'hover';
   // The parts STAY in `parts`: the wire encoder still needs them, in order.
   /** Skip the citations row that consecutive `source` parts collapse into. */
@@ -570,6 +571,20 @@ function AttachmentTile(props: { data: AttachmentData }) {
   );
 }
 
+/** Resolve the action bar's reveal mode. An explicit value always wins; an OMITTED one is
+ *  keyed to the turn, because the row already knows its own speaker. A user message is read
+ *  back, so its actions wait for a hover or a focus; an assistant message's actions are the
+ *  ones a reader reaches for while reading forward, so they stay put. One spelling of the
+ *  rule, read by `MessageBody` and by every list that renders a row (`ChatThread`, `Thread`,
+ *  and the `<kai-message>` facade) so the row's `group` class and the bar's own reveal can
+ *  never disagree. */
+export function resolveActionsReveal(
+  reveal: 'always' | 'hover' | undefined,
+  isUser: boolean,
+): 'always' | 'hover' {
+  return reveal ?? (isUser ? 'hover' : 'always');
+}
+
 /**
  * The shared message body: the message's `parts` rendered in a single ordered
  * pass (text, reasoning, tool calls, generative-UI cards, citations and file
@@ -761,7 +776,7 @@ function MessageBody(props: MessageBodyProps) {
       <Show when={(props.actions?.length ?? 0) > 0}>
         <MessageActionBar
           actions={props.actions!}
-          reveal={props.actionsReveal === 'hover' ? 'hover' : 'always'}
+          reveal={resolveActionsReveal(props.actionsReveal, props.isUser)}
           activeFeedback={props.activeFeedback}
           copied={props.copied}
           onAction={(id) => props.onAction?.(id)}

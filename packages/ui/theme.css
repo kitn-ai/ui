@@ -330,7 +330,24 @@
   --color-secondary: var(--kai-color-secondary, hsl(45 4% 17%));
   --color-secondary-foreground: var(--kai-color-secondary-foreground, hsl(0 0% 98%));
   --color-muted: var(--kai-color-muted, hsl(45 4% 17%));
-  --color-muted-foreground: var(--kai-color-muted-foreground, hsl(45 4% 64%));
+  /* Muted TEXT - dark. Moved DOWN from 64% to 56% lightness (2026-09-27). The owner
+     asked for the sidebar's section labels ("Project", "Recent", "No conversations
+     yet") to read a little more muted in dark only: "light mode looks fine".
+     One token, so this moves EVERY muted surface in dark, not those three labels:
+     250 `text-muted-foreground` call sites in `src/` (88 files). That is the
+     deliberate route rather than a dimmer token on the labels, because there is
+     no dimmer TEXT token to use: the darker members of the dark palette
+     (--color-input 48%, --color-scrollbar-thumb-hover 42%, --color-scrollbar-thumb
+     30%) are control boundaries, and as text they measure 3.99:1, 3.19:1 and
+     1.98:1 on --color-card - all below the 4.5:1 AA floor. 56% is where the dark
+     register lands in the LIGHT register's own contrast band, which is the honest
+     way to say "the same muting as light": light muted-foreground is 4.91:1 at its
+     worst (on --color-secondary) and 5.40:1 at its best (on white); dark at 56% is
+     5.68:1 on the background, 5.22:1 on a card, 4.94:1 on --color-surface-strong,
+     so it keeps AA everywhere, including the strongest muted surface. Before the
+     move dark read 7.27 / 6.68 / 6.32 on the same three - brighter than light's
+     best, which is what the owner saw. Hue and saturation are untouched. */
+  --color-muted-foreground: var(--kai-color-muted-foreground, hsl(45 4% 56%));
   /* Re-declared in the dark scope so the color-mix recomputes with the DARK
      muted/background (a derived token is computed where it's declared, not where
      it's used — see the light --color-surface for the full note). */

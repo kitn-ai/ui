@@ -210,7 +210,9 @@ defineWebComponent<Props, Events>('kai-chat', {
   codeTheme: 'github-dark-dimmed', codeHighlight: true, chatTitle: undefined,
   models: undefined, currentModel: undefined, context: undefined, scrollButton: true,
   attach: true, tools: undefined, expanded: undefined, voice: false, triggers: undefined, kindIcons: undefined,
-  actionsReveal: 'always', cardTypes: undefined, cardSchemas: undefined, accept: undefined,
+  // No default, deliberately: an omitted value keys the reveal to each message's own role
+  // (see `resolveActionsReveal`), which a default here would override with an explicit one.
+  actionsReveal: undefined, cardTypes: undefined, cardSchemas: undefined, accept: undefined,
   reasoning: undefined, reasoningOpen: undefined, conversations: false, store: undefined,
   home: undefined, userActions: undefined, assistantActions: undefined, hideSources: false,
   hostOpen: true,
@@ -324,7 +326,7 @@ defineWebComponent<Props, Events>('kai-chat', {
     reasoningOpen={flag('reasoningOpen')}
     triggers={props.triggers as TriggerDef[] | undefined}
     kindIcons={props.kindIcons as Record<string, string> | undefined}
-    actionsReveal={props.actionsReveal as 'always' | 'hover'}
+    actionsReveal={props.actionsReveal as 'always' | 'hover' | undefined}
     density={props.density as ThreadDensity}
     userActions={props.userActions as (ChatMessageAction | CustomAction)[] | undefined}
     assistantActions={props.assistantActions as (ChatMessageAction | CustomAction)[] | undefined}

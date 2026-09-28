@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { Message, MessageAvatar, MessageContent, MessageActions, MessageBody } from './message';
-import type { MessagePart } from '../../web-components/chat/chat-types';
+import type { MessagePart, ChatMessageAction } from '../../web-components/chat/chat-types';
 import { Button } from '../button/button';
 import { ChatContainer } from '../chat/chat-container';
 import { ChatConfig } from '../../primitives/chat-config';
@@ -226,6 +226,41 @@ export const WithActions: Story = {
     </MessageActions>
   </div>
 </Message>`),
+};
+
+/** WHEN the action row appears, both states side by side. The default is keyed to the turn:
+ *  hover the user row (or Tab into it) and its actions fade in, while the assistant row's are
+ *  there from the first paint. The third row is the same user turn with the prop set
+ *  explicitly, which pins them visible. */
+export const ActionsReveal: Story = {
+  name: 'Actions reveal (role default)',
+  render: () => {
+    const turn = (text: string): MessagePart[] => [{ type: 'text', text }];
+    const actions: ChatMessageAction[] = ['copy', 'like', 'dislike'];
+    return (
+      <div class="max-w-2xl space-y-4">
+        <Message role="user" class="group flex-col items-end">
+          <MessageBody parts={turn('What is SolidJS?')} isUser markdown={false} actions={actions} />
+        </Message>
+        <Message role="assistant">
+          <MessageBody parts={turn('A reactive UI library.')} isUser={false} markdown actions={actions} />
+        </Message>
+        <Message role="user" class="flex-col items-end">
+          <MessageBody parts={turn('And with actionsReveal="always"?')} isUser markdown={false} actions={actions} actionsReveal="always" />
+        </Message>
+      </div>
+    );
+  },
+  ...src(`{/* user: fades in on hover or focus */}
+<Message role="user" class="group flex-col items-end">
+  <MessageBody isUser markdown={false} actions={['copy', 'like', 'dislike']} parts={parts} />
+</Message>
+{/* assistant: visible at rest */}
+<Message role="assistant">
+  <MessageBody isUser={false} markdown actions={['copy', 'like', 'dislike']} parts={parts} />
+</Message>
+{/* explicit, over the role default */}
+<MessageBody isUser markdown={false} actionsReveal="always" actions={['copy']} parts={parts} />`),
 };
 
 /** A user + assistant pair showing both layouts together (showcase). */

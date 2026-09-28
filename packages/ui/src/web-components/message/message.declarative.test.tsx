@@ -14,7 +14,7 @@ import './message';
 // jsdom doesn't implement Element.scrollTo; see chat-thread.test.tsx / thread.test.tsx.
 if (!Element.prototype.scrollTo) (Element.prototype as unknown as { scrollTo: () => void }).scrollTo = () => {};
 
-type MessageEl = HTMLElement & { message?: unknown };
+type MessageEl = HTMLElement & { message?: unknown; actionsReveal?: 'always' | 'hover' };
 
 let errorSpy: ReturnType<typeof vi.spyOn>;
 
@@ -89,5 +89,48 @@ describe('<kai-message> boundary validation', () => {
     expect(good.shadowRoot!.textContent).toContain('I am fine');
     expect(bad.shadowRoot!.querySelector('[part="row"]')).toBeNull();
     expect(errorSpy).toHaveBeenCalledTimes(1);
+  });
+});
+
+/**
+ * The action bar's reveal, reached from the ELEMENT.
+ *
+ * A prop only the SolidJS path can set is half a feature: the reveal rule has to be
+ * settable, and its role-keyed default reachable, from `<kai-message>` and its `role`.
+ */
+describe('<kai-message> action reveal', () => {
+  const HIDDEN = '[@media(hover:hover)]:opacity-0';
+
+  async function mount(role: 'user' | 'assistant', attr?: 'always' | 'hover'): Promise<MessageEl> {
+    const el = document.createElement('kai-message') as MessageEl;
+    el.message = { id: 'm1', role, parts: [{ type: 'text', text: 'hi' }], actions: ['copy'] };
+    if (attr) el.setAttribute('actions-reveal', attr);
+    document.body.appendChild(el);
+    await Promise.resolve();
+    await Promise.resolve();
+    return el;
+  }
+
+  const barClasses = (el: MessageEl) => el.shadowRoot!.querySelector('[part="actions"]')!.className;
+
+  it('an omitted actionsReveal is undefined on the element, so the role default applies', async () => {
+    const el = await mount('user');
+    expect(el.actionsReveal, 'no declared default: a default of always would erase the rule').toBeUndefined();
+    expect(barClasses(el)).toContain(HIDDEN);
+  });
+
+  it('leaves an assistant row visible at rest', async () => {
+    const el = await mount('assistant');
+    expect(barClasses(el)).not.toContain(HIDDEN);
+  });
+
+  it('an explicit attribute overrides the role default, both ways', async () => {
+    // The kebab attribute, which is the form an HTML author writes: `actionsReveal` ->
+    // `actions-reveal` (`define.tsx`'s `attributeName`).
+    const pinned = await mount('user', 'always');
+    expect(barClasses(pinned)).not.toContain(HIDDEN);
+
+    const fading = await mount('assistant', 'hover');
+    expect(barClasses(fading)).toContain(HIDDEN);
   });
 });

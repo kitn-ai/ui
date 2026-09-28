@@ -39,10 +39,15 @@ function PromptSuggestion(props: PromptSuggestionProps) {
             <Show
               when={local.block}
               fallback={
+                // The pill's box comes from the button size scale, not from literals:
+                // `sm` IS 32px tall with 12px inline padding (h-8/px-3), which is the
+                // box the owner picked off the running app. Its `text-xs` is NOT taken:
+                // the ask was padding, so the type size stays where `lg` put it (14px),
+                // rather than shrinking as a side effect of reusing the size preset.
                 <Button
                   variant={local.variant ?? 'outline'}
-                  size="lg"
-                  class={cn('rounded-pill', local.class)}
+                  size="sm"
+                  class={cn('rounded-pill text-sm', local.class)}
                   {...rest}
                 >
                   <Icon />

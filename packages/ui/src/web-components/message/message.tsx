@@ -3,7 +3,7 @@ import { Dynamic } from 'solid-js/web';
 import { defineWebComponent } from '../define/define';
 import { readSlots, MESSAGE_SLOTS } from '../slots/slots';
 import { ChatConfig, useChatConfig, type ProseSize } from '../../primitives/chat-config';
-import { Message, MessageAvatar, MessageBody } from '../../components/message/message';
+import { Message, MessageAvatar, MessageBody, resolveActionsReveal } from '../../components/message/message';
 import { createMessageFeedback } from '../../primitives/message-feedback';
 import {
   mergeCardTags,
@@ -79,7 +79,8 @@ interface Props extends Record<string, unknown> {
   codeTheme?: string;
   /** Disable syntax highlighting for code blocks (no Shiki loads). */
   codeHighlight?: boolean;
-  /** Whether the action bar stays visible or appears on pointer-over; visible by default. */
+  /** Whether the action bar stays visible or appears on pointer-over; omitted keys the
+   *  default to the turn, so a user row reveals and an assistant row stays visible. */
   actionsReveal?: 'always' | 'hover';
   /** Convenience avatar image URL (used when `message.avatar` is not set). */
   avatarSrc?: string;
@@ -159,7 +160,11 @@ defineWebComponent<Props, Events>('kai-message', {
   proseSize: 'sm',
   codeTheme: 'github-dark-dimmed',
   codeHighlight: true,
-  actionsReveal: 'always',
+  // NO default here, deliberately: `resolveActionsReveal` keys an omitted value to the
+  // message's own role (a user row reveals on hover or focus, an assistant row stays
+  // visible), and a default of 'always' in this record would reach the row as an EXPLICIT
+  // value and erase that rule for every consumer who never set the prop.
+  actionsReveal: undefined,
   avatarSrc: undefined,
   avatarFallback: undefined,
   avatar: undefined,
@@ -259,7 +264,7 @@ defineWebComponent<Props, Events>('kai-message', {
   const hasAvatarSlot = () => !!slots()['avatar'];
   // The rail shows when not suppressed and there's either a slot or a resolved avatar.
   const showRail = () => !noAvatar() && (hasAvatarSlot() || !!avatar());
-  const reveal = () => (props.actionsReveal === 'hover' ? 'hover' : 'always');
+  const reveal = () => resolveActionsReveal(props.actionsReveal, isUser());
   // markdown: explicit prop/attribute wins; otherwise default by role.
   const markdownExplicit = () =>
     element.hasAttribute('markdown') || props.markdown === true || props.markdown === false;
@@ -276,7 +281,7 @@ defineWebComponent<Props, Events>('kai-message', {
       isUser={isUser()}
       markdown={useMarkdown()}
       actions={mergedActions()}
-      actionsReveal={reveal()}
+      actionsReveal={props.actionsReveal as 'always' | 'hover' | undefined}
       activeFeedback={feedback.resolveFeedback(msg())}
       copied={feedback.isCopied(msg().id)}
       onAction={(action) => feedback.handleAction(msg(), action)}

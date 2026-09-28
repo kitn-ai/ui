@@ -1,7 +1,7 @@
 import { For, Show, createMemo, onMount, type JSX } from 'solid-js';
 import { ChatConfig, useChatConfig } from '../../primitives/chat-config';
 import { ChatContainer, ChatContainerContent, ChatContainerScrollAnchor } from '../chat/chat-container';
-import { Message, MessageAvatar, MessageBody } from '../message/message';
+import { Message, MessageAvatar, MessageBody, resolveActionsReveal } from '../message/message';
 import { createMessageFeedback, type MessageActionDetail } from '../../primitives/message-feedback';
 import { ScrollButton } from '../scroll/scroll-button';
 import { Loader } from '../loader/loader';
@@ -54,7 +54,8 @@ export interface ThreadProps {
   // Inert for non-image tiles, which keep the hover card.
   /** How an image tile in a message's attachment grid reveals its full size; `'lightbox'` is the one a keyboard or touch user can reach. Defaults to `'hover'`. */
   imagePreview?: AttachmentImagePreview;
-  /** Whether a message's action bar stays open or appears on pointer-over. Defaults to `'always'`. */
+  /** Whether a message's action bar is visible at rest or on pointer-over; omitted keys it
+   *  to the turn, so a user row reveals while an assistant row stays visible. */
   actionsReveal?: 'always' | 'hover';
   /** Show the scroll-to-bottom button inside the scroll area. Default true. */
   scrollButton?: boolean;
@@ -89,7 +90,10 @@ function DefaultEmpty() {
  */
 export function Thread(props: ThreadProps) {
   const outer = useChatConfig();
-  const reveal = () => (props.actionsReveal === 'hover' ? 'hover' : 'always');
+  // Per ROW, from that row's own speaker, so one thread can hold a hover-revealed user turn
+  // and a pinned assistant turn at once. The rule lives in `resolveActionsReveal` because the
+  // row's `group` class and the bar's own opacity have to agree.
+  const revealFor = (isUser: boolean) => resolveActionsReveal(props.actionsReveal, isUser);
   // Resolved ONCE per render and used twice: for the band/gap classes here, and as the
   // value handed to every row below, so the rows agree with the list they sit in rather
   // than resolving the raw prop again (which would also report an unknown value under
@@ -167,13 +171,13 @@ export function Thread(props: ThreadProps) {
                         isUser={m().role === 'user'}
                         markdown={m().role === 'assistant'}
                         actions={m().actions}
-                        actionsReveal={reveal()}
+                        actionsReveal={revealFor(m().role === 'user')}
                         activeFeedback={feedback.resolveFeedback(m())}
                         copied={feedback.isCopied(m().id)}
                         onAction={(action) => feedback.handleAction(m(), action)}
                       />
                     );
-                    const rowGroup = () => (reveal() === 'hover' ? 'group ' : '');
+                    const rowGroup = () => (revealFor(m().role === 'user') === 'hover' ? 'group ' : '');
                     return (
                       // `role` is the SPEAKER, and it has to be forwarded on BOTH
                       // branches. `Message` turns it into `role="article"` + an

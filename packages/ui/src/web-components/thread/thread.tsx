@@ -31,8 +31,8 @@ interface Props extends Record<string, unknown> {
   /** How an image tile reveals its full size. Default is the pointer-only hover card; the modal on click
    *  is the only one keyboard and touch reach. */
   imagePreview?: 'hover' | 'lightbox';
-  /** Whether each message's action bar is visible at rest or only revealed on pointer-over.
-   *  Visible at rest by default. */
+  /** Whether each row's action bar is visible at rest or on pointer-over; omitted keys it to
+   *  the turn, so a user row reveals and an assistant row does not. */
   actionsReveal?: 'always' | 'hover';
   /** Show the scroll-to-bottom button inside the scroll area. Default true. */
   scrollButton?: boolean;
@@ -83,7 +83,9 @@ defineWebComponent<Props, Events>('kai-thread', {
   codeTheme: 'github-dark-dimmed',
   codeHighlight: true,
   imagePreview: 'hover',
-  actionsReveal: 'always',
+  // No default, deliberately: an omitted value keys the reveal to each message's own role
+  // (see `resolveActionsReveal`), which a default here would override with an explicit one.
+  actionsReveal: undefined,
   scrollButton: true,
   // Cast so the literal cannot narrow this prop's published type to `'default'` alone in
   // the generated artifacts — the same reason `theme` above carries one.
@@ -138,7 +140,7 @@ defineWebComponent<Props, Events>('kai-thread', {
         codeTheme={props.codeTheme as string}
         codeHighlight={flag('codeHighlight')}
         imagePreview={(props.imagePreview as 'hover' | 'lightbox' | undefined) ?? 'hover'}
-        actionsReveal={props.actionsReveal as 'always' | 'hover'}
+        actionsReveal={props.actionsReveal as 'always' | 'hover' | undefined}
         density={props.density as ThreadDensity}
         scrollButton={props.scrollButton !== false}
         cardTypes={cardComponentsFromTags(props.cardTypes as Record<string, string> | undefined, (props as { theme?: string }).theme)}
