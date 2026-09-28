@@ -339,20 +339,32 @@
           "styles": {}
         },
         {
-          "name": "30-suggestion-rows",
+          "name": "30-empty-state-layout",
           "probes": {
-            "fourRows": true,
-            "rowsAreTheOfferedLabels": true,
-            "rowsFillTheirContainer": true,
-            "rowsStack": true,
+            "fourLabels": true,
+            "theBoxesAreTheOfferedLabels": true,
+            "theLabelsShareOneLine": true,
+            "theLabelsAreIntrinsicWidth": true,
+            "theLabelsWrapWhenThereIsNoRoom": true,
+            "theCardsFoldToOneColumnWhenThereIsNoRoom": true,
+            "theCardsCarryTheKitsOwnAir": true,
+            "theGridTakesTheComposersColumn": true,
             "rendered": true
           },
           "styles": {
-            "suggestionRow": {
-              "height": "39.25px",
-              "paddingInline": "16px",
-              "borderRadius": "13.6px",
-              "textAlign": "left"
+            "suggestionPill": {
+              "height": "40px",
+              "paddingInline": "24px",
+              "borderRadius": "64px"
+            },
+            "guideCardsGrid": {
+              "width": "768px",
+              "gridTemplateColumns": "380px 380px",
+              "gap": "8px",
+              "minWidth": "100%"
+            },
+            "guideCardText": {
+              "rowGap": "8px"
             }
           }
         },
@@ -991,20 +1003,32 @@
           "styles": {}
         },
         {
-          "name": "30-suggestion-rows",
+          "name": "30-empty-state-layout",
           "probes": {
-            "fourRows": true,
-            "rowsAreTheOfferedLabels": true,
-            "rowsFillTheirContainer": true,
-            "rowsStack": true,
+            "fourLabels": true,
+            "theBoxesAreTheOfferedLabels": true,
+            "theLabelsShareOneLine": true,
+            "theLabelsAreIntrinsicWidth": true,
+            "theLabelsWrapWhenThereIsNoRoom": true,
+            "theCardsFoldToOneColumnWhenThereIsNoRoom": true,
+            "theCardsCarryTheKitsOwnAir": true,
+            "theGridTakesTheComposersColumn": true,
             "rendered": true
           },
           "styles": {
-            "suggestionRow": {
-              "height": "39.25px",
-              "paddingInline": "16px",
-              "borderRadius": "13.6px",
-              "textAlign": "left"
+            "suggestionPill": {
+              "height": "40px",
+              "paddingInline": "24px",
+              "borderRadius": "64px"
+            },
+            "guideCardsGrid": {
+              "width": "768px",
+              "gridTemplateColumns": "380px 380px",
+              "gap": "8px",
+              "minWidth": "100%"
+            },
+            "guideCardText": {
+              "rowGap": "8px"
             }
           }
         },

@@ -743,6 +743,17 @@
              mic cannot: that it is listening, that recognition failed, or that
              the browser captured audio and has no speech recognition to turn it
              into words (the kit's documented record-only fallback). -->
+        <!-- THE SUGGESTIONS RIDE THE KIT'S DEFAULT LAYOUT, so no layout attribute
+             is asked for here. `suggestions-layout="block"` used to sit on this
+             element (added with the empty state's own pass), and that value is
+             the full-width ROW variant - four stacked rows where this page had
+             always shown one wrapping row of intrinsic-width pills. The owner
+             read the column as a regression, which is exactly what it was: the
+             kit's default ('pill') is the wrapping row, the variant exists for a
+             composer that wants a menu, and this one does not. What the row does
+             is measured in the block driver rather than described: the four
+             boxes share one line at a wide viewport and wrap onto more than one
+             when there is no room for them. -->
         <!-- `.tools` is the composer's `+` menu, and `@kai-select` is every row
              in it: the kit renders the rows and this block decides what they do,
              so one handler reads the id and acts on it. -->
@@ -753,7 +764,6 @@
           :theme="themeMode"
           .placeholder="promptPlaceholder"
           .suggestions="suggestions"
-          suggestions-layout="block"
           .loading="loading"
           .triggers="triggers"
           .tools="tools"

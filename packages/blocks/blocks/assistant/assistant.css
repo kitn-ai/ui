@@ -320,15 +320,37 @@ kai-button[hidden] { display: none; }
 
 /* THE GUIDE CARDS on the empty state. Two columns while there is room, one
    below the narrow breakpoint, because a summary that wraps to three lines is
-   harder to scan than a card with the width to say it in two. `max-width` keeps
-   the pair from stretching across a wide page: four cards are a small menu, not
-   a dashboard. */
+   harder to scan than a card with the width to say it in two.
+
+   THE GRID IS WIDER THAN THE BOX IT IS SLOTTED INTO, on purpose, and this is the
+   one rule here that has to be read before it is changed. The cards are slotted
+   into the kit's `EmptyContent`, which caps its content at `max-w-sm` (24rem) -
+   a PROSE measure, for the one sentence an ordinary empty state carries - so
+   `width: 100%` out here is 384px and four cards two-up get 188px each. Those
+   two columns are what the owner read as "quite narrow", and the cap lives in
+   kai-empty's shadow root where nothing out here can reach it.
+
+   What the grid takes instead is the measure of the column it sits in: the
+   thread's own `max-w-3xl` (48rem) - the same 48rem the composer below is capped
+   to, so the card menu and the composer are one column. It renders centred
+   because EmptyContent centres its children, and it paints past that box rather
+   than inside it, which is safe here for a measurable reason rather than a hoped
+   one: the grid never exceeds the thread's own column, because the expression
+   below can only be smaller than the room main has.
+
+   THAT EXPRESSION is the room a page actually has: the viewport, less the shell's
+   own start-aside width - read from `--kai-workspace-start-width`, the very
+   variable the shell itself reads for that column, so a page that widens its rail
+   moves this with it - less 2rem of breathing room. `min-width: 100%` is what
+   keeps a narrow page at the prose box instead of shrinking the cards below it:
+   where the viewport cannot pay for the wider grid, this is today's 384px and the
+   single-column media query below is the whole layout. */
 .guide-cards {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.5rem;
-  width: 100%;
-  max-width: 34rem;
+  width: min(48rem, calc(100vw - var(--kai-workspace-start-width, 280px) - 2rem));
+  min-width: 100%;
   margin-top: 0.25rem;
 }
 
@@ -339,18 +361,38 @@ kai-button[hidden] { display: none; }
 /* The button's BOX is inside kai-button's shadow root, so its height, padding
    and wrapping are set through `::part(button)` - the same reach the menu's
    delete row already uses. A kit button is one line tall by default and does
-   not wrap, which is right for a label and wrong for a card. */
+   not wrap, which is right for a label and wrong for a card.
+
+   THE PADDING IS THE KIT'S OWN CARD PADDING, spelled in the kit's own spacing
+   token: `5 x --kai-density` is byte-for-byte the `p-5` (20px) the kit's Card
+   paints in its non-dense variant, because `--spacing` is re-pointed at
+   `--kai-density` (theme.css). It replaced a hand-typed `0.75rem 0.875rem`
+   (12px / 14px, and 14px is not a step on that scale at all), which the owner
+   read as tight; the pair is now one step of the same scale on both axes, so a
+   page that moves the density knob moves the cards. */
 .guide-cards kai-button::part(button) {
   height: auto;
-  padding: 0.75rem 0.875rem;
+  padding: calc(var(--kai-density, 0.25rem) * 5);
   white-space: normal;
   align-items: flex-start;
 }
 
 /* ONE slotted child, stacked here rather than by the button: the button lays
    its content out in a row, so two spans would sit side by side. The wrapper
-   keeps that layout decision in the block, where the card is composed. */
-.guide-card-text { display: flex; flex-direction: column; gap: 0.125rem; text-align: start; }
+   keeps that layout decision in the block, where the card is composed.
+
+   THE STEP BETWEEN THE TITLE AND ITS SUMMARY is the kit's `gap-2` (two density
+   units, 8px), and it was `0.125rem` - 2px, which is not a step on the kit's
+   scale and read as the two lines being one paragraph. The kit's own Card
+   separates a title from its description by a `gap-1` (4px) inside a `gap-4`
+   card; a two-line summary under a card's title is the same job with the air
+   the owner asked for, so it takes the step above it. */
+.guide-card-text {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--kai-density, 0.25rem) * 2);
+  text-align: start;
+}
 
 .guide-card-title { font-size: 0.875rem; font-weight: 500; }
 

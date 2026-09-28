@@ -10,10 +10,13 @@
 // voice transcript path, the settings menu's theme choice, the scroll-to-bottom
 // button, and the four suggestion ARCS, whose promise is that clicking a label
 // plays the turn that label names rather than the fallback script, plus the
-// empty state's own rendering as four full-width suggestion ROWS - the one
-// shape no other state can see, because every other state reads the labels off
+// empty state's own layout - the four suggestion labels as one wrapping row of
+// pills and the guide cards' grid - the one shape no other state can see,
+// because every other state reads the labels off
 // the element's `suggestions` property, which says what the block offered and
-// nothing about how the kit laid it out. Last of all the rail's TOP ACTIONS: the
+// nothing about how the kit laid it out. That state reads the same boxes twice,
+// once at the run's viewport and once at 600px, because "they wrap when there is
+// no room" is a claim about two widths. Last of all the rail's TOP ACTIONS: the
 // four rows in its header region, three of them inert with their reason on them,
 // and the one that acts firing the same new-chat path the rail's built-in button
 // used to. The keyboard walk over the rail's rows runs BEFORE those two, and its
@@ -223,32 +226,33 @@ let labelsMidArc = [];
 let labelsEndOfArc = [];
 let labelsFromCard = [];
 
-// The empty state's rows, measured in state 30: the labels the element offered
-// and the box each of them rendered into. Two captures rather than one, because
-// the probes make two different claims - that the measured boxes ARE the offered
-// labels, and that those labels render as rows.
+// The empty state's layout, measured in state 30: the labels the element offered
+// and the box each of them rendered into, plus the guide cards' grid - each read
+// at the run's own viewport and again at a narrow one. Two captures rather than
+// one, because the probes make two different claims - that the measured boxes ARE
+// the offered labels, and that those labels render as one wrapping row.
 let offeredRows = [];
-let rowBoxes = null;
+let emptyStateBoxes = null;
 
 /** The boxes the empty state's labels rendered into, read through the element's
  *  shadow root.
  *
- *  WHY A MEASUREMENT AND NOT A CLASS NAME. The rendering IS the decision
- *  (`suggestions-layout="block"`), and the two variants differ in a way a box
- *  can see: a row carries `w-full`, so it fills its container's content box and
- *  four rows stack at four different tops, while a pill is intrinsic-width and
- *  wraps along one line. A probe that asserted a class would be asserting the
- *  kit's markup rather than the shape a reader sees, and this file asserts the
- *  shape everywhere else.
+ *  WHY A MEASUREMENT AND NOT A CLASS NAME. The rendering IS the decision (the
+ *  kit's `suggestionsLayout`), and its two variants differ in a way a box can
+ *  see: the row variant carries `w-full`, so each one fills its container's
+ *  content box and four of them stack at four different tops, while the default
+ *  pill is intrinsic-width and they share one line until there is no room. A
+ *  probe that asserted a class would be asserting the kit's markup rather than
+ *  the shape a reader sees, and this file asserts the shape everywhere else.
  *
- *  The reference the width claim is made against is the row's OWN container's
+ *  The reference the width claim is made against is the pill's OWN container's
  *  content box, computed from that container's box and padding - a typed pixel
  *  count would rot with the theme. */
-const measureRows = (page, labels) => page.evaluate((wanted) => {
+const measureSuggestions = (page, labels) => page.evaluate((wanted) => {
   const root = document.getElementById('prompt')?.shadowRoot;
   if (!root) return { error: 'no shadow root on #prompt' };
   const buttons = [...root.querySelectorAll('button')];
-  const rows = wanted.map((label) => {
+  const pills = wanted.map((label) => {
     const el = buttons.find((b) => (b.textContent ?? '').trim() === label);
     if (!el) return { label, missing: true };
     const parent = el.parentElement;
@@ -266,8 +270,48 @@ const measureRows = (page, labels) => page.evaluate((wanted) => {
         : null,
     };
   });
-  return { rows };
+  return { pills };
 }, labels);
+
+/** The guide cards' grid and one card's box, plus the two measures the card's
+ *  looseness is asserted against rather than typed: the kit's own spacing unit
+ *  (--kai-density, the knob every numeric spacing utility is re-pointed at) and
+ *  the composer's element box below, which is the 48rem column the cards are
+ *  supposed to share.
+ *
+ *  PADDING IS MEASURED, NOT READ. The button's box lives in kai-button's shadow
+ *  root, so the visible padding is the distance from the card's own edge to the
+ *  text the page slotted into it - the same fact a reader sees, and the one a
+ *  `::part(button)` rule moves. */
+const measureCards = (page) => page.evaluate(() => {
+  const grid = document.querySelector('.guide-cards');
+  if (!grid) return { error: 'no .guide-cards on the page' };
+  const cards = [...grid.querySelectorAll('kai-button')];
+  const card = cards[0];
+  const title = card?.querySelector('.guide-card-title');
+  const summary = card?.querySelector('.guide-card-summary');
+  const gridBox = grid.getBoundingClientRect();
+  const cardBox = card ? card.getBoundingClientRect() : null;
+  const titleBox = title ? title.getBoundingClientRect() : null;
+  const summaryBox = summary ? summary.getBoundingClientRect() : null;
+  return {
+    cards: cards.length,
+    columns: getComputedStyle(grid).gridTemplateColumns.trim().split(/\s+/).filter(Boolean).length,
+    // HOW MANY COLUMNS THE CARDS ACTUALLY LAND IN, read off their own left
+    // edges rather than off the template string: a rule that left the template
+    // alone while the boxes moved would pass a string comparison.
+    lefts: [...new Set(cards.map((el) => Math.round(el.getBoundingClientRect().left)))].length,
+    gridWidth: Math.round(gridBox.width),
+    cardWidth: cardBox ? Math.round(cardBox.width) : null,
+    paddingTop: cardBox && titleBox ? Math.round(titleBox.top - cardBox.top) : null,
+    paddingLeft: cardBox && titleBox ? Math.round(titleBox.left - cardBox.left) : null,
+    titleToSummary: titleBox && summaryBox ? Math.round(summaryBox.top - titleBox.bottom) : null,
+    // THE KIT'S OWN UNIT, as the page resolves it: 0.25rem when nothing set the
+    // knob, which is the fallback the block's own rules carry.
+    density: getComputedStyle(grid).getPropertyValue('--kai-density').trim(),
+    composerWidth: Math.round(document.getElementById('prompt')?.getBoundingClientRect().width ?? 0),
+  };
+});
 
 // The arcs' own captures, one entry per arc, written by that arc's state: what
 // its first turn carried, what its SECOND turn carried (the turn its own label
@@ -1915,64 +1959,169 @@ export default {
       },
     },
     {
-      name: '30-suggestion-rows',
+      // THE EMPTY STATE'S OWN LAYOUT, at the run's viewport and again at a narrow
+      // one: the four suggestion labels as the kit lays them out, and the guide
+      // cards' grid. Both are shapes no other state can see - every other state
+      // reads the labels off the element's `suggestions` property, which says what
+      // the block offered and nothing about how the kit laid it out, and every
+      // other state's screenshot is of a wide document.
+      name: '30-empty-state-layout',
       act: async (page) => {
-        // Back to the empty state: the rows are what it offers BEFORE a
+        // Back to the empty state: both halves are what it offers BEFORE a
         // conversation exists, and the arc states above left one open.
         await page.getByRole('button', { name: 'New chat' }).click();
         await settle(400)(page);
         offeredRows = await suggestionLabels(page);
-        rowBoxes = await measureRows(page, offeredRows);
+        emptyStateBoxes = {
+          wide: {
+            suggestions: await measureSuggestions(page, offeredRows),
+            cards: await measureCards(page),
+          },
+        };
+        // THE NARROW PASS, and it is the same four boxes read again rather than a
+        // second set of claims: the viewport comes back afterwards because the
+        // states below are about a wide document, which is why this flip lives
+        // here (state 15's stays narrow because a narrow document IS its point).
+        await page.setViewportSize({ width: 600, height: 800 });
+        await settle(500)(page);
+        emptyStateBoxes.narrow = {
+          suggestions: await measureSuggestions(page, offeredRows),
+          cards: await measureCards(page),
+        };
+        await page.setViewportSize({ width: 1280, height: 800 });
+        await settle(500)(page);
       },
       probes: {
-        // FOUR, and each of them found: a row that did not render is reported
+        // FOUR, and each of them found: a label that did not render is reported
         // as `missing` rather than counted away.
-        fourRows: () => (rowBoxes?.rows ?? []).length === 4
-          && rowBoxes.rows.every((r) => !r.missing),
+        fourLabels: () => (emptyStateBoxes?.wide?.suggestions?.pills ?? []).length === 4
+          && emptyStateBoxes.wide.suggestions.pills.every((p) => !p.missing),
         // ...and the four boxes ARE the four labels the element offered, in
-        // order. Without this the width claim below could be measuring any
-        // four buttons that happen to be in the element.
-        rowsAreTheOfferedLabels: () => (rowBoxes?.rows ?? []).map((r) => r.label).join(' | ')
+        // order. Without this every claim below could be measuring any four
+        // buttons that happen to be in the element.
+        theBoxesAreTheOfferedLabels: () => (emptyStateBoxes?.wide?.suggestions?.pills ?? []).map((p) => p.label).join(' | ')
           === offeredRows.join(' | '),
-        // THE ROW CLAIM, and the measurement that discriminates it from the pill
-        // variant: a row fills its container's content box (`w-full`), a pill is
-        // intrinsic-width. The measurements come back on failure, so a wrapped
-        // box names its own numbers instead of only that it differed.
-        rowsFillTheirContainer: () => {
-          const rows = rowBoxes?.rows ?? [];
-          if (rows.length === 0) return 'no rows measured';
-          const bad = rows.filter((r) => r.containerWidth === null || r.width < r.containerWidth - 1);
-          return bad.length === 0 ? true : JSON.stringify(bad);
+        // THE ROW, and the measurement that discriminates it from the kit's
+        // `block` variant: pills are intrinsic-width, so all four sit on ONE
+        // line at a wide viewport - one top, and four lefts ascending in the
+        // order the block offered them. The values come back on failure, so a
+        // stacked set names its own tops instead of only that it differed.
+        theLabelsShareOneLine: () => {
+          const pills = emptyStateBoxes?.wide?.suggestions?.pills ?? [];
+          if (pills.length !== 4) return `measured ${pills.length} labels`;
+          const tops = [...new Set(pills.map((p) => p.top))];
+          if (tops.length !== 1) return `the labels sit on ${tops.length} lines: ${JSON.stringify(tops)}`;
+          const lefts = pills.map((p) => p.left);
+          return lefts.every((left, i) => i === 0 || left > lefts[i - 1])
+            ? true
+            : `the labels are not in the offered order: ${JSON.stringify(lefts)}`;
         },
-        // ...and four rows STACK: four distinct tops, ascending. Pills share a
-        // line, so this is the half that pins the column rather than the width.
-        rowsStack: () => {
-          const tops = (rowBoxes?.rows ?? []).map((r) => r.top);
-          if (tops.length !== 4) return `measured ${tops.length} rows`;
-          const ascending = tops.every((top, i) => i === 0 || top > tops[i - 1]);
-          return ascending ? true : JSON.stringify(tops);
+        // ...AND THEY ARE NOT FULL-WIDTH ROWS, which is the OTHER half of "this
+        // is the pill variant": the row variant sets `w-full`, so every box
+        // would be its container's whole content box. Intrinsic width is what a
+        // pill is, so the claim is that each is strictly narrower than that.
+        theLabelsAreIntrinsicWidth: () => {
+          const pills = emptyStateBoxes?.wide?.suggestions?.pills ?? [];
+          if (pills.length === 0) return 'no labels measured';
+          const full = pills.filter((p) => p.containerWidth === null || p.width >= p.containerWidth - 1);
+          return full.length === 0 ? true : JSON.stringify(full);
+        },
+        // AND THEY WRAP WHEN THERE IS NO ROOM. The premise of the claim is that
+        // the narrow read really is narrower than the wide one, so a viewport
+        // that silently did not change would be reported here rather than
+        // passing on an unchanged set: the container has to have shrunk, and the
+        // four labels have to have landed on more than one line.
+        theLabelsWrapWhenThereIsNoRoom: () => {
+          const wide = emptyStateBoxes?.wide?.suggestions?.pills ?? [];
+          const narrow = emptyStateBoxes?.narrow?.suggestions?.pills ?? [];
+          if (narrow.length === 0) return 'no narrow labels measured';
+          if ((narrow[0].containerWidth ?? 0) >= (wide[0]?.containerWidth ?? 0)) {
+            return `the narrow container is ${narrow[0].containerWidth}px against ${wide[0]?.containerWidth}px wide`;
+          }
+          const tops = [...new Set(narrow.map((p) => p.top))];
+          return tops.length > 1
+            ? true
+            : `the four labels still share one line in a ${narrow[0].containerWidth}px container`;
+        },
+        // THE CARDS: two columns while there is room, ONE when there is not - the
+        // viewport query the cards' own breakpoint declares, read off the boxes
+        // rather than off the template string, and read at both widths in the one
+        // state so "they fold" cannot pass on a page that was never narrow. Four
+        // cards are read as the loop the grid actually is: a distinct-left count
+        // of 2 is two columns, and of 1 is one.
+        theCardsFoldToOneColumnWhenThereIsNoRoom: () => {
+          const wide = emptyStateBoxes?.wide?.cards;
+          const narrow = emptyStateBoxes?.narrow?.cards;
+          if (!wide || !narrow) return 'the cards were not measured';
+          if (wide.cards !== 4 || narrow.cards !== 4) return `${wide.cards} cards wide, ${narrow.cards} narrow`;
+          if (wide.lefts !== 2) return `the wide grid lays its cards in ${wide.lefts} columns`;
+          return narrow.lefts === 1
+            ? true
+            : `the narrow grid kept ${narrow.lefts} columns at a ${narrow.gridWidth}px width`;
+        },
+        // AND THE CARDS CARRY THE KIT'S OWN AIR, asserted against the kit's unit
+        // rather than against numbers typed here: 5 density units of padding
+        // (the `p-5` the kit's own Card paints) and 2 units between a title and
+        // its summary. The owner asked for adequate spacing rather than for a
+        // look, so the claim is that the box answers to the kit's scale at all -
+        // a page that moves --kai-density moves the cards with it.
+        theCardsCarryTheKitsOwnAir: () => {
+          const cards = emptyStateBoxes?.wide?.cards;
+          if (!cards) return 'the cards were not measured';
+          for (const edge of ['paddingTop', 'paddingLeft', 'titleToSummary']) {
+            if (typeof cards[edge] !== 'number') return `${edge} was not measured`;
+          }
+          const unit = cards.density === '' ? 4 : parseFloat(cards.density) * 16;
+          if (!Number.isFinite(unit) || unit <= 0) return `the density knob reads ${JSON.stringify(cards.density)}`;
+          // The measured padding is the SLOTTED TEXT's offset inside the card, so
+          // it is an integer by construction: a fractional rule lands as 20.4 and
+          // this rounds nothing away on its behalf.
+          const want = { paddingTop: unit * 5, paddingLeft: unit * 5, titleToSummary: unit * 2 };
+          const wrong = Object.entries(want)
+            .filter(([edge, value]) => Math.abs(cards[edge] - value) > 0.5)
+            .map(([edge, value]) => `${edge} ${cards[edge]}px, ${value}px wanted`);
+          return wrong.length === 0 ? true : wrong.join(' | ');
+        },
+        // ...AND THE GRID TAKES THE COLUMN THE PAGE HAS rather than the prose box
+        // it is slotted into: the cards' two columns are the WIDE fact the owner
+        // asked for, and the column they may use is the composer's own 48rem box
+        // below them - the same measure, so the two line up. Equality within a
+        // pixel, read at the run's viewport, where both are capped at 48rem.
+        theGridTakesTheComposersColumn: () => {
+          const cards = emptyStateBoxes?.wide?.cards;
+          if (!cards || cards.composerWidth === 0) return 'the grid or the composer was not measured';
+          const off = Math.abs(cards.gridWidth - cards.composerWidth);
+          return off <= 1
+            ? true
+            : `the grid is ${cards.gridWidth}px against the composer's ${cards.composerWidth}px`;
         },
         // And every one of them is on screen, not merely in the array.
         rendered: (page) => allRendered(page, offeredRows),
       },
       expect: {
-        fourRows: true, rowsAreTheOfferedLabels: true, rowsFillTheirContainer: true,
-        rowsStack: true, rendered: true,
+        fourLabels: true, theBoxesAreTheOfferedLabels: true, theLabelsShareOneLine: true,
+        theLabelsAreIntrinsicWidth: true, theLabelsWrapWhenThereIsNoRoom: true,
+        theCardsFoldToOneColumnWhenThereIsNoRoom: true, theCardsCarryTheKitsOwnAir: true,
+        theGridTakesTheComposersColumn: true, rendered: true,
       },
-      // The two that are GEOMETRY, and they run on BOTH pages: each compares a
-      // row's box against its OWN container's content box, and the four tops
-      // against each other, so there is no document-relative pixel in either. (An
-      // earlier version listed them in `layoutProbes` and skipped them on the react
-      // host, justified by "a measurement of the document it was taken in" — which
-      // is not what these two are.) There is no `skipLayout` on either page now, so
-      // this state's style probe is measured on the react host too, against the
-      // block's own stylesheet, which the emitted tree imports.
+      // Every probe above is a comparison among the block's own boxes or against
+      // the kit's own token, so none of them is skipped on the react host: the
+      // emitted tree imports the block's stylesheet, and a narrow viewport is the
+      // same fact in either document. The state ENDS at the run's viewport, which
+      // is what its screenshot is of.
       styleProbes: [
-        // The row's own surface, measured where it renders: the row variant is
-        // `h-auto w-full ... rounded-xl px-4 py-2.5`, and a pill would differ in
-        // every one of these.
-        style('suggestionRow', (page) => page.getByRole('button', { name: ARC_LABELS[0], exact: true }).first(),
-          ['height', 'paddingInline', 'borderRadius', 'textAlign']),
+        // The pill's own surface, recorded rather than described: the default
+        // variant is intrinsic-width and pill-shaped, and the `block` variant the
+        // block used to ask for was neither (h-auto w-full rounded-xl).
+        style('suggestionPill', (page) => page.getByRole('button', { name: ARC_LABELS[0], exact: true }).first(),
+          ['height', 'paddingInline', 'borderRadius']),
+        // And the cards' grid at the run's viewport: the two column traces ARE
+        // the width the owner read as narrow, so the recorded pair is where the
+        // change is visible in the baseline and not only in the screenshot.
+        style('guideCardsGrid', (page) => page.locator('.guide-cards'),
+          ['width', 'gridTemplateColumns', 'gap', 'minWidth']),
+        style('guideCardText', (page) => page.locator('.guide-card-text').first(),
+          ['rowGap']),
       ],
     },
     {
