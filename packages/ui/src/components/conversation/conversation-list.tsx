@@ -81,15 +81,14 @@ export interface ConversationItemsController {
   handleKeyDown(e: KeyboardEvent): void;
 }
 
-// lint-prop-docs: long -- the parent-item contract below is this member's whole value
 /**
  * The parent-item contract of item mode: the `kai-conversations` facade wires it over its
  * slotted `kai-conversation-item` children, and the jsdom contract tests drive it over
  * plain nodes. Solid context cannot cross the element boundary, so the channel is DOM
  * traversal by construction.
  *
- * The traversal mechanism — one tab stop, arrows, Home/End, activation, and yielding to a
- * control inside the row — is `createRovingTabList` (`primitives/roving-tab-list.ts`),
+ * The traversal mechanism (one tab stop, arrows, Home/End, activation, and yielding to a
+ * control inside the row) is `createRovingTabList` (`primitives/roving-tab-list.ts`),
  * which is public so an application arranging its own rows gets the same keyboard. What
  * stays here is the conversation row's own rule:
  *
