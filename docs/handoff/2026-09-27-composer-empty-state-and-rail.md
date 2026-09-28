@@ -178,3 +178,25 @@ The owner supplied ChatGPT's sidebar and command palette as a **layout blueprint
 **The lesson, now with an instance behind it: a stale-but-uncommitted generated file is indistinguishable from a fresh one without a fresh regeneration diff.** Six artifacts sat stale in the tree and no gate caught them, because `verify:generated` was not run between the change and the regeneration — the gate works, it simply was not invoked. This is what the queued README note is for.
 
 **(historical) Ladder, restated for the sidebar work:** the five generated artifacts (`docs/web-components.md`, `packages/ui/llms-full.txt`, `packages/ui/frameworks/react/index.tsx`, `web-component-meta.json`, `web-component-types.d.ts`) are **uncommitted on purpose** and belong to the ladder's build step, which regenerates and commits them before `verify:generated` can be trusted.
+
+
+## Sidebar, current state (tip `3926314f`)
+
+**The ladder is green end to end** — rebuild (cache off) · `build:api` · `verify:generated` 19/19 · **unit 449 files / 6428 tests** · **emitted 5/36** · `verify:blocks` 3 blocks × 6 checks · `verify:blocks:react` 3/3 in a real browser · **`verify:consumer` 99/99 registrations** · **`verify:scaffold` 705/705 scaffolds + 110/110 routes + 10/10 block cells** · `lint:silent-drops` · `lint:cdn-pins` · `lint:prop-docs` (cleared, one finding was ours) · `verify:guide-fences` 9/0 · `verify:preview` · `typecheck` clean. **Not run:** the storybook browser project (known-flaky, not the merge gate) and the react page's document-relative layout probes — a recorded gap, not a silent one.
+
+**Two real bugs came out of the sidebar work, both fixed in the kit rather than patched in the block:**
+1. `localStorageStore.save()` **silently dropped `groupId` and `scope`** while carrying `lastReadAt`/`pinned`/`archived` forward on an argument that covered them exactly. Fixed, with `lastMessageAt` correctly left alone because it is implied by `updatedAt`. Then `setGroup` was added because the field was **declared, persisted and unwritable** — "declared but unusable" being the same defect one step over.
+2. **The HTML binder set properties on a cloned `*for` row before inserting it.** A clone is not upgraded until connected, so the assignment landed as a plain data property and the element's own install **overwrote it on upgrade** — the value was gone. Guarded on the *initial* render only, so later single-patch transitions were unprotected: **switch the organizer, or clear a search, then open a row menu, and it came up empty.** Fixed with `customElements.upgrade(node)` in the shared renderer (`8d5d7b56`) plus a **class-level** assertion, because `kai-editable-label`'s `.value`/`.editing` on the same rows were latent victims surviving only because a second patch always followed.
+
+**Landed for the rail:** `72182f4d` (four top action rows, a **Projects** label, one-line rows, muted labels via **theme tokens**, air from the density token, caret trailing and hover-only) · `2b3e1a3b` + `f1bc7768` (`showTrailing` on the row/list, exposed as `show-trailing`) · `883d70f1` (the prop-docs gate cleared) · `6e32703f` (the block strip check masked prose instead of scanning it) · `8d5d7b56` (the binder upgrade fix).
+
+**In flight (`549156c8`):** the rail's hover chrome, adopted from a round that ran out of time with the work written but uncommitted.
+
+**Owner requests not yet started, in his order:**
+- **Outdent the conversation rows** (flush with the folder heading, a small gap instead of an indent) and **tighten the rows' vertical padding** — both stylesheet-sized, steered into the in-flight round; check whether they landed.
+- **The search button replacing the built-in "Search chats" box**, opening `kai-command` as the palette: search chats on top, `Chats` from the rail's own rows, `Quick actions`, `Settings`, `⌘K`. **The input is not to be half-removed before this piece.**
+- The **`+` on Projects opens a new-project dialog** (the owner has a reference screenshot for it); **Recents shows kebab · filter · compose**; **Projects shows kebab · `+`**.
+- `ConversationPanel` and `HomePanel`'s recent card derive an **unstoppable timestamp** (same class as the row was) — needs a chat-level prop and a naming ruling.
+- A **README note** that a stale recorded baseline is indistinguishable from a fresh one without a regeneration diff.
+- **The block's source structure** — `docs/superpowers/specs/2026-09-27-block-source-structure-design.md`: the registry already declares files by path (the block ships six), so the work is **size**, not count — the controller is **2067 lines** and the driver states **3633** — with a size budget that has a lint behind it.
+- **The rail primitive** — `docs/superpowers/specs/2026-09-27-rail-primitive-design.md`, approved, queued after the palette.
