@@ -282,3 +282,10 @@ The owner supplied ChatGPT's sidebar and command palette as a **layout blueprint
 ## `69d3e5af` — the dialog's focus walk (and a ruling that keeps it)
 
 Focus now returns to the nearest recorded context **that verifiably took focus**, walking past a silent `focus()` refusal, never into the dialog's own panel. **Ruling: the walk stays as built** — its terminal is the page's first focusable, which is exactly where `BODY` plus a Tab already lands, so narrowing it would only trade an explicit destination for an implicit one. **Queued:** its `deepActiveElement()` refusal branch is unreachable in jsdom and wants a real Chromium assertion, alongside the ladder's other browser checks.
+
+
+## Process rule adopted late, from the owner's observation
+
+**He caught the machine sitting idle**: I had been dispatching one round per completion, so the pipeline drained to empty between turns and waited for the next notification. **Serial dispatch reads as a full queue in a report and is an idle machine in practice.**
+
+**The rule: keep several disjoint rounds in flight, dispatch in batches, and dispatch the successor in the same turn a round lands.** A round landing into an empty fleet is a machine nobody is driving.
