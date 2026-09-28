@@ -277,3 +277,8 @@ The owner supplied ChatGPT's sidebar and command palette as a **layout blueprint
 **Dispatched `b4c01b42`:** the dialog's focus fallback is a **single-link chain walk** — when the remembered opener is removed while open and the nearest surviving context has no focusable descendant, focus drops to `BODY`. Walk further; one focus memory, not two.
 
 **Dist restored (~19:28):** `state.js`, `wire.js`, `schemas.js`, `stores.js` are back, so `verify:blocks` runs again; `1356e827` continues with the light-and-dark re-record.
+
+
+## `69d3e5af` — the dialog's focus walk (and a ruling that keeps it)
+
+Focus now returns to the nearest recorded context **that verifiably took focus**, walking past a silent `focus()` refusal, never into the dialog's own panel. **Ruling: the walk stays as built** — its terminal is the page's first focusable, which is exactly where `BODY` plus a Tab already lands, so narrowing it would only trade an explicit destination for an implicit one. **Queued:** its `deepActiveElement()` refusal branch is unreachable in jsdom and wants a real Chromium assertion, alongside the ladder's other browser checks.
