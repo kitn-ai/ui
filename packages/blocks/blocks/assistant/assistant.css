@@ -222,6 +222,40 @@ kai-conversation-item[data-rail="folder"] + kai-conversation-item { margin-block
 .menu-row-disabled, .rail-action-inert { color: color-mix(in srgb, currentColor 55%, transparent); }
 .menu-row-label, .rail-action-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
+/* THE RAIL'S LIGHT-MODE SHADE, and it is the ONLY colour this sheet puts on the
+ * rail. The rail paints its own box from the kit's `--color-sidebar` token
+ * (`hsl(0 0% 100%)` in light - pure white, the same colour as the canvas behind
+ * it), while the composer's card paints `--color-surface` (`bg-surface` on the
+ * prompt input's frame), which in light is
+ * `color-mix(in srgb, muted 40%, background)` - the slight shading the owner
+ * asked to see on the rail too. So the rail keeps its own token and the token's
+ * value is retinted to the surface's, through the `--kai-color-sidebar` knob the
+ * kit documents for exactly this (this sheet's own header says a `--kai-color-*`
+ * override retints an element). The block driver reads both regions' painted
+ * boxes and asserts they are the same colour in light.
+ *
+ * LIGHT ONLY, and the two selectors are the two ways the scheme COMES OUT
+ * light: an explicit `light` choice, and `auto` on a machine whose OS is light.
+ * That is not a second source of truth - `auto` IS "whatever the OS says" - and
+ * it is required rather than tidy: the knob is set on the HOST, where custom
+ * properties resolve in the PAGE's scope, so `var(--color-surface)` up there is
+ * the LIGHT value whatever the element's own scheme is (measured: the host's
+ * `--color-surface` stayed `color-mix(in srgb, #f4f4f5 40%, #fff)` with the
+ * element on dark). Setting it unconditionally would paint the light shade under
+ * a dark rail.
+ *
+ * DARK MODE IS THEREFORE UNTOUCHED, and that is the measured answer rather than
+ * an omission: the rail keeps the kit's `--color-sidebar` (`hsl(50 2% 7%)`,
+ * measured rgb(18 18 17) against the canvas's rgb(23 23 22)), so it stays the
+ * darker of the two in dark mode, while the composer's surface beside it is
+ * rgb(32 31 30). The relationship between the two regions is what light mode
+ * changed, not the rail's colour in general. */
+kai-conversations[theme='light'] { --kai-color-sidebar: var(--color-surface); }
+
+@media (prefers-color-scheme: light) {
+  kai-conversations[theme='auto'] { --kai-color-sidebar: var(--color-surface); }
+}
+
 /* THE RAIL'S TOP REGION, which lives in the list's header slot. That slot's own
  * box is inside the rail's shadow root and is a plain block with no padding, so
  * the region's box is this rule: the rail's own inline padding, one step between
@@ -505,10 +539,25 @@ kai-empty { --kai-empty-content-width: 100%; }
 
 .guide-card-title { font-size: 0.875rem; font-weight: 500; }
 
+/* The summary takes the theme's MUTED register, and it is the token rather than
+ * the `color-mix(in srgb, currentColor 65%, transparent)` this rule carried for
+ * one measured reason: in Chromium that mix does NOT re-derive when only the
+ * inherited colour changes, so the summary came out one toggle behind - correct
+ * on the first paint (it was computed against the scheme that painted it), and
+ * then the light scheme's value kept showing in dark mode and the dark scheme's
+ * in light, which is the owner's "in light mode the text is light". The token
+ * re-resolves on every theme change because the value it resolves is the
+ * theme's own, and it is the same register the rail's section labels read
+ * (`--color-muted-foreground`, measured #696972 light / #a7a5a0 dark).
+ *
+ * THE SAME 65% MIX STILL SITS ON .voice-strip AND .project-dialog-note, and it
+ * lags the same way there; those two are untouched here so that one defect is
+ * fixed by one change rather than three, and the block driver's state that
+ * reads this card's colour is what would catch them if they are changed. */
 .guide-card-summary {
   font-size: 0.75rem;
   line-height: 1.35;
-  color: color-mix(in srgb, currentColor 65%, transparent);
+  color: var(--color-muted-foreground);
 }
 
 /* THE CREATE-PROJECT DIALOG's slotted content. The dialog paints its own panel,

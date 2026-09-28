@@ -1,6 +1,6 @@
 {
   "scenario": "assistant",
-  "base": "http://localhost:8957",
+  "base": "http://localhost:8966",
   "runs": [
     {
       "page": "block",
@@ -745,6 +745,25 @@
             "theRowCameBackUnfiled": true,
             "theRowIsStillReachable": true,
             "theDeleteSurvivedAReload": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "56-card-text-follows-the-theme",
+          "probes": {
+            "theCardTextIsTheThemesMutedRegisterInLight": true,
+            "theCardTextIsStillTheThemesMutedRegisterAfterTheToggle": true,
+            "theTwoSchemesPaintItDifferently": true,
+            "andItComesBackWhenTheReaderTogglesBack": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "57-rail-shade-follows-the-composer",
+          "probes": {
+            "theRailTakesTheComposersShade": true,
+            "whicheverWayLightIsReachedGivesTheSameShade": true,
+            "darkKeepsTheKitsOwnDarkerSidebar": true
           },
           "styles": {}
         }
@@ -1497,6 +1516,25 @@
             "theRowCameBackUnfiled": true,
             "theRowIsStillReachable": true,
             "theDeleteSurvivedAReload": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "56-card-text-follows-the-theme",
+          "probes": {
+            "theCardTextIsTheThemesMutedRegisterInLight": true,
+            "theCardTextIsStillTheThemesMutedRegisterAfterTheToggle": true,
+            "theTwoSchemesPaintItDifferently": true,
+            "andItComesBackWhenTheReaderTogglesBack": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "57-rail-shade-follows-the-composer",
+          "probes": {
+            "theRailTakesTheComposersShade": true,
+            "whicheverWayLightIsReachedGivesTheSameShade": true,
+            "darkKeepsTheKitsOwnDarkerSidebar": true
           },
           "styles": {}
         }

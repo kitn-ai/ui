@@ -27,6 +27,10 @@
 // row of that menu really does - the organizers as a state change, the sorts as
 // two orders read against the store's own records, and the filter handing the
 // caret to the rail's search box.
+// The last two states are the THEME's own: the guide card's description text read
+// either side of a scheme toggle (the colour against the theme's muted register at
+// each end, and again after toggling back), and the two boxes the owner compared
+// by eye - the rail's against the composer's card - read in light and in dark.
 // One page (the generated /kit/ rendering of the CDN form), so record/check are
 // the modes; there is no facade parity reference for this composition.
 //
@@ -566,6 +570,15 @@ let folderEdit = null;
 let paletteOpen = null;
 let paletteFiltered = null;
 let paletteKeys = null;
+// State 56's three readings of the guide card's own description text - the one
+// before the toggle, the one after it, and the one after toggling back - each
+// beside the theme's own muted token resolved in that same scope. Captured in
+// the act for the reason the globals above are: the state ends on light, which
+// is what its screenshot has to show, so the dark reading has to be taken while
+// the page is dark. State 57's pair of regions, captured the same way and for
+// the same reason.
+let cardTextTheme = null;
+let railShade = null;
 
 /** The rail's two SECTION LABELS and the trailing actions each carries, read off
  *  the ROW ELEMENTS: which rows are section labels, whether their actions are
@@ -5103,6 +5116,163 @@ export default {
         theRowCameBackUnfiled: true,
         theRowIsStillReachable: true,
         theDeleteSurvivedAReload: true,
+      },
+      styleProbes: [],
+    },
+    {
+      name: '56-card-text-follows-the-theme',
+      act: async (page) => {
+        // THE SHAPE, BUILT FIRST: the guide cards live on the empty state, and by
+        // this point in the run the thread holds a restored conversation, so the
+        // page is taken back to the new-chat thread the cards are on.
+        await page.getByRole('button', { name: 'New chat' }).click();
+        await settle(400)(page);
+        // THE THEME'S OWN ANSWER, resolved in the CARD'S scope rather than on the
+        // page: the kit declares its colour tokens inside each element's shadow
+        // root, so the page's own `--color-muted-foreground` is the LIGHT value in
+        // both schemes (measured), and a comparison against it would pass a card
+        // that had stopped following the theme. The hidden sibling resolves the
+        // token where the card sits, which is the same scope the card's text is
+        // painted out of, so what is compared is the colour against the theme's
+        // own value for that register.
+        const read = () => page.evaluate(() => {
+          const card = document.querySelector('.guide-card-summary');
+          if (card === null) return { color: null, token: null };
+          const probe = document.createElement('span');
+          probe.style.display = 'none';
+          probe.style.color = 'var(--color-muted-foreground)';
+          card.parentElement.appendChild(probe);
+          const token = getComputedStyle(probe).color;
+          probe.remove();
+          return { color: getComputedStyle(card).color, token };
+        });
+        // THE READER'S OWN CHOICE, through the settings gear - the control state
+        // 17 drives. The choice rather than the OS is the point: under `auto` a
+        // toggle is a no-op on a machine whose OS already agrees.
+        const choose = async (name) => {
+          await page.getByRole('button', { name: 'Settings' }).click();
+          await settle(350)(page);
+          await page.getByRole('menuitemradio', { name }).click();
+          await settle(600)(page);
+          return read();
+        };
+        cardTextTheme = { light: await choose('Light'), dark: await choose('Dark'), lightAgain: await choose('Light') };
+      },
+      probes: {
+        // THE CARD'S DESCRIPTION IS THE THEME'S MUTED REGISTER, on a paint that
+        // came AFTER a toggle rather than only on the first one: the colour the
+        // card resolves and the token the theme declares for that register are the
+        // same colour.
+        theCardTextIsTheThemesMutedRegisterInLight: () => (cardTextTheme?.light.color === null
+          ? 'the empty state shows no guide card to read'
+          : cardTextTheme.light.color === cardTextTheme.light.token
+            || `the card reads ${cardTextTheme.light.color}, the theme's muted token is ${cardTextTheme.light.token}`),
+        theCardTextIsStillTheThemesMutedRegisterAfterTheToggle: () => (cardTextTheme?.dark.color === null
+          ? 'the empty state shows no guide card to read'
+          : cardTextTheme.dark.color === cardTextTheme.dark.token
+            || `the card reads ${cardTextTheme.dark.color}, the theme's muted token is ${cardTextTheme.dark.token}`),
+        // ...AND THE TWO SCHEMES DISAGREE ABOUT IT, which is what makes the two
+        // sentences above a claim about the theme rather than about a card that
+        // happens to match itself in both schemes.
+        theTwoSchemesPaintItDifferently: () => (cardTextTheme === null
+          ? 'no reading was taken'
+          : (cardTextTheme.light.token !== cardTextTheme.dark.token && cardTextTheme.light.color !== cardTextTheme.dark.color)
+            || `the two schemes resolve the same colour: ${JSON.stringify(cardTextTheme)}`),
+        // ...AND IT COMES BACK, which is the direction the defect failed: the
+        // captured value was a scheme behind, so the light reading after the
+        // toggle was the DARK scheme's colour (the owner's "in light mode the text
+        // is light"). A colour that follows the theme cannot be a toggle behind.
+        andItComesBackWhenTheReaderTogglesBack: () => (cardTextTheme === null
+          ? 'no reading was taken'
+          : cardTextTheme.lightAgain.color === cardTextTheme.light.color
+            || `toggling back to light left the card at ${cardTextTheme.lightAgain.color}, it read ${cardTextTheme.light.color} before the toggle`),
+      },
+      expect: {
+        theCardTextIsTheThemesMutedRegisterInLight: true,
+        theCardTextIsStillTheThemesMutedRegisterAfterTheToggle: true,
+        theTwoSchemesPaintItDifferently: true,
+        andItComesBackWhenTheReaderTogglesBack: true,
+      },
+      styleProbes: [],
+    },
+    {
+      name: '57-rail-shade-follows-the-composer',
+      act: async (page, sctx) => {
+        // BOTH REGIONS' PAINTED BOXES, not the tokens behind them: the rail's own
+        // root - the box the kit paints from `--color-sidebar` - and the frame the
+        // prompt input paints from `bg-surface`, which is the composer's card. Two
+        // elements the reader can see, each reached by its own hook: the prompt
+        // frame carries `data-prompt-input`, and the rail's box is the one element
+        // in the rail's shadow root carrying `bg-sidebar` (its rows are slotted, so
+        // nothing else in there paints).
+        const read = () => page.evaluate(() => {
+          const rail = document.getElementById('conversations');
+          const railBox = rail?.shadowRoot?.querySelector('div[class~="bg-sidebar"]') ?? null;
+          const composer = document.getElementById('prompt')?.shadowRoot?.querySelector('[data-prompt-input]') ?? null;
+          return {
+            rail: railBox === null ? null : getComputedStyle(railBox).backgroundColor,
+            composer: composer === null ? null : getComputedStyle(composer).backgroundColor,
+          };
+        });
+        const choose = async (name) => {
+          await page.getByRole('button', { name: 'Settings' }).click();
+          await settle(350)(page);
+          await page.getByRole('menuitemradio', { name }).click();
+          await settle(600)(page);
+          return read();
+        };
+        // SYSTEM FIRST, and that is the reading that matters most: it is the state
+        // a reader who has never opened this menu is in, so it is where the light
+        // shade has to land too - and it is the only reading the run's own
+        // `colorScheme` decides, which is what the probes below compare against.
+        railShade = {
+          system: await choose('System'),
+          light: await choose('Light'),
+          dark: await choose('Dark'),
+          scheme: sctx.colorScheme,
+        };
+      },
+      probes: {
+        // THE RAIL WEARS THE COMPOSER'S SHADE IN LIGHT: one colour, read off both
+        // boxes. It is the owner's ask measured rather than described.
+        theRailTakesTheComposersShade: () => (railShade?.light.rail === null || railShade?.light.composer === null
+          ? 'one of the two boxes was not found'
+          : railShade.light.rail === railShade.light.composer
+            || `the rail paints ${railShade.light.rail}, the composer's card paints ${railShade.light.composer}`),
+        // ...AND WHICHEVER WAY LIGHT IS REACHED, because System is the default: on a
+        // light machine the untouched rail already wears it, so choosing Light
+        // changes nothing - which is what makes the `auto` leg of the rule
+        // load-bearing rather than a duplicate of the explicit one. On a dark
+        // machine System IS dark, so the same reading has to come out the OTHER
+        // way: `auto` is the OS's answer, and the light shade must not be what it
+        // lands on. Both legs are real, so neither run skips this claim.
+        whicheverWayLightIsReachedGivesTheSameShade: () => {
+          if (railShade?.system.rail === null || railShade?.light.rail === null) return 'one of the two boxes was not found';
+          const same = railShade.system.rail === railShade.light.rail;
+          if (railShade.scheme === 'light') {
+            return same || `System painted the rail ${railShade.system.rail} while Light painted it ${railShade.light.rail}`;
+          }
+          return !same || `System on a dark machine painted the rail ${railShade.system.rail}, the same colour the explicit Light choice paints it`;
+        },
+        // DARK IS UNTOUCHED: the light shade does not follow the reader there, and
+        // the rail keeps the kit's own darker sidebar - which, on a machine that is
+        // dark to begin with, is the very colour it painted before the menu was
+        // opened at all.
+        darkKeepsTheKitsOwnDarkerSidebar: () => {
+          if (railShade?.dark.rail === null || railShade?.dark.composer === null) return 'one of the two boxes was not found';
+          if (railShade.dark.rail === railShade.dark.composer) {
+            return `dark mode paints the rail ${railShade.dark.rail}, which is the composer's own shade - the light shade followed the reader`;
+          }
+          if (railShade.scheme === 'dark' && railShade.dark.rail !== railShade.system.rail) {
+            return `dark mode moved the rail from ${railShade.system.rail} to ${railShade.dark.rail}`;
+          }
+          return true;
+        },
+      },
+      expect: {
+        theRailTakesTheComposersShade: true,
+        whicheverWayLightIsReachedGivesTheSameShade: true,
+        darkKeepsTheKitsOwnDarkerSidebar: true,
       },
       styleProbes: [],
     },
