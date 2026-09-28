@@ -355,23 +355,33 @@ describe('DropdownContent width', () => {
 });
 
 describe('DropdownContent height', () => {
-  // The ceiling is `min(<themeable default>, <the room off the anchor>)`, so the assertion
-  // is on the SHAPE of that value rather than a number: jsdom has no layout, so a typed
-  // pixel expectation here would be a promise about jsdom, not about the surface. The
-  // numbers the shape produces are measured in Chromium (911px -> 513.5px on a 33-row
-  // menu in a 560px window, scrollHeight 911 vs clientHeight 514).
+  // The ceiling is `min(<themeable default>, <the room on the side the positioner resolved>)`,
+  // and what is asserted here is the SHAPE plus the bound: jsdom has no layout, so a typed
+  // pixel expectation would be a promise about jsdom rather than about the surface. The
+  // INVARIANT the shape serves -- a menu's box never exceeding the window -- is measured in a
+  // real browser over several viewport heights, both placements and every anchor position
+  // down a window, in `tests/browser/dropdown-containment.browser.test.tsx`
+  // (`npm run test:containment`), which is the only layer that can measure it at all.
   const CEILING = 'var(--kai-dropdown-max-height,calc(100dvh - 2rem))';
 
-  it('caps the height at the viewport, and never above the room its own anchor leaves', () => {
+  it('caps the height at the viewport, and never above the room the positioner left it', () => {
     const { trg, menu } = setupSurface();
     fireEvent.click(trg);
 
     const value = (menu() as HTMLElement).style.maxHeight;
     expect(value.startsWith(`min(${CEILING}, `), `unexpected ceiling: ${value}`).toBe(true);
-    expect(value.endsWith('px)'), 'the anchor room is measured in px, at open time').toBe(true);
+    expect(value.endsWith('px)'), 'the room is a measured px value').toBe(true);
     // The viewport is the ceiling, never a typed pixel count: `100dvh` is the window the
     // user actually has, so the same declaration covers a laptop and a short window.
     expect(value).toContain('100dvh');
+    // And the room half is a bound INSIDE the window rather than a number of its own. The
+    // px comes from the offset the positioner applied, which is still its seed (`y = 0`)
+    // until the first `computePosition` resolves — and a cap for a surface at the top of
+    // the window is the whole window minus the edge gap, so even that first frame is
+    // inside it rather than above or below.
+    const room = Number(value.slice(`min(${CEILING}, `.length, -'px)'.length));
+    expect(room, `the room half is not inside the window: ${value}`).toBeGreaterThan(0);
+    expect(room).toBeLessThan(window.innerHeight);
   });
 
   it('keeps the ceiling themeable from outside the shadow root the panel is portaled into', () => {

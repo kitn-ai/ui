@@ -59,33 +59,28 @@ const VIEWPORT_MARGIN = 8;
 const MENU_MAX_HEIGHT = 'var(--kai-dropdown-max-height,calc(100dvh - 2rem))';
 
 /**
- * How many px tall a surface may be before it would leave the viewport.
+ * How many px tall a surface may be before it would leave the window.
  *
- * Measured from the ANCHOR's rect, never from the surface's own height: a cap derived
- * from the box it constrains is a feedback loop that can oscillate between placements.
+ * `pin` is the surface's edge that does NOT depend on its own height, in viewport
+ * coordinates, and `grows` is which way the box extends from it. Which edge that is follows
+ * from the placement the positioner RESOLVED, and the room is that side's ALONE -- never the
+ * larger of the two: a cap taken from the roomier side describes a placement the surface may
+ * not be on, and the panel is then free to hang past the edge it actually opened toward.
  *
- * `sides` is which sides the positioner may actually put the surface on, because the two
- * surfaces are not symmetrical -- and neither answer is CSS's to give, which is why this
- * is JavaScript: `shift({ padding })` engages Floating UI's MAIN axis, and the main axis
- * of a `bottom` placement is X, so nothing was keeping a tall menu on screen vertically.
- * `flip()` moves on Y, so it is the only middleware that can act on this room, and it
- * only considers the sides in its fallback list:
+ * Where the pin can be read off the POSITIONER'S OWN OFFSET it is, because that half cannot
+ * drift: the surface's top IS `y`, so `pin + room` is `innerHeight - VIEWPORT_MARGIN` by
+ * construction. Measuring from the anchor instead restates the gutter in a second place.
  *
- * - a menu flips `bottom-start` <-> `top-start`, so both rooms count and the larger wins;
- * - a submenu is `right-start` and its fallback list is `left-start`/`right-end`/`left-end`
- *   -- it never flips vertically, and its top is pinned to the anchor's top, so the only
- *   room it has is the space below the anchor.
+ * A `top*` placement is the one side where `y` cannot be read back -- there it is the TOP,
+ * which the positioner computed BY SUBTRACTING the surface's own height, so a cap from it
+ * comes from the box it constrains and can oscillate. Its height-independent edge is its
+ * BOTTOM, `anchor.top - offset(gutter)`; so is an `end`-aligned side placement's. And the
+ * floor is 0, never negative: `min()` with a negative argument is INVALID, CSS drops it, and
+ * the ceiling vanishes silently. JavaScript because CSS cannot know where the anchor is.
  */
-function viewportRoom(
-  ref: HTMLElement | undefined,
-  gutter: number,
-  sides: 'below-or-above' | 'below',
-): number | undefined {
-  if (!ref) return undefined;
-  const rect = ref.getBoundingClientRect();
-  const edge = gutter + VIEWPORT_MARGIN;
-  if (sides === 'below') return window.innerHeight - rect.top - edge;
-  return Math.max(window.innerHeight - rect.bottom - edge, rect.top - edge);
+function viewportRoom(grows: 'down' | 'up', pin: number): number {
+  const room = grows === 'down' ? window.innerHeight - pin - VIEWPORT_MARGIN : pin - VIEWPORT_MARGIN;
+  return Math.max(0, room);
 }
 
 /**
@@ -348,15 +343,20 @@ export function DropdownContent(props: DropdownContentProps) {
 
   const items = () => menuItems(ctx.menu());
   // The surface's height ceiling, in two parts: the viewport-derived one the consumer can
-  // theme (`MENU_MAX_HEIGHT`) and the room this surface actually has beside its anchor.
-  // Both, so the panel can neither exceed the window nor hang off the edge it opened
-  // toward. See `viewportRoom` for why the second half cannot be CSS.
+  // theme (`MENU_MAX_HEIGHT`) and the room the surface has on the side the positioner put
+  // it. Both, so the panel can neither exceed the window nor hang off the edge it opened
+  // toward. See `viewportRoom` for which half is CSS's and which is not.
   const maxHeight = () => {
-    // Read the resolved position so the room is re-measured whenever the positioner
-    // recomputes — scroll, window resize, anchor resize — which is the only time it moves.
-    position.pos();
-    const room = viewportRoom(ctx.trigger(), SURFACE_GUTTER, 'below-or-above');
-    return room === undefined ? MENU_MAX_HEIGHT : `min(${MENU_MAX_HEIGHT}, ${room}px)`;
+    // Read the resolved position so the room follows a FLIP (the cap belongs to the side
+    // the surface ended up on) and is re-measured whenever the positioner recomputes —
+    // scroll, window resize, anchor resize — which is the only time it moves.
+    const { y, placement } = position.pos();
+    const rect = ctx.trigger()?.getBoundingClientRect();
+    if (!rect) return MENU_MAX_HEIGHT;
+    const room = placement.startsWith('top')
+      ? viewportRoom('up', rect.top - SURFACE_GUTTER)
+      : viewportRoom('down', y);
+    return `min(${MENU_MAX_HEIGHT}, ${room}px)`;
   };
   const focusIndex = (i: number) => {
     const list = items();
@@ -823,13 +823,20 @@ export function DropdownSubContent(props: DropdownSubContentProps) {
   // after stopPropagation on the element, not on the document.
 
   const items = () => menuItems(sub.menu());
-  // The same two-part ceiling with the submenu's own geometry: its top is pinned to the
-  // row's top and it does not flip vertically, so only the room BELOW the anchor is real to
-  // it. See `viewportRoom`.
+  // The same two-part ceiling with the submenu's own geometry. A submenu is a SIDE
+  // placement: `right-start`/`left-start` pins its top to the row's top — which is the
+  // positioner's own `y`, the gutter between them being horizontal — and an `end` fallback
+  // pins its bottom to the row's bottom, where the offset is height-dependent and the room
+  // has to come from the anchor. Either way it is the room on ONE side, not the larger of
+  // two. See `viewportRoom`.
   const maxHeight = () => {
-    position.pos();
-    const room = viewportRoom(sub.trigger(), SUB_GUTTER, 'below');
-    return room === undefined ? MENU_MAX_HEIGHT : `min(${MENU_MAX_HEIGHT}, ${room}px)`;
+    const { y, placement } = position.pos();
+    const rect = sub.trigger()?.getBoundingClientRect();
+    if (!rect) return MENU_MAX_HEIGHT;
+    const room = placement.endsWith('-end')
+      ? viewportRoom('up', rect.bottom)
+      : viewportRoom('down', y);
+    return `min(${MENU_MAX_HEIGHT}, ${room}px)`;
   };
   const focusIndex = (i: number) => {
     const list = items();

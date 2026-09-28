@@ -279,6 +279,12 @@ export default defineConfig({
           '**/.claude/**',
           'tests/react/**', '**/tests/react/**',
           'tests/e2e/**', '**/tests/e2e/**',
+          // `tests/browser/**` are real-browser specs (`vitest.browser.config.ts`,
+          // `npm run test:containment`). Without this line the default include would
+          // collect them into jsdom, where every box is zero-sized and a menu that
+          // hangs off the window passes: the wrong environment is a NAMED cause of
+          // green, not a slower one.
+          'tests/browser/**', '**/tests/browser/**',
           ...EMITTED_CODE_TESTS_EXCLUDE,
         ]
       }
