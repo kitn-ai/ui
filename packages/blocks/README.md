@@ -96,3 +96,21 @@ outputs:
   block driver against the react page in a real browser.
 - `pnpm --filter @kitn.ai/ui run verify:scaffold` -- carries the block compile
   cells (blocks x forms), and prints the axis and the cell count it ran.
+
+## A recorded baseline is only as fresh as its last recording
+
+A block's recorded browser baseline and its screenshots are **snapshots, not
+derivations**. Nothing compares them against the source they were taken from, so
+a change that alters what a block renders leaves them stale and the next
+`verify:blocks` passes against the OLD recording -- a green that proves the
+previous state, not the current one. A baseline file's git status is the only
+signal that it is fresh.
+
+**This is not hypothetical.** Six generated API artifacts sat stale in the tree
+at once; each was indistinguishable from a fresh one by inspection, and they
+were only caught when someone regenerated them and their content differed.
+
+So: after changing what a block renders, re-record (`--record`) **before**
+trusting a baseline check, and treat "the baseline did not move" as evidence
+only when the recording just ran.
+
