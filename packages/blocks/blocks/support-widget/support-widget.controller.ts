@@ -41,8 +41,8 @@ import type { KaiDockElement, KaiViewStackElement } from '@kitn.ai/ui/web-compon
 // written at that name by `create-kai add` (wiring.modeTarget / wiring.modeFiles
 // in registry-item.json). The mock form is what an install without flags gets;
 // `--gateway` writes the route form and `--no-mock` the one that throws with the
-// file to write named. This import is what makes all three real, so it must not
-// name a file any mode leaves out.
+// file to write named. This one specifier is what makes all three real, so it
+// must not name a file any mode leaves out.
 import { transport } from './support-widget.transport'; // lint:dangling-imports: allowed -- generated name, written by `create-kai add` from wiring.modeFiles
 
 /** The suggestion chips the empty thread offers. IN THE CONTROLLER, not in the

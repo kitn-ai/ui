@@ -703,8 +703,13 @@ function planRoutes(resolved: ResolvedAdd, opts: PlanOptions, plan: AddPlan, wir
     // The declaration is the mock-free modes' way of saying what this block
     // COULD be installed against, so the note names the gateways to pass.
     for (const gateway of [...new Set(resolved.blocks.flatMap(declaredGateways))]) {
+      // NO FLAG ON A DEFAULT INSTALL. `modeFlag` is the REFUSAL convention - it names the mode a
+      // caller asked for - and the mock is what a caller who said nothing gets, so stamping
+      // `--no-mock` here would explain a missing route by naming a flag the reader never passed.
+      // The `none` mode did pass it, and its own sentence names it again anyway.
+      const asked = wiring.mode === 'mock' ? '' : `${modeFlag(wiring)}: `;
       plan.notes.push(
-        `${modeFlag(wiring)}: no backend route was written; this block declares ${gateway}. ` +
+        `${asked}no backend route was written; this block declares ${gateway}. ` +
           (wiring.mode === 'none'
             ? 'The composition-only form leaves the transport to you.'
             : `Pass \`--gateway ${gateway}\` for the route the scaffolder emits, or --no-mock to wire your own.`),
