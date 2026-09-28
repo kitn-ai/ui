@@ -483,7 +483,9 @@ const railTopRowFacts = (page) => page.evaluate(() => {
  *  OFF THE ROW ELEMENTS, never off the state array: the claim is about what the
  *  rail LAYS OUT, and the array beside it says nothing about a line count or a
  *  margin. The title is read from the row's own slotted span - the row's body
- *  lives in its shadow root, and the span is what the page can see. */
+ *  lives in its shadow root, and the span is what the page can see. The row's BOX
+ *  is here for the ONE-LINE claims: the height and the top two rows are compared
+ *  by, so "one line tall" is a comparison rather than a typed pixel value. */
 const railSectionFacts = (page) => page.evaluate(() => {
   const rootSize = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
   const toPx = (value) => {
@@ -524,8 +526,6 @@ const railSectionFacts = (page) => page.evaluate(() => {
       const cs = span ? getComputedStyle(span) : null;
       const box = el.getBoundingClientRect();
       const own = getComputedStyle(el);
-      const caret = el.querySelector('.row-caret');
-      const caretStyle = caret ? getComputedStyle(caret) : null;
       return {
         id: el.conversationId ?? el.getAttribute('conversation-id') ?? el.id,
         kind: el.getAttribute('data-rail') ?? 'conversation',
@@ -536,21 +536,6 @@ const railSectionFacts = (page) => page.evaluate(() => {
         metaSlots: el.querySelectorAll('[slot="meta"]').length,
         marginBlockStart: toPx(own.marginBlockStart),
         register: cs === null ? null : { fontSize: cs.fontSize, fontWeight: cs.fontWeight, color: cs.color },
-        caret: caret === null || caretStyle === null ? null : {
-          // AFTER the title: the title FOLLOWS the caret, so a tree that still led
-          // the label with the caret reports itself here rather than in a
-          // screenshot nobody diffs.
-          trailsTheTitle: span !== null
-            && (span.compareDocumentPosition(caret) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0,
-          // Every row carries the element (one repeat renders one element kind);
-          // only a heading SHOWS one, and the hidden ones are not a caret a
-          // reader could see.
-          hidden: caret.hasAttribute('hidden'),
-          tabindex: caret.getAttribute('tabindex'),
-          tabIndex: caret.tabIndex,
-          opacity: caretStyle.opacity,
-          color: caretStyle.color,
-        },
       };
     }),
   };
@@ -2686,17 +2671,15 @@ export default {
         // rail: a folder drawn as a single row would barely move the count.
         const folder = runs.filter((run) => run.group !== '')
           .reduce((a, b) => (b.rows.length > a.rows.length ? b : a));
-        // The heading and its caret are this folder's OWN rows, found by the
-        // label the rows of that folder carry. The caret is named by its CLASS,
-        // because a heading carries two glyphs now: the project's folder icon
-        // ahead of the label, and the caret that is the folder's open state.
+        // The heading IS this folder's own row, found by the group its rows
+        // carry. The heading's own GLYPH was the second locator here while a
+        // caret painted the folder's open state; the click is what this state is
+        // about, and the heading is what takes it.
         const heading = page.locator(`kai-conversations > kai-conversation-item[data-rail="folder"][data-group="${folder.group}"]`);
-        const caret = page.locator(`kai-conversations > kai-conversation-item[data-rail="folder"][data-group="${folder.group}"] > kai-icon.row-caret`);
         const before = await railNodes(page);
         await heading.click();
         await settle(350)(page);
         const shut = await railNodes(page);
-        const caretShut = await readBoundValue(caret, 'name', 'name');
         await heading.click();
         await settle(350)(page);
         const open = await railNodes(page);
@@ -2711,8 +2694,6 @@ export default {
           ).length,
           shutHeadings: shut.filter((node) => node.kind === 'folder').length,
           headings: count(before, 'folder'),
-          caretShut,
-          caretOpen: await readBoundValue(caret, 'name', 'name'),
         };
       },
       probes: {
@@ -2728,17 +2709,11 @@ export default {
         // ...AND OPENING IT AGAIN PUTS THEM BACK: one heading click reads both
         // ways, because open and closed are which rows the state emits.
         reopeningRestoresTheRows: () => folderToggle?.open === folderToggle?.before,
-        // The caret is how the row says which way round it is, and the two states
-        // are different icons.
-        theCaretSaysTheState: () => (folderToggle?.caretShut ?? '') !== ''
-          && (folderToggle?.caretOpen ?? '') !== ''
-          && folderToggle.caretShut !== folderToggle.caretOpen,
       },
       expect: {
         theFolderHadAHeading: true,
         closingHidesTheFoldersRows: true,
         reopeningRestoresTheRows: true,
-        theCaretSaysTheState: true,
       },
     },
     {
@@ -3470,27 +3445,14 @@ export default {
       // This state runs LAST and touches nothing: it reads the rail the run has
       // built, so what it measures is the same tree the states above pinned.
       name: '45-rail-sections',
-      layoutProbes: ['theSectionStartsCarryTheAir', 'theRowsAreOneLine'],
+      layoutProbes: ['theSectionStartsCarryTheAir', 'theRowsAreOneLine', 'headingIsOneLine'],
       act: async (page) => {
-        // NO POINTER ON THE RAIL FIRST. The caret is revealed on hover, so "what
-        // the row shows" is only a fact once the mouse is somewhere else - and
-        // the states before this one left it wherever they last clicked.
+        // NO POINTER ON THE RAIL FIRST, so what the state's own screenshot is of
+        // is a rail nobody is hovering: the states before this one left the
+        // pointer wherever they last clicked.
         await page.mouse.move(1000, 700);
         await settle(250)(page);
         railSections = await railSectionFacts(page);
-        // AND THEN THE HOVER, the other half of that claim: the caret a reader
-        // sees when they point at the row. Read on the first folder's heading,
-        // and the pointer is moved off again so the state's own screenshot is of
-        // a rail nobody is hovering.
-        const heading = page.locator('kai-conversations > kai-conversation-item[data-rail="folder"]').first();
-        await heading.hover();
-        await settle(300)(page);
-        railSections.caretOnHover = await heading.evaluate((el) => {
-          const caret = el.querySelector('.row-caret');
-          return caret === null ? null : getComputedStyle(caret).opacity;
-        });
-        await page.mouse.move(1000, 700);
-        await settle(250)(page);
       },
       probes: {
         // THE LABEL, where a section heading belongs: one row, reading `Projects`,
@@ -3534,6 +3496,27 @@ export default {
             ? true
             : `conversation rows disagree on height: ${JSON.stringify(heights)}`;
         },
+        // THE HEADING ROW IS ONE LINE TALL, and it is a BOOLEAN rather than a
+        // height because the fact is a comparison and not a number: the line it is
+        // compared against is DERIVED - the height the conversation rows already
+        // agree on in `theRowsAreOneLine` - so the assertion survives a density
+        // change, which a typed pixel value would not. This is the probe that
+        // would have caught the caret: the disclosure icon beside the folder
+        // glyph wrapped, which took a heading to two lines while every
+        // conversation row under it stayed on one. Read on the FOLDER comments
+        // (heading and Recents), which is what the caret row was.
+        headingIsOneLine: () => {
+          const rows = railSections?.rows ?? [];
+          const headings = rows.filter((row) => row.kind === 'folder');
+          const conversations = rows.filter((row) => row.kind === 'conversation');
+          if (headings.length === 0) return 'the rail holds no heading to measure';
+          if (conversations.length === 0) return 'the rail holds no conversation row to measure a line against';
+          const line = conversations[0].height;
+          const wrapped = headings.filter((row) => row.height !== line);
+          return wrapped.length === 0
+            ? true
+            : wrapped.map((row) => `${row.title} stands ${row.height}px against a ${line}px row`).join(' | ');
+        },
         // THE AIR BETWEEN SECTIONS, DERIVED RATHER THAN TYPED: both rows that START
         // a section carry the same block-start margin, that margin is TWO DENSITY
         // UNITS of the kit's own spacing knob (the page sets none, so the kit's
@@ -3575,34 +3558,14 @@ export default {
             ? true
             : `${same.length} content rows are painted in the label register`;
         },
-        // THE CARET TRAILS THE TITLE, REVEALS ON HOVER, AND IS NOT A CONTROL: it
-        // comes after the title in the row, it is invisible until the row is
-        // hovered and visible while it is, and it carries no tabindex - so the row
-        // that is already a tab stop does not gain a second one. The keyboard walk
-        // over the same rows is the state before this one's neighbours, and it
-        // measures the tab stop count directly.
-        theCaretTrailsTheTitleAndReveals: () => {
-          const rows = railSections?.rows ?? [];
-          const caretRows = rows.filter((row) => row.caret !== null && row.caret.hidden !== true);
-          if (caretRows.length === 0) return 'no row shows a caret to measure';
-          const leading = caretRows.filter((row) => row.caret.trailsTheTitle !== true).map((row) => row.title);
-          if (leading.length) return `the caret leads the title on ${JSON.stringify(leading)}`;
-          const focusable = caretRows.filter((row) => row.caret.tabindex !== null || row.caret.tabIndex >= 0).map((row) => row.title);
-          if (focusable.length) return `a caret is a second tab stop on ${JSON.stringify(focusable)}`;
-          const shown = caretRows.filter((row) => row.caret.opacity !== '0').map((row) => `${row.title}:${row.caret.opacity}`);
-          if (shown.length) return `a caret is visible with no pointer on the rail: ${shown.join(', ')}`;
-          return railSections?.caretOnHover === '1'
-            ? true
-            : `hovering the heading left the caret at opacity ${JSON.stringify(railSections?.caretOnHover)}`;
-        },
       },
       expect: {
         theProjectsLabelHeadsTheFolders: true,
         theLabelReadsLikeRecents: true,
         theRowsAreOneLine: true,
+        headingIsOneLine: true,
         theSectionStartsCarryTheAir: true,
         theSectionLabelsTakeTheMutedToken: true,
-        theCaretTrailsTheTitleAndReveals: true,
       },
       styleProbes: [
         // THE REGISTERS, pinned by this state rather than described: three rows'
@@ -3619,8 +3582,6 @@ export default {
           ['fontSize', 'color']),
         style('railProjectsLabelRow', (page) => page.locator('kai-conversations > kai-conversation-item[data-rail="section"]'),
           ['height', 'marginBlockStart']),
-        style('railCaret', (page) => page.locator('kai-conversations > kai-conversation-item[data-rail="folder"] .row-caret').first(),
-          ['color', 'opacity']),
       ],
     },
     {

@@ -293,22 +293,6 @@
             ></kai-icon>
             <span class="row-title-text" .textContent="row.title"></span>
           </span>
-          <!-- The folder's open state, and the one part of a heading that is not
-               a word: the caret TRAILS the title and points down while the folder
-               is open, which is where the reference puts it. It trails rather
-               than leads so the heading's title starts at the row's own inline
-               padding - flush with the section label above it - instead of being
-               pushed one glyph to the right. Hidden on a conversation row, which
-               has none. The element paints an icon and nothing focusable: no
-               tabindex, so it is never a second tab stop inside a row that is
-               already one. -->
-          <kai-icon
-            class="row-caret"
-            :theme="themeMode"
-            :name="row.caretName"
-            :hidden="row.caretHidden"
-            size="md"
-          ></kai-icon>
           <kai-editable-label
             class="row-rename"
             :hidden="row.renameFieldHidden"

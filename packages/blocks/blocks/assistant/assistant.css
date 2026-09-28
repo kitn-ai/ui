@@ -60,11 +60,12 @@ kai-workspace.app { display: block; height: 100dvh; }
 kai-editable-label[hidden] { display: none; }
 kai-editable-label.row-rename { min-width: 0; max-width: 100%; }
 
-/* A folder heading's caret, and the row menu a heading does not have. Both
- * elements paint their host from their own shadow sheet as an AUTHOR rule, which
- * outranks the UA's [hidden] one, so the attribute needs an author-level rule
- * here or a hidden control stays laid out - the same fix kai-button[hidden] at
- * the foot of this sheet carries. */
+/* The folder glyph a heading ahead of the title carries, and the row menu a
+ * heading does not have. Both elements paint their host from their own shadow
+ * sheet as an AUTHOR rule, which outranks the UA's [hidden] one, so the attribute
+ * needs an author-level rule here or a hidden control stays laid out - the same
+ * fix kai-button[hidden] at the foot of this sheet carries. The glyph's rule is
+ * what keeps the folder out of a conversation's row, which is not a folder. */
 kai-icon[hidden] { display: none; }
 kai-dropdown[hidden] { display: none; }
 
@@ -118,7 +119,18 @@ kai-conversations {
 .row-title-group[hidden] { display: none; }
 /* The glyph's BOX is set here rather than left to the kit's `size`, because the
  * box is what the rows under the folder step by: a size the kit could re-point
- * would move the labels without moving the rows. */
+ * would move the labels without moving the rows.
+ *
+ * THE GLYPH IS ALWAYS VISIBLE, and that is a decision rather than an omission.
+ * A heading used to carry a SECOND glyph beside it - a caret painting the
+ * folder's open state, which a reveal hid until the row was hovered or held
+ * focus - and that caret is gone: a disclosure arrow beside a folder arrow was
+ * one affordance too many, and the folder carries the heading's meaning on its
+ * own. The glyph's reveal was NOT carried over from the caret's rule: the glyph
+ * is information, not a control worth keeping out of sight, so every heading
+ * shows it from the first paint. (The open/closed state a reader could still
+ * want is a NAMED FOLLOW-UP: it needs a kit icon this block's curated roster
+ * does not carry yet.) */
 .row-folder-icon {
   flex: 0 0 auto;
   width: var(--rail-folder-icon);
@@ -196,8 +208,9 @@ kai-conversation-item[data-rail="folder"] + kai-conversation-item { margin-block
  * children out as flex items, so these three decide their own box and the gap
  * between them. NO COLOUR HERE, and that is the measured answer rather than an
  * omission: each control is a kit element painting its glyph from the tokens on
- * its own host, and a colour set from out here is not what the reader sees (the
- * row caret taught the same lesson - host and glyph disagreed by a whole scheme).
+ * its own host, and a colour set from out here is not what the reader sees (a
+ * colour set on a kit icon's host and the glyph inside it disagreed by a whole
+ * scheme when this was measured).
  * Two of the three are icon-only kit buttons and the third is a menu trigger, so
  * their sizes are the kit's own and land within a couple of pixels of each
  * other. */
@@ -275,30 +288,6 @@ kai-button.menu-delete::part(button) { color: var(--color-destructive-text); }
 .profile-trigger { display: flex; align-items: center; gap: 0.5rem; width: 100%; min-width: 0; }
 .profile-name { font-size: 0.8125rem; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .profile-caret { margin-left: auto; opacity: 0.6; }
-
-/* The caret TRAILS the row's title, which is where the reference puts it, and it
- * is revealed like the row menu is: zero opacity until the row is hovered or holds
- * focus. ONE difference from the menu's rule above, and it is why this one is
- * written out rather than folded into that one: a heading is a CONTROL, so its
- * caret is the row's open state and the only sign of it - a reader on a device with
- * no hover gets it always, and inside the hover query the hidden state is what a
- * mouse gets. The three constraints on the menu's reveal (opacity rather than
- * display, the hidden state INSIDE the hover query, focus-within as well as hover)
- * are the same, for the same reasons; read that rule before changing this one.
- *
- * NO COLOUR HERE, and that is the measured answer rather than an omission: the
- * caret is a kai icon, and an icon is a nested custom element that resolves its own
- * theme scope inside its own shadow root - a colour set on its host from out here
- * is not what the reader sees (measured dark: the host and the glyph disagreed by a
- * whole scheme). The glyph follows the kit's own tokens, which is what the kit is
- * for. It also paints nothing focusable - no tabindex - so a row that is already a
- * tab stop does not gain a second one. */
-kai-conversation-item .row-caret { margin-left: 0.25rem; }
-@media (hover: hover) {
-  kai-conversation-item .row-caret { opacity: 0; transition: opacity 120ms ease; }
-  kai-conversation-item:hover .row-caret,
-  kai-conversation-item:focus-within .row-caret { opacity: 1; }
-}
 
 /* THE RAIL'S SECTION LABELS SIT IN THE THEME'S MUTED REGISTER, and the token is
  * the theme's own rather than a colour mixed here: the kit sets its colour tokens on

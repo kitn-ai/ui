@@ -1111,8 +1111,8 @@ function sectionLabel(group: string, groupName: string): string {
 }
 
 /** The shape every row that is NOT a conversation starts from: the conversation
- *  parts off, and the five a control row can have (a caret, the project glyph, a
- *  menu, a rename field, the items that act) off too, plus the trailing ACTIONS, which only the
+ *  parts off, and the four a control row can have (the project glyph, a menu, a
+ *  rename field, the items that act) off too, plus the trailing ACTIONS, which only the
  *  two section labels show. The three builders below turn on the ones their own
  *  kind needs, so a field added to the row cannot be forgotten in one of them. */
 function controlNode(id: string, kind: ConversationRow['kind'], title: string, group: string, groupName: string): ConversationRow {
@@ -1136,8 +1136,6 @@ function controlNode(id: string, kind: ConversationRow['kind'], title: string, g
     pinned: false,
     group,
     groupName,
-    caretHidden: true,
-    caretName: '',
     folderIconHidden: true,
     menuHidden: true,
     trioHidden: true,
@@ -1176,7 +1174,6 @@ function folderNode(
   kind: 'folder' | 'more',
   group: string,
   groupName: string,
-  open: boolean,
   menu: FolderMenu,
   empty = false,
 ): ConversationRow {
@@ -1201,16 +1198,6 @@ function folderNode(
     deleteItemHidden: !(heading && menu.canManage),
     menuHidden: !heading,
     menuLabel: heading ? `Actions for ${title}` : '',
-    // A folder's heading leads its own run with a caret that IS its open state;
-    // the Show more row that ends a run has none.
-    //
-    // AN EMPTY FOLDER HAS NONE EITHER (`empty`): a heading over no rows would
-    // carry a caret that reveals nothing, which is a control that lies about
-    // what is under it. A folder grows its caret in the same pass that emits the
-    // rows, so a project starts without one the moment it holds its first
-    // conversation.
-    caretHidden: !heading || empty,
-    caretName: heading && !empty ? (open ? 'chevron-down' : 'chevron-right') : '',
     // ...AND THE GLYPH AHEAD OF THE TITLE, on a PROJECT's heading and on nothing
     // else. The Recents heading is a section label over the unfiled remainder
     // rather than a project, and a heading for a group the catalogue cannot name
@@ -1227,7 +1214,7 @@ function folderNode(
 /** THE LABEL OVER THE FOLDERS: one row, the Projects heading, emitted ahead of
  *  the first folder. It is a rail row for the same reason a folder's heading is
  *  (the repeat renders one element kind), and it is a LABEL rather than a
- *  control: no caret, activation does nothing - what is under it is the folders,
+ *  control: activation does nothing - what is under it is the folders,
  *  and they are already each their own control. It DOES carry the trailing
  *  actions, because the rail's own two settings belong to the rail rather than to
  *  any one folder. */
@@ -1297,7 +1284,7 @@ function railNodes(
   const empty = created.filter((project) => !rows.some((row) => row.group === project.id));
   let labelled = empty.length > 0;
   if (labelled) out.push(sectionNode(PROJECTS_LABEL));
-  for (const project of empty) out.push(folderNode('folder', project.id, project.name, false, menu, true));
+  for (const project of empty) out.push(folderNode('folder', project.id, project.name, menu, true));
   let at = 0;
   while (at < rows.length) {
     const group = rows[at].group;
@@ -1314,11 +1301,11 @@ function railNodes(
       out.push(sectionNode(PROJECTS_LABEL));
       labelled = true;
     }
-    out.push(folderNode('folder', group, groupName, open, menu));
+    out.push(folderNode('folder', group, groupName, menu));
     if (open) {
       const shown = grown.has(group) ? run : run.slice(0, FOLDER_LIMIT);
       out.push(...shown);
-      if (shown.length < run.length) out.push(folderNode('more', group, groupName, false, menu));
+      if (shown.length < run.length) out.push(folderNode('more', group, groupName, menu));
     }
     at = end;
   }
@@ -1369,10 +1356,10 @@ function fixtureRail(created: readonly DemoProject[], menu: FolderMenu): Convers
     const filed = SAMPLE_CONVERSATIONS.filter(
       (sample) => projectOfOpening(sample.opening, catalogue) === project.id,
     );
-    // A folder holds its rows, so its heading is OPEN and carries the caret that
-    // says so; a project with no sample under it (every project a reader made)
+    // A folder holds its rows, so its heading leads the run they are; a project
+    // with no sample under it (every project a reader made)
     // is a heading and nothing else (`folderNode`'s `empty`).
-    nodes.push(folderNode('folder', project.id, project.name, true, menu, filed.length === 0));
+    nodes.push(folderNode('folder', project.id, project.name, menu, filed.length === 0));
     nodes.push(...filed.map((sample) => sampleNode(sample, project.id, project.name)));
   }
   // The remainder's heading and its rows, so the section a reader's own typed
@@ -1381,7 +1368,7 @@ function fixtureRail(created: readonly DemoProject[], menu: FolderMenu): Convers
   const ungrouped = SAMPLE_CONVERSATIONS.filter(
     (sample) => projectOfOpening(sample.opening, catalogue) === undefined,
   );
-  nodes.push(folderNode('folder', '', '', true, menu, ungrouped.length === 0));
+  nodes.push(folderNode('folder', '', '', menu, ungrouped.length === 0));
   nodes.push(...ungrouped.map((sample) => sampleNode(sample, '', '')));
   return nodes;
 }
@@ -1537,11 +1524,6 @@ export interface ConversationRow {
   /** That project's label, or ''. Empty for a group the catalogue cannot name,
    *  which a heading then labels with the id instead (`sectionLabel`). */
   groupName: string;
-  /** Whether the leading CARET is hidden: only a folder heading shows one. */
-  caretHidden: boolean;
-  /** The caret's icon name, which is the folder's open state. Empty where the
-   *  caret is hidden; a binding holds a field, never an expression. */
-  caretName: string;
   /** Whether the project glyph ahead of the title is hidden. Only a folder heading
    *  for a project the store keeps shows one: it is what says the row heads a
    *  project rather than being another conversation, and the Recents heading heads
@@ -2184,8 +2166,6 @@ export function createController(deps: AssistantDeps): AssistantController {
         pinned: s.pinned === true,
         group,
         groupName: catalogue().find((project) => project.id === group)?.name ?? '',
-        caretHidden: true,
-        caretName: '',
         // A conversation is not a folder, so it paints no project glyph. This is
         // the one row literal the two builders above do not produce, and it is
         // the reason the field is required rather than optional: a projection
