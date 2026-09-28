@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import { captureBaseline, reportBaselineCaptures } from './screenshot-baselines';
 
 /**
  * IVP (Independent Visual Proof) for <kai-composer>.
@@ -6,11 +7,17 @@ import { test, expect, type Page } from '@playwright/test';
  * Drives the real web component rendered by Storybook with NATIVE keyboard
  * events — the full `/`-menu → select → pill → submit and atomic-Backspace
  * flows that the jsdom unit tests and synthetic-userEvent story tests cannot
- * reliably prove. Also screenshots the result for visual comparison against the
+ * reliably prove. Also captures the result for visual comparison against the
  * design reference (icon + label pill rendered inline with typed text).
  *
  * Run: `npm run test:composer-ivp`
  * (Storybook must be serving on :6006.)
+ *
+ * The captures are not assertions and do not decide this suite: they are
+ * compared against the committed PNGs instead of overwriting them, and only
+ * `KAI_SCREENSHOT_UPDATE=1` re-records those (`screenshot-baselines.ts`). The
+ * tests themselves run on every platform — this file's assertions are about
+ * behavior, which a rendering reason must not take out of the gate.
  */
 
 const SKILLS_STORY = '/iframe.html?id=test-fixtures-composer--skills&viewMode=story';
@@ -29,6 +36,8 @@ function pills(page: Page) {
 function menuOptions(page: Page) {
   return page.locator('[role="option"]');
 }
+
+test.afterAll(() => reportBaselineCaptures('composer-ivp'));
 
 /** Install a capture for kai-submit on the host element. */
 async function captureSubmit(page: Page) {
@@ -76,10 +85,8 @@ test.describe('kai-composer IVP', () => {
     // Continue typing — reproduces the reference image exactly.
     await page.keyboard.type(" I'm going to show y");
 
-    // Screenshot the reproduced reference (pill + trailing text).
-    await page
-      .locator('kai-composer')
-      .screenshot({ path: 'tests/e2e/__screenshots__/composer-skill-inline.png' });
+    // Capture the reproduced reference (pill + trailing text).
+    await captureBaseline(page.locator('kai-composer'), 'tests/e2e/__screenshots__/composer-skill-inline.png');
 
     // Submit with Enter (menu closed now) → kai-submit fires.
     await page.keyboard.press('Enter');
@@ -248,9 +255,7 @@ test.describe('kai-composer IVP', () => {
     await expect(pills(page)).toHaveCount(1);
     await expect(pills(page).first()).toContainText('Record & Replay');
     await expect(editable(page)).toContainText("I'm going to show y");
-    await page
-      .locator('kai-composer')
-      .screenshot({ path: 'tests/e2e/__screenshots__/composer-prefilled.png' });
+    await captureBaseline(page.locator('kai-composer'), 'tests/e2e/__screenshots__/composer-prefilled.png');
   });
 
   test('placeholder reappears after the field is cleared (bogus <br> handled)', async ({ page }) => {

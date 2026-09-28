@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import { UPDATE_BASELINES, evidenceDir } from './screenshot-baselines';
 import { mkdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -71,10 +72,19 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 /** Repo root: packages/ui/tests/e2e -> ../../../.. */
 // The task text's location, and it is TRACKED. `.superpowers/` is gitignored, so
 // evidence written there evaporates -- which is the exact failure HANDOFF §5 names.
+//
+// It is now the RECORD path, not the default: a plain run writes these captures
+// beside the evidence tree (`screenshot-baselines.ts`) so running the suite stops
+// rewriting committed files, and `KAI_SCREENSHOT_UPDATE=1` is the deliberate
+// re-record onto this tracked path. INPUT_MASK_EVIDENCE_DIR still wins, as it did.
+// Note the committed captures here are mac-rendered; a capture from another
+// platform is not the same image and belongs in an evidence dir, not in the doc.
 const DEFAULT_EVIDENCE_DIR = resolve(HERE, '../../../..', 'docs/superpowers/research/2026-08-24-field-mask');
 const SHOT_ROOT = process.env.INPUT_MASK_EVIDENCE_DIR
   ? resolve(process.env.INPUT_MASK_EVIDENCE_DIR)
-  : DEFAULT_EVIDENCE_DIR;
+  : UPDATE_BASELINES
+    ? DEFAULT_EVIDENCE_DIR
+    : evidenceDir('docs/superpowers/research/2026-08-24-field-mask');
 mkdirSync(SHOT_ROOT, { recursive: true });
 
 /** The story is both the host page for the bare-input probes and scenario 8's subject. */

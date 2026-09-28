@@ -1554,6 +1554,19 @@ jobs:
       # the project on every line. Cost measured locally against a warm
       # Storybook: 55 tests across the five blocking projects in ~1.2 min; the
       # advisory pair below adds ~2.5 min more.
+      #
+      # SCREENSHOT CAPTURES IN THIS STEP, because two of these projects write
+      # PNGs and what they write used to be committed files. A plain run now
+      # captures beside EVIDENCE_ROOT (outside the repo) and byte-compares each
+      # capture against the committed baseline, reporting the verdict per file;
+      # re-recording is the deliberate `KAI_SCREENSHOT_UPDATE=1` and appears in
+      # no step here, so this leg cannot rewrite the checkout it just checked
+      # out. The capture-only specs (project `shot`, and `promptinput-shot`) also
+      # skip off darwin: the committed baselines hold a mac rasteriser's output,
+      # so on this ubuntu runner they report as SKIPPED rather than passing over
+      # a comparison that could only differ. Read `N skipped` on those lines as
+      # exactly that -- the specs' own assertions are unaffected, and the three
+      # specs that assert behavior while capturing keep running here in full.
       - name: Storybook-driven suites (every project with a script, one process each)
         run: pnpm --filter @kitn.ai/ui run test:storybook-suites
 

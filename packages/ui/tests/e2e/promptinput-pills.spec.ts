@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import { captureBaseline, reportBaselineCaptures } from './screenshot-baselines';
 
 /**
  * IVP: rich entity pills inside the REAL <kai-prompt-input>, Codex-style.
@@ -7,7 +8,11 @@ import { test, expect, type Page } from '@playwright/test';
  * the structured doc + entities (each with its kind + id). `/` inserts skills.
  */
 const STORY = '/iframe.html?id=test-fixtures-prompt-input--with-entity-pills&viewMode=story';
+// The captures ride along with real assertions, so this file runs on every
+// platform and only the capture-and-compare moves off the tracked path.
 const SHOTS = 'tests/e2e/__screenshots__/promptinput/after';
+
+test.afterAll(() => reportBaselineCaptures('promptinput-pills'));
 
 const editable = (p: Page) => p.locator('[data-kai-composer-editable]').first();
 const pills = (p: Page) => p.locator('[data-kai-entity]');
@@ -37,7 +42,7 @@ test('@ opens a sectioned menu (Plugins/Agents) with descriptions; select insert
   await expect(page.getByText("Record what I'm doing on my Mac and turn it into a Skill")).toBeVisible();
 
   // Screenshot the open, sectioned menu (the Codex-style flow).
-  await page.screenshot({ path: `${SHOTS}/promptinput-menu-open.png` });
+  await captureBaseline(page, `${SHOTS}/promptinput-menu-open.png`);
 
   // Filter to "Record & Replay" (a plugin) and select it.
   await page.keyboard.type('rec');
@@ -53,7 +58,7 @@ test('@ opens a sectioned menu (Plugins/Agents) with descriptions; select insert
   await page.keyboard.press('Enter');
   await expect(pills(page)).toHaveCount(2);
 
-  await page.locator('kai-prompt-input').screenshot({ path: `${SHOTS}/with-entity-pills.png` });
+  await captureBaseline(page.locator('kai-prompt-input'), `${SHOTS}/with-entity-pills.png`);
 
   // Submit → kai-submit carries doc + entities with their distinct kinds.
   await page.keyboard.press('Enter');
@@ -94,7 +99,7 @@ test('adjacent pills (a / skill + an @ plugin) are the same height, vertically a
   await page.keyboard.press('Enter');
   await expect(pills(page)).toHaveCount(2);
 
-  await page.locator('kai-prompt-input').screenshot({ path: `${SHOTS}/adjacent-pills.png` });
+  await captureBaseline(page.locator('kai-prompt-input'), `${SHOTS}/adjacent-pills.png`);
 
   const boxes = await pills(page).evaluateAll((els) =>
     els.map((e) => {
@@ -127,7 +132,7 @@ test('can add many pills — a 3rd/4th does NOT replace an earlier one (the cap 
   for (const label of ['Summarize', 'Brainstorm', 'Translate', 'Code Reviewer']) {
     await expect(editable(page)).toContainText(label);
   }
-  await page.locator('kai-prompt-input').screenshot({ path: `${SHOTS}/many-pills.png` });
+  await captureBaseline(page.locator('kai-prompt-input'), `${SHOTS}/many-pills.png`);
 });
 
 test('Backspace deletes a whole pill inside the prompt input', async ({ page }) => {
