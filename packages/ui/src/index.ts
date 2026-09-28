@@ -42,6 +42,12 @@ export type { PdfPreviewOptions } from './primitives/pdf-preview';
 // every existing bundler consumer for no gain.
 export { localStorageStore, fetchStore, byRecency, byPinnedThenRecency, orderedSummaries, mostRecentSummary, isConversationUnread, LEGACY_THREAD_MIGRATED_TITLE } from './primitives/conversation-store';
 export type { ConversationStore } from './primitives/conversation-store';
+// The roving tab list: the keyboard half of a list rail — one tab stop, arrow traversal,
+// Home/End and activation over rows the CALLER resolves. Public so an application
+// arranging its own rows gets the same keyboard instead of rebuilding it; the conversation
+// rail's items controller runs on it.
+export { createRovingTabList } from './primitives/roving-tab-list';
+export type { RovingTabList, RovingTabListOptions } from './primitives/roving-tab-list';
 
 // Toasts: imperative `toast()` API + the reactive store behind <kai-toast-region>
 export { toast, configureToasts, ensureMounted as ensureToastRegion, getToasts } from './primitives/toast-store';

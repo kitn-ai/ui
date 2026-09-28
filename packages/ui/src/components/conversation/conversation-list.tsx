@@ -8,6 +8,7 @@ import { Badge } from '../badge/badge';
 import { ScrollArea } from '../scroll/scroll-area';
 import { ConversationItem, type ConversationRowDensity } from './conversation-item';
 import { orderedSummaries } from '../../primitives/conversation-store';
+import { createRovingTabList } from '../../primitives/roving-tab-list';
 import { interactiveInside } from '../../primitives/focusable-child';
 import type { ConversationSummary, ConversationGroup } from '../../types';
 
@@ -81,31 +82,27 @@ export interface ConversationItemsController {
 }
 
 /**
- * The parent-item contract of item mode, as a pure-DOM controller so it is host-agnostic:
- * the `kai-conversations` facade wires it over its slotted `kai-conversation-item`
- * children, and the jsdom contract tests drive it over plain nodes. Solid context cannot
- * cross the element boundary, so the channel is DOM traversal by construction:
+ * The parent-item contract of item mode: the `kai-conversations` facade wires it over its
+ * slotted `kai-conversation-item` children, and the jsdom contract tests drive it over
+ * plain nodes. Solid context cannot cross the element boundary, so the channel is DOM
+ * traversal by construction.
  *
- * - selection flows container to item: exactly one item's BODY node (see `bodyOf`) is
+ * The traversal mechanism — one tab stop, arrows, Home/End, activation, and yielding to a
+ * control inside the row — is `createRovingTabList` (`primitives/roving-tab-list.ts`),
+ * which is public so an application arranging its own rows gets the same keyboard. What
+ * stays here is the conversation row's own rule:
+ *
+ * - a row is a `kai-conversation-item` host, identified by `readConversationItemId`, and
+ *   its activation node is its shadow body (see `bodyOf`);
+ * - selection flows container to item: exactly one item's body node is
  *   `aria-current="true"`, plus the `active` property on the host;
  * - `role="button"` is ensured on each item's body node, leaving an authored role alone;
- * - roving tabindex: exactly one body node is `tabindex="0"` (the active item's, else the
- *   first's) and the rest `-1`, re-derived on every `sync()`; menu content keeps its natural
- *   tab order, being the body's sibling;
- * - activation (click / Enter / Space) calls `onSelect` with the item's id, and is
- *   SUPPRESSED when the composed path crosses the item's menu region, so the consumer's
- *   own popover never also selects the row;
- * - activation and roving yield to a nested keyboard-reachable control (`interactiveInside` over
- *   the row's shadow body), so an inline editor in the default slot keeps its own SPACE and arrows;
- * - ArrowUp/ArrowDown/Home/End move focus item-to-item, tabindex following it.
+ * - activation calls `onSelect` with the item's id, and is SUPPRESSED when the composed path
+ *   crosses the item's menu region, so the consumer's own popover never also selects the row.
  */
 export function createConversationItemsController(
   opts: ConversationItemsControllerOptions,
 ): ConversationItemsController {
-  const itemFromEvent = (e: Event): HTMLElement | undefined => {
-    const items = opts.getItems();
-    return e.composedPath().find((n): n is HTMLElement => items.includes(n as HTMLElement));
-  };
   /** The item's ACTIVATION node, the target of role/aria-current/tabindex/
    *  focus. For a `kai-conversation-item` host that is its shadow body (the
    *  sibling restructure: the host is the row listitem
@@ -150,74 +147,42 @@ export function createConversationItemsController(
    *  facade's own mount mutates host attributes, which re-runs sync through
    *  the container's MutationObserver read(). Bare nodes (no dash: the jsdom
    *  stand-ins) are always ready. */
-  const readyBodies = (items: HTMLElement[]) => {
-    const out = new Map<HTMLElement, HTMLElement>();
-    for (const item of items) {
-      const body = bodyOf(item);
-      if (body === item && item.localName.includes('-')) continue;
-      out.set(item, body);
-    }
-    return out;
+  const isReady = (item: HTMLElement): boolean => {
+    const body = bodyOf(item);
+    return !(body === item && item.localName.includes('-'));
   };
-
-  const rove = (items: HTMLElement[], target: HTMLElement | undefined) => {
-    for (const [item, body] of readyBodies(items)) setAttr(body, 'tabindex', item === target ? '0' : '-1');
-  };
-
-  const sync = () => {
-    const items = opts.getItems();
+  /** The item the container considers selected, last match winning. `undefined` when the
+   *  container has no active id — the primitive then falls back to the first rendered row. */
+  const activeItem = (): HTMLElement | undefined => {
     const activeId = opts.getActiveId();
-    const bodies = readyBodies(items);
-    let anchor: HTMLElement | undefined;
-    for (const [item, body] of bodies) {
-      const isActive = activeId !== undefined && readConversationItemId(item) === activeId;
+    if (activeId === undefined) return undefined;
+    let found: HTMLElement | undefined;
+    for (const item of opts.getItems()) if (readConversationItemId(item) === activeId) found = item;
+    return found;
+  };
+
+  const roving = createRovingTabList({
+    getRows: opts.getItems,
+    getActiveRow: activeItem,
+    targetOf: bodyOf,
+    isReady,
+    onRowSynced(item) {
+      const body = bodyOf(item);
       if (!body.hasAttribute('role')) body.setAttribute('role', 'button');
+      const activeId = opts.getActiveId();
+      const isActive = activeId !== undefined && readConversationItemId(item) === activeId;
       setAttr(body, 'aria-current', isActive ? 'true' : 'false');
       const host = item as HTMLElement & { active?: boolean };
       if (host.active !== isActive) host.active = isActive;
-      if (isActive) anchor = item;
-    }
-    rove(items, anchor ?? (bodies.keys().next().value as HTMLElement | undefined));
-  };
+    },
+    onActivate: (item) => opts.onSelect(readConversationItemId(item)),
+    yieldsToRow: (item, e) => menuInPath(e) || yieldsToNestedControl(item, e),
+  });
 
   return {
-    sync,
-    handleClick(e) {
-      const item = itemFromEvent(e);
-      if (!item || menuInPath(e) || yieldsToNestedControl(item, e)) return;
-      opts.onSelect(readConversationItemId(item));
-    },
-    handleKeyDown(e) {
-      const items = opts.getItems();
-      if (items.length === 0) return;
-      const item = itemFromEvent(e);
-      // The key belongs to the control the user is in — a control nested in the row body, or
-      // the consumer's own menu region beside it. No preventDefault, no onSelect, no rove;
-      // this covers Enter/Space AND the Arrow/Home/End branch below.
-      //
-      // The menu check reaches this branch rather than the Enter/Space one it used to sit in
-      // because the guard now stops at the BODY boundary, and the menu is the body's SIBLING
-      // (the sibling restructure), so it is outside that boundary: a focusable control in the
-      // menu is no longer what `interactiveInside` reports, and its keys must not start roving
-      // the rows either.
-      if (item && (yieldsToNestedControl(item, e) || menuInPath(e))) return;
-      if (e.key === 'Enter' || e.key === ' ') {
-        if (!item) return;
-        e.preventDefault();
-        opts.onSelect(readConversationItemId(item));
-        return;
-      }
-      let next: HTMLElement | undefined;
-      const idx = item ? items.indexOf(item) : items.findIndex((i) => bodyOf(i).getAttribute('tabindex') === '0');
-      if (e.key === 'ArrowDown') next = items[Math.min(idx + 1, items.length - 1)];
-      else if (e.key === 'ArrowUp') next = items[Math.max(idx - 1, 0)];
-      else if (e.key === 'Home') next = items[0];
-      else if (e.key === 'End') next = items[items.length - 1];
-      if (!next) return;
-      e.preventDefault();
-      rove(items, next);
-      bodyOf(next).focus();
-    },
+    sync: () => roving.sync(),
+    handleClick: (e) => roving.handleClick(e),
+    handleKeyDown: (e) => roving.handleKeyDown(e),
   };
 }
 
