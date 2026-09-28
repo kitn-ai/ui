@@ -4650,13 +4650,21 @@ export default {
               // markup: the kit renders nothing for a name its roster does not
               // carry, so a heading whose icon resolved is a heading with an svg of
               // a real size inside it, and the name is recorded beside it.
+              //
+              // THE NAME IS READ OFF THE ELEMENT FIRST, the same shape `railShape`
+              // reads a conversation row's id in. `kai-icon`'s `name` is a PROPERTY
+              // with no attribute reflection, and the react form's wrapper assigns a
+              // declared prop as a property rather than writing the attribute (`Icon`
+              // in frameworks/react/index.tsx) - so the attribute is set in this
+              // block's own markup and ABSENT in the react tree, and a probe reading
+              // only the attribute would call a correctly painted glyph unnamed there.
               const icon = el.querySelector('.row-folder-icon');
               const glyph = icon !== null && !hidden(icon) ? icon.shadowRoot?.querySelector('svg') ?? null : null;
               const glyphBox = glyph?.getBoundingClientRect() ?? null;
               return {
                 group: el.getAttribute('data-folder') ?? '',
                 label: title?.textContent ?? '',
-                iconName: icon?.getAttribute('name') ?? '',
+                iconName: icon?.name ?? icon?.getAttribute('name') ?? '',
                 iconPainted: glyphBox !== null && glyphBox.width > 0 && glyphBox.height > 0,
                 menu: dropdown !== null && !hidden(dropdown),
                 rename: dropdown !== null && named('Rename'),
