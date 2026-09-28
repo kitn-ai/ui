@@ -1,6 +1,6 @@
 {
   "scenario": "assistant",
-  "base": "http://localhost:8956",
+  "base": "http://localhost:8952",
   "runs": [
     {
       "page": "block",
@@ -482,7 +482,7 @@
             "theHeadingsRawIdIsItsLabel": true,
             "itSitsAboveRecents": true,
             "clickingItOpensItsThread": true,
-            "folderIndent": true
+            "folderRowStep": true
           },
           "styles": {}
         },
@@ -548,12 +548,64 @@
               "color": "oklab(0.140764 0.00120224 -0.00421676 / 0.8)"
             },
             "railProjectsLabelRow": {
-              "height": "36px",
+              "height": "40px",
               "marginBlockStart": "8px"
             },
             "railCaret": {
               "color": "oklab(0.140764 0.00120224 -0.00421676 / 0.8)",
               "opacity": "0"
+            }
+          }
+        },
+        {
+          "name": "46-rail-hover-actions",
+          "probes": {
+            "theSectionLabelsCarryTheTrio": true,
+            "everyTrioGlyphPainted": true,
+            "theActionsReadKebabThenFilterThenCompose": true,
+            "theActionsAreHiddenAtRestAndShownOnHover": true,
+            "theActionsSitInTheRowsTrailingEdge": true,
+            "theTrioAddsNoStopToTheRailWalk": true
+          },
+          "styles": {
+            "railTrio": {
+              "opacity": "1",
+              "gap": "2px",
+              "alignItems": "center"
+            },
+            "railTrioControl": {
+              "height": "28px",
+              "width": "28px"
+            }
+          }
+        },
+        {
+          "name": "47-rail-organizer-menu",
+          "probes": {
+            "theMenuReadsInTheOrderTheOwnerAskedFor": true,
+            "theMenuShowsTheRailsCurrentChoices": true,
+            "theUnavailableRowsSayWhy": true,
+            "theDividerOpensThePlusSection": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "48-rail-organizer-wiring",
+          "probes": {
+            "theOrganizerSwitchesToOneFlatList": true,
+            "theMenuFollowsTheChoice": true,
+            "theSortModesAreTheStoreOrders": true,
+            "theTreeComesBack": true,
+            "theFilterHandsTheCaretToTheRailsSearchBox": true,
+            "everyRowKeptItsPropertyBindings": true
+          },
+          "styles": {
+            "railOneListLabelRow": {
+              "height": "40px",
+              "marginBlockStart": "8px"
+            },
+            "railOneListRow": {
+              "marginInlineStart": "0px"
             }
           }
         }
@@ -1041,7 +1093,7 @@
             "theHeadingsRawIdIsItsLabel": true,
             "itSitsAboveRecents": true,
             "clickingItOpensItsThread": true,
-            "folderIndent": true
+            "folderRowStep": true
           },
           "styles": {}
         },
@@ -1107,12 +1159,64 @@
               "color": "oklab(0.985098 0.0000447631 0.0000197291 / 0.8)"
             },
             "railProjectsLabelRow": {
-              "height": "36px",
+              "height": "40px",
               "marginBlockStart": "8px"
             },
             "railCaret": {
               "color": "oklab(0.985098 0.0000447631 0.0000197291 / 0.8)",
               "opacity": "0"
+            }
+          }
+        },
+        {
+          "name": "46-rail-hover-actions",
+          "probes": {
+            "theSectionLabelsCarryTheTrio": true,
+            "everyTrioGlyphPainted": true,
+            "theActionsReadKebabThenFilterThenCompose": true,
+            "theActionsAreHiddenAtRestAndShownOnHover": true,
+            "theActionsSitInTheRowsTrailingEdge": true,
+            "theTrioAddsNoStopToTheRailWalk": true
+          },
+          "styles": {
+            "railTrio": {
+              "opacity": "1",
+              "gap": "2px",
+              "alignItems": "center"
+            },
+            "railTrioControl": {
+              "height": "28px",
+              "width": "28px"
+            }
+          }
+        },
+        {
+          "name": "47-rail-organizer-menu",
+          "probes": {
+            "theMenuReadsInTheOrderTheOwnerAskedFor": true,
+            "theMenuShowsTheRailsCurrentChoices": true,
+            "theUnavailableRowsSayWhy": true,
+            "theDividerOpensThePlusSection": true
+          },
+          "styles": {}
+        },
+        {
+          "name": "48-rail-organizer-wiring",
+          "probes": {
+            "theOrganizerSwitchesToOneFlatList": true,
+            "theMenuFollowsTheChoice": true,
+            "theSortModesAreTheStoreOrders": true,
+            "theTreeComesBack": true,
+            "theFilterHandsTheCaretToTheRailsSearchBox": true,
+            "everyRowKeptItsPropertyBindings": true
+          },
+          "styles": {
+            "railOneListLabelRow": {
+              "height": "40px",
+              "marginBlockStart": "8px"
+            },
+            "railOneListRow": {
+              "marginInlineStart": "0px"
             }
           }
         }

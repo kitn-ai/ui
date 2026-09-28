@@ -8,10 +8,11 @@
  * Everything the imperative `assistant.js` did to the DOM is now either a
  * field of `State` (bound onto an element with `.prop=` / `:attr=`) or an
  * `actions` entry (bound with `@kai-event=`). The ONLY DOM this file touches
- * is through `deps.refs()`, and only for the two facts the page's grammar has
- * no declarative equivalent for: the composer's clear()/focus() methods, and
- * the row-menu SHORTCUTS, a keydown listener on the document that stands down
- * for any key aimed outside this block (see `onShortcut`).
+ * is through `deps.refs()`, and only for the three facts the page's grammar has
+ * no declarative equivalent for: the composer's clear()/focus() methods, the
+ * rail's focus() for the section label's filter control, and the row-menu
+ * SHORTCUTS, a keydown listener on the document that stands down for any key
+ * aimed outside this block (see `onShortcut`).
  *
  * WHAT THIS BLOCK ADDED TO THE CONTRACT'S EVIDENCE, over support-widget's
  * conversion:
@@ -61,6 +62,17 @@
  *    renders (the kit's own theming doc says the same). `theme` is the choice in
  *    the menu's vocabulary and `themeMode` is the same choice in the kit's, one
  *    field each because a binding holds a field and never an expression.
+ * 8. THE RAIL'S CHROME IS A PROJECTION OF THE RAIL'S OWN STATE. The kebab on a
+ *    section label changes two fields, and the label over the folders, the folder
+ *    headings, the Show more row, the row order AND the indent all follow from
+ *    them - so "by project" and "one list" are one derivation read two ways
+ *    rather than two rails to keep in step. Its rows are an items array, which is
+ *    the shape that holds a section label, a single-choice row, a divider, a
+ *    disabled row and a sentence in one prop, and that is why that menu is a
+ *    kai-menu rather than authored markup. The trailing actions themselves sit in
+ *    the row's own menu region, which the container's item-mode contract excludes
+ *    from activation and from the arrow walk: a row's chrome can therefore be
+ *    keyboard reachable without joining the walk.
  */
 import { createAssistantStream } from '@kitn.ai/ui/state';
 import type { ChatMessage } from '@kitn.ai/ui/state';
@@ -70,10 +82,12 @@ import {
   localStorageStore,
   createConversationController,
   byPinnedThenRecency,
+  byRecency,
   isConversationUnread,
   type ConversationSummary,
 } from '@kitn.ai/ui/stores';
 import type {
+  KaiConversationsElement,
   KaiPromptInputElement,
   KaiVoiceInputElement,
   KaiWorkspaceElement,
@@ -420,11 +434,45 @@ const ROW_MENU_OPS: readonly string[] = ['rename', 'pin', 'archive', 'delete'];
  *  and hands each binding the value ITS attribute accepts (see `themeMode`). */
 export type ThemeChoice = 'light' | 'dark' | 'system';
 
-/** One entry of a footer menu. Mirrors the kit's `KaiMenuItem` structurally and
- *  deliberately: the block never imports the kit's internals, and the kit types
- *  this prop structurally, so the two agree by shape. Items are DATA, which is
- *  what the delivery forms carry best (a prop, not authored rows), and it is
- *  why `kai-menu` is the element these menus use. */
+/** How the rail ORGANIZES its rows, in the organizer menu's own vocabulary: by
+ *  the project each conversation is filed under, or one flat list. It is a
+ *  field rather than two rails because both are the same rows - the difference
+ *  is which row the rail emits ahead of them, which is the state a heading
+ *  already is (see `railNodes`). */
+export type RailOrganizer = 'project' | 'list';
+
+/** The order the rail's rows come in. `priority` is the kit's own list-order
+ *  rule (pinned first, then most recent) and `updated` is pure recency with the
+ *  pins ignored, so the two are DIFFERENT orders whenever a pinned row is not
+ *  also the newest one - which is why both are worth offering at all. */
+export type RailSort = 'priority' | 'updated';
+
+/** The choices each menu group offers, in the order the menu reads them, so the
+ *  action's membership test and the menu's rows read one list. */
+const RAIL_ORGANIZERS: readonly RailOrganizer[] = ['project', 'list'];
+const RAIL_SORTS: readonly RailSort[] = ['priority', 'updated'];
+
+/** The comparator each sort choice reads. The kit's own two, imported rather
+ *  than restated, so a rail ordered by this menu and a list ordered by the kit
+ *  cannot come to disagree about what "most recent" means. */
+const RAIL_SORT_COMPARATORS: Record<RailSort, (a: ConversationSummary, b: ConversationSummary) => number> = {
+  priority: byPinnedThenRecency,
+  updated: byRecency,
+};
+
+/** One entry of a footer menu or of the rail's organizer menu. Mirrors the kit's
+ *  `KaiMenuItem` structurally and deliberately: the block never imports the kit's
+ *  internals, and the kit types this prop structurally, so the two agree by shape.
+ *  Items are DATA, which is what the delivery forms carry best (a prop, not
+ *  authored rows), and it is why `kai-menu` is the element these menus use.
+ *
+ *  THE FIELDS ARE THE MENU'S WHOLE VOCABULARY, so a row's shape is readable here:
+ *  `heading` and `separator` are the section label and the divider, `radioGroup`
+ *  with `checked` is a single-choice row (the kit draws its dot), `checked` alone
+ *  is a toggle whose trailing glyph is `control`, `description` is the muted second
+ *  line, `disabled` marks a row that is visibly unavailable, and `note` is a
+ *  non-interactive sentence - where a row's REASON goes when the reason is longer
+ *  than a second line. */
 export interface MenuItem {
   /** Emitted back in `kai-select`. */
   id?: string;
@@ -438,6 +486,13 @@ export interface MenuItem {
   /** Membership in a single-choice group (`role="menuitemradio"`). */
   radioGroup?: string;
   disabled?: boolean;
+  /** The muted second line under the label: what the row means, or why it cannot act. */
+  description?: string;
+  /** The trailing glyph a togglable row shows: the kit's check by default, or a
+   *  switch for a capability rather than a choice. */
+  control?: 'check' | 'switch';
+  /** A non-interactive muted sentence (uses `label`), for a reason too long for a row. */
+  note?: true;
   /** A divider. */
   separator?: boolean;
   /** A non-interactive section label. */
@@ -472,6 +527,110 @@ export interface ComposerTool {
    *  so a capability is visible without opening the menu. Off unless asked for,
    *  which is why the kit's default stays quiet. */
   chip?: boolean;
+}
+
+/** The two single-choice groups the organizer menu holds, spelled once so the
+ *  rows' `radioGroup` and nothing else decides which rows are one choice. */
+const RAIL_ORGANIZER_GROUP = 'rail-organizer';
+const RAIL_SORT_GROUP = 'rail-sort';
+
+/** `organizer-list` / `sort-updated`: THE ID CARRIES THE CHOICE, so the menu's
+ *  rows and the action that reads them need no second table to keep in step (the
+ *  same rule the settings menu's theme rows follow, where the id IS the choice). */
+const organizerId = (choice: RailOrganizer): string => `organizer-${choice}`;
+const sortId = (choice: RailSort): string => `sort-${choice}`;
+
+/** The two rows that cannot act, named so the action can say they are not its
+ *  own: a disabled row never emits `kai-select` (the kit skips it), and an id no
+ *  action claims is a choice that silently did nothing. */
+const RAIL_MANUAL_ID = 'sort-manual';
+const RAIL_NEW_PROJECT_ID = 'new-project';
+
+/**
+ * The organizer menu, projected from State: the section label's kebab opens it,
+ * and it holds the rail's own two settings, then a plus section under a divider.
+ *
+ * EVERY ROW EITHER DOES SOMETHING OR SAYS WHY IT CANNOT, and the two that cannot
+ * are the two the data does not support:
+ *
+ *  - `Manual order` is DISABLED with its reason on the row, because this store
+ *    keeps no manual position. A conversation's place is derived from its pin and
+ *    its last write, and the one `sortOrder` the data carries orders conversation
+ *    GROUPS, not chats - so a live row here would reorder nothing and report
+ *    nothing, which is the failure this block treats as its worst.
+ *  - the plus row has nothing behind it either, since the block ships no project
+ *    picker and a group is the consumer's own data, so it is disabled and the
+ *    sentence under it says so rather than leaving a live-looking no-op. A real
+ *    app points it at the screen that creates a project.
+ *
+ * The rows that DO act are the same rows the rail is already made of: the two
+ * organizers and the two sorts are a state change and a comparator, and both are
+ * read off the rows the rail has already ordered.
+ */
+function projectRailMenu(
+  organizer: RailOrganizer,
+  sort: RailSort,
+): Pick<AssistantState, 'railOrganizer' | 'railSort' | 'railItems'> {
+  return {
+    railOrganizer: organizer,
+    railSort: sort,
+    railItems: [
+      { heading: true, label: 'Organizer sidebar' },
+      {
+        id: organizerId('project'),
+        label: 'By project',
+        icon: 'folder',
+        radioGroup: RAIL_ORGANIZER_GROUP,
+        checked: organizer === 'project',
+        description: 'Group the rail by the project each chat is filed under',
+      },
+      {
+        id: organizerId('list'),
+        label: 'One list',
+        icon: 'list-filter',
+        radioGroup: RAIL_ORGANIZER_GROUP,
+        checked: organizer === 'list',
+        description: 'Every chat in one flat list, with no folders',
+      },
+      { heading: true, label: 'Sort chats by' },
+      {
+        id: sortId('priority'),
+        label: 'Priority',
+        icon: 'flag',
+        radioGroup: RAIL_SORT_GROUP,
+        checked: sort === 'priority',
+        description: 'Pinned chats first, then the most recent',
+      },
+      {
+        id: sortId('updated'),
+        label: 'Last updated',
+        icon: 'clock',
+        radioGroup: RAIL_SORT_GROUP,
+        checked: sort === 'updated',
+        description: 'Most recently written first, pinned or not',
+      },
+      {
+        id: RAIL_MANUAL_ID,
+        label: 'Manual order',
+        radioGroup: RAIL_SORT_GROUP,
+        checked: false,
+        disabled: true,
+        description: 'This store keeps no manual position to order by',
+      },
+      { separator: true },
+      {
+        id: RAIL_NEW_PROJECT_ID,
+        label: 'New project',
+        icon: 'plus',
+        disabled: true,
+        description: 'This block ships no project picker',
+      },
+      // A note, not a disabled row's second line: the reason is a sentence about
+      // the app rather than about this row, and the kit renders it as the muted
+      // non-interactive line the composer's own disabled capability already uses.
+      { note: true, label: "Not in this template: a project is your app's own data, so point this row at the screen that creates one." },
+    ],
+  };
 }
 
 /** The three choices, in the order the menu reads them, with the glyph each row
@@ -709,12 +868,25 @@ function openingOf(messages: readonly ChatMessage[]): string {
   return '';
 }
 
-/** The rail's ONE row order: the projects in the catalogue's order, the
- *  ungrouped remainder last, and inside each of those the kit's own
- *  `byPinnedThenRecency`. So a pinned conversation sorts first WITHIN its
- *  project, pinning one never lifts it out of the project it belongs to, and no
- *  pin moves a project: the section order is the catalogue's, not the rows'. */
-function orderByProject(summaries: readonly ConversationSummary[]): ConversationSummary[] {
+/** The rail's ONE row order, for the organizer and the sort the menu chose: the
+ *  projects in the catalogue's order, the ungrouped remainder last, and inside
+ *  each of those the sort's own comparator. So a pinned conversation sorts first
+ *  WITHIN its project under `priority`, pinning one never lifts it out of the
+ *  project it belongs to, and no pin moves a project: the section order is the
+ *  catalogue's, not the rows'.
+ *
+ *  ONE LIST IS THE SAME FUNCTION'S FLAT BRANCH, not a second order: with no
+ *  folders there is nothing for the catalogue's rank to do, so the sort choice
+ *  decides the whole list. Both branches read the comparators above, which is why
+ *  a rail organizing one way and sorting another cannot disagree about what the
+ *  sort means. */
+function orderRows(
+  summaries: readonly ConversationSummary[],
+  organizer: RailOrganizer,
+  sort: RailSort,
+): ConversationSummary[] {
+  const compare = RAIL_SORT_COMPARATORS[sort];
+  if (organizer === 'list') return [...summaries].sort(compare);
   const rank = (groupId: string | undefined): number => {
     const at = PROJECTS.findIndex((project) => project.id === groupId);
     if (at !== -1) return at;
@@ -732,7 +904,7 @@ function orderByProject(summaries: readonly ConversationSummary[]): Conversation
     // by recency, and a folder split around another folder's rows renders as two
     // folders with one label.
     const byGroup = (a.groupId ?? '').localeCompare(b.groupId ?? '');
-    return byGroup !== 0 ? byGroup : byPinnedThenRecency(a, b);
+    return byGroup !== 0 ? byGroup : compare(a, b);
   });
 }
 
@@ -780,9 +952,9 @@ function sectionLabel(group: string, groupName: string): string {
 
 /** The shape every row that is NOT a conversation starts from: the conversation
  *  parts off, and the four a control row can have (a caret, a menu, a rename
- *  field, the items that act) off too. The three builders below turn on the ones
- *  their own kind needs, so a field added to the row cannot be forgotten in one
- *  of them. */
+ *  field, the items that act) off too, plus the trailing ACTIONS, which only the
+ *  two section labels show. The three builders below turn on the ones their own
+ *  kind needs, so a field added to the row cannot be forgotten in one of them. */
 function controlNode(id: string, kind: ConversationRow['kind'], title: string, group: string, groupName: string): ConversationRow {
   return {
     id,
@@ -803,6 +975,8 @@ function controlNode(id: string, kind: ConversationRow['kind'], title: string, g
     caretHidden: true,
     caretName: '',
     menuHidden: true,
+    trioHidden: true,
+    trioMenuLabel: '',
   };
 }
 
@@ -819,28 +993,34 @@ function folderNode(
   open: boolean,
 ): ConversationRow {
   const heading = kind === 'folder';
+  const title = heading ? (group === '' ? RECENTS_LABEL : sectionLabel(group, groupName)) : SHOW_MORE_LABEL;
   return {
-    ...controlNode(
-      `${heading ? FOLDER_HEADING_NODE : FOLDER_MORE_NODE}${group}`,
-      kind,
-      heading ? (group === '' ? RECENTS_LABEL : sectionLabel(group, groupName)) : SHOW_MORE_LABEL,
-      group,
-      groupName,
-    ),
+    ...controlNode(`${heading ? FOLDER_HEADING_NODE : FOLDER_MORE_NODE}${group}`, kind, title, group, groupName),
     // A folder's heading leads its own run with a caret that IS its open state;
     // the Show more row that ends a run has none.
     caretHidden: !heading,
     caretName: heading ? (open ? 'chevron-down' : 'chevron-right') : '',
+    // THE RECENTS HEADING IS THE RAIL'S SECOND SECTION LABEL, so it carries the
+    // same trailing actions the Projects label does; a folder INSIDE Projects
+    // heads a folder rather than a section and carries none.
+    trioHidden: !(heading && group === ''),
+    trioMenuLabel: `Rail options for ${title}`,
   };
 }
 
 /** THE LABEL OVER THE FOLDERS: one row, the Projects heading, emitted ahead of
  *  the first folder. It is a rail row for the same reason a folder's heading is
  *  (the repeat renders one element kind), and it is a LABEL rather than a
- *  control: no caret, no menu, and activation does nothing - what is under it is
- *  the folders, and they are already each their own control. */
+ *  control: no caret, activation does nothing - what is under it is the folders,
+ *  and they are already each their own control. It DOES carry the trailing
+ *  actions, because the rail's own two settings belong to the rail rather than to
+ *  any one folder. */
 function sectionNode(label: string): ConversationRow {
-  return controlNode(`${SECTION_NODE}${label.toLowerCase()}`, 'section', label, '', '');
+  return {
+    ...controlNode(`${SECTION_NODE}${label.toLowerCase()}`, 'section', label, '', ''),
+    trioHidden: false,
+    trioMenuLabel: `Rail options for ${label}`,
+  };
 }
 
 /** The rail's ONE flat repeat, expanded from the ordered conversations into the
@@ -851,13 +1031,29 @@ function sectionNode(label: string): ConversationRow {
  *
  *  Open/closed is therefore which rows this emits at all: a closed folder is its
  *  heading and nothing else. A search opens every folder it has a match in,
- *  because a match the reader cannot see is a match that does not exist. */
+ *  because a match the reader cannot see is a match that does not exist.
+ *
+ *  ONE LIST EMITS THE ROWS AND NOTHING ELSE - no section label, no folder
+ *  heading, no Show more, and the closed/expanded sets unread. There is no folder
+ *  for a heading to head, and a row the reader cannot file has nothing to reveal
+ *  from, so the flat branch is the whole of what "one list" means here. */
 function railNodes(
   rows: readonly ConversationRow[],
   closed: readonly string[],
   expanded: readonly string[],
   query: string,
+  organizer: RailOrganizer,
 ): ConversationRow[] {
+  // ONE LIST IS THE ROWS UNDER ONE LABEL AND NOTHING ELSE: no folder headings, no
+  // Show more, and the closed/expanded sets unread, because there is no folder for
+  // a heading to head and nothing for a row to be revealed from.
+  //
+  // THE LABEL STAYS, and it is the one thing the flat list cannot drop: the
+  // rail's own settings live in the actions a section label carries, so a list
+  // with no label at all would have no way back to the organizer that made it -
+  // a state the reader can enter and not leave. Its heading is the flat list's
+  // own name rather than a project's, which is what makes it honest.
+  if (organizer === 'list') return [sectionNode(ONE_LIST_LABEL), ...rows];
   const shut = new Set(closed);
   const grown = new Set(expanded);
   const out: ConversationRow[] = [];
@@ -890,17 +1086,20 @@ function railNodes(
 }
 
 /** The rail's rows and the projects those rows make, from the ONE ordered list
- *  and at most one narrowing: the search. */
+ *  and at most one narrowing: the search. One list has no sections at all, so the
+ *  section list is empty there rather than describing folders the rail does not
+ *  render. */
 function railFrom(
   rows: readonly ConversationRow[],
   query: string,
   closed: readonly string[],
   expanded: readonly string[],
+  organizer: RailOrganizer,
 ): Pick<AssistantState, 'conversationRows' | 'conversationSections'> {
   const matched = narrow(rows, query);
   return {
-    conversationRows: railNodes(matched, closed, expanded, query),
-    conversationSections: sectionsFrom(matched),
+    conversationRows: railNodes(matched, closed, expanded, query, organizer),
+    conversationSections: organizer === 'list' ? [] : sectionsFrom(matched),
   };
 }
 
@@ -966,6 +1165,16 @@ export interface ConversationRow {
   /** Whether the row menu is hidden: a control row carries no kebab, and the
    *  heading's own activation is the folder control. */
   menuHidden: boolean;
+  /** Whether the row's TRAILING ACTIONS are hidden. The rail's two section labels
+   *  - the Projects label and the Recents heading - carry them, and nothing else
+   *  does: a folder heads a folder, and a conversation row's own kebab is its
+   *  menu. */
+  trioHidden: boolean;
+  /** The trailing menu's accessible name, named for the row it belongs to: two
+   *  rows carry the same menu, so one shared name would leave a screen reader with
+   *  two identical controls and no way to tell which row each belongs to. Empty
+   *  where the actions are hidden. */
+  trioMenuLabel: string;
 }
 
 /** How many of a folder's conversations the rail shows before it offers the
@@ -984,6 +1193,11 @@ const FOLDER_MORE_NODE = 'folder-more:';
  *  element has no label of its own for either. */
 const RECENTS_LABEL = 'Recents';
 const SHOW_MORE_LABEL = 'Show more';
+
+/** The heading one flat list carries. It is the rail's own name for the rows
+ *  under it rather than a project's, because there is no project being grouped:
+ *  the list IS every chat, which is what the organizer chose. */
+const ONE_LIST_LABEL = 'All chats';
 
 /** The label over the folders, in the register the Recents heading already uses:
  *  the muted heading over a group of rows. The folders below it are the projects
@@ -1025,8 +1239,22 @@ export interface AssistantState {
   conversationRows: ConversationRow[];
   /** The projects those rows make, in the order the rail renders them: one per
    *  project that holds a row, derived in the same pass as the rows themselves
-   *  (`railFrom`), so the two can never disagree. */
+   *  (`railFrom`), so the two can never disagree. Empty in one list, which has no
+   *  sections. */
   conversationSections: ConversationSection[];
+  /** How the rail organizes its rows: the projects each chat is filed under, or
+   *  one flat list. A field because the organizer menu changes it, and because
+   *  both organizations render the SAME rows - the difference is the headings the
+   *  rail emits ahead of them. */
+  railOrganizer: RailOrganizer;
+  /** The order the rail's rows come in, which is the sort group's choice. */
+  railSort: RailSort;
+  /** The organizer menu's items: the two settings, the divider, and the plus
+   *  section under it. An items array, like the footer menus, because that is the
+   *  shape the delivery forms carry best and the kit's item vocabulary can hold
+   *  every row this menu has (a section label, a single-choice row, a divider, a
+   *  disabled row and a note). */
+  railItems: MenuItem[];
   // The composer
   /** The composer's controlled text mirror. It is a field rather than a DOM read
    *  because the voice transcript has to WRITE into the composer, and the kit's
@@ -1094,6 +1322,10 @@ export interface AssistantRefs {
   workspace: KaiWorkspaceElement | null;
   /** The recorder the composer's own mic drives (see `voiceToggle`). */
   voice: KaiVoiceInputElement | null;
+  /** The rail. Its own search box is the rail's filter, and the element exposes
+   *  the focus method that reaches it: the box lives in the rail's shadow root,
+   *  which is why the block asks the element rather than the DOM. */
+  conversations: KaiConversationsElement | null;
 }
 
 export interface AssistantDeps {
@@ -1120,6 +1352,15 @@ export interface AssistantActions {
   newChat(): void;
   /** `@kai-search` on the rail's built-in search box. */
   search(event: CustomEvent<{ query: string }>): void;
+  /** `@kai-select` on the rail's organizer menu (the kebab on a section label).
+   *  The item's id CARRIES its choice, so nothing here re-reads an attribute, and
+   *  a row this action does not own is ignored rather than half-applied. */
+  railMenuSelect(event: CustomEvent<{ id: string; radioGroup?: string }>): void;
+  /** `@kai-click` on a section label's filter control. The rail's filter IS its
+   *  own search box, so the honest thing this control can do is hand that box the
+   *  caret - through the element's public focus method, because the box lives in
+   *  the rail's shadow root. */
+  filterChats(): void;
   /** `@kai-click` on an empty-state card. The card carries its guide id, which
    *  is the only thing this needs to know. */
   openGuide(event: Event): Promise<void>;
@@ -1202,6 +1443,9 @@ export function createController(deps: AssistantDeps): AssistantController {
     // The block starts on the system's scheme, which is what the kit's own
     // `auto` default does and what the page did before the menu existed.
     ...projectMenus('system'),
+    // And on the rail's own defaults: the projects the demo files its
+    // conversations into, in the kit's own pinned-first order.
+    ...projectRailMenu('project', 'priority'),
   };
 
   // A NEW state object every patch: the snapshot getter is compared by
@@ -1269,12 +1513,17 @@ export function createController(deps: AssistantDeps): AssistantController {
     onSummariesChange: (summaries) => patch(projectSummaries(summaries)),
   });
 
-  function projectSummaries(summaries: ConversationSummary[], query: string = state.query): Partial<AssistantState> {
+  function projectSummaries(
+    summaries: ConversationSummary[],
+    query: string = state.query,
+    organizer: RailOrganizer = state.railOrganizer,
+    sort: RailSort = state.railSort,
+  ): Partial<AssistantState> {
     lastSummaries = summaries;
     // Where a row is filed is the summary's OWN `groupId`, the field the store
     // writes, round-trips and hands back: one source of truth, and the same one
-    // `orderByProject` reads its order from.
-    const projected = orderByProject(summaries).map((s) => {
+    // `orderRows` reads its order from.
+    const projected = orderRows(summaries, organizer, sort).map((s) => {
       // ONE LINE PER ROW, and that is a decision about the rail rather than about
       // the data: the kit paints a row's `meta` slot as a second line, and a
       // sidebar row that carries its own last message reads as a feed rather than
@@ -1302,14 +1551,35 @@ export function createController(deps: AssistantDeps): AssistantController {
         caretHidden: true,
         caretName: '',
         menuHidden: false,
+        // A conversation's trailing edge is its own menu and nothing else, so the
+        // section labels' actions are off here; they are on the controlNode's
+        // default and turned on by the two builders that head a section.
+        trioHidden: true,
+        trioMenuLabel: '',
       };
     });
     // The unfiltered conversation rows, which is what the row menu and the two
     // shortcuts act on. What the rail renders is the projection below, which
     // narrows and expands them in the same pass as the sections.
     allRows = projected;
-    return { ...railFrom(projected, query, closedGroups, expandedGroups), activeId: controller.activeId() };
+    return { ...railFrom(projected, query, closedGroups, expandedGroups, organizer), activeId: controller.activeId() };
   }
+
+  /** One reader choice from the organizer menu, applied in ONE patch: the choice
+   *  itself (which moves the checked row), and the rail re-projected with it.
+   *
+   *  THE TWO ARE PASSED IN RATHER THAN READ BACK OFF STATE, and that is the whole
+   *  reason `projectSummaries` takes them: a patch is applied by the next render,
+   *  so reading `state` inside the same call would re-project the rail in the OLD
+   *  organization and the rail would lag one click behind its own menu. */
+  const applyRailMenu = (next: { organizer?: RailOrganizer; sort?: RailSort }): void => {
+    const organizer = next.organizer ?? state.railOrganizer;
+    const sort = next.sort ?? state.railSort;
+    patch({
+      ...projectRailMenu(organizer, sort),
+      ...projectSummaries(lastSummaries, state.query, organizer, sort),
+    });
+  };
 
   /** Open (id) or close (undefined) the one inline rename field. Re-projects
    *  every row, because the edit flags are per row and the kai- reactivity
@@ -1554,6 +1824,32 @@ export function createController(deps: AssistantDeps): AssistantController {
       // it opens every folder it has a match in (`railNodes`), because a match
       // behind a closed heading is a match the reader cannot see.
       patch({ query, ...projectSummaries(lastSummaries, query) });
+    },
+
+    // The organizer menu, one handler for the rows that act. The id is
+    // `organizer-<choice>` or `sort-<choice>`, so the choice is read off it
+    // rather than looked up, and a choice outside the two lists above is ignored:
+    // the kit never emits a disabled row, so an id this action does not own means
+    // the menu grew a row nobody wired rather than a reader asking for something.
+    railMenuSelect(event) {
+      const { id } = event.detail;
+      const organizerOf = (choice: string): RailOrganizer | undefined =>
+        RAIL_ORGANIZERS.find((candidate) => candidate === choice);
+      const sortOf = (choice: string): RailSort | undefined =>
+        RAIL_SORTS.find((candidate) => candidate === choice);
+      if (id.startsWith('organizer-')) {
+        const organizer = organizerOf(id.slice('organizer-'.length));
+        if (organizer !== undefined) applyRailMenu({ organizer });
+        return;
+      }
+      if (id.startsWith('sort-')) {
+        const sort = sortOf(id.slice('sort-'.length));
+        if (sort !== undefined) applyRailMenu({ sort });
+      }
+    },
+
+    filterChats() {
+      deps.refs().conversations?.focus();
     },
 
     valueChange(event) {

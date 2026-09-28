@@ -64,10 +64,18 @@
            The footer slot holds the identity row. It is a PLACEHOLDER identity
            by rule ("Demo User", a demo plan): the kit owns no auth, no account
            and no settings screen, so the block shows one and says so in every
-           item it cannot wire. -->
+           item it cannot wire.
+
+           ONE OF THE ELEMENT'S OWN CHANNELS CARRIES A RAIL SETTING: the `#ref`,
+           which is how the section label's filter control reaches the rail's
+           search box (`focus()` on the element, because the box is inside its
+           shadow root). Nothing else about the rail's state rides an attribute
+           the stylesheet reads - what the rows look like is the same under either
+           organizer. -->
       <kai-conversations
         id="conversations"
         slot="start"
+        #ref="conversations"
         :theme="themeMode"
         .collapsed="railCollapsed"
         .activeId="activeId"
@@ -93,8 +101,10 @@
              affordance beside it: the page holds exactly one control named "New
              chat" (the driver counts them), and it fires the block's one
              new-chat action, `newChat` - the action the element's kai-new-chat
-             event was already answered with. Two ways to a fresh chat existed
-             while the bar was there; there is one now.
+             event was already answered with. A section label's compose control
+             fires that same action, and the two carry different accessible names
+             for that reason: the name belongs to the control, the action to the
+             page.
 
              THE "Chats" LABEL IS DROPPED: the rail's own rows are headed by what
              they hold (the project folders, then Recents), and a page-level title
@@ -197,6 +207,12 @@
              is what keeps every row a direct child of the list - an item nested
              in another element would go standalone by the container's own rule
              and lose the roving focus and the container's active state. -->
+        <!-- The row's own density, from the kit's axis rather than a padding
+             spelled here: `default` is px-2.5 py-2 (a 44px rail row beside the
+             32px kai-button rows above it), and `compact` is the same box one
+             step tighter top and bottom (px-2.5 py-1.5), which is what makes a
+             rail row carry its label rather than float in it. Every row of the
+             rail is this one element, so the headings tighten with the rows. -->
         <kai-conversation-item
           *for="row of conversationRows"
           :key="row.id"
@@ -206,6 +222,7 @@
           :data-group="row.groupName"
           :data-rail="row.kind"
           :data-folder="row.group"
+          density="compact"
         >
           <!-- The title, and - only while that row is the one being renamed -
                an inline field in its place. kai-editable-label is driven as a
@@ -247,11 +264,13 @@
                own last message reads as a feed, not as a list of conversations.
                The summary's trailing text is still there in the store (see the
                projection in the controller); the rail simply does not show it. -->
-          <!-- The row's trailing edge: its own menu, and nothing else. It sits
-               in the item's `menu` region, which the item renders
-               OUTSIDE its activation surface - that is what keeps a click on
-               the kebab, or on the menu behind it, from also selecting the
-               conversation.
+          <!-- The row's trailing edge: a CONVERSATION row's own menu, and - on
+               the rail's two section labels - the trailing actions described
+               below them. Both sit in the item's `menu` region, which the item
+               renders OUTSIDE its activation surface - that is what keeps a click
+               on the kebab, or on the menu behind it, from also selecting the
+               conversation, and it is why a section label can carry controls at
+               all without becoming one.
 
                The menu reveals on hover or focus, in this block's stylesheet
                rather than in the kit: whether a row's menu is always visible is
@@ -417,6 +436,77 @@
               Delete
             </kai-button>
           </kai-dropdown>
+
+          <!-- THE SECTION LABEL'S TRAILING ACTIONS, in the item's `menu` region,
+               which is where a row's chrome belongs and the only place it can sit
+               safely: that region is the row body's SIBLING, so the container's
+               item-mode contract never activates the row from a press in it and
+               never lets a key in it start roving the list. The three controls are
+               therefore reachable with Tab - the row body comes first in the tab
+               order, and focus anywhere inside the row is what reveals them, so a
+               reader cannot land on one they cannot see - while the arrow walk
+               over the rail stays exactly one stop wide, because the walk covers
+               the rows and this is not a row.
+
+               THREE CONTROLS, in the reference's order: the kebab, which opens
+               the rail's own two settings; a filter, which hands the caret to the
+               rail's search box (the rail's filter IS that box, so the honest
+               thing this control can do is take the reader to it, through the
+               element's own focus method - the box is inside the rail's shadow
+               root); and a compose, which fires the same new-chat action the
+               header's row does.
+
+               THE COMPOSE ANSWERS TO "New conversation", and that is the same act
+               under the noun this block's data already uses - a chat IS a stored
+               conversation. It is not named "New chat" because the header row is,
+               and one accessible name on two controls of one page is a name a
+               reader (or a spoken command) cannot tell apart.
+
+               THE KEBAB IS A MENU WITH AN ITEMS ARRAY rather than authored rows,
+               because the rail's settings are single-choice groups and the kit's
+               item vocabulary holds every shape this menu needs in one prop: a
+               section label, a radio row carrying its own state, a muted second
+               line saying what a row means, a divider, a disabled row, and the
+               sentence under it saying why. `label` names the trigger, and the row
+               supplies it: an icon is not text, and two rows carry the same menu,
+               so the name says which row's it is.
+
+               WHICH ROWS SHOW IT IS THE PAGE'S CALL, not the kit's: the row says
+               whether its actions are hidden, and only the rail's two section
+               labels - the Projects label and the Recents heading - turn them on. A
+               folder inside Projects heads a folder rather than a section, and a
+               conversation's trailing edge is its own menu. The reveal itself is
+               the same rule the row menu already had (see assistant.css): opacity
+               only, hidden inside the hover-capable query, and shown on hover OR
+               on focus inside the row. -->
+          <div slot="menu" class="row-menu row-trio" :hidden="row.trioHidden">
+            <kai-menu
+              data-trio="menu"
+              :theme="themeMode"
+              .items="railItems"
+              triggerIcon="more-horizontal"
+              :label="row.trioMenuLabel"
+              @kai-select="railMenuSelect"
+            ></kai-menu>
+            <kai-button
+              data-trio="filter"
+              :theme="themeMode"
+              variant="ghost"
+              size="icon-sm"
+              icon="list-filter"
+              label="Filter chats"
+              @kai-click="filterChats"
+            ></kai-button>
+            <kai-button
+              data-trio="compose"
+              :theme="themeMode"
+              variant="ghost"
+              size="icon-sm"
+              icon="square-pen"
+              label="New conversation"
+              @kai-click="newChat"
+            ></kai-button>
+          </div>
         </kai-conversation-item>
 
         <!-- The foot of the rail: a ROW of two menus, the identity trigger and the

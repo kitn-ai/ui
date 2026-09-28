@@ -18,6 +18,12 @@
 // and the one that acts firing the same new-chat path the rail's built-in button
 // used to. The keyboard walk over the rail's rows runs BEFORE those two, and its
 // recorded values do not move: the rows are outside the list by construction.
+// The last three states are the rail's own CHROME: the trailing actions a section
+// label reveals on hover (kebab, filter, compose), the menu behind the kebab (the
+// owner's two groups, the divider and the plus section under it), and what each
+// row of that menu really does - the organizers as a state change, the sorts as
+// two orders read against the store's own records, and the filter handing the
+// caret to the rail's search box.
 // One page (the generated /kit/ rendering of the CDN form), so record/check are
 // the modes; there is no facade parity reference for this composition.
 //
@@ -496,6 +502,202 @@ const railSectionFacts = (page) => page.evaluate(() => {
 
 // State 45's one reading, captured in its act.
 let railSections = null;
+// States 46-48's readings, captured in their acts for the same reason as the
+// three globals above: the revealed trio, the OPEN menu and the organizer wiring
+// are each a moment, and by probe time the page has been left where the state
+// wants its screenshot.
+let railTrio = null;
+let railMenu = null;
+let railWiring = null;
+
+/** The rail's two SECTION LABELS and the trailing actions each carries, read off
+ *  the ROW ELEMENTS: which rows are section labels, whether their actions are
+ *  hidden, the opacity they resolved, whether they sit in the row's own menu
+ *  region, the box each control came to, the glyph each actually painted (a
+ *  curated name the kit does not carry paints nothing) and the name it declares.
+ *
+ *  The row's title is the FIRST slotted span, which is why the actions are the
+ *  markup AFTER the title rather than beside it.
+ *
+ *  `rovingStops` is the rail's whole roving contract in one number, the same one
+ *  the keyboard walk measures: exactly one row body carries `tabindex="0"`, so a
+ *  chunk of chrome that had joined the walk would show up here as a second. */
+const railTrioFacts = (page) => page.evaluate(() => {
+  const bound = (el, prop, attr) => {
+    if (!el) return null;
+    const value = el[prop];
+    return typeof value === 'string' && value ? value : el.getAttribute(attr);
+  };
+  const glyphOf = (el) => {
+    const box = el?.shadowRoot?.querySelector('svg')?.getBoundingClientRect() ?? null;
+    return box === null ? null : { width: Math.round(box.width), height: Math.round(box.height) };
+  };
+  const rows = [...document.querySelectorAll('kai-conversations > kai-conversation-item')];
+  const facts = rows.map((row) => {
+    const kind = row.getAttribute('data-rail') ?? 'conversation';
+    const trio = row.querySelector('[slot="menu"].row-trio');
+    const box = row.getBoundingClientRect();
+    const trioBox = trio?.getBoundingClientRect() ?? null;
+    return {
+      id: row.conversationId ?? row.getAttribute('conversation-id') ?? row.id,
+      kind,
+      title: (row.querySelector(':scope > span')?.textContent ?? '').trim(),
+      sectionLabel: kind === 'section'
+        || (kind === 'folder' && (row.getAttribute('data-folder') ?? '') === ''),
+      hidden: trio === null ? true : trio.hasAttribute('hidden'),
+      opacity: trio === null ? null : getComputedStyle(trio).opacity,
+      // WHETHER THE ROW IS "AT REST" IS A FACT ABOUT THE ROW, not about the
+      // pointer and the caret the states before this one happened to leave behind:
+      // the reveal rule's two halves are a hover and a focus, so the reading below
+      // can say which rows are at rest instead of assuming the act produced rest.
+      hover: row.matches(':hover'),
+      focusWithin: row.matches(':focus-within'),
+      // Named in the failure message rather than only used: a revealed trio that is
+      // neither hovered nor focused is a fact about WHICH RULE reached it, and the
+      // classes are what says whether it was reached at all.
+      trioClass: trio?.getAttribute('class') ?? null,
+      inViewport: (() => {
+        const box = row.getBoundingClientRect();
+        const view = { width: window.innerWidth, height: window.innerHeight };
+        return `${Math.round(box.left)},${Math.round(box.top)} in ${view.width}x${view.height}`;
+      })(),
+      // THE SLOT IS THE WHOLE OF IT, and it is read on the LIGHT-DOM node rather
+      // than by walking up: the region the actions are projected into lives in
+      // the row's SHADOW root, so `closest` cannot see it from here. `slot="menu"`
+      // is also the fact the container itself reads (`menuInPath`), which is what
+      // keeps a press or a key in the actions from selecting or roving the row.
+      menuSlot: trio === null ? null : trio.getAttribute('slot'),
+      rowBox: { left: Math.round(box.left), right: Math.round(box.right), width: Math.round(box.width) },
+      trioBox: trioBox === null ? null : {
+        left: Math.round(trioBox.left),
+        right: Math.round(trioBox.right),
+        width: Math.round(trioBox.width),
+      },
+      controls: trio === null ? [] : [...trio.children].map((el) => ({
+        trio: el.getAttribute('data-trio'),
+        tag: el.localName,
+        label: bound(el, 'label', 'label'),
+        icon: bound(el, 'icon', 'icon'),
+        glyph: glyphOf(el),
+        left: Math.round(el.getBoundingClientRect().left),
+        height: Math.round(el.getBoundingClientRect().height),
+      })),
+    };
+  });
+  return {
+    rows: facts,
+    sectionLabels: facts.filter((row) => row.sectionLabel),
+    rovingStops: rows.filter((el) => el.shadowRoot?.querySelector('[data-kai-item-body][tabindex="0"]') !== null).length,
+  };
+});
+
+/** The menu the section label's kebab opened, as the ROWS IT RENDERED: each row's
+ *  role, its whole text, and the two states a choice can carry. The surface is
+ *  portaled into the menu element's own shadow root, so it is read through the
+ *  host rather than from the document - and a row with a description carries that
+ *  sentence after its label in the same text, which is why the comparison below
+ *  matches a row by PREFIX. */
+const railMenuFacts = (page) => page.evaluate(() => {
+  const host = document.querySelector(
+    'kai-conversations > kai-conversation-item[data-rail="section"] .row-trio kai-menu',
+  );
+  const surface = host?.shadowRoot?.querySelector('[role="menu"]') ?? null;
+  return {
+    open: surface !== null,
+    rows: surface === null ? [] : [...surface.children].map((el) => ({
+      role: el.getAttribute('role') ?? '',
+      text: (el.textContent ?? '').replace(/\s+/g, ' ').trim(),
+      checked: el.getAttribute('aria-checked'),
+      disabled: el.getAttribute('aria-disabled'),
+    })),
+  };
+});
+
+// A COPY, and it says so: the organizer menu the owner asked for, written as the
+// rows it renders. The driver is plain JS and cannot import the block's
+// controller, so the label of each row is restated here - a reworded row, a
+// reordered group or a row that stopped rendering goes red against this list.
+// `role: ''` is a row with no role: a section label or a note, neither of which is
+// a menu item.
+const RAIL_MENU_ROWS = [
+  { role: '', label: 'Organizer sidebar' },
+  { role: 'menuitemradio', label: 'By project' },
+  { role: 'menuitemradio', label: 'One list' },
+  { role: '', label: 'Sort chats by' },
+  { role: 'menuitemradio', label: 'Priority' },
+  { role: 'menuitemradio', label: 'Last updated' },
+  { role: 'menuitemradio', label: 'Manual order' },
+  { role: 'separator', label: '' },
+  { role: 'menuitem', label: 'New project' },
+  { role: '', label: 'Not in this template' },
+];
+
+/** Every rail row as the shape the ORGANIZER produced: its id, the kind of row it
+ *  is, its title and the inline step it came to. Read off the row elements, never
+ *  off the state array beside them, because the claim is about the tree the rail
+ *  laid out. */
+const railShape = (page) => page.evaluate(() =>
+  [...document.querySelectorAll('kai-conversations > kai-conversation-item')].map((el) => ({
+    id: el.conversationId ?? el.getAttribute('conversation-id') ?? el.id,
+    kind: el.getAttribute('data-rail') ?? 'conversation',
+    title: (el.querySelector(':scope > span')?.textContent ?? '').trim(),
+    indent: getComputedStyle(el).marginInlineStart,
+    // THE FOLDER a row is filed under, by ID. It is the fact the tree is read
+    // from now that no row carries an inline step: `data-folder` is empty on the
+    // ungrouped remainder and on the heading over it, and it is the same field
+    // the container hands the element.
+    folder: el.getAttribute('data-folder') ?? '',
+  }))
+);
+
+/** The rows' PROPERTY BINDINGS, read back off the elements: the trailing menu's
+ *  items array and the rename field's value. A `*for` row is cloned from a
+ *  template, and a clone is not upgraded until it is connected - so a row created
+ *  by a LATER patch is where a property binding can be lost, silently, because
+ *  the element replaces the assigned own property when it upgrades. That is a fact
+ *  about the generated binder rather than about this block, and the state that
+ *  switches the organizer is the one that creates a row in a single patch, so it
+ *  is where the claim is measured. */
+const rowBindingFacts = (page) => page.evaluate(() => {
+  const menuRows = document.querySelectorAll('kai-conversations kai-menu').length;
+  return {
+    menuRows,
+    rows: [...document.querySelectorAll('kai-conversations > kai-conversation-item')].map((el) => {
+      const menu = el.querySelector('.row-trio kai-menu');
+      const editor = el.querySelector('.row-rename');
+      return {
+        kind: el.getAttribute('data-rail') ?? 'conversation',
+        title: (el.querySelector(':scope > span')?.textContent ?? '').trim(),
+        menuItems: Array.isArray(menu?.items) ? menu.items.length : null,
+        editorValue: editor?.value ?? null,
+      };
+    }),
+  };
+});
+
+/** The order the rail should show, DERIVED from the store's own records rather
+ *  than from a second copy of the block's rule: the index holds the summaries, and
+ *  the two orders below are the comparators the kit exports (pinned first then
+ *  recency, and recency alone) with archived rows left out. A probe that typed its
+ *  own expected order could agree with a block that is wrong in the same way
+ *  twice; this one reads the data where it lives. */
+const storedOrders = (page, indexKey) => page.evaluate((key) => {
+  let entries = [];
+  try { entries = JSON.parse(localStorage.getItem(key) ?? '[]'); } catch { entries = []; }
+  const shown = entries.filter((entry) => entry.archived !== true);
+  const at = (entry) => {
+    const time = Date.parse(entry.updatedAt ?? '');
+    return Number.isNaN(time) ? -Infinity : time;
+  };
+  return {
+    count: shown.length,
+    updated: shown.slice().sort((a, b) => at(b) - at(a)).map((entry) => entry.id),
+    priority: shown.slice().sort((a, b) => {
+      const pinned = (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0);
+      return pinned !== 0 ? pinned : at(b) - at(a);
+    }).map((entry) => entry.id),
+  };
+}, indexKey);
 
 const firstIndexRow = (page, spec) => page.evaluate(
   (key) => { try { return JSON.parse(localStorage.getItem(key) ?? '[]')[0] ?? null; } catch { return null; } },
@@ -530,20 +732,38 @@ const railNodes = (page) => page.evaluate(() =>
  *  attribute, and the fallbacks here are for the row's identity. */
 const railRows = async (page) => (await railNodes(page)).filter((node) => node.kind === 'conversation');
 
-/** Each CONVERSATION row's inline start step, with the folder ID the row is
- *  scanned by. The step belongs to the stylesheet, so asserting it means reading
- *  what the page computed - and `data-folder` is the folder's ID, the fact the
- *  rule keys on: a row in a folder the catalogue cannot name is therefore
- *  tellable from one in the ungrouped remainder, which its label could never do,
- *  because both labels are empty. */
-const rowIndents = (page) => page.evaluate(() =>
-  [...document.querySelectorAll('kai-conversations > kai-conversation-item[data-rail="conversation"]')]
+/** The rail's row geometry, which is a stylesheet fact and can therefore only be
+ *  asserted by reading what the page COMPUTED: every conversation row's inline
+ *  step, and the step from each FOLDER heading to the first conversation row
+ *  under it - left, because a filed row sits flush with its heading, and down,
+ *  because one step of separation is what still says the row is filed there.
+ *  `data-folder` carries the folder's ID, the fact the old rule keyed on: a row
+ *  in a folder the catalogue cannot name is tellable from one in the ungrouped
+ *  remainder, whose label is empty in both cases. */
+const railSteps = (page) => page.evaluate(() => {
+  const items = [...document.querySelectorAll('kai-conversations > kai-conversation-item')];
+  const rows = items
+    .filter((el) => el.getAttribute('data-rail') === 'conversation')
     .map((el) => ({
       id: el.conversationId ?? el.getAttribute('conversation-id') ?? el.id,
       folder: el.getAttribute('data-folder') ?? '',
-      indent: getComputedStyle(el).marginInlineStart,
-    }))
-);
+      inline: getComputedStyle(el).marginInlineStart,
+    }));
+  const pairs = [];
+  for (let i = 0; i < items.length; i++) {
+    if (items[i].getAttribute('data-rail') !== 'folder') continue;
+    const next = items[i + 1];
+    if (!next || next.getAttribute('data-rail') !== 'conversation') continue;
+    const heading = items[i].getBoundingClientRect();
+    const row = next.getBoundingClientRect();
+    pairs.push({
+      folder: items[i].getAttribute('data-folder') ?? '',
+      left: Math.round((row.left - heading.left) * 10) / 10,
+      gap: Math.round((row.top - heading.bottom) * 10) / 10,
+    });
+  }
+  return { rows, pairs };
+});
 
 /** Those rows as the groups they make: one entry per RUN, which is what the
  *  rail renders as one folder. Derived from the rows the page rendered, never
@@ -2546,13 +2766,9 @@ export default {
         const headings = nodes.filter((node) => node.kind === 'folder');
         const heading = headings.find((node) => node.folder === group) ?? null;
         const onRail = filed.some((candidate) => candidate.id === id);
-        // The three rows the indent is read on, each chosen from what the rail
-        // RENDERED: one in a folder the catalogue names, the seeded one in the
-        // folder it cannot, and one in the ungrouped remainder.
-        const indents = await rowIndents(page);
-        const named = indents.find((row) => row.folder !== '' && row.folder !== group) ?? null;
-        const seeded = indents.find((row) => row.id === id) ?? null;
-        const remainder = indents.find((row) => row.folder === '') ?? null;
+        // The row geometry, read off what the rail RENDERED rather than off a
+        // list this file would keep in step by hand.
+        const steps = await railSteps(page);
         const activeBefore = await page.evaluate(
           () => document.getElementById('conversations')?.activeId ?? '',
         );
@@ -2583,11 +2799,7 @@ export default {
           activeBefore,
           activeAfter: opened.activeId,
           threadText: opened.text,
-          indents: {
-            named: named === null ? null : named.indent,
-            unknown: seeded === null ? null : seeded.indent,
-            remainder: remainder === null ? null : remainder.indent,
-          },
+          steps,
         };
       },
       probes: {
@@ -2644,26 +2856,29 @@ export default {
           return (unknownGroup?.threadText ?? '').includes(unknownGroup?.answer ?? '')
             || `the thread reads ${JSON.stringify(unknownGroup?.threadText)}`;
         },
-        // THE INDENT FOLLOWS THE FOLDER, NOT THE LABEL, and a row filed under a
-        // group the catalogue cannot name is the only place the two differ: its
-        // label is empty, so a rule keyed on the label leaves it flush, level
-        // with the heading it sits under. The step is read as computed style on
-        // three rows - one in a named folder, the seeded one, and one in the
-        // remainder - and the claim is that the two FILED rows agree and the
-        // remainder is the flat one.
-        folderIndent: () => {
-          const rows = unknownGroup?.indents ?? null;
-          const step = (value) => parseFloat(value ?? '') || 0;
-          if (rows === null) return 'the rail rows were not measured';
-          if (rows.named === null) return 'no conversation sits in a folder the catalogue names';
-          if (rows.unknown === null) return 'the unknown group renders no conversation row';
-          if (rows.remainder === null) return 'no conversation is in the remainder to compare against';
-          if (step(rows.named) === 0) return `a row in a named folder renders flush (${rows.named})`;
-          if (rows.unknown !== rows.named) {
-            return `a filed row and the unknown group's row disagree: ${rows.named} vs ${rows.unknown}`;
+        // FLUSH LEFT, WITH ONE STEP OF GAP UNDER EACH HEADING. The rail is the
+        // page's narrowest column, so the nesting a filed row sits in is said by
+        // the heading's caret and the gap, not by an inline step - and both halves
+        // are read as computed style and box geometry, on every conversation row
+        // the rail rendered and on every heading that is followed by one, so the
+        // claim covers a row in a folder the catalogue cannot name as much as one
+        // in a folder it can.
+        folderRowStep: () => {
+          const steps = unknownGroup?.steps ?? null;
+          if (steps === null) return 'the rail rows were not measured';
+          const rows = steps.rows ?? [];
+          if (rows.length === 0) return 'no conversation row was rendered to measure';
+          const indented = rows.filter((row) => (parseFloat(row.inline) || 0) !== 0);
+          if (indented.length > 0) {
+            return `${indented.length} conversation row(s) still carry an inline step (${indented.map((row) => row.inline).join(', ')})`;
           }
-          return step(rows.remainder) === 0
-            || `the ungrouped remainder is not flush (${rows.remainder})`;
+          const pairs = steps.pairs ?? [];
+          if (pairs.length === 0) return 'no heading was followed by a conversation row, so the gap was not measured';
+          const off = pairs.filter((pair) => pair.left !== 0);
+          if (off.length > 0) return `a heading's first row starts ${off[0].left}px off the heading`;
+          const gaps = [...new Set(pairs.map((pair) => pair.gap))];
+          if (gaps.length !== 1) return `the headings do not share one gap: ${gaps.join(', ')}`;
+          return gaps[0] > 0 || `the step under a heading is ${gaps[0]}px, which separates nothing`;
         },
       },
       expect: {
@@ -2672,7 +2887,7 @@ export default {
         theHeadingsRawIdIsItsLabel: true,
         itSitsAboveRecents: true,
         clickingItOpensItsThread: true,
-        folderIndent: true,
+        folderRowStep: true,
       },
     },
     {
@@ -2789,7 +3004,9 @@ export default {
         },
         // ONE CONTROL NAMED "New chat" ON THE PAGE. The rail's built-in bar used to
         // hold the other one; the header region replaces that bar, so the row IS the
-        // affordance and every path through it is the one `newChat` action.
+        // affordance and every path through it is the one `newChat` action. (The
+        // section labels' compose fires that same action under the action's other
+        // name, which is why this stays a count of the NAME.)
         oneNewChatOnThePage: (page) => page.getByRole('button', { name: 'New chat', exact: true })
           .count().then((n) => n === 1 || `${n} controls are named New chat`),
         // ...and the collapse control the built-in bar also carried survived the
@@ -3045,6 +3262,445 @@ export default {
           ['height', 'marginBlockStart']),
         style('railCaret', (page) => page.locator('kai-conversations > kai-conversation-item[data-rail="folder"] .row-caret').first(),
           ['color', 'opacity']),
+      ],
+    },
+    {
+      // THE SECTION LABEL'S TRAILING ACTIONS, and the two facts that make them safe
+      // to put on a row that is already a tab stop: they are HIDDEN until the row
+      // is hovered or holds focus, and they live in the row's own menu region -
+      // which the container's item-mode contract excludes from activation and from
+      // the arrow walk. The walk's own state measures that exclusion from the other
+      // side five states earlier; this one measures what a reader gets.
+      //
+      // The act ENDS with the pointer on the label, which is what the screenshot
+      // shows: the actions revealed at the row's right end.
+      name: '46-rail-hover-actions',
+      act: async (page) => {
+        // NO POINTER AND NO FOCUS ON THE RAIL FIRST: the actions are invisible at
+        // rest, and "at rest" means nothing inside the row has the caret either -
+        // focus is the OTHER half of the reveal rule, so the states before this
+        // one (the keyboard walk included) can leave a row focused. Clicking a
+        // heading of the page's own chrome is what a reader does to leave the
+        // rail, and it blurs whatever held focus.
+        await page.locator('.topbar h1').click();
+        // THE POINTER AWAY, at a point DERIVED from the rail's own box rather than
+        // a typed pair of viewport pixels: the rail's width is the page's own fact,
+        // so a page whose column is wider than the coordinate assumed would leave
+        // the pointer on a row and the "at rest" read would be of a hovered row.
+        const railBox = await page.evaluate(() => {
+          const box = document.getElementById('conversations')?.getBoundingClientRect();
+          return box === null || box === undefined ? null : { right: box.right };
+        });
+        const viewport = page.viewportSize() ?? { width: 1280, height: 800 };
+        await page.mouse.move(
+          Math.round((railBox === null ? 0 : railBox.right) + (viewport.width - (railBox === null ? 0 : railBox.right)) / 2),
+          viewport.height - 24,
+        );
+        // AND THE CARET OUT OF THE RAIL, explicitly. Whether a click on the page's
+        // own chrome blurs what held focus, or leaves it inside a shadow root, is
+        // the browser's business - and a caret left in the row reveals the actions
+        // through the rule's focus half, so the rest is no rest at all. The deepest
+        // active element is the one that has to be blurred: focus inside a shadow
+        // root is reported on the host by `document.activeElement`.
+        await page.evaluate(() => {
+          let node = document.activeElement;
+          while (node?.shadowRoot?.activeElement) node = node.shadowRoot.activeElement;
+          node?.blur?.();
+        });
+        // AND WAIT FOR THE REST STATE rather than assuming one settle bought it: the
+        // reveal fades, so a read taken mid-transition is a read of the hover that
+        // was there a moment ago. The wait is on the READ - nothing in the row is
+        // touched - and it gives up at a second and a half, which is long enough for
+        // any fade this stylesheet declares and short enough that a row genuinely
+        // revealed at rest is still reported as revealed.
+        for (let attempt = 0; attempt < 6; attempt++) {
+          await settle(250)(page);
+          const resting = await page.evaluate(() =>
+            [...document.querySelectorAll('kai-conversations > kai-conversation-item[data-rail="section"]')]
+              .every((el) => !el.matches(':hover') && !el.matches(':focus-within')));
+          if (resting) break;
+        }
+        railTrio = await railTrioFacts(page);
+        // AND THEN THE HOVER, the other half of that claim.
+        const label = page.locator('kai-conversations > kai-conversation-item[data-rail="section"]').first();
+        await label.hover();
+        await settle(300)(page);
+        railTrio.hovered = await railTrioFacts(page);
+      },
+      probes: {
+        // TWO SECTION LABELS, and each carries three actions: the Projects label
+        // over the folders and the Recents heading over the remainder. A folder
+        // inside Projects heads a folder, not a section, and carries none.
+        theSectionLabelsCarryTheTrio: () => {
+          const labels = railTrio?.sectionLabels ?? [];
+          if (labels.length !== 2) return `${labels.length} rows are section labels`;
+          const bad = labels.filter((row) => row.controls.length !== 3).map((row) => `${row.title}:${row.controls.length}`);
+          return bad.length === 0 ? true : `the rows carry ${bad.join(', ')} actions`;
+        },
+        // A CURATED NAME OR NOTHING AT ALL: the kit paints no glyph for a name its
+        // roster does not carry, so the box IS the check that each name resolved -
+        // the same check the rail's top action rows get, and for the same reason.
+        everyTrioGlyphPainted: () => {
+          const controls = (railTrio?.hovered?.sectionLabels ?? []).flatMap((row) => row.controls);
+          if (controls.length !== 6) return `${controls.length} controls across the two labels`;
+          const empty = controls.filter((c) => c.glyph === null || c.glyph.width <= 0 || c.glyph.height <= 0)
+            .map((c) => `${c.trio}:${c.icon}`);
+          return empty.length === 0 ? true : `no glyph painted for ${empty.join(', ')}`;
+        },
+        // KEBAB, THEN FILTER, THEN COMPOSE, read as the order the row lays them out
+        // rather than as the order the markup happens to name them: the three left
+        // edges ascend.
+        theActionsReadKebabThenFilterThenCompose: () => {
+          const row = (railTrio?.hovered?.sectionLabels ?? [])[0];
+          if (!row) return 'no section label to read';
+          const order = row.controls.map((c) => c.trio);
+          if (JSON.stringify(order) !== JSON.stringify(['menu', 'filter', 'compose'])) {
+            return `the actions are ${JSON.stringify(order)}`;
+          }
+          const lefts = row.controls.map((c) => c.left);
+          return lefts.every((left, index) => index === 0 || left > lefts[index - 1])
+            ? true
+            : `the actions are not stacked left to right: ${JSON.stringify(lefts)}`;
+        },
+        // HIDDEN AT REST, VISIBLE ON HOVER - the two halves of one claim, and both
+        // are read here because either alone is half a rule: a row that always
+        // showed them is as wrong as one that never did.
+        theActionsAreHiddenAtRestAndShownOnHover: () => {
+          const labels = railTrio?.sectionLabels ?? [];
+          const atRest = labels.filter((row) => !row.hover && !row.focusWithin);
+          if (atRest.length === 0) {
+            const where = labels.map((row) => `${row.title}: hover=${row.hover} focus=${row.focusWithin}`).join(' | ');
+            return `no section label was at rest, so the hidden half was never read (${where})`;
+          }
+          const rest = atRest.filter((row) => !row.hidden && row.opacity !== '0');
+          if (rest.length) {
+            return rest.map((row) => `${row.title}: hidden=${row.hidden} opacity=${row.opacity} class=${row.trioClass} inset=${row.inViewport}`).join(' | ');
+          }
+          // THE HOVERED LABEL, not every label: the act hovers one of the two, and
+          // the other is correctly invisible while the pointer is elsewhere - so the
+          // claim is read on the labels the pointer is actually over, and a state
+          // that hovered none says so rather than passing on an empty set.
+          const hovered = (railTrio?.hovered?.sectionLabels ?? []).filter((row) => row.hover);
+          if (hovered.length === 0) return 'no section label was hovered, so the shown half was never read';
+          const unrevealed = hovered.filter((row) => row.hidden || row.opacity !== '1');
+          return unrevealed.length === 0
+            ? true
+            : unrevealed.map((row) => `${row.title}: hidden=${row.hidden} opacity=${row.opacity}`).join(' | ');
+        },
+        // AT THE ROW'S RIGHT END, INSIDE THE ROW, AND IN ITS MENU REGION. Three
+        // facts, because the claim is all three: the actions belong to the row's
+        // trailing edge, they sit within the row's box rather than on a line of
+        // their own, and the region they sit in is the one the container keeps out
+        // of activation and out of the arrow walk - which is the whole reason they
+        // can be added to a row the walk already covers.
+        theActionsSitInTheRowsTrailingEdge: () => {
+          const row = (railTrio?.hovered?.sectionLabels ?? [])[0];
+          if (!row || row.trioBox === null) return 'no section label box to measure';
+          if (row.menuSlot !== 'menu') return `the actions carry slot=${JSON.stringify(row.menuSlot)}`;
+          if (row.trioBox.left < row.rowBox.left || row.trioBox.right > row.rowBox.right) {
+            return `the actions run from ${row.trioBox.left} to ${row.trioBox.right}, the row from ${row.rowBox.left} to ${row.rowBox.right}`;
+          }
+          const gap = row.rowBox.right - row.trioBox.right;
+          if (gap > 16) return `the actions stop ${gap}px short of the row's right edge`;
+          return row.trioBox.left > row.rowBox.left + row.rowBox.width / 2
+            ? true
+            : 'the actions do not sit at the row\u2019s trailing half';
+        },
+        // AND THE ROVING WALK IS UNTOUCHED: exactly one row body in the whole rail
+        // carries `tabindex="0"`. That number IS the walk's width, and the actions
+        // are the chrome most likely to widen it - every row renders them.
+        theTrioAddsNoStopToTheRailWalk: () => {
+          const stops = railTrio?.rovingStops;
+          if (stops === undefined) return 'the state was not captured';
+          return stops === 1 ? true : `the rail has ${stops} roving stops`;
+        },
+      },
+      expect: {
+        theSectionLabelsCarryTheTrio: true,
+        everyTrioGlyphPainted: true,
+        theActionsReadKebabThenFilterThenCompose: true,
+        theActionsAreHiddenAtRestAndShownOnHover: true,
+        theActionsSitInTheRowsTrailingEdge: true,
+        theTrioAddsNoStopToTheRailWalk: true,
+      },
+      styleProbes: [
+        // The reveal itself, pinned: the state's screenshot is taken with the
+        // pointer on the row, so the opacity this records is the shown value, and
+        // the gap is the two facts the box above was measured against.
+        style('railTrio', (page) => page.locator('kai-conversations > kai-conversation-item[data-rail="section"] .row-trio').first(),
+          ['opacity', 'gap', 'alignItems']),
+        style('railTrioControl', (page) => page.locator('kai-conversations > kai-conversation-item[data-rail="section"] kai-button[data-trio="compose"]').first(),
+          ['height', 'width']),
+      ],
+    },
+    {
+      // THE MENU BEHIND THE KEBAB, open: the two single-choice groups the owner
+      // described, the divider, and the plus section under it. The state leaves the
+      // menu OPEN, which is what its screenshot is of.
+      name: '47-rail-organizer-menu',
+      act: async (page) => {
+        await page.mouse.move(1000, 700);
+        await settle(200)(page);
+        const label = page.locator('kai-conversations > kai-conversation-item[data-rail="section"]').first();
+        // Hover first so the kebab is revealed the way a reader reveals it, then
+        // click the trigger the menu element renders inside its own shadow root.
+        await label.hover();
+        await settle(250)(page);
+        await label.locator('.row-trio kai-menu').click();
+        await settle(400)(page);
+        railMenu = await railMenuFacts(page);
+      },
+      probes: {
+        // THE ROWS, IN ORDER, AS RENDERED, against the copy above. The comparison
+        // is by PREFIX because a row's text carries its description after its
+        // label; a mismatch returns what was read rather than only failing.
+        theMenuReadsInTheOrderTheOwnerAskedFor: () => {
+          const rows = railMenu?.rows ?? [];
+          if (rows.length !== RAIL_MENU_ROWS.length) {
+            return `${rows.length} rows: ${JSON.stringify(rows.map((row) => row.text))}`;
+          }
+          const bad = rows
+            .map((row, index) => ({ row, want: RAIL_MENU_ROWS[index] }))
+            .filter(({ row, want }) => row.role !== want.role || !row.text.startsWith(want.label));
+          return bad.length === 0
+            ? true
+            : bad.map(({ row, want }) => `want ${want.role || 'label'} "${want.label}", read ${row.role || 'label'} "${row.text}"`).join(' | ');
+        },
+        // THE MENU SHOWS THE RAIL'S CURRENT CHOICES: exactly one checked row per
+        // group, and the two are the ones the rail is running. A menu that showed a
+        // choice the rail was not in would be the same lie as a row that did
+        // nothing.
+        theMenuShowsTheRailsCurrentChoices: () => {
+          const rows = railMenu?.rows ?? [];
+          const checked = rows.filter((row) => row.checked === 'true').map((row) => row.text);
+          if (checked.length !== 2) return `${checked.length} rows are checked: ${JSON.stringify(checked)}`;
+          const want = ['By project', 'Priority'];
+          const wrong = checked.filter((text, index) => !text.startsWith(want[index]));
+          return wrong.length === 0
+            ? true
+            : `the checked rows are ${JSON.stringify(checked)}`;
+        },
+        // AND THE TWO ROWS THAT CANNOT ACT SAY WHY, on the row itself: a disabled
+        // row whose text is only its label is a mystery, which is what this reads
+        // for. The plus section's reason is the sentence under it.
+        theUnavailableRowsSayWhy: () => {
+          const rows = railMenu?.rows ?? [];
+          const disabled = rows.filter((row) => row.disabled === 'true');
+          if (disabled.length !== 2) return `${disabled.length} rows are announced disabled`;
+          const wordless = disabled.filter((row) => row.text.split(' ').length < 4).map((row) => row.text);
+          if (wordless.length) return `a disabled row carries no reason: ${JSON.stringify(wordless)}`;
+          const note = rows.find((row) => row.role === '' && row.text.startsWith('Not in this template'));
+          return note === undefined ? 'no sentence under the plus row says why' : true;
+        },
+        // THE DIVIDER, where the owner put it: one separator, and the plus section
+        // is what comes after it.
+        theDividerOpensThePlusSection: () => {
+          const rows = railMenu?.rows ?? [];
+          const separators = rows.filter((row) => row.role === 'separator');
+          if (separators.length !== 1) return `${separators.length} dividers`;
+          const at = rows.findIndex((row) => row.role === 'separator');
+          const after = rows.slice(at + 1).map((row) => row.text);
+          return after.length > 0 && after[0].startsWith('New project')
+            ? true
+            : `the divider is followed by ${JSON.stringify(after)}`;
+        },
+      },
+      expect: {
+        theMenuReadsInTheOrderTheOwnerAskedFor: true,
+        theMenuShowsTheRailsCurrentChoices: true,
+        theUnavailableRowsSayWhy: true,
+        theDividerOpensThePlusSection: true,
+      },
+      styleProbes: [],
+    },
+    {
+      // WHAT EACH ROW ACTUALLY DOES, which is the half a screenshot cannot show.
+      // The two organizers are a state change and the sorts are two comparators, so
+      // every claim here is a before and an after read off the rail: the flat list,
+      // the order the store's own records say it should be, and the tree coming
+      // back. The state ENDS on the flat list, which is what its screenshot is of.
+      name: '48-rail-organizer-wiring',
+      // `sctx` because the store's own records are keyed by the spec this scenario
+      // declares, and the claim below is the rail's order against THEM.
+      act: async (page, sctx) => {
+        // State 47 left its menu open; a reader's first press closes it, and the
+        // driver does the same rather than clicking through an open surface.
+        await page.keyboard.press('Escape');
+        await settle(250)(page);
+        await page.mouse.move(1000, 700);
+        await settle(200)(page);
+        const before = await railShape(page);
+        /** The rail's label row, hovered so its actions are revealed. */
+        const openSectionLabel = async () => {
+          const label = page.locator('kai-conversations > kai-conversation-item[data-rail="section"]').first();
+          await label.hover();
+          await settle(250)(page);
+          return label;
+        };
+        /**
+         * One row of the organizer menu, chosen the way a reader chooses it: the
+         * label's kebab, then the row.
+         *
+         * THE MENU IS REOPENED EVERY TIME, and that is the page rather than the
+         * driver: the rows are an items ARRAY, so a choice rebuilds it, and a
+         * changed array re-runs the menu element's own body and drops its open
+         * state. A reader gets the same thing - a settings menu that closes on the
+         * choice it just made - so every read below takes a fresh menu.
+         */
+        const choose = async (name) => {
+          const label = await openSectionLabel();
+          await label.locator('.row-trio kai-menu').click();
+          await settle(350)(page);
+          await page.getByRole('menuitemradio', { name }).click();
+          await settle(450)(page);
+        };
+        // THE FILTER: it hands the caret to the rail's own search box, which is the
+        // rail's filter. Read as the active element inside the rail's shadow root,
+        // because that is where the box lives.
+        const label = await openSectionLabel();
+        await label.locator('.row-trio kai-button[data-trio="filter"]').click();
+        await settle(300)(page);
+        const focused = await page.evaluate(() => {
+          const rail = document.getElementById('conversations');
+          const active = rail?.shadowRoot?.activeElement ?? null;
+          if (active === null) return '';
+          return `${active.localName}:${active.getAttribute('type') ?? ''}:${active.getAttribute('aria-label') ?? ''}`;
+        });
+        // THE ORGANIZER: one flat list, then the menu read back to show the radio
+        // moved with it.
+        await choose('One list');
+        const oneList = await railShape(page);
+        const flatLabel = await openSectionLabel();
+        await flatLabel.locator('.row-trio kai-menu').click();
+        await settle(350)(page);
+        const oneListMenu = await railMenuFacts(page);
+        await page.keyboard.press('Escape');
+        await settle(200)(page);
+        // THE SORT: pure recency, which the store's own records can be asked about.
+        await choose('Last updated');
+        const sorted = await railShape(page);
+        // AND BACK, so "by project" is exercised in both directions.
+        await choose('By project');
+        const backToProjects = await railShape(page);
+        // END ON THE FLAT LIST, in the rail's default sort: the state's screenshot is
+        // the one list the organizer menu produces.
+        await choose('Priority');
+        await choose('One list');
+        await page.mouse.move(1000, 700);
+        await settle(250)(page);
+        const orders = await storedOrders(page, sctx.spec.indexKey);
+        railWiring = { before, focused, oneList, oneListMenu, sorted, backToProjects, orders, bindings: await rowBindingFacts(page) };
+      },
+      probes: {
+        // ONE FLAT LIST: a single label row over every chat, no folder heading and no
+        // Show more row, and no row left claiming a folder - a flat list whose rows
+        // kept one would read as rows filed under something that is not there.
+        theOrganizerSwitchesToOneFlatList: () => {
+          const rows = railWiring?.oneList ?? [];
+          const labels = rows.filter((row) => row.kind === 'section');
+          const rest = rows.filter((row) => row.kind !== 'section');
+          if (labels.length !== 1) return `${labels.length} label rows in one list`;
+          if (labels[0].title !== 'All chats') return `the flat list is headed ${JSON.stringify(labels[0].title)}`;
+          if (rest.length === 0) return 'the flat list holds no rows';
+          const notConversations = rest.filter((row) => row.kind !== 'conversation').map((row) => row.kind);
+          if (notConversations.length) return `one list still holds ${JSON.stringify(notConversations)} rows`;
+          // THE STEP, not `data-folder`: a flat row keeps the folder it is filed under
+          // as data - the organizer decides whether the rail GROUPS by it, not what
+          // the row knows - so the visible fact is that no row carries an inline step
+          // in this list either, which a rule keyed on that field would reintroduce.
+          const stepped = rest.filter((row) => (parseFloat(row.indent) || 0) !== 0).map((row) => `${row.title}:${row.indent}`);
+          return stepped.length === 0 ? true : `a flat row keeps its step: ${stepped.join(', ')}`;
+        },
+        // ...AND THE MENU AGREES, because a choice the rail has taken and the menu
+        // still shows as unchosen is the same lie as a dead row.
+        theMenuFollowsTheChoice: () => {
+          const rows = railWiring?.oneListMenu?.rows ?? [];
+          const checked = rows.filter((row) => row.checked === 'true').map((row) => row.text);
+          if (checked.length !== 2) return `${checked.length} rows are checked after the switch: ${JSON.stringify(checked)}`;
+          const want = ['One list', 'Priority'];
+          const wrong = checked.filter((text, index) => !text.startsWith(want[index]));
+          return wrong.length === 0 ? true : `the checked rows are ${JSON.stringify(checked)}`;
+        },
+        // THE FLAT LIST HOLDS EVERY CHAT THE STORE HAS, in the order the sort asked
+        // for: the block's own sort rule against the store's records, so a rail that
+        // ordered by something else - or dropped a row - is red here.
+        theSortModesAreTheStoreOrders: () => {
+          const orders = railWiring?.orders;
+          if (!orders) return 'the store was not read';
+          const rendered = (rows) => (rows ?? []).filter((row) => row.kind === 'conversation').map((row) => row.id);
+          const byPriority = rendered(railWiring?.oneList);
+          const byUpdated = rendered(railWiring?.sorted);
+          if (byPriority.length !== orders.count) return `${byPriority.length} rows under Priority, the store holds ${orders.count}`;
+          if (byPriority.join() !== orders.priority.join()) {
+            return `Priority rendered ${JSON.stringify(byPriority)}, the store's pinned-first order is ${JSON.stringify(orders.priority)}`;
+          }
+          if (byUpdated.join() !== orders.updated.join()) {
+            return `Last updated rendered ${JSON.stringify(byUpdated)}, the store's recency order is ${JSON.stringify(orders.updated)}`;
+          }
+          return true;
+        },
+        // ...AND "BY PROJECT" COMES BACK, in both directions: the label over the
+        // folders, the folders themselves, and the step a filed row carries.
+        theTreeComesBack: () => {
+          const rows = railWiring?.backToProjects ?? [];
+          const label = rows.find((row) => row.kind === 'section');
+          if (label === undefined || label.title !== 'Projects') {
+            return `the label row reads ${JSON.stringify(label?.title ?? 'nothing')}`;
+          }
+          // A HEADING BY ITS OWN FIELD, not by its id: the id of a folder heading is
+          // `folder:<group>`, so an id-based filter reads the headings it wants as
+          // the ones to skip. Filed-ness is read off `data-folder` for the same
+          // reason the inline step cannot say it any more.
+          const folders = rows.filter((row) => row.kind === 'folder' && row.folder !== '');
+          if (folders.length === 0) return 'no folder heading came back';
+          const filed = rows.filter((row) => row.kind === 'conversation' && row.folder !== '');
+          return filed.length > 0 ? true : 'no row came back filed into a folder';
+        },
+        // THE FILTER CONTROL DOES SOMETHING REAL, and it is the rail's own search
+        // box: the caret lands in the input the rail keeps inside its shadow root.
+        theFilterHandsTheCaretToTheRailsSearchBox: () => {
+          const focused = railWiring?.focused ?? '';
+          return focused === 'input:text:Search chats'
+            ? true
+            : `the caret went to ${JSON.stringify(focused || 'nothing')}`;
+        },
+        // THE PROPERTY BINDINGS SURVIVED THE ROWS THEY WERE APPLIED TO. Every row
+        // here was created by a patch, the last of them by a SINGLE one (the
+        // organizer switch), and a row's own property assignment is what a clone
+        // can lose: the menu would render empty and the rename field would come up
+        // blank. Read on EVERY row rather than on the new one, because the class is
+        // "a row created by a later patch keeps its bindings", and a lost binding
+        // is invisible until the next patch - which is exactly the luck this
+        // asserts against.
+        everyRowKeptItsPropertyBindings: () => {
+          const facts = railWiring?.bindings;
+          if (!facts) return 'the rows were not read';
+          const want = RAIL_MENU_ROWS.length;
+          const menus = facts.rows.filter((row) => row.menuItems !== want)
+            .map((row) => `${row.title}:${JSON.stringify(row.menuItems)}`);
+          if (menus.length) return `a row's menu came up without its items: ${menus.join(', ')}`;
+          const editors = facts.rows
+            .filter((row) => row.kind === 'conversation' && row.editorValue !== row.title)
+            .map((row) => `${row.title}:${JSON.stringify(row.editorValue)}`);
+          return editors.length === 0 || `a rename field came up without its title: ${editors.join(', ')}`;
+        },
+      },
+      expect: {
+        theOrganizerSwitchesToOneFlatList: true,
+        theMenuFollowsTheChoice: true,
+        theSortModesAreTheStoreOrders: true,
+        theTreeComesBack: true,
+        theFilterHandsTheCaretToTheRailsSearchBox: true,
+        everyRowKeptItsPropertyBindings: true,
+      },
+      styleProbes: [
+        // The one-list label and a flat conversation row, so the change of
+        // organization is visible in the recorded values and not only in the
+        // screenshot.
+        style('railOneListLabelRow', (page) => page.locator('kai-conversations > kai-conversation-item[data-rail="section"]'),
+          ['height', 'marginBlockStart']),
+        style('railOneListRow', (page) => page.locator('kai-conversations > kai-conversation-item[data-rail="conversation"]').first(),
+          ['marginInlineStart']),
       ],
     },
   ],
