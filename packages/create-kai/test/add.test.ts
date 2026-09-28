@@ -110,7 +110,16 @@ function mockBlock(
   name: string,
   opts: { importsMock?: boolean; manifest?: Partial<Block['manifest']> } = {},
 ): Block {
-  const base = authoredBlock(name, opts.manifest);
+  // The fixture's gateway list: what the caller declared, or the `openrouter`
+  // the default declaration spells. A caller whose `wiring` declares no gateway
+  // (the `no-route` case) keeps that - the fixture must not invent a capability
+  // the case is testing the absence of.
+  const gateways = opts.manifest?.wiring ? (opts.manifest.wiring.gateways ?? []) : ['openrouter'];
+  // The helpers build the seam from this gateway declaration, so
+  // `modeTarget`/`real`/`none` are the one spelling they own. A caller-declared
+  // `wiring` is dropped rather than merged, because a half-declared one is the
+  // defect the validator now refuses; only its `gateways`/`mockFiles` survive.
+  const base = authoredBlock(name, { ...callerManifest(opts.manifest), wiring: { gateways } });
   const mock = 'export const MOCK_SCRIPT = [];\n';
   const importer = opts.importsMock ? `import { MOCK_SCRIPT } from './mock';\n` : '';
   const files = new Map(base.files);
@@ -128,11 +137,29 @@ function mockBlock(
       // what ships it in mock mode, the second is what a mock-free mode drops.
       files: [...base.manifest.files, { path: 'mock.ts', type: 'registry:file' }],
       // The data axis, declared rather than resolved: the file the default mode
-      // ships and the one integration `--gateway` may name.
-      wiring: { gateways: ['openrouter'], mockFiles: ['mock.ts'] },
-      ...opts.manifest,
+      // ships and the one integration `--gateway` may name. This fixture's mock
+      // IS the seam's `mock` source (the shape the assistant block ships), so
+      // the seam names `mock.ts` for both fields and keeps the base block's
+      // derived `modeTarget`/`real`/`none`. A block advertising a gateway must
+      // ship the seam that makes it real; a block advertising none ships it too,
+      // because it is the same one controller.
+      wiring: {
+        gateways,
+        mockFiles: opts.manifest?.wiring?.mockFiles ?? ['mock.ts'],
+        // Derived from the base block the helper built, never restated here.
+        modeTarget: base.manifest.wiring?.modeTarget,
+        modeFiles: { ...base.manifest.wiring?.modeFiles, mock: 'mock.ts' },
+      },
     },
   };
+}
+
+/** A caller's manifest fields, minus any `wiring`: the helpers own that field. */
+function callerManifest(manifest?: Partial<Block['manifest']>): Partial<Block['manifest']> {
+  if (!manifest?.wiring) return manifest ?? {};
+  const fields = { ...manifest };
+  delete fields.wiring;
+  return fields;
 }
 
 /** The resolve + plan pair `runAdd` performs, without a filesystem. */
@@ -710,9 +737,13 @@ describe('the data axis: three modes, one spelling each (spec 4)', () => {
     mockBlock(name, { importsMock, manifest: { registryDependencies: ['route:openrouter'] } });
 
   it('mock (the default) ships the scripted mock and writes no route, loudly', async () => {
+    // The scripted mock SHIPS, but at the seam's target name: the fixture's
+    // controller imports `./mock-block.transport`, and the mode puts the
+    // scripted source there. The form's JavaScript twin is the html form's
+    // spelling of that same file.
     for (const [form, mock] of [
-      ['react', fileTarget('react', 'mock-block', 'mock.ts')],
-      ['html', fileTarget('html', 'mock-block', 'mock.js')],
+      ['react', fileTarget('react', 'mock-block', 'mock-block.transport.ts')],
+      ['html', fileTarget('html', 'mock-block', 'mock-block.transport.js')],
     ] as const) {
       const { plan, error } = await planFor(routed(), form);
       expect(error, form).toBeUndefined();
