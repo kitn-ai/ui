@@ -8,13 +8,24 @@
     { "path": "in-app-assistant.html", "type": "registry:page" },
     { "path": "in-app-assistant.controller.ts", "type": "registry:file" },
     { "path": "in-app-assistant.css", "type": "registry:file" },
-    { "path": "mock.ts", "type": "registry:file" }
+    { "path": "in-app-assistant.transport.mock.ts", "type": "registry:file" },
+    { "path": "in-app-assistant.transport.route.ts", "type": "registry:file" },
+    { "path": "in-app-assistant.transport.none.ts", "type": "registry:file" }
   ],
-  "wiring": { "mockFiles": ["mock.ts"] },
+  "wiring": {
+    "gateways": ["openrouter", "anthropic"],
+    "mockFiles": ["in-app-assistant.transport.mock.ts"],
+    "modeTarget": "in-app-assistant.transport.ts",
+    "modeFiles": {
+      "mock": "in-app-assistant.transport.mock.ts",
+      "real": "in-app-assistant.transport.route.ts",
+      "none": "in-app-assistant.transport.none.ts"
+    }
+  },
   "dependencies": ["@kitn.ai/ui"],
   "registryDependencies": [],
   "cssVars": { "light": {}, "dark": {} },
   "envVars": {},
-  "docs": "Runs against a scripted local mock out of the box - no endpoint, no key. The host page content is a stand-in: keep the aside, replace the main region with your app. To go live, replace the mock responder in in-app-assistant.controller.ts with a fetch to your chat endpoint and keep parsing through the @kitn.ai/ui/wire readers.",
+  "docs": "Runs against a scripted local mock out of the box - no endpoint, no key. The transport is one file, in-app-assistant.transport.ts: the scripted mock in the default mode, a POST to /api/chat with --gateway, a loud stub with --no-mock. Replace it with your own to go live, and keep parsing through the @kitn.ai/ui/wire readers. The host page content is a stand-in: keep the aside, replace the main region with your app.",
   "meta": { "iframeHeight": "720px" }
 }
