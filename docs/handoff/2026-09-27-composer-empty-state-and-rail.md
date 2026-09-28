@@ -224,3 +224,22 @@ The owner supplied ChatGPT's sidebar and command palette as a **layout blueprint
 **Done:** #11, `c69fee82` — `packages/blocks/README.md` now states that a recorded baseline is only as fresh as its last recording, with the six-stale-artifacts case behind it. **#2 done:** `2f472783` published `createRovingTabList`; the element is a thin adapter over it, so they cannot drift; **the block's adoption of it is still the primitive's open acceptance item.**
 
 **In flight:** `d8f19fbb` (fresh rail + new-project dialog — the owner's blocker) · `417dc752` (read-only audit of the six older specs, cited verdicts) · `72f28278` (`showTrailing` on panel + Home card, story-first) · `fc5fa2ee` (parked hygiene items, final verdicts for the two deferred twice).
+
+
+## The older-specs audit (`older-specs-audit.md`) — verdicts and the new work it found
+
+**Three DONE** (`docs-code-alignment`, `vesper-solid2`, `create-kai-add-targets`) · **three PARTIAL** · **one NOT STARTED** (voice input, all of §13, and the spec omits a precondition the audit found: §7's live interim text has nothing to consume because `interim` is a no-op on the transcribe path).
+
+**The remainders, named:**
+1. **Two blocks are half-wired** — `in-app-assistant` and `support-widget` advertise `gateways` with **no `modeTarget`/`modeFiles`** and one `mock.ts`, so `--gateway`/`--no-mock` either fail or silently do nothing. **Dispatched `b302d799`** (answer which, forbid the shape, port `support-widget`; the third block next). It also verifies **F-5/F-8/F-9/F-10**, unconfirmed from PR B0 — `support-widget`'s react form has a documented defect if F-8 is missing.
+2. **PR B2 not started** — no vue/svelte/angular/solid renderer; `INSTALL_ROOTS`' four entries are unreachable. **The highest-value item to add**: prerequisites paid off, four derived lists move at once.
+3. **The guides are assistant-only** where the spec ruled one shared module imported by every block. **Ruled: supersede the spec with the reason written in**; the shared module is the right change when a second block gains a guide surface.
+
+**New work the audit discovered:**
+- **Six Playwright suites no CI step invokes** (audio, shot, promptinput, composer, slots, input-mask), and the step that appears to police this can only see that a config matches ≥1 spec. **Largest single open promise found. Dispatched `bd4a8601`.**
+- A CI step wired ahead of its dependency (the hover-card guard waiting on PR #284).
+- **NOTHING enforces the docs-deploy vs npm-publish race** (`coupling-map` §1).
+- Deferred by their own specs: the `/blocks` redesign, block acceptance automation, MCP tools over blocks, builder/theme-studio, the production composer.
+- A stale status line in `2026-08-10-docs-code-alignment.md` ("NOT wired in yet" while CI runs it as blocking).
+
+**Adopted as a rule: do not trust any spec's status line in this repo.** Both stale ones were stale in the direction that matters.
