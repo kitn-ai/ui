@@ -138,7 +138,7 @@ The chips below the card and the notice above it aren't slots — there's no reg
 </div>
 ```
 
-`<kai-notice>` takes a `severity`, an optional `action` slot for a link, and `dismissible` for the × (which fires `kai-dismiss`). `<kai-suggestions>` takes its chips in JavaScript; clicking one fires `kai-select`.
+`<kai-notice>` takes a `severity`, an optional `action` slot for a link, and `dismissible` for the × (which fires `kai-dismiss`). `<kai-suggestions>` takes its chips in JavaScript; clicking one fires `kai-select` carrying `{ value }`, the chip's `value` or its label.
 
 ```js
 const suggestions = document.querySelector('kai-suggestions');
@@ -149,7 +149,7 @@ suggestions.suggestions = [
   { label: 'Life stuff', icon: 'smile' },
 ];
 suggestions.addEventListener('kai-select', (e) => {
-  document.querySelector('kai-prompt-input').value = e.detail.value ?? e.detail.label;
+  document.querySelector('kai-prompt-input').value = e.detail.value;
 });
 ```
 
