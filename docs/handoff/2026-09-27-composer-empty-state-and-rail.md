@@ -209,3 +209,18 @@ The owner supplied ChatGPT's sidebar and command palette as a **layout blueprint
 **Menu honesty, per row:** real — By project / One list (state change), Priority / Last updated (the kit's comparators), filter (focuses the rail's search box), compose (the new-chat path). Declared inert with a reason — Manual order (no manual position in this store), New project (no picker yet).
 
 **The owner's open eyeball:** section-label rows grew **36px → 40px** because the trio's 28px buttons are the tallest thing in them. **Fix the trio's icon size (24px keeps the accessibility floor), not the row height** — the height now comes from the density token.
+
+
+## Owner rulings + orchestrator rulings, while he reviews later (status at `2f472783` + work in flight)
+
+**His rulings on the review list:** shrink the section-label hover icons to **24px** (#6, approved) · **heading air accepted**, to be judged on sight (#7) · `kai-icon` 20-vs-24 **accepted** (#8) · the task-list arc's second card **accepted** (#9) · **"yeah, should show a folder"** (#10 — a folder heading must render, now asserted by the fresh-rail state).
+
+**My rulings, recorded so they can be checked rather than assumed:**
+- **#5** — reuse **`showTrailing`** for the panel and Home card: same concept, one vocabulary. Additive, threaded through `kai-chat`, **story-first** (he verifies kit changes at `localhost:6006`).
+- **#13** — the missing **group-persistence API** is queued and **designed from the fresh-rail round's real consumer need**, not invented in the abstract.
+- **#14** — the switch-vs-check 4px stays **accepted on measurement**; the sweep confirms the reasoning or says it does not.
+- **#15 / #16** — must reach a **final verdict** (fix, or won't-fix with the reason). A permanent "deferred" is not an answer.
+
+**Done:** #11, `c69fee82` — `packages/blocks/README.md` now states that a recorded baseline is only as fresh as its last recording, with the six-stale-artifacts case behind it. **#2 done:** `2f472783` published `createRovingTabList`; the element is a thin adapter over it, so they cannot drift; **the block's adoption of it is still the primitive's open acceptance item.**
+
+**In flight:** `d8f19fbb` (fresh rail + new-project dialog — the owner's blocker) · `417dc752` (read-only audit of the six older specs, cited verdicts) · `72f28278` (`showTrailing` on panel + Home card, story-first) · `fc5fa2ee` (parked hygiene items, final verdicts for the two deferred twice).
