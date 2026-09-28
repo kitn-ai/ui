@@ -6,8 +6,9 @@ import {
   orderedSummaries,
   mostRecentSummary,
   isConversationUnread,
+  orderedGroups,
 } from './conversation-store';
-import type { ConversationSummary } from '../types';
+import type { ConversationSummary, ConversationGroup } from '../types';
 import type { ChatMessage } from '../web-components/chat/chat-types';
 
 const INDEX_KEY = 'kai:acme-support:threads';
@@ -213,13 +214,16 @@ describe('fetchStore', () => {
     expect(store.markRead).toBeUndefined();
   });
 
-  it('implements none of rename/setPinned/setArchived/setGroup/remove — the recast contract has no such endpoints, so the omission surfaces at the controller instead of as a silent no-op', () => {
+  it('implements none of rename/setPinned/setArchived/setGroup/remove/listGroups/saveGroup/removeGroup — the recast contract has no such endpoints, so the omission surfaces at the controller instead of as a silent no-op', () => {
     const store = fetchStore('/api/conversations');
     expect(store.rename).toBeUndefined();
     expect(store.setPinned).toBeUndefined();
     expect(store.setArchived).toBeUndefined();
     expect(store.setGroup).toBeUndefined();
     expect(store.remove).toBeUndefined();
+    expect(store.listGroups).toBeUndefined();
+    expect(store.saveGroup).toBeUndefined();
+    expect(store.removeGroup).toBeUndefined();
   });
 
   it('list() GETs the index endpoint with the x-kai-user-id header when userId is set', async () => {
@@ -366,6 +370,90 @@ describe('localStorageStore — rename / setPinned / setArchived / setGroup / re
     expect(summary.archived).toBeUndefined();
     // Which is what the one list-order rule reads as false for both flags.
     expect(orderedSummaries([summary]).map((s) => s.id)).toEqual(['c1']);
+  });
+});
+
+const GROUPS_KEY = 'kai:acme-support:groups';
+
+// The group list, designed from the consumer that needs it: a created group has to
+// have somewhere canonical to live, or the app keeps it in a key of its own and says
+// so in the UI.
+describe('localStorageStore — groups (listGroups / saveGroup / removeGroup)', () => {
+  const group = (id: string, name: string, sortOrder: number): ConversationGroup => ({
+    id,
+    name,
+    sortOrder,
+    createdAt: '2026-09-27T00:00:00.000Z',
+  });
+
+  it('saveGroup() creates a group and listGroups() hands it back — a created group survives list()', async () => {
+    const store = localStorageStore('acme-support');
+    await store.saveGroup!(group('g1', 'Release notes', 0));
+    expect(await store.listGroups!()).toEqual([group('g1', 'Release notes', 0)]);
+    // Its own key, not smuggled into the conversation index: the two lists are
+    // entities with different shapes and one must not be read as the other.
+    expect(JSON.parse(localStorage.getItem(GROUPS_KEY) ?? '[]')).toEqual([group('g1', 'Release notes', 0)]);
+  });
+
+  it('listGroups() is the one group order — sortOrder ascending, ties keeping the order they were saved in', async () => {
+    // Saved deliberately NOT in sortOrder, so an accidental declaration-order
+    // pass cannot cover for a missing sort.
+    const store = localStorageStore('acme-support');
+    await store.saveGroup!(group('g-late', 'Zulu', 20));
+    await store.saveGroup!(group('g-tie-b', 'Second of the tie', 10));
+    await store.saveGroup!(group('g-tie-a', 'First of the tie', 10));
+    expect((await store.listGroups!()).map((g) => g.id)).toEqual(['g-tie-b', 'g-tie-a', 'g-late']);
+  });
+
+  it('saveGroup() on an existing id REPLACES it — create-or-update keyed on the id, never a second entry', async () => {
+    const store = localStorageStore('acme-support');
+    await store.saveGroup!(group('g1', 'Draft', 0));
+    await store.saveGroup!(group('g1', 'Release notes', 5));
+    expect(await store.listGroups!()).toEqual([group('g1', 'Release notes', 5)]);
+  });
+
+  it('removeGroup() deletes the group and UNFILES the conversations filed under it — no conversation is deleted', async () => {
+    const store = localStorageStore('acme-support');
+    await store.save('c1', [msg('u1', 'filed here')]);
+    await store.setGroup!('c1', 'g1');
+    await store.saveGroup!(group('g1', 'Release notes', 0));
+    await store.removeGroup!('g1');
+    expect(await store.listGroups!()).toEqual([]);
+    // The conversation survives, whole: unfiled, not gone.
+    const [summary] = await store.list();
+    expect(summary.id).toBe('c1');
+    expect(summary.groupId).toBeUndefined();
+    expect(await store.load('c1')).toEqual([msg('u1', 'filed here')]);
+  });
+
+  it('removeGroup() of an id nobody created is a no-op — a conversation filed by hand keeps its filing', async () => {
+    const store = localStorageStore('acme-support');
+    await store.save('c1', [msg('u1', 'hi')]);
+    await store.setGroup!('c1', 'g-typed-by-hand');
+    await expect(store.removeGroup!('g-missing')).resolves.toBeUndefined();
+    expect((await store.list())[0].groupId).toBe('g-typed-by-hand');
+  });
+
+  it('per-userId namespacing keeps two users\' group lists disjoint', async () => {
+    const alice = localStorageStore('acme-support', 'alice');
+    const bob = localStorageStore('acme-support', 'bob');
+    await alice.saveGroup!(group('g1', 'Alice only', 0));
+    expect(await bob.listGroups!()).toEqual([]);
+  });
+
+  it('decide loudly: a corrupt group list does not throw — listGroups() drops it and warns', async () => {
+    localStorage.setItem(GROUPS_KEY, '{not json');
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const store = localStorageStore('acme-support');
+    expect(await store.listGroups!()).toEqual([]);
+    expect(warn).toHaveBeenCalled();
+    warn.mockRestore();
+  });
+
+  it('orderedGroups() is the exported one group order: a fresh array, the caller\'s never mutated', () => {
+    const given: ConversationGroup[] = [group('b', 'B', 1), group('a', 'A', 0)];
+    expect(orderedGroups(given).map((g) => g.id)).toEqual(['a', 'b']);
+    expect(given.map((g) => g.id)).toEqual(['b', 'a']);
   });
 });
 

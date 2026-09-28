@@ -14,9 +14,10 @@
  * shows AND it is the active conversation, so any missing leg suppresses `markRead`;
  * `anyUnread()` folding the one public read of `lastReadAt` over the cached summaries,
  * excluding the active conversation only while it is seen; the five list operations
- * (rename / pin / archive / group / delete) delegating to the store or refusing loudly; and a
- * failed store call reported rather than swallowed. */
-import type { ConversationSummary } from '../types';
+ * (rename / pin / archive / group / delete) delegating to the store or refusing loudly; the
+ * group list (read / save / remove) on the same terms; and a failed store call reported
+ * rather than swallowed. */
+import type { ConversationSummary, ConversationGroup } from '../types';
 import type { ChatMessage } from '../web-components/chat/chat-types';
 import {
   mostRecentSummary,
@@ -35,6 +36,9 @@ export type ConversationControllerOp =
   | 'setPinned'
   | 'setArchived'
   | 'setGroup'
+  | 'listGroups'
+  | 'saveGroup'
+  | 'removeGroup'
   | 'remove';
 
 export interface ConversationControllerHooks {
@@ -115,6 +119,15 @@ export interface ConversationController {
   /** File a conversation under `groupId` (`undefined` unfiles it), then
    *  refresh; refuses loudly when the store implements no `setGroup`. */
   setGroup(id: string, groupId: string | undefined): Promise<void>;
+  /** The store's groups in the one group order, or `[]`; refuses loudly when the
+   *  store implements no `listGroups`. Not cached: nothing here derives from them. */
+  listGroups(): Promise<ConversationGroup[]>;
+  /** Create or update a group record; refuses loudly when the store implements
+   *  no `saveGroup`. No refresh follows, see the note below. */
+  saveGroup(group: ConversationGroup): Promise<void>;
+  /** Delete a group, unfiling its conversations and refreshing; refuses loudly
+   *  when the store implements no `removeGroup`. */
+  removeGroup(id: string): Promise<void>;
   // Archiving is not deleting, so the stored thread is untouched: what changes is the active
   // pointer and the delivered thread, through the same step `remove()` uses, because an
   // archived row leaves every list and a thread still claiming to show it cannot be navigated
@@ -332,6 +345,51 @@ export function createConversationController(
       }
       // No pointer work, unlike archiving: refiling a row leaves it in the list, so
       // there is no unreachable state to walk out of and nothing to hand back.
+      await refresh();
+    },
+
+    // A store without the group list refuses on the read as well as the two writes: a
+    // consumer that ASKS rather than assuming gets an answer either way, and `[]` plus a
+    // reported error is the loud version of "this store keeps no groups" (never a quiet
+    // empty rail that reads as "you have not made one").
+    async listGroups() {
+      if (!store.listGroups) {
+        refuse('listGroups', 'listGroups');
+        return [];
+      }
+      try {
+        return await store.listGroups();
+      } catch (err) {
+        report('listGroups', err);
+        return [];
+      }
+    },
+
+    async saveGroup(group) {
+      if (!store.saveGroup) return refuse('saveGroup', 'saveGroup');
+      try {
+        await store.saveGroup(group);
+      } catch (err) {
+        report('saveGroup', err);
+      }
+      // NO refresh, unlike every other write here: no field of a `ConversationSummary` is
+      // a group's own, so a group record cannot move the cached summaries. The caller's
+      // own `listGroups()` is where the new record comes back.
+    },
+
+    async removeGroup(id) {
+      if (!store.removeGroup) return refuse('removeGroup', 'removeGroup');
+      try {
+        await store.removeGroup(id);
+      } catch (err) {
+        report('removeGroup', err);
+        return;
+      }
+      // A refresh, unlike saveGroup: removal UNFILES every conversation filed under the
+      // group, so the cached summaries' `groupId`s move and the rail re-projects those rows
+      // onto the ungrouped remainder. No pointer work, the reasoning setGroup() carries:
+      // an unfiled row stays in the list, so there is no unreachable state and nothing to
+      // hand back.
       await refresh();
     },
 

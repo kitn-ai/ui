@@ -17,7 +17,7 @@
  * imports) for no-bundler/CDN pages, which cannot load the solid-importing
  * root bundle, see src/stores/index.ts for the decision record.
  */
-import type { ConversationSummary } from '../types';
+import type { ConversationSummary, ConversationGroup } from '../types';
 import type { ChatMessage } from '../web-components/chat/chat-types';
 
 export interface ConversationStore {
@@ -70,6 +70,20 @@ export interface ConversationStore {
   // calls the store directly has to check for it first, exactly as for `rename`.
   /** File `id` under the group whose `id` is `groupId`; `undefined` unfiles it. */
   setGroup?(id: string, groupId: string | undefined): Promise<void>;
+  // The GROUP LIST, on `setGroup`'s own opt-in terms and for the same reason. `setGroup`
+  // files a conversation into a group; without these three, a CREATED group has nowhere
+  // canonical to live, so a consumer keeps its own key for them and says so in the UI (the
+  // block that shipped it keeps projects under `kai:assistant:projects`). One concept, three
+  // verbs, mirroring the conversation trio: `listGroups` reads, `saveGroup` is the
+  // create-or-update write, `removeGroup` the delete. A store whose summaries it does not
+  // own says so with their ABSENCE (`fetchStore`, see its own doc) and
+  // `ConversationController` refuses loudly, exactly as for `setGroup`.
+  /** List this store's groups in the one group order: ascending `sortOrder`. */
+  listGroups?(): Promise<ConversationGroup[]>;
+  /** Create or update `group`, keyed on `group.id`; the stored record is that object. */
+  saveGroup?(group: ConversationGroup): Promise<void>;
+  /** Delete group `id`; every conversation filed under it is unfiled, never deleted. */
+  removeGroup?(id: string): Promise<void>;
   /** Delete `id` and everything stored under it. */
   remove?(id: string): Promise<void>;
 }
@@ -113,6 +127,16 @@ export function byPinnedThenRecency(
  */
 export function orderedSummaries(summaries: readonly ConversationSummary[]): ConversationSummary[] {
   return summaries.filter((c) => !c.archived).sort(byPinnedThenRecency);
+}
+
+/** The ONE group order: ascending `sortOrder`, ties keeping the order they were given
+ *  (stable sort), so a rail that renders the array as-is reads the same order the store
+ *  hands up. A missing or non-finite `sortOrder` reads as `0` (an unplaced group lands
+ *  first) rather than poisoning the comparator with `NaN`, the same defence `byRecency`
+ *  makes one concept over. Returns a fresh array; never mutates the caller's. */
+export function orderedGroups(groups: readonly ConversationGroup[]): ConversationGroup[] {
+  const order = (g: ConversationGroup): number => (Number.isFinite(g.sortOrder) ? g.sortOrder : 0);
+  return [...groups].sort((a, b) => order(a) - order(b));
 }
 
 /**
@@ -163,6 +187,38 @@ function indexKey(name: string, userId: string | undefined): string {
   return userId ? `kai:${name}:${userId}:threads` : `kai:${name}:threads`;
 }
 
+/** The group list's own key, beside the conversation index: a group is its own entity,
+ *  and its list must never be read as a conversation list. */
+function groupsKey(name: string, userId: string | undefined): string {
+  return userId ? `kai:${name}:${userId}:groups` : `kai:${name}:groups`;
+}
+
+/** Read a JSON array from `key`, warning and returning `[]` when it is missing or
+ *  corrupt. The ONE read for both stored lists (the conversation index and the group
+ *  list), so "corrupt" reads identically whichever list a consumer reaches for. */
+function readJsonArray<T>(key: string, corruptMessage: string): T[] {
+  const raw = localStorage.getItem(key);
+  if (!raw) return [];
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) throw new Error('stored value was not an array');
+    return parsed as T[];
+  } catch {
+    console.warn(`[${key}] ${corruptMessage}`);
+    return [];
+  }
+}
+
+/** The ONE write for both stored lists, so "storage unavailable" degrades the same way
+ *  for each: this tab's session runs without persistence. */
+function writeJsonArray(key: string, value: unknown): void {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    /* storage unavailable: this browser session runs without persistence */
+  }
+}
+
 /** The legacy pre-conversations single-thread key (codegen.ts's emitHistorySetup). */
 function legacyKey(name: string, userId: string | undefined): string {
   return userId ? `kai:${name}:${userId}:thread` : `kai:${name}:thread`;
@@ -181,26 +237,27 @@ function truncatePreview(text: string): string {
 
 export function localStorageStore(name: string, userId?: string): ConversationStore {
   const idxKey = indexKey(name, userId);
+  const grpKey = groupsKey(name, userId);
 
   function readIndex(): ConversationSummary[] {
-    const raw = localStorage.getItem(idxKey);
-    if (!raw) return [];
-    try {
-      const parsed: unknown = JSON.parse(raw);
-      if (!Array.isArray(parsed)) throw new Error('index was not an array');
-      return parsed as ConversationSummary[];
-    } catch {
-      console.warn(`[${idxKey}] stored conversation index was corrupt; ignoring and starting fresh`);
-      return [];
-    }
+    return readJsonArray<ConversationSummary>(
+      idxKey,
+      'stored conversation index was corrupt; ignoring and starting fresh',
+    );
   }
 
   function writeIndex(entries: ConversationSummary[]): void {
-    try {
-      localStorage.setItem(idxKey, JSON.stringify(entries));
-    } catch {
-      /* storage unavailable: this browser session runs without persistence */
-    }
+    writeJsonArray(idxKey, entries);
+  }
+
+  /** Same seam as `readIndex`/`writeIndex`, one list over: the group records this store
+   *  owns, in the order they were written. */
+  function readGroups(): ConversationGroup[] {
+    return readJsonArray<ConversationGroup>(grpKey, 'stored group list was corrupt; ignoring and starting fresh');
+  }
+
+  function writeGroups(groups: ConversationGroup[]): void {
+    writeJsonArray(grpKey, groups);
   }
 
   /** Merge `patch` into the index entry for `id`. A field patched to `undefined` is
@@ -256,16 +313,7 @@ export function localStorageStore(name: string, userId?: string): ConversationSt
       return readIndex();
     },
     async load(id) {
-      const raw = localStorage.getItem(threadKey(name, userId, id));
-      if (!raw) return [];
-      try {
-        const parsed: unknown = JSON.parse(raw);
-        if (!Array.isArray(parsed)) throw new Error('stored thread was not an array');
-        return parsed as ChatMessage[];
-      } catch {
-        console.warn(`[${threadKey(name, userId, id)}] stored thread was corrupt; starting empty`);
-        return [];
-      }
+      return readJsonArray<ChatMessage>(threadKey(name, userId, id), 'stored thread was corrupt; starting empty');
     },
     async save(id, messages) {
       try {
@@ -340,6 +388,33 @@ export function localStorageStore(name: string, userId?: string): ConversationSt
       // not this step's call to make quietly.
       patchEntry(id, { groupId });
     },
+    async listGroups() {
+      // Sorted HERE rather than left to the caller: the built-in list surface renders the
+      // array it is handed as-is (`ConversationList`'s `<For each={groups}>`), so the one
+      // group order has to hold at the boundary that produces the array. Fresh on every
+      // call, the kai- reactivity contract `list()` documents.
+      return orderedGroups(readGroups());
+    },
+    async saveGroup(group) {
+      // Create-or-update keyed on `group.id`, through the same append the conversation
+      // index's own save() uses, so a new id lands last and an existing one is replaced
+      // rather than duplicated. The stored record is exactly the object handed in: what a
+      // group is called and how it orders is the app's decision, and `saveGroup` is the
+      // write, not the policy. No try/catch here, the same shape setGroup() has: the
+      // read/write pair below is the one seam that absorbs a missing localStorage.
+      writeGroups([...readGroups().filter((g) => g.id !== group.id), group]);
+    },
+    async removeGroup(id) {
+      // The group goes. The conversations filed under it stay and come back UNFILED: a
+      // group is a filing, not a container, so removing one can never take a conversation's
+      // messages with it, and a stored `groupId` pointing at a group that no longer exists
+      // is a reference the store would hold forever while the rail silently renders it as
+      // ungrouped (`ConversationList`'s stale-id fallthrough). Clearing it makes the record
+      // say what the surface already shows. `undefined` is dropped by JSON.stringify, the
+      // absent-means-unfiled spelling setGroup() documents.
+      writeGroups(readGroups().filter((g) => g.id !== id));
+      writeIndex(readIndex().map((e) => (e.groupId === id ? { ...e, groupId: undefined } : e)));
+    },
     async remove(id) {
       try {
         localStorage.removeItem(threadKey(name, userId, id));
@@ -360,18 +435,19 @@ export function localStorageStore(name: string, userId?: string): ConversationSt
  *  rejection, a caller (ChatThread's lifecycle, Task 2) decides how to
  *  degrade, exactly as the spec's degradation section requires.
  *
- *  No `markRead`, and none of `rename`/`setPinned`/`setArchived`/`setGroup`/`remove`: the
- *  recast contract above has no such endpoints, and inventing request shapes
- *  here would be this adapter deciding a backend behavior rather than passing
- *  one through. `list()`/`load()` already forward whatever `lastReadAt`,
- *  `pinned`, `archived` and `groupId` the backend's own summaries carry, same as any other
- *  `ConversationSummary` field, so a consumer who wants any of these writes
- *  needs their own store (or their own endpoint plus a thin wrapper), same as
- *  any other capability this recast doesn't cover. The caller hears about the
- *  omission rather than discovering it as a silent no-op:
- *  `ConversationController` reports an error for each of these when the store
- *  does not implement it, `setGroup` included: a PUT of `{ messages }` cannot
- *  refile a row whose summary the server owns. */
+ *  No `markRead`, and none of `rename`/`setPinned`/`setArchived`/`setGroup`/`remove`, and no
+ *  `listGroups`/`saveGroup`/`removeGroup`: the recast contract above has no such endpoints
+ *  (a conversation index endpoint and a per-conversation messages endpoint), and inventing
+ *  request shapes here would be this adapter deciding a backend behavior rather than passing
+ *  one through. In particular the group LIST is the part of this omission that a consumer
+ *  meets first: a `{ messages }` PUT can neither create a group nor hand back the groups a
+ *  backend already holds, so a created group has nowhere canonical to live and an app that
+ *  wants one keeps its own list (or its own endpoints plus a thin wrapper). `list()`/`load()`
+ *  already forward whatever `lastReadAt`, `pinned`, `archived` and `groupId` the backend's own
+ *  summaries carry, same as any other `ConversationSummary` field. The caller hears about the
+ *  omission rather than discovering it as a silent no-op: `ConversationController` reports an
+ *  error for each of these when the store does not implement it, `setGroup` included: a PUT of
+ *  `{ messages }` cannot refile a row whose summary the server owns. */
 export function fetchStore(url: string, userId?: string): ConversationStore {
   const headers: Record<string, string> = userId ? { 'x-kai-user-id': userId } : {};
   return {

@@ -24,6 +24,7 @@ export {
   byRecency,
   byPinnedThenRecency,
   orderedSummaries,
+  orderedGroups,
   mostRecentSummary,
   isConversationUnread,
   LEGACY_THREAD_MIGRATED_TITLE,
@@ -39,9 +40,10 @@ export type {
   ConversationControllerOp,
 } from './conversation-controller';
 // The type `ConversationStore.list()` returns and `onSummariesChange` hands
-// you. It shipped only through the package ROOT, whose bundle bare-imports
-// solid-js, so a framework-neutral controller consuming this self-contained
-// entry had to import @kitn.ai/ui for a type its own dependency already gives
-// it. Type-only, so dist/stores.js is byte-equal
+// you, and (with `listGroups()`) the type `@kitn.ai/ui/stores` hands a
+// framework-neutral consumer of this entry. Both shipped only through the
+// package ROOT, whose bundle bare-imports solid-js, so a controller consuming
+// this self-contained entry had to import @kitn.ai/ui for types its own
+// dependency already gives it. Type-only, so dist/stores.js is byte-equal
 // and the entry stays solid-free.
-export type { ConversationSummary } from '../types';
+export type { ConversationSummary, ConversationGroup } from '../types';

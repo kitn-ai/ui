@@ -9,8 +9,8 @@
  */
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { createConversationController, type ConversationControllerHooks } from './conversation-controller';
-import { isConversationUnread, type ConversationStore } from '../primitives/conversation-store';
-import type { ConversationSummary } from '../types';
+import { isConversationUnread, orderedGroups, type ConversationStore } from '../primitives/conversation-store';
+import type { ConversationSummary, ConversationGroup } from '../types';
 import type { ChatMessage } from '../web-components/chat/chat-types';
 
 const msg = (text: string): ChatMessage => ({
@@ -25,6 +25,7 @@ const msg = (text: string): ChatMessage => ({
  *  writers are setPinned()/setArchived()/setGroup(). */
 function fakeStore() {
   const threads = new Map<string, ChatMessage[]>();
+  const groups = new Map<string, ConversationGroup>();
   const meta = new Map<string, { updatedAt: string; lastReadAt?: string; pinned?: boolean; archived?: boolean; groupId?: string; title?: string }>();
   let clock = 1000;
   const now = () => new Date((clock += 1000)).toISOString();
@@ -90,8 +91,24 @@ function fakeStore() {
       threads.delete(id);
       meta.delete(id);
     },
+    // The group list, on the store that owns both sides of the filing. Removal
+    // mirrors localStorageStore: the group goes, the conversations filed under it
+    // stay and come back UNFILED.
+    async listGroups() {
+      calls.push('listGroups');
+      return orderedGroups([...groups.values()]);
+    },
+    async saveGroup(group) {
+      calls.push(`saveGroup:${group.id}`);
+      groups.set(group.id, group);
+    },
+    async removeGroup(id) {
+      calls.push(`removeGroup:${id}`);
+      groups.delete(id);
+      for (const m of meta.values()) if (m.groupId === id) m.groupId = undefined;
+    },
   };
-  return { store, calls, threads, meta };
+  return { store, calls, threads, meta, groups };
 }
 
 const controllerWith = (store: ConversationStore, hooks: ConversationControllerHooks = {}) =>
@@ -448,6 +465,91 @@ describe('the three-leg seen rule for markRead', () => {
     await c.setOpen(false);
     await c.setOpen(true);
     expect(f.calls.filter((x) => x.startsWith('markRead'))).toEqual([]);
+  });
+});
+
+describe('group list operations (listGroups / saveGroup / removeGroup)', () => {
+  const group = (id: string, name: string, sortOrder: number): ConversationGroup => ({
+    id,
+    name,
+    sortOrder,
+    createdAt: '2026-09-27T00:00:00.000Z',
+  });
+
+  /** One saved conversation filed under `g1`, the recorder cleared. */
+  async function seeded(over: ConversationControllerHooks = {}) {
+    const f = fakeStore();
+    f.threads.set('c1', [msg('first')]);
+    f.meta.set('c1', { updatedAt: new Date(1000).toISOString(), groupId: 'g1' });
+    f.groups.set('g1', group('g1', 'Release notes', 0));
+    const c = controllerWith(f.store, over);
+    await c.refresh();
+    f.calls.length = 0;
+    return { ...f, c };
+  }
+
+  it('listGroups() hands up the store\'s own list, in the one group order', async () => {
+    const f = fakeStore();
+    f.groups.set('g-late', group('g-late', 'Zulu', 20));
+    f.groups.set('g-first', group('g-first', 'Alpha', 10));
+    const c = controllerWith(f.store);
+    expect((await c.listGroups()).map((g) => g.id)).toEqual(['g-first', 'g-late']);
+    expect(f.calls).toEqual(['listGroups']);
+  });
+
+  it('saveGroup() delegates and refreshes nothing — no ConversationSummary field is the group\'s own', async () => {
+    const { c, calls } = await seeded();
+    await c.saveGroup(group('g2', 'Archive', 1));
+    expect(calls).toEqual(['saveGroup:g2']);
+    // The conversations' own list is untouched by a group record, which is why
+    // this op does not re-list: `orderedGroups` covers the read side.
+    expect(c.summaries().map((s) => s.id)).toEqual(['c1']);
+  });
+
+  it('removeGroup() delegates, then refreshes: the filed conversation comes back UNFILED and stays in the list', async () => {
+    const { c, calls, threads } = await seeded();
+    await c.select('c1');
+    calls.length = 0;
+    await c.removeGroup('g1');
+    expect(calls).toEqual(['removeGroup:g1', 'list']);
+    const [summary] = c.summaries();
+    expect(summary.id).toBe('c1');
+    expect(summary.groupId).toBeUndefined();
+    // Unfiled is not archived and not deleted: the thread is whole and the active
+    // pointer is left alone, the same reasoning setGroup() carries.
+    expect(threads.get('c1')).toEqual([msg('first')]);
+    expect(c.activeId()).toBe('c1');
+  });
+
+  it('a store without the three group ops REFUSES LOUDLY, naming what was not written', async () => {
+    const onError = vi.fn();
+    const f = fakeStore();
+    delete (f.store as { listGroups?: unknown }).listGroups;
+    delete (f.store as { saveGroup?: unknown }).saveGroup;
+    delete (f.store as { removeGroup?: unknown }).removeGroup;
+    const c = controllerWith(f.store, { onError });
+    await c.listGroups();
+    await c.saveGroup(group('g1', 'Release notes', 0));
+    await c.removeGroup('g1');
+    expect(onError.mock.calls.map(([op]) => op)).toEqual(['listGroups', 'saveGroup', 'removeGroup']);
+    expect(f.calls).toEqual([]);
+    // The message names the method, so a surface can say WHY nothing happened.
+    expect((onError.mock.calls[0][1] as Error).message).toContain('listGroups()');
+  });
+
+  it('a failed removeGroup() reports its own op and leaves the cache as it was', async () => {
+    const f = fakeStore();
+    f.threads.set('c1', [msg('first')]);
+    f.meta.set('c1', { updatedAt: new Date(1000).toISOString(), groupId: 'g1' });
+    f.store.removeGroup = async () => {
+      throw new Error('disk on fire');
+    };
+    const onError = vi.fn();
+    const c = controllerWith(f.store, { onError });
+    await c.refresh();
+    await c.removeGroup('g1');
+    expect(onError).toHaveBeenCalledWith('removeGroup', expect.any(Error));
+    expect(c.summaries()[0].groupId).toBe('g1');
   });
 });
 

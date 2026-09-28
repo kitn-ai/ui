@@ -40,7 +40,7 @@ export type { PdfPreviewOptions } from './primitives/pdf-preview';
 // so a no-bundler CDN page can't load it — the stores subpath is the raw-URL
 // route to the same module. Keep BOTH: removing these re-exports would break
 // every existing bundler consumer for no gain.
-export { localStorageStore, fetchStore, byRecency, byPinnedThenRecency, orderedSummaries, mostRecentSummary, isConversationUnread, LEGACY_THREAD_MIGRATED_TITLE } from './primitives/conversation-store';
+export { localStorageStore, fetchStore, byRecency, byPinnedThenRecency, orderedSummaries, orderedGroups, mostRecentSummary, isConversationUnread, LEGACY_THREAD_MIGRATED_TITLE } from './primitives/conversation-store';
 export type { ConversationStore } from './primitives/conversation-store';
 // The roving tab list: the keyboard half of a list rail — one tab stop, arrow traversal,
 // Home/End and activation over rows the CALLER resolves. Public so an application
