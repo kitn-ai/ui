@@ -441,8 +441,7 @@
           "probes": {
             "theFolderHadAHeading": true,
             "closingHidesTheFoldersRows": true,
-            "reopeningRestoresTheRows": true,
-            "theCaretSaysTheState": true
+            "reopeningRestoresTheRows": true
           },
           "styles": {}
         },
@@ -539,9 +538,9 @@
             "theProjectsLabelHeadsTheFolders": true,
             "theLabelReadsLikeRecents": true,
             "theRowsAreOneLine": true,
+            "headingIsOneLine": true,
             "theSectionStartsCarryTheAir": true,
-            "theSectionLabelsTakeTheMutedToken": true,
-            "theCaretTrailsTheTitleAndReveals": true
+            "theSectionLabelsTakeTheMutedToken": true
           },
           "styles": {
             "railConversationRowTitle": {
@@ -563,10 +562,6 @@
             "railProjectsLabelRow": {
               "height": "36px",
               "marginBlockStart": "8px"
-            },
-            "railCaret": {
-              "color": "oklab(0.140764 0.00120224 -0.00421676 / 0.8)",
-              "opacity": "0"
             }
           }
         },
@@ -637,7 +632,7 @@
               "marginBlockStart": "8px"
             },
             "freshRailRecentsHeading": {
-              "height": "53px",
+              "height": "40px",
               "marginInlineStart": "0px"
             }
           }
@@ -656,7 +651,7 @@
           },
           "styles": {
             "createdProjectFolder": {
-              "height": "53px",
+              "height": "40px",
               "marginInlineStart": "0px"
             }
           }
@@ -1175,8 +1170,7 @@
           "probes": {
             "theFolderHadAHeading": true,
             "closingHidesTheFoldersRows": true,
-            "reopeningRestoresTheRows": true,
-            "theCaretSaysTheState": true
+            "reopeningRestoresTheRows": true
           },
           "styles": {}
         },
@@ -1273,9 +1267,9 @@
             "theProjectsLabelHeadsTheFolders": true,
             "theLabelReadsLikeRecents": true,
             "theRowsAreOneLine": true,
+            "headingIsOneLine": true,
             "theSectionStartsCarryTheAir": true,
-            "theSectionLabelsTakeTheMutedToken": true,
-            "theCaretTrailsTheTitleAndReveals": true
+            "theSectionLabelsTakeTheMutedToken": true
           },
           "styles": {
             "railConversationRowTitle": {
@@ -1297,10 +1291,6 @@
             "railProjectsLabelRow": {
               "height": "36px",
               "marginBlockStart": "8px"
-            },
-            "railCaret": {
-              "color": "oklab(0.985098 0.0000447631 0.0000197291 / 0.8)",
-              "opacity": "0"
             }
           }
         },
@@ -1371,7 +1361,7 @@
               "marginBlockStart": "8px"
             },
             "freshRailRecentsHeading": {
-              "height": "53px",
+              "height": "40px",
               "marginInlineStart": "0px"
             }
           }
@@ -1390,7 +1380,7 @@
           },
           "styles": {
             "createdProjectFolder": {
-              "height": "53px",
+              "height": "40px",
               "marginInlineStart": "0px"
             }
           }
