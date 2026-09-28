@@ -1224,7 +1224,14 @@ describe('the authored manifests declare the data axis the CLI resolves', () => 
     for (const name of ['support-widget', 'in-app-assistant']) {
       const block = byName.get(name);
       expect(block, `${name} is not in the authored registry`).toBeDefined();
-      expect(declaredMockFiles(block!), name).toContain('mock.ts');
+      // The seam resolves ONE file per data mode, and the mock it resolves must be
+      // among the files the manifest declares. Grading the two declarations against
+      // each other rather than against a filename means a rename moves both, instead
+      // of silently invalidating an assertion written when the file was called
+      // something else.
+      const seamMock = block!.manifest.wiring?.modeFiles?.mock;
+      expect(seamMock, `${name} declares no data-mode seam, so its mock cannot resolve`).toBeDefined();
+      expect(declaredMockFiles(block!), name).toContain(seamMock);
       const gateways = block!.manifest.wiring?.gateways ?? [];
       expect(gateways.length, `${name} declares no gateway, so --gateway can never satisfy it`).toBeGreaterThan(0);
       // The declared ids are the CATALOG's, checked where the real catalog is:
