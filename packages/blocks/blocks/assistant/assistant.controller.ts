@@ -2186,6 +2186,11 @@ export function createController(deps: AssistantDeps): AssistantController {
         groupName: catalogue().find((project) => project.id === group)?.name ?? '',
         caretHidden: true,
         caretName: '',
+        // A conversation is not a folder, so it paints no project glyph. This is
+        // the one row literal the two builders above do not produce, and it is
+        // the reason the field is required rather than optional: a projection
+        // that forgot it would paint a folder on every row in the rail.
+        folderIconHidden: true,
         menuHidden: false,
         // A conversation's trailing edge is its own menu and nothing else, so the
         // section labels' actions are off here; they are on the controlNode's

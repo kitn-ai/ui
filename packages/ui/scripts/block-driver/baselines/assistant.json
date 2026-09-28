@@ -1,6 +1,6 @@
 {
   "scenario": "assistant",
-  "base": "http://localhost:8959",
+  "base": "http://localhost:8960",
   "runs": [
     {
       "page": "block",
