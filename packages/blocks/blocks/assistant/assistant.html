@@ -66,12 +66,14 @@
            and no settings screen, so the block shows one and says so in every
            item it cannot wire.
 
-           ONE OF THE ELEMENT'S OWN CHANNELS CARRIES A RAIL SETTING: the `#ref`,
-           which is how the section label's filter control reaches the rail's
-           search box (`focus()` on the element, because the box is inside its
-           shadow root). Nothing else about the rail's state rides an attribute
-           the stylesheet reads - what the rows look like is the same under either
-           organizer. -->
+           THE ELEMENT'S OWN SEARCH BOX IS SWITCHED OFF (`searchable="false"`),
+           because the page offers ONE search affordance and it is the palette at
+           the top of the aside: a rail with two boxes filtering the same rows is
+           two places to look for the same thing. The `@kai-search` binding stays
+           beside it, so a consumer who turns the box back on gets a working filter
+           rather than a dead one. Nothing else about the rail's state rides an
+           attribute the stylesheet reads - what the rows look like is the same
+           under either organizer. -->
       <kai-conversations
         id="conversations"
         slot="start"
@@ -79,6 +81,7 @@
         :theme="themeMode"
         .collapsed="railCollapsed"
         .activeId="activeId"
+        searchable="false"
         @kai-conversation-select="openConversation"
         @kai-new-chat="newChat"
         @kai-toggle-sidebar="collapseRail"
@@ -120,15 +123,36 @@
              screen reader and once to the hovered eye. A real app points each
              row at the screen it owns. -->
         <div slot="header" class="rail-header">
-          <kai-button
-            id="rail-collapse"
-            :theme="themeMode"
-            variant="ghost"
-            size="icon-sm"
-            icon="panel-left"
-            label="Toggle sidebar"
-            @kai-click="collapseRail"
-          ></kai-button>
+          <!-- THE HEADER'S OWN ROW: the collapse control at its start, the search
+               button at its END - the top right of the aside, which is where the
+               reference puts it. The search button OPENS THE PALETTE, and it is the
+               only search affordance the page offers: the element's own filter box
+               is switched off above (`searchable="false"`), so the rail does not
+               offer two ways to search the same rows.
+
+               IT REPLACES THE BUILT-IN FILTER rather than sitting beside it: the
+               section label's own filter control fires the same `openPalette`
+               action, so the two are one surface reached from two places. -->
+          <div class="rail-head-row">
+            <kai-button
+              id="rail-collapse"
+              :theme="themeMode"
+              variant="ghost"
+              size="icon-sm"
+              icon="panel-left"
+              label="Toggle sidebar"
+              @kai-click="collapseRail"
+            ></kai-button>
+            <kai-button
+              id="rail-search"
+              :theme="themeMode"
+              variant="ghost"
+              size="icon-sm"
+              icon="search"
+              label="Search chats"
+              @kai-click="openPalette"
+            ></kai-button>
+          </div>
 
           <div class="rail-actions">
             <!-- THE ONE ROW THAT ACTS, and it is a kai-button for the one reason
@@ -449,12 +473,10 @@
                the rows and this is not a row.
 
                THREE CONTROLS, in the reference's order: the kebab, which opens
-               the rail's own two settings; a filter, which hands the caret to the
-               rail's search box (the rail's filter IS that box, so the honest
-               thing this control can do is take the reader to it, through the
-               element's own focus method - the box is inside the rail's shadow
-               root); and a compose, which fires the same new-chat action the
-               header's row does.
+               the rail's own two settings; a filter, which opens the page's one
+               search (the palette, through the same action the header's search
+               button fires); and a compose, which fires the same new-chat action
+               the header's row does.
 
                THE COMPOSE ANSWERS TO "New conversation", and that is the same act
                under the noun this block's data already uses - a chat IS a stored
@@ -495,7 +517,7 @@
               size="icon-sm"
               icon="list-filter"
               label="Filter chats"
-              @kai-click="filterChats"
+              @kai-click="openPalette"
             ></kai-button>
             <kai-button
               data-trio="compose"
@@ -641,6 +663,52 @@
             Create project
           </kai-button>
         </div>
+      </kai-dialog>
+
+      <!-- THE COMMAND PALETTE, and it is the SHORTEST possible wiring because the
+           element is already a palette: `kai-command` owns the search input (its
+           `placeholder`), takes flat rows carrying `icon` / `description` /
+           `shortcut`, buckets them under their `group` headers, filters them itself,
+           and documents the `focus()` method this call needs for exactly this case.
+           Nothing about the palette is rebuilt here - every row is one field of
+           State, projected from what the page already has.
+
+           IT RIDES IN A MODAL, and the rail's own WALK is what decides that rather
+           than taste. The rail's roving focus is one tab stop wide, and an overlay
+           inside the rail would have to join that region's tab order; a dialog is a
+           child of the SHELL instead, so it is not a descendant of the rail at all
+           and the rail's walk is unchanged by it. The kit's dialog is also what makes
+           the palette leaveable by keyboard: it moves focus into the panel on open,
+           keeps Tab inside it, closes on Escape and restores focus to the trigger -
+           so `Mod+K`, Escape and the backdrop all take a road the kit owns.
+
+           THE GROUPS ARE THE OWNER'S REFERENCE, in its order: the chats the rail
+           shows (projected from the rail's OWN rows, so there is one list), the
+           block's real quick actions, and the block's settings entries. What each
+           row does is named in `activatePaletteItem`.
+
+           EVERY ROW ACTS. A `kai-command` row cannot be disabled (its item shape has
+           no such field), so an inert row here would be a selection that did nothing
+           - which is why the rail top region's three demo rows are not repeated, and
+           why the account row the identity menu disables is not here either. -->
+      <kai-dialog
+        id="palette-dialog"
+        #ref="paletteDialog"
+        class="palette-dialog"
+        :theme="themeMode"
+        label="Search chats and actions"
+        @kai-open-change="paletteToggle"
+      >
+        <kai-command
+          id="palette"
+          #ref="palette"
+          :theme="themeMode"
+          .items="paletteItems"
+          placeholder="Search chats"
+          emptyLabel="No chats or actions match"
+          @kai-select="paletteSelect"
+          @kai-query-change="paletteQuery"
+        ></kai-command>
       </kai-dialog>
 
       <main slot="main" class="main">

@@ -87,6 +87,7 @@ import {
   type ConversationSummary,
 } from '@kitn.ai/ui/stores';
 import type {
+  KaiCommandElement,
   KaiConversationsElement,
   KaiDialogElement,
   KaiPromptInputElement,
@@ -528,6 +529,128 @@ export interface ComposerTool {
    *  so a capability is visible without opening the menu. Off unless asked for,
    *  which is why the kit's default stays quiet. */
   chip?: boolean;
+}
+
+/** One row of the command palette. Mirrors `KaiCommandItem` structurally, for the
+ *  reason `MenuItem` and `ComposerTool` do: the block hands the kit its own object
+ *  and the kit types the prop by shape, so the two agree without the block
+ *  importing an internal. The field set is the whole of what a palette row can
+ *  say, and the one thing it CANNOT say is "unavailable": a `kai-command` item has
+ *  no `disabled` field, which is why this palette offers no row that cannot act
+ *  (see `projectPalette`). */
+export interface PaletteItem {
+  id: string;
+  label: string;
+  /** The section header the row is bucketed under. */
+  group: string;
+  icon?: string;
+  /** The muted second line: the folder a chat is filed under, or what an action does. */
+  description?: string;
+  /** The key that activates this row, in the kit's `keys` syntax. Present only on
+   *  the rows `Mod+<n>` really reaches (see `numberPaletteRows`). */
+  shortcut?: string;
+}
+
+/** The palette's three sections, in the order the owner's reference reads them:
+ *  the chats above the actions, and the settings last. */
+const PALETTE_GROUP_CHATS = 'Chats';
+const PALETTE_GROUP_ACTIONS = 'Quick actions';
+const PALETTE_GROUP_SETTINGS = 'Settings';
+
+/** How many rows `Mod+<n>` reaches. Nine, because that is how far the reference's
+ *  numbering goes and how many digits a reader can reach without looking. */
+const PALETTE_NUMBERS = 9;
+
+/** The id prefixes, so a row's id says which of the three kinds it is and the one
+ *  handler that acts on a selection needs no second table to read it. */
+const PALETTE_CHAT_ID = 'chat:';
+const PALETTE_ACTION_ID = 'action:';
+const PALETTE_THEME_ID = 'theme:';
+
+/** One of the block's own quick actions, as the palette reads it. The `key` is the
+ *  action's name in `activatePaletteItem`'s switch, and the two lists are one list
+ *  read twice on purpose: a row with no action is a row that does nothing. */
+interface PaletteAction {
+  key: string;
+  label: string;
+  icon: string;
+  description: string;
+}
+
+/** THE THREE ACTIONS THIS PAGE REALLY HAS, and nothing else is offered. The rail's
+ *  top region also shows three demo rows (Images, Scheduled, Plugins) that are
+ *  inert with their reason on them; they are deliberately NOT repeated here,
+ *  because a palette row cannot be disabled (`KaiCommandItem` has no such field) -
+ *  so the one thing this group must never carry is a row whose selection would do
+ *  nothing. */
+const PALETTE_ACTIONS: readonly PaletteAction[] = [
+  { key: 'new-chat', label: 'New chat', icon: 'square-pen', description: 'Start a conversation' },
+  {
+    key: 'new-project',
+    label: 'New project',
+    icon: 'folder',
+    description: 'Name a project, and the rail grows a folder for it',
+  },
+  { key: 'toggle-sidebar', label: 'Toggle sidebar', icon: 'panel-left', description: 'Collapse or expand the rail' },
+];
+
+/** The key a numbered row carries, or undefined past the ninth. The number IS the
+ *  row's place among the rows the palette is showing, which is what makes
+ *  `Mod+<n>` honest after a filter: the chip on a row and the key that activates it
+ *  are the same fact. */
+const numberPaletteRows = (rows: readonly PaletteItem[]): PaletteItem[] =>
+  rows.map((row, index) => (index < PALETTE_NUMBERS ? { ...row, shortcut: `Mod+${index + 1}` } : row));
+
+/** The rows a query leaves, by the ELEMENT's own rule (a case-insensitive
+ *  substring of the label or the description). A COPY of `kai-command`'s filter,
+ *  and it is recorded as one: the block numbers the rows it hands over rather than
+ *  reading back what the palette drew, so the numbering has to agree with what the
+ *  element is about to show. */
+const paletteMatches = (row: PaletteItem, query: string): boolean =>
+  row.label.toLowerCase().includes(query) || (row.description?.toLowerCase().includes(query) ?? false);
+
+/**
+ * The palette's rows, in the reference's order: the rail's own chats, the block's
+ * actions, the block's settings entries.
+ *
+ * THE CHATS COME FROM THE RAIL'S ROWS, not from a second list: `chats` is the same
+ * projection the rail renders (`narrow(projected, query)`, filtered to the
+ * conversation rows), so a chat the rail does not show is a chat the palette cannot
+ * offer and the two cannot drift.
+ *
+ * THE SETTINGS ARE THE BLOCK'S OWN, read off `THEME_CHOICES` - the same list the
+ * gear's menu is built from - so the two settings surfaces cannot disagree about
+ * which schemes exist. The identity menu's account row is NOT here for the reason
+ * the demo rows are not (see `PALETTE_ACTIONS`).
+ */
+function projectPalette(chats: readonly ConversationRow[], query: string): PaletteItem[] {
+  const rows: PaletteItem[] = chats.map((row) => ({
+    id: `${PALETTE_CHAT_ID}${row.id}`,
+    label: row.title,
+    group: PALETTE_GROUP_CHATS,
+    icon: 'message-square',
+    description: row.group === '' ? RECENTS_LABEL : sectionLabel(row.group, row.groupName),
+  }));
+  for (const action of PALETTE_ACTIONS) {
+    rows.push({
+      id: `${PALETTE_ACTION_ID}${action.key}`,
+      label: action.label,
+      group: PALETTE_GROUP_ACTIONS,
+      icon: action.icon,
+      description: action.description,
+    });
+  }
+  for (const choice of THEME_CHOICES) {
+    rows.push({
+      id: `${PALETTE_THEME_ID}${choice.id}`,
+      label: choice.label,
+      group: PALETTE_GROUP_SETTINGS,
+      icon: choice.icon,
+      description: `Use the ${choice.label.toLowerCase()} scheme`,
+    });
+  }
+  const shown = query === '' ? rows : rows.filter((row) => paletteMatches(row, query));
+  return numberPaletteRows(shown);
 }
 
 /** The two single-choice groups the organizer menu holds, spelled once so the
@@ -1526,6 +1649,17 @@ export interface AssistantState {
   accountItems: MenuItem[];
   /** The settings menu's items (the theme group). */
   settingsItems: MenuItem[];
+  // The command palette, which is the rail's search now: the element's own box is
+  // off (see the markup's `searchable="false"`), so the palette's search input is
+  // the only one the page offers.
+  /** The palette's rows, re-projected with the rail in every pass that can move
+   *  them: the chats follow the rail's own rows, and the numbering follows the
+   *  query, so a stale list is not a list this field can hold. */
+  paletteItems: PaletteItem[];
+  /** Whether the palette is open, mirrored from the dialog's own
+   *  `kai-open-change` - the element owns that state (see `AssistantRefs`), and
+   *  `Mod+K` and the numbered keys are the one thing that has to read it. */
+  paletteOpen: boolean;
 }
 
 /** The element handles the controller calls methods on. Nullable because no
@@ -1536,10 +1670,20 @@ export interface AssistantRefs {
   workspace: KaiWorkspaceElement | null;
   /** The recorder the composer's own mic drives (see `voiceToggle`). */
   voice: KaiVoiceInputElement | null;
-  /** The rail. Its own search box is the rail's filter, and the element exposes
-   *  the focus method that reaches it: the box lives in the rail's shadow root,
-   *  which is why the block asks the element rather than the DOM. */
+  /** The rail. Its state (the rows, their active row and the roving focus) is what
+   *  the block drives through props; the element's own search box is OFF here (see
+   *  the markup's `searchable="false"`), so its `focus()` method - which reaches
+   *  that box - is not a channel this page uses. The ref stays declared because the
+   *  tag is in the markup and the binder hands every `#ref` over. */
   conversations: KaiConversationsElement | null;
+  /** The palette's search input, which is where the caret goes on open: the box
+   *  lives in the palette's shadow root, so the block asks the element for it. */
+  palette: KaiCommandElement | null;
+  /** The surface the palette rides in: a modal, so the overlay cannot join the
+   *  rail's roving focus (it is not a descendant of the rail at all) and so
+   *  Escape, the backdrop press and the focus trap are the kit's own. It owns its
+   *  open state for the reason the create-project dialog does. */
+  paletteDialog: KaiDialogElement | null;
   /** The create-project dialog, and the ONE reason this block drives a surface by
    *  method rather than by a bound prop: `kai-dialog` reports Escape and a
    *  backdrop press through `kai-open-change` while it owns its own open state,
@@ -1573,8 +1717,23 @@ export interface AssistantActions {
   openConversation(event: CustomEvent<{ id: string }>): Promise<void>;
   /** `@kai-new-chat` on the rail. */
   newChat(): void;
-  /** `@kai-search` on the rail's built-in search box. */
+  /** `@kai-search` on the rail's built-in search box, which the block ships OFF
+   *  (`searchable="false"`): the binding stays so a consumer who turns the box
+   *  back on gets a working filter rather than a dead one. */
   search(event: CustomEvent<{ query: string }>): void;
+  /** `@kai-click` on the rail header's search button and on a section label's
+   *  filter control, and the way in from `Mod+K`: open the palette on an empty
+   *  search and put the caret in its box. */
+  openPalette(): void;
+  /** `@kai-open-change` on the palette's dialog: the kit's own ways out of a modal
+   *  - Escape, a backdrop press, a method this block called. */
+  paletteToggle(event: CustomEvent<{ open: boolean }>): void;
+  /** `@kai-query-change` on the palette: the typed query, which narrows the rail's
+   *  own rows as well, because the two read the same field. */
+  paletteQuery(event: CustomEvent<{ value: string }>): void;
+  /** `@kai-select` on the palette, and the numbered keys: one handler for every
+   *  row, whose id says which kind it is. */
+  paletteSelect(event: CustomEvent<{ id: string }>): void;
   /** `@kai-select` on the rail's organizer menu (the kebab on a section label).
    *  The item's id CARRIES its choice, so nothing here re-reads an attribute, and
    *  a row this action does not own is ignored rather than half-applied. */
@@ -1591,11 +1750,6 @@ export interface AssistantActions {
   cancelProject(): void;
   /** `@kai-click` on the dialog's Create button: name it, keep it, show it. */
   createProject(): void;
-  /** `@kai-click` on a section label's filter control. The rail's filter IS its
-   *  own search box, so the honest thing this control can do is hand that box the
-   *  caret - through the element's public focus method, because the box lives in
-   *  the rail's shadow root. */
-  filterChats(): void;
   /** `@kai-click` on an empty-state card. The card carries its guide id, which
    *  is the only thing this needs to know. */
   openGuide(event: Event): Promise<void>;
@@ -1697,6 +1851,10 @@ export function createController(deps: AssistantDeps): AssistantController {
     // And on the rail's own defaults: the projects the demo files its
     // conversations into, in the kit's own pinned-first order.
     ...projectRailMenu('project', 'priority', createdKey),
+    // The palette starts empty and closed: its rows arrive with the rail's first
+    // projection (`projectSummaries`), and the element owns its open state.
+    paletteItems: [],
+    paletteOpen: false,
   };
 
   // A NEW state object every patch: the snapshot getter is compared by
@@ -1838,8 +1996,119 @@ export function createController(deps: AssistantDeps): AssistantController {
     // shortcuts act on. What the rail renders is the projection below, which
     // narrows and expands them in the same pass as the sections.
     allRows = projected;
-    return { ...railFrom(projected, query, closedGroups, expandedGroups, organizer, createdProjects, storeIsEmpty), activeId: controller.activeId() };
+    // The palette's chats are THE RAIL'S OWN ROWS, narrowed by the same function:
+    // the query narrows both, so a chat the rail does not show is a chat the
+    // palette cannot offer.
+    const railChats = narrow(projected, query).filter((row) => row.kind === 'conversation');
+    return {
+      ...railFrom(projected, query, closedGroups, expandedGroups, organizer, createdProjects, storeIsEmpty),
+      paletteItems: projectPalette(railChats, query),
+      activeId: controller.activeId(),
+    };
   }
+
+  /** The rail's query, from ONE place, whichever control typed it: the palette's
+   *  search input (the page's only one now) or the rail's built-in box for a
+   *  consumer who turns it back on. The query narrows the rail's own rows, and the
+   *  palette's Chats section is that same narrowed list, so the two cannot
+   *  disagree about what a query means. */
+  const applyQuery = (raw: string): void => {
+    const query = raw.trim().toLowerCase();
+    patch({ query, ...projectSummaries(lastSummaries, query) });
+  };
+
+  /** Close the palette, through the element's own method, so `Mod+<n>`, a row
+   *  selection and the dialog's own Escape all take the same road. */
+  const closePalette = (): void => {
+    deps.refs().paletteDialog?.hide();
+  };
+
+  /** Open the create-project dialog on a clean draft, with the caret in its field.
+   *  One function for the rail menu's plus row and the palette's action, so the two
+   *  ways in cannot come to differ about the stale draft or the focus order. */
+  const openNewProject = (): void => {
+    // A stale draft or a stale error from a dialog the reader left by Escape is
+    // cleared BEFORE the field is shown, not after: the field must never show a
+    // rejected name from the last visit.
+    patch({ projectDraft: '', projectNameError: '' });
+    deps.refs().projectDialog?.show();
+    // AND THE CARET GOES IN, on a MACROTASK rather than in the kit's own
+    // queued microtask. The dialog moves focus into its panel on open, but a
+    // menu item ALSO restores focus to its trigger on close - the dropdown does
+    // that in a microtask queued after the dialog's (measured: focus stayed on
+    // `kai-menu`, so Escape never reached the dialog's own key handler and the
+    // modal could not be left by keyboard). The dialog's panel keydown is what
+    // reads Escape, so the caret has to be inside the panel for the modal to be
+    // closable at all; a timeout is the one turn that lands after every
+    // microtask the menu queued.
+    setTimeout(() => deps.refs().projectDialog?.focus(), 0);
+  };
+
+  /** Open a conversation by id, whichever surface asked: the rail's own row, or the
+   *  palette's chat row. One function so the two cannot drift about what activating
+   *  a chat does (the heading and Show more rows are answered the same way). */
+  const openConversationById = async (id: string): Promise<void> => {
+    // The label over the folders heads them; it is not a control of its own, so
+    // activating it does nothing - the folders under it are each their own.
+    if (id.startsWith(SECTION_NODE)) return;
+    // A heading is not a conversation: it names the folder it heads, so
+    // activation opens or closes that folder rather than loading anything.
+    if (id.startsWith(FOLDER_HEADING_NODE)) {
+      const group = id.slice(FOLDER_HEADING_NODE.length);
+      closedGroups = closedGroups.includes(group)
+        ? closedGroups.filter((candidate) => candidate !== group)
+        : [...closedGroups, group];
+      patch(projectSummaries(lastSummaries));
+      return;
+    }
+    // The Show more row names the folder that has to grow, which is the same
+    // mechanic read the other way: the rows past the limit are emitted.
+    if (id.startsWith(FOLDER_MORE_NODE)) {
+      const group = id.slice(FOLDER_MORE_NODE.length);
+      if (!expandedGroups.includes(group)) expandedGroups = [...expandedGroups, group];
+      patch(projectSummaries(lastSummaries));
+      return;
+    }
+    // The conversation's own folder is opened before the load, so the row the
+    // reader just activated is on screen while its thread arrives.
+    revealGroup(allRows.find((row) => row.id === id)?.group ?? '');
+    await controller.select(id);
+  };
+
+  /** One palette row's action, read off its own id. The ids are projected from the
+   *  three lists above, so an id this does not own is a bug rather than a reader's
+   *  request - and every branch that acts closes the palette, so a row is never a
+   *  press that leaves the overlay in the way. */
+  const activatePaletteItem = (id: string): void => {
+    if (id.startsWith(PALETTE_CHAT_ID)) {
+      closePalette();
+      void openConversationById(id.slice(PALETTE_CHAT_ID.length));
+      return;
+    }
+    if (id.startsWith(PALETTE_THEME_ID)) {
+      const choice = themeOf(id.slice(PALETTE_THEME_ID.length));
+      if (choice === undefined) return;
+      patch(projectMenus(choice));
+      closePalette();
+      return;
+    }
+    if (!id.startsWith(PALETTE_ACTION_ID)) return;
+    switch (id.slice(PALETTE_ACTION_ID.length)) {
+      case 'new-chat':
+        controller.startNew();
+        break;
+      case 'new-project':
+        openNewProject();
+        break;
+      case 'toggle-sidebar':
+        if (state.railCollapsed) deps.refs().workspace?.expandAside('start');
+        else deps.refs().workspace?.collapseAside('start');
+        break;
+      default:
+        return;
+    }
+    closePalette();
+  };
 
   /** One reader choice from the organizer menu, applied in ONE patch: the choice
    *  itself (which moves the checked row), and the rail re-projected with it.
@@ -1913,6 +2182,29 @@ export function createController(deps: AssistantDeps): AssistantController {
       && !(owner?.contains(target) ?? false)) return;
 
     const mod = event.metaKey || event.ctrlKey;
+    // THE PALETTE'S KEYS, and they are the block's only global ones. `Mod+K` opens
+    // the palette and closes it again; `Mod+<1..9>` activates the numbered row the
+    // palette is showing, which is the NUMBER ON THE ROW rather than a key of its
+    // own - so a filter that moves a row into the ninth slot moves its chord with
+    // it, and a row past the ninth carries no chip and no key. Neither key is
+    // handled while the palette is closed for the digit case: there is no visible
+    // row to activate, and a key that silently did nothing is the failure this
+    // block treats as its worst.
+    if (mod && !event.shiftKey && !event.altKey) {
+      if (event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        if (state.paletteOpen) closePalette();
+        else actions.openPalette();
+        return;
+      }
+      const digit = event.key >= '1' && event.key <= '9' ? Number(event.key) : 0;
+      const row = digit === 0 ? undefined : state.paletteItems[digit - 1];
+      if (state.paletteOpen && row !== undefined) {
+        event.preventDefault();
+        activatePaletteItem(row.id);
+        return;
+      }
+    }
     if (!mod && !event.shiftKey && event.key === 'F2') {
       const id = state.activeId;
       if (id === undefined || !storeOps.rename) return;
@@ -2061,32 +2353,7 @@ export function createController(deps: AssistantDeps): AssistantController {
     },
 
     async openConversation(event) {
-      const id = event.detail.id;
-      // The label over the folders heads them; it is not a control of its own, so
-      // activating it does nothing - the folders under it are each their own.
-      if (id.startsWith(SECTION_NODE)) return;
-      // A heading is not a conversation: it names the folder it heads, so
-      // activation opens or closes that folder rather than loading anything.
-      if (id.startsWith(FOLDER_HEADING_NODE)) {
-        const group = id.slice(FOLDER_HEADING_NODE.length);
-        closedGroups = closedGroups.includes(group)
-          ? closedGroups.filter((candidate) => candidate !== group)
-          : [...closedGroups, group];
-        patch(projectSummaries(lastSummaries));
-        return;
-      }
-      // The Show more row names the folder that has to grow, which is the same
-      // mechanic read the other way: the rows past the limit are emitted.
-      if (id.startsWith(FOLDER_MORE_NODE)) {
-        const group = id.slice(FOLDER_MORE_NODE.length);
-        if (!expandedGroups.includes(group)) expandedGroups = [...expandedGroups, group];
-        patch(projectSummaries(lastSummaries));
-        return;
-      }
-      // The conversation's own folder is opened before the load, so the row the
-      // reader just activated is on screen while its thread arrives.
-      revealGroup(allRows.find((row) => row.id === id)?.group ?? '');
-      await controller.select(id);
+      await openConversationById(event.detail.id);
     },
 
     newChat() {
@@ -2094,12 +2361,39 @@ export function createController(deps: AssistantDeps): AssistantController {
     },
 
     search(event) {
-      const query = event.detail.query.trim().toLowerCase();
-      // The rows AND the sections, from the same pass: a query narrows both, so
-      // a group whose rows all missed is not a folder the rail still offers - and
-      // it opens every folder it has a match in (`railNodes`), because a match
-      // behind a closed heading is a match the reader cannot see.
-      patch({ query, ...projectSummaries(lastSummaries, query) });
+      // The rows AND the sections move together, from the same pass: a query
+      // narrows both, so a group whose rows all missed is not a folder the rail
+      // still offers - and it opens every folder it has a match in (`railNodes`),
+      // because a match behind a closed heading is a match the reader cannot see.
+      applyQuery(event.detail.query);
+    },
+
+    // THE RAIL'S SEARCH BUTTON, which is the palette's way in. It is opened on an
+    // EMPTY search every time - the element keeps its query between opens, and a
+    // reader coming back to search again should not meet the last search - and the
+    // caret is put in the box after the dialog's own focus move (see the macrotask
+    // note in `openNewProject`, which needs the same ordering for the same reason).
+    openPalette() {
+      const palette = deps.refs().palette;
+      const dialog = deps.refs().paletteDialog;
+      if (palette === null || dialog === null) return;
+      // `clear()` also fires `kai-query-change` with '', which is what hands the
+      // rail back its unfiltered rows.
+      palette.clear();
+      dialog.show();
+      setTimeout(() => palette.focus(), 0);
+    },
+
+    paletteToggle(event) {
+      patch({ paletteOpen: event.detail.open });
+    },
+
+    paletteQuery(event) {
+      applyQuery(event.detail.value);
+    },
+
+    paletteSelect(event) {
+      activatePaletteItem(event.detail.id);
     },
 
     // The organizer menu, one handler for the rows that act. The id is
@@ -2110,21 +2404,7 @@ export function createController(deps: AssistantDeps): AssistantController {
     railMenuSelect(event) {
       const { id } = event.detail;
       if (id === RAIL_NEW_PROJECT_ID) {
-        // A stale draft or a stale error from a dialog the reader left by Escape is
-        // cleared BEFORE the field is shown, not after: the field must never show a
-        // rejected name from the last visit.
-        patch({ projectDraft: '', projectNameError: '' });
-        deps.refs().projectDialog?.show();
-        // AND THE CARET GOES IN, on a MACROTASK rather than in the kit's own
-        // queued microtask. The dialog moves focus into its panel on open, but a
-        // menu item ALSO restores focus to its trigger on close - the dropdown does
-        // that in a microtask queued after the dialog's (measured: focus stayed on
-        // `kai-menu`, so Escape never reached the dialog's own key handler and the
-        // modal could not be left by keyboard). The dialog's panel keydown is what
-        // reads Escape, so the caret has to be inside the panel for the modal to be
-        // closable at all; a timeout is the one turn that lands after every
-        // microtask the menu queued.
-        setTimeout(() => deps.refs().projectDialog?.focus(), 0);
+        openNewProject();
         return;
       }
       const organizerOf = (choice: string): RailOrganizer | undefined =>
@@ -2181,10 +2461,6 @@ export function createController(deps: AssistantDeps): AssistantController {
       // that had not changed.
       patch({ ...projectSummaries(lastSummaries), projectDraft: '', projectNameError: '' });
       deps.refs().projectDialog?.hide();
-    },
-
-    filterChats() {
-      deps.refs().conversations?.focus();
     },
 
     valueChange(event) {

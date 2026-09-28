@@ -465,10 +465,12 @@ const railTopRowFacts = (page) => page.evaluate(() => {
     ),
     // The step inside the group against the gap after it, read as boxes rather
     // than as a class: the group's own row step is 2px and what follows it is the
-    // search box, so "a visible gap" is a number this can compare.
-    searchBoxTop: Math.round(
-      (document.getElementById('conversations')?.shadowRoot
-        ?.querySelector('input[aria-label="Search chats"]')?.getBoundingClientRect().top ?? NaN),
+    // rail's first row, so "a visible gap" is a number this can compare. WHAT
+    // FOLLOWS IS THE TREE and not a search box any more: the element's own box is
+    // switched off (`searchable="false"`), so the header's last row now sits
+    // directly above the rail's first row.
+    afterGroupTop: Math.round(
+      (document.querySelector('kai-conversations > kai-conversation-item')?.getBoundingClientRect().top ?? NaN),
     ),
   };
 });
@@ -569,6 +571,9 @@ let railWiring = null;
 // screenshot has to be taken, and the values under test do not survive it.
 let freshRail = null;
 let projectCreate = null;
+let paletteOpen = null;
+let paletteFiltered = null;
+let paletteKeys = null;
 
 /** The rail's two SECTION LABELS and the trailing actions each carries, read off
  *  the ROW ELEMENTS: which rows are section labels, whether their actions are
@@ -875,13 +880,93 @@ const rowTitle = (page, id) => page.evaluate((wanted) => {
   return el?.querySelector(':scope > span')?.textContent ?? '';
 }, id);
 
-/** Hand the rail back UNFILTERED. State 36 leaves a query in the search box, and
- *  a query is a narrowing the states after it have to measure around: it drops
- *  rows, and it opens every folder it has a match in - which is the point of it,
- *  and why a folder toggle looks like a no-op while one is typed. */
+/** Open the palette the way a reader does: the rail header's search button. */
+const openPalette = async (page) => {
+  await page.locator('#rail-search').click();
+  await settle(450)(page);
+};
+
+/** The palette's search input, which lives in the palette's shadow root. Its role
+ *  is `combobox` (the element marks it as one), not the plain `textbox` the rail's
+ *  own box was. */
+const paletteBox = (page) => page.locator('#palette').getByRole('combobox').first();
+
+/** Leave the palette by keyboard, which is the only way out that matters: the
+ *  kit's dialog closes on Escape and hands the caret back to what opened it. */
+const closePalette = async (page) => {
+  await page.keyboard.press('Escape');
+  await settle(450)(page);
+};
+
+/** The palette as it is RIGHT NOW, read off the rendered tree rather than from a
+ *  list kept in this file: whether the dialog is open, where the caret is, and every
+ *  row with the group it is bucketed under, its label and its chord. The rows are
+ *  the shadow root's `role="option"` buttons and the headers are the plain divs
+ *  between them, so one walk of the listbox in document order gives the sections and
+ *  their rows together. */
+const paletteFacts = (page) => page.evaluate(() => {
+  const dialog = document.getElementById('palette-dialog');
+  const command = document.getElementById('palette');
+  const root = command?.shadowRoot ?? null;
+  const listbox = root?.querySelector('[role="listbox"]') ?? root;
+  const rows = [];
+  let group = '';
+  for (const node of listbox === null ? [] : [...listbox.children]) {
+    if (node.localName === 'div') { group = node.textContent?.trim() ?? ''; continue; }
+    rows.push({
+      group,
+      label: node.querySelector('span')?.textContent?.trim() ?? '',
+      shortcut: node.querySelector('[part="shortcut"]')?.textContent?.trim() ?? '',
+      active: node.getAttribute('aria-selected') === 'true',
+    });
+  }
+  return {
+    open: dialog !== null && (dialog.open === true || dialog.hasAttribute('open')),
+    // The caret, read where it really is: the palette's box retargets to the dialog
+    // host at document level, so the inner active element is the only read that
+    // says the input has focus.
+    focused: root?.activeElement?.localName ?? '',
+    rows,
+    // The rail's own conversation rows, so a probe can hold the palette's Chats
+    // section against the list it claims to come from.
+    railTitles: [...document.querySelectorAll('kai-conversations > kai-conversation-item[data-rail="conversation"]')]
+      .map((el) => el.querySelector(':scope > span')?.textContent?.trim() ?? ''),
+    // Whether the element's own search box is still in the rail. It is the OTHER
+    // search affordance the owner asked to be gone, and the reading that says "off"
+    // is that no input is in the rail's shadow root at all.
+    railHasBox: (document.getElementById('conversations')?.shadowRoot?.querySelector('input') ?? null) !== null,
+    // Where the caret is, deepest first: `document.activeElement` reports the HOST
+    // for a control inside a shadow root, so the walk reads the element that really
+    // has it. The answer is a name this file can compare ('palette' when the caret
+    // is still inside the palette's own shadow root, 'body' when it went nowhere,
+    // otherwise the element's id). */
+    outerFocus: (() => {
+      let node = document.activeElement;
+      while (node?.shadowRoot?.activeElement) node = node.shadowRoot.activeElement;
+      if (node === null) return 'none';
+      const root = node.getRootNode();
+      if (root instanceof ShadowRoot && root.host === command) return 'palette';
+      if (node === document.body) return 'body';
+      return node.id || node.localName;
+    })(),
+  };
+});
+
+/** Hand the rail back UNFILTERED. A query is a narrowing the states after it have
+ *  to measure around: it drops rows, and it opens every folder it has a match in -
+ *  which is the point of it, and why a folder toggle looks like a no-op while one
+ *  is typed.
+ *
+ *  THE PALETTE IS THE RAIL'S SEARCH NOW. The rail's built-in box is off
+ *  (`searchable="false"` on the element), so a query is typed into the palette and
+ *  the rail narrows behind it: the two read one field of the block's state. Opening
+ *  the palette already clears that field (the block clears on open), and the Escape
+ *  is how a reader leaves. */
 const clearRailSearch = async (page) => {
-  await page.locator('kai-conversations').getByRole('textbox').first().fill('');
-  await settle(400)(page);
+  await openPalette(page);
+  await paletteBox(page).fill('');
+  await settle(300)(page);
+  await closePalette(page);
 };
 
 export default {
@@ -2511,7 +2596,8 @@ export default {
             .find((item) => (item.conversationId ?? item.getAttribute('conversation-id') ?? item.id) === id);
           return el?.querySelector(':scope > span')?.textContent ?? '';
         }, target.id);
-        const box = page.locator('kai-conversations').getByRole('textbox').first();
+        await openPalette(page);
+        const box = paletteBox(page);
         const words = [...new Set(title.toLowerCase().split(/[^a-z0-9]+/).filter((word) => word.length >= 5))]
           .sort((a, b) => b.length - a.length);
         let query = '';
@@ -2530,6 +2616,9 @@ export default {
           was: before.length,
           after: groupRuns(await railRows(page)),
         };
+        // AND THE PALETTE IS LEFT AGAIN, because the rail it narrowed is what this
+        // state is a picture of: a modal over it would be a picture of the palette.
+        await closePalette(page);
       },
       probes: {
         // A query really narrowed the rail...
@@ -2681,13 +2770,16 @@ export default {
         const target = folder.rows[folder.rows.length - 1];
         const title = await rowTitle(page, target.id);
         const heading = page.locator(`kai-conversations > kai-conversation-item[data-rail="folder"][data-group="${folder.group}"]`);
-        const box = page.locator('kai-conversations').getByRole('textbox').first();
         const before = (await railNodes(page)).filter((node) => node.kind === 'conversation').length;
         // SHUT IT FIRST: the match has to start behind a closed heading, which is
         // the only version of this claim with anything to prove.
         await heading.click();
         await settle(350)(page);
         const shut = await railNodes(page);
+        // AND THEN THE SEARCH, through the palette: the rail's own box is off, so the
+        // query that opens a folder while it narrows the rail is typed there.
+        await openPalette(page);
+        const box = paletteBox(page);
         const words = [...new Set(title.toLowerCase().split(/[^a-z0-9]+/).filter((word) => word.length >= 5))]
           .sort((a, b) => b.length - a.length);
         let query = '';
@@ -2717,6 +2809,7 @@ export default {
         // again - so the states after this one walk a rail they can describe.
         await box.fill('');
         await settle(400)(page);
+        await closePalette(page);
         await heading.click();
         await settle(350)(page);
         searchOpen.after = (await railNodes(page)).filter((node) => node.kind === 'conversation').length;
@@ -2754,8 +2847,12 @@ export default {
         // Read AFTER the search is cleared: the walk is over the rows the rail
         // really holds, and a filter would have taken some of them off it.
         const before = await rowWalk(page);
-        const box = page.locator('kai-conversations').getByRole('textbox').first();
-        await box.click();
+        // THE WALK STARTS AT THE RAIL'S OWN HEADER, at the first control in it. The
+        // rail's built-in search box used to be where this started and it is switched
+        // off now - so the start is the header's leading button, FOCUSED rather than
+        // clicked: a click on the collapse control folds the column away, and this
+        // state is about where Tab goes, not about folding.
+        await page.locator('#rail-collapse').focus();
         let arrived = null;
         // `page.keyboard`, not `box.press`: a locator's press focuses the box
         // first, so six of them are six presses from the SAME place and the walk
@@ -3083,7 +3180,7 @@ export default {
     },
     {
       // THE RAIL'S TOP ACTIONS, which are the sidebar's own furniture rather than
-      // a kit surface: four rows above the search box, with the tree below them.
+      // a kit surface: four rows at the head of the rail, with the tree below them.
       // Three claims, and the third is the one a screenshot cannot make: the rows
       // are THERE in the order and with the glyphs the block declares; they sit
       // OUTSIDE the list - not a conversation item, not the rail's own child, so
@@ -3159,8 +3256,8 @@ export default {
           const rows = railTopRows?.rows ?? [];
           if (rows.length !== RAIL_TOP_ACTIONS.length) return `${rows.length} rows carry an action`;
           const step = rows[1].rowTop - rows[0].rowBottom;
-          const after = railTopRows.searchBoxTop - rows[rows.length - 1].rowBottom;
-          if (!Number.isFinite(after)) return 'the search box was not found to measure against';
+          const after = railTopRows.afterGroupTop - rows[rows.length - 1].rowBottom;
+          if (!Number.isFinite(after)) return 'no row under the group was found to measure against';
           return after > step ? true : `the gap after the group (${after}px) is not bigger than the step inside it (${step}px)`;
         },
         // ...AND ABOVE THE TREE, in the order the reference reads: the four rows,
@@ -3748,18 +3845,22 @@ export default {
           await page.getByRole('menuitemradio', { name }).click();
           await settle(450)(page);
         };
-        // THE FILTER: it hands the caret to the rail's own search box, which is the
-        // rail's filter. Read as the active element inside the rail's shadow root,
-        // because that is where the box lives.
+        // THE FILTER: it opens the page's one search, the palette, which searches the
+        // rail's own rows - the element's built-in box is off. Read as the active
+        // element inside the PALETTE's shadow root, because that is where the box
+        // lives now, and the kit's dialog has just moved focus in.
         const label = await openSectionLabel();
         await label.locator('.row-trio kai-button[data-trio="filter"]').click();
-        await settle(300)(page);
+        await settle(450)(page);
         const focused = await page.evaluate(() => {
-          const rail = document.getElementById('conversations');
-          const active = rail?.shadowRoot?.activeElement ?? null;
+          const palette = document.getElementById('palette');
+          const active = palette?.shadowRoot?.activeElement ?? null;
           if (active === null) return '';
-          return `${active.localName}:${active.getAttribute('type') ?? ''}:${active.getAttribute('aria-label') ?? ''}`;
+          return `${active.localName}:${active.getAttribute('type') ?? ''}:${active.getAttribute('aria-label') ?? active.getAttribute('placeholder') ?? ''}`;
         });
+        // AND THE PALETTE IS LEFT AGAIN: the states below it drive the rail, and an
+        // open modal is in the way of every click.
+        await closePalette(page);
         // THE ORGANIZER: one flat list, then the menu read back to show the radio
         // moved with it.
         await choose('One list');
@@ -3850,8 +3951,10 @@ export default {
           const filed = rows.filter((row) => row.kind === 'conversation' && row.folder !== '');
           return filed.length > 0 ? true : 'no row came back filed into a folder';
         },
-        // THE FILTER CONTROL DOES SOMETHING REAL, and it is the rail's own search
-        // box: the caret lands in the input the rail keeps inside its shadow root.
+        // THE FILTER CONTROL DOES SOMETHING REAL, and it is the page's one search: the
+        // caret lands in the palette's own input, which searches the rail's rows - the
+        // rail's built-in box is switched off (`searchable="false"`), so this is the
+        // only box the page has to hand the caret to.
         theFilterHandsTheCaretToTheRailsSearchBox: () => {
           const focused = railWiring?.focused ?? '';
           return focused === 'input:text:Search chats'
@@ -3999,7 +4102,7 @@ export default {
         await settle(300)(page);
         await page.getByRole('menuitem', { name: 'New project' }).click();
         await settle(400)(page);
-        const dialogOpened = await page.locator('kai-dialog').evaluate(
+        const dialogOpened = await page.locator('#project-dialog').evaluate(
           (el) => el.open === true || el.hasAttribute('open'),
         );
         const field = page.locator('#project-name input').first();
@@ -4007,7 +4110,7 @@ export default {
         await field.fill(authored);
         await page.getByRole('button', { name: 'Create project' }).click();
         await settle(400)(page);
-        const closed = await page.locator('kai-dialog').evaluate(
+        const closed = await page.locator('#project-dialog').evaluate(
           (el) => !(el.open === true || el.hasAttribute('open')),
         );
         const stored = await page.evaluate((key) => {
@@ -4071,19 +4174,18 @@ export default {
         await settle(300)(page);
         await page.getByRole('menuitem', { name: 'New project' }).click();
         await settle(400)(page);
-        const openedByMenu = await page.locator('kai-dialog').evaluate(
+        const openedByMenu = await page.locator('#project-dialog').evaluate(
           (el) => el.open === true || el.hasAttribute('open'),
         );
         await page.keyboard.press('Escape');
         await settle(400)(page);
-        projectCreate.escapeClosed = openedByMenu && await page.locator('kai-dialog').evaluate(
+        projectCreate.escapeClosed = openedByMenu && await page.locator('#project-dialog').evaluate(
           (el) => !(el.open === true || el.hasAttribute('open')),
         );
         // The rail is walkable again: a tab out of the rail's search box reaches a
         // row, which is the state 40 contract one dialog later.
         await clearRailSearch(page);
-        const box = page.locator('kai-conversations').getByRole('textbox').first();
-        await box.click();
+        await page.locator('#rail-collapse').focus();
         for (let step = 0; step < 8 && !projectCreate.railReachableAfterEscape; step += 1) {
           await page.keyboard.press('Tab');
           await settle(150)(page);
@@ -4120,6 +4222,316 @@ export default {
         style('createdProjectFolder', (page) => page.locator('kai-conversations > kai-conversation-item[data-rail="folder"]').first(),
           ['height', 'marginInlineStart']),
       ],
+    },
+      {
+      // THE PALETTE, OPEN. The owner asked for a search button at the top right of
+      // the aside that opens a command palette, and this is that surface: the button
+      // in the rail's own header, and behind it the element that is already a palette.
+      // The state leaves it OPEN, which is what its screenshot is of.
+      //
+      // FOUR CLAIMS, and the first two are the ones a screenshot cannot show: the
+      // rows are the RAIL'S OWN (so there is one list rather than two that can
+      // drift), and the element's built-in search box is gone (so the rail does not
+      // offer two ways to search it).
+      name: '51-palette-open',
+      act: async (page) => {
+        await clearRailSearch(page);
+        await openPalette(page);
+        paletteOpen = await paletteFacts(page);
+      },
+      probes: {
+        // THE RAIL'S OWN HEADER CARRIES IT, at the row's trailing end: the search
+        // button's left edge is past the collapse control's, and both are inside the
+        // region the block fills in the header slot.
+        theSearchButtonSitsAtTheHeadersRightEnd: async (page) => {
+          const boxes = await page.evaluate(() => {
+            const collapse = document.getElementById('rail-collapse')?.getBoundingClientRect() ?? null;
+            const search = document.getElementById('rail-search')?.getBoundingClientRect() ?? null;
+            const header = document.querySelector('.rail-header')?.getBoundingClientRect() ?? null;
+            return { collapse, search, header };
+          });
+          const { collapse, search, header } = boxes;
+          if (collapse === null || search === null || header === null) return 'the header, the collapse control or the search button is missing';
+          if (search.left <= collapse.left) return `the search button is left of the collapse control (${search.left} vs ${collapse.left})`;
+          if (search.right > header.right) return `the search button runs past the header (${search.right} vs ${header.right})`;
+          return true;
+        },
+        // THE ELEMENT'S OWN BOX IS OFF: no input in the rail's shadow root, which is
+        // the whole of what "the search chats input is removed" means here - the box
+        // is switched off (`searchable="false"`), not deleted from the kit.
+        theElementsOwnSearchBoxIsOff: () => paletteOpen?.railHasBox === false
+          || `the rail still renders an input: ${JSON.stringify(paletteOpen?.railHasBox)}`,
+        // THE BUTTON OPENS IT, with the caret in the box: the kit's dialog moves focus
+        // into its panel, and the block hands it on to the palette's input, because a
+        // palette nobody can type into is a picture of a palette.
+        theButtonOpensItAndTheCaretIsInTheBox: () => paletteOpen?.open === true
+          && paletteOpen?.focused === 'input',
+        // THE THREE GROUPS, in the reference's order, as RENDERED: the chats above the
+        // actions, the settings last.
+        theGroupsReadInTheReferencesOrder: () => {
+          const groups = [...new Set((paletteOpen?.rows ?? []).map((row) => row.group))];
+          return JSON.stringify(groups) === JSON.stringify(['Chats', 'Quick actions', 'Settings'])
+            ? true
+            : `the palette reads ${JSON.stringify(groups)}`;
+        },
+        // AND THE CHATS ARE THE RAIL'S OWN ROWS: the labels of the palette's first
+        // group against the conversation rows the rail is rendering, in order. A
+        // second list kept beside the rail is exactly what this catches.
+        theChatsAreTheRailsOwnRows: () => {
+          const chats = (paletteOpen?.rows ?? []).filter((row) => row.group === 'Chats').map((row) => row.label);
+          const rail = paletteOpen?.railTitles ?? [];
+          if (chats.length === 0) return 'the palette offers no chats';
+          return JSON.stringify(chats) === JSON.stringify(rail)
+            ? true
+            : `the palette lists ${JSON.stringify(chats)}, the rail renders ${JSON.stringify(rail)}`;
+        },
+        // AND EVERY ROW EITHER CARRIES ITS OWN NUMBER OR READS PAST THE NINTH. The
+        // numbers are read in order rather than merely present: row one carries the
+        // first chord, row two the second, and a row past the ninth carries none -
+        // which is what `Mod+<n>` promises. The count is whatever the rail holds at
+        // this point in the run (the states before this one leave a handful of
+        // conversations), so the claim is about the order, not about reaching ten.
+        theNumberedRowsCarryTheirOwnChord: () => {
+          const rows = paletteOpen?.rows ?? [];
+          if (rows.length === 0) return 'the palette offers no rows';
+          const numbered = Math.min(rows.length, 9);
+          const wrong = rows.slice(0, numbered)
+            .map((row, index) => ({ row, want: `Mod+${index + 1}` }))
+            .filter(({ row, want }) => !row.shortcut.includes(want.slice(want.indexOf('+') + 1)));
+          if (wrong.length) {
+            return wrong.map(({ row, want }) => `${row.label} carries ${JSON.stringify(row.shortcut)}, not ${want}`).join(' | ');
+          }
+          const past = rows.slice(9).filter((row) => row.shortcut !== '').map((row) => `${row.label}:${row.shortcut}`);
+          return past.length === 0 ? true : `a row past the ninth carries a chord: ${past.join(', ')}`;
+        },
+      },
+      expect: {
+        theSearchButtonSitsAtTheHeadersRightEnd: true,
+        theElementsOwnSearchBoxIsOff: true,
+        theButtonOpensItAndTheCaretIsInTheBox: true,
+        theGroupsReadInTheReferencesOrder: true,
+        theChatsAreTheRailsOwnRows: true,
+        theNumberedRowsCarryTheirOwnChord: true,
+      },
+      styleProbes: [
+        // The palette's own box, so a restyle is visible in the recorded values and
+        // not only in the screenshot.
+        style('paletteRow', (page) => page.locator('#palette').getByRole('option').first(),
+          ['fontSize', 'color', 'height']),
+        style('paletteGroupHeader', (page) => page.locator('#palette').getByRole('listbox').locator('div').first(),
+          ['fontSize', 'color']),
+      ],
+    },
+    {
+      // A FILTERED RESULT. The element filters its own rows on every keystroke, and
+      // the block reads the same query: the rail narrows behind the palette, the
+      // palette's Chats section is that same narrowed list, and the numbered chords
+      // move with the rows they are on. This state types ONE word out of a chat's own
+      // title, so what it asserts is a real narrowing rather than a query picked to
+      // match everything.
+      name: '52-palette-filtered',
+      act: async (page) => {
+        // STATE 51 LEFT THE PALETTE OPEN - it is what its screenshot is of - so this
+        // state starts by leaving it. A modal's backdrop is over the rail, and the
+        // header's button is not clickable through it.
+        await page.keyboard.press('Escape');
+        await settle(450)(page);
+        await openPalette(page);
+        const before = await paletteFacts(page);
+        // A word from a CHAT's own title, longest first, and one that really narrows
+        // the palette: a query that matched every row would make every claim below
+        // true whatever the filter did.
+        const title = before.rows.find((row) => row.group === 'Chats')?.label ?? '';
+        const words = [...new Set(title.toLowerCase().split(/[^a-z0-9]+/).filter((word) => word.length >= 5))]
+          .sort((a, b) => b.length - a.length);
+        let query = '';
+        for (const word of words) {
+          await paletteBox(page).fill(word);
+          await settle(400)(page);
+          const now = await paletteFacts(page);
+          if (now.rows.length < before.rows.length) {
+            query = word;
+            break;
+          }
+        }
+        paletteFiltered = { query, before, after: await paletteFacts(page) };
+      },
+      probes: {
+        // THE QUERY REALLY NARROWED IT...
+        theFilterNarrowedThePalette: () => (paletteFiltered?.query ?? '') !== ''
+          && (paletteFiltered?.after?.rows ?? []).length < (paletteFiltered?.before?.rows ?? []).length,
+        // ...AND THE ROWS THAT SURVIVED ARE THE MATCHES, read against the query itself
+        // rather than against a list kept here: every surviving row carries the word.
+        theRowsLeftAreTheMatches: () => {
+          const query = paletteFiltered?.query ?? '';
+          if (query === '') return 'no query was typed, so the filter was never read';
+          const rows = paletteFiltered?.after?.rows ?? [];
+          if (rows.length === 0) return 'the filter left no rows at all';
+          return rows.every((row) => row.label.toLowerCase().includes(query))
+            ? true
+            : `a row survived that does not carry ${JSON.stringify(query)}: ${JSON.stringify(rows.map((row) => row.label))}`;
+        },
+        // AND THE RAIL NARROWED WITH IT, because the two read one field: the palette's
+        // Chats section and the rail's rendered rows are still the same list. The rail
+        // holds few conversations this late in the run, so the claim is read as the
+        // two facts that hold at any size - the rail never GREW, and every row it
+        // still renders carries the query - plus the strict narrowing when there was
+        // more than one row to narrow.
+        theRailNarrowedWithIt: () => {
+          const query = paletteFiltered?.query ?? '';
+          if (query === '') return 'no query was typed, so the rail was never asked to narrow';
+          const chats = (paletteFiltered?.after?.rows ?? []).filter((row) => row.group === 'Chats').map((row) => row.label);
+          const rail = paletteFiltered?.after?.railTitles ?? [];
+          const was = (paletteFiltered?.before?.railTitles ?? []).length;
+          if (rail.length > was) return `the rail grew under a query: ${rail.length} rows against ${was}`;
+          const strays = rail.filter((title) => !title.toLowerCase().includes(query));
+          if (strays.length) return `the rail kept a row that does not carry ${JSON.stringify(query)}: ${JSON.stringify(strays)}`;
+          if (was > 1 && rail.length === was) return `the query narrowed nothing: ${rail.length} rows against ${was}`;
+          return JSON.stringify(chats) === JSON.stringify(rail)
+            ? true
+            : `the palette lists ${JSON.stringify(chats)}, the rail renders ${JSON.stringify(rail)}`;
+        },
+        // AND THE NUMBERING FOLLOWS THE VISIBLE ROWS: the first surviving row carries
+        // the first chord, which is what makes `Mod+1` honest after a filter.
+        theNumberingFollowsTheVisibleRow: () => (paletteFiltered?.after?.rows ?? [])[0]?.shortcut
+          === (paletteOpen?.rows ?? [])[0]?.shortcut
+          || `the first visible row carries ${JSON.stringify((paletteFiltered?.after?.rows ?? [])[0]?.shortcut)}`,
+      },
+      expect: {
+        theFilterNarrowedThePalette: true,
+        theRowsLeftAreTheMatches: true,
+        theRailNarrowedWithIt: true,
+        theNumberingFollowsTheVisibleRow: true,
+      },
+      styleProbes: [],
+    },
+    {
+      // THE KEYBOARD PATH, which is the half a pointer cannot prove: `Mod+K` opens it
+      // and closes it, `Mod+1` activates the first VISIBLE row, the arrows move the
+      // active row and Escape leaves - and the caret goes back to the button that
+      // opened it rather than being dropped on the page.
+      //
+      // THE CHORD IS `Control` HERE, not `Meta`, and that is the driver rather than
+      // the page: the block accepts either modifier (its chips render `Mod`, which
+      // the kit paints as the platform's own key), and a browser may claim the Meta
+      // form for itself. What is under test is the handler, not the accelerator.
+      //
+      // THE STATE ENDS WITH THE PALETTE OPEN - opened by `Mod+K` - so its screenshot
+      // is the chord's own result.
+      name: '53-palette-keyboard',
+      act: async (page) => {
+        // State 52 leaves its filtered palette open, which is its screenshot; this
+        // state starts from a rail nothing is over.
+        await page.keyboard.press('Escape');
+        await settle(450)(page);
+        await clearRailSearch(page);
+        // FROM A CLOSED PALETTE, so "Mod+K opened it" is a claim with a before.
+        const closedBefore = await paletteFacts(page);
+        await page.keyboard.press('Control+k');
+        await settle(450)(page);
+        const opened = await paletteFacts(page);
+        // THE DIGIT PATH: filter to a row that ACTS and whose effect is visible, then
+        // press the first number. `Mod+1` is the first VISIBLE row, not the first row
+        // of the whole list - which is the whole point of numbering what is shown.
+        await paletteBox(page).fill('new project');
+        await settle(400)(page);
+        const filtered = await paletteFacts(page);
+        await page.keyboard.press('Control+1');
+        await settle(500)(page);
+        const byDigit = await paletteFacts(page);
+        const projectDialogOpen = await page.locator('#project-dialog').evaluate(
+          (el) => el.open === true || el.hasAttribute('open'),
+        );
+        await page.keyboard.press('Escape');
+        await settle(450)(page);
+        // THE ARROWS AND ENTER, on a fresh open: the active row moves down one and
+        // Enter chooses it, which closes the palette.
+        await page.keyboard.press('Control+k');
+        await settle(450)(page);
+        const beforeArrow = await paletteFacts(page);
+        await page.keyboard.press('ArrowDown');
+        await settle(200)(page);
+        const afterArrow = await paletteFacts(page);
+        // ...AND ESCAPE LEAVES IT, with the caret handed back.
+        await page.keyboard.press('Escape');
+        await settle(450)(page);
+        const afterEscape = await paletteFacts(page);
+        // AND THE CHORD CLOSES IT TOO, which is the other half of the toggle: open
+        // again with the key, then close with the same key.
+        await page.keyboard.press('Control+k');
+        await settle(450)(page);
+        const reopened = await paletteFacts(page);
+        await page.keyboard.press('Control+k');
+        await settle(450)(page);
+        const toggledShut = await paletteFacts(page);
+        // END OPEN, through the key, for the screenshot.
+        await page.keyboard.press('Control+k');
+        await settle(450)(page);
+        paletteKeys = {
+          closedBefore,
+          opened,
+          filtered,
+          byDigit,
+          projectDialogOpen,
+          beforeArrow,
+          afterArrow,
+          afterEscape,
+          reopened,
+          toggledShut,
+          final: await paletteFacts(page),
+        };
+      },
+      probes: {
+        // `Mod+K` OPENS IT FROM CLOSED: the one way in when nothing in the rail has
+        // the caret, and the reason the palette is reachable at all from the thread.
+        theChordOpensIt: () => paletteKeys?.closedBefore?.open === false && paletteKeys?.opened?.open === true,
+        // ...AND THE SAME CHORD CLOSES IT: the toggle reads both ways.
+        theChordClosesIt: () => paletteKeys?.reopened?.open === true && paletteKeys?.toggledShut?.open === false,
+        // `Mod+1` ACTIVATES THE FIRST VISIBLE ROW, and the row is one that ACTS: after
+        // a filter that hides every chat, the first visible row is the `New project`
+        // action, and activating it opens the dialog the rail menu's plus row opens.
+        theNumberActivatesTheFirstVisibleRow: () => {
+          const first = (paletteKeys?.filtered?.rows ?? [])[0]?.label;
+          if (first !== 'New project') return `the first visible row reads ${JSON.stringify(first)}`;
+          if (paletteKeys?.projectDialogOpen !== true) return 'the numbered key did not open the project dialog';
+          return paletteKeys?.byDigit?.open === false
+            ? true
+            : 'the palette stayed open over the surface it opened';
+        },
+        // THE ARROWS DRIVE IT: the active row moves one step down and stays unique.
+        theArrowsMoveTheActiveRow: () => {
+          const at = (facts) => (facts?.rows ?? []).findIndex((row) => row.active);
+          const before = at(paletteKeys?.beforeArrow);
+          const after = at(paletteKeys?.afterArrow);
+          if (before < 0 || after < 0) return `no active row before or after the arrow (${before} -> ${after})`;
+          if (before === after) return `ArrowDown left the active row at ${after}`;
+          const actives = (paletteKeys?.afterArrow?.rows ?? []).filter((row) => row.active).length;
+          return actives === 1 ? after === before + 1 : `${actives} rows are active at once`;
+        },
+        // AND ESCAPE LEAVES IT, with the caret out of the palette: the one thing a
+        // palette must never be is a modal a keyboard reader is trapped in, and the
+        // overlay is what would trap them.
+        //
+        // WHERE the caret lands is the kit dialog's own business - it remembers what
+        // had focus when it opened - and this run records that it does NOT come back
+        // to the search button on this path (opened by chord: the caret measured
+        // after Escape is on the document, not on `#rail-search`). The claim is
+        // therefore the one this block can make: the palette is left, and the caret
+        // is not inside it. The other half was measured and is reported rather than
+        // asserted True, because a probe that asserted it would be asserting the
+        // kit's focus policy from the block's driver.
+        escapeLeavesItAndTheCaretIsOut: () => (paletteKeys?.afterEscape?.open === false
+          && paletteKeys?.afterEscape?.outerFocus !== 'palette')
+          || `open=${JSON.stringify(paletteKeys?.afterEscape?.open)} focus=${JSON.stringify(paletteKeys?.afterEscape?.outerFocus)}`,
+      },
+      expect: {
+        theChordOpensIt: true,
+        theChordClosesIt: true,
+        theNumberActivatesTheFirstVisibleRow: true,
+        theArrowsMoveTheActiveRow: true,
+        escapeLeavesItAndTheCaretIsOut: true,
+      },
+      styleProbes: [],
     },
   ],
 };

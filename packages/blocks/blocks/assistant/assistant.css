@@ -112,6 +112,17 @@ kai-conversation-item[data-rail="folder"] + kai-conversation-item { margin-block
  * group of their own rather than as the head of the search box below them. The
  * step is measured in the driver, against the rows' own step. */
 .rail-header { display: flex; flex-direction: column; gap: 0.5rem; padding: 0.75rem 0.75rem 1rem; }
+/* THE HEADER'S OWN ROW: the collapse control and the search button, one at each
+ * end of the same line. `space-between` rather than a gap, because the search
+ * button belongs to the rail's top RIGHT corner - the side of the aside the
+ * reference puts it on - and a gap would leave it floating beside the collapse
+ * control instead. */
+.rail-head-row { display: flex; align-items: center; justify-content: space-between; }
+/* The palette rides in the kit's modal, and the panel is in ITS shadow root -
+ * so its width is the one box this page has to ask for by name. The kit's own
+ * `part="panel"` is the documented hook for exactly that; the width is a
+ * reading measure, and nothing else about the panel is restated here. */
+.palette-dialog::part(panel) { width: min(36rem, calc(100vw - 2rem)); }
 /* The four rows are one list, so the step inside it is the rail's own row step
  * (the kit's space-y-0.5), not the region's lonelier one. */
 .rail-actions { display: flex; flex-direction: column; gap: 0.125rem; }
