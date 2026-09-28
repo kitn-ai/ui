@@ -277,11 +277,178 @@ export async function vueCell({ tsc, name, files }) {
 }
 
 /**
+ * The svelte form is a runes-mode `.svelte` component plus a `.svelte.ts` store.
+ * No tsconfig reads a `.svelte` template — `tsc` reports TS1136 on the first tag —
+ * so the cell runs `svelte-check`, which compiles the script AND reads the markup.
+ * `svelte-check` is a real devDependency of `examples/starters/svelte` and `svelte`
+ * and `vite` are already symlinked by `createConsumerTsc`; the cell links
+ * `svelte-check` itself, exactly as `vueCell` links `vue-tsc`.
+ *
+ * TWO PARTS OF THIS CELL ARE LOUD ABOUT WHAT SVELTE DOES NOT CHECK.
+ *
+ * 1. THE PROJECT needs `vite/client`, or every emitted `import './<name>.css'`
+ *    is TS2307 — the starter ships `src/app.d.ts` with that reference line and
+ *    so does this cell, because that file is the consumer's, not the kit's.
+ * 2. THE TEMPLATE'S ATTRIBUTES ARE NOT TYPED, and the plant at the end of this
+ *    function is what stops that from being a silent gap. `svelteHTML`
+ *    .IntrinsicElements ends with `[name: string]: { [name: string]: any }`, so
+ *    an unknown `kai-*` tag accepts every attribute of every type — where vue
+ *    has the kit's own `GlobalComponents` augmentation and react its
+ *    `JSX.IntrinsicElements`. A wrong-authored literal on a kai element is
+ *    therefore invisible here (it is a hard error in the vue cell), which means
+ *    this cell checks the SCRIPT and the bind:this/Refs wiring, not the props.
+ */
+export async function svelteCell({ tsc, name, files }) {
+  const checkDir = pkgDir('svelte-check');
+  if (!checkDir) {
+    return [
+      `${name} [svelte]: svelte-check is not installed, so the emitted .svelte cannot be compiled. It is a ` +
+        'devDependency of examples/starters/svelte; `pnpm install` at the repo root is what puts it here.',
+    ];
+  }
+  const nm = join(tsc.tmp, 'node_modules');
+  const linked = join(nm, 'svelte-check');
+  if (!existsSync(linked)) symlinkSync(checkDir, linked, 'dir');
+
+  const dir = join(tsc.tmp, 'svelte', name);
+  mkdirSync(dir, { recursive: true });
+  const clear = () => {
+    for (const f of readdirSync(dir)) {
+      // The tsconfig and the consumer's own ambient file are this cell's harness
+      // and outlive every tree it writes; deleting them made the second run exit
+      // on a missing file, which reads as a compiler failure.
+      if (f === 'tsconfig.json' || f === 'app.d.ts') continue;
+      rmSync(join(dir, f), { recursive: true, force: true });
+    }
+  };
+  const tsconfig = join(dir, 'tsconfig.json');
+  writeFileSync(
+    tsconfig,
+    JSON.stringify(
+      {
+        // BASE_OPTIONS plus the three lines `sv create` writes that this repo's
+        // svelte starter keeps: verbatimModuleSyntax is what makes an emitted
+        // `import { X }` of a type-only name an error rather than a smell.
+        compilerOptions: {
+          ...BASE_OPTIONS,
+          verbatimModuleSyntax: true,
+          noUncheckedSideEffectImports: true,
+          moduleDetection: 'force',
+        },
+        include: ['**/*.svelte', '**/*.svelte.ts', '**/*.ts', '**/*.d.ts'],
+      },
+      null,
+      2,
+    ),
+  );
+  // The consumer's ambient file, byte for byte the two reference lines the
+  // starter's src/app.d.ts opens with. `vite/client` is the one that declares
+  // `*.css`, so without it every emitted stylesheet import is TS2307.
+  writeFileSync(join(dir, 'app.d.ts'), '/// <reference types="svelte" />\n/// <reference types="vite/client" />\n');
+
+  // The anti-theatre controls FIRST, in this directory. Both of the shared
+  // probes are reported by svelte-check (measured), so a sandbox whose
+  // @kitn.ai/ui resolved to `any` or whose strict flags never took is caught here
+  // rather than passing every tree below vacuously.
+  //
+  // THE ASSERTION IS NOT THE PROBE'S OWN `expect` REGEX. That pattern is written
+  // against tsc's output, which carries the diagnostic CODE (`error TS2322`);
+  // svelte-check's machine output prints `ERROR "<path>" <line>:<col> "<message>"`
+  // with no code at all, so reusing it matched nothing and reported BOTH probes as
+  // unfired while svelte-check was printing both (measured). The message fragments
+  // below are svelte-check's wording for the same two defects; a probe is counted
+  // as fired only when its own file is an ERROR line AND that fragment is there.
+  const SVELTE_PROBE_MESSAGE = {
+    'probe-wrong-type.ts': /not assignable to type 'number'/,
+    'probe-unused-import.ts': /is declared but its value is never read/,
+  };
+  for (const probe of ANTI_THEATRE_PROBES) writeFileSync(join(dir, probe.file), probe.code);
+  const controls = svelteCheck(dir);
+  const probeLines = controls.split('\n').filter((line) => line.includes('ERROR'));
+  const missed = ANTI_THEATRE_PROBES.filter((probe) => {
+    const line = probeLines.find((l) => l.includes(probe.file));
+    return !line || !SVELTE_PROBE_MESSAGE[probe.file].test(line);
+  });
+  // Gone before anything else is written: a probe left in the directory would
+  // be reported against every tree below it, so a real defect and a passing
+  // harness would look identical.
+  clear();
+  if (missed.length) {
+    return [
+      `${name} [svelte]: the sandbox self-test did NOT fire (${missed.map((p) => p.file).join(', ')}).\n` +
+        `    ${missed.map((p) => p.why).join('\n    ')}\n` +
+        `    Every cell under it would pass vacuously. svelte-check said:\n${controls || '    (nothing)'}`,
+    ];
+  }
+
+  // THE TEMPLATE PLANT. A kai element with an attribute the kit has no prop for,
+  // and the authored `variant="solid"` literal the vue and react cells both
+  // reject. Svelte reports NEITHER, because an unknown tag resolves through
+  // svelteHTML.IntrinsicElements's `[name: string]` index signature — there is no
+  // kit-side svelte augmentation to type it with (vue has GlobalComponents,
+  // react JSX.IntrinsicElements). So this asserts today's truth instead of
+  // leaving it implicit, and FAILS the day the truth changes: when the kit ships
+  // a typed svelte augmentation this probe starts erroring, and the note below
+  // is then wrong and has to be deleted rather than quietly kept.
+  const templateProbe = 'probe-template.svelte';
+  writeFileSync(
+    join(dir, templateProbe),
+    '<script lang="ts">\n  let n = $state(0);\n</script>\n\n<kai-button variant="solid" not-a-kai-prop={n}>x</kai-button>\n',
+  );
+  const templateControls = svelteCheck(dir);
+  clear();
+  if (/ERROR\s+"[^"]*probe-template\.svelte"/.test(templateControls)) {
+    return [
+      `${name} [svelte]: the template is now TYPED (${templateProbe} errored), which this cell's prose says it is not.\n` +
+        `    Svelte reports ${templateControls.trimEnd()}\n` +
+        `    That is the good news, not a failure of the tree: delete the template plant and its note in ` +
+        'scripts/lib/block-compile-cells.mjs, and state that the svelte cell checks the template too.',
+    ];
+  }
+
+  for (const file of files) {
+    const dest = join(dir, file.path);
+    mkdirSync(dirname(dest), { recursive: true });
+    writeFileSync(dest, file.content);
+  }
+  // ANTI-VACUITY: the include matches `**/*.svelte`, so a tree that emitted none
+  // (a renderer that stopped, a tree read from the wrong form's file) leaves
+  // svelte-check with only the probes to read. Same guard as vueCell's, same
+  // reason: that is how the first version of that cell passed.
+  const components = files.filter((file) => file.path.endsWith('.svelte'));
+  if (components.length === 0) {
+    clear();
+    return [
+      `${name} [svelte]: the form emitted no .svelte file at all, so this cell checked nothing. ` +
+        'Every svelte tree is one component plus the .svelte.ts store it imports.',
+    ];
+  }
+  const diagnostics = svelteCheck(dir);
+  clear();
+  if (!diagnostics.trim()) return [];
+  return [`${name} [svelte]: does not compile under a stock svelte-check consumer project:\n${diagnostics.trimEnd()}`];
+
+  /** `svelte-check` over one directory holding a tsconfig.json; raw diagnostics ('' when clean). */
+  function svelteCheck(runDir) {
+    try {
+      execFileSync(
+        process.execPath,
+        [join(checkDir, 'bin/svelte-check'), '--tsconfig', join(runDir, 'tsconfig.json'), '--output', 'machine'],
+        { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] },
+      );
+      return '';
+    } catch (e) {
+      return `${e.stdout ?? ''}${e.stderr ?? ''}`;
+    }
+  }
+}
+
+/**
  * One strategy per form id. A form with no strategy is a HARD failure rather
  * than a skip: a cell that quietly stops running is the exact shape of check
  * this repo keeps paying for.
  */
-const STRATEGIES = { react: reactCell, html: htmlCell, vue: vueCell };
+const STRATEGIES = { react: reactCell, html: htmlCell, vue: vueCell, svelte: svelteCell };
 
 /**
  * Run every block x form cell. Prints the axis and the cell count it actually
