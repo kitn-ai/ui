@@ -176,7 +176,25 @@ function stripComments(code) {
 }
 
 /**
- * @returns findings[] — { kind, tag, detail, line, severity }
+ * @returns findings[] — { kind, tag, detail, line, severity, via }
+ *
+ * `via` is WHERE the name was written, and it is what lets a caller scope itself
+ * to one surface without re-implementing the walk:
+ *   'attribute'      — a name inside a `<kai-x …>` opening tag (the snippet the
+ *                      reader copies verbatim)
+ *   'property'       — `el.prop = …` on a variable resolved to a kai-* tag
+ *   'method'         — `el.method()`
+ *   'event-listener' — `addEventListener('kai-…')`
+ *   'slot'           — `slot="…"`
+ *
+ * A PROP-path finding is not the same claim as an attribute one: the pair
+ * `el.values` on `<kai-checkbox-group>` / `<kai-select>` is a real runtime
+ * property installed by `Object.defineProperty` that the Props interface never
+ * declares, so web-component-meta.json and the generated types omit it and
+ * checkMarkup reports it as an unknown prop. A reader of a snippet has to be
+ * told that, but it is a defect in the DECLARATION, not in the snippet — which
+ * is a judgement only the caller can make, hence the field rather than a
+ * folded-in rule.
  */
 export function checkMarkup({ code: rawCode, startLine, surface, lang }) {
   const code = stripComments(rawCode);
@@ -200,8 +218,9 @@ export function checkMarkup({ code: rawCode, startLine, surface, lang }) {
               detail: `<${tag}> is used by the kit (a declarative light-DOM child) but is not a registered element, so web-component-meta.json, the generated types and the MCP catalog all omit it`,
               line,
               severity: 'advisory',
+              via: 'attribute',
             }
-          : { kind: 'unknown-element', tag, detail: `<${tag}> is not a registered element and the kit's source never mentions it`, line, severity: 'high' },
+          : { kind: 'unknown-element', tag, detail: `<${tag}> is not a registered element and the kit's source never mentions it`, line, severity: 'high', via: 'attribute' },
       );
       continue;
     }
@@ -221,6 +240,7 @@ export function checkMarkup({ code: rawCode, startLine, surface, lang }) {
             detail: `<${tag}> has no event '${base}' (declares: ${[...el.eventNames].join(', ') || 'none'})`,
             line,
             severity: 'high',
+            via: 'attribute',
           });
         }
         continue;
@@ -234,6 +254,7 @@ export function checkMarkup({ code: rawCode, startLine, surface, lang }) {
           detail: `<${tag}> has no prop '${base}'`,
           line,
           severity: 'high',
+          via: 'attribute',
         });
         continue;
       }
@@ -249,6 +270,7 @@ export function checkMarkup({ code: rawCode, startLine, surface, lang }) {
           detail: `<${tag} ${attr.raw}="…"> — '${prop.name}' is ${prop.displayType ?? 'a non-scalar'}; set it as a JS property, an attribute stringifies it`,
           line,
           severity: 'high',
+          via: 'attribute',
         });
       }
     }
@@ -282,6 +304,7 @@ export function checkMarkup({ code: rawCode, startLine, surface, lang }) {
           detail: `${name}.${p} = … — <${tag}> has no prop '${p}'`,
           line: lineOf(code, m.index, startLine),
           severity: 'high',
+          via: 'property',
         });
       }
     }
@@ -296,6 +319,7 @@ export function checkMarkup({ code: rawCode, startLine, surface, lang }) {
           detail: `${name}.${meth}() — <${tag}> declares methods: ${[...el.methodNames].join(', ') || 'none'}`,
           line: lineOf(code, m.index, startLine),
           severity: 'medium',
+          via: 'method',
         });
       }
     }
@@ -314,6 +338,7 @@ export function checkMarkup({ code: rawCode, startLine, surface, lang }) {
             detail: `addEventListener('${name}') — the kit dispatches this event, but no element DECLARES it, so it is missing from web-component-meta.json and the generated event types`,
             line,
             severity: 'advisory',
+            via: 'event-listener',
           }
         : {
             kind: 'unknown-event',
@@ -321,6 +346,7 @@ export function checkMarkup({ code: rawCode, startLine, surface, lang }) {
             detail: `addEventListener('${name}') — no kai-* element declares that event and the kit's source never mentions it`,
             line,
             severity: 'high',
+            via: 'event-listener',
           },
     );
   }
@@ -341,10 +367,69 @@ export function checkMarkup({ code: rawCode, startLine, surface, lang }) {
         detail: `slot="${m[1]}" — not a slot of ${seenTags.map((e) => e.tag).join(' / ')} (available: ${[...slots].join(', ') || 'none'})`,
         line: lineOf(code, m.index, startLine),
         severity: 'medium',
+        via: 'slot',
       });
     }
   }
 
+  return findings;
+}
+
+/**
+ * An attribute VALUE against the closed union the element declares for it.
+ *
+ * `checkMarkup` above answers "does this element have a prop called that"; it
+ * cannot see that `variant` DOES exist while `variant="secondary"` does not,
+ * because `secondary` is a VALUE. That is the one shape a snippet can be wrong
+ * in while every name in it is real, and it is the shape that shipped:
+ * `stories/showcase/lovable.stories.tsx` told the reader to write
+ * `<kai-badge variant="secondary">` in its HTML skeleton. Typed `kai-*` JSX
+ * catches a wrong literal at the call site; nothing reads literals inside a
+ * snippet string, which is the code the reader actually copies.
+ *
+ * The unions are NOT read here. `unionByTag` — tag → prop → { name, values } —
+ * is built by the caller from the shipped `Kai<Name>ElementProps` interfaces in
+ * web-component-types.d.ts, which is the same declaration the Solid/Svelte/Vue
+ * JSX augmentations type their tags from. Keeping the TypeScript parse out of
+ * this file is what lets it stay dependency-free.
+ *
+ * Only `kind === 'attr'` quoted literals are compared: a `{…}` value is a real
+ * binding and an unquoted attribute assigns `""`, neither of which is a
+ * literal the reader copied. An empty value is skipped for the same reason —
+ * `theme=""` is served by the element's own default, and the kit's unions do
+ * not list `""` as a member, so flagging it would report correct code twice
+ * over.
+ *
+ * @returns findings[] — the same `{ kind, tag, detail, line, severity, via }`
+ *          shape `checkMarkup` returns (`via: 'attribute'`), so one reporter can
+ *          print both.
+ */
+export function checkAttrValues({ code: rawCode, startLine, unionByTag }) {
+  const code = stripComments(rawCode);
+  const negative = counterExampleLines(rawCode);
+  const findings = [];
+
+  for (const { tag, attrText, index } of kaiTags(code)) {
+    const byProp = unionByTag.get(tag);
+    if (!byProp) continue;
+    for (const attr of parseAttrs(attrText)) {
+      const { base, kind } = classifyAttr(attr.raw);
+      if (kind !== 'attr' || !base || isGlobal(base)) continue;
+      if (attr.expression || attr.value === null || attr.value === '') continue;
+      const prop = byProp.get(base) ?? byProp.get(kebabToCamel(base)) ?? byProp.get(camelToKebab(base));
+      if (!prop || prop.values.has(attr.value)) continue;
+      const line = lineOf(code, index, startLine);
+      if (negative.has(line - startLine + 1)) continue;
+      findings.push({
+        kind: 'unknown-attribute-value',
+        tag,
+        detail: `<${tag} ${attr.raw}="${attr.value}"> — '${prop.name}' accepts ${[...prop.values].map((v) => `\`${v}\``).join(' | ')}`,
+        line,
+        severity: 'high',
+        via: 'attribute',
+      });
+    }
+  }
   return findings;
 }
 

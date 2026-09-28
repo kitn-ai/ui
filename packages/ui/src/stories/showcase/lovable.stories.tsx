@@ -621,7 +621,7 @@ export const Lovable: Story = {
     <kai-tasks><!-- the build plan: data = { mode:'progress', tasks:[...] } --></kai-tasks>
     <div class="build-log"><!-- Created src/App.tsx, Created StatCard.tsx, ... --></div>
     <kai-message><!-- "Helm is live - preview it on the right." --></kai-message>
-    <kai-badge variant="secondary">v1</kai-badge> Checkpoint saved
+    <kai-badge>v1</kai-badge> Checkpoint saved
     <kai-button variant="ghost" icon="rotate-cw">Restore</kai-button>
 
     <!-- composer pinned at the bottom -->
@@ -637,7 +637,7 @@ export const Lovable: Story = {
   <section class="preview">
     <div class="toolbar">
       <kai-button size="icon-sm" label="Refresh"><svg slot="icon"></svg></kai-button>
-      <!-- device toggle: active = variant="secondary", others ghost -->
+      <!-- device toggle: active = variant="default", others ghost -->
       <kai-button label="Desktop"><svg slot="icon"></svg></kai-button>
       <kai-button label="Tablet"><svg slot="icon"></svg></kai-button>
       <kai-button label="Mobile"><svg slot="icon"></svg></kai-button>
