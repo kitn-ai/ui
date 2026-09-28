@@ -1,10 +1,13 @@
 import { describe, expect, it, afterEach } from 'vitest';
-import { render } from 'solid-js/web';
 import { createSignal, type Accessor, type JSX } from 'solid-js';
 import { page } from 'vitest/browser';
 import {
   Dropdown, DropdownContent, DropdownItem, DropdownTrigger,
 } from '../../src/components/dropdown/dropdown';
+import {
+  describeBox, expectInsideWindow, menuBox, mount, outsideWindow, reset, settle,
+  type Box,
+} from './containment-helpers';
 
 /**
  * THE INVARIANT, MEASURED IN A BROWSER: a menu's box never exceeds the viewport.
@@ -13,11 +16,8 @@ import {
  * menu hanging past the bottom edge is indistinguishable from one that fits — which is
  * how a height cap shipped with its own residual ("532px tall with its bottom 10.5px
  * past the viewport edge, a 33-row menu in a 560px window") attached to it instead of a
- * failing test. Here the surface's real border box is compared with the real window.
- *
- * Both AXES: `shift()` moves a `bottom-*` placement along its MAIN axis, which is X, so
- * the horizontal half is the positioner's and the vertical half is the ceiling's. A
- * check on one axis would have called the 10.5px run green.
+ * failing test. Here the surface's real border box is compared with the real window:
+ * `expectInsideWindow` in ./containment-helpers, the one statement of the invariant.
  *
  * WHY A SWEEP AND NOT A CHOSEN ANCHOR. The cap's vertical half is the room beside the
  * anchor, and the positioner keeps the surface where it is while the surface still fits
@@ -38,61 +38,7 @@ const ROWS = 80;
 /** A menu that fits anywhere: the "nothing changed for a short menu" half. */
 const SHORT_ROWS = 2;
 
-type Box = {
-  top: number; right: number; bottom: number; left: number; height: number;
-  contentHeight: number; boxHeight: number;
-};
-
-let dispose: (() => void) | undefined;
-
-afterEach(() => {
-  dispose?.();
-  dispose = undefined;
-  document.body.replaceChildren();
-});
-
-function mount(node: () => JSX.Element): void {
-  const root = document.createElement('div');
-  document.body.append(root);
-  dispose = render(node, root);
-}
-
-/** Two frames: one for the positioner's microtask, one for the ResizeObserver it feeds. */
-const settle = () =>
-  new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
-
-/**
- * The surface, whichever root it was portaled into. `position: fixed`, so its rect is
- * already in viewport coordinates.
- */
-function menuBox(): Box {
-  const el = document.querySelector<HTMLElement>('[role="menu"]');
-  if (!el) throw new Error('no [role="menu"] rendered');
-  const rect = el.getBoundingClientRect();
-  return {
-    top: rect.top,
-    right: rect.right,
-    bottom: rect.bottom,
-    left: rect.left,
-    height: rect.height,
-    contentHeight: el.scrollHeight,
-    boxHeight: el.clientHeight,
-  };
-}
-
-const describeBox = (box: Box, width: number, height: number, where: string): string =>
-  `${where}: menu box top=${box.top.toFixed(1)} bottom=${box.bottom.toFixed(1)} ` +
-  `left=${box.left.toFixed(1)} right=${box.right.toFixed(1)} (height ${box.height.toFixed(1)}) ` +
-  `in a ${width}x${height} window`;
-
-/** The named invariant: inside on BOTH axes, which is the whole claim. */
-function expectInsideWindow(box: Box, width: number, height: number, where: string): void {
-  const at = describeBox(box, width, height, where);
-  expect(box.top, `top edge above the window -- ${at}`).toBeGreaterThanOrEqual(0);
-  expect(box.bottom, `bottom edge past the window -- ${at}`).toBeLessThanOrEqual(height);
-  expect(box.left, `left edge outside the window -- ${at}`).toBeGreaterThanOrEqual(0);
-  expect(box.right, `right edge outside the window -- ${at}`).toBeLessThanOrEqual(width);
-}
+afterEach(reset);
 
 /**
  * A menu whose trigger sits at a chosen distance from the top, so the placement is a
@@ -154,12 +100,10 @@ describe('a menu never exceeds the window', () => {
       await settle();
       const box = menuBox();
       const where = `anchor ${anchorTop}px from the top`;
-      if (box.bottom > height || box.top < 0 || box.right > WIDTH || box.left < 0) {
+      if (outsideWindow(box, WIDTH, height)) {
         failures.push(describeBox(box, WIDTH, height, where));
       }
-      dispose?.();
-      dispose = undefined;
-      document.body.replaceChildren();
+      reset();
     }
     expect(failures, `${failures.length} anchor positions opened a menu outside the window`).toEqual([]);
   });
