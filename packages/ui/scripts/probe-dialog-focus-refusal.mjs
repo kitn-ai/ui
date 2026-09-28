@@ -9,7 +9,17 @@
  *   node scripts/probe-dialog-focus-refusal.mjs                  # the shipped walk
  *   node scripts/probe-dialog-focus-refusal.mjs --variant=assume-took
  *   node scripts/probe-dialog-focus-refusal.mjs --variant=drop-check
- *   node scripts/probe-dialog-focus-refusal.mjs --shape=details|hidden|inert
+ *   node scripts/probe-dialog-focus-refusal.mjs --shape=details|hidden|inert|modal|modal-outside
+ *
+ * `--shape=modal` is the one refusal nothing on the page authors: the walk's candidates
+ * sit outside a native `<dialog>` the page opened with `showModal()`, and the browser
+ * makes everything outside it inert. Nothing in the kit does this - `src/components/
+ * dialog/dialog.tsx` is a Portal'd `role="dialog" aria-modal="true"` div and there is no
+ * `showModal()` under `src/` - so the shape is the consumer's own native modal with a
+ * kai-dialog nested inside it, which is the arrangement where the kit's panel can still
+ * take focus at all. `--shape=modal-outside` is the same page with the panel beside the
+ * modal instead of inside it; there the browser refuses the panel's own `focus()` on
+ * open, so the walk is never reached and the probe's precondition check fails.
  *
  * WHAT IS MEASURED, and how the page is built:
  *
@@ -67,18 +77,62 @@ const arg = (name, fallback) => {
 const variant = arg('variant', 'real');
 const shape = arg('shape', 'inert');
 if (!['real', 'assume-took', 'drop-check'].includes(variant)) throw new Error(`unknown --variant=${variant}`);
-if (!['inert', 'details', 'hidden'].includes(shape)) throw new Error(`unknown --shape=${shape}`);
+if (!['inert', 'details', 'hidden', 'modal', 'modal-outside'].includes(shape)) throw new Error(`unknown --shape=${shape}`);
+/** Both modal shapes put the page's own `showModal()` on the page and differ only in
+ *  where the panel sits relative to it. */
+const modalShape = shape === 'modal' || shape === 'modal-outside';
 
 /** The verification line, spelled exactly as it is in src. */
 const VERIFY_LINE = 'if (deepActiveElement() === el) return true;';
 
-/** The three shapes under test, wrapped around the decoy. `inert` and a closed
- *  `<details>` both REFUSE focus while still painting a normal-size box; `hidden` is
- *  the plain `display:none` control, measured for contrast. */
+/** The shapes under test, wrapped around the decoy. `inert` and a closed `<details>`
+ *  both REFUSE focus while still painting a normal-size box; `hidden` is the plain
+ *  `display:none` control, measured for contrast. `modal` is the same refusal with no
+ *  page author at all: the decoy is inert because the browser made it so. */
 const SHAPES = {
   inert: '<div inert><button id="decoy" type="button">Delete photo</button></div>',
   details: '<details style="display:block"><summary>Filters</summary><button id="decoy" type="button">Apply filters</button></details>',
   hidden: '<div style="display:none"><button id="decoy" type="button">Apply filters</button></div>',
+  modal: '<div id="void"><button id="decoy" type="button">Delete photo</button></div>',
+};
+
+/** `#host`'s children. The page-authored shapes keep the layout the probe was written
+ *  against: the decoy, the remembered opener, then the nearest real destination.
+ *
+ *  The two modal shapes split that layout across the browser's own boundary.
+ *  `<dialog id="shell">` is opened with `showModal()`, so everything outside it - the
+ *  decoy, `#outside` - is inert by the browser's doing, with no `[inert]` attribute
+ *  anywhere on the page. `#next` sits inside the modal in both, or the browser would
+ *  refuse the drop-check variant's brute-forced destination too and control B could not
+ *  fire. The opener `#shutter` is focused before the modal opens (nothing outside it
+ *  can be focused once it is) and removed while the dialog is open.
+ *
+ *  `modal` nests the panel INSIDE the modal, which is the only arrangement the walk can
+ *  run in: `modal-outside` puts it beside the modal instead, where the browser refuses
+ *  the panel's own `focus()` on open, the walk is never reached, and the run says so
+ *  through its own precondition check rather than a green one. */
+const HOST_INNER = (s) => {
+  if (s === 'modal') {
+    return `${SHAPES.modal}
+    <button id="shutter" type="button">Zoom the photo</button>
+    <dialog id="shell">
+      <kai-dialog id="dlg" label="Photo preview"></kai-dialog>
+      <button id="near" type="button">Shutter speed</button>
+      <button id="next" type="button">Back to the gallery</button>
+    </dialog>`;
+  }
+  if (s === 'modal-outside') {
+    return `${SHAPES.modal}
+    <button id="shutter" type="button">Zoom the photo</button>
+    <dialog id="shell">
+      <button id="near" type="button">Shutter speed</button>
+      <button id="next" type="button">Back to the gallery</button>
+    </dialog>
+    <kai-dialog id="dlg" label="Photo preview"></kai-dialog>`;
+  }
+  return `${SHAPES[s]}
+    <button id="shutter" type="button">Zoom the photo</button>
+    <button id="near" type="button">Shutter speed</button>`;
 };
 
 const PAGE = /* html */ `<!doctype html>
@@ -86,13 +140,13 @@ const PAGE = /* html */ `<!doctype html>
 <body>
   <button id="outside" type="button">Skip to content</button>
   <div id="host">
-    ${SHAPES[shape]}
-    <button id="shutter" type="button">Zoom the photo</button>
-    <button id="near" type="button">Shutter speed</button>
+    ${HOST_INNER(shape)}
   </div>
-  <button id="next" type="button">Back to the gallery</button>
-  <kai-dialog id="dlg" label="Photo preview"></kai-dialog>
+  ${modalShape ? '' : `<button id="next" type="button">Back to the gallery</button>
+  <kai-dialog id="dlg" label="Photo preview"></kai-dialog>`}
   <script type="module">
+    const SHAPE = ${JSON.stringify(shape)};
+    const MODAL = SHAPE.startsWith('modal');
     const deep = () => { let el = document.activeElement; while (el?.shadowRoot?.activeElement) el = el.shadowRoot.activeElement; return el; };
     window.__trail = [];
     // Record every focus() the page makes and whether it MOVED focus. This is what
@@ -148,6 +202,14 @@ const PAGE = /* html */ `<!doctype html>
       window.__trail.length = 0;
       document.getElementById('shutter').focus();
       dlg.show();
+      // Opened AFTER dlg.show() on purpose: showModal() takes focus into the modal
+      // itself, and the panel's own focus() runs in a microtask, so the panel lands
+      // focused on a page that is already inert. Opened before, the opener could not
+      // have been focused at all and the walk would never be reached.
+      if (MODAL) {
+        const shell = document.getElementById('shell');
+        if (!shell.open) shell.showModal();
+      }
       await frames(3);
       return window.__snap();
     };
@@ -162,15 +224,33 @@ const PAGE = /* html */ `<!doctype html>
     // Independent shape evidence: does #decoy really match the kit's focusable
     // selector, look focusable, and still refuse focus? Measured from a known
     // position, with the dialog closed, without the walk involved at all.
+    const tryFocus = (el, from) => {
+      from.focus();
+      const before = deep();
+      let threw = null;
+      try { el.focus(); } catch (e) { threw = String(e); }
+      return { before, took: deep() === el, activeAfter: deep()?.id ?? null, threw };
+    };
     window.__shapeEvidence = () => {
       const SEL = ['a[href]', 'button:not([disabled])', 'input:not([disabled])', 'select:not([disabled])',
         'textarea:not([disabled])', 'audio[controls]', 'video[controls]',
         '[contenteditable]:not([contenteditable="false"])', '[tabindex]:not([tabindex="-1"])'].join(',');
       const decoy = document.getElementById('decoy');
-      document.getElementById('outside').focus();
-      const before = deep();
-      let threw = null;
-      try { decoy.focus(); } catch (e) { threw = String(e); }
+      const shell = document.getElementById('shell');
+      // The modal shape measures the SAME node twice: with the browser's modal closed
+      // (it takes focus, so the markup is not what refuses it) and with it open (it does
+      // not). The pair is what makes "the browser refused this, page wrote nothing" a
+      // measurement rather than a claim.
+      const closedRun = tryFocus(decoy, document.getElementById('outside'));
+      let openRun = null;
+      if (MODAL) {
+        if (!shell.open) shell.showModal();
+        // From a real destination INSIDE the modal, so a refusal cannot be read as
+        // "focus was nowhere to begin with".
+        openRun = tryFocus(decoy, document.getElementById('near'));
+        shell.close();
+      }
+      const run = openRun ?? closedRun;
       const r = decoy.getBoundingClientRect();
       const style = getComputedStyle(decoy);
       return {
@@ -179,11 +259,12 @@ const PAGE = /* html */ `<!doctype html>
         offsetWidth: decoy.offsetWidth,
         visibility: style.visibility,
         display: style.display,
-        inertSelf: decoy.closest('[inert]') !== null,
-        showedAsActiveBefore: before?.id,
-        tookFocus: deep() === decoy,
-        activeAfter: deep()?.id ?? null,
-        threw,
+        inertAttributeAncestor: decoy.closest('[inert]') !== null,
+        focusedWithoutNativeModal: closedRun.took,
+        showedAsActiveBefore: run.before?.id ?? null,
+        tookFocus: run.took,
+        activeAfter: run.activeAfter,
+        threw: run.threw,
       };
     };
     window.__probe = { error };
@@ -269,7 +350,13 @@ const ev = await page.evaluate(() => window.__shapeEvidence());
 check('the decoy matches the kit\'s focusable selector', ev.matchesSelector, JSON.stringify(ev));
 check('the decoy paints (it does not look any different from a live control)', ev.offsetWidth > 0 && ev.rect.h > 0, `offsetWidth=${ev.offsetWidth} rect=${JSON.stringify(ev.rect)} visibility=${ev.visibility}`);
 check('the decoy REFUSES focus, silently', !ev.tookFocus && ev.threw === null, `focus() moved focus to ${ev.activeAfter}, threw ${ev.threw}`);
-check('focus before the attempt was somewhere real (not vacuous)', ev.showedAsActiveBefore === 'outside', `was ${ev.showedAsActiveBefore}`);
+check('focus before the attempt was somewhere real (not vacuous)', ev.showedAsActiveBefore === (modalShape ? 'near' : 'outside'), `was ${ev.showedAsActiveBefore}`);
+if (modalShape) {
+  // The distinguishing evidence for this shape: no `[inert]` anywhere (so no page author
+  // made the decoy unfocusable) and the identical node takes focus with the browser's
+  // modal closed. Both together are the browser refusing it, and only those.
+  check('the refusal is the BROWSER\'s, not the page\'s (no [inert] ancestor, and the same node focuses with the modal closed)', !ev.inertAttributeAncestor && ev.focusedWithoutNativeModal, JSON.stringify({ inertAttributeAncestor: ev.inertAttributeAncestor, focusedWithoutNativeModal: ev.focusedWithoutNativeModal }));
+}
 
 // 2. Open with the shutter focused: focus goes into the panel, the shutter is
 //    remembered as the opener (the precondition pair jsdom needs stubbed visibility

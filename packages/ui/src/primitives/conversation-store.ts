@@ -80,7 +80,7 @@ export interface ConversationStore {
   // `ConversationController` refuses loudly, exactly as for `setGroup`.
   /** List this store's groups in the one group order: ascending `sortOrder`. */
   listGroups?(): Promise<ConversationGroup[]>;
-  /** Create or update `group`, keyed on `group.id`; the stored record is that object. */
+  /** Create or update `group`, keyed on `group.id`; the stored record is that object, except `createdAt`, which keeps the stored value on an update. */
   saveGroup?(group: ConversationGroup): Promise<void>;
   /** Delete group `id`; every conversation filed under it is unfiled, never deleted. */
   removeGroup?(id: string): Promise<void>;
@@ -398,11 +398,28 @@ export function localStorageStore(name: string, userId?: string): ConversationSt
     async saveGroup(group) {
       // Create-or-update keyed on `group.id`, through the same append the conversation
       // index's own save() uses, so a new id lands last and an existing one is replaced
-      // rather than duplicated. The stored record is exactly the object handed in: what a
-      // group is called and how it orders is the app's decision, and `saveGroup` is the
-      // write, not the policy. No try/catch here, the same shape setGroup() has: the
-      // read/write pair below is the one seam that absorbs a missing localStorage.
-      writeGroups([...readGroups().filter((g) => g.id !== group.id), group]);
+      // rather than duplicated. Every field the caller hands over is stored verbatim: what
+      // a group is called, how it orders and who it belongs to are the app's decisions,
+      // and `saveGroup` is the write, not the policy. `name` and `sortOrder` are required,
+      // so an update always states them, and `userId`/`teamId` are current membership
+      // rather than history: reassigning a group to another team or owner is an update this
+      // write passes straight through.
+      //
+      // `createdAt` is the ONE field on this record that is not the caller's to restate,
+      // and the carry is the same rule save()'s own carries state one concept over: it is
+      // a fact about the PAST, a group is never renamed INTO a new creation date, so the
+      // stored value wins whenever the group already exists and the supplied one stands
+      // only on create. Without this, a caller renaming a group has to carry `createdAt`
+      // forward itself, and a caller who forgets silently makes a months-old group look
+      // brand new. `lastReadAt`'s carry in save() is the same shape; neither is a value an
+      // unrelated write has any business resetting.
+      //
+      // No try/catch here, the same shape setGroup() has: the read/write pair below is the
+      // one seam that absorbs a missing localStorage.
+      const groups = readGroups();
+      const existing = groups.find((g) => g.id === group.id);
+      const next: ConversationGroup = existing ? { ...group, createdAt: existing.createdAt } : group;
+      writeGroups([...groups.filter((g) => g.id !== group.id), next]);
     },
     async removeGroup(id) {
       // The group goes. The conversations filed under it stay and come back UNFILED: a

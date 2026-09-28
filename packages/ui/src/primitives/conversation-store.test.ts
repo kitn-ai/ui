@@ -412,6 +412,21 @@ describe('localStorageStore — groups (listGroups / saveGroup / removeGroup)', 
     expect(await store.listGroups!()).toEqual([group('g1', 'Release notes', 5)]);
   });
 
+  it('saveGroup() preserves createdAt on an update — renaming a group must not make it look new', async () => {
+    const store = localStorageStore('acme-support');
+    await store.saveGroup!({ ...group('g1', 'Draft', 0), createdAt: '2026-01-01T00:00:00.000Z' });
+    // The rename carries a DIFFERENT createdAt, standing in for the caller who does
+    // not remember the field: the stored value is the fact about the past and wins.
+    await store.saveGroup!(group('g1', 'Release notes', 5));
+    expect((await store.listGroups!())[0].createdAt).toBe('2026-01-01T00:00:00.000Z');
+  });
+
+  it('saveGroup() on a new id keeps the supplied createdAt — the carry is an update rule, never a trade', async () => {
+    const store = localStorageStore('acme-support');
+    await store.saveGroup!({ ...group('g-new', 'Fresh', 0), createdAt: '2026-03-04T05:06:07.000Z' });
+    expect((await store.listGroups!())[0].createdAt).toBe('2026-03-04T05:06:07.000Z');
+  });
+
   it('removeGroup() deletes the group and UNFILES the conversations filed under it — no conversation is deleted', async () => {
     const store = localStorageStore('acme-support');
     await store.save('c1', [msg('u1', 'filed here')]);

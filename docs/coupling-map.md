@@ -445,3 +445,11 @@ naming which command produced it.
 44. The drilled rule in `createViewStack` vs `kai-chat`'s private view switching.
 45. `kai-row` anatomy vs the hand-built rows in `home-panel.tsx`.
 46. `createConversationController`'s fold vs the facades' internal conversation state — each side's own suite is green; their agreement is checked by nothing.
+
+## Late additions (2026-09-27): pairs found by the day's work
+
+**A block's `registry-item.json` has two consumers and no shared gate.** `@kitn.ai/blocks` reads it for the registry, the contracts and the delivery forms; `create-kai` reads it to plan an install. A rename inside one block's manifest (`mock.ts` becoming `<block>.transport.mock.ts`) **silently invalidated an assertion in `create-kai`'s suite**, because neither package runs the other's tests: the porting round ran its own package's gates, and the scaffolder suite is a different package. **Guard: NOTHING.** The scaffold gate compiles emitted trees, which is a different question from what `create-kai` asserts about them.
+
+**A block's source and its built pages.** Any edit to a block's source — **including a comment** — invalidates the pages the block driver loads. A round measured a green that meant the *previous* source because a comment-only commit landed mid-verification. **Guard: none in the harness**, so the rule is procedural: run `gen-blocks`/`build:blocks` before trusting a driver check, after any edit.
+
+**The store's carry-forward rule, now derivable.** `save()` and `saveGroup()` carry a field forward on write **only when clearing it has no meaning**: `createdAt`, `lastReadAt`, `pinned`, `archived`, `groupId` are carried; `name`, `sortOrder`, `userId`, `teamId` are taken from the caller **because reassigning or clearing them is a real decision** that a carry would make inexpressible. `lastMessageAt` is derived rather than carried. This rule was arrived at three times in one day before it was written down.
