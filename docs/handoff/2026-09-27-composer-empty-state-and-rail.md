@@ -200,3 +200,12 @@ The owner supplied ChatGPT's sidebar and command palette as a **layout blueprint
 - A **README note** that a stale recorded baseline is indistinguishable from a fresh one without a regeneration diff.
 - **The block's source structure** — `docs/superpowers/specs/2026-09-27-block-source-structure-design.md`: the registry already declares files by path (the block ships six), so the work is **size**, not count — the controller is **2067 lines** and the driver states **3633** — with a size budget that has a lint behind it.
 - **The rail primitive** — `docs/superpowers/specs/2026-09-27-rail-primitive-design.md`, approved, queued after the palette.
+
+
+## Tip `73603857` — the rail's hover chrome landed
+
+`73603857` (95 files: the four block sources, `baselines/assistant.json`, 90 screenshots including six new states 46–48) adopts the hover-chrome round that timed out with its work written but uncommitted. **`40-rail-keyboard-walk` is unchanged** (five probes, all `true`), rows are **flush left** with a `var(--kai-density)` gap instead of an indent, and rows use the kit's **`compact`** density rather than a typed padding.
+
+**Menu honesty, per row:** real — By project / One list (state change), Priority / Last updated (the kit's comparators), filter (focuses the rail's search box), compose (the new-chat path). Declared inert with a reason — Manual order (no manual position in this store), New project (no picker yet).
+
+**The owner's open eyeball:** section-label rows grew **36px → 40px** because the trio's 28px buttons are the tallest thing in them. **Fix the trio's icon size (24px keeps the accessibility floor), not the row height** — the height now comes from the density token.
