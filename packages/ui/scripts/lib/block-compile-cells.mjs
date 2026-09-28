@@ -465,15 +465,15 @@ export async function svelteCell({ tsc, name, files }) {
  * the anti-vacuity guard this matrix reads as a pass without: a tree that
  * emitted no `.tsx` leaves tsc reading the `shims.d.ts` alone.
  *
- * THE KAI TAGS DO NOT COMPILE, AND IT IS NOT THIS FORM'S BUG. Solid's
- * `JSX.IntrinsicElements` is a closed union of DOM tag interfaces with no index
- * signature, so every `<kai-…>` in an emitted tree is TS2339 ("Property
- * 'kai-button' does not exist on type 'JSX.IntrinsicElements'"). React, Vue and
- * Svelte each have a kit-side block in src/web-components/web-component-types.d.ts
- * for exactly this; solid has none. The diagnostic below is therefore printed
- * with that sentence attached rather than as a bare wall of TS2339, so a reader
- * can tell "the augmentation is missing" from "the renderer emits tags that do
- * not exist". Measured on solid-js 1.9.13 against this same project.
+ * THE KAI TAGS ARE TYPED, and the plant below is what keeps that true. Solid's
+ * `JSX.IntrinsicElements` is a closed set of DOM tag interfaces with no index
+ * signature, so with no kit-side block every `<kai-…>` was TS2339 — measured
+ * before `gen-web-component-types.mjs` gained one: 0/9 trees clean, 480 ×
+ * "Property 'kai-button' does not exist on type 'JSX.IntrinsicElements'". Every
+ * tree now compiles, and the plant fails the day an attribute on a kai tag
+ * stops being checked — a renamed augmentation target, the block dropped from
+ * the generator, or a tag that fell out of the registry. The state this cell
+ * used to assert as normal is the state the plant rejects.
  */
 async function solidCell({ tsc, name, files }) {
   const box = tsc.sandbox('solid', `block-${name}-solid`);
@@ -486,6 +486,41 @@ async function solidCell({ tsc, name, files }) {
     ];
   }
   box.clear();
+
+  // THE TEMPLATE PLANT, asserting the KIT'S AUGMENTATION rather than today's gap.
+  // `<kai-button variant="solid">` is the same literal the vue, react and svelte
+  // cells reject: `variant` IS a declared prop on kai-button and `'solid'` is not
+  // in its union. With the solid block in the program that is TS2322 ("is not
+  // assignable to type"), and nothing about it is incidental — solid resolves JSX
+  // through `jsxImportSource`, so the augmentation has to land on
+  // `solid-js/jsx-runtime`, and without it the tag itself is TS2339 instead.
+  //
+  // The probe imports the registration because that import is what puts
+  // web-component-types.d.ts in the program, exactly as an emitted tree's store
+  // does — the same reason the svelte plant carries it.
+  const templateProbe = 'probe-template.tsx';
+  writeFileSync(
+    join(box.dir, templateProbe),
+    "import '@kitn.ai/ui/web-components';\n\nexport function Probe() {\n  return <kai-button variant=\"solid\">x</kai-button>;\n}\n",
+  );
+  const templateControls = box.run();
+  box.clear();
+  const templateError = templateControls.split('\n').find((line) => line.includes(templateProbe));
+  // The fragment is tsc's own wording for THIS defect, asserted rather than the
+  // whole message so a prop union gaining a member cannot red this cell for the
+  // wrong reason, but an unrelated error in the probe cannot stand in for the
+  // proof.
+  if (!templateError || !/is not assignable to type/.test(templateError)) {
+    return [
+      `${name} [solid]: the template plant did NOT fire, so a kai-* tag in a solid JSX tree is not type-checked and this cell is checking the store only.\n` +
+        '    <kai-button variant="solid"> has to be an error: `variant` is a declared prop and its union has no `solid` ' +
+        '— the same literal the vue, react and svelte cells reject. Either the solid block in web-component-types.d.ts ' +
+        '(scripts/gen-web-component-types.mjs) no longer reaches this program — it must augment `solid-js/jsx-runtime`, ' +
+        'the subpath `jsxImportSource` resolves — or this plant stopped being a wrong attribute.\n' +
+        `    tsc said:\n${templateControls || '    (nothing)'}`,
+    ];
+  }
+
   const components = files.filter((file) => file.path.endsWith('.tsx'));
   if (components.length === 0) {
     return [

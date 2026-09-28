@@ -201,29 +201,29 @@ export const Skeletons: Story = {
       <div class="flex items-start gap-6">
         <kai-skeleton variant="circle" width="2.5rem" />
         <kai-skeleton variant="rect" width="8rem" height="5rem" />
-        <div class="w-48"><kai-skeleton variant="text" lines="3" /></div>
+        <div class="w-48"><kai-skeleton variant="text" lines={3} /></div>
       </div>
       {/* Responsive: the SAME text skeleton fills containers of different widths. */}
       <div class="flex flex-col gap-3">
-        <div class="w-full rounded-md border border-border p-3"><kai-skeleton variant="text" lines="2" /></div>
-        <div class="w-1/2 rounded-md border border-border p-3"><kai-skeleton variant="text" lines="2" /></div>
+        <div class="w-full rounded-md border border-border p-3"><kai-skeleton variant="text" lines={2} /></div>
+        <div class="w-1/2 rounded-md border border-border p-3"><kai-skeleton variant="text" lines={2} /></div>
       </div>
       {/* Composed: avatar + lines (how a consumer mirrors a real layout). */}
       <div class="flex w-72 items-center gap-3 rounded-lg border border-border p-3">
         <kai-skeleton variant="circle" width="2.5rem" />
-        <div class="flex-1"><kai-skeleton variant="text" lines="2" /></div>
+        <div class="flex-1"><kai-skeleton variant="text" lines={2} /></div>
       </div>
     </div>
   ),
   parameters: src(`<!-- variants: circle, rect, multi-line text -->
 <kai-skeleton variant="circle" width="2.5rem"></kai-skeleton>
 <kai-skeleton variant="rect" width="8rem" height="5rem"></kai-skeleton>
-<kai-skeleton variant="text" lines="3"></kai-skeleton>
+<kai-skeleton variant="text" lines={3}></kai-skeleton>
 
 <!-- composed: avatar + lines, mirroring a real layout -->
 <div style="display:flex;align-items:center;gap:0.75rem">
   <kai-skeleton variant="circle" width="2.5rem"></kai-skeleton>
-  <kai-skeleton variant="text" lines="2"></kai-skeleton>
+  <kai-skeleton variant="text" lines={2}></kai-skeleton>
 </div>`),
 };
 

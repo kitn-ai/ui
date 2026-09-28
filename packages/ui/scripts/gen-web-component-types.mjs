@@ -449,9 +449,11 @@ export function writeTypes(root, elements, _toAttr, IMPORTS, { domMembers = new 
 // entry for every event name whose payload is the same on every element that declares it.
 // Also augments React's JSX.IntrinsicElements (see below) so a raw <kai-chat>
 // written directly in TSX type-checks, vue's GlobalComponents so a <kai-chat> in a
-// Vue template is checked, and svelte's svelteHTML.IntrinsicElements so a <kai-chat>
-// in a Svelte markup is too. The svelte block's registry drift is guarded by
-// src/web-components/web-component/svelte-html-elements.test.ts.`;
+// Vue template is checked, svelte's svelteHTML.IntrinsicElements so a <kai-chat>
+// in a Svelte markup is too, and solid-js's JSX.IntrinsicElements (the
+// \`solid-js/jsx-runtime\` subpath solid resolves through \`jsxImportSource\`) so a
+// <kai-chat> in a Solid JSX tree is too. The svelte block's registry drift is
+// guarded by src/web-components/web-component/svelte-html-elements.test.ts.`;
 
   const tagMapBlock = `declare global {
   interface HTMLElementTagNameMap {
@@ -674,6 +676,104 @@ ${svelteTagMap}
   }
 }`;
 
+  // Solid's `JSX.IntrinsicElements` is a CLOSED set — `HTMLElementTags &
+  // SVGElementTags & MathMLElementTags` with no index signature — so an unknown
+  // tag is a hard error and not an `any`-typed one: `<kai-button>` in a .tsx
+  // tree is TS2339 ("Property 'kai-button' does not exist on type
+  // 'JSX.IntrinsicElements'"). MEASURED by the block compile cell that owns the
+  // solid form (scripts/lib/block-compile-cells.mjs): all nine emitted trees
+  // failed, 480 × TS2339, before this block existed — solid is the kit's own
+  // framework and its markup type-checked nothing about a kai tag. React, Vue
+  // and Svelte each had a block here; this closes the set from the same
+  // `elements` registry as the three above, so a prop reaches every template
+  // type space or none.
+  //
+  // Shape notes:
+  //  - AUGMENT `solid-js/jsx-runtime`, not a global: solid resolves JSX through
+  //    `jsxImportSource` (`jsx: preserve`, `jsxImportSource: solid-js` — the
+  //    project the scaffolder's own solid front end compiles under), and that
+  //    subpath's types are the ones exporting `namespace JSX`. There is no
+  //    global `JSX` namespace to merge with.
+  //  - PER ELEMENT, unlike the React block above, and for the same reason the
+  //    vue and svelte blocks are: a declared member WINS over an index
+  //    signature, so `<kai-button variant="solid">` — a value its own prop
+  //    union does not contain — is an error, where a single shared
+  //    `[attr: string]: unknown` interface would have accepted it. Solid reads
+  //    no kebab-to-camel mapping for an unknown tag, so a camelCase prop also
+  //    matches its authored kebab twin only through `KaiElementSolidProps`.
+  //  - KEBAB KEYS ONLY: solid reads a capitalised tag as a component reference,
+  //    so the PascalCase twin the vue block emits would type no tag here.
+  //  - `KaiElementSolidProps`'s index signature keeps the tolerance the other
+  //    three arms have: `id`, `slot`, `class`, `data-*`, `aria-*`, and the
+  //    `on:<name>` keys solid spells a custom-event listener with (the emitted
+  //    solid form writes `on:kai-submit`). Events are UNTYPED here on purpose:
+  //    a handler's shape is checked where it is written (the controller's own
+  //    action signature), and solid's handler union type is a member of the
+  //    `JSX` namespace this file deliberately does not reference.
+  //  - Props are `Partial<>` for vue's reason: the kai- contract allows setting
+  //    any prop imperatively through a ref, so flagging an absent prop in a
+  //    template would be a false positive.
+  const solidEventInterfaces = elements
+    .map((el) => {
+      const body = el.events.flatMap((e) => [
+        ...(e.description ? [`  /** ${e.description} */`] : []),
+        `  'on:${e.name}'?: (event: CustomEvent${e.detail ? `<${clean(e.detail, false)}>` : ''}) => void;`,
+      ]);
+      return `export interface ${el.className}SolidEvents {\n${body.join('\n')}\n}`;
+    })
+    .join('\n\n');
+
+  const solidTagMap = elements
+    .map((el) => `      '${el.tag}': KaiSolidElement<${el.className}Props, ${el.className}SolidEvents>;`)
+    .join('\n');
+
+  const solidBlock = `/** Attributes every kai-* element tolerates in a Solid JSX tree on top of its own
+ *  props: \`id\`, \`class\`, \`slot\`, \`style\`, \`data-*\`, \`aria-*\`, \`ref\`, and the
+ *  \`on:<name>\` keys solid spells a non-delegated listener with. The index
+ *  signature keeps those legal on a tag this file types WITHOUT weakening the
+ *  declared props — an explicit member always wins over an index signature.
+ *  It also carries the authored kebab spelling of a camelCase prop
+ *  (\`collapse-below\` for \`collapseBelow\`): solid maps no kebab tag attribute onto
+ *  a camelCase member. */
+export interface KaiElementSolidProps {
+  children?: unknown;
+  [attr: string]: unknown;
+}
+
+/** A kai-* custom element as solid-js's JSX type-checker sees it. Props are
+ *  \`Partial\` because the kai- contract allows setting any of them imperatively
+ *  through a ref instead of in the markup. */
+export type KaiSolidElement<Props, Events> = Partial<Props> & Events & KaiElementSolidProps & {
+  /** Solid assigns a \`ref\` as the element itself OR a callback with the element
+   *  as its parameter (\`ref={(el) => …}\`). It is typed \`HTMLElement\` — NOT the
+   *  element's own interface — and that is a MEASURED choice, not a default:
+   *
+   *   · \`unknown\`/\`any\` leaves the callback's parameter with no contextual type,
+   *     which is TS7006 under \`strict\` at every \`ref={(el) => …}\` in the tree.
+   *   · the element interface (\`KaiButtonElement\`) removes that, but makes the
+   *     kit's own \`el as HTMLElement & Record<string, unknown>\` idiom — how a
+   *     story sets a non-scalar prop imperatively, the kai- contract's own
+   *     pattern — TS2352 at 120 sites: an interface has no implicit index
+   *     signature, so that conversion is a mistake in both directions, while
+   *     \`HTMLElement\` itself converts cleanly because the target's own
+   *     \`HTMLElement\` constituent makes it comparable to the source.
+   *
+   *  WHAT IT DOES NOT WEAKEN: whether a kai-* ATTRIBUTE is checked is decided by
+   *  \`Partial<Props>\` above, not by \`ref\` — \`ref\` only types the element a
+   *  callback is handed. Pinned by the template plant in the solid cell of
+   *  scripts/lib/block-compile-cells.mjs, which fails if
+   *  \`<kai-button variant="solid">\` stops being a compile error. */
+  ref?: HTMLElement | ((el: HTMLElement) => void);
+};
+
+declare module 'solid-js/jsx-runtime' {
+  namespace JSX {
+    interface IntrinsicElements {
+${solidTagMap}
+    }
+  }
+}`;
+
   // SOURCE copy (src/web-components/web-component-types.d.ts): used internally + by the
   // web-components/provider builds. Keeps type-only relative re-exports (fine — the
   // library's own tsconfig resolves them; they are erased at emit). The value
@@ -740,6 +840,10 @@ ${vueBlock}
 ${svelteEventInterfaces}
 
 ${svelteBlock}
+
+${solidEventInterfaces}
+
+${solidBlock}
 `;
   writeFileSync(resolve(root, 'src/web-components/web-component-types.d.ts'), srcOut);
   console.log(`✓ src/web-components/web-component-types.d.ts — ${elements.length} web components`);
@@ -776,6 +880,10 @@ ${vueBlock}
 ${svelteEventInterfaces}
 
 ${svelteBlock}
+
+${solidEventInterfaces}
+
+${solidBlock}
 `;
   const distDir = resolve(root, 'dist');
   if (!existsSync(distDir)) mkdirSync(distDir, { recursive: true });

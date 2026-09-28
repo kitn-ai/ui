@@ -453,7 +453,7 @@ export const V0: Story = {
               <header class="flex shrink-0 items-center justify-between gap-3 border-b border-border px-4 py-2.5">
                 <div class="flex items-center gap-2">
                   <span class="text-sm font-medium">Vesper editorial</span>
-                  <kai-badge variant="outline">Generating UI</kai-badge>
+                  <kai-badge>Generating UI</kai-badge>
                 </div>
                 <kai-tooltip content="Share this build">
                   <kai-button variant="ghost" size="sm" icon="share">Share</kai-button>
@@ -479,7 +479,7 @@ export const V0: Story = {
                             artifact to an earlier generation. */}
                         <Show when={turn.version}>
                           <div class="flex items-center gap-2 pl-1">
-                            <kai-badge variant={turn.version === activeVersion() ? undefined : 'outline'}>
+                            <kai-badge>
                               {turn.version}{turn.version === activeVersion() ? ' · showing' : ''}
                             </kai-badge>
                             <Show when={turn.version !== activeVersion()}>

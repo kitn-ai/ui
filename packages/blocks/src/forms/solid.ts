@@ -14,21 +14,22 @@
  * and custom-element upgrade does not put it back. Solid's gate is `<Show>`,
  * which is the structure this framework has for exactly that.
  *
- * THE KAI TAGS NEED AN AUGMENTATION THIS REPO DOES NOT SHIP YET, and a
- * consumer's `tsc` is where that shows. MEASURED, solid-js 1.9.13 under the
+ * THE KAI TAGS ARE TYPED, by a kit-side block this form does not own. Solid's
+ * `IntrinsicElements` is `HTMLElementTags & SVGElementTags & MathMLElementTags &
+ * ...` with NO index signature, so before that block existed an unknown tag was a
+ * hard error rather than an `any`-typed one. MEASURED, solid-js 1.9.13 under the
  * stock consumer tsconfig this form's cell compiles with (`jsx: preserve`,
- * `jsxImportSource: solid-js`), over a file that imports the registration:
+ * `jsxImportSource: solid-js`), over a file that imports the registration, that
+ * error was `TS2339: Property 'kai-button' does not exist on type
+ * 'JSX.IntrinsicElements'` — and the cell reported it for all nine emitted trees.
  *
- *   error TS2339: Property 'kai-button' does not exist on type 'JSX.IntrinsicElements'.
- *
- * Solid's `IntrinsicElements` is `HTMLElementTags & SVGElementTags &
- * MathMLElementTags & ...` with NO index signature, so an unknown tag is a hard
- * error rather than an `any`-typed one. React, Vue and Svelte each have a kit-side
- * block in src/web-components/web-component-types.d.ts (`JSX.IntrinsicElements`,
- * `GlobalComponents`, `svelteHTML.IntrinsicElements`); solid has none. Until
- * that block exists (a kit-side change, not this form's to make), the tree below
- * does not compile -- and it does not compile for that reason rather than
- * because the bindings are wrong, which is what the cell's diagnostic says.
+ * It is CLOSED now: `scripts/gen-web-component-types.mjs` emits a per-element
+ * `JSX.IntrinsicElements` block onto `solid-js/jsx-runtime` beside React's, Vue's
+ * and Svelte's, so a kai-* tag and its attributes are checked here — the same
+ * nine trees compile with zero diagnostics, and a wrong attribute on a kai-* tag
+ * is a compile error in this form (the plant in scripts/lib/block-compile-cells.mjs
+ * fails the day that stops being true). Nothing about this form's markup was
+ * changed to get there.
  *
  * NO `prop:` NAMESPACE, deliberately. Solid's `prop:name` forces a property
  * assignment and `attr:name` forces an attribute one, which reads like the vue

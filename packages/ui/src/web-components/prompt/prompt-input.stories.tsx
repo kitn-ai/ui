@@ -8,17 +8,6 @@ import type { TriggerDef } from '../../components/composer/composer';
 import type { ComposerDoc } from '../../primitives/composer-model';
 import { argTypesFor, specDescription } from '../../stories/docs/web-component-controls';
 
-// The web components are custom DOM elements, so declare the tags for JSX.
-declare module 'solid-js' {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
-  namespace JSX {
-    interface IntrinsicElements {
-      'kai-prompt-input': JSX.HTMLAttributes<HTMLElement> & { theme?: string; placeholder?: string; loading?: boolean; disabled?: boolean; voice?: boolean; attach?: boolean; submit?: string; 'suggestion-mode'?: string };
-      'kai-action': JSX.HTMLAttributes<HTMLElement> & { icon?: string; tooltip?: string };
-    }
-  }
-}
-
 const WEB_SEARCH_ITEM = { id: 'web-search', label: 'Web search', icon: 'globe', checked: false, chip: true };
 
 const sampleSuggestions: string[] = [
@@ -318,7 +307,24 @@ export const WithCustomToolbarActions: Story = {
     onMount(() => {
       if (!el) return;
       el.setAttribute('placeholder', 'Ask anything...');
-      // Log every declared event, incl. kai-toolbar-action from the <kai-action> children.
+      // `<kai-action>` children are invisible data carriers — kai-prompt-input reads its
+      // light DOM for them (src/web-components/prompt/prompt-input.tsx) and renders a ghost
+      // icon button per entry. The tag is a DATA CARRIER, not a registered element: nothing
+      // calls `defineWebComponent('kai-action')`, so it is in no registry entry, so the
+      // generated JSX augmentation has nothing to type it with. Built as nodes here — the
+      // same shape this story's own HTML snippet uses above.
+      for (const [id, icon, tooltip] of [
+        ['attach', 'paperclip', 'Attach'],
+        ['translate', 'flag', 'Translate'],
+        ['bookmark', 'bookmark', 'Bookmark'],
+      ] as const) {
+        const action = document.createElement('kai-action');
+        action.setAttribute('id', id);
+        action.setAttribute('icon', icon);
+        action.setAttribute('tooltip', tooltip);
+        el.appendChild(action);
+      }
+      // Log every declared event, incl. kai-toolbar-action from the kai-action children.
       onCleanup(attachKaiActions(el));
     });
     return (
@@ -326,14 +332,7 @@ export const WithCustomToolbarActions: Story = {
         <kai-prompt-input
           ref={(e: HTMLElement) => (el = e)}
           style={{ display: 'block', width: '100%' }}
-        >
-          {/* <kai-action> children are invisible data carriers; Shadow DOM hides them.
-              The element reads them via querySelectorAll + MutationObserver and renders
-              a ghost icon button per entry in the left toolbar. Clicking fires kai-action. */}
-          <kai-action id="attach" icon="paperclip" tooltip="Attach" />
-          <kai-action id="translate" icon="flag" tooltip="Translate" />
-          <kai-action id="bookmark" icon="bookmark" tooltip="Bookmark" />
-        </kai-prompt-input>
+        />
         <p style={{ 'margin-top': '8px', 'font-size': '12px', color: 'var(--color-muted-foreground)' }}>
           Watch the Actions panel for <code>kai-toolbar-action</code> events when you click the extra toolbar buttons.
         </p>

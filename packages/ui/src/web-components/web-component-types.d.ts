@@ -6,9 +6,11 @@
 // entry for every event name whose payload is the same on every element that declares it.
 // Also augments React's JSX.IntrinsicElements (see below) so a raw <kai-chat>
 // written directly in TSX type-checks, vue's GlobalComponents so a <kai-chat> in a
-// Vue template is checked, and svelte's svelteHTML.IntrinsicElements so a <kai-chat>
-// in a Svelte markup is too. The svelte block's registry drift is guarded by
-// src/web-components/web-component/svelte-html-elements.test.ts.
+// Vue template is checked, svelte's svelteHTML.IntrinsicElements so a <kai-chat>
+// in a Svelte markup is too, and solid-js's JSX.IntrinsicElements (the
+// `solid-js/jsx-runtime` subpath solid resolves through `jsxImportSource`) so a
+// <kai-chat> in a Solid JSX tree is too. The svelte block's registry drift is
+// guarded by src/web-components/web-component/svelte-html-elements.test.ts.
 
 
 // Local bindings for the two names the DECLARATIONS below reference
@@ -491,7 +493,7 @@ export interface KaiChatElement extends HTMLElement {
   /** Turns on the prior-conversations list. Requires `store`; default `false`; a load arrives as `kai-conversation-load` -- set `el.messages` yourself. */
   conversations?: boolean;
   /** The persistence adapter: `{ list, load, save }`. JS property only (`el.store = myAdapter`). */
-  store?: { list: () => Promise<{ id: string; title: string; groupId?: string; scope?: { type: "document" | "collection"; documentId?: string; filters?: { tags?: string[]; authors?: string[]; contentType?: "transcript" | "markdown"; dateRange?: { from: string; to: string } } }; messageCount: number; lastMessageAt?: string; updatedAt: string; trailing?: string; lastReadAt?: string; pinned?: boolean; archived?: boolean }[]>; load: (id: string) => Promise<{ id: string; role: "user" | "assistant"; parts: ({ type: "text"; text: string; raw?: { source: string; payload: unknown } } | { type: "reasoning"; text: string; label?: string; index?: number; streamId?: string; signature?: string; raw?: { source: string; payload: unknown } } | { type: "tool"; tool: { type: string; kind?: "command" | "file-change" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: Record<string, unknown>; rawInput?: string; output?: Record<string, unknown>; toolCallId?: string; errorText?: string; raw?: { source: string; payload: unknown } }; raw?: { source: string; payload: unknown } } | { type: "card"; envelope: { type: string; id: string; data: unknown; title?: string; resolution?: { kind: "action"; action: string; payload?: unknown; at?: string } | { kind: "submit"; data: unknown; at?: string } | { kind: "dismissed"; at?: string } | { kind: "expired"; reason?: string; at?: string } }; raw?: { source: string; payload: unknown } } | { type: "source"; source: { id?: string; url?: string; title?: string; snippet?: string; index?: number }; raw?: { source: string; payload: unknown } } | { type: "file"; attachment: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }; raw?: { source: string; payload: unknown } })[]; actions?: ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: string; tooltip?: string })[]; avatar?: { src?: string; fallback?: string; alt?: string }; feedback?: "like" | "dislike" }[]>; save: (id: string, messages: { id: string; role: "user" | "assistant"; parts: ({ type: "text"; text: string; raw?: { source: string; payload: unknown } } | { type: "reasoning"; text: string; label?: string; index?: number; streamId?: string; signature?: string; raw?: { source: string; payload: unknown } } | { type: "tool"; tool: { type: string; kind?: "command" | "file-change" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: Record<string, unknown>; rawInput?: string; output?: Record<string, unknown>; toolCallId?: string; errorText?: string; raw?: { source: string; payload: unknown } }; raw?: { source: string; payload: unknown } } | { type: "card"; envelope: { type: string; id: string; data: unknown; title?: string; resolution?: { kind: "action"; action: string; payload?: unknown; at?: string } | { kind: "submit"; data: unknown; at?: string } | { kind: "dismissed"; at?: string } | { kind: "expired"; reason?: string; at?: string } }; raw?: { source: string; payload: unknown } } | { type: "source"; source: { id?: string; url?: string; title?: string; snippet?: string; index?: number }; raw?: { source: string; payload: unknown } } | { type: "file"; attachment: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }; raw?: { source: string; payload: unknown } })[]; actions?: ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: string; tooltip?: string })[]; avatar?: { src?: string; fallback?: string; alt?: string }; feedback?: "like" | "dislike" }[]) => Promise<void>; markRead?: ((id: string) => Promise<void>); rename?: ((id: string, title: string) => Promise<void>); setPinned?: ((id: string, pinned: boolean) => Promise<void>); setArchived?: ((id: string, archived: boolean) => Promise<void>); setGroup?: ((id: string, groupId: string) => Promise<void>); remove?: ((id: string) => Promise<void>) };
+  store?: { list: () => Promise<{ id: string; title: string; groupId?: string; scope?: { type: "document" | "collection"; documentId?: string; filters?: { tags?: string[]; authors?: string[]; contentType?: "transcript" | "markdown"; dateRange?: { from: string; to: string } } }; messageCount: number; lastMessageAt?: string; updatedAt: string; trailing?: string; lastReadAt?: string; pinned?: boolean; archived?: boolean }[]>; load: (id: string) => Promise<{ id: string; role: "user" | "assistant"; parts: ({ type: "text"; text: string; raw?: { source: string; payload: unknown } } | { type: "reasoning"; text: string; label?: string; index?: number; streamId?: string; signature?: string; raw?: { source: string; payload: unknown } } | { type: "tool"; tool: { type: string; kind?: "command" | "file-change" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: Record<string, unknown>; rawInput?: string; output?: Record<string, unknown>; toolCallId?: string; errorText?: string; raw?: { source: string; payload: unknown } }; raw?: { source: string; payload: unknown } } | { type: "card"; envelope: { type: string; id: string; data: unknown; title?: string; resolution?: { kind: "action"; action: string; payload?: unknown; at?: string } | { kind: "submit"; data: unknown; at?: string } | { kind: "dismissed"; at?: string } | { kind: "expired"; reason?: string; at?: string } }; raw?: { source: string; payload: unknown } } | { type: "source"; source: { id?: string; url?: string; title?: string; snippet?: string; index?: number }; raw?: { source: string; payload: unknown } } | { type: "file"; attachment: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }; raw?: { source: string; payload: unknown } })[]; actions?: ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: string; tooltip?: string })[]; avatar?: { src?: string; fallback?: string; alt?: string }; feedback?: "like" | "dislike" }[]>; save: (id: string, messages: { id: string; role: "user" | "assistant"; parts: ({ type: "text"; text: string; raw?: { source: string; payload: unknown } } | { type: "reasoning"; text: string; label?: string; index?: number; streamId?: string; signature?: string; raw?: { source: string; payload: unknown } } | { type: "tool"; tool: { type: string; kind?: "command" | "file-change" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: Record<string, unknown>; rawInput?: string; output?: Record<string, unknown>; toolCallId?: string; errorText?: string; raw?: { source: string; payload: unknown } }; raw?: { source: string; payload: unknown } } | { type: "card"; envelope: { type: string; id: string; data: unknown; title?: string; resolution?: { kind: "action"; action: string; payload?: unknown; at?: string } | { kind: "submit"; data: unknown; at?: string } | { kind: "dismissed"; at?: string } | { kind: "expired"; reason?: string; at?: string } }; raw?: { source: string; payload: unknown } } | { type: "source"; source: { id?: string; url?: string; title?: string; snippet?: string; index?: number }; raw?: { source: string; payload: unknown } } | { type: "file"; attachment: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }; raw?: { source: string; payload: unknown } })[]; actions?: ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: string; tooltip?: string })[]; avatar?: { src?: string; fallback?: string; alt?: string }; feedback?: "like" | "dislike" }[]) => Promise<void>; markRead?: ((id: string) => Promise<void>); rename?: ((id: string, title: string) => Promise<void>); setPinned?: ((id: string, pinned: boolean) => Promise<void>); setArchived?: ((id: string, archived: boolean) => Promise<void>); setGroup?: ((id: string, groupId: string) => Promise<void>); listGroups?: (() => Promise<{ id: string; userId?: string; teamId?: string; name: string; sortOrder: number; createdAt: string }[]>); saveGroup?: ((group: { id: string; userId?: string; teamId?: string; name: string; sortOrder: number; createdAt: string }) => Promise<void>); removeGroup?: ((id: string) => Promise<void>); remove?: ((id: string) => Promise<void>) };
   /** Turns on the Home screen (greeting, recent conversation, links, Home/Messages tabs). JS property; omit for the chat-only widget. */
   home?: { greeting?: { title?: string; subtitle?: string }; recentConversation?: boolean; newConversation?: { label?: string }; links?: { label: string; href?: string; description?: string; icon?: string }[] };
   /** Whether the chrome hosting this element is visible (e.g. a launcher's open state). JS property only; `false` has no attribute form. */
@@ -3402,7 +3404,7 @@ export interface KaiChatElementProps {
   /** Turns on the prior-conversations list. Requires `store`; default `false`; a load arrives as `kai-conversation-load` -- set `el.messages` yourself. */
   conversations?: boolean;
   /** The persistence adapter: `{ list, load, save }`. JS property only (`el.store = myAdapter`). */
-  store?: { list: () => Promise<{ id: string; title: string; groupId?: string; scope?: { type: "document" | "collection"; documentId?: string; filters?: { tags?: string[]; authors?: string[]; contentType?: "transcript" | "markdown"; dateRange?: { from: string; to: string } } }; messageCount: number; lastMessageAt?: string; updatedAt: string; trailing?: string; lastReadAt?: string; pinned?: boolean; archived?: boolean }[]>; load: (id: string) => Promise<{ id: string; role: "user" | "assistant"; parts: ({ type: "text"; text: string; raw?: { source: string; payload: unknown } } | { type: "reasoning"; text: string; label?: string; index?: number; streamId?: string; signature?: string; raw?: { source: string; payload: unknown } } | { type: "tool"; tool: { type: string; kind?: "command" | "file-change" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: Record<string, unknown>; rawInput?: string; output?: Record<string, unknown>; toolCallId?: string; errorText?: string; raw?: { source: string; payload: unknown } }; raw?: { source: string; payload: unknown } } | { type: "card"; envelope: { type: string; id: string; data: unknown; title?: string; resolution?: { kind: "action"; action: string; payload?: unknown; at?: string } | { kind: "submit"; data: unknown; at?: string } | { kind: "dismissed"; at?: string } | { kind: "expired"; reason?: string; at?: string } }; raw?: { source: string; payload: unknown } } | { type: "source"; source: { id?: string; url?: string; title?: string; snippet?: string; index?: number }; raw?: { source: string; payload: unknown } } | { type: "file"; attachment: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }; raw?: { source: string; payload: unknown } })[]; actions?: ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: string; tooltip?: string })[]; avatar?: { src?: string; fallback?: string; alt?: string }; feedback?: "like" | "dislike" }[]>; save: (id: string, messages: { id: string; role: "user" | "assistant"; parts: ({ type: "text"; text: string; raw?: { source: string; payload: unknown } } | { type: "reasoning"; text: string; label?: string; index?: number; streamId?: string; signature?: string; raw?: { source: string; payload: unknown } } | { type: "tool"; tool: { type: string; kind?: "command" | "file-change" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: Record<string, unknown>; rawInput?: string; output?: Record<string, unknown>; toolCallId?: string; errorText?: string; raw?: { source: string; payload: unknown } }; raw?: { source: string; payload: unknown } } | { type: "card"; envelope: { type: string; id: string; data: unknown; title?: string; resolution?: { kind: "action"; action: string; payload?: unknown; at?: string } | { kind: "submit"; data: unknown; at?: string } | { kind: "dismissed"; at?: string } | { kind: "expired"; reason?: string; at?: string } }; raw?: { source: string; payload: unknown } } | { type: "source"; source: { id?: string; url?: string; title?: string; snippet?: string; index?: number }; raw?: { source: string; payload: unknown } } | { type: "file"; attachment: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }; raw?: { source: string; payload: unknown } })[]; actions?: ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: string; tooltip?: string })[]; avatar?: { src?: string; fallback?: string; alt?: string }; feedback?: "like" | "dislike" }[]) => Promise<void>; markRead?: ((id: string) => Promise<void>); rename?: ((id: string, title: string) => Promise<void>); setPinned?: ((id: string, pinned: boolean) => Promise<void>); setArchived?: ((id: string, archived: boolean) => Promise<void>); setGroup?: ((id: string, groupId: string) => Promise<void>); remove?: ((id: string) => Promise<void>) };
+  store?: { list: () => Promise<{ id: string; title: string; groupId?: string; scope?: { type: "document" | "collection"; documentId?: string; filters?: { tags?: string[]; authors?: string[]; contentType?: "transcript" | "markdown"; dateRange?: { from: string; to: string } } }; messageCount: number; lastMessageAt?: string; updatedAt: string; trailing?: string; lastReadAt?: string; pinned?: boolean; archived?: boolean }[]>; load: (id: string) => Promise<{ id: string; role: "user" | "assistant"; parts: ({ type: "text"; text: string; raw?: { source: string; payload: unknown } } | { type: "reasoning"; text: string; label?: string; index?: number; streamId?: string; signature?: string; raw?: { source: string; payload: unknown } } | { type: "tool"; tool: { type: string; kind?: "command" | "file-change" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: Record<string, unknown>; rawInput?: string; output?: Record<string, unknown>; toolCallId?: string; errorText?: string; raw?: { source: string; payload: unknown } }; raw?: { source: string; payload: unknown } } | { type: "card"; envelope: { type: string; id: string; data: unknown; title?: string; resolution?: { kind: "action"; action: string; payload?: unknown; at?: string } | { kind: "submit"; data: unknown; at?: string } | { kind: "dismissed"; at?: string } | { kind: "expired"; reason?: string; at?: string } }; raw?: { source: string; payload: unknown } } | { type: "source"; source: { id?: string; url?: string; title?: string; snippet?: string; index?: number }; raw?: { source: string; payload: unknown } } | { type: "file"; attachment: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }; raw?: { source: string; payload: unknown } })[]; actions?: ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: string; tooltip?: string })[]; avatar?: { src?: string; fallback?: string; alt?: string }; feedback?: "like" | "dislike" }[]>; save: (id: string, messages: { id: string; role: "user" | "assistant"; parts: ({ type: "text"; text: string; raw?: { source: string; payload: unknown } } | { type: "reasoning"; text: string; label?: string; index?: number; streamId?: string; signature?: string; raw?: { source: string; payload: unknown } } | { type: "tool"; tool: { type: string; kind?: "command" | "file-change" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: Record<string, unknown>; rawInput?: string; output?: Record<string, unknown>; toolCallId?: string; errorText?: string; raw?: { source: string; payload: unknown } }; raw?: { source: string; payload: unknown } } | { type: "card"; envelope: { type: string; id: string; data: unknown; title?: string; resolution?: { kind: "action"; action: string; payload?: unknown; at?: string } | { kind: "submit"; data: unknown; at?: string } | { kind: "dismissed"; at?: string } | { kind: "expired"; reason?: string; at?: string } }; raw?: { source: string; payload: unknown } } | { type: "source"; source: { id?: string; url?: string; title?: string; snippet?: string; index?: number }; raw?: { source: string; payload: unknown } } | { type: "file"; attachment: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }; raw?: { source: string; payload: unknown } })[]; actions?: ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: string; tooltip?: string })[]; avatar?: { src?: string; fallback?: string; alt?: string }; feedback?: "like" | "dislike" }[]) => Promise<void>; markRead?: ((id: string) => Promise<void>); rename?: ((id: string, title: string) => Promise<void>); setPinned?: ((id: string, pinned: boolean) => Promise<void>); setArchived?: ((id: string, archived: boolean) => Promise<void>); setGroup?: ((id: string, groupId: string) => Promise<void>); listGroups?: (() => Promise<{ id: string; userId?: string; teamId?: string; name: string; sortOrder: number; createdAt: string }[]>); saveGroup?: ((group: { id: string; userId?: string; teamId?: string; name: string; sortOrder: number; createdAt: string }) => Promise<void>); removeGroup?: ((id: string) => Promise<void>); remove?: ((id: string) => Promise<void>) };
   /** Turns on the Home screen (greeting, recent conversation, links, Home/Messages tabs). JS property; omit for the chat-only widget. */
   home?: { greeting?: { title?: string; subtitle?: string }; recentConversation?: boolean; newConversation?: { label?: string }; links?: { label: string; href?: string; description?: string; icon?: string }[] };
   /** Whether the chrome hosting this element is visible (e.g. a launcher's open state). JS property only; `false` has no attribute form. */
@@ -6299,6 +6301,757 @@ declare global {
       'kai-voice-input': KaiSvelteElement<KaiVoiceInputElementProps, KaiVoiceInputElementSvelteEvents>;
       'kai-voice-output': KaiSvelteElement<KaiVoiceOutputElementProps, KaiVoiceOutputElementSvelteEvents>;
       'kai-workspace': KaiSvelteElement<KaiWorkspaceElementProps, KaiWorkspaceElementSvelteEvents>;
+    }
+  }
+}
+
+export interface KaiAgentCardElementSolidEvents {
+  /** The card was activated by a click, or by Enter / Space while focused. Promote this agent back to focus. */
+  'on:kai-activate'?: (event: CustomEvent) => void;
+  /** The trailing "..." kebab was clicked. The consumer opens its own menu; the card only surfaces the affordance (the click does not also activate the card). */
+  'on:kai-menu'?: (event: CustomEvent) => void;
+}
+
+export interface KaiArtifactElementSolidEvents {
+  /** Fired when a file is selected. `detail.path`. */
+  'on:kai-file-select'?: (event: CustomEvent<{ path: string }>) => void;
+  /** Artifact's own maximize button toggled (consumer-observable; non-bubbling). */
+  'on:kai-maximize-change'?: (event: CustomEvent<{ maximized: boolean }>) => void;
+  /** The maximize PROTOCOL intent, as a raw bubbling + composed CustomEvent. */
+  'on:kai-maximize-intent'?: (event: CustomEvent<{ requested: boolean }>) => void;
+  /** The preview navigated. `detail.url` is the raw new location. */
+  'on:kai-navigate'?: (event: CustomEvent<{ url: string }>) => void;
+  /** Fired when the Preview|Code tab changes. `detail.tab`. */
+  'on:kai-tab-change'?: (event: CustomEvent<{ tab: "preview" | "code" }>) => void;
+}
+
+export interface KaiAttachmentsElementSolidEvents {
+  /** A remove button was clicked. */
+  'on:kai-remove'?: (event: CustomEvent<{ id: string }>) => void;
+}
+
+export interface KaiAudioVisualizerElementSolidEvents {
+
+}
+
+export interface KaiAvatarElementSolidEvents {
+
+}
+
+export interface KaiBadgeElementSolidEvents {
+
+}
+
+export interface KaiButtonElementSolidEvents {
+  /** The button was activated (pointer or keyboard). Carries no detail. The native `click` also bubbles (composed) for consumers who prefer it. */
+  'on:kai-click'?: (event: CustomEvent) => void;
+}
+
+export interface KaiCardElementSolidEvents {
+  /** A `clickable`/`href` card was activated (click, or Enter/Space). */
+  'on:kai-card-click'?: (event: CustomEvent) => void;
+  /** The card was dismissed via its × (it also hides itself). */
+  'on:kai-dismiss'?: (event: CustomEvent) => void;
+}
+
+export interface KaiCardsElementSolidEvents {
+  /** A child card resolved (an action chosen, a form/tasks submission landed, or dismissed). `detail` = `{ cardId, resolution }`. */
+  'on:kai-card-resolved'?: (event: CustomEvent<{ cardId: string; resolution: { kind: "action"; action: string; payload?: unknown; at?: undefined | string } | { kind: "submit"; data: unknown; at?: undefined | string } | { kind: "dismissed"; at?: undefined | string } | { kind: "expired"; reason?: undefined | string; at?: undefined | string } }>) => void;
+}
+
+export interface KaiChainOfThoughtElementSolidEvents {
+  /** The open set changed, by user click or an `expand()`/`collapse()`/`toggle()` call. */
+  'on:kai-value-change'?: (event: CustomEvent<{ value: string | string[] }>) => void;
+}
+
+export interface KaiChatElementSolidEvents {
+  /** The staged attachments changed (file added or removed). Carries the full current list so a consumer can react in real time. */
+  'on:kai-attachments-change'?: (event: CustomEvent<{ attachments: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }>) => void;
+  /** One or more picked files were refused because `accept` excluded them. Renders no message of its own; only fires when `accept` is set. */
+  'on:kai-attachments-rejected'?: (event: CustomEvent<{ rejected: { filename: string; mediaType: string; reason: "filtered" | "unsupported" }[] }>) => void;
+  /** A conversation's history loaded. Set `el.messages` from `detail.messages` -- the element does not render it for you. */
+  'on:kai-conversation-load'?: (event: CustomEvent<{ id: string | undefined; messages: { id: string; role: "user" | "assistant"; parts: ({ type: "text"; text: string; raw?: undefined | { source: string; payload: unknown } } | { type: "reasoning"; text: string; label?: undefined | string; index?: undefined | number; streamId?: undefined | string; signature?: undefined | string; raw?: undefined | { source: string; payload: unknown } } | { type: "tool"; tool: { type: string; kind?: undefined | "command" | "file-change" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; rawInput?: undefined | string; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string; raw?: undefined | { source: string; payload: unknown } }; raw?: undefined | { source: string; payload: unknown } } | { type: "card"; envelope: { type: string; id: string; data: unknown; title?: undefined | string; resolution?: undefined | { kind: "action"; action: string; payload?: unknown; at?: undefined | string } | { kind: "submit"; data: unknown; at?: undefined | string } | { kind: "dismissed"; at?: undefined | string } | { kind: "expired"; reason?: undefined | string; at?: undefined | string } }; raw?: undefined | { source: string; payload: unknown } } | { type: "source"; source: { id?: undefined | string; url?: undefined | string; title?: undefined | string; snippet?: undefined | string; index?: undefined | number }; raw?: undefined | { source: string; payload: unknown } } | { type: "file"; attachment: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }; raw?: undefined | { source: string; payload: unknown } })[]; actions?: undefined | ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string }; feedback?: undefined | "like" | "dislike" }[] }>) => void;
+  /** A `home.links` entry with no `href` was activated (tapped/clicked/Enter). Meaningful only when `home` is set. */
+  'on:kai-home-link'?: (event: CustomEvent<{ entry: { label: string; href?: undefined | string; description?: undefined | string; icon?: undefined | string } }>) => void;
+  /** An action button on a message was clicked. `action` is the built-in name or a custom id. */
+  'on:kai-message-action'?: (event: CustomEvent<{ messageId: string; action: string; state?: undefined | "on" | "off" }>) => void;
+  /** The header model switcher changed. */
+  'on:kai-model-change'?: (event: CustomEvent<{ modelId: string }>) => void;
+  /** A `+` menu item was chosen. `checked` is present only for a toggle, with its NEW state. The same name and shape `<kai-menu>` fires, so one handler serves both. */
+  'on:kai-select'?: (event: CustomEvent<{ id: string; checked?: undefined | boolean }>) => void;
+  /** User submitted a message. */
+  'on:kai-submit'?: (event: CustomEvent<{ value: string; attachments: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }>) => void;
+  /** A suggestion chip was clicked (only in `suggestion-mode="fill"`). */
+  'on:kai-suggestion-click'?: (event: CustomEvent<{ value: string }>) => void;
+  /** Whether a conversation OTHER than the one on screen is unread. Mirror it onto a launcher badge (`dock.unread = detail.unread`). */
+  'on:kai-unread-change'?: (event: CustomEvent<{ unread: boolean }>) => void;
+  /** Fired on every input change. */
+  'on:kai-value-change'?: (event: CustomEvent<{ value: string }>) => void;
+  /** The Mic / voice button was clicked. */
+  'on:kai-voice'?: (event: CustomEvent<Record<string, never>>) => void;
+}
+
+export interface KaiCheckboxElementSolidEvents {
+  /** The box was ticked or unticked. */
+  'on:kai-change'?: (event: CustomEvent<{ checked: boolean }>) => void;
+}
+
+export interface KaiCheckboxGroupElementSolidEvents {
+  /** A row was ticked or unticked. `values` is the whole selection afterwards, `value` its first entry. */
+  'on:kai-change'?: (event: CustomEvent<{ value: string; values: string[] }>) => void;
+}
+
+export interface KaiCheckpointElementSolidEvents {
+  /** The checkpoint was clicked. */
+  'on:kai-select'?: (event: CustomEvent) => void;
+}
+
+export interface KaiChoiceElementSolidEvents {
+  /** The selection changed BEFORE submit (a row click or the `select()` method). Distinct from the terminal `action` verb on the `kai-card` contract event. */
+  'on:kai-value-change'?: (event: CustomEvent<{ value: string }>) => void;
+}
+
+export interface KaiCoachmarkElementSolidEvents {
+  /** The × dismiss button was pressed. The consumer records that this hint was seen so it won't show again. */
+  'on:kai-dismiss'?: (event: CustomEvent<Record<string, never>>) => void;
+  /** The coachmark opened or closed (a method, the ×, or a driven `open`). */
+  'on:kai-open-change'?: (event: CustomEvent<{ open: boolean }>) => void;
+}
+
+export interface KaiCodeBlockElementSolidEvents {
+
+}
+
+export interface KaiCommandElementSolidEvents {
+  /** The highlighted item changed. `detail.id` is `undefined` when nothing is active (e.g. the filtered list is empty). */
+  'on:kai-active-change'?: (event: CustomEvent<{ id: string | undefined }>) => void;
+  /** Fired on every keystroke in the search input. */
+  'on:kai-query-change'?: (event: CustomEvent<{ value: string }>) => void;
+  /** Fired when the user selects an item (click or Enter). */
+  'on:kai-select'?: (event: CustomEvent<{ id: string }>) => void;
+}
+
+export interface KaiCompareElementSolidEvents {
+  /** The user committed a pick. `detail` = `{ chosenId, rejectedIds, at }`. */
+  'on:kai-compare-select'?: (event: CustomEvent<{ chosenId: string; rejectedIds: string[]; at?: undefined | number }>) => void;
+  /** The definition was unusable. */
+  'on:kai-error'?: (event: CustomEvent<{ compareId: string; message: string }>) => void;
+  /** Both candidates have settled and the pick is live. */
+  'on:kai-ready'?: (event: CustomEvent<{ compareId: string }>) => void;
+}
+
+export interface KaiComposerElementSolidEvents {
+  /** The composer lost focus. */
+  'on:kai-blur'?: (event: CustomEvent<{ originalEvent: FocusEvent }>) => void;
+  /** An entity pill was inserted into the composer. */
+  'on:kai-entity-add'?: (event: CustomEvent<{ entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } }>) => void;
+  /** An entity pill was deleted from the composer. */
+  'on:kai-entity-remove'?: (event: CustomEvent<{ entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } }>) => void;
+  /** The composer gained focus. */
+  'on:kai-focus'?: (event: CustomEvent<{ originalEvent: FocusEvent }>) => void;
+  /** The user submitted (Enter or programmatic submit). */
+  'on:kai-submit'?: (event: CustomEvent<{ doc: ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]; text: string; entities: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }>) => void;
+  /** A trigger character was detected at the caret (e.g. `/` or `@`). */
+  'on:kai-trigger'?: (event: CustomEvent<{ char: string; query: string; rect: DOMRect }>) => void;
+  /** The active trigger was dismissed (Escape, space, or outside click). */
+  'on:kai-trigger-close'?: (event: CustomEvent<Record<string, never>>) => void;
+  /** The content changed (fires on every input event). */
+  'on:kai-value-change'?: (event: CustomEvent<{ doc: ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]; text: string; entities: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }>) => void;
+}
+
+export interface KaiConfirmElementSolidEvents {
+
+}
+
+export interface KaiContextElementSolidEvents {
+  /** Fires when the computed severity level changes (ok → warn → danger or back). `detail.level` is `'ok'`, `'warn'`, or `'danger'`. */
+  'on:kai-threshold-change'?: (event: CustomEvent<{ level: "ok" | "warn" | "danger" }>) => void;
+}
+
+export interface KaiConversationItemElementSolidEvents {
+  /** STANDALONE activation of the row (click, Enter or Space on its body). Never fires inside `<kai-conversations>`. */
+  'on:kai-select'?: (event: CustomEvent<{ id: string }>) => void;
+}
+
+export interface KaiConversationsElementSolidEvents {
+  /** The rail was collapsed or expanded (via the toggle, the reopen button, or a `collapse()`/`expand()`/`toggle()` call). */
+  'on:kai-collapse-toggle'?: (event: CustomEvent<{ collapsed: boolean }>) => void;
+  /** A conversation was selected. The selection event in BOTH modes: a batteries data row, or an activated `<kai-conversation-item>` child (click, Enter or Space). */
+  'on:kai-conversation-select'?: (event: CustomEvent<{ id: string }>) => void;
+  /** The "New chat" button was clicked. */
+  'on:kai-new-chat'?: (event: CustomEvent<Record<string, never>>) => void;
+  /** The built-in search box query changed (typing, or a programmatic `clear()` which fires it with `''`). Lets a consumer mirror or server-side the filter. */
+  'on:kai-search'?: (event: CustomEvent<{ query: string }>) => void;
+  /** The sidebar toggle was clicked. */
+  'on:kai-toggle-sidebar'?: (event: CustomEvent<Record<string, never>>) => void;
+}
+
+export interface KaiDialogElementSolidEvents {
+  /** The dialog opened or closed (Escape, backdrop click, a driven `open`, or a method). */
+  'on:kai-open-change'?: (event: CustomEvent<{ open: boolean }>) => void;
+}
+
+export interface KaiDockElementSolidEvents {
+  /** The dock opened or closed (the launcher, Escape, a driven `open`, or a method). */
+  'on:kai-open-change'?: (event: CustomEvent<{ open: boolean }>) => void;
+}
+
+export interface KaiDropdownElementSolidEvents {
+  /** The menu opened or closed (click, keyboard, Escape, outside-click, or a method). */
+  'on:kai-open-change'?: (event: CustomEvent<{ open: boolean }>) => void;
+}
+
+export interface KaiEditableLabelElementSolidEvents {
+  /** Edit was cancelled (Esc); the text is restored. */
+  'on:kai-cancel'?: (event: CustomEvent<Record<string, never>>) => void;
+  /** Committed a changed value (Enter / blur). */
+  'on:kai-rename'?: (event: CustomEvent<{ value: string }>) => void;
+}
+
+export interface KaiEmbedElementSolidEvents {
+
+}
+
+export interface KaiEmptyElementSolidEvents {
+
+}
+
+export interface KaiFeedbackBarElementSolidEvents {
+  /** The user dismissed the banner. */
+  'on:kai-close'?: (event: CustomEvent) => void;
+  /** The user rated the response. `value` is `'helpful'` or `'not-helpful'`. */
+  'on:kai-feedback'?: (event: CustomEvent<{ value: "helpful" | "not-helpful" }>) => void;
+  /** The user submitted the optional detail form (`collect-detail`). */
+  'on:kai-feedback-detail'?: (event: CustomEvent<{ value: "helpful" | "not-helpful"; category?: undefined | string; comment?: undefined | string }>) => void;
+}
+
+export interface KaiFileTreeElementSolidEvents {
+  /** Fired when a file is selected. `detail.path` = the file's path. */
+  'on:kai-select'?: (event: CustomEvent<{ path: string }>) => void;
+}
+
+export interface KaiFileUploadElementSolidEvents {
+  /** Files were picked or dropped. */
+  'on:kai-files-added'?: (event: CustomEvent<{ files: File[] }>) => void;
+}
+
+export interface KaiFormElementSolidEvents {
+  /** The form's values changed on input. Carries the current coerced values + validity. */
+  'on:kai-values-change'?: (event: CustomEvent<{ values: Record<string, unknown>; valid: boolean }>) => void;
+}
+
+export interface KaiHoverCardElementSolidEvents {
+  /** The card opened or closed (by hover/focus, outside-click, or a method). */
+  'on:kai-open-change'?: (event: CustomEvent<{ open: boolean }>) => void;
+}
+
+export interface KaiIconElementSolidEvents {
+
+}
+
+export interface KaiImageElementSolidEvents {
+
+}
+
+export interface KaiImageArtifactElementSolidEvents {
+
+}
+
+export interface KaiInputElementSolidEvents {
+  /** The value was committed (blur). Same detail shape as `kai-input`. */
+  'on:kai-change'?: (event: CustomEvent<{ value: string; formattedValue: string }>) => void;
+  /** The value changed per keystroke. `value` is the canonical value (what a backend wants); `formattedValue` is the text on screen. With no mask the two are equal. */
+  'on:kai-input'?: (event: CustomEvent<{ value: string; formattedValue: string }>) => void;
+  /** A mask refused, or partly refused, some content. `detail.data` is what was refused. */
+  'on:kai-input-rejected'?: (event: CustomEvent<{ reason: "full" | "wrong-class" | "over-capacity" | "format-change-clipped"; data: string }>) => void;
+}
+
+export interface KaiKbdElementSolidEvents {
+
+}
+
+export interface KaiKbdGroupElementSolidEvents {
+
+}
+
+export interface KaiLightboxElementSolidEvents {
+  /** The modal opened or closed (trigger click, Escape, backdrop click, or a method). */
+  'on:kai-open-change'?: (event: CustomEvent<{ open: boolean }>) => void;
+}
+
+export interface KaiLinkPreviewElementSolidEvents {
+
+}
+
+export interface KaiLoaderElementSolidEvents {
+
+}
+
+export interface KaiMarkdownElementSolidEvents {
+
+}
+
+export interface KaiMenuElementSolidEvents {
+  /** The menu opened or closed (by click, keyboard, Escape, outside-click, or a method). */
+  'on:kai-open-change'?: (event: CustomEvent<{ open: boolean }>) => void;
+  /** A leaf item was selected. Plain: `{ id }`; checkbox: `{ id, checked }` with the NEW state; radio: `{ id, radioGroup }`. */
+  'on:kai-select'?: (event: CustomEvent<{ id: string; checked?: undefined | boolean; radioGroup?: undefined | string }>) => void;
+}
+
+export interface KaiMessageElementSolidEvents {
+  /** An action button on a message was clicked. `action` is the built-in name or a custom id. */
+  'on:kai-message-action'?: (event: CustomEvent<{ messageId: string; action: string; state?: undefined | "on" | "off" }>) => void;
+}
+
+export interface KaiModelSwitcherElementSolidEvents {
+  /** A model was selected. */
+  'on:kai-model-change'?: (event: CustomEvent<{ modelId: string }>) => void;
+  /** The model dropdown opened or closed (by click, keyboard, Escape, outside-click, or a method). */
+  'on:kai-open-change'?: (event: CustomEvent<{ open: boolean }>) => void;
+}
+
+export interface KaiNavElementSolidEvents {
+  /** A row's trailing `action` button was activated (not a select). `value` is the item id; `action` echoes the item's `{ icon, label }`. */
+  'on:kai-nav-item-action'?: (event: CustomEvent<{ value: string; action?: undefined | { icon: string; label: string } }>) => void;
+  /** A `closable` row's trailing close button was activated (not a select). `value` is the item id. */
+  'on:kai-nav-item-close'?: (event: CustomEvent<{ value: string }>) => void;
+  /** A nav item was activated. */
+  'on:kai-nav-select'?: (event: CustomEvent<{ id: string }>) => void;
+}
+
+export interface KaiNoticeElementSolidEvents {
+  /** The notice was dismissed via its × (it also hides itself). */
+  'on:kai-dismiss'?: (event: CustomEvent) => void;
+}
+
+export interface KaiPaneElementSolidEvents {
+  /** The close (×) control was clicked. */
+  'on:kai-close'?: (event: CustomEvent) => void;
+  /** The dock control was clicked (only present when `show-dock`). */
+  'on:kai-dock'?: (event: CustomEvent) => void;
+  /** The maximize/restore control was clicked. `detail.maximized` is the intended NEXT state. Drive the `maximized` prop yourself from it. */
+  'on:kai-maximize'?: (event: CustomEvent<{ maximized: boolean }>) => void;
+  /** The split control was clicked (only present when `show-split`). */
+  'on:kai-split'?: (event: CustomEvent) => void;
+}
+
+export interface KaiPaneGridElementSolidEvents {
+
+}
+
+export interface KaiPaneGroupElementSolidEvents {
+  /** A tab was selected (click, Enter/Space, or arrow-key move). `detail.id` is the tab's id. */
+  'on:kai-tab-change'?: (event: CustomEvent<{ id: string }>) => void;
+  /** A tab's close (×) was clicked. Drop the tab from `tabs` yourself. */
+  'on:kai-tab-close'?: (event: CustomEvent<{ id: string }>) => void;
+  /** A tab's "…" overflow was clicked. Open your own menu from `detail.id`. */
+  'on:kai-tab-menu'?: (event: CustomEvent<{ id: string }>) => void;
+}
+
+export interface KaiPanelElementSolidEvents {
+
+}
+
+export interface KaiPanelHeaderElementSolidEvents {
+
+}
+
+export interface KaiPopoverElementSolidEvents {
+  /** The popover opened or closed (click, Escape, outside-click, or a method). */
+  'on:kai-open-change'?: (event: CustomEvent<{ open: boolean }>) => void;
+}
+
+export interface KaiProgressBarElementSolidEvents {
+
+}
+
+export interface KaiPromptDockElementSolidEvents {
+
+}
+
+export interface KaiPromptInputElementSolidEvents {
+  /** The staged attachments changed (file added or removed). Carries the full current list so a consumer can react in real time. */
+  'on:kai-attachments-change'?: (event: CustomEvent<{ attachments: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }>) => void;
+  /** A `+` menu item was chosen. `checked` is present only for a toggle, carrying its NEW state. Shares `<kai-menu>`'s event name. */
+  'on:kai-select'?: (event: CustomEvent<{ id: string; checked?: undefined | boolean }>) => void;
+  /** The Stop button was clicked while `stoppable` and `loading` are both true. */
+  'on:kai-stop'?: (event: CustomEvent<Record<string, never>>) => void;
+  /** The user submitted the prompt (Enter or send button). `value` is the flattened text. */
+  'on:kai-submit'?: (event: CustomEvent<{ value: string; doc: ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]; entities: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[]; attachments: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }>) => void;
+  /** A suggestion was clicked while `suggestion-mode="fill"`. */
+  'on:kai-suggestion-click'?: (event: CustomEvent<{ value: string }>) => void;
+  /** A custom `<kai-action>` toolbar button was clicked. `action` is the `id` of the `<kai-action>` element that was clicked. */
+  'on:kai-toolbar-action'?: (event: CustomEvent<{ action: string }>) => void;
+  /** The input changed (fires on every edit). Carries the flattened `value` plus the structured `doc` + `entities`. */
+  'on:kai-value-change'?: (event: CustomEvent<{ value: string; doc: ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]; entities: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }>) => void;
+  /** The Voice (Mic) toolbar button was clicked. */
+  'on:kai-voice'?: (event: CustomEvent<Record<string, never>>) => void;
+}
+
+export interface KaiRadioGroupElementSolidEvents {
+  /** A row was chosen. */
+  'on:kai-change'?: (event: CustomEvent<{ value: string }>) => void;
+}
+
+export interface KaiReasoningElementSolidEvents {
+  /** The reasoning block expanded or collapsed (via the trigger, streaming auto-open, or a method). */
+  'on:kai-open-change'?: (event: CustomEvent<{ open: boolean }>) => void;
+}
+
+export interface KaiRemoteElementSolidEvents {
+
+}
+
+export interface KaiResizableElementSolidEvents {
+  /** Fired on drag-end / keyboard resize / visibility change. `detail.sizes` = panel sizes in percent. */
+  'on:kai-change'?: (event: CustomEvent<{ sizes: number[] }>) => void;
+  /** Observe layout maximize state. */
+  'on:kai-maximize-change'?: (event: CustomEvent<{ maximized: boolean; index: number | null }>) => void;
+  /** Authoritative maximize state. */
+  'on:kai-maximize-state'?: (event: CustomEvent<{ maximized: boolean }>) => void;
+}
+
+export interface KaiResizableItemElementSolidEvents {
+  'on:kai-change'?: (event: CustomEvent<unknown>) => void;
+  'on:kai-maximize-change'?: (event: CustomEvent<unknown>) => void;
+  'on:kai-maximize-state'?: (event: CustomEvent<unknown>) => void;
+}
+
+export interface KaiResponseStreamElementSolidEvents {
+  /** Streaming finished. */
+  'on:kai-complete'?: (event: CustomEvent) => void;
+}
+
+export interface KaiRowElementSolidEvents {
+  /** The row was activated (click, Enter or Space) while `interactive` is set and no `href` is present. Non-bubbling: listen on the element itself. */
+  'on:kai-click'?: (event: CustomEvent) => void;
+}
+
+export interface KaiRowGroupElementSolidEvents {
+
+}
+
+export interface KaiScopePickerElementSolidEvents {
+  /** The dropdown opened or closed. */
+  'on:kai-open-change'?: (event: CustomEvent<{ open: boolean }>) => void;
+  /** A scope was chosen (`undefined` filters means all content). */
+  'on:kai-scope-change'?: (event: CustomEvent<{ filters: { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | "transcript" | "markdown"; dateRange?: undefined | { from: string; to: string } } | undefined }>) => void;
+}
+
+export interface KaiScreenElementSolidEvents {
+  /** Back navigation intent: the back button or Escape. The consumer flips their own routing in response (the screen knows nothing about the trigger). */
+  'on:kai-back'?: (event: CustomEvent<Record<string, never>>) => void;
+  /** The screen opened or closed (a method, `Escape` close, or driven `open`). */
+  'on:kai-open-change'?: (event: CustomEvent<{ open: boolean }>) => void;
+}
+
+export interface KaiScrollAreaElementSolidEvents {
+
+}
+
+export interface KaiScrollButtonElementSolidEvents {
+  /** Emitted when the user clicks the button and `scrollToBottom()` is called. Carries no detail; consumers use it to know a manual scroll occurred. */
+  'on:kai-scroll'?: (event: CustomEvent) => void;
+}
+
+export interface KaiSearchElementSolidEvents {
+  /** The field committed (blur). */
+  'on:kai-change'?: (event: CustomEvent<{ value: string }>) => void;
+  /** The query changed (debounced live, and on clear). */
+  'on:kai-search'?: (event: CustomEvent<{ value: string }>) => void;
+  /** Enter was pressed. */
+  'on:kai-submit'?: (event: CustomEvent<{ value: string }>) => void;
+}
+
+export interface KaiSegmentedElementSolidEvents {
+  /** A segment was chosen. */
+  'on:kai-change'?: (event: CustomEvent<{ value: string }>) => void;
+}
+
+export interface KaiSelectElementSolidEvents {
+  /** A choice was made. `value` is the first selected option, empty when nothing is selected. */
+  'on:kai-change'?: (event: CustomEvent<{ value: string; values: string[] }>) => void;
+}
+
+export interface KaiSeparatorElementSolidEvents {
+
+}
+
+export interface KaiSettingItemElementSolidEvents {
+
+}
+
+export interface KaiSettingsGroupElementSolidEvents {
+
+}
+
+export interface KaiSkeletonElementSolidEvents {
+
+}
+
+export interface KaiSkillsElementSolidEvents {
+
+}
+
+export interface KaiSliderElementSolidEvents {
+  /** The value was committed: pointer released, or a key press finished. */
+  'on:kai-change'?: (event: CustomEvent<{ value: number }>) => void;
+  /** The thumb moved. Fires per step during a drag or a key press. */
+  'on:kai-input'?: (event: CustomEvent<{ value: number }>) => void;
+}
+
+export interface KaiSourceElementSolidEvents {
+
+}
+
+export interface KaiSourcesElementSolidEvents {
+
+}
+
+export interface KaiStatusElementSolidEvents {
+
+}
+
+export interface KaiSuggestionsElementSolidEvents {
+  /** A suggestion was clicked. */
+  'on:kai-select'?: (event: CustomEvent<{ value: string }>) => void;
+}
+
+export interface KaiSwitchElementSolidEvents {
+  /** The toggle changed. */
+  'on:kai-change'?: (event: CustomEvent<{ checked: boolean }>) => void;
+}
+
+export interface KaiTabBarElementSolidEvents {
+  /** A tab was selected (click, Enter/Space, or arrow-key move). `value` is the item's `value` attribute, else its host `id`. */
+  'on:kai-tab-change'?: (event: CustomEvent<{ value: string }>) => void;
+}
+
+export interface KaiTabBarItemElementSolidEvents {
+
+}
+
+export interface KaiTabsElementSolidEvents {
+  /** A tab was selected (click, Enter/Space, or arrow-key move). `value` is the item's id. */
+  'on:kai-tab-change'?: (event: CustomEvent<{ value: string }>) => void;
+}
+
+export interface KaiTasksElementSolidEvents {
+  /** The selection changed on a toggle. Carries the selected ids in input order. */
+  'on:kai-value-change'?: (event: CustomEvent<{ value: string[] }>) => void;
+}
+
+export interface KaiTextShimmerElementSolidEvents {
+
+}
+
+export interface KaiThinkingBarElementSolidEvents {
+  /** The "stop / answer now" affordance was clicked. */
+  'on:kai-stop'?: (event: CustomEvent) => void;
+}
+
+export interface KaiThreadElementSolidEvents {
+  /** An action button on a message was clicked. `action` is the built-in name or a custom id. */
+  'on:kai-message-action'?: (event: CustomEvent<{ messageId: string; action: string; state?: undefined | "on" | "off" }>) => void;
+}
+
+export interface KaiToastRegionElementSolidEvents {
+  /** A toast's action button was pressed. */
+  'on:kai-action'?: (event: CustomEvent<{ id: string; label: string }>) => void;
+  /** A toast left the stack. `reason` is `'timeout' | 'close' | 'action'`. */
+  'on:kai-dismiss'?: (event: CustomEvent<{ id: string; reason: "timeout" | "close" | "action" }>) => void;
+}
+
+export interface KaiToolElementSolidEvents {
+  /** The panel expanded or collapsed (by trigger click or a method). */
+  'on:kai-open-change'?: (event: CustomEvent<{ open: boolean }>) => void;
+}
+
+export interface KaiTooltipElementSolidEvents {
+  /** The tooltip opened or closed (by hover/focus, outside-click, or a method). */
+  'on:kai-open-change'?: (event: CustomEvent<{ open: boolean }>) => void;
+}
+
+export interface KaiViewElementSolidEvents {
+
+}
+
+export interface KaiViewStackElementSolidEvents {
+  /** The visible view or the drilled flag changed (push, back, replace, tab switch, or a `view` attribute write). */
+  'on:kai-view-change'?: (event: CustomEvent<{ view: string | undefined; root: string | undefined; drilled: boolean; stack: string[] }>) => void;
+}
+
+export interface KaiVoiceInputElementSolidEvents {
+  /** Raw audio captured, before transcription. */
+  'on:kai-audio-captured'?: (event: CustomEvent<{ blob: Blob }>) => void;
+  /** Recording started or stopped. */
+  'on:kai-recording-change'?: (event: CustomEvent<{ recording: boolean }>) => void;
+  /** Live partial transcript during native recognition (only when `interim` is set). Fires repeatedly before the final `kai-transcription`. */
+  'on:kai-transcript-interim'?: (event: CustomEvent<{ text: string }>) => void;
+  /** Final transcript: the `transcribe` property resolved, OR native `SpeechRecognition` produced final text (no `transcribe` set). */
+  'on:kai-transcription'?: (event: CustomEvent<{ text: string }>) => void;
+  /** A voice session failed, so no failure is ever silent. `detail.error` is the platform error code or the thrown name. */
+  'on:kai-voice-error'?: (event: CustomEvent<{ source: "recognition"; error: string; message: string }>) => void;
+}
+
+export interface KaiVoiceOutputElementSolidEvents {
+  /** Playback started or stopped. */
+  'on:kai-speaking-change'?: (event: CustomEvent<{ speaking: boolean }>) => void;
+  /** The model path (`synthesize`) resolved audio: the raw `Blob` before playback. */
+  'on:kai-synthesized'?: (event: CustomEvent<{ blob: Blob }>) => void;
+  /** A voice session failed, so no failure is ever silent. `detail.error` is the platform error code or the thrown name. */
+  'on:kai-voice-error'?: (event: CustomEvent<{ source: "synthesis"; error: string; message: string }>) => void;
+}
+
+export interface KaiWorkspaceElementSolidEvents {
+  /** The aside was resized (fires per drag step, keyboard nudge, or a handle double-click reset), width in px. */
+  'on:kai-aside-resize'?: (event: CustomEvent<{ side: "start" | "end"; width: number }>) => void;
+  /** An aside collapsed or expanded (a method, the breakpoint, the drawer's Escape). */
+  'on:kai-aside-toggle'?: (event: CustomEvent<{ side: "start" | "end"; collapsed: boolean }>) => void;
+}
+
+/** Attributes every kai-* element tolerates in a Solid JSX tree on top of its own
+ *  props: `id`, `class`, `slot`, `style`, `data-*`, `aria-*`, `ref`, and the
+ *  `on:<name>` keys solid spells a non-delegated listener with. The index
+ *  signature keeps those legal on a tag this file types WITHOUT weakening the
+ *  declared props — an explicit member always wins over an index signature.
+ *  It also carries the authored kebab spelling of a camelCase prop
+ *  (`collapse-below` for `collapseBelow`): solid maps no kebab tag attribute onto
+ *  a camelCase member. */
+export interface KaiElementSolidProps {
+  children?: unknown;
+  [attr: string]: unknown;
+}
+
+/** A kai-* custom element as solid-js's JSX type-checker sees it. Props are
+ *  `Partial` because the kai- contract allows setting any of them imperatively
+ *  through a ref instead of in the markup. */
+export type KaiSolidElement<Props, Events> = Partial<Props> & Events & KaiElementSolidProps & {
+  /** Solid assigns a `ref` as the element itself OR a callback with the element
+   *  as its parameter (`ref={(el) => …}`). It is typed `HTMLElement` — NOT the
+   *  element's own interface — and that is a MEASURED choice, not a default:
+   *
+   *   · `unknown`/`any` leaves the callback's parameter with no contextual type,
+   *     which is TS7006 under `strict` at every `ref={(el) => …}` in the tree.
+   *   · the element interface (`KaiButtonElement`) removes that, but makes the
+   *     kit's own `el as HTMLElement & Record<string, unknown>` idiom — how a
+   *     story sets a non-scalar prop imperatively, the kai- contract's own
+   *     pattern — TS2352 at 120 sites: an interface has no implicit index
+   *     signature, so that conversion is a mistake in both directions, while
+   *     `HTMLElement` itself converts cleanly because the target's own
+   *     `HTMLElement` constituent makes it comparable to the source.
+   *
+   *  WHAT IT DOES NOT WEAKEN: whether a kai-* ATTRIBUTE is checked is decided by
+   *  `Partial<Props>` above, not by `ref` — `ref` only types the element a
+   *  callback is handed. Pinned by the template plant in the solid cell of
+   *  scripts/lib/block-compile-cells.mjs, which fails if
+   *  `<kai-button variant="solid">` stops being a compile error. */
+  ref?: HTMLElement | ((el: HTMLElement) => void);
+};
+
+declare module 'solid-js/jsx-runtime' {
+  namespace JSX {
+    interface IntrinsicElements {
+      'kai-agent-card': KaiSolidElement<KaiAgentCardElementProps, KaiAgentCardElementSolidEvents>;
+      'kai-artifact': KaiSolidElement<KaiArtifactElementProps, KaiArtifactElementSolidEvents>;
+      'kai-attachments': KaiSolidElement<KaiAttachmentsElementProps, KaiAttachmentsElementSolidEvents>;
+      'kai-audio-visualizer': KaiSolidElement<KaiAudioVisualizerElementProps, KaiAudioVisualizerElementSolidEvents>;
+      'kai-avatar': KaiSolidElement<KaiAvatarElementProps, KaiAvatarElementSolidEvents>;
+      'kai-badge': KaiSolidElement<KaiBadgeElementProps, KaiBadgeElementSolidEvents>;
+      'kai-button': KaiSolidElement<KaiButtonElementProps, KaiButtonElementSolidEvents>;
+      'kai-card': KaiSolidElement<KaiCardElementProps, KaiCardElementSolidEvents>;
+      'kai-cards': KaiSolidElement<KaiCardsElementProps, KaiCardsElementSolidEvents>;
+      'kai-chain-of-thought': KaiSolidElement<KaiChainOfThoughtElementProps, KaiChainOfThoughtElementSolidEvents>;
+      'kai-chat': KaiSolidElement<KaiChatElementProps, KaiChatElementSolidEvents>;
+      'kai-checkbox': KaiSolidElement<KaiCheckboxElementProps, KaiCheckboxElementSolidEvents>;
+      'kai-checkbox-group': KaiSolidElement<KaiCheckboxGroupElementProps, KaiCheckboxGroupElementSolidEvents>;
+      'kai-checkpoint': KaiSolidElement<KaiCheckpointElementProps, KaiCheckpointElementSolidEvents>;
+      'kai-choice': KaiSolidElement<KaiChoiceElementProps, KaiChoiceElementSolidEvents>;
+      'kai-coachmark': KaiSolidElement<KaiCoachmarkElementProps, KaiCoachmarkElementSolidEvents>;
+      'kai-code-block': KaiSolidElement<KaiCodeBlockElementProps, KaiCodeBlockElementSolidEvents>;
+      'kai-command': KaiSolidElement<KaiCommandElementProps, KaiCommandElementSolidEvents>;
+      'kai-compare': KaiSolidElement<KaiCompareElementProps, KaiCompareElementSolidEvents>;
+      'kai-composer': KaiSolidElement<KaiComposerElementProps, KaiComposerElementSolidEvents>;
+      'kai-confirm': KaiSolidElement<KaiConfirmElementProps, KaiConfirmElementSolidEvents>;
+      'kai-context': KaiSolidElement<KaiContextElementProps, KaiContextElementSolidEvents>;
+      'kai-conversation-item': KaiSolidElement<KaiConversationItemElementProps, KaiConversationItemElementSolidEvents>;
+      'kai-conversations': KaiSolidElement<KaiConversationsElementProps, KaiConversationsElementSolidEvents>;
+      'kai-dialog': KaiSolidElement<KaiDialogElementProps, KaiDialogElementSolidEvents>;
+      'kai-dock': KaiSolidElement<KaiDockElementProps, KaiDockElementSolidEvents>;
+      'kai-dropdown': KaiSolidElement<KaiDropdownElementProps, KaiDropdownElementSolidEvents>;
+      'kai-editable-label': KaiSolidElement<KaiEditableLabelElementProps, KaiEditableLabelElementSolidEvents>;
+      'kai-embed': KaiSolidElement<KaiEmbedElementProps, KaiEmbedElementSolidEvents>;
+      'kai-empty': KaiSolidElement<KaiEmptyElementProps, KaiEmptyElementSolidEvents>;
+      'kai-feedback-bar': KaiSolidElement<KaiFeedbackBarElementProps, KaiFeedbackBarElementSolidEvents>;
+      'kai-file-tree': KaiSolidElement<KaiFileTreeElementProps, KaiFileTreeElementSolidEvents>;
+      'kai-file-upload': KaiSolidElement<KaiFileUploadElementProps, KaiFileUploadElementSolidEvents>;
+      'kai-form': KaiSolidElement<KaiFormElementProps, KaiFormElementSolidEvents>;
+      'kai-hover-card': KaiSolidElement<KaiHoverCardElementProps, KaiHoverCardElementSolidEvents>;
+      'kai-icon': KaiSolidElement<KaiIconElementProps, KaiIconElementSolidEvents>;
+      'kai-image': KaiSolidElement<KaiImageElementProps, KaiImageElementSolidEvents>;
+      'kai-image-artifact': KaiSolidElement<KaiImageArtifactElementProps, KaiImageArtifactElementSolidEvents>;
+      'kai-input': KaiSolidElement<KaiInputElementProps, KaiInputElementSolidEvents>;
+      'kai-kbd': KaiSolidElement<KaiKbdElementProps, KaiKbdElementSolidEvents>;
+      'kai-kbd-group': KaiSolidElement<KaiKbdGroupElementProps, KaiKbdGroupElementSolidEvents>;
+      'kai-lightbox': KaiSolidElement<KaiLightboxElementProps, KaiLightboxElementSolidEvents>;
+      'kai-link-preview': KaiSolidElement<KaiLinkPreviewElementProps, KaiLinkPreviewElementSolidEvents>;
+      'kai-loader': KaiSolidElement<KaiLoaderElementProps, KaiLoaderElementSolidEvents>;
+      'kai-markdown': KaiSolidElement<KaiMarkdownElementProps, KaiMarkdownElementSolidEvents>;
+      'kai-menu': KaiSolidElement<KaiMenuElementProps, KaiMenuElementSolidEvents>;
+      'kai-message': KaiSolidElement<KaiMessageElementProps, KaiMessageElementSolidEvents>;
+      'kai-model-switcher': KaiSolidElement<KaiModelSwitcherElementProps, KaiModelSwitcherElementSolidEvents>;
+      'kai-nav': KaiSolidElement<KaiNavElementProps, KaiNavElementSolidEvents>;
+      'kai-notice': KaiSolidElement<KaiNoticeElementProps, KaiNoticeElementSolidEvents>;
+      'kai-pane': KaiSolidElement<KaiPaneElementProps, KaiPaneElementSolidEvents>;
+      'kai-pane-grid': KaiSolidElement<KaiPaneGridElementProps, KaiPaneGridElementSolidEvents>;
+      'kai-pane-group': KaiSolidElement<KaiPaneGroupElementProps, KaiPaneGroupElementSolidEvents>;
+      'kai-panel': KaiSolidElement<KaiPanelElementProps, KaiPanelElementSolidEvents>;
+      'kai-panel-header': KaiSolidElement<KaiPanelHeaderElementProps, KaiPanelHeaderElementSolidEvents>;
+      'kai-popover': KaiSolidElement<KaiPopoverElementProps, KaiPopoverElementSolidEvents>;
+      'kai-progress-bar': KaiSolidElement<KaiProgressBarElementProps, KaiProgressBarElementSolidEvents>;
+      'kai-prompt-dock': KaiSolidElement<KaiPromptDockElementProps, KaiPromptDockElementSolidEvents>;
+      'kai-prompt-input': KaiSolidElement<KaiPromptInputElementProps, KaiPromptInputElementSolidEvents>;
+      'kai-radio-group': KaiSolidElement<KaiRadioGroupElementProps, KaiRadioGroupElementSolidEvents>;
+      'kai-reasoning': KaiSolidElement<KaiReasoningElementProps, KaiReasoningElementSolidEvents>;
+      'kai-remote': KaiSolidElement<KaiRemoteElementProps, KaiRemoteElementSolidEvents>;
+      'kai-resizable': KaiSolidElement<KaiResizableElementProps, KaiResizableElementSolidEvents>;
+      'kai-resizable-item': KaiSolidElement<KaiResizableItemElementProps, KaiResizableItemElementSolidEvents>;
+      'kai-response-stream': KaiSolidElement<KaiResponseStreamElementProps, KaiResponseStreamElementSolidEvents>;
+      'kai-row': KaiSolidElement<KaiRowElementProps, KaiRowElementSolidEvents>;
+      'kai-row-group': KaiSolidElement<KaiRowGroupElementProps, KaiRowGroupElementSolidEvents>;
+      'kai-scope-picker': KaiSolidElement<KaiScopePickerElementProps, KaiScopePickerElementSolidEvents>;
+      'kai-screen': KaiSolidElement<KaiScreenElementProps, KaiScreenElementSolidEvents>;
+      'kai-scroll-area': KaiSolidElement<KaiScrollAreaElementProps, KaiScrollAreaElementSolidEvents>;
+      'kai-scroll-button': KaiSolidElement<KaiScrollButtonElementProps, KaiScrollButtonElementSolidEvents>;
+      'kai-search': KaiSolidElement<KaiSearchElementProps, KaiSearchElementSolidEvents>;
+      'kai-segmented': KaiSolidElement<KaiSegmentedElementProps, KaiSegmentedElementSolidEvents>;
+      'kai-select': KaiSolidElement<KaiSelectElementProps, KaiSelectElementSolidEvents>;
+      'kai-separator': KaiSolidElement<KaiSeparatorElementProps, KaiSeparatorElementSolidEvents>;
+      'kai-setting-item': KaiSolidElement<KaiSettingItemElementProps, KaiSettingItemElementSolidEvents>;
+      'kai-settings-group': KaiSolidElement<KaiSettingsGroupElementProps, KaiSettingsGroupElementSolidEvents>;
+      'kai-skeleton': KaiSolidElement<KaiSkeletonElementProps, KaiSkeletonElementSolidEvents>;
+      'kai-skills': KaiSolidElement<KaiSkillsElementProps, KaiSkillsElementSolidEvents>;
+      'kai-slider': KaiSolidElement<KaiSliderElementProps, KaiSliderElementSolidEvents>;
+      'kai-source': KaiSolidElement<KaiSourceElementProps, KaiSourceElementSolidEvents>;
+      'kai-sources': KaiSolidElement<KaiSourcesElementProps, KaiSourcesElementSolidEvents>;
+      'kai-status': KaiSolidElement<KaiStatusElementProps, KaiStatusElementSolidEvents>;
+      'kai-suggestions': KaiSolidElement<KaiSuggestionsElementProps, KaiSuggestionsElementSolidEvents>;
+      'kai-switch': KaiSolidElement<KaiSwitchElementProps, KaiSwitchElementSolidEvents>;
+      'kai-tab-bar': KaiSolidElement<KaiTabBarElementProps, KaiTabBarElementSolidEvents>;
+      'kai-tab-bar-item': KaiSolidElement<KaiTabBarItemElementProps, KaiTabBarItemElementSolidEvents>;
+      'kai-tabs': KaiSolidElement<KaiTabsElementProps, KaiTabsElementSolidEvents>;
+      'kai-tasks': KaiSolidElement<KaiTasksElementProps, KaiTasksElementSolidEvents>;
+      'kai-text-shimmer': KaiSolidElement<KaiTextShimmerElementProps, KaiTextShimmerElementSolidEvents>;
+      'kai-thinking-bar': KaiSolidElement<KaiThinkingBarElementProps, KaiThinkingBarElementSolidEvents>;
+      'kai-thread': KaiSolidElement<KaiThreadElementProps, KaiThreadElementSolidEvents>;
+      'kai-toast-region': KaiSolidElement<KaiToastRegionElementProps, KaiToastRegionElementSolidEvents>;
+      'kai-tool': KaiSolidElement<KaiToolElementProps, KaiToolElementSolidEvents>;
+      'kai-tooltip': KaiSolidElement<KaiTooltipElementProps, KaiTooltipElementSolidEvents>;
+      'kai-view': KaiSolidElement<KaiViewElementProps, KaiViewElementSolidEvents>;
+      'kai-view-stack': KaiSolidElement<KaiViewStackElementProps, KaiViewStackElementSolidEvents>;
+      'kai-voice-input': KaiSolidElement<KaiVoiceInputElementProps, KaiVoiceInputElementSolidEvents>;
+      'kai-voice-output': KaiSolidElement<KaiVoiceOutputElementProps, KaiVoiceOutputElementSolidEvents>;
+      'kai-workspace': KaiSolidElement<KaiWorkspaceElementProps, KaiWorkspaceElementSolidEvents>;
     }
   }
 }

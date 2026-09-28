@@ -335,7 +335,7 @@ function HelmApp(props: { narrow: boolean }) {
                       <div class="truncate text-xs text-muted-foreground">{c.email}</div>
                     </div>
                     <Show when={!props.narrow}>
-                      <kai-badge variant={c.plan === 'Free' ? 'outline' : 'secondary'}>{c.plan}</kai-badge>
+                      <kai-badge>{c.plan}</kai-badge>
                     </Show>
                     <div class="w-14 text-right text-sm font-medium tabular-nums">{c.mrr}</div>
                     <span class="size-2 shrink-0 rounded-full" classList={{ 'bg-tool-green': c.ok, 'bg-tool-red': !c.ok }}></span>
@@ -477,7 +477,7 @@ export const Lovable: Story = {
                     style={{ display: 'block' }}
                   ></kai-message>
                   <div class="flex items-center gap-2">
-                    <kai-badge variant="secondary">v1</kai-badge>
+                    <kai-badge>v1</kai-badge>
                     <span class="text-xs text-muted-foreground">Checkpoint saved</span>
                     <kai-button variant="ghost" size="sm" icon="rotate-cw" class="ml-auto">Restore</kai-button>
                   </div>
@@ -522,7 +522,7 @@ export const Lovable: Story = {
                     <kai-tooltip content={d.label}>
                       <kai-button
                         ref={(el) => { el.addEventListener('kai-click', () => setDevice(d.id)); }}
-                        variant={device() === d.id ? 'secondary' : 'ghost'}
+                        variant={device() === d.id ? 'default' : 'ghost'}
                         size="icon-sm"
                         label={d.label}
                       ><d.Icon slot="icon" class="size-4" /></kai-button>

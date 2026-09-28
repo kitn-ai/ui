@@ -1191,8 +1191,8 @@ export const SplitWorkspace: Story = {
                   el.addEventListener('focusout', () => setRenamingId(null));
                   queueMicrotask(() => (el as unknown as { edit?: () => void }).edit?.());
                 }}
-                onClick={(e) => e.stopPropagation()}
-                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e: MouseEvent) => e.stopPropagation()}
+                onPointerDown={(e: PointerEvent) => e.stopPropagation()}
                 class="min-w-0 max-w-[10rem] text-xs font-medium"
               ></kai-editable-label>
             </Show>
