@@ -348,7 +348,8 @@
             "theLabelsWrapWhenThereIsNoRoom": true,
             "theCardsFoldToOneColumnWhenThereIsNoRoom": true,
             "theCardsCarryTheKitsOwnAir": true,
-            "theGridTakesTheComposersColumn": true,
+            "theGridFillsTheEmptyContentsBox": true,
+            "theGridStaysInsideThreadColumn": true,
             "rendered": true
           },
           "styles": {
@@ -358,10 +359,10 @@
               "borderRadius": "64px"
             },
             "guideCardsGrid": {
-              "width": "768px",
-              "gridTemplateColumns": "380px 380px",
+              "width": "720px",
+              "gridTemplateColumns": "356px 356px",
               "gap": "8px",
-              "minWidth": "100%"
+              "minWidth": "auto"
             },
             "guideCardText": {
               "rowGap": "8px"
@@ -1012,7 +1013,8 @@
             "theLabelsWrapWhenThereIsNoRoom": true,
             "theCardsFoldToOneColumnWhenThereIsNoRoom": true,
             "theCardsCarryTheKitsOwnAir": true,
-            "theGridTakesTheComposersColumn": true,
+            "theGridFillsTheEmptyContentsBox": true,
+            "theGridStaysInsideThreadColumn": true,
             "rendered": true
           },
           "styles": {
@@ -1022,10 +1024,10 @@
               "borderRadius": "64px"
             },
             "guideCardsGrid": {
-              "width": "768px",
-              "gridTemplateColumns": "380px 380px",
+              "width": "720px",
+              "gridTemplateColumns": "356px 356px",
               "gap": "8px",
-              "minWidth": "100%"
+              "minWidth": "auto"
             },
             "guideCardText": {
               "rowGap": "8px"
