@@ -90,5 +90,10 @@ export interface ControllerShape {
   name: string;
   stateFields: string[];
   actionNames: string[];
+  /** Parameter count per action, by name. Read for the one renderer whose
+   *  generated code CALLS an action rather than handing it to the host: an
+   *  Angular event binding is a template statement, so `submit(event)` needs
+   *  `$event` and `close()` must not be given one. */
+  actionParams: Record<string, number>;
   refNames: string[];
 }

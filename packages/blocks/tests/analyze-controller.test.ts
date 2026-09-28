@@ -40,6 +40,10 @@ describe('analyzeController', () => {
       name: 'Widget',
       stateFields: ['messages', 'loading', 'backHidden'],
       actionNames: ['back', 'submit', 'boot'],
+      // `submit(event)` takes the event and `back()` does not: the one fact a
+      // renderer whose generated code CALLS an action needs (the angular
+      // template), read from the same interface body as the names.
+      actionParams: { back: 0, submit: 1, boot: 0 },
       refNames: ['stack', 'dock'],
     });
   });

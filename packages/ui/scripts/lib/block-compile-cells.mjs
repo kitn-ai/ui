@@ -458,11 +458,183 @@ export async function svelteCell({ tsc, name, files }) {
 }
 
 /**
+ * The solid form is a `.tsx` tree, so — unlike vue and svelte — no second
+ * compiler is needed: `tsc` under the project the scaffolder's own solid front
+ * end compiles in (`jsx: preserve`, `jsxImportSource: solid-js`) checks the JSX
+ * and the store together. The cell is `reactCell`'s shape for that reason, with
+ * the anti-vacuity guard this matrix reads as a pass without: a tree that
+ * emitted no `.tsx` leaves tsc reading the `shims.d.ts` alone.
+ *
+ * THE KAI TAGS DO NOT COMPILE, AND IT IS NOT THIS FORM'S BUG. Solid's
+ * `JSX.IntrinsicElements` is a closed union of DOM tag interfaces with no index
+ * signature, so every `<kai-…>` in an emitted tree is TS2339 ("Property
+ * 'kai-button' does not exist on type 'JSX.IntrinsicElements'"). React, Vue and
+ * Svelte each have a kit-side block in src/web-components/web-component-types.d.ts
+ * for exactly this; solid has none. The diagnostic below is therefore printed
+ * with that sentence attached rather than as a bare wall of TS2339, so a reader
+ * can tell "the augmentation is missing" from "the renderer emits tags that do
+ * not exist". Measured on solid-js 1.9.13 against this same project.
+ */
+async function solidCell({ tsc, name, files }) {
+  const box = tsc.sandbox('solid', `block-${name}-solid`);
+  const { missed, out } = box.selfTest();
+  if (missed.length) {
+    return [
+      `${name} [solid]: the sandbox self-test did NOT fire (${missed.map((p) => p.file).join(', ')}).\n` +
+        `    ${missed.map((p) => p.why).join('\n    ')}\n` +
+        `    Every cell under it would pass vacuously. tsc said:\n${out || '    (nothing)'}`,
+    ];
+  }
+  box.clear();
+  const components = files.filter((file) => file.path.endsWith('.tsx'));
+  if (components.length === 0) {
+    return [
+      `${name} [solid]: the form emitted no .tsx file at all, so this cell checked nothing. ` +
+        'Every solid tree is one component plus the .ts store it imports.',
+    ];
+  }
+  for (const file of files) {
+    const dest = join(box.dir, file.path);
+    mkdirSync(dirname(dest), { recursive: true });
+    writeFileSync(dest, file.content);
+  }
+  const diagnostics = box.run();
+  box.clear();
+  if (!diagnostics.trim()) return [];
+  return [`${name} [solid]: does not compile under a stock consumer tsconfig:\n${diagnostics.trimEnd()}`];
+}
+
+/**
+ * The angular form is a `.ts` component whose markup is a STRING — `tsc` reads
+ * the class and nothing of the template, so this cell runs the real Angular
+ * compiler (`ngc`, from @angular/compiler-cli, a devDependency of
+ * examples/starters/angular) exactly as `vueCell` runs `vue-tsc`. The project
+ * options are the `angular` consumer project's, plus the `angularCompilerOptions`
+ * a real `ng build` sets: without them the template is not read at all.
+ *
+ * WHAT THIS CELL CANNOT CHECK, measured on 22.0.5 rather than assumed, and it is
+ * the one gap in this matrix that no cell can close:
+ *
+ *   · WITHOUT `CUSTOM_ELEMENTS_SCHEMA` the emitted template fails NG8001 ("'kai-'
+ *     is not a known element") and NG8002 for every binding, so the tags cannot
+ *     appear at all.
+ *   · WITH it — which the emitted component declares itself — the same template
+ *     compiles with ZERO diagnostics, INCLUDING `variant="solid"` and
+ *     `[notAKaiProp]="1"`, the two literals the vue, react and svelte cells all
+ *     reject.
+ *   · A genuine type error in the class still reports (TS2322), so that green is
+ *     ngc checking the class and not sitting out.
+ *
+ * There is nothing to add: Angular resolves a template element name through its
+ * own `ElementSchemaRegistry`, so there is no `declare global` that could type a
+ * kai- tag the way `JSX.IntrinsicElements`, `GlobalComponents` and
+ * `svelteHTML.IntrinsicElements` type the other three. The schema that admits
+ * the tag IS the switch that turns the checking off. The scaffolder's own
+ * `angularStructureCheck` covers what this cannot, for the same reason.
+ */
+async function angularCell({ tsc, name, files }) {
+  const ngDir = pkgDir('@angular/compiler-cli');
+  if (!ngDir) {
+    return [
+      `${name} [angular]: @angular/compiler-cli is not installed, so the emitted template cannot be ` +
+        'compiled. It is a devDependency of examples/starters/angular; `pnpm install` at the repo root is what puts it here.',
+    ];
+  }
+  // ngc resolves @angular/core and @angular/compiler from the SAME tree it runs
+  // in, and createConsumerTsc already symlinks @angular/core. The compiler
+  // packages themselves are linked here, beside it, rather than into the
+  // consumer tree: they are this cell's tooling, not the tree's dependency.
+  const nm = join(tsc.tmp, 'node_modules');
+  for (const pkg of ['@angular/compiler', '@angular/compiler-cli']) {
+    const dir = pkgDir(pkg);
+    if (!dir) return [`${name} [angular]: ${pkg} is not installed; the angular cell cannot run.`];
+    const linked = join(nm, pkg);
+    if (!existsSync(linked)) symlinkSync(dir, linked, 'dir');
+  }
+
+  const dir = join(tsc.tmp, 'angular', name);
+  mkdirSync(dir, { recursive: true });
+  const clear = () => {
+    for (const f of readdirSync(dir)) {
+      // The tsconfig is this cell's harness and outlives every tree it writes.
+      if (f === 'tsconfig.json') continue;
+      rmSync(join(dir, f), { recursive: true, force: true });
+    }
+  };
+  const tsconfig = join(dir, 'tsconfig.json');
+  writeFileSync(
+    tsconfig,
+    JSON.stringify(
+      {
+        compilerOptions: { ...BASE_OPTIONS, ...tsc.PROJECTS.angular.options },
+        angularCompilerOptions: { strictTemplates: true, strictInjectionParameters: true, typeCheckHostBindings: true },
+        include: ['**/*.ts'],
+      },
+      null,
+      2,
+    ),
+  );
+  // The anti-theatre controls FIRST, in this directory — with ngc's own output
+  // shape, which differs from tsc's: it colourises the file name and prints no
+  // `error TS####` prefix on the file line. The shared `expect` regexes are
+  // written for tsc, so the fragment each probe is matched on is stated here,
+  // the same way `svelteCell` states svelte-check's.
+  const NGC_PROBE_MESSAGE = {
+    'probe-wrong-type.ts': /Type 'WireMessage\[\]'|TS2322/,
+    'probe-unused-import.ts': /TS6133|is declared but its value is never read/,
+  };
+  for (const probe of ANTI_THEATRE_PROBES) writeFileSync(join(dir, probe.file), probe.code);
+  const controls = ngc(dir);
+  const missed = ANTI_THEATRE_PROBES.filter((probe) => {
+    const line = controls.split('\n').find((l) => l.includes(probe.file) || l.includes(`${probe.file}:`));
+    return !line || !NGC_PROBE_MESSAGE[probe.file].test(controls);
+  });
+  clear();
+  if (missed.length) {
+    return [
+      `${name} [angular]: the sandbox self-test did NOT fire (${missed.map((p) => p.file).join(', ')}).\n` +
+        `    ${missed.map((p) => p.why).join('\n    ')}\n` +
+        `    Every cell under it would pass vacuously. ngc said:\n${controls || '    (nothing)'}`,
+    ];
+  }
+
+  const components = files.filter((file) => file.path.endsWith('.ts') && !file.path.endsWith('.controller.ts'));
+  if (components.length === 0) {
+    return [
+      `${name} [angular]: the form emitted no component .ts file at all, so this cell checked nothing. ` +
+        'Every angular tree is one component plus the .ts store it imports.',
+    ];
+  }
+  for (const file of files) {
+    const dest = join(dir, file.path);
+    mkdirSync(dirname(dest), { recursive: true });
+    writeFileSync(dest, file.content);
+  }
+  const diagnostics = ngc(dir);
+  clear();
+  if (!diagnostics.trim()) return [];
+  return [`${name} [angular]: does not compile under a real Angular consumer project (ngc):\n${diagnostics.trimEnd()}`];
+
+  /** `ngc` over one directory holding a tsconfig.json; raw diagnostics ('' when clean). */
+  function ngc(runDir) {
+    try {
+      execFileSync(process.execPath, [join(ngDir, 'bundles/src/bin/ngc.js'), '-p', join(runDir, 'tsconfig.json')], {
+        encoding: 'utf8',
+        stdio: ['ignore', 'pipe', 'pipe'],
+      });
+      return '';
+    } catch (e) {
+      return `${e.stdout ?? ''}${e.stderr ?? ''}`;
+    }
+  }
+}
+
+/**
  * One strategy per form id. A form with no strategy is a HARD failure rather
  * than a skip: a cell that quietly stops running is the exact shape of check
  * this repo keeps paying for.
  */
-const STRATEGIES = { react: reactCell, html: htmlCell, vue: vueCell, svelte: svelteCell };
+const STRATEGIES = { react: reactCell, html: htmlCell, vue: vueCell, svelte: svelteCell, angular: angularCell, solid: solidCell };
 
 /**
  * Run every block x form cell. Prints the axis and the cell count it actually

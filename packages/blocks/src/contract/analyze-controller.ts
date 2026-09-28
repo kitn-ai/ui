@@ -139,6 +139,55 @@ function memberNames(body: string): string[] {
   return names;
 }
 
+/**
+ * Parameter count of every METHOD member, by name. A property member (or a
+ * method whose list does not close) counts as zero.
+ *
+ * WHY THIS IS READ AT ALL. Every renderer except angular hands an action to the
+ * host as a FUNCTION (react's prop, vue's `@kai-click="actions.open"`, svelte's
+ * `onkai-click={store.actions.open}`), so the host decides what reaches it. An
+ * Angular event binding is a template STATEMENT, so the generated template is
+ * the caller and has to KNOW: `(kai-submit)="store.actions.submit()"` is
+ * TS2554 ("Expected 1 arguments, but got 0") on the kit's own blocks, where
+ * `submit(event: CustomEvent)` takes the event, and `(kai-click)="store
+ * .actions.close($event)"` is the same error REVERSED on `close(): void`.
+ * Both shapes ship in the same block, so nothing short of the per-action count
+ * is correct. It lives here, beside the names, rather than in one renderer's
+ * own mini-parser: this module is where the controller contract is read, and a
+ * second reader of the same file would be the copy that rots.
+ */
+function memberParamCounts(body: string): Record<string, number> {
+  const counts: Record<string, number> = {};
+  for (const token of splitMembers(body)) {
+    const m = /^\s*(?:readonly\s+)?([A-Za-z_$][\w$]*)\s*\??\s*[:(<]/.exec(token);
+    if (!m || counts[m[1]] !== undefined) continue;
+    counts[m[1]] = countParams(token);
+  }
+  return counts;
+}
+
+/** Commas at depth ZERO inside a member's first parameter list: `()` is 0, and
+ *  `(event: CustomEvent<{ a: string; b: string }>)` is ONE, not three. */
+function countParams(token: string): number {
+  const open = token.indexOf('(');
+  if (open === -1) return 0;
+  let depth = 0;
+  let commas = 0;
+  let seen = false;
+  for (let i = open; i < token.length; i += 1) {
+    const ch = token[i];
+    if (ch === '(' || ch === '{' || ch === '[' || ch === '<') depth += 1;
+    else if (ch === ')' || ch === '}' || ch === ']' || ch === '>') {
+      depth -= 1;
+      if (depth === 0) return seen ? commas + 1 : 0;
+    } else if (depth === 1) {
+      if (ch === ',') commas += 1;
+      else if (ch !== ' ' && ch !== '\t' && ch !== '\n' && ch !== '?') seen = true;
+    }
+  }
+  return 0;
+}
+
 export function analyzeController(
   source: string,
   componentName: string,
@@ -167,6 +216,10 @@ export function analyzeController(
 
   const stateFields = read('State', 'state');
   const actionNames = read('Actions', 'actions');
+  // The parameter count per action, read from the SAME interface body the names
+  // come from. Only angular needs it (its template CALLS the action); see
+  // `memberParamCounts` for why nothing weaker than this is correct.
+  const actionParams = memberParamCounts(interfaceBody(code, `${componentName}Actions`) ?? '');
   // `boot()` is the mount hook every host calls once after wiring: the react
   // adapter fires it in an effect, and the html binder awaits it before
   // setting the driver's readiness signal. The html form has nowhere else to
@@ -178,7 +231,7 @@ export function analyzeController(
   const refNames = read('Refs', 'refs');
 
   if (errors.length) return { errors };
-  return { shape: { name: componentName, stateFields, actionNames, refNames }, errors: [] };
+  return { shape: { name: componentName, stateFields, actionNames, actionParams, refNames }, errors: [] };
 }
 
 /** The page's `@` and `#ref` bindings against the controller's declared

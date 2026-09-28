@@ -19,6 +19,14 @@
  *              elements, plus a `create<Name>()` store in a `.svelte.ts`
  *              module holding one `$state` over the controller's snapshot
  *              (see `./svelte`).
+ *   - `angular` - the angular form: a standalone component whose template is a
+ *              string in the class file, plus a `create<Name>()` store holding
+ *              one Angular signal over the controller's snapshot (see
+ *              `./angular` for what Angular's template checker does with a
+ *              kai- tag, which is not checking it).
+ *   - `solid`  - the solid form: a `.tsx` component over the custom elements,
+ *              plus a `create<Name>()` store holding one `createSignal` over
+ *              the controller's snapshot (see `./solid`).
  *   - `cdn`  : the single-file CDN paste form: the HTML form above, inlined
  *              and pinned onto the published entries by `registry.ts`'s
  *              `generateCdnForm` (see `./cdn`).
@@ -41,6 +49,8 @@ import { renderHtmlForm } from './html';
 import { renderReactForm } from './react';
 import { renderVueForm } from './vue';
 import { renderSvelteForm } from './svelte';
+import { renderAngularForm } from './angular';
+import { renderSolidForm } from './solid';
 import { renderCdnFormFiles } from './cdn';
 
 // The renderers live in their own modules and are re-exported HERE, so every
@@ -54,6 +64,10 @@ export { renderVueForm } from './vue';
 export type { VueFormOptions } from './vue';
 export { renderSvelteForm } from './svelte';
 export type { SvelteFormOptions } from './svelte';
+export { renderAngularForm } from './angular';
+export type { AngularFormOptions } from './angular';
+export { renderSolidForm } from './solid';
+export type { SolidFormOptions } from './solid';
 export { renderCdnFormFiles } from './cdn';
 // THE DATA-MODE SEAM, re-exported for the same reason the renderers are: the CLI
 // resolves a mode through the renderers, and the generator asks this package
@@ -79,6 +93,8 @@ export const BLOCK_FORMS = [
   { id: 'react', label: 'React' },
   { id: 'vue', label: 'Vue' },
   { id: 'svelte', label: 'Svelte' },
+  { id: 'angular', label: 'Angular' },
+  { id: 'solid', label: 'SolidJS' },
   { id: 'cdn', label: 'CDN single file' },
 ] as const;
 
@@ -154,6 +170,8 @@ export function renderBlockForm(
     case 'react': return renderReactForm(block, { mode: opts.mode });
     case 'vue': return renderVueForm(block, { mode: opts.mode });
     case 'svelte': return renderSvelteForm(block, { mode: opts.mode });
+    case 'angular': return renderAngularForm(block, { mode: opts.mode });
+    case 'solid': return renderSolidForm(block, { mode: opts.mode });
     case 'cdn': return renderCdnFormFiles(block, { ...opts.cdn, mode: opts.mode });
   }
 }
