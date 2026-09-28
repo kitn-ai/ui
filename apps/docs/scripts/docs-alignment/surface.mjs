@@ -146,6 +146,71 @@ export function loadSurface(uiRoot) {
     for (const e of el.events ?? []) eventNames.add(e.name);
   }
 
+  // ── 2b. Declarative light-DOM children: markup a consumer WRITES that no
+  //         `defineWebComponent` registers ─────────────────────────────────────
+  // `<kai-step>` inside `<kai-chain-of-thought>`, `<kai-model>` inside
+  // `<kai-model-switcher>`, `<kai-conversation>` inside `<kai-conversations>`.
+  // The owning element reads them out of the light DOM; they have no
+  // `Kai<Name>Element`, no `HTMLElementTagNameMap` row and nothing to upgrade, so
+  // they stay ABSENT from the element catalog — which is what `loadSurface`
+  // returns them under a marker for, not a registration.
+  //
+  // The declaration was never missing. `gen-web-component-api.mjs` reads each
+  // owner's `querySelectorAll('kai-…')` parse callback and emits the attributes it
+  // reads under that owner's `declarativeChildren` in web-component-meta.json, and
+  // the docs site renders it (DeclarativeChildrenTable). What was missing is a
+  // CONSUMER of it here, so `<kai-step whatever="x">` was checked against NOTHING
+  // and every gate passed — and the tag was reported as a metadata hole instead.
+  //
+  // Merged into `byTag` (marked `dataCarrier`) rather than kept in a second map:
+  // every reader in this harness already asks `byTag`, so this is what makes
+  // `checkMarkup` validate their attribute names, what stops `checkProse`
+  // advising on a tag the kit really declares, and what keeps them out of the
+  // registered-element counts everywhere else (nothing else reads this map).
+  const dataCarrierParents = new Map(); // tag -> { parents, attributes, description }
+  for (const el of elements) {
+    for (const child of el.declarativeChildren ?? []) {
+      // A child that is ALSO a registered element — `<kai-source>` inside
+      // `<kai-sources>` — is already in `byTag` with its real Props interface.
+      // Never overwrite that with the attribute-name-only view.
+      if (byTag.has(child.tag)) continue;
+      const entry = dataCarrierParents.get(child.tag) ?? { parents: [], attributes: new Set(), description: '' };
+      entry.parents.push(el.tag);
+      for (const name of child.attributes ?? []) entry.attributes.add(name);
+      if (!entry.description) entry.description = child.description ?? '';
+      dataCarrierParents.set(child.tag, entry);
+    }
+  }
+  for (const [tag, carrier] of dataCarrierParents) {
+    const props = new Map();
+    for (const name of carrier.attributes) {
+      // `scalar: true`: each is read with `getAttribute`, so an attribute string is
+      // the whole channel and the nonscalar-as-attribute check has nothing to say.
+      const prop = { name, scalar: true };
+      props.set(name, prop);
+      props.set(camelToKebab(name), prop);
+    }
+    byTag.set(tag, {
+      tag,
+      className: null,
+      displayName: null,
+      dataCarrier: true,
+      declarativeChildOf: carrier.parents,
+      description: carrier.description,
+      // Empty rather than absent: readers walk `byTag.values()` and touch `.props`
+      // (the self-test picks its non-scalar probe that way), and an entry missing
+      // the key crashes them. A data carrier declares no Props interface, so the
+      // truthful value is the empty list.
+      props: [],
+      propIndex: props,
+      propNames: new Set(props.keys()),
+      eventNames: new Set(),
+      handlerNames: new Set(),
+      slotNames: new Set(),
+      partNames: new Set(),
+      methodNames: new Set(),
+    });
+  }
   // Not every kai-* event is declared on an element. The card protocol routes a
   // document-level `kai-card` event, published as `CARD_EVENT_NAME = "kai-card"`.
   // Any exported const whose type is a string literal starting with `kai-` is an

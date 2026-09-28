@@ -215,7 +215,7 @@ export function checkMarkup({ code: rawCode, startLine, surface, lang }) {
           ? {
               kind: 'undeclared-in-web-component-meta',
               tag,
-              detail: `<${tag}> is used by the kit (a declarative light-DOM child) but is not a registered element, so web-component-meta.json, the generated types and the MCP catalog all omit it`,
+              detail: `<${tag}> is named by the kit's source but is neither a registered element nor a declared light-DOM child (web-component-meta.json carries its children under the owning element's \`declarativeChildren\`), so the generated types and the MCP catalog omit it`,
               line,
               severity: 'advisory',
               via: 'attribute',
@@ -224,7 +224,12 @@ export function checkMarkup({ code: rawCode, startLine, surface, lang }) {
       );
       continue;
     }
-    seenTags.push(el);
+    // A data carrier is NOT a registered element: it declares no slots, so
+    // counting it here would silently disable the slot check below for the whole
+    // block — that check only runs when EVERY tag in the block has slot data, and
+    // that guard exists to stop an element with no recorded slots ("unknown", not
+    // "has none") flagging correct `slot="…"`.
+    if (!el.dataCarrier) seenTags.push(el);
 
     for (const attr of parseAttrs(attrText)) {
       const { base, kind } = classifyAttr(attr.raw);
@@ -251,7 +256,9 @@ export function checkMarkup({ code: rawCode, startLine, surface, lang }) {
         push({
           kind: 'unknown-prop',
           tag,
-          detail: `<${tag}> has no prop '${base}'`,
+          detail: el.dataCarrier
+            ? `<${tag} ${base}="…"> — <${tag}> is a light-DOM data carrier of ${el.declarativeChildOf.map((t) => `<${t}>`).join(' / ')}; it reads ${[...el.propIndex.keys()].join(', ') || 'no attributes'}`
+            : `<${tag}> has no prop '${base}'`,
           line,
           severity: 'high',
           via: 'attribute',
@@ -471,11 +478,18 @@ export function checkMdxComponents(doc, surface) {
     if (!tagAttr || tagAttr.kind !== 'string') continue;
     const tag = tagAttr.value;
     const el = surface.byTag.get(tag);
-    if (!el) {
+    // A data carrier is in `byTag` for the attribute check, but it is NOT an
+    // element this component can render: `<Example>`/`<Playground>` resolve `tag`
+    // against the top-level array of web-component-meta.json, where a
+    // `declarativeChildren` entry does not appear, so `tag="kai-step"` previews
+    // as "Unknown element". `<DeclarativeChildrenTable>` is the component for them.
+    if (!el || el.dataCarrier) {
       findings.push({
         kind: 'unknown-element',
         tag,
-        detail: `<${c.name} tag="${tag}" …/> — no such element; this component renders "Unknown element" in the browser`,
+        detail: el
+          ? `<${c.name} tag="${tag}" …/> — <${tag}> is a light-DOM child of ${el.declarativeChildOf.map((t) => `<${t}>`).join(' / ')}, not an element this component can render; use <DeclarativeChildrenTable>`
+          : `<${c.name} tag="${tag}" …/> — no such element; this component renders "Unknown element" in the browser`,
         line: c.line,
         severity: 'high',
       });
