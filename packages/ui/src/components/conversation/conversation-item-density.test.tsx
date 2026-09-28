@@ -16,6 +16,12 @@
  *   so real computed geometry runs in the block driver (V-1); what this test
  *   pins is that the public density resolves to the exact same utilities the
  *   facade paints, which is what makes the geometry equal by construction.
+ * - `default` and `compact` are NOT derived from any source: each is a decision
+ *   this axis owns, so a change to either is an edit to `DENSITY_ROW_BOX` and
+ *   nothing else here is expected to follow it. `default` is the box every
+ *   consumer gets with no density set, and `px-2.5 py-1.5` is its current value
+ *   (10px inline, 6px block, both on the density scale); the derivation above
+ *   covers `panel`, which that change does not reach.
  * - No contortions: the panel presentation must be reachable with the ONE
  *   prop, no host padding, no slotted-span padding.
  */

@@ -25,6 +25,13 @@ export type ConversationRowDensity = 'default' | 'compact' | 'panel';
  * derives the expected utilities from conversation-panel.tsx's SOURCE and
  * fails if the two drift.
  *
+ * `default` is the box this axis has always called non-compact, and it is the
+ * one EVERY consumer gets with no density set: `px-2.5 py-1.5`, 10px inline and
+ * 6px block. Its inline half is deliberately the same `px-2.5` the axis has
+ * always carried, so a consumer that moved to `compact` and back keeps its
+ * rows' leading edge where it was; what the owner's read-back moved is the
+ * block half, from `py-2` (8px) down ONE step to `py-1.5` (6px).
+ *
  * `compact` is the DENSE single-line box - `px-2 py-0.5`, 8px inline and 2px
  * block - and it is deliberately the tightest box on the axis rather than one
  * step below `default`: a rail row is furniture listed one under another, and
@@ -36,7 +43,7 @@ export type ConversationRowDensity = 'default' | 'compact' | 'panel';
  * with the 20px text-sm line is a 24px row.
  */
 export const DENSITY_ROW_BOX: Record<ConversationRowDensity, string> = {
-  default: 'px-2.5 py-2',
+  default: 'px-2.5 py-1.5',
   compact: 'px-2 py-0.5',
   panel: 'px-3 py-2.5',
 };

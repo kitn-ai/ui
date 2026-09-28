@@ -102,7 +102,9 @@
         }
       ],
       "consoleErrors": [],
-      "failures": []
+      "failures": [],
+      "skippedProbes": [],
+      "skippedStyles": []
     },
     {
       "page": "block",
@@ -204,7 +206,9 @@
         }
       ],
       "consoleErrors": [],
-      "failures": []
+      "failures": [],
+      "skippedProbes": [],
+      "skippedStyles": []
     }
   ],
   "failures": [],
