@@ -35,6 +35,10 @@ export type {
   DropdownSeparatorProps, DropdownLabelProps, DropdownCheckboxItemProps, DropdownRadioItemProps,
   DropdownSubProps, DropdownSubTriggerProps, DropdownSubContentProps,
 } from './components/dropdown/dropdown';
+// The declarative item ladder `<kai-menu>` and the composer's tools menu render from a
+// `KaiMenuItem[]` tree. A Solid consumer building the same menu needs the same component.
+export { DropdownItems } from './components/dropdown/dropdown-items';
+export type { DropdownItemsProps } from './components/dropdown/dropdown-items';
 export { clampBasis } from './components/resizable/resizable';
 export { Input } from './components/input/input';
 export type { InputProps } from './components/input/input';
