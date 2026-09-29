@@ -307,6 +307,12 @@ export function ConversationItem(props: ConversationItemProps) {
   // `trailing` field, which is the PREVIEW line there), same as
   // ConversationPanel. The same option empties THIS edge in this density: the
   // preview line under the title is not the trailing edge, so it stays.
+  // The ACTIVE panel row sits on `bg-muted`, and muted text on the muted surface itself is
+  // 4.42:1 in dark (#93918a on #2d2c2a), just under AA's 4.5. The token is right for every
+  // other surface it lands on (5.68 on the background, 4.94 on the strongest surface), so
+  // the row steps its own secondary text up instead, the same treatment the message-count
+  // line below gives an active row.
+  const activeMuted = () => (local.isActive ? 'text-foreground/70' : 'text-muted-foreground');
   const panelTime = () => (showTrailing()
     ? relativeTimeShort(local.conversation.updatedAt ?? local.conversation.lastMessageAt)
     : '');
@@ -343,12 +349,12 @@ export function ConversationItem(props: ConversationItemProps) {
                 {local.conversation.title}
               </span>
               <Show when={panelTime()}>
-                <span part="trailing" class="shrink-0 text-xs text-muted-foreground">{panelTime()}</span>
+                <span part="trailing" class={cn('shrink-0 text-xs', activeMuted())}>{panelTime()}</span>
               </Show>
             </div>
             <Show when={local.conversation.trailing || unread()}>
               <div class="mt-0.5 flex items-center gap-1.5">
-                <span class="min-w-0 flex-1 truncate text-xs text-muted-foreground">{local.conversation.trailing}</span>
+                <span class={cn('min-w-0 flex-1 truncate text-xs', activeMuted())}>{local.conversation.trailing}</span>
                 <Show when={unread()}>
                   <UnreadDot />
                 </Show>
