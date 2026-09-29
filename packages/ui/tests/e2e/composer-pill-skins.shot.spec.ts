@@ -1,4 +1,10 @@
 import { test, type Page } from '@playwright/test';
+import {
+  BASELINE_PLATFORM,
+  BASELINE_SKIP_REASON,
+  captureBaseline,
+  reportBaselineCaptures,
+} from './screenshot-baselines';
 
 /**
  * Screenshot artifact (NOT an assertion) for the per-kind pill decoration:
@@ -7,10 +13,21 @@ import { test, type Page } from '@playwright/test';
  * against the Claude Code web reference.
  *
  * Run: `npm run test:shot`
- * Output: tests/e2e/__screenshots__/pill-skins/{light,dark}.png
+ * Output: the committed `tests/e2e/__screenshots__/pill-skins/…` on a deliberate
+ * `KAI_SCREENSHOT_UPDATE=1`; a plain run captures beside the evidence tree and
+ * compares against those committed images instead of overwriting them.
+ *
+ * CAPTURE-ONLY, so off darwin the whole file skips visibly: the committed
+ * captures hold a different rasteriser's output (`screenshot-baselines.ts`).
  */
-
 const STORY = '/iframe.html?id=test-fixtures-composer--pill-kinds&viewMode=story';
+const REL = 'tests/e2e/__screenshots__/pill-skins';
+
+test.beforeEach(() => {
+  test.skip(process.platform !== BASELINE_PLATFORM, BASELINE_SKIP_REASON);
+});
+
+test.afterAll(() => reportBaselineCaptures('composer-pill-skins'));
 
 async function shoot(page: Page, scheme: 'light' | 'dark') {
   await page.emulateMedia({ colorScheme: scheme });
@@ -27,7 +44,7 @@ async function shoot(page: Page, scheme: 'light' | 'dark') {
     document.body.style.padding = '8px';
   }, scheme);
   const host = page.locator('kai-composer');
-  await host.screenshot({ path: `tests/e2e/__screenshots__/pill-skins/${scheme}.png` });
+  await captureBaseline(host, `${REL}/${scheme}.png`);
 }
 
 test('pill skins — light', async ({ page }) => {
@@ -58,5 +75,5 @@ test('pill selected (arrow-nav highlight) — dark', async ({ page }) => {
     const sr = document.querySelector('kai-composer')?.shadowRoot;
     sr?.querySelector('[data-kai-entity][data-kind="skill"]')?.setAttribute('data-selected', '');
   });
-  await page.locator('kai-composer').screenshot({ path: 'tests/e2e/__screenshots__/pill-skins/selected-dark.png' });
+  await captureBaseline(page.locator('kai-composer'), `${REL}/selected-dark.png`);
 });

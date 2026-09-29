@@ -450,20 +450,31 @@ describe('Escape, per this element\'s own semantics', () => {
     expect(isOpen(el)).toBe(false);
   });
 
-  test('Escape from OUTSIDE the dialog does not close it', async () => {
-    // Not a modal-scope claim: the handler is bound to the backdrop subtree, so an
-    // Escape whose target is elsewhere on the page never reaches it. Paired with the
-    // positive case over the same harness.
+  test('Escape from outside the panel closes it TOO, and announces it once', async () => {
+    // WIDENED DELIBERATELY, and this pair is the record of it. The handler used to be
+    // reachable only through the backdrop's own keydown, so an Escape whose target was
+    // anywhere else on the page never arrived - and that is not a state a keyboard user
+    // can avoid: whatever opened the modal can take focus back (a menu item returning to
+    // its trigger does it in a microtask), leaving an `aria-modal` dialog open that no
+    // key can leave. A modal owns Escape for the whole page; this is that.
     const el = await mount('<p>body</p>');
     const outside = document.createElement('button');
     document.body.appendChild(outside);
     el.show();
     await flush();
 
+    const seen: unknown[] = [];
+    el.addEventListener('kai-open-change', (e) => seen.push((e as CustomEvent).detail));
+    outside.focus();
     key(outside, 'Escape');
     await flush();
-    expect(isOpen(el)).toBe(true);
+    expect(seen, 'once, from the document listener').toEqual([{ open: false }]);
+    expect(isOpen(el)).toBe(false);
 
+    // Paired over the same harness, so "it closed" cannot be a dialog that never opened.
+    el.show();
+    await flush();
+    expect(isOpen(el)).toBe(true);
     key(panel(el)!, 'Escape');
     await flush();
     expect(isOpen(el)).toBe(false);
@@ -488,6 +499,258 @@ describe('Escape, per this element\'s own semantics', () => {
 
     expect(onDocument).toHaveBeenCalledTimes(1);
     expect(e.defaultPrevented).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// A modal is dismissible by keyboard even when focus is not in it
+// ---------------------------------------------------------------------------
+
+describe('Escape while focus is OUTSIDE the panel', () => {
+  // WHY THIS GROUP EXISTS. The backdrop's own keydown is reached through the event's
+  // composed path, so an Escape from anywhere else on the page never arrives - and a
+  // modal whose focus has drifted out is exactly the state a keyboard user gets stuck
+  // in. It is not a hypothetical: a wrapper that returns focus to its own trigger after
+  // opening a modal (a menu item that closes behind it is the ordinary case) leaves the
+  // dialog open with focus on the trigger, and the modal then swallows every later
+  // press. An `aria-modal="true"` surface owns Escape for the whole page, so this is
+  // the element's job rather than the consumer's.
+
+  test('Escape from OUTSIDE closes it, and reaches the consumer in one kai-open-change', async () => {
+    const el = await mount('<button id="a">a</button>');
+    const trigger = document.createElement('button');
+    document.body.appendChild(trigger);
+    el.show();
+    await flush();
+    trigger.focus();
+    // Precondition: this is the state under test, and not a dialog that still has focus.
+    expect(shadow(el).activeElement).not.toBe(panel(el));
+
+    const seen: unknown[] = [];
+    el.addEventListener('kai-open-change', (e) => seen.push((e as CustomEvent).detail));
+    key(trigger, 'Escape');
+    await flush();
+
+    expect(seen, 'the close request must reach the consumer').toEqual([{ open: false }]);
+    expect(isOpen(el)).toBe(false);
+  });
+
+  test('a consumer-OWNED dialog hears Escape through the same channel', async () => {
+    // The shape the reporting round tried first: the consumer binds `open` and mirrors
+    // its own state from the event. The element must not have to close itself for the
+    // consumer to be told, because it is the consumer's state that is authoritative -
+    // with focus on the opener, though, nothing was announced at all and the binding
+    // left the modal uncloseable by any key.
+    const el = await mount('<button id="a">a</button>');
+    const trigger = document.createElement('button');
+    document.body.appendChild(trigger);
+
+    let consumerOpen = false;
+    el.addEventListener('kai-open-change', (e) => {
+      consumerOpen = (e as CustomEvent).detail.open as boolean;
+      el.open = consumerOpen;
+    });
+    el.open = true;
+    await flush();
+    expect(isOpen(el), 'precondition: the bound `open` opened it').toBe(true);
+
+    trigger.focus();
+    key(trigger, 'Escape');
+    await flush();
+    expect(consumerOpen, 'the consumer owns the state and must hear the request').toBe(false);
+    expect(isOpen(el)).toBe(false);
+  });
+
+  test('Escape from INSIDE still closes, and only once', async () => {
+    // The pair for the two above: widening the scope must not turn one keypress into
+    // two closes (the document listener and the backdrop handler both seeing it).
+    const el = await mount('<button id="a">a</button>');
+    el.show();
+    await flush();
+    const seen: unknown[] = [];
+    el.addEventListener('kai-open-change', (e) => seen.push((e as CustomEvent).detail));
+
+    key(el.querySelector('#a')!, 'Escape');
+    await flush();
+    expect(seen).toEqual([{ open: false }]);
+    expect(isOpen(el)).toBe(false);
+  });
+
+  test('a NESTED dialog keeps its own Escape — the outer one does not close with it', async () => {
+    // The hazard the document listener introduces, and the reason it is scoped to an
+    // Escape whose path does NOT include the panel: a modal opened from inside this one
+    // is in this panel's subtree, so its Escape is this panel's too, and closing both is
+    // the failure. Paired so "the outer is still open" cannot pass vacuously.
+    const outer = await mount('<p>outer body</p><kai-dialog id="inner"><p>inner body</p></kai-dialog>');
+    outer.show();
+    await flush();
+    const inner = outer.querySelector('#inner') as Dialog;
+    inner.show();
+    await flush();
+    expect(isOpen(outer) && isOpen(inner)).toBe(true);
+
+    key(panel(inner)!, 'Escape');
+    await flush();
+    expect(isOpen(inner), 'the inner modal owns the key').toBe(false);
+    expect(isOpen(outer), 'and the outer one is untouched').toBe(true);
+
+    key(panel(outer)!, 'Escape');
+    await flush();
+    expect(isOpen(outer)).toBe(false);
+  });
+});
+
+describe('focus restoration when the opener is GONE', () => {
+  // The reporting round opened the dialog from a menu item that closed behind it, so
+  // the element the dialog remembers was detached by the time Escape arrived, the
+  // restore was skipped - correctly - and focus fell to <body>: the reader lost their
+  // place on the page they were still looking at. Skipping a detached target is right;
+  // leaving focus nowhere is not. When the remembered element is gone, the dialog
+  // restores to the nearest SURVIVING context it was in.
+
+  test('focus lands in the surviving context, not on BODY', async () => {
+    const region = document.createElement('div');
+    region.innerHTML = '<button id="trigger">New project</button><div id="items"><button id="item">New project</button></div>';
+    document.body.appendChild(region);
+    const item = region.querySelector('#item') as HTMLElement;
+    const trigger = region.querySelector('#trigger') as HTMLElement;
+
+    const el = await mount('<p>body</p>');
+    item.focus();
+    el.show();
+    await flush();
+    expect(shadow(el).activeElement, 'precondition: focus went into the dialog').toBe(panel(el));
+
+    // The menu that held the item closes behind the dialog, taking the item with it.
+    item.parentElement!.remove();
+    el.hide();
+    await flush();
+
+    expect(document.activeElement, 'a keyboard user must not be dropped on the page').not.toBe(document.body);
+    expect(document.activeElement).toBe(trigger);
+  });
+
+  test('the walk keeps going when the nearest surviving context has nothing left in it', async () => {
+    // The residual the single-link walk left behind. The ancestor chain is [opener,
+    // host, body, html], and the FIRST surviving context is not necessarily able to
+    // take focus: here the host survives with its only focusable inside it removed, so
+    // `focusFirstIn(host)` found nothing, the walk ended there, and focus fell to
+    // `<body>` - the same lost place, one step further out. Surviving and being able to
+    // take focus are different questions, so the walk asks the second one and continues
+    // outward to the next control on the page.
+    const host = document.createElement('div');
+    host.innerHTML = '<button id="opener">New project</button>';
+    document.body.appendChild(host);
+    const elsewhere = document.createElement('button');
+    elsewhere.id = 'elsewhere';
+    document.body.appendChild(elsewhere);
+
+    const el = await mount('<p>body</p>');
+    const opener = host.querySelector('#opener') as HTMLElement;
+    opener.focus();
+    el.show();
+    await flush();
+    expect(shadow(el).activeElement, 'precondition: focus went into the dialog').toBe(panel(el));
+
+    // The menu that held the item closes behind the dialog, taking the item with it and
+    // leaving the host it sat in with nothing focusable of its own.
+    opener.remove();
+    el.hide();
+    await flush();
+
+    expect(host.querySelector('button'), 'precondition: the host is EMPTY, not gone').toBeNull();
+    expect(document.activeElement, 'the walk must not stop at the emptied host').toBe(elsewhere);
+  });
+
+  test('a target that survives is still restored to EXACTLY, not to its region', async () => {
+    // The pair: the fallback must not take over from an ordinary restore, which lands on
+    // the remembered element itself.
+    const el = await mount('<p>body</p>');
+    const trigger = document.createElement('button');
+    document.body.appendChild(trigger);
+    trigger.focus();
+    el.show();
+    await flush();
+    el.hide();
+    await flush();
+    expect(document.activeElement).toBe(trigger);
+  });
+});
+
+describe('the dialog says so when the browser refuses to focus the panel', () => {
+  // SEE THE FILE HEADER. jsdom models neither `inert` nor a top-layer native modal, so a
+  // subtree every browser refuses to focus is still focusable to jsdom's `focus()`: the
+  // one fact missing here is the refusal itself, and this stub supplies it for this
+  // describe only, delegating every other call. The arrangement it stands in for is the
+  // consumer's - an open native modal, or an `inert` region, covering the portal target -
+  // and `scripts/probe-dialog-focus-refusal.mjs --shape=modal-outside` measures it in
+  // Chromium, where the browser does the refusing with nothing on the page to mark it.
+  //
+  // WHY THIS IS PINNED AS A PAIR. A warning on the refusal is worth nothing if it also
+  // fires on the ordinary open, and the ordinary open is what every other test in this
+  // file performs. An always-warning dialog is noise a consumer learns to filter, which
+  // is the silence again with extra steps, so both halves run over one harness.
+  const real = HTMLElement.prototype.focus;
+  /** Is `node` in a subtree the browser would refuse to focus: it, or an ancestor of it,
+   *  is `inert` - crossing shadow boundaries, the way the browser's own check does, so a
+   *  `<slot>`-less shadow tree inside an inert region is caught as well. `closest()`
+   *  alone stops at the shadow root and would call the panel focusable. */
+  const behindInert = (node: HTMLElement): boolean => {
+    let el: HTMLElement | null = node;
+    while (el) {
+      if (el.hasAttribute('inert')) return true;
+      const root = el.getRootNode();
+      el = el.parentElement ?? (root instanceof ShadowRoot && root.host instanceof HTMLElement ? root.host : null);
+    }
+    return false;
+  };
+  beforeAll(() => {
+    HTMLElement.prototype.focus = function (this: HTMLElement, options?: FocusOptions) {
+      if (behindInert(this)) return;
+      real.call(this, options);
+    };
+  });
+  afterAll(() => { HTMLElement.prototype.focus = real; });
+  afterEach(() => { document.body.removeAttribute('inert'); });
+
+  test('a refused open warns, naming what happened', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const el = await mount('<p>body</p>');
+    const outside = document.createElement('button');
+    document.body.appendChild(outside);
+    outside.focus();
+
+    el.show();
+    // The consumer's native modal opens in the same turn, making everything outside it
+    // unfocusable - which is where this dialog's portal target sits. The panel's own
+    // `focus()` is already queued by then, so it lands on a page that refuses it.
+    document.body.setAttribute('inert', '');
+    await flush();
+
+    // The precondition is what makes the warning non-vacuous: the panel really did not
+    // take focus, and the reader really is still outside the dialog.
+    expect(shadow(el).activeElement, 'precondition: the panel did NOT take focus').toBeNull();
+    expect(document.activeElement, 'precondition: the reader is still where they were').toBe(outside);
+    expect(warn, 'a dialog that could not take focus must say so').toHaveBeenCalledTimes(1);
+    const said = warn.mock.calls[0].join(' ');
+    expect(said).toContain('kai-dialog');
+    expect(said, 'and it must say WHAT happened, not merely that something did').toContain('opened without taking focus');
+    warn.mockRestore();
+  });
+
+  test('an ordinary open stays quiet', async () => {
+    // The other half of the pair, over the same harness with the surround left focusable:
+    // silence is the correct output here, and the precondition is that the warning had
+    // every chance to fire - the panel did take focus, so a dialog that warned regardless
+    // would be caught by this test rather than by a consumer.
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const el = await mount('<p>body</p>');
+    el.show();
+    await flush();
+
+    expect(shadow(el).activeElement, 'precondition: the panel took focus').toBe(panel(el));
+    expect(warn, 'the ordinary path must not be noisy').not.toHaveBeenCalled();
+    warn.mockRestore();
   });
 });
 

@@ -121,6 +121,39 @@ describe('<kai-conversation-item>', () => {
     expect(bodyOf(item).getAttribute('aria-current')).toBe('false');
   });
 
+  it('derives nothing on its trailing edge: the meta slot is the whole edge', async () => {
+    // A DATA row derives a relative time from the summary's timestamps. This
+    // element is handed no summary, so its edge holds only what the consumer
+    // slots: with the region empty the edge is already empty. That is why there
+    // is no trailing-edge option to opt out of here, and why the container's
+    // own `show-trailing` scopes to its data rows rather than to slotted ones.
+    const bare = makeItem('c1', 'No meta');
+    document.body.appendChild(bare);
+    await tick();
+    expect(bare.shadowRoot!.querySelector('[part~="meta"]')).toBeNull();
+    expect(bare.shadowRoot!.textContent).not.toMatch(/just now|\d+m ago|\d+h ago|\d+d ago/);
+
+    const item = makeItem('c2', 'With meta');
+    const meta = document.createElement('span');
+    meta.slot = 'meta';
+    meta.textContent = '2d ago';
+    item.appendChild(meta);
+    document.body.appendChild(item);
+    await tick();
+    // Slotted content stays in the light DOM, so it is read through the slot.
+    const metaSlot = () => item.shadowRoot!.querySelector('[part~="meta"] slot[name="meta"]') as HTMLSlotElement;
+    expect(metaSlot().assignedElements()).toContain(meta);
+
+    // Inside a container, the row is still the consumer's: the container's
+    // option governs the rows it builds from `conversations`.
+    const container = mountList() as ConvEl & { showTrailing?: boolean };
+    container.setAttribute('show-trailing', 'false');
+    container.appendChild(item);
+    document.body.appendChild(container);
+    await tick();
+    expect(metaSlot().assignedElements()).toContain(meta);
+  });
+
   it('an authored role is left alone', async () => {
     const item = makeItem('c1', 'T');
     item.setAttribute('role', 'treeitem');

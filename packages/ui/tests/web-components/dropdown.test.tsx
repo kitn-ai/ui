@@ -21,7 +21,7 @@
  * undefined) the slot would be an inert unknown element in the light DOM and every
  * slotted row would silently vanish. That is asserted, not assumed.
  */
-import { afterEach, describe, expect, test } from 'vitest';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 import '../../src/web-components/dropdown/dropdown';
 
 /**
@@ -32,6 +32,7 @@ import '../../src/web-components/dropdown/dropdown';
 const flush = () => new Promise((r) => setTimeout(r, 0));
 
 afterEach(() => {
+  vi.restoreAllMocks();
   document.body.replaceChildren();
 });
 
@@ -260,6 +261,44 @@ describe('kai-dropdown', () => {
       expect(document.activeElement).toBe(row(el, 'rename'));
       await keydown(el, 'ArrowDown');
       expect(document.activeElement).toBe(row(el, 'delete'));
+    });
+  });
+
+  describe('the surface width with `full`', () => {
+    /** The rect field the surface reads, and nothing else. */
+    const rect = (width: number): DOMRect => ({
+      width, height: 32, top: 0, left: 0, right: width, bottom: 32, x: 0, y: 0,
+      toJSON: () => ({}),
+    }) as DOMRect;
+
+    test('a NON-full surface writes no width and keeps the facade\'s own floor', async () => {
+      const el = await mount(ROWS);
+      const trigger = triggerOf(el)!;
+      vi.spyOn(trigger, 'getBoundingClientRect').mockReturnValue(rect(364));
+
+      el.show();
+      await flush();
+
+      const menu = menuOf(el)!;
+      expect(trigger.classList.contains('w-full'), 'a non-full trigger does not stretch').toBe(false);
+      expect(menu.style.width, 'no tracked width: the CSS floor governs').toBe('');
+      expect(menu.classList.contains('min-w-[10rem]'), 'the 10rem override is still declared here').toBe(true);
+      expect(
+        menu.classList.contains('min-w-[15rem]'),
+        "the facade's floor REPLACES the surface default rather than adding a second one",
+      ).toBe(false);
+    });
+
+    test('`full` makes the slotted-row surface as wide as the trigger', async () => {
+      const el = await mount(ROWS, { full: '' });
+      const trigger = triggerOf(el)!;
+      vi.spyOn(trigger, 'getBoundingClientRect').mockReturnValue(rect(300));
+
+      el.show();
+      await flush();
+
+      expect(trigger.classList.contains('w-full'), '`full` stretches the trigger to its container').toBe(true);
+      expect(menuOf(el)!.style.width).toBe('300px');
     });
   });
 });
