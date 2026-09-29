@@ -745,6 +745,12 @@
           "fn": false
         },
         {
+          "name": "density",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
           "name": "value",
           "scalar": false,
           "optional": true,
@@ -765,6 +771,12 @@
         {
           "name": "suggestions",
           "scalar": false,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "suggestionsLayout",
+          "scalar": true,
           "optional": true,
           "fn": false
         },
@@ -859,6 +871,12 @@
           "fn": false
         },
         {
+          "name": "showTrailing",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
           "name": "headerFull",
           "scalar": true,
           "optional": true,
@@ -907,7 +925,13 @@
           "fn": false
         },
         {
-          "name": "webSearch",
+          "name": "tools",
+          "scalar": false,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "expanded",
           "scalar": true,
           "optional": true,
           "fn": false
@@ -1010,12 +1034,12 @@
         "kai-home-link",
         "kai-message-action",
         "kai-model-change",
+        "kai-select",
         "kai-submit",
         "kai-suggestion-click",
         "kai-unread-change",
         "kai-value-change",
-        "kai-voice",
-        "kai-web-search"
+        "kai-voice"
       ],
       "methods": [
         "focus",
@@ -1128,6 +1152,12 @@
         {
           "name": "value",
           "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "values",
+          "scalar": false,
           "optional": true,
           "fn": false
         },
@@ -1832,6 +1862,12 @@
           "fn": false
         },
         {
+          "name": "showTrailing",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
           "name": "searchable",
           "scalar": true,
           "optional": true,
@@ -2175,7 +2211,7 @@
     },
     {
       "tag": "kai-empty",
-      "description": "The empty state of a list or panel: a heading, a line of copy, and room for an action.",
+      "description": "The empty state of a list or panel: a heading, a line of copy, and room for an action. HOW WIDE THAT ROOM MAY BE is the consumer's call: `--kai-empty-content-width` on the host (or any ancestor) widens the box the default slot is laid out in, so content that is not prose - a two-up card grid - fits INSIDE it instead of having to paint past its parent. It inherits through the shadow boundary, which is why setting it on the element reaches the component's own `EmptyContent` (`src/components/empty/empty.tsx`), and where a label like `--kai-workspace-start-width` belongs: the host is the slot the consumer holds. Unset, the prose default (24rem) applies and nothing moves.",
       "props": [
         {
           "name": "theme",
@@ -3089,15 +3125,7 @@
         "Dropdown",
         "DropdownTrigger",
         "DropdownContent",
-        "DropdownItem",
-        "DropdownSeparator",
-        "DropdownLabel",
-        "DropdownCheckboxItem",
-        "DropdownRadioItem",
-        "DropdownSub",
-        "DropdownSubTrigger",
-        "DropdownSubContent",
-        "Kbd"
+        "DropdownItems"
       ],
       "tokens": []
     },
@@ -3766,13 +3794,25 @@
           "fn": false
         },
         {
+          "name": "suggestionsLayout",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
           "name": "suggestionMode",
           "scalar": true,
           "optional": true,
           "fn": false
         },
         {
-          "name": "webSearch",
+          "name": "tools",
+          "scalar": false,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "expanded",
           "scalar": true,
           "optional": true,
           "fn": false
@@ -3822,13 +3862,13 @@
       ],
       "events": [
         "kai-attachments-change",
+        "kai-select",
         "kai-stop",
         "kai-submit",
         "kai-suggestion-click",
         "kai-toolbar-action",
         "kai-value-change",
-        "kai-voice",
-        "kai-web-search"
+        "kai-voice"
       ],
       "methods": [
         "focus",
@@ -3837,7 +3877,8 @@
         "send"
       ],
       "parts": [
-        "send"
+        "send",
+        "tools"
       ],
       "composedFrom": [
         "DefaultPromptInput"
@@ -4553,6 +4594,12 @@
         {
           "name": "value",
           "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "values",
+          "scalar": false,
           "optional": true,
           "fn": false
         },
@@ -5493,6 +5540,12 @@
           "fn": false
         },
         {
+          "name": "density",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
           "name": "class",
           "scalar": true,
           "optional": true,
@@ -6128,6 +6181,7 @@
     "--kai-density",
     "--kai-font-code",
     "--kai-radius",
+    "--kai-radius-composer",
     "--kai-radius-pill",
     "--kai-shadow-color",
     "--kai-shadow-strength",

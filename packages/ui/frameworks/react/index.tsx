@@ -405,6 +405,8 @@ export const ChainOfThought = /*#__PURE__*/ createWebComponent<ChainOfThoughtPro
 );
 
 export interface ChatProps extends WebComponentProps {
+  /** How much air the thread has: `'default'` (the shipped look) or `'compact'` (a desktop-panel rhythm: 8px between turns, a tighter band). */
+  density?: "default" | "compact";
   /** Value of the input: a string is controlled, a `ComposerDoc` is a one-time seed that pre-populates pills, unset is uncontrolled. */
   value?: string | ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: string; promptText?: string; data?: Record<string, unknown> } })[];
   /** Placeholder text shown in the empty input. */
@@ -413,6 +415,8 @@ export interface ChatProps extends WebComponentProps {
   loading?: boolean;
   /** Starter prompts shown above the input while the thread is empty. */
   suggestions?: string[];
+  /** How `suggestions` render. `'pill'` is the default; the alternative renders each suggestion as a full-width list row. */
+  suggestionsLayout?: "pill" | "block";
   /** What clicking a suggestion does. Default sends it immediately; `'fill'` places it in the input without sending. */
   suggestionMode?: "submit" | "fill";
   /** Keep suggestions visible after the conversation starts; they otherwise hide once `messages` is non-empty. Default false. */
@@ -443,6 +447,8 @@ export interface ChatProps extends WebComponentProps {
   headerStart?: boolean;
   /** Whether the host has `slot="header-end"` content (right of the controls). */
   headerEnd?: boolean;
+  /** Paint the panel rows' and home recent card's derived trailing edge, or leave it empty. Default true. */
+  showTrailing?: boolean;
   /** Replaces the built-in header bar with `slot="header"` content. */
   headerFull?: boolean;
   /** Replaces the built-in home screen with `slot="home"` content, while the home view shows. */
@@ -459,15 +465,17 @@ export interface ChatProps extends WebComponentProps {
   footer?: boolean;
   /** Hides the built-in paperclip attach button; only an explicit `false` hides it. Default true. */
   attach?: boolean;
-  /** Show a web-search (Globe) button in the input toolbar; calls `onWebSearch`. */
-  webSearch?: boolean;
+  /** The composer's `+` menu tree: the built-in file row first (when `attach`), then these verbatim. An array, so it is a JS property and never an attribute. An attribute is JSON-parsed; a malformed one is refused loudly. */
+  tools?: { chip?: boolean; id?: string; label?: string; icon?: string; shortcut?: string; checked?: boolean; radioGroup?: string; disabled?: boolean; description?: string; control?: "check" | "switch"; note?: true; separator?: boolean; heading?: boolean; items?: { id?: string; label?: string; icon?: string; shortcut?: string; checked?: boolean; radioGroup?: string; disabled?: boolean; description?: string; control?: "check" | "switch"; note?: true; separator?: boolean; heading?: boolean; items?: Record<string, unknown>[] }[] }[];
+  /** Pins the composer's layout: `true` is two rows, `false` is one, omitted derives it from the content. As an attribute: present pins two rows, `="false"` pins one, absent derives. */
+  expanded?: boolean;
   /** Show a voice-input button in the input toolbar; calls `onVoice`. */
   voice?: boolean;
   /** Rich entity triggers. Each opens a menu at the caret that inserts an atomic pill. */
   triggers?: { char: string; kind: string; items?: { id: string; label: string; icon?: string; description?: string; group?: string; kind?: string; promptText?: string; data?: Record<string, unknown> }[] }[];
   /** Default icon per entity kind (kind → image src) for pills/menu items. */
   kindIcons?: Record<string, string>;
-  /** Whether each message's action bar is visible at rest or revealed on pointer-over. Visible at rest by default. */
+  /** Whether each row's action bar is visible at rest or on pointer-over; omitted keys it to the turn, so a user row reveals and an assistant row does not. */
   actionsReveal?: "always" | "hover";
   /** Default action bar for user messages that have no `actions` of their own; a message's own `actions` replaces it. */
   userActions?: ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: string; tooltip?: string })[];
@@ -486,7 +494,7 @@ export interface ChatProps extends WebComponentProps {
   /** Turns on the prior-conversations list. Requires `store`; default `false`; a load arrives as `kai-conversation-load` -- set `el.messages` yourself. */
   conversations?: boolean;
   /** The persistence adapter: `{ list, load, save }`. JS property only (`el.store = myAdapter`). */
-  store?: { list: () => Promise<{ id: string; title: string; groupId?: string; scope?: { type: "document" | "collection"; documentId?: string; filters?: { tags?: string[]; authors?: string[]; contentType?: "transcript" | "markdown"; dateRange?: { from: string; to: string } } }; messageCount: number; lastMessageAt?: string; updatedAt: string; trailing?: string; lastReadAt?: string }[]>; load: (id: string) => Promise<{ id: string; role: "user" | "assistant"; parts: ({ type: "text"; text: string; raw?: { source: string; payload: unknown } } | { type: "reasoning"; text: string; label?: string; index?: number; streamId?: string; signature?: string; raw?: { source: string; payload: unknown } } | { type: "tool"; tool: { type: string; kind?: "command" | "file-change" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: Record<string, unknown>; rawInput?: string; output?: Record<string, unknown>; toolCallId?: string; errorText?: string; raw?: { source: string; payload: unknown } }; raw?: { source: string; payload: unknown } } | { type: "card"; envelope: { type: string; id: string; data: unknown; title?: string; resolution?: { kind: "action"; action: string; payload?: unknown; at?: string } | { kind: "submit"; data: unknown; at?: string } | { kind: "dismissed"; at?: string } | { kind: "expired"; reason?: string; at?: string } }; raw?: { source: string; payload: unknown } } | { type: "source"; source: { id?: string; url?: string; title?: string; snippet?: string; index?: number }; raw?: { source: string; payload: unknown } } | { type: "file"; attachment: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }; raw?: { source: string; payload: unknown } })[]; actions?: ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: string; tooltip?: string })[]; avatar?: { src?: string; fallback?: string; alt?: string }; feedback?: "like" | "dislike" }[]>; save: (id: string, messages: { id: string; role: "user" | "assistant"; parts: ({ type: "text"; text: string; raw?: { source: string; payload: unknown } } | { type: "reasoning"; text: string; label?: string; index?: number; streamId?: string; signature?: string; raw?: { source: string; payload: unknown } } | { type: "tool"; tool: { type: string; kind?: "command" | "file-change" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: Record<string, unknown>; rawInput?: string; output?: Record<string, unknown>; toolCallId?: string; errorText?: string; raw?: { source: string; payload: unknown } }; raw?: { source: string; payload: unknown } } | { type: "card"; envelope: { type: string; id: string; data: unknown; title?: string; resolution?: { kind: "action"; action: string; payload?: unknown; at?: string } | { kind: "submit"; data: unknown; at?: string } | { kind: "dismissed"; at?: string } | { kind: "expired"; reason?: string; at?: string } }; raw?: { source: string; payload: unknown } } | { type: "source"; source: { id?: string; url?: string; title?: string; snippet?: string; index?: number }; raw?: { source: string; payload: unknown } } | { type: "file"; attachment: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }; raw?: { source: string; payload: unknown } })[]; actions?: ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: string; tooltip?: string })[]; avatar?: { src?: string; fallback?: string; alt?: string }; feedback?: "like" | "dislike" }[]) => Promise<void>; markRead?: ((id: string) => Promise<void>) };
+  store?: { list: () => Promise<{ id: string; title: string; groupId?: string; scope?: { type: "document" | "collection"; documentId?: string; filters?: { tags?: string[]; authors?: string[]; contentType?: "transcript" | "markdown"; dateRange?: { from: string; to: string } } }; messageCount: number; lastMessageAt?: string; updatedAt: string; trailing?: string; lastReadAt?: string; pinned?: boolean; archived?: boolean }[]>; load: (id: string) => Promise<{ id: string; role: "user" | "assistant"; parts: ({ type: "text"; text: string; raw?: { source: string; payload: unknown } } | { type: "reasoning"; text: string; label?: string; index?: number; streamId?: string; signature?: string; raw?: { source: string; payload: unknown } } | { type: "tool"; tool: { type: string; kind?: "command" | "file-change" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: Record<string, unknown>; rawInput?: string; output?: Record<string, unknown>; toolCallId?: string; errorText?: string; raw?: { source: string; payload: unknown } }; raw?: { source: string; payload: unknown } } | { type: "card"; envelope: { type: string; id: string; data: unknown; title?: string; resolution?: { kind: "action"; action: string; payload?: unknown; at?: string } | { kind: "submit"; data: unknown; at?: string } | { kind: "dismissed"; at?: string } | { kind: "expired"; reason?: string; at?: string } }; raw?: { source: string; payload: unknown } } | { type: "source"; source: { id?: string; url?: string; title?: string; snippet?: string; index?: number }; raw?: { source: string; payload: unknown } } | { type: "file"; attachment: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }; raw?: { source: string; payload: unknown } })[]; actions?: ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: string; tooltip?: string })[]; avatar?: { src?: string; fallback?: string; alt?: string }; feedback?: "like" | "dislike" }[]>; save: (id: string, messages: { id: string; role: "user" | "assistant"; parts: ({ type: "text"; text: string; raw?: { source: string; payload: unknown } } | { type: "reasoning"; text: string; label?: string; index?: number; streamId?: string; signature?: string; raw?: { source: string; payload: unknown } } | { type: "tool"; tool: { type: string; kind?: "command" | "file-change" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: Record<string, unknown>; rawInput?: string; output?: Record<string, unknown>; toolCallId?: string; errorText?: string; raw?: { source: string; payload: unknown } }; raw?: { source: string; payload: unknown } } | { type: "card"; envelope: { type: string; id: string; data: unknown; title?: string; resolution?: { kind: "action"; action: string; payload?: unknown; at?: string } | { kind: "submit"; data: unknown; at?: string } | { kind: "dismissed"; at?: string } | { kind: "expired"; reason?: string; at?: string } }; raw?: { source: string; payload: unknown } } | { type: "source"; source: { id?: string; url?: string; title?: string; snippet?: string; index?: number }; raw?: { source: string; payload: unknown } } | { type: "file"; attachment: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }; raw?: { source: string; payload: unknown } })[]; actions?: ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: string; tooltip?: string })[]; avatar?: { src?: string; fallback?: string; alt?: string }; feedback?: "like" | "dislike" }[]) => Promise<void>; markRead?: ((id: string) => Promise<void>); rename?: ((id: string, title: string) => Promise<void>); setPinned?: ((id: string, pinned: boolean) => Promise<void>); setArchived?: ((id: string, archived: boolean) => Promise<void>); setGroup?: ((id: string, groupId: string) => Promise<void>); listGroups?: (() => Promise<{ id: string; userId?: string; teamId?: string; name: string; sortOrder: number; createdAt: string }[]>); saveGroup?: ((group: { id: string; userId?: string; teamId?: string; name: string; sortOrder: number; createdAt: string }) => Promise<void>); removeGroup?: ((id: string) => Promise<void>); remove?: ((id: string) => Promise<void>) };
   /** Turns on the Home screen (greeting, recent conversation, links, Home/Messages tabs). JS property; omit for the chat-only widget. */
   home?: { greeting?: { title?: string; subtitle?: string }; recentConversation?: boolean; newConversation?: { label?: string }; links?: { label: string; href?: string; description?: string; icon?: string }[] };
   /** Whether the chrome hosting this element is visible (e.g. a launcher's open state). JS property only; `false` has no attribute form. */
@@ -503,6 +511,8 @@ export interface ChatProps extends WebComponentProps {
   onMessageAction?: (event: CustomEvent<{ messageId: string; action: string; state?: undefined | "on" | "off" }>) => void;
   /** The header model switcher changed. */
   onModelChange?: (event: CustomEvent<{ modelId: string }>) => void;
+  /** A `+` menu item was chosen. `checked` is present only for a toggle, with its NEW state. The same name and shape `<kai-menu>` fires, so one handler serves both. */
+  onSelect?: (event: CustomEvent<{ id: string; checked?: undefined | boolean }>) => void;
   /** User submitted a message. */
   onSubmit?: (event: CustomEvent<{ value: string; attachments: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }>) => void;
   /** A suggestion chip was clicked (only in `suggestion-mode="fill"`). */
@@ -513,14 +523,12 @@ export interface ChatProps extends WebComponentProps {
   onValueChange?: (event: CustomEvent<{ value: string }>) => void;
   /** The Mic / voice button was clicked. */
   onVoice?: (event: CustomEvent<Record<string, never>>) => void;
-  /** The web-search (Globe) toolbar button was clicked. */
-  onWebSearch?: (event: CustomEvent<Record<string, never>>) => void;
 }
 
 export const Chat = /*#__PURE__*/ createWebComponent<ChatProps, KaiChatElement>(
   'kai-chat',
-  ["theme","value","placeholder","loading","suggestions","suggestionMode","persistSuggestions","proseSize","codeTheme","imagePreview","codeHighlight","reasoning","reasoningOpen","chatTitle","models","currentModel","context","scrollButton","headerStart","headerEnd","headerFull","homeFull","sidebar","empty","composer","composerActions","footer","attach","webSearch","voice","triggers","kindIcons","actionsReveal","userActions","assistantActions","hideSources","accept","messages","cardTypes","cardSchemas","conversations","store","home","hostOpen"],
-  { onAttachmentsChange: 'kai-attachments-change', onAttachmentsRejected: 'kai-attachments-rejected', onConversationLoad: 'kai-conversation-load', onHomeLink: 'kai-home-link', onMessageAction: 'kai-message-action', onModelChange: 'kai-model-change', onSubmit: 'kai-submit', onSuggestionClick: 'kai-suggestion-click', onUnreadChange: 'kai-unread-change', onValueChange: 'kai-value-change', onVoice: 'kai-voice', onWebSearch: 'kai-web-search' },
+  ["theme","density","value","placeholder","loading","suggestions","suggestionsLayout","suggestionMode","persistSuggestions","proseSize","codeTheme","imagePreview","codeHighlight","reasoning","reasoningOpen","chatTitle","models","currentModel","context","scrollButton","headerStart","headerEnd","showTrailing","headerFull","homeFull","sidebar","empty","composer","composerActions","footer","attach","tools","expanded","voice","triggers","kindIcons","actionsReveal","userActions","assistantActions","hideSources","accept","messages","cardTypes","cardSchemas","conversations","store","home","hostOpen"],
+  { onAttachmentsChange: 'kai-attachments-change', onAttachmentsRejected: 'kai-attachments-rejected', onConversationLoad: 'kai-conversation-load', onHomeLink: 'kai-home-link', onMessageAction: 'kai-message-action', onModelChange: 'kai-model-change', onSelect: 'kai-select', onSubmit: 'kai-submit', onSuggestionClick: 'kai-suggestion-click', onUnreadChange: 'kai-unread-change', onValueChange: 'kai-value-change', onVoice: 'kai-voice' },
   () => import('@kitn.ai/ui/web-components/chat'),
 );
 
@@ -557,6 +565,8 @@ export interface CheckboxGroupProps extends WebComponentProps {
   options: { value: string; label: string; description?: undefined | string; disabled?: undefined | boolean }[];
   /** The FIRST selected value. Read or drive the rest with `el.values`. */
   value?: string;
+  /** The whole selection in order; `value` is only its first entry and setting this replaces it. */
+  values?: string[];
   /** Shared name on every box, for `FormData.getAll(name)`. No default: checkboxes are independent controls. */
   name?: string;
   /** Disable every row. Individual rows carry their own `disabled`. */
@@ -569,7 +579,7 @@ export interface CheckboxGroupProps extends WebComponentProps {
 
 export const CheckboxGroup = /*#__PURE__*/ createWebComponent<CheckboxGroupProps, KaiCheckboxGroupElement>(
   'kai-checkbox-group',
-  ["theme","options","value","name","disabled","label"],
+  ["theme","options","value","values","name","disabled","label"],
   { onChange: 'kai-change' },
   () => import('@kitn.ai/ui/web-components/checkbox-group'),
 );
@@ -830,7 +840,7 @@ export interface ConversationsProps extends WebComponentProps {
   /** The list's section headers (`{ id, name, sortOrder, createdAt }`) in array order. JS property; omit for an ungrouped list. */
   groups?: { id: string; userId?: string; teamId?: string; name: string; sortOrder: number; createdAt: string }[];
   /** The conversations to render, flat. JS property; omit to pass `<kai-conversation>` light-DOM children instead, or for the empty state. */
-  conversations?: { id: string; title: string; groupId?: string; scope?: { type: "document" | "collection"; documentId?: string; filters?: { tags?: string[]; authors?: string[]; contentType?: "transcript" | "markdown"; dateRange?: { from: string; to: string } } }; messageCount: number; lastMessageAt?: string; updatedAt: string; trailing?: string; lastReadAt?: string }[];
+  conversations?: { id: string; title: string; groupId?: string; scope?: { type: "document" | "collection"; documentId?: string; filters?: { tags?: string[]; authors?: string[]; contentType?: "transcript" | "markdown"; dateRange?: { from: string; to: string } } }; messageCount: number; lastMessageAt?: string; updatedAt: string; trailing?: string; lastReadAt?: string; pinned?: boolean; archived?: boolean }[];
   /** The id of the currently-open conversation, highlighted in the list. */
   activeId?: string;
   /** Controlled collapsed state (`el.collapsed = true`). Omit for uncontrolled; collapsed shrinks the rail to a reopen button. */
@@ -841,6 +851,8 @@ export interface ConversationsProps extends WebComponentProps {
   compact?: boolean;
   /** Row density: `default`, `compact` (same as the `compact` flag), or `panel` (the widget-panel row box). */
   density?: "default" | "compact" | "panel";
+  /** Paint each data row's trailing edge. Default `true`; `show-trailing="false"` leaves the edge empty. */
+  showTrailing?: boolean;
   /** Show the built-in search box above the list. Default `true`; `searchable="false"` hides it. */
   searchable?: boolean;
   /** The rail was collapsed or expanded (via the toggle, the reopen button, or a `collapse()`/`expand()`/`toggle()` call). */
@@ -857,7 +869,7 @@ export interface ConversationsProps extends WebComponentProps {
 
 export const Conversations = /*#__PURE__*/ createWebComponent<ConversationsProps, KaiConversationsElement>(
   'kai-conversations',
-  ["theme","groups","conversations","activeId","collapsed","defaultCollapsed","compact","density","searchable"],
+  ["theme","groups","conversations","activeId","collapsed","defaultCollapsed","compact","density","showTrailing","searchable"],
   { onCollapseToggle: 'kai-collapse-toggle', onConversationSelect: 'kai-conversation-select', onNewChat: 'kai-new-chat', onSearch: 'kai-search', onToggleSidebar: 'kai-toggle-sidebar' },
   () => import('@kitn.ai/ui/web-components/conversation-list'),
 );
@@ -921,7 +933,7 @@ export interface DropdownProps extends WebComponentProps {
   triggerIconTrailing?: string;
   /** Accessible name for a trigger with no visible label. Ignored when `triggerLabel` is set. */
   label?: string;
-  /** Stretch the trigger to the full width of its container (a block row). Attribute: `full`. */
+  /** Stretch the trigger to the full width of its container (a block row), and open the surface at that same measured width. Attribute: `full`. */
   full?: boolean;
   /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
@@ -1315,7 +1327,7 @@ export const Markdown = /*#__PURE__*/ createWebComponent<MarkdownProps, KaiMarkd
 
 export interface MenuProps extends WebComponentProps {
   /** Tree of menu items. Set as a JS property, not an HTML attribute. */
-  items?: { id?: string; label?: string; icon?: string; shortcut?: string; checked?: boolean; radioGroup?: string; disabled?: boolean; separator?: boolean; heading?: boolean; items?: Record<string, unknown>[] }[];
+  items?: { id?: string; label?: string; icon?: string; shortcut?: string; checked?: boolean; radioGroup?: string; disabled?: boolean; description?: string; control?: "check" | "switch"; note?: true; separator?: boolean; heading?: boolean; items?: Record<string, unknown>[] }[];
   /** Optional placement hint (unused by the underlying Dropdown which always positions bottom-start, kept for future extension). */
   placement?: string;
   /** Built-in trigger: a leading icon (a named icon, an image URL/data-URI, or text). A slotted trigger overrides it. */
@@ -1326,7 +1338,7 @@ export interface MenuProps extends WebComponentProps {
   triggerIconTrailing?: string;
   /** Accessible name for a trigger with no visible label. Ignored when `triggerLabel` is set. */
   label?: string;
-  /** Stretch the trigger to the full width of its container (a block row). Attribute: `full`. */
+  /** Stretch the trigger to the full width of its container (a block row), and open the surface at that same measured width. Attribute: `full`. */
   full?: boolean;
   /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
@@ -1360,7 +1372,7 @@ export interface MessageProps extends WebComponentProps {
   codeTheme?: string;
   /** Disable syntax highlighting for code blocks (no Shiki loads). */
   codeHighlight?: boolean;
-  /** Whether the action bar stays visible or appears on pointer-over; visible by default. */
+  /** Whether the action bar stays visible or appears on pointer-over; omitted keys the default to the turn, so a user row reveals and an assistant row stays visible. */
   actionsReveal?: "always" | "hover";
   /** Convenience avatar image URL (used when `message.avatar` is not set). */
   avatarSrc?: string;
@@ -1611,10 +1623,14 @@ export interface PromptInputProps extends WebComponentProps {
   loading?: boolean;
   /** Starter prompts shown above the input. Clicking one follows `suggestionMode`. Set as a JS property. */
   suggestions?: string[];
+  /** How `suggestions` render. `'pill'` is the default; the alternative is a full-width list row. Attribute: `suggestions-layout`. */
+  suggestionsLayout?: "pill" | "block";
   /** What clicking a suggestion does. Defaults to `'submit'`. */
   suggestionMode?: "submit" | "fill";
-  /** Show a web-search (Globe) button in the left toolbar; clicking it fires a `kai-web-search` event. Attribute: `web-search`. */
-  webSearch?: boolean;
+  /** The composer's `+` menu tree: the built-in file row first (when `attach`), then these verbatim. JS property; an array cannot be an attribute. */
+  tools?: { chip?: boolean; id?: string; label?: string; icon?: string; shortcut?: string; checked?: boolean; radioGroup?: string; disabled?: boolean; description?: string; control?: "check" | "switch"; note?: true; separator?: boolean; heading?: boolean; items?: { id?: string; label?: string; icon?: string; shortcut?: string; checked?: boolean; radioGroup?: string; disabled?: boolean; description?: string; control?: "check" | "switch"; note?: true; separator?: boolean; heading?: boolean; items?: Record<string, unknown>[] }[] }[];
+  /** Pins the composer's layout: `true` is two rows, `false` is one, omitted derives it from the content. Attribute `expanded`; `="false"` pins one row. */
+  expanded?: boolean;
   /** Show a Voice (Mic) button in the left toolbar; clicking it fires a `voice` event. */
   voice?: boolean;
   /** When set and `loading` is true, the send button is replaced by a Stop button (square icon, "Stop" aria-label). Clicking it fires `kai-stop`. */
@@ -1631,6 +1647,8 @@ export interface PromptInputProps extends WebComponentProps {
   kindIcons?: Record<string, string>;
   /** The staged attachments changed (file added or removed). Carries the full current list so a consumer can react in real time. */
   onAttachmentsChange?: (event: CustomEvent<{ attachments: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }>) => void;
+  /** A `+` menu item was chosen. `checked` is present only for a toggle, carrying its NEW state. Shares `<kai-menu>`'s event name. */
+  onSelect?: (event: CustomEvent<{ id: string; checked?: undefined | boolean }>) => void;
   /** The Stop button was clicked while `stoppable` and `loading` are both true. */
   onStop?: (event: CustomEvent<Record<string, never>>) => void;
   /** The user submitted the prompt (Enter or send button). `value` is the flattened text. */
@@ -1643,14 +1661,12 @@ export interface PromptInputProps extends WebComponentProps {
   onValueChange?: (event: CustomEvent<{ value: string; doc: ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]; entities: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }>) => void;
   /** The Voice (Mic) toolbar button was clicked. */
   onVoice?: (event: CustomEvent<Record<string, never>>) => void;
-  /** The web-search (Globe) toolbar button was clicked. */
-  onWebSearch?: (event: CustomEvent<Record<string, never>>) => void;
 }
 
 export const PromptInput = /*#__PURE__*/ createWebComponent<PromptInputProps, KaiPromptInputElement>(
   'kai-prompt-input',
-  ["theme","value","placeholder","disabled","loading","suggestions","suggestionMode","webSearch","voice","stoppable","submit","attach","attachments","triggers","kindIcons"],
-  { onAttachmentsChange: 'kai-attachments-change', onStop: 'kai-stop', onSubmit: 'kai-submit', onSuggestionClick: 'kai-suggestion-click', onToolbarAction: 'kai-toolbar-action', onValueChange: 'kai-value-change', onVoice: 'kai-voice', onWebSearch: 'kai-web-search' },
+  ["theme","value","placeholder","disabled","loading","suggestions","suggestionsLayout","suggestionMode","tools","expanded","voice","stoppable","submit","attach","attachments","triggers","kindIcons"],
+  { onAttachmentsChange: 'kai-attachments-change', onSelect: 'kai-select', onStop: 'kai-stop', onSubmit: 'kai-submit', onSuggestionClick: 'kai-suggestion-click', onToolbarAction: 'kai-toolbar-action', onValueChange: 'kai-value-change', onVoice: 'kai-voice' },
   () => import('@kitn.ai/ui/web-components/prompt-input'),
 );
 
@@ -1951,6 +1967,8 @@ export interface SelectProps extends WebComponentProps {
   options: { value: string; label?: undefined | string; disabled?: undefined | boolean }[];
   /** Controlled selected value, reflected to the `value` attribute. For a `multiple` select read `el.values`. */
   value?: string;
+  /** The whole selection in order; `value` is only its first entry and setting this replaces it. */
+  values?: string[];
   /** Text for a leading, disabled, empty option (the "nothing chosen yet" row). */
   placeholder?: string;
   /** Allow more than one selection. Turns the control into the platform's list box, so the kit's chevron is not drawn. */
@@ -1971,7 +1989,7 @@ export interface SelectProps extends WebComponentProps {
 
 export const Select = /*#__PURE__*/ createWebComponent<SelectProps, KaiSelectElement>(
   'kai-select',
-  ["theme","options","value","placeholder","multiple","invalid","disabled","required","label","name"],
+  ["theme","options","value","values","placeholder","multiple","invalid","disabled","required","label","name"],
   { onChange: 'kai-change' },
   () => import('@kitn.ai/ui/web-components/select'),
 );
@@ -2323,10 +2341,12 @@ export interface ThreadProps extends WebComponentProps {
   codeHighlight?: boolean;
   /** How an image tile reveals its full size. Default is the pointer-only hover card; the modal on click is the only one keyboard and touch reach. */
   imagePreview?: "hover" | "lightbox";
-  /** Whether each message's action bar is visible at rest or only revealed on pointer-over. Visible at rest by default. */
+  /** Whether each row's action bar is visible at rest or on pointer-over; omitted keys it to the turn, so a user row reveals and an assistant row does not. */
   actionsReveal?: "always" | "hover";
   /** Show the scroll-to-bottom button inside the scroll area. Default true. */
   scrollButton?: boolean;
+  /** How much air the message list has: `'default'` (shipped) or `'compact'` (a desktop-panel rhythm: 8px between turns, a tighter band). */
+  density?: "default" | "compact";
   /** Extra classes applied to the thread's inner root. */
   class?: string;
   /** Card type → custom-element tag overrides/additions, merged over the built-ins. JS property: `el.cardTypes`. */
@@ -2339,7 +2359,7 @@ export interface ThreadProps extends WebComponentProps {
 
 export const Thread = /*#__PURE__*/ createWebComponent<ThreadProps, KaiThreadElement>(
   'kai-thread',
-  ["theme","messages","loading","proseSize","codeTheme","codeHighlight","imagePreview","actionsReveal","scrollButton","class","cardTypes","cardSchemas"],
+  ["theme","messages","loading","proseSize","codeTheme","codeHighlight","imagePreview","actionsReveal","scrollButton","density","class","cardTypes","cardSchemas"],
   { onMessageAction: 'kai-message-action' },
   () => import('@kitn.ai/ui/web-components/thread'),
 );

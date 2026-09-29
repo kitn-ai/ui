@@ -1369,6 +1369,15 @@
         "displayType": "\"light\" | \"dark\" | \"auto\""
       },
       {
+        "name": "density",
+        "type": "undefined | \"default\" | \"compact\"",
+        "optional": true,
+        "scalar": true,
+        "description": "How much air the thread has: `'default'` (the shipped look) or `'compact'` (a desktop-panel rhythm: 8px between turns, a tighter band).",
+        "default": "'default'",
+        "displayType": "undefined | \"default\" | \"compact\""
+      },
+      {
         "name": "value",
         "type": "undefined | string | ({ type: \"text\"; text: string } | { type: \"entity\"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]",
         "optional": true,
@@ -1401,6 +1410,15 @@
         "scalar": false,
         "description": "Starter prompts shown above the input while the thread is empty.",
         "displayType": "undefined | string[]"
+      },
+      {
+        "name": "suggestionsLayout",
+        "type": "undefined | \"pill\" | \"block\"",
+        "optional": true,
+        "scalar": true,
+        "description": "How `suggestions` render. `'pill'` is the default; the alternative renders each suggestion as a full-width list row.",
+        "default": "'pill'",
+        "displayType": "undefined | \"pill\" | \"block\""
       },
       {
         "name": "suggestionMode",
@@ -1535,6 +1553,15 @@
         "displayType": "undefined | false | true"
       },
       {
+        "name": "showTrailing",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Paint the panel rows' and home recent card's derived trailing edge, or leave it empty. Default true.",
+        "default": "true",
+        "displayType": "undefined | false | true"
+      },
+      {
         "name": "headerFull",
         "type": "undefined | false | true",
         "optional": true,
@@ -1600,12 +1627,22 @@
         "displayType": "undefined | false | true"
       },
       {
-        "name": "webSearch",
+        "name": "tools",
+        "type": "undefined | { chip?: undefined | false | true; id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; description?: undefined | string; control?: undefined | \"check\" | \"switch\"; note?: undefined | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | { id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; description?: undefined | string; control?: undefined | \"check\" | \"switch\"; note?: undefined | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | Record<string, unknown>[] }[] }[]",
+        "optional": true,
+        "scalar": false,
+        "description": "The composer's `+` menu tree: the built-in file row first (when `attach`), then these verbatim. An array, so it is a JS property and never an attribute. An attribute is JSON-parsed; a malformed one is refused loudly.",
+        "typeName": "ComposerToolItem[]",
+        "typeShape": "{ chip?: undefined | false | true; id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; description?: undefined | string; control?: undefined | \"check\" | \"switch\"; note?: undefined | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | { id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; description?: undefined | string; control?: undefined | \"check\" | \"switch\"; note?: undefined | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | Record<string, unknown>[] }[] }[]",
+        "typeImport": "ComposerToolItem",
+        "displayType": "undefined | { chip?: undefined | false | true; id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; description?: undefined | string; control?: undefined | \"check\" | \"switch\"; note?: undefined | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | { id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; description?: undefined | string; control?: undefined | \"check\" | \"switch\"; note?: undefined | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | Record<string, unknown>[] }[] }[]"
+      },
+      {
+        "name": "expanded",
         "type": "undefined | false | true",
         "optional": true,
         "scalar": true,
-        "description": "Show a web-search (Globe) button in the input toolbar; calls `onWebSearch`.",
-        "default": "false",
+        "description": "Pins the composer's layout: `true` is two rows, `false` is one, omitted derives it from the content. As an attribute: present pins two rows, `=\"false\"` pins one, absent derives.",
         "displayType": "undefined | false | true"
       },
       {
@@ -1641,8 +1678,7 @@
         "type": "undefined | \"always\" | \"hover\"",
         "optional": true,
         "scalar": true,
-        "description": "Whether each message's action bar is visible at rest or revealed on pointer-over. Visible at rest by default.",
-        "default": "'always'",
+        "description": "Whether each row's action bar is visible at rest or on pointer-over; omitted keys it to the turn, so a user row reveals and an assistant row does not.",
         "displayType": "undefined | \"always\" | \"hover\""
       },
       {
@@ -1717,14 +1753,14 @@
       },
       {
         "name": "store",
-        "type": "undefined | { list: () => Promise<{ id: string; title: string; groupId?: undefined | string; scope?: undefined | { type: \"document\" | \"collection\"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | \"transcript\" | \"markdown\"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt?: undefined | string; updatedAt: string; trailing?: undefined | string; lastReadAt?: undefined | string }[]>; load: (id: string) => Promise<{ id: string; role: \"user\" | \"assistant\"; parts: ({ type: \"text\"; text: string; raw?: undefined | { source: string; payload: unknown } } | { type: \"reasoning\"; text: string; label?: undefined | string; index?: undefined | number; streamId?: undefined | string; signature?: undefined | string; raw?: undefined | { source: string; payload: unknown } } | { type: \"tool\"; tool: { type: string; kind?: undefined | \"command\" | \"file-change\" | \"search\" | \"fetch\" | \"mcp\" | \"image\" | \"generic\"; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; rawInput?: undefined | string; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string; raw?: undefined | { source: string; payload: unknown } }; raw?: undefined | { source: string; payload: unknown } } | { type: \"card\"; envelope: { type: string; id: string; data: unknown; title?: undefined | string; resolution?: undefined | { kind: \"action\"; action: string; payload?: unknown; at?: undefined | string } | { kind: \"submit\"; data: unknown; at?: undefined | string } | { kind: \"dismissed\"; at?: undefined | string } | { kind: \"expired\"; reason?: undefined | string; at?: undefined | string } }; raw?: undefined | { source: string; payload: unknown } } | { type: \"source\"; source: { id?: undefined | string; url?: undefined | string; title?: undefined | string; snippet?: undefined | string; index?: undefined | number }; raw?: undefined | { source: string; payload: unknown } } | { type: \"file\"; attachment: { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }; raw?: undefined | { source: string; payload: unknown } })[]; actions?: undefined | (\"copy\" | \"dislike\" | \"edit\" | \"like\" | \"regenerate\" | \"speak\" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string }; feedback?: undefined | \"like\" | \"dislike\" }[]>; save: (id: string, messages: { id: string; role: \"user\" | \"assistant\"; parts: ({ type: \"text\"; text: string; raw?: undefined | { source: string; payload: unknown } } | { type: \"reasoning\"; text: string; label?: undefined | string; index?: undefined | number; streamId?: undefined | string; signature?: undefined | string; raw?: undefined | { source: string; payload: unknown } } | { type: \"tool\"; tool: { type: string; kind?: undefined | \"command\" | \"file-change\" | \"search\" | \"fetch\" | \"mcp\" | \"image\" | \"generic\"; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; rawInput?: undefined | string; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string; raw?: undefined | { source: string; payload: unknown } }; raw?: undefined | { source: string; payload: unknown } } | { type: \"card\"; envelope: { type: string; id: string; data: unknown; title?: undefined | string; resolution?: undefined | { kind: \"action\"; action: string; payload?: unknown; at?: undefined | string } | { kind: \"submit\"; data: unknown; at?: undefined | string } | { kind: \"dismissed\"; at?: undefined | string } | { kind: \"expired\"; reason?: undefined | string; at?: undefined | string } }; raw?: undefined | { source: string; payload: unknown } } | { type: \"source\"; source: { id?: undefined | string; url?: undefined | string; title?: undefined | string; snippet?: undefined | string; index?: undefined | number }; raw?: undefined | { source: string; payload: unknown } } | { type: \"file\"; attachment: { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }; raw?: undefined | { source: string; payload: unknown } })[]; actions?: undefined | (\"copy\" | \"dislike\" | \"edit\" | \"like\" | \"regenerate\" | \"speak\" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string }; feedback?: undefined | \"like\" | \"dislike\" }[]) => Promise<void>; markRead?: undefined | ((id: string) => Promise<void>) }",
+        "type": "undefined | { list: () => Promise<{ id: string; title: string; groupId?: undefined | string; scope?: undefined | { type: \"document\" | \"collection\"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | \"transcript\" | \"markdown\"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt?: undefined | string; updatedAt: string; trailing?: undefined | string; lastReadAt?: undefined | string; pinned?: undefined | false | true; archived?: undefined | false | true }[]>; load: (id: string) => Promise<{ id: string; role: \"user\" | \"assistant\"; parts: ({ type: \"text\"; text: string; raw?: undefined | { source: string; payload: unknown } } | { type: \"reasoning\"; text: string; label?: undefined | string; index?: undefined | number; streamId?: undefined | string; signature?: undefined | string; raw?: undefined | { source: string; payload: unknown } } | { type: \"tool\"; tool: { type: string; kind?: undefined | \"command\" | \"file-change\" | \"search\" | \"fetch\" | \"mcp\" | \"image\" | \"generic\"; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; rawInput?: undefined | string; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string; raw?: undefined | { source: string; payload: unknown } }; raw?: undefined | { source: string; payload: unknown } } | { type: \"card\"; envelope: { type: string; id: string; data: unknown; title?: undefined | string; resolution?: undefined | { kind: \"action\"; action: string; payload?: unknown; at?: undefined | string } | { kind: \"submit\"; data: unknown; at?: undefined | string } | { kind: \"dismissed\"; at?: undefined | string } | { kind: \"expired\"; reason?: undefined | string; at?: undefined | string } }; raw?: undefined | { source: string; payload: unknown } } | { type: \"source\"; source: { id?: undefined | string; url?: undefined | string; title?: undefined | string; snippet?: undefined | string; index?: undefined | number }; raw?: undefined | { source: string; payload: unknown } } | { type: \"file\"; attachment: { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }; raw?: undefined | { source: string; payload: unknown } })[]; actions?: undefined | (\"copy\" | \"dislike\" | \"edit\" | \"like\" | \"regenerate\" | \"speak\" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string }; feedback?: undefined | \"like\" | \"dislike\" }[]>; save: (id: string, messages: { id: string; role: \"user\" | \"assistant\"; parts: ({ type: \"text\"; text: string; raw?: undefined | { source: string; payload: unknown } } | { type: \"reasoning\"; text: string; label?: undefined | string; index?: undefined | number; streamId?: undefined | string; signature?: undefined | string; raw?: undefined | { source: string; payload: unknown } } | { type: \"tool\"; tool: { type: string; kind?: undefined | \"command\" | \"file-change\" | \"search\" | \"fetch\" | \"mcp\" | \"image\" | \"generic\"; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; rawInput?: undefined | string; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string; raw?: undefined | { source: string; payload: unknown } }; raw?: undefined | { source: string; payload: unknown } } | { type: \"card\"; envelope: { type: string; id: string; data: unknown; title?: undefined | string; resolution?: undefined | { kind: \"action\"; action: string; payload?: unknown; at?: undefined | string } | { kind: \"submit\"; data: unknown; at?: undefined | string } | { kind: \"dismissed\"; at?: undefined | string } | { kind: \"expired\"; reason?: undefined | string; at?: undefined | string } }; raw?: undefined | { source: string; payload: unknown } } | { type: \"source\"; source: { id?: undefined | string; url?: undefined | string; title?: undefined | string; snippet?: undefined | string; index?: undefined | number }; raw?: undefined | { source: string; payload: unknown } } | { type: \"file\"; attachment: { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }; raw?: undefined | { source: string; payload: unknown } })[]; actions?: undefined | (\"copy\" | \"dislike\" | \"edit\" | \"like\" | \"regenerate\" | \"speak\" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string }; feedback?: undefined | \"like\" | \"dislike\" }[]) => Promise<void>; markRead?: undefined | ((id: string) => Promise<void>); rename?: undefined | ((id: string, title: string) => Promise<void>); setPinned?: undefined | ((id: string, pinned: false | true) => Promise<void>); setArchived?: undefined | ((id: string, archived: false | true) => Promise<void>); setGroup?: undefined | ((id: string, groupId: string | undefined) => Promise<void>); listGroups?: undefined | (() => Promise<{ id: string; userId?: undefined | string; teamId?: undefined | string; name: string; sortOrder: number; createdAt: string }[]>); saveGroup?: undefined | ((group: { id: string; userId?: undefined | string; teamId?: undefined | string; name: string; sortOrder: number; createdAt: string }) => Promise<void>); removeGroup?: undefined | ((id: string) => Promise<void>); remove?: undefined | ((id: string) => Promise<void>) }",
         "optional": true,
         "scalar": false,
         "description": "The persistence adapter: `{ list, load, save }`. JS property only (`el.store = myAdapter`).",
         "typeName": "ConversationStore",
-        "typeShape": "{ list: () => Promise<{ id: string; title: string; groupId?: undefined | string; scope?: undefined | { type: \"document\" | \"collection\"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | \"transcript\" | \"markdown\"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt?: undefined | string; updatedAt: string; trailing?: undefined | string; lastReadAt?: undefined | string }[]>; load: (id: string) => Promise<{ id: string; role: \"user\" | \"assistant\"; parts: ({ type: \"text\"; text: string; raw?: undefined | { source: string; payload: unknown } } | { type: \"reasoning\"; text: string; label?: undefined | string; index?: undefined | number; streamId?: undefined | string; signature?: undefined | string; raw?: undefined | { source: string; payload: unknown } } | { type: \"tool\"; tool: { type: string; kind?: undefined | \"command\" | \"file-change\" | \"search\" | \"fetch\" | \"mcp\" | \"image\" | \"generic\"; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; rawInput?: undefined | string; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string; raw?: undefined | { source: string; payload: unknown } }; raw?: undefined | { source: string; payload: unknown } } | { type: \"card\"; envelope: { type: string; id: string; data: unknown; title?: undefined | string; resolution?: undefined | { kind: \"action\"; action: string; payload?: unknown; at?: undefined | string } | { kind: \"submit\"; data: unknown; at?: undefined | string } | { kind: \"dismissed\"; at?: undefined | string } | { kind: \"expired\"; reason?: undefined | string; at?: undefined | string } }; raw?: undefined | { source: string; payload: unknown } } | { type: \"source\"; source: { id?: undefined | string; url?: undefined | string; title?: undefined | string; snippet?: undefined | string; index?: undefined | number }; raw?: undefined | { source: string; payload: unknown } } | { type: \"file\"; attachment: { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }; raw?: undefined | { source: string; payload: unknown } })[]; actions?: undefined | (\"copy\" | \"dislike\" | \"edit\" | \"like\" | \"regenerate\" | \"speak\" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string }; feedback?: undefined | \"like\" | \"dislike\" }[]>; save: (id: string, messages: { id: string; role: \"user\" | \"assistant\"; parts: ({ type: \"text\"; text: string; raw?: undefined | { source: string; payload: unknown } } | { type: \"reasoning\"; text: string; label?: undefined | string; index?: undefined | number; streamId?: undefined | string; signature?: undefined | string; raw?: undefined | { source: string; payload: unknown } } | { type: \"tool\"; tool: { type: string; kind?: undefined | \"command\" | \"file-change\" | \"search\" | \"fetch\" | \"mcp\" | \"image\" | \"generic\"; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; rawInput?: undefined | string; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string; raw?: undefined | { source: string; payload: unknown } }; raw?: undefined | { source: string; payload: unknown } } | { type: \"card\"; envelope: { type: string; id: string; data: unknown; title?: undefined | string; resolution?: undefined | { kind: \"action\"; action: string; payload?: unknown; at?: undefined | string } | { kind: \"submit\"; data: unknown; at?: undefined | string } | { kind: \"dismissed\"; at?: undefined | string } | { kind: \"expired\"; reason?: undefined | string; at?: undefined | string } }; raw?: undefined | { source: string; payload: unknown } } | { type: \"source\"; source: { id?: undefined | string; url?: undefined | string; title?: undefined | string; snippet?: undefined | string; index?: undefined | number }; raw?: undefined | { source: string; payload: unknown } } | { type: \"file\"; attachment: { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }; raw?: undefined | { source: string; payload: unknown } })[]; actions?: undefined | (\"copy\" | \"dislike\" | \"edit\" | \"like\" | \"regenerate\" | \"speak\" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string }; feedback?: undefined | \"like\" | \"dislike\" }[]) => Promise<void>; markRead?: undefined | ((id: string) => Promise<void>) }",
+        "typeShape": "{ list: () => Promise<{ id: string; title: string; groupId?: undefined | string; scope?: undefined | { type: \"document\" | \"collection\"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | \"transcript\" | \"markdown\"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt?: undefined | string; updatedAt: string; trailing?: undefined | string; lastReadAt?: undefined | string; pinned?: undefined | false | true; archived?: undefined | false | true }[]>; load: (id: string) => Promise<{ id: string; role: \"user\" | \"assistant\"; parts: ({ type: \"text\"; text: string; raw?: undefined | { source: string; payload: unknown } } | { type: \"reasoning\"; text: string; label?: undefined | string; index?: undefined | number; streamId?: undefined | string; signature?: undefined | string; raw?: undefined | { source: string; payload: unknown } } | { type: \"tool\"; tool: { type: string; kind?: undefined | \"command\" | \"file-change\" | \"search\" | \"fetch\" | \"mcp\" | \"image\" | \"generic\"; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; rawInput?: undefined | string; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string; raw?: undefined | { source: string; payload: unknown } }; raw?: undefined | { source: string; payload: unknown } } | { type: \"card\"; envelope: { type: string; id: string; data: unknown; title?: undefined | string; resolution?: undefined | { kind: \"action\"; action: string; payload?: unknown; at?: undefined | string } | { kind: \"submit\"; data: unknown; at?: undefined | string } | { kind: \"dismissed\"; at?: undefined | string } | { kind: \"expired\"; reason?: undefined | string; at?: undefined | string } }; raw?: undefined | { source: string; payload: unknown } } | { type: \"source\"; source: { id?: undefined | string; url?: undefined | string; title?: undefined | string; snippet?: undefined | string; index?: undefined | number }; raw?: undefined | { source: string; payload: unknown } } | { type: \"file\"; attachment: { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }; raw?: undefined | { source: string; payload: unknown } })[]; actions?: undefined | (\"copy\" | \"dislike\" | \"edit\" | \"like\" | \"regenerate\" | \"speak\" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string }; feedback?: undefined | \"like\" | \"dislike\" }[]>; save: (id: string, messages: { id: string; role: \"user\" | \"assistant\"; parts: ({ type: \"text\"; text: string; raw?: undefined | { source: string; payload: unknown } } | { type: \"reasoning\"; text: string; label?: undefined | string; index?: undefined | number; streamId?: undefined | string; signature?: undefined | string; raw?: undefined | { source: string; payload: unknown } } | { type: \"tool\"; tool: { type: string; kind?: undefined | \"command\" | \"file-change\" | \"search\" | \"fetch\" | \"mcp\" | \"image\" | \"generic\"; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; rawInput?: undefined | string; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string; raw?: undefined | { source: string; payload: unknown } }; raw?: undefined | { source: string; payload: unknown } } | { type: \"card\"; envelope: { type: string; id: string; data: unknown; title?: undefined | string; resolution?: undefined | { kind: \"action\"; action: string; payload?: unknown; at?: undefined | string } | { kind: \"submit\"; data: unknown; at?: undefined | string } | { kind: \"dismissed\"; at?: undefined | string } | { kind: \"expired\"; reason?: undefined | string; at?: undefined | string } }; raw?: undefined | { source: string; payload: unknown } } | { type: \"source\"; source: { id?: undefined | string; url?: undefined | string; title?: undefined | string; snippet?: undefined | string; index?: undefined | number }; raw?: undefined | { source: string; payload: unknown } } | { type: \"file\"; attachment: { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }; raw?: undefined | { source: string; payload: unknown } })[]; actions?: undefined | (\"copy\" | \"dislike\" | \"edit\" | \"like\" | \"regenerate\" | \"speak\" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string }; feedback?: undefined | \"like\" | \"dislike\" }[]) => Promise<void>; markRead?: undefined | ((id: string) => Promise<void>); rename?: undefined | ((id: string, title: string) => Promise<void>); setPinned?: undefined | ((id: string, pinned: false | true) => Promise<void>); setArchived?: undefined | ((id: string, archived: false | true) => Promise<void>); setGroup?: undefined | ((id: string, groupId: string | undefined) => Promise<void>); listGroups?: undefined | (() => Promise<{ id: string; userId?: undefined | string; teamId?: undefined | string; name: string; sortOrder: number; createdAt: string }[]>); saveGroup?: undefined | ((group: { id: string; userId?: undefined | string; teamId?: undefined | string; name: string; sortOrder: number; createdAt: string }) => Promise<void>); removeGroup?: undefined | ((id: string) => Promise<void>); remove?: undefined | ((id: string) => Promise<void>) }",
         "typeImport": "ConversationStore",
-        "displayType": "undefined | { list: () => Promise<{ id: string; title: string; groupId?: undefined | string; scope?: undefined | { type: \"document\" | \"collection\"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | \"transcript\" | \"markdown\"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt?: undefined | string; updatedAt: string; trailing?: undefined | string; lastReadAt?: undefined | string }[]>; load: (id: string) => Promise<{ id: string; role: \"user\" | \"assistant\"; parts: ({ type: \"text\"; text: string; raw?: undefined | { source: string; payload: unknown } } | { type: \"reasoning\"; text: string; label?: undefined | string; index?: undefined | number; streamId?: undefined | string; signature?: undefined | string; raw?: undefined | { source: string; payload: unknown } } | { type: \"tool\"; tool: { type: string; kind?: undefined | \"command\" | \"file-change\" | \"search\" | \"fetch\" | \"mcp\" | \"image\" | \"generic\"; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; rawInput?: undefined | string; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string; raw?: undefined | { source: string; payload: unknown } }; raw?: undefined | { source: string; payload: unknown } } | { type: \"card\"; envelope: { type: string; id: string; data: unknown; title?: undefined | string; resolution?: undefined | { kind: \"action\"; action: string; payload?: unknown; at?: undefined | string } | { kind: \"submit\"; data: unknown; at?: undefined | string } | { kind: \"dismissed\"; at?: undefined | string } | { kind: \"expired\"; reason?: undefined | string; at?: undefined | string } }; raw?: undefined | { source: string; payload: unknown } } | { type: \"source\"; source: { id?: undefined | string; url?: undefined | string; title?: undefined | string; snippet?: undefined | string; index?: undefined | number }; raw?: undefined | { source: string; payload: unknown } } | { type: \"file\"; attachment: { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }; raw?: undefined | { source: string; payload: unknown } })[]; actions?: undefined | (\"copy\" | \"dislike\" | \"edit\" | \"like\" | \"regenerate\" | \"speak\" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string }; feedback?: undefined | \"like\" | \"dislike\" }[]>; save: (id: string, messages: { id: string; role: \"user\" | \"assistant\"; parts: ({ type: \"text\"; text: string; raw?: undefined | { source: string; payload: unknown } } | { type: \"reasoning\"; text: string; label?: undefined | string; index?: undefined | number; streamId?: undefined | string; signature?: undefined | string; raw?: undefined | { source: string; payload: unknown } } | { type: \"tool\"; tool: { type: string; kind?: undefined | \"command\" | \"file-change\" | \"search\" | \"fetch\" | \"mcp\" | \"image\" | \"generic\"; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; rawInput?: undefined | string; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string; raw?: undefined | { source: string; payload: unknown } }; raw?: undefined | { source: string; payload: unknown } } | { type: \"card\"; envelope: { type: string; id: string; data: unknown; title?: undefined | string; resolution?: undefined | { kind: \"action\"; action: string; payload?: unknown; at?: undefined | string } | { kind: \"submit\"; data: unknown; at?: undefined | string } | { kind: \"dismissed\"; at?: undefined | string } | { kind: \"expired\"; reason?: undefined | string; at?: undefined | string } }; raw?: undefined | { source: string; payload: unknown } } | { type: \"source\"; source: { id?: undefined | string; url?: undefined | string; title?: undefined | string; snippet?: undefined | string; index?: undefined | number }; raw?: undefined | { source: string; payload: unknown } } | { type: \"file\"; attachment: { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }; raw?: undefined | { source: string; payload: unknown } })[]; actions?: undefined | (\"copy\" | \"dislike\" | \"edit\" | \"like\" | \"regenerate\" | \"speak\" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string }; feedback?: undefined | \"like\" | \"dislike\" }[]) => Promise<void>; markRead?: undefined | ((id: string) => Promise<void>) }"
+        "displayType": "undefined | { list: () => Promise<{ id: string; title: string; groupId?: undefined | string; scope?: undefined | { type: \"document\" | \"collection\"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | \"transcript\" | \"markdown\"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt?: undefined | string; updatedAt: string; trailing?: undefined | string; lastReadAt?: undefined | string; pinned?: undefined | false | true; archived?: undefined | false | true }[]>; load: (id: string) => Promise<{ id: string; role: \"user\" | \"assistant\"; parts: ({ type: \"text\"; text: string; raw?: undefined | { source: string; payload: unknown } } | { type: \"reasoning\"; text: string; label?: undefined | string; index?: undefined | number; streamId?: undefined | string; signature?: undefined | string; raw?: undefined | { source: string; payload: unknown } } | { type: \"tool\"; tool: { type: string; kind?: undefined | \"command\" | \"file-change\" | \"search\" | \"fetch\" | \"mcp\" | \"image\" | \"generic\"; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; rawInput?: undefined | string; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string; raw?: undefined | { source: string; payload: unknown } }; raw?: undefined | { source: string; payload: unknown } } | { type: \"card\"; envelope: { type: string; id: string; data: unknown; title?: undefined | string; resolution?: undefined | { kind: \"action\"; action: string; payload?: unknown; at?: undefined | string } | { kind: \"submit\"; data: unknown; at?: undefined | string } | { kind: \"dismissed\"; at?: undefined | string } | { kind: \"expired\"; reason?: undefined | string; at?: undefined | string } }; raw?: undefined | { source: string; payload: unknown } } | { type: \"source\"; source: { id?: undefined | string; url?: undefined | string; title?: undefined | string; snippet?: undefined | string; index?: undefined | number }; raw?: undefined | { source: string; payload: unknown } } | { type: \"file\"; attachment: { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }; raw?: undefined | { source: string; payload: unknown } })[]; actions?: undefined | (\"copy\" | \"dislike\" | \"edit\" | \"like\" | \"regenerate\" | \"speak\" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string }; feedback?: undefined | \"like\" | \"dislike\" }[]>; save: (id: string, messages: { id: string; role: \"user\" | \"assistant\"; parts: ({ type: \"text\"; text: string; raw?: undefined | { source: string; payload: unknown } } | { type: \"reasoning\"; text: string; label?: undefined | string; index?: undefined | number; streamId?: undefined | string; signature?: undefined | string; raw?: undefined | { source: string; payload: unknown } } | { type: \"tool\"; tool: { type: string; kind?: undefined | \"command\" | \"file-change\" | \"search\" | \"fetch\" | \"mcp\" | \"image\" | \"generic\"; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; rawInput?: undefined | string; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string; raw?: undefined | { source: string; payload: unknown } }; raw?: undefined | { source: string; payload: unknown } } | { type: \"card\"; envelope: { type: string; id: string; data: unknown; title?: undefined | string; resolution?: undefined | { kind: \"action\"; action: string; payload?: unknown; at?: undefined | string } | { kind: \"submit\"; data: unknown; at?: undefined | string } | { kind: \"dismissed\"; at?: undefined | string } | { kind: \"expired\"; reason?: undefined | string; at?: undefined | string } }; raw?: undefined | { source: string; payload: unknown } } | { type: \"source\"; source: { id?: undefined | string; url?: undefined | string; title?: undefined | string; snippet?: undefined | string; index?: undefined | number }; raw?: undefined | { source: string; payload: unknown } } | { type: \"file\"; attachment: { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }; raw?: undefined | { source: string; payload: unknown } })[]; actions?: undefined | (\"copy\" | \"dislike\" | \"edit\" | \"like\" | \"regenerate\" | \"speak\" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string }; feedback?: undefined | \"like\" | \"dislike\" }[]) => Promise<void>; markRead?: undefined | ((id: string) => Promise<void>); rename?: undefined | ((id: string, title: string) => Promise<void>); setPinned?: undefined | ((id: string, pinned: false | true) => Promise<void>); setArchived?: undefined | ((id: string, archived: false | true) => Promise<void>); setGroup?: undefined | ((id: string, groupId: string | undefined) => Promise<void>); listGroups?: undefined | (() => Promise<{ id: string; userId?: undefined | string; teamId?: undefined | string; name: string; sortOrder: number; createdAt: string }[]>); saveGroup?: undefined | ((group: { id: string; userId?: undefined | string; teamId?: undefined | string; name: string; sortOrder: number; createdAt: string }) => Promise<void>); removeGroup?: undefined | ((id: string) => Promise<void>); remove?: undefined | ((id: string) => Promise<void>) }"
       },
       {
         "name": "home",
@@ -1785,6 +1821,12 @@
         "displayDetail": "{ modelId: string }"
       },
       {
+        "name": "kai-select",
+        "detail": "{ id: string; checked?: undefined | false | true }",
+        "description": "A `+` menu item was chosen. `checked` is present only for a toggle, with its NEW state. The same name and shape `<kai-menu>` fires, so one handler serves both.",
+        "displayDetail": "{ id: string; checked?: undefined | false | true }"
+      },
+      {
         "name": "kai-submit",
         "detail": "{ value: string; attachments: { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }",
         "description": "User submitted a message.",
@@ -1812,12 +1854,6 @@
         "name": "kai-voice",
         "detail": "Record<string, never>",
         "description": "The Mic / voice button was clicked.",
-        "displayDetail": "Record<string, never>"
-      },
-      {
-        "name": "kai-web-search",
-        "detail": "Record<string, never>",
-        "description": "The web-search (Globe) toolbar button was clicked.",
         "displayDetail": "Record<string, never>"
       }
     ],
@@ -2088,6 +2124,14 @@
         "scalar": true,
         "description": "The FIRST selected value. Read or drive the rest with `el.values`.",
         "displayType": "undefined | string"
+      },
+      {
+        "name": "values",
+        "type": "undefined | string[]",
+        "optional": true,
+        "scalar": false,
+        "description": "The whole selection in order; `value` is only its first entry and setting this replaces it.",
+        "displayType": "undefined | string[]"
       },
       {
         "name": "name",
@@ -3363,15 +3407,15 @@
       },
       {
         "name": "conversations",
-        "type": "undefined | { id: string; title: string; groupId?: undefined | string; scope?: undefined | { type: \"document\" | \"collection\"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | \"transcript\" | \"markdown\"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt?: undefined | string; updatedAt: string; trailing?: undefined | string; lastReadAt?: undefined | string }[]",
+        "type": "undefined | { id: string; title: string; groupId?: undefined | string; scope?: undefined | { type: \"document\" | \"collection\"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | \"transcript\" | \"markdown\"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt?: undefined | string; updatedAt: string; trailing?: undefined | string; lastReadAt?: undefined | string; pinned?: undefined | false | true; archived?: undefined | false | true }[]",
         "optional": true,
         "scalar": false,
         "description": "The conversations to render, flat. JS property; omit to pass `<kai-conversation>` light-DOM children instead, or for the empty state.",
         "typeName": "ConversationSummary[]",
-        "typeShape": "{ id: string; title: string; groupId?: undefined | string; scope?: undefined | { type: \"document\" | \"collection\"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | \"transcript\" | \"markdown\"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt?: undefined | string; updatedAt: string; trailing?: undefined | string; lastReadAt?: undefined | string }[]",
+        "typeShape": "{ id: string; title: string; groupId?: undefined | string; scope?: undefined | { type: \"document\" | \"collection\"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | \"transcript\" | \"markdown\"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt?: undefined | string; updatedAt: string; trailing?: undefined | string; lastReadAt?: undefined | string; pinned?: undefined | false | true; archived?: undefined | false | true }[]",
         "default": "[]",
         "typeImport": "ConversationSummary",
-        "displayType": "undefined | { id: string; title: string; groupId?: undefined | string; scope?: undefined | { type: \"document\" | \"collection\"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | \"transcript\" | \"markdown\"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt?: undefined | string; updatedAt: string; trailing?: undefined | string; lastReadAt?: undefined | string }[]"
+        "displayType": "undefined | { id: string; title: string; groupId?: undefined | string; scope?: undefined | { type: \"document\" | \"collection\"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | \"transcript\" | \"markdown\"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt?: undefined | string; updatedAt: string; trailing?: undefined | string; lastReadAt?: undefined | string; pinned?: undefined | false | true; archived?: undefined | false | true }[]"
       },
       {
         "name": "activeId",
@@ -3412,6 +3456,15 @@
         "scalar": true,
         "description": "Row density: `default`, `compact` (same as the `compact` flag), or `panel` (the widget-panel row box).",
         "displayType": "undefined | \"default\" | \"compact\" | \"panel\""
+      },
+      {
+        "name": "showTrailing",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Paint each data row's trailing edge. Default `true`; `show-trailing=\"false\"` leaves the edge empty.",
+        "default": "true",
+        "displayType": "undefined | false | true"
       },
       {
         "name": "searchable",
@@ -3923,7 +3976,7 @@
         "type": "undefined | false | true",
         "optional": true,
         "scalar": true,
-        "description": "Stretch the trigger to the full width of its container (a block row). Attribute: `full`.",
+        "description": "Stretch the trigger to the full width of its container (a block row), and open the surface at that same measured width. Attribute: `full`.",
         "default": "false",
         "displayType": "undefined | false | true"
       },
@@ -4005,6 +4058,20 @@
         "name": "trigger",
         "mode": "replace",
         "doc": "Visual content of the trigger button (an icon, text, an `<svg>`). Replaces the built-in trigger* content; name it with `label`."
+      }
+    ],
+    "vars": [
+      {
+        "name": "--kai-dropdown-max-width",
+        "doc": "How wide the menu surface may get. The `24rem` default is a CEILING forced by how the surface is laid out: it is `position: fixed` with no `width`, so it shrink-wraps to its content, and the widest row decides how wide EVERY row is: a panel inside a 280px rail opened 1216.9px wide (with 1208.9px rows) because one sentence-shaped note row was that long. Under the ceiling a long label and its description WRAP instead, so nothing is truncated and nothing is clipped; the panel gets taller rather than wider. Raise it for a surface whose rows are genuinely wide, lower it for a narrow rail.",
+        "default": "24rem",
+        "recipe": "kai-menu { --kai-dropdown-max-width: 20rem }"
+      },
+      {
+        "name": "--kai-dropdown-max-height",
+        "doc": "How tall the menu surface may get, and the default is the VIEWPORT rather than a number of pixels: `calc(100dvh - 2rem)` is the window the user actually has, minus a breathing gap, so a long menu is bounded on a laptop and on a short window alike. A menu holds as many rows as the consumer has data -- a rail listing the user's own conversations grows without limit -- and a wrapped label makes a capped menu taller, so without this the last rows landed below the fold with nothing to scroll: a 33-row menu measured 911px in a 560px window, its last row 386px past the bottom edge. The surface also takes whichever is smaller of this and the room left between its trigger and the viewport edge, so a long menu stays on screen beside its trigger instead of hanging off the bottom of the window; and it keeps its own scrollbar (`overflow-y: auto`) either way, so every row stays reachable. A menu that already fits shows no bar and is unchanged. Set any length or `calc()` (e.g. `60vh`) to lower the ceiling, or `none` to remove it (the panel is then still clamped to the room beside its trigger).",
+        "default": "calc(100dvh - 2rem)",
+        "recipe": "kai-menu { --kai-dropdown-max-height: 60vh }"
       }
     ]
   },
@@ -4172,7 +4239,7 @@
     "tag": "kai-empty",
     "className": "KaiEmptyElement",
     "displayName": "Empty",
-    "description": "The empty state of a list or panel: a heading, a line of copy, and room for an action.",
+    "description": "The empty state of a list or panel: a heading, a line of copy, and room for an action. HOW WIDE THAT ROOM MAY BE is the consumer's call: `--kai-empty-content-width` on the host (or any ancestor) widens the box the default slot is laid out in, so content that is not prose - a two-up card grid - fits INSIDE it instead of having to paint past its parent. It inherits through the shadow boundary, which is why setting it on the element reaches the component's own `EmptyContent` (`src/components/empty/empty.tsx`), and where a label like `--kai-workspace-start-width` belongs: the host is the slot the consumer holds. Unset, the prose default (24rem) applies and nothing moves.",
     "props": [
       {
         "name": "theme",
@@ -4236,12 +4303,20 @@
       {
         "name": "",
         "mode": "inject",
-        "doc": "The empty-state body below the title/description, usually the call to action."
+        "doc": "The empty-state body below the title/description, usually the call to action. It is capped at a prose measure by default -- see `--kai-empty-content-width`."
       },
       {
         "name": "media",
         "mode": "replace",
         "doc": "The leading illustration or icon above the title (any inline SVG or <img>). Replaces the built-in media box."
+      }
+    ],
+    "vars": [
+      {
+        "name": "--kai-empty-content-width",
+        "doc": "How wide the content in the default slot may be. The `24rem` default is a PROSE measure, right for a sentence and its action; content that is not prose (a two-up card grid) sets this to the measure its own column has, and the slotted content then stays inside the box instead of painting past it.",
+        "default": "24rem",
+        "recipe": "kai-empty { --kai-empty-content-width: 48rem }"
       }
     ]
   },
@@ -5635,14 +5710,14 @@
       },
       {
         "name": "items",
-        "type": "undefined | { id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | Record<string, unknown>[] }[]",
+        "type": "undefined | { id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; description?: undefined | string; control?: undefined | \"check\" | \"switch\"; note?: undefined | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | Record<string, unknown>[] }[]",
         "optional": true,
         "scalar": false,
         "description": "Tree of menu items. Set as a JS property, not an HTML attribute.",
         "typeName": "KaiMenuItem[]",
-        "typeShape": "{ id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | { id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | Record<string, unknown>[] }[] }[]",
+        "typeShape": "{ id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; description?: undefined | string; control?: undefined | \"check\" | \"switch\"; note?: undefined | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | { id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; description?: undefined | string; control?: undefined | \"check\" | \"switch\"; note?: undefined | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | Record<string, unknown>[] }[] }[]",
         "typeImport": "KaiMenuItem",
-        "displayType": "undefined | { id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | Record<string, unknown>[] }[]"
+        "displayType": "undefined | { id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; description?: undefined | string; control?: undefined | \"check\" | \"switch\"; note?: undefined | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | Record<string, unknown>[] }[]"
       },
       {
         "name": "placement",
@@ -5689,7 +5764,7 @@
         "type": "undefined | false | true",
         "optional": true,
         "scalar": true,
-        "description": "Stretch the trigger to the full width of its container (a block row). Attribute: `full`.",
+        "description": "Stretch the trigger to the full width of its container (a block row), and open the surface at that same measured width. Attribute: `full`.",
         "default": "false",
         "displayType": "undefined | false | true"
       },
@@ -5766,39 +5841,7 @@
         "group": "Components"
       },
       {
-        "name": "DropdownItem",
-        "group": "Components"
-      },
-      {
-        "name": "DropdownSeparator",
-        "group": "Components"
-      },
-      {
-        "name": "DropdownLabel",
-        "group": "Components"
-      },
-      {
-        "name": "DropdownCheckboxItem",
-        "group": "Components"
-      },
-      {
-        "name": "DropdownRadioItem",
-        "group": "Components"
-      },
-      {
-        "name": "DropdownSub",
-        "group": "Components"
-      },
-      {
-        "name": "DropdownSubTrigger",
-        "group": "Components"
-      },
-      {
-        "name": "DropdownSubContent",
-        "group": "Components"
-      },
-      {
-        "name": "Kbd",
+        "name": "DropdownItems",
         "group": "Components"
       }
     ],
@@ -5815,6 +5858,20 @@
         "name": "shortcut",
         "doc": "The right-aligned per-item keyboard shortcut, rendered as kai-kbd key caps. Shown only when an item carries a `shortcut`.",
         "recipe": "kai-menu::part(shortcut) { opacity: 0.8 }"
+      }
+    ],
+    "vars": [
+      {
+        "name": "--kai-dropdown-max-width",
+        "doc": "How wide the menu surface may get. The `24rem` default is a CEILING forced by how the surface is laid out: it is `position: fixed` with no `width`, so it shrink-wraps to its content, and the widest row decides how wide EVERY row is: a panel inside a 280px rail opened 1216.9px wide (with 1208.9px rows) because one sentence-shaped note row was that long. Under the ceiling a long label and its description WRAP instead, so nothing is truncated and nothing is clipped; the panel gets taller rather than wider. Raise it for a surface whose rows are genuinely wide, lower it for a narrow rail.",
+        "default": "24rem",
+        "recipe": "kai-menu { --kai-dropdown-max-width: 20rem }"
+      },
+      {
+        "name": "--kai-dropdown-max-height",
+        "doc": "How tall the menu surface may get, and the default is the VIEWPORT rather than a number of pixels: `calc(100dvh - 2rem)` is the window the user actually has, minus a breathing gap, so a long menu is bounded on a laptop and on a short window alike. A menu holds as many rows as the consumer has data -- a rail listing the user's own conversations grows without limit -- and a wrapped label makes a capped menu taller, so without this the last rows landed below the fold with nothing to scroll: a 33-row menu measured 911px in a 560px window, its last row 386px past the bottom edge. The surface also takes whichever is smaller of this and the room left between its trigger and the viewport edge, so a long menu stays on screen beside its trigger instead of hanging off the bottom of the window; and it keeps its own scrollbar (`overflow-y: auto`) either way, so every row stays reachable. A menu that already fits shows no bar and is unchanged. Set any length or `calc()` (e.g. `60vh`) to lower the ceiling, or `none` to remove it (the panel is then still clamped to the room beside its trigger).",
+        "default": "calc(100dvh - 2rem)",
+        "recipe": "kai-menu { --kai-dropdown-max-height: 60vh }"
       }
     ]
   },
@@ -5894,8 +5951,7 @@
         "type": "undefined | \"always\" | \"hover\"",
         "optional": true,
         "scalar": true,
-        "description": "Whether the action bar stays visible or appears on pointer-over; visible by default.",
-        "default": "'always'",
+        "description": "Whether the action bar stays visible or appears on pointer-over; omitted keys the default to the turn, so a user row reveals and an assistant row stays visible.",
         "displayType": "undefined | \"always\" | \"hover\""
       },
       {
@@ -7192,6 +7248,15 @@
         "displayType": "undefined | string[]"
       },
       {
+        "name": "suggestionsLayout",
+        "type": "undefined | \"pill\" | \"block\"",
+        "optional": true,
+        "scalar": true,
+        "description": "How `suggestions` render. `'pill'` is the default; the alternative is a full-width list row. Attribute: `suggestions-layout`.",
+        "default": "'pill'",
+        "displayType": "undefined | \"pill\" | \"block\""
+      },
+      {
         "name": "suggestionMode",
         "type": "undefined | \"submit\" | \"fill\"",
         "optional": true,
@@ -7201,12 +7266,22 @@
         "displayType": "undefined | \"submit\" | \"fill\""
       },
       {
-        "name": "webSearch",
+        "name": "tools",
+        "type": "undefined | { chip?: undefined | false | true; id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; description?: undefined | string; control?: undefined | \"check\" | \"switch\"; note?: undefined | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | { id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; description?: undefined | string; control?: undefined | \"check\" | \"switch\"; note?: undefined | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | Record<string, unknown>[] }[] }[]",
+        "optional": true,
+        "scalar": false,
+        "description": "The composer's `+` menu tree: the built-in file row first (when `attach`), then these verbatim. JS property; an array cannot be an attribute.",
+        "typeName": "ComposerToolItem[]",
+        "typeShape": "{ chip?: undefined | false | true; id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; description?: undefined | string; control?: undefined | \"check\" | \"switch\"; note?: undefined | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | { id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; description?: undefined | string; control?: undefined | \"check\" | \"switch\"; note?: undefined | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | Record<string, unknown>[] }[] }[]",
+        "typeImport": "ComposerToolItem",
+        "displayType": "undefined | { chip?: undefined | false | true; id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; description?: undefined | string; control?: undefined | \"check\" | \"switch\"; note?: undefined | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | { id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; description?: undefined | string; control?: undefined | \"check\" | \"switch\"; note?: undefined | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | Record<string, unknown>[] }[] }[]"
+      },
+      {
+        "name": "expanded",
         "type": "undefined | false | true",
         "optional": true,
         "scalar": true,
-        "description": "Show a web-search (Globe) button in the left toolbar; clicking it fires a `kai-web-search` event. Attribute: `web-search`.",
-        "default": "false",
+        "description": "Pins the composer's layout: `true` is two rows, `false` is one, omitted derives it from the content. Attribute `expanded`; `=\"false\"` pins one row.",
         "displayType": "undefined | false | true"
       },
       {
@@ -7284,6 +7359,12 @@
         "displayDetail": "{ attachments: { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }"
       },
       {
+        "name": "kai-select",
+        "detail": "{ id: string; checked?: undefined | false | true }",
+        "description": "A `+` menu item was chosen. `checked` is present only for a toggle, carrying its NEW state. Shares `<kai-menu>`'s event name.",
+        "displayDetail": "{ id: string; checked?: undefined | false | true }"
+      },
+      {
         "name": "kai-stop",
         "detail": "Record<string, never>",
         "description": "The Stop button was clicked while `stoppable` and `loading` are both true.",
@@ -7317,12 +7398,6 @@
         "name": "kai-voice",
         "detail": "Record<string, never>",
         "description": "The Voice (Mic) toolbar button was clicked.",
-        "displayDetail": "Record<string, never>"
-      },
-      {
-        "name": "kai-web-search",
-        "detail": "Record<string, never>",
-        "description": "The web-search (Globe) toolbar button was clicked.",
         "displayDetail": "Record<string, never>"
       }
     ],
@@ -7394,6 +7469,11 @@
         "name": "send",
         "doc": "The send button. Restyle from outside, or hide it entirely (Enter-only). Hiding is pure CSS, which is why there is no `submit=\"never\"`.",
         "recipe": "kai-prompt-input::part(send) { display: none } /* Enter-only; or restyle: background, border-radius, … */"
+      },
+      {
+        "name": "tools",
+        "doc": "The `+` tools trigger, the leading control of the composer row. Restyle it from outside, or hide it to offer no menu at all.",
+        "recipe": "kai-prompt-input::part(tools) { display: none } /* or restyle: background, border-radius, … */"
       }
     ]
   },
@@ -8710,6 +8790,14 @@
         "scalar": true,
         "description": "Controlled selected value, reflected to the `value` attribute. For a `multiple` select read `el.values`.",
         "displayType": "undefined | string"
+      },
+      {
+        "name": "values",
+        "type": "undefined | string[]",
+        "optional": true,
+        "scalar": false,
+        "description": "The whole selection in order; `value` is only its first entry and setting this replaces it.",
+        "displayType": "undefined | string[]"
       },
       {
         "name": "placeholder",
@@ -10253,8 +10341,7 @@
         "type": "undefined | \"always\" | \"hover\"",
         "optional": true,
         "scalar": true,
-        "description": "Whether each message's action bar is visible at rest or only revealed on pointer-over. Visible at rest by default.",
-        "default": "'always'",
+        "description": "Whether each row's action bar is visible at rest or on pointer-over; omitted keys it to the turn, so a user row reveals and an assistant row does not.",
         "displayType": "undefined | \"always\" | \"hover\""
       },
       {
@@ -10265,6 +10352,15 @@
         "description": "Show the scroll-to-bottom button inside the scroll area. Default true.",
         "default": "true",
         "displayType": "undefined | false | true"
+      },
+      {
+        "name": "density",
+        "type": "undefined | \"default\" | \"compact\"",
+        "optional": true,
+        "scalar": true,
+        "description": "How much air the message list has: `'default'` (shipped) or `'compact'` (a desktop-panel rhythm: 8px between turns, a tighter band).",
+        "default": "'default'",
+        "displayType": "undefined | \"default\" | \"compact\""
       },
       {
         "name": "class",

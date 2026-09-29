@@ -31,6 +31,8 @@
   "file-text",
   "flag",
   "folder",
+  "folder-closed",
+  "folder-open",
   "git-branch",
   "git-pull-request",
   "github",
