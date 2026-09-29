@@ -1,7 +1,7 @@
 import { For, Show, createMemo, onMount, type JSX } from 'solid-js';
 import { ChatConfig, useChatConfig } from '../../primitives/chat-config';
 import { ChatContainer, ChatContainerContent, ChatContainerScrollAnchor } from '../chat/chat-container';
-import { Message, MessageAvatar, MessageBody } from '../message/message';
+import { Message, MessageAvatar, MessageBody, resolveActionsReveal } from '../message/message';
 import { createMessageFeedback, type MessageActionDetail } from '../../primitives/message-feedback';
 import { ScrollButton } from '../scroll/scroll-button';
 import { Loader } from '../loader/loader';
@@ -10,6 +10,7 @@ import type { ProseSize } from '../../primitives/chat-config';
 import type { CardComponentMap } from '../card/card-registry';
 import type { CardSchemaMap } from '../card/card-renderer';
 import type { AttachmentImagePreview } from '../attachments/attachments';
+import { resolveThreadDensity, THREAD_DENSITY_CLASSES, type ThreadDensity } from '../chat/thread-density';
 
 /** Imperative handle exposed via `controllerRef`: the thread's scroll control,
  *  forwarded onto `<kai-thread>` as the `scrollToBottom()` instance method. */
@@ -21,6 +22,12 @@ export interface ThreadController {
 export interface ThreadProps {
   /** Extra classes for the thread root (e.g. `rounded-xl`). */
   class?: string;
+  // ONE axis, mirroring `ChatThread`'s (see `thread-density.ts`): the between-turn
+  // gap and the message band's padding move together. This slice has no composer
+  // band, so only those two of the four apply here.
+  /** How much air the message list has: `'default'` (the shipped look) or
+   *  `'compact'` (a desktop-panel rhythm: 8px between turns, a tighter band). */
+  density?: ThreadDensity;
   /** The messages to render, newest last; a new array reference per streaming chunk is what re-renders. */
   messages: ChatMessage[];
   /** Add/override card type -> component entries, forwarded to `CardRenderer`
@@ -47,7 +54,8 @@ export interface ThreadProps {
   // Inert for non-image tiles, which keep the hover card.
   /** How an image tile in a message's attachment grid reveals its full size; `'lightbox'` is the one a keyboard or touch user can reach. Defaults to `'hover'`. */
   imagePreview?: AttachmentImagePreview;
-  /** Whether a message's action bar stays open or appears on pointer-over. Defaults to `'always'`. */
+  /** Whether a message's action bar is visible at rest or on pointer-over; omitted keys it
+   *  to the turn, so a user row reveals while an assistant row stays visible. */
   actionsReveal?: 'always' | 'hover';
   /** Show the scroll-to-bottom button inside the scroll area. Default true. */
   scrollButton?: boolean;
@@ -82,7 +90,16 @@ function DefaultEmpty() {
  */
 export function Thread(props: ThreadProps) {
   const outer = useChatConfig();
-  const reveal = () => (props.actionsReveal === 'hover' ? 'hover' : 'always');
+  // Per ROW, from that row's own speaker, so one thread can hold a hover-revealed user turn
+  // and a pinned assistant turn at once. The rule lives in `resolveActionsReveal` because the
+  // row's `group` class and the bar's own opacity have to agree.
+  const revealFor = (isUser: boolean) => resolveActionsReveal(props.actionsReveal, isUser);
+  // Resolved ONCE per render and used twice: for the band/gap classes here, and as the
+  // value handed to every row below, so the rows agree with the list they sit in rather
+  // than resolving the raw prop again (which would also report an unknown value under
+  // 'Message' instead of 'Thread', the caller whose prop it actually is).
+  const resolvedDensity = () => resolveThreadDensity(props.density, 'Thread');
+  const density = () => THREAD_DENSITY_CLASSES[resolvedDensity()];
   // Feedback (copy + vote) state lives ABOVE the per-message <For>, so streaming
   // re-renders (a fresh `messages` array ref per chunk) don't wipe it. The
   // copy/feedback toasts scope to this thread's root so they appear in-thread
@@ -121,8 +138,14 @@ export function Thread(props: ThreadProps) {
         ref={(e) => (rootEl = e as HTMLElement)}
         class={`relative flex h-full min-h-0 flex-col bg-background ${props.class ?? ''}`}
       >
-        <ChatContainer class="h-full px-4 py-3">
-          <ChatContainerContent class="mx-auto w-full max-w-3xl space-y-4">
+        <ChatContainer class={`h-full ${density().band}`}>
+          {/* `min-h-full` is what makes the empty state's `flex-1` mean anything: this
+              column is the scroller's only child and, with a content-driven height, the
+              empty surface resolved to its own content height (measured 180px inside a
+              633px region) and sat at the top. At least the viewport, so a short empty
+              state has room to be centred in — and free to grow past it, which is what
+              keeps tall content scrollable rather than clipped. */}
+          <ChatContainerContent class={`mx-auto w-full max-w-3xl min-h-full ${density().gap}`}>
             {/* Zero-state: the consumer owns WHAT it looks like (`empty`); the
                 component owns WHEN it shows (empty + not loading). */}
             <Show when={showEmpty()}>
@@ -148,13 +171,13 @@ export function Thread(props: ThreadProps) {
                         isUser={m().role === 'user'}
                         markdown={m().role === 'assistant'}
                         actions={m().actions}
-                        actionsReveal={reveal()}
+                        actionsReveal={revealFor(m().role === 'user')}
                         activeFeedback={feedback.resolveFeedback(m())}
                         copied={feedback.isCopied(m().id)}
                         onAction={(action) => feedback.handleAction(m(), action)}
                       />
                     );
-                    const rowGroup = () => (reveal() === 'hover' ? 'group ' : '');
+                    const rowGroup = () => (revealFor(m().role === 'user') === 'hover' ? 'group ' : '');
                     return (
                       // `role` is the SPEAKER, and it has to be forwarded on BOTH
                       // branches. `Message` turns it into `role="article"` + an
@@ -168,13 +191,13 @@ export function Thread(props: ThreadProps) {
                       <Show
                         when={m().avatar}
                         fallback={
-                          <Message role={m().role} class={`${rowGroup()}${m().role === 'user' ? 'flex-col items-end' : 'flex-col items-start'}`}>
+                          <Message role={m().role} density={resolvedDensity()} class={`${rowGroup()}${m().role === 'user' ? 'flex-col items-end' : 'flex-col items-start'}`}>
                             {body}
                           </Message>
                         }
                       >
                         {(av) => (
-                          <Message role={m().role} class={rowGroup()}>
+                          <Message role={m().role} density={resolvedDensity()} class={rowGroup()}>
                             <MessageAvatar src={av().src ?? ''} alt={av().alt ?? ''} fallback={av().fallback} />
                             <div class={`flex min-w-0 flex-1 flex-col ${m().role === 'user' ? 'items-end' : 'items-start'}`}>
                               {body}
@@ -198,7 +221,7 @@ export function Thread(props: ThreadProps) {
                 `role="status"` / aria-live wrapper around it. A real but
                 SEPARATE gap, and it lives in loader.tsx. Filed, not fixed here. */}
             <Show when={props.loading}>
-              <Message class="flex-col items-start">
+              <Message density={resolvedDensity()} class="flex-col items-start">
                 <div class="rounded-lg px-1 py-2">
                   <Loader variant="typing" />
                 </div>
@@ -207,7 +230,18 @@ export function Thread(props: ThreadProps) {
             <ChatContainerScrollAnchor />
           </ChatContainerContent>
           <Show when={showScrollButton()}>
-            <div class="absolute bottom-4 left-1/2 flex w-full max-w-3xl -translate-x-1/2 justify-center px-5">
+            {/* The `pointer-events-none` on this wrapper and the
+                `pointer-events-auto` on the button are ONE fix, not two style
+                choices, and the wrapper is the half that gets deleted as
+                redundant. This box is `w-full max-w-3xl` across the bottom
+                band of the message list, so it is a 768px-wide strip painted
+                OVER the messages: with the pointer live on it, a wheel over
+                the strip scrolled nothing, a drag starting on it selected
+                nothing, and clicks landed on a positioning box. It exists only
+                to place the control, so it is a hole for the pointer and the
+                control is the one thing that takes it back.
+                `scripts/probe-scroll-overlay.mjs` measures all three. */}
+            <div class="pointer-events-none absolute bottom-4 left-1/2 flex w-full max-w-3xl -translate-x-1/2 justify-center px-5">
               {/* The button now owns its elevation (kai-elevation); a `shadow-sm`
                   here would set box-shadow a second time and the winner would
                   be stylesheet order, not this call site. */}

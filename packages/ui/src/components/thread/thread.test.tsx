@@ -3,6 +3,7 @@ import '@testing-library/jest-dom/vitest';
 import { createSignal } from 'solid-js';
 import { render, cleanup, fireEvent } from '@solidjs/testing-library';
 import { Thread, type ThreadController } from './thread';
+import type { ThreadDensity } from '../chat/thread-density';
 import type { ChatMessage } from '../../web-components/chat/chat-types';
 
 // Spy on the imperative toast() the feedback controller raises.
@@ -236,5 +237,84 @@ describe('Thread reasoning parts', () => {
     ];
     const { container } = render(() => <Thread messages={messages} />);
     expect(container.textContent ?? '').toContain('Second block.');
+  });
+});
+
+describe('Thread scroll overlay', () => {
+  // The wrapper that places the scroll button spans the whole message band, so it must be
+  // pointer-inert and the button must ask for the pointer back. jsdom cannot hit-test, so
+  // this CLASS PAIR is the entire contract it can see; the wheel, drag-selection and click
+  // behaviour is measured in `scripts/probe-scroll-overlay.mjs`. Pinned here because the
+  // wrapper's half reads as redundant styling and is the half a later reader deletes —
+  // which is precisely how the strip came to swallow the pointer over the messages.
+  const scrolledUp = (container: HTMLElement) => {
+    const log = container.querySelector('[role="log"]') as HTMLElement;
+    // The scrolled-up state the primitive reads off real layout, faked the way
+    // `scroll-button-label.test.tsx` fakes it.
+    Object.defineProperty(log, 'scrollHeight', { value: 2000, configurable: true });
+    Object.defineProperty(log, 'clientHeight', { value: 400, configurable: true });
+    log.scrollTop = 0;
+    log.dispatchEvent(new Event('scroll'));
+    return log;
+  };
+
+  it('makes the band a hole for the pointer, and gives the pointer back to the button', () => {
+    const { container } = render(() => <Thread messages={[{ id: 'u1', role: 'user', parts: [{ type: 'text', text: 'hi' }] }]} />);
+    const log = scrolledUp(container);
+    const button = log.querySelector('button[aria-label="Scroll to bottom"]') as HTMLElement;
+    const wrapper = button.parentElement as HTMLElement;
+
+    expect(button.className).toContain('pointer-events-auto');
+    expect(wrapper.className).toContain('pointer-events-none');
+    // The pair only means anything on the box that actually spans the band.
+    expect(wrapper.className).toContain('absolute');
+  });
+});
+
+// The `<kai-thread>` facade's axis, on the component that element renders. The
+// element's own pass-through is pinned in
+// `src/web-components/thread/thread-density.declarative.test.tsx`.
+describe('Thread density axis', () => {
+  const log = (c: HTMLElement) => c.querySelector('[role="log"]') as HTMLElement;
+  const content = (c: HTMLElement) => log(c).firstElementChild as HTMLElement;
+
+  it('renders the shipped box with no `density` given, and for an explicit `default`', () => {
+    const unset = render(() => <Thread messages={[]} />).container;
+    const explicit = render(() => <Thread messages={[]} density="default" />).container;
+    for (const c of [unset, explicit]) {
+      expect(log(c).getAttribute('class')).toBe('flex flex-col overflow-y-auto kai-focus-inset h-full px-4 py-3');
+      // `min-h-full` is the empty state's room to centre in: this column is the scroller's
+      // only child, and at content height it left the empty surface resolved to its own
+      // content and sitting at the top.
+      expect(content(c).getAttribute('class')).toBe('flex flex-col mx-auto w-full max-w-3xl min-h-full space-y-4');
+    }
+  });
+
+  it("renders the tighter band and between-turn gap for `'compact'`", () => {
+    const { container } = render(() => <Thread messages={[]} density="compact" />);
+    expect(log(container).getAttribute('class')).toBe('flex flex-col overflow-y-auto kai-focus-inset h-full px-3 py-2');
+    expect(content(container).getAttribute('class')).toBe('flex flex-col mx-auto w-full max-w-3xl min-h-full space-y-2');
+  });
+
+  it('hands its RESOLVED density down to every row, so the avatar gap follows the thread', () => {
+    // The row gap is the one message internal this axis owns (see `thread-density.ts`):
+    // a compact thread whose rows still held their avatar 12px off is the defect this
+    // closes. The row is the `part="row"` node, which is the same node the standalone
+    // `<Message>` renders, so `gap-3` here is byte-for-byte the shipped attribute.
+    const convo: ChatMessage[] = [
+      { id: 'a1', role: 'assistant', parts: [{ type: 'text', text: 'hi' }], avatar: { fallback: 'AI' } },
+    ];
+    const rowClasses = (c: HTMLElement) => [...c.querySelectorAll('[part="row"]')].map((r) => r.getAttribute('class'));
+    expect(rowClasses(render(() => <Thread messages={convo} />).container)).toEqual(['flex items-start gap-3']);
+    expect(rowClasses(render(() => <Thread messages={convo} density="compact" />).container)).toEqual(['flex items-start gap-0']);
+  });
+
+  it('falls back to `default` and says so for an unknown value arriving as a string', () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const { container } = render(() => <Thread messages={[]} density={'cosy' as unknown as ThreadDensity} />);
+    expect(log(container).getAttribute('class')).toBe('flex flex-col overflow-y-auto kai-focus-inset h-full px-4 py-3');
+    expect(error).toHaveBeenCalledTimes(1);
+    expect(String(error.mock.calls[0][0])).toContain('Thread');
+    error.mockRestore();
   });
 });

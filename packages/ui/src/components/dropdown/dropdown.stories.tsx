@@ -151,6 +151,57 @@ function CascadingMenuDemo(props: { onSelect?: SelectHandler }) {
   );
 }
 
+function LongMenuDemo(props: { onSelect?: SelectHandler }) {
+  const [last, setLast] = createSignal<string>();
+  const select = (label: string) => { setLast(label); props.onSelect?.(label); };
+  return (
+    <div class="space-y-3">
+      <Dropdown>
+        <DropdownTrigger class={cn(buttonVariants({ variant: 'outline' }))}>Chats</DropdownTrigger>
+        <DropdownContent>
+          <DropdownLabel>Your chats</DropdownLabel>
+          {Array.from({ length: 30 }, (_, i) => (
+            <DropdownItem onSelect={() => select(`Chat ${i + 1}`)}>{`Chat ${i + 1}`}</DropdownItem>
+          ))}
+        </DropdownContent>
+      </Dropdown>
+      <p class="text-xs text-muted-foreground">Last action: {last() ?? '—'}</p>
+    </div>
+  );
+}
+
+/**
+ * A menu whose LENGTH comes from the consumer's data, which is the case the height
+ * ceiling exists for: the rail's palette listing the user's own conversations. 30 chats
+ * here, and the surface caps itself at the room between its trigger and the viewport
+ * edge and scrolls the rest, so the last row is reached by scrolling rather than by
+ * resizing the window. Open it in a short window and the panel shrinks with it; the
+ * ceiling is `--kai-dropdown-max-height`, defaulting to `calc(100dvh - 2rem)`.
+ */
+export const LongMenu: Story = {
+  render: (args: { onSelect?: SelectHandler }) => <LongMenuDemo onSelect={args.onSelect} />,
+  parameters: {
+    docs: {
+      source: {
+        language: 'tsx',
+        code: `${IMPORT}
+
+const chats = Array.from({ length: 30 }, (_, i) => \`Chat \${i + 1}\`);
+
+<Dropdown>
+  <DropdownTrigger class={cn(buttonVariants({ variant: 'outline' }))}>Chats</DropdownTrigger>
+  <DropdownContent>
+    <DropdownLabel>Your chats</DropdownLabel>
+    {chats.map((chat) => (
+      <DropdownItem onSelect={() => open(chat)}>{chat}</DropdownItem>
+    ))}
+  </DropdownContent>
+</Dropdown>`,
+      },
+    },
+  },
+};
+
 /**
  * The composer's Plus action menu: a section `DropdownLabel`, items with leading
  * icons + a trailing keyboard-shortcut span, a `DropdownSub` ("Skills") that

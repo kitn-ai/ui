@@ -11,6 +11,13 @@ interface Props extends Record<string, unknown> {
   options: KaiSelectOption[];
   /** Controlled selected value, reflected to the `value` attribute. For a `multiple` select read `el.values`. */
   value?: string;
+  // The WHOLE selection, the read/write companion to `value` (which is only its first
+  // entry). Installed on the host by `Object.defineProperty` in the facade below, the
+  // same way `value` is, and the same pair `<kai-checkbox-group>` exposes. Declared
+  // HERE because this interface is what the API generator reads: an undeclared runtime
+  // property is absent from web-component-meta.json, the generated types and the catalog.
+  /** The whole selection in order; `value` is only its first entry and setting this replaces it. */
+  values?: string[];
   // Omitted means no such row at all; there is no default wording, because inventing one
   // would put words in your UI.
   /** Text for a leading, disabled, empty option (the "nothing chosen yet" row). */
@@ -50,6 +57,7 @@ interface Events {
 defineWebComponent<Props, Events>('kai-select', {
   options: [],
   value: undefined,
+  values: undefined,
   placeholder: undefined,
   multiple: undefined,
   invalid: undefined,

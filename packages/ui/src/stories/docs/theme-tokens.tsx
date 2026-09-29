@@ -81,6 +81,8 @@ export const PURPOSE: Record<string, string> = {
   '--kai-radius-pill': 'Fully-round corners (badges, chips, switch tracks)',
   '--code-radius': 'Code block / inline code corner',
   '--kai-code-radius': 'Code block / inline code corner',
+  '--radius-composer': 'The composer’s corner (half the collapsed row, so the input reads as a pill; set it for a rounded square)',
+  '--kai-radius-composer': 'The composer’s corner (half the collapsed row, so the input reads as a pill; set it for a rounded square)',
   '--kai-shadow-strength': 'Elevation multiplier (0 = flat; scales every shadow rung)',
   '--kai-shadow-color': 'Shadow tint',
   '--kai-weight-normal': 'Body text weight',
@@ -143,6 +145,13 @@ function collect(): {
   return { light, dark, declared, knobValues };
 }
 
+/** A corner's NAME, whether a ladder rung or one of the standalone corners. Shared by the
+ *  filter and by the root read, because the two have to agree: a corner whose value reads
+ *  a non-corner (a spacing unit, say) must not be able to name the root. */
+function isCornerName(name: string): boolean {
+  return name === '--radius' || name === '--code-radius' || name.startsWith('--radius-');
+}
+
 /** The corner tokens the reference lists. A token is a corner when its value reads the
  *  ladder root (`calc(var(--radius) - 4px)`, `var(--radius)`) or wires the `--kai-` knob
  *  of its own name (`--radius: var(--kai-radius, 0.6rem)`, `--radius-pill`,
@@ -159,13 +168,18 @@ function collect(): {
  *  rather than typed, and the rest sort by their own offset. */
 export function cornerTokens(declared: Record<string, string>): string[] {
   const corners = Object.entries(declared).filter(([name, value]) => {
-    const isCorner = name === '--radius' || name === '--code-radius' || name.startsWith('--radius-');
-    if (!isCorner) return false;
+    if (!isCornerName(name)) return false;
     if (/var\(\s*--radius\s*\)/.test(value)) return true;
     return new RegExp(`var\\(\\s*--kai-${name.slice(2)}\\s*[,)]`).test(value);
   });
+  // The ladder root is read off the rungs rather than typed -- but a bare `var()` does
+  // not identify it on its own, because a corner's value may read something that is not
+  // a corner at all (the composer's corner is six SPACING units). Only a reference to
+  // another corner can be the root; anything else would let a rung's dependency decide
+  // the ordering.
   const root = corners
-    .flatMap(([, value]) => [...value.matchAll(/var\(\s*(--[a-zA-Z0-9-]+)\s*\)/g)].map((m) => m[1]))[0];
+    .flatMap(([, value]) => [...value.matchAll(/var\(\s*(--[a-zA-Z0-9-]+)\s*\)/g)].map((m) => m[1]))
+    .find(isCornerName);
   const sortKey = ([name, value]: [string, string]) => (name === root ? -1e9 : rungOffset(value));
   return corners.sort((a, b) => sortKey(a) - sortKey(b)).map(([name]) => name);
 }

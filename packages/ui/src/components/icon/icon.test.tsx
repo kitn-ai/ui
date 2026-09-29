@@ -61,6 +61,46 @@ describe('curated icon set', () => {
     }
   });
 
+  it('exposes the folder-state pair a disclosure needs (open expanded, closed collapsed)', () => {
+    // Reported gap: a sidebar rail replaces its disclosure caret with a folder
+    // glyph that reads open when the group is expanded and closed when it is
+    // collapsed. `folder` was the only folder-ish curated name, so the block had
+    // no second state to paint.
+    for (const name of ['folder-open', 'folder-closed']) {
+      expect(ICON_NAMES).toContain(name);
+    }
+  });
+
+  it('the folder pair PAINTS its own glyphs — asserted per name, not by membership', () => {
+    // Membership alone is vacuous here: an unrostered icon-shaped name paints the
+    // `circle-alert` fallback rather than nothing, so "an svg exists" would pass
+    // for a name that resolves to nothing of its own. The assertion below is the
+    // one that fails before the roster carries the pair — the geometry must differ
+    // from that fallback, and the loud guard must stay silent.
+    const { container: fallbackBox } = render(() => <span>{renderIcon('circle-alert')}</span>);
+    const fallback = glyph(fallbackBox);
+    cleanup();
+    expect(fallback).not.toBe('');
+
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const seen = new Map<string, string>();
+    try {
+      for (const name of ['folder-open', 'folder-closed']) {
+        const { container } = render(() => <span>{renderIcon(name, { class: 'size-4' })}</span>);
+        const painted = glyph(container);
+        expect(painted).not.toBe('');
+        expect(painted).not.toBe(fallback);
+        seen.set(name, painted);
+        cleanup();
+      }
+      // Two names are only worth having if they are two DRAWINGS.
+      expect(seen.get('folder-open')).not.toBe(seen.get('folder-closed'));
+      expect(errorSpy).not.toHaveBeenCalled();
+    } finally {
+      errorSpy.mockRestore();
+    }
+  });
+
   it('is the SAME list the map holds — ICON_NAMES is derived, not restated', () => {
     // A duplicate hand-written list is how the Playground control went stale.
     expect([...ICON_NAMES]).toEqual([...ICON_NAMES].sort());

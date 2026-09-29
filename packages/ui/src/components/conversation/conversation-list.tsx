@@ -3,9 +3,13 @@ import { PanelLeftOpen } from 'lucide-solid';
 import { cn } from '../../utils/cn';
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '../collapsible/collapsible';
 import { Button } from '../button/button';
+import { Tooltip } from '../tooltip/tooltip';
 import { Badge } from '../badge/badge';
 import { ScrollArea } from '../scroll/scroll-area';
 import { ConversationItem, type ConversationRowDensity } from './conversation-item';
+import { orderedSummaries } from '../../primitives/conversation-store';
+import { createRovingTabList } from '../../primitives/roving-tab-list';
+import { interactiveInside } from '../../primitives/focusable-child';
 import type { ConversationSummary, ConversationGroup } from '../../types';
 
 /**
@@ -78,29 +82,27 @@ export interface ConversationItemsController {
 }
 
 /**
- * The parent-item contract of item mode, as a pure-DOM controller so it is host-agnostic:
- * the `kai-conversations` facade wires it over its slotted `kai-conversation-item`
- * children, and the jsdom contract tests drive it over plain nodes. Solid context cannot
- * cross the element boundary, so the channel is DOM traversal by construction:
+ * The parent-item contract of item mode: the `kai-conversations` facade wires it over its
+ * slotted `kai-conversation-item` children, and the jsdom contract tests drive it over
+ * plain nodes. Solid context cannot cross the element boundary, so the channel is DOM
+ * traversal by construction.
  *
- * - selection flows container to item: exactly one item's BODY node (see `bodyOf`) is
+ * The traversal mechanism (one tab stop, arrows, Home/End, activation, and yielding to a
+ * control inside the row) is `createRovingTabList` (`primitives/roving-tab-list.ts`),
+ * which is public so an application arranging its own rows gets the same keyboard. What
+ * stays here is the conversation row's own rule:
+ *
+ * - a row is a `kai-conversation-item` host, identified by `readConversationItemId`, and
+ *   its activation node is its shadow body (see `bodyOf`);
+ * - selection flows container to item: exactly one item's body node is
  *   `aria-current="true"`, plus the `active` property on the host;
  * - `role="button"` is ensured on each item's body node, leaving an authored role alone;
- * - roving tabindex: exactly one body node is `tabindex="0"` (the active item's, else the
- *   first's) and the rest `-1`, re-derived on every `sync()`; menu content keeps its natural
- *   tab order, being the body's sibling;
- * - activation (click / Enter / Space) calls `onSelect` with the item's id, and is
- *   SUPPRESSED when the composed path crosses the item's menu region, so the consumer's
- *   own popover never also selects the row;
- * - ArrowUp/ArrowDown/Home/End move focus item-to-item, tabindex following it.
+ * - activation calls `onSelect` with the item's id, and is SUPPRESSED when the composed path
+ *   crosses the item's menu region, so the consumer's own popover never also selects the row.
  */
 export function createConversationItemsController(
   opts: ConversationItemsControllerOptions,
 ): ConversationItemsController {
-  const itemFromEvent = (e: Event): HTMLElement | undefined => {
-    const items = opts.getItems();
-    return e.composedPath().find((n): n is HTMLElement => items.includes(n as HTMLElement));
-  };
   /** The item's ACTIVATION node, the target of role/aria-current/tabindex/
    *  focus. For a `kai-conversation-item` host that is its shadow body (the
    *  sibling restructure: the host is the row listitem
@@ -115,6 +117,21 @@ export function createConversationItemsController(
         n instanceof Element &&
         (n.hasAttribute('data-kai-item-menu') || n.getAttribute('slot') === 'menu'),
     );
+  /**
+   * The guard that makes the row yield: `interactiveInside` over the row's SHADOW BODY as the
+   * boundary (the composed path, so a control in a nested shadow root is seen too). The
+   * boundary is the BODY, not the host the controller was handed, and not anything wider: the
+   * scan must stop at the row, because a `tabindex` ABOVE it (the ScrollArea viewport carries
+   * `tabindex="0"`) is not a control the user is in — measured, a plain click on the item
+   * stopped selecting it.
+   *
+   * Without this guard `itemFromEvent` matched on ANY node inside the row, so an inline editor
+   * in the default slot lost every SPACE (preventDefault ate it) and Enter committed nothing.
+   * Capture-phase stopPropagation was never an option: it would kill the editor's own keydown
+   * too.
+   */
+  const yieldsToNestedControl = (item: HTMLElement, e: Event): boolean =>
+    interactiveInside(e.composedPath(), bodyOf(item)) !== undefined;
   // Write-on-change only. `setAttribute` records a mutation even when the value
   // is identical, and the facade re-syncs from a MutationObserver over these very
   // nodes — unconditional writes would feed the observer forever.
@@ -130,64 +147,42 @@ export function createConversationItemsController(
    *  facade's own mount mutates host attributes, which re-runs sync through
    *  the container's MutationObserver read(). Bare nodes (no dash: the jsdom
    *  stand-ins) are always ready. */
-  const readyBodies = (items: HTMLElement[]) => {
-    const out = new Map<HTMLElement, HTMLElement>();
-    for (const item of items) {
-      const body = bodyOf(item);
-      if (body === item && item.localName.includes('-')) continue;
-      out.set(item, body);
-    }
-    return out;
+  const isReady = (item: HTMLElement): boolean => {
+    const body = bodyOf(item);
+    return !(body === item && item.localName.includes('-'));
   };
-
-  const rove = (items: HTMLElement[], target: HTMLElement | undefined) => {
-    for (const [item, body] of readyBodies(items)) setAttr(body, 'tabindex', item === target ? '0' : '-1');
-  };
-
-  const sync = () => {
-    const items = opts.getItems();
+  /** The item the container considers selected, last match winning. `undefined` when the
+   *  container has no active id — the primitive then falls back to the first rendered row. */
+  const activeItem = (): HTMLElement | undefined => {
     const activeId = opts.getActiveId();
-    const bodies = readyBodies(items);
-    let anchor: HTMLElement | undefined;
-    for (const [item, body] of bodies) {
-      const isActive = activeId !== undefined && readConversationItemId(item) === activeId;
+    if (activeId === undefined) return undefined;
+    let found: HTMLElement | undefined;
+    for (const item of opts.getItems()) if (readConversationItemId(item) === activeId) found = item;
+    return found;
+  };
+
+  const roving = createRovingTabList({
+    getRows: opts.getItems,
+    getActiveRow: activeItem,
+    targetOf: bodyOf,
+    isReady,
+    onRowSynced(item) {
+      const body = bodyOf(item);
       if (!body.hasAttribute('role')) body.setAttribute('role', 'button');
+      const activeId = opts.getActiveId();
+      const isActive = activeId !== undefined && readConversationItemId(item) === activeId;
       setAttr(body, 'aria-current', isActive ? 'true' : 'false');
       const host = item as HTMLElement & { active?: boolean };
       if (host.active !== isActive) host.active = isActive;
-      if (isActive) anchor = item;
-    }
-    rove(items, anchor ?? (bodies.keys().next().value as HTMLElement | undefined));
-  };
+    },
+    onActivate: (item) => opts.onSelect(readConversationItemId(item)),
+    yieldsToRow: (item, e) => menuInPath(e) || yieldsToNestedControl(item, e),
+  });
 
   return {
-    sync,
-    handleClick(e) {
-      const item = itemFromEvent(e);
-      if (!item || menuInPath(e)) return;
-      opts.onSelect(readConversationItemId(item));
-    },
-    handleKeyDown(e) {
-      const items = opts.getItems();
-      if (items.length === 0) return;
-      const item = itemFromEvent(e);
-      if (e.key === 'Enter' || e.key === ' ') {
-        if (!item || menuInPath(e)) return;
-        e.preventDefault();
-        opts.onSelect(readConversationItemId(item));
-        return;
-      }
-      let next: HTMLElement | undefined;
-      const idx = item ? items.indexOf(item) : items.findIndex((i) => bodyOf(i).getAttribute('tabindex') === '0');
-      if (e.key === 'ArrowDown') next = items[Math.min(idx + 1, items.length - 1)];
-      else if (e.key === 'ArrowUp') next = items[Math.max(idx - 1, 0)];
-      else if (e.key === 'Home') next = items[0];
-      else if (e.key === 'End') next = items[items.length - 1];
-      if (!next) return;
-      e.preventDefault();
-      rove(items, next);
-      bodyOf(next).focus();
-    },
+    sync: () => roving.sync(),
+    handleClick: (e) => roving.handleClick(e),
+    handleKeyDown: (e) => roving.handleKeyDown(e),
   };
 }
 
@@ -204,13 +199,18 @@ export interface ConversationListProps {
   footer?: JSX.Element;
   /** Replaces the built-in "no conversations yet" state. */
   empty?: JSX.Element;
-  /** Dense single-line rows (a leading dot + title, no message count). */
+  /** Dense single-line rows: a leading icon + title, no message count. The trailing edge
+   *  stays on that line. */
   compact?: boolean;
   // `panel` is the widget-panel presentation, matching the facade panel's measured row
   // box. An explicit density wins over `compact`; item mode is unaffected, since slotted
   // rows carry their own density.
   /** Row density for the data rows. */
   density?: ConversationRowDensity;
+  // Forwarded to both row producers (the ungrouped loop and the group sections), so a
+  // rail that groups its conversations behaves like the flat one.
+  /** Paint each row's trailing edge, or leave the edge empty. Default `true`. */
+  showTrailing?: boolean;
   // Hidden, the imperative `focus()`/`clearSearch()` still exist but reach no input, and
   // `onSearchChange` never fires.
   /** Whether the built-in search box renders. On by default. */
@@ -247,11 +247,16 @@ export interface ConversationListController {
 }
 
 export function ConversationList(props: ConversationListProps) {
-  const [local] = splitProps(props, ['groups', 'conversations', 'activeId', 'onSelect', 'onNewChat', 'onToggleSidebar', 'header', 'footer', 'empty', 'compact', 'density', 'searchable', 'onSearchChange', 'controllerRef', 'items', 'itemsKeyDown', 'itemsClick', 'class']);
+  const [local] = splitProps(props, ['groups', 'conversations', 'activeId', 'onSelect', 'onNewChat', 'onToggleSidebar', 'header', 'footer', 'empty', 'compact', 'density', 'showTrailing', 'searchable', 'onSearchChange', 'controllerRef', 'items', 'itemsKeyDown', 'itemsClick', 'class']);
   const [searchQuery, setSearchQuery] = createSignal('');
   // Item mode: the consumer's own rows replace the data rendering wholesale.
   const itemMode = createMemo(() => local.items != null);
-  const isEmpty = createMemo(() => local.conversations.length === 0);
+  // The one list-order rule, applied to the `conversations` prop before the search filter
+  // and the grouping: archived rows are not rendered at all (so an archived-only set is
+  // the empty state, not a list of nothing), pinned rows lead. Item mode is untouched:
+  // the consumer's own rows carry their own fields and their own order.
+  const visible = createMemo(() => orderedSummaries(local.conversations));
+  const isEmpty = createMemo(() => visible().length === 0);
   // The search query is owned here; setQuery is the single mutation point so both
   // typing and the imperative clearSearch() notify the facade (→ kai-search).
   let searchInput: HTMLInputElement | undefined;
@@ -267,8 +272,8 @@ export function ConversationList(props: ConversationListProps) {
 
   const filteredConversations = createMemo(() => {
     const q = searchQuery().toLowerCase();
-    if (!q) return local.conversations;
-    return local.conversations.filter((c) => c.title.toLowerCase().includes(q));
+    if (!q) return visible();
+    return visible().filter((c) => c.title.toLowerCase().includes(q));
   });
 
   const groupedConversations = createMemo(() => {
@@ -310,9 +315,16 @@ export function ConversationList(props: ConversationListProps) {
               </Button>
               <span class="text-sm font-semibold text-foreground">Chats</span>
             </div>
-            <Button variant="ghost" size="icon-sm" aria-label="New chat" onClick={local.onNewChat}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            </Button>
+            {/* The icon says nothing on its own, and this button lives in the
+                element's SHADOW root, so the hint has to come from the kit rather
+                than from a consumer's `title`. The tooltip is the DESCRIPTION and
+                the `aria-label` stays the NAME -- same split as the composer's
+                attach button (`prompt/default-input.tsx`). */}
+            <Tooltip content="New chat">
+              <Button variant="ghost" size="icon-sm" aria-label="New chat" onClick={local.onNewChat}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              </Button>
+            </Tooltip>
           </div>
         }
       >
@@ -379,7 +391,7 @@ export function ConversationList(props: ConversationListProps) {
               const convs = createMemo(() => groupedConversations().get(group.id) ?? []);
               return (
                 <Show when={convs().length > 0}>
-                  <GroupSection name={group.name} count={convs().length} conversations={convs()} activeId={local.activeId} onSelect={local.onSelect} compact={local.compact} density={local.density} />
+                  <GroupSection name={group.name} count={convs().length} conversations={convs()} activeId={local.activeId} onSelect={local.onSelect} compact={local.compact} density={local.density} showTrailing={local.showTrailing} />
                 </Show>
               );
             }}
@@ -387,11 +399,11 @@ export function ConversationList(props: ConversationListProps) {
           <Show when={ungrouped().length > 0}>
             <Show
               when={local.compact}
-              fallback={<GroupSection name="Ungrouped" count={ungrouped().length} conversations={ungrouped()} activeId={local.activeId} onSelect={local.onSelect} density={local.density} />}
+              fallback={<GroupSection name="Ungrouped" count={ungrouped().length} conversations={ungrouped()} activeId={local.activeId} onSelect={local.onSelect} density={local.density} showTrailing={local.showTrailing} />}
             >
               <div class="space-y-0.5 py-1">
                 <For each={ungrouped()}>
-                  {(conv) => <ConversationItem conversation={conv} isActive={conv.id === local.activeId} onSelect={local.onSelect} compact density={local.density} />}
+                  {(conv) => <ConversationItem conversation={conv} isActive={conv.id === local.activeId} onSelect={local.onSelect} compact density={local.density} showTrailing={local.showTrailing} />}
                 </For>
               </div>
             </Show>
@@ -407,7 +419,7 @@ export function ConversationList(props: ConversationListProps) {
   );
 }
 
-function GroupSection(props: { name: string; count: number; conversations: ConversationSummary[]; activeId?: string; onSelect: (id: string) => void; compact?: boolean; density?: ConversationRowDensity }) {
+function GroupSection(props: { name: string; count: number; conversations: ConversationSummary[]; activeId?: string; onSelect: (id: string) => void; compact?: boolean; density?: ConversationRowDensity; showTrailing?: boolean }) {
   const [open, setOpen] = createSignal(true);
   return (
     <Collapsible open={open()} onOpenChange={setOpen}>
@@ -420,7 +432,7 @@ function GroupSection(props: { name: string; count: number; conversations: Conve
       <CollapsibleContent>
         <div class="pl-2 mt-0.5 space-y-0.5">
           <For each={props.conversations}>
-            {(conv) => <ConversationItem conversation={conv} isActive={conv.id === props.activeId} onSelect={props.onSelect} compact={props.compact} density={props.density} />}
+            {(conv) => <ConversationItem conversation={conv} isActive={conv.id === props.activeId} onSelect={props.onSelect} compact={props.compact} density={props.density} showTrailing={props.showTrailing} />}
           </For>
         </div>
       </CollapsibleContent>

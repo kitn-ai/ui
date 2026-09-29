@@ -123,6 +123,13 @@ export { VoiceOutput } from './components/voice/voice-output';
 export type { VoiceOutputProps, VoiceOutputController } from './components/voice/voice-output';
 export { CollapsedRail } from './components/conversation/conversation-list';
 export type { CollapsedRailProps } from './components/conversation/conversation-list';
+// ConversationPanel — the widget-box list view `<kai-chat>` swaps in for its
+// conversation view. Its siblings in the same family (ConversationList,
+// ConversationItem) were already public and its own Storybook page documents
+// `import { ConversationPanel } from '@kitn.ai/ui/solid'`, so that snippet named
+// a symbol only a deep import could reach.
+export { ConversationPanel } from './components/conversation/conversation-panel';
+export type { ConversationPanelProps } from './components/conversation/conversation-panel';
 
 // ---------------------------------------------------------------------------
 // Layer 3b: the composed thread/shell components the coarse elements wrap.

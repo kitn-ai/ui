@@ -72,7 +72,11 @@ const meta = {
       <PromptInput {...args}>
         <PromptInputTextarea placeholder="Ask anything..." />
         <PromptInputActions>
-          <Button variant="default" size="sm">Send</Button>
+          <Button size="icon-sm" class="rounded-full" aria-label="Send message">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="19" x2="12" y2="5" /><polyline points="5 12 12 5 19 12" />
+            </svg>
+          </Button>
         </PromptInputActions>
       </PromptInput>
     </div>
@@ -95,7 +99,11 @@ export const Playground: Story = {
   ...src(`<PromptInput value={value()} onValueChange={setValue} onSubmit={send}>
   <PromptInputTextarea placeholder="Ask anything..." />
   <PromptInputActions>
-    <Button variant="default" size="sm">Send</Button>
+    <Button size="icon-sm" class="rounded-full" aria-label="Send message">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="12" y1="19" x2="12" y2="5" /><polyline points="5 12 12 5 19 12" />
+      </svg>
+    </Button>
   </PromptInputActions>
 </PromptInput>`),
 };
@@ -110,8 +118,10 @@ export const Default: Story = {
         <PromptInput value={value()} onValueChange={handleChange} onSubmit={args.onSubmit}>
           <PromptInputTextarea placeholder="Ask anything..." />
           <PromptInputActions>
-            <Button variant="default" size="sm" disabled={!value()}>
-              Send
+            <Button size="icon-sm" class="rounded-full" aria-label="Send message" disabled={!value()}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="19" x2="12" y2="5" /><polyline points="5 12 12 5 19 12" />
+              </svg>
             </Button>
           </PromptInputActions>
         </PromptInput>
@@ -121,7 +131,11 @@ export const Default: Story = {
   ...src(`<PromptInput value={value()} onValueChange={setValue}>
   <PromptInputTextarea placeholder="Ask anything..." />
   <PromptInputActions>
-    <Button variant="default" size="sm" disabled={!value()}>Send</Button>
+    <Button size="icon-sm" class="rounded-full" aria-label="Send message" disabled={!value()}>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="12" y1="19" x2="12" y2="5" /><polyline points="5 12 12 5 19 12" />
+      </svg>
+    </Button>
   </PromptInputActions>
 </PromptInput>`),
 };
@@ -136,7 +150,11 @@ export const WithContent: Story = {
         <PromptInput value={value()} onValueChange={handleChange} onSubmit={args.onSubmit}>
           <PromptInputTextarea placeholder="Ask anything..." />
           <PromptInputActions>
-            <Button variant="default" size="sm">Send</Button>
+            <Button size="icon-sm" class="rounded-full" aria-label="Send message">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="19" x2="12" y2="5" /><polyline points="5 12 12 5 19 12" />
+              </svg>
+            </Button>
           </PromptInputActions>
         </PromptInput>
       </div>
@@ -145,7 +163,11 @@ export const WithContent: Story = {
   ...src(`<PromptInput value={value()} onValueChange={setValue}>
   <PromptInputTextarea placeholder="Ask anything..." />
   <PromptInputActions>
-    <Button variant="default" size="sm">Send</Button>
+    <Button size="icon-sm" class="rounded-full" aria-label="Send message">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="12" y1="19" x2="12" y2="5" /><polyline points="5 12 12 5 19 12" />
+      </svg>
+    </Button>
   </PromptInputActions>
 </PromptInput>`),
 };
@@ -157,7 +179,11 @@ export const Disabled: Story = {
       <PromptInput disabled value="" onValueChange={args.onValueChange} onSubmit={args.onSubmit}>
         <PromptInputTextarea placeholder="Chat is disabled..." />
         <PromptInputActions>
-          <Button variant="default" size="sm" disabled>Send</Button>
+          <Button size="icon-sm" class="rounded-full" aria-label="Send message" disabled>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="19" x2="12" y2="5" /><polyline points="5 12 12 5 19 12" />
+            </svg>
+          </Button>
         </PromptInputActions>
       </PromptInput>
     </div>
@@ -165,7 +191,11 @@ export const Disabled: Story = {
   ...src(`<PromptInput disabled value="" onValueChange={setValue}>
   <PromptInputTextarea placeholder="Chat is disabled..." />
   <PromptInputActions>
-    <Button variant="default" size="sm" disabled>Send</Button>
+    <Button size="icon-sm" class="rounded-full" aria-label="Send message" disabled>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="12" y1="19" x2="12" y2="5" /><polyline points="5 12 12 5 19 12" />
+      </svg>
+    </Button>
   </PromptInputActions>
 </PromptInput>`),
 };
@@ -192,16 +222,22 @@ export const Loading: Story = {
 </PromptInput>`),
 };
 
-/** A split actions row: a leading icon control and a trailing Send (showcase). */
+/** A split actions row: a leading icon control and a trailing Send (showcase).
+ *
+ *  `expanded` is pinned here, and that is what the prop is for. The frame derives its
+ *  layout (one row until the text wraps), so with an empty value this composition would
+ *  render both controls on the text's own row, packed together, and `justify-between`
+ *  would have nothing to distribute. Pinning it open is how a host says "always two rows",
+ *  and that is the arrangement demonstrated here. */
 export const WithMultipleActions: Story = {
   render: (args: EventArgs) => {
     const [value, setValue] = createSignal('');
     const handleChange = (v: string) => { setValue(v); args.onValueChange?.(v); };
     return (
       <div class="max-w-xl">
-        <PromptInput value={value()} onValueChange={handleChange} onSubmit={args.onSubmit}>
+        <PromptInput expanded value={value()} onValueChange={handleChange} onSubmit={args.onSubmit}>
           <PromptInputTextarea placeholder="Ask anything..." />
-          <PromptInputActions class="justify-between w-full px-2 pb-1">
+          <PromptInputActions class="justify-between">
             <div class="flex items-center gap-1">
               <Button variant="ghost" size="icon-sm" aria-label="Attach file">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -209,8 +245,10 @@ export const WithMultipleActions: Story = {
                 </svg>
               </Button>
             </div>
-            <Button variant="default" size="sm" disabled={!value()}>
-              Send
+            <Button size="icon-sm" class="rounded-full" aria-label="Send message" disabled={!value()}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="19" x2="12" y2="5" /><polyline points="5 12 12 5 19 12" />
+              </svg>
             </Button>
           </PromptInputActions>
         </PromptInput>
@@ -219,9 +257,13 @@ export const WithMultipleActions: Story = {
   },
   ...src(`<PromptInput value={value()} onValueChange={setValue}>
   <PromptInputTextarea placeholder="Ask anything..." />
-  <PromptInputActions class="justify-between w-full px-2 pb-1">
+  <PromptInputActions class="justify-between">
     <Button variant="ghost" size="icon-sm"><AttachIcon /></Button>
-    <Button variant="default" size="sm" disabled={!value()}>Send</Button>
+    <Button size="icon-sm" class="rounded-full" aria-label="Send message" disabled={!value()}>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="12" y1="19" x2="12" y2="5" /><polyline points="5 12 12 5 19 12" />
+      </svg>
+    </Button>
   </PromptInputActions>
 </PromptInput>`),
 };

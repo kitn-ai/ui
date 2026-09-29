@@ -977,18 +977,38 @@ describe('WEB_COMPONENT_COMPOSITION registry (single source of truth the build e
     // var in a component and the doc keeps describing it: a knob that does nothing,
     // advertised to every consumer and every agent. This asserts the registry
     // against the SOURCE, which is the direction nothing else checks.
+    //
+    // The scan root is ALL of `src/`, like every other source scan in this file. It
+    // used to be `src/web-components` alone, and that root could not see its own
+    // subject: the layer holds the `kai-*` FACADES, while the var is read by the
+    // Solid component under `src/components/` that renders the surface
+    // (`--kai-dropdown-max-height` lives in `components/dropdown/dropdown.tsx` and
+    // nowhere under `web-components/`). That miss also hid WHY it went unnoticed: the
+    // registered vars this root did find were found in `compiled.css` -- Tailwind
+    // transcribing a `max-w-[var(--kai-…)]` arbitrary value into a GENERATED,
+    // gitignored sheet -- so the verdict depended on whether `build:css` had run in
+    // this checkout, and a var written as an inline `var()` never appeared at all.
+    // Generated CSS is not a source, so it is skipped: `theme-tokens.ts` and the
+    // components are where a knob is actually read. The `stories` deny-list is the
+    // one every other scan here uses, so a docs page restating the registry cannot
+    // justify a name either.
     const source: string[] = [];
-    const walk = (dir: string): void => {
+    const walk = (dir: string, skip?: Set<string>): void => {
       for (const entry of readdirSync(dir, { withFileTypes: true })) {
         const path = resolve(dir, entry.name);
-        if (entry.isDirectory()) { walk(path); continue; }
+        if (entry.isDirectory()) {
+          if (skip?.has(entry.name)) continue;
+          walk(path);
+          continue;
+        }
         if (!/\.(tsx?|css)$/.test(entry.name)) continue;
         if (/\.(test|stories)\.tsx?$/.test(entry.name)) continue;
         if (path.endsWith('slots.ts')) continue;
+        if (entry.name === 'compiled.css') continue;
         source.push(readFileSync(path, 'utf8'));
       }
     };
-    walk(resolve(HERE, '..'));
+    walk(SRC, UNSCANNED_DIRS);
     const haystack = source.join('\n');
 
     const vars = Object.entries(WEB_COMPONENT_COMPOSITION).flatMap(([tag, def]) =>

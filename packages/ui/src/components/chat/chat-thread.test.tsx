@@ -3,6 +3,7 @@ import '@testing-library/jest-dom/vitest';
 import { createSignal } from 'solid-js';
 import { render, cleanup, fireEvent } from '@solidjs/testing-library';
 import { ChatThread, type ChatThreadController } from './chat-thread';
+import type { ThreadDensity } from './thread-density';
 import type { ChatMessage } from '../../web-components/chat/chat-types';
 import { localStorageStore } from '../../primitives/conversation-store';
 
@@ -115,28 +116,35 @@ describe('ChatThread emptyContent (JSX empty-state escape hatch)', () => {
   });
 });
 
-// `attach` passthrough: mirrors the existing webSearch/voice pattern (ChatThreadProps
-// -> the composer fallback branch -> DefaultPromptInput), but with the OPPOSITE
-// default direction. webSearch/voice default OFF when undeclared (`props.webSearch
-// === true`); attach must default ON when undeclared, so kit consumers who never
-// heard of this prop keep today's behavior (attach visible) and only an explicit
-// `attach={false}` hides it — forwarded as `props.attach` unchanged, not coerced.
+// `attach` passthrough: mirrors the `voice` pattern (ChatThreadProps -> the composer
+// fallback branch -> DefaultPromptInput), but with the OPPOSITE default direction.
+// `voice` defaults OFF when undeclared (`props.voice === true`); attach must default
+// ON when undeclared, so kit consumers who never heard of this prop keep today's
+// behavior (attach visible) and only an explicit `attach={false}` hides it —
+// forwarded as `props.attach` unchanged, not coerced.
+//
+// The observable moved from the paperclip to the `+` trigger when the file item
+// replaced that button, and this guard was re-pointed rather than left alone: its
+// "false hides it" case passed VACUOUSLY against the old selector, because a query for
+// a button that no longer exists finds nothing whether the prop works or not. With no
+// host tools declared, the tree is the file item ALONE, so the trigger's presence is
+// still an exact proxy for `attach`.
 describe('ChatThread attach passthrough', () => {
-  const attachButton = (container: HTMLElement) => container.querySelector('button[aria-label="Attach files"]');
+  const toolsTrigger = (container: HTMLElement) => container.querySelector('button[aria-label="More tools"]');
 
-  it('shows the attach button when attach is undeclared (default)', () => {
+  it('shows the tools trigger when attach is undeclared (default)', () => {
     const { container } = render(() => <ChatThread messages={[]} />);
-    expect(attachButton(container)).toBeTruthy();
+    expect(toolsTrigger(container)).toBeTruthy();
   });
 
-  it('shows the attach button when attach is explicitly true', () => {
+  it('shows the tools trigger when attach is explicitly true', () => {
     const { container } = render(() => <ChatThread messages={[]} attach={true} />);
-    expect(attachButton(container)).toBeTruthy();
+    expect(toolsTrigger(container)).toBeTruthy();
   });
 
-  it('removes the attach button when attach is explicitly false', () => {
+  it('removes the file item, and with it the trigger, when attach is explicitly false', () => {
     const { container } = render(() => <ChatThread messages={[]} attach={false} />);
-    expect(attachButton(container)).toBeNull();
+    expect(toolsTrigger(container)).toBeNull();
   });
 });
 
@@ -1275,6 +1283,101 @@ describe('composerStart/composerEnd (B-9)', () => {
     const start = getByTestId('cs');
     const end = getByTestId('ce');
     expect(start.compareDocumentPosition(end) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+});
+
+describe('ChatThread density axis', () => {
+  // The RENDERED attributes, not the map: a map entry that no call site reads would
+  // pass a test over `THREAD_DENSITY_CLASSES` and change nothing on screen. Every
+  // string below is byte-for-byte what this thread painted before the axis existed
+  // — which is the whole "`default` changes nothing" claim, checked here rather than
+  // asserted.
+  const log = (c: HTMLElement) => c.querySelector('[role="log"]') as HTMLElement;
+  const content = (c: HTMLElement) => log(c).firstElementChild as HTMLElement;
+  // The composer band is the nearest `shrink-0` ancestor of the editable: it is the
+  // only `shrink-0` in that chain (the composer's own `shrink-0` spans live INSIDE the
+  // editable, where `closest` cannot reach them).
+  const composerBand = (c: HTMLElement) =>
+    (c.querySelector('[data-kai-composer-editable]') as HTMLElement | null)?.closest('.shrink-0') as HTMLElement;
+
+  it('renders the shipped box with no `density` given', () => {
+    const { container } = render(() => <ChatThread messages={[]} />);
+    expect(log(container).getAttribute('class')).toBe('flex flex-col overflow-y-auto kai-focus-inset h-full px-4 py-3');
+    expect(content(container).getAttribute('class')).toBe('flex flex-col mx-auto w-full max-w-3xl space-y-4');
+    expect(composerBand(container).getAttribute('class')).toBe('shrink-0 px-4 pb-4');
+  });
+
+  it("renders the same box for an explicit `'default'`", () => {
+    const { container } = render(() => <ChatThread messages={[]} density="default" />);
+    expect(log(container).getAttribute('class')).toBe('flex flex-col overflow-y-auto kai-focus-inset h-full px-4 py-3');
+    expect(content(container).getAttribute('class')).toBe('flex flex-col mx-auto w-full max-w-3xl space-y-4');
+    expect(composerBand(container).getAttribute('class')).toBe('shrink-0 px-4 pb-4');
+  });
+
+  it("renders the tighter band, gap and composer padding for `'compact'`", () => {
+    const { container } = render(() => <ChatThread messages={[]} density="compact" />);
+    expect(log(container).getAttribute('class')).toBe('flex flex-col overflow-y-auto kai-focus-inset h-full px-3 py-2');
+    expect(content(container).getAttribute('class')).toBe('flex flex-col mx-auto w-full max-w-3xl space-y-2');
+    expect(composerBand(container).getAttribute('class')).toBe('shrink-0 px-3 pb-3');
+  });
+
+  it('moves the accessory row above the composer with the composer band, so the edges line up', () => {
+    const { container } = render(() => <ChatThread messages={[]} composerActions density="compact" />);
+    const actions = composerBand(container).previousElementSibling as HTMLElement;
+    expect(actions.getAttribute('class')).toBe('shrink-0 px-3');
+  });
+
+  it('falls back to `default` and says so for an unknown value arriving as a string', () => {
+    // The prop's TYPE rejects this; a value a runtime consumer can still produce (an
+    // attribute, a JS caller with `any`) has to land somewhere safe AND loud.
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const { container } = render(() => <ChatThread messages={[]} density={'cosy' as unknown as ThreadDensity} />);
+    expect(log(container).getAttribute('class')).toBe('flex flex-col overflow-y-auto kai-focus-inset h-full px-4 py-3');
+    expect(content(container).getAttribute('class')).toBe('flex flex-col mx-auto w-full max-w-3xl space-y-4');
+    expect(error).toHaveBeenCalledTimes(1);
+    expect(String(error.mock.calls[0][0])).toContain('ChatThread');
+    error.mockRestore();
+  });
+
+  it('leaves the column width alone, and moves the ROW gap with the density', () => {
+    // What this axis does NOT own is the column width, which is its own axis. What it
+    // DOES own, beyond the three bands, is one message internal: the row's avatar gap
+    // (`messageGap` in `thread-density.ts`). The row is the `part="row"` node, so the
+    // `default` attribute below is byte-for-byte what the row painted before this axis.
+    const rows = (c: HTMLElement) => [...c.querySelectorAll('[part="row"]')].map((r) => r.getAttribute('class'));
+    const message = { id: 'u1', role: 'user' as const, parts: [{ type: 'text' as const, text: 'hi' }] };
+    const shipped = render(() => <ChatThread messages={[message]} />).container;
+    expect(shipped.querySelector('[role="log"]')!.firstElementChild!.getAttribute('class')).toContain('max-w-3xl');
+    // (The user row's own `flex-col items-end` wins over `items-start` inside `cn`,
+    // which is why the shipped class reads as it does: same string before and after
+    // this change, which is the point.)
+    expect(rows(shipped)).toEqual(['flex gap-3 flex-col items-end']);
+
+    const compact = render(() => <ChatThread messages={[message]} density="compact" />).container;
+    expect(rows(compact)).toEqual(['flex gap-0 flex-col items-end']);
+    expect(compact.querySelector('[data-kai-composer-editable]')).toBeTruthy();
+  });
+});
+
+describe('ChatThread scroll overlay', () => {
+  // The other half of `thread.test.tsx`'s "Thread scroll overlay": this component ships its
+  // own copy of the same wrapper over the same message band, so the pair has to hold here
+  // too. jsdom cannot hit-test the strip — `scripts/probe-scroll-overlay.mjs` does.
+  it('makes the band a hole for the pointer, and gives the pointer back to the button', () => {
+    const { container } = render(() => (
+      <ChatThread messages={[{ id: 'u1', role: 'user', parts: [{ type: 'text', text: 'hi' }] }]} />
+    ));
+    const log = container.querySelector('[role="log"]') as HTMLElement;
+    Object.defineProperty(log, 'scrollHeight', { value: 2000, configurable: true });
+    Object.defineProperty(log, 'clientHeight', { value: 400, configurable: true });
+    log.scrollTop = 0;
+    log.dispatchEvent(new Event('scroll'));
+
+    const button = container.querySelector('button[aria-label="Scroll to bottom"]') as HTMLElement;
+    const wrapper = button.parentElement as HTMLElement;
+    expect(button.className).toContain('pointer-events-auto');
+    expect(wrapper.className).toContain('pointer-events-none');
+    expect(wrapper.className).toContain('absolute');
   });
 });
 

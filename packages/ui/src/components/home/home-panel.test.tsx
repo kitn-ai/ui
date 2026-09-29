@@ -76,6 +76,35 @@ describe('HomePanel (H-1)', () => {
     ));
     expect(container.querySelector('[data-kai-home-new]')).toBeNull();
   });
+
+  // The recent card's trailing region derives its own relative time from the summary
+  // (the consumer's `trailing` field is the card's SUBTITLE there, not this edge), so
+  // a consumer who owns that region could not reach "empty". Same option, same name
+  // and same default as the data row's.
+  it('showTrailing defaults on: the recent card derives a relative time on its trailing edge', () => {
+    const { container } = render(() => (
+      <HomePanel
+        recent={{ ...summary, updatedAt: new Date(Date.now() - 5 * 60_000).toISOString() }}
+        onNewChat={() => {}}
+      />
+    ));
+    expect(container.querySelector('[data-kai-home-recent]')!.textContent).toContain('5m ago');
+  });
+
+  it('showTrailing={false} leaves the recent card\'s trailing edge empty', () => {
+    const { container } = render(() => (
+      <HomePanel
+        recent={{ ...summary, updatedAt: new Date(Date.now() - 5 * 60_000).toISOString() }}
+        onNewChat={() => {}}
+        showTrailing={false}
+      />
+    ));
+    const card = container.querySelector('[data-kai-home-recent]')!;
+    expect(card.textContent).not.toContain('ago');
+    // The card's own content is untouched: title and the summary's `trailing` preview.
+    expect(card.textContent).toContain('Order #42');
+    expect(card.textContent).toContain('On its way!');
+  });
 });
 
 describe('WidgetTabBar (H-2, H-6)', () => {

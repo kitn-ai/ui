@@ -14,6 +14,13 @@ interface Props extends Record<string, unknown> {
   // selection; to read or drive the rest, use `el.values`.
   /** The FIRST selected value. Read or drive the rest with `el.values`. */
   value?: string;
+  // The WHOLE selection, the read/write companion to `value` (which is only its first
+  // entry). Installed on the host by `Object.defineProperty` in the facade below, the
+  // same way `value` is, and the same pair `<kai-select multiple>` exposes. Declared
+  // HERE because this interface is what the API generator reads: an undeclared runtime
+  // property is absent from web-component-meta.json, the generated types and the catalog.
+  /** The whole selection in order; `value` is only its first entry and setting this replaces it. */
+  values?: string[];
   // The shared form-control name every box carries, so `FormData.getAll(name)` reads the
   // whole selection back under one key.
   //
@@ -53,6 +60,7 @@ interface Events {
 defineWebComponent<Props, Events>('kai-checkbox-group', {
   options: [],
   value: undefined,
+  values: undefined,
   name: undefined,
   disabled: undefined,
   label: undefined,

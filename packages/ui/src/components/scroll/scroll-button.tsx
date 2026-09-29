@@ -69,8 +69,15 @@ function ScrollButton(props: ScrollButtonProps) {
         surfaceClasses(props.variant),
         // Square while icon-only; a pill-ish labelled button once the text is in.
         showLabel() ? 'h-10 w-auto gap-1.5 px-3.5 text-sm' : 'h-10 w-10 px-0',
+        // `pointer-events-auto` is not decoration. Whoever positions this button
+        // wraps it in an absolutely positioned box that spans the message band,
+        // and that box has to carry `pointer-events-none` or it swallows the
+        // wheel, drag-selection and clicks aimed at the content under it (see
+        // `thread.tsx`). A child of a pointer-inert box only takes the pointer
+        // back by asking for it, which is what this does — and it is why the
+        // `pointer-events-none` in the other branch has to stay.
         !isAtBottom()
-          ? 'translate-y-0 scale-100 opacity-100'
+          ? 'pointer-events-auto translate-y-0 scale-100 opacity-100'
           : 'pointer-events-none translate-y-4 scale-95 opacity-0',
         props.class
       )}

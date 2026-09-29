@@ -112,6 +112,13 @@ export interface KaiMenuItem {
   /** Membership in a single-select group (role=menuitemradio); items sharing a value are mutually exclusive. */
   radioGroup?: string;
   disabled?: boolean;
+  /** Muted second line under the label, e.g. "Visualize anything". */
+  description?: string;
+  /** The trailing glyph for a togglable item. Defaults to `check`. */
+  control?: 'check' | 'switch';
+  /** A non-interactive muted text row (uses `label`), for a disabled group's
+   *  reason. `label` is required; without it the row is empty. */
+  note?: true;
   /** A divider (ignores other fields). */
   separator?: boolean;
   /** A non-interactive section label (uses `label`). */

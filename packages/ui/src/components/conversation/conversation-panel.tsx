@@ -2,7 +2,7 @@ import { For, Show, createMemo } from 'solid-js';
 import { cn } from '../../utils/cn';
 import { ScrollArea } from '../scroll/scroll-area';
 import { relativeTimeShort, isConversationUnread } from './conversation-item';
-import { byRecency } from '../../primitives/conversation-store';
+import { orderedSummaries } from '../../primitives/conversation-store';
 import type { ConversationSummary } from '../../types';
 
 export interface ConversationPanelProps {
@@ -12,6 +12,15 @@ export interface ConversationPanelProps {
   onNewChat: () => void;
   /** Wording for the floating new-conversation pill. Defaults to "New conversation". */
   newChatLabel?: string;
+  // The row's trailing edge holds a relative time this component DERIVES from the
+  // summary's timestamps, so a consumer whose own chrome owns that edge had no way to
+  // reach "nothing": omitting the timestamps in the data only changed which fallback
+  // ran. Same option, same name and same default as the data row's
+  // (`ConversationItem.showTrailing`) and the list's (`ConversationList.showTrailing`),
+  // because it is one concept on one class of surface. The preview line under the
+  // title is not this edge, so it and its unread dot stay either way.
+  /** Paint each row's trailing edge, or leave the edge empty. Default `true`. */
+  showTrailing?: boolean;
   class?: string;
 }
 
@@ -28,18 +37,21 @@ export interface ConversationPanelProps {
  * and the list replaces the ENTIRE content area (`ChatThread` hides the
  * thread, suggestions and composer while this renders; see its
  * `view() === 'list'` branch).
+ *
+ * What it lists and in what order is the one list-order rule (`orderedSummaries`):
+ * archived rows are left out entirely (so an archived-only set shows this surface's own
+ * empty state) and pinned ones lead; ordered HERE rather than assumed of the caller, so a
+ * box fed a raw `store.list()` array reads the same as one fed the controller's cache.
  */
 export function ConversationPanel(props: ConversationPanelProps) {
-  // Most-recently-updated first — the same defensive sort ChatThread's own
-  // auto-restore uses (an unparsable/missing date sorts last, never throws).
-  const ordered = createMemo(() =>
-    [...props.conversations].sort(byRecency),
-  );
+  // Most-recently-updated first inside each half - the same rules ChatThread's own
+  // auto-restore reads, minus the pin hoist that pick deliberately does not use.
+  const ordered = createMemo(() => orderedSummaries(props.conversations));
 
   return (
     <div class={cn('relative flex h-full flex-col', props.class)}>
       <Show
-        when={props.conversations.length > 0}
+        when={ordered().length > 0}
         fallback={
           <div class="flex flex-1 flex-col items-center justify-center gap-1 p-6 text-center text-sm text-muted-foreground">
             No conversations yet
@@ -53,7 +65,12 @@ export function ConversationPanel(props: ConversationPanelProps) {
             <For each={ordered()}>
               {(conv) => {
                 const isActive = () => conv.id === props.activeId;
-                const time = () => relativeTimeShort(conv.updatedAt ?? conv.lastMessageAt);
+                // The edge is opted OUT of rather than into, because the written form of
+                // a default-true prop is `showTrailing={false}`; every other value leaves
+                // the row exactly as it was.
+                const time = () => (props.showTrailing === false
+                  ? ''
+                  : relativeTimeShort(conv.updatedAt ?? conv.lastMessageAt));
                 const unread = () => isConversationUnread(conv);
                 return (
                   // The row is a listitem WRAPPER holding a native <button>, not a

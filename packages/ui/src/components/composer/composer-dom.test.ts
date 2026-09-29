@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { ZWSP, createEntityEl, createTextWalker, isEntityEl, parseDom, renderDoc } from './composer-dom';
+import { ZWSP, createEntityEl, createTextWalker, isUsableImageSrc, isEntityEl, parseDom, renderDoc } from './composer-dom';
 
 const skill = { kind: 'skill', id: 'rec', label: 'Record & Replay' };
 
@@ -33,33 +33,73 @@ describe('composer-dom', () => {
     expect(parseDom(root)).toEqual([{ type: 'text', text: 'a\nb' }]);
   });
 
-  it('skills/agents render a sigil (no icon); other kinds resolve an icon: item icon > kindIcons > glyph > nothing', () => {
+  it('skills/agents render their built-in sigil, which wins over any icon', () => {
     // Skills + agents are LIGHT sigil-led text — a sigil span, never an icon.
     const skillPill = createEntityEl(document, { kind: 'skill', id: 's', label: 'S' });
     expect(skillPill.querySelector('.kai-composer-pill-sigil')?.textContent).toBe('/');
     expect(skillPill.querySelector('img')).toBeNull();
     expect(skillPill.querySelector('svg')).toBeNull();
     // kindIcons is ignored for a sigil kind (it still renders the sigil, no img).
-    const agentPill = createEntityEl(document, { kind: 'agent', id: 'a', label: 'A' }, { agent: '/bot.svg' });
+    const agentPill = createEntityEl(document, { kind: 'agent', id: 'a', label: 'A' }, { kindIcons: { agent: '/bot.svg' } });
     expect(agentPill.querySelector('.kai-composer-pill-sigil')?.textContent).toBe('@');
     expect(agentPill.querySelector('img')).toBeNull();
+  });
 
-    // Chip kinds (plugins, etc.): the icon-resolution chain still applies.
+  it('other kinds resolve one chain: own icon > kindIcons > built-in glyph > the kind’s trigger char', () => {
     const plugin = { kind: 'plugin', id: 'p', label: 'P' };
     // kindIcons default for the kind → <img>
-    const withKindIcon = createEntityEl(document, plugin, { plugin: '/plug.svg' });
+    const withKindIcon = createEntityEl(document, plugin, { kindIcons: { plugin: '/plug.svg' } });
     expect(withKindIcon.querySelector('img')?.getAttribute('src')).toBe('/plug.svg');
     // item's own icon wins over kindIcons
-    const withOwn = createEntityEl(document, { ...plugin, icon: '/own.png' }, { plugin: '/plug.svg' });
+    const withOwn = createEntityEl(document, { ...plugin, icon: '/own.png' }, { kindIcons: { plugin: '/plug.svg' } });
     expect(withOwn.querySelector('img')?.getAttribute('src')).toBe('/own.png');
+    // an icon NAME (`file-text` is a Lucide name, not a src) is treated as absent
+    // and the chain falls through instead of emitting a broken <img>.
+    const named = createEntityEl(document, { ...plugin, icon: 'file-text' }, { kindIcons: { plugin: '/plug.svg' } });
+    expect(named.querySelector('img')?.getAttribute('src')).toBe('/plug.svg');
     // no icon + no kindIcons → built-in plugin glyph (svg, no img)
     const glyph = createEntityEl(document, plugin);
     expect(glyph.querySelector('img')).toBeNull();
     expect(glyph.querySelector('svg')).toBeTruthy();
-    // an unknown chip kind with nothing → no icon element at all
+    // LAST step: a kind with no built-in glyph leads with the character that
+    // triggers it — the whole point, since a consumer's kind is reached by a
+    // trigger and would otherwise render a hole where a glyph belongs.
+    const mention = createEntityEl(
+      document,
+      { kind: 'mention', id: 'm', label: 'q3.pdf', icon: 'file-text' },
+      { sigils: { mention: '@' } },
+    );
+    expect(mention.querySelector('img')).toBeNull();
+    expect(mention.querySelector('.kai-composer-pill-sigil')?.textContent).toBe('@');
+    // No built-in glyph AND no trigger → no glyph element at all (never an empty box).
     const bare = createEntityEl(document, { kind: 'file', id: 'f', label: 'F' });
     expect(bare.querySelector('img')).toBeNull();
     expect(bare.querySelector('svg')).toBeNull();
+    expect(bare.querySelector('.kai-composer-pill-sigil')).toBeNull();
+  });
+
+  it('covers the tree’s second instance of the class: the builder’s `/` rows', () => {
+    // `builder-composer-triggers.tsx` maps `/` → kind `command`, and its default
+    // rows carry `icon: 'sparkles'` — a name, so the same defect rendered a broken
+    // <img> in the `/` menu too. Same class, same chain, no second fix.
+    const pill = createEntityEl(
+      document,
+      { kind: 'command', id: 'c', label: 'summarize', icon: 'sparkles' },
+      { sigils: { command: '/' } },
+    );
+    expect(pill.querySelector('img')).toBeNull();
+    expect(pill.querySelector('.kai-composer-pill-sigil')?.textContent).toBe('/');
+  });
+
+  it('isUsableImageSrc accepts addresses and rejects names', () => {
+    for (const src of ['https://x/y.png', 'data:image/svg+xml,<svg/>', 'blob:abc', '/x.png', './x.png', 'icons/x.png', 'x.png']) {
+      expect(isUsableImageSrc(src)).toBe(true);
+    }
+    // A name in an <img src> is a broken image — and a scheme an <img> cannot
+    // fetch is one that can never load, so neither counts as an address.
+    for (const name of ['file-text', 'sparkles', '', '   ', 'javascript:alert(1)', undefined, null, 42]) {
+      expect(isUsableImageSrc(name)).toBe(false);
+    }
   });
 
   it('createTextWalker skips text inside entity pills (pill label not in the text model)', () => {

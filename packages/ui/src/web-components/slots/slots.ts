@@ -198,6 +198,11 @@ export const PROMPT_INPUT_PARTS: PartDef[] = [
     doc: 'The send button. Restyle from outside, or hide it entirely (Enter-only). Hiding is pure CSS, which is why there is no `submit="never"`.',
     recipe: 'kai-prompt-input::part(send) { display: none } /* Enter-only; or restyle: background, border-radius, … */',
   },
+  {
+    name: 'tools',
+    doc: 'The `+` tools trigger, the leading control of the composer row. Restyle it from outside, or hide it to offer no menu at all.',
+    recipe: 'kai-prompt-input::part(tools) { display: none } /* or restyle: background, border-radius, … */',
+  },
 ];
 
 /** Styleable `::part`s of `<kai-button>`. */
@@ -740,6 +745,24 @@ export const MENU_PARTS: PartDef[] = [
   { name: 'shortcut', doc: 'The right-aligned per-item keyboard shortcut, rendered as kai-kbd key caps. Shown only when an item carries a `shortcut`.', recipe: 'kai-menu::part(shortcut) { opacity: 0.8 }' },
 ];
 
+/** CSS custom properties of the MENU SURFACE: `<DropdownContent>`, the portaled box
+ *  behind `<kai-menu>`, `<kai-dropdown>` and any component that renders one. Declared
+ *  once here because there is one surface: see `DROPDOWN_VARS`. */
+export const DROPDOWN_VARS: VarDef[] = [
+  {
+    name: '--kai-dropdown-max-width',
+    doc: 'How wide the menu surface may get. The `24rem` default is a CEILING forced by how the surface is laid out: it is `position: fixed` with no `width`, so it shrink-wraps to its content, and the widest row decides how wide EVERY row is: a panel inside a 280px rail opened 1216.9px wide (with 1208.9px rows) because one sentence-shaped note row was that long. Under the ceiling a long label and its description WRAP instead, so nothing is truncated and nothing is clipped; the panel gets taller rather than wider. Raise it for a surface whose rows are genuinely wide, lower it for a narrow rail.',
+    default: '24rem',
+    recipe: 'kai-menu { --kai-dropdown-max-width: 20rem }',
+  },
+  {
+    name: '--kai-dropdown-max-height',
+    doc: 'How tall the menu surface may get, and the default is the VIEWPORT rather than a number of pixels: `calc(100dvh - 2rem)` is the window the user actually has, minus a breathing gap, so a long menu is bounded on a laptop and on a short window alike. A menu holds as many rows as the consumer has data -- a rail listing the user\'s own conversations grows without limit -- and a wrapped label makes a capped menu taller, so without this the last rows landed below the fold with nothing to scroll: a 33-row menu measured 911px in a 560px window, its last row 386px past the bottom edge. The surface also takes whichever is smaller of this and the room left between its trigger and the viewport edge, so a long menu stays on screen beside its trigger instead of hanging off the bottom of the window; and it keeps its own scrollbar (`overflow-y: auto`) either way, so every row stays reachable. A menu that already fits shows no bar and is unchanged. Set any length or `calc()` (e.g. `60vh`) to lower the ceiling, or `none` to remove it (the panel is then still clamped to the room beside its trigger).',
+    default: 'calc(100dvh - 2rem)',
+    recipe: 'kai-menu { --kai-dropdown-max-height: 60vh }',
+  },
+];
+
 /** Slots of `<kai-thread>` (the standalone scrolling message list; messages come
  *  from the `messages` prop). */
 export const THREAD_SLOTS: SlotDef[] = [
@@ -749,6 +772,16 @@ export const THREAD_SLOTS: SlotDef[] = [
 /** Slots of `<kai-empty>`. The body is the default slot; `media` is the named seam. */
 export const EMPTY_SLOTS: SlotDef[] = [
   { name: 'media', mode: 'replace', doc: 'The leading illustration or icon above the title (any inline SVG or <img>). Replaces the built-in media box.' },
+];
+
+/** CSS custom properties of `<kai-empty>`. */
+export const EMPTY_VARS: VarDef[] = [
+  {
+    name: '--kai-empty-content-width',
+    doc: 'How wide the content in the default slot may be. The `24rem` default is a PROSE measure, right for a sentence and its action; content that is not prose (a two-up card grid) sets this to the measure its own column has, and the slotted content then stays inside the box instead of painting past it.',
+    default: '24rem',
+    recipe: 'kai-empty { --kai-empty-content-width: 48rem }',
+  },
 ];
 
 /** Slots of `<kai-popover>`. The panel body is the default slot; `trigger` is the
@@ -944,7 +977,7 @@ export const WEB_COMPONENT_COMPOSITION: Record<string, WebComponentComposition> 
   'kai-scroll-area': { parts: SCROLL_AREA_PARTS, children: 'The scrollable content.' },
   'kai-notice': { slots: NOTICE_SLOTS, children: 'The notice message. `icon` and `action` are the named seams around it.' },
   'kai-hover-card': { slots: HOVER_CARD_SLOTS, children: 'The TRIGGER the card hovers off. The card body is the `card` slot.' },
-  'kai-menu': { slots: MENU_SLOTS, parts: MENU_PARTS },
+  'kai-menu': { slots: MENU_SLOTS, parts: MENU_PARTS, vars: DROPDOWN_VARS },
   'kai-skeleton': { parts: SKELETON_PARTS },
   'kai-attachments': { parts: ATTACHMENTS_PARTS },
   'kai-status': { parts: STATUS_PARTS },
@@ -973,10 +1006,10 @@ export const WEB_COMPONENT_COMPOSITION: Record<string, WebComponentComposition> 
   'kai-kbd': { parts: KBD_PARTS, children: 'Literal key text, when you are not using the `keys` prop to render key caps.' },
   'kai-kbd-group': { parts: KBD_GROUP_PARTS, children: 'The `<kai-kbd>` elements to weld into one key strip, in order.' },
   'kai-editable-label': { parts: EDITABLE_LABEL_PARTS },
-  'kai-empty': { slots: EMPTY_SLOTS, children: 'The empty-state body below the title/description, usually the call to action.' },
+  'kai-empty': { slots: EMPTY_SLOTS, vars: EMPTY_VARS, children: 'The empty-state body below the title/description, usually the call to action. It is capped at a prose measure by default -- see `--kai-empty-content-width`.' },
   'kai-file-upload': { children: 'Custom dropzone content, replacing the default label (the `label` prop is the fallback).' },
   'kai-popover': { slots: POPOVER_SLOTS, children: 'The popover panel body. The control that opens it is the `trigger` slot.' },
-  'kai-dropdown': { slots: DROPDOWN_SLOTS, children: 'The menu body: your own rows. Give each `role="menuitem"`. The control that opens it is the `trigger` slot.' },
+  'kai-dropdown': { slots: DROPDOWN_SLOTS, vars: DROPDOWN_VARS, children: 'The menu body: your own rows. Give each `role="menuitem"`. The control that opens it is the `trigger` slot.' },
   'kai-resizable': { children: 'The `<kai-resizable-item>` panels, in order. Dividers are inserted between them.' },
   'kai-resizable-item': { children: 'This panel\'s content.' },
   'kai-tooltip': { slots: TOOLTIP_SLOTS, children: 'The TRIGGER the tooltip describes. The tip text is the `content` prop, or the `content` slot when it carries markup.' },

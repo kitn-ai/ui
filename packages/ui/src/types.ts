@@ -53,6 +53,18 @@ export interface ConversationSummary {
   // rather than guessing. Round-tripped through `list()`/`save()`; never authored by hand.
   /** ISO timestamp of when this conversation was last seen by the visitor. */
   lastReadAt?: string;
+  // Pinned and archived are the two list-shape flags, and the ONLY rule that reads them is
+  // `orderedSummaries` (primitives/conversation-store.ts): archived rows are excluded from
+  // every list surface, pinned rows sort above the recency order. Absent means false for
+  // both, so a record written before these fields existed (every record already on a
+  // visitor's machine) still reads as unpinned and unarchived, and a store that implements
+  // neither reads as a plain list rather than guessing. Written by
+  // ConversationStore.setPinned/setArchived, round-tripped through list(), and carried
+  // forward by save() the way lastReadAt is (a content event must not wipe a decision).
+  /** True to hold this row above the recency order in every list; absent or false to leave it in place. */
+  pinned?: boolean;
+  /** True to keep this row out of every list without deleting it; absent or false to show it. */
+  archived?: boolean;
 }
 
 export interface ConversationGroup {

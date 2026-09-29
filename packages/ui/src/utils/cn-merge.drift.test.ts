@@ -78,9 +78,9 @@ const oracle = extendTailwindMerge({
     classGroups: {
       'font-size': [{ text: ['micro', 'caption', 'meta', 'compact', 'body', 'title'] }],
       // Kit-added rungs must be taught to the oracle: tailwind-merge does not know
-      // `pill`, so it reports no conflict with `rounded-lg` while the kit's merger
-      // keys both into `radius` — otherwise this reads as a merger bug.
-      rounded: [{ rounded: ['pill'] }],
+      // `pill` or `composer`, so it reports no conflict with `rounded-lg` while the kit's
+      // merger keys all three into `radius` — otherwise this reads as a merger bug.
+      rounded: [{ rounded: ['pill', 'composer'] }],
     },
   },
 });

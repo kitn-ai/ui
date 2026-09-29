@@ -70,10 +70,77 @@ export function kindGlyph(kind: string): string {
   }
 }
 
+/**
+ * What leads an entity: the RESULT of the resolution chain below. `null` means
+ * "no glyph at all", which a caller renders as the label alone rather than as an
+ * empty box that reads as a space.
+ */
+export type GlyphSpec =
+  | { type: 'image'; src: string }
+  | { type: 'svg'; markup: string }
+  | { type: 'sigil'; text: string };
+
+/**
+ * Everything the glyph chain needs beyond the entity itself: the per-kind icon
+ * defaults (a `Composer` prop), and the per-kind SIGIL: the trigger character
+ * the caller creates that kind with (`{ command: '/', mention: '@' }`), derived
+ * from the same `triggers` prop the trigger detection reads.
+ */
+export interface GlyphContext {
+  kindIcons?: Record<string, string>;
+  sigils?: Record<string, string>;
+}
+
+/**
+ * True when a value is an ADDRESS an `<img>` can fetch, as opposed to a NAME.
+ * `icon: 'file-text'` is a Lucide name, not a `src`: putting it in one renders a
+ * broken image, which is a 1em hole where the glyph should be. That is the bug that made
+ * an `@`-mention pill read as "a space before the word". Accepted: an absolute
+ * URL whose scheme an `<img>` can fetch (`https:`, `data:`, `blob:`; a
+ * `javascript:` src is an image that can never load, so it counts as absent), or
+ * a path (`/x.png`, `./x.png`, `icons/x.png`, `x.png`).
+ */
+export function isUsableImageSrc(value: unknown): value is string {
+  if (typeof value !== 'string') return false;
+  const src = value.trim();
+  if (src === '') return false;
+  if (/^(https?|data|blob):/i.test(src)) return true;
+  return src.includes('/') || /\.(svg|png|jpe?g|gif|webp|avif|ico)$/i.test(src);
+}
+
+/**
+ * ONE resolution chain for what leads an entity, used by the pill
+ * (`createEntityEl`) AND by the composer's trigger-menu row, so the two surfaces
+ * cannot disagree about a kind:
+ *
+ *   the item's own icon -> the per-kind default (`kindIcons`) -> the kind's
+ *   built-in glyph -> the kind's SIGIL (its trigger char)
+ *
+ * The last step is what keeps a kind the kit knows nothing about from rendering a
+ * hole: a consumer's kind is reached by SOME trigger, and the character the user
+ * typed to get the entity is the honest glyph for it. Only a kind with no
+ * built-in glyph AND no trigger resolves to `null`. Every image candidate goes
+ * through `isUsableImageSrc`, so a NAME is treated as absent and the chain falls
+ * through instead of emitting a broken `<img>`.
+ */
+export function resolveGlyph(
+  kind: string,
+  icon: string | undefined,
+  ctx?: GlyphContext,
+): GlyphSpec | null {
+  for (const candidate of [icon, ctx?.kindIcons?.[kind]]) {
+    if (isUsableImageSrc(candidate)) return { type: 'image', src: candidate };
+  }
+  const markup = kindGlyph(kind);
+  if (markup) return { type: 'svg', markup };
+  const text = kindSigil(kind) || ctx?.sigils?.[kind];
+  return text ? { type: 'sigil', text } : null;
+}
+
 export function createEntityEl(
   doc: Document,
   entity: EntityRef,
-  kindIcons?: Record<string, string>,
+  ctx?: GlyphContext,
 ): HTMLElement {
   const el = doc.createElement('span');
   el.setAttribute(ENTITY_ATTR, '');
@@ -82,37 +149,34 @@ export function createEntityEl(
   el.dataset.id = entity.id;
   el.className = 'kai-composer-pill';
 
-  const sigil = kindSigil(entity.kind);
-  if (sigil) {
-    // Skills/agents: LIGHT pill — decorated inline text led by the sigil, no
-    // icon. (`/my-skill`, `@my-agent`.)
+  // Skills/agents: LIGHT pill — decorated inline text led by their built-in
+  // sigil, and that sigil WINS over any icon, which is what the light style
+  // means. (`/my-skill`, `@my-agent`.) Every other kind — plugins and any
+  // consumer kind — resolves through the shared chain, which ends at the kind's
+  // trigger character so no kind renders a hole where its glyph belongs.
+  const builtinSigil = kindSigil(entity.kind);
+  const spec: GlyphSpec | null = builtinSigil
+    ? { type: 'sigil', text: builtinSigil }
+    : resolveGlyph(entity.kind, entity.icon, ctx);
+
+  if (spec?.type === 'image') {
+    const img = doc.createElement('img');
+    img.src = spec.src;
+    img.alt = '';
+    img.className = 'kai-composer-pill-icon';
+    el.appendChild(img);
+  } else if (spec?.type === 'svg') {
+    const span = doc.createElement('span');
+    span.className = 'kai-composer-pill-icon kai-composer-pill-glyph';
+    span.setAttribute('aria-hidden', 'true');
+    span.innerHTML = spec.markup; // trusted SVG markup (not user input)
+    el.appendChild(span);
+  } else if (spec?.type === 'sigil') {
     const s = doc.createElement('span');
     s.className = 'kai-composer-pill-sigil';
     s.setAttribute('aria-hidden', 'true');
-    s.textContent = sigil;
+    s.textContent = spec.text;
     el.appendChild(s);
-  } else {
-    // Plugins (and other composite/unknown kinds): the richer CHIP, with an
-    // icon so a bundle reads differently from a skill/agent at a glance. Icon
-    // resolution: the item's own icon → per-kind default (kindIcons) → a
-    // built-in kind glyph (plugin) → nothing.
-    const iconSrc = entity.icon ?? kindIcons?.[entity.kind];
-    if (iconSrc) {
-      const img = doc.createElement('img');
-      img.src = iconSrc;
-      img.alt = '';
-      img.className = 'kai-composer-pill-icon';
-      el.appendChild(img);
-    } else {
-      const glyph = kindGlyph(entity.kind);
-      if (glyph) {
-        const span = doc.createElement('span');
-        span.className = 'kai-composer-pill-icon kai-composer-pill-glyph';
-        span.setAttribute('aria-hidden', 'true');
-        span.innerHTML = glyph; // trusted SVG markup (not user input)
-        el.appendChild(span);
-      }
-    }
   }
   el.appendChild(doc.createTextNode(entity.label));
   entityStore.set(el, entity);
@@ -146,13 +210,13 @@ export function renderDoc(
   root: HTMLElement,
   doc: ComposerDoc,
   ownerDoc: Document = document,
-  kindIcons?: Record<string, string>,
+  ctx?: GlyphContext,
 ): void {
   root.textContent = '';
   for (const seg of doc) {
     if (seg.type === 'text') root.appendChild(ownerDoc.createTextNode(seg.text));
     else {
-      root.appendChild(createEntityEl(ownerDoc, seg.entity, kindIcons));
+      root.appendChild(createEntityEl(ownerDoc, seg.entity, ctx));
       root.appendChild(ownerDoc.createTextNode(ZWSP));
     }
   }

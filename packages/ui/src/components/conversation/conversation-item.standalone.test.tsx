@@ -124,6 +124,73 @@ describe('SlottedConversationItem — standalone activation (onActivate set)', (
   });
 });
 
+describe('SlottedConversationItem — a control inside the row keeps its own keys and clicks', () => {
+  /**
+   * The standalone twin of the container case: the SAME shape — an inline editor
+   * in the row's default slot, the documented place for the title — reached here
+   * through the row body's OWN onClick/onKeyDown rather than a delegated
+   * container handler. Before the guard, the body's Enter/Space branch matched
+   * any key that bubbled up from inside it, so every SPACE in the editor was
+   * `preventDefault()`ed and the input never saw the character.
+   *
+   * Every negative assertion is paired with the row body doing the same thing
+   * below, so none of them can pass by the row simply going inert.
+   */
+  function renderWithEditor(onActivate: () => void) {
+    const { container } = render(() => (
+      <SlottedConversationItem conversationId="c-1" onActivate={onActivate}>
+        <input aria-label="Rename" />
+      </SlottedConversationItem>
+    ));
+    const input = container.querySelector('input') as HTMLInputElement;
+    const title = container.querySelector('[part~="title"]') as HTMLElement;
+    return { container, b: body(container), input, title };
+  }
+
+  it('a typed title keeps every SPACE and selects nothing', () => {
+    const onActivate = vi.fn();
+    const { input } = renderWithEditor(onActivate);
+    input.focus();
+    // jsdom implements no text insertion, so the platform default is applied
+    // here and ONLY when the keydown was not default-prevented — a swallowed
+    // space and a typed space would otherwise both leave the value empty.
+    for (const ch of 'Renamed by keyboard') {
+      if (fireEvent.keyDown(input, { key: ch }) !== false) input.value += ch;
+    }
+    expect(input.value).toBe('Renamed by keyboard');
+    expect(onActivate).not.toHaveBeenCalled();
+  });
+
+  it('Enter inside the editor neither activates the row nor is prevented', () => {
+    const onActivate = vi.fn();
+    const { input } = renderWithEditor(onActivate);
+    expect(fireEvent.keyDown(input, { key: 'Enter' })).toBe(true);
+    expect(fireEvent.keyDown(input, { key: ' ' })).toBe(true);
+    expect(onActivate).not.toHaveBeenCalled();
+  });
+
+  it('a click inside the editor does not activate the row', () => {
+    const onActivate = vi.fn();
+    const { input } = renderWithEditor(onActivate);
+    fireEvent.click(input);
+    expect(onActivate).not.toHaveBeenCalled();
+  });
+
+  it('the row body itself still activates: click, Enter and Space, with the editor present', () => {
+    const onActivate = vi.fn();
+    const { b, title } = renderWithEditor(onActivate);
+    fireEvent.click(b);
+    expect(onActivate).toHaveBeenCalledTimes(1);
+    // A click on the row's own inert content (the title wrapper around the
+    // editor) is still the row speaking.
+    fireEvent.click(title);
+    expect(onActivate).toHaveBeenCalledTimes(2);
+    expect(fireEvent.keyDown(b, { key: 'Enter' })).toBe(false);
+    expect(fireEvent.keyDown(b, { key: ' ' })).toBe(false);
+    expect(onActivate).toHaveBeenCalledTimes(4);
+  });
+});
+
 describe('SlottedConversationItem — inside a container (onActivate absent), nothing changes', () => {
   it('the body is not tabbable and carries no component-level activation', () => {
     const { container } = render(() => (

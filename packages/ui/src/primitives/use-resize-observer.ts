@@ -2,6 +2,12 @@
  *  THRESHOLD px (hysteresis kills sub-pixel oscillation). Returns a disposer. */
 const THRESHOLD = 1;
 export function observeContentHeight(el: Element, onHeight: (height: number) => void): () => void {
+  // No ResizeObserver -- jsdom, and therefore the kit's own unit environment -- means no
+  // content-height reporting at all. Returning a NO-OP rather than throwing is what keeps
+  // the platform assumption in the one module that makes it: a caller that does not know
+  // would otherwise throw on render, which is how a composer became unrenderable in the
+  // unit suite while every test that did not mount one stayed green.
+  if (typeof ResizeObserver === 'undefined') return () => {};
   let last = -1;
   const ro = new ResizeObserver((entries) => {
     const h = entries[entries.length - 1]?.contentRect.height ?? el.getBoundingClientRect().height;
@@ -32,6 +38,9 @@ export function observeContentHeight(el: Element, onHeight: (height: number) => 
  *  such floor; its scrollHeight is a plain padding-box measurement of body's own
  *  content, so it shrinks along with the card. */
 export function observeDocumentHeight(el: Element, onHeight: (height: number) => void): () => void {
+  // See `observeContentHeight`: a missing ResizeObserver is a documented environment, not
+  // an error, so this reports nothing rather than throwing at the caller.
+  if (typeof ResizeObserver === 'undefined') return () => {};
   let last = -1;
   const ro = new ResizeObserver(() => {
     const doc = el.ownerDocument;

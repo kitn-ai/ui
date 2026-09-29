@@ -203,6 +203,20 @@ describe('theme studio — --kai-density is wired, not merely catalogued', () =>
     await waitFor(() => expect(stepActive('Density', 'Loose')).toBe(true));
   });
 
+  it('accepts a paste carrying ONLY --kai-radius-composer, the token its own rejection message names', () => {
+    render(() => <ThemeStudio />);
+    fireEvent.click(screen.getByText('Import'));
+    fireEvent.input(screen.getByRole('textbox'), { target: { value: ':root { --kai-radius-composer: 0.5rem; }' } });
+    clickModalApply();
+    // The guard is a list of the tokens a paste may carry, and the message it shows on
+    // rejection reads that same list back to the user. It spelled one of them
+    // `composer-radius` while the token — and the message — say `radius-composer`, so a
+    // paste carrying only that knob was rejected by a sentence naming it as acceptable.
+    expect(screen.queryByText(/token found/)).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Code' }));
+    expect(exportedCss(), 'the imported value is what the studio holds').toContain('--kai-radius-composer: 0.5rem;');
+  });
+
   it('a density that is NOT one of the steps shows as Custom rather than being snapped', async () => {
     render(() => <ThemeStudio />);
     openOtherTab();
