@@ -307,7 +307,7 @@ export function ConversationItem(props: ConversationItemProps) {
   // `trailing` field, which is the PREVIEW line there), same as
   // ConversationPanel. The same option empties THIS edge in this density: the
   // preview line under the title is not the trailing edge, so it stays.
-  // The ACTIVE panel row sits on `bg-muted`, and muted text on the muted surface itself is
+  // The ACTIVE row (every density) sits on `bg-muted`, and muted text on the muted surface itself is
   // 4.42:1 in dark (#93918a on #2d2c2a), just under AA's 4.5. The token is right for every
   // other surface it lands on (5.68 on the background, 4.94 on the strongest surface), so
   // the row steps its own secondary text up instead, the same treatment the message-count
@@ -373,7 +373,7 @@ export function ConversationItem(props: ConversationItemProps) {
                   <UnreadDot />
                 </Show>
                 <Show when={trailing()}>
-                  <span part="trailing" class="ml-auto shrink-0 text-xs text-muted-foreground">{trailing()}</span>
+                  <span part="trailing" class={cn('ml-auto shrink-0 text-xs', activeMuted())}>{trailing()}</span>
                 </Show>
               </div>
               <div class={cn('mt-0.5 truncate text-xs', local.isActive ? 'text-foreground/70' : 'text-muted-foreground')}>{local.conversation.messageCount} messages</div>
@@ -387,7 +387,7 @@ export function ConversationItem(props: ConversationItemProps) {
               <UnreadDot />
             </Show>
             <Show when={trailing()}>
-              <span part="trailing" class="ml-auto shrink-0 text-xs text-muted-foreground">{trailing()}</span>
+              <span part="trailing" class={cn('ml-auto shrink-0 text-xs', activeMuted())}>{trailing()}</span>
             </Show>
           </div>
         </Show>
