@@ -185,6 +185,7 @@ export const LongMenu: Story = {
       source: {
         language: 'tsx',
         code: `${IMPORT}
+import { DropdownLabel } from '@kitn.ai/ui/solid';
 
 const chats = Array.from({ length: 30 }, (_, i) => \`Chat \${i + 1}\`);
 
