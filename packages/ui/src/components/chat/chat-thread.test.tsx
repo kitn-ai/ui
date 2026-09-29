@@ -1349,12 +1349,13 @@ describe('ChatThread density axis', () => {
     const shipped = render(() => <ChatThread messages={[message]} />).container;
     expect(shipped.querySelector('[role="log"]')!.firstElementChild!.getAttribute('class')).toContain('max-w-3xl');
     // (The user row's own `flex-col items-end` wins over `items-start` inside `cn`,
-    // which is why the shipped class reads as it does: same string before and after
-    // this change, which is the point.)
-    expect(rows(shipped)).toEqual(['flex gap-3 flex-col items-end']);
+    // which is why the class reads as it does. `group` is the hover-reveal default for a
+    // USER row (`resolveActionsReveal`: user -> 'hover', assistant -> 'always'): the row
+    // has to be the hover group its action bar reveals from.)
+    expect(rows(shipped)).toEqual(['flex gap-3 group flex-col items-end']);
 
     const compact = render(() => <ChatThread messages={[message]} density="compact" />).container;
-    expect(rows(compact)).toEqual(['flex gap-0 flex-col items-end']);
+    expect(rows(compact)).toEqual(['flex gap-0 group flex-col items-end']);
     expect(compact.querySelector('[data-kai-composer-editable]')).toBeTruthy();
   });
 });
