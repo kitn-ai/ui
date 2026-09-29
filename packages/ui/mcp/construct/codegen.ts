@@ -756,10 +756,12 @@ ${emitHistorySetup(c)}
 // be OFF). The construct schema carries ONE capability field so far
 // (capabilities.starters, Task 8) — every other affordance below is gated to
 // "off" unconditionally, not per-construct, until there's a field to gate ON.
-//   - webSearch / voice: real ChatThreadProps booleans, default OFF when
-//     omitted — set to \`false\` explicitly rather than left implicit, so the
-//     gating decision is visible in the emitted source, not just inferred
-//     from an absent prop.
+//   - voice: a real ChatThreadProps boolean, default OFF when omitted — set
+//     to \`false\` explicitly rather than left implicit, so the gating
+//     decision is visible in the emitted source, not just inferred from an
+//     absent prop. Web search is NOT a prop any more: it is a capability a
+//     host declares as an item in the composer's \`tools\` tree, so an
+//     undeclared one is absent rather than false.
 //   - suggestions: ChatThread ALREADY owns starter prompts end to end — its
 //     own \`suggestions\` prop renders the chips, hides them once
 //     \`messages\` is non-empty, and (default \`suggestionMode="submit"\`)
@@ -770,7 +772,7 @@ ${emitHistorySetup(c)}
 //   - models: omitted (undefined) — no model switcher; no capabilities field yet.
 //   - attachments (the paperclip): gated via ChatThread's \`attach\`/\`accept\`
 //     props (kit gap closed — ChatThread forwards both to DefaultPromptInput,
-//     mirroring webSearch/voice). ChatThread ALREADY owns the whole
+//     mirroring voice). ChatThread ALREADY owns the whole
 //     round-trip end to end — the paperclip button, staged previews, staging
 //     each file as a data URI (never a blob object URL; see
 //     AttachmentData.url's doc in primitives/attachment-types.ts), and
@@ -825,7 +827,7 @@ ${emitHistorySetup(c)}
 //     for \`widget\`, the one layout with something that closes/reopens at all.
 ${emitChromeComment(c)}export function App(${needsHost(c) ? 'props: { host: HTMLElement }' : ''}) {
 ${emitToggleThemeVar(c, '  ')}${emitDockCloseVar(c, '  ')}${emitChatControllerVar(c, '  ')}${emitConversationsSignalsVar(c, '  ')}${emitShellPaletteVars(c, '  ')}${emitPaneProbeVar(c, '  ')}${emitWorkSurfaceVars(c, '  ')}${emitHeaderActionDispatchVar(c, '  ')}  return (
-${hasShellPalette(c) ? '    <>\n' : ''}${emitLayoutOpen(c)}${emitSlots(c.slots, '      ')}      <ChatThread messages={chat.messages()} loading={chat.loading()} placeholder="Ask anything" onSubmit={submit} webSearch={false} voice={false}${emitHeaderProp(c)}${emitHeaderEndContentProp(c)}${emitAttachProps(c)}${emitStartersProp(c)}${emitReasoningProp(c)}${emitReasoningOpenProp(c)}${emitMessageActionsProps(c)}${emitHideSourcesProp(c)}${emitTriggersProp(c)}${emitEmptyContentProp(c)}${emitCardTypesProp(c)}${emitHomeProp(c)}${emitConversationsProps(c)}${emitChatControllerRefProp(c)}${emitChatThreadUnreadProps(c)} />
+${hasShellPalette(c) ? '    <>\n' : ''}${emitLayoutOpen(c)}${emitSlots(c.slots, '      ')}      <ChatThread messages={chat.messages()} loading={chat.loading()} placeholder="Ask anything" onSubmit={submit} voice={false}${emitHeaderProp(c)}${emitHeaderEndContentProp(c)}${emitAttachProps(c)}${emitStartersProp(c)}${emitReasoningProp(c)}${emitReasoningOpenProp(c)}${emitMessageActionsProps(c)}${emitHideSourcesProp(c)}${emitTriggersProp(c)}${emitEmptyContentProp(c)}${emitCardTypesProp(c)}${emitHomeProp(c)}${emitConversationsProps(c)}${emitChatControllerRefProp(c)}${emitChatThreadUnreadProps(c)} />
 ${emitLayoutClose(c)}${emitShellPaletteOverlay(c)}${hasShellPalette(c) ? '    </>\n' : ''}  );
 }
 `;
@@ -1544,7 +1546,7 @@ function emitTriggersProp(c: Construct): string {
 
 /** capabilities.attachments -> ChatThread's own \`attach\`/\`accept\` props.
  *  Undeclared keeps the explicit off-by-default gating (\`attach={false}\`,
- *  matching webSearch/voice above). Declared flips \`attach={true}\` and
+ *  matching voice above). Declared flips \`attach={true}\` and
  *  threads the accept list through — construct-authored/untrusted like
  *  \`starters\`/\`theme.accent\`/\`provider.url\`, so JSON.stringify'd into a
  *  real JS string-literal expression rather than a raw JSX attribute
@@ -2193,7 +2195,7 @@ ${indent}const [surfaceExpanded, setSurfaceExpanded] = createSignal(false);\n`
  *  never raw JSX attribute strings. Every chrome flag is emitted EXPLICITLY,
  *  true or false, so the gating decision is visible in the eject artifact
  *  rather than inferred from an absent prop — the same convention
- *  `webSearch={false}`/`voice={false}` already follow above. */
+ *  `voice={false}` already follows above. */
 function emitWorkSurface(c: Construct, indent: string): string {
   const ws = workSurfaceOf(c);
   if (!ws) return '';

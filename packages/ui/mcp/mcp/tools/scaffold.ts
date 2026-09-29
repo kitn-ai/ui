@@ -5140,7 +5140,13 @@ function renderSolid(components: readonly string[], ctx: RenderCtx): string {
         : []),
       `        <ChatContainerScrollAnchor />`,
       `      </ChatContainerContent>`,
-      `      <div class="absolute bottom-4 left-1/2 flex w-full max-w-3xl -translate-x-1/2 justify-center px-5">`,
+      // `pointer-events-none` on the wrapper, and the `ScrollButton` this emits
+      // carries the matching `pointer-events-auto`: a PAIR, because either one
+      // alone is a defect. A full-width wrapper left pointer-live swallows the
+      // wheel and the drag-selection over the message band, and a button inside a
+      // pointer-inert wrapper is unclickable without asking for the pointer back.
+      // The kit version this scaffold pins is the one that carries both halves.
+      `      <div class="pointer-events-none absolute bottom-4 left-1/2 flex w-full max-w-3xl -translate-x-1/2 justify-center px-5">`,
       `        <ScrollButton />`,
       `      </div>`,
       `    </ChatContainer>`,

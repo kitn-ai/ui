@@ -2777,8 +2777,8 @@ const SELF_TEST_CASES = [
   {
     name: '(f) a hyphenated event name camelCases (kai-attachments-change -> onAttachmentsChange)',
     code: `const meta = { title: 'X', argTypes: argTypesFor('kai-widget') };`,
-    events: { 'kai-widget': ['kai-attachments-change', 'kai-web-search'] },
-    expectElementEvents: ['onAttachmentsChange', 'onWebSearch'],
+    events: { 'kai-widget': ['kai-attachments-change', 'kai-select'] },
+    expectElementEvents: ['onAttachmentsChange', 'onSelect'],
   },
   {
     // The generator covers PROPS, and the only function-typed props in the meta
