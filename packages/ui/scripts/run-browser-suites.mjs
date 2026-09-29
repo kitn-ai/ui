@@ -22,7 +22,7 @@
  * whoever ran it by hand, invisible to the graph a merge gate reads.
  * `verify:playwright-projects` cannot see that gap -- it asserts every project
  * matches at least one spec, which is a fact about the config, not about who
- * runs it. `docs/handoff/2026-09-27-composer-empty-state-and-rail.md` had
+ * runs it. An earlier handoff had
  * already called `test:slots-ivp` "dead" in passing; the same was true of the
  * rest of the list. `test:containment` landed the next day with the same shape
  * (a new browser config, a new script, no CI step), which is why the vitest

@@ -224,7 +224,7 @@ The spec's §13.4 **plus the part of §13.5 that cannot wait**. Today `<kai-prom
 
 - [ ] **Step 1: Wire the template.** The app owns the `deviceId`: the block keeps the value in its state, sets `voice-device-id` from it, and updates it from `@kai-device-change`; `voice-preview` is on. For this block the value is in memory, and the plan says so rather than implying persistence the kit does not have (§9, §12.2).
 - [ ] **Step 2: Add the guide's turn.** Recording, transcription, the five events, the preview opt-in, and choosing a device — with a fence that names the props.
-- [ ] **Step 3: Gate.** `pnpm --filter @kitn.ai/ui run verify:guide-fences` (this is the gate that de-restricts), `verify:blocks`, driver states + baselines, screenshots re-recorded and noise-only diffs reverted.
+- [ ] **Step 3: Gate.** the block-side guide compile gate (this is the gate that de-restricts; it lives with the block work, not on this branch), `verify:blocks`, driver states + baselines, screenshots re-recorded and noise-only diffs reverted.
 - [ ] **Step 4: Commit.**
 
 **Acceptance:** the fence compiles, and the guide's prose no longer promises less than the kit does.
