@@ -14,15 +14,23 @@
 //   install. Those are what a doc fragment legitimately looks like, and a
 //   harness that fails them gets switched off within a day.
 //
+//   REFUSES — a surface read off a build that has not finished writing. Every
+//   count this harness prints comes from `surface`, so a truncated `dist` reads as
+//   a small package and produces a plausible number instead of a failure. The
+//   probe below builds that shape and requires the refusal to name the file it
+//   expected.
+//
 // If the kit types ever resolve to `any` — a bad symlink, an unbuilt dist, a
 // wrong moduleResolution — the MUST-FAIL probes go quiet and this file is what
 // notices.
-import { writeFileSync } from 'node:fs';
+import { writeFileSync, readFileSync, mkdtempSync, mkdirSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { compileProject, writeShims, bareSpecifiers, chooseWrapper } from './compile.mjs';
 import { checkMarkup, checkCss, checkMdxComponents } from './structural.mjs';
 import { makeShadowVariant, diffFindings } from './shadow.mjs';
 import { classifyCompileFinding } from './classify.mjs';
+import { declaredTypedEntries, incompleteSurfaceMessage, surfaceIncompleteness } from './surface.mjs';
 
 /** Snippets that MUST produce a KIT finding. */
 const MUST_FAIL = [
@@ -415,6 +423,64 @@ export function runSelfTest({ workspace, surface, uiRoot, verbose }) {
       } else {
         log.push(`    RED as required  ${shadowProbe.id}  ->  as-written: 0 errors; with the real ChatMessage: TS${introduced[0].code} ${truncate(introduced[0].message)}`);
       }
+    }
+  }
+
+  // ── surface-completeness probes ───────────────────────────────────────────
+  // The gate computes EVERY number it prints from `surface`, and `surface` is read off a
+  // built `dist`. A build caught mid-write therefore reads as a small package, and the
+  // harness reports a plausible count instead of failing — one tree reported 70 then 85
+  // advisories four minutes apart, the only tell being the entry-point count. These
+  // probes construct that exact shape (a package.json declaring more typed entries than
+  // the build wrote) and require the refusal to name BOTH sides of it. A guard for a
+  // silent wrong answer that has never been shown to fire is decoration.
+  {
+    // The anchor for the live run: what `packages/ui/package.json` declares is the floor
+    // `loadSurface` holds this tree to, so the probe below is measured against a real
+    // expectation rather than a number in this file.
+    const declared = declaredTypedEntries(uiRoot, JSON.parse(readFileSync(join(uiRoot, 'package.json'), 'utf8')));
+    if (!declared.length) {
+      problems.push(
+        `surface probe: ${join(uiRoot, 'package.json')} declares no typed entry points, so the completeness guard has nothing to hold the build to and every count below is unanchored.`,
+      );
+    } else if (surface.entries.size !== declared.length) {
+      problems.push(
+        `surface probe: ${declared.length} typed entry points are declared but ${surface.entries.size} were read — this run should already have refused to report.`,
+      );
+    } else {
+      log.push(`    ANCHORED as required  surface completeness floor  ->  ${declared.length} declared typed entry points, all read`);
+    }
+  }
+  {
+    // A package that DECLARES two typed entries and wrote one. `<tmp>/dist/index.d.ts` is
+    // empty on purpose: it exists, so the missing-file check cannot be what fires.
+    const root = mkdtempSync(join(tmpdir(), 'kai-surface-'));
+    mkdirSync(join(root, 'dist'), { recursive: true });
+    writeFileSync(join(root, 'dist', 'index.d.ts'), '');
+    const pkg = { exports: { '.': { types: './dist/index.d.ts' }, './wire': { types: './dist/wire.d.ts' } } };
+    const entries = new Map([
+      ['@kitn.ai/ui', new Map([['kaiFixture', { value: true, type: false }]])],
+      ['@kitn.ai/ui/wire', new Map()],
+    ]);
+    const problems2 = surfaceIncompleteness(root, pkg, entries);
+    const text = problems2.join('\n');
+    if (!problems2.length) {
+      problems.push(`surface probe: a half-written build (1 of 2 declared typed entries on disk) reported NO problem, so a truncated build would be reported on as if it were small.`);
+    } else if (!text.includes('@kitn.ai/ui/wire') || !text.includes('dist/wire.d.ts')) {
+      problems.push(`surface probe: the refusal does not name what it saw and what it expected:\n      ${text}`);
+    } else {
+      log.push(`    RED as required  incomplete surface  ->  ${problems2[0]}`);
+    }
+    // The other half of the same shape: the file exists but the build never finished writing
+    // it, so it declares nothing. `entries` here is what a program over that file yields.
+    const empty = surfaceIncompleteness(
+      root,
+      { exports: { '.': { types: './dist/index.d.ts' } } },
+      new Map([['@kitn.ai/ui', new Map()]]),
+    );
+    const message = incompleteSurfaceMessage(root, { exports: { '.': { types: './dist/index.d.ts' } } }, empty);
+    if (!empty.some((p) => p.includes('declares NO exports')) || !message.includes('1 typed entry points are declared')) {
+      problems.push(`surface probe: an existing-but-empty entry point was not reported as incomplete:\n      ${message}`);
     }
   }
 

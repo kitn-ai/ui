@@ -56,7 +56,7 @@ Register web components once, then wire up JS properties and DOM events:
 ```
 
 - **Array props**: `suggestions`, `triggers`, `kindIcons`, `attachments`: set them in JavaScript, not as attributes.
-- **Scalars**: `placeholder`, `disabled`, `loading`, `webSearch` (`web-search`), `voice`, `stoppable`, `suggestionMode`: attributes or properties.
+- **Scalars**: `placeholder`, `disabled`, `loading`, `voice`, `stoppable`, `suggestionMode`, `expanded`: attributes or properties.
 - **Loading + stoppable**: `loading` blocks submit while a response streams; `stoppable` swaps send for a Stop button that fires `kai-stop`.
 - **Custom toolbar buttons**: `<kai-action id icon tooltip>` children inside the element fire `kai-toolbar-action` with `detail.action`.
 - **Entity pills**: `triggers` makes `/` and `@` insert atomic skill/agent/plugin pills, and `kai-submit` / `kai-value-change` carry the structured `doc` + `entities`.
@@ -72,11 +72,36 @@ Type and press Enter, or click a chip, to fire `kai-submit`.
 
 <Example client:visible tag="kai-prompt-input" data="withSuggestions" />
 
-### With Voice and Web Search
+### With Voice, and a Search Capability
 
-`webSearch` and `voice` add Globe and Mic buttons, firing `kai-web-search` and `kai-voice`. Renamed from `search` / `kai-search`, with no alias.
+`voice` adds the built-in Mic button beside Send, firing `kai-voice`. **Web search is not a
+built-in button** — it is a capability the host declares as an item in the `tools` tree, where
+it renders as a menu checkbox and, with `chip: true`, as a removable chip in the row:
 
-<Example client:visible tag="kai-prompt-input" config={{ webSearch: true, voice: true }} data="withSuggestions" />
+```js
+input.tools = [{ id: 'web-search', label: 'Web search', icon: 'globe', checked: false, chip: true }];
+input.addEventListener('kai-select', (e) => {
+  if (e.detail.id !== 'web-search') return;
+  input.tools = input.tools.map((tool) =>
+    tool.id === 'web-search' ? { ...tool, checked: e.detail.checked } : tool);
+});
+```
+
+The `+` menu's own items are the same tree, so one array drives both surfaces.
+
+<Example client:visible tag="kai-prompt-input" config={{ voice: true }} data="withSuggestions" />
+
+### Changing the Corner
+
+The frame's radius is a token, so the pill is one line of CSS rather than a variant:
+
+```css
+kai-prompt-input { --kai-radius-composer: 0.75rem; }  /* a rounded square */
+```
+
+The default is derived — half the collapsed row — which is what makes the short box read as a
+pill and the tall one as a card; a fixed value gives that relationship up deliberately, and
+nothing else about the frame moves because every other dimension is a spacing step.
 
 ### Entity Pills
 
