@@ -1,0 +1,34 @@
+diff --git a/dist/component-register.js b/dist/component-register.js
+index 174b9b1117e6fd82babe24cadae97b20f4276cb0..72ba43276b19a71c8dc08f8d7500e2577262c9cc 100644
+--- a/dist/component-register.js
++++ b/dist/component-register.js
+@@ -119,7 +119,11 @@ function createElementType(BaseElement, propDefinition) {
+       this.__updating = {};
+       this.props = {};
+       for (let propKey of propKeys) {
+-        this[propKey] = undefined;
++        // kai patch: an own property here was set on the element BEFORE it was upgraded
++        // (createElement + assign, parsed markup + assign, template clone + assign).
++        // Overwriting it with undefined destroys the only copy, and the harvest in
++        // connectedCallback/initializeProps then reads undefined.
++        if (!Object.prototype.hasOwnProperty.call(this, propKey)) this[propKey] = undefined;
+       }
+     }
+     connectedCallback() {
+diff --git a/lib/component-register.js b/lib/component-register.js
+index 77ff7af89cfd4175c6330891391c83fd77afa9a7..4ff4a974aaf43604f7726ed2a253c2f6d8350444 100644
+--- a/lib/component-register.js
++++ b/lib/component-register.js
+@@ -123,7 +123,11 @@ function createElementType(BaseElement, propDefinition) {
+       this.__updating = {};
+       this.props = {};
+       for (let propKey of propKeys) {
+-        this[propKey] = undefined;
++        // kai patch: an own property here was set on the element BEFORE it was upgraded
++        // (createElement + assign, parsed markup + assign, template clone + assign).
++        // Overwriting it with undefined destroys the only copy, and the harvest in
++        // connectedCallback/initializeProps then reads undefined.
++        if (!Object.prototype.hasOwnProperty.call(this, propKey)) this[propKey] = undefined;
+       }
+     }
+     connectedCallback() {
