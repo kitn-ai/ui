@@ -31,3 +31,16 @@ describe('kai-command long labels', () => {
     expect(label.getBoundingClientRect().right).toBeLessThanOrEqual(option.getBoundingClientRect().right);
   });
 });
+
+describe('kai-command search focus', () => {
+  it('shows a rounded ring on the wrapper, not the square base outline on the input', async () => {
+    const cmd = await mount();
+    const input = cmd.shadowRoot!.querySelector('input') as HTMLInputElement;
+    input.focus();
+    await tick();
+    expect(getComputedStyle(input).outlineStyle).toBe('none');
+    const wrapper = input.parentElement as HTMLElement;
+    expect(parseFloat(getComputedStyle(wrapper).borderTopLeftRadius)).toBeGreaterThan(0);
+    expect(getComputedStyle(wrapper).boxShadow).not.toBe('none');
+  });
+});

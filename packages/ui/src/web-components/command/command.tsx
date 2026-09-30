@@ -148,7 +148,11 @@ defineWebComponent<Props, Events>('kai-command', {
 
   return (
     <div class="flex flex-col overflow-hidden">
-      <div class="border-b border-border px-3 py-2">
+      <div class="border-b border-border px-2 py-2">
+        {/* The ring sits on this wrapper, as kai-input's field row does, so it follows the
+            rounded box. On the input itself the base focus outline is a square 2px line
+            (radius 0), and dropping it with nothing in its place once left no indicator. */}
+        <div class="rounded-md px-1 focus-within:ring-2 focus-within:ring-ring">
         <input
           type="text"
           role="combobox"
@@ -158,13 +162,11 @@ defineWebComponent<Props, Events>('kai-command', {
           aria-controls={listboxId}
           value={query()}
           placeholder={(props.placeholder as string | undefined) ?? 'Search…'}
-          // No `focus-visible:outline-none` here. It used to suppress the base
-          // focus ring and put nothing in its place, so keyboard users had no
-          // indication of where they were in the palette.
-          class="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground"
+          class="w-full bg-transparent py-1 text-sm text-foreground outline-none placeholder:text-muted-foreground"
           onInput={handleInput}
           onKeyDown={handleKeyDown}
         />
+        </div>
       </div>
       <div class="overflow-y-auto max-h-[320px]">
         <CommandList
