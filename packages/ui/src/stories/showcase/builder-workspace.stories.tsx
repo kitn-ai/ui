@@ -419,14 +419,12 @@ function WorkspacePreview(props: {
   // Owner feedback round: the header's theme toggle needs a REAL dark mode
   // to flip, scoped to just this preview frame — not the whole Storybook
   // page (that's the manager's own theme toggle, an unrelated control).
-  // `web-components/define/define.tsx`'s real `<kai-*>` facade does exactly this per
-  // shadow root already: `classList={{ dark: isDark() }}` on a wrapper div,
-  // because `theme.css`'s `.dark { --color-background: ...; ... }` is a
-  // plain class selector (not `:root`/`:host`-scoped), so it re-declares
-  // every color token at WHATEVER element carries the class and cascades
-  // down from there — confirmed by reading `theme.css` before relying on
-  // this. That helper is module-private to `define.tsx` (not exported, and
-  // this file has no shadow root to attach to), so the same mechanism is
+  // `theme.css`'s `.dark { color-scheme: dark; --kai-color-scheme: dark }` is a plain class
+  // selector, and every colour token is a `light-dark()` resolved against the used
+  // `color-scheme` of whatever element paints with it, so the class re-themes everything
+  // under the element that carries it (a `<kai-*>` facade does the same per shadow root by
+  // writing `--kai-color-scheme` on its wrapper). That helper is module-private to
+  // `define.tsx` and this file has no shadow root to attach to, so the same mechanism is
   // replicated here rather than imported — `resolvedDark`/`toggleDark` in
   // `WorkspaceBuilderDemo` below do the `theme.mode` + system-preference
   // resolution `define.tsx`'s `createDarkMode` does, kept in sync with the
