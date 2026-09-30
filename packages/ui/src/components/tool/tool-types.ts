@@ -12,6 +12,16 @@ export interface RawOrigin {
   payload: unknown;
 }
 
+/** When a part ran, in epoch milliseconds. DISPLAY metadata for the activity line ("Thought for 6s"):
+ *  stamped by `createAssistantStream` through its injectable clock, never sent to a provider (the
+ *  wire encoders build each block field by field; `wire/timing-not-sent.test.ts` pins it), and
+ *  absent on a thread saved before it existed. `endedAt` is set once the part is over, so a part
+ *  with `startedAt` alone is still running. */
+export interface PartTiming {
+  startedAt: number;
+  endedAt?: number;
+}
+
 /** A tool-call part rendered by <Tool>. Pure type, kept JSX-free so it can be
  *  imported by the framework-neutral state core and the React typecheck pass.
  *
@@ -45,4 +55,6 @@ export interface ToolPart {
   errorText?: string;
   /** The untranslated provider payload this was normalized from. */
   raw?: RawOrigin;
+  /** When the call started and settled. Set by `createAssistantStream`; absent on older threads. */
+  timing?: PartTiming;
 }

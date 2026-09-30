@@ -1,5 +1,5 @@
 import type { MessagePart, RawOrigin } from '../web-components/chat/chat-types';
-import type { ToolPart } from '../components/tool/tool-types';
+import type { ToolPart, PartTiming } from '../components/tool/tool-types';
 import type { CardEnvelope } from '../primitives/card-contract';
 import { classifyTool } from '../primitives/tool-classify';
 
@@ -38,10 +38,24 @@ export interface ReasoningOpts {
   streamId?: string;
   label?: string;
   signature?: string;
+  // Carried forward when a later delta omits it, replaced when one gives it (that is how
+  // `createAssistantStream` ends a block). The folds never read a clock.
+  /** The block's timing; display metadata, never encoded. */
+  timing?: PartTiming;
   raw?: RawOrigin;
 }
 
 type ReasoningPart = Extract<MessagePart, { type: 'reasoning' }>;
+
+/** Where the reasoning block a delta belongs to sits in `parts`, or -1. The one place the
+ *  `(streamId, index)` key is spelled, shared with `createAssistantStream`, which has to know
+ *  whether a delta OPENS a block (to stamp its start) without re-deriving the rule. */
+export function findReasoningIndex(parts: MessagePart[], opts: Pick<ReasoningOpts, 'index' | 'streamId'> = {}): number {
+  const index = opts.index ?? 0;
+  return parts.findIndex(
+    (p) => p.type === 'reasoning' && (p.index ?? 0) === index && p.streamId === opts.streamId,
+  );
+}
 
 /** Keyed by `(streamId, index)` so parallel reasoning blocks stay distinct.
  *
@@ -68,11 +82,9 @@ export function appendReasoningPart(
 ): MessagePart[] {
   const index = opts.index ?? 0;
   const streamId = opts.streamId;
-  const i = parts.findIndex(
-    (p) => p.type === 'reasoning' && (p.index ?? 0) === index && p.streamId === streamId,
-  );
+  const i = findReasoningIndex(parts, opts);
   if (i < 0) {
-    return [...parts, { type: 'reasoning', text: delta, index, streamId, label: opts.label, signature: opts.signature, raw: opts.raw }];
+    return [...parts, { type: 'reasoning', text: delta, index, streamId, label: opts.label, signature: opts.signature, ...(opts.timing ? { timing: opts.timing } : {}), raw: opts.raw }];
   }
   const cur = parts[i] as ReasoningPart;
   const next: ReasoningPart = {
@@ -80,10 +92,17 @@ export function appendReasoningPart(
     text: cur.text + delta,
     label: opts.label ?? cur.label,
     signature: opts.signature ?? cur.signature,
+    ...(opts.timing ?? cur.timing ? { timing: opts.timing ?? cur.timing } : {}),
     raw: opts.raw ?? cur.raw,
   };
   if (reasoningEqual(cur, next)) return parts;
   return [...parts.slice(0, i), next, ...parts.slice(i + 1)];
+}
+
+/** Two timings are equal by VALUE (`startedAt`, `endedAt`), not identity: a producer rebuilds the
+ *  object on every patch, and comparing references would defeat the same-array dedupe. */
+function timingEqual(a: PartTiming | undefined, b: PartTiming | undefined): boolean {
+  return a === b || (a?.startedAt === b?.startedAt && a?.endedAt === b?.endedAt);
 }
 
 /** Every `ReasoningPart` key, in the order `reasoningEqual` checks them. Same
@@ -92,7 +111,7 @@ export function appendReasoningPart(
  *  here AND given a comparator, so a new field can never be silently ignored by
  *  the dedupe check and strand a stale array reference. */
 const REASONING_KEYS = [
-  'type', 'text', 'index', 'streamId', 'label', 'signature', 'raw',
+  'type', 'text', 'index', 'streamId', 'label', 'signature', 'timing', 'raw',
 ] as const satisfies readonly (keyof ReasoningPart)[];
 
 type _ReasoningKeysExhaustive = Exclude<
@@ -123,6 +142,7 @@ const REASONING_COMPARATORS: {
   streamId: (a, b) => a.streamId === b.streamId,
   label: (a, b) => a.label === b.label,
   signature: (a, b) => a.signature === b.signature,
+  timing: (a, b) => timingEqual(a.timing, b.timing),
   raw: (a, b) => a.raw === b.raw,
 };
 
@@ -220,7 +240,7 @@ function resolveKind(cur: ToolPart, patch: Partial<ToolPart>, nextType: string):
  *  to `ToolPart` without wiring it into both is a BUILD failure, not a silently
  *  stale array reference. */
 const TOOL_KEYS = [
-  'type', 'state', 'kind', 'toolCallId', 'errorText', 'rawInput', 'raw', 'input', 'output',
+  'type', 'state', 'kind', 'toolCallId', 'errorText', 'rawInput', 'raw', 'timing', 'input', 'output',
 ] as const satisfies readonly (keyof ToolPart)[];
 
 // If `ToolPart` gains a key absent from `TOOL_KEYS`, `Exclude<...>` stops being
@@ -259,6 +279,7 @@ const TOOL_COMPARATORS: { [K in (typeof TOOL_KEYS)[number]]: (a: ToolPart, b: To
   errorText: (a, b) => a.errorText === b.errorText,
   rawInput: (a, b) => a.rawInput === b.rawInput,
   raw: (a, b) => a.raw === b.raw,
+  timing: (a, b) => timingEqual(a.timing, b.timing),
   input: (a, b) => a.input === b.input || fingerprint(a.input) === fingerprint(b.input),
   output: (a, b) => a.output === b.output || fingerprint(a.output) === fingerprint(b.output),
 };
