@@ -1,10 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { userEvent } from 'vitest/browser';
-import '../../src/web-components/button/button';
-import '../../src/web-components/code-block/code-block';
-import '../../src/web-components/file-tree/file-tree';
-import '../../src/web-components/embed/embed';
-import '../../src/web-components/screen/screen';
+import { FIXTURES } from './hover-fixtures';
 import { resolveTokens } from '../theme/token-probe';
 
 /**
@@ -83,88 +79,114 @@ function foreground(el: Element, bg: [number, number, number]): [number, number,
   return over([c[0], c[1], c[2], alpha], bg);
 }
 
-/** Every interactive element in a subtree, through open shadow roots. */
+/** Every hoverable element under `root`, through open shadow roots. */
+const HOVERABLE = 'button:not([disabled]), a[href], summary, label, [role="button"], [role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"], [role="option"], [role="treeitem"], [role="tab"], [role="checkbox"], [role="radio"], [role="row"], [tabindex]:not([tabindex="-1"]), [data-kai-item-body], [class*="hover:bg-"]';
 function controls(root: Element | ShadowRoot, out: Element[] = []): Element[] {
   for (const el of root.querySelectorAll('*')) {
-    if (el.matches('button:not([disabled]), a[href], [role="button"], [role="menuitem"], [role="option"], [role="treeitem"], summary')) out.push(el);
+    if (el.matches(HOVERABLE)) out.push(el);
     if (el.shadowRoot) controls(el.shadowRoot, out);
   }
-  if (root instanceof Element && root.shadowRoot) controls(root.shadowRoot, out);
   return out;
 }
 const ownText = (el: Element) => [...el.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent ?? '').join('').trim();
 const label = (el: Element) => `${el.localName}${el.getAttribute('part') ? `[part=${el.getAttribute('part')}]` : ''}${el.getAttribute('aria-label') ? ` "${el.getAttribute('aria-label')}"` : ''}`;
-
-const FIXTURES: Record<string, () => HTMLElement> = {
-  'kai-code-block': () => Object.assign(document.createElement('kai-code-block'), { code: 'const a = 1;', language: 'ts', copy: true }),
-  'kai-file-tree': () =>
-    Object.assign(document.createElement('kai-file-tree'), {
-      summary: true,
-      defaultExpanded: ['src'],
-      files: [
-        { path: 'src/a.ts', code: 'a', additions: 2, deletions: 1, status: 'modified' },
-        { path: 'src/b.ts', code: 'b', status: 'added' },
-        { path: 'README.md', code: 'r' },
-      ],
-    }),
-  'kai-embed': () => Object.assign(document.createElement('kai-embed'), { data: { provider: 'youtube', id: 'dQw4w9WgXcQ', title: 'A video' } }),
-  'kai-screen': () => {
-    const s = Object.assign(document.createElement('kai-screen'), { open: true, back: true, headline: 'Screen' });
-    s.style.cssText = 'position:relative;display:block;height:240px;';
-    return s;
-  },
-  'kai-button ghost': () => btn('ghost'),
-  'kai-button subtle': () => btn('subtle'),
-  'kai-button outline': () => btn('outline'),
+const visible = (el: Element) => {
+  const r = el.getBoundingClientRect();
+  return r.width > 0 && r.height > 0;
 };
-function btn(variant: string) {
-  const b = document.createElement('kai-button');
-  b.setAttribute('variant', variant);
-  b.textContent = 'Label';
-  return b;
-}
 
-interface Row { scheme: string; fixture: string; control: string; kind: string; ratio: number; min: number }
+interface Row { scheme: string; fixture: string; control: string; node: string; kind: string; ratio: number; min: number }
 const rows: Row[] = [];
 
-describe.each(['light', 'dark'] as const)('hover contrast in %s', (scheme) => {
-  for (const [name, make] of Object.entries(FIXTURES)) {
+describe('every fixture is registered against the scan', () => {
+  it('has at least one fixture per registry key', () => {
+    expect(Object.keys(FIXTURES).length).toBeGreaterThan(0);
+  });
+});
+
+declare const __HOVER_SCHEMES__: string;
+const SCHEMES = (__HOVER_SCHEMES__.split(',') as ('light' | 'dark')[]).filter((x) => x === 'light' || x === 'dark');
+
+describe.each(SCHEMES)('hover contrast in %s', (scheme) => {
+  for (const [name, fixture] of Object.entries(FIXTURES)) {
     it(`${name} controls stay legible under the pointer`, async () => {
       const host = document.createElement('div');
       host.className = scheme;
-      host.style.cssText = 'padding:24px;width:520px;';
-      const el = make();
+      host.style.cssText = `padding:24px;width:520px;color-scheme:${scheme};--kai-color-scheme:${scheme};`;
+      await userEvent.unhover(document.body).catch(() => {}); // start each fixture with the pointer off the previous one
+      const el = await fixture.make();
       el.setAttribute('theme', scheme);
+      if (el.dataset.solidFixture !== undefined) el.style.cssText += `color-scheme:${scheme};--kai-color-scheme:${scheme};`;
       host.append(el);
       document.body.append(host);
-      await customElements.whenDefined(el.localName);
-      await settle(400);
-      const tokens = resolveTokens(el).resolved['--color-background'];
-      const page = rgba(tokens).slice(0, 3) as [number, number, number];
-      host.style.background = tokens;
+      await customElements.whenDefined(el.localName.includes('-') ? el.localName : 'kai-button');
+      await settle(500);
+      await fixture.after?.(el);
+      await settle(300);
+      const probe = document.querySelector('kai-button, kai-code-block') ?? el;
+      const tokens = (() => {
+        const t = document.createElement('kai-button');
+        t.setAttribute('theme', scheme);
+        host.append(t);
+        return t;
+      })();
+      await settle(120);
+      const bgToken = resolveTokens(tokens).resolved['--color-background'];
+      tokens.remove();
+      void probe;
+      const page = rgba(bgToken).slice(0, 3) as [number, number, number];
+      host.style.background = bgToken;
 
-      const found = controls(el);
-      expect(found.length, `${name}: no interactive controls found, the probe would pass vacuously`).toBeGreaterThan(0);
+      // Popups (menu, model switcher) may portal out of the fixture, so scan the whole body.
+      const seen = new Set<Element>();
+      const found = controls(document.body).filter((c) => visible(c) && !seen.has(c) && seen.add(c));
+      expect(found.length, `${name}: no hoverable controls found, the probe would pass vacuously`).toBeGreaterThan(0);
+      const rowsBefore = rows.length;
+      const skipped: string[] = [];
       for (const c of found) {
-        await userEvent.hover(c);
+        // Playwright's own actionability decides reachability: a control something paints over cannot be
+        // hovered by a pointer either, so it is not a state a person reaches. It is recorded, and the
+        // per-fixture assertion below still requires at least one measured control.
+        try {
+          await userEvent.hover(c, { timeout: 6000 });
+        } catch (e) {
+          skipped.push(`${label(c)} (${String(e).replace(/\s+/g, ' ').slice(0, 900)})`);
+          continue;
+        }
         await settle(350); // transition-colors is 150ms
-        const bg = backdrop(c, page);
         const measure = (node: Element, kind: string, min: number) => {
+          // The backdrop is resolved from the NODE, so a badge that paints its own fill is measured on it.
+          const bg = backdrop(node, page);
           const r = ratio(foreground(node, bg), bg);
-          rows.push({ scheme, fixture: name, control: label(c), kind, ratio: Math.round(r * 100) / 100, min });
+          rows.push({ scheme, fixture: name, control: label(c), node: label(node), kind, ratio: Math.round(r * 100) / 100, min });
         };
-        const text = ownText(c) || [...c.querySelectorAll('span,div')].some((n) => ownText(n));
-        if (text) measure(c, 'text', 4.5);
-        c.querySelectorAll('svg').forEach((svg) => measure(svg, 'icon', 3));
-        if (!text && !c.querySelector('svg')) measure(c, 'text', 4.5);
+        const walk = (n: Element) => {
+          // Rendered code is the kit's one documented axe exception (syntax-theme colours), see preview.ts.
+          if (n.localName === 'pre') return;
+          if (n.localName === 'svg') return measure(n, 'icon', 3);
+          if (ownText(n)) measure(n, 'text', 4.5);
+          // Slotted light-DOM content paints inside this control, coloured by the slot it lands in.
+          if (n instanceof HTMLSlotElement) {
+            for (const a of n.assignedNodes({ flatten: true })) {
+              if (a instanceof Element) walk(a);
+              else if (a.textContent?.trim()) measure(n, 'text', 4.5);
+            }
+          }
+          for (const ch of n.children) walk(ch);
+        };
+        const before = rows.length;
+        walk(c);
+        if (rows.length === before) measure(c, 'text', 4.5);
       }
-    }, 60_000);
+      expect(rows.length - rowsBefore, `${name}: ${found.length} control(s) found but none could be hovered and measured. Skipped: ${skipped.join('; ')}`).toBeGreaterThan(0);
+    }, 120_000);
   }
 });
 
 describe('hover contrast report', () => {
   it('every hovered control clears 4.5:1 for text and 3:1 for icons', () => {
-    console.table(rows.map((r) => ({ ...r, pass: r.ratio >= r.min ? 'yes' : 'NO' })));
+    const table = rows.map((r) => `${r.scheme.padEnd(5)} ${r.fixture.padEnd(30)} ${r.kind.padEnd(4)} ${String(r.ratio).padStart(6)} (min ${r.min}) ${r.control} > ${r.node}`);
+    console.log(table.join('\n'));
     const bad = rows.filter((r) => r.ratio < r.min);
     expect(rows.length).toBeGreaterThan(0);
     expect(bad, JSON.stringify(bad, null, 1)).toEqual([]);

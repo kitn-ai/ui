@@ -165,6 +165,19 @@ const ADVISORY = new Map([
   ],
 ]);
 
+/**
+ * Derived browser suites that run in their OWN CI job and so must not run here too. Keyed by suite id
+ * (the config path for shape 2), each with the reason. Not a coverage list: the config sweep still
+ * requires a script to name each of these, and a stale entry fails below.
+ */
+const OWN_JOB = new Map([
+  [
+    'vitest.hover.config.ts',
+    'the hover-contrast probe takes 4-6 min; it is the required `hover-contrast` job (one leg per ' +
+      'scheme) so it cannot push this job past its timeout',
+  ],
+]);
+
 const advisoryOnly = process.argv.includes('--advisory-only');
 const selfTest = process.argv.includes('--self-test');
 
@@ -321,6 +334,16 @@ for (const shape of SHAPES) {
   }
   suites.push(...found);
 }
+for (const id of OWN_JOB.keys()) {
+  if (!suites.some((s) => s.id === id)) {
+    console.error(
+      `run-browser-suites: OWN_JOB names ${id}, which no script derives as a browser suite. ` +
+        `Either the script was renamed (then the \`hover-contrast\` CI job no longer runs it) or the ` +
+        `entry is stale.`,
+    );
+    process.exit(1);
+  }
+}
 
 if (selfTest) {
   runSelfTest();
@@ -345,10 +368,11 @@ if (unreferenced.length > 0) {
   process.exit(1);
 }
 
-const selected = suites.filter((s) =>
+const inThisJob = suites.filter((s) => !OWN_JOB.has(s.id));
+const selected = inThisJob.filter((s) =>
   advisoryOnly ? ADVISORY.has(s.id) : !ADVISORY.has(s.id),
 );
-const skipped = suites.filter((s) => (advisoryOnly ? !ADVISORY.has(s.id) : ADVISORY.has(s.id)));
+const skipped = inThisJob.filter((s) => (advisoryOnly ? !ADVISORY.has(s.id) : ADVISORY.has(s.id)));
 
 if (selected.length === 0) {
   console.error(
@@ -361,7 +385,8 @@ if (selected.length === 0) {
 console.log(
   `run-browser-suites: ${advisoryOnly ? 'advisory' : 'blocking'} run of ${selected.length} ` +
     `derived suite(s): ${selected.map((s) => `${s.id} (${s.kind} · pnpm run ${s.script})`).join(', ')}` +
-    `${skipped.length ? `; not in this run: ${skipped.map((s) => s.id).join(', ')}` : ''}`,
+    `${skipped.length ? `; not in this run: ${skipped.map((s) => s.id).join(', ')}` : ''}` +
+    `${OWN_JOB.size ? `; own CI job: ${[...OWN_JOB.keys()].join(', ')}` : ''}`,
 );
 console.log(
   `run-browser-suites: config sweep walked ${collectConfigFiles(PKG).length} config file(s) under ` +
