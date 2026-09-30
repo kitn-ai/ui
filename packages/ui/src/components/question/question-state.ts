@@ -145,9 +145,10 @@ export function clampText(text: string, max: number): string {
   return `${text.slice(0, max)}\u2026 [+${text.length - max} more characters]`;
 }
 
-// Bidi format characters reorder the text AROUND them, and an isolate on the element cannot stop one
-// inside it: "\u202Eevil.exe" reads "exe.live". They are drawn as a visible code point instead.
-const BIDI_CONTROLS = /[\u202A-\u202E\u2066-\u2069\u200E\u200F\u061C]/g;
+// The embedding and override controls (U+202A-202E) reorder the text AROUND them, and an isolate on the
+// element cannot stop one inside it. LRM, RLM and the isolates are left alone: real RTL text carries them
+// and `unicode-bidi: isolate` contains them. "\u202Eevil.exe" reads "exe.live". They are drawn as a visible code point instead.
+const BIDI_CONTROLS = /[\u202A-\u202E]/g;
 const bidiLabel = (c: string): string => `[U+${c.charCodeAt(0).toString(16).toUpperCase().padStart(4, '0')}]`;
 
 /** Model text as it is DRAWN: bidi controls made visible, then clamped. Answers keep the original. */

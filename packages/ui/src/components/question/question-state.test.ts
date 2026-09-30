@@ -106,8 +106,11 @@ describe('question-state', () => {
   });
 
   it('showText draws a bidi override as a visible code point and leaves the rest alone', () => {
-    const out = showText('\u202Eevil.exe \u2066x\u2069');
-    expect(out).toBe('[U+202E]evil.exe [U+2066]x[U+2069]');
+    expect(showText('\u202Eevil.exe')).toBe('[U+202E]evil.exe');
+    expect(showText('\u202Bx\u202C')).toBe('[U+202B]x[U+202C]');
+    // marks real RTL text carries are left alone
+    expect(showText('\u05E9\u05DC\u05D5\u05DD\u200F')).toBe('\u05E9\u05DC\u05D5\u05DD\u200F');
+    expect(showText('a\u200Eb \u2066x\u2069')).toBe('a\u200Eb \u2066x\u2069');
     expect(showText('plain <b>text</b>')).toBe('plain <b>text</b>');
     expect(showText('y'.repeat(50), 10)).toMatch(/more characters/);
   });

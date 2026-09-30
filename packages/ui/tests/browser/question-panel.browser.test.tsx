@@ -471,6 +471,15 @@ describe('question panel in Chromium: bidi controls cannot reorder the text', ()
   });
 });
 
+describe('question panel in Chromium: real RTL text', () => {
+  it('a Hebrew label with a trailing RLM renders with no marker', async () => {
+    const he = '\u05E9\u05DC\u05D5\u05DD\u200F';
+    const p = await mount([{ id: 'q', header: he, question: he, kind: 'choice', required: true, options: [{ label: he }, { label: 'b' }] }]);
+    expect(p.root.textContent).not.toContain('U+');
+    expect(p.root.textContent).toContain(he);
+  });
+});
+
 describe('question panel in Chromium: Back and the confirm strip', () => {
   it('Back is hidden on the first step and shown after it', async () => {
     const p = await mount([SCOPE, TONE]);
