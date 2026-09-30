@@ -60,11 +60,23 @@ describe('message helpers', () => {
     expect(typeof msg.id).toBe('string');
   });
 
-  it('partsToText concatenates every text part and ignores others', () => {
+  it('partsToText joins text parts with a paragraph break and ignores others', () => {
     expect(partsToText([
       { type: 'text', text: 'a' },
       { type: 'reasoning', text: 'ignored' },
       { type: 'text', text: 'b' },
-    ])).toBe('ab');
+    ])).toBe('a\n\nb');
+  });
+
+  it('partsToText keeps text either side of a tool call apart, as copy and speech read it', () => {
+    expect(partsToText([
+      { type: 'text', text: 'Intro' },
+      { type: 'tool', tool: { type: 'web_search', toolCallId: 'c', state: 'output-available' } },
+      { type: 'text', text: 'Conclusion text' },
+    ])).toBe('Intro\n\nConclusion text');
+  });
+
+  it('partsToText of one text part is that text, with nothing added', () => {
+    expect(partsToText([{ type: 'text', text: 'solo' }])).toBe('solo');
   });
 });
