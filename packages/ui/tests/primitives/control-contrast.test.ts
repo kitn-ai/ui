@@ -222,15 +222,14 @@ const pillCss = (() => {
   return composerSrc.slice(at, composerSrc.indexOf('</style>', at));
 })();
 
-/** A `--kai-pill-<kind>` fallback hue, from the rule at the given scope. */
+/** A `--kai-pill-<kind>` fallback hue: one half of the rule's `light-dark(<light>, <dark>)`. */
 function pillHue(kind: 'skill' | 'agent', scope: 'light' | 'dark'): string {
-  const prefix = scope === 'dark' ? '\\.dark ' : '';
   const re = new RegExp(
-    `(^|\\n)\\s*${prefix}\\.kai-composer-pill\\[data-kind="${kind}"\\] \\{ color: var\\(--kai-pill-${kind}, (#[0-9a-f]{6})\\); \\}`,
+    `\\.kai-composer-pill\\[data-kind="${kind}"\\] \\{ color: var\\(--kai-pill-${kind}, light-dark\\((#[0-9a-f]{6}), (#[0-9a-f]{6})\\)\\); \\}`,
   );
   const m = re.exec(pillCss);
-  if (!m) throw new Error(`no ${scope} colour rule for pill kind "${kind}"`);
-  return m[2];
+  if (!m) throw new Error(`no light-dark() colour rule for pill kind "${kind}"`);
+  return scope === 'dark' ? m[2] : m[1];
 }
 
 describe('composer entity pills (WCAG 2.1 SC 1.4.3)', () => {
@@ -238,8 +237,11 @@ describe('composer entity pills (WCAG 2.1 SC 1.4.3)', () => {
     // The OS preference cannot be the switch: the surface behind the pill is
     // chosen by the theme attribute, so the two can disagree.
     expect(pillCss).not.toContain('@media (prefers-color-scheme'); // the rule, not the comment explaining it
-    expect(pillCss).toContain('.dark .kai-composer-pill[data-kind="skill"]');
-    expect(pillCss).toContain('.dark .kai-composer-pill[data-kind="agent"]');
+    // ... and not on a `.dark` ancestor either: a light-dark() fallback resolves against the element's
+    // own scheme (inherited `--kai-color-scheme`, or `theme`), which a `.dark` selector cannot see.
+    expect(pillCss).not.toContain('.dark .kai-composer-pill');
+    expect(pillCss).toMatch(/data-kind="skill"\] \{ color: var\(--kai-pill-skill, light-dark\(/);
+    expect(pillCss).toMatch(/data-kind="agent"\] \{ color: var\(--kai-pill-agent, light-dark\(/);
   });
 
   for (const [scope, surfaces] of [

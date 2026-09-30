@@ -27,7 +27,7 @@ function MessageSkills(props: MessageSkillsProps) {
       <div class={cn("flex items-center gap-1 flex-wrap", props.class)}>
         <For each={props.skills}>
           {(skill) => (
-            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-micro font-medium bg-violet-400/10 text-[light-dark(oklch(0.541_0.281_293.009),oklch(0.702_0.183_293.541))]">
+            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-micro font-medium bg-violet-400/10 text-[color:light-dark(oklch(0.541_0.281_293.009),oklch(0.702_0.183_293.541))]">
               {skill.name}
             </span>
           )}

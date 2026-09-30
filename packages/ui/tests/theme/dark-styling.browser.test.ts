@@ -61,8 +61,8 @@ const pill = (kind: string) => (r: ShadowRoot) => r.querySelector(`.kai-composer
 const sigil = (kind: string) => (r: ShadowRoot) => r.querySelector(`.kai-composer-pill[data-kind="${kind}"] .kai-composer-pill-sigil`);
 
 const ROWS: Row[] = [
-  { name: 'kai-input invalid border', mount: () => make('kai-input', () => {}, { invalid: '' }), find: (r) => r.querySelector('[class*="border-[light-dark"]'), prop: 'borderTopColor', light: DESTRUCTIVE.light, dark: mix(RED400, 70) },
-  { name: 'kai-select invalid border', mount: () => make('kai-select', (e) => { e.options = [{ value: 'a', label: 'A' }]; }, { invalid: '' }), find: (r) => r.querySelector('[class*="border-[light-dark"]'), prop: 'borderTopColor', light: DESTRUCTIVE.light, dark: mix(RED400, 70) },
+  { name: 'kai-input invalid border', mount: () => make('kai-input', () => {}, { invalid: '' }), find: (r) => r.querySelector('[class*="border-[color:light-dark"]'), prop: 'borderTopColor', light: DESTRUCTIVE.light, dark: mix(RED400, 70) },
+  { name: 'kai-select invalid border', mount: () => make('kai-select', (e) => { e.options = [{ value: 'a', label: 'A' }]; }, { invalid: '' }), find: (r) => r.querySelector('[class*="border-[color:light-dark"]'), prop: 'borderTopColor', light: DESTRUCTIVE.light, dark: mix(RED400, 70) },
   { name: 'kai-skills badge text', mount: () => make('kai-skills', (e) => { e.skills = [{ name: 'search' }]; }), find: (r) => r.querySelector('span[class*="violet"]'), prop: 'color', light: 'oklch(0.541 0.281 293.009)', dark: 'oklch(0.702 0.183 293.541)' },
   { name: 'kai-link-preview invalid chip background', mount: () => make('kai-link-preview', (e) => { e.data = { url: 'javascript:alert(1)' }; }), find: (r) => r.querySelector('[role="img"]'), prop: 'backgroundColor', light: mix(DESTRUCTIVE.light, 10), dark: mix(DESTRUCTIVE.dark, 20) },
   { name: 'kai-link-preview invalid chip border', mount: () => make('kai-link-preview', (e) => { e.data = { url: 'javascript:alert(1)' }; }), find: (r) => r.querySelector('[role="img"]'), prop: 'borderTopColor', light: mix(DESTRUCTIVE.light, 40), dark: mix(RED400, 50) },

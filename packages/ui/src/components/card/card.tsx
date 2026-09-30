@@ -170,7 +170,7 @@ export function Card(props: CardProps): JSX.Element {
       >
         <div
           role="alert"
-          class="flex items-start gap-2 rounded-lg border border-destructive/40 bg-[light-dark(color-mix(in_oklab,var(--color-destructive)_10%,transparent),color-mix(in_oklab,var(--color-destructive)_15%,transparent))] p-3 text-sm text-destructive-text"
+          class="flex items-start gap-2 rounded-lg border border-destructive/40 bg-[color:light-dark(color-mix(in_oklab,var(--color-destructive)_10%,transparent),color-mix(in_oklab,var(--color-destructive)_15%,transparent))] p-3 text-sm text-destructive-text"
         >
           <AlertTriangle size={16} class="mt-0.5 shrink-0" aria-hidden="true" />
           <span>{local.errorMessage}</span>
