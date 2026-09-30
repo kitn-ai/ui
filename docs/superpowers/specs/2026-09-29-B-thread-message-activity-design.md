@@ -3,7 +3,14 @@
 Part of the [composition round](2026-09-29-composition-round-design.md); builds on
 [A](2026-09-29-A-composition-contract-design.md) (the registry, the preset rule, root theme).
 Owner decisions: 15 (activity: summary → steps → args), 17 (plan display), 18 (presets stay,
-rebuilt), 19 (`kai-chat` flow-through only).
+rebuilt), 19 (`kai-chat` flow-through only), 20 (content attaches by growing into the prompt input),
+23 (activity line and plan display approved at the checkpoint).
+
+**Amended 2026-09-30 after the visual checkpoint.** The activity line and plan display were
+approved as mocked (round 1, branch `feat/comp-b0`, `stories/checkpoint/{activity,plan}.stories.tsx`).
+The plan now attaches to the prompt input's `above` region (spec
+[P](2026-09-30-P-prompt-attachments-design.md)), not a dock band. The thread's list renders from
+C's `threadRows(messages)` so C's answers bubble can sit between messages (§2). B1 is merged.
 
 ## 1. What is true today
 
@@ -47,6 +54,11 @@ the same parts: the preset's `MessageBody` renders each part group through publi
 (`Markdown`, `Activity`, `CardRenderer`, `Sources`, `Attachments`), and `lint:preset-parts` (A §5)
 enforces it. A parity test per preset (A's helper) compares preset vs composed DOM for a fixture
 containing every part variant.
+
+**Display rows.** `Thread` (preset mode) and `ChatApp` render their list from C's
+`threadRows(messages)` rather than from `messages` directly, so a non-message row (C's answers
+bubble) can sit between two messages. C1 lands `threadRows` first; B4 introduces the row loop and
+renders only `message` rows; C3 renders the `answers` rows.
 
 **The part registry.** Both elements (and `kai-chat`, flow-through) gain
 `renderers?: Record<string, string>` (A's `RendererMap`), as a JS property. Keys, most specific
@@ -166,12 +178,14 @@ runs.
 **Element: `<kai-plan>`.** Props `items: PlanItem[]` (data mode), `open`/`defaultOpen`
 (collapsed shows "3 of 7 done · <current in_progress label>"), `label` (default "Plan"); composed
 mode takes `<kai-plan-item status>` children; event `kai-open-change`. It is designed to sit in
-`kai-prompt-dock`'s `top` band (A adds the band slide animation). In the thread, a `kai_plan` tool
-part shows as one activity step, "Updated the plan".
+the prompt input's `above` region (spec P), where it grows into the input's card over a hairline
+divider. It carries no surface of its own. In the thread, a `kai_plan` tool part shows as one
+activity step, "Updated the plan".
 
 **`kai-chat` flow-through.** `kai-chat` derives `planFromMessages(messages)` and shows `kai-plan`
-in its dock's top band when present; new prop `plan: 'auto' | 'off'` (default `auto`). When C's
-question panel is open, the plan collapses to its one line.
+in the prompt input's `above` region when present; new prop `plan: 'auto' | 'off'` (default
+`auto`). While C's question panel replaces the composer the plan is not shown; after "Let's chat" it
+shares the `above` region with C's waiting line, collapsed to its one line.
 
 ## 5. Everything that moves
 
@@ -210,7 +224,7 @@ question panel is open, the plan collapses to its one line.
 - In-browser (storybook project + a Playwright IVP): a streamed turn in `kai-chat` shows the live
   step with shimmer and settles to the summary; expand and step-expand by mouse and keyboard;
   composed `kai-thread` with app children sticks to bottom while a child grows; `kai-plan` in the
-  dock updates as `kai_plan` calls arrive; light and dark; axe on every new story.
+  prompt input's `above` region updates as `kai_plan` calls arrive; light and dark; axe on every new story.
 - Consumer gates: `verify:consumer`, `verify:scaffold`, `verify:generated`, `verify:solid-coverage`,
   `lint:preset-parts`, `lint:silent-drops`.
 
