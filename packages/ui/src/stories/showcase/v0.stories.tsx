@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
+import { expect, waitFor } from 'storybook/test';
 import { createSignal, For, Show } from 'solid-js';
 import { RotateCcw } from 'lucide-solid';
 import '../../web-components/register/register'; // every kai-* element used below
@@ -586,6 +587,19 @@ export const V0: Story = {
         </kai-resizable>
       </div>
     );
+  },
+  // The composed Preview|Code toggle has to follow the tab it sets itself.
+  play: async ({ canvasElement }) => {
+    const art = canvasElement.querySelector('kai-artifact') as HTMLElement;
+    const tab = (name: string) => art.querySelector(`[slot="toolbar"] [role="tab"]:nth-child(${name === 'Preview' ? 1 : 2})`) as HTMLElement;
+    await waitFor(() => expect(tab('Preview')).not.toBeNull());
+    await expect(tab('Preview').getAttribute('aria-selected')).toBe('true');
+    tab('Code').click();
+    await waitFor(() => expect(tab('Code').getAttribute('aria-selected')).toBe('true'));
+    await expect(tab('Preview').getAttribute('aria-selected')).toBe('false');
+    // An assignment from outside the toolbar moves it too.
+    (art as HTMLElement & { tab: string }).tab = 'preview';
+    await waitFor(() => expect(tab('Preview').getAttribute('aria-selected')).toBe('true'));
   },
   parameters: {
     docs: {

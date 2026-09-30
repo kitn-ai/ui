@@ -114,6 +114,21 @@ export function composeArtifactToolbar(art: HTMLElement, controls: ToolbarContro
     };
     paint();
     art.addEventListener('kai-tab-change', paint);
+    // `kai-tab-change` reports the user's tab choice, not a `tab` assignment, and the toggle sets
+    // `el.tab` itself, so repaint on every write. The element installs its own `tab` accessor when
+    // it upgrades, so the wrap goes on after that, and wraps that accessor.
+    customElements.whenDefined('kai-artifact').then(() => queueMicrotask(() => {
+      const desc = Object.getOwnPropertyDescriptor(el, 'tab');
+      if (!desc?.get || !desc.set) return;
+      const { get, set } = desc;
+      Object.defineProperty(el, 'tab', {
+        configurable: true,
+        enumerable: true,
+        get: () => get.call(el),
+        set: (v: unknown) => { set.call(el, v); paint(); },
+      });
+      paint();
+    }));
     bar.append(list);
   }
   art.append(bar);
