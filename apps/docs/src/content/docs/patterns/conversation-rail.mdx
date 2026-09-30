@@ -1,0 +1,36 @@
+---
+title: Conversation rail
+description: A product sidebar composed from public parts, with search and collapse buttons, quick actions, collapsible project folders and recents.
+---
+
+import { Code } from '@astrojs/starlight/components';
+import railHtml from '../../../../../../packages/blocks/patterns/conversation-rail/conversation-rail.html?raw';
+import railJs from '../../../../../../packages/blocks/patterns/conversation-rail/conversation-rail.js?raw';
+
+<p class="kai-lede">A header with search and collapse buttons, quick-action rows, project folders that hold conversations, and a recents list. Every part is a public component; the arrangement is a page you own and edit.</p>
+
+```bash
+npx kai add conversation-rail
+```
+
+That writes `src/patterns/conversation-rail/` with the two files below. The rail sits in the `start` aside of a [`kai-workspace`](/components/workspace/), so it resizes and collapses like any other aside.
+
+## The page
+
+<Code code={railHtml} lang="html" title="conversation-rail.html" />
+
+## The script
+
+<Code code={railJs} lang="js" title="conversation-rail.js" />
+
+## How the parts fit
+
+- **Header.** The `header` slot of [`kai-conversations`](/components/conversations/) replaces the built-in title bar. The search and collapse buttons are plain [`kai-button`](/components/button/)s, and the quick actions are interactive `kai-row`s. They only report a click. What a click does is the script's decision.
+- **Folders.** A folder is a native `<details>`. The rail walks the rows inside open folders and skips the ones inside closed folders, and a summary keeps its own Enter and Space toggle. There is one tab stop into the rows, and arrows move across folders.
+- **Search.** The button opens a [command palette](/patterns/command-trigger/) in a dialog. The chat list, the filter and what selecting a result does all live in your script, so the palette shows whatever you assign to `items`.
+- **Collapse.** The button calls `collapseAside('start')` on the workspace. Swap it for whatever your layout does.
+- **Active row.** The rail reports `kai-conversation-select`. Your script sets `activeId` in response, which is why the highlight follows your state and not the element's.
+
+## Make it yours
+
+Rows can be any `kai-conversation-item`, wrapped in whatever structure you want, and each takes a `menu` slot for your own row menu. Replace the hard-coded rows with a loop over your records. The pattern keeps ARIA valid by putting each folder's rows in a list inside a list item, so keep that shape if you change the markup.

@@ -2,6 +2,8 @@
 
 **Status:** approved, not started. Queued after the command-palette work.
 
+**2026-09-29:** the mechanism had shipped (`createRovingTabList` in `@kitn.ai/ui`, `createConversationItemsController` in `@kitn.ai/ui/solid`), so the claims below that it is not exported are stale. Nested rows moved to [2026-09-29-D](2026-09-29-D-conversation-rail-design.md).
+
 ## The question that produced this
 
 Is the conversation list going to keep causing problems because it is a *configuration* of a fixed arrangement rather than a set of parts a developer can *compose*? Will it be stale in a month, and will we end up maintaining versions 1, 2 and 3 of it for the different things applications apply to it?

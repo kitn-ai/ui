@@ -1,6 +1,6 @@
 ---
 title: Conversations
-description: A conversation sidebar for switching between past chats.
+description: A conversation sidebar. Slot your own rows and folders, or pass an array.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -17,9 +17,9 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kai-tag-sub">kai-conversations</p>
 
-<p class="kai-lede">Groups the history by whatever you group on, with search built in.</p>
+<p class="kai-lede">Slot your own rows and arrange them however the app needs, or hand it an array and let it group and search for you.</p>
 
-<Facts items={['Shadow DOM', '3 events', 'Flat or grouped lists', 'Built-in search', 'Declarative child elements']} />
+<Facts items={['Shadow DOM', '3 events', 'Composable rows', 'Folders of rows', 'Flat or grouped preset', 'Built-in search']} />
 
 ## Preview
 
@@ -29,7 +29,47 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 On a chat app's left rail, beside the thread it switches between. For a whole chat surface in one element, use [Chat](/components/chat/).
 </Aside>
 
-## Usage
+## Compose the rail
+
+Slot `<kai-conversation-item>` rows, put your own controls in the `header` slot, and group rows in native `<details>` folders. The element gives every row one shared tab stop, arrow traversal and activation, and it reports selection. Where things sit and what a click does stays in your page.
+
+```html
+<kai-conversations id="rail" active-id="c2">
+  <div slot="header">
+    <span>Assistant</span>
+    <kai-button id="search" variant="ghost" size="icon-sm" icon="search" label="Search chats"></kai-button>
+  </div>
+  <details open>
+    <summary>Assistant UI</summary>
+    <kai-conversation-item conversation-id="c1">Wiring the fetch route</kai-conversation-item>
+    <kai-conversation-item conversation-id="c2">Streaming reasoning parts</kai-conversation-item>
+  </details>
+  <kai-conversation-item conversation-id="c3">Naming the export</kai-conversation-item>
+</kai-conversations>
+```
+
+Rows inside an open folder are rows, so arrows walk across folders. Rows inside a closed folder are skipped, and the folder's summary keeps its native Enter and Space toggle. A `kai-conversation-item` placed inside another row's `menu` slot is a preview, not a row.
+
+The [conversation rail](/patterns/conversation-rail/) pattern is the full version: search and collapse buttons, quick actions, project folders and recents. Install it with `npx kai add conversation-rail`.
+
+### Build your own rail
+
+If the arrangement is not `kai-conversations` at all, `createRovingTabList` from `@kitn.ai/ui` is the same keyboard mechanism as a function. You supply the rows and what activation means, and it maintains the single tab stop.
+
+```js
+import { createRovingTabList } from '@kitn.ai/ui';
+
+const nav = document.querySelector('nav');
+const list = createRovingTabList({
+  getRows: () => [...(nav?.querySelectorAll('a') ?? [])],
+  onActivate: (row) => row.click(),
+});
+nav?.addEventListener('keydown', list.handleKeyDown);
+nav?.addEventListener('click', list.handleClick);
+list.sync(); // call again whenever rows are added, removed or change state
+```
+
+## The `conversations` preset
 
 Set the data in JavaScript (it's arrays and objects) and listen for CustomEvents:
 
@@ -130,7 +170,7 @@ Slot `<kai-conversation-item>` children into the list and the loop is yours: fra
 
 Each item takes a default slot for the title plus three named slots: `leading` (an icon or avatar), `meta` (a timestamp or status line), and `menu`. The `menu` slot takes your own popover, and that is the point: rename, fork, and archive are entries in YOUR menu, wired to YOUR state, not a declarative actions prop. A click inside the menu never selects the row.
 
-Keyboard order: the row bodies share a single roving tab stop (Tab enters at the active row, arrow keys move between rows), and each row's menu trigger keeps its natural place in the tab order, directly after its row. The menu sits BESIDE the activation body in the accessibility tree, never inside it, so your trigger stays reachable without tripping accessibility checkers on nested controls.
+Keyboard order: the row bodies share a single roving tab stop (Tab enters at the active row, arrow keys move between rows, including rows inside open folders), and each row's menu trigger keeps its natural place in the tab order, directly after its row. The menu sits BESIDE the activation body in the accessibility tree, never inside it, so your trigger stays reachable without tripping accessibility checkers on nested controls.
 
 **Standalone rows.** Outside `<kai-conversations>` — a hand-rolled rail, or any wrapper that isn't the container itself — a `<kai-conversation-item>` activates itself: its body is a tabbable button and click, Enter or Space fire `kai-select` on the item with `{ id }` in the detail (non-bubbling, so listen on the row). What standalone rows don't get is the container's list story — roving tabindex and arrow-key traversal stay yours. Inside the container nothing changes: `kai-conversation-select` on the container is the one activation event, and the item stays silent.
 
