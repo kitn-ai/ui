@@ -1,0 +1,11 @@
+{
+  "name": "agent-card",
+  "kind": "pattern",
+  "title": "Agent card",
+  "description": "One agent's state at a glance: a kai-row with a kai-status dot, an outline kai-badge for the attention signal and a kai-menu for per-agent actions.",
+  "files": [
+    { "path": "agent-card.html", "type": "html" },
+    { "path": "agent-card.js", "type": "js" },
+    { "path": "agent-card.css", "type": "css" }
+  ]
+}

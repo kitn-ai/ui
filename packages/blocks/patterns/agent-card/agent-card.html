@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Agent card</title>
+    <link rel="stylesheet" href="./agent-card.css" />
+  </head>
+  <body>
+    <!-- The card is four public parts. The row is the button (Enter and Space
+         come from it); the menu is its SIBLING, laid over the row's trailing
+         edge, because a menu trigger inside the row's button would nest one
+         interactive control in another. -->
+    <template id="agent-card">
+      <div class="agent-card">
+        <kai-row interactive>
+          <span slot="leading" class="agent-status">
+            <kai-status></kai-status>
+            <span class="agent-status-label" aria-hidden="true"></span>
+          </span>
+          <span class="agent-name"></span>
+          <span slot="trailing" class="agent-trailing">
+            <!-- Visible text, so the attention signal is never colour alone. -->
+            <kai-badge variant="outline" hidden>Needs you</kai-badge>
+          </span>
+        </kai-row>
+        <kai-menu class="agent-menu"></kai-menu>
+      </div>
+    </template>
+
+    <div id="agents" class="agent-list"></div>
+    <p id="log" aria-live="polite"></p>
+
+    <script type="module" src="./agent-card.js"></script>
+  </body>
+</html>
