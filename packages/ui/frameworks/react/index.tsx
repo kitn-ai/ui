@@ -65,6 +65,8 @@ import type {
   KaiPaneGroupElement,
   KaiPanelElement,
   KaiPanelHeaderElement,
+  KaiPlanElement,
+  KaiPlanItemElement,
   KaiPopoverElement,
   KaiProgressBarElement,
   KaiPromptDockElement,
@@ -464,6 +466,8 @@ export interface ChatProps extends WebComponentProps {
   codeHighlight?: boolean;
   /** Seeds the reasoning disclosure open and keeps it tracking the stream. Default false; inert unless `reasoning` is `'full'`. */
   reasoningOpen?: boolean;
+  /** Whether the agent's latest plan (a `kai_plan` tool call) shows above the prompt input. Default on; `off` hides it. */
+  plan?: "auto" | "off";
   /** Title shown at the start of the header bar. */
   chatTitle?: string;
   /** Model list; more than one renders a switcher in the header. */
@@ -560,7 +564,7 @@ export interface ChatProps extends WebComponentProps {
 
 export const Chat = /*#__PURE__*/ createWebComponent<ChatProps, KaiChatElement>(
   'kai-chat',
-  ["theme","reasoning","density","value","placeholder","loading","suggestions","suggestionsLayout","suggestionMode","persistSuggestions","proseSize","codeTheme","imagePreview","codeHighlight","reasoningOpen","chatTitle","models","currentModel","context","scrollButton","headerStart","headerEnd","showTrailing","headerFull","homeFull","sidebar","empty","composer","composerActions","footer","attach","tools","expanded","voice","triggers","kindIcons","actionsReveal","userActions","assistantActions","hideSources","accept","messages","cardTypes","renderers","cardSchemas","conversations","store","home","hostOpen"],
+  ["theme","reasoning","density","value","placeholder","loading","suggestions","suggestionsLayout","suggestionMode","persistSuggestions","proseSize","codeTheme","imagePreview","codeHighlight","reasoningOpen","plan","chatTitle","models","currentModel","context","scrollButton","headerStart","headerEnd","showTrailing","headerFull","homeFull","sidebar","empty","composer","composerActions","footer","attach","tools","expanded","voice","triggers","kindIcons","actionsReveal","userActions","assistantActions","hideSources","accept","messages","cardTypes","renderers","cardSchemas","conversations","store","home","hostOpen"],
   { onAttachmentsChange: 'kai-attachments-change', onAttachmentsRejected: 'kai-attachments-rejected', onConversationLoad: 'kai-conversation-load', onHomeLink: 'kai-home-link', onMessageAction: 'kai-message-action', onModelChange: 'kai-model-change', onSelect: 'kai-select', onSubmit: 'kai-submit', onSuggestionClick: 'kai-suggestion-click', onUnreadChange: 'kai-unread-change', onValueChange: 'kai-value-change', onVoice: 'kai-voice' },
   () => import('@kitn.ai/ui/web-components/chat'),
 );
@@ -1591,6 +1595,38 @@ export const PanelHeader = /*#__PURE__*/ createWebComponent<PanelHeaderProps, Ka
   ["theme"],
   {  },
   () => import('@kitn.ai/ui/web-components/panel'),
+);
+
+export interface PlanProps extends WebComponentProps {
+  /** Data mode: the plan, as `planFromMessages(messages)` returns it. JS property; omit to pass `<kai-plan-item>` children. */
+  items?: { id: string; label: string; status: "pending" | "in_progress" | "completed" }[];
+  /** Drive/observe the disclosure: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
+  open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** The header shown while open. Default `Plan`. */
+  label?: string;
+  /** The plan expanded or collapsed (via the line, an attribute, or `show()`/`hide()`/`toggle()`). */
+  onOpenChange?: (event: CustomEvent<{ open: boolean }>) => void;
+}
+
+export const Plan = /*#__PURE__*/ createWebComponent<PlanProps, KaiPlanElement>(
+  'kai-plan',
+  ["theme","items","open","defaultOpen","label"],
+  { onOpenChange: 'kai-open-change' },
+  () => import('@kitn.ai/ui/web-components/plan'),
+);
+
+export interface PlanItemProps extends WebComponentProps {
+  /** `pending` (default), `in_progress` or `completed`. Names the glyph for assistive tech and styles the row. */
+  status?: "pending" | "in_progress" | "completed";
+}
+
+export const PlanItem = /*#__PURE__*/ createWebComponent<PlanItemProps, KaiPlanItemElement>(
+  'kai-plan-item',
+  ["theme","status"],
+  {  },
+  () => import('@kitn.ai/ui/web-components/plan-item'),
 );
 
 export interface PopoverProps extends WebComponentProps {

@@ -111,12 +111,15 @@ function CodeBlockCode(props: CodeBlockCodeProps) {
   const [probe, setProbe] = createSignal<HTMLElement>();
   onMount(() => {
     let raf = 0;
+    // Bound here, at mount: a teardown callback must not resolve a DOM global by bare name
+    // (it can run where the global is gone). Client-only, so the guard is belt and braces.
+    const cancel = typeof cancelAnimationFrame === 'function' ? cancelAnimationFrame.bind(globalThis) : () => {};
     const settle = () => {
       if (probeEl?.isConnected) setProbe(probeEl);
       else raf = requestAnimationFrame(settle);
     };
     settle();
-    onCleanup(() => cancelAnimationFrame(raf));
+    onCleanup(() => cancel(raf));
   });
   const scheme = createMemo(() => {
     const el = probe();

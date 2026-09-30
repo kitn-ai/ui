@@ -888,6 +888,12 @@
           "fn": false
         },
         {
+          "name": "plan",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
           "name": "chatTitle",
           "scalar": true,
           "optional": true,
@@ -3687,6 +3693,80 @@
         "PanelBody",
         "PanelFooter",
         "PanelHeader"
+      ],
+      "tokens": []
+    },
+    {
+      "tag": "kai-plan",
+      "description": "The agent's plan: one line (\"2 of 4 done · the running item\") that opens to a checklist, over a thin progress bar. It has no surface of its own, so put it in `<kai-prompt-input>`'s `above` slot (`<kai-chat>` does that for you). Pass `items` for the preset, or put `<kai-plan-item>` children inside to write the rows yourself.",
+      "props": [
+        {
+          "name": "theme",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "items",
+          "scalar": false,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "open",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "defaultOpen",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "label",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        }
+      ],
+      "events": [
+        "kai-open-change"
+      ],
+      "methods": [
+        "show",
+        "hide",
+        "toggle"
+      ],
+      "parts": [],
+      "composedFrom": [
+        "Plan"
+      ],
+      "tokens": []
+    },
+    {
+      "tag": "kai-plan-item",
+      "description": "One row of a `kai-plan` checklist. Put the item's text inside it. Compose the rows yourself inside `<kai-plan>`; the container adds the summary line, the progress bar and the list.",
+      "props": [
+        {
+          "name": "theme",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "status",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        }
+      ],
+      "events": [],
+      "methods": [],
+      "parts": [],
+      "composedFrom": [
+        "PlanItemRow"
       ],
       "tokens": []
     },

@@ -3,14 +3,14 @@
 ## Overview
 
 <!-- spec:overview -->
-`@kitn.ai/ui` ships 105 framework-agnostic custom elements built on the SolidJS kit.
+`@kitn.ai/ui` ships 107 framework-agnostic custom elements built on the SolidJS kit.
 
 | Tag | Purpose |
 |-----|---------|
 | `<kai-chat>` | Full chat UI — message list plus prompt input |
 | `<kai-conversations>` | Sidebar conversation browser with group support |
 | `<kai-prompt-input>` | Standalone text-input area with send button |
-| + 102 composable custom elements | See the full roster below |
+| + 104 composable custom elements | See the full roster below |
 <!-- /spec:overview -->
 
 Each web component renders into its own **Shadow DOM** so the host page's CSS cannot leak in, and the kit's Tailwind classes cannot leak out. SolidJS and all kit dependencies are bundled inside the web-components bundle — the host does not need SolidJS.
@@ -153,6 +153,7 @@ Every web component also accepts a `theme` attribute (`'light' | 'dark' | 'auto'
 | `imagePreview` | `image-preview` | `undefined | "hover" | "lightbox"` | — | How an image tile reveals full size. `'lightbox'` is the only value keyboard and touch can reach. Default `'hover'`. |
 | `codeHighlight` | `code-highlight` | `undefined | false | true` | `true` | Renders plain `<pre>` blocks with no highlighter load when false. Default true. |
 | `reasoningOpen` | `reasoning-open` | `undefined | false | true` | — | Seeds the reasoning disclosure open and keeps it tracking the stream. Default false; inert unless `reasoning` is `'full'`. |
+| `plan` | `plan` | `undefined | "auto" | "off"` | — | Whether the agent's latest plan (a `kai_plan` tool call) shows above the prompt input. Default on; `off` hides it. |
 | `chatTitle` | `chat-title` | `undefined | string` | — | Title shown at the start of the header bar. |
 | `models` | — | `undefined | { id: string; name: string; provider?: undefined | string; description?: undefined | string; group?: undefined | string }[]` | — | Model list; more than one renders a switcher in the header. |
 | `currentModel` | `current-model` | `undefined | string` | — | The currently selected model id (pairs with `models`). |

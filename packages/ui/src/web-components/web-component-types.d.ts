@@ -467,6 +467,8 @@ export interface KaiChatElement extends HTMLElement {
   codeHighlight?: boolean;
   /** Seeds the reasoning disclosure open and keeps it tracking the stream. Default false; inert unless `reasoning` is `'full'`. */
   reasoningOpen?: boolean;
+  /** Whether the agent's latest plan (a `kai_plan` tool call) shows above the prompt input. Default on; `off` hides it. */
+  plan?: "auto" | "off";
   /** Title shown at the start of the header bar. */
   chatTitle?: string;
   /** Model list; more than one renders a switcher in the header. */
@@ -1501,6 +1503,36 @@ export interface KaiPanelElement extends HTMLElement {
 export interface KaiPanelHeaderElement extends HTMLElement {
   /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
+}
+
+export interface KaiPlanElement extends HTMLElement {
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
+  theme?: "light" | "dark" | "auto";
+  /** Data mode: the plan, as `planFromMessages(messages)` returns it. JS property; omit to pass `<kai-plan-item>` children. */
+  items: { id: string; label: string; status: "pending" | "in_progress" | "completed" }[];
+  /** Drive/observe the disclosure: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
+  open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** The header shown while open. Default `Plan`. */
+  label?: string;
+  /** Open it programmatically (no-op while disabled). */
+  show(): void;
+  /** Close it programmatically. */
+  hide(): void;
+  /** Flip the open state (closes while disabled). */
+  toggle(): void;
+  addEventListener<K extends keyof KaiPlanElementEventMap>(type: K, listener: (this: KaiPlanElement, ev: KaiPlanElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+  addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+  removeEventListener<K extends keyof KaiPlanElementEventMap>(type: K, listener: (this: KaiPlanElement, ev: KaiPlanElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+  removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+}
+
+export interface KaiPlanItemElement extends HTMLElement {
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
+  theme?: "light" | "dark" | "auto";
+  /** `pending` (default), `in_progress` or `completed`. Names the glyph for assistive tech and styles the row. */
+  status?: "pending" | "in_progress" | "completed";
 }
 
 export interface KaiPopoverElement extends HTMLElement {
@@ -2776,6 +2808,11 @@ export interface KaiPaneGroupElementEventMap extends HTMLElementEventMap {
   'kai-tab-menu': CustomEvent<{ id: string }>;
 }
 
+export interface KaiPlanElementEventMap extends HTMLElementEventMap {
+  /** The plan expanded or collapsed (via the line, an attribute, or `show()`/`hide()`/`toggle()`). */
+  'kai-open-change': CustomEvent<{ open: boolean }>;
+}
+
 export interface KaiPopoverElementEventMap extends HTMLElementEventMap {
   /** The popover opened or closed (click, Escape, outside-click, or a method). */
   'kai-open-change': CustomEvent<{ open: boolean }>;
@@ -3034,6 +3071,8 @@ declare global {
     'kai-pane-group': KaiPaneGroupElement;
     'kai-panel': KaiPanelElement;
     'kai-panel-header': KaiPanelHeaderElement;
+    'kai-plan': KaiPlanElement;
+    'kai-plan-item': KaiPlanItemElement;
     'kai-popover': KaiPopoverElement;
     'kai-progress-bar': KaiProgressBarElement;
     'kai-prompt-dock': KaiPromptDockElement;
@@ -3232,6 +3271,8 @@ declare module 'react' {
       'kai-pane-group': KaiElementJsxProps;
       'kai-panel': KaiElementJsxProps;
       'kai-panel-header': KaiElementJsxProps;
+      'kai-plan': KaiElementJsxProps;
+      'kai-plan-item': KaiElementJsxProps;
       'kai-popover': KaiElementJsxProps;
       'kai-progress-bar': KaiElementJsxProps;
       'kai-prompt-dock': KaiElementJsxProps;
@@ -3539,6 +3580,8 @@ export interface KaiChatElementProps {
   codeHighlight?: boolean;
   /** Seeds the reasoning disclosure open and keeps it tracking the stream. Default false; inert unless `reasoning` is `'full'`. */
   reasoningOpen?: boolean;
+  /** Whether the agent's latest plan (a `kai_plan` tool call) shows above the prompt input. Default on; `off` hides it. */
+  plan?: "auto" | "off";
   /** Title shown at the start of the header bar. */
   chatTitle?: string;
   /** Model list; more than one renders a switcher in the header. */
@@ -4295,6 +4338,26 @@ export interface KaiPanelElementProps {
 export interface KaiPanelHeaderElementProps {
   /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
+}
+
+export interface KaiPlanElementProps {
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
+  theme?: "light" | "dark" | "auto";
+  /** Data mode: the plan, as `planFromMessages(messages)` returns it. JS property; omit to pass `<kai-plan-item>` children. */
+  items?: { id: string; label: string; status: "pending" | "in_progress" | "completed" }[];
+  /** Drive/observe the disclosure: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
+  open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** The header shown while open. Default `Plan`. */
+  label?: string;
+}
+
+export interface KaiPlanItemElementProps {
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
+  theme?: "light" | "dark" | "auto";
+  /** `pending` (default), `in_progress` or `completed`. Names the glyph for assistive tech and styles the row. */
+  status?: "pending" | "in_progress" | "completed";
 }
 
 export interface KaiPopoverElementProps {
@@ -5398,6 +5461,15 @@ export interface KaiPanelHeaderElementEvents {
 
 }
 
+export interface KaiPlanElementEvents {
+  /** The plan expanded or collapsed (via the line, an attribute, or `show()`/`hide()`/`toggle()`). */
+  onKaiOpenChange?: (event: CustomEvent<{ open: boolean }>) => void;
+}
+
+export interface KaiPlanItemElementEvents {
+
+}
+
 export interface KaiPopoverElementEvents {
   /** The popover opened or closed (click, Escape, outside-click, or a method). */
   onKaiOpenChange?: (event: CustomEvent<{ open: boolean }>) => void;
@@ -5805,6 +5877,10 @@ declare module 'vue' {
     KaiPanel: KaiVueElement<KaiPanelElementProps, KaiPanelElementEvents>;
     'kai-panel-header': KaiVueElement<KaiPanelHeaderElementProps, KaiPanelHeaderElementEvents>;
     KaiPanelHeader: KaiVueElement<KaiPanelHeaderElementProps, KaiPanelHeaderElementEvents>;
+    'kai-plan': KaiVueElement<KaiPlanElementProps, KaiPlanElementEvents>;
+    KaiPlan: KaiVueElement<KaiPlanElementProps, KaiPlanElementEvents>;
+    'kai-plan-item': KaiVueElement<KaiPlanItemElementProps, KaiPlanItemElementEvents>;
+    KaiPlanItem: KaiVueElement<KaiPlanItemElementProps, KaiPlanItemElementEvents>;
     'kai-popover': KaiVueElement<KaiPopoverElementProps, KaiPopoverElementEvents>;
     KaiPopover: KaiVueElement<KaiPopoverElementProps, KaiPopoverElementEvents>;
     'kai-progress-bar': KaiVueElement<KaiProgressBarElementProps, KaiProgressBarElementEvents>;
@@ -6264,6 +6340,15 @@ export interface KaiPanelHeaderElementSvelteEvents {
 
 }
 
+export interface KaiPlanElementSvelteEvents {
+  /** The plan expanded or collapsed (via the line, an attribute, or `show()`/`hide()`/`toggle()`). */
+  'onkai-open-change'?: (event: CustomEvent<{ open: boolean }>) => void;
+}
+
+export interface KaiPlanItemElementSvelteEvents {
+
+}
+
 export interface KaiPopoverElementSvelteEvents {
   /** The popover opened or closed (click, Escape, outside-click, or a method). */
   'onkai-open-change'?: (event: CustomEvent<{ open: boolean }>) => void;
@@ -6615,6 +6700,8 @@ declare global {
       'kai-pane-group': KaiSvelteElement<KaiPaneGroupElementProps, KaiPaneGroupElementSvelteEvents>;
       'kai-panel': KaiSvelteElement<KaiPanelElementProps, KaiPanelElementSvelteEvents>;
       'kai-panel-header': KaiSvelteElement<KaiPanelHeaderElementProps, KaiPanelHeaderElementSvelteEvents>;
+      'kai-plan': KaiSvelteElement<KaiPlanElementProps, KaiPlanElementSvelteEvents>;
+      'kai-plan-item': KaiSvelteElement<KaiPlanItemElementProps, KaiPlanItemElementSvelteEvents>;
       'kai-popover': KaiSvelteElement<KaiPopoverElementProps, KaiPopoverElementSvelteEvents>;
       'kai-progress-bar': KaiSvelteElement<KaiProgressBarElementProps, KaiProgressBarElementSvelteEvents>;
       'kai-prompt-dock': KaiSvelteElement<KaiPromptDockElementProps, KaiPromptDockElementSvelteEvents>;
@@ -7026,6 +7113,15 @@ export interface KaiPanelHeaderElementSolidEvents {
 
 }
 
+export interface KaiPlanElementSolidEvents {
+  /** The plan expanded or collapsed (via the line, an attribute, or `show()`/`hide()`/`toggle()`). */
+  'on:kai-open-change'?: (event: CustomEvent<{ open: boolean }>) => void;
+}
+
+export interface KaiPlanItemElementSolidEvents {
+
+}
+
 export interface KaiPopoverElementSolidEvents {
   /** The popover opened or closed (click, Escape, outside-click, or a method). */
   'on:kai-open-change'?: (event: CustomEvent<{ open: boolean }>) => void;
@@ -7402,6 +7498,8 @@ declare module 'solid-js/jsx-runtime' {
       'kai-pane-group': KaiSolidElement<KaiPaneGroupElementProps, KaiPaneGroupElementSolidEvents>;
       'kai-panel': KaiSolidElement<KaiPanelElementProps, KaiPanelElementSolidEvents>;
       'kai-panel-header': KaiSolidElement<KaiPanelHeaderElementProps, KaiPanelHeaderElementSolidEvents>;
+      'kai-plan': KaiSolidElement<KaiPlanElementProps, KaiPlanElementSolidEvents>;
+      'kai-plan-item': KaiSolidElement<KaiPlanItemElementProps, KaiPlanItemElementSolidEvents>;
       'kai-popover': KaiSolidElement<KaiPopoverElementProps, KaiPopoverElementSolidEvents>;
       'kai-progress-bar': KaiSolidElement<KaiProgressBarElementProps, KaiProgressBarElementSolidEvents>;
       'kai-prompt-dock': KaiSolidElement<KaiPromptDockElementProps, KaiPromptDockElementSolidEvents>;

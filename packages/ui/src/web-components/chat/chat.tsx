@@ -220,7 +220,7 @@ defineWebComponent<Props, Events>('kai-chat', {
   // No default, deliberately: an omitted value keys the reveal to each message's own role
   // (see `resolveActionsReveal`), which a default here would override with an explicit one.
   actionsReveal: undefined, cardTypes: undefined, renderers: undefined, cardSchemas: undefined, accept: undefined,
-  reasoning: undefined, reasoningOpen: undefined, conversations: false, store: undefined,
+  reasoning: undefined, reasoningOpen: undefined, plan: undefined, conversations: false, store: undefined,
   home: undefined, userActions: undefined, assistantActions: undefined, hideSources: false,
   hostOpen: true,
   // Default-true flag convention, as `<kai-conversations show-trailing="false">`: the
@@ -331,6 +331,7 @@ defineWebComponent<Props, Events>('kai-chat', {
     expanded={resolveExpandedProp(props.expanded, element.hasAttribute('expanded'), element.getAttribute('expanded'))}
     reasoning={props.reasoning as 'full' | 'compact' | 'off' | undefined}
     reasoningOpen={flag('reasoningOpen')}
+    plan={props.plan as 'auto' | 'off' | undefined}
     triggers={props.triggers as TriggerDef[] | undefined}
     kindIcons={props.kindIcons as Record<string, string> | undefined}
     actionsReveal={props.actionsReveal as 'always' | 'hover' | undefined}

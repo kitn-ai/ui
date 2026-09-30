@@ -622,24 +622,30 @@ export function createClassMerger(table: ClassMergeTable, removes: ClassRemoves)
     const cached = mergedLists.get(classList);
     if (cached !== undefined) return cached;
 
-    const out: string[] = [];
-    for (const cls of classList.split(' ')) {
-      if (!cls) continue;
+    // Right to left, like tailwind-merge: a class is dropped when a KEPT later class removes its
+    // key, and only a kept class removes anything. A left-to-right pass let a class that a later
+    // one would drop still delete its neighbours first (`touch-pan-x touch-none touch-pinch-zoom`
+    // lost `touch-pan-x`, which tailwind-merge keeps).
+    const tokens = classList.split(' ').filter(Boolean);
+    const removed = new Map<string, Set<string>>();
+    const kept: string[] = [];
+    for (let i = tokens.length - 1; i >= 0; i--) {
+      const cls = tokens[i]!;
       const token = parse(cls);
       if (token.key === null) {
         // Unknown to the table: kept verbatim, and its key is itself, so it can never
         // conflict with anything.
-        out.push(cls);
+        kept.push(cls);
         continue;
       }
-      const dropped = droppedBy(token.key);
-      for (let i = out.length - 1; i >= 0; i--) {
-        const earlier = parse(out[i]);
-        if (earlier.modifier !== token.modifier) continue;
-        if (earlier.key !== null && dropped.has(earlier.key)) out.splice(i, 1);
-      }
-      out.push(cls);
+      const gone = removed.get(token.modifier);
+      if (gone?.has(token.key)) continue;
+      kept.push(cls);
+      let into = gone;
+      if (!into) removed.set(token.modifier, (into = new Set()));
+      for (const k of droppedBy(token.key)) into.add(k);
     }
+    const out = kept.reverse();
 
     const merged = out.join(' ');
     if (mergedLists.size >= CACHE_CAP) mergedLists.clear();
