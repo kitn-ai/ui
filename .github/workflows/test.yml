@@ -165,6 +165,12 @@ jobs:
       - name: Silent-drop guard (wire encoders)
         run: pnpm --filter @kitn.ai/ui run lint:silent-drops
 
+      # A preset facade may render only public parts (re-exported from src/solid.ts
+      # or src/index.ts), so what a preset composes a consumer can compose. Reads
+      # source only, no build. --self-test proves it fires on a private import.
+      - name: Preset-parts guard (facades render public parts only)
+        run: pnpm --filter @kitn.ai/ui run lint:preset-parts
+
       # Every authored catalog claim (web-component tags, events, properties, invariant
       # ids, corpus paths, inventory titles, scenario invariant refs) must resolve
       # against the derived layer and the tree. This is what stops the authored
