@@ -97,3 +97,28 @@ describe('unsafe-href rule (the HomePanel precedent)', () => {
     expect(onActivate).not.toHaveBeenCalled();
   });
 });
+
+describe('active (the current row)', () => {
+  it('a button row marks aria-current="true" and takes the selected background', () => {
+    const { container } = render(() => <Row active onActivate={() => {}}>Planner</Row>);
+    const row = container.querySelector('button[part="row"]')!;
+    expect(row).toHaveAttribute('aria-current', 'true');
+    expect(row).toHaveAttribute('data-active', '');
+    expect(row.className).toContain('bg-muted');
+  });
+
+  it('an anchor row carries it on the link itself', () => {
+    const { container } = render(() => <Row active href="https://example.com/a">Docs</Row>);
+    const row = container.querySelector('a[part="row"]')!;
+    expect(row).toHaveAttribute('aria-current', 'true');
+    expect(row.className).toContain('bg-muted');
+  });
+
+  it('not active: no aria-current and no selected background', () => {
+    const { container } = render(() => <Row onActivate={() => {}}>Planner</Row>);
+    const row = container.querySelector('button[part="row"]')!;
+    expect(row).not.toHaveAttribute('aria-current');
+    expect(row).not.toHaveAttribute('data-active');
+    expect(row.className).not.toMatch(/(^|\s)bg-muted(\s|$)/);
+  });
+});

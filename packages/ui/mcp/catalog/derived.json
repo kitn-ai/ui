@@ -4159,6 +4159,12 @@
           "scalar": true,
           "optional": true,
           "fn": false
+        },
+        {
+          "name": "active",
+          "scalar": true,
+          "optional": true,
+          "fn": false
         }
       ],
       "events": [

@@ -7983,6 +7983,14 @@
         "scalar": true,
         "description": "Show a trailing chevron affordance at the row's end.",
         "displayType": "undefined | false | true"
+      },
+      {
+        "name": "active",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "The current row: sets `aria-current=\"true\"` on its button or link, with the selected background.",
+        "displayType": "undefined | false | true"
       }
     ],
     "events": [
