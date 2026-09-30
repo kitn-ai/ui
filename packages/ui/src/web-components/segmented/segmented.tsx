@@ -1,5 +1,6 @@
 import { createEffect, createSignal, untrack } from 'solid-js';
 import { defineWebComponent } from '../define/define';
+import { createForwardedName } from '../define/forwarded-name';
 import { Segmented, type SegmentedOption } from '../../components/segmented/segmented';
 import { renderIcon } from '../../components/icon/icon';
 // Public shape of the `options` prop; lives in ./web-component-data-types so the ROOT
@@ -30,6 +31,9 @@ defineWebComponent<Props, Events>('kai-segmented', {
   size: 'md',
 }, (props, ctx) => {
   const { element, dispatch } = ctx;
+  // A host `aria-label` / `aria-labelledby` names the inner control (it lives in the shadow root);
+  // it wins over the `label` prop, as an explicit ARIA name outranks a derived one.
+  const forwardedName = createForwardedName(element);
 
   // Lift the selected value into the facade and drive Segmented CONTROLLED so the
   // host can read it (`el.value` / `:host([value])`) and set it after mount. Seed
@@ -100,6 +104,7 @@ defineWebComponent<Props, Events>('kai-segmented', {
         options={resolved()}
         value={value()}
         size={(props.size as 'sm' | 'md' | undefined) ?? 'md'}
+        aria-label={forwardedName()}
         onChange={(next) => apply(next)}
       />
     </>

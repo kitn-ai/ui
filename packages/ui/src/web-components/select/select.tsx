@@ -1,5 +1,6 @@
 import { createEffect, createSignal, untrack } from 'solid-js';
 import { defineWebComponent } from '../define/define';
+import { createForwardedName } from '../define/forwarded-name';
 import { Select } from '../../components/select/select';
 // Public shape of the `options` prop; lives in ./web-component-data-types so the ROOT
 // entry can re-export it (see that file's header).
@@ -67,6 +68,9 @@ defineWebComponent<Props, Events>('kai-select', {
   name: undefined,
 }, (props, ctx) => {
   const { element, dispatch, flag, expose } = ctx;
+  // A host `aria-label` / `aria-labelledby` names the inner control (it lives in the shadow root);
+  // it wins over the `label` prop, as an explicit ARIA name outranks a derived one.
+  const forwardedName = createForwardedName(element);
 
   // Lift the selection into the facade and drive Select CONTROLLED so the host can read
   // it (`el.value` / `:host([value])`) and set it after mount. Seed from the `value`
@@ -135,7 +139,7 @@ defineWebComponent<Props, Events>('kai-select', {
       invalid={flag('invalid')}
       disabled={flag('disabled')}
       required={flag('required')}
-      aria-label={props.label as string | undefined}
+      aria-label={forwardedName() ?? (props.label as string | undefined)}
       name={props.name as string | undefined}
       onChange={(e) => apply([...e.currentTarget.selectedOptions].map((o) => o.value))}
     />

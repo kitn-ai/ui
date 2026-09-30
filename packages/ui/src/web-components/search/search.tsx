@@ -1,5 +1,6 @@
 import { createEffect, createSignal, untrack, Show } from 'solid-js';
 import { defineWebComponent } from '../define/define';
+import { createForwardedName } from '../define/forwarded-name';
 import { Input } from '../../components/input/input';
 import { Kbd } from '../../components/kbd/kbd';
 import { Loader } from '../../components/loader/loader';
@@ -46,6 +47,9 @@ defineWebComponent<Props, Events>('kai-search', {
   shortcut: undefined,
 }, (props, ctx) => {
   const { element, dispatch, flag, expose } = ctx;
+  // A host `aria-label` / `aria-labelledby` names the inner control (it lives in the shadow root);
+  // it wins over the `label` prop, as an explicit ARIA name outranks a derived one.
+  const forwardedName = createForwardedName(element);
 
   // Lift the query into the facade and drive Input CONTROLLED so the host can read
   // it (`el.value` / `:host([value])`) and set it after mount. Mirrors kai-segmented.
@@ -157,6 +161,7 @@ defineWebComponent<Props, Events>('kai-search', {
       <style>{':host{display:block}'}</style>
       <Input
         type="search"
+        aria-label={forwardedName()}
         value={value()}
         placeholder={(props.placeholder as string) ?? 'Search…'}
         leading={leading}

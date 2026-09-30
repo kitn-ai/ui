@@ -1,5 +1,6 @@
 import { createEffect, createSignal, untrack } from 'solid-js';
 import { defineWebComponent } from '../define/define';
+import { createForwardedName } from '../define/forwarded-name';
 import { Switch } from '../../components/switch/switch';
 
 interface Props extends Record<string, unknown> {
@@ -35,6 +36,9 @@ defineWebComponent<Props, Events>('kai-switch', {
   value: undefined,
 }, (props, ctx) => {
   const { element, dispatch, flag, expose } = ctx;
+  // A host `aria-label` / `aria-labelledby` names the inner control (it lives in the shadow root);
+  // it wins over the `label` prop, as an explicit ARIA name outranks a derived one.
+  const forwardedName = createForwardedName(element);
 
   // Lift the on/off state into the facade and drive the Switch CONTROLLED so the
   // host can read it (`el.checked` / `:host([checked])`) and set it after mount.
@@ -92,7 +96,7 @@ defineWebComponent<Props, Events>('kai-switch', {
     <Switch
       checked={checked()}
       disabled={flag('disabled')}
-      label={props.label as string | undefined}
+      label={forwardedName() ?? (props.label as string | undefined)}
       name={props.name as string | undefined}
       value={props.value as string | undefined}
       onChange={(next) => apply(next)}

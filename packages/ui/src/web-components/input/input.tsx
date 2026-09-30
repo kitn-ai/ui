@@ -1,5 +1,6 @@
 import { createEffect, createSignal, onCleanup, onMount, untrack } from 'solid-js';
 import { defineWebComponent } from '../define/define';
+import { createForwardedName } from '../define/forwarded-name';
 import { DEFAULT_FORMAT, Input, type InputProps } from '../../components/input/input';
 import {
   compileMask,
@@ -141,6 +142,8 @@ defineWebComponent<Props, Events>('kai-input', {
   copyPolicy: undefined,
 }, (props, ctx) => {
   const { element, dispatch, flag, expose } = ctx;
+  // A host `aria-label` / `aria-labelledby` names the inner input (it lives in the shadow root).
+  const forwardedName = createForwardedName(element);
 
   /** Is a mask configured at all? An empty `format` means no, same as an absent one. */
   const masked = (): boolean => {
@@ -400,6 +403,7 @@ defineWebComponent<Props, Events>('kai-input', {
         name={props.name as string | undefined}
         autocomplete={props.autocomplete as InputProps['autocomplete']}
         inputmode={props.inputmode as InputProps['inputmode']}
+        aria-label={forwardedName()}
         autocapitalize={autocapitalize() as InputProps['autocapitalize']}
         format={props.format as string | undefined}
         guide={props.guide as string | undefined}

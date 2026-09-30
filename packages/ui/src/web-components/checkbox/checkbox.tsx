@@ -1,5 +1,6 @@
 import { createEffect, createSignal, untrack } from 'solid-js';
 import { defineWebComponent } from '../define/define';
+import { createForwardedName } from '../define/forwarded-name';
 import { Checkbox } from '../../components/checkbox/checkbox';
 
 interface Props extends Record<string, unknown> {
@@ -44,6 +45,9 @@ defineWebComponent<Props, Events>('kai-checkbox', {
   value: undefined,
 }, (props, ctx) => {
   const { element, dispatch, flag, expose } = ctx;
+  // A host `aria-label` / `aria-labelledby` names the inner control (it lives in the shadow root);
+  // it wins over the `label` prop, as an explicit ARIA name outranks a derived one.
+  const forwardedName = createForwardedName(element);
 
   // Lift the on/off state into the facade and drive Checkbox CONTROLLED so the host
   // can read it (`el.checked` / `:host([checked])`) and set it after mount. Seed from
@@ -103,7 +107,7 @@ defineWebComponent<Props, Events>('kai-checkbox', {
         indeterminate={flag('indeterminate')}
         disabled={flag('disabled')}
         required={flag('required')}
-        aria-label={props.label as string | undefined}
+        aria-label={forwardedName() ?? (props.label as string | undefined)}
         aria-checked={flag('indeterminate') ? 'mixed' : undefined}
         name={props.name as string | undefined}
         value={(props.value as string | undefined) ?? 'on'}

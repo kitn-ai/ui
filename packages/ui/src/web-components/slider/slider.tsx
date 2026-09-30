@@ -1,5 +1,6 @@
 import { createEffect, createSignal, untrack } from 'solid-js';
 import { defineWebComponent } from '../define/define';
+import { createForwardedName } from '../define/forwarded-name';
 import { Slider } from '../../components/slider/slider';
 
 interface Props extends Record<string, unknown> {
@@ -54,6 +55,9 @@ defineWebComponent<Props, Events>('kai-slider', {
   valueLabel: undefined,
 }, (props, ctx) => {
   const { element, dispatch, flag, expose } = ctx;
+  // A host `aria-label` / `aria-labelledby` names the inner control (it lives in the shadow root);
+  // it wins over the `label` prop, as an explicit ARIA name outranks a derived one.
+  const forwardedName = createForwardedName(element);
 
   // `Number(null)` is 0 and `Number('')` is 0, both FINITE, so a naive
   // `Number.isFinite(Number(v))` treats a missing attribute as a real zero and the
@@ -144,7 +148,7 @@ defineWebComponent<Props, Events>('kai-slider', {
       step={step()}
       value={value()}
       disabled={flag('disabled')}
-      aria-label={props.label as string | undefined}
+      aria-label={forwardedName() ?? (props.label as string | undefined)}
       name={props.name as string | undefined}
       valueLabel={valueLabel()}
       onInput={(e) => apply(e.currentTarget.valueAsNumber, 'kai-input')}

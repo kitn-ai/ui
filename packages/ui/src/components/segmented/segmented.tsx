@@ -17,6 +17,8 @@ export interface SegmentedProps {
   onChange: (value: string) => void;
   /** Control density. Defaults to `md`. */
   size?: 'sm' | 'md';
+  /** Accessible name for the group, rendered as `aria-label` on the track. */
+  'aria-label'?: string;
   class?: string;
 }
 
@@ -69,6 +71,7 @@ export function Segmented(props: SegmentedProps): JSX.Element {
   return (
     <div
       role="group"
+      aria-label={merged['aria-label']}
       part="track"
       onKeyDown={onKeyDown}
       class={cn('inline-flex items-center gap-0.5 rounded-lg bg-surface-sunken p-0.5', merged.class)}

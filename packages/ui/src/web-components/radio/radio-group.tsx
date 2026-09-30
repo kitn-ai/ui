@@ -1,5 +1,6 @@
 import { createEffect, createSignal, untrack } from 'solid-js';
 import { defineWebComponent } from '../define/define';
+import { createForwardedName } from '../define/forwarded-name';
 import { RadioGroup } from '../../components/radio/radio';
 // Public shape of the `options` prop; lives in ./web-component-data-types so the ROOT
 // entry can re-export it (see that file's header).
@@ -37,6 +38,9 @@ defineWebComponent<Props, Events>('kai-radio-group', {
   label: undefined,
 }, (props, ctx) => {
   const { element, dispatch, flag, expose } = ctx;
+  // A host `aria-label` / `aria-labelledby` names the inner control (it lives in the shadow root);
+  // it wins over the `label` prop, as an explicit ARIA name outranks a derived one.
+  const forwardedName = createForwardedName(element);
 
   // Lift the selection into the facade and drive RadioGroup CONTROLLED so the host can
   // read it (`el.value` / `:host([value])`) and set it after mount. Seed from the
@@ -93,7 +97,7 @@ defineWebComponent<Props, Events>('kai-radio-group', {
       value={value()}
       name={props.name as string | undefined}
       disabled={flag('disabled')}
-      label={props.label as string | undefined}
+      label={forwardedName() ?? (props.label as string | undefined)}
       onChange={(next) => apply(next)}
     />
   );
