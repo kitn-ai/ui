@@ -3359,6 +3359,7 @@ A generic list row.
 | `interactive` | `interactive` | `undefined \| false \| true` | Pressable row: renders real button semantics (click, Enter, Space) and fires `kai-click` on activation. Ignored when `href` is set. |
 | `href` | `href` | `undefined \| string` | Navigate on press: the row renders as a real anchor opening in a new tab. An unsafe URL scheme renders a plain, non-interactive row. |
 | `chevron` | `chevron` | `undefined \| false \| true` | Show a trailing chevron affordance at the row's end. |
+| `active` | `active` | `undefined \| false \| true` | The current row: sets `aria-current="true"` on its button or link, with the selected background. |
 
 **Events** (non-bubbling `CustomEvent`s — listen directly on the element):
 

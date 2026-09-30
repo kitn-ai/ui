@@ -39,6 +39,9 @@ export interface RowProps extends Omit<JSX.HTMLAttributes<HTMLElement>, 'ref'> {
   /** Navigate on press: the row renders as an anchor (new tab). An href that
    *  fails the kit's URL scheme policy renders a non-interactive row instead. */
   href?: string;
+  // Same look as `ConversationItem`'s active row (`bg-muted`); `data-active` is the hook.
+  /** The current row: sets `aria-current="true"` and the selected background. */
+  active?: boolean;
   class?: string;
 }
 
@@ -47,13 +50,15 @@ export function Row(props: RowProps) {
   // interaction model renders, so a consumer's marker attribute lands on the
   // real row node (the facade's home rows depend on this).
   const [local, rest] = splitProps(props, [
-    'children', 'subtitle', 'leading', 'trailing', 'chevron', 'onActivate', 'href', 'class',
+    'children', 'subtitle', 'leading', 'trailing', 'chevron', 'onActivate', 'href', 'active', 'class',
   ]);
 
   const safeHref = () => (local.href && isSafeUrl(local.href) ? local.href : undefined);
   // `href` present but unsafe forces the inert branch even if onActivate is
   // also set: a hostile href must not silently become an event-emitter.
   const interactive = () => (local.href ? !!safeHref() : !!local.onActivate);
+
+  const activeAttrs = () => (local.active ? { 'aria-current': 'true' as const, 'data-active': '' } : {});
 
   const rowClass = () =>
     cn(
@@ -79,6 +84,7 @@ export function Row(props: RowProps) {
       // thing. Full comment: kit-base.css.
       'border-t-[length:var(--kai-row-divide-width,0px)]',
       'border-t-[color:var(--color-border)]',
+      local.active && 'bg-muted',
       interactive() &&
         'cursor-pointer transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
       local.class,
@@ -123,12 +129,12 @@ export function Row(props: RowProps) {
           fallback={
             // Non-interactive: a plain row (including the unsafe-href case,
             // where the label stays visible but nothing is clickable).
-            <div part="row" {...rest} class={rowClass()}>
+            <div part="row" {...rest} {...activeAttrs()} class={rowClass()}>
               {inner}
             </div>
           }
         >
-          <button type="button" part="row" {...rest} onClick={() => local.onActivate?.()} class={rowClass()}>
+          <button type="button" part="row" {...rest} {...activeAttrs()} onClick={() => local.onActivate?.()} class={rowClass()}>
             {inner}
           </button>
         </Show>
@@ -137,6 +143,7 @@ export function Row(props: RowProps) {
       <a
         part="row"
         {...rest}
+        {...activeAttrs()}
         href={safeHref()}
         target="_blank"
         rel="noreferrer noopener"

@@ -1783,13 +1783,15 @@ export interface RowProps extends WebComponentProps {
   href?: string;
   /** Show a trailing chevron affordance at the row's end. */
   chevron?: boolean;
+  /** The current row: sets `aria-current="true"` on its button or link, with the selected background. */
+  active?: boolean;
   /** The row was activated (click, Enter or Space) while `interactive` is set and no `href` is present. Non-bubbling: listen on the element itself. */
   onClick?: (event: CustomEvent) => void;
 }
 
 export const Row = /*#__PURE__*/ createWebComponent<RowProps, KaiRowElement>(
   'kai-row',
-  ["theme","interactive","href","chevron"],
+  ["theme","interactive","href","chevron","active"],
   { onClick: 'kai-click' },
   () => import('@kitn.ai/ui/web-components/row'),
 );

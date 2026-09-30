@@ -68,7 +68,7 @@ function AgentList() {
               data-tone={agent.tone}
               style={{ position: 'relative', border: '1px solid', 'border-radius': '0.5rem', ...cardColors(agent, active() === agent.name) }}
             >
-              <kai-row ref={row} interactive>
+              <kai-row ref={row} interactive prop:active={active() === agent.name}>
                 <span slot="leading" style={{ display: 'inline-flex', 'align-items': 'center', gap: '0.375rem', 'font-size': '0.75rem', 'font-weight': '500', 'line-height': '1', color: TONE_COLOR[agent.tone] }}>
                   <kai-status status={agent.tone} label={agent.label} pulse={agent.pulse}></kai-status>
                   <span aria-hidden="true">{agent.label}</span>
@@ -140,5 +140,10 @@ export const Default: Story = {
     await userEvent.keyboard('{Enter}');
     await userEvent.keyboard(' ');
     expect(clicks).toBe(2);
+    // The selected card is announced: aria-current sits on the row's own button, and only there.
+    const current = () => [...canvasElement.querySelectorAll('kai-row')].map((r) => r.shadowRoot?.querySelector('button')?.getAttribute('aria-current') ?? null);
+    await waitFor(() => expect(current()).toEqual([null, 'true', null, null, null]));
+    await userEvent.click(canvasElement.querySelectorAll('kai-row')[2].shadowRoot!.querySelector('button')!);
+    await waitFor(() => expect(current()).toEqual([null, null, 'true', null, null]));
   },
 };

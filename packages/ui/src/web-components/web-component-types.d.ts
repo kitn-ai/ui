@@ -1670,6 +1670,8 @@ export interface KaiRowElement extends HTMLElement {
   href?: string;
   /** Show a trailing chevron affordance at the row's end. */
   chevron?: boolean;
+  /** The current row: sets `aria-current="true"` on its button or link, with the selected background. */
+  active?: boolean;
   addEventListener<K extends keyof KaiRowElementEventMap>(type: K, listener: (this: KaiRowElement, ev: KaiRowElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
   addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
   removeEventListener<K extends keyof KaiRowElementEventMap>(type: K, listener: (this: KaiRowElement, ev: KaiRowElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
@@ -4230,6 +4232,8 @@ export interface KaiRowElementProps {
   href?: string;
   /** Show a trailing chevron affordance at the row's end. */
   chevron?: boolean;
+  /** The current row: sets `aria-current="true"` on its button or link, with the selected background. */
+  active?: boolean;
 }
 
 export interface KaiRowGroupElementProps {

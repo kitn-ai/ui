@@ -11,6 +11,8 @@ interface Props extends Record<string, unknown> {
   href?: string;
   /** Show a trailing chevron affordance at the row's end. */
   chevron?: boolean;
+  /** The current row: sets `aria-current="true"` on its button or link, with the selected background. */
+  active?: boolean;
 }
 
 interface Events {
@@ -29,7 +31,8 @@ defineWebComponent<Props, Events>('kai-row', {
   interactive: undefined,
   href: undefined,
   chevron: undefined,
-}, (props, { element, flag, dispatch }) => {
+  active: undefined,
+}, (props, { element, flag, reflectFlag, dispatch }) => {
   // Marks the host as a LIST ROW, which is what `RowGroup`'s `::slotted()` rules
   // match on: the geometry cannot be scoped by tag name (a hand-typed roster a
   // third row-shaped element would miss) or by `*` (the sheet is shared, so it
@@ -38,6 +41,8 @@ defineWebComponent<Props, Events>('kai-row', {
   // and a row in a group never flashes without its hairline. Full reasoning:
   // kit-base.css's row-list block.
   element.setAttribute('data-kai-row', '');
+  // Property and attribute stay in agreement; the inner element carries aria-current.
+  reflectFlag('active');
 
   // Which named regions the consumer has filled; drives the conditional
   // wrappers so an empty region leaves no stray box behind.
@@ -60,6 +65,7 @@ defineWebComponent<Props, Events>('kai-row', {
       <Row
         href={props.href as string | undefined}
         chevron={flag('chevron')}
+        active={flag('active')}
         onActivate={flag('interactive') ? () => dispatch('kai-click') : undefined}
         leading={slots().leading ? <slot name="leading" /> : undefined}
         subtitle={slots().subtitle ? <slot name="subtitle" /> : undefined}
