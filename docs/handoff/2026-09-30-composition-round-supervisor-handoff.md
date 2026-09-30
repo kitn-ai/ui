@@ -24,7 +24,7 @@ A0–A7 (ChatApp rename, tag registry, preset-parts lint, root theme via light-d
 ## In flight when this was written (check their branches)
 
 - **B5 MERGED** (fba517b9 + regen 9e82a9ea): kai-plan inside the prompt input; verified. It also fixed K5(a) code-block bare cancelAnimationFrame and K5(b) cn-merge touch-* (merger now resolves right-to-left like tailwind-merge). llms-full 332,657 B vs 331 KiB ceiling (6.1 KiB headroom).
-- **T1** `feat/comp-t1` — root-cause the flaky `upgrade-props` "kai-menu disconnected" test and `promptinput` cold-start flakes (10-run proof).
+- **T1** `feat/comp-t1` — DONE by worker (fd263241 upgrade-props define moved to beforeAll with a named 120s compile budget; 9be17b0a Playwright `warmup-promptinput` setup project that pre-warms every promptinput story). 10/10 runs under 20 CPU burners; still goes red when K1's guard or the send button is broken. **NOT yet independently verified or merged** — next session: verify, then merge. Follow-up noted: other Playwright suites have the same cold-compile risk; generalize the warm-up setup project to each suite.
 - **P2** `feat/comp-p2` — DONE by worker (1dc78797: kai-prompt-dock/PromptDock deleted, labs + guides migrated to kai-prompt-input above/below), **NOT yet independently verified or merged**. Next session: dispatch an ivp-verifier (screenshots `/private/tmp/claude-501/comp-p2/{claude-code,codex}-{before,after}.png`, MCP no longer lists it, grep clean), then merge and regenerate artifacts with `build:api` (conflicts with kai-plan registrations/generated files expected; resolve by regenerating). Note: after deleting a component, run `build:api` BEFORE `nx build ui` or `verify:react-wrappers` fails on the stale wrapper.
 
 ## Next, in order (task graph from the amended plans)
