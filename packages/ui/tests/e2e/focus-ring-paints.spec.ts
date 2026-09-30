@@ -254,7 +254,11 @@ async function measureFocusPaint(page: Page, handle: ElementHandle<Element>): Pr
   const box = await handle.boundingBox();
   if (!box) return { changed: -1, noise: -1 };
 
-  const PAD = 10;
+  // Wide enough to contain a ring drawn by an ANCESTOR frame, not only the control's own
+  // outline: the composer's editable sits 10px inside its frame (the 48px row), so the
+  // frame's 2px `focus-within` ring lands 12px out, past the old 10px and reading as no
+  // indicator at all. The negative control still reads zero at this width.
+  const PAD = 16;
   const clip = {
     x: Math.max(0, box.x - PAD),
     y: Math.max(0, box.y - PAD),
