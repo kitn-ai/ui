@@ -118,9 +118,8 @@ export interface ConversationItemsController {
  * control inside the row) is `createRovingTabList` (`primitives/roving-tab-list.ts`),
  * which is public so an application arranging its own rows gets the same keyboard. What
  * stays here is the conversation row's own rule:
- *
- * - rows may be nested (`conversationRowsOf`): a row inside an open `<details>` folder is a row, one
- *   inside a closed folder or inside another row's menu is not;
+ * - rows may be nested (`conversationRowsOf`): a row in an open `<details>` folder is a row;
+ *   one in a closed folder or inside another row's menu is not;
  * - a row is a `kai-conversation-item` host, identified by `readConversationItemId`, and
  *   its activation node is its shadow body (see `bodyOf`);
  * - selection flows container to item: exactly one item's body node is
