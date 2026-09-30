@@ -44,6 +44,24 @@ describe('activityStepsFromParts', () => {
   it('tolerates parts with no timing (persisted threads)', () => {
     expect(() => summarizeActivity(activityStepsFromParts([R('a'), T('web_search', 'output-available')]))).not.toThrow();
   });
+  it('is total over corrupt saved threads: malformed parts are skipped, good ones kept', () => {
+    const corrupt = [
+      null, undefined, 7, 'text', [], {}, { type: 'tool' }, { type: 'tool', tool: null }, { type: 'tool', tool: 'x' },
+      { type: 'tool', tool: { state: 'output-available' } },
+      { type: 'tool', tool: { type: 42, state: 'output-available', toolCallId: 9 } },
+      { type: 'reasoning' }, { type: 'reasoning', text: 5, timing: 'soon' },
+      { type: 'weird', text: 'x' },
+      T('web_search', 'output-available'),
+    ] as unknown as MessagePart[];
+    let steps: ReturnType<typeof activityStepsFromParts> = [];
+    expect(() => { steps = activityStepsFromParts(corrupt); }).not.toThrow();
+    expect(steps.some((s) => s.toolName === 'web_search' && s.status === 'done')).toBe(true);
+    expect(() => summarizeActivity(steps)).not.toThrow();
+    expect(steps.every((s) => typeof s.id === 'string')).toBe(true);
+    for (const bad of [undefined, null, 'parts', 5, {}]) {
+      expect(activityStepsFromParts(bad as never), String(bad)).toEqual([]);
+    }
+  });
   it('never throws on a tool part missing every optional field', () => {
     expect(() => activityStepsFromParts([{ type: 'tool', tool: { type: '', state: 'input-available' } }, R('')])).not.toThrow();
   });

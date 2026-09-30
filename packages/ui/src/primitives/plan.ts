@@ -16,6 +16,7 @@
 // 50k-char label rides no further than the text it is. Labels reach the DOM only as text.
 
 import type { ChatMessage } from '../web-components/chat/chat-types';
+import type { ToolPart } from '../components/tool/tool-types';
 import type { JsonSchema } from './card-validate';
 import { validateAgainstSchema } from './card-validate';
 import { PLAN_TOOL_NAME } from './plan-tool-name';
@@ -127,13 +128,19 @@ export function validatePlan(input: unknown): PlanValidation {
  * stays on screen until a valid one replaces it. An empty `items` is a valid plan (it clears it).
  */
 export function planFromMessages(messages: ChatMessage[]): PlanItem[] | undefined {
+  // TOTAL over corrupt input: a saved thread can hold a null message, a message with no `parts`, a
+  // tool part with no `tool`. Each such entry is skipped (it cannot be a plan call), never thrown on.
+  if (!Array.isArray(messages)) return undefined;
   for (let m = messages.length - 1; m >= 0; m--) {
-    const parts = messages[m].parts;
+    const parts = (messages[m] as { parts?: unknown } | null | undefined)?.parts;
+    if (!Array.isArray(parts)) continue;
     for (let p = parts.length - 1; p >= 0; p--) {
-      const part = parts[p];
-      if (part.type !== 'tool' || !isPlanTool(part.tool.type)) continue;
-      if (part.tool.state === 'input-streaming' || part.tool.state === 'output-error') continue;
-      const plan = validatePlan(part.tool.input);
+      const part = parts[p] as { type?: unknown; tool?: unknown } | null | undefined;
+      if (part?.type !== 'tool' || !isRecord(part.tool)) continue;
+      const tool = part.tool as Partial<ToolPart>;
+      if (typeof tool.type !== 'string' || !isPlanTool(tool.type)) continue;
+      if (tool.state === 'input-streaming' || tool.state === 'output-error') continue;
+      const plan = validatePlan(tool.input);
       if (plan.ok) return plan.items;
     }
   }

@@ -37,7 +37,17 @@ export interface ActivityStep {
 
 const PLAN_STEP_LABEL = 'Updated the plan';
 
-const isSettled = (t: ToolPart): boolean => t.state === 'output-available' || t.state === 'output-error';
+const isObject = (v: unknown): v is object => typeof v === 'object' && v !== null && !Array.isArray(v);
+
+/** A timing only if it is one: a number `startedAt`, and an `endedAt` that is a number or absent. */
+function readTiming(v: unknown): { startedAt: number; endedAt?: number } | undefined {
+  if (!isObject(v)) return undefined;
+  const t = v as { startedAt?: unknown; endedAt?: unknown };
+  if (typeof t.startedAt !== 'number') return undefined;
+  return { startedAt: t.startedAt, ...(typeof t.endedAt === 'number' ? { endedAt: t.endedAt } : {}) };
+}
+
+const isSettled = (t: Partial<ToolPart>): boolean => t.state === 'output-available' || t.state === 'output-error';
 
 /**
  * Reasoning and tool parts as steps, in order; every other part is skipped (the caller splits runs
@@ -52,30 +62,40 @@ const isSettled = (t: ToolPart): boolean => t.state === 'output-available' || t.
 export function activityStepsFromParts(parts: MessagePart[], opts: { streaming?: boolean } = {}): ActivityStep[] {
   const streaming = opts.streaming === true;
   const steps: ActivityStep[] = [];
-  parts.forEach((part, i) => {
+  // TOTAL over corrupt input. A saved thread can hold anything (a null part, a tool part with no
+  // `tool`, a timing that is a string), so every read below is checked, and an entry that is not a
+  // part is SKIPPED. Skipping is the honest answer here: there is no step to show, and throwing
+  // would take the whole thread's rendering down with one bad row.
+  if (!Array.isArray(parts)) return steps;
+  parts.forEach((raw, i) => {
+    if (!isObject(raw)) return;
+    const part = raw as Record<string, unknown>;
     if (part.type === 'reasoning') {
-      const open = part.timing ? part.timing.endedAt === undefined : i === parts.length - 1;
+      const timing = readTiming(part.timing);
+      const open = timing ? timing.endedAt === undefined : i === parts.length - 1;
       steps.push({
         id: `reasoning-${i}`,
         kind: 'reasoning',
         status: streaming && open ? 'running' : 'done',
-        ...(part.label ? { label: part.label } : {}),
-        text: part.text,
-        ...(part.timing ? { startedAt: part.timing.startedAt, endedAt: part.timing.endedAt } : {}),
+        ...(typeof part.label === 'string' && part.label ? { label: part.label } : {}),
+        ...(typeof part.text === 'string' ? { text: part.text } : {}),
+        ...(timing ? { startedAt: timing.startedAt, endedAt: timing.endedAt } : {}),
       });
-    } else if (part.type === 'tool') {
-      const t = part.tool;
+    } else if (part.type === 'tool' && isObject(part.tool)) {
+      const t = part.tool as Partial<ToolPart>;
+      const name = typeof t.type === 'string' ? t.type : '';
+      const timing = readTiming(t.timing);
       steps.push({
-        id: t.toolCallId ?? `tool-${i}`,
+        id: typeof t.toolCallId === 'string' ? t.toolCallId : `tool-${i}`,
         kind: 'tool',
         status: t.state === 'output-error' ? 'error' : isSettled(t) ? 'done' : streaming ? 'running' : 'interrupted',
-        ...(isPlanTool(t.type) ? { label: PLAN_STEP_LABEL } : {}),
-        toolName: t.type,
-        toolKind: t.kind ?? classifyTool(t.type),
-        ...(t.input !== undefined ? { input: t.input } : {}),
-        ...(t.output !== undefined ? { output: t.output } : {}),
-        ...(t.errorText !== undefined ? { errorText: t.errorText } : {}),
-        ...(t.timing ? { startedAt: t.timing.startedAt, endedAt: t.timing.endedAt } : {}),
+        ...(isPlanTool(name) ? { label: PLAN_STEP_LABEL } : {}),
+        toolName: name,
+        toolKind: t.kind ?? classifyTool(name),
+        ...(isObject(t.input) ? { input: t.input } : {}),
+        ...(isObject(t.output) ? { output: t.output } : {}),
+        ...(typeof t.errorText === 'string' ? { errorText: t.errorText } : {}),
+        ...(timing ? { startedAt: timing.startedAt, endedAt: timing.endedAt } : {}),
       });
     }
   });

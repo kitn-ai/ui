@@ -122,6 +122,22 @@ describe('planFromMessages', () => {
       planCall('p4', { items: [{ id: 'q', label: 'x', status: 'wat' }] }))];
     expect(planFromMessages(thread)).toEqual([item('a', 'in_progress')]);
   });
+  it('is total over corrupt saved threads: skips malformed messages and parts, still finds the plan', () => {
+    const good = asst('g', planCall('p', { items: [item('a', 'in_progress')] }));
+    const corrupt = [
+      null, undefined, 5, 'm', {}, { id: 'x', role: 'assistant' }, { id: 'x', parts: null }, { id: 'x', parts: 'no' },
+      { id: 'x', role: 'assistant', parts: [null, undefined, 3, {}, { type: 'tool' }, { type: 'tool', tool: null }, { type: 'tool', tool: 'x' }] },
+      good,
+      { id: 'y', role: 'assistant', parts: [null, { type: 'tool', tool: null }] },
+    ] as unknown as ChatMessage[];
+    let r: ReturnType<typeof planFromMessages>;
+    expect(() => { r = planFromMessages(corrupt); }).not.toThrow();
+    expect(r!).toEqual([item('a', 'in_progress')]);
+    for (const bad of [undefined, null, 'm', 5, {}]) {
+      expect(() => planFromMessages(bad as never), String(bad)).not.toThrow();
+      expect(planFromMessages(bad as never)).toBeUndefined();
+    }
+  });
   it('never throws on a tool part with no input', () => {
     expect(planFromMessages([asst('a', { type: 'tool', tool: { type: 'kai_plan', state: 'input-available', toolCallId: 'x' } })])).toBeUndefined();
   });
