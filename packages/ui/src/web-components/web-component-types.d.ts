@@ -177,6 +177,14 @@ export interface KaiArtifactElement extends HTMLElement {
   readonlyPath?: boolean;
   /** Friendly read-only address shown in the path field instead of the real url. Attribute: `display-url`. */
   displayUrl?: string;
+  /** The current url: the RAW, REAL one (never `displayUrl`), so a path field can show what was refused. Display only: use it as an href, src or window.open target ONLY when `urlSafe` is true. */
+  readonly url: string;
+  /** `isSafeUrl(url)`, the predicate the open-in-tab button uses. False for `javascript:`, `vbscript:`, `data:` and an empty url. A composed `<a href={el.url}>` runs a model-steered `javascript:` in the host origin on one click, so gate every link on this. */
+  readonly urlSafe: boolean;
+  /** Whether `back()` has an entry to go to. False right after load. */
+  readonly canGoBack: boolean;
+  /** Whether `forward()` has an entry to go to. */
+  readonly canGoForward: boolean;
   /** Go back in the artifact's own history stack (no-op when there's no prior entry). */
   back(): void;
   /** Go forward in the history stack (no-op when there's no forward entry). */
@@ -2351,8 +2359,8 @@ export interface KaiAgentCardElementEventMap extends HTMLElementEventMap {
 export interface KaiArtifactElementEventMap extends HTMLElementEventMap {
   /** Fired when a file is selected. `detail.path`. */
   'kai-file-select': CustomEvent<{ path: string }>;
-  /** The history state changed (fires once per navigation, back and forward included). Drives a composed toolbar's back/forward buttons. */
-  'kai-history-change': CustomEvent<{ url: string; canGoBack: boolean; canGoForward: boolean }>;
+  /** The history state changed (once per navigation, back and forward included). `urlSafe` is `isSafeUrl(url)`. */
+  'kai-history-change': CustomEvent<{ url: string; urlSafe: boolean; canGoBack: boolean; canGoForward: boolean }>;
   /** Artifact's own maximize button toggled (consumer-observable; non-bubbling). */
   'kai-maximize-change': CustomEvent<{ maximized: boolean }>;
   /** The maximize PROTOCOL intent, as a raw bubbling + composed CustomEvent. */
@@ -2942,7 +2950,7 @@ declare global {
     'kai-file-select': CustomEvent<{ path: string }>;
     'kai-files-added': CustomEvent<{ files: File[] }>;
     'kai-focus': CustomEvent<{ originalEvent: FocusEvent }>;
-    'kai-history-change': CustomEvent<{ url: string; canGoBack: boolean; canGoForward: boolean }>;
+    'kai-history-change': CustomEvent<{ url: string; urlSafe: boolean; canGoBack: boolean; canGoForward: boolean }>;
     'kai-home-link': CustomEvent<{ entry: { label: string; href?: undefined | string; description?: undefined | string; icon?: undefined | string } }>;
     'kai-input-rejected': CustomEvent<{ reason: "full" | "wrong-class" | "over-capacity" | "format-change-clipped"; data: string }>;
     'kai-maximize': CustomEvent<{ maximized: boolean }>;
@@ -4755,8 +4763,8 @@ export interface KaiAgentCardElementEvents {
 export interface KaiArtifactElementEvents {
   /** Fired when a file is selected. `detail.path`. */
   onKaiFileSelect?: (event: CustomEvent<{ path: string }>) => void;
-  /** The history state changed (fires once per navigation, back and forward included). Drives a composed toolbar's back/forward buttons. */
-  onKaiHistoryChange?: (event: CustomEvent<{ url: string; canGoBack: boolean; canGoForward: boolean }>) => void;
+  /** The history state changed (once per navigation, back and forward included). `urlSafe` is `isSafeUrl(url)`. */
+  onKaiHistoryChange?: (event: CustomEvent<{ url: string; urlSafe: boolean; canGoBack: boolean; canGoForward: boolean }>) => void;
   /** Artifact's own maximize button toggled (consumer-observable; non-bubbling). */
   onKaiMaximizeChange?: (event: CustomEvent<{ maximized: boolean }>) => void;
   /** The maximize PROTOCOL intent, as a raw bubbling + composed CustomEvent. */
@@ -5582,8 +5590,8 @@ export interface KaiAgentCardElementSvelteEvents {
 export interface KaiArtifactElementSvelteEvents {
   /** Fired when a file is selected. `detail.path`. */
   'onkai-file-select'?: (event: CustomEvent<{ path: string }>) => void;
-  /** The history state changed (fires once per navigation, back and forward included). Drives a composed toolbar's back/forward buttons. */
-  'onkai-history-change'?: (event: CustomEvent<{ url: string; canGoBack: boolean; canGoForward: boolean }>) => void;
+  /** The history state changed (once per navigation, back and forward included). `urlSafe` is `isSafeUrl(url)`. */
+  'onkai-history-change'?: (event: CustomEvent<{ url: string; urlSafe: boolean; canGoBack: boolean; canGoForward: boolean }>) => void;
   /** Artifact's own maximize button toggled (consumer-observable; non-bubbling). */
   'onkai-maximize-change'?: (event: CustomEvent<{ maximized: boolean }>) => void;
   /** The maximize PROTOCOL intent, as a raw bubbling + composed CustomEvent. */
@@ -6310,8 +6318,8 @@ export interface KaiAgentCardElementSolidEvents {
 export interface KaiArtifactElementSolidEvents {
   /** Fired when a file is selected. `detail.path`. */
   'on:kai-file-select'?: (event: CustomEvent<{ path: string }>) => void;
-  /** The history state changed (fires once per navigation, back and forward included). Drives a composed toolbar's back/forward buttons. */
-  'on:kai-history-change'?: (event: CustomEvent<{ url: string; canGoBack: boolean; canGoForward: boolean }>) => void;
+  /** The history state changed (once per navigation, back and forward included). `urlSafe` is `isSafeUrl(url)`. */
+  'on:kai-history-change'?: (event: CustomEvent<{ url: string; urlSafe: boolean; canGoBack: boolean; canGoForward: boolean }>) => void;
   /** Artifact's own maximize button toggled (consumer-observable; non-bubbling). */
   'on:kai-maximize-change'?: (event: CustomEvent<{ maximized: boolean }>) => void;
   /** The maximize PROTOCOL intent, as a raw bubbling + composed CustomEvent. */

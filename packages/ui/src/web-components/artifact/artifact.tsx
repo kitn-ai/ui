@@ -80,7 +80,7 @@ defineWebComponent<Props, Events>('kai-artifact', {
   standalone: false,
   readonlyPath: false,
   displayUrl: undefined,
-}, (props, { element, dispatch, flag, expose }) => {
+}, (props, { element, dispatch, flag, expose, exposeState }) => {
   const [maximized, setMaximized] = createSignal(flag('maximized'));
 
   // `slot="toolbar"` REPLACES the built-in toolbar, so it has to be read off the host (a native
@@ -129,12 +129,9 @@ defineWebComponent<Props, Events>('kai-artifact', {
     restore: () => controller?.restore(),
   });
 
-  // Read-only state for a composed toolbar (`el.canGoBack` disables a custom Back button). Getters
-  // only, no setters: the stack belongs to the component.
-  //   `url`     the RAW current url, and the REAL one, never `displayUrl`. Display only.
-  //   `urlSafe` `isSafeUrl(url)`, the predicate the open-in-tab button uses. A composed
-  //             `<a href={el.url}>` runs a model-steered `javascript:` in the host origin on one
-  //             click, so use `url` as an href/src/window.open target ONLY when `urlSafe` is true.
+  // Read-only state for a composed toolbar (`el.canGoBack` disables a custom Back button), through
+  // `exposeState`: getter-only, no setters, the stack belongs to the component. The generator
+  // types each member from its getter's return type.
   const history = () =>
     controller?.getHistory() ?? {
       url: props.src ?? '',
@@ -142,14 +139,16 @@ defineWebComponent<Props, Events>('kai-artifact', {
       canGoBack: false,
       canGoForward: false,
     };
-  for (const [name, read] of [
-    ['url', () => history().url],
-    ['urlSafe', () => history().urlSafe],
-    ['canGoBack', () => history().canGoBack],
-    ['canGoForward', () => history().canGoForward],
-  ] as const) {
-    Object.defineProperty(element, name, { get: read, configurable: true });
-  }
+  exposeState({
+    /** The current url: the RAW, REAL one (never `displayUrl`), so a path field can show what was refused. Display only: use it as an href, src or window.open target ONLY when `urlSafe` is true. */
+    url: () => history().url,
+    /** `isSafeUrl(url)`, the predicate the open-in-tab button uses. False for `javascript:`, `vbscript:`, `data:` and an empty url. A composed `<a href={el.url}>` runs a model-steered `javascript:` in the host origin on one click, so gate every link on this. */
+    urlSafe: () => history().urlSafe,
+    /** Whether `back()` has an entry to go to. False right after load. */
+    canGoBack: () => history().canGoBack,
+    /** Whether `forward()` has an entry to go to. */
+    canGoForward: () => history().canGoForward,
+  });
 
   const onMaximizeChange = (next: boolean) => {
     setMaximized(next);

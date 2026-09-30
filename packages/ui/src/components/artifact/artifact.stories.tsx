@@ -179,7 +179,7 @@ export const ComposedToolbar: Story = {
   name: 'Toolbar: composed',
   render: () => {
     const [controller, setController] = createSignal<ArtifactController>();
-    const [history, setHistory] = createSignal<ArtifactHistoryState>({ url: `${BASE}/index.html`, canGoBack: false, canGoForward: false });
+    const [history, setHistory] = createSignal<ArtifactHistoryState>({ url: `${BASE}/index.html`, urlSafe: true, canGoBack: false, canGoForward: false });
     return (
       <div class="h-[420px] w-full max-w-[900px]">
         <Artifact

@@ -72,6 +72,15 @@ export interface WebComponentContext<E = Record<string, unknown>> {
   // facade renders (on element upgrade).
   /** Expose imperative methods on the host element (`el.focus()`), the input half of the interaction surface. */
   expose: (methods: Record<string, (...args: never[]) => unknown>) => void;
+  // The READ-ONLY twin of `expose`: state the element owns and a composed sibling needs to read
+  // (`el.canGoBack` to disable a custom Back button), that is NOT a prop because nobody may set
+  // it. Each entry installs a GETTER-ONLY accessor on the host, so an assignment cannot change
+  // it. The generator walks the literal like `expose` and derives each member's type from the
+  // getter's RETURN TYPE (`readonly canGoBack: boolean` on the element interface), so there is
+  // no hand-typed table to drift and the members are typed for consumers. Give each key a JSDoc.
+  // The name must not collide with a declared prop, an exposed method or a DOM accessor.
+  /** Expose read-only state on the host (`el.canGoBack`) as getter-only, generator-typed members. */
+  exposeState: (state: Record<string, () => unknown>) => void;
   // WHY IT IS ONE CALL AND NOT TWO. The reflection is what BREAKS the read-back, so the
   // fix has to be attached to it or it gets forgotten -- and it was, three times.
   // `toggleAttribute(name, true)` sets the attribute to the EMPTY STRING;
@@ -455,6 +464,18 @@ export function defineWebComponent<P extends Record<string, unknown>, E = Record
       }
     };
 
+    // See WebComponentContext.exposeState. No setter is defined on purpose: a write to a
+    // getter-only accessor is ignored (or a TypeError in strict mode), never a silent change.
+    const exposeState: WebComponentContext<E>['exposeState'] = (state) => {
+      for (const [name, read] of Object.entries(state)) {
+        try {
+          Object.defineProperty(element, name, { get: read, configurable: true });
+        } catch (err) {
+          console.warn(`defineWebComponent(${tag}): could not expose state "${name}"`, err);
+        }
+      }
+    };
+
     const isDark = createDarkMode(() => props.theme as string | undefined);
 
     // Prefer a single shared stylesheet adopted into this shadow root; only emit
@@ -516,6 +537,7 @@ export function defineWebComponent<P extends Record<string, unknown>, E = Record
                 flag,
                 reflectFlag,
                 expose,
+                exposeState,
                 dark: isDark,
               }),
             )}

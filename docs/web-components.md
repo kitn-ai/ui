@@ -1587,7 +1587,7 @@ The message list on its own: renders a `messages` array (roles, ordered `parts`,
 | Event | `detail` | Description |
 |-------|-----------|-------------|
 | `kai-file-select` | `{ path: string }` | Fired when a file is selected. `detail.path`. |
-| `kai-history-change` | `{ url: string; canGoBack: false | true; canGoForward: false | true }` | The history state changed (fires once per navigation, back and forward included). Drives a composed toolbar's back/forward buttons. |
+| `kai-history-change` | `{ url: string; urlSafe: false | true; canGoBack: false | true; canGoForward: false | true }` | The history state changed (once per navigation, back and forward included). `urlSafe` is `isSafeUrl(url)`. |
 | `kai-maximize-change` | `{ maximized: false | true }` | Artifact's own maximize button toggled (consumer-observable; non-bubbling). |
 | `kai-maximize-intent` | `{ requested: false | true }` | The maximize PROTOCOL intent, as a raw bubbling + composed CustomEvent. |
 | `kai-navigate` | `{ url: string }` | The preview navigated. `detail.url` is the raw new location. |
@@ -1615,7 +1615,7 @@ Project your own markup with `slot="name"` on a light-DOM child.
 
 | Slot | Mode | Description |
 |------|------|-------------|
-| `toolbar` | replace | Replaces the built-in toolbar entirely. An empty element here means no toolbar. You own its behavior: call the host's `back()`/`forward()`/`reload()`/`home()`/`navigate()` and read `canGoBack`/`canGoForward` (updated on `kai-history-change`). |
+| `toolbar` | replace | Replaces the built-in toolbar entirely. An empty element here means no toolbar. You own its behavior: call the host's `back()`/`forward()`/`reload()`/`home()`/`navigate()` and read `canGoBack`/`canGoForward` (updated on `kai-history-change`). `url` is display text (the raw, real url, never `displayUrl`); use it as an href, src or window.open target only when `urlSafe` is true. |
 | `toolbar-start` | inject | Extra controls at the leading end of the built-in toolbar (ignored while `toolbar` is filled). |
 | `toolbar-end` | inject | Extra controls at the trailing end of the built-in toolbar (ignored while `toolbar` is filled). |
 

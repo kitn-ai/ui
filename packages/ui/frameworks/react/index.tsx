@@ -173,8 +173,8 @@ export interface ArtifactProps extends WebComponentProps {
   displayUrl?: string;
   /** Fired when a file is selected. `detail.path`. */
   onFileSelect?: (event: CustomEvent<{ path: string }>) => void;
-  /** The history state changed (fires once per navigation, back and forward included). Drives a composed toolbar's back/forward buttons. */
-  onHistoryChange?: (event: CustomEvent<{ url: string; canGoBack: boolean; canGoForward: boolean }>) => void;
+  /** The history state changed (once per navigation, back and forward included). `urlSafe` is `isSafeUrl(url)`. */
+  onHistoryChange?: (event: CustomEvent<{ url: string; urlSafe: boolean; canGoBack: boolean; canGoForward: boolean }>) => void;
   /** Artifact's own maximize button toggled (consumer-observable; non-bubbling). */
   onMaximizeChange?: (event: CustomEvent<{ maximized: boolean }>) => void;
   /** The maximize PROTOCOL intent, as a raw bubbling + composed CustomEvent. */
