@@ -13,23 +13,24 @@
 ## Global Constraints
 
 - Everything in plan A's Global Constraints applies (worktree setup, untouchable paths/ports, `kai-` contract, untrusted model output, decide loudly, `build:api`, commit trailer, no push).
-- **B0 comes first and nothing else in B starts until the supervisor relays the owner's checkpoint reply.**
-- B1–B6 depend on A0 (rename) and A1 (registry); B5 depends on A5 (dock bands).
+- **Status 2026-09-30:** B0 is DONE (checkpoint approved, ruling 23; the stories stay on `feat/comp-b0` as the visual reference and are not merged). B1 is DONE (merged). A is merged.
+- B5 depends on P1 (attachment regions, `2026-09-30-P-prompt-attachments.md`), not on a dock band: `PromptDock` is retired.
+- B4 renders the thread from C1's `threadRows`, so B4 follows C1 as well as B3.
 - No new `MessagePart` variant. `lint:silent-drops` must stay green untouched.
 - The reactivity rule: new array + new object for every changed item.
 
 ## Shared files (supervisor serializes)
 
-`src/solid.ts`, `src/index.ts`, `src/state/index.ts`, `src/schemas/index.ts`, `src/web-components/register-impl.ts`, the autoloader map, `scripts/preset-facades.json`, `components/message/message.tsx` (B3 only), every generated artifact.
+`src/solid.ts`, `src/index.ts`, `src/state/index.ts`, `src/schemas/index.ts`, `src/web-components/register-impl.ts`, the autoloader map, `scripts/preset-facades.json`, `components/message/message.tsx` (B3 then B4 then C3), `components/thread/thread.tsx` and `web-components/thread/thread.tsx` (B4 then C3), `components/chat/chat-app.tsx` (B3, B4, B5, C3, C4 in that order), every generated artifact.
 
 ## Task graph
 
 ```
-B0 checkpoint mockups (parallel with plan A) ── OWNER LOOK ──┐
-B1 primitives + timing ──┬── B2 Activity component/elements ──┬── B3 MessageBody + registry ── B6 MCP/docs/starters
-                         └── B5 kai-plan (+ A5) ───────────────┘
-B4 thread item mode + message composed mode (parallel with B2; disjoint files; after B1)
+B0 DONE (checkpoint approved)   B1 DONE (merged)
+B2 Activity component/elements ── B3 MessageBody + registry ──┬── B4 thread rows + item mode (also after C1) ── B6 MCP/docs/starters
+P1 attachment regions ── B5 kai-plan in the prompt input ─────┘
 ```
+B2 and P1 and C1 can run in parallel now; B5 can run in parallel with B3 (it touches `chat-app.tsx` only at the composer; the supervisor merges B3 first).
 
 ## Review Focus
 
@@ -41,7 +42,7 @@ B4 thread item mode + message composed mode (parallel with B2; disjoint files; a
 
 ---
 
-### Task B0: Checkpoint mockups — activity line and plan display (stories only)
+### Task B0: Checkpoint mockups — activity line and plan display (stories only) — DONE 2026-09-30
 
 **Files:**
 - Create: `packages/ui/src/stories/checkpoint/activity.stories.tsx`, `packages/ui/src/stories/checkpoint/plan.stories.tsx`
@@ -54,7 +55,7 @@ B4 thread item mode + message composed mode (parallel with B2; disjoint files; a
   - `Expanded` — the timeline: ✓ Thought 6s / ✓ Searched the web 1.2s › / ✗ Read src/app.ts 0.1s ›.
   - `Step Expanded` — one tool step open showing its JSON arguments and result in a code block.
   - `Interleaved` — text, activity line, text, activity line, text (one assistant turn).
-- [ ] **Step 2: Plan stories**: `Pending`, `Running` (one item in progress, spinner/shimmer), `Done`, `Collapsed` ("3 of 7 done · Writing tests"), and `In The Dock` (inside `PromptDock`'s top band above a `DefaultPromptInput`).
+- [ ] **Step 2: Plan stories**: `Pending`, `Running` (one item in progress, spinner/shimmer), `Done`, `Collapsed` ("3 of 7 done · Writing tests"), and `In The Dock` (inside `PromptDock`'s top band above a `DefaultPromptInput`; historical: the checkpoint later chose variant B, spec P).
 - [ ] **Step 3: Verify** `pnpm --filter @kitn.ai/ui exec vitest run --project=storybook src/stories/checkpoint` (axe passes), `lint:story-conventions`, typecheck. Take screenshots of every story in light and dark into the supervisor-provided scratch dir.
 - [ ] **Step 4: Commit** — `docs(stories): checkpoint mockups for the activity line and the plan display`.
 
@@ -62,7 +63,7 @@ B4 thread item mode + message composed mode (parallel with B2; disjoint files; a
 
 ---
 
-### Task B1: Primitives, timing, and the plan tool
+### Task B1: Primitives, timing, and the plan tool — DONE (merged)
 
 **Files:**
 - Create: `packages/ui/src/primitives/activity.ts`, `activity.test.ts`, `packages/ui/src/primitives/plan.ts`, `plan.test.ts`, `packages/ui/src/primitives/question-schemas/plan.schema.json` (the `kai_plan` input schema; C adds `ask.schema.json` beside it)
@@ -178,16 +179,18 @@ Also: a `state/stream.test.ts` case with `now` stubbed (`let t = 0; now: () => t
 ### Task B4: `kai-thread` item mode and `kai-message` composed mode
 
 **Files:**
-- Modify: `packages/ui/src/web-components/thread/thread.tsx`, `components/thread/thread.tsx`, `web-components/message/message.tsx`, `components/message/message.tsx` (only the `Message` row wrapper, not `MessageBody`; coordinate: B3 owns `MessageBody`), `web-components/slots/slots.ts` (default slot docs)
+- Modify: `packages/ui/src/web-components/thread/thread.tsx`, `components/thread/thread.tsx`, `components/chat/chat-app.tsx` (its message list), `web-components/message/message.tsx`, `components/message/message.tsx` (only the `Message` row wrapper, not `MessageBody`; B3 is merged first), `web-components/slots/slots.ts` (default slot docs)
 - Test: `web-components/thread/thread-children.declarative.test.tsx`, `web-components/message/message-children.declarative.test.tsx`, `tests/presets/thread-parity.test.tsx`, `tests/presets/message-parity.test.tsx`
 
 **Interfaces:**
+- Consumes: C1's `threadRows(messages): ThreadRow[]` (`@kitn.ai/ui/state`). `Thread` (preset mode) and `ChatApp` loop over `threadRows(messages)` keyed by `row.key`, rendering `kind: 'message'` rows exactly as today and rendering NOTHING for any other kind (C3 adds the `answers` rendering).
 - Produces: `<kai-thread>` renders light-DOM `<kai-message>` children when present (default slot inside the scroll viewport) and ignores `messages` (warn once if both); `<kai-message>` renders default-slot children as the body when present (warn once if `message` is also set) with `role`, `actions`, `actionsReveal`, `before-body`, `after-body`, `avatar` intact.
 
 - [ ] **Step 1: Failing tests**
   - Thread item mode: two `kai-message` children render inside the scroll viewport; `messages` set alongside warns once and is ignored; `loading` shows the pending indicator after the last child; `empty` slot shows when there are no children and no messages; `scrollToBottom()` works.
   - Stick-to-bottom (storybook/Chromium, not jsdom): a composed thread scrolled to bottom; append 40 lines of text into the last child's `kai-markdown` over 20 frames; assert `scrollTop + clientHeight >= scrollHeight - 2` after each frame. Scrolled up by the user → it does NOT yank down.
   - Message composed mode: `<kai-message role="user">` with a `<kai-markdown>` child renders right-aligned with the action bar; `kai-message-action` fires from the host.
+  - Row loop: a thread whose messages contain no `kai_ask` renders byte-identical DOM to before the change (capture before); an unrelated message update does not remount other rows (assert element identity).
   - Parity (A2 helper): `kai-thread` with `messages=[fixture]` vs composed `kai-message` children built from the same fixture (text + reasoning + tool + source + file) → equal normalised DOM; same for `kai-message`.
 - [ ] **Step 2: FAIL. Step 3: Implement**: mode by `readSlots` + `MutationObserver` (the `THREAD_SLOTS` pattern already in `thread.tsx`); stick-to-bottom observes the slot's assigned elements with the existing `ResizeObserver` path in `primitives/use-stick-to-bottom.ts` (extend it to observe assigned nodes; do not fork it).
 - [ ] **Step 4: Run** unit, storybook project for thread/message, axe, `lint:preset-parts`, `build:api`. **Step 5: Commit** — `feat(ui): kai-thread and kai-message accept the app's own children`.
@@ -196,18 +199,18 @@ Also: a `state/stream.test.ts` case with `now` stubbed (`let t = 0; now: () => t
 
 ---
 
-### Task B5: `kai-plan` and `kai-chat`'s plan
+### Task B5: `kai-plan`, attached to the prompt input
 
 **Files:**
 - Create: `packages/ui/src/components/plan/plan.tsx`, `plan.test.tsx`, `plan.stories.tsx`, `packages/ui/src/web-components/plan/plan.tsx`, `plan-item.tsx`, `plan.declarative.test.tsx`, `packages/ui/tests/components/plan-hostile-output.test.tsx`
-- Modify: `components/chat/chat-app.tsx` (render `Plan` in the dock's top band from `planFromMessages(messages)`; `plan: 'auto' | 'off'`), `web-components/chat/chat.tsx` (`plan` prop), shared registration files
+- Modify: `components/chat/chat-app.tsx` (pass `<Plan>` as `DefaultPromptInput`'s `above` from `planFromMessages(messages)`; `plan: 'auto' | 'off'`), `web-components/chat/chat.tsx` (`plan` prop), shared registration files
 
 **Interfaces:**
-- Consumes: B1 `PlanItem`, `planFromMessages`; A5 dock bands.
-- Produces: `kai-plan` (`items`, `open`/`defaultOpen`, `label`; default slot for `<kai-plan-item status>` children; `kai-open-change`), Solid `Plan`.
+- Consumes: B1 `PlanItem`, `planFromMessages` (merged); P1's `above` region on `DefaultPromptInput` / `kai-prompt-input`.
+- Produces: `kai-plan` (`items`, `open`/`defaultOpen`, `label`; default slot for `<kai-plan-item status>` children; `kai-open-change`), Solid `Plan`. The plan has NO surface, border or shadow of its own: it lives inside the prompt input's card (ruling 20). Visual reference: `feat/comp-b0`, `stories/checkpoint/plan.stories.tsx`, and `prompt-attachments.stories.tsx` `B. Grows into the input`.
 
-- [ ] **Step 1: Failing tests**: renders items with status icons and `aria-label`s ("completed", "in progress", "pending"); collapsed text is "N of M done · <in_progress label>"; composed children equal data mode (parity); `kai-chat` with a message containing a `kai_plan` tool part shows `kai-plan` in the dock's top band, updates when a later `kai_plan` arrives (new messages array), hides with `plan="off"`; hostile labels render as inert visible text.
-- [ ] **Step 2: FAIL. Step 3: Implement. Step 4: Run** unit, storybook project, axe, `build:api`. **Step 5: Commit** — `feat(ui): kai-plan, the agent's plan above the composer`.
+- [ ] **Step 1: Failing tests**: renders items with status icons and `aria-label`s ("completed", "in progress", "pending"); collapsed text is "N of M done · <in_progress label>"; composed children equal data mode (parity); inside `DefaultPromptInput`'s `above` it renders above the divider part with no surface of its own (computed `background-color` transparent, no box-shadow); `kai-chat` with a message containing a `kai_plan` tool part shows `kai-plan` in the prompt input's `above` region, updates when a later `kai_plan` arrives (new messages array), hides with `plan="off"`; hostile labels render as inert visible text.
+- [ ] **Step 2: FAIL. Step 3: Implement. Step 4: Run** unit, storybook project, axe (light and dark), `build:api`. Compare a screenshot of `kai-chat` with a plan against the checkpoint's `B. Grows into the input` story. **Step 5: Commit** — `feat(ui): kai-plan, the agent's plan inside the prompt input`.
 
 **Verification type:** unit + in-browser IVP of `kai-chat` with a scripted mock `kai_plan` sequence.
 
