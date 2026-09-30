@@ -1676,6 +1676,10 @@ export interface PromptInputProps extends WebComponentProps {
   triggers?: { char: string; kind: string; items?: { id: string; label: string; icon?: string; description?: string; group?: string; kind?: string; promptText?: string; data?: Record<string, unknown> }[] }[];
   /** Default icon per entity kind (kind → image URL/data-URI) for pills/menu items without their own `icon`. Overrides the built-in agent/plugin glyphs. JS property. */
   kindIcons?: Record<string, string>;
+  /** Drives the `above` region directly: `false` slides it shut with its content fading, and unset returns to slot occupancy. */
+  aboveOpen?: boolean;
+  /** Drives the `below` region directly, the same way as `aboveOpen`. */
+  belowOpen?: boolean;
   /** The staged attachments changed (file added or removed). Carries the full current list so a consumer can react in real time. */
   onAttachmentsChange?: (event: CustomEvent<{ attachments: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }>) => void;
   /** A `+` menu item was chosen. `checked` is present only for a toggle, carrying its NEW state. Shares `<kai-menu>`'s event name. */
@@ -1696,7 +1700,7 @@ export interface PromptInputProps extends WebComponentProps {
 
 export const PromptInput = /*#__PURE__*/ createWebComponent<PromptInputProps, KaiPromptInputElement>(
   'kai-prompt-input',
-  ["theme","value","placeholder","disabled","loading","suggestions","suggestionsLayout","suggestionMode","tools","expanded","voice","stoppable","submit","attach","attachments","triggers","kindIcons"],
+  ["theme","value","placeholder","disabled","loading","suggestions","suggestionsLayout","suggestionMode","tools","expanded","voice","stoppable","submit","attach","attachments","triggers","kindIcons","aboveOpen","belowOpen"],
   { onAttachmentsChange: 'kai-attachments-change', onSelect: 'kai-select', onStop: 'kai-stop', onSubmit: 'kai-submit', onSuggestionClick: 'kai-suggestion-click', onToolbarAction: 'kai-toolbar-action', onValueChange: 'kai-value-change', onVoice: 'kai-voice' },
   () => import('@kitn.ai/ui/web-components/prompt-input'),
 );

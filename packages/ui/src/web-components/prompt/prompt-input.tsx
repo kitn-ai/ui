@@ -1,9 +1,10 @@
-import { createEffect, createSignal, onMount, onCleanup } from 'solid-js';
+import { createEffect, createMemo, createSignal, onMount, onCleanup } from 'solid-js';
 import { defineWebComponent } from '../define/define';
 import { DefaultPromptInput, type ComposerToolItem } from '../../components/prompt/default-input';
 import { resolveExpandedProp } from '../../primitives/composer-expansion';
 import type { AttachmentData } from '../../components/attachments/attachments';
 import type { CustomAction } from '../chat/chat-types';
+import { readSlots, PROMPT_INPUT_SLOTS } from '../slots/slots';
 import type { TriggerDef, ComposerChange } from '../../components/composer/composer';
 import { type ComposerDoc, type EntityRef, normalizeValue, serializeToText, entitiesOf } from '../../primitives/composer-model';
 
@@ -71,6 +72,15 @@ interface Props extends Record<string, unknown> {
   /** Default icon per entity kind (kind → image URL/data-URI) for pills/menu items
    *  without their own `icon`. Overrides the built-in agent/plugin glyphs. JS property. */
   kindIcons?: Record<string, string>;
+  // Unset (or the attribute removed), a region is open while a child is slotted into it. A
+  // bare `above-open` means open, even with no child. To animate a region out, keep the
+  // child slotted, set this to `false`, and remove the child after the transition (about
+  // 240ms): a child removed from the light DOM is gone from the slot at once, so removing
+  // it first cannot fade.
+  /** Drives the `above` region directly: `false` slides it shut with its content fading, and unset returns to slot occupancy. */
+  aboveOpen?: boolean;
+  /** Drives the `below` region directly, the same way as `aboveOpen`. */
+  belowOpen?: boolean;
 }
 
 /** Events fired by `<kai-prompt-input>`. */
@@ -123,6 +133,8 @@ defineWebComponent<Props, Events>('kai-prompt-input', {
   attachments: undefined,
   triggers: undefined,
   kindIcons: undefined,
+  aboveOpen: undefined,
+  belowOpen: undefined,
 }, (props, { dispatch, flag, element, expose }) => {
   const [internal, setInternal] = createSignal<string | ComposerDoc>(props.value ?? '');
   // Seed staged attachments from the `attachments` property; the element manages
@@ -153,6 +165,36 @@ defineWebComponent<Props, Events>('kai-prompt-input', {
     observer.observe(element, { childList: true, attributes: true, subtree: true });
     onCleanup(() => observer.disconnect());
   });
+
+  // Which attachment slots are filled. An empty native `<slot>` is still a node the region
+  // would take for content, so the facade renders each only while something is slotted
+  // into it (or while the region is driven by its `*-open` prop, so a closing child can
+  // fade instead of vanishing). Re-read on child changes so late content appears.
+  const [filled, setFilled] = createSignal({ above: false, below: false });
+  onMount(() => {
+    const read = () => {
+      const now = readSlots(element, PROMPT_INPUT_SLOTS);
+      // Only a real change notifies: with `subtree` this runs on every mutation inside
+      // slotted content (a streaming plan), and a new object each time would rebuild
+      // the region's `<slot>` on every one.
+      const next = { above: !!now.above, below: !!now.below };
+      setFilled((prev) => (prev.above === next.above && prev.below === next.below ? prev : next));
+    };
+    read();
+    const observer = new MutationObserver(read);
+    observer.observe(element, { childList: true, attributes: true, attributeFilter: ['slot', 'hidden'], subtree: true });
+    onCleanup(() => observer.disconnect());
+  });
+  // A bare attribute parses to an `undefined` prop, so presence counts as set too.
+  const controlled = (name: 'aboveOpen' | 'belowOpen') => props[name] !== undefined || flag(name);
+  // One memo per side, so filling `above` does not rebuild the `below` slot.
+  const hasAbove = createMemo(() => filled().above);
+  const hasBelow = createMemo(() => filled().below);
+  const region = (side: 'above' | 'below') =>
+    controlled(side === 'above' ? 'aboveOpen' : 'belowOpen') || (side === 'above' ? hasAbove() : hasBelow())
+      ? <slot name={side} />
+      : undefined;
+  const openOf = (name: 'aboveOpen' | 'belowOpen') => (controlled(name) ? flag(name) : undefined);
 
   // A string `value` is controlled (the host owns it). A ComposerDoc `value` is a
   // one-time seed: it lives in `internal` and the user's edits (which arrive as
@@ -244,6 +286,10 @@ defineWebComponent<Props, Events>('kai-prompt-input', {
       toolbarActions={toolbarActions()}
       triggers={props.triggers}
       kindIcons={props.kindIcons as Record<string, string> | undefined}
+      above={region('above')}
+      below={region('below')}
+      aboveOpen={openOf('aboveOpen')}
+      belowOpen={openOf('belowOpen')}
       onComposerChange={(c) => { lastChange = c; }}
       onValueChange={handleChange}
       onSubmit={handleSubmit}
