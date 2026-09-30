@@ -52,22 +52,18 @@
 // been drift with a receipt that no longer describes the tree. 324 KiB is the same ~3%
 // headroom over the measurement that the baseline and the previous raise used. If this file
 // grows again, the note above explains what to measure and what to trim first.
-// 2026-09-30 RAISED: 324 -> 338 KiB. Measured 336,320 bytes at 101 elements. What grew: the two
-// activity elements (kai-activity, kai-activity-step), about 4.5 KB, of which roughly 1 KB is the
-// `steps` row, which prints the whole ActivityStep union inline. Trimming lost: every other
-// cell is a real prop of new public API, and the prop docs are already one line each.
-// 338 KiB keeps the ~3% headroom over the measurement that the raises above used.
-// 2026-09-30 raise: 324 -> 343 KiB. Measured 340,235 bytes at 103 elements / 154 state/wire
-// exports, against a 330,354-byte baseline on the branch before the question panel. What grew
-// (9.9 KB): four new elements (`kai-question-panel`, `kai-question`, `kai-question-option`,
-// `kai-questions-waiting`), of which `kai-question-panel` is 5.5 KB alone because its `questions`,
-// `value` and `defaultValue` props are `Question[]` / `Answer[]` and the generator inlines every
-// structural type by design (`kai-thread`'s `messages` row is larger still). Trimming lost: the
-// descriptions are already one sentence, and a narrower type would take the typed React wrapper
-// down with it. 343 KiB is ~3% headroom over the measurement, the same margin the earlier raises used.
-// Both raises above landed together on the integration branch; the combined value is re-measured
-// by the integration run, which sets the final number.
-const MAX_LLMS_FULL_BYTES = 357 * 1024; // provisional, re-measured on integration
+// 2026-09-30 raise: 324 -> 350 KiB. Measured 347,716 bytes at 105 elements, against 327,959 on
+// the branch before the B/C/P rounds (+19.8 KB). What grew: six new elements' worth of reference
+// (`kai-activity` and `kai-activity-step`; `kai-question-panel`, `kai-question`,
+// `kai-question-option` and `kai-questions-waiting`) plus the composed thread and message props.
+// About 10 KB of that is `kai-question-panel` and `kai-activity` alone, because the generator
+// inlines every structural type (`Question[]`, `Answer[]`, the whole `ActivityStep` union) and
+// `kai-thread`'s `messages` row is larger still. Trimming lost: every other cell is a real prop
+// of real public API, the descriptions are already one sentence, and a narrower type would take
+// the typed React wrapper down with it. Referencing named types from one definitions section is
+// the structural fix (see the integration report); until it lands, 350 KiB (358,400) is ~3%
+// headroom over the measurement, the same margin the raises above used.
+const MAX_LLMS_FULL_BYTES = 350 * 1024;
 
 // THE FLOOR IS A TRUNCATION TRIPWIRE, NOT A TARGET. This repo has already
 // shipped the failure it guards: running gen-llms.mjs standalone silently
