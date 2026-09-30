@@ -7574,7 +7574,7 @@
     "tag": "kai-question-panel",
     "className": "KaiQuestionPanelElement",
     "displayName": "QuestionPanel",
-    "description": "The question panel: tabs, Back and Next, numbered options with an Other row, a review step and Submit.",
+    "description": "The question panel: tabs, Back and Next, numbered options with an Other row, a review step and Submit. Escape inside it dismisses.",
     "props": [
       {
         "name": "theme",
@@ -7693,7 +7693,7 @@
       {
         "name": "kai-questions-dismiss",
         "detail": "{ toolCallId?: undefined | string; answers: { questionId: string; header: string; question: string; kind: \"choice\" | \"confirm\" | \"tasks\" | \"text\" | \"form\"; selected?: undefined | string[]; text?: undefined | string; values?: undefined | Record<string, unknown> }[] }",
-        "description": "The user chose to chat instead. `answers` are the partial answers so far. This does not settle the call.",
+        "description": "The user chose to chat instead (the button, or Escape inside the panel). `answers` are the partial answers so far. Settles nothing.",
         "displayDetail": "{ toolCallId?: undefined | string; answers: { questionId: string; header: string; question: string; kind: \"choice\" | \"confirm\" | \"tasks\" | \"text\" | \"form\"; selected?: undefined | string[]; text?: undefined | string; values?: undefined | Record<string, unknown> }[] }"
       },
       {

@@ -3929,7 +3929,7 @@
     },
     {
       "tag": "kai-question-panel",
-      "description": "The question panel: tabs, Back and Next, numbered options with an Other row, a review step and Submit.",
+      "description": "The question panel: tabs, Back and Next, numbered options with an Other row, a review step and Submit. Escape inside it dismisses.",
       "props": [
         {
           "name": "theme",

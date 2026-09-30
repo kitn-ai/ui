@@ -3207,7 +3207,7 @@ _No events._
 
 ### `kai-question-panel` / `QuestionPanel`
 
-The question panel: tabs, Back and Next, numbered options with an Other row, a review step and Submit.
+The question panel: tabs, Back and Next, numbered options with an Other row, a review step and Submit. Escape inside it dismisses.
 
 **Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
 
@@ -3231,7 +3231,7 @@ The question panel: tabs, Back and Next, numbered options with an Other row, a r
 |---|---|---|
 | `kai-active-change` | `CustomEvent<{ index: number; questionId?: undefined \| string }>` | The step changed (a tab, Back, Next, or a method). `questionId` is absent on the Review step. |
 | `kai-answer-change` | `CustomEvent<{ answers: { questionId: string; header: string; question: string; kind: "choice" \| "confirm" \| "tasks" \| "text" \| "form"; selected?: undefined \| string[]; text?: undefined \| string; values?: undefined \| Record<string, unknown> }[] }>` | An answer changed. `answers` is the whole current set, one entry per answered question. |
-| `kai-questions-dismiss` | `CustomEvent<{ toolCallId?: undefined \| string; answers: { questionId: string; header: string; question: string; kind: "choice" \| "confirm" \| "tasks" \| "text" \| "form"; selected?: undefined \| string[]; text?: undefined \| string; values?: undefined \| Record<string, unknown> }[] }>` | The user chose to chat instead. `answers` are the partial answers so far. This does not settle the call. |
+| `kai-questions-dismiss` | `CustomEvent<{ toolCallId?: undefined \| string; answers: { questionId: string; header: string; question: string; kind: "choice" \| "confirm" \| "tasks" \| "text" \| "form"; selected?: undefined \| string[]; text?: undefined \| string; values?: undefined \| Record<string, unknown> }[] }>` | The user chose to chat instead (the button, or Escape inside the panel). `answers` are the partial answers so far. Settles nothing. |
 | `kai-questions-submit` | `CustomEvent<{ toolCallId?: undefined \| string; result: { status: "answered"; answers: { questionId: string; header: string; question: string; kind: "choice" \| "confirm" \| "tasks" \| "text" \| "form"; selected?: undefined \| string[]; text?: undefined \| string; values?: undefined \| Record<string, unknown> }[] } \| { status: "dismissed"; answers: { questionId: string; header: string; question: string; kind: "choice" \| "confirm" \| "tasks" \| "text" \| "form"; selected?: undefined \| string[]; text?: undefined \| string; values?: undefined \| Record<string, unknown> }[] } }>` | The user submitted. `result` is the AskResult to hand to `answerQuestions` as the call's tool result. |
 
 **Methods** (call on the element instance: `document.querySelector('kai-question-panel').next()`):
