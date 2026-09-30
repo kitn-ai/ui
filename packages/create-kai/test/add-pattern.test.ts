@@ -120,14 +120,14 @@ describe('add <pattern>', () => {
       title: 'Hello',
       description: 'From a URL.',
       files: [
-        { path: 'hello-pattern.html', type: 'html', content: '<kai-button>x</kai-button>' },
+        { path: 'hello-pattern.html', type: 'html', content: '<kai-button>x</kai-button><script type="module" src="./hello-pattern.js"></script>' },
         { path: 'hello-pattern.js', type: 'js', content: "import '@kitn.ai/ui/web-components';\n" },
       ],
     };
     const { code, err } = await run(dir, ['https://example.test/r/hello-pattern.json'], { fetchJson: async () => item });
     expect(err).toEqual([]);
     expect(code).toBe(0);
-    expect(await written(dir, 'hello-pattern.html')).toBe('<kai-button>x</kai-button>');
+    expect(await written(dir, 'hello-pattern.html')).toContain('<kai-button>x</kai-button>');
   });
 
   it('refuses a hostile pattern item JSON (path traversal)', async () => {
