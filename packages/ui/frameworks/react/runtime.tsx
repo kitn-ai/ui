@@ -206,7 +206,12 @@ export function createWebComponent<
           }
           declaredDefaults.set(el, defaults);
         }
-        for (const name of propNames) {
+        // NO declared-prop writes until the element is upgraded. The kit now keeps a value
+        // written to a not-yet-defined element through the upgrade, so a pre-upgrade write
+        // would be harvested as the element's own initial value and then captured above as
+        // its "declared default": a later `undefined` would restore the caller's old value
+        // instead of the real default. The whenDefined re-apply below writes them all.
+        for (const name of upgraded ? propNames : []) {
           // PRESENT-with-undefined RESTORES THE DECLARED DEFAULT. ABSENT is untouched.
           //
           // React hands a component a COMPLETE props object every render, so a
