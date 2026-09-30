@@ -194,6 +194,8 @@ export const topics = [
       { label: 'Generative UI cards', slug: 'patterns/generative-ui-cards' },
       { label: 'Open an artifact from a message', slug: 'patterns/artifact-from-message' },
       { label: 'Attachments flow', slug: 'patterns/attachments-flow' },
+      { label: 'Conversation rail', slug: 'patterns/conversation-rail' },
+      { label: 'Command trigger', slug: 'patterns/command-trigger' },
     ],
   },
   {

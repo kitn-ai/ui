@@ -71,6 +71,44 @@ export function conversationRowsOf(host: Element, includeClosed = false): HTMLEl
   });
 }
 
+/** Hosts whose `listitem` role the kit stamped itself, as opposed to one the author wrote.
+ *  Only these are taken back when rows nest, so an authored role is never removed. */
+const kitStampedListitem = new WeakSet<Element>();
+/** Hosts the container took the role back from, so it can hand it back if the rows go flat again.
+ *  A row never stamped this way is left to the item's own mount: that attribute write is what
+ *  re-runs the container's sync once the row's body has rendered. */
+const kitRemovedListitem = new WeakSet<Element>();
+
+/** Give a row host the `listitem` role unless the author set one. */
+export function stampListitem(el: Element): void {
+  if (el.hasAttribute('role')) return;
+  el.setAttribute('role', 'listitem');
+  kitStampedListitem.add(el);
+}
+
+/** Whether any row sits below a wrapper (a folder) rather than directly in the container.
+ *  A list may only hold listitems, so nested rows cannot ride on one `role="list"`. */
+export function rowsAreNested(host: Element, rows: readonly HTMLElement[]): boolean {
+  return rows.some((r) => r.parentElement !== host);
+}
+
+/** Keep each row's `listitem` role in step with the arrangement: flat rows are the list's
+ *  items, nested rows sit in a `group` and carry no list role of their own. */
+export function syncListitemRoles(rows: readonly HTMLElement[], nested: boolean): void {
+  for (const row of rows) {
+    if (nested) {
+      if (kitStampedListitem.has(row) && row.getAttribute('role') === 'listitem') {
+        row.removeAttribute('role');
+        kitStampedListitem.delete(row);
+        kitRemovedListitem.add(row);
+      }
+    } else if (kitRemovedListitem.has(row)) {
+      kitRemovedListitem.delete(row);
+      stampListitem(row);
+    }
+  }
+}
+
 /** Whether a `<kai-conversation-item>` is STANDALONE, outside the management
  *  of a `<kai-conversations>` container, and therefore activates ITSELF:
  *  the facade makes its row body a
@@ -262,6 +300,9 @@ export interface ConversationListProps {
   /** Click handler for the item-mode list region (the facade wires
    *  `createConversationItemsController.handleClick`). */
   itemsClick?: (e: MouseEvent) => void;
+  /** The item region's role. `list` for flat rows (the default); `group` when rows are
+   *  nested in folders, where a list would hold non-listitems. */
+  itemsRole?: 'list' | 'group';
   class?: string;
 }
 
@@ -275,7 +316,7 @@ export interface ConversationListController {
 }
 
 export function ConversationList(props: ConversationListProps) {
-  const [local] = splitProps(props, ['groups', 'conversations', 'activeId', 'onSelect', 'onNewChat', 'onToggleSidebar', 'header', 'footer', 'empty', 'compact', 'density', 'showTrailing', 'searchable', 'onSearchChange', 'controllerRef', 'items', 'itemsKeyDown', 'itemsClick', 'class']);
+  const [local] = splitProps(props, ['groups', 'conversations', 'activeId', 'onSelect', 'onNewChat', 'onToggleSidebar', 'header', 'footer', 'empty', 'compact', 'density', 'showTrailing', 'searchable', 'onSearchChange', 'controllerRef', 'items', 'itemsKeyDown', 'itemsClick', 'itemsRole', 'class']);
   const [searchQuery, setSearchQuery] = createSignal('');
   // Item mode: the consumer's own rows replace the data rendering wholesale.
   const itemMode = createMemo(() => local.items != null);
@@ -374,7 +415,7 @@ export function ConversationList(props: ConversationListProps) {
       <Show when={itemMode()}>
         <ScrollArea class="flex-1 px-2">
           <div
-            role="list"
+            role={local.itemsRole ?? 'list'}
             aria-label="Conversations"
             part="items"
             class="space-y-0.5 py-1"

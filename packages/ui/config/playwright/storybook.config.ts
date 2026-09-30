@@ -151,6 +151,20 @@ export default defineConfig({
     },
     {
       /*
+       * Run (current): `npm run test:rail-pattern-ivp`
+       *
+       * IVP for the conversation-rail and command-trigger patterns: drives their
+       * Storybook stories (which render the installed .html and .js verbatim) with
+       * native keyboard and pointer events across shadow roots.
+       */
+      name: 'rail-pattern',
+      testMatch: /rail-pattern\.ivp\.spec\.ts/,
+      retries: process.env.CI ? 1 : 0,
+      expect: COLD_COMPILE,
+      use: CHROMIUM,
+    },
+    {
+      /*
        * Run (current): `npm run test:input-mask-ivp`
        *
        * Standalone IVP config for the input masker — the same arrangement every other

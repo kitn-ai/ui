@@ -1,0 +1,30 @@
+---
+title: Command trigger
+description: Any button opens a command palette in a dialog. Mod+K does too, typing filters your own list, and Escape returns focus to the button.
+---
+
+import { Code } from '@astrojs/starlight/components';
+import triggerHtml from '../../../../../../packages/blocks/patterns/command-trigger/command-trigger.html?raw';
+import triggerJs from '../../../../../../packages/blocks/patterns/command-trigger/command-trigger.js?raw';
+
+<p class="kai-lede">A button, a dialog and a command palette. The button and Mod+K open it, the palette reports each keystroke, and your script decides what the list holds and what a selection does. The same shape works for a filter menu.</p>
+
+```bash
+npx kai add command-trigger
+```
+
+## The page
+
+<Code code={triggerHtml} lang="html" title="command-trigger.html" />
+
+## The script
+
+<Code code={triggerJs} lang="js" title="command-trigger.js" />
+
+## How the parts fit
+
+- **Trigger.** The dialog does not know which control opened it. Any button can call `show()`, and closing hands focus back to whichever one you name in the `kai-open-change` handler.
+- **Focus.** A shadow-DOM input cannot autofocus, so the script calls `focus()` on the [`kai-command`](/components/command/) after the dialog opens.
+- **Items.** `items` is a property, and every change assigns a new array. Setting the same array back does not re-render.
+- **Filtering.** The palette already matches a query against each item's `label` and `description`. Use `kai-query-change` when results come from somewhere it cannot see, like message text or a server, and put the matched text in `description` so the result stays visible.
+- **Filter menus.** For a filter, swap the palette for a [`kai-menu`](/components/menu/) behind the same kind of button. Your script applies the selection to its own list.

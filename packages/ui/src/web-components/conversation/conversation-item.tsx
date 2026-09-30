@@ -3,7 +3,8 @@ import { defineWebComponent } from '../define/define';
 import { readSlots, CONVERSATION_ITEM_SLOTS } from '../slots/slots';
 import { SlottedConversationItem, type ConversationRowDensity } from '../../components/conversation/conversation-item';
 // lint-preset-parts: private isStandaloneConversationItem -- DOM-host predicate that only exists for the element form of the item
-import { isStandaloneConversationItem, readConversationItemId } from '../../components/conversation/conversation-list';
+// lint-preset-parts: private stampListitem -- DOM-host role bookkeeping that only exists for the element form of the item
+import { isStandaloneConversationItem, readConversationItemId, stampListitem } from '../../components/conversation/conversation-list';
 
 interface Props extends Record<string, unknown> {
   // Inside `<kai-conversations>` it is handed to the container's selection contract
@@ -69,7 +70,8 @@ defineWebComponent<Props, Events>('kai-conversation-item', {
     // tabindex live on the shadow BODY (`data-kai-item-body`): inside a
     // container its controller stamps them; standalone the component renders
     // them itself. An authored role wins.
-    if (!element.hasAttribute('role')) element.setAttribute('role', 'listitem');
+    // A container that finds its rows nested takes this back (`syncListitemRoles`).
+    stampListitem(element);
 
     setStandalone(isStandaloneConversationItem(element));
   });

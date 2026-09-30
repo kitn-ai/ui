@@ -196,6 +196,7 @@ describe('pattern contract checks', () => {
 
 describe('pattern index, item JSON and rendering', () => {
   const { patterns } = discoverPatterns(scan());
+  // Found by name: the directory holds more patterns than the fixture.
   const hello = patterns.find((p) => p.name === 'hello-pattern')!;
 
   it('the index lists patterns by manifest, contents omitted', () => {

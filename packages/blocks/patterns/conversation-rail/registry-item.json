@@ -1,0 +1,10 @@
+{
+  "name": "conversation-rail",
+  "kind": "pattern",
+  "title": "Conversation rail",
+  "description": "A product sidebar composed from public parts: a header with search and collapse buttons, quick-action rows, collapsible project folders holding conversations, and recents. Search opens a command palette; every control hands off to your code.",
+  "files": [
+    { "path": "conversation-rail.html", "type": "html" },
+    { "path": "conversation-rail.js", "type": "js" }
+  ]
+}
