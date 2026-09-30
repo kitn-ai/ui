@@ -306,7 +306,7 @@ describe('MessageBody streaming identity', () => {
 //
 // Reasoning is a step of the ONE activity line now, so the line is the disclosure. It starts
 // closed (Task 19f, owner ruling 2026-08-26: the quiet chip is the default, expand on click);
-// `reasoningDefaultOpen` seeds the timeline open. The line is a shimmer while a step runs.
+// `reasoningDefaultOpen` opens the timeline while the turn streams and settles it closed after. The line is a shimmer while a step runs.
 describe('MessageBody reasoningDefaultOpen', () => {
   const reasoningParts = () => appendReasoningPart([], 'Considering', { index: 0, streamId: 's1' });
 
@@ -338,12 +338,15 @@ describe('MessageBody reasoningDefaultOpen', () => {
     expect(lineOpen(container)).toBe(false);
   });
 
-  it('reasoningDefaultOpen={true} opens the timeline, and it stays open as text streams in', () => {
-    const { container, delta } = renderStreaming(true, true);
+  it('reasoningDefaultOpen={true} opens the timeline while streaming, and closes it once the turn settles', () => {
+    const { container, delta, setStreaming } = renderStreaming(true, true);
     expect(lineOpen(container)).toBe(true);
 
     delta((p) => appendReasoningPart(p, ' the options.', { index: 0, streamId: 's1' }));
     expect(lineOpen(container)).toBe(true);
+
+    setStreaming(false);
+    expect(lineOpen(container)).toBe(false);
   });
 
   it('renders collapsed when the message is not streaming', () => {

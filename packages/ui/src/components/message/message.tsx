@@ -765,6 +765,12 @@ function MessageBody(props: MessageBodyProps) {
                   for (const k of Object.keys(map)) if (k === 'tool' || k === 'reasoning' || k.startsWith('tool:')) out[k] = map[k]!;
                   return out;
                 };
+                // `reasoningDefaultOpen` keeps its meaning: the timeline of a run that holds reasoning
+                // is open while the turn streams and closes once it settles, until the reader toggles
+                // it, after which their choice stands. Unset, the line is uncontrolled and starts closed.
+                const [readerOpen, setReaderOpen] = createSignal<boolean | undefined>(undefined);
+                const tracksStream = () => props.reasoningDefaultOpen === true && steps().some((s) => s.kind === 'reasoning');
+                const open = () => (tracksStream() ? readerOpen() ?? (props.isStreaming === true && isFinal()) : undefined);
                 return (
                   <Show when={steps().length > 0}>
                     <Activity
@@ -772,7 +778,8 @@ function MessageBody(props: MessageBodyProps) {
                       steps={steps()}
                       streaming={props.isStreaming === true}
                       detail={reasoningMode() === 'compact' ? 'summary' : 'full'}
-                      defaultOpen={props.reasoningDefaultOpen}
+                      open={open()}
+                      onOpenChange={setReaderOpen}
                       renderers={stepRenderers()}
                     />
                   </Show>
