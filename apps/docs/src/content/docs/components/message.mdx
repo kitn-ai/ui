@@ -65,6 +65,7 @@ Set `message` in JavaScript (objects can't be HTML attributes) and listen for `k
 - **Markdown** is on by default for `role="assistant"`, off for `role="user"`. Override with the `markdown` boolean.
 - **`actions`** accepts built-in names (`'copy'`, `'like'`, `'dislike'`, `'regenerate'`, `'edit'`) and/or `{ id, label, icon?, tooltip? }` descriptors, or `<kai-action>` children in the light DOM.
 - **`actionsReveal`** — `'always'` (default) keeps the action bar visible; `'hover'` hides it until the row is hovered.
+- **`renderers`** swaps how a part renders, keyed `tool:<name>`, `tool`, `reasoning`, `text`, `source`, `file`. Reasoning and tool parts render as one activity line; see [Tool calls & reasoning](/patterns/tool-reasoning/#swap-how-a-part-renders). Cards keep `cardTypes`.
 
 <DeclarativeChildrenTable tag="kai-message" />
 

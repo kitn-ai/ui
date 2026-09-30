@@ -1056,6 +1056,12 @@
           "fn": false
         },
         {
+          "name": "renderers",
+          "scalar": false,
+          "optional": true,
+          "fn": false
+        },
+        {
           "name": "cardSchemas",
           "scalar": false,
           "optional": true,
@@ -3260,6 +3266,12 @@
         },
         {
           "name": "cardTypes",
+          "scalar": false,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "renderers",
           "scalar": false,
           "optional": true,
           "fn": false
@@ -5648,6 +5660,12 @@
         },
         {
           "name": "cardTypes",
+          "scalar": false,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "renderers",
           "scalar": false,
           "optional": true,
           "fn": false

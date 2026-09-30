@@ -516,6 +516,8 @@ export interface ChatProps extends WebComponentProps {
   messages?: { id: string; role: "user" | "assistant"; parts: ({ type: "text"; text: string; raw?: { source: string; payload: unknown } } | { type: "reasoning"; text: string; label?: string; index?: number; streamId?: string; signature?: string; timing?: { startedAt: number; endedAt?: number }; raw?: { source: string; payload: unknown } } | { type: "tool"; tool: { type: string; kind?: "command" | "file-change" | "file-read" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: Record<string, unknown>; rawInput?: string; output?: Record<string, unknown>; toolCallId?: string; errorText?: string; raw?: { source: string; payload: unknown }; timing?: { startedAt: number; endedAt?: number } }; raw?: { source: string; payload: unknown } } | { type: "card"; envelope: { type: string; id: string; data: unknown; title?: string; resolution?: { kind: "action"; action: string; payload?: unknown; at?: string } | { kind: "submit"; data: unknown; at?: string } | { kind: "dismissed"; at?: string } | { kind: "expired"; reason?: string; at?: string } }; raw?: { source: string; payload: unknown } } | { type: "source"; source: { id?: string; url?: string; title?: string; snippet?: string; index?: number }; raw?: { source: string; payload: unknown } } | { type: "file"; attachment: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }; raw?: { source: string; payload: unknown } })[]; actions?: ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: string; tooltip?: string })[]; avatar?: { src?: string; fallback?: string; alt?: string }; feedback?: "like" | "dislike" }[];
   /** Card type → custom-element tag overrides/additions, merged over the built-ins. JS property: `el.cardTypes`. */
   cardTypes?: Record<string, string>;
+  /** Part renderers: a key (`tool:<name>`, `tool`, `reasoning`, `text`, `source`, `file`) mapped to a custom-element tag. JS property. */
+  renderers?: Record<string, string>;
   /** Card-type JSON Schemas keyed by envelope type; validates each card's `data`. JS property: `el.cardSchemas`. */
   cardSchemas?: Record<string, object>;
   /** Turns on the prior-conversations list. Requires `store`; default `false`; a load arrives as `kai-conversation-load` -- set `el.messages` yourself. */
@@ -554,7 +556,7 @@ export interface ChatProps extends WebComponentProps {
 
 export const Chat = /*#__PURE__*/ createWebComponent<ChatProps, KaiChatElement>(
   'kai-chat',
-  ["theme","reasoning","density","value","placeholder","loading","suggestions","suggestionsLayout","suggestionMode","persistSuggestions","proseSize","codeTheme","imagePreview","codeHighlight","reasoningOpen","chatTitle","models","currentModel","context","scrollButton","headerStart","headerEnd","showTrailing","headerFull","homeFull","sidebar","empty","composer","composerActions","footer","attach","tools","expanded","voice","triggers","kindIcons","actionsReveal","userActions","assistantActions","hideSources","accept","messages","cardTypes","cardSchemas","conversations","store","home","hostOpen"],
+  ["theme","reasoning","density","value","placeholder","loading","suggestions","suggestionsLayout","suggestionMode","persistSuggestions","proseSize","codeTheme","imagePreview","codeHighlight","reasoningOpen","chatTitle","models","currentModel","context","scrollButton","headerStart","headerEnd","showTrailing","headerFull","homeFull","sidebar","empty","composer","composerActions","footer","attach","tools","expanded","voice","triggers","kindIcons","actionsReveal","userActions","assistantActions","hideSources","accept","messages","cardTypes","renderers","cardSchemas","conversations","store","home","hostOpen"],
   { onAttachmentsChange: 'kai-attachments-change', onAttachmentsRejected: 'kai-attachments-rejected', onConversationLoad: 'kai-conversation-load', onHomeLink: 'kai-home-link', onMessageAction: 'kai-message-action', onModelChange: 'kai-model-change', onSelect: 'kai-select', onSubmit: 'kai-submit', onSuggestionClick: 'kai-suggestion-click', onUnreadChange: 'kai-unread-change', onValueChange: 'kai-value-change', onVoice: 'kai-voice' },
   () => import('@kitn.ai/ui/web-components/chat'),
 );
@@ -1409,6 +1411,8 @@ export interface MessageProps extends WebComponentProps {
   avatar?: string;
   /** Card type → custom-element tag overrides/additions, merged over the built-ins. JS property: `el.cardTypes`. */
   cardTypes?: Record<string, string>;
+  /** Part renderers: a key (`tool:<name>`, `tool`, `reasoning`, `text`, `source`, `file`) mapped to a custom-element tag. JS property. */
+  renderers?: Record<string, string>;
   /** Card-type JSON Schemas keyed by envelope type; validates each card's `data`. JS property: `el.cardSchemas`. */
   cardSchemas?: Record<string, object>;
   /** An action button on a message was clicked. `action` is the built-in name or a custom id. */
@@ -1417,7 +1421,7 @@ export interface MessageProps extends WebComponentProps {
 
 export const Message = /*#__PURE__*/ createWebComponent<MessageProps, KaiMessageElement>(
   'kai-message',
-  ["theme","message","role","markdown","proseSize","codeTheme","codeHighlight","actionsReveal","avatarSrc","avatarFallback","avatar","cardTypes","cardSchemas"],
+  ["theme","message","role","markdown","proseSize","codeTheme","codeHighlight","actionsReveal","avatarSrc","avatarFallback","avatar","cardTypes","renderers","cardSchemas"],
   { onMessageAction: 'kai-message-action' },
   () => import('@kitn.ai/ui/web-components/message'),
 );
@@ -2388,6 +2392,8 @@ export interface ThreadProps extends WebComponentProps {
   class?: string;
   /** Card type → custom-element tag overrides/additions, merged over the built-ins. JS property: `el.cardTypes`. */
   cardTypes?: Record<string, string>;
+  /** Part renderers: a key (`tool:<name>`, `tool`, `reasoning`, `text`, `source`, `file`) mapped to a custom-element tag. JS property. */
+  renderers?: Record<string, string>;
   /** Card-type JSON Schemas keyed by envelope type; validates each card's `data`. JS property: `el.cardSchemas`. */
   cardSchemas?: Record<string, object>;
   /** An action button on a message was clicked. `action` is the built-in name or a custom id. */
@@ -2396,7 +2402,7 @@ export interface ThreadProps extends WebComponentProps {
 
 export const Thread = /*#__PURE__*/ createWebComponent<ThreadProps, KaiThreadElement>(
   'kai-thread',
-  ["theme","messages","loading","proseSize","codeTheme","codeHighlight","imagePreview","actionsReveal","scrollButton","density","class","cardTypes","cardSchemas"],
+  ["theme","messages","loading","proseSize","codeTheme","codeHighlight","imagePreview","actionsReveal","scrollButton","density","class","cardTypes","renderers","cardSchemas"],
   { onMessageAction: 'kai-message-action' },
   () => import('@kitn.ai/ui/web-components/thread'),
 );

@@ -310,19 +310,19 @@ describe('ChatApp composer reset on submit', () => {
 // open AND (via openOnStream) keeps it tracking the stream — reproducing the
 // pre-19f auto-open default losslessly for a consumer who opts back in.
 describe('ChatApp reasoningOpen forwarding (Task 19f)', () => {
-  const reasoningTrigger = (c: HTMLElement) =>
-    Array.from(c.querySelectorAll('button')).find((b) => (b.textContent ?? '').includes('Reasoning')) as HTMLButtonElement;
+  // Reasoning is a step of the one activity line now; the line's button is the disclosure.
+  const reasoningTrigger = (c: HTMLElement) => c.querySelector('[data-kai-activity] > button') as HTMLButtonElement;
 
   const streamingMessages: ChatMessage[] = [
     { id: 'a1', role: 'assistant', parts: [{ type: 'reasoning', text: 'Considering the options.' }] },
   ];
 
-  it('default (reasoningOpen absent): a streaming reasoning disclosure starts closed', () => {
+  it('default (reasoningOpen absent): the streaming activity line starts closed', () => {
     const { container } = render(() => <ChatApp messages={streamingMessages} loading={true} />);
     expect(reasoningTrigger(container)).toHaveAttribute('aria-expanded', 'false');
   });
 
-  it('reasoningOpen={true} reaches MessageBody: a streaming reasoning disclosure starts open', () => {
+  it('reasoningOpen={true} reaches MessageBody: the streaming activity line starts open', () => {
     const { container } = render(() => <ChatApp messages={streamingMessages} loading={true} reasoningOpen={true} />);
     expect(reasoningTrigger(container)).toHaveAttribute('aria-expanded', 'true');
   });

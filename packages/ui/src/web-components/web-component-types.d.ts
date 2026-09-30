@@ -523,6 +523,8 @@ export interface KaiChatElement extends HTMLElement {
   messages: { id: string; role: "user" | "assistant"; parts: ({ type: "text"; text: string; raw?: { source: string; payload: unknown } } | { type: "reasoning"; text: string; label?: string; index?: number; streamId?: string; signature?: string; timing?: { startedAt: number; endedAt?: number }; raw?: { source: string; payload: unknown } } | { type: "tool"; tool: { type: string; kind?: "command" | "file-change" | "file-read" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: Record<string, unknown>; rawInput?: string; output?: Record<string, unknown>; toolCallId?: string; errorText?: string; raw?: { source: string; payload: unknown }; timing?: { startedAt: number; endedAt?: number } }; raw?: { source: string; payload: unknown } } | { type: "card"; envelope: { type: string; id: string; data: unknown; title?: string; resolution?: { kind: "action"; action: string; payload?: unknown; at?: string } | { kind: "submit"; data: unknown; at?: string } | { kind: "dismissed"; at?: string } | { kind: "expired"; reason?: string; at?: string } }; raw?: { source: string; payload: unknown } } | { type: "source"; source: { id?: string; url?: string; title?: string; snippet?: string; index?: number }; raw?: { source: string; payload: unknown } } | { type: "file"; attachment: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }; raw?: { source: string; payload: unknown } })[]; actions?: ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: string; tooltip?: string })[]; avatar?: { src?: string; fallback?: string; alt?: string }; feedback?: "like" | "dislike" }[];
   /** Card type → custom-element tag overrides/additions, merged over the built-ins. JS property: `el.cardTypes`. */
   cardTypes?: Record<string, string>;
+  /** Part renderers: a key (`tool:<name>`, `tool`, `reasoning`, `text`, `source`, `file`) mapped to a custom-element tag. JS property. */
+  renderers?: Record<string, string>;
   /** Card-type JSON Schemas keyed by envelope type; validates each card's `data`. JS property: `el.cardSchemas`. */
   cardSchemas?: Record<string, object>;
   /** Turns on the prior-conversations list. Requires `store`; default `false`; a load arrives as `kai-conversation-load` -- set `el.messages` yourself. */
@@ -1361,6 +1363,8 @@ export interface KaiMessageElement extends HTMLElement {
   avatar?: string;
   /** Card type → custom-element tag overrides/additions, merged over the built-ins. JS property: `el.cardTypes`. */
   cardTypes?: Record<string, string>;
+  /** Part renderers: a key (`tool:<name>`, `tool`, `reasoning`, `text`, `source`, `file`) mapped to a custom-element tag. JS property. */
+  renderers?: Record<string, string>;
   /** Card-type JSON Schemas keyed by envelope type; validates each card's `data`. JS property: `el.cardSchemas`. */
   cardSchemas?: Record<string, object>;
   /** Copy the message content to the clipboard and show the copied check. */
@@ -2204,6 +2208,8 @@ export interface KaiThreadElement extends HTMLElement {
   class?: string;
   /** Card type → custom-element tag overrides/additions, merged over the built-ins. JS property: `el.cardTypes`. */
   cardTypes?: Record<string, string>;
+  /** Part renderers: a key (`tool:<name>`, `tool`, `reasoning`, `text`, `source`, `file`) mapped to a custom-element tag. JS property. */
+  renderers?: Record<string, string>;
   /** Card-type JSON Schemas keyed by envelope type; validates each card's `data`. JS property: `el.cardSchemas`. */
   cardSchemas?: Record<string, object>;
   /** Scroll the message list to the bottom (default `'smooth'`). */
@@ -3474,6 +3480,8 @@ export interface KaiChatElementProps {
   messages?: { id: string; role: "user" | "assistant"; parts: ({ type: "text"; text: string; raw?: { source: string; payload: unknown } } | { type: "reasoning"; text: string; label?: string; index?: number; streamId?: string; signature?: string; timing?: { startedAt: number; endedAt?: number }; raw?: { source: string; payload: unknown } } | { type: "tool"; tool: { type: string; kind?: "command" | "file-change" | "file-read" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: Record<string, unknown>; rawInput?: string; output?: Record<string, unknown>; toolCallId?: string; errorText?: string; raw?: { source: string; payload: unknown }; timing?: { startedAt: number; endedAt?: number } }; raw?: { source: string; payload: unknown } } | { type: "card"; envelope: { type: string; id: string; data: unknown; title?: string; resolution?: { kind: "action"; action: string; payload?: unknown; at?: string } | { kind: "submit"; data: unknown; at?: string } | { kind: "dismissed"; at?: string } | { kind: "expired"; reason?: string; at?: string } }; raw?: { source: string; payload: unknown } } | { type: "source"; source: { id?: string; url?: string; title?: string; snippet?: string; index?: number }; raw?: { source: string; payload: unknown } } | { type: "file"; attachment: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }; raw?: { source: string; payload: unknown } })[]; actions?: ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: string; tooltip?: string })[]; avatar?: { src?: string; fallback?: string; alt?: string }; feedback?: "like" | "dislike" }[];
   /** Card type → custom-element tag overrides/additions, merged over the built-ins. JS property: `el.cardTypes`. */
   cardTypes?: Record<string, string>;
+  /** Part renderers: a key (`tool:<name>`, `tool`, `reasoning`, `text`, `source`, `file`) mapped to a custom-element tag. JS property. */
+  renderers?: Record<string, string>;
   /** Card-type JSON Schemas keyed by envelope type; validates each card's `data`. JS property: `el.cardSchemas`. */
   cardSchemas?: Record<string, object>;
   /** Turns on the prior-conversations list. Requires `store`; default `false`; a load arrives as `kai-conversation-load` -- set `el.messages` yourself. */
@@ -4072,6 +4080,8 @@ export interface KaiMessageElementProps {
   avatar?: string;
   /** Card type → custom-element tag overrides/additions, merged over the built-ins. JS property: `el.cardTypes`. */
   cardTypes?: Record<string, string>;
+  /** Part renderers: a key (`tool:<name>`, `tool`, `reasoning`, `text`, `source`, `file`) mapped to a custom-element tag. JS property. */
+  renderers?: Record<string, string>;
   /** Card-type JSON Schemas keyed by envelope type; validates each card's `data`. JS property: `el.cardSchemas`. */
   cardSchemas?: Record<string, object>;
 }
@@ -4725,6 +4735,8 @@ export interface KaiThreadElementProps {
   class?: string;
   /** Card type → custom-element tag overrides/additions, merged over the built-ins. JS property: `el.cardTypes`. */
   cardTypes?: Record<string, string>;
+  /** Part renderers: a key (`tool:<name>`, `tool`, `reasoning`, `text`, `source`, `file`) mapped to a custom-element tag. JS property. */
+  renderers?: Record<string, string>;
   /** Card-type JSON Schemas keyed by envelope type; validates each card's `data`. JS property: `el.cardSchemas`. */
   cardSchemas?: Record<string, object>;
 }

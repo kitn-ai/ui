@@ -61,7 +61,7 @@ describe('groupMessageParts', () => {
     ];
     const groups = groupMessageParts(parts);
     expect(groups.map((g) => (g.kind === 'single' ? g.part.type : g.kind))).toEqual([
-      'text', 'tool', 'text',
+      'text', 'activity', 'text',
     ]);
   });
 
@@ -181,14 +181,14 @@ const triggerLabelled = (c: HTMLElement, label: string) =>
   Array.from(c.querySelectorAll('button')).find((b) =>
     (b.textContent ?? '').includes(label),
   ) as HTMLButtonElement;
-/** The tool panel's disclosure trigger — labelled with the tool's type. */
+/** The activity line's disclosure button: ONE per run of reasoning and tool parts. */
+const lineTrigger = (c: HTMLElement) => c.querySelector('[data-kai-activity] > button') as HTMLButtonElement;
+/** The tool call's own disclosure: the line, whose summary carries the tool's name. */
 const toolTrigger = (c: HTMLElement) => triggerLabelled(c, 'get_weather');
-/** The reasoning disclosure trigger — labelled from the part's `label`, default 'Reasoning'. */
-const reasoningTrigger = (c: HTMLElement) => triggerLabelled(c, 'Reasoning');
-/** Read the reasoning disclosure's state off its aria wiring rather than the
- *  chevron's rotation class. */
-const reasoningOpen = (c: HTMLElement) =>
-  reasoningTrigger(c).getAttribute('aria-expanded') === 'true';
+/** A step row's own disclosure button, by the order of its row in the opened timeline. */
+const stepTrigger = (c: HTMLElement, n = 0) =>
+  c.querySelectorAll('li[data-kai-step] [data-kai-step-trigger]')[n] as HTMLButtonElement;
+const lineOpen = (c: HTMLElement) => lineTrigger(c).getAttribute('aria-expanded') === 'true';
 
 describe('MessageBody streaming identity', () => {
   it('keeps a TOOL panel expanded across the next stream delta', () => {
@@ -213,20 +213,23 @@ describe('MessageBody streaming identity', () => {
     expect(toolTrigger(container)).toHaveAttribute('aria-expanded', 'true');
   });
 
-  it('keeps a REASONING panel expanded while its own text is still streaming', () => {
+  it('keeps a REASONING step expanded while its own text is still streaming', () => {
     const { container, delta } = renderStream(
       appendReasoningPart([], 'Considering', { index: 0, streamId: 's1' }),
     );
 
-    fireEvent.click(reasoningTrigger(container));
-    expect(reasoningOpen(container)).toBe(true);
+    fireEvent.click(lineTrigger(container));
+    fireEvent.click(stepTrigger(container));
+    expect(stepTrigger(container)).toHaveAttribute('aria-expanded', 'true');
 
     // The part the user just expanded is the one being rebuilt each delta.
     delta((p) => appendReasoningPart(p, ' the options', { index: 0, streamId: 's1' }));
-    expect(reasoningOpen(container)).toBe(true);
+    expect(lineOpen(container)).toBe(true);
+    expect(stepTrigger(container)).toHaveAttribute('aria-expanded', 'true');
 
     delta((p) => appendReasoningPart(p, ' carefully.', { index: 0, streamId: 's1' }));
-    expect(reasoningOpen(container)).toBe(true);
+    expect(stepTrigger(container)).toHaveAttribute('aria-expanded', 'true');
+    expect(container.textContent).toContain('Considering the options carefully.');
   });
 
   it('does not remount the parts subtree between deltas', () => {
@@ -259,22 +262,28 @@ describe('MessageBody streaming identity', () => {
     expect(container.textContent).toContain('The weather in SF is sunny.');
   });
 
-  it('still streams REASONING text into the already-mounted panel', () => {
+  it('still streams REASONING text into the already-mounted step', () => {
     const { container, delta } = renderStream(
       appendReasoningPart([], 'Considering', { index: 0, streamId: 's1' }),
     );
+    fireEvent.click(lineTrigger(container));
+    fireEvent.click(stepTrigger(container));
     delta((p) => appendReasoningPart(p, ' the options.', { index: 0, streamId: 's1' }));
     expect(container.textContent).toContain('Considering the options.');
   });
 
-  it('still applies a TOOL patch to the already-mounted panel', () => {
-    const { container, delta } = renderStream(
+  it('still applies a TOOL patch to the already-mounted step', () => {
+    const [parts, setParts] = createSignal<MessagePart[]>(
       upsertToolPart([], 'call_1', { type: 'get_weather', state: 'input-streaming' }),
     );
-    expect(container.textContent).toContain('Processing');
+    const { container } = render(() => <MessageBody parts={parts()} isUser={false} markdown={false} isStreaming />);
+    expect(lineTrigger(container).textContent).toContain('get_weather');
+    fireEvent.click(lineTrigger(container));
+    expect(container.querySelector('li[data-kai-step]')).toHaveAttribute('data-kai-status', 'running');
 
-    delta((p) => upsertToolPart(p, 'call_1', { state: 'output-available', output: { forecast: 'sunny in SF' } }));
-    expect(container.textContent).toContain('Completed');
+    setParts(upsertToolPart(parts(), 'call_1', { state: 'output-available', output: { forecast: 'sunny in SF' } }));
+    expect(container.querySelector('li[data-kai-step]')).toHaveAttribute('data-kai-status', 'done');
+    fireEvent.click(stepTrigger(container));
     expect(container.textContent).toContain('sunny in SF');
   });
 
@@ -293,20 +302,12 @@ describe('MessageBody streaming identity', () => {
   });
 });
 
-// ─── F-21 / Task 19f: reasoning auto-open while streaming ────────────────────
+// ─── reasoning opens from `reasoningDefaultOpen` ─────────────────────────────
 //
-// `reasoning.tsx` originally gated auto-open-while-streaming on an `isStreaming`
-// prop alone, and `message.tsx` never passed it — so a user watched a static
-// collapsed "Reasoning ⌄" label for the whole thinking window (the reproduced
-// defect from .superpowers/sdd/2026-08-20-rung-3/latency-debug/report.md).
-//
-// Task 19f (owner ruling, 2026-08-26) REVERSED the default: auto-open is no
-// longer the no-op default plumb — it's opt-in via `reasoningDefaultOpen`. The
-// tests below that used to assert "streaming alone opens the panel" are UPDATED
-// (not deleted) to assert the new default stays closed, with a parallel case
-// proving `reasoningDefaultOpen={true}` reproduces the old F-21 behavior
-// losslessly.
-describe('MessageBody reasoning auto-open while streaming (F-21 / Task 19f)', () => {
+// Reasoning is a step of the ONE activity line now, so the line is the disclosure. It starts
+// closed (Task 19f, owner ruling 2026-08-26: the quiet chip is the default, expand on click);
+// `reasoningDefaultOpen` seeds the timeline open. The line is a shimmer while a step runs.
+describe('MessageBody reasoningDefaultOpen', () => {
   const reasoningParts = () => appendReasoningPart([], 'Considering', { index: 0, streamId: 's1' });
 
   const renderStreaming = (initialStreaming: boolean, reasoningDefaultOpen?: boolean) => {
@@ -328,54 +329,48 @@ describe('MessageBody reasoning auto-open while streaming (F-21 / Task 19f)', ()
     };
   };
 
-  it('WAS: opened the reasoning disclosure by default while streaming. NOW (Task 19f): stays closed — default is the "Thinking" chip, expand-on-click only', () => {
+  it('streams closed by default, with the live shimmer as the only feedback', () => {
     const { container, delta } = renderStreaming(true);
-    expect(reasoningOpen(container)).toBe(false);
+    expect(lineOpen(container)).toBe(false);
+    expect(container.querySelector('[data-kai-activity]')).toHaveAttribute('data-kai-streaming');
 
-    // …and it stays closed as the reasoning text keeps streaming in — the
-    // trigger's shimmer is the only streaming feedback now, independent of open state.
     delta((p) => appendReasoningPart(p, ' the options.', { index: 0, streamId: 's1' }));
-    expect(reasoningOpen(container)).toBe(false);
-    expect(container.textContent).toContain('Considering the options.');
+    expect(lineOpen(container)).toBe(false);
   });
 
-  it('reasoningDefaultOpen={true} reproduces the old F-21 auto-open behavior losslessly', () => {
+  it('reasoningDefaultOpen={true} opens the timeline, and it stays open as text streams in', () => {
     const { container, delta } = renderStreaming(true, true);
-    expect(reasoningOpen(container)).toBe(true);
+    expect(lineOpen(container)).toBe(true);
 
     delta((p) => appendReasoningPart(p, ' the options.', { index: 0, streamId: 's1' }));
-    expect(reasoningOpen(container)).toBe(true);
-    expect(container.textContent).toContain('Considering the options.');
+    expect(lineOpen(container)).toBe(true);
   });
 
   it('renders collapsed when the message is not streaming', () => {
     const { container } = renderStreaming(false);
-    expect(reasoningOpen(container)).toBe(false);
+    expect(lineOpen(container)).toBe(false);
+    expect(container.querySelector('[data-kai-activity]')).not.toHaveAttribute('data-kai-streaming');
   });
 
   it('keeps the state the user toggled once streaming ends (reasoningDefaultOpen={true})', () => {
     const { container, setStreaming } = renderStreaming(true, true);
-    expect(reasoningOpen(container)).toBe(true);
+    expect(lineOpen(container)).toBe(true);
 
-    // The user shuts the panel mid-stream; the end of the stream must not
-    // reopen it or fight the toggle.
-    fireEvent.click(reasoningTrigger(container));
-    expect(reasoningOpen(container)).toBe(false);
+    // The user shuts the timeline mid-stream; the end of the stream must not reopen it.
+    fireEvent.click(lineTrigger(container));
+    expect(lineOpen(container)).toBe(false);
 
     setStreaming(false);
-    expect(reasoningOpen(container)).toBe(false);
+    expect(lineOpen(container)).toBe(false);
   });
 });
 
-// ─── Task 10b: reasoningMode ─────────────────────────────────────────────────
+// ─── reasoningMode ───────────────────────────────────────────────────────────
 //
-// `reasoningMode` controls how a `reasoning` part renders: 'full' (default) is
-// the collapsible disclosure pinned above; 'compact' drops the disclosure and
-// shows only a shimmer loader while the part streams; 'off' renders nothing.
-// The default MUST be a no-op — every test above this block passes no
-// `reasoningMode` at all and pins the 'full' disclosure, so this block only
-// adds the 'compact'/'off' cases plus one explicit-'full' parity check.
-describe('MessageBody reasoningMode (Task 10b)', () => {
+// `reasoningMode` maps onto the activity line: 'full' (default) is the expandable line;
+// 'compact' is the line alone, with no disclosure; 'off' hides the reasoning steps (tool
+// steps still show, see message-activity.test.tsx).
+describe('MessageBody reasoningMode', () => {
   const reasoningParts = () => appendReasoningPart([], 'Considering the options.', { index: 0, streamId: 's1' });
 
   const renderMode = (mode: 'full' | 'compact' | 'off' | undefined, streaming: boolean) =>
@@ -383,44 +378,34 @@ describe('MessageBody reasoningMode (Task 10b)', () => {
       <MessageBody parts={reasoningParts()} isUser={false} markdown={false} isStreaming={streaming} reasoningMode={mode} />
     ));
 
-  it('defaults to the full disclosure when reasoningMode is unset (no-op)', () => {
-    // Task 19f (owner ruling 2026-08-26): the DISPLAY MODE default ('full') is
-    // still a no-op, but the OPEN default flipped — a streaming 'full'
-    // disclosure with no reasoningDefaultOpen now starts closed (the "Thinking"
-    // shimmer chip), not auto-open. See the F-21 / Task 19f block above.
+  it('defaults to the expandable line when reasoningMode is unset', () => {
     const { container } = renderMode(undefined, true);
-    expect(reasoningTrigger(container)).toBeTruthy();
-    expect(reasoningOpen(container)).toBe(false);
+    expect(lineTrigger(container)).toBeTruthy();
+    expect(lineOpen(container)).toBe(false);
   });
 
-  it('explicit "full" renders the same disclosure as the default', () => {
-    const { container } = renderMode('full', true);
-    expect(reasoningTrigger(container)).toBeTruthy();
+  it('explicit "full" is the same line as the default', () => {
+    const { container } = renderMode('full', false);
+    expect(lineTrigger(container)).toBeTruthy();
+    fireEvent.click(lineTrigger(container));
+    fireEvent.click(stepTrigger(container));
     expect(container.textContent).toContain('Considering the options.');
   });
 
-  it('"compact" renders a loader, not the disclosure, while streaming', () => {
+  it('"compact" is the line alone: no disclosure, no reasoning text', () => {
     const { container } = renderMode('compact', true);
-    expect(reasoningTrigger(container)).toBeUndefined();
-    // The loader shows the part's label as its shimmer text (default 'Reasoning').
-    expect(container.textContent).toContain('Reasoning');
-    // No expandable detail: the reasoning TEXT itself is not rendered.
+    expect(lineTrigger(container)).toBeNull();
+    expect(container.querySelector('[data-kai-activity-summary]')).toBeTruthy();
     expect(container.textContent).not.toContain('Considering the options.');
-    // The shimmer row carries its own bottom margin (the owner's tweak: mb-3, the
-    // same step the tool panel uses above), pinned as a class rather than as a
-    // computed style jsdom cannot resolve from the compiled stylesheet.
-    expect(container.querySelector('.mb-3')?.textContent).toContain('Reasoning');
-    expect(container.querySelector('.mb-2')).toBeNull();
   });
 
-  it('"compact" renders nothing once the part has settled (not streaming)', () => {
+  it('"compact" still shows the settled line (the spec keeps the summary)', () => {
     const { container } = renderMode('compact', false);
-    expect(reasoningTrigger(container)).toBeUndefined();
-    expect(container.textContent).not.toContain('Reasoning');
-    expect(container.textContent).not.toContain('Considering the options.');
+    expect(lineTrigger(container)).toBeNull();
+    expect(container.querySelector('[data-kai-activity-summary]')!.textContent).toContain('Thought');
   });
 
-  it('"off" renders nothing at all, streaming or not', () => {
+  it('"off" renders nothing for a reasoning-only message, streaming or not', () => {
     const streamingCase = renderMode('off', true);
     expect(streamingCase.container.textContent).toBe('');
     cleanup();

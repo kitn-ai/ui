@@ -1884,6 +1884,14 @@
         "displayType": "undefined | Record<string, string>"
       },
       {
+        "name": "renderers",
+        "type": "undefined | Record<string, string>",
+        "optional": true,
+        "scalar": false,
+        "description": "Part renderers: a key (`tool:<name>`, `tool`, `reasoning`, `text`, `source`, `file`) mapped to a custom-element tag. JS property.",
+        "displayType": "undefined | Record<string, string>"
+      },
+      {
         "name": "cardSchemas",
         "type": "undefined | Record<string, object>",
         "optional": true,
@@ -6133,6 +6141,14 @@
         "optional": true,
         "scalar": false,
         "description": "Card type → custom-element tag overrides/additions, merged over the built-ins. JS property: `el.cardTypes`.",
+        "displayType": "undefined | Record<string, string>"
+      },
+      {
+        "name": "renderers",
+        "type": "undefined | Record<string, string>",
+        "optional": true,
+        "scalar": false,
+        "description": "Part renderers: a key (`tool:<name>`, `tool`, `reasoning`, `text`, `source`, `file`) mapped to a custom-element tag. JS property.",
         "displayType": "undefined | Record<string, string>"
       },
       {
@@ -10608,6 +10624,14 @@
         "optional": true,
         "scalar": false,
         "description": "Card type → custom-element tag overrides/additions, merged over the built-ins. JS property: `el.cardTypes`.",
+        "displayType": "undefined | Record<string, string>"
+      },
+      {
+        "name": "renderers",
+        "type": "undefined | Record<string, string>",
+        "optional": true,
+        "scalar": false,
+        "description": "Part renderers: a key (`tool:<name>`, `tool`, `reasoning`, `text`, `source`, `file`) mapped to a custom-element tag. JS property.",
         "displayType": "undefined | Record<string, string>"
       },
       {
