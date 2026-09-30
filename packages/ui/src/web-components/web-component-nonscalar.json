@@ -1,4 +1,8 @@
 {
+  "kai-activity": [
+    "renderers",
+    "steps"
+  ],
   "kai-artifact": [
     "files"
   ],

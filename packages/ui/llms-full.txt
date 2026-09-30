@@ -3,7 +3,7 @@
 
 # @kitn.ai/ui
 
-> Framework-agnostic, Shadow-DOM web components for building AI chat interfaces — works in React, Vue, Angular, Svelte, or plain HTML. 99 custom elements, every one prefixed `kai-` (e.g. `<kai-chat>`, `<kai-artifact>`): streaming responses, markdown + code rendering, reasoning/tool panels, attachments, conversation sidebar, voice input. Zero framework dependency for consumers; the SolidJS runtime it is authored in is bundled in, so the host needs nothing.
+> Framework-agnostic, Shadow-DOM web components for building AI chat interfaces — works in React, Vue, Angular, Svelte, or plain HTML. 101 custom elements, every one prefixed `kai-` (e.g. `<kai-chat>`, `<kai-artifact>`): streaming responses, markdown + code rendering, reasoning/tool panels, attachments, conversation sidebar, voice input. Zero framework dependency for consumers; the SolidJS runtime it is authored in is bundled in, so the host needs nothing.
 
 ## Install
 
@@ -37,7 +37,7 @@ Drop an element into any framework (React, Vue, plain HTML). Data in via JS prop
 - `<kai-prompt-input>` — standalone composer with send button.
 
 **Layer 2 — composable custom elements** (`import { … } from '@kitn.ai/ui'`):
-All 99 web components are also exported individually. Use them for custom layouts or features `<kai-chat>` does not expose (ChainOfThought, FeedbackBar, ThinkingBar, VoiceInput, …). Your bundler tree-shakes the rest.
+All 101 web components are also exported individually. Use them for custom layouts or features `<kai-chat>` does not expose (ChainOfThought, FeedbackBar, ThinkingBar, VoiceInput, …). Your bundler tree-shakes the rest.
 
 ## Key rules for the web components
 
@@ -151,7 +151,7 @@ For Tailwind builds: `@import "@kitn.ai/ui/theme.css"` in your CSS.
 
 ## Docs
 
-- Web component reference (all 99 web components, every prop/event/method/slot/part): the "Web component reference" section of ./llms-full.txt — https://kitn.dev/llms-full.txt
+- Web component reference (all 101 web components, every prop/event/method/slot/part): the "Web component reference" section of ./llms-full.txt — https://kitn.dev/llms-full.txt
 - Programmatic layer (`@kitn.ai/ui/state` + `@kitn.ai/ui/wire`: streaming folds, the mock responder, the SSE readers/encoders): the "Programmatic layer" section of llms-full.txt
 - How to build a chat app in 5 steps (install → pick a layer → handle submit + stream → wire features → theme, with working code): the "How to build a chat app in 5 steps" section of llms-full.txt
 - Streaming recipe (the two rules that bite: reassign new references per chunk, fold deltas onto the trailing text part): the "Streaming recipe" section of llms-full.txt
@@ -1031,9 +1031,81 @@ Every name `kai-icon` (and every `icon` prop/attribute across the elements) reso
 
 ---
 
-## Web component reference (99 web components, generated from custom-elements.json)
+## Web component reference (101 web components, generated from custom-elements.json)
 
 Every element also accepts the `theme` attribute. Array/object properties are marked with a `—` attribute: they must be set as JS properties.
+
+### `kai-activity` / `Activity`
+
+Reasoning and tool calls as one quiet line that opens to a timeline of steps, each of which opens to its arguments and result. Pass `steps` for the preset, or put `<kai-activity-step>` children inside to render the timeline yourself.
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `theme` | `theme` | `"light" \| "dark" \| "auto"` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
+| `steps` | — | `undefined \| { id: string; kind: "reasoning" \| "tool"; status: "running" \| "done" \| "error" \| "interrupted"; label?: undefined \| string; toolName?: undefined \| string; toolKind?: undefined \| "command" \| "file-change" \| "file-read" \| "search" \| "fetch" \| "mcp" \| "image" \| "generic"; text?: undefined \| string; input?: undefined \| Record<string, unknown>; output?: undefined \| Record<string, unknown>; errorText?: undefined \| string; startedAt?: undefined \| number; endedAt?: undefined \| number }[]` | Data mode: the steps to show, as `activityStepsFromParts(parts)` returns them. JS property; omit to pass `<kai-activity-step>` children. |
+| `streaming` | `streaming` | `undefined \| false \| true` | A run in progress: the line shows the live step in the present tense and shimmers. |
+| `open` | `open` | `undefined \| false \| true` | Drive/observe the timeline disclosure: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. |
+| `defaultOpen` | `default-open` | `undefined \| false \| true` | Initial open state on mount (uncontrolled seed). |
+| `detail` | `detail` | `undefined \| "full" \| "summary"` | Whether the line opens to the timeline (default) or stands alone with no disclosure, as `summary`. |
+| `renderers` | — | `undefined \| Record<string, string>` | Step kind → custom-element tag, so an app draws its own row for one tool, all tools or reasoning. JS property: `el.renderers`. |
+| `summary` | `summary` | `undefined \| string` | Replaces the derived summary line. |
+
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `kai-open-change` | `CustomEvent<{ open: false \| true }>` | The timeline expanded or collapsed (via the line, an attribute, or `show()`/`hide()`/`toggle()`). |
+| `kai-step-toggle` | `CustomEvent<{ id: string; open: false \| true }>` | A step's detail opened or closed, in either mode. `id` is the step's id (data mode) or its host `id` (item mode). |
+
+**Methods** (call on the element instance: `document.querySelector('kai-activity').show()`):
+
+| Method | Signature | Description |
+|---|---|---|
+| `show` | `(): void` | Open it programmatically (no-op while disabled). |
+| `hide` | `(): void` | Close it programmatically. |
+| `toggle` | `(): void` | Flip the open state (closes while disabled). |
+
+**Slots** (project your own markup via `slot="name"` on a light-DOM child):
+
+| Slot | Mode | Description |
+|---|---|---|
+| _(default)_ | inject | The `<kai-activity-step>` rows, direct children in timeline order. Omit them and set `steps` for the preset. |
+
+---
+
+### `kai-activity-step` / `ActivityStep`
+
+One row of a `kai-activity` timeline: a status glyph on the rail, a label, a duration and, when you put content inside it, a disclosure that shows that content. Compose the rows yourself inside `<kai-activity>`; the container adds the summary line, the rail and arrow-key traversal.
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `theme` | `theme` | `"light" \| "dark" \| "auto"` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
+| `label` | `label` | `undefined \| string` | What the step says, e.g. `Searched the web`. Rendered as text. |
+| `status` | `status` | `undefined \| "done" \| "error" \| "interrupted" \| "running"` | `running`, `done` (default), `error` or `interrupted`. |
+| `kind` | `kind` | `undefined \| "reasoning" \| "tool"` | What the step is. Defaults to a tool call; feeds the fallback label and the container's summary line. |
+| `tool` | `tool` | `undefined \| string` | The tool's name, e.g. `web_search`. Lets the container's summary line say "Searched the web" instead of repeating the label. |
+| `duration` | `duration` | `undefined \| number` | How long the step took, in milliseconds. Shown right-aligned as `1.2s`. |
+| `note` | `note` | `undefined \| string` | A line under the label; for an `error` step, the reason. Rendered as text. |
+| `open` | `open` | `undefined \| false \| true` | Whether the step's detail is showing. Settable; listen for `kai-open-change`. |
+| `defaultOpen` | `default-open` | `undefined \| false \| true` | Initial open state on mount (uncontrolled seed). |
+
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `kai-open-change` | `CustomEvent<{ open: false \| true }>` | The step's detail expanded or collapsed. |
+
+**Slots** (project your own markup via `slot="name"` on a light-DOM child):
+
+| Slot | Mode | Description |
+|---|---|---|
+| _(default)_ | inject | The step's detail (arguments, a result, reasoning text), shown when the step is expanded. Empty means the step cannot expand. |
+
+---
 
 ### `kai-artifact` / `Artifact`
 
@@ -1385,6 +1457,7 @@ A complete chat surface: a message thread with its own header and prompt input.
 | Property | Attribute | Type | Description |
 |---|---|---|---|
 | `theme` | `theme` | `"light" \| "dark" \| "auto"` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
+| `reasoning` | `reasoning` | `undefined \| "full" \| "compact" \| "off"` | How reasoning parts render. Default is the collapsible disclosure. |
 | `density` | `density` | `undefined \| "default" \| "compact"` | How much air the thread has: `'default'` (the shipped look) or `'compact'` (a desktop-panel rhythm: 8px between turns, a tighter band). |
 | `value` | — | `undefined \| string \| ({ type: "text"; text: string } \| { type: "entity"; entity: { kind: string; id: string; label: string; icon?: undefined \| string; promptText?: undefined \| string; data?: undefined \| Record<string, unknown> } })[]` | Value of the input: a string is controlled, a `ComposerDoc` is a one-time seed that pre-populates pills, unset is uncontrolled. |
 | `placeholder` | `placeholder` | `undefined \| string` | Placeholder text shown in the empty input. |
@@ -1397,7 +1470,6 @@ A complete chat surface: a message thread with its own header and prompt input.
 | `codeTheme` | `code-theme` | `undefined \| string` | Shiki theme name for syntax-highlighted code blocks (e.g. `'github-dark-dimmed'`). |
 | `imagePreview` | `image-preview` | `undefined \| "hover" \| "lightbox"` | How an image tile reveals full size. `'lightbox'` is the only value keyboard and touch can reach. Default `'hover'`. |
 | `codeHighlight` | `code-highlight` | `undefined \| false \| true` | Renders plain `<pre>` blocks with no highlighter load when false. Default true. |
-| `reasoning` | `reasoning` | `undefined \| "full" \| "compact" \| "off"` | How reasoning parts render. Default is the collapsible disclosure. |
 | `reasoningOpen` | `reasoning-open` | `undefined \| false \| true` | Seeds the reasoning disclosure open and keeps it tracking the stream. Default false; inert unless `reasoning` is `'full'`. |
 | `chatTitle` | `chat-title` | `undefined \| string` | Title shown at the start of the header bar. |
 | `models` | — | `undefined \| { id: string; name: string; provider?: undefined \| string; description?: undefined \| string; group?: undefined \| string }[]` | Model list; more than one renders a switcher in the header. |

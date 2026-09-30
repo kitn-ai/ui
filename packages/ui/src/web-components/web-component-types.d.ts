@@ -131,6 +131,60 @@ export declare const toast: {
 /** Configure the imperative `toast()` singleton — call once at app start. */
 export declare function configureToasts(config: ToastConfig): void;
 
+export interface KaiActivityElement extends HTMLElement {
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
+  theme?: "light" | "dark" | "auto";
+  /** Data mode: the steps to show, as `activityStepsFromParts(parts)` returns them. JS property; omit to pass `<kai-activity-step>` children. */
+  steps: { id: string; kind: "reasoning" | "tool"; status: "running" | "done" | "error" | "interrupted"; label?: string; toolName?: string; toolKind?: "command" | "file-change" | "file-read" | "search" | "fetch" | "mcp" | "image" | "generic"; text?: string; input?: Record<string, unknown>; output?: Record<string, unknown>; errorText?: string; startedAt?: number; endedAt?: number }[];
+  /** A run in progress: the line shows the live step in the present tense and shimmers. */
+  streaming?: boolean;
+  /** Drive/observe the timeline disclosure: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
+  open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** Whether the line opens to the timeline (default) or stands alone with no disclosure, as `summary`. */
+  detail?: "full" | "summary";
+  /** Step kind → custom-element tag, so an app draws its own row for one tool, all tools or reasoning. JS property: `el.renderers`. */
+  renderers?: Record<string, string>;
+  /** Replaces the derived summary line. */
+  summary?: string;
+  /** Open it programmatically (no-op while disabled). */
+  show(): void;
+  /** Close it programmatically. */
+  hide(): void;
+  /** Flip the open state (closes while disabled). */
+  toggle(): void;
+  addEventListener<K extends keyof KaiActivityElementEventMap>(type: K, listener: (this: KaiActivityElement, ev: KaiActivityElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+  addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+  removeEventListener<K extends keyof KaiActivityElementEventMap>(type: K, listener: (this: KaiActivityElement, ev: KaiActivityElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+  removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+}
+
+export interface KaiActivityStepElement extends HTMLElement {
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
+  theme?: "light" | "dark" | "auto";
+  /** What the step says, e.g. `Searched the web`. Rendered as text. */
+  label?: string;
+  /** `running`, `done` (default), `error` or `interrupted`. */
+  status?: "done" | "error" | "interrupted" | "running";
+  /** What the step is. Defaults to a tool call; feeds the fallback label and the container's summary line. */
+  kind?: "reasoning" | "tool";
+  /** The tool's name, e.g. `web_search`. Lets the container's summary line say "Searched the web" instead of repeating the label. */
+  tool?: string;
+  /** How long the step took, in milliseconds. Shown right-aligned as `1.2s`. */
+  duration?: number;
+  /** A line under the label; for an `error` step, the reason. Rendered as text. */
+  note?: string;
+  /** Whether the step's detail is showing. Settable; listen for `kai-open-change`. */
+  open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
+  addEventListener<K extends keyof KaiActivityStepElementEventMap>(type: K, listener: (this: KaiActivityStepElement, ev: KaiActivityStepElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+  addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+  removeEventListener<K extends keyof KaiActivityStepElementEventMap>(type: K, listener: (this: KaiActivityStepElement, ev: KaiActivityStepElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+  removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+}
+
 export interface KaiArtifactElement extends HTMLElement {
   /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
@@ -385,6 +439,8 @@ export interface KaiChainOfThoughtElement extends HTMLElement {
 export interface KaiChatElement extends HTMLElement {
   /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
+  /** How reasoning parts render. Default is the collapsible disclosure. */
+  reasoning?: "full" | "compact" | "off";
   /** How much air the thread has: `'default'` (the shipped look) or `'compact'` (a desktop-panel rhythm: 8px between turns, a tighter band). */
   density?: "default" | "compact";
   /** Value of the input: a string is controlled, a `ComposerDoc` is a one-time seed that pre-populates pills, unset is uncontrolled. */
@@ -409,8 +465,6 @@ export interface KaiChatElement extends HTMLElement {
   imagePreview?: "hover" | "lightbox";
   /** Renders plain `<pre>` blocks with no highlighter load when false. Default true. */
   codeHighlight?: boolean;
-  /** How reasoning parts render. Default is the collapsible disclosure. */
-  reasoning?: "full" | "compact" | "off";
   /** Seeds the reasoning disclosure open and keeps it tracking the stream. Default false; inert unless `reasoning` is `'full'`. */
   reasoningOpen?: boolean;
   /** Title shown at the start of the header bar. */
@@ -2338,6 +2392,18 @@ export interface KaiWorkspaceElement extends HTMLElement {
   removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
 }
 
+export interface KaiActivityElementEventMap extends HTMLElementEventMap {
+  /** The timeline expanded or collapsed (via the line, an attribute, or `show()`/`hide()`/`toggle()`). */
+  'kai-open-change': CustomEvent<{ open: boolean }>;
+  /** A step's detail opened or closed, in either mode. `id` is the step's id (data mode) or its host `id` (item mode). */
+  'kai-step-toggle': CustomEvent<{ id: string; open: boolean }>;
+}
+
+export interface KaiActivityStepElementEventMap extends HTMLElementEventMap {
+  /** The step's detail expanded or collapsed. */
+  'kai-open-change': CustomEvent<{ open: boolean }>;
+}
+
 export interface KaiArtifactElementEventMap extends HTMLElementEventMap {
   /** Fired when a file is selected. `detail.path`. */
   'kai-file-select': CustomEvent<{ path: string }>;
@@ -2798,6 +2864,8 @@ export interface KaiWorkspaceElementEventMap extends HTMLElementEventMap {
 
 declare global {
   interface HTMLElementTagNameMap {
+    'kai-activity': KaiActivityElement;
+    'kai-activity-step': KaiActivityStepElement;
     'kai-artifact': KaiArtifactElement;
     'kai-attachments': KaiAttachmentsElement;
     'kai-audio-visualizer': KaiAudioVisualizerElement;
@@ -2953,6 +3021,7 @@ declare global {
     'kai-scroll': CustomEvent;
     'kai-speaking-change': CustomEvent<{ speaking: boolean }>;
     'kai-split': CustomEvent;
+    'kai-step-toggle': CustomEvent<{ id: string; open: boolean }>;
     'kai-suggestion-click': CustomEvent<{ value: string }>;
     'kai-synthesized': CustomEvent<{ blob: Blob }>;
     'kai-tab-close': CustomEvent<{ id: string }>;
@@ -2986,6 +3055,8 @@ interface KaiElementJsxProps {
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
+      'kai-activity': KaiElementJsxProps;
+      'kai-activity-step': KaiElementJsxProps;
       'kai-artifact': KaiElementJsxProps;
       'kai-attachments': KaiElementJsxProps;
       'kai-audio-visualizer': KaiElementJsxProps;
@@ -3087,6 +3158,46 @@ declare module 'react' {
       'kai-workspace': KaiElementJsxProps;
     }
   }
+}
+
+export interface KaiActivityElementProps {
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
+  theme?: "light" | "dark" | "auto";
+  /** Data mode: the steps to show, as `activityStepsFromParts(parts)` returns them. JS property; omit to pass `<kai-activity-step>` children. */
+  steps?: { id: string; kind: "reasoning" | "tool"; status: "running" | "done" | "error" | "interrupted"; label?: string; toolName?: string; toolKind?: "command" | "file-change" | "file-read" | "search" | "fetch" | "mcp" | "image" | "generic"; text?: string; input?: Record<string, unknown>; output?: Record<string, unknown>; errorText?: string; startedAt?: number; endedAt?: number }[];
+  /** A run in progress: the line shows the live step in the present tense and shimmers. */
+  streaming?: boolean;
+  /** Drive/observe the timeline disclosure: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
+  open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** Whether the line opens to the timeline (default) or stands alone with no disclosure, as `summary`. */
+  detail?: "full" | "summary";
+  /** Step kind → custom-element tag, so an app draws its own row for one tool, all tools or reasoning. JS property: `el.renderers`. */
+  renderers?: Record<string, string>;
+  /** Replaces the derived summary line. */
+  summary?: string;
+}
+
+export interface KaiActivityStepElementProps {
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
+  theme?: "light" | "dark" | "auto";
+  /** What the step says, e.g. `Searched the web`. Rendered as text. */
+  label?: string;
+  /** `running`, `done` (default), `error` or `interrupted`. */
+  status?: "done" | "error" | "interrupted" | "running";
+  /** What the step is. Defaults to a tool call; feeds the fallback label and the container's summary line. */
+  kind?: "reasoning" | "tool";
+  /** The tool's name, e.g. `web_search`. Lets the container's summary line say "Searched the web" instead of repeating the label. */
+  tool?: string;
+  /** How long the step took, in milliseconds. Shown right-aligned as `1.2s`. */
+  duration?: number;
+  /** A line under the label; for an `error` step, the reason. Rendered as text. */
+  note?: string;
+  /** Whether the step's detail is showing. Settable; listen for `kai-open-change`. */
+  open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
 }
 
 export interface KaiArtifactElementProps {
@@ -3275,6 +3386,8 @@ export interface KaiChainOfThoughtElementProps {
 export interface KaiChatElementProps {
   /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
+  /** How reasoning parts render. Default is the collapsible disclosure. */
+  reasoning?: "full" | "compact" | "off";
   /** How much air the thread has: `'default'` (the shipped look) or `'compact'` (a desktop-panel rhythm: 8px between turns, a tighter band). */
   density?: "default" | "compact";
   /** Value of the input: a string is controlled, a `ComposerDoc` is a one-time seed that pre-populates pills, unset is uncontrolled. */
@@ -3299,8 +3412,6 @@ export interface KaiChatElementProps {
   imagePreview?: "hover" | "lightbox";
   /** Renders plain `<pre>` blocks with no highlighter load when false. Default true. */
   codeHighlight?: boolean;
-  /** How reasoning parts render. Default is the collapsible disclosure. */
-  reasoning?: "full" | "compact" | "off";
   /** Seeds the reasoning disclosure open and keeps it tracking the stream. Default false; inert unless `reasoning` is `'full'`. */
   reasoningOpen?: boolean;
   /** Title shown at the start of the header bar. */
@@ -4724,6 +4835,18 @@ export interface KaiWorkspaceElementProps {
   compact?: boolean;
 }
 
+export interface KaiActivityElementEvents {
+  /** The timeline expanded or collapsed (via the line, an attribute, or `show()`/`hide()`/`toggle()`). */
+  onKaiOpenChange?: (event: CustomEvent<{ open: boolean }>) => void;
+  /** A step's detail opened or closed, in either mode. `id` is the step's id (data mode) or its host `id` (item mode). */
+  onKaiStepToggle?: (event: CustomEvent<{ id: string; open: boolean }>) => void;
+}
+
+export interface KaiActivityStepElementEvents {
+  /** The step's detail expanded or collapsed. */
+  onKaiOpenChange?: (event: CustomEvent<{ open: boolean }>) => void;
+}
+
 export interface KaiArtifactElementEvents {
   /** Fired when a file is selected. `detail.path`. */
   onKaiFileSelect?: (event: CustomEvent<{ path: string }>) => void;
@@ -5341,6 +5464,10 @@ export type KaiVueElement<Props, Events> = new () => {
 
 declare module 'vue' {
   interface GlobalComponents {
+    'kai-activity': KaiVueElement<KaiActivityElementProps, KaiActivityElementEvents>;
+    KaiActivity: KaiVueElement<KaiActivityElementProps, KaiActivityElementEvents>;
+    'kai-activity-step': KaiVueElement<KaiActivityStepElementProps, KaiActivityStepElementEvents>;
+    KaiActivityStep: KaiVueElement<KaiActivityStepElementProps, KaiActivityStepElementEvents>;
     'kai-artifact': KaiVueElement<KaiArtifactElementProps, KaiArtifactElementEvents>;
     KaiArtifact: KaiVueElement<KaiArtifactElementProps, KaiArtifactElementEvents>;
     'kai-attachments': KaiVueElement<KaiAttachmentsElementProps, KaiAttachmentsElementEvents>;
@@ -5540,6 +5667,18 @@ declare module 'vue' {
     'kai-workspace': KaiVueElement<KaiWorkspaceElementProps, KaiWorkspaceElementEvents>;
     KaiWorkspace: KaiVueElement<KaiWorkspaceElementProps, KaiWorkspaceElementEvents>;
   }
+}
+
+export interface KaiActivityElementSvelteEvents {
+  /** The timeline expanded or collapsed (via the line, an attribute, or `show()`/`hide()`/`toggle()`). */
+  'onkai-open-change'?: (event: CustomEvent<{ open: boolean }>) => void;
+  /** A step's detail opened or closed, in either mode. `id` is the step's id (data mode) or its host `id` (item mode). */
+  'onkai-step-toggle'?: (event: CustomEvent<{ id: string; open: boolean }>) => void;
+}
+
+export interface KaiActivityStepElementSvelteEvents {
+  /** The step's detail expanded or collapsed. */
+  'onkai-open-change'?: (event: CustomEvent<{ open: boolean }>) => void;
 }
 
 export interface KaiArtifactElementSvelteEvents {
@@ -6159,6 +6298,8 @@ export type KaiSvelteElement<Props, Events> = Partial<Props> & Events & KaiEleme
 declare global {
   namespace svelteHTML {
     interface IntrinsicElements {
+      'kai-activity': KaiSvelteElement<KaiActivityElementProps, KaiActivityElementSvelteEvents>;
+      'kai-activity-step': KaiSvelteElement<KaiActivityStepElementProps, KaiActivityStepElementSvelteEvents>;
       'kai-artifact': KaiSvelteElement<KaiArtifactElementProps, KaiArtifactElementSvelteEvents>;
       'kai-attachments': KaiSvelteElement<KaiAttachmentsElementProps, KaiAttachmentsElementSvelteEvents>;
       'kai-audio-visualizer': KaiSvelteElement<KaiAudioVisualizerElementProps, KaiAudioVisualizerElementSvelteEvents>;
@@ -6260,6 +6401,18 @@ declare global {
       'kai-workspace': KaiSvelteElement<KaiWorkspaceElementProps, KaiWorkspaceElementSvelteEvents>;
     }
   }
+}
+
+export interface KaiActivityElementSolidEvents {
+  /** The timeline expanded or collapsed (via the line, an attribute, or `show()`/`hide()`/`toggle()`). */
+  'on:kai-open-change'?: (event: CustomEvent<{ open: boolean }>) => void;
+  /** A step's detail opened or closed, in either mode. `id` is the step's id (data mode) or its host `id` (item mode). */
+  'on:kai-step-toggle'?: (event: CustomEvent<{ id: string; open: boolean }>) => void;
+}
+
+export interface KaiActivityStepElementSolidEvents {
+  /** The step's detail expanded or collapsed. */
+  'on:kai-open-change'?: (event: CustomEvent<{ open: boolean }>) => void;
 }
 
 export interface KaiArtifactElementSolidEvents {
@@ -6904,6 +7057,8 @@ export type KaiSolidElement<Props, Events> = Partial<Props> & Events & KaiElemen
 declare module 'solid-js/jsx-runtime' {
   namespace JSX {
     interface IntrinsicElements {
+      'kai-activity': KaiSolidElement<KaiActivityElementProps, KaiActivityElementSolidEvents>;
+      'kai-activity-step': KaiSolidElement<KaiActivityStepElementProps, KaiActivityStepElementSolidEvents>;
       'kai-artifact': KaiSolidElement<KaiArtifactElementProps, KaiArtifactElementSolidEvents>;
       'kai-attachments': KaiSolidElement<KaiAttachmentsElementProps, KaiAttachmentsElementSolidEvents>;
       'kai-audio-visualizer': KaiSolidElement<KaiAudioVisualizerElementProps, KaiAudioVisualizerElementSolidEvents>;

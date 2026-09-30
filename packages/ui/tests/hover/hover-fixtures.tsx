@@ -7,6 +7,8 @@ import '../../src/web-components/code-block/code-block';
 import '../../src/web-components/file-tree/file-tree';
 import '../../src/web-components/embed/embed';
 import '../../src/web-components/screen/screen';
+import '../../src/web-components/activity/activity';
+import '../../src/web-components/activity/activity-step';
 import '../../src/web-components/artifact/artifact';
 import '../../src/web-components/attachments/attachments';
 import '../../src/web-components/checkbox/checkbox-group';
@@ -103,6 +105,16 @@ export const FIXTURES: Record<string, Fixture> = {
           { path: 'src/a.ts', code: 'a', additions: 2, deletions: 1, status: 'modified' },
           { path: 'src/b.ts', code: 'b', status: 'added' },
           { path: 'README.md', code: 'r' },
+        ],
+      }),
+  },
+  'kai-activity': {
+    covers: ['src/components/activity/activity.tsx'],
+    make: () =>
+      el('kai-activity', {
+        defaultOpen: true,
+        steps: [
+          { id: 's', kind: 'tool', status: 'done', toolName: 'web_search', toolKind: 'search', input: { q: 'x' }, output: { n: 1 } },
         ],
       }),
   },

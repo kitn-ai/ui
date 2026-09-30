@@ -13,6 +13,8 @@
     "kai-markdown": "markdown",
     "kai-code-block": "code-block",
     "kai-reasoning": "reasoning",
+    "kai-activity": "activity",
+    "kai-activity-step": "activity-step",
     "kai-tool": "tool",
     "kai-context": "context-meter",
     "kai-feedback-bar": "feedback-bar",
@@ -138,6 +140,12 @@
     ],
     "reasoning": [
       "kai-reasoning"
+    ],
+    "activity": [
+      "kai-activity"
+    ],
+    "activity-step": [
+      "kai-activity-step"
     ],
     "tool": [
       "kai-tool"

@@ -894,6 +894,8 @@ describe('WEB_COMPONENT_COMPOSITION registry (single source of truth the build e
 
   it('maps each composable element to its slots/parts arrays', () => {
     expect(Object.keys(WEB_COMPONENT_COMPOSITION).sort()).toEqual([
+      'kai-activity',
+      'kai-activity-step',
       'kai-artifact',
       'kai-attachments',
       'kai-audio-visualizer',

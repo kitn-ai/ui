@@ -9,6 +9,8 @@
 // For eager all-registration call registerAll() or import '@kitn.ai/ui/web-components'.
 import { createWebComponent, registerAll, type WebComponentProps } from './runtime';
 import type {
+  KaiActivityElement,
+  KaiActivityStepElement,
   KaiArtifactElement,
   KaiAttachmentsElement,
   KaiAudioVisualizerElement,
@@ -120,6 +122,62 @@ export type {
 } from './use-kai-chat';
 export { useVoiceInput } from './use-voice-input';
 
+
+export interface ActivityProps extends WebComponentProps {
+  /** Data mode: the steps to show, as `activityStepsFromParts(parts)` returns them. JS property; omit to pass `<kai-activity-step>` children. */
+  steps?: { id: string; kind: "reasoning" | "tool"; status: "running" | "done" | "error" | "interrupted"; label?: string; toolName?: string; toolKind?: "command" | "file-change" | "file-read" | "search" | "fetch" | "mcp" | "image" | "generic"; text?: string; input?: Record<string, unknown>; output?: Record<string, unknown>; errorText?: string; startedAt?: number; endedAt?: number }[];
+  /** A run in progress: the line shows the live step in the present tense and shimmers. */
+  streaming?: boolean;
+  /** Drive/observe the timeline disclosure: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
+  open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** Whether the line opens to the timeline (default) or stands alone with no disclosure, as `summary`. */
+  detail?: "full" | "summary";
+  /** Step kind → custom-element tag, so an app draws its own row for one tool, all tools or reasoning. JS property: `el.renderers`. */
+  renderers?: Record<string, string>;
+  /** Replaces the derived summary line. */
+  summary?: string;
+  /** The timeline expanded or collapsed (via the line, an attribute, or `show()`/`hide()`/`toggle()`). */
+  onOpenChange?: (event: CustomEvent<{ open: boolean }>) => void;
+  /** A step's detail opened or closed, in either mode. `id` is the step's id (data mode) or its host `id` (item mode). */
+  onStepToggle?: (event: CustomEvent<{ id: string; open: boolean }>) => void;
+}
+
+export const Activity = /*#__PURE__*/ createWebComponent<ActivityProps, KaiActivityElement>(
+  'kai-activity',
+  ["theme","steps","streaming","open","defaultOpen","detail","renderers","summary"],
+  { onOpenChange: 'kai-open-change', onStepToggle: 'kai-step-toggle' },
+  () => import('@kitn.ai/ui/web-components/activity'),
+);
+
+export interface ActivityStepProps extends WebComponentProps {
+  /** What the step says, e.g. `Searched the web`. Rendered as text. */
+  label?: string;
+  /** `running`, `done` (default), `error` or `interrupted`. */
+  status?: "done" | "error" | "interrupted" | "running";
+  /** What the step is. Defaults to a tool call; feeds the fallback label and the container's summary line. */
+  kind?: "reasoning" | "tool";
+  /** The tool's name, e.g. `web_search`. Lets the container's summary line say "Searched the web" instead of repeating the label. */
+  tool?: string;
+  /** How long the step took, in milliseconds. Shown right-aligned as `1.2s`. */
+  duration?: number;
+  /** A line under the label; for an `error` step, the reason. Rendered as text. */
+  note?: string;
+  /** Whether the step's detail is showing. Settable; listen for `kai-open-change`. */
+  open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** The step's detail expanded or collapsed. */
+  onOpenChange?: (event: CustomEvent<{ open: boolean }>) => void;
+}
+
+export const ActivityStep = /*#__PURE__*/ createWebComponent<ActivityStepProps, KaiActivityStepElement>(
+  'kai-activity-step',
+  ["theme","label","status","kind","tool","duration","note","open","defaultOpen"],
+  { onOpenChange: 'kai-open-change' },
+  () => import('@kitn.ai/ui/web-components/activity-step'),
+);
 
 export interface ArtifactProps extends WebComponentProps {
   /** URL the preview iframe frames. Consumer-controlled. */
@@ -374,6 +432,8 @@ export const ChainOfThought = /*#__PURE__*/ createWebComponent<ChainOfThoughtPro
 );
 
 export interface ChatProps extends WebComponentProps {
+  /** How reasoning parts render. Default is the collapsible disclosure. */
+  reasoning?: "full" | "compact" | "off";
   /** How much air the thread has: `'default'` (the shipped look) or `'compact'` (a desktop-panel rhythm: 8px between turns, a tighter band). */
   density?: "default" | "compact";
   /** Value of the input: a string is controlled, a `ComposerDoc` is a one-time seed that pre-populates pills, unset is uncontrolled. */
@@ -398,8 +458,6 @@ export interface ChatProps extends WebComponentProps {
   imagePreview?: "hover" | "lightbox";
   /** Renders plain `<pre>` blocks with no highlighter load when false. Default true. */
   codeHighlight?: boolean;
-  /** How reasoning parts render. Default is the collapsible disclosure. */
-  reasoning?: "full" | "compact" | "off";
   /** Seeds the reasoning disclosure open and keeps it tracking the stream. Default false; inert unless `reasoning` is `'full'`. */
   reasoningOpen?: boolean;
   /** Title shown at the start of the header bar. */
@@ -496,7 +554,7 @@ export interface ChatProps extends WebComponentProps {
 
 export const Chat = /*#__PURE__*/ createWebComponent<ChatProps, KaiChatElement>(
   'kai-chat',
-  ["theme","density","value","placeholder","loading","suggestions","suggestionsLayout","suggestionMode","persistSuggestions","proseSize","codeTheme","imagePreview","codeHighlight","reasoning","reasoningOpen","chatTitle","models","currentModel","context","scrollButton","headerStart","headerEnd","showTrailing","headerFull","homeFull","sidebar","empty","composer","composerActions","footer","attach","tools","expanded","voice","triggers","kindIcons","actionsReveal","userActions","assistantActions","hideSources","accept","messages","cardTypes","cardSchemas","conversations","store","home","hostOpen"],
+  ["theme","reasoning","density","value","placeholder","loading","suggestions","suggestionsLayout","suggestionMode","persistSuggestions","proseSize","codeTheme","imagePreview","codeHighlight","reasoningOpen","chatTitle","models","currentModel","context","scrollButton","headerStart","headerEnd","showTrailing","headerFull","homeFull","sidebar","empty","composer","composerActions","footer","attach","tools","expanded","voice","triggers","kindIcons","actionsReveal","userActions","assistantActions","hideSources","accept","messages","cardTypes","cardSchemas","conversations","store","home","hostOpen"],
   { onAttachmentsChange: 'kai-attachments-change', onAttachmentsRejected: 'kai-attachments-rejected', onConversationLoad: 'kai-conversation-load', onHomeLink: 'kai-home-link', onMessageAction: 'kai-message-action', onModelChange: 'kai-model-change', onSelect: 'kai-select', onSubmit: 'kai-submit', onSuggestionClick: 'kai-suggestion-click', onUnreadChange: 'kai-unread-change', onValueChange: 'kai-value-change', onVoice: 'kai-voice' },
   () => import('@kitn.ai/ui/web-components/chat'),
 );

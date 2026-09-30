@@ -1,5 +1,237 @@
 [
   {
+    "tag": "kai-activity",
+    "className": "KaiActivityElement",
+    "displayName": "Activity",
+    "description": "Reasoning and tool calls as one quiet line that opens to a timeline of steps, each of which opens to its arguments and result. Pass `steps` for the preset, or put `<kai-activity-step>` children inside to render the timeline yourself.",
+    "props": [
+      {
+        "name": "theme",
+        "type": "\"light\" | \"dark\" | \"auto\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
+        "default": "'auto'",
+        "universal": true,
+        "displayType": "\"light\" | \"dark\" | \"auto\""
+      },
+      {
+        "name": "steps",
+        "type": "undefined | { id: string; kind: \"reasoning\" | \"tool\"; status: \"running\" | \"done\" | \"error\" | \"interrupted\"; label?: undefined | string; toolName?: undefined | string; toolKind?: undefined | \"command\" | \"file-change\" | \"file-read\" | \"search\" | \"fetch\" | \"mcp\" | \"image\" | \"generic\"; text?: undefined | string; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; errorText?: undefined | string; startedAt?: undefined | number; endedAt?: undefined | number }[]",
+        "optional": true,
+        "scalar": false,
+        "description": "Data mode: the steps to show, as `activityStepsFromParts(parts)` returns them. JS property; omit to pass `<kai-activity-step>` children.",
+        "typeName": "ActivityStep[]",
+        "typeShape": "{ id: string; kind: \"reasoning\" | \"tool\"; status: \"running\" | \"done\" | \"error\" | \"interrupted\"; label?: undefined | string; toolName?: undefined | string; toolKind?: undefined | \"command\" | \"file-change\" | \"file-read\" | \"search\" | \"fetch\" | \"mcp\" | \"image\" | \"generic\"; text?: undefined | string; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; errorText?: undefined | string; startedAt?: undefined | number; endedAt?: undefined | number }[]",
+        "default": "[]",
+        "typeImport": "ActivityStep",
+        "displayType": "undefined | { id: string; kind: \"reasoning\" | \"tool\"; status: \"running\" | \"done\" | \"error\" | \"interrupted\"; label?: undefined | string; toolName?: undefined | string; toolKind?: undefined | \"command\" | \"file-change\" | \"file-read\" | \"search\" | \"fetch\" | \"mcp\" | \"image\" | \"generic\"; text?: undefined | string; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; errorText?: undefined | string; startedAt?: undefined | number; endedAt?: undefined | number }[]"
+      },
+      {
+        "name": "streaming",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "A run in progress: the line shows the live step in the present tense and shimmers.",
+        "default": "false",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "open",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Drive/observe the timeline disclosure: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`.",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "defaultOpen",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Initial open state on mount (uncontrolled seed).",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "detail",
+        "type": "undefined | \"full\" | \"summary\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Whether the line opens to the timeline (default) or stands alone with no disclosure, as `summary`.",
+        "displayType": "undefined | \"full\" | \"summary\""
+      },
+      {
+        "name": "renderers",
+        "type": "undefined | Record<string, string>",
+        "optional": true,
+        "scalar": false,
+        "description": "Step kind → custom-element tag, so an app draws its own row for one tool, all tools or reasoning. JS property: `el.renderers`.",
+        "displayType": "undefined | Record<string, string>"
+      },
+      {
+        "name": "summary",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Replaces the derived summary line.",
+        "displayType": "undefined | string"
+      }
+    ],
+    "events": [
+      {
+        "name": "kai-open-change",
+        "detail": "{ open: false | true }",
+        "description": "The timeline expanded or collapsed (via the line, an attribute, or `show()`/`hide()`/`toggle()`).",
+        "displayDetail": "{ open: false | true }"
+      },
+      {
+        "name": "kai-step-toggle",
+        "detail": "{ id: string; open: false | true }",
+        "description": "A step's detail opened or closed, in either mode. `id` is the step's id (data mode) or its host `id` (item mode).",
+        "displayDetail": "{ id: string; open: false | true }"
+      }
+    ],
+    "methods": [
+      {
+        "name": "show",
+        "params": "",
+        "returns": "void",
+        "description": "Open it programmatically (no-op while disabled)."
+      },
+      {
+        "name": "hide",
+        "params": "",
+        "returns": "void",
+        "description": "Close it programmatically."
+      },
+      {
+        "name": "toggle",
+        "params": "",
+        "returns": "void",
+        "description": "Flip the open state (closes while disabled)."
+      }
+    ],
+    "composedFrom": [
+      {
+        "name": "Activity",
+        "group": "Components"
+      }
+    ],
+    "tokens": [],
+    "slots": [
+      {
+        "name": "",
+        "mode": "inject",
+        "doc": "The `<kai-activity-step>` rows, direct children in timeline order. Omit them and set `steps` for the preset."
+      }
+    ]
+  },
+  {
+    "tag": "kai-activity-step",
+    "className": "KaiActivityStepElement",
+    "displayName": "ActivityStep",
+    "description": "One row of a `kai-activity` timeline: a status glyph on the rail, a label, a duration and, when you put content inside it, a disclosure that shows that content. Compose the rows yourself inside `<kai-activity>`; the container adds the summary line, the rail and arrow-key traversal.",
+    "props": [
+      {
+        "name": "theme",
+        "type": "\"light\" | \"dark\" | \"auto\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
+        "default": "'auto'",
+        "universal": true,
+        "displayType": "\"light\" | \"dark\" | \"auto\""
+      },
+      {
+        "name": "label",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "What the step says, e.g. `Searched the web`. Rendered as text.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "status",
+        "type": "undefined | \"done\" | \"error\" | \"interrupted\" | \"running\"",
+        "optional": true,
+        "scalar": true,
+        "description": "`running`, `done` (default), `error` or `interrupted`.",
+        "displayType": "undefined | \"done\" | \"error\" | \"interrupted\" | \"running\""
+      },
+      {
+        "name": "kind",
+        "type": "undefined | \"reasoning\" | \"tool\"",
+        "optional": true,
+        "scalar": true,
+        "description": "What the step is. Defaults to a tool call; feeds the fallback label and the container's summary line.",
+        "displayType": "undefined | \"reasoning\" | \"tool\""
+      },
+      {
+        "name": "tool",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "The tool's name, e.g. `web_search`. Lets the container's summary line say \"Searched the web\" instead of repeating the label.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "duration",
+        "type": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": "How long the step took, in milliseconds. Shown right-aligned as `1.2s`.",
+        "displayType": "undefined | number"
+      },
+      {
+        "name": "note",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "A line under the label; for an `error` step, the reason. Rendered as text.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "open",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Whether the step's detail is showing. Settable; listen for `kai-open-change`.",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "defaultOpen",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Initial open state on mount (uncontrolled seed).",
+        "displayType": "undefined | false | true"
+      }
+    ],
+    "events": [
+      {
+        "name": "kai-open-change",
+        "detail": "{ open: false | true }",
+        "description": "The step's detail expanded or collapsed.",
+        "displayDetail": "{ open: false | true }"
+      }
+    ],
+    "methods": [],
+    "composedFrom": [
+      {
+        "name": "ActivityStepItem",
+        "group": "Components"
+      }
+    ],
+    "tokens": [],
+    "slots": [
+      {
+        "name": "",
+        "mode": "inject",
+        "doc": "The step's detail (arguments, a result, reasoning text), shown when the step is expanded. Empty means the step cannot expand."
+      }
+    ]
+  },
+  {
     "tag": "kai-artifact",
     "className": "KaiArtifactElement",
     "displayName": "Artifact",
@@ -1286,6 +1518,14 @@
         "displayType": "\"light\" | \"dark\" | \"auto\""
       },
       {
+        "name": "reasoning",
+        "type": "undefined | \"full\" | \"compact\" | \"off\"",
+        "optional": true,
+        "scalar": true,
+        "description": "How reasoning parts render. Default is the collapsible disclosure.",
+        "displayType": "undefined | \"full\" | \"compact\" | \"off\""
+      },
+      {
         "name": "density",
         "type": "undefined | \"default\" | \"compact\"",
         "optional": true,
@@ -1389,14 +1629,6 @@
         "description": "Renders plain `<pre>` blocks with no highlighter load when false. Default true.",
         "default": "true",
         "displayType": "undefined | false | true"
-      },
-      {
-        "name": "reasoning",
-        "type": "undefined | \"full\" | \"compact\" | \"off\"",
-        "optional": true,
-        "scalar": true,
-        "description": "How reasoning parts render. Default is the collapsible disclosure.",
-        "displayType": "undefined | \"full\" | \"compact\" | \"off\""
       },
       {
         "name": "reasoningOpen",

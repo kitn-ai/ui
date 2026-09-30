@@ -220,3 +220,8 @@ export { ViewStack, View, useViewStack } from './components/view/view-stack';
 export type { ViewStackProps, ViewProps, ViewStackController, ViewStackState, ViewEntry } from './components/view/view-stack';
 export { TagRenderer } from './components/renderer/tag-renderer';
 export type { TagRendererProps } from './components/renderer/tag-renderer';
+
+// Activity: reasoning and tool calls as one quiet line over a timeline of steps. `Activity` is the
+// preset (give it `steps`); `ActivityStepItem` is the row, for composing the timeline yourself.
+export { Activity, ActivityStepItem, activityLine, activityStepLabel, activityStepDuration, MAX_VALUE_CHARS, INTERRUPTED_NOTE } from './components/activity/activity';
+export type { ActivityProps, ActivityStepItemProps, ActivityController, ActivityStatus } from './components/activity/activity';

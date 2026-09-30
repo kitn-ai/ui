@@ -1,6 +1,143 @@
 {
   "webComponents": [
     {
+      "tag": "kai-activity",
+      "description": "Reasoning and tool calls as one quiet line that opens to a timeline of steps, each of which opens to its arguments and result. Pass `steps` for the preset, or put `<kai-activity-step>` children inside to render the timeline yourself.",
+      "props": [
+        {
+          "name": "theme",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "steps",
+          "scalar": false,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "streaming",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "open",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "defaultOpen",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "detail",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "renderers",
+          "scalar": false,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "summary",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        }
+      ],
+      "events": [
+        "kai-open-change",
+        "kai-step-toggle"
+      ],
+      "methods": [
+        "show",
+        "hide",
+        "toggle"
+      ],
+      "parts": [],
+      "composedFrom": [
+        "Activity"
+      ],
+      "tokens": []
+    },
+    {
+      "tag": "kai-activity-step",
+      "description": "One row of a `kai-activity` timeline: a status glyph on the rail, a label, a duration and, when you put content inside it, a disclosure that shows that content. Compose the rows yourself inside `<kai-activity>`; the container adds the summary line, the rail and arrow-key traversal.",
+      "props": [
+        {
+          "name": "theme",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "label",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "status",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "kind",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "tool",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "duration",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "note",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "open",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "defaultOpen",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        }
+      ],
+      "events": [
+        "kai-open-change"
+      ],
+      "methods": [],
+      "parts": [],
+      "composedFrom": [
+        "ActivityStepItem"
+      ],
+      "tokens": []
+    },
+    {
       "tag": "kai-artifact",
       "description": "A framed viewer for a generated artifact: a sandboxed preview beside its source.",
       "props": [
@@ -667,6 +804,12 @@
           "fn": false
         },
         {
+          "name": "reasoning",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
           "name": "density",
           "scalar": true,
           "optional": true,
@@ -734,12 +877,6 @@
         },
         {
           "name": "codeHighlight",
-          "scalar": true,
-          "optional": true,
-          "fn": false
-        },
-        {
-          "name": "reasoning",
           "scalar": true,
           "optional": true,
           "fn": false
