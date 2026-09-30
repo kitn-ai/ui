@@ -39,6 +39,13 @@ export { activityStepsFromParts, summarizeActivity, formatDuration, interruptedL
 export type { ActivityStep, ActivityLabel } from '../primitives/activity';
 export { PLAN_TOOL_NAME, isPlanTool, validatePlan, planFromMessages } from '../primitives/plan';
 export type { PlanItem, PlanItemStatus, PlanValidation } from '../primitives/plan';
+
+// The question tool's thread half: read the open `kai_ask`, settle it with the user's answers, and
+// derive the display rows. See ./questions; the model's call is read by `@kitn.ai/ui/schemas`.
+export { pendingQuestions, answerQuestions, settlePendingQuestions, approvalQuestion, threadRows, isOneClick } from './questions';
+export type { ThreadRow } from './questions';
+// The question TYPES (`Question`, `Answer`, `AskResult`, ...) and `ASK_TOOL_NAME` are exported from
+// `@kitn.ai/ui/schemas` and the root, so this entry stays the helpers alone.
 export type { ToolKind } from '../primitives/tool-classify';
 // upsertToolPart defaults `kind` to classifyTool(type) and reverts it on a type
 // change (see ./parts), and ToolPart.kind's doc comment names the function, so a

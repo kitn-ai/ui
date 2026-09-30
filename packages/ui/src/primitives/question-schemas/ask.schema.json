@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kitn.ai/schemas/question/ask.schema.json",
+  "title": "AskToolInput",
+  "description": "Input of the `kai_ask` tool: one to four questions for the user. The call is NOT answered by the host at once: the turn ends, the user answers in a panel above the prompt, and their answers become this call's tool result.",
+  "type": "object",
+  "required": ["questions"],
+  "properties": {
+    "questions": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 4,
+      "description": "One to four questions, asked together. Ask only what you cannot decide yourself.",
+      "items": {
+        "type": "object",
+        "required": ["header", "question", "kind"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Optional stable id for the question, unique within this call. Defaults to q0, q1, ... by position."
+          },
+          "header": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 12,
+            "description": "A short label for the question, shown as a tab. At most 12 characters."
+          },
+          "question": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The question, in one sentence."
+          },
+          "kind": {
+            "type": "string",
+            "enum": ["choice", "confirm", "tasks", "text", "form"],
+            "description": "`choice`: pick from options. `confirm`: approve or deny. `tasks`: tick any of a checklist. `text`: a free-text answer. `form`: several typed fields, described by `fields`."
+          },
+          "multiSelect": {
+            "type": "boolean",
+            "description": "`choice` only: let the user pick more than one option."
+          },
+          "options": {
+            "type": "array",
+            "maxItems": 12,
+            "description": "`choice`: two to six options. `tasks`: one to twelve items. `confirm`: optional, a pair of labels replacing Approve and Deny. The user can always answer in their own words instead, so do not add an Other option.",
+            "items": {
+              "type": "object",
+              "required": ["label"],
+              "properties": {
+                "label": { "type": "string", "minLength": 1, "description": "The option, in a few words. This exact text comes back as the answer." },
+                "description": { "type": "string", "description": "One line on what choosing it means." },
+                "preview": { "type": "string", "description": "Optional plain text shown beside the options while this one is focused, for example a code snippet or a sample. Not markdown." }
+              }
+            }
+          },
+          "placeholder": {
+            "type": "string",
+            "description": "`text` only: hint text for the empty answer box."
+          },
+          "fields": {
+            "type": "object",
+            "description": "`form` only: the fields to collect, as a JSON Schema object (`type: object`, `properties`, `required`) in the subset the kit's form understands."
+          },
+          "required": {
+            "type": "boolean",
+            "description": "Whether the user must answer before submitting. Defaults to true."
+          }
+        }
+      }
+    }
+  }
+}

@@ -193,6 +193,8 @@ export {
   cardTools,
   PLAN_TOOL_DESCRIPTION,
   planTool,
+  ASK_TOOL_DESCRIPTION,
+  askTool,
   toAnthropicTools,
   toJsonSchemaTools,
   toOpenAITools,
@@ -217,6 +219,11 @@ export type {
 // are as server-safe as the rest of this entry. See ../primitives/plan.
 export { PLAN_TOOL_NAME, isPlanTool, validatePlan, planFromMessages } from '../primitives/plan';
 export type { PlanItem, PlanItemStatus, PlanValidation } from '../primitives/plan';
+
+// The question tool's server half. `askTool` (above) hands the model `kai_ask`; these read its call.
+// The call is left OPEN and settled from the thread by `@kitn.ai/ui/state`'s `answerQuestions`.
+export { ASK_TOOL_NAME, isAskTool, questionsFromToolCall } from './ask';
+export type { Question, QuestionKind, QuestionOption, QuestionSet, Answer, AskResult } from '../primitives/questions';
 
 // The registry: "these are the card types THIS app renders", written once and threaded
 // to both ends (`chat.cardTypes = cards.tags` on the client, `cardTools(cards, …)` on

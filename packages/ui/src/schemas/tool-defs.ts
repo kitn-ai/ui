@@ -22,6 +22,8 @@
 import { toolNameForCardType } from './from-tool-call';
 import { PLAN_TOOL_NAME } from '../primitives/plan-tool-name';
 import planSchemaDoc from '../primitives/question-schemas/plan.schema.json';
+import askSchemaDoc from '../primitives/question-schemas/ask.schema.json';
+import { ASK_TOOL_NAME } from '../primitives/questions';
 import { cardSchemas } from './index';
 import type { CardSchema, CardSchemaName } from './index';
 import {
@@ -655,6 +657,34 @@ export function planTool<P extends ToolProvider>(opts: { readonly provider: P })
   }
   const parameters = project(planSchemaDoc, { closeObjects: false, requireEveryProperty: false }) as ToolParameters;
   return toolDef(opts.provider, PLAN_TOOL_NAME, PLAN_TOOL_DESCRIPTION, parameters, false) as ToolDefFor<P>;
+}
+
+/** What `kai_ask` is FOR, addressed to a model. The last sentence is the contract: the call is not
+ *  answered at once, and the answers arrive as this call's tool result. */
+export const ASK_TOOL_DESCRIPTION =
+  'Ask the user one to four questions when you need a decision you cannot make yourself: a choice between options, an approval, a checklist, a free-text answer or a small form. Ask only what you need to continue. The user can always answer in their own words. Then STOP and wait: the call is answered by the user, not by a tool, and the tool result you get back holds their answers ({ status: "answered" | "dismissed", answers }), and "dismissed" means they declined, possibly with some answers.';
+
+/**
+ * The `kai_ask` tool definition for one provider: questions the user answers in a panel above the
+ * prompt. Not a card, so it is not in `cardTools()`; add it beside them:
+ *
+ * ```ts
+ * const tools = [...myTools, askTool({ provider: 'anthropic' })];
+ * ```
+ *
+ * Unlike a card tool, the host must NOT close the call at once. Leave it open (`isAskTool`,
+ * `questionsFromToolCall`), let the user answer, then settle it with `answerQuestions`. The schema
+ * carries its limits (four questions, twelve-character headers) as GUIDANCE for the model; the kit
+ * never refuses a call for exceeding them. Never strict, like `planTool`.
+ *
+ * @throws {TypeError} without an options object carrying a `provider`, like {@link cardTools}.
+ */
+export function askTool<P extends ToolProvider>(opts: { readonly provider: P }): ToolDefFor<P> {
+  if (!isRecord(opts) || (opts.provider !== 'openai' && opts.provider !== 'anthropic' && opts.provider !== 'jsonschema')) {
+    throw new TypeError('askTool: an options object with a `provider` is required, e.g. askTool({ provider: "openai" })');
+  }
+  const parameters = project(askSchemaDoc, { closeObjects: false, requireEveryProperty: false }) as ToolParameters;
+  return toolDef(opts.provider, ASK_TOOL_NAME, ASK_TOOL_DESCRIPTION, parameters, false) as ToolDefFor<P>;
 }
 
 /**

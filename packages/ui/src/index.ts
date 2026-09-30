@@ -403,6 +403,14 @@ export { activityStepsFromParts, summarizeActivity, formatDuration, interruptedL
 export type { ActivityStep, ActivityLabel } from './primitives/activity';
 export { PLAN_TOOL_NAME, isPlanTool, validatePlan, planFromMessages } from './primitives/plan';
 export type { PlanItem, PlanItemStatus, PlanValidation } from './primitives/plan';
+
+// Questions: the data half of `kai_ask` (the panel is a later task). `askTool` and
+// `questionsFromToolCall` live in ./schemas, the thread helpers in ./state.
+export { ASK_TOOL_NAME, isOneClick } from './primitives/questions';
+export type { Question, QuestionKind, QuestionOption, QuestionSet, Answer, AskResult } from './primitives/questions';
+export { isAskTool, questionsFromToolCall } from './schemas/ask';
+export { pendingQuestions, answerQuestions, settlePendingQuestions, approvalQuestion, threadRows } from './state/questions';
+export type { ThreadRow } from './state/questions';
 export { ThinkingBar } from './components/thinking-bar/thinking-bar';
 export type { ThinkingBarProps } from './components/thinking-bar/thinking-bar';
 export { Reasoning, ReasoningTrigger, ReasoningContent } from './components/reasoning/reasoning';

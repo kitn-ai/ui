@@ -38,6 +38,8 @@ import { pathToFileURL, fileURLToPath } from 'node:url';
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const VERBOSE = process.argv.includes('--verbose');
 const SCHEMA_DIR = join(ROOT, 'src', 'primitives', 'card-schemas');
+// The non-card tool schemas (`kai_plan`, `kai_ask`): projected by `planTool` / `askTool`, not by `cardTools`.
+const QUESTION_SCHEMA_DIR = join(ROOT, 'src', 'primitives', 'question-schemas');
 const BUILT = join(ROOT, 'dist', 'schemas.js');
 
 const problems = [];
@@ -59,11 +61,16 @@ const {
   OPENAI_STRICT,
   ANTHROPIC_STRICT,
   UnsupportedCardToolSchemaError,
+  askTool,
+  planTool,
+  isAskTool,
+  isCardTool,
 } = mod;
 
 for (const [name, value] of Object.entries({
   cardSchemas, cardSchemaNames, cardTools, cardTypeFromToolName, checkProviderSubset,
   providerSubsets, OPENAI_STRICT, ANTHROPIC_STRICT, UnsupportedCardToolSchemaError,
+  askTool, planTool, isAskTool, isCardTool,
 })) {
   if (value === undefined) fail(`the built entry does not export \`${name}\`; @kitn.ai/ui/schemas is missing part of the tool-definition surface`);
 }
@@ -142,12 +149,18 @@ function collectKeywords(node, into) {
   return into;
 }
 
-const schemaFiles = readdirSync(SCHEMA_DIR).filter((f) => f.endsWith('.json')).sort();
-if (schemaFiles.length === 0) fail(`no schema documents found in ${SCHEMA_DIR}`);
+const schemaEntries = [
+  ...readdirSync(SCHEMA_DIR).filter((f) => f.endsWith('.json')).sort().map((f) => ({ file: f, path: join(SCHEMA_DIR, f) })),
+  ...readdirSync(QUESTION_SCHEMA_DIR).filter((f) => f.endsWith('.json')).sort().map((f) => ({ file: `question-schemas/${f}`, path: join(QUESTION_SCHEMA_DIR, f) })),
+];
+if (schemaEntries.length === 0) fail(`no schema documents found in ${SCHEMA_DIR}`);
+for (const need of ['ask.schema.json', 'plan.schema.json']) {
+  if (!schemaEntries.some((e) => e.file === `question-schemas/${need}`)) fail(`${QUESTION_SCHEMA_DIR} has no ${need}: a tool's schema that no check reads is a keyword nobody classified`);
+}
 
 const unclassified = [];
-for (const file of schemaFiles) {
-  const doc = JSON.parse(readFileSync(join(SCHEMA_DIR, file), 'utf8'));
+for (const { file, path } of schemaEntries) {
+  const doc = JSON.parse(readFileSync(path, 'utf8'));
   for (const keyword of collectKeywords(doc, new Set())) {
     if (keyword.startsWith('x-')) continue; // vendor extensions are recognised as such
     for (const subset of Object.values(providerSubsets)) {
@@ -211,6 +224,37 @@ for (const provider of ['openai', 'anthropic', 'jsonschema']) {
     // reach here; anything that does is genuine metadata that should have been
     // stripped before it cost tokens in every request.
     if (leaked.length) fail(`${provider}: ${name} ships internal keyword(s) on the wire: ${leaked.join(', ')}`);
+  }
+}
+
+// The non-card tools: `kai_plan` and `kai_ask`. Each must come out in every provider's documented
+// envelope, named as the loop's predicate expects, described, free of authoring metadata, and NOT
+// claimed by the card dispatcher (a `kai_`-prefixed name it claims would render as a fallback card).
+for (const [label, make, expectedName] of [['askTool', askTool, 'kai_ask'], ['planTool', planTool, 'kai_plan']]) {
+  for (const provider of ['openai', 'anthropic', 'jsonschema']) {
+    let def;
+    try {
+      def = make({ provider });
+    } catch (e) {
+      fail(`${label}({ provider: '${provider}' }) threw: ${e.message}`);
+      continue;
+    }
+    const name = NAME_OF[provider](def);
+    const params = ENVELOPE[provider](def);
+    if (name !== expectedName) fail(`${label}/${provider}: named "${name}", expected "${expectedName}"`);
+    if (params === undefined) { fail(`${label}/${provider}: no schema in the documented place`); continue; }
+    if (!def.description && !def.function?.description) fail(`${label}/${provider}: no description`);
+    const leaked = [...collectKeywords(params, new Set())].filter((k) => k === '$schema' || k === '$id' || k.startsWith('x-'));
+    if (leaked.length) fail(`${label}/${provider}: ships internal keyword(s) on the wire: ${leaked.join(', ')}`);
+    if (isCardTool(expectedName)) fail(`${label}: isCardTool("${expectedName}") is true, so the card dispatcher would claim it`);
+  }
+}
+if (!isAskTool('kai_ask') || isAskTool('kai_confirm')) fail('isAskTool does not match exactly `kai_ask`');
+// the question tool's limits reach the model: they are guidance, and a projection that dropped them would say nothing
+{
+  const q = ENVELOPE.anthropic(askTool({ provider: 'anthropic' }))?.properties?.questions;
+  if (q?.maxItems !== 4 || q?.minItems !== 1 || q?.items?.properties?.header?.maxLength !== 12) {
+    fail('askTool: the projected schema lost its guidance limits (questions 1..4, header maxLength 12)');
   }
 }
 
@@ -348,5 +392,5 @@ if (problems.length) {
 
 console.log(
   `✓ verify-tool-schemas: ${cardSchemaNames.length} card types project cleanly for 3 providers; ` +
-    `the 2 strict subsets differ and classify every keyword in ${schemaFiles.length} schema documents.`,
+    `the 2 strict subsets differ and classify every keyword in ${schemaEntries.length} schema documents.`,
 );
