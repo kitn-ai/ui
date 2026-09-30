@@ -22,6 +22,8 @@ import '../../src/web-components/dropdown/dropdown';
 import '../../src/web-components/editable-label/editable-label';
 import '../../src/web-components/form/form';
 import '../../src/web-components/lightbox/lightbox';
+import '../../src/web-components/dock/dock';
+import '../../src/web-components/file-upload/file-upload';
 import '../../src/web-components/model-switcher/model-switcher';
 import '../../src/web-components/nav/nav';
 import '../../src/web-components/notice/notice';
@@ -183,13 +185,37 @@ export const FIXTURES: Record<string, Fixture> = {
     make: () => el('kai-conversations', { conversations: [convo('a', 'Alpha'), convo('b', 'Beta')], activeId: 'a' }),
   },
   'kai-menu': {
-    covers: ['src/components/dropdown/dropdown.tsx'],
+    covers: ['src/components/dropdown/dropdown.tsx', 'src/web-components/menu/menu.tsx'],
     make: () =>
       el('kai-menu', {
         open: true,
         triggerLabel: 'Menu',
         items: [{ id: 'a', label: 'Alpha', icon: 'settings' }, { id: 'b', label: 'Check', checked: true, control: 'check' }, { id: 'c', label: 'Beta', shortcut: 'B' }],
       }),
+  },
+  'kai-menu icon-only': {
+    covers: [],
+    make: () => el('kai-menu', { triggerIcon: 'settings', label: 'Options', items: [{ id: 'a', label: 'Alpha' }] }),
+  },
+  'kai-dropdown': {
+    covers: ['src/web-components/dropdown/dropdown.tsx'],
+    make: () => el('kai-dropdown', { open: true, triggerLabel: 'Dropdown' }, '<div style="padding:8px">Item</div>'),
+  },
+  'kai-dropdown icon-only': {
+    covers: [],
+    make: () => el('kai-dropdown', { triggerIcon: 'settings', label: 'Options' }, '<div style="padding:8px">Item</div>'),
+  },
+  'kai-file-upload': {
+    covers: ['src/web-components/file-upload/file-upload.tsx'],
+    make: () => el('kai-file-upload', {}),
+  },
+  'kai-dock': {
+    covers: ['src/components/dock/dock.tsx'],
+    // Open, so the panel's close control is on screen (its :hover rule lives in an embedded stylesheet).
+    make: () => {
+      const d = el('kai-dock', { open: true, label: 'Chat' }, '<div style="padding:24px">Panel content</div>');
+      return d;
+    },
   },
   'kai-editable-label': {
     covers: ['src/components/editable/editable-label.tsx'],

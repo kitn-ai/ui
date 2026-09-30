@@ -12,12 +12,19 @@
 const HOVER_MODIFIER = String.raw`(?:(?:group-|peer-)?hover(?:\/[\w.-]+)?:|\[&[^\]\s]*:hover[^\]\s]*\]:)`;
 const HOVER_BG_CLASS = new RegExp(`${HOVER_MODIFIER}(?:[^\\s'"\`]*:)?!?bg-`);
 
+/**
+ * A `:hover` rule with a background in CSS embedded in a string (a `<style>` template, a `css\`\``
+ * block). A class scan cannot see these. The selector may not cross a `}` and the declaration block
+ * may not either, so a `:hover` rule and an unrelated later `background` are not paired.
+ */
+const HOVER_BG_CSS = /:hover[^{};]*\{[^{}]*\bbackground(?:-color)?\s*:/;
+
 export function hasHoverBackground(source: string): boolean {
-  return HOVER_BG_CLASS.test(source);
+  return HOVER_BG_CLASS.test(source) || HOVER_BG_CSS.test(source);
 }
 
 /** Directories scanned, relative to packages/ui. */
-export const SCAN_ROOTS = ['src/components'];
+export const SCAN_ROOTS = ['src/components', 'src/web-components'];
 /** Source extensions scanned. Stories and tests are not shipped UI. */
 export const SCAN_FILE = /\.tsx?$/;
 export const SCAN_SKIP = /\.(stories|test)\.tsx?$|\.d\.ts$/;

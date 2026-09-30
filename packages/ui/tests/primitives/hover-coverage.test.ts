@@ -4,7 +4,7 @@ import { join, relative } from 'node:path';
 import { hasHoverBackground, SCAN_FILE, SCAN_ROOTS, SCAN_SKIP } from '../hover/hover-scan';
 
 /**
- * Every component file that paints a hover background must be measured by the hover-contrast
+ * Every component file (src/components and src/web-components) that paints a hover background must be measured by the hover-contrast
  * probe (tests/hover/hover-contrast.browser.test.tsx) or carry an explicit, reasoned waiver.
  *
  * The site list is DERIVED from src/components, never typed, so a new hover state cannot ship without
@@ -68,6 +68,9 @@ describe('the scan recognises every spelling of a hover background', () => {
     'after an open paren': "cn(cond && 'a', (hover:bg-muted))",
     'after a template hole': 'class={`${base}hover:bg-muted`}',
     'after a quote': "cn('hover:bg-muted')",
+    'embedded css rule': 'const css = `[part="close"]:hover { background: red; }`',
+    'embedded css background-color': 'const css = `.x:hover{background-color:red}`',
+    'embedded css nested': 'const css = `.x { &:hover { background: var(--y) } }`',
   };
   for (const [name, src] of Object.entries(positives)) {
     it(`finds: ${name}`, () => expect(hasHoverBackground(src)).toBe(true));
@@ -78,6 +81,8 @@ describe('the scan recognises every spelling of a hover background', () => {
     'hover border only': 'class="hover:border-ring hover:opacity-100"',
     'bg without hover': 'class="bg-muted focus:bg-accent"',
     'hover and bg in separate tokens': 'class="hover:text-foreground bg-muted"',
+    'css hover without a background': 'const css = `.x:hover { color: red; }`',
+    'css hover then an unrelated background': 'const css = `.x:hover { color: red; } .y { background: blue; }`',
   };
   for (const [name, src] of Object.entries(negatives)) {
     it(`ignores: ${name}`, () => expect(hasHoverBackground(src)).toBe(false));
