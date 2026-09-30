@@ -30,6 +30,7 @@ import '../../src/web-components/notice/notice';
 import '../../src/web-components/pane/pane';
 import '../../src/web-components/pane/pane-group';
 import '../../src/web-components/prompt/prompt-suggestions';
+import '../../src/web-components/question/question-panel';
 import '../../src/web-components/row/row';
 import '../../src/web-components/source/source';
 import '../../src/web-components/tasks/tasks';
@@ -216,6 +217,19 @@ export const FIXTURES: Record<string, Fixture> = {
       const d = el('kai-dock', { open: true, label: 'Chat' }, '<div style="padding:24px">Panel content</div>');
       return d;
     },
+  },
+  'kai-question-panel': {
+    covers: ['src/components/question/question-option.tsx', 'src/components/question/question-panel.tsx'],
+    // Two questions so the tabs, Back and the outline buttons are all drawn; the options carry
+    // descriptions so the row hover sits over both text tiers.
+    make: () =>
+      el('kai-question-panel', {
+        focusOnOpen: false,
+        questions: [
+          { id: 'a', header: 'Scope', question: 'Which part?', kind: 'choice', required: true, options: [{ label: 'One', description: 'first' }, { label: 'Two', description: 'second' }] },
+          { id: 'b', header: 'Tone', question: 'How formal?', kind: 'choice', required: true, options: [{ label: 'Casual' }, { label: 'Formal' }] },
+        ],
+      }),
   },
   'kai-editable-label': {
     covers: ['src/components/editable/editable-label.tsx'],
