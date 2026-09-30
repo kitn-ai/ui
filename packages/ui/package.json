@@ -242,6 +242,7 @@
     "test": "vitest run",
     "test:react": "vitest run --config vitest.react.config.ts",
     "test:containment": "vitest run --config vitest.browser.config.ts",
+    "test:hover-contrast": "vitest run --config vitest.hover.config.ts",
     "test:storybook": "vitest run --project=storybook",
     "test:storybook:ci": "node scripts/run-storybook-tests.mjs",
     "test:watch": "vitest",

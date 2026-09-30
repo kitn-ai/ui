@@ -104,7 +104,10 @@ describe('every fixture is registered against the scan', () => {
   });
 });
 
-describe.each(['light', 'dark'] as const)('hover contrast in %s', (scheme) => {
+declare const __HOVER_SCHEMES__: string;
+const SCHEMES = (__HOVER_SCHEMES__.split(',') as ('light' | 'dark')[]).filter((x) => x === 'light' || x === 'dark');
+
+describe.each(SCHEMES)('hover contrast in %s', (scheme) => {
   for (const [name, fixture] of Object.entries(FIXTURES)) {
     it(`${name} controls stay legible under the pointer`, async () => {
       const host = document.createElement('div');

@@ -288,6 +288,9 @@ export default defineConfig({
           // `tests/theme/**` are real-browser specs too (`light-dark()` needs a real cascade), run by
           // vitest.browser.config.ts alongside tests/browser.
           'tests/theme/**', '**/tests/theme/**',
+          // `tests/hover/**` is the hover-contrast probe, a real-browser spec with its own config
+          // (vitest.hover.config.ts) and its own CI job.
+          'tests/hover/**', '**/tests/hover/**',
           ...EMITTED_CODE_TESTS_EXCLUDE,
         ]
       }

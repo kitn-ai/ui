@@ -4,7 +4,7 @@ import { join, relative } from 'node:path';
 
 /**
  * Every component file that paints a `hover:bg-*` background must be measured by the hover-contrast
- * probe (tests/browser/hover-contrast.browser.test.tsx) or carry an explicit, reasoned waiver.
+ * probe (tests/hover/hover-contrast.browser.test.tsx) or carry an explicit, reasoned waiver.
  *
  * The site list is DERIVED from src/components, never typed, so a new hover state cannot ship without
  * a fixture. The registry is read as text because it imports the facades (a DOM, real-Chromium
@@ -27,7 +27,7 @@ const sites = walk(join(ROOT, 'src/components'))
   .map((f) => relative(ROOT, f))
   .sort();
 
-const registry = readFileSync(join(ROOT, 'tests/browser/hover-fixtures.tsx'), 'utf8');
+const registry = readFileSync(join(ROOT, 'tests/hover/hover-fixtures.tsx'), 'utf8');
 const covered = new Set([...registry.matchAll(/covers:\s*\[([^\]]*)\]/g)].flatMap((m) => [...m[1].matchAll(/'([^']+)'/g)].map((x) => x[1])));
 const waiverBlock = registry.match(/export const WAIVERS[^=]*=\s*\{([\s\S]*?)\n\};/)?.[1] ?? '';
 const waivers = new Map([...waiverBlock.matchAll(/'([^']+)':\s*'([^']*)'/g)].map((m) => [m[1], m[2]] as const));
@@ -38,7 +38,7 @@ describe('hover-contrast coverage is derived from the source', () => {
   });
   it('every file with a hover:bg- class has a fixture or a reasoned waiver', () => {
     const missing = sites.filter((f) => !covered.has(f) && !waivers.has(f));
-    expect(missing, `add a fixture (covers: ['<file>']) or a WAIVERS entry with a reason in tests/browser/hover-fixtures.tsx`).toEqual([]);
+    expect(missing, `add a fixture (covers: ['<file>']) or a WAIVERS entry with a reason in tests/hover/hover-fixtures.tsx`).toEqual([]);
   });
   it('every waiver states a reason', () => {
     expect([...waivers].filter(([, why]) => why.trim().length < 15)).toEqual([]);

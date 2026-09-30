@@ -9,7 +9,7 @@ on:
 jobs:
   # THE REQUIRED CHECK IS A GRAPH, NOT A JOB.
   #
-  # `test` is an aggregator. It runs no gate itself: five legs do, in parallel,
+  # `test` is an aggregator. It runs no gate itself: six legs do, in parallel,
   # and `test` fails unless every one of them succeeded. The check-run name stays
   # `test` because that is the context the ruleset requires and the literal
   # `require-green-checks.mjs` gates the publish on, and moving it would buy
@@ -1595,7 +1595,50 @@ jobs:
         continue-on-error: true
         run: pnpm --filter @kitn.ai/ui run test:browser-suites:advisory
 
-  # THE REQUIRED CHECK. It runs no gate: the five legs above do, and this fails
+  # The hover-contrast probe, in its OWN job. It really hovers every control of ~40 fixtures in
+  # chromium and takes 4-6 minutes per scheme; inside `browser` (~7.4 min against a 15 min cap) it
+  # made a timeout depend on runner load. A dedicated job runs in parallel with the other legs,
+  # and one matrix leg per scheme halves it again. `run-browser-suites.mjs` skips this config by
+  # name (its OWN_JOB map), so the `browser` job does not run it twice. It is a leg of the
+  # required `test` aggregator (`needs:` above), which is what makes it required.
+  hover-contrast:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        scheme: [light, dark]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Same download as the `browser` job: the probe drives `src/` but needs the generated
+      # `compiled.css` the build produced.
+      - name: Download the kit build
+        uses: actions/download-artifact@v4
+        with:
+          name: kit-dist
+          path: packages/ui
+
+      - name: Install Playwright browser
+        timeout-minutes: 5
+        run: npx playwright install --with-deps chromium
+
+      - name: Hover-state contrast (${{ matrix.scheme }})
+        env:
+          HOVER_SCHEME: ${{ matrix.scheme }}
+        run: pnpm --filter @kitn.ai/ui run test:hover-contrast
+
+  # THE REQUIRED CHECK. It runs no gate: the legs above do, and this fails
   # unless every one of them succeeded.
   #
   # `if: always()` is what makes a red leg RED here rather than skipped. Without
@@ -1603,7 +1646,7 @@ jobs:
   # one -- the ruleset would see a green gate over a workflow that ran nothing.
   #
   # The verdict is DERIVED. `storybook-gate` below compares one named result
-  # because it has exactly one leg; a five-leg copy of that shape has a real
+  # because it has exactly one leg; a many-leg copy of that shape has a real
   # failure mode, which is a leg added to `needs:` and forgotten in the `if`
   # chain, silently ungated forever. `toJSON(needs)` IS the `needs:` list, so the
   # two cannot drift, and the failure names the red legs.
@@ -1613,7 +1656,7 @@ jobs:
   # as commands it has never seen and the linter hard-fails on them. The whole
   # pipeline has to be one logical line for the gate-set extractor to place it.
   test:
-    needs: [build, construct, unit, dist-guards, browser]
+    needs: [build, construct, unit, dist-guards, browser, hover-contrast]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 5
