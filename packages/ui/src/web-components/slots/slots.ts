@@ -904,10 +904,10 @@ export const TAB_BAR_ITEM_PARTS: PartDef[] = [
 
 /** Slots of `<kai-artifact>`: its toolbar is composed, not toggled. `toolbar` REPLACES the
  *  built-in bar (an empty element in it means "no toolbar"); `toolbar-start`/`toolbar-end`
- *  add controls at its ends. Read `url`, `canGoBack`, `canGoForward` and `kai-history-change`
+ *  add controls at its ends. Read `url` (display only), `urlSafe`, `canGoBack`, `canGoForward` and `kai-history-change`
  *  off the host, and drive it with `back()`, `forward()`, `reload()`, `home()`, `navigate()`. */
 export const ARTIFACT_SLOTS: SlotDef[] = [
-  { name: 'toolbar', mode: 'replace', doc: 'Replaces the built-in toolbar entirely. An empty element here means no toolbar. You own its behavior: call the host\'s `back()`/`forward()`/`reload()`/`home()`/`navigate()` and read `canGoBack`/`canGoForward` (updated on `kai-history-change`).' },
+  { name: 'toolbar', mode: 'replace', doc: 'Replaces the built-in toolbar entirely. An empty element here means no toolbar. You own its behavior: call the host\'s `back()`/`forward()`/`reload()`/`home()`/`navigate()` and read `canGoBack`/`canGoForward` (updated on `kai-history-change`). `url` is display text (the raw, real url, never `displayUrl`); use it as an href, src or window.open target only when `urlSafe` is true.' },
   { name: 'toolbar-start', mode: 'inject', doc: 'Extra controls at the leading end of the built-in toolbar (ignored while `toolbar` is filled).' },
   { name: 'toolbar-end', mode: 'inject', doc: 'Extra controls at the trailing end of the built-in toolbar (ignored while `toolbar` is filled).' },
 ];

@@ -67,8 +67,12 @@ export interface ArtifactController {
 
 /** The read-only history state a composed toolbar reads. */
 export interface ArtifactHistoryState {
-  /** The current url, as it arrived (not scheme-validated; see `isSafeUrl`). */
+  // `url` is the RAW url, and it is the REAL one: never `displayUrl`. A path field should show what
+  // was refused, so it is not filtered. It is display text, not a link target.
+  /** The current url as it arrived. Display only: use it as an href/src/window.open target ONLY when `urlSafe`. */
   url: string;
+  /** `isSafeUrl(url)`, the same predicate the open-in-tab button uses. False for `javascript:`, `vbscript:`, `data:` and an empty url. */
+  urlSafe: boolean;
   canGoBack: boolean;
   canGoForward: boolean;
 }
@@ -112,9 +116,9 @@ export interface ArtifactProps extends Omit<JSX.HTMLAttributes<HTMLDivElement>, 
   toolbarStart?: JSX.Element;
   /** Extra controls at the TRAILING end of the built-in toolbar (ignored when `toolbar` is set). */
   toolbarEnd?: JSX.Element;
-  // `url` is reported AS IT ARRIVED, like `onNavigate`: NOT scheme-validated, so check it with
-  // `isSafeUrl` before rendering, storing or navigating to it.
-  /** Fired on every navigation with `{ url, canGoBack, canGoForward }`, for a composed toolbar. */
+  // `url` is reported AS IT ARRIVED, like `onNavigate`, so it is NOT scheme-validated. Use it for
+  // display; put it in an href, src or window.open ONLY when `urlSafe` is true.
+  /** Fired on every navigation with `{ url, urlSafe, canGoBack, canGoForward }`, for a composed toolbar. */
   onHistoryChange?: (state: ArtifactHistoryState) => void;
   // New affordances are OPT-IN: hidden by default.
   /** Show the expand-to-fill button. Default `false` (opt-in). */
@@ -286,10 +290,10 @@ export function Artifact(props: ArtifactProps): JSX.Element {
   // scheme filter is part of `canOpenInTab` rather than only of the handler so
   // the button renders DISABLED for a url that would be refused: a control that
   // looks live and does nothing is the worse failure.
-  const canOpenInTab = createMemo(() => {
-    const u = currentUrl();
-    return !!u && u !== 'about:blank' && isSafeUrl(u);
-  });
+  // ONE predicate for both: `urlSafe` is what a composed toolbar reads, and the open-in-tab button
+  // is gated on the very same answer, so the two can never disagree about a url.
+  const urlSafe = createMemo(() => isSafeUrl(currentUrl()));
+  const canOpenInTab = createMemo(() => currentUrl() !== 'about:blank' && urlSafe());
   const openInNewTab = () => {
     const u = currentUrl();
     if (!canOpenInTab()) {
@@ -354,8 +358,14 @@ export function Artifact(props: ArtifactProps): JSX.Element {
 
   /** Report the history state. Called once per navigation, AFTER both signals have moved, so a
    *  listener never sees a half-updated stack. `reload` is not a navigation and does not call it. */
+  const historyState = (): ArtifactHistoryState => ({
+    url: currentUrl(),
+    urlSafe: urlSafe(),
+    canGoBack: canBack(),
+    canGoForward: canForward(),
+  });
   const emitHistory = () =>
-    local.onHistoryChange?.({ url: currentUrl(), canGoBack: canBack(), canGoForward: canForward() });
+    local.onHistoryChange?.(historyState());
 
   /** Point the iframe at the current cursor entry + emit `navigate`. */
   function loadCurrent() {
@@ -430,7 +440,7 @@ export function Artifact(props: ArtifactProps): JSX.Element {
         if (file) selectFile(path, file);
       },
       openExternal: () => openInNewTab(),
-      getHistory: () => ({ url: currentUrl(), canGoBack: canBack(), canGoForward: canForward() }),
+      getHistory: () => historyState(),
       maximize: () => setMaximizeState(true),
       restore: () => setMaximizeState(false),
     });

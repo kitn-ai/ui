@@ -1,5 +1,6 @@
 import { createSignal, onMount, onCleanup } from 'solid-js';
 import { readSlots, ARTIFACT_SLOTS } from '../slots/slots';
+import { isSafeUrl } from '../../primitives/card-routing';
 import { defineWebComponent } from '../define/define';
 import { Artifact, type ArtifactController, type ArtifactFile, type ArtifactTab } from '../../components/artifact/artifact';
 
@@ -48,10 +49,10 @@ interface Events extends Record<string, unknown> {
   'kai-file-select': { path: string };
   /** Artifact's own maximize button toggled (consumer-observable; non-bubbling). */
   'kai-maximize-change': { maximized: boolean };
-  // `url` is reported AS IT ARRIVED, exactly like `kai-navigate`, so it is NOT scheme-validated:
-  // check it with `isSafeUrl` from `@kitn.ai/ui` before rendering, storing or navigating to it.
-  /** The history state changed (fires once per navigation, back and forward included). Drives a composed toolbar's back/forward buttons. */
-  'kai-history-change': { url: string; canGoBack: boolean; canGoForward: boolean };
+  // `url` is reported AS IT ARRIVED, exactly like `kai-navigate`, so it is display text, NOT a link
+  // target. Put it in an href, src or window.open only when `urlSafe` is true.
+  /** The history state changed (once per navigation, back and forward included). `urlSafe` is `isSafeUrl(url)`. */
+  'kai-history-change': { url: string; urlSafe: boolean; canGoBack: boolean; canGoForward: boolean };
   // Raised as a raw bubbling + composed CustomEvent (not through `dispatch`) so an
   // enclosing `<kai-resizable>` can catch it and maximize the containing panel.
   // Declared here so it is typed and reaches the generated API. Listen for it to drive
@@ -128,13 +129,22 @@ defineWebComponent<Props, Events>('kai-artifact', {
     restore: () => controller?.restore(),
   });
 
-  // Read-only history state for a composed toolbar (`el.canGoBack` disables a custom Back
-  // button). Getters only, no setters: the stack belongs to the component. `url` is the raw
-  // current url, the same value `kai-navigate` carries, so it is NOT scheme-validated either.
+  // Read-only state for a composed toolbar (`el.canGoBack` disables a custom Back button). Getters
+  // only, no setters: the stack belongs to the component.
+  //   `url`     the RAW current url, and the REAL one, never `displayUrl`. Display only.
+  //   `urlSafe` `isSafeUrl(url)`, the predicate the open-in-tab button uses. A composed
+  //             `<a href={el.url}>` runs a model-steered `javascript:` in the host origin on one
+  //             click, so use `url` as an href/src/window.open target ONLY when `urlSafe` is true.
   const history = () =>
-    controller?.getHistory() ?? { url: props.src ?? '', canGoBack: false, canGoForward: false };
+    controller?.getHistory() ?? {
+      url: props.src ?? '',
+      urlSafe: isSafeUrl(props.src ?? ''),
+      canGoBack: false,
+      canGoForward: false,
+    };
   for (const [name, read] of [
     ['url', () => history().url],
+    ['urlSafe', () => history().urlSafe],
     ['canGoBack', () => history().canGoBack],
     ['canGoForward', () => history().canGoForward],
   ] as const) {

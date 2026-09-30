@@ -104,17 +104,17 @@ test('history: navigate x2 → canGoBack, one kai-history-change per navigation;
   expect(el.canGoBack).toBe(true);
   expect(el.url).toBe('https://x.test/b');
   expect(seen).toEqual([
-    { url: 'https://x.test/a', canGoBack: true, canGoForward: false },
-    { url: 'https://x.test/b', canGoBack: true, canGoForward: false },
+    { url: 'https://x.test/a', urlSafe: true, canGoBack: true, canGoForward: false },
+    { url: 'https://x.test/b', urlSafe: true, canGoBack: true, canGoForward: false },
   ]);
   el.back();
   await flush();
   expect(el.canGoForward).toBe(true);
   expect(seen).toHaveLength(3);
-  expect(seen[2]).toEqual({ url: 'https://x.test/a', canGoBack: true, canGoForward: true });
+  expect(seen[2]).toEqual({ url: 'https://x.test/a', urlSafe: true, canGoBack: true, canGoForward: true });
   el.forward();
   await flush();
-  expect(seen[3]).toEqual({ url: 'https://x.test/b', canGoBack: true, canGoForward: false });
+  expect(seen[3]).toEqual({ url: 'https://x.test/b', urlSafe: true, canGoBack: true, canGoForward: false });
 });
 
 test('history getters have no setter: assigning does not change state', async () => {
