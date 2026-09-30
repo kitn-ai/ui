@@ -27,7 +27,7 @@ import type { ChatMessage } from '../web-components/chat/chat-types';
 // file rather than by a second one with a second idea of the rule. See the
 // element block at the bottom.
 import '../web-components/conversation/conversation-list';
-import '../web-components/agent-card/agent-card';
+import '../web-components/menu/menu';
 import { emitWebComponentRegistry } from '../web-components/web-component/web-component-diagnostics';
 import { assertElementEventsVocabulary } from '../../tests/helpers/web-component-event-vocabulary';
 
@@ -419,7 +419,7 @@ const E = {
   nested: `${LEAK}-buried-three-levels-down`,
   key: `${LEAK}-an-object-KEY-not-a-value`,
   attrText: `${LEAK}-typed-into-an-attribute`,
-  agentLabel: `${LEAK}-agent-status-label`,
+  itemLabel: `${LEAK}-menu-item-label`,
 };
 
 /** The full strings AND the shared head. The head is the one that survives a
@@ -456,18 +456,18 @@ function driveElements(): KaiDiagnosticEvent[] {
     // The attribute channel, on an element that survives the misuse, in four
     // shapes: raw text, the stringified-object marker with text appended,
     // valid JSON holding a sentinel, and a long value whose LENGTH is reported.
-    const card = document.createElement('kai-agent-card') as HTMLElement & Record<string, unknown>;
+    const card = document.createElement('kai-menu') as unknown as HTMLElement & Record<string, unknown>;
     document.body.appendChild(card);
     // Every form of the vocabulary, so the allowlist check below is exercised
     // across the whole closed set rather than one branch of it.
-    card.setAttribute('status', E.attrText); // string(len=N)
-    card.setAttribute('status', `[object Object]${E.attrText}`); // string(len=N)
-    card.setAttribute('status', JSON.stringify({ [E.key]: E.agentLabel })); // valid: no event
-    card.setAttribute('status', `${E.agentLabel}-`.repeat(40)); // string(len=N), long
-    card.setAttribute('status', '[object Object]'); // the bare marker
-    card.setAttribute('status', String([{ a: E.title }, { b: E.id }])); // [object Object] x 2
-    card.setAttribute('status', '42'); // json:number
-    card.setAttribute('status', ''); // empty-attribute
+    card.setAttribute('items', E.attrText); // string(len=N)
+    card.setAttribute('items', `[object Object]${E.attrText}`); // string(len=N)
+    card.setAttribute('items', JSON.stringify([{ [E.key]: E.itemLabel }])); // valid: no event
+    card.setAttribute('items', `${E.itemLabel}-`.repeat(40)); // string(len=N), long
+    card.setAttribute('items', '[object Object]'); // the bare marker
+    card.setAttribute('items', String([{ a: E.title }, { b: E.id }])); // [object Object] x 2
+    card.setAttribute('items', '42'); // json:number
+    card.setAttribute('items', ''); // empty-attribute
 
     // The registry snapshot, taken while the sentinel-bearing props are live on
     // a mounted element — so "it reports tags, not the state of the props"
@@ -577,7 +577,7 @@ describe('the payload boundary — element events', () => {
     expect(previews.length).toBeGreaterThan(0);
     // The one field that reads the raw text at all. `string(len=N)` is the only
     // form that can carry an arbitrary consumer value, and it carries a number.
-    const longValue = `${E.agentLabel}-`.repeat(40);
+    const longValue = `${E.itemLabel}-`.repeat(40);
     expect(previews).toContain(`string(len=${longValue.length})`);
     for (const sentinel of WEB_COMPONENT_SENTINELS) {
       expect(JSON.stringify(previews)).not.toContain(sentinel);

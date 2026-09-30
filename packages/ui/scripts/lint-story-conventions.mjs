@@ -2819,8 +2819,8 @@ const SELF_TEST_CASES = [
   {
     // Reads the REAL meta, so a misrooted path or a regenerated meta that lost
     // its events fails here rather than making every (f) assertion vacuous.
-    name: '(f) the real web-component-meta.json still maps kai-agent-card events onto prop names',
-    expectMetaEvents: { 'kai-agent-card': ['onActivate', 'onMenu'] },
+    name: '(f) the real web-component-meta.json still maps kai-menu events onto prop names',
+    expectMetaEvents: { 'kai-menu': ['onOpenChange', 'onSelect'] },
   },
   {
     // The options the sibling change landed. Every other (g) case is a way of

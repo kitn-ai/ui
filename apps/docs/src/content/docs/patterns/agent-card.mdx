@@ -1,0 +1,25 @@
+---
+title: Agent card
+description: One agent's state at a glance, composed from kai-row, kai-status, kai-badge and kai-menu, and copied into your project with kai add.
+---
+
+<p class="kai-lede">A compact card for one agent in a multi-agent workspace: a status dot with its word, the agent's name, an attention badge when it needs you, and a menu for per-agent actions. The kit ships the parts, and you own the card.</p>
+
+```sh
+kai add agent-card
+```
+
+## What it is made of
+
+- `<kai-row interactive>` is the press target. It renders a real button, so Enter and Space work and the focus ring comes with it. Listen for `kai-click` on the row.
+- `<kai-status>` is the dot. The agent tones (`working`, `idle`, `done`, `error`, `blocked`) set the hue, and `label` names it for a screen reader.
+- `<kai-badge variant="outline">` carries the "Needs you" signal as text, so attention is never colour alone.
+- `<kai-menu>` holds the per-agent actions. Give each one a `label` that names its agent.
+
+The menu is the row's sibling, laid over the row's trailing edge with CSS. A menu trigger inside the row's button would put one interactive control inside another.
+
+## Making it yours
+
+The pattern is three files: `agent-card.html`, `agent-card.js` and `agent-card.css`. The card is a `<template>` cloned once per agent, so adding a field is one element in the template and one line in `createAgentCard`. Change the states, the menu items or the layout in place. Nothing here is a prop of the kit, so nothing needs a release.
+
+Properties on an element that is not defined yet are lost. The script waits on `customElements.whenDefined` and builds the cards with `document.importNode`, which upgrades them on the spot, before it sets `menu.items`.

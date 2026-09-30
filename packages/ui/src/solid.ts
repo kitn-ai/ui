@@ -82,8 +82,6 @@ export { Nav } from './components/nav/nav';
 export type { NavProps, KaiNavItem, NavItemStatus, NavStatusTone } from './components/nav/nav';
 export { CommandList } from './components/command/command';
 export type { CommandListProps, CommandRow, CommandGroup } from './components/command/command';
-export { AgentCard } from './components/agent-card/agent-card';
-export type { AgentCardProps, AgentStatus, AgentStatusTone } from './components/agent-card/agent-card';
 export { Pane } from './components/pane/pane';
 export type { PaneProps, PaneStatus, PaneStatusTone } from './components/pane/pane';
 export { PaneGroup } from './components/pane/pane-group';

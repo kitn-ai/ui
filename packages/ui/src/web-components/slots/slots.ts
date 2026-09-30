@@ -627,12 +627,6 @@ export const PANE_PARTS: PartDef[] = [
   { name: 'controls', doc: 'The window-control cluster (maximize/close, and split/dock when enabled).', recipe: 'kai-pane::part(controls) { gap: 0.25rem }' },
 ];
 
-/** Styleable `::part`s of `<kai-agent-card>`. */
-export const AGENT_CARD_PARTS: PartDef[] = [
-  { name: 'status', doc: 'The leading tone-colored status dot.', recipe: 'kai-agent-card::part(status) { width: 0.625rem; height: 0.625rem }' },
-  { name: 'menu', doc: 'The trailing overflow ("...") menu button.', recipe: 'kai-agent-card::part(menu) { opacity: 1 }' },
-];
-
 /** Styleable `::part`s of `<kai-code-block>` (one syntax-highlighted code block).
  *  The code region itself is not a part; it is rebuilt when the highlight lands,
  *  and its look is owned by the Shiki theme (`code-theme`). */
@@ -1007,7 +1001,6 @@ export const WEB_COMPONENT_COMPOSITION: Record<string, WebComponentComposition> 
   'kai-setting-item': { slots: SETTING_ITEM_SLOTS, parts: SETTING_ITEM_PARTS },
   'kai-pane': { slots: PANE_SLOTS, parts: PANE_PARTS, children: 'The pane body, below the header row.' },
   'kai-pane-group': { parts: PANE_GROUP_PARTS, children: 'Content shown for every tab. Use it INSTEAD of the per-tab `slot="<tab id>"` seams when you swap the content yourself.' },
-  'kai-agent-card': { parts: AGENT_CARD_PARTS },
   'kai-dialog': { slots: DIALOG_SLOTS, parts: DIALOG_PARTS, children: 'The dialog body, between the `header` and `footer` slots.' },
   'kai-lightbox': { slots: LIGHTBOX_SLOTS, parts: LIGHTBOX_PARTS, children: 'The TRIGGER the modal opens from: plain markup of your own, and optional. With nothing here the element renders no button and you drive it from `show()` or the `open` attribute. The zoomed media is the `content` slot.' },
   'kai-dock': { slots: DOCK_SLOTS, parts: DOCK_PARTS, children: 'The panel body, the same region as `slot="panel"`.' },

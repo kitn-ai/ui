@@ -323,7 +323,7 @@ export function ConversationItem(props: ConversationItemProps) {
       // `isActive` drives the selected LOOK below; it has to reach assistive tech
       // too, or the active conversation is visible only to sighted users. `true`
       // rather than `page` because this selects a conversation within the app, it
-      // is not page navigation — same call as components/agent-card/agent-card.tsx and components/pane/pane-group.tsx
+      // is not page navigation — same call as components/pane/pane-group.tsx
       // (components/nav/nav.tsx uses `page` because its items really are nav links).
       aria-current={local.isActive ? 'true' : undefined}
       onClick={() => local.onSelect(local.conversation.id)}

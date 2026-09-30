@@ -23,7 +23,7 @@ import { assertElementEventsVocabulary } from '../../../tests/helpers/web-compon
 
 // Exactly two of the 79, so the partition has something on both sides.
 import '../conversation/conversation-list';
-import '../agent-card/agent-card';
+import '../menu/menu';
 
 let events: KaiDiagnosticEvent[] = [];
 let off: (() => void) | undefined;
@@ -53,7 +53,10 @@ describe('web-component.registry', () => {
     // Both sides populated: the two imported above are defined, and the ~77
     // this file never imported are not.
     expect(defined).toContain('kai-conversations');
-    expect(defined).toContain('kai-agent-card');
+    expect(defined).toContain('kai-menu');
+    // Removed in favour of the agent-card pattern: it must not come back as a tag.
+    expect(customElements.get('kai-agent-card')).toBeUndefined();
+    expect(manifest.tags).not.toHaveProperty('kai-agent-card');
     expect(notDefined).toContain('kai-chat');
     expect(notDefined.length).toBeGreaterThan(0);
 

@@ -101,7 +101,6 @@ import '../settings/setting-item';
 import '../pane/pane';
 import '../pane/pane-group';
 import '../pane/pane-grid';
-import '../agent-card/agent-card';
 import '../dialog/dialog';
 import '../lightbox/lightbox';
 import '../dock/dock';

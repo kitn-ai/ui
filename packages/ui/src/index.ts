@@ -464,7 +464,6 @@ export type { ComposerDoc, Segment, EntityRef } from './primitives/composer-mode
 export type { TriggerDef, TriggerItem } from './components/composer/composer';
 export type { ChatAppContextUsage } from './components/chat/chat-app';
 export type { Skill } from './components/message/message-skills';
-export type { AgentStatus } from './components/agent-card/agent-card';
 export type { KaiNavItem } from './components/nav/nav';
 export type { KaiTabItem } from './components/tabs/tabs';
 export type { PaneStatus } from './components/pane/pane';

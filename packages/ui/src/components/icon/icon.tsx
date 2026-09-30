@@ -114,7 +114,7 @@ const NAMED_ICONS: Record<string, IconComponent> = {
   upload: Upload,
   link: Link,
   'rotate-ccw': RotateCcw,
-  // Pane / media chrome (kai-pane, kai-artifact, kai-embed, kai-agent-card).
+  // Pane / media chrome (kai-pane, kai-artifact, kai-embed).
   'maximize-2': Maximize2,
   'minimize-2': Minimize2,
   eye: Eye,

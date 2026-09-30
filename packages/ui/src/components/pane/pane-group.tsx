@@ -4,7 +4,7 @@ import { type PaneStatusTone } from './pane';
 import { cn } from '../../utils/cn';
 
 /** The work state of a tab's agent/process, mapped to the kit's tool / status
- *  hues: the SAME vocabulary as {@link './pane'.PaneStatus} and the AgentCard:
+ *  hues: the SAME vocabulary as {@link './pane'.PaneStatus} and the agent-card pattern:
  *  working = blue, idle = muted, done = green, error = red, blocked = amber. */
 export interface PaneTabStatus {
   /** Which hue the numbered badge takes. */
