@@ -9,7 +9,7 @@ describe('isBandControlled', () => {
     expect(isBandControlled(false, false)).toBe(true);
     expect(isBandControlled(true, false)).toBe(true);
   });
-  it('is controlled by a bare attribute, which parses to undefined', () => {
+  it('is controlled by a bare attribute, which parses to undefined but turns flag() on', () => {
     expect(isBandControlled(undefined, true)).toBe(true);
   });
 });

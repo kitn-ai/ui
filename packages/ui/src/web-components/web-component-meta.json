@@ -7148,7 +7148,7 @@
         "type": "undefined | false | true",
         "optional": true,
         "scalar": true,
-        "description": "Drives the `top` band directly. Unset, the band is open while a child is slotted into `top`. To animate a band out, keep the child slotted, set this to `false`, and remove the child after the transition (about 200ms); the content fades as the band closes.",
+        "description": "Drives the `top` band directly: `false` fades it out, and unset returns to slot occupancy.",
         "displayType": "undefined | false | true"
       },
       {
@@ -7156,7 +7156,7 @@
         "type": "undefined | false | true",
         "optional": true,
         "scalar": true,
-        "description": "Drives the `bottom` band directly, the same way as `topOpen`: flip to `false`, then remove the child after the transition.",
+        "description": "Drives the `bottom` band directly, the same way as `topOpen`.",
         "displayType": "undefined | false | true"
       }
     ],

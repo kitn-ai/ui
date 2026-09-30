@@ -21,7 +21,9 @@ export type PromptDockAppearance = 'soft' | 'outlined' | 'filled' | 'plain';
 export interface PromptDockProps {
   /** Content for the recessed band above the input (a notice, a hint); omitted, no top lip renders. */
   top?: JSX.Element;
-  /** Drives the top band's presence directly. Omitted, the band is open while `top` has content. Set it `false` while `top` is still mounted to slide the band shut with its content fading; drop `top` afterwards. */
+  // Omitted, the band is open while `top` has content. Set `false` while `top` is still
+  // mounted to slide the band shut with its content fading; drop `top` afterwards.
+  /** Drives the top band's presence directly, overriding the content rule. */
   topOpen?: boolean;
   /** Content for the recessed band below the input (a mode or control row); omitted, no bottom lip renders. */
   bottom?: JSX.Element;

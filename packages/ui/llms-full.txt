@@ -3109,8 +3109,8 @@ A recessed in-flow tray that frames a prompt input, with optional bands above an
 | `theme` | `theme` | `"light" \| "dark" \| "auto"` | Color mode (`auto` follows prefers-color-scheme). |
 | `frame` | `frame` | `undefined \| "inset" \| "edge" \| "none"` | How the tray frames the input, the SPATIAL axis: `inset` (default, recessed on every side), `edge` (top/bottom only), or `none`. |
 | `appearance` | `appearance` | `undefined \| "soft" \| "outlined" \| "filled" \| "plain"` | How the tray surface looks, the VISUAL axis: `soft` (default), `outlined`, `filled`, or `plain`. |
-| `topOpen` | `top-open` | `undefined \| false \| true` | Drives the `top` band directly. Unset, the band is open while a child is slotted into `top`. To animate a band out, keep the child slotted, set this to `false`, and remove the child after the transition (about 200ms); the content fades as the band closes. |
-| `bottomOpen` | `bottom-open` | `undefined \| false \| true` | Drives the `bottom` band directly, the same way as `topOpen`: flip to `false`, then remove the child after the transition. |
+| `topOpen` | `top-open` | `undefined \| false \| true` | Drives the `top` band directly: `false` fades it out, and unset returns to slot occupancy. |
+| `bottomOpen` | `bottom-open` | `undefined \| false \| true` | Drives the `bottom` band directly, the same way as `topOpen`. |
 
 _No events._
 

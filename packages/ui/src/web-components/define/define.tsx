@@ -340,6 +340,38 @@ function resolveFlag(element: HTMLElement, value: unknown, attribute: string): b
   return element.hasAttribute(attribute) && element.getAttribute(attribute) !== 'false';
 }
 
+/** Per-element hook the attribute patch calls after every attribute change, so `flag()`
+ *  (which reads attribute presence) re-evaluates when a bare boolean attribute is added
+ *  or removed: the prop does not change in that case, so nothing else would notify. */
+const attributeNotifiers = new WeakMap<HTMLElement, () => void>();
+
+/**
+ * Removing an attribute undoes what setting it did. component-register answers a
+ * removal with `this[prop] = null` (scalar) or `undefined` (parsed), never the declared
+ * default, so `removeAttribute('placeholder')` left `null` where the facade expected
+ * its default. Installed on the prototype BEFORE define(), like the other patches,
+ * because the registry snapshots lifecycle callbacks.
+ */
+function installAttributeRemovalReset(proto: object, defaults: Record<string, unknown>): void {
+  const byAttr = new Map<string, string>();
+  for (const key of Object.keys(defaults)) byAttr.set(toAttr(key), key);
+  const original = (proto as { attributeChangedCallback?: (...a: unknown[]) => void }).attributeChangedCallback;
+  (proto as Record<string, unknown>).attributeChangedCallback = function (
+    this: HTMLElement & Record<string, unknown>,
+    name: string,
+    oldValue: string | null,
+    newValue: string | null,
+  ) {
+    original?.call(this, name, oldValue, newValue);
+    if (!(this as { __initialized?: boolean }).__initialized) return;
+    const key = byAttr.get(name);
+    if (newValue === null && key !== undefined && this[key] !== defaults[key]) {
+      this[key] = defaults[key];
+    }
+    attributeNotifiers.get(this)?.();
+  };
+}
+
 type FacadeComponent<P, E> = (props: P, ctx: WebComponentContext<E>) => JSX.Element;
 
 /**
@@ -421,8 +453,10 @@ export function defineWebComponent<P extends Record<string, unknown>, E = Record
 
     // Reads `props[name]` (reactive) and falls back to attribute presence so
     // bare boolean attributes behave like normal HTML. See WebComponentContext.
+    const [attributeTick, bumpAttributes] = createSignal(0);
+    attributeNotifiers.set(element, () => bumpAttributes((n) => n + 1));
     const flag = (name: string) =>
-      resolveFlag(element, (props as Record<string, unknown>)[name], toAttr(name));
+      (attributeTick(), resolveFlag(element, (props as Record<string, unknown>)[name], toAttr(name)));
 
     // Reflect a boolean prop to its attribute and keep the property readable. See
     // WebComponentContext.reflectFlag for the defect this exists to close.
@@ -543,7 +577,10 @@ export function defineWebComponent<P extends Record<string, unknown>, E = Record
     tag,
     shadowedProps,
     () => customElement(tag, defaults, renderFacade),
-    wantsDiagnostics ? (proto) => installElementDiagnostics(tag, proto) : undefined,
+    (proto) => {
+      installAttributeRemovalReset(proto, defaults);
+      if (wantsDiagnostics) installElementDiagnostics(tag, proto);
+    },
   );
 
   // Belt and braces for the one path the wrap cannot see: if `customElements.define`
