@@ -103,7 +103,7 @@ Question text is echoed in each `Answer` so the tool result reads on its own in 
 | `isAskTool(name)` | `@kitn.ai/ui/schemas` | the loop's check: `if (isAskTool(call.name)) continue;` |
 | `questionsFromToolCall(name, input, { id })` | `@kitn.ai/ui/schemas` | validates and normalises to `{ id, questions }`, or `{ error }` (never throws); the host sends `error` back with `applyToolFailure` so the model retries |
 | `pendingQuestions(messages)` | `@kitn.ai/ui/state` | the open `kai_ask` of the last assistant message, or `undefined` |
-| `answerQuestions(messages, toolCallId, result)` | `@kitn.ai/ui/state` | returns a new array with that tool part at `output-available`, `output = result` (new array, new message object, new part object: the reactivity rule) |
+| `answerQuestions(messages, toolCallId, result)` | `@kitn.ai/ui/state` | returns a new array with that tool part at `output-available`, `output = result` (new array, new message object, new part object: the reactivity rule). Idempotent: the same result on an already-answered call returns the input array unchanged; a DIFFERENT result on an answered call is refused, returns the input unchanged and warns once (a double submit must not rewrite history) |
 | `approvalQuestion(toolPart, opts?)` | `@kitn.ai/ui/state` | builds a `confirm` question for a tool call the APP wants approved before it runs; the app decides what to do with the answer |
 
 ## 3. The panel
@@ -190,7 +190,7 @@ deliberate interpretation and is listed in the round's report.
 
 | element | props (JS properties unless scalar) | slots | events | methods |
 |---|---|---|---|---|
-| `kai-question-panel` | `questions: Question[]` (preset), `toolCallId`, `value: Answer[]` / `defaultValue`, `activeIndex` / `defaultActiveIndex`, `renderers` (keys `question:<kind>`; element gets `el.question`), `label` | default: composed `<kai-question>` children | `kai-answer-change {answers}`, `kai-active-change {index, questionId}`, `kai-questions-submit {toolCallId, result}`, `kai-questions-dismiss {toolCallId, result}` | `next()`, `prev()`, `select(index)`, `answerActive(text)`, `submit()`, `focus()` |
+| `kai-question-panel` | `questions: Question[]` (preset), `toolCallId`, `returnFocus: HTMLElement` (where Esc sends focus; `kai-chat` sets its composer), `value: Answer[]` / `defaultValue`, `activeIndex` / `defaultActiveIndex`, `renderers` (keys `question:<kind>`; element gets `el.question`), `label` | default: composed `<kai-question>` children | `kai-answer-change {answers}`, `kai-active-change {index, questionId}`, `kai-questions-submit {toolCallId, result}`, `kai-questions-dismiss {toolCallId, result}` | `next()`, `prev()`, `select(index)`, `answerActive(text)`, `submit()`, `focus()` |
 | `kai-question` | `questionId`, `header`, `question`, `kind`, `multiSelect`, `placeholder`, `required` | default: `<kai-question-option>` children; `fields` slot for a composed form | — | — |
 | `kai-question-option` | `label`, `description`, `preview` (text) | `preview`: app-authored rich preview (trusted: the app wrote it) | — | — |
 | `kai-answer-receipt` | `answers: Answer[]`, `status`, `open` / `defaultOpen` | — | `kai-open-change {open}` | `show()`, `hide()`, `toggle()` |

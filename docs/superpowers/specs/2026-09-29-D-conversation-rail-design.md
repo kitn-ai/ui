@@ -41,7 +41,8 @@ folders each holding conversations, and the active row highlighted.
    `closest('details')` up to the host). The container re-syncs on `toggle` events from `<details>`
    descendants as well as on child mutations. Arrow traversal therefore walks into an open folder
    and skips a closed one; Home/End and activation are unchanged. The folder's own `<summary>` is
-   not a row: it keeps native keyboard behaviour (Enter/Space toggles). Section labels and other
+   not a row: it keeps native keyboard behaviour (Enter/Space toggles). A `kai-conversation-item`
+   inside another row's `menu` slot (a preview in a popover) is not a row either. Section labels and other
    non-row children stay inert, as `createRovingTabList` already guarantees.
 2. **No new rail element and no `groups` growth.** The arrangement is the app's (the 2026-09-27
    rule: new look → the application, new behaviour → the kit). Folders are native `<details>`,
