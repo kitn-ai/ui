@@ -1,5 +1,6 @@
 import { createSignal, For, onMount, type JSX } from 'solid-js';
 import type { Palette } from './theme-editor/theme-css';
+import { kitColorHalves, splitLightDark } from '../../themes/theme-tokens';
 
 // Docs-only helpers (not part of the kit's public API). They auto-discover the
 // kit's design tokens straight from the loaded CSS, so the reference + editor
@@ -265,21 +266,26 @@ function fallbackAfter(text: string, start: number): string {
  *  are derived from the loaded sheet's own declarations -- every family (colours, type,
  *  corners, `--kai-*` options) for the same reason: the hand-typed colour list was 17
  *  tokens behind theme.css while the page claimed to be a complete reference. PURPOSE
- *  supplies labels and row order only. Dark values come from a throwaway `.dark` probe; a
- *  token with no `.dark` override inherits its `:root` value (identical in both columns). */
+ *  supplies labels and row order only. Both columns are the two halves of the token's one
+ *  `light-dark(<light>, <dark>)`; a single-valued token reads the same in both. */
 function discover(): { colors: ColorToken[]; radii: RadiusToken[]; texts: TextToken[]; knobs: KnobToken[] } {
   const rootCS = getComputedStyle(document.documentElement);
   const probe = document.createElement('div');
-  probe.className = 'dark';
   probe.style.display = 'none';
   document.body.appendChild(probe);
-  const darkCS = getComputedStyle(probe);
   const get = (cs: CSSStyleDeclaration, n: string) => cs.getPropertyValue(n).trim();
   const { declared, knobValues } = collect();
 
   // Row ORDER is curated (PURPOSE), the row SET is derived for all four tables: a token
   // theme.css grows still appears, unlabelled and last, rather than going missing.
-  const colors = colorTokens(declared).map((name) => ({ name, light: get(rootCS, name), dark: get(darkCS, name) || get(rootCS, name) }));
+  // A colour token is one `light-dark(<light>, <dark>)` computed on `:root`: split it into the two
+  // halves (a single-valued token reads the same both ways). No `.dark` probe: the value is
+  // scheme-independent until something paints with it.
+  const colors = colorTokens(declared).map((name) => {
+    const raw = get(rootCS, name);
+    const pair = splitLightDark(raw);
+    return { name, light: pair?.light ?? raw, dark: pair?.dark ?? raw };
+  });
   const texts = textTokens(declared).map((name) => ({ name, size: get(rootCS, name), lineHeight: get(rootCS, `${name}--line-height`) || '-' }));
   const radii = cornerTokens(declared).map((name) => ({ name, value: get(rootCS, name) })).filter((r) => r.value);
   const knobs = byPurpose(
@@ -292,22 +298,24 @@ function discover(): { colors: ColorToken[]; radii: RadiusToken[]; texts: TextTo
 }
 
 /** Light/dark palettes for the theme editor: light = colors + --radius, dark = colors.
- *  The token set is keyed off the `.dark` overrides: that's what defines a kit token
- *  and excludes Tailwind's default palette (which has no `.dark` entry). Light values
- *  come from `:root`, falling back to the dark value if a token only exists in dark. */
+ *  The token set is the colours the kit wires a `--kai-color-*` knob into: that is what
+ *  defines a kit token and excludes Tailwind's default palette (which reads no knob).
+ *  Each value is one half of the token's `light-dark(<light>, <dark>)`, and each key is the
+ *  `--kai-color-*` knob, so `buildThemeCss` of the pair is paste-ready for any consumer. */
 export function discoverPalettes(): { light: Palette; dark: Palette } {
-  const { light, dark } = collect();
-  const names = Object.keys(dark).filter((n) => n.startsWith('--color-')).sort();
+  const { light } = collect();
   const lightPalette: Palette = { '--radius': light['--radius'] ?? '0.6rem' };
   const darkPalette: Palette = {};
-  for (const name of names) {
-    lightPalette[name] = light[name] || dark[name];
-    darkPalette[name] = dark[name];
+  for (const name of Object.keys(light).filter((n) => n.startsWith('--color-')).sort()) {
+    const halves = kitColorHalves(light[name]);
+    if (!halves) continue;
+    // Keyed by the KNOB (`--kai-color-x`), not the token: the knob is what inherits into a shadow
+    // root, while a `--color-x` on the page would be redeclared by each element's own `:host`.
+    const knob = name.replace(/^--/, '--kai-');
+    lightPalette[knob] = halves.light;
+    darkPalette[knob] = halves.dark;
   }
-  return {
-    light: lightPalette,
-    dark: darkPalette,
-  };
+  return { light: lightPalette, dark: darkPalette };
 }
 
 /** Resolve any CSS color string (e.g. hsl(...)) to #rrggbb for a color input. */

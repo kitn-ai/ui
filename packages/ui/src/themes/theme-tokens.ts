@@ -187,7 +187,7 @@ export function declaredKitTokens(css: string): ReadonlySet<string> {
 
 /** Split a top-level `light-dark(<light>, <dark>)` fallback into its two halves, paren-balanced
  *  because either half can be a `color-mix(...)` with its own commas. `null` when the value is not one. */
-function splitLightDark(value: string): { light: string; dark: string } | null {
+export function splitLightDark(value: string): { light: string; dark: string } | null {
   const m = /^light-dark\(([\s\S]*)\)$/.exec(value);
   if (!m) return null;
   const body = m[1];
@@ -201,8 +201,19 @@ function splitLightDark(value: string): { light: string; dark: string } | null {
   return null;
 }
 
-/** Parse `var(--kai-x, <default>)` out of theme.css, per mode. The `.dark { }`
- *  block is the dark scope; everything else is light. Defaults are read with a
+/** The light and dark halves of a compiled colour token declaration as a stylesheet holds it:
+ *  `var(--kai-color-x, light-dark(<l>, <d>))` -> `{ light, dark }`, a single-valued
+ *  `var(--kai-color-x, <v>)` -> the same value twice, anything that is not a kit knob -> `null`. */
+export function kitColorHalves(declared: string): { light: string; dark: string } | null {
+  const m = /^var\(\s*--kai-color-[a-z0-9-]+\s*,([\s\S]*)\)$/.exec(declared.trim());
+  if (!m) return null;
+  const fallback = m[1].trim();
+  return splitLightDark(fallback) ?? { light: fallback, dark: fallback };
+}
+
+/** Parse `var(--kai-x, <default>)` out of theme.css, per mode. A colour's default is one
+ *  `light-dark(<light>, <dark>)`; the `.dark { }` block only keeps prose now, but a stray
+ *  declaration in it is still read as dark. Everything else is light. Defaults are read with a
  *  paren-balanced scan because a color-mix default nests its own parentheses
  *  and a font stack carries commas. Throws on a token declared with no fallback
  *  -- the editor would have nothing to seed and a silent blank is worse. */
