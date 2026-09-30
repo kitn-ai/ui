@@ -25,6 +25,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 // The `/state` + `/wire` section, derived from the shipped dist/*.d.ts (F-46).
 // A separate module because it parses declarations with the TypeScript API,
 // which nothing else in this file needs.
+import { toolKindUnion } from './_ts-helpers.mjs';
 import { buildProgrammaticSection } from './gen-llms-programmatic.mjs';
 // The icon roster, derived from the NAMED_ICONS map in src/components/icon/icon.tsx — the
 // SAME extraction docs/web-components.md's icon-roster region uses (P-8), so
@@ -128,7 +129,7 @@ interface ToolPart {
   type: string;
   /** Rendering classification. Derived from \`type\` when you omit it; an explicit
    *  value you set is preserved across later patches. */
-  kind?: 'command' | 'file-change' | 'file-read' | 'search' | 'fetch' | 'mcp' | 'image' | 'generic';
+  kind?: ${toolKindUnion()};
   state: 'input-streaming' | 'input-available' | 'output-available' | 'output-error';
   input?: Record<string, unknown>;
   /** Raw accumulated argument fragments, for character-level streaming. */
