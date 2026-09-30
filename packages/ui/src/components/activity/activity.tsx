@@ -30,6 +30,9 @@ import {
 
 export type ActivityStatus = ActivityStep['status'];
 
+/** A run of more steps than this scrolls inside a capped timeline; a shorter one shows every step in full. */
+export const LONG_RUN_STEPS = 8;
+
 /** Largest run of characters one Arguments / Result / Error block renders before it clamps. */
 export const MAX_VALUE_CHARS = 20_000;
 
@@ -457,6 +460,10 @@ function Activity(props: ActivityProps) {
     onCleanup(dispose);
   });
 
+  // The cap is for LONG runs only, and never over an opened step: a step's Arguments and Result must
+  // not be clipped by the pane it was opened in. Item mode is the app's list, so it is never capped.
+  const capped = () => !itemMode() && steps().length > LONG_RUN_STEPS && openSteps().size === 0;
+
   const dotTone = () =>
     failed() ? 'border-destructive-text bg-destructive-text' : interrupted() ? 'border-warning bg-warning' : 'border-current';
   const lineContent = () => (
@@ -530,7 +537,7 @@ function Activity(props: ActivityProps) {
               the rail, and an overflow container would clip them. */}
           <div
             ref={panelEl}
-            class="-ml-3 mt-2 max-h-72 overflow-y-auto pl-3 pr-2 kai-focus-inset"
+            class={cn('-ml-3 mt-2 pl-3 pr-2 kai-focus-inset', capped() && 'max-h-72 overflow-y-auto')}
             tabindex={overflowing() ? 0 : undefined}
             role={overflowing() ? 'group' : undefined}
             aria-label={overflowing() ? 'Activity steps' : undefined}

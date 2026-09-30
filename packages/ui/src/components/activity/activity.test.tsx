@@ -2,7 +2,7 @@ import { describe, it, expect, afterEach, vi } from 'vitest';
 import '@testing-library/jest-dom/vitest';
 import { createSignal } from 'solid-js';
 import { render, cleanup, fireEvent } from '@solidjs/testing-library';
-import { Activity, ActivityStepItem, activityLine, INTERRUPTED_NOTE, MAX_VALUE_CHARS } from './activity';
+import { Activity, ActivityStepItem, activityLine, INTERRUPTED_NOTE, MAX_VALUE_CHARS, LONG_RUN_STEPS } from './activity';
 import { summarizeActivity, type ActivityStep } from '../../primitives/activity';
 
 if (typeof globalThis.ResizeObserver === 'undefined') {
@@ -301,3 +301,36 @@ describe('Activity, long runs', () => {
     expect(container.querySelector('[data-kai-activity-value="Arguments"]')!.textContent!.length).toBeGreaterThan(big.length);
   });
 });
+
+describe('Activity, timeline height cap', () => {
+  const scroller = (c: HTMLElement) => c.querySelector('[data-kai-activity-scroller]') as HTMLElement;
+  const run = (n: number) => Array.from({ length: n }, (_, i) => ({ ...STEPS[1]!, id: `s${i}` }));
+
+  it('does not cap a short run, so an opened step is never clipped', () => {
+    const { container } = render(() => <Activity steps={run(LONG_RUN_STEPS)} defaultOpen />);
+    expect(scroller(container).className).not.toContain('max-h-72');
+    expect(scroller(container).className).not.toContain('overflow-y-auto');
+  });
+
+  it('caps a run past the threshold', () => {
+    const { container } = render(() => <Activity steps={run(LONG_RUN_STEPS + 1)} defaultOpen />);
+    expect(scroller(container).className).toContain('max-h-72');
+  });
+
+  it('lifts the cap while any step of a long run is open, and restores it when closed', () => {
+    const { container } = render(() => <Activity steps={run(LONG_RUN_STEPS + 1)} defaultOpen />);
+    const b = stepButton(rows(container)[0]!)!;
+    fireEvent.click(b);
+    expect(scroller(container).className).not.toContain('max-h-72');
+    fireEvent.click(b);
+    expect(scroller(container).className).toContain('max-h-72');
+  });
+
+  it('item mode is never capped (the app owns the rows)', () => {
+    const { container } = render(() => (
+      <Activity summary="x" defaultOpen><ActivityStepItem label="a" /></Activity>
+    ));
+    expect(scroller(container).className).not.toContain('max-h-72');
+  });
+});
+
