@@ -932,6 +932,8 @@ describe('WEB_COMPONENT_COMPOSITION registry (single source of truth the build e
       'kai-progress-bar',
       'kai-prompt-dock',
       'kai-prompt-input',
+      'kai-question',
+      'kai-question-panel',
       'kai-resizable',
       'kai-resizable-item',
       'kai-row',

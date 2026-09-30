@@ -763,6 +763,12 @@ export const THREAD_SLOTS: SlotDef[] = [
   { name: 'empty', mode: 'replace', doc: 'Custom zero-state rendered in the message area while the thread is empty; replaces the built-in default.' },
 ];
 
+/** Slots of `<kai-question-panel>`. The questions themselves are the app's own `<kai-question>` children
+ *  (or the `questions` property); `dismiss` is the one named seam. */
+export const QUESTION_PANEL_SLOTS: SlotDef[] = [
+  { name: 'dismiss', mode: 'replace', doc: 'Replaces the "Let\'s chat" button. A click anywhere in it dismisses the panel, so a slotted `<button>` or `<kai-button>` needs no handler of its own.' },
+];
+
 /** Slots of `<kai-empty>`. The body is the default slot; `media` is the named seam. */
 export const EMPTY_SLOTS: SlotDef[] = [
   { name: 'media', mode: 'replace', doc: 'The leading illustration or icon above the title (any inline SVG or <img>). Replaces the built-in media box.' },
@@ -973,6 +979,8 @@ export const WEB_COMPONENT_COMPOSITION: Record<string, WebComponentComposition> 
   'kai-conversation-item': { slots: CONVERSATION_ITEM_SLOTS, parts: CONVERSATION_ITEM_PARTS, children: 'The row title. `leading`, `meta` and `menu` are the named regions around it.' },
   'kai-message': { slots: MESSAGE_SLOTS, parts: MESSAGE_PARTS, children: 'The message body, in place of `message`: a `<kai-markdown>`, or any element of yours. The row (alignment, speaker role, the action bar) stays. `<kai-action>` children are actions, not body.' },
   'kai-thread': { slots: THREAD_SLOTS, children: 'Your own `<kai-message>` rows (item mode: the consumer-owned loop). `messages` is ignored while any are present. The thread keeps the scroll, stick-to-bottom, the live region and the empty state.' },
+  'kai-question-panel': { slots: QUESTION_PANEL_SLOTS, children: 'Your own `<kai-question>` children (item mode: the app owns the questions). `questions` is ignored while any are present. The panel keeps the tabs, Back and Next, the review step and Submit.' },
+  'kai-question': { children: 'The question\'s `<kai-question-option>` rows, in order. "Other" is added after them by the panel.' },
   'kai-prompt-input': { slots: PROMPT_INPUT_SLOTS, parts: PROMPT_INPUT_PARTS },
   'kai-button': { slots: BUTTON_SLOTS, parts: BUTTON_PARTS, children: 'The button\'s label. Omit it for an icon-only button (pair with `aria-label`).' },
   'kai-badge': { parts: BADGE_PARTS, children: 'The badge\'s label: text, or a small inline icon plus text.' },
