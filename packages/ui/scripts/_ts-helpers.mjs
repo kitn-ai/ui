@@ -6,7 +6,30 @@
 // `createTsHelpers(program, checker, { importable })` returns the helper set
 // bound to that program/checker so each generator keeps a single parse.
 
+import { readFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
+
+/**
+ * The `ToolKind` members, read from the exported type in `src/primitives/tool-classify.ts`, as the
+ * union text to splice into an emitted declaration (`'command' | 'file-change' | ...`).
+ *
+ * Derived, not restated: the generators used to carry a hand-typed copy of this union, and a kind
+ * added to the source alone left every gate green. Throws if the type is missing or not a plain
+ * union of string literals, so a refactor of it fails the generator instead of emitting nothing.
+ */
+export function toolKindUnion() {
+  const file = resolve(dirname(fileURLToPath(import.meta.url)), '../src/primitives/tool-classify.ts');
+  const sf = ts.createSourceFile(file, readFileSync(file, 'utf8'), ts.ScriptTarget.Latest, true);
+  const decl = sf.statements.find((n) => ts.isTypeAliasDeclaration(n) && n.name.text === 'ToolKind');
+  const members = decl && ts.isUnionTypeNode(decl.type) ? decl.type.types : [];
+  const kinds = members.map((t) => (ts.isLiteralTypeNode(t) && ts.isStringLiteral(t.literal) ? t.literal.text : null));
+  if (kinds.length === 0 || kinds.includes(null)) {
+    throw new Error(`toolKindUnion: \`export type ToolKind\` in ${file} is not a union of string literals`);
+  }
+  return kinds.map((k) => `'${k}'`).join(' | ');
+}
 
 // Friendly web-component name shared by the React/Solid wrappers, story titles, and the
 // API tab. KaiArtifactElement -> Artifact. All web-component tags start `kai-`, so the

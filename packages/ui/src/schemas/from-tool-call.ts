@@ -23,6 +23,7 @@
 
 
 import type { CardEnvelope } from '../primitives/card-contract';
+import { PLAN_TOOL_NAME } from '../primitives/plan-tool-name';
 
 /**
  * The tool-name prefix that marks a card tool.
@@ -44,6 +45,9 @@ export const KAI_TOOL_PREFIX = 'kai_';
  */
 export function cardTypeFromToolName(name: string): string | null {
   if (!name.startsWith(KAI_TOOL_PREFIX)) return null;
+  // `kai_plan` shares the prefix and is not a card: it is display data with its own reader
+  // (`planFromMessages`), and a card of type `plan` would render as the unregistered-type fallback.
+  if (name === PLAN_TOOL_NAME) return null;
   const type = name.slice(KAI_TOOL_PREFIX.length);
   return type.length > 0 ? type : null;
 }
@@ -56,7 +60,7 @@ export function toolNameForCardType(type: string): string {
 /**
  * Is this tool call a card, rather than one of the app's own tools?
  *
- * True for any `kai_`-prefixed name with a non-empty remainder. It does NOT claim
+ * True for any `kai_`-prefixed name with a non-empty remainder, except the plan tool (`kai_plan`). It does NOT claim
  * the type is registered or the data is valid; see the module header for why those
  * are the dispatcher's questions.
  */

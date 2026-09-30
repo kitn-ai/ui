@@ -25,9 +25,9 @@ describe('createAssistantStream', () => {
 
   it('appendReasoning wires opts through to a labeled part', () => {
     const sink = makeSink();
-    const s = createAssistantStream(sink.set, { id: 'a1' });
+    const s = createAssistantStream(sink.set, { id: 'a1', now: () => 42 });
     s.appendReasoning('thinking', { label: 'Reasoning' });
-    expect(sink.get()[0].parts).toEqual([{ type: 'reasoning', text: 'thinking', index: 0, label: 'Reasoning', signature: undefined, raw: undefined }]);
+    expect(sink.get()[0].parts).toEqual([{ type: 'reasoning', text: 'thinking', index: 0, label: 'Reasoning', signature: undefined, raw: undefined, timing: { startedAt: 42 } }]);
   });
 
   it('upsertTool adds then merges a patch by toolCallId', () => {
@@ -396,11 +396,11 @@ describe('createAssistantStream', () => {
 
   it('appendReasoning delegates through the onStreamSettled wrapper, opts and all', () => {
     const sink = makeSink();
-    const s = onStreamSettled(createAssistantStream(sink.set, { id: 'a1' }), () => {});
+    const s = onStreamSettled(createAssistantStream(sink.set, { id: 'a1', now: () => 42 }), () => {});
     expect(s.appendReasoning('thinking', { index: 2, label: 'Reasoning' })).toBe(s);
     // a non-default index: dropping the `opts` argument would silently land on 0.
     expect(sink.get()[0].parts).toEqual([
-      { type: 'reasoning', text: 'thinking', index: 2, label: 'Reasoning', signature: undefined, raw: undefined },
+      { type: 'reasoning', text: 'thinking', index: 2, label: 'Reasoning', signature: undefined, raw: undefined, timing: { startedAt: 42 } },
     ]);
   });
 

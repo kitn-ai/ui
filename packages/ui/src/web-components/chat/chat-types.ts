@@ -1,4 +1,4 @@
-import type { ToolPart, RawOrigin } from '../../components/tool/tool-types';
+import type { ToolPart, RawOrigin, PartTiming } from '../../components/tool/tool-types';
 import type { AttachmentData } from '../../primitives/attachment-types';
 import type { CardEnvelope } from '../../primitives/card-contract';
 import { CHAT_MESSAGE_ACTIONS } from './chat-actions';
@@ -85,6 +85,8 @@ export type MessagePart =
       // thinking block rebuilt from text plus signature is a hard 400.
       /** Provider signature for the reasoning block, read by the OpenAI encoder and ignored by the Anthropic one. */
       signature?: string;
+      /** When the block started and ended. Display metadata, never encoded; see `PartTiming`. */
+      timing?: PartTiming;
       raw?: RawOrigin;
     }
   | { type: 'tool'; tool: ToolPart; raw?: RawOrigin }

@@ -42,8 +42,12 @@ async function runTurn(respond: ReturnType<typeof createMockResponder>, prompt =
   };
   const stream = createAssistantStream(set);
   const turn = await readOpenAIStream(respond(prompt), stream);
+  // `done()` ends any timing still open and, when nothing is open, hands `set` an updater that
+  // returns its input: not a commit anyone renders. The re-render contract is asserted over the
+  // chunk commits, so they are snapshotted before it. (`stream-timing.test.ts` covers `done()`.)
+  const chunkCommits = commits.slice();
   stream.done();
-  return { messages, commits, turn };
+  return { messages, commits: chunkCommits, turn };
 }
 
 const quiet = { announce: false as const };

@@ -76,7 +76,7 @@ interface ToolPart {
   type: string;
   /** Rendering classification. Derived from `type` when you omit it; an explicit
    *  value you set is preserved across later patches. */
-  kind?: 'command' | 'file-change' | 'search' | 'fetch' | 'mcp' | 'image' | 'generic';
+  kind?: 'command' | 'file-change' | 'file-read' | 'search' | 'fetch' | 'mcp' | 'image' | 'generic';
   state: 'input-streaming' | 'input-available' | 'output-available' | 'output-error';
   input?: Record<string, unknown>;
   /** Raw accumulated argument fragments, for character-level streaming. */

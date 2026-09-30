@@ -1,9 +1,9 @@
 // src/state/stream.ts
 import type { ChatMessage, MessagePart, Source } from '../web-components/chat/chat-types';
-import type { ToolPart } from '../components/tool/tool-types';
+import type { ToolPart, PartTiming } from '../components/tool/tool-types';
 import type { CardEnvelope } from '../primitives/card-contract';
 import type { AttachmentData } from '../primitives/attachment-types';
-import { appendReasoningPart, appendTextPart, upsertCardPart, upsertToolPart, type ReasoningOpts } from './parts';
+import { appendReasoningPart, appendTextPart, findReasoningIndex, upsertCardPart, upsertToolPart, type ReasoningOpts } from './parts';
 
 /** The one universal contract: a functional-updater setter (React setState shape). */
 export type SetMessages = (updater: (prev: ChatMessage[]) => ChatMessage[]) => void;
@@ -89,23 +89,65 @@ export interface AssistantStream {
   abort(reason?: string): void;
 }
 
-/** Start an assistant message and drive it through `set`. New refs on every mutation. */
+export interface AssistantStreamInit extends Partial<ChatMessage> {
+  /** The clock `timing` is stamped from, in epoch milliseconds. Defaults to `Date.now`; a test injects
+   *  a fake one. It is NOT copied onto the message. */
+  now?: () => number;
+}
+
+const isSettledState = (state: ToolPart['state']): boolean => state === 'output-available' || state === 'output-error';
+
+/** Ends the timing of every part that is still open, or returns `parts` itself when none is.
+ *  A reasoning block is open until told otherwise; a tool is open until it settles, so an unsettled
+ *  one is only ended when `unsettledToo` (the stream is over). A part with NO timing (a saved
+ *  thread, a producer that supplied none) is never touched. Only the first `upTo` parts are looked
+ *  at: the part that just opened is not the one being closed. */
+function endOpenTiming(parts: MessagePart[], t: number, unsettledToo: boolean, upTo = parts.length): MessagePart[] {
+  let out: MessagePart[] | undefined;
+  for (let i = 0; i < upTo; i++) {
+    const part = parts[i];
+    let next: MessagePart | undefined;
+    if (part.type === 'reasoning' && part.timing && part.timing.endedAt === undefined) {
+      next = { ...part, timing: { ...part.timing, endedAt: t } };
+    } else if (part.type === 'tool' && part.tool.timing && part.tool.timing.endedAt === undefined
+      && (unsettledToo || isSettledState(part.tool.state))) {
+      next = { ...part, tool: { ...part.tool, timing: { ...part.tool.timing, endedAt: t } } };
+    }
+    if (next) {
+      out ??= parts.slice();
+      out[i] = next;
+    }
+  }
+  return out ?? parts;
+}
+
+/** Start an assistant message and drive it through `set`. New refs on every mutation.
+ *
+ *  TIMING. Reasoning and tool parts get `timing` here, not in the pure folds: a fold that read a
+ *  clock would not be deterministic. `startedAt` is stamped when the part first appears; `endedAt`
+ *  when the next part opens (reasoning), when the call settles (a tool), or when the stream ends
+ *  (`done`/`abort`, for whatever is still open). The clock is read once per mutation. */
 export function createAssistantStream(
   set: SetMessages,
-  init: Partial<ChatMessage> = {},
+  init: AssistantStreamInit = {},
 ): AssistantStream {
-  const id = init.id ?? newId();
+  const { now = Date.now, ...message } = init;
+  const id = message.id ?? newId();
   let settled = false;
 
-  set((prev) => [...prev, { id, role: 'assistant', parts: [], ...init }]);
+  set((prev) => [...prev, { id, role: 'assistant', parts: [], ...message }]);
 
-  const mutate = (fn: (parts: MessagePart[]) => MessagePart[]) => {
+  const mutate = (fn: (parts: MessagePart[], t: number) => MessagePart[]) => {
     if (settled) return;
+    const t = now();
     set((prev) => {
       const i = prev.findIndex((m) => m.id === id);
       if (i < 0) return prev;
-      const next = fn(prev[i].parts);
-      if (next === prev[i].parts) return prev;
+      const before = prev[i].parts;
+      let next = fn(before, t);
+      // A part opened: whatever reasoning came before it is over.
+      if (next.length > before.length) next = endOpenTiming(next, t, false, before.length);
+      if (next === before) return prev;
       return [...prev.slice(0, i), { ...prev[i], parts: next }, ...prev.slice(i + 1)];
     });
   };
@@ -113,19 +155,40 @@ export function createAssistantStream(
   const stream: AssistantStream = {
     id,
     appendText(delta) { mutate((p) => appendTextPart(p, delta)); return stream; },
-    appendReasoning(delta, opts) { mutate((p) => appendReasoningPart(p, delta, opts)); return stream; },
-    upsertTool(toolCallId, patch) { mutate((p) => upsertToolPart(p, toolCallId, patch)); return stream; },
+    appendReasoning(delta, opts) {
+      mutate((p, t) => {
+        const opens = findReasoningIndex(p, opts) < 0;
+        const timing: PartTiming | undefined = opts?.timing ?? (opens ? { startedAt: t } : undefined);
+        return appendReasoningPart(p, delta, timing ? { ...opts, timing } : opts);
+      });
+      return stream;
+    },
+    upsertTool(toolCallId, patch) {
+      mutate((p, t) => {
+        const cur = p.find((x): x is Extract<MessagePart, { type: 'tool' }> => x.type === 'tool' && x.tool.toolCallId === toolCallId)?.tool;
+        // A call already in the thread WITHOUT timing (saved before timing existed) stays without it.
+        const base = patch.timing ?? cur?.timing ?? (cur ? undefined : { startedAt: t });
+        const settledNow = isSettledState(patch.state ?? cur?.state ?? 'input-streaming');
+        const timing = patch.timing ?? (base && settledNow && base.endedAt === undefined ? { ...base, endedAt: t } : base);
+        return upsertToolPart(p, toolCallId, timing ? { ...patch, timing } : patch);
+      });
+      return stream;
+    },
     // Upsert, not append: keyed on envelope.id so a revised card replaces itself.
     addCard(envelope) { mutate((p) => upsertCardPart(p, envelope)); return stream; },
     addSource(source) { mutate((p) => [...p, { type: 'source', source }]); return stream; },
     addFile(attachment) { mutate((p) => [...p, { type: 'file', attachment }]); return stream; },
-    done() { settled = true; },
+    done() {
+      // Whatever is still open ends with the stream. Emits nothing when nothing is.
+      mutate((p, t) => endOpenTiming(p, t, true));
+      settled = true;
+    },
     abort(reason) {
       // Whitespace-only is the same nothing as empty. `err.message` on a thrown
       // Error is free to be either, and appending it would render an INVISIBLE
       // text part -- a blank bubble that also claims to have said something.
       const text = reason?.trim() || undefined;
-      mutate((p) => {
+      mutate((p, t) => {
         let carried = false;
         const next = p.map((part) => {
           if (part.type !== 'tool' || part.tool.state === 'output-available') return part;
@@ -139,8 +202,9 @@ export function createAssistantStream(
           return { ...part, tool: { ...part.tool, state: 'output-error' as const, errorText: text } };
         });
         // The reason has to land SOMEWHERE. See the note above `abort`.
-        if (carried || !text) return next;
-        return [...next, { type: 'text', text }];
+        const ended = endOpenTiming(next, t, true);
+        if (carried || !text) return ended;
+        return [...ended, { type: 'text', text }];
       });
       settled = true;
     },

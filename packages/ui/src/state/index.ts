@@ -3,7 +3,7 @@
 export { appendMessage, upsertMessage, updateMessage, removeMessage, appendText, textMessage, partsToText } from './messages';
 export { addSuggestion, removeSuggestion } from './suggestions';
 export { createAssistantStream, onStreamSettled } from './stream';
-export type { SetMessages, AssistantStream } from './stream';
+export type { SetMessages, AssistantStream, AssistantStreamInit } from './stream';
 export { appendTextPart, appendReasoningPart, upsertToolPart, upsertCardPart, fingerprint } from './parts';
 export type { ReasoningOpts } from './parts';
 
@@ -33,7 +33,12 @@ export type {
   ChatMessage, ChatMessageAction, CustomAction, AvatarData, FeedbackVote, MessagePart,
   MessageSource, RawOrigin,
 } from '../web-components/chat/chat-types';
-export type { ToolPart } from '../components/tool/tool-types';
+export type { ToolPart, PartTiming } from '../components/tool/tool-types';
+// The pure reads over those parts: the activity line's steps and summary, and the agent's plan.
+export { activityStepsFromParts, summarizeActivity, formatDuration, interruptedLabel, truncateForDisplay, MAX_DISPLAY_NAME, ACTIVITY_LABELS } from '../primitives/activity';
+export type { ActivityStep, ActivityLabel } from '../primitives/activity';
+export { PLAN_TOOL_NAME, isPlanTool, validatePlan, planFromMessages } from '../primitives/plan';
+export type { PlanItem, PlanItemStatus, PlanValidation } from '../primitives/plan';
 export type { ToolKind } from '../primitives/tool-classify';
 // upsertToolPart defaults `kind` to classifyTool(type) and reverts it on a type
 // change (see ./parts), and ToolPart.kind's doc comment names the function, so a

@@ -20,6 +20,8 @@
 // emits six actions and the card renders six buttons with nothing saying the contract loosened.
 
 import { toolNameForCardType } from './from-tool-call';
+import { PLAN_TOOL_NAME } from '../primitives/plan-tool-name';
+import planSchemaDoc from '../primitives/question-schemas/plan.schema.json';
 import { cardSchemas } from './index';
 import type { CardSchema, CardSchemaName } from './index';
 import {
@@ -611,6 +613,50 @@ function describe(cardType: string, schema: CardSchema, overrides: Readonly<Reco
   return typeof own === 'string' && own.length > 0 ? own : `Render a \`${cardType}\` card.`;
 }
 
+/** The one place a projected schema is put in a provider's envelope. `cardTools` and `planTool`
+ *  both go through it, so a provider whose envelope changes changes in one spot. */
+function toolDef(provider: ToolProvider, name: string, description: string, parameters: ToolParameters, strict: boolean): ToolDef {
+  if (provider === 'openai') {
+    return { type: 'function', function: { name, description, parameters, ...(strict ? { strict: true as const } : {}) } };
+  }
+  if (provider === 'anthropic') {
+    return { name, description, input_schema: parameters, ...(strict ? { strict: true as const } : {}) };
+  }
+  return { name, description, schema: parameters };
+}
+
+/** What `kai_plan` is FOR, addressed to a model, in the same voice as {@link CARD_TOOL_DESCRIPTIONS}. */
+export const PLAN_TOOL_DESCRIPTION =
+  'Show the user your plan for the task and keep it current. Send the COMPLETE list of steps every time it changes, with each step\'s status; the latest call replaces the previous plan. Use it for work with several steps, not for a single quick action. It is display only: nothing waits on the user.';
+
+/**
+ * The `kai_plan` tool definition for one provider: the agent's plan, shown pinned above the
+ * composer. Not a card, so it is not in `cardTools()`; add it beside them:
+ *
+ * ```ts
+ * const tools = [...myTools, ...cardTools({ provider: 'anthropic' }), planTool({ provider: 'anthropic' })];
+ * ```
+ *
+ * The schema sets NO SIZE CAP (no `maxItems`, no `maxLength`): a limit on plan size is the app's
+ * call, not the kit's. An app that wants one enforces it in the tool loop and answers the call with
+ * an error the model can read; `validatePlan` says the same. Nothing bounds the model's output but
+ * the app, so treat every label as untrusted text of any length.
+ *
+ * Projected through the same code as the card tools, so it is stripped of authoring metadata the
+ * same way. The host answers a call at once (`validatePlan`, then `applyToolOutput`); see
+ * `primitives/plan`. Never strict: the plan schema is deliberately simple, but a strict mode this
+ * file has never been able to promise for a built-in is not promised for this one either.
+ *
+ * @throws {TypeError} without an options object carrying a `provider`, like {@link cardTools}.
+ */
+export function planTool<P extends ToolProvider>(opts: { readonly provider: P }): ToolDefFor<P> {
+  if (!isRecord(opts) || (opts.provider !== 'openai' && opts.provider !== 'anthropic' && opts.provider !== 'jsonschema')) {
+    throw new TypeError('planTool: an options object with a `provider` is required, e.g. planTool({ provider: "openai" })');
+  }
+  const parameters = project(planSchemaDoc, { closeObjects: false, requireEveryProperty: false }) as ToolParameters;
+  return toolDef(opts.provider, PLAN_TOOL_NAME, PLAN_TOOL_DESCRIPTION, parameters, false) as ToolDefFor<P>;
+}
+
 /**
  * Project the card schemas into tool definitions for one provider.
  *
@@ -704,13 +750,8 @@ export function cardTools(a: CardToolInput | CardToolOptions, b?: CardToolOption
       }
     }
 
-    if (opts.provider === 'openai') {
-      defs.push({ type: 'function', function: { name, description: wireDescription, parameters, ...(strict ? { strict: true as const } : {}) } });
-    } else if (opts.provider === 'anthropic') {
-      defs.push({ name, description: wireDescription, input_schema: parameters, ...(strict ? { strict: true as const } : {}) });
-    } else {
-      defs.push({ name, description, schema: parameters });
-    }
+    // The jsonschema form never carries the relaxation note: it stays the authored description.
+    defs.push(toolDef(opts.provider, name, opts.provider === 'jsonschema' ? description : wireDescription, parameters, strict));
   }
 
   if (subset && failures.length > 0) throw new UnsupportedCardToolSchemaError(subset, failures);

@@ -5,6 +5,7 @@
 
 import { writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { cleanEmittedType as clean } from './_ts-helpers.mjs';
+import { toolKindUnion } from './_ts-helpers.mjs';
 import { resolve } from 'node:path';
 
 // Self-contained inline type declarations for the runtime-adjacent exports of the
@@ -52,7 +53,7 @@ export interface RawOrigin {
 }
 
 /** Semantic classification of a tool call, used to pick a rendering. */
-export type ToolKind = 'command' | 'file-change' | 'search' | 'fetch' | 'mcp' | 'image' | 'generic';
+export type ToolKind = ${toolKindUnion()};
 
 /** A tool-call part rendered by <kai-tool>. */
 export interface ToolPart {

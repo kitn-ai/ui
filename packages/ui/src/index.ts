@@ -396,6 +396,13 @@ export type { ToolPart, ToolProps } from './components/tool/tool';
 // genuinely useful to anyone rendering tool calls themselves.
 export { classifyTool } from './primitives/tool-classify';
 export type { ToolKind } from './primitives/tool-classify';
+// Activity and plan: the pure data half of `kai-activity` / `kai-plan`. Timing is stamped by
+// `createAssistantStream`; the plan arrives as `kai_plan` tool calls (`planTool` in ./schemas).
+export type { PartTiming } from './components/tool/tool-types';
+export { activityStepsFromParts, summarizeActivity, formatDuration, interruptedLabel, truncateForDisplay, MAX_DISPLAY_NAME, ACTIVITY_LABELS } from './primitives/activity';
+export type { ActivityStep, ActivityLabel } from './primitives/activity';
+export { PLAN_TOOL_NAME, isPlanTool, validatePlan, planFromMessages } from './primitives/plan';
+export type { PlanItem, PlanItemStatus, PlanValidation } from './primitives/plan';
 export { ThinkingBar } from './components/thinking-bar/thinking-bar';
 export type { ThinkingBarProps } from './components/thinking-bar/thinking-bar';
 export { Reasoning, ReasoningTrigger, ReasoningContent } from './components/reasoning/reasoning';

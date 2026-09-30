@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kitn.ai/schemas/question/plan.schema.json",
+  "title": "PlanToolInput",
+  "description": "Input of the `kai_plan` tool: the agent's WHOLE plan, re-sent in full every time it changes. Display only, not a question: the host answers it immediately.",
+  "type": "object",
+  "required": ["items"],
+  "properties": {
+    "items": {
+      "type": "array",
+      "description": "Every step of the plan, in order, each with its current status. Send the complete list on every call, not a diff: the latest call replaces the previous plan.",
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "status"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Stable id for the step. Keep it the same across calls so the display can track the step. Unique within `items`."
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "description": "What the step is, in a few words."
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "in_progress", "completed"],
+            "description": "`in_progress` for the step being worked on now (normally at most one), `completed` once it is done, `pending` otherwise."
+          }
+        }
+      }
+    }
+  }
+}
