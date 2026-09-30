@@ -61,18 +61,41 @@ export function activityStepDuration(step: ActivityStep): string | undefined {
   return formatDuration(step.endedAt - step.startedAt) || undefined;
 }
 
+/** Longest file path the failure phrase carries, in UTF-16 code units. */
+const MAX_PATH_CHARS = 60;
+
+/**
+ * The path a failed file read was aimed at, made safe to put in a sentence. It is model output:
+ * only a STRING `path` or `file_path` counts, control and line-separator characters become spaces
+ * (a newline or bidi override must not reshape the line), it is cut for display, and the caller
+ * renders it as text. It never becomes an href or free-form copy.
+ */
+function displayPath(input: ActivityStep['input']): string | undefined {
+  const raw = input?.path ?? input?.file_path;
+  if (typeof raw !== 'string') return undefined;
+  // Cut BEFORE cleaning: a megabyte path must not cost a megabyte regex pass.
+  const clean = raw.slice(0, 4 * MAX_PATH_CHARS).replace(/[\u0000-\u001f\u007f-\u009f\u200e\u200f\u2028-\u202e\u2066-\u2069]/g, ' ').replace(/\s+/g, ' ').trim();
+  return clean ? truncateForDisplay(clean, MAX_PATH_CHARS) : undefined;
+}
+
+/** What one failed step reads as in the collapsed line. */
+function failedPhrase(s: ActivityStep): string {
+  const path = s.kind === 'tool' && s.toolKind === 'file-read' ? displayPath(s.input) : undefined;
+  return path ? `Couldn't read ${path}` : `${truncateForDisplay(s.toolName || s.label || 'step')} failed`;
+}
+
 /**
  * The collapsed line for a run: `summarizeActivity`, plus what FAILED. A failed step is left out of
  * the counted phrases ("Read a file" would claim work that has no result) and named at the end
- * instead: "Thought for 6s · Searched the web · read_file failed".
+ * instead: "Thought for 6s · Searched the web · Couldn't read src/app.ts" (a file read with a path), or
+ * "<tool> failed".
  */
 export function activityLine(steps: ActivityStep[], streaming = false): string {
   if (streaming && steps.some((s) => s.status === 'running')) return summarizeActivity(steps, { streaming: true });
   const failed = steps.filter((s) => s.status === 'error');
   if (failed.length === 0) return summarizeActivity(steps, { streaming });
   const ok = summarizeActivity(steps.filter((s) => s.status !== 'error'));
-  const names = [...new Set(failed.map((s) => truncateForDisplay(s.toolName || s.label || 'step')))];
-  const what = failed.length === 1 ? `${names[0]} failed` : `${failed.length} steps failed`;
+  const what = failed.length === 1 ? failedPhrase(failed[0]!) : `${failed.length} steps failed`;
   return ok ? `${ok} · ${what}` : what;
 }
 

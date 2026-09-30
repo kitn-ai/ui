@@ -37,7 +37,7 @@ describe('Activity, collapsed', () => {
 
   it('says what failed, and does not count the failed step as work done', () => {
     const { container } = render(() => <Activity steps={STEPS} />);
-    expect(trigger(container).textContent).toBe('Thought for 6s · Searched the web · read_file failed');
+    expect(trigger(container).textContent).toBe("Thought for 6s · Searched the web · Couldn't read src/app.ts");
     // the dot turns red for a failure
     expect(container.querySelector('[data-kai-dot]')!.className).toContain('destructive-text');
   });
@@ -334,3 +334,34 @@ describe('Activity, timeline height cap', () => {
   });
 });
 
+describe('Activity, failed file read', () => {
+  const failed = (input: Record<string, unknown> | undefined, extra: Partial<ActivityStep> = {}): ActivityStep => ({
+    id: 'f', kind: 'tool', status: 'error', toolName: 'read_file', toolKind: 'file-read', errorText: 'ENOENT', ...(input ? { input } : {}), ...extra,
+  });
+
+  it("names the path in a fixed phrase: Couldn't read <path>", () => {
+    expect(activityLine([failed({ path: 'src/app.ts' })])).toBe("Couldn't read src/app.ts");
+    expect(activityLine([failed({ file_path: 'a/b.ts' })])).toBe("Couldn't read a/b.ts");
+  });
+  it('keeps it after the counted steps', () => {
+    expect(activityLine([STEPS[0]!, failed({ path: 'src/app.ts' })])).toBe("Thought for 6s · Couldn't read src/app.ts");
+  });
+  it('falls back to "<tool> failed" without a usable string path, or for other kinds', () => {
+    expect(activityLine([failed(undefined)])).toBe('read_file failed');
+    expect(activityLine([failed({ path: 42 })])).toBe('read_file failed');
+    expect(activityLine([failed({ path: '   ' })])).toBe('read_file failed');
+    expect(activityLine([failed({ path: 'x' }, { toolKind: 'search' })])).toBe('read_file failed');
+  });
+  it('strips control characters and newlines, and truncates a long path', () => {
+    const line = activityLine([failed({ path: 'a\n\r\u0000b\u202ec\td' })]);
+    expect(line).toBe("Couldn't read a b c d");
+    const long = activityLine([failed({ path: 'p'.repeat(1_000_000) })]);
+    expect(long.length).toBeLessThan(150);
+    expect(long).toContain('…');
+  });
+  it('renders the path as text in the line, never as markup', () => {
+    const { container } = render(() => <Activity steps={[failed({ path: '<img src=x onerror=alert(1)>' })]} />);
+    expect(trigger(container).textContent).toBe("Couldn't read <img src=x onerror=alert(1)>");
+    expect(container.querySelector('img, a')).toBeNull();
+  });
+});

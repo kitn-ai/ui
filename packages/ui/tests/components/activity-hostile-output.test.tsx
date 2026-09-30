@@ -98,4 +98,38 @@ describe('activity sink: model output never becomes live DOM', () => {
     expect(rendered.length).toBeLessThan(big.length);
     expect(Array.from(marker!.querySelectorAll('button')).some((b) => b.textContent === 'Show all')).toBe(true);
   });
+
+  describe('a failed file read names its path in a fixed phrase', () => {
+    const failedRead = (path: unknown): ActivityStep[] => [
+      { id: 'f', kind: 'tool', status: 'error', toolName: 'read_file', toolKind: 'file-read', input: { path }, errorText: 'ENOENT' },
+    ];
+
+    test('HTML in the path stays visible text, with no element and no link', () => {
+      const { container } = render(() => <Activity steps={failedRead(`${IMG}${SCRIPT}`)} />);
+      assertInert(container);
+      expect(container.querySelector('button')!.textContent).toContain("Couldn't read <img src=x onerror=");
+      expect(container.querySelector('a')).toBeNull();
+    });
+
+    test('control characters and newlines cannot reshape the line', () => {
+      const { container } = render(() => <Activity steps={failedRead('a\n\r\u0000\u001b[31m\u202eb\u2028c')} />);
+      const line = container.querySelector('button')!.textContent!;
+      expect(line).not.toMatch(/[\u0000-\u001f\u007f-\u009f\u2028-\u202e]/);
+      expect(line.startsWith("Couldn't read a")).toBe(true);
+    });
+
+    test('a 1MB path is cut, quickly, and marked', () => {
+      const t0 = performance.now();
+      const { container } = render(() => <Activity steps={failedRead('x'.repeat(1_000_000))} />);
+      const line = container.querySelector('button')!.textContent!;
+      expect(performance.now() - t0).toBeLessThan(2000);
+      expect(line.length).toBeLessThan(150);
+      expect(line).toContain('…');
+    });
+
+    test('a path that is not a string falls back to the tool name', () => {
+      const { container } = render(() => <Activity steps={failedRead({ toString: () => '<img>' })} />);
+      expect(container.querySelector('button')!.textContent).toBe('read_file failed');
+    });
+  });
 });
